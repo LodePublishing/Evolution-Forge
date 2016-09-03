@@ -5,6 +5,7 @@
 #include <map>
 #include "../stl/misc.hpp"
 #include <string>
+#include <set>
 #include "../sdl/dc.hpp"
 
 enum eResolution
@@ -59,25 +60,6 @@ enum eLanguage
 
 class UI_Configuration
 {
-// This is still a public class though access _SHOULD_ be made through the corresponding functions of settings
-private:
-	eLanguage language;
-	eResolution resolution;
-	eBitDepth bitdepth;
-	eTheme theme;
-
-	unsigned int musicVolume;
-	unsigned int soundVolume;
-
-	unsigned int channels;
-	
-	bool useMusic;
-	bool useSound;
-	bool glowingButtons;
-	bool transparency;
-	bool smoothMovements;
-	bool unloadGraphics;
-	std::string configurationFile;
 public:
 	UI_Configuration();
 	~UI_Configuration();
@@ -101,6 +83,8 @@ public:
 	const bool isSmoothMovements() const;
 	const bool isUnloadGraphics() const;
 	
+	const bool isFirstStart() const;
+	
 	const bool setResolution(const eResolution current_resolution);
 	const bool setBitDepth(const eBitDepth current_bitdepth);
 	const bool setLanguage(const eLanguage current_language);
@@ -116,13 +100,45 @@ public:
 	const bool setTransparency(const bool trans_parency);
 	const bool setSmoothMovements(const bool smooth_movements);
 	const bool setUnloadGraphics(const bool unload_graphics);
+	
+	const bool setFirstStart(const bool first_start);
 
 	void setConfigurationFile(const std::string& configuration_file);
 	void loadConfigurationFile();
 	void saveToFile() const;
+
+	const bool isVisitedHelpChapter(const unsigned int chapter) const;
+	void visitHelpChapter(const unsigned int chapter);
+private:
+	eLanguage language;
+	eResolution resolution;
+	eBitDepth bitdepth;
+	eTheme theme;
+
+	unsigned int musicVolume;
+	unsigned int soundVolume;
+
+	unsigned int channels;
+	
+	bool useMusic;
+	bool useSound;
+	bool glowingButtons;
+	bool transparency;
+	bool smoothMovements;
+	bool unloadGraphics;
+
+	bool firstStart;
+	
+	std::string configurationFile;
+
+	std::set<unsigned int> visitedHelpChapters;
 };
 
 extern UI_Configuration uiConfiguration;
+
+inline const bool UI_Configuration::isFirstStart() const {
+	return(firstStart);
+}
 
 inline const eResolution UI_Configuration::getResolution() const {
 	return(resolution);

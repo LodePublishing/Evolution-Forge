@@ -6,12 +6,9 @@
 class UI_StaticText : public UI_Object
 {
 	public:
-		UI_StaticText& operator=(const UI_StaticText& object);
-		UI_StaticText(const UI_StaticText& object);
-		
-		UI_StaticText(UI_Object* st_parent, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode = HORIZONTALLY_CENTERED, const eAutoSize auto_size = NO_AUTO_SIZE);
-		UI_StaticText(UI_Object* st_parent, const eString st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode = HORIZONTALLY_CENTERED, const eAutoSize auto_size = NO_AUTO_SIZE);
-		UI_StaticText(UI_Object* st_parent, const std::string& st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode = HORIZONTALLY_CENTERED, const eAutoSize auto_size = NO_AUTO_SIZE);
+		UI_StaticText(UI_Object* st_parent, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode = HORIZONTALLY_CENTERED);
+		UI_StaticText(UI_Object* st_parent, const eString st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode = HORIZONTALLY_CENTERED);
+		UI_StaticText(UI_Object* st_parent, const std::string& st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode = HORIZONTALLY_CENTERED);
 		~UI_StaticText();
 
 		void setTemporaryColor(const Color& st_color);
@@ -52,6 +49,9 @@ class UI_StaticText : public UI_Object
 		eString eText;
 		bool pressed; // for buttons only, draw the text +(1,1)	
 		bool highlight;
+	
+		UI_StaticText& operator=(const UI_StaticText& object);
+		UI_StaticText(const UI_StaticText& object);
 };
 
 
@@ -65,11 +65,11 @@ inline UI_Object* UI_StaticText::checkHighlight() {
 }
 
 inline const Size UI_StaticText::getTextSize() const {
-	return(theme.lookUpFont(font)->GetTextExtent(text));
+	return(theme.lookUpFont(font)->getTextExtent(text));
 }
 
 inline const Size UI_StaticText::getTextPosSize(const unsigned pos) const {
-	return(theme.lookUpFont(font)->GetTextExtent(text.substr(0, pos)));
+	return(theme.lookUpFont(font)->getTextExtent(text.substr(0, pos)));
 }
 
 inline void UI_StaticText::setColor(const eColor st_color) {

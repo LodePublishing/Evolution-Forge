@@ -1,71 +1,39 @@
 #include "numberfield.hpp"
 #include <sstream>
 
-UI_NumberField& UI_NumberField::operator=(const UI_NumberField& object)
-{
-	((UI_Object)(*this)) = ((UI_Object)object);
-   	fieldType = object.fieldType;
-	delete addbutton;
-	addbutton = new UI_Button(*(object.addbutton)); // Problem PARENT!
-	delete subbutton;
-	subbutton = new UI_Button(*(object.subbutton));
-	delete text;
-	text = (object.text?new UI_StaticText(*(object.text)):NULL);
-	delete numberText;
-	numberText = new UI_StaticText(*(object.numberText));
-	number = object.number;
-	min = object.min;
-	max = object.max;
-	steps = object.steps;
-	numberHasChanged = object.numberHasChanged;
-	return(*this);
-}
-
-
-UI_NumberField::UI_NumberField(const UI_NumberField& object) :
-	UI_Object((UI_Object)object),
-	fieldType(object.fieldType),
-	addbutton(new UI_Button(*(object.addbutton))),
-	subbutton(new UI_Button(*(object.subbutton))),
-	text(object.text?new UI_StaticText(*(object.text)):NULL),
-	numberText(new UI_StaticText(*(object.numberText))),
-	number(object.number),
-	min(object.min),
-	max(object.max),
-	steps(object.steps),
-	numberHasChanged(object.numberHasChanged)
-{ }
 // TODO: ui_objects arrangen! es nur in button zu benutzen bringt wenig...
-UI_NumberField::UI_NumberField(UI_Object* numberfield_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const unsigned int number_min, const unsigned int number_max, const eString txt, const eString tool_tip, const unsigned int number_steps, const unsigned int num, const eFieldType field_type) :
+UI_NumberField::UI_NumberField(UI_Object* numberfield_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const unsigned int number_min, const unsigned int number_max, const eString txt, const eString tool_tip, const unsigned int number_steps, const unsigned int num, const bool shift_right, const eFieldType field_type) :
 	UI_Object(numberfield_parent, rect, distance_bottom_right, position_mode, AUTO_HEIGHT_CONST_WIDTH),
 	fieldType(field_type),
-	addbutton(new UI_Button(this, Rect(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 40, 1), Size(8, 8)), Size(0, 0), INCREASE_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST)),
-	subbutton(new UI_Button(this, Rect(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 50, 1), Size(8, 8)), Size(0, 0), SUB_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST)),
-	text(txt == NULL_STRING ? NULL : new UI_StaticText(this, txt, Rect(Point(0, 0), Size(0, 0)), Size(0, 0), FORCE_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
-	numberText(new UI_StaticText(this, "0", Rect(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 0), Size(0, 0)), Size(0, 0), FORCE_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
+	addButton(new UI_Button(this, Rect(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 40, 1), Size(8, 8)), Size(0, 0), INCREASE_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST)),
+	subButton(new UI_Button(this, Rect(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 50, 1), Size(8, 8)), Size(0, 0), SUB_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST)),
+	text(txt == NULL_STRING ? NULL : new UI_StaticText(this, txt, Rect(Point(shift_right?10:0, 0), Size(0, 0)), Size(0, 0), FORCE_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
+	numberText(new UI_StaticText(this, "0", Rect(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 10, 0), Size(0, 0)), Size(0, 0), FORCE_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
 	number(num),
 	min(number_min),
 	max(number_max),
 	steps(number_steps),
-	numberHasChanged(true)
+	numberHasChanged(false), //?
+	shiftRight(shift_right)
 {
 	if(tool_tip!=NULL_STRING)
 		this->updateToolTip(tool_tip);
 	updateNumber(num);
 }
 
-UI_NumberField::UI_NumberField(UI_Object* numberfield_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const unsigned int number_min, const unsigned int number_max, const std::string& txt, const eString tool_tip, const unsigned int number_steps, const unsigned int num, const eFieldType field_type) :
+UI_NumberField::UI_NumberField(UI_Object* numberfield_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const unsigned int number_min, const unsigned int number_max, const std::string& txt, const eString tool_tip, const unsigned int number_steps, const unsigned int num, const bool shift_right, const eFieldType field_type) :
 	UI_Object(numberfield_parent, rect, distance_bottom_right, position_mode, AUTO_HEIGHT_CONST_WIDTH),
 	fieldType(field_type),
-	addbutton(new UI_Button(this, Rect(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 40, 1), Size(8, 8)), Size(0, 0), INCREASE_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST)),
-	subbutton(new UI_Button(this, Rect(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 50, 1), Size(8, 8)), Size(0, 0), SUB_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST)),
-	text(new UI_StaticText(this, txt, Rect(Point(0, 0), Size(0, 0)), Size(0, 0), FORCE_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
-	numberText(new UI_StaticText(this, "0", Rect(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 0), Size(0, 0)), Size(0, 0), FORCE_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
+	addButton(new UI_Button(this, Rect(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 40, 1), Size(8, 8)), Size(0, 0), INCREASE_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST)),
+	subButton(new UI_Button(this, Rect(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 50, 1), Size(8, 8)), Size(0, 0), SUB_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST)),
+	text(new UI_StaticText(this, txt, Rect(Point(shift_right?10:0, 0), Size(0, 0)), Size(0, 0), FORCE_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
+	numberText(new UI_StaticText(this, "0", Rect(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 10, 0), Size(0, 0)), Size(0, 0), FORCE_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
 	number(num),
 	min(number_min),
 	max(number_max),
 	steps(number_steps),
-	numberHasChanged(true)
+	numberHasChanged(false),
+	shiftRight(shift_right)
 {
 	if(tool_tip!=NULL_STRING)
 		this->updateToolTip(tool_tip);
@@ -74,15 +42,15 @@ UI_NumberField::UI_NumberField(UI_Object* numberfield_parent, const Rect& rect, 
 
 UI_NumberField::~UI_NumberField()
 {
-	delete addbutton;
-	delete subbutton;
+	delete addButton;
+	delete subButton;
 	delete text;
 	delete numberText;
 }
 
 UI_Object* UI_NumberField::checkToolTip() 
 {
-	if( (!isShown()) || ((!addbutton->getAbsoluteRect().Inside(mouse)) && (!subbutton->getAbsoluteRect().Inside(mouse)) && ((!text)||(!text->getAbsoluteRect().Inside(mouse))) && (!numberText->getAbsoluteRect().Inside(mouse))))
+	if( (!isShown()) || ((!addButton->getAbsoluteRect().Inside(mouse)) && (!subButton->getAbsoluteRect().Inside(mouse)) && ((!text)||(!text->getAbsoluteRect().Inside(mouse))) && (!numberText->getAbsoluteRect().Inside(mouse))))
 		return(NULL);
 	return((UI_Object*)this);
 }
@@ -97,11 +65,11 @@ void UI_NumberField::updateText(const eString txt) {
 
 void UI_NumberField::reloadOriginalSize()
 {
-	setOriginalSize(Size(3*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)/2,0));
+	setOriginalSize(Size(3*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)/2,text->getTextSize().getHeight()));
 		
-	addbutton->setOriginalPosition(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 40, 1));
-	subbutton->setOriginalPosition(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 50, 1));
-	numberText->setOriginalPosition(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 1));
+	addButton->setOriginalPosition(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 40, 1));
+	subButton->setOriginalPosition(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 50, 1));
+	numberText->setOriginalPosition(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 10, 1));
 	UI_Object::reloadOriginalSize();
 }
 
@@ -171,7 +139,7 @@ void UI_NumberField::process()
 		text->doHighlight(isMouseInside());
 	numberText->doHighlight(isMouseInside());
 
-	if((numberText->checkForNeedRedraw())||((text)&&(text->checkForNeedRedraw()))||(addbutton->checkForNeedRedraw())||(subbutton->checkForNeedRedraw()))
+	if((numberText->checkForNeedRedraw())||((text)&&(text->checkForNeedRedraw()))||(addButton->checkForNeedRedraw())||(subButton->checkForNeedRedraw()))
 		setNeedRedrawMoved();
 }
 
@@ -180,6 +148,10 @@ void UI_NumberField::draw(DC* dc) const
 	if(!isShown())
 		return;
 	UI_Object::draw(dc);
+	
+	if(shiftRight)
+		dc->DrawBitmap(theme.lookUpBitmap(LIST_BITMAP), getAbsolutePosition());
+	
 /*	dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 	dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 	Rect edge;

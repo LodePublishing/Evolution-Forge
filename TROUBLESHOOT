@@ -1,0 +1,4 @@
+If you are experiencing any problems (program crashes, weird behaviour, bugs etc.) first consult the 'error.log' in your Evolution Forge directory. The error message might be helpful in solving your problem.
+If that does not help much then you probably found a bug i.e. an error in the program itself (my fault :D ). Please contact me in that case at ef@clawsoftware.de and attach the error.log to the email or post your error at the clawsoftware.de forums. It is sometimes helpful if you include what you have done before the error occured and if you also attach other files (like goals or settings) to track down the source of error.
+
+

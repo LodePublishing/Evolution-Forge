@@ -33,12 +33,9 @@ class DC
 		DC(const Size current_resolution, const eBitDepth bit_depth, const Uint32 nflags, const Uint32 initflags);
 		~DC();
 		
-		DC(const DC& other);
-		DC &operator=(const DC& other);
-
 		operator SDL_Surface*() const;
 		SDL_Surface* operator->() const;
-		SDL_Surface* GetSurface() const;
+		SDL_Surface* getSurface() const;
 
 		const unsigned int w() const;
 		const unsigned int h() const;
@@ -66,8 +63,8 @@ class DC
 
 		const bool initializationOK() const;
 		
-		const bool SetColorKey(const Uint32 flag, const Color key) const;
-		const bool SetAlpha(const Uint32 flag, const Uint8 alpha) const;
+		const bool setColorKey(const Uint32 flag, const Color key) const;
+		const bool setAlpha(const Uint32 flag, const Uint8 alpha) const;
 		void updateScreen();
 		
 		void Blit(SDL_Surface* src, SDL_Rect& dstrect) const;
@@ -78,22 +75,25 @@ class DC
 
 		void setFullscreen(const bool fullscreen = true);
 		
-		void SetBrush(const Brush& brush);
-		void SetPen(const Pen& pen);
-		void SetColor(const Color* color);
-		void SetFont(const Font* font);
+		void setBrush(const Brush& brush);
+		void setPen(const Pen& pen);
+		void setColor(const Color* color);
+		void setFont(const Font* font);
 
-		const Font* GetFont() const;
+		const Font* getFont() const;
 
-		void SetTextForeground(const SDL_Color& textColor);
+		void setTextForeground(const SDL_Color& textColor);
 
-		const Size GetTextExtent(const std::string& text) const;
+		const Size getTextExtent(const std::string& text) const;
 		
 		void DrawText(const std::string& text, const Point& p) const;
 		void DrawText(const std::string& text, const signed int x, const signed int y) const;
 		
 		void DrawBitmap(SDL_Surface* bitmap, const Point& p) const;
 		void DrawBitmap(SDL_Surface* bitmap, const signed int x, const signed int y) const;
+		
+		void DrawBitmap(SDL_Surface* bitmap, const Point& p, const Rect& clip_rect) const;
+		void DrawBitmap(SDL_Surface* bitmap, const signed int x, const signed int y, const Rect& clip_rect) const;
 
 		void DrawEmptyRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height) const;
 		void DrawEmptyRectangle(const Rect& rect) const;
@@ -138,7 +138,7 @@ class DC
 		static Uint16 max_x, max_y;
 
 		SDL_Surface* surface;
-		void SetSurface(SDL_Surface* sdl_surface) {
+		void setSurface(SDL_Surface* sdl_surface) {
 			if(surface) 
 				SDL_FreeSurface(surface);
 			surface = sdl_surface;
@@ -205,6 +205,9 @@ class DC
 		void DrawFilledEdgedBorderRound_16bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
 		void DrawFilledEdgedBorderRound_24bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
 		void DrawFilledEdgedBorderRound_32bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+
+		DC(const DC& other);
+		DC &operator=(const DC& other);
 };
 
 inline void DC::setPressedRectangle(const bool pressed) {
@@ -212,7 +215,7 @@ inline void DC::setPressedRectangle(const bool pressed) {
 }
 
 inline DC& DC::operator=(const DC& other) {
-	if(this != &other) SetSurface(other.surface);return *this;
+	if(this != &other) setSurface(other.surface);return *this;
 }
 
 inline DC::operator SDL_Surface*() const { 
@@ -223,7 +226,7 @@ inline SDL_Surface* DC::operator->() const {
 	return surface;
 }
 		
-inline SDL_Surface* DC::GetSurface() const {
+inline SDL_Surface* DC::getSurface() const {
 	return(surface);
 }
 		
@@ -232,31 +235,31 @@ inline const bool DC::valid() const {
 }
 		
 inline Uint32 DC::flags() const {
-	return GetSurface()->flags;
+	return getSurface()->flags;
 }
 		
 inline const unsigned int DC::w() const {
-	return GetSurface()->w;
+	return getSurface()->w;
 }
 		
 inline const unsigned int DC::h() const {
-	return GetSurface()->h;
+	return getSurface()->h;
 }
 		
 inline Uint16 DC::pitch() const {
-	return GetSurface()->pitch;
+	return getSurface()->pitch;
 }
 		
 inline void* DC::pixels() { 
-	return GetSurface()->pixels; 
+	return getSurface()->pixels; 
 }
 		
 inline const void* DC::pixels() const {
-	return GetSurface()->pixels;
+	return getSurface()->pixels;
 }
 		
 inline struct private_hwdata* DC::hwdata() const {
-	return GetSurface()->hwdata;
+	return getSurface()->hwdata;
 }
 		
 inline bool DC::SaveBMP(const std::string& file) const {
@@ -272,74 +275,78 @@ inline void DC::DrawText(const std::string& text, const Point& p) const {
 }
 
 inline void DC::DrawRoundedRectangle(const Point& p, const Size& s, const unsigned int radius) const {
-	DrawRoundedRectangle(p.x, p.y, s.GetWidth(), s.GetHeight(), radius);
+	DrawRoundedRectangle(p.x, p.y, s.getWidth(), s.getHeight(), radius);
 }
 			
 inline void DC::DrawRoundedRectangle(const Rect& rect, const unsigned int radius) const {
-	DrawRoundedRectangle(rect.GetLeft(), rect.GetTop(), rect.GetWidth(), rect.GetHeight(), radius);
+	DrawRoundedRectangle(rect.getLeft(), rect.getTop(), rect.getWidth(), rect.getHeight(), radius);
 }
 
 inline void DC::DrawEdgedRoundedRectangle(const Point& p, const Size& s, const unsigned int radius) const {
-	DrawEdgedRoundedRectangle(p.x, p.y, s.GetWidth(), s.GetHeight(), radius);
+	DrawEdgedRoundedRectangle(p.x, p.y, s.getWidth(), s.getHeight(), radius);
 }
 		
 inline void DC::DrawEdgedRoundedRectangle(const Rect& rect, const unsigned int radius) const {
-	DrawEdgedRoundedRectangle(rect.GetLeft(), rect.GetTop(), rect.GetWidth(), rect.GetHeight(), radius);
+	DrawEdgedRoundedRectangle(rect.getLeft(), rect.getTop(), rect.getWidth(), rect.getHeight(), radius);
 }
 
-inline void DC::SetBrush(const Brush& dc_brush) {
+inline void DC::setBrush(const Brush& dc_brush) {
 	brush = dc_brush;
 }
 
-inline void DC::SetPen(const Pen& dc_pen) {
+inline void DC::setPen(const Pen& dc_pen) {
 	pen = dc_pen;
 }
 
-inline void DC::SetColor(const Color* dc_color) {
+inline void DC::setColor(const Color* dc_color) {
 	color = dc_color;
 }
 
-inline void DC::SetFont(const Font* dc_font) {
+inline void DC::setFont(const Font* dc_font) {
 	font = dc_font;
 }
 
-inline void DC::SetTextForeground(const SDL_Color& dc_text_color) {
+inline void DC::setTextForeground(const SDL_Color& dc_text_color) {
 	textColor = dc_text_color;
 }
 
-inline const Font* DC::GetFont() const {
+inline const Font* DC::getFont() const {
 	return(font);
 }
 
-inline const Size DC::GetTextExtent(const std::string& text) const {
-	return(font->GetTextExtent(text));
+inline const Size DC::getTextExtent(const std::string& text) const {
+	return(font->getTextExtent(text));
 }
 		
 inline void DC::DrawBitmap(SDL_Surface* bitmap, const Point& p) const {
 	DrawBitmap(bitmap, p.x, p.y);
 }
-		
+
+inline void DC::DrawBitmap(SDL_Surface* bitmap, const Point& p, const Rect& clip_rect) const {
+	DrawBitmap(bitmap, p.x, p.y, clip_rect);
+}	
+
 inline void DC::DrawEmptyRectangle(const Rect& rect) const	{
-	DrawEmptyRectangle(rect.GetLeft(), rect.GetTop(), rect.GetWidth(), rect.GetHeight());
+	DrawEmptyRectangle(rect.getLeft(), rect.getTop(), rect.getWidth(), rect.getHeight());
 }
 		
 inline void DC::DrawEmptyRectangle(const Point& p, const Size& s) const {
-	DrawEmptyRectangle(p.x, p.y, s.GetWidth(), s.GetHeight());
+	DrawEmptyRectangle(p.x, p.y, s.getWidth(), s.getHeight());
 }
 		
 inline void DC::DrawRectangle(const Rect& rect) const { 
-	DrawRectangle(rect.GetLeft(), rect.GetTop(), rect.GetWidth(), rect.GetHeight());
+	DrawRectangle(rect.getLeft(), rect.getTop(), rect.getWidth(), rect.getHeight());
 }
 		
 inline void DC::DrawRectangle(const Point& p, const Size& s) const { 
-	DrawRectangle(p.x, p.y, s.GetWidth(), s.GetHeight());
+	DrawRectangle(p.x, p.y, s.getWidth(), s.getHeight());
 }
 
-inline const bool DC::SetColorKey(const Uint32 flag, const Color key) const {
+inline const bool DC::setColorKey(const Uint32 flag, const Color key) const {
 	return SDL_SetColorKey(surface, flag, key) == 0;
 }
 
-inline const bool DC::SetAlpha(const Uint32 flag, const Uint8 alpha) const {
+inline const bool DC::setAlpha(const Uint32 flag, const Uint8 alpha) const {
 	return SDL_SetAlpha(surface, flag, alpha) == 0;
 }
 

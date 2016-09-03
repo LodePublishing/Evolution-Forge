@@ -13,6 +13,7 @@ class IntroWindow : public UI_Window
 		void draw(DC* dc) const;
 		void reloadOriginalSize();
 		void gotoChapter(unsigned int chapter);
+
 	private:
 		UI_LongText* text;
 		UI_Button* doneButton;

@@ -6,6 +6,24 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+void toErrorLog(const std::string& msg) {
+	std::cout << msg << "\n";
+}
+
+void toErrorLog(int msg)
+{
+	std::cout << msg << "\n";
+}
+
+void toInitLog(const std::string& msg)
+{
+	std::cout << msg << "\n";
+}
+
+void toInitLog(int msg)
+{
+	std::cout << msg << "\n";
+}
 
 #include <dirent.h>
 #include <sys/types.h>
@@ -14,23 +32,6 @@
 #else 
 #include <windows.h>
 #endif
-
-
-std::string lastMsg;
-void toLog(const std::string& msg)
-{
-//	if(msg == lastMsg)
-//		return;
-	lastMsg=msg;
-	std::cout << msg << "\n";
-//	ofstream pFile("error.log", std::ios_base::app);
-//	pFile << msg.c_str() << endl;
-}
-
-void toLog(int msg)
-{
-	std::cout << msg << "\n";
-}
 
 std::list<std::string> findFiles(const std::string& directory1, const std::string& directory2, const std::string& directory3)
 {
@@ -48,7 +49,7 @@ std::list<std::string> findFiles(const std::string& directory1, const std::strin
 		os << directory1;
 
 	if ((dir = opendir(os.str().c_str())) == NULL)
-		toLog("ERROR (findFiles()): Cannot open directory " + os.str());
+		toErrorLog("ERROR (findFiles()): Cannot open directory " + os.str());
 	else 
 	{
 		while ((entry = readdir(dir)) != NULL)
@@ -65,7 +66,7 @@ std::list<std::string> findFiles(const std::string& directory1, const std::strin
 			fileList.push_back(directory1 + "\\" + directory2 + "\\" + directory3 + "\\" + dir.cFileName);
 		while(FindNextFile(fhandle, &dir));
 	} else
-		toLog("ERROR (findFiles()): Cannot load " + directory1 + "\\" + directory2 + "\\" + directory3 + ".");
+		toErrorLog("ERROR (findFiles()): Cannot load " + directory1 + "\\" + directory2 + "\\" + directory3 + ".");
 	FindClose(fhandle);
 #endif
 	return fileList;
@@ -76,7 +77,7 @@ const bool checkStreamIsOpen(std::ifstream& stream, const std::string function_n
 {
 	if(!stream.is_open())
 	{
-		toLog("ERROR (" + function_name + "()): File " + file_name + " not found or cannot be opened => canceling request.");
+		toErrorLog("ERROR (" + function_name + "()): File " + file_name + " not found or cannot be opened => canceling request.");
 		return(false);
 	}
 	return(true);
@@ -86,7 +87,7 @@ const bool checkStreamIsOpen(std::ofstream& stream, const std::string function_n
 {
 	if(!stream.is_open())
 	{
-		toLog("ERROR (" + function_name + "()): Could not create file " + file_name + " (write protection? disk space?) => canceling request.");
+		toErrorLog("ERROR (" + function_name + "()): Could not create file " + file_name + " (write protection? disk space?) => canceling request.");
 		return(false);
 	}
 	return(true);
@@ -96,13 +97,13 @@ const bool checkStreamForFailure(std::ifstream& stream, const std::string functi
 {
 	if(stream.bad())
 	{
-		toLog("ERROR (" + function_name + "()): Fatal error while accessing file " + file_name + " => canceling request.");
+		toErrorLog("ERROR (" + function_name + "()): Fatal error while accessing file " + file_name + " => canceling request.");
 		return(false);
 	}
 	if(stream.fail())
 	{
 		stream.clear(stream.rdstate() & ~std::ios::failbit);
-		toLog("WARNING (" + function_name + "()): Error while reading from file " + file_name + " => trying to continue.");
+		toErrorLog("WARNING (" + function_name + "()): Error while reading from file " + file_name + " => trying to continue.");
 	}
 	return(true);
 }
@@ -111,13 +112,13 @@ const bool checkStreamForFailure(std::ofstream& stream, const std::string functi
 {
 	if(stream.bad())
 	{
-		toLog("ERROR (" + function_name + "()): Fatal error while accessing file " + file_name + " => canceling request.");
+		toErrorLog("ERROR (" + function_name + "()): Fatal error while accessing file " + file_name + " => canceling request.");
 		return(false);
 	}
 	if(stream.fail())
 	{
 		stream.clear(stream.rdstate() & ~std::ios::failbit);
-		toLog("WARNING (" + function_name + "()): Error while writing to file " + file_name + " => trying to continue.");
+		toErrorLog("WARNING (" + function_name + "()): Error while writing to file " + file_name + " => trying to continue.");
 	}
 	return(true);
 }

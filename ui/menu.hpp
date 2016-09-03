@@ -15,26 +15,24 @@ enum eMenuType
 class UI_Menu : public UI_Object
 {
 	public:
-// Anzahl, Position, coloumns, height / width, first string, Button
-// TODO Button noch rein evtl
-		UI_Menu(UI_Object* menu_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const bool choose_menu);
-		UI_Menu(UI_Object* menu_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const unsigned int entryNumber, const unsigned int coloumns, const Size& s, const eString firstString, const eButtonColorsType button_colors_type, const bool choose_menu);
-		
-		UI_Menu(const UI_Menu& object);
+		// if all items to 'choose_menu' are used then it is a custom menu and reloadOriginalSize, updateItemPositions etc will not be called
+		UI_Menu(UI_Object* menu_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const bool choose_menu, eMenuType menu_type = CUSTOM_MENU, const eButtonWidthType button_width_type = STANDARD_BUTTON_WIDTH, const unsigned int entryNumber = 0, const eString firstString = NULL_STRING, const eButtonColorsType button_colors_type = MY_BUTTON);
 		~UI_Menu();
-		UI_Menu& operator=(const UI_Menu& object);
 		void process();
 		void draw(DC* dc) const;
 		const unsigned int getHeight() const;
-		const signed int getPressedItem() const;
+		const signed int getPressedItem();
 		const signed int getMarkedItem() const;
+
+		void forcePressItem(const unsigned int number);
 		void close();
 		void open();		
 		const bool isOpen() const;
 		const bool menuHasChanged() const;
 		void setMenuHasChanged(const bool has_changed = true);
 		void updateItemSizes(const unsigned int width);
-		void updateItemPositions(const eMenuType menu_type);
+		void updateItemPositions();
+		void reloadOriginalSize();
 	protected:
 		void setMenuLevel(const unsigned int menu_level);
 		std::list<UI_MenuEntry*> menuEntries;
@@ -46,6 +44,11 @@ class UI_Menu : public UI_Object
 	private:
 		Point p1, p2;
 		bool menuChanged;
+		eButtonWidthType buttonWidthType;
+		eMenuType menuType;
+	
+		UI_Menu& operator=(const UI_Menu& object);
+		UI_Menu(const UI_Menu& object);
 };
 
 #endif // _UI_MENU_HPP

@@ -18,12 +18,13 @@ class Size
 		const Size operator+(const Size& size) const;
 		const Size operator-(const Size& size) const;
 		const Size operator/(const unsigned int d) const;
-		void SetWidth(const unsigned int w);
-		void SetHeight(const unsigned int h);
-		const unsigned int GetWidth() const;
-		const unsigned int GetHeight() const;
+		void setWidth(const unsigned int w);
+		void setHeight(const unsigned int h);
+		const unsigned int getWidth() const;
+		const unsigned int getHeight() const;
 		void move(const Size& startSize, const Size& targetSize);
-		static void mv(unsigned int& x, const unsigned int sx, const unsigned int tx);
+		static const bool mv(unsigned int& x, const unsigned int sx, const unsigned int tx);
+		static const bool mv2(unsigned int& x, const unsigned int sx, const unsigned int tx);
 	private:
 		unsigned int width;
 		unsigned int height;
@@ -44,7 +45,7 @@ inline Size::Size(const unsigned int w, const unsigned int h) :
 {
 #ifdef _SCC_DEBUG
         if((w > 10000) || (h > 10000))
-                toLog("WARNING (Size::Size()): Coordinates out of boundary.");
+                toErrorLog("WARNING (Size::Size()): Coordinates out of boundary.");
 #endif
 }
 
@@ -75,19 +76,27 @@ inline const Size Size::operator/(const unsigned int d) const {
 	return(Size(width/d, height/d));
 }
 
-inline void Size::SetWidth(const unsigned int w) {
+inline void Size::setWidth(const unsigned int w) {
 	width = w;
+#ifdef _SCC_DEBUG
+        if((w > 10000))
+                toErrorLog("WARNING (Size::setWidth()): Coordinates out of boundary.");
+#endif
 }
 		
-inline void Size::SetHeight(const unsigned int h) {
+inline void Size::setHeight(const unsigned int h) {
 	height = h;
+#ifdef _SCC_DEBUG
+        if((h > 10000))
+                toErrorLog("WARNING (Size::setHeight()): Coordinates out of boundary.");
+#endif
 }
 
-inline const unsigned int Size::GetWidth() const {
+inline const unsigned int Size::getWidth() const {
 	return width;
 }
 																				
-inline const unsigned int Size::GetHeight() const {
+inline const unsigned int Size::getHeight() const {
 	return height;
 }
 

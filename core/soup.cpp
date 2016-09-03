@@ -15,7 +15,7 @@ SOUP::SOUP() :
 
 SOUP::~SOUP()
 {
-	toLog("* Freeing build orders...");
+	toInitLog("* Freeing build orders...");
 	for(unsigned int i=MAX_PROGRAMS;i--;)
 		delete buildOrder[i];
 	for(unsigned int i=MAX_PLAYER;i--;)
@@ -96,31 +96,31 @@ void SOUP::initSoup(START* (*start)[MAX_INTERNAL_PLAYER])
 #ifdef _SCC_DEBUG
 /*f(player_number >= mapPlayerNum)
 	{
-		toLog("ERROR: (SOUP::initSoup) player_number out of range.");
+		toErrorLog("ERROR: (SOUP::initSoup) player_number out of range.");
 		return;
 	}*/
 /*	if(!mapInitialized)
 	{
-		toLog("ERROR: (SOUP::initSoup) Map not initialized.");
+		toErrorLog("ERROR: (SOUP::initSoup) Map not initialized.");
 		return;
 	}
 	
 	if(!goalsInitialized)
 	{
-		toLog("ERROR: (SOUP::initSoup) Goals not initialized.");
+		toErrorLog("ERROR: (SOUP::initSoup) Goals not initialized.");
 		return;
 	}
 	*/
 #endif
 //	if(buildOrderInitialized)
 //	{
-//		toLog("ERROR: (SOUP::initSoup) SOUP is already initialzed.");
+//		toErrorLog("ERROR: (SOUP::initSoup) SOUP is already initialzed.");
 //		return(0);
 //	}
 //	PREBUILDORDER::resetMapInitialized();
 /*	if(!(PREBUILDORDER::setMap(pMap)))
 	{
-		toLog("ERROR: (SOUP::initSoup) Map not initialized.");
+		toErrorLog("ERROR: (SOUP::initSoup) Map not initialized.");
 		return(0);
 	}*/
 	unsigned int groupSize = MAX_PROGRAMS / mapPlayerNum;
@@ -166,11 +166,10 @@ void SOUP::setMapPlayerNum(const unsigned int map_player_num)
 {
 #ifdef _SCC_DEBUG
 	if((map_player_num < 1) || (map_player_num > MAX_PLAYER)) {
-		toLog("DEBUG: (SOUP::setMapPlayerNum): map_player_num not initialized.");return;
+		toErrorLog("DEBUG: (SOUP::setMapPlayerNum): map_player_num not initialized.");return;
 	}
 #endif
 	mapPlayerNum = map_player_num;
-	// TODO irgendwie von hier initSoup aufrufen
 }
 
 
@@ -270,10 +269,12 @@ const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_P
 	const unsigned int groupSize=MAX_PROGRAMS/mapPlayerNum;
 
 	// Veraendert? Dann zurueckkopieren
-	for(unsigned int k = mapPlayerNum; k--;)
+/*	for(unsigned int k = mapPlayerNum; k--;)
 		if((previous_analyzed_buildorder[k])&&(analyzedBuildOrder[k]->writeProgramBackToCode(previous_analyzed_buildorder[k]->getProgramList()))) // irrefuehrend, previous ist ja dasselbe...
 			for(unsigned int i = groupSize;i--;)
-				buildOrder[k*groupSize+i]->copyCode(*(analyzedBuildOrder[k]));
+				buildOrder[k*groupSize+i]->copyCode(*(analyzedBuildOrder[k]));*/
+	// TODO: wenn Ziele veraendert wurden wird u.U. alter falscher Code mit neuem guten Code vermixt (andere phaeno/geno Tabellen)
+	// TODO Zurueckkopieren ist auch nur wichtig wenn man Editieren erlaubt
 
 //	PREBUILDORDER::initNoise();
 
@@ -396,8 +397,8 @@ const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_P
 			std::ostringstream os;
 			for(unsigned int i = MAX_LENGTH;i--;)
 				os << analyzedBuildOrder[k]->getCode(i);
-			toLog("CurrentCode: " + os.str());
-			toLog("^^^^^^^^^^^^ WARNING: genetic core and analysis core are not synchrosized");
+			toErrorLog("CurrentCode: " + os.str());
+			toErrorLog("^^^^^^^^^^^^ WARNING: genetic core and analysis core are not synchronized!");
 		}
 #endif			
 
@@ -421,7 +422,7 @@ const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_P
 			analyzedBuildOrder[k]->fitnessVariance/=MAX_PROGRAMS;
 //			analyzedBuildOrder[k]->analyzeBuildOrder(); TODO?
 //			analyzedBuildOrder[k]->getPlayer()->getGoal()->bestTime=analyzedBuildOrder[k]->getTimer(); TODO !!
-//			analyzedBuildOrder[k]->setUnchangedGenerations(analyzedBuildOrder[k]->getUnchangedGenerations()+1);
+//			analyzedBuildOrder[k]->incrementUnchangedGenerations();
 //			analyzedBuildOrder[k]->setTotalGeneration(analyzedBuildOrder[k]->getTotalGeneration()+1); TODO
 #if 0
 if(analyzedBuildOrder[k]->getUnchangedGenerations()>=coreConfiguration.getMaxGenerations())
@@ -473,6 +474,7 @@ const bool SOUP::recalculateGeneration(ANABUILDORDER* previous_analyzed_buildord
 	}
 	if(!changed_bo)
 		return(false);
+	toErrorLog("recalculate");
 	const unsigned int groupSize=MAX_PROGRAMS/mapPlayerNum;
 
 	for(unsigned int k=mapPlayerNum;k--;)
@@ -551,7 +553,7 @@ const bool SOUP::recalculateGeneration(ANABUILDORDER* previous_analyzed_buildord
 			analyzedBuildOrder[k]->fitnessVariance/=MAX_PROGRAMS;
 //			analyzedBuildOrder[k]->analyzeBuildOrder(); TODO?
 //			analyzedBuildOrder[k]->getPlayer()->getGoal()->bestTime=analyzedBuildOrder[k]->getTimer(); TODO !!
-//			analyzedBuildOrder[k]->setUnchangedGenerations(analyzedBuildOrder[k]->getUnchangedGenerations()+1);
+//			analyzedBuildOrder[k]->incrementUnchangedGenerations();
 //			analyzedBuildOrder[k]->setTotalGeneration(analyzedBuildOrder[k]->getTotalGeneration()+1); TODO
 #if 0
 if(analyzedBuildOrder[k]->getUnchangedGenerations()>=coreConfiguration.getMaxGenerations())

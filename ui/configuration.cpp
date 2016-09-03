@@ -17,7 +17,9 @@ UI_Configuration::UI_Configuration():
 	transparency(false),
 	smoothMovements(true),
 	unloadGraphics(false),
-	configurationFile("settings/ui.cfg")
+	firstStart(false),
+	configurationFile("settings/ui.cfg"),
+	visitedHelpChapters()
 {}
 
 UI_Configuration::~UI_Configuration()
@@ -38,6 +40,7 @@ void UI_Configuration::initDefaults()
 	setTransparency(false);
 	setSmoothMovements(true);
 	setUnloadGraphics(false);
+	setFirstStart(false);
 	configurationFile = "settings/ui.cfg";
 }
 
@@ -51,10 +54,12 @@ void UI_Configuration::saveToFile() const
 	std::ofstream pFile(configurationFile.c_str(), std::ios_base::out | std::ios_base::trunc);
 	if(!pFile.is_open())
 	{
-		toLog("ERROR: (UI_Configuration::saveToFile): File could not be opened.");
+		toErrorLog("ERROR: (UI_Configuration::saveToFile): File could not be opened.");
 		return;
 	}
 	pFile << "@SETTINGS" << std::endl;
+	pFile << "# Is this the first start? Then display a language menu at the beginning... 1 = yes, 0 = no" << std::endl;
+	pFile << "    \"First start\" = \"" << (int)isFirstStart() << "\"" << std::endl;
 	pFile << "# 1 = english, 2 = german" << std::endl;
 	pFile << "    \"Language\" = \"" << (int)getLanguage() << "\"" << std::endl;
 	pFile << "# 1 = 640x480, 2 = 800x600, 3 = 1024x768, 4 = 1280x1024" << std::endl;
@@ -85,7 +90,11 @@ void UI_Configuration::saveToFile() const
 	pFile << "    \"Transparency\" = \"" << (int)isTransparency() << "\"" << std::endl;
 	pFile << "# Unload graphics if they are not needed, for low-memory systems" << std::endl;
 	pFile << "    \"Unload graphics\" = \"" << (int)isUnloadGraphics() << "\"" << std::endl;
-
+	pFile << "# internal" << std::endl;
+	pFile << "    \"Visited help chapters\" =";
+	for(std::set<unsigned int>::const_iterator i = visitedHelpChapters.begin(); i != visitedHelpChapters.end(); ++i)
+		pFile << " " << *i;
+	pFile << std::endl;
 	pFile << "@END" << std::endl;
 }
 
@@ -94,14 +103,14 @@ void UI_Configuration::loadConfigurationFile()
 	std::ifstream pFile(configurationFile.c_str());
 	if(!pFile.is_open())
 	{
-		toLog("WARNING: (UI_Configuration::loadConfigurationFile): File not found.");
-		toLog("-> Creating new file with default values...");
+		toErrorLog("WARNING: (UI_Configuration::loadConfigurationFile): File not found.");
+		toErrorLog("-> Creating new file with default values...");
 		initDefaults();
 		saveToFile();		
 		return;
 	}
 
-	toLog("* Loading " + configurationFile);
+	toInitLog("* Loading " + configurationFile);
 	
 	std::fstream::pos_type old_pos = pFile.tellg();
 	char line[1024];
@@ -111,7 +120,7 @@ void UI_Configuration::loadConfigurationFile()
 		{
 			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
 #ifdef _SCC_DEBUG
-			toLog("WARNING: (UI_Configuration::loadConfigurationFile) Long line!");
+			toErrorLog("WARNING: (UI_Configuration::loadConfigurationFile) Long line!");
 #endif
 		}
 		
@@ -129,6 +138,11 @@ void UI_Configuration::loadConfigurationFile()
 			std::map<std::string, std::list<std::string> > block;
 			pFile.seekg(old_pos);
 			parse_block_map(pFile, block);
+
+			if((i=block.find("First start"))!=block.end()){
+				i->second.pop_front();
+			   	setFirstStart(atoi(i->second.front().c_str()));
+			}
 
 			if((i=block.find("Language"))!=block.end()){
 				i->second.pop_front();
@@ -183,10 +197,39 @@ void UI_Configuration::loadConfigurationFile()
 				i->second.pop_front();
 			   	setUnloadGraphics(atoi(i->second.front().c_str()));
 			}
+		
+			if((i=block.find("Visited help chapters"))!=block.end()){
+				i->second.pop_front();
+				visitedHelpChapters.clear();
+				for(std::list<std::string>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+					visitedHelpChapters.insert(atoi(j->c_str()));
+			}				
 		}
 		old_pos = pFile.tellg();
 	}// END while
 } // schoen :)
+
+const bool UI_Configuration::isVisitedHelpChapter(const unsigned int chapter) const
+{
+	if(visitedHelpChapters.find(chapter) == visitedHelpChapters.end())
+		return(false);
+	else return(true);
+}
+
+void UI_Configuration::visitHelpChapter(const unsigned int chapter)
+{
+	visitedHelpChapters.insert(chapter);
+}
+
+const bool UI_Configuration::setFirstStart(const bool first_start) 
+{
+	if(firstStart == first_start)
+		return(false);
+	firstStart = first_start;
+	if(!firstStart)
+		saveToFile();
+	return(true);
+}
 
 const bool UI_Configuration::setResolution(const eResolution current_resolution) 
 {

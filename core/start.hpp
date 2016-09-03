@@ -50,12 +50,12 @@ class START
 		bool startConditionsInitialized;
 		bool mapInitialized;
 // Benutzer waehlt: Karte, Spielmodus, Harvestspeed, und fuegt Spieler mit Rasse, Startforce (default), StartPosition (absolut / zufaellig), Siegbedingungen (goals), 
+		START& operator=(const START& start);
+		START(const START& start);
 
 	public:
 		START(UNIT (*start_force)[MAX_LOCATIONS]);
 		~START();
-		START& operator=(const START& start);
-		//START(const START& start);
 
 		const bool assignMap(const BASIC_MAP* map); 
 		const bool setHarvestSpeed(const eRace race, const HARVEST_SPEED* harvest_speed); // copy data (pointers) from settings 
@@ -111,7 +111,7 @@ inline const bool START::setStartPosition(const unsigned int start_position)
 		return(false);
 #ifdef _SCC_DEBUG
 	if((start_position < 1) || (start_position >= tmpmap->getMaxLocations())) {
-		toLog("DEBUG: (START::setStartPosition): Value start_position out of range.");return(false);
+		toErrorLog("DEBUG: (START::setStartPosition): Value start_position out of range.");return(false);
 	}
 #endif
 	startPosition = start_position;

@@ -1,46 +1,63 @@
-* * * * * * * * * * * * * * * * * *
-* Evolution Forge 1.62 final Beta *
-* * * * * * * * * * * * * * * * * *
+* * * * * * * * * * * * * * *
+* Evolution Forge 1.78 Beta *
+* * * * * * * * * * * * * * *
 
 Please visit http://www.clawsoftware.de for changelogs, updates and informations.
 
 
 -------------------------
-Please post your ideas, discuss or report bugs at the forums at clawsoftware.de.This is a beta test. Please test the program on different pcs, different configurations, color settings, drivers etc and report back any crashes, bugs etc. Try out many different, especially unusual goal lists to test the core, let the program run some hours, change the settings, etc.
-Please do not mess with the data files, the loading routines do not take notice of every error. In the worst case the programm will probably crash.
+Please post your ideas, discuss or report bugs at the forums at clawsoftware.de. 
+This is a beta test. If you want to help finding bugs / increase the compatibility then please test the program on different pcs, different operating systems, different configurations, color settings, drivers etc. and (most important) report back any crashes, bugs etc you have encountered. Try out many different (especially unusual) goal lists to test the core, let the program run some hours, change the settings during a run etc.
+
+Please do not mess with the data files, the loading routines do not take notice of every error. In the worst case the program might crash.
 -------------------------
 
 -------------------------
-The program simulates an abstract StarCraft : Broodwar environment, calculates the time a certain build order needs and optimizes randomly created build orders to a given goal list using evolutionary algorithms.
+The program simulates an abstract StarCraft : Broodwar environment, calculates the time a certain build order needs and optimizes randomly created build orders to a given goal list using evolutionary algorithms which form a special tool to efficiently search through a large search space.
+
 Mouse commands:
 - LEFT BUTTON: activates buttons and adds items
 - RIGHT BUTTON: removes items (units) or adds very many items (+/- buttons)
+
 While you can do everything with the mouse there are some Keyboard shortcuts:
-- SPACE: deactivate drawing (less CPU usage / faster calculation)
+- PAUSE: stop optimizing
+- SPACE: start / stop optimizing
 - ALT + ENTER: switch between fullscreen and window mode
-- ESC: quits the program without saving
-- PAUSE: stop/continue calculation
+- CTRL + Q: quits the program
+- ESC: quits the program without saving TODO
 Also the program produces an output:
+
+
 - Saving/Loading: Saved build orders are placed in output/bos/<the race>/, goals are placed in settings/goals/<the race>/
+
+deactivate drawing (less CPU usage / faster calculation)
 -------------------------
 
 -------------------------
-Evolution Forge consists of 3 parts:
-- SDL (LGP License) (http://www.libsdl.org)
-- SDL TTF (LGP License) (http://www.libsdl.org/projects/SDL_ttf/)
-- Evolution Forge (see below)
-There were no other libraries (except the C++ standard libraries) used.
+-      Legal things     -
+-------------------------
+Evolution Forge consists of several libraries / media from other parties who may have special licenses or rulings that are not listed below. For specifics please look up in the appropriate files in the same directory.
 
-* You may not use Evolution Forge for any direct commercial use. 
+- C++ standard libraries (compiled into the program)
+- SDL (LGP License) (http://www.libsdl.org) 'SDL.dll'
+- SDL Image (LGP License) (http://www.libsdl.org/projects/SDL_image/) 'SDL_image.dll'
+- SDL TTF (LGP License) (http://www.libsdl.org/projects/SDL_ttf/) 'SDL_ttf.dll'
+- 'FreeSans' fonts (LGP License) 'FreeSans.ttf' 'FreeSansBold.ttf'
+- FMOD Sound System, copyright (C) Firelight Technologies Pty, Ltd., 1994-2005. http://www.fmod.org/ 'fmod.dll' TODO
+- Music: 'Genetic Transmissions' by Unknown TODO - 'genetic.mp3'
+
+All other libraries, program components (ClawGUI and Evolution Forge itself) and media has been produced by myself and may be used under the following conditions:
+
+* You may not use Evolution Forge for any direct commercial use (publishers might want to contact me if they are prepared to wage a legal war with Blizzard)
 * You may use Evolution Forge for Entertainment, Scientific Interest or Education purposes.
 * You are allowed to make as many copies as you wish as long as you do not change any of the files (except all files in settings) and always distribute all files together.
-* You may distribute any of the files in "settings" and "output" as you wish as long as you do not remove the link to www.clawsoftware.de or as long as you provide a link to www.clawsoftware.de yourself.
-
-Also notice that the SDL.dll is patched. If you want to use a different SDL version make sure you have the latest patches availible. I did apply a patch and removed some MMX code of the source to allow MinGW to compile it.
--------------------------
+* You may distribute any of the files in "settings" and "output" as you wish as long as you do not remove the link to www.clawsoftware.de or provide a link to www.clawsoftware.de in connection with the files.
+This of course does not affect the build orders themselves.
 
 -------------------------
-This is a BETA Version. That means that it is not fully tested and that there are one or more bugs that may cause any kind of damage. Though I tested it successfully on several different machines it is possible that the program or the whole system might crash and therefore data is lost. I SPECIFICALLY DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT WITH RESPECT TO THIS SOFTWARE. IN NO EVENT WILL I BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES EVEN IF IT HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+-------------------------
+This is a BETA Version. That means that it is not fully tested and that there are one or more bugs that may cause any kind of damage (down to a nuclear meltdown if you are using it in a nuclear power plant). Though I tested it successfully on several different machines and in connection with different software configuration it is possible that the program or the whole system might crash and therefore data is lost or even worse. I SPECIFICALLY DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT WITH RESPECT TO THIS SOFTWARE. IN NO EVENT WILL I BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES EVEN IF IT HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 StarCraft and Warcraft are registered trademarks of Blizzard/Vivendi. All other brand, product, service, and process names appearing in this program are the trademarks of their respective holders. Reference to or use of a product, service, or process does not imply recommendation, approval, affiliation, or sponsorship of that product, service, or process by ClawSoftware.
 -------------------------

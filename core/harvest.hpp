@@ -25,7 +25,7 @@ inline const unsigned int HARVEST_SPEED::getHarvestMineralSpeed(const unsigned i
 #ifdef _SCC_DEBUG
 	//todo range checking von minerals[num]!
 	if(num>=45) {
-		toLog("DEBUG: (HARVEST_SPEED::getHarvestMineralSpeed): Value out of range.");return(0);
+		toErrorLog("DEBUG: (HARVEST_SPEED::getHarvestMineralSpeed): Value out of range.");return(0);
 	}
 #endif
 	return(minerals[num]);
@@ -35,7 +35,7 @@ inline const unsigned int HARVEST_SPEED::getHarvestGasSpeed(const unsigned int n
 {
 #ifdef _SCC_DEBUG
 	if(num>=5) {
-		toLog("DEBUG: (HARVEST_SPEED::getHarvestGasSpeed): Value out of range.");return(0);
+		toErrorLog("DEBUG: (HARVEST_SPEED::getHarvestGasSpeed): Value out of range.");return(0);
 	}
 #endif
 	return(gas[num]);
@@ -45,7 +45,7 @@ inline void HARVEST_SPEED::setHarvestMineralSpeed(const unsigned int num, const 
 {
 #ifdef _SCC_DEBUG
 	if(num>=45) {
-		toLog("DEBUG: (HARVEST_SPEED::setHarvestMineralSpeed): Value out of range.");return;
+		toErrorLog("DEBUG: (HARVEST_SPEED::setHarvestMineralSpeed): Value out of range.");return;
 	}
 #endif
 	minerals[num]=speed;
@@ -55,7 +55,7 @@ inline void HARVEST_SPEED::setHarvestGasSpeed(const unsigned int num, const unsi
 {
 #ifdef _SCC_DEBUG
 	if(num>=5) {
-		toLog("DEBUG: (HARVEST_SPEED::getHarvestGasSpeed): Value out of range.");return;
+		toErrorLog("DEBUG: (HARVEST_SPEED::getHarvestGasSpeed): Value out of range.");return;
 	}
 #endif
 	gas[num]=speed;

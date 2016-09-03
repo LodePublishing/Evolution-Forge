@@ -6,7 +6,9 @@
 
 ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std::string& entry_unit):
 	UI_Button(entry_parent, entry_rect, Size(0,0), FORCE_ENTRY_BUTTON, false, PRESS_BUTTON_MODE, entry_unit, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH),
-	oldGoalCount(0),	
+	oldGoalCount(0),
+	oldGoalTime(0),
+	oldGoalFinalTime(0),
 	startForce(0),
 	targetForce(0),
 	currentForce(0),
@@ -17,35 +19,6 @@ ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std
 	goal(NULL)
 {}	
 
-ForceEntry::ForceEntry(const ForceEntry& object) :
-	UI_Button((UI_Button)object),
-	oldGoalCount(object.oldGoalCount),	
-	startForce(object.startForce),
-	targetForce(object.targetForce),
-	currentForce(object.currentForce),
-	totalNumber(object.totalNumber),
-	highlight(object.highlight),
-	unit(object.unit),
-	type(object.type),
-	goal(object.goal)
-{ }
-
-
-ForceEntry& ForceEntry::operator=(const ForceEntry& object)
-{
-	((UI_Button)(*this)) = ((UI_Button)object);
-	oldGoalCount = object.oldGoalCount;
-	startForce = object.startForce;
-	targetForce = object.targetForce;
-	currentForce = object.currentForce;
-	totalNumber = object.totalNumber;
-	highlight = object.highlight;
-	unit = object.unit;
-	type = object.type;
-	goal = object.goal;
-	return(*this);
-}
-																																					   
 ForceEntry::~ForceEntry()
 {
 	if(makeTimeGoalButton)
@@ -97,37 +70,74 @@ void ForceEntry::process()
 	{
 		// wichtig: Speichern des forceentries damit nicht KOnkurrenz zwischen den entries betsteht!
 		Rect r = getAbsoluteRect();
-		r.SetWidth(16);
-		r.SetLeft(getParent()->getWidth()-10);
+		r.setWidth(16);
+		r.setLeft(getParent()->getAbsoluteRightBound()-10);
 // situation 1: mouse just entered, both timeentrybox and maketimegoal is hidden => Show makeTimeGoalButton
-		if((ForceEntry::currentForceEntry == NULL)&&(r.Inside(mouse))&&(!ForceEntry::makeTimeGoalButton)&&(!ForceEntry::timeEntryBox))
+
+		if(!ForceEntry::timeEntryBox)
 		{
-			setOriginalSize(Size(getParent()->getWidth()-30, getHeight()));
-			ForceEntry::makeTimeGoalButton = new UI_Button(getParent(), Rect(Point(getRelativePosition() + Size(getParent()->getWidth()-26, 0)), Size(16,10)), Size(0,0), GOAL_TIME_BUTTON, true, STATIC_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST);
-			ForceEntry::makeTimeGoalButton->updateToolTip(FORCEENTRY_TIME_TOOLTIP_STRING);
-			ForceEntry::currentForceEntry = this;
-		} else 
-		if((ForceEntry::currentForceEntry == this)&&(!r.Inside(mouse))&&(ForceEntry::makeTimeGoalButton)&&(!ForceEntry::timeEntryBox))
-		{
+			if((ForceEntry::currentForceEntry == NULL) && (r.Inside(mouse)) && (!ForceEntry::makeTimeGoalButton))
+			{
+				std::ostringstream os;
+				os << mouse.x << "/" << mouse.y << " " << r.getLeft() << "/" << r.getTop();
+				toErrorLog(os.str());
+				setOriginalSize(Size(getParent()->getWidth()-30, getHeight()));
+				ForceEntry::makeTimeGoalButton = new UI_Button(getParent(), Rect(Point(getRelativePosition() + Size(getParent()->getWidth()-26, 0)), Size(16,10)), Size(0,0), GOAL_TIME_BUTTON, true, STATIC_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST);
+				ForceEntry::makeTimeGoalButton->updateToolTip(FORCEENTRY_TIME_TOOLTIP_STRING);
+				ForceEntry::currentForceEntry = this;
+			} else 
+			if((ForceEntry::currentForceEntry == this) && (!r.Inside(mouse)))
+			{
+				if(ForceEntry::makeTimeGoalButton)
+				{
 // situation 2: mouse is outside and timeEntryBox is not shown => Remove makeTimeGoalButton
 			// EVTL PROBLEM: Ich loesche es hier, es ist aber Kind vom Parent das gerade noch proces durchlaeuft... evtl an parent benachrichtigen, dass button geloescht werden soll... :o
-			if(UI_Button::getCurrentButton() == ForceEntry::makeTimeGoalButton)
-				UI_Button::resetButton();
-			delete ForceEntry::makeTimeGoalButton;
-			ForceEntry::makeTimeGoalButton = NULL;
-		}
+					if(UI_Button::getCurrentButton() == ForceEntry::makeTimeGoalButton)
+						UI_Button::resetButton();
+					delete ForceEntry::makeTimeGoalButton;
+					ForceEntry::makeTimeGoalButton = NULL;
+				}
 // situation 3: nothing is pressed, mouse is outside => return to normal width
-		if((!r.Inside(mouse))&&(!ForceEntry::makeTimeGoalButton)&&(!ForceEntry::timeEntryBox))
+				else if(!ForceEntry::makeTimeGoalButton)
+				{
+					setOriginalSize(Size(getParent()->getWidth()-10, getHeight()));
+					ForceEntry::currentForceEntry = NULL;
+				}
+			}
+		}
+		
+		if(goal->getTime()>0)
 		{
-			setOriginalSize(Size(getParent()->getWidth()-10, getHeight()));
-			ForceEntry::currentForceEntry = NULL;
+			if(totalNumber >= goal->getCount())
+			{
+				if((oldGoalFinalTime > oldGoalTime) && (goal->getFinalTime() <= goal->getTime())) 
+				{
+					toInitLog("k");
+					ForceEntry::doCompleteSound = true;
+				}
+			}
+			
+			if(oldGoalFinalTime != goal->getFinalTime())
+			{
+				resetGradient();
+				oldGoalFinalTime = goal->getFinalTime();
+			}
+		}
+
+		if(oldGoalTime != goal->getTime())
+			oldGoalTime = goal->getTime();
+
+		if(oldGoalCount != goal->getCount())
+		{
+			resetGradient();
+			oldGoalCount = goal->getCount();
 		}
 	}
 
 	if(ForceEntry::currentForceEntry == this)
 	{
 		Rect r = getAbsoluteRect();
-		r.SetWidth(getParent()->getWidth());
+		r.setWidth(getParent()->getWidth());
 		if(!r.Inside(mouse))
 		{
 			if(UI_Button::getCurrentButton() == ForceEntry::makeTimeGoalButton)
@@ -136,7 +146,6 @@ void ForceEntry::process()
 			ForceEntry::makeTimeGoalButton = NULL;
 			delete ForceEntry::timeEntryBox;	
 			ForceEntry::timeEntryBox = NULL;
-			
 		}
 	
 		if((ForceEntry::makeTimeGoalButton)&&(ForceEntry::makeTimeGoalButton->isLeftClicked()))
@@ -149,12 +158,14 @@ void ForceEntry::process()
 			}
 			else
 			{
-				ForceEntry::timeEntryBox = new UI_NumberField(getParent(), Rect(Point(getRelativePosition() + Size(getParent()->getWidth()-UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)-90, 0)), Size(0, 0)), Size(0,0), DO_NOT_ADJUST, 0, coreConfiguration.getMaxTime(), NULL_STRING, NULL_STRING, 6, getTime(), TIME_NUMBER_TYPE);
-				setOriginalSize(Size(getParent()->getWidth()-110, getHeight()));
+				ForceEntry::timeEntryBox = new UI_NumberField(getParent(), Rect(Point(getRelativePosition() + Size(getParent()->getWidth()-UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)-90, 0)), Size(0, 0)), Size(0,0), DO_NOT_ADJUST, 0, coreConfiguration.getMaxTime(), NULL_STRING, NULL_STRING, 6, getTime(), false, TIME_NUMBER_TYPE);
+				setOriginalSize(Size(getParent()->getWidth()*2/3, getHeight()));
 			}
 		}
 		if((ForceEntry::timeEntryBox)&&(ForceEntry::timeEntryBox->hasNumberChanged()))
 		{
+			ForceEntry::changed = GOAL_TIME_HAS_CHANGED;
+			ForceEntry::forceEntryIsGoal = true; // only goals can have time restrictions
 			// time removed from goal -> try to remove the goal!
 			if(getTime() && (!ForceEntry::timeEntryBox->getNumber()))
 			{
@@ -166,6 +177,10 @@ void ForceEntry::process()
 			else
 			{
 				setTime(ForceEntry::timeEntryBox->getNumber());
+				ForceEntry::forceEntryUnit = 0;
+				ForceEntry::forceEntryLocation = 0;
+				ForceEntry::forceEntryTime = 0;
+				ForceEntry::forceEntryCount = 0;
 			}
 		}
 	}
@@ -183,18 +198,8 @@ void ForceEntry::process()
 		ForceEntry::forceEntryCount = left_clicked?1:-1;
 	}
 	
-	if((goal)&&(oldGoalCount != goal->getCount()))
-	{
-		resetGradient();
-		oldGoalCount = goal->getCount();
-	}
-
-
-	
-
 }
-	
-																																							
+
 void ForceEntry::setTargetForce(const unsigned int force)
 {
 	if(targetForce != force)
@@ -217,14 +222,14 @@ void ForceEntry::draw(DC* dc) const
 	Brush b = *theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+getType()));
 
 	if(highlight>0)
-		dc->SetBrush(Brush(dc->changeAbsoluteBrightness(*b.GetColor(), highlight), b.GetStyle()));
+		dc->setBrush(Brush(dc->changeAbsoluteBrightness(*b.getColor(), highlight), b.getStyle()));
 	else
-		dc->SetBrush(b);
+		dc->setBrush(b);
 	Pen p = *theme.lookUpPen((ePen)(UNIT_TYPE_0_PEN+getType()));
 	if(highlight>0)
-		dc->SetPen(Pen(dc->changeAbsoluteBrightness(*p.GetColor(), highlight), p.GetWidth(), p.GetStyle()));
+		dc->setPen(Pen(dc->changeAbsoluteBrightness(*p.getColor(), highlight), p.getWidth(), p.getStyle()));
 	else
-		dc->SetPen(p);
+		dc->setPen(p);
 
 	dc->DrawEdgedRoundedRectangle(Rect(getAbsolutePosition()+Point(getWidth()-currentForce-1, 1), Size(currentForce+1, FONT_SIZE+4)), 3);
 
@@ -235,44 +240,44 @@ void ForceEntry::draw(DC* dc) const
 	
 	if((goal)&&(totalNumber >= goal->getCount()))
 	{
-		dc->SetTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(FULFILLED_TEXT_COLOR)));
+		dc->setTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(FULFILLED_TEXT_COLOR)));
 		if(totalNumber > goal->getCount()) 
 			os << "+" << totalNumber - goal->getCount() << "    ";
 	}
 	else if(goal)
-		dc->SetTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(NOT_FULFILLED_TEXT_COLOR)));
+		dc->setTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(NOT_FULFILLED_TEXT_COLOR)));
 	else 
-		dc->SetTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(FULFILLED_TEXT_COLOR)));
+		dc->setTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(FULFILLED_TEXT_COLOR)));
 
 	if(goal)
 		os << totalNumber << "/" << goal->getCount();
 	else
 		os << totalNumber;
 		
-	//dc->SetFont(UI_Object::theme.lookUpFont(SMALL_BOLD_FONT));
-	Size s = dc->GetTextExtent(os.str());
-	dc->DrawText(os.str(), getAbsolutePosition() + Point(getWidth() - s.GetWidth() - 2, 1+(FONT_SIZE+12-s.GetHeight())/2));
+	//dc->setFont(UI_Object::theme.lookUpFont(SMALL_BOLD_FONT));
+	Size s = dc->getTextExtent(os.str());
+	dc->DrawText(os.str(), getAbsolutePosition() + Point(getWidth() - s.getWidth() - 2, 1+(FONT_SIZE+12-s.getHeight())/2));
   
 // ------ Time
-	if((goal)&&(goal->getTime()>0)) // nur fuer tatsaechliche goals
+	if((goal) && (goal->getTime()>0) && (ForceEntry::timeEntryBox==NULL)) // nur fuer tatsaechliche goals und nur wenn timeentrybox gerade nicht angezeigt wird
 	{
 		os.str("");
 		if ((goal->getFinalTime() > goal->getTime()) && (totalNumber >= goal->getCount()))
 		{
-			dc->SetTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(NOT_FULFILLED_TEXT_COLOR)));
+			dc->setTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(NOT_FULFILLED_TEXT_COLOR)));
 			os << formatTime(goal->getFinalTime()) << " / " << formatTime(goal->getTime());
 		}
 		else if(totalNumber >= goal->getCount())
 		{
-			dc->SetTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(FULFILLED_TEXT_COLOR)));
+			dc->setTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(FULFILLED_TEXT_COLOR)));
 			os << "+" << formatTime(goal->getTime() - goal->getFinalTime()) << " / " << formatTime(goal->getTime());
 		} else
 		{
-			dc->SetTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(NOT_FULFILLED_TEXT_COLOR)));
+			dc->setTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(NOT_FULFILLED_TEXT_COLOR)));
 			os << "[" << formatTime(goal->getTime()) << "]";
 		}
-		s = dc->GetTextExtent(os.str());
-		dc->DrawText(os.str(), getAbsolutePosition() + Point(getWidth() - s.GetWidth() - 100, 1+(FONT_SIZE+12-s.GetHeight())/2 ));
+		s = dc->getTextExtent(os.str());
+		dc->DrawText(os.str(), getAbsolutePosition() + Point(getWidth() - s.getWidth() - getParent()->getWidth()/3, 1+(FONT_SIZE+12-s.getHeight())/2 ));
 	}
 }
 																																							
@@ -286,17 +291,24 @@ void ForceEntry::HideIt()
 	Hide();
 }
 
+void ForceEntry::setTime(const unsigned int time) 
+{
+	goal->setTime(time);
+}
+
+
 void ForceEntry::setTotalNumber(const unsigned int total_number)
 {
 	if(totalNumber != total_number)
 	{
 		highlight = 50;
-		if((goal)&&(totalNumber < goal->getCount())&&(total_number >= goal->getCount()))
-			UI_Object::theme.playSound(COMPLETE_SOUND, (getAbsolutePosition() + getSize()/2).x);
+		if((goal)&&(totalNumber < goal->getCount())&&(total_number >= goal->getCount())&&((goal->getTime()==0)||((goal->getTime()>0)&&(goal->getFinalTime() <= goal->getTime()))))
+			ForceEntry::doCompleteSound = true;
 		totalNumber = total_number;
 	}
 }
 
+bool ForceEntry::doCompleteSound = false;
 eForceEntryMessage ForceEntry::changed = NO_MESSAGE;
 bool ForceEntry::forceEntryIsGoal = false;
 unsigned int ForceEntry::forceEntryUnit = 0;

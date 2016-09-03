@@ -62,7 +62,7 @@ void FPS::delay()
 		if((currentFramerate > desiredFramerate) && (framesPerGeneration>1))
 			--framesPerGeneration;
 		else 
-		if((currentFramerate < desiredFramerate) && (framesPerGeneration<10000))
+		if((currentFramerate < desiredFramerate) && (framesPerGeneration<100)) //100?
 			++framesPerGeneration;
 	} else if(currentFramerate > desiredFramerate)
 	{

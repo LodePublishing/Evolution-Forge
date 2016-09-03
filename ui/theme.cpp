@@ -16,11 +16,11 @@ unsigned int FONT_SIZE=6;
 
 UI_Theme::UI_Theme():
 	sound(NULL),
-	resolution(RESOLUTION_640x480),
-	bitdepth(DEPTH_32BIT),
-	language(ENGLISH_LANGUAGE),
-	colorTheme(DARK_BLUE_THEME),
-	mainColorTheme(DARK_BLUE_THEME),
+	currentResolution(RESOLUTION_640x480),
+	currentBitDepth(DEPTH_32BIT),
+	currentLanguage(ENGLISH_LANGUAGE),
+	currentColorTheme(DARK_BLUE_THEME),
+	currentMainColorTheme(DARK_BLUE_THEME),
 	loadedBitmaps(),
 	defaultCursor(NULL)
 {
@@ -84,17 +84,22 @@ UI_Theme::UI_Theme():
 			cursorList[i][j] = NULL;
 	initStringIdentifier();
 	initBitmapIdentifier();
+	initSoundIdentifier();
 }
 
 UI_Theme::~UI_Theme()
 {
-	toLog("* Resetting mouse cursor...");
+	toInitLog("* Resetting mouse cursor...");
 	SDL_SetCursor(defaultCursor);
-	for(unsigned int i = MAX_CURSORS; i--;)
-		for(unsigned int j = 2; j--;)
-			SDL_FreeCursor(cursorList[i][j]);
+// TODO: Jeder Mauszeiger der benutzt wurde verursacht bei SDL_FreeCursor einen segfault :/ (bzw. 'wurde schon geloescht' Fehler der glibc
+//	for(unsigned int i = MAX_CURSORS; i--;)
+//		for(unsigned int j = 2; j--;)
+//	SDL_FreeCursor(cursorList[ARROW_CURSOR][0]);
+//	SDL_FreeCursor(cursorList[HAND_CURSOR][0]);
+//	SDL_FreeCursor(cursorList[CLOCK_CURSOR][0]);
+//	SDL_FreeCursor(cursorList[CLOCK_CURSOR][1]);
 
-	toLog("* Freeing colors, brushes and pens...");
+	toInitLog("* Freeing colors, brushes and pens...");
 	for(unsigned int i = MAX_COLOR_THEMES;i--;)
 	{
 		for(unsigned int j = MAX_COLORS;j--;)
@@ -105,11 +110,11 @@ UI_Theme::~UI_Theme()
 			delete penList[i][j];
 	}
 
-	toLog("* Freeing bitmaps..."); 
+	toInitLog("* Freeing bitmaps..."); 
 	for(std::list<BitmapEntry>::iterator l = loadedBitmaps.begin(); l!=loadedBitmaps.end();++l)
 		SDL_FreeSurface(l->bitmap);
 
-	toLog("* Freeing coordinates...");
+	toInitLog("* Freeing coordinates...");
         for(unsigned int i = MAX_RESOLUTIONS;i--;)
         {
                 for(unsigned int j = MAX_GLOBAL_WINDOWS;j--;)
@@ -126,25 +131,21 @@ UI_Theme::~UI_Theme()
 			}
         }
 
-	toLog("* Freeing buttons...");
+	toInitLog("* Freeing buttons...");
 	for(unsigned int i=MAX_BUTTON_COLORS_TYPES;i--;)
 		delete buttonColorsList[i];
 
-	toLog("* Freeing fonts...");
+	toInitLog("* Freeing fonts...");
 	for(unsigned int i = MAX_RESOLUTIONS;i--;)
 //		for(unsigned int j = MAX_LANGUAGES;j--;)
 			for(unsigned int k = MAX_FONTS;k--;)
 				delete fontList[i][k];
 
-	toLog("* Freeing sounds...");
+	toInitLog("* Freeing sounds...");
 	for(unsigned int i=MAX_SOUNDS;i--;)
 		soundList[i]->release();
 
-	toLog("* Closing sound engine...");
-	sound->close();
-
-	toLog("* Releasing sound engine...");
-	sound->release();
+	releaseSoundEngine();
 }
 
 bool UI_Theme::ERRCHECK(FMOD_RESULT result)
@@ -153,13 +154,13 @@ bool UI_Theme::ERRCHECK(FMOD_RESULT result)
 	{
 		std::ostringstream os;
 		os << "FMOD error! ( "<< result << ") " << FMOD_ErrorString(result);
-		toLog(os.str());
+		toErrorLog(os.str());
 		return(false);
 	}
 	return(true);
 }
 
-void UI_Theme::unloadGraphicsAndSounds()
+void UI_Theme::unloadGraphics()
 {
 	for(std::list<BitmapEntry>::iterator i = loadedBitmaps.begin(); i!=loadedBitmaps.end(); ++i)
 		if(!i->used)
@@ -180,7 +181,7 @@ void UI_Theme::unloadGraphicsAndSounds()
 			for(unsigned int j = MAX_SOUNDS;j--;)
 				if(i->sound == soundList[j])
 					soundList[j] = NULL;
-			soundEngine.unload(i->sound);
+			i->sound->release();
 			i->sound = NULL;
 			i->used = true;
 		} else if(i->sound!=NULL)
@@ -189,7 +190,7 @@ void UI_Theme::unloadGraphicsAndSounds()
 
 const Size UI_Theme::getResolutionSize() const
 {
-	switch(resolution)
+	switch(currentResolution)
 	{
 		case RESOLUTION_640x480:return(Size(640, 480));break;
 		case RESOLUTION_800x600:return(Size(800, 600));break;
@@ -203,8 +204,8 @@ const Size UI_Theme::getResolutionSize() const
 void UI_Theme::setResolution(const eResolution theme_resolution) 
 {
 	// TODO auslagern in Conf Datei
-	resolution = theme_resolution;
-	switch(resolution)
+	currentResolution = theme_resolution;
+	switch(currentResolution)
 	{
 		case RESOLUTION_640x480:FONT_SIZE=3;break;
 		case RESOLUTION_800x600:FONT_SIZE=6;break;
@@ -219,12 +220,12 @@ void UI_Theme::setResolution(const eResolution theme_resolution)
 const std::string& UI_Theme::lookUpHelpChapterString(const eHelpChapter id) const
 {
 #ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_HELP_CHAPTER)||(helpChapterStringMap[language].find(id) == helpChapterStringMap[language].end())) {
-		toLog("ERROR: (UI_Theme::lookUpHelpChapterString) id out of range.");
-		return(helpChapterStringMap[language].find(INDEX_CHAPTER)->second);
+	if((id<0)||(id>=MAX_HELP_CHAPTER)||(helpChapterStringMap[currentLanguage].find(id) == helpChapterStringMap[currentLanguage].end())) {
+		toErrorLog("ERROR: (UI_Theme::lookUpHelpChapterString) id out of range.");
+		return(helpChapterStringMap[currentLanguage].find(INDEX_CHAPTER)->second);
 	}
 #endif
-	return(helpChapterStringMap[language].find(id)->second);
+	return(helpChapterStringMap[currentLanguage].find(id)->second);
 }
 
 void findandreplace( std::string& source, const std::string& find, const std::string& replace )
@@ -232,7 +233,7 @@ void findandreplace( std::string& source, const std::string& find, const std::st
 	size_t j = source.find(find);
 	if(j==std::string::npos) {
 #ifdef _SCC_DEBUG
-		toLog("WARNING: (UI_Theme::findandreplace) string not found.");
+		toErrorLog("WARNING: (UI_Theme::findandreplace) string not found.");
 #endif
 		return;
 	}
@@ -243,10 +244,10 @@ const std::string UI_Theme::lookUpFormattedString(const eString id, const std::s
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_STRINGS)) {
-		toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
+		toErrorLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
 	}
 #endif
-	std::string bla = stringList[language][id];
+	std::string bla = stringList[currentLanguage][id];
 	findandreplace(bla, "%s", text);
 	return(bla);
 }
@@ -255,10 +256,10 @@ const std::string UI_Theme::lookUpFormattedString(const eString id, const unsign
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_STRINGS)) {
-		toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
+		toErrorLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
 	}
 #endif
-	std::string bla = stringList[language][id];
+	std::string bla = stringList[currentLanguage][id];
 	std::ostringstream os;
 	os.str("");
 	os << i; 
@@ -269,10 +270,10 @@ const std::string UI_Theme::lookUpFormattedString(const eString id, const unsign
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_STRINGS)) {
-		toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
+		toErrorLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
 	}
 #endif
-	std::string bla = stringList[language][id];
+	std::string bla = stringList[currentLanguage][id];
 	std::ostringstream os;
 	os.str("");
 	os << i;findandreplace(bla, "%i", os.str());os.str("");
@@ -285,10 +286,10 @@ const std::string UI_Theme::lookUpFormattedString(const eString id, const unsign
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_STRINGS)) {
-		toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
+		toErrorLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
 	}
 #endif
-	std::string bla = stringList[language][id];
+	std::string bla = stringList[currentLanguage][id];
 	std::ostringstream os;
 	os.str("");
 	if(bla.find("%2i")!=std::string::npos)
@@ -318,84 +319,84 @@ const Rect UI_Theme::lookUpGlobalRect(const eGlobalWindow id) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_GLOBAL_WINDOWS)) {
-		toLog("ERROR: (UI_Theme::lookUpGlobalRect) id out of range.");return(Rect(0,0,0,0));
+		toErrorLog("ERROR: (UI_Theme::lookUpGlobalRect) id out of range.");return(Rect(0,0,0,0));
 	}
 #endif
-	return(*globalRectList[resolution][id]);
+	return(*globalRectList[currentResolution][id]);
 }
 
 const unsigned int UI_Theme::lookUpGlobalMaxHeight(const eGlobalWindow id) const 
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_GLOBAL_WINDOWS)) {
-		toLog("ERROR: (UI_Theme::lookUpGlobalMaxHeight) id out of range.");return(0);
+		toErrorLog("ERROR: (UI_Theme::lookUpGlobalMaxHeight) id out of range.");return(0);
 	}
 #endif
-	return(maxGlobalHeightList[resolution][id]);
+	return(maxGlobalHeightList[currentResolution][id]);
 }
 
 const Rect UI_Theme::lookUpGameRect(const eGameWindow id, const unsigned int gameNumber, const unsigned int maxGames) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_GAME_WINDOWS)) {
-		toLog("ERROR: (UI_Theme::lookUpGameRect) id out of range.");return(Rect(0,0,0,0));
+		toErrorLog("ERROR: (UI_Theme::lookUpGameRect) id out of range.");return(Rect(0,0,0,0));
 	}
 	if(maxGames==0) {
-		toLog("ERROR: (UI_Theme::lookUpGameRect) maxGames out of range.");return(Rect(0,0,0,0));
+		toErrorLog("ERROR: (UI_Theme::lookUpGameRect) maxGames out of range.");return(Rect(0,0,0,0));
 	}
 	if((gameNumber>=maxGames)||(maxGames>MAX_COMPARE_GAMES)) {
-		toLog("ERROR: (UI_Theme::lookUpGameRect) game out of range.");return(Rect(0,0,0,0));
+		toErrorLog("ERROR: (UI_Theme::lookUpGameRect) game out of range.");return(Rect(0,0,0,0));
 	}
 #endif
-	return(*gameRectList[resolution][gameNumber][maxGames-1][id]);
+	return(*gameRectList[currentResolution][gameNumber][maxGames-1][id]);
 }
 
 const unsigned int UI_Theme::lookUpGameMaxHeight(const eGameWindow id, const unsigned int gameNumber, const unsigned int maxGames) const 
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_GAME_WINDOWS)) {
-		toLog("ERROR: (UI_Theme::lookUpGameMaxHeight) id out of range.");return(0);
+		toErrorLog("ERROR: (UI_Theme::lookUpGameMaxHeight) id out of range.");return(0);
 	}
 	if(maxGames==0) {
-		toLog("ERROR: (UI_Theme::lookUpGameMaxHeight) maxGames out of range.");return(0);
+		toErrorLog("ERROR: (UI_Theme::lookUpGameMaxHeight) maxGames out of range.");return(0);
 	}
 	if((gameNumber>=maxGames)||(maxGames>MAX_COMPARE_GAMES)) {
-		toLog("ERROR: (UI_Theme::lookUpGameMaxHeight) game out of range.");return(0);
+		toErrorLog("ERROR: (UI_Theme::lookUpGameMaxHeight) game out of range.");return(0);
 	}
 #endif
-	return(maxGameHeightList[resolution][gameNumber][maxGames-1][id]);
+	return(maxGameHeightList[currentResolution][gameNumber][maxGames-1][id]);
 }
 
 const Rect UI_Theme::lookUpPlayerRect(const ePlayerWindow id, const unsigned int gameNumber, const unsigned int maxGames, const unsigned int playerNumber, const unsigned int maxPlayer) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_PLAYER_WINDOWS)) {
-		toLog("ERROR: (UI_Theme::lookUpPlayerRect) id out of range.");return(Rect(0,0,0,0));
+		toErrorLog("ERROR: (UI_Theme::lookUpPlayerRect) id out of range.");return(Rect(0,0,0,0));
 	}
 	if(maxPlayer==0) {
-		toLog("ERROR: (UI_Theme::lookUpPlayerRect) maxPlayer out of range.");return(Rect(0,0,0,0));
+		toErrorLog("ERROR: (UI_Theme::lookUpPlayerRect) maxPlayer out of range.");return(Rect(0,0,0,0));
 	}
 	if((playerNumber>=maxPlayer)||(maxPlayer>MAX_PLAYER)) {
-		toLog("ERROR: (UI_Theme::lookUpPlayerRect) player out of range.");return(Rect(0,0,0,0));
+		toErrorLog("ERROR: (UI_Theme::lookUpPlayerRect) player out of range.");return(Rect(0,0,0,0));
 	}	
 #endif
-	return(*playerRectList[resolution][gameNumber][maxGames-1][maxPlayer-1][playerNumber][id]);
+	return(*playerRectList[currentResolution][gameNumber][maxGames-1][maxPlayer-1][playerNumber][id]);
 }
 
 const unsigned int UI_Theme::lookUpPlayerMaxHeight(const ePlayerWindow id, const unsigned int gameNumber, const unsigned int maxGames, const unsigned int playerNumber, const unsigned int maxPlayer) const 
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_PLAYER_WINDOWS)) {
-		toLog("ERROR: (UI_Theme::lookUpMaxHeight) id out of range.");return(0);
+		toErrorLog("ERROR: (UI_Theme::lookUpMaxHeight) id out of range.");return(0);
 	}
 	if(maxPlayer==0) {
-		toLog("ERROR: (UI_Theme::lookUpPlayerMaxHeight) maxPlayer out of range.");return(0);
+		toErrorLog("ERROR: (UI_Theme::lookUpPlayerMaxHeight) maxPlayer out of range.");return(0);
 	}
 	if((playerNumber>=maxPlayer)||(maxPlayer>MAX_PLAYER)) {
-		toLog("ERROR: (UI_Theme::lookUpPlayerRect) player out of range.");return(0);
+		toErrorLog("ERROR: (UI_Theme::lookUpPlayerRect) player out of range.");return(0);
 	}
 #endif
-	return(maxPlayerHeightList[resolution][gameNumber][maxGames-1][maxPlayer-1][playerNumber][id]);
+	return(maxPlayerHeightList[currentResolution][gameNumber][maxGames-1][maxPlayer-1][playerNumber][id]);
 }
 
 const ePlayerType getPlayerType(const std::string& item)
@@ -558,8 +559,9 @@ eGlobalWindow parse_global_window(const std::string& item)
 	if(item=="Intro window") return(INTRO_WINDOW);else
 	if(item=="Message window") return(MESSAGE_WINDOW);else
 	if(item=="Help window") return(HELP_WINDOW);else
-	if(item=="Settings window") return(SETTINGS_WINDOW);else
+	if(item=="settings window") return(SETTINGS_WINDOW);else
 	if(item=="Database window") return(DATABASE_WINDOW);else
+	if(item=="Datalist window") return(DATALIST_WINDOW);else
 	if(item=="Map window") return(MAP_WINDOW);else
 	if(item=="Info window") return(INFO_WINDOW);else
 	if(item=="Tech tree window") return(TECHTREE_WINDOW);else
@@ -665,12 +667,12 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 	{
 		if(dxpart)
 		{
-			rect->SetWidth(atoi(parameter[i].c_str()));
+			rect->setWidth(atoi(parameter[i].c_str()));
 			dxpart=false;dypart=true;
 		} else
 		if(dypart)
 		{
-			rect->SetHeight(atoi(parameter[i].c_str()));
+			rect->setHeight(atoi(parameter[i].c_str()));
 			dypart=false;hpart=true;
 		} else
 		if(hpart)
@@ -680,7 +682,7 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 		} else
 		if(xpart)
 		{
-			rect->SetLeft(atoi(parameter[i].c_str()));
+			rect->setLeft(atoi(parameter[i].c_str()));
 			xpart=false;
 			if(xypart)
 			{
@@ -690,7 +692,7 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 		} else
 		if(ypart)
 		{
-			rect->SetTop(atoi(parameter[i].c_str()));
+			rect->setTop(atoi(parameter[i].c_str()));
 			ypart=false;
 		} else // Befehl
 		{
@@ -702,49 +704,49 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 			if(type==2) win = parse_player_window(parameter[i]);
 			if((win==0)&&(command>=DOCK_WITH_LEFT_BORDER_OF_COMMAND))
 			{
-				toLog(parameter[i]);
+				toErrorLog(parameter[i]);
 			}
 			switch(command)
 			{
 				case ABSOLUTE_COORDINATES_COMMAND:--i;xpart=true;xypart=true;break;
 				case ABSOLUTE_X_COORDINATE_COMMAND:--i;xpart=true;break;
 				case ABSOLUTE_Y_COORDINATE_COMMAND:--i;ypart=true;break;
-				case DOCK_WITH_LEFT_BORDER_OF_COMMAND:rect->SetLeft(-10 + windows[win]->GetLeft() - rect->GetWidth());break;
-				case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:rect->SetLeft(0 + windows[win]->GetRight());break;
-				case DOCK_WITH_LOWER_BORDER_OF_COMMAND:rect->SetTop(10 + windows[win]->GetBottom());break;
-				case DOCK_WITH_UPPER_BORDER_OF_COMMAND:rect->SetTop(20 + windows[win]->GetTop() - rect->GetHeight());break;
+				case DOCK_WITH_LEFT_BORDER_OF_COMMAND:rect->setLeft(-10 + windows[win]->getLeft() - rect->getWidth());break;
+				case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:rect->setLeft(0 + windows[win]->getRight());break;
+				case DOCK_WITH_LOWER_BORDER_OF_COMMAND:rect->setTop(10 + windows[win]->getBottom());break;
+				case DOCK_WITH_UPPER_BORDER_OF_COMMAND:rect->setTop(20 + windows[win]->getTop() - rect->getHeight());break;
 
-				case DOCK_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(15 + windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, 15 + windows[win]->GetHeight() / 2 - rect->GetHeight() / 2));break;
-				case DOCK_BOTTOM_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, windows[win]->GetHeight() - rect->GetHeight() - 10));break;
-				case DOCK_TOP_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, 15));break;
-				case DOCK_LEFT_INSIDE_OF_COMMAND:rect->SetLeft(0);break;
-				case DOCK_RIGHT_INSIDE_OF_COMMAND:rect->SetLeft(windows[win]->GetWidth() - rect->GetWidth());break;
-				case DOCK_TOP_INSIDE_OF_COMMAND:rect->SetTop(0);break;
-				case DOCK_TOP_LEFT_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(0, 0));break;
-				case DOCK_TOP_RIGHT_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() - rect->GetWidth(), 0));break;
-				case DOCK_BOTTOM_INSIDE_OF_COMMAND:rect->SetTop(-15+windows[win]->GetHeight() - rect->GetHeight());break;
+				case DOCK_CENTER_INSIDE_OF_COMMAND:rect->setTopLeft(Point(15 + windows[win]->getWidth() / 2 - rect->getWidth() / 2, 15 + windows[win]->getHeight() / 2 - rect->getHeight() / 2));break;
+				case DOCK_BOTTOM_CENTER_INSIDE_OF_COMMAND:rect->setTopLeft(Point(windows[win]->getWidth() / 2 - rect->getWidth() / 2, windows[win]->getHeight() - rect->getHeight() - 10));break;
+				case DOCK_TOP_CENTER_INSIDE_OF_COMMAND:rect->setTopLeft(Point(windows[win]->getWidth() / 2 - rect->getWidth() / 2, 35));break;
+				case DOCK_LEFT_INSIDE_OF_COMMAND:rect->setLeft(0);break;
+				case DOCK_RIGHT_INSIDE_OF_COMMAND:rect->setLeft(windows[win]->getWidth() - rect->getWidth());break;
+				case DOCK_TOP_INSIDE_OF_COMMAND:rect->setTop(0);break;
+				case DOCK_TOP_LEFT_INSIDE_OF_COMMAND:rect->setTopLeft(Point(0, 0));break;
+				case DOCK_TOP_RIGHT_INSIDE_OF_COMMAND:rect->setTopLeft(Point(windows[win]->getWidth() - rect->getWidth(), 15));break;
+				case DOCK_BOTTOM_INSIDE_OF_COMMAND:rect->setTop(-15+windows[win]->getHeight() - rect->getHeight());break;
 	
 								   
-				case DOCK_CLOSE_WITH_LEFT_BORDER_OF_COMMAND:rect->SetLeft(windows[win]->GetLeft() - rect->GetWidth());break;
-				case DOCK_CLOSE_WITH_RIGHT_BORDER_OF_COMMAND:rect->SetLeft(windows[win]->GetRight());break;
-				case DOCK_CLOSE_WITH_LOWER_BORDER_OF_COMMAND:rect->SetTop(windows[win]->GetBottom());break;
-				case DOCK_CLOSE_WITH_UPPER_BORDER_OF_COMMAND:rect->SetTop(windows[win]->GetTop() - rect->GetHeight());break;
+				case DOCK_CLOSE_WITH_LEFT_BORDER_OF_COMMAND:rect->setLeft(windows[win]->getLeft() - rect->getWidth());break;
+				case DOCK_CLOSE_WITH_RIGHT_BORDER_OF_COMMAND:rect->setLeft(windows[win]->getRight());break;
+				case DOCK_CLOSE_WITH_LOWER_BORDER_OF_COMMAND:rect->setTop(windows[win]->getBottom());break;
+				case DOCK_CLOSE_WITH_UPPER_BORDER_OF_COMMAND:rect->setTop(windows[win]->getTop() - rect->getHeight());break;
 
-				case DOCK_CLOSE_BOTTOM_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, windows[win]->GetHeight() - rect->GetHeight()));break;
-				case DOCK_CLOSE_TOP_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, 0));break;
-				case DOCK_CLOSE_LEFT_INSIDE_OF_COMMAND:rect->SetLeft(0);break;
-				case DOCK_CLOSE_RIGHT_INSIDE_OF_COMMAND:rect->SetLeft(windows[win]->GetWidth() - rect->GetWidth());break;
-				case DOCK_CLOSE_TOP_INSIDE_OF_COMMAND:rect->SetTop(0);break;
-				case DOCK_CLOSE_TOP_LEFT_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(0, 0));break;
-				case DOCK_CLOSE_TOP_RIGHT_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() - rect->GetWidth(), 0));break;
-				case DOCK_CLOSE_BOTTOM_INSIDE_OF_COMMAND:rect->SetTop(windows[win]->GetHeight() - rect->GetHeight());break;							   
+				case DOCK_CLOSE_BOTTOM_CENTER_INSIDE_OF_COMMAND:rect->setTopLeft(Point(windows[win]->getWidth() / 2 - rect->getWidth() / 2, windows[win]->getHeight() - rect->getHeight()));break;
+				case DOCK_CLOSE_TOP_CENTER_INSIDE_OF_COMMAND:rect->setTopLeft(Point(windows[win]->getWidth() / 2 - rect->getWidth() / 2, 0));break;
+				case DOCK_CLOSE_LEFT_INSIDE_OF_COMMAND:rect->setLeft(0);break;
+				case DOCK_CLOSE_RIGHT_INSIDE_OF_COMMAND:rect->setLeft(windows[win]->getWidth() - rect->getWidth());break;
+				case DOCK_CLOSE_TOP_INSIDE_OF_COMMAND:rect->setTop(0);break;
+				case DOCK_CLOSE_TOP_LEFT_INSIDE_OF_COMMAND:rect->setTopLeft(Point(0, 0));break;
+				case DOCK_CLOSE_TOP_RIGHT_INSIDE_OF_COMMAND:rect->setTopLeft(Point(windows[win]->getWidth() - rect->getWidth(), 0));break;
+				case DOCK_CLOSE_BOTTOM_INSIDE_OF_COMMAND:rect->setTop(windows[win]->getHeight() - rect->getHeight());break;							   
 								   
-/*				case DOCK_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetLeft() + windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, windows[win]->GetTop() + windows[win]->GetHeight() / 2 - rect->GetHeight() / 2));break;
-				case DOCK_BOTTOM_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetLeft() + windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, windows[win]->GetBottom() - rect->GetHeight() - 35));break;
-				case DOCK_LEFT_INSIDE_OF_COMMAND:rect->SetLeft(10+windows[win]->GetLeft());break;
-				case DOCK_RIGHT_INSIDE_OF_COMMAND:rect->SetLeft(-15+windows[win]->GetRight() - rect->GetWidth());break;
-				case DOCK_TOP_INSIDE_OF_COMMAND:rect->SetTop(windows[win]->GetTop());break;
-				case DOCK_BOTTOM_INSIDE_OF_COMMAND:rect->SetTop(-15+windows[win]->GetBottom() - rect->GetHeight());break;*/
+/*				case DOCK_CENTER_INSIDE_OF_COMMAND:rect->setTopLeft(Point(windows[win]->getLeft() + windows[win]->getWidth() / 2 - rect->getWidth() / 2, windows[win]->getTop() + windows[win]->getHeight() / 2 - rect->getHeight() / 2));break;
+				case DOCK_BOTTOM_CENTER_INSIDE_OF_COMMAND:rect->setTopLeft(Point(windows[win]->getLeft() + windows[win]->getWidth() / 2 - rect->getWidth() / 2, windows[win]->getBottom() - rect->getHeight() - 35));break;
+				case DOCK_LEFT_INSIDE_OF_COMMAND:rect->setLeft(10+windows[win]->getLeft());break;
+				case DOCK_RIGHT_INSIDE_OF_COMMAND:rect->setLeft(-15+windows[win]->getRight() - rect->getWidth());break;
+				case DOCK_TOP_INSIDE_OF_COMMAND:rect->setTop(windows[win]->getTop());break;
+				case DOCK_BOTTOM_INSIDE_OF_COMMAND:rect->setTop(-15+windows[win]->getBottom() - rect->getHeight());break;*/
 				default:--i;;break;
 			}
 		}
@@ -752,7 +754,7 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 	return(rect);
 }
 
-
+// TODO: Wenn Sprache schon geladen wurde und eine weitere Datei mit @SPRACHE geladen wird, wird alles einfach hinten angehaengt...
 const bool UI_Theme::loadHelpChapterStringFile(const std::string& help_file)
 {
 	if((help_file.substr(help_file.size()-2,2) == "..") ||(help_file.substr(help_file.size()-1,1) == "."))
@@ -795,9 +797,9 @@ const bool UI_Theme::loadHelpChapterStringFile(const std::string& help_file)
 			if(mode==ZERO_DATA_TYPE)
 			{
 				if(entry=="@END")
-					toLog("WARNING: (UI_Theme::loadHelpChapterStringFile) Lonely @END.");
+					toErrorLog("WARNING: (UI_Theme::loadHelpChapterStringFile) Lonely @END.");
 				else
-					toLog("WARNING: (UI_Theme::loadHelpChapterStringFile) Line is outside a block but is not marked as comment.");
+					toErrorLog("WARNING: (UI_Theme::loadHelpChapterStringFile) Line is outside a block but is not marked as comment.");
 			}
 #endif				
 			sub_mode=getSubDataType(mode);
@@ -910,7 +912,7 @@ const bool UI_Theme::loadStringFile(const std::string& string_file)
 	if(!checkStreamIsOpen(pFile, "UI_Theme::loadStringFile", string_file))
 		return(false);
 
-	toLog("* Loading " + string_file);
+	toInitLog("* Loading " + string_file);
 
 	bool found_any_language_block = false;
 	bool found_language_block[MAX_LANGUAGES];
@@ -939,9 +941,9 @@ const bool UI_Theme::loadStringFile(const std::string& string_file)
 			if(mode==ZERO_DATA_TYPE)
 			{
 				if(index=="@END")
-					toLog("WARNING (UI_Theme::loadStringFile()): Lonely @END => ignoring line.");
+					toErrorLog("WARNING (UI_Theme::loadStringFile()): Lonely @END => ignoring line.");
 				else
-					toLog("WARNING (UI_Theme::loadStringFile()): Line '" + index + "' is outside a block but is not marked as comment => ignoring line.");
+					toErrorLog("WARNING (UI_Theme::loadStringFile()): Line '" + index + "' is outside a block but is not marked as comment => ignoring line.");
 			} else
 			{
 				sub_mode=getSubDataType(mode);
@@ -956,11 +958,11 @@ const bool UI_Theme::loadStringFile(const std::string& string_file)
 					current_language = getLanguageSubDataEntry(index);
 					if(current_language==ZERO_LANGUAGE)
 					{
-						toLog("ERROR (UI_Theme::loadStringFile()): Invalid language entry '" + index + "'.");
+						toErrorLog("ERROR (UI_Theme::loadStringFile()): Invalid language entry '" + index + "'.");
 						return(false);
 					} else if(languageInitialized[current_language])
 					{
-						toLog("ERROR (UI_Theme::loadStringFile()): Language '" + index + "' already initialized.");
+						toErrorLog("ERROR (UI_Theme::loadStringFile()): Language '" + index + "' already initialized.");
 						return(false);
 					}
 					else
@@ -980,7 +982,7 @@ const bool UI_Theme::loadStringFile(const std::string& string_file)
 			pFile.seekg(old_pos);
 			if(!parse_block_map(pFile, block))
 			{
-				toLog("WARNING (UI_Theme::loadStringFile()): No concluding @END for @STRINGS block was found in file " + string_file + " => trying to parse what we have so far.");
+				toErrorLog("WARNING (UI_Theme::loadStringFile()): No concluding @END for @STRINGS block was found in file " + string_file + " => trying to parse what we have so far.");
 			}
 			for(unsigned int j = 0; j < MAX_STRINGS; j++)
 			{
@@ -998,7 +1000,7 @@ const bool UI_Theme::loadStringFile(const std::string& string_file)
 
 	if(!found_any_language_block)
 	{
-		toLog("ERROR (UI_Theme::loadStringFile()): No language block (@ENGLISH, @GERMAN etc.) was found in file " + string_file + " => ignoring file.");
+		toErrorLog("ERROR (UI_Theme::loadStringFile()): No language block (@ENGLISH, @GERMAN etc.) was found in file " + string_file + " => ignoring file.");
 		return(false);
 	}
 	for(unsigned int i = MAX_LANGUAGES; i--;)
@@ -1031,13 +1033,13 @@ const bool UI_Theme::loadWindowDataFile(const std::string& window_data_file, con
 		return(false);
 	
 	if((game_number==0) && (max_games==1))
-		toLog("* Loading window coordinates for single view...");
+		toInitLog("* Loading window coordinates for single view...");
 	else 
 	if((game_number==0) && (max_games==2))
-		toLog("* Loading left side window coordinates for split view...");
+		toInitLog("* Loading left side window coordinates for split view...");
 	else 
 	if((game_number==1) && (max_games==2))
-		toLog("* Loading right side window coordinates for split view...");
+		toInitLog("* Loading right side window coordinates for split view...");
 
 	char line[1024];
 	while(pFile.getline(line, sizeof line))
@@ -1069,7 +1071,7 @@ const bool UI_Theme::loadWindowDataFile(const std::string& window_data_file, con
 		if((buffer=strtok(NULL,",\0"))!=NULL)
 		{
 #ifdef _SCC_DEBUG
-			toLog("WARNING: (UI_Theme::loadWindowData) Too many parameters.");
+			toErrorLog("WARNING: (UI_Theme::loadWindowData) Too many parameters.");
 #endif
 			continue;
 		}
@@ -1082,13 +1084,13 @@ const bool UI_Theme::loadWindowDataFile(const std::string& window_data_file, con
 			current_resolution = getResolutionSubDataEntry(parameter[0]);
 #ifdef _SCC_DEBUG
 //			if(mode!=ZERO_DATA_TYPE)
-//				toLog("Loading "+parameter[0]+"...");
+//				toInitLog("Loading "+parameter[0]+"...");
 			if(current_resolution==ZERO_RESOLUTION)
 			{
 				if(parameter[0]=="@END")
-					toLog("WARNING: (UI_Theme::loadWindowData) Lonely @END.");
+					toErrorLog("WARNING: (UI_Theme::loadWindowData) Lonely @END.");
 				else
-					toLog("WARNING: (UI_Theme::loadWindowData) Line is outside a block but is not marked as comment.");
+					toErrorLog("WARNING: (UI_Theme::loadWindowData) Line is outside a block but is not marked as comment.");
 			}
 #endif
 		}
@@ -1115,7 +1117,7 @@ const bool UI_Theme::loadWindowDataFile(const std::string& window_data_file, con
 				unsigned int max_height=0;
 				gameRectList[current_resolution][game_number][max_games-1][current_line+1] = parse_window(parameter, gameRectList[current_resolution][game_number][max_games-1], max_height, 1, (game_number==1));
 				if((game_number==1)&&(current_line==0))
-					gameRectList[current_resolution][game_number][max_games-1][current_line+1]->SetTopLeft(gameRectList[current_resolution][game_number][max_games-1][current_line+1]->GetTopLeft() + Size(globalRectList[current_resolution][MAIN_WINDOW]->GetWidth()/2,0));
+					gameRectList[current_resolution][game_number][max_games-1][current_line+1]->setTopLeft(gameRectList[current_resolution][game_number][max_games-1][current_line+1]->getTopLeft() + Size(globalRectList[current_resolution][MAIN_WINDOW]->getWidth()/2,0));
 				setMaxGameHeight(current_resolution, game_number, max_games-1, current_line+1, max_height);
 				++current_line;
 			}
@@ -1175,7 +1177,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 		value[i]=0;
 	}
 
-	toLog("* Loading data file");
+	toInitLog("* Loading data file");
 
 	bool loading_fonts = false;
 	bool loading_main_coordinates = false;
@@ -1191,7 +1193,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 	if(!pFile.is_open())
 	{
 #ifdef _SCC_DEBUG
-		toLog("ERROR: (UI_Theme::loadGraphicData) Could not open data file!");
+		toErrorLog("ERROR: (UI_Theme::loadGraphicData) Could not open data file!");
 #endif
 		return;
 	}
@@ -1203,7 +1205,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 		if(pFile.fail())
 		{
 #ifdef _SCC_DEBUG
-			toLog("WARNING: (UI_Theme::loadGraphicData) Long line!");
+			toErrorLog("WARNING: (UI_Theme::loadGraphicData) Long line!");
 #endif
 			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
 		}
@@ -1236,7 +1238,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 		if((buffer=strtok(NULL,",\0"))!=NULL)
 		{
 #ifdef _SCC_DEBUG
-			toLog("WARNING: (UI_Theme::loadGraphicData) Too many parameters.");
+			toErrorLog("WARNING: (UI_Theme::loadGraphicData) Too many parameters.");
 #endif
 			continue;
 		}
@@ -1252,9 +1254,9 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 			if(mode==ZERO_DATA_TYPE)
 			{
 				if(parameter[0]=="@END")
-					toLog("WARNING: (UI_Theme::loadGraphicData) Lonely @END.");
+					toErrorLog("WARNING: (UI_Theme::loadGraphicData) Lonely @END.");
 				else
-					toLog("WARNING: (UI_Theme::loadGraphicData) Line is outside a block but is not marked as comment.");
+					toErrorLog("WARNING: (UI_Theme::loadGraphicData) Line is outside a block but is not marked as comment.");
 			}
 #endif				
 			sub_mode=getSubDataType(mode);
@@ -1327,31 +1329,31 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 						if(!loading_colors)
 						{
 							loading_colors = true;
-							toLog("  - Loading colors...");
+							toInitLog("  - Loading colors...");
 						}
-						colorList[current_theme][current_line]=new Color(dc->GetSurface(),(Uint8)value[0],(Uint8)value[1],(Uint8)value[2]);
+						colorList[current_theme][current_line]=new Color(dc->getSurface(),(Uint8)value[0],(Uint8)value[1],(Uint8)value[2]);
 					break;
 					case PEN_DATA_TYPE:
 						if(!loading_pens)
 						{
 							loading_pens = true;
-							toLog("  - Loading pens...");
+							toInitLog("  - Loading pens...");
 						}
-						penList[current_theme][current_line]=new Pen(dc->GetSurface(),value[1],value[2],value[3],value[0],get_pen_style(parameter[4]));
+						penList[current_theme][current_line]=new Pen(dc->getSurface(),value[1],value[2],value[3],value[0],get_pen_style(parameter[4]));
 						break;
 					case BRUSH_DATA_TYPE:
 						if(!loading_brushes)
 						{
 							loading_brushes = true;
-							toLog("  - Loading brushes...");
+							toInitLog("  - Loading brushes...");
 						}
-						brushList[current_theme][current_line]=new Brush(dc->GetSurface(),(Uint8)value[0],(Uint8)value[1],(Uint8)value[2],get_brush_style(parameter[3]));
+						brushList[current_theme][current_line]=new Brush(dc->getSurface(),(Uint8)value[0],(Uint8)value[1],(Uint8)value[2],get_brush_style(parameter[3]));
 						break;
 					case FONT_DATA_TYPE:
 						if(!loading_fonts)
 						{
 							loading_fonts = true;
-							toLog("  - Loading fonts...");
+							toInitLog("  - Loading fonts...");
 						}
 						{
 							std::string font_name=font_dir+parameter[0]+".ttf";
@@ -1368,7 +1370,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 						if(!loading_main_coordinates)
 						{
 							loading_main_coordinates = true;
-							toLog("  - Loading main coordinates...");
+							toInitLog("  - Loading main coordinates...");
 						}
 
 						{
@@ -1382,13 +1384,13 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 						if(!loading_bitmaps)
 						{
 							loading_bitmaps = true;
-							toLog("  - Loading bitmaps...");
+							toInitLog("  - Loading bitmaps...");
 						}
 			                        std::map<std::string, std::list<std::string> > block;
 			                        pFile.seekg(old_pos);
 			                        if(!parse_block_map(pFile, block))
 			                        {
-			                                toLog("WARNING (UI_Theme::loadDataFile()): No concluding @END for @GENERAL_RESOLUTION_BITMAP_DATA_TYPE block was found in file " + data_file + " => trying to parse what we have so far.");
+			                                toErrorLog("WARNING (UI_Theme::loadDataFile()): No concluding @END for @GENERAL_RESOLUTION_BITMAP_DATA_TYPE block was found in file " + data_file + " => trying to parse what we have so far.");
 			                        }
 			                        for(unsigned int j = 0; j < MAX_BITMAPS; j++)
 			                        {
@@ -1435,13 +1437,13 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 						if(!loading_bitmaps)
 						{
 							loading_bitmaps = true;
-							toLog("  - Loading bitmaps...");
+							toInitLog("  - Loading bitmaps...");
 						}					
 			                        std::map<std::string, std::list<std::string> > block;
 			                        pFile.seekg(old_pos);
 			                        if(!parse_block_map(pFile, block))
 			                        {
-			                                toLog("WARNING (UI_Theme::loadDataFile()): No concluding @END for @GENERAL_THEME_BITMAP_DATA_TYPE block was found in file " + data_file + " => trying to parse what we have so far.");
+			                                toErrorLog("WARNING (UI_Theme::loadDataFile()): No concluding @END for @GENERAL_THEME_BITMAP_DATA_TYPE block was found in file " + data_file + " => trying to parse what we have so far.");
 			                        }
 			                        for(unsigned int j = 0; j < MAX_BITMAPS; j++)
 			                        {
@@ -1496,7 +1498,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 					if(!loading_buttons)
 					{
 						loading_buttons = true;
-						toLog("  - Loading buttons...");
+						toInitLog("  - Loading buttons...");
 					}
 					buttonColorsList[current_line] = new ButtonColorsType;
 					buttonColorsList[current_line]->speed=value[0];
@@ -1518,64 +1520,63 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 					if(!loading_sounds)
 					{
 						loading_sounds = true;
-						toLog("  - Loading sounds...");
+						toInitLog("  - Loading sounds...");
 					}
-					std::string name;
-					if((parameter[0].size()<4)||(parameter[0][parameter[0].size()-4]!='.'))
-						name = sound_dir + parameter[0] + ".mp3";
-					else name = sound_dir + parameter[0];
-					bool found_sound = false;
-					for(std::list<SoundEntry>::iterator i = loadedSounds.begin(); i!=loadedSounds.end(); ++i)
-						// already loaded?
-						if(i->name == name)
+			                std::map<std::string, std::list<std::string> > block;
+			                pFile.seekg(old_pos);
+			                if(!parse_block_map(pFile, block))
+			                {
+			                	toErrorLog("WARNING (UI_Theme::loadDataFile()): No concluding @END for @SOUND_DATA_TYPE block was found in file " + data_file + " => trying to parse what we have so far.");
+			                }
+			                for(unsigned int j = 0; j < MAX_SOUNDS; j++)
+			                {
+						std::map<std::string, std::list<std::string> >::iterator i;
+						if((i = block.find(soundIdentifier[j])) != block.end())
 						{
-							found_sound = true;
-							soundAccessTable[current_line] = &(*i);
-							break;
+							i->second.pop_front(); // Identifier loeschen
+							std::string name = i->second.front();
+							if((name.size()<4)||(name[name.size()-4]!='.'))
+								name = sound_dir + name + ".mp3";
+							else name = sound_dir + name;
+							bool found_sound = false;
+							for(std::list<SoundEntry>::iterator l = loadedSounds.begin(); l!=loadedSounds.end(); ++l)
+							// already loaded?
+								if(l->name == name)
+								{
+									found_sound = true;
+									soundAccessTable[j] = &(*l);
+									break;
+								}
+							if(!found_sound)
+							{
+								SoundEntry entry;
+								entry.line = current_line;
+								entry.name = name;
+								entry.sound = NULL;
+								entry.used = false;
+								i->second.pop_front(); // Parameter
+								entry.loop = ((i->second.size()>0)&&(i->second.front() == "(LOOP)"));
+								loadedSounds.push_back(entry);
+								soundAccessTable[j] = &(loadedSounds.back());
+							}
+							block.erase(i);
 						}
-					if(!found_sound)
-					{
-						SoundEntry entry;
-						entry.line = current_line;
-						entry.name = name;
-						entry.sound = NULL;//temp;
-						entry.used = false;
-						loadedSounds.push_back(entry);
-						soundAccessTable[current_line] = &(loadedSounds.back());
 					}
-					
-//					if(soundList[id] == NULL)
-// reload
-					{
-						FMOD::Sound* temp;
-						FMOD_RESULT result;
-						if(parameter[1] == "LOOP")
-							result = sound->createSound(soundAccessTable[current_line]->name.c_str(), FMOD_LOOP_NORMAL | FMOD_SOFTWARE, 0, &temp);
-						else 
-							result = sound->createSound(soundAccessTable[current_line]->name.c_str(), FMOD_SOFTWARE, 0, &temp);
-						if(!ERRCHECK(result))
-						{
-							toLog("Could not load " + soundAccessTable[current_line]->name);
-							return;
-						}
-						soundAccessTable[current_line]->sound = temp;
-						soundList[current_line] = temp;
-					}
-					soundAccessTable[current_line]->used = true;
-					++current_line;
+					mode = ZERO_DATA_TYPE;
+				// TODO nicht gefundene Eintraege bemaengeln
 				}
 				else if(mode == GENERAL_BITMAP_DATA_TYPE)
 				{
 					if(!loading_bitmaps)
 					{
 						loading_bitmaps = true;
-						toLog("  - Loading bitmaps...");
+						toInitLog("  - Loading bitmaps...");
 					}					
 		                        std::map<std::string, std::list<std::string> > block;
 		                        pFile.seekg(old_pos);
 		                        if(!parse_block_map(pFile, block))
 		                        {
-		                                toLog("WARNING (UI_Theme::loadDataFile()): No concluding @END for @GENERAL_BITMAP_DATA_TYPE block was found in file " + data_file + " => trying to parse what we have so far.");
+		                                toErrorLog("WARNING (UI_Theme::loadDataFile()): No concluding @END for @GENERAL_BITMAP_DATA_TYPE block was found in file " + data_file + " => trying to parse what we have so far.");
 		                        }
 		                        for(unsigned int j = 0; j < MAX_BITMAPS; j++)
 		                        {
@@ -1641,13 +1642,13 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 						if(!loading_bitmaps)
 						{
 							loading_bitmaps = true;
-							toLog("  - Loading bitmaps...");
+							toInitLog("  - Loading bitmaps...");
 						}					
 			                        std::map<std::string, std::list<std::string> > block;
 			                        pFile.seekg(old_pos);
 			                        if(!parse_block_map(pFile, block))
 			                        {
-			                                toLog("WARNING (UI_Theme::loadDataFile()): No concluding @END for @BITMAP_DATA_TYPE block was found in file " + data_file + " => trying to parse what we have so far.");
+			                                toErrorLog("WARNING (UI_Theme::loadDataFile()): No concluding @END for @BITMAP_DATA_TYPE block was found in file " + data_file + " => trying to parse what we have so far.");
 			                        }
 			                        for(unsigned int j = 0; j < MAX_BITMAPS; j++)
 			                        {
@@ -1706,10 +1707,10 @@ void UI_Theme::setMaxGlobalHeight(unsigned int current_resolution, unsigned int 
 {
 #ifdef _SCC_DEBUG
         if(current_resolution>MAX_RESOLUTIONS) {
-                toLog("ERROR: (UI_Theme::setMaxGlobalHeightList) resolution out of range.");return;
+                toErrorLog("ERROR: (UI_Theme::setMaxGlobalHeightList) resolution out of range.");return;
         }
         if(id>=MAX_GLOBAL_WINDOWS) {
-                toLog("ERROR: (UI_Theme::setMaxGlobalHeightList) window out of range.");return;
+                toErrorLog("ERROR: (UI_Theme::setMaxGlobalHeightList) window out of range.");return;
         }
 #endif	
 	maxGlobalHeightList[current_resolution][id] = max_height;
@@ -1719,16 +1720,16 @@ void UI_Theme::setMaxGameHeight(unsigned int current_resolution, unsigned int ga
 {
 #ifdef _SCC_DEBUG
         if(current_resolution>MAX_RESOLUTIONS) {
-                toLog("ERROR: (UI_Theme::setMaxGameHeight) resolution out of range.");return;
+                toErrorLog("ERROR: (UI_Theme::setMaxGameHeight) resolution out of range.");return;
         }
         if(gameNumber>=MAX_COMPARE_GAMES) {
-                toLog("ERROR: (UI_Theme::setMaxGameHeight) gameNumber out of range.");return;
+                toErrorLog("ERROR: (UI_Theme::setMaxGameHeight) gameNumber out of range.");return;
         }
         if(maxGames>=MAX_COMPARE_GAMES) {
-                toLog("ERROR: (UI_Theme::setMaxGameHeight) maxGames out of range.");return;
+                toErrorLog("ERROR: (UI_Theme::setMaxGameHeight) maxGames out of range.");return;
         }
         if(id>=MAX_GAME_WINDOWS) {
-                toLog("ERROR: (UI_Theme::setMaxGameHeight) id out of range.");return;
+                toErrorLog("ERROR: (UI_Theme::setMaxGameHeight) id out of range.");return;
         }
 #endif	
 	maxGameHeightList[current_resolution][gameNumber][maxGames][id]=max_height;
@@ -1738,22 +1739,22 @@ void UI_Theme::setMaxPlayerHeight(unsigned int current_resolution, unsigned int 
 {
 #ifdef _SCC_DEBUG
         if(current_resolution>MAX_RESOLUTIONS) {
-                toLog("ERROR: (UI_Theme::setMaxPlayerHeight) resolution out of range.");return;
+                toErrorLog("ERROR: (UI_Theme::setMaxPlayerHeight) resolution out of range.");return;
         }
         if(gameNumber>MAX_COMPARE_GAMES) {
-                toLog("ERROR: (UI_Theme::setMaxPlayerHeight) gameNumber out of range.");return;
+                toErrorLog("ERROR: (UI_Theme::setMaxPlayerHeight) gameNumber out of range.");return;
         }
         if(maxGames>MAX_COMPARE_GAMES) {
-		toLog("ERROR: (UI_Theme::setMaxPlayerHeight) maxGames out of range.");return;
+		toErrorLog("ERROR: (UI_Theme::setMaxPlayerHeight) maxGames out of range.");return;
         }
 	if(player_max>MAX_PLAYER) {
-		toLog("ERROR: (UI_Theme::setMaxPlayerHeight) player_max out of range.");return;
+		toErrorLog("ERROR: (UI_Theme::setMaxPlayerHeight) player_max out of range.");return;
         }
 	if(playerNumber>MAX_PLAYER) {
-		toLog("ERROR: (UI_Theme::setMaxPlayerHeight) playerNumber out of range.");return;
+		toErrorLog("ERROR: (UI_Theme::setMaxPlayerHeight) playerNumber out of range.");return;
         }
         if(id>=MAX_PLAYER_WINDOWS) {
-                toLog("ERROR: (UI_Theme::setMaxPlayerHeight) window out of range.");return;
+                toErrorLog("ERROR: (UI_Theme::setMaxPlayerHeight) window out of range.");return;
         }
 #endif	
 	maxPlayerHeightList[current_resolution][gameNumber][maxGames][player_max][playerNumber][id] = max_height;
@@ -1764,86 +1765,99 @@ Font* UI_Theme::lookUpFont(const eFont id) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_FONTS)) {
-		toLog("ERROR: (UI_Theme::lookUpFont) id out of range.");return(fontList[resolution]/*[language]*/[id]);
+		toErrorLog("ERROR: (UI_Theme::lookUpFont) id out of range.");return(fontList[currentResolution]/*[language]*/[id]);
 	}
 #endif
 //	std::ostringstream os;
 //	os.str("");
 //	os << "getting id " << id << " (with resolution " << resolution << ")";
 //	toLog(os.str());
-	return(fontList[resolution]/*[language]*/[id]);
+	return(fontList[currentResolution]/*[language]*/[id]);
 }
 
 SDL_Surface* UI_Theme::lookUpBitmap(const eBitmap id)
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_BITMAPS)) {
-		toLog("ERROR: (UI_Theme::lookUpBitmap) id out of range.");return(NULL); // TODO
+		toErrorLog("ERROR: (UI_Theme::lookUpBitmap) id out of range.");return(NULL); // TODO
 	}
 #endif
-	if(bitmapList[resolution][colorTheme][id] == NULL)
+	if(bitmapList[currentResolution][currentColorTheme][id] == NULL)
 // reload
 	{
-//		toLog("Loading " + bitmapAccessTable[resolution][colorTheme][id]->name);
+//		toLog("Loading " + bitmapAccessTable[currentResolution][currentColorTheme][id]->name);
 		
 		SDL_Surface* temp = NULL;
 		
-		if(bitmapAccessTable[resolution][colorTheme][id]==NULL)
+		if(bitmapAccessTable[currentResolution][currentColorTheme][id]==NULL)
 		{
-			toLog("Bitmap " + bitmapIdentifier[id] + " was not initialized for resolution '" + lookUpString((eString)(SETTING_RESOLUTION_ZERO_STRING + resolution)) + "' and theme '" + lookUpString((eString)(SETTING_ZERO_THEME_STRING + colorTheme)) + "'. Check 'settings/ui/default.ui' and 'data/bitmaps'.");
+			toErrorLog("ERROR (UI_Theme::lookUpBitmap()): Bitmap " + bitmapIdentifier[id] + " was not initialized for resolution '" + lookUpString((eString)(SETTING_RESOLUTION_ZERO_STRING + currentResolution)) + "' and theme '" + lookUpString((eString)(SETTING_ZERO_THEME_STRING + currentColorTheme)) + "'. Check 'settings/ui/default.ui' and 'data/bitmaps'.");
 			return(NULL);
-		} else if((temp=IMG_Load(bitmapAccessTable[resolution][colorTheme][id]->name.c_str()))==NULL)
+		} else if((temp=IMG_Load(bitmapAccessTable[currentResolution][currentColorTheme][id]->name.c_str()))==NULL)
 		{
-			toLog("Could not load Bitmap " + bitmapAccessTable[resolution][colorTheme][id]->name + " : " + IMG_GetError());
+			toErrorLog("ERROR (UI_Theme::lookUpBitmap()): Could not load Bitmap " + bitmapAccessTable[currentResolution][currentColorTheme][id]->name + " : " + IMG_GetError());
 			return(NULL);
 		}
-		if(!bitmapAccessTable[resolution][colorTheme][id]->solid)
+		if(!bitmapAccessTable[currentResolution][currentColorTheme][id]->solid)
 			SDL_SetColorKey(temp, SDL_SRCCOLORKEY , SDL_MapRGB(temp->format, 0,0,0));
-		bitmapAccessTable[resolution][colorTheme][id]->bitmap = temp;
-		bitmapList[resolution][colorTheme][id] = temp;
+//		SDL_SetAlpha(temp, SDL_SRCALPHA, 128);
+		bitmapAccessTable[currentResolution][currentColorTheme][id]->bitmap = temp;
+		bitmapList[currentResolution][currentColorTheme][id] = temp;
 	}
-	bitmapAccessTable[resolution][colorTheme][id]->used = true;
-	return(bitmapList[resolution][colorTheme][id]);
+	bitmapAccessTable[currentResolution][currentColorTheme][id]->used = true;
+	return(bitmapList[currentResolution][currentColorTheme][id]);
 }
 
 FMOD::Sound* UI_Theme::lookUpSound(const eSound id)
 {
+	if(!sound)
+		return(NULL);
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_SOUNDS)) {
-		toLog("ERROR: (UI_Theme::lookUpSound) id out of range.");return(NULL); // TODO
+		toErrorLog("ERROR: (UI_Theme::lookUpSound) id out of range.");return(NULL); // TODO
 	}
 #endif
-/*	if(soundList[id] == NULL)
+	if(soundList[id] == NULL)
 // reload
 	{
-		toLog("Loading " + soundAccessTable[id]->name);
-		SndInfo* temp = sound.load(soundAccessTable[id]->name.c_str());
-		if(temp == NULL)
+		FMOD::Sound* temp = NULL;
+		if(soundAccessTable[id]==NULL)
 		{
-			toLog("Could not load Sound " + soundAccessTable[id]->name + " : " + SDL_GetError());
+			toErrorLog("ERROR (UI_Theme::lookUpSound()): Sound was not initialized. Check 'settings/ui/default.ui' and 'data/sounds'."); // TODO sound identifier...
 			return(NULL);
+		} else		
+		{
+			FMOD_RESULT result;
+			result = sound->createSound(soundAccessTable[id]->name.c_str(), (soundAccessTable[id]->loop?FMOD_LOOP_NORMAL:0) | FMOD_SOFTWARE, 0, &temp);
+			if(!ERRCHECK(result))
+			{
+				toErrorLog("ERROR (UI_Theme::lookUpSound()): Could not load " + soundAccessTable[id]->name);
+				return(NULL);
+			}
+			soundAccessTable[id]->sound = temp;
+			soundList[id] = temp;
 		}
-		soundAccessTable[id]->sound = temp;
-		soundList[id] = temp;
 	}
-	soundAccessTable[id]->used = true;*/
+	soundAccessTable[id]->used = true;
 	return(soundList[id]);
 }
 
 void UI_Theme::playSound(const eSound id, const unsigned int x)
 {
-	soundsToPlay.push_back(std::pair<FMOD::Sound*, float>(lookUpSound(id), 2*((float)(2*x) - (float)getResolutionSize().GetWidth())/(float)(3*getResolutionSize().GetWidth())));
+	if(!sound)
+		return;
+	soundsToPlay.push_back(std::pair<FMOD::Sound*, float>(lookUpSound(id), 2*((float)(2*x) - (float)getResolutionSize().getWidth())/(float)(3*getResolutionSize().getWidth())));
 }
 
 const bool UI_Theme::setLanguage(const eLanguage theme_language) {
 	if(languageInitialized[theme_language])
 	{
-		language = theme_language;
+		currentLanguage = theme_language;
 		return(true);
 	}
 	else
 	{
-		toLog("ERROR (UI_Theme::setLanguage()): Cannot set language " + lookUpString((eString)(SETTING_ZERO_LANGUAGE_STRING + theme_language)) + ", language was not initialized.");
+		toErrorLog("ERROR (UI_Theme::setLanguage()): Cannot set language " + lookUpString((eString)(SETTING_ZERO_LANGUAGE_STRING + theme_language)) + ", language was not initialized.");
 		return(false);
 	}
 }
@@ -1859,7 +1873,7 @@ void UI_Theme::printSoundInformation() const
 		sound->getDriverName(i, driver_name, 128);
 		os << driver_name << " ";
 	}
-	toLog(os.str());
+	toInitLog(os.str());
 	os.str("");
 	int current_driver;
 	sound->getDriver(&current_driver);
@@ -1874,15 +1888,53 @@ void UI_Theme::printSoundInformation() const
 			sound->getDriverName(current_driver, driver_name, 128);
 			os << "(probably '" << driver_name << "')";
 		}
-		toLog(os.str());
+		toInitLog(os.str());
 	}
 	else
 	{
 		char driver_name[128];
 		sound->getDriverName(current_driver, driver_name, 128);
 		os << driver_name;
-		toLog(os.str());
+		toInitLog(os.str());
 	}
+}
+
+void UI_Theme::releaseSoundEngine()
+{
+	if(!sound)
+		return;
+	toInitLog("* Closing sound engine...");
+	sound->close();
+
+	toInitLog("* Releasing sound engine...");
+	sound->release();
+	sound = NULL;
+}
+
+const eBitmap UI_Theme::getBitmapFromIdentifier(const std::string& identifier) const
+{
+	for(unsigned int j = MAX_BITMAPS; j--;)
+		if(bitmapIdentifier[j] == identifier)
+			return((eBitmap)j);
+	return(NULL_BITMAP);
+}
+
+void UI_Theme::initSoundIdentifier()
+{
+	for(unsigned int i = MAX_SOUNDS; i--;)
+		soundIdentifier[i] = "null";
+	soundIdentifier[NULL_SOUND] = "NULL_SOUND";
+	soundIdentifier[LALA_SOUND] = "LALA_SOUND";
+	soundIdentifier[MOUSEOVER_SOUND] = "MOUSEOVER_SOUND";
+	soundIdentifier[SWISHIN_SOUND] = "SWISHIN_SOUND";
+	soundIdentifier[SWISHOUT_SOUND] = "SWISHOUT_SOUND";
+	soundIdentifier[SWISHLOCK_SOUND] = "SWISHLOCK_SOUND";
+	soundIdentifier[CLICKED_SOUND] = "CLICKED_SOUND";
+	soundIdentifier[CLICK_SOUND] = "CLICK_SOUND";
+	soundIdentifier[COMPLETE_SOUND] = "COMPLETE_SOUND";
+	soundIdentifier[ERROR_SOUND] = "ERROR_SOUND";
+	soundIdentifier[RING_SOUND] = "RING_SOUND";
+	soundIdentifier[INTRO_SOUND] = "INTRO_SOUND";
 }
 
 
@@ -1931,6 +1983,8 @@ void UI_Theme::initBitmapIdentifier()
 	bitmapIdentifier[BOGRAPH_WINDOW_BITMAP] = "BOGRAPH_WINDOW_BITMAP";
 	bitmapIdentifier[BO_WINDOW_BITMAP] = "BO_WINDOW_BITMAP";
 	bitmapIdentifier[CLEMENS_BITMAP] = "CLEMENS_BITMAP";
+	bitmapIdentifier[LIST_BITMAP] = "LIST_BITMAP";
+//	bitmapIdentifier[OPEN_TREE_BITMAP] = "OPEN_TREE_BITMAP";
 }
 
 void UI_Theme::initStringIdentifier()
@@ -2250,7 +2304,7 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[START_INITIALIZATION_TIME_STRING] = "START_INITIALIZATION_TIME_STRING";
 	stringIdentifier[CHANGED_BIT_DEPTH_STRING] = "CHANGED_BIT_DEPTH_STRING";
 	stringIdentifier[CHANGED_RESOLUTION_STRING] = "CHANGED_RESOLUTION_STRING";
-	stringIdentifier[MAIN_WINDOW_TITLE_STRING] = "MAIN_WINDOW_TITLE_STRING";
+	stringIdentifier[INTRO_WINDOW_TITLE_STRING] = "INTRO_WINDOW_TITLE_STRING";
 	stringIdentifier[MESSAGE_WINDOW_TITLE_STRING] = "MESSAGE_WINDOW_TITLE_STRING";
 	stringIdentifier[HELP_WINDOW_TITLE_STRING] = "HELP_WINDOW_TITLE_STRING";
 	stringIdentifier[SETTINGS_WINDOW_TITLE_STRING] = "SETTINGS_WINDOW_TITLE_STRING";
@@ -2314,6 +2368,10 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[GIVE_GOAL_A_NAME_STRING] = "GIVE_GOAL_A_NAME_STRING";
 	stringIdentifier[SAVE_BUILD_ORDER_AS_STRING] = "SAVE_BUILD_ORDER_AS_STRING";
 	stringIdentifier[GIVE_BO_A_NAME_STRING] = "GIVE_BO_A_NAME_STRING";
+	stringIdentifier[BODIAGRAM_MINERALS_STRING] = "BODIAGRAM_MINERALS_STRING";
+	stringIdentifier[BODIAGRAM_GAS_STRING] = "BODIAGRAM_GAS_STRING";
+	stringIdentifier[BODIAGRAM_SUPPLY_STRING] = "BODIAGRAM_SUPPLY_STRING";
+	stringIdentifier[BODIAGRAM_TIME_STRING] = "BODIAGRAM_TIME_STRING";
 	stringIdentifier[TERRA_STRING] = "TERRA_STRING";
 	stringIdentifier[PROTOSS_STRING] = "PROTOSS_STRING";
 	stringIdentifier[ZERG_STRING] = "ZERG_STRING";
@@ -2374,77 +2432,63 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[DATABASE_TAB_TOOLTIP_STRING] = "DATABASE_TAB_TOOLTIP_STRING";
 	stringIdentifier[MAP_TAB_TOOLTIP_STRING] = "MAP_TAB_TOOLTIP_STRING";
 	stringIdentifier[FORCEENTRY_TIME_TOOLTIP_STRING] = "FORCEENTRY_TIME_TOOLTIP_STRING";
-	stringIdentifier[TITLE_PREDEFINED_SETTINGS_STRING] = "TITLE_PREDEFINED_SETTINGS_STRING";
-	stringIdentifier[SETTING_MAX_TIME_STRING] = "SETTING_MAX_TIME_STRING";
-	stringIdentifier[SETTING_RESTRICT_SC_STRING] = "SETTING_RESTRICT_SC_STRING";
-	stringIdentifier[SETTING_FACILITY_MODE_STRING] = "SETTING_FACILITY_MODE_STRING";
-	stringIdentifier[SETTING_AUTO_SAVE_RUNS_STRING] = "SETTING_AUTO_SAVE_RUNS_STRING";
-	stringIdentifier[SETTING_ALWAYS_BUILD_WORKER_STRING] = "SETTING_ALWAYS_BUILD_WORKER_STRING";
-	stringIdentifier[SETTING_ONLY_SWAP_ORDERS_STRING] = "SETTING_ONLY_SWAP_ORDERS_STRING";
-	stringIdentifier[SETTING_PREPROCESS_BUILDORDER_STRING] = "SETTING_PREPROCESS_BUILDORDER_STRING";
-	stringIdentifier[SETTING_MAX_LENGTH_STRING] = "SETTING_MAX_LENGTH_STRING";
-	stringIdentifier[SETTING_MAX_RUNS_STRING] = "SETTING_MAX_RUNS_STRING";
+
+	stringIdentifier[SETTING_FAST_CALCULATION_STRING] = "SETTING_FAST_CALCULATION_STRING";
+	stringIdentifier[SETTING_EXPANSION_SET_STRING] = "SETTING_EXPANSION_SET_STRING";
+	stringIdentifier[SETTING_ALWAYS_BUILD_WORKERS_STRING] = "SETTING_ALWAYS_BUILD_WORKERS_STRING";
+	stringIdentifier[SETTING_ALLOW_WAIT_ORDERS_STRING] = "SETTING_ALLOW_WAIT_ORDERS_STRING";
+	stringIdentifier[SETTING_WAIT_ACCURACY_STRING] = "SETTING_WAIT_ACCURACY_STRING";
+	stringIdentifier[SETTING_AUTO_RUNS_STRING] = "SETTING_AUTO_RUNS_STRING";
 	stringIdentifier[SETTING_MAX_GENERATIONS_STRING] = "SETTING_MAX_GENERATIONS_STRING";
-	stringIdentifier[SETTING_MAX_TIMEOUT_STRING] = "SETTING_MAX_TIMEOUT_STRING";
-	stringIdentifier[SETTING_ALLOW_GOAL_ADAPTION_STRING] = "SETTING_ALLOW_GOAL_ADAPTION_STRING";
-	stringIdentifier[SETTING_BREED_FACTOR_STRING] = "SETTING_BREED_FACTOR_STRING";
-	stringIdentifier[SETTING_CROSSING_OVER_STRING] = "SETTING_CROSSING_OVER_STRING";
-	stringIdentifier[SETTING_MINIMALIST_STRING] = "SETTING_MINIMALIST_STRING";
-	stringIdentifier[SETTING_FULL_STRING] = "SETTING_FULL_STRING";
-	stringIdentifier[SETTING_CUSTOM_STRING] = "SETTING_CUSTOM_STRING";
-	stringIdentifier[SETTING_DESIRED_FRAMERATE_STRING] = "SETTING_DESIRED_FRAMERATE_STRING";
-	stringIdentifier[SETTING_DESIRED_CPU_USAGE_STRING] = "SETTING_DESIRED_CPU_USAGE_STRING";
-	stringIdentifier[SETTING_SMOOTH_MOVEMENT_STRING] = "SETTING_SMOOTH_MOVEMENT_STRING";
-	stringIdentifier[SETTING_SHOW_DEBUG_STRING] = "SETTING_SHOW_DEBUG_STRING";
-	stringIdentifier[SETTING_GLOWING_BUTTONS_STRING] = "SETTING_GLOWING_BUTTONS_STRING";
-	stringIdentifier[SETTING_DNA_SPIRAL_STRING] = "SETTING_DNA_SPIRAL_STRING";
-	stringIdentifier[SETTING_ROUNDED_RECTANGLES_STRING] = "SETTING_ROUNDED_RECTANGLES_STRING";
-	stringIdentifier[SETTING_BACKGROUND_BITMAP_STRING] = "SETTING_BACKGROUND_BITMAP_STRING";
-	stringIdentifier[SETTING_TRANSPARENCY_STRING] = "SETTING_TRANSPARENCY_STRING";
-	stringIdentifier[SETTING_FULLSCREEN_STRING] = "SETTING_FULLSCREEN_STRING";
-	stringIdentifier[SETTING_TOOLTIPS_STRING] = "SETTING_TOOLTIPS_STRING";
-	stringIdentifier[SETTING_SOFTWARE_MOUSE_STRING] = "SETTING_SOFTWARE_MOUSE_STRING";
-	stringIdentifier[SETTING_UNLOAD_GRAPHICS_STRING] = "SETTING_UNLOAD_GRAPHICS_STRING";
 	stringIdentifier[SETTING_USE_MUSIC_STRING] = "SETTING_USE_MUSIC_STRING";
 	stringIdentifier[SETTING_USE_SOUND_STRING] = "SETTING_USE_SOUND_STRING";
 	stringIdentifier[SETTING_MUSIC_VOLUME_STRING] = "SETTING_MUSIC_VOLUME_STRING";
 	stringIdentifier[SETTING_SOUND_VOLUME_STRING] = "SETTING_SOUND_VOLUME_STRING";
 	stringIdentifier[SETTING_CHANNELS_STRING] = "SETTING_CHANNELS_STRING";
-	stringIdentifier[SETTING_MAX_TIME_TOOLTIP_STRING] = "SETTING_MAX_TIME_TOOLTIP_STRING";
-	stringIdentifier[SETTING_RESTRICT_SC_TOOLTIP_STRING] = "SETTING_RESTRICT_SC_TOOLTIP_STRING";
-	stringIdentifier[SETTING_FACILITY_MODE_TOOLTIP_STRING] = "SETTING_FACILITY_MODE_TOOLTIP_STRING";
-	stringIdentifier[SETTING_AUTO_SAVE_RUNS_TOOLTIP_STRING] = "SETTING_AUTO_SAVE_RUNS_TOOLTIP_STRING";
-	stringIdentifier[SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING] = "SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING";
-	stringIdentifier[SETTING_ONLY_SWAP_ORDERS_TOOLTIP_STRING] = "SETTING_ONLY_SWAP_ORDERS_TOOLTIP_STRING";
-	stringIdentifier[SETTING_PREPROCESS_BUILDORDER_TOOLTIP_STRING] = "SETTING_PREPROCESS_BUILDORDER_TOOLTIP_STRING";
-	stringIdentifier[SETTING_MAX_LENGTH_TOOLTIP_STRING] = "SETTING_MAX_LENGTH_TOOLTIP_STRING";
-	stringIdentifier[SETTING_MAX_RUNS_TOOLTIP_STRING] = "SETTING_MAX_RUNS_TOOLTIP_STRING";
+	stringIdentifier[SETTING_BACKGROUND_BITMAP_STRING] = "SETTING_BACKGROUND_BITMAP_STRING";
+	stringIdentifier[SETTING_SMOOTH_MOVEMENT_STRING] = "SETTING_SMOOTH_MOVEMENT_STRING";
+	stringIdentifier[SETTING_WAIT_AFTER_CHANGE_STRING] = "SETTING_WAIT_AFTER_CHANGE_STRING";
+	stringIdentifier[SETTING_TOOLTIPS_STRING] = "SETTING_TOOLTIPS_STRING";
+	stringIdentifier[SETTING_DNA_SPIRAL_STRING] = "SETTING_DNA_SPIRAL_STRING";
+	stringIdentifier[SETTING_GLOWING_BUTTONS_STRING] = "SETTING_GLOWING_BUTTONS_STRING";
+	stringIdentifier[SETTING_COMPACT_DISPLAY_MODE_STRING] = "SETTING_COMPACT_DISPLAY_MODE_STRING";
+	stringIdentifier[SETTING_FACILITY_MODE_STRING] = "SETTING_FACILITY_MODE_STRING";
+	stringIdentifier[SETTING_FULLSCREEN_STRING] = "SETTING_FULLSCREEN_STRING";
+	stringIdentifier[SETTING_UNLOAD_GRAPHICS_STRING] = "SETTING_UNLOAD_GRAPHICS_STRING";
+	stringIdentifier[SETTING_SHOW_DEBUG_STRING] = "SETTING_SHOW_DEBUG_STRING";
+	stringIdentifier[SETTING_DESIRED_FRAMERATE_STRING] = "SETTING_DESIRED_FRAMERATE_STRING";
+	stringIdentifier[SETTING_DESIRED_CPU_USAGE_STRING] = "SETTING_DESIRED_CPU_USAGE_STRING";
+	
+	stringIdentifier[SETTING_RELOAD_FROM_FILE_STRING] = "SETTING_RELOAD_FROM_FILE_STRING";
+	stringIdentifier[SETTING_SAVE_TO_FILE_STRING] = "SETTING_SAVE_TO_FILE_STRING";
+	stringIdentifier[SETTING_LOAD_DEFAULTS_STRING] = "SETTING_LOAD_DEFAULTS_STRING";
+
+	stringIdentifier[SETTING_FAST_CALCULATION_TOOLTIP_STRING] = "SETTING_FAST_CALCULATION_TOOLTIP_STRING";
+	stringIdentifier[SETTING_EXPANSION_SET_TOOLTIP_STRING] = "SETTING_EXPANSION_SET_TOOLTIP_STRING";
+	stringIdentifier[SETTING_ALWAYS_BUILD_WORKERS_TOOLTIP_STRING] = "SETTING_ALWAYS_BUILD_WORKERS_TOOLTIP_STRING";
+	stringIdentifier[SETTING_ALLOW_WAIT_ORDERS_TOOLTIP_STRING] = "SETTING_ALLOW_WAIT_ORDERS_TOOLTIP_STRING";
+	stringIdentifier[SETTING_WAIT_ACCURACY_TOOLTIP_STRING] = "SETTING_WAIT_ACCURACY_TOOLTIP_STRING";
+	stringIdentifier[SETTING_AUTO_RUNS_TOOLTIP_STRING] = "SETTING_AUTO_RUNS_TOOLTIP_STRING";
 	stringIdentifier[SETTING_MAX_GENERATIONS_TOOLTIP_STRING] = "SETTING_MAX_GENERATIONS_TOOLTIP_STRING";
-	stringIdentifier[SETTING_MAX_TIMEOUT_TOOLTIP_STRING] = "SETTING_MAX_TIMEOUT_TOOLTIP_STRING";
-	stringIdentifier[SETTING_ALLOW_GOAL_ADAPTION_TOOLTIP_STRING] = "SETTING_ALLOW_GOAL_ADAPTION_TOOLTIP_STRING";
-	stringIdentifier[SETTING_BREED_FACTOR_TOOLTIP_STRING] = "SETTING_BREED_FACTOR_TOOLTIP_STRING";
-	stringIdentifier[SETTING_CROSSING_OVER_TOOLTIP_STRING] = "SETTING_CROSSING_OVER_TOOLTIP_STRING";
-	stringIdentifier[SETTING_MINIMALIST_TOOLTIP_STRING] = "SETTING_MINIMALIST_TOOLTIP_STRING";
-	stringIdentifier[SETTING_FULL_TOOLTIP_STRING] = "SETTING_FULL_TOOLTIP_STRING";
-	stringIdentifier[SETTING_CUSTOM_TOOLTIP_STRING] = "SETTING_CUSTOM_TOOLTIP_STRING";
-	stringIdentifier[SETTING_DESIRED_FRAMERATE_TOOLTIP_STRING] = "SETTING_DESIRED_FRAMERATE_TOOLTIP_STRING";
-	stringIdentifier[SETTING_DESIRED_CPU_USAGE_TOOLTIP_STRING] = "SETTING_DESIRED_CPU_USAGE_TOOLTIP_STRING";
-	stringIdentifier[SETTING_SMOOTH_MOVEMENT_TOOLTIP_STRING] = "SETTING_SMOOTH_MOVEMENT_TOOLTIP_STRING";
-	stringIdentifier[SETTING_SHOW_DEBUG_TOOLTIP_STRING] = "SETTING_SHOW_DEBUG_TOOLTIP_STRING";
-	stringIdentifier[SETTING_GLOWING_BUTTONS_TOOLTIP_STRING] = "SETTING_GLOWING_BUTTONS_TOOLTIP_STRING";
-	stringIdentifier[SETTING_DNA_SPIRAL_TOOLTIP_STRING] = "SETTING_DNA_SPIRAL_TOOLTIP_STRING";
-	stringIdentifier[SETTING_ROUNDED_RECTANGLES_TOOLTIP_STRING] = "SETTING_ROUNDED_RECTANGLES_TOOLTIP_STRING";
-	stringIdentifier[SETTING_BACKGROUND_BITMAP_TOOLTIP_STRING] = "SETTING_BACKGROUND_BITMAP_TOOLTIP_STRING";
-	stringIdentifier[SETTING_TRANSPARENCY_TOOLTIP_STRING] = "SETTING_TRANSPARENCY_TOOLTIP_STRING";
-	stringIdentifier[SETTING_FULLSCREEN_TOOLTIP_STRING] = "SETTING_FULLSCREEN_TOOLTIP_STRING";
-	stringIdentifier[SETTING_TOOLTIPS_TOOLTIP_STRING] = "SETTING_TOOLTIPS_TOOLTIP_STRING";
-	stringIdentifier[SETTING_SOFTWARE_MOUSE_TOOLTIP_STRING] = "SETTING_SOFTWARE_MOUSE_TOOLTIP_STRING";
-	stringIdentifier[SETTING_UNLOAD_GRAPHICS_TOOLTIP_STRING] = "SETTING_UNLOAD_GRAPHICS_TOOLTIP_STRING";
 	stringIdentifier[SETTING_USE_MUSIC_TOOLTIP_STRING] = "SETTING_USE_MUSIC_TOOLTIP_STRING";
 	stringIdentifier[SETTING_USE_SOUND_TOOLTIP_STRING] = "SETTING_USE_SOUND_TOOLTIP_STRING";
 	stringIdentifier[SETTING_MUSIC_VOLUME_TOOLTIP_STRING] = "SETTING_MUSIC_VOLUME_TOOLTIP_STRING";
 	stringIdentifier[SETTING_SOUND_VOLUME_TOOLTIP_STRING] = "SETTING_SOUND_VOLUME_TOOLTIP_STRING";
 	stringIdentifier[SETTING_CHANNELS_TOOLTIP_STRING] = "SETTING_CHANNELS_TOOLTIP_STRING";
+	stringIdentifier[SETTING_BACKGROUND_BITMAP_TOOLTIP_STRING] = "SETTING_BACKGROUND_BITMAP_TOOLTIP_STRING";
+	stringIdentifier[SETTING_SMOOTH_MOVEMENT_TOOLTIP_STRING] = "SETTING_SMOOTH_MOVEMENT_TOOLTIP_STRING";
+	stringIdentifier[SETTING_WAIT_AFTER_CHANGE_TOOLTIP_STRING] = "SETTING_WAIT_AFTER_CHANGE_TOOLTIP_STRING";
+	stringIdentifier[SETTING_TOOLTIPS_TOOLTIP_STRING] = "SETTING_TOOLTIPS_TOOLTIP_STRING";
+	stringIdentifier[SETTING_DNA_SPIRAL_TOOLTIP_STRING] = "SETTING_DNA_SPIRAL_TOOLTIP_STRING";
+	stringIdentifier[SETTING_GLOWING_BUTTONS_TOOLTIP_STRING] = "SETTING_GLOWING_BUTTONS_TOOLTIP_STRING";
+	stringIdentifier[SETTING_COMPACT_DISPLAY_MODE_TOOLTIP_STRING] = "SETTING_COMPACT_DISPLAY_MODE_TOOLTIP_STRING";
+	stringIdentifier[SETTING_FACILITY_MODE_TOOLTIP_STRING] = "SETTING_FACILITY_MODE_TOOLTIP_STRING";
+	stringIdentifier[SETTING_FULLSCREEN_TOOLTIP_STRING] = "SETTING_FULLSCREEN_TOOLTIP_STRING";
+	stringIdentifier[SETTING_UNLOAD_GRAPHICS_TOOLTIP_STRING] = "SETTING_UNLOAD_GRAPHICS_TOOLTIP_STRING";
+	stringIdentifier[SETTING_SHOW_DEBUG_TOOLTIP_STRING] = "SETTING_SHOW_DEBUG_TOOLTIP_STRING";
+	stringIdentifier[SETTING_DESIRED_FRAMERATE_TOOLTIP_STRING] = "SETTING_DESIRED_FRAMERATE_TOOLTIP_STRING";
+	stringIdentifier[SETTING_DESIRED_CPU_USAGE_TOOLTIP_STRING] = "SETTING_DESIRED_CPU_USAGE_TOOLTIP_STRING";
+	
 	stringIdentifier[SETTINGS_SAVED_STRING] = "SETTINGS_SAVED_STRING";
 	stringIdentifier[LANGUAGE_HAS_CHANGED_STRING] = "LANGUAGE_HAS_CHANGED_STRING";
 	stringIdentifier[SETTING_LANGUAGE_STRING] = "SETTING_LANGUAGE_STRING";
@@ -2481,64 +2525,17 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[SETTING_YELLOW_THEME_STRING] = "SETTING_YELLOW_THEME_STRING";
 	stringIdentifier[SETTING_GREY_THEME_STRING] = "SETTING_GREY_THEME_STRING";
 	stringIdentifier[SETTING_RELOAD_FROM_FILE_STRING] = "SETTING_RELOAD_FROM_FILE_STRING";
-	stringIdentifier[SETTING_LOAD_FAILSAFE_DEFAULTS_STRING] = "SETTING_LOAD_FAILSAFE_DEFAULTS_STRING";
 	stringIdentifier[SETTING_SAVE_TO_FILE_STRING] = "SETTING_SAVE_TO_FILE_STRING";
+	stringIdentifier[SETTING_LOAD_DEFAULTS_STRING] = "SETTING_LOAD_DEFAULTS_STRING";
+	
 	stringIdentifier[SETWINDOW_CORE_SETTINGS_STRING] = "SETWINDOW_CORE_SETTINGS_STRING";
-	stringIdentifier[SETWINDOW_GUI_SETTINGS_STRING] = "SETWINDOW_GUI_SETTINGS_STRING";
 	stringIdentifier[SETWINDOW_SOUND_SETTINGS_STRING] = "SETWINDOW_SOUND_SETTINGS_STRING";
+	stringIdentifier[SETWINDOW_GUI_SETTINGS_STRING] = "SETWINDOW_GUI_SETTINGS_STRING";
+	stringIdentifier[SETWINDOW_GRAPHIC_SETTINGS_STRING] = "SETWINDOW_GRAPHIC_SETTINGS_STRING";
+	
 	stringIdentifier[SETWINDOW_UI_SETTINGS_STRING] = "SETWINDOW_UI_SETTINGS_STRING";
 	stringIdentifier[SETWINDOW_LOADSAVE_SETTINGS_STRING] = "SETWINDOW_LOADSAVE_SETTINGS_STRING";
-	stringIdentifier[MAPWINDOW_MAP_SETTINGS_STRING] = "MAPWINDOW_MAP_SETTINGS_STRING";
-	stringIdentifier[MAPWINDOW_MAX_PLAYER_STRING] = "MAPWINDOW_MAX_PLAYER_STRING";
-	stringIdentifier[MAPWINDOW_MAX_LOCATIONS_STRING] = "MAPWINDOW_MAX_LOCATIONS_STRING";
-	stringIdentifier[MAPWINDOW_MAP_NAME_STRING] = "MAPWINDOW_MAP_NAME_STRING";
-	stringIdentifier[MAPWINDOW_SYMMETRY_STRING] = "MAPWINDOW_SYMMETRY_STRING";
-	stringIdentifier[MAPWINDOW_LOCATION_SETTINGS_STRING] = "MAPWINDOW_LOCATION_SETTINGS_STRING";
-	stringIdentifier[MAPWINDOW_PLAYER_SETTINGS_STRING] = "MAPWINDOW_PLAYER_SETTINGS_STRING";
-	stringIdentifier[MAPWINDOW_LOCATION_CONTENT_STRING] = "MAPWINDOW_LOCATION_CONTENT_STRING";
-	stringIdentifier[MAPWINDOW_DISTANCES_STRING] = "MAPWINDOW_DISTANCES_STRING";
-	stringIdentifier[MAPWINDOW_MINERAL_BLOCKS_STRING] = "MAPWINDOW_MINERAL_BLOCKS_STRING";
-	stringIdentifier[MAPWINDOW_VESPENE_GEYSIRS_STRING] = "MAPWINDOW_VESPENE_GEYSIRS_STRING";
-	stringIdentifier[MAPWINDOW_MINERAL_DISTANCE_STRING] = "MAPWINDOW_MINERAL_DISTANCE_STRING";
-	stringIdentifier[MAPWINDOW_MAX_PLAYER_TOOLTIP_STRING] = "MAPWINDOW_MAX_PLAYER_TOOLTIP_STRING";
-	stringIdentifier[MAPWINDOW_MAX_LOCATIONS_TOOLTIP_STRING] = "MAPWINDOW_MAX_LOCATIONS_TOOLTIP_STRING";
-	stringIdentifier[MAPWINDOW_SYMMETRY_TOOLTIP_STRING] = "MAPWINDOW_SYMMETRY_TOOLTIP_STRING";
-	stringIdentifier[MAPWINDOW_CREATE_NEW_MAP_TOOLTIP_STRING] = "MAPWINDOW_CREATE_NEW_MAP_TOOLTIP_STRING";
-	stringIdentifier[MAPWINDOW_RESET_MAP_TOOLTIP_STRING] = "MAPWINDOW_RESET_MAP_TOOLTIP_STRING";
-	stringIdentifier[MAPWINDOW_LOAD_MAP_TOOLTIP_STRING] = "MAPWINDOW_LOAD_MAP_TOOLTIP_STRING";
-	stringIdentifier[MAPWINDOW_SAVE_MAP_TOOLTIP_STRING] = "MAPWINDOW_SAVE_MAP_TOOLTIP_STRING";
-	stringIdentifier[MAPWINDOW_MINERAL_BLOCKS_TOOLTIP_STRING] = "MAPWINDOW_MINERAL_BLOCKS_TOOLTIP_STRING";
-	stringIdentifier[MAPWINDOW_VESPENE_GEYSIRS_TOOLTIP_STRING] = "MAPWINDOW_VESPENE_GEYSIRS_TOOLTIP_STRING";
-	stringIdentifier[MAPWINDOW_MINERAL_DISTANCE_TOOLTIP_STRING] = "MAPWINDOW_MINERAL_DISTANCE_TOOLTIP_STRING";
-	stringIdentifier[MAPWINDOW_DISTANCES_TOOLTIP_STRING] = "MAPWINDOW_DISTANCES_TOOLTIP_STRING";
-	stringIdentifier[OUTPUT_UNITNAME_STRING] = "OUTPUT_UNITNAME_STRING";
-	stringIdentifier[OUTPUT_SUPPLY_STRING] = "OUTPUT_SUPPLY_STRING";
-	stringIdentifier[OUTPUT_MINERALS_STRING] = "OUTPUT_MINERALS_STRING";
-	stringIdentifier[OUTPUT_GAS_STRING] = "OUTPUT_GAS_STRING";
-	stringIdentifier[OUTPUT_LOCATION_STRING] = "OUTPUT_LOCATION_STRING";
-	stringIdentifier[OUTPUT_TIME_STRING] = "OUTPUT_TIME_STRING";
-	stringIdentifier[ENDRUN_FINISHED_STRING] = "ENDRUN_FINISHED_STRING";
-	stringIdentifier[ENDRUN_SAVED_BUILDORDER_STRING] = "ENDRUN_SAVED_BUILDORDER_STRING";
-	stringIdentifier[ENDRUN_DIALOG_TITLE_STRING] = "ENDRUN_DIALOG_TITLE_STRING";
-	stringIdentifier[ENDRUN_QUESTION_STRING] = "ENDRUN_QUESTION_STRING";
-	stringIdentifier[ENDRUN_SAVE_AND_CONTINUE_STRING] = "ENDRUN_SAVE_AND_CONTINUE_STRING";
-	stringIdentifier[ENDRUN_DONT_SAVE_AND_CONTINUE_STRING] = "ENDRUN_DONT_SAVE_AND_CONTINUE_STRING";
-	stringIdentifier[SUCCESS_OK_STRING] = "SUCCESS_OK_STRING";
-	stringIdentifier[SUCCESS_MINERALS_STRING] = "SUCCESS_MINERALS_STRING";
-	stringIdentifier[SUCCESS_GAS_STRING] = "SUCCESS_GAS_STRING";
-	stringIdentifier[SUCCESS_SUPPLY_STRING] = "SUCCESS_SUPPLY_STRING";
-	stringIdentifier[SUCCESS_PREREQUISITE_STRING] = "SUCCESS_PREREQUISITE_STRING";
-	stringIdentifier[SUCCESS_FACILITY_STRING] = "SUCCESS_FACILITY_STRING";
-	stringIdentifier[SUCCESS_TIMEOUT_STRING] = "SUCCESS_TIMEOUT_STRING";
-	stringIdentifier[SUCCESS_UNKNOWN_STRING] = "SUCCESS_UNKNOWN_STRING";
-	stringIdentifier[INFO_BUILD_STRING] = "INFO_BUILD_STRING";
-	stringIdentifier[INFO_AS_SOON_AS_STRING] = "INFO_AS_SOON_AS_STRING";
-	stringIdentifier[INFO_BECOMES_AVAILIBLE_STRING] = "INFO_BECOMES_AVAILIBLE_STRING";
-	stringIdentifier[INFO_AT_STRING] = "INFO_AT_STRING";
-	stringIdentifier[INFO_WHEN_STRING] = "INFO_WHEN_STRING";
-	stringIdentifier[INFO_HAVING_STRING] = "INFO_HAVING_STRING";
-	stringIdentifier[INFO_MINERALS_STRING] = "INFO_MINERALS_STRING";
-	stringIdentifier[INFO_GAS_STRING] = "INFO_GAS_STRING";
-	stringIdentifier[INFO_SUPPLY_STRING] = "INFO_SUPPLY_STRING";
-	stringIdentifier[INFO_TIME_STRING] = "INFO_TIME_STRING";
+	
+	stringIdentifier[DATA_ENTRY_OPEN_BUTTON_TOOLTIP_STRING] = "DATA_ENTRY_OPEN_BUTTON_TOOLTIP_STRING";
+	stringIdentifier[DATA_ENTRY_CHECK_BUTTON_TOOLTIP_STRING] = "DATA_ENTRY_CHECK_BUTTON_TOOLTIP_STRING";
 }

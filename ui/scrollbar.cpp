@@ -2,48 +2,6 @@
 
 #define MAX_INTERNAL_SCROLLY 10000
 
-UI_ScrollBar& UI_ScrollBar::operator=(const UI_ScrollBar& object)
-{
-	((UI_Object)(*this)) = ((UI_Object)object);
-	firstItemY = object.firstItemY;
-	lastItemY = object.lastItemY;
-	startY = object.startY;
-	delete add;
-	add = new UI_Button(*(object.add));
-	delete sub;
-	sub = new UI_Button(*(object.sub));
-	hideable = object.hideable;
-	internalScrollY = object.internalScrollY;
-	internalHeight = object.internalHeight;
-	currentScrollY = object.currentScrollY;
-	targetScrollY = object.targetScrollY;
-	barHeight = object.barHeight;
-	clientHeight = object.clientHeight;
-	clientTargetHeight = object.clientTargetHeight;
-	totalHeight = object.totalHeight;
-	maxHeight = object.maxHeight;
-	return(*this);
-}
-
-UI_ScrollBar::UI_ScrollBar(const UI_ScrollBar& object) :
-	UI_Object((UI_Object)object),
-	firstItemY(object.firstItemY),
-	lastItemY(object.lastItemY),
-	startY(object.startY),
-	add(new UI_Button(*(object.add))),
-	sub(new UI_Button(*(object.sub))),
-	hideable(object.hideable),
-	internalScrollY(object.internalScrollY),
-	internalHeight(object.internalHeight),
-	currentScrollY(object.currentScrollY),
-	targetScrollY(object.targetScrollY),
-	barHeight(object.barHeight),
-	clientHeight(object.clientHeight),
-	clientTargetHeight(object.clientTargetHeight),
-	totalHeight(object.totalHeight),
-	maxHeight(object.maxHeight)
-{ }
-
 UI_ScrollBar::UI_ScrollBar(UI_Object* scroll_parent, const unsigned int start_y, const unsigned int max_height, const bool scroll_hideable) :
 	UI_Object(scroll_parent, Rect()),//scroll_parent->getWidth(), scroll_parent->getHeight())), // TODO
 	firstItemY(0),
@@ -82,12 +40,12 @@ void UI_ScrollBar::setClientTargetHeight(const unsigned int height)
 
 void UI_ScrollBar::moveUp()
 {
-	targetScrollY-=clientHeight/20;
+	targetScrollY-=clientHeight/40;
 }
 
 void UI_ScrollBar::moveDown()
 {
-	targetScrollY+=clientHeight/20;
+	targetScrollY+=clientHeight/40;
 }
 
 // TODO: Wenn Scrollbereich ausserhalb des Fensters rutscht moechte das Programm verstaendlicherweise neumalen, da es nicht weiss, dass die entsprechenden Eintraege versteckt werden... :-/
@@ -111,7 +69,22 @@ void UI_ScrollBar::checkBoundsOfChildren(const signed int upper_bound, const sig
 			if((tmp!=add)&&(tmp!=sub))
 			{
 				if(((tmp->getAbsoluteUpperBound() < upper_bound) || (tmp->getAbsoluteLowerBound() > lower_bound)))
-					tmp->Hide();
+				{
+					if(tmp->isClipped)
+					{
+						if((tmp->getAbsoluteLowerBound() > upper_bound + 5) && (tmp->getAbsoluteUpperBound() + 5< lower_bound))
+						{
+							tmp->Show();
+							tmp->clipRect = Rect(tmp->getAbsoluteLeftBound(), upper_bound+5, tmp->getWidth(), lower_bound - upper_bound-10);
+						} else 
+						{
+							tmp->Hide();
+							tmp->clipRect = Rect();
+						}
+					}	
+					else
+						tmp->Hide();
+				}
 				else tmp->Show();
 			}
 			tmp = tmp->getNextBrother();
@@ -124,16 +97,17 @@ void UI_ScrollBar::reloadStrings()
 	UI_Object::reloadStrings();
 }
 
-
+// TODO: Klarer gliedern zwischen virtueller Hoehe und realer Hoehe!
 void UI_ScrollBar::process() // process messages, continue animation etc.
 {
+
 	if(!isShown())
 		return;
 
 	
-	totalHeight = lastItemY - firstItemY + clientHeight; //???
+	totalHeight = lastItemY - firstItemY + clientHeight; //? :-/
 
-// totalHeight wird 0...
+// totalHeight wird 0... ?
 
 	unsigned int oldBarHeight = barHeight;
 
@@ -194,22 +168,22 @@ void UI_ScrollBar::draw(DC* dc) const
 		return;
 	if(checkForNeedRedraw())
 	{
-		dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
+		dc->setBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
 		if(Rect(getParent()->getAbsolutePosition() + Point(getWidth(), startY+5) - Size(14, 0), Size(12, getHeight()+12)).Inside(mouse))
-			dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+			dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 		else
-			dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
+			dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));
 			
 		dc->DrawRectangle(Rect(getParent()->getAbsolutePosition() + Size(getParent()->getWidth()-13, startY+5), Size(10, clientHeight)));
-		dc->SetBrush(*theme.lookUpBrush(CONTINUE_BUTTON_BRUSH));
+		dc->setBrush(*theme.lookUpBrush(CONTINUE_BUTTON_BRUSH));
 		dc->DrawRectangle(Rect(getParent()->getAbsolutePosition() + Point(getParent()->getWidth()-12, startY+currentScrollY+5), Size(8, barHeight)));
 	}
 	UI_Object::draw(dc);
 		
 	/*Point p = Point(100, 300);
-	dc->SetTextForeground(DC::toSDL_Color(255, 20, 20));
-	dc->SetFont(UI_Object::theme.lookUpFont(LARGE_BOLD_FONT));
-	dc->SetBrush(Brush(Color(dc->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
+	dc->setTextForeground(DC::toSDL_Color(255, 20, 20));
+	dc->setFont(UI_Object::theme.lookUpFont(LARGE_BOLD_FONT));
+	dc->setBrush(Brush(Color(dc->getSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
 	dc->DrawRectangle(Rect(p, Size(200, 20)));
 
 	std::ostringstream os;

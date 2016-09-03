@@ -47,8 +47,8 @@ BUILDORDER& BUILDORDER::operator=(const BUILDORDER& object)
 #include <sstream>
 const unsigned int BUILDORDER::calculateSecondaryFitness() const
 {
-	unsigned int bonus[MAX_LOCATIONS][UNIT_TYPE_COUNT];
-	memset(bonus, 0, MAX_LOCATIONS * UNIT_TYPE_COUNT * sizeof(int));
+	unsigned int bonus[MAX_LOCATIONS][LAST_UNIT];
+	memset(bonus, 0, MAX_LOCATIONS * LAST_UNIT * sizeof(int));
 	
 	//TODO: evtl gas und minerals (wie urspruenglich eigentlich) in Verhaeltnis setyen wieviel es jeweils Geysire/Mineralien gibt...	
 	unsigned int penalty = 0;
@@ -57,7 +57,7 @@ const unsigned int BUILDORDER::calculateSecondaryFitness() const
 			bonus[i->getLocation()][i->getUnit()] += i->getCount();
 
 	for(unsigned int j = MAX_LOCATIONS; j--;)
-		for(unsigned int i = UNIT_TYPE_COUNT; i--;)
+		for(unsigned int i = LAST_UNIT; i--;)
 			if(bonus[j][i]>0)
 			{
 				unsigned int total = bonus[j][i];
@@ -66,31 +66,13 @@ const unsigned int BUILDORDER::calculateSecondaryFitness() const
 				if(getLocationTotal(j, i) > total)
 					penalty += (getLocationTotal(GLOBAL,i) - total) * (stats[getGoal()->getRace()][i].gas + stats[getGoal()->getRace()][i].minerals);
 			}
-	// TODO
-/*#if _SCC_DEBUG
+#ifdef _SCC_DEBUG
 	if(getHarvestedMinerals() + getHarvestedGas() < penalty)
 	{
-		std::ostringstream os; os.str("");
-		for(unsigned int i=GAS_SCV+1; i--;)
-		{
-			unsigned int total = getGoal()->getAllGoal(i);
-			if(total > 0)
-			{
-				if((*(pStart->getStartCondition()))->getLocationTotal(GLOBAL, i) > total)
-					total = (*(pStart->getStartCondition()))->getLocationTotal(GLOBAL, i);					
-				if(total < getLocationTotal(GLOBAL, i))
-				{
-					os.str("");
-					os << "Unit: " << i << ", " << (getLocationTotal(GLOBAL,i) - total) * (stats[getGoal()->getRace()][i].gas+stats[getGoal()->getRace()][i].minerals);
-					toLog(os.str());
-				}
-			}
-		}
-		os.str("");
-		os << "Penalty/Ressources: " << penalty << " / " << getHarvestedMinerals() + getHarvestedGas() << " workers: " << getLocationTotal(GLOBAL, 1);
-		toLog(os.str());
+		toErrorLog("WARNING (BUILDORDER::calculateSecondaryFitness()): Penalty out of range.");
+		return(0);
 	}
-#endif*/
+#endif
 	return(getHarvestedMinerals() + getHarvestedGas() - penalty);
 }
 
@@ -132,8 +114,14 @@ const bool BUILDORDER::calculateStep()
 		if((code >= BUILD_PARALLEL_2) && (code <= BUILD_PARALLEL_16))
 		{
 			setIP(getIP()-1);
-			while((getGoal()->toPhaeno(getCurrentCode()) > GAS_SCV)&&(getIP()))
+			while((getGoal()->toPhaeno(getCurrentCode()) >= LAST_UNIT)&&(getIP()))
+			{
+#ifdef _SCC_DEBUG
+				toErrorLog("WARNING (BUILDORDER::calculateStep()): Current code out of range => ignoring order.");
+#endif
+				
 				setIP(getIP()-1);
+			}
 			PARALLEL_COMMAND* pcommand = new PARALLEL_COMMAND;
 			switch(code)
 			{
@@ -203,6 +191,7 @@ const bool BUILDORDER::calculateStep()
 	setTimer(getTimer()-t);
 //  ------ END LEAP FORWARD IN TIME ------
 	
+	unsigned int remaining_waitstates = 0;
 	bool foundAnother=true;
 	while((!buildingQueue.empty())&&(foundAnother==true))
 	{
@@ -210,8 +199,14 @@ const bool BUILDORDER::calculateStep()
 		{
 			foundAnother=true;
 			const Building& build(buildingQueue.top());
+			if(build.getType() == INTRON)
+			{
+				buildingQueue.pop();
+				continue;
+			}
+			
 			const UNIT_STATISTICS* stat=&(*pStats)[build.getType()];
-
+				
 // ------ ACTUAL BUILDING ------
 			adjustLocationUnitsAfterCompletion(build.getLocation(), stat->facilityType, build.getFacility(), stat->facility2, build.getUnitCount());
 // increase haveSupply AFTER the building is completed (needSupply is increased BEFORE it's started!)
@@ -430,7 +425,7 @@ const bool BUILDORDER::buildIt(const unsigned int build_unit)
 {
 	//Zuerst: availible pruefen ob am Ort gebaut werden kann
 	//Wenn nicht => +/- absteigen bis alle locations durch sind
-
+	
 	const UNIT_STATISTICS* stat = &((*pStats)[build_unit]);
 	bool ok = false;
 	unsigned int picked_facility = 0;
@@ -439,11 +434,16 @@ const bool BUILDORDER::buildIt(const unsigned int build_unit)
 //	unsigned int j=0;
 
 /*	if(lastcounter>0)
-	{	
+	{
 		--lastcounter;
 		tloc=last[lastcounter].location;
 	}*/
 
+	if((!buildingQueue.empty())&&(buildingQueue.top().getType() == INTRON))
+		return(false);
+	// = = = > INTRON? Ignoriere alle folgenden Befehle
+	// Larva? Larva ermoeglichen, aber gleichzeitig noch ein INTRON einfuegen TODO
+	
 	if(stat->facility[0]==0)
 		ok=true;
 	else
@@ -467,7 +467,7 @@ const bool BUILDORDER::buildIt(const unsigned int build_unit)
 					ok=true;
 					break;
 				}
-		}						
+		}
 	}
 				
 //				j=1;
@@ -539,7 +539,6 @@ const bool BUILDORDER::buildIt(const unsigned int build_unit)
 //		setNeedSupply(getNeedSupply()-stat->needSupply); //? Beschreibung!
 		adjustAvailibility(current_location_window, picked_facility, stat);
 		buildingQueue.push(build);
-	
 
 // ---- SPECIAL RULES -----		
 		if(getGoal()->getRace()==ZERG)
@@ -551,6 +550,31 @@ const bool BUILDORDER::buildIt(const unsigned int build_unit)
 				buildIt(LARVA);
 		}
 // ----- END SPECIAL RULES -----
+
+		
+		if(build.getType() == INTRON)
+		{
+			std::list<Building> b_list;
+			// fuege ein 'erinnerungsintron' vor jeden Befehl der frueher fertig wird (und somit dem INTRON die Spitzenposition streitig machen wuerde) TODO
+			while((!buildingQueue.empty())&&(buildingQueue.top().getBuildFinishedTime() > build.getBuildFinishedTime()))
+			{
+				b_list.push_back(buildingQueue.top());
+				buildingQueue.pop();
+				
+			}
+			std::list<Building>::iterator i = b_list.begin();
+			while(i!=b_list.end())
+			{
+				build.setBuildFinishedTime(i->getBuildFinishedTime());
+				build.setTotalBuildTime(getTimer() - i->getBuildFinishedTime());
+				buildingQueue.push(build);
+				buildingQueue.push(*i);
+				++i;
+			}		
+		}
+		
+		
+
 	
 	} //end if(ok)
 	

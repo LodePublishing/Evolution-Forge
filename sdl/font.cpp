@@ -14,7 +14,7 @@ Font::Font(const std::string& fname, const unsigned int font_size, const bool is
 { 
 #ifdef _SCC_DEBUG
 	if(font == NULL)
-		toLog("ERROR (Font::Font()): Could not initialize font " + fname + " [TTF ERROR: \"" + TTF_GetError() + "\"].");
+		toErrorLog("ERROR (Font::Font()): Could not initialize font " + fname + " [TTF ERROR: \"" + TTF_GetError() + "\"].");
 #endif
 }
 
@@ -52,7 +52,7 @@ Font::~Font()
 	}
 }
 
-const Size Font::GetTextExtent(const std::string& font_text) const
+const Size Font::getTextExtent(const std::string& font_text) const
 {
 	int width;// = 0;
 	int height;// = 0;

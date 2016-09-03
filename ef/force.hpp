@@ -14,7 +14,6 @@
 #include "../core/anabuildorder.hpp"
 #include "../core/database.hpp"
 #include "../ui/radio.hpp"
-#include "../ui/checkbutton.hpp"
 #include "savebox.hpp"
 
 
@@ -47,10 +46,19 @@ class ForceWindow : public UI_Window
 		static TechTreeWindow* techTreeWindow;
 
 		void resetData();
+
+		void needSaveBox();
+		void saveBoxIsCanceled();
+		void saveBoxIsDone(std::string& input_string);
+
+		const bool saveGoal();
+		const bool openGoalMenu();
+		const bool openUnitMenu();
 	private:
 		unsigned int currentGoalUnit; // which goal is currently highlighted?
 		unsigned int startLine;
-	
+
+		
 		void closeMenus();
 
 		UI_Radio* menuRadio;
@@ -69,21 +77,25 @@ class ForceWindow : public UI_Window
 
 		UnitMenu* unitMenu;
 		GoalMenu* goalMenu;
-		SaveBox* saveBox;
 //		RaceMenu* raceMenu;
 //		LocationMenu* locationMenu;
 		unsigned int gameNumber;
 		unsigned int gameMax;
 		unsigned int playerNumber;
 		unsigned int playerMax;
+		bool saveBox;
 
+		void mouseHasLeft();
+		
+		bool goalMenuOpenedExternally;
+		bool unitMenuOpenedExternally;
 };
 
 inline void ForceWindow::setMarkedUnit(const unsigned int marked_unit)
 {
 #ifdef _SCC_DEBUG
-	if(marked_unit >= UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (ForceWindow::setMarkedUnit): Value marked_unit out of range.");return;
+	if(marked_unit >= LAST_UNIT) {
+		toErrorLog("DEBUG: (ForceWindow::setMarkedUnit): Value marked_unit out of range.");return;
 	}
 #endif
 	markedUnit = marked_unit;
@@ -92,8 +104,8 @@ inline void ForceWindow::setMarkedUnit(const unsigned int marked_unit)
 inline const unsigned int ForceWindow::getMarkedUnit() const
 {
 #ifdef _SCC_DEBUG
-	if(markedUnit >= UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (ForceWindow::getMarkedUnit): Value markedUnit out of range.");return(0);
+	if(markedUnit >= LAST_UNIT) {
+		toErrorLog("DEBUG: (ForceWindow::getMarkedUnit): Value markedUnit out of range.");return(0);
 	}
 #endif
 	return (markedUnit);

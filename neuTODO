@@ -8,3 +8,17 @@ Playerentry ueberarbeiten (erwartete Zeit)
 
 
 
+
+Beim Speichern:
+1. Goal suchen das dem aktuellen entspricht (siehe boMenu)
+-> gefunden? Namen uebernehmen
+-> nicht gefunden? Namen aus teuerster Einheit generieren (alternativ: spaetest gebauter Einheit...)
+2. Existiert Datei bereits?
+-> Nummerieren
+
+Ausserdem saveDialog etwas schoener machen! OK
+
+bei bowindow und bodiagram:
+Kurzdarstellung (5x mutalisk) ermoeglichen OK
+
+CheckButton!... ~

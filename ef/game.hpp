@@ -6,7 +6,8 @@
 #include "../core/anabuildorder.hpp"
 #include "../core/soup.hpp"
 #include "score.hpp"
-#include "../core/configuration.hpp"
+#include "configuration.hpp"
+
 
 class Game : public UI_Window
 {
@@ -23,16 +24,15 @@ class Game : public UI_Window
 
 		const bool isOptimizing(const unsigned int player_number) const;
 		const bool isAnyOptimizing() const;
+		void stopOptimizing();
+		void startLastOptimizing();
 
 		void newGeneration();
 	
-		const unsigned int getUnchangedGenerations() const;	// gets number of generations where no change in fitness took place
-		const unsigned int getRun() const;					// gets number of runs (one run is complete when no <unchangedGenerations> > <maxGenerations>)
-		const unsigned int getTotalGeneration() const;			// gets number of total generations of this run
-	
-		void setUnchangedGenerations(const unsigned int unchanged_generations); 
-		void setRun(const unsigned int current_run);
-		void setTotalGeneration(const unsigned int total_generations);
+//		const unsigned int getUnchangedGenerations() const;	// gets number of generations where no change in fitness took place
+//		const unsigned int getTotalGeneration() const;			// gets number of total generations of this run
+//		void setUnchangedGenerations(const unsigned int unchanged_generations); 
+//		void setTotalGeneration(const unsigned int total_generations);
 
 		void assignMap(const BASIC_MAP* game_map);
 		void assignRace(const unsigned int player_num, const eRace race);
@@ -42,6 +42,7 @@ class Game : public UI_Window
 		void initSoup();
 		void initSoup(unsigned int player_number);
 		void assignStartCondition(const unsigned int player_num, const START_CONDITION* start_condition);
+		void loadBuildOrder(const unsigned int player_num, const unsigned int number, const GOAL_ENTRY* player_goal);
 		void setStartPosition(const unsigned int player_num, const unsigned int player_position);
 		void assignGoal(const unsigned int player_num, const GOAL_ENTRY* player_goal);
 		void fillGroups(); // TODO
@@ -58,7 +59,12 @@ class Game : public UI_Window
 
 		const bool getResetFlag();
 		void setResetFlag(const bool flag=true);
-	
+
+		void compactDisplayModeHasChanged();
+		const bool needSaveBox(SaveBoxParameter& savebox_parameter, int* caller_canceled, int* caller_done);
+
+		const bool openMenu(const ePlayerOrder order);
+		void setPlayerInitMode(const unsigned int player_number, const eInitMode init_mode);
 	private:
 		bool resetFlag;
 		SOUP* soup;
@@ -80,32 +86,26 @@ class Game : public UI_Window
 
 		unsigned int unchangedGenerations;
  		unsigned int currentRun;
-		unsigned int totalGeneration;		
+//		unsigned int totalGenerations;
 
 		unsigned int gameNumber;
 		unsigned int gameMax;
-		UI_Button* splitGameButton;
-		UI_Button* removeButton; // remove Game
+
+		bool lastOptimizing[MAX_PLAYER];
+
+//		UI_Group* buttonGroup;
+//		UI_Button* splitGameButton;
+//		UI_Button* removeButton; // remove Game
 };
 
-inline const unsigned int Game::getUnchangedGenerations() const
+/*inline const unsigned int Game::getUnchangedGenerations() const
 {
 #ifdef _SCC_DEBUG	
-	if(unchangedGenerations > coreConfiguration.getMaxGenerations()) {
-		toLog("DEBUG: (Game::getUnchangedGenerations): Variable unchangedGenerations not initialized.");return(0);
+	if(unchangedGenerations > efConfiguration.getMaxGenerations()) {
+		toErrorLog("DEBUG: (Game::getUnchangedGenerations): Variable unchangedGenerations not initialized.");return(0);
 	}
 #endif
 	return(unchangedGenerations);
-}
-
-inline const unsigned int Game::getRun() const
-{
-#ifdef _SCC_DEBUG	
-	if(currentRun > coreConfiguration.getMaxRuns()) {
-		toLog("DEBUG: (Game::getRun): Variable currentRun not initialized.");return(0);
-	}
-#endif
-	return(currentRun);
 }
 
 inline const unsigned int Game::getTotalGeneration() const
@@ -116,31 +116,21 @@ inline const unsigned int Game::getTotalGeneration() const
 inline void Game::setUnchangedGenerations(const unsigned int unchanged_generations)
 {
 #ifdef _SCC_DEBUG	
-	if(unchanged_generations > coreConfiguration.getMaxGenerations()) {
-		toLog("DEBUG: (Game::setUnchangedGenerations): Value out of range.");return;
+	if(unchanged_generations > efConfiguration.getMaxGenerations()) {
+		toErrorLog("DEBUG: (Game::setUnchangedGenerations): Value out of range.");return;
 	}
 #endif
 	unchangedGenerations = unchanged_generations;
 }
 
-inline void Game::setRun(const unsigned int current_run)
-{
-#ifdef _SCC_DEBUG
-	if(current_run > coreConfiguration.getMaxRuns()) {
-		toLog("DEBUG: (Game::setRun): Value out of range.");return;
-	}
-#endif
-	currentRun = current_run;
-}
-
 inline void Game::setTotalGeneration(const unsigned int total_generation) {
 	totalGeneration = total_generation;
-}
+}*/
 
 inline void Game::setHarvestSpeed(const unsigned int player_num, const eRace harvest_race, const HARVEST_SPEED* harvest_speed) {
 #ifdef _SCC_DEBUG
         if((player_num < 1) || (player_num > mapPlayerCount)) {
-                toLog("DEBUG: (Game::setHarvestSpeed): Value player_num out of range.");return;
+                toErrorLog("DEBUG: (Game::setHarvestSpeed): Value player_num out of range.");return;
         }
 #endif
 	start[player_num]->setHarvestSpeed(harvest_race, harvest_speed);
@@ -149,7 +139,7 @@ inline void Game::setHarvestSpeed(const unsigned int player_num, const eRace har
 inline void Game::setStartRace(const unsigned int player_num, const eRace player_race) {
 #ifdef _SCC_DEBUG
 	if((player_num < 1) || (player_num > mapPlayerCount)) {
-		toLog("DEBUG: (Game::setStartRace): Value player_num out of range.");return;
+		toErrorLog("DEBUG: (Game::setStartRace): Value player_num out of range.");return;
 	}
 #endif
 	start[player_num]->setPlayerRace(player_race);
@@ -158,7 +148,7 @@ inline void Game::setStartRace(const unsigned int player_num, const eRace player
 inline void Game::setStartPosition(const unsigned int player_num, const unsigned int player_position) {
 #ifdef _SCC_DEBUG
         if((player_num < 1) || (player_num > mapPlayerCount)) {
-                toLog("DEBUG: (Game::setStartPosition): Value player_num out of range.");return;
+                toErrorLog("DEBUG: (Game::setStartPosition): Value player_num out of range.");return;
         }
 #endif
 	start[player_num]->setStartPosition(player_position);
@@ -167,18 +157,18 @@ inline void Game::setStartPosition(const unsigned int player_num, const unsigned
 inline void Game::assignGoal(const unsigned int player_num, const GOAL_ENTRY* player_goal) {
 #ifdef _SCC_DEBUG
         if((player_num < 1) || (player_num > mapPlayerCount)) {
-                toLog("DEBUG: (Game::assignGoal): Value player_num out of range.");return;
+                toErrorLog("DEBUG: (Game::assignGoal): Value player_num out of range.");return;
         }       
 #endif
 	start[player_num]->assignGoal(player_goal);
 }
 
 inline const bool Game::isRemoveGame() const {
-	return removeButton->isLeftClicked();
+	return false;//removeButton->isLeftClicked();
 }
 
 inline const bool Game::isSplitGame() const {
-	return splitGameButton->isLeftClicked();
+	return false;//splitGameButton->isLeftClicked();
 }
 
 inline const unsigned int Game::getMapPlayerCount() const {

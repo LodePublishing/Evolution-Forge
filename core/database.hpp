@@ -71,7 +71,7 @@ inline const BASIC_MAP* DATABASE::getMap(const unsigned int map_number) const
 {
 #ifdef _SCC_DEBUG
 	if(map_number>loadedMap.size()) {
-		toLog("WARNING: (DATABASE::getMap): Value out of range.");return(0);
+		toErrorLog("WARNING: (DATABASE::getMap): Value out of range.");return(0);
 	}
 #endif
 	return(loadedMap[map_number]);
@@ -94,7 +94,7 @@ inline const GOAL_ENTRY* DATABASE::getGoal(const eRace race, const unsigned int 
 {
 #ifdef _SCC_DEBUG
 	if(goal>=loadedGoal[race].size()) {
-		toLog("WARNING: (DATABASE::getGoal): Value out of range.");return(NULL);
+		toErrorLog("WARNING: (DATABASE::getGoal): Value out of range.");return(NULL);
 	}
 #endif
 	return(loadedGoal[race][goal]);
@@ -104,7 +104,7 @@ inline const START_CONDITION* DATABASE::getStartCondition(const eRace race, cons
 {
 #ifdef _SCC_DEBUG
 	if(start_condition_number >= loadedStartCondition[race].size()) {
-		toLog("WARNING: (DATABASE::getStartCondition): Value out of range.");return(NULL);
+		toErrorLog("WARNING: (DATABASE::getStartCondition): Value out of range.");return(NULL);
 	}
 #endif
 	return(loadedStartCondition[race][start_condition_number]);
@@ -114,7 +114,7 @@ inline const HARVEST_SPEED* DATABASE::getHarvestSpeed(const eRace race, const un
 {
 #ifdef _SCC_DEBUG
 	if(harvest_number >= loadedHarvestSpeed[race].size()) {
-		toLog("WARNING: (DATABASE::getHarvestSpeed): Value out of range.");return(NULL);
+		toErrorLog("WARNING: (DATABASE::getHarvestSpeed): Value out of range.");return(NULL);
 	}
 #endif
 	return(loadedHarvestSpeed[race][harvest_number]);

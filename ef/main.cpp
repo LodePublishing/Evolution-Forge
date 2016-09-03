@@ -22,9 +22,33 @@ ExitInfo::~ExitInfo()
 {
 	if(!smoothExit)
 	{
-		toLog("If you need help with the error message please post it on www.clawsoftware.de in the forums or contact me at ghoul@clawsoftware.de");
+		toInitLog("If you need help with the error message please post it on www.clawsoftware.de in the forums or contact me at ghoul@clawsoftware.de");
 	} else
-		toLog("Exiting ...");
+		toInitLog("Exiting ...");
+}
+
+const bool init_sound()
+{
+	// TODO start a 'watchdog' thread (FMOD waits indefinitely if the sound is currently used!)
+	unsigned int version;
+	
+        if(!UI_Theme::ERRCHECK(FMOD::System_Create(&UI_Object::theme.sound))) 
+		return(false);
+	if(!UI_Theme::ERRCHECK(UI_Object::theme.sound->getVersion(&version))) 
+		return(false);
+
+	if (version < FMOD_VERSION)
+        {
+		std::ostringstream os;
+		os << "Error!  You are using an old version of FMOD " << version << ". This program requires " << FMOD_VERSION << ".";
+		toErrorLog(os.str());
+	       	return(false);
+	}
+	if(!UI_Theme::ERRCHECK(UI_Object::theme.sound->init(32, FMOD_INIT_NONREALTIME, 0)))
+		return(false);
+
+	UI_Object::theme.printSoundInformation();
+	return(true);
 }
 
 
@@ -40,19 +64,19 @@ int main(int argc, char *argv[])
 		current_driver = getenv("SDL_VIDEODRIVER");
 
 // ------ LOAD CONFIGURATION FILES ------
-	toLog("Initializing language files...");
+	toInitLog("Initializing language files...");
 	std::list<std::string> stringFiles = findFiles("settings", "strings", "");
 	for(std::list<std::string>::iterator j = stringFiles.begin(); j!=stringFiles.end(); ++j)
 		UI_Object::theme.loadStringFile(*j);
 	
-	toLog(UI_Object::theme.lookUpString(START_LOAD_CONFIGURATION_STRING));
+	toInitLog(UI_Object::theme.lookUpString(START_LOAD_CONFIGURATION_STRING));
 	uiConfiguration.loadConfigurationFile();
 	if(!UI_Object::theme.setLanguage(uiConfiguration.getLanguage()))
 	{
-		toLog("Trying default language english... ");
+		toErrorLog("Could not load language, trying default language english... ");
 		if(!UI_Object::theme.setLanguage(ENGLISH_LANGUAGE))
 		{
-			toLog("ERROR (main()): Cannot set any language, please reinstall language files (in 'settings/strings/') or the whole program.");
+			toErrorLog("ERROR (main()): Cannot set any language, please reinstall language files (in 'settings/strings/') or the whole program.");
 			return(EXIT_FAILURE);
 		}
 	}
@@ -65,50 +89,81 @@ int main(int argc, char *argv[])
 // ------ END LOAD CONFIGURATION FILES -------
 
 // ------ PARSING COMMAND LINE ------
-	toLog(UI_Object::theme.lookUpString(START_PARSE_COMMAND_LINE_STRING));
+	toInitLog("You can set some parameters of the sound and graphic engine with the command line:");
+	toInitLog("-vo <driver> sets the video driver, see below for a list of availible video drivers");
+	toInitLog("-nosound deactivates sound and music");
+	toInitLog("-640, -800, -1024, -1280 sets the video resolution");
+	toInitLog("-8bit, -16bit, -24bit, -32bit sets the bit depth");
+	toInitLog("-fs, -window sets the program to fullscreen or to window mode");
+	toInitLog(UI_Object::theme.lookUpString(START_PARSE_COMMAND_LINE_STRING));
 	if(!arguments.empty())
 		for(std::list<std::string>::const_iterator i = arguments.begin();i!=arguments.end(); ++i)
 		{
-			toLog(*i);
 			if((*i) == "-vo")
 			{
 				++i;
 				if(i==arguments.end())
-					toLog(UI_Object::theme.lookUpString(START_WARNING_VO_ARGUMENT_STRING));
+					toErrorLog(UI_Object::theme.lookUpString(START_WARNING_VO_ARGUMENT_STRING));
 				else current_driver = *i;
-				break;
+			} else 
+			if((*i) == "-nosound")
+			{
+				uiConfiguration.setSound(false);
+				uiConfiguration.setMusic(false);
+				toInitLog("Parameter -nosound causes the sound engine to be deactivated, To activate sound in the program go to the 'settings'.");
+			} else if((*i) == "-640")
+			{
+				uiConfiguration.setResolution(RESOLUTION_640x480);
+			} else if((*i) == "-800")
+			{
+				uiConfiguration.setResolution(RESOLUTION_800x600);
+			} else if((*i) == "-1024")
+			{
+				uiConfiguration.setResolution(RESOLUTION_1024x768);
+			} else if((*i) == "-1280")
+			{
+				uiConfiguration.setResolution(RESOLUTION_1280x1024);
+			} else if((*i) == "-8bit")
+			{
+				uiConfiguration.setBitDepth(DEPTH_8BIT);
+			} else if((*i) == "-16bit")
+			{
+				uiConfiguration.setBitDepth(DEPTH_16BIT);
+			} else if((*i) == "-24bit")
+			{
+				uiConfiguration.setBitDepth(DEPTH_24BIT);
+			} else if((*i) == "-32bit")
+			{
+				uiConfiguration.setBitDepth(DEPTH_32BIT);
+			} else if((*i) == "-fs")
+			{
+				efConfiguration.setFullScreen(true);
+			} else if((*i) == "-window")
+			{
+				efConfiguration.setFullScreen(false);
 			}
 		}
 // ------ END PARSING COMMAND LINE ------
-
+	bool sound_not_initialized = true;
 // ------ INIT SOUND ENGINE -------
-	toLog(UI_Object::theme.lookUpString(START_INIT_SOUND_STRING)); 
-	
-	unsigned int version;
-	std::list<FMOD::Channel*> channel;
-	
-        if(!UI_Theme::ERRCHECK(FMOD::System_Create(&UI_Object::theme.sound))) 
-		return(EXIT_FAILURE);
-	if(!UI_Theme::ERRCHECK(UI_Object::theme.sound->getVersion(&version))) 
-		return(EXIT_FAILURE);
-
-	if (version < FMOD_VERSION)
-        {
-		std::ostringstream os;
-		os << "Error!  You are using an old version of FMOD " << version << ". This program requires " << FMOD_VERSION << ".";
-		toLog(os.str());
-	        return(EXIT_FAILURE);
+	std::list<FMOD::Channel*> sound_channel;
+	FMOD::Channel* music_channel;
+	eSound current_music = MAX_SOUNDS;
+	if((uiConfiguration.isSound())||(uiConfiguration.isMusic()))
+	{
+		toInitLog(UI_Object::theme.lookUpString(START_INIT_SOUND_STRING)); 
+		if(!init_sound())
+		{
+			uiConfiguration.setSound(false);
+			uiConfiguration.setMusic(false);
+		} else
+			sound_not_initialized = false;
 	}
-	if(!UI_Theme::ERRCHECK(UI_Object::theme.sound->init(32, FMOD_INIT_NONREALTIME, 0)))
-		return(EXIT_FAILURE);
-
-	UI_Object::theme.printSoundInformation();
-
 // ------ END INIT SOUND ENGINE -------
 
 	
 // ------ INIT SDL AND WINDOW ------
-	toLog(UI_Object::theme.lookUpString(START_INIT_SDL_STRING));
+	toInitLog(UI_Object::theme.lookUpString(START_INIT_SDL_STRING));
 	
 	{
 		std::ostringstream os;
@@ -116,15 +171,15 @@ int main(int argc, char *argv[])
 		std::list<std::string> s = DC::getAvailibleDrivers();
 		for(std::list<std::string>::const_iterator i = s.begin(); i!=s.end(); i++)
 			os << *i << " ";
-		toLog("* Availible graphic drivers: " + os.str());
+		toInitLog("* Availible graphic drivers: " + os.str());
 	}
 
 	
 	switch(DC::chooseDriver(current_driver))
 	{
-		case NO_DRIVER_ERROR:toLog("* " + UI_Object::theme.lookUpFormattedString(START_SDL_USING_DRIVER_STRING, current_driver));break;
-		case NO_VIDEO_DRIVERS_AVAILIBLE:toLog("* " + UI_Object::theme.lookUpString(START_ERROR_NO_DRIVER_AVAILIBLE_STRING));return(EXIT_FAILURE);break;
-		case SDL_DRIVER_NOT_SUPPORTED:toLog("* " + UI_Object::theme.lookUpFormattedString(START_ERROR_DRIVER_NOT_SUPPORTED_STRING, current_driver));return(EXIT_FAILURE);break;
+		case NO_DRIVER_ERROR:toInitLog("* " + UI_Object::theme.lookUpFormattedString(START_SDL_USING_DRIVER_STRING, current_driver));break;
+		case NO_VIDEO_DRIVERS_AVAILIBLE:toErrorLog("* " + UI_Object::theme.lookUpString(START_ERROR_NO_DRIVER_AVAILIBLE_STRING));return(EXIT_FAILURE);break;
+		case SDL_DRIVER_NOT_SUPPORTED:toErrorLog("* " + UI_Object::theme.lookUpFormattedString(START_ERROR_DRIVER_NOT_SUPPORTED_STRING, current_driver));return(EXIT_FAILURE);break;
 	}
 
 
@@ -132,38 +187,39 @@ int main(int argc, char *argv[])
 	UI_Object::setResolution(UI_Object::theme.getResolutionSize());
 	UI_Object::theme.setBitDepth(uiConfiguration.getBitDepth());
 	
-	toLog("* " + UI_Object::theme.lookUpString(efConfiguration.isFullScreen()?START_SET_FULLSCREEN_MODE_STRING:START_SET_WINDOW_MODE_STRING));
+	toInitLog("* " + UI_Object::theme.lookUpString(efConfiguration.isFullScreen()?START_SET_FULLSCREEN_MODE_STRING:START_SET_WINDOW_MODE_STRING));
 	
-	DC* screen = new DC(UI_Object::theme.getResolutionSize(), UI_Object::theme.getBitDepth(), (efConfiguration.isFullScreen()?SDL_FULLSCREEN:0)|SDL_HWSURFACE|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC|SDL_DOUBLEBUF, SDL_INIT_NOPARACHUTE | SDL_INIT_VIDEO | SDL_INIT_AUDIO); // TODO ueber Flag setzen ob Audio initialisiert werden soll
+	DC* screen = new DC(UI_Object::theme.getResolutionSize(), UI_Object::theme.getBitDepth(), (efConfiguration.isFullScreen()?SDL_FULLSCREEN:0)|SDL_HWSURFACE|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|/*SDL_SRCALPHA|*/SDL_PREALLOC|SDL_DOUBLEBUF, SDL_INIT_NOPARACHUTE | SDL_INIT_VIDEO/* | SDL_INIT_AUDIO*/); // TODO ueber Flag setzen ob Audio initialisiert werden soll
 
 
 		
 	if(!screen->initializationOK())	{
-		toLog(UI_Object::theme.lookUpString(START_UNABLE_TO_INIT_SDL_STRING) + " [SDL ERROR: \"" + SDL_GetError() + "\"]");
+		toErrorLog(UI_Object::theme.lookUpString(START_UNABLE_TO_INIT_SDL_STRING) + " [SDL ERROR: \"" + SDL_GetError() + "\"]");
 		delete screen;
 		return(EXIT_FAILURE);
 	}
 	
 	if ( !screen->valid() ) {
-		toLog(UI_Object::theme.lookUpString(START_ERROR_SETTING_VIDEO_MODE_STRING) + " [SDL ERROR: \"" + SDL_GetError() + "\"]");
+		toErrorLog(UI_Object::theme.lookUpString(START_ERROR_SETTING_VIDEO_MODE_STRING) + " [SDL ERROR: \"" + SDL_GetError() + "\"]");
 		delete screen;
 		return(EXIT_FAILURE);
 	}
-	
 
-	SDL_WM_SetCaption("EVOLUTION FORGE BETA v1.70 - www.clawsoftware.de","");
+	{
+		std::ostringstream os;
+		os << "EVOLUTION FORGE " << CORE_VERSION << " - www.clawsoftware.de";
+		SDL_WM_SetCaption(os.str().c_str(),"");
+	}
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 	SDL_ShowCursor(SDL_DISABLE);
-	toLog(DC::printHardwareInformation());
-	toLog("* " + UI_Object::theme.lookUpString(START_CREATED_SURFACE_STRING) + " " + DC::printSurfaceInformation(screen));
-
-//	SDL_SetCursor(UI_Object::theme.lookUpCursor(HAND_CURSOR, 0));
+	toInitLog(DC::printHardwareInformation());
+	toInitLog("* " + UI_Object::theme.lookUpString(START_CREATED_SURFACE_STRING) + " " + DC::printSurfaceInformation(screen));
 // ------ END INIT SDL AND WINDOW ------
 
 // ------ INIT SDL_TTF ------
-	toLog("* " + UI_Object::theme.lookUpString(START_INIT_SDL_TRUETYPE_FONTS_STRING));
+	toInitLog("* " + UI_Object::theme.lookUpString(START_INIT_SDL_TRUETYPE_FONTS_STRING));
 	if(TTF_Init()==-1) {
-		toLog(std::string("TTF_Init: ") + " [TTF ERROR: \"" + TTF_GetError() + "\"]");
+		toErrorLog(std::string("TTF_Init: ") + " [TTF ERROR: \"" + TTF_GetError() + "\"]");
 		delete screen;
 		return(EXIT_FAILURE);
 	}
@@ -172,7 +228,7 @@ int main(int argc, char *argv[])
 
 	
 // ------- INIT GRAPHIC ENGINE ------
-	toLog(UI_Object::theme.lookUpString(START_INIT_GRAPHIC_ENGINE_CORE_STRING));
+	toInitLog(UI_Object::theme.lookUpString(START_INIT_GRAPHIC_ENGINE_CORE_STRING));
 	Main m;
 	if((!m.initGUI(screen))||(!m.initCore()))
 	{
@@ -180,7 +236,7 @@ int main(int argc, char *argv[])
 		return(EXIT_FAILURE);
 	}
 
-	toLog(UI_Object::theme.lookUpString(START_MAIN_INIT_COMPLETE_STRING));	
+	toInitLog(UI_Object::theme.lookUpString(START_MAIN_INIT_COMPLETE_STRING));	
 	m.initializeGame(0);
 
 	unsigned int screenshot = 100;
@@ -190,25 +246,13 @@ int main(int argc, char *argv[])
 //		m.stopAllOptimizing(); TODO
 
 	unsigned int screenCapturing=0;
+	SDL_SetCursor(UI_Object::theme.lookUpCursor(ARROW_CURSOR, 0));
 
-
+//	toLog(SDL_SetGamma(1.2, 1.5, 1.5)); TODO?
 // ------ END INIT GRAPHIC ENGINE ------
 
-
-
-// ------ INTRO PICTURE ------
-//	SDL_Surface* progress = SDL_LoadBMP("data/bitmaps/bar.bmp");
-//	Bitmap claw("data/bitmaps/clawsoftware.bmp");
-//	screen->DrawBitmap(progress, (UI_Object::max_x - progress->w)/2, (UI_Object::max_y - progress->h)/2-60);
-//	screen->DrawBitmap(claw, UI_Object::max_x - claw->w, UI_Object::max_y - claw->h);
-//	screen->SetPen(Pen(Color(screen->GetSurface(), 255, 255, 255), 1, SOLID_PEN_STYLE));
-//	screen->SetBrush(Brush(Color(screen->GetSurface(), 100, 150, 255), SOLID_BRUSH_STYLE));
-// ------ END INTRO PICTURE -------
-
-
-
 // ------ CAP FRAMERATE ------
-	toLog(UI_Object::theme.lookUpString(START_INIT_FRAMERATE_STRING)); 
+	toInitLog(UI_Object::theme.lookUpString(START_INIT_FRAMERATE_STRING)); 
 	unsigned int original_desired_cpu = efConfiguration.getDesiredCPU();
 	unsigned int original_desired_framerate = efConfiguration.getDesiredFramerate();
 	efConfiguration.setDesiredCPU(99);
@@ -216,10 +260,9 @@ int main(int argc, char *argv[])
 	FPS_SYSTEM* fps = new FPS_SYSTEM();
 // ------ END CAP FRAMERATE
 	
-	toLog(UI_Object::theme.lookUpString(START_SYSTEM_READY_STRING));
-	UI_Theme::ERRCHECK(UI_Object::theme.lookUpSound(LALA_SOUND)->setLoopCount(-1));
+	toInitLog(UI_Object::theme.lookUpString(START_SYSTEM_READY_STRING));
 	
-
+//				- Introwindow mit languageauswahl (bzw. schwarzer Bildschirm mit raceMenu :o )
 	
 // MAIN LOOP
 	bool done = false;
@@ -247,7 +290,7 @@ int main(int argc, char *argv[])
 					done = true;
 					break;
 				case SDL_MOUSEBUTTONDOWN:
-					if(picture_num==INTRO_ANIMATION_FRAMES-1) picture_num = 9999;
+					if(picture_num!=INTRO_ANIMATION_FRAMES) picture_num = 9999;
 					if(event.button.button == SDL_BUTTON_LEFT)
 						m.leftDown();
 					else if(event.button.button == SDL_BUTTON_RIGHT)
@@ -270,24 +313,59 @@ int main(int argc, char *argv[])
 				case SDL_MOUSEMOTION:
 					m.setMouse(Point(event.motion.x, event.motion.y));break;
 				case SDL_KEYDOWN:
-					if(picture_num==INTRO_ANIMATION_FRAMES-1) picture_num = 9999;
+					if(picture_num!=INTRO_ANIMATION_FRAMES) 
+					{
+						while (SDL_PollEvent(&event));
+						picture_num = 9999;
+					} else
 					if((UI_Object::focus==NULL)||(!UI_Object::focus->addKey(event.key.keysym.sym, event.key.keysym.mod)))
 					switch(event.key.keysym.sym)
 					{
+						case SDLK_r: m.openMenu(OPEN_RACE_MENU);break;
+						case SDLK_n: if(event.key.keysym.mod & KMOD_CTRL)
+								     m.openMenu(RESTART_CALCULATION);break;
+						case SDLK_b: if(event.key.keysym.mod & KMOD_CTRL)
+								     m.openMenu(SAVE_BUILD_ORDER);
+							     m.openMenu(OPEN_BO_MENU);break;
+						case SDLK_g: if(event.key.keysym.mod & KMOD_CTRL)
+								     m.openMenu(SAVE_GOAL);
+							     else
+								     m.openMenu(OPEN_GOAL_MENU);break;
+						case SDLK_u: m.openMenu(OPEN_UNIT_MENU);break;
+//						case SDLK_a: m.openMenu(ADD_PLAYER);break;
+						case SDLK_e: m.openMenu(EDIT_FORCE_LIST);break;
+						case SDLK_F1:
+						case SDLK_F2:
+						case SDLK_F3:
+						case SDLK_F4:
+						case SDLK_F5:m.mainWindow->activateTabNumber(event.key.keysym.sym - SDLK_F1);break;
+							     
+						case SDLK_F6:m.mainWindow->activateTab(DATABASE_TAB);break;
+						case SDLK_F7:m.mainWindow->activateTab(SETTINGS_TAB);break;
+						case SDLK_F8:m.mainWindow->activateTab(HELP_TAB);break;
+
+
+						case SDLK_HOME:m.wheelToTop();break;
+						case SDLK_END:m.wheelToBottom();break;
+							  
+						case SDLK_PAGEUP:m.wheelUp();m.wheelUp();m.wheelUp();break;
+						case SDLK_PAGEDOWN:m.wheelDown();m.wheelDown();m.wheelDown();break;
+						case SDLK_UP:m.wheelUp();break;
+						case SDLK_DOWN:m.wheelDown();break;
+						case SDLK_LEFT:if(!(event.key.keysym.mod & (KMOD_LALT | KMOD_RALT | KMOD_ALT)))
+								       break;
+						case SDLK_BACKSPACE:m.goBack();break;							
 						case SDLK_TAB:
-							//UI_Object::theme.sound->playSound(FMOD_CHANNEL_FREE, UI_Object::theme.lookUpSound(MOUSEOVER_SOUND), 0, &channel[1]);
 							//UI_Object::rotateEditField();
 							break;
 						case SDLK_KP_ENTER:
 						case SDLK_RETURN:
 							if(event.key.keysym.mod & (KMOD_LALT | KMOD_RALT | KMOD_ALT))
-							{
-//								screen->setFullscreen(!efConfiguration.isFullScreen());
-//								efConfiguration.setFullScreen(!efConfiguration.isFullScreen());
 								m.noticeFullscreen();
-//								toLog(UI_Object::theme.lookUpString(efConfiguration.isFullScreen()?START_SET_FULLSCREEN_MODE_STRING:START_SET_WINDOW_MODE_STRING));
-							}
 						break;
+						case SDLK_q: 
+							if(event.key.keysym.mod & KMOD_CTRL)
+								done = true;break;
 						case SDLK_ESCAPE:
 							if(UI_Object::focus!=NULL)
 								UI_Object::focus=NULL;
@@ -295,80 +373,68 @@ int main(int argc, char *argv[])
 								done = true;
 							break;
 						case SDLK_PAUSE:
-						{
-//							if(m.isOptimizing())
-//								m.stopAllOptimizing();
-//							else m.startAllOptimizing();
-						}break;
+								if(m.isAnyOptimizing())
+									m.stopAllOptimizing();break;
+
 						case SDLK_SPACE:
-								screenCapturing=100;
-//								if(m.isOptimizing())
-//									m.stopAllOptimizing();
-//								else m.startAllOptimizing();
+								if(m.isAnyOptimizing())
+									m.stopAllOptimizing();
+								else m.startLastOptimizing();
 							break;
 //						case SDLK_PRINT:break;
 						case SDLK_EQUALS:
 								if(UI_Object::theme.getResolution()<RESOLUTION_1280x1024)
 								{
-									if(ignore_rest) 
-										break;
 									UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() + 1));
 									screen->setResolution(UI_Object::theme.getResolutionSize());
 									UI_Object::setResolution(UI_Object::theme.getResolutionSize());
 									uiConfiguration.setResolution(UI_Object::theme.getResolution());
 									std::ostringstream os;os.str("");
  									os << UI_Object::max_x << "x" << UI_Object::max_y;
-									toLog(UI_Object::theme.lookUpFormattedString(CHANGED_RESOLUTION_STRING, os.str()));
+									toInitLog(UI_Object::theme.lookUpFormattedString(CHANGED_RESOLUTION_STRING, os.str()));
 									m.reloadOriginalSize();
-									ignore_rest=true;
+									while (SDL_PollEvent(&event));
 								}
 								break;
 						case SDLK_MINUS:
 								if(UI_Object::theme.getResolution()>RESOLUTION_640x480)
 								{
-									if(ignore_rest) 
-										break;
 									UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() - 1));
 									screen->setResolution(UI_Object::theme.getResolutionSize());
 									UI_Object::setResolution(UI_Object::theme.getResolutionSize());
 									uiConfiguration.setResolution(UI_Object::theme.getResolution());
 									std::ostringstream os;os.str("");
  									os << UI_Object::max_x << "x" << UI_Object::max_y;
-									toLog(UI_Object::theme.lookUpFormattedString(CHANGED_RESOLUTION_STRING, os.str()));
+									toInitLog(UI_Object::theme.lookUpFormattedString(CHANGED_RESOLUTION_STRING, os.str()));
 									m.reloadOriginalSize();
-									ignore_rest=true;
+									while (SDL_PollEvent(&event));
 								}
 								break;
 						case SDLK_LEFTBRACKET:
 								if(screen->getBitDepth() > DEPTH_8BIT)
 								{
-									if(ignore_rest) break;
 									UI_Object::theme.setBitDepth((eBitDepth)(screen->getBitDepth()-1));
 									screen->setBitDepth(UI_Object::theme.getBitDepth());
 									uiConfiguration.setBitDepth(UI_Object::theme.getBitDepth());
-									UI_Object::theme.updateColors(screen->GetSurface());
-									// TODO bitDepth im theme aendern!
-									toLog(UI_Object::theme.lookUpFormattedString(CHANGED_BIT_DEPTH_STRING, (unsigned int)screen->GetSurface()->format->BitsPerPixel));
-									ignore_rest=true;
+									UI_Object::theme.updateColors(screen->getSurface());
+									// TODO bitDepth im theme aendern! ?
+									toInitLog(UI_Object::theme.lookUpFormattedString(CHANGED_BIT_DEPTH_STRING, (unsigned int)screen->getSurface()->format->BitsPerPixel));
+									while (SDL_PollEvent(&event));
 								}
 								break;
 						case SDLK_RIGHTBRACKET:
 								if(screen->getBitDepth() < DEPTH_32BIT)
 								{
-									if(ignore_rest) break;
 									UI_Object::theme.setBitDepth((eBitDepth)(screen->getBitDepth()+1));
 									screen->setBitDepth(UI_Object::theme.getBitDepth());
 									uiConfiguration.setBitDepth(UI_Object::theme.getBitDepth());
-									UI_Object::theme.updateColors(screen->GetSurface());
-									toLog(UI_Object::theme.lookUpFormattedString(CHANGED_BIT_DEPTH_STRING, (unsigned int)screen->GetSurface()->format->BitsPerPixel));
+									UI_Object::theme.updateColors(screen->getSurface());
+									toInitLog(UI_Object::theme.lookUpFormattedString(CHANGED_BIT_DEPTH_STRING, (unsigned int)screen->getSurface()->format->BitsPerPixel));
 									ignore_rest=true;
-									
+									while (SDL_PollEvent(&event));
 								}
 								break;
 							
-//						case SDLK_F6:m.mainWindow->forcePressTab(MAP_TAB);break;
-//						case SDLK_F7:m.mainWindow->forcePressTab(SETTINGS_TAB);break;
-//						case SDLK_F8:m.mainWindow->forcePressTab(HELP_TAB);break;
 						default:break;
 					}
 					break;
@@ -384,8 +450,8 @@ int main(int argc, char *argv[])
 		if(m.hasBitDepthChanged())
 		{
 			screen->setBitDepth(UI_Object::theme.getBitDepth());
-			UI_Object::theme.updateColors(screen->GetSurface());
-			toLog(UI_Object::theme.lookUpFormattedString(CHANGED_BIT_DEPTH_STRING, (unsigned int)screen->GetSurface()->format->BitsPerPixel));
+			UI_Object::theme.updateColors(screen->getSurface());
+			toInitLog(UI_Object::theme.lookUpFormattedString(CHANGED_BIT_DEPTH_STRING, (unsigned int)screen->getSurface()->format->BitsPerPixel));
 			m.needRedraw();
 			UI_Object::resetWindow();
 			
@@ -396,14 +462,14 @@ int main(int argc, char *argv[])
 			UI_Object::setResolution(UI_Object::theme.getResolutionSize());
 			std::ostringstream os;os.str("");
  			os << UI_Object::max_x << "x" << UI_Object::max_y;
-			toLog(UI_Object::theme.lookUpFormattedString(CHANGED_RESOLUTION_STRING, os.str()));
+			toInitLog(UI_Object::theme.lookUpFormattedString(CHANGED_RESOLUTION_STRING, os.str()));
 			m.reloadOriginalSize();
 			UI_Object::resetWindow();
 		}
 		if(m.hasFullScreenChanged())
 		{
 			screen->setFullscreen(efConfiguration.isFullScreen());
-			toLog(UI_Object::theme.lookUpString(efConfiguration.isFullScreen()?START_SET_FULLSCREEN_MODE_STRING:START_SET_WINDOW_MODE_STRING));
+			toInitLog(UI_Object::theme.lookUpString(efConfiguration.isFullScreen()?START_SET_FULLSCREEN_MODE_STRING:START_SET_WINDOW_MODE_STRING));
 		}
 		if(m.hasThemeChanged())
 		{
@@ -414,48 +480,75 @@ int main(int argc, char *argv[])
 
 		fps->poll(PROCESS_TICKS);
 
-		float vol;
-		channel.front()->getVolume(&vol);
-		if(!uiConfiguration.isMusic())
+// ------ SOUND ENGINE -------
+		if(((uiConfiguration.isSound())||(uiConfiguration.isMusic()))&&(sound_not_initialized))
 		{
-			if(vol < 0.1)
-				channel.front()->setVolume(0.0);
-			else
-				channel.front()->setVolume(vol - 0.1);
-		} else
-		{
-			if(uiConfiguration.getMusicVolume() > vol*100)
-				channel.front()->setVolume(vol+0.01);
-			else
-			if(uiConfiguration.getMusicVolume() < vol*100)
-				channel.front()->setVolume(vol-0.01);
-		}
-
-		for(std::list<FMOD::Channel*>::iterator i = channel.begin(); i!=channel.end(); i++)
-		{
-			bool isplaying = false;
-			(*i)->isPlaying(&isplaying);
-			if(!isplaying)
-				i = channel.erase(i);
-		}
-
-		for(std::list<std::pair<FMOD::Sound*,float> >::iterator i = UI_Object::theme.soundsToPlay.begin(); i != UI_Object::theme.soundsToPlay.end(); )
-		{
-			if((uiConfiguration.isSound()) && (channel.size() < uiConfiguration.getChannels()))
+			toInitLog(UI_Object::theme.lookUpString(START_INIT_SOUND_STRING)); 
+			if(!init_sound())
 			{
-				FMOD::Channel* mychannel = NULL;
-				UI_Object::theme.sound->playSound(FMOD_CHANNEL_FREE, i->first, 0, &mychannel);
-				mychannel->setPan(i->second);
-				mychannel->setVolume((float)(uiConfiguration.getSoundVolume())/100.0);
-				channel.push_back(mychannel);
+				uiConfiguration.setSound(false);
+				uiConfiguration.setMusic(false);
+			} else
+			{
+				sound_not_initialized = false;
+				if(uiConfiguration.isMusic())
+					current_music = LALA_SOUND;
+
+//				- NO_FACILITY checken... evtl orders darueber pruefen...
+				
 			}
-			i = UI_Object::theme.soundsToPlay.erase(i);
+		} else 
+		if((!uiConfiguration.isSound())&&(!uiConfiguration.isMusic())&&(!sound_not_initialized))
+		{
+			UI_Object::theme.releaseSoundEngine();
+			sound_not_initialized = true;
+		} else
+			
+		if(!sound_not_initialized)
+		{
+			if(uiConfiguration.isMusic())
+			{
+				float vol;
+				music_channel->getVolume(&vol);
+				if(uiConfiguration.getMusicVolume() > vol*100)
+					music_channel->setVolume(vol+0.01);
+				else
+				if(uiConfiguration.getMusicVolume() < vol*100)
+					music_channel->setVolume(vol-0.01);
+				bool is_playing = false;
+				music_channel->isPlaying(&is_playing);
+				if((!is_playing)&&(current_music!=MAX_SOUNDS))
+					UI_Object::theme.sound->playSound(FMOD_CHANNEL_FREE, UI_Object::theme.lookUpSound(current_music), 0, &music_channel);
+			} else
+				music_channel->stop();
+
+			if(uiConfiguration.isSound())
+			{
+				for(std::list<FMOD::Channel*>::iterator i = sound_channel.begin(); i!=sound_channel.end(); i++)
+				{
+					bool is_playing = false;
+					(*i)->isPlaying(&is_playing);
+					if(!is_playing)
+						i = sound_channel.erase(i);
+				}
+
+				for(std::list<std::pair<FMOD::Sound*,float> >::iterator i = UI_Object::theme.soundsToPlay.begin(); i != UI_Object::theme.soundsToPlay.end(); ++i)
+					if((sound_channel.size() < uiConfiguration.getChannels()))
+					{
+						FMOD::Channel* mychannel = NULL;
+						UI_Object::theme.sound->playSound(FMOD_CHANNEL_FREE, i->first, 0, &mychannel);
+						mychannel->setPan(i->second);
+						mychannel->setVolume((float)(uiConfiguration.getSoundVolume())/100.0);
+						sound_channel.push_back(mychannel);
+					}
+			} else
+				sound_channel.clear();
+			UI_Object::theme.sound->update();
 		}
-
-		UI_Object::theme.sound->update();
-
+		UI_Object::theme.soundsToPlay.clear();
 		fps->poll(SOUND_TICKS);
 
+// ------ END SOUND ENGINE -------
 
 
 // ------ DRAWING AND PROCESSING ------
@@ -464,8 +557,8 @@ int main(int argc, char *argv[])
 		{
 			m.draw(screen);
 			if(uiConfiguration.isUnloadGraphics())
-				UI_Object::theme.unloadGraphicsAndSounds();
-		}
+				UI_Object::theme.unloadGraphics();
+		} else
 
 		if((picture_num>=990)&&(picture_num<=1100))
 		{
@@ -478,16 +571,16 @@ int main(int argc, char *argv[])
 			if(picture_num==1010)
 			{
 				UI_Object::theme.playSound(INTRO_SOUND, UI_Object::max_x/2);
-				screen->SetTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
-				screen->SetFont(UI_Object::theme.lookUpFont(SMALL_SHADOW_BOLD_FONT));
+				screen->setTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
+				screen->setFont(UI_Object::theme.lookUpFont(SMALL_SHADOW_BOLD_FONT));
 				screen->DrawText("Brought to you by...", UI_Object::max_x/2 - picture->w/3, p.y - 15);
 				DC::addRectangle(Rect(UI_Object::max_x/2 - picture->w/3, p.y - 20, picture->w, 20));
 			}
 			
-//			screen->SetBrush(*UI_Object::theme.lookUpBrush(TRANSPARENT_BRUSH));
-//			screen->SetPen(*UI_Object::theme.lookUpPen(INNER_BORDER_PEN));
+//			screen->setBrush(*UI_Object::theme.lookUpBrush(TRANSPARENT_BRUSH));
+//			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_PEN));
 //			screen->DrawEdgedRoundedRectangle(Rect(p - Size(5,5), s + Size(10,10)), 4);
-//			screen->SetPen(*UI_Object::theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+//			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 //			screen->DrawEdgedRoundedRectangle(Rect(p - Size(3,3), s + Size(6,6)), 4);
 			screen->DrawBitmap(picture, p);
 			DC::addRectangle(Rect(p - Size(5,5), s + Size(10, 10)));
@@ -505,13 +598,21 @@ int main(int argc, char *argv[])
 			if(picture_num==1)
 				UI_Object::theme.playSound(RING_SOUND, p.x + picture->w/2);
 			
-			screen->SetBrush(*UI_Object::theme.lookUpBrush(TRANSPARENT_BRUSH));
-			screen->SetPen(*UI_Object::theme.lookUpPen(INNER_BORDER_PEN));
+			screen->setBrush(*UI_Object::theme.lookUpBrush(TRANSPARENT_BRUSH));
+			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_PEN));
 			screen->DrawEdgedRoundedRectangle(Rect(p - Size(5,5), s + Size(10,10)), 4);
-			screen->SetPen(*UI_Object::theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 			screen->DrawEdgedRoundedRectangle(Rect(p - Size(3,3), s + Size(6,6)), 4);
 			screen->DrawBitmap(picture, p);
-			DC::addRectangle(Rect(p - Size(5,5), s + Size(10,10)));
+			if(picture_num == 1)
+			{
+				screen->setTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
+				screen->setFont(UI_Object::theme.lookUpFont(SMALL_SHADOW_BOLD_FONT));
+				screen->DrawText("ClawGUI", p.x + 5, p.y + 10 + picture->h);
+				screen->DrawText("http://www.clawsoftware.de/", p.x + 5, p.y + 20 + picture->h);
+			}
+			
+			DC::addRectangle(Rect(p - Size(5,5), s + Size(75,40)));
 			picture_num++;
 			SDL_FreeSurface(picture);
 		}  else if(picture_num<=32)
@@ -526,16 +627,25 @@ int main(int argc, char *argv[])
 			if(picture_num==17)
 				UI_Object::theme.playSound(RING_SOUND, p.x + picture->w/2);
 
-			screen->SetBrush(*UI_Object::theme.lookUpBrush(TRANSPARENT_BRUSH));
-			screen->SetPen(*UI_Object::theme.lookUpPen(INNER_BORDER_PEN));
+			screen->setBrush(*UI_Object::theme.lookUpBrush(TRANSPARENT_BRUSH));
+			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_PEN));
 			screen->DrawEdgedRoundedRectangle(Rect(p - Size(5,5), s + Size(10,10)), 4);
-			screen->SetPen(*UI_Object::theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 			screen->DrawEdgedRoundedRectangle(Rect(p - Size(3,3), s + Size(6,6)), 4);
 			screen->DrawBitmap(picture, p);
-			DC::addRectangle(Rect(p - Size(5,5), s + Size(10,10)));
+
+			if(picture_num == 17)
+			{
+				screen->setTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
+				screen->setFont(UI_Object::theme.lookUpFont(SMALL_SHADOW_BOLD_FONT));
+				screen->DrawText("Simple Directmedia Library", p.x + 5, p.y + 10 + picture->h);
+				screen->DrawText("http://libsdl.org/", p.x + 5, p.y + 20 + picture->h);
+			}
+			
+			DC::addRectangle(Rect(p - Size(5,5), s + Size(75,40)));
 			picture_num++;
 
-			SDL_FreeSurface(picture);		
+			SDL_FreeSurface(picture);
 		} else if(picture_num<=48)
 		{
 			std::ostringstream os; os.str("");
@@ -547,13 +657,20 @@ int main(int argc, char *argv[])
 			
 			if(picture_num==33)
 				UI_Object::theme.playSound(RING_SOUND, p.x + picture->w/2);
-			screen->SetBrush(*UI_Object::theme.lookUpBrush(TRANSPARENT_BRUSH));
-			screen->SetPen(*UI_Object::theme.lookUpPen(INNER_BORDER_PEN));
+			screen->setBrush(*UI_Object::theme.lookUpBrush(TRANSPARENT_BRUSH));
+			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_PEN));
 			screen->DrawEdgedRoundedRectangle(Rect(p - Size(5,5), s + Size(10,10)), 4);
-			screen->SetPen(*UI_Object::theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 			screen->DrawEdgedRoundedRectangle(Rect(p - Size(3,3), s + Size(6,6)), 4);
 			screen->DrawBitmap(picture, p);
-			DC::addRectangle(Rect(p - Size(5,5), s + Size(10,10)));
+			if(picture_num == 33)
+			{
+				screen->setTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
+				screen->setFont(UI_Object::theme.lookUpFont(SMALL_FONT));
+				screen->DrawText("FMOD Sound System http://www.fmod.org", p.x, p.y+10+picture->h);
+				screen->DrawText("(C) Firelight Technologies Pty, Ltd., 1994-2005", p.x, p.y+20+picture->h);
+			}
+			DC::addRectangle(Rect(p - Size(10,5), s + Size(80,40)));
 			picture_num++;
 
 			SDL_FreeSurface(picture);				
@@ -563,20 +680,20 @@ int main(int argc, char *argv[])
 			picture_num++;
 //			if(picture_num == (INTRO_ANIMATION_FRAMES-1))
 //				picture_num = 9999; // ~
-		}
+		} else
 			
 		if(picture_num == 9999)
 		{
 			picture_num = INTRO_ANIMATION_FRAMES;
-			UI_Object::theme.playSound(LALA_SOUND, UI_Object::max_x/2);
+			current_music = LALA_SOUND;
 			efConfiguration.setDesiredCPU(original_desired_cpu);
 			efConfiguration.setDesiredFramerate(original_desired_framerate);
 			std::ostringstream os;
 			os << efConfiguration.getDesiredFramerate();
-			toLog("* Setting desired framerate to " + os.str());
+			toInitLog("* setting desired framerate to " + os.str());
 			os.str("");	
 			os << efConfiguration.getDesiredCPU();
-			toLog("* Setting desired CPU usage to " + os.str() + "%");
+			toInitLog("* setting desired CPU usage to " + os.str() + "%");
 			SDL_ShowCursor(SDL_ENABLE);
 		}
 
@@ -587,18 +704,18 @@ int main(int argc, char *argv[])
 // 
 // ------ FPS DEBUG 
 
-		if(efConfiguration.isShowDebug())
+		if((efConfiguration.isShowDebug())&&(picture_num==INTRO_ANIMATION_FRAMES)&&(!m.isIntro()))
 			fps->draw(screen);
 // ------ END FPS DEBUG
 // ------ SCREENCAPTURE ------ 
 /*                if(screenCapturing==100) {
 			std::ostringstream os;os.str("");os << "shot" << screenshot << ".bmp";
-                        SDL_SaveBMP(screen->GetSurface() , os.str().c_str());
+                        SDL_SaveBMP(screen->getSurface() , os.str().c_str());
 			++screenshot;
 		}
 		if(screenCapturing>0) {
 			--screenCapturing;
-			std::ostringstream os;os.str("");os << "shot" << (screenshot-1) << ".bmp" << " saved (" << (UI_Object::max_x * UI_Object::max_y * (int)(screen->GetSurface()->format->BitsPerPixel))/1024 << "kb)";
+			std::ostringstream os;os.str("");os << "shot" << (screenshot-1) << ".bmp" << " saved (" << (UI_Object::max_x * UI_Object::max_y * (int)(screen->getSurface()->format->BitsPerPixel))/1024 << "kb)";
                         screen->DrawText(os.str(), 50, 300);
                 }*/
 // ------ END SCREENCAPTURE -----
@@ -623,7 +740,7 @@ int main(int argc, char *argv[])
 		
 	}
 	delete fps;
-	toLog("* Closing SDL...");
+	toInitLog("* Closing SDL...");
 	delete screen;
 	exitInfo.smoothExit = true;
 	return(EXIT_SUCCESS);

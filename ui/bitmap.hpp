@@ -8,7 +8,7 @@ class UI_Bitmap : public UI_Object
 	public:
 // TODO Beschreibung der Konstruktoren
 		UI_Bitmap(UI_Object* bitmap_parent, 
-				const Rect bitmap_rect, 
+				const Rect& bitmap_rect, 
 				const Size distance_bottom_right, 
 				const eBitmap my_bitmap, 
 				const ePositionMode bitmap_position_mode = DO_NOT_ADJUST);

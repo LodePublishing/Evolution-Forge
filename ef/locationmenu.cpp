@@ -1,19 +1,7 @@
 #include "locationmenu.hpp"
 
-LocationMenu::LocationMenu(const LocationMenu& object) :
-	UI_Menu((UI_Menu)object),
-	locationList(object.locationList)
-{ }
-
-LocationMenu& LocationMenu::operator=(const LocationMenu& object)
-{
-	((UI_Menu)(*this)) = ((UI_Menu)object);
-	locationList = object.locationList;
-	return(*this);
-}
-
 LocationMenu::LocationMenu(UI_Object* location_parent, const BASIC_MAP* location_map, const Rect& location_rect):
-	UI_Menu(location_parent, location_rect, Size(0,0), DO_NOT_ADJUST, true),
+	UI_Menu(location_parent, location_rect, Size(0,0), DO_NOT_ADJUST, true, TWO_COLOUMNS_MENU, SMALL_BUTTON_WIDTH),
 	locationList()
 {
 	assignMap(location_map);
@@ -21,7 +9,7 @@ LocationMenu::LocationMenu(UI_Object* location_parent, const BASIC_MAP* location
 }
 
 LocationMenu::LocationMenu(UI_Object* location_parent, const std::list<std::string>& location_list, const Rect& location_rect):
-	UI_Menu(location_parent, location_rect, Size(0,0), DO_NOT_ADJUST, true),
+	UI_Menu(location_parent, location_rect, Size(0,0), DO_NOT_ADJUST, true, TWO_COLOUMNS_MENU, SMALL_BUTTON_WIDTH),
 	locationList(location_list)
 {
 	resetData();
@@ -30,7 +18,6 @@ LocationMenu::LocationMenu(UI_Object* location_parent, const std::list<std::stri
 void LocationMenu::resetData()
 {
 	std::list<std::string>::iterator i = locationList.begin();
-	height=1;
 	for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 	{
 		if(i == locationList.end())
@@ -42,19 +29,15 @@ void LocationMenu::resetData()
 		(*m)->Show();
 		(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_6_BUTTON));
 		(*m)->updateText(*i);
-		Rect edge = Rect(Point(10, height * (FONT_SIZE + 9)), Size(0,0));
-		(*m)->adjustRelativeRect(edge);
-		++height;
 		++i;
     	}
 	for(;i!=locationList.end();++i)
 	{
-		UI_MenuEntry* entry = new UI_MenuEntry(this, Rect(Point(10, height * (FONT_SIZE + 9)), Size(160, FONT_SIZE)), *i);
+		UI_MenuEntry* entry = new UI_MenuEntry(this, Rect(), *i);
 		entry->setButtonColorsType(eButtonColorsType(UNIT_TYPE_6_BUTTON));
 		menuEntries.push_back(entry);
-		++height;
 	}
-	height+=2;
+	reloadOriginalSize();
 }
 
 
@@ -63,9 +46,7 @@ LocationMenu::~LocationMenu()
 
 void LocationMenu::reloadOriginalSize()
 {
-	updateItemSizes(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH));
-	UI_Object::reloadOriginalSize();
-	updateItemPositions(TWO_COLOUMNS_MENU);
+	UI_Menu::reloadOriginalSize();
 }
 
 void LocationMenu::assignMap(const std::list<std::string>& location_list)

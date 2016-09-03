@@ -30,10 +30,10 @@ class BUILD_ORDER
 		BO_HEADER boHeader;
 		GOAL_ENTRY goal;
 		std::list<PROGRAM> programList;
+		BUILD_ORDER& operator=(const BUILD_ORDER& object);
+		BUILD_ORDER(const BUILD_ORDER& object);
 	public:
 		BUILD_ORDER(const BO_HEADER& bo_header, const GOAL_ENTRY& bo_goal, std::list<PROGRAM>& bo_program);
-		BUILD_ORDER(const BUILD_ORDER& object);
-		BUILD_ORDER& operator=(const BUILD_ORDER& object);
 		~BUILD_ORDER();
 
 		const std::string& getName() const;

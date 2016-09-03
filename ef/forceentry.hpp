@@ -16,9 +16,7 @@ class ForceEntry : public UI_Button
 	public:
 		ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std::string& entry_unit);
 		~ForceEntry();
-		ForceEntry(const ForceEntry& object);
-		ForceEntry& operator=(const ForceEntry& object);
-		
+	
 		void process();
 		void draw(DC* dc) const;
 
@@ -53,14 +51,18 @@ class ForceEntry : public UI_Button
 
 		static bool doCompleteSound;
 
-	private:
+		static ForceEntry* currentForceEntry;
 		void setTime(const unsigned int time);
+	private:
 		
 		static UI_Button* makeTimeGoalButton;
 		static UI_NumberField* timeEntryBox;
-		static ForceEntry* currentForceEntry;
 
         	unsigned int oldGoalCount;
+
+		unsigned int oldGoalTime;
+		unsigned int oldGoalFinalTime;
+
 		unsigned int startForce;
 		unsigned int targetForce;
 		unsigned int currentForce;
@@ -71,11 +73,9 @@ class ForceEntry : public UI_Button
 		eUnitType type;
 		GOAL* goal;
 //		bool showLocMenu;
+		ForceEntry(const ForceEntry& object);
+		ForceEntry& operator=(const ForceEntry& object);
 };
-
-inline void ForceEntry::setTime(const unsigned int time) {
-	goal->setTime(time);
-}
 
 inline const unsigned int ForceEntry::getTime() const {
 	return(goal->getTime());

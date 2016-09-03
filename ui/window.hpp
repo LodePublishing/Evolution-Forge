@@ -4,12 +4,6 @@
 #include "radio.hpp"
 #include "scrollbar.hpp"
 
-enum eIsTabbed
-{
-	NOT_TABBED,
-	TABBED
-};
-
 enum eIsAutoAdjust
 {
 	NO_AUTO_SIZE_ADJUST,
@@ -23,22 +17,18 @@ enum eIsTransparent
 };
 
 
-enum eTabs
+struct SaveBoxParameter
 {
-	HELP_TAB=27,
-	SETTINGS_TAB,
-	MAP_TAB,
-	DATABASE_TAB,	
-	MAX_TABS
+	eString saveboxText, descriptionText, okString, cancelString;
+	std::string inputProposal;
 };
+
 
 class UI_Window : public UI_Object
 {
 	public:
-		UI_Window& operator=(const UI_Window& object);
-		UI_Window(const UI_Window& object);
 
-		UI_Window(UI_Object* window_parent, const eString window_title_string, const Rect rect, const unsigned int max_height, const eIsScrolled window_is_scrolled=NOT_SCROLLED, const eIsAutoAdjust win_is_auto_adjust=NO_AUTO_SIZE_ADJUST, const eIsTabbed win_is_tabbed=NOT_TABBED, const Rect win_client_area=Rect(0,0,1280,1024), eIsTransparent transparent = NOT_TRANSPARENT);
+		UI_Window(UI_Object* window_parent, const eString window_title_string, const Rect rect, const unsigned int max_height, const eIsScrolled window_is_scrolled=NOT_SCROLLED, const eIsAutoAdjust win_is_auto_adjust=NO_AUTO_SIZE_ADJUST, const Rect win_client_area=Rect(0,0,1280,1024), eIsTransparent transparent = NOT_TRANSPARENT);
 		~UI_Window();
 
 // returns position and size of the client area
@@ -60,8 +50,6 @@ class UI_Window : public UI_Object
 		const unsigned int getClientTargetHeight() const;
 		const unsigned int getClientTargetWidth() const;
 		
-		void addTab(UI_Button* tab_button, const unsigned int button_id);
-		void removeTab(const unsigned int button_id);
 
 		void process();
 
@@ -81,8 +69,6 @@ class UI_Window : public UI_Object
 
 		void setTitleParameter(const std::string& p);
 
-		const signed int getCurrentTab() const;
-		void forcePressTab(const unsigned int press_tab);
 
 		static unsigned int rectnumber;
 		const bool fitItemToRelativeClientRect(const Rect& rectangle, const unsigned int adjust = 0);
@@ -101,15 +87,19 @@ class UI_Window : public UI_Object
 		void reloadOriginalSize();
 		static signed int gotoHelpChapter;
 		void addHelpButton(eHelpChapter help_chapter);
+
+		static bool needSaveBox;
+		static bool saveBoxCanceled;
+		static bool saveBoxDone;
+		static std::string saveBoxString;
+		static SaveBoxParameter saveBoxParameter;
 	protected:
-		UI_Radio* tabRow;
 	private:
 	// do windows size changes smoothly		
 		void adjustClientRect();
 		unsigned int filledHeight;
 
 		bool doAdjustments;
-		UI_Button* tab[MAX_TABS];
 
 		eIsTransparent isTransparent;
 
@@ -128,16 +118,13 @@ class UI_Window : public UI_Object
 		unsigned int maxHeight;
 
 		void calculateClientRect();
-		void drawTabs(DC* dc) const;
 		void drawTitle(DC* dc) const;
 		void drawToolTip(DC* dc, const Point p, const std::string* tip) const;
 
 		eIsAutoAdjust isAutoAdjust;
 // has this window a ScrollBar?
 		eIsScrolled isScrollable;
-// has this window tab buttons at the top?
-		eIsTabbed isTabbed;
-	
+
 		bool highlighted;
 
 		static bool changedFlag; 
@@ -146,6 +133,9 @@ class UI_Window : public UI_Object
 		UI_ScrollBar* scrollBar;
 		UI_Button* helpButton;
 		eHelpChapter helpChapter;
+	
+		UI_Window& operator=(const UI_Window& object);
+		UI_Window(const UI_Window& object);
 };
 
 inline const unsigned int UI_Window::getMaxHeight() const {
@@ -161,15 +151,15 @@ inline const Rect& UI_Window::getRelativeClientRect() const {
 }
 
 inline const Point UI_Window::getRelativeClientRectPosition() const {
-	return(clientRect.GetTopLeft());
+	return(clientRect.getTopLeft());
 }
 
 inline const Point UI_Window::getAbsoluteClientRectPosition() const {
-	return(clientRect.GetTopLeft()+getAbsolutePosition());
+	return(clientRect.getTopLeft()+getAbsolutePosition());
 }
 
 inline const Size& UI_Window::getClientRectSize() const {
-	return(clientRect.GetSize());
+	return(clientRect.getSize());
 }
 
 inline const Rect UI_Window::getAbsoluteClientRect() const {
@@ -177,27 +167,27 @@ inline const Rect UI_Window::getAbsoluteClientRect() const {
 }
 
 inline const unsigned int UI_Window::getClientRectHeight() const {
-	return(clientRect.GetHeight());
+	return(clientRect.getHeight());
 }
 
 inline const unsigned int UI_Window::getClientRectWidth() const {
-	return(clientRect.GetWidth());
+	return(clientRect.getWidth());
 }
 
 inline const signed int UI_Window::getRelativeClientRectUpperBound() const {
-	return(clientRect.GetTop());
+	return(clientRect.getTop());
 }
 
 inline const signed int UI_Window::getRelativeClientRectLeftBound() const {
-	return(clientRect.GetLeft());
+	return(clientRect.getLeft());
 }
 
 inline const signed int UI_Window::getRelativeClientRectLowerBound() const {
-	return(clientRect.GetBottom());
+	return(clientRect.getBottom());
 }
 
 inline const signed int UI_Window::getRelativeClientRectRightBound() const {
-	return(clientRect.GetRight());
+	return(clientRect.getRight());
 }
 
 inline const signed int UI_Window::getAbsoluteClientRectUpperBound() const {
@@ -217,11 +207,11 @@ inline const signed int UI_Window::getAbsoluteClientRectRightBound() const {
 }
 
 inline const unsigned int UI_Window::getClientTargetWidth() const {
-	return(clientTargetRect.GetWidth());
+	return(clientTargetRect.getWidth());
 }
 
 inline const unsigned int UI_Window::getClientTargetHeight() const {
-	return(clientTargetRect.GetHeight());
+	return(clientTargetRect.getHeight());
 }
 
 inline void UI_Window::setChangedFlag(const bool flag) {

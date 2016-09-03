@@ -1,12 +1,12 @@
 #ifndef _GUI_PLAYER_HPP
 #define _GUI_PLAYER_HPP
 
-//#include "statistics.hpp"
 #include "score.hpp"
 #include "bgwindow.hpp"
 #include "force.hpp"
 #include "bodiagram.hpp"
 #include "bowindow.hpp"
+
 
 
 class Player : public UI_Object
@@ -33,6 +33,11 @@ class Player : public UI_Object
 		const bool wasResetted() const;
 
 		void recheckSomeDataAfterChange();
+
+		void compactDisplayModeHasChanged();
+
+		const bool openMenu(const ePlayerOrder order);
+		void loadBuildOrder(const unsigned int number);
 	private:
 		float geneAnimation;
 		void drawGeneString(DC* dc) const;

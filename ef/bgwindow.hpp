@@ -41,7 +41,7 @@ class BoGraphWindow:public UI_Window
 		unsigned int gameMax;
 		unsigned int playerNumber;
 		unsigned int playerMax;
-
+		eRace lastRace;
 };
 
 inline const std::list<unsigned int>& BoGraphWindow::getSelectedItems() const {

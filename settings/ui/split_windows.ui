@@ -1,6 +1,6 @@
 @640x480
 	@MAIN
-		Game window, 320, 450, 450, absolute coordinates, 0, 25 
+		Game window, 320, 440, 440, absolute coordinates, 0, 25 
 		Score window, 160, 100, 100, dock right inside of, Game window, dock top inside of, Game window
 #		Database window, 300, 500, 500, dock left inside of, Game window, dock top inside of, Game window
 	@END

@@ -2,37 +2,7 @@
 
 #include <sstream>
 
-UI_LongText& UI_LongText::operator=(const UI_LongText& object)
-{
-	((UI_Object)(*this)) = ((UI_Object)object);
-	updateText(object.text);
-	scrollBar = object.scrollBar; // TODO
-	longText = object.longText;
-	longButton = object.longButton;
-	longNumber = object.longNumber;
-	longBitmap = object.longBitmap;
-	color1 = object.color1;
-	color2 = object.color2;
-	button = object.button;
-	textWasChanged=true;
-	return(*this);
-}
-
-UI_LongText::UI_LongText(const UI_LongText& object) :
-	UI_Object((UI_Object)object),
-	scrollBar(object.scrollBar),
-	longText(object.longText),
-	longButton(object.longButton),
-	longNumber(object.longNumber),
-	longBitmap(object.longBitmap),
-	text(object.text),
-	color1(object.color1),
-	color2(object.color2),
-	button(object.button),
-	textWasChanged(true)
-{}
-
-UI_LongText::UI_LongText(UI_Object* lt_parent, const Rect lt_pos, const Size distance_bottom_right, const std::string& lt_text, const eColor lt_color1, const eColor lt_color2, const eFont lt_font, const eButtonColorsType lt_button, UI_Object* scroll_bar, const ePositionMode position_mode, const eAutoSize auto_size) :
+UI_LongText::UI_LongText(UI_Object* lt_parent, const Rect lt_pos, const Size distance_bottom_right, const std::string& lt_text, const eColor lt_color1, const eColor lt_color2, const eFont lt_font, const eButtonColorsType lt_button, const eButtonColorsType lt_visited_button, UI_Object* scroll_bar, const bool use_help_chapters, const ePositionMode position_mode, const eAutoSize auto_size) :
 	UI_Object(lt_parent, lt_pos, distance_bottom_right, position_mode, auto_size),
 	scrollBar(scroll_bar),
 	longText(),
@@ -44,7 +14,9 @@ UI_LongText::UI_LongText(UI_Object* lt_parent, const Rect lt_pos, const Size dis
 	color2(lt_color2),
 	font(lt_font),
 	button(lt_button),
-	textWasChanged(true)
+	visitedButton(lt_visited_button),
+	textWasChanged(true),
+	useHelpChapters(use_help_chapters)
 {}
 
 UI_LongText::~UI_LongText()
@@ -132,10 +104,10 @@ void UI_LongText::updateText(const std::string& lt_text)
 //		return; OMFG
 	setNeedRedrawMoved();
 	text = lt_text;
-	if(getParent()!=NULL)
-	{
-		getParent()->adjustPositionAndSize(ADJUST_ONLY_POSITION);
-	}
+//	if(getParent()!=NULL)
+//	{
+//		getParent()->adjustPositionAndSize(ADJUST_ONLY_POSITION);
+//	}
 
 	unsigned int text_cursor_x = 5;
 	unsigned int first_text_cursor_x = 5;
@@ -154,10 +126,11 @@ void UI_LongText::updateText(const std::string& lt_text)
 	if(scrollBar!=NULL)
 		p = getRelativePosition();
 			
-	maxdy = UI_Object::theme.lookUpFont(font)->GetTextExtent(text).GetHeight();
+	maxdy = UI_Object::theme.lookUpFont(font)->getTextExtent(text).getHeight();
 	
 	eColor current_color = color1;
 	eFont current_font = font;
+
 
 	{
 		std::list<UI_StaticText*>::iterator i = longText.begin();
@@ -185,7 +158,7 @@ void UI_LongText::updateText(const std::string& lt_text)
 		}
 	
 	}
-	
+
 	
 	for(unsigned int i=0;i<text.length();i++)
 	{
@@ -199,7 +172,7 @@ void UI_LongText::updateText(const std::string& lt_text)
 		if((text[i]==' ')||(text[i]=='/')||(text[i]==','))//&&(!must_not_make_new_line)) 
 		{
 			last_char_position = i;
-			text_cursor_x += UI_Object::theme.lookUpFont(current_font)->GetTextExtent(" ").GetWidth();
+			text_cursor_x += UI_Object::theme.lookUpFont(current_font)->getTextExtent(" ").getWidth();
 		}
 // ... or a line:
 		else if(text[i]=='#') {
@@ -234,16 +207,15 @@ void UI_LongText::updateText(const std::string& lt_text)
 			new_check = true;
 			end_of_order=true;
 		} else
-		
 		// move the textcursor forward:
 		{
 			std::ostringstream os;
 			os.str("");
 			os << text[i];
 			if(textbutton==0)
-				text_cursor_x += UI_Object::theme.lookUpFont(current_font)->GetTextExtent(os.str()).GetWidth();
+				text_cursor_x += UI_Object::theme.lookUpFont(current_font)->getTextExtent(os.str()).getWidth();
 			else
-				text_cursor_x += UI_Object::theme.lookUpFont((eFont)(font+3))->GetTextExtent(os.str()).GetWidth();
+				text_cursor_x += UI_Object::theme.lookUpFont((eFont)(font+3))->getTextExtent(os.str()).getWidth();
 		}
 		// TODO zeilenuebergreifende BOLDs und TEXTBUTTONs
 // reached end of line? Calculate line and draw it
@@ -267,24 +239,36 @@ void UI_LongText::updateText(const std::string& lt_text)
 			realstring.str("");
 			for(unsigned int j = first_char_position; j < last_char_position; j++)
 			{
-				if((text[j]=='$')||(text[j]=='#')||(text[j]=='&')||(text[j]=='@')||(text[j]=='~')||(text[j]<32))
+				if((text[j]=='$')||(text[j]=='#')||(text[j]=='&')||(text[j]=='@')||(text[j]=='~'))//||(text[j]<32))
+				// Sonderzeichen!!!
 					continue;
 				realstring << text[j];
 			}
 			if(realstring.str().length()>0)
 			{
-
-				
 				if((textbutton==3)||(textbutton==5))
 				{
-					longNumber.push_back(atoi(realstring.str().c_str()));
-					text_cursor_x = first_text_cursor_x;
+					int this_number = atoi(realstring.str().c_str());
+					longNumber.push_back(this_number);
 					if(textbutton==5)
-						longNumber.push_back(atoi(realstring.str().c_str()));
+						longNumber.push_back(this_number); // ok... wenn button ueber zwei Zeilen geht
+					// visited button?
+
+					if((useHelpChapters) && (uiConfiguration.isVisitedHelpChapter(this_number)))
+					{
+						std::list<UI_Button*>::iterator i = longButton.end();
+						--i;
+						if(textbutton==5) --i;
+						(*i)->setButtonColorsType(visitedButton);++i;
+						if(textbutton==5)
+							(*i)->setButtonColorsType(visitedButton);
+					}
+
+					text_cursor_x = first_text_cursor_x;
 					textbutton=0;
 				} else if((textbutton==2)||(textbutton==4))
 				{
-					unsigned int height = UI_Object::theme.lookUpFont((eFont)(font+3))->GetTextExtent(realstring.str()).GetHeight();
+					unsigned int height = UI_Object::theme.lookUpFont((eFont)(font+3))->getTextExtent(realstring.str()).getHeight();
 					unsigned int ty;
 					if(current_row+maxdy/2 < height/2)
 						ty = 0;
@@ -294,9 +278,10 @@ void UI_LongText::updateText(const std::string& lt_text)
 					text_cursor_x = first_text_cursor_x + t->getTextWidth();
 				} else if((textbutton==1)&&(!end_of_order))
 				{
+					// abgebrochener button
 					if(text_cursor_x>getWidth()-10)
 					{
-						unsigned int height = UI_Object::theme.lookUpFont((eFont)(font+3))->GetTextExtent(realstring.str()).GetHeight();
+						unsigned int height = UI_Object::theme.lookUpFont((eFont)(font+3))->getTextExtent(realstring.str()).getHeight();
 						unsigned int ty;
 						if(current_row+maxdy/2 < height/2)
 							ty = 0;
@@ -308,26 +293,31 @@ void UI_LongText::updateText(const std::string& lt_text)
 				} else if(bitmap==2)
 				{
 					bitmap=0;
-					
-					UI_Bitmap* t = new UI_Bitmap(scrollBar==NULL?this:scrollBar, Rect(p+Point(first_text_cursor_x, current_row), Size(0, 0)), Size(0, 0), (eBitmap)(NULL_BITMAP+atoi(realstring.str().c_str())));
-					if(t->getBitmapHeight() < maxdy)
-						t->setOriginalPosition(t->getOriginalPosition() + Size(0, 1+(maxdy - t->getBitmapHeight())/2));
-					longBitmap.push_back(t);
-					text_cursor_x-= UI_Object::theme.lookUpFont(current_font)->GetTextExtent(realstring.str()).GetWidth();
-					// TODO... ein Zaehler mit linkerRand und linkerRandEnde machen
-					text_cursor_x+=t->getBitmapWidth();
-					bitmap_left_border = text_cursor_x;
-					bitmap_lower_border = current_row+t->getBitmapHeight();
+					eBitmap bitmap_number = UI_Object::theme.getBitmapFromIdentifier(realstring.str());
+					if(bitmap_number == NULL_BITMAP)
+						toErrorLog("WARNING (UI_LongText::updateText()): Bitmap identifier " + realstring.str() + " not recognized => ignoring bitmap.");
+					else
+					{
+						UI_Bitmap* t = new UI_Bitmap(scrollBar==NULL?this:scrollBar, Rect(p+Point(first_text_cursor_x, current_row), Size(0, 0)), Size(0, 0), bitmap_number);
+						if(t->getBitmapHeight() < maxdy)
+							t->setOriginalPosition(t->getOriginalPosition() + Size(0, 1+(maxdy - t->getBitmapHeight())/2)); //?
+						longBitmap.push_back(t);
+						text_cursor_x-= UI_Object::theme.lookUpFont(current_font)->getTextExtent(realstring.str()).getWidth();
+						// TODO... ein Zaehler mit linkerRand und linkerRandEnde machen
+						text_cursor_x+=t->getBitmapWidth();
+						bitmap_left_border = text_cursor_x;
+						bitmap_lower_border = current_row+t->getBitmapHeight();
+					}
 				} else
 				{
-					unsigned int height = UI_Object::theme.lookUpFont(current_font)->GetTextExtent(realstring.str()).GetHeight();
+					unsigned int height = UI_Object::theme.lookUpFont(current_font)->getTextExtent(realstring.str()).getHeight();
 					unsigned int ty;
 					if(current_row+maxdy/2 < height/2)
 						ty = 0;
 					else ty = current_row+maxdy/2-height/2+2;
 					UI_StaticText* t = new UI_StaticText(scrollBar==NULL?this:scrollBar, realstring.str(), Rect(p+Point(first_text_cursor_x, ty), Size(0,0)), Size(0,0), current_color, current_font, DO_NOT_ADJUST);
 					longText.push_back(t);
-					text_cursor_x = first_text_cursor_x + UI_Object::theme.lookUpFont(current_font)->GetTextExtent(realstring.str()).GetWidth() ;
+					text_cursor_x = first_text_cursor_x + UI_Object::theme.lookUpFont(current_font)->getTextExtent(realstring.str()).getWidth() ;
 				}
 			}
 			first_char_position = last_char_position;
@@ -347,7 +337,7 @@ void UI_LongText::updateText(const std::string& lt_text)
 			}
 		}
 	}
-	textWasChanged=true;
+//	textWasChanged=true; ?
 }
 
 const unsigned int UI_LongText::getTextHeight() const

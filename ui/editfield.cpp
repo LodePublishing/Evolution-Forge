@@ -3,23 +3,6 @@
 
 // ISO-LEVEL 2 
 
-UI_EditField::UI_EditField(const UI_EditField& object) :
-	UI_Object((UI_Object)object),
-	position(object.position),
-	ani(object.ani),
-	pressedEnter(object.pressedEnter),
-	pressedEscape(object.pressedEscape)
-{ }
-
-UI_EditField& UI_EditField::operator=(const UI_EditField& object)
-{
-	(UI_Object)(*this) = (UI_Object)object;
-	position = object.position;
-	ani = object.ani;
-	pressedEnter = object.pressedEnter;
-	pressedEscape = object.pressedEscape;
-	return(*this);
-}
 UI_EditField::UI_EditField(UI_Object* edit_parent, const Rect& edit_rect, const Size& edit_size, const eFont st_font, const ePositionMode position_mode, const eString description_text, const std::string& name_proposal) :
 	UI_Object(edit_parent, edit_rect, edit_size, position_mode),
 	position(name_proposal.size()),
@@ -62,7 +45,8 @@ const bool UI_EditField::addKey(unsigned int key, unsigned int mod)
 	switch(key)
 	{
 		case SDLK_KP_ENTER:
-		case SDLK_RETURN:if(editField->getText()->getString().length()>0) enterWasPressed();break;
+		case SDLK_RETURN:if((editField->getText()->getString().length()>0) && (!(mod & (KMOD_LALT | KMOD_RALT | KMOD_ALT))))
+					 enterWasPressed();break;
 		case SDLK_ESCAPE:escapeWasPressed();break;
 		case SDLK_SPACE:addChar(' ');break;
 		case SDLK_UNDERSCORE:addChar('_');break;
@@ -170,17 +154,17 @@ void UI_EditField::draw(DC* dc) const
 	if(UI_Object::focus != this)
 		return;
 	
-	Rect entry_rect = Rect(getAbsolutePosition(), getOriginalRect().GetSize());
+	Rect entry_rect = Rect(getAbsolutePosition(), getOriginalRect().getSize());
 //	if(entry_rect.Inside(mouse))
-//		dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+//		dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 //	else
-//		dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
-//	dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+//		dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));
+//	dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 //	dc->DrawEdgedRoundedRectangle(Rect(100, 100, 200, 200), 4);
 
 	
-	dc->SetPen(Pen(dc->mixColor(*theme.lookUpColor(FORCE_TEXT_COLOR), *theme.lookUpColor(BRIGHT_TEXT_COLOR), (unsigned int)(50*(sin(3.141*ani/10)+1))), 1, SOLID_PEN_STYLE));
-	dc->DrawVerticalLine(editField->getAbsolutePosition().x + 2 + editField->getText()->getTextPosSize(position).GetWidth(), editField->getAbsoluteUpperBound()+2, editField->getAbsoluteLowerBound()-3);
+	dc->setPen(Pen(dc->mixColor(*theme.lookUpColor(FORCE_TEXT_COLOR), *theme.lookUpColor(BRIGHT_TEXT_COLOR), (unsigned int)(50*(sin(3.141*ani/10)+1))), 1, SOLID_PEN_STYLE));
+	dc->DrawVerticalLine(editField->getAbsolutePosition().x + 5 + editField->getText()->getTextPosSize(position).getWidth(), editField->getAbsoluteUpperBound()+2, editField->getAbsoluteLowerBound()-3);
 }
 
 void UI_EditField::process()

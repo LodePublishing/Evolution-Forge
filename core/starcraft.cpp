@@ -3,10 +3,9 @@
 #include "starcraft.hpp"
 #include <string>
 
-const std::string CORE_VERSION="Beta 1.64";
+const std::string CORE_VERSION="Beta 1.76";
 
 /*const unsigned int MAX_RACES = 3;
-const unsigned int UNIT_TYPE_COUNT = 105;
 const unsigned int MAX_LOCATIONS = 20;
 
 const unsigned int MAX_GAME_TABS = 6;
@@ -30,15 +29,11 @@ const unsigned int MAX_GAS = 50000000;
 
 //const unsigned int MAX_PROGRAMS = 128; //must be multiplier of (16*player)
 const unsigned int LARVA_MAX = 200;
-//const unsigned int UNIT_TYPE_COUNT = 105;
 //const unsigned int MAX_GOALS = 100; // count of possible different goals
 //const unsigned int MAX_HARVEST_SPEEDS = 100;
 const unsigned int MAX_SUPPLY = 200;
 
 const unsigned int MAX_TOTAL_UNITS = 600; // 600 because larva max is 600... in addition 600 should be low enough to find bugs concerning uninitialized values
-
-const unsigned int MAX_GENERATIONS = 10000;
-const unsigned int MIN_GENERATIONS = 100;
 
 
 
@@ -159,6 +154,7 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"Build parallel 4",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
 {"Build parallel 8",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
 {"Build parallel 16",		  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
+{"Wait 5 sec",					  5,    0 ,   0,  0, 0, 0, {0, 0}, {0, 0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
 {"Send all Gas to Minerals",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {GAS_SCV, 0, 0}, 0, IS_MORPHING, 0, 0, WORKER_UNIT_TYPE, 0},
 {"Move to here",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
 
@@ -194,8 +190,7 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"F_Factory Addon",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
 {"F_Starport Addon",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
 {"F_Command Center Addon",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"F_Science Facility Addon",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"INTRON",					  0,    0,    0,  0, 0, 0, {0, 0}, {0, 0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0}
+{"F_Science Facility Addon",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0}
 },
 
  //for colors... 0= rest, 1= scv, 2= gas scv, 3= combat units, 4=support, 5=supply/refinery, 6=produce buildings, 7=research buildigns, 8= addons, 9=researchs, 10= special
@@ -272,6 +267,7 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"Build parallel 4",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
 {"Build parallel 8",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
 {"Build parallel 16",		  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
+{"Wait 5 sec",					  5,    0 ,   0,  0, 0, 0, {0, 0}, {0, 0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
 {"Send all Gas to Minerals",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {GAS_SCV, 0, 0}, 0, IS_MORPHING, 0, 0, WORKER_UNIT_TYPE, 0},
 {"Move to here",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
 
@@ -306,8 +302,7 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
 {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
 {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"INTRON",					  0,    0,    0,  0, 0, 0, {0, 0}, {0, 0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0}
+{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0}
 },
  //for colors... 0= rest, 1= scv, 2= gas scv, 3= combat units, 4=support, 5=supply/refinery, 6=produce buildings, 7=research buildigns, 8= addons, 9=researchs, 10= special
 {
@@ -381,6 +376,7 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"Build parallel 4",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
 {"Build parallel 8",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
 {"Build parallel 16",		  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
+{"Wait 5 sec",					  5,    0 ,   0,  0, 0, 0, {0, 0}, {0, 0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
 {"Send all Gas to Minerals",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {GAS_SCV, 0, 0}, 0, IS_MORPHING, 0, 0, WORKER_UNIT_TYPE, 0},
 {"Move to here",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
 	
@@ -415,8 +411,7 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
 {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
 {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"INTRON",					  0,    0 ,   0,  0, 0, 0, {0, 0}, {0, 0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0}
+{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0}
 }
 };
 

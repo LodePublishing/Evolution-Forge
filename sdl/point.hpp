@@ -42,7 +42,7 @@ inline Point::Point(const signed int xx, const signed int yy) :
 { 
 #ifdef _SCC_DEBUG
 	if((x < -10000) || (x > 10000) || (y < -10000) || (y > 10000))
-		toLog("WARNING (Point::Point()): Coordinates out of boundary.");
+		toErrorLog("WARNING (Point::Point()): Coordinates out of boundary.");
 #endif
 }
 
@@ -62,6 +62,10 @@ inline const bool Point::operator!=(const Point& point) const {
 }
 
 inline const Point Point::operator*(const signed int scalar) const	{
+#ifdef _SCC_DEBUG
+        if((x * scalar > 10000) || (y * scalar > 10000) || (x * scalar < -10000) || (y * scalar < -10000))
+                toErrorLog("WARNING (Point::operator*()): Coordinates out of boundary.");
+#endif
 	return Point(x * scalar, y * scalar );
 }
 
@@ -70,34 +74,34 @@ inline const Point Point::operator+(const Point& point) const	{
 }
 
 inline const Point Point::operator+(const Size& size) const	{
-	return Point(x + size.GetWidth(), y + size.GetHeight() );
+	return Point(x + size.getWidth(), y + size.getHeight() );
 }
 
 inline const Point Point::operator-(const Size& size) const {
-	return Point(x - size.GetWidth(), y - size.GetHeight() );
+	return Point(x - size.getWidth(), y - size.getHeight() );
 }
 	
 inline const Size Point::operator-(const Point& point) const
 {
-/*#ifdef _SCC_DEBUG
+#ifdef _SCC_DEBUG
 	if(((x > point.x)&&(y < point.y))||((x < point.x)&&(y > point.y)))
-		toLog("POINT: wrong subtraction!");
-#endif*/
+		toErrorLog("WARNING (Point::operator-()): Wrong subtraction.");
+#endif
 	return Size(x > point.x?x - point.x:point.x - x, y > point.y?y - point.y:point.y - y);
 	// TODO ERROR wenn nicht beide > bzw beide <
 }
 
 inline Point& Point::operator+=(const Size& size) 
 {
-	x += size.GetWidth();
-	y += size.GetHeight();
+	x += size.getWidth();
+	y += size.getHeight();
 	return *this;
 }
 		
 inline Point& Point::operator-=(const Size& size)
 {
-	x -= size.GetWidth();
-	y -= size.GetHeight();
+	x -= size.getWidth();
+	y -= size.getHeight();
 	return *this;
 }
 

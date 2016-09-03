@@ -7,12 +7,12 @@ const float GUI_VERSION=0.51;
 #include "msgwindow.hpp"
 //#include "info.hpp"
 #include "helpwindow.hpp"
-#include "mapwindow.hpp"
+//#include "mapwindow.hpp"
 #include "datawindow.hpp"
 #include "mainwindow.hpp"
 #include "setwindow.hpp"
 
-#include "progressbar.hpp"
+//#include "progressbar.hpp"
 
 #include <math.h>
 #include <iostream>
@@ -20,8 +20,8 @@ const float GUI_VERSION=0.51;
 #include <iomanip>
 #include <string>
 
-#include "endrundialog.hpp"
 #include "intro.hpp"
+#include "savebox.hpp"
 
 class Main
 {
@@ -42,7 +42,7 @@ class Main
 		
 		const bool isAnyOptimizing() const;
 		void stopAllOptimizing();
-		void startAllOptimizing();
+		void startLastOptimizing();
 
 		void noticeFullscreen();
 
@@ -53,6 +53,9 @@ class Main
 
 		void wheelUp();
 		void wheelDown();
+
+		void wheelToTop();
+		void wheelToBottom();
 	
 		void setMouse(const Point p);
 
@@ -70,13 +73,24 @@ class Main
 		void needRedraw();
 	
 		void initializeGame(const unsigned int game_number);
-	private:
+
+		const bool isIntro() const;
+
+		void openMenu(const ePlayerOrder order);
+		
 		MainWindow* mainWindow;
+
+		void goBack();
+	private:
 		IntroWindow* introWindow;
 		HelpWindow* helpWindow;
 		SettingsWindow* settingsWindow;
 		DataBaseWindow* dataBaseWindow;
-		MapWindow* mapWindow;
+//		MapWindow* mapWindow;
+
+		SaveBox* saveBox;
+		LanguageMenu* languageMenu;		
+		
 		Point maus;
 		unsigned int gameCount; 
 		Game* game[MAX_GAME];
@@ -92,7 +106,9 @@ class Main
 		signed int tabToGameList[MAX_TABS];
 		signed int tabToSplitGameList[MAX_TABS];
 
-		signed int currentTab;
+		eTabs currentTab;
+
+		unsigned int currentGame; // for openRaceMenu
 };
 
 inline const bool Main::hasBitDepthChanged() const {

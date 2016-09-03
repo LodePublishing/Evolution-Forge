@@ -8,8 +8,6 @@ class UI_Window;
 class UI_ScrollBar : public UI_Object
 {
 	public:
-		UI_ScrollBar& operator=(const UI_ScrollBar& object);
-		UI_ScrollBar(const UI_ScrollBar& object);
 		UI_ScrollBar(UI_Object* scroll_parent, /*const Rect& clientrect?*/ const unsigned int start_y, const unsigned int max_height, const bool scroll_hideable = false);
 		~UI_ScrollBar();
 
@@ -55,6 +53,9 @@ class UI_ScrollBar : public UI_Object
 		unsigned int totalHeight;
 
 		unsigned int maxHeight;
+
+		UI_ScrollBar& operator=(const UI_ScrollBar& object);
+		UI_ScrollBar(const UI_ScrollBar& object);
 };
 
 inline void UI_ScrollBar::setFirstItemY(const signed int first_item_y) 
@@ -62,7 +63,7 @@ inline void UI_ScrollBar::setFirstItemY(const signed int first_item_y)
 #ifdef _SCC_DEBUG
 	if(first_item_y > 90000)
 	{
-		toLog("DEBUG: (UI_ScrollBar::setFirstItemY): Value first_item_y out of range.");return;
+		toErrorLog("DEBUG: (UI_ScrollBar::setFirstItemY): Value first_item_y out of range.");return;
 	}
 #endif
 	firstItemY = first_item_y;
@@ -73,7 +74,7 @@ inline void UI_ScrollBar::setLastItemY(const signed int last_item_y)
 #ifdef _SCC_DEBUG
 	if(last_item_y > 90000)
 	{
-		toLog("DEBUG: (UI_ScrollBar::setLastItemY): Value last_item_y out of range.");return;
+		toErrorLog("DEBUG: (UI_ScrollBar::setLastItemY): Value last_item_y out of range.");return;
 	}
 #endif
 	lastItemY = last_item_y;
@@ -84,7 +85,7 @@ inline const signed int UI_ScrollBar::getFirstItemY() const
 #ifdef _SCC_DEBUG
 	if(firstItemY > 90000)
 	{
-		toLog("DEBUG: (UI_ScrollBar::getFirstItemY): Value firstItemY out of range.");return(0);
+		toErrorLog("DEBUG: (UI_ScrollBar::getFirstItemY): Value firstItemY out of range.");return(0);
 	}
 #endif
 	return(firstItemY);
@@ -95,7 +96,7 @@ inline const signed int UI_ScrollBar::getLastItemY() const
 #ifdef _SCC_DEBUG
 	if(lastItemY > 90000)
 	{
-		toLog("DEBUG: (UI_ScrollBar::getLastItemY): Value lastItemY out of range.");return(0);
+		toErrorLog("DEBUG: (UI_ScrollBar::getLastItemY): Value lastItemY out of range.");return(0);
 	}
 #endif
 	return(lastItemY);

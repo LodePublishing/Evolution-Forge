@@ -1,29 +1,30 @@
+# TODO: Shortcut Keys (aus dem Intro) auffuehren!
 @HELP_STRINGS
 	@ENGLISH
 # INDEX_CHAPTER = 0
 		@0	
-			$Help Index$###
-			~33~@Chapter 1: Introduction@100@##
-			~33~@Chapter 2: Detailed description@200@##
-			~33~@Chapter 3: How to use the results@300@##
-			~33~@Chapter 4: Configuration@400@##
-			~33~@Chapter 4: Program Mechanics@500@##
-			~33~@Chapter 5: Interactive Mode@600@##
-			~33~@Chapter 6: The core of the program@700@##
-			~33~@Chapter 7: Communication@800@##
-			~33~@Chapter 8: Development of EF@900@##
-			~33~@Chapter 9: Philosophy and EF@1000@#
+			$Evolution Forge Help Index$###
+			~BULLET_BITMAP~@Chapter  1: Introduction@100@##
+			~BULLET_BITMAP~@Chapter  2: Detailed description@200@##
+			~BULLET_BITMAP~@Chapter  3: How to use the results@300@##
+			~BULLET_BITMAP~@Chapter  4: Configuration@400@##
+			~BULLET_BITMAP~@Chapter  5: Program Mechanics@500@##
+			~BULLET_BITMAP~@Chapter  6: Interactive Mode@600@##
+			~BULLET_BITMAP~@Chapter  7: The core of the program@700@##
+			~BULLET_BITMAP~@Chapter  8: Communication@800@##
+			~BULLET_BITMAP~@Chapter  9: Development of EF@900@##
+			~BULLET_BITMAP~@Chapter 10: Philosophy and EF@1000@#
 		@END
 		
 # INTRODUCTION_MAIN_CHAPTER = 100
 		@100
-			@~4~Chapter 1: Introduction@0@###
-			~33~@1.1: What does this program?@110@##
-			~33~@1.2: Quickstart@120@##
-			~33~@1.3: Overview of the elements@130@##
-			~33~@1.4: Is it useful?@140@##
-			~33~@1.5: Limits of the Program@150@##
-			~33~@1.6: Problems of the Program@160@##
+			~SMALL_ARROW_LEFT_BITMAP~@Chapter 1: Introduction@0@###
+			~BULLET_BITMAP~@1.1: What does this program?@110@##
+			~BULLET_BITMAP~@1.2: Quickstart@120@##
+			~BULLET_BITMAP~@1.3: Overview of the elements@130@##
+			~BULLET_BITMAP~@1.4: Is it useful?@140@##
+			~BULLET_BITMAP~@1.5: Limits of the Program@150@##
+			~BULLET_BITMAP~@1.6: Problems of the Program@160@##
 		@END
 
 # INTRODUCTION_CHAPTER = 110
@@ -40,21 +41,21 @@
 			It's easy:#
 			- In the @score window@210@ click on $'Add player'$#
 			- Choose a race by clicking on the $'race'$ button#
-			- In the @unit list window@230@ click on ~27~, choose a category and pick your goals#
+			- In the @unit list window@230@ click on ~ADD_BITMAP~, choose a category and pick your goals#
 			- Finally click on $'(paused)'$ button in the @score window@210@ and sit back to watch the progress#
 			- You will see items moving around in window named @build order@260@. The program now will optimize the build order by adding, removing and rearranging the items#
 			- In the @score window@210@ you will see the current status of the calculation. $'searching'$ means that it still looks for a valid solution (i.e. a solution that fulfills your goals), $'optimizing'$ means that it will try to reduce the time the build order needs#
 			- The @overview@240@ window shows how supply, minerals and gas develop over the time span of the build order#
 			- The @graphical build order@250@ window shows graphically where and when units and buildings are constructed#
 			- After a while you will notice that there are no more changes on the screen. Probably the fastest build order is found. 
-			- Now you might want to save the build order by clicking on ~23~ in the @build order window@260@. You can also save your goal list by doing the same with the @unit list window@230@#
-			- Saved build orders and goal lists can be loaded again by clicking on ~22~#
+			- Now you might want to save the build order by clicking on ~SAVE_BITMAP~ in the @build order window@260@. You can also save your goal list by doing the same with the @unit list window@230@#
+			- Saved build orders and goal lists can be loaded again by clicking on ~LOAD_BITMAP~#
 		@END
 
 # INTRODUCTION_OVERVIEW_CHAPTER = 130
 		@130
 			@1.3: Overview of the elements@100@##
-			TEXT  ~2~   
+			TEXT  ~SUB_BITMAP~   
 		@END
 
 # INTRODUCTION_USE_CHAPTER = 140
@@ -84,23 +85,23 @@
 
 # DESCRIPTION_MAIN_CHAPTER = 200
 		@200
-			@Chapter 2. Detailed Description@0@###
-			~33~@2.1: The score window@210@##
-			~33~@2.2: The unit list window@220@##
-			~33~@2.3: The build order diagram window@230@##
-			~33~@2.4: The build order graph window@240@##
-			~33~@2.5: The build order window@250@#
+			~SMALL_ARROW_LEFT_BITMAP~@Chapter 2. Detailed Description@0@###
+			~BULLET_BITMAP~@2.1: The score window@210@##
+			~BULLET_BITMAP~@2.2: The unit list window@220@##
+			~BULLET_BITMAP~@2.3: The build order diagram window@230@##
+			~BULLET_BITMAP~@2.4: The build order graph window@240@##
+			~BULLET_BITMAP~@2.5: The build order window@250@#
 		@END
 
 # DESCRIPTION_SCORE_WINDOW_CHAPTER = 210
 		@210
 			@2.1: The score window@200@##
-			~35~   
+			~SCORE_EMPTY_BITMAP~   
 			(1) $Choose a map$#   
 			A map contains a unit list for each player (normally workers and a main building), start conditions (minerals, gas, ...) and a list of locations and their distances.#   
 			(2) $Add a player$#   
 			Add a player to the list. All players in the list will play on the map you have chosen.##
-			~33~   
+			~BULLET_BITMAP~   
 			(3) $Choose a race$#   
 			Choose which race you want to use for calculation. Choosing a new race will reset the calculation.#   
 			(4) $Remove the player$#   
@@ -116,7 +117,7 @@
 # DESCRIPTION_UNIT_LIST_WINDOW_CHAPTER = 220
 		@220
 			@2.2: The unit list window@200@##
-			~36~
+			~FORCE_WINDOW_BITMAP~
 			(1) $Add a goal$#
 			Here you can add units/buildings/researches to your goal list below. These goals will be used to calculate the build order. If you like a different structure (based on buildings vs based on unit types) of the unit menu then change the 'facility mode' in the settings window.#
 			(2) $Load a goal list$#
@@ -138,7 +139,7 @@
 # DESCRIPTION_BODIAGRAM_WINDOW_CHAPTER = 230
 		@230
 			@2.3: The build order diagram window@200@##
-			~37~
+			~BODIAGRAM_WINDOW_BITMAP~
 			(1) $Minerals and Gas$#
 			The blue and green graph represents the amount of minerals and gas that you have at that time. While the program tries to maximize the amount of gathered ressources a fast build order should never save large amounts of minerals and gas.#
 			(2) $Supply$#
@@ -150,14 +151,14 @@
 # DESCRIPTION_BOGRAPH_WINDOW_CHAPTER = 240
 		@240
 			@2.4: The build order graph window@200@##
-			~38~
+			~BOGRAPH_WINDOW_BITMAP~
 			In this window all orders are presented graphically. On the top you see a rough time raster, below there is a list of used facilities. When building for example a factory the SCV 'facility' is used, when building a marine the barracks facility is used. When there are several build orders and several availible facilities the build orders are often executed in parallel because that speeds up the build order.#			
 		@END
 
 # DESCRIPTION_BUILD_ORDER_WINDOW_CHAPTER = 250
 		@250
 			@2.5: The build order window@200@##
-			~39~
+			~BO_WINDOW_BITMAP~
 
 			TODO
 			You can edit the build order, too. To do that you have to click on the $edit mode button$ TODO which pauses the calculation (else the program will immediately 'optimize' your build order), change the entries and finally press edit button again TODO. For the editing part look in the @Editing the build order@610@ chapter.
@@ -173,11 +174,11 @@
 
 # RESULTS_MAIN_CHAPTER = 300
 		@300
-			@Chapter 3. How to use the results@0@###
-			~33~@3.1: About time and numbers@310@##
-			~33~@3.2: HTML output@320@##
-			~33~@3.3: Using the database@330@##
-			~33~@3.4: Results during the run@340@#
+			~SMALL_ARROW_LEFT_BITMAP~@Chapter 3. How to use the results@0@###
+			~BULLET_BITMAP~@3.1: About time and numbers@310@##
+			~BULLET_BITMAP~@3.2: HTML output@320@##
+			~BULLET_BITMAP~@3.3: Using the database@330@##
+			~BULLET_BITMAP~@3.4: Results during the run@340@#
 		@END
 
 # RESULTS_TIME_AND_NUMBERS_CHAPTER = 310
@@ -209,12 +210,12 @@
 
 # CONFIGURATION_MAIN_CHAPTER = 400
 		@400
-			@Chapter 4. Configuration of the program@0@###
-			~33~@4.1: Loading/Saving Settings@410@##
-			~33~@4.2: Resolution, Color Depth and Language@420@##
-			~33~@4.3: Core Settings@430@##
-			~33~@4.4: GUI Settings@440@##
-			~33~@4.5: Rules Settings@450@##
+			~SMALL_ARROW_LEFT_BITMAP~@Chapter 4. Configuration of the program@0@###
+			~BULLET_BITMAP~@4.1: Loading/Saving Settings@410@##
+			~BULLET_BITMAP~@4.2: Resolution, Color Depth and Language@420@##
+			~BULLET_BITMAP~@4.3: Core Settings@430@##
+			~BULLET_BITMAP~@4.4: GUI Settings@440@##
+			~BULLET_BITMAP~@4.5: Rules Settings@450@##
 		@END
 
 
@@ -236,9 +237,18 @@
 # CONFIGURATION_CORE_SETTINGS_CHAPTER = 430
 		@430
 			@4.3: Core Settings@400@##
+			$Fast calculation$:#
 			$Max Time$: Sets the upper limit of time span where a valid build order should be searched. Reducing this might result in a faster calculation but keep in mind that if you set it too low the program might find no solution at all. Even the best optimized build order cannot give you a Battle Cruiser in 1 minute.#
 			$Max Length$: Sets the maximum length of a build order. Reducing this also might result in a faster calculation. And again, if you set this to very small number the program might not find a solution at all. There is no way building 10 marines with a build order that has 9 elements.#
 			$Max Timeout$: In each step of the build order the program waits until all requirements are met. The upper time limit of that waiting is set here. If you set the number lower than the longest build time (in Starcraft: 266 seconds) you might loose some valid solutions. (for better understanding read @How the build order is processed@510@)#
+#			      "SETTING_FAST_CALCULATION_TOOLTIP_STRING" = "Mehrere interne Parameter werden auf Werte gesetzt wodurch die Optimierung beschleunigt wird (jedoch fallen dabei u.U. einige Baureihenfolgen weg)"
+#			   "SETTING_DEEP_SEARCH_TOOLTIP_STRING" = "Soll die Suche grundsätzlich von der aktuell besten Baureihenfolge ausgehen? Die Alternative wäre die Breitensuche bei der auch wenn eine bessere gefunden wurde noch kurzzeitig auf Basis der bisherigen Baureihenfolgen gesucht wird."
+#		           "SETTING_WAIT_ORDERS_TOOLTIP_STRING" = "In Ausnahmefällen ist es sinnvoll Rohstoffe zu sparen. Hierdurch werden u.U. bessere Baureihenfolgen auf Kosten der Berechnungsdauer gefunden."
+#		         "SETTING_EXPANSION_SET_TOOLTIP_STRING" = "Mit dieser Option werden alle Einheiten des Erweiterungssets benutzt (z.B. Schleicher oder Korsar)"
+#		   "SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING" = "Soll versucht werden ununterbrochen Arbeiter zu produzieren?"
+#		             "SETTING_AUTO_RUNS_TOOLTIP_STRING" = "Soll nach einer Zeit ohne Fortschritt bei der Optimierung der aktuelle Versuch automatisch gespeichert und neugestartet werden?"
+#		       "SETTING_MAX_GENERATIONS_TOOLTIP_STRING" = "Nach wievielen unveränderten Generationen soll der aktuelle Versuch verworfen und mit einer neuerstellten Baureihenfolge begonnen werden?"
+		
 		@END
 
 # CONFIGURATION_GUI_SETTINGS_CHAPTER = 440
@@ -265,11 +275,11 @@
 
 # MECHANICS_MAIN_CHAPTER = 500
 		@500
-			@Chapter 5. Mechanics of the program@0@###
-			~33~@5.1: How the build order is processed@510@##
-			~33~@5.2: How multiplayer works@520@##
-			~33~@5.3: How the algorithm works@540@##
-			~33~@5.4: How to finetune the build order@530@##
+			~SMALL_ARROW_LEFT_BITMAP~@Chapter 5. Mechanics of the program@0@###
+			~BULLET_BITMAP~@5.1: How the build order is processed@510@##
+			~BULLET_BITMAP~@5.2: How multiplayer works@520@##
+			~BULLET_BITMAP~@5.3: How the algorithm works@540@##
+			~BULLET_BITMAP~@5.4: How to finetune the build order@530@##
 		@END
 
 
@@ -299,11 +309,11 @@
 
 # INTERACTIVE_MAIN_CHAPTER = 600
 		@600
-			@Chapter 6. Interactive mode@0@###
-			~33~@6.1: Editing the build order@610@##
-			~33~@6.2: Playing against the computer@620@##
-			~33~@6.3: Letting it play against itself@630@##
-			~33~@6.4: What to learn from the program@640@#
+			~SMALL_ARROW_LEFT_BITMAP~@Chapter 6. Interactive mode@0@###
+			~BULLET_BITMAP~@6.1: Editing the build order@610@##
+			~BULLET_BITMAP~@6.2: Playing against the computer@620@##
+			~BULLET_BITMAP~@6.3: Letting it play against itself@630@##
+			~BULLET_BITMAP~@6.4: What to learn from the program@640@#
 		@END
 	
 # INTERACTIVE_EDITING_CHAPTER = 610
@@ -333,16 +343,16 @@
 			@6.4: What to learn from the program@600@##
 			(UNDER CONSTRUCTION) Letting the program run against itself is indeed an interesting experience. There is no "best build order", each build order has its disadvantages, it is always a process of adaption. That is what kept discussions about StarCraft interesting, each new strategy can be countered by some different strategy.#
 			In addition you can see how economic advantages are traded in for speed: Always building workers might give you an economical advantage over your opponent and therefore more units... but only in a long-term scale. The distance to your enemy plays an important role. If you start right beside your enemy your first priority might be a combat unit. The farther the enemy is away the more important long-term thinking gets.
-			If you want to know more about the algorithm which makes all that possible then proceed to @Chapter 7@700@.
+			If you want to know more about the algorithm which makes all that possible then proceed to ~SMALL_ARROW_LEFT_BITMAP~@Chapter 7@700@.
 		@END
 # CORE_MAIN_CHAPTER = 700
 		@700
-			@Chapter 7. The core of the program@0@###
-			~33~@7.1: The algorithm of the core@710@##
-			~33~@7.2: Buildorder TODO@720@##
-			~33~@7.3: Scalability@730@##
-			~33~@7.4: Comparison?@740@##
-			~33~@7.5: Problems with the algorithm@750@#
+			~SMALL_ARROW_LEFT_BITMAP~@Chapter 7. The core of the program@0@###
+			~BULLET_BITMAP~@7.1: The algorithm of the core@710@##
+			~BULLET_BITMAP~@7.2: Buildorder TODO@720@##
+			~BULLET_BITMAP~@7.3: Scalability@730@##
+			~BULLET_BITMAP~@7.4: Comparison?@740@##
+			~BULLET_BITMAP~@7.5: Problems with the algorithm@750@#
 		@END
 
 
@@ -395,32 +405,33 @@
 
 # COMMUNICATION_MAIN_CHAPTER = 800
 		@800
-			@Chapter 8. Communication@0@###
-			~33~@8.1: ClawSoftware.de@810@##
-			~33~@8.3: About myself@830@#
+			~SMALL_ARROW_LEFT_BITMAP~@Chapter 8. Communication@0@###
+			~BULLET_BITMAP~@8.1: ClawSoftware.de@810@##
+			~BULLET_BITMAP~@8.3: About myself@830@#
 		@END
 
 # COMMUNICATION_CLAWSOFTWARE_CHAPTER = 810
 		@810
 			@8.1: ClawSoftware.de@800@##
-			~19~gsldkjfg lsdkjgf lskdfjg lksdjfg k #
+			~CLAWSOFTWARE_BITMAP~gsldkjfg lsdkjgf lskdfjg lksdjfg k #
 		@END
 
 
 # COMMUNICATION_ABOUT_CHAPTER = 830
 		@830
 			@8.3: About myself@800@##
-			~40~ My name is Clemens and I am living in germany and currently studying Computer Science in Karlsruhe. I am programming since about 12 years doing small projects until 2000. Then I started my work on Evolution Forge (called Starcraft Calculator back then).#
+			~CLEMENS_BITMAP~ My name is Clemens and I am living in germany and currently studying Computer Science in Karlsruhe. I am programming since about 12 years doing small projects until 2000. Then I started my work on Evolution Forge (called Starcraft Calculator back then).#
 		@END
 
 # DEVELOPMENT_MAIN_CHAPTER = 900
 		@900
-			@Chapter 9. Development@0@###
-			~33~@9.1: History@910@##
-			~33~@9.2: Things that will come later@920@##
-			~33~@9.3: Current developments@930@##
-			~33~@9.4: Future plans with Evolution Forge@940@#
-			~33~@9.5: Things will never be implemented@950@##
+			~SMALL_ARROW_LEFT_BITMAP~@Chapter 9. Development@0@###
+			~BULLET_BITMAP~@9.1: History@910@##
+			~BULLET_BITMAP~@9.2: Things that will come later@920@##
+			~BULLET_BITMAP~@9.3: Current developments@930@##
+			~BULLET_BITMAP~@9.4: Future plans with Evolution Forge@940@#
+			~BULLET_BITMAP~@9.5: Things will never be implemented@950@##
+			MAKING OF...~~~
 		@END
 
 # DEVELOPMENT_HISTORY_CHAPTER = 910
@@ -439,13 +450,18 @@
 
 # DEVELOPMENT_CURRENT_CHAPTER = 930
 		@930
-			@9.3: Current developments@900@##
-			TEXT
+			@9.3: Current developments and future plans@900@##
+			Well, I mentioned this several times and always post-poned it as I wanted to have a functioning GUI first... 'Locations' will be the next great thing, i.e. expansions and such. It still gives me restless nights (well, somewhat) to figure out how to implement them in a nice user interface... It's less a problem of actually calculating the movements of different units on a virtual map than to displaying it and allowing you to edit/add/delete things there. In the core itself 'locations' are already implemented to a large portion but it still will need some time to complete (and especially bugfix) the code.
+			Also editing build orders will be one of the coming features. It's already implemented but the user interface for that is too crappy and too buggy to activate it... 
+			The last big thing that will be included is a computer player to play against. For that I will need some sort of 'battle calculator' which also gives me a headache because that makes the whole thing even more inaccurate...
+			On the other hand this is a too interesting feature to miss, so it will be included.
 		@END
 
 # DEVELOPMENT_FUTURE_CHAPTER = 940
 		@940
 			@9.4: Future plans with Evolution Forge@900@##
+			Well, what probably will come is support for other games. Unfortunately there are not many (popular) games that offer such a complexity as in StarCraft although some games come near or would just be fun to develop (like WarCraft or Warhammer). If you have any idea what other games should be included, please let me know :) TODO
+			Also I thought about going more into parallel computing (e.g. over the internet) or similar things :ugly:
 			TEXT
 		@END
 
@@ -456,32 +472,111 @@
 			TEXT
 		@END
 
+		@960
+		MAKING OF
+
+		Very helpful Joel Spolsky 'User interface design for programmers' which explains very well the point that the user (that is you! :) ) not necessarily has a degree in computer science and loves to figure out what the programmer was thinking when he was designing the interface ;)
+		'GUI bloopers' by jeff johnson does then look at certain "Don'ts and Do's" by looking at real examples in great detail.
+
+		I think I used hundred of papers to think out algorithms, make out menu behaviors or figuring out bugs in the program and spend thousands of hours programming this thing. All in all I learned a lot and you can be certain that there will more coming from my keyboard at a later date :>
+
+		@END
 
 # PHILOSOHPY_MAIN_CHAPTER = 1000
 		@1000
-			@Chapter 10. Philosophy@0@###
-			~33~@10.1: Evolution@1010@##
-			~33~@10.2: TODO@1020@##
-			~33~@10.3: Reality check@1030@#
+			~SMALL_ARROW_LEFT_BITMAP~@Chapter 10. Philosophy@0@###
+			~BULLET_BITMAP~@10.1: Evolution@1010@##
+			~BULLET_BITMAP~@10.2: TODO@1020@##
+			~BULLET_BITMAP~@10.3: Reality check@1030@#
 		@END
 
 # PHILOSOPHY_EVOLUTION_CHAPTER = 1010
 		@1010
 			@10.1 Evolution@1000@##
+
+			Evolution 
 			TEXT
 		@END
 
 # PHILOSOPHY_GOD_CHAPTER = 1020
 		@1020
 			@10.2 TODO@1000@##
+			If I talk about evolution I cannot just remain on the scientific side of the subject. The act of evolution itself is woven into practically everything what is going on. ~~
+			social darwinism ~~
+
+			I also want to talk about creationism, because looking at the critics of a theory also helps to get a bigger picture. I think both - the 'theory' of evolution and creationism has a point but by dismissing each other they do not come to a good solution. The theory of evolution explains in great detail (or in great simplicity if you wish) which way 'we' took to get to the point we are now. Creationism on the other hand explains how it all started. The researchers stumbled over a number of shards of a dish, the one group says that god has created the shards as they lie on the ground while the other group says that this is nonsense, the dish was dropped there.
+			Being rational one what immediately think that the second group 'is right'. But the only thing they do is to move the discussion to another level. Who put the dish there at first? Who put up the laws of gravity?
+			To make it a little more clear I will speak in terms of 'Evolution Forge'. Did YOU create the build order that resulted at the end? No. You've 'just' set up the rules and the build order developed around them. So who is the creator? The program? The rules? You? I?
+			It's getting confusing!
+			The point is that as stated above if you argue if the build order was created as it is or if you have created the build order by giving the goals is pointless because both arguments are correct. The only difference between 'creationism' and 'evolution' is that 'creationism' let's a door open for things that can not evolute. Even if you try hard you will not be able to get a build order like 'Battle Cruiser' 'SCV' 'SCV' 'Barracks' 'Tank' because the program (i.e. the laws of physics) dismiss any such build order after one generation.
+
+			Real world on the other hand is different
+
+			I actually believe in two gods (call me a polytheist if you wish), one 'creator' and one 'social god'. I think we discussed the first one in great detail. What about the 'social god'?
+			Ah, well, this is game theory. 
+			We are constructed as people who normally live in small groups (100-200 people, if you want to learn more about our past - before we began agriculture, read Chapter 11.1 The biggest mistake in human history) where everyone knows everyone. In a huge society (talking of millions) it is impossible to even meet everyone. So we often meet unknown people. 
+			In a small society where we often meet the same people again and again we can easily decide if we can trust this person or not. If we have caught them lying once we do not trust them anymore, if this person does not really cooperate with you you maybe won't help them. This 'strategy' is called 'This for that', i.e. normally we cooperate but as soon as someone no longer cooperates we refuse to cooperate, too, until this person cooperates again.
+			This is a stable strategy as in the ideal case (i.e. you meet other members of the society often) no other strategy can subjugate-TODO this society.
+			Now what if our society grows beyond a point where we no longer can know everyone? Where we often meet other people just once? Where if the other person does not cooperate the first time we have no possibility to 'pay back'? Well, the only  other stable strategy is 'never cooperate' which is what our society currently leads to. If we do not believe in a higher goodness, call it god / altrurism / whatever, where we believe that if we help person A, A will help person B, B will help person C etc. i.e. get their 'cooperation' in circles (maybe even shifted in time to the next generation), then society goes 'to the dogs' (not literally because dogs themselves are very social animals :} ).
+
+			Help others! Believe in a greater goodness! It's the logical thing to do! (talking of rationalizing believe... but hey, game theory proves it :) )
+			
+			God - two gods
+
+			why do people today at all still believe in creationism? I do not want to criticize them, after all science does not give the answer who did 
+
+			
 			TEXT
 		@END
 
 # PHILOSOPHY_REALITY_CHAPTER = 1030
-		@1030
-			@10.3 Reality check@1000@##
+		@1040
+			@10.4 Reality check@1000@##
+				
+			In 10.2 I already mentioned a little the situation of our society. Well, I do not want to sound pessimistic
+			
+			
 			TEXT
 		@END
+
+		@1100
+			~SMALL_ARROW_LEFT_BITMAP~@Chapter 11. Articles@0@###
+			~BULLET_BITMAP~@11.1: Effective citizen@1110@##
+			~BULLET_BITMAP~@11.2: 911 was an inside job.@1120@##
+			~BULLET_BITMAP~@11.3: 777 was an inside job.@1130@##
+			~BULLET_BITMAP~@11.4: The worst mistake of human history@1140@#
+		@END
+		@1110
+			@11.1 Effective citizen and 1984@1100@##
+			
+			$11.1.1 Effective citizen$
+			I say public secret because these things are widely availible. One only needs the time to find it. Which is what brings me to the point, my purpose in creating this show is to offer to those who are either too busy, unable or simply unwilling to do the research on their own. I seek to revise and amplify your world view.
+			Now, a lot of us have come to the realisation that the corporate or mainstream media has been rather untruthful as of late, ok, we go ahead and say it, they've lied to has, they've full on lied to us, they've fed us with propaganda, they've given us disinformation, they've obfuscated the truth on several occations, they've even given the same photograph for completely different facilities. And these people are not above lying. This is what they do for a living. They stretch the truth, they bend the truth, they twist the things around and they support a particular agenda and that is the corporate agenda.
+			I was reading somewhere once where someone asks me how large is the workers' section in the newspaper, in the daily paper, and I said what do you mean by that and he said well you've got a huge business section, what part of the newspaper is devoted to the average working citizen, what is the workers' section? and the answer of course is that there is not one there is obviously not one because the newspaper is not designed for the average common individual it is designed for the business people the corporate elites, that's who the information is tailored to and that's who it is written for. And the information presented on my show is going to come from media both corporate owned in order to examine the spin as well as from independant and alternative media. I break the last two into seperate categories although they're really the same thing. The grouping refers to investigative reporting falling under the heading of independant and the alternative media is consinsting primarily of the french voices the blogs, the web forums things of that nature. The news found on the program is not always going to be political although a large margin of it will be. I find a blend of varying ideas and concepts are the key of understanding our universe. And really at the end of the day this show is about the search for truth, the essence about what life truly means, to me anyway.
+			Now some are going to ask, what is an effective citizen and how they can become one?
+			Well, that's a great question!
+			An effective citizen is an informed one and in being so they don't fall into the pitfalls and traps as more uninformed illeffective citizens do. An effective citizen knows their rights and understands what freedom means, an effective citizen respects privacy and understands how that privacy must be respected for everyone, now this goes far beyond property rights and privacy in your own home, this goes to the right to free speech, it goes to respecting the right to free speech of others and that's the big problem that we have in America right now as you get too many little voices running around and all of them have different opinions and these different opinions oftentimes collide. And this is exactly what the globalists want, this is exactly what the government wants. Sun Tsu writes in the Art of War to divide and conquer is the best way to overcome one's enemy and that is exactly what the government does, they continue feeding us completely different information in different cities, the beauty of this is that you can start a test market in a city, let's take grand rabits michigan TODO for example because in 1952 or 1960 they introduced fluoride into the water, ... TODO but ehm this was the first city to have fluoridated water introduced into the city water system. No other city in the nation had fluoride in their water, they did this in a test market city. The people embraced it, it was sold as this wonderful new cure for germs and bad breath and it can clean teeth you know beyond the fact it's a bio-hazard.
+			But the people embraced it and it took shape there, the cottage industry based right there in one small city in one state. But of course this little tactic broadened and was put all across America, everybody has got fluoridated water, we all know this, but that is just one illustration of how people in one city will say 'well I don't see the development of martial law in my city, what are you talking about, it hasn't gotten to me yet.' No it hasn't gotten to you yet, and that is what test market cities are all about. They test something out in Los Angeles, they test it out in Eugen Oregon, they test it out in Austin Texas, in Phoenix Arizona, in Atlanta Georgia, they test all these little agendas out and they see how far they can push until the public begins to accept it. Once the public accept it it becomes the real world, it becomes their new paradigm, and everybody knows that if you tell a big enough lie for long enough time everyone will accept it for the truth.
+			I think I've established the essence of the show, so let's get right into it.
+
+		
+			$11.1.2 1984$
+			1984
+		
+			Seventyblub? recently that we live in Orwellian times, that our very existence is now resembling the novel 1984 and this all goes back to the fact that we are being watched on a daily basis, cameras have invaded every single facet of our lifes. I was just at the grocery store only a few moments ago and I was looking around and noticed camera, camera, camera. In the manager's office there is a camera pointing straight into the office, there is a camera pointing at you as you walk into the building, right there! And it has the nice brilliant screen showing you Look we're watching you and this is what we can see! Now, it's a public place ok, and it is a private organisation, it is a grocery store, it is owned by a private consortium, probably not the Monsanto group, but it might be, who knows. But the fact of the matter is is that you can't deny the encrouching surveillance upon the American public. And everybody cries out and says 'Oh but it's good, it's good! It helps out, it helps out!' Yeah and it would be wonderful if every single citizen was being watched and monitored, wouldn't that be so great? Every day you wake up you go outside your house and you would not have to live in fear of somebody coming up and mugging you and then disappearing and getting away scot-free TODO because this guy's got a chip in his shoulder now and we got cameras everywhere and this people can't run and hide anymore so there won't be anymore crime, right? Well now, why is it that we're passing all this government legislature to PUT PEOPLE IN JAIL? Specifically designed to keep people in jail, they're putting in jail, passing new legislature, passing all different kinds of laws to arrest people and put them in jail. If they're doing that are they really trying to keep people out, are they really trying to build some beautiful utopian society, which in itself is really a ridiculous concept, there is no true utopia. Not everybody can get along, what we need to find is a balance, a common ground between all of us. 
+			In the book 1984, that Eric Blair wrote, Eric Blair is the birth name of George Orwell, Winston Smith worked for the Ministry of Defense removing politically incorrect material from news wires and this is basically working in a censor position. He would then deposit this information into little tubes and it would be whisped TODO to the memory hole, never to be seen or heard again. Now Blair's version of the future was not taken from what he observed while switching sides and recognizing the false deception of both, the controlling factor is the government itself. TODO
+			Now he recognized the false paradigm, he saw that socialism and communism were both constructs and that they were designed to control the people and keep them dummed down and sub servient. We haven't moved that far from futilism. And everybody that really thinks about it has only to read 'a slave wage earnerer in today's society' and understand that the connection can very easily be made about a person working in the sale's industry or a person that is working for an hourly wage they can see easily how they are a slave, a indentured servant working for the rest of their life, never able to get ahead. 
+			And really this falls all back on education, because education is the foundation of moving ahead, of learning and expanding your world view. In the work 1984 the nation of Oceania is and always has been at war with East Asia and constant bombardments of the island are a daily reminder of that war. And when it becomes apparent to Winston that the bombs are being purpetrated TODO by the very nation that he calls home, Winston has the choice to ignore the facts or speak out against them. Now when we are given new information that conflicts with our current perception of the universe, how should we behave? Should we ignore the knowledge and disregard it out of hand? Or should we accept it for what it is and examine the truth behind it?
+			The latter is of course the choice to be made...
+			
+			Thanks to August Harper!
+		@END
+			Well, I thought a lot about whether putting it into here. But there is no other choice, we have to talk about it. Now.#
+		@1140
+			@11.4 The biggest mistake in human history@1110@##
+		@END
+
+	
 	@END
 @END
 

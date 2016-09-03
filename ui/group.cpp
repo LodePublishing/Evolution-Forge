@@ -1,46 +1,30 @@
 #include "group.hpp"
 #include "button.hpp"
 
-UI_Group::UI_Group(UI_Object* group_parent, const Rect& initial_rect, const Size bottom_right_distance, const ePositionMode position_mode, const eString txt ) :
-	UI_Object(group_parent, initial_rect, bottom_right_distance, position_mode, AUTO_SIZE),
-	title(txt==NULL_STRING?NULL:new UI_StaticText(this, txt, Rect(Point(0,0) - Size(3, 14), Size(0,0)), Size(0,0), BRIGHT_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST, AUTO_SIZE)),
-	highlighted(false)
+UI_Group::UI_Group(UI_Object* group_parent, const Rect& initial_rect, const Size bottom_right_distance, const eGroupType group_type, const ePositionMode position_mode, const eString txt ) :
+	UI_Object(group_parent, initial_rect, bottom_right_distance, position_mode, NOTHING),
+	title(txt==NULL_STRING?NULL:new UI_StaticText(this, txt, Rect(Point(0,0) - Size(3, 14), Size(0,0)), Size(0,0), BRIGHT_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
+	highlighted(false),
+	groupType(group_type)
 { }
 
 UI_Group::~UI_Group() {
 	delete title;
 }
 
-UI_Group::UI_Group(const UI_Group& object) :
-	UI_Object((UI_Object)object),
-	title(object.title==NULL?NULL:new UI_StaticText(*object.title)),
-	highlighted(false)
-{ }
-
-UI_Group& UI_Group::operator=(const UI_Group& object)
-{
-	(UI_Object)(*this) = (UI_Object)object;
-	delete title;
-	if(object.title)
-		title = new UI_StaticText(*object.title);
-	highlighted = object.highlighted;
-	return(*this);
-}
-
 void UI_Group::reloadStrings() {
 	UI_Object::reloadStrings();
 }
 
-#include <sstream>
-void UI_Group::calculateBoxSize(const eGroupType group_type)
+void UI_Group::calculateBoxSize()
 {
 	UI_Object* tmp = getChildren();
 	if(!tmp)
 		return;
-//	resetMinXY();
 	unsigned int maxWidth = 0;
 	unsigned int maxHeight = 0;
 	unsigned int i = 0;
+	unsigned int current_height = 2;
 	do
 	{
 		if((tmp==title)||(!tmp->isShown())) 
@@ -48,22 +32,22 @@ void UI_Group::calculateBoxSize(const eGroupType group_type)
 			tmp=tmp->getNextBrother();
 			continue;
 		}
-		switch(group_type)
+		switch(groupType)
 		{
 			case CUSTOM_GROUP:break;
 			case ONE_COLOUMN_GROUP:
 			{
-				tmp->setOriginalPosition(Point(0, i*(tmp->getHeight()+tmp->getDistanceBottomRight().GetHeight())));
-				i++;
+				tmp->setOriginalPosition(Point(2, current_height + tmp->getDistanceBottomRight().getHeight()));
+				current_height += tmp->getHeight() + tmp->getDistanceBottomRight().getHeight();
 			}break;			 
 			case TWO_COLOUMNS_GROUP:
 			{
-				tmp->setOriginalPosition(Point((i%2) * (tmp->getWidth() + tmp->getDistanceBottomRight().GetWidth() + 5), (i/2)*(tmp->getHeight()+tmp->getDistanceBottomRight().GetHeight()+5)));
+				tmp->setOriginalPosition(Point(2 + (i%2) * (tmp->getWidth() + tmp->getDistanceBottomRight().getWidth() + 5), (i/2)*(tmp->getHeight()+tmp->getDistanceBottomRight().getHeight()+5  + tmp->getDistanceBottomRight().getHeight())));
 				i++;
 			}break;
 			case HORIZONTAL_GROUP:
 			{
-				tmp->setOriginalPosition(Point(i * (tmp->getWidth() + tmp->getDistanceBottomRight().GetWidth()), 0));
+				tmp->setOriginalPosition(Point(i * (tmp->getWidth() + tmp->getDistanceBottomRight().getWidth()) + 2, 3 + tmp->getDistanceBottomRight().getHeight() ));
 				i++;
 			}break;	
 		}
@@ -75,18 +59,35 @@ void UI_Group::calculateBoxSize(const eGroupType group_type)
 	{
 		if((tmp->isShown())&&(tmp!=title))
 		{
-//			tmp->adjustPositionAndSize(ADJUST_ONLY_POSITION);
-			if(maxWidth < tmp->getRelativeRightBound())
-				maxWidth = tmp->getRelativeRightBound();
-			if(maxHeight < tmp->getRelativeLowerBound())
-				maxHeight = tmp->getRelativeLowerBound();
+			Rect r = tmp->getTargetRect();
+			if(maxWidth < r.getRight())
+				maxWidth = r.getRight();
+			if(maxHeight < r.getBottom())
+				maxHeight = r.getBottom();
 		}
 		tmp = tmp->getNextBrother();
 	} while(tmp!=getChildren());
-	Size s = Size(maxWidth + 10, maxHeight + 10);
+	Size s = Size(maxWidth , maxHeight+7);
 
-//	adjustRelativeRect(Rect(getTargetPosition(), s));
-	adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, s);//Size(maxWidth + 5, getChildren()->getPrevBrother()->getAbsoluteLowerBound() - getChildren()->getAbsoluteUpperBound()));
+//	setOriginalSize(s);
+	adjustRelativeRect(Rect(getTargetPosition(), s));
+}
+
+void UI_Group::alignWidth(const unsigned int width)
+{
+	UI_Object* tmp = getChildren();
+	do
+	{
+		if((tmp->isShown())&&(tmp!=title))
+			tmp->setOriginalWidth(width);
+		tmp = tmp->getNextBrother();
+	} while(tmp!=getChildren());
+}
+
+void UI_Group::reloadOriginalSize()
+{
+	UI_Object::reloadOriginalSize();
+	calculateBoxSize();
 }
 
 void UI_Group::draw(DC* dc) const
@@ -94,23 +95,23 @@ void UI_Group::draw(DC* dc) const
 	if(checkForNeedRedraw())
 	{
 		if(highlighted)
-			dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+			dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 		else	
-			dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
+			dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));
 		if(title!=NULL)
 		{
-			dc->SetBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-			dc->DrawEdgedRoundedRectangle(getAbsolutePosition() - Size(4, 6), getSize(), 4);
+			dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
+			dc->DrawRoundedRectangle(getAbsolutePosition() - Size(4, 5), getSize(), 4);
 		
 			Size s = title->getTextSize();
 		  	Rect titleRect = Rect(getAbsolutePosition() - Size(5, 15), s + Size(5,2));
-			dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-			dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
+			dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+			dc->setBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
 			dc->DrawEdgedRoundedRectangle(titleRect, 2);
 		}
 		else
 		{
-			dc->SetBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
+			dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
 			dc->DrawEdgedRoundedRectangle(getAbsolutePosition()-Size(3,0), getSize()+Size(6,0), 4);
 		}
 	}
@@ -122,7 +123,14 @@ void UI_Group::process()
 //	if(!isShown())
 //		return; //?
 	UI_Object::process();
+//	calculateBoxSize(); ?
+//	nur aufrufen wenn: child added/removed, child size changed
 
+	if(childrenWereChanged)
+	{
+		calculateBoxSize();
+		childrenWereChanged = false;
+	}
 	if(getAbsoluteRect().Inside(mouse))
 	{
 		if(!highlighted)
@@ -137,32 +145,18 @@ void UI_Group::process()
 			highlighted = false;
 		}
 	
-/*	UI_Object* tmp = getChildren();
-	if(!tmp)
-		return;
-	do
-	{
-		if(tmp->checkForNeedRedraw())
-		{
-			setNeedRedrawMoved(); //?
-			return;
-		}
-		tmp = tmp->getNextBrother();
-	} while(tmp!=getChildren());*/	
+	if((checkForNeedRedraw())&&(getParent()))
+		setNeedRedrawMoved();
 }
 
 
 UI_Object* UI_Group::checkToolTip()
 {
-//	if(!(Rect(getAbsolutePosition(), boxSize).Inside(mouse)))
-//		return(0);
 	return(UI_Object::checkToolTip());
 }
 
 UI_Object* UI_Group::checkHighlight()
 {
-//	if(!(Rect(getAbsolutePosition(), boxSize).Inside(mouse)))
-//		return(0);
 	return(UI_Object::checkHighlight());
 }
 

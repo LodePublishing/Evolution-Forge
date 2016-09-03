@@ -160,11 +160,12 @@
 	@640x480
 		Main window, 640, 480, 480, absolute coordinates, 0, 0
 		Intro window, 600, 400, 400, dock center inside of, Main window
-		Message window, 200, 75, 75, dock bottom center inside of, Main window
+		Message window, 225, 75, 75, dock bottom center inside of, Main window
 		Help window, 600, 400, 400, dock center inside of, Main window
-		Settings window, 550, 368, 368, dock center inside of, Main window
+		Settings window, 300, 400, 460, dock center inside of, Main window
+		Database window, 320, 450, 450, absolute coordinates, 0, 25 
+		Datalist window, 290, 350, 350, absolute coordinates, 10, 40
 		Map window, 600, 450, 450, dock center inside of, Main window
-		Database window, 600, 450, 450, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 500, 200, 200, dock bottom center inside of, Main window
 		Save box window, 350, 150, 150, dock center inside of, Main window
@@ -172,10 +173,11 @@
 	@800x600
 		Main window, 800, 600, 600, absolute coordinates, 0, 0
 		Intro window, 750, 500, 500, dock center inside of, Main window
-		Message window, 250, 100, 100, dock bottom center inside of, Main window
+		Message window, 275, 125, 125, dock bottom center inside of, Main window
 		Help window, 750, 500, 500, dock center inside of, Main window
-		Settings window, 600, 400, 400, dock center inside of, Main window
-		Database window, 750, 550, 550, dock center inside of, Main window
+		Settings window, 325, 400, 450, dock center inside of, Main window
+		Database window, 395, 570, 570, absolute coordinates, 0, 25
+		Datalist window, 350, 350, 350, absolute coordinates, 10, 40
 		Map window, 750, 550, 550, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 600, 250, 250, dock bottom center inside of, Main window
@@ -185,10 +187,11 @@
 	@1024x768
 		Main window, 1024, 768, 768, Main window, absolute coordinates, 0, 0
 		Intro window, 900, 600, 600, dock center inside of, Main window
-		Message window, 300, 125, 125, dock bottom center inside of, Main window
+		Message window, 350, 150, 150, dock bottom center inside of, Main window
 		Help window, 900, 600, 600, dock center inside of, Main window
-		Settings window, 700, 450, 450, dock center inside of, Main window
-		Database window, 950, 700, 700, dock center inside of, Main window
+		Settings window, 350, 350, 450, dock center inside of, Main window
+		Database window, 505, 720, 720, absolute coordinates, 5, 30 
+		Datalist window, 450, 350, 350, absolute coordinates, 10, 40
 		Map window, 950, 700, 700, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 700, 300, 300, dock bottom center inside of, Main window
@@ -199,8 +202,9 @@
 		Intro window, 1100, 900, 700, dock center inside of, Main window
 		Message window, 400, 150, 150, dock top center inside of, Main window
 		Help window, 1100, 900, 700, dock center inside of, Main window
-		Settings window, 800, 500, 500, dock center inside of, Main window
-		Database window, 1200, 900, 900, dock center inside of, Main window
+		Settings window, 375, 450, 510, dock center inside of, Main window
+		Database window, 620, 990, 990, absolute coordinates, 5, 25 
+		Datalist window, 500, 350, 350, absolute coordinates, 10, 40
 		Map window, 1200, 900, 900, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 800, 350, 350, dock bottom center inside of, Main window
@@ -1381,6 +1385,7 @@
 	"BOGRAPH_WINDOW_BITMAP" = "bograph_window.jpg"
 	"BO_WINDOW_BITMAP" = "bo_window.jpg"
 	"CLEMENS_BITMAP" = "clemens.jpg"
+	"LIST_BITMAP" = "list"
 
 @END
 
@@ -1457,14 +1462,14 @@
 	@END
 
 	@GREEN_THEME
-		"RADIO_OFF" = "yellow_radio_off"
-		"RADIO_ON" = "yellow_radio_on"
+		"RADIO_OFF" = "green_radio_off"
+		"RADIO_ON" = "green_radio_on"
 		"BULLET_BITMAP" = "yellow_bullet"
 	@END
 	
 	@GREY_THEME
-		"RADIO_OFF" = "yellow_radio_off"
-		"RADIO_ON" = "yellow_radio_on"
+		"RADIO_OFF" = "grey_radio_off"
+		"RADIO_ON" = "grey_radio_on"
 		"BULLET_BITMAP" = "yellow_bullet"
 	@END
 @END
@@ -1603,13 +1608,20 @@
 	20, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0, 17, 17,    0,  0,  0, 14, 14,   11, 11, 19, 11, 19
 
 # location button
-	20, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0,  3,  3,    0,  0,  0, 14,  14,    5,  5,  5,  5,  5
+	40, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0,  3,  3,    0,  0,  0, 14,  14,    5,  5,  5,  5,  5
 # time button
-	20, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0,  3,  3,    0,  0,  0, 14,  14,    9,  9,  9,  9,  9
+	40, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0,  3,  3,    0,  0,  0, 14,  14,    9,  9,  9,  9,  9
 # checkButton
-	40, 0,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   16, 16, 16, 16, 16,    0,  0,  0, 17,  17,   14, 14, 15, 14, 15
+	25, 2,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    3,  3,  3,  3,  3,    3,  3,  3, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,   14, 14, 15, 14, 15
+# open tree
+	40, 2,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    3,  3,  3,  3,  3,    3,  3,  3, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,    1,  1,  2,  1,  2
+# non-goal bo-entry dataentry (with setting bitmap)
+	40, 2,    0,  0,  4,  0,  4,    0,  0,  6,  4,  6,    3,  3,  3,  3,  3,    3,  3,  3, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,   41, 41, 41, 41, 41
+
 # text button
 	40, 2,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    2,  2,  2,  2,  2,    2,  2,  2, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,    0,  0,  0,  0,  0
+# visited text button
+	40, 2,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    4,  4,  4,  4,  4,    4,  4,  4,  2,  2,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,    0,  0,  0,  0,  0
 
 # new button
 	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   21, 21, 21, 21, 21
@@ -1643,40 +1655,45 @@
 
 @BUTTON_WIDTH
 	@640x480
-# standard button width
-		90
-# small
+		30
 		65
+		90
+		160
 	@END
-
 	@800x600
-		110
+		40
 		80
+		110
+		180
 	@END
 	@1024x768
-		120
+		45
 		90
+		120
+		200
 	@END
 	@1280x1024
-		140
+		50
 		100
+		140
+		220
 	@END
 @END
 
 
 @SOUNDS
-	click.wav
-	geneti_9.mp3, LOOP
-	mouseover.wav
-	swishin.wav
-	swishout.wav
-	swishlock.wav
-	scorefillend.wav
-	click.wav
-	trescue.wav
-	buzz.wav
-	tmedcure.wav
-	intro.mp3
+	"NULL_SOUND" = "click.wav"
+	"LALA_SOUND" = "scherzo.mid", (LOOP)
+	"MOUSEOVER_SOUND" = "mouseover.wav"
+	"SWISHIN_SOUND" = "swishin.wav"
+	"SWISHOUT_SOUND" = "swishout.wav"
+	"SWISHLOCK_SOUND" = "swishlock.wav"
+	"CLICKED_SOUND" = "scorefillend.wav"
+	"CLICK_SOUND" = "click.wav"
+	"COMPLETE_SOUND" = "trescue.wav"
+	"ERROR_SOUND" = "buzz.wav"
+	"RING_SOUND" = "tmedcure.wav"
+	"INTRO_SOUND" = "intro.mp3"
 @END
 
 

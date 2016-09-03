@@ -8,8 +8,6 @@ class UnitMenu : public UI_Menu
 {
 	public:
 		UnitMenu(UI_Object* unit_parent, const Rect unit_rect, const Size distance_bottom_right, const ePositionMode position_mode);
-		UnitMenu(const UnitMenu& object);
-		UnitMenu& operator=(const UnitMenu& object);
 		~UnitMenu();
 		void process();
 		void draw(DC* dc) const;
@@ -18,15 +16,18 @@ class UnitMenu : public UI_Menu
 		void assignAnarace(ANABUILDORDER* unit_anarace);
 		const bool secondLevel() const;
 
+		const bool addKey(unsigned int key, unsigned int mod);
 		void reloadOriginalSize();
 	private:
 		ANABUILDORDER* anarace;
 // sort units in the addgoal menu rather by facility than by unitType		
 		unsigned int facilityNumber;
-		unsigned int facility[GAS_SCV+1];
+		unsigned int facility[LAST_UNIT];
 		// facility number -> real facility 
-//		void setMenuLevel(const unsigned int menu_level);
 		void processMenu();
+		eRace lastRace;
+		UnitMenu(const UnitMenu& object);
+		UnitMenu& operator=(const UnitMenu& object);
 };
 
 #endif // _GUI_UNITMENU_HPP

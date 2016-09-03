@@ -10,8 +10,6 @@ class BoGraphEntry : public UI_Button
 {
 	public:
 		BoGraphEntry(UI_Object* entry_parent, const Rect bg_rect, const Size distance_bottom_right, const PROGRAM& bg_program, const unsigned int my_number);
-		BoGraphEntry(const BoGraphEntry& object);
-		BoGraphEntry& operator=(const BoGraphEntry& object);
 		~BoGraphEntry();
 		
 		void process();
@@ -22,6 +20,9 @@ class BoGraphEntry : public UI_Button
 		const unsigned int getNumber() const;
 	private:
 		unsigned int number;
+	
+		BoGraphEntry(const BoGraphEntry& object);
+		BoGraphEntry& operator=(const BoGraphEntry& object);
 };
 
 inline void BoGraphEntry::setNumber(const unsigned int my_number) {

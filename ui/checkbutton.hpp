@@ -5,7 +5,7 @@
 
 // TODO: aus 'text' einen TEXT_BUTTON machen!
 
-class UI_CheckButton : public UI_Object
+class UI_CheckButton : public UI_Button
 {
 	public:
 		UI_CheckButton& operator=(const UI_CheckButton& object);
@@ -14,22 +14,22 @@ class UI_CheckButton : public UI_Object
 		~UI_CheckButton();
 		UI_Object* checkToolTip();
 		const bool isChecked() const;
-		const bool isClicked() const;
+		const bool isClicked();
 		void check(const bool is_checked = true);
 		void process();
 		void draw(DC* dc) const;
 	private:
 		bool checked;
-		UI_Button* checkButton;
-		UI_StaticText* text;
+		UI_Button* text;
+//		UI_StaticText* text;
 };
 
-inline const bool UI_CheckButton::isClicked() const {
-	return(checkButton->isLeftClicked());
+inline const bool UI_CheckButton::isClicked() {
+	return(isLeftClicked()||text->isLeftClicked());
 }
 
 inline const bool UI_CheckButton::isChecked() const {
-	return(checkButton->isCurrentlyActivated());
+	return(isCurrentlyActivated()||text->isCurrentlyActivated());
 }
 
 

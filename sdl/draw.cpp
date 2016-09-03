@@ -46,12 +46,12 @@
 
 void DC::Draw_VLine_8bit(const signed int x0, const signed int y0, const signed int y1) const
 {
-	Uint8 pen_col = (Uint8)(*pen.GetColor());
+	Uint8 pen_col = (Uint8)(*pen.getColor());
 	register Uint8 *p = (Uint8*)surface->pixels + y0 * surface->pitch + x0;
 	register signed int i = y1-y0+1;
 	Lock();
 
-	if(pen.GetStyle() == SHORT_DASH_PEN_STYLE)
+	if(pen.getStyle() == SHORT_DASH_PEN_STYLE)
 	{
 		for(;i--;)
 		{
@@ -76,12 +76,12 @@ void DC::Draw_VLine_8bit(const signed int x0, const signed int y0, const signed 
 
 void DC::Draw_VLine_16bit(const signed int x0, const signed int y0, const signed int y1) const
 {
-	Uint16 pen_col = (Uint16)(*pen.GetColor());
+	Uint16 pen_col = (Uint16)(*pen.getColor());
 	register Uint8 *p = (Uint8*)surface->pixels + y0 * surface->pitch + (x0 << 1);
 	register signed int i = y1-y0+1;
 	Lock();
 
-	if(pen.GetStyle() == SHORT_DASH_PEN_STYLE)
+	if(pen.getStyle() == SHORT_DASH_PEN_STYLE)
 	{
 		for(;i--;)
 		{
@@ -105,7 +105,7 @@ void DC::Draw_VLine_16bit(const signed int x0, const signed int y0, const signed
 
 void DC::Draw_VLine_24bit(const signed int x0, const signed int y0, const signed int y1) const
 {
-	Uint32 pen_col = (Uint32)(*pen.GetColor());
+	Uint32 pen_col = (Uint32)(*pen.getColor());
 	Uint8 colorbyte0 = (Uint8) (pen_col & 0xff);
 	Uint8 colorbyte1 = (Uint8) ((pen_col >> 8) & 0xff);
 	Uint8 colorbyte2 = (Uint8) ((pen_col >> 16) & 0xff);
@@ -114,7 +114,7 @@ void DC::Draw_VLine_24bit(const signed int x0, const signed int y0, const signed
 	register signed int k = y1-y0+1;
 
 	Lock();
-	if(pen.GetStyle() == SHORT_DASH_PEN_STYLE)
+	if(pen.getStyle() == SHORT_DASH_PEN_STYLE)
 	{
 		for(;k--;)
 		{
@@ -133,14 +133,14 @@ void DC::Draw_VLine_24bit(const signed int x0, const signed int y0, const signed
 
 void DC::Draw_VLine_32bit(const signed int x0, const signed int y0, const signed int y1) const
 {
-	Uint32 pen_col = (Uint32)(*pen.GetColor());
+	Uint32 pen_col = (Uint32)(*pen.getColor());
 
 	register Uint8 *p = (Uint8*)surface->pixels + y0 * surface->pitch + (x0 << 2);
 	register signed int i = y1-y0+1;
 	
 	Lock();
 	
-	if(pen.GetStyle() == SHORT_DASH_PEN_STYLE)
+	if(pen.getStyle() == SHORT_DASH_PEN_STYLE)
 	{
 		for(;i--;)
 		{
@@ -160,14 +160,14 @@ void DC::Draw_VLine_32bit(const signed int x0, const signed int y0, const signed
 
 void DC::Draw_HLine_8bit(const signed int x0, const signed int y0, const signed int x1) const
 {
-	Uint32 col = (Uint32)(*pen.GetColor());
+	Uint32 col = (Uint32)(*pen.getColor());
 	register Uint8* p = (Uint8*)surface->pixels + y0 * surface->pitch + x0;
 	memset(p, col, x1-x0+1);
 }
 
 void DC::Draw_HLine_16bit(const signed int x0, const signed int y0, const signed int x1) const
 {
-	Uint32 col = (Uint32)(*pen.GetColor());
+	Uint32 col = (Uint32)(*pen.getColor());
 	register Uint8* p = (Uint8*)surface->pixels + y0 * surface->pitch + (x0 << 1);
 	register signed int i = x1-x0+1;
 	
@@ -183,7 +183,7 @@ void DC::Draw_HLine_16bit(const signed int x0, const signed int y0, const signed
 
 void DC::Draw_HLine_24bit(const signed int x0, const signed int y0, const signed int x1) const
 {
-	Uint32 col = (Uint32)(*pen.GetColor());
+	Uint32 col = (Uint32)(*pen.getColor());
 	Uint8 colorbyte0 = (Uint8) (col & 0xff);
 	Uint8 colorbyte1 = (Uint8) ((col >> 8) & 0xff);
 	Uint8 colorbyte2 = (Uint8) ((col >> 16) & 0xff);
@@ -200,7 +200,7 @@ void DC::Draw_HLine_24bit(const signed int x0, const signed int y0, const signed
 
 void DC::Draw_HLine_32bit(const signed int x0, const signed int y0, const signed int x1) const
 {
-	Uint32 pen_col = (Uint32)(*pen.GetColor());
+	Uint32 pen_col = (Uint32)(*pen.getColor());
 
 	Lock();
 	
@@ -235,7 +235,7 @@ void DC::Draw_Line_8bit(signed int x1, signed int y1, signed int x2, signed int 
 		swaptmp = pixx;pixx = pixy;pixy = swaptmp;
 	}
 
-	Uint8 col = (Uint8)(*pen.GetColor());
+	Uint8 col = (Uint8)(*pen.getColor());
 	register signed int x = 0;
 	register signed int y = 0;
 	
@@ -266,7 +266,7 @@ void DC::Draw_Line_16bit(signed int x1, signed int y1, signed int x2, signed int
 		swaptmp = pixx;pixx = pixy;pixy = swaptmp;
 	}
 	
-	Uint16 col = (Uint16)(*pen.GetColor());
+	Uint16 col = (Uint16)(*pen.getColor());
 	register signed int x = 0;
 	register signed int y = 0;
 	
@@ -297,7 +297,7 @@ void DC::Draw_Line_24bit(signed int x1, signed int y1, signed int x2, signed int
 		swaptmp = pixx;pixx = pixy;pixy = swaptmp;
 	}
 
-	Color col = (*pen.GetColor());
+	Color col = (*pen.getColor());
 	Uint8 colorbyte0 = (Uint8) (col & 0xff);
 	Uint8 colorbyte1 = (Uint8) ((col >> 8) & 0xff);
 	Uint8 colorbyte2 = (Uint8) ((col >> 16) & 0xff);
@@ -333,7 +333,7 @@ void DC::Draw_Line_32bit(signed int x1, signed int y1, signed int x2, signed int
 		swaptmp = pixx;pixx = pixy;pixy = swaptmp;
 	}
 
-	Uint32 col = (Uint32)(*pen.GetColor());
+	Uint32 col = (Uint32)(*pen.getColor());
 	register signed int x = 0;
 	register signed int y = 0;
 
@@ -366,7 +366,7 @@ void DC::DrawEmptyRound_8bit(const signed int x, const signed int y, const unsig
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint8 col = (Uint8)(*pen.GetColor());
+	Uint8 col = (Uint8)(*pen.getColor());
 
 	Lock();
 	{
@@ -460,7 +460,7 @@ void DC::DrawEmptyRound_16bit(const signed int x, const signed int y, const unsi
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 col = (Uint32)(*pen.GetColor());
+	Uint32 col = (Uint32)(*pen.getColor());
 	
 	Lock();
 	{
@@ -548,7 +548,7 @@ void DC::DrawEmptyRound_24bit(const signed int x, const signed int y, const unsi
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 col = (Uint32)(*pen.GetColor());
+	Uint32 col = (Uint32)(*pen.getColor());
 	
 	Uint8 colorbyte0 = (Uint8) (col & 0xff);
 	Uint8 colorbyte1 = (Uint8) ((col >> 8) & 0xff);
@@ -619,7 +619,7 @@ void DC::DrawEmptyRound_32bit(const signed int x, const signed int y, const unsi
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 pen_col = (Uint32)(*pen.GetColor());
+	Uint32 pen_col = (Uint32)(*pen.getColor());
 
 	Lock();
 	{
@@ -731,7 +731,7 @@ void DC::DrawFilledRound_8bit(const signed int x, const signed int y, const unsi
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 col = (Uint32)(*brush.GetColor());
+	Uint32 col = (Uint32)(*brush.getColor());
 
 // Rechteck von linker Kante nach rechter Kante
 	if(dy > 0)
@@ -807,7 +807,7 @@ void DC::DrawFilledRound_16bit(const signed int x, const signed int y, const uns
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 col = (Uint32)(*brush.GetColor());
+	Uint32 col = (Uint32)(*brush.getColor());
 
 // Rechteck von linker Kante nach rechter Kante
 	if(dy > 0)
@@ -882,7 +882,7 @@ void DC::DrawFilledRound_24bit(const signed int x, const signed int y, const uns
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 col = (Uint32)(*brush.GetColor());
+	Uint32 col = (Uint32)(*brush.getColor());
 
 // Rechteck von linker Kante nach rechter Kante
 	if(dy > 0)
@@ -960,7 +960,7 @@ void DC::DrawFilledRound_32bit(const signed int x, const signed int y, const uns
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 col = (Uint32)(*brush.GetColor());
+	Uint32 col = (Uint32)(*brush.getColor());
 
 // FILLED
 	// Rechteck von linker Kante nach rechter Kante
@@ -1057,7 +1057,7 @@ void DC::DrawEmptyEdgedRound_8bit(const signed int x, const signed int y, const 
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 pen_col = (Uint32)(*pen.GetColor());
+	Uint32 pen_col = (Uint32)(*pen.getColor());
 
 // ------ TOP AND LOWER HORIZONTAL LINE ------
 	Lock();
@@ -1132,7 +1132,7 @@ void DC::DrawEmptyEdgedRound_16bit(const signed int x, const signed int y, const
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 pen_col = (Uint32)(*pen.GetColor());
+	Uint32 pen_col = (Uint32)(*pen.getColor());
 	
 // ------ TOP AND LOWER HORIZONTAL LINE ------
 	Lock();
@@ -1217,7 +1217,7 @@ void DC::DrawEmptyEdgedRound_24bit(const signed int x, const signed int y, const
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 pen_col = (Uint32)(*pen.GetColor());
+	Uint32 pen_col = (Uint32)(*pen.getColor());
 
 // ------ TOP AND LOWER HORIZONTAL LINE ------
 	Uint8 colorbyte0 = (Uint8) (pen_col & 0xff);
@@ -1286,7 +1286,7 @@ void DC::DrawEmptyEdgedRound_32bit(const signed int x, const signed int y, const
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 pen_col = (Uint32)(*pen.GetColor());
+	Uint32 pen_col = (Uint32)(*pen.getColor());
 
 // ------ TOP AND LOWER HORIZONTAL LINE ------
 	{
@@ -1381,7 +1381,7 @@ void DC::DrawFilledEdgedRound_8bit(const signed int x, const signed int y, const
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 col = (Uint32)(*brush.GetColor());
+	Uint32 col = (Uint32)(*brush.getColor());
 
 // Rechteck von linker Kante nach rechter Kante
 	if(dy > 0)
@@ -1408,7 +1408,7 @@ void DC::DrawFilledEdgedRound_8bit(const signed int x, const signed int y, const
 	unsigned int rightInc = 6;
 	signed int diagonalInc = 10 - (corner<<2);
 	signed int d = 3 - (corner<<1);
-	unsigned int radius = corner;
+	unsigned int radius = corner - 1;
 	unsigned int i = 0;
 	Lock();
 // Halbkreis
@@ -1454,7 +1454,7 @@ void DC::DrawFilledEdgedRound_16bit(const signed int x, const signed int y, cons
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 col = (Uint32)(*brush.GetColor());
+	Uint32 col = (Uint32)(*brush.getColor());
 
 // Rechteck von linker Kante nach rechter Kante
 	if(dy > 0)
@@ -1481,7 +1481,7 @@ void DC::DrawFilledEdgedRound_16bit(const signed int x, const signed int y, cons
 	unsigned int rightInc = 6;
 	signed int diagonalInc = 10 - (corner<<2);
 	signed int d = 3 - (corner<<1);
-	unsigned int radius = corner;
+	unsigned int radius = corner - 1;
 	unsigned int i = 0;
 	
 	Lock();
@@ -1528,7 +1528,7 @@ void DC::DrawFilledEdgedRound_24bit(const signed int x, const signed int y, cons
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 col = (Uint32)(*brush.GetColor());
+	Uint32 col = (Uint32)(*brush.getColor());
 
 // Rechteck von linker Kante nach rechter Kante
 	if(dy > 0)
@@ -1559,7 +1559,7 @@ void DC::DrawFilledEdgedRound_24bit(const signed int x, const signed int y, cons
 	unsigned int rightInc = 6;
 	signed int diagonalInc = 10 - (corner<<2);
 	signed int d = 3 - (corner<<1);
-	unsigned int radius = corner;
+	unsigned int radius = corner - 1;
 	unsigned int i = 0;
 
 	Lock();
@@ -1602,7 +1602,7 @@ void DC::DrawFilledEdgedRound_32bit(const signed int x, const signed int y, cons
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 col = (Uint32)(*brush.GetColor());
+	Uint32 col = (Uint32)(*brush.getColor());
 
 
 	// Rechteck von linker Kante nach rechter Kante
@@ -1630,7 +1630,7 @@ void DC::DrawFilledEdgedRound_32bit(const signed int x, const signed int y, cons
 	unsigned int rightInc = 6;
 	signed int diagonalInc = 10 - (corner << 2);
 	signed int d = 3 - (corner << 2);
-	unsigned int radius = corner;
+	unsigned int radius = corner - 1;
 	unsigned int i = 0;
 
 	Lock();
@@ -1683,7 +1683,7 @@ void DC::DrawFilledEdgedBorderRound_8bit(const signed int x, const signed int y,
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 brush_col = (Uint32)(*brush.GetColor());
+	Uint32 brush_col = (Uint32)(*brush.getColor());
 
 // Rechteck von linker Kante nach rechter Kante
 	
@@ -1714,15 +1714,15 @@ void DC::DrawFilledEdgedBorderRound_8bit(const signed int x, const signed int y,
 	Uint32 dark_pen_col, bright_pen_col, pen_col;
 	if(pressedRectangle)
 	{
-		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 110));
-		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 70));
-		pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 90));
+		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 110));
+		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 70));
+		pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 90));
 	
 	} else
 	{
-		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 80));
-		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 120));
-		pen_col = (Uint32)(*pen.GetColor());
+		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 80));
+		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 120));
+		pen_col = (Uint32)(*pen.getColor());
 	}
 	
 	Lock();
@@ -1833,7 +1833,7 @@ void DC::DrawFilledEdgedBorderRound_16bit(const signed int x, const signed int y
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 brush_col = (Uint32)(*brush.GetColor());
+	Uint32 brush_col = (Uint32)(*brush.getColor());
 
 // Rechteck von linker Kante nach rechter Kante
 	
@@ -1864,15 +1864,15 @@ void DC::DrawFilledEdgedBorderRound_16bit(const signed int x, const signed int y
 	Uint32 dark_pen_col, bright_pen_col, pen_col;
 	if(pressedRectangle)
 	{
-		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 110));
-		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 70));
-		pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 90));
+		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 110));
+		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 70));
+		pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 90));
 	
 	} else
 	{
-		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 80));
-		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 120));
-		pen_col = (Uint32)(*pen.GetColor());
+		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 80));
+		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 120));
+		pen_col = (Uint32)(*pen.getColor());
 	}
 	
 
@@ -1993,7 +1993,7 @@ void DC::DrawFilledEdgedBorderRound_24bit(const signed int x, const signed int y
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 brush_col = (Uint32)(*brush.GetColor());
+	Uint32 brush_col = (Uint32)(*brush.getColor());
 
 // Rechteck von linker Kante nach rechter Kante
 	if(dy > 0)
@@ -2022,18 +2022,18 @@ void DC::DrawFilledEdgedBorderRound_24bit(const signed int x, const signed int y
 	
 	if(pressedRectangle)
 	{
-		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 70));
-		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 110));
-		pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 90));
+		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 70));
+		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 110));
+		pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 90));
 	
 	} else
 	{
-		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 80));
-		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 120));
-		pen_col = (Uint32)(*pen.GetColor());
+		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 80));
+		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 120));
+		pen_col = (Uint32)(*pen.getColor());
 	}
 
-//	Uint32 pen_col = (Uint32)(*pen.GetColor());
+//	Uint32 pen_col = (Uint32)(*pen.getColor());
 
 	Uint8 colorbyte0 = (Uint8) (pen_col & 0xff);
 	Uint8 colorbyte1 = (Uint8) ((pen_col >> 8) & 0xff);
@@ -2161,7 +2161,7 @@ void DC::DrawFilledEdgedBorderRound_32bit(const signed int x, const signed int y
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 brush_col = (Uint32)(*brush.GetColor());
+	Uint32 brush_col = (Uint32)(*brush.getColor());
 
 // Rechteck von linker Kante nach rechter Kante
 	if(dy > 0)
@@ -2188,15 +2188,15 @@ void DC::DrawFilledEdgedBorderRound_32bit(const signed int x, const signed int y
 	Uint32 dark_pen_col, bright_pen_col, pen_col;
 	if(pressedRectangle)
 	{
-		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 110));
-		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 70));
-		pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 90));
+		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 110));
+		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 70));
+		pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 90));
 	
 	} else
 	{
-		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 80));
-		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 120));
-		pen_col = (Uint32)(*pen.GetColor());
+		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 80));
+		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 120));
+		pen_col = (Uint32)(*pen.getColor());
 	}
 // ------ TOP AND LOWER HORIZONTAL LINE ------
 	{

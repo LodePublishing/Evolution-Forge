@@ -15,10 +15,9 @@ enum eScoreMode
 
 enum eInitMode
 {
-	INACTIVE,
-	NOT_INITIALIZED,
-	RACE_CHOSEN_BUT_NOT_INITIALIZED,
-	INITIALIZED	
+	INACTIVE, // => 'add player' button active
+	NOT_INITIALIZED, // => waiting for user to pick race
+	INITIALIZED	// everything ok
 };
 
 /*enum ePlayerEntryMenu
@@ -56,6 +55,9 @@ class PlayerEntry : public UI_Object
 
 		const signed int getAssignedRace() const;
 		void mouseHasLeft();
+
+		const bool addPlayer();
+		const bool openRaceMenu();
 	private:
 		void closeMenus();
 		unsigned int oldScoreCounter[20], oldScore[20];
@@ -69,15 +71,15 @@ class PlayerEntry : public UI_Object
 //		UI_Radio* menuRadio;
 		UI_Button* raceMenuButton;
 		RaceMenu* raceMenu;
-		UI_Button* removePlayerButton;
+//		UI_Button* removePlayerButton;
 		UI_StaticText* scoreText;
 		UI_StaticText* goalsFulfilledText;
-		UI_Button* addPlayerButton;
+//		UI_Button* addPlayerButton;
 		bool optimizing;
 		unsigned int number;
 
 		signed int assignRace;
-
+		bool raceMenuOpenedExternally;
 };
 
 

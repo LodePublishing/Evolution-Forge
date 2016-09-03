@@ -28,7 +28,7 @@ BoGraphWindow& BoGraphWindow::operator=(const BoGraphWindow& object)
 }*/
 
 BoGraphWindow::BoGraphWindow(UI_Object* bograph_parent, const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max) :
-	UI_Window(bograph_parent, BOGRAPH_WINDOW_TITLE_STRING, theme.lookUpPlayerRect(BUILD_ORDER_GRAPH_WINDOW, game_number, game_max, player_number, player_max), theme.lookUpPlayerMaxHeight(BUILD_ORDER_GRAPH_WINDOW, game_number, game_max, player_number, player_max), SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0, 15, 1000, 1000)),
+	UI_Window(bograph_parent, BOGRAPH_WINDOW_TITLE_STRING, theme.lookUpPlayerRect(BUILD_ORDER_GRAPH_WINDOW, game_number, game_max, player_number, player_max), theme.lookUpPlayerMaxHeight(BUILD_ORDER_GRAPH_WINDOW, game_number, game_max, player_number, player_max), SCROLLED, AUTO_SIZE_ADJUST, Rect(0, 15, 1000, 1000)),
 	markAni(0),
 	anarace(NULL),
 	selectedItems(),
@@ -88,7 +88,10 @@ void BoGraphWindow::processList()
 {
 	if(!isShown())
 		return;
-	if(anarace==NULL) return;
+	if((anarace==NULL)||(anarace->getRealTimer()==coreConfiguration.getMaxTime()))
+	{
+		return;
+	}
 	
 // the legend
 // and the time steps on the top
@@ -107,15 +110,15 @@ void BoGraphWindow::processList()
 //			legend.push_back(new UI_StaticText(this, os.str(), Rect(Point(5+i*((getClientRectWidth()-20)/((anarace->getRealTimer())/30)), 6), Size(0,0)), Size(0,0), TIMESTEPS_TEXT_COLOR, SMALL_FONT, DO_NOT_ADJUST));
 		}*/
 	
-	unsigned int unitCounter[UNIT_TYPE_COUNT][MAX_TIME];
-	unsigned int height[UNIT_TYPE_COUNT];
-	unsigned int lines[UNIT_TYPE_COUNT];
+	unsigned int unitCounter[LAST_UNIT][MAX_TIME];
+	unsigned int height[LAST_UNIT];
+	unsigned int lines[LAST_UNIT];
 	
 	std::priority_queue<unsigned int, std::vector<unsigned int> > endOfBuild;
 
-	memset(unitCounter, 0, MAX_TIME * UNIT_TYPE_COUNT * sizeof(int));
-	memset(height, 0, UNIT_TYPE_COUNT * sizeof(int));
-	memset(lines, 0, UNIT_TYPE_COUNT * sizeof(int));
+	memset(unitCounter, 0, MAX_TIME * LAST_UNIT * sizeof(int));
+	memset(height, 0, LAST_UNIT * sizeof(int));
+	memset(lines, 0, LAST_UNIT * sizeof(int));
 
 // ------ CALCULATE NUMBER OF ENTRIES FOR EACH FACILITY ------ 
 // = maximum of force - availible for each facility
@@ -143,7 +146,7 @@ void BoGraphWindow::processList()
 
 
 //calculate number of lines per facility and adjust the height
-	for(unsigned int i=UNIT_TYPE_COUNT;i--;)
+	for(unsigned int i=LAST_UNIT; i--;)
 	{
 // at maximum MIN_HEIGHT items in one row
 		while(height[i]>MIN_HEIGHT) {
@@ -248,7 +251,7 @@ void BoGraphWindow::processList()
 #ifdef _SCC_DEBUG
 			// no facility found!?
 			if(i == boGraphLine.end())
-				toLog("ERROR: GraphWindow::processList(), Facility not found");
+				toErrorLog("ERROR (BoGraphWindow::processList()): Facility not found");
 #endif
 
 			if(*j == (*i)->boGraphList.end())
@@ -358,7 +361,7 @@ void BoGraphWindow::mouseHasMoved()
 	for(std::list<Order*>::const_iterator order = orderList->begin(); order != orderList->end(); ++order)
 		if(anarace->getProgramFacility((*order)->getIP()))
 		{
-			Rect edge=Rect(getAbsolutePosition()+getRelativeClientRectPosition()+(*order)->brect.GetTopLeft(), (*order)->brect.GetSize());
+			Rect edge=Rect(getAbsolutePosition()+getRelativeClientRectPosition()+(*order)->brect.getTopLeft(), (*order)->brect.getSize());
 			if(edge.Inside(mouse))
 			{
 				ownMarkedUnit=(*order)->getUnit();
@@ -380,12 +383,12 @@ void BoGraphWindow::draw(DC* dc) const
 	{
 		UI_Window::drawWindow(dc);
 	
-		dc->SetFont(UI_Object::theme.lookUpFont(SMALL_FONT));
+		dc->setFont(UI_Object::theme.lookUpFont(SMALL_FONT));
 // and the time steps on the top
-		dc->SetTextForeground(*theme.lookUpColor(TIMESTEPS_TEXT_COLOR));
-// dc->SetPen(*BLACK_PEN); TODO
+		dc->setTextForeground(*theme.lookUpColor(TIMESTEPS_TEXT_COLOR));
+// dc->setPen(*BLACK_PEN); TODO
 		unsigned int timesteps=((anarace->getRealTimer())/30)/10+1; // TODO <- wird 0? bei Protoss? :-/
-		dc->SetPen(*theme.lookUpPen(GREEN_TIMESTEPS_PEN));
+		dc->setPen(*theme.lookUpPen(GREEN_TIMESTEPS_PEN));
 		for(unsigned int i=0;i<(anarace->getRealTimer())/30;++i)
 			if(i%timesteps==0)
 			{
@@ -411,8 +414,19 @@ void BoGraphWindow::draw(DC* dc) const
 	
 }
 
-void BoGraphWindow::assignAnarace(ANABUILDORDER* bograph_anarace) {
+void BoGraphWindow::assignAnarace(ANABUILDORDER* bograph_anarace) 
+{
+	bool race_has_changed = false;
+	if((anarace==NULL)||(lastRace != bograph_anarace->getRace()))
+		race_has_changed = true;
 	anarace = bograph_anarace;
+	if(race_has_changed)
+	{
+		lastRace = anarace->getRace();
+		for(std::list<BoGraphLine*>::iterator i = boGraphLine.begin(); i != boGraphLine.end(); ++i)
+			delete(*i);
+		boGraphLine.clear();
+	}
 }
 
 

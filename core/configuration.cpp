@@ -10,11 +10,13 @@ CoreConfiguration::CoreConfiguration():
 	maxTime(MAX_TIME),
 	maxTimeOut(MAX_TIMEOUT),
 	maxLength(MAX_LENGTH),
-	maxRuns(MAX_RUNS),
-	maxGenerations(200),
 	noise(0),
 	preprocessBuildOrder(false),
 	allowGoalAdaption(true),
+	allowWaitOrders(true),
+	waitAccuracy(5),
+	fastCalculation(false),
+	expansionSet(true),
 	configurationFile("settings/core.cfg")
 { }
 
@@ -29,11 +31,13 @@ void CoreConfiguration::initDefaults()
 	setMaxTime(MAX_TIME-1);
 	setMaxTimeOut(MAX_TIMEOUT-1);
 	setMaxLength(MAX_LENGTH-1);
-	setMaxRuns(MAX_RUNS-1);
-	setMaxGenerations(MAX_GENERATIONS-1);
 	setNoise(0);
 	setPreprocessBuildOrder(false);
 	setAllowGoalAdaption(true);
+	setAllowWaitOrders(true);
+	setWaitAccuracy(5);
+	setFastCalculation(false);
+	setExpansionSet(true);
 	configurationFile = "settings/core.cfg";
 }
 
@@ -42,29 +46,36 @@ void CoreConfiguration::saveToFile() const
 	std::ofstream pFile(configurationFile.c_str(), std::ios_base::out | std::ios_base::trunc);
 	if(!pFile.is_open())
 	{
-		toLog("ERROR: (CoreConfiguration::saveToFile): File could not be opened.");
+		toErrorLog("ERROR (CoreConfiguration::saveToFile()): File could not be opened.");
 		return;
 	}
 	pFile << "@SETTINGS" << std::endl;
-	pFile << "# max time in seconds" << std::endl;
-	pFile << "    \"Max Time\" = \"" << getMaxTime() << "\"" << std::endl;
-	pFile << "# Preprocessing not implemented yet" << std::endl;
-	pFile << "    \"Preprocess Buildorder\" = \"" << (int)isPreprocessBuildOrder() << "\"" << std::endl;
-	pFile << "    \"Max unchanged Generations\" = \"" << getMaxGenerations() << "\"" << std::endl;
-	pFile << "    \"Max Length\" = \"" << getMaxLength() << "\"" << std::endl;
-	pFile << "    \"Max Runs\" = \"" << getMaxRuns() << "\"" << std::endl;
-	pFile << "# max timeout for each order in seconds" << std::endl;
-	pFile << "    \"Max Timeout\" = \"" << getMaxTimeOut() << "\"" << std::endl;
-	pFile << "# Allow to ignore unnecessary goals (mainly for using for example only \"lair\" instead of both \"lair\" and \"hatchery\")" << std::endl;
-	pFile << "    \"Allow goal adaption\" = \"" << (int)isAllowGoalAdaption() << "\"" << std::endl;
-	pFile << "# Breed Factor:" << std::endl;
-	pFile << "# This parameter determines how many % of the players will multiply by 1:1 copy" << std::endl;
-	pFile << "    \"Breed Factor\" = \"" << getBreedFactor() << "\"" << std::endl;
-	pFile << "# Crossing Over:" << std::endl;
-	pFile << "# This parameter determines how many % of the players will multiply by crossover# CURRENTLY NOT IMPLEMENTED!" << std::endl;
-	pFile << "    \"Crossing Over\" = \"" << getCrossingOver() << "\"" << std::endl;
-	pFile << "# 10 means that programs will be sorted into 10-program groups, the best 2 are" << std::endl;
-	pFile << "# taken for reproduction and the worst two are replaced by their children" << std::endl;
+	pFile << "# fast calculation?" << std::endl;
+	pFile << "\"Fast calculation\" = \"" << (int)isFastCalculation() << "\"" << std::endl;
+	pFile << "# use broodwar units?" << std::endl;
+	pFile << "\"Expansion set\" = \"" << (int)isExpansionSet() << "\"" << std::endl;
+	pFile << "# allow orders to let the build order wait a certain time instead of building units and buildings as soon as possible?" << std::endl;
+	pFile << "\"Allow wait orders\" = \"" << (int)isAllowWaitOrders() << "\"" << std::endl;
+	pFile << "# time in seconds to wait (less = the more accurate but needs also much more time to calculate)" << std::endl;
+	pFile << "\"Wait accuracy\" = \"" << (int)getWaitAccuracy() << "\"" << std::endl;	
+
+//	pFile << "# max time in seconds" << std::endl;
+//	pFile << "    \"Max Time\" = \"" << getMaxTime() << "\"" << std::endl;
+//	pFile << "# Preprocessing not implemented yet" << std::endl;
+//	pFile << "    \"Preprocess Buildorder\" = \"" << (int)isPreprocessBuildOrder() << "\"" << std::endl;
+//	pFile << "    \"Max Length\" = \"" << getMaxLength() << "\"" << std::endl;
+//	pFile << "# max timeout for each order in seconds" << std::endl;
+//	pFile << "    \"Max Timeout\" = \"" << getMaxTimeOut() << "\"" << std::endl;
+//	pFile << "# Allow to ignore unnecessary goals (mainly for using for example only \"lair\" instead of both \"lair\" and \"hatchery\")" << std::endl;
+//	pFile << "    \"Allow goal adaption\" = \"" << (int)isAllowGoalAdaption() << "\"" << std::endl;
+//	pFile << "# Breed Factor:" << std::endl;
+//	pFile << "# This parameter determines how many % of the players will multiply by 1:1 copy" << std::endl;
+//	pFile << "    \"Breed Factor\" = \"" << getBreedFactor() << "\"" << std::endl;
+//	pFile << "# Crossing Over:" << std::endl;
+//	pFile << "# This parameter determines how many % of the players will multiply by crossover# CURRENTLY NOT IMPLEMENTED!" << std::endl;
+//	pFile << "    \"Crossing Over\" = \"" << getCrossingOver() << "\"" << std::endl;
+//	pFile << "# 10 means that programs will be sorted into 10-program groups, the best 2 are" << std::endl;
+//	pFile << "# taken for reproduction and the worst two are replaced by their children" << std::endl;
 	pFile << "@END" << std::endl;
 }
 
@@ -73,14 +84,14 @@ void CoreConfiguration::loadConfigurationFile()
 	std::ifstream pFile(configurationFile.c_str());
 	if(!pFile.is_open())
 	{
-		toLog("WARNING: (CoreConfiguration::loadConfigurationFile): File not found.");
-		toLog("-> Creating new file with default values...");
+		toErrorLog("WARNING: (CoreConfiguration::loadConfigurationFile): File not found.");
+		toErrorLog("-> Creating new file with default values...");
 		initDefaults();
 		saveToFile();		
 		return;
 	}
 	
-	toLog("* Loading " + configurationFile);
+	toInitLog("* Loading " + configurationFile);
 	
 	std::fstream::pos_type old_pos = pFile.tellg();
 	char line[1024];
@@ -90,7 +101,7 @@ void CoreConfiguration::loadConfigurationFile()
 		{
 			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
 #ifdef _SCC_DEBUG
-			toLog("WARNING: (CoreConfiguration::loadConfigurationFile) Long line!");
+			toErrorLog("WARNING: (CoreConfiguration::loadConfigurationFile) Long line!");
 #endif
 		}
 		
@@ -109,11 +120,28 @@ void CoreConfiguration::loadConfigurationFile()
 			if(!parse_block_map(pFile, block))
 			{
 #ifdef _SCC_DEBUG
-				toLog("WARNING: (CoreConfiguration::loadConfigurationFile) No concluding @END was found!");
+				toErrorLog("WARNING: (CoreConfiguration::loadConfigurationFile) No concluding @END was found!");
 #endif
 			}
 			std::map<std::string, std::list<std::string> >::iterator i;
-			if((i=block.find("Allow goal adaption"))!=block.end()){
+			if((i=block.find("Fast calculation"))!=block.end()){
+				i->second.pop_front();
+			   	setFastCalculation(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Expansion set"))!=block.end()){
+				i->second.pop_front();
+			   	setExpansionSet(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Allow wait orders"))!=block.end()){
+				i->second.pop_front();
+			   	setAllowWaitOrders(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Wait accuracy"))!=block.end()){
+				i->second.pop_front();
+			   	setWaitAccuracy(atoi(i->second.front().c_str()));
+			}
+
+/*			if((i=block.find("Allow goal adaption"))!=block.end()){
 				i->second.pop_front();
 			   	setAllowGoalAdaption(atoi(i->second.front().c_str()));
 			}
@@ -128,10 +156,6 @@ void CoreConfiguration::loadConfigurationFile()
 			if((i=block.find("Max Length"))!=block.end()){
 				i->second.pop_front();
 			   	setMaxLength(atoi(i->second.front().c_str()));
-			}
-			if((i=block.find("Max Runs"))!=block.end()){
-				i->second.pop_front();
-			   	setMaxRuns(atoi(i->second.front().c_str()));
 			}
 			if((i=block.find("Preprocess Buildorder"))!=block.end()){
 				i->second.pop_front();
@@ -148,11 +172,48 @@ void CoreConfiguration::loadConfigurationFile()
 			if((i=block.find("Max unchanged Generations"))!=block.end()){
 				i->second.pop_front();
 			   	setMaxGenerations(atoi(i->second.front().c_str()));
-			}
+			}*/
 		}
 		old_pos = pFile.tellg();
 	}// END while
 } // schoen :)
+
+const bool CoreConfiguration::setFastCalculation(const bool fast_calculation) 
+{
+	if(fastCalculation == fast_calculation)
+		return(false);
+	fastCalculation = fast_calculation;
+	return(true);
+}
+
+const bool CoreConfiguration::setExpansionSet(const bool expansion_set) 
+{
+	if(expansionSet == expansion_set)
+		return(false);
+	expansionSet = expansion_set;
+	return(true);
+}
+
+const bool CoreConfiguration::setAllowWaitOrders(const bool allow_wait_orders) 
+{
+	if(allowWaitOrders == allow_wait_orders)
+		return(false);
+	allowWaitOrders = allow_wait_orders;
+	return(true);
+}
+
+const bool CoreConfiguration::setWaitAccuracy(const unsigned int wait_accuracy) 
+{
+	if(waitAccuracy == wait_accuracy)
+		return(false);
+#ifdef _SCC_DEBUG
+	if((wait_accuracy<1) || (wait_accuracy>120)) {
+		toErrorLog("WARNING (CoreConfiguration::setWaitAccuracy()): Value out of range.");return(false);
+	}
+#endif
+	waitAccuracy = wait_accuracy;
+	return(true);
+}
 
 const bool CoreConfiguration::setCrossingOver(const unsigned int crossing_over) 
 {
@@ -160,7 +221,7 @@ const bool CoreConfiguration::setCrossingOver(const unsigned int crossing_over)
 		return(false);
 #ifdef _SCC_DEBUG
 	if((crossing_over<MIN_CROSSING_OVER)||(crossing_over>MAX_CROSSING_OVER)) {
-		toLog("WARNING: (CoreConfiguration::setCrossingOver): Value out of range.");return(false);
+		toErrorLog("WARNING: (CoreConfiguration::setCrossingOver): Value out of range.");return(false);
 	}
 #endif
 	crossingOver = crossing_over;
@@ -173,7 +234,7 @@ const bool CoreConfiguration::setBreedFactor(const unsigned int breed_factor)
 		return(false);
 #ifdef _SCC_DEBUG
 	if((breed_factor<MIN_BREED_FACTOR)||(breed_factor>MAX_BREED_FACTOR)) {
-		toLog("WARNING: (CoreConfiguration::setBreedFactor): Value out of range.");return(false);
+		toErrorLog("WARNING: (CoreConfiguration::setBreedFactor): Value out of range.");return(false);
 	}
 #endif
 	breedFactor = breed_factor;
@@ -185,7 +246,7 @@ const bool CoreConfiguration::setMutationFactor(const unsigned int mutation_fact
 		return(false);
 #ifdef _SCC_DEBUG
 	if((mutation_factor<MIN_MUTATION_FACTOR)||(mutation_factor>MAX_MUTATION_FACTOR)) {
-		toLog("WARNING: (CoreConfiguration::setMutationFactor): Value out of range.");return(false);
+		toErrorLog("WARNING: (CoreConfiguration::setMutationFactor): Value out of range.");return(false);
 	}
 #endif
 	mutationFactor = mutation_factor;
@@ -198,7 +259,7 @@ const bool CoreConfiguration::setMaxTime(const unsigned int max_time)
 		return(false);
 #ifdef _SCC_DEBUG
 	if((max_time<MIN_TIME)||(max_time>MAX_TIME)) {
-		toLog("WARNING: (CoreConfiguration::setMaxTime): Value out of range.");return(false);
+		toErrorLog("WARNING: (CoreConfiguration::setMaxTime): Value out of range.");return(false);
 	}
 #endif
 	maxTime = max_time;
@@ -211,7 +272,7 @@ const bool CoreConfiguration::setMaxTimeOut(const unsigned int time_out)
 		return(false);
 #ifdef _SCC_DEBUG
 	if((time_out<MIN_TIMEOUT)||(time_out>MAX_TIMEOUT)) {
-		toLog("WARNING: (CoreConfiguration::setMaxTimeOut): Value out of range.");return(false);
+		toErrorLog("WARNING: (CoreConfiguration::setMaxTimeOut): Value out of range.");return(false);
 	}
 #endif
 	maxTimeOut = time_out;
@@ -224,36 +285,10 @@ const bool CoreConfiguration::setMaxLength(const unsigned int max_length)
 		return(false);
 #ifdef _SCC_DEBUG
 	if((max_length<MIN_LENGTH)||(max_length>MAX_LENGTH)) {
-		toLog("WARNING: (CoreConfiguration::setMaxLength): Value out of range.");return(false);
+		toErrorLog("WARNING: (CoreConfiguration::setMaxLength): Value out of range.");return(false);
 	}
 #endif
 	maxLength = max_length;
-	return(true);
-}
-
-const bool CoreConfiguration::setMaxRuns(const unsigned int max_runs) 
-{
-	if(maxRuns == max_runs)
-		return(false);
-#ifdef _SCC_DEBUG
-	if((max_runs<MIN_RUNS)||(max_runs>MAX_RUNS)) {
-		toLog("WARNING: (CoreConfiguration::setMaxRuns): Value out of range.");return(false);
-	}
-#endif
-	maxRuns = max_runs;
-	return(true);
-}
-
-const bool CoreConfiguration::setMaxGenerations(const unsigned int max_generations) 
-{
-	if(maxGenerations == max_generations)
-		return(false);
-#ifdef _SCC_DEBUG
-	if((max_generations<MIN_GENERATIONS)||(max_generations>MAX_GENERATIONS)) {
-		toLog("WARNING: (CoreConfiguration::setMaxGenerations): Value out of range.");return(false);
-	}
-#endif
-	maxGenerations = max_generations;
 	return(true);
 }
 
@@ -263,7 +298,7 @@ const bool CoreConfiguration::setNoise(const unsigned int desired_noise)
 		return(false);
 #ifdef _SCC_DEBUG
 	if((desired_noise < MIN_NOISE)||(desired_noise > MAX_NOISE)) {
-		toLog("WARNING: (CoreConfiguration::setNoise): Value out of range.");return(false);
+		toErrorLog("WARNING: (CoreConfiguration::setNoise): Value out of range.");return(false);
 	}
 #endif
 	noise = desired_noise;

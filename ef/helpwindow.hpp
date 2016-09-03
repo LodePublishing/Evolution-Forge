@@ -14,6 +14,7 @@ class HelpWindow : public UI_Window
 		void draw(DC* dc) const;
 		void reloadOriginalSize();
 		void gotoChapter(unsigned int chapter);
+		void goBack();
 	private:
 		eHelpChapter helpChapter; // ~~
 		UI_LongText* text;

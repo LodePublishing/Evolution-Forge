@@ -9,9 +9,7 @@
 class BoEntry : public UI_Button
 {
 	public:
-		BoEntry(const BoEntry& object);
-		BoEntry& operator=(const BoEntry& object);
-		BoEntry(UI_Object* bo_parent, const Point top_left, const Size distance_bottom_right, const eString bo_unit, const PROGRAM& bo_program, const unsigned int my_number);
+		BoEntry(UI_Object* bo_parent, const Point top_left, const Size distance_bottom_right, const eString bo_unit, const PROGRAM& bo_program, const unsigned int unit_count, const unsigned int my_id);
 		~BoEntry();
 
 		const unsigned int changed();
@@ -22,26 +20,43 @@ class BoEntry : public UI_Button
 //		const bool locked() const;
 
 		PROGRAM program;
-		void setNumber(const unsigned int my_number);
-		const unsigned int getNumber() const;
+		
+		void setId(const unsigned int my_id);
+		const unsigned int getId() const;
+
+		void setCount(const unsigned int unit_count);
+		const unsigned int getCount() const;
+		
 		static bool doLockSound;		
 	private:
-		unsigned int number;
+		unsigned int id;
+		unsigned int count;
 //		bool fixed;
 //        UI_Button* addUnit;
 //      UI_Button* subUnit;
 //    UI_Button* cancelUnit; TODO
+		BoEntry(const BoEntry& object);
+		BoEntry& operator=(const BoEntry& object);
 };
 
-inline void BoEntry::setNumber(const unsigned int my_number)
+inline void BoEntry::setId(const unsigned int my_id)
 {
-	number = my_number;
+	id = my_id;
 }
 
-inline const unsigned int BoEntry::getNumber() const
+inline const unsigned int BoEntry::getId() const
 {
-	return(number);
+	return(id);
 }
 
+inline void BoEntry::setCount(const unsigned int unit_count)
+{
+	count = unit_count;
+}
+
+inline const unsigned int BoEntry::getCount() const
+{
+	return(count);
+}
 #endif
 

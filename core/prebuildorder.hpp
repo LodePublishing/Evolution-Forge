@@ -234,7 +234,7 @@ inline void PREBUILDORDER::setIP(const unsigned int ip)
 {
 #ifdef _SCC_DEBUG
 	if(ip >= MAX_LENGTH) {
-		toLog("DEBUG: (PREBUILDORDER::setIP): Value out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setIP): Value out of range.");return;
 	}
 #endif
 	IP = ip;
@@ -244,7 +244,7 @@ inline const unsigned int PREBUILDORDER::getIP() const
 {
 #ifdef _SCC_DEBUG
 	if(IP>MAX_LENGTH) {
-		toLog("DEBUG: (PREBUILDORDER::getIP): Variable IP not initialized.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getIP): Variable IP not initialized.");return(0);
 	}
 #endif
 	return(IP);
@@ -277,7 +277,7 @@ inline const unsigned int PREBUILDORDER::getLocationTotal(const unsigned int loc
 {
 #ifdef _SCC_DEBUG
 	if((location_number >= (*getMap())->getMaxLocations())) {
-		toLog("DEBUG: (PREBUILDORDER::getLocationTotal): Value location_number out of range.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getLocationTotal): Value location_number out of range.");return(0);
 	}
 #endif
 	return((*unit)[playerNum][location_number].getTotal(unit_type));
@@ -289,10 +289,10 @@ inline void PREBUILDORDER::setCode(const unsigned int ip, const unsigned int val
 {
 #ifdef _SCC_DEBUG
 	if(ip >= MAX_LENGTH) {
-		toLog("DEBUG: (PREBUILDORDER::setCode): Value ip out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setCode): Value ip out of range.");return;
 	}	
-	if(value >= UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (PREBUILDORDER::setCode): Value out of range.");return;
+	if(value >= LAST_UNIT) {
+		toErrorLog("DEBUG: (PREBUILDORDER::setCode): Value out of range.");return;
 	}
 #endif
 	Code[ip]=value;
@@ -306,10 +306,10 @@ inline const unsigned int PREBUILDORDER::getCode(const unsigned int ip) const
 {
 #ifdef _SCC_DEBUG
 	if(ip >= MAX_LENGTH) {
-		toLog("DEBUG: (PREBUILDORDER::getCode): Value ip out of range.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getCode): Value ip out of range.");return(0);
 	}	
-	if(Code[ip] >= UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (PREBUILDORDER::getCode): Variable Code not initialized.");return(0);
+	if(Code[ip] >= LAST_UNIT) {
+		toErrorLog("DEBUG: (PREBUILDORDER::getCode): Variable Code not initialized.");return(0);
 	}
 #endif
 	return(Code[ip]);
@@ -318,8 +318,8 @@ inline const unsigned int PREBUILDORDER::getCode(const unsigned int ip) const
 inline const unsigned int PREBUILDORDER::getCurrentCode() const
 {
 #ifdef _SCC_DEBUG
-	if(Code[getIP()] >= UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (PREBUILDORDER::getCurrentCode): Variable Code not initialized.");return(0);
+	if(Code[getIP()] >= LAST_UNIT) {
+		toErrorLog("DEBUG: (PREBUILDORDER::getCurrentCode): Variable Code not initialized.");return(0);
 	}
 #endif
 	return(Code[getIP()]);
@@ -329,7 +329,7 @@ inline const unsigned int PREBUILDORDER::getCurrentCode() const
 {
 #ifdef _SCC_DEBUG
 	if(ip > MAX_LENGTH) {
-		toLog("DEBUG: (PREBUILDORDER::getMarker): Value ip out of range.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getMarker): Value ip out of range.");return(0);
 	}
 #endif
 	return(Marker[ip]); 
@@ -342,10 +342,10 @@ inline const unsigned int PREBUILDORDER::getMapLocationAvailible(const unsigned 
 {
 #ifdef _SCC_DEBUG
 	if(player >= (*getMap())->getMaxPlayer()) {
-		toLog("DEBUG: (PREBUILDORDER::getMapLocationAvailible): Value player out of range.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getMapLocationAvailible): Value player out of range.");return(0);
 	}
 	if((location_number >= (*getMap())->getMaxLocations()))	{
-		toLog("DEBUG: (PREBUILDORDER::getMapLocationAvailible): Value location_number out of range.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getMapLocationAvailible): Value location_number out of range.");return(0);
 	}
 #endif
 	return((*unit)[player][location_number].getAvailible(unit_type));
@@ -355,10 +355,10 @@ inline const unsigned int PREBUILDORDER::getMapLocationTotal(const unsigned int 
 {
 #ifdef _SCC_DEBUG
 	if(player >= (*getMap())->getMaxPlayer()) {
-		toLog("DEBUG: (PREBUILDORDER::getMapLocationTotal): Value player out of range.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getMapLocationTotal): Value player out of range.");return(0);
 	}
 	if((location_number >= (*getMap())->getMaxLocations()))	{
-		toLog("DEBUG: (PREBUILDORDER::getMapLocationTotal): Value location_number out of range.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getMapLocationTotal): Value location_number out of range.");return(0);
 	}
 #endif
 	return((*unit)[player][location_number].getTotal(unit_type));
@@ -368,10 +368,10 @@ inline void PREBUILDORDER::setMapLocationAvailible(const unsigned int player, co
 {
 #ifdef _SCC_DEBUG
 	if(player >= (*getMap())->getMaxPlayer()) {
-		toLog("DEBUG: (PREBUILDORDER::setMapLocationAvailible): Value player out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setMapLocationAvailible): Value player out of range.");return;
 	}
 	if((location_number >= (*getMap())->getMaxLocations()))	{
-		toLog("DEBUG: (PREBUILDORDER::setMapLocationAvailible): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setMapLocationAvailible): Value location_number out of range.");return;
 	}
 #endif
 	(*unit)[player][location_number].setAvailible(unit_type, availible);
@@ -381,10 +381,10 @@ inline void PREBUILDORDER::setMapLocationTotal(const unsigned int player, const 
 {
 #ifdef _SCC_DEBUG
 	if(player >= (*getMap())->getMaxPlayer()) {
-		toLog("DEBUG: (PREBUILDORDER::setMapLocationTotal): Value player out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setMapLocationTotal): Value player out of range.");return;
 	}
 	if((location_number >= (*getMap())->getMaxLocations()))	{
-		toLog("DEBUG: (PREBUILDORDER::setMapLocationTotal): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setMapLocationTotal): Value location_number out of range.");return;
 	}
 #endif
 	(*unit)[player][location_number].setTotal(unit_type, total);
@@ -394,10 +394,10 @@ inline void PREBUILDORDER::addOneMapLocationAvailible(const unsigned int player,
 {
 #ifdef _SCC_DEBUG
 	if(player >= (*getMap())->getMaxPlayer()) {
-		toLog("DEBUG: (PREBUILDORDER::addOneMapLocationAvailible): Value player out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::addOneMapLocationAvailible): Value player out of range.");return;
 	}
 	if((location_number >= (*getMap())->getMaxLocations())) {
-		toLog("DEBUG: (PREBUILDORDER::addOneMapLocationAvailible): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::addOneMapLocationAvailible): Value location_number out of range.");return;
 	}
 #endif
 	(*unit)[player][location_number].addOneAvailible(unit_type);
@@ -407,10 +407,10 @@ inline void PREBUILDORDER::addOneMapLocationTotal(const unsigned int player, con
 {
 #ifdef _SCC_DEBUG
 	if(player >= (*getMap())->getMaxPlayer()) {
-		toLog("DEBUG: (PREBUILDORDER::addOneMapLocationTotal): Value player out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::addOneMapLocationTotal): Value player out of range.");return;
 	}
 	if((location_number >= (*getMap())->getMaxLocations())) {
-		toLog("DEBUG: (PREBUILDORDER::addOneMapLocationTotal): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::addOneMapLocationTotal): Value location_number out of range.");return;
 	}
 #endif
 	(*unit)[player][location_number].addOneTotal(unit_type);
@@ -420,10 +420,10 @@ inline void PREBUILDORDER::removeOneMapLocationAvailible(const unsigned int play
 {
 #ifdef _SCC_DEBUG
 	if(player >=(*getMap())->getMaxPlayer()) {
-		toLog("DEBUG: (PREBUILDORDER::addOneMapLocationAvailible): Value player out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::addOneMapLocationAvailible): Value player out of range.");return;
 	}
 	if((location_number >= (*getMap())->getMaxLocations())) {
-		toLog("DEBUG: (PREBUILDORDER::addOneMapLocationAvailible): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::addOneMapLocationAvailible): Value location_number out of range.");return;
 	}
 #endif
 	(*unit)[player][location_number].removeOneAvailible(unit_type);
@@ -434,10 +434,10 @@ inline void PREBUILDORDER::removeOneMapLocationTotal(const unsigned int player, 
 {
 #ifdef _SCC_DEBUG
 	if(player >=(*getMap())->getMaxPlayer()) {
-		toLog("DEBUG: (PREBUILDORDER::addOneMapLocationTotal): Value player out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::addOneMapLocationTotal): Value player out of range.");return;
 	}
 	if((location_number >= (*getMap())->getMaxLocations())) {
-		toLog("DEBUG: (PREBUILDORDER::addOneMapLocationTotal): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::addOneMapLocationTotal): Value location_number out of range.");return;
 	}
 #endif
 	(*unit)[player][location_number].removeOneTotal(unit_type);
@@ -447,7 +447,7 @@ inline const unsigned int PREBUILDORDER::getLocationAvailible(const unsigned int
 {
 #ifdef _SCC_DEBUG
 	if((location_number >= (*getMap())->getMaxLocations()))	{
-		toLog("DEBUG: (PREBUILDORDER::getLocationAvailible): Value location_number out of range.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getLocationAvailible): Value location_number out of range.");return(0);
 	}
 #endif
 //	return((*location)[location_number].getAvailible(unit_type));
@@ -458,7 +458,7 @@ inline void PREBUILDORDER::setLocationAvailible(const unsigned int location_numb
 {
 #ifdef _SCC_DEBUG
 	if((location_number >= (*getMap())->getMaxLocations())) {
-		toLog("DEBUG: (PREBUILDORDER::setLocationAvailible): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setLocationAvailible): Value location_number out of range.");return;
 	}
 #endif
 //	(*location)[location_number].setAvailible(unit_type, availible);
@@ -469,7 +469,7 @@ inline void PREBUILDORDER::setLocationTotal(const unsigned int location_number, 
 {
 #ifdef _SCC_DEBUG
 	if(location_number >= (*getMap())->getMaxLocations())	{
-		toLog("DEBUG: (PREBUILDORDER::setLocationTotal): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setLocationTotal): Value location_number out of range.");return;
 	}
 #endif
 //	(*location)[location_number].setTotal(unit_type, total);
@@ -480,7 +480,7 @@ inline void PREBUILDORDER::addLocationAvailible(const unsigned int location_numb
 {
 #ifdef _SCC_DEBUG
 	if(location_number >= (*getMap())->getMaxLocations()) {
-		toLog("DEBUG: (PREBUILDORDER::addLocationAvailible): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::addLocationAvailible): Value location_number out of range.");return;
 	}
 #endif	
 	(*unit)[playerNum][location_number].addAvailible(unit_type, availible);
@@ -496,7 +496,7 @@ inline void PREBUILDORDER::addLocationTotal(const unsigned int location_number, 
 {
 #ifdef _SCC_DEBUG
 	if(location_number >= (*getMap())->getMaxLocations())	{
-		toLog("DEBUG: (PREBUILDORDER::addLocationTotal): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::addLocationTotal): Value location_number out of range.");return;
 	}
 #endif
 	(*unit)[playerNum][location_number].addTotal( unit_type, total );
@@ -512,7 +512,7 @@ inline void PREBUILDORDER::addOneLocationAvailible(const unsigned int location_n
 {
 #ifdef _SCC_DEBUG
 	if(location_number >= (*getMap())->getMaxLocations()) {
-		toLog("DEBUG: (PREBUILDORDER::addLocationAvailible): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::addLocationAvailible): Value location_number out of range.");return;
 	}
 #endif
 	(*unit)[playerNum][location_number].addOneAvailible( unit_type );
@@ -530,7 +530,7 @@ inline void PREBUILDORDER::addOneLocationTotal(const unsigned int location_numbe
 {
 #ifdef _SCC_DEBUG
 	if(location_number >= (*getMap())->getMaxLocations()) {
-		toLog("DEBUG: (PREBUILDORDER::addLocationTotal): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::addLocationTotal): Value location_number out of range.");return;
 	}
 #endif
 	(*unit)[playerNum][location_number].addOneTotal( unit_type );
@@ -546,7 +546,7 @@ inline void PREBUILDORDER::removeOneLocationAvailible(const unsigned int locatio
 {
 #ifdef _SCC_DEBUG
 	if((location_number >= (*getMap())->getMaxLocations())) {
-		toLog("DEBUG: (PREBUILDORDER::removeOneLocationAvailible): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::removeOneLocationAvailible): Value location_number out of range.");return;
 	}
 #endif
 	(*unit)[playerNum][location_number].removeOneAvailible( unit_type );
@@ -564,7 +564,7 @@ inline void PREBUILDORDER::removeOneLocationTotal(const unsigned int location_nu
 {
 #ifdef _SCC_DEBUG
 	if((location_number >= (*getMap())->getMaxLocations())) {
-		toLog("DEBUG: (PREBUILDORDER::removeOneLocationTotal): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::removeOneLocationTotal): Value location_number out of range.");return;
 	}
 #endif
 	(*unit)[playerNum][location_number].removeOneTotal( unit_type );
@@ -583,7 +583,7 @@ inline void PREBUILDORDER::setNeedSupply(const unsigned int need_supply)
 {
 #ifdef _SCC_DEBUG
 	if(need_supply > 10*MAX_SUPPLY) {
-		toLog("DEBUG: (PREBUILDORDER::setNeedSupply): Value need_supply out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setNeedSupply): Value need_supply out of range.");return;
 	}
 #endif
 	needSupply = need_supply;
@@ -593,7 +593,7 @@ inline const unsigned int PREBUILDORDER::getNeedSupply() const
 {
 #ifdef _SCC_DEBUG
 	if(needSupply > 10*MAX_SUPPLY) {
-		toLog("DEBUG: (PREBUILDORDER::getNeedSupply): Variable not initialized.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getNeedSupply): Variable not initialized.");return(0);
 	}
 #endif
 	return(needSupply);
@@ -603,7 +603,7 @@ inline void PREBUILDORDER::setHaveSupply(const unsigned int have_supply)
 {
 #ifdef _SCC_DEBUG
 	if(have_supply > 10*MAX_SUPPLY) {
-		toLog("DEBUG: (PREBUILDORDER::setHaveSupply): Value have_supply out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setHaveSupply): Value have_supply out of range.");return;
 	}
 #endif
 	haveSupply = have_supply;
@@ -613,7 +613,7 @@ inline const unsigned int PREBUILDORDER::getHaveSupply() const
 {
 #ifdef _SCC_DEBUG
 	if(haveSupply>10*MAX_SUPPLY) {
-		toLog("DEBUG: (PREBUILDORDER::getHaveSupply): Variable not initialized.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getHaveSupply): Variable not initialized.");return(0);
 	}
 #endif
 	return(haveSupply);
@@ -626,7 +626,7 @@ inline void PREBUILDORDER::setMinerals(const unsigned int have_minerals)
 {
 #ifdef _SCC_DEBUG
 	if(have_minerals > MAX_MINERALS) {
-		toLog("DEBUG: (PREBUILDORDER::setMinerals): Value have_minerals out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setMinerals): Value have_minerals out of range.");return;
 	}
 #endif
 	minerals = have_minerals;
@@ -636,7 +636,7 @@ inline const unsigned int PREBUILDORDER::getMinerals() const
 {
 #ifdef _SCC_DEBUG
 	if(minerals > MAX_MINERALS) {
-		toLog("DEBUG: (PREBUILDORDER::getMinerals): Variable minerals not initialized.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getMinerals): Variable minerals not initialized.");return(0);
 	}
 #endif
 	return(minerals);
@@ -646,7 +646,7 @@ inline void PREBUILDORDER::setGas(const unsigned int have_gas)
 {
 #ifdef _SCC_DEBUG
 	if(have_gas > MAX_GAS) {
-		toLog("DEBUG: (PREBUILDORDER::setGas): Value have_gas out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setGas): Value have_gas out of range.");return;
 	}
 #endif
 	gas = have_gas;
@@ -656,7 +656,7 @@ inline const unsigned int PREBUILDORDER::getGas() const
 {
 #ifdef _SCC_DEBUG
 	if(gas > MAX_GAS) {
-		toLog("DEBUG: (PREBUILDORDER::getGas): Variable gas not initialized.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getGas): Variable gas not initialized.");return(0);
 	}
 #endif
 	return(gas);
@@ -666,13 +666,13 @@ inline void PREBUILDORDER::setMineralHarvestPerSecond( const unsigned int locati
 {
 #ifdef _SCC_DEBUG
 	if(mineral_harvest_per_second >= MAX_MINERALS) {
-		toLog("DEBUG: (PREBUILDORDER::setMineralHarvestPerSecond): Value mineral_harvest_per_second out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setMineralHarvestPerSecond): Value mineral_harvest_per_second out of range.");return;
 	}
 	if((location_number >= (*getMap())->getMaxLocations())) {
-		toLog("DEBUG: (PREBUILDORDER::setMineralHarvestPerSecond): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setMineralHarvestPerSecond): Value location_number out of range.");return;
 	}
 	if(worker>=45) {
-		toLog("DEBUG: (PREBUILDORDER::setMineralHarvestPerSecond): Value worker out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setMineralHarvestPerSecond): Value worker out of range.");return;
 	}
 #endif
 	mineralHarvestPerSecond[location_number][worker] = mineral_harvest_per_second;
@@ -682,13 +682,13 @@ inline const unsigned int PREBUILDORDER::getMineralHarvestPerSecond( const unsig
 {
 #ifdef _SCC_DEBUG
 	if((location_number >= (*getMap())->getMaxLocations()))	{
-		toLog("DEBUG: (PREBUILDORDER::getMineralHarvestPerSecond): Value location_number out of range.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getMineralHarvestPerSecond): Value location_number out of range.");return(0);
 	}
 	if(worker>=45) {
-		toLog("DEBUG: (PREBUILDORDER::getMineralHarvestPerSecond): Value worker out of range.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getMineralHarvestPerSecond): Value worker out of range.");return(0);
 	}
 	if(mineralHarvestPerSecond[location_number][worker]>MAX_MINERALS) {
-		toLog("DEBUG: (PREBUILDORDER::getMineralHarvestPerSecond): Variable mineralHarvestPerSecond not initialized.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getMineralHarvestPerSecond): Variable mineralHarvestPerSecond not initialized.");return(0);
 	}
 #endif
 	return(mineralHarvestPerSecond[location_number][worker]);
@@ -698,13 +698,13 @@ inline void PREBUILDORDER::setGasHarvestPerSecond( const unsigned int location_n
 {
 #ifdef _SCC_DEBUG
 	if(gas_harvest_per_second >= MAX_GAS) {
-		toLog("DEBUG: (PREBUILDORDER::setGasHarvestPerSecond): Value gas_harvest_per_second out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setGasHarvestPerSecond): Value gas_harvest_per_second out of range.");return;
 	}
 	if((location_number >= (*getMap())->getMaxLocations())) {
-		toLog("DEBUG: (PREBUILDORDER::setGasHarvestPerSecond): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setGasHarvestPerSecond): Value location_number out of range.");return;
 	}
 	if(worker >= 5) {
-		toLog("DEBUG: (PREBUILDORDER::setGasHarvestPerSecond): Value worker out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setGasHarvestPerSecond): Value worker out of range.");return;
 	}
 #endif
 	gasHarvestPerSecond[location_number][worker] = gas_harvest_per_second;
@@ -714,13 +714,13 @@ inline const unsigned int PREBUILDORDER::getGasHarvestPerSecond( const unsigned 
 {
 #ifdef _SCC_DEBUG
 	if((location_number >= (*getMap())->getMaxLocations()))	{
-		toLog("DEBUG: (PREBUILDORDER::getGasHarvestPerSecond): Value location_number out of range.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getGasHarvestPerSecond): Value location_number out of range.");return(0);
 	}
 	if(worker>=5)	{
-		toLog("DEBUG: (PREBUILDORDER::getGasHarvestPerSecond): Value worker out of range.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getGasHarvestPerSecond): Value worker out of range.");return(0);
 	}
 	if(gasHarvestPerSecond[location_number][worker]>MAX_GAS) {
-		toLog("DEBUG: (PREBUILDORDER::getGasHarvestPerSecond): Variable gasHarvestPerSecond not initialized.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getGasHarvestPerSecond): Variable gasHarvestPerSecond not initialized.");return(0);
 	}
 #endif
 	return(gasHarvestPerSecond[location_number][worker]);
@@ -730,7 +730,7 @@ inline void PREBUILDORDER::setHarvestedMinerals( const unsigned int harvested_mi
 {
 #ifdef _SCC_DEBUG
 	if(harvested_minerals >= MAX_MINERALS) {
-		toLog("DEBUG: (PREBUILDORDER::setHarvestedMinerals): Value out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setHarvestedMinerals): Value out of range.");return;
 	}
 #endif
 	harvestedMinerals = harvested_minerals;
@@ -740,7 +740,7 @@ inline const unsigned int PREBUILDORDER::getHarvestedMinerals() const
 {
 #ifdef _SCC_DEBUG
 	if(harvestedMinerals>MAX_MINERALS) {
-		toLog("DEBUG: (PREBUILDORDER::getHarvestedMinerals): Variable harvestedMinerals not initialized.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getHarvestedMinerals): Variable harvestedMinerals not initialized.");return(0);
 	}
 #endif
 	return(harvestedMinerals);
@@ -750,7 +750,7 @@ inline void PREBUILDORDER::setHarvestedGas( const unsigned int harvested_gas )
 {
 #ifdef _SCC_DEBUG
 	if(harvested_gas >= MAX_GAS) {
-		toLog("DEBUG: (PREBUILDORDER::setHarvestedGas): Value out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setHarvestedGas): Value out of range.");return;
 	}
 #endif
 	harvestedGas = harvested_gas;
@@ -760,7 +760,7 @@ inline const unsigned int PREBUILDORDER::getHarvestedGas() const
 {
 #ifdef _SCC_DEBUG
 	if(harvestedGas > MAX_GAS) {
-		toLog("DEBUG: (PREBUILDORDER::getHarvestedGas): Variable harvestedGas not initialized.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getHarvestedGas): Variable harvestedGas not initialized.");return(0);
 	}
 #endif
 	return(harvestedGas);
@@ -771,7 +771,7 @@ inline void PREBUILDORDER::setWastedMinerals( const unsigned int wasted_minerals
 {
 #ifdef _SCC_DEBUG
 	if(wasted_minerals >= MAX_MINERALS*MAX_TIME) {
-		toLog("DEBUG: (PREBUILDORDER::setWastedMinerals): Value out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setWastedMinerals): Value out of range.");return;
 	}
 #endif
 	wastedMinerals = wasted_minerals;
@@ -781,7 +781,7 @@ inline const unsigned int PREBUILDORDER::getWastedMinerals() const
 {
 #ifdef _SCC_DEBUG
 	if(wastedMinerals >= MAX_MINERALS*MAX_TIME) {
-		toLog("DEBUG: (PREBUILDORDER::getWastedMinerals): Variable wastedMinerals not initialized.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getWastedMinerals): Variable wastedMinerals not initialized.");return(0);
 	}
 #endif
 	return(wastedMinerals);
@@ -791,7 +791,7 @@ inline void PREBUILDORDER::setWastedGas(const unsigned int wasted_gas)
 {
 #ifdef _SCC_DEBUG
 	if(wasted_gas >= MAX_GAS*MAX_TIME) {
-		toLog("DEBUG: (PREBUILDORDER::setWastedGas): Value out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setWastedGas): Value out of range.");return;
 	}
 #endif
 	wastedGas = wasted_gas;
@@ -801,7 +801,7 @@ inline const unsigned int PREBUILDORDER::getWastedGas() const
 {
 #ifdef _SCC_DEBUG
 	if(wastedGas >= MAX_GAS*MAX_TIME) {
-		toLog("DEBUG: (PREBUILDORDER::getWastedGas): Variable wastedGas not initialized.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getWastedGas): Variable wastedGas not initialized.");return(0);
 	}
 #endif
 	return(wastedGas);
@@ -812,7 +812,7 @@ inline void PREBUILDORDER::setGoal(GOAL_ENTRY* current_goal)
 {
 #ifdef _SCC_DEBUG
 	if(!current_goal) {
-		toLog("DEBUG: (PREBUILDORDER::setGoal): Variable current_goal not initialized.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setGoal): Variable current_goal not initialized.");return;
 	}
 #endif
 	pGoal = current_goal;
@@ -822,7 +822,7 @@ inline const unsigned int PREBUILDORDER::getPlayerNumber() const
 {
 #ifdef _SCC_DEBUG
 	if(playerNum > MAX_PLAYER) {
-		toLog("DEBUG: (PREBUILDORDER::getPlayerNumber): Variable not initialized.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getPlayerNumber): Variable not initialized.");return(0);
 	}
 #endif
 	return(playerNum);
@@ -838,7 +838,7 @@ inline void PREBUILDORDER::setTimer(const unsigned int time)
 {
 #ifdef _SCC_DEBUG
 	if(time > coreConfiguration.getMaxTime()) {
-		toLog("DEBUG: (PREBUILDORDER::setTimer): Value time out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setTimer): Value time out of range.");return;
 	}
 #endif
 	timer = time;
@@ -848,7 +848,7 @@ inline const unsigned int PREBUILDORDER::getTimer() const
 {
 #ifdef _SCC_DEBUG
 	if(timer > coreConfiguration.getMaxTime()) {
-		toLog("DEBUG: (PREBUILDORDER::getTimer): Variable timer not initialized.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getTimer): Variable timer not initialized.");return(0);
 	}
 #endif
 	return(timer);
@@ -859,7 +859,7 @@ inline const unsigned int PREBUILDORDER::getRealTimer() const
 {
 #ifdef _SCC_DEBUG
 	if(timer > coreConfiguration.getMaxTime()) {
-		toLog("DEBUG: (PREBUILDORDER::getRealTimer): Variable timer not initialized.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getRealTimer): Variable timer not initialized.");return(0);
 	}
 #endif
 	return(coreConfiguration.getMaxTime()-timer);
@@ -870,7 +870,7 @@ inline void PREBUILDORDER::setpStats(const UNIT_STATISTICS* const* player_stats)
 {
 /*#ifdef _SCC_DEBUG
 	if((*player_stats)[0].minerals!=0) { // TODO
-		toLog("DEBUG: (PREBUILDORDER::setpStats): Variable not initialized.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setpStats): Variable not initialized.");return;
 	}
 #endif*/
 	pStats = player_stats;
@@ -880,55 +880,28 @@ inline const UNIT_STATISTICS* const * PREBUILDORDER::getpStats() const
 {
 #ifdef _SCC_DEBUG
 	if(!pStats)	{
-		toLog("DEBUG: (PREBUILDORDER::getpStats): Variable not initialized.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getpStats): Variable not initialized.");return(0);
 	}
 #endif
 	return(pStats);
 }
 
-
-/*const unsigned int PREBUILDORDER::getFinalTime(const unsigned int goal) const
-{
-#ifdef _SCC_DEBUG
-	if((goal<0)||(goal>=MAX_GOALS))	{
-		toLog("DEBUG: (PREBUILDORDER::getFinalTime): Value goal out of range.");return(0);
-	}
-	if((ftime[goal]<0)||(ftime[goal]>=MAX_TIME)) {
-		toLog("DEBUG: (PREBUILDORDER::getFinalTime): Variable ftime not initialized.");return(0);
-	}
-#endif
-	return(ftime[goal]);
-}*/
-
 inline const unsigned int PREBUILDORDER::getLength() const
 {
 #ifdef _SCC_DEBUG
 	if(length>MAX_LENGTH) {
-		toLog("DEBUG: (PREBUILDORDER::getLength): Variable length not initialized.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getLength): Variable length not initialized.");return(0);
 	}
 #endif
 	return(length);
 }
-
-/*void PREBUILDORDER::setFinalTime(const unsigned int goal, const unsigned int time)
-{
-#ifdef _SCC_DEBUG
-	if((time<0)||(time>=MAX_TIME)) {
-		toLog("DEBUG: (PREBUILDORDER::setFinalTime): Value time out of range.");return;
-	}
-	if((goal<0)||(goal>=MAX_GOALS)) {
-		toLog("DEBUG: (PREBUILDORDER::setFinalTime): Value goal out of range.");return;
-	}
-#endif
-	ftime[goal]=time;
-}*/
 
 inline void PREBUILDORDER::setLength(const unsigned int bo_length)
 {
 #ifdef _SCC_DEBUG
 	if(bo_length > MAX_LENGTH)
 	{
-		toLog("DEBUG: (PREBUILDORDER::setLength): Value bo_length out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setLength): Value bo_length out of range.");return;
 	}
 #endif
 	length = bo_length;
@@ -941,7 +914,7 @@ inline void PREBUILDORDER::setTimeOut(const unsigned int time_out)
 		return;		
 #ifdef _SCC_DEBUG
 	if(time_out > coreConfiguration.getMaxTimeOut()) {
-		toLog("DEBUG: (PREBUILDORDER::setTimeOut): Value time_out out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setTimeOut): Value time_out out of range.");return;
 	}
 #endif
 	timeout = time_out;
@@ -951,7 +924,7 @@ inline const unsigned int PREBUILDORDER::getTimeOut() const
 {
 #ifdef _SCC_DEBUG
 	if(timeout > coreConfiguration.getMaxTimeOut()) {
-		toLog("DEBUG: (PREBUILDORDER::getTimeOut): Variable timeout not initialized.");return(0);
+		toErrorLog("DEBUG: (PREBUILDORDER::getTimeOut): Variable timeout not initialized.");return(0);
 	}
 #endif
 	return(timeout);
@@ -966,10 +939,10 @@ inline void PREBUILDORDER::removeLarvaFromQueue(const unsigned int location_numb
 {
 #ifdef _SCC_DEBUG
 	if((location_number<1) || (location_number >= (*getMap())->getMaxLocations())) {
-		toLog("DEBUG: (PREBUILDORDER::removeLarvaFromQueue): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::removeLarvaFromQueue): Value location_number out of range.");return;
 	}
 	if((larvaInProduction[location_number]<1)||(larvaInProduction[location_number]>=MAX_SUPPLY)) {
-		toLog("DEBUG: (PREBUILDORDER::removeLarvaFromQueue): Variable larvaInProduction not initialized or out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::removeLarvaFromQueue): Variable larvaInProduction not initialized or out of range.");return;
 	}
 #endif
 	--larvaInProduction[location_number];
@@ -979,10 +952,10 @@ inline void PREBUILDORDER::addLarvaToQueue(const unsigned int location_number)
 {
 #ifdef _SCC_DEBUG
 	if((location_number<1) || (location_number >= (*getMap())->getMaxLocations())) {
-		toLog("DEBUG: (PREBUILDORDER::addLarvaFromQueue): Value location_number out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::addLarvaFromQueue): Value location_number out of range.");return;
 	}
 	if(larvaInProduction[location_number]>=MAX_SUPPLY) {
-		toLog("DEBUG: (PREBUILDORDER::addLarvaFromQueue): Variable larvaInProduction not initialized or out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::addLarvaFromQueue): Variable larvaInProduction not initialized or out of range.");return;
 	}
 #endif
 	++larvaInProduction[location_number];

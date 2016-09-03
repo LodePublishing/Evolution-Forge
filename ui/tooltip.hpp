@@ -8,8 +8,6 @@
 class UI_ToolTip : public UI_LongText
 {
 	public:
-		UI_ToolTip& operator=(const UI_ToolTip& object);
-		UI_ToolTip(const UI_ToolTip& object);
 		UI_ToolTip(UI_Object* parent_object, const std::string& tooltip_text);
 		UI_ToolTip(UI_Object* parent_object, const eString tooltip_text);
 		~UI_ToolTip();
@@ -19,6 +17,9 @@ class UI_ToolTip : public UI_LongText
 		void process();
 	private:
 		Rect boxSize;
+	
+		UI_ToolTip& operator=(const UI_ToolTip& object);
+		UI_ToolTip(const UI_ToolTip& object);
 };
 
 #endif

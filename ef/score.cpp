@@ -1,14 +1,16 @@
 #include "score.hpp"
+#include "configuration.hpp"
 #include <sstream>
 #include <iomanip>
 
 ScoreWindow::ScoreWindow(UI_Object* score_parent, const unsigned int game_number, const unsigned int game_max) :
 	UI_Window(score_parent, TIMER_WINDOW_TITLE_STRING, theme.lookUpGameRect(SCORE_WINDOW, game_number, game_max), theme.lookUpGameMaxHeight(SCORE_WINDOW, game_number, game_max), NOT_SCROLLED),
-// TODO irgendwas stimmt hier mit der Hoehe nicht
+	currentPlayer(0),
 	players(0),
 	maxPlayer(0),
-	mapMenuButton(new UI_Button(this, Rect(Point(10, 20), Size(100, 50)), Size(5,5), MY_BUTTON, false, STATIC_BUTTON_MODE, database.getMap(0)->getName(), ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
-	mapMenu(new MapMenu(mapMenuButton, Rect(10, 10, 100, 0), Size(0, 0), DO_NOT_ADJUST)),
+	unchangedGenerations(0),
+//	mapMenuButton(new UI_Button(this, Rect(Point(10, 20), Size(100, 50)), Size(5,5), MY_BUTTON, false, STATIC_BUTTON_MODE, database.getMap(0)->getName(), ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+//	mapMenu(new MapMenu(mapMenuButton, Rect(10, 10, 100, 0), Size(0, 0), DO_NOT_ADJUST)),
 	assignMap(-1),
 	gameNumber(0),
 	gameMax(0)
@@ -19,7 +21,6 @@ ScoreWindow::ScoreWindow(UI_Object* score_parent, const unsigned int game_number
 - Harvest speed initialisieren
 
 */
-	mapMenu->Hide();
 	for(unsigned int i = MAX_PLAYER;i--;)
 	{
 		player[i] = new PlayerEntry(this, Rect(), Size(5,5));
@@ -30,6 +31,14 @@ ScoreWindow::ScoreWindow(UI_Object* score_parent, const unsigned int game_number
 //	goalsFulfilledText->updateToolTip(GOALS_FULFILLED_TOOLTIP_STRING);
 	resetData(); // TODO
 	addHelpButton(DESCRIPTION_SCORE_WINDOW_CHAPTER);
+}
+
+ScoreWindow::~ScoreWindow()
+{
+	for(unsigned int i = MAX_PLAYER;i--;)
+		delete player[i];
+//	delete mapMenuButton;
+//	delete mapMenu;
 }
 
 void ScoreWindow::setMode(const unsigned int game_number, const unsigned int game_max)
@@ -46,24 +55,24 @@ void ScoreWindow::reloadOriginalSize()
 	setMaxHeight(theme.lookUpGameMaxHeight(SCORE_WINDOW, gameNumber, gameMax));
 	
 	for(unsigned int i = MAX_PLAYER;i--;)
-		player[i]->setOriginalSize(Size(getRelativeClientRect().GetWidth()-10, 12));
+		player[i]->setOriginalSize(Size(getRelativeClientRect().getWidth()-10, 12));
 	UI_Window::reloadOriginalSize();
 }
 
-ScoreWindow::~ScoreWindow()
+
+void ScoreWindow::setUnchangedGenerations(const unsigned int unchanged_generations) 
 {
-	for(unsigned int i = MAX_PLAYER;i--;)
-		delete player[i];
-	delete mapMenuButton;
-//	delete menuRadio;
-	delete mapMenu;
+	if(unchangedGenerations == unchanged_generations)
+		return;
+	setNeedRedrawNotMoved();
+	unchangedGenerations = unchanged_generations;
 }
 
 void ScoreWindow::resetPlayerTime(unsigned int player_number)
 {
 #ifdef _SCC_DEBUG
 	if(player_number>=MAX_PLAYER)	{
-		toLog("DEBUG: (ScoreWindow::resetPlayerTime): player_number out of range.");return;
+		toErrorLog("DEBUG: (ScoreWindow::resetPlayerTime): player_number out of range.");return;
 	}
 #endif
 	player[player_number]->resetTime();
@@ -71,12 +80,31 @@ void ScoreWindow::resetPlayerTime(unsigned int player_number)
 
 void ScoreWindow::resetData()
 {
-//	menuButton[MAP_MENU]->updateText(CHOOSE_MAP_STRING);
 }
 
 void ScoreWindow::closeMenus()
 {
-	mapMenu->close();
+//	mapMenu->close();
+}
+
+void ScoreWindow::stopOptimizing(const unsigned int player_number)
+{
+#ifdef _SCC_DEBUG
+	if(player_number>=MAX_PLAYER)	{
+		toErrorLog("DEBUG: (ScoreWindow::stopOptimizing): player_number out of range.");return;
+	}
+#endif
+	player[player_number]->setOptimizing(false);
+}
+
+void ScoreWindow::startOptimizing(const unsigned int player_number)
+{
+#ifdef _SCC_DEBUG
+	if(player_number>=MAX_PLAYER)	{
+		toErrorLog("DEBUG: (ScoreWindow::startOptimizing): player_number out of range.");return;
+	}
+#endif
+	player[player_number]->setOptimizing(true);
 }
 
 void ScoreWindow::process()
@@ -87,7 +115,7 @@ void ScoreWindow::process()
 	UI_Window::process();
 
 	assignMap=-1;
-	if(mapMenu->getPressedItem()>=0)
+/*	if(pressed = etc. mapMenu->getPressedItem()>=0)
 	{
 		assignMap = mapMenu->getPressedItem();
 		mapMenuButton->updateText(NULL_STRING);
@@ -107,20 +135,20 @@ void ScoreWindow::process()
 			mapMenu->close();
 			mapMenu->open();
 		}
-	}
+	}*/
 
 	
         if(!isMouseInside())
 	{
-		mapMenuButton->forceUnpress();
+	//	mapMenuButton->forceUnpress();
 		closeMenus();
 		for(unsigned int i=MAX_PLAYER;i--;)
 			player[i]->mouseHasLeft();
 	}
 							
-        unsigned int line = 3;
+        unsigned int line = 1;
 //        if(mapMenu->getHeight() > line)
-                line += mapMenu->getHeight();
+//              line += mapMenu->getHeight();
 	for(unsigned int i=MAX_PLAYER;i--;)
 	{
 		if(i>=maxPlayer)
@@ -128,7 +156,7 @@ void ScoreWindow::process()
 		else 
 		{
 			player[i]->Show();
-			player[i]->adjustRelativeRect(Rect(getRelativeClientRectLeftBound()+5, line*16, getRelativeClientRect().GetWidth()-10, 12));
+			player[i]->adjustRelativeRect(Rect(getRelativeClientRectLeftBound()+5, line*16, getRelativeClientRect().getWidth()-10, 12));
 			line+=player[i]->getLineHeight(); // height of menu <-
 			if(player[i]->checkForNeedRedraw())
 				setNeedRedrawNotMoved();
@@ -148,13 +176,34 @@ void ScoreWindow::draw(DC* dc) const
 	UI_Window::draw(dc);
 	if(!checkForNeedRedraw())
 		return;
-		
-/*	dc->SetPen(*UI_Object::theme.lookUpPen(BODIAGRAM_FITNESS_PEN));
-	dc->DrawHorizontalLine(getAbsoluteLeftBound() + 10, getAbsoluteLowerBound() - 30, getAbsoluteLeftBound() + 10 + ((getWidth()-35)*game->getUnchangedGenerations())  / configuration.getMaxGenerations() );
-	ostringstream os;
-	os.str("");
-	os << 100*game->getUnchangedGenerations()  / configuration.getMaxGenerations() << "%";
-	dc->DrawText(os.str(), getAbsolutePosition() + Size(getWidth() - 25, getHeight() - 30));*/
+	
+	if(efConfiguration.isAutoRuns())
+	{
+		dc->setPen(*UI_Object::theme.lookUpPen(BODIAGRAM_FITNESS_PEN));
+		dc->DrawHorizontalLine(getAbsoluteLeftBound() + 10, getAbsoluteLowerBound() - 24, getAbsoluteLeftBound() + 10 + ((getWidth()-35)*unchangedGenerations)  / efConfiguration.getMaxGenerations() );
+		std::ostringstream os;
+		os.str("");
+		os << 100 * unchangedGenerations / efConfiguration.getMaxGenerations() << "%";
+	
+		dc->setTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
+		dc->setFont(UI_Object::theme.lookUpFont(SMALL_BOLD_FONT));
+		dc->DrawText(os.str(), getAbsolutePosition() + Size(getWidth() - 20, getHeight() - 30));
+	}
 }
 
-
+const bool ScoreWindow::openMenu(const ePlayerOrder order)
+{
+	unsigned int i = currentPlayer;
+	do
+	{
+		i++;
+		if(i > MAX_PLAYER)
+			i = 0;
+		if( (player[i]) && (player[i]->isShown()) && ( ((order == OPEN_RACE_MENU)&&(player[i]->openRaceMenu()))/* || ((order == ADD_PLAYER)&&(player[i]->addPlayer()))*/ ) )
+		{
+			currentPlayer = i;
+			return(true);
+		}
+	} while(i!=currentPlayer);
+	return(false);
+}

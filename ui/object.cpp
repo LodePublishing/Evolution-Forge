@@ -1,29 +1,22 @@
 #include "object.hpp"
 #include "configuration.hpp"
 
-// TODO zwischen Positionseltern und Processeltern unterscheiden (damit man z.B. ein Menue an die Position einer Group setzen kann, ohne dass es teil der group wird... mmmh
-
-
 UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const Size distance_bottom_right, const ePositionMode position_mode, const eAutoSize auto_size) :
+	isClipped(false),
+	clipRect(),
 	children(NULL),
+	childrenWereChanged(false),
 	relativeRect(relative_rect),
 	startRect(relative_rect),
 	targetRect(relative_rect),
 	originalRect(relative_rect),
 	distanceBottomRight(distance_bottom_right),
-	oldSize(relative_rect.GetSize()),
+	oldSize(relative_rect.getSize()),
 	sizeHasChanged(true),
 
 	positionMode(position_mode),
 	autoSize(auto_size),
 	shown(true),
-
-	min_top_left_x(0),
-	min_left_y(0),
-	min_right_y(0),
-	min_bottom_left_x(0),
-	min_top_right_x(0),
-	min_bottom_right_x(0),	
 
 	needRedraw(true),
 	parent(NULL),
@@ -38,25 +31,21 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const S
 }
 
 UI_Object::UI_Object(UI_Object* parent_object, UI_Object* position_parent_object, const Rect relative_rect, const Size distance_bottom_right, const ePositionMode position_mode, const eAutoSize auto_size) :
+	isClipped(false),
+	clipRect(),
 	children(NULL),
+	childrenWereChanged(false),
 	relativeRect(relative_rect),
 	startRect(relative_rect),
 	targetRect(relative_rect),
 	originalRect(relative_rect),
 	distanceBottomRight(distance_bottom_right),
-	oldSize(relative_rect.GetSize()),
+	oldSize(relative_rect.getSize()),
 	sizeHasChanged(true),
 
 	positionMode(position_mode),
 	autoSize(auto_size),
 	shown(true),
-
-	min_top_left_x(0),
-	min_left_y(0),
-	min_right_y(0),
-	min_bottom_left_x(0),
-	min_top_right_x(0),
-	min_bottom_right_x(0),	
 
 	needRedraw(true),
 	parent(NULL),
@@ -82,18 +71,12 @@ UI_Object& UI_Object::operator=(const UI_Object& object)
 	originalRect = object.originalRect;
 	distanceBottomRight = object.distanceBottomRight;
 	oldSize = object.oldSize;
-	sizeHasChanged = true;	
+	setSizeHasChanged();
 
 	positionMode = object.positionMode;
 	autoSize = object.autoSize;
 	shown = object.shown;
-
-	min_top_left_x = object.min_top_left_x;
-	min_left_y = object.min_left_y;
-	min_right_y = object.min_right_y;
-	min_bottom_left_x = object.min_bottom_left_x;
-	min_top_right_x = object.min_top_right_x;
-	min_bottom_right_x = object.min_bottom_right_x;
+	
 	needRedraw = object.needRedraw;
 	prevBrother = this; // !!
 	nextBrother = this; // !!
@@ -121,13 +104,6 @@ UI_Object::UI_Object(const UI_Object& object) :
 	autoSize( object.autoSize ),
 	
 	shown( object.shown ), 
-
-	min_top_left_x( object.min_top_left_x ),
-	min_left_y( object.min_left_y ),
-	min_right_y( object.min_right_y ),
-	min_bottom_left_x( object.min_bottom_left_x ),
-	min_top_right_x( object.min_top_right_x ),
-	min_bottom_right_x( object.min_bottom_right_x ),
 
 	needRedraw( object.needRedraw ),
 
@@ -165,76 +141,75 @@ void UI_Object::reloadOriginalSize()
 		}	
 }
 
-
-#include <sstream>
-void UI_Object::adjustPositionAndSize(const eAdjustMode adjust_mode, const Size& size)
+void UI_Object::adjustSize(const eAdjustMode adjust_mode, const Size& size)
 {
 //	UI_Object::addToProcessArray(this);
-//	sizeHasChanged = false; ?
-	signed int left = originalRect.GetLeft();
-	signed int top = originalRect.GetTop();
+	Size old_size = getSize();
+	signed int left = originalRect.getLeft();
+	signed int top = originalRect.getTop();
 	unsigned int full_width;
-	unsigned int full_height;
 	if(getParent() != NULL)
 	{
-		full_width = getParent()->getWidth() - left - distanceBottomRight.GetWidth();
-		full_height = getParent()->getHeight() - top - distanceBottomRight.GetHeight();
+		if(left + distanceBottomRight.getWidth() > getParent()->getWidth())
+			full_width = 0;
+		else 
+			full_width = getParent()->getWidth() - left - distanceBottomRight.getWidth();
 	} 
 	else
-	{
 		full_width = getWidth();
-		full_height = getHeight();
-	}
-	if(adjust_mode == ADJUST_ONLY_POSITION)
-	{
-//		if(size!=Size(0,0))
-//			setSize(size);
-//		if(getParent()!=NULL)
-//			getParent()->adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, getSize());
-// called after size was changed
-	} else
-	if(adjust_mode == ADJUST_AFTER_PARENT_WAS_CHANGED)
+
+	if(adjust_mode == PARENT_WAS_CHANGED)
 	{
 // called by PARENT after PARENT's size was changed
 		switch(autoSize)
 		{
 			case NOTHING:break;
 			case NO_AUTO_SIZE:break;
-			case AUTO_SIZE_ONCE:
-			case AUTO_SIZE_TWICE:
-			case AUTO_SIZE:;break;
+			case AUTO_SIZE:break;
 			case AUTO_HEIGHT_FULL_WIDTH:
 			case FULL_WIDTH:setWidth(full_width);break;
-			case AUTO_HEIGHT_CONST_WIDTH:break;// ~~ nur fuer tabs naja
-			case CONST_SIZE:break;// ~~ nur fuer tabs naja
+			case AUTO_HEIGHT_CONST_WIDTH:break;
+			case CONST_SIZE:break;
 			default:break; // TODO ERROR
 		}
 	} else
-	if(adjust_mode == ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED)
+	if(adjust_mode == CHILD_WAS_CHANGED)
 	{
 // called if the object is dependant on the child's size (e.g. Button - StaticText)
 // TODO maybe update other children too
-	
+		childrenWereChanged = true;
 		switch(autoSize)
 		{
 			case NOTHING:break;
-			case NO_AUTO_SIZE:setSize(originalRect.GetSize());break;
-			case AUTO_SIZE_ONCE:
-/*				setSize(size+Size(6, 0));
-				autoSize = AUTO_SIZE_TWICE;
-				break;*/
-			case AUTO_SIZE_TWICE:
-//					setSize(size+Size(6, 0));
-//					autoSize = NO_AUTO_SIZE;break;
+			case NO_AUTO_SIZE:setSize(originalRect.getSize());break;
 			case AUTO_SIZE:setSize(size+Size(6, 0));break;
-			case AUTO_HEIGHT_FULL_WIDTH:setSize(Size(full_width, size.GetHeight()));break;
+			case AUTO_HEIGHT_FULL_WIDTH:setSize(Size(full_width, size.getHeight()));break;
 			case FULL_WIDTH:setSize(Size(full_width, getHeight()));break;
-			case AUTO_HEIGHT_CONST_WIDTH:setSize(Size(originalRect.GetWidth(), size.GetHeight()));break;// ~~ nur fuer tabs naja
-			case CONST_SIZE:setSize(Size(originalRect.GetWidth(), originalRect.GetHeight()));break;// ~~ nur fuer tabs naja
+			case AUTO_HEIGHT_CONST_WIDTH:setSize(Size(originalRect.getWidth(), size.getHeight()));break;
+			case CONST_SIZE:setSize(Size(originalRect.getWidth(), originalRect.getHeight()));break;
 			default:break; // TODO ERROR
 		}
-		
-//		resetMinXY();	
+	}
+	if(old_size != getSize())
+		setSizeHasChanged();
+}
+	
+void UI_Object::adjustPosition()
+{
+//	UI_Object::addToProcessArray(this);
+	signed int left = originalRect.getLeft();
+	signed int top = originalRect.getTop();
+	unsigned int full_width;
+	unsigned int full_height;
+	if(getParent() != NULL)
+	{
+		full_width = getParent()->getWidth() - left - distanceBottomRight.getWidth();
+		full_height = getParent()->getHeight() - top - distanceBottomRight.getHeight();
+	} 
+	else
+	{
+		full_width = getWidth();
+		full_height = getHeight();
 	}
 	
 	signed int hor_center = left + ((signed int)full_width - (signed int)getWidth())/2;
@@ -244,13 +219,12 @@ void UI_Object::adjustPositionAndSize(const eAdjustMode adjust_mode, const Size&
 	if(ver_center < top) ver_center = top;
 	signed int bottom = (signed int)full_height - top - (signed int)getHeight();
 
-//	setPosition(originalButtonRect.GetTopLeft());
-	
+//	setPosition(originalButtonRect.getTopLeft());
 	//relativeRect ok... aber was ist mit startRect, targetRect etc??
 
  	switch(positionMode)
 	{
-		case DO_NOT_ADJUST:break;//setPosition(originalButtonRect.GetTopLeft());break;
+		case DO_NOT_ADJUST:break;//setPosition(originalButtonRect.getTopLeft());break;
 		case TOTAL_CENTERED:setPosition(hor_center, ver_center);break;
 		case HORIZONTALLY_CENTERED:setLeft(hor_center);break;
 		case VERTICALLY_CENTERED:setTop(ver_center);break;
@@ -262,59 +236,7 @@ void UI_Object::adjustPositionAndSize(const eAdjustMode adjust_mode, const Size&
 		case BOTTOM_CENTER:setPosition(hor_center, bottom);break;
 		case BOTTOM_LEFT:setPosition(left, bottom);break;
 		case CENTER_LEFT:setPosition(left, ver_center);break;
-		case ARRANGE_TOP_LEFT:
-		{
-			if(getParent())
-			{
-				setPosition(left + getParent()->getMinTopLeftX(), top);
-				getParent()->addMinTopLeftX(getWidth() + MIN_DISTANCE);
-			}
-		}break;
-		case ARRANGE_TOP_RIGHT:
-		// TODO: Wird irgendwie beim Erstaufruf falsch (getmintoprightx mit falschem Wert initialisiert?)
-		{
-			if(getParent())
-			{
-				setPosition(right - getParent()->getMinTopRightX(), top);
-				getParent()->addMinTopRightX(getWidth() + MIN_DISTANCE);
-			}
-		}break;
-		case ARRANGE_BOTTOM_LEFT:
-		{ 
-			if(getParent())
-			{
-				setPosition(left + getParent()->getMinBottomLeftX(), bottom);
-				getParent()->addMinBottomLeftX(getWidth()+MIN_DISTANCE);
-			}
-		}break;
-		case ARRANGE_BOTTOM_RIGHT:
-		{
-			if(getParent())
-			{
-				setPosition(right - getParent()->getMinBottomRightX() - 20, bottom);
-				getParent()->addMinBottomRightX(getWidth() + MIN_DISTANCE);
-			}
-		}break;
-		case ARRANGE_LEFT:
-		if(adjust_mode!=ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED)
-		{
-			if(getParent())
-			{
-				setPosition(left, top + getParent()->getMinLeftY());
-				getParent()->addMinLeftY(getHeight() + MIN_DISTANCE);
-			}
-		}break;
-		case ARRANGE_RIGHT:
-		{
-			if(getParent())
-			{
-				setPosition(right, top + getParent()->getMinRightY()); // TODO
-				getParent()->addMinRightY(getHeight()+MIN_DISTANCE);
-			}
-		}break;
-		default:
-			toLog("Wheee");
-		break;//TODO error
+		default:break;
 	}
 }
 
@@ -325,24 +247,24 @@ void UI_Object::adjustRelativeRect(const Rect& edge)
 	{
 // neues Ziel?
 /*
-		if((edge.GetLeft()!=targetRect.GetLeft())||(edge.GetRight()!=targetRect.GetRight()))
+		if((edge.getLeft()!=targetRect.getLeft())||(edge.getRight()!=targetRect.getRight()))
 		{
-			startRect.SetLeft(getRelativeLeftBound());
-//			if(edge.GetRight()!=targetRect.GetRight())
-			startRect.SetRight(getRelativeRightBound());
+			startRect.setLeft(getRelativeLeftBound());
+//			if(edge.getRight()!=targetRect.getRight())
+			startRect.setRight(getRelativeRightBound());
 		}
 			
-		if((edge.GetTop()!=targetRect.GetTop())||(edge.GetHeight()!=targetRect.GetHeight()))
+		if((edge.getTop()!=targetRect.getTop())||(edge.getHeight()!=targetRect.getHeight()))
 		{
-			startRect.SetTop(getRelativeUpperBound());
-//			if(edge.GetHeight()!=targetRect.GetHeight())
-			startRect.SetBottom(getRelativeLowerBound());
+			startRect.setTop(getRelativeUpperBound());
+//			if(edge.getHeight()!=targetRect.getHeight())
+			startRect.setBottom(getRelativeLowerBound());
 		}*/
 
-		if(edge.GetTopLeft()!=targetRect.GetTopLeft())
-			startRect.SetTopLeft(getRelativePosition());
-		if(edge.GetSize()!=targetRect.GetSize())
-			startRect.SetSize(getSize());
+		if(edge.getTopLeft()!=targetRect.getTopLeft())
+			startRect.setTopLeft(getRelativePosition());
+		if(edge.getSize()!=targetRect.getSize())
+			startRect.setSize(getSize());
  
 //		UI_Object::addToProcessArray(this);
 		targetRect=edge;
@@ -352,15 +274,6 @@ void UI_Object::adjustRelativeRect(const Rect& edge)
 }
 
 
-// Take gadget out of family.  Children of this gadget stay with gadget, though.
-//
-// A family is basically the whole parent/sibling/children hierarchy for gadgets.  Any gadget
-// that is linked to another gadget by one of these pointers is said to be in the same family
-// as that gadget.  This function, therefore, caused all references to a gadget by it's
-// family's gadgets' sibling or children pointers to be broken, and all references to any of them
-// by this gadget's parent or sibling pointers to also be broken.  This isolates the gadget and
-// it's children into a new family.
-//
 void UI_Object::removeFromFamily()
 {
 	if((parent)&&(parent->children == this))
@@ -397,6 +310,7 @@ void UI_Object::setParent(UI_Object* daddy)
 
 void UI_Object::addChild(UI_Object* child)
 {
+	childrenWereChanged = true;
 	if (!children) 
 		children = child;
 	else 
@@ -416,24 +330,10 @@ void UI_Object::addChild(UI_Object* child)
 	}
 }
 
-void UI_Object::resetMinXY()
-{
-	UI_Object* tmp=children;  // process all children of gadget
-	if (tmp) {
-		min_top_right_x = 0; min_bottom_right_x = 0; min_bottom_left_x = 0; min_left_y = 0; min_top_left_x = 0; min_right_y = 0;
-		do {
-			tmp->resetMinXY();
-			tmp = tmp->nextBrother;
-		} while (tmp != children);
-	}
-
-}
-
 void UI_Object::process()
 {
 //	if (!isShown()) //~~
 //		return;
-
 	if(startRect != targetRect)
 	{
 		if(uiConfiguration.isSmoothMovements())
@@ -451,24 +351,30 @@ void UI_Object::process()
 				setNeedRedrawMoved();
 			}
 		}
-		if(oldSize != relativeRect.GetSize())
-			sizeHasChanged=true;
+		if(oldSize != relativeRect.getSize())
+			setSizeHasChanged();
 	}
 
-	if(sizeHasChanged==true)
+	if(hasSizeChanged())
 	{
-		adjustPositionAndSize(ADJUST_ONLY_POSITION);
+//		adjustSize(CHILD_WAS_CHANGED, getSize()); // TODO ? muesste hier nicht die Groesse des Kinds stehen?
+		if(getParent())
+			getParent()->adjustSize(CHILD_WAS_CHANGED, getSize()); // problematisch TODO
 		UI_Object* tmp=children;  // process all children of gadget
 		if (tmp) {
 			do {
-				tmp->adjustPositionAndSize(ADJUST_AFTER_PARENT_WAS_CHANGED);
+				tmp->adjustSize(PARENT_WAS_CHANGED, getSize());
+				tmp->adjustPosition();
 				tmp = tmp->nextBrother;
 			} while (tmp != children);
 		}
-		sizeHasChanged=false;
+		
+		adjustPosition();
+		setSizeHasChanged(false);
 	}
-	
 
+
+	// hier wird height des fensters veraendert!
 	UI_Object* tmp=children;  // process all children of gadget
 	if (tmp) {
 		do {
@@ -476,11 +382,25 @@ void UI_Object::process()
 			tmp = tmp->nextBrother;
 		} while (tmp != children);
 	}
-	
-	if(/*(efConfiguration.isToolTips())&&*/(isMouseInside())&&(hasToolTip()))
-		toolTipParent = this;
-	oldSize = relativeRect.GetSize();
-//	resetMinXY();	
+	oldSize = relativeRect.getSize();
+}
+
+const bool UI_Object::hasSizeChanged() const
+{
+	return(sizeHasChanged);
+}
+
+void UI_Object::setSizeHasChanged(const bool size_has_changed)
+{
+	if(size_has_changed == true)
+	{
+		sizeHasChanged = true;
+	}
+	else if(size_has_changed == false)
+	{
+		sizeHasChanged = false;
+	}
+		
 }
 
 void UI_Object::resetData()
@@ -495,12 +415,11 @@ void UI_Object::resetData()
 	}
 }
 
+// returns the object the mouse cursor is currently over and owns a tooltip
 UI_Object* UI_Object::checkToolTip()
 {
 	if(!isShown())
 		return(NULL);
-//	if(!(getAbsoluteRect().Inside(p)))
-//		return(0); 0 size players ?
 	UI_Object* tmp=children;  // process all children of gadget
 	
 	if(!tmp)
@@ -509,6 +428,8 @@ UI_Object* UI_Object::checkToolTip()
 	do 
 	{
 		result = tmp->checkToolTip();
+		if((result!=NULL)&&(!result->hasToolTip()))
+			result = NULL;
 		tmp = tmp->nextBrother;
 	} while((tmp!=children)&&(result==NULL));
 	
@@ -533,9 +454,6 @@ UI_Object* UI_Object::checkHighlight()
 {
 	if(!isShown())
 		return(NULL);
-//	if(!(getAbsoluteRect().Inside(p)))
-//		return(0); 0 size players ?
-
 	UI_Object* tmp=children;  // process all children of gadget
 	if(!tmp)
 		return(NULL); // return 0 as this is an object and no button!
@@ -563,14 +481,29 @@ void UI_Object::draw(DC* dc) const
 	}
 }
 
+void UI_Object::setSize(const unsigned int width, const unsigned int height) 
+{
+	setSize(Size(width, height));
+}
+
 void UI_Object::setOriginalRect(const Rect& rect) {
 	originalRect = rect;
 	setRect(rect);
 }
 
+void UI_Object::setOriginalSize(const Size& size) {
+	originalRect.setSize(size);
+	setSize(size);
+}
+
+void UI_Object::setOriginalWidth(const unsigned int width) {
+	originalRect.setWidth(width);
+	setWidth(width);
+}
+
 const bool UI_Object::isMoving() const
 {
-	return((isShown())&&(relativeRect.GetLeft() != targetRect.GetLeft()));
+	return((isShown())&&(relativeRect.getLeft() != targetRect.getLeft()));
 }
 
 void UI_Object::setRect(const Rect& rect) 
@@ -581,23 +514,23 @@ void UI_Object::setRect(const Rect& rect)
 	targetRect = rect;
 	relativeRect = rect;
 	setNeedRedrawMoved();
-	sizeHasChanged=true;
+	setSizeHasChanged();
 //	UI_Object::addToProcessArray(this);
 }
 
 void UI_Object::setPosition(const Point& position)
 {
-	if(position == relativeRect.GetTopLeft())
+	if(position == relativeRect.getTopLeft())
 		return;
 #ifdef _SCC_DEBUG
 	if((position.y > 900000)||(position.x > 900000))
 	{
-		toLog("DEBUG (UI_Object::setPosition()): Value position out of range.");return;
+		toErrorLog("DEBUG (UI_Object::setPosition()): Value position out of range.");return;
 	}
 #endif
-	startRect.SetTopLeft(position);
-	targetRect.SetTopLeft(position);
-	relativeRect.SetTopLeft(position);
+	startRect.setTopLeft(position);
+	targetRect.setTopLeft(position);
+	relativeRect.setTopLeft(position);
 	setNeedRedrawMoved();
 //	UI_Object::addToProcessArray(this);
 }
@@ -606,57 +539,58 @@ void UI_Object::setHeight(const unsigned int height)
 {
 	if(getTargetHeight() == height)
 		return;
-	sizeHasChanged = true;
-	relativeRect.SetHeight(height);
-	startRect.SetHeight(height);
-	targetRect.SetHeight(height);
+	toInitLog("set height");
+	setSizeHasChanged();
+	relativeRect.setHeight(height);
+	startRect.setHeight(height);
+	targetRect.setHeight(height);
 	setNeedRedrawNotMoved(); // TODO wenns kleiner wird
 //	UI_Object::addToProcessArray(this);
 }
 
 void UI_Object::setWidth(const unsigned int width) 
 {
-	if(relativeRect.GetWidth() == width)
+	if(relativeRect.getWidth() == width)
 		return;
 //	UI_Object::addToProcessArray(this);
-	sizeHasChanged = true;
-	relativeRect.SetWidth(width);
-	startRect.SetWidth(width);
-	targetRect.SetWidth(width);
+	setSizeHasChanged();
+	relativeRect.setWidth(width);
+	startRect.setWidth(width);
+	targetRect.setWidth(width);
 	setNeedRedrawNotMoved(); // TODO Wenns kleiner wird!
 }
 
 void UI_Object::setSize(const Size size)
 {
-	if(relativeRect.GetSize() == size)
+	if(relativeRect.getSize() == size)
 		return;
 //	UI_Object::addToProcessArray(this);
-	sizeHasChanged = true;
-	relativeRect.SetSize(size);
-	startRect.SetSize(size);
-	targetRect.SetSize(size);
+	setSizeHasChanged();
+	relativeRect.setSize(size);
+	startRect.setSize(size);
+	targetRect.setSize(size);
 	
 	setNeedRedrawNotMoved(); // TODO Wenns kleiner wird!
 }
 
 void UI_Object::setLeft(const signed int x) 
 {
-	if(relativeRect.GetLeft() == x)
+	if(relativeRect.getLeft() == x)
 		return;
 //	UI_Object::addToProcessArray(this);
-	relativeRect.SetLeft(x);
-	startRect.SetLeft(x);
-	targetRect.SetLeft(x);
+	relativeRect.setLeft(x);
+	startRect.setLeft(x);
+	targetRect.setLeft(x);
 	setNeedRedrawMoved();
 }
 		
 void UI_Object::setTop(const signed int y) 
 {
-	if(relativeRect.GetTop() == y)
+	if(relativeRect.getTop() == y)
 		return;
-	relativeRect.SetTop(y);
-	startRect.SetTop(y);
-	targetRect.SetTop(y);
+	relativeRect.setTop(y);
+	startRect.setTop(y);
+	targetRect.setTop(y);
 	setNeedRedrawMoved();
 }
 
@@ -666,12 +600,16 @@ void UI_Object::Show(const bool show)
 	{
 		shown = true;
 		setNeedRedrawMoved(true);
+		if(getParent())
+			getParent()->childrenWereChanged = true;
 	} 
 	else if((!show)&&(shown))
 	{
 		setNeedRedrawMoved(true);
 //		setNeedRedrawMoved(false); // ~~ ?
 		shown = false;
+		if(getParent())
+			getParent()->childrenWereChanged = true;
 	}
 }
 
@@ -775,61 +713,10 @@ const bool UI_Object::checkForNeedRedraw() const
 	} else return(false);
 }
 
-void UI_Object::addMinTopLeftX(signed int dx)
-{
-	if((dx + min_top_left_x > (signed int)max_x)||(dx + min_top_left_x < 0))
-	{
-//		std::ostringstream os;os.str("");
-//		os << "MIN_TOP_LEFT_X out of range [ dx: " << dx << ", min_top_left_x: " << min_top_left_x << ", max_x: " << max_x << " ]  { " << getAbsolutePosition().x << ":" << getAbsolutePosition().y << "  " << getWidth() << "x" << getHeight() << " }";
-//		toLog(os.str());
-	}
-	min_top_left_x += dx;		
-}
-
-void UI_Object::addMinLeftY(signed int dy)
-{
-	if((dy + min_left_y > (signed int)max_y)||(dy + min_left_y < 0));
-//		toLog("MIN_LEFT_Y out of range");
-	min_left_y += dy;
-}
-
-void UI_Object::addMinRightY(signed int dy)
-{
-	if((dy + min_right_y > (signed int)max_y)||(dy + min_right_y < 0));
-//		toLog("MIN_RIGHT_Y out of range");
-	min_right_y += dy;
-}
-
-void UI_Object::addMinBottomLeftX(signed int dx)
-{
-	if((dx + min_bottom_left_x > (signed int)max_x)||(dx + min_bottom_left_x < 0));
-//		toLog("MIN_BOTTOM_LEFT_X out of range");
-	min_bottom_left_x += dx;		
-}
-
-void UI_Object::addMinTopRightX(signed int dx)
-{
-	if((dx + min_top_right_x > (signed int)max_x)||(dx + min_top_right_x < 0))
-	{
-//		std::ostringstream os;os.str("");
-//		os << "MIN_TOP_RIGHT_X out of range [ dx: " << dx << ", min_top_right_x: " << min_top_right_x << ", max_x: " << max_x << " ]  { " << getAbsolutePosition().x << ":" << getAbsolutePosition().y << "  " << getWidth() << "x" << getHeight() << " }";
-//		toLog(os.str());
-	}
-	min_top_right_x += dx;		
-}
-
-void UI_Object::addMinBottomRightX(signed int dx)
-{
-	if((dx + min_bottom_right_x > (signed int)max_x)||(dx + min_bottom_right_x < 0));
-//		toLog("BUTTON MIN_BOTTOM_RIGHT_X out of range");
-	min_bottom_right_x += dx;		
-}
-
-
 void UI_Object::setResolution(const Size resolution)
 {
-	max_x = resolution.GetWidth();
-	max_y = resolution.GetHeight();
+	max_x = resolution.getWidth();
+	max_y = resolution.getHeight();
 }
 
 
@@ -861,60 +748,6 @@ void UI_Object::resetWindow()
 	UI_Object::windowSelected = false;
 	UI_Object::currentWindow = NULL;
 }
-/*
-bool UI_Object::editFieldActive()
-{
-	if(editFieldList.empty())
-		return(false);
-	else return(true);
-}
-
-void UI_Object::addEditField(UI_EditField* edit_field)
-{
-	if(*editField == edit_field)
-		return;
-	else
-		for(std::list<UI_EditField*>::iterator i = editFieldList.begin(); i != editFieldList.end(); ++i)
-			if(*i==edit_field)
-				return;
-	editField = editFieldList.insert(editFieldList.end(), edit_field);
-}
-
-void UI_Object::removeEditField(UI_EditField* edit_field)
-{
-	if(*editField == edit_field)
-		editField = editFieldList.erase(editField);
-	else
-	{
-		for(std::list<UI_EditField*>::iterator i = editFieldList.begin(); i != editFieldList.end(); ++i)
-		{
-			if(*i==edit_field)
-			{
-				editFieldList.erase(i);
-				break;
-			}
-		}
-	}
-}
-
-void UI_Object::rotateEditField()
-{
-	if(!editFieldActive())
-		return;
-	editField++;
-}
-
-UI_EditField* UI_Object::getEditField()
-{
-	if(!editFieldActive())
-		return(NULL);
-	return(*editField);
-}*/
-
-
-//std::list<UI_EditField*> UI_Object::editFieldList;
-//std::list<UI_EditField*>::iterator UI_Object::editField;
-//UI_Object* hotkey[300];
 
 UI_Object* UI_Object::focus(NULL);
 

@@ -48,8 +48,8 @@ void BoGraphLine::draw(DC* dc) const
 		return;
 	if(checkForNeedRedraw())
 	{
-		dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
-		dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+		dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));
+		dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 		dc->DrawRectangle(getAbsoluteRect());
 		facilityName->Hide();
 		UI_Object::draw(dc);

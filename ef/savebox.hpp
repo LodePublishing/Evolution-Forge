@@ -4,14 +4,14 @@
 #include "../ui/window.hpp"
 #include "../ui/editfield.hpp"
 
+
 // simplified window class, maybe inheritate UI_Window from SaveBox...
 class SaveBox : public UI_Window
 {
 	public:
 		SaveBox(UI_Object* savebox_parent, const eString savebox_text=NULL_STRING, const eString description_text=NULL_STRING, const eString ok_string=SAVE_BOX_OK_STRING, const eString cancel_string=SAVE_BOX_CANCEL_STRING, const std::string& name_proposal="");
+		SaveBox(UI_Object* savebox_parent, SaveBoxParameter savebox_parameter);
 		~SaveBox();
-		SaveBox(const SaveBox& object);
-		SaveBox& operator=(const SaveBox& object);
 
 		void draw(DC* dc) const;
 		void process();
@@ -30,6 +30,9 @@ class SaveBox : public UI_Window
 		UI_Button* OK_Button;
 		UI_Button* Cancel_Button;
 		UI_EditField* editField;
+
+		SaveBox(const SaveBox& object);
+		SaveBox& operator=(const SaveBox& object);
 };
 
 

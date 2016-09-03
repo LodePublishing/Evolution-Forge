@@ -4,13 +4,10 @@
 
 #include <sstream>
 Player::Player(UI_Object* player_parent, const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max) :
-//	UI_Window(player_parent, PLAYER_WINDOW_TITLE_STRING, theme.lookUpPlayerRect(PLAYER_WINDOW, game_number, game_max, player_number, player_max), theme.lookUpPlayerMaxHeight(PLAYER_WINDOW, game_number, game_max, player_number, player_max), NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0,0,1280,1024), TRANSPARENT),
 	UI_Object(player_parent, theme.lookUpPlayerRect(PLAYER_WINDOW, game_number, game_max, player_number, player_max), Size(0,0), DO_NOT_ADJUST),
 	geneAnimation(0),
 	anarace(NULL),
-//	mode(0),
 	forceWindow(new ForceWindow(this, game_number, game_max, player_number, player_max)),
-//	statisticsWindow(new StatisticsWindow(this, playerNumber)),
 	boWindow(new BoWindow(this, /* fixed,*/ game_number, game_max, player_number, player_max)),
 	boGraphWindow(new BoGraphWindow(this, game_number, game_max, player_number, player_max)),
 	boDiagramWindow(new BoDiagramWindow(this, game_number, game_max, player_number, player_max)),
@@ -24,7 +21,6 @@ Player::Player(UI_Object* player_parent, const unsigned int game_number, const u
 	os.str("");
 	os << UI_Object::theme.lookUpString(PLAYER_WINDOW_TITLE_STRING) << " " << (player_number+1);
 	forceWindow->setTitleParameter(os.str());
-//	statisticsWindow->setTitleParameter(os.str());
 	boWindow->setTitleParameter(os.str());
 	boGraphWindow->setTitleParameter(os.str());
 	boDiagramWindow->setTitleParameter(os.str());
@@ -35,11 +31,11 @@ Player::Player(UI_Object* player_parent, const unsigned int game_number, const u
 //		fixed[i]=false;	
 //	anarace->setFixed(fixed);
 }
+	
 
 Player::~Player()
 { 
 	delete forceWindow;
-//	delete statisticsWindow;
 	delete boWindow;
 	delete boGraphWindow;
 	delete boDiagramWindow;
@@ -49,20 +45,23 @@ void Player::assignAnarace(ANABUILDORDER* player_anarace)
 {
 	anarace = player_anarace;
 	forceWindow->assignAnarace(anarace);
-//	statisticsWindow->assignAnarace(anarace);
 	boWindow->assignAnarace(anarace);
 	boGraphWindow->assignAnarace(anarace);
 	boDiagramWindow->assignAnarace(anarace);
 //	anarace->setFixed(fixed);
 }
 
+void Player::loadBuildOrder(const unsigned int number)
+{
+	boWindow->loadBuildOrder(number);
+}
+	
 void Player::reloadStrings() //TODO
 {
 	std::ostringstream os;
 	os.str("");
 	os << UI_Object::theme.lookUpString(PLAYER_WINDOW_TITLE_STRING) << " " << (playerNumber+1);
 	forceWindow->setTitleParameter(os.str());
-//	statisticsWindow->setTitleParameter(os.str());
 	boWindow->setTitleParameter(os.str());
 	boGraphWindow->setTitleParameter(os.str());
 	boDiagramWindow->setTitleParameter(os.str());
@@ -70,9 +69,10 @@ void Player::reloadStrings() //TODO
 	UI_Object::reloadStrings(); 
 }
 
+
 void Player::drawGene(DC* dc, unsigned int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const
 {
-	if(points[0].y<points[1].y) dc->SetPen(bla1);else dc->SetPen(bla2);
+	if(points[0].y<points[1].y) dc->setPen(bla1);else dc->setPen(bla2);
 	dc->DrawSpline(k, points, position);
 	dc->DrawSpline(k, points, position - Size(0,1));
 	dc->DrawSpline(k, points, position + Size(0,1));
@@ -82,9 +82,9 @@ void Player::drawGeneString(DC* dc) const
 {
 	Rect position = //Rect(boWindow->getAbsolutePosition() + Point(boWindow->getWidth() / 2+5, 30), Size(boWindow->getWidth()/2 -15, 2*(FONT_SIZE+10)));
 		Rect(getAbsolutePosition()+Point(210, 200), Size(256, 128));
-	dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
-	dc->SetPen(*theme.lookUpPen(BRIGHT_UNIT_TYPE_1_PEN));
-	dc->DrawRectangle(Rect(position.GetTopLeft() - Size(1,2), position.GetSize() + Size(2,4)));
+	dc->setBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
+	dc->setPen(*theme.lookUpPen(BRIGHT_UNIT_TYPE_1_PEN));
+	dc->DrawRectangle(Rect(position.getTopLeft() - Size(1,2), position.getSize() + Size(2,4)));
 	DC::addRectangle(position);
 
 	unsigned int stringheight=0;
@@ -113,13 +113,13 @@ void Player::drawGeneString(DC* dc) const
 			current_type = stats[anarace->getRace()][colors[i/2]].facilityType;
 				for(unsigned int j=0;j<2;++j)
 				{
-					points1[j] = Point(5+(stringheight+j)*(position.GetWidth()-8)/(orderCount*2)-1, (int)((cos((float)(4*(stringheight+j)+geneAnimation)*5.0*M_PI/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
+					points1[j] = Point(5+(stringheight+j)*(position.getWidth()-8)/(orderCount*2)-1, (int)((cos((float)(4*(stringheight+j)+geneAnimation)*5.0*M_PI/200.0)*0.9*position.getHeight()/2)+position.getHeight()/2.1));
 					
-					points2[j] = Point(5+(stringheight+j)*(position.GetWidth()-8)/(orderCount*2)-1, (int)((sin(((float)(4*(stringheight+j)+geneAnimation)+13.0)*5.0*M_PI/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
+					points2[j] = Point(5+(stringheight+j)*(position.getWidth()-8)/(orderCount*2)-1, (int)((sin(((float)(4*(stringheight+j)+geneAnimation)+13.0)*5.0*M_PI/200.0)*0.9*position.getHeight()/2)+position.getHeight()/2.1));
 					
-					points3[j] = Point(5+(stringheight+j)*(position.GetWidth()-8)/(orderCount*2)-1, (int)((cos(((float)(4*(stringheight+j)+geneAnimation)+26.0)*5.0*M_PI/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
+					points3[j] = Point(5+(stringheight+j)*(position.getWidth()-8)/(orderCount*2)-1, (int)((cos(((float)(4*(stringheight+j)+geneAnimation)+26.0)*5.0*M_PI/200.0)*0.9*position.getHeight()/2)+position.getHeight()/2.1));
 					
-					points4[j] = Point(5+(stringheight+j)*(position.GetWidth()-8)/(orderCount*2)-1, (int)((sin(((float)(4*(stringheight+j)+geneAnimation)+39.0)*5.0*M_PI/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
+					points4[j] = Point(5+(stringheight+j)*(position.getWidth()-8)/(orderCount*2)-1, (int)((sin(((float)(4*(stringheight+j)+geneAnimation)+39.0)*5.0*M_PI/200.0)*0.9*position.getHeight()/2)+position.getHeight()/2.1));
 				} //end for(j=0;j<k;++j)
 				stringheight+=1;
 //				++k;
@@ -133,43 +133,43 @@ void Player::drawGeneString(DC* dc) const
 					{
 						if(points1[0].y>points2[0].y)
 						{
-							drawGene(dc, k, points1, position.GetTopLeft(), bla1, bla2);
-							drawGene(dc, k, points2, position.GetTopLeft(), bla1, bla2);
+							drawGene(dc, k, points1, position.getTopLeft(), bla1, bla2);
+							drawGene(dc, k, points2, position.getTopLeft(), bla1, bla2);
 						}
 						else
 						{
-							drawGene(dc, k, points2, position.GetTopLeft(), bla1, bla2);
-							drawGene(dc, k, points1, position.GetTopLeft(), bla1, bla2);
+							drawGene(dc, k, points2, position.getTopLeft(), bla1, bla2);
+							drawGene(dc, k, points1, position.getTopLeft(), bla1, bla2);
 						}
 						if(points3[0].y>points4[0].y)
 						{
-							drawGene(dc, k, points3, position.GetTopLeft(), bla1, bla2);
-							drawGene(dc, k, points4, position.GetTopLeft(), bla1, bla2);
+							drawGene(dc, k, points3, position.getTopLeft(), bla1, bla2);
+							drawGene(dc, k, points4, position.getTopLeft(), bla1, bla2);
 						} else
 						{
-							drawGene(dc, k, points4, position.GetTopLeft(), bla1, bla2);
-							drawGene(dc, k, points3, position.GetTopLeft(), bla1, bla2);
+							drawGene(dc, k, points4, position.getTopLeft(), bla1, bla2);
+							drawGene(dc, k, points3, position.getTopLeft(), bla1, bla2);
 						}
 					} else
 					{
 						if(points3[0].y>points4[0].y)
 						{
-							drawGene(dc, k, points3, position.GetTopLeft(), bla1, bla2);
-							drawGene(dc, k, points4, position.GetTopLeft(), bla1, bla2);
+							drawGene(dc, k, points3, position.getTopLeft(), bla1, bla2);
+							drawGene(dc, k, points4, position.getTopLeft(), bla1, bla2);
 						} else
 						{
-							drawGene(dc, k, points4, position.GetTopLeft(), bla1, bla2);
-							drawGene(dc, k, points3, position.GetTopLeft(), bla1, bla2);
+							drawGene(dc, k, points4, position.getTopLeft(), bla1, bla2);
+							drawGene(dc, k, points3, position.getTopLeft(), bla1, bla2);
 						}
 						if(points1[0].y>points2[0].y)
 						{
-							drawGene(dc, k, points1, position.GetTopLeft(), bla1, bla2);
-							drawGene(dc, k, points2, position.GetTopLeft(), bla1, bla2);
+							drawGene(dc, k, points1, position.getTopLeft(), bla1, bla2);
+							drawGene(dc, k, points2, position.getTopLeft(), bla1, bla2);
 						}
 						else
 						{
-							drawGene(dc, k, points2, position.GetTopLeft(), bla1, bla2);
-							drawGene(dc, k, points1, position.GetTopLeft(), bla1, bla2);
+							drawGene(dc, k, points2, position.getTopLeft(), bla1, bla2);
+							drawGene(dc, k, points1, position.getTopLeft(), bla1, bla2);
 						}
 					
 					}
@@ -248,9 +248,26 @@ void Player::process()
 		boWindow->setSelected(boDiagramWindow->getSelectedItems());
 		boGraphWindow->setSelected(boDiagramWindow->getSelectedItems());
 	}
-		
+}
 
+const bool Player::openMenu(const ePlayerOrder order)
+{
+	switch(order)
+	{
+		case OPEN_BO_MENU:boWindow->openBoMenu();break;
+		case OPEN_GOAL_MENU:forceWindow->openGoalMenu();break;
+		case OPEN_UNIT_MENU:forceWindow->openUnitMenu();break;
+		case SAVE_GOAL:forceWindow->saveGoal();break;
+		case SAVE_BUILD_ORDER:boWindow->saveBuildOrder();break;
+		case EDIT_FORCE_LIST:/*forceWindow->editForceList();*/break;
+		default:return(false);
+	}
+	return(false);
+}
 
+void Player::compactDisplayModeHasChanged()
+{
+	boWindow->resetData();
 }
 
 void Player::setMode(const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max)

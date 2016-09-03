@@ -2,36 +2,8 @@
 
 #include <sstream>
 
-UI_StaticText& UI_StaticText::operator=(const UI_StaticText& object)
-{
-	((UI_Object)(*this)) = ((UI_Object)object);
-	updateText(object.text);
-	textWasChanged=true;
-	font = object.font;
-	color = object.color;
-	tempColor = object.tempColor;
-	tempColorIsSet = object.tempColorIsSet;
-	eText = object.eText;
-	pressed = object.pressed;
-	highlight = object.highlight;
-	return(*this);
-}
-
-UI_StaticText::UI_StaticText(const UI_StaticText& object) :
-	UI_Object((UI_Object)object),
-	text(),
-	textWasChanged(true),
-	font(object.font),
-	color(object.color),
-	tempColor(object.tempColor),
-	tempColorIsSet(object.tempColorIsSet),
-	eText(object.eText),
-	pressed(object.pressed),
-	highlight(object.highlight)
-{}
-
-UI_StaticText::UI_StaticText(UI_Object* st_parent, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode, const eAutoSize auto_size) :
-	UI_Object(st_parent, st_pos, distance_bottom_right, position_mode, auto_size),
+UI_StaticText::UI_StaticText(UI_Object* st_parent, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode) :
+	UI_Object(st_parent, st_pos, distance_bottom_right, position_mode, AUTO_SIZE),
 	text(),
 	textWasChanged(true),
 	font(st_font),
@@ -43,8 +15,8 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const Rect st_pos, const Size
 	highlight(false)
 { }
 
-UI_StaticText::UI_StaticText(UI_Object* st_parent, const eString st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode, const eAutoSize auto_size) :
-	UI_Object(st_parent, st_pos, distance_bottom_right, position_mode, auto_size),
+UI_StaticText::UI_StaticText(UI_Object* st_parent, const eString st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode) :
+	UI_Object(st_parent, st_pos, distance_bottom_right, position_mode, NO_AUTO_SIZE),
 	text(),
 	textWasChanged(true),
 	font(st_font),
@@ -55,13 +27,14 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const eString st_text, const 
 	pressed(false),
 	highlight(false)
 {
-//	updateText(eText);
+//	adjustSize(CHILD_WAS_CHANGED, getTextSize());
+	updateText(eText);
 //	if(getParent()) 
 //		adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, getTextSize()); TODO
 }
 
-UI_StaticText::UI_StaticText(UI_Object* st_parent, const std::string& st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode, const eAutoSize auto_size) :
-	UI_Object(st_parent, st_pos, distance_bottom_right, position_mode, auto_size),
+UI_StaticText::UI_StaticText(UI_Object* st_parent, const std::string& st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode) :
+	UI_Object(st_parent, st_pos, distance_bottom_right, position_mode, NO_AUTO_SIZE),
 	text(st_text),
 	textWasChanged(true),
 	font(st_font),
@@ -72,7 +45,8 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const std::string& st_text, c
 	pressed(false),
 	highlight(false)
 {
-//	updateText(text);
+//	adjustSize(CHILD_WAS_CHANGED, getTextSize());
+	updateText(text);
 //	if(getParent()) 
 //		adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, getTextSize()); TODO, fuer UI_Group groessen bei Buttons... AUTO_HEIGHT muss irgendwo berechnet werden...
 }
@@ -101,21 +75,21 @@ void UI_StaticText::draw(DC* dc) const
 	if(checkForNeedRedraw())
 	{
 	//	if(font!=NULL_FONT)
-			dc->SetFont(theme.lookUpFont(font));
+			dc->setFont(theme.lookUpFont(font));
 		if(color!=NULL_COLOR) 
 		{
 			if(tempColorIsSet)
 			{
 				if(highlight==true)
-					dc->SetTextForeground(dc->changeAbsoluteBrightness(tempColor, 60));
+					dc->setTextForeground(dc->changeAbsoluteBrightness(tempColor, 60));
 				else
-					dc->SetTextForeground(tempColor);
+					dc->setTextForeground(tempColor);
 			} else
 			{
 				if(highlight==true)
-					dc->SetTextForeground(dc->changeAbsoluteBrightness(*UI_Object::theme.lookUpColor(color), 60));
+					dc->setTextForeground(dc->changeAbsoluteBrightness(*UI_Object::theme.lookUpColor(color), 60));
 				else
-					dc->SetTextForeground(*UI_Object::theme.lookUpColor(color));
+					dc->setTextForeground(*UI_Object::theme.lookUpColor(color));
 			}
 		}
 		if(pressed)
@@ -198,13 +172,11 @@ void UI_StaticText::updateText(const std::string& st_text)
 	textWasChanged=true;
 	Size old_size = getTextSize();
 	text = st_text;
-	setSize(getTextSize());
-	if((getParent()!=NULL)&&(old_size!=getTextSize()))
-	{
-//		getParent()->resetMinXY();
-		getParent()->adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, getSize());
-		adjustPositionAndSize(ADJUST_ONLY_POSITION, getTextSize());
-	}
+	std::ostringstream os;
+//	adjustSize(CHILD_WAS_CHANGED, getTextSize());
+	setSize(getTextSize());	
+//	os << "Gewuenschte Groesse: " << getTextSize().getWidth() << "x" << getTextSize().getHeight() << ", erzielte Groesse: " << getSize().getWidth() << "x" << getSize().getHeight() << " - " << text;
+//	toLog(os.str());
 }
 
 void UI_StaticText::updateText(const eString st_text)
@@ -221,14 +193,10 @@ void UI_StaticText::reloadText(const std::string& st_text)
 {
 	setNeedRedrawMoved();
 	textWasChanged=true;
-	Size old_size = getTextSize();
+//	Size old_size = getTextSize();
 	text = st_text;
 	setSize(getTextSize());
-	if((getParent()!=NULL))
-	{
-//		getParent()->resetMinXY();
-		getParent()->adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, getSize());
-	}
+//	adjustSize(CHILD_WAS_CHANGED, getTextSize());
 }
 
 void UI_StaticText::reloadText(const eString st_text)

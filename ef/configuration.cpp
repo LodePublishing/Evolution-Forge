@@ -3,13 +3,17 @@
 #include <iostream>
 #include <sstream>
 
+const unsigned int MAX_GENERATIONS = 10000;
+const unsigned int MIN_GENERATIONS = 100;
+
 EF_Configuration::EF_Configuration():
 	desiredFramerate(25),
 	desiredCPU(75),
 	currentFramerate(1),
 	currentFramesPerGeneration(1),
-	autoSaveRuns(false),
-	restrictSC(true),
+	autoRuns(false),
+	waitAfterChange(false),
+	compactDisplayMode(false),
 	facilityMode(true),
 	fullScreen(false),
 	softwareMouse(false),
@@ -17,6 +21,7 @@ EF_Configuration::EF_Configuration():
 	dnaSpiral(true),
 	toolTips(true),
 	showDebug(false),
+	maxGenerations(MAX_GENERATIONS-1),
 	configurationFile("settings/main.cfg")
 { }
 
@@ -29,15 +34,16 @@ void EF_Configuration::initDefaults()
 	setDesiredCPU(75);
 	setCurrentFramerate(1);
 	setCurrentFramesPerGeneration(1),
-	setAutoSaveRuns(false);
-	setRestrictSC(false);
+	setAutoRuns(false);
+	setWaitAfterChange(false);
+	setCompactDisplayMode(false);
 	setFacilityMode(true);
 	setFullScreen(false);
-	setSoftwareMouse(false);
 	setBackgroundBitmap(false);
 	setDnaSpiral(true);
 	setToolTips(true);
 	setShowDebug(false);
+	setMaxGenerations(MAX_GENERATIONS-1);
 	configurationFile = "settings/main.cfg";
 }
 
@@ -51,24 +57,22 @@ void EF_Configuration::saveToFile() const
 	std::ofstream pFile(configurationFile.c_str(), std::ios_base::out | std::ios_base::trunc);
 	if(!pFile.is_open())
 	{
-		toLog("ERROR: (EF_Configuration::saveToFile): File could not be opened.");
+		toErrorLog("ERROR: (EF_Configuration::saveToFile): File could not be opened.");
 		return;
 	}
 	pFile << "@SETTINGS" << std::endl;
 	pFile << "# Do autosave at the end of a run or ask for it?" << std::endl;
-	pFile << "    \"Autosave runs\" = \"" << (int)isAutoSaveRuns() << "\"" << std::endl;
-	pFile << "# set this to 1 to set all details to zero, fastest output" << std::endl;
-	pFile << "# Real minimalists should take a look at the command line options where SDL can be deactivated completely! 8-DD" << std::endl;
-	pFile << "# CURRENTLY NOT IMPLEMENTED" << std::endl;
-	pFile << "    \"Minimalist\" = \"0\"" << std::endl; // TODO
-	pFile << "" << std::endl;
+	pFile << "    \"Auto runs\" = \"" << (int)isAutoRuns() << "\"" << std::endl;
+	pFile << "    \"Max unchanged Generations\" = \"" << getMaxGenerations() << "\"" << std::endl;
 	pFile << "# Desired framerate: If the computer is fast the calculation speed is improved, if the computer is slow the calculation speed is decreased" << std::endl;
 	pFile << "    \"Desired framerate\" = \"" << getDesiredFramerate() << "\"" << std::endl;
 	pFile << "# Desired CPU usage" << std::endl;
 	pFile << "    \"Desired CPU usage\" = \"" << getDesiredCPU() << "\"" << std::endl;
-	pFile << "" << std::endl;                                                                                
-	pFile << "# Restrict unit menus to StarCraft (TM) units?" << std::endl;
-	pFile << "    \"Restrict units\" = \"" << (int)isRestrictSC() << "\"" << std::endl;
+	pFile << "" << std::endl;
+	pFile << "# Wait briefly after each change in the build order or just progress as fast as possible? (1 / 0)" << std::endl;
+	pFile << "    \"Wait after change\" = \"" << (int)isWaitAfterChange() << "\"" << std::endl;
+	pFile << "# Display entries in the build order window compact (i.e. '6x Zergling' instead of Zergling, Zergling, Zergling, ...)" << std::endl;
+	pFile << "    \"Compact display mode\" = \"" << (int)isCompactDisplayMode() << "\"" << std::endl;
 	pFile << "# Order entries in the unitmenu by area or by facility?" << std::endl;
 	pFile << "    \"Facility mode\" = \"" << (int)isFacilityMode() << "\"" << std::endl;
 	pFile << "# Show nice DNA spiral?" << std::endl;
@@ -76,26 +80,25 @@ void EF_Configuration::saveToFile() const
 	pFile << "# use background bitmap, saves some cpu power if deactivated" << std::endl;
 	pFile << "    \"Background bitmap\" = \"" << (int)isBackgroundBitmap() << "\"" << std::endl;
 	pFile << "    \"Fullscreen\" = \"" << (int)isFullScreen() << "\"" << std::endl;
-	pFile << "    \"Software mouse\" = \"" << (int)isSoftwareMouse() << "\"" << std::endl;
 	pFile << "    \"Tooltips\" = \"" << (int)isToolTips() << "\"" << std::endl;
 	pFile << "# show which part of the program needs how much CPU resources" << std::endl;
 	pFile << "    \"Show debug\" = \"" << (int)isShowDebug() << "\"" << std::endl;
 	pFile << "@END" << std::endl;
 }
-
+	
 void EF_Configuration::loadConfigurationFile()
 {
 	std::ifstream pFile(configurationFile.c_str());
 	if(!pFile.is_open())
 	{
-		toLog("WARNING: (EF_Configuration::loadConfigurationFile): File not found.");
-		toLog("-> Creating new file with default values...");
+		toErrorLog("WARNING: (EF_Configuration::loadConfigurationFile): File not found.");
+		toErrorLog("-> Creating new file with default values...");
 		initDefaults();
 		saveToFile();		
 		return;
 	}
 
-	toLog("* Loading " + configurationFile);
+	toInitLog("* Loading " + configurationFile);
 	
 	std::fstream::pos_type old_pos = pFile.tellg();
 	char line[1024];
@@ -105,7 +108,7 @@ void EF_Configuration::loadConfigurationFile()
 		{
 			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
 #ifdef _SCC_DEBUG
-			toLog("WARNING: (EF_Configuration::loadConfigurationFile) Long line!");
+			toErrorLog("WARNING: (EF_Configuration::loadConfigurationFile) Long line!");
 #endif
 		}
 		std::string text = line;
@@ -124,21 +127,30 @@ void EF_Configuration::loadConfigurationFile()
 			if(!parse_block_map(pFile, block))
 			{
 #ifdef _SCC_DEBUG
-				toLog("WARNING: (EF_Configuration::loadConfigurationFile) No concluding @END was found!");
+				toErrorLog("WARNING: (EF_Configuration::loadConfigurationFile) No concluding @END was found!");
 #endif
 			}			
 				
 
-			if((i=block.find("Autosave runs"))!=block.end()) {
+			if((i=block.find("Auto runs"))!=block.end()) {
 				i->second.pop_front();
-			   	setAutoSaveRuns(atoi(i->second.front().c_str()));
+			   	setAutoRuns(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Max generations"))!=block.end()) {
+				i->second.pop_front();
+			   	setMaxGenerations(atoi(i->second.front().c_str()));
+			}
+
+			if((i=block.find("Wait after change"))!=block.end()){
+				i->second.pop_front();
+			   	setWaitAfterChange(atoi(i->second.front().c_str()));
+			}
+	
+			if((i=block.find("Compact display mode"))!=block.end()){
+				i->second.pop_front();
+			   	setCompactDisplayMode(atoi(i->second.front().c_str()));
 			}
 		
-			if((i=block.find("Restrict units"))!=block.end()){
-				i->second.pop_front();
-				setRestrictSC(atoi(i->second.front().c_str()));
-			}
-			
 			if((i=block.find("Facility mode"))!=block.end()){
 				i->second.pop_front();
 			   	setFacilityMode(atoi(i->second.front().c_str()));
@@ -147,10 +159,6 @@ void EF_Configuration::loadConfigurationFile()
 			if((i=block.find("Fullscreen"))!=block.end()){
 				i->second.pop_front();
 			   	setFullScreen(atoi(i->second.front().c_str()));
-			}
-			if((i=block.find("Software mouse"))!=block.end()){
-				i->second.pop_front();
-			   	setSoftwareMouse(atoi(i->second.front().c_str()));
 			}
 			if((i=block.find("Tooltips"))!=block.end()){
 				i->second.pop_front();
@@ -177,24 +185,33 @@ void EF_Configuration::loadConfigurationFile()
 				i->second.pop_front();
 			   	setDnaSpiral(atoi(i->second.front().c_str()));
 			}
+
 		}
 		old_pos = pFile.tellg();
 	}// END while
 } // schoen :)
 
-const bool EF_Configuration::setAutoSaveRuns(const bool auto_save_runs) 
+const bool EF_Configuration::setAutoRuns(const bool auto_runs) 
 {
-	if(autoSaveRuns == auto_save_runs)
+	if(autoRuns == auto_runs)
 		return(false);		
-	autoSaveRuns = auto_save_runs;
+	autoRuns = auto_runs;
 	return(true);
 }
 
-const bool EF_Configuration::setRestrictSC(const bool restrict_sc) 
+const bool EF_Configuration::setWaitAfterChange(const bool wait_after_change)
 {
-	if(restrictSC == restrict_sc)
+	if(waitAfterChange == wait_after_change)
 		return(false);
-	restrictSC = restrict_sc;
+	waitAfterChange = wait_after_change;
+	return(true);
+}
+
+const bool EF_Configuration::setCompactDisplayMode(const bool compact_display_mode) 
+{
+	if(compactDisplayMode == compact_display_mode)
+		return(false);
+	compactDisplayMode = compact_display_mode;
 	return(true);
 }
 
@@ -203,14 +220,6 @@ const bool EF_Configuration::setFacilityMode(const bool facility_mode)
 	if(facilityMode == facility_mode)
 		return(false);
 	facilityMode = facility_mode;
-	return(true);
-}
-
-const bool EF_Configuration::setSoftwareMouse(const bool software_mouse) 
-{
-	if(softwareMouse == software_mouse)
-		return(false);
-	softwareMouse = software_mouse;
 	return(true);
 }
 
@@ -254,6 +263,14 @@ const bool EF_Configuration::setShowDebug(const bool show_debug)
 	return(true);
 }
 
+const bool EF_Configuration::setMaxGenerations(const unsigned int max_generations)
+{
+	if(maxGenerations == max_generations)
+		return(false);
+	maxGenerations = max_generations;
+	return(true);
+}
+
 const bool EF_Configuration::setCurrentFramerate(const unsigned int frame_rate) 
 {
 	if(currentFramerate == frame_rate)
@@ -276,7 +293,7 @@ const bool EF_Configuration::setDesiredCPU(const unsigned int desired_cpu_usage)
 		return(false);
 #ifdef _SCC_DEBUG
 	if((desired_cpu_usage<1)||(desired_cpu_usage>99)) {
-		toLog("WARNING: (EF_Configuration::setDesiredCPU): Value out of range.");return(false);
+		toErrorLog("WARNING: (EF_Configuration::setDesiredCPU): Value out of range.");return(false);
 	}
 #endif
 	desiredCPU = desired_cpu_usage;
@@ -289,15 +306,11 @@ const bool EF_Configuration::setDesiredFramerate(const unsigned int desired_fram
 		return(false);
 #ifdef _SCC_DEBUG
 	if((desired_frame_rate<MIN_DESIRED_FRAMERATE)||(desired_frame_rate>MAX_DESIRED_FRAMERATE)) {
-		toLog("WARNING: (EF_Configuration::setDesiredFramerate): Value out of range.");return(false);
+		toErrorLog("WARNING: (EF_Configuration::setDesiredFramerate): Value out of range.");return(false);
 	}
 #endif
 	desiredFramerate = desired_frame_rate;
 	return(true);
 }
 EF_Configuration efConfiguration;
-//const unsigned int EF_Configuration::MIN_DYNAMIC_FRAMERATE = 0;
-//const unsigned int EF_Configuration::MAX_DYNAMIC_FRAMERATE = 100;
-//const unsigned int EF_Configuration::MIN_STATIC_FRAMERATE = 1;
-//const unsigned int EF_ConfigurationMAX_STATIC_FRAMERATE = 100;
 

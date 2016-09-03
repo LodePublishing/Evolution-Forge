@@ -20,6 +20,7 @@ enum eButtonMode
 	PRESS_BUTTON_MODE,  // returns to unpressed
 	PUSH_BUTTON_MODE,   // calls several messages when being pressed
 	TAB_BUTTON_MODE,
+	CHECK_BUTTON_MODE, // no '3d effect', allows button to be set with 'check'
 //	MENU_TAB_BUTTON_MODE,
 	BOGRAPH_BUTTON_MODE, // just a rectangle, not rounded
 	
@@ -31,9 +32,6 @@ class UI_Radio;
 class UI_Button:public UI_Object
 {
 	public:
-		UI_Button& operator=(const UI_Button& object);		
-		UI_Button(const UI_Button& object);
-
 // TODO Beschreibung der Konstruktoren
 		UI_Button(UI_Object* button_parent, 
 				const Rect button_rect, 
@@ -41,28 +39,39 @@ class UI_Button:public UI_Object
 				const eButtonColorsType button_colors_type, 
 				const bool has_bitmap,
 				const eButtonMode button_mode,
+				
 				const eString button_text, 
+				
 				const ePositionMode button_position_mode = DO_NOT_ADJUST, 
 				const eFont button_font = SMALL_BOLD_FONT, 
 				const eAutoSize button_auto_size = NO_AUTO_SIZE);
-		
+	
+		UI_Button(UI_Object* button_parent, 
+				const Rect button_rect, 
+				const Size distance_bottom_right,
+				const eButtonColorsType button_colors_type, 
+				const bool has_bitmap,
+				const eButtonMode button_mode,
+				
+				const eString button_text, 
+				const eString button_tooltip,
+				
+				const ePositionMode button_position_mode = DO_NOT_ADJUST, 
+				const eFont button_font = SMALL_BOLD_FONT, 
+				const eAutoSize button_auto_size = NO_AUTO_SIZE);
+
 		UI_Button(UI_Object* button_parent, 
 				const Rect button_rect, 
 				const Size distance_bottom_right, 
 				const eButtonColorsType button_colors_type,
 				const bool has_bitmap,
 				const eButtonMode button_mode, 
+				
 				const std::string& button_text, 
+				
 				const ePositionMode button_position_mode = DO_NOT_ADJUST,
 				const eFont button_font = SMALL_BOLD_FONT, 
 				const eAutoSize button_auto_size = NO_AUTO_SIZE);
-// Bitmap button
-/*		UI_Button(UI_Object* button_parent, 
-				const Rect button_rect, 
-				const Size distance_bottom_right, 
-				const eButtonColorsType button_colors_type, 
-				const eButtonMode button_mode = STATIC_BUTTON_MODE, 
-				const ePositionMode button_position_mode = DO_NOT_ADJUST);*/
 		~UI_Button();
 		
 		const bool isLeftClicked();			// has it been selected (ie clicked on)
@@ -76,9 +85,9 @@ class UI_Button:public UI_Object
 		void reloadOriginalSize();																																							
 		void doHighlight(const bool high_light=true);	// force button to be highlighted
 
+		void check(const bool is_checked=true);
 		void forcePress();	  // force button to get pressed
 		void forceUnpress();
-
 
 		void updateText(const std::string& utext);
 		void updateText(const eString utext);
@@ -97,13 +106,13 @@ class UI_Button:public UI_Object
 		void mouseRightButtonPressed();
 		void mouseRightButtonReleased();
 
+		const bool addKey(unsigned int key, unsigned int mod);
 		
 		void draw(DC* dc) const;
 		void setButtonColorsType(const eButtonColorsType button_colors_type);
 		void resetGradient();
 		UI_Radio* radio;
 
-		bool forcedPress;
 // relative 'button placement area'
 		const unsigned int getTextWidth() const;
 		const unsigned int getTextHeight() const;
@@ -166,7 +175,7 @@ class UI_Button:public UI_Object
 		static const unsigned int BF_LEFT_CLICKED = 8;
 		static const unsigned int BF_RIGHT_CLICKED = 16;
 		static const unsigned int BF_DOUBLE_CLICKED = 32;
-		static const unsigned int BF_HIGHLIGHTED = 64;  // button is not highlighted (ie mouse is not over)
+		static const unsigned int BF_HIGHLIGHTED = 64;  // button is not highlighted (ie mouse is not above the item)
 		static const unsigned int BF_JUST_HIGHLIGHTED = 128;  // button has just been highlighted, true for 1 frame
 		static const unsigned int BF_REPEATS = 256;
 		static const unsigned int BF_STATIC = 512;
@@ -175,8 +184,13 @@ class UI_Button:public UI_Object
 		static const unsigned int BF_IS_TAB = 4096;
 		static const unsigned int BF_WAS_PRESSED = 8192; // button will be DOWN again, wenn mouse gets over button, without pressing the button again
 		static const unsigned int BF_IS_RECTANGLE = 16384;
+		static const unsigned int BF_IS_CHECKBUTTON = 32768; // no '3d effect', allows to be 'checked'
+		//static const unsigned int BF_WAS_FORCED = 65536; // TODO irgendwie mit Zeit machen, dass z.B. nach 100ms die Taste automatisch losgelassen wird
 	protected:
 		UI_StaticText* text;
+	private:
+		UI_Button& operator=(const UI_Button& object);		
+		UI_Button(const UI_Button& object);
 };
 
 inline UI_StaticText* UI_Button::getText() const {
@@ -195,34 +209,14 @@ inline const unsigned int UI_Button::getGradient() const {
 	return(gradient);
 }
 
-inline const Size UI_Button::getTextSize() const {
-	return(text->getTextSize());
-}
-
-inline const unsigned int UI_Button::getTextWidth() const {
-	return(text->getTextSize().GetWidth());
-}
-
-inline const unsigned int UI_Button::getTextHeight() const {
-	return(text->getTextSize().GetHeight());
-}
-
 inline void UI_Button::setButtonColorsType(const eButtonColorsType button_colors_type)
 {
 #ifdef _SCC_DEBUG
 	if((button_colors_type<0)&&(button_colors_type>=MAX_BUTTON_COLORS_TYPES)) {
-		toLog("WARNING: (UI_Button::setButtonColorsType): Value button_colors_type out of range.");return;
+		toErrorLog("WARNING (UI_Button::setButtonColorsType()): Value button_colors_type out of range.");return;
 	}
 #endif
 	buttonColorsType = button_colors_type;
-}
-
-inline void UI_Button::updateText(const std::string& utext) {
-	text->updateText(utext);
-}
-
-inline void UI_Button::updateText(const eString utext) {
-	text->updateText(utext);
 }
 
 inline const bool UI_Button::isCurrentButtonPressed() {

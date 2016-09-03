@@ -1,28 +1,7 @@
 #include "radio.hpp"
 
-UI_Radio& UI_Radio::operator=(const UI_Radio& object)
-{
-	((UI_Group)(*this)) = ((UI_Group)object);
-	markedItem = -1;
-	reorder = object.reorder;
-	buttonWasPressed = NULL;
-	for(unsigned int i = 0; i < 50; i++) 
-		buttonId[i]=object.buttonId[i];
-	return(*this);
-}
-
-UI_Radio::UI_Radio(const UI_Radio& object):
-	UI_Group((UI_Group)object),
-	markedItem(-1),
-	reorder(object.reorder),
-	buttonWasPressed(NULL)
-{
-	for(unsigned int i = 0; i < 50; i++) 
-		buttonId[i]=object.buttonId[i];
-}
-
-UI_Radio::UI_Radio(UI_Object* radio_parent, Rect initial_rect, Size bottom_right_distance, const ePositionMode position_mode, const eString radio_title) :
-	UI_Group(radio_parent, initial_rect, bottom_right_distance, position_mode, radio_title),
+UI_Radio::UI_Radio(UI_Object* radio_parent, Rect initial_rect, Size bottom_right_distance, const eGroupType group_type, const ePositionMode position_mode, const eString radio_title) :
+	UI_Group(radio_parent, initial_rect, bottom_right_distance, group_type, position_mode, radio_title),
 	markedItem(-1),
 	reorder(false),
 	buttonWasPressed(NULL)
@@ -39,7 +18,7 @@ void UI_Radio::addButton(UI_Button* button, const unsigned int id)
 {
 #ifdef _SCC_DEBUG
 	if((!button)||(buttonId[id]!=NULL)) {
-                toLog("DEBUG: (UI_Radio::addButton): Variable button not initialized.");return;
+                toErrorLog("DEBUG: (UI_Radio::addButton): Variable button not initialized.");return;
         }
 #endif
 	button->setParent(this);
@@ -53,7 +32,7 @@ void UI_Radio::removeButton(const unsigned int button_id)
 {
 #ifdef _SCC_DEBUG
 	if((button_id>=50)||(buttonId[button_id]==NULL)) {
-                toLog("DEBUG: (UI_Radio::removeButton): Value button_id out of range.");return;
+                toErrorLog("DEBUG: (UI_Radio::removeButton): Value button_id out of range.");return;
         }
 #endif
 	buttonId[button_id]->setParent(NULL);
@@ -94,18 +73,6 @@ void UI_Radio::forceUnpressAll()
 	for(unsigned int i = 0; i < 50; i++)
 		if(buttonId[i])
 			buttonId[i]->forceUnpress();
-}
-
-void UI_Radio::forcePress(const unsigned int button_id)
-{
-#ifdef _SCC_DEBUG
-        if(!buttonId[button_id]) {
-                toLog("DEBUG: (UI_Radio::forcePress): Variable buttonId not initialized.");return;
-        }
-#endif
-	forceUnpressAll();
-	buttonId[button_id]->forcePress();
-	markedItem = button_id;
 }
 
 const signed int UI_Radio::getMarked() const
@@ -165,12 +132,11 @@ void UI_Radio::process()
 	if(reorder)
 	{
 		reorder=false;
-		resetMinXY();
-
+//		calculateBoxSize(); // TODO
+/*		resetMinXY();
 		for(unsigned int i = 0; i < 50; i++)
 			if(buttonId[i])
-				buttonId[i]->adjustPositionAndSize(ADJUST_ONLY_POSITION);
+				buttonId[i]->adjustPositionAndSize(ADJUST_ONLY_POSITION);*/
 	}
-
 }
 

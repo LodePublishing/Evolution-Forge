@@ -1,52 +1,6 @@
 #include "dc.hpp"
 #include <stdlib.h>
 
-DC::DC():
-	surface(),
-	pressedRectangle(false),
-	initOK(true),
-	brush(),
-	pen(),
-	color(NULL),
-	textColor(),
-	font(NULL),
-	bitDepth(DEPTH_8BIT),
-	resolution(Size(640,480)),
-	Draw_HLine(NULL),
-	Draw_VLine(NULL),
-	Draw_Line(NULL),
-	DrawFilledRound(NULL),
-	DrawFilledEdgedRound(NULL),
-	DrawEmptyEdgedRound(NULL),
-	DrawEmptyRound(NULL),
-	DrawFilledEdgedBorderRound(NULL)
-{ 
-}
-
-DC::DC(const DC& other):
-	surface(other.surface),
-	pressedRectangle(other.pressedRectangle),
-	initOK(other.initOK),
-	brush(other.brush),
-	pen(other.pen),
-	color(other.color),
-	textColor(other.textColor),
-	font(other.font),
-	bitDepth(other.bitDepth),
-	resolution(other.resolution),
-	Draw_HLine(other.Draw_HLine),
-	Draw_VLine(other.Draw_VLine),
-	Draw_Line(other.Draw_Line),
-	DrawFilledRound(other.DrawFilledRound),
-	DrawFilledEdgedRound(other.DrawFilledEdgedRound),
-	DrawEmptyEdgedRound(other.DrawEmptyEdgedRound),
-	DrawEmptyRound(other.DrawEmptyRound),
-	DrawFilledEdgedBorderRound(other.DrawFilledEdgedBorderRound)
-{ 
-	changedRectangles=0;
-}
-
-
 DC::DC(const Size current_resolution, const eBitDepth bit_depth, const Uint32 nflags, const Uint32 initflags) :
 	surface(NULL),
 	pressedRectangle(false),
@@ -157,7 +111,7 @@ std::string DC::printHardwareInformation()
 std::string DC::printSurfaceInformation(DC* surface)
 {
 	std::ostringstream os; os.str("");
-	os << surface->GetSurface()->w << " x " << surface->GetSurface()->h << " @ " << (unsigned int)(surface->GetSurface()->format->BitsPerPixel);
+	os << surface->getSurface()->w << " x " << surface->getSurface()->h << " @ " << (unsigned int)(surface->getSurface()->format->BitsPerPixel);
 	if (surface->flags() & SDL_SWSURFACE) os << "\n- Surface is stored in system memory";
 	else if(surface->flags() & SDL_HWSURFACE) os << "\n- Surface is stored in video memory";
 	if(surface->flags() & SDL_ASYNCBLIT) os << "\n- Surface uses asynchronous blits if possible";
@@ -172,7 +126,7 @@ std::string DC::printSurfaceInformation(DC* surface)
 	if(surface->flags() & SDL_RLEACCEL) os << "\n- Colorkey blitting is accelerated with RLE";
 	if(surface->flags() & SDL_SRCALPHA) os << "\n- Surface blit uses alpha blending";
 	if(surface->flags() & SDL_PREALLOC) os << "\n- Surface uses preallocated memory";
-	if(SDL_MUSTLOCK(surface->GetSurface())) os << "\n- Surface needs locking";
+	if(SDL_MUSTLOCK(surface->getSurface())) os << "\n- Surface needs locking";
 	return(os.str());
 }
 
@@ -218,33 +172,33 @@ void DC::addRectangle(const Rect& rect)
 	if(changedRectangles>199)
 		return;
 	SDL_Rect r;
-	if(rect.GetLeft() < 0)
+	if(rect.getLeft() < 0)
 		r.x = 0;
-	else if(rect.GetLeft() >= max_x)
+	else if(rect.getLeft() >= max_x)
 		return;
 	else
-		r.x = rect.GetLeft();
+		r.x = rect.getLeft();
 
-	if(rect.GetTop() < 0)
+	if(rect.getTop() < 0)
 		r.y = 0;
-	else if(rect.GetTop() >= max_y)
+	else if(rect.getTop() >= max_y)
 		return;
 	else 
-		r.y = rect.GetTop();
+		r.y = rect.getTop();
 	
-	if(rect.GetRight() < 0)
+	if(rect.getRight() < 0)
 		return;
-	else if(rect.GetRight() > max_x)
+	else if(rect.getRight() > max_x)
 		r.w = max_x - r.x;
 	else 
-		r.w = rect.GetRight() - r.x;
+		r.w = rect.getRight() - r.x;
 
-	if(rect.GetBottom() < 0)
+	if(rect.getBottom() < 0)
 		return;
-	else if(rect.GetBottom() > max_y)
+	else if(rect.getBottom() > max_y)
 		r.h = max_y - r.y;
 	else 
-		r.h = rect.GetBottom() - r.y;
+		r.h = rect.getBottom() - r.y;
 	std::ostringstream os;
 
 	for(unsigned int i = 0; i < changedRectangles; i ++)
@@ -276,7 +230,7 @@ void DC::updateScreen()
 {
 /*	for(unsigned int i = changedRectangles; i--;)
 	{
-		SetPen(Pen(surface, rand()%256, rand()%256, rand()%256, 2, SOLID_PEN_STYLE)); 
+		setPen(Pen(surface, rand()%256, rand()%256, rand()%256, 2, SOLID_PEN_STYLE)); 
 		DrawEmptyRectangle(changedRectangle[i].x, changedRectangle[i].y, changedRectangle[i].w, changedRectangle[i].h);
 	}*/
 
@@ -289,11 +243,50 @@ void DC::DrawBitmap(SDL_Surface* bitmap, const signed int x, const signed int y)
 	SDL_Rect drect;
 	drect.x = x;
 	drect.y = y;
-	drect.w = bitmap->w;
-	drect.h = bitmap->h;
-	if((drect.x + drect.w >= max_x)||(drect.y + drect.h >= max_y) || (drect.x < 0) || (drect.y < 0))
+	if((drect.x + bitmap->w >= max_x)||(drect.y + bitmap->h >= max_y) || (drect.x < 0) || (drect.y < 0))
+	{
+		DrawBitmap(bitmap, x, y, Rect(0, 0, max_x, max_y));
 		return;
+	}
 	SDL_BlitSurface(bitmap , NULL, surface, &drect);
+}
+
+// clipped bitmap
+void DC::DrawBitmap(SDL_Surface* bitmap, const signed int x, const signed int y, const Rect& clip_rect) const
+{
+	SDL_Rect srect;
+	SDL_Rect drect;
+	drect.x = x;
+	drect.y = y;
+
+	if((clip_rect.getLeft() > x + bitmap->w) || (clip_rect.getTop() > y + bitmap->h) || (clip_rect.getBottom() < y) || (clip_rect.getRight() < x))
+		return;
+	if(clip_rect.getLeft() > x)
+	{
+		srect.x = clip_rect.getLeft() - x;
+		srect.w = bitmap->w - srect.x;
+		drect.x = clip_rect.getLeft();
+	}
+	else
+		srect.x = 0;
+	if(clip_rect.getTop() > y)
+	{
+		srect.y = clip_rect.getTop() - y;
+		srect.h = bitmap->h - srect.y;
+		drect.y = clip_rect.getTop();
+	}
+	else srect.y = 0;
+
+	if(clip_rect.getRight() < srect.x + bitmap->w)
+		srect.w = srect.x + bitmap->w - clip_rect.getRight();
+	else
+		srect.w = bitmap->w;
+	
+	if(clip_rect.getBottom() < srect.y + bitmap->h)
+		srect.h = srect.y + bitmap->h - clip_rect.getBottom();
+	else
+		srect.h = bitmap->h;
+	SDL_BlitSurface(bitmap , &srect, surface, &drect);
 }
 
 const Color DC::mixColor(const Color& id1, const Color& id2)  const
@@ -327,25 +320,25 @@ const Color DC::changeRelativeBrightness(const Color& id, const unsigned int bri
 
 void DC::DrawLine(const signed x1, const signed y1, const signed x2, const signed y2) const
 {
-	if(pen.GetStyle()==TRANSPARENT_PEN_STYLE)
+	if(pen.getStyle()==TRANSPARENT_PEN_STYLE)
 		return;
 	signed int xx1, xx2, yy1, yy2;
 	if(x1>x2)
 		{xx1=x2;xx2=x1;yy1=y2;yy2=y1;}
 	else {xx1=x1;xx2=x2;yy1=y1;yy2=y2;}
 
-	if((xx1<pen.GetWidth()/2)||(yy1+1<pen.GetWidth()/2)||(yy2<pen.GetWidth()/2)||(xx2>=max_x-pen.GetWidth()/2)||(yy1>=max_y-pen.GetWidth()/2)||(yy2>=max_y-pen.GetWidth()/2))
+	if((xx1<pen.getWidth()/2)||(yy1+1<pen.getWidth()/2)||(yy2<pen.getWidth()/2)||(xx2>=max_x-pen.getWidth()/2)||(yy1>=max_y-pen.getWidth()/2)||(yy2>=max_y-pen.getWidth()/2))
 		return;
 		
 	if(yy1==yy2)
 	{
 		if(xx1==xx2)
 			return;
-		if(pen.GetWidth()>1)
+		if(pen.getWidth()>1)
 		{
 			SDL_Rect rc;
-			rc.x=xx1/*-pen.GetWidth()/2*/;rc.y=yy1/*-pen.GetWidth()/2*/;rc.w=xx2-xx1/*+pen.GetWidth()*/;rc.h=pen.GetWidth();
-			SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()) );
+			rc.x=xx1/*-pen.getWidth()/2*/;rc.y=yy1/*-pen.getWidth()/2*/;rc.w=xx2-xx1/*+pen.getWidth()*/;rc.h=pen.getWidth();
+			SDL_FillRect(surface, &rc, (Uint32)(*pen.getColor()) );
 		} else
 			(*this.*Draw_HLine)(xx1, yy1, xx2);
 	} else
@@ -353,24 +346,24 @@ void DC::DrawLine(const signed x1, const signed y1, const signed x2, const signe
 	{
 		if(yy1>yy2)
 			{signed int swp=yy1;yy1=yy2;yy2=swp;}
-		if(pen.GetWidth()>1)
+		if(pen.getWidth()>1)
 		{
 			SDL_Rect rc;
-			rc.x=xx1/*-pen.GetWidth()/2*/;rc.y=yy1/*-pen.GetWidth()/2*/;rc.w=pen.GetWidth();rc.h=yy2-yy1/*+pen.GetWidth()*/;
-			SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()) );
+			rc.x=xx1/*-pen.getWidth()/2*/;rc.y=yy1/*-pen.getWidth()/2*/;rc.w=pen.getWidth();rc.h=yy2-yy1/*+pen.getWidth()*/;
+			SDL_FillRect(surface, &rc, (Uint32)(*pen.getColor()) );
 		} else
 			(*this.*Draw_VLine)(xx1, yy1, yy2);
 	} else
 	{
 		(*this.*Draw_Line)(xx1, yy1, xx2, yy2);
-		if(pen.GetWidth()==2)
+		if(pen.getWidth()==2)
 		{
-//			Color c = *pen.GetColor();
-//			const_cast<DC*>(this)->pen.SetColor(Color(surface, (Uint8)(pen.GetColor()->r()*0.5),  (Uint8)(pen.GetColor()->g()*0.5), (Uint8)(pen.GetColor()->b()*0.5)));
+//			Color c = *pen.getColor();
+//			const_cast<DC*>(this)->pen.setColor(Color(surface, (Uint8)(pen.getColor()->r()*0.5),  (Uint8)(pen.getColor()->g()*0.5), (Uint8)(pen.getColor()->b()*0.5)));
 			(*this.*Draw_Line)(xx1, yy1+1, xx2, yy2+1);
 			(*this.*Draw_Line)(xx1, yy1, xx2, yy2);
 			(*this.*Draw_Line)(xx1, yy1-1, xx2, yy2-1);
-//			const_cast<DC*>(this)->pen.SetColor(c);
+//			const_cast<DC*>(this)->pen.setColor(c);
 		}
 	}
 }
@@ -378,12 +371,12 @@ void DC::DrawLine(const signed x1, const signed y1, const signed x2, const signe
 
 void DC::DrawSpline(const unsigned int c, const Point* p) const
 {
-	if((pen.GetStyle() == TRANSPARENT_PEN_STYLE)||(c<2))
+	if((pen.getStyle() == TRANSPARENT_PEN_STYLE)||(c<2))
 		return;
 	for(unsigned int i=c-1;i--;)
 //	{
-//		aalineColor(surface, p[i].x, p[i].y, p[i+1].x, p[i+1].y, (Uint32)(*pen.GetColor()));
-//		aalineColor(surface, p[i].x, p[i].y+1, p[i+1].x, p[i+1].y+1, (Uint32)(*pen.GetColor()));
+//		aalineColor(surface, p[i].x, p[i].y, p[i+1].x, p[i+1].y, (Uint32)(*pen.getColor()));
+//		aalineColor(surface, p[i].x, p[i].y+1, p[i+1].x, p[i+1].y+1, (Uint32)(*pen.getColor()));
 //	}
 	{
 /*		if((i>0)&&(i<c-2))
@@ -402,12 +395,12 @@ void DC::DrawSpline(const unsigned int c, const Point* p) const
 	
 void DC::DrawSpline(const unsigned int c, const Point* p, const Point s) const
 {
-	if((pen.GetStyle() == TRANSPARENT_PEN_STYLE)||(c<2))
+	if((pen.getStyle() == TRANSPARENT_PEN_STYLE)||(c<2))
 		return;
 	for(unsigned int i=c-1;i--;)
 //	{
-//		aalineColor(surface, p[i].x, p[i].y, p[i+1].x, p[i+1].y, (Uint32)(*pen.GetColor()));
-//		aalineColor(surface, p[i].x, p[i].y+1, p[i+1].x, p[i+1].y+1, (Uint32)(*pen.GetColor()));
+//		aalineColor(surface, p[i].x, p[i].y, p[i+1].x, p[i+1].y, (Uint32)(*pen.getColor()));
+//		aalineColor(surface, p[i].x, p[i].y+1, p[i+1].x, p[i+1].y+1, (Uint32)(*pen.getColor()));
 //	}
 	{
 /*		if((i>0)&&(i<c-2))
@@ -432,9 +425,9 @@ void DC::DrawText(const std::string& text, const signed int x, const signed int 
 	font->DrawText(surface, textColor, text, x, y);
 	if(font->isUnderlined())
 	{
-		Size s = font->GetTextExtent(text);
+		Size s = font->getTextExtent(text);
 		SDL_Rect r;
-		r.x = x;r.y = y+s.GetHeight()*2/3;r.w = s.GetWidth();r.h = 1;
+		r.x = x;r.y = y+s.getHeight()*2/3;r.w = s.getWidth();r.h = 1;
 		SDL_FillRect(surface, &r, Color(surface, textColor.r, textColor.g, textColor.b));
 	}
 
@@ -446,8 +439,8 @@ void DC::setScreen(const Size current_resolution, const eBitDepth bit_depth, con
 	if((current_resolution == resolution) && (bit_depth == bitDepth) && (surface!=NULL))
 		return;
 	resolution = current_resolution;
-	max_x = resolution.GetWidth();
-	max_y = resolution.GetHeight();
+	max_x = resolution.getWidth();
+	max_y = resolution.getHeight();
 	unsigned int bits;
 	switch(bit_depth)
 	{
@@ -550,11 +543,11 @@ void DC::DrawGridEdgedRoundedRectangle(const signed int x, const signed y, const
 	while(i!=notDrawRectList.end())
 	{
 		lastHeight=0;
-		while((i!=notDrawRectList.end())&&(yy == i->GetTop()))
+		while((i!=notDrawRectList.end())&&(yy == i->getTop()))
 		{
-			DrawRectangle(xx, yy, i->GetLeft() - xx, i->GetHeight());
-			lastHeight = i->GetHeight();
-			xx = i->GetLeft() + i->GetWidth();
+			DrawRectangle(xx, yy, i->getLeft() - xx, i->getHeight());
+			lastHeight = i->getHeight();
+			xx = i->getLeft() + i->getWidth();
 			i++;
 		}
 		// rechter Rand
@@ -562,10 +555,10 @@ void DC::DrawGridEdgedRoundedRectangle(const signed int x, const signed y, const
 		// neue Zeile
 		xx = x;
 		yy += lastHeight;
-		if((i!=notDrawRectList.end())&&(yy < i->GetTop()))
+		if((i!=notDrawRectList.end())&&(yy < i->getTop()))
 		{
-			DrawRectangle(xx, yy, ww, i->GetTop() - yy);
-			yy = i->GetTop();
+			DrawRectangle(xx, yy, ww, i->getTop() - yy);
+			yy = i->getTop();
 			xx = x;
 		}
 	}
@@ -576,9 +569,9 @@ void DC::DrawGridEdgedRoundedRectangle(const signed int x, const signed y, const
 		return;
 	}
 	
-	if (brush.GetStyle() != TRANSPARENT_BRUSH_STYLE)
+	if (brush.getStyle() != TRANSPARENT_BRUSH_STYLE)
 		DrawFilledEdgedRound(x, y, ww, hh, radius);
-	if (pen.GetStyle() != TRANSPARENT_PEN_STYLE)
+	if (pen.getStyle() != TRANSPARENT_PEN_STYLE)
 		DrawEmptyEdgedRound(x, y, ww, hh, radius);*/
 }
 #endif
@@ -601,12 +594,12 @@ void DC::DrawEdgedRoundedRectangle(const signed int x, const signed int y, const
 		return;
 	}
 
-	if(brush.GetStyle() == TRANSPARENT_BRUSH_STYLE)
+	if(brush.getStyle() == TRANSPARENT_BRUSH_STYLE)
 	{
-		if(pen.GetStyle() != TRANSPARENT_PEN_STYLE)
+		if(pen.getStyle() != TRANSPARENT_PEN_STYLE)
 			(*this.*DrawEmptyEdgedRound)(x, y, mw, mh, radius);
 	} else
-	if(pen.GetStyle() == TRANSPARENT_PEN_STYLE)
+	if(pen.getStyle() == TRANSPARENT_PEN_STYLE)
 		(*this.*DrawFilledEdgedRound)(x, y, mw, mh, radius);
 	else 
 		(*this.*DrawFilledEdgedBorderRound)(x, y, mw, mh, radius);
@@ -621,9 +614,9 @@ void DC::DrawRoundedRectangle(const signed int x, const signed int y, const unsi
 		return;
 	}
 
-	if (brush.GetStyle() != TRANSPARENT_BRUSH_STYLE)
+	if (brush.getStyle() != TRANSPARENT_BRUSH_STYLE)
 		(*this.*DrawFilledRound)(x, y, width, height, radius);
-	if (pen.GetStyle() != TRANSPARENT_PEN_STYLE)
+	if (pen.getStyle() != TRANSPARENT_PEN_STYLE)
 		(*this.*DrawEmptyRound)(x, y, width, height, radius);
 }
 
@@ -633,40 +626,40 @@ void DC::DrawRectangle(const signed int x, const signed int y, const unsigned in
 	if((width<2)||(height<2)||(width>max_x)||(height>max_y)||(x<0)||(y<0)) return;
 	SDL_Rect rc;
 	rc.x=x+1;rc.y=y+1;rc.w=width-2;rc.h=height-2;
-	if(brush.GetStyle() != TRANSPARENT_BRUSH_STYLE)
-		SDL_FillRect(surface, &rc, (Uint32)(*brush.GetColor()) );
+	if(brush.getStyle() != TRANSPARENT_BRUSH_STYLE)
+		SDL_FillRect(surface, &rc, (Uint32)(*brush.getColor()) );
 	DrawEmptyRectangle(x, y, width, height);	
 }
 
 void DC::DrawEmptyRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height) const
 {
-	if(pen.GetStyle()==TRANSPARENT_PEN_STYLE) 
+	if(pen.getStyle()==TRANSPARENT_PEN_STYLE) 
 		return;
 	if((width<2)||(height<2)||(width>max_x)||(height>max_y)||(x<0)||(y<0)) return;
 	
 	Uint32 dark_pen_col, bright_pen_col;
 	if(pressedRectangle)
 	{
-		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 110));
-		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 70));
+		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 110));
+		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 70));
 	
 	} else
 	{
-		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 80));
-		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 120));
+		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 80));
+		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), 120));
 	}
 
 	SDL_Rect rc;
-	rc.x=x-(pen.GetWidth()>>1);rc.y=y-(pen.GetWidth()>>1);rc.w=width;rc.h=pen.GetWidth();
+	rc.x=x-(pen.getWidth()>>1);rc.y=y-(pen.getWidth()>>1);rc.w=width;rc.h=pen.getWidth();
 	SDL_FillRect(surface, &rc, bright_pen_col);
 	
-	rc.x=x-(pen.GetWidth()>>1);rc.y=y+height-1-(pen.GetWidth()>>1);rc.w=width;rc.h=pen.GetWidth();
+	rc.x=x-(pen.getWidth()>>1);rc.y=y+height-1-(pen.getWidth()>>1);rc.w=width;rc.h=pen.getWidth();
 	SDL_FillRect(surface, &rc, dark_pen_col);
 	
-	rc.x=x-(pen.GetWidth()>>1);rc.y=y-(pen.GetWidth()>>1);rc.w=pen.GetWidth();rc.h=height;
+	rc.x=x-(pen.getWidth()>>1);rc.y=y-(pen.getWidth()>>1);rc.w=pen.getWidth();rc.h=height;
 	SDL_FillRect(surface, &rc, bright_pen_col);
 	
-	rc.x=x+width-1-(pen.GetWidth()>>1);rc.y=y-(pen.GetWidth()>>1);rc.w=pen.GetWidth();rc.h=height;
+	rc.x=x+width-1-(pen.getWidth()>>1);rc.y=y-(pen.getWidth()>>1);rc.w=pen.getWidth();rc.h=height;
 	SDL_FillRect(surface, &rc, dark_pen_col);
 }
 
@@ -674,10 +667,10 @@ void DC::DrawVerticalLine(const signed int x0, const signed int y0, const signed
 {
 	if((y1<0)||(y0>=max_y)||(x0<0)||(x0>=max_x)||(y1<y0))
 	{
-//		std::ostringstream os;
-//		os.str("");
-//		os << "Line out of range: " << x0 << ", " << y0 << ", " << y1;
-//		toLog("Line out of range");//os.str());
+	//	std::ostringstream os;
+	//	os.str("");
+	//	os << "Line out of range: " << x0 << ", " << y0 << ", " << y1;
+	//	toErrorLog(os.str());
 		return;
 	}
 	signed int yy0;

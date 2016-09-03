@@ -5,8 +5,8 @@ const bool Rect::moveSmooth(const Rect& startRect, const Rect& targetRect)
 	if((startRect == targetRect)||(*this == targetRect))
 		return(false);
 	Rect oldRect = *this;
-	topLeftCorner.move(startRect.GetTopLeft(), targetRect.GetTopLeft());
-	rectSize.move(startRect.GetSize(), targetRect.GetSize());
+	topLeftCorner.move(startRect.getTopLeft(), targetRect.getTopLeft());
+	rectSize.move(startRect.getSize(), targetRect.getSize());
 	bottomRightCorner = topLeftCorner + rectSize;
 	if(oldRect==*this)
 		return(false);
@@ -23,12 +23,12 @@ const bool Rect::move(const Rect& startRect, const Rect& targetRect)
 
 const bool Rect::overlaps(const Rect& rect) const
 {
-	return(Inside(rect.GetTopLeft()) || Inside(rect.GetBottomLeft()) || Inside(rect.GetBottomRight()) || Inside(rect.GetTopRight()));	
+	return(Inside(rect.getTopLeft()) || Inside(rect.getBottomLeft()) || Inside(rect.getBottomRight()) || Inside(rect.getTopRight()));	
 }
 
 const bool Rect::Inside(const Rect& rect) const 
 {
-	if( ( rect.GetTopLeft() >= topLeftCorner ) && ( rect.GetBottomRight() <= bottomRightCorner ) )
+	if( ( rect.getTopLeft() >= topLeftCorner ) && ( rect.getBottomRight() <= bottomRightCorner ) )
 		return(true);
 	else return(false);
 }

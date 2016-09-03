@@ -2,31 +2,11 @@
 #define _GUI_DATABASE_WINDOW_HPP
 
 #include "../ui/window.hpp"
-#include "../ui/group.hpp"
-#include "../ui/radio.hpp"
-#include "../ui/editfield.hpp"
-#include "../ui/checkbutton.hpp"
-#include "../ui/numberfield.hpp"
-
+#include "dataentry.hpp"
+#include "racemenu.hpp"
 #include "game.hpp"
 
-#include "../core/database.hpp"
-#include "bitdepthmenu.hpp"
-#include "languagemenu.hpp"
-#include "resolutionmenu.hpp"
-#include "locationmenu.hpp"
-
-/*enum eDataBaseWindowMenu
-{
-	MAPWINDOW_NEW_BUTTON,
-	MAPWINDOW_RESET_BUTTON,
-	MAPWINDOW_LOAD_BUTTON,
-	MAPWINDOW_SAVE_BUTTON,
-	
-	MAX_MAPWINDOW_BUTTONS
-};*/
-
-class DataBaseWindow:public UI_Window
+class DataBaseWindow : public UI_Window
 {
 	public:
 		DataBaseWindow(UI_Object* data_window_parent);
@@ -35,128 +15,65 @@ class DataBaseWindow:public UI_Window
 		void resetData();
 		void process();
 		void draw(DC* dc) const;
-//		void updateItems();
 
-//		void forceLanguageChange();
 		void reloadOriginalSize();
 
 		// goal liste (loeschbar)
 		// liste (aehnlich bowindow) von build-order-namen und Zeit (geordnet nach Zeit) (auch loeschbar)
 		// wenn da eins angeklickt wird dann erscheint die build order in einem weiteren Fenster (split-screen)
-		
-//		const bool hasFullScreenChanged() const;
+	
 	private:
-		Game* game;
-/*		BASIC_MAP* map;
-
-		UI_Group* mapSettings;
-		UI_EditField* mapName;
-
-		UI_NumberField* maxPlayer;
-		UI_NumberField* maxLocations;
-		UI_CheckButton* symmetryButton;
-
-		UI_Group* locationSettings;
-		UI_EditField* locationName[MAX_LOCATIONS];
-
-		UI_Radio* playerSettings;
-		UI_Button* playerStart[MAX_INTERNAL_PLAYER];
-		LocationMenu* locationMenu;
-
-		UI_Radio* menuRadio;
-		UI_Button* menuButton[MAX_MAPWINDOW_BUTTONS];
-
-
-		UI_Group* locationContents;
-		UI_NumberField* mineralBlocks;
-		UI_NumberField* vespeneGeysirs;
-		UI_NumberField* mineralDistance;
-		UI_NumberField* distance[MAX_LOCATIONS];
+//		void saveBoxDone(const std::string file_name);
+//		void saveBoxCanceled();
 		
-		void calculateMap();*/
+		void activateGame();
+		void mouseHasLeft();
+		void updateList();
+		void updateItemPositions();
+	
+		std::list<DataBaseEntry*> dataList;
+		UI_Window* dataListWindow;
+		UI_Button* raceMenuButton;
+		RaceMenu* raceMenu;
+		eRace currentRace;
+ 		Game* game;
+		bool raceMenuOpenedExternally;
+		unsigned int lastBoLoaded;
+		const GOAL_ENTRY* lastGoalLoaded;
+//		UI_Button* executeButton; // apply changes to the disk
+//		UI_Button* exportDataBase; // write everything in one file
+//		UI_Button* importDataBase; // import such a file and add it to the database without overwriting things ~~
+//		
+//		UI_Button* deleteButton; // delete all marked items
+//		UI_Button* exportBoAsHTML;
+//		UI_Button* exportBoAsDingens;
+//		UI_Button* exportBoAsPicture;
+//		UI_StaticText* ein paar Erklaerungen, ueberschriften
+
 		
-//		void calculateStartCondition();
+// jeder goal eintrag kann geoeffnet oder geschlossen werden (wie [+] [-] bei windows guis), am besten mit Pfeil > und Pfeil v
+// auf der rechten Seite erscheint dann ein 'game' mit der aktuellen build order, sobald ein goal oder bo MARKIERT wurde
+// wenn goals markiert werden => besondere situation, bowindow soll dann nur force window darstellen (bzw. den Rest auch)
+// => erst mal keine Eingabemoeglichkeit auf der rechten Seite? mmmh... ne, ganz normal...
+// 
+
+// => DataEntry: bool isGoal, UI_Button* openclose, UI_Button* delete, UI_Button* this (text button bestehend aus goal/bonamen und Zeit falls kein goal bzw. (<ZAHL>) Anzahl der im Ordner gespeicherten bos), UI_Button* exportAsPicture, UI_Button* exportAsHTML, UI_Button* exportAsBoDingens...
 		
-//		void reloadFromFile();
-//		void loadFailsafeDefaults();
-		void closeMenus();
-#if 0
-		UI_Group* coreSettings;
-		UI_Group* guiSettings;
-		UI_Radio* uiSettingsRadio;
-//		UI_Group* defaultSettings;
-		UI_Group* loadSaveSettings;
+/*
+
+		UI_Button* sortBOsByGoal;
+
+		UI_Button* importDatabase; // => saveBox (ersetzen?)
+		UI_Button* exportDatabase; // => saveBox
+
+		bool saveBoxImport;
+		bool saveBoxExport;
+
 		
-		UI_Radio* defaultSettingsRadio;
-
-		UI_NumberField* maxRuns;
-		UI_NumberField* maxGenerations;
-		UI_NumberField* maxTimeOut;
-		UI_NumberField* breedFactor;
-//		UI_NumberField* crossingOver;
-
-		UI_CheckButton* autoSaveRuns;
-		UI_CheckButton* alwaysBuildWorker;
-		UI_CheckButton* onlySwapOrders;
-		UI_CheckButton* restrictSC;
-		UI_CheckButton* facilityMode;
-//		UI_CheckButton* preprocessBuildorder;
-//		UI_CheckButton* allowGoalAdaption;
-		UI_CheckButton* glowingButtons;
-		UI_CheckButton* dnaSpiral;
-		UI_CheckButton* backgroundBitmap;
-		UI_CheckButton* fullscreen;
-		UI_CheckButton* tooltips;
-//		UI_CheckButton* softwareMouse;
-
-//		UI_CheckButton* transparency;
-		UI_CheckButton* smoothMovement;
-	
-		UI_NumberField* desiredFramerate;
-		UI_NumberField* desiredCPU;
-	
-		UI_Button* minimalistButton;
-		UI_Button* fullButton;
-		UI_Button* customButton;
-
-		UI_Button* reloadFromFileButton;
-		UI_Button* loadFailsafeDefaultsButton;
-		UI_Button* saveToFileButton;
-
-// number
-	
-	
-//		ThemeMenu* themeMenu;
-//		UI_Button* themeMenuButton;
-		UI_Button* languageMenuButton;
-		UI_Button* resolutionMenuButton;
-		UI_Button* bitDepthMenuButton;
-		LanguageMenu* languageMenu;
-		ResolutionMenu* resolutionMenu;
-		BitDepthMenu* bitDepthMenu;
-
-		bool languageHasChanged;
-		bool resolutionHasChanged;
-		bool bitDepthHasChanged;
-		bool fullScreenHasChanged;
-#endif
+// => aktualisierungsfunktion (sobald auf database umgeschaltet wird oder wenn geloescht wird)
+		std::list<std::pair<GOAL_ENTRY*, std::list<BUILD_ORDER*> > > boList;*/
+		
 };
-
-/*inline const bool DataBaseWindow::hasLanguageChanged() const {
-	return(languageHasChanged);
-}
-
-inline const bool DataBaseWindow::hasResolutionChanged() const {
-	return(resolutionHasChanged);
-}
-
-inline const bool DataBaseWindow::hasBitDepthChanged() const {
-	return(bitDepthHasChanged);
-}
-
-inline const bool DataBaseWindow::hasFullScreenChanged() const {
-	return(fullScreenHasChanged);
-}*/
 
 #endif
 

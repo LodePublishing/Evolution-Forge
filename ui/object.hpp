@@ -31,27 +31,15 @@ enum ePositionMode
 	BOTTOM_CENTER,
 	BOTTOM_LEFT,
 	CENTER_LEFT,
-	ARRANGE_TOP_LEFT,
-	ARRANGE_TOP_RIGHT,
-	ARRANGE_BOTTOM_LEFT,
-	ARRANGE_BOTTOM_RIGHT,
-	ARRANGE_LEFT,
-	ARRANGE_RIGHT,
-	SPECIAL_BUTTON_LEFT, // normal button but arrange text left
-	SPECIAL_BUTTON_ARRANGE_LEFT,
-	SPECIAL_BUTTON_ARRANGE_RIGHT,	
-	SPECIAL_BUTTON_ARRANGE_TOP_LEFT,
-	SPECIAL_BUTTON_ARRANGE_TOP_RIGHT
+	SPECIAL_BUTTON_LEFT // normal button but put text left
 };
 
 enum eAutoSize
 {
 	NOTHING,
 	NO_AUTO_SIZE,
-	AUTO_SIZE_ONCE,
-	AUTO_SIZE_TWICE,
 	AUTO_SIZE,
-	AUTO_HEIGHT_FULL_WIDTH, // fehlerhaft! TODO
+	AUTO_HEIGHT_FULL_WIDTH,
 	FULL_WIDTH,
 	AUTO_HEIGHT_CONST_WIDTH,
 	CONST_SIZE //~~ constant width
@@ -59,24 +47,19 @@ enum eAutoSize
 
 enum eAdjustMode
 {
-	ADJUST_ONLY_POSITION,
-	ADJUST_AFTER_PARENT_WAS_CHANGED,
-	ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED
+	PARENT_WAS_CHANGED,
+	CHILD_WAS_CHANGED
 };
 
 class UI_Object;
-class UI_EditField;
 class UI_ToolTip;
-class UI_Button;
 class UI_Window;
 
 class UI_Object
 {
 	public:
-		UI_Object& operator=(const UI_Object& object);
-		UI_Object(const UI_Object& object);
-		UI_Object(UI_Object* parent_object, const Rect relative_rect = Rect(0, 0, 0, 0), const Size distance_bottom_right = Size(0, 0), const ePositionMode position_mode = DO_NOT_ADJUST, const eAutoSize auto_size = NO_AUTO_SIZE);
-		UI_Object(UI_Object* parent_object, UI_Object* position_parent_object, const Rect relative_rect = Rect(0, 0, 0, 0), const Size distance_bottom_right = Size(0, 0), const ePositionMode position_mode = DO_NOT_ADJUST, const eAutoSize auto_size = NO_AUTO_SIZE);
+		UI_Object(UI_Object* parent_object, const Rect relative_rect = Rect(0, 0, 0, 0), const Size distance_bottom_right = Size(0, 0), const ePositionMode position_mode = DO_NOT_ADJUST, const eAutoSize auto_size = NOTHING);
+		UI_Object(UI_Object* parent_object, UI_Object* position_parent_object, const Rect relative_rect = Rect(0, 0, 0, 0), const Size distance_bottom_right = Size(0, 0), const ePositionMode position_mode = DO_NOT_ADJUST, const eAutoSize auto_size = NOTHING);
 
 		virtual ~UI_Object();
 	
@@ -87,13 +70,7 @@ class UI_Object
 		const bool isTopItem() const;
 		
 		const Point& getRelativePosition() const;
-		void setPosition(const Point& position);
-		void setPosition(const unsigned int x, const unsigned int y);
-
-		void setRect(const Rect& rect);
-		
-		void setLeft(const signed int x);
-		void setTop(const signed int y);
+	
 		const Size& getSize() const;
 		const signed int getRelativeUpperBound() const;
 		const signed int getRelativeLowerBound() const;
@@ -119,38 +96,32 @@ class UI_Object
 		
 		const bool isMouseInside() const;
 
-		void checkForChildrenOverlap(const Rect& rect);
 		const bool checkForNeedRedraw() const;
 		void setNeedRedrawMoved(const bool need_redraw=true);
 		void setNeedRedrawNotMoved(const bool need_redraw=true);
 		void setNeedRedrawNotMovedFirstChild(const bool need_redraw=true);
 
-		virtual UI_Object* checkHighlight();
+// returns the object the mouse cursor is currently over
 		virtual UI_Object* checkToolTip();
+		virtual UI_Object* checkHighlight();
 		virtual void reloadStrings();
 		virtual void reloadOriginalSize();
 
-		UI_Object* getNextBrother() const;
-		UI_Object* getPrevBrother() const;
-		UI_Object* getParent() const; // TODO make const correctness!
-		UI_Object* getPositionParent() const; // TODO make const correctness!
-		UI_Object* getChildren() const;
-		void setParent(UI_Object* daddy);
-		void setPositionParent(UI_Object* daddy);
-		void removeFromFamily();
-		void makeFirstChild();
-		
 		virtual void draw(DC* dc) const;
 		virtual void process();
 		virtual void resetData();
+		
+		void clearRedrawFlag();
 
 		void updateToolTip(const eString tool_tip_string);
 		void updateToolTip(const std::string& tool_tip_string);
-
+		
 		const eString getToolTipEString() const;
 		const std::string& getToolTipString() const;
-		
 		const bool hasToolTip() const;
+		
+		static UI_ToolTip* tooltip;
+		static UI_Object* toolTipParent;
 
 		static unsigned int redrawnObjects;
 		static void setResolution(const Size resolution);
@@ -158,47 +129,16 @@ class UI_Object
 		static UI_Window* currentWindow;
 		static bool windowSelected;
 		
-//		static void maybeShowToolTip(DC* dc);
-//		static void hideToolTip();
-
-		void resetMinXY();
-		
-		void addMinTopLeftX(signed int dx);
-		void addMinLeftY(signed int dy);
-		void addMinRightY(signed int dy);
-		void addMinBottomLeftX(signed int dx);
-		void addMinTopRightX(signed int dx);
-		void addMinBottomRightX(signed int dx);
-	
-		signed int getMinTopLeftX() const { return min_top_left_x;};
-		signed int getMinLeftY() const { return min_left_y;};
-		signed int getMinRightY() const { return min_right_y;};
-		signed int getMinBottomLeftX() const { return min_bottom_left_x;};
-		signed int getMinTopRightX() const { return min_top_right_x;};
-		signed int getMinBottomRightX() const { return min_bottom_right_x;};
-	
 		static unsigned int mouseType;
 		static Point mouse;
-//		static UI_EndRunDialog* endRunDialog;
-
-		static UI_ToolTip* tooltip;
-		static UI_Object* toolTipParent;
-
-		void clearRedrawFlag();
 
 		static std::list<std::string> msgList;
 
-		void adjustPositionAndSize(const eAdjustMode adjust_mode, const Size& size = Size(0,0));
-		void setSize(const Size size);
 		static unsigned int max_x;
 		static unsigned int max_y;
 
 		static void resetWindow();	
 		
-		void setOriginalPosition(const Point& position);
-		void setOriginalSize(const Size& size);
-		void setOriginalRect(const Rect& rect);
-
 		const Point& getOriginalPosition() const;
 		const Rect& getOriginalRect() const;
 		const Size& getDistanceBottomRight() const;
@@ -214,22 +154,57 @@ class UI_Object
 
 		static bool toolTipWasDeleted;
 		const bool isMoving() const;
+		
+		void adjustSize(const eAdjustMode adjust_mode, const Size& size = Size(0,0));
+		void setParent(UI_Object* daddy);
+		void setPositionParent(UI_Object* daddy);
+		void setOriginalPosition(const Point& position);
+		UI_Object* getNextBrother() const;
+		void setPosition(const Point& position);
+		void setPosition(const unsigned int x, const unsigned int y);
+		void setSize(const Size size);
+		void setOriginalSize(const Size& size);
+		void setOriginalRect(const Rect& rect);
+		void setOriginalWidth(const unsigned int width);
+		void removeFromFamily();
+		void makeFirstChild();
+
+		bool isClipped;
+		Rect clipRect;
+		void setWidth(const unsigned int width);
 	protected:
+		void setRect(const Rect& rect);
+
+		void checkForChildrenOverlap(const Rect& rect);
 		UI_Object* children; // pointer to the head of the linked list of children
+		UI_Object* getPrevBrother() const;
+		UI_Object* getParent() const; // TODO make const correctness!
+		UI_Object* getPositionParent() const; // TODO make const correctness!
+		UI_Object* getChildren() const;
+		
+		bool childrenWereChanged;
 	private:
 //		bei wechsel alle rekursiv (-> virtual) durchlaufen und Liste bilden, das aktuelle heraussuchen und aktivieren
 //		Ansonsten bei klick Focus legen, Esc/anderer Klick entfernt den Focus (NULL bzw. anderer Fokus)
+
+		void setLeft(const signed int x);
+		void setTop(const signed int y);
+
+
 		
+		void adjustPosition();
 		Rect relativeRect; // every object needs a current position and size, position is >> RELATIVE << to parent!
-		Rect startRect; // TODO private machen
+		Rect startRect;
 		Rect targetRect;
 	
 		Rect originalRect;
 		Size distanceBottomRight;
 		Size oldSize;
+
+		const bool hasSizeChanged() const;
+		void setSizeHasChanged(const bool size_has_changed = true);
 		bool sizeHasChanged;
 
-		void setWidth(const unsigned int width);
 		void setHeight(const unsigned int height);
 		void setSize(const unsigned int width, const unsigned int height);
 
@@ -239,9 +214,6 @@ class UI_Object
 		
 		bool shown;
 
-		signed int min_top_left_x, min_left_y, min_right_y, min_bottom_left_x;
-		signed int min_top_right_x/*, min_left_y, min_right_y*/, min_bottom_right_x;
-	
 		bool needRedraw;
 			
 		void addChild(UI_Object* child);
@@ -252,6 +224,11 @@ class UI_Object
 
 		eString toolTipEString;
 		std::string toolTipString;
+
+
+		UI_Object& operator=(const UI_Object& object);
+		UI_Object(const UI_Object& object);
+	
 };
 
 inline const Size& UI_Object::getDistanceBottomRight() const {
@@ -263,18 +240,13 @@ inline const Rect& UI_Object::getOriginalRect() const {
 }
 
 inline const Point& UI_Object::getOriginalPosition() const {
-	return(originalRect.GetTopLeft());
+	return(originalRect.getTopLeft());
 }
 
 
 inline void UI_Object::setOriginalPosition(const Point& position) {
-	originalRect.SetTopLeft(position);
+	originalRect.setTopLeft(position);
 	setPosition(position);
-}
-
-inline void UI_Object::setOriginalSize(const Size& size) {
-	originalRect.SetSize(size);
-	setSize(size);
 }
 
 inline void UI_Object::Hide(const bool hide) {
@@ -286,36 +258,36 @@ inline const bool UI_Object::isShown() const {
 }
 
 inline const Point& UI_Object::getRelativePosition() const {
-	return(relativeRect.GetTopLeft());
+	return(relativeRect.getTopLeft());
 }
 			
 			
 inline const Size& UI_Object::getSize() const {
-	return(relativeRect.GetSize());
+	return(relativeRect.getSize());
 }
 	
 inline const signed int UI_Object::getRelativeUpperBound() const {
-	return(relativeRect.GetTop());
+	return(relativeRect.getTop());
 }
 				
 inline const signed int UI_Object::getRelativeLowerBound() const {
-	return(relativeRect.GetBottom());
+	return(relativeRect.getBottom());
 }
 	
 inline const signed int UI_Object::getRelativeLeftBound() const {
-	return(relativeRect.GetLeft());
+	return(relativeRect.getLeft());
 }
 	
 inline const signed int UI_Object::getRelativeRightBound() const {
-	return(relativeRect.GetRight());
+	return(relativeRect.getRight());
 }
 	
 inline const unsigned int UI_Object::getHeight() const {
-	return(relativeRect.GetHeight());
+	return(relativeRect.getHeight());
 }
 	
 inline const unsigned int UI_Object::getWidth() const {
-	return(relativeRect.GetWidth());
+	return(relativeRect.getWidth());
 }
 	
 inline const Rect& UI_Object::getRelativeRect() const {
@@ -325,8 +297,8 @@ inline const Rect& UI_Object::getRelativeRect() const {
 inline const Point UI_Object::getAbsolutePosition() const
 {
 	if(positionParent)
-		return(relativeRect.GetTopLeft() + positionParent->getAbsolutePosition());
-	else return(relativeRect.GetTopLeft());
+		return(relativeRect.getTopLeft() + positionParent->getAbsolutePosition());
+	else return(relativeRect.getTopLeft());
 }
 	
 inline const Point UI_Object::getParentAbsolutePosition() const	{
@@ -337,37 +309,37 @@ inline const Point UI_Object::getParentAbsolutePosition() const	{
 		
 inline const Rect UI_Object::getAbsoluteRect() const {
 	if(positionParent)
-		return(Rect(relativeRect.GetTopLeft() + positionParent->getAbsolutePosition(), getSize()));
+		return(Rect(relativeRect.getTopLeft() + positionParent->getAbsolutePosition(), getSize()));
 	else 
 		return(relativeRect);
 }
 		
 inline const signed int UI_Object::getAbsoluteUpperBound() const {
 	if(positionParent)
-		return(relativeRect.GetTop() + positionParent->getAbsoluteUpperBound());
+		return(relativeRect.getTop() + positionParent->getAbsoluteUpperBound());
 	else
-		return(relativeRect.GetTop());
+		return(relativeRect.getTop());
 }
 				
 inline const signed int UI_Object::getAbsoluteLowerBound() const {
 	if(positionParent)
-		return(relativeRect.GetBottom() + positionParent->getAbsoluteUpperBound());			
+		return(relativeRect.getBottom() + positionParent->getAbsoluteUpperBound());			
 	else
-		return(relativeRect.GetBottom());
+		return(relativeRect.getBottom());
 }
 	
 inline const signed int UI_Object::getAbsoluteLeftBound() const {
 	if(positionParent)
-		return(relativeRect.GetLeft() + positionParent->getAbsoluteLeftBound());			
+		return(relativeRect.getLeft() + positionParent->getAbsoluteLeftBound());			
 	else
-		return(relativeRect.GetLeft());
+		return(relativeRect.getLeft());
 }
 	
 inline const signed int UI_Object::getAbsoluteRightBound() const {
 	if(positionParent)
-		return(relativeRect.GetRight() + positionParent->getAbsoluteLeftBound());			
+		return(relativeRect.getRight() + positionParent->getAbsoluteLeftBound());			
 	else
-		return(relativeRect.GetRight());
+		return(relativeRect.getRight());
 }
 
 inline UI_Object* UI_Object::getPrevBrother() const {
@@ -403,15 +375,15 @@ inline const bool UI_Object::hasToolTip() const {
 }
 
 inline const unsigned int UI_Object::getTargetWidth() const {
-	return(targetRect.GetWidth());
+	return(targetRect.getWidth());
 }
 
 inline const unsigned int UI_Object::getTargetHeight() const {
-	return(targetRect.GetHeight());
+	return(targetRect.getHeight());
 }
 
 inline const Point UI_Object::getTargetPosition() const {
-	return(targetRect.GetTopLeft());
+	return(targetRect.getTopLeft());
 }
 
 inline const Rect& UI_Object::getTargetRect() const {
@@ -422,9 +394,7 @@ inline const bool UI_Object::isMouseInside() const {
 	return(getAbsoluteRect().Inside(mouse));
 }
 
-inline void UI_Object::setSize(const unsigned int width, const unsigned int height) {
-	setSize(Size(width, height));
-}
+
 
 inline void UI_Object::setPosition(const unsigned int x, const unsigned int y) {
 	setPosition(Point(x, y));

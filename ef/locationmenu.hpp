@@ -12,8 +12,6 @@ class LocationMenu : public UI_Menu
 	public:
 		LocationMenu(UI_Object* location_parent, const BASIC_MAP* location_map, const Rect& location_rect);
 		LocationMenu(UI_Object* location_parent, const std::list<std::string>& location_list, const Rect& location_rect);
-		LocationMenu(const LocationMenu& object);
-		LocationMenu& operator=(const LocationMenu& object);
 		~LocationMenu();
 		void process();
 		void draw(DC* dc) const;
@@ -23,6 +21,8 @@ class LocationMenu : public UI_Menu
 		void reloadOriginalSize();
 	private:
 		std::list<std::string> locationList;
+		LocationMenu(const LocationMenu& object);
+		LocationMenu& operator=(const LocationMenu& object);
 };
 
 #endif // _GUI_LOCATIONMENU_HPP

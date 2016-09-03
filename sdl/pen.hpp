@@ -22,10 +22,10 @@ class Pen
 		Pen(SDL_Surface* surface, const Uint8 r, const Uint8 g, const Uint8 b, const unsigned int pen_width, const ePenStyle pen_style);
 		Pen();
 		~Pen() {};
-		const ePenStyle GetStyle() const {return style;};
-		const int GetWidth() const {return width;};
-		const Color* GetColor() const {return &color;};
-		void SetColor(const Color pen_color);
+		const ePenStyle getStyle() const {return style;};
+		const int getWidth() const {return width;};
+		const Color* getColor() const {return &color;};
+		void setColor(const Color pen_color);
 		void updateColor(SDL_Surface* surface);
 	private:
 		unsigned int width;

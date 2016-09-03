@@ -411,7 +411,7 @@ enum eString
 	CHANGED_BIT_DEPTH_STRING,
 	CHANGED_RESOLUTION_STRING,
 	
-	MAIN_WINDOW_TITLE_STRING,
+	INTRO_WINDOW_TITLE_STRING,
 	MESSAGE_WINDOW_TITLE_STRING,
 	HELP_WINDOW_TITLE_STRING,
 	SETTINGS_WINDOW_TITLE_STRING, 
@@ -493,6 +493,11 @@ enum eString
 	
 	SAVE_BUILD_ORDER_AS_STRING,
 	GIVE_BO_A_NAME_STRING, //40
+
+	BODIAGRAM_MINERALS_STRING,
+	BODIAGRAM_GAS_STRING,
+	BODIAGRAM_SUPPLY_STRING,
+	BODIAGRAM_TIME_STRING,
 
 	TERRA_STRING,
 	PROTOSS_STRING,
@@ -576,82 +581,68 @@ enum eString
 	FORCEENTRY_TIME_TOOLTIP_STRING,
 
 // settings:
-	TITLE_PREDEFINED_SETTINGS_STRING,
-// core-settings:
-	SETTING_MAX_TIME_STRING,
-	SETTING_RESTRICT_SC_STRING,
-	SETTING_FACILITY_MODE_STRING,
-	SETTING_AUTO_SAVE_RUNS_STRING,
-	SETTING_ALWAYS_BUILD_WORKER_STRING,
-	SETTING_ONLY_SWAP_ORDERS_STRING,
-	SETTING_PREPROCESS_BUILDORDER_STRING,
-	SETTING_MAX_LENGTH_STRING,
-	SETTING_MAX_RUNS_STRING,
+	SETTING_FAST_CALCULATION_STRING,
+	SETTING_EXPANSION_SET_STRING,
+	SETTING_ALWAYS_BUILD_WORKERS_STRING,
+	SETTING_ALLOW_WAIT_ORDERS_STRING,
+	SETTING_WAIT_ACCURACY_STRING,
+	SETTING_AUTO_RUNS_STRING,
 	SETTING_MAX_GENERATIONS_STRING,
-	SETTING_MAX_TIMEOUT_STRING, // 120
-	SETTING_ALLOW_GOAL_ADAPTION_STRING,
-	SETTING_BREED_FACTOR_STRING,
-	SETTING_CROSSING_OVER_STRING,
-// gui-settings:
-	SETTING_MINIMALIST_STRING,
-	SETTING_FULL_STRING,
-	SETTING_CUSTOM_STRING,
-	SETTING_DESIRED_FRAMERATE_STRING,
-	SETTING_DESIRED_CPU_USAGE_STRING,
-	SETTING_SMOOTH_MOVEMENT_STRING,
-	SETTING_SHOW_DEBUG_STRING,
-	SETTING_GLOWING_BUTTONS_STRING, //130
-	SETTING_DNA_SPIRAL_STRING,
-	SETTING_ROUNDED_RECTANGLES_STRING,
-	SETTING_BACKGROUND_BITMAP_STRING,
-	SETTING_TRANSPARENCY_STRING,
-	SETTING_FULLSCREEN_STRING,
-	SETTING_TOOLTIPS_STRING,
-	SETTING_SOFTWARE_MOUSE_STRING,
-	SETTING_UNLOAD_GRAPHICS_STRING,
 
 	SETTING_USE_MUSIC_STRING,
 	SETTING_USE_SOUND_STRING,
 	SETTING_MUSIC_VOLUME_STRING,
 	SETTING_SOUND_VOLUME_STRING,
 	SETTING_CHANNELS_STRING,
+	
+	SETTING_BACKGROUND_BITMAP_STRING,
+	SETTING_SMOOTH_MOVEMENT_STRING,
+	SETTING_WAIT_AFTER_CHANGE_STRING,
+	SETTING_TOOLTIPS_STRING,
+	SETTING_DNA_SPIRAL_STRING,
+	SETTING_GLOWING_BUTTONS_STRING,
+	SETTING_COMPACT_DISPLAY_MODE_STRING,
+	SETTING_FACILITY_MODE_STRING,
 
-	SETTING_MAX_TIME_TOOLTIP_STRING,
-	SETTING_RESTRICT_SC_TOOLTIP_STRING,
-	SETTING_FACILITY_MODE_TOOLTIP_STRING,
-	SETTING_AUTO_SAVE_RUNS_TOOLTIP_STRING,
-	SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING,
-	SETTING_ONLY_SWAP_ORDERS_TOOLTIP_STRING,
-	SETTING_PREPROCESS_BUILDORDER_TOOLTIP_STRING,
-	SETTING_MAX_LENGTH_TOOLTIP_STRING,
-	SETTING_MAX_RUNS_TOOLTIP_STRING, //140
+	SETTING_FULLSCREEN_STRING,
+	SETTING_UNLOAD_GRAPHICS_STRING,
+	SETTING_SHOW_DEBUG_STRING,
+	SETTING_DESIRED_FRAMERATE_STRING,
+	SETTING_DESIRED_CPU_USAGE_STRING,
+
+	SETTING_RELOAD_FROM_FILE_STRING,
+	SETTING_SAVE_TO_FILE_STRING,
+	SETTING_LOAD_DEFAULTS_STRING,
+
+// tooltips	
+	SETTING_FAST_CALCULATION_TOOLTIP_STRING,
+	SETTING_EXPANSION_SET_TOOLTIP_STRING,
+	SETTING_ALWAYS_BUILD_WORKERS_TOOLTIP_STRING,
+	SETTING_ALLOW_WAIT_ORDERS_TOOLTIP_STRING,
+	SETTING_WAIT_ACCURACY_TOOLTIP_STRING,
+	SETTING_AUTO_RUNS_TOOLTIP_STRING,
 	SETTING_MAX_GENERATIONS_TOOLTIP_STRING,
-	SETTING_MAX_TIMEOUT_TOOLTIP_STRING,
-	SETTING_ALLOW_GOAL_ADAPTION_TOOLTIP_STRING,
-	SETTING_BREED_FACTOR_TOOLTIP_STRING, 
-	SETTING_CROSSING_OVER_TOOLTIP_STRING,
-	SETTING_MINIMALIST_TOOLTIP_STRING,
-	SETTING_FULL_TOOLTIP_STRING,
-	SETTING_CUSTOM_TOOLTIP_STRING,
-	SETTING_DESIRED_FRAMERATE_TOOLTIP_STRING,
-	SETTING_DESIRED_CPU_USAGE_TOOLTIP_STRING, //150
-	SETTING_SMOOTH_MOVEMENT_TOOLTIP_STRING,
-	SETTING_SHOW_DEBUG_TOOLTIP_STRING,
-	SETTING_GLOWING_BUTTONS_TOOLTIP_STRING,
-	SETTING_DNA_SPIRAL_TOOLTIP_STRING,
-	SETTING_ROUNDED_RECTANGLES_TOOLTIP_STRING,
-	SETTING_BACKGROUND_BITMAP_TOOLTIP_STRING,
-	SETTING_TRANSPARENCY_TOOLTIP_STRING,
-	SETTING_FULLSCREEN_TOOLTIP_STRING,
-	SETTING_TOOLTIPS_TOOLTIP_STRING,
-	SETTING_SOFTWARE_MOUSE_TOOLTIP_STRING,
-	SETTING_UNLOAD_GRAPHICS_TOOLTIP_STRING,
 
 	SETTING_USE_MUSIC_TOOLTIP_STRING,
 	SETTING_USE_SOUND_TOOLTIP_STRING,
 	SETTING_MUSIC_VOLUME_TOOLTIP_STRING,
 	SETTING_SOUND_VOLUME_TOOLTIP_STRING,
 	SETTING_CHANNELS_TOOLTIP_STRING,
+
+	SETTING_BACKGROUND_BITMAP_TOOLTIP_STRING,
+	SETTING_SMOOTH_MOVEMENT_TOOLTIP_STRING,
+	SETTING_WAIT_AFTER_CHANGE_TOOLTIP_STRING,
+	SETTING_TOOLTIPS_TOOLTIP_STRING,
+	SETTING_DNA_SPIRAL_TOOLTIP_STRING,
+	SETTING_GLOWING_BUTTONS_TOOLTIP_STRING,
+	SETTING_COMPACT_DISPLAY_MODE_TOOLTIP_STRING,
+	SETTING_FACILITY_MODE_TOOLTIP_STRING,
+	
+	SETTING_FULLSCREEN_TOOLTIP_STRING,
+	SETTING_UNLOAD_GRAPHICS_TOOLTIP_STRING,
+	SETTING_SHOW_DEBUG_TOOLTIP_STRING,
+	SETTING_DESIRED_FRAMERATE_TOOLTIP_STRING,
+	SETTING_DESIRED_CPU_USAGE_TOOLTIP_STRING,
 
 	SETTINGS_SAVED_STRING,
 
@@ -694,79 +685,18 @@ enum eString
 	SETTING_YELLOW_THEME_STRING,
 	SETTING_GREY_THEME_STRING,
 
-	SETTING_RELOAD_FROM_FILE_STRING,
-	SETTING_LOAD_FAILSAFE_DEFAULTS_STRING,
-	SETTING_SAVE_TO_FILE_STRING,
-
 	SETWINDOW_CORE_SETTINGS_STRING,
-	SETWINDOW_GUI_SETTINGS_STRING,
 	SETWINDOW_SOUND_SETTINGS_STRING,
+	SETWINDOW_GUI_SETTINGS_STRING,
+	SETWINDOW_GRAPHIC_SETTINGS_STRING,
+	
 	SETWINDOW_UI_SETTINGS_STRING,
 	SETWINDOW_LOADSAVE_SETTINGS_STRING,
 
-	MAPWINDOW_MAP_SETTINGS_STRING,
-	MAPWINDOW_MAX_PLAYER_STRING,
-	MAPWINDOW_MAX_LOCATIONS_STRING,
-	MAPWINDOW_MAP_NAME_STRING,
-	MAPWINDOW_SYMMETRY_STRING,
-
-	MAPWINDOW_LOCATION_SETTINGS_STRING,
-	MAPWINDOW_PLAYER_SETTINGS_STRING,
-	MAPWINDOW_LOCATION_CONTENT_STRING,
-	MAPWINDOW_DISTANCES_STRING,
+	DATA_ENTRY_OPEN_BUTTON_TOOLTIP_STRING,
+	DATA_ENTRY_CHECK_BUTTON_TOOLTIP_STRING,
 	
-	MAPWINDOW_MINERAL_BLOCKS_STRING,
-	MAPWINDOW_VESPENE_GEYSIRS_STRING,
-	MAPWINDOW_MINERAL_DISTANCE_STRING,
 
-
-	MAPWINDOW_MAX_PLAYER_TOOLTIP_STRING,
-	MAPWINDOW_MAX_LOCATIONS_TOOLTIP_STRING,
-	MAPWINDOW_SYMMETRY_TOOLTIP_STRING,
-
-	MAPWINDOW_CREATE_NEW_MAP_TOOLTIP_STRING,
-	MAPWINDOW_RESET_MAP_TOOLTIP_STRING,
-	MAPWINDOW_LOAD_MAP_TOOLTIP_STRING,
-	MAPWINDOW_SAVE_MAP_TOOLTIP_STRING,
-
-	MAPWINDOW_MINERAL_BLOCKS_TOOLTIP_STRING,
-	MAPWINDOW_VESPENE_GEYSIRS_TOOLTIP_STRING,
-	MAPWINDOW_MINERAL_DISTANCE_TOOLTIP_STRING,
-	MAPWINDOW_DISTANCES_TOOLTIP_STRING,
-
-	OUTPUT_UNITNAME_STRING, // 190
-	OUTPUT_SUPPLY_STRING,
-	OUTPUT_MINERALS_STRING,
-	OUTPUT_GAS_STRING,
-	OUTPUT_LOCATION_STRING,
-	OUTPUT_TIME_STRING,
-
-	ENDRUN_FINISHED_STRING,
-	ENDRUN_SAVED_BUILDORDER_STRING,
-	ENDRUN_DIALOG_TITLE_STRING,
-	ENDRUN_QUESTION_STRING,
-	ENDRUN_SAVE_AND_CONTINUE_STRING,
-	ENDRUN_DONT_SAVE_AND_CONTINUE_STRING,
-
-	SUCCESS_OK_STRING,
-	SUCCESS_MINERALS_STRING,
-	SUCCESS_GAS_STRING,
-	SUCCESS_SUPPLY_STRING,
-	SUCCESS_PREREQUISITE_STRING,
-	SUCCESS_FACILITY_STRING,
-	SUCCESS_TIMEOUT_STRING,
-	SUCCESS_UNKNOWN_STRING,
-
-	INFO_BUILD_STRING,
-	INFO_AS_SOON_AS_STRING,
-	INFO_BECOMES_AVAILIBLE_STRING,
-	INFO_AT_STRING,
-	INFO_WHEN_STRING,
-	INFO_HAVING_STRING,
-	INFO_MINERALS_STRING,
-	INFO_GAS_STRING,
-	INFO_SUPPLY_STRING,
-	INFO_TIME_STRING,
 
 	MAX_STRINGS //207
 };
@@ -825,6 +755,9 @@ enum eBitmap
 	BOGRAPH_WINDOW_BITMAP,
 	BO_WINDOW_BITMAP,
 	CLEMENS_BITMAP,
+	LIST_BITMAP,
+
+//	OPEN_TREE_BITMAP,	
 	
 	
 //	ARROW_LEFT_BITMAP,
@@ -874,8 +807,9 @@ enum eGlobalWindow
 	HELP_WINDOW,
 //	STATISTICS_WINDOW, ?
 	SETTINGS_WINDOW,
-	MAP_WINDOW,
 	DATABASE_WINDOW,
+	DATALIST_WINDOW,
+	MAP_WINDOW,
 	
 	INFO_WINDOW,
 	TECHTREE_WINDOW,
@@ -1015,9 +949,11 @@ enum eButtonColorsType
 	GOAL_TIME_BUTTON,
 
 	CHECK_BUTTON,
+	OPEN_TREE_BUTTON,
+	NON_GOAL_ENTRY_BUTTON,
 	
-
 	TEXT_BUTTON,
+	VISITED_TEXT_BUTTON,
 
 	NEW_BUTTON,
 	LOAD_BUTTON,
@@ -1045,8 +981,10 @@ enum eButtonColorsType
 
 enum eButtonWidthType
 {
-	STANDARD_BUTTON_WIDTH,
+	TINY_BUTTON_WIDTH,
 	SMALL_BUTTON_WIDTH,
+	STANDARD_BUTTON_WIDTH,
+	LARGE_BUTTON_WIDTH,
 	
 	MAX_BUTTON_WIDTH_TYPES
 };
@@ -1111,8 +1049,9 @@ struct SoundEntry
 {
 	unsigned int line;
 	std::string name;
-	const FMOD::Sound* sound;
+	FMOD::Sound* sound;
 	bool used;
+	bool loop;
 };
 
 class UI_Theme
@@ -1137,7 +1076,7 @@ class UI_Theme
 		const eBitDepth getBitDepth() const;
 		void setBitDepth(const eBitDepth theme_bitdepth);
 		
-		void unloadGraphicsAndSounds();
+		void unloadGraphics();
 
 		const bool loadHelpChapterStringFile(const std::string& help_file);
 		const bool loadStringFile(const std::string& string_file);
@@ -1173,27 +1112,35 @@ class UI_Theme
 		const unsigned int lookUpButtonWidth(const eButtonWidthType id) const;
 
 		void updateColors(SDL_Surface* surface);
+		
+		const eBitmap getBitmapFromIdentifier(const std::string& identifier) const;
+
 		void playSound(const eSound id, const unsigned int x);
 		std::list<std::pair<FMOD::Sound*, float> > soundsToPlay;
-
 		static bool ERRCHECK(FMOD_RESULT result);
 		FMOD::System* sound;
+		void releaseSoundEngine();
+
+		const bool isLanguageInitialized(const eLanguage language) const;
 	private:
 		void setMaxGlobalHeight(unsigned int current_resolution, unsigned int id, unsigned int max_height);
 		void setMaxGameHeight(unsigned int current_resolution, unsigned int gameNumber, unsigned int maxGames, unsigned int id, unsigned int max_height);
 		void setMaxPlayerHeight(unsigned int current_resolution, unsigned int gameNumber, unsigned int maxGames, unsigned int player_max, unsigned int playerNumber, unsigned int id, unsigned int max_height);
-//memory issue: load maybe all data after a change! TODO
- 		eResolution resolution;
-		eBitDepth bitdepth;
-		eLanguage language;
-		eTheme colorTheme;
-		eTheme mainColorTheme;
+ 		eResolution currentResolution;
+		eBitDepth currentBitDepth;
+		eLanguage currentLanguage;
+		eTheme currentColorTheme;
+		eTheme currentMainColorTheme;
 
 		void initBitmapIdentifier();
 		std::string bitmapIdentifier[MAX_BITMAPS];
+		SDL_Surface* bitmapList[MAX_RESOLUTIONS][MAX_COLOR_THEMES][MAX_BITMAPS];
 		std::list<BitmapEntry> loadedBitmaps;
 		BitmapEntry* bitmapAccessTable[MAX_RESOLUTIONS][MAX_COLOR_THEMES][MAX_BITMAPS];
 	
+		void initSoundIdentifier();
+		std::string soundIdentifier[MAX_SOUNDS];
+		FMOD::Sound* soundList[MAX_SOUNDS];
 		std::list<SoundEntry> loadedSounds;
 		SoundEntry* soundAccessTable[MAX_SOUNDS];
 		
@@ -1205,8 +1152,6 @@ class UI_Theme
 		
 		Color* colorList[MAX_COLOR_THEMES][MAX_COLORS];
 		
-		SDL_Surface* bitmapList[MAX_RESOLUTIONS][MAX_COLOR_THEMES][MAX_BITMAPS];
-		FMOD::Sound* soundList[MAX_SOUNDS];
 		
 		Pen* penList[MAX_COLOR_THEMES][MAX_PENS];
 		Brush* brushList[MAX_COLOR_THEMES][MAX_BRUSHES];
@@ -1226,39 +1171,41 @@ class UI_Theme
 		unsigned int buttonWidthList[MAX_RESOLUTIONS][MAX_BUTTON_WIDTH_TYPES];
 };
 
+inline const bool UI_Theme::isLanguageInitialized(const eLanguage language) const {
+	return(currentLanguage);
+}
+
 inline void UI_Theme::setColorTheme(const eTheme color_theme) {
-	colorTheme=color_theme;
+	currentColorTheme = color_theme;
 }
 
 inline void UI_Theme::setMainColorTheme(const eTheme main_color_theme) {
-	mainColorTheme=main_color_theme;
+	currentMainColorTheme = main_color_theme;
 }
 
 inline const eTheme UI_Theme::getColorTheme() const {
-	return(colorTheme);
+	return(currentColorTheme);
 }
 
 inline const eTheme UI_Theme::getMainColorTheme() const {
-	return(mainColorTheme);
+	return(currentMainColorTheme);
 }
 
 
 inline const eLanguage UI_Theme::getLanguage() const {
-	return(language);
+	return(currentLanguage);
 }
 
-
-
 inline const eResolution UI_Theme::getResolution() const {
-	return(resolution);
+	return(currentResolution);
 }
 
 inline const eBitDepth UI_Theme::getBitDepth() const {
-	return(bitdepth);
+	return(currentBitDepth);
 }
 
 inline void UI_Theme::setBitDepth(const eBitDepth theme_bitdepth) {
-	bitdepth = theme_bitdepth;
+	currentBitDepth = theme_bitdepth;
 	// TODO update dc
 }
 
@@ -1266,7 +1213,7 @@ inline SDL_Cursor* UI_Theme::lookUpCursor(const eCursor id, const unsigned int a
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_CURSORS)||(animation_phase>1)||(cursorList[id][animation_phase]==NULL)) {
-		toLog("ERROR: (UI_Theme::lookUpCursor) id/phase out of range.");return(cursorList[0][0]);
+		toErrorLog("ERROR: (UI_Theme::lookUpCursor) id/phase out of range.");return(cursorList[0][0]);
 	}
 #endif
 	return(cursorList[id][animation_phase]);
@@ -1278,7 +1225,7 @@ inline const ButtonColorsType* UI_Theme::lookUpButtonColors(const eButtonColorsT
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_BUTTON_COLORS_TYPES)||(buttonColorsList[id]==NULL)) {
-		toLog("ERROR: (UI_Theme::lookUpButtonColors) id out of range.");return(buttonColorsList[0]);
+		toErrorLog("ERROR: (UI_Theme::lookUpButtonColors) id out of range.");return(buttonColorsList[0]);
 	}
 #endif
 	return(buttonColorsList[id]);
@@ -1288,30 +1235,30 @@ inline const unsigned int UI_Theme::lookUpButtonWidth(const eButtonWidthType id)
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_BUTTON_WIDTH_TYPES)||(buttonWidthList[id]==NULL)) {
-		toLog("ERROR: (UI_Theme::lookUpButtonWidth) id out of range.");return(buttonWidthList[0][0]);
+		toErrorLog("ERROR: (UI_Theme::lookUpButtonWidth) id out of range.");return(buttonWidthList[0][0]);
 	}
 #endif
-	return(buttonWidthList[resolution][id]);
+	return(buttonWidthList[currentResolution][id]);
 }
 
 inline const std::string& UI_Theme::lookUpString(const eString id) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_STRINGS)) {
-		toLog("ERROR: (UI_Theme::lookUpString) id out of range.");return(stringList[language][0]);
+		toErrorLog("ERROR: (UI_Theme::lookUpString) id out of range.");return(stringList[currentLanguage][0]);
 	}
 #endif
-	return(stringList[language][id]);
+	return(stringList[currentLanguage][id]);
 }
 
 inline Color* UI_Theme::lookUpColor(const eColor id) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_COLORS)) {
-		toLog("ERROR: (UI_Theme::lookUpColor) id out of range.");return(colorList[colorTheme][id]);
+		toErrorLog("ERROR: (UI_Theme::lookUpColor) id out of range.");return(colorList[currentColorTheme][id]);
 	}
 #endif
-	return(colorList[colorTheme][id]);
+	return(colorList[currentColorTheme][id]);
 }
 
 
@@ -1320,20 +1267,20 @@ inline Pen* UI_Theme::lookUpPen(const ePen id) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_PENS)) {
-		toLog("ERROR: (UI_Theme::lookUpPen) id out of range.");return(penList[colorTheme][id]);
+		toErrorLog("ERROR: (UI_Theme::lookUpPen) id out of range.");return(penList[currentColorTheme][id]);
 	}
 #endif
-	return(penList[colorTheme][id]);
+	return(penList[currentColorTheme][id]);
 }
 
 inline Brush* UI_Theme::lookUpBrush(const eBrush id) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_BRUSHES)) {
-		toLog("ERROR: (UI_Theme::lookUpBrush) id out of range.");return(brushList[colorTheme][id]);
+		toErrorLog("ERROR: (UI_Theme::lookUpBrush) id out of range.");return(brushList[currentColorTheme][id]);
 	}
 #endif
-	return(brushList[colorTheme][id]);
+	return(brushList[currentColorTheme][id]);
 }
 
 #endif // _UI_THEME_HPP

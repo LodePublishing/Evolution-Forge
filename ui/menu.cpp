@@ -8,48 +8,7 @@ const unsigned int UI_Menu::getHeight() const
 		return(height);
 }
 
-UI_Menu::UI_Menu(const UI_Menu& object) :
-	UI_Object((UI_Object)object),
-	menuEntries(object.menuEntries),
-	menuLevel(object.menuLevel),
-	pressedItem(object.pressedItem),
-	markedItem(object.markedItem),
-	height(object.height),
-	chooseMenu(object.chooseMenu),
-	p1(object.p1),
-	p2(object.p2),
-	menuChanged(false)
-{ }
-
-UI_Menu& UI_Menu::operator=(const UI_Menu& object)
-{
-	((UI_Object)(*this)) = ((UI_Object)object);
-	menuEntries = object.menuEntries;
-	menuLevel = object.menuLevel;
-	pressedItem = object.pressedItem;
-	markedItem = object.markedItem;
-	height = object.height;
-	chooseMenu = object.chooseMenu;
-	p1 = object.p1;
-	p2 = object.p2;
-	setMenuHasChanged(false);
-	return(*this);
-}
-
-UI_Menu::UI_Menu(UI_Object* menu_parent, const Rect& menu_rect, const Size distance_bottom_right, const ePositionMode position_mode, const bool choose_menu):
-	UI_Object(menu_parent, menu_rect, distance_bottom_right, position_mode),
-	menuEntries(),
-	menuLevel(0),
-	pressedItem(-1),
-	markedItem(-1),
-	height(0),
-	chooseMenu(choose_menu),
-	p1(),
-	p2(),
-	menuChanged(false)
-{ }
-
-UI_Menu::UI_Menu(UI_Object* menu_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const unsigned int entryNumber, const unsigned int coloumns, const Size& s, const eString firstString, const eButtonColorsType button_colors_type, const bool choose_menu):
+UI_Menu::UI_Menu(UI_Object* menu_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const bool choose_menu, const eMenuType menu_type, const eButtonWidthType button_width_type, const unsigned int entryNumber, const eString firstString, const eButtonColorsType button_colors_type):
 	UI_Object(menu_parent, rect, distance_bottom_right, position_mode),
 	menuEntries(),
 	menuLevel(0),
@@ -59,15 +18,22 @@ UI_Menu::UI_Menu(UI_Object* menu_parent, const Rect& rect, const Size distance_b
 	chooseMenu(choose_menu),
 	p1(),
 	p2(),
-	menuChanged(false)
+	menuChanged(false),
+	buttonWidthType(button_width_type),
+	menuType(menu_type)
 {
-	for(unsigned int i=0;i<entryNumber;++i)
+	if(entryNumber > 0)
 	{
-		Rect edge = Rect(Point(10 + (i%coloumns) * (s.GetWidth()+10), (i/coloumns)*(s.GetHeight()+12)), s);
-		UI_MenuEntry* entry = new UI_MenuEntry(this, edge, (eString)(firstString+i));
-		entry->setButtonColorsType(button_colors_type);
-		menuEntries.push_back(entry);
+		for(unsigned int i=0;i<entryNumber;++i)
+		{
+			UI_MenuEntry* entry = new UI_MenuEntry(this, Rect(), (eString)(firstString+i));
+			entry->setButtonColorsType(button_colors_type);
+			menuEntries.push_back(entry);
+		}
+		updateItemSizes(UI_Object::theme.lookUpButtonWidth(buttonWidthType));
+		updateItemPositions();
 	}
+	Hide();
 }
 
 UI_Menu::~UI_Menu()
@@ -76,37 +42,53 @@ UI_Menu::~UI_Menu()
 		delete (*m);	
 }
 
+void UI_Menu::reloadOriginalSize()
+{
+	updateItemSizes(UI_Object::theme.lookUpButtonWidth(buttonWidthType));
+	updateItemPositions();
+	UI_Object::reloadOriginalSize();	 //?
+}
+
 void UI_Menu::updateItemSizes(const unsigned int width)
 {
 	for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 		(*m)->setOriginalSize(Size(width, 0));
 }
 
-void UI_Menu::updateItemPositions(const eMenuType menu_type)
+void UI_Menu::updateItemPositions()
 {
 	unsigned int i = 0;
-	switch(menu_type)
+	height = 0;
+	switch(menuType)
 	{
 		case CUSTOM_MENU:break;
 		case ONE_COLOUMN_MENU:
 		for(std::list<UI_MenuEntry*>::iterator m = menuEntries.begin(); m != menuEntries.end(); ++m)
-		{
-			(*m)->setOriginalPosition(Point(0, i*((*m)->getTextHeight()+(*m)->getDistanceBottomRight().GetHeight())));
-			i++;
-		}break;			 
+			if((*m)->isShown())
+			{
+				(*m)->setOriginalPosition(Point(0, i*((*m)->getTextHeight()+(*m)->getDistanceBottomRight().getHeight())));
+				i++;
+				height++;
+			}
+		break;			 
 		case TWO_COLOUMNS_MENU:
 		for(std::list<UI_MenuEntry*>::iterator m = menuEntries.begin(); m != menuEntries.end(); ++m)
-		{
-			(*m)->setOriginalPosition(Point((i%2) * ((*m)->getWidth() + (*m)->getDistanceBottomRight().GetWidth()), (i/2)*((*m)->getTextHeight()+(*m)->getDistanceBottomRight().GetHeight())));
-			i++;
-		}break;
+			if((*m)->isShown())
+			{
+				(*m)->setOriginalPosition(Point((i%2) * ((*m)->getWidth() + (*m)->getDistanceBottomRight().getWidth()), (i/2)*((*m)->getTextHeight()+(*m)->getDistanceBottomRight().getHeight())));
+				i++;
+				if(i%2==0) height++;
+			}
+		break;
 		case HORIZONTAL_MENU:
 		for(std::list<UI_MenuEntry*>::iterator m = menuEntries.begin(); m != menuEntries.end(); ++m)
-		{
-			(*m)->setOriginalPosition(Point(i * ((*m)->getWidth() + (*m)->getDistanceBottomRight().GetWidth()), 0));
-			i++;
-		}break;	
-		break;
+			if((*m)->isShown())
+			{
+				(*m)->setOriginalPosition(Point(i * ((*m)->getWidth() + (*m)->getDistanceBottomRight().getWidth()), 0));
+				i++;
+			}
+		height = 1;
+		break;	
 		default:break;
 	}
 }
@@ -118,9 +100,11 @@ const bool UI_Menu::isOpen() const
 	else return(true);
 }
 
-const signed int UI_Menu::getPressedItem() const
+const signed int UI_Menu::getPressedItem()
 {
-	return(pressedItem);
+	signed int p = pressedItem;
+	pressedItem = -1;
+	return(p);
 }
 
 void UI_Menu::open()
@@ -179,7 +163,6 @@ const signed int UI_Menu::getMarkedItem() const
 
 void UI_Menu::process()
 {
-	pressedItem = -1;
 	markedItem = -1;
 	if(!isShown())
 		return;
@@ -229,9 +212,9 @@ void UI_Menu::draw(DC* dc) const
 	if(checkForNeedRedraw())
 	{
 		Rect edge = Rect(p1 - Size(3,3), Size(p2.x-p1.x+6, p2.y-p1.y+6) );
-		dc->SetBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-//		dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
-		dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+		dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
+//		dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+		dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 		dc->DrawRoundedRectangle(edge,4);
 	}
 	UI_Object::draw(dc);
@@ -240,6 +223,26 @@ void UI_Menu::draw(DC* dc) const
 const bool UI_Menu::menuHasChanged() const
 {
 	return(menuChanged);
+}
+	
+void UI_Menu::forcePressItem(const unsigned int number)
+{
+	if(number > menuEntries.size())
+		return;
+	pressedItem = number;
+	if(chooseMenu)
+		close();
+/*	unsigned int n = 0;
+	for(std::list<UI_MenuEntry*>::const_iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+		if((*m)->isShown())
+		{
+			if(n == number)
+			{
+				(*m)->forcePress();
+				return;
+			}
+			n++;
+		}*/
 }
 
 

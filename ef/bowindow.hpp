@@ -8,7 +8,6 @@
 
 #include "boentry.hpp"
 #include "../ui/scrollbar.hpp"
-#include "../ui/checkbutton.hpp"
 
 #include "savebox.hpp"
 #include "bomenu.hpp"
@@ -37,6 +36,14 @@ class BoWindow : public UI_Window
 
 		void recheckSomeDataAfterChange();
 		
+		void needSaveBox();
+		void saveBoxIsCanceled();
+		void saveBoxIsDone(std::string input_string);
+
+		const bool saveBuildOrder();
+		const bool openBoMenu();
+		void mouseHasLeft();
+		void loadBuildOrder(const unsigned int number);
 	private:
 		void closeMenus();
 		void drawSelectionStuff(DC* dc) const;
@@ -44,11 +51,11 @@ class BoWindow : public UI_Window
 //		void resetButtons();
 		ANABUILDORDER* anarace;
 		std::list<BoEntry*> boList;
-		Rect moveTarget;
+//		Rect moveTarget;
 		unsigned int optimizeMode;
 		signed int addUnit;
-		bool wasMovedByMouse;
-		signed int boInsertPoint, boEndPoint;
+//		bool wasMovedByMouse;
+//		signed int boInsertPoint, boEndPoint;
 //		int makeSpaceButton;
 //		int unitButton[2*MAX_LENGTH];
 //		int optButton[2*MAX_LENGTH];
@@ -61,7 +68,7 @@ class BoWindow : public UI_Window
 
 		UI_StaticText* timeSlot[60];
 
-//		UI_Radio* menuRadio;
+		UI_Group* menuGroup;
 		UI_Button* restartBuildOrderButton;
 		UI_Button* saveBuildOrderButton;
 		UI_Button* loadBuildOrderButton;
@@ -69,20 +76,22 @@ class BoWindow : public UI_Window
 
 		bool* fixed;
 		UI_ScrollBar* scrollBar;
-		UI_CheckButton* alwaysBuildWorker;
-		UI_CheckButton* onlySwapOrders;
+		UI_Button* alwaysBuildWorker;
+//		UI_Button* onlySwapOrders;
 		
 //		UI_Button* unitMenuButton;
 //		UnitMenu* unitMenu;
 
 		BoMenu* boMenu;
-		SaveBox* saveBox;
 	
 		unsigned int gameNumber;
 		unsigned int gameMax;
 		unsigned int playerNumber;
 		unsigned int playerMax;
-	
+
+		bool saveBox;
+
+		bool boMenuOpenedExternally;
 };
 
 inline const std::list<unsigned int>& BoWindow::getSelectedItems() const {

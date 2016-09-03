@@ -8,11 +8,11 @@
 
 enum eTicks
 {
-	PROCESS_TICKS,
 	DRAW_TICKS,
-	SOUND_TICKS,
 	GENERATION_TICKS,
+	PROCESS_TICKS,
 	MESSAGE_TICKS,
+	SOUND_TICKS,
 	IDLE_TICKS,
 	
 	MAX_TICK_TYPES
@@ -33,14 +33,14 @@ class FPS_SYSTEM
 		void updateConfiguration();
 	private:
 		FPS* fps;
-		long unsigned int current_ticks;
+		long unsigned int currentTicks;
 		long unsigned int ticks[MAX_TICK_TYPES][TICK_INTERVALL];
 		unsigned int frames_count[TICK_INTERVALL];
-		unsigned int frames_per_second;
+		unsigned int framesPerSecond;
 		signed int percent[MAX_TICK_TYPES];
-		long unsigned int total_ticks;
-		unsigned int tick_intervall;
-		unsigned int frames_per_generation;
+		long unsigned int totalTicks;
+		unsigned int tickIntervall;
+		unsigned int framesPerGeneration;
 		unsigned int refresh;
 };
 

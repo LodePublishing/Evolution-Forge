@@ -30,7 +30,7 @@ class Font
 
 		const unsigned int getSize() const;
 		
-		const Size GetTextExtent(const std::string& text) const;
+		const Size getTextExtent(const std::string& text) const;
 		void DrawText(SDL_Surface* surface, const SDL_Color& color, const std::string& text, const signed int x, const signed int y) const;
 };
 

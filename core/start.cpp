@@ -16,8 +16,9 @@ START::START(UNIT (*start_force)[MAX_LOCATIONS]):
 	for(unsigned int i = MAX_RACES;i--;)
 		harvest[i] = NULL;
 }
+/*
 
-/*START::START(const START& start) :
+START::START(const START& start) :
 	tmpmap(start.tmpmap),
 	startConditionsInitialized(start.startConditionsInitialized),
 	mapInitialized(start.mapInitialized)	
@@ -53,7 +54,7 @@ void START::fillAsNeutralPlayer()
 {
 #ifdef _SCC_DEBUG
 	if(!mapInitialized) {
-		toLog("DEBUG: (START::fillAsMap): No map was initialized.");return;
+		toErrorLog("DEBUG: (START::fillAsMap): No map was initialized.");return;
 	}
 #endif
 	for(unsigned int j = tmpmap->getMaxLocations();j--;)
@@ -88,10 +89,10 @@ void START::fillAsActivePlayer()
 {
 #ifdef _SCC_DEBUG
 	if(!mapInitialized) {
-		toLog("DEBUG: (START::fillAsActivePlayer): No map was initialized.");return;
+		toErrorLog("DEBUG: (START::fillAsActivePlayer): No map was initialized.");return;
 	}
 	if(!startConditionsInitialized) {
-		toLog("DEBUG: (START::fillAsActivePlayer): Not all startConditions were initialized.");return;
+		toErrorLog("DEBUG: (START::fillAsActivePlayer): Not all startConditions were initialized.");return;
 	}
 #endif
 	totalForce.resetData();
@@ -144,7 +145,7 @@ const bool START::assignStartCondition(const START_CONDITION* start_condition)
 	startCondition = start_condition;
 	if(mapInitialized)
 		startConditionsInitialized=true;
-	else toLog("ERROR");
+	else toErrorLog("ERROR");
 		
 	return(true);
 }
@@ -155,7 +156,7 @@ const bool START::assignMap(const BASIC_MAP* map) // TODO
 		return(false);
 #ifdef _SCC_DEBUG
 	if(!map) {
-		toLog("DEBUG: (START::assignMap): Value map out of range.");return(false);
+		toErrorLog("DEBUG: (START::assignMap): Value map out of range.");return(false);
 	}
 #endif
 	tmpmap = map;

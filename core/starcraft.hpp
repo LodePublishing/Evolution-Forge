@@ -56,9 +56,6 @@ extern const unsigned int MAX_SUPPLY;
 
 extern const unsigned int MAX_TOTAL_UNITS;
 
-extern const unsigned int MAX_GENERATIONS;
-extern const unsigned int MIN_GENERATIONS;
-
 #define MAX_TIME 3601
 //extern const unsigned int MAX_TIME;
 extern const unsigned int MIN_TIME;
@@ -243,9 +240,10 @@ enum eTerraUnits
 	BUILD_PARALLEL_4,
 	BUILD_PARALLEL_8,
 	BUILD_PARALLEL_16,
+	INTRON,
 	
 	FROM_GAS_TO_MINERALS,
-	LAST_UNIT,// 70
+	LAST_UNIT,// 71
 
 	VESPENE_GEYSIR,
 	MINERAL_PATCH,
@@ -282,7 +280,6 @@ enum eTerraUnits
 	F_COMMAND_CENTER_ADDON,
 	F_SCIENCE_FACILITY_ADDON,
 	
-	INTRON, //104 
 //} // end eTerranUnits
 //
 //enum eProtossUnits
@@ -349,7 +346,7 @@ enum eTerraUnits
 	ASSIMILATOR = 64, 
 	GAS_PROBE,
 
-	R_PSIONIC_STORM = 74,
+	R_PSIONIC_STORM = 75,
 	R_HALLUCINATION,
 	R_RECALL,
 	R_STASIS_FIELD,
@@ -433,7 +430,7 @@ enum eTerraUnits
 	EXTRACTOR = 64,
 	GAS_DRONE,
 
-	BREAK_UP_BUILDING = 74,
+	BREAK_UP_BUILDING = 75,
 	R_VENTRAL_SACKS,
 	R_ANTENNAE,
 	R_PNEUMATIZED_CARAPACE,

@@ -14,11 +14,8 @@ enum eFieldType
 class UI_NumberField : public UI_Object
 {
 	public:
-		UI_NumberField& operator=(const UI_NumberField& object);
-		UI_NumberField(const UI_NumberField& object);
-		
-		UI_NumberField(UI_Object* numberfield_parent, const Rect& field_rect, const Size distance_bottom_right, const ePositionMode position_mode, const unsigned int number_min, const unsigned int number_max, const eString txt, const eString tool_tip=NULL_STRING, const unsigned int number_steps=1, const unsigned int num=0, const eFieldType field_type = NORMAL_NUMBER_TYPE);
-		UI_NumberField(UI_Object* numberfield_parent, const Rect& field_rect, const Size distance_bottom_right, const ePositionMode position_mode, const unsigned int number_min, const unsigned int number_max, const std::string& txt, const eString tool_tip=NULL_STRING, const unsigned int number_steps=1, const unsigned int num=0, const eFieldType field_type = NORMAL_NUMBER_TYPE);
+		UI_NumberField(UI_Object* numberfield_parent, const Rect& field_rect, const Size distance_bottom_right, const ePositionMode position_mode, const unsigned int number_min, const unsigned int number_max, const eString txt, const eString tool_tip=NULL_STRING, const unsigned int number_steps=1, const unsigned int num=0, const bool shift_right = false, const eFieldType field_type = NORMAL_NUMBER_TYPE);
+		UI_NumberField(UI_Object* numberfield_parent, const Rect& field_rect, const Size distance_bottom_right, const ePositionMode position_mode, const unsigned int number_min, const unsigned int number_max, const std::string& txt, const eString tool_tip=NULL_STRING, const unsigned int number_steps=1, const unsigned int num=0, const bool shift_right = false, const eFieldType field_type = NORMAL_NUMBER_TYPE);
 
 		~UI_NumberField();
 		UI_Object* checkToolTip();
@@ -40,8 +37,8 @@ class UI_NumberField : public UI_Object
 		const bool hasNumberChanged() const;
 	private:
 		eFieldType fieldType;
-		UI_Button* addbutton;
-		UI_Button* subbutton;
+		UI_Button* addButton;
+		UI_Button* subButton;
 		UI_StaticText* text;
 		UI_StaticText* numberText;
 		unsigned int number;
@@ -49,6 +46,10 @@ class UI_NumberField : public UI_Object
 		unsigned int max;
 		unsigned int steps;
 		bool numberHasChanged;
+		bool shiftRight;
+
+		UI_NumberField& operator=(const UI_NumberField& object);
+		UI_NumberField(const UI_NumberField& object);
 };
 
 inline const bool UI_NumberField::hasNumberChanged() const {
@@ -60,19 +61,19 @@ inline const unsigned int UI_NumberField::getNumber() const {
 }
 
 inline const bool UI_NumberField::addClicked() const {
-	return(addbutton->isLeftClicked());
+	return(addButton->isLeftClicked());
 }
 
 inline const bool UI_NumberField::subClicked() const {
-	return(subbutton->isLeftClicked());
+	return(subButton->isLeftClicked());
 }
 
 inline const bool UI_NumberField::addRightClicked() const {
-	return(addbutton->isRightClicked());
+	return(addButton->isRightClicked());
 }
 
 inline const bool UI_NumberField::subRightClicked() const {
-	return(subbutton->isRightClicked());
+	return(subButton->isRightClicked());
 }
 
 #endif

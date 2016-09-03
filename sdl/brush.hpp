@@ -25,19 +25,19 @@ class Brush
 		Brush(SDL_Surface* surface, const Uint8 r, Uint8 g, Uint8 b, const eBrushStyle brush_style);
 		Brush();
 		~Brush();
-		const eBrushStyle GetStyle() const;
-		const Color* GetColor() const;
+		const eBrushStyle getStyle() const;
+		const Color* getColor() const;
 		void updateColor(SDL_Surface* surface);
 	private:
 		Color color;
 		eBrushStyle style;
 };
 
-inline const eBrushStyle Brush::GetStyle() const {
+inline const eBrushStyle Brush::getStyle() const {
 	return style;
 }
 
-inline const Color* Brush::GetColor() const {
+inline const Color* Brush::getColor() const {
 	return &color;
 }
 

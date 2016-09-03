@@ -86,7 +86,7 @@ inline const unsigned int PROGRAM::getFacility() const
 {
 #ifdef _SCC_DEBUG
 	if(facility >= UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (PROGRAM::getFacility): Variable not initialized.");return(0);
+		toErrorLog("DEBUG: (PROGRAM::getFacility): Variable not initialized.");return(0);
 	}
 #endif
 	return(facility);
@@ -96,7 +96,7 @@ inline const unsigned int PROGRAM::getUsedFacilityCount() const
 {
 #ifdef _SCC_DEBUG
 	if(usedFacilityCount >= MAX_SUPPLY) {
-		toLog("DEBUG: (PROGRAM::getUsedFacilityCount): Variable not initialized.");return(0);
+		toErrorLog("DEBUG: (PROGRAM::getUsedFacilityCount): Variable not initialized.");return(0);
 	}
 #endif
 	return(usedFacilityCount);
@@ -106,7 +106,7 @@ inline const unsigned int PROGRAM::getBT() const
 {
 #ifdef _SCC_DEBUG
 	if(BT >= MAX_TIME) {
-		toLog("DEBUG: (PROGRAM::getBT): Variable not initialized.");return(0);
+		toErrorLog("DEBUG: (PROGRAM::getBT): Variable not initialized.");return(0);
 	}
 #endif
 	return(BT);
@@ -116,7 +116,7 @@ inline const unsigned int PROGRAM::getSuccessType() const
 {
 #ifdef _SCC_DEBUG
 	if(successType >= ERROR_MESSAGES) {
-		toLog("DEBUG: (PROGRAM::getSuccessType): Variable not initialized.");return(0);
+		toErrorLog("DEBUG: (PROGRAM::getSuccessType): Variable not initialized.");return(0);
 	}
 #endif
 	return(successType);
@@ -126,7 +126,7 @@ inline const unsigned int PROGRAM::getSuccessUnit() const
 {
 #ifdef _SCC_DEBUG
 	if(successUnit >= UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (PROGRAM::getSuccessUnit): Variable not initialized.");return(0);
+		toErrorLog("DEBUG: (PROGRAM::getSuccessUnit): Variable not initialized.");return(0);
 	}
 #endif
 	return(successUnit);
@@ -135,8 +135,8 @@ inline const unsigned int PROGRAM::getSuccessUnit() const
 inline const unsigned int PROGRAM::getUnit() const
 {
 #ifdef _SCC_DEBUG
-	if(unit >= UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (PROGRAM::getUnit): Variable not initialized.");return(0);
+	if(unit >= LAST_UNIT) {
+		toErrorLog("DEBUG: (PROGRAM::getUnit): Variable not initialized.");return(0);
 	}
 #endif
 	return(unit);
@@ -146,8 +146,8 @@ inline const unsigned int PROGRAM::getUnit() const
 inline void PROGRAM::setUnit(const unsigned int unit_type)
 {
 #ifdef _SCC_DEBUG
-	if(unit_type >= UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (PROGRAM::setUnit): Value out of range.");return;
+	if(unit_type >= LAST_UNIT) {
+		toErrorLog("DEBUG: (PROGRAM::setUnit): Value out of range.");return;
 	}
 #endif
 	unit = unit_type;
@@ -162,10 +162,10 @@ inline void PROGRAM::setUnit(const unsigned int unit_type)
 {
 #ifdef _SCC_DEBUG
 	if(unit_type >= UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (PROGRAM::setAvailibleCount): Value unit_type out of range.");return;
+		toErrorLog("DEBUG: (PROGRAM::setAvailibleCount): Value unit_type out of range.");return;
 	}
 	if(unit_count >= MAX_TOTAL_UNITS) {
-		toLog("DEBUG: (PROGRAM::setAvailibleCount): Value unit_count out of range.");return;
+		toErrorLog("DEBUG: (PROGRAM::setAvailibleCount): Value unit_count out of range.");return;
 	}
 #endif
 	availibleCount[unit_type] = unit_count;
@@ -176,10 +176,10 @@ inline void PROGRAM::setTotalCount(const unsigned int unit_type, const unsigned 
 {
 #ifdef _SCC_DEBUG
 	if(unit_type >= UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (PROGRAM::setTotalCount): Value unit_type out of range.");return;
+		toErrorLog("DEBUG: (PROGRAM::setTotalCount): Value unit_type out of range.");return;
 	}
 	if(unit_count >= MAX_TOTAL_UNITS) {
-		toLog("DEBUG: (PROGRAM::setTotalCount): Value unit_count out of range.");return;
+		toErrorLog("DEBUG: (PROGRAM::setTotalCount): Value unit_count out of range.");return;
 	}
 #endif
 	forceCount[unit_type] = unit_count;
@@ -190,7 +190,7 @@ inline void PROGRAM::setTime(const unsigned int program_time)
 {
 #ifdef _SCC_DEBUG
 	if(program_time > coreConfiguration.getMaxTime()) {
-		toLog("DEBUG: (PROGRAM::setTime): Value program_time out of range.");return;
+		toErrorLog("DEBUG: (PROGRAM::setTime): Value program_time out of range.");return;
 	}
 #endif
 	time = program_time;
@@ -200,7 +200,7 @@ inline void PROGRAM::setBT(const unsigned int program_bt)
 {
 #ifdef _SCC_DEBUG
 	if(program_bt >= MAX_TIME) {
-		toLog("DEBUG: (PROGRAM::setBT): Value program_bt out of range.");return;
+		toErrorLog("DEBUG: (PROGRAM::setBT): Value program_bt out of range.");return;
 	}
 #endif
 	BT = program_bt;
@@ -211,7 +211,7 @@ inline void PROGRAM::setLocation(const unsigned int program_location)
 #ifdef _SCC_DEBUG
 	if(program_location >= MAX_LOCATIONS) //(*getMap())->getMaxLocations()) { // TODO
 	{
-		toLog("DEBUG: (PROGRAM::setLocation): Value program_location out of range.");return;
+		toErrorLog("DEBUG: (PROGRAM::setLocation): Value program_location out of range.");return;
 	}
 #endif
 	location = program_location;
@@ -221,7 +221,7 @@ inline void PROGRAM::setLocation(const unsigned int program_location)
 {
 #ifdef _SCC_DEBUG
 	if(unit_type >= UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (PROGRAM::getTotalCount): Value unit_type out of range.");return(0);
+		toErrorLog("DEBUG: (PROGRAM::getTotalCount): Value unit_type out of range.");return(0);
 	}
 #endif
 	return(forceCount[unit_type]);
@@ -232,7 +232,7 @@ inline const unsigned int PROGRAM::getAvailibleCount(const unsigned int unit_typ
 {
 #ifdef _SCC_DEBUG
 	if(unit_type >= UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (PROGRAM::getAvailibleCount): Value unit_type out of range.");return(0);
+		toErrorLog("DEBUG: (PROGRAM::getAvailibleCount): Value unit_type out of range.");return(0);
 	}
 #endif
 	return(availibleCount[unit_type]);
@@ -242,7 +242,7 @@ inline void PROGRAM::setFacility(const unsigned int program_facility)
 {
 #ifdef _SCC_DEBUG
 	if(program_facility >= UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (PROGRAM::setFacility): Value program_facility out of range.");return;
+		toErrorLog("DEBUG: (PROGRAM::setFacility): Value program_facility out of range.");return;
 	}
 #endif
 	facility = program_facility;
@@ -252,7 +252,7 @@ inline void PROGRAM::setUsedFacilityCount(const unsigned int used_facility_count
 {
 #ifdef _SCC_DEBUG
 	if(used_facility_count >= UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (PROGRAM::setUsedFacilityCount): Value used_facility_count out of range.");return;
+		toErrorLog("DEBUG: (PROGRAM::setUsedFacilityCount): Value used_facility_count out of range.");return;
 	}
 #endif
 	usedFacilityCount = used_facility_count;
@@ -262,7 +262,7 @@ inline void PROGRAM::setSuccessType(const unsigned int type)
 {
 #ifdef _SCC_DEBUG
 	if(type >= ERROR_MESSAGES) {
-		toLog("DEBUG: (PROGRAM::setSuccessType): Value type out of range.");return;
+		toErrorLog("DEBUG: (PROGRAM::setSuccessType): Value type out of range.");return;
 	}
 #endif
 	successType = type;
@@ -272,7 +272,7 @@ inline void PROGRAM::setSuccessUnit(const unsigned int unit_type)
 {
 #ifdef _SCC_DEBUG
 	if(unit_type >= UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (PROGRAM::setSuccessUnit): Value unit_type out of range.");return;
+		toErrorLog("DEBUG: (PROGRAM::setSuccessUnit): Value unit_type out of range.");return;
 	}
 #endif
 	successUnit = unit_type;
@@ -288,7 +288,7 @@ inline const unsigned int PROGRAM::getTime() const
 {
 #ifdef _SCC_DEBUG
 	if(time > coreConfiguration.getMaxTime()) {
-		toLog("DEBUG: (PROGRAM::getTime): Variable not initialized.");return(0);
+		toErrorLog("DEBUG: (PROGRAM::getTime): Variable not initialized.");return(0);
 	}
 #endif
 	return(time);
@@ -303,7 +303,7 @@ inline const unsigned int PROGRAM::getLocation() const
 #ifdef _SCC_DEBUG
 	if(location > MAX_LOCATIONS) //(*getMap())->getMaxLocations()) { TODO
 	{
-		toLog("DEBUG: (PROGRAM::getLocation): Variable program.location not initialized.");return(0);
+		toErrorLog("DEBUG: (PROGRAM::getLocation): Variable program.location not initialized.");return(0);
 	}
 #endif
 	return(location);

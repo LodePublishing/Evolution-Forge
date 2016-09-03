@@ -5,6 +5,19 @@
 #include "mapmenu.hpp"
 #include "playerentry.hpp"
 
+enum ePlayerOrder
+{
+	ADD_PLAYER,
+	OPEN_RACE_MENU,
+	RESTART_CALCULATION,
+	OPEN_BO_MENU,
+	OPEN_GOAL_MENU,
+	OPEN_UNIT_MENU,
+	SAVE_GOAL,
+	SAVE_BUILD_ORDER,
+	EDIT_FORCE_LIST
+};
+
 class ScoreWindow : public UI_Window
 {
 	public:
@@ -28,24 +41,34 @@ class ScoreWindow : public UI_Window
 		void setMaxPlayer(const unsigned int max_player);
 		const unsigned int getPlayers() const;
 		const bool isOptimizing(const unsigned int player_number) const;
+		void startOptimizing(const unsigned int player_number);
+		void stopOptimizing(const unsigned int player_number);
 		const signed int getAssignedMap() const;
 
 		void reloadOriginalSize();
 		void setMode(const unsigned int game_number, const unsigned int game_max);
 
 		const signed int getAssignedRace(const unsigned int player_number) const;
+
+		void setUnchangedGenerations(const unsigned int unchanged_generations);
+
+		const bool openMenu(const ePlayerOrder order);
+		unsigned int currentPlayer;
 	private:
 		PlayerEntry* player[MAX_PLAYER];
 		unsigned int players;
 		unsigned int maxPlayer;
 
+		unsigned int unchangedGenerations;
+
 		void closeMenus();
-		UI_Button* mapMenuButton;
-		MapMenu* mapMenu;		
+//		UI_Button* mapMenuButton;
+//		MapMenu* mapMenu;		
 		signed int assignMap;
 
 		unsigned int gameNumber;
 		unsigned int gameMax;
+
 };
 
 //inline const bool ScoreWindow::isOptimizing() const {
@@ -56,7 +79,7 @@ inline void ScoreWindow::setScore(const unsigned int player_number, const unsign
 {
 #ifdef _SCC_DEBUG       
 	if(player_number >= maxPlayer) {
-		toLog("DEBUG: (ScoreWindow::setScore): Value player_number out of range.");return;
+		toErrorLog("DEBUG: (ScoreWindow::setScore): Value player_number out of range.");return;
 	}
 #endif
 	player[player_number]->setScore(score);
@@ -65,7 +88,7 @@ inline void ScoreWindow::setScore(const unsigned int player_number, const unsign
 inline void ScoreWindow::setGoalComplete(const unsigned int player_number, const unsigned int goal) {
 #ifdef _SCC_DEBUG       
 	if(player_number >= maxPlayer) {
-		toLog("DEBUG: (ScoreWindow::setGoalComplete): Value player_number out of range.");return;
+		toErrorLog("DEBUG: (ScoreWindow::setGoalComplete): Value player_number out of range.");return;
 	}
 #endif
 	player[player_number]->setGoalComplete(goal);
@@ -74,7 +97,7 @@ inline void ScoreWindow::setGoalComplete(const unsigned int player_number, const
 inline void ScoreWindow::setPlayers(const unsigned int player_count) {
 #ifdef _SCC_DEBUG       
 	if(player_count >= maxPlayer) {
-		toLog("DEBUG: (ScoreWindow::setPlayers): Value player_count out of range.");return;
+		toErrorLog("DEBUG: (ScoreWindow::setPlayers): Value player_count out of range.");return;
 	}
 #endif
 	players = player_count;
@@ -92,7 +115,7 @@ inline const bool ScoreWindow::isOptimizing(const unsigned int player_number) co
 {
 #ifdef _SCC_DEBUG       
         if(player_number >= maxPlayer) {
-                toLog("DEBUG: (ScoreWindow::isOptimizing): Value player_number out of range.");return(false);
+                toErrorLog("DEBUG: (ScoreWindow::isOptimizing): Value player_number out of range.");return(false);
         }
 #endif
 	return(player[player_number]->isOptimizing());
@@ -102,7 +125,7 @@ inline void ScoreWindow::setMaxPlayer(const unsigned int max_player)
 {
 #ifdef _SCC_DEBUG       
 	if(max_player > MAX_PLAYER) {
-		toLog("DEBUG: (ScoreWindow::setMaxPlayer): Value max_player out of range.");return;
+		toErrorLog("DEBUG: (ScoreWindow::setMaxPlayer): Value max_player out of range.");return;
 	}
 #endif
 	maxPlayer = max_player;
@@ -112,7 +135,7 @@ inline void ScoreWindow::setScoreMode(const unsigned int player_number, eScoreMo
 {
 #ifdef _SCC_DEBUG       
 	if(player_number >= maxPlayer) {
-		toLog("DEBUG: (ScoreWindow::setScoreMode): Value player_number out of range.");return;
+		toErrorLog("DEBUG: (ScoreWindow::setScoreMode): Value player_number out of range.");return;
 	}
 #endif
 	player[player_number]->setScoreMode(score_mode);
@@ -122,7 +145,7 @@ inline const eScoreMode ScoreWindow::getScoreMode(const unsigned int player_numb
 {
 #ifdef _SCC_DEBUG       
 	if(player_number >= maxPlayer) {
-		toLog("DEBUG: (ScoreWindow::getScoreMode): Value player_number out of range.");return(SCORE_FULFILL_MODE);
+		toErrorLog("DEBUG: (ScoreWindow::getScoreMode): Value player_number out of range.");return(SCORE_FULFILL_MODE);
 	}
 #endif
 	return(player[player_number]->getScoreMode());
@@ -132,7 +155,7 @@ inline void ScoreWindow::setInitMode(const unsigned int player_number, eInitMode
 {
 #ifdef _SCC_DEBUG
 	if(player_number >= maxPlayer) {
-		toLog("DEBUG: (ScoreWindow::setInitMode): Value player_number out of range.");return;
+		toErrorLog("DEBUG: (ScoreWindow::setInitMode): Value player_number out of range.");return;
 	}
 #endif
 	player[player_number]->setInitMode(init_mode);
@@ -142,7 +165,7 @@ inline const eInitMode ScoreWindow::getInitMode(const unsigned int player_number
 {
 #ifdef _SCC_DEBUG       
 	if(player_number >= maxPlayer) {
-		toLog("DEBUG: (ScoreWindow::getInitMode): Value player_number out of range.");return(INACTIVE);
+		toErrorLog("DEBUG: (ScoreWindow::getInitMode): Value player_number out of range.");return(INACTIVE);
 	}
 #endif
 	return(player[player_number]->getInitMode());
@@ -152,7 +175,7 @@ inline const signed int ScoreWindow::getAssignedRace(const unsigned int player_n
 {
 #ifdef _SCC_DEBUG       
         if(player_number >= maxPlayer) {
-                toLog("DEBUG: (ScoreWindow::getAssignedRace): Value player_number out of range.");return(-1);
+                toErrorLog("DEBUG: (ScoreWindow::getAssignedRace): Value player_number out of range.");return(-1);
         }
 #endif
 	return(player[player_number]->getAssignedRace());

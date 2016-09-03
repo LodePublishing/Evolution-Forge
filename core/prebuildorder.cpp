@@ -45,7 +45,6 @@ PREBUILDORDER::PREBUILDORDER():
 	memset(mineralHarvestPerSecond, 0, 45 * MAX_LOCATIONS*sizeof(int));
 	memset(gasHarvestPerSecond, 0, 5 * MAX_LOCATIONS*sizeof(int));
 	memset(Code, 0, MAX_LENGTH*sizeof(int));
-//	memset(Marker, 0, MAX_LENGTH*sizeof(int));
 	resetSpecial();
 }
 
@@ -80,7 +79,6 @@ void PREBUILDORDER::resetData()
 	memset(mineralHarvestPerSecond, 0, 45 * MAX_LOCATIONS*sizeof(int));
 	memset(gasHarvestPerSecond, 0, 5 * MAX_LOCATIONS*sizeof(int));
 	memset(Code, 0, MAX_LENGTH*sizeof(int));
-//	memset(Marker, 0, MAX_LENGTH*sizeof(int));
 	resetSpecial();
 }
 
@@ -115,7 +113,6 @@ PREBUILDORDER::PREBUILDORDER(const PREBUILDORDER& object) :
 	timeout(object.timeout)
 {
 	memcpy(Code, object.Code, MAX_LENGTH * sizeof(int));
-//	memcpy(Marker, object.Marker, MAX_LENGTH * sizeof(int));
 	//memcpy(last, object.last, MAX_LENGTH * sizeof(int));
 	
 	memcpy(larvaInProduction, object.larvaInProduction, MAX_LOCATIONS * sizeof(int));
@@ -156,7 +153,6 @@ PREBUILDORDER& PREBUILDORDER::operator=(const PREBUILDORDER& object)
 	length = object.length;
 	timeout = object.timeout;
 	memcpy(Code, object.Code, MAX_LENGTH * sizeof(int));
-//	memcpy(Marker, object.Marker, MAX_LENGTH * sizeof(int));
 	//memcpy(last, object.last, MAX_LENGTH * sizeof(int));
 
 	memcpy(larvaInProduction, object.larvaInProduction, MAX_LOCATIONS * sizeof(int));	
@@ -213,10 +209,10 @@ void PREBUILDORDER::prepareForNewGeneration()
 	
 	const UNIT* start_units = (*(getStartCondition()))->getUnit(0);
 //	int j = 0;
-	for(unsigned int k=UNIT_TYPE_COUNT;k--;)
+	for(unsigned int k=LAST_UNIT;k--;)
 		if(start_units->getTotal(k))
 		{
-			getGoal()->calculateFinalTimes(0, k, start_units->getTotal(k), 0);
+			getGoal()->calculateFinalTimesAtBeginning(0, k, start_units->getTotal(k), 0);
 /*			last[j].location = 1;
 			last[j].unit = k;
 			last[j].count = 1;
@@ -269,10 +265,10 @@ const bool PREBUILDORDER::replaceCode(const unsigned int ip, const unsigned int 
 {
 #ifdef _SCC_DEBUG
 	if(ip >= MAX_LENGTH) {
-		toLog("DEBUG: (PREBUILDORDER::replaceCode): Value ip out of range.");return(false);
+		toErrorLog("DEBUG: (PREBUILDORDER::replaceCode): Value ip out of range.");return(false);
 	}
 	if(code >= getGoal()->getMaxBuildTypes()) {
-		toLog("DEBUG: (PREBUILDORDER::replaceCode): Value code out of range.");return(false);
+		toErrorLog("DEBUG: (PREBUILDORDER::replaceCode): Value code out of range.");return(false);
 	}
 #endif
 	bool changed_bo = false;
@@ -280,8 +276,6 @@ const bool PREBUILDORDER::replaceCode(const unsigned int ip, const unsigned int 
 		changed_bo=true;
 	setCode(ip, code);
 	return(changed_bo);
-//	++markerCounter;
-//	setMarker(ip, markerCounter);
 }
 
 // ------------------------------------------
@@ -306,7 +300,7 @@ const unsigned int PREBUILDORDER::calculateIdleTime() const
 		if(buildingQueue.top().getBuildFinishedTime() > getTimer())
 		{
 	// => Gebaeude sollte garnicht mehr in der buildingqueue sein...
-			toLog("ERROR: PREBUILDORDER::calculateIdleTime(): FinishedTime > getTimer...");
+			toErrorLog("ERROR: PREBUILDORDER::calculateIdleTime(): FinishedTime > getTimer...");
 		}
 #endif
 		unsigned int buildingRemaining = getTimer() - buildingQueue.top().getBuildFinishedTime();
@@ -395,7 +389,7 @@ void PREBUILDORDER::adjustLocationUnitsAfterCompletion(const unsigned int locati
 		case FACILITY_TYPES:
 		default:
 #ifdef _SCC_DEBUG
-			toLog("ERROR: UNDEFINED FACILITY BEHAVIOUR DETECTED!");
+			toErrorLog("ERROR: UNDEFINED FACILITY BEHAVIOUR DETECTED!");
 #endif
 		break;
 	} // end switch facilityType
@@ -471,7 +465,7 @@ void PREBUILDORDER::adjustAvailibility(const unsigned int loc, const unsigned in
 		case FACILITY_TYPES:
 		default:
 #ifdef _SCC_DEBUG
-			  toLog("ERROR: UNDEFINED FACILITY BEHAVIOUR DETECTED!");
+			  toErrorLog("ERROR: UNDEFINED FACILITY BEHAVIOUR DETECTED!");
 #endif
 			break;
 	}
@@ -492,8 +486,8 @@ const unsigned int PREBUILDORDER::calculatePrimaryFitness(const bool is_ready)
 	unsigned int tpF=0;
 	if(!is_ready)
 	{
-		unsigned int bonus[MAX_LOCATIONS][UNIT_TYPE_COUNT]; 
-		memset(bonus, 0, UNIT_TYPE_COUNT * MAX_LOCATIONS * sizeof(int));
+		unsigned int bonus[MAX_LOCATIONS][LAST_UNIT]; 
+		memset(bonus, 0, LAST_UNIT * MAX_LOCATIONS * sizeof(int));
 
 		tpF = getGoal()->calculateFitness((*unit)[playerNum], bonus);
 		
@@ -648,10 +642,10 @@ const bool PREBUILDORDER::buildIt(const unsigned int build_unit)
 	return(ok);
 }
 #endif
-const bool PREBUILDORDER::isDifferent(const unsigned int* code) const //, const unsigned int* marker) const
+const bool PREBUILDORDER::isDifferent(const unsigned int* code) const
 {
 	for(unsigned int i = MAX_LENGTH;i--;)
-		if((getCode(i)!=code[i]))//||(getMarker(i)!=marker[i]))
+		if(getCode(i)!=code[i])
 			return(true);
 	return(false);	
 }
@@ -807,7 +801,7 @@ void PREBUILDORDER::assignStart(START* start)
 {
 #ifdef _SCC_DEBUG
 	if(!start) {
-		toLog("DEBUG: (PREBUILDORDER::assignStart): Variable pStart not initialized.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::assignStart): Variable pStart not initialized.");return;
 	}
 #endif
 	pStart = start;
@@ -820,7 +814,6 @@ void PREBUILDORDER::assignStart(START* start)
 	setpStats(pStart->getpStats());
 
 //	memset(noise, 0, MAX_TIME * sizeof(int));
-//	markerCounter = 1;
 //	setPlayerNumber(playerNum);
 }
 
@@ -842,7 +835,7 @@ void PREBUILDORDER::setPlayerNumber(const unsigned int player_number)
 {
 #ifdef _SCC_DEBUG
 	if((player_number < 1) || (player_number > MAX_PLAYER)) {
-		toLog("DEBUG: (PREBUILDORDER::setPlayerNumber): Value out of range.");return;
+		toErrorLog("DEBUG: (PREBUILDORDER::setPlayerNumber): Value out of range.");return;
 	}
 #endif
 	playerNum = player_number;
@@ -887,9 +880,9 @@ void PREBUILDORDER::eraseIllegalCode()
 
 void PREBUILDORDER::eraseUselessCode()
 {
-	unsigned int allUnits[UNIT_TYPE_COUNT];
-	for(int i=UNIT_TYPE_COUNT;i--;)
-		allUnits[i]=getLocationTotal(GLOBAL,i);
+	unsigned int allUnits[LAST_UNIT];
+	for(int i=LAST_UNIT; i--;)
+		allUnits[i] = getLocationTotal(GLOBAL,i);
 	for(unsigned int i=MAX_LENGTH;i--;)
 	{
 		bool ok=true;
@@ -919,55 +912,54 @@ void PREBUILDORDER::mutateGeneCode()
 	if(getLength()==0) 
 		setLength(MAX_LENGTH);//coreConfiguration.getMaxLength()); // TODO
 
-	bool checked[UNIT_TYPE_COUNT];
-	bool buildable[UNIT_TYPE_COUNT];
-	unsigned int tMaxBuildTypes = 0;
-	unsigned int tGeno[UNIT_TYPE_COUNT]; // !! keine anderen units drueber nehmen!
+	bool t_checked[LAST_UNIT];
+	bool t_buildable[LAST_UNIT];
+	unsigned int t_max_build_types = 0;
+	unsigned int t_geno[LAST_UNIT]; // !! keine anderen units drueber nehmen!
+	NEED t_need[LAST_UNIT];
 
-	NEED need[UNIT_TYPE_COUNT];
-
-	for(unsigned int i = UNIT_TYPE_COUNT; i--;)
+	for(unsigned int i = LAST_UNIT; i--;)
 	{
-		need[i] = getGoal()->need[i];
-		checked[i] = false;
-		buildable[i] = false;
+		t_need[i] = getGoal()->need[i];
+		t_checked[i] = false;
+		t_buildable[i] = false;
 	}
 	
-	memset(tGeno, 0, UNIT_TYPE_COUNT*sizeof(int));
+	memset(t_geno, 0, LAST_UNIT*sizeof(int));
  
-	ALLOW* allow = getGoal()->allow;
+	ALLOW* t_allow = getGoal()->allow;
 
 	for(unsigned int i = LAST_UNIT;i--;)
 		if(getGoal()->getIsBuildable(i))
 		{
-			buildable[i]=true;
-			tGeno[tMaxBuildTypes]=getGoal()->toGeno(i);
-			++tMaxBuildTypes;
+			t_buildable[i]=true;
+			t_geno[t_max_build_types] = getGoal()->toGeno(i);
+			++t_max_build_types;
 			if((*(getStartCondition()))->getLocationTotal(GLOBAL,i))
 			{
-				std::list<unsigned int> newBuildable;
-				for(std::list<unsigned int>::iterator j = allow[i].facility.begin();j!=allow[i].facility.end(); ++j) 
-					if(need[*j].facilityIsDone())
-						newBuildable.push_back(*j);
-				for(std::list<unsigned int>::iterator j = allow[i].facility2.begin();j!=allow[i].facility2.end(); ++j) 
-					if(need[*j].facility2IsDone())
-						newBuildable.push_back(*j);
-				for(std::list<unsigned int>::iterator j = allow[i].prerequisite.begin();j!=allow[i].prerequisite.end(); ++j) 
-					if(need[*j].prerequisiteIsDone())
-						newBuildable.push_back(*j);
-				checked[i]=true;
-				for(std::list<unsigned int>::iterator j = newBuildable.begin();j!=newBuildable.end(); ++j)
+				std::list<unsigned int> new_buildable;
+				for(std::list<unsigned int>::iterator j = t_allow[i].facility.begin(); j != t_allow[i].facility.end(); ++j) 
+					if(t_need[*j].facilityIsDone())
+						new_buildable.push_back(*j);
+				for(std::list<unsigned int>::iterator j = t_allow[i].facility2.begin(); j != t_allow[i].facility2.end(); ++j) 
+					if(t_need[*j].facility2IsDone())
+						new_buildable.push_back(*j);
+				for(std::list<unsigned int>::iterator j = t_allow[i].prerequisite.begin(); j != t_allow[i].prerequisite.end(); ++j) 
+					if(t_need[*j].prerequisiteIsDone())
+						new_buildable.push_back(*j);
+				t_checked[i] = true;
+				for(std::list<unsigned int>::iterator j = new_buildable.begin(); j!=new_buildable.end(); ++j)
 				{
-					buildable[*j]=true;
-					tGeno[tMaxBuildTypes]=getGoal()->toGeno(*j);
-					tMaxBuildTypes++;
+					t_buildable[*j]=true;
+					t_geno[t_max_build_types] = getGoal()->toGeno(*j);
+					t_max_build_types++;
 				}
 			}
 		}
 #ifdef _SCC_DEBUG
-	if(tMaxBuildTypes <= 1)
+	if(t_max_build_types <= 1)
 	{
-		toLog("ERROR: PREBUILDORDER::mutateGeneCode(): No units can be build with current configuration!");return;
+		toErrorLog("ERROR: PREBUILDORDER::mutateGeneCode(): No units can be build with current configuration!");return;
 	}
 #endif
 		
@@ -978,18 +970,19 @@ void PREBUILDORDER::mutateGeneCode()
 		{
 			int new_item;
 			if(isAlwaysBuildWorkers())
-				new_item = tGeno[(rand()%(tMaxBuildTypes-1))+1];
+				new_item = t_geno[(rand()%(t_max_build_types-1))+1];
 			else 
-				new_item = tGeno[rand()%tMaxBuildTypes];
+				new_item = t_geno[rand()%t_max_build_types];
 			int random=3;
 			if(!isOnlySwapOrders())
-				random = rand()%4;
+				random = rand()%6;
 			switch(random)
 			{
 				case 0://remove
 				{
-					for(unsigned int i=x;i<MAX_LENGTH-1; ++i)
-						Code[i] = Code[i+1];
+					memmove(Code+x, Code+x+1, (MAX_LENGTH-x-1) * sizeof(int));
+//					for(unsigned int i=x;i<MAX_LENGTH-1; ++i)
+//						Code[i] = Code[i+1];
 					Code[MAX_LENGTH-1] = new_item;
 				}break;
 				case 1://add
@@ -1001,93 +994,110 @@ void PREBUILDORDER::mutateGeneCode()
 				{
 					Code[x] = new_item;
 				}break;
-				case 3://exchange two entries
-					if(x < MAX_LENGTH)
+				case 3://move one entry (no new_item) here
+				{
+					if(x < MAX_LENGTH-1) // <- we need at least one entry to switch with after the current one
 					{
-						unsigned int y=rand()%(MAX_LENGTH-x) + x;
-						if(buildable[getGoal()->toPhaeno(Code[y])])
+						unsigned int y=rand()%(MAX_LENGTH-x-1) + x + 1;
+						if(t_buildable[getGoal()->toPhaeno(Code[y])])
+						{
+							unsigned int l = Code[y];
+							memmove(Code+x+1, Code+x, (y-x) * sizeof(int));
+							Code[x] = l;
+						}
+					}
+				}break;
+				case 4://exchange two entries
+				{
+					if(x < MAX_LENGTH-1) // <- we need at least one entry to switch with after the current one
+					{
+						unsigned int y = rand()%(MAX_LENGTH-x-1) + x + 1;
+						if(t_buildable[getGoal()->toPhaeno(Code[y])])
 						{
 							unsigned int l;
 							l=Code[x];Code[x]=Code[y];Code[y]=l;
 						}
-					}break;
-				case 4://move a block of orders  [a..b..ta..tb..c..d] -> [a..ta..tb..b..c..d]
-					//~~~TODO bug, marker und code wird nicht richtig verschoben
-					if((getLength()>2)&&(x>0))
+					}
+				}break;
+				case 5://move a block of orders  [a..b..ta..tb..c..d] -> [a..ta..tb..b..c..d]
+					//~~~TODO bug, code wird nicht richtig verschoben ?
+				{
+					if(x < MAX_LENGTH-1)
 					{
-						unsigned int block_length = rand()%(MAX_LENGTH-x);
-						unsigned int target_position = rand()%x;
-						if(block_length > 0)
-						{       
-							unsigned int tmpCode[MAX_LENGTH];
-							for(unsigned int i = 0; i < block_length; ++i)
-								tmpCode[i] = Code[x + i];
-							for(unsigned int i = target_position; i < x; ++i)
-								Code[i+block_length] = Code[i];
-							for(unsigned int i = 0; i<block_length; ++i)
-								Code[target_position + i] = tmpCode[i];
+						unsigned int source_position = rand()%(MAX_LENGTH-x-1) + x + 1;
+						unsigned int block_length = rand()%(MAX_LENGTH-source_position)+1;
+// TODO beschleunigbar indem erstmal alle verschiebbaren Elemente aufgesammelt werden
+						for(unsigned int i = source_position; i < source_position+block_length; i++)
+						{
+							if(t_buildable[getGoal()->toPhaeno(Code[i])])
+							{
+								unsigned int l = Code[i];
+								memmove(Code+x+1, Code+x, (i-x) * sizeof(int));
+								Code[x] = l;
+							}
 						}
-					}break; 
+					}
+				}break; 
 				default:
 #ifdef _SCC_DEBUG		       
-				toLog("ERROR in PREBUILDORDER::mutateGeneCode: rand out of Range");
+					toErrorLog("ERROR (PREBUILDORDER::mutateGeneCode()): rand out of range");
 #endif
-				break; // TODO ERROR
+				break;
 			}
 		}
 			int i = getGoal()->toPhaeno(getCode(x));
-			if(!checked[i])
+			if(!t_checked[i])
 			{
 				{
-					std::list<unsigned int> newBuildable;
-					for(std::list<unsigned int>::iterator j = allow[i].facility.begin();j!=allow[i].facility.end(); ++j)
-					if(need[*j].facilityIsDone())
-						newBuildable.push_back(*j);
-					for(std::list<unsigned int>::iterator j = allow[i].facility2.begin();j!=allow[i].facility2.end(); ++j)
-					if(need[*j].facility2IsDone())
-						newBuildable.push_back(*j);
-					for(std::list<unsigned int>::iterator j = allow[i].prerequisite.begin();j!=allow[i].prerequisite.end(); ++j)
-					if(need[*j].prerequisiteIsDone())
-						newBuildable.push_back(*j);
-					checked[i]=true;
+					std::list<unsigned int> new_buildable;
+					for(std::list<unsigned int>::iterator j = t_allow[i].facility.begin(); j!=t_allow[i].facility.end(); ++j)
+					if(t_need[*j].facilityIsDone())
+						new_buildable.push_back(*j);
+					for(std::list<unsigned int>::iterator j = t_allow[i].facility2.begin(); j!=t_allow[i].facility2.end(); ++j)
+					if(t_need[*j].facility2IsDone())
+						new_buildable.push_back(*j);
+					for(std::list<unsigned int>::iterator j = t_allow[i].prerequisite.begin(); j!=t_allow[i].prerequisite.end(); ++j)
+					if(t_need[*j].prerequisiteIsDone())
+						new_buildable.push_back(*j);
+					t_checked[i]=true;
 					if(getGoal()->getIsStatic(i))
 					// remove
-						for(unsigned int j = tMaxBuildTypes;j--;)
-							if(tGeno[j] == getGoal()->toGeno(i))
+						for(unsigned int j = t_max_build_types;j--;)
+							if(t_geno[j] == getGoal()->toGeno(i))
 							{
-								--tMaxBuildTypes;
-								for(unsigned int k = j;k<tMaxBuildTypes; ++k)
-									tGeno[k] = tGeno[k+1];
+								--t_max_build_types;
+								for(unsigned int k = j; k < t_max_build_types; ++k)
+									t_geno[k] = t_geno[k+1];
 							}
 			
-					for(std::list<unsigned int>::iterator j = newBuildable.begin();j!=newBuildable.end(); ++j) 
+					for(std::list<unsigned int>::iterator j = new_buildable.begin(); j!= new_buildable.end(); ++j) 
 					{
-						buildable[*j]=true;
-						tGeno[tMaxBuildTypes]=getGoal()->toGeno(*j);
-						++tMaxBuildTypes;
+						t_buildable[*j]=true;
+						t_geno[t_max_build_types] = getGoal()->toGeno(*j);
+						++t_max_build_types;
 					}
 				}
-				if((*pStats)[i].create>0)
+				if(((*pStats)[i].create>0)&&((*pStats)[i].create<LAST_UNIT))
 				{
 					i = (*pStats)[i].create;
-					if(!checked[i])
+					if(!t_checked[i])
 					{
-						std::list<unsigned int> newBuildable;
-			       			for(std::list<unsigned int>::iterator j = allow[i].facility.begin();j!=allow[i].facility.end(); ++j)
-							if(need[*j].facilityIsDone())
-								newBuildable.push_back(*j);
-						for(std::list<unsigned int>::iterator j = allow[i].facility2.begin();j!=allow[i].facility2.end(); ++j)
-							if(need[*j].facility2IsDone())
-								newBuildable.push_back(*j);
-						for(std::list<unsigned int>::iterator j = allow[i].prerequisite.begin();j!=allow[i].prerequisite.end(); ++j)
-							if(need[*j].prerequisiteIsDone())
-								newBuildable.push_back(*j);
-				       		checked[i]=true;
-						for(std::list<unsigned int>::iterator j = newBuildable.begin();j!=newBuildable.end(); ++j)
+						std::list<unsigned int> new_buildable;
+			       			for(std::list<unsigned int>::iterator j = t_allow[i].facility.begin(); j != t_allow[i].facility.end(); ++j)
+							if(t_need[*j].facilityIsDone())
+								new_buildable.push_back(*j);
+						for(std::list<unsigned int>::iterator j = t_allow[i].facility2.begin(); j != t_allow[i].facility2.end(); ++j)
+							if(t_need[*j].facility2IsDone())
+								new_buildable.push_back(*j);
+						for(std::list<unsigned int>::iterator j = t_allow[i].prerequisite.begin(); j != t_allow[i].prerequisite.end(); ++j)
+							if(t_need[*j].prerequisiteIsDone())
+								new_buildable.push_back(*j);
+				       		t_checked[i]=true;
+						for(std::list<unsigned int>::iterator j = new_buildable.begin(); j != new_buildable.end(); ++j)
 						{
-							buildable[*j]=true;
-							tGeno[tMaxBuildTypes]=getGoal()->toGeno(*j);
-							++tMaxBuildTypes;
+							t_buildable[*j]=true;
+							t_geno[t_max_build_types]=getGoal()->toGeno(*j);
+							++t_max_build_types;
 						}
 					}
 				}

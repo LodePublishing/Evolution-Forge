@@ -2,11 +2,18 @@
 
 Music - Genetic Transmissions TODO
 
-FMOD Sound System, copyright (C) Firelight Technologies Pty, Ltd., 1994-2005. 
-http://www.fmod.org/
+FMOD Sound System, copyright (C) Firelight Technologies Pty, Ltd., 1994-2005. http://www.fmod.org/
 
 Simple Directmedia Library 
 http://libsdl.org/
 
 SDL_image 1.2
+
+SDL TTF
+
+FreeSans
+FreeSansBold
+
+
+All other libraries (especially ClawGUI) and media is produced by myself and may not be ...
 

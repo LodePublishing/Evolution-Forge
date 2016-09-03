@@ -131,7 +131,7 @@ void ANABUILDORDER::restartData()
 	timePercentage = 0;
 	goalPercentage = 0;
 	averageLength = 0;
-//	setTimer(0);
+	setTimer(0); //?
 }
 
 
@@ -186,7 +186,7 @@ const bool ANABUILDORDER::calculateStep()
 				if((getTimer() < i->getBT()) || (i->getTime() < getTimer() - i->getBT()))
 				{
 					i = programList.erase(i);
-					toLog("deleted something");
+					toErrorLog("deleted something");
 				}
 				else ++i;
 			}
@@ -214,8 +214,13 @@ const bool ANABUILDORDER::calculateStep()
 		if((code >= BUILD_PARALLEL_2) && (code <= BUILD_PARALLEL_16))
                 {
                         setIP(getIP()-1);
-                        while((getGoal()->toPhaeno(getCurrentCode()) > GAS_SCV)&&(getIP()))
-                                setIP(getIP()-1);
+                        while((getGoal()->toPhaeno(getCurrentCode()) >= LAST_UNIT)&&(getIP()))
+			{
+#ifdef _SCC_DEBUG
+				toErrorLog("WARNING (BUILDORDER::calculateStep()): Current code out of range => ignoring order.");
+#endif
+			        setIP(getIP()-1);
+			}
                         PARALLEL_COMMAND* pcommand = new PARALLEL_COMMAND;
                         switch(code)
                         {
@@ -313,7 +318,13 @@ const bool ANABUILDORDER::calculateStep()
 		if((buildingQueue.top().canBeCompleted()) && (buildingQueue.top().getBuildFinishedTime() == getTimer()))
 		{
 			foundAnother = true;
-		   	const Building build(buildingQueue.top());
+			const Building& build(buildingQueue.top());
+			if(buildingQueue.top().getType() == INTRON)
+			{
+				buildingQueue.pop();
+				continue;
+			}
+
 			const UNIT_STATISTICS* stat = &((*pStats)[build.getType()]);
 
 // ------ ACTUAL BUILDING ------
@@ -372,8 +383,8 @@ const bool ANABUILDORDER::calculateStep()
 //			setProgramLocation(build.getIP(), build.getLocation());
 //			setProgramBT(build.getIP(), build.getTotalBuildTime()); //~~~
 // ------ END OF RECORD -------
-			
 			buildingQueue.pop();
+			
 		} // end while(getremainingbuildorder) ~|~
 		else foundAnother = false;
 	} //end while
@@ -595,6 +606,9 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 		tloc=last[lastcounter].location;
 	}*/
 
+	if((!buildingQueue.empty())&&(buildingQueue.top().getType() == INTRON))
+		return(false);
+
 	if(stat->facility[0]==0)
 		ok=true;
 	else
@@ -743,6 +757,26 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 			programList.push_back(program);
 		}
 
+		if(build.getType() == INTRON)
+		{
+			std::list<Building> b_list;
+			while((!buildingQueue.empty())&&(buildingQueue.top().getBuildFinishedTime() > build.getBuildFinishedTime()))
+			{
+				b_list.push_back(buildingQueue.top());
+				buildingQueue.pop();
+				
+			}
+			std::list<Building>::iterator i = b_list.begin();
+			while(i!=b_list.end())
+			{
+				build.setBuildFinishedTime(i->getBuildFinishedTime());
+				build.setTotalBuildTime(getTimer() - i->getBuildFinishedTime());
+				buildingQueue.push(build);
+				buildingQueue.push(*i);
+				++i;
+			}		
+		}
+
 	} //end if(ok)
 	return(ok);
 }
@@ -827,7 +861,7 @@ void ANABUILDORDER::countUnitsTotal()
 	unitsTotal = 0;
 //	unitsTotalMax = 1;
 	nonGoalsUnitsTotalMax = 1;
-	for (unsigned int i = GAS_SCV+1; i--;)
+	for (unsigned int i = LAST_UNIT; i--;)
 	{
 		unitsTotal += getLocationTotal(GLOBAL, i);
 		if ((!getGoal()->getIsGoal(i)) && (getLocationTotal(GLOBAL, i) > nonGoalsUnitsTotalMax))

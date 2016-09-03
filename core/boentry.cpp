@@ -6,24 +6,13 @@ BUILD_ORDER::BUILD_ORDER(const BO_HEADER& bo_header, const GOAL_ENTRY& bo_goal, 
 	programList(bo_program)
 {}
 
-BUILD_ORDER::BUILD_ORDER(const BUILD_ORDER& object) :
-	boHeader(object.boHeader),
-	goal(object.goal),
-	programList(object.programList)
-{}
-
-BUILD_ORDER& BUILD_ORDER::operator=(const BUILD_ORDER& object)
-{
-	boHeader = object.boHeader;
-	goal = object.goal;
-	programList = object.programList;
-	return(*this);
-}
-
 BUILD_ORDER::~BUILD_ORDER()
 {}
 
-BO_HEADER::BO_HEADER() 
+BO_HEADER::BO_HEADER():
+	name("ERROR"),
+	race(TERRA),
+	time(0)
 {}
 
 BO_HEADER::~BO_HEADER() 

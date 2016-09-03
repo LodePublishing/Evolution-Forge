@@ -1,0 +1,531 @@
+1a2
+> #include <sstream>
+5,7c6
+< 	runNumber(0),
+< 	newcalc(true),
+< 	isNewRun(false)
+---
+> 	mapPlayerNumInitialized(false)
+11,13d9
+< //	buildOrderInitialized=0;
+< //	goalCount=0;
+< //	goalsInitialized=0;
+18c14
+< 	toInitLog("* Freeing build orders...");
+---
+> 	toInitLog("* Freeing build orders..."); // TODO... :/
+20a17
+> 	toInitLog("* Freeing analyzed data..."); // TODO... :/
+25,37d21
+< SOUP::SOUP(const SOUP& object):
+< 	mapPlayerNum(object.mapPlayerNum),
+< 	runNumber(object.runNumber),
+< 	newcalc(object.newcalc),
+< 	isNewRun(object.isNewRun)
+< {
+< 	for(unsigned int i=MAX_PROGRAMS;i--;)
+< 		if(buildOrder[i]!=NULL)
+< 			buildOrder[i] = new BUILDORDER(*(object.buildOrder[i]));
+< 	for(unsigned int i=MAX_PLAYER;i--;)
+< 		if(analyzedBuildOrder[i]!=NULL)
+< 			analyzedBuildOrder[i] = new ANABUILDORDER(*(object.analyzedBuildOrder[i]));
+< }
+39,54c23
+< SOUP& SOUP::operator=(const SOUP& object)
+< {
+< 	mapPlayerNum = object.mapPlayerNum;
+< 	runNumber = object.runNumber;
+< 	newcalc = object.newcalc;
+< 	isNewRun = object.isNewRun;
+< 	for(unsigned int i=MAX_PROGRAMS;i--;)
+< 		if(buildOrder[i]!=NULL)
+< 			buildOrder[i] = new BUILDORDER(*(object.buildOrder[i]));
+< 	for(unsigned int i=MAX_PLAYER;i--;)
+< 		if(analyzedBuildOrder[i]!=NULL)
+< 			analyzedBuildOrder[i] = new ANABUILDORDER(*(object.analyzedBuildOrder[i]));
+< 	return(*this);
+< }
+< 
+< ANABUILDORDER* SOUP::getAnalyzedBuildOrder(const unsigned int player_num)
+---
+> void SOUP::initSoup(unsigned int player_number, START* start)
+56,57c25,32
+< 	return(analyzedBuildOrder[player_num]);
+< }
+---
+> #ifdef _SCC_DEBUG
+> 	if(!mapPlayerNumInitialized) {
+> 		toErrorLog("DEBUG (SOUP::initSoup()): Variable mapPlayerNum not initialized.");return;
+> 	}
+> 	if(player_number >= mapPlayerNum) {
+> 		toErrorLog("DEBUG (SOUP::initSoup()): Value player_number out of range.");return;
+> 	}
+> #endif
+59,60d33
+< void SOUP::initSoup(unsigned int player, START* start)
+< {
+63d35
+< 
+66,76c38,44
+< 		if(buildOrder[i+player*groupSize])
+< 			buildOrder[i+player*groupSize]->resetData();
+< 		else 
+< 		{
+< 			delete buildOrder[i+player*groupSize];
+< 			buildOrder[i+player*groupSize]=new BUILDORDER();
+< 		}
+< 		buildOrder[i+player*groupSize]->assignStart(start);
+< 		buildOrder[i+player*groupSize]->setPlayerNumber(player+1);
+< 		buildOrder[i+player*groupSize]->resetGeneCode();
+< 		buildOrder[i+player*groupSize]->assignUnits(&temporaryForce);
+---
+> 		if(buildOrder[i + player_number*groupSize] == NULL)
+> 			buildOrder[i + player_number*groupSize]=new BUILDORDER();
+> 		else
+> 			buildOrder[i + player_number*groupSize]->resetData();
+> 		buildOrder[i + player_number*groupSize]->assignStart(start);
+> 		buildOrder[i + player_number*groupSize]->setPlayerNumber(player_number+1);
+> 		buildOrder[i + player_number*groupSize]->assignUnits(&temporaryForce);
+79,80c47,48
+< 	if(analyzedBuildOrder[player])
+< 		analyzedBuildOrder[player]->resetData();
+---
+> 	if(analyzedBuildOrder[player_number] == NULL)
+> 		analyzedBuildOrder[player_number] = new ANABUILDORDER();
+82,88c50,54
+< 	{
+< 		delete analyzedBuildOrder[player];
+< 		analyzedBuildOrder[player] = new ANABUILDORDER();
+< 	}
+< 	analyzedBuildOrder[player]->assignStart(start);
+< 	analyzedBuildOrder[player]->setPlayerNumber(player+1);
+< 	analyzedBuildOrder[player]->assignUnits(&temporaryForce);
+---
+> 		analyzedBuildOrder[player_number]->resetData();
+> 	
+> 	analyzedBuildOrder[player_number]->assignStart(start);
+> 	analyzedBuildOrder[player_number]->setPlayerNumber(player_number+1);
+> 	analyzedBuildOrder[player_number]->assignUnits(&temporaryForce);
+93,95d58
+< /* benoetigt folgende initialisierte Daten:
+<    mapPlayerNum
+< */
+97,111c60,61
+< /*f(player_number >= mapPlayerNum)
+< 	{
+< 		toErrorLog("ERROR: (SOUP::initSoup) player_number out of range.");
+< 		return;
+< 	}*/
+< /*	if(!mapInitialized)
+< 	{
+< 		toErrorLog("ERROR: (SOUP::initSoup) Map not initialized.");
+< 		return;
+< 	}
+< 	
+< 	if(!goalsInitialized)
+< 	{
+< 		toErrorLog("ERROR: (SOUP::initSoup) Goals not initialized.");
+< 		return;
+---
+> 	if(!mapPlayerNumInitialized) {
+> 		toErrorLog("DEBUG (SOUP::initSoup()): Variable mapPlayerNum not initialized.");return;
+113d62
+< 	*/
+115,125d63
+< //	if(buildOrderInitialized)
+< //	{
+< //		toErrorLog("ERROR: (SOUP::initSoup) SOUP is already initialzed.");
+< //		return(0);
+< //	}
+< //	PREBUILDORDER::resetMapInitialized();
+< /*	if(!(PREBUILDORDER::setMap(pMap)))
+< 	{
+< 		toErrorLog("ERROR: (SOUP::initSoup) Map not initialized.");
+< 		return(0);
+< 	}*/
+128,131c66,67
+< //differenzieren, damit auch restarts/updates moeglich sind waehrend dem run! TODO
+< 	
+< 	unsigned int k;
+< 	for(k = mapPlayerNum; k--;)
+---
+> 	unsigned int player;
+> 	for(player = mapPlayerNum; player--;)
+135,136c71,72
+< 			if(buildOrder[i+k*groupSize])
+< 				buildOrder[i+k*groupSize]->resetData();
+---
+> 			if(buildOrder[i + player*groupSize] == NULL)
+> 				buildOrder[i + player*groupSize]=new BUILDORDER();
+138,145c74,77
+< 			{
+< 				delete buildOrder[i+k*groupSize];
+< 				buildOrder[i+k*groupSize]=new BUILDORDER();
+< 			}
+< 			buildOrder[i+k*groupSize]->assignStart((*start)[k+1]);
+< 			buildOrder[i+k*groupSize]->setPlayerNumber(k+1);
+< 			buildOrder[i+k*groupSize]->resetGeneCode();
+< 			buildOrder[i+k*groupSize]->assignUnits(&temporaryForce);
+---
+> 				buildOrder[i + player*groupSize]->resetData();
+> 			buildOrder[i + player*groupSize]->assignStart((*start)[player+1]);
+> 			buildOrder[i + player*groupSize]->setPlayerNumber(player+1);
+> 			buildOrder[i + player*groupSize]->assignUnits(&temporaryForce);
+147,148c79,80
+< 		if(analyzedBuildOrder[k])
+< 			analyzedBuildOrder[k]->resetData();
+---
+> 		if(analyzedBuildOrder[player] == NULL)
+> 			analyzedBuildOrder[player] = new ANABUILDORDER();
+150,156c82,85
+< 		{
+< 			delete analyzedBuildOrder[k];
+< 			analyzedBuildOrder[k] = new ANABUILDORDER();
+< 		}
+< 		analyzedBuildOrder[k]->assignStart((*start)[k+1]);
+< 		analyzedBuildOrder[k]->setPlayerNumber(k+1);
+< 		analyzedBuildOrder[k]->assignUnits(&temporaryForce);
+---
+> 			analyzedBuildOrder[player]->resetData();
+> 		analyzedBuildOrder[player]->assignStart((*start)[player+1]);
+> 		analyzedBuildOrder[player]->setPlayerNumber(player+1);
+> 		analyzedBuildOrder[player]->assignUnits(&temporaryForce);
+158c87
+< 	for(k = mapPlayerNum; k < MAX_PLAYER; ++k)
+---
+> 	for(player = mapPlayerNum; player < MAX_PLAYER; ++player)
+160,169c89,90
+< 		delete analyzedBuildOrder[k];
+< 		analyzedBuildOrder[k] = NULL;
+< 	}
+< }
+< 
+< void SOUP::setMapPlayerNum(const unsigned int map_player_num)
+< {
+< #ifdef _SCC_DEBUG
+< 	if((map_player_num < 1) || (map_player_num > MAX_PLAYER)) {
+< 		toErrorLog("DEBUG: (SOUP::setMapPlayerNum): map_player_num not initialized.");return;
+---
+> 		delete analyzedBuildOrder[player];
+> 		analyzedBuildOrder[player] = NULL;
+171,173d91
+< #endif
+< 	mapPlayerNum = map_player_num;
+< 	// TODO irgendwie von hier initSoup aufrufen
+179,197d96
+< void SOUP::checkForChange() const
+< {
+< //	TODO
+< //	unsigned int changed=0;
+< /*	for(unsigned int k=mapPlayerNum-1;k--;)
+< 		if(analyzedBuildOrder[k]->getPlayer()->isChanged())
+< 		{
+< 			changed=1;
+< //			analyzedBuildOrder[k]->getPlayer()->changeAccepted(); TODO
+< 			analyzedBuildOrder[k]->setTotalGeneration(0); //?
+< 			analyzedBuildOrder[k]->setMaxpFitness(0);
+< 			analyzedBuildOrder[k]->setMaxsFitness(0);
+< 			analyzedBuildOrder[k]->setUnchangedGenerations(0);
+< 		}
+< 	if(changed)
+< 		calculateAnalyzedBuildOrder(); // TODO */
+< }
+< 
+< 
+205a105,109
+> #ifdef _SCC_DEBUG
+> 	if(!mapPlayerNumInitialized) {
+> 		toErrorLog("DEBUG (SOUP::calculateAnalyzedBuildOrder()): Variable mapPlayerNum not initialized.");return;
+> 	}
+> #endif
+209d112
+< 			analyzedBuildOrder[k]->assignUnits(&temporaryForce);
+221c124
+< 				complete&=analyzedBuildOrder[k]->calculateStep();
+---
+> 				complete &= analyzedBuildOrder[k]->calculateStep();
+229a133,137
+> #ifdef _SCC_DEBUG
+> 	if(!mapPlayerNumInitialized) {
+> 		toErrorLog("DEBUG (SOUP::calculateBuildOrder()): Variable mapPlayerNum not initialized.");return;
+> 	}
+> #endif
+240,241d147
+< 			
+< 			buildOrder[k*groupSize+bo_num]->assignUnits(&temporaryForce);
+263,264c169,172
+< #include <sstream>
+< const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER], const UNIT (*start_force)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]) //reset: have the goals/settings been changed?
+---
+> 
+> 
+> const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER], const UNIT (*start_force)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]) 
+> 	//reset: have the goals/settings been changed?
+265a174,178
+> #ifdef _SCC_DEBUG
+> 	if(!mapPlayerNumInitialized) {
+> 		toErrorLog("DEBUG (SOUP::newGeneration()): Variable mapPlayerNum not initialized.");return(false);
+> 	}
+> #endif
+281a195
+> // This part needs the most CPU power:
+285c199
+< 		calculateBuildOrder(i);
+---
+> 		calculateBuildOrder(i); // <- this command :o
+303,311d216
+< 
+< /*				for(int j=MAX_LENGTH;j--;)
+< 				{
+< 					buildOrder[k*groupSize+l]->Code[j]=buildOrder[k*groupSize]->Code[j];
+< 					buildOrder[k*groupSize+l]->Marker[j]=buildOrder[k*groupSize]->Marker[j];
+< 
+< 	//				  memcpy(buildOrder[t]->Code[0],buildOrder[0]->Code[0],MAX_LENGTH); 
+< 	//				  memcpy(buildOrder[t]->Code[1],buildOrder[0]->Code[1],MAX_LENGTH);
+< 				}*/
+316c221,222
+< 		newcalc = false;
+---
+> //
+> 		bool newcalc = false;
+345,348d250
+< //					std::ostringstream os;
+< //					for(unsigned int i = MAX_LENGTH;i--;)
+< //						os << analyzedBuildOrder[k]->getCode(i);
+< //					toLog("Copied Code: " + os.str());
+393,403c295,305
+< 	for(unsigned int k=mapPlayerNum;k--;)
+< 		if((analyzedBuildOrder[k]->getHarvestedMinerals() != buildOrder[k*groupSize]->getHarvestedMinerals())||
+< 		(analyzedBuildOrder[k]->getHarvestedGas() != buildOrder[k*groupSize]->getHarvestedGas())||
+< 		(analyzedBuildOrder[k]->getTimer() != buildOrder[k*groupSize]->getTimer()))
+< 		{
+< 			std::ostringstream os;
+< 			for(unsigned int i = MAX_LENGTH;i--;)
+< 				os << analyzedBuildOrder[k]->getCode(i);
+< 			toErrorLog("CurrentCode: " + os.str());
+< 			toErrorLog("^^^^^^^^^^^^ WARNING: genetic core and analysis core are not synchronized!");
+< 		}
+---
+> 		for(unsigned int k=mapPlayerNum;k--;)
+> 			if((analyzedBuildOrder[k]->getHarvestedMinerals() != buildOrder[k*groupSize]->getHarvestedMinerals())||
+> 				(analyzedBuildOrder[k]->getHarvestedGas() != buildOrder[k*groupSize]->getHarvestedGas())||
+> 				(analyzedBuildOrder[k]->getTimer() != buildOrder[k*groupSize]->getTimer()))
+> 				{
+> 					std::ostringstream os;
+> 					for(unsigned int i = MAX_LENGTH;i--;)
+> 						os << analyzedBuildOrder[k]->getCode(i);
+> 					toErrorLog("CurrentCode: " + os.str());
+> 					toErrorLog("^^^^^^^^^^^^ WARNING: genetic core and analysis core are not synchronized!");
+> 				}
+409,429c311,312
+< 	for(unsigned int k=mapPlayerNum;k--;)
+< 		if(analyzedBuildOrder[k]->isOptimizing()) //~~ TODO evtl isOptimizing stattdessen...
+< 		{
+< 			analyzedBuildOrder[k]->fitnessAverage=0;
+< 			for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
+< 				analyzedBuildOrder[k]->fitnessAverage+=buildOrder[i]->getpFitness();
+< 			analyzedBuildOrder[k]->fitnessAverage/=(MAX_PROGRAMS/mapPlayerNum);
+< 			analyzedBuildOrder[k]->fitnessVariance=0;
+< 			
+< 			for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
+< 			{
+< 				unsigned int z = analyzedBuildOrder[k]->fitnessAverage-buildOrder[i]->getpFitness();
+< 				analyzedBuildOrder[k]->fitnessVariance += (z*z);
+< 			}
+< 			analyzedBuildOrder[k]->fitnessVariance/=MAX_PROGRAMS;
+< //			analyzedBuildOrder[k]->analyzeBuildOrder(); TODO?
+< //			analyzedBuildOrder[k]->getPlayer()->getGoal()->bestTime=analyzedBuildOrder[k]->getTimer(); TODO !!
+< //			analyzedBuildOrder[k]->incrementUnchangedGenerations();
+< //			analyzedBuildOrder[k]->setTotalGeneration(analyzedBuildOrder[k]->getTotalGeneration()+1); TODO
+< #if 0
+< if(analyzedBuildOrder[k]->getUnchangedGenerations()>=coreConfiguration.getMaxGenerations())
+---
+> 		for(unsigned int k=mapPlayerNum;k--;)
+> 			if(analyzedBuildOrder[k]->isOptimizing())
+430a314
+> 				analyzedBuildOrder[k]->fitnessAverage=0;
+432,447c316,326
+< 					buildOrder[i]->resetGeneCode();
+< 
+< 				analyzedBuildOrder[k]->setRun(analyzedBuildOrder[k]->getRun()+1);
+< 				analyzedBuildOrder[k]->setTotalGeneration(0);
+< 				analyzedBuildOrder[k]->setMaxpFitness(0);
+< 				analyzedBuildOrder[k]->setMaxsFitness(0);
+< 				analyzedBuildOrder[k]->setMaxtFitness(0);
+< 				analyzedBuildOrder[k]->setUnchangedGenerations(0);
+< 
+< 				isNewRun=true;
+< 
+< 					
+< ?
+< 			return(&(analyzedBuildOrder[0])/*Save[analyzedBuildOrder[k]->getRun()]*/); //~~~~
+< 	#endif
+< 		}
+---
+> 					analyzedBuildOrder[k]->fitnessAverage+=buildOrder[i]->getpFitness();
+> 				analyzedBuildOrder[k]->fitnessAverage/=(MAX_PROGRAMS/mapPlayerNum);
+> 				analyzedBuildOrder[k]->fitnessVariance=0;
+> 				
+> 				for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
+> 				{
+> 					unsigned int z = analyzedBuildOrder[k]->fitnessAverage-buildOrder[i]->getpFitness();
+> 					analyzedBuildOrder[k]->fitnessVariance += (z*z);
+> 				}
+> 				analyzedBuildOrder[k]->fitnessVariance/=MAX_PROGRAMS;
+> 			}
+459c338
+< const bool SOUP::recalculateGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER], const UNIT (*start_force)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]) //reset: have the goals/settings been changed?
+---
+> const bool SOUP::recalculateGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER], const UNIT (*start_force)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS], const bool active[MAX_PLAYER]) 
+460a340,345
+> #ifdef _SCC_DEBUG
+> 	if(!mapPlayerNumInitialized) {
+> 		toErrorLog("DEBUG (SOUP::recalculateGeneration()): Variable mapPlayerNum not initialized.");return(false);
+> 	}
+> #endif
+> //	TODO  Abfragen was initialisiert wurde...
+463,464c348
+< 	{
+< 		if(previous_analyzed_buildorder[k]!=NULL)
+---
+> 		if(active[k])
+466,467c350
+< 			// TODO: bei goal change werden Code und programList ungueltig
+< 			if(previous_analyzed_buildorder[k]->haveConditionsChanged())
+---
+> 			if(previous_analyzed_buildorder[k]!=NULL)
+469,475c352,361
+< 				previous_analyzed_buildorder[k]->setConditionsChanged(false);
+< 				changed_bo = true;
+< 			}
+< 			if(analyzedBuildOrder[k]->writeProgramBackToCode(previous_analyzed_buildorder[k]->getProgramList()))
+< 				changed_bo=true;
+< 		} else changed_bo=true;
+< 	}
+---
+> 				// TODO: bei goal change werden Code und programList ungueltig
+> 				if(previous_analyzed_buildorder[k]->haveConditionsChanged())
+> 				{
+> 					previous_analyzed_buildorder[k]->setConditionsChanged(false);
+> 					changed_bo = true;
+> 				}
+> //				if(analyzedBuildOrder[k]->writeProgramBackToCode(previous_analyzed_buildorder[k]->getProgramList()))
+> //					changed_bo=true;
+> 			} else changed_bo=true;
+> 		}
+481a368
+> 		if(active[k])
+492,499c379,387
+< 	{
+< 		buildOrder[k*groupSize]->assignUnits(&temporaryForce);
+< 		buildOrder[k*groupSize]->prepareForNewGeneration();
+< 		buildOrder[k*groupSize]->initializePlayer();
+< 		buildOrder[k*groupSize]->adjustHarvestAllLocations();
+< 		// evtl noch switch ohne mutation...
+< //		buildOrder[k*groupSize]->eraseIllegalCode();
+< 	}
+---
+> 		if(active[k])
+> 		{
+> 			buildOrder[k*groupSize]->assignUnits(&temporaryForce); //?
+> 			buildOrder[k*groupSize]->prepareForNewGeneration();
+> 			buildOrder[k*groupSize]->initializePlayer();
+> 			buildOrder[k*groupSize]->adjustHarvestAllLocations();
+> 			// evtl noch switch ohne mutation...
+> //			buildOrder[k*groupSize]->eraseIllegalCode();
+> 		}
+505c393,394
+< 			complete&=buildOrder[k*groupSize]->calculateStep();
+---
+> 			if(active[k])
+> 				complete&=buildOrder[k*groupSize]->calculateStep();
+509,514c398,403
+< 	{
+< 		analyzedBuildOrder[k]->setMaxpFitness(buildOrder[k*groupSize]->getpFitness());
+< 		analyzedBuildOrder[k]->setMaxsFitness(buildOrder[k*groupSize]->getsFitness());
+< 		analyzedBuildOrder[k]->setMaxtFitness(buildOrder[k*groupSize]->gettFitness());
+< 	}
+< 
+---
+> 		if(active[k])
+> 		{
+> 			analyzedBuildOrder[k]->setMaxpFitness(buildOrder[k*groupSize]->getpFitness());
+> 			analyzedBuildOrder[k]->setMaxsFitness(buildOrder[k*groupSize]->getsFitness());
+> 			analyzedBuildOrder[k]->setMaxtFitness(buildOrder[k*groupSize]->gettFitness());
+> 		}
+518,519c407,409
+< 	{
+< 	//	if(previous_analyzed_buildorder[k])
+---
+> 		if(active[k])
+> 		{
+> 		//	if(previous_analyzed_buildorder[k])
+521,525c411,415
+< 		analyzedBuildOrder[k]->assignUnits(&temporaryForce);
+< 		analyzedBuildOrder[k]->prepareForNewGeneration();
+< 		analyzedBuildOrder[k]->initializePlayer();
+< 		analyzedBuildOrder[k]->adjustHarvestAllLocations();
+< 	}
+---
+> 			analyzedBuildOrder[k]->assignUnits(&temporaryForce); //?
+> 			analyzedBuildOrder[k]->prepareForNewGeneration();
+> 			analyzedBuildOrder[k]->initializePlayer();
+> 			analyzedBuildOrder[k]->adjustHarvestAllLocations();
+> 		}
+532c422,423
+< 			complete&=analyzedBuildOrder[k]->calculateStep();
+---
+> 			if(active[k])
+> 				complete&=analyzedBuildOrder[k]->calculateStep();
+541a433
+> 		if(active[k])
+548c440
+< 			
+---
+> 		
+555,576d446
+< //			analyzedBuildOrder[k]->analyzeBuildOrder(); TODO?
+< //			analyzedBuildOrder[k]->getPlayer()->getGoal()->bestTime=analyzedBuildOrder[k]->getTimer(); TODO !!
+< //			analyzedBuildOrder[k]->incrementUnchangedGenerations();
+< //			analyzedBuildOrder[k]->setTotalGeneration(analyzedBuildOrder[k]->getTotalGeneration()+1); TODO
+< #if 0
+< if(analyzedBuildOrder[k]->getUnchangedGenerations()>=coreConfiguration.getMaxGenerations())
+< 			{
+< 				for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
+< 					buildOrder[i]->resetGeneCode();
+< 
+< 				analyzedBuildOrder[k]->setRun(analyzedBuildOrder[k]->getRun()+1);
+< 				analyzedBuildOrder[k]->setTotalGeneration(0);
+< 				analyzedBuildOrder[k]->setMaxpFitness(0);
+< 				analyzedBuildOrder[k]->setMaxsFitness(0);
+< 				analyzedBuildOrder[k]->setMaxtFitness(0);
+< 				analyzedBuildOrder[k]->setUnchangedGenerations(0);
+< 
+< 				isNewRun=true;
+< 
+< 				
+< 
+< 			return(&(analyzedBuildOrder[0])/*Save[analyzedBuildOrder[k]->getRun()]*/); //~~~~
+578,579d447
+< 	#endif
+< 	}
+594c462
+< const bool SOUP::getIsNewRun()
+---
+> void SOUP::setMapPlayerNum(const unsigned int map_player_num)
+596,600c464,470
+< 	if(isNewRun)
+< 	{
+< 		isNewRun = false;
+< 		return(true);
+< 	} else return(false);
+---
+> #ifdef _SCC_DEBUG
+> 	if((map_player_num < 1) || (map_player_num > MAX_PLAYER)) {
+> 		toErrorLog("DEBUG (SOUP::setMapPlayerNum()): Value map_player_num out of range.");return;
+> 	}
+> #endif
+> 	mapPlayerNum = map_player_num;
+> 	mapPlayerNumInitialized = true;
+602a473
+> 

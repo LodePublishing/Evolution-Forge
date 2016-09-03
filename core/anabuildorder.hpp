@@ -73,6 +73,8 @@ class ANABUILDORDER: public PREBUILDORDER
 		void copyProgramList(std::list<PROGRAM>& program_list);
 
 		std::list<PROGRAM> programList; // TODO private machen
+
+		
 	private:
 		unsigned int unitsTotal; // total number of all unit types at the end
 		unsigned int unitsTotalMax; // maximum number of one unit type at the end
@@ -86,6 +88,8 @@ class ANABUILDORDER: public PREBUILDORDER
 		unsigned int goalPercentage;
 		unsigned int currentpFitness;
 		unsigned int averageLength;
+
+		
 //		unsigned int phaenoCode[MAX_LENGTH];		// the final build order: an array of unit numbers (as defined in main.h)
 
 		STATISTICS timeStatistics[MAX_TIME];
@@ -132,7 +136,7 @@ inline const unsigned int ANABUILDORDER::getNonGoalsUnitsTotalMax() const
 {
 #ifdef _SCC_DEBUG
 	if(nonGoalsUnitsTotalMax>MAX_TOTAL_UNITS*UNIT_TYPE_COUNT * MAX_LOCATIONS) {
-		toLog("DEBUG: (ANABUILDORDER::getNonGoalsUnitsTotalMax): Variable not initialized.");return(0);
+		toErrorLog("DEBUG: (ANABUILDORDER::getNonGoalsUnitsTotalMax): Variable not initialized.");return(0);
 	}
 #endif
 	return(nonGoalsUnitsTotalMax);
@@ -142,7 +146,7 @@ inline const unsigned int ANABUILDORDER::getUnitsTotal() const
 {
 #ifdef _SCC_DEBUG
 	if(unitsTotal>MAX_TOTAL_UNITS*UNIT_TYPE_COUNT * MAX_LOCATIONS) {
-		toLog("DEBUG: (ANABUILDORDER::getUnitsTotal): Variable not initialized.");return(0);
+		toErrorLog("DEBUG: (ANABUILDORDER::getUnitsTotal): Variable not initialized.");return(0);
 	}
 #endif
 	return(unitsTotal);
@@ -184,7 +188,7 @@ inline const unsigned int ANABUILDORDER::getCurrentpFitness() const
 #ifdef _SCC_DEBUG
 // TODO max pfitness?
 	if(currentpFitness > MAX_PFITNESS) {
-		toLog("DEBUG: (ANABUILDORDER::getCurrentpFitness): Variable currentpFitness not initialized.");return(0);
+		toErrorLog("DEBUG: (ANABUILDORDER::getCurrentpFitness): Variable currentpFitness not initialized.");return(0);
 	}
 #endif
 	return(currentpFitness);
@@ -195,7 +199,7 @@ inline void ANABUILDORDER::setCurrentpFitness(const unsigned int current_pfitnes
 #ifdef _SCC_DEBUG
 // TODO max pfitness?
 	if(current_pfitness > MAX_PFITNESS) {
-		toLog("DEBUG: (ANABUILDORDER::setCurrentpFitness): Variable current_pfitness not initialized.");return;
+		toErrorLog("DEBUG: (ANABUILDORDER::setCurrentpFitness): Variable current_pfitness not initialized.");return;
 	}
 #endif
 	currentpFitness = current_pfitness;
@@ -207,7 +211,7 @@ inline const unsigned int ANABUILDORDER::getMaxpFitness() const
 #ifdef _SCC_DEBUG	
 // TODO max pfitness?
 	if(maxpFitness > MAX_PFITNESS) {
-		toLog("DEBUG: (ANABUILDORDER::getMaxpFitness): Variable maxpFitness not initialized.");return(0);
+		toErrorLog("DEBUG: (ANABUILDORDER::getMaxpFitness): Variable maxpFitness not initialized.");return(0);
 	}
 #endif
 	return(maxpFitness);
@@ -217,7 +221,7 @@ inline const unsigned int ANABUILDORDER::getMaxsFitness() const
 {
 #ifdef _SCC_DEBUG	
 	if(maxsFitness > MAX_MINERALS+MAX_GAS) {
-		toLog("DEBUG: (ANABUILDORDER::getMaxsFitness): Variable maxsFitness not initialize.");return(0);
+		toErrorLog("DEBUG: (ANABUILDORDER::getMaxsFitness): Variable maxsFitness not initialize.");return(0);
 	}
 #endif
 	return(maxsFitness);
@@ -227,7 +231,7 @@ inline const unsigned int ANABUILDORDER::getMaxtFitness() const
 {
 #ifdef _SCC_DEBUG       
         if(maxtFitness > MAX_TFITNESS) {
-                toLog("DEBUG: (ANABUILDORDER::getMaxtFitness): Variable maxtFitness not initialized.");return(0);
+                toErrorLog("DEBUG: (ANABUILDORDER::getMaxtFitness): Variable maxtFitness not initialized.");return(0);
         }
 #endif
         return(maxtFitness);
@@ -238,7 +242,7 @@ inline void ANABUILDORDER::setMaxpFitness(const unsigned int max_pfitness)
 #ifdef _SCC_DEBUG
 // TODO maxpitness
 	if(max_pfitness > MAX_PFITNESS) {
-		toLog("DEBUG: (ANABUILDORDER::setMaxpFitness): Value out of range.");return;
+		toErrorLog("DEBUG: (ANABUILDORDER::setMaxpFitness): Value out of range.");return;
 	}
 #endif
 	maxpFitness = max_pfitness;
@@ -248,7 +252,7 @@ inline void ANABUILDORDER::setMaxsFitness(const unsigned int max_sfitness)
 {
 #ifdef _SCC_DEBUG
 	if(max_sfitness > MAX_MINERALS+MAX_GAS) {
-		toLog("DEBUG: (ANABUILDORDER::setMaxsFitness): Value out of range.");return;
+		toErrorLog("DEBUG: (ANABUILDORDER::setMaxsFitness): Value out of range.");return;
 	}
 #endif
 	maxsFitness = max_sfitness;
@@ -258,7 +262,7 @@ inline void ANABUILDORDER::setMaxtFitness(const unsigned int max_tfitness)
 {
 #ifdef _SCC_DEBUG
         if(max_tfitness > MAX_TFITNESS) {
-                toLog("DEBUG: (ANABUILDORDER::setMaxtFitness): Value out of range.");return;
+                toErrorLog("DEBUG: (ANABUILDORDER::setMaxtFitness): Value out of range.");return;
         }
 #endif
         maxtFitness = max_tfitness;

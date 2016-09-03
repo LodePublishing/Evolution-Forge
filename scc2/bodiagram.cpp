@@ -1,82 +1,93 @@
 #include "bodiagram.h"
 
-BoDiagramWindow::BoDiagramWindow(wxRect rahmen, wxRect maxSize):GraphixScrollWindow(0,rahmen,maxSize,NOT_SCROLLED)
+BoDiagramWindow::BoDiagramWindow(UI_Object* parent, wxRect rahmen, wxRect maxSize, ANARACE* anarace, InfoWindow* infoWindow):UI_Window(parent, BODIAGRAM_WINDOW_TITLE_STRING, rahmen,maxSize,NOT_SCROLLED)
 {
+	resetData();
+	this->anarace=anarace;
+	this->infoWindow=infoWindow;
 };
 
-void BoDiagramWindow::setAnarace(ANARACE* anarace)
+BoDiagramWindow::~BoDiagramWindow()
 {
-	this->anarace=anarace;
-	resetData();
-}
+};
 
 void BoDiagramWindow::resetData()
 {
 };
 
-void BoDiagramWindow::assignInfoWindow(InfoWindow* infoWindow)
+void BoDiagramWindow::process()
 {
-	this->infoWindow=infoWindow;
+	UI_Window::process();
 };
-																												                                            
-void BoDiagramWindow::showProgramGraph(wxDC* dc)
+
+void BoDiagramWindow::draw(wxDC* dc)
 {
+	UI_Window::draw(dc);
 		wxPoint mins[MAX_TIME];
 		wxPoint gas[MAX_TIME];
 //	  wxPoint fitness[MAX_LENGTH];
-		wxPoint supply[MAX_TIME];
+		wxPoint hsupply[MAX_TIME];
+		wxPoint nsupply[MAX_TIME];
 		// TODO evtl einen gefuellten Graphen zwischen maxSupply und supply machen... => anarace setStatisticsSupply aendern
 		int time;
 		if(anarace->ga->maxTime-anarace->getTimer()<2) return;
 		int count=0;
 
 
-//		if(infoWindow->isShown())
-  //			dc->SetBrush(wxBrush(wxColour(30,30,30),wxCROSS_HATCH));
-	//	else
+		if(infoWindow->isShown())
+  			dc->SetBrush(wxBrush(wxColour(30,30,30),wxCROSS_HATCH));
+		else
 			  dc->SetBrush(wxBrush(wxColour(50,50,50),wxCROSS_HATCH));
-		dc->DrawRectangle(getInnerLeftBound(),getInnerUpperBound()+10,getInnerWidth(),getInnerHeight()-10);
+		dc->DrawRectangle(getClientRectLeftBound(),getClientRectUpperBound()+10,getClientRectWidth(),getClientRectHeight()-10);
 
-		if(insideClientArea(controls.getCurrentPosition()))
+		if(insideClientRect(controls.getCurrentPosition()))
 		{				
 			int x=controls.getX()-2;
-			if(x<getInnerLeftBound())
-				x=getInnerLeftBound();
-			if(x+4>=getInnerLeftBound()+getInnerWidth())
-				x=getInnerLeftBound()+getInnerWidth()-5;
+			if(x<getClientRectLeftBound())
+				x=getClientRectLeftBound();
+			if(x+4>=getClientRectLeftBound()+getClientRectWidth())
+				x=getClientRectLeftBound()+getClientRectWidth()-5;
 			dc->SetBrush(wxBrush(wxColour(40,40,40),wxSOLID));
-			dc->DrawRectangle(x,getInnerUpperBound()+10,4,getInnerHeight()-10);
+			dc->DrawRectangle(x,getClientRectUpperBound()+10,4,getClientRectHeight()-10);
 		}
-		
 																												                                            
 		if(anarace->getTimer()==anarace->ga->maxTime) time=0;
 				else time=anarace->getTimer()+1;
+		int maxSupply=0;
+		int maxMins=0;
+		int maxGas=0;
+		for(int i=time;i<anarace->ga->maxTime;i++)
+		{
+			if(anarace->getStatisticsHaveMinerals(i)>maxMins) maxMins=anarace->getStatisticsHaveMinerals(i);
+			if(anarace->getStatisticsHaveGas(i)>maxGas) maxGas=anarace->getStatisticsHaveGas(i);
+			if(anarace->getStatisticsNeedSupply(i)>maxSupply) maxSupply=anarace->getStatisticsNeedSupply(i);
+			if(anarace->getStatisticsHaveSupply(i)>maxSupply) maxSupply=anarace->getStatisticsHaveSupply(i);
+		};
+			
 		int s=anarace->ga->maxTime-1;
 		while(s>=time)
 		{
-		int y1;
-				if(anarace->getStatisticsHaveMinerals(s)>75000) y1=75; else y1=anarace->getStatisticsHaveMinerals(s)/1000;
-				mins[count]=wxPoint(getInnerLeftBound()+3+((count*(getInnerWidth()-6))/(anarace->ga->maxTime-time)),getInnerUpperBound()+getInnerHeight()-y1-2);
+			int y1;
+			if(maxMins) y1=anarace->getStatisticsHaveMinerals(s)*75/maxMins; else y1=0;
+			mins[count]=wxPoint(getClientRectLeftBound()+3+((count*(getClientRectWidth()-6))/(anarace->ga->maxTime-time)),getClientRectUpperBound()+getClientRectHeight()-y1-2);
 																												                                            
-				if(anarace->getStatisticsHaveGas(s)>75000) y1=75; else y1=anarace->getStatisticsHaveGas(s)/1000;
-				gas[count]=wxPoint(getInnerLeftBound()+3+((count*(getInnerWidth()-6))/(anarace->ga->maxTime-time)),getInnerUpperBound()+getInnerHeight()-y1-2);
+			if(maxGas) y1=anarace->getStatisticsHaveGas(s)*75/maxGas; else y1=0;
+			gas[count]=wxPoint(getClientRectLeftBound()+3+((count*(getClientRectWidth()-6))/(anarace->ga->maxTime-time)),getClientRectUpperBound()+getClientRectHeight()-y1-2);
 //TODO anarace->getMaxpFitness-getTimer kann auch 0 sein !!
 																												                                            
-/*			  y1=anarace->getStatisticsFitness(s)*75/(anarace->getMaxpFitness()-anarace->getTimer());
-				fitness[count]=wxPoint(getInnerLeftBound()+3+((s*(getInnerWidth()-6))/(anarace->ga->maxTime-anarace->getTimer())),getInnerUpperBound()+getInnerHeight()-y1);*/
-																												                                            
-				if(anarace->getStatisticsHaveSupply(s)-anarace->getStatisticsNeedSupply(s)>25) y1=75; else
-				if(anarace->getStatisticsHaveSupply(s)<anarace->getStatisticsNeedSupply(s)) y1=0; else
-				y1=(anarace->getStatisticsHaveSupply(s)-anarace->getStatisticsNeedSupply(s))*3;
-																												                                            
-				supply[count]=wxPoint(getInnerLeftBound()+3+((count*(getInnerWidth()-6))/(anarace->ga->maxTime-time)),getInnerUpperBound()+getInnerHeight()-y1-2);
-				count++;
-				s--;
+/*		  y1=anarace->getStatisticsFitness(s)*75/(anarace->getMaxpFitness()-anarace->getTimer());
+			fitness[count]=wxPoint(getClientRectLeftBound()+3+((s*(getClientRectWidth()-6))/(anarace->ga->maxTime-anarace->getTimer())),getClientRectUpperBound()+getClientRectHeight()-y1);*/
+			if(maxSupply) y1=anarace->getStatisticsHaveSupply(s)*75/maxSupply; else y1=0;
+			hsupply[count]=wxPoint(getClientRectLeftBound()+3+((count*(getClientRectWidth()-6))/(anarace->ga->maxTime-time)),getClientRectUpperBound()+getClientRectHeight()-y1-2);
+			if(maxSupply) y1=anarace->getStatisticsNeedSupply(s)*75/maxSupply; else y1=0;
+			nsupply[count]=wxPoint(getClientRectLeftBound()+3+((count*(getClientRectWidth()-6))/(anarace->ga->maxTime-time)),getClientRectUpperBound()+getClientRectHeight()-y1-2);
+			count++;
+			s--;
 		}
 
 		if(count>0)
 		{
-				dc->SetFont(GraphixScrollWindow::font2);
+				dc->SetFont(*theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
 /*			  if(infoWindowNumber)
 				{
 						dc->SetPen(wxPen(wxColour(80,80,80),2,wxSOLID));
@@ -88,19 +99,32 @@ void BoDiagramWindow::showProgramGraph(wxDC* dc)
 //					  dc->SetPen(wxPen(wxColour(255,40,40),2,wxSOLID));
 //					  dc->DrawSpline(count,fitness);
 //					  dc->SetTextForeground(wxColour(255,40,40));
-//					  dc->DrawText(_T("Fitness"),getInnerLeftBound()+1,getInnerUpperBound()+8);
+//					  dc->DrawText(_T("Fitness"),getClientRectLeftBound()+1,getClientRectUpperBound()+8);
 						dc->SetTextForeground(wxColour(60,60,200));
-						dc->DrawText(_T("Minerals"),getInnerLeftBound()+1,getInnerUpperBound()+10);
+						dc->DrawText(_T("Minerals"),getClientRectLeftBound()+1,getClientRectUpperBound()+10);
 						dc->SetTextForeground(wxColour(20,200,20));
-						dc->DrawText(_T("Gas"),getInnerLeftBound()+1,getInnerUpperBound()+21);
+						dc->DrawText(_T("Gas"),getClientRectLeftBound()+1,getClientRectUpperBound()+21);
 						dc->SetTextForeground(wxColour(120,120,120));
-						dc->DrawText(_T("Supply"),getInnerLeftBound()+1,getInnerUpperBound()+32);
+						dc->DrawText(_T("Supply"),getClientRectLeftBound()+1,getClientRectUpperBound()+32);
 				} else*/
 //				{
 						dc->SetTextForeground(wxColour(255,160,160));
 
-						dc->SetPen(wxPen(wxColour(120,120,120),2,wxSOLID));
-						dc->DrawSpline(count,supply);
+						dc->SetPen(wxPen(wxColour(120,120,120),1,wxSOLID));
+						for(int i=count;i--;)
+						{
+							if(i>0)
+							{
+								int k=hsupply[i].x;
+								while(k<hsupply[i-1].x)
+								{
+									k++;
+									dc->DrawLine(wxPoint(k,hsupply[i].x),wxPoint(k,nsupply[i].y));
+								}
+							}
+							dc->DrawLine(hsupply[i],nsupply[i]);
+						} // TODO
+//						dc->DrawSpline(count,supply);
 						dc->SetPen(wxPen(wxColour(80,80,255),2,wxSOLID));
 						dc->DrawSpline(count,mins);
 						dc->SetPen(wxPen(wxColour(40,255,40),2,wxSOLID));
@@ -108,63 +132,62 @@ void BoDiagramWindow::showProgramGraph(wxDC* dc)
 //					  dc->SetPen(wxPen(wxColour(255,40,40),2,wxSOLID));
 //					  dc->DrawSpline(count,fitness);
 //					  dc->SetTextForeground(wxColour(255,40,40));
-//					  dc->DrawText(_T("Fitness"),getInnerLeftBound()+1,getInnerUpperBound()+8);
-						dc->SetTextForeground(wxColour(80,80,255));
-						dc->DrawText(_T("Minerals"),getInnerLeftBound()+1,getInnerUpperBound()+10);
-						dc->SetTextForeground(wxColour(40,255,40));
-						dc->DrawText(_T("Gas"),getInnerLeftBound()+1,getInnerUpperBound()+21);
-						dc->SetTextForeground(wxColour(160,160,160));
-						dc->DrawText(_T("Supply"),getInnerLeftBound()+1,getInnerUpperBound()+32);
+//					  dc->DrawText(_T("Fitness"),getClientRectLeftBound()+1,getClientRectUpperBound()+8);
+						dc->SetTextForeground(*theme.lookUpColour(MINERALS_TEXT_COLOUR));
+						dc->DrawText(_T("Minerals"),getClientRectLeftBound()+1,getClientRectUpperBound()+10);
+						dc->SetTextForeground(*theme.lookUpColour(GAS_TEXT_COLOUR));
+						dc->DrawText(_T("Gas"),getClientRectLeftBound()+1,getClientRectUpperBound()+21);
+						dc->SetTextForeground(*theme.lookUpColour(SUPPLY_TEXT_COLOUR));
+						dc->DrawText(_T("Supply"),getClientRectLeftBound()+1,getClientRectUpperBound()+32);
 
 			if(count>5)
-			if(insideClientArea(controls.getCurrentPosition()))
+			if(insideClientRect(controls.getCurrentPosition()))
 			{
 
-				dc->SetTextForeground(wxColour(180,180,255));
+				dc->SetTextForeground(*theme.lookUpColour(BRIGHT_MINERALS_TEXT_COLOUR));
 				dc->DrawText(_T(wxString::Format(wxT("%i"),
 
-				anarace->getStatisticsHaveMinerals(anarace->ga->maxTime-(controls.getX()-getInnerLeftBound())*(anarace->ga->maxTime-anarace->getTimer())/getInnerWidth())/100)),
-					getInnerLeftBound()+50,getInnerUpperBound()+10);
+				anarace->getStatisticsHaveMinerals(anarace->ga->maxTime-(controls.getX()-getClientRectLeftBound())*(anarace->ga->maxTime-anarace->getTimer())/getClientRectWidth())/100)),
+					getClientRectLeftBound()+50,getClientRectUpperBound()+10);
 				
-				dc->SetTextForeground(wxColour(140,255,140));
+				dc->SetTextForeground(*theme.lookUpColour(BRIGHT_GAS_TEXT_COLOUR));
 				dc->DrawText(_T(wxString::Format(wxT("%i"),
 				
-				anarace->getStatisticsHaveGas(anarace->ga->maxTime-(controls.getX()-getInnerLeftBound())*(anarace->ga->maxTime-anarace->getTimer())/getInnerWidth())/100)),
-					getInnerLeftBound()+50,getInnerUpperBound()+21);
+				anarace->getStatisticsHaveGas(anarace->ga->maxTime-(controls.getX()-getClientRectLeftBound())*(anarace->ga->maxTime-anarace->getTimer())/getClientRectWidth())/100)),
+					getClientRectLeftBound()+50,getClientRectUpperBound()+21);
 				
-				dc->SetTextForeground(wxColour(220,220,220));
+				dc->SetTextForeground(*theme.lookUpColour(BRIGHT_SUPPLY_TEXT_COLOUR));
 				dc->DrawText(_T(wxString::Format(wxT("%i/%i"),
 							
-				anarace->getStatisticsNeedSupply(anarace->ga->maxTime-(controls.getX()-getInnerLeftBound())*(anarace->ga->maxTime-anarace->getTimer())/getInnerWidth()),anarace->getStatisticsHaveSupply(anarace->ga->maxTime-(controls.getX()-getInnerLeftBound())*(anarace->ga->maxTime-anarace->getTimer())/getInnerWidth()))),
-				getInnerLeftBound()+50,getInnerUpperBound()+32);
+				anarace->getStatisticsNeedSupply(anarace->ga->maxTime-(controls.getX()-getClientRectLeftBound())*(anarace->ga->maxTime-anarace->getTimer())/getClientRectWidth()),anarace->getStatisticsHaveSupply(anarace->ga->maxTime-(controls.getX()-getClientRectLeftBound())*(anarace->ga->maxTime-anarace->getTimer())/getClientRectWidth()))),
+				getClientRectLeftBound()+50,getClientRectUpperBound()+32);
 			}
-			dc->SetPen(wxPen(wxColour(PEN1R,PEN1G,PEN1B),1,wxSOLID));
+			dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
 		}
 		if(infoWindow->isShown())
 		{
 				if(stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].supply)
 				{
-						dc->SetPen(wxPen(wxColour(160,160,160),2,wxSHORT_DASH));
-			int y1=stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].supply*5;
-			if(y1<0) y1=-y1;
-						dc->DrawLine(getInnerLeftBound()+infoWindow->getBx()+1,getInnerUpperBound()+getInnerHeight()-y1,getInnerLeftBound()+infoWindow->getBx()+infoWindow->getBWidth()-1,getInnerUpperBound()+getInnerHeight()-y1);
+						dc->SetPen(*theme.lookUpPen(DASHED_SUPPLY_PEN));
+						int y1=stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].supply*5;
+						if(y1<0) y1=-y1;
+						dc->DrawLine(getClientRectLeftBound()+infoWindow->getBx()+1,getClientRectUpperBound()+getClientRectHeight()-y1,getClientRectLeftBound()+infoWindow->getBx()+infoWindow->getBWidth()-1,getClientRectUpperBound()+getClientRectHeight()-y1);
 				}
 
 				if(stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].mins)
 				{
-						dc->SetPen(wxPen(wxColour(120,120,255),2,wxSHORT_DASH));
-						dc->DrawLine(getInnerLeftBound()+infoWindow->getBx()+1,getInnerUpperBound()+getInnerHeight()-stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].mins/1000,getInnerLeftBound()+infoWindow->getBx()+infoWindow->getBWidth()-1,getInnerUpperBound()+getInnerHeight()-stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].mins/1000);
+						dc->SetPen(*theme.lookUpPen(DASHED_MINERALS_PEN));
+						dc->DrawLine(getClientRectLeftBound()+infoWindow->getBx()+1,getClientRectUpperBound()+getClientRectHeight()-stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].mins/1000,getClientRectLeftBound()+infoWindow->getBx()+infoWindow->getBWidth()-1,getClientRectUpperBound()+getClientRectHeight()-stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].mins/1000);
 				}
 
 				if(stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].gas)
 				{
-						dc->SetPen(wxPen(wxColour(80,255,80),2,wxSHORT_DASH));
-						dc->DrawLine(getInnerLeftBound()+infoWindow->getBx()+1,getInnerUpperBound()+getInnerHeight()-stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].gas/1000,getInnerLeftBound()+infoWindow->getBx()+infoWindow->getBWidth()-1,getInnerUpperBound()+getInnerHeight()-stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].gas/1000);
+						dc->SetPen(*theme.lookUpPen(DASHED_GAS_PEN));
+						dc->DrawLine(getClientRectLeftBound()+infoWindow->getBx()+1,getClientRectUpperBound()+getClientRectHeight()-stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].gas/1000,getClientRectLeftBound()+infoWindow->getBx()+infoWindow->getBWidth()-1,getClientRectUpperBound()+getClientRectHeight()-stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].gas/1000);
 				}
-
-				dc->SetPen(wxPen(wxColour(150,0,0),2,wxSHORT_DASH));
-				dc->DrawLine(getInnerLeftBound()+infoWindow->getBx()+infoWindow->getBWidth(),getInnerUpperBound()+10,getInnerLeftBound()+infoWindow->getBx()+infoWindow->getBWidth(),getInnerUpperBound()+getInnerHeight());
-				dc->DrawLine(getInnerLeftBound()+infoWindow->getBx(),getInnerUpperBound()+10,getInnerLeftBound()+infoWindow->getBx(),getInnerUpperBound()+getInnerHeight());
+				dc->SetPen(*theme.lookUpPen(DASHED_MARKER_PEN));
+				dc->DrawLine(getClientRectLeftBound()+infoWindow->getBx()+infoWindow->getBWidth(),getClientRectUpperBound()+10,getClientRectLeftBound()+infoWindow->getBx()+infoWindow->getBWidth(),getClientRectUpperBound()+getClientRectHeight());
+				dc->DrawLine(getClientRectLeftBound()+infoWindow->getBx(),getClientRectUpperBound()+10,getClientRectLeftBound()+infoWindow->getBx(),getClientRectUpperBound()+getClientRectHeight());
 		}
 }
 

@@ -1,5 +1,14 @@
 #include "info.h"
 
+InfoWindow::InfoWindow(UI_Object* parent, wxRect rahmen, wxRect maxSize, ANARACE* anarace):UI_Window(parent, INFO_WINDOW_TITLE_STRING,rahmen,maxSize,NOT_SCROLLED)
+{
+	this->anarace=anarace;
+    resetData();
+};
+
+InfoWindow::~InfoWindow()
+{
+};
 
 int InfoWindow::getBx()
 {
@@ -41,21 +50,11 @@ void InfoWindow::setKey(int key)
 	this->key=key;
 };
 
-void InfoWindow::setAnarace(ANARACE* anarace)
-{
-	this->anarace=anarace;
-}
-
 void InfoWindow::setOrder(ORDER* order)
 {
 	this->order=order;
 };
 
-InfoWindow::InfoWindow(wxRect rahmen, wxRect maxSize):GraphixScrollWindow(2,rahmen,maxSize,NOT_SCROLLED)
-{
-        resetData();
-};
-                                                                                                                                                           
 void InfoWindow::resetData()
 {
 	bx=0;
@@ -80,16 +79,23 @@ ORDER* InfoWindow::getOrder()
 {
 	return(order);
 };
-                                                                                                                                                            
-void InfoWindow::drawInfo(wxDC* dc)
+
+void InfoWindow::process()
 {
-        if(!order)
+	UI_Window::process();
+};
+                                                                                                                                                            
+void InfoWindow::draw(wxDC* dc)
+{
+	UI_Window::draw(dc);
+#if 0
+	if(!order)
                 return;
 		newTextPage();
-		writeLongText(_T(" "), dc);
+		writeLongText(_T("#"), dc);
 		if(!anarace->getProgramSuccessUnit(order->IP))
 		{
-				writeLongText(_T(wxString::Format(wxT("Build $%i$. $%s$ as soon as $%s$ at $%s$ when having $%i$ minerals, $%i$ gas, $%i$/$%i$ supply [time: %.2i:%.2i]#"),
+				writeLongText(_T(wxString::Format(wxT("Build $%i$. $%s$ as soon as $%s$ at $%s$ when having $%i$ minerals, $%i$ gas, $%i$/$%i$ supply [time: %.2i:%.2i]"),
 				anarace->getProgramForceCount(order->IP,order->unit)+1, 
 				stats[anarace->getPlayer()->getRace()][order->unit].name, 
 				error_message[anarace->getProgramSuccessType(order->IP)], 
@@ -103,7 +109,7 @@ void InfoWindow::drawInfo(wxDC* dc)
 		}
 		else
 		{
-                writeLongText(_T(wxString::Format(wxT("Build $%i$. $%s$ as soon as $%s$ at $%s$ when $%s$ becomes availible and having $%i$ minerals, $%i$ gas, $%i$/$%i$ supply [time: %.2i:%.2i]#"),
+                writeLongText(_T(wxString::Format(wxT("Build $%i$. $%s$ as soon as $%s$ at $%s$ when $%s$ becomes availible and having $%i$ minerals, $%i$ gas, $%i$/$%i$ supply [time: %.2i:%.2i]"),
                 anarace->getProgramForceCount(order->IP,order->unit)+1,
                 stats[anarace->getPlayer()->getRace()][order->unit].name,
                 error_message[anarace->getProgramSuccessType(order->IP)],
@@ -117,5 +123,6 @@ void InfoWindow::drawInfo(wxDC* dc)
                 anarace->getProgramTime(order->IP)%60)),dc);
 			
 		}
+#endif
 };
 

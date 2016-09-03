@@ -11,7 +11,7 @@ void EXPORT GOAL_ENTRY::copy(GOAL_ENTRY* goal)
         return;
     }
 #endif
-//	race=goal->getRace();
+	race=goal->getRace();
 	maxBuildTypes=goal->getMaxBuildTypes();
 	initialized=goal->getInitialized();
 	raceInitialized=1; //TODO!
@@ -33,6 +33,7 @@ void EXPORT GOAL_ENTRY::copy(GOAL_ENTRY* goal)
 		this->goal[i].count=goal->goal[i].count;
 		this->goal[i].location=goal->goal[i].location;
 	};
+	adjustGoals(1);
 };
 
 
@@ -55,7 +56,7 @@ void EXPORT GOAL_ENTRY::changeAccepted()
 	changed=0;
 };
 
-/*const char* EXPORT GOAL_ENTRY::getName()
+const char* EXPORT GOAL_ENTRY::getName()
 {
 #ifdef _SCC_DEBUG
 		if(name==NULL)
@@ -65,12 +66,12 @@ void EXPORT GOAL_ENTRY::changeAccepted()
 		}
 #endif
 	return name;
-};*/
+};
 
 int EXPORT GOAL_ENTRY::getRace()
 {
 #ifdef _SCC_DEBUG
-	if((race<MIN_RACE)||(race>MAX_RACE))
+	if((race<0)||(race>=MAX_RACES))
 	{
 		debug.toLog(0,"DEBUG: (GOAL_ENTRY::getRace): Variable race not initialized [%i].",race);
 		return(0);
@@ -79,7 +80,7 @@ int EXPORT GOAL_ENTRY::getRace()
 	return race;
 };
 
-/*int EXPORT GOAL_ENTRY::setName(const char* line)
+int EXPORT GOAL_ENTRY::setName(const char* line)
 {
 #ifdef _SCC_DEBUG
 		if(line==NULL)
@@ -90,7 +91,17 @@ int EXPORT GOAL_ENTRY::getRace()
 #endif
 	strcpy(name,line);
 	return(1);
-};*/
+};
+
+int EXPORT GOAL_ENTRY::getMode()
+{
+	return(mode);
+};
+
+void EXPORT GOAL_ENTRY::setMode(int mode)
+{
+	this->mode=mode;
+};
 
 int EXPORT GOAL_ENTRY::isRaceInitialized()
 {
@@ -169,10 +180,10 @@ int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption, UNITS* units)
 				for(int k=0;k<3;k++)
 					if((pStats[i].prerequisite[k]>0)&&(allGoal[pStats[i].prerequisite[k]]==0))
 						addGoal(pStats[i].prerequisite[k],1,0,0);
-				if((pStats[i].facility2>0)&&(allGoal[pStats[i].facility2]==0)&&(pStats[i].facility_type!=NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE)&&(pStats[i].facility_type!=NEEDED_UNTIL_COMPLETE_IS_LOST))
+				if((pStats[i].facility2>0)&&(allGoal[pStats[i].facility2]==0)&&(pStats[i].facilityType!=NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE)&&(pStats[i].facilityType!=NEEDED_UNTIL_COMPLETE_IS_LOST))
 				{
 					isVariable[pStats[i].facility2]=1;
-					if(pStats[i].facility_type!=IS_LOST) //do not set those morph-facilities as goals...
+					if(pStats[i].facilityType!=IS_LOST) //do not set those morph-facilities as goals...
 						addGoal(pStats[i].facility2,1,0,0);
 					else isBuildable[pStats[i].facility2]=1;// ... but make them buildable :)
 				}
@@ -180,7 +191,7 @@ int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption, UNITS* units)
 // only facility[0] is important
 				{
 					isVariable[pStats[i].facility[0]]=1;
-					if((pStats[i].facility_type==NEEDED_ONCE)||(pStats[i].facility_type==NEEDED_UNTIL_COMPLETE)||(pStats[i].facility_type==NEEDED_ALWAYS))
+					if((pStats[i].facilityType==NEEDED_ONCE)||(pStats[i].facilityType==NEEDED_UNTIL_COMPLETE)||(pStats[i].facilityType==NEEDED_ALWAYS))
 						addGoal(pStats[i].facility[0],1,0,0);
 					else isBuildable[pStats[i].facility[0]]=1; // ... same as above...
 				}
@@ -210,7 +221,7 @@ int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption, UNITS* units)
 	
 		long Need_Gas=0;
 		for(int i=UNIT_TYPE_COUNT;i--;)
-				Need_Gas+=(allGoal[i]*pStats[i].gas);
+			Need_Gas+=(allGoal[i]*pStats[i].gas);
 		if(Need_Gas>0)
 		{
 				isBuildable[REFINERY]=1;
@@ -286,7 +297,6 @@ int EXPORT GOAL_ENTRY::addGoal(int unit, int count, int time, int location)
 				debug.toLog(0,"DEBUG: (GOAL_ENTRY::addGoal): Value time [%i] out of range.",time);
 				return(0);
 		}
-
 		if((location<0)||(location>=MAX_LOCATIONS))
 		{
 				debug.toLog(0,"DEBUG: (GOAL_ENTRY::addGoal): Value location [%i] out of range.",location);
@@ -363,10 +373,6 @@ int EXPORT GOAL_ENTRY::toGeno(int num)
 		return(0);
 	}
 #endif
-	if(num==FACTORY)
-	{
-		int i=1;
-	}
 	return(phaenoToGenotype[num]);
 }
 
@@ -389,6 +395,7 @@ int EXPORT GOAL_ENTRY::toPhaeno(int num)
 
 void GOAL_ENTRY::resetData()
 {
+	mode=0;
 	raceInitialized=0;
 	goalCount=0;
 	maxBuildTypes=0;

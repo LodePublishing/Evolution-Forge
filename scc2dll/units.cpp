@@ -38,7 +38,7 @@ void UNITS::copy(UNITS* units)
 void UNITS::adjustSupply(int race, int& supply, int& maxSupply)
 {
 #ifdef _SCC_DEBUG
-	if((race<MIN_RACE)||(race>MAX_RACE))
+	if((race<0)||(race>=MAX_RACES))
 	{
 		debug.toLog(0,"DEBUG: (UNITS::adjustSupply): Value race [%i] out of range.",race);
 		return;
@@ -67,7 +67,7 @@ void UNITS::adjustSupply(int race, int& supply, int& maxSupply)
 void UNITS::adjustResearches(int race) // only use this on location ZERO
 {
 #ifdef _SCC_DEBUG
-	if((race<MIN_RACE)||(race>MAX_RACE))
+	if((race<0)||(race>=MAX_RACES))
 	{
 		debug.toLog(0,"DEBUG: (UNITS::adjustResearches): Value race [%i] out of range.",race);
 		return;

@@ -9,6 +9,7 @@ class START
 	private:
 		MAP map; // distances, names etc.
 	public:
+		void assignGoal(GOAL* goal, int player);
 		void adjustGoals(int player);
 		void assignMap(MAP* map, DEFAULT* defaults=0);
 		void setPlayerRace(int player, int race);

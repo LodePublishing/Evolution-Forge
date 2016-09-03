@@ -1,5 +1,6 @@
 #include "list.h"
 
+                                                                              
 NODE::NODE(NODE* prev, int key)
 {
 	SetData(0);
@@ -86,6 +87,7 @@ OrderList::OrderList()
 {
 	head=0;
 	tail=0;
+	makeSpace=-1;		
 };
 
 OrderList::~OrderList()
@@ -93,6 +95,16 @@ OrderList::~OrderList()
 	Clear();
 	head=0;
 	tail=0;
+};
+
+int OrderList::getMakeSpace()
+{
+	return(makeSpace);
+};
+
+void OrderList::setMakeSpace(int makeSpace)
+{
+	this->makeSpace=makeSpace;
 };
 
 void OrderList::Append(int key, ORDER* object)
@@ -114,6 +126,7 @@ void OrderList::Clear()
 	}
 	head=0;
 	tail=0;
+	makeSpace=-1;
 };
 
 NODE* OrderList::DeleteNode(NODE* node)

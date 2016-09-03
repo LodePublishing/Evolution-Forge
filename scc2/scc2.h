@@ -12,14 +12,19 @@
 //	#include "scc.png"
 #endif
 
+const float GUI_VERSION=0.50;
+
 //#include <wx/spinctrl.h>
 //#include <wx/button.h>
 #include <wx/datetime.h>
 
-#include "graphics.h"
+#include "UI_Object.h"
+#include "UI_Window.h"
+#include "UI_Theme.h"
 #include "list.h"
 #include "player.h"
 #include "message.h"
+
 
 enum
 {
@@ -113,19 +118,19 @@ public:
 	void OnMouseLeftUp(wxMouseEvent& event);
 	void OnMouseLeftDown(wxMouseEvent& event);
 
-	void OnMouseScroll(wxMouseEvent& event);
+	void OnMouseWheelScroll(wxMouseEvent& event);
 	void OnKeyUp(wxKeyEvent& event);
 	void OnKeyDown(wxKeyEvent& event);
 	void OnTimer(wxTimerEvent& event);
 	void resetData();
 	void showToolTip();
-	GraphixScrollWindow* mainWindow;
+	UI_Window* mainWindow;
 	MessageWindow* msgWindow;
-	GraphixScrollWindow* haxor;
-	GraphixScrollWindow* infoWindow;
-	GraphixScrollWindow* tutorialWindow;
+	UI_Window* haxor;
+	UI_Window* infoWindow;
+	UI_Window* tutorialWindow;
 	Player* player[MAX_PLAYER];
-	GraphixScrollWindow* theCore;
+	UI_Window* theCore;
 	int isOptimizing();
 	void stopOptimizing();
 private:
@@ -135,15 +140,12 @@ private:
 	
 	int mouseLeft;
 	int oldrun,endrun;
-		GA* ga;
-		BOLOG bolog[MAX_LENGTH];
+	GA* ga;
 	void processButtons();
 	void drawGizmo();
 	void showCoreAnimation();
 	wxMemoryDC* dc;
-		ANARACE* anarace[MAX_PLAYER];
-		
-
+	ANARACE* anarace[MAX_PLAYER];
 
 	int animationNumbers;
 	int update;
@@ -151,9 +153,9 @@ private:
 
 	int tutorialChapter;
 
-		int ani;
+	int ani;
 	int tutorialAnimation;
-	   DECLARE_EVENT_TABLE()
+	DECLARE_EVENT_TABLE()
 };
 																				
 

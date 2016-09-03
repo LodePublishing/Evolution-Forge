@@ -9,55 +9,67 @@
 #include "bodiagram.h"
 #include "bowindow.h"
 #include "list.h"
+#include "UI_Object.h"
 
-class Player
+enum ePlayerMode
+{
+	HIDE_MODE,
+	BASIC_PLAYER_MODE,
+	ADVANCED_PLAYER_MODE,
+	EXPERT_PLAYER_MODE,
+	EXPERT_COMPUTER_MODE,
+	GOSU_PLAYER_MODE,
+	GOSU_COMPUTER_MODE,
+	TRANSCENDEND_COMPUTER_MODE,
+	
+	MAX_MODES
+};
+	
+    // hide: 0
+    // basic mode [PLAYER]: 1     // 1 - 2 player trying to reach the goal
+    // advanced mode [PLAYER]: 2  // 1 - 2 player trying to reach the goal
+    // expert mode [PLAYER]: 3    // 2 - 4 player, 1-2 'human', 1-3 computers trying to stop him
+    // expert mode [COMPUTER]: 4
+    // gosu mode [PLAYER]: 5      // freeplay for 1-2 human vs 1-2 computers
+    // gosu mode [COMPUTER]: 6
+    // transcendend mode [COMPUTER]: 7 // freeplay for 1-2 computers vs 1-2 computers
+
+
+class Player : public UI_Object
 {
 	public:
-		Player(ANARACE** anarace, int mode);
+		Player(UI_Object* parent, ANARACE** anarace, ePlayerMode mode);
 		~Player();
+		
 		void update();
-		StatisticsWindow* statisticsWindow;
-		BoWindow* boWindow;
-		TimerWindow* timerWindow;
-		BoDiagramWindow* boDiagramWindow;
-		BoGraphWindow* boGraphWindow;
-		ForceWindow* forceWindow;
-		InfoWindow* infoWindow;
+
 		void resetData();
-		void setTitles(int mode);
-		void assignAnarace(ANARACE** anarace);
-		void DrawMe(wxDC* dc);
-		void drawGeneString(wxDC* dc, wxRect position);
-		void Show(int type); 
-		void processButtons();
-		int isShown();
+		
+		void setMode(ePlayerMode mode); 
+
+		void draw(wxDC* dc);
+		void process();
+
 		void changeAccepted();
-		int hasChanged();
-		int isOptimizing();
-		void setOptimizing(int opt);
-		static void InitPositions(GraphixScrollWindow* mainWindow);
-		static wxRect statisticsWindowRect[25];
-		static wxRect statisticsWindowMax[25];
-		static wxRect boWindowRect[25];
-		static wxRect boWindowMax[25];
-		static wxRect timerWindowRect[25];
-		static wxRect timerWindowMax[25];
-		static wxRect boDiagramWindowRect[25];
-		static wxRect boDiagramWindowMax[25];
-		static wxRect boGraphWindowRect[25];
-		static wxRect boGraphWindowMax[25];
-		static wxRect forceWindowRect[25];
-		static wxRect forceWindowMax[25];
-		static wxRect infoWindowRect[25];
-		static wxRect infoWindowMax[25];
-		void CheckForInfoWindow();
+		bool getChangedFlag();
+
+		bool isOptimizing();
+		void setOptimizing(bool opt=true);
+
 		void CheckOrders();
-		void MoveOrders();
+		
 	private:
+		void setWindowTitles(ePlayerMode mode);
+		
+		void drawGeneString(wxDC* dc, wxRect position);
+
+		UI_Window* window[MAX_WINDOWS]; // TODO 
+		
 		ANARACE** anarace; //pointer auf pointer, weil sich der pointer ja veraendert!
-		int shown;
 		int geneAnimation;
 		OrderList orderList;		
+		ePlayerMode mode;
+		void MoveOrders();
 };
 
 #endif

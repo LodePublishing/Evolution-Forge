@@ -1,7 +1,7 @@
 #ifndef __INFO_H
 #define __INFO_H
 
-#include "graphics.h"
+#include "UI_Window.h"
 #include "../scc2dll/anarace.h"
 #include "list.h"
 
@@ -17,14 +17,14 @@ const char error_message[ERROR_MESSAGES][25]=
         "SC2 comes out." //unknown
 };
 
-class InfoWindow:public GraphixScrollWindow
+class InfoWindow:public UI_Window
 {
         public:
-                InfoWindow(wxRect rahmen, wxRect maxSize);
+                InfoWindow(UI_Object* parent, wxRect rahmen, wxRect maxSize, ANARACE* anarace);
                 ~InfoWindow();
                 void resetData();
-                void drawInfo(wxDC* dc);
-		void setAnarace(ANARACE* anarace);
+				void process();
+                void draw(wxDC* dc);
 
 		int getBx();
 		int getBWidth();

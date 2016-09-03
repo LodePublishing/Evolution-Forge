@@ -1,31 +1,33 @@
 #ifndef __BOWINDOW_H
 #define __BOWINDOW_H
 
-#include "graphics.h"
+#include "UI_Window.h"
 #include "../scc2dll/anarace.h"
 #include "list.h"
 #include "info.h"
 
 
-class BoWindow:public GraphixScrollWindow
+class BoWindow:public UI_Window
 {
 	public:
-		BoWindow(wxRect rahmen, wxRect maxSize);
+		BoWindow(UI_Object* parent, wxRect rahmen, wxRect maxSize, ANARACE* anarace, InfoWindow* infoWindow, OrderList* orderList);
 		~BoWindow();
+		
 		void resetData();
-		void drawBuildOrder(wxDC* dc, OrderList* orderList);
-		void drawSelectionStuff(wxDC* dc);
-		void processButtons();
-		void setAnarace(ANARACE* anarace);
-		void assignInfoWindow(InfoWindow* infoWindow);
-		bool mouseOnOrder(ORDER* order);
-		int makeSpace;
+		void draw(wxDC* dc);
+		void process();
+		
 		void setMarkedUnit(int unit);
 	private:
+		void drawSelectionStuff(wxDC* dc);
+		void checkForInfoWindow();
+	
+		void resetButtons();
 		int markedUnit;
 		int markAni;
 		InfoWindow* infoWindow;
 		ANARACE* anarace;
+		OrderList* orderList;
 		int optimizeMode;
 		int boInsertPoint,boEndPoint;
 		int makeSpaceButton;

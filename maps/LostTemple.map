@@ -59,7 +59,10 @@
 #"Hatchery" = "1"
 #"Overlord" = "1"
 #"Larva" = "3"
-"Probe" = "4"
+"Reaver" = "7"
+"Carrier" = "10"
+"Zealot" = "10"
+"Probe" = "8"
 "Nexus" = "1"
 "@END"
 

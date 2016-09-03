@@ -43,7 +43,6 @@ bool APIENTRY DllMain( HANDLE hModule,
 }
 #endif
 
-
 void SOUP::initializeMap(MAP* map)
 {
 	mapInitialized=1;
@@ -76,7 +75,7 @@ void SOUP::setGoal(GOAL_ENTRY* goal, int player)
 //	if(goalCount==pMap->getMaxPlayer()-1)
 	goalsInitialized=1;
 	this->goal[player]=goal;
-	pMap->setStartPlayerGoal(player,goal);
+	pMap->setStartPlayerGoal(player, goal);
 };
 
 int SOUP::setParameters(GA* ga, START* start)
@@ -254,11 +253,10 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 		if(oldAnarace[j]) //TODO
 		{
 			for(int i=MAX_LENGTH;i--;)
-				for(int k=0;k<2;k++)
-				{
-					player[j*t]->Code[k][i]=oldAnarace[j]->Code[k][i];
-					player[j*t]->Marker[k][i]=oldAnarace[j]->Marker[k][i];
-				}
+			{
+				player[j*t]->Code[i]=oldAnarace[j]->Code[i];
+				player[j*t]->Marker[i]=oldAnarace[j]->Marker[i];
+			}
 //			anaplayer[j]->setActive(oldAnarace[j]->isActive());
 			anaplayer[j]->setOptimizing(oldAnarace[j]->isOptimizing());
 		}
@@ -284,7 +282,7 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 				{
 					if(i!=0)
 						player[k*t+i]->mutateGeneCode();
-					player[k*t+i]->eraseIllegalCode(); //TODO Problem beim switchen, falls schon goals gesetzt waren
+//					player[k*t+i]->eraseIllegalCode(); //TODO Problem beim switchen, falls schon goals gesetzt waren
 				}
 			}
 		int complete=0;
@@ -328,11 +326,8 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 
 				for(int j=0;j<MAX_LENGTH;j++)
 				{
-					player[k*t+l]->Code[0][j]=player[k*t]->Code[0][j];
-					player[k*t+l]->Marker[0][j]=player[k*t]->Marker[0][j];
-
-					player[k*t+l]->Code[1][j]=player[k*t]->Code[1][j];
-					player[k*t+l]->Marker[1][j]=player[k*t]->Marker[1][j];
+					player[k*t+l]->Code[j]=player[k*t]->Code[j];
+					player[k*t+l]->Marker[j]=player[k*t]->Marker[j];
 
 	//			      memcpy(player[t]->Code[0],player[0]->Code[0],MAX_LENGTH); 
 	//			      memcpy(player[t]->Code[1],player[0]->Code[1],MAX_LENGTH);
@@ -372,10 +367,8 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 					for(int i=0;i<MAX_LENGTH;i++)
 					{
 	// assign the 'best of breed' to anaplayer
-						anaplayer[k]->Code[0][i]=player[t*k]->Code[0][i];
-						anaplayer[k]->Marker[0][i]=player[t*k]->Marker[0][i];
-						anaplayer[k]->Code[1][i]=player[t*k]->Code[1][i];
-						anaplayer[k]->Marker[1][i]=player[t*k]->Marker[1][i];
+						anaplayer[k]->Code[i]=player[t*k]->Code[i];
+						anaplayer[k]->Marker[i]=player[t*k]->Marker[i];
 					//memcpy(anaplayer[j]->Code[0],player[j*MAX_PROGRAMS/2]->Code[0],MAX_LENGTH*4);
 					//memcpy(anaplayer[j]->Code[1],player[j*MAX_PROGRAMS/2]->Code[1],MAX_LENGTH*4);
 					}

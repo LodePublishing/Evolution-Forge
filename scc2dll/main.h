@@ -11,9 +11,7 @@
 #define EXPORT
 #endif
 
-
-#define MAX_RACE 2
-#define MIN_RACE 0
+const float CORE_VERSION=0.50;
 
 #define MAX_LOCATIONS 9
 #define MIN_LOCATIONS 0 //this does not mean that maps with 0 locations can exist....
@@ -32,7 +30,7 @@
 
 #define MAX_PROGRAMS 128 //must be multiplier of (16*player)
 #define LARVA_MAX 200
-#define UNIT_TYPE_COUNT 101
+#define UNIT_TYPE_COUNT 201
 #define MAX_GOALS 100 // count of possible different goals
 #define MAX_SUPPLY 200
 
@@ -82,352 +80,350 @@ struct GOAL
 };
 
 
-#define ERROR_MESSAGES 8
+enum eErrorMessages
+{
+	NO_ERROR,
+	OK,
+	ENOUGH_MINERALS_WERE_GATHERED,
+	ENOUGH_GAS_WAS_GATHERED,
+	SUPPLY_WAS_SATISFIED,
+	PREREQUISITE_WAS_FULFILLED,
+	FACILITY_BECAME_AVAILIBLE,
+	TIMEOUT_ERROR,
+	UNKNOWN_ERROR,
+	ERROR_MESSAGES
+};
 
-#define OK 0
-#define ENOUGH_MINERALS 1
-#define ENOUGH_GAS 2
-#define SUPPLY_SATISFIED 3
-#define PREREQUISITE_FAILED 4
-#define FACILITY_FAILED 5
-#define TIMEOUT 6
-#define UNKNOWN 7
+enum eRaces
+{
+	TERRA,
+	PROTOSS,
+	ZERG,
+	MAX_RACES
+};
 
-#define NAME_LENGTH 21
+enum eTerraUnits
+{
+	NONE,
+	SCV,
+	MARINE,
+	GHOST,
+	VULTURE,
+	GOLIATH,
+	SIEGE_TANK,
+	FIREBAT,
+	MEDIC,
+	WRAITH,
+	SCIENCE_VESSEL,
+	DROPSHIP,
+	BATTLE_CRUISER,
+	VALKYRIE,
+	NUCLEAR_WARHEAD,
+	SUPPLY_DEPOT,
+	BARRACKS,
+	ACADEMY,
+	FACTORY,
+	COMMAND_CENTER,
+	STARPORT,
+	SCIENCE_FACILITY,
+	ENGINEERING_BAY,
+	ARMORY,
+	MISSILE_TURRET,
+	BUNKER,
+	COMSAT_STATION,
+	NUCLEAR_SILO,
+	CONTROL_TOWER,
+	COVERT_OPS,
+	PHYSICS_LAB,
+	MACHINE_SHOP,
+	COMMAND_CENTER_CS,
+	COMMAND_CENTER_NS,
+	STARPORT_CT,
+	SCIENCE_FACILITY_CO,
+	SCIENCE_FACILITY_PL,
+	FACTORY_MS,
+	STIM_PACKS,
+	LOCKDOWN,
+	EMP_SHOCKWAVE,
+	SPIDER_MINES,
+	TANK_SIEGE_MODE,
+	IRRADIATE,
+	YAMATO_GUN,
+	CLOAKING_FIELD,
+	PERSONNEL_CLOAKING,
+	RESTORATION,
+	OPTICAL_FLARE,
+	U238_SHELLS,
+	ION_THRUSTERS,
+	TITAN_REACTOR,
+	OCULAR_IMPLANTS,
+	MOEBIUS_REACTOR,
+	APOLLO_REACTOR,
+	COLOSSUS_REACTOR,
+	CADUCEUS_REACTOR,
+	CHARON_BOOSTER,
+	INFANTRY_ARMOR,
+	INFANTRY_WEAPONS,
+	VEHICLE_PLATING,
+	VEHICLE_WEAPONS,
+	SHIP_PLATING,
+	SHIP_WEAPONS,
+	REFINERY, // <- must be set constant to 64
+	GAS_SCV,
+	
+	MOVE_ONE_3_FORWARD,
+	MOVE_ONE_1_FORWARD,
+	MOVE_ONE_1_BACKWARD,
+	ROTATE,
+	FOLLOW,
+	RESET,
 
-#define TERRA 0
-#define PROTOSS 1
-#define ZERG 2
+	VESPENE_GEYSIR,
+	MINERALS,
 
-#define RACES 3
+	R_STIM_PACKS,
+	R_LOCKDOWN,
+	R_EMP_SHOCKWAVE,
+	R_SPIDER_MINES,
+	R_TANK_SIEGE_MODE,
+	R_IRRADIATE,
+	R_YAMATO_GUN,
+	R_CLOAKING_FIELD,
+	R_PERSONNEL_CLOAKING,
+	R_RESTORATION,
+	R_OPTICAL_FLARE,
+	R_U238_SHELLS,
+	R_ION_THRUSTERS,
+	R_TITAN_REACTOR,
+	R_OCULAR_IMPLANTS,
+	R_MOEBIUS_REACTOR,
+	R_APOLLO_REACTOR,
+	R_COLOSSUS_REACTOR,
+	R_CADUCEUS_REACTOR,
+	R_CHARON_BOOSTER,
+	R_INFANTRY_ARMOR,
+	R_INFANTRY_WEAPONS,
+	R_VEHICLE_PLATING,
+	R_VEHICLE_WEAPONS,
+	R_SHIP_PLATING,
+	R_SHIP_WEAPONS,
+	INTRON
+}; // end eTerranUnits
 
-#define SCV 				1
-#define MARINE 				2
-#define GHOST 				3
-#define VULTURE 			4
-#define GOLIATH 			5
-#define SIEGE_TANK 			6
-#define FIREBAT 			7
-#define MEDIC  				8
-#define WRAITH 				9
-#define SCIENCE_VESSEL 			10
-#define DROPSHIP 			11
-#define BATTLE_CRUISER 			12
-#define VALKYRIE 			13
-#define NUCLEAR_WARHEAD 		14
-#define COMMAND_CENTER 			15
-#define SUPPLY_DEPOT 			16
-#define BARRACKS 			17
-#define ACADEMY 			18
-#define FACTORY 			19
-#define STARPORT 			20
-#define SCIENCE_FACILITY 		21
-#define ENGINEERING_BAY 		22
-#define ARMORY 				23
-#define MISSILE_TURRET 			24
-#define BUNKER 				25
-#define COMSAT_STATION 			26
-#define NUCLEAR_SILO 			27
-#define CONTROL_TOWER 			28
-#define COVERT_OPS 			29
-#define PHYSICS_LAB 			30
-#define MACHINE_SHOP 			31
-#define COMMAND_CENTER_CS 		32
-#define COMMAND_CENTER_NS 		33
-#define STARPORT_CT 			34
-#define SCIENCE_FACILITY_CO 		35
-#define SCIENCE_FACILITY_PL 		36 
-#define FACTORY_MS 			37
-#define STIM_PACKS 			38
-#define LOCKDOWN 			39
-#define EMP_SHOCKWAVE 			40
-#define SPIDER_MINES 			41
-#define TANK_SIEGE_MODE 		42
-#define IRRADIATE 			43
-#define YAMATO_GUN 			44
-#define CLOAKING_FIELD 			45
-#define PERSONNEL_CLOAKING 		46
-#define RESTORATION 			47
-#define OPTICAL_FLARE 			48
-#define U238_SHELLS 			49
-#define ION_THRUSTERS 			50
-#define TITAN_REACTOR 			51
-#define OCULAR_IMPLANTS 		52
-#define MOEBIUS_REACTOR 		53
-#define APOLLO_REACTOR 			54
-#define COLOSSUS_REACTOR 		55
-#define CADUCEUS_REACTOR 		56
-#define CHARON_BOOSTER 			57
-#define INFANTRY_ARMOR 			58
-#define INFANTRY_WEAPONS 		59
-#define VEHICLE_PLATING 		60
-#define VEHICLE_WEAPONS 		61
-#define SHIP_PLATING 			62
-#define SHIP_WEAPONS 			63
-#define REFINERY 			64 // <- must be set constant to 64
-#define GAS_SCV				65
+enum eProtossUnits
+{
+	PROBE = 1,
+	DARK_TEMPLAR,
+	DARK_ARCHON,
+	ZEALOT,
+	DRAGOON,
+	HIGH_TEMPLAR,
+	ARCHON,
+	REAVER,
+	HALF_SCARAB,
+	FULL_SCARAB,
+	CORSAIR,
+	SHUTTLE,
+	SCOUT,
+	ARBITER,
+	CARRIER,
+	HALF_INTERCEPTOR,
+	FULL_INTERCEPTOR,
+	OBSERVER,
+	NEXUS,
+	ROBOTICS_FACILITY,
+	PYLON,
+	OBSERVATORY,
+	GATEWAY,
+	PHOTON_CANNON,
+	CYBERNETICS_CORE,
+	CITADEL_OF_ADUN,
+	TEMPLAR_ARCHIVES,
+	FORGE,
+	STARGATE,
+	FLEET_BEACON,
+	ARBITER_TRIBUNAL,
+	ROBOTICS_SUPPORT_BAY,
+	SHIELD_BATTERY,
+	PSIONIC_STORM,
+	HALLUCINATION,
+	RECALL,
+	STASIS_FIELD,
+	DISRUPTION_WEB,
+	MIND_CONTROL,
+	MAELSTROM,
+	SINGULARITY_CHARGE,
+	LEG_ENHANCEMENTS,
+	SCARAB_DAMAGE,
+	REAVER_CAPACITY,
+	GRAVITIC_DRIVE,
+	SENSOR_ARRAY,
+	GRAVITIC_BOOSTERS,
+	KHAYDARIN_AMULET,
+	APIAL_SENSORS,
+	GRAVITIC_THRUSTERS,
+	CARRIER_CAPACITY,
+	KHAYDARIN_CORE,
+	ARGUS_JEWEL,
+	ARGUS_TALISMAN,
+	ARMOR,
+	PLATING,
+	GROUND_WEAPONS,
+	AIR_WEAPONS,
+	PLASMA_SHIELDS,
+	ASSIMILATOR = 64,
+	GAS_PROBE,
 
-#define MOVE_ONE_3_FORWARD		66
-#define MOVE_ONE_1_FORWARD		67
-#define MOVE_ONE_1_BACKWARD		68
+	R_PSIONIC_STORM = 74,
+	R_HALLUCINATION,
+	R_RECALL,
+	R_STASIS_FIELD,
+	R_DISRUPTION_WEB,
+	R_MIND_CONTROL,
+	R_MAELSTROM,
+	R_SINGULARITY_CHARGE,
+	R_LEG_ENHANCEMENTS,
+	R_SCARAB_DAMAGE,
+	R_REAVER_CAPACITY,
+	R_GRAVITIC_DRIVE,
+	R_SENSOR_ARRAY,
+	R_GRAVITIC_BOOSTERS,
+	R_KHAYDARIN_AMULET,
+	R_APIAL_SENSORS,
+	R_GRAVITIC_THRUSTERS,
+	R_CARRIER_CAPACITY,
+	R_KHAYDARIN_CORE,
+	R_ARGUS_JEWEL,
+	R_ARGUS_TALISMAN,
+	R_ARMOR,
+	R_PLATING,
+	R_GROUND_WEAPONS,
+	R_AIR_WEAPONS,
+	R_PLASMA_SHIELDS
+};
 
-#define ROTATE		69 //~~
-#define FOLLOW		70 //~~
-#define RESET		71 //~~
+enum eZergUnits
+{
+	DRONE = 1,
+	LARVA,
+	ZERGLING,
+	HYDRALISK,
+	ULTRALISK,
+	DEFILER,
+	LURKER,
+	OVERLORD,
+	MUTALISK,
+	GUARDIEN,
+	QUEEN,
+	SCOURGE,
+	DEVOURER,
+	LAIR,
+	HIVE,
+	NYDUS_CANAL,
+	HYDRALISK_DEN,
+	DEFILER_MOUND,
+	HATCHERY,
+	GREATER_SPIRE,
+	QUEENS_NEST,
+	EVOLUTION_CHAMBER,
+	ULTRALISK_CAVERN,
+	SPIRE,
+	SPAWNING_POOL,
+	CREEP_COLONY,
+	SPORE_COLONY,
+	SUNKEN_COLONY,
+	VENTRAL_SACKS,
+	ANTENNAE,
+	PNEUMATIZED_CARAPACE,
+	METABOLIC_BOOST,
+	ADRENAL_GLANDS,
+	MUSCULAR_AUGMENTS,
+	GROOVED_SPINES,
+	GAMETE_MEIOSIS,
+	METASYNAPTIC_NODE,
+	CHITINOUS_PLATING,
+	ANABOLIC_SYNTHESIS,
+	BURROWING,
+	SPAWN_BROODLING,
+	PLAGUE,
+	CONSUME,
+	ENSNARE,
+	LURKER_ASPECT,
+	CARAPACE,
+	FLYER_CARAPACE,
+	MELEE_ATTACKS,
+	MISSILE_ATTACKS,
+	FLYER_ATTACKS,
+//	CREEP_COLONY,
+	EXTRACTOR = 64,
+	GAS_DRONE,
 
-#define VESPENE_GEYSIR 			72 
-#define MINERALS			73
-
-#define R_STIM_PACKS 			74
-#define R_LOCKDOWN 			75
-#define R_EMP_SHOCKWAVE 		76
-#define R_SPIDER_MINES 			77
-#define R_TANK_SIEGE_MODE 		78
-#define R_IRRADIATE 			79 
-#define R_YAMATO_GUN 			80
-#define R_CLOAKING_FIELD 		81
-#define R_PERSONNEL_CLOAKING 		82
-#define R_RESTORATION 			83
-#define R_OPTICAL_FLARE 		84
-#define R_U238_SHELLS 			85
-#define R_ION_THRUSTERS 		86
-#define R_TITAN_REACTOR 		87
-#define R_OCULAR_IMPLANTS 		88
-#define R_MOEBIUS_REACTOR 		89
-#define R_APOLLO_REACTOR 		90
-#define R_COLOSSUS_REACTOR 		91
-#define R_CADUCEUS_REACTOR 		92
-#define R_CHARON_BOOSTER 		93
-#define R_INFANTRY_ARMOR 		94
-#define R_INFANTRY_WEAPONS 		95
-#define R_VEHICLE_PLATING 		96
-#define R_VEHICLE_WEAPONS 		97
-#define R_SHIP_PLATING 			98 
-#define R_SHIP_WEAPONS			99 
-
-#define PROBE 				1
-#define DARK_TEMPLAR 			2
-#define DARK_ARCHON 			3
-#define ZEALOT 				4
-#define DRAGOON 			5
-#define HIGH_TEMPLAR 			6
-#define ARCHON 				7
-#define REAVER 				8
-#define HALF_SCARAB 			9
-#define FULL_SCARAB 			10 
-#define CORSAIR 			11
-#define SHUTTLE 			12
-#define SCOUT 				13
-#define ARBITER 			14
-#define CARRIER 			15
-#define HALF_INTERCEPTOR 		16
-#define FULL_INTERCEPTOR 		17
-#define OBSERVER 			18
-#define NEXUS 				19
-#define ROBOTICS_FACILITY 		20
-#define PYLON 				21
-#define OBSERVATORY 			22
-#define GATEWAY 			23
-#define PHOTON_CANNON 			24
-#define CYBERNETICS_CORE 		25
-#define CITADEL_OF_ADUN 		26
-#define TEMPLAR_ARCHIVES 		27
-#define FORGE 				28
-#define STARGATE 			29
-#define FLEET_BEACON 			30
-#define ARBITER_TRIBUNAL 		31
-#define ROBOTICS_SUPPORT_BAY 		32
-#define SHIELD_BATTERY 			33
-#define PSIONIC_STORM 			34
-#define HALLUCINATION 			35
-#define RECALL 				36
-#define STASIS_FIELD 			37
-#define DISRUPTION_WEB 			38
-#define MIND_CONTROL 			39
-#define MAELSTROM 			40
-#define SINGULARITY_CHARGE 		41
-#define LEG_ENHANCEMENTS 		42
-#define SCARAB_DAMAGE 			43
-#define REAVER_CAPACITY 		44
-#define GRAVITIC_DRIVE 			45
-#define SENSOR_ARRAY 			46
-#define GRAVITIC_BOOSTERS 		47
-#define KHAYDARIN_AMULET 		48
-#define APIAL_SENSORS 			49
-#define GRAVITIC_THRUSTERS 		50
-#define CARRIER_CAPACITY 		51
-#define KHAYDARIN_CORE 			52
-#define ARGUS_JEWEL 			53
-#define ARGUS_TALISMAN 			54
-#define ARMOR 				55
-#define PLATING 			56
-#define GROUND_WEAPONS 			57
-#define AIR_WEAPONS 			58
-#define PLASMA_SHIELDS 			59
-//#define NULL				60
-//#define NULL				61
-//#define NULL				62
-//#define NULL				63
-#define ASSIMILATOR 			64  // <- must be set constant to 64
-#define GAS_PROBE			65
-
-//#define MOVE_ONE_3_FORWARD              66
-//#define MOVE_ONE_1_FORWARD              67
-//#define MOVE_ONE_1_BACKWARD             68
-//#define ROTATE          69 //~~
-//#define FOLLOW          70 //~~
-//#define RESET           71 //~~
-
-//#define VESPENE_GEYSIR 		72  <- already defined in terra unit list
-//#define MINERALS			73
-#define R_PSIONIC_STORM                 74
-#define R_HALLUCINATION                 75
-#define R_RECALL                        76
-#define R_STASIS_FIELD                  77
-#define R_DISRUPTION_WEB                78
-#define R_MIND_CONTROL                  79
-#define R_MAELSTROM                     80
-#define R_SINGULARITY_CHARGE            81
-#define R_LEG_ENHANCEMENTS              82
-#define R_SCARAB_DAMAGE                 83
-#define R_REAVER_CAPACITY               84
-#define R_GRAVITIC_DRIVE                85
-#define R_SENSOR_ARRAY                  86
-#define R_GRAVITIC_BOOSTERS             87
-#define R_KHAYDARIN_AMULET              88
-#define R_APIAL_SENSORS                 89
-#define R_GRAVITIC_THRUSTERS            90
-#define R_CARRIER_CAPACITY              91
-#define R_KHAYDARIN_CORE                92
-#define R_ARGUS_JEWEL                   93
-#define R_ARGUS_TALISMAN                94
-#define R_ARMOR                         95
-#define R_PLATING                       96
-#define R_GROUND_WEAPONS                97
-#define R_AIR_WEAPONS                   98
-#define R_PLASMA_SHIELDS                99
+	BREAK_UP_BUILDING = 74,
+	R_VENTRAL_SACKS,
+	R_ANTENNAE,
+	R_PNEUMATIZED_CARAPACE,
+	R_METABOLIC_BOOST,
+	R_ADRENAL_GLANDS,
+	R_MUSCULAR_AUGMENTS,
+	R_GROOVED_SPINES,
+	R_GAMETE_MEIOSIS,
+	R_METASYNAPTIC_NODE,
+	R_CHITINOUS_PLATING,
+	R_ANABOLIC_SYNTHESIS,
+	R_BURROWING,
+	R_SPAWN_BROODLING,
+	R_PLAGUE,
+	R_CONSUME,
+	R_ENSNARE,
+	R_LURKER_ASPECT,
+	R_CARAPACE,
+	R_FLYER_CARAPACE,
+	R_MELEE_ATTACKS,
+	R_MISSILE_ATTACKS,
+	R_FLYER_ATTACKS
+}; // end eZergUnits
 
 
-
-#define DRONE 				1
-#define LARVA               2
-#define ZERGLING 			3
-#define HYDRALISK			4
-#define ULTRALISK 			5
-#define DEFILER 			5
-#define LURKER 				7
-#define OVERLORD 			8
-#define MUTALISK 			9
-#define GUARDIEN 			10
-#define QUEEN 				11
-#define SCOURGE 			12
-#define DEVOURER 			13
-#define HATCHERY 			14
-#define LAIR 				15
-#define HIVE 				16
-#define NYDUS_CANAL 			17
-#define HYDRALISK_DEN 			18
-#define DEFILER_MOUND 			19
-#define GREATER_SPIRE 			20
-#define QUEENS_NEST 			21
-#define EVOLUTION_CHAMBER 		22
-#define ULTRALISK_CAVERN 		23
-#define SPIRE 				24
-#define SPAWNING_POOL 			25
-#define CREEP_COLONY 			26
-#define SPORE_COLONY 			27
-#define SUNKEN_COLONY 			28
-#define VENTRAL_SACKS 			29
-#define ANTENNAE 			30
-#define PNEUMATIZED_CARAPACE 		31
-#define METABOLIC_BOOST 		32
-#define ADRENAL_GLANDS 			33 
-#define MUSCULAR_AUGMENTS 		34
-#define GROOVED_SPINES 			35
-#define GAMETE_MEIOSIS 			36
-#define METASYNAPTIC_NODE 		37
-#define CHITINOUS_PLATING 		38
-#define ANABOLIC_SYNTHESIS 		39
-#define BURROWING 			40
-#define SPAWN_BROODLING 		41
-#define PLAGUE 				42
-#define CONSUME 			43
-#define ENSNARE 			44
-#define LURKER_ASPECT 			45
-#define CARAPACE 			46
-#define FLYER_CARAPACE 			47
-#define MELEE_ATTACKS 			48
-#define MISSILE_ATTACKS 		49
-#define FLYER_ATTACKS 			50
-//#define NULL                          51
-//#define NULL                          52
-//#define NULL                          53
-//#define NULL                          54
-//#define NULL                          55
-//#define NULL                          56
-//#define NULL                          57
-//#define NULL                          58
-//#define NULL                          59
-//#define NULL                          60
-//#define NULL                          61
-//#define NULL                          62
-//#define CREEP				63
-#define EXTRACTOR 			64 // <- must be set constant to 64
-#define GAS_DRONE			65
-
-//#define MOVE_ONE_3_FORWARD              66
-//#define MOVE_ONE_1_FORWARD              67
-//#define MOVE_ONE_1_BACKWARD             68
-                                                                                                                                                            
-//#define ROTATE          69 //~~
-//#define FOLLOW          70 //~~
-//#define RESET           71 //~~
-
-//#define VESPENE_GEYSIR 		72 <- already defined in terra unit list
-//#define MINERALS			73 <- already defined in terra unit list
-#define BREAK_UP_BUILDING		74
-
-#define R_VENTRAL_SACKS                 75
-#define R_ANTENNAE                      76
-#define R_PNEUMATIZED_CARAPACE          77
-#define R_METABOLIC_BOOST               78
-#define R_ADRENAL_GLANDS                79
-#define R_MUSCULAR_AUGMENTS             80
-#define R_GROOVED_SPINES                81
-#define R_GAMETE_MEIOSIS                82
-#define R_METASYNAPTIC_NODE             83
-#define R_CHITINOUS_PLATING             84
-#define R_ANABOLIC_SYNTHESIS            85
-#define R_BURROWING                     86
-#define R_SPAWN_BROODLING               87
-#define R_PLAGUE                        88
-#define R_CONSUME                       89
-#define R_ENSNARE                       90
-#define R_LURKER_ASPECT                 91
-#define R_CARAPACE                      92
-#define R_FLYER_CARAPACE                93
-#define R_MELEE_ATTACKS                 94
-#define R_MISSILE_ATTACKS               95
-#define R_FLYER_ATTACKS                 96
-//#define NULL                          97
-//#define NULL                          98
-//#define NULL                          99
-#define INTRON				100
-
+enum eFacilityType
+{
 // these are the possible values for facility_type
 // they describe what happens to the units while constructing / when the building is complete
-#define IS_LOST 0		// 0: facilities are lost (templars/archons, drones/buildings, command center/comsat, ...), 
-#define NEEDED_ONCE 1   // 1: facility is needed at this place, but only once (probes!)
-#define NEEDED_UNTIL_COMPLETE 2 // 2: facility is needed until the item is complete (Scvs, buildings in general)
-#define NEEDED_ONCE_IS_LOST 3 // Special, probes in facility0!
-#define NEEDED_UNTIL_COMPLETE_IS_LOST 4 // Special, scvs in facility0!
-#define NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE 5 //availible returns to 1 but one item is lost... kinda hack for upgrades :)
-#define NEEDED_ALWAYS 6 //nuke silos/nukes, reaver/scarabs, carrier/interceptors, ...
+	// error when this comes up!
+	NO_FACILITY_BEHAVIOUR_DEFINED,
+// needs no facility rules
+	NO_FACILITY,
+	IS_LOST,
+// facilities are lost (templars/archons, drones/buildings, command center/comsat, ...), 
+	NEEDED_ONCE,
+// facility is needed at this place, only once (probes!)
+	NEEDED_UNTIL_COMPLETE, // facility is needed until the item is complete (Scvs,ldings in general)
+	NEEDED_ONCE_IS_LOST, // Special, probes in facility0!
+	NEEDED_UNTIL_COMPLETE_IS_LOST, // Special, scvs in facility0!
+	NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, //availible returns to 1 but one item is lost... kinda hack for upgrades :)
+	NEEDED_ALWAYS, //nuke silos/nukes, reaver/scarabs, carrier/interceptors, ...
+	FACILITY_TYPES
+};
 
+// units can optionally be ordered by area (combat, support, research etc.) instead by their facility:
+enum eUnitType
+{
+	REMAINING_UNIT_TYPE,
+	WORKER_UNIT_TYPE,
+	GAS_MINER_UNIT_TYPE,
+	COMBAT_UNIT_TYPE,
+	SUPPORT_UNIT_TYPE,
+	SUPPLY_UNIT_TYPE,
+	PRODUCE_UNIT_TYPE,
+	RESEARCH_FACILITY_UNIT_TYPE,
+	ADD_ON_UNIT_TYPE,
+	RESEARCH_UNIT_TYPE,
+	SPECIAL_UNIT_TYPE,
+	UNIT_TYPE_TYPES
+};	
 
 struct UNIT_STATISTICS
 {
-	char name[NAME_LENGTH];
+	char name[21]; // TODO!
 	int BT;
 	int mins,gas;
 	int supply;
@@ -437,337 +433,334 @@ struct UNIT_STATISTICS
 	int facility[3];	 // where _can_ the unit be produced? primariliy for zerg and terra
 			             // for upgrades: fac[2] and fac[3] are places to hold prequerisities for additional upgrading beyond level 1~~
 	int facility2;		 // additional facilities, primarily for drones or morphing templars
-	int facility_type;	 // see above
+	eFacilityType facilityType;	 // see above
 						 
 	int create;			 // Additional building created when this item is completed (only for add-ons)
 	int speed;			 // speed of units, not yet implemented
-	int type;		//for colors... 0= rest, 1= scv, 2= gas scv, 3= combat units, 4=support, 5=supply/refinery, 6=produce buildings, 7=research buildigns, 8= addons, 9=researchs, 10= special
-				// protoss
+	eUnitType unitType;		
 };
 
 
-const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
+const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {
 {
-{"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 100,0},
-{"SCV", 20, 5000,    0,  1, 0, {0, 0}, {0 ,0, 0}, {COMMAND_CENTER, COMMAND_CENTER_CS, COMMAND_CENTER_NS}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,1},
-{"Marine", 24, 5000,    0,  1, 0, {0, 0}, {0 ,0, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,3},
-{"Ghost", 50, 2500, 7500,  1, 0, {0, 0}, {ACADEMY ,COVERT_OPS, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,4},
-{"Vulture", 30, 7500,    0,  2, 0, {0, 0}, {FACTORY ,0, 0}, {FACTORY, FACTORY_MS, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,3},
-{"Goliath", 40,10000, 5000,  2, 0, {0, 0}, {ARMORY, 0, 0}, {FACTORY, FACTORY_MS, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,3},
-{"Siege Tank", 50,15000,10000,  2, 0, {0, 0}, {0 ,0, 0}, {FACTORY_MS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,3},
-{"Firebat", 24, 5000, 2500,  1, 0, {0, 0}, {ACADEMY ,0, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,3},
-{"Medic", 30, 5000, 2500,  1, 0, {0, 0}, {ACADEMY ,0, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,4},
-{"Wraith", 60,15000,10000,  2, 0, {0, 0}, {0 ,0, 0}, {STARPORT, STARPORT_CT, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,3},
-{"Science Vessel", 80,10000,22500,  2, 0, {0, 0}, {SCIENCE_FACILITY, 0, 0}, {STARPORT_CT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,4},
-{"Dropship", 50,10000,10000,  2, 0, {0, 0}, {0, 0, 0}, {STARPORT_CT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,4},
-{"Battle Cruiser",133,40000,30000,  6, 0, {0, 0}, {PHYSICS_LAB, 0, 0}, {STARPORT_CT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,3},
-{"Valkyrie", 50,25000,12500,  3, 0, {0, 0}, {ARMORY, 0, 0}, {STARPORT_CT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,3},
-{"Nuclear Warhead",100,20000,20000,  8, 0, {0, 0}, {COMMAND_CENTER_NS, 0, 0}, {NUCLEAR_SILO, 0, 0}, 0, NEEDED_ALWAYS, 0, 0,4},
-{"Command Center",120,40000,    0,-10, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10,5},
-{"Supply Depot", 40,10000,    0, -8, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0,5},
-{"Barracks", 80,15000,    0,  0, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10,6},
-{"Academy", 80,15000,    0,  0, 0, {0, 0}, {BARRACKS ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0,7},
-{"Factory", 80,20000,10000,  0, 0, {0, 0}, {BARRACKS ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10,6},
-{"Starport", 70,15000,10000,  0, 0, {0, 0}, {FACTORY ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10,6},
-{"Science Facility", 60,10000,15000,  0, 0, {0, 0}, {STARPORT ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10,7},
-{"Engineering Bay", 60,12500,    0,  0, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10,7},
-{"Armory", 80,10000, 5000,  0, 0, {0, 0}, {FACTORY, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0,7},
-{"Missile Turret", 30, 7500,    0,  0, 0, {0, 0}, {ENGINEERING_BAY, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0,4},
-{"Bunker", 30,10000,    0,  0, 0, {0, 0}, {BARRACKS, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0,4},
-{"Comsat Station",  0,    0,    0,  0, 0, {0, 0}, {COMSAT_STATION, COMMAND_CENTER_CS, 0}, {0, 0 ,0}, 0, 0, 0, 0,8}, 
-{"Nuclear Silo",  0,    0,    0,  0, 0, {0, 0}, {NUCLEAR_SILO, COMMAND_CENTER_NS, 0}, {0, 0, 0}, 0, 0, 0, 0,8},
-{"Control Tower",  0,    0,    0,  0, 0, {0, 0}, {CONTROL_TOWER, STARPORT_CT, 0}, {0, 0, 0}, 0, 0, 0, 0,8},
-{"Covert Ops",  0,    0,    0,  0, 0, {0, 0}, {COVERT_OPS, SCIENCE_FACILITY_CO, 0}, {0, 0, 0}, 0, 0, 0, 0,8},
-{"Physics Lab",  0,    0,    0,  0, 0, {0, 0}, {PHYSICS_LAB, SCIENCE_FACILITY_PL, 0}, {0, 0, 0}, 0, 0, 0, 0,8},
-{"Machine Shop",  0,    0,    0,  0, 0, {0, 0}, {MACHINE_SHOP, FACTORY_MS, 0}, {0, 0, 0}, 0, 0, 0, 0,8},
-{"Command Center[CS]", 40, 5000, 5000,-10, 0, {0, 0}, {ACADEMY, 0, 0}, {COMMAND_CENTER, 0, 0}, 0, IS_LOST, COMSAT_STATION, 0,8}, //TODO: Beim Abheben zerstoeren...
-{"Command Center[NS]", 40,10000,10000,-10, 0, {0, 0}, {COVERT_OPS, 0, 0}, {COMMAND_CENTER, 0, 0}, 0, IS_LOST, NUCLEAR_SILO, 0,8},
-{"Starport[CT]", 80, 5000, 5000,  0, 0, {0, 0}, {0 ,0, 0}, {STARPORT, 0, 0}, 0, IS_LOST, CONTROL_TOWER, 0,8},
-{"Science Facility[CO]", 40, 5000, 5000,  0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, 0, IS_LOST, COVERT_OPS, 0,8},
-{"Science Facility[PL]", 40, 5000, 5000,  0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, 0, IS_LOST, PHYSICS_LAB, 0,8},
-{"Factory[MS]", 40, 5000, 5000,  0, 0, {0, 0}, {0 ,0, 0}, {FACTORY, 0, 0}, 0, IS_LOST, MACHINE_SHOP, 0,8},
-{"Stim Packs", 80,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_STIM_PACKS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Lockdown",100,20000,20000,  0, 0, {0, 0}, {SCIENCE_FACILITY_CO, 0, 0}, {COVERT_OPS, 0, 0}, R_LOCKDOWN, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"EMP Shockwave",120,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, SCIENCE_FACILITY_CO, SCIENCE_FACILITY_PL}, R_EMP_SHOCKWAVE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Spider Mines", 80,10000,10000,  0, 0, {0, 0}, {FACTORY_MS ,0, 0}, {MACHINE_SHOP, 0, 0}, R_SPIDER_MINES, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Siege Mode", 80,15000,15000,  0, 0, {0, 0}, {FACTORY_MS ,0, 0}, {MACHINE_SHOP, 0, 0}, R_TANK_SIEGE_MODE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Irradiate", 80,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, SCIENCE_FACILITY_CO, SCIENCE_FACILITY_PL}, R_IRRADIATE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Yamato Gun",120,10000,10000,  0, 0, {0, 0}, {SCIENCE_FACILITY_PL ,0, 0}, {PHYSICS_LAB, 0, 0}, R_YAMATO_GUN, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Cloaking Field",100,15000,15000,  0, 0, {0, 0}, {STARPORT_CT ,0, 0}, {CONTROL_TOWER, 0, 0}, R_CLOAKING_FIELD, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Personnel Cloaking", 80,10000,10000,  0, 0, {0, 0}, {SCIENCE_FACILITY_CO ,0, 0}, {COVERT_OPS, 0, 0}, R_PERSONNEL_CLOAKING, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Restoration", 80,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_RESTORATION, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Optical Flare",120,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_OPTICAL_FLARE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"U-238 Shells",100,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_U238_SHELLS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Ion Thrusters",100,10000,10000,  0, 0, {0, 0}, {FACTORY_MS ,0, 0}, {MACHINE_SHOP, 0, 0}, R_ION_THRUSTERS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Titan Reactor",166,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, SCIENCE_FACILITY_CO, SCIENCE_FACILITY_PL}, R_TITAN_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Ocular Implants",166,10000,10000,  0, 0, {0, 0}, {SCIENCE_FACILITY_CO ,0, 0}, {COVERT_OPS, 0, 0}, R_OCULAR_IMPLANTS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Moebius Reactor",166,20000,20000,  0, 0, {0, 0}, {SCIENCE_FACILITY_CO ,0, 0}, {COVERT_OPS, 0, 0}, R_MOEBIUS_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Apollo Reactor",166,20000,20000,  0, 0, {0, 0}, {STARPORT_CT ,0, 0}, {CONTROL_TOWER, 0, 0}, R_APOLLO_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Colossus Reactor",166,15000,15000,  0, 0, {0, 0}, {SCIENCE_FACILITY_PL ,0, 0}, {PHYSICS_LAB, 0, 0}, R_COLOSSUS_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Caduceus Reactor",166,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_CADUCEUS_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Charon Booster",133,10000,10000,  0, 0, {0, 0}, {FACTORY_MS ,0, 0}, {MACHINE_SHOP, 0, 0}, R_CHARON_BOOSTER, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Infantry Armor",266,10000,10000,  0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ENGINEERING_BAY, 0, 0}, R_INFANTRY_ARMOR, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
-{"Infantry Weapons",266,10000,10000,  0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ENGINEERING_BAY, 0, 0}, R_INFANTRY_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
-{"Vehicle Plating",266,10000,10000,  0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_VEHICLE_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
-{"Vehicle Weapons",266,10000,10000,  0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_VEHICLE_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
-{"Ship Plating",266,15000,15000,  0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_SHIP_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
-{"Ship Weapons",266,10000,10000,  0, 5000, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_SHIP_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
-{"Refinery", 40,10000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {SCV, 0, 0}, 0/*VESPENE_GEYSIR*/, NEEDED_UNTIL_COMPLETE_IS_LOST/*_IS_LOST*/, GAS_SCV, 0,5}, //~~~ueberlegen...
-{"Gas SCV",  3,    0,    0,  1, 0, {0, 0}, {REFINERY ,0, 0}, {SCV/*REFINERY*/, 0, 0}, /*SCV*/0, /*NEEDED_ONCE_*/IS_LOST, 0, 0,2},	//~~~~
+{"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 100, REMAINING_UNIT_TYPE},
+{"SCV", 20, 5000,    0,  1, 0, {0, 0}, {0 ,0, 0}, {COMMAND_CENTER, COMMAND_CENTER_CS, COMMAND_CENTER_NS}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, WORKER_UNIT_TYPE},
+{"Marine", 24, 5000,    0,  1, 0, {0, 0}, {0 ,0, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Ghost", 50, 2500, 7500,  1, 0, {0, 0}, {ACADEMY ,COVERT_OPS, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
+{"Vulture", 30, 7500,    0,  2, 0, {0, 0}, {FACTORY ,0, 0}, {FACTORY, FACTORY_MS, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Goliath", 40,10000, 5000,  2, 0, {0, 0}, {ARMORY, 0, 0}, {FACTORY, FACTORY_MS, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Siege Tank", 50,15000,10000,  2, 0, {0, 0}, {0 ,0, 0}, {FACTORY_MS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Firebat", 24, 5000, 2500,  1, 0, {0, 0}, {ACADEMY ,0, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Medic", 30, 5000, 2500,  1, 0, {0, 0}, {ACADEMY ,0, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
+{"Wraith", 60,15000,10000,  2, 0, {0, 0}, {0 ,0, 0}, {STARPORT, STARPORT_CT, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Science Vessel", 80,10000,22500,  2, 0, {0, 0}, {SCIENCE_FACILITY, 0, 0}, {STARPORT_CT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
+{"Dropship", 50,10000,10000,  2, 0, {0, 0}, {0, 0, 0}, {STARPORT_CT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
+{"Battle Cruiser",133,40000,30000,  6, 0, {0, 0}, {PHYSICS_LAB, 0, 0}, {STARPORT_CT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Valkyrie", 50,25000,12500,  3, 0, {0, 0}, {ARMORY, 0, 0}, {STARPORT_CT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Nuclear Warhead",100,20000,20000,  8, 0, {0, 0}, {COMMAND_CENTER_NS, 0, 0}, {NUCLEAR_SILO, 0, 0}, 0, NEEDED_ALWAYS, 0, 0, SUPPORT_UNIT_TYPE},
+{"Supply Depot", 40,10000,    0, -8, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0, SUPPLY_UNIT_TYPE},
+{"Barracks", 80,15000,    0,  0, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, PRODUCE_UNIT_TYPE},
+{"Academy", 80,15000,    0,  0, 0, {0, 0}, {BARRACKS ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Factory", 80,20000,10000,  0, 0, {0, 0}, {BARRACKS ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, PRODUCE_UNIT_TYPE},
+{"Command Center",120,40000,    0,-10, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, SUPPLY_UNIT_TYPE},
+{"Starport", 70,15000,10000,  0, 0, {0, 0}, {FACTORY ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, PRODUCE_UNIT_TYPE},
+{"Science Facility", 60,10000,15000,  0, 0, {0, 0}, {STARPORT ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, RESEARCH_FACILITY_UNIT_TYPE},
+{"Engineering Bay", 60,12500,    0,  0, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, RESEARCH_FACILITY_UNIT_TYPE},
+{"Armory", 80,10000, 5000,  0, 0, {0, 0}, {FACTORY, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Missile Turret", 30, 7500,    0,  0, 0, {0, 0}, {ENGINEERING_BAY, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0, SUPPORT_UNIT_TYPE},
+{"Bunker", 30,10000,    0,  0, 0, {0, 0}, {BARRACKS, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0, SUPPORT_UNIT_TYPE},
+{"Comsat Station",  0,    0,    0,  0, 0, {0, 0}, {COMSAT_STATION, COMMAND_CENTER_CS, 0}, {0, 0 ,0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE}, 
+{"Nuclear Silo",  0,    0,    0,  0, 0, {0, 0}, {NUCLEAR_SILO, COMMAND_CENTER_NS, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"Control Tower",  0,    0,    0,  0, 0, {0, 0}, {CONTROL_TOWER, STARPORT_CT, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"Covert Ops",  0,    0,    0,  0, 0, {0, 0}, {COVERT_OPS, SCIENCE_FACILITY_CO, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"Physics Lab",  0,    0,    0,  0, 0, {0, 0}, {PHYSICS_LAB, SCIENCE_FACILITY_PL, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"Machine Shop",  0,    0,    0,  0, 0, {0, 0}, {MACHINE_SHOP, FACTORY_MS, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"Command Center[CS]", 40, 5000, 5000,-10, 0, {0, 0}, {ACADEMY, 0, 0}, {COMMAND_CENTER, 0, 0}, 0, IS_LOST, COMSAT_STATION, 0, ADD_ON_UNIT_TYPE}, //TODO: Beim Abheben zerstoeren...
+{"Command Center[NS]", 40,10000,10000,-10, 0, {0, 0}, {COVERT_OPS, 0, 0}, {COMMAND_CENTER, 0, 0}, 0, IS_LOST, NUCLEAR_SILO, 0, ADD_ON_UNIT_TYPE},
+{"Starport[CT]", 80, 5000, 5000,  0, 0, {0, 0}, {0 ,0, 0}, {STARPORT, 0, 0}, 0, IS_LOST, CONTROL_TOWER, 0, ADD_ON_UNIT_TYPE},
+{"Science Facility[CO]", 40, 5000, 5000,  0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, 0, IS_LOST, COVERT_OPS, 0, ADD_ON_UNIT_TYPE},
+{"Science Facility[PL]", 40, 5000, 5000,  0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, 0, IS_LOST, PHYSICS_LAB, 0, ADD_ON_UNIT_TYPE},
+{"Factory[MS]", 40, 5000, 5000,  0, 0, {0, 0}, {0 ,0, 0}, {FACTORY, 0, 0}, 0, IS_LOST, MACHINE_SHOP, 0, ADD_ON_UNIT_TYPE},
+{"Stim Packs", 80,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_STIM_PACKS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Lockdown",100,20000,20000,  0, 0, {0, 0}, {SCIENCE_FACILITY_CO, 0, 0}, {COVERT_OPS, 0, 0}, R_LOCKDOWN, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"EMP Shockwave",120,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, SCIENCE_FACILITY_CO, SCIENCE_FACILITY_PL}, R_EMP_SHOCKWAVE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Spider Mines", 80,10000,10000,  0, 0, {0, 0}, {FACTORY_MS ,0, 0}, {MACHINE_SHOP, 0, 0}, R_SPIDER_MINES, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Siege Mode", 80,15000,15000,  0, 0, {0, 0}, {FACTORY_MS ,0, 0}, {MACHINE_SHOP, 0, 0}, R_TANK_SIEGE_MODE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Irradiate", 80,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, SCIENCE_FACILITY_CO, SCIENCE_FACILITY_PL}, R_IRRADIATE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Yamato Gun",120,10000,10000,  0, 0, {0, 0}, {SCIENCE_FACILITY_PL ,0, 0}, {PHYSICS_LAB, 0, 0}, R_YAMATO_GUN, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Cloaking Field",100,15000,15000,  0, 0, {0, 0}, {STARPORT_CT ,0, 0}, {CONTROL_TOWER, 0, 0}, R_CLOAKING_FIELD, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Personnel Cloaking", 80,10000,10000,  0, 0, {0, 0}, {SCIENCE_FACILITY_CO ,0, 0}, {COVERT_OPS, 0, 0}, R_PERSONNEL_CLOAKING, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Restoration", 80,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_RESTORATION, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Optical Flare",120,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_OPTICAL_FLARE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"U-238 Shells",100,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_U238_SHELLS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Ion Thrusters",100,10000,10000,  0, 0, {0, 0}, {FACTORY_MS ,0, 0}, {MACHINE_SHOP, 0, 0}, R_ION_THRUSTERS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Titan Reactor",166,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, SCIENCE_FACILITY_CO, SCIENCE_FACILITY_PL}, R_TITAN_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Ocular Implants",166,10000,10000,  0, 0, {0, 0}, {SCIENCE_FACILITY_CO ,0, 0}, {COVERT_OPS, 0, 0}, R_OCULAR_IMPLANTS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Moebius Reactor",166,20000,20000,  0, 0, {0, 0}, {SCIENCE_FACILITY_CO ,0, 0}, {COVERT_OPS, 0, 0}, R_MOEBIUS_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Apollo Reactor",166,20000,20000,  0, 0, {0, 0}, {STARPORT_CT ,0, 0}, {CONTROL_TOWER, 0, 0}, R_APOLLO_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Colossus Reactor",166,15000,15000,  0, 0, {0, 0}, {SCIENCE_FACILITY_PL ,0, 0}, {PHYSICS_LAB, 0, 0}, R_COLOSSUS_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Caduceus Reactor",166,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_CADUCEUS_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Charon Booster",133,10000,10000,  0, 0, {0, 0}, {FACTORY_MS ,0, 0}, {MACHINE_SHOP, 0, 0}, R_CHARON_BOOSTER, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Infantry Armor",266,10000,10000,  0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ENGINEERING_BAY, 0, 0}, R_INFANTRY_ARMOR, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
+{"Infantry Weapons",266,10000,10000,  0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ENGINEERING_BAY, 0, 0}, R_INFANTRY_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
+{"Vehicle Plating",266,10000,10000,  0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_VEHICLE_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
+{"Vehicle Weapons",266,10000,10000,  0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_VEHICLE_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
+{"Ship Plating",266,15000,15000,  0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_SHIP_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
+{"Ship Weapons",266,10000,10000,  0, 5000, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_SHIP_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
+{"Refinery", 40,10000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {SCV, 0, 0}, 0/*VESPENE_GEYSIR*/, NEEDED_UNTIL_COMPLETE_IS_LOST/*_IS_LOST*/, GAS_SCV, 0, SUPPLY_UNIT_TYPE}, //~~~ueberlegen...
+{"Gas SCV",  3,    0,    0,  1, 0, {0, 0}, {REFINERY ,0, 0}, {SCV/*REFINERY*/, 0, 0}, /*SCV*/0, /*NEEDED_ONCE_*/IS_LOST, 0, 0, GAS_MINER_UNIT_TYPE},	//~~~~  warum 3,0,0,1?
 //TODO: Move Befehle an den Anfang der Befehlskette (wegen code[0]>code[1]...) TODO
-{"Move 3 Forward",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
-{"Move 1 Forward",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
-{"Move 1 Backward",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
-{"Window move prev",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
-{"Move from here",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
-{"Move to here",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
+{"Move 3 Forward",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
+{"Move 1 Forward",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
+{"Move 1 Backward",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
+{"Window move prev",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
+{"Move from here",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
+{"Move to here",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
 
-{"Vespene Geysir",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"Minerals",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Stim Packs",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Lockdown",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_EMP Shockwave",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Spider Mines",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Siege Mode",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Irradiate",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Yamato Gun",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Cloaking Field",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Personnel Cloaking",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Restoration",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Optical Flare",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_U-238 Shells",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Ion Thrusters",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Titan Reactor",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Ocular Implants",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Moebius Reactor",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Apollo Reactor",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Colossus Reactor",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Caduceus Reactor",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Charon Booster",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Infantry Armor",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Infantry Weapons",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Vehicle Plating",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Vehicle Weapons",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Ship Plating",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Ship Weapons",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"INTRON",  0,   0,   0,  0, 0, {0, 0}, {0, 0, 0}, {0, 0, 0}, 0, 0, 0, 0,0}
+{"Vespene Geysir",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"Minerals",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Stim Packs",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Lockdown",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_EMP Shockwave",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Spider Mines",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Siege Mode",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Irradiate",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Yamato Gun",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Cloaking Field",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Personnel Cloaking",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Restoration",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Optical Flare",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_U-238 Shells",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Ion Thrusters",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Titan Reactor",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Ocular Implants",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Moebius Reactor",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Apollo Reactor",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Colossus Reactor",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Caduceus Reactor",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Charon Booster",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Infantry Armor",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Infantry Weapons",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Vehicle Plating",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Vehicle Weapons",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Ship Plating",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Ship Weapons",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"INTRON",  0,   0,   0,  0, 0, {0, 0}, {0, 0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE}
 },
 
  //for colors... 0= rest, 1= scv, 2= gas scv, 3= combat units, 4=support, 5=supply/refinery, 6=produce buildings, 7=research buildigns, 8= addons, 9=researchs, 10= special
 
 
 {
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"Probe", 20, 5000,    0,  1, 0, {0, 0}, {0 ,0, 0}, {NEXUS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,1},
-{"Dark Templar", 50,12500,10000,  2, 0, {0, 0}, {TEMPLAR_ARCHIVES ,0, 0}, {GATEWAY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,3},
-{"Dark Archon", 20,    0,    0,  2, 0, {0, 0}, {0 ,0, 0}, {DARK_TEMPLAR, 0, 0}, DARK_TEMPLAR, IS_LOST, 0, 100,3},
-{"Zealot", 40,10000,    0,  2, 0, {0, 0}, {0 ,0, 0}, {GATEWAY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,3},
-{"Dragoon", 50,12500, 5000,  2, 0, {0, 0}, {CYBERNETICS_CORE ,0, 0}, {GATEWAY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,3},
-{"High Templar", 50, 5000,15000,  2, 0, {0, 0}, {TEMPLAR_ARCHIVES ,0, 0}, {GATEWAY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,4},
-{"Archon", 20,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {HIGH_TEMPLAR, 0, 0}, HIGH_TEMPLAR, IS_LOST, 0, 100,3},
-{"Reaver", 70,20000,10000,  4, 0, {0, 0}, {ROBOTICS_SUPPORT_BAY ,0, 0}, {ROBOTICS_FACILITY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,3}, 
-{"5xScarab", 35, 7500,    0,  0, 0, {0, 0}, {0, 0, 0}, {REAVER, 0, 0}, 0, NEEDED_ALWAYS, 0, 0,10},
-{"10xScarab", 35, 7500,    0,  0, 0, {0, 0}, {REAVER_CAPACITY, 0, 0}, {HALF_SCARAB, 0, 0}, 0, IS_LOST, 0, 0,10}, //~~ special rule... reaver is no longer availible :/
-{"Corsair", 40,15000,10000,  2, 0, {0, 0}, {0 ,0, 0}, {STARGATE, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,3},
-{"Shuttle", 60,20000,    0,  2, 0, {0, 0}, {0 ,0, 0}, {ROBOTICS_FACILITY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,4},
-{"Scout", 80,27500,12500,  3, 0, {0, 0}, {0 ,0, 0}, {STARGATE, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,3},
-{"Arbiter",160,10000,35000,  4, 0, {0, 0}, {ARBITER_TRIBUNAL ,0, 0}, {STARGATE, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,4},
-{"Carrier",140,35000,25000,  6, 0, {0, 0}, {FLEET_BEACON ,0, 0}, {STARGATE, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,3},
-{"5xInterceptor",100,25000,    0,  0, 0, {0, 0}, {0,0,0}, {CARRIER, 0, 0}, 0, NEEDED_ALWAYS, 0, 0,10},
-{"8xInterceptor", 60,15000,    0,  0, 0, {0, 0}, {CARRIER_CAPACITY,0,0}, {HALF_INTERCEPTOR, 0, 0}, 0, IS_LOST, 0, 0,10}, //~~~ Special rule... carrier is no longer availible :/
-{"Observer", 40, 2500, 7500,  1, 0, {0, 0}, {OBSERVATORY ,0, 0}, {ROBOTICS_FACILITY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100,4},
-{"Nexus",120,40000,    0, -9, 0, {0, 0}, {0 ,0, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0,5},
-{"Robotics Facility", 80,20000,20000,  0, 0, {0, 0}, {CYBERNETICS_CORE ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0,6},
-{"Pylon", 30,10000,    0, -8, 0, {0, 0}, {0 ,0, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0,5},
-{"Observatory", 30, 5000,10000,  0, 0, {0, 0}, {ROBOTICS_FACILITY ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0,7},
-{"Gateway", 60,15000,    0,  0, 0, {0, 0}, {PYLON ,0, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0,6},
-{"Photon Cannon", 50,15000,    0,  0, 0, {0, 0}, {FORGE ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0,4},
-{"Cybernetics Core", 60,20000,    0,  0, 0, {0, 0}, {GATEWAY ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0,7},
-{"Citadel Of Adun", 60,15000,10000,  0, 0, {0, 0}, {CYBERNETICS_CORE ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0,7},
-{"Templar Archives", 60,15000,20000,  0, 0, {0, 0}, {CITADEL_OF_ADUN ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0,7},
-{"Forge", 40,15000,    0,  0, 0, {0, 0}, {PYLON ,0, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0,7},
-{"Stargate", 70,15000,15000,  0, 0, {0, 0}, {CYBERNETICS_CORE ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0,6},
-{"Fleet Beacon", 60,30000,20000,  0, 0, {0, 0}, {STARGATE ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0,7},
-{"Arbiter Tribunal", 60,20000,15000,  0, 0, {0, 0}, {TEMPLAR_ARCHIVES ,STARGATE, PYLON}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0,7},
-{"Robotics Support Bay", 30,15000,10000,  0, 0, {0, 0}, {ROBOTICS_FACILITY ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0,7},
-{"Shield Battery", 30,10000,    0,  0, 0, {0, 0}, {GATEWAY ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0,4},
-{"Psionic Storm",120,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_PSIONIC_STORM, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Hallucination", 80,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_HALLUCINATION, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Recall",120,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {ARBITER_TRIBUNAL, 0, 0}, R_RECALL, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Stasis Field",100,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {ARBITER_TRIBUNAL, 0, 0}, R_STASIS_FIELD, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Disruption Web", 80,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {FLEET_BEACON, 0, 0}, R_DISRUPTION_WEB, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Mind Control",120,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_MIND_CONTROL, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Maelstrom",100,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_MAELSTROM, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Singularity Charge",166,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {CYBERNETICS_CORE, 0, 0}, R_SINGULARITY_CHARGE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Leg Enhancements",133,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {CITADEL_OF_ADUN, 0, 0}, R_LEG_ENHANCEMENTS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Scarab Damage",166,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {ROBOTICS_SUPPORT_BAY, 0, 0}, R_SCARAB_DAMAGE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Reaver Capacity",166,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {ROBOTICS_SUPPORT_BAY, 0, 0}, R_REAVER_CAPACITY, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Gravitic Drive",166,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {ROBOTICS_SUPPORT_BAY, 0, 0}, R_GRAVITIC_DRIVE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Sensor Array",133,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {OBSERVATORY, 0, 0}, R_SENSOR_ARRAY, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Gravitic Boosters",133,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {OBSERVATORY, 0, 0}, R_GRAVITIC_BOOSTERS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Khaydarin Amulet",166,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_KHAYDARIN_AMULET, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Apial Sensors",166,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {FLEET_BEACON, 0, 0}, R_APIAL_SENSORS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Gravitic Thrusters",166,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {FLEET_BEACON, 0, 0}, R_GRAVITIC_THRUSTERS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Carrier Capacity",100,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {FLEET_BEACON, 0, 0}, R_CARRIER_CAPACITY, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Khaydarin Core",166,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {ARBITER_TRIBUNAL, 0, 0}, R_KHAYDARIN_CORE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Argus Jewel",166,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {FLEET_BEACON, 0, 0}, R_ARGUS_JEWEL, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Argus Talisman",166,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_ARGUS_TALISMAN, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Armor",266,10000,10000,  0, 7500, {TEMPLAR_ARCHIVES, TEMPLAR_ARCHIVES}, {0 ,0, 0}, {FORGE, 0, 0}, R_ARMOR, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
-{"Plating",266,15000,15000,  0, 7500, {FLEET_BEACON, FLEET_BEACON}, {0 ,0, 0}, {CYBERNETICS_CORE, 0, 0}, R_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
-{"Ground Weapons",266,10000,10000,  0, 5000, {TEMPLAR_ARCHIVES, TEMPLAR_ARCHIVES}, {0 ,0, 0}, {FORGE, 0, 0}, R_GROUND_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
-{"Air Weapons",266,10000,10000,  0, 7500, {FLEET_BEACON, FLEET_BEACON}, {0 ,0, 0}, {CYBERNETICS_CORE, 0, 0}, R_AIR_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
-{"Plasma Shields",266,20000,20000,  0, 10000, {0, 0}, {0 ,0, 0}, {FORGE, 0, 0}, R_PLASMA_SHIELDS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"Assimilator", 40,10000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {PROBE, 0, 0}, /*VESPENE_GEYSIR*/0, NEEDED_ONCE/*_IS_LOST*/, 0, 0,5},
-{"Gas Probe",  3,    0,    0,  1, 0, {0, 0}, {ASSIMILATOR ,0, 0}, {PROBE/*ASSIMILATOR*/, 0, 0}, 0/*PROBE*/, /*NEEDED_ONCE_*/IS_LOST, 0, 0,2},	//Needed once? ~~~ wenn hier ne Aenderung, Facility2 in race und anarace wieder auf location availible checken !TODO
-{"Window move+++",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
-{"Window move+",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
-{"Window move-",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
-{"Window move prev",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
-{"Move from here",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
-{"Move to here",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"Probe", 20, 5000,    0,  1, 0, {0, 0}, {0 ,0, 0}, {NEXUS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, WORKER_UNIT_TYPE},
+{"Dark Templar", 50,12500,10000,  2, 0, {0, 0}, {TEMPLAR_ARCHIVES ,0, 0}, {GATEWAY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Dark Archon", 20,    0,    0,  2, 0, {0, 0}, {0 ,0, 0}, {DARK_TEMPLAR, 0, 0}, DARK_TEMPLAR, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
+{"Zealot", 40,10000,    0,  2, 0, {0, 0}, {0 ,0, 0}, {GATEWAY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Dragoon", 50,12500, 5000,  2, 0, {0, 0}, {CYBERNETICS_CORE ,0, 0}, {GATEWAY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"High Templar", 50, 5000,15000,  2, 0, {0, 0}, {TEMPLAR_ARCHIVES ,0, 0}, {GATEWAY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
+{"Archon", 20,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {HIGH_TEMPLAR, 0, 0}, HIGH_TEMPLAR, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
+{"Reaver", 70,20000,10000,  4, 0, {0, 0}, {ROBOTICS_SUPPORT_BAY ,0, 0}, {ROBOTICS_FACILITY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE}, 
+{"5xScarab", 35, 7500,    0,  0, 0, {0, 0}, {0, 0, 0}, {REAVER, 0, 0}, 0, NEEDED_ALWAYS, 0, 0, SPECIAL_UNIT_TYPE},
+{"10xScarab", 35, 7500,    0,  0, 0, {0, 0}, {REAVER_CAPACITY, 0, 0}, {HALF_SCARAB, 0, 0}, 0, IS_LOST, 0, 0, SPECIAL_UNIT_TYPE}, //~~ special rule... reaver is no longer availible :/
+{"Corsair", 40,15000,10000,  2, 0, {0, 0}, {0 ,0, 0}, {STARGATE, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Shuttle", 60,20000,    0,  2, 0, {0, 0}, {0 ,0, 0}, {ROBOTICS_FACILITY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
+{"Scout", 80,27500,12500,  3, 0, {0, 0}, {0 ,0, 0}, {STARGATE, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Arbiter",160,10000,35000,  4, 0, {0, 0}, {ARBITER_TRIBUNAL ,0, 0}, {STARGATE, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
+{"Carrier",140,35000,25000,  6, 0, {0, 0}, {FLEET_BEACON ,0, 0}, {STARGATE, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"5xInterceptor",100,25000,    0,  0, 0, {0, 0}, {0,0, REMAINING_UNIT_TYPE}, {CARRIER, 0, 0}, 0, NEEDED_ALWAYS, 0, 0, SPECIAL_UNIT_TYPE},
+{"8xInterceptor", 60,15000,    0,  0, 0, {0, 0}, {CARRIER_CAPACITY,0, REMAINING_UNIT_TYPE}, {HALF_INTERCEPTOR, 0, 0}, 0, IS_LOST, 0, 0, SPECIAL_UNIT_TYPE}, //~~~ Special rule... carrier is no longer availible :/
+{"Observer", 40, 2500, 7500,  1, 0, {0, 0}, {OBSERVATORY ,0, 0}, {ROBOTICS_FACILITY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
+{"Nexus",120,40000,    0, -9, 0, {0, 0}, {0 ,0, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, SUPPLY_UNIT_TYPE},
+{"Robotics Facility", 80,20000,20000,  0, 0, {0, 0}, {CYBERNETICS_CORE ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, PRODUCE_UNIT_TYPE},
+{"Pylon", 30,10000,    0, -8, 0, {0, 0}, {0 ,0, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, SUPPLY_UNIT_TYPE},
+{"Observatory", 30, 5000,10000,  0, 0, {0, 0}, {ROBOTICS_FACILITY ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Gateway", 60,15000,    0,  0, 0, {0, 0}, {PYLON ,0, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, PRODUCE_UNIT_TYPE},
+{"Photon Cannon", 50,15000,    0,  0, 0, {0, 0}, {FORGE ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, SUPPORT_UNIT_TYPE},
+{"Cybernetics Core", 60,20000,    0,  0, 0, {0, 0}, {GATEWAY ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Citadel Of Adun", 60,15000,10000,  0, 0, {0, 0}, {CYBERNETICS_CORE ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Templar Archives", 60,15000,20000,  0, 0, {0, 0}, {CITADEL_OF_ADUN ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Forge", 40,15000,    0,  0, 0, {0, 0}, {PYLON ,0, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Stargate", 70,15000,15000,  0, 0, {0, 0}, {CYBERNETICS_CORE ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, PRODUCE_UNIT_TYPE},
+{"Fleet Beacon", 60,30000,20000,  0, 0, {0, 0}, {STARGATE ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Arbiter Tribunal", 60,20000,15000,  0, 0, {0, 0}, {TEMPLAR_ARCHIVES ,STARGATE, PYLON}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Robotics Support Bay", 30,15000,10000,  0, 0, {0, 0}, {ROBOTICS_FACILITY ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Shield Battery", 30,10000,    0,  0, 0, {0, 0}, {GATEWAY ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, SUPPORT_UNIT_TYPE},
+{"Psionic Storm",120,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_PSIONIC_STORM, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Hallucination", 80,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_HALLUCINATION, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Recall",120,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {ARBITER_TRIBUNAL, 0, 0}, R_RECALL, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Stasis Field",100,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {ARBITER_TRIBUNAL, 0, 0}, R_STASIS_FIELD, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Disruption Web", 80,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {FLEET_BEACON, 0, 0}, R_DISRUPTION_WEB, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Mind Control",120,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_MIND_CONTROL, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Maelstrom",100,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_MAELSTROM, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Singularity Charge",166,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {CYBERNETICS_CORE, 0, 0}, R_SINGULARITY_CHARGE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Leg Enhancements",133,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {CITADEL_OF_ADUN, 0, 0}, R_LEG_ENHANCEMENTS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Scarab Damage",166,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {ROBOTICS_SUPPORT_BAY, 0, 0}, R_SCARAB_DAMAGE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Reaver Capacity",166,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {ROBOTICS_SUPPORT_BAY, 0, 0}, R_REAVER_CAPACITY, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Gravitic Drive",166,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {ROBOTICS_SUPPORT_BAY, 0, 0}, R_GRAVITIC_DRIVE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Sensor Array",133,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {OBSERVATORY, 0, 0}, R_SENSOR_ARRAY, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Gravitic Boosters",133,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {OBSERVATORY, 0, 0}, R_GRAVITIC_BOOSTERS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Khaydarin Amulet",166,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_KHAYDARIN_AMULET, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Apial Sensors",166,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {FLEET_BEACON, 0, 0}, R_APIAL_SENSORS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Gravitic Thrusters",166,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {FLEET_BEACON, 0, 0}, R_GRAVITIC_THRUSTERS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Carrier Capacity",100,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {FLEET_BEACON, 0, 0}, R_CARRIER_CAPACITY, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Khaydarin Core",166,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {ARBITER_TRIBUNAL, 0, 0}, R_KHAYDARIN_CORE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Argus Jewel",166,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {FLEET_BEACON, 0, 0}, R_ARGUS_JEWEL, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Argus Talisman",166,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_ARGUS_TALISMAN, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Armor",266,10000,10000,  0, 7500, {TEMPLAR_ARCHIVES, TEMPLAR_ARCHIVES}, {0 ,0, 0}, {FORGE, 0, 0}, R_ARMOR, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
+{"Plating",266,15000,15000,  0, 7500, {FLEET_BEACON, FLEET_BEACON}, {0 ,0, 0}, {CYBERNETICS_CORE, 0, 0}, R_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
+{"Ground Weapons",266,10000,10000,  0, 5000, {TEMPLAR_ARCHIVES, TEMPLAR_ARCHIVES}, {0 ,0, 0}, {FORGE, 0, 0}, R_GROUND_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
+{"Air Weapons",266,10000,10000,  0, 7500, {FLEET_BEACON, FLEET_BEACON}, {0 ,0, 0}, {CYBERNETICS_CORE, 0, 0}, R_AIR_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
+{"Plasma Shields",266,20000,20000,  0, 10000, {0, 0}, {0 ,0, 0}, {FORGE, 0, 0}, R_PLASMA_SHIELDS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"Assimilator", 40,10000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {PROBE, 0, 0}, /*VESPENE_GEYSIR*/0, NEEDED_ONCE/*_IS_LOST*/, 0, 0, SUPPLY_UNIT_TYPE},
+{"Gas Probe",  3,    0,    0,  1, 0, {0, 0}, {ASSIMILATOR ,0, 0}, {PROBE/*ASSIMILATOR*/, 0, 0}, 0/*PROBE*/, /*NEEDED_ONCE_*/IS_LOST, 0, 0, GAS_MINER_UNIT_TYPE},	//Needed once? ~~~ wenn hier ne Aenderung, Facility2 in race und anarace wieder auf location availible checken !TODO
+{"Window move+++",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
+{"Window move+",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
+{"Window move-",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
+{"Window move prev",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
+{"Move from here",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
+{"Move to here",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
 
-	
-{"Vespene Geysir",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"Minerals",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Psionic Storm",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Hallucination",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Recall",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Stasis Field",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Disruption Web",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Mind Control",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Maelstrom",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Singularity Charge",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Leg Enhancements",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Scarab Damage",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Reaver Capacity",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Gravitic Drive",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Sensor Array",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Gravitic Boosters",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Khaydarin Amulet",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Apial Sensors",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Gravitic Thrusters",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Carrier Capacity",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Khaydarin Core",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Argus Jewel",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Argus Talisman",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Armor",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Plating",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Ground Weapons",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Air Weapons",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Plasma Shields",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"INTRON",  0,   0,   0,  0, 0, {0, 0}, {0, 0, 0}, {0, 0, 0}, 0, 0, 0, 0,0}
+{"Vespene Geysir",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"Minerals",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Psionic Storm",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Hallucination",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Recall",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Stasis Field",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Disruption Web",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Mind Control",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Maelstrom",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Singularity Charge",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Leg Enhancements",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Scarab Damage",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Reaver Capacity",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Gravitic Drive",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Sensor Array",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Gravitic Boosters",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Khaydarin Amulet",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Apial Sensors",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Gravitic Thrusters",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Carrier Capacity",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Khaydarin Core",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Argus Jewel",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Argus Talisman",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Armor",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Plating",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Ground Weapons",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Air Weapons",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Plasma Shields",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"INTRON",  0,   0,   0,  0, 0, {0, 0}, {0, 0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE}
 },
  //for colors... 0= rest, 1= scv, 2= gas scv, 3= combat units, 4=support, 5=supply/refinery, 6=produce buildings, 7=research buildigns, 8= addons, 9=researchs, 10= special
-
 {
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0, 0, 0}, {0 ,0, 0}, 0, 0, 0, 0, 0},
-{"Drone", 23, 5000,    0,  1, 0, {0, 0}, {0 ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, 1},
-{"Larva", 20,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0, 10},
-{"Zergling", 28, 5000,    0,  1, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, 3},
-{"Hydralisk", 28, 7500, 2500,  1, 0, {0, 0}, {HYDRALISK_DEN ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, 3}, //Hier stand ein Zergling als facility2!?
-{"Ultralisk", 60,20000,20000,  6, 0, {0, 0}, {ULTRALISK_CAVERN ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, 3},
-{"Defiler", 50, 5000,15000,  2, 0, {0, 0}, {DEFILER_MOUND ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, 4},
-{"Lurker", 40, 5000,10000,  2, 0, {0, 0}, {HYDRALISK_DEN ,0, 0}, {HYDRALISK, 0, 0}, 0, IS_LOST, 0, 100, 3},
-{"Overlord", 40,10000,    0, -8, 0, {0, 0}, {0 ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, 5},
-{"Mutalisk", 40,10000,10000,  2, 0, {0, 0}, {SPIRE ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, 3},
-{"Guardien", 40, 5000,10000,  2, 0, {0, 0}, {GREATER_SPIRE ,0, 0}, {MUTALISK, 0, 0}, 0, IS_LOST, 0, 100, 3}, 
-{"Queen", 50,10000,10000,  2, 0, {0, 0}, {QUEENS_NEST ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, 4},
-{"Scourge", 30, 2500, 7500,  1, 0, {0, 0}, {SPIRE ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, SCOURGE, 100, 3},
-{"Devourer", 40,10000, 5000,  2, 0, {0, 0}, {GREATER_SPIRE ,0, 0}, {MUTALISK, 0, 0}, 0, IS_LOST, 0, 100, 3}, 
-{"Hatchery",120,30000,    0, -1, 0, {0, 0}, {0 ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, LARVA, 0, 5}, //create 1 Larva when done :-) TODO: add another "create"field for "CREEP"
-{"Lair",100,15000,10000, -1, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {HATCHERY, 0, 0}, 0, IS_LOST, 0, 0, 8},
-{"Hive",120,20000,15000, -1, 0, {0, 0}, {QUEENS_NEST ,0, 0}, {LAIR, 0, 0}, 0, IS_LOST, 0, 0,8},
-{"Nydus Canal", 40,15000,    0,  0, 0, {0, 0}, {HIVE ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0,4},
-{"Hydralisk den", 40,10000, 5000,  0, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0,7},
-{"Defiler mound", 60,10000,10000,  0, 0, {0, 0}, {HIVE ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0,7},
-{"Greater Spire",120,10000,15000,  0, 0, {0, 0}, {HIVE ,0, 0}, {SPIRE, 0, 0}, 0, IS_LOST, 0, 0,7},
-{"Queen's Nest", 60,15000,10000,  0, 0, {0, 0}, {LAIR ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0,7},
-{"Evolution Chamber", 40, 7500,    0,  0, 0, {0, 0}, {0 ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0,7},
-{"Ultralisk Cavern", 80,15000,20000,  0, 0, {0, 0}, {HIVE ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0,7},
-{"Spire",120,20000,15000,  0, 0, {0, 0}, {LAIR ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0,7},
-{"Spawning Pool", 80,20000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0,7},
-{"Creep Colony", 20, 7500,    0,  0, 0, {0, 0}, {0 ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0,4},
-{"Spore Colony", 20, 5000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {CREEP_COLONY, 0, 0}, 0, IS_LOST, 0, 0,8},
-{"Sunken Colony", 20, 5000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {CREEP_COLONY, 0, 0}, 0, IS_LOST, 0, 0,8},
-{"Ventral Sacs",160,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {LAIR, HIVE, 0}, R_VENTRAL_SACKS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9}, 
-{"Antennae",133,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {LAIR, HIVE, 0}, R_ANTENNAE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Pneumatized Carapace",133,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {LAIR, HIVE, 0}, R_PNEUMATIZED_CARAPACE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Metabolic Boost",100,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {SPAWNING_POOL, 0, 0}, R_METABOLIC_BOOST, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Adrenal Glands",100,20000,20000,  0, 0, {0, 0}, {HIVE ,0, 0}, {SPAWNING_POOL, 0, 0}, R_ADRENAL_GLANDS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Muscular Augments",100,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {HYDRALISK_DEN, 0, 0}, R_MUSCULAR_AUGMENTS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Grooved Spines",100,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {HYDRALISK_DEN, 0, 0}, R_GROOVED_SPINES, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Gamete Meiosis",166,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {QUEENS_NEST, 0, 0}, R_GAMETE_MEIOSIS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Metasynaptic Node",166,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {DEFILER_MOUND, 0, 0}, R_METASYNAPTIC_NODE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Chitinous Plating",133,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {ULTRALISK_CAVERN, 0, 0}, R_CHITINOUS_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Anabolic Synthesis",133,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {ULTRALISK_CAVERN, 0, 0}, R_ANABOLIC_SYNTHESIS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Burrowing", 80,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {HATCHERY, LAIR, HIVE}, R_BURROWING, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Spawn Broodling", 80,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {QUEENS_NEST, 0, 0}, R_SPAWN_BROODLING, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Plague",100,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {DEFILER_MOUND, 0, 0}, R_PLAGUE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Consume",100,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {DEFILER_MOUND, 0, 0}, R_CONSUME, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Ensnare", 80,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {QUEENS_NEST, 0, 0}, R_ENSNARE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9},
-{"Lurker Aspect",120,20000,20000,  0, 0, {0, 0}, {LAIR ,0, 0}, {HYDRALISK_DEN, 0, 0}, R_LURKER_ASPECT, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0,9}, 
-{"Carapace",266,15000,15000,  0, 7500, {LAIR, HIVE}, {0 ,0, 0}, {EVOLUTION_CHAMBER, 0, 0}, R_CARAPACE, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
-{"Flyer Carapace",266,15000,15000,  0, 7500, {LAIR, HIVE}, {0 ,0, 0}, {SPIRE, GREATER_SPIRE, 0}, R_FLYER_CARAPACE, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
-{"Melee Attacks",266,10000,10000,  0, 5000, {LAIR, HIVE}, {0 ,0, 0}, {EVOLUTION_CHAMBER, 0, 0}, R_MELEE_ATTACKS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
-{"Missile Attacks",266,10000,10000,  0, 5000, {LAIR, HIVE}, {0 ,0, 0}, {EVOLUTION_CHAMBER, 0, 0}, R_MISSILE_ATTACKS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
-{"Flyer Attacks",266,10000,10000,  0, 7500, {LAIR, HIVE}, {0 ,0, 0}, {SPIRE, GREATER_SPIRE, 0}, R_FLYER_ATTACKS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"Extractor", 40, 5000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {/*VESPENE_GEYSIR*/DRONE, 0, 0}, 0/*DRONE*/, IS_LOST, 0, 0,5}, //~~ //TODO HAE?
-{"Gas Drone",  3,    0,    0,  1, 0, {0, 0}, {EXTRACTOR ,0, 0}, {/*EXTRACTOR*/DRONE, 0, 0}, /*DRONE*/0, /*NEEDED_ONCE_*/IS_LOST, 0, 0,2}, //~~~~
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0, 0, 0}, {0 ,0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"Drone", 23, 5000,    0,  1, 0, {0, 0}, {0 ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, WORKER_UNIT_TYPE},
+{"Larva", 20,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NEEDED_ONCE, 0, 0, SPECIAL_UNIT_TYPE},
+{"Zergling", 28, 5000,    0,  1, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
+{"Hydralisk", 28, 7500, 2500,  1, 0, {0, 0}, {HYDRALISK_DEN ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE}, //Hier stand ein Zergling als facility2!?
+{"Ultralisk", 60,20000,20000,  6, 0, {0, 0}, {ULTRALISK_CAVERN ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
+{"Defiler", 50, 5000,15000,  2, 0, {0, 0}, {DEFILER_MOUND ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, SUPPORT_UNIT_TYPE},
+{"Lurker", 40, 5000,10000,  2, 0, {0, 0}, {HYDRALISK_DEN ,0, 0}, {HYDRALISK, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
+{"Overlord", 40,10000,    0, -8, 0, {0, 0}, {0 ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, SUPPLY_UNIT_TYPE},
+{"Mutalisk", 40,10000,10000,  2, 0, {0, 0}, {SPIRE ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
+{"Guardien", 40, 5000,10000,  2, 0, {0, 0}, {GREATER_SPIRE ,0, 0}, {MUTALISK, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE}, 
+{"Queen", 50,10000,10000,  2, 0, {0, 0}, {QUEENS_NEST ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, SUPPORT_UNIT_TYPE},
+{"Scourge", 30, 2500, 7500,  1, 0, {0, 0}, {SPIRE ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, SCOURGE, 100, COMBAT_UNIT_TYPE},
+{"Devourer", 40,10000, 5000,  2, 0, {0, 0}, {GREATER_SPIRE ,0, 0}, {MUTALISK, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE}, 
+{"Lair",100,15000,10000, -1, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {HATCHERY, 0, 0}, 0, IS_LOST, 0, 0, ADD_ON_UNIT_TYPE},
+{"Hive",120,20000,15000, -1, 0, {0, 0}, {QUEENS_NEST ,0, 0}, {LAIR, 0, 0}, 0, IS_LOST, 0, 0, ADD_ON_UNIT_TYPE},
+{"Nydus Canal", 40,15000,    0,  0, 0, {0, 0}, {HIVE ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, SUPPORT_UNIT_TYPE},
+{"Hydralisk den", 40,10000, 5000,  0, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Defiler mound", 60,10000,10000,  0, 0, {0, 0}, {HIVE ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Hatchery",120,30000,    0, -1, 0, {0, 0}, {0 ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, LARVA, 0, PRODUCE_UNIT_TYPE}, //create 1 Larva when done :-) TODO: add another "create"field for "CREEP"
+{"Greater Spire",120,10000,15000,  0, 0, {0, 0}, {HIVE ,0, 0}, {SPIRE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Queen's Nest", 60,15000,10000,  0, 0, {0, 0}, {LAIR ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Evolution Chamber", 40, 7500,    0,  0, 0, {0, 0}, {0 ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Ultralisk Cavern", 80,15000,20000,  0, 0, {0, 0}, {HIVE ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Spire",120,20000,15000,  0, 0, {0, 0}, {LAIR ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Spawning Pool", 80,20000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Creep Colony", 20, 7500,    0,  0, 0, {0, 0}, {0 ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, SUPPORT_UNIT_TYPE},
+{"Spore Colony", 20, 5000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {CREEP_COLONY, 0, 0}, 0, IS_LOST, 0, 0, ADD_ON_UNIT_TYPE},
+{"Sunken Colony", 20, 5000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {CREEP_COLONY, 0, 0}, 0, IS_LOST, 0, 0, ADD_ON_UNIT_TYPE},
+{"Ventral Sacs",160,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {LAIR, HIVE, 0}, R_VENTRAL_SACKS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE}, 
+{"Antennae",133,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {LAIR, HIVE, 0}, R_ANTENNAE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Pneumatized Carapace",133,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {LAIR, HIVE, 0}, R_PNEUMATIZED_CARAPACE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Metabolic Boost",100,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {SPAWNING_POOL, 0, 0}, R_METABOLIC_BOOST, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Adrenal Glands",100,20000,20000,  0, 0, {0, 0}, {HIVE ,0, 0}, {SPAWNING_POOL, 0, 0}, R_ADRENAL_GLANDS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Muscular Augments",100,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {HYDRALISK_DEN, 0, 0}, R_MUSCULAR_AUGMENTS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Grooved Spines",100,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {HYDRALISK_DEN, 0, 0}, R_GROOVED_SPINES, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Gamete Meiosis",166,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {QUEENS_NEST, 0, 0}, R_GAMETE_MEIOSIS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Metasynaptic Node",166,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {DEFILER_MOUND, 0, 0}, R_METASYNAPTIC_NODE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Chitinous Plating",133,15000,15000,  0, 0, {0, 0}, {0 ,0, 0}, {ULTRALISK_CAVERN, 0, 0}, R_CHITINOUS_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Anabolic Synthesis",133,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {ULTRALISK_CAVERN, 0, 0}, R_ANABOLIC_SYNTHESIS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Burrowing", 80,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {HATCHERY, LAIR, HIVE}, R_BURROWING, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Spawn Broodling", 80,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {QUEENS_NEST, 0, 0}, R_SPAWN_BROODLING, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Plague",100,20000,20000,  0, 0, {0, 0}, {0 ,0, 0}, {DEFILER_MOUND, 0, 0}, R_PLAGUE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Consume",100,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {DEFILER_MOUND, 0, 0}, R_CONSUME, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Ensnare", 80,10000,10000,  0, 0, {0, 0}, {0 ,0, 0}, {QUEENS_NEST, 0, 0}, R_ENSNARE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Lurker Aspect",120,20000,20000,  0, 0, {0, 0}, {LAIR ,0, 0}, {HYDRALISK_DEN, 0, 0}, R_LURKER_ASPECT, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE}, 
+{"Carapace",266,15000,15000,  0, 7500, {LAIR, HIVE}, {0 ,0, 0}, {EVOLUTION_CHAMBER, 0, 0}, R_CARAPACE, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
+{"Flyer Carapace",266,15000,15000,  0, 7500, {LAIR, HIVE}, {0 ,0, 0}, {SPIRE, GREATER_SPIRE, 0}, R_FLYER_CARAPACE, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
+{"Melee Attacks",266,10000,10000,  0, 5000, {LAIR, HIVE}, {0 ,0, 0}, {EVOLUTION_CHAMBER, 0, 0}, R_MELEE_ATTACKS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
+{"Missile Attacks",266,10000,10000,  0, 5000, {LAIR, HIVE}, {0 ,0, 0}, {EVOLUTION_CHAMBER, 0, 0}, R_MISSILE_ATTACKS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
+{"Flyer Attacks",266,10000,10000,  0, 7500, {LAIR, HIVE}, {0 ,0, 0}, {SPIRE, GREATER_SPIRE, 0}, R_FLYER_ATTACKS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"Extractor", 40, 5000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {/*VESPENE_GEYSIR*/DRONE, 0, 0}, 0/*DRONE*/, IS_LOST, 0, 0, SUPPLY_UNIT_TYPE}, //~~ //TODO HAE?
+{"Gas Drone",  3,    0,    0,  1, 0, {0, 0}, {EXTRACTOR ,0, 0}, {/*EXTRACTOR*/DRONE, 0, 0}, /*DRONE*/0, /*NEEDED_ONCE_*/IS_LOST, 0, 0, GAS_MINER_UNIT_TYPE}, //~~~~
 
-{"Window move+++",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
-{"Window move+",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
-{"Window move-",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
-{"Window move prev",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
-{"Move from here",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
-{"Move to here",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
+{"Window move+++",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
+{"Window move+",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
+{"Window move-",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
+{"Window move prev",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
+{"Move from here",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
+{"Move to here",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
 	
-{"Vespene Geysir",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"Minerals",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"Break up Building",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Ventral Sacs",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Antennae",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Pneumati. Carapace",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Metabolic Boost",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Adrenal Glands",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Muscular Augments",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Grooved Spines",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Gamete Meiosis",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Metasynaptic Node",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Chitinous Plating",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Anabolic Synthesis",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Burrowing",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Spawn Broodling",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Plague",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Consume",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Ensnare",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Lurker Aspect",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Carapace",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Flyer Carapace",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Melee Attacks",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Missile Attacks",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"R_Flyer Attacks",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
-{"INTRON",  0,   0,   0,  0, 0, {0, 0}, {0, 0, 0}, {0, 0, 0}, 0, 0, 0, 0}
+{"Vespene Geysir",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"Minerals",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"Break up Building",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Ventral Sacs",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Antennae",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Pneumati. Carapace",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Metabolic Boost",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Adrenal Glands",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Muscular Augments",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Grooved Spines",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Gamete Meiosis",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Metasynaptic Node",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Chitinous Plating",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Anabolic Synthesis",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Burrowing",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Spawn Broodling",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Plague",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Consume",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Ensnare",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Lurker Aspect",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Carapace",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Flyer Carapace",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Melee Attacks",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Missile Attacks",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"R_Flyer Attacks",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"INTRON",  0,   0,   0,  0, 0, {0, 0}, {0, 0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE}
 }
 };
 

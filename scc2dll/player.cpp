@@ -27,11 +27,11 @@ void EXPORT PLAYER::copy(PLAYER* player)
 const int* PLAYER::getHarvestMining()
 {
 #ifdef _SCC_DEBUG
-	if(!basicMineralHarvestPerSecond)
-	{
-		debug.toLog(0,"DEBUG: (PLAYER::getHarvestMining): Variable not initialized [%i].",basicMineralHarvestPerSecond);
-		return(0);
-	}
+    if(!basicMineralHarvestPerSecond)
+    {
+        debug.toLog(0,"DEBUG: (PLAYER::getHarvestMining): Variable not initialized [%i].",basicMineralHarvestPerSecond);
+        return(0);
+    }
 #endif
 	return basicMineralHarvestPerSecond;
 };
@@ -39,11 +39,11 @@ const int* PLAYER::getHarvestMining()
 const int* PLAYER::getHarvestGasing()
 {
 #ifdef _SCC_DEBUG
-	if(!basicGasHarvestPerSecond)
-	{
-		debug.toLog(0,"DEBUG: (PLAYER::getHarvestGasing): Variable not initialized [%i].",basicGasHarvestPerSecond);
-		return(0);
-	}
+    if(!basicGasHarvestPerSecond)
+    {
+        debug.toLog(0,"DEBUG: (PLAYER::getHarvestGasing): Variable not initialized [%i].",basicGasHarvestPerSecond);
+        return(0);
+    }
 #endif
 	return basicGasHarvestPerSecond;
 };
@@ -261,7 +261,8 @@ int EXPORT PLAYER::setRace(int num)
 #endif
 	wasChanged();
 	pStats=&(stats[race=num][0]);
-	goal.setRace(num);
+	if(goal.getRace()!=num)
+		goal.setRace(num);
 	return(1);
 };
 
@@ -325,11 +326,11 @@ int EXPORT PLAYER::setMaxSupply(int num)
 int EXPORT PLAYER::getInitialized()
 {
 #ifdef _SCC_DEBUG
-	if((initialized<0)||(initialized>1))
-	{
-		debug.toLog(0,"DEBUG: (PLAYER::getInitialized): Variable initialized not initialized [%i].",initialized);
-		return(0);
-	}
+    if((initialized<0)||(initialized>1))
+    {
+        debug.toLog(0,"DEBUG: (PLAYER::getInitialized): Variable initialized not initialized [%i].",initialized);
+        return(0);
+    }
 #endif
 	return(initialized);
 };

@@ -1,20 +1,20 @@
 #ifndef __STATISTICS_H
 #define __STATISTICS_H
 
-#include "graphics.h"
+#include "UI_Window.h"
 #include "../scc2dll/anarace.h"
 
-class StatisticsWindow:public GraphixScrollWindow
+class StatisticsWindow:public UI_Window
 {
 	public:
-		StatisticsWindow(wxRect rahmen, wxRect maxSize);
+		StatisticsWindow(UI_Object* parent, wxRect rahmen, wxRect maxSize, ANARACE* anarace);
 		~StatisticsWindow();
-		void setAnarace(ANARACE* anarace);
-		void drawStatistics(wxDC* dc);
-		void ProgressGraph();
+		
+		void process();
+		void draw(wxDC* dc);
+		
 		void resetData();
-		int maxForce; //all units
-		int currentForce;
+		
 	private:
 		ANARACE* anarace;
 		void showGraph(wxDC* dc, int* data, int min, int max, wxColour col);
@@ -36,6 +36,7 @@ class StatisticsWindow:public GraphixScrollWindow
 		int mintFitness;
 		int maxaFitness;
 		int maxvFitness;
+		int maxForce;
 		int maxHarvestedRessources;
 		int average[100];int averagecounter;
 //		wxDateTime dt1;

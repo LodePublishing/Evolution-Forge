@@ -10,13 +10,6 @@
 #include "blist.h"
 #include "start.h"
 
-struct LARVACOUNTER
-{
-	int location;
-	int counter; //produce every 20 seconds a new larva
-	int larvacount; //do not produce more than 3 larva per larvacounter
-};
-
 class EXPORT PRERACE
 {
 protected:
@@ -33,8 +26,6 @@ protected:
 	static int noise[MAX_TIME];
 	static int markerCounter;
 	static UNITS units[MAX_PLAYER][MAX_LOCATIONS];
-	int larvacounternumber;
-	LARVACOUNTER larva[30]; //koennen larvacounter (hatcheries etc.) auch wegfallen? mmmh... naja, wenn sie zerstoert werden... TODO
 	LAST last[MAX_LENGTH]; // last* is to save the last position, for movements
 	int lastcounter;
 	int lastunit;
@@ -51,7 +42,9 @@ protected:
 	int calculateReady();
 	void adjustAvailibility(int loc,int fac,const UNIT_STATISTICS* stat);
 	int calculatePrimaryFitness(int ready);
-	void replaceCode(int dominant, int IP, int num);
+	void replaceCode(int IP, int num);
+
+	int larvaInProduction[MAX_LOCATIONS]; // well... one of that ugly race-specific variables saves a lot of trouble...
 private:
 //	static int doTransform; // -> a new goal was added so the genetic information is probably wrong... bad thing to do but better than keeping track which goals are already changed
 //	static int transformList[UNIT_TYPE_COUNT]; // old geno type -> new geno type
@@ -67,6 +60,7 @@ private:
 	int ftime[MAX_GOALS]; //when the goal is reached / when the last item is produced (ALL locations...*/
 	int length,timeout;
 	int calculated;
+
 public:
 	static void setStartConditions(START* pStart);
 	static void initNoise();
@@ -91,8 +85,8 @@ public:
 	int addLocationForce(int loc, int type, int num);
 
 
-	int Code[2][MAX_LENGTH];
-	int Marker[2][MAX_LENGTH];
+	int Code[MAX_LENGTH];
+	int Marker[MAX_LENGTH];
 
 	int setpStats(const UNIT_STATISTICS* pStats);
 	const UNIT_STATISTICS* getpStats();

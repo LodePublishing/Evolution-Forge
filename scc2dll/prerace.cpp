@@ -4,37 +4,32 @@
 void PRERACE::setStartConditions(START* pStart)
 {
 #ifdef _SCC_DEBUG
-    if(!pStart)
-    {
-        debug.toLog(0,"DEBUG: (PRERACE::setStartConditions): Variable pStart not initialized [%i].",pStart);
-        return;
-    }
+	if(!pStart)
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::setStartConditions): Variable pStart not initialized [%i].",pStart);
+		return;
+	}
 #endif
 	start=pStart;
 	pMap=start->getMap();
 };
 
-void PRERACE::replaceCode(int dominant, int IP, int num)
+void PRERACE::replaceCode(int IP, int num)
 {
 #ifdef _SCC_DEBUG
-    if((IP<0)||(IP>=MAX_LENGTH))
-    {
-        debug.toLog(0,"DEBUG: (PRERACE::replaceCode): Value IP [%i] out of range.",IP);
-        return;
-    }
-    if((num<0)||(num>=getPlayer()->getGoal()->getMaxBuildTypes()))
-    {
-        debug.toLog(0,"DEBUG: (PRERACE::replaceCode): Value num [%i] out of range.",num);
-        return;
-    }
-    if((dominant<0)||(dominant>1))
-    {
-        debug.toLog(0,"DEBUG: (PRERACE::replaceCode): Value dominant [%i] out of range.",dominant);
-        return;
-    }
+	if((IP<0)||(IP>=MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::replaceCode): Value IP [%i] out of range.",IP);
+		return;
+	}
+	if((num<0)||(num>=getPlayer()->getGoal()->getMaxBuildTypes()))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::replaceCode): Value num [%i] out of range.",num);
+		return;
+	}
 #endif
-	Code[dominant][IP]=num;
-	markerCounter++;Marker[dominant][IP]=markerCounter;
+	Code[IP]=num;
+	markerCounter++;Marker[IP]=markerCounter;
 };
 
 void PRERACE::initializeMap() // initializes the Map (units[][]) with values from 'start'
@@ -119,9 +114,7 @@ if( /*((getPlayer()->getGoal()->goal[i].location==0)&&(getPlayer()->getGoal()->g
 								}
 						} //end of goal checking
 // TODO: Check for very small 'goal.time' values, probably in scc.cpp!!
-															                                                                                                
 //Bonus: Hier werden Einheiten verarbeitet die noch in Produktion sind, aber Teil der goals sind
-															                                                                                                
 //Erstmal Maximalbonus errechnen (nicht, dass die engine dann 50 Battlecruiser kurz vor Schluss noch anfaengt oder so :P )
 /*			  for(i=MAX_LOCATIONS;i--;)
 					   for(j=UNIT_TYPE_COUNT;j--;)
@@ -135,14 +128,12 @@ if( /*((getPlayer()->getGoal()->goal[i].location==0)&&(getPlayer()->getGoal()->g
 						{
 						//erstmal ohne Zeit...
 								pFitness+=((build->getRemainingBuildTime(i)*100)/((getLocationForce(build->getLocation(i),build->getType(i))+bonus[build->getLocation(i)][build->getType(i)])*pStats[build->getType(i)].BT)); //TODO in ProgramBT aendern
-															                                                                                                
 								if((getPlayer()->getGoal()->goal[build->getType(i)].time>0)&&(getLocationForce(build->getLocation(i),build->getType(i))==0))
 										pFitness+=(build->getRemainingBuildTime(i)*100*getPlayer()->getGoal()->goal[build->getType(i)].time*getLocationForce(0,i))/(getPlayer()->getGoal()->goal[build->getType(i)].count*pStats[build->getType(i)].BT*ga->maxTime);//hier auch ProgramBT
 								else
 										pFitness+=((build->getRemainingBuildTime(i)*100)/(getPlayer()->getGoal()->goal[build->getType(i)].count*pStats[build->getType(i)].BT));
 								bonus[build->getLocation(i)][build->getType(i)]--;
 						}*/
-															                                                                                                
 		} // end of ready=false
 		else   // all goals fulfilled, fitness <- timer
 	{
@@ -159,24 +150,6 @@ if( /*((getPlayer()->getGoal()->goal[i].location==0)&&(getPlayer()->getGoal()->g
 	return(tpF);
 }
 // end of calculatePrimaryFitness
-
-void EXPORT PRERACE::createSpecial()
-{
-	if(getPlayer()->getGoal()->getRace()==ZERG)
-		for(int i=0;i<larvacounternumber;i++)
-			if(!--larva[i].counter)
-			{
-				larva[i].counter=20;
-				if(larva[i].larvacount<3)
-				{
-					larva[i].larvacount++;
-					addLocationForce(larva[i].location,LARVA,1);
-					addLocationAvailible(larva[i].location,LARVA,1);					
-				}
-			}
-	//TODO energy, regeneration life/shield etc.
-	// TODO linked list draus machen!
-};
 
 int EXPORT PRERACE::getMapLocationAvailible(int player, int loc, int type)
 {
@@ -208,7 +181,7 @@ int EXPORT PRERACE::getMapLocationForce(int player, int loc, int type)
 		debug.toLog(0,"DEBUG: (PRERACE::getMapLocationForce): Value player [%i] out of range.",player);
 		return(0);
 	}
-																				
+
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getMapLocationForce): Value loc [%i] out of range.",loc);
@@ -232,7 +205,7 @@ int EXPORT PRERACE::setMapLocationAvailible(int player, int loc, int type, int n
 		debug.toLog(0,"DEBUG: (PRERACE::setMapLocationAvailible): Value player [%i] out of range.",player);
 		return(0);
 	}
-																				
+
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setMapLocationAvailible): Value loc [%i] out of range.",loc);
@@ -247,7 +220,7 @@ int EXPORT PRERACE::setMapLocationAvailible(int player, int loc, int type, int n
 	units[player][loc].setAvailible(type, num);
 	return(1);
 };
-																				
+
 int EXPORT PRERACE::setMapLocationForce(int player, int loc, int type, int num)
 {
 #ifdef _SCC_DEBUG
@@ -284,7 +257,6 @@ int EXPORT PRERACE::addMapLocationAvailible(int player, int loc, int type, int n
 		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationAvailible): Value player [%i] out of range.",player);
 		return(0);
 	}
-																				
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationAvailible): Value loc [%i] out of range.",loc);
@@ -309,7 +281,6 @@ int EXPORT PRERACE::addMapLocationForce(int player, int loc, int type, int num)
 		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationForce): Value player [%i] out of range.",player);
 		return(0);
 	}
-																				
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationForce): Value loc [%i] out of range.",loc);
@@ -324,7 +295,6 @@ int EXPORT PRERACE::addMapLocationForce(int player, int loc, int type, int num)
 	units[player][loc].addTotal(type, num);
 	return(1);
 };
-																				
 
 //----
 
@@ -449,7 +419,7 @@ int EXPORT PRERACE::addLocationAvailible(int loc, int type, int num)
 		location[0].addAvailible(type, num);
 	return(1);
 };
-																				
+
 int EXPORT PRERACE::addLocationForce(int loc, int type, int num)
 {
 #ifdef _SCC_DEBUG
@@ -1192,52 +1162,20 @@ int EXPORT PRERACE::getTimeOut()
 
 void EXPORT PRERACE::resetSpecial()
 {
-	for(int i=0;i<20;i++)
-	{
-		larva[i].counter=0;
-		larva[i].location=0;
-		larva[i].larvacount=0;
-	}
-	larvacounternumber=0;
-	if(getPlayer()->getGoal()->getRace()==ZERG)
-	{
-		for(int i=1;i<MAX_LOCATIONS;i++)
-		{
-			int j=(getLocationForce(i,HATCHERY)+getLocationForce(i,LAIR)+getLocationForce(i,HIVE));
-			if(j)
-			{
-				for(int k=0;k<j;k++)
-				{
-					larva[larvacounternumber].counter=20;
-					larva[larvacounternumber].location=i;
-					larva[larvacounternumber].larvacount=1;
-					larvacounternumber++;
-					addLocationForce(i,LARVA,1);
-					addLocationAvailible(i,LARVA,1);	
-				}
-			}
-		}
-	}
+	for(int i=MAX_LOCATIONS;i--;)
+		larvaInProduction[i]=0;
 }
 
 void PRERACE::adjustAvailibility(int loc,int fac,const UNIT_STATISTICS* stat)
 {
-	switch(stat->facility_type)
+	switch(stat->facilityType)
 	{
+		case NO_FACILITY:break;
 		case IS_LOST:
 			if(stat->facility[fac]>0)
 			{
 				addLocationAvailible(loc,stat->facility[fac],-1);
 				setSupply(getSupply()+pStats[stat->facility[fac]].supply);
-				if((getPlayer()->getGoal()->getRace()==ZERG)&&(stat->facility[fac]==LARVA))
-				{
-					int bestPlace=0;//unschoen hier :/
-					int bestCounter=0;
-					for(int i=0;i<larvacounternumber;i++)
-						if((larva[i].location==loc)&&(larva[i].larvacount>bestCounter))
-							{bestCounter=larva[i].larvacount;bestPlace=i;}
-					larva[bestPlace].larvacount--;
-				}
 			}
 			if(stat->facility2>0)
 			{
@@ -1284,7 +1222,10 @@ void PRERACE::adjustAvailibility(int loc,int fac,const UNIT_STATISTICS* stat)
 			if(stat->facility2>0)
 				addLocationAvailible(loc,stat->facility2,-1);
 			break;
-		default:debug.toLog(0,"DEBUG: (ANARACE::buildGene) default case reached!");break;
+        case NO_FACILITY_BEHAVIOUR_DEFINED:
+        default:
+              debug.toLog(0,"ERROR: UNDEFINED FACILITY BEHAVIOUR DETECTED!");
+                   break;
 	}
 }
 
@@ -1294,7 +1235,7 @@ int PRERACE::calculateReady()
 	int ready=1;
 	for(int i=MAX_GOALS;(i--)&&(ready);)
 		if(getPlayer()->getGoal()->goal[i].count)
-			ready&=((getPlayer()->getGoal()->goal[i].count<=getLocationForce(getPlayer()->getGoal()->goal[i].location,getPlayer()->getGoal()->goal[i].unit))&&((getPlayer()->getGoal()->goal[i].time>=getFinalTime(i))||(getPlayer()->getGoal()->goal[i].time==0)));
+			ready&=((getPlayer()->getGoal()->goal[i].count<=getLocationForce(getPlayer()->getGoal()->goal[i].location, getPlayer()->getGoal()->goal[i].unit))				 &&((getPlayer()->getGoal()->goal[i].time>=getFinalTime(i))||(getPlayer()->getGoal()->goal[i].time==0)));
 	return(ready);
 }
 
@@ -1323,19 +1264,12 @@ PRERACE::PRERACE()
 	};
 	for(int i=0;i<MAX_LENGTH;i++)
 	{
-		Code[0][i]=0;
-		Code[1][i]=0;
+		Code[i]=0;
 		last[i].unit=0;
 		last[i].location=0;
 		last[i].count=0;
 	};
-	for(int i=0;i<20;i++)
-	{
-		larva[i].counter=0;
-		larva[i].location=0;
-		larva[i].larvacount=0;
-	}
-	larvacounternumber=0;
+	resetSpecial();
 };
 
 PRERACE::~PRERACE()
@@ -1373,10 +1307,10 @@ void PRERACE::initializeMap();
 
 int PRERACE::getMapLocationAvailible(int player, int loc, int type);
 int PRERACE::getMapLocationForce(int player, int loc, int type);
-                                                                                
+
 int PRERACE::setMapLocationAvailible(int player, int loc, int type, int num);
 int PRERACE::setMapLocationForce(int player, int loc, int type, int num);
-                                                                                
+
 int PRERACE::addMapLocationAvailible(int player, int loc, int type, int num);
 int PRERACE::addMapLocationForce(int player, int loc, int type, int num);
 void PRERACE::resetGeneMarker();

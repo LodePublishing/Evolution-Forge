@@ -1,7 +1,7 @@
 #ifndef __UTIL_H
 #define __UTIL_H
 
-#include "wx/wx.h"
+//#include "wx/wx.h" ?
 
 inline void xchg(int& a, int& b)
 {

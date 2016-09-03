@@ -7,11 +7,11 @@
 class RACE: public PRERACE
 {
 	private:
-        	static int basicLength;
-        	static int basicBuildOrder[2][MAX_LENGTH];
-        	int mutationRate;
-        	int buildGene(int unit);
-       		static void generateBasicBuildOrder(); //pre-process goals to create a b
+       	static int basicLength;
+       	static int basicBuildOrder[2][MAX_LENGTH];
+       	int mutationRate;
+       	int buildGene(int unit);
+ 		static void generateBasicBuildOrder(); //pre-process goals to create a b
 		int pFitness;
 		int sFitness;
 		int tFitness;

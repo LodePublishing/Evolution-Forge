@@ -1,6 +1,6 @@
 #include "message.h"
 
-MessageWindow::MessageWindow(wxRect rahmen, wxRect maxSize):GraphixScrollWindow(0,rahmen,maxSize,SCROLLED)
+MessageWindow::MessageWindow(UI_Window* parentWindow):UI_Window(parentWindow, MESSAGE_WINDOW_TITLE_STRING, *theme.lookUpRect(MESSAGE_WINDOW), *theme.lookUpMaxRect(MESSAGE_WINDOW), SCROLLED)
 {
         resetData();
 };
@@ -22,26 +22,32 @@ void MessageWindow::resetData()
                                                                                                                                                             
 void MessageWindow::addMessage(wxString bla)
 {
-        setScrollY(0);
+//        setScrollY(0); TODO
         message[msgCount].col=155;
         message[msgCount].type=1;
         message[msgCount].string=bla;
         msgCount++;
-}
-                                                                                                                                                            
-void MessageWindow::drawMessages(wxDC* dc)
+};
+
+void MessageWindow::process()
 {
+	UI_Window::process();
+};
+                                                                                                                                                            
+void MessageWindow::draw(wxDC* dc)
+{
+	UI_Window::draw(dc);
         int t;
         t=0;
-        dc->SetFont(GraphixScrollWindow::font2);
+        dc->SetFont(*theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
         for(int i=msgCount;i--;)
                 if(message[i].type>0)
                 {
                         dc->SetTextForeground(wxColour(100+message[i].col,100+message[i].col,255));
                         if(message[i].col>5) message[i].col-=message[i].col/5+1;
                         else message[i].col=0;
-                        wxRect edge=wxRect(getInnerPosition()+wxPoint(5,8+t*(FONT_SIZE+5)-getScrollY()),wxSize(getInnerWidth(),FONT_SIZE+5));
-                        if(fitToClientArea(edge))
+                        wxRect edge=wxRect(getClientRectPosition()+wxPoint(5,8+t*(FONT_SIZE+5)-getScrollY()),wxSize(getClientRectWidth(),FONT_SIZE+5));
+                        if(fitItemToClientRect(edge))
                         {
 //                              dc->DrawBitmap(hintBitmap,edge.x,edge.y);
                                 dc->SetPen(wxPen(wxColour(20,20,20),1,wxSOLID));

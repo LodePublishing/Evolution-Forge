@@ -1,23 +1,49 @@
 #include "bograph.h"
 
+BoGraphWindow::BoGraphWindow(UI_Object* parent, wxRect rahmen, wxRect maxSize, ANARACE* anarace, InfoWindow* infoWindow, OrderList* orderList):UI_Window(parent, BOGRAPH_WINDOW_TITLE_STRING, rahmen, maxSize, SCROLLED)
+{
+	this->orderList=orderList;
+	this->infoWindow=infoWindow;
+	this->anarace=anarace;
+	resetData();
+};
+
+BoGraphWindow::~BoGraphWindow()
+{
+};
+
+
 void BoGraphWindow::setMarkedUnit(int unit)
 {
 	markedUnit=unit;
 };
 
-void BoGraphWindow::assignInfoWindow(InfoWindow* infoWindow)
+void BoGraphWindow::checkForInfoWindow()
 {
-	this->infoWindow=infoWindow;
+    NODE *node=orderList->GetFirst();
+    while(node)
+    {
+        ORDER* order=node->GetData();
+//        int row=((boInsertPoint>-1)&&(order->row>=boInsertPoint))*(boEndPoint-boInsertPoint);
+//      mouse on order in player reinschieben, da is ja auch orderList zuhause
+        
+		wxRect edge(getRelativeClientRectPosition()+order->brect.GetPosition()/*-wxPoint(0,getScrollY() TODO)*/,order->brect.GetSize());
+                                                                                                       
+        if((fitItemToClientRect(edge)&&edge.Inside(getAbsolutePosition()+controls.getCurrentPosition())))
+        {
+//window[INFO_WINDOW]->adjustWindow(wxRect(wxPoint(window[INFO_WINDOW]->getPosition().x,500)/*order->rect.GetY()+getClientRectUpperBound()-getScrollY()+((boInsertPoint>-1)&&(order->row>=boInsertPoint))*(boEndPoint-boInsertPoint)*(FONT_SIZE+5)-1)*/,window[INFO_WINDOW]->getSize()));
+            infoWindow->setUnit(order->unit);
+            infoWindow->setKey(node->GetKey());
+            infoWindow->setOrder(order);
+            infoWindow->setBx(order->brect.x);
+            infoWindow->setBWidth(order->brect.width);
+            infoWindow->Show(1);
+            return;
+        }
+        node=node->GetNext();
+    }
 };
-
-bool BoGraphWindow::mouseOnOrder(ORDER* order)
-{
-	wxRect edge(getInnerPosition()+order->brect.GetPosition()-wxPoint(0,getScrollY()),order->brect.GetSize());
-        if((fitToClientArea(edge)&&edge.Inside(controls.getCurrentPosition())))
-		return true;
-	else return(false);	
-};
-
+	
 #if 0
 //TODO evtl irgendwie doch mit bowindow zusammenfassen
 void BoGraphWindow::CheckOrders()
@@ -82,16 +108,6 @@ void BoGraphWindow::CheckOrders()
 };
 #endif
        
-void BoGraphWindow::setAnarace(ANARACE* anarace)
-{
-	this->anarace=anarace;
-}																		    
-																			   
-BoGraphWindow::BoGraphWindow(wxRect rahmen, wxRect maxSize):GraphixScrollWindow(0,rahmen,maxSize,SCROLLED)
-{
-	resetData();
-};
-																			    
 void BoGraphWindow::resetData()
 {
 	markedUnit=0;
@@ -111,9 +127,18 @@ void BoGraphWindow::MoveOrders()
 		node=node->GetNext();
 	}
 };*/
-																			    
-void BoGraphWindow::showBoGraph(wxDC* dc, OrderList* orderList)
+
+void BoGraphWindow::process()
 {
+	checkForInfoWindow();
+	UI_Window::process();
+};
+
+void BoGraphWindow::draw(wxDC* dc)
+{
+	UI_Window::draw(dc);
+	
+	if(!orderList) return;
 	struct BOGRAPH
 	{
 		int type;
@@ -211,6 +236,7 @@ void BoGraphWindow::showBoGraph(wxDC* dc, OrderList* orderList)
 	}
 //sort the order after IPs
 // now calculate the rectangles :)
+	orderList->Sort();
 	node=orderList->GetFirst();
 	int hoehe=0;
 	while(node)
@@ -229,9 +255,9 @@ void BoGraphWindow::showBoGraph(wxDC* dc, OrderList* orderList)
 							j=MAX_LENGTH;
 					       }
 					wxRect t=wxRect(
-wxPoint( (anarace->getProgramTime(order->IP)*getInnerWidth())/(anarace->ga->maxTime-anarace->getTimer()),
+wxPoint( (anarace->getProgramTime(order->IP)*getClientRectWidth())/(anarace->ga->maxTime-anarace->getTimer()),
 	 (1+i+hoehe/MIN_HEIGHT)*(FONT_SIZE+5)+(hoehe%MIN_HEIGHT)*(FONT_SIZE+4)/bograph[i].height),
-wxSize(  (stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->IP)].BT/*anarace->getProgramBT(s)*/*getInnerWidth())/(anarace->ga->maxTime-anarace->getTimer()),
+wxSize(  (stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->IP)].BT/*anarace->getProgramBT(s)*/*getClientRectWidth())/(anarace->ga->maxTime-anarace->getTimer()),
 	 (FONT_SIZE+4)/(bograph[i].height)));
 					if(t!=order->btarget)
 						order->bstart=order->brect;
@@ -246,20 +272,20 @@ wxSize(  (stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->I
 	}
 	// now print the lines...
 	int lastbograph=-1;
-	dc->SetPen(wxPen(wxColour(PEN1R,PEN1G,PEN1B),1,wxSOLID));
+	dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
 	{
-		wxRect edge=wxRect(getInnerPosition(),wxSize(10000,FONT_SIZE+4));
+		wxRect edge=wxRect(getRelativeClientRectPosition(),wxSize(10000,FONT_SIZE+4));
 		for(int i=0;i<20;i++)
 			if(bograph[i].type>0)
 				for(int j=i;j<i+bograph[i].lines;j++)
 				{
-					edge.SetY(getInnerUpperBound()+(j+1)*(FONT_SIZE+5));
-					if(fitToClientArea(edge,1))
+					edge.SetY(getRelativeClientRectUpperBound()+(j+1)*(FONT_SIZE+5));
+					if(fitItemToClientRect(edge,1))
 					{
 						if(j%2==0)
-							dc->SetBrush(wxBrush(wxColour(COLOR1G,COLOR1G,COLOR1B),wxSOLID));
-						else dc->SetBrush(wxBrush(wxColour(COLOR2R,COLOR2G,COLOR2B),wxSOLID));
-						dc->DrawRoundedRectangle(edge,4);
+							dc->SetBrush(*theme.lookUpBrush(BO_DARK_BRUSH));
+						else dc->SetBrush(*theme.lookUpBrush(BO_BRIGHT_BRUSH));
+						dc->DrawRoundedRectangle(wxRect(getAbsolutePosition()+edge.GetPosition(), edge.GetSize()),4);
 						lastbograph=edge.y+edge.height;
 					}
 				}
@@ -273,16 +299,16 @@ wxSize(  (stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->I
 	for(int i=0;i<(anarace->ga->maxTime-anarace->getTimer())/30;i++)
 		if(i%timesteps==0)
 		{
-		      dc->DrawLine(getInnerLeftBound()+(i+timesteps)*(getInnerWidth()/((anarace->ga->maxTime-anarace->getTimer())/30)),getInnerUpperBound(),
-			      getInnerLeftBound()+(i+timesteps)*(getInnerWidth()/((anarace->ga->maxTime-anarace->getTimer())/30)),lastbograph);
-			dc->DrawText(_T(wxString::Format(wxT("%i:%i0"),i/2,3*(i%2))),getInnerLeftBound()+5+i*((getInnerWidth()-20)/((anarace->ga->maxTime-anarace->getTimer())/30)),getInnerUpperBound());
+		      dc->DrawLine(getClientRectLeftBound()+(i+timesteps)*(getClientRectWidth()/((anarace->ga->maxTime-anarace->getTimer())/30)),getClientRectUpperBound(),
+			      getClientRectLeftBound()+(i+timesteps)*(getClientRectWidth()/((anarace->ga->maxTime-anarace->getTimer())/30)),getClientRectUpperBound()+lastbograph);
+			dc->DrawText(_T(wxString::Format(wxT("%i:%i0"),i/2,3*(i%2))),getClientRectLeftBound()+5+i*((getClientRectWidth()-20)/((anarace->ga->maxTime-anarace->getTimer())/30)),getClientRectUpperBound());
 			
 		}
 	for(int i=0;i<(anarace->ga->maxTime-anarace->getTimer())/30;i++)
 		if(i%timesteps==0)
 		{
-  //		  dc->DrawLine(getInnerLeftBound()+(i+timesteps)*(getInnerWidth()/((anarace->ga->maxTime-anarace->getTimer())/30)),getInnerUpperBound(),    //		      getInnerLeftBound()+(i+timesteps)*(getInnerWidth()/((anarace->ga->maxTime-anarace->getTimer())/30)),getInnerUpperBound()+FONT_SIZE+4);
-			dc->DrawText(_T(wxString::Format(wxT("%i:%i0"),i/2,3*(i%2))),getInnerLeftBound()+5+i*((getInnerWidth()-20)/((anarace->ga->maxTime-anarace->getTimer())/30)),getInnerUpperBound());
+  //		  dc->DrawLine(getClientRectLeftBound()+(i+timesteps)*(getClientRectWidth()/((anarace->ga->maxTime-anarace->getTimer())/30)),getClientRectUpperBound(),    //		      getClientRectLeftBound()+(i+timesteps)*(getClientRectWidth()/((anarace->ga->maxTime-anarace->getTimer())/30)),getClientRectUpperBound()+FONT_SIZE+4);
+			dc->DrawText(_T(wxString::Format(wxT("%i:%i0"),i/2,3*(i%2))),getClientRectLeftBound()+5+i*((getClientRectWidth()-20)/((anarace->ga->maxTime-anarace->getTimer())/30)),getClientRectUpperBound());
 		}
 //TODO nochmal timesteps checken
 																			    
@@ -307,8 +333,8 @@ wxSize(  (stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->I
 		ORDER* order=node->GetData();
 		if(anarace->getProgramFacility(order->IP))
 		{
-			wxRect edge=wxRect(getInnerPosition()+order->brect.GetPosition(),order->brect.GetSize());
-			if(fitToClientArea(edge))
+			wxRect edge=wxRect(getRelativeClientRectPosition()+order->brect.GetPosition(),order->brect.GetSize());
+			if(fitItemToClientRect(edge))
 			{
 #if 0
 				dc->SetBrush(wxBrush(wxColour(
@@ -323,7 +349,7 @@ wxSize(  (stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->I
 		((anarace->getProgramCode(order->IP)+1)*155/(1+anarace->getPlayer()->getGoal()->getMaxBuildTypes()/2))%156+bright,
 		((anarace->getProgramCode(order->IP)+1)*155/(1+anarace->getPlayer()->getGoal()->getMaxBuildTypes()/4))%156+bright,
 		((anarace->getProgramCode(order->IP)+1)*155/(1+anarace->getPlayer()->getGoal()->getMaxBuildTypes()/8))%156+bright),wxSOLID));
-				dc->DrawRoundedRectangle(edge,4);
+				dc->DrawRoundedRectangle(wxRect(getAbsolutePosition()+edge.GetPosition(), edge.GetSize()),4);
 			}
 		}
 		node=node->GetNext();
@@ -332,7 +358,7 @@ wxSize(  (stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->I
 	dc->SetTextForeground(wxColour(0,0,0));
 	for(int i=0;i<20;i++)
 		if(bograph[i].type>0)
-			dc->DrawText(_T(wxString::Format(wxT("%s"),stats[anarace->getPlayer()->getRace()][bograph[i].type].name)),getInnerPosition()+wxPoint(0,(i+1)*(FONT_SIZE+5)));
+			dc->DrawText(_T(wxString::Format(wxT("%s"),stats[anarace->getPlayer()->getRace()][bograph[i].type].name)),getClientRectPosition()+wxPoint(0,(i+1)*(FONT_SIZE+5)));
 	markedUnit=0;
 };
 

@@ -1,0 +1,424 @@
+# put here all data (colours, strings, etc.)
+
+@STRINGS
+
+	@ENGLISH
+		0,  NULL!
+# window titles
+		1,  Evolution Forge v%s
+		2,  Messages
+		3,  The core of Evolution Forge
+		4,  Evolution forge tutorial
+		5,  Order description player %s
+		6,  Graphical build order %s
+		7,  Overview %s
+		8,  Statistics %s
+		9,  Best of breed %s
+		10, Unit list %s
+		11, Build order %s
+# messages
+		12, Welcome to Evolution Forge!
+		13, Click above to add new goals.
+		14, %i players loaded...
+
+# force window
+# unit type names TODO
+		15, rest
+		16, SCV
+		17, Gas SCV
+		18, Combat units...
+		19, Support units...
+		20, Supply/Refinery...
+		21, Producing buildings...
+		22, Research buildings...
+		23, Building addons...
+		24, Researchs...
+		25, Special...
+		26, Starting force:
+		27, Click here to add a goal
+		28, (Click here to close)
+		29, (Click here to go back)
+		30, non-goals:
+		31, add this as goal
+		32, Load goal list...
+		33, Close goal list
+		34, Use Map Settings
+		35, Terra
+		36, Protoss
+		37, Zerg
+# bowindow
+		38, (Click here to insert order)
+#		(Click here to close)
+#		(Click here to go back)
+		39, Optimize everything
+		40, Optimize selected
+# timer window
+		41, %i%% of goals fulfilled
+		42, (paused)
+		43, Searching...
+		44, %i%% of theoretical optimum
+		45, Optimizing...
+		46, %i/%i/%i res./units/struc.
+		47, Total: %i
+		48, Click to continue
+		49, Click to pause
+# statistics window
+		50, Force : %i
+		51, Time : %.2i:%.2i
+		52, Minerals : %i
+		53, Gas : %i
+		54, Fitness average : %i
+		55, Fitness variance : %i
+		56, Build order length : %i
+		57, %2i+ generations left
+# window title parameter strings
+		58, INVISIBLE
+		59, Player
+		60, Advanced Player
+		61, Expert (Player)
+		62, 1st Computer enemy
+		63, GOSU (Player)
+		64, 1st Computer enemy
+		65, 2nd Computer enemy
+		66, ERROR - Check playermodes
+	@END
+
+	@GERMAN
+
+        0,  NULL!
+# window titles
+        1,  Evolution Forge v%s
+        2,  Nachrichten
+        3,  Kern von Evolution Forge
+        4,  Evolution forge Einfuehrung
+        5,  Befehlsbeschreibung Spieler %s
+        6,  Grafische Darstellung der Befehle %s
+        7,  Uebersicht ueber den Verlauf %s
+        8,  Statistiken %s
+        9,  Das beste Programm %s
+        10, Einheitenliste %s
+        11, Befehlsreihenfolge %s
+# messages
+        12, Willkommen zu Evolution Forge!
+        13, Klicke oben um weitere Ziele hinzuzufuegen.
+        14, %i Spieler geladen ....
+
+# force window
+# unit type names TODO
+        15, rest
+        16, WBF
+        17, Gas WBF
+        18, Kampfeinheiten...
+        19, Unterstuetzungseinheiten...
+        20, Versorgung/Raffinerie...
+        21, Produzierende Gebaeude...
+        22, Forschungseinrichtungen...
+        23, Gebaeudezusaetze...
+        24, Forschung...
+        25, Spezial...
+        26, Einheiten zu Beginn:
+		27, Hier klicken um Ziel hinzuzufuegen
+        28, (Hier klicken zum schliessen)
+        29, (Hier klicken um zurueckzukehren)
+        30, zusaetzliche Einheiten (keine Ziele):
+        31, diese Einheit als Ziel hinzufuegen
+        32, Lade Ziele-Liste...
+        33, Schliesse Ziel-Liste
+        34, Karteneinstellungen
+        35, Terraner
+        36, Protoss
+        37, Zerg
+# bowindow
+        38, (Hier klicken um ein Befehl einzufuegen)
+#       (Click here to close)
+#       (Click here to go back)
+        39, Alles optimieren
+        40, Optimiere nur Auswahl
+# timer window
+        41, %i%% der Ziele erfuellt
+        42, (unterbrochen)
+        43, Suche...
+        44, %i%% des theoretischen Optimums
+        45, Optimiere...
+        46, %i/%i/%i Res./Einh./Geb.
+        47, Gesamt: %i
+        48, Klicken um fortzufahren
+		49, Klicken um zu unterbrechen
+# statistics window
+		50, Einheitenzahl : %i
+		51, Zeit : %.2i:%.2i
+		52, Mineralien : %i
+		53, Vespine Gas : %i
+		54, durchschnittliche Fitness : %i
+		55, Varianz der Fitness : %i
+		56, Laenge der Befehlsliste : %i
+		57, %2i+ Generationen uebrig
+# window title parameter strings
+		58, INVISIBLE
+		59, Spieler
+		60, Erfahrener Spieler
+		61, Experte (Spieler)
+		62, 1. Computerspieler
+		63, GOSU (Spieler)
+		64, 1. Computerspieler
+		65, 2. Computerspieler
+		66, ERROR - Check playermodes
+	@END
+
+@END
+
+@FONTS
+
+	@1280x1024
+		
+		@ENGLISH
+# null font
+			0,  4, normal, normal, normal
+			1,  7, decorative, normal, bold
+			2,  7, decorative, italics, bold
+			3,  12, decorative, normal, bold
+			4,  18, decorative, normal, bold
+			5,  24, decorative, normal, bold
+			6,  32, normal, normal, bold
+		@END
+
+		@GERMAN
+# null font
+			0,  4, normal, normal, normal
+			1,  7, decorative, normal, bold
+			2,  7, decorative, italics, bold
+			3,  12, decorative, normal, bold
+			4,  18, decorative, normal, bold
+			5,  24, decorative, normal, bold
+			6,  32, normal, normal, bold
+		@END
+
+	@END
+
+@END
+
+@COLOURS
+
+	@DARK_BLUE_THEME
+		0,    0,   0,   0
+# Text colour
+		1,    0,   0,   0
+# window text colour
+		2,  150, 150, 200
+# bright window text colour
+		3,  200, 200, 250
+# title colour
+		4,  100, 100, 200
+# important text (time etc. red in the original)
+		5,  200,   0,   0
+# fulfilled & not fulfilled
+		6,    0, 100,   0
+		7,  100,   0,   0
+# force add goal button colour
+		8,    0, 200,   0
+# force text colour
+		9,   50, 150,  50
+# big text buttons colour
+		10, 255, 255, 255
+# bodiagram
+# minerals text colour
+		11,  80,  80, 255
+# bright minerals text colour
+		12, 180, 180, 255
+# gas text colour
+		13,  40, 255,  40
+# bright gas text colour
+		14, 140, 255, 140
+# supply text colour
+		15, 160, 160, 160
+# bright supply text colour
+		16, 220, 220, 220
+	@END
+
+@END
+
+@PENS
+
+	@1280x1024
+		@DARK_BLUE_THEME
+# null pen
+			0,  1,   0,   0,   0, TRANSPARENT
+# border pen
+			1,  1,  40,  30, 120, SOLID
+# outer border pen
+			2,  1,  40,  30, 120, SOLID
+# inner border pen
+			3,  1,  40,  30, 120, SOLID
+# inner border higlight pen
+			4,  1,  70,  90, 150, SOLID
+# big buttons pen
+			5,  1, 100, 100, 255, SOLID
+# rectangle pen
+			6,  1,   0,   0,   0, SOLID
+# marked bitmap pen
+			7,  1, 255, 255, 255, SOLID
+# dashed minerals pen
+			8,  2, 120, 120, 255, SHORT_DASH
+# dashed gas pen
+			9,  2,  80, 255,  80, SHORT_DASH
+# dashed supply pen
+			10, 2, 160, 160, 160, SHORT_DASH
+# dashed marker pen
+			11, 2, 150,   0,   0, SHORT_DASH
+# select pen
+			12, 1, 100, 200, 100, SOLID
+# dark background button pen
+			13, 1,   0,   5,  10, SOLID	
+# marked bitmap green
+			14, 1,   0,   0, 200, SOLID	
+# marked bitmap yellow
+			15, 1, 100, 100,   0, SOLID	
+# marked bitmap red
+			16, 1, 200,   0,   0, SOLID
+# basic bitmap pen
+			17, 1, 255,  255,  255, SOLID
+		@END
+	@END
+
+@END
+
+@BRUSHES
+
+	@DARK_BLUE_THEME
+		0,    0,   0,   0, SOLID
+# main window is transparent
+		1,    0,   0,   0, TRANSPARENT
+# window foreground
+        2,    5,  10,  20, SOLID
+# window background
+		3,    5,  25,  40, SOLID
+
+# bo dark color
+		4,  100, 100, 100, SOLID
+# bo bright color
+		5,  150, 150, 150, SOLID
+
+# force list colour
+		6,  100,  100, 100, SOLID
+
+# force add goal button brush
+		7,   50,   50,  50, SOLID
+
+# unit list colours:
+		8,    0,   0,   0, SOLID
+		9,   25,  25,  25, SOLID
+		10,   0,  50,   0, SOLID
+		11,  50,   0,   0, SOLID
+		12,  50,   0,  50, SOLID
+        13,   0,   0,  50, SOLID
+        14,   0,  50,  50, SOLID
+        15,  50,  50,   0, SOLID
+        16,   0,   0,  25, SOLID
+        17,  25,   0,   0, SOLID
+		18,   0,  25,   0, SOLID
+
+# bright unit list colours:
+		19,   0,   0,   0, SOLID
+		20,  50,  50,  50, SOLID
+		21,   0, 100,   0, SOLID
+		22, 100,   0,   0, SOLID
+		23, 100,   0, 100, SOLID
+        24,   0,   0, 100, SOLID
+        25,   0, 100, 100, SOLID
+        26, 100, 100,   0, SOLID
+        27,   0,   0,  50, SOLID
+        28,  50,   0,   0, SOLID
+		29,   0,  50,   0, SOLID
+# continue button brush
+		30,  50,  50, 200, SOLID
+	@END
+
+@END
+
+@BITMAPS
+
+	@1280x1024
+
+		@DARK_BLUE_THEME
+			0,  null
+			1,  add
+			2,  sub
+			3,  cancel
+			4,  arrow_left
+			5,  arrow_right
+			6,  arrow_up
+			7,  arrow_down
+			8,  clemens
+			9,  clawsoftware
+			10, backstar
+			11, i1
+			12, i2
+			13, i3
+			14, i4
+			15, i5
+			16, i6
+		@END
+
+	@END
+
+@END
+
+@RECTANGLES
+
+	@1280x1024
+
+		@BASIC_TAB
+			0,  NULL window, absolute coordinates, 0, 0, 0, 0
+			1,  Main window, absolute coordinates, 0, 0, 1020, 713
+			2,  Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
+			3,  The core window, dock center inside of, Main window, 500, 220
+			4,  Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
+			5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
+			6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
+			7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
+			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
+			9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
+			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
+			11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
+		@END
+
+	@END
+
+@END
+
+@MAX_RECTANGLES
+
+	@1280x1024
+
+		@BASIC_TAB
+			0,  NULL window, same as above
+	        1,  Main window, same as above
+        	2,  Message window, same as above
+    	    3,  The core window, same as above
+	        4,  Tutorial window, calculate maxsize
+			5,  Build order window, calculate maxheight
+			6,  Force window, calculate maxheight
+			7,  Timer window, same as above
+			8,  Statistics window, same as above
+			9,  Build order diagram window, same as above
+			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 380
+			11, Info window, same as above
+		@END
+	
+	@END
+
+@END
+
+@BUTTONS
+# continue button brush
+	0,	30, 2, 30, 30, 30, 30, 30,  30, 30, 30, 30, 30,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,   4,  4,  4,  3,  4,   5,  5,  5,  5,  5,   0,  0,  0,  0,  0
+# non-button force entry
+	1,	20, 2,  6,  6,  6,  5,  6,   6,  6,  6,  5,  6,   1,  1,  1,  1,  1,   1,  1,  1,  1,  1,   0,  0,  0,  3,  0,   0,  0,  0,  5,  0,   0,  0,  0,  0,  0
+# add button
+	2,	20, 2,  6,  6,  6,  5,  6,   6,  6,  6,  5,  6,   1,  1,  1,  1,  1,   1,  1,  1,  1,  1,   0,  0,  0, 17,  0,   0,  0,  0, 14,  0,   1,  1,  1,  1,  1
+# sub button
+	3,	20, 2,  6,  6,  6,  5,  6,   6,  6,  6,  5,  6,   1,  1,  1,  1,  1,   1,  1,  1,  1,  1,   0,  0,  0, 17,  0,   0,  0,  0, 15,  0,   2,  2,  2,  2,  2
+# cancel button
+	4,	20, 2,  6,  6,  6,  5,  6,   6,  6,  6,  5,  6,   1,  1,  1,  1,  1,   1,  1,  1,  1,  1,   0,  0,  0, 17,  0,   0,  0,  0, 16,  0,   3,  3,  3,  3,  3
+@END
+

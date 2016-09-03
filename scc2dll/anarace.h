@@ -16,7 +16,6 @@ struct STATISTICS
 struct PROGRAM
 {
 	int built;			// was this order successfully built?
-	int dominant;		// which one of the two 'Code' entries is dominant?
 	int time;			// at which time this order was started
 	int temp;			// unused
 	int location;		// at which location was this unit built
@@ -34,6 +33,10 @@ struct PROGRAM
 EXPORT class ANARACE: public PRERACE
 {
 	private:
+		int totalUnitForce; // total number of all unit types at the end
+		int maxUnitForce; // maximum number of one unit type at the end
+		void countForce(); // to set maxUnitForce and totalUnitForce
+		
 		int buildGene(int unit);
 		int unchangedGenerations;
 		int currentRun;
@@ -50,22 +53,25 @@ EXPORT class ANARACE: public PRERACE
 		static MAP_LOCATION backupLoc[MAX_PLAYER][MAX_LOCATIONS];
 		int needTime(int unit);
 		int maximum(int unit);
-		int percentage;
+		int timePercentage;
+		int goalPercentage;
 		void setCurrentpFitness(int num);
 		int currentpFitness;
 		int phaenoCode[MAX_LENGTH];		// the final build order: an array of unit numbers (as defined in main.h)
 	public:
+		int getMaxUnitForce();
+		int getTotalUnitForce();
 		
 		int getPhaenoCode(int IP);
 		void setPhaenoCode(int IP, int num);		
 
 		int getCurrentpFitness();		
 
-		int isOptimizing();
-		void setOptimizing(int opt);
+		bool isOptimizing();
+		void setOptimizing(bool optimizing=true);
 
-		int isActive();
-		void setActive(int act);
+		bool isActive();
+		void setActive(bool active=true);
 
 		int fitnessCode[MAX_GOALS];
 
@@ -84,7 +90,8 @@ EXPORT class ANARACE: public PRERACE
 
 //		int getProgramIsConstant(int IP);
 
-		int getPercentage();
+		int getTimePercentage();
+		int getGoalPercentage();
 		int getProgramCode(int IP);
 		int getProgramSuccessType(int IP);	// determines the type of the last error before the item was built at that IP
 		int getProgramSuccessUnit(int IP);	// what unit was missing? (connected to successtype)
@@ -107,7 +114,6 @@ EXPORT class ANARACE: public PRERACE
 
 		int getProgramFacility(int IP);
 		int getProgramBT(int IP);
-		int getProgramDominant(int IP);
 
 		int getUnchangedGenerations();	// gets number of generations where no change in fitness took place
 		int getRun();					// gets number of runs (one run is complete when no <unchangedGenerations> > <maxGenerations>)
@@ -144,7 +150,6 @@ EXPORT class ANARACE: public PRERACE
 		int setProgramLocation(int IP, int location);
 		int setProgramTime(int IP, int time);
 		int setProgramIsGoal(int IP, int num);	
-		int setProgramDominant(int IP, int num);
 		int setProgramForceCount(int IP, int unit, int count);	
                 int setProgramAvailibleCount(int IP, int unit, int count);
 

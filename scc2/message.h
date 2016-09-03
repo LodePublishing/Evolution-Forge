@@ -1,16 +1,17 @@
 #ifndef __MESSAGE_H
 #define __MESSAGE_H
 
-#include "graphics.h"
+#include "UI_Window.h"
 
-class MessageWindow:public GraphixScrollWindow
+class MessageWindow:public UI_Window
 {
         public:
-                MessageWindow(wxRect rahmen, wxRect maxSize);
+                MessageWindow(UI_Window* parentWindow);
                 ~MessageWindow();
                 void addMessage(wxString bla);
                 void resetData();
-                void drawMessages(wxDC* dc);
+				void process();
+                void draw(wxDC* dc);
         private:
                 struct Message
                 {

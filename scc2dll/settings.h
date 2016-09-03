@@ -110,5 +110,8 @@ public:
 	SETTINGS();
 	~SETTINGS();
 };
+
+extern SETTINGS settings;
+
 #endif
 

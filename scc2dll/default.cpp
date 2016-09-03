@@ -16,7 +16,7 @@ DEFAULT::~DEFAULT()
 UNITS* EXPORT DEFAULT::getUnits(int race)
 {
 #ifdef _SCC_DEBUG
-    if((race<MIN_RACE)||(race>MAX_RACE))     
+    if((race<0)||(race>=MAX_RACES))     
 	{
         debug.toLog(0,"DEBUG: (UNITS::getUnits): Value race [%i] out of range.",race);
         return(0);
@@ -28,7 +28,7 @@ UNITS* EXPORT DEFAULT::getUnits(int race)
 PLAYER* EXPORT DEFAULT::getPlayer(int race)
 {
 #ifdef _SCC_DEBUG
-    if((race<MIN_RACE)||(race>MAX_RACE))
+    if((race<0)||(race>=MAX_RACES))
     {
         debug.toLog(0,"DEBUG: (UNITS::getPlayer): Value race [%i] out of range.",race);
         return(0);
@@ -135,13 +135,13 @@ void DEFAULT::loadFromFile(const char* defaultFile, HARVEST_SPEED* harvestSpeed)
 
 void DEFAULT::adjustResearches()
 {
-	for(int i=0;i<=MAX_RACE;i++)
+	for(int i=0;i<MAX_RACES;i++)
 		units[i].adjustResearches(i);
 };
 
 void DEFAULT::adjustGoals()
 {
-	for(int i=0;i<=MAX_RACE;i++)
+	for(int i=0;i<MAX_RACES;i++)
 	{
 		player[i].getGoal()->setRace(i);
 		player[i].adjustGoals(1, &units[i]);	
@@ -151,7 +151,7 @@ void DEFAULT::adjustGoals()
 
 void DEFAULT::adjustSupply()
 {
-	for(int i=0;i<=MAX_RACE;i++)
+	for(int i=0;i<MAX_RACES;i++)
 	{
 		int supply=0;
 		int maxSupply=0;

@@ -18,7 +18,7 @@ class EXPORT PLAYER
 		int supply,maxSupply; //k
 		int changed; //did the settings change? //k
 		GOAL_ENTRY goal; // ~~ goals need to be copied so that each player has his own goals... but also think about 2vs2 with goals... i.e. build 10 marines etc.
-    const UNIT_STATISTICS* pStats;
+	    const UNIT_STATISTICS* pStats;
 	
 	public:
 		void adjustGoals(int adjust, UNITS* units);

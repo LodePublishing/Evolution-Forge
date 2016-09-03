@@ -6,17 +6,13 @@ wxRect GraphixScrollWindow::getTarget()
 	return(target);
 };
 
-int GraphixScrollWindow::addBitmapButton(wxRect edge, wxBitmap& bitmap, int permButton)
+int GraphixScrollWindow::addBitmapButton(wxRect edge, wxBitmap& bitmap, const char* tip, int permButton)
 {
-	for(int i=0;i<1000;i++)
-	if(!button[i].used)
+	int i=addButton(edge, tip, permButton);
+	if(i)
 	{
-		button[i].permButton=permButton;
-		button[i].edge=edge;
-		button[i].used=1;
 		button[i].bitmapButton=1;
 		button[i].bitmap=&bitmap;
-		button[i].pressed=0;
 		return i;
 	}
 	return(0);
@@ -97,13 +93,72 @@ void GraphixScrollWindow::writeLongText(wxString text, wxDC* dc, wxColour colour
 	}
 };
 
+void GraphixScrollWindow::writeLongRectangleText(wxString text, wxRect rect, wxDC* dc, wxColour colour)
+{
+	wxColour normalColour, boldColour;
+	normalColour=colour;
+	boldColour=wxColour(colour.Red()+50,colour.Green()+50,colour.Blue()+55);
+	dc->SetTextForeground(normalColour);
+	int lastChar, firstChar, bold;
+	int twidth=0;
+	textCursor.x=5;
+	firstChar=0;
+	lastChar=0;
+	bold=0;
+	for(int i=0;i<text.Length();i++)
+	{
+		int newLine=0;
+		if(text.GetChar(i)==' ') 
+		{
+			lastChar=i;
+			twidth=textCursor.x;
+		}
+		else if(text.GetChar(i)=='#')
+		{
+			lastChar=i;
+			twidth=(textCursor.x+rect.GetWidth())/2;
+			newLine=1;
+		}
+		dc->GetTextExtent(_T(wxString::Format(wxT("%c"),text.GetChar(i))),&textCursor.width,&textCursor.height);
+		textCursor.x+=textCursor.width;
+		if((textCursor.x>rect.GetWidth()-5)||(newLine))
+		{
+			textCursor.x=5;
+			int d=0;
+			for(int j=firstChar;j<lastChar;j++)
+			{
+				dc->GetTextExtent(_T(wxString::Format(wxT("%c"),text.GetChar(j))),&textCursor.width,&textCursor.height);
+				if(text.GetChar(j)=='$')
+				{
+					if(bold){bold=0;dc->SetTextForeground(normalColour);} else
+						{bold=1;dc->SetTextForeground(boldColour);}
+					continue;
+				}
+				if(text.GetChar(j)=='#') break;
+				dc->DrawText(_T(wxString::Format(wxT("%c"),text.GetChar(j))),rect.GetPosition()+textCursor.GetPosition()+wxPoint(d/(lastChar-firstChar-1),0));
+				textCursor.x+=textCursor.width;
+				if(!newLine)
+					d+=(rect.GetWidth()-10-twidth);
+			}
+			textCursor.y+=textCursor.height+2;
+			twidth=0;
+			firstChar=lastChar+1;
+			i=lastChar;
+			lastChar=0;
+			textCursor.x=5;
+		}
+	}
+};
+
+
+
 wxRect GraphixScrollWindow::getButtonRect(int num)
 {
 	if(!button[num].used) return(wxRect(0,0,0,0));
 	else return(button[num].edge);
 };
 
-void GraphixScrollWindow::textButton(wxString text, wxDC* dc)
+void GraphixScrollWindow::textButton(wxString text, wxDC* dc, const char* tip)
 {
 	dc->GetTextExtent(text,&textCursor.width,&textCursor.height);
 	wxRect edge=wxRect(textCursor.GetPosition()+getInnerPosition()+wxPoint(5,0),textCursor.GetSize());
@@ -115,15 +170,20 @@ void GraphixScrollWindow::textButton(wxString text, wxDC* dc)
 	else
 		dc->SetTextForeground(wxColour(100,100,200));
 	dc->DrawText(text,edge.GetPosition());
-	addButton(edge);
+	addButton(edge, tip);
 	textCursor.y+=textCursor.height+5;
 };
-
 
 void GraphixScrollWindow::newTextPage()
 {
 	textCursor.y=getRelativeInnerUpperBound();
 };
+
+void GraphixScrollWindow::newRectTextPage()
+{
+	textCursor.y=0;
+};
+
 
 void GraphixScrollWindow::writeText(wxString text, wxDC* dc)
 {
@@ -135,7 +195,7 @@ void GraphixScrollWindow::writeText(wxString text, wxDC* dc)
 	textCursor.y+=textCursor.height+3;
 };
 
-int GraphixScrollWindow::addButton(wxRect edge, int permButton)
+int GraphixScrollWindow::addButton(wxRect edge, const char* tip, int permButton)
 {
 	for(int i=0;i<1000;i++)
 		if(!button[i].used)
@@ -145,6 +205,11 @@ int GraphixScrollWindow::addButton(wxRect edge, int permButton)
 			button[i].used=1;
 			button[i].bitmapButton=0;
 			button[i].pressed=0;
+			if(tip)
+			{
+				button[i].tip=new wxString;
+				button[i].tip->Printf("%s",tip);
+			}
 			return i;
 		}
 	return(0);
@@ -206,11 +271,11 @@ void GraphixScrollWindow::setDescription(int nr, int x, const char* Description)
 	this->Description[nr].Printf("%s",Description);
 };
 
-void GraphixScrollWindow::addTab(int x, const char* tab)
+void GraphixScrollWindow::addTab(int x, const char* tab, const char* tip)
 {
 	if(tabNumber>=10) return;
 	tabPosition[tabNumber]=x;
-	tabButton[tabNumber]=addButton(wxRect(x,0,140,30),1);
+	tabButton[tabNumber]=addButton(wxRect(x,0,120,30), tip, 1);
 	this->tab[tabNumber].Printf("%s",tab);
 	tabNumber++;
 };
@@ -356,15 +421,35 @@ void GraphixScrollWindow::setRahmen(wxRect rahmen)
 
 void GraphixScrollWindow::DrawButtons(wxDC* dc)
 {
+	dc->SetFont(font);
+	dc->SetBrush(wxBrush(wxColour(220,220,0),wxSOLID));
+	dc->SetPen(*wxBLACK_PEN);
+	dc->SetTextForeground(wxColour(0,0,0));
 	for(int i=0;i<1000;i++)
 	if(button[i].used)
 	{
 		if(button[i].bitmapButton)
 			dc->DrawBitmap(*button[i].bitmap,button[i].edge.GetPosition(),false);
+		if(button[i].tip)
+		{
+			if(button[i].edge.Inside(controls.getCurrentPosition()))
+				showTip(dc, button[i].edge.GetPosition()+wxPoint(8, button[i].edge.GetHeight()), button[i].tip);
+		}
 //		else			
 //			dc->DrawRoundedRectangle(button[i].edge,3);
 	}
 }
+
+void GraphixScrollWindow::showTip(wxDC* dc, wxPoint p, wxString* tip)
+{
+	int dx,dy;
+	dc->GetTextExtent((*tip),&dx,&dy);
+	wxRect edge=wxRect(p+wxPoint(8,8),wxSize(dx+4,dy+2));
+	dc->DrawRectangle(edge);
+	dc->DrawText((*tip), edge.GetPosition()+wxPoint(2,1));
+//	newRectTextPage();
+//	writeLongRectangleText((*tip), edge, dc);
+};
 		
 
 void GraphixScrollWindow::clearButtons()
@@ -372,8 +457,16 @@ void GraphixScrollWindow::clearButtons()
 	for(int i=0;i<1000;i++)
 		if(button[i].used)
 		{
-			if(!button[i].permButton) button[i].used=0;
-			else button[i].pressed=0;
+			if(button[i].permButton) button[i].pressed=0;
+			else 
+			{
+				button[i].used=0;
+				if(button[i].tip)
+				{
+					delete button[i].tip;
+					button[i].tip=0;
+				}
+			}
 		}
 }
 
@@ -414,14 +507,15 @@ void GraphixScrollWindow::DrawTitle(wxDC* dc)
 {
 	dc->SetBrush(*wxBLACK_BRUSH);
 	dc->SetPen(*wxTRANSPARENT_PEN);
-	for(int i=0;i<2;i++)
+
+/*	for(int i=0;i<2;i++)
 	{
 		dc->DrawRoundedRectangle(OuterRahmen.GetPosition()+rect.GetPosition()+wxPoint(-2,OuterRahmen.GetHeight()/4),wxSize(8,OuterRahmen.GetHeight()/2),4);
 		dc->DrawRoundedRectangle(OuterRahmen.GetPosition()+rect.GetPosition()+wxPoint(OuterRahmen.GetWidth()/4,OuterRahmen.GetHeight()-6),wxSize(OuterRahmen.GetWidth()/2,8),4);
 		dc->DrawRoundedRectangle(OuterRahmen.GetPosition()+rect.GetPosition()+wxPoint(OuterRahmen.GetWidth()-6,OuterRahmen.GetHeight()/4),wxSize(8,OuterRahmen.GetHeight()/2),4);
 		dc->DrawRoundedRectangle(OuterRahmen.GetPosition()+rect.GetPosition()+wxPoint(OuterRahmen.GetWidth()/4,-2),wxSize(OuterRahmen.GetWidth()/2,8),4);
 //		dc->SetBrush(getBackground());
-	}
+	}*/
 
 	dc->SetFont(font2);
 	dc->SetTextForeground(TitleColour);
@@ -471,7 +565,7 @@ void GraphixScrollWindow::DrawTabs(wxDC* dc)
 	}
 };
 
-void GraphixScrollWindow::setWindow(wxRect rect)
+void GraphixScrollWindow::setWindow(wxRect rect) // obsolete
 {
 	this->rect=rect;
 	start=rect;
@@ -511,9 +605,12 @@ void GraphixScrollWindow::Draw(wxDC* dc)
 	if((doAdjustments))//||(autoAdjust))
 		adjustWindow(wxRect(wxPoint(target.GetPosition()),wxSize(target.GetWidth(),lastEntry+25)));
 	doAdjustments=0;
-	lastEntry=0;																			
-	if(ScrollBalkenMove)
-		moveScrollBalkenTo(controls.getCurrentPosition().y-ScrollBalkenMoveY-ScrollBalken.y);
+	lastEntry=0;
+	if((ScrollBalkenPressed==2)||(ScrollBalkenPressed==3)||(ScrollBalkenPressed==4))
+	{
+		moveScrollBalkenTo(controls.getCurrentPosition().y-controls.getDragStartPosition().y-ScrollBalken.y);
+//		controls.updateDragStartPosition(controls.getCurrentPosition());
+	}
 	else moveScrollBalkenTo(0);
 
 	if(tabNumber)
@@ -551,11 +648,12 @@ void GraphixScrollWindow::Draw(wxDC* dc)
 
 	dc->DrawRoundedRectangle(wxRect(ScrollArea.GetPosition()+rect.GetPosition(),ScrollArea.GetSize()),3);
 //TODO button draus machen
-	if(ScrollBalkenMove)
+	if((ScrollBalkenPressed==2)||(ScrollBalkenPressed==3)||(ScrollBalkenPressed==4)) //currently pressing the ScrollBalken
 	{
 		dc->SetBrush(clickedItemBrush);
 		dc->SetPen(RahmenPen);
-	} else if(ScrollBalken.Inside(controls.getCurrentPosition(rect.GetPosition())))
+	} else 
+	if(ScrollBalkenPressed) // just inside the ScrollBalken
 	{
 		dc->SetBrush(RahmenBrush);
 		dc->SetPen(clickedItemPen);
@@ -564,8 +662,11 @@ void GraphixScrollWindow::Draw(wxDC* dc)
 		dc->SetBrush(getBackground());
 		dc->SetPen(RahmenPen);
 	}
-	dc->DrawRoundedRectangle(wxRect(ScrollBalken.GetPosition()+rect.GetPosition(),ScrollBalken.GetSize()),4);
+	
 
+	dc->DrawRoundedRectangle(wxRect(ScrollBalken.GetPosition()+rect.GetPosition(),ScrollBalken.GetSize()),4);
+	dc->DrawRoundedRectangle(wxRect(controls.getDragStartPosition(),ScrollBalken.GetSize()),4);
+	
 	dc->SetPen(RahmenPen);
 	dc->SetBrush(getBackground());
 	dc->DrawRoundedRectangle(wxRect(PfeilUp.GetPosition()+rect.GetPosition(),PfeilUp.GetSize()),4);
@@ -656,8 +757,8 @@ bool GraphixScrollWindow::fitToClientArea(wxRect& rectangle, int adjust)
 	if(adjust)
 	{
 		doAdjustments=1;
-		if(rectangle.y+rectangle.height-getInnerUpperBound()>lastEntry)
-			lastEntry=rectangle.y+rectangle.height-getInnerUpperBound();
+		if(rectangle.y+rectangle.height-getUpperBound()>lastEntry)
+			lastEntry=rectangle.y+rectangle.height-getUpperBound();
 	}
 	
 	if((rectangle.width<=0)||(rectangle.y<getInnerUpperBound())||(rectangle.y+rectangle.height>getInnerUpperBound()+getInnerHeight())) return false;
@@ -688,6 +789,8 @@ GraphixScrollWindow::GraphixScrollWindow(int level, wxRect rahmen, wxRect maxSiz
 	{
 		button[i].used=0;
 		button[i].pressed=0;
+		button[i].tip=0;
+		button[i].permButton=0;
 	}
 	this->scrolled=scrolled;
 	setTitleColour(wxColour(100,100,200));
@@ -758,7 +861,7 @@ GraphixScrollWindow::GraphixScrollWindow(int level, wxRect rahmen, wxRect maxSiz
 	innerStart=clientArea;
 	originalInnerRect=clientArea; //brauchts eh nur fuer hoehe eigentlich
 
-	ScrollBalkenMove=0;
+	ScrollBalkenPressed=0;
 	PfeilUpPressed=0;PfeilDownPressed=0;
 	setMaxScrollY(1500);
 //	maxcheight=maxheight-Rahmen.height+clientArea.height-2*clientArea.y;
@@ -791,8 +894,7 @@ void GraphixScrollWindow::checkButtons()
 	if(!isShown())
 		return;
 
-/*	PfeilUpPressed=0;
-	PfeilDownPressed0;
+/*
 	ScrollBalkenMove=0;
 
 	if(ScrollBalken.Inside(controls.getX()-x,controls.getY()-y))
@@ -800,11 +902,14 @@ void GraphixScrollWindow::checkButtons()
 		ScrollBalkenMove=1;
 		ScrollBalkenMoveY=controls.getY()-ScrollBalken.y;
 	}*/
-
+	
+	ScrollBalkenPressed=controls.getPressCondition(wxRect(ScrollBalken.GetPosition()+rect.GetPosition(), ScrollBalken.GetSize()));
 	PfeilUpPressed=controls.getPressCondition(wxRect(PfeilUp.GetPosition()+rect.GetPosition(),PfeilUp.GetSize()));
 	PfeilDownPressed=controls.getPressCondition(wxRect(PfeilDown.GetPosition()+rect.GetPosition(),PfeilUp.GetSize()));
 
-/*	else
+/*
+---------WINDOW MOVING PER MOUSE
+   else
 	if(titlePosition.Inside(controls.getX()-x,controls.getY()-y))
 	{
 		WindowMove=1;
@@ -819,10 +924,7 @@ void GraphixScrollWindow::checkButtons()
 			{
 				button[i].pressed=controls.getPressCondition(button[i].edge);
 				if(button[i].pressed)
-				{
-					int x=button[i].edge.x;
 					break;
-				}
 			}
 	}
 };
@@ -890,27 +992,6 @@ void GraphixScrollWindow::transformClientHeight(int height) //handle with care O
 {
 	originalInnerRect.height+=height;
 }
-/*
-void GraphixScrollWindow::adjustClientWindow(int width, int height)
-{
-//	if(edge.x!=targetcx)
-  //		startcx=clientArea.x;
-//	if(edge.y!=targetcy)
-  //		startcy=clientArea.y;
-	   if(height!=targetcheight)
-//||((targetcheight>maxcheight)&&(edge.height!=maxcheight))) already checked in adjustWindow
-		  startcheight=clientArea.height;
-	if(width!=targetcwidth)
-		startcwidth=clientArea.width;
-//	  targetcx=edge.x;
-  //	 targetcy=edge.y;
-	targetcwidth=width;
-//	if(edge.height<=maxcheight)
-		  targetcheight=height;
-  //  else targetcheight=maxcheight;
-}*/
-
-
 
 void GraphixScrollWindow::adjustWindow(wxRect edge)
 {
@@ -919,7 +1000,7 @@ void GraphixScrollWindow::adjustWindow(wxRect edge)
 	if(edge.height==-99)
 		edge.height=target.height;
 //Only 1 change (X OR WIDTH, Y OR HEIGHT) is allowed!
-	if(edge.width==target.width) // nur x ist unterschiedlich
+ 	if(edge.width==target.width) // nur x ist unterschiedlich
 	{
 		if(((edge.x!=target.x)&&(edge.x+edge.width<maxSize.x+maxSize.width)) // es ist ein neues Ziel
 		||((edge.x+edge.width>maxSize.x+maxSize.width)&&(target.x+target.width!=maxSize.x+maxSize.width)) // oder einfach ausserhalb der Begrenzung aber unser Ziel war nicht die Begrenzung
@@ -1045,5 +1126,12 @@ wxBitmap GraphixScrollWindow::bmpArrowDown;
 wxBitmap GraphixScrollWindow::bmpClemens;
 wxBitmap GraphixScrollWindow::bmpClawsoftware;
 wxBitmap GraphixScrollWindow::bmpBack;
+wxBitmap GraphixScrollWindow::bmpImp1;
+wxBitmap GraphixScrollWindow::bmpImp2;
+wxBitmap GraphixScrollWindow::bmpImp3;
+wxBitmap GraphixScrollWindow::bmpImp4;
+wxBitmap GraphixScrollWindow::bmpImp5;
+wxBitmap GraphixScrollWindow::bmpImp6;
+
 SETTINGS GraphixScrollWindow::settings;
 

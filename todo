@@ -135,5 +135,18 @@ ifs, loops, gotos und stops rein
 if abfrage ist das heikelste, evtl Rasse, primaerer Einheitentyp, Armeegroesse, Expansionen, Mobilitaet
 evtl das ganze auf den Speicher abwaelzen und bei jedem Ast auf jeden Fall absteigen oder Aeste so plazieren/belegen, dass es STOP Zeichen gibt und die benachbarten Aeste dann je nach dem genommen werden... so ne Art kleines ANN
 
+- build as many as possible
+ 
+- Regler fuer Wichtigkeit
+
+mit goals stimmt was net... da wird irgendwie die Anfangsforce draufgeschlagen bzw. nicht draufgeschlagen (auf die goal->goal[].count)
+
+durch bauen von gas scv gewinnt man 1 supply!!
 
 
+- ueberlegen wie man beide Player synchronisieren koennte... jo, evtl das speed dingens wieder rausnehmen... evtl auch buildingList fuer beide Player zusammenwerfen...
+
+-evtl wieder Zusammenfassung der Buildorder (4 zealots anstatt zeal zeal zeal zeal)
+- Memo an GNU GCC - optionale Warnung falls Rueckgabewert einer Funktion nicht ausgewertet wird
+
+- RECTANGLES ueberarbeiten, noch nicht maechtig genug

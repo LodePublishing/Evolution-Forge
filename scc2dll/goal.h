@@ -7,7 +7,7 @@ class EXPORT GOAL_ENTRY
 {
 private:
 	int number; // to look up in the goal name list
-//	char name[128];
+	char name[128];
 	int race;
 	int raceInitialized;
 	int maxBuildTypes;
@@ -16,7 +16,11 @@ private:
 	int phaenoToGenotype[UNIT_TYPE_COUNT];
 	int genoToPhaenotype[UNIT_TYPE_COUNT];
 	int changed;
+	int mode;
 public:
+	int getMode(); // 0: normal, 1: based on success of enemy
+	void setMode(int mode);
+	
 	void copy(GOAL_ENTRY* goal);
 	void resetData();
 	int isChanged();
@@ -29,7 +33,7 @@ public:
 
 //TODO: evtl linked list draus machen
 	GOAL goal[MAX_GOALS];
-//	const char* getName();
+	const char* getName();
 
 	const UNIT_STATISTICS* getpStats();
 	int toGeno(int num);
@@ -38,7 +42,7 @@ public:
 	int getRace();
 	int getMaxBuildTypes();
 	int isRaceInitialized();
-//	int setName(const char* line);
+	int setName(const char* line);
 	int setRace(int num);
 	int addGoal(int unit, int count, int time, int location);
 	int adjustGoals(int allowGoalAdaption, UNITS* units=0);

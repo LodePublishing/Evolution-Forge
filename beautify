@@ -1,0 +1,65 @@
+#!/bin/sh
+indent "$1" -cbi0 -bli0 -nbad -bap -bbo -nbc -bl -bls -c33 -cd33 -cp33 -cdb -ce -cli2 -cs -d16 -fc1 -nfca -i4 -ip0 -l125 -lp -npcs -nprs -npsl -saf -sai -saw -sc -sob -nss -cdw -di16 -ts4 -nhnl
+
+#			-bli0
+# no blank lines after declarations
+#			-nbad
+# blank lines after procedures
+#			-bap 
+# get the boolean operators to the front
+#			-bbo 
+# no blank lines after comma
+#			-nbc 
+# braces structs
+#			-bls 
+# comments after coloumn 33
+#			-c33 
+#			-cd33 
+#			-cp33 
+# Do not put comment delimiters on blank lines.
+#			-ncdb 
+# } <next line> else 
+#			-nce 
+# 4 spaces (?)
+#			-ci4 
+# 2 spaces after { (?)
+#			-cli2 
+# case also counts as { (?)
+#			-cbi0 
+# space after each cast operator
+#			-cs 
+# variable names in coloumn 16
+#			-d16 
+# get comments aligned with the code
+#			-fc1 
+# do not format comments
+#			-nfca 
+# honour newlines in the original file
+#			-hnl 
+# four idents for each level
+#			-i4 
+# format ifs && || without additional idents
+#			-ip0 
+# line length 150 at maximum
+#			-l150 
+# arrange parameters within parantheses
+#			-lp 
+# no space after function call names
+#			-npcs 
+# no space after parantheses
+#			-nprs 
+# don't break procedure types
+#			-npsl 
+# space after for
+#			-saf 
+# space after if
+#			-sai 
+# space after while
+#			-saw 
+# star * comments
+#			-sc 
+# kill blank lines
+#			-sob 
+# put a space in front of a semicolon ; if it's in the same line as an ifwhile to empasize 
+#			-nss
+

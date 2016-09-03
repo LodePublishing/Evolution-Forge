@@ -6,6 +6,31 @@
 #include <stdlib.h>
 #include <time.h>
 
+SETTINGS::SETTINGS()
+{
+	initDefaults();
+	srand(time(NULL));
+};
+
+SETTINGS::~SETTINGS()
+{
+};
+
+void EXPORT SETTINGS::initDefaults()
+{
+	currentMap=-1;UMS=0;
+	setAllowGoalAdaption(1);
+	setMaxTime(MAX_TIME);
+	setMaxTimeOut(MAX_TIMEOUT);
+	setMaxLength(MAX_LENGTH);
+	setMaxRuns(MAX_RUNS);
+	setMaxGenerations(MAX_GENERATIONS);
+	setPreprocessBuildOrder(0);
+	setCrossOver(MIN_CROSSOVER);
+	setBreedFactor(20);
+	setMode(MIN_MODE);
+};
+
 void EXPORT SETTINGS::calculateAnaplayer()
 {
 	soup.calculateAnaplayer();
@@ -410,7 +435,7 @@ int EXPORT SETTINGS::getMapCount()
 int EXPORT SETTINGS::getHarvestMineralsSpeed(int race, int workers)
 {
 #ifdef _SCC_DEBUG
-	if((race<MIN_RACE)||(race>MAX_RACE))
+	if((race<0)||(race>=MAX_RACES))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::getHarvestMineralSpeed): Value race [%i] out of range.",race);
 		return(0);
@@ -422,7 +447,7 @@ int EXPORT SETTINGS::getHarvestMineralsSpeed(int race, int workers)
 int EXPORT SETTINGS::getHarvestGasSpeed(int race, int workers)
 {
 #ifdef _SCC_DEBUG
-    if((race<MIN_RACE)||(race>MAX_RACE))
+    if((race<0)||(race>=MAX_RACES))
     {
         debug.toLog(0,"WARNING: (SETTINGS::getHarvestGasSpeed): Value race [%i] out of range.",race);
         return(0);
@@ -453,6 +478,14 @@ GOAL_ENTRY* EXPORT SETTINGS::getGoal(int num)
 
 void EXPORT SETTINGS::loadDefaultsFile(const char* defaultFile)
 {
+	char* t=new char[257];
+	for(int i=32;i<256;i++)
+		t[i]=i;
+	t[256]=0;
+	debug.toLog(0,t);
+	delete t;
+
+	
 	defaults.loadFromFile(defaultFile, harvestSpeed);
 };
 
@@ -516,8 +549,8 @@ int EXPORT SETTINGS::loadGoalFile(const char* goalFile) //~~~
 		}
 		else if(mode==1)
 		{
-			if(!strcmp(item,"Name"));
-//				loadedGoal[getGoalCount()].setName(param1);
+			if(!strcmp(item,"Name"))
+				loadedGoal[getGoalCount()].setName(param1);
 			else if(!strcmp(item,"@RACE"))
 			{
 				mode=2;
@@ -1099,28 +1132,6 @@ ANARACE** EXPORT SETTINGS::newGeneration(ANARACE* oldAnarace[MAX_PLAYER])
 	return(soup.newGeneration(oldAnarace));
 };
 
-void EXPORT SETTINGS::initDefaults()
-{
-	currentMap=-1;UMS=0;
-	setAllowGoalAdaption(1);
-	setMaxTime(MAX_TIME);
-	setMaxTimeOut(MAX_TIMEOUT);
-	setMaxLength(MAX_LENGTH);
-	setMaxRuns(MAX_RUNS);
-	setMaxGenerations(MAX_GENERATIONS);
-	setPreprocessBuildOrder(0);
-	setCrossOver(MIN_CROSSOVER);
-	setBreedFactor(20);
-	setMode(MIN_MODE);
-};
 
-SETTINGS::SETTINGS()
-{
-	initDefaults();
-	srand(time(NULL));
-};
-
-SETTINGS::~SETTINGS()
-{
-};
+SETTINGS settings;
 

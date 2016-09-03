@@ -4,31 +4,55 @@
 #include "debug.h"
 // TODO: reimplement/recheck the speed of the units
 
-int EXPORT ANARACE::isActive()
+ANARACE::ANARACE()
+{
+	setGeneration(0);
+	setMaxpFitness(0);
+	setMaxsFitness(0);
+	setMaxtFitness(MAX_TFITNESS);
+	setUnchangedGenerations(0);
+	setRun(0);
+	optimizing=0;
+	active=1;
+	totalUnitForce=4;
+	maxUnitForce=4;
+	timePercentage=0;
+	goalPercentage=0;
+};
+
+ANARACE::~ANARACE()
+{
+};
+
+
+int EXPORT ANARACE::getMaxUnitForce()
+{
+	return(maxUnitForce);
+};
+
+int EXPORT ANARACE::getTotalUnitForce()
+{
+	return(totalUnitForce);
+};
+
+bool EXPORT ANARACE::isActive()
 {
 	return(active);
 };
 
-void EXPORT ANARACE::setActive(int act)
+void EXPORT ANARACE::setActive(bool active)
 {
-	if(act)
-		active=1;
-	else
-		active=0;
+	this->active=active;
 };
 
-int EXPORT ANARACE::isOptimizing()
+bool EXPORT ANARACE::isOptimizing()
 {
 	return(optimizing);
-	return(1);
 };
 
-void EXPORT ANARACE::setOptimizing(int opt)
+void EXPORT ANARACE::setOptimizing(bool optimizing)
 {
-	if(opt)
-		optimizing=1;
-	else
-		optimizing=0;
+	this->optimizing=optimizing;
 };
 
 
@@ -41,22 +65,19 @@ int EXPORT ANARACE::getMarker(int IP)
 				return(0);
 		}
 #endif
-		return(Marker[getProgramDominant(IP)][IP]); 
+		return(Marker[IP]); 
 };
 
 void EXPORT ANARACE::removeOrder(int IP)
 {
 		for(int j=IP;j--;)
 		{
-				Code[0][j+1]=Code[0][j];
-				Code[1][j+1]=Code[1][j];
-				Marker[0][j+1]=Marker[0][j];
-				Marker[1][j+1]=Marker[1][j];
-				program[j+1].dominant=program[j].dominant;
+				Code[j+1]=Code[j];
+				Marker[j+1]=Marker[j];
 				program[j+1].built=program[j].built;
 		}
 	for(int j=0;j<MAX_LENGTH;j++)
-				phaenoCode[j]=getPlayer()->getGoal()->toPhaeno(Code[getProgramDominant(j)][j]);
+				phaenoCode[j]=getPlayer()->getGoal()->toPhaeno(Code[j]);
 		getPlayer()->wasChanged(); // to allow update of time etc. of anarace
 };
 
@@ -74,11 +95,8 @@ void EXPORT ANARACE::insertOrder(int unit, int position)
 		i=MAX_LENGTH-1;
 	for(int j=0;j<i;j++)
 	{
-		Code[0][j]=Code[0][j+1];
-		Code[1][j]=Code[1][j+1];
-		Marker[0][j]=Marker[0][j+1];
-		Marker[1][j]=Marker[1][j+1];
-			program[j].dominant=program[j+1].dominant;
+		Code[j]=Code[j+1];
+		Marker[j]=Marker[j+1];
 		program[j].built=program[j+1].built;
 	}
 	
@@ -87,14 +105,12 @@ void EXPORT ANARACE::insertOrder(int unit, int position)
 		getPlayer()->getGoal()->addGoal(unit,1,0,0);
 		getPlayer()->changeAccepted();
 	}
-	replaceCode(0,i,getPlayer()->getGoal()->toGeno(unit));
-	replaceCode(1,i,getPlayer()->getGoal()->toGeno(unit));
+	replaceCode(i,getPlayer()->getGoal()->toGeno(unit));
 	
-	program[i].dominant=0;
 	program[i].built=1;
 
 	for(int j=0;j<MAX_LENGTH;j++)
-			phaenoCode[j]=getPlayer()->getGoal()->toPhaeno(Code[getProgramDominant(j)][j]); 
+		phaenoCode[j]=getPlayer()->getGoal()->toPhaeno(Code[j]); 
 	getPlayer()->wasChanged(); // to allow update of time etc. of anarace
 }
 
@@ -122,24 +138,6 @@ int EXPORT ANARACE::restoreMap()
 	return(1);
 };
 
-int EXPORT ANARACE::getProgramDominant(int IP) 
-{
-#ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH))
-	{
-		debug.toLog(0,"DEBUG: (ANARACE::getProgramCode): Value IP [%i] out of range.",IP);
-		return(0);
-	}
-	if((program[IP].dominant<0)||(program[IP].dominant>=2))
-	{
-		debug.toLog(0,"DEBUG: (ANARACE::getProgramCode): Variable program[%i].dominant not initialized [%i].",IP,program[IP].dominant);
-		return(0);
-	}
-#endif
-	return(program[IP].dominant);
-};
-
-
 int EXPORT ANARACE::getProgramCode(int IP)
 {
 #ifdef _SCC_DEBUG
@@ -148,13 +146,13 @@ int EXPORT ANARACE::getProgramCode(int IP)
 		debug.toLog(0,"DEBUG: (ANARACE::getProgramCode): Value IP [%i] out of range.",IP);
 		return(0);
 	}
-	if((Code[getProgramDominant(IP)][IP]<0)||(Code[getProgramDominant(IP)][IP]>=UNIT_TYPE_COUNT))
+	if((Code[IP]<0)||(Code[IP]>=UNIT_TYPE_COUNT))
 	{
-		debug.toLog(0,"DEBUG: (ANARACE::getProgramCode): Variable not initialized [%i].",Code[getProgramDominant(IP)][IP]);
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramCode): Variable Code[%i] not initialized [%i].",Code[IP], IP);
 		return(0);
 	}
 #endif					
-	return(Code[getProgramDominant(IP)][IP]);
+	return(Code[IP]);
 }
 
 
@@ -418,24 +416,6 @@ int EXPORT ANARACE::setProgramIsGoal(int IP, int num)
 
 
 
-
-int EXPORT ANARACE::setProgramDominant(int IP, int num)
-{
-#ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH))
-	{
-		debug.toLog(0,"DEBUG: (ANARACE::setProgramDominant): Value IP [%i] out of range.",IP);
-		return(0);
-	}
-	if((num<0)||(num>=2))
-	{
-		debug.toLog(0,"DEBUG: (ANARACE::setProgramDominant): Value num [%i] out of range.",num);
-		return(0);
-	}
-#endif
-	program[IP].dominant=num;
-	return(1);
-}
 
 
 int EXPORT ANARACE::setProgramBT(int IP, int time)
@@ -954,18 +934,47 @@ int EXPORT ANARACE::calculateFitness() // Fuer den Uebersichtsgraphen unten rech
 				totalBT=j;
 		}
 		if(totalBT==(ga->maxTime-getTimer()))
-			percentage=100;
+			timePercentage=100;
 		else 
-			percentage=100*totalBT/(ga->maxTime-getTimer());
+			timePercentage=100*totalBT/(ga->maxTime-getTimer());
 	}	
-	else*/ percentage=0;
+	else*/ timePercentage=0;
+	
+   int count=0;
+        for(int i=0;i<MAX_GOALS;i++)
+            if(getPlayer()->getGoal()->goal[i].count>0)
+                count++;
+        goalPercentage=0;
+        if(count>0)
+            goalPercentage=getCurrentpFitness()/count;
+        else goalPercentage=100;
 	return(tpF);
 }
 #endif
-int EXPORT ANARACE::getPercentage()
+
+int EXPORT ANARACE::getTimePercentage()
 {
-	return(percentage);
-}
+	return(timePercentage);
+};
+
+int EXPORT ANARACE::getGoalPercentage()
+{
+	return(goalPercentage);
+};
+
+void EXPORT ANARACE::countForce()
+{
+	totalUnitForce = 0;
+    maxUnitForce = 4;
+    for (int i = 0; i <= GAS_SCV; i++)
+    {
+        if (getLocationForce(0, i) > maxUnitForce)
+            maxUnitForce = getLocationForce(0, i);
+        if (getPlayer()->getGoal()->allGoal[i] > maxUnitForce)
+            maxUnitForce = getPlayer()->getGoal()->allGoal[i];
+        totalUnitForce += getLocationForce(0, i);;
+    }
+};
 
 
 int EXPORT ANARACE::calculateStep()
@@ -985,28 +994,20 @@ int EXPORT ANARACE::calculateStep()
 		setLength(ga->maxLength-getIP());
 		if(!ready) setTimer(0);
 		for(int i=0;i<MAX_LENGTH;i++)
-			phaenoCode[i]=getPlayer()->getGoal()->toPhaeno(Code[getProgramDominant(i)][i]);
-		setCurrentpFitness(calculatePrimaryFitness(ready));
+			phaenoCode[i]=getPlayer()->getGoal()->toPhaeno(Code[i]);
+		if(getPlayer()->getGoal()->getMode()==0)
+			setCurrentpFitness(calculatePrimaryFitness(ready));
 		buildingList.Clear();
+		countForce();
 		return(1);
 	}
 
-	int dominant=0;
 	int ok=1;
 	while((ok)&&(getIP()))
 	{
 		neededMinerals=99999;
 		neededGas=99999;
-		if(Code[0][getIP()]>Code[1][getIP()]) //dominance
-		{
-			if(!(ok=buildGene(getPlayer()->getGoal()->toPhaeno(Code[dominant=0][getIP()]))))
-				ok=buildGene(getPlayer()->getGoal()->toPhaeno(Code[dominant=1][getIP()]));
-		}
-		else
-		{
-			if(!(ok=buildGene(getPlayer()->getGoal()->toPhaeno(Code[dominant=1][getIP()]))))
-				ok=buildGene(getPlayer()->getGoal()->toPhaeno(Code[dominant=0][getIP()]));
-		}
+		ok=buildGene(getPlayer()->getGoal()->toPhaeno(Code[getIP()]));
 		if(successType>0)
 		{
 			setProgramSuccessType(getIP(),successType);
@@ -1020,12 +1021,11 @@ int EXPORT ANARACE::calculateStep()
 			if(ok)
 			{
 				setProgramTime(getIP(),ga->maxTime-getTimer()); //ANA~
-				setProgramDominant(getIP(),dominant); //ANA~
 			}
 			else 
 			{
 				setProgramTime(getIP(),ga->maxTime);
-				setProgramSuccessType(getIP(),TIMEOUT);
+				setProgramSuccessType(getIP(),TIMEOUT_ERROR);
 				setProgramSuccessUnit(getIP(),0);
 //				setProgramSuccessLocation(0);
 			}
@@ -1047,7 +1047,7 @@ int EXPORT ANARACE::calculateStep()
 
 /*	int t=getTimer();*/
 	BNODE *node=buildingList.GetFirst();
-	Building* build;
+	Building* build=0;
 	if(node)
 	{
 		build=(Building*)node->GetData();
@@ -1096,9 +1096,9 @@ int EXPORT ANARACE::calculateStep()
 			int drinne=1;
 			for(int i=0;i<3;i++)
 				drinne&=stat->facility[i]!=build->getFacility();
-			if(drinne) debug.toLog(0,"O_o");
-			switch(stat->facility_type)
+			switch(stat->facilityType)
 			{
+				case NO_FACILITY:break;
 				case IS_LOST:
 					if(build->getFacility())
 					{
@@ -1149,7 +1149,10 @@ int EXPORT ANARACE::calculateStep()
 					}
 					break;
 				case NEEDED_ALWAYS:break;
-				default:debug.toLog(0,"DEBUG: (ANARACE::calculateStep) default case reached!");break;
+                case NO_FACILITY_BEHAVIOUR_DEFINED:
+                default:
+                        debug.toLog(0,"ERROR: UNDEFINED FACILITY BEHAVIOUR DETECTED!");
+                        break;
 			}
 
 			if(stat->supply<0) 
@@ -1183,6 +1186,24 @@ int EXPORT ANARACE::calculateStep()
 				adjustMineralHarvest(build->getLocation());
 				adjustGasHarvest(build->getLocation());
 			}
+ else if((build->getType()==LARVA)&&(getPlayer()->getGoal()->getRace()==ZERG))
+            {
+                if(!buildGene(LARVA))
+                    larvaInProduction[build->getLocation()]--;
+//                      if(
+//TODO Was wenn Gebaeude zerstoert? etc.? eigentlich is das hier net noetig...
+//                                  (((getLocationForce(tloc, HATCHERY)+getLocationForce(tloc, LAIR)+getLocationForce(tloc, HIVE))*3>
+//                                    (larvaInProduction[tloc]+getLocationForce(tloc, LARVA)))&&
+//                                   ((getLocationForce(tloc, HATCHERY)+getLocationForce(tloc, LAIR)+getLocationForce(tloc, HIVE)<larvaInProduction[tloc])))) // => zuwenig Larven da!
+//                          {
+//                              if(buildGene(LARVA))
+//                                  larvaInProduction[tloc]++;
+//                          }
+//                      };
+//                  };
+            };
+
+
 			last[lastcounter].unit=build->getType();
 			last[lastcounter].count=build->getUnitCount();
 			last[lastcounter].location=build->getLocation();
@@ -1192,13 +1213,6 @@ int EXPORT ANARACE::calculateStep()
 				addLocationForce(build->getLocation(),stat->create,1);
 				addLocationAvailible(build->getLocation(),stat->create,1);
 				if(last[lastcounter].unit==stat->create) last[lastcounter].count++; //TODO ???
-				if((getPlayer()->getGoal()->getRace()==ZERG)&&(stat->create==LARVA))
-				{
-					larva[larvacounternumber].location=build->getLocation();
-					larva[larvacounternumber].larvacount=1;
-					larva[larvacounternumber].counter=20;
-					larvacounternumber++; //~~mei... ne linked list...
-				}
 				// ~~~~ Ja... geht schon... aber kann ja auch mal was anderes sein...
 			}
 					//evtl noch location==0 als 'egal wo' einfuehren
@@ -1256,25 +1270,25 @@ int ANARACE::buildGene(int unit)
 		{
 			successUnit=stat->prerequisite[0];
 //			successLocation=0;
-			successType=PREREQUISITE_FAILED;
+			successType=PREREQUISITE_WAS_FULFILLED;
 		}
 		else		
 		if((stat->prerequisite[1]>0)&&(getLocationForce(0,stat->prerequisite[1])==0))
 		{
 			successUnit=stat->prerequisite[1];
 //			successLocation=0;
-			successType=PREREQUISITE_FAILED;
+			successType=PREREQUISITE_WAS_FULFILLED;
 		}
 		else 
 		if((stat->prerequisite[2]>0)&&(getLocationForce(0,stat->prerequisite[2])==0))
 		{
 			successUnit=stat->prerequisite[2];
 //			successLocation=0;
-			successType=PREREQUISITE_FAILED;
+			successType=PREREQUISITE_WAS_FULFILLED;
 		}
 		else
 		if //ANA~
-//TODO, < ((stat->facility_type==IS_LOST)&&(stat->facility[fac]==stat->facility2)) einfuegen....
+//TODO, < ((stat->facilityType==IS_LOST)&&(stat->facility[fac]==stat->facility2)) einfuegen....
 			( ((stat->facility[0]==0)||(getLocationAvailible(0,stat->facility[0])==0))&&
 			  ((stat->facility[1]==0)||(getLocationAvailible(0,stat->facility[1])==0))&&
 			  ((stat->facility[2]==0)||(getLocationAvailible(0,stat->facility[2])==0))&&
@@ -1289,14 +1303,14 @@ int ANARACE::buildGene(int unit)
 			else if(stat->facility[2]>0)
 				successUnit=stat->facility[2];
 //			successLocation=0;
-			successType=FACILITY_FAILED;
+			successType=FACILITY_BECAME_AVAILIBLE;
 		}
 		else
 		if((stat->facility2>0)&&(getLocationAvailible(0,stat->facility2)==0))
 		{
 			successUnit=stat->facility2;
 //			successLocation=0;
-			successType=FACILITY_FAILED;
+			successType=FACILITY_BECAME_AVAILIBLE;
 		}
 //TODO: evtl success 2 Schritte zurueckverfolgen...
 		else
@@ -1304,14 +1318,14 @@ int ANARACE::buildGene(int unit)
 		{
 			successUnit=0;
 //			  successLocation=0;
-			successType=SUPPLY_SATISFIED;
+			successType=SUPPLY_WAS_SATISFIED;
 		}
 		else
 		if(getMins()<stat->mins+stat->upgrade_cost*getLocationForce(0,unit))
 		{
 			successUnit=0;
 //			successLocation=0;
-			successType=ENOUGH_MINERALS;
+			successType=ENOUGH_MINERALS_WERE_GATHERED;
 			if(neededMinerals>stat->mins+stat->upgrade_cost*getLocationForce(0,unit)-getMins())
 				neededMinerals=stat->mins+stat->upgrade_cost*getLocationForce(0,unit)-getMins();
 //Fehler is wahrscheinlich hier irgendwoe...
@@ -1322,7 +1336,7 @@ int ANARACE::buildGene(int unit)
 		{
 			successUnit=0;
 //			successLocation=0;
-			successType=ENOUGH_GAS;
+			successType=ENOUGH_GAS_WAS_GATHERED;
 			if(neededGas>stat->gas+stat->upgrade_cost*getLocationForce(0,unit)-getGas())
 				neededGas=stat->gas+stat->upgrade_cost*getLocationForce(0,unit)-getGas();
 		}
@@ -1343,7 +1357,7 @@ int ANARACE::buildGene(int unit)
 
 //			if((stat->facility2==0)||(getLocationAvailible(tloc,stat->facility2)>0))
 			for(fac=3;fac--;)
-				if( ((stat->facility[fac]>0)&&(getLocationAvailible(tloc,stat->facility[fac])>((stat->facility_type==IS_LOST)&&(stat->facility[fac]==stat->facility2)))) || ((stat->facility[fac]==0)&&(fac==0))) 
+				if( ((stat->facility[fac]>0)&&(getLocationAvailible(tloc,stat->facility[fac])>((stat->facilityType==IS_LOST)&&(stat->facility[fac]==stat->facility2)))) || ((stat->facility[fac]==0)&&(fac==0))) 
 				{
 					ok=1;
 					break;
@@ -1357,7 +1371,7 @@ int ANARACE::buildGene(int unit)
 //					if((stat->facility2==0)||(getLocationAvailible(ttloc,stat->facility2)>0))
 //					{
 					for(fac=3;fac--;)
-						if( ((stat->facility[fac]>0)&&(getLocationAvailible(ttloc,stat->facility[fac])>((stat->facility_type==IS_LOST)&&(stat->facility[fac]==stat->facility2)))) || ((stat->facility[fac]==0)&&(fac==0)))
+						if( ((stat->facility[fac]>0)&&(getLocationAvailible(ttloc,stat->facility[fac])>((stat->facilityType==IS_LOST)&&(stat->facility[fac]==stat->facility2)))) || ((stat->facility[fac]==0)&&(fac==0)))
 						{
 							tloc=ttloc;
 							ok=1;
@@ -1382,6 +1396,21 @@ int ANARACE::buildGene(int unit)
 
 			if(ok)
 			{
+                    if(getPlayer()->getGoal()->getRace()==ZERG)
+                    {
+                        if(pStats[unit].facility[0]==LARVA)
+                        {
+                            if(
+                                    (((getLocationForce(tloc, HATCHERY)+getLocationForce(tloc, LAIR)+getLocationForce(tloc, HIVE))*3==
+                                      (larvaInProduction[tloc]+getLocationForce(tloc, LARVA)))&&
+                                     ((getLocationForce(tloc, HATCHERY)+getLocationForce(tloc, LAIR)+getLocationForce(tloc, HIVE)<larvaInProduction[tloc])))) // => zuwenig Larven da!
+                            {
+                                if(buildGene(LARVA))
+                                    larvaInProduction[tloc]++;
+                            }
+                                                                                                                                                            
+                        };
+                    };
 				BNODE *node=NULL;
 				for (node = buildingList.GetFirst();node&&((node->GetData())->getRemainingBuildTime()<stat->BT/*+3200*(stat->facility2==unit)*/);node = node->GetNext());
 				Building* build=new Building();
@@ -1400,7 +1429,7 @@ int ANARACE::buildGene(int unit)
 
 				setMins(getMins()-(stat->mins+stat->upgrade_cost*getLocationForce(0,unit)));
 				setGas(getGas()-(stat->gas+stat->upgrade_cost*getLocationForce(0,unit)));
-				if((stat->supply>0)||((pStats[stat->facility[0]].supply<0)&&(stat->facility_type==IS_LOST))) 
+				if((stat->supply>0)||((pStats[stat->facility[0]].supply<0)&&(stat->facilityType==IS_LOST))) 
 					setSupply(getSupply()-stat->supply);
 				adjustAvailibility(tloc,fac,stat);
 				build->setIP(getIP()); //?
@@ -1553,7 +1582,6 @@ void ANARACE::setCurrentpFitness(int num)
 // Reset all ongoing data (between two runs)
 void EXPORT ANARACE::resetData() // resets all data to standard starting values
 {
-
 	setCurrentpFitness(0);
 	for(int i=MAX_GOALS;i--;)
 		setFinalTime(i,0);
@@ -1581,7 +1609,6 @@ void EXPORT ANARACE::resetData() // resets all data to standard starting values
 			setProgramForceCount(i,j,0);
 		}
 		//program[i].temp=0;
-		setProgramDominant(i,0);
 		setProgramLocation(i,0);
 		setProgramIsGoal(i,0);
 		setProgramFacility(i,0);
@@ -1593,8 +1620,8 @@ void EXPORT ANARACE::resetData() // resets all data to standard starting values
 	setMins(getPlayer()->getMins());
 	setGas(getPlayer()->getGas());
 	setTimer(ga->maxTime-getPlayer()->getTimer());
-	setSupply(0);
-	setMaxSupply(0);
+	setSupply(getPlayer()->getSupply());
+	setMaxSupply(getPlayer()->getMaxSupply());
 
 	for(int i=0;i<4;i++) //TODO
 	{
@@ -1793,22 +1820,6 @@ void EXPORT ANARACE::analyzeBuildOrder()
 
 
 
-ANARACE::ANARACE()
-{
-	setGeneration(0);
-	setMaxpFitness(0);
-	setMaxsFitness(0);
-	setMaxtFitness(MAX_TFITNESS);
-	setUnchangedGenerations(0);
-	setRun(0);
-	optimizing=0;
-	active=1;
-};
-
-ANARACE::~ANARACE()
-{
-
-};
 
 int EXPORT ANARACE::successType;
 int EXPORT ANARACE::successUnit;

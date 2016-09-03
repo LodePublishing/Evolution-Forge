@@ -4,6 +4,7 @@
 #include "../scc2dll/anarace.h"
 #include "../scc2dll/default.h"
 #include "math.h"
+#include "UI_Object.h"
 
 IMPLEMENT_APP(MyApp)
 
@@ -29,7 +30,7 @@ BEGIN_EVENT_TABLE(MyDCWindow, wxWindow)
 	EVT_LEFT_DOWN(MyDCWindow::OnMouseLeftDown)
 	EVT_RIGHT_UP(MyDCWindow::OnMouseRightUp)
 	EVT_RIGHT_DOWN(MyDCWindow::OnMouseRightDown)
-	EVT_MOUSEWHEEL(MyDCWindow::OnMouseScroll)
+	EVT_MOUSEWHEEL(MyDCWindow::OnMouseWheelScroll)
 	EVT_KEY_DOWN(MyDCWindow::OnKeyDown)
 	EVT_KEY_UP(MyDCWindow::OnKeyUp)
 	EVT_TIMER(-1,MyDCWindow::OnTimer)
@@ -41,15 +42,6 @@ int SCREEN_Y;
 int oldy;
 
 int gizmor;
-
-const int BASIC=0;
-const int ADVANCED=1;
-const int EXPERT=2;
-const int GOSU=3;
-const int TRANSCENDEND=4;
-const int MAP=5;
-const int SETTINGS=6;
-const int TUTORIAL=7;
 
 int grey; //0-100%
 
@@ -72,20 +64,23 @@ void MyDCWindow::resetData()
 MyDCWindow::MyDCWindow(wxFrame *parent)
 	:wxWindow(parent, -1)
 {
+	/*
 #ifdef __WIN32__
+	
 	GraphixScrollWindow::font=wxFont(FONT_SIZE,wxDEFAULT,wxNORMAL,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);
 	GraphixScrollWindow::font2=wxFont(FONT_SIZE,wxDEFAULT,wxFONTSTYLE_ITALIC,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);
 #else
 	GraphixScrollWindow::font=wxFont(FONT_SIZE,wxDECORATIVE,wxNORMAL,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);
 	GraphixScrollWindow::font2=wxFont(FONT_SIZE,wxDECORATIVE,wxFONTSTYLE_ITALIC,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);
 #endif
+	
 	GraphixScrollWindow::font4=wxFont(18,wxDECORATIVE,wxNORMAL,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);
 	GraphixScrollWindow::font3=wxFont(32,wxDEFAULT,wxNORMAL,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);
 
 	GraphixScrollWindow::font5=wxFont(24,wxDECORATIVE,wxNORMAL,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);
 	GraphixScrollWindow::font6=wxFont(12,wxDECORATIVE,wxNORMAL,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);
-	GraphixScrollWindow::font7=wxFont(16,wxDECORATIVE,wxNORMAL,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);
-		
+	GraphixScrollWindow::font7=wxFont(16,wxDECORATIVE,wxNORMAL,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);*/
+
 /*
 
 (- lade spielregeln)
@@ -106,32 +101,30 @@ MyDCWindow::MyDCWindow(wxFrame *parent)
 
 void MyDCWindow::initEngine()
 {
+	UI_Object::theme.loadDataFiles();
+		
 // Always do loadHarvestFile (mining speeds) before loadMapFile, because at the moment the mapfile also sets the gathering speed
-	GraphixScrollWindow::settings.loadHarvestFile("mining.txt");
-	GraphixScrollWindow::settings.loadSettingsFile("settings.txt");
-	GraphixScrollWindow::settings.loadMapFile("LostTemple");
-	GraphixScrollWindow::settings.loadDefaultsFile("default.map");
+	settings.loadHarvestFile("mining.txt");
+	settings.loadSettingsFile("settings.txt");
+	settings.loadMapFile("LostTemple");
+	settings.loadDefaultsFile("default.map");
 
-	GraphixScrollWindow::settings.loadGoalFile("goalp1.txt");
-	GraphixScrollWindow::settings.loadGoalFile("goalp0.txt");
-	GraphixScrollWindow::settings.loadGoalFile("goalp0.txt");
-	GraphixScrollWindow::settings.loadGoalFile("goalp0.txt");
-	GraphixScrollWindow::settings.loadGoalFile("goalp0.txt");
-	GraphixScrollWindow::settings.loadGoalFile("goalp0.txt");
-
+	settings.loadGoalFile("goal.txt");
+	settings.loadGoalFile("goal2.txt");
+	settings.loadGoalFile("goal3.txt");
 // goal beschreibt Rasse, Ziele und Modus
 
 	
 // Map in "map.txt" is now map[0]
-//	GraphixScrollWindow::settings.loadMapFile("LostTemple",USE_MAP_SETTINGS);
-//	GraphixScrollWindow::settings.loadMapFile("LostTemple",TOP_VS_BOTTOM);
+//	settings.loadMapFile("LostTemple",USE_MAP_SETTINGS);
+//	settings.loadMapFile("LostTemple",TOP_VS_BOTTOM);
 // choose the first map we loaded (map[0])
-	GraphixScrollWindow::settings.initSoup(); // assign START of settings
+	settings.initSoup(); // assign START of settings
 	// initializes players, initializes Map
-	GraphixScrollWindow::settings.setMap(0, 0); // first map (lt) and ums = false
+	settings.setMap(0, 0); // first map (lt) and ums = false
 	
-//	for(int i=1;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer();i++)
-//		GraphixScrollWindow::settings.setGoal(0, i);
+//	for(int i=1;i<settings.getMap(0)->getMaxPlayer();i++)
+//		settings.setGoal(0, i);
 	
 	//setMap VOR initsoup um v.a. die Zahl der Spieler zu bestimmen
 
@@ -144,46 +137,36 @@ void MyDCWindow::initEngine()
 	
 	update=0;
 // initialize the soup, set the parameters, load the players etc.
-	ga=GraphixScrollWindow::settings.getGa();
+	ga=settings.getGa();
 	oldrun=0;
 	grey=0;
 	resetData();
-	if(ANARACE** temp=GraphixScrollWindow::settings.newGeneration(anarace))
+	if(ANARACE** temp=settings.newGeneration(anarace))
 	{
-		for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
+		for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
 			anarace[i]=temp[i];
 		update=2;
 //		if(anarace[0]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=1;} TODO?
 	};
 
-	mainWindow=new GraphixScrollWindow(1,wxRect(0,0,SCREEN_X,SCREEN_Y),wxRect(0,0,SCREEN_X,SCREEN_Y),NOT_SCROLLED,0,TABBED);
-	mainWindow->setTitle(SCREEN_X/2,_T(wxString::Format(wxT("Evolution Forge v.%i "),EF_Version)));
-	mainWindow->addTab(10,_T("Basic"));
-	mainWindow->addTab(130,_T("Advanced"));
-	mainWindow->addTab(250,_T("Expert"));
-	mainWindow->addTab(370,_T("Gosu >_<"));
-	mainWindow->addTab(490,_T("Transcend"));
-	mainWindow->addTab(610,_T("Map&Goals"));
-	mainWindow->addTab(730,_T("Settings"));
-	mainWindow->addTab(890,_T("Tutorial"));
+	UI_Object::assignStartTime();
 
-	msgWindow=new MessageWindow(wxRect(mainWindow->getInnerPosition()+wxPoint(0,mainWindow->getInnerHeight()-125),wxSize(FIRST_COLOUMN,120)),wxRect(mainWindow->getInnerLeftBound(),mainWindow->getInnerLeftBound()+mainWindow->getInnerHeight()-125,FIRST_COLOUMN,120));
-msgWindow->setTitle(0,"Messages");
+	mainWindow=new UI_Window(NULL, MAIN_WINDOW_TITLE_STRING, *(UI_Object::theme.lookUpRect(MAIN_WINDOW)), *(UI_Object::theme.lookUpMaxRect(MAIN_WINDOW)), NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, TABBED);
+	 mainWindow->setTitleParameter(_T(wxString::Format(wxT("[GUI: %.3f] [CORE: %.3f]"), GUI_VERSION, CORE_VERSION)));
+	
+	msgWindow=new MessageWindow(mainWindow);
 
-	theCore=new GraphixScrollWindow(0,wxRect(FIRST_COLOUMN+5,mainWindow->getInnerUpperBound()+SECOND_ROW,SECOND_COLOUMN,220),wxRect(FIRST_COLOUMN+5,mainWindow->getInnerUpperBound()+SECOND_ROW,SECOND_COLOUMN,220),NOT_SCROLLED);
-	theCore->setTitle(0,"The Core of Evolution Forge");
+	theCore=new UI_Window(mainWindow, CORE_WINDOW_TITLE_STRING, *(UI_Object::theme.lookUpRect(THE_CORE_WINDOW)), *(UI_Object::theme.lookUpMaxRect(THE_CORE_WINDOW)),NOT_SCROLLED);
 
-	tutorialWindow=new GraphixScrollWindow(0,wxRect(mainWindow->getInnerWidth()-theCore->getWidth(),SECOND_ROW,theCore->getWidth(),500),wxRect(mainWindow->getInnerLeftBound(),mainWindow->getInnerUpperBound(),mainWindow->getInnerWidth(),1000),NOT_SCROLLED,0,TABBED);
-	tutorialWindow->setTitle(0,"Evolution Forge Tutorial");
+	tutorialWindow=new UI_Window(mainWindow, TUTORIAL_WINDOW_TITLE_STRING,  *(UI_Object::theme.lookUpRect(TUTORIAL_WINDOW)),  *(UI_Object::theme.lookUpMaxRect(TUTORIAL_WINDOW)), NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, TABBED);
 
-	Player::InitPositions(mainWindow);
 
 //TODO: scc2 player und scc2dll player Zusammenhang nachschaun! loadPlayer wird net aufgerufen... goals ueberschneiden etc...
 
-	for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
-		player[i]=new Player(&(anarace[i]),i);
+	for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
+		player[i]=new Player(mainWindow, &(anarace[i]), BASIC_PLAYER_MODE);
 
-//	haxor=new GraphixScrollWindow(wxColour(255,0,0), wxColour(5,25,0), wxColour(40,150,20), wxRect(0,0,550,100),0,boGraphWindow->getLeftBound(),boGraphWindow->getLowerBound()+10,0);
+//	haxor=new UI_Window(wxColour(255,0,0), wxColour(5,25,0), wxColour(40,150,20), wxRect(0,0,550,100),0,boGraphWindow->getRelativeLeftBound(),boGraphWindow->getLowerBound()+10,0);
 //	haxor->setTitle(0,"H4Xx0r 57uff! :D");
 
 //TODO grey wieder rein... evtl bei draw
@@ -192,16 +175,15 @@ msgWindow->setTitle(0,"Messages");
 	msgWindow->Show(0);
 	theCore->Show(0);
 	tutorialWindow->Show(0);
-	mainWindow->currentTab=0;
 
 	player[0]->Show(1);
 	player[1]->Show(0);
 
-	msgWindow->addMessage(_T("Welcome to Evolution Forge!"));
-	msgWindow->addMessage(_T("Click above to add new goals."));
-	msgWindow->addMessage(_T(wxString::Format(wxT("%i players loaded..."),GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1))),
-
-	GraphixScrollWindow::bmpBack.LoadFile("backstar.bmp", wxBITMAP_TYPE_BMP);
+	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG1_STRING)));
+	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG2_STRING)));
+	msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(PLAYERS_LOADED_STRING, settings.getMap(0)->getMaxPlayer()-1));
+				
+/*  GraphixScrollWindow::bmpBack.LoadFile("backstar.bmp", wxBITMAP_TYPE_BMP);
 	GraphixScrollWindow::bmpClawsoftware.LoadFile("clawsoftware.bmp", wxBITMAP_TYPE_BMP);
 	GraphixScrollWindow::bmpClemens.LoadFile("clemens.bmp", wxBITMAP_TYPE_BMP);
 	GraphixScrollWindow::bmpCancel.LoadFile("cancel.bmp", wxBITMAP_TYPE_BMP);
@@ -212,15 +194,22 @@ msgWindow->setTitle(0,"Messages");
 	GraphixScrollWindow::bmpArrowRight.LoadFile("arrow_right.bmp",wxBITMAP_TYPE_BMP);
 	GraphixScrollWindow::bmpArrowDown.LoadFile("arrow_down.bmp",wxBITMAP_TYPE_BMP);
 
-/*	theCore->addBitmapButton(wxRect(theCore->getInnerLeftBound()+440,theCore->getInnerUpperBound()+50,8,8),bmpAdd,1);
-	theCore->addBitmapButton(wxRect(theCore->getInnerLeftBound()+440,theCore->getInnerUpperBound()+60,8,8),bmpSub,1);
-	theCore->addBitmapButton(wxRect(theCore->getInnerLeftBound()+440,theCore->getInnerUpperBound()+70,8,8),bmpCancel,1);
-	theCore->addBitmapButton(wxRect(theCore->getInnerLeftBound()+40,theCore->getInnerUpperBound()+50,8,8),bmpAdd,1);
-	theCore->addBitmapButton(wxRect(theCore->getInnerLeftBound()+40,theCore->getInnerUpperBound()+60,8,8),bmpSub,1);
-	theCore->addBitmapButton(wxRect(theCore->getInnerLeftBound()+40,theCore->getInnerUpperBound()+70,8,8),bmpCancel,1);
-	theCore->addBitmapButton(wxRect(theCore->getInnerLeftBound()+40,theCore->getInnerUpperBound()+150,8,8),bmpAdd,1);
-	theCore->addBitmapButton(wxRect(theCore->getInnerLeftBound()+40,theCore->getInnerUpperBound()+160,8,8),bmpSub,1);
-	theCore->addBitmapButton(wxRect(theCore->getInnerLeftBound()+40,theCore->getInnerUpperBound()+170,8,8),bmpCancel,1);*/
+	GraphixScrollWindow::bmpImp1.LoadFile("i1.bmp",wxBITMAP_TYPE_BMP);
+	GraphixScrollWindow::bmpImp2.LoadFile("i2.bmp",wxBITMAP_TYPE_BMP);
+	GraphixScrollWindow::bmpImp3.LoadFile("i3.bmp",wxBITMAP_TYPE_BMP);
+	GraphixScrollWindow::bmpImp4.LoadFile("i4.bmp",wxBITMAP_TYPE_BMP);
+	GraphixScrollWindow::bmpImp5.LoadFile("i5.bmp",wxBITMAP_TYPE_BMP);
+	GraphixScrollWindow::bmpImp6.LoadFile("i6.bmp",wxBITMAP_TYPE_BMP);*/
+	
+/*	theCore->addBitmapButton(wxRect(theCore->getClientRectLeftBound()+440,theCore->getClientRectUpperBound()+50,8,8),bmpAdd,1);
+	theCore->addBitmapButton(wxRect(theCore->getClientRectLeftBound()+440,theCore->getClientRectUpperBound()+60,8,8),bmpSub,1);
+	theCore->addBitmapButton(wxRect(theCore->getClientRectLeftBound()+440,theCore->getClientRectUpperBound()+70,8,8),bmpCancel,1);
+	theCore->addBitmapButton(wxRect(theCore->getClientRectLeftBound()+40,theCore->getClientRectUpperBound()+50,8,8),bmpAdd,1);
+	theCore->addBitmapButton(wxRect(theCore->getClientRectLeftBound()+40,theCore->getClientRectUpperBound()+60,8,8),bmpSub,1);
+	theCore->addBitmapButton(wxRect(theCore->getClientRectLeftBound()+40,theCore->getClientRectUpperBound()+70,8,8),bmpCancel,1);
+	theCore->addBitmapButton(wxRect(theCore->getClientRectLeftBound()+40,theCore->getClientRectUpperBound()+150,8,8),bmpAdd,1);
+	theCore->addBitmapButton(wxRect(theCore->getClientRectLeftBound()+40,theCore->getClientRectUpperBound()+160,8,8),bmpSub,1);
+	theCore->addBitmapButton(wxRect(theCore->getClientRectLeftBound()+40,theCore->getClientRectUpperBound()+170,8,8),bmpCancel,1);*/
 
 //	wxtimer.SetOwner(this);
 //	wxtimer.Start(200);
@@ -243,6 +232,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
 //	msgBox=NULL;
 	SetIcon(wxICON(icon));
 
+	
 #if wxUSE_MENUS
 //	menuFile=new wxMenu;
 /*	menuHelp=new wxMenu;	
@@ -253,7 +243,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
 	menuHelp->Append(EF_About, _T("&About...\tF1"), _T("Show about dialog"));
 	menuFile->Append(EF_Open, _T("&Open\tAlt-O"), _T("Load Build Order"));
 //evtl nen strich mit save/load
-/*	  menuFile->Append(EF_Open, _T("&Open\tAlt-O"), _T("Load Population"));
+	  menuFile->Append(EF_Open, _T("&Open\tAlt-O"), _T("Load Population"));
 	menuFile->Append(EF_Open, _T("&Open\tAlt-O"), _T("Save Build Order"));
 	menuFile->Append(EF_Open, _T("&Open\tAlt-O"), _T("Save Population"));*/
 //	menuFile->Append(EF_Start, _T("&Start\tAlt-S"), _T("Start/Continue calculation"));
@@ -290,7 +280,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
 bool MyApp::OnInit()
 {
 	SCREEN_X=1024-4;SCREEN_Y=768-55;
-	MyFrame *frame = new MyFrame(_T("Evolution Forge v1.11"), wxPoint(0, 0), wxSize(SCREEN_X,SCREEN_Y));
+	MyFrame *frame = new MyFrame(_T("Evolution Forge v1.12"), wxPoint(0, 0), wxSize(SCREEN_X,SCREEN_Y));
 	frame->Show(TRUE);
 	return TRUE;
 }
@@ -304,9 +294,9 @@ void MyDCWindow::showToolTip()
 		what=1;
 	else if(boWindow->getButtonRect(1).Inside(mouseX,mouseY))
 		what=2;
-	dc->SetFont(GraphixScrollWindow::font2);
+	dc->SetFont(UI_Object::theme.lookUpFont(SMALL_FONT));
 	dc->SetTextForeground(wxColour(255,40,40));
-	dc->DrawText(_T("Fitness"),boDiagramWindow->getInnerLeftBound()+1,boDiagramWindow->getInnerUpperBound()+8);
+	dc->DrawText(_T("Fitness"),boDiagramWindow->getClientRectLeftBound()+1,boDiagramWindow->getClientRectUpperBound()+8);
 	switch(what)
 	{
 		case 1:dc->DrawText(_T("Mutation will affect every part of the build order"),mouseX,mouseY);break; //~~
@@ -318,106 +308,101 @@ void MyDCWindow::showToolTip()
 
 void MyDCWindow::processButtons()
 {
-	mainWindow->checkButtons();
-	for(int i=0;i<TUTORIAL+1;i++) //always show main window
-		if(mainWindow->isActivated(i))
-		{
-			update=2;
-//			player[0]->resetData();
-//			player[1]->resetData();
-			mainWindow->currentTab=i;
-			mainWindow->clearButtons();
-			switch(mainWindow->currentTab)
+	eTab oldTab=mainWindow->getCurrentTab();
+	mainWindow->process();
+	if(oldTab!=mainWindow->getCurrentTab())
+	{
+		update=2;
+//		player[0]->resetData();
+//		player[1]->resetData();
+//		mainWindow->clearButtons();
+			switch(mainWindow->getCurrentTab())
 			{
-				case BASIC:
+				case BASIC_TAB:
 					player[0]->Show(1);
 					player[1]->Show(0);
 					 //1 player
 					msgWindow->Show(0);
 					theCore->Show(0);
 					tutorialWindow->Show(0);
-//					GraphixScrollWindow::settings.setGoal(1,1); // share same goal with advanced
-//					GraphixScrollWindow::settings.setGoal(0,2); //zero goal!
+//					settings.setGoal(1,1); // share same goal with advanced
+//					settings.setGoal(0,2); //zero goal!
 				break;
-				case ADVANCED: //1 player
+				case ADVANCED_TAB: //1 player
 					player[0]->Show(2);
 					player[1]->Show(0);
 					msgWindow->Show(0);
 					theCore->Show(1);
 					tutorialWindow->Show(0);
-//					GraphixScrollWindow::settings.setGoal(1,1); //share same goal with basic
-//					GraphixScrollWindow::settings.setGoal(0,2); //zero goal!
+//					settings.setGoal(1,1); //share same goal with basic
+//					settings.setGoal(0,2); //zero goal!
 				break;
-				case EXPERT: //2 player rushversuche
+				case EXPERT_TAB: //2 player rushversuche
 					player[0]->Show(3);
 					player[1]->Show(4);
 					msgWindow->Show(0);
 					theCore->Show(0);
 					tutorialWindow->Show(0);
-//					GraphixScrollWindow::settings.setGoal(1,1); // share same goal as advanced
-//					GraphixScrollWindow::settings.setGoal(0,2); // zero goal!  -> computer!
+//					settings.setGoal(1,1); // share same goal as advanced
+//					settings.setGoal(0,2); // zero goal!  -> computer!
 				break;
-				case GOSU: // 2 player - Spieler spielt
+				case GOSU_TAB: // 2 player - Spieler spielt
 					player[0]->Show(5);
 					player[1]->Show(6);
 					msgWindow->Show(0);
 					theCore->Show(0);
 					tutorialWindow->Show(0);
 // TODO wenn zero goal -> absturz beim aendern
-//					GraphixScrollWindow::settings.setGoal(0,1); // zero goal! -> human
-//					GraphixScrollWindow::settings.setGoal(0,2); // zero goal!  -> computer!
+//					settings.setGoal(0,1); // zero goal! -> human
+//					settings.setGoal(0,2); // zero goal!  -> computer!
 				break;
-				case TRANSCENDEND: // 2 player - 2 Computer
+				case TRANSCENDEND_TAB: // 2 player - 2 Computer
 					player[0]->Show(7); //~~
 					player[1]->Show(6);
 					msgWindow->Show(0);
 					theCore->Show(0);
 					tutorialWindow->Show(0);
-//					GraphixScrollWindow::settings.setGoal(0,1); // zero goal!  -> computer!
-//					GraphixScrollWindow::settings.setGoal(0,2); // zero goal!  -> computer!
+//					settings.setGoal(0,1); // zero goal!  -> computer!
+//					settings.setGoal(0,2); // zero goal!  -> computer!
 				break;
-				case TUTORIAL:
-					player[0]->Show(1);
+				case TUTORIAL_TAB:
+					player[0]->Show(1); // TODO eigenen tutorial player machen
 					player[1]->Show(0);
-					player[0]->boWindow->Show(0);
-					player[0]->forceWindow->Show(0);
-					player[0]->timerWindow->Show(0);
+//					player[0]->boWindow->Show(0);
+//					player[0]->forceWindow->Show(0);
+//					player[0]->timerWindow->Show(0);
 						
 					msgWindow->Show(0);
 					theCore->Show(0);			
 					tutorialWindow->Show(1);
-//					GraphixScrollWindow::settings.setGoal(1,1); // same goal as basic
-//					GraphixScrollWindow::settings.setGoal(0,2); // zero goal!  -> computer!
+//					settings.setGoal(1,1); // same goal as basic
+//					settings.setGoal(0,2); // zero goal!  -> computer!
 				break;
 				default:break;		
 			} // end switch
+			player[0]->CheckOrders();
+			player[1]->CheckOrders();
 
-			player[0]->update();
-			player[1]->update();
-			
-/*			GraphixScrollWindow::settings.initSoup();
+/*			settings.initSoup();
 				resetData();
-				if(ANARACE** temp=GraphixScrollWindow::settings.newGeneration(anarace))
-				{				 for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
+				if(ANARACE** temp=settings.newGeneration(anarace))
+				{				 for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
 									anarace[i]=temp[i];
 						update=2;
 //			  if(anarace[0]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=1;} TODO?
 				};
-				for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
+				for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
 						player[i]->assignAnarace(&(anarace[i]));*/
 	
-//			GraphixScrollWindow::settings.checkForChange();
+//			settings.checkForChange();
 		} // end mainwindow is activated
 
-	player[0]->CheckForInfoWindow();
-	player[1]->CheckForInfoWindow();
-
-	GraphixScrollWindow::settings.checkForChange();
-	for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
+	settings.checkForChange();
+	for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
 		if(player[i]->isShown())
 		{
-			player[i]->processButtons();
-			if(player[i]->hasChanged())
+			player[i]->process(); // button check was done in mainWindow->process
+			if(player[i]->getChangedFlag())
 			{
 				if(!isOptimizing())
 					update=2;
@@ -597,14 +582,14 @@ void MyDCWindow::processButtons()
 
 void MyDCWindow::stopOptimizing()
 {
-	for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
+	for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
 		   if(player[i]->isShown())
-			player[i]->setOptimizing(0);
+			player[i]->setOptimizing(false);
 };
 
 int MyDCWindow::isOptimizing()
 {
-	for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
+	for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
  		   if(player[i]->isOptimizing())
 			return(1);
 	return(0);
@@ -612,54 +597,52 @@ int MyDCWindow::isOptimizing()
 
 void MyDCWindow::drawGizmo()
 {
-	dc->SetFont(GraphixScrollWindow::font3);
+	dc->SetFont(*UI_Object::theme.lookUpFont(HUGE_DEFAULT_BOLD_FONT));
 	if(isOptimizing()) ani++;
 	else ani=1;
 	if(ani>30) ani=1;
 	int dx=0;int dy=0;
 	dc->SetTextForeground(wxColour((0==ani%20)*200+((0==ani%19)+(0==ani%21))*50,(0==ani%20)*200+((0==ani%19)+(0==ani%21))*50,(0==ani%20)*200+((0==ani%19)+(0==ani%21))*100+50));
-	dc->DrawText(_T("E"),mainWindow->getInnerLeftBound()+10,mainWindow->getInnerUpperBound()+5);
+	dc->DrawText(_T("E"),mainWindow->getClientRectLeftBound()+10,mainWindow->getClientRectUpperBound()+5);
 	dc->GetTextExtent("E",&dx,&dy);
 
 	dc->SetTextForeground(wxColour((0==ani%21)*200+((0==ani%20)+(0==ani%22))*50,(0==ani%21)*200+((0==ani%20)+(0==ani%22))*50,(0==ani%21)*200+((0==ani%20)+(0==ani%22))*100+50));
-	dc->DrawText(_T("v"),mainWindow->getInnerLeftBound()+10+dx,mainWindow->getInnerUpperBound()+5);
+	dc->DrawText(_T("v"),mainWindow->getClientRectLeftBound()+10+dx,mainWindow->getClientRectUpperBound()+5);
 	dc->GetTextExtent("Ev",&dx,&dy);
 
 	dc->SetTextForeground(wxColour((0==ani%22)*200+((0==ani%21)+(0==ani%23))*50,(0==ani%22)*200+((0==ani%21)+(0==ani%23))*50,(0==ani%22)*200+((0==ani%21)+(0==ani%23))*100+50));
-	dc->DrawText(_T("o"),mainWindow->getInnerLeftBound()+10+dx,mainWindow->getInnerUpperBound()+5);
+	dc->DrawText(_T("o"),mainWindow->getClientRectLeftBound()+10+dx,mainWindow->getClientRectUpperBound()+5);
 	dc->GetTextExtent("Evo",&dx,&dy);
 
 	dc->SetTextForeground(wxColour((0==ani%23)*200+((0==ani%22)+(0==ani%24))*50,(0==ani%23)*200+((0==ani%22)+(0==ani%24))*50,(0==ani%23)*200+((0==ani%22)+(0==ani%24))*100+50));
-	dc->DrawText(_T("l"),mainWindow->getInnerLeftBound()+10+dx,mainWindow->getInnerUpperBound()+5);
+	dc->DrawText(_T("l"),mainWindow->getClientRectLeftBound()+10+dx,mainWindow->getClientRectUpperBound()+5);
 	dc->GetTextExtent("Evol",&dx,&dy);
 
 	dc->SetTextForeground(wxColour((0==ani%24)*200+((0==ani%23)+(0==ani%25))*50,(0==ani%24)*200+((0==ani%23)+(0==ani%25))*50,(0==ani%24)*200+((0==ani%23)+(0==ani%25))*100+50));
-	dc->DrawText(_T("u"),mainWindow->getInnerLeftBound()+10+dx,mainWindow->getInnerUpperBound()+5);
+	dc->DrawText(_T("u"),mainWindow->getClientRectLeftBound()+10+dx,mainWindow->getClientRectUpperBound()+5);
 	dc->GetTextExtent("Evolu",&dx,&dy);
 
 	dc->SetTextForeground(wxColour((0==ani%25)*200+((0==ani%24)+(0==ani%26))*50,(0==ani%25)*200+((0==ani%24)+(0==ani%26))*50,(0==ani%25)*200+((0==ani%24)+(0==ani%26))*100+50));
-	dc->DrawText(_T("t"),mainWindow->getInnerLeftBound()+10+dx,mainWindow->getInnerUpperBound()+5);
+	dc->DrawText(_T("t"),mainWindow->getClientRectLeftBound()+10+dx,mainWindow->getClientRectUpperBound()+5);
 	dc->GetTextExtent("Evolut",&dx,&dy);
 
 	dc->SetTextForeground(wxColour((0==ani%26)*200+((0==ani%25)+(0==ani%27))*50,(0==ani%26)*200+((0==ani%25)+(0==ani%27))*50,(0==ani%26)*200+((0==ani%25)+(0==ani%27))*100+50));
-	dc->DrawText(_T("i"),mainWindow->getInnerLeftBound()+10+dx,mainWindow->getInnerUpperBound()+5);
+	dc->DrawText(_T("i"),mainWindow->getClientRectLeftBound()+10+dx,mainWindow->getClientRectUpperBound()+5);
 	dc->GetTextExtent("Evoluti",&dx,&dy);
 
 	dc->SetTextForeground(wxColour((0==ani%27)*200+((0==ani%26)+(0==ani%28))*50,(0==ani%27)*200+((0==ani%26)+(0==ani%28))*50,(0==ani%27)*200+((0==ani%26)+(0==ani%28))*100+50));
-	dc->DrawText(_T("o"),mainWindow->getInnerLeftBound()+10+dx,mainWindow->getInnerUpperBound()+5);
+	dc->DrawText(_T("o"),mainWindow->getClientRectLeftBound()+10+dx,mainWindow->getClientRectUpperBound()+5);
 	dc->GetTextExtent("Evolutio",&dx,&dy);
 
 	dc->SetTextForeground(wxColour((0==ani%28)*200+((0==ani%27)+(0==ani%29))*50,(0==ani%28)*200+((0==ani%27)+(0==ani%29))*50,(0==ani%28)*200+((0==ani%27)+(0==ani%29))*100+50));
-	dc->DrawText(_T("n"),mainWindow->getInnerLeftBound()+10+dx,mainWindow->getInnerUpperBound()+5);
+	dc->DrawText(_T("n"),mainWindow->getClientRectLeftBound()+10+dx,mainWindow->getClientRectUpperBound()+5);
 
 	dc->SetTextForeground(wxColour(25,25,85));
-	dc->DrawText(_T("Forge"),mainWindow->getInnerLeftBound()+50,mainWindow->getInnerUpperBound()+45);
+	dc->DrawText(_T("Forge"),mainWindow->getClientRectLeftBound()+50,mainWindow->getClientRectUpperBound()+45);
 	dc->SetTextForeground(wxColour(0,0,85));
-	dc->SetFont(GraphixScrollWindow::font3);
-	dc->DrawText(_T("v1.11"),mainWindow->getInnerLeftBound()+154,mainWindow->getInnerUpperBound()+84);
+	dc->DrawText(_T("v1.12"),mainWindow->getClientRectLeftBound()+154,mainWindow->getClientRectUpperBound()+84);
 	dc->SetTextForeground(wxColour(50,50,85));
-	dc->SetFont(GraphixScrollWindow::font3);
-	dc->DrawText(_T("v1.11"),mainWindow->getInnerLeftBound()+150,mainWindow->getInnerUpperBound()+80);
+	dc->DrawText(_T("v1.12"),mainWindow->getClientRectLeftBound()+150,mainWindow->getClientRectUpperBound()+80);
 };
 
 
@@ -680,7 +663,7 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 	if(dc) delete(dc);
 	dc=new wxMemoryDC();
 	dc->SelectObject(wxBitmap(SCREEN_X,SCREEN_Y));
-    dc->DrawBitmap(GraphixScrollWindow::bmpBack,0,0);
+    dc->DrawBitmap(*(UI_Object::theme.lookUpBitmap(BACKGROUND_BITMAP)),0,0);
 		
 	dc->SetBrush(*wxBLACK_BRUSH);
 	animationNumbers++;
@@ -691,7 +674,7 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 
 	if(mainWindow->isShown())
 	{
-		mainWindow->Draw(dc);
+		mainWindow->draw(dc);
 		drawGizmo();
 	}
 
@@ -699,26 +682,24 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 	{
 //		dc->SetBrush(*wxBLACK_BRUSH);
 //		dc->SetPen(*wxTRANSPARENT_PEN);
-		dc->DrawBitmap(GraphixScrollWindow::bmpArrowRight,mainWindow->getLeftBound()+mainWindow->getWidth()-150-animationNumbers/4%6,mainWindow->getUpperBound()-8);
+		dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(ARROW_RIGHT_BITMAP),mainWindow->getRelativeLeftBound()+mainWindow->getWidth()-150-animationNumbers/4%6,mainWindow->getRelativeUpperBound()-8);
 	}
 
 	if(update==2)
 	{
-		for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
+		for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
 			if(player[i]->isShown())
-				player[i]->update();
+				player[i]->CheckOrders();
 	}
 
 	update=1;
 
-	for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
-		player[i]->drawGeneString(dc,wxRect(mainWindow->getPosition()+wxPoint(0,20+i*(mainWindow->getInnerHeight()/(GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1))),wxSize(mainWindow->getWidth(),mainWindow->getInnerHeight()/(GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1)-40)));
+//	for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
 
 
 	if(tutorialWindow->isShown())
 	{
-		tutorialWindow->DrawButtons(dc);	
-		tutorialWindow->checkButtons();
+/*		tutorialWindow->checkButtons();
 		userIsNewbie=0;
 		int t=0;
 		for(t=0;t<8;t++)
@@ -745,7 +726,6 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 		if((tutorialAnimation==400)&&(!isOptimizing()))
 			tutorialAnimation=399;
 
-		tutorialWindow->Draw(dc);
 		wxRect edge;
 		switch(tutorialChapter)
 		{
@@ -796,7 +776,7 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 					if(tutorialAnimation>1450)
 					{
 						tutorialAnimation=1;
-						tutorialWindow->adjustWindow(wxRect(mainWindow->getInnerLeftBound()+mainWindow->getInnerWidth()-(tutorialWindow->getTargetWidth()),mainWindow->getInnerUpperBound()+SECOND_ROW,tutorialWindow->getTargetWidth(),400));
+						tutorialWindow->adjustClientRect(wxRect(mainWindow->getClientRectLeftBound()+mainWindow->getClientRectWidth()-(tutorialWindow->getTargetWidth()),mainWindow->getClientRectUpperBound()+SECOND_ROW,tutorialWindow->getTargetWidth(),400));
 						stopOptimizing();
 					}
 			
@@ -812,7 +792,7 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 					else
 					if(tutorialAnimation<600)
 					{
-												tutorialWindow->adjustWindow(wxRect(theCore->getLeftBound(),mainWindow->getInnerUpperBound()+125,tutorialWindow->getTargetWidth(),500));
+												tutorialWindow->adjustClientRect(wxRect(theCore->getRelativeLeftBound(),mainWindow->getClientRectUpperBound()+125,tutorialWindow->getTargetWidth(),500));
 						player[0]->timerWindow->Show(0);
 						player[0]->boWindow->Show(1);
 					}
@@ -822,13 +802,13 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 					else if(tutorialAnimation<1000)
 					{
 						player[0]->statisticsWindow->Show(1);
-						tutorialWindow->adjustWindow(wxRect(theCore->getLeftBound(),200,tutorialWindow->getTargetWidth(),500));
+						tutorialWindow->adjustClientRect(wxRect(theCore->getRelativeLeftBound(),200,tutorialWindow->getTargetWidth(),500));
 					}
 					else if(tutorialAnimation<1200)
 					{
 						player[0]->statisticsWindow->Show(0);
-// Problem: da das hier ja oefters aufgerufen wird, wuerde jede Veraenderung durch andere Teile des Programms der Hoehe und Breite hier wieder zu nichte gemacht werden!						boDiagramWindow->adjustWindow(wxRect(boDiagramWindow->getLeftBound(),theCore->getLowerBound()+5+150,boDiagramWindow->getWidth(),boDiagramWindow->getHeight					
-						tutorialWindow->adjustWindow(wxRect(theCore->getLeftBound(),mainWindow->getInnerUpperBound(),tutorialWindow->getTargetWidth(),500));
+// Problem: da das hier ja oefters aufgerufen wird, wuerde jede Veraenderung durch andere Teile des Programms der Hoehe und Breite hier wieder zu nichte gemacht werden!						boDiagramWindow->adjustClientRect(wxRect(boDiagramWindow->getRelativeLeftBound(),theCore->getLowerBound()+5+150,boDiagramWindow->getWidth(),boDiagramWindow->getHeight					
+						tutorialWindow->adjustClientRect(wxRect(theCore->getRelativeLeftBound(),mainWindow->getClientRectUpperBound(),tutorialWindow->getTargetWidth(),500));
 					}
 				};break;
 			case 130:
@@ -1147,25 +1127,12 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 				};break;
 
 			default:break;
-		}
-	}
-
-	if(theCore->isShown())
-	{
-		theCore->Draw(dc);
-//		showCoreAnimation();
-		theCore->DrawButtons(dc);
-	}
-
-	if(msgWindow->isShown())
-	{
-		msgWindow->Draw(dc);
-		msgWindow->drawMessages(dc);
+		}*/
 	}
 
 	if(endrun)
 	{
-		   msgWindow->addMessage(_T(wxString::Format(wxT("Final time round %i: [%.2i:%.2i]"),anarace[0]->getRun(),(ga->maxTime-anarace[0]->getTimer())/60,(ga->maxTime-anarace[0]->getTimer())%60)));
+		msgWindow->addMessage(_T(wxString::Format(wxT("Final time round %i: [%.2i:%.2i]"),anarace[0]->getRun(),(ga->maxTime-anarace[0]->getTimer())/60,(ga->maxTime-anarace[0]->getTimer())%60)));
 		resetData();
 	}
 /*		dc->SetFont(font3);
@@ -1182,22 +1149,24 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 	{
 		dc->SetTextForeground(wxColour(130*grey*(100-grey)/2500,0,0));
 		dc->SetFont(font3);
-		dc->DrawText(_T(wxString::Format(wxT("Round %i"),anarace[0]->getRun()+1)),msgWindow->getInnerLeftBound()+18,msgWindow->getInnerUpperBound()+13);
+		dc->DrawText(_T(wxString::Format(wxT("Round %i"),anarace[0]->getRun()+1)),msgWindow->getClientRectLeftBound()+18,msgWindow->getClientRectUpperBound()+13);
 		dc->SetFont(font3);
-		dc->DrawText(_T(wxString::Format(wxT("%s"),gizmo[gizmor])),msgWindow->getInnerLeftBound()+18,msgWindow->getInnerUpperBound()+63);
+		dc->DrawText(_T(wxString::Format(wxT("%s"),gizmo[gizmor])),msgWindow->getClientRectLeftBound()+18,msgWindow->getClientRectUpperBound()+63);
 																				
 		dc->SetTextForeground(wxColour(230*grey*(100-grey)/2500,0,0));
 		dc->SetFont(font3);
-		dc->DrawText(_T(wxString::Format(wxT("Round %i"),anarace[0]->getRun()+1)),msgWindow->getInnerLeftBound()+15,msgWindow->getInnerUpperBound()+10);
+		dc->DrawText(_T(wxString::Format(wxT("Round %i"),anarace[0]->getRun()+1)),msgWindow->getClientRectLeftBound()+15,msgWindow->getClientRectUpperBound()+10);
 		dc->SetFont(font3);
-		dc->DrawText(_T(wxString::Format(wxT("%s"),gizmo[gizmor])),msgWindow->getInnerLeftBound()+15,msgWindow->getInnerUpperBound()+60);
+		dc->DrawText(_T(wxString::Format(wxT("%s"),gizmo[gizmor])),msgWindow->getClientRectLeftBound()+15,msgWindow->getClientRectUpperBound()+60);
 																				
 		grey+=2;
 	}*/
-	for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
-		if(player[i]->isShown())
-			player[i]->DrawMe(dc);
+//	for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
+//		if(player[i]->isShown())
+//			player[i]->DrawMe(dc);
 
+// TODO evtl player in mainwindow als UI_Object einhaengen
+	
 //	if(theCore->isShown())
 	wxPaintDC dcp(this);
 
@@ -1206,26 +1175,27 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 	dcp.Blit(0, 0, SCREEN_X, SCREEN_Y, dc, 0, 0);
 //	dcp2->EndDrawingOnTop();
 //	delete dcp2;
-}
+};
+
 										
 //settings: log level (none, debug only, +final result, +result of each run, +snapshot every X generations, +snapshot every generation, EVERYTHING (~2MB/generation!)
 /*
 void MyFrame::OnSettingsDialogApply()
 {
-	child->GraphixScrollWindow::settings.setMaxTime(spin1->GetValue());
-	child->GraphixScrollWindow::settings.setMaxTimeOut(spin2->GetValue());
-	child->GraphixScrollWindow::settings.setMaxLength(spin3->GetValue());
-	child->GraphixScrollWindow::settings.setMaxRuns(spin4->GetValue());
-	child->GraphixScrollWindow::settings.setMaxGenerations(spin5->GetValue());
-	child->GraphixScrollWindow::settings.setBreedFactor(spin6->GetValue());
-	child->GraphixScrollWindow::settings.setCrossOver(spin7->GetValue());
+	child->settings.setMaxTime(spin1->GetValue());
+	child->settings.setMaxTimeOut(spin2->GetValue());
+	child->settings.setMaxLength(spin3->GetValue());
+	child->settings.setMaxRuns(spin4->GetValue());
+	child->settings.setMaxGenerations(spin5->GetValue());
+	child->settings.setBreedFactor(spin6->GetValue());
+	child->settings.setCrossOver(spin7->GetValue());
 	if(check1->GetValue())
-		child->GraphixScrollWindow::settings.setPreprocessBuildOrder(1);
-	else child->GraphixScrollWindow::settings.setPreprocessBuildOrder(0);
+		child->settings.setPreprocessBuildOrder(1);
+	else child->settings.setPreprocessBuildOrder(0);
 
-	child->GraphixScrollWindow::settings.setCurrentMap(lb1->GetSelection());
-	child->GraphixScrollWindow::settings.setGoal(lb2->GetSelection(),1);
-	child->GraphixScrollWindow::settings.setGoal(lb2->GetSelection(),2);
+	child->settings.setCurrentMap(lb1->GetSelection());
+	child->settings.setGoal(lb2->GetSelection(),1);
+	child->settings.setGoal(lb2->GetSelection(),2);
 }
 */
 
@@ -1236,9 +1206,9 @@ void MyDCWindow::OnIdle(wxIdleEvent& WXUNUSED(event))
 		update=2;
 		ANARACE** temp;
 //TODO: nach Ende eines Durchlaufs ist anarace 0, aber viele anderen Teile des Codes greifen noch drauf zu!!
-		if(temp=GraphixScrollWindow::settings.newGeneration(anarace))
+		if((temp=settings.newGeneration(anarace)))
 		{
-			for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
+			for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
 			{
 				anarace[i]=temp[i];
 //				if(anarace[i]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=1;} TODO
@@ -1252,8 +1222,8 @@ void MyDCWindow::OnIdle(wxIdleEvent& WXUNUSED(event))
 //		Refresh(false);
 //	}
 
-//	refresh++;
-//	if(refresh>2)
+	refresh++;
+	if(refresh>5)
 		refresh=0;		
 	Refresh(false);
 }
@@ -1266,52 +1236,48 @@ void MyDCWindow::OnTimer(wxTimerEvent& WXUNUSED(event))
 void MyDCWindow::OnKeyDown(wxKeyEvent& event)
 {
 //	if(event.ShiftDown())
-		mainWindow->controls.setShiftPressed(1);
+		controls.setShiftPressed(1);
 };
 
 void MyDCWindow::OnKeyUp(wxKeyEvent& event)
 {
 //	if(!event.ShiftDown())
-		mainWindow->controls.setShiftPressed(0);
+		controls.setShiftPressed(0);
 // TODO, wenn event verloren geht... :/
 };
 
 
-void MyDCWindow::OnMouseScroll(wxMouseEvent& event)
+void MyDCWindow::OnMouseWheelScroll(wxMouseEvent& event)
 {
-	mainWindow->controls.scrollMouse(event.GetWheelRotation());
-//	boWindow->OnScrollMouse(msy);
-//	goalForceWindow->OnScrollMouse(msy);
-//	forceWindow->OnScrollMouse(msy);
-//	msgWindow->OnScrollMouse(msy);
+	controls.scrollMouseWheel(event.GetWheelRotation());
 }
 
 void MyDCWindow::OnMouseMove(wxMouseEvent& event)
 {
 	wxPoint position;
 	event.GetPosition(&position.x,&position.y);
-	mainWindow->controls.setMouse(position);
+	controls.setMouse(position);
 	//TODO irgendwie ein player -> update oder so
 }
 
 void MyDCWindow::OnMouseRightDown(wxMouseEvent& event)
 {
-	mainWindow->controls.rightDown();
+	controls.rightDown();
 };
 
 void MyDCWindow::OnMouseRightUp(wxMouseEvent& event)
 {
-	mainWindow->controls.rightUp();
+	controls.rightUp();
 };
 
 void MyDCWindow::OnMouseLeftDown(wxMouseEvent& event)
 {
-	mainWindow->controls.leftDown();
+	controls.leftDown();
 }
 
 void MyDCWindow::OnMouseLeftUp(wxMouseEvent& event)
 {
-	mainWindow->controls.leftUp();
+	controls.leftUp();
 }
 /*
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -1346,7 +1312,7 @@ void MyFrame::OnMapImport(wxCommandEvent& event)
 			case wxID_OK:
 				{
 					wxString path=fileDialog.GetPath();
-					if(!(error=(child->GraphixScrollWindow::settings.loadMapFile(path))))
+					if(!(error=(child->settings.loadMapFile(path))))
 					{
 						wxMessageDialog bla(this,path/*_T(wxString::Format(wxT("Error importing goal file!\n %s : Error Code %i."),path,error))*/,_T("Message"),wxOK,wxDefaultPosition);
 						while(bla.ShowModal()!=wxID_OK);
@@ -1386,7 +1352,7 @@ void MyFrame::OnGoalImport(wxCommandEvent& event)
 			case wxID_OK:
 				{
 					wxString path=fileDialog.GetPath();
-					if(!(error=(child->GraphixScrollWindow::settings.loadGoalFile(path))))
+					if(!(error=(child->settings.loadGoalFile(path))))
 					{
 						wxMessageDialog bla(this,path/*_T(wxString::Format(wxT("Error importing goal file!\n %s : Error Code %i."),path,error))*/,_T("Message"),wxOK,wxDefaultPosition);
 						while(bla.ShowModal()!=wxID_OK);
@@ -1421,16 +1387,16 @@ void MyFrame::OnGeneralSettings(wxCommandEvent& WXUNUSED(event))
 	text7=new wxStaticText(dia,-1,_T("BreedFactor"),wxPoint(10,110),wxDefaultSize,0,_T("BreedFactor percentage"));
 	text8=new wxStaticText(dia,-1,_T("CrossOver"),wxPoint(10,130),wxDefaultSize,0,_T("CrossOver percentage"));
 
-	spin1=new wxSpinCtrl(dia,EF_SpinMaxTime,wxEmptyString,wxPoint(100,10),wxSize(60,18),wxSP_ARROW_KEYS,child->GraphixScrollWindow::settings.getMINMaxTime(),child->settings.getMAXMaxTime(),child->settings.getMaxTime(),_T("MaxTimeSpin"));
-	spin2=new wxSpinCtrl(dia,EF_SpinMaxTimeOut,wxEmptyString,wxPoint(100,30),wxSize(60,18),wxSP_ARROW_KEYS,child->GraphixScrollWindow::settings.getMINMaxTimeOut(),child->settings.getMAXMaxTimeOut(),child->settings.getMaxTimeOut(),_T("MaxTimeOutSpin"));
-	spin3=new wxSpinCtrl(dia,EF_SpinMaxLength,wxEmptyString,wxPoint(100,50),wxSize(60,18),wxSP_ARROW_KEYS,child->GraphixScrollWindow::settings.getMINMaxLength(),child->settings.getMAXMaxLength(),child->settings.getMaxLength(),_T("MaxLengthSpin"));
-	spin4=new wxSpinCtrl(dia,EF_SpinMaxRuns,wxEmptyString,wxPoint(100,70),wxSize(60,18),wxSP_ARROW_KEYS,child->GraphixScrollWindow::settings.getMINMaxRuns(),child->settings.getMAXMaxRuns(),child->settings.getMaxRuns(),_T("MaxRunsSpin"));
-	spin5=new wxSpinCtrl(dia,EF_SpinMaxGenerations,wxEmptyString,wxPoint(100,90),wxSize(60,18),wxSP_ARROW_KEYS,child->GraphixScrollWindow::settings.getMINMaxGenerations(),child->settings.getMAXMaxGenerations(),child->settings.getMaxGenerations(),_T("MaxGenerationsSpin"));
-	spin6=new wxSpinCtrl(dia,EF_SpinBreedFactor,wxEmptyString,wxPoint(100,110),wxSize(60,18),wxSP_ARROW_KEYS,child->GraphixScrollWindow::settings.getMINBreedFactor(),child->settings.getMAXBreedFactor(),child->settings.getBreedFactor(),_T("BreedFactorSpin"));
-	spin7=new wxSpinCtrl(dia,EF_SpinCrossOver,wxEmptyString,wxPoint(100,130),wxSize(60,18),wxSP_ARROW_KEYS,child->GraphixScrollWindow::settings.getMINCrossOver(),child->settings.getMAXCrossOver(),child->settings.getCrossOver(),_T("CrossOverSpin"));
+	spin1=new wxSpinCtrl(dia,EF_SpinMaxTime,wxEmptyString,wxPoint(100,10),wxSize(60,18),wxSP_ARROW_KEYS,child->settings.getMINMaxTime(),child->settings.getMAXMaxTime(),child->settings.getMaxTime(),_T("MaxTimeSpin"));
+	spin2=new wxSpinCtrl(dia,EF_SpinMaxTimeOut,wxEmptyString,wxPoint(100,30),wxSize(60,18),wxSP_ARROW_KEYS,child->settings.getMINMaxTimeOut(),child->settings.getMAXMaxTimeOut(),child->settings.getMaxTimeOut(),_T("MaxTimeOutSpin"));
+	spin3=new wxSpinCtrl(dia,EF_SpinMaxLength,wxEmptyString,wxPoint(100,50),wxSize(60,18),wxSP_ARROW_KEYS,child->settings.getMINMaxLength(),child->settings.getMAXMaxLength(),child->settings.getMaxLength(),_T("MaxLengthSpin"));
+	spin4=new wxSpinCtrl(dia,EF_SpinMaxRuns,wxEmptyString,wxPoint(100,70),wxSize(60,18),wxSP_ARROW_KEYS,child->settings.getMINMaxRuns(),child->settings.getMAXMaxRuns(),child->settings.getMaxRuns(),_T("MaxRunsSpin"));
+	spin5=new wxSpinCtrl(dia,EF_SpinMaxGenerations,wxEmptyString,wxPoint(100,90),wxSize(60,18),wxSP_ARROW_KEYS,child->settings.getMINMaxGenerations(),child->settings.getMAXMaxGenerations(),child->settings.getMaxGenerations(),_T("MaxGenerationsSpin"));
+	spin6=new wxSpinCtrl(dia,EF_SpinBreedFactor,wxEmptyString,wxPoint(100,110),wxSize(60,18),wxSP_ARROW_KEYS,child->settings.getMINBreedFactor(),child->settings.getMAXBreedFactor(),child->settings.getBreedFactor(),_T("BreedFactorSpin"));
+	spin7=new wxSpinCtrl(dia,EF_SpinCrossOver,wxEmptyString,wxPoint(100,130),wxSize(60,18),wxSP_ARROW_KEYS,child->settings.getMINCrossOver(),child->settings.getMAXCrossOver(),child->settings.getCrossOver(),_T("CrossOverSpin"));
 
 	check1=new wxCheckBox(dia,EF_CheckPreprocess,_T("Preprocess Buildorder"),wxPoint(10,150),wxDefaultSize,-1,wxDefaultValidator,_T("preprocess"));
-	if(child->GraphixScrollWindow::settings.getPreprocessBuildOrder())
+	if(child->settings.getPreprocessBuildOrder())
 		check1->SetValue(TRUE);
 	else check1->SetValue(FALSE);
 
@@ -1440,18 +1406,18 @@ void MyFrame::OnGeneralSettings(wxCommandEvent& WXUNUSED(event))
 	but4=new wxButton(dia,wxID_CANCEL,_T("Cancel"),wxPoint(230,200),wxSize(65,20));
 
 	wxString bla[MAX_MAPS];
-	for(int i=0;i<child->GraphixScrollWindow::settings.getMapCount();i++)
-		bla[i]=_T(wxString::Format(wxT("%s"),child->GraphixScrollWindow::settings.getMap(i)->getName()));
+	for(int i=0;i<child->settings.getMapCount();i++)
+		bla[i]=_T(wxString::Format(wxT("%s"),child->settings.getMap(i)->getName()));
 	text9=new wxStaticText(dia,-1,_T("SelectMap"),wxPoint(200,10),wxDefaultSize,0,_T("Select Map"));
-	lb1=new wxListBox(dia,-1,wxPoint(200,30),wxSize(80,150),child->GraphixScrollWindow::settings.getMapCount(),bla,0,wxDefaultValidator,_T("listBox"));
-	lb1->SetSelection(child->GraphixScrollWindow::settings.getCurrentMap());
+	lb1=new wxListBox(dia,-1,wxPoint(200,30),wxSize(80,150),child->settings.getMapCount(),bla,0,wxDefaultValidator,_T("listBox"));
+	lb1->SetSelection(child->settings.getCurrentMap());
 
 	wxString bla2[MAX_MAPS];
-	for(int i=0;i<child->GraphixScrollWindow::settings.getGoalCount();i++)
-		bla2[i]=_T(wxString::Format(wxT("%s"),child->GraphixScrollWindow::settings.getGoal(i)->getName()));
+	for(int i=0;i<child->settings.getGoalCount();i++)
+		bla2[i]=_T(wxString::Format(wxT("%s"),child->settings.getGoal(i)->getName()));
 	text10=new wxStaticText(dia,-1,_T("SelectGoal"),wxPoint(300,10),wxDefaultSize,0,_T("Select Goal"));
-	lb2=new wxListBox(dia,-1,wxPoint(300,30),wxSize(80,150),child->GraphixScrollWindow::settings.getGoalCount(),bla2,0,wxDefaultValidator,_T("listBox"));
-	//lb2->SetSelection(GraphixScrollWindow::settings.getCurrentGoal()); ~~~ multiple players...
+	lb2=new wxListBox(dia,-1,wxPoint(300,30),wxSize(80,150),child->settings.getGoalCount(),bla2,0,wxDefaultValidator,_T("listBox"));
+	//lb2->SetSelection(settings.getCurrentGoal()); ~~~ multiple players...
 
 	int temp;
 	while(true)
@@ -1462,7 +1428,7 @@ void MyFrame::OnGeneralSettings(wxCommandEvent& WXUNUSED(event))
 			case wxID_CANCEL:break;
 			case wxID_APPLY:
 			case wxID_OK:OnSettingsDialogApply();break;
-			case wxID_RESET:child->GraphixScrollWindow::settings.loadDefaults();break;
+			case wxID_RESET:child->settings.loadDefaults();break;
 		}
 		if((temp==wxID_CANCEL)||(temp==wxID_OK)) break;
 	}

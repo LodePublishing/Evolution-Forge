@@ -11,7 +11,6 @@ Intro::Intro(UI_Object* intro_parent,
 	wasClicked(false),
 	soundPlayed(false)
 {
-	
 	reloadOriginalSize();
 	clickText->Hide();
 	Hide();

@@ -1,6 +1,20 @@
 #include "dc.hpp"
 #include <stdlib.h>
 
+DC* DC::Instance(const Size current_resolution, const eBitDepth bit_depth, const Uint32 nflags, const Uint32 initflags)
+{
+	static DC inst(current_resolution, bit_depth, nflags, initflags);
+	return &inst;
+/*	if(instance == NULL)
+	{
+		instance = new DC(current_resolution, bit_depth, nflags, initflags);
+	} else
+	{
+	// setResolution etc?
+	}
+	return instance;*/
+}	
+
 DC::DC(const Size current_resolution, const eBitDepth bit_depth, const Uint32 nflags, const Uint32 initflags) :
 	surface(NULL),
 	oldSurface(NULL),
@@ -102,20 +116,20 @@ SDL_Cursor* DC::createCursor(char* xpm_image[])
 
 
 
-std::list<std::string> DC::getAvailibleDrivers()
+std::ostringstream DC::getAvailibleDrivers()
 {
-	std::list<std::string> availible_drivers;
+	std::ostringstream availible_drivers;
 #ifdef __WIN32__
-	availible_drivers.push_back("directx");
-	availible_drivers.push_back("windib");
+	availible_drivers << " directx ";
+	availible_drivers << " windib";
 #elif __linux__
-	availible_drivers.push_back("x11");
-	availible_drivers.push_back("dga");
-	availible_drivers.push_back("nano");
-	availible_drivers.push_back("fbcon");
-	availible_drivers.push_back("directfb");
-	availible_drivers.push_back("svgalib");	
-	availible_drivers.push_back("aalib");
+	availible_drivers << " x11 ";
+	availible_drivers << " dga ";
+	availible_drivers << " nano ";
+	availible_drivers << " fbcon ";
+	availible_drivers << " directfb ";
+	availible_drivers << " svgalib ";	
+	availible_drivers << " aalib";
 #endif
 	return(availible_drivers);
 }
@@ -814,3 +828,4 @@ SDL_Rect DC::changedRectangle[200];
 unsigned int DC::changedRectangles=0;
 Uint16 DC::max_x = 0;
 Uint16 DC::max_y = 0;
+//DC* DC::instance = NULL;

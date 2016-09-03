@@ -9,7 +9,7 @@ UI_ExitInfo::~UI_ExitInfo()
 {
 	if(UI_Object::dc!=NULL)
 	{
-		delete UI_Object::dc;
+//		delete UI_Object::dc; is singleton
 		UI_Object::dc = NULL;
 	}
 

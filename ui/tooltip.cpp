@@ -33,10 +33,10 @@ void UI_ToolTip::process()
 {
 	Point t = getRelativePosition();
 	Point p = mouse + Size(8, 8);
-	if(p.x + (signed int)getTextWidth() >= (signed int)max_x - 10)
-		p.x =  (signed int)max_x - (signed int)getTextWidth() - 10;
-	if(p.y + (signed int)getTextHeight() >= (signed int)max_y - 10)
-		p.y =  (signed int)max_y - (signed int)getTextHeight() - 10;
+	if(p.x + (signed int)getTextWidth() >= (signed int)(getParent->getWidth()) - 10)
+		p.x =  (signed int)(getParent()->getWidth()) - (signed int)getTextWidth() - 10;
+	if(p.y + (signed int)getTextHeight() >= (signed int)(getParent->getWidth()) - 10)
+		p.y =  (signed int)(getParent()->getWidth()) - (signed int)getTextHeight() - 10;
 	setPosition(p);
 	UI_LongText::process();
 }

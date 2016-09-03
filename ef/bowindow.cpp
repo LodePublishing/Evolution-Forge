@@ -310,7 +310,7 @@ void BoWindow::processList()
 				o.setUnit(addUnit);
 				order = anarace->getProgramList().insert(order, o);
 				
-				BoEntry* t = new BoEntry((UI_Object*)getScrollBar(), Point(UI_Object::max_x, getRelativeClientRectPosition().y+205), Size(5,5),
+				BoEntry* t = new BoEntry((UI_Object*)getScrollBar(), Point(getParent()->getWidth(), getRelativeClientRectPosition().y+205), Size(5,5),
 				UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*my_race+my_unit)), *order); // (*anarace->getStartCondition())->getRace()?
 				entry = boList.insert(entry, t);
 				addUnit=-1;
@@ -351,8 +351,8 @@ void BoWindow::processList()
 //		toErrorLog("check this bo");
 		if(entry == boList.end())
 		{
-			signed int x_pos = max_x/2;
-			if((gameMax>1)&&(gameNumber==0)) x_pos = - getWidth() - max_x/2;
+			signed int x_pos = getParent()->getWidth();
+			if((gameMax>1)&&(gameNumber==0)) x_pos = - getWidth() - getParent()->getWidth()/2;
 			// wenn nicht optimieren -> anaraceliste loeschen TODO
 			BoEntry* t = new BoEntry((UI_Object*)getScrollBar(), Point(x_pos, 205), Size(5,5),
 			// max size -y? TODO
@@ -394,8 +394,8 @@ void BoWindow::processList()
 				old->program = *order;
 			} else // => not found, insert a new one
 			{
-				signed int x_pos = max_x/2;
-				if((gameMax>1)&&(gameNumber==0)) x_pos = - getWidth() - max_x/2;
+				signed int x_pos = getParent()->getWidth()/2;
+				if((gameMax>1)&&(gameNumber==0)) x_pos = - getWidth() - getParent()->getWidth()/2;
 				BoEntry* t = new BoEntry((UI_Object*)getScrollBar(), Point(x_pos, 205), Size(5,5), GAME::lookUpUnitString(my_race, my_unit), *order, count, id);
 				new_item = true;
 				t->setAllowMoveByMouse();

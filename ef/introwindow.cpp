@@ -47,7 +47,7 @@ IntroWindow::IntroWindow(UI_Object* intro_parent) :
 	gameType(0),
 	done(false)
 {
-	setPosition(Point(UI_Object::max_x, getRelativeUpperBound()));
+	setPosition(Point(getParent()->getRelativeRightBound(), getRelativeUpperBound()));
 	adjustRelativeRect(theme.lookUpGlobalRect(INTRO_WINDOW));
 }
 

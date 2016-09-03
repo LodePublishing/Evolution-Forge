@@ -1,7 +1,6 @@
 #ifndef _UI_OBJECT_HPP
 #define _UI_OBJECT_HPP
 
-#include "theme.hpp"
 #include "sound.hpp"
 
 enum eDrawType
@@ -147,7 +146,6 @@ class UI_Object
 		static const bool setResolution(const eResolution resolution, const bool first_call = false);
 		static const bool setBitDepth(const eBitDepth bitdepth);
 		
-		static UI_Theme theme;
 		static UI_Sound sound;
 		static UI_Window* currentWindow;
 		static bool windowSelected;

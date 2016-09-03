@@ -91,10 +91,7 @@ UI_Object::~UI_Object()
 		} else i++;
 }
 
-
-
-
-const bool UI_Object::initSDL(std::list<std::string>& arguments, std::string window_title)
+const bool UI_Object::initSDL(std::string window_title)
 {
 	std::list<std::string> string_files = findFiles("data", "strings", "help", "");
 
@@ -107,7 +104,7 @@ const bool UI_Object::initSDL(std::list<std::string>& arguments, std::string win
 #ifdef _SDL_MIXER_SOUND
 	flags |= SDL_INIT_AUDIO;
 #endif
-	dc = new DC(UI_Object::theme.getCurrentResolutionSize(), UI_Object::theme.getBitDepth(), flags, SDL_INIT_NOPARACHUTE | SDL_INIT_VIDEO);
+	dc = DC::Instance(UI_Object::theme.getCurrentResolutionSize(), UI_Object::theme.getBitDepth(), flags, SDL_INIT_NOPARACHUTE | SDL_INIT_VIDEO);
 		
 	if(!dc->initializationOK())	{
 		toErrorLog(UI_Object::theme.lookUpString(START_UNABLE_TO_INIT_SDL_STRING) + " [SDL ERROR: \"" + SDL_GetError() + "\"]");

@@ -58,14 +58,12 @@ typedef struct tColorY {
 #define SDL_amask 0x00000000
 #endif
 
-
+// singleton class
 class DC
 {
 	public:
-		DC();
-		DC(const Size current_resolution, const eBitDepth bit_depth, const Uint32 nflags, const Uint32 initflags);
-		~DC();
-		
+		DC* Instance(const Size current_resolution, const eBitDepth bit_depth, const Uint32 nflags, const Uint32 initflags);
+
 		operator SDL_Surface*() const;
 		SDL_Surface* operator->() const;
 		SDL_Surface* getSurface() const;
@@ -158,7 +156,7 @@ class DC
 		
 		static SDL_Color toSDL_Color(const Uint8 r, const Uint8 g, const Uint8 b);
 		
-		static std::list<std::string> getAvailibleDrivers();
+		static std::ostringstream getAvailibleDrivers();
 		static SDL_Cursor* createCursor(char* xpm_image[]);
 		static const eChooseDriverError chooseDriver(std::list<std::string>& parameter_list, std::string& current_driver);
 
@@ -180,6 +178,9 @@ class DC
 
 		void drawFromPoint(const Point p);
 	private:
+		DC(const Size current_resolution, const eBitDepth bit_depth, const Uint32 nflags, const Uint32 initflags);
+		~DC();
+//		static DC* instance;
 
 		static unsigned int changedRectangles;
 		static SDL_Rect changedRectangle[200];

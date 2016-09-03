@@ -36,7 +36,7 @@ void UI_BackGround::draw() const
 	UI_Object::draw();
 	if(uiConfiguration.isBackgroundBitmap())
 	{
-		SDL_Rect rc;rc.x = 0;rc.y = 0; rc.w = UI_Object::max_x; rc.h = UI_Object::max_y;
+		SDL_Rect rc;rc.x = 0;rc.y = 0; rc.w = getWidth(); rc.h = getHeight();
 		dc->Blit(UI_Object::theme.lookUpBitmap(BACKGROUND_SC_BITMAP), rc);
 	}
 	else
@@ -45,7 +45,7 @@ void UI_BackGround::draw() const
 	dc->setFont(UI_Object::theme.lookUpFont(SMALL_FONT));
 	Size s = dc->getTextExtent(CORE_VERSION);	
 	dc->setTextForeground(DC::toSDL_Color(100, 100, 100));
-	dc->DrawText(CORE_VERSION, Point(UI_Object::max_x - s.getWidth() - 10, UI_Object::max_y - s.getHeight() - 2));
+	dc->DrawText(CORE_VERSION, Point(getWidth() - s.getWidth() - 10, getHeight() - s.getHeight() - 2));
 		
 	UI_Object::theme.setColorTheme(UI_Object::theme.getMainColorTheme());
 	

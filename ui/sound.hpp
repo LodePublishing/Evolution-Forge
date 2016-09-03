@@ -60,10 +60,12 @@ struct MusicEntry
 class UI_Sound
 {
 	public:
-		UI_Sound();
+		UI_Sound(const unsigned int max_x);
 		~UI_Sound();
 		
 		const bool init();
+
+		void setMaxX(const unsigned int max_x);
 		
 		const bool loadSoundDataFile(const std::string& sound_dir);
 #ifdef _FMOD_SOUND
@@ -105,6 +107,8 @@ class UI_Sound
 		static eMusic currentMusic;
 		
 		void initSoundAndMusicIdentifier();
+
+		unsigned int maxX;
 		
 		std::string soundIdentifier[MAX_SOUNDS];
 		std::string musicIdentifier[MAX_MUSIC];

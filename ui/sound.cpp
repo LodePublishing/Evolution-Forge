@@ -10,11 +10,12 @@
 
 #define MUSIC_TRANSITION_DURATION 2000
 
-UI_Sound::UI_Sound() :
+UI_Sound::UI_Sound(const unsigned int max_x) :
 #ifdef _FMOD_SOUND
 	sound(NULL),
 	musicChannel(NULL),
 #endif
+	maxX(max_x),
 	configurationFile("sounds.cfg")
 {
 	for(unsigned int i = MAX_SOUNDS;i--;)
@@ -53,6 +54,11 @@ UI_Sound::~UI_Sound()
 		musicList[i] = NULL;
 	}
 	releaseSoundEngine();
+}
+
+void UI_Sound::setMaxX(const unsigned int max_x)
+{
+	maxX = max_x;
 }
 
 #ifdef _FMOD_SOUND
@@ -360,11 +366,11 @@ void UI_Sound::playSound(const eSound id, const unsigned int x)
 #ifdef _FMOD_SOUND
 	if(!sound)
 		return;
-	soundsToPlay.push_back(std::pair<FMOD::Sound*, float>(lookUpSound(id), 2*((float)(2*x) - (float)UI_Object::max_x)/(float)(3*UI_Object::max_x)));
+	soundsToPlay.push_back(std::pair<FMOD::Sound*, float>(lookUpSound(id), 2*((float)(2*x) - (float)maxX)/(float)(3*maxX)));
 #elif _SDL_MIXER_SOUND
 //	toErrorLog("play sound: ");
 //	toErrorLog(id);
-	soundsToPlay.push_back(std::pair<Mix_Chunk*, float>(lookUpSound(id), 2*((float)(2*x) - (float)UI_Object::max_x)/(float)(3*UI_Object::max_x)));
+	soundsToPlay.push_back(std::pair<Mix_Chunk*, float>(lookUpSound(id), 2*((float)(2*x) - (float)maxX)/(float)(3*maxX)));
 #endif
 }
 

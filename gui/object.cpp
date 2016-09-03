@@ -91,6 +91,30 @@ UI_Object::~UI_Object()
 		} else i++;
 }
 
+const bool GUI::chooseDriver(std::list<std::string>& arguments)
+{
+	toInitLog("* " + theme.lookUpString(START_AVAILIBLE_GRAPHIC_DRIVERS_STRING));
+
+	std::ostringstream os;
+	os << "* " << theme.lookUpString(START_AVAILIBLE_GRAPHIC_DRIVERS_STRING);
+	std::list<std::string> s = DC::getAvailibleDrivers();
+	for(std::list<std::string>::const_iterator i = s.begin(); i!=s.end(); i++)
+		os << *i << " ";
+	toInitLog(os.str());
+	
+	std::string current_driver;
+	switch(DC::chooseDriver(arguments, current_driver))
+	{
+//		toErrorLog(theme.lookUpString(START_WARNING_VO_ARGUMENT_STRING)); TODO
+		case NO_DRIVER_ERROR:toInitLog("* " + theme.lookUpFormattedString(START_SDL_USING_DRIVER_STRING, current_driver));break;
+		case NO_VIDEO_DRIVERS_AVAILIBLE:toErrorLog("* " + theme.lookUpString(START_ERROR_NO_DRIVER_AVAILIBLE_STRING));return(false);break;
+		case SDL_DRIVER_NOT_SUPPORTED:toErrorLog("* " + theme.lookUpFormattedString(START_ERROR_DRIVER_NOT_SUPPORTED_STRING, current_driver));return(false);break;
+	}
+	return(true);
+}
+
+
+
 #include <sstream>
 const bool UI_Object::initSDL(std::list<std::string>& arguments, std::string window_title)
 {
@@ -121,13 +145,6 @@ const bool UI_Object::initSDL(std::list<std::string>& arguments, std::string win
 // ------ INIT SDL AND WINDOW ------
 	toInitLog(theme.lookUpString(START_INIT_SDL_STRING));
 	{
-		std::ostringstream os;
-		os.str("");
-		os << "* " << theme.lookUpString(START_AVAILIBLE_GRAPHIC_DRIVERS_STRING);
-		std::list<std::string> s = DC::getAvailibleDrivers();
-		for(std::list<std::string>::const_iterator i = s.begin(); i!=s.end(); i++)
-			os << *i << " ";
-		toInitLog(os.str());
 	}
 
 	std::string current_driver;

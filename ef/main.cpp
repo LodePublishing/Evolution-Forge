@@ -20,7 +20,13 @@ int main(int argc, char *argv[])
 		arguments.push_back(argv[i]);
 
 // ------ LOAD CONFIGURATION FILES ------
-	if(!UI_Object::initSDL(arguments, "EVOLUTION FORGE " + CORE_VERSION + " - www.clawsoftware.de"))
+ 
+	toInitLog(theme.lookUpString(START_INIT_SDL_STRING));
+
+	if(!GUI::chooseDriver(arguments))
+		return(EXIT_FAILURE);
+	
+	if(!UI_Object::initSDL("EVOLUTION FORGE " + CORE_VERSION + " - www.clawsoftware.de"))
 		return(EXIT_FAILURE);
 		
 	SDL_SetCursor(UI_Object::theme.lookUpCursor(CLOCK_CURSOR, 1));

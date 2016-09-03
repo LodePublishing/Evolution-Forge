@@ -77,7 +77,7 @@ const bool Main::initGUI()
 	introWindow = new IntroWindow(backGround);
 	intro = new Intro(backGround, backGround->getRelativeRect(), Size(), DO_NOT_ADJUST);
 	
-	languageMenu = new UI_Menu(NULL, Rect(Point((UI_Object::max_x - UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH))/2, UI_Object::max_y/2), Size(0,0)), Size(0,0), DO_NOT_ADJUST, true, ONE_COLOUMN_MENU, SMALL_BUTTON_WIDTH, 2, SETTING_ENGLISH_LANGUAGE_STRING, UNIT_TYPE_5_BUTTON);
+	languageMenu = new UI_Menu(NULL, Rect(Point((backGround->getWidth() - UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH))/2, UI_Object::max_y/2), Size(0,0)), Size(0,0), DO_NOT_ADJUST, true, ONE_COLOUMN_MENU, SMALL_BUTTON_WIDTH, 2, SETTING_ENGLISH_LANGUAGE_STRING, UNIT_TYPE_5_BUTTON);
 	
 	debugWindow = new DebugWindow(backGround);
 

@@ -254,15 +254,15 @@ void MainMenuLine::draw() const
 		dc->setPen(Pen(dc->changeRelativeBrightness(*UI_Object::theme.lookUpPen(UI_Object::theme.lookUpButtonColors(TAB_BUTTON)->startBorderPen[NORMAL_BUTTON_PHASE])->getColor(), NOT_PRESSED_BRIGHTEN), 1, SOLID_PEN_STYLE));
 		dc->DrawHorizontalLine(Point(0, tab[getCurrentTab()]->getAbsoluteLowerBound()), tab[getCurrentTab()]->getAbsoluteLeftBound());
 		dc->setPen(Pen(dc->changeRelativeBrightness(*UI_Object::theme.lookUpPen(UI_Object::theme.lookUpButtonColors(TAB_BUTTON)->startBorderPen[NORMAL_BUTTON_PHASE])->getColor(), NOT_PRESSED_DARKEN), 1, SOLID_PEN_STYLE));
-		dc->DrawHorizontalLine(Point(tab[getCurrentTab()]->getAbsoluteRightBound(), tab[getCurrentTab()]->getAbsoluteLowerBound()), UI_Object::max_x);
+		dc->DrawHorizontalLine(Point(tab[getCurrentTab()]->getAbsoluteRightBound(), tab[getCurrentTab()]->getAbsoluteLowerBound()), getParent()->getRelativeRightBound());
 	} else if(getCurrentTab() > viewTabs)
 	{
 		dc->setPen(Pen(dc->changeRelativeBrightness(*UI_Object::theme.lookUpPen(UI_Object::theme.lookUpButtonColors(TAB_BUTTON)->startBorderPen[NORMAL_BUTTON_PHASE])->getColor(), NOT_PRESSED_BRIGHTEN), 1, SOLID_PEN_STYLE));
-		dc->DrawHorizontalLine(Point(0, tab[getCurrentTab()]->getAbsoluteLowerBound()), UI_Object::max_x);
+		dc->DrawHorizontalLine(Point(0, tab[getCurrentTab()]->getAbsoluteLowerBound()), getParent()->getRelativeRightBound());
 	} else
 	{
 		dc->setPen(Pen(dc->changeRelativeBrightness(*UI_Object::theme.lookUpPen(UI_Object::theme.lookUpButtonColors(TAB_BUTTON)->startBorderPen[NORMAL_BUTTON_PHASE])->getColor(), NOT_PRESSED_DARKEN), 1, SOLID_PEN_STYLE));
-		dc->DrawHorizontalLine(Point(0, tab[getCurrentTab()]->getAbsoluteLowerBound()), UI_Object::max_x);
+		dc->DrawHorizontalLine(Point(0, tab[getCurrentTab()]->getAbsoluteLowerBound()), getParent()->getRelativeRightBound());
 	}
 	UI_Object::draw();
 }

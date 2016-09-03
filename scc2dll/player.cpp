@@ -2,6 +2,22 @@
 #include "debug.h"
 #include "location.h"
 
+int EXPORT PLAYER::isChanged()
+{
+	if((changed)||(goal->isChanged()))
+		return(1);
+	else return(0);
+};
+
+void EXPORT PLAYER::changeAccepted()
+{
+	if(goal->isChanged())
+	{
+		goal->changeAccepted();
+		goal->adjustGoals(1);
+	}
+	changed=0;
+};
 
 int EXPORT PLAYER::getSupply()
 {
@@ -112,6 +128,7 @@ int EXPORT PLAYER::setMins(int num)
 		debug.toLog(0,"DEBUG: (PLAYER::setMins): Value [%i] out of range.",num);
 		return(0);
 	}
+	changed=1;
 	mins=num;
 	return(1);
 };
@@ -123,6 +140,7 @@ int EXPORT PLAYER::setGas(int num)
 		debug.toLog(0,"DEBUG: (PLAYER::setGas): Value [%i] out of range.",num);
 		return(0);
 	}
+	changed=1;
 	gas=num;
 	return(1);
 };
@@ -134,6 +152,7 @@ int EXPORT PLAYER::setTimer(int num)
 		debug.toLog(0,"DEBUG: (PLAYER::setTimer): Value [%i] out of range.",num);
 		return(0);
 	}
+	changed=1;
 	timer=num;
 	return(1);
 };
@@ -145,6 +164,7 @@ int EXPORT PLAYER::setPosition(int num)
 		debug.toLog(0,"DEBUG: (PLAYER::setPosition): Value [%i] out of range.",num);
 		return(0);
 	}
+	changed=1;
 	position=num;
 	return(1);
 };
@@ -156,6 +176,7 @@ int EXPORT PLAYER::setRace(int num)
 		debug.toLog(0,"DEBUG: (PLAYER::setRace): Value [%i] out of range.",num);
 		return(0);
 	}
+	changed=1;
 	race=num;
 	return(1);
 };
@@ -167,6 +188,7 @@ int EXPORT PLAYER::setHarvest(const int* mining, const int* gasing)
 		debug.toLog(0,"DEBUG: (PLAYER::setHarvest): Variable is not initialized.");
 		return(0); //evtl auf initialized pruefen
 	}
+	changed=1;
 	basicMineralHarvestPerSecond=mining;
 	basicGasHarvestPerSecond=gasing;
 	return(1);
@@ -179,6 +201,7 @@ int EXPORT PLAYER::setGoal(GOAL_ENTRY* goal)
 		debug.toLog(0,"DEBUG: (PLAYER::setGoal): Variable not initialized.");
 		return(0);
 	};
+	changed=1;
 	this->goal=goal;
 	return(1);
 };
@@ -191,6 +214,7 @@ int EXPORT PLAYER::setSupply(int num)
 		debug.toLog(0,"DEBUG: (PLAYER::setSupply): Value [%i] out of range.",num);
 		return(0);
 	}
+	changed=1;
 	supply=num;
 	return(1);
 };
@@ -202,6 +226,7 @@ int EXPORT PLAYER::setMaxSupply(int num)
 		debug.toLog(0,"DEBUG: (PLAYER::setMaxSupply): Value [%i] out of range.",num);
 		return(0);
 	}
+	changed=1;
 	maxSupply=num;
 	return(1);
 };

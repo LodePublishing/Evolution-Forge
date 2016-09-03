@@ -2,6 +2,16 @@
 #include <string.h>
 #include "debug.h"
 
+int EXPORT GOAL_ENTRY::isChanged()
+{
+	return(changed);
+};
+
+void EXPORT GOAL_ENTRY::changeAccepted()
+{
+	changed=0;
+};
+
 const char* EXPORT GOAL_ENTRY::getName()
 {
 	return name;
@@ -40,6 +50,7 @@ int EXPORT GOAL_ENTRY::setRace(int num)
 	}
 	pStats=&(stats[race=num][0]);
 	raceInitialized=1;
+	changed=1;
 	return(1);
 };
 
@@ -55,6 +66,8 @@ int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption)
 	int oldGoal[UNIT_TYPE_COUNT]; //goals we got from the user which we MAY NOT ignore
 	for(i=0;i<UNIT_TYPE_COUNT;i++)
 		oldGoal[i]=allGoal[i];
+
+//TODO: Reset hier rein!
 	
 //        isBuildable[MOVE_ONE_1_FORWARD]=1;isVariable[MOVE_ONE_1_FORWARD]=1;
   //      isBuildable[MOVE_ONE_3_FORWARD]=1;isVariable[MOVE_ONE_3_FORWARD]=1;
@@ -72,8 +85,10 @@ int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption)
 
 	for(j=6;j--;) // Nuclear Warhead needs 6 steps (?) ~~~~
 		for(i=UNIT_TYPE_COUNT;i--;)
-			if((allGoal[i]>0)||(isBuildable[i]>0))
+			if((allGoal[i])||(isBuildable[i]))
 			{
+				if((i==GAS_SCV)&&(allGoal[REFINERY]==0))
+					addGoal(REFINERY,1,0,0); //~~
 				isBuildable[i]=1;
 				//gather all prerequisites and mark them as goals
 				for(k=0;k<3;k++)
@@ -166,7 +181,7 @@ int EXPORT GOAL_ENTRY::addGoal(int unit, int count, int time, int location)
                 return(0);
         }
 
-        if((count<=0)||(count>MAX_SUPPLY))
+        if((count+globalGoal[location][unit]<0)||(count>MAX_SUPPLY)) //~~
         {
                 debug.toLog(0,"DEBUG: (GOAL_ENTRY::addGoal): Value count [%i] out of range.",count);
                 return(0);
@@ -184,8 +199,13 @@ int EXPORT GOAL_ENTRY::addGoal(int unit, int count, int time, int location)
                 return(0);
         }
 
-
+//TODO goal loeschen einbauen
 	allGoal[unit]+=count;
+	if(allGoal[unit]==0)
+	{
+		isBuildable[unit]=0;
+		isVariable[unit]=0;
+	}
 
 	globalGoal[location][unit]+=count;
 
@@ -193,6 +213,7 @@ int EXPORT GOAL_ENTRY::addGoal(int unit, int count, int time, int location)
 	for(i=0;i<goalCount;i++)
 		if((goal[i].unit==unit)&&(goal[i].time==time)&&(goal[i].location==location))
 		{
+	//TODO goal loeschen..
 			goal[i].count+=count;
 			i=goalCount+1;
 		}
@@ -204,6 +225,7 @@ int EXPORT GOAL_ENTRY::addGoal(int unit, int count, int time, int location)
 		goal[goalCount].count=count;
 		goalCount++;
 	}
+	changed=1;
 	return(1);
 };
 

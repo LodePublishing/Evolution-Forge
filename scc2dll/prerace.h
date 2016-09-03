@@ -9,6 +9,13 @@
 #include "building.h"
 #include "wx/list.h"
 
+#include "wx/wxprec.h"
+                                                                                
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
+#endif
+
+
 WX_DECLARE_LIST(Building, BuildingList);
 
 struct LARVACOUNTER

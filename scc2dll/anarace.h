@@ -38,6 +38,7 @@ EXPORT class ANARACE: public PRERACE
 		static int successType; //type of error
 		static int successUnit; //unit number
 		static MAP_LOCATION backupLoc[MAX_PLAYER][MAX_LOCATIONS];
+		int percentage;
 	public:
 		int fitnessCode[MAX_GOALS];
 
@@ -52,6 +53,7 @@ EXPORT class ANARACE: public PRERACE
 // external data output
 		int phaenoCode[MAX_LENGTH];		// the final build order: an array of unit numbers (as defined in main.h)
 
+		int getPercentage();
 		int getProgramCode(int IP);
 		int getProgramSuccessType(int IP);	// determines the type of the last error before the item was built at that IP
 		int getProgramSuccessUnit(int IP);	// what unit was missing? (connected to successtype)
@@ -78,6 +80,9 @@ EXPORT class ANARACE: public PRERACE
 		int getMaxpFitness();			// gets primary fitness (goal and time)
 		int getMaxsFitness();			// gets secondary fitness (ressources)
 		int getMaxtFitness();			// gets tertiary fitness (build order appearance, some heuristics)
+
+		void insertOrder(int unit, int position);
+
 
 // internal control structures, do not touch ;-)
 		int setUnchangedGenerations(int num); 

@@ -8,7 +8,7 @@
                                                                                                                                                             
 // the application icon (under Windows and OS/2 it is in resources)
 #if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
-    #include "/home/clawg/work/sc1038/sc/icon.xpm"
+    #include "/home/clawg/work/sc1039/sc/icon.xpm"
 //    #include "scc.png"
 #endif
 
@@ -93,9 +93,15 @@ const char gizmo[GIZMO_NUMBER][40]=
                                                                                     
 
 
-const int SECOND_COLOUMN=290;
-const int SECOND_COLOUMN_WIDTH=250;
-const int THIRD_COLOUMN=570;
+const int FIRST_COLOUMN=300;
+const int SECOND_COLOUMN=500;
+const int THIRD_COLOUMN=200;
+
+//const int FIRST_ROW=0;
+const int SECOND_ROW=125;
+//const int THIRD_ROW=
+//const int FOURTH_ROW=
+
 const int BUILD_ORDER_NUMBER=36;
 const int FORCE_LIST_NUMBER=23;
 
@@ -142,8 +148,18 @@ struct OLDORDER
 	
 	int unit,mins,gas,time,location,needSupply,haveSupply,forceFacilityCount,availibleFacilityCount,successType,successUnit,facility,code,forceCount;
 	int marker,bonew;
+
+	int row;
 //	int mins, color  etc.
 };
+
+struct Message
+{
+	int type;
+	wxString string;
+	int col;
+} message[1000];
+int msgCount;
 
 
 class MyDCWindow : 
@@ -161,23 +177,51 @@ public:
         SETTINGS settings;
 	int run;
 	void resetData();
+	void showToolTip();
 private:
+	void CheckOldOrders();
+	void MoveOldOrders();
+	int CheckForInfoWindow();
+	void ProgressGraph();
+	int userIsNewbie;
+	
+	int selection[MAX_LENGTH];
 	int mouseX,mouseY,mouseLeft,orderLength;
 	int oldrun,endrun;
-        const GA* ga;
+        GA* ga;
         BOLOG bolog[MAX_LENGTH];
         BOLOG globalForcelog[UNIT_TYPE_COUNT];
-        wxBitmap bmpGraph,bmpTimer,bmpBack,bmpBack2;
+        wxBitmap bmpGraph,bmpTimer,bmpBack,bmpBack2,bmpCancel,bmpAdd,bmpSub;
+	wxBitmap bmpArrowLeft,bmpArrowUp,bmpArrowRight,bmpArrowDown;
+	void showBoGraph();
+	void processButtons();
+	void drawStatistics();
+	void drawGoalList();
+	void drawGizmo();
+	void drawMessages();
+	void drawSelectionStuff();
+	void drawGeneString();
+	int optimizeMode;
         void showGraph(int* data,int max,wxColour col);
+	void showInfoWindow();
+	void showCoreAnimation();
         void showForceListBack();
 	void showTimer();
 	void showProgramGraph();
 	wxMemoryDC* dc;
         ANARACE* anarace;
         
-	int infoWindow,infoWindowX,infoWindowY;
+	int boInsertPoint,boEndPoint,boGoalListOpened,addBoGoalButton,lastBogoal;
+	int continueButton;
+
+	int unitButton[MAX_LENGTH];
+	int optButton[MAX_LENGTH];
+
+	int animationNumbers;
+	int infoWindowNumber;
 	int update;
-        int sFitness[200];
+        int harvestedMins[200];
+	int harvestedGas[200];
         int pFitness[200];
         int tFitness[200];
         int aFitness[200];
@@ -189,9 +233,14 @@ private:
 	wxDateTime dt1;
 	wxDateTime dt2;
 
+	int tutorialChapter;
+
 	int average[100];int averagecounter;
 	
 	int oldTimeCounter[20],oldTime[20];
+	int oldForceCounter[20],oldForce[20];
+	int oldGasCounter[20],oldGas[20];
+	int oldMinsCounter[20],oldMins[20];
 	
 	OLDORDER* oldOrder[MAX_LENGTH*50];
 //	int oldMarker[MAX_LENGTH];
@@ -199,7 +248,9 @@ private:
 //	int oldBuildOrders[BUILD_ORDER_NUMBER];
 	int oldForceList[FORCE_LIST_NUMBER];
 	//int oldData[8];
-wxBitmap bitmap,bitmap2,bitmap3;
+wxBitmap bitmap,bitmap2,bitmap3,hintBitmap,bmpNumbers,bmpRadiation,bmpAlpha,bmpTreppe,bmpCloning,bmpFitness;
+	wxBitmap bmpRad[5];
+	wxBitmap bmpHeart[5];
 	int ani,boanzahl;
         int maxsFitness;
         int maxpFitness;
@@ -207,7 +258,6 @@ wxBitmap bitmap,bitmap2,bitmap3;
 	int mintFitness;
         int maxForce; //all units
         int maxUnitForce; //single unit
-        wxFont font,font2;
         DECLARE_EVENT_TABLE()
 };
                                                                                 

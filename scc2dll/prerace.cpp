@@ -5,7 +5,6 @@
 																			    
 WX_DEFINE_LIST(BuildingList);
 
-
 void EXPORT PRERACE::createSpecial()
 {
 	int i;
@@ -76,6 +75,7 @@ int EXPORT PRERACE::getMapLocationForce(int player, int loc, int type)
 	return(this->loc[player][loc].force[type]);
 };
 
+//TODO Static machen
 int EXPORT PRERACE::setMapLocationAvailible(int player, int loc, int type, int num)
 {
 	if((player<0)||(player>=pMap->getMaxPlayer()))

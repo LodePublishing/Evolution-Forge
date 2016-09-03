@@ -92,3 +92,25 @@ Zeitanzeige +/- noise angeben, also beste und schlechteste Loesung und Mittelwer
 maxscrolly anpassen, damit nicht noch schon am ende nach unten gedrueckt werden kann
 
 location[0] in der map belegen
+
+- so ne art parser machen, der die bo in einen verstaendlichen Text uebersetzt...
+evtl so machen, dass gewisse Merkmale (lange Zeiten, mehrere Befehle auf einmal) besonders behansdelt werden...
+
+bug ueberpruefen goal unit>0 anstatt count>0
+
+bug wenn ich goal entferne wird von sfitness ja mehr oder weniger abgezogen...
+
+evtl verlaufsdiagram speichern und dazwischen immer mal wieder die bos... waere halt ein grosses Bild/html datei
+
+max out modus - build as many as possible
+
+u238 shells und colossus reactor haengen irgendwie zusammen :o
+
+- issue: addons + addonbuildings ([CO] etc.)... ueberarbeiten, dass z.B. CC [NS] als CC zaehlt
+
+- selection markers... anfang und schluss merken und verschieben
+
+- alle goal bts zusammenzaehlen und jeweils durch facilities teilen
+
+- oben den Graphen schoener machen... Veraenderungen etc.... => gui blooper :o
+

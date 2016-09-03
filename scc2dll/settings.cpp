@@ -254,7 +254,7 @@ int EXPORT SETTINGS::setBreedFactor(int num)
 		debug.toLog(0,"WARNING: (SETTINGS::setBreedFactor): Value [%i] out of range.",num);
 		return(0);
 	}
-	ga.breedFactor=num;
+	ga.setBreedFactor(num);
 	return(1);
 };
 
@@ -276,13 +276,13 @@ int EXPORT SETTINGS::setCrossOver(int num)
 		debug.toLog(0,"WARNING: (SETTINGS::setCrossOver): Value [%i] out of range.",num);
 		return(0);
 	}
-	ga.crossOver=num;
+	ga.setCrossOver(num);
 	return(1);
 };
 
 int EXPORT SETTINGS::getBreedFactor()
 {
-	return(ga.breedFactor);
+	return(ga.getBreedFactor());
 };
 
 int EXPORT SETTINGS::getMode()
@@ -292,7 +292,7 @@ int EXPORT SETTINGS::getMode()
 
 int EXPORT SETTINGS::getCrossOver()
 {
-	return(ga.crossOver);
+	return(ga.getCrossOver());
 };
 
 int EXPORT SETTINGS::getMaxTime()
@@ -974,7 +974,7 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 	return(1);
 };
 
-const GA* EXPORT SETTINGS::getGa()
+GA* EXPORT SETTINGS::getGa()
 {
 	return(&ga);
 };

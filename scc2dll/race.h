@@ -27,6 +27,7 @@ class RACE: public PRERACE
 		int getsFitness();
 		int gettFitness();
 //Controls:
+		void eraseIllegalCode();
 		void mutateGeneCode();
 		int calculateStep();
 		void resetGeneCode();//resets either to a pre-processed buildorder or a completely random one*/

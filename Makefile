@@ -9,14 +9,16 @@ DLLFLAGS=-DBUILD_DLL
 LIBS=-L./ $(PROGRAM).so.1.0
 RES_PROGRAM_OBJ = $(PROGRAM)_resourcesl.o
 
-EXTRALIBS = -Wl -L/usr/lib -L/usr/X11R6/lib -lgtk -lgdk -rdynamic -lgmodule -lglib -ldl -lXi -lXext -lX11 -lm -lpng -ljpeg -ltiff -lz -ldl -lm
+EXTRALIBS = -Wl -L/usr/lib -L/usr/X11R6/lib -lgtk 
+#-lgdk -rdynamic -lgmodule -lglib -ldl -lXi -lXext -lX11 -lm -lpng -ljpeg -lz -ldl -lm
 
 DLIBS=$(WXPATH)/lib/libwx_gtk-2.4.so.0.1.1 $(EXTRALIBS)
 
 WXLIB=libwx_msw-2.4-i386-mingw32msvc.a
 RESFLAGS=--include-dir $(WXPATH)/include --define __WXGTK__ --define __UNIX__
 
-CPPFLAGS = -I$(WXPATH)/lib/wx/include/gtk-2.4 -I$(WXPATH)/include -I/user/include/gtk-1.2 -I/usr/include/glib-1.2 -I/usr/lib/glib/include -D_REENTRANT -I/usr/X11R6/include -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -D__WXGTK__ -DGTK_NO_CHECK_CASTS -g 
+CPPFLAGS = -I$(WXPATH)/lib/wx/include/gtk-2.4 -I$(WXPATH)/include -I/user/include/gtk-1.2 -D__WXGTK__ -DGTK_NO_CHECK_CASTS -g
+#-I/usr/include/glib-1.2 -I/usr/lib/glib/include -D_REENTRANT -I/usr/X11R6/include -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES 
 
 CXXFLAGS = $(CPPFLAGS) -MMD -Wall
 

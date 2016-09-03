@@ -157,7 +157,7 @@ int compare(const void* a,const void* b)
 
 //TODO: Ueber Optionen einstellen, welche Fitness ueberhaupt bzw. wie stark gewertet wird (oder ob z.B. die Fitnesswerte zusammengeschmissen werden sollen etc.)
 
-ANARACE* SOUP::newGeneration(ANARACE* oldAnarace)
+ANARACE* SOUP::newGeneration(ANARACE* oldAnarace) //reset: have the goals/settings been changed?
 {
 	int i,j,k,l,m,t,complete,tournaments;
 	if(!mapInitialized)
@@ -183,7 +183,16 @@ ANARACE* SOUP::newGeneration(ANARACE* oldAnarace)
 		for(i=MAX_LENGTH;i--;)
 			for(k=0;k<2;k++)
 				player[0]->Code[k][i]=oldAnarace->Code[k][i];
-
+	for(k=0;k<pMap->getMaxPlayer()-1;k++)
+	if(anaplayer[k]->getPlayer()->isChanged())
+	{
+		anaplayer[k]->getPlayer()->changeAccepted();
+        	anaplayer[k]->setGeneration(0); //?
+                anaplayer[k]->setMaxpFitness(0);
+                anaplayer[k]->setMaxsFitness(0);
+                anaplayer[k]->setMaxtFitness(0);
+                anaplayer[k]->setUnchangedGenerations(0);
+	}
 //create noise for this whole generation:
 
 	if(ga->noise>0)
@@ -263,6 +272,7 @@ ANARACE* SOUP::newGeneration(ANARACE* oldAnarace)
 			player[k*t+i]->adjustHarvest();
 			if(i!=0)
 				player[k*t+i]->mutateGeneCode();
+			player[k*t+i]->eraseIllegalCode(); 
 		}
 		complete=0;
 		while(!complete)
@@ -294,9 +304,9 @@ ANARACE* SOUP::newGeneration(ANARACE* oldAnarace)
 //	      qsort(player[0],MAX_PROGRAMS/2,sizeof(RACE),compare);
 //	      qsort(player[MAX_PROGRAMS/2],MAX_PROGRAMS/2,sizeof(RACE),compare);
 
-		for(i=0;i<ga->breedFactor*t/100;i++) // % are replaced by the uber-program :-o
+		for(i=0;i<ga->getBreedFactor()*t/100;i++) // % are replaced by the uber-program :-o
 		{
-			l=rand()%(t*(ga->breedFactor)/100) + t*(100-ga->breedFactor)/100;
+			l=rand()%(t*(ga->getBreedFactor())/100) + t*(100-ga->getBreedFactor())/100;
 if((player[k*t+l]->getpFitness()*1.1<player[k*t]->getpFitness())||
                                   ((player[k*t+l]->getpFitness()==player[k*t]->getpFitness())&&(player[k*t+l]->getsFitness()*1.1<player[k*t]->getsFitness()))||
                                   ((player[k*t+l]->getpFitness()==player[k*t]->getpFitness())&&(player[k*t+l]->getsFitness()==player[k*t]->getsFitness())&&(player[k*t+l]->gettFitness()*1.1<player[k*t]->gettFitness())) )
@@ -361,8 +371,8 @@ if((player[k*t+l]->getpFitness()*1.1<player[k*t]->getpFitness())||
 	}
 
 //TODO: Kinder sofort neuberechnen
-// Anzahl Tournaments pro Spieler: (MAX_PROGRAMS/pMap->getMaxPlayer())/(100/ga->crossOver)
-	tournaments=t*ga->crossOver/100;
+// Anzahl Tournaments pro Spieler: (MAX_PROGRAMS/pMap->getMaxPlayer())/(100/ga->getCrossOver())
+	tournaments=t*ga->getCrossOver()/100;
 	if(tournaments>0)
 	{
 																			    
@@ -370,9 +380,9 @@ if((player[k*t+l]->getpFitness()*1.1<player[k*t]->getpFitness())||
 		for(k=0;k<pMap->getMaxPlayer()-1;k++)
 			for(i=0;i<tournaments;i++)
 			{
-				for(j=(k*t)+i*(100/ga->crossOver);j<(k*t)+(i+1)*(100/ga->crossOver);j++) //diese (100/ga->crossOver) Programme untereinander sortieren
+				for(j=(k*t)+i*(100/ga->getCrossOver());j<(k*t)+(i+1)*(100/ga->getCrossOver());j++) //diese (100/ga->crossOver) Programme untereinander sortieren
 				{
-					for(l=(k*t)+i*(100/ga->crossOver);l<j;l++)
+					for(l=(k*t)+i*(100/ga->getCrossOver());l<j;l++)
 						if((player[j]->getpFitness()>player[l]->getpFitness())||
 						  ((player[j]->getpFitness()==player[l]->getpFitness())&&(player[j]->getsFitness()>player[l]->getsFitness()))||
 						  ((player[j]->getpFitness()==player[l]->getpFitness())&&(player[j]->getsFitness()==player[l]->getsFitness())&&(player[j]->gettFitness()>player[l]->gettFitness())) )
@@ -390,10 +400,10 @@ if((player[k*t+l]->getpFitness()*1.1<player[k*t]->getpFitness())||
 		for(k=0;k<pMap->getMaxPlayer()-1;k++)
 			for(i=0;i<tournaments;i++)
 			{
-				int p1=i*(100/ga->crossOver)+(k*t);
-				int p2=i*(100/ga->crossOver)+(k*t)+1; //evtl nur unterschiedlichen nehmen? => phaenocode zusammenzaehlen ~
-				int c1=(i+1)*(100/ga->crossOver)+(k*t)-1;
-				int c2=(i+1)*(100/ga->crossOver)+(k*t)-2;
+				int p1=i*(100/ga->getCrossOver())+(k*t);
+				int p2=i*(100/ga->getCrossOver())+(k*t)+1; //evtl nur unterschiedlichen nehmen? => phaenocode zusammenzaehlen ~
+				int c1=(i+1)*(100/ga->getCrossOver())+(k*t)-1;
+				int c2=(i+1)*(100/ga->getCrossOver())+(k*t)-2;
 				player[p1]->crossOver(player[p2],player[c1],player[c2]);
 			}
 	}

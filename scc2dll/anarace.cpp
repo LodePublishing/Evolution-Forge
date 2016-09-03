@@ -4,6 +4,34 @@
 #include "debug.h"
 // TODO: reimplement/recheck the speed of the units
 
+void EXPORT ANARACE::insertOrder(int unit, int position)
+{
+	int i,j,l;
+	l=0;
+	for(i=MAX_LENGTH;(l<position)&&(i--);)
+		if(getProgramIsBuilt(i))
+			l++;
+	j=i;
+	for(;(i--);)
+	{
+		Code[0][i]=Code[0][i+1];
+		Code[1][i]=Code[1][i+1];
+		Marker[0][i]=Marker[0][i+1];
+		Marker[1][i]=Marker[1][i+1];
+	        program[i].dominant=program[i+1].dominant;
+		program[i].built=program[i+1].built;
+	}
+		
+	Code[0][j]=getPlayer()->goal->toGeno(unit);
+	Code[1][j]=Code[0][j];
+        program[j].dominant=0;
+        program[j].built=1;
+
+	markerCounter++;Marker[0][j]=markerCounter;
+        markerCounter++;Marker[1][j]=markerCounter;
+for(i=0;i<MAX_LENGTH;i++)
+                        phaenoCode[i]=getPlayer()->goal->toPhaeno(Code[getProgramDominant(i)][i]); 
+}
 
 int EXPORT ANARACE::backupMap()
 {
@@ -701,7 +729,37 @@ int EXPORT ANARACE::calculateFitness() // Fuer den Uebersichtsgraphen unten rech
 				else					 tpF+=((getRemainingBuildTime(i)*100)/(getPlayer()->goal->goal[getType(i)].count*pStats[getType(i)].BT));
 				bonus[getLocation(i)][getType(i)]--;
 			}*/
+	if(ready)
+	{
+/*		int totalBT=0;
+		for(i=0;i<UNIT_TYPE_COUNT;i++)
+			if(int temp=getPlayer()->goal->allGoal[i]-getMap()->location[0].force[1][i]>0) // minus startforce
+			{
+				int fac=getLocationForce(0,stats[getPlayer()->goal->getRace()][i].facility[0])
+				       +getLocationForce(0,stats[getPlayer()->goal->getRace()][i].facility[1])
+				       +getLocationForce(0,stats[getPlayer()->goal->getRace()][i].facility[2]);
+				while(temp>fac)
+				{
+					totalBT+=stats[getPlayer()->goal->getRace()][i].BT;
+					temp-=fac;
+				}
+				if(temp>0)
+                	                totalBT+=stats[getPlayer()->goal->getRace()][i].BT;
+			}
+		if(totalBT==(ga->maxTime-getTimer()))
+			percentage=100;
+		else 
+			percentage=100*totalBT/(ga->maxTime-getTimer());
+	}	
+	else percentage=0;*/
+	}
+	percentage=0; //TODO
 	return(tpF);
+}
+
+int EXPORT ANARACE::getPercentage()
+{
+	return(percentage);
 }
 
 
@@ -711,7 +769,7 @@ int EXPORT ANARACE::calculateStep()
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
 	int tm,tg;
 	int i;
-	if((!getTimer())||(ready)||(!getIP())||((bestTime*4<3*ga->maxTime)&&(4*getTimer()<3*bestTime)))
+	if((!getTimer())||(ready=calculateReady())||(!getIP())||((bestTime*4<3*ga->maxTime)&&(4*getTimer()<3*bestTime))) //TODO calculateReady optimieren
 	{
 		setLength(ga->maxLength-getIP());
 		if(!ready) setTimer(0);

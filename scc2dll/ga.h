@@ -3,10 +3,14 @@
 
 #include "main.h"
 
-class GA
+class EXPORT GA
 {
 // This is still a public class though access _SHOULD_ be made through the corresponding functions of settings
 // TODO: make it private
+private:
+	int crossOver;			// percentage of population that should exchange their genetic informations with each other
+	int breedFactor;		// percentage of population that should copy 1:1 their genetic informations 
+	int mutationFactor;
 public:
 	int goalCount;			// number of total goals currently loaded
 	int mapCount;			// number of total maps currently loaded
@@ -18,10 +22,17 @@ public:
 	int preprocessBuildOrder; // should the program create a basic valid solution? TODO: IMPLEMENT IT!
 	int currentMap;			// number of current map
 	int mode;				// mode, only mode 0 works as battle calculator is not yet implemented
-	int crossOver;			// percentage of population that should exchange their genetic informations with each other
-	int breedFactor;		// percentage of population that should copy 1:1 their genetic informations 
 	int noise; //in %
 	int allowGoalAdaption;
+
+
+	int getMutationFactor();
+	int getCrossOver();
+	int getBreedFactor();
+
+	void setMutationFactor(int num);
+	void setCrossOver(int num);
+	void setBreedFactor(int num);
 //constructor
 	GA();
 	~GA();

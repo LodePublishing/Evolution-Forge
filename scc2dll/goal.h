@@ -14,7 +14,10 @@ private:
 	int initialized;
 	int phaenoToGenotype[UNIT_TYPE_COUNT];
 	int genoToPhaenotype[UNIT_TYPE_COUNT];
+	int changed;
 public:
+	int isChanged();
+	void changeAccepted();
 	int goalCount;
 	int allGoal[UNIT_TYPE_COUNT];
 	int globalGoal[MAX_LOCATIONS][UNIT_TYPE_COUNT];

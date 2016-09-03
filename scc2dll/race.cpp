@@ -10,7 +10,7 @@ int RACE::calculateStep()
 //ZERG:  CREEP!
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
 //mins, gas hier rein...
-	if((!getTimer())||(ready)||(!getIP())||((bestTime*4<ga->maxTime*3)&&(4*getTimer()<3*bestTime)))
+	if((!getTimer())||(ready=calculateReady())||(!getIP())||((bestTime*4<ga->maxTime*3)&&(4*getTimer()<3*bestTime))) //TODO calculateReady optimieren
 	{
 		setLength(ga->maxLength-getIP());
 		settFitness(gettFitness()-getLength());
@@ -46,7 +46,7 @@ int RACE::calculateStep()
 		{
 			if(!(ok=buildGene(getPlayer()->goal->toPhaeno(Code[dominant=1][getIP()]))))
 				ok=buildGene(getPlayer()->goal->toPhaeno(Code[dominant=0][getIP()]));
-		};
+  		};
 		if((ok)||(!getTimeOut()))
 		{
 			if(!first)
@@ -249,8 +249,8 @@ void RACE::calculateFitness(int ready)
 //TODO: Nicht alle Einheiten am Ort? => Ort egal sein lassen aber zur Zeit hinzuzaehlen
 	// Nicht alle Einheiten ueberhaupt gebaut UND nicht alle am Ort => nur viertel Bonus fuer Einheiten die nicht am Ort sind
 	for(i=0;i<UNIT_TYPE_COUNT;i++)
-		if((getPlayer()->goal->allGoal[i]>0)&&(getPlayer()->goal->allGoal[i]<getLocationForce(0,i)))
-			setsFitness(getsFitness()-(getLocationForce(0,i)-getPlayer()->goal->allGoal[i]));
+		if((getPlayer()->goal->allGoal[i]>0)&&(getPlayer()->goal->allGoal[i]+getMap()->location[0].force[1][i]<getLocationForce(0,i)))
+			setsFitness(getsFitness()-(getLocationForce(0,i)-getMap()->location[0].force[1][i]-getPlayer()->goal->allGoal[i])*(stats[getPlayer()->goal->getRace()][i].gas+stats[getPlayer()->goal->getRace()][i].mins));
 	if(!ready)
 	{
 		//calculate number of fulfilled goals & their time & their distance to goal position
@@ -349,9 +349,10 @@ if( /*((getPlayer()->goal->goal[i].location==0)&&(getPlayer()->goal->goal[i].cou
 		{
 			if(getPlayer()->goal->goal[i].count>0)
 				setpFitness(getpFitness()+100);
-			if((getPlayer()->goal->goal[i].unit!=GAS_SCV)&&(getPlayer()->goal->goal[i].unit!=SCV)) //do not punish 'too much' workers!
+
+/*			if((getPlayer()->goal->goal[i].unit!=GAS_SCV)&&(getPlayer()->goal->goal[i].unit!=SCV)) //do not punish 'too much' workers!
 				if(getPlayer()->goal->goal[i].count<getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit))
-					setsFitness(getsFitness()+(-getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit)+getPlayer()->goal->goal[i].count)*(stats[getPlayer()->goal->getRace()][getPlayer()->goal->goal[i].unit].mins+stats[getPlayer()->goal->getRace()][getPlayer()->goal->goal[i].unit].gas));
+					setsFitness(getsFitness()+(-getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit)+getPlayer()->goal->goal[i].count)*(stats[getPlayer()->goal->getRace()][getPlayer()->goal->goal[i].unit].mins+stats[getPlayer()->goal->getRace()][getPlayer()->goal->goal[i].unit].gas));*/
 		}
 }
 // end of calculateFitness
@@ -581,23 +582,53 @@ int RACE::buildGene(int unit)
 	return(ok);
 }
 
+void RACE::eraseIllegalCode()
+{
+	int i,k;
+	int allUnits[UNIT_TYPE_COUNT];
+	for(i=0;i<UNIT_TYPE_COUNT;i++)
+		allUnits[i]=getLocationForce(0,i);
+	for(i=MAX_LENGTH;i--;)
+	{
+		int ok=1;
+		for(k=0;k<3;k++)
+			ok&=((stats[getPlayer()->goal->getRace()][getPlayer()->goal->toPhaeno(Code[0][i])].prerequisite[k]==0)||(allUnits[i]>=stats[getPlayer()->goal->getRace()][getPlayer()->goal->toPhaeno(Code[0][i])].prerequisite[k]))&&((stats[getPlayer()->goal->getRace()][getPlayer()->goal->toPhaeno(Code[0][i])].prerequisite[k]==0)||(allUnits[i]>=stats[getPlayer()->goal->getRace()][getPlayer()->goal->toPhaeno(Code[0][i])].prerequisite[k]));
+		if(!ok)
+		{
+			for(k=i;k--;)
+			{
+				Code[0][k+1]=Code[0][k];
+				Code[1][k+1]=Code[0][k];
+			}
+			Code[0][0]=0;
+			Code[1][0]=0;
+		}
+		else
+		{
+			allUnits[getPlayer()->goal->toPhaeno(Code[0][i])]++;
+        	        allUnits[getPlayer()->goal->toPhaeno(Code[1][i])]++;
+		}
+	}		
+}
+
 void RACE::mutateGeneCode()
 {
 //TODO: ne Art Mutationlogger ueber mehrere Generationen (weitervererbbar) machen um festzustellen, was passiert ist...
 //ODER: jedem Befehl eine Zahl zuweisen, ne Art radioaktiver Marker... Zu ueberlegen ist nur, was mit dem bei crossing over passiert...
-
+	if(ga->getMutationFactor()==0)
+		return;
 	int x;
 	if(getLength()==0) 
 		setLength(MAX_LENGTH);
 //		return;
-	if(rand()%100==0)
+/*	if(rand()%100==0)
 	{
        		if(mutationRate>50)
 			mutationRate-=rand()%50;
 		else mutationRate+=rand()%50;
-	}
+	}*/
 	for(x=MAX_LENGTH;x--;) //length
-		if(rand()%100/*mutationRate*/==0)
+		if(rand()%(MAX_LENGTH*100/ga->getMutationFactor())==0)
 		{
 			switch(rand()%7)
 			{

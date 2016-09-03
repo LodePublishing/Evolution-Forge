@@ -12,7 +12,8 @@ RES_PROGRAM_OBJ = ../$(PROGRAM)_resources.o
 LIBS=-L./ -L./../ -l$(PROGRAM)
 
 
-EXTRALIBS =  -Wl,--subsystem,windows -mwindows -mthreads  -Wl,--version-script,$(WXPATH)/version-script -lrpcrt4 -loleaut32 -lole32 -luuid -lwinspool -lwinmm -lshell32 -lcomctl32 -lctl3d32 -ladvapi32 -lwsock32 -l../$(PROGRAM) -l$(DLLPATH)
+EXTRALIBS =  -Wl,--subsystem,windows -mwindows -mthreads  -Wl,--version-script,$(WXPATH)/version-script -l../$(PROGRAM) -l$(DLLPATH)
+#-lrpcrt4 -loleaut32 -lole32 -luuid -lwinspool -lwinmm -lshell32 -lcomctl32 -lctl3d32 -ladvapi32 -lwsock32 -l../$(PROGRAM) -l$(DLLPATH)
 
 LDLIBS=$(WXPATH)/lib/libwx_msw-2.4-i386-mingw32msvc.dll $(WEXTRALIBS)
 
@@ -22,7 +23,8 @@ WXLIBBASE=wx_msw
 SHARED_LD=i386-mingw32msvc-c++ -shared -Wl,--out-implib,lib/libwx_msw-2.4-i386-mingw32msvc.dll.a -o
 RESFLAGS=--include-dir $(WXPATH)/include --define __WIN32__ --define __WIN95__ --define __GNUWIN32__ 
 
-CPPFLAGS = -I$(WXPATH)/lib/wx/include/msw-2.4-i386-mingw32msvc -I$(WXPATH)/include -I$(WXPATH)/src/regex -I$(WXPATH)/src/zlib -I$(WXPATH)/src/png -I$(WXPATH)/src/jpeg -I$(WXPATH)/src/tiff -D_WIN32_IE=0x400 $(EXTRADEFS)  -D__WXMSW__ -mthreads -DWXUSINGDLL=1 -I$(DLLPATH)
+CPPFLAGS = -I$(WXPATH)/lib/wx/include/msw-2.4-i386-mingw32msvc -I$(WXPATH)/include -D_WIN32_IE=0x400 $(EXTRADEFS)  -D__WXMSW__ -mthreads -DWXUSINGDLL=1 -I$(DLLPATH)
+#-I$(WXPATH)/src/regex -I$(WXPATH)/src/zlib -I$(WXPATH)/src/png -I$(WXPATH)/src/jpeg -I$(WXPATH)/src/tiff -D_WIN32_IE=0x400 $(EXTRADEFS)  -D__WXMSW__ -mthreads -DWXUSINGDLL=1 -I$(DLLPATH)
 
 CXXFLAGS = $(CPPFLAGS) -fno-pcc-struct-return -MMD -mthreads -Wall -O3
 RESCOMP=i386-mingw32msvc-windres

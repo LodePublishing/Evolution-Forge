@@ -73,7 +73,7 @@ public:
 	int getHarvestMineralsSpeed(int race, int workers); // get basic mineral harvest speed of <race> with <workers> workers
 	int getHarvestGasSpeed(int race, int workers); // get basic mineral harvest speed of <race> with <workers> workers
 	int getDistance(int l1,int l2); // get distance between location 1 and 2
-	const GA* getGa();
+	GA* getGa();
 	int getGoalCount();
 	int getMapCount();
 	GOAL_ENTRY* getGoal(int num);

@@ -44,11 +44,11 @@ IntroWindow::IntroWindow(UI_Object* intro_parent) :
 //	doneButton(NULL),
 	doneButton(new UI_Button(this, Rect(0, 0, UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 0), Size(20, 10), STANDARD_BUTTON, NULL_BITMAP, PRESS_BUTTON_MODE, SAVE_BOX_OK_STRING, BOTTOM_RIGHT, HUGE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	was_initialized(false),
-	gameType(0)
+	gameType(0),
+	done(false)
 {
 	setPosition(Point(UI_Object::max_x, getRelativeUpperBound()));
 	adjustRelativeRect(theme.lookUpGlobalRect(INTRO_WINDOW));
-	UI_Object::focus = doneButton;
 }
 
 IntroWindow::~IntroWindow()
@@ -63,7 +63,7 @@ void IntroWindow::reloadOriginalSize()
 	setMaxHeight(UI_Object::theme.lookUpGlobalMaxHeight(INTRO_WINDOW));
 
 	doneButton->setOriginalSize(Size(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 0));
-	text->setOriginalSize(Size(getSize()-Size(80, 60)));
+//	text->setOriginalSize(Size(getSize()-Size(80, 60)));
 	UI_Window::reloadOriginalSize();
 }
 
@@ -83,9 +83,13 @@ void IntroWindow::init()
 
 void IntroWindow::process()
 {
-	if(!isShown()) return;
-	
 	UI_Window::process();
+	if(!isShown()) 
+		return;
+
+	if(doneButton->isShown())
+		UI_Object::focus = doneButton;
+	
 	getScrollBar()->checkBoundsOfChildren(getAbsoluteClientRectUpperBound()+10, getAbsoluteClientRectLowerBound());
 	init();
 	int game_type = -1;
@@ -98,8 +102,8 @@ void IntroWindow::process()
 	else if((game_type = text->getPressed())>=0)
 	{
 		gameType = game_type+1;
-		Hide();
 		UI_Object::focus = NULL;
+		done = true;
 	}
 }
 

@@ -30,6 +30,7 @@ Game::Game(UI_Object* game_parent, const BASIC_MAP* game_map, const unsigned int
 	setMode(game_number, game_max);
 
 	scoreWindow->makeFirstChild();
+	setDrawType(TRANSPARENT_OBJECT);
 }
 
 Game::~Game()

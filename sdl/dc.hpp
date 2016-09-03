@@ -460,7 +460,7 @@ inline const bool DC::initializationOK() const {
 inline void DC::clearScreen() {
 	SDL_Rect rc;
 	rc.x=0;rc.y=0;rc.w=max_x;rc.h=max_y;
-	SDL_FillRect(surface, &rc, 0);
+	SDL_FillRect(surface, &rc, 1);
 }
 
 inline void DC::Blit(SDL_Surface* src, SDL_Rect& dstrect) const {

@@ -23,6 +23,7 @@ Player::Player(UI_Object* player_parent, const unsigned int game_number, const u
 	boGraphWindow->setTitleParameter(os.str());
 	boDiagramWindow->setTitleParameter(os.str());
 
+	setDrawType(TRANSPARENT_OBJECT);
 	Hide();
 }
 	

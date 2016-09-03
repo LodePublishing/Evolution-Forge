@@ -8,7 +8,9 @@
 const std::string intro_string = "TEST TEST TEST#";
 Main::Main():
 	mainMenuLine(NULL),
+	backGround(NULL),
 	introWindow(NULL),
+	intro(NULL),
 	helpWindow(NULL),
 	settingsWindow(NULL),
 	dataBaseWindow(NULL),
@@ -19,9 +21,7 @@ Main::Main():
 	gameCount(0),
 	currentTab((eTabs)0),
 	currentGame(0),
-	gameTypeHasChanged(false),
-	backGround(NULL),
-	text(NULL)
+	gameTypeHasChanged(false)
 {
 	for(unsigned int i = MAX_TABS;i--;)
 	{
@@ -30,20 +30,20 @@ Main::Main():
 	}
 	
 	for(unsigned int i = MAX_GAME;i--;)
-		game[i]=NULL;
+		game[i] = NULL;
 }
 #include <sstream>
 const bool Main::initGUI()
 {
 	toInitLog(UI_Object::theme.lookUpString(START_LOAD_UI_BITMAPS_FONTS_STRING));
 #ifdef __linux__
-	UI_Object::theme.loadData("settings/ui/default.ui", "data/bitmaps/", "data/fonts/", UI_Object::dc);
+	UI_Object::theme.loadData("settings/ui/default.ui", "data/bitmaps/", "data/animations/", "data/fonts/", UI_Object::dc);
 	UI_Object::sound.loadSoundDataFile("data/sounds/");
 	UI_Object::theme.loadWindowDataFile("settings/ui/windows.ui", 0, 1);
 	UI_Object::theme.loadWindowDataFile("settings/ui/split_windows.ui", 0, 2);
 	UI_Object::theme.loadWindowDataFile("settings/ui/split_windows.ui", 1, 2);
 #elif __WIN32__
-	UI_Object::theme.loadData("settings\\ui\\default.ui", "data\\bitmaps\\", "data\\fonts\\", UI_Object::dc);
+	UI_Object::theme.loadData("settings\\ui\\default.ui", "data\\bitmaps\\", "data\\animations\\", "data\\fonts\\", UI_Object::dc);
 	UI_Object::sound.loadSoundDataFile("data\\sounds\\");
 	UI_Object::theme.loadWindowDataFile("settings\\ui\\windows.ui", 0, 1);
 	UI_Object::theme.loadWindowDataFile("settings\\ui\\split_windows.ui", 0, 2);
@@ -58,8 +58,8 @@ const bool Main::initGUI()
 
 	mainMenuLine = new MainMenuLine(backGround);
 	
-//	toInitLog("* " + UI_Object::theme.lookUpString(START_INIT_HELP_WINDOW_STRING));
-//	helpWindow = new HelpWindow(backGround);
+	toInitLog("* " + UI_Object::theme.lookUpString(START_INIT_HELP_WINDOW_STRING));
+	helpWindow = new HelpWindow(backGround);
 	
 	toInitLog("* " + UI_Object::theme.lookUpString(START_INIT_SETTINGS_WINDOW_STRING));
 	settingsWindow = new SettingsWindow(backGround);
@@ -75,8 +75,7 @@ const bool Main::initGUI()
 	
 	toInitLog("* " + UI_Object::theme.lookUpString(START_INIT_INTRO_WINDOW_STRING));
 	introWindow = new IntroWindow(backGround);
-	
-//	text = new UI_LongText(backGround/*getScrollBar()*/, Rect(Point(20, 30), Size(Size(400,300))), Size(0, 0), intro_string, BRIGHT_TEXT_COLOR, FORCE_TEXT_COLOR, LARGE_FONT, TEXT_BUTTON, VISITED_TEXT_BUTTON, NULL);
+	intro = new Intro(backGround, backGround->getRelativeRect(), Size(), DO_NOT_ADJUST);
 	
 	languageMenu = new UI_Menu(NULL, Rect(Point((UI_Object::max_x - UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH))/2, UI_Object::max_y/2), Size(0,0)), Size(0,0), DO_NOT_ADJUST, true, ONE_COLOUMN_MENU, SMALL_BUTTON_WIDTH, 2, SETTING_ENGLISH_LANGUAGE_STRING, UNIT_TYPE_5_BUTTON);
 	
@@ -87,21 +86,22 @@ const bool Main::initGUI()
 	
 	toInitLog("* " + UI_Object::theme.lookUpString(START_HIDING_WINDOWS_STRING));
 
+	intro->Hide();
+	introWindow->Hide();
 	ForceWindow::techTreeWindow->Hide();
 	mainMenuLine->Hide();
-//	helpWindow->Hide();
+	helpWindow->Hide();
 	settingsWindow->Hide();
 	dataBaseWindow->Hide();
 	debugWindow->Hide();
-	if(!uiConfiguration.isFirstStart())
-		languageMenu->Hide();
+	languageMenu->Hide();
 	
 	UI_Object::addMessage(WELCOME_MSG1_STRING);
 	UI_Object::addMessage(WELCOME_MSG2_STRING);
 	UI_Object::addMessage("Visit www.clawsoftware.de - - - ");
 // ----- END INITIALIZING WINDOWS -----
 
-//	backGround->setZ(100);
+	backGround->setZ(100);
 	return(true); // TODO
 }
 
@@ -149,16 +149,12 @@ const bool Main::initCore()
 void Main::reloadOriginalSize()
 {
 	backGround->reloadOriginalSize();
+	intro->setSize(Size(backGround->getWidth(), backGround->getHeight()));
 }
 
 void Main::reloadStrings()
 {
 	backGround->reloadStrings();
-}
-
-const bool Main::isIntro() const
-{
-	return((introWindow->isShown()) || (languageMenu->isShown()));
 }
 
 void Main::initializeGame(const unsigned int tab_number)
@@ -225,8 +221,8 @@ Main::~Main()
 	toInitLog("* " + UI_Object::theme.lookUpString(END_FREEING_WINDOWS_STRING));
 	delete mainMenuLine;
 	delete introWindow;
+	delete intro;
 	delete languageMenu;
-	delete text;
 	delete ForceWindow::techTreeWindow;
 //	delete msgWindow;
 	delete helpWindow;
@@ -250,8 +246,8 @@ void Main::resetData()
 
 void Main::goBack()
 {
-//	if(helpWindow->isShown())
-//		helpWindow->goBack();
+	if(helpWindow->isShown())
+		helpWindow->goBack();
 }
 
 void Main::noticeFullscreen()
@@ -279,17 +275,59 @@ void Main::process()
 	BoEntry::entryIsMoving = false;
 	debugWindow->updateData(frameRateControl.getPercentList(), frameRateControl.getFramesPerSecond(), frameRateControl.getGenerationsPerSecond());
 	UI_Object::processAll();
-// ------ PROCESSING ------
-//	if((efConfiguration.isToolTips())&&(UI_Object::tooltip))
-//		UI_Object::tooltip->process();
+	int pressed = -1;
 
-	if((!mainMenuLine->isShown()) && (!isIntro()))
+// ------ PROCESSING ------
+	if((!languageMenu->isShown()) && (uiConfiguration.isFirstStart()) && ((pressed = languageMenu->getPressedItem())<0))
 	{
+// ------ CAP FRAMERATE ------
+		toInitLog(UI_Object::theme.lookUpString(START_INIT_FRAMERATE_STRING)); 
+		
+		original_desired_cpu = uiConfiguration.getDesiredCPU();
+		original_desired_framerate = uiConfiguration.getDesiredFramerate();
+		original_background_bitmap = uiConfiguration.isBackgroundBitmap();
+		
+		uiConfiguration.setBackgroundBitmap(false);
+		uiConfiguration.setDesiredCPU(99);
+		uiConfiguration.setDesiredFramerate(20); // for the intro
+		languageMenu->Show();
+		toErrorLog("show language menu");
+	} else 
+	if((languageMenu->isShown()) && ((pressed>=0) || ((pressed = languageMenu->getPressedItem())>=0)))
+	{
+		UI_Object::theme.setLanguage((eLanguage)(pressed+1));
+		uiConfiguration.setFirstStart(false);
+		languageMenu->Hide();
+		toErrorLog("hide language menu");
+        }
+// ------ END CAP FRAMERATE
+	else if((!languageMenu->isShown()) && (!intro->isShown()) && (!intro->isDone()))
+	{
+		SDL_ShowCursor(SDL_DISABLE);
+		intro->Show();
+	}
+
+	else if((!languageMenu->isShown()) && intro->isShown() && intro->isDone())
+	{
+		SDL_ShowCursor(SDL_ENABLE);
+		uiConfiguration.setDesiredCPU(original_desired_cpu);
+		uiConfiguration.setDesiredFramerate(original_desired_framerate);
+		UI_Object::sound.playMusic(DIABLO_MUSIC);
+
+		intro->Hide();
+		introWindow->Show();
+	}
+	else if((!languageMenu->isShown()) && introWindow->isShown() && (introWindow->isDone()))
+	{
+		introWindow->Hide();
 		mainMenuLine->Show();
 		debugWindow->Show(efConfiguration.isShowDebug());
-	}
+		uiConfiguration.setBackgroundBitmap(original_background_bitmap);
+	} 
+	
 // ------ PROCESSING ------
-	checkTab();
+	if(mainMenuLine->isShown())
+		checkTab();
 
 	if(!UI_Object::windowSelected)
 		UI_Object::currentWindow=NULL;
@@ -322,19 +360,10 @@ void Main::process()
 
 	
 	{
-		int pressed = -1;
-		if(((pressed = languageMenu->getPressedItem())>=0))
+		unsigned int pressedg = 0;
+		if((pressedg = introWindow->getGameType())>0)
 		{
-			UI_Object::theme.setLanguage((eLanguage)(pressed+1));
-			uiConfiguration.setFirstStart(false);
-		}
-	}
-	
-	{
-		unsigned int pressed = 0;
-		if((pressed = introWindow->getGameType())>0)
-		{
-			if(coreConfiguration.setGameType(pressed))
+			if(coreConfiguration.setGameType(pressedg))
 			{
 				gameTypeHasChanged = true;
 				UI_Button::resetButton();
@@ -371,7 +400,7 @@ void Main::process()
 		if(UI_Window::gotoHelpChapter>=0)
 		{
 			mainMenuLine->activateTab(HELP_TAB);
-//			helpWindow->gotoChapter(UI_Window::gotoHelpChapter);
+			helpWindow->gotoChapter(UI_Window::gotoHelpChapter);
 		}
 	}
 
@@ -384,19 +413,6 @@ void Main::process()
 	database.changeAccepted();
 
 	frameRateControl.updateConfiguration();
-	{
-	/*		std::ostringstream os;
-			os << uiConfiguration.getDesiredFramerate();
-			toInitLog("* " + UI_Object::theme.lookUpString(START_SET_DESIRED_FRAMERATE_STRING) + " " + os.str());
-		}
-	
-		{
-			std::ostringstream os;
-			os << uiConfiguration.getDesiredCPU();
-			toInitLog("* " + UI_Object::theme.lookUpString(START_SET_DESIRED_CPU_STRING) + " " + os.str() + "%");*/ // TODO
-	}
-
-	
 }
 
 void Main::checkTab()
@@ -416,7 +432,7 @@ void Main::checkTab()
 				settingsWindow->Hide();
 				dataBaseWindow->Show();
 //				mapWindow->Hide();
-//				helpWindow->Hide();
+				helpWindow->Hide();
 			break;
 /*			case MAP_TAB:
 				for(unsigned int i = MAX_GAME; i--;)
@@ -436,7 +452,7 @@ void Main::checkTab()
 				settingsWindow->updateItems();
 				dataBaseWindow->Hide();
 //				mapWindow->Hide();
-//				helpWindow->Hide();
+				helpWindow->Hide();
 			break;
 			case HELP_TAB:
 				for(unsigned int i = MAX_GAME; i--;) 
@@ -446,7 +462,7 @@ void Main::checkTab()
 				settingsWindow->Hide();
 				dataBaseWindow->Hide();
 //				mapWindow->Hide();
-//				helpWindow->Show();
+				helpWindow->Show();
 			break;
 			default:
 				for(unsigned int i = MAX_GAME; i--;) 
@@ -457,7 +473,7 @@ void Main::checkTab()
 				settingsWindow->Hide();
 				dataBaseWindow->Hide();
 //				mapWindow->Hide();
-//				helpWindow->Hide();
+				helpWindow->Hide();
 				if(tabToGameList[currentTab]>=0)
 				{
 					game[tabToGameList[currentTab]]->Show(); //...
@@ -545,6 +561,17 @@ void Main::checkTab()
 	}
 }
 
+const bool Main::click()
+{
+	if(intro->isShown())
+	{
+		intro->setWasClicked();
+		return(true);
+	}
+	else
+		return(false);
+}
+
 void Main::stopAllOptimizing()
 {
 	for(unsigned int i=MAX_GAME;i--;)
@@ -574,12 +601,6 @@ void Main::draw() const
 	UI_Object::updateScreen();	
 
 	UI_Object::theme.setColorTheme(UI_Object::theme.getMainColorTheme());
-/*	if(languageMenu->isShown())
-	{
-//		dc->setBrush(*UI_Object::theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-//		dc->setPen(*UI_Object::theme.lookUpPen(NULL_PEN));
-//		dc->DrawRectangle(mainMenuLine->getAbsoluteRect());
-	}*/
 }
 
 										
@@ -590,8 +611,6 @@ void Main::newGeneration()
 	frameRateControl.delay(isAnyOptimizing()); 
 	poll(IDLE_TICKS);
 
-	if(isIntro())
-		return;
 //	evtl savebox oder so
 //	if(UI_Object::focus==NULL) // TODO, bei Force/Bowindow abfragen
 	while(frameRateControl.allowCalculation())

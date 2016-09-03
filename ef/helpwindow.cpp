@@ -42,7 +42,9 @@ void HelpWindow::draw() const
 
 void HelpWindow::process()
 {
-	if(!isShown()) return;
+	if(!isShown()) 
+		return;
+
 	UI_Window::process();
 
 	if(indexButton->isLeftClicked())

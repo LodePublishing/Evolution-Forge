@@ -70,28 +70,16 @@ int main(int argc, char *argv[])
 		return(EXIT_FAILURE);
 	SDL_SetCursor(UI_Object::theme.lookUpCursor(CLOCK_CURSOR, 1));
 	
-// ------ CAP FRAMERATE ------
-	toInitLog(UI_Object::theme.lookUpString(START_INIT_FRAMERATE_STRING)); 
-	unsigned int original_desired_cpu = uiConfiguration.getDesiredCPU();
-	unsigned int original_desired_framerate = uiConfiguration.getDesiredFramerate();
-	uiConfiguration.setDesiredCPU(99);
-	uiConfiguration.setDesiredFramerate(25); // for the intro
-// ------ END CAP FRAMERATE
-
-
 	toInitLog(UI_Object::theme.lookUpString(START_SYSTEM_READY_STRING));
 	SDL_SetCursor(UI_Object::theme.lookUpCursor(CLOCK_CURSOR, 0));
 
 // ------ END INIT GRAPHIC ENGINE ------
 
-	
+
+	bool sound_not_initialized = true;
 	bool done = false;
-	int picture_num = 1100;
-	const int INTRO_ANIMATION_FRAMES1 = 64;
-	const int INTRO_ANIMATION_FRAMES2 = 128;
 	SDL_Event event;
 
-	SDL_ShowCursor(SDL_ENABLE);
 	SDL_SetCursor(UI_Object::theme.lookUpCursor(ARROW_CURSOR, 0));
 // MAIN LOOP
 	while(!done)
@@ -104,12 +92,10 @@ int main(int argc, char *argv[])
 				case SDL_QUIT:
 					done = true;
 					break;
+					// TODO Mouse & Focus...
 				case SDL_MOUSEBUTTONDOWN:
-					if((picture_num!=INTRO_ANIMATION_FRAMES2)&&(picture_num!=INTRO_ANIMATION_FRAMES1)) 
-						picture_num = INTRO_ANIMATION_FRAMES1;
-					else if(picture_num == INTRO_ANIMATION_FRAMES1)
-						picture_num = 9999;
-
+					if(m.click());
+					else
 					if(event.button.button == SDL_BUTTON_LEFT)
 						m.leftDown();
 					else if(event.button.button == SDL_BUTTON_RIGHT)
@@ -120,6 +106,8 @@ int main(int argc, char *argv[])
 						m.wheelDown();
 					break;
 				case SDL_MOUSEBUTTONUP:
+					if(m.click());
+					else
 					if(event.button.button == SDL_BUTTON_LEFT)
 						m.leftUp(Point(event.motion.x, event.motion.y));
 					else if(event.button.button == SDL_BUTTON_RIGHT)
@@ -132,13 +120,8 @@ int main(int argc, char *argv[])
 				case SDL_MOUSEMOTION:
 					m.setMouse(Point(event.motion.x, event.motion.y));break;
 				case SDL_KEYDOWN:
-					if((picture_num!=INTRO_ANIMATION_FRAMES2)&&(picture_num!=INTRO_ANIMATION_FRAMES1)) 
-						picture_num = INTRO_ANIMATION_FRAMES1;
-					else if(picture_num == INTRO_ANIMATION_FRAMES1)
-					{
-						while (SDL_PollEvent(&event));
-						picture_num = 9999;
-					} else
+//						while (SDL_PollEvent(&event));
+//						picture_num = 9999;
 					if((UI_Object::focus==NULL)||(!UI_Object::focus->addKey(event.key.keysym.sym, event.key.keysym.mod)))
 					switch(event.key.keysym.sym)
 					{
@@ -240,12 +223,8 @@ int main(int argc, char *argv[])
 		}
 		m.poll(MESSAGE_TICKS);
 		
-		if(picture_num==INTRO_ANIMATION_FRAMES2)
-		{
-			m.process();
-		}
+		m.process();
 		
-// TODO
 		if(m.hasBitDepthChanged()) // TODO
 		{
 			UI_Object::setBitDepth(UI_Object::theme.getBitDepth());
@@ -311,12 +290,11 @@ int main(int argc, char *argv[])
 				if(!m.initCore())
 					return(EXIT_FAILURE);
 				SDL_SetCursor(UI_Object::theme.lookUpCursor(CLOCK_CURSOR, 0));
-//				m.initializeGame(0);
+				m.initializeGame(0);
 				SDL_SetCursor(UI_Object::theme.lookUpCursor(CLOCK_CURSOR, 1));
 				toInitLog(UI_Object::theme.lookUpString(START_MAIN_INIT_COMPLETE_STRING));
 			}
 			SDL_SetCursor(UI_Object::theme.lookUpCursor(ARROW_CURSOR, 0));
-
 			UI_Object::sound.playMusic(LALA_MUSIC); 
 		}
 
@@ -324,8 +302,6 @@ int main(int argc, char *argv[])
 
 		m.poll(PROCESS_TICKS);
 
-#if 0 
-		TODO
 // ------ SOUND ENGINE -------
 		if(((uiConfiguration.isSound())||(uiConfiguration.isMusic()))&&(sound_not_initialized))
 		{
@@ -337,13 +313,14 @@ int main(int argc, char *argv[])
 			} else
 			{
 				sound_not_initialized = false;
-				if(uiConfiguration.isMusic())
-					UI_Object::sound.playMusic(LALA_MUSIC);
+//				if(uiConfiguration.isMusic()) 
+//					UI_Object::sound.playMusic(LALA_MUSIC); TODO
 
 //				- NO_FACILITY checken... evtl orders darueber pruefen...
 				
 			}
-		} else 
+		} 
+		else 
 		if((!uiConfiguration.isSound()) && (!uiConfiguration.isMusic()) && (!sound_not_initialized))
 		{
 			UI_Object::sound.releaseSoundEngine();
@@ -359,155 +336,18 @@ int main(int argc, char *argv[])
 			UI_Object::sound.update();
 		}
 		UI_Object::sound.clearSoundsToPlay();
-#endif
+		
 		m.poll(SOUND_TICKS);
 
 // ------ END SOUND ENGINE -------
 
 // ------ DRAWING AND PROCESSING ------
 	
-		//	efConfiguration.setDesiredCPU(original_desired_cpu);
-		//	efConfiguration.setDesiredFramerate(original_desired_framerate);
+		m.draw();
+//		if(uiConfiguration.isUnloadGraphics())
+//			UI_Object::theme.unloadGraphics();
+//			
 
-	
-		if(picture_num==INTRO_ANIMATION_FRAMES2)
-		{
-			m.draw();
-			if(uiConfiguration.isUnloadGraphics())
-				UI_Object::theme.unloadGraphics();
-		} else
-
-		if((picture_num>=990)&&(picture_num<=1100))
-		{
-			std::ostringstream os; os.str("");
-			os << "intro_ani/ani" << picture_num << ".bmp";
-			SDL_Surface* picture = IMG_Load(os.str().c_str());
-			picture_num--;
-			Point p = Point((UI_Object::max_x - picture->w)/2, (UI_Object::max_y - picture->h)/2);
-			Size s = Size(picture->w, picture->h);
-			if(picture_num==1010)
-			{
-				UI_Object::sound.playSound(INTRO_SOUND, UI_Object::max_x/2);
-				screen->setTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
-				screen->setFont(UI_Object::theme.lookUpFont(SMALL_SHADOW_BOLD_FONT));
-				screen->DrawText("Brought to you by...", UI_Object::max_x/2 - picture->w/3, p.y - 15);
-				DC::addRectangle(Rect(UI_Object::max_x/2 - picture->w/3, p.y - 20, picture->w, 20));
-			}
-			
-//			screen->setBrush(*UI_Object::theme.lookUpBrush(TRANSPARENT_BRUSH));
-//			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_PEN));
-//			screen->DrawEdgedRoundedRectangle(Rect(p - Size(5,5), s + Size(10,10)), 4);
-//			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-//			screen->DrawEdgedRoundedRectangle(Rect(p - Size(3,3), s + Size(6,6)), 4);
-			screen->DrawBitmap(picture, p);
-			DC::addRectangle(Rect(p - Size(5,5), s + Size(10, 10)));
-			SDL_FreeSurface(picture);
-		} else if(picture_num==989)
-			picture_num=1;
-		else if(picture_num<=16)
-		{
-			std::ostringstream os; os.str("");
-			os << "intro_ani/claw_gui" << picture_num << ".png";
-			SDL_Surface* picture = IMG_Load(os.str().c_str());
-			Point p = Point(picture->w-5, (UI_Object::max_y - 2*picture->h));
-			Size s = Size(picture->w, picture->h);
-			if(picture_num==1)
-				UI_Object::sound.playSound(RING_SOUND, p.x + picture->w/2);
-			
-			screen->setBrush(*UI_Object::theme.lookUpBrush(TRANSPARENT_BRUSH));
-			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_PEN));
-			screen->DrawEdgedRoundedRectangle(Rect(p - Size(5,5), s + Size(10,10)), 4);
-			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-			screen->DrawEdgedRoundedRectangle(Rect(p - Size(3,3), s + Size(6,6)), 4);
-			screen->DrawBitmap(picture, p);
-			if(picture_num == 1)
-			{
-				screen->setTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
-				screen->setFont(UI_Object::theme.lookUpFont(SMALL_SHADOW_BOLD_FONT));
-				screen->DrawText("ClawGUI", p.x + 5, p.y + 10 + picture->h);
-				screen->DrawText("http://www.clawsoftware.de/", p.x + 5, p.y + 20 + picture->h);
-			}
-			
-			DC::addRectangle(Rect(p - Size(5,5), s + Size(75,40)));
-			picture_num++;
-			SDL_FreeSurface(picture);
-		}  else if(picture_num<=32)
-		{
-			std::ostringstream os; os.str("");
-			os << "intro_ani/sdl" << picture_num-16 << ".png";
-			SDL_Surface* picture = IMG_Load(os.str().c_str());
-	
-			Point p = Point((UI_Object::max_x+5 - 2*picture->w), (UI_Object::max_y - 2*picture->h));
-			Size s = Size(picture->w, picture->h);
-		
-			if(picture_num==17)
-				UI_Object::sound.playSound(RING_SOUND, p.x + picture->w/2);
-			
-			screen->setBrush(*UI_Object::theme.lookUpBrush(TRANSPARENT_BRUSH));
-			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_PEN));
-			screen->DrawEdgedRoundedRectangle(Rect(p - Size(5,5), s + Size(10,10)), 4);
-			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-			screen->DrawEdgedRoundedRectangle(Rect(p - Size(3,3), s + Size(6,6)), 4);
-			screen->DrawBitmap(picture, p);
-
-			if(picture_num == 17)
-			{
-				screen->setTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
-				screen->setFont(UI_Object::theme.lookUpFont(SMALL_SHADOW_BOLD_FONT));
-				screen->DrawText("Simple Directmedia Library", p.x + 5, p.y + 10 + picture->h);
-				screen->DrawText("http://libsdl.org/", p.x + 5, p.y + 20 + picture->h);
-			}
-			
-			DC::addRectangle(Rect(p - Size(5,5), s + Size(75,40)));
-			picture_num++;
-
-			SDL_FreeSurface(picture);
-		} 
-		else if(picture_num<=48)
-		{
-#ifdef _FMOD_SOUND
-			std::ostringstream os; os.str("");
-			os << "intro_ani/fmod" << picture_num-32 << ".png";
-			SDL_Surface* picture = IMG_Load(os.str().c_str());
-
-			Point p = Point((UI_Object::max_x - picture->w)/2, (UI_Object::max_y - 2*picture->h));
-			Size s = Size(picture->w, picture->h);
-			
-			if(picture_num==33)
-				UI_Object::sound.playSound(RING_SOUND, p.x + picture->w/2);
-			screen->setBrush(*UI_Object::theme.lookUpBrush(TRANSPARENT_BRUSH));
-			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_PEN));
-			screen->DrawEdgedRoundedRectangle(Rect(p - Size(5,5), s + Size(10,10)), 4);
-			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-			screen->DrawEdgedRoundedRectangle(Rect(p - Size(3,3), s + Size(6,6)), 4);
-			screen->DrawBitmap(picture, p);
-			if(picture_num == 33)
-			{
-				screen->setTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
-				screen->setFont(UI_Object::theme.lookUpFont(SMALL_FONT));
-				screen->DrawText("FMOD Sound System http://www.fmod.org", p.x-20, p.y+10+picture->h);
-				screen->DrawText("(C) Firelight Technologies Pty, Ltd., 1994-2005", p.x-20, p.y+20+picture->h);
-			}
-			DC::addRectangle(Rect(p - Size(10,5), s + Size(80,40)));
-			SDL_FreeSurface(picture);				
-#endif
-			picture_num++;
-
-		}
-		else if(picture_num<(INTRO_ANIMATION_FRAMES1-1))
-			picture_num++;
-		else if(picture_num == INTRO_ANIMATION_FRAMES1)
-		{
-				picture_num = 9999; // ~
-		} else
-		if(picture_num == 9999)
-		{
-			picture_num = INTRO_ANIMATION_FRAMES2;
-			UI_Object::sound.playMusic(DIABLO_MUSIC);
-			efConfiguration.setDesiredCPU(original_desired_cpu);
-			efConfiguration.setDesiredFramerate(original_desired_framerate);
-			SDL_ShowCursor(SDL_ENABLE);
-		}
 
 /// ------ END DRAWING ------
 

@@ -19,6 +19,8 @@
 //#include "progressbar.hpp"
 
 #include "introwindow.hpp"
+#include "intro.hpp"
+
 #include "savebox.hpp"
 
 class Main
@@ -72,26 +74,21 @@ class Main
 	
 		void initializeGame(const unsigned int game_number);
 
-		const bool isIntro() const;
-		const bool isHelp() const;
-
 		const bool openMenu(const ePlayerOrder order);
 		
-		MainMenuLine* mainMenuLine;
-
+		const bool click();
 		void goBack();
 		
 		void poll(const eTicks etick);
-		UI_Button* testb;
 	private:
+		MainMenuLine* mainMenuLine;
 		UI_FrameRateControl frameRateControl;
 		UI_BackGround* backGround;
-
-		UI_LongText* text;
 
 		void checkTab();
 
 		IntroWindow* introWindow;
+		Intro* intro;
 		HelpWindow* helpWindow;
 		SettingsWindow* settingsWindow;
 		DataBaseWindow* dataBaseWindow;
@@ -122,6 +119,10 @@ class Main
 		unsigned int currentGame; // for openRaceMenu
 
 		bool gameTypeHasChanged;
+		
+		unsigned int original_desired_cpu; // for intro
+		unsigned int original_desired_framerate;
+		unsigned int original_background_bitmap;
 };
 
 inline void Main::poll(const eTicks etick) {

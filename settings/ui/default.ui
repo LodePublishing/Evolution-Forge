@@ -1360,8 +1360,6 @@
 @END
 
 
-# TODO: keine einfache Liste sondern Namen fuer die Bilder vergeben, wie bei STRINGS auch... alle nicht aufgefuehrten Namen in zwei Ebenen (Theme und Resolution) aufgeteilten generellen Bitmaps legen.
-
 # bitmaps independant from theme
 @BITMAPS
 	"NULL_BITMAP" = "null"
@@ -1410,6 +1408,15 @@
 	"BIGGRIN_BITMAP" = "biggrin.gif"
 	"BIGGRINHAT_BITMAP" = "biggrinhat.gif"
 	"THE_QUESTION_BITMAP" = "question.jpg", (SOLID)
+
+	"INTRO_MAIN_BITMAP" = "clawsoftware_intro.jpg", (SOLID)
+	"INTRO_SDL_BITMAP" = "sdl.png"
+	"INTRO_SDL_TTF_BITMAP" = "sdl_ttf.png"
+	"INTRO_SDL_IMAGE_BITMAP" = "sdl_image.png"
+	"INTRO_GUI_BITMAP" = "claw_gui.png"
+	"INTRO_SMPEG_BITMAP" = "smpeg.png"
+	"INTRO_FMOD_BITMAP" = "fmod.png"
+	"INTRO_SDL_MIXER_BITMAP" = "sdl_mixer.png"
 	
 	"BACKGROUND_SC_BITMAP" = "back_sc.jpg", (SOLID), (SCALE)
 	"BACKGROUND_WH40K_BITMAP" = "back_wh40k.jpg", (SOLID), (SCALE)
@@ -1425,6 +1432,7 @@
 	"ADD_BITMAP" = "add", (SCALE)
 	"DELETE_BITMAP" = "delete", (SCALE)
 @END
+
 
 # bitmaps dependant from theme
 @THEME_BITMAPS
@@ -1458,6 +1466,7 @@
 		"BULLET_BITMAP" = "yellow_bullet"
 	@END
 @END
+
 
 #00111
 #00011
@@ -1544,4 +1553,17 @@
 		220
 	@END
 @END
+
+@ANIMATIONS
+	"NULL_ANIMATION" = "null.mpg"
+	"INTRO_MAIN_ANIMATION" = "clawsoftware.mpg"
+	"INTRO_SDL_ANIMATION" = "sdl.mpg"
+	"INTRO_SDL_TTF_ANIMATION" = "sdl_ttf.mpg"
+	"INTRO_SDL_IMAGE_ANIMATION" = "sdl_image.mpg"
+	"INTRO_GUI_ANIMATION" = "claw_gui.mpg"
+	"INTRO_SMPEG_ANIMATION" = "smpeg.mpg"
+	"INTRO_FMOD_ANIMATION" = "fmod.mpg"
+	"INTRO_MIXER_ANIMATION" = "sdl_mixer.mpg"
+@END
+
 

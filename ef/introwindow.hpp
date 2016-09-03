@@ -14,15 +14,21 @@ class IntroWindow : public UI_Window
 		void reloadOriginalSize();
 		void init();
 		const unsigned int getGameType() const;
+		const bool isDone() const;
 	private:
 		bool was_initialized;
 		UI_LongText* text;
 		UI_Button* doneButton;
 		unsigned int gameType;
+		bool done;
 };
 
 inline const unsigned int IntroWindow::getGameType() const {
 	return(gameType);
+}
+
+inline const bool IntroWindow::isDone() const {
+	return(done);
 }
 
 #endif

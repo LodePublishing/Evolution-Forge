@@ -5,8 +5,10 @@
 
 #ifdef BUILD_DLL
 #define EXPORT __declspec(dllexport)
-#else
+#elif IMPORT_DLL
 #define EXPORT __declspec(dllimport)
+#else
+#define EXPORT
 #endif
 
 
@@ -64,7 +66,7 @@
 
 struct BUILDING
 {
-	int RB;			// Remaining Buildtime
+	int TB,RB;			// Remaining Buildtime
 	int type;		// Type of Building
 	int unitCount;	// number of units which are moving... currently ONLY for movements...
 	int facility;	// in what facility it was produced

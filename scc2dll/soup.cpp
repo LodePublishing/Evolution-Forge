@@ -2,11 +2,14 @@
 #include <stdlib.h>
 #include <cstring>
 #include <time.h>
-#include <windows.h>
+//#include <windows.h>
 #include "race.h"
 #include "anarace.h"
 #include "debug.h"
 
+
+#ifdef BUILD_DLL
+#include <windows.h>
 bool APIENTRY DllMain( HANDLE hModule, 
                        DWORD  ul_reason_for_call, 
                        LPVOID lpReserved
@@ -22,6 +25,24 @@ bool APIENTRY DllMain( HANDLE hModule,
     }
     return TRUE;
 }
+#elif IMPORT_DLL
+bool APIENTRY DllMain( HANDLE hModule,
+                       DWORD  ul_reason_for_call, 
+                       LPVOID lpReserved
+                                         )
+{
+    switch (ul_reason_for_call)
+        {
+                case DLL_PROCESS_ATTACH:^M
+                case DLL_THREAD_ATTACH:^M
+                case DLL_THREAD_DETACH:^M
+                case DLL_PROCESS_DETACH:^M
+                        break;
+    }
+    return TRUE;
+}
+#endif
+
 
 int SOUP::setMap(MAP* map)
 {
@@ -87,7 +108,9 @@ int SOUP::initSoup()
 		return(0);
 	}
 	t=MAX_PROGRAMS/(pMap->getMaxPlayer()-1);
-	for(k=0;k<pMap->getMaxPlayer()-1;k++)
+	
+//differenzieren, damit auch restarts/updates moeglich sind waehrend dem run!
+for(k=0;k<pMap->getMaxPlayer()-1;k++)
 	{
 		for(i=0;i<t;i++)
 		{
@@ -170,12 +193,10 @@ ANARACE* SOUP::newGeneration()
 	}
 
 
-/*
 
-  ga->crossOver
+//  ga->crossOver
 
-
-	for(t=7;t--;)
+/*	for(t=7;t--;)
 		for(i=t*16;i<t*16+MAX_PROGRAMS/16;i++)
 			for(j=t*16;j<i;j++)
 				if((player[j]->getpFitness()>player[i]->getpFitness())||
@@ -241,6 +262,9 @@ ANARACE* SOUP::newGeneration()
 //				memcpy(player[t]->Code[1],player[0]->Code[1],MAX_LENGTH);
 			}
 		}  
+
+
+
 
 		if((player[k*t]->getpFitness()>anaplayer[k]->getMaxpFitness())||
 		  ((player[k*t]->getpFitness()>=anaplayer[k]->getMaxpFitness())
@@ -320,12 +344,41 @@ ANARACE* SOUP::newGeneration()
 		}
 	}
 	//	~~
- 	//	if((anaplayer[0]->getMaxpFitness()>anaplayer[1]->getMaxpFitness())||((anaplayer[0]->getMaxpFitness()>=anaplayer[1]->getMaxpFitness())&&(anaplayer[0]->getMaxsFitness()>anaplayer[1]->getMaxsFitness()))|| ((anaplayer[0]->getMaxpFitness()>=anaplayer[1]->getMaxpFitness())&&(anaplayer[0]->getMaxsFitness()>=anaplayer[1]->getMaxsFitness())&&(anaplayer[0]->getMaxtFitness()>anaplayer[1]->getMaxtFitness())))
-	//	return(anaplayer[0]);
-	//	else 
+
+	t=MAX_PROGRAMS/(pMap->getMaxPlayer()-1);
+        for(k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
+	{
+	        anaplayer[k]->fitnessAverage=0;
+       	        for(i=k*t;i<(k+1)*t;i++)
+			anaplayer[k]->fitnessAverage+=player[i]->getpFitness();
+		anaplayer[k]->fitnessAverage/=MAX_PROGRAMS;
+	}
+	
+	for(k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
+	{
+	        anaplayer[k]->fitnessVariance=0;
+		for(i=k*t;i<(k+1)*t;i++)
+		{
+			int z=anaplayer[k]->fitnessAverage-player[i]->getpFitness();
+			anaplayer[k]->fitnessVariance+=(z*z);
+		}
+		anaplayer[k]->fitnessVariance/=MAX_PROGRAMS;
+	}
+                                                                                                                                                            
+ 		if((anaplayer[0]->getMaxpFitness()>anaplayer[1]->getMaxpFitness())||((anaplayer[0]->getMaxpFitness()>=anaplayer[1]->getMaxpFitness())&&(anaplayer[0]->getMaxsFitness()>anaplayer[1]->getMaxsFitness()))|| ((anaplayer[0]->getMaxpFitness()>=anaplayer[1]->getMaxpFitness())&&(anaplayer[0]->getMaxsFitness()>=anaplayer[1]->getMaxsFitness())&&(anaplayer[0]->getMaxtFitness()>anaplayer[1]->getMaxtFitness())))
+		{
+			anaplayer[0]->analyzeBuildOrder();
+			return(anaplayer[0]);
+		}
+		else
+		{
+			anaplayer[1]->analyzeBuildOrder();
+			return(anaplayer[1]);
+		}
 //TODO: sort the anaplayer and return the best
-	anaplayer[0]->analyzeBuildOrder();
-	return(anaplayer[0]);
+
+//	anaplayer[0]->analyzeBuildOrder();
+//	return(anaplayer[0]);
 };
 
 SOUP::SOUP()

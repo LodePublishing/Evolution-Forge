@@ -17,6 +17,10 @@ struct PROGRAM
 	int successType;	// type of error
 	int successUnit;	// unit number
 	int isGoal;			// is this unit part of the goal list? DOES NOT WORK YET :)
+        int forceCount;
+	int facility; 	// where it was produced
+	int BT;		//real buildtime, incl. moving scv etc.
+	int fitness;	//fitness at that time
 }; 
 
 EXPORT class ANARACE: public PRERACE
@@ -28,15 +32,22 @@ EXPORT class ANARACE: public PRERACE
         int generation;
         int maxpFitness;
         int maxsFitness;
-		int maxtFitness;
+	int maxtFitness;
+	
         PROGRAM program[MAX_LENGTH];
-		BUILDING building[MAX_BUILDINGS];
-		static int successType; //type of error
-		static int successUnit; //unit number
+	BUILDING building[MAX_BUILDINGS];
+	static int successType; //type of error
+	static int successUnit; //unit number
 	public:
+	        int fitnessAverage;
+       		int fitnessVariance;
+		int positiveCrossover;
+		int wayneCrossover;
+		int negativeCrossover;
 // external data output
 		int phaenoCode[MAX_LENGTH];		// the final build order: an array of unit numbers (as defined in main.h)
 
+		int getProgramCode(int IP);
 		int getProgramSuccessType(int IP);	// determines the type of the last error before the item was built at that IP
 		int getProgramSuccessUnit(int IP);	// what unit was missing? (connected to successtype)
 		int getProgramNeedSupply(int IP);	// supply that is used up by all units
@@ -48,6 +59,10 @@ EXPORT class ANARACE: public PRERACE
 		int getProgramLocation(int IP);		// at which location was this unit built
 		int getProgramTemp(int IP);			// unused
 		int getProgramIsGoal(int IP);		// is this unit part of the goal list? NOT YET WORKING!
+		int getProgramForceCount(int IP);	// how many units of the type at phaenoCode[s] do exist at that time?
+		int getProgramFacility(int IP);
+		int getProgramBT(int IP);
+		int getProgramFitness(int IP);
 
 		int getUnchangedGenerations();	// gets number of generations where no change in fitness took place
 		int getRun();					// gets number of runs (one run is complete when no <unchangedGenerations> > <maxGenerations>)
@@ -57,6 +72,8 @@ EXPORT class ANARACE: public PRERACE
 		int getMaxtFitness();			// gets tertiary fitness (build order appearance, some heuristics)
 
 // internal control structures, do not touch ;-)
+		int setProgramFacility(int num);
+		int setProgramBT(int num);
 		int setUnchangedGenerations(int num); 
 		int setRun(int num);
 		int setGeneration(int num);
@@ -66,6 +83,7 @@ EXPORT class ANARACE: public PRERACE
 		int setProgramSuccessType(int num);
 		int setProgramSuccessUnit(int num);
 		int calculateStep();			// calculates another time step of current generation
+		int calculateFitness();
 		void resetData();				// resets all data to standard values
 		void analyzeBuildOrder();		// sets the isGoal of program
 

@@ -20,6 +20,8 @@ class GA
 		int mode;				// mode, only mode 0 works as battle calculator is not yet implemented
 		int crossOver;			// percentage of population that should exchange their genetic informations with each other
 		int breedFactor;		// percentage of population that should copy 1:1 their genetic informations 
+
+		int noise;
 //constructor
 	GA();
 	~GA();

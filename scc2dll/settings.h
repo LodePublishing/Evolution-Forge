@@ -21,6 +21,7 @@ class EXPORT SETTINGS
 		int setMapCount(int num);
 		int setGoalCount(int num);
 	public:
+		MAP* getMap(int num);
 
 //all those nasty range checking stuff :-)
 		int getMAXBreedFactor();
@@ -68,13 +69,14 @@ class EXPORT SETTINGS
 		int getMaxGenerations();
 		int getPreprocessBuildOrder();
 		int getCurrentMap();
+		int getCurrentGoal();
 		int getHarvestMineralsSpeed(int race, int workers); // get basic mineral harvest speed of <race> with <workers> workers
 		int getHarvestGasSpeed(int race, int workers); // get basic mineral harvest speed of <race> with <workers> workers
 		int getDistance(int l1,int l2); // get distance between location 1 and 2
 		const GA* getGa();
 		int getGoalCount();
 		int getMapCount();
-		int getGoal(GOAL_ENTRY &goal,int num);
+		GOAL_ENTRY* getGoal(int num);
 
 		void loadDefaults();
 		int loadGoalFile(const char* goalFile);

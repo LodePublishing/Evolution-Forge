@@ -12,8 +12,8 @@
     #include "scc.png"
 #endif
 
-//#include <wx/grid.h>
-                                                                                                                                                            
+#include <wx/spinctrl.h>
+#include <wx/button.h>                                                                                                                                                            
 // Define a new application type, each program should derive a class from wxApp
 class MyApp : public wxApp
 {
@@ -49,17 +49,69 @@ public:
 	void OnStart(wxCommandEvent& event);
 	void OnStop(wxCommandEvent& event);
         void OnIdle(wxIdleEvent& WXUNUSED(event));
-                                                                                                                                                            
+	void OnPaint(wxPaintEvent& event);
+	void OnGeneralSettings(wxCommandEvent& event);
+	
+        void OnSettingsDialogApply();
+
+	void OnGoalCreate(wxCommandEvent& event);
+        void OnGoalImport(wxCommandEvent& event);
+        void OnMapCreate(wxCommandEvent& event);
+        void OnMapImport(wxCommandEvent& event);
+
 private:
         SETTINGS settings;
         ANARACE* anarace;
-        int run;
+        int run,update;
+        int sFitness[200];
+        int pFitness[200];
+        int tFitness[200];
+	int aFitness[200];
+	int time[200];
+	int force[200];
+	int oldTimeCounter[10],oldTime[10];
+	int maxsFitness;
+	int maxpFitness;
+	int maxtFitness;
+	int maxForce; //all units
+	int maxUnitForce; //single unit
+
+	wxFont font;	
+
+        wxMenu* menuFile;
+        wxMenu* menuHelp;
+	wxMenu* menuSettings;
+	wxMenu* menuGoal;
+	wxMenu* menuMap;
+	wxMenu* menuAdvanced;
+
+	wxDialog* dia;
+
+	wxSpinCtrl* spin1;
+	wxSpinCtrl* spin2;
+	wxSpinCtrl* spin3;
+	wxSpinCtrl* spin4;
+	wxSpinCtrl* spin5;
+	wxSpinCtrl* spin6;
+	wxSpinCtrl* spin7;
+	wxCheckBox* check1;
+	
+	wxButton* but1;
+	wxButton* but2;
+	wxButton* but3;
+	wxButton* but4;
+
+	wxListBox* lb1;
+	wxListBox* lb2;
+
+	wxDialog* msgBox;
+
 	const GA* ga;
-//	wxGrid* wxgrid;
-	//wxGrid* wxgrid2;
         BOLOG bolog[MAX_LENGTH];
         BOLOG globalForcelog[UNIT_TYPE_COUNT];
-
+	wxBitmap bmpGraph,bmpTimer,bmpBack,bmpBack2,bitmap;
+	void showGraph(wxDC* dec,int* data,int max,wxColour col);
+	
     // any class wishing to process wxWindows events must use this macro
         DECLARE_EVENT_TABLE()
 };

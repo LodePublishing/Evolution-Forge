@@ -1,0 +1,6 @@
+"@GOAL"
+"Name" "Tanks!"
+"@RACE" "Terra"
+"Siege Tank" "12" "0" "0"
+"@END"
+"@END"

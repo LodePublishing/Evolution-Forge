@@ -2,28 +2,28 @@
 #include <string.h>
 #include "debug.h"
 
-const char* GOAL_ENTRY::getName()
+const char* EXPORT GOAL_ENTRY::getName()
 {
 	return name;
 };
 
-int GOAL_ENTRY::getRace()
+int EXPORT GOAL_ENTRY::getRace()
 {
 	if((race<0)||(race>2))
 	{
-		debug.toLog(0,"DEBUG: (GOAL_ENTRY::getRace): Variable not initialized [%i].",race);
+		debug.toLog(0,"DEBUG: (EXPORT GOAL_ENTRY::getRace): Variable not initialized [%i].",race);
 		return(0);
 	}
 	return race;
 };
 
-int GOAL_ENTRY::setName(const char* line)
+int EXPORT GOAL_ENTRY::setName(const char* line)
 {
 	strcpy(name,line);
 	return(1);
 };
 
-int GOAL_ENTRY::isRaceInitialized()
+int EXPORT GOAL_ENTRY::isRaceInitialized()
 {
 	if(raceInitialized==1)
 		return(1);
@@ -31,11 +31,11 @@ int GOAL_ENTRY::isRaceInitialized()
 };
 
 
-int GOAL_ENTRY::setRace(int num)
+int EXPORT GOAL_ENTRY::setRace(int num)
 {
 	if((num<0)||(num>2))
 	{
-		debug.toLog(0,"DEBUG: (GOAL_ENTRY::setRace): Value [%i] out of range.",num);
+		debug.toLog(0,"DEBUG: (EXPORT GOAL_ENTRY::setRace): Value [%i] out of range.",num);
 		return(0);
 	}
 	pStats=&(stats[race=num][0]);
@@ -43,13 +43,13 @@ int GOAL_ENTRY::setRace(int num)
 	return(1);
 };
 
-const UNIT_STATISTICS* GOAL_ENTRY::getpStats()
+const UNIT_STATISTICS* EXPORT GOAL_ENTRY::getpStats()
 {
 	return(pStats);
 };
 
 
-int GOAL_ENTRY::adjustGoals()
+int EXPORT GOAL_ENTRY::adjustGoals()
 {
 	int i,j,k;
 
@@ -116,14 +116,14 @@ int GOAL_ENTRY::adjustGoals()
 };
 
 
-int GOAL_ENTRY::isGoal(int unit)
+int EXPORT GOAL_ENTRY::isGoal(int unit)
 {
 	if(allGoal[unit]>0)
 		return(1);
 	else return(0);
 };
 
-int GOAL_ENTRY::addGoal(int unit, int count, int time, int location)
+int EXPORT GOAL_ENTRY::addGoal(int unit, int count, int time, int location)
 {
 	if(unit==0) 
 		return(0);
@@ -149,47 +149,47 @@ int GOAL_ENTRY::addGoal(int unit, int count, int time, int location)
 	return(1);
 };
 
-int GOAL_ENTRY::getMaxBuildTypes()
+int EXPORT GOAL_ENTRY::getMaxBuildTypes()
 {
 	if((maxBuildTypes<0)||(maxBuildTypes>UNIT_TYPE_COUNT))
 	{
-		debug.toLog(0,"DEBUG: (GOAL_ENTRY::getMaxBuildTypes): Variable not initialized [%i].",maxBuildTypes);
+		debug.toLog(0,"DEBUG: (EXPORT GOAL_ENTRY::getMaxBuildTypes): Variable not initialized [%i].",maxBuildTypes);
 		return(0);
 	}
 	return(maxBuildTypes);
 };
 
 
-int GOAL_ENTRY::getInitialized()
+int EXPORT GOAL_ENTRY::getInitialized()
 {
 	return(initialized);
 };
 
-int GOAL_ENTRY::toGeno(int num)
+int EXPORT GOAL_ENTRY::toGeno(int num)
 {
 	if((num<0)||(num>=UNIT_TYPE_COUNT))
 	{
-		debug.toLog(0,"DEBUG: (GOAL_ENTRY::toGeno): Value [%i] out of range.",num);
+		debug.toLog(0,"DEBUG: (EXPORT GOAL_ENTRY::toGeno): Value [%i] out of range.",num);
 		return(0);
 	}
 	if((phaenoToGenotype[num]<0)||(phaenoToGenotype[num]>=UNIT_TYPE_COUNT))
 	{
-		debug.toLog(0,"DEBUG: (GOAL_ENTRY::toGeno): Variable not initialized [%i].",phaenoToGenotype[num]);
+		debug.toLog(0,"DEBUG: (EXPORT GOAL_ENTRY::toGeno): Variable not initialized [%i].",phaenoToGenotype[num]);
 		return(0);
 	}
 	return(phaenoToGenotype[num]);
 }
 
-int GOAL_ENTRY::toPhaeno(int num)
+int EXPORT GOAL_ENTRY::toPhaeno(int num)
 {
 	if((num<0)||(num>=UNIT_TYPE_COUNT))
 	{
-		debug.toLog(0,"DEBUG: (GOAL_ENTRY::toPhaeno): Value [%i] out of range.",num);
+		debug.toLog(0,"DEBUG: (EXPORT GOAL_ENTRY::toPhaeno): Value [%i] out of range.",num);
 		return(0);
 	}
 	if((genoToPhaenotype[num]<0)||(genoToPhaenotype[num]>=UNIT_TYPE_COUNT))
 	{
-		debug.toLog(0,"DEBUG: (GOAL_ENTRY::toPhaeno): Variable not initialized [%i].",genoToPhaenotype[num]);
+		debug.toLog(0,"DEBUG: (EXPORT GOAL_ENTRY::toPhaeno): Variable not initialized [%i].",genoToPhaenotype[num]);
 		return(0);
 	}
 	return(genoToPhaenotype[num]);

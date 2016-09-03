@@ -1,2 +1,0 @@
-"@RACE" "Terra"
-"Siege Tank" "2" "0" "0"

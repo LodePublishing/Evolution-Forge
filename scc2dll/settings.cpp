@@ -8,6 +8,16 @@
 #include <stdlib.h>
 #include <time.h>
 
+MAP* EXPORT SETTINGS::getMap(int num)
+{
+        if((num>getMapCount())||(num<0))
+        {
+                debug.toLog(0,"WARNING: (SETTINGS::getMap): Value [%i] out of range.",num);
+                return(0);
+        }
+	return(&map[num]);
+};
+
 int EXPORT SETTINGS::getMAXBreedFactor()
 {
 	return(MAX_BREED_FACTOR);
@@ -340,12 +350,11 @@ int EXPORT SETTINGS::getDistance(int l1,int l2)
 	return(map[ga.currentMap].location[l1].getDistance(l2));
 };
 
-int EXPORT SETTINGS::getGoal(GOAL_ENTRY &goal,int num)
+GOAL_ENTRY* EXPORT SETTINGS::getGoal(int num)
 {
 	if((num<MIN_GOAL_ENTRIES)||(num>=getGoalCount()))
 		return(0);
-	goal=(goalEntry[num]);
-	return(1);
+	return(&goalEntry[num]);
 };
 
 
@@ -362,6 +371,7 @@ int EXPORT SETTINGS::loadGoalFile(const char* goalFile) //~~~
 	char param3[1024];
 	int ln=0;
 	int value1=0,value2=0,value3=0;
+	int mode=0;
 
 	int i;
 
@@ -400,10 +410,21 @@ int EXPORT SETTINGS::loadGoalFile(const char* goalFile) //~~~
 			debug.toLog(0,"WARNING: (SETTINGS::loadGoalFile) %s: Line %d [%s]: Value below zero.",goalFile,ln,old);
 			continue;
 		}
-
-		if(!strcmp(item,"@RACE"))
+		
+		if(mode==0)
 		{
-			if(!strcmp(param1,"Terra")) goalEntry[getGoalCount()].setRace(TERRA);
+			if(!strcmp(item,"@GOAL"))
+				mode=1;
+			//else ...
+		}
+		else if(mode==1)
+		{
+			if(!strcmp(item,"Name"))
+				goalEntry[getGoalCount()].setName(param1);
+			else if(!strcmp(item,"@RACE"))
+			{
+				mode=2;
+				if(!strcmp(param1,"Terra")) goalEntry[getGoalCount()].setRace(TERRA);
 				else if(!strcmp(param1,"Protoss")) goalEntry[getGoalCount()].setRace(PROTOSS);
 				else if(!strcmp(param1,"Zerg")) goalEntry[getGoalCount()].setRace(ZERG);
 				else
@@ -412,15 +433,25 @@ int EXPORT SETTINGS::loadGoalFile(const char* goalFile) //~~~
 					fclose(pFile);
 					return(0);
 				}
+			}
+			else if(!strcmp(item,"@END"))
+				mode=0;
+			//else...
+			
 		}
-		else 
-			if(!goalEntry[getGoalCount()].isRaceInitialized())
+		else if(mode==2)
+		{
+		/*	if(!goalEntry[getGoalCount()].isRaceInitialized())
 			{
 				debug.toLog(0,"ERROR: (SETTINGS::loadGoalFile) %s: Line %d [%s]: @RACE must be the first line.",goalFile,ln,old);
 				fclose(pFile);
 				return(0);
 			}
 		else
+			{*/
+			if(!strcmp(item,"@END"))
+				mode=1;
+			else
 			{
 
 //Aufbau der goal datei: "Einheitname" LEER "Anzahl" LEER "Zeit" LEER "Ort"
@@ -438,8 +469,9 @@ int EXPORT SETTINGS::loadGoalFile(const char* goalFile) //~~~
 				if(i!=REFINERY+1)
 					debug.toLog(0,"WARNING: (SETTINGS::loadGoalFile) %s: Line %d [%s]: No unit name matched this goal.",goalFile,ln,old);
 			}
+		}
 	} //end while
-
+//missing @END ??
 	goalEntry[getGoalCount()].adjustGoals();
 	setGoalCount(getGoalCount()+1);
 	fclose(pFile);

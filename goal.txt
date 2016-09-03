@@ -1,2 +1,7 @@
+"@GOAL"
+"Name" "Tank"
 "@RACE" "Terra"
-"Siege Tank" "2" "0" "0"
+"Siege Tank" "4" "0" "0"
+"@END"
+"@END"
+#problem bei zu vielen goals!

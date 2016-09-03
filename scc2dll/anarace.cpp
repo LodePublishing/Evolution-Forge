@@ -4,6 +4,54 @@
 #include "debug.h"
 // TODO: reimplement/recheck the speed of the units
 
+int EXPORT ANARACE::getProgramCode(int IP)
+{
+	if((IP<0)||(IP>=MAX_LENGTH))
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::getProgramCode): Value [%i] out of range.",IP);
+                return(0);
+        }
+                                                                                                                                                            
+        if((program[IP].facility<0)||(program[IP].facility>=UNIT_TYPE_COUNT))
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::getProgramCode): Variable not initialized [%i].",Code[program[IP].dominant][IP]);
+                return(0);
+        }
+        return(Code[program[IP].dominant][IP]);
+}
+
+
+int EXPORT ANARACE::getProgramFacility(int IP)
+{
+	if((IP<0)||(IP>=MAX_LENGTH))
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::getProgramFacility): Value [%i] out of range.",IP);
+                return(0);
+        }
+                                                                                                                                                  
+        if((program[IP].facility<0)||(program[IP].facility>=UNIT_TYPE_COUNT))
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::getProgramFacility): Variable not initialized [%i].",program[IP].facility);
+                return(0);
+        }
+        return(program[IP].facility);
+}
+
+int EXPORT ANARACE::getProgramBT(int IP)
+{
+	if((IP<0)||(IP>=MAX_LENGTH))
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::getProgramBT): Value [%i] out of range.",IP);
+                return(0);
+        }
+                                                                                                                                                  
+        if((program[IP].BT<0)||(program[IP].BT>=MAX_TIME))
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::getProgramBT): Variable not initialized [%i].",program[IP].BT);
+                return(0);
+        }
+        return(program[IP].BT);
+}                                                                                                                                      
 
 int EXPORT ANARACE::getProgramSuccessType(int IP)
 {
@@ -53,6 +101,40 @@ int EXPORT ANARACE::getProgramSuccessUnit(int IP)
 	}
 	return(program[IP].successLocation);
 };*/
+
+
+int EXPORT ANARACE::getProgramForceCount(int IP)       // how many units of the type at phaenoCode[s] do exist at that time?
+{
+	if((IP<0)||(IP>=MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramForceCount): Value [%i] out of range.",IP);
+		return(0);
+	}
+	return(program[getIP()].forceCount);
+};
+
+
+int EXPORT ANARACE::setProgramFacility(int num)
+{
+        if((num<0)||(num>=UNIT_TYPE_COUNT))
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::setProgramFacility): Value [%i] out of range.",num);
+                return(0);
+        }
+        program[getIP()].facility=num;
+        return(1);
+};
+
+int EXPORT ANARACE::setProgramBT(int num)
+{
+        if((num<0)||(num>=MAX_TIME))
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::setProgramBT): Value [%i] out of range.",num);
+                return(0);
+        }
+        program[getIP()].BT=num;
+        return(1);
+};
 
 int EXPORT ANARACE::setProgramSuccessType(int num)
 {
@@ -227,6 +309,95 @@ int EXPORT ANARACE::getProgramLocation(int IP)
 	return(program[IP].location);
 };
 
+int EXPORT ANARACE::getProgramFitness(int IP)
+{
+        if((IP<0)||(IP>=MAX_LENGTH))
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::getProgramFitness): Value [%i] out of range.",IP);
+                return(0);
+        }
+                                                                                                                                                            
+        if((program[IP].fitness<0)||(program[IP].fitness>100000)) //todo: ga werte einfuegen
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::getProgramFitness): Variable not initialized [%i].",program[IP].fitness);
+                return(0);
+        }
+	return(program[IP].fitness);
+};
+
+
+int EXPORT ANARACE::calculateFitness()
+{
+        int i,j,tpF,sumup;
+        int bonus[MAX_LOCATIONS][UNIT_TYPE_COUNT]; // temporary data to check whether a bonus is already given (only applies if force > goal)
+//TODO: Nicht alle Einheiten am Ort? => Ort egal sein lassen aber zur Zeit hinzuzaehlen
+        // Nicht alle Einheiten ueberhaupt gebaut UND nicht alle am Ort => nur viertel Bonus fuer Einheiten die nicht am Ort sind
+	tpF=0;
+	for(i=MAX_GOALS;i--;)
+        	if(getPlayer()->goal->goal[i].count>0)
+                        {
+                                if( ((getPlayer()->goal->goal[i].location==0)&&(getPlayer()->goal->goal[i].count>location[0].force[getPlayer()->goal->goal[i].unit])) || ( (getPlayer()->goal->goal[i].location>0)&&(getPlayer()->goal->goal[i].count>location[getPlayer()->goal->goal[i].location].force[getPlayer()->goal->goal[i].unit])) )                                 {
+                                        //total points: (Am Ort befindliche Einheiten + (Summe aller Locations(100-distance)/100)) / Goalcount
+                                        //TODO: Absteigen und markieren der benutzten wbfs! Also zuerst die eigentliche location abchecken, dann nach links und rechts die naehesten hinzuziehen                                         //evtl direkt von den locations die wbfs erstmal abziehen und am Schluss nochmal alle goals durchlaufen und den Rest verteilen!                                         int sumup=0;
+                                        int bon=0;
+                                        if(getPlayer()->goal->goal[i].location==0)
+                                                sumup=location[0].force[getPlayer()->goal->goal[i].unit]*100;
+                                        else
+                                        {
+                                                bon=getPlayer()->goal->goal[i].count;
+                                                int j=1;
+                                                while((j<MAX_LOCATIONS)&&(bon>location[pMap->locationList[getPlayer()->goal->goal[i].location][j]].force[getPlayer()->goal->goal[i].unit]))                                                 {
+                                                        sumup+=location[pMap->locationList[getPlayer()->goal->goal[i].location][j]].force[getPlayer()->goal->goal[i].unit]*(100-pMap->location[j].getDistance(getPlayer()->goal->goal[i].location));                                                         bon-=location[pMap->locationList[getPlayer()->goal->goal[i].location][j]].force[getPlayer()->goal->goal[i].unit];                                                         j++;
+                                        }
+                                                //rest
+                                        if(j<MAX_LOCATIONS)
+                                        sumup+=bon*(100-pMap->location[pMap->locationList[getPlayer()->goal->goal[i].location][j]].getDistance(getPlayer()->goal->goal[i].location));                                         }
+                                        //TODO: Hier gibts Probleme wenn mehrere goals gleicher Units an unterschiedlichen Orten existieren...
+                                        // evtl funktionsglobales bonus System wie bei den '@' in scc.cpp einfuegen
+                                        // bissl komplex da mans ja den einzelnen goals verteilen muss...
+                                        if(getPlayer()->goal->goal[i].time>0)
+                                        {
+                                                if(getFinalTime(i)>0)
+                                                        tpF+=(getPlayer()->goal->goal[i].time*sumup)/(getPlayer()->goal->goal[i].count*getFinalTime(i));                                                 else
+                                                        tpF+=(getPlayer()->goal->goal[i].time*sumup)/(getPlayer()->goal->goal[i].count*ga->maxTime);
+                                        }
+                                        else
+                                                tpF+=sumup/getPlayer()->goal->goal[i].count;
+                                }
+                                else if( ((getPlayer()->goal->goal[i].location==0)&&(getPlayer()->goal->goal[i].count<=location[0].force[getPlayer()->goal->goal[i].unit])) || ( (getPlayer()->goal->goal[i].location>0)&&(getPlayer()->goal->goal[i].count<=location[getPlayer()->goal->goal[i].location].force[getPlayer()->goal->goal[i].unit])) )
+                                                //force >= goal
+                                {
+                                        if((getPlayer()->goal->goal[i].time>0)&&(getFinalTime(i)>getPlayer()->goal->goal[i].time))
+                                                tpF+=(getPlayer()->goal->goal[i].time*100/getFinalTime(i));
+                                        else tpF+=100;
+// does not work yet, if this is uncommented, sFitness occasionally jumps to -1222000 or something like that... :/
+// include the final location maybe...
+//                              if(getPlayer()->goal->goal[i].count<location[getPlayer()->goal->goal[i].location].force[getPlayer()->goal->goal[i].unit])
+//                                      setsFitness(getsFitness()-location[getPlayer()->goal->goal[i].location].force[getPlayer()->goal->goal[i].unit])*(pStats[i].mins+pStats[i].gas));
+                                }
+                        }
+// TODO: Check for very small 'goal.time' values, probably in scc.cpp!!
+                                                                                                                                                            
+//Bonus: Sind noch Plaetze offen?
+                                                                                                                                                            /* Absturz 8[
+                for(i=MAX_LOCATIONS;i--;)
+                       for(j=UNIT_TYPE_COUNT;j--;)
+                               bonus[i][j]=0;
+                                                                                                                                                            
+                for(i=MAX_GOALS;i--;)
+                        if(location[getPlayer()->goal->goal[i].location].force[getPlayer()->goal->goal[i].unit]<getPlayer()->goal->goal[i].count)
+                                bonus[getPlayer()->goal->goal[i].location][getPlayer()->goal->goal[i].unit]+=getPlayer()->goal->goal[i].count-location[getPlayer()->goal->goal[i].location].force[getPlayer()->goal->goal[i].unit];                 for(i=MAX_BUILDINGS;i--;)
+                        if((building[i].RB>0)&&(bonus[building[i].type][building[i].location]>0))
+                        {                         //erstmal ohne Zeit...
+                                tpF+=((building[i].RB*100)/((location[building[i].location].force[building[i].type]+bonus[building[i].type][building[i].location])*pStats[building[i].type].BT));
+                                                                                                                                                            
+                                if((getPlayer()->goal->goal[building[i].type].time>0)&&(location[building[i].location].force[building[i].type]==0))
+                                        tpF+=(building[i].RB*100*getPlayer()->goal->goal[building[i].type].time*location[0].force[i])/(getPlayer()->goal->goal[building[i].type].count*pStats[building[i].type].BT*ga->maxTime);
+                                else                                         tpF+=((building[i].RB*100)/(getPlayer()->goal->goal[building[i].type].count*pStats[building[i].type].BT));
+                                bonus[building[i].location][building[i].type]--;
+                        }*/
+	return(tpF);
+}
 
 
 int EXPORT ANARACE::calculateStep()
@@ -273,7 +444,7 @@ int EXPORT ANARACE::calculateStep()
 			if(timeout) 
 			{
 				program[getIP()].time=ga->maxTime-time; //ANA~
-                program[getIP()].dominant=dominant; //ANA~
+		                program[getIP()].dominant=dominant; //ANA~
 			}
 			else 
 			{
@@ -287,6 +458,8 @@ int EXPORT ANARACE::calculateStep()
 			program[getIP()].mins=tm;//getMins();
 			program[getIP()].gas=tg;//getGas();
 //			program[getIP()].temp=location[1].availible[COMMAND_CENTER];
+			program[getIP()].forceCount+=location[0].force[getPlayer()->goal->toPhaeno(Code[program[getIP()].dominant][getIP()])];
+			program[getIP()].fitness=calculateFitness();
 	
 			timeout=ga->maxTimeOut;
 			setIP(getIP()-1);
@@ -324,6 +497,7 @@ int EXPORT ANARACE::calculateStep()
 							{
 								location[build->location].availible[build->facility]++;
 								location[0].availible[build->facility]++;
+                                                                setProgramFacility(build->facility);
 							}
 							break; // fuer spaeter mal: Wenn in 2 Fabriken produziert wuerde wirds probmelatisch, da
 //in Buiding nur eine facility gespeichert wird...
@@ -339,6 +513,7 @@ int EXPORT ANARACE::calculateStep()
 							{
 								location[build->location].availible[build->facility]++;
 								location[0].availible[build->facility]++;
+                                                                setProgramFacility(build->facility);
 							}
 							if(stat->facility2)
 							{
@@ -352,6 +527,7 @@ int EXPORT ANARACE::calculateStep()
 								{
 									location[build->location].availible[build->facility]++;
 									location[0].availible[build->facility]++;
+	                                                                setProgramFacility(build->facility);
 								}
 								if(stat->facility2) // special rule for upgrades!
 								{
@@ -415,6 +591,7 @@ int EXPORT ANARACE::calculateStep()
 
 					program[build->IP].built=1;
 					program[build->IP].location=build->location;
+					setProgramBT(build->TB); //~~~
 
 					lastcounter++;
 	//			IP zeugs checken... length is immer 2 :/	
@@ -584,7 +761,8 @@ int ANARACE::buildGene(int unit)
 						building[nr].facility=stat->facility[fac];
 						building[nr].location=tloc;
 						building[nr].unitCount=1; //~~
-						building[nr].RB=stat->BT+3200*(stat->facility2==unit); //~~ hack :/ TODO
+						building[nr].RB=stat->BT+3200*(stat->facility2==unit); //~~ hack :/ TODO ???
+						building[nr].TB=building[nr].RB;
 						setMins(getMins()-(stat->mins+stat->upgrade_cost*location[0].force[unit]));
 						setGas(getGas()-(stat->gas+stat->upgrade_cost*location[0].force[unit]));
 						building[nr].type=unit;
@@ -770,6 +948,7 @@ void EXPORT ANARACE::resetData() // resets all data to standard starting values
 	for(i=MAX_BUILDINGS;i--;)
 	{
 	       building[i].RB=0;
+	building[i].TB=0;
 	       building[i].type=255;
 	       building[i].IP=0;
 	       building[i].location=0;
@@ -788,10 +967,13 @@ void EXPORT ANARACE::resetData() // resets all data to standard starting values
         program[i].time=MAX_TIME;
         program[i].mins=0;
         program[i].gas=0;
+	program[i].forceCount=1;
         program[i].temp=0;
         program[i].dominant=0;
 		program[i].location=0;
 		program[i].isGoal=0;
+	program[i].facility=0;
+	program[i].BT=0;
 		phaenoCode[i]=0;
 	}
 	setHarvestedGas(0);

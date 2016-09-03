@@ -3,7 +3,7 @@
 
 #include "location.h"
 
-class GOAL_ENTRY
+class EXPORT GOAL_ENTRY
 {
 	private:
 		char name[128];

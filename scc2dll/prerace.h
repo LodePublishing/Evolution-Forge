@@ -24,13 +24,13 @@ class EXPORT PRERACE
 		int playerNum;
 		int mins,gas,timer;
 		int IP;
-        int mineralHarvestPerSecond[MAX_LOCATIONS][45];
-        int gasHarvestPerSecond[MAX_LOCATIONS][5];
+	        int mineralHarvestPerSecond[MAX_LOCATIONS][45];
+       		int gasHarvestPerSecond[MAX_LOCATIONS][5];
 		int harvestedGas,harvestedMins;
 		int supply;		// free supply
 		int maxSupply; // total supply
-        int ftime[MAX_GOALS]; //when the goal is reached / when the last item is produced (ALL locations...*/
-        int length;
+		int ftime[MAX_GOALS]; //when the goal is reached / when the last item is produced (ALL locations...*/
+		int length;
 	public:
 		static MAP_LOCATION loc[MAX_PLAYER][MAX_LOCATIONS];
 		MAP_LOCATION* location;

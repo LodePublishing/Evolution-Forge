@@ -1,0 +1,6 @@
+"@GOAL"
+"Name" "Zergling Rush"
+"@RACE" "Zerg"
+"Zergling" "6" "0" "0"
+"@END"
+"@END"

@@ -1,17 +1,20 @@
 #include "mapmenu.hpp"
 
 MapMenu::MapMenu(const MapMenu& object) :
-    UI_Menu((UI_Menu)object)
+    UI_Menu((UI_Menu)object),
+    anarace(object.anarace)
 { }
 
 MapMenu& MapMenu::operator=(const MapMenu& object)
 {
 	((UI_Menu)(*this)) = ((UI_Menu)object);
+	anarace = object.anarace;
 	return(*this);
 }
 
 MapMenu::MapMenu(UI_Object* map_parent, const Rect map_rect, const Size distance_bottom_right, const ePositionMode position_mode):
-	UI_Menu(map_parent, map_rect, distance_bottom_right, position_mode, true)
+	UI_Menu(map_parent, map_rect, distance_bottom_right, position_mode, true),
+	anarace(NULL)
 { 
 	resetData();
 }

@@ -73,6 +73,7 @@ void BoDiagramWindow::resetData()
 		targetNneedSupply[i]=Point(0,0);
 		targetFitness[i]=Point(0,0);
 	}
+	processList();
 }
 
 void BoDiagramWindow::process()
@@ -110,8 +111,8 @@ void BoDiagramWindow::process()
 
 void BoDiagramWindow::processList()
 {
-	if(anarace->getRealTimer()<2) return;
-	
+	if((anarace==NULL)||(anarace->getRealTimer()<2)) 
+		return;
 // TODO nur machen wenns optimiert!
 
 //	if(anarace->getTimer()==coreConfiguration.getMaxTime()) time=0;
@@ -382,19 +383,39 @@ void BoDiagramWindow::draw(DC* dc) const
 				else if((hneedSupply[i].y < nneedSupply[i].y)&&(hneedSupply[i].x < (signed int)(getClientTargetWidth()-2)))
 					dc->DrawRectangle(getAbsoluteClientRectPosition() + Point(0, getClientRectHeight()) + hneedSupply[i], Size(hneedSupply[i+1].x - hneedSupply[i].x, nneedSupply[i].y - hneedSupply[i].y));
 			}
-				
+	
+			{
+				Point p = getAbsoluteClientRectPosition()+Point(0,getClientRectHeight());
+				for(unsigned int i = 0; i < count-1;i++)
+				{
+					if(gas[i].y + 10 < gas[i+1].y)
+						dc->SetPen(*theme.lookUpPen(DASHED_GAS_PEN));
+					else
+					if(gas[i].y < gas[i+1].y)
+						dc->SetPen(*theme.lookUpPen(BODIAGRAM_GAS_PEN));
+					else
+						dc->SetPen(*theme.lookUpPen((ePen)(BODIAGRAM_GAS_PEN+(bold?3:0))));
+					dc->DrawLine(p.x + gas[i].x, p.y + gas[i].y, p.x + gas[i+1].x, p.y + gas[i+1].y);
+				}
+			}
 			
-			if(bold)
-				dc->SetPen(*theme.lookUpPen(BODIAGRAM_MINERALS_BOLD_PEN));
-			else
-				dc->SetPen(*theme.lookUpPen(BODIAGRAM_MINERALS_PEN));
-			dc->DrawSpline(count, &(minerals[0]), getAbsoluteClientRectPosition()+Point(0,getClientRectHeight()));
+			
+			{
+				Point p = getAbsoluteClientRectPosition()+Point(0,getClientRectHeight());
+				for(unsigned int i = 0; i < count-1;i++)
+				{
+					if(minerals[i].y + 10 < minerals[i+1].y)
+						dc->SetPen(*theme.lookUpPen(DASHED_MINERALS_PEN));
+					else
+					if(minerals[i].y < minerals[i+1].y)
+						dc->SetPen(*theme.lookUpPen(BODIAGRAM_MINERALS_PEN));
+					else
+						dc->SetPen(*theme.lookUpPen((ePen)(BODIAGRAM_MINERALS_PEN+(bold?3:0))));
+					dc->DrawLine(p.x + minerals[i].x, p.y + minerals[i].y, p.x + minerals[i+1].x, p.y + minerals[i+1].y);
+				}
+			}
 
-			if(bold)
-				dc->SetPen(*theme.lookUpPen(BODIAGRAM_GAS_BOLD_PEN));
-			else
-				dc->SetPen(*theme.lookUpPen(BODIAGRAM_GAS_PEN));
-			dc->DrawSpline(count, &(gas[0]), getAbsoluteClientRectPosition()+Point(0,getClientRectHeight()));
+//			dc->DrawSpline(count, &(minerals[0]), getAbsoluteClientRectPosition()+Point(0,getClientRectHeight()));
 //			dc->SetPen(*theme.lookUpPen(BODIAGRAM_FITNESS_PEN));
 //			dc->DrawSpline(count, &(fitness[0]), getAbsoluteClientRectPosition()+Point(0,getClientRectHeight()));*/
 					

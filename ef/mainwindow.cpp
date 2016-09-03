@@ -17,17 +17,19 @@ MainWindow::MainWindow() :
 		gameNumbers[i]=0;
 		tab[i]=NULL;
 	}
- 	tab[0] = new UI_Button(NULL, Rect(10, 1, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), TAB_BUTTON, false, TAB_BUTTON_MODE, NEW_GAME_STRING, ARRANGE_TOP_LEFT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+ 	tab[0] = new UI_Button(NULL, Rect(10, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), TAB_BUTTON, false, TAB_BUTTON_MODE, NEW_GAME_STRING, ARRANGE_TOP_LEFT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 // right:
-	tab[MAP_TAB] = new UI_Button(NULL, Rect(0, 1, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), MAP_TAB_BUTTON, true, TAB_BUTTON_MODE, MAP_TAB_STRING, ARRANGE_TOP_RIGHT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
-	tab[SETTINGS_TAB] = new UI_Button(NULL, Rect(0, 1, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), SETTINGS_TAB_BUTTON, true, TAB_BUTTON_MODE, SETTINGS_TAB_STRING, ARRANGE_TOP_RIGHT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
-	tab[HELP_TAB] = new UI_Button(NULL, Rect(0, 1, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), HELP_TAB_BUTTON, true, TAB_BUTTON_MODE, HELP_TAB_STRING, ARRANGE_TOP_RIGHT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	tab[DATABASE_TAB] = new UI_Button(NULL, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), DATABASE_TAB_BUTTON, true, TAB_BUTTON_MODE, DATABASE_TAB_STRING, ARRANGE_TOP_RIGHT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	tab[MAP_TAB] = new UI_Button(NULL, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), MAP_TAB_BUTTON, true, TAB_BUTTON_MODE, MAP_TAB_STRING, ARRANGE_TOP_RIGHT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	tab[SETTINGS_TAB] = new UI_Button(NULL, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), SETTINGS_TAB_BUTTON, true, TAB_BUTTON_MODE, SETTINGS_TAB_STRING, ARRANGE_TOP_RIGHT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	tab[HELP_TAB] = new UI_Button(NULL, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), HELP_TAB_BUTTON, true, TAB_BUTTON_MODE, HELP_TAB_STRING, ARRANGE_TOP_RIGHT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 
 	for(unsigned int i=0;i<MAX_TABS;i++)
 		if(tab[i]!=NULL)
 		{
 			addTab(tab[i], i);
 		}
+	tab[DATABASE_TAB]->updateToolTip(DATABASE_TAB_TOOLTIP_STRING);
 	tab[MAP_TAB]->updateToolTip(MAP_TAB_TOOLTIP_STRING);
 	tab[SETTINGS_TAB]->updateToolTip(SETTINGS_TAB_TOOLTIP_STRING);
 	tab[HELP_TAB]->updateToolTip(HELP_TAB_TOOLTIP_STRING);
@@ -64,9 +66,8 @@ void MainWindow::addNewGameTab()
 {
 	delete(tab[gameTabCount]); // 'new game' loeschen
 	removeTab(gameTabCount);
-	UI_Button::resetButton();
 
-	tab[gameTabCount] = new UI_Button(this, Rect(10, 1, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), TAB_BUTTON, false, TAB_BUTTON_MODE, UI_Object::theme.lookUpFormattedString(GAME_NUMBER_STRING, gameNumber), ARRANGE_TOP_LEFT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	tab[gameTabCount] = new UI_Button(this, Rect(10, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), TAB_BUTTON, false, TAB_BUTTON_MODE, UI_Object::theme.lookUpFormattedString(GAME_NUMBER_STRING, gameNumber), ARRANGE_TOP_LEFT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 	addTab(tab[gameTabCount], gameTabCount);
 	gameNumbers[gameTabCount] = gameNumber;
 	++gameTabCount;
@@ -74,7 +75,7 @@ void MainWindow::addNewGameTab()
 	
 	if(gameTabCount<MAX_GAME_TABS)
 	{
-	 	tab[gameTabCount] = new UI_Button(this, Rect(10, 1, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), TAB_BUTTON, false, TAB_BUTTON_MODE, NEW_GAME_STRING, ARRANGE_TOP_LEFT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	 	tab[gameTabCount] = new UI_Button(this, Rect(10, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), TAB_BUTTON, false, TAB_BUTTON_MODE, NEW_GAME_STRING, ARRANGE_TOP_LEFT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 		addTab(tab[gameTabCount], gameTabCount);
 	}	
 }
@@ -92,7 +93,6 @@ void MainWindow::removeGameTab(const unsigned int game_number)
 	}
 #endif
 	removeTab(game_number);
-//	UI_Button::resetButton();
 	UI_Object::currentWindow = NULL;
 	delete(tab[game_number]);
 	for(unsigned int i = game_number; i < gameTabCount-1;++i)
@@ -100,7 +100,7 @@ void MainWindow::removeGameTab(const unsigned int game_number)
 	--gameTabCount;
 	if(gameTabCount==MAX_GAME_TABS-1) // alles voll => letztes durch new game ersetzen
 	{
-	 	tab[gameTabCount] = new UI_Button(this, Rect(10, 1, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), TAB_BUTTON, false, TAB_BUTTON_MODE, NEW_GAME_STRING, ARRANGE_TOP_LEFT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	 	tab[gameTabCount] = new UI_Button(this, Rect(10, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), TAB_BUTTON, false, TAB_BUTTON_MODE, NEW_GAME_STRING, ARRANGE_TOP_LEFT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 		addTab(tab[gameTabCount], gameTabCount);
 	} else 
 	{

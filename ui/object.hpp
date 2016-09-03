@@ -11,6 +11,12 @@
 #endif
 // Windows kotz
 
+enum eIsScrolled
+{
+	NOT_SCROLLED,
+	SCROLLED
+};
+
 enum ePositionMode
 {
 	DO_NOT_ADJUST,
@@ -70,6 +76,7 @@ class UI_Object
 		UI_Object& operator=(const UI_Object& object);
 		UI_Object(const UI_Object& object);
 		UI_Object(UI_Object* parent_object, const Rect relative_rect = Rect(0, 0, 0, 0), const Size distance_bottom_right = Size(0, 0), const ePositionMode position_mode = DO_NOT_ADJUST, const eAutoSize auto_size = NO_AUTO_SIZE);
+		UI_Object(UI_Object* parent_object, UI_Object* position_parent_object, const Rect relative_rect = Rect(0, 0, 0, 0), const Size distance_bottom_right = Size(0, 0), const ePositionMode position_mode = DO_NOT_ADJUST, const eAutoSize auto_size = NO_AUTO_SIZE);
 
 		virtual ~UI_Object();
 	
@@ -126,8 +133,10 @@ class UI_Object
 		UI_Object* getNextBrother() const;
 		UI_Object* getPrevBrother() const;
 		UI_Object* getParent() const; // TODO make const correctness!
+		UI_Object* getPositionParent() const; // TODO make const correctness!
 		UI_Object* getChildren() const;
 		void setParent(UI_Object* daddy);
+		void setPositionParent(UI_Object* daddy);
 		void removeFromFamily();
 		void makeFirstChild();
 		
@@ -135,8 +144,13 @@ class UI_Object
 		virtual void process();
 		virtual void resetData();
 
-		void updateToolTip(const eString tooltip);
-		const eString getToolTipString() const;
+		void updateToolTip(const eString tool_tip_string);
+		void updateToolTip(const std::string& tool_tip_string);
+
+		const eString getToolTipEString() const;
+		const std::string& getToolTipString() const;
+		
+		const bool hasToolTip() const;
 
 		static unsigned int redrawnObjects;
 		static void setResolution(const Size resolution);
@@ -185,6 +199,7 @@ class UI_Object
 		void setOriginalSize(const Size& size);
 		void setOriginalRect(const Rect& rect);
 
+		const Point& getOriginalPosition() const;
 		const Rect& getOriginalRect() const;
 		const Size& getDistanceBottomRight() const;
 	
@@ -231,10 +246,12 @@ class UI_Object
 			
 		void addChild(UI_Object* child);
 		UI_Object* parent; // = NULL means that this is the screen (x=0/y=0)
+		UI_Object* positionParent; // = NULL means that this is the screen (x=0/y=0)
 		UI_Object* prevBrother;
 		UI_Object* nextBrother; 
 
-		eString toolTipString;
+		eString toolTipEString;
+		std::string toolTipString;
 };
 
 inline const Size& UI_Object::getDistanceBottomRight() const {
@@ -244,6 +261,11 @@ inline const Size& UI_Object::getDistanceBottomRight() const {
 inline const Rect& UI_Object::getOriginalRect() const {
 	return(originalRect);
 }
+
+inline const Point& UI_Object::getOriginalPosition() const {
+	return(originalRect.GetTopLeft());
+}
+
 
 inline void UI_Object::setOriginalPosition(const Point& position) {
 	originalRect.SetTopLeft(position);
@@ -302,48 +324,48 @@ inline const Rect& UI_Object::getRelativeRect() const {
 	
 inline const Point UI_Object::getAbsolutePosition() const
 {
-	if(parent)
-		return(relativeRect.GetTopLeft() + parent->getAbsolutePosition());
+	if(positionParent)
+		return(relativeRect.GetTopLeft() + positionParent->getAbsolutePosition());
 	else return(relativeRect.GetTopLeft());
 }
 	
 inline const Point UI_Object::getParentAbsolutePosition() const	{
-	if(parent)
-		return(parent->getAbsolutePosition());
+	if(positionParent)
+		return(positionParent->getAbsolutePosition());
 	else return(Point(0,0));
 }
 		
 inline const Rect UI_Object::getAbsoluteRect() const {
-	if(parent)
-		return(Rect(relativeRect.GetTopLeft() + parent->getAbsolutePosition(), getSize()));
+	if(positionParent)
+		return(Rect(relativeRect.GetTopLeft() + positionParent->getAbsolutePosition(), getSize()));
 	else 
 		return(relativeRect);
 }
 		
 inline const signed int UI_Object::getAbsoluteUpperBound() const {
-	if(parent)
-		return(relativeRect.GetTop() + parent->getAbsoluteUpperBound());
+	if(positionParent)
+		return(relativeRect.GetTop() + positionParent->getAbsoluteUpperBound());
 	else
 		return(relativeRect.GetTop());
 }
 				
 inline const signed int UI_Object::getAbsoluteLowerBound() const {
-	if(parent)
-		return(relativeRect.GetBottom() + parent->getAbsoluteUpperBound());			
+	if(positionParent)
+		return(relativeRect.GetBottom() + positionParent->getAbsoluteUpperBound());			
 	else
 		return(relativeRect.GetBottom());
 }
 	
 inline const signed int UI_Object::getAbsoluteLeftBound() const {
-	if(parent)
-		return(relativeRect.GetLeft() + parent->getAbsoluteLeftBound());			
+	if(positionParent)
+		return(relativeRect.GetLeft() + positionParent->getAbsoluteLeftBound());			
 	else
 		return(relativeRect.GetLeft());
 }
 	
 inline const signed int UI_Object::getAbsoluteRightBound() const {
-	if(parent)
-		return(relativeRect.GetRight() + parent->getAbsoluteLeftBound());			
+	if(positionParent)
+		return(relativeRect.GetRight() + positionParent->getAbsoluteLeftBound());			
 	else
 		return(relativeRect.GetRight());
 }
@@ -360,16 +382,24 @@ inline UI_Object* UI_Object::getParent() const {
 	return(parent);
 }
 
+inline UI_Object* UI_Object::getPositionParent() const {
+	return(positionParent);
+}
+
 inline UI_Object* UI_Object::getChildren() const {
 	return(children);
 }
 
-inline void UI_Object::updateToolTip(const eString tool_tip) {
-	toolTipString = tool_tip;
+inline void UI_Object::updateToolTip(const eString tool_tip_string) {
+	toolTipEString = tool_tip_string;
 }
 
-inline const eString UI_Object::getToolTipString() const {
-	return(toolTipString);
+inline void UI_Object::updateToolTip(const std::string& tool_tip_string) {
+	toolTipString = tool_tip_string;
+}
+
+inline const bool UI_Object::hasToolTip() const {
+	return((toolTipString!="")||(toolTipEString!=NULL_STRING));
 }
 
 inline const unsigned int UI_Object::getTargetWidth() const {
@@ -401,7 +431,15 @@ inline void UI_Object::setPosition(const unsigned int x, const unsigned int y) {
 }
 
 inline const bool UI_Object::isTopItem() const {
-	return(parent==NULL);
+	return(positionParent==NULL);
+}
+
+inline const eString UI_Object::getToolTipEString() const {
+	return(toolTipEString);
+}
+
+inline const std::string& UI_Object::getToolTipString() const {
+	return(toolTipString);
 }
 
 #endif

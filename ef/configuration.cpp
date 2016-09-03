@@ -16,6 +16,7 @@ EF_Configuration::EF_Configuration():
 	backgroundBitmap(false),
 	dnaSpiral(true),
 	toolTips(true),
+	showDebug(false),
 	configurationFile("settings/main.cfg")
 { }
 
@@ -36,6 +37,7 @@ void EF_Configuration::initDefaults()
 	setBackgroundBitmap(false);
 	setDnaSpiral(true);
 	setToolTips(true);
+	setShowDebug(false);
 	configurationFile = "settings/main.cfg";
 }
 
@@ -76,6 +78,8 @@ void EF_Configuration::saveToFile() const
 	pFile << "    \"Fullscreen\" = \"" << (int)isFullScreen() << "\"" << std::endl;
 	pFile << "    \"Software mouse\" = \"" << (int)isSoftwareMouse() << "\"" << std::endl;
 	pFile << "    \"Tooltips\" = \"" << (int)isToolTips() << "\"" << std::endl;
+	pFile << "# show which part of the program needs how much CPU resources" << std::endl;
+	pFile << "    \"Show debug\" = \"" << (int)isShowDebug() << "\"" << std::endl;
 	pFile << "@END" << std::endl;
 }
 
@@ -133,7 +137,14 @@ void EF_Configuration::loadConfigurationFile()
 				i->second.pop_front();
 			   	setSoftwareMouse(atoi(i->second.front().c_str()));
 			}
-		
+			if((i=block.find("Tooltips"))!=block.end()){
+				i->second.pop_front();
+				setToolTips(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Show debug"))!=block.end()){
+				i->second.pop_front();
+				setShowDebug(atoi(i->second.front().c_str()));
+			}
 			if((i=block.find("Background bitmap"))!=block.end()){
 				i->second.pop_front();
 			   	setBackgroundBitmap(atoi(i->second.front().c_str()));
@@ -216,6 +227,14 @@ const bool EF_Configuration::setToolTips(const bool tool_tips)
 	if(toolTips == tool_tips)
 		return(false);
 	toolTips = tool_tips;
+	return(true);
+}
+
+const bool EF_Configuration::setShowDebug(const bool show_debug)
+{
+	if(showDebug == show_debug)
+		return(false);
+	showDebug = show_debug;
 	return(true);
 }
 

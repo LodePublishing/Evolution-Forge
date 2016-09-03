@@ -12,7 +12,7 @@
 # location forces... 2 = LOCATION MAIN
 @LOCATION "2"
 	"Hatchery" = "1"
-	"Drone" = "0"
-	"Overlord" = "0"
-	"Larva" = "0"
+	"Drone" = "4"
+	"Overlord" = "1"
+	"Larva" = "3"
 @END

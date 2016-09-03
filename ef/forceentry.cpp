@@ -6,10 +6,6 @@
 
 ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std::string& entry_unit):
 	UI_Button(entry_parent, entry_rect, Size(0,0), FORCE_ENTRY_BUTTON, false, PRESS_BUTTON_MODE, entry_unit, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH),
-	timeEntryBox(new UI_NumberField(this, Rect(entry_rect.GetWidth() - 210, -14, 0, 0), Size(10,10), DO_NOT_ADJUST, 0, coreConfiguration.getMaxTime(), NULL_STRING, NULL_STRING, 6, 0, TIME_NUMBER_TYPE)),
-//	makeLocationGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 60, -11), Size(10,10)), entry_max_rect, GOAL_LOCATION_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
-	makeTimeGoal(new UI_Button(this, Rect(Point(0, 0), Size(16,10)), Size(0,0), GOAL_TIME_BUTTON, true, STATIC_BUTTON_MODE, NULL_STRING, ARRANGE_RIGHT)),
-
 	oldGoalCount(0),	
 	startForce(0),
 	targetForce(0),
@@ -18,20 +14,11 @@ ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std
 	highlight(0),
 	unit(0),
 	type(REMAINING_UNIT_TYPE),
-	goal(NULL),
-	showLocMenu(false)
-{
-//	makeLocationGoal->Hide();
-	makeTimeGoal->Hide();
-	makeTimeGoal->updateToolTip(FORCEENTRY_TIME_TOOLTIP_STRING);
-	timeEntryBox->Hide();
-}	
+	goal(NULL)
+{}	
 
 ForceEntry::ForceEntry(const ForceEntry& object) :
 	UI_Button((UI_Button)object),
-	timeEntryBox(new UI_NumberField(*object.timeEntryBox)),
-//	makeLocationGoal(new UI_Button(*object.makeLocationGoal)),
-	makeTimeGoal(new UI_Button(*object.makeTimeGoal)),
 	oldGoalCount(object.oldGoalCount),	
 	startForce(object.startForce),
 	targetForce(object.targetForce),
@@ -40,17 +27,13 @@ ForceEntry::ForceEntry(const ForceEntry& object) :
 	highlight(object.highlight),
 	unit(object.unit),
 	type(object.type),
-	goal(object.goal),
-	showLocMenu(object.showLocMenu)
+	goal(object.goal)
 { }
 
 
 ForceEntry& ForceEntry::operator=(const ForceEntry& object)
 {
 	((UI_Button)(*this)) = ((UI_Button)object);
-	timeEntryBox = new UI_NumberField(*object.timeEntryBox);
-//	makeLocationGoal = new UI_Button(*object.makeLocationGoal);
-	makeTimeGoal = new UI_Button(*object.makeTimeGoal);
 	oldGoalCount = object.oldGoalCount;
 	startForce = object.startForce;
 	targetForce = object.targetForce;
@@ -60,69 +43,38 @@ ForceEntry& ForceEntry::operator=(const ForceEntry& object)
 	unit = object.unit;
 	type = object.type;
 	goal = object.goal;
-
-	showLocMenu = object.showLocMenu;
-
 	return(*this);
 }
 																																					   
 ForceEntry::~ForceEntry()
 {
-	delete makeTimeGoal;
-//	delete makeLocationGoal;
-	delete timeEntryBox;
+	if(makeTimeGoalButton)
+	{
+		if(UI_Button::getCurrentButton() == makeTimeGoalButton)
+			UI_Button::resetButton();
+		delete makeTimeGoalButton;
+		makeTimeGoalButton = NULL;
+	}
+	if(timeEntryBox)
+	{
+		delete timeEntryBox;
+		timeEntryBox = NULL;
+	}
 }
 
 void ForceEntry::reloadOriginalSize()
 {
-	timeEntryBox->setOriginalPosition(Point(getWidth() - 210, -14));
 	UI_Object::reloadOriginalSize();
 }
 
 UI_Object* ForceEntry::checkToolTip()
 {
-	UI_Object* t = makeTimeGoal->checkToolTip();
-	if(t == NULL)
-	{
-	//	t = makeLocationGoal->checkToolTip();
-//		if(t == NULL)
-//		{
-			t = timeEntryBox->checkToolTip();
-			if(t == NULL)
-				return(UI_Button::checkToolTip());
-			else return(t);
-//		}
-//		else return(t);
-	}
-	else return(t);
+	return(UI_Button::checkToolTip());
 }
 
 UI_Object* ForceEntry::checkHighlight()
 {
-	UI_Object* t = UI_Object::checkHighlight();
-	if(t == NULL)
-	{
-		t = makeTimeGoal->checkHighlight();
-		if(t == NULL)
-		{
-//			t = makeLocationGoal->checkHighlight();
-//			if(t == NULL)
-//			{
-				t = timeEntryBox->checkHighlight();
-				if(t == NULL)
-					return(UI_Button::checkHighlight());
-				else return(t);
-//			}
-//			else return(t);
-		}
-		else return(t);
-	} else return(t);
-}
-
-const bool ForceEntry::isLocationGoalClicked() const
-{
-	return(showLocMenu);
-//	makeLocationGoal->isLeftClicked());
+	return(UI_Button::checkHighlight());
 }
 
 void ForceEntry::process()
@@ -138,119 +90,109 @@ void ForceEntry::process()
 	if(targetForce!=currentForce)
 		setNeedRedrawNotMoved();
 	Size::mv(currentForce, startForce, targetForce);
-	showLocMenu = false;
-	if(makeTimeGoal->isLeftClicked())
-	{
-		timeEntryBox->Show(!timeEntryBox->isShown());
-//		makeLocationGoal->forceUnpress();
-//		showLocMenu=false;
-	} else
-/*	if(makeLocationGoal->isLeftClicked())
-	{
-		timeEntryBox->Hide();
-		makeTimeGoal->forceUnpress();
-		showLocMenu=true;
-	} else*/
-	if(!goal)
-	{
-//		makeLocationGoal->Hide();
-		makeTimeGoal->Hide();
-//		buttonPlacementArea.SetWidth(((UI_Window*)getParent())->getClientRectWidth()); TODO
-	}
-	else
-	{
-		if(goal->getTime() != timeEntryBox->getNumber())
-		{
-			goal->setTime(timeEntryBox->getNumber());
-			changed = GOAL_TIME_HAS_CHANGED;
-			forceEntryUnit = getUnit();
-			ForceEntry::forceEntryUnit = getUnit();
-			forceEntryLocation = goal->getLocation();
-			forceEntryTime = goal->getTime();
-			forceEntryIsGoal = true;
-		}
-		
-		Rect r;
-		r.SetTopLeft(getAbsolutePosition());
-//		r.SetHeight(buttonPlacementArea.GetHeight()); TODO
-		r.SetWidth(((UI_Window*)getParent())->getClientRectWidth());
-		if(r.Inside(mouse))
-		{
-			if(timeEntryBox->isShown())
-				r.SetWidth(((UI_Window*)getParent())->getClientRectWidth()-100);
-			else
-				r.SetWidth(((UI_Window*)getParent())->getClientRectWidth()-30);
-//			makeLocationGoal->Show();
-			makeTimeGoal->Show();
-			if(r.GetWidth() < getWidth())
-				setNeedRedrawMoved();
-//			setWidth(r.GetWidth());
-		}
-		else
-		if(!((UI_Window*)getParent())->getAbsoluteRect().Inside(mouse))
-		{
-//			makeLocationGoal->forceUnpress();
-			makeTimeGoal->forceUnpress();
-//			makeLocationGoal->Hide();
-			makeTimeGoal->Hide();
-			timeEntryBox->Hide();
-//			buttonPlacementArea.SetWidth(r.GetWidth());
-//			setWidth(r.GetWidth());
-		} else //if(!makeTimeGoal->isCurrentlyPressed())
-		{
-//			makeLocationGoal->forceUnpress();
-			makeTimeGoal->forceUnpress();
-//			makeLocationGoal->Hide();
-			makeTimeGoal->Hide();
-			timeEntryBox->Hide();
-//			buttonPlacementArea.SetWidth(r.GetWidth());
-//			setWidth(r.GetWidth());
-		} 
-	}
+	
 	UI_Button::process();
-	if(isLeftClicked())
+
+	if(goal!=NULL)
 	{
-		changed = LEFT_CLICKED;
-		ForceEntry::forceEntryUnit = getUnit();
-		if(goal)
+		// wichtig: Speichern des forceentries damit nicht KOnkurrenz zwischen den entries betsteht!
+		Rect r = getAbsoluteRect();
+		r.SetWidth(16);
+		r.SetLeft(getParent()->getWidth()-10);
+// situation 1: mouse just entered, both timeentrybox and maketimegoal is hidden => Show makeTimeGoalButton
+		if((ForceEntry::currentForceEntry == NULL)&&(r.Inside(mouse))&&(!ForceEntry::makeTimeGoalButton)&&(!ForceEntry::timeEntryBox))
 		{
-			forceEntryLocation = goal->getLocation();
-			forceEntryTime = goal->getTime();
-			forceEntryIsGoal = true;
-		} else
+			setOriginalSize(Size(getParent()->getWidth()-30, getHeight()));
+			ForceEntry::makeTimeGoalButton = new UI_Button(getParent(), Rect(Point(getRelativePosition() + Size(getParent()->getWidth()-26, 0)), Size(16,10)), Size(0,0), GOAL_TIME_BUTTON, true, STATIC_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST);
+			ForceEntry::makeTimeGoalButton->updateToolTip(FORCEENTRY_TIME_TOOLTIP_STRING);
+			ForceEntry::currentForceEntry = this;
+		} else 
+		if((ForceEntry::currentForceEntry == this)&&(!r.Inside(mouse))&&(ForceEntry::makeTimeGoalButton)&&(!ForceEntry::timeEntryBox))
 		{
-			forceEntryLocation = 0;
-			forceEntryTime = 0;
-			forceEntryIsGoal = false;
+// situation 2: mouse is outside and timeEntryBox is not shown => Remove makeTimeGoalButton
+			// EVTL PROBLEM: Ich loesche es hier, es ist aber Kind vom Parent das gerade noch proces durchlaeuft... evtl an parent benachrichtigen, dass button geloescht werden soll... :o
+			if(UI_Button::getCurrentButton() == ForceEntry::makeTimeGoalButton)
+				UI_Button::resetButton();
+			delete ForceEntry::makeTimeGoalButton;
+			ForceEntry::makeTimeGoalButton = NULL;
+		}
+// situation 3: nothing is pressed, mouse is outside => return to normal width
+		if((!r.Inside(mouse))&&(!ForceEntry::makeTimeGoalButton)&&(!ForceEntry::timeEntryBox))
+		{
+			setOriginalSize(Size(getParent()->getWidth()-10, getHeight()));
+			ForceEntry::currentForceEntry = NULL;
+		}
+	}
+
+	if(ForceEntry::currentForceEntry == this)
+	{
+		Rect r = getAbsoluteRect();
+		r.SetWidth(getParent()->getWidth());
+		if(!r.Inside(mouse))
+		{
+			if(UI_Button::getCurrentButton() == ForceEntry::makeTimeGoalButton)
+				UI_Button::resetButton();
+			delete ForceEntry::makeTimeGoalButton;
+			ForceEntry::makeTimeGoalButton = NULL;
+			delete ForceEntry::timeEntryBox;	
+			ForceEntry::timeEntryBox = NULL;
+			
 		}
 	
-	}
-	if(isRightClicked())
-	{
-		changed = RIGHT_CLICKED;
-		forceEntryUnit = getUnit();
-		ForceEntry::forceEntryUnit = getUnit();
-		if(goal)
+		if((ForceEntry::makeTimeGoalButton)&&(ForceEntry::makeTimeGoalButton->isLeftClicked()))
 		{
-			forceEntryLocation = goal->getLocation();
-			forceEntryTime = goal->getTime();
-			forceEntryIsGoal = true;
-		} else
+			if(ForceEntry::timeEntryBox)
+			{
+				delete ForceEntry::timeEntryBox;
+				ForceEntry::timeEntryBox = NULL;
+				setOriginalSize(Size(getParent()->getWidth()-30, getHeight()));
+			}
+			else
+			{
+				ForceEntry::timeEntryBox = new UI_NumberField(getParent(), Rect(Point(getRelativePosition() + Size(getParent()->getWidth()-UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)-90, 0)), Size(0, 0)), Size(0,0), DO_NOT_ADJUST, 0, coreConfiguration.getMaxTime(), NULL_STRING, NULL_STRING, 6, getTime(), TIME_NUMBER_TYPE);
+				setOriginalSize(Size(getParent()->getWidth()-110, getHeight()));
+			}
+		}
+		if((ForceEntry::timeEntryBox)&&(ForceEntry::timeEntryBox->hasNumberChanged()))
 		{
-			forceEntryLocation = 0;
-			forceEntryTime = 0;
-			forceEntryIsGoal = false;
-		}	
+			if(getTime() && (!ForceEntry::timeEntryBox->getNumber()))
+			{
+				ForceEntry::forceEntryTimeRemoved = true;
+				ForceEntry::forceEntryUnit = getUnit();
+				ForceEntry::forceEntryLocation = goal->getLocation();
+				ForceEntry::forceEntryTime = goal->getTime();
+				ForceEntry::forceEntryCount = goal->getCount();
+			}
+			else
+			{
+				ForceEntry::forceEntryTimeRemoved = false;
+				setTime(ForceEntry::timeEntryBox->getNumber());
+			}
+		}
 	}
-	if(timeEntryBox->checkForNeedRedraw())
-		setNeedRedrawMoved();
+	
 
+	bool left_clicked = isLeftClicked();
+	bool right_clicked = isRightClicked();
+	if(left_clicked || right_clicked)
+	{
+		if(left_clicked)
+			changed = LEFT_CLICKED;
+		else changed = RIGHT_CLICKED;
+		ForceEntry::forceEntryUnit = getUnit();
+		ForceEntry::forceEntryIsGoal = (goal!=NULL);
+		ForceEntry::forceEntryLocation = goal->getLocation();
+		ForceEntry::forceEntryTime = goal->getTime();
+	}
 	
 	if((goal)&&(oldGoalCount != goal->getCount()))
 	{
 		resetGradient();
 		oldGoalCount = goal->getCount();
 	}
+
+
+	
 
 }
 	
@@ -339,9 +281,6 @@ void ForceEntry::draw(DC* dc) const
 void ForceEntry::assignGoal(GOAL* assign_goal)
 {
 	goal = assign_goal;
-	if(goal)
-		timeEntryBox->updateNumber(goal->getTime());
-	
 }
 
 void ForceEntry::HideIt()
@@ -358,9 +297,14 @@ void ForceEntry::setTotalNumber(const unsigned int total_number)
 	}
 }
 
-eForceEntryMessage ForceEntry::changed = NO_MESSAGE;
+eForceEntryMessage ForceEntry::changed = LEFT_CLICKED;
 bool ForceEntry::forceEntryIsGoal = false;
+bool ForceEntry::forceEntryTimeRemoved = false;
 unsigned int ForceEntry::forceEntryUnit = 0;
 unsigned int ForceEntry::forceEntryLocation = 0;
 unsigned int ForceEntry::forceEntryTime = 0;
+unsigned int ForceEntry::forceEntryCount = 0;
 
+UI_Button* ForceEntry::makeTimeGoalButton = NULL;
+UI_NumberField* ForceEntry::timeEntryBox = NULL;
+ForceEntry* ForceEntry::currentForceEntry = NULL;

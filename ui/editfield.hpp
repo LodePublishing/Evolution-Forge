@@ -39,8 +39,8 @@ class UI_EditField : public UI_Object
 		void moveRight();
 
 	private:
-		int position;
-		int ani;
+		unsigned int position;
+		unsigned int ani;
 		bool pressedEnter;
 		bool pressedEscape;
 

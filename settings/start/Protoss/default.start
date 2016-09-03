@@ -8,7 +8,6 @@
 	"Minerals" = "50"
 	"Gas" = "0"
 	"Time" = "0"
-	"Max Locations" = "4"
 @END
 
 # location forces... 2 = LOCATION MAIN

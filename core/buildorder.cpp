@@ -50,32 +50,42 @@ const unsigned int BUILDORDER::calculateSecondaryFitness() const
 	//TODO: evtl gas und minerals (wie urspruenglich eigentlich) in Verhaeltnis setyen wieviel es jeweils Geysire/Mineralien gibt...	
 	unsigned int penalty = 0;
 	for(unsigned int i=GAS_SCV+1; i--;)
+		if((i!=SCV)&&(i!=GAS_SCV))
 	{
 		unsigned int total = getGoal()->getAllGoal(i);
-		if((total>0)&&((*pStartCondition)->getLocationTotal(GLOBAL, i) > total))
-			total = (*pStartCondition)->getLocationTotal(GLOBAL, i);
-		if(getLocationTotal(GLOBAL, i) > total)
-			penalty += (getLocationTotal(GLOBAL,i) - total) * (stats[getGoal()->getRace()][i].gas+stats[getGoal()->getRace()][i].minerals);
+		if(total>0)
+		{
+			if((*(pStart->getStartCondition()))->getLocationTotal(GLOBAL, i) > total)
+				total = (*(pStart->getStartCondition()))->getLocationTotal(GLOBAL, i);
+			if(getLocationTotal(GLOBAL, i) > total)
+				penalty += (getLocationTotal(GLOBAL,i) - total) * (stats[getGoal()->getRace()][i].gas+stats[getGoal()->getRace()][i].minerals);
+		}
 	}
+
+#if _SCC_DEBUG	
 	if(getHarvestedMinerals() + getHarvestedGas() < penalty)
 	{
 		std::ostringstream os; os.str("");
 		for(unsigned int i=GAS_SCV+1; i--;)
 		{
 			unsigned int total = getGoal()->getAllGoal(i);
-			if((*pStartCondition)->getLocationTotal(GLOBAL, i) > total)
-				total = (*pStartCondition)->getLocationTotal(GLOBAL, i);					
-			if(total < getLocationTotal(GLOBAL, i))
+			if(total > 0)
 			{
-				os.str("");
-				os << "Unit: " << i << ", " << (getLocationTotal(GLOBAL,i) - total) * (stats[getGoal()->getRace()][i].gas+stats[getGoal()->getRace()][i].minerals);
-				toLog(os.str());
+				if((*(pStart->getStartCondition()))->getLocationTotal(GLOBAL, i) > total)
+					total = (*(pStart->getStartCondition()))->getLocationTotal(GLOBAL, i);					
+				if(total < getLocationTotal(GLOBAL, i))
+				{
+					os.str("");
+					os << "Unit: " << i << ", " << (getLocationTotal(GLOBAL,i) - total) * (stats[getGoal()->getRace()][i].gas+stats[getGoal()->getRace()][i].minerals);
+					toLog(os.str());
+				}
 			}
 		}
 		os.str("");
 		os << "Penalty/Ressources: " << penalty << " / " << getHarvestedMinerals() + getHarvestedGas() << " workers: " << getLocationTotal(GLOBAL, 1);
 		toLog(os.str());
 	}
+#endif
 	return(getHarvestedMinerals() + getHarvestedGas() - penalty);
 }
 
@@ -100,30 +110,8 @@ const bool BUILDORDER::calculateStep()
 		settFitness(gettFitness()-getLength());
 		setsFitness(calculateSecondaryFitness());
 // ----- END BUILDORDER SPECIFIC ------
-
-	
 		return(true);
 	}
-/*		if(getGoal()->getRace()==ZERG)
-		{
-//		  ((*pStats)[build_unit].facility[0]==LARVA)&&
-		// Larva wird benoetigt zum Bau? Fein, dann bauen wir eine neue Larva falls nicht schon alle hatcheries etc. belegt sidn
-				// Gesamtzahl der Larven < 3 * HATCHERY?
-		   if(((getLocationTotal(1, HATCHERY)+
-		     getLocationTotal(1, LAIR)+
-			 getLocationTotal(1, HIVE)) *3 > 
-			 (larvaInProduction[1]+getLocationTotal(1, LARVA))))
-			 {
-// max 1 larva pro Gebaeude produzieren
- 		   if(((getLocationTotal(1, HATCHERY)+
-		     getLocationTotal(1, LAIR)+
-			 getLocationTotal(1, HIVE) > larvaInProduction[1]))) // => zuwenig Larven da!
-			 {
-				if(buildIt(LARVA)) // TODO!
-					addLarvaToQueue(1);
-			}
-			}
-		}*/
 	
 	bool ok = true;
 	bool first = true;
@@ -238,27 +226,13 @@ const bool BUILDORDER::calculateStep()
 				adjustGasHarvest(build.getLocation());
 			} else 
 // if the larva was built reduce the number of larvas in the queue
-			if((build.getType()==LARVA)&&(getRace()==ZERG)) {
+			if((getRace()==ZERG)&&(build.getType()==LARVA))
+			{
 				removeLarvaFromQueue(build.getLocation());
-
-                                if(// Gesamtzahl der Larven < 3 * HATCHERY?
-                   ((getLocationTotal(build.getLocation(), HATCHERY)+
-                         getLocationTotal(build.getLocation(), LAIR)+
-                         getLocationTotal(build.getLocation(), HIVE)) *3 >
-                         (larvaInProduction[build.getLocation()]+getLocationTotal(build.getLocation(), LARVA)))  &&
-// max 1 larva pro Gebaeude produzieren
-                   ((getLocationTotal(build.getLocation(), HATCHERY)+
-                         getLocationTotal(build.getLocation(), LAIR)+
-                         getLocationTotal(build.getLocation(), HIVE) >
-                          larvaInProduction[build.getLocation()]))) // => zuwenig Larven da!
-                        {
-                                addLarvaToQueue(build.getLocation());
-                                if(!buildIt(LARVA));
-//                                      removeLarvaFromQueue(build.getLocation());
-                        }
-
-				
+				if(checkForLarva(build.getLocation()))
+					buildIt(LARVA);
 			}
+
 // ------ END SPECIAL RULES ------
 
 			
@@ -541,26 +515,6 @@ const bool BUILDORDER::buildIt(const unsigned int build_unit)
 //	  Phagen ueber Phagen...
 	if(ok)
 	{ 
- 		if((getGoal()->getRace()==ZERG) &&
-//		  ((*pStats)[build_unit].facility[0]==LARVA)&&
-			(build_unit!=LARVA) &&
-		// Larva wird benoetigt zum Bau? Fein, dann bauen wir eine neue Larva falls nicht schon alle hatcheries etc. belegt sidn
-				// Gesamtzahl der Larven < 3 * HATCHERY?
-		   ((getLocationTotal(current_location_window, HATCHERY)+
-			 getLocationTotal(current_location_window, LAIR)+
-			 getLocationTotal(current_location_window, HIVE)) *3 > 
-			 (larvaInProduction[current_location_window]+getLocationTotal(current_location_window, LARVA)))  &&
-// max 1 larva pro Gebaeude produzieren
- 		   ((getLocationTotal(current_location_window, HATCHERY)+
-			 getLocationTotal(current_location_window, LAIR)+
-			 getLocationTotal(current_location_window, HIVE) > 
-			  larvaInProduction[current_location_window]))) // => zuwenig Larven da!
-			{
-				addLarvaToQueue(current_location_window);
-				if(!buildIt(LARVA));
-//					removeLarvaFromQueue(current_location_window);
-			}
-																													  
 		Building build;
 		build.setOnTheRun(false);
 		build.setFacility(stat->facility[picked_facility]);
@@ -580,7 +534,23 @@ const bool BUILDORDER::buildIt(const unsigned int build_unit)
 //		setNeedSupply(getNeedSupply()-stat->needSupply); //? Beschreibung!
 		adjustAvailibility(current_location_window, picked_facility, stat);
 		buildingQueue.push(build);
+	
+
+// ---- SPECIAL RULES -----		
+		if(getGoal()->getRace()==ZERG)
+		{
+			if(build_unit==LARVA)
+				addLarvaToQueue(current_location_window);
+			else
+			if(((*pStats)[build_unit].facility[0]==LARVA)&&(checkForLarva(current_location_window)))
+				buildIt(LARVA);
+		}
+// ----- END SPECIAL RULES -----
+	
 	} //end if(ok)
+	
+	
+	
 	return(ok);
 }
 // Reset all ongoing data (between two generations)

@@ -1,0 +1,487 @@
+@HELP_STRINGS
+	@ENGLISH
+# INDEX_CHAPTER = 0
+		@0	
+			$Help Index$###
+			~32~@Chapter 1: Introduction@100@##
+			~32~@Chapter 2: Detailed description@200@##
+			~32~@Chapter 3: How to use the results@300@##
+			~32~@Chapter 4: Configuration@400@##
+			~32~@Chapter 4: Program Mechanics@500@##
+			~32~@Chapter 5: Interactive Mode@600@##
+			~32~@Chapter 6: The core of the program@700@##
+			~32~@Chapter 7: Communication@800@##
+			~32~@Chapter 8: Development of EF@900@##
+			~32~@Chapter 9: Philosophy and EF@1000@#
+		@END
+		
+# INTRODUCTION_MAIN_CHAPTER = 100
+		@100
+			@Chapter 1: Introduction@0@###
+			~32~@1.1: What does this program?@110@##
+			~32~@1.2: Quickstart@120@##
+			~32~@1.3: Overview of the elements@130@##
+			~32~@1.4: Is it useful?@140@##
+			~32~@1.5: Limits of the Program@150@##
+			~32~@1.6: Problems of the Program@160@##
+		@END
+
+# INTRODUCTION_CHAPTER = 110
+
+		@110
+			@1.1: What does this program?@100@##
+			The program simulates an abstract $StarCraft:Broodwar$ environment and calculates the time a certain build order needs.#By comparing different build orders, randomly changing them and taking the best build order for the next generation, the build order is improved step by step.#$StarCraft$ build orders fit perfectly for this algorithm called $HillClimbing$.#
+			You can either type in the build order manually and let the program improve it or you can just type in the goals you want and the program will calculate an optimal build order.#
+		@END
+
+#	INTRODUCTION_QUICKSTART_CHAPTER = 120
+		@120
+			@1.2: Quickstart@100@##
+			It's easy:#
+			- In the @score window@210@ click on $'Add player'$#
+			- Choose a race by clicking on the $'race'$ button#
+			- In the @unit list window@230@ click on ~26~, choose a category and pick your goals#
+			- Finally click on $'(paused)'$ button in the @score window@210@ and sit back to watch the progress#
+			- You will see items moving around in window named @build order@260@. The program now will optimize the build order by adding, removing and rearranging the items#
+			- In the @score window@210@ you will see the current status of the calculation. $'searching'$ means that it still looks for a valid solution (i.e. a solution that fulfills your goals), $'optimizing'$ means that it will try to reduce the time the build order needs#
+			- The @overview@240@ window shows how supply, minerals and gas develop over the time span of the build order#
+			- The @graphical build order@250@ window shows graphically where and when units and buildings are constructed#
+			- After a while you will notice that there are no more changes on the screen. Probably the fastest build order is found. 
+			- Now you might want to save the build order by clicking on ~22~ in the @build order window@260@. You can also save your goal list by doing the same with the @unit list window@230@#
+			- Saved build orders and goal lists can be loaded again by clicking on ~21~#
+		@END
+
+# INTRODUCTION_OVERVIEW_CHAPTER = 130
+		@130
+			@1.3: Overview of the elements@100@##
+			TEXT  ~2~   
+		@END
+
+# INTRODUCTION_USE_CHAPTER = 140
+		@140
+			@1.4: Is it useful?@100@##
+			It's fun (I heard) and you maybe save some time trying the strategy inside the game. I doubt that people with a lot of skill profit from it but maybe they will use the results of this program as an inspiration for trying new strategies that make the game more exciting :)#
+			A lot of good build orders were already 'discovered' in the years since the release of StarCraft but I look at Evolution Forge more as a steppingstone to apply the same engine on other games. Certainly WarCraft and Dawn of War, maybe StarCraft2 some day later?
+		@END
+
+# INTRODUCTION_LIMITS_CHAPTER = 150
+		@150
+			@1.5: Where are the limits?@100@##
+			- It only calculates a general build order. Depending on the map, the latency, your mousespeed and many other small factors there might be a better build order.#
+			- Goals consisting of many units will result in exponential growth of time needed for the calculation.#
+			- The program is based on one-second steps. This might lead to some inaccurate calculation.#
+			- In most cases the build orders cannot be applied directly 1:1 in the game but you have to exercise them and adapt them to your needs.
+		@END
+
+# INTRODUCTION_PROBLEMS_CHAPTER = 160
+		@160
+			@1.6: Is it cheating?@100@##
+			Well... in a way... yes.#
+			If you use the program correctly you might get an advantage over your enemy: You learn to get a better starting in the game so that you can concentrate on the main thing, strategies and tactics!#
+			While you can get the same information by watching replays, reading strategy articles or just playing the game it is much more fun to interactivly trying out combinations to compare them.
+		@END
+
+
+# DESCRIPTION_MAIN_CHAPTER = 200
+		@200
+			@Chapter 2. Detailed Description@0@###
+			~32~@2.1: The score window@210@##
+			~32~@2.2: The unit list window@220@##
+			~32~@2.3: The build order diagram window@230@##
+			~32~@2.4: The build order graph window@240@##
+			~32~@2.5: The build order window@250@#
+		@END
+
+# DESCRIPTION_SCORE_WINDOW_CHAPTER = 210
+		@210
+			@2.1: The score window@200@##
+			~34~   
+			(1) $Choose a map$#   
+			A map contains a unit list for each player (normally workers and a main building), start conditions (minerals, gas, ...) and a list of locations and their distances.#   
+			(2) $Add a player$#   
+			Add a player to the list. All players in the list will play on the map you have chosen.##
+			~33~   
+			(3) $Choose a race$#   
+			Choose which race you want to use for calculation. Choosing a new race will reset the calculation.#   
+			(4) $Remove the player$#   
+			Removes the player from the calculation, any unsaved data is lost.#   
+			(5) $Continue/Pause calculation$#   
+			Here you can start and stop the calculation. The button itself will change the text during the calculation from $searching$ (that means a valid solution was not found yet) to $optimizing$ (that means that the program has found a valid solution and tries to optimize the speed by rearranging the items).#   
+			(6) $Time$#   
+			Here is the time the current solution needs. Please remember that the time is the same as a game with $speed 5$. For example a worker needs 20 seconds to build.#   
+			(7) $Percent of goals fulfilled / Percent of optimal solution$#   
+			If the calculation is still in $searching$ mode you will see here how much percent of the goals are fulfilled. In $optimizing$ mode the percentage gives a comparison of the time with the theoretical best time. Note that it is hardly possible to reach 100% as the theoretical best time is measured using infinite ressources and workers.#
+		@END
+	
+# DESCRIPTION_UNIT_LIST_WINDOW_CHAPTER = 220
+		@220
+			@2.2: The unit list window@200@##
+			~35~
+			(1) $Add a goal$#
+			Here you can add units/buildings/researches to your goal list below. These goals will be used to calculate the build order. If you like a different structure (based on buildings vs based on unit types) of the unit menu then change the 'facility mode' in the settings window.#
+			(2) $Load a goal list$#
+			With this menu you can clear the goal list or load goal lists you have saved earlier. The current results of the calculation will be discarded.#
+			(3) $Save the goal list$#
+			Save the current goal list to your harddisk. If you are interested you can find the files in '$settings/goals/$' in your Evolution Forge directory.#
+			(4) $Goal list$#
+			This is the goal list. At the top you can see the name (you can change that by loading/saving the goal list), below you can see all units that will be used for the calculation. You can remove an unit by clicking right and add an unit by clicking left. If that does not work some entries will highlight. That means that the unit you have clicked on are needed by other units (e.g. factory for starport).#
+			(5) $Unit count$#
+			Here you can see three numbers. The last one is the number of desired units (1 in this case), the second number is the total number of units after the build order was executed and the first number shows the difference between total and desired number.#
+			(6) $Not fulfillfed goal$#
+			When the program is in '$searching mode$' some goals are displayed in red. That means that the program did not found a valid solution that fulfills all goals yet.#
+			(7) $Time$#
+			If you move your mouse to the right side of one goal entry and click on the '$time$' button this setting field opens. You can set here a time when this goal shall be fulfilled at the latest. The difference of the '$unit count$' compared to an entry without a time restriction is that the total number is the number of units at that time and not at the end. If you want to have both time restricted goals and normal goals just add the same unit using the unit menu.#
+			(8) $non-goals$#
+			In this list are all auxiliary units that are not necessary for fulfilling the goals (gathering gas, providing supply, morphing units, addons etc.). If you left-click on one of the non-goal entries it will move up to the goal list.#
+		@END
+	
+# DESCRIPTION_BODIAGRAM_WINDOW_CHAPTER = 230
+		@230
+			@2.3: The build order diagram window@200@##
+			~36~
+			(1) $Minerals and Gas$#
+			The blue and green graph represents the amount of minerals and gas that you have at that time. While the program tries to maximize the amount of gathered ressources a fast build order should never save large amounts of minerals and gas.#
+			(2) $Supply$#
+			Several bars represent the supply that is availible at that time. The bigger the bar the more supply is availible. A good build order should try not to waste supply and always build additional supply just before it is needed.#
+			(3) $Data$#
+			If you move your mouse inside the window you can see a bar and all the values of minerals, gas and supply at that time.
+		@END
+
+# DESCRIPTION_BOGRAPH_WINDOW_CHAPTER = 240
+		@240
+			@2.4: The build order graph window@200@##
+			~37~
+			In this window all orders are presented graphically. On the top you see a rough time raster, below there is a list of used facilities. When building for example a factory the SCV 'facility' is used, when building a marine the barracks facility is used. When there are several build orders and several availible facilities the build orders are often executed in parallel because that speeds up the build order.#			
+		@END
+
+# DESCRIPTION_BUILD_ORDER_WINDOW_CHAPTER = 250
+		@250
+			@2.5: The build order window@200@##
+			~38~
+
+			TODO
+			You can edit the build order, too. To do that you have to click on the $edit mode button$ TODO which pauses the calculation (else the program will immediately 'optimize' your build order), change the entries and finally press edit button again TODO. For the editing part look in the @Editing the build order@610@ chapter.
+			TEXT
+		@END
+
+# DESCRIPTION_MAP_WINDOW_CHAPTER = 260
+		@260
+			@2.6: The map window@200@##
+			TEXT
+		@END
+	
+
+# RESULTS_MAIN_CHAPTER = 300
+		@300
+			@Chapter 3. How to use the results@0@###
+			~32~@3.1: About time and numbers@310@##
+			~32~@3.2: HTML output@320@##
+			~32~@3.3: Using the database@330@##
+			~32~@3.4: Results during the run@340@#
+		@END
+
+# RESULTS_TIME_AND_NUMBERS_CHAPTER = 310
+		@310
+			@3.1: About time and numbers@300@##
+			TEXT
+		@END
+
+# RESULTS_OUTPUT_CHAPTER = 320
+		@320
+			@3.2: HTML output@300@##
+			When saving a build order the TODO
+			TEXT
+		@END
+
+# RESULTS_DATABASE_CHAPTER = 330
+		@330
+			@3.3: Using the database@300@##
+			Saving the build order also results in a new entry in the database. You can access the database by clicking on the $database$ button at the top or, if you are in single-game mode, by clicking on the $compare with database$ button. TODO
+			TEXT
+		@END
+
+# RESULTS_INGAME_CHAPTER = 340
+		@340
+			@3.4: Results during the run@300@##
+			TEXT
+		@END
+
+
+# CONFIGURATION_MAIN_CHAPTER = 400
+		@400
+			@Chapter 4. Configuration of the program@0@###
+			~32~@4.1: Loading/Saving Settings@410@##
+			~32~@4.2: Resolution, Color Depth and Language@420@##
+			~32~@4.3: Core Settings@430@##
+			~32~@4.4: GUI Settings@440@##
+			~32~@4.5: Rules Settings@450@##
+		@END
+
+
+# CONFIGURATION_LOADING_SAVING_CHAPTER = 410
+		@410
+			@4.1: Loading/Saving Settings@400@##
+			All settings (also goals, maps etc.) are saved in the $settings$ folder in your EF directory. You can save the current settings by clicking on the $save$ button. Then the three files $main.cfg$, $ui.cfg$ and $core.cfg$ are overwritten with the new values. You can edit those files manually but please keep in mind that the syntax has to remain the same. If the program do not work anymore because you have changed the settings copy the original files from the archive or start Evolution Forge in the command line with the parameter 'defaults': $ef.exe -defaults$.#
+		@END
+
+# CONFIGURATION_RESOLUTION_DEPTH_LANGUAGE_CHAPTER = 420
+		@420
+			@4.2: Resolution, Color Depth and Language@400@##
+			The engine which is used in Evolution Forge allows different resolutions, color depths and languages:
+			$Resolution$:#   The sizes and coordinates of the windows and items are to a certain extend statically programmed into the engine thus changing the resolution will not neccessarily result in just a simple zoom. Please keep in mind that changing the resolution in full screen mode takes a little more time and also keep in mind that your graphics card/operating system may not support all resolutions/color depths.
+			$Color depth$:#   I commend not to use 8bit as this looks ugly. Evolution Forge uses more than 256 colors (especially when using a background picture) and therefor 16bit or 32bit is recommended. 24bit is still somewhat slow.#
+			$Languages$:#   If you find any errors in the text or do not understand a certain phrase or description then please tell me so. If you want to invest the time to translate the text into a different language I would be happy if you contact me. Evolution Forge is based on 'UTF' which means any font can be displayed correctly. The main text files are in $settings/strings$ and $settings/help$.			
+		@END
+
+# CONFIGURATION_CORE_SETTINGS_CHAPTER = 430
+		@430
+			@4.3: Core Settings@400@##
+			$Max Time$: Sets the upper limit of time span where a valid build order should be searched. Reducing this might result in a faster calculation but keep in mind that if you set it too low the program might find no solution at all. Even the best optimized build order cannot give you a Battle Cruiser in 1 minute.#
+			$Max Length$: Sets the maximum length of a build order. Reducing this also might result in a faster calculation. And again, if you set this to very small number the program might not find a solution at all. There is no way building 10 marines with a build order that has 9 elements.#
+			$Max Timeout$: In each step of the build order the program waits until all requirements are met. The upper time limit of that waiting is set here. If you set the number lower than the longest build time (in Starcraft: 266 seconds) you might loose some valid solutions. (for better understanding read @How the build order is processed@510@)#
+		@END
+
+# CONFIGURATION_GUI_SETTINGS_CHAPTER = 440
+		@440
+			@4.4: GUI Settings@400@## 
+			$Glowing Buttons$: Switches the animation of buttons between glowing and blinking.#
+			$DNA Spirale$: Display a Spiral that looks like DNA. That is just some nice looking feature with no real use. I will put in some animations later. So far the only thing that it displays are the colors of the entries in the @build order window@260@.#
+			$Background Bitmap$: With this option you can display a picture in the background. This makes animations a lot slower because the engine is not yet fully optimized. You can use your own pictures by either replacing the appropriate pictures in the $data/bitmaps$ folder or by changing the entries in $settings/default.cfg$. If you use the latter keep in mind that you have to be careful. Refer to the description at the top in this file.#
+			$Fullscreen$: Switch between window mode and fullscreen mode.#
+			$Tooltips$: Activates so called tooltips. Besides displaying help texts on buttons it also displays unit statistics and other information in a small box. Currently drains some CPU power because of some bad optimized routines in the engine.#
+			$Unload Graphics$: If you are very low on memory then use this. It will unload graphics from the memory if they are not used.#
+			$Smooth Movements$: Switch between smooth movement and jumping to the target position. Slows the redrawing a little.#
+			$Show Debug$: Shows current $frames per second$ and how the CPU is used for each part of the program. No real use except for the user I think :)#
+			$Desired Framerate$: This number tells the engine how often the screen should be redrawn each second. Keep it above 20 if you want to watch the process.#
+			$Desired CPU Usage$: The maximum percentage of CPU the program will grab. If you let Evolution Forge run in the background while working on something else you might want to set it to 80% or lower.#
+		@END
+
+# CONFIGURATION_RULES_SETTINGS_CHAPTER = 450
+		@450
+			@4.5: Rules Settings@400@##
+			TEXT
+		@END
+
+
+# MECHANICS_MAIN_CHAPTER = 500
+		@500
+			@Chapter 5. Mechanics of the program@0@###
+			~32~@5.1: How the build order is processed@510@##
+			~32~@5.2: How multiplayer works@520@##
+			~32~@5.3: How the algorithm works@540@##
+			~32~@5.4: How to finetune the build order@530@##
+		@END
+
+
+# MECHANICS_ORDER_CHAPTER = 510
+		@510
+			@5.1: How the build order is processed@500@##
+			The build order is a linear array of orders which is executed one by one (later versions will execute some orders parallel). As long as an order cannot be build the next order has to wait. Internally the programm interpolates the current situation (minerals, gas, build times) to a later point in time where a new building is built or enough minerals and gas is gathered. Then it checks again whether the current order can be executed.
+			TODO
+		@END
+
+# MECHANICS_MULTIPLAYER_CHAPTER = 520
+		@520
+			@5.2: How multiplayer works@500@##
+			(UNDER CONSTRUCTION)
+		@END
+# MECHANICS_SIMULATION_CHAPTER = 530
+		@530
+			@5.3: How the Game is simulated@500@##
+			In StarCraft (TM) each object (units, buildings, build queues) is processed one by one. The building time is decreased then the unit is moved then the resources are gathered etc. Simulating all this in detail costs much time thus the program jumps from one event (e.g. a new unit is built) to the next. All movements and resource gathering is compressed into a single calculation which increases the calculation speed greatly but decreases the accuracy. But because units often move around randomly this is impossible to accuratly calculate anyway.
+		@END
+
+# MECHANICS_FINETUNE_CHAPTER = 540
+		@540
+			@5.4: How to finetune the build order@500@##
+			As described above you
+		@END
+
+# INTERACTIVE_MAIN_CHAPTER = 600
+		@600
+			@Chapter 6. Interactive mode@0@###
+			~32~@6.1: Editing the build order@610@##
+			~32~@6.2: Playing against the computer@620@##
+			~32~@6.3: Letting it play against itself@630@##
+			~32~@6.4: What to learn from the program@640@#
+		@END
+	
+# INTERACTIVE_EDITING_CHAPTER = 610
+		@610
+			@6.1: Editing the build order@600@##
+			- Left click and hold to move an entry#
+			- Right click to open a unit menu to insert new entries#
+			- Shift + Left click to clone the entry#
+			- Shift + Right click to remove the entry#
+			TODO
+		@END
+
+# INTERACTIVE_PLAYING_CHAPTER = 620
+		@620
+			@6.2: Playing against the computer@600@##
+			(UNDER CONSTRUCTION)
+		@END
+
+# INTERACTIVE_TOURNAMENTS_CHAPTER = 630
+		@630
+			@6.3: Letting it play against itself@600@##
+			(UNDER CONSTRUCTION)
+		@END
+
+# INTERACTIVE_WHATTOLEARN_CHAPTER = 640
+		@640
+			@6.4: What to learn from the program@600@##
+			(UNDER CONSTRUCTION) Letting the program run against itself is indeed an interesting experience. There is no "best build order", each build order has its disadvantages, it is always a process of adaption. That is what kept discussions about StarCraft interesting, each new strategy can be countered by some different strategy.#
+			In addition you can see how economic advantages are traded in for speed: Always building workers might give you an economical advantage over your opponent and therefore more units... but only in a long-term scale. The distance to your enemy plays an important role. If you start right beside your enemy your first priority might be a combat unit. The farther the enemy is away the more important long-term thinking gets.
+			If you want to know more about the algorithm which makes all that possible then proceed to @Chapter 7@700@.
+		@END
+# CORE_MAIN_CHAPTER = 700
+		@700
+			@Chapter 7. The core of the program@0@###
+			~32~@7.1: The algorithm of the core@710@##
+			~32~@7.2: Buildorder TODO@720@##
+			~32~@7.3: Scalability@730@##
+			~32~@7.4: Comparison?@740@##
+			~32~@7.5: Problems with the algorithm@750@#
+		@END
+
+
+# CORE_ALGORITHM_CHAPTER = 710
+		@710
+			@7.1: The algorithm of the core@700@##
+			That is very simple. If you understand a little of computer science this should be no problem:##
+			- create 100 random build orders#
+			- loop#
+			-   determine fitness of each build order#
+			-   pick the best build orders#
+			-   overwrite the worst with best build orders#
+			-   randomly mutate the build orders#
+			- loop end##
+			$fitness$ is in this case how fast the build order can build the goals. There are several possible approaches how to pick the best and worst build orders, 
+			
+			The main problems I ran into were optimizing that algorithm to allow a fast fitness determination and to let the mutation only create valid solutions. A mutation which creates a battle cruiser as the first entry of a build order will certainly fail.#
+			In addition the communcation with the user was a very complicated part of coding, especially letting the user changing the build order and allowing different sets of start conditions.#
+			TEXT
+		@END
+
+# CORE_BUILDORDER_CHAPTER = 720
+		@720		
+			@7.2: Buildorder TODO@700@##
+			TEXT
+		@END
+
+# CORE_SCALABILITY_CHAPTER = 730
+		@730
+			@7.3: Scalability@700@##
+			Ah well, using genetic algorithms does very nice when it comes to scalability :) When I can get a hand on a parallel computer and/or study networking there will be a version that allows to speed up the calculation using a whole network of computers. This can be done because the main cpu usage is in the fitness calculation.#
+			In addition the speed of the calculation improves if the size of the population (currently 128) is increased.#
+			TODO
+			TEXT
+		@END
+
+# CORE_COMPARISON_CHAPTER = 740
+		@740
+			@7.4: Comparison?@700@##
+			TEXT
+		@END
+
+# CORE_PROBLEMS_GAS_CHAPTER = 750
+		@750
+			@7.5: Problems with the algorithm@700@##
+			In the algorithm itself you might have noticed the word $random$. Well, after all this is a random algorithm. It might not give you the optimal solution. But that is not quite neccessary as there are some inaccuracies between the 'real game' and the simulation anyways. TODO
+			TEXT
+		@END
+
+
+# COMMUNICATION_MAIN_CHAPTER = 800
+		@800
+			@Chapter 8. Communication@0@###
+			~32~@8.1: ClawSoftware.de@810@##
+			~32~@8.3: About myself@830@#
+		@END
+
+# COMMUNICATION_CLAWSOFTWARE_CHAPTER = 810
+		@810
+			@8.1: ClawSoftware.de@800@##
+			~19~gsldkjfg lsdkjgf lskdfjg lksdjfg k #
+		@END
+
+# COMMUNICATION_ABOUT_CHAPTER = 830
+		@830
+			@8.3: About myself@800@##
+			~39~ My name is Clemens and I am living in germany and currently studying Computer Science in Karlsruhe. I am programming since about 12 years doing small projects until 2000. Then I started my work on Evolution Forge (called Starcraft Calculator back then).#
+		@END
+
+# DEVELOPMENT_MAIN_CHAPTER = 900
+		@900
+			@Chapter 9. Development@0@###
+			~32~@9.1: History@910@##
+			~32~@9.2: Things that will come later@920@##
+			~32~@9.3: Current developments@930@##
+			~32~@9.4: Future plans with Evolution Forge@940@#
+			~32~@9.5: Things will never be implemented@950@##
+		@END
+
+# DEVELOPMENT_HISTORY_CHAPTER = 910
+		@910
+			@9.1: History@900@##
+			TEXT
+		@END
+
+
+# DEVELOPMENT_TODO_CHAPTER = 920
+		@920
+			@9.2: Things that will come later@900@##
+			I will certainly go into the parallel computing a little more.
+			TEXT
+		@END
+
+# DEVELOPMENT_CURRENT_CHAPTER = 930
+		@930
+			@9.3: Current developments@900@##
+			TEXT
+		@END
+
+# DEVELOPMENT_FUTURE_CHAPTER = 940
+		@940
+			@9.4: Future plans with Evolution Forge@900@##
+			TEXT
+		@END
+
+# DEVELOPMENT_NOTIMPLEMENTED_CHAPTER = 950
+		@950
+			@9.5: Things will never be implemented@900@##
+			Not so sure about that
+			TEXT
+		@END
+
+
+# PHILOSOHPY_MAIN_CHAPTER = 1000
+		@1000
+			@Chapter 10. Philosophy@0@###
+			~32~@10.1: Evolution@1010@##
+			~32~@10.2: TODO@1020@##
+			~32~@10.3: Reality check@1030@#
+		@END
+
+# PHILOSOPHY_EVOLUTION_CHAPTER = 1010
+		@1010
+			@10.1 Evolution@1000@##
+			TEXT
+		@END
+
+# PHILOSOPHY_GOD_CHAPTER = 1020
+		@1020
+			@10.2 TODO@1000@##
+			TEXT
+		@END
+
+# PHILOSOPHY_REALITY_CHAPTER = 1030
+		@1030
+			@10.3 Reality check@1000@##
+			TEXT
+		@END
+	@END
+@END
+
+

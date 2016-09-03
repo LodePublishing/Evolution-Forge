@@ -34,12 +34,10 @@ private:
 	
 	bool preprocessBuildOrder; // should the program create a basic valid solution? TODO: IMPLEMENT IT!
 	bool allowGoalAdaption;
-	bool alwaysBuildWorker;
-	bool onlySwapOrders;
 
-	bool autoSaveRuns;  // raus
-	bool restrictSC;
-	bool facilityMode;
+//	bool autoSaveRuns;  // raus
+//	bool restrictSC;
+//	bool facilityMode;
 
 	std::string configurationFile;
 public:
@@ -58,14 +56,12 @@ public:
 	const unsigned int getMaxGenerations() const;
 	const unsigned int getNoise() const;
 
-	const bool isAutoSaveRuns() const;
-	const bool isRestrictSC() const;
-	const bool isFacilityMode() const;	
+//	const bool isAutoSaveRuns() const;
+//	const bool isRestrictSC() const;
+//	const bool isFacilityMode() const;	
 	
 	const bool isPreprocessBuildOrder() const;
 	const bool isAllowGoalAdaption() const;
-	const bool isAlwaysBuildWorker() const;
-	const bool isOnlySwapOrders() const;
 	
 	const bool setCrossingOver(const unsigned int crossing_over);
 	const bool setBreedFactor(const unsigned int breed_factor);
@@ -77,13 +73,11 @@ public:
 	const bool setMaxGenerations(const unsigned int max_generations);
 	const bool setNoise(const unsigned int desired_noise);
 
-	const bool setAutoSaveRuns(const bool auto_save_runs);
-	const bool setRestrictSC(const bool restrict_sc);
-	const bool setFacilityMode(const bool facility_mode);
+//	const bool setAutoSaveRuns(const bool auto_save_runs);
+//	const bool setRestrictSC(const bool restrict_sc);
+//	const bool setFacilityMode(const bool facility_mode);
 	const bool setPreprocessBuildOrder(const bool preprocess_build_order);
 	const bool setAllowGoalAdaption(const bool allow_goal_adaption);
-	const bool setAlwaysBuildWorker(const bool always_build_scv);
-	const bool setOnlySwapOrders(const bool only_swap_orders);
 
 	void setConfigurationFile(const std::string& configuration_file);
 	void loadConfigurationFile();
@@ -180,14 +174,6 @@ inline const bool CoreConfiguration::isPreprocessBuildOrder() const {
 
 inline const bool CoreConfiguration::isAllowGoalAdaption() const {
 	return(allowGoalAdaption);
-}
-
-inline const bool CoreConfiguration::isAlwaysBuildWorker() const {
-	return(alwaysBuildWorker);
-}
-
-inline const bool CoreConfiguration::isOnlySwapOrders() const {
-	return(onlySwapOrders);
 }
 
 inline void CoreConfiguration::setConfigurationFile(const std::string& configuration_file) {

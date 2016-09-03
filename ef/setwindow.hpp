@@ -11,6 +11,7 @@
 #include "bitdepthmenu.hpp"
 #include "languagemenu.hpp"
 #include "resolutionmenu.hpp"
+#include "thememenu.hpp"
 
 class SettingsWindow:public UI_Window
 {
@@ -19,16 +20,21 @@ class SettingsWindow:public UI_Window
 		~SettingsWindow();
 		
 		void resetData();
+		void resetDataChange();
 		void process();
 		void draw(DC* dc) const;
 		void updateItems();
 
 		void forceLanguageChange();
+		void forceResolutionChange();
+		void forceBitDepthChange();
+		void forceFullScreenChange();
 		void reloadOriginalSize();
 		
 		const bool hasLanguageChanged() const;
 		const bool hasResolutionChanged() const;
 		const bool hasBitDepthChanged() const;
+		const bool hasThemeChanged() const;
 		const bool hasFullScreenChanged() const;
 	private:
 
@@ -53,8 +59,6 @@ class SettingsWindow:public UI_Window
 //		UI_NumberField* crossingOver;
 
 		UI_CheckButton* autoSaveRuns;
-		UI_CheckButton* alwaysBuildWorker;
-		UI_CheckButton* onlySwapOrders;
 		UI_CheckButton* restrictSC;
 		UI_CheckButton* facilityMode;
 //		UI_CheckButton* preprocessBuildorder;
@@ -65,9 +69,11 @@ class SettingsWindow:public UI_Window
 		UI_CheckButton* fullscreen;
 		UI_CheckButton* tooltips;
 //		UI_CheckButton* softwareMouse;
+		UI_CheckButton* unloadGraphics;
 
 //		UI_CheckButton* transparency;
 		UI_CheckButton* smoothMovement;
+		UI_CheckButton* showDebug;
 	
 		UI_NumberField* desiredFramerate;
 		UI_NumberField* desiredCPU;
@@ -83,18 +89,19 @@ class SettingsWindow:public UI_Window
 // number
 	
 	
-//		ThemeMenu* themeMenu;
-//		UI_Button* themeMenuButton;
 		UI_Button* languageMenuButton;
 		UI_Button* resolutionMenuButton;
 		UI_Button* bitDepthMenuButton;
+		UI_Button* themeMenuButton;
 		LanguageMenu* languageMenu;
 		ResolutionMenu* resolutionMenu;
 		BitDepthMenu* bitDepthMenu;
+		ThemeMenu* themeMenu;
 
 		bool languageHasChanged;
 		bool resolutionHasChanged;
 		bool bitDepthHasChanged;
+		bool themeHasChanged;
 		bool fullScreenHasChanged;
 };
 
@@ -108,6 +115,10 @@ inline const bool SettingsWindow::hasResolutionChanged() const {
 
 inline const bool SettingsWindow::hasBitDepthChanged() const {
 	return(bitDepthHasChanged);
+}
+
+inline const bool SettingsWindow::hasThemeChanged() const {
+	return(themeHasChanged);
 }
 
 inline const bool SettingsWindow::hasFullScreenChanged() const {

@@ -1,23 +1,30 @@
 #include "thememenu.hpp"
 
-ThemeMenu::ThemeMenu(UI_Object* thememenu_parent, Rect rect) :
-	Menu(thememenu_parent, rect, true)
+ThemeMenu::ThemeMenu(UI_Object* thememenu_parent, const Rect rect, const Size distance_bottom_right, const ePositionMode position_mode) :
+	UI_Menu(thememenu_parent, rect, distance_bottom_right, position_mode, true)
 {
-	for(unsigned int i=0;i<MAX_COLOR_THEMES-1;++i)
+	for(unsigned int i=1;i<MAX_COLOR_THEMES;++i)
 	{
-		Rect edge = Rect(Point(10 + (i%2) * 90, (i/2)*20 + height * (FONT_SIZE+9)), Size(75, FONT_SIZE+3));
-		MenuEntry* entry = new MenuEntry(this, edge, (eString)(SETTING_DARK_BLUE_THEME_STRING+i));
+		UI_MenuEntry* entry = new UI_MenuEntry(this, Rect(), (eString)(SETTING_ZERO_THEME_STRING+i));
 		entry->setButtonColorsType(eButtonColorsType(UNIT_TYPE_4_BUTTON));
    		menuEntries.push_back(entry);
 	}
+	reloadOriginalSize();
 }
 
 ThemeMenu::~ThemeMenu() 
 { }
 
+void ThemeMenu::reloadOriginalSize()
+{
+	updateItemSizes(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH));
+	UI_Object::reloadOriginalSize();
+	updateItemPositions(TWO_COLOUMN_MENU);
+}
+
 void ThemeMenu::process()
 {
-	Menu::process();
+	UI_Menu::process();
 	if(!isShown())
 		return;
 }
@@ -26,6 +33,6 @@ void ThemeMenu::draw(DC* dc) const
 {
 	if(!isShown())
 		return;
-	Menu::draw(dc);
+	UI_Menu::draw(dc);
 }	
 

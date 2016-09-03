@@ -28,7 +28,7 @@ UI_CheckButton::UI_CheckButton(UI_Object* checkbutton_parent, const Rect checkbu
 	this->updateToolTip(tooltip_string); // TODO
 	check(is_checked);
 }
-
+// TODO evtl statt UI_Object ein UI_Button draus machen und text als Anhaengsel benutzen...
 UI_CheckButton::~UI_CheckButton()
 {
 	delete checkButton;
@@ -49,6 +49,7 @@ void UI_CheckButton::check(const bool is_checked)
 		if(!is_checked)
 			checkButton->forceUnpress();
 		else checkButton->forcePress();
+		setNeedRedrawMoved();
 	}
 }
 
@@ -63,7 +64,6 @@ void UI_CheckButton::process()
 
 	if(checkButton->checkForNeedRedraw())
 		setNeedRedrawMoved();
-
 }
 
 void UI_CheckButton::draw(DC* dc) const

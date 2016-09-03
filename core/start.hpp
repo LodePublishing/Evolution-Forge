@@ -32,7 +32,6 @@ class START
 		const HARVEST_SPEED* harvest[MAX_RACES]; // pointer to harvest data in settings
 		const START_CONDITION* startCondition; // units are here!
 		const GOAL_ENTRY* tmpgoal; // basic 
-		const UNIT_STATISTICS* pStats;
 	
 // ----- DATA WHICH IS COPIED EACH GENERATION ON THE PLAYERS -------
 //		list<GROUP> group[MAX_LOCATIONS]; // ~~~
@@ -44,6 +43,7 @@ class START
 		GOAL_ENTRY currentGoal; // initialized things
 		unsigned int startPosition;
 		eRace playerRace;
+		const UNIT_STATISTICS* pStats;
 // TODO Funktion zum verteilen von startcondition auf units abhaengig von tmpmap (startposition) und startPositions
 
 
@@ -57,13 +57,13 @@ class START
 		START& operator=(const START& start);
 		//START(const START& start);
 
-		void assignMap(const BASIC_MAP* map); 
-		void setHarvestSpeed(const eRace race, const HARVEST_SPEED* harvest_speed); // copy data (pointers) from settings 
+		const bool assignMap(const BASIC_MAP* map); 
+		const bool setHarvestSpeed(const eRace race, const HARVEST_SPEED* harvest_speed); // copy data (pointers) from settings 
 		// assign Mode ?
-		void setStartPosition(const unsigned int startPosition);
-		void setPlayerRace(const eRace race); // => gleichzeitig wird harvestspeed geaendert und condition und goal muessen u.U. neugewaehlt werden!
-		void assignStartCondition(const START_CONDITION* start_condition);
-		void assignGoal(const GOAL_ENTRY* goal);
+		const bool setStartPosition(const unsigned int startPosition);
+		const bool setPlayerRace(const eRace race); // => gleichzeitig wird harvestspeed geaendert und condition und goal muessen u.U. neugewaehlt werden!
+		const bool assignStartCondition(const START_CONDITION* start_condition);
+		const bool assignGoal(const GOAL_ENTRY* goal);
 
 		void fillAsActivePlayer();
 		void fillAsNeutralPlayer();
@@ -78,9 +78,12 @@ class START
 		const unsigned int getBasicGasHarvestSpeedPerSecond(const unsigned int worker) const;
 };
 
-inline void START::setHarvestSpeed(const eRace race, const HARVEST_SPEED* harvest_speed)
+inline const bool START::setHarvestSpeed(const eRace race, const HARVEST_SPEED* harvest_speed)
 {
+	if(harvest_speed == harvest[race])
+		return(false);
 	harvest[race]=harvest_speed;
+	return(true);
 }
 
 inline const unsigned int START::getBasicMineralHarvestSpeedPerSecond(const unsigned int worker) const // 'player' noch rausoptimieren! 
@@ -102,14 +105,17 @@ inline const START_CONDITION* const* START::getStartCondition() const
 	return(&(startCondition));
 }
 
-inline void START::setStartPosition(const unsigned int start_position)
+inline const bool START::setStartPosition(const unsigned int start_position)
 {
+	if(startPosition == start_position)
+		return(false);
 #ifdef _SCC_DEBUG
 	if((start_position < 1) || (start_position >= tmpmap->getMaxLocations())) {
-		toLog("DEBUG: (START::setStartPosition): Value start_position out of range.");return;
+		toLog("DEBUG: (START::setStartPosition): Value start_position out of range.");return(false);
 	}
 #endif
 	startPosition = start_position;
+	return(true);
 }
 
 inline const eRace START::getPlayerRace() const {

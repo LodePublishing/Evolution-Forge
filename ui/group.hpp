@@ -11,7 +11,7 @@
 class UI_Group : public UI_Object
 {
 	public:
-		UI_Group(UI_Object* group_parent, const Rect initial_rect, const Size bottom_right_distance, const ePositionMode position_mode = DO_NOT_ADJUST, const eString txt=NULL_STRING);
+		UI_Group(UI_Object* group_parent, const Rect& initial_rect, const Size bottom_right_distance, const ePositionMode position_mode = DO_NOT_ADJUST, const eString txt=NULL_STRING);
 		~UI_Group();
 		UI_Group(const UI_Group& object);
 		UI_Group& operator=(const UI_Group& object);

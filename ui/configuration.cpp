@@ -7,9 +7,11 @@ UI_Configuration::UI_Configuration():
 	language(ZERO_LANGUAGE),
 	resolution(RESOLUTION_640x480),
 	bitdepth(DEPTH_32BIT),
+	theme(DARK_BLUE_THEME),
 	glowingButtons(true),
 	transparency(false),
 	smoothMovements(true),
+	unloadGraphics(false),
 	configurationFile("settings/ui.cfg")
 {}
 
@@ -21,9 +23,11 @@ void UI_Configuration::initDefaults()
 	setLanguage(ENGLISH_LANGUAGE);
 	setResolution(RESOLUTION_640x480);
 	setBitDepth(DEPTH_32BIT);
+	setTheme(DARK_BLUE_THEME);
 	setGlowingButtons(true);
 	setTransparency(false);
 	setSmoothMovements(true);
+	setUnloadGraphics(false);
 	configurationFile = "settings/ui.cfg";
 }
 
@@ -47,12 +51,17 @@ void UI_Configuration::saveToFile() const
 	pFile << "    \"Resolution\" = \"" << (int)getResolution() << "\"" << std::endl;
 	pFile << "# 0 = 256 colors, 1 = 64k colors, 2 = 16mio colors, 3 = 4mrd colors" << std::endl;
 	pFile << "    \"Bit depth\" = \"" << (int)getBitDepth() << "\"" << std::endl;
+	pFile << "# 1 = dark red theme, 2 = dark blue theme, 4 = yellow theme" << std::endl;
+	pFile << "    \"Theme\" = \"" << (int)getTheme() << "\"" << std::endl;
 	pFile << "# glowing effects" << std::endl;
 	pFile << "    \"Glowing buttons\" = \"" << (int)isGlowingButtons() << "\"" << std::endl;
 	pFile << "# moving rectangles, 2 = all objects move smoothly, 1 = some objects move smoothly, 0 = all objects jump directly to their destination" << std::endl;
 	pFile << "    \"Smooth movements\" = \"" << (int)isSmoothMovements() << "\"" << std::endl;
 	pFile << "# Transparency, let's burn some cpu power (NOT YET IMPLEMENTED)" << std::endl;
 	pFile << "    \"Transparency\" = \"" << (int)isTransparency() << "\"" << std::endl;
+	pFile << "# Unload graphics if they are not needed, for low-memory systems" << std::endl;
+	pFile << "    \"Unload graphics\" = \"" << (int)isUnloadGraphics() << "\"" << std::endl;
+
 	pFile << "@END" << std::endl;
 }
 
@@ -99,6 +108,10 @@ void UI_Configuration::loadConfigurationFile()
 				i->second.pop_front();
 			   	setBitDepth((eBitDepth)(atoi(i->second.front().c_str())));
 			}
+			if((i=block.find("Theme"))!=block.end()){
+				i->second.pop_front();
+			   	setTheme((eTheme)(atoi(i->second.front().c_str())));
+			}		
 			if((i=block.find("Glowing buttons"))!=block.end()){
 				i->second.pop_front();
 			   	setGlowingButtons(atoi(i->second.front().c_str()));
@@ -110,6 +123,10 @@ void UI_Configuration::loadConfigurationFile()
 			if((i=block.find("Smooth movements"))!=block.end()){
 				i->second.pop_front();
 			   	setSmoothMovements(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Unload graphics"))!=block.end()){
+				i->second.pop_front();
+			   	setUnloadGraphics(atoi(i->second.front().c_str()));
 			}
 
 		}
@@ -140,6 +157,14 @@ const bool UI_Configuration::setLanguage(const eLanguage current_language)
 	return(true);
 }
 
+const bool UI_Configuration::setTheme(const eTheme current_theme) 
+{
+	if(theme == current_theme)
+		return(false);
+	theme = current_theme;
+	return(true);
+}
+
 const bool UI_Configuration::setGlowingButtons(const bool glowing_buttons) 
 {
 	if(glowingButtons == glowing_buttons)
@@ -163,6 +188,14 @@ const bool UI_Configuration::setSmoothMovements(const bool smooth_movements)
 	smoothMovements = smooth_movements;
 	return(true);
 }
-	
+
+const bool UI_Configuration::setUnloadGraphics(const bool unload_graphics) 
+{
+	if(unloadGraphics == unload_graphics)
+		return(false);
+	unloadGraphics = unload_graphics;
+	return(true);
+}
+
 UI_Configuration uiConfiguration;
 

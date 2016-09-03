@@ -21,7 +21,7 @@ void MessageWindow::resetData()
 void MessageWindow::addMessage( const std::string& bla )
 {
 	setNeedRedrawNotMoved();
-	Message* msg = new Message(getScrollbar(), Rect(Point(10, 20  /*message.size() * (FONT_SIZE+5)*/), Size(getClientRectWidth(), FONT_SIZE+5)), 1, bla, 155);
+	Message* msg = new Message(getScrollBar(), Rect(Point(10, 20  /*message.size() * (FONT_SIZE+5)*/), Size(getClientRectWidth(), FONT_SIZE+5)), 1, bla, 100);
 	message.push_front(msg);
 //	addToProcessArray(this);
 	

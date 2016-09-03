@@ -9,7 +9,7 @@ SaveBox::SaveBox(UI_Object* savebox_parent, const eString savebox_text, const eS
 	UI_Window(savebox_parent, savebox_text, theme.lookUpGlobalRect(SAVE_BOX_WINDOW), theme.lookUpGlobalMaxHeight(SAVE_BOX_WINDOW)),
 	OK_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), MY_BUTTON, false, PRESS_BUTTON_MODE, ok_string, ARRANGE_BOTTOM_RIGHT, MIDDLE_BOLD_FONT, AUTO_SIZE)),
 	Cancel_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), MY_BUTTON, false, PRESS_BUTTON_MODE, cancel_string, ARRANGE_BOTTOM_RIGHT, MIDDLE_BOLD_FONT, AUTO_SIZE)),
-	editField(new UI_EditField(this, Rect(getRelativeClientRectPosition() + Point(30, 50), getClientRectSize()), Size(0,0), MIDDLE_BOLD_FONT, DO_NOT_ADJUST, description_text, name_proposal))
+	editField(new UI_EditField(this, Rect(getRelativeClientRectPosition() + Point(30, 50), Size(getClientRectWidth()-60, FONT_SIZE+6)), Size(0,0), MIDDLE_BOLD_FONT, DO_NOT_ADJUST, description_text, name_proposal))
 { 
 	UI_Object::focus = editField;
 }
@@ -58,11 +58,12 @@ void SaveBox::reloadOriginalSize()
 #include <math.h>					  
 void SaveBox::draw(DC* dc) const
 {
-	if(!checkForNeedRedraw())
-		return; // TODO
-	dc->SetBrush(*theme.lookUpBrush(BRIGHT_UNIT_TYPE_3_BRUSH));
-	dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
-	dc->DrawRectangle(Rect(getAbsolutePosition()-Size(10,10), getSize() + Size(20,20)));
+	if(checkForNeedRedraw())
+	{
+		dc->SetBrush(*theme.lookUpBrush(BRIGHT_UNIT_TYPE_3_BRUSH));
+		dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
+		dc->DrawRectangle(Rect(getAbsolutePosition()-Size(10,10), getSize() + Size(20,20)));
+	}
 	UI_Window::draw(dc);
 }
 

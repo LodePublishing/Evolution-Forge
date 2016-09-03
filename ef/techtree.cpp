@@ -2,6 +2,7 @@
 
 TechTreeWindow::TechTreeWindow(UI_Object* techtree_parent) :
 	UI_Window(techtree_parent, TECHTREE_WINDOW_TITLE_STRING, theme.lookUpGlobalRect(TECHTREE_WINDOW), theme.lookUpGlobalMaxHeight(TECHTREE_WINDOW), NOT_SCROLLED),
+	unitChanged(false),
 	currentGoalUnit(0),
 	anarace(NULL),
 	s(Size(100, 15)),
@@ -19,7 +20,10 @@ TechTreeWindow::~TechTreeWindow()
 
 void TechTreeWindow::assignAnarace(ANABUILDORDER* techtree_anarace)
 {
+	if((!anarace)||(anarace->getRace() != techtree_anarace->getRace()))
+		unitChanged = true;
 	anarace = techtree_anarace;
+	
 }
 
 void TechTreeWindow::reloadOriginalSize()
@@ -29,13 +33,14 @@ void TechTreeWindow::reloadOriginalSize()
 	UI_Window::reloadOriginalSize();
 }
 
-void TechTreeWindow::process()
+void TechTreeWindow::processList()
 {
-	if(!isShown())
-		return;
 	signed int x1 = 0;
 	signed int x2 = 5*s2.GetWidth();
 	signed int y2 = 10 * s2.GetHeight() + 10;
+
+	signed int max_width = 0;
+	signed int max_height = 0;
 
 	bool checked[UNIT_TYPE_COUNT];
 	tree = anarace->getGoalTree(currentGoalUnit);
@@ -56,8 +61,15 @@ void TechTreeWindow::process()
 				foundOne=true;
 				if(x1 > px - (signed int)(s.GetWidth())/2)
 					x1 = px - (s.GetWidth())/2;
+				Rect edge = Rect(Point(px - s.GetWidth()/2, 15+k*s2.GetHeight()), s);
+				node[*i]->adjustRelativeRect(edge);
+				if(edge.GetRight() > max_width)
+					max_width = edge.GetRight();
+				if(edge.GetBottom() > max_height)
+					max_height = edge.GetBottom();
 
-				node[*i]->adjustRelativeRect(Rect(Point(px - s.GetWidth()/2, 15+k*s2.GetHeight()), s));
+				
+					
 				node[*i]->Show();
 				checked[*i]=true;
                                 ++x;
@@ -73,6 +85,23 @@ void TechTreeWindow::process()
 			node[i]->setPosition(Point((getWidth() - s.GetWidth())/2, 15));
 			node[i]->Hide();
 		}
+	if(max_width > getOriginalRect().GetWidth())
+		max_width = getOriginalRect().GetWidth();
+	if(max_height > getOriginalRect().GetHeight())
+		max_height = getOriginalRect().GetHeight();
+
+	adjustRelativeRect(Rect(getOriginalRect().GetLeft() + (getOriginalRect().GetWidth() - max_width)/2, getOriginalRect().GetTop() + (getOriginalRect().GetHeight() - max_height)/2, max_width+20 , max_height+20));
+}
+
+void TechTreeWindow::process()
+{
+	if(!isShown())
+		return;
+	if(unitChanged)
+	{
+		processList();
+		unitChanged=false;
+	}
 	UI_Window::process();
 }
 
@@ -155,17 +184,17 @@ void TechTreeWindow::draw(DC* dc) const
 		}
 			
 	dc->SetTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
-
+	dc->setPressedRectangle(false);	
+	dc->SetFont(UI_Object::theme.lookUpFont(SMALL_BOLD_FONT));
 	for(unsigned int i = UNIT_TYPE_COUNT;i--;)
 		if(node[i]->isShown())
 		{
 			dc->SetBrush(*theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][i].unitType)));
 			dc->SetPen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN+stats[anarace->getRace()][i].unitType)));
-				
 			dc->DrawEdgedRoundedRectangle(node[i]->getAbsoluteRect(), 4);
 			std::string text = UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i+UNIT_NULL_STRING));
 			Size text_size = dc->GetTextExtent(text);
-			dc->DrawText(text, node[i]->getAbsolutePosition() + Point(4 + (s.GetWidth())/2,4) - Size(text_size.GetWidth()/2, 0));
+			dc->DrawText(text, node[i]->getAbsolutePosition() + Point(2 + (s.GetWidth())/2, 5) - Size(text_size.GetWidth()/2, 0));
 		}
 		
 		

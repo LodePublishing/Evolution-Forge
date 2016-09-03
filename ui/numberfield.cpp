@@ -167,10 +167,11 @@ void UI_NumberField::process()
 		else number = max;
 		updateNumber(number);
 	}
-	text->doHighlight(isMouseInside());
+	if(text)
+		text->doHighlight(isMouseInside());
 	numberText->doHighlight(isMouseInside());
 
-	if((numberText->checkForNeedRedraw())||(text->checkForNeedRedraw())||(addbutton->checkForNeedRedraw())||(subbutton->checkForNeedRedraw()))
+	if((numberText->checkForNeedRedraw())||((text)&&(text->checkForNeedRedraw()))||(addbutton->checkForNeedRedraw())||(subbutton->checkForNeedRedraw()))
 		setNeedRedrawMoved();
 }
 

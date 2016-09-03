@@ -83,9 +83,9 @@ void FPS::delay()
                 }
 	}
 	if((delayTicks < cpu_delay)&&(delayTicks<1000))
-		delayTicks+=(cpu_delay - delayTicks)/10 + 1;
+		delayTicks+=(cpu_delay - delayTicks)/5 + 1;
 	else if((delayTicks > cpu_delay))
-		delayTicks-=(delayTicks - cpu_delay)/10 + 1;
+		delayTicks-=(delayTicks - cpu_delay)/5 + 1;
 	SDL_Delay(delayTicks);
 
 }

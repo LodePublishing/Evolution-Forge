@@ -6,6 +6,7 @@ UI_LongText& UI_LongText::operator=(const UI_LongText& object)
 {
 	((UI_Object)(*this)) = ((UI_Object)object);
 	updateText(object.text);
+	scrollBar = object.scrollBar; // TODO
 	longText = object.longText;
 	longButton = object.longButton;
 	longNumber = object.longNumber;
@@ -19,6 +20,7 @@ UI_LongText& UI_LongText::operator=(const UI_LongText& object)
 
 UI_LongText::UI_LongText(const UI_LongText& object) :
 	UI_Object((UI_Object)object),
+	scrollBar(object.scrollBar),
 	longText(object.longText),
 	longButton(object.longButton),
 	longNumber(object.longNumber),
@@ -30,8 +32,9 @@ UI_LongText::UI_LongText(const UI_LongText& object) :
 	textWasChanged(true)
 {}
 
-UI_LongText::UI_LongText(UI_Object* lt_parent, const Rect lt_pos, const Size distance_bottom_right, const std::string& lt_text, const eColor lt_color1, const eColor lt_color2, const eFont lt_font, const eButtonColorsType lt_button, const ePositionMode position_mode, const eAutoSize auto_size) :
+UI_LongText::UI_LongText(UI_Object* lt_parent, const Rect lt_pos, const Size distance_bottom_right, const std::string& lt_text, const eColor lt_color1, const eColor lt_color2, const eFont lt_font, const eButtonColorsType lt_button, UI_Object* scroll_bar, const ePositionMode position_mode, const eAutoSize auto_size) :
 	UI_Object(lt_parent, lt_pos, distance_bottom_right, position_mode, auto_size),
+	scrollBar(scroll_bar),
 	longText(),
 	longButton(),
 	longNumber(),
@@ -64,7 +67,6 @@ UI_LongText::~UI_LongText()
 		delete(*k);
 		k = longBitmap.erase(k);
 	}
-
 }
 
 void UI_LongText::draw(DC* dc) const
@@ -84,6 +86,7 @@ void UI_LongText::process()
 		updateText(text);
 		textWasChanged=false;
 	}
+
 
 	std::list<UI_StaticText*>::iterator i = longText.begin();
 	while(i!=longText.end())
@@ -134,20 +137,24 @@ void UI_LongText::updateText(const std::string& lt_text)
 		getParent()->adjustPositionAndSize(ADJUST_ONLY_POSITION);
 	}
 
-	unsigned int textCursorX = 5;
-	unsigned int firstTextCursorX = 5;
+	unsigned int text_cursor_x = 5;
+	unsigned int first_text_cursor_x = 5;
 	unsigned int bold = 0;
 	unsigned int textbutton = 0;
 	unsigned int bitmap = 0;
-	bool mustNotMakeNewLine = false;
-	unsigned int firstCharPosition=0;
-	unsigned int lastCharPosition=0;
-	unsigned int currentRow=1;
-	unsigned int maxdy=0;
-	unsigned int bitmapLeftBorder = 5;
-	unsigned int bitmapLowerBorder = 0; // TODO, funzt nur mit Bildern links oben...
+	bool must_not_make_new_line = false;
+	unsigned int first_char_position=0;
+	unsigned int last_char_position=0;
+	signed int current_row=1;
+	signed int maxdy=0;
+	unsigned int bitmap_left_border = 5;
+	unsigned int bitmap_lower_border = 0; // TODO, funzt nur mit Bildern links oben...
 
-	maxdy = UI_Object::theme.lookUpFont(SMALL_BOLD_FONT)->GetTextExtent(text).GetHeight()*13/10;
+	Point p;
+	if(scrollBar!=NULL)
+		p = getRelativePosition();
+			
+	maxdy = UI_Object::theme.lookUpFont(font)->GetTextExtent(text).GetHeight();
 	
 	eColor current_color = color1;
 	eFont current_font = font;
@@ -182,44 +189,50 @@ void UI_LongText::updateText(const std::string& lt_text)
 	
 	for(unsigned int i=0;i<text.length();i++)
 	{
-		bool newLine=false;
-		bool newCheck = false;
+		bool new_line=false;
+		bool new_check = false;
+		bool end_of_order=false;
 //		if(text[i]=='&') {
-//			mustNotMakeNewLine = !mustNotMakeNewLine;
+//			must_not_make_new_line = !must_not_make_new_line;
 //		} else 
 // set new 'milestone' when reaching end of a word:
-		if((text[i]==' '))//&&(!mustNotMakeNewLine)) 
+		if((text[i]==' ')||(text[i]=='/')||(text[i]==','))//&&(!must_not_make_new_line)) 
 		{
-			lastCharPosition = i;
+			last_char_position = i;
+			text_cursor_x += UI_Object::theme.lookUpFont(current_font)->GetTextExtent(" ").GetWidth();
 		}
 // ... or a line:
 		else if(text[i]=='#') {
-			lastCharPosition = i;
-			newLine=true;
+			last_char_position = i;
+			new_line=true;
+			end_of_order=true;
 		} 
 		else if(i==text.length()-1) {
-			lastCharPosition = i+1;
-			newLine=true;
+			last_char_position = i+1;
+			new_line=true;
 		} 
 	
 // bold:
 		else if(text[i]=='$')
 		{
 			bold++;
-			lastCharPosition = i;
-			newCheck = true;
+			last_char_position = i;
+			new_check = true;
+			end_of_order=true;
 // button:			
 		} else if(text[i]=='@')
 		{
 			textbutton++;
-			lastCharPosition = i;
-			newCheck = true;
+			last_char_position = i;
+			new_check = true;
+			end_of_order=true;
 // bitmap			
 		} else if(text[i]=='~')
 		{
 			bitmap++;
-			lastCharPosition = i;
-			newCheck = true;
+			last_char_position = i;
+			new_check = true;
+			end_of_order=true;
 		} else
 		
 		// move the textcursor forward:
@@ -227,21 +240,32 @@ void UI_LongText::updateText(const std::string& lt_text)
 			std::ostringstream os;
 			os.str("");
 			os << text[i];
-			textCursorX += UI_Object::theme.lookUpFont(current_font)->GetTextExtent(os.str()).GetWidth();
+			if(textbutton==0)
+				text_cursor_x += UI_Object::theme.lookUpFont(current_font)->GetTextExtent(os.str()).GetWidth();
+			else
+				text_cursor_x += UI_Object::theme.lookUpFont((eFont)(font+3))->GetTextExtent(os.str()).GetWidth();
 		}
+		// TODO zeilenuebergreifende BOLDs und TEXTBUTTONs
 // reached end of line? Calculate line and draw it
-		if((textCursorX>getWidth()-15)||(newLine)||(newCheck))
-		{
-			newCheck = false;
 			
-			if(bold==2){bold=0;current_color = color2;current_font = (eFont)(font+1);} else
+		if((text_cursor_x>getWidth()-10)||(new_line)||(new_check))
+		{
+			new_check = false;
+			
+			if(((bold==1)&&(text_cursor_x>getWidth()-10))||(bold==2))
+			{
+				if(bold==2)
+					bold=0;
+				current_color = color2;
+				current_font = (eFont)(font+1);
+			} else
 			{
 				current_color = color1;
 				current_font = font;
 			}
 			std::ostringstream realstring;
 			realstring.str("");
-			for(unsigned int j = firstCharPosition; j < lastCharPosition; j++)
+			for(unsigned int j = first_char_position; j < last_char_position; j++)
 			{
 				if((text[j]=='$')||(text[j]=='#')||(text[j]=='&')||(text[j]=='@')||(text[j]=='~')||(text[j]<32))
 					continue;
@@ -249,54 +273,93 @@ void UI_LongText::updateText(const std::string& lt_text)
 			}
 			if(realstring.str().length()>0)
 			{
-			
-			textCursorX = firstTextCursorX + UI_Object::theme.lookUpFont(current_font)->GetTextExtent(realstring.str()).GetWidth() ;
-			unsigned int height = UI_Object::theme.lookUpFont(current_font)->GetTextExtent(realstring.str()).GetHeight();
-			if(textbutton==3)
-			{
-				textbutton=0;
-				longNumber.push_back(atoi(realstring.str().c_str()));
-			} else
-			if(textbutton==2)
-			{
-				UI_Button* t = new UI_Button(this, Rect(Point(firstTextCursorX, currentRow-5), Size(0, 0)), Size(0, 0), button, false, PRESS_BUTTON_MODE, realstring.str(), DO_NOT_ADJUST, (eFont)(current_font+1), AUTO_SIZE);
-				longButton.push_back(t);
-			} else if(bitmap==2)
-			{
-				bitmap=0;
-				UI_Bitmap* t = new UI_Bitmap(this, Rect(Point(firstTextCursorX, currentRow), Size(0, 0)), Size(0, 0), (eBitmap)(NULL_BITMAP+atoi(realstring.str().c_str())));
-				longBitmap.push_back(t);
-				textCursorX-= UI_Object::theme.lookUpFont(current_font)->GetTextExtent(realstring.str()).GetWidth();
-				// TODO... ein Zaehler mit linkerRand und linkerRandEnde machen
-				textCursorX+=t->getBitmapWidth();
-				bitmapLeftBorder = textCursorX;
-				bitmapLowerBorder = currentRow+3+t->getBitmapHeight();
-			} else
-			{
-				UI_StaticText* t = new UI_StaticText(this, realstring.str(), Rect(firstTextCursorX, currentRow+(maxdy-height)/2, 0,0), Size(0,0), current_color, current_font, DO_NOT_ADJUST);
-				longText.push_back(t);
-			}
-			}
-			firstCharPosition = lastCharPosition+1;
-//			i = firstCharPosition;
-			firstTextCursorX = textCursorX;
 
-			if((newLine)||(textCursorX>getWidth()-15))
+				
+				if((textbutton==3)||(textbutton==5))
+				{
+					longNumber.push_back(atoi(realstring.str().c_str()));
+					text_cursor_x = first_text_cursor_x;
+					if(textbutton==5)
+						longNumber.push_back(atoi(realstring.str().c_str()));
+					textbutton=0;
+				} else if((textbutton==2)||(textbutton==4))
+				{
+					unsigned int height = UI_Object::theme.lookUpFont((eFont)(font+3))->GetTextExtent(realstring.str()).GetHeight();
+					unsigned int ty;
+					if(current_row+maxdy/2 < height/2)
+						ty = 0;
+					else ty = current_row+maxdy/2-height/2+2;
+					UI_Button* t = new UI_Button(scrollBar==NULL?this:scrollBar, Rect(p+Point(first_text_cursor_x-1, ty), Size(0, 0)), Size(0, 0), button, false, PRESS_BUTTON_MODE, realstring.str(), DO_NOT_ADJUST, (eFont)(font+3), AUTO_SIZE);
+					longButton.push_back(t);
+					text_cursor_x = first_text_cursor_x + t->getTextWidth();
+				} else if((textbutton==1)&&(!end_of_order))
+				{
+					if(text_cursor_x>getWidth()-10)
+					{
+						unsigned int height = UI_Object::theme.lookUpFont((eFont)(font+3))->GetTextExtent(realstring.str()).GetHeight();
+						unsigned int ty;
+						if(current_row+maxdy/2 < height/2)
+							ty = 0;
+						else ty = current_row+maxdy/2-height/2+2;
+						UI_Button* t = new UI_Button(scrollBar==NULL?this:scrollBar, Rect(p+Point(first_text_cursor_x-1, ty), Size(0, 0)), Size(0, 0), button, false, PRESS_BUTTON_MODE, realstring.str(), DO_NOT_ADJUST, (eFont)(font+3), AUTO_SIZE);
+						longButton.push_back(t);
+						textbutton=3;
+					} else continue;
+				} else if(bitmap==2)
+				{
+					bitmap=0;
+					
+					UI_Bitmap* t = new UI_Bitmap(scrollBar==NULL?this:scrollBar, Rect(p+Point(first_text_cursor_x, current_row), Size(0, 0)), Size(0, 0), (eBitmap)(NULL_BITMAP+atoi(realstring.str().c_str())));
+					if(t->getBitmapHeight() < maxdy)
+						t->setOriginalPosition(t->getOriginalPosition() + Size(0, 1+(maxdy - t->getBitmapHeight())/2));
+					longBitmap.push_back(t);
+					text_cursor_x-= UI_Object::theme.lookUpFont(current_font)->GetTextExtent(realstring.str()).GetWidth();
+					// TODO... ein Zaehler mit linkerRand und linkerRandEnde machen
+					text_cursor_x+=t->getBitmapWidth();
+					bitmap_left_border = text_cursor_x;
+					bitmap_lower_border = current_row+t->getBitmapHeight();
+				} else
+				{
+					unsigned int height = UI_Object::theme.lookUpFont(current_font)->GetTextExtent(realstring.str()).GetHeight();
+					unsigned int ty;
+					if(current_row+maxdy/2 < height/2)
+						ty = 0;
+					else ty = current_row+maxdy/2-height/2+2;
+					UI_StaticText* t = new UI_StaticText(scrollBar==NULL?this:scrollBar, realstring.str(), Rect(p+Point(first_text_cursor_x, ty), Size(0,0)), Size(0,0), current_color, current_font, DO_NOT_ADJUST);
+					longText.push_back(t);
+					text_cursor_x = first_text_cursor_x + UI_Object::theme.lookUpFont(current_font)->GetTextExtent(realstring.str()).GetWidth() ;
+				}
+			}
+			first_char_position = last_char_position;
+			first_text_cursor_x = text_cursor_x;
+
+			if((new_line)||(text_cursor_x>getWidth()-10))
 			{
-				newLine = false;
-				currentRow+=maxdy;
-				lastCharPosition = 0;
-				if(currentRow >= bitmapLowerBorder)
-					bitmapLeftBorder = 5;
-				firstTextCursorX = bitmapLeftBorder;
-				textCursorX = bitmapLeftBorder;
+				new_line = false;
+				current_row+=maxdy;
+				last_char_position = 0;
+				if(current_row >= bitmap_lower_border)
+					bitmap_left_border = 5;
+				first_text_cursor_x = bitmap_left_border;
+				text_cursor_x = bitmap_left_border;
 // this must be resetted!
-				mustNotMakeNewLine = false;
+				must_not_make_new_line = false;
 			}
 		}
 	}
-
 	textWasChanged=true;
+}
+
+const unsigned int UI_LongText::getTextHeight() const
+{
+	unsigned int text_height = 0;
+	if((longText.size()>0)&&(text_height < longText.back()->getRelativeLowerBound()))
+		text_height = longText.back()->getRelativeLowerBound();
+	if((longButton.size()>0)&&(text_height < longButton.back()->getRelativeLowerBound()))
+		text_height = longButton.back()->getRelativeLowerBound();
+	if((longBitmap.size()>0)&&(text_height < longBitmap.back()->getRelativeLowerBound()))
+		text_height = longBitmap.back()->getRelativeLowerBound();
+	return(text_height);
 }
 
 const signed int UI_LongText::getPressed() const
@@ -317,5 +380,4 @@ void UI_LongText::reloadStrings()
 {
 	updateText(text);
 }
-
 

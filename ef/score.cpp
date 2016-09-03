@@ -5,12 +5,13 @@
 ScoreWindow::ScoreWindow(UI_Object* score_parent, const unsigned int game_number, const unsigned int game_max) :
 	UI_Window(score_parent, TIMER_WINDOW_TITLE_STRING, theme.lookUpGameRect(SCORE_WINDOW, game_number, game_max), theme.lookUpGameMaxHeight(SCORE_WINDOW, game_number, game_max), NOT_SCROLLED),
 // TODO irgendwas stimmt hier mit der Hoehe nicht
-//	resetButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), RESET_BUILD_ORDER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, CENTER_RIGHT, SMALL_BOLD_FONT, AUTO_SIZE))
 	players(0),
 	maxPlayer(0),
 	mapMenuButton(new UI_Button(this, Rect(Point(10, 20), Size(100, 50)), Size(5,5), MY_BUTTON, false, STATIC_BUTTON_MODE, database.getMap(0)->getName(), ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	mapMenu(new MapMenu(mapMenuButton, Rect(10, 10, 100, 0), Size(0, 0), DO_NOT_ADJUST)),
-	assignMap(-1)
+	assignMap(-1),
+	gameNumber(0),
+	gameMax(0)
 {
 /*TODO
 
@@ -26,7 +27,6 @@ ScoreWindow::ScoreWindow(UI_Object* score_parent, const unsigned int game_number
 		player[i]->Hide();
 	}
 //		goalsFulfilledText[i] = new UI_StaticText(this, getRelativeClientRect() + Point(100, i * 20), IMPORTANT_COLOR, SMALL_BOLD_FONT, NO_TEXT_MODE); TODO => tooltip
-//      resetButton->updateToolTip(RESET_BUILD_ORDER_TOOLTIP_STRING);
 //	goalsFulfilledText->updateToolTip(GOALS_FULFILLED_TOOLTIP_STRING);
 	resetData(); // TODO
 	addHelpButton(DESCRIPTION_SCORE_WINDOW_CHAPTER);
@@ -57,7 +57,16 @@ ScoreWindow::~ScoreWindow()
 	delete mapMenuButton;
 //	delete menuRadio;
 	delete mapMenu;
-//	delete resetButton;
+}
+
+void ScoreWindow::resetPlayerTime(unsigned int player_number)
+{
+#ifdef _SCC_DEBUG
+	if(player_number>=MAX_PLAYER)	{
+		toLog("DEBUG: (ScoreWindow::resetPlayerTime): player_number out of range.");return;
+	}
+#endif
+	player[player_number]->resetTime();
 }
 
 void ScoreWindow::resetData()
@@ -129,12 +138,6 @@ void ScoreWindow::process()
 // Alle Player durchlaufen, evtl Hoehe anpassen: 
 
 	fitItemToRelativeClientRect(Rect(0,16*(line-1),10,12)/*playerText[i]->getAbsoluteRect()*/,2); // TODO
-
-//        if(resetButton->isLeftClicked())
-//      {
-//            setResetFlag();
-//		UI_Object::msgList.push_back("Resetted build order...");
-//      }
 }
 
 

@@ -79,7 +79,7 @@ class DC
 		
 		const bool SetColorKey(const Uint32 flag, const Color key) const;
 		const bool SetAlpha(const Uint32 flag, const Uint8 alpha) const;
-		static void updateScreen(SDL_Surface* src);
+		void updateScreen();
 		
 		void Blit(SDL_Surface* src, SDL_Rect& dstrect) const;
 		
@@ -141,10 +141,12 @@ class DC
 		void setPressedRectangle(const bool pressed = true);
 
 		static void addRectangle(const Rect& rect);
+	private:
+
 		static unsigned int changedRectangles;
 		static SDL_Rect changedRectangle[200];
 		static Uint16 max_x, max_y;
-	private:
+
 		SDL_Surface* surface;
 		void SetSurface(SDL_Surface* sdl_surface) {
 			if(surface) 
@@ -273,10 +275,6 @@ inline bool DC::SaveBMP(const std::string& file) const {
 
 inline void DC::DrawLine(const Point& p1, const Point& p2) const {
 	DrawLine(p1.x, p1.y, p2.x, p2.y);
-}
-
-inline void DC::DrawText(const std::string& text, const signed int x, const signed int y) const {
-	font->DrawText(surface, textColor, text, x, y);
 }
 
 inline void DC::DrawText(const std::string& text, const Point& p) const {

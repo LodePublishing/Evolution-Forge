@@ -5,6 +5,16 @@
 #include "../ui/configuration.hpp"
 #include "../core/configuration.hpp"
 
+enum eTicks
+{
+	PROCESS_TICKS,
+	DRAW_TICKS,
+	GENERATION_TICKS,
+	MESSAGE_TICKS,
+	IDLE_TICKS,
+	
+	MAX_TICK_TYPES
+};
 
 int main(int argc, char *argv[])
 {
@@ -22,6 +32,10 @@ int main(int argc, char *argv[])
 	std::list<std::string> stringFiles = database.findFiles("settings", "strings", "");
 	for(std::list<std::string>::iterator j = stringFiles.begin(); j!=stringFiles.end(); ++j)
 		UI_Object::theme.loadStringFile(*j);
+	stringFiles = database.findFiles("settings", "help", "");
+	for(std::list<std::string>::iterator j = stringFiles.begin(); j!=stringFiles.end(); ++j)
+		UI_Object::theme.loadHelpChapterStringFile(*j);
+	
 	toLog(UI_Object::theme.lookUpString(START_LOAD_CONFIGURATION_STRING));
 	coreConfiguration.loadConfigurationFile();
 	efConfiguration.loadConfigurationFile();
@@ -45,6 +59,16 @@ int main(int argc, char *argv[])
 
 
 // ------ INIT SDL AND WINDOW ------
+	{
+		std::ostringstream os;
+		os.str("");
+		std::list<std::string> s = DC::getAvailibleDrivers();
+		for(std::list<std::string>::const_iterator i = s.begin(); i!=s.end(); i++)
+			os << *i << " ";
+		toLog("Availible drivers: " + os.str());
+	}
+
+	
 	switch(DC::chooseDriver(current_driver))
 	{
 		case NO_DRIVER_ERROR:toLog(UI_Object::theme.lookUpFormattedString(START_SDL_USING_DRIVER_STRING, current_driver));break;
@@ -62,12 +86,6 @@ int main(int argc, char *argv[])
 	DC* screen = new DC(UI_Object::theme.getResolution(), UI_Object::theme.getBitDepth(), (efConfiguration.isFullScreen()?SDL_FULLSCREEN:0)|SDL_HWSURFACE|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC|SDL_DOUBLEBUF, SDL_INIT_NOPARACHUTE);
 
 	{
-		std::ostringstream os;
-		os.str("");
-		std::list<std::string> s = screen->getAvailibleDrivers();
-		for(std::list<std::string>::const_iterator i = s.begin(); i!=s.end(); i++)
-			os << *i << " ";
-		toLog("Availible drivers: " + os.str());		
 	}
 
 		
@@ -110,27 +128,54 @@ int main(int argc, char *argv[])
 // ------- END INIT SDL_TTF -------
 
 // ------ CAP FRAMERATE ------
+	toLog(UI_Object::theme.lookUpString(START_INIT_FRAMERATE_STRING)); 
 	FPS* fps = new FPS();
 	fps->setDesiredFramerate(efConfiguration.getDesiredFramerate());
 	fps->setDesiredCPU(efConfiguration.getDesiredCPU());
+	unsigned int refresh = fps->getFramesPerGeneration();
+	
+	const unsigned int TICK_INTERVALL = 2;
+	long unsigned int current_ticks = 500;
+	long unsigned int ticks[MAX_TICK_TYPES][TICK_INTERVALL];
+	for(unsigned int i = MAX_TICK_TYPES;i--;)
+		for(unsigned int j = TICK_INTERVALL;j--;)
+			ticks[i][j] = 10;
+
+	unsigned int frames_count[TICK_INTERVALL];
+
+	for(unsigned int j = TICK_INTERVALL;j--;)
+		frames_count[j]=5;
+	unsigned int frames_per_second = 10;
+
+
+	signed int percent[MAX_TICK_TYPES];
+
+	for(unsigned int i = MAX_TICK_TYPES; i--;)
+		percent[i] = 10;
+	
+	long unsigned int total_ticks=500;
+
+	unsigned int tick_intervall = 0;
+
+	UI_Object::focus=NULL;
+	unsigned int frames_per_generation = 0;
+	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 // ------ END CAP FRAMERATE
 
 
 // ------- INIT GRAPHIC ENGINE ------
 	toLog(UI_Object::theme.lookUpString(START_INIT_GRAPHIC_ENGINE_CORE_STRING));
 	Main m(screen); 
+	toLog(UI_Object::theme.lookUpString(START_MAIN_INIT_COMPLETE_STRING));
 
 	unsigned int screenshot = 100;
-	unsigned int refresh = fps->getFramesPerGeneration();
 //	if(efConfiguration.isAutoSaveRuns())
 //		m.startAllOptimizing();
 //	else
 //		m.stopAllOptimizing(); TODO
 
-	bool endrun = false;
 	unsigned int screenCapturing=0;
 
-	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 
 // ------ END INIT GRAPHIC ENGINE ------
 
@@ -151,7 +196,6 @@ int main(int argc, char *argv[])
 		screen->DrawEdgedRoundedRectangle(t,6);
 //		screen->DrawBitmap(claw, resolution.w - claw->w, resolution.h - claw->h);
 		introText.draw(screen);
-		screen->updateScreen();
 		fps->delay();
 		while (SDL_PollEvent(&event))
 		{
@@ -168,21 +212,13 @@ int main(int argc, char *argv[])
 
 // ------ END INTRO ------
 
-	long unsigned int current_ticks = 500;
-	long unsigned int process_ticks = 100;
-	long unsigned int draw_ticks = 100;
-	long unsigned int message_ticks = 10;
-	long unsigned int generation_ticks = 190;
-	long unsigned int idle_ticks = 100;
-	long unsigned int total_ticks=500;
-
-	UI_Object::focus=NULL;
-
+	toLog(UI_Object::theme.lookUpString(START_SYSTEM_READY_STRING));
 // MAIN LOOP
 	while(true)
 	{
-// ------ DRAWING ------
+//TODO
 		UI_Object::redrawnObjects = 0;
+// ------ DRAWING ------
 //		for(std::list<UI_Object*>::iterator i = UI_Object::processArray.begin(); i!=UI_Object::processArray.end(); ++i)
 //			(*i)->process();
 //		{
@@ -191,97 +227,10 @@ int main(int argc, char *argv[])
 	
 //		UI_Object::copyToNextProcessArray();
 		
-		current_ticks = SDL_GetTicks();
-		m.process();
-		process_ticks = SDL_GetTicks() - current_ticks;
-		current_ticks = SDL_GetTicks();
-		m.draw(screen);
-	
-// ------ END DRAWING ------
-// ------ FPS DEBUG
-		{
-			Point p = Point(20, resolution.GetHeight() - 110);
-			screen->SetTextForeground(DC::toSDL_Color(255, 20, 20));
-			screen->SetFont(UI_Object::theme.lookUpFont(MIDDLE_BOLD_FONT));
-			screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
-			screen->DrawRectangle(Rect(p, Size(200, 80)));
-			DC::addRectangle(Rect(p, Size(200, 80)));
-
-			std::ostringstream os;
-			os.str("");
-			os << "Objects: (" << UI_Object::redrawnObjects << "/" << DC::changedRectangles << ")   FPS: " << efConfiguration.getCurrentFramerate();
-			screen->DrawText(os.str(), p + Size(20, 5));
-
-			
-			os.str("");
-			os << "process() " << process_ticks*100/total_ticks << "%";screen->DrawText(os.str(), p + Size(20, 25));os.str("");
-			os << "newGeneration() " << generation_ticks*100/total_ticks << "%";screen->DrawText(os.str(), p + Size(20, 35));os.str("");
-			os << "draw() " << draw_ticks*100/total_ticks << "%";screen->DrawText(os.str(), p + Size(20, 45));os.str("");	
-			os << "idle() " << idle_ticks*100/total_ticks << "%";screen->DrawText(os.str(), p + Size(20, 55));os.str("");	
-			os << "message() " << message_ticks*100/total_ticks << "%";screen->DrawText(os.str(), p + Size(20, 65));os.str("");	
-		}
-		screen->SetBrush(*UI_Object::theme.lookUpBrush(TRANSPARENT_BRUSH));
-		for(int i = 0; i < DC::changedRectangles; i++)
-		{
-			screen->SetPen(*UI_Object::theme.lookUpPen((ePen)(NULL_PEN+(rand()%MAX_PENS))));
-			screen->DrawEmptyRectangle(DC::changedRectangle[i].x, DC::changedRectangle[i].y, DC::changedRectangle[i].w, DC::changedRectangle[i].h);
-		}
-// ------ END FPS DEBUG
-		DC::updateScreen(screen->GetSurface());
-		draw_ticks = SDL_GetTicks() - current_ticks;
-		current_ticks = SDL_GetTicks();
-
-// ------ SCREENCAPTURE ------ 
-/*                if(screenCapturing==100) {
-			std::ostringstream os;os.str("");os << "shot" << screenshot << ".bmp";
-                        SDL_SaveBMP(screen->GetSurface() , os.str().c_str());
-			++screenshot;
-		}
-		if(screenCapturing>0) {
-			--screenCapturing;
-			std::ostringstream os;os.str("");os << "shot" << (screenshot-1) << ".bmp" << " saved (" << (resolution.GetWidth() * resolution.GetHeight() * (int)(screen->GetSurface()->format->BitsPerPixel))/1024 << "kb)";
-                        screen->DrawText(os.str(), 50, 300);
-                }*/
-// ------ END SCREENCAPTURE -----
 		
 		
-// ------ FRAMERATE AND CALCULATION ------	
-		unsigned int frames_per_generation = fps->getFramesPerGeneration();
-		unsigned int frames_per_second = fps->getCurrentFramerate();
-		bool is_optimizing = (!endrun)&&((/*(!UI_Object::editFieldActive())&&*/(m.isAnyOptimizing())));//TODO
-	
-		fps->setAdaptFramesPerGeneration(is_optimizing);
-		fps->setDesiredFramerate(efConfiguration.getDesiredFramerate());
-		fps->setDesiredCPU(efConfiguration.getDesiredCPU());
-		fps->setTotalTicks(total_ticks);
-		fps->delay();
-		efConfiguration.setCurrentFramerate(frames_per_second);
-		efConfiguration.setCurrentFramesPerGeneration(frames_per_generation);
-	
-		idle_ticks = SDL_GetTicks() - current_ticks;
 		current_ticks = SDL_GetTicks();
-			
-		if(is_optimizing)	
-		{
-			refresh += 100;
-			while((refresh > frames_per_generation))// && (!(endrun = database.getIsNewRun()))) // TODO
-			{
-				m.OnIdle();
-				if(frames_per_generation > refresh)
-					refresh = 0;
-				else
-					refresh -= frames_per_generation;
-			}
-		}
-		if(endrun)
-			endrun = m.newRun();
-		endrun=false; // TODO
-// ------ END FRAMERATE AND CALCULATION 
-		generation_ticks = SDL_GetTicks() - current_ticks;
-		current_ticks = SDL_GetTicks();	
-
 		bool ignore_rest = false;
-
 		while (SDL_PollEvent(&event))
 		{
 			switch (event.type)
@@ -402,6 +351,7 @@ int main(int argc, char *argv[])
 									UI_Object::theme.updateColors(screen->GetSurface());
 									toLog(UI_Object::theme.lookUpFormattedString(CHANGED_BIT_DEPTH_STRING, (unsigned int)screen->GetSurface()->format->BitsPerPixel));
 									ignore_rest=true;
+									
 								}
 								break;
 							
@@ -414,19 +364,19 @@ int main(int argc, char *argv[])
 				default:break;
 			}
 		}
-
+		ticks[MESSAGE_TICKS][tick_intervall] = SDL_GetTicks() - current_ticks;
+		current_ticks = SDL_GetTicks();
+		m.process();
+	
 		if(m.hasBitDepthChanged())
 		{
 			screen->setBitDepth(UI_Object::theme.getBitDepth());
 			UI_Object::theme.updateColors(screen->GetSurface());
 			toLog(UI_Object::theme.lookUpFormattedString(CHANGED_BIT_DEPTH_STRING, (unsigned int)screen->GetSurface()->format->BitsPerPixel));
-			screen->setResolution(UI_Object::theme.getResolution());
-			resolution = screen->getResolutionSize();
-			UI_Object::setResolution(resolution);
-			m.reloadOriginalSize(); //~
-			UI_Button::resetButton();
+			m.needRedraw();
 			UI_Object::resetWindow();
-		}	
+			
+		}
 		if(m.hasResolutionChanged())
 		{
 			screen->setResolution(UI_Object::theme.getResolution());
@@ -437,7 +387,6 @@ int main(int argc, char *argv[])
  			os << resolution.GetWidth() << "x" << resolution.GetHeight();
 			toLog(UI_Object::theme.lookUpFormattedString(CHANGED_RESOLUTION_STRING, os.str()));
 			m.reloadOriginalSize();
-			UI_Button::resetButton();
 			UI_Object::resetWindow();
 		}
 		if(m.hasFullScreenChanged())
@@ -445,8 +394,155 @@ int main(int argc, char *argv[])
 			screen->setFullscreen(efConfiguration.isFullScreen());
 			toLog(UI_Object::theme.lookUpString(efConfiguration.isFullScreen()?START_SET_FULLSCREEN_MODE_STRING:START_SET_WINDOW_MODE_STRING));
 		}
-		message_ticks = SDL_GetTicks() - current_ticks;
-		total_ticks = process_ticks + generation_ticks + draw_ticks + message_ticks + idle_ticks+1;
+		if(m.hasThemeChanged())
+		{
+			m.needRedraw();
+		}
+
+		m.resetDataChange();
+
+		ticks[PROCESS_TICKS][tick_intervall] = SDL_GetTicks() - current_ticks;
+		current_ticks = SDL_GetTicks();	
+
+// ------ DRAWING AND PROCESSING ------
+
+		m.draw(screen);
+		if(uiConfiguration.isUnloadGraphics())
+			UI_Object::theme.unloadGraphics();
+// ------ END DRAWING ------
+
+//
+//
+// 
+// ------ FPS DEBUG 
+
+		if(efConfiguration.isShowDebug())
+		{			
+			screen->SetPen(*UI_Object::theme.lookUpPen(NULL_PEN));
+			
+			Point p = Point(20, resolution.GetHeight() - 110);
+			screen->SetTextForeground(DC::toSDL_Color(255, 20, 20));
+			screen->SetFont(UI_Object::theme.lookUpFont(MIDDLE_BOLD_FONT));
+			screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
+			screen->DrawRectangle(Rect(p, Size(200, 80)));
+			DC::addRectangle(Rect(p, Size(200, 80)));
+
+			std::ostringstream os;
+//			os.str("");
+//			os << "Objects: (" << UI_Object::redrawnObjects << "/" << DC::changedRectangles << ")   FPS: " << efConfiguration.getCurrentFramerate();
+//			screen->DrawText(os.str(), p + Size(20, 5));
+			
+			
+			os.str("");
+		
+screen->SetBrush(*UI_Object::theme.lookUpBrush(BRIGHT_UNIT_TYPE_1_BRUSH));screen->DrawRectangle(Rect(p + Size(10, 24), Size(percent[PROCESS_TICKS], 10)));
+os << "process() " << percent[PROCESS_TICKS] << "%";screen->DrawText(os.str(), p + Size(20, 25));os.str("");
+
+screen->SetBrush(*UI_Object::theme.lookUpBrush(BRIGHT_UNIT_TYPE_2_BRUSH));screen->DrawRectangle(Rect(p + Size(10, 34), Size(percent[GENERATION_TICKS], 10)));
+os << "newGeneration() " << percent[GENERATION_TICKS] << "%";screen->DrawText(os.str(), p + Size(20, 35));os.str("");
+
+screen->SetBrush(*UI_Object::theme.lookUpBrush(BRIGHT_UNIT_TYPE_3_BRUSH));screen->DrawRectangle(Rect(p + Size(10, 44), Size(percent[DRAW_TICKS], 10)));
+os << "draw() " << percent[DRAW_TICKS] << "%";screen->DrawText(os.str(), p + Size(20, 45));os.str("");	
+
+screen->SetBrush(*UI_Object::theme.lookUpBrush(BRIGHT_UNIT_TYPE_4_BRUSH));screen->DrawRectangle(Rect(p + Size(10, 54), Size(percent[MESSAGE_TICKS], 10)));
+os << "message() " << percent[MESSAGE_TICKS] << "%";screen->DrawText(os.str(), p + Size(20, 55));os.str("");
+
+screen->SetBrush(*UI_Object::theme.lookUpBrush(BRIGHT_UNIT_TYPE_5_BRUSH));screen->DrawRectangle(Rect(p + Size(10, 64), Size(percent[IDLE_TICKS], 10)));
+os << "idle() " << percent[IDLE_TICKS] << "%";screen->DrawText(os.str(), p + Size(20, 65));os.str("");	
+		
+		}
+// ------ END FPS DEBUG
+// ------ SCREENCAPTURE ------ 
+/*                if(screenCapturing==100) {
+			std::ostringstream os;os.str("");os << "shot" << screenshot << ".bmp";
+                        SDL_SaveBMP(screen->GetSurface() , os.str().c_str());
+			++screenshot;
+		}
+		if(screenCapturing>0) {
+			--screenCapturing;
+			std::ostringstream os;os.str("");os << "shot" << (screenshot-1) << ".bmp" << " saved (" << (resolution.GetWidth() * resolution.GetHeight() * (int)(screen->GetSurface()->format->BitsPerPixel))/1024 << "kb)";
+                        screen->DrawText(os.str(), 50, 300);
+                }*/
+// ------ END SCREENCAPTURE -----
+		screen->updateScreen();
+		ticks[DRAW_TICKS][tick_intervall] = SDL_GetTicks() - current_ticks;
+		
+		current_ticks = SDL_GetTicks();
+		
+		
+// ------ FRAMERATE AND CALCULATION ------	
+		frames_per_generation = fps->getFramesPerGeneration();
+		frames_count[tick_intervall] = fps->getCurrentFramerate();
+	
+		fps->setAdaptFramesPerGeneration(m.isAnyOptimizing());
+		fps->setDesiredFramerate(efConfiguration.getDesiredFramerate());
+		fps->setDesiredCPU(efConfiguration.getDesiredCPU());
+		fps->setTotalTicks(1+total_ticks/TICK_INTERVALL);
+		fps->delay();
+	
+		ticks[IDLE_TICKS][tick_intervall] = SDL_GetTicks() - current_ticks;
+		current_ticks = SDL_GetTicks();
+			
+		{
+			refresh += 100;
+			while((refresh > frames_per_generation))
+			{
+				m.newGeneration();
+				if(frames_per_generation > refresh)
+					refresh = 0;
+				else
+					refresh -= frames_per_generation;
+			}
+		}
+// ------ END FRAMERATE AND CALCULATION 
+		ticks[GENERATION_TICKS][tick_intervall] = SDL_GetTicks() - current_ticks;
+
+
+		
+		tick_intervall++;
+		if(tick_intervall >= TICK_INTERVALL)
+			tick_intervall = 0;
+		
+		total_ticks = 0;
+		unsigned int total_this_ticks[MAX_TICK_TYPES];
+		for(unsigned int i = MAX_TICK_TYPES;i--;)
+		{
+			total_this_ticks[i]=0;
+			for(unsigned int j = TICK_INTERVALL;j--;)
+				total_this_ticks[i] += ticks[i][j];
+			total_ticks+=total_this_ticks[i];
+			
+		}
+		total_ticks+=1;
+
+		unsigned int total_frames = 0;
+		for(unsigned int j = TICK_INTERVALL;j--;)
+			total_frames += frames_count[j];
+		total_frames /= TICK_INTERVALL;
+
+		if(frames_per_second > total_frames)
+			frames_per_second -= (frames_per_second - total_frames)/5 + 1;
+		else
+		if(frames_per_second < total_frames)
+			frames_per_second += (total_frames - frames_per_second)/5 + 1;
+		if(frames_per_second < 0) frames_per_second = 0;
+		
+
+		for(unsigned int i = MAX_TICK_TYPES;i--;)
+		{
+			if(percent[i] > total_this_ticks[i] * 100 / total_ticks)
+				percent[i] -= (percent[i] - total_this_ticks[i] * 100 / total_ticks)/5 + 1;
+			else
+			if(percent[i] < total_this_ticks[i] * 100 / total_ticks)
+				percent[i] += (total_this_ticks[i] * 100 / total_ticks - percent[i])/5 + 1;
+			if(percent[i] < 0) percent[i]=0;
+			if(percent[i] > 100) percent[i]=100;
+		}
+	
+		efConfiguration.setCurrentFramerate(frames_per_second);
+		efConfiguration.setCurrentFramesPerGeneration(frames_per_generation);
+	
+		
 	}
 	return(EXIT_SUCCESS);
 }

@@ -29,6 +29,7 @@ class SOUP
 // 		TODO evtl ueber Rueckgabewert
 // 		initializes the soup (primarily it does some error checking whether all is initialized and allocates the memory for the players
 		void initSoup(START* (*start)[MAX_INTERNAL_PLAYER]);
+		void initSoup(unsigned int player, START* start);
 //one generation, copies stats and results of best individual and average values of the soup in 'best'
 		const bool newGeneration(ANABUILDORDER* previous_build_order[MAX_PLAYER], const UNIT (*startForce)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]); 
 		const bool recalculateGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER], const UNIT (*startForce)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]);

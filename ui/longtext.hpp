@@ -9,7 +9,7 @@ class UI_LongText : public UI_Object
 	public:
 		UI_LongText& operator=(const UI_LongText& object);
 		UI_LongText(const UI_LongText& object);
-		UI_LongText(UI_Object* lt_parent, const Rect lt_pos, const Size distance_bottom_right, const std::string& lt_text, const eColor lt_color1, const eColor lt_color2, const eFont lt_font, const eButtonColorsType button, const ePositionMode lt_mode = DO_NOT_ADJUST, const eAutoSize auto_size=NO_AUTO_SIZE);
+		UI_LongText(UI_Object* lt_parent, const Rect lt_pos, const Size distance_bottom_right, const std::string& lt_text, const eColor lt_color1, const eColor lt_color2, const eFont lt_font, const eButtonColorsType button, UI_Object* scroll_bar=NULL, const ePositionMode lt_mode = DO_NOT_ADJUST, const eAutoSize auto_size=NO_AUTO_SIZE);
 
 		~UI_LongText();
 		void updateText(const std::string& lt_text);
@@ -21,9 +21,12 @@ class UI_LongText : public UI_Object
 		void process();
 
 		const signed int getPressed() const;
+		const unsigned int getTextHeight() const;
+		
 //	protected:
 //		eTextMode  mode; 
 	private:
+		UI_Object* scrollBar;
 		std::list<UI_StaticText*> longText; // parsed text
 		std::list<UI_Button*> longButton; // parsed buttons
 		std::list<signed int> longNumber; // numbers of parsed buttons

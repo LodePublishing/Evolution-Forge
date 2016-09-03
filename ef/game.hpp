@@ -35,9 +35,12 @@ class Game : public UI_Window
 		void setTotalGeneration(const unsigned int total_generations);
 
 		void assignMap(const BASIC_MAP* game_map);
+		void assignRace(const unsigned int player_num, const eRace race);
+		void resetPlayer(const unsigned int player_num);
 		void setHarvestSpeed(const unsigned int player_num, const eRace harvest_race, const HARVEST_SPEED* harvest_speed);
 		void setStartRace(const unsigned int player_num, const eRace player_race);
 		void initSoup();
+		void initSoup(unsigned int player_number);
 		void assignStartCondition(const unsigned int player_num, const START_CONDITION* start_condition);
 		void setStartPosition(const unsigned int player_num, const unsigned int player_position);
 		void assignGoal(const unsigned int player_num, const GOAL_ENTRY* player_goal);
@@ -52,11 +55,17 @@ class Game : public UI_Window
 
 		const bool isSplitGame() const;
 		const bool isRemoveGame() const;
+
+		const bool getResetFlag();
+		void setResetFlag(const bool flag=true);
+	
 	private:
+		bool resetFlag;
 		SOUP* soup;
 		START* start[MAX_INTERNAL_PLAYER];
 		Player* player[MAX_PLAYER];
 		ANABUILDORDER* anarace[MAX_PLAYER];
+		unsigned int oldCode[MAX_PLAYER][MAX_LENGTH];
 		UNIT startForce[MAX_INTERNAL_PLAYER][MAX_LOCATIONS];
 
 		void setBoHasChanged(const bool bo_has_changed = true);
@@ -146,17 +155,6 @@ inline void Game::setStartRace(const unsigned int player_num, const eRace player
 	start[player_num]->setPlayerRace(player_race);
 }
 
-inline void Game::assignStartCondition(const unsigned int player_num, const START_CONDITION* start_condition) {
-#ifdef _SCC_DEBUG
-	if((player_num < 1) || (player_num > mapPlayerCount)) {
-		toLog("DEBUG: (Game::assignStartCondition): Value player_num out of range.");return;
-	}                       
-#endif
-	start[player_num]->assignStartCondition(start_condition);
-}
-
-
-
 inline void Game::setStartPosition(const unsigned int player_num, const unsigned int player_position) {
 #ifdef _SCC_DEBUG
         if((player_num < 1) || (player_num > mapPlayerCount)) {
@@ -193,6 +191,14 @@ inline const bool Game::isOptimizing(const unsigned int player_number) const {
 
 inline void Game::resetData() {
 	boHasChanged = true;
+}
+
+inline void Game::setResetFlag(const bool flag) {
+	resetFlag=flag;
+}
+
+inline const bool Game::getResetFlag() {
+	return(resetFlag);
 }
 
 #endif

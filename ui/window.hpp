@@ -4,12 +4,6 @@
 #include "radio.hpp"
 #include "scrollbar.hpp"
 
-enum eIsScrolled
-{
-	NOT_SCROLLED,
-	SCROLLED
-};
-
 enum eIsTabbed
 {
 	NOT_TABBED,
@@ -34,6 +28,7 @@ enum eTabs
 	HELP_TAB=27,
 	SETTINGS_TAB,
 	MAP_TAB,
+	DATABASE_TAB,	
 	MAX_TABS
 };
 
@@ -67,7 +62,6 @@ class UI_Window : public UI_Object
 		
 		void addTab(UI_Button* tab_button, const unsigned int button_id);
 		void removeTab(const unsigned int button_id);
-		const bool tabWasChanged() const;
 
 		void process();
 
@@ -85,28 +79,24 @@ class UI_Window : public UI_Object
 		static void setChangedFlag(const bool flag=true);
 		static void changeAccepted();
 
-		static const bool getResetFlag();
-		static void setResetFlag(const bool flag=true);
-		static void resetAccepted();
-
 		void setTitleParameter(const std::string& p);
 
-		const unsigned int getCurrentTab() const;
+		const signed int getCurrentTab() const;
 		void forcePressTab(const unsigned int press_tab);
 
 		static unsigned int rectnumber;
 		const bool fitItemToRelativeClientRect(const Rect& rectangle, const unsigned int adjust = 0);
 		const bool fitItemToAbsoluteClientRect(const Rect& rectangle, const unsigned int adjust = 0);
 
-		UI_Object* getScrollbar() const; 
+		UI_ScrollBar* getScrollBar() const;
 		const unsigned int getMaxHeight() const;
 
 		void setMaxHeight(const unsigned int max_height);
 
 		void wheelUp();
 		void wheelDown();
-		void moveScrollbarToTop();
-		void moveScrollbarToBottom();
+		void moveScrollBarToTop();
+		void moveScrollBarToBottom();
 
 		void reloadOriginalSize();
 		static signed int gotoHelpChapter;
@@ -151,10 +141,9 @@ class UI_Window : public UI_Object
 		bool highlighted;
 
 		static bool changedFlag; 
-		static bool resetFlag;
 		
 // this windows may have a scroll bar		
-		UI_Scrollbar* scrollBar;
+		UI_ScrollBar* scrollBar;
 		UI_Button* helpButton;
 		eHelpChapter helpChapter;
 };
@@ -163,7 +152,7 @@ inline const unsigned int UI_Window::getMaxHeight() const {
 	return(maxHeight);
 }
 
-inline UI_Object* UI_Window::getScrollbar() const {
+inline UI_ScrollBar* UI_Window::getScrollBar() const {
 	return(scrollBar);
 }
 
@@ -247,17 +236,7 @@ inline void UI_Window::changeAccepted() {
 	changedFlag=false;
 }
 
-inline void UI_Window::setResetFlag(const bool flag) {
-	resetFlag=flag;
-}
 
-inline const bool UI_Window::getResetFlag() {
-	return(resetFlag);
-}
-
-inline void UI_Window::resetAccepted() {
-	resetFlag=false;
-}
 
 
 #endif

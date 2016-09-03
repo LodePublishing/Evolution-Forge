@@ -1,7 +1,9 @@
 #include "game.hpp"
+#include <sstream>
 
 Game::Game(UI_Object* game_parent, const unsigned int game_number, const unsigned int game_max):
 	UI_Window(game_parent, GAME_WINDOW_TITLE_STRING, theme.lookUpGameRect(GAME_WINDOW, game_number, game_max), theme.lookUpGameMaxHeight(GAME_WINDOW, game_number, game_max), NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0,0,1280,1024), TRANSPARENT),
+	resetFlag(false),
 	soup(new SOUP()),
 	map(NULL),
 	optimizing(false),
@@ -26,6 +28,15 @@ Game::Game(UI_Object* game_parent, const unsigned int game_number, const unsigne
 	for(unsigned int i=MAX_INTERNAL_PLAYER;i--;)
 		start[i] = new START(&(startForce[i]));
 	setMode(game_number, game_max);
+	std::ostringstream os;
+	os.str("");
+	os << game_number+1;
+	setTitleParameter(os.str());
+	scoreWindow->setTitleParameter(UI_Object::theme.lookUpFormattedString(GAME_WINDOW_TITLE_STRING, os.str()));
+	
+	for(unsigned int i=MAX_PLAYER;i--;)
+		for(unsigned int j = MAX_LENGTH;j--;)
+			oldCode[i][j]=999;
 }
 
 Game::~Game()
@@ -52,7 +63,6 @@ void Game::assignMap(const BASIC_MAP* game_map)
 {
 	map = game_map;
 	mapPlayerCount = map->getMaxPlayer();
-
 //	TODO
 	for(unsigned int i = mapPlayerCount+1;i--;)
 		start[i]->assignMap(game_map);
@@ -72,11 +82,52 @@ void Game::assignMap(const BASIC_MAP* game_map)
 	setResetFlag();
 }
 
+void Game::assignStartCondition(const unsigned int player_num, const START_CONDITION* start_condition) 
+{
+#ifdef _SCC_DEBUG
+	if((player_num < 1) || (player_num > mapPlayerCount)) {
+		toLog("DEBUG: (Game::assignStartCondition): Value player_num out of range.");return;
+	}
+#endif
+	start[player_num]->assignStartCondition(start_condition);
+}
+
+void Game::assignRace(const unsigned int player_num, const eRace assigned_race)
+{
+       	anarace[player_num]->setRace(assigned_race);
+	start[player_num+1]->assignStartCondition(database.getStartCondition(anarace[player_num]->getRace(), 0)); // assign default startcondition, make a menu later
+	fillGroups();
+	anarace[player_num]->assignGoal(database.getGoal(anarace[player_num]->getRace(), 0)); // assign default goal
+	scoreWindow->setInitMode(player_num, INITIALIZED); //?
+//	setChangedFlag(); ?
+
+	initSoup(player_num);
+	newGeneration();
+	player[player_num]->resetData();
+	scoreWindow->resetPlayerTime(player_num);
+}
+
+void Game::resetPlayer(const unsigned int player_num)
+{
+	initSoup(player_num);
+	newGeneration();
+	player[player_num]->resetData();
+	scoreWindow->resetPlayerTime(player_num);
+}
+
+
 void Game::initSoup() 
 {
 // TODO pruefen ob alles initiiert wurde...
 	ANABUILDORDER::resetStaticData(); // TODO
 	soup->initSoup(&start);
+}
+
+void Game::initSoup(unsigned int player_number) 
+{
+// TODO pruefen ob alles initiiert wurde...
+	ANABUILDORDER::resetStaticData(); // TODO
+	soup->initSoup(player_number, start[player_number+1]);
 }
 
 void Game::fillGroups() 
@@ -102,13 +153,10 @@ void Game::setMode(const unsigned int game_number, const unsigned int game_max)
 		player[i]->setMode(gameNumber, gameMax, i, mapPlayerCount);
 	
 	reloadOriginalSize();
-	resetData();
+//	resetData();
 	setNeedRedrawMoved();
 	if((game_max>1)||(game_number==1))
-	{
-		UI_Button::resetButton();
 		splitGameButton->Hide();
-	}
 	else splitGameButton->Show();
 }
 
@@ -117,8 +165,8 @@ void Game::draw(DC* dc) const
 {
 	if(!isShown())
 		return;
+	UI_Object::theme.setColorTheme(UI_Object::theme.getMainColorTheme());
 	UI_Window::draw(dc);
-	UI_Object::theme.setColorTheme(DARK_BLUE_THEME);
 }
 
 void Game::setBoHasChanged(const bool bo_has_changed)
@@ -126,53 +174,25 @@ void Game::setBoHasChanged(const bool bo_has_changed)
 	boHasChanged = bo_has_changed;
 }
 
-#include <sstream>
+
+
 void Game::process()
 {
 	if(!isShown())
 		return;
+	
 	UI_Window::process();
+
+	
 	
 // ------ Did the user change optimization?
 	for(unsigned int i = mapPlayerCount;i--;)
 	{
-		if(scoreWindow->getAssignedRace(i)>=0)
-		{
-                	anarace[i]->setRace((eRace)scoreWindow->getAssignedRace(i));
-	                anarace[i]->assignGoal(database.getGoal(anarace[i]->getRace(), 0)); // assign default goal
-	                anarace[i]->assignStartCondition(database.getStartCondition(anarace[i]->getRace(), 0)); // assign default startcondition, make a menu later
-			scoreWindow->setInitMode(i, INITIALIZED); //?
-        
-//                unitMenu->resetData(); // TODO
-  //              goalMenu->resetData(); TODO
- /*               switch(assignRace)
-                {
-                        case TERRA:UI_Object::theme.setColorTheme(DARK_BLUE_THEME);break;
-                        case PROTOSS:UI_Object::theme.setColorTheme(YELLOW_THEME);break;
-                        case ZERG:UI_Object::theme.setColorTheme(DARK_RED_THEME);break;
-                        default:break;
-                }*/
-/*                std::list<ForceEntry*>::iterator a = goalForceList.begin();
-                while(a!=goalForceList.end())
-                {
-                        if(UI_Object::currentButton==*a)
-                                UI_Object::currentButton=NULL;
-                        delete(*a);
-                        a = goalForceList.erase(a);
-                }
-                a = nongoalForceList.begin();
-                while(a!=nongoalForceList.end())
-                {
-                        if(UI_Object::currentButton==*a)
-                                UI_Object::currentButton=NULL;
-                        delete(*a);
-                        a = nongoalForceList.erase(a);
-                }               */ //TODO
-                
-	                setResetFlag(); //!
-			
-		}
+		if(player[i]->wasResetted())
+			resetPlayer(i);
 
+		if(scoreWindow->getAssignedRace(i)>=0)
+			assignRace(i, (eRace)scoreWindow->getAssignedRace(i));
 		anarace[i]->setOptimizing(scoreWindow->isOptimizing(i));
 	}		
 		
@@ -196,26 +216,22 @@ void Game::process()
 		for(unsigned int i=mapPlayerCount;i--;)
 //			if(scoreWindow->isOptimizing(i)) // <- :o
 			{
-//				player[i]->resetData();
-				anarace[i]->restartData();
+				player[i]->recheckSomeDataAfterChange();
+				anarace[i]->restartData(); // TODO
 				setBoHasChanged();
 			}
 		UI_Window::changeAccepted();
 	}
 	
-	if(UI_Window::getResetFlag())
+	if(getResetFlag())
 	{
 		for(unsigned int i=mapPlayerCount;i--;)
 	//		if(scoreWindow->getInitMode(i) == INITIALIZED)
 			player[i]->resetData();
-		
 // soup->
-		initSoup();//&start);
-//		soup->setParameters(start); ??
-		
+		initSoup();
 		newGeneration();
-		// TODO players durchlaufen;
-		UI_Window::resetAccepted();
+		setResetFlag(false);
 		UI_Window::changeAccepted();
 	}
 	for(unsigned int i = MAX_PLAYER;i--;)
@@ -258,7 +274,6 @@ void Game::process()
 		}	
 	}
 
-
 }
 
 const bool Game::isAnyOptimizing() const 
@@ -271,18 +286,6 @@ const bool Game::isAnyOptimizing() const
 
 void Game::newGeneration()
 {
-	unsigned int oldCode[MAX_PLAYER][MAX_LENGTH];
-	for(unsigned int i=mapPlayerCount;i--;)
-		if(anarace[i])
-		{
-			anarace[i]->copyCode(oldCode[i]);
-		}
-		else
-		{
-			for(unsigned int j = MAX_LENGTH;j--;)
-				oldCode[i][j]=999;
-		}
-	
 	bool is_any_optimizing = isAnyOptimizing();
 	
 	for(unsigned int i=mapPlayerCount;i--;)
@@ -295,6 +298,7 @@ void Game::newGeneration()
 	if(!is_any_optimizing)
 	{
 		if(soup->recalculateGeneration(anarace, &startForce)) // <- konstant
+		{
 			for(unsigned int i=mapPlayerCount;i--;)
 			{
 				if(anarace[i]->isDifferent(oldCode[i]))//, oldMarker[i]))
@@ -303,23 +307,27 @@ void Game::newGeneration()
 					player[i]->assignAnarace(anarace[i]);
 				}
 			}
+		}
 	} else
-	{
-//TODO: nach Ende eines Durchlaufs ist anarace 0, aber viele anderen Teile des Codes greifen noch drauf zu!!
+//TODO: nach Ende eines Durchlaufs ist anarace 0, aber viele anderen Teile des Codes greifen noch drauf zu!! ?
 	if(soup->newGeneration(anarace, &startForce))
 		for(unsigned int i=mapPlayerCount;i--;)
-			if(scoreWindow->isOptimizing(i))
+			if((scoreWindow->isOptimizing(i))&&(anarace[i]->isDifferent(oldCode[i])))
 			{
-				if(anarace[i]->isDifferent(oldCode[i]))//, oldMarker[i]))
-				{
-					setBoHasChanged();
-					player[i]->assignAnarace(anarace[i]);
-				}
+				setBoHasChanged();
+				player[i]->assignAnarace(anarace[i]);
 			}
-	}
-					
+	
+	for(unsigned int i=mapPlayerCount;i--;)
+		if(anarace[i])
+			anarace[i]->copyCode(oldCode[i]);
+		else
+		for(unsigned int j = MAX_LENGTH;j--;)
+			oldCode[i][j]=999;
 }
 
 //virtual machen
 //resetData, updateItems, assignAnarace, checkOrders
+
+
 

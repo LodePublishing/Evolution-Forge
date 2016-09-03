@@ -24,9 +24,6 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
 
 //TODO
 	autoSaveRuns(new UI_CheckButton(coreSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_AUTO_SAVE_RUNS_STRING, SETTING_AUTO_SAVE_RUNS_TOOLTIP_STRING, efConfiguration.isAutoSaveRuns())),
-	alwaysBuildWorker(new UI_CheckButton(coreSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_ALWAYS_BUILD_WORKER_STRING, SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING, coreConfiguration.isAlwaysBuildWorker())),
-	onlySwapOrders(new UI_CheckButton(coreSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_ONLY_SWAP_ORDERS_STRING, SETTING_ONLY_SWAP_ORDERS_TOOLTIP_STRING, coreConfiguration.isOnlySwapOrders())),
-
 	restrictSC(new UI_CheckButton(guiSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_RESTRICT_SC_STRING, SETTING_RESTRICT_SC_TOOLTIP_STRING, efConfiguration.isRestrictSC())),
  	facilityMode(new UI_CheckButton(guiSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_FACILITY_MODE_STRING, SETTING_FACILITY_MODE_TOOLTIP_STRING, efConfiguration.isFacilityMode())),
 //	preprocessBuildorder(new UI_CheckButton(coreSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_PREPROCESS_BUILDORDER_STRING, SETTING_PREPROCESS_BUILDORDER_TOOLTIP_STRING, coreConfiguration.isPreprocessBuildOrder())),
@@ -38,8 +35,10 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
  	fullscreen(new UI_CheckButton(guiSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_FULLSCREEN_STRING, SETTING_FULLSCREEN_TOOLTIP_STRING, efConfiguration.isFullScreen())),
  	tooltips(new UI_CheckButton(guiSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_TOOLTIPS_STRING, SETTING_TOOLTIPS_TOOLTIP_STRING, efConfiguration.isToolTips())),
 //	softwareMouse(new UI_CheckButton(guiSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_SOFTWARE_MOUSE_STRING, SETTING_SOFTWARE_MOUSE_TOOLTIP_STRING, efConfiguration.isSoftwareMouse())),
+	unloadGraphics(new UI_CheckButton(guiSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_UNLOAD_GRAPHICS_STRING, SETTING_UNLOAD_GRAPHICS_TOOLTIP_STRING, uiConfiguration.isUnloadGraphics())),
 //	transparency(new UI_CheckButton(guiSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_TRANSPARENCY_STRING, SETTING_TRANSPARENCY_TOOLTIP_STRING, uiConfiguration.isTransparency())),
 	smoothMovement(new UI_CheckButton(guiSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_SMOOTH_MOVEMENT_STRING, SETTING_SMOOTH_MOVEMENT_TOOLTIP_STRING, uiConfiguration.isSmoothMovements())),
+	showDebug(new UI_CheckButton(guiSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_SHOW_DEBUG_STRING, SETTING_SHOW_DEBUG_TOOLTIP_STRING, efConfiguration.isShowDebug())),
 	desiredFramerate(new UI_NumberField(guiSettings, Rect(Point(10, 0), Size(200, 15)), Size(5,5), ARRANGE_LEFT,  EF_Configuration::MIN_DESIRED_FRAMERATE, EF_Configuration::MAX_DESIRED_FRAMERATE, SETTING_DESIRED_FRAMERATE_STRING, SETTING_DESIRED_FRAMERATE_TOOLTIP_STRING, 1, efConfiguration.getDesiredFramerate())),
  	desiredCPU(new UI_NumberField(guiSettings, Rect(Point(10, 0), Size(200, 15)), Size(5,5), ARRANGE_LEFT,  EF_Configuration::MIN_CPU_USAGE, EF_Configuration::MAX_CPU_USAGE, SETTING_DESIRED_CPU_USAGE_STRING, SETTING_DESIRED_CPU_USAGE_TOOLTIP_STRING, 1, efConfiguration.getDesiredCPU(), PERCENT_NUMBER_TYPE)),
 
@@ -54,14 +53,17 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
 	languageMenuButton(new UI_Button(uiSettingsRadio, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(0, 0), MY_BUTTON, false, STATIC_BUTTON_MODE, SETTING_LANGUAGE_STRING, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	resolutionMenuButton(new UI_Button(uiSettingsRadio, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(0, 0), MY_BUTTON, false, STATIC_BUTTON_MODE, SETTING_RESOLUTION_STRING, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	bitDepthMenuButton(new UI_Button(uiSettingsRadio, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(0, 0), MY_BUTTON, false, STATIC_BUTTON_MODE, SETTING_BITDEPTH_STRING, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+	themeMenuButton(new UI_Button(uiSettingsRadio, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(0, 0), MY_BUTTON, false, STATIC_BUTTON_MODE, SETTING_THEME_STRING, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 
-	languageMenu(new LanguageMenu(this, Rect(Point(2*theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 30),Size(50, 0)), Size(0, 0), CENTER_RIGHT)),
-	resolutionMenu(new ResolutionMenu(this, Rect(Point(3*theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2, 30),Size(50, 0)), Size(0, 0), CENTER_RIGHT)),
-	bitDepthMenu(new BitDepthMenu(this, Rect(Point(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 30),Size(50, 0)), Size(0, 0), CENTER_RIGHT)),
+	languageMenu(new LanguageMenu(this, Rect(Point(0, 20), Size(50, 0)), Size(0, 0), DO_NOT_ADJUST)),
+	resolutionMenu(new ResolutionMenu(this, Rect(Point(0, 20), Size(50, 0)), Size(0, 0), DO_NOT_ADJUST)),
+	bitDepthMenu(new BitDepthMenu(this, Rect(Point(-theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 20), Size(50, 0)), Size(0, 0), DO_NOT_ADJUST)),
+	themeMenu(new ThemeMenu(this, Rect(Point(-theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 20), Size(50, 0)), Size(0, 0), DO_NOT_ADJUST)),
 
 	languageHasChanged(false),
 	resolutionHasChanged(false),
 	bitDepthHasChanged(false),
+	themeHasChanged(false),
 	fullScreenHasChanged(false)
 {
 
@@ -74,12 +76,18 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
 	uiSettingsRadio->addButton(languageMenuButton, 0);
 	uiSettingsRadio->addButton(resolutionMenuButton, 1);
 	uiSettingsRadio->addButton(bitDepthMenuButton, 2);
+	uiSettingsRadio->addButton(themeMenuButton, 3);
 
 	defaultSettingsRadio->calculateBoxSize();
 	coreSettings->calculateBoxSize();
 	guiSettings->calculateBoxSize();
 	uiSettingsRadio->calculateBoxSize(true);
 	loadSaveSettings->calculateBoxSize();
+
+	languageMenu->setPositionParent(languageMenuButton);
+	resolutionMenu->setPositionParent(resolutionMenuButton);
+	bitDepthMenu->setPositionParent(bitDepthMenuButton);
+	themeMenu->setPositionParent(themeMenuButton);
 
 	customButton->updateToolTip(SETTING_CUSTOM_TOOLTIP_STRING);
 	fullButton->updateToolTip(SETTING_FULL_TOOLTIP_STRING);
@@ -89,6 +97,7 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
 	languageMenu->close();
 	resolutionMenu->close();
 	bitDepthMenu->close();
+	themeMenu->close();
 }
 
 void SettingsWindow::reloadOriginalSize()
@@ -99,6 +108,7 @@ void SettingsWindow::reloadOriginalSize()
 	languageMenuButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
 	resolutionMenuButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
 	bitDepthMenuButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
+	themeMenuButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
 	
 	reloadFromFileButton->setOriginalSize(Size(theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 0));
 	loadFailsafeDefaultsButton->setOriginalSize(Size(theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 0));
@@ -109,10 +119,6 @@ void SettingsWindow::reloadOriginalSize()
 	customButton->setOriginalSize(Size(theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 0));
 
 	UI_Window::reloadOriginalSize();
-
-	languageMenu->setOriginalPosition(Point(2*theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 30));
-	resolutionMenu->setOriginalPosition(Point(3*theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2, 30));
-	bitDepthMenu->setOriginalPosition(Point(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 30));
 
 /*	defaultSettingsRadio->calculateBoxSize();
 	coreSettings->calculateBoxSize();
@@ -138,8 +144,6 @@ SettingsWindow::~SettingsWindow()
 	delete restrictSC;
 	delete facilityMode;
 	delete autoSaveRuns;
-	delete alwaysBuildWorker;
-	delete onlySwapOrders;
 //	delete preprocessBuildorder;
 //	delete allowGoalAdaption;
 	delete glowingButtons;
@@ -148,8 +152,10 @@ SettingsWindow::~SettingsWindow()
 	delete fullscreen;
 	delete tooltips;
 //	delete softwareMouse;
+	delete unloadGraphics;
 //	delete transparency;
 	delete smoothMovement;
+	delete showDebug;
 	
 
 	delete minimalistButton;
@@ -160,13 +166,14 @@ SettingsWindow::~SettingsWindow()
 	delete loadFailsafeDefaultsButton;
 	delete saveToFileButton;
 
-/*	delete resolutionMenu;
+	delete resolutionMenu;
 	delete resolutionMenuButton;
-	delete themeMenu;
-	delete themeMenuButton;*/
 	delete languageMenu;
 	delete languageMenuButton;
-/*	delete menuRadio;*/
+	delete bitDepthMenu;
+	delete bitDepthMenuButton;
+	delete themeMenu;
+	delete themeMenuButton;
 	
 	delete loadSaveSettings;
 	delete coreSettings;
@@ -176,25 +183,32 @@ SettingsWindow::~SettingsWindow()
 }
 
 void SettingsWindow::resetData()
-{}
+{ }
+
+void SettingsWindow::resetDataChange()
+{
+	languageHasChanged=false;
+	bitDepthHasChanged=false;
+	resolutionHasChanged=false;
+	themeHasChanged=false;
+	fullScreenHasChanged=false;
+}
 
 void SettingsWindow::closeMenus()
 {
-	if(languageMenu->isOpen()||resolutionMenu->isOpen()||bitDepthMenu->isOpen())
+	if(languageMenu->isOpen()||resolutionMenu->isOpen()||bitDepthMenu->isOpen()||themeMenu->isOpen())
 	{
 		languageMenu->close();
 		resolutionMenu->close();
 		bitDepthMenu->close();
+		themeMenu->close();
+		
 		setNeedRedrawNotMoved();
 	}
 }
 
 void SettingsWindow::process()
 {
-	languageHasChanged=false;
-	bitDepthHasChanged=false;
-	resolutionHasChanged=false;
-	fullScreenHasChanged=false;
 
 	if(!isShown())
 		return;
@@ -206,50 +220,65 @@ void SettingsWindow::process()
 	uiSettingsRadio->calculateBoxSize(true);
 	loadSaveSettings->calculateBoxSize();
 
-	if(uiSettingsRadio->buttonHasChanged())
+	if((coreSettings->checkForNeedRedraw())||(guiSettings->checkForNeedRedraw())||(uiSettingsRadio->checkForNeedRedraw())||(loadSaveSettings->checkForNeedRedraw())||(defaultSettingsRadio->checkForNeedRedraw()))
+		setNeedRedrawMoved();
+
+	switch(uiSettingsRadio->getMarked())
 	{
-		setNeedRedrawNotMoved();
-		switch(uiSettingsRadio->getMarked())
-		{
-			case 0:languageMenu->open();
-			       if(!languageMenu->isOpen())
-			       {
-				       uiSettingsRadio->forceUnpressAll();
-				       closeMenus();
-				} else
-				{
-					languageMenuButton->forcePress();
-					closeMenus();
-					languageMenu->open();
-				}break;
-				       
-			case 1:resolutionMenu->open();
-			       if(!resolutionMenu->isOpen())
-			       {
-				       uiSettingsRadio->forceUnpressAll();
-				       closeMenus();
-				} else
-				{
-					resolutionMenuButton->forcePress();
-					closeMenus();
-					resolutionMenu->open();
-				}break;
-			       
-			case 2:bitDepthMenu->open();
-			       if(!bitDepthMenu->isOpen())
-			       {
-				       uiSettingsRadio->forceUnpressAll();
-				       closeMenus();
-				} else
-				{
-					bitDepthMenuButton->forcePress();
-					closeMenus();
+		case 0:
+			languageMenu->open();
+			if(!languageMenu->isOpen())
+			{
+				uiSettingsRadio->forceUnpressAll();
+				closeMenus();
+			} else
+			{
+				languageMenuButton->forcePress();
+				closeMenus();
+				languageMenu->open();
+			}break;
+		case 1:
+			resolutionMenu->open();
+			if(!resolutionMenu->isOpen())
+			{
+				uiSettingsRadio->forceUnpressAll();
+				closeMenus();
+			} else
+			{
+				resolutionMenuButton->forcePress();
+				closeMenus();
+				resolutionMenu->open();
+			}break;
+		case 2:
+			bitDepthMenu->open();
+			if(!bitDepthMenu->isOpen())
+			{
+				uiSettingsRadio->forceUnpressAll();
+				closeMenus();
+			} else
+			{
+				bitDepthMenuButton->forcePress();
+				closeMenus();
 					bitDepthMenu->open();
-				}break;
-			default:break;
-		}
+			}break;
+			
+		case 3:
+			themeMenu->open();
+			if(!themeMenu->isOpen())
+			{
+				uiSettingsRadio->forceUnpressAll();
+				closeMenus();
+			} else
+			{
+				themeMenuButton->forcePress();
+				closeMenus();
+				themeMenu->open();
+			}break;
+			
+		default:break;
 	}
-        if(!isMouseInside())
+	
+	if(!isMouseInside())
 	{
 		uiSettingsRadio->forceUnpressAll();
 		closeMenus();
@@ -289,11 +318,23 @@ void SettingsWindow::process()
 			UI_Object::theme.setBitDepth(newBitDepth);
 			uiConfiguration.setBitDepth(UI_Object::theme.getBitDepth());
 			bitDepthHasChanged = true;
-			resolutionHasChanged = true;
 		}
 		bitDepthMenuButton->forceUnpress();
 		bitDepthMenu->close();
-		setNeedRedrawNotMoved();
+		setNeedRedrawNotMoved(); // to update mainwindow
+	}
+	else if(themeMenu->getPressedItem()>=0)
+	{
+		eTheme newTheme = (eTheme)(themeMenu->getPressedItem()+1);
+		if(newTheme != UI_Object::theme.getMainColorTheme())
+		{
+			UI_Object::theme.setMainColorTheme(newTheme);
+			uiConfiguration.setTheme(UI_Object::theme.getMainColorTheme());
+			themeHasChanged = true;
+		}
+		themeMenuButton->forceUnpress();
+		themeMenu->close();
+		setNeedRedrawNotMoved(); // to update mainwindow
 	}
 
 	bool packet_change = false;
@@ -307,6 +348,7 @@ void SettingsWindow::process()
 		fullscreen->check ( false );
 		tooltips->check ( false );
 //		softwareMouse->check ( false );
+		unloadGraphics->check ( true );		
 //		transparency->check ( false );
 		smoothMovement->check ( false );
 		packet_change = true;
@@ -320,6 +362,7 @@ void SettingsWindow::process()
 		backgroundBitmap->check ( true );
 		fullscreen->check ( true );
 		tooltips->check ( true );
+		unloadGraphics->check ( false );		
 //	  softwareMouse->check ( true );
 //	  transparency->check ( true );
 		smoothMovement->check ( true );
@@ -350,14 +393,16 @@ void SettingsWindow::process()
 				defaultSettingsRadio->forcePress(2); // custombutton
 			setNeedRedrawMoved();
 		}
+	uiConfiguration.setUnloadGraphics( unloadGraphics->isChecked());
+	
+	if(efConfiguration.setShowDebug( showDebug->isChecked()))
+		setNeedRedrawMoved();
 	efConfiguration.setDesiredFramerate ( desiredFramerate->getNumber() );
 	efConfiguration.setDesiredCPU ( desiredCPU->getNumber() );
 	efConfiguration.setRestrictSC( restrictSC->isChecked() );
 	efConfiguration.setFacilityMode( facilityMode->isChecked() );
 	efConfiguration.setAutoSaveRuns ( autoSaveRuns->isChecked() );
 
-	coreConfiguration.setAlwaysBuildWorker( alwaysBuildWorker->isChecked() );
-	coreConfiguration.setOnlySwapOrders( onlySwapOrders->isChecked() );
 //	coreConfiguration.setPreprocessBuildOrder ( preprocessBuildorder->isChecked() );
 //	coreConfiguration.setAllowGoalAdaption ( allowGoalAdaption->isChecked() );
 
@@ -429,12 +474,17 @@ void SettingsWindow::updateItems()
 		uiConfiguration.setBitDepth( newBitDepth );
 		bitDepthHasChanged = true;
 	}
-	
+	eTheme newTheme = uiConfiguration.getTheme();
+	if(newTheme != UI_Object::theme.getMainColorTheme())
+	{
+		UI_Object::theme.setMainColorTheme( newTheme );
+		uiConfiguration.setTheme( newTheme );
+		themeHasChanged = true;
+	}
+
 	restrictSC->check ( efConfiguration.isRestrictSC() );
 	facilityMode->check ( efConfiguration.isFacilityMode() );
 	autoSaveRuns->check ( efConfiguration.isAutoSaveRuns() );
-	alwaysBuildWorker->check ( coreConfiguration.isAlwaysBuildWorker() );
-	onlySwapOrders->check ( coreConfiguration.isOnlySwapOrders() );
 //	preprocessBuildorder->check ( coreConfiguration.isPreprocessBuildOrder() );
 //	allowGoalAdaption->check ( coreConfiguration.isAllowGoalAdaption() );
 	glowingButtons->check ( uiConfiguration.isGlowingButtons() );
@@ -444,9 +494,11 @@ void SettingsWindow::updateItems()
 		fullScreenHasChanged=true;
 	fullscreen->check ( efConfiguration.isFullScreen() );
 	tooltips->check ( efConfiguration.isToolTips() );
+	unloadGraphics->check( uiConfiguration.isUnloadGraphics() );
 //	softwareMouse->check ( efConfiguration.isSoftwareMouse() );
 //	transparency->check ( uiConfiguration.isTransparency() );
 	smoothMovement->check ( uiConfiguration.isSmoothMovements() );
+	showDebug->check(efConfiguration.isShowDebug() );
 }
 
 void SettingsWindow::draw(DC* dc) const
@@ -454,6 +506,21 @@ void SettingsWindow::draw(DC* dc) const
 	if(!isShown())
 		return;
 	UI_Window::draw(dc);
+}
+
+void SettingsWindow::forceFullScreenChange()
+{
+	fullScreenHasChanged = true;
+}
+
+void SettingsWindow::forceResolutionChange()
+{
+	resolutionHasChanged = true;
+}
+
+void SettingsWindow::forceBitDepthChange()
+{
+	bitDepthHasChanged = true;
 }
 
 void SettingsWindow::forceLanguageChange()

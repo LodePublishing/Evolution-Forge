@@ -14,7 +14,7 @@ class UI_StaticText : public UI_Object
 		UI_StaticText(UI_Object* st_parent, const std::string& st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode = HORIZONTALLY_CENTERED, const eAutoSize auto_size = NO_AUTO_SIZE);
 		~UI_StaticText();
 
-		void setColor(const Color st_color);
+		void setTemporaryColor(const Color& st_color);
 		void setColor(const eColor st_color);
 		void setFont(const eFont st_font);
 		const std::string& getString() const;
@@ -46,7 +46,9 @@ class UI_StaticText : public UI_Object
 		std::string text;
 		bool textWasChanged;
 		eFont font;
-		Color color;
+		eColor color;
+		Color tempColor;
+		bool tempColorIsSet;
 		eString eText;
 		bool pressed; // for buttons only, draw the text +(1,1)	
 		bool highlight;
@@ -71,11 +73,12 @@ inline const Size UI_StaticText::getTextPosSize(const unsigned pos) const {
 }
 
 inline void UI_StaticText::setColor(const eColor st_color) {
-	color = *theme.lookUpColor(st_color);
+	color = st_color;
 }
 
-inline void UI_StaticText::setColor(const Color st_color) {
-	color = st_color;
+inline void UI_StaticText::setTemporaryColor(const Color& st_color) {
+	tempColorIsSet = true;
+	tempColor = st_color;
 }
 
 inline const std::string& UI_StaticText::getString() const {

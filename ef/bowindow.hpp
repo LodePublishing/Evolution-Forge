@@ -11,6 +11,7 @@
 #include "../ui/checkbutton.hpp"
 
 #include "savebox.hpp"
+#include "bomenu.hpp"
 
 class BoWindow : public UI_Window
 {
@@ -26,22 +27,25 @@ class BoWindow : public UI_Window
 		void process();
 		void assignAnarace(ANABUILDORDER* bo_anarace);
 		void reloadOriginalSize();
+
+		const bool wasResetted() const;
+
+		const signed int getSelectedItem() const;
+		void setSelected(const unsigned int selected);
+
+		void recheckSomeDataAfterChange();
+		
 	private:
-		void saveBuildOrder(const std::string& name) const;
+		void closeMenus();
 		void drawSelectionStuff(DC* dc) const;
 		void checkForInfoWindow();
 //		void resetButtons();
 		ANABUILDORDER* anarace;
 		std::list<BoEntry*> boList;
+		Rect moveTarget;
 		unsigned int optimizeMode;
 		signed int addUnit;
-		int new_one;
-		int same;
-		int moved;
-		int add_end;
-		int deleted;
-//		int size1;
-//		int size2;
+		bool wasMovedByMouse;
 		signed int boInsertPoint, boEndPoint;
 //		int makeSpaceButton;
 //		int unitButton[2*MAX_LENGTH];
@@ -49,21 +53,33 @@ class BoWindow : public UI_Window
 //		int orderButton[2*MAX_LENGTH];
 		unsigned int boGoalListOpened;
 		unsigned int lastBogoal;
+		unsigned int startLine;
+		signed int selectedItem;
 
+		UI_StaticText* timeSlot[60];
+
+//		UI_Radio* menuRadio;
+		UI_Button* restartBuildOrderButton;
 		UI_Button* saveBuildOrderButton;
 		UI_Button* loadBuildOrderButton;
-		UI_Button* restartBuildOrderButton;
+		
 
 		bool* fixed;
-		UI_Scrollbar* scrollBar;
+		UI_ScrollBar* scrollBar;
 		UI_CheckButton* alwaysBuildWorker;
 		UI_CheckButton* onlySwapOrders;
 		
-		UI_Button* unitMenuButton;
-		UnitMenu* unitMenu;
+//		UI_Button* unitMenuButton;
+//		UnitMenu* unitMenu;
 
+		BoMenu* boMenu;
 		SaveBox* saveBox;
 };
+
+inline const signed int BoWindow::getSelectedItem() const {
+	return(selectedItem);
+}
+
 
 #endif // _GUI_BOWINDOW_HPP
 

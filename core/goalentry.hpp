@@ -57,9 +57,9 @@ class GOAL_ENTRY
 		bool isBuildable[UNIT_TYPE_COUNT];
 		bool isStatic[UNIT_TYPE_COUNT];	
 		bool isHaveable[UNIT_TYPE_COUNT]; // all units that are goals, can be build or are build by the bo (larva etc.)
+		std::list<GOAL> goal; // private?
 
 	public:
-		std::list<GOAL> goal; // private?
 		NEED need[UNIT_TYPE_COUNT];
 		ALLOW allow[UNIT_TYPE_COUNT];
 		
@@ -67,6 +67,7 @@ class GOAL_ENTRY
 		GOAL_ENTRY(const GOAL_ENTRY& object);
 		~GOAL_ENTRY();
 		GOAL_ENTRY& operator=(const GOAL_ENTRY& object);
+		const bool operator==(const GOAL_ENTRY& other) const;
 
  
 //		const unsigned int getMode() const; // 0: normal, 1: based on success of enemy
@@ -90,6 +91,7 @@ class GOAL_ENTRY
 //		const bool getNextGoal(std::list<GOAL>::const_iterator& current, const bool first) const;
 		void addGoal(const unsigned int unit, const signed int count, const unsigned int time, const unsigned int location);
 		void adjustGoals(const bool allowGoalAdaption, const UNIT* unit=0);
+		void removeDouble(const unsigned int goal_unit, const unsigned int goal_location, const unsigned int goal_time, const unsigned int goal_count);
 		const unsigned int calculateFastestBO(const UNIT* startForce) const;
 		const GOAL_TREE getGoalTree(const UNIT* startForce, const unsigned int currentGoalUnit) const;
 
@@ -224,13 +226,13 @@ inline const unsigned int GOAL_ENTRY::getGlobalGoal(const unsigned int location,
 {
 #ifdef _SCC_DEBUG
 	if(location>=MAX_LOCATIONS) {
-		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value location out of range.");return(0);
+		toLog("DEBUG: (GOAL_ENTRY::getGlobalGoal): Value location out of range.");return(0);
 	}
 	if(unit >= LAST_UNIT) {
-		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value unit out of range.");return(0);
+		toLog("DEBUG: (GOAL_ENTRY::getGlobalGoal): Value unit out of range.");return(0);
 	}
 	if(globalGoal[location][unit]>200) {
-		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Variable globalGoal out of range.");return(0);
+		toLog("DEBUG: (GOAL_ENTRY::getGlobalGoal): Variable globalGoal out of range.");return(0);
 	}	
 #endif
 	return(globalGoal[location][unit]);		

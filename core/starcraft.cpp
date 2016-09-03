@@ -25,8 +25,8 @@ const unsigned int MIN_PLAYER = 1;
 //const unsigned int MAX_GOAL_ENTRIES = 25;
 const unsigned int MIN_GOAL_ENTRIES = 0;
 
-const unsigned int MAX_MINERALS = 5000000;
-const unsigned int MAX_GAS = 5000000;
+const unsigned int MAX_MINERALS = 50000000;
+const unsigned int MAX_GAS = 50000000;
 
 //const unsigned int MAX_PROGRAMS = 128; //must be multiplier of (16*player)
 const unsigned int LARVA_MAX = 200;

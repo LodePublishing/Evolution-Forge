@@ -24,10 +24,8 @@ void UI_Bitmap::reloadOriginalSize()
 // Render button.  How it draws exactly depends on it's current state.
 void UI_Bitmap::draw(DC* dc) const
 {
-
 	if(!isShown())
 		return;
-
 	if(checkForNeedRedraw())
 		dc->DrawBitmap(theme.lookUpBitmap(bitmap), getAbsolutePosition());
 	UI_Object::draw(dc);	

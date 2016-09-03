@@ -82,21 +82,21 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Siz
 		default:break;
 	} 
 
+	Size bitmap_size;
+	if(hasBitmap)
+		bitmap_size = Size(theme.lookUpBitmap(theme.lookUpButtonColors(buttonColorsType)->bitmap[0])->w, theme.lookUpBitmap(theme.lookUpButtonColors(buttonColorsType)->bitmap[0])->h);
+
 	if(button_text!=NULL_STRING)
 	{
-	unsigned int w=0;
-	if(hasBitmap)
-		w = theme.lookUpBitmap(theme.lookUpButtonColors(buttonColorsType)->bitmap[0])->w;
-	
-	if((button_position_mode == SPECIAL_BUTTON_LEFT)||(button_position_mode == SPECIAL_BUTTON_ARRANGE_TOP_LEFT)||(button_position_mode == SPECIAL_BUTTON_ARRANGE_TOP_RIGHT) || (button_position_mode == SPECIAL_BUTTON_ARRANGE_LEFT) || (button_position_mode == SPECIAL_BUTTON_ARRANGE_RIGHT))
-		text = new UI_StaticText(this, button_text, Rect(Point(w+2,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, CENTER_LEFT); // TODO
-	else if(button_auto_size == AUTO_SIZE)
-		text = new UI_StaticText(this, button_text, Rect(Point(w+2,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, DO_NOT_ADJUST); // TODO
-	else
-	text = new UI_StaticText(this, button_text, Rect(Point(w+0,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, HORIZONTALLY_CENTERED); // TODO
-	}
+		if((button_position_mode == SPECIAL_BUTTON_LEFT)||(button_position_mode == SPECIAL_BUTTON_ARRANGE_TOP_LEFT)||(button_position_mode == SPECIAL_BUTTON_ARRANGE_TOP_RIGHT) || (button_position_mode == SPECIAL_BUTTON_ARRANGE_LEFT) || (button_position_mode == SPECIAL_BUTTON_ARRANGE_RIGHT))
+		text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.GetWidth()+2,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, CENTER_LEFT); // TODO
+		else if(button_auto_size == AUTO_SIZE)
+			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.GetWidth()+2,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, DO_NOT_ADJUST); // TODO
+		else
+			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.GetWidth()+0,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, HORIZONTALLY_CENTERED); // TODO
+	} else if(hasBitmap)
+		setOriginalSize(bitmap_size);
 }
-
 
 UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Size distance_bottom_right, const eButtonColorsType button_colors_type, const bool has_bitmap, const eButtonMode button_mode, const std::string& button_text, const ePositionMode button_position_mode, const eFont button_font, const eAutoSize button_auto_size) :
 	UI_Object(button_parent, button_rect, distance_bottom_right, 
@@ -138,25 +138,24 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Siz
 //	targetRect=getRelativeRect();
 //	filledHeight=getHeight();
 
-	if(button_text!="")
-	{
-	unsigned int w=0;
+	Size bitmap_size;
 	if(hasBitmap)
-		w = theme.lookUpBitmap(theme.lookUpButtonColors(buttonColorsType)->bitmap[0])->w;
-	
-	if((button_position_mode == SPECIAL_BUTTON_LEFT)||(button_position_mode == SPECIAL_BUTTON_ARRANGE_TOP_LEFT)||(button_position_mode == SPECIAL_BUTTON_ARRANGE_TOP_RIGHT) || (button_position_mode == SPECIAL_BUTTON_ARRANGE_LEFT) || (button_position_mode == SPECIAL_BUTTON_ARRANGE_RIGHT))
-		text = new UI_StaticText(this, button_text, Rect(Point(w+2,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, CENTER_LEFT); // TODO
-	else if(button_auto_size == AUTO_SIZE)
+		bitmap_size = Size(theme.lookUpBitmap(theme.lookUpButtonColors(buttonColorsType)->bitmap[0])->w, theme.lookUpBitmap(theme.lookUpButtonColors(buttonColorsType)->bitmap[0])->h);
 
-		
-		text = new UI_StaticText(this, button_text, Rect(Point(w+2,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, DO_NOT_ADJUST); // TODO
+	if((button_text!="")||(!hasBitmap))
+	{
+		if((button_position_mode == SPECIAL_BUTTON_LEFT)||(button_position_mode == SPECIAL_BUTTON_ARRANGE_TOP_LEFT)||(button_position_mode == SPECIAL_BUTTON_ARRANGE_TOP_RIGHT) || (button_position_mode == SPECIAL_BUTTON_ARRANGE_LEFT) || (button_position_mode == SPECIAL_BUTTON_ARRANGE_RIGHT))
+			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.GetWidth()+2,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, CENTER_LEFT); // TODO
+		else if(button_auto_size == AUTO_SIZE)
+			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.GetWidth()+2,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, DO_NOT_ADJUST); // TODO
 
-	else
-		text = new UI_StaticText(this, button_text, Rect(Point(w+0,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, TOTAL_CENTERED); // TODO
+		else
+			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.GetWidth()+0,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, TOTAL_CENTERED); // TODO
 
-//	for(int i=DISABLED_BUTTON_PHASE;i<MAX_BUTTON_ANIMATION_PHASES;i++)
-//		text[i]=new UI_StaticText(this, normalText, Rect(0,0,0,0), HORIZONTALLY_CENTERED_TEXT_MODE, font, theme.lookUpButtonColors(button_colors_type)->startTextColor[i]);
-	}
+//		for(int i=DISABLED_BUTTON_PHASE;i<MAX_BUTTON_ANIMATION_PHASES;i++)
+//			text[i]=new UI_StaticText(this, normalText, Rect(0,0,0,0), HORIZONTALLY_CENTERED_TEXT_MODE, font, theme.lookUpButtonColors(button_colors_type)->startTextColor[i]);
+	} else if(hasBitmap)
+		setOriginalSize(bitmap_size);
 }
 
 // -> bitmap button!
@@ -196,11 +195,15 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Siz
 
 UI_Button::~UI_Button()
 {
+	if(UI_Button::currentButton == this)
+		UI_Button::resetButton();
 	delete text;
 }
 
 void UI_Button::reloadOriginalSize()
 {
+	if(text==NULL)
+		setOriginalSize(Size(theme.lookUpBitmap(theme.lookUpButtonColors(buttonColorsType)->bitmap[0])->w, theme.lookUpBitmap(theme.lookUpButtonColors(buttonColorsType)->bitmap[0])->h));
 	UI_Object::reloadOriginalSize();
 	adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED);
 }
@@ -280,7 +283,7 @@ void UI_Button::draw(DC* dc) const
 //			dc->SetPen(*theme.lookUpPen(NULL_PEN));
 //			if(statusFlags & BF_DOWN)
 			if(text!=NULL)
-				text->setColor(dc->mixColor(
+				text->setTemporaryColor(dc->mixColor(
 					*(theme.lookUpColor(theme.lookUpButtonColors(buttonColorsType)->startTextColor[animation_phase])), 
 					*(theme.lookUpColor(theme.lookUpButtonColors(buttonColorsType)->endTextColor[animation_phase])), gradient));
 // TODO TAB-BUTTON MODE
@@ -410,7 +413,7 @@ void UI_Button::mouseLeftButtonReleased()
 				radio->leftButtonPressed(this);
 			else 
 			if(!(statusFlags & BF_IS_TAB))
-				radio->leftButtonReleased();
+				radio->leftButtonReleased(this);
 		}		
 	}
 	if(allowMoveByMouse)
@@ -456,21 +459,21 @@ void UI_Button::mouseRightButtonReleased()
 		}
 		else
 			setPressDepth(0);
-		if(radio)
+	/*	if(radio)
 		{
 			if(isOriginalPosition)
 				radio->rightButtonPressed(this);
 			else 
 			if(!(statusFlags & BF_IS_TAB))
 				radio->rightButtonReleased();
-		}		
+		}		 // TODO?*/
 	}
 }
 
 UI_Object* UI_Button::checkToolTip() 
 {
 	if( (!isShown()) || (!getAbsoluteRect().Inside(mouse - Size(pressdepth, pressdepth))))
-		return(0);
+		return(NULL);
 	return((UI_Object*)this);
 }
 
@@ -510,13 +513,13 @@ void UI_Button::process()
 		else 
 			gradient = 100;
 	} else
-	if(!(statusFlags & BF_HIGHLIGHTED))
+	if((!(statusFlags & BF_HIGHLIGHTED))&&(theme.lookUpButtonColors(buttonColorsType)->type!=NO_ANIMATION))
 		gradient += (100 - gradient) / 5 + 1;
 	else {
 //		UI_Object::addToNextProcessArray(this);
 		switch(theme.lookUpButtonColors(buttonColorsType)->type)
 		{	
-		case NO_ANIMATION:if(gradient < 100) ++gradient;else gradient = 100;break;
+		case NO_ANIMATION:/*if(gradient < 100) ++gradient;else gradient = 100;*/break;
 		case JUMPY_COLORS_ANIMATION:gradient=(frameNumber%theme.lookUpButtonColors(buttonColorsType)->speed)*100/theme.lookUpButtonColors(buttonColorsType)->speed;break;
 		case GLOWING_ANIMATION:gradient=(unsigned int)(50*(sin(3.141*frameNumber/theme.lookUpButtonColors(buttonColorsType)->speed)+1));break;
 		case BLINKING_ANIMATION:if(frameNumber<theme.lookUpButtonColors(buttonColorsType)->speed/2) gradient=0;else gradient=100;break;
@@ -669,7 +672,7 @@ void UI_Button::resetButton()
 	if(UI_Button::currentButton!=NULL)
 		UI_Button::currentButton->frameReset();
 	UI_Button::currentButton=NULL;
-	UI_Button::currentButtonHasAlreadyLeft=false;	
+	UI_Button::currentButtonHasAlreadyLeft=false;
 	UI_Button::currentButtonPressed=false;
 	UI_Button::mouseMovePoint = Point(0, 0);
 	UI_Button::moveByMouse = false;

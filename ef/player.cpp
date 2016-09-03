@@ -1,17 +1,11 @@
 #include "player.hpp"
 #include "configuration.hpp"
 
-Player::~Player()
-{ 
-	delete forceWindow;
-//	delete statisticsWindow;
-	delete boWindow;
-	delete boGraphWindow;
-	delete boDiagramWindow;
-}
+
 #include <sstream>
 Player::Player(UI_Object* player_parent, const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max) :
-	UI_Window(player_parent, PLAYER_WINDOW_TITLE_STRING, theme.lookUpPlayerRect(PLAYER_WINDOW, game_number, game_max, player_number, player_max), theme.lookUpPlayerMaxHeight(PLAYER_WINDOW, game_number, game_max, player_number, player_max), NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0,0,1280,1024), TRANSPARENT),
+//	UI_Window(player_parent, PLAYER_WINDOW_TITLE_STRING, theme.lookUpPlayerRect(PLAYER_WINDOW, game_number, game_max, player_number, player_max), theme.lookUpPlayerMaxHeight(PLAYER_WINDOW, game_number, game_max, player_number, player_max), NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0,0,1280,1024), TRANSPARENT),
+	UI_Object(player_parent, theme.lookUpPlayerRect(PLAYER_WINDOW, game_number, game_max, player_number, player_max), Size(0,0), DO_NOT_ADJUST),
 	geneAnimation(0),
 	anarace(NULL),
 //	mode(0),
@@ -42,6 +36,15 @@ Player::Player(UI_Object* player_parent, const unsigned int game_number, const u
 //	anarace->setFixed(fixed);
 }
 
+Player::~Player()
+{ 
+	delete forceWindow;
+//	delete statisticsWindow;
+	delete boWindow;
+	delete boGraphWindow;
+	delete boDiagramWindow;
+}
+
 void Player::assignAnarace(ANABUILDORDER* player_anarace)
 {
 	anarace = player_anarace;
@@ -64,7 +67,7 @@ void Player::reloadStrings() //TODO
 	boGraphWindow->setTitleParameter(os.str());
 	boDiagramWindow->setTitleParameter(os.str());
 
-	UI_Window::reloadStrings(); 
+	UI_Object::reloadStrings(); 
 }
 
 void Player::drawGene(DC* dc, unsigned int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const
@@ -77,11 +80,12 @@ void Player::drawGene(DC* dc, unsigned int k, const Point* points, const Point p
 
 void Player::drawGeneString(DC* dc) const
 {
-	return;
-	Rect position = Rect(getAbsolutePosition()+Point(210, 200+anarace->getPlayerNumber()*300), Size(600, 120));
+	Rect position = Rect(boWindow->getAbsolutePosition() + Point(boWindow->getWidth() / 2+5, 30), Size(boWindow->getWidth()/2 -15, 2*(FONT_SIZE+10)));
+		//Rect(getAbsolutePosition()+Point(210, 200+anarace->getPlayerNumber()*300), Size(600, 120));
 	dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
 	dc->SetPen(*theme.lookUpPen(BRIGHT_UNIT_TYPE_1_PEN));
 	dc->DrawRectangle(position);
+	DC::addRectangle(position);
 
 	unsigned int stringheight=0;
 	Point points1[2];
@@ -189,16 +193,22 @@ void Player::draw(DC* dc) const
 	}
 
 	// TODO
-	UI_Window::draw(dc);
-//	if(efConfiguration.isDnaSpiral())
-//		drawGeneString(dc);
+	UI_Object::draw(dc);
+	if(efConfiguration.isDnaSpiral())
+		drawGeneString(dc);
 }
 
 void Player::process()
 {
 	if(!isShown())
 		return;
-	UI_Window::process();
+	UI_Object::process();
+/*	{
+		boWindow->resetData();
+		boGraphWindow->resetData();
+		boDiagramWindow->resetData();
+	}*/
+	
 // TODO!
 // ------ COMMUNICATION BETWEEN THE WINDOWS ------ TODO
 /*	if(window[FORCE_WINDOW]->isShown())
@@ -224,10 +234,17 @@ void Player::process()
 	}*/
 // ------ END COMMUNICATION BETWEEN THE WINDOWS ------
 
-//	if(anarace->isOptimizing())
-//		geneAnimation+=0.43;
+	if(anarace->isOptimizing())
+		geneAnimation+=0.43;
 // ------ PROCESS MEMBER VARIABLES ------	
 // ------ END PROCESSING MEMBER VARIABLES ------
+
+	if(boGraphWindow->getSelectedItem() >=0)
+		boWindow->setSelected(boGraphWindow->getSelectedItem());
+	else if(boWindow->getSelectedItem() >= 0)
+		boGraphWindow->setSelected(boWindow->getSelectedItem());
+
+
 }
 
 void Player::setMode(const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max)
@@ -244,7 +261,7 @@ void Player::setMode(const unsigned int game_number, const unsigned int game_max
 void Player::reloadOriginalSize()
 {
 	setOriginalRect(UI_Object::theme.lookUpPlayerRect(PLAYER_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
-	setMaxHeight(UI_Object::theme.lookUpPlayerMaxHeight(PLAYER_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
+//	setMaxHeight(UI_Object::theme.lookUpPlayerMaxHeight(PLAYER_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
 
 	forceWindow->setOriginalRect(UI_Object::theme.lookUpPlayerRect(FORCE_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
 	forceWindow->setMaxHeight(UI_Object::theme.lookUpPlayerMaxHeight(FORCE_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
@@ -258,7 +275,7 @@ void Player::reloadOriginalSize()
 	boDiagramWindow->setOriginalRect(UI_Object::theme.lookUpPlayerRect(BUILD_ORDER_DIAGRAM_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
 	boDiagramWindow->setMaxHeight(UI_Object::theme.lookUpPlayerMaxHeight(BUILD_ORDER_DIAGRAM_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
 
-	UI_Window::reloadOriginalSize();
+	UI_Object::reloadOriginalSize();
 }
 
 void Player::resetData()
@@ -272,6 +289,12 @@ void Player::resetData()
 	boDiagramWindow->resetData();
 }
 
+
+void Player::recheckSomeDataAfterChange()
+{
+	boWindow->recheckSomeDataAfterChange();
+}
+
 void Player::CheckOrders()
 {
 	boDiagramWindow->processList();
@@ -283,3 +306,9 @@ void Player::CheckOrders()
 //virtual machen
 //resetData, updateItems, assignAnarace, checkOrders
 
+const bool Player::wasResetted() const 
+{
+	if(!isShown())
+		return(false);
+	return(boWindow->wasResetted());
+}

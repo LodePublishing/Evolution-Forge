@@ -31,11 +31,12 @@ class ForceEntry : public UI_Button
 
 		const eUnitType getType() const;
 		const unsigned int getUnit() const;
+		const unsigned int getTime() const;
 
-		const unsigned int getHeight() const;
+//		const unsigned int getHeight() const;
 
 		//const bool showLocationMenu() const;
-		const bool isLocationGoalClicked() const;
+//		const bool isLocationGoalClicked() const;
 		
 		void HideIt();
 
@@ -44,15 +45,21 @@ class ForceEntry : public UI_Button
 		UI_Object* checkToolTip();
 		UI_Object* checkHighlight();
 	
-		UI_NumberField* timeEntryBox;
-		UI_Button* makeLocationGoal;
-		UI_Button* makeTimeGoal;
 		static eForceEntryMessage changed;
 		static bool forceEntryIsGoal;
+		static bool forceEntryTimeRemoved;
+		static unsigned int forceEntryCount;
 		static unsigned int forceEntryUnit;
 		static unsigned int forceEntryTime;
 		static unsigned int forceEntryLocation;
+
 	private:
+		void setTime(const unsigned int time);
+		
+		static UI_Button* makeTimeGoalButton;
+		static UI_NumberField* timeEntryBox;
+		static ForceEntry* currentForceEntry;
+
         	unsigned int oldGoalCount;
 		unsigned int startForce;
 		unsigned int targetForce;
@@ -63,8 +70,16 @@ class ForceEntry : public UI_Button
 		unsigned int unit;
 		eUnitType type;
 		GOAL* goal;
-		bool showLocMenu;
+//		bool showLocMenu;
 };
+
+inline void ForceEntry::setTime(const unsigned int time) {
+	goal->setTime(time);
+}
+
+inline const unsigned int ForceEntry::getTime() const {
+	return(goal->getTime());
+}
 
 inline void ForceEntry::setUnit(const unsigned int unit_type) {
 	unit = unit_type; // TODO

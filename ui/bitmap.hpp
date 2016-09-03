@@ -3,7 +3,7 @@
 
 #include "object.hpp"
 
-class UI_Bitmap:public UI_Object
+class UI_Bitmap : public UI_Object
 {
 	public:
 // TODO Beschreibung der Konstruktoren

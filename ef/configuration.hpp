@@ -22,6 +22,8 @@ class EF_Configuration
 		bool backgroundBitmap;
 		bool dnaSpiral;
 		bool toolTips;
+		bool showDebug;
+	
 
 		std::string configurationFile;
 	public:
@@ -48,6 +50,7 @@ class EF_Configuration
 		const bool isBackgroundBitmap() const;
 		const bool isDnaSpiral() const;
 		const bool isToolTips() const;
+		const bool isShowDebug() const;
 	
 		const bool setDesiredFramerate(const unsigned int desired_frame_rate);
 		const bool setDesiredCPU(const unsigned int cpu_usage);
@@ -61,6 +64,7 @@ class EF_Configuration
 		const bool setBackgroundBitmap(const bool background_bitmap);
 		const bool setDnaSpiral(const bool dna_spiral);
 		const bool setToolTips(const bool tool_tips);
+		const bool setShowDebug(const bool show_debug);
 
 		void setConfigurationFile(const std::string& configuration_file);
 		void loadConfigurationFile();
@@ -137,8 +141,9 @@ inline const bool EF_Configuration::isToolTips() const {
 	return(toolTips);
 }
 
-
-
+inline const bool EF_Configuration::isShowDebug() const {
+	return(showDebug);
+}
 
 #endif // _EF_CONFIGURATION_HPP
 

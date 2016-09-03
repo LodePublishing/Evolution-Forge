@@ -55,13 +55,13 @@ void UnitMenu::resetData()
 	facilityNumber=1;
 	for(unsigned int i=1;i<=GAS_SCV;++i)
 		// cut out those [CS], [NS] temporary facilities
-//	if(stats[(*anarace->getStartCondition())->getRace()][i].unitType != ADD_ON_UNIT_TYPE)
+//	if(stats[anarace->getRace()][i].unitType != ADD_ON_UNIT_TYPE)
 	{
 		for(unsigned int j=1;j<=GAS_SCV;++j)
-		if((!efConfiguration.isRestrictSC())||(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==0))
-		if((stats[(*anarace->getStartCondition())->getRace()][j].facility[0] == i)||
-		   (stats[(*anarace->getStartCondition())->getRace()][j].facility[1] == i)||
-		   (stats[(*anarace->getStartCondition())->getRace()][j].facility[2] == i))
+		if((!efConfiguration.isRestrictSC())||(stats[anarace->getRace()][i].bwunit==0))
+		if((stats[anarace->getRace()][j].facility[0] == i)||
+		   (stats[anarace->getRace()][j].facility[1] == i)||
+		   (stats[anarace->getRace()][j].facility[2] == i))
 		{
 			facility[facilityNumber] = i;
 			++facilityNumber;
@@ -75,7 +75,7 @@ void UnitMenu::assignAnarace(ANABUILDORDER* goal_anarace)
 	anarace = goal_anarace;
 	resetData();
 }
-
+#include <sstream>
 void UnitMenu::processMenu()
 {
 	if(menuLevel)
@@ -88,7 +88,7 @@ void UnitMenu::processMenu()
 				for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					++i;
-					if((i >=10 ))// || ((efConfiguration.isRestrictSC())&&(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==1)))					
+					if((i >=10 ))// || ((efConfiguration.isRestrictSC())&&(stats[anarace->getRace()][i].bwunit==1)))					
 					{
 						(*m)->Hide();
 						continue;
@@ -98,13 +98,44 @@ void UnitMenu::processMenu()
 					{
 						(*m)->Show();
 						(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+i));
-						if(i==1)
-							(*m)->updateText(theme.lookUpString((eString)(SCV+UNIT_NULL_STRING+UNIT_TYPE_COUNT*anarace->getRace())));
-						else 
-						if(i==2)
-							(*m)->updateText(theme.lookUpString((eString)(GAS_SCV+UNIT_NULL_STRING+UNIT_TYPE_COUNT*anarace->getRace())));
+						if((i==1)||(i==2))
+						{
+							int unit_type = 0;
+							if(i==1)
+								unit_type = SCV;
+							else if(i==2)
+								unit_type = GAS_SCV;
+							(*m)->updateText(theme.lookUpString((eString)(unit_type+UNIT_NULL_STRING+UNIT_TYPE_COUNT*anarace->getRace())));
+							std::ostringstream os;
+							os << "$" << stats[anarace->getRace()][unit_type].name << "$#" <<
+								"  build time $" << stats[anarace->getRace()][unit_type].BT << "$ sec.#";
+								if(stats[anarace->getRace()][unit_type].minerals>0)
+									os << "  $" << stats[anarace->getRace()][unit_type].minerals/100 << "$ minerals#";
+								if(stats[anarace->getRace()][unit_type].gas>0)
+									os << "  $" << stats[anarace->getRace()][unit_type].gas/100 << "$ gas#";
+/*								<< stats[anarace->getRace()][unit_type].prerequisite[]
+								<< stats[anarace->getRace()][unit_type].facility[]
+								<< stats[anarace->getRace()][unit_type].needSupply
+								<< stats[anarace->getRace()][unit_type].haveSupply
+								<< stats[anarace->getRace()][unit_type].facilityType
+								<< stats[anarace->getRace()][unit_type].create
+								<< stats[anarace->getRace()][unit_type].bwunit*/
+								
+							(*m)->updateToolTip(os.str());
+						}
 						else
+						{
 							(*m)->updateText(theme.lookUpString((eString)(UNIT_TYPE_0_STRING+i)));
+							
+							std::ostringstream os;
+							os << "$" << theme.lookUpString((eString)(UNIT_TYPE_0_STRING+i)) << "$#";
+
+							for(unsigned int j = 0; j < GAS_SCV; ++j)
+								if((stats[anarace->getRace()][j].unitType == i) &&((!efConfiguration.isRestrictSC())||(stats[anarace->getRace()][i].bwunit==0)))
+									os << stats[anarace->getRace()][j].name << "#";
+								
+							(*m)->updateToolTip(os.str());
+						}
 						(*m)->adjustRelativeRect(edge);
 					}
 					++height;
@@ -116,7 +147,7 @@ void UnitMenu::processMenu()
 				for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					++i;
-					if((i >= facilityNumber)) //|| ((efConfiguration.isRestrictSC())/*&&(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==1)*/))
+					if((i >= facilityNumber)) //|| ((efConfiguration.isRestrictSC())/*&&(stats[anarace->getRace()][i].bwunit==1)*/))
 					{
 						(*m)->Hide();
 						continue;
@@ -125,8 +156,18 @@ void UnitMenu::processMenu()
 	//			  if (fitItemToClientRect(edge, 1))
 					{
 						(*m)->Show();
-						(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][facility[i]].unitType));
+						(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[anarace->getRace()][facility[i]].unitType));
 						(*m)->updateText(UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+facility[i]+UNIT_NULL_STRING)) + "...");
+						std::ostringstream os;
+						os << "$" << stats[anarace->getRace()][facility[i]].name << "$#";
+
+						for(unsigned int j = 0; j < GAS_SCV; ++j)
+							if( ( (stats[anarace->getRace()][j].facility[0] == facility[i])||
+								(stats[anarace->getRace()][j].facility[1] == facility[i])||
+								(stats[anarace->getRace()][j].facility[2] == facility[i]))									&&((!efConfiguration.isRestrictSC())||(stats[anarace->getRace()][i].bwunit==0)))
+								os << stats[anarace->getRace()][j].name << "#";
+						(*m)->updateToolTip(os.str());
+
 						(*m)->adjustRelativeRect(edge);
 					}
 					++height;
@@ -141,7 +182,7 @@ void UnitMenu::processMenu()
 				for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					++i;
-					if(/*(i >= facilityNumber ) ||*/ (stats[(*anarace->getStartCondition())->getRace()][i].unitType != (signed int)(menuLevel)) || ((efConfiguration.isRestrictSC())&&(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==1)))
+					if(/*(i >= facilityNumber ) ||*/ (stats[anarace->getRace()][i].unitType != (signed int)(menuLevel)) || ((efConfiguration.isRestrictSC())&&(stats[anarace->getRace()][i].bwunit==1)))
 					{
 						(*m)->Hide();
 						continue;
@@ -152,6 +193,22 @@ void UnitMenu::processMenu()
 						(*m)->Show();
 						(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+menuLevel));
 						(*m)->updateText(UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i+UNIT_NULL_STRING)));
+						std::ostringstream os;
+						os << "$" << stats[anarace->getRace()][i].name << "$#" <<
+							"  build time $" << stats[anarace->getRace()][i].BT << "$ sec.#";
+							if(stats[anarace->getRace()][i].minerals>0)
+								os << "  $" << stats[anarace->getRace()][i].minerals/100 << "$ minerals#";
+							if(stats[anarace->getRace()][i].gas>0)
+								os << "  $" << stats[anarace->getRace()][i].gas/100 << "$ gas#";
+/*							<< stats[anarace->getRace()][unit_type].prerequisite[]
+							<< stats[anarace->getRace()][unit_type].facility[]
+							<< stats[anarace->getRace()][unit_type].needSupply
+							<< stats[anarace->getRace()][unit_type].haveSupply
+							<< stats[anarace->getRace()][unit_type].facilityType
+							<< stats[anarace->getRace()][unit_type].create
+							<< stats[anarace->getRace()][unit_type].bwunit*/
+								
+							(*m)->updateToolTip(os.str());					
 						(*m)->adjustRelativeRect(edge);
 					}
 					++height;
@@ -162,9 +219,9 @@ void UnitMenu::processMenu()
 				{
 					++i;
 					if((i > GAS_SCV ) || 
-						(((stats[(*anarace->getStartCondition())->getRace()][i].facility[0] != facility[menuLevel-1])&&
-				   		(stats[(*anarace->getStartCondition())->getRace()][i].facility[1] != facility[menuLevel-1])&&
-					   (stats[(*anarace->getStartCondition())->getRace()][i].facility[2] != facility[menuLevel-1]))))
+						(((stats[anarace->getRace()][i].facility[0] != facility[menuLevel-1])&&
+				   		(stats[anarace->getRace()][i].facility[1] != facility[menuLevel-1])&&
+					   (stats[anarace->getRace()][i].facility[2] != facility[menuLevel-1]))))
 						{
 							(*m)->Hide();
 							continue;
@@ -173,9 +230,27 @@ void UnitMenu::processMenu()
 			//		if (parent->fitItemToRelativeRect(edge, 1)) 
 					{
 						(*m)->Show();
-						(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][i].unitType));
+						(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[anarace->getRace()][i].unitType));
 						(*m)->updateText(
 						UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i+UNIT_NULL_STRING)));
+	
+						std::ostringstream os;
+						os << "$" << stats[anarace->getRace()][i].name << "$#" <<
+							"  build time $" << stats[anarace->getRace()][i].BT << "$ sec.#";
+							if(stats[anarace->getRace()][i].minerals>0)
+								os << "  $" << stats[anarace->getRace()][i].minerals/100 << "$ minerals#";
+							if(stats[anarace->getRace()][i].gas>0)
+								os << "  $" << stats[anarace->getRace()][i].gas/100 << "$ gas#";
+/*							<< stats[anarace->getRace()][unit_type].prerequisite[]
+							<< stats[anarace->getRace()][unit_type].facility[]
+							<< stats[anarace->getRace()][unit_type].needSupply
+							<< stats[anarace->getRace()][unit_type].haveSupply
+							<< stats[anarace->getRace()][unit_type].facilityType
+							<< stats[anarace->getRace()][unit_type].create
+							<< stats[anarace->getRace()][unit_type].bwunit*/
+								
+							(*m)->updateToolTip(os.str());					
+					
 						(*m)->adjustRelativeRect(edge);
 					}
 					++height;
@@ -205,7 +280,7 @@ void UnitMenu::process()
 	}
 	// check for Pressed Units
 	eButtonColorsType button_colors_type;
-	switch((*anarace->getStartCondition())->getRace())
+	switch(anarace->getRace())
 	{
 		case TERRA:button_colors_type=UNIT_TYPE_5_BUTTON;break;
 		case PROTOSS:button_colors_type=UNIT_TYPE_7_BUTTON;break;

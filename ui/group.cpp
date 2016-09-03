@@ -1,7 +1,7 @@
 #include "group.hpp"
 #include "button.hpp"
 
-UI_Group::UI_Group(UI_Object* group_parent, const Rect initial_rect, const Size bottom_right_distance, const ePositionMode position_mode, const eString txt ) :
+UI_Group::UI_Group(UI_Object* group_parent, const Rect& initial_rect, const Size bottom_right_distance, const ePositionMode position_mode, const eString txt ) :
 	UI_Object(group_parent, initial_rect, bottom_right_distance, position_mode, AUTO_SIZE),
 	title(txt==NULL_STRING?NULL:new UI_StaticText(this, txt, Rect(Point(0,0) - Size(3, 14), Size(0,0)), Size(0,0), BRIGHT_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST, AUTO_SIZE)),
 	number(0)
@@ -92,7 +92,6 @@ void UI_Group::draw(DC* dc) const
 			dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
 		if(title!=NULL)
 		{
-			title->setColor(BRIGHT_TEXT_COLOR);
 			dc->SetBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
 			dc->DrawEdgedRoundedRectangle(getAbsolutePosition() - Size(4, 6), getSize(), 4);
 		

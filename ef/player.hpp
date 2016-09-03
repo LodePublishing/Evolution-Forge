@@ -9,7 +9,7 @@
 #include "bowindow.hpp"
 
 
-class Player : public UI_Window
+class Player : public UI_Object
 {
 	public:
 		Player(UI_Object* player_parent, const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max);
@@ -30,7 +30,9 @@ class Player : public UI_Window
 		void reloadStrings();
 
 		void reloadOriginalSize();
-	
+		const bool wasResetted() const;
+
+		void recheckSomeDataAfterChange();
 	private:
 		float geneAnimation;
 		void drawGeneString(DC* dc) const;

@@ -9,6 +9,8 @@ UI_StaticText& UI_StaticText::operator=(const UI_StaticText& object)
 	textWasChanged=true;
 	font = object.font;
 	color = object.color;
+	tempColor = object.tempColor;
+	tempColorIsSet = object.tempColorIsSet;
 	eText = object.eText;
 	pressed = object.pressed;
 	highlight = object.highlight;
@@ -21,6 +23,8 @@ UI_StaticText::UI_StaticText(const UI_StaticText& object) :
 	textWasChanged(true),
 	font(object.font),
 	color(object.color),
+	tempColor(object.tempColor),
+	tempColorIsSet(object.tempColorIsSet),
 	eText(object.eText),
 	pressed(object.pressed),
 	highlight(object.highlight)
@@ -31,7 +35,9 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const Rect st_pos, const Size
 	text(),
 	textWasChanged(true),
 	font(st_font),
-	color(*theme.lookUpColor(st_color)),
+	color(st_color),
+	tempColor(),
+	tempColorIsSet(false),
 	eText(NULL_STRING),
 	pressed(false),
 	highlight(false)
@@ -42,7 +48,9 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const eString st_text, const 
 	text(),
 	textWasChanged(true),
 	font(st_font),
-	color(*theme.lookUpColor(st_color)),
+	color(st_color),
+	tempColor(),
+	tempColorIsSet(false),
 	eText(st_text),
 	pressed(false),
 	highlight(false)
@@ -57,7 +65,9 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const std::string& st_text, c
 	text(st_text),
 	textWasChanged(true),
 	font(st_font),
-	color(*theme.lookUpColor(st_color)),
+	color(st_color),
+	tempColor(),
+	tempColorIsSet(false),
 	eText(NULL_STRING),
 	pressed(false),
 	highlight(false)
@@ -88,24 +98,31 @@ void UI_StaticText::draw(DC* dc) const
 {
 	if(!isShown())
 		return;
-	if(!checkForNeedRedraw())
-		return;
-
-//	if(font!=NULL_FONT)
-		dc->SetFont(theme.lookUpFont(font));
-	if(color!=NULL_COLOR) 
+	if(checkForNeedRedraw())
 	{
-		if(highlight==true)
-			dc->SetTextForeground(dc->changeAbsoluteBrightness(color, 60));
+	//	if(font!=NULL_FONT)
+			dc->SetFont(theme.lookUpFont(font));
+		if(color!=NULL_COLOR) 
+		{
+			if(tempColorIsSet)
+			{
+				if(highlight==true)
+					dc->SetTextForeground(dc->changeAbsoluteBrightness(tempColor, 60));
+				else
+					dc->SetTextForeground(tempColor);
+			} else
+			{
+				if(highlight==true)
+					dc->SetTextForeground(dc->changeAbsoluteBrightness(*UI_Object::theme.lookUpColor(color), 60));
+				else
+					dc->SetTextForeground(*UI_Object::theme.lookUpColor(color));
+			}
+		}
+		if(pressed)
+			dc->DrawText(text, getAbsolutePosition() + Size(1, 4));
 		else
-			dc->SetTextForeground(color);
+			dc->DrawText(text, getAbsolutePosition() + Size(0, 3));
 	}
-		
-	
-	if(pressed)
-		dc->DrawText(text, getAbsolutePosition() + Size(1, 4));
-	else
-		dc->DrawText(text, getAbsolutePosition() + Size(0, 3));
 	UI_Object::draw(dc);
 }
 
@@ -155,6 +172,9 @@ void UI_StaticText::removeCharDelete(const unsigned int pos)
 void UI_StaticText::process()
 {
 	UI_Object::process();
+	tempColorIsSet = false;
+	if( (isShown()) && (Rect(getAbsolutePosition(), getTextSize()).Inside(mouse )) )
+		setNeedRedrawMoved();
 	if(textWasChanged)
 	{
 		if(eText != NULL_STRING)
@@ -227,5 +247,4 @@ void UI_StaticText::reloadStrings()
 	else
 		reloadText(text);
 }
-
 

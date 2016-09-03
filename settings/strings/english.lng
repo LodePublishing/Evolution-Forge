@@ -68,10 +68,10 @@
 		Ship Weapons
 		Refinery 
 		Gas SCV
-                Build parallel two
-                Build parallel four
-                Build parallel eight
-                Build parallel sixteen
+		Build parallel two
+		Build parallel four
+		Build parallel eight
+		Build parallel sixteen
 		All from Gas to Minerals
 		NULL
 		Vespene Geysir
@@ -96,7 +96,7 @@
 		R_COLOSSUS_REACTOR
 		R_CADUCEUS_REACTOR
 		R_CHARON_BOOSTER
-		R_INFANTRY_ARMOR		
+		R_INFANTRY_ARMOR
 		R_INFANTRY_WEAPONS
 		R_VEHICLE_PLATING
 		R_VEHICLE_WEAPONS
@@ -330,6 +330,7 @@
 		Setting window mode ...
 		Setting fullscreen mode ...
 		Initializing SDL true type fonts ...
+		Initializing framerate system ...
 		Initializing graphic engine and core ...
 		Loading ui settings and bitmaps and fonts ...
 		UI settings and bitmaps and fonts loaded.
@@ -355,17 +356,18 @@
 		Evolution forge help
 		Settings
 		Maps
+		Database
 		
 		Order description player %s
 		Techtree
 		Graphical build order %s
 		Overview %s
 		Statistics %s
-		Scores
+		Scores %s
 		Unit list %s
 		Build order %s
-		Game
-		Player		
+		Game %s
+		Player
 
 		Game %i
 		New Game
@@ -421,10 +423,10 @@
 
 		save goal...
 		Save Goals as
-		Give the goal a name you can recognize later:
+		Give the goal a name:
 
 		Save build order as
-		Give the build order a name you can recognize later:
+		Give the build order a name:
 
 		Terra
 		Protoss
@@ -461,8 +463,9 @@
 #tabs
 		Help
 		Settings
+		Database
 		Maps
-				
+
 # tooltips:
 		add a unit
 		remove a unit
@@ -481,8 +484,8 @@
 		fitness variance of all programs
 		minimum number of generations left
 		Frames per second [build orders per second]
-	
-		Save goal list as...	
+
+		Save goal list as...
 
 		Reset and restart from the scratch
 		Save build order as html
@@ -492,10 +495,12 @@
 		Pause the optimization
 
 		
-		Percent of all goals / Percent of theoretical (without minerals/gas) optimum
+		Percent of all completed goals
+		Percent of theoretical optimum (infinite minerals/gas/workers at the beginning)
 
 		Explanation of the different windows and a tutorial
-		Display and global ef settings
+		Display and global EF settings
+		Compare and administrate all goals and build orders
 		Create and configure starting forces and map configurations
 
 		Click to set latest time these units should be complete
@@ -522,23 +527,17 @@
 # Eingabefeld
 		Desired number of FPS
 		Desired % CPU usage
-# an aus
 		Smooth movements
-# an aus
+		Show debug
 		Glowing buttons
-# an aus
 		DNA Spiral
-# an aus
 		Rounded rectangles
-# an aus
 		Background bitmap
-# an aus
 		Transparency
-# an aus
 		Full screen
-# an aus
 		Tool tips
 		Software mouse
+		Unload graphics
 
 		Time a build order may use at maximum (has influence on the time the program needs to find a first solution)
 		Shall only StarCraft (TM) units be allowed to be build?
@@ -563,6 +562,7 @@
 		Desired usage of the CPU
 # an aus
 		Shall the objects move around slowly or shall they directly jump to their destinations?
+		Shall a box be drawn where the cpu usage of each module (processing/drawing/messages/core/idle) is displayed?
 		Shall buttons and items glow when the mouse is over the item?
 		Shall a dna spiral representing the build order be drawn?
 		Shall the rectangles have rounded edges and borders? (needs a little CPU)
@@ -571,11 +571,12 @@
 		Switch between window and fullscreen (needs a program restart on some systems)
 		8[ Don't ya like these texts?
 		Use software mouse or use mouse pointer of the operating system?
+		Shall unnecessary graphics be unloaded and reloaded when needed? (for low-memory systems)
 
 		Settings will be saved to settings/default.cfg when quitting the program
 		
 		GUI was changed to english language.
-	
+
 		Language
 		ERROR
 		English
@@ -607,12 +608,11 @@
 
 		Theme
 		ERROR
+		Dark Red
 		Dark blue
 		Green
-		Red
 		Yellow
 		Grey
-		Monochrome
 
 		Reload from file
 		Failsafe settings
@@ -685,7 +685,6 @@
 		gas
 		supply
 		time
-		
 	@END
 
 @END

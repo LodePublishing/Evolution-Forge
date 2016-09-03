@@ -336,10 +336,10 @@ void MapWindow::process()
 //	}
 	
 // ------ OPEN/CLOSE MENUES
-	if(playerSettings->buttonHasChanged())
-	{
+//	if(playerSettings->buttonHasChanged())
+//	{
 //		locationMenu->setParent(playerStart[playerSettings->getMarked()]);
-		locationMenu->open();
+//		locationMenu->open();
 //		if(!locationMenu->isOpen())
 //		{
 //			playerSettings->forceUnpressAll();
@@ -349,7 +349,7 @@ void MapWindow::process()
 //			closeMenus();
 //			locationMenu->open();
 //		}
-	}
+//	}
 
 
 

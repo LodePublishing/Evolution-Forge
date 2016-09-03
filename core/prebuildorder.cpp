@@ -10,16 +10,24 @@
 
 
 PREBUILDORDER::PREBUILDORDER():
+	pMap(NULL),
 //	location(0),
-	pStartCondition(NULL),
+//	pStartCondition(NULL),
 	buildingQueue(), // TODO
+	parallelCommandQueues(),
 //	lastcounter(0),
 //	lastunit(0),
+	unit(NULL),
 	pStats(NULL),
 	neededMinerals(0),
 	neededGas(0),
+	pStart(NULL),
 	ready(false),
 	pGoal(NULL),
+	alwaysBuildWorkers(false),
+	onlySwapOrders(false),
+	conditionsChanged(true),
+
 	playerNum(0),
 	minerals(0),
 	gas(0),
@@ -44,12 +52,15 @@ PREBUILDORDER::PREBUILDORDER():
 void PREBUILDORDER::resetPrerace()
 {
 //	location = NULL;
-	pStartCondition = NULL;
+	conditionsChanged = true;
+//	pStartCondition = NULL;
 	while(!buildingQueue.empty())
 		buildingQueue.pop();
+	unit = NULL;
 	pStats = NULL;
 	neededMinerals = 0;
 	neededGas = 0;
+	pStart = NULL;
 	ready = false;
 	pGoal = NULL;
 	playerNum = 0;
@@ -65,6 +76,7 @@ void PREBUILDORDER::resetPrerace()
 	haveSupply = 0;
 	length = 0;
 	timeout = 0;
+	// pMap == NULL?
 	memset(mineralHarvestPerSecond, 0, 45 * MAX_LOCATIONS*sizeof(int));
 	memset(gasHarvestPerSecond, 0, 5 * MAX_LOCATIONS*sizeof(int));
 	memset(Code, 0, MAX_LENGTH*sizeof(int));
@@ -74,15 +86,20 @@ void PREBUILDORDER::resetPrerace()
 
 PREBUILDORDER::PREBUILDORDER(const PREBUILDORDER& object) :
 //	location(object.location),
-	pStartCondition(object.pStartCondition),
+//	pStartCondition(object.pStartCondition),
 	buildingQueue(object.buildingQueue),
 //	lastcounter(object.lastcounter),
 //	lastunit(object.lastunit),
+	unit(object.unit),
 	pStats(object.pStats),
 	neededMinerals(object.neededMinerals),
 	neededGas(object.neededGas),
+	pStart(object.pStart),
 	ready(object.ready),
 	pGoal(object.pGoal),
+	alwaysBuildWorkers(object.alwaysBuildWorkers),
+	onlySwapOrders(object.onlySwapOrders),
+	conditionsChanged(true),
 	playerNum(object.playerNum),
 	minerals(object.minerals),
 	gas(object.gas),
@@ -109,15 +126,22 @@ PREBUILDORDER::PREBUILDORDER(const PREBUILDORDER& object) :
 PREBUILDORDER& PREBUILDORDER::operator=(const PREBUILDORDER& object)
 {
 //	location = object.location;
-	pStartCondition = object.pStartCondition;
+//	pStartCondition = object.pStartCondition;
 	buildingQueue = object.buildingQueue;
 //	lastcounter = object.lastcounter;
   //  lastunit = object.lastunit;
+	unit = object.unit;
 	pStats = object.pStats;
 	neededMinerals = object.neededMinerals;
 	neededGas = object.neededGas;
+	pStart = object.pStart;
 	ready = object.ready;
 	pGoal = object.pGoal;
+	
+	alwaysBuildWorkers = object.alwaysBuildWorkers;
+	onlySwapOrders = object.onlySwapOrders;
+	conditionsChanged = true;
+
 	playerNum = object.playerNum;
 	minerals = object.minerals;
 	gas = object.gas;
@@ -142,6 +166,23 @@ PREBUILDORDER& PREBUILDORDER::operator=(const PREBUILDORDER& object)
 	return(*this);
 }
 
+const bool PREBUILDORDER::setAlwaysBuildWorkers(const bool always_build_workers)
+{
+	if(alwaysBuildWorkers == always_build_workers)
+		return(false);
+	conditionsChanged = true;
+	alwaysBuildWorkers = always_build_workers;
+	return(true);
+}
+
+const bool PREBUILDORDER::setOnlySwapOrders(const bool only_swap_orders)
+{
+	if(onlySwapOrders == only_swap_orders)
+		return(false);
+	conditionsChanged = true;
+	onlySwapOrders = only_swap_orders;
+	return(true);
+}
 
 void PREBUILDORDER::prepareForNewGeneration()
 {
@@ -153,7 +194,7 @@ void PREBUILDORDER::prepareForNewGeneration()
 		i = parallelCommandQueues.erase(i);
 	}
 
-	if(coreConfiguration.isAlwaysBuildWorker())
+	if(isAlwaysBuildWorkers())
 	{
 		PARALLEL_COMMAND* gimme = new PARALLEL_COMMAND();
 		gimme->unit = SCV;
@@ -164,13 +205,13 @@ void PREBUILDORDER::prepareForNewGeneration()
 	setHarvestedGas(0);setHarvestedMinerals(0);
 	setWastedGas(0);setWastedMinerals(0);
 
-	setMinerals((*pStartCondition)->getMinerals());
-	setGas((*pStartCondition)->getGas());
-	setTimer(coreConfiguration.getMaxTime()-(*pStartCondition)->getStartTime());
-	setNeedSupply((*pStartCondition)->getNeedSupply());
-	setHaveSupply((*pStartCondition)->getHaveSupply());
+	setMinerals((*(getStartCondition()))->getMinerals());
+	setGas((*(getStartCondition()))->getGas());
+	setTimer(coreConfiguration.getMaxTime()-(*(getStartCondition()))->getStartTime());
+	setNeedSupply((*(getStartCondition()))->getNeedSupply());
+	setHaveSupply((*(getStartCondition()))->getHaveSupply());
 	
-	const UNIT* start_units = (*pStartCondition)->getUnit(0);
+	const UNIT* start_units = (*(getStartCondition()))->getUnit(0);
 //	int j = 0;
 	for(unsigned int k=UNIT_TYPE_COUNT;k--;)
 		if(start_units->getTotal(k))
@@ -201,7 +242,8 @@ void PREBUILDORDER::prepareForNewGeneration()
 	setIP(coreConfiguration.getMaxLength()-1);
 	ready=false;
 
-	resetSpecial();
+	if(getRace() == ZERG)
+		resetSpecial();
 }																																							
 
 PREBUILDORDER::~PREBUILDORDER()
@@ -294,19 +336,21 @@ const unsigned int PREBUILDORDER::calculateIdleTime() const
 
 // called within the calculateStep function
 void PREBUILDORDER::adjustLocationUnitsAfterCompletion(const unsigned int location_number, const eFacilityType facilityType, const unsigned int facility, const unsigned int facility2, const unsigned int count)
+	// TODO count?
 {
 	switch(facilityType)
 	{
 		case NO_FACILITY:break;
 		case IS_LOST:
 		case IS_MORPHING:
-			if(SPECIAL_UNIT_TYPE) // TODO
+/*			if(stats[SPECIAL_UNIT_TYPE) // TODO
 			{
+			
 				if(facility)
 					setLocationTotal(location_number, facility, getLocationTotal(location_number, facility) - count);
 //				if(facility2)
 //					removeOneLocationTotal(location_number, facility2);
-			} else
+			} else*/ // TODO!!!
 			{
 				if(facility)
 					removeOneLocationTotal(location_number, facility);
@@ -489,6 +533,8 @@ const unsigned int PREBUILDORDER::calculatePrimaryFitness(const bool is_ready)
 						// Falls j<MAX_LOCATIONS => unser "Bon" wurde schon vorher aufgebraucht => An dieser Stelle j den Rest draufgeben... 
 						if(j<(*getMap())->getMaxLocations())
 							sumup+=bon*(100-(*pMap)->getLocation(loc)->getDistance(i->getLocation()));
+
+//						TODO 'bonus' veraendern?
 					}
 
 //jetzt steht in sumup die gesammelten totals gewichtet mit den Entfernungen zum Ziel
@@ -864,7 +910,7 @@ void PREBUILDORDER::assignStart(START* start)
 //	Optimierungen...
 	
 	pMap = pStart->getMap();
-	pStartCondition = pStart->getStartCondition();
+//	pStartCondition = getStartCondition();
 	setGoal(pStart->getCurrentGoal());
 	setpStats(pStart->getpStats());
 
@@ -906,11 +952,11 @@ void PREBUILDORDER::assignUnits(UNIT (*units)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS
 
 void PREBUILDORDER::initializePlayer()
 {
-	setMinerals((*pStartCondition)->getMinerals());
-	setGas((*pStartCondition)->getGas());
-	setTimer(coreConfiguration.getMaxTime()-(*pStartCondition)->getStartTime());
-	setNeedSupply((*pStartCondition)->getNeedSupply());
-	setHaveSupply((*pStartCondition)->getHaveSupply());
+	setMinerals((*(getStartCondition()))->getMinerals());
+	setGas((*(getStartCondition()))->getGas());
+	setTimer(coreConfiguration.getMaxTime()-(*(getStartCondition()))->getStartTime());
+	setNeedSupply((*(getStartCondition()))->getNeedSupply());
+	setHaveSupply((*(getStartCondition()))->getHaveSupply());
 }
 
 void PREBUILDORDER::eraseIllegalCode()
@@ -925,14 +971,14 @@ void PREBUILDORDER::eraseIllegalCode()
 		}*/
 }
 
-void PREBUILDORDER::assignStartCondition(const START_CONDITION* start_condition, const bool neutral_player) 
+/*void PREBUILDORDER::assignStartCondition(const START_CONDITION* start_condition, const bool neutral_player) 
 {
 	pStart->assignStartCondition(start_condition);
 	if(neutral_player)
 		pStart->fillAsNeutralPlayer();
 	else
 		pStart->fillAsActivePlayer();
-}
+}*/
 
 void PREBUILDORDER::eraseUselessCode()
 {
@@ -992,7 +1038,7 @@ void PREBUILDORDER::mutateGeneCode()
 			buildable[i]=true;
 			tGeno[tMaxBuildTypes]=getGoal()->toGeno(i);
 			++tMaxBuildTypes;
-			if((*pStartCondition)->getLocationTotal(GLOBAL,i))
+			if((*(getStartCondition()))->getLocationTotal(GLOBAL,i))
 			{
 				std::list<unsigned int> newBuildable;
 				for(std::list<unsigned int>::iterator j = allow[i].facility.begin();j!=allow[i].facility.end(); ++j) 
@@ -1020,12 +1066,12 @@ void PREBUILDORDER::mutateGeneCode()
 		if(rand() % (MAX_LENGTH*100/coreConfiguration.getMutationFactor())==0)
 		{
 			int new_item;
-			if(coreConfiguration.isAlwaysBuildWorker())
+			if(isAlwaysBuildWorkers())
 				new_item = tGeno[(rand()%(tMaxBuildTypes-1))+1];
 			else 
 				new_item = tGeno[rand()%tMaxBuildTypes];
 			int random=3;
-			if(!coreConfiguration.isOnlySwapOrders())
+			if(!isOnlySwapOrders())
 				random = rand()%4;
 			switch(random)
 			{
@@ -1138,6 +1184,30 @@ void PREBUILDORDER::mutateGeneCode()
 	}
 }
 
+#include <sstream>
+const bool PREBUILDORDER::checkForLarva(const unsigned int current_location_window)
+{	
+		// Larva wird benoetigt zum Bau? Fein, dann bauen wir eine neue Larva falls nicht schon alle hatcheries etc. belegt sidn
+				// Gesamtzahl der Larven < 3 * HATCHERY?
+// TODO: Ueberpruefen: Eine Art Defizit einfuehren: Wenn eine Brutstaette voll ausgelastet ist und anschliessend eine neue fertig wird, wird dann ploetzlich schneller produziert?
+
+// Falls mehr Produktionsstaetten existieren als Larven in Produktion und Larven auf dem Feld sind...
+	
+	if(((   getLocationTotal(current_location_window, HATCHERY)+
+		getLocationTotal(current_location_window, LAIR)+
+		getLocationTotal(current_location_window, HIVE)) *3 > 
+		(larvaInProduction[current_location_window]+getLocationTotal(current_location_window, LARVA)))  &&
+
+// ... und mehr Produktionsstaetten als Larven in Produktion existieren			
+ 		((getLocationTotal(current_location_window, HATCHERY)+
+		 getLocationTotal(current_location_window, LAIR)+
+		 getLocationTotal(current_location_window, HIVE) > 
+		  larvaInProduction[current_location_window]))) // => zuwenig Larven da!
+// ... dann baue eine Larve
+	{
+		return true;
+	} else return false;
+}
 
 
 
@@ -1239,6 +1309,11 @@ void PREBUILDORDER::copyCode(PREBUILDORDER& player)
 void PREBUILDORDER::copyCode(unsigned int* dst) const
 {
 	memcpy(dst, Code, MAX_LENGTH * sizeof(int));
+}
+
+void PREBUILDORDER::setConditionsChanged(const bool conditions_changed) 
+{
+	conditionsChanged = conditions_changed;
 }
 
 

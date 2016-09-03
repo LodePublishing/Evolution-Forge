@@ -12,6 +12,7 @@ class ScoreWindow : public UI_Window
 		~ScoreWindow();
 
 		void resetData();
+		void resetPlayerTime(unsigned int player_number);
 		void process();
 		void draw(DC* dc) const;
 
@@ -35,7 +36,6 @@ class ScoreWindow : public UI_Window
 		const signed int getAssignedRace(const unsigned int player_number) const;
 	private:
 		PlayerEntry* player[MAX_PLAYER];
-//		UI_Button* resetButton;
 		unsigned int players;
 		unsigned int maxPlayer;
 

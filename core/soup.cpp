@@ -55,6 +55,38 @@ ANABUILDORDER* SOUP::getAnalyzedBuildOrder(const unsigned int player_num)
 	return(analyzedBuildOrder[player_num]);
 }
 
+void SOUP::initSoup(unsigned int player, START* start)
+{
+	unsigned int groupSize = MAX_PROGRAMS / mapPlayerNum;
+//differenzieren, damit auch restarts/updates moeglich sind waehrend dem run! TODO
+
+	for(unsigned int i = groupSize; i--;)
+	{
+		if(buildOrder[i+player*groupSize])
+			buildOrder[i+player*groupSize]->resetData();
+		else 
+		{
+			delete buildOrder[i+player*groupSize];
+			buildOrder[i+player*groupSize]=new BUILDORDER();
+		}
+		buildOrder[i+player*groupSize]->assignStart(start);
+		buildOrder[i+player*groupSize]->setPlayerNumber(player+1);
+		buildOrder[i+player*groupSize]->resetGeneCode();
+		buildOrder[i+player*groupSize]->assignUnits(&temporaryForce);
+	}
+
+	if(analyzedBuildOrder[player])
+		analyzedBuildOrder[player]->resetData();
+	else
+	{
+		delete analyzedBuildOrder[player];
+		analyzedBuildOrder[player] = new ANABUILDORDER();
+	}
+	analyzedBuildOrder[player]->assignStart(start);
+	analyzedBuildOrder[player]->setPlayerNumber(player+1);
+	analyzedBuildOrder[player]->assignUnits(&temporaryForce);
+}
+
 void SOUP::initSoup(START* (*start)[MAX_INTERNAL_PLAYER])
 {
 /* benoetigt folgende initialisierte Daten:
@@ -71,6 +103,7 @@ void SOUP::initSoup(START* (*start)[MAX_INTERNAL_PLAYER])
 		toLog("ERROR: (SOUP::initSoup) Map not initialized.");
 		return;
 	}
+	
 	if(!goalsInitialized)
 	{
 		toLog("ERROR: (SOUP::initSoup) Goals not initialized.");
@@ -116,10 +149,10 @@ void SOUP::initSoup(START* (*start)[MAX_INTERNAL_PLAYER])
 		{
 			delete analyzedBuildOrder[k];
 			analyzedBuildOrder[k] = new ANABUILDORDER();
-			analyzedBuildOrder[k]->assignUnits(&temporaryForce);
 		}
 		analyzedBuildOrder[k]->assignStart((*start)[k+1]);
 		analyzedBuildOrder[k]->setPlayerNumber(k+1);
+		analyzedBuildOrder[k]->assignUnits(&temporaryForce);
 	}
 	for(k = mapPlayerNum; k < MAX_PLAYER; ++k)
 	{
@@ -171,6 +204,7 @@ void SOUP::calculateAnalyzedBuildOrder()
 	for(unsigned int k = mapPlayerNum; k--;)
 		if(analyzedBuildOrder[k]->isOptimizing())
 		{
+			analyzedBuildOrder[k]->assignUnits(&temporaryForce);
 			analyzedBuildOrder[k]->prepareForNewGeneration();
 			analyzedBuildOrder[k]->initializePlayer();
 			analyzedBuildOrder[k]->adjustHarvestAllLocations();
@@ -195,11 +229,13 @@ void SOUP::calculateBuildOrder(const unsigned int bo_num)
 /* copies the precalculated startforce from pStart into our map (temporaryForce[][])
  * this is done 1:1, i.e. with memcpy */
 	const unsigned int groupSize=MAX_PROGRAMS/mapPlayerNum;
-
 	//reset code && calculate 
 	for(unsigned int k = mapPlayerNum; k--;)
 		if(analyzedBuildOrder[k]->isOptimizing())
 		{
+			buildOrder[k*groupSize+bo_num]->setAlwaysBuildWorkers( analyzedBuildOrder[k]->isAlwaysBuildWorkers());
+			buildOrder[k*groupSize+bo_num]->setOnlySwapOrders( analyzedBuildOrder[k]->isOnlySwapOrders());
+			
 			buildOrder[k*groupSize+bo_num]->assignUnits(&temporaryForce);
 			buildOrder[k*groupSize+bo_num]->prepareForNewGeneration();
 			buildOrder[k*groupSize+bo_num]->initializePlayer();
@@ -222,51 +258,26 @@ void SOUP::calculateBuildOrder(const unsigned int bo_num)
 				complete&=buildOrder[k*groupSize+bo_num]->calculateStep();
 	}
 }
-
-const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER], const UNIT (*startForce)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]) //reset: have the goals/settings been changed?
+#include <sstream>
+const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER], const UNIT (*start_force)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]) //reset: have the goals/settings been changed?
 {
-#ifdef _SCC_DEBUG
-	/*if(!mapInitialized)
-	{
-		toLog("ERROR: (SOUP::newGeneration) Map not initialized.");
-		return(0);
-	}
-	if(!goalsInitialized)
-	{
-		toLog("ERROR: (SOUP::newGeneration) Goals not initialized.");
-		return(0);
-	}
-	*/
-#endif
+// TODO evtl checken ob alles richtig initialisiert wurde
 //	if(analyzedBuildOrder[0]->getRun()>=ga->getMaxRuns()) //~~
 //		return(0);
+
 	const unsigned int groupSize=MAX_PROGRAMS/mapPlayerNum;
 
+	// Veraendert? Dann zurueckkopieren
+	for(unsigned int k = mapPlayerNum; k--;)
+		if((previous_analyzed_buildorder[k])&&(analyzedBuildOrder[k]->writeProgramBackToCode(previous_analyzed_buildorder[k]->getProgramList()))) // irrefuehrend, previous ist ja dasselbe...
+			for(unsigned int i = groupSize;i--;)
+				buildOrder[k*groupSize+i]->copyCode(*(analyzedBuildOrder[k]));
+
 //	PREBUILDORDER::initNoise();
-// Set players on given code and parameters
-/*	for(int j=mapPlayerNum;j--;)
-		if(previous_analyzed_buildorder[j]) //TODO
-		{
-			for(int i=MAX_LENGTH;i--;)
-			{
-				buildOrder[j*groupSize]->Code[i]=previous_analyzed_buildorder[j]->Code[i];
-				buildOrder[j*groupSize]->Marker[i]=previous_analyzed_buildorder[j]->Marker[i];
-			}
-//			analyzedBuildOrder[j]->setOptimizing(previous_analyzed_buildorder[j]->isOptimizing());
-		}
-	if(!previous_analyzed_buildorder[0])
-	{
-		analyzedBuildOrder[0]->setOptimizing(true);
-	}*/
-	
-
-// check whether goals etc. have changed
-//		checkForChange();
-
 
 	for(unsigned int i=groupSize;i--;)
 	{
-		memcpy(&temporaryForce, &((*startForce)[0][0]), sizeof(temporaryForce));
+		memcpy(&temporaryForce, &((*start_force)[0][0]), sizeof(temporaryForce));
 		calculateBuildOrder(i);
 	}
 //NOW: all pFitness of the players are calculated
@@ -278,7 +289,7 @@ const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_P
 			std::sort(buildOrder+k*groupSize, buildOrder+(k+1)*groupSize, SoupPlayerDescendingFitnessSort());
 	//NOW: all players are sorted
 			
-			for(int i=coreConfiguration.getBreedFactor()*groupSize/100;i--;) // % are replaced by the uber-program :-o
+			for(unsigned int i=coreConfiguration.getBreedFactor()*groupSize/100;i--;) // % are replaced by the uber-program :-o
 			{
 				int l=rand() % (groupSize*coreConfiguration.getBreedFactor()/100) + groupSize*(100-coreConfiguration.getBreedFactor())/100;
                                 if((buildOrder[k*groupSize+l]->getpFitness()*1.1<buildOrder[k*groupSize]->getpFitness())||
@@ -325,17 +336,12 @@ const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_P
                                                 analyzedBuildOrder[k]->setMaxsFitness(buildOrder[k*groupSize]->getsFitness());
                                                 analyzedBuildOrder[k]->setMaxtFitness(buildOrder[k*groupSize]->gettFitness());
                                         }
-//                                        analyzedBuildOrder[k]->setUnchangedGenerations(0); TODO
                                         newcalc = true;
                                         analyzedBuildOrder[k]->copyCode(*buildOrder[k*groupSize]);
-/*                                      for(int i=MAX_LENGTH;i--;)
-                                        {
-        // assign the 'best of breed' to analyzedBuildOrder
-                                                analyzedBuildOrder[k]->Code[i]=buildOrder[k*groupSize]->Code[i];
-                                                analyzedBuildOrder[k]->Marker[i]=buildOrder[k*groupSize]->Marker[i];
-                                        //memcpy(analyzedBuildOrder[j]->Code[0],buildOrder[j*MAX_PROGRAMS/2]->Code[0],MAX_LENGTH*4);
-                                        //memcpy(analyzedBuildOrder[j]->Code[1],buildOrder[j*MAX_PROGRAMS/2]->Code[1],MAX_LENGTH*4);
-                                        }*/
+//					std::ostringstream os;
+//					for(unsigned int i = MAX_LENGTH;i--;)
+//						os << analyzedBuildOrder[k]->getCode(i);
+//					toLog("Copied Code: " + os.str());
                                 }
                         }
 
@@ -374,10 +380,25 @@ const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_P
 																				
 //evtl breed hinter crossover, aber vorher neue Kinder neu berechnen!
 
-//	if(newcalc)
-//	{
-	memcpy(&temporaryForce, &((*startForce)[0][0]), sizeof(temporaryForce));
-	calculateAnalyzedBuildOrder();
+	if(newcalc)
+	{
+		memcpy(&temporaryForce, &((*start_force)[0][0]), sizeof(temporaryForce));
+		calculateAnalyzedBuildOrder();
+
+#ifdef _SCC_DEBUG
+	for(unsigned int k=mapPlayerNum;k--;)
+		if((analyzedBuildOrder[k]->getHarvestedMinerals() != buildOrder[k*groupSize]->getHarvestedMinerals())||
+		(analyzedBuildOrder[k]->getHarvestedGas() != buildOrder[k*groupSize]->getHarvestedGas())||
+		(analyzedBuildOrder[k]->getTimer() != buildOrder[k*groupSize]->getTimer()))
+		{
+			std::ostringstream os;
+			for(unsigned int i = MAX_LENGTH;i--;)
+				os << analyzedBuildOrder[k]->getCode(i);
+			toLog("CurrentCode: " + os.str());
+			toLog("^^^^^^^^^^^^ WARNING: genetic core and analysis core are not synchrosized");
+		}
+#endif			
+
 
 // SOME POST PROCESSING
 // CALCULATE FITNESS AVERAGE & VARIANCE
@@ -415,11 +436,11 @@ if(analyzedBuildOrder[k]->getUnchangedGenerations()>=coreConfiguration.getMaxGen
 
 				isNewRun=true;
 
-				
-
+					
+?
 			return(&(analyzedBuildOrder[0])/*Save[analyzedBuildOrder[k]->getRun()]*/); //~~~~
-		}
 	#endif
+		}
 	}
 	for(unsigned int i=MAX_PLAYER;i--;)
 		previous_analyzed_buildorder[i]=analyzedBuildOrder[i];
@@ -429,31 +450,36 @@ if(analyzedBuildOrder[k]->getUnchangedGenerations()>=coreConfiguration.getMaxGen
 //	return(&(analyzedBuildOrder[0])); TODO
 }
 
-const bool SOUP::recalculateGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER], const UNIT (*startForce)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]) //reset: have the goals/settings been changed?
+
+// just recalculate the soup, don't mutate
+const bool SOUP::recalculateGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER], const UNIT (*start_force)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]) //reset: have the goals/settings been changed?
 {
 	bool changed_bo=false;
-	for(unsigned int k = mapPlayerNum; k--;)
+	for(unsigned int k = mapPlayerNum; (k--)&&(!changed_bo);)
 	{
-		if(previous_analyzed_buildorder[k])
+		if(previous_analyzed_buildorder[k]!=NULL)
 		{
+			if(previous_analyzed_buildorder[k]->haveConditionsChanged())
+			{
+				previous_analyzed_buildorder[k]->setConditionsChanged(false);
+				changed_bo = true;
+			}
 			if(analyzedBuildOrder[k]->writeProgramBackToCode(previous_analyzed_buildorder[k]->getProgramList()))
 				changed_bo=true;
 		} else changed_bo=true;
 	}
 	if(!changed_bo)
 		return(false);
-
 	const unsigned int groupSize=MAX_PROGRAMS/mapPlayerNum;
-	if(coreConfiguration.isOnlySwapOrders())
-	{
-		for(unsigned int k=mapPlayerNum;k--;)
-			for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
-				buildOrder[i]->copyCode(*analyzedBuildOrder[k]);
-	} else
-		for(unsigned int k=mapPlayerNum;k--;)
+
+	for(unsigned int k=mapPlayerNum;k--;)
+//		if(analyzedBuildOrder[k]->isOnlySwapOrders())  //?
+//			for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
+//				buildOrder[i]->copyCode(*analyzedBuildOrder[k]);
+//		else
 			buildOrder[k*groupSize]->copyCode(*analyzedBuildOrder[k]);
 		
-	memcpy(&temporaryForce, &((*startForce)[0][0]), sizeof(temporaryForce));
+	memcpy(&temporaryForce, &((*start_force)[0][0]), sizeof(temporaryForce));
 
 	//reset code && calculate 
 	for(unsigned int k = mapPlayerNum; k--;)
@@ -480,12 +506,13 @@ const bool SOUP::recalculateGeneration(ANABUILDORDER* previous_analyzed_buildord
 		analyzedBuildOrder[k]->setMaxtFitness(buildOrder[k*groupSize]->gettFitness());
 	}
 
-	memcpy(&temporaryForce, &((*startForce)[0][0]), sizeof(temporaryForce));
+	memcpy(&temporaryForce, &((*start_force)[0][0]), sizeof(temporaryForce));
 
 	for(unsigned int k = mapPlayerNum; k--;)
 	{
 	//	if(previous_analyzed_buildorder[k])
 	//		analyzedBuildOrder[k]->writeProgramBackToCode(previous_analyzed_buildorder[k]->getProgramList());
+		analyzedBuildOrder[k]->assignUnits(&temporaryForce);
 		analyzedBuildOrder[k]->prepareForNewGeneration();
 		analyzedBuildOrder[k]->initializePlayer();
 		analyzedBuildOrder[k]->adjustHarvestAllLocations();
@@ -551,6 +578,9 @@ if(analyzedBuildOrder[k]->getUnchangedGenerations()>=coreConfiguration.getMaxGen
 		previous_analyzed_buildorder[i]=analyzedBuildOrder[i];
 
 	//	~~
+
+	
+		
 	return(true);
 //	return(&(analyzedBuildOrder[0])); TODO
 }

@@ -7,8 +7,10 @@ Main::Main(DC* dc):
 	mainWindow(NULL),
 	helpWindow(NULL),
 	settingsWindow(NULL),
+	dataBaseWindow(NULL),
 	mapWindow(NULL),
 	maus(),
+	gameCount(0),
 	currentTab(0)
 {
 // ----- INITIALIZE DATABASE -----	
@@ -24,24 +26,28 @@ Main::Main(DC* dc):
 	UI_Object::theme.loadWindowData("settings\\ui\\split_windows.ui", 0, 2);
 	UI_Object::theme.loadWindowData("settings\\ui\\split_windows.ui", 1, 2);
 #endif
+	toLog(UI_Object::theme.lookUpString(START_UI_BITMAPS_FONTS_LOADED_STRING));
+	
 	loadHarvestData();
 	loadMaps();
+	
 	loadStartConditions();
 	loadGoals();
+	loadBuildOrders();
 
-
-	
 // goal beschreibt Rasse, Ziele und Modus
 	
 // Map in "map.txt" is now map[0]
 // choose the first map we loaded (map[0])
 // ----- END OF INITIALIZING DATABASE -----
-	mainWindow = new MainWindow();
+
+	toLog(UI_Object::theme.lookUpString(START_INIT_GUI_STRING));
 	
+	mainWindow = new MainWindow();
 	helpWindow = new HelpWindow(mainWindow);
 	settingsWindow = new SettingsWindow(mainWindow);
+	dataBaseWindow = new DataBaseWindow(mainWindow);
 	mapWindow = new MapWindow(mainWindow);
-	
 	Main::msgWindow = new MessageWindow(mainWindow);
 	ForceWindow::techTreeWindow = new TechTreeWindow(mainWindow);
 	ForceWindow::techTreeWindow->Hide();
@@ -50,6 +56,8 @@ Main::Main(DC* dc):
 	helpWindow->Hide();
 	settingsWindow->Hide();
 	mapWindow->Hide();
+	dataBaseWindow->Hide();
+	
 	msgWindow->addMessage(UI_Object::theme.lookUpString(WELCOME_MSG1_STRING));
 	msgWindow->addMessage(UI_Object::theme.lookUpString(WELCOME_MSG2_STRING));
 	msgWindow->addMessage("Visit www.clawsoftware.de - - - ");
@@ -59,9 +67,9 @@ Main::Main(DC* dc):
 		tabToGameList[i] = -1;
 		tabToSplitGameList[i] = -1;
 	}
+	
 	for(unsigned int i = MAX_GAME;i--;)
 		game[i]=NULL;
-	
 	initializeGame(0);
 }
 
@@ -79,10 +87,11 @@ void Main::reloadStrings()
 
 void Main::initializeGame(const unsigned int tab_number)
 {
+	toLog(UI_Object::theme.lookUpString(START_PREPARE_FIRST_RUN_STRING));
 	// erstes freies suchen:
 	signed int game_number;
-	int game_nr = 0;
-	int game_max = 0;
+	unsigned int game_nr = 0;
+	unsigned int game_max = 0;
 	for(game_number = 0;game_number < MAX_GAME; ++game_number)
 		if(game[game_number]==NULL)
 			break;
@@ -129,7 +138,6 @@ void Main::initializeGame(const unsigned int tab_number)
 	game[game_number]->initSoup();
 	game[game_number]->newGeneration();
 	game[game_number]->Show();
-	UI_Window::setResetFlag();
 }
 
 
@@ -140,6 +148,7 @@ Main::~Main()
 	delete msgWindow;
 	delete helpWindow;
 	delete settingsWindow;
+	delete dataBaseWindow;
 	delete mapWindow;
 	for(unsigned int i=MAX_GAME;i--;)
 		delete game[i];
@@ -155,6 +164,12 @@ void Main::resetData()
 void Main::noticeFullscreen()
 {
 	settingsWindow->updateItems();
+	settingsWindow->forceFullScreenChange();
+}
+
+void Main::resetDataChange()
+{
+	settingsWindow->resetDataChange();
 }
 
 void Main::process()
@@ -177,9 +192,7 @@ void Main::process()
 	mainWindow->process();
 
 	if((UI_Object::tooltip)&&(UI_Object::toolTipParent->checkForNeedRedraw()))
-	{
 		UI_Object::tooltip->setNeedRedrawNotMoved();
-	}
 
 	ForceWindow::techTreeWindow->process();
 //	if(UI_Button::getCurrentButton()==NULL) // TODO verschaerfen, boolvariable setzen wenn currentButton von !NULL auf NULL gesetzt wurde
@@ -219,38 +232,51 @@ void Main::process()
 		helpWindow->gotoChapter(UI_Window::gotoHelpChapter);
 	}
 
-	if(mainWindow->tabWasChanged())
+	if(mainWindow->getCurrentTab()>=0)
 	{
-//		mainWindow->setGizmo(false);
-		for(unsigned int i = MAX_GAME; i--;)
-			if(game[i]!=NULL)
-				game[i]->Hide();
 		currentTab = mainWindow->getCurrentTab();
 		switch(currentTab)
 		{
-			case MAP_TAB:
+			case -1:break;
+			case DATABASE_TAB:
+				for(unsigned int i = MAX_GAME; i--;) if(game[i]!=NULL) game[i]->Hide();
 				msgWindow->Show();
 				settingsWindow->Hide();
+				dataBaseWindow->Show();
+				mapWindow->Hide();
+				helpWindow->Hide();
+			break;
+			
+			case MAP_TAB:
+				for(unsigned int i = MAX_GAME; i--;) if(game[i]!=NULL) game[i]->Hide();
+				msgWindow->Show();
+				settingsWindow->Hide();
+				dataBaseWindow->Hide();
 				mapWindow->Show();
 				helpWindow->Hide();
 			break;
 			case SETTINGS_TAB:
+				for(unsigned int i = MAX_GAME; i--;) if(game[i]!=NULL) game[i]->Hide();
 				msgWindow->Hide();
 				settingsWindow->Show();
 				settingsWindow->updateItems();
+				dataBaseWindow->Hide();
 				mapWindow->Hide();
 				helpWindow->Hide();
 			break;
 			case HELP_TAB:
+				for(unsigned int i = MAX_GAME; i--;) if(game[i]!=NULL) game[i]->Hide();
 				msgWindow->Hide();
 				settingsWindow->Hide();
+				dataBaseWindow->Hide();
 				mapWindow->Hide();
 				helpWindow->Show();
 			break;
 			default:
-			// => game[currentTab] wechseln, TODO mehrere auf eine Seite
+				for(unsigned int i = MAX_GAME; i--;) if(game[i]!=NULL) game[i]->Hide();
 				msgWindow->Show();
 				settingsWindow->Hide();
+				dataBaseWindow->Hide();
 				mapWindow->Hide();
 				helpWindow->Hide();
 				if(tabToGameList[currentTab]>=0)
@@ -260,22 +286,16 @@ void Main::process()
 						game[tabToSplitGameList[currentTab]]->Show();
 				}
 				else // new game!
-				{
 					initializeGame(currentTab);
-				}
 			break;
-// TODO delete game!
-
-			
 		} // end switch getCurrentTabs
-//		for(unsigned int i=MAX_GAME;i--;)
-//			game[i]->setMode(currentTab, i); // TODO
-	} // end tabwasChanged*/
-
+	}
+	
 	if((tabToGameList[currentTab]>=0)&&(game[tabToGameList[currentTab]]->isSplitGame())&&(tabToSplitGameList[currentTab]==-1))
 	{
 		initializeGame(currentTab);
 	}
+
 	if((tabToGameList[currentTab]>=0)&&(game[tabToGameList[currentTab]]->isRemoveGame()))
 	{
 		if(tabToSplitGameList[currentTab]>=0) // delete just the first game, move second game to the first
@@ -285,6 +305,8 @@ void Main::process()
 			tabToGameList[currentTab] = tabToSplitGameList[currentTab];
 			tabToSplitGameList[currentTab]=-1;
 			game[tabToGameList[currentTab]]->setMode(0,1);
+			UI_Object::currentWindow = NULL;
+			UI_Object::windowSelected = false;
 		} else if(mainWindow->getGameTabCount()>1) // delete the whole tab if it's not the last
 		{
 			delete game[tabToGameList[currentTab]];
@@ -293,13 +315,16 @@ void Main::process()
 				tabToGameList[i] = tabToGameList[i+1];
 			tabToGameList[mainWindow->getGameTabCount()-1]=-1;
 			mainWindow->removeGameTab(currentTab);
-			if(currentTab == mainWindow->getGameTabCount())
+			if(currentTab == (signed int)(mainWindow->getGameTabCount()))
 				currentTab--;
 			mainWindow->forcePressTab(currentTab);
 			game[tabToGameList[currentTab]]->Show(); //...
 			if(tabToSplitGameList[currentTab]>=0)
 				game[tabToSplitGameList[currentTab]]->Show();
 //			if(mainWindow->getGameTabCount()) TODO show/hide removeButton;
+			UI_Object::currentWindow = NULL;
+			UI_Object::windowSelected = false;
+
 		}
 	} else if((tabToSplitGameList[currentTab]>=0)&&(game[tabToSplitGameList[currentTab]]->isRemoveGame())) // just the second game
 	{
@@ -307,10 +332,12 @@ void Main::process()
 		game[tabToSplitGameList[currentTab]]=NULL;
 		game[tabToGameList[currentTab]]->setMode(0,1);
 		tabToSplitGameList[currentTab]=-1;
+		UI_Object::currentWindow = NULL;
+		UI_Object::windowSelected = false;
 	}
-	
+
 /*	for(unsigned int i = MAX_GAME;i--;) // TODO
-		if((game[i])&&(game[i]->checkForNeedRedraw()))
+	if((game[i])&&(game[i]->checkForNeedRedraw()))
 		{
 			mainWindow->setNeedRedrawNotMoved();
 			msgWindow->setNeedRedrawNotMoved();
@@ -344,6 +371,17 @@ const bool Main::isAnyOptimizing() const
 	return(false);
 }
 
+void Main::needRedraw()
+{
+	msgWindow->setNeedRedrawNotMoved();
+	mainWindow->setNeedRedrawNotMoved();
+	for(unsigned int i=MAX_GAME;i--;)
+		if(game[i])
+			game[i]->setNeedRedrawNotMoved();
+	if(UI_Object::tooltip!=NULL)
+		UI_Object::tooltip->setNeedRedrawNotMoved();
+}
+
 
 void Main::draw(DC* dc) const
 {
@@ -372,6 +410,7 @@ void Main::draw(DC* dc) const
 			msgWindow->setNeedRedrawNotMoved();
 			mainWindow->setNeedRedrawNotMoved();
 		}
+		UI_Object::theme.setColorTheme(UI_Object::theme.getMainColorTheme());
 		mainWindow->draw(dc);
 	}
 	ForceWindow::techTreeWindow->draw(dc);
@@ -380,7 +419,7 @@ void Main::draw(DC* dc) const
 										
 //settings: log level (none, debug only, +final result, +result of each run, +snapshot every X generations, +snapshot every generation, EVERYTHING (~2MB/generation!)
 
-void Main::OnIdle()
+void Main::newGeneration()
 {
 //	if(UI_Object::focus==NULL) // TODO, bei Force/Bowindow abfragen
 	{
@@ -433,14 +472,12 @@ const bool Main::newRun()
 					msgWindow->addMessage(UI_Object::theme.lookUpString(ENDRUN_SAVED_BUILDORDER_STRING));
 				}
 				delete UI_Object::editTextField;
-				UI_Object::resetButton();
 				UI_Object::editTextField=NULL;
 				endrun = false;
 			} else
 			if((UI_Object::editTextField->isCanceled())&&(UI_Object::editTextField->getCaller()==NULL))
 			{
 				delete UI_Object::editTextField;
-				UI_Object::resetButton();
 				UI_Object::editTextField=NULL;
 				endrun = false;
 			}
@@ -455,6 +492,7 @@ const bool Main::newRun()
 
 void Main::loadHarvestData()
 {
+	toLog(UI_Object::theme.lookUpString(START_LOAD_HARVEST_STRING));
 	for(unsigned int i = 0; i < MAX_RACES; ++i)
 	{
 		std::list<std::string> harvestFiles = database.findFiles("settings", "harvest", raceString[i]);
@@ -467,6 +505,7 @@ void Main::loadHarvestData()
 
 void Main::loadStartConditions()
 {
+	toLog(UI_Object::theme.lookUpString(START_LOAD_STARTCONDITIONS_STRING));
 	for(unsigned int i = 0; i < MAX_RACES; ++i)
 	{
 		std::list<std::string> startFiles = database.findFiles("settings", "start", raceString[i]);
@@ -478,6 +517,7 @@ void Main::loadStartConditions()
 
 void Main::loadMaps()
 {
+	toLog(UI_Object::theme.lookUpString(START_LOAD_MAPS_STRING));
 	std::list<std::string> mapFiles = database.findFiles("settings", "maps");
 	for(std::list<std::string>::iterator j = mapFiles.begin(); j!=mapFiles.end(); ++j)
 		database.loadMapFile(*j);
@@ -486,6 +526,7 @@ void Main::loadMaps()
 
 void Main::loadGoals()
 {
+	toLog(UI_Object::theme.lookUpString(START_LOAD_GOALS_STRING));
 	for(unsigned int i = 0; i < MAX_RACES; ++i)
 	{
 		database.addDefaultGoal((eRace)i);
@@ -496,6 +537,18 @@ void Main::loadGoals()
 //TODO flag setzen ob was geladen wurde
 }
 
+void Main::loadBuildOrders()
+{
+	toLog(UI_Object::theme.lookUpString(START_LOAD_GOALS_STRING));
+	for(unsigned int i = 0; i < MAX_RACES; ++i)
+	{
+//		database.addDefaultBuildOrder((eRace)i); :/ TODO
+		std::list<std::string> boFiles = database.findFiles("output", "bos", raceString[i]);
+		for(std::list<std::string>::iterator j = boFiles.begin(); j!=boFiles.end(); ++j)
+			database.loadBuildOrderFile(*j);
+	}
+//TODO flag setzen ob was geladen wurde
+}
 
 void Main::leftDown()
 {
@@ -609,11 +662,11 @@ void Main::setMouse(const Point p)
 			if(!temp_button)
 				temp_button = settingsWindow->checkHighlight();
 			if(!temp_button)
+				temp_button = dataBaseWindow->checkHighlight();		
+			if(!temp_button)
 				temp_button = mapWindow->checkHighlight();		
 			if(!temp_button)
 				temp_button = helpWindow->checkHighlight();
-//			if(!temp_button)
-//				temp_button = (UI_Button*) (mapWindow->checkHighlight();
 		} //else
 //		if((!temp_button)&&(UI_Object::editFieldActive()))
 //			temp_button = UI_Object::getEditField()->checkHighlight());
@@ -639,24 +692,26 @@ void Main::setMouse(const Point p)
 					{
 						if(UI_Object::toolTipParent==NULL)
 							temp2 = game[i]->checkToolTip();
-						if((temp2!=NULL) && (temp2->getToolTipString()!=NULL_STRING))
+						if((temp2!=NULL) && (temp2->hasToolTip()))
 							UI_Object::toolTipParent = temp2;
 						temp2=NULL;
 					}
 				
 				if(UI_Object::toolTipParent==NULL)
 					temp2 = mainWindow->checkToolTip();
-				if((temp2!=NULL) && (temp2->getToolTipString()!=NULL_STRING))
+				if((temp2!=NULL) && (temp2->hasToolTip()))
 					UI_Object::toolTipParent = temp2;
 				temp2=NULL;
 				if(UI_Object::toolTipParent==NULL)
 					temp2 = settingsWindow->checkToolTip();
 				if(temp2==NULL)
+					temp2 = dataBaseWindow->checkToolTip();
+				if(temp2==NULL)
 					temp2 = mapWindow->checkToolTip();
 				if(temp2==NULL)
 					temp2 = helpWindow->checkToolTip();
 
-				if((temp2!=NULL) && (temp2->getToolTipString()!=NULL_STRING))
+				if((temp2!=NULL) && (temp2->hasToolTip()))
 					UI_Object::toolTipParent = temp2;
 
 // toolTipParent changed or tooltip has to be deleted?
@@ -665,8 +720,13 @@ void Main::setMouse(const Point p)
 					delete UI_Object::tooltip;
 					if(UI_Object::toolTipParent==NULL)
 						UI_Object::tooltip=NULL;
-					else
-						UI_Object::tooltip=new UI_ToolTip(mainWindow, (UI_Object::toolTipParent)->getToolTipString());
+					else 
+					{
+						if(UI_Object::toolTipParent->getToolTipEString()!=NULL_STRING)
+							UI_Object::tooltip = new UI_ToolTip(mainWindow, UI_Object::toolTipParent->getToolTipEString());
+						else
+							UI_Object::tooltip = new UI_ToolTip(mainWindow, UI_Object::toolTipParent->getToolTipString());
+					}
 				}
 
 			}
@@ -684,5 +744,5 @@ void Main::setMouse(const Point p)
 }
 
 
-InfoWindow* Main::infoWindow = NULL;
+//InfoWindow* Main::infoWindow = NULL;
 MessageWindow* Main::msgWindow = NULL;

@@ -3,6 +3,7 @@
 
 DC::DC():
 	surface(),
+	pressedRectangle(false),
 	initOK(true),
 	brush(),
 	pen(),
@@ -24,6 +25,7 @@ DC::DC():
 
 DC::DC(const DC& other):
 	surface(other.surface),
+	pressedRectangle(other.pressedRectangle),
 	initOK(other.initOK),
 	brush(other.brush),
 	pen(other.pen),
@@ -47,6 +49,7 @@ DC::DC(const DC& other):
 
 DC::DC(const eResolution current_resolution, const eBitDepth bit_depth, const Uint32 nflags, const Uint32 initflags) :
 	surface(NULL),
+	pressedRectangle(false),
 	initOK(true),
 	brush(),
 	pen(),
@@ -171,6 +174,8 @@ void DC::setFullscreen(const bool full_screen)
 #endif
 	}										
 }
+#include "../stl/misc.hpp"
+#include <sstream>
 
 void DC::addRectangle(const Rect& rect)
 {
@@ -196,16 +201,17 @@ void DC::addRectangle(const Rect& rect)
 	else if(rect.GetRight() > max_x)
 		r.w = max_x - r.x;
 	else 
-		r.w = rect.GetWidth();
+		r.w = rect.GetRight() - r.x;
 
 	if(rect.GetBottom() < 0)
 		return;
 	else if(rect.GetBottom() > max_y)
 		r.h = max_y - r.y;
 	else 
-		r.h = rect.GetHeight();
+		r.h = rect.GetBottom() - r.y;
+	std::ostringstream os;
 
-	for(int i = 0; i < changedRectangles; i ++)
+	for(unsigned int i = 0; i < changedRectangles; i ++)
 	{
 		if(
 			(r.x >= changedRectangle[i].x)&&
@@ -230,20 +236,18 @@ void DC::addRectangle(const Rect& rect)
 	changedRectangles++;
 }
 
-void DC::updateScreen(SDL_Surface* sdl_surface)
+void DC::updateScreen()
 {
-//	SDL_Flip(sdl_surface);
-/*	for(int i = 0; i < changedRectangles; i ++)
-		if(
-			(r.x >= changedRectangle[i].x)&&
-			(r.x + r.w <= changedRectangle[i].x + changedRectangle[i].w)&&
-			(r.y >= changedRectangle[i].y)&&
-			(r.y + r.h <= changedRectangle[i].y + changedRectangle[i].h)
-		)
-			return;*/	
-	SDL_UpdateRects(sdl_surface, changedRectangles, changedRectangle);
+/*	for(unsigned int i = changedRectangles; i--;)
+	{
+		SetPen(Pen(surface, rand()%256, rand()%256, rand()%256, 2, SOLID_PEN_STYLE)); 
+		DrawEmptyRectangle(changedRectangle[i].x, changedRectangle[i].y, changedRectangle[i].w, changedRectangle[i].h);
+	}*/
+
+	SDL_UpdateRects(surface, changedRectangles, changedRectangle);
 	changedRectangles=0;
 }
+
 void DC::DrawBitmap(SDL_Surface* bitmap, const signed int x, const signed int y) const
 {
 	SDL_Rect drect;
@@ -251,8 +255,8 @@ void DC::DrawBitmap(SDL_Surface* bitmap, const signed int x, const signed int y)
 	drect.y = y;
 	drect.w = bitmap->w;
 	drect.h = bitmap->h;
-//	if((drect.x + drect.w >= max_x)||(drect.y + drect.h >= max_y) || (drect.x < 0) || (drect.y < 0))
-//		return;
+	if((drect.x + drect.w >= max_x)||(drect.y + drect.h >= max_y) || (drect.x < 0) || (drect.y < 0))
+		return;
 	SDL_BlitSurface(bitmap , NULL, surface, &drect);
 }
 
@@ -384,6 +388,22 @@ void DC::DrawSpline(const unsigned int c, const Point* p, const Point s) const
 	}
 	
 }
+void DC::DrawText(const std::string& text, const signed int x, const signed int y) const 
+{
+	if(font->isShadow())
+		font->DrawText(surface, toSDL_Color(0,0,0), text, x+font->getSize()/6, y+font->getSize()/6); 
+
+	font->DrawText(surface, textColor, text, x, y);
+	if(font->isUnderlined())
+	{
+		Size s = font->GetTextExtent(text);
+		SDL_Rect r;
+		r.x = x;r.y = y+s.GetHeight()*2/3;r.w = s.GetWidth();r.h = 1;
+		SDL_FillRect(surface, &r, Color(surface, textColor.r, textColor.g, textColor.b));
+	}
+
+}
+
 
 void DC::setScreen(const eResolution current_resolution, const eBitDepth bit_depth, const Uint32 nflags)
 {
@@ -409,6 +429,10 @@ void DC::setScreen(const eResolution current_resolution, const eBitDepth bit_dep
 	surface = SDL_SetVideoMode(max_x, max_y, bits, nflags);
 	if(surface==NULL)
 		return;
+	SDL_Rect r;
+	r.x=0;r.y=0;r.w=max_x;r.h=max_y;
+	changedRectangle[0] = r;
+	changedRectangles = 1;
 
 	switch(surface->format->BitsPerPixel)
 	{
@@ -695,4 +719,3 @@ SDL_Rect DC::changedRectangle[200];
 unsigned int DC::changedRectangles=0;
 Uint16 DC::max_x = 0;
 Uint16 DC::max_y = 0;
-

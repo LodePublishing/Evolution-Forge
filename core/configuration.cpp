@@ -15,8 +15,6 @@ CoreConfiguration::CoreConfiguration():
 	noise(0),
 	preprocessBuildOrder(false),
 	allowGoalAdaption(true),
-	alwaysBuildWorker(false),
-	onlySwapOrders(false),
 	configurationFile("settings/core.cfg")
 { }
 
@@ -36,8 +34,6 @@ void CoreConfiguration::initDefaults()
 	setNoise(0);
 	setPreprocessBuildOrder(false);
 	setAllowGoalAdaption(true);
-	setAlwaysBuildWorker(false);
-	setOnlySwapOrders(false);
 	configurationFile = "settings/core.cfg";
 }
 
@@ -69,10 +65,6 @@ void CoreConfiguration::saveToFile() const
 	pFile << "    \"Crossing Over\" = \"" << getCrossingOver() << "\"" << std::endl;
 	pFile << "# 10 means that programs will be sorted into 10-program groups, the best 2 are" << std::endl;
 	pFile << "# taken for reproduction and the worst two are replaced by their children" << std::endl;
-	pFile << "" << std::endl;                                                       
-	pFile << "    \"Always Build Worker\" = \"" << (int)isAlwaysBuildWorker() << "\"" << std::endl;
-	pFile << "" << std::endl;                                                       
-	pFile << "    \"Only Swap Orders\" = \"" << (int)isOnlySwapOrders() << "\"" << std::endl;
 	pFile << "@END" << std::endl;
 }
 
@@ -143,15 +135,6 @@ void CoreConfiguration::loadConfigurationFile()
 				i->second.pop_front();
 			   	setMaxGenerations(atoi(i->second.front().c_str()));
 			}
-			if((i=block.find("Always Build Worker"))!=block.end()){
-				i->second.pop_front();
-			   	setAlwaysBuildWorker(atoi(i->second.front().c_str()));
-			}
-			if((i=block.find("Only Swap Orders"))!=block.end()){
-				i->second.pop_front();
-			   	setOnlySwapOrders(atoi(i->second.front().c_str()));
-			}
-
 		}
 	}// END while
 } // schoen :)
@@ -288,23 +271,6 @@ const bool CoreConfiguration::setAllowGoalAdaption(const bool allow_goal_adaptio
 	return(true);
 }
 
-const bool CoreConfiguration::setAlwaysBuildWorker(const bool always_build_worker) 
-{
-	if(alwaysBuildWorker == always_build_worker)
-		return(false);
-	alwaysBuildWorker = always_build_worker;
-	return(true);
-}
-
-const bool CoreConfiguration::setOnlySwapOrders(const bool only_swap_orders) 
-{
-	if(onlySwapOrders == only_swap_orders)
-		return(false);
-	onlySwapOrders = only_swap_orders;
-	return(true);
-}
-
-	
 CoreConfiguration coreConfiguration;
 
 const unsigned int MAX_MUTATION_FACTOR = 400;

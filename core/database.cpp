@@ -34,8 +34,12 @@ DATABASE::~DATABASE()
 			delete *i;
 		for(std::vector<GOAL_ENTRY*>::iterator i = loadedGoal[j].begin(); i!=loadedGoal[j].end(); ++i)
 			delete *i;
+		for(std::vector<BUILD_ORDER*>::iterator i = loadedBuildOrder[j].begin(); i!=loadedBuildOrder[j].end(); ++i)
+			delete *i;
+	
 		loadedStartCondition[j].clear();
 		loadedGoal[j].clear();
+		loadedBuildOrder[j].clear();
 	}
 }
 
@@ -94,64 +98,42 @@ void DATABASE::addDefaultGoal(const eRace race)
 // ------- FILE LOADING ------
 // ---------------------------
 
-void DATABASE::loadGoalFile(const std::string& goalFile)
+GOAL_ENTRY* parseGoalBlock(std::list< std::list<std::string> >::iterator& i, std::list< std::list<std::string> >& block)
 {
-	if((goalFile.compare(goalFile.size()-4, goalFile.size(), ".gol")==1))
-		return;
+	GOAL_ENTRY* goal = new GOAL_ENTRY;
+	bool race_initialized = false;
 
-	std::ifstream pFile(goalFile.c_str());
-	if(!pFile.is_open())
+	for(; i!=block.end(); ++i)
 	{
-		toLog("ERROR: (DATABASE::loadGoalFile): File " + goalFile + " not found.");
-		return;
-	}
-//	toLog(goalFile + " loaded.");
-	
-	char line[1024];
-	std::string text;
-	while(pFile.getline(line, sizeof line))
-	{
-		if(pFile.fail())
-			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
-		text=line;
-		size_t start_position = text.find_first_not_of("\t ");
-		if((start_position == std::string::npos)||(text[0]=='#')||(text[0]=='\0'))
-			continue; // ignore line
-		size_t stop_position = text.find_first_of("\t ",start_position);
-		if(stop_position == std::string::npos) stop_position = text.size();
-		std::string index=text.substr(start_position, stop_position);
-		std::map<std::string, std::list<std::string> >::iterator i;
-
-		if(index=="@GOAL")
+		if(*(i->begin()) == "Name")
 		{
-			GOAL_ENTRY* goal = new GOAL_ENTRY;
-			std::map<std::string, std::list<std::string> > block;
-			parse_block(pFile, block);
-			if((i=block.find("Name"))!=block.end()){
-				i->second.pop_front();
-				goal->setName(i->second.front());
-			}
-			if((i=block.find("Race"))!=block.end()) 
-			{
-				eRace race=TERRA;
-				i->second.pop_front();
-				std::string estr=i->second.front();
-				if(i->second.front() == raceString[TERRA]) race=TERRA;
-				else if(i->second.front() == raceString[PROTOSS]) race=PROTOSS;
-				else if(i->second.front() == raceString[ZERG]) race=ZERG;
+			i->pop_front();
+			goal->setName(*(i->begin()));
+		} else if(*(i->begin()) == "Race")
+		{
+			i->pop_front();
+			std::string estr = i->front();
+			eRace goal_race = TERRA;
+			if(estr == raceString[TERRA]) goal_race=TERRA;
+			else if(estr == raceString[PROTOSS]) goal_race=PROTOSS;
+			else if(estr == raceString[ZERG]) goal_race=ZERG;
 #ifdef _SCC_DEBUG
-				else {
-					toLog("ERROR: (DATABASE::loadSettingsFile [" + goalFile + "]): Wrong race entry (" + i->second.front() + " [" + raceString[TERRA] + "|" + raceString[PROTOSS] + "|" + raceString[ZERG] + "]).");return;
-				}
-#endif
-				goal->setRace(race);
+			else {
+				toLog("ERROR: parseGoalBlock(): Wrong race entry (" + estr + " [" + raceString[TERRA] + "|" + raceString[PROTOSS] + "|" + raceString[ZERG] + "]).");delete goal;return(NULL);
 			}
-			std::map<std::string, std::list<std::string> >::iterator k;
+			race_initialized = true;
+#endif
+			goal->setRace(goal_race);
+		} else if(*(i->begin()) == "@END")
+		{
+			return(goal);
+		} else if(race_initialized)
+		{
 			for(unsigned int unit=UNIT_TYPE_COUNT;unit--;)
 			{
-				if((k=block.find(stats[goal->getRace()][unit].name))!=block.end())
+				if(*(i->begin()) == stats[goal->getRace()][unit].name)
 				{
-					std::list<std::string>::iterator l=k->second.begin();
+					std::list<std::string>::iterator l=i->begin();
 					if(l->size()>=3)
 					{
 						++l;int count=atoi(l->c_str());
@@ -161,9 +143,127 @@ void DATABASE::loadGoalFile(const std::string& goalFile)
 					}
 				}
 			}
-			loadedGoal[goal->getRace()].push_back(goal);
+		}
+	}
+	toLog("ERROR: parseGoalBlock(): No @END for goal block found");
+	return(NULL);
+}
+
+void DATABASE::loadGoalFile(const std::string& goal_file)
+{
+	if((goal_file.compare(goal_file.size()-4, goal_file.size(), ".gol")==1))
+		return;
+
+	std::ifstream pFile(goal_file.c_str());
+	if(!pFile.is_open())
+	{
+		toLog("ERROR: (DATABASE::loadGoalFile): File " + goal_file + " not found.");
+		return;
+	}
+//	toLog(goal_file + " loaded.");
+	std::list<std::list<std::string> > block;
+	parse_block(pFile, block);
+
+	for(std::list<std::list<std::string> >::iterator i = block.begin(); i!=block.end(); ++i)
+	{
+
+		if(*(i->begin())=="@GOAL")
+		{
+			parse_block(pFile, block);
+			GOAL_ENTRY* my_goal = parseGoalBlock(i, block);
+			if(my_goal == NULL)
+			{
+				toLog("ERROR: DATABASE::loadGoalFile(): Error parsing " + goal_file + ".");
+				return;
+			}
+			else 
+			{
+				loadedGoal[my_goal->getRace()].push_back(my_goal);
+				return;
+			}
 		} // end index == GOAL
 	}
+} // schoen :) naja :o
+
+void DATABASE::loadBuildOrderFile(const std::string& build_order_file)
+{
+	if((build_order_file.compare(build_order_file.size()-4, build_order_file.size(), ".txt")==1))
+		return;
+
+	std::ifstream pFile(build_order_file.c_str());
+	if(!pFile.is_open())
+	{
+		toLog("ERROR: (DATABASE::loadBuildOrderFile): File " + build_order_file + " not found.");
+		return;
+	}
+//	toLog(build_order_file + " loaded.");
+	
+	
+	std::list<std::list<std::string> > block;
+	std::list<PROGRAM> program_list;
+	parse_block(pFile, block);
+	bool bo_mode = false;
+	eRace bo_race = TERRA;
+	std::string bo_name;
+	GOAL_ENTRY* bo_goal;
+	unsigned int bo_time = 0;
+	for(std::list<std::list<std::string> >::iterator i = block.begin(); i!=block.end(); ++i)
+	{
+		if(*(i->begin())=="@GOAL")
+		{
+			parse_block(pFile, block);
+			bo_goal = parseGoalBlock(i, block);
+			if(bo_goal==NULL) {
+				toLog("ERROR: DATABASE::loadBuildOrderFile(): Error parsing " +  build_order_file + ".");return;
+			}
+		} else	
+		if(*(i->begin()) == "@BUILDORDER")
+			bo_mode = true;
+		else if(*(i->begin()) == "@END")
+			bo_mode = false;
+		else if(bo_mode==true)
+		{
+			if(*(i->begin()) == "Name")
+			{
+				i->pop_front();
+				bo_name = i->front();
+			} else 
+			if(*(i->begin()) == "Race")
+			{
+				i->pop_front();
+				std::string estr = i->front();
+				if(estr == raceString[TERRA]) bo_race=TERRA;
+				else if(estr == raceString[PROTOSS]) bo_race=PROTOSS;
+				else if(estr == raceString[ZERG]) bo_race=ZERG;
+#ifdef _SCC_DEBUG
+				else {
+					toLog("ERROR: (DATABASE::loadBuildOrderFile [" + build_order_file + "]): Wrong race entry (" + estr + " [" + raceString[TERRA] + "|" + raceString[PROTOSS] + "|" + raceString[ZERG] + "]).");return;
+				}
+#endif
+			} else 
+			if(*(i->begin()) == "Time")
+			{
+				i->pop_front();
+				bo_time = atoi(i->begin()->c_str());
+			} else
+			{
+				
+				for(unsigned int unit=UNIT_TYPE_COUNT;unit--;)
+				{
+					if(*(i->begin())==stats[bo_race][unit].name)
+					{
+						PROGRAM p;
+						p.setUnit(unit);
+						program_list.push_back(p);
+						break;
+					}
+				}
+			}
+		} // end index == BUILDORDER
+	}
+	BUILD_ORDER* build_order = new BUILD_ORDER(bo_race, *bo_goal, bo_name, bo_time, program_list);
+	delete bo_goal;
+	loadedBuildOrder[build_order->getRace()].push_back(build_order);
 
 } // schoen :)
 
@@ -441,7 +541,7 @@ void DATABASE::loadStartConditionFile(const std::string& startconditionFile)
 				return;
 			}
 			
-			int location = atoi(j->c_str());
+			unsigned int location = atoi(j->c_str());
 // TODO pruefen
 			std::map<std::string, std::list<std::string> > block;
 			parse_block(pFile, block);
@@ -450,13 +550,17 @@ void DATABASE::loadStartConditionFile(const std::string& startconditionFile)
 				std::string unit=stats[race][k].name;
 				if((i=block.find(unit))!=block.end())
 				{
-					i->second.pop_front();int count=atoi(i->second.front().c_str());
-						//TODO: values checken!
-					startcondition->setLocationTotal(location-1, k, count);
-					startcondition->setLocationAvailible(location-1, k, count);
-					std::ostringstream os;
-					os << k << " / " << count;
-					toLog(os.str());
+					i->second.pop_front();
+					unsigned int count=atoi(i->second.front().c_str());
+//TODO: values checken!
+					if(count > 0)
+					{
+						startcondition->setLocationTotal(location-1, k, count);
+						startcondition->setLocationAvailible(location-1, k, count);
+			//			std::ostringstream os;
+			//			os << unit << " : " << count;
+			//			toLog(os.str());
+					}
 				}
 			}
 		} // end if == LOCATION
@@ -465,6 +569,15 @@ void DATABASE::loadStartConditionFile(const std::string& startconditionFile)
 	startcondition->adjustResearches();
 	startcondition->adjustSupply();
 	loadedStartCondition[race].push_back(startcondition); // beendet nicht richtig :/
+		
+/*	for(unsigned int i = MAX_LOCATIONS;i--;)
+		for(unsigned int j=UNIT_TYPE_COUNT;j--;)
+			if(startcondition->getLocationTotal(i, j))
+			{
+				std::ostringstream os;
+				os << stats[startcondition->getRace()][j].name << " : " << startcondition->getLocationTotal(i, j);
+				toLog(os.str());
+			}*/
 } // schoen :)
 
 // ---------------------------------
@@ -473,17 +586,80 @@ void DATABASE::loadStartConditionFile(const std::string& startconditionFile)
 
 // FILE SAVING
 
-#if 0
-void DATABASE::saveBuildOrder(const std::string& name, const ANABUILDORDER* anarace) const
+void DATABASE::saveGoal(const std::string& name, GOAL_ENTRY* goalentry)
+{
+	std::ostringstream os;
+	os.str("");
+#ifdef __linux__
+	os << "settings/goals/";
+	os << raceString[goalentry->getRace()] << "/" << name << ".gol";// TODO!
+#elif __WIN32__
+	os << "settings\\goals\\";
+	os << raceString[goalentry->getRace()] << "\\" << name << ".gol";// TODO!
+#endif 
+	std::ofstream pFile(os.str().c_str(), std::ios_base::out | std::ios_base::trunc);
+	if(!pFile.is_open())
+	{
+		toLog("ERROR: (DATABASE::saveGoal) Could not create file " + os.str() + " (write protection? disk space?)");
+		return;
+	}
+
+	goalentry->setName(name);
+
+	pFile << "@GOAL" << std::endl;
+	pFile << "		\"Name\" \"" << name << "\"" << std::endl; // TODO
+	pFile << "		\"Race\" \"" << raceString[goalentry->getRace()] << "\"" << std::endl;
+
+	for(std::list<GOAL>::const_iterator i = goalentry->goal.begin(); i!=goalentry->goal.end(); ++i)
+		pFile << "		\"" << stats[goalentry->getRace()][i->getUnit()].name << "\" \"" << i->getCount() << "\" \"" << i->getLocation() << "\" \"" << i->getTime() << "\"" << std::endl;		
+	pFile << "@END" << std::endl;
+	loadGoalFile(os.str().c_str());
+}
+
+void DATABASE::saveBuildOrder(const std::string& name, BUILD_ORDER& build_order)
 {
 	std::ostringstream os;
 	os.str("");
 #ifdef __linux__
 	os << "output/bos/";
-	os << raceString[anarace->getRace()] << "/" << name << ".html";
+	os << raceString[build_order.getRace()] << "/" << name << ".txt";
 #elif __WIN32__
 	os << "output\\bos\\";
-	os << raceString[anarace->getRace()] << "\\" << name << ".html";
+	os << raceString[build_order.getRace()] << "\\" << name << ".txt";
+#endif 
+	std::ofstream pFile(os.str().c_str(), std::ios_base::out | std::ios_base::trunc);
+	if(!pFile.is_open())
+	{
+		toLog("ERROR: (DATABASE::saveBuildOrder) Could not create file " + os.str() + " (write protection? disk space?)");
+		return;
+	}
+
+	pFile << "@GOAL" << std::endl;
+	pFile << "		\"Name\" \"" << name << "\"" << std::endl; // TODO
+	pFile << "		\"Race\" \"" << raceString[build_order.getGoal().getRace()] << "\"" << std::endl;
+
+	for(std::list<GOAL>::const_iterator i = build_order.getGoal().goal.begin(); i!= build_order.getGoal().goal.end(); ++i)
+		pFile << "		\"" << stats[build_order.getGoal().getRace()][i->getUnit()].name << "\" \"" << i->getCount() << "\" \"" << i->getLocation() << "\" \"" << i->getTime() << "\"" << std::endl;		
+	pFile << "@END" << std::endl;
+
+	pFile << "@BUILDORDER" << std::endl;
+	pFile << "		\"Name\" \"" << name << "\"" << std::endl; // TODO
+	pFile << "		\"Race\" \"" << raceString[build_order.getRace()] << "\"" << std::endl;
+	pFile << "		\"Time\" \"" << build_order.getTime() << "\"" << std::endl;
+
+	for(std::list<PROGRAM>::iterator i = build_order.getProgramList().begin(); i!=build_order.getProgramList().end(); ++i)
+		pFile << "		\"" << stats[build_order.getRace()][i->getUnit()].name << "\""/* \"" << i->getCount() << "\" \"" << i->getLocation() << "\" \"" << i->getTime() << "\""*/ << std::endl;
+	pFile << "@END" << std::endl;
+	loadBuildOrderFile(os.str().c_str());
+
+/*	std::ostringstream os;
+	os.str("");
+#ifdef __linux__
+	os << "output/bos/";
+	os << raceString[build_order.getRace()] << "/" << name << ".html";
+#elif __WIN32__
+	os << "output\\bos\\";
+	os << raceString[build_order.getRace()] << "\\" << name << ".html";
 #endif
 	std::ofstream pFile(os.str().c_str(), std::ios_base::out | std::ios_base::trunc);
 	
@@ -516,16 +692,16 @@ void DATABASE::saveBuildOrder(const std::string& name, const ANABUILDORDER* anar
 	pFile << "	  </td>" << std::endl;
 	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << UI_Object::theme.lookUpString(OUTPUT_GAS_STRING) << "<br>" << std::endl;
 	pFile << "	  </td>" << std::endl;
-	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 100px;\">" << UI_Object::theme.lookUpString(OUTPUT_LOCATION_STRING) << "<br>" << std::endl;
-	pFile << "	  </td>" << std::endl;
+//	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 100px;\">" << UI_Object::theme.lookUpString(OUTPUT_LOCATION_STRING) << "<br>" << std::endl;
+//	pFile << "	  </td>" << std::endl; TODO
 	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << UI_Object::theme.lookUpString(OUTPUT_TIME_STRING) << "<br>" << std::endl;
 	pFile << "	  </td>" << std::endl;
 	pFile << "	</tr>" << std::endl;
 
-	for(std::list<PROGRAM>::const_iterator order = anarace->programList.begin(); order != anarace->programList.end(); ++order)
+	for(std::list<PROGRAM>::const_iterator order = build_order.getProgramList().begin(); order != build_order.getProgramList().end(); ++order)
 	{
-		pFile << "	<tr style=\"text-align: center; vertical-align: middle; background-color: rgb(" << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][order->getUnit()].unitType))->GetColor()->r() << ", " << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][order->getUnit()].unitType))->GetColor()->g() << ", " << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][order->getUnit()].unitType))->GetColor()->b() << ");\">" << std::endl;
-		pFile << "	  <td style=\"\">" << UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace() + order->getUnit() + UNIT_NULL_STRING)) << "<br>" << std::endl;
+		pFile << "	<tr style=\"text-align: center; vertical-align: middle; background-color: rgb(" << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[build_order.getRace()][order->getUnit()].unitType))->GetColor()->r() << ", " << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[build_order.getRace()][order->getUnit()].unitType))->GetColor()->g() << ", " << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[build_order.getRace()][order->getUnit()].unitType))->GetColor()->b() << ");\">" << std::endl;
+		pFile << "	  <td style=\"\">" << UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*build_order.getRace() + order->getUnit() + UNIT_NULL_STRING)) << "<br>" << std::endl;
 		pFile << "	  </td>" << std::endl;
 		pFile << "	  <td style=\"\">" << order->getStatisticsBefore().getNeedSupply() << "/" << order->getStatisticsBefore().getHaveSupply() << "<br>" << std::endl;
 		pFile << "	  </td>" << std::endl;
@@ -536,8 +712,8 @@ void DATABASE::saveBuildOrder(const std::string& name, const ANABUILDORDER* anar
 		pFile << "	  <td style=\"\">" << order->getStatisticsBefore().getHaveGas()/100 << "<br>" << std::endl;
 		pFile << "	  </td>" << std::endl;
 
-		pFile << "	  <td style=\"\">" << (*anarace->getMap())->getLocation(order->getLocation())->getName() << "<br>" << std::endl;
-		pFile << "	  </td>" << std::endl;
+//		pFile << "	  <td style=\"\">" << (*build_order.getMap())->getLocation(order->getLocation())->getName() << "<br>" << std::endl;
+//		pFile << "	  </td>" << std::endl; TODO
 
 		pFile << "	  <td style=\"\">" << formatTime(order->getRealTime()) << "<br>" << std::endl;
 		pFile << "	  </td>" << std::endl;
@@ -550,38 +726,38 @@ void DATABASE::saveBuildOrder(const std::string& name, const ANABUILDORDER* anar
 	pFile << "<br>" << std::endl;
 	pFile << "<b><a href=\"http://www.clawsoftware.de\">www.clawsoftware.de</a></b>\n";
 	pFile << "</body>\n";
-	pFile << "</html>" << std::endl;
+	pFile << "</html>" << std::endl;*/
 }
-#endif
 
-void DATABASE::saveGoal(const std::string& name, GOAL_ENTRY* goalentry)
+const unsigned int DATABASE::getBuildOrderCount(const eRace race, const GOAL_ENTRY* goal) const 
 {
-	std::ostringstream os;
-	os.str("");
-#ifdef __linux__
-	os << "settings/goals/";
-	os << raceString[goalentry->getRace()] << "/" << name << ".gol";// TODO!
-#elif __WIN32__
-	os << "settings\\goals\\";
-	os << raceString[goalentry->getRace()] << "\\" << name << ".gol";// TODO!
-#endif 
-	std::ofstream pFile(os.str().c_str(), std::ios_base::out | std::ios_base::trunc);
-	if(!pFile.is_open())
+	unsigned int count = 0;
+	for(unsigned int i = loadedBuildOrder[race].size(); i--;)
 	{
-		toLog("ERROR: (DATABASE::saveGoal) Could not create file " + os.str() + " (write protection? disk space?)");
-		return;
+		if(loadedBuildOrder[race][i]->getGoal() == *goal)
+			count++;
 	}
+	return(count);
+}
 
-	goalentry->setName(name);
 
-	pFile << "@GOAL" << std::endl;
-	pFile << "		\"Name\" \"" << name << "\"" << std::endl; // TODO
-	pFile << "		\"Race\" \"" << raceString[goalentry->getRace()] << "\"" << std::endl;
-
-	for(std::list<GOAL>::const_iterator i = goalentry->goal.begin(); i!=goalentry->goal.end(); ++i)
-		pFile << "		\"" << stats[goalentry->getRace()][i->getUnit()].name << "\" \"" << i->getCount() << "\" \"" << i->getLocation() << "\" \"" << i->getTime() << "\"" << std::endl;		
-	pFile << "@END" << std::endl;
-	loadGoalFile(os.str().c_str());
+BUILD_ORDER* DATABASE::getBuildOrder(const eRace race, const GOAL_ENTRY* goal, const unsigned int build_order) const
+{
+#ifdef _SCC_DEBUG
+	if(build_order>=getBuildOrderCount(race, goal)) {
+		toLog("WARNING: (DATABASE::getBuildOrder): Value out of range.");return(NULL);
+	}
+#endif
+	unsigned int count = 0;
+	for(unsigned int i = 0; i < loadedBuildOrder[race].size(); i++)
+	{
+		if(!(loadedBuildOrder[race][i]->getGoal() == *goal))
+			continue;
+		if(count == build_order)
+			return(loadedBuildOrder[race][i]);
+		count++;
+	}
+	return(NULL);
 }
 
 

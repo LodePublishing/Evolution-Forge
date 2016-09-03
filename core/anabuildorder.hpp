@@ -72,6 +72,7 @@ class ANABUILDORDER: public PREBUILDORDER
 //		void analyzeBuildOrder();		// sets the isGoal of program
 	
 		const bool writeProgramBackToCode(std::list<PROGRAM>& program_list);
+		void copyProgramList(std::list<PROGRAM>& program_list);
 
 		std::list<PROGRAM> programList; // TODO private machen
 	private:
@@ -100,6 +101,7 @@ class ANABUILDORDER: public PREBUILDORDER
 		
 		const bool buildGene(const unsigned int build_unit);
 		const bool buildIt(const unsigned int build_unit);
+		void postProcessing();
 };
 
 // -------------------------------
@@ -182,11 +184,11 @@ inline const unsigned int ANABUILDORDER::getTimePercentage() const {
 }
 
 inline const unsigned int ANABUILDORDER::getFastestGoalTime() const {
-	return(getGoal()->calculateFastestBO((*pStartCondition)->getUnit(GLOBAL)));
+	return(getGoal()->calculateFastestBO((*(pStart->getStartCondition()))->getUnit(GLOBAL)));
 }
 
 inline const GOAL_TREE ANABUILDORDER::getGoalTree(const unsigned int currentGoalUnit) const {
-	return(getGoal()->getGoalTree((*pStartCondition)->getUnit(GLOBAL), currentGoalUnit));
+	return(getGoal()->getGoalTree((*(pStart->getStartCondition()))->getUnit(GLOBAL), currentGoalUnit));
 }
 
 inline const unsigned int ANABUILDORDER::getCurrentpFitness() const

@@ -17,16 +17,17 @@ UI_Window& UI_Window::operator=(const UI_Window& object)
 	clientStartRect = object.clientStartRect;
 	clientTargetRect = object.clientTargetRect;
 	originalClientRect = object.originalClientRect;
+	maxHeight = object.maxHeight;
 	isAutoAdjust = object.isAutoAdjust;
 	isScrollable = object.isScrollable;
 	isTabbed = object.isTabbed;
 	highlighted = object.highlighted;
 	delete scrollBar;
-	scrollBar = (object.scrollBar != NULL? new UI_Scrollbar(*object.scrollBar) : NULL);
-	return(*this);
+	scrollBar = object.scrollBar != NULL? new UI_ScrollBar(*object.scrollBar) : NULL;
 	delete helpButton;
 	helpButton = (object.helpButton != NULL? new UI_Button(*object.helpButton) : NULL );
 	helpChapter = object.helpChapter;
+	return(*this);
 }
 
 UI_Window::UI_Window(const UI_Window& object) :
@@ -41,11 +42,12 @@ UI_Window::UI_Window(const UI_Window& object) :
 	clientStartRect( object.clientStartRect ),
 	clientTargetRect( object.clientTargetRect ),
 	originalClientRect( object.originalClientRect ),
+	maxHeight ( object.maxHeight),
 	isAutoAdjust( object.isAutoAdjust ),
 	isScrollable( object.isScrollable ),
 	isTabbed( object.isTabbed ),
 	highlighted( object.highlighted ),
-	scrollBar((object.scrollBar != NULL? new UI_Scrollbar(*object.scrollBar) : NULL)),
+	scrollBar((object.scrollBar != NULL? new UI_ScrollBar(*object.scrollBar) : NULL)),
 	helpButton((object.helpButton != NULL? new UI_Button(*object.helpButton) : NULL)),
 	helpChapter(object.helpChapter)
 { }
@@ -67,7 +69,7 @@ UI_Window::UI_Window(UI_Object* window_parent, const eString window_title_string
 	isScrollable(window_is_scrollable), // TODO
 	isTabbed(window_is_tabbed), //?
 	highlighted(false),
-	scrollBar(isScrollable==SCROLLED?new UI_Scrollbar(this, /*getClientRect(), TODO */ getRelativeClientRectUpperBound(), getMaxHeight()) : NULL),
+	scrollBar(isScrollable==NOT_SCROLLED?NULL:new UI_ScrollBar(this, getRelativeClientRectUpperBound(), getMaxHeight())),
 	helpButton(NULL),
 	helpChapter(INDEX_CHAPTER)
 {
@@ -140,17 +142,6 @@ void UI_Window::reloadOriginalSize()
 	UI_Object::reloadOriginalSize();
 }
 
-/*void UI_Window::updateRectangles(const Rect rect, const unsigned int max_height)
-{
-	maxHeight = max_height;
-	adjustRelativeRect(isScrollable==SCROLLED?Rect(rect.GetTopLeft(), rect.GetSize() - Size(0, 0)):rect);
-	adjustClientRect();
-//	originalRect=getRelativeRect();
-// TODO Buttons benachrichtigen ueber geaenderte buttonPlacementArea!
-	setNeedRedrawMoved();
-}*/
-
-
 void UI_Window::addTab(UI_Button* tab_button, const unsigned int button_id)
 {
 #ifdef _SCC_DEBUG
@@ -179,19 +170,11 @@ void UI_Window::forcePressTab(const unsigned int press_tab)
 	tabRow->forcePress(press_tab);
 }
 
-const bool UI_Window::tabWasChanged() const
+const signed int UI_Window::getCurrentTab() const
 {
 	if(isTabbed==NOT_TABBED) 
-		return false;
-	return(tabRow->buttonHasChanged());
-}
-
-const unsigned int UI_Window::getCurrentTab() const
-{
-	if(isTabbed==NOT_TABBED) 
-		return 0;
-	unsigned int tmp = tabRow->getMarked();
-	return(tmp);
+		return -1;
+	return(tabRow->getMarked());
 }
 
 void UI_Window::setTitleParameter(const std::string& p) {
@@ -233,28 +216,22 @@ void UI_Window::adjustClientRect()
 void UI_Window::wheelUp()
 {
 	if(scrollBar)
-	{
 		scrollBar->moveUp();
-		setNeedRedrawNotMoved();
-	}
 }
 
 void UI_Window::wheelDown()
 {
 	if(scrollBar)
-	{
 		scrollBar->moveDown();
-		setNeedRedrawNotMoved();
-	}
 }
 
-void UI_Window::moveScrollbarToTop()
+void UI_Window::moveScrollBarToTop()
 {
 	if(scrollBar)
 		scrollBar->moveToTop();
 }
 
-void UI_Window::moveScrollbarToBottom()
+void UI_Window::moveScrollBarToBottom()
 {
 	if(scrollBar)
 		scrollBar->moveToBottom();
@@ -264,6 +241,9 @@ void UI_Window::process()
 {
 	if(!isShown()) 
 		return;
+	if((getScrollBar())&&(getScrollBar()->checkForNeedRedraw()))
+		setNeedRedrawNotMoved();
+
 	adjustClientRect();
 	if(doAdjustments==true)
 	{
@@ -282,8 +262,15 @@ void UI_Window::process()
 
 	UI_Object::process();
 
-	if((helpButton!=NULL)&&(helpButton->isLeftClicked()))
-		UI_Window::gotoHelpChapter = helpChapter;
+	if(helpButton!=NULL)
+	{
+		if(isMouseInside())
+		{
+			helpButton->Show();
+			if(helpButton->isLeftClicked())
+				UI_Window::gotoHelpChapter = helpChapter;
+		} else helpButton->Hide();
+	}
 	
 	
 	if(clientRect != clientTargetRect)
@@ -314,13 +301,6 @@ void UI_Window::process()
 
 
 	filledHeight=0;
-//	if((ScrollBalkenPressed==2)||(ScrollBalkenPressed==3)||(ScrollBalkenPressed==4))
-  //  {
-//		moveScrollBalkenTo(controls.getCurrentPosition().y-controls.getDragStartPosition().y-ScrollBalken.y);
-//	  controls.updateDragStartPosition(controls.getCurrentPosition());
-//	}
-  //  else moveScrollBalkenTo(0);
-
 }
 
 
@@ -412,7 +392,7 @@ void UI_Window::drawTitle(DC* dc) const
 
 
 	// TODO UI_StaticText einfuegen!
-	if(titleParameter.size())
+	if(titleParameter!="")
 		text=theme.lookUpFormattedString(titleString, titleParameter);
 	else text = theme.lookUpString(titleString);
 	
@@ -460,5 +440,4 @@ void UI_Window::draw(DC* dc) const
 
 
 bool UI_Window::changedFlag=false;
-bool UI_Window::resetFlag=false;
 signed int UI_Window::gotoHelpChapter=-1;

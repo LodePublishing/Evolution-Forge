@@ -7,26 +7,13 @@
 
 unsigned int FONT_SIZE=6;
 
-void UI_Theme::setResolution(const eResolution theme_resolution) 
-{
-	// TODO auslagern in Conf Datei
-	resolution = theme_resolution;
-	switch(resolution)
-	{
-		case RESOLUTION_640x480:FONT_SIZE=3;break;
-		case RESOLUTION_800x600:FONT_SIZE=6;break;
-		case RESOLUTION_1024x768:FONT_SIZE=8;break;
-		case RESOLUTION_1280x1024:FONT_SIZE=10;break;
-		default:break;
-	}
-	// TODO update whole engine
-}
-
 UI_Theme::UI_Theme():
 	resolution(RESOLUTION_640x480),
 	bitdepth(DEPTH_32BIT),
 	language(GERMAN_LANGUAGE),
-	colorTheme(DARK_BLUE_THEME)
+	colorTheme(DARK_BLUE_THEME),
+	mainColorTheme(DARK_BLUE_THEME),
+	loadedBitmaps()	
 {
 	for(unsigned int i = MAX_LANGUAGES;i--;)
 		for(unsigned int j = MAX_STRINGS;j--;)
@@ -41,16 +28,15 @@ UI_Theme::UI_Theme():
 			colorList[i][j] = NULL;
 		for(unsigned int j = MAX_PENS;j--;)
 			penList[i][j] = NULL; // !
-		
-  		for(unsigned int j = MAX_RESOLUTIONS;j--;)
-			 for(unsigned int k = MAX_BITMAPS;k--;)
-				bitmapList[i][j][k] = NULL;
-					
 		for(unsigned int j = MAX_BRUSHES;j--;)
 			brushList[i][j] = NULL;
 	}
 	for(unsigned int i = MAX_RESOLUTIONS;i--;)
 	{
+  		for(unsigned int j = MAX_COLOR_THEMES;j--;)
+			 for(unsigned int k = MAX_BITMAPS;k--;)
+				bitmapList[i][j][k] = NULL;
+
 		for(unsigned int j = MAX_GLOBAL_WINDOWS;j--;)
 		{
 			globalRectList[i][j] = NULL;
@@ -94,11 +80,10 @@ UI_Theme::~UI_Theme()
 			delete brushList[i][j];
 		for(unsigned int j = MAX_PENS;j--;)
 			delete penList[i][j];
-		
-		for(unsigned int j = MAX_RESOLUTIONS;j--;)
-			for(unsigned int k = MAX_BITMAPS;k--;)
-				SDL_FreeSurface(bitmapList[i][j][k]);
 	}
+	for(std::list<BitmapEntry>::iterator l = loadedBitmaps.begin(); l!=loadedBitmaps.end();++l)
+		SDL_FreeSurface(l->bitmap);
+	
         for(unsigned int i = MAX_RESOLUTIONS;i--;)
         {
                 for(unsigned int j = MAX_GLOBAL_WINDOWS;j--;)
@@ -119,21 +104,60 @@ UI_Theme::~UI_Theme()
 		delete buttonColorsList[i];
 }
 
+void UI_Theme::unloadGraphics()
+{
+	for(std::list<BitmapEntry>::iterator i = loadedBitmaps.begin(); i!=loadedBitmaps.end(); ++i)
+		if(!i->used)
+		{
+			SDL_FreeSurface(i->bitmap);
+			for(unsigned int j = MAX_RESOLUTIONS;j--;)
+				for(unsigned int k = MAX_COLOR_THEMES;k--;)
+					for(unsigned int l = MAX_BITMAPS;l--;)
+						if(i->bitmap == bitmapList[j][k][l])
+							bitmapList[j][k][l] = NULL;
+			i->bitmap = NULL;
+			i->used = true;
+		} else if(i->bitmap!=NULL)
+			i->used = false;
+}
+
+void UI_Theme::setResolution(const eResolution theme_resolution) 
+{
+	// TODO auslagern in Conf Datei
+	resolution = theme_resolution;
+	switch(resolution)
+	{
+		case RESOLUTION_640x480:FONT_SIZE=3;break;
+		case RESOLUTION_800x600:FONT_SIZE=6;break;
+		case RESOLUTION_1024x768:FONT_SIZE=8;break;
+		case RESOLUTION_1280x1024:FONT_SIZE=10;break;
+		default:break;
+	}
+	// TODO update whole engine
+}
+
 
 const std::string& UI_Theme::lookUpHelpChapterString(const eHelpChapter id) const
 {
 #ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_HELP_CHAPTER)) {
-		toLog("ERROR: (UI_Theme::lookUpHelpChapterString) id out of range.");return(*helpChapterStringsMap[INDEX_CHAPTER]);
+	if((id<0)||(id>=MAX_HELP_CHAPTER)||(helpChapterStringMap[language].find(id) == helpChapterStringMap[language].end())) {
+		toLog("ERROR: (UI_Theme::lookUpHelpChapterString) id out of range.");
+		return(helpChapterStringMap[language].find(INDEX_CHAPTER)->second);
 	}
 #endif
-	return(helpChapterStringsMap[id]);
+	return(helpChapterStringMap[language].find(id)->second);
 }
 
 void findandreplace( std::string& source, const std::string& find, const std::string& replace )
 {
-	size_t j = source.find(find);source.replace(j,find.length(),replace);
-	// TODO wenn nix gefunden wird...
+	size_t j = source.find(find);
+	if(j==std::string::npos) {
+#ifdef _SCC_DEBUG
+		toLog("WARNING: (UI_Theme::findandreplace) string not found.");
+#endif
+		return;
+	}
+	source.replace(j,find.length(),replace);
 }
 
 const std::string UI_Theme::lookUpFormattedString(const eString id, const std::string& text) const
@@ -317,6 +341,7 @@ const eGameType getGameType(const std::string& item)
 const eDataType getDataType(const std::string& item)
 {
 	if(item=="@STRINGS") return(STRING_DATA_TYPE);else
+	if(item=="@HELP_STRINGS") return(HELP_STRING_DATA_TYPE);else
 	if(item=="@FONTS") return(FONT_DATA_TYPE);else
 	if(item=="@MAIN") return(WINDOW_DATA_TYPE);else
 	if(item=="@COLORS") return(COLOR_DATA_TYPE);else
@@ -332,6 +357,7 @@ const eSubDataType getSubDataType(const eDataType mode)
 {
 	switch(mode)
 	{	
+		case HELP_STRING_DATA_TYPE:return(LANGUAGE_SUB_DATA_TYPE);
 		case STRING_DATA_TYPE:return(LANGUAGE_SUB_DATA_TYPE);
 		case FONT_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
 		case BUTTON_WIDTH_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
@@ -390,7 +416,6 @@ const eTheme getThemeSubDataEntry(const std::string& item)
 	if(item=="@GREEN_THEME") return(GREEN_THEME);else
 	if(item=="@YELLOW_THEME") return(YELLOW_THEME);else
 	if(item=="@GREY_THEME") return(GREY_THEME);else
-	if(item=="@MONOCHROME_THEME") return(MONOCHROME_THEME);else
 	return(ZERO_THEME);
 }
 
@@ -448,6 +473,7 @@ eGlobalWindow parse_global_window(const std::string& item)
 	if(item=="Message window") return(MESSAGE_WINDOW);else
 	if(item=="Help window") return(HELP_WINDOW);else
 	if(item=="Settings window") return(SETTINGS_WINDOW);else
+	if(item=="Database window") return(DATABASE_WINDOW);else
 	if(item=="Map window") return(MAP_WINDOW);else
 	if(item=="Info window") return(INFO_WINDOW);else
 	if(item=="Tech tree window") return(TECHTREE_WINDOW);else
@@ -459,7 +485,7 @@ eGameWindow parse_game_window(const std::string& item)
 {
 	if(item=="Game window") return(GAME_WINDOW);else
 	if(item=="Score window") return(SCORE_WINDOW);else
-	if(item=="Database window") return(DATABASE_WINDOW);else
+//	if(item=="Database window") return(DATABASE_WINDOW);else TODO
 	return(NULL_GAME_WINDOW);
 }
 
@@ -493,6 +519,20 @@ eCommand parse_commands(const std::string& item, const bool horizontal_mirror)
 		if(item=="dock top left inside of") return(DOCK_TOP_RIGHT_INSIDE_OF_COMMAND);else
 		if(item=="dock top right inside of") return(DOCK_TOP_LEFT_INSIDE_OF_COMMAND);else
 		if(item=="dock bottom inside of") return(DOCK_BOTTOM_INSIDE_OF_COMMAND);else
+
+		if(item=="dock close with left border of") return(DOCK_CLOSE_WITH_RIGHT_BORDER_OF_COMMAND);else
+		if(item=="dock close with right border of") return(DOCK_CLOSE_WITH_LEFT_BORDER_OF_COMMAND);else
+		if(item=="dock close with lower border of") return(DOCK_CLOSE_WITH_LOWER_BORDER_OF_COMMAND);else
+		if(item=="dock close with upper border of") return(DOCK_CLOSE_WITH_UPPER_BORDER_OF_COMMAND);else
+		if(item=="dock close bottom center inside of") return(DOCK_CLOSE_BOTTOM_CENTER_INSIDE_OF_COMMAND);else
+		if(item=="dock close top center inside of") return(DOCK_CLOSE_TOP_CENTER_INSIDE_OF_COMMAND);else
+		if(item=="dock close left inside of") return(DOCK_CLOSE_RIGHT_INSIDE_OF_COMMAND);else
+		if(item=="dock close right inside of") return(DOCK_CLOSE_LEFT_INSIDE_OF_COMMAND);else
+		if(item=="dock close top inside of") return(DOCK_CLOSE_TOP_INSIDE_OF_COMMAND);else
+		if(item=="dock close top left inside of") return(DOCK_CLOSE_TOP_RIGHT_INSIDE_OF_COMMAND);else
+		if(item=="dock close top right inside of") return(DOCK_CLOSE_TOP_LEFT_INSIDE_OF_COMMAND);else
+		if(item=="dock close bottom inside of") return(DOCK_CLOSE_BOTTOM_INSIDE_OF_COMMAND);else
+			
 		return(NO_COMMAND);
 	} else
 	{
@@ -512,6 +552,20 @@ eCommand parse_commands(const std::string& item, const bool horizontal_mirror)
 		if(item=="dock top left inside of") return(DOCK_TOP_LEFT_INSIDE_OF_COMMAND);else
 		if(item=="dock top right inside of") return(DOCK_TOP_RIGHT_INSIDE_OF_COMMAND);else
 		if(item=="dock bottom inside of") return(DOCK_BOTTOM_INSIDE_OF_COMMAND);else
+	
+		if(item=="dock close with left border of") return(DOCK_CLOSE_WITH_LEFT_BORDER_OF_COMMAND);else
+		if(item=="dock close with right border of") return(DOCK_CLOSE_WITH_RIGHT_BORDER_OF_COMMAND);else
+		if(item=="dock close with lower border of") return(DOCK_CLOSE_WITH_LOWER_BORDER_OF_COMMAND);else
+		if(item=="dock close with upper border of") return(DOCK_CLOSE_WITH_UPPER_BORDER_OF_COMMAND);else
+		if(item=="dock close bottom center inside of") return(DOCK_CLOSE_BOTTOM_CENTER_INSIDE_OF_COMMAND);else
+		if(item=="dock close top center inside of") return(DOCK_CLOSE_TOP_CENTER_INSIDE_OF_COMMAND);else
+		if(item=="dock close left inside of") return(DOCK_CLOSE_LEFT_INSIDE_OF_COMMAND);else
+		if(item=="dock close right inside of") return(DOCK_CLOSE_RIGHT_INSIDE_OF_COMMAND);else
+		if(item=="dock close top inside of") return(DOCK_CLOSE_TOP_INSIDE_OF_COMMAND);else
+		if(item=="dock close top left inside of") return(DOCK_CLOSE_TOP_LEFT_INSIDE_OF_COMMAND);else
+		if(item=="dock close top right inside of") return(DOCK_CLOSE_TOP_RIGHT_INSIDE_OF_COMMAND);else
+		if(item=="dock close bottom inside of") return(DOCK_CLOSE_BOTTOM_INSIDE_OF_COMMAND);else
+		
 		return(NO_COMMAND);
 	}
 }
@@ -571,18 +625,33 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 				case ABSOLUTE_Y_COORDINATE_COMMAND:--i;ypart=true;break;
 				case DOCK_WITH_LEFT_BORDER_OF_COMMAND:rect->SetLeft(-10 + windows[win]->GetLeft() - rect->GetWidth());break;
 				case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:rect->SetLeft(0 + windows[win]->GetRight());break;
-				case DOCK_WITH_LOWER_BORDER_OF_COMMAND:rect->SetTop(25 + windows[win]->GetBottom());break;
-				case DOCK_WITH_UPPER_BORDER_OF_COMMAND:rect->SetTop(25 + windows[win]->GetTop() - rect->GetHeight());break;
+				case DOCK_WITH_LOWER_BORDER_OF_COMMAND:rect->SetTop(10 + windows[win]->GetBottom());break;
+				case DOCK_WITH_UPPER_BORDER_OF_COMMAND:rect->SetTop(20 + windows[win]->GetTop() - rect->GetHeight());break;
 
 				case DOCK_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(15 + windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, 15 + windows[win]->GetHeight() / 2 - rect->GetHeight() / 2));break;
 				case DOCK_BOTTOM_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, windows[win]->GetHeight() - rect->GetHeight() - 10));break;
 				case DOCK_TOP_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, 15));break;
-				case DOCK_LEFT_INSIDE_OF_COMMAND:rect->SetLeft(15);break;
+				case DOCK_LEFT_INSIDE_OF_COMMAND:rect->SetLeft(0);break;
 				case DOCK_RIGHT_INSIDE_OF_COMMAND:rect->SetLeft(windows[win]->GetWidth() - rect->GetWidth());break;
 				case DOCK_TOP_INSIDE_OF_COMMAND:rect->SetTop(0);break;
-				case DOCK_TOP_LEFT_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(0, 15));break;
+				case DOCK_TOP_LEFT_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(0, 0));break;
 				case DOCK_TOP_RIGHT_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() - rect->GetWidth(), 0));break;
 				case DOCK_BOTTOM_INSIDE_OF_COMMAND:rect->SetTop(-15+windows[win]->GetHeight() - rect->GetHeight());break;
+	
+								   
+				case DOCK_CLOSE_WITH_LEFT_BORDER_OF_COMMAND:rect->SetLeft(windows[win]->GetLeft() - rect->GetWidth());break;
+				case DOCK_CLOSE_WITH_RIGHT_BORDER_OF_COMMAND:rect->SetLeft(windows[win]->GetRight());break;
+				case DOCK_CLOSE_WITH_LOWER_BORDER_OF_COMMAND:rect->SetTop(windows[win]->GetBottom());break;
+				case DOCK_CLOSE_WITH_UPPER_BORDER_OF_COMMAND:rect->SetTop(windows[win]->GetTop() - rect->GetHeight());break;
+
+				case DOCK_CLOSE_BOTTOM_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, windows[win]->GetHeight() - rect->GetHeight()));break;
+				case DOCK_CLOSE_TOP_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, 0));break;
+				case DOCK_CLOSE_LEFT_INSIDE_OF_COMMAND:rect->SetLeft(0);break;
+				case DOCK_CLOSE_RIGHT_INSIDE_OF_COMMAND:rect->SetLeft(windows[win]->GetWidth() - rect->GetWidth());break;
+				case DOCK_CLOSE_TOP_INSIDE_OF_COMMAND:rect->SetTop(0);break;
+				case DOCK_CLOSE_TOP_LEFT_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(0, 0));break;
+				case DOCK_CLOSE_TOP_RIGHT_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() - rect->GetWidth(), 0));break;
+				case DOCK_CLOSE_BOTTOM_INSIDE_OF_COMMAND:rect->SetTop(windows[win]->GetHeight() - rect->GetHeight());break;							   
 								   
 /*				case DOCK_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetLeft() + windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, windows[win]->GetTop() + windows[win]->GetHeight() / 2 - rect->GetHeight() / 2));break;
 				case DOCK_BOTTOM_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetLeft() + windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, windows[win]->GetBottom() - rect->GetHeight() - 35));break;
@@ -597,97 +666,64 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 	return(rect);
 }
 
+
 void UI_Theme::loadHelpChapterStringFile(const std::string& dataFile)
 {
 	if((dataFile.substr(dataFile.size()-2,2) == "..") ||(dataFile.substr(dataFile.size()-1,1) == "."))
 		return;
-	const unsigned int MAX_PARAMETERS = 50;
-	char line[1024], old[1024];
-	char* buffer;
-	std::string parameter[MAX_PARAMETERS];
-	unsigned int value[MAX_PARAMETERS];
-	eDataType mode=ZERO_DATA_TYPE;
-	eSubDataType sub_mode=ZERO_SUB_DATA_TYPE;
-	eSubSubDataType sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
+	char line[1024];
+	std::string entry;
+	eDataType mode = ZERO_DATA_TYPE;
+	eSubDataType sub_mode = ZERO_SUB_DATA_TYPE;
+	eSubSubDataType sub_sub_mode = ZERO_SUB_SUB_DATA_TYPE;
+	eLanguage current_language = ZERO_LANGUAGE;
+	eResolution current_resolution=ZERO_RESOLUTION;
 
-	eLanguage current_language=ZERO_LANGUAGE;
-
-	unsigned int current_line = 0;
+	eTheme current_theme=ZERO_THEME;
+	eHelpChapter chapter = MAX_HELP_CHAPTER;
 	
- 	for(unsigned int i=MAX_PARAMETERS;i--;)
-	{
-		parameter[i]="";
-		value[i]=0;
-	}
-
 	std::ifstream pFile(dataFile.c_str());
 	
 	if(!pFile.is_open())
 	{
 #ifdef _SCC_DEBUG
-		toLog("ERROR: (UI_Theme::loadStringFile) Could not open file! [" + dataFile + "]");
+		toLog("ERROR: (UI_Theme::loadHelpChapterStringFile) Could not open file! [" + dataFile + "]");
 #endif
 		return;
 	}
 	
 	while(pFile.getline(line, 1024))
 	{
+		
 		if(pFile.fail())
 		{
 #ifdef _SCC_DEBUG
-			toLog("WARNING: (UI_Theme::loadStringFile) Long line!");
+			toLog("WARNING: (UI_Theme::loadHelpChapterStringFile) Long line!");
 #endif
 			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
 		}
 			
 		//line[strlen(line)-1]='\0';
 		if((line[0]=='#')||(line[0]=='\0')||(line=="")) continue;
-		for(unsigned int i=MAX_PARAMETERS;i--;)
-		{
-			parameter[i]="";
-			value[i]=0;
-		}
+		
 		char* line2=line;		
 		while(((*line2)==32)||((*line2)==9))
 			++line2;
 		if((*line2)=='\0')
 			continue;
+		entry = line2;
 		
-		strcpy(old,line2);
-		
-		if((buffer=strtok(line2,",\0"))!=NULL)
-			parameter[0]=buffer;
-		unsigned int k=1;
-		
-		while(((buffer=strtok(NULL,",\0"))!=NULL)&&(k<MAX_PARAMETERS))
-		{
-			while(((*buffer)==32)||((*buffer)==9))
-				++buffer;
-			parameter[k]=buffer;
-			++k;
-		}
-		if((buffer=strtok(NULL,",\0"))!=NULL)
-		{
-#ifdef _SCC_DEBUG
-			toLog("WARNING: (UI_Theme::loadStringFile) Too many parameters.");
-#endif
-			continue;
-		}
-		for(unsigned int j=MAX_PARAMETERS;j--;)
-			value[j]=atoi(parameter[j].c_str());
 		// mode	
 		if(mode==ZERO_DATA_TYPE)
 		{
-			mode=getDataType(parameter[0]);
+			mode=getDataType(entry);
 #ifdef _SCC_DEBUG
-//			if(mode!=ZERO_DATA_TYPE)
-//				toLog("Loading "+parameter[0]+"...");
 			if(mode==ZERO_DATA_TYPE)
 			{
-				if(parameter[0]=="@END")
-					toLog("WARNING: (UI_Theme::loadStringFile) Lonely @END.");
+				if(entry=="@END")
+					toLog("WARNING: (UI_Theme::loadHelpChapterStringFile) Lonely @END.");
 				else
-					toLog("WARNING: (UI_Theme::loadStringFile) Line is outside a block but is not marked as comment.");
+					toLog("WARNING: (UI_Theme::loadHelpChapterStringFile) Line is outside a block but is not marked as comment.");
 			}
 #endif				
 			sub_mode=getSubDataType(mode);
@@ -695,7 +731,7 @@ void UI_Theme::loadHelpChapterStringFile(const std::string& dataFile)
 		}
 		else if(mode!=ZERO_DATA_TYPE)
 		{
-			if(parameter[0]=="@END")
+			if(entry=="@END")
 			{
 			// TODO! 
 				// @END of 1st sub area => return to begin of data type
@@ -704,10 +740,14 @@ void UI_Theme::loadHelpChapterStringFile(const std::string& dataFile)
 				if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE)&&
 				  ((current_language!=ZERO_LANGUAGE)||(current_resolution!=ZERO_RESOLUTION)||(current_theme!=ZERO_THEME)))
 				{
-					current_language=ZERO_LANGUAGE;
-					current_resolution=ZERO_RESOLUTION;
-					current_theme=ZERO_THEME;
-					current_line=0;
+					if(chapter!=MAX_HELP_CHAPTER)
+						chapter = MAX_HELP_CHAPTER;
+					else
+					{
+						current_language=ZERO_LANGUAGE;
+						current_resolution=ZERO_RESOLUTION;
+						current_theme=ZERO_THEME;
+					}
 				}
 				// @END of 2nd sub area => return to begin of sub data type
 				else 
@@ -717,7 +757,6 @@ void UI_Theme::loadHelpChapterStringFile(const std::string& dataFile)
 				{
 					current_language=ZERO_LANGUAGE;
 					current_theme=ZERO_THEME;
-					current_line=0;
 				}
 				// @END  of 1st sub area (with an existing sub sub area...)
 // - deepness |2|: end of SUB-MODE
@@ -726,7 +765,6 @@ void UI_Theme::loadHelpChapterStringFile(const std::string& dataFile)
 						(current_resolution!=ZERO_RESOLUTION)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
 				{
 					current_resolution=ZERO_RESOLUTION;
-					current_line=0;
 				}
 				// @END of 0 area => reset mode
 				else
@@ -734,7 +772,6 @@ void UI_Theme::loadHelpChapterStringFile(const std::string& dataFile)
 					mode=ZERO_DATA_TYPE;
 					sub_mode=ZERO_SUB_DATA_TYPE;
 					sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
-					current_line=0;
 				}
 			}
 			else
@@ -742,32 +779,38 @@ void UI_Theme::loadHelpChapterStringFile(const std::string& dataFile)
 			{
 				switch(sub_mode)
 				{
-					case LANGUAGE_SUB_DATA_TYPE:current_language = getLanguageSubDataEntry(line2);break;
-					case RESOLUTION_SUB_DATA_TYPE:current_resolution = getResolutionSubDataEntry(line2);break;
-					case COLOR_THEME_SUB_DATA_TYPE:current_theme = getThemeSubDataEntry(line2);break;
+					case LANGUAGE_SUB_DATA_TYPE:current_language = getLanguageSubDataEntry(entry);break;
+					case RESOLUTION_SUB_DATA_TYPE:current_resolution = getResolutionSubDataEntry(entry);break;
+					case COLOR_THEME_SUB_DATA_TYPE:current_theme = getThemeSubDataEntry(entry);break;
 					default:break;
 				}
-				current_line = 0;
 			}
 			// => hat nur 1 Ebene => Position festgestellt!
 			else if((sub_mode != ZERO_SUB_DATA_TYPE)&&(sub_sub_mode == ZERO_SUB_SUB_DATA_TYPE))
 			{
+				if(chapter == MAX_HELP_CHAPTER)
+				{
+					if(entry[0] == '@')
+						chapter = (eHelpChapter)atoi(entry.substr(1).c_str());
+				} else
 				switch(mode)
 				{
-					case STRING_DATA_TYPE:stringList[current_language][current_line] = parameter[0];
+					case HELP_STRING_DATA_TYPE:
+						if(helpChapterStringMap[current_language].find(chapter)==helpChapterStringMap[current_language].end())
+							helpChapterStringMap[current_language].insert(std::pair<const eHelpChapter, const std::string>(chapter, entry));
+						else
+						{
+							entry = helpChapterStringMap[current_language][chapter] + entry;
+							helpChapterStringMap[current_language].erase(chapter);
+							helpChapterStringMap[current_language].insert(std::pair<const eHelpChapter, const std::string>(chapter, entry));
+						}
+						break;
 					default:break;
 				}
-				++current_line;
 			}
 			// 0 ebenen -> buttons :) BUTTON_COLORS_DATA_TYPE?? TODO
 		} // end if mode != ZERO_DATA_TYPE
 	} // end while
-
-	for(unsigned int i = MAX_LANGUAGES; i--;)
-		for(unsigned int j = MAX_STRINGS; j--;)
-			if(stringList[i][j] == "")
-				stringList[i][j] = "ERROR";
-
 }
 
 
@@ -1253,7 +1296,7 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 			{
 				switch(mode)
 				{
-					case STRING_DATA_TYPE:stringList[current_language][current_line] = parameter[0];
+					case STRING_DATA_TYPE:stringList[current_language][current_line] = parameter[0]; //? TODO raus?
 					//toLog(parameter[0]);
 					break;
 					case COLOR_DATA_TYPE:
@@ -1263,7 +1306,9 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 					case FONT_DATA_TYPE:
 					{
 						std::string t=fontDir+parameter[0]+".ttf";
-						fontList[current_resolution]/*[current_language]*/[current_line]=new Font(t, value[1]/*, get_font_style1(parameter[2]), get_font_style2(parameter[3]), get_font_style3(parameter[4]), false, _T(""), FONTENCODING_DEFAULT*/);
+						bool is_under_lined = (parameter[2] == "underlined") || (parameter[3] == "underlined");
+						bool is_shadow = (parameter[2] == "shadow") || (parameter[3] == "shadow");
+						fontList[current_resolution]/*[current_language]*/[current_line] = new Font(t, value[1], is_under_lined, is_shadow/*, get_font_style1(parameter[2]), get_font_style2(parameter[3]), get_font_style3(parameter[4]), false, _T(""), FONTENCODING_DEFAULT*/);
 //						std::ostringstream os;
 //						os.str("");
 //						os << "- " << current_resolution << " " << current_line << " " << t << " " << value[1];
@@ -1321,17 +1366,28 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 					case BITMAP_DATA_TYPE:
 						{
 							std::string name = bitmapDir+parameter[0]+".bmp";
-							SDL_Surface* temp = SDL_LoadBMP(name.c_str());
-							if(temp == NULL)
+							bool found_bitmap = false;
+							for(std::list<BitmapEntry>::iterator i = loadedBitmaps.begin(); i!=loadedBitmaps.end(); ++i)
+								// already loaded?
+								if(i->name == name)
+								{
+									found_bitmap = true;
+									bitmapAccessTable[current_resolution][current_theme][current_line] = &(*i);
+									break;
+								}
+							if(!found_bitmap)
 							{
-								toLog("Could not load Bitmap " + name);
-								SDL_FreeSurface(temp);
-								bitmapList[current_resolution][current_theme][current_line] = NULL;
+								BitmapEntry entry;
+								entry.resolution = current_resolution;
+								entry.theme = current_theme;
+								entry.line = current_line;
+								entry.name = name;
+								entry.bitmap = NULL;//temp;
+								entry.used = false;
+								entry.solid = (parameter[1] == "(SOLID)");
+								loadedBitmaps.push_back(entry);
+								bitmapAccessTable[current_resolution][current_theme][current_line] = &(loadedBitmaps.back());
 							}
-							else 
-								bitmapList[current_resolution][current_theme][current_line] = temp;
-							SDL_SetColorKey(bitmapList[current_resolution][current_theme][current_line], SDL_SRCCOLORKEY , SDL_MapRGB(bitmapList[current_resolution][current_theme][current_line]->format, 0,0,0));
-		
 						}break;
 					default:break;
 				}
@@ -1414,6 +1470,32 @@ Font* UI_Theme::lookUpFont(const eFont id) const
 	return(fontList[resolution]/*[language]*/[id]);
 }
 
-
+SDL_Surface* UI_Theme::lookUpBitmap(const eBitmap id)
+{
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_BITMAPS)) {
+		toLog("ERROR: (UI_Theme::lookUpBitmap) id out of range.");return(NULL); // TODO
+	}
+#endif
+	if(bitmapList[resolution][colorTheme][id] == NULL)
+// reload
+	{
+//		toLog("Loading " + bitmapAccessTable[resolution][colorTheme][id]->name);
+		SDL_Surface* temp = SDL_LoadBMP(bitmapAccessTable[resolution][colorTheme][id]->name.c_str());
+		
+		if(temp == NULL)
+		{
+			toLog("Could not load Bitmap " + bitmapAccessTable[resolution][colorTheme][id]->name);
+			SDL_FreeSurface(temp);
+			return(NULL);
+		}
+		if(!bitmapAccessTable[resolution][colorTheme][id]->solid)
+			SDL_SetColorKey(temp, SDL_SRCCOLORKEY , SDL_MapRGB(temp->format, 0,0,0));
+		bitmapAccessTable[resolution][colorTheme][id]->bitmap = temp;
+		bitmapList[resolution][colorTheme][id] = temp;
+	}
+	bitmapAccessTable[resolution][colorTheme][id]->used = true;
+	return(bitmapList[resolution][colorTheme][id]);
+}
 
 

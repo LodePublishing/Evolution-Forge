@@ -3,8 +3,9 @@
 UI_Radio& UI_Radio::operator=(const UI_Radio& object)
 {
 	((UI_Group)(*this)) = ((UI_Group)object);
-	setButtonHasChanged(object.changed);
+	markedItem = -1;
 	reorder = object.reorder;
+	buttonWasPressed = NULL;
 	for(unsigned int i = 0; i < 50; i++) 
 		buttonId[i]=object.buttonId[i];
 	return(*this);
@@ -12,8 +13,9 @@ UI_Radio& UI_Radio::operator=(const UI_Radio& object)
 
 UI_Radio::UI_Radio(const UI_Radio& object):
 	UI_Group((UI_Group)object),
-	changed(object.changed),
-	reorder(object.reorder)
+	markedItem(-1),
+	reorder(object.reorder),
+	buttonWasPressed(NULL)
 {
 	for(unsigned int i = 0; i < 50; i++) 
 		buttonId[i]=object.buttonId[i];
@@ -21,8 +23,9 @@ UI_Radio::UI_Radio(const UI_Radio& object):
 
 UI_Radio::UI_Radio(UI_Object* radio_parent, Rect initial_rect, Size bottom_right_distance, const ePositionMode position_mode, const eString radio_title) :
 	UI_Group(radio_parent, initial_rect, bottom_right_distance, position_mode, radio_title),
-	changed(true),
-	reorder(false)
+	markedItem(-1),
+	reorder(false),
+	buttonWasPressed(NULL)
 { 
 
 	for(unsigned int i = 0; i < 50; i++) 
@@ -102,43 +105,41 @@ void UI_Radio::forcePress(const unsigned int button_id)
 #endif
 	forceUnpressAll();
 	buttonId[button_id]->forcePress();
-	setButtonHasChanged();
 }
 
-const unsigned int UI_Radio::getMarked()
+const signed int UI_Radio::getMarked() const
 {
-	setButtonHasChanged(false);
-	for(unsigned int i = 0; i < 50; i++)
-		if((buttonId[i])&&(buttonId[i]->isLeftClicked()))
-			return(i);
-#ifdef _SCC_DEBUG
-	toLog("DEBUG: (UI_Radio::getMarked): was changed but no button is pressed!");
-#endif
-	return(50);
+	return(markedItem);
 }
 
 void UI_Radio::leftButtonPressed(UI_Button* button) // Unpress all except one
 {
-	setButtonHasChanged();
-	for(unsigned int i = 0; i < 50; i++)
-		if((buttonId[i])&&(button!=buttonId[i]))
-			buttonId[i]->forceUnpress();
+	buttonWasPressed = button;
 }
 
-void UI_Radio::leftButtonReleased(/*UI_Button* button*/) // allow release? TODO
+void UI_Radio::leftButtonReleased(UI_Button* button) // allow release?
 {
-	setButtonHasChanged();
-	// TODO?
+	buttonWasPressed = button;
 }
 
 
 void UI_Radio::process()
 {
 // TODO
-//		return;
-
 	UI_Button* lastPressed = NULL;
 	UI_Button* tmp;
+	markedItem = -1;
+	if(buttonWasPressed != NULL)
+	{
+		for(unsigned int i = 0; i < 50; i++)
+			if(buttonId[i])
+			{
+				if(buttonWasPressed!=buttonId[i])
+					buttonId[i]->forceUnpress();
+				else markedItem = i;
+			}
+		buttonWasPressed = NULL;
+	}
 
 	for(unsigned int i = 0; i < 50; i++)
 		if((buttonId[i])&&(buttonId[i]->isCurrentlyActivated()))
@@ -158,10 +159,7 @@ void UI_Radio::process()
 				break;
 			}
 		if(allUnpressed)
-		{
 			lastPressed->forcePress();
-			setButtonHasChanged();
-		}
 	}
 	if(reorder)
 	{

@@ -5,9 +5,10 @@ const float GUI_VERSION=0.51;
 
 #include "game.hpp"
 #include "msgwindow.hpp"
-#include "info.hpp"
+//#include "info.hpp"
 #include "helpwindow.hpp"
 #include "mapwindow.hpp"
+#include "datawindow.hpp"
 #include "mainwindow.hpp"
 #include "setwindow.hpp"
 
@@ -28,9 +29,9 @@ class Main
 		~Main();
 		void draw(DC* dc) const;
 		void process();
-		void OnIdle();
 		void resetData();
 		
+		void newGeneration();
 		
 		const bool isAnyOptimizing() const;
 		void stopAllOptimizing();
@@ -52,23 +53,30 @@ class Main
 		const bool hasBitDepthChanged() const;
 		const bool hasResolutionChanged() const;
 		const bool hasFullScreenChanged() const;
+		const bool hasThemeChanged() const;
+
+		void resetDataChange();
 
 		void reloadOriginalSize();
 		void reloadStrings();
+
+		void needRedraw();
 	
 	private:
 		void initializeGame(const unsigned int game_number);
 		MainWindow* mainWindow;
 		HelpWindow* helpWindow;
 		SettingsWindow* settingsWindow;
+		DataBaseWindow* dataBaseWindow;
 		MapWindow* mapWindow;
 		Point maus;
 		unsigned int gameCount; 
 		Game* game[MAX_GAME];
-		static InfoWindow* infoWindow;
+//		static InfoWindow* infoWindow;
 		static MessageWindow* msgWindow;
 //		StatisticsWindow* statisticsWindow;
 		void loadGoals();
+		void loadBuildOrders();
 		void loadStartConditions();
 		void loadHarvestData();
 		void loadMaps();
@@ -76,7 +84,7 @@ class Main
 		signed int tabToGameList[MAX_TABS];
 		signed int tabToSplitGameList[MAX_TABS];
 
-		unsigned int currentTab;
+		signed int currentTab;
 };
 
 inline const bool Main::hasBitDepthChanged() const {
@@ -90,6 +98,11 @@ inline const bool Main::hasResolutionChanged() const {
 inline const bool Main::hasFullScreenChanged() const {
 	return(settingsWindow->hasFullScreenChanged());
 }
-																			
+
+inline const bool Main::hasThemeChanged() const {
+	return(settingsWindow->hasThemeChanged());
+}
+
+																		
 #endif
 

@@ -10,15 +10,17 @@ PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size d
 	scoreMode(SCORE_FULFILL_MODE),
 // TODO UI_Object:: arrange top left :(
 // 
-	currentActionButton(new UI_Button(this, Rect(Point(0, 0), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*9/10, 0)), Size(0,0), MY_BUTTON, false, STATIC_BUTTON_MODE, PAUSED_STRING, DO_NOT_ADJUST, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
-	playerText(new UI_StaticText(this, "Player 1:", Rect(Point(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(0,0)), Size(0, 0), IMPORTANT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
-	menuRadio(new UI_Radio(this, Rect(Point(playerText->getRelativeRect().GetLeft()+playerText->getTextSize().GetWidth()+5, 0), Size(0, 0)), Size(0,0), DO_NOT_ADJUST)), // TODO
+	playerText(new UI_StaticText(this, "Player 1:", Rect(Point(/*UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*/12, 0), Size(0,0)), Size(0, 0), IMPORTANT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
+	currentActionButton(new UI_Button(this, Rect(Point(playerText->getRelativeRect().GetLeft()+playerText->getTextSize().GetWidth()+5, 0), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*9/10, 0)), Size(0,0), MY_BUTTON, false, STATIC_BUTTON_MODE, PAUSED_STRING, DO_NOT_ADJUST, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+	menuRadio(new UI_Radio(this, Rect(Point(0, FONT_SIZE+8), Size(0, 0)), Size(0,0), DO_NOT_ADJUST)), // TODO
 	raceMenuButton(new UI_Button(menuRadio, Rect(Point(0, 0), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2, 0)), Size(0, 0), TAB_BUTTON, false, STATIC_BUTTON_MODE, CHOOSE_RACE_STRING, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
-	raceMenu(new RaceMenu(raceMenuButton, Rect(10, 15, 0, 0), Size(0,0), TOP_LEFT )),
+	raceMenu(new RaceMenu(this, Rect(10, 15, 0, 0), Size(0,0), TOP_LEFT )),
 
-	removePlayerButton(new UI_Button(this, Rect(Point(getParent()->getWidth()-25, 1), Size(8, 8)), Size(5, 0), CANCEL_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST)), // Evtl bitmap
-	scoreText(new UI_StaticText(this, Rect(Point(getParent()->getWidth()-50, 0), Size(0, 0)), Size(5, 0), IMPORTANT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
-	addPlayerButton(new UI_Button(this, Rect(Point(5, 0), Size(60, 0)), Size(5, 0), MY_BUTTON, false, PRESS_BUTTON_MODE, ADD_PLAYER_STRING, TOP_CENTER, SMALL_BOLD_FONT, AUTO_SIZE)),
+	removePlayerButton(new UI_Button(this, Rect(Point(0, 1), Size(8, 8)), Size(5, 0), CANCEL_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST)), // Evtl bitmap
+	
+	scoreText(new UI_StaticText(this, Rect(Point(currentActionButton->getRelativeRightBound()+5, -2), Size(0, 0)), Size(5, 0), IMPORTANT_COLOR, LARGE_BOLD_FONT, DO_NOT_ADJUST)),
+	goalsFulfilledText(new UI_StaticText(this, Rect(Point(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2 + 5, FONT_SIZE+8), Size(0, 0)), Size(5, 0), IMPORTANT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
+	addPlayerButton(new UI_Button(this, Rect(Point(5, 0), Size(60, 0)), Size(5, 0), MY_BUTTON, false, PRESS_BUTTON_MODE, ADD_PLAYER_STRING, TOP_CENTER, LARGE_BOLD_FONT, AUTO_SIZE)),
 	optimizing(false),
 	assignRace(-1)
 {
@@ -26,12 +28,14 @@ PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size d
 - Startposition
 - Startbedingungen
  * */
+	raceMenu->setPositionParent(raceMenuButton);
 	menuRadio->addButton(raceMenuButton, 0);
 	menuRadio->calculateBoxSize(true);
 	
 	raceMenu->Hide();
 	currentActionButton->Hide();
 	scoreText->Hide();
+	goalsFulfilledText->Hide();
 	playerText->Hide();
 	addPlayerButton->Show();
 	removePlayerButton->Hide();
@@ -42,23 +46,28 @@ PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size d
 		oldScoreCounter[i] = 0;
 		oldScore[i] = MAX_TIME-1;
 	}
+	process();
+	reloadOriginalSize();
 }
 
 void PlayerEntry::reloadOriginalSize()
 {
-	playerText->setOriginalPosition(Point(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
-	currentActionButton->setOriginalSize(Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*9/10, 0));
-	raceMenuButton->setOriginalSize(Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2, 0));
-	menuRadio->setOriginalPosition(Point(playerText->getRelativeRect().GetLeft()+playerText->getTextSize().GetWidth()+5, 0));
+	playerText->setOriginalPosition(Point(12/*UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*/, 0));
+	removePlayerButton->setOriginalPosition(Point(0, 1));
+	goalsFulfilledText->setOriginalPosition(Point(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2 + 5, FONT_SIZE+8));
 
-	removePlayerButton->setOriginalPosition(Point(getParent()->getWidth()-20, 1));
-	scoreText->setOriginalPosition(Point(getParent()->getWidth()-50, 0));
+	currentActionButton->setOriginalSize(Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*9/10, 0));
+	currentActionButton->setOriginalPosition(Point(playerText->getRelativeRect().GetLeft()+playerText->getTextSize().GetWidth()+5, 0));
+	scoreText->setOriginalPosition(Point(currentActionButton->getRelativeRightBound()+5, -2));
+	raceMenuButton->setOriginalSize(Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2, 0));
+	menuRadio->setOriginalPosition(Point(0, FONT_SIZE+8));
+
 	UI_Object::reloadOriginalSize();
 }
 
 const unsigned int PlayerEntry::getLineHeight() const
 {
-	return(1+raceMenu->getHeight());
+	return(2+raceMenu->getHeight());
 }
 
 #include <sstream>
@@ -76,6 +85,7 @@ PlayerEntry::~PlayerEntry()
 {
 	delete currentActionButton;
 	delete scoreText;
+	delete goalsFulfilledText;
 	delete playerText;
 	delete addPlayerButton;
 	delete removePlayerButton;
@@ -96,9 +106,7 @@ void PlayerEntry::mouseHasLeft()
 	closeMenus();
 }
 
-	
-
-void PlayerEntry::resetData()
+void PlayerEntry::resetTime()
 {
 	for(unsigned int i=20;i--;)
 	{
@@ -108,6 +116,11 @@ void PlayerEntry::resetData()
 	currentScore = MAX_TIME;
 	programScore = MAX_TIME;
 	goalComplete = 0;
+}
+
+void PlayerEntry::resetData()
+{
+	resetTime();	
 	initMode = INACTIVE;
 	scoreMode = SCORE_FULFILL_MODE;
 }
@@ -179,7 +192,7 @@ void PlayerEntry::process()
 	if(!isShown())
 		return;
 	UI_Object::process();
-
+	
 	if(initMode!=INACTIVE)
 	{
 		if(currentActionButton->isLeftClicked())
@@ -197,16 +210,10 @@ void PlayerEntry::process()
 //				currentActionButton->updateToolTip(CONTINUE_OPTIMIZATION_TOOLTIP_STRING);
 			}
 		}
-//		currentActionButton->Show();
-//		scoreText->Show();
-//		playerText->Show();
-//		addPlayerButton->Hide();
-//		removePlayerButton->Show();
-//		raceMenuButton->Show();
-//		goalsFulfilledText->Show();
 		if(scoreMode==SCORE_FULFILL_MODE)
 		{																	
-//			goalsFulfilledText[i]->updateText(theme.lookUpFormattedString(OF_GOALS_FULFILLED_STRING, goalComplete/100));
+			goalsFulfilledText->updateToolTip(OF_GOALS_FULFILLED_TOOLTIP_STRING);
+			goalsFulfilledText->updateText(theme.lookUpFormattedString(OF_GOALS_FULFILLED_STRING, goalComplete/100));
 			if(!isOptimizing()) 
 				currentActionButton->updateText(PAUSED_STRING);
 			else
@@ -214,7 +221,8 @@ void PlayerEntry::process()
 		}
 		else if(scoreMode==SCORE_TIME_MODE)
 		{
-//			goalsFulfilledText->updateText(theme.lookUpFormattedString(OF_TIME_FULFILLED_STRING, goalComplete));
+			goalsFulfilledText->updateToolTip(OF_TIME_FULFILLED_TOOLTIP_STRING);
+			goalsFulfilledText->updateText(theme.lookUpFormattedString(OF_TIME_FULFILLED_STRING, goalComplete));
 			if(!isOptimizing())
 				currentActionButton->updateText(PAUSED_STRING);
 			else
@@ -253,8 +261,7 @@ void PlayerEntry::process()
 		currentActionButton->Hide();
 		raceMenuButton->Hide();
 		menuRadio->Hide();
-//		goalsFulfilledText->Hide();
-
+		goalsFulfilledText->Hide();
 	}
 	if(addPlayerButton->isLeftClicked())
 	{
@@ -263,6 +270,7 @@ void PlayerEntry::process()
 		removePlayerButton->Show();
 		playerText->Show();
 		scoreText->Show();
+		goalsFulfilledText->Show();
 		currentActionButton->Hide();
 		raceMenuButton->Show();
 		menuRadio->Show();
@@ -270,11 +278,13 @@ void PlayerEntry::process()
 	}
 	if(removePlayerButton->isLeftClicked())
 	{
+		resetData();
 		setInitMode(INACTIVE);
 		addPlayerButton->Show();
 		removePlayerButton->Hide();
 		playerText->Hide();
 		scoreText->Hide();
+		goalsFulfilledText->Hide();
 		currentActionButton->Hide();
 		raceMenuButton->updateText(CHOOSE_RACE_STRING);
 		raceMenuButton->Hide();
@@ -291,8 +301,8 @@ void PlayerEntry::process()
 		currentActionButton->Show();
 	}
 
-	if(menuRadio->buttonHasChanged())
-	{
+//	if(menuRadio->buttonHasChanged())
+//	{
 		switch(menuRadio->getMarked())
 		{
 			case 0:
@@ -309,7 +319,7 @@ void PlayerEntry::process()
 			break;
 			default:break;
 		}
-	}
+//	}
 }
 
 void PlayerEntry::draw(DC* dc) const

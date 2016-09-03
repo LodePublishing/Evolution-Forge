@@ -44,6 +44,7 @@ class PlayerEntry : public UI_Object
 		const eInitMode getInitMode() const;
 
 		void resetData();
+		void resetTime();
 		const bool isOptimizing() const;
 
 		void process();
@@ -63,14 +64,14 @@ class PlayerEntry : public UI_Object
 
 		eInitMode initMode;
 		eScoreMode scoreMode;
-		UI_Button* currentActionButton;
 		UI_StaticText* playerText;
+		UI_Button* currentActionButton;
 		UI_Radio* menuRadio;
 		UI_Button* raceMenuButton;
 		RaceMenu* raceMenu;
 		UI_Button* removePlayerButton;
-//		UI_StaticText* goalsFulfilledText;
 		UI_StaticText* scoreText;
+		UI_StaticText* goalsFulfilledText;
 		UI_Button* addPlayerButton;
 		bool optimizing;
 		unsigned int number;

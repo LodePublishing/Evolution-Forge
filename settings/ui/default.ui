@@ -3,75 +3,177 @@
 			FreeSans, 1
 			FreeSans, 8
 			FreeSansBold, 8
+			FreeSans, 8, shadow
+			FreeSansBold, 8, shadow
+			FreeSans, 8, underlined
+			FreeSansBold, 8, underlined
+		
 			FreeSans, 9
 			FreeSansBold, 9
+			FreeSans, 9, shadow
+			FreeSansBold, 9, shadow
+			FreeSans, 9, underlined
+			FreeSansBold, 9, underlined
+		
 			FreeSans, 12
 			FreeSansBold, 12
+			FreeSans, 12, shadow
+			FreeSansBold, 12, shadow
+			FreeSans, 12, underlined
+			FreeSansBold, 12, underlined
+		
 			FreeSans, 14
 			FreeSansBold, 14
+			FreeSans, 14, shadow
+			FreeSansBold, 14, shadow
+			FreeSans, 14, underlined
+			FreeSansBold, 14, underlined
+		
 			FreeSans, 18
 			FreeSansBold, 18
+			FreeSans, 18, shadow
+			FreeSansBold, 18, shadow
+			FreeSans, 18, underlined
+			FreeSansBold, 18, underlined
+		
 	@END
 
 	@800x600
 			FreeSans, 1
 			FreeSans, 9
 			FreeSansBold, 9
+			FreeSans, 9, shadow
+			FreeSansBold, 9, shadow
+			FreeSans, 9, underlined
+			FreeSansBold, 9, underlined
+		
 			FreeSans, 11
 			FreeSansBold, 11
+			FreeSans, 11, shadow
+			FreeSansBold, 11, shadow
+			FreeSans, 11, underlined
+			FreeSansBold, 11, underlined
+		
 			FreeSans, 13
 			FreeSansBold, 13
+			FreeSans, 13, shadow
+			FreeSansBold, 13, shadow
+			FreeSans, 13, underlined
+			FreeSansBold, 13, underlined
+		
 			FreeSans, 16
 			FreeSansBold, 16
+			FreeSans, 16, shadow
+			FreeSansBold, 16, shadow
+			FreeSans, 16, underlined
+			FreeSansBold, 16, underlined
+		
 			FreeSans, 22
 			FreeSansBold, 22
+			FreeSans, 22, shadow
+			FreeSansBold, 22, shadow
+			FreeSans, 22, underlined
+			FreeSansBold, 22, underlined
+		
 	@END
 
 	@1024x768
 			FreeSans, 1
 			FreeSans, 9
 			FreeSansBold, 9
+			FreeSans, 9, shadow
+			FreeSansBold, 9, shadow
+			FreeSans, 9, underlined
+			FreeSansBold, 9, underlined
+		
 			FreeSans, 12
 			FreeSansBold, 12
+			FreeSans, 12, shadow
+			FreeSansBold, 12, shadow
+			FreeSans, 12, underlined
+			FreeSansBold, 12, underlined
+		
 			FreeSans, 14
 			FreeSansBold, 14
+			FreeSans, 14, shadow
+			FreeSansBold, 14, shadow
+			FreeSans, 14, underlined
+			FreeSansBold, 14, underlined
+		
 			FreeSans, 20
 			FreeSansBold, 20
+			FreeSans, 20, shadow
+			FreeSansBold, 20, shadow
+			FreeSans, 20, underlined
+			FreeSansBold, 20, underlined
+		
 			FreeSans, 26
 			FreeSansBold, 26
+			FreeSans, 26, shadow
+			FreeSansBold, 26, shadow
+			FreeSans, 26, underlined
+			FreeSansBold, 26, underlined
+		
 	@END
 
 	@1280x1024
 			FreeSans, 1
 			FreeSans, 10
 			FreeSansBold, 10
+			FreeSans, 10, shadow
+			FreeSansBold, 10, shadow
+			FreeSans, 10, underlined
+			FreeSansBold, 10, underlined
+		
 			FreeSans, 12
 			FreeSansBold, 12
+			FreeSans, 12, shadow
+			FreeSansBold, 12, shadow
+			FreeSans, 12, underlined
+			FreeSansBold, 12, underlined
+		
 			FreeSans, 18
 			FreeSansBold, 18
+			FreeSans, 18, shadow
+			FreeSansBold, 18, shadow
+			FreeSans, 18, underlined
+			FreeSansBold, 18, underlined
+		
 			FreeSans, 24
 			FreeSansBold, 24
+			FreeSans, 24, shadow
+			FreeSansBold, 24, shadow
+			FreeSans, 24, underlined
+			FreeSansBold, 24, underlined
+		
 			FreeSans, 32
 			FreeSansBold, 32
+			FreeSans, 32, shadow
+			FreeSansBold, 32, shadow
+			FreeSans, 32, underlined
+			FreeSansBold, 32, underlined
+		
 	@END
 @END
 
 @MAIN
 	@640x480
 		Main window, 640, 480, 480, absolute coordinates, 0, 0
-		Message window, 250, 75, 75, dock bottom center inside of, Main window
-		Help window, 500, 400, 400, dock center inside of, Main window
+		Message window, 200, 75, 75, dock bottom center inside of, Main window
+		Help window, 600, 400, 400, dock center inside of, Main window
 		Settings window, 425, 368, 368, dock center inside of, Main window
 		Map window, 600, 450, 450, dock center inside of, Main window
+		Database window, 600, 450, 450, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 500, 200, 200, dock bottom center inside of, Main window
 		Save box window, 350, 150, 150, dock center inside of, Main window
 	@END
 	@800x600
 		Main window, 800, 600, 600, absolute coordinates, 0, 0
-		Message window, 300, 100, 100, dock bottom center inside of, Main window
-		Help window, 600, 500, 500, dock center inside of, Main window
+		Message window, 250, 100, 100, dock bottom center inside of, Main window
+		Help window, 750, 500, 500, dock center inside of, Main window
 		Settings window, 500, 400, 400, dock center inside of, Main window
+		Database window, 750, 550, 550, dock center inside of, Main window
 		Map window, 750, 550, 550, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 600, 250, 250, dock bottom center inside of, Main window
@@ -80,9 +182,10 @@
 	
 	@1024x768
 		Main window, 1024, 768, 768, Main window, absolute coordinates, 0, 0
-		Message window, 350, 125, 125, dock bottom center inside of, Main window
-		Help window, 800, 600, 600, dock center inside of, Main window
+		Message window, 300, 125, 125, dock bottom center inside of, Main window
+		Help window, 900, 600, 600, dock center inside of, Main window
 		Settings window, 600, 450, 450, dock center inside of, Main window
+		Database window, 950, 700, 700, dock center inside of, Main window
 		Map window, 950, 700, 700, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 700, 300, 300, dock bottom center inside of, Main window
@@ -90,9 +193,10 @@
 	@END
 	@1280x1024
 		Main window, 1280, 1024, 1024, Main window, absolute coordinates, 0, 0
-		Message window, 400, 150, 150, dock top center inside of, Main window
-		Help window, 900, 700, 700, dock center inside of, Main window
+		Message window, 330, 150, 150, dock top center inside of, Main window
+		Help window, 1100, 900, 700, dock center inside of, Main window
 		Settings window, 700, 500, 500, dock center inside of, Main window
+		Database window, 1200, 900, 900, dock center inside of, Main window
 		Map window, 1200, 900, 900, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 800, 350, 350, dock bottom center inside of, Main window
@@ -276,7 +380,123 @@
 		 90,  90,  80
 
 	@END
+	@GREEN_THEME
+		0,   0,   0
+# Text color
+		1,   1,   1
+# window text color
+		150, 150, 200
+# bright window text color
+		200, 200, 250
+# title color
+		100, 100, 200
+# important text (time etc. red in the original)
+		200,   0,   0
+# fulfilled & not fulfilled
+		0, 100,   0
+		100,   0,   0
+# force add goal button color
+		0, 200,   0
+# force text color
+		50, 150,  50
+# big text buttons color 10
+		255, 255, 255
+# bodiagram
+# bright minerals text color
+		180, 180, 255
+# bright gas text color
+		140, 255, 140
+# supply text color
+		160, 160, 160
+# bright supply text color
+		220, 220, 220
+# timesteps text color
+		50, 200,  50
+# minerals text color
+		80,  80, 255
+# gas text color
+		40, 255,  40
+# 	time text color
+		255, 255,  40
+# statistics force text color
+		40, 255, 255
+#   bo length text color 
+		100, 150, 200
+# 	fitness average text color
+		200, 200, 200
+#   fitness variance text color
+		100, 100, 100
+#	generations left text color
+		200,   0,   0
+#  fps text color
+		255, 255, 255
+#  fitness diagram text color
+		200,  40,  40
+# bright fitness diagram text color
+		255,  80,  80
+# disabled text color
+		 90,  90,  80
 
+	@END
+
+	@GREY_THEME
+		0,   0,   0
+# Text color
+		1,   1,   1
+# window text color
+		170, 170, 170
+# bright window text color
+		220, 220, 220
+# title color
+		140, 140, 140
+# important text (time etc. red in the original)
+		200, 200, 200
+# fulfilled & not fulfilled
+		60, 60, 60
+		50, 50, 50
+# force add goal button color
+		100, 100, 100
+# force text color
+		150, 150, 150
+# big text buttons color 10
+		255, 255, 255
+# bodiagram
+# bright minerals text color
+		255, 255, 255
+# bright gas text color
+		200, 200, 200
+# supply text color
+		160, 160, 160
+# bright supply text color
+		220, 220, 220
+# timesteps text color
+		120, 120, 120
+# minerals text color
+		255, 255, 255
+# gas text color
+		200, 200, 200
+# 	time text color
+		230, 230, 230
+# statistics force text color
+		110, 110, 110
+#   bo length text color 
+		150, 150, 150
+# 	fitness average text color
+		200, 200, 200
+#   fitness variance text color
+		100, 100, 100
+#	generations left text color
+		200, 200, 200
+#  fps text color
+		255, 255, 255
+#  fitness diagram text color
+		100, 100, 100
+# bright fitness diagram text color
+		200, 200, 200
+# disabled text color
+		 90,  90,  90
+
+	@END
 @END
 
 @PENS
@@ -481,7 +701,7 @@
 # disabled border pen
 		1, 100, 100, 110, SOLID
 	@END
-		
+	
 	@YELLOW_THEME
 # null pen
 		1,   0,   0,   0, TRANSPARENT
@@ -584,6 +804,207 @@
 # disabled border pen
 		1, 105, 105, 100, SOLID
 	@END
+	@GREEN_THEME
+# null pen
+		1,   0,   0,   0, TRANSPARENT
+# border pen
+		1,   40, 100, 40, SOLID
+# outer border pen
+		1,   30,  80, 30, SOLID
+# inner border pen
+		1,   0,  80,  0, SOLID
+# inner border higlight pen
+		1,  50, 100, 50, SOLID
+# big buttons pen
+		1, 100, 155, 100, SOLID
+# rectangle pen
+		1,   0,   0,   0, SOLID
+# marked bitmap pen
+		1, 255, 255, 255, SOLID
+# dashed minerals pen was width 2
+		1, 120, 120, 255, SHORT_DASH
+# dashed gas pen was width 2
+		1,  80, 255,  80, SHORT_DASH
+# dashed supply pen was width 2
+		1, 160, 160, 160, SHORT_DASH
+# dashed marker pen was width 2
+		1, 150,   0,   0, SHORT_DASH
+# select pen
+		1, 100, 200, 100, SOLID
+# dark background button pen
+		1,   0,   5,  10, SOLID	
+# marked bitmap green
+		1,   0, 255,   0, SOLID	
+# marked bitmap yellow
+		1, 100, 100,   0, SOLID	
+# marked bitmap red
+		1, 200,   0,   0, SOLID
+# basic bitmap pen
+		1, 255,  255,  255, SOLID
+# bodiagram supply, mins, gas pen
+		1,  60,   60,   60, SOLID
+		1,  80,   80,  255, SOLID
+		1,  40,  255,   40, SOLID
+		2, 120,  120,  120, SOLID
+		2,  80,   80,  255, SOLID
+		2,  40,  255,   40, SOLID
+# unit list colors:
+		1,  25,  25,  25, SOLID
+		1,  75,  75,  75, SOLID
+		1,  50, 100,  50, SOLID
+		1, 100,  50,  50, SOLID
+		1, 100,  50, 100, SOLID
+		1,  50,  50, 100, SOLID
+		1,  50, 100, 100, SOLID
+		1, 100, 100,  50, SOLID
+		1,  50,  50,  75, SOLID
+		1,  75,  50,  50, SOLID
+		1,  50,  75,  50, SOLID
+	
+		2,  25,  25,  25, SOLID
+		2,  75,  75,  75, SOLID
+		2,  50, 100,  50, SOLID
+		2, 100,  50,  50, SOLID
+		2, 100,  50, 100, SOLID
+		2,  50,  50, 100, SOLID
+		2,  50, 100, 100, SOLID
+		2, 100, 100,  50, SOLID
+		2,  50,  50,  75, SOLID
+		2,  75,  50,  50, SOLID
+		2,  50,  75,  50, SOLID
+		
+# bright unit list colors:
+		1,  60,  60,  60, SOLID
+		1, 150, 150, 150, SOLID
+		1,  75, 225,  75, SOLID
+		1, 225,  75,  75, SOLID
+		1, 225,  75, 225, SOLID
+		1,  75,  75, 225, SOLID
+		1,  75, 225, 225, SOLID
+		1, 225, 225,  75, SOLID
+		1,  75,  75, 150, SOLID
+		1, 150,  75,  75, SOLID
+		1,  75, 150,  75, SOLID
+
+		2,  60,  60,  60, SOLID
+		2, 150, 150, 150, SOLID
+		2,  75, 225,  75, SOLID
+		2, 225,  75,  75, SOLID
+		2, 225,  75, 225, SOLID
+		2,  75,  75, 225, SOLID
+		2,  75, 225, 225, SOLID
+		2, 225, 225,  75, SOLID
+		2,  75,  75, 150, SOLID
+		2, 150,  75,  75, SOLID
+		2,  75, 150,  75, SOLID
+# green timesteps pen
+		1,  20, 100,  20, SOLID
+# fitness diagram pen
+		2, 155,  40,  40, SOLID
+# disabled border pen
+		1, 100, 110, 100, SOLID
+	@END
+
+	@GREY_THEME
+# null pen
+		1,   0,   0,   0, TRANSPARENT
+# border pen
+		1,   60, 60, 60, SOLID
+# outer border pen
+		1,   80,  80, 80, SOLID
+# inner border pen
+		1,  50,  50, 50, SOLID
+# inner border higlight pen
+		1,  100, 100, 100, SOLID
+# big buttons pen
+		1, 155, 155, 155, SOLID
+# rectangle pen
+		1,   0,   0,   0, SOLID
+# marked bitmap pen
+		1, 255, 255, 255, SOLID
+# dashed minerals pen was width 2
+		1, 175, 175, 175, SHORT_DASH
+# dashed gas pen was width 2
+		1, 150, 150, 150, SHORT_DASH
+# dashed supply pen was width 2
+		1, 160, 160, 160, SHORT_DASH
+# dashed marker pen was width 2
+		1, 100, 100, 100, SHORT_DASH
+# select pen
+		1, 150, 150, 150, SOLID
+# dark background button pen
+		1,  10,  10,  10, SOLID	
+# marked bitmap green
+		1, 150, 150, 150, SOLID	
+# marked bitmap yellow
+		1,  80,  80,  80, SOLID	
+# marked bitmap red
+		1, 100, 100, 100, SOLID
+# basic bitmap pen
+		1, 255,  255,  255, SOLID
+# bodiagram supply, mins, gas pen
+		1,  60,   60,   60, SOLID
+		1, 150,  150,  150, SOLID
+		1, 130,  130,  130, SOLID
+		2, 120,  120,  120, SOLID
+		2, 140,  140,  140, SOLID
+		2, 110,  110,  110, SOLID
+# unit list colors:
+		1,  20,  20,  20, SOLID
+		1,  80,  80,  80, SOLID
+		1, 100, 100, 100, SOLID
+		1, 120, 120, 120, SOLID
+		1, 150, 150, 150, SOLID
+		1, 130, 130, 130, SOLID
+		1, 140, 140, 140, SOLID
+		1, 160, 160, 160, SOLID
+		1,  70,  70,  70, SOLID
+		1,  40,  40,  40, SOLID
+		1,  60,  60,  60, SOLID
+	
+		2,  20,  20,  20, SOLID
+		2,  80,  80,  80, SOLID
+		2, 100, 100, 100, SOLID
+		2, 120, 120, 120, SOLID
+		2, 150, 150, 150, SOLID
+		2, 130, 130, 130, SOLID
+		2, 140, 140, 140, SOLID
+		2, 160, 160, 160, SOLID
+		2,  70,  70,  70, SOLID
+		2,  40,  40,  40, SOLID
+		2,  60,  60,  60, SOLID
+		
+# bright unit list colors:
+		1,  80,  80,  80, SOLID
+		1, 140, 140, 140, SOLID
+		1, 160, 160, 160, SOLID
+		1, 180, 180, 180, SOLID
+		1, 255, 255, 255, SOLID
+		1, 200, 200, 200, SOLID
+		1, 220, 220, 220, SOLID
+		1, 240, 240, 240, SOLID
+		1, 120, 120, 120, SOLID
+		1, 100, 100, 100, SOLID
+		1, 120, 120, 120, SOLID
+	
+		2,  80,  80,  80, SOLID
+		2, 140, 140, 140, SOLID
+		2, 160, 160, 160, SOLID
+		2, 180, 180, 180, SOLID
+		2, 255, 255, 255, SOLID
+		2, 200, 200, 200, SOLID
+		2, 220, 220, 220, SOLID
+		2, 240, 240, 240, SOLID
+		2, 120, 120, 120, SOLID
+		2, 100, 100, 100, SOLID
+		2, 120, 120, 120, SOLID
+# green timesteps pen
+		1, 100, 100, 100, SOLID
+# fitness diagram pen
+		2, 80,  80,  80, SOLID
+# disabled border pen
+		1, 100, 100, 100, SOLID
+	@END
 @END
 
 @BRUSHES
@@ -593,11 +1014,7 @@
 # main window is transparent
 		0,   0,   0, TRANSPARENT
 # window foreground
-#		5,  10,  10, SOLID
-# window background
-#		5,  15,  30, SOLID
-# window foreground
-		10,  10,  15, SOLID
+		15,  10,  10, SOLID
 # window background
 		30,  15,  5, SOLID
 # bo dark color
@@ -791,6 +1208,140 @@
 		55,   55,  50, SOLID
 	@END
 
+	@GREEN_THEME
+		0,   0,   0, SOLID
+# main window is transparent
+		0,   0,   0, TRANSPARENT
+# window foreground
+		10,  15,  10, SOLID
+# window background
+		10,  30,  10, SOLID
+# bo dark color
+		40, 125, 40, SOLID
+# bo bright color
+		75, 225,  75, SOLID
+# force list color
+		50, 150, 50, SOLID
+
+# force add goal button brush
+		50,   50,  50, SOLID
+
+# unit list colors:
+		15,  15,  15, SOLID
+		35,  35,  35, SOLID
+		 0,  75,   0, SOLID
+		75,   0,   0, SOLID
+		75,   0,  75, SOLID
+		 0,   0,  75, SOLID
+		 0,  75,  75, SOLID
+		75,  75,   0, SOLID
+		 0,   0,  35, SOLID
+		35,   0,   0, SOLID
+		 0,  35,   0, SOLID
+
+# bright unit list colors:
+		30,  30,  30, SOLID
+		110, 110, 110, SOLID
+		35, 180,  35, SOLID
+		180,  35,  35, SOLID
+		180,  35, 180, SOLID
+		35,  35, 180, SOLID
+		35, 180, 180, SOLID
+		180, 180,  35, SOLID
+		35,  35, 110, SOLID
+		110,  35,  35, SOLID
+		35, 110,  35, SOLID
+		
+		255, 255, 255, SOLID
+
+# continue button brush
+		50, 125, 50, SOLID
+		20,  50,  20, SOLID
+		125, 200, 125, SOLID
+
+
+# bodiagram background brush
+		30,  30,  30, CROSS_HATCH
+		50,  50,  50, CROSS_HATCH
+# bodiagram bar 
+		40,  40,  40, SOLID
+# supply brush
+		120, 120, 120, SOLID
+# statistics window (generations left brush)
+#		40,  40, 100, SOLID
+		100,  40, 40, SOLID
+# tooltip
+		200, 200,  20, SOLID
+# disabled item
+		50,   60,  50, SOLID
+	@END
+	@GREY_THEME
+		0,   0,   0, SOLID
+# main window is transparent
+		0,   0,   0, TRANSPARENT
+# window foreground
+		15,  15,  15, SOLID
+# window background
+		20,  20,  20, SOLID
+# bo dark color
+		80,  80, 80, SOLID
+# bo bright color
+		140, 140, 140, SOLID
+# force list color
+		100, 100, 100, SOLID
+
+# force add goal button brush
+		50,   50,  50, SOLID
+
+# unit list colors:
+		15,  15,  15, SOLID
+		35,  35,  35, SOLID
+		50,  50,  50, SOLID
+		60,  60,  60, SOLID
+		80,  80,  80, SOLID
+		70,  70,  70, SOLID
+		90,  90,  90, SOLID
+		100, 100, 100, SOLID
+		25,  25,  25, SOLID
+		20,  20,  20, SOLID
+		10,  10,  10, SOLID
+
+# bright unit list colors:
+		40,  40,  40, SOLID
+		100,  100,  100, SOLID
+		90,  90,  90, SOLID
+		110, 110, 110, SOLID
+		130, 130, 130, SOLID
+		120, 120, 120, SOLID
+		140, 140, 140, SOLID
+		150, 150, 150, SOLID
+		80,  80,  80, SOLID
+		70,  70,  70, SOLID
+		60,  60,  60, SOLID
+		
+		255, 255, 255, SOLID
+
+# continue button brush
+		90, 90, 90, SOLID
+		30,  30,  30, SOLID
+		150, 150, 150, SOLID
+
+
+# bodiagram background brush
+		30,  30,  30, CROSS_HATCH
+		50,  50,  50, CROSS_HATCH
+# bodiagram bar 
+		40,  40,  40, SOLID
+# supply brush
+		120, 120, 120, SOLID
+# statistics window (generations left brush)
+		70,  70, 70, SOLID
+# tooltip
+		200, 200, 200, SOLID
+# disabled item
+		60,   60,  60, SOLID
+	@END
+
 @END
 
 @BITMAPS
@@ -812,21 +1363,30 @@
 			mouse3
 			red_radio_off
 			red_radio_on
-			back_640
+			back_wh40k_640, (SOLID)
 			bar
 			key
 			clawsoftware
-			new
-			open
-			save
-			refresh
-			back
-			forward
-			add
-			delete
+			new_640
+			open_640
+			save_640
+			refresh_640
+			back_640
+			forward_640
+			add_640
+			delete_640
 			help
 			map
 			settings
+			background_640, (SOLID)
+			red_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
 		@END
 
 		@DARK_BLUE_THEME
@@ -846,21 +1406,30 @@
 			mouse3
 			blue_radio_off
 			blue_radio_on
-			back_640
+			back_wh40k_640, (SOLID)
 			bar
 			key
 			clawsoftware
-			new
-			open
-			save
-			refresh
-			back
-			forward
-			add
-			delete
+			new_640
+			open_640
+			save_640
+			refresh_640
+			back_640
+			forward_640
+			add_640
+			delete_640
 			help
 			map
 			settings
+			background_640, (SOLID)
+			blue_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
 		@END
 		@YELLOW_THEME
 			null
@@ -879,21 +1448,115 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			back_640
+			back_wh40k_640, (SOLID)
 			bar
 			key
 			clawsoftware
-			new
-			open
-			save
-			refresh
-			back
-			forward
-			add
-			delete
+			new_640
+			open_640
+			save_640
+			refresh_640
+			back_640
+			forward_640
+			add_640
+			delete_640
 			help
 			map
 			settings
+			background_640, (SOLID)
+			yellow_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
+		@END
+	
+		@GREEN_THEME
+			null
+			increase
+			sub
+			cancel
+			arrow_left
+			arrow_right
+			arrow_up
+			arrow_down
+			location_button
+			time_button
+			mouse
+			mouse1
+			mouse2
+			mouse3
+			yellow_radio_off
+			yellow_radio_on
+			back_wh40k_640, (SOLID)
+			bar
+			key
+			clawsoftware
+			new_640
+			open_640
+			save_640
+			refresh_640
+			back_640
+			forward_640
+			add_640
+			delete_640
+			help
+			map
+			settings
+			background_640, (SOLID)
+			yellow_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
+		@END
+		@GREY_THEME
+			null
+			increase
+			sub
+			cancel
+			arrow_left
+			arrow_right
+			arrow_up
+			arrow_down
+			location_button
+			time_button
+			mouse
+			mouse1
+			mouse2
+			mouse3
+			yellow_radio_off
+			yellow_radio_on
+			back_wh40k_640, (SOLID)
+			bar
+			key
+			clawsoftware
+			new_640
+			open_640
+			save_640
+			refresh_640
+			back_640
+			forward_640
+			add_640
+			delete_640
+			help
+			map
+			settings
+			background_640, (SOLID)
+			yellow_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
 		@END
 
 	@END
@@ -915,21 +1578,30 @@
 			mouse3
 			red_radio_off
 			red_radio_on
-			back_800
+			background_800, (SOLID)
 			bar
 			key
 			clawsoftware
-			new
-			open
-			save
-			refresh
-			back
-			forward
-			add
-			delete
+			new_800
+			open_800
+			save_800
+			refresh_800
+			back_800
+			forward_800
+			add_800
+			delete_800
 			help
 			map
 			settings
+			back_wh40k_800, (SOLID)
+			red_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
 		@END
 
 		@DARK_BLUE_THEME
@@ -949,21 +1621,30 @@
 			mouse3
 			blue_radio_off
 			blue_radio_on
-			back_800
+			background_800, (SOLID)
 			bar
 			key
 			clawsoftware
-			new
-			open
-			save
-			refresh
-			back
-			forward
-			add
-			delete
+			new_800
+			open_800
+			save_800
+			refresh_800
+			back_800
+			forward_800
+			add_800
+			delete_800
 			help
 			map
 			settings
+			back_wh40k_800, (SOLID)
+			blue_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
 		@END
 		@YELLOW_THEME
 			null
@@ -982,21 +1663,115 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			back_800
+			background_800, (SOLID)
 			bar
 			key
 			clawsoftware
-			new
-			open
-			save
-			refresh
-			back
-			forward
-			add
-			delete
+			new_800
+			open_800
+			save_800
+			refresh_800
+			back_800
+			forward_800
+			add_800
+			delete_800
 			help
 			map
 			settings
+			back_wh40k_800, (SOLID)
+			yellow_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
+		@END
+		@GREEN_THEME
+			null
+			increase
+			sub
+			cancel
+			arrow_left
+			arrow_right
+			arrow_up
+			arrow_down
+			location_button
+			time_button
+			mouse
+			mouse1
+			mouse2
+			mouse3
+			yellow_radio_off
+			yellow_radio_on
+			background_800, (SOLID)
+			bar
+			key
+			clawsoftware
+			new_800
+			open_800
+			save_800
+			refresh_800
+			back_800
+			forward_800
+			add_800
+			delete_800
+			help
+			map
+			settings
+			back_wh40k_800, (SOLID)
+			yellow_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
+		@END
+
+		@GREY_THEME
+			null
+			increase
+			sub
+			cancel
+			arrow_left
+			arrow_right
+			arrow_up
+			arrow_down
+			location_button
+			time_button
+			mouse
+			mouse1
+			mouse2
+			mouse3
+			yellow_radio_off
+			yellow_radio_on
+			background_800, (SOLID)
+			bar
+			key
+			clawsoftware
+			new_800
+			open_800
+			save_800
+			refresh_800
+			back_800
+			forward_800
+			add_800
+			delete_800
+			help
+			map
+			settings
+			back_wh40k_800, (SOLID)
+			yellow_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
 		@END
 
 	@END
@@ -1019,21 +1794,30 @@
 			mouse3
 			red_radio_off
 			red_radio_on
-			back_1024
+			background_1024, (SOLID)
 			bar
 			key
 			clawsoftware
-			new
-			open
-			save
-			refresh
-			back
-			forward
-			add
-			delete
+			new_1024
+			open_1024
+			save_1024
+			refresh_1024
+			back_1024
+			forward_1024
+			add_1024
+			delete_1024
 			help
 			map
 			settings
+			back_wh40k_1024, (SOLID)
+			red_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
 		@END
 
 		@DARK_BLUE_THEME
@@ -1053,21 +1837,30 @@
 			mouse3
 			blue_radio_off
 			blue_radio_on
-			back_1024
+			background_1024, (SOLID)
 			bar
 			key
 			clawsoftware
-			new
-			open
-			save
-			refresh
-			back
-			forward
-			add
-			delete
+			new_1024
+			open_1024
+			save_1024
+			refresh_1024
+			back_1024
+			forward_1024
+			add_1024
+			delete_1024
 			help
 			map
 			settings
+			back_wh40k_1024, (SOLID)
+			blue_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
 		@END
 		@YELLOW_THEME
 			null
@@ -1086,21 +1879,114 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			back_1024
+			background_1024, (SOLID)
 			bar
 			key
 			clawsoftware
-			new
-			open
-			save
-			refresh
-			back
-			forward
-			add
-			delete
+			new_1024
+			open_1024
+			save_1024
+			refresh_1024
+			back_1024
+			forward_1024
+			add_1024
+			delete_1024
 			help
 			map
 			settings
+			back_wh40k_1024, (SOLID)
+			yellow_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
+		@END
+		@GREEN_THEME
+			null
+			increase
+			sub
+			cancel
+			arrow_left
+			arrow_right
+			arrow_up
+			arrow_down
+			location_button
+			time_button
+			mouse
+			mouse1
+			mouse2
+			mouse3
+			yellow_radio_off
+			yellow_radio_on
+			background_1024, (SOLID)
+			bar
+			key
+			clawsoftware
+			new_1024
+			open_1024
+			save_1024
+			refresh_1024
+			back_1024
+			forward_1024
+			add_1024
+			delete_1024
+			help
+			map
+			settings
+			back_wh40k_1024, (SOLID)
+			yellow_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
+		@END
+		@GREY_THEME
+			null
+			increase
+			sub
+			cancel
+			arrow_left
+			arrow_right
+			arrow_up
+			arrow_down
+			location_button
+			time_button
+			mouse
+			mouse1
+			mouse2
+			mouse3
+			yellow_radio_off
+			yellow_radio_on
+			background_1024, (SOLID)
+			bar
+			key
+			clawsoftware
+			new_1024
+			open_1024
+			save_1024
+			refresh_1024
+			back_1024
+			forward_1024
+			add_1024
+			delete_1024
+			help
+			map
+			settings
+			back_wh40k_1024, (SOLID)
+			yellow_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
 		@END
 
 	@END
@@ -1122,7 +2008,7 @@
 			mouse3
 			red_radio_off
 			red_radio_on
-			back_1280
+			background_1280, (SOLID)
 			bar
 			key
 			clawsoftware
@@ -1137,6 +2023,15 @@
 			help
 			map
 			settings
+			back_wh40k_1280, (SOLID)
+			red_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
 		@END
 
 		@DARK_BLUE_THEME
@@ -1156,7 +2051,7 @@
 			mouse3
 			blue_radio_off
 			blue_radio_on
-			back_1280
+			background_1280, (SOLID)
 			bar
 			key
 			clawsoftware
@@ -1171,6 +2066,15 @@
 			help
 			map
 			settings
+			back_wh40k_1280, (SOLID)
+			blue_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
 		@END
 		@YELLOW_THEME
 			null
@@ -1189,7 +2093,7 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			back_1280
+			background_1280, (SOLID)
 			bar
 			key
 			clawsoftware
@@ -1204,6 +2108,100 @@
 			help
 			map
 			settings
+			back_wh40k_1280, (SOLID)
+			yellow_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
+		@END
+		@GREEN_THEME
+			null
+			increase
+			sub
+			cancel
+			arrow_left
+			arrow_right
+			arrow_up
+			arrow_down
+			location_button
+			time_button
+			mouse
+			mouse1
+			mouse2
+			mouse3
+			yellow_radio_off
+			yellow_radio_on
+			background_1280, (SOLID)
+			bar
+			key
+			clawsoftware
+			new
+			open
+			save
+			refresh
+			back
+			forward
+			add
+			delete
+			help
+			map
+			settings
+			back_wh40k_1280, (SOLID)
+			yellow_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
+		@END
+
+		@GREY_THEME
+			null
+			increase
+			sub
+			cancel
+			arrow_left
+			arrow_right
+			arrow_up
+			arrow_down
+			location_button
+			time_button
+			mouse
+			mouse1
+			mouse2
+			mouse3
+			yellow_radio_off
+			yellow_radio_on
+			background_1280, (SOLID)
+			bar
+			key
+			clawsoftware
+			new
+			open
+			save
+			refresh
+			back
+			forward
+			add
+			delete
+			help
+			map
+			settings
+			back_wh40k_1280, (SOLID)
+			yellow_bullet
+			score_active
+			score_empty
+			force_window
+			bodiagram_window
+			bograph_window
+			bo_window
+			clemens
 		@END
 	@END
 
@@ -1294,7 +2292,7 @@
 # time button
 	20, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0,  3,  3,    0,  0,  0, 14,  14,    9,  9,  9,  9,  9
 # checkButton
-	40, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   16, 16, 16, 16, 16,    0,  0,  0, 17,  17,   14, 14, 15, 14, 15
+	40, 0,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   16, 16, 16, 16, 16,    0,  0,  0, 17,  17,   14, 14, 15, 14, 15
 # text button
 	40, 2,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    2,  2,  2,  2,  2,    2,  2,  2, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,    0,  0,  0,  0,  0
 
@@ -1318,6 +2316,8 @@
 	20, 2,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   28, 28, 28, 28, 28
 # help tab
 	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   28, 28, 28, 28, 28
+# database tab
+	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   29, 29, 29, 29, 29
 # map tab
 	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   29, 29, 29, 29, 29
 # settings tab

@@ -2,6 +2,7 @@
 #define _CORE_DATABASE_HPP
 
 #include "goalentry.hpp"	
+#include "boentry.hpp"	
 #include "harvest.hpp"
 #include "basicmap.hpp"
 #include "anabuildorder.hpp"
@@ -15,6 +16,7 @@ class DATABASE
 {
 	private:
 		std::vector<GOAL_ENTRY*> loadedGoal[MAX_RACES];
+		std::vector<BUILD_ORDER*> loadedBuildOrder[MAX_RACES];
 		std::vector<START_CONDITION*> loadedStartCondition[MAX_RACES];
 		std::vector<BASIC_MAP*> loadedMap; //modes: 0: ignore map settings and make up a default force, 1: use map settings
 		std::vector<HARVEST_SPEED*> loadedHarvestSpeed[MAX_RACES];
@@ -31,15 +33,17 @@ class DATABASE
 		const unsigned int getGoalCount(const eRace race) const;
 		const GOAL_ENTRY* getGoal(const eRace race, const unsigned int goal_number) const;
 		void addDefaultGoal(const eRace race);
+// ----- BUILD ORDERS ------
+		void loadBuildOrderFile(const std::string& boFile);
+		void saveBuildOrder(const std::string& name, BUILD_ORDER& build_order);
+		const unsigned int getBuildOrderCount(const eRace race, const GOAL_ENTRY* goal) const;
+		BUILD_ORDER* getBuildOrder(const eRace race, const GOAL_ENTRY* goal, const unsigned int bo_number) const;
 
 // ----- STARTCONDITION -----
 		void loadStartConditionFile(const std::string& startConditionFile);
 		const unsigned int getStartConditionCount(const eRace race) const;
 		const START_CONDITION* getStartCondition(const eRace race, const unsigned int start_condition_number) const;
 
-// ----- BUILD ORDERS -----		
-//		void saveBuildOrder(const std::string& name, const ANABUILDORDER* anarace) const;
-		
 // ----- HARVEST DATA -----
 		void loadHarvestFile(const std::string& harvestFile);
 		const HARVEST_SPEED* getHarvestSpeed(const eRace race, const unsigned int harvest_number) const;
@@ -69,6 +73,7 @@ inline const unsigned int DATABASE::getStartConditionCount(const eRace race) con
 inline const unsigned int DATABASE::getGoalCount(const eRace race) const {
 	return(loadedGoal[race].size());
 }
+
 
 inline const unsigned int DATABASE::getMapCount() const {
 	return(loadedMap.size());

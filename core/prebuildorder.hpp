@@ -21,7 +21,7 @@ class PREBUILDORDER
 //------------------ optimizations:-----------------
 //		UNIT (*location)[MAX_LOCATIONS]; // non-static pointer to players total/availible units (unit[playerNum])
 
-		const START_CONDITION* const* pStartCondition; //pointer to player in start
+//		const START_CONDITION* const* pStartCondition; //pointer to player in start
 
 		const BASIC_MAP* const* pMap; // MAP is all the same for all players using 'start
 //------------- end -------------------------------
@@ -58,11 +58,18 @@ class PREBUILDORDER
 //TODO: PlayerNum von anarace ist irgendwie 2 statt 1 oder so ... auch ist die Frage wie was upgedatet wird...
 //		 Deutlich durchsichtiger machen...
 		const unsigned int calculateIdleTime() const; // calculate the next time something significant will happen, CONST MACHEN
+		
+		const bool checkForLarva(const unsigned int current_location_window);
 	
 		bool ready;
 	
 		GOAL_ENTRY* pGoal; // pStart->getGoal()
+		
+		bool alwaysBuildWorkers;
+		bool onlySwapOrders;
+
 	private:
+		bool conditionsChanged;
 		unsigned int Code[MAX_LENGTH];
 
 		unsigned int playerNum;
@@ -78,6 +85,14 @@ class PREBUILDORDER
 		unsigned int timeout;
 
 	public:
+		const bool haveConditionsChanged() const;
+		
+		const bool setAlwaysBuildWorkers(const bool always_build_workers = true);
+		const bool setOnlySwapOrders(const bool only_swap_orders = true);
+
+		const bool isAlwaysBuildWorkers() const;
+		const bool isOnlySwapOrders() const;
+	
 		void assignStart(START* start);
 		void assignUnits(UNIT (*units)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]);
 
@@ -135,6 +150,7 @@ class PREBUILDORDER
 // ------ GET/SET ROUTINES ------
 //		void setMarker(const unsigned int ip, const unsigned int value);
 		void setCode(const unsigned int ip, const unsigned int value);
+		const unsigned int* getCodePointer() const; 
 		const unsigned int getCode(const unsigned int ip) const;
 		const unsigned int getCurrentCode() const;
 //		const unsigned int getMarker(const unsigned int ip) const;
@@ -155,6 +171,8 @@ class PREBUILDORDER
 		void setMapLocationAvailible(const unsigned int player, const unsigned int location_number, const unsigned int unit_type, const unsigned int availible);
 		void setMapLocationTotal(const unsigned int player, const unsigned int location_number, const unsigned int unit_type, const unsigned int total);
 																				
+		void setConditionsChanged(const bool conditions_changed = true);
+		
 		void addOneMapLocationAvailible(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
 		void addOneMapLocationTotal(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
 		void removeOneMapLocationAvailible(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
@@ -202,6 +220,11 @@ class PREBUILDORDER
 		void setLength(const unsigned int bo_length);
 };
 
+inline const bool PREBUILDORDER::haveConditionsChanged() const
+{
+	return(conditionsChanged);
+}
+
 inline const BASIC_MAP* const* PREBUILDORDER::getMap() const
 {
 	return(pMap);
@@ -231,20 +254,23 @@ inline GOAL_ENTRY* PREBUILDORDER::getGoal() const {
 	return(pGoal);
 }
 
-
-inline void PREBUILDORDER::setStartPosition(const unsigned int startPosition) {
-	pStart->setStartPosition(startPosition);
+inline void PREBUILDORDER::setStartPosition(const unsigned int startPosition) 
+{
+	if(pStart->setStartPosition(startPosition))
+		setConditionsChanged();
 }
 
 inline void PREBUILDORDER::setRace(const eRace race) // => gleichzeitig wird harvestspeed geaendert und condition und goal muessen u.U. neugewaehlt werden!
 {
-	pStart->setPlayerRace(race);
+	if(pStart->setPlayerRace(race))
+		setConditionsChanged();
 }
 
 
 
 inline void PREBUILDORDER::assignGoal(const GOAL_ENTRY* goal) {
-	pStart->assignGoal(goal);
+	if(pStart->assignGoal(goal))
+		setConditionsChanged();
 }
 
 inline const unsigned int PREBUILDORDER::getLocationTotal(const unsigned int location_number, const unsigned int unit_type) const
@@ -270,6 +296,10 @@ inline void PREBUILDORDER::setCode(const unsigned int ip, const unsigned int val
 	}
 #endif
 	Code[ip]=value;
+}
+
+inline const unsigned int* PREBUILDORDER::getCodePointer() const {
+	return(Code);
 }
 
 inline const unsigned int PREBUILDORDER::getCode(const unsigned int ip) const
@@ -800,7 +830,7 @@ inline const unsigned int PREBUILDORDER::getPlayerNumber() const
 
 inline const START_CONDITION* const* PREBUILDORDER::getStartCondition()
 {
-	return(pStartCondition);
+	return(pStart->getStartCondition());
 }
 
 
@@ -907,6 +937,8 @@ inline void PREBUILDORDER::setLength(const unsigned int bo_length)
 
 inline void PREBUILDORDER::setTimeOut(const unsigned int time_out)
 {
+	if(timeout == time_out)
+		return;		
 #ifdef _SCC_DEBUG
 	if(time_out > coreConfiguration.getMaxTimeOut()) {
 		toLog("DEBUG: (PREBUILDORDER::setTimeOut): Value time_out out of range.");return;
@@ -954,6 +986,15 @@ inline void PREBUILDORDER::addLarvaToQueue(const unsigned int location_number)
 	}
 #endif
 	++larvaInProduction[location_number];
+}
+
+
+inline const bool PREBUILDORDER::isAlwaysBuildWorkers() const {
+	return(alwaysBuildWorkers);
+}
+
+inline const bool PREBUILDORDER::isOnlySwapOrders() const {
+	return(onlySwapOrders);
 }
 
 #endif // __PREBUILDORDER_H

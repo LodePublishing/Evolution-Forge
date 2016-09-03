@@ -1,0 +1,12 @@
+@GOAL
+		"Name" "4 wraiths"
+		"Race" "Terra"
+		"SCV" "1" "0" "0"
+		"Command Center" "1" "0" "0"
+		"Wraith" "4" "0" "0"
+		"Starport" "1" "0" "0"
+		"Factory" "1" "0" "0"
+		"Barracks" "1" "0" "0"
+		"Refinery" "1" "0" "0"
+		"Space Marine" "4" "0" "0"
+@END

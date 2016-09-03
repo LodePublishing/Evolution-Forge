@@ -50,13 +50,25 @@ void DC::Draw_VLine_8bit(const signed int x0, const signed int y0, const signed 
 	register Uint8 *p = (Uint8*)surface->pixels + y0 * surface->pitch + x0;
 	register signed int i = y1-y0+1;
 	Lock();
-	switch( i % 4 ) {					
-		do{								 
-			case 0: *p = pen_col; p+=surface->pitch;
-			case 3: *p = pen_col; p+=surface->pitch;
-			case 2: *p = pen_col; p+=surface->pitch;
-			case 1: *p = pen_col; p+=surface->pitch;
-		}while( (i-=4) > 0 );
+
+	if(pen.GetStyle() == SHORT_DASH_PEN_STYLE)
+	{
+		for(;i--;)
+		{
+			if(((i%5) != 2)&&((i%5) != 3))
+				*p = pen_col;
+			p+=surface->pitch;
+		}
+	} else
+	{
+		switch( i % 4 ) {					
+			do{								 
+				case 0: *p = pen_col; p+=surface->pitch;
+				case 3: *p = pen_col; p+=surface->pitch;
+				case 2: *p = pen_col; p+=surface->pitch;
+				case 1: *p = pen_col; p+=surface->pitch;
+			}while( (i-=4) > 0 );
+		}
 	}
 	Unlock();
 }

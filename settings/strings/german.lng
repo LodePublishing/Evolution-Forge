@@ -95,7 +95,7 @@
 		R_COLOSSUS_REACTOR
 		R_CADUCEUS_REACTOR
 		R_CHARON_BOOSTER
-		R_INFANTRY_ARMOR		
+		R_INFANTRY_ARMOR
 		R_INFANTRY_WEAPONS
 		R_VEHICLE_PLATING
 		R_VEHICLE_WEAPONS
@@ -211,12 +211,12 @@
 		NULL
 		NULL
 		INTRON
-		
+
 		NULL
 		Drone
 		Larve
 		Zergling
-		Hydralish
+		Hydralisk
 		Ultralisk
 		Vergifter
 		Schleicher
@@ -317,7 +317,7 @@
 		NULL
 		NULL
 		INTRON
-				
+
 		Lade Konfiguration ...
 		Lese Kommandozeilenparameter ...
 		WARNUNG: -vo Argument ohne Treibernamen angegeben.
@@ -330,6 +330,7 @@
 		Setze Fenstermodus ...
 		Setze Vollbildmodus ...
 		Initialisiere SDL Truetype Schriftarten ...
+		Initialisiere Bildwiederholungssystem ...
 		Initialisiere Grafikoberfläche und Kern ...
 		Lade Einstellungen der Oberfläche/Bilder/Schriftarten ...
 		Einstellungen der Oberfläche/Bilder/Schriftarten geladen.
@@ -349,23 +350,23 @@
 		Farbtiefe zu %ibit geändert.
 		Auflösung zu  %s geändert.
 
-		
 # window titles
 		Evolution Forge v%s
 		Nachrichten
-		Evolution forge Einführung
+		Evolution Forge Einführung
 		Einstellungen
+		Datenbank
 		Karten
-		
+
 		Befehlsbeschreibung Spieler %s
 		Techtree
 		Grafische Darstellung der Befehle %s
 		Übersicht über den Verlauf %s
 		Statistiken %s
-		Punkte
+		Punkte %s
 		Einheitenliste %s
 		Befehlsreihenfolge %s
-		Spiel
+		Spiel %s
 		Spieler
 
 		Spiel %i
@@ -399,7 +400,6 @@
 		Gas WBF
 		Kampfeinheiten...
 		Unterstützungseinheiten...
-#20		
 		Versorgung/Raffinerie...
 		Produzierende Gebäude...
 		Forschungseinrichtungen...
@@ -417,7 +417,7 @@
 		Ziel hinzu
 		Ziel laden
 		Starteinheiten
-#				Wähle Rasse
+#		Wähle Rasse
 		Rasse
 		Karten
 
@@ -432,7 +432,6 @@
 		Protoss
 		Zerg
 # bowindow
-# 40
 		(Hier klicken um ein Befehl einzufügen)
 		Alles optimieren
 		Optimiere nur Auswahl
@@ -456,8 +455,6 @@
 		Zeit : %s
 		Einheitenzahl : %i
 		Länge Befehlsliste : %i
-	
-# 60
 		durchschn. Qualität : %i [beste %i]
 		Varianz der Qualität : %i
 		%i+ Generationen übrig [%i insg.]
@@ -465,7 +462,7 @@
 		Hilfe
 		Einstellungen
 		Karten
-
+		Datenbank
 # tooltips:
 		füge Einheit hinzu
 		nehme Einheit weg
@@ -493,10 +490,12 @@
 
 		Fahre mit der Optimierung fort
 		Halte die Optimierung an
-		Anteil aller Ziele / zeitlicher Anteil am Optimum (Mineralien/Gas ignoriert)
+		Anteil aller bisher erfüllten Ziele
+		Zeitlicher Anteil am theoretischen Optimum (mit unendlich Mineralien/Gas/Arbeiter)
 
 		Erklränrungen und Hintergrundinformationen
 		Grafische und globale Einstellungen
+		Vergleiche und verwalte alle Ziele und Baureihenfolgen
 		Erstelle und verändere Starteinheiten und Kartenaufbau
 
 		Klicken um spätesten Zeitpunkt der Produktion einzustellen
@@ -512,7 +511,6 @@
 		Maximale Länge
 		Zahl der Versuche
 		Zahl der Generationen
-#120
 		maximaler Timeout
 		Zielanpassung erlaubt
 		Vermehrungsfaktor
@@ -526,6 +524,7 @@
 		CPU Auslastung
 # an aus
 		fliessende Bewegung
+		Debuginformationen
 		Pulsierende Knöpfe
 		DNS Spirale
 		Abgerundete Rechtecke
@@ -534,6 +533,7 @@
 		Vollbild
 		Tool Tips
 		Software Maus
+		Entlade Grafiken
 
 		Zeit die eine Baureihenfolge maximal benötigen darf (beeinflusst Zeit bis zum Finden der ersten Lösung)
 		Sollen nur StarCraft (TM) Einheiten verwendet werden?
@@ -558,6 +558,7 @@
 		Wieviel % Last soll die CPU tragen?
 # an aus
 		Sollen sich Objekte langsam hin und herbewegen oder auf ihren Zielpunkt springen?
+		Soll angezeigt werden wieviel jedes Modul (Verarbeitung/Zeichnen/Kern/Nachrichten/Leerlauf) an Ressourcen benötigt?
 		Sollen Knöpfe pulsierende Animation besitzen?
 		Soll eine DNS Spirale die die Baureihenfolge darstellt gemalt werden?
 		Sollen Rechtecke abgerundete Ecken und Kanten besitzen? (Benötigt minimal CPU)
@@ -566,11 +567,11 @@
 		Wechsel zwischen Vollbild und Fenstermodus (Benötigt einen Neustart auf manchen Systemen)
 		8[ Gefallen Dir die Texte etwa nicht?
 		Benutze Software Maus oder Mauszeiger vom Betriebssystem?
+		Sollen nichtbenutzte Grafiken aus dem Speicher entfernt werden? (falls wenig Speicher vorhanden ist)
 
 		Einstellungen werden in settings/default.cfg gespeichert sobald das Programm verlassen wird
-	
 		Oberfläche wurde auf deutsch umgestellt.
-	
+
 		Sprache
 		Fehler
 		Englisch
@@ -602,12 +603,11 @@
 
 		Farbwahl
 		Fehler
+		Dunkelrot
 		Dunkelblau
 		Grün
-		Rot
 		Gelb
 		Grau
-		Monochrom
 
 		Lade von Datei
 		Standardeinstellung

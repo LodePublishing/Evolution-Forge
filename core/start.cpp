@@ -4,12 +4,12 @@ START::START(UNIT (*start_force)[MAX_LOCATIONS]):
 	tmpmap(NULL),
 	startCondition(NULL),
 	tmpgoal(NULL),
-	pStats(NULL),
 	totalForce(),
 	startForce(start_force),
 	currentGoal(),
 	startPosition(0),
 	playerRace(TERRA),
+	pStats(&(stats[playerRace][0])),
 	startConditionsInitialized(false),
 	mapInitialized(false)
 {
@@ -46,11 +46,7 @@ maxplayer rausfinden
 START::~START()
 { }
 
-void START::setPlayerRace(const eRace race)
-{
-	playerRace = race; // TODO
-	pStats = &(stats[race][0]);
-}
+
 
 
 void START::fillAsNeutralPlayer()
@@ -121,31 +117,52 @@ void START::fillAsActivePlayer()
 // ------ GET/SET FUNCTIONS ------
 // -------------------------------
 
-void START::assignGoal(const GOAL_ENTRY* goal)
+const bool START::setPlayerRace(const eRace race)
 {
+	if(race == playerRace)
+		return(false);
+	playerRace = race; // TODO
+	pStats = &(stats[race][0]);
+	return(true);
+}
+
+const bool START::assignGoal(const GOAL_ENTRY* goal)
+{
+	// TODO
+//	if((goal == tmpgoal)&&(currentGoal == *goal))
+//		return(false);
 	tmpgoal = goal;
 	currentGoal = *goal;
 	currentGoal.adjustGoals(true, &totalForce); // TODO
+	return(true);
 }
 
-void START::assignStartCondition(const START_CONDITION* start_condition)
+const bool START::assignStartCondition(const START_CONDITION* start_condition)
 {
+	if(startCondition == start_condition)
+		return(false);
 	startCondition = start_condition;
 	if(mapInitialized)
 		startConditionsInitialized=true;
+	else toLog("ERROR");
+		
+	return(true);
 }
 
-void START::assignMap(const BASIC_MAP* map) // TODO
+const bool START::assignMap(const BASIC_MAP* map) // TODO
 {
+	if(map == tmpmap)
+		return(false);
 #ifdef _SCC_DEBUG
 	if(!map) {
-		toLog("DEBUG: (START::assignMap): Value map out of range.");return;
+		toLog("DEBUG: (START::assignMap): Value map out of range.");return(false);
 	}
 #endif
 	tmpmap = map;
 	mapInitialized=true;
 	// initialize Map???
 	// player 0 ?
+	return(true); 
 }
 
 //void START::copyStartForce(UNIT (*target)[MAX_LOCATIONS]) const

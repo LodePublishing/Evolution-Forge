@@ -1,6 +1,9 @@
 #include "object.hpp"
 #include "configuration.hpp"
 
+// TODO zwischen Positionseltern und Processeltern unterscheiden (damit man z.B. ein Menue an die Position einer Group setzen kann, ohne dass es teil der group wird... mmmh
+
+
 UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const Size distance_bottom_right, const ePositionMode position_mode, const eAutoSize auto_size) :
 	children(NULL),
 	relativeRect(relative_rect),
@@ -24,11 +27,47 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const S
 
 	needRedraw(true),
 	parent(NULL),
+	positionParent(NULL),
 	prevBrother(this),
 	nextBrother(this),
-	toolTipString(NULL_STRING)
+	toolTipEString(NULL_STRING),
+	toolTipString()
 {
 	setParent(parent_object);
+//	addToProcessArray(this);
+}
+
+UI_Object::UI_Object(UI_Object* parent_object, UI_Object* position_parent_object, const Rect relative_rect, const Size distance_bottom_right, const ePositionMode position_mode, const eAutoSize auto_size) :
+	children(NULL),
+	relativeRect(relative_rect),
+	startRect(relative_rect),
+	targetRect(relative_rect),
+	originalRect(relative_rect),
+	distanceBottomRight(distance_bottom_right),
+	oldSize(relative_rect.GetSize()),
+	sizeHasChanged(true),
+
+	positionMode(position_mode),
+	autoSize(auto_size),
+	shown(true),
+
+	min_top_left_x(0),
+	min_left_y(0),
+	min_right_y(0),
+	min_bottom_left_x(0),
+	min_top_right_x(0),
+	min_bottom_right_x(0),	
+
+	needRedraw(true),
+	parent(NULL),
+	positionParent(NULL),
+	prevBrother(this),
+	nextBrother(this),
+	toolTipEString(NULL_STRING),
+	toolTipString()
+{
+	setParent(parent_object);
+	setPositionParent(position_parent_object);
 //	addToProcessArray(this);
 }
 
@@ -59,6 +98,8 @@ UI_Object& UI_Object::operator=(const UI_Object& object)
 	prevBrother = this; // !!
 	nextBrother = this; // !!
 	parent = NULL; // !!
+	positionParent = NULL; //!?
+	toolTipEString = object.toolTipEString;
 	toolTipString = object.toolTipString;
 	
 	setParent(object.parent);
@@ -91,8 +132,10 @@ UI_Object::UI_Object(const UI_Object& object) :
 	needRedraw( object.needRedraw ),
 
 	parent( NULL ), // !!
+	positionParent( NULL ), // !!
 	prevBrother( this ), // !!
 	nextBrother( this ), // !!
+	toolTipEString( object.toolTipEString ),
 	toolTipString( object.toolTipString )
 { 
 	setParent(object.parent);
@@ -100,6 +143,8 @@ UI_Object::UI_Object(const UI_Object& object) :
 
 UI_Object::~UI_Object()
 {
+	if(UI_Object::focus == this)
+		UI_Object::focus = NULL;
 	removeFromFamily(); // !!!!!
 }
 
@@ -333,8 +378,14 @@ void UI_Object::removeFromFamily()
 	nextBrother = prevBrother = this;
 }
 
+void UI_Object::setPositionParent(UI_Object* daddy)
+{
+	positionParent = daddy;
+}
+
 void UI_Object::setParent(UI_Object* daddy) 
 {
+	setPositionParent(daddy);
 	removeFromFamily();
 	parent = daddy;
 
@@ -417,7 +468,7 @@ void UI_Object::process()
 		} while (tmp != children);
 	}
 	
-	if((toolTipString!=NULL_STRING)/*&&(uiConfiguration.isToolTips())*/&&(isMouseInside()))
+	if(/*(efConfiguration.isToolTips())&&*/(isMouseInside())&&(hasToolTip()))
 		toolTipParent = this;
 	oldSize = relativeRect.GetSize();
 //	resetMinXY();	

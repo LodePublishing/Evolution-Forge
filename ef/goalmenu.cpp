@@ -30,11 +30,11 @@ void GoalMenu::assignAnarace(ANABUILDORDER* goal_anarace)
 void GoalMenu::reloadOriginalSize()
 {
 	for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
-		(*m)->setOriginalSize(Size(getParent()->getWidth()-40, FONT_SIZE+6));
+		(*m)->setOriginalSize(Size(getParent()->getWidth()-40, FONT_SIZE+7));
 	resetData();
 	UI_Menu::reloadOriginalSize();
 }
-
+#include <sstream>
 void GoalMenu::resetData()
 {
 	if(!anarace)
@@ -53,15 +53,28 @@ void GoalMenu::resetData()
 			(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_2_BUTTON));
 		else
 			(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_1_BUTTON));
-		(*m)->updateText(database.getGoal(anarace->getRace(), i)->getName());
-		Rect edge = Rect(Point(10, height * (FONT_SIZE + 8)), Size(getParent()->getWidth()-40, FONT_SIZE+6));
+		
+		const GOAL_ENTRY* my_goal = database.getGoal(anarace->getRace(), i);
+		(*m)->updateText(my_goal->getName());
+
+		std::ostringstream os;
+		for(std::list<GOAL>::const_iterator j = my_goal->goal.begin();j!=my_goal->goal.end();++j)
+		{
+			os << j->getCount() << "x $" << stats[anarace->getRace()][j->getUnit()].name << "$";
+			if(j->getTime()>0)
+				os << " [" << formatTime(j->getTime()) << "]"; 
+			os << "#";
+		}
+		(*m)->updateToolTip(os.str());
+		
+		Rect edge = Rect(Point(10, height * (FONT_SIZE + 9)), Size(getParent()->getWidth()-40, FONT_SIZE+7));
 		(*m)->adjustRelativeRect(edge);
 		++height;
 		++i;
 	}
 	for(;i<database.getGoalCount(anarace->getRace());++i)
 	{
-		UI_MenuEntry* entry = new UI_MenuEntry(this, Rect(Point(10, height * (FONT_SIZE + 8)), Size(getParent()->getWidth()-40, FONT_SIZE+6)), database.getGoal(anarace->getRace(), i)->getName());
+		UI_MenuEntry* entry = new UI_MenuEntry(this, Rect(Point(10, height * (FONT_SIZE + 9)), Size(getParent()->getWidth()-40, FONT_SIZE+7)), database.getGoal(anarace->getRace(), i)->getName());
 		if(i==0)
 			entry->setButtonColorsType(eButtonColorsType(UNIT_TYPE_2_BUTTON));
 		else

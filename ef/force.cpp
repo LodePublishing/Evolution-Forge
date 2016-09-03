@@ -15,7 +15,7 @@ ForceWindow::ForceWindow(UI_Object* force_parent, ANARACE* force_anarace, Messag
 	unitMenu(new UnitMenu(this, anarace, Rect(10, 10, getWidth()-10, 0))),
 	goalMenu(new GoalMenu(this, anarace, Rect(10, 10, getWidth()-100, 0))),
 	forceMenu(new ForceMenu(this, anarace, Rect(10, 10, getWidth()-200, 0))),
-	raceMenu(new RaceMenu(this, anarace, Rect(10, 10, getWidth()-200, 0))) // TODO
+	raceMenu(new RaceMenu(this, Rect(10, 10, getWidth()-200, 0))) // TODO
 {	
 	resetData();
 	
@@ -24,10 +24,10 @@ ForceWindow::ForceWindow(UI_Object* force_parent, ANARACE* force_anarace, Messag
 	menuButton[GOAL_MENU] = new UI_Button(this, Rect(getRelativeClientRectPosition()+Point(0,10), getClientRectSize()), Rect(Point(0,0),getSize()), GOAL_LIST_STRING, GOAL_LIST_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE);
 	menuButton[FORCE_MENU] = new UI_Button(this, Rect(getRelativeClientRectPosition()+Point(0,10), getClientRectSize()), Rect(Point(0,0),getSize()), STARTFORCE_STRING, STARTFORCE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE);
 
-	menuButton[RACE_MENU]->updateToolTip(*theme.lookUpString(CHOOSE_RACE_TOOLTIP_STRING));
-	menuButton[UNIT_MENU]->updateToolTip(*theme.lookUpString(ADD_GOALS_TOOLTIP_STRING));
-	menuButton[GOAL_MENU]->updateToolTip(*theme.lookUpString(CHOOSE_GOALS_TOOLTIP_STRING));
-	menuButton[FORCE_MENU]->updateToolTip(*theme.lookUpString(CHOOSE_STARTING_FORCE_TOOLTIP_STRING));
+	menuButton[RACE_MENU]->updateToolTip(CHOOSE_RACE_TOOLTIP_STRING);
+	menuButton[UNIT_MENU]->updateToolTip(ADD_GOALS_TOOLTIP_STRING);
+	menuButton[GOAL_MENU]->updateToolTip(CHOOSE_GOALS_TOOLTIP_STRING);
+	menuButton[FORCE_MENU]->updateToolTip(CHOOSE_STARTING_FORCE_TOOLTIP_STRING);
 	
 
 	raceMenu->Hide();
@@ -96,12 +96,17 @@ void ForceWindow::process()
 	int assignForce = -1;
 	int assignRace = -1;
 
-	currentGoalUnit = unitMenu->getMarkedUnit();
+	currentGoalUnit = unitMenu->getMarkedItem();
 
 	if(saveGoalButton->isLeftClicked())
+	{
 		settings.saveGoal(*anarace->getCurrentGoal());
-
-	if(unitMenu->getPressedItem()>0)
+        ostringstream os;
+        os << "Saved " << (*anarace->getCurrentGoal())->getName() << ".";
+        msgWindow->addMessage(os.str());
+	}
+	
+	if(unitMenu->getPressedItem()>=0)
 	{
 		addUnit = unitMenu->getPressedItem(); addCount = 1; addTime = 0; addLocation = 0;
 		ostringstream os;
@@ -126,12 +131,11 @@ void ForceWindow::process()
 		menuButton[FORCE_MENU]->forceUnpress();
 	}
 
-	eRace racepressed = (eRace)(raceMenu->getPressedItem());
-	if(racepressed >= 0)
+	if(raceMenu->getPressedItem()>=0)
 	{
-		assignRace = racepressed;
+		assignRace = raceMenu->getPressedItem();
 		ostringstream os;
-		os << "Set " << (*anarace->getCurrentGoal())->getName() << " as new goal list."; // TODO
+		os << "Set " << *theme.lookUpString((eString)(TERRA_STRING + assignRace)) << " as race.";
 		msgWindow->addMessage(os.str()); 
     	menuButton[RACE_MENU]->forceUnpress();
 	}
@@ -376,10 +380,13 @@ void ForceWindow::process()
 		settings.assignStartcondition(anarace->getPlayerNum(), forceMenu->getPressedItem());
 		settings.fillGroups();
 		setChangedFlag();
+    //  ostringstream os; TODO
+//      os << "Set " << settings.getStartcondition(anarace->getPlayerNum(), fo)->getName() << " as starting force.";
+  //    msgWindow->addMessage(os.str())
 	}
 	if(assignRace>=0)
 	{
-		settings.assignStartRace(anarace->getPlayerNum(), racepressed);
+		settings.assignStartRace(anarace->getPlayerNum(), (eRace)assignRace);
 		settings.assignStartcondition(anarace->getPlayerNum(), 0);
 		settings.fillGroups();
 		settings.assignGoal(anarace->getPlayerNum(), 0);

@@ -73,8 +73,8 @@ BoWindow::BoWindow(const BoWindow& object) :
     boGoalListOpened(object.boGoalListOpened),
     lastBogoal(object.lastBogoal),
     resetButton(new UI_Button(*(object.resetButton))),
-    saveBuildOrderButton(new UI_Button(*(object.saveBuildOrderButton)))
-//    speed(new NumberField(*(object.speed)))
+    saveBuildOrderButton(new UI_Button(*(object.saveBuildOrderButton))),
+	msgWindow(object.msgWindow)
 { }
 
 BoWindow& BoWindow::operator=(const BoWindow& object)
@@ -96,12 +96,11 @@ BoWindow& BoWindow::operator=(const BoWindow& object)
 	resetButton = new UI_Button(*(object.resetButton));
 	delete saveBuildOrderButton;
 	saveBuildOrderButton = new UI_Button(*(object.saveBuildOrderButton));
-//	delete speed;
-//	speed = new NumberField(*(object.speed));
 	return(*this);
+	msgWindow = object.msgWindow;
 }
 
-BoWindow::BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_info_window, std::map <long, Order>* bo_order_list, const unsigned int bo_window_number):
+BoWindow::BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_info_window, MessageWindow* message_window, std::map <long, Order>* bo_order_list, const unsigned int bo_window_number):
 	UI_Window(bo_parent, BOWINDOW_TITLE_STRING, BUILD_ORDER_WINDOW, bo_window_number, SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0,25,1000,1000)),
 	markedUnit(0),
 	ownMarkedUnit(0),
@@ -116,8 +115,8 @@ BoWindow::BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_inf
     boGoalListOpened(0),
 	lastBogoal(0),
 	resetButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), Rect(Point(0,0),getSize()), RESET_BUILD_ORDER_STRING, RESET_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	saveBuildOrderButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), Rect(Point(0,0),getSize()), SAVE_BUILD_ORDER_STRING, SAVE_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE))
-	//speed(new NumberField(this, Rect(getRelativeClientRectPosition(), Size(getClientRectWidth() - 100, 0)), SPEED_STRING, SETTING_FRAMERATE_TOOLTIP_STRING, 25, PERCENT_NUMBER_TYPE))
+	saveBuildOrderButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), Rect(Point(0,0),getSize()), SAVE_BUILD_ORDER_STRING, SAVE_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	msgWindow(message_window)
 {
 	resetData();
 	for(int i=MAX_LENGTH;i--;)
@@ -127,8 +126,8 @@ BoWindow::BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_inf
 						stats[(*anarace->getStartCondition())->getRace()][i].name);
 		boEntry[i]->Hide();
 	}
-	resetButton->updateToolTip("Reset and restart from the scratch");
-	saveBuildOrderButton->updateToolTip("Save build order as bitmap or html");
+	resetButton->updateToolTip(RESET_BUILD_ORDER_TOOLTIP_STRING);
+	saveBuildOrderButton->updateToolTip(SAVE_BUILD_ORDER_TOOLTIP_STRING);
 }
 
 BoWindow::~BoWindow()
@@ -389,9 +388,10 @@ void BoWindow::process()
 	} // end for ...
 	for(;line<MAX_LENGTH;line++)
 	{
+		
     	boEntry[line]->adjustRelativeRect(Rect(Point(max_x+10,getRelativeClientRectPosition().y+200), Size(getClientRectWidth(), FONT_SIZE+5)));
-//		if(boEntry[line]->getAbsoluteRect().GetTopLeft() == getRelativeClientRectPosition()+Point(200,200))
-//			boEntry[line]->Hide(); TODO
+		if(boEntry[line]->getAbsoluteRect().GetTopLeft() == (Point(max_x+10,getRelativeClientRectPosition().y+200)))
+			boEntry[line]->Hide(); //TODO
 	}
 	
 		
@@ -406,11 +406,13 @@ void BoWindow::process()
 	{
 		settings.assignRunParametersToSoup();
 		setChangedFlag();
+		msgWindow->addMessage("Resetted build order...");
 	}
 
 	if(saveBuildOrderButton->isLeftClicked())
 	{
 		settings.saveBuildOrder(anarace);
+		msgWindow->addMessage("Saved build order...");
 	}
 
 //	if(speed->addClicked() && (settings.getSpeed()>0))

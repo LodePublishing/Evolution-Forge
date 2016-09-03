@@ -2,7 +2,10 @@
 
 const unsigned int Menu::getHeight() const
 {
-	return(height);
+	if(!isOpen())
+		return(0);
+	else
+		return(height);
 }
 
 Menu::Menu(const Menu& object) :
@@ -10,7 +13,9 @@ Menu::Menu(const Menu& object) :
 	menuEntries(object.menuEntries),
     menuLevel(object.menuLevel),
     pressedItem(object.pressedItem),
+	markedItem(object.markedItem),
     height(object.height),
+	chooseMenu(object.chooseMenu),
     p1(object.p1),
     p2(object.p2)
 { }
@@ -21,20 +26,43 @@ Menu& Menu::operator=(const Menu& object)
 	menuEntries = object.menuEntries;
 	menuLevel = object.menuLevel;
 	pressedItem = object.pressedItem;
+	markedItem = object.markedItem;
 	height = object.height;
+	chooseMenu = object.chooseMenu;
 	p1 = object.p1;
 	p2 = object.p2;
 	return(*this);
 }
 
-Menu::Menu(UI_Object* menu_parent, Rect menu_rect):
+Menu::Menu(UI_Object* menu_parent, Rect menu_rect, const bool chooseMenu):
 	UI_Object(menu_parent, menu_rect),
 	menuLevel(0),
 	pressedItem(-1),
+	markedItem(-1),
 	height(0),
+	chooseMenu(chooseMenu),
 	p1(),
 	p2()
 { }
+
+Menu::Menu(UI_Object* parent, Rect rect, const int entryNumber, const int coloumns, const Size& s, const eString firstString, const eButton button, const bool chooseMenu):
+    UI_Object(parent, rect),
+    menuLevel(0),
+    pressedItem(-1),
+    markedItem(-1),
+    height(0),
+    chooseMenu(chooseMenu),
+    p1(),
+    p2()
+{
+    for(int i=0;i<entryNumber;i++)
+    {
+        Rect edge = Rect(Point(10 + (i%coloumns) * (s.GetWidth()+10), (i/coloumns)*(s.GetHeight()+10)), s);
+        MenuEntry* entry = new MenuEntry(this, edge, (eString)(firstString+i));
+        entry->setButton(button);
+        menuEntries.push_back(entry);
+    }
+}
 
 Menu::~Menu()
 {
@@ -61,11 +89,16 @@ void Menu::open()
 	else if(menuLevel==1)
 		menuLevel=0;
 	else menuLevel=1;
+
+	if(menuLevel)
+		Show();
+	else Hide();
 }
 
 void Menu::close()
 {
 	menuLevel=0;
+	Hide();
 }
 
 const signed int Menu::getMarkedItem() const
@@ -77,11 +110,13 @@ void Menu::process()
 {
 	UI_Object::process();
 	pressedItem = -1;
-	height = 1;
+	markedItem = -1;
 	if(!isShown())
 		return;
 	p1=Point(9999,9999);
 	p2=Point(0,0);
+
+	int i = 0;
 
 	for(list<MenuEntry*>::const_iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 	{
@@ -103,9 +138,17 @@ void Menu::process()
 				p2.x = (*m)->getAbsolutePosition().x + ((signed int)((*m)->getWidth()));
 			if((*m)->getAbsolutePosition().y + ((signed int)((*m)->getHeight())) > p2.y)
 				p2.y = (*m)->getAbsolutePosition().y + ((signed int)((*m)->getHeight()));
+
+			if ((*m)->isLeftClicked())
+				pressedItem = i;
+			if ((*m)->isCurrentlyHighlighted())
+				markedItem = i;
 		}
+		i++;
 	}
-	height+=2;
+
+	if((pressedItem>=0)&&(chooseMenu))
+		close();
 }
 
 void Menu::draw(DC* dc) const

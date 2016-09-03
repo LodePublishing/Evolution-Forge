@@ -178,14 +178,7 @@ class Rect
 			else return(false);
 		}
 
-		void move(const Rect startRect, const Rect targetRect)
-		{
-			topLeftCorner.move(startRect.GetTopLeft(), targetRect.GetTopLeft());
-			rectSize.move(startRect.GetSize(), targetRect.GetSize());
-			bottomRightCorner = topLeftCorner + rectSize;
-		}
-		
-		
+		void move(const Rect startRect, const Rect targetRect);
 	private:
 		Point topLeftCorner;
 		Point bottomRightCorner;

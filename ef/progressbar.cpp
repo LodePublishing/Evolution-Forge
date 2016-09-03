@@ -24,6 +24,7 @@ void ProgressBar::draw(DC* dc, const unsigned int dp, const string& text)
 	dc->SetTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
 	dc->DrawText(text, Point(bar.GetLeft(), bar.GetTop()+bar.GetHeight()+50+h*20));
 	dc->SetTextForeground(*UI_Object::theme.lookUpColor(FORCE_TEXT_COLOR));
+	dc->DrawEmptyRectangle(bar.GetLeft()-2, bar.GetTop()+bar.GetHeight()+46+h*20, 425, 18);
 	dc->DrawText("OK", Point(bar.GetLeft()+400, bar.GetTop()+bar.GetHeight()+50+h*20));
 	draw(dc, dp);
 	h++;

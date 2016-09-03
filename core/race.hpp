@@ -3,7 +3,7 @@
 
 #include "prerace.hpp"
 
-class RACE: public PRERACE
+class RACE : public PRERACE
 {
 	private:
        	unsigned int mutationRate;
@@ -11,7 +11,12 @@ class RACE: public PRERACE
 		unsigned int pFitness;
 		unsigned int sFitness;
 		unsigned int tFitness;
+		
 	public:
+		RACE();
+		~RACE();
+		RACE& operator=(const RACE& object);
+		RACE(const RACE& object);
 //Output:
 		void setpFitness(const unsigned int pFitness);
 		void setsFitness(const unsigned int sFitness);
@@ -27,11 +32,6 @@ class RACE: public PRERACE
 //		void resetGeneCode();//resets either to a pre-processed buildorder or a completely random one*/
 		void prepareForNewGeneration(); //resets all data to standard values
 //		void crossOver(RACE* parent2, RACE* child1, RACE* child2);
-
-		const RACE& operator=(const RACE& race);
-		RACE(const RACE& race);
-		RACE();
-		~RACE();
 };
 
 #endif //_CORE_RACE_HPP

@@ -1,4 +1,5 @@
 #include "object.hpp"
+#include "../core/configuration.hpp"
 
 UI_Object& UI_Object::operator=(const UI_Object& object)
 {
@@ -60,6 +61,12 @@ UI_Object::UI_Object(const UI_Object& object) :
     toolTip( object.toolTip )
 { 
 	setParent(object.parent);
+}
+
+const Point UI_Object::getAbsolutePosition() const	{
+	if(parent)
+		return(relativeRect.GetTopLeft() + parent->getAbsolutePosition());
+	else return(relativeRect.GetTopLeft());
 }
 
 /*
@@ -133,7 +140,7 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const R
 	lastRect(),
 	maxRect(max_rect),
 	doAdjustments(1),
-	toolTip()
+	toolTip(NULL_STRING)
 {
 	setParent(parent_object);
 	lastRect=getAbsoluteRect();
@@ -164,7 +171,7 @@ UI_Object* UI_Object::getChildren() const
 	return(children);
 }
 
-void UI_Object::updateToolTip(const string& tool_tip)
+void UI_Object::updateToolTip(const eString tool_tip)
 {
 	toolTip=tool_tip;
 }
@@ -453,8 +460,8 @@ void UI_Object::addRectToBeDrawn(Rect& lastRect, const Rect currentRect)
 
 void UI_Object::process()
 {
-//    if ((disabledFlag)||(!shown)) //~~
-  //    return;
+    if ((disabledFlag)||(!shown)) //~~
+      return;
 
 	if(doAdjustments==1)
 	{
@@ -490,16 +497,18 @@ void UI_Object::process()
                                                                                 
         } while (tmp != children);
     }
-	if((isMouseInside())&&(toolTip.size()))
+	if((configuration.isTooltips())&&(isMouseInside())&&(toolTip!=NULL_STRING))
 	{
 		toolTipIsShown=true;
-		toolTipString = toolTip;
+		toolTipString = *theme.lookUpString(toolTip);
 		toolTipPosition = getAbsolutePosition();
 	}
 }
                                                                                 
 UI_Object* UI_Object::checkHighlight()
 {
+	if(!isShown())
+		return(0);
 //	if(!(getAbsoluteRect().Inside(p)))
 //		return(0); 0 size players ?
     UI_Object* tmp=children;  // process all children of gadget
@@ -567,10 +576,11 @@ void UI_Object::maybeShowToolTip(DC* dc)
 	dc->DrawRectangle(r);
 	dc->DrawText(toolTipString, r.GetTopLeft()+Point(8,4));
     if((lastToolTipRect!=r)||(needToolTipRedraw))
-    {
-        needToolTipRedraw=false;
+   	{
+       	needToolTipRedraw=false;
     	addRectToBeDrawn(lastToolTipRect, r);
 	}
+	// TODO breite tooltips in 2 Zeilen
 }
 
 void UI_Object::setPosition(const Point& position)

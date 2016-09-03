@@ -4,7 +4,7 @@
 extern const unsigned int MIN_HEIGHT; // TODO in bograph?
 
 #include "object.hpp"
-#include "button.hpp"
+#include "radio.hpp"
 #include "scrollbar.hpp"
 
 enum eIsScrolled

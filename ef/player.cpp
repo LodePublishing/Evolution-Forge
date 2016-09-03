@@ -16,7 +16,7 @@ Player::Player(UI_Object* player_parent, ANARACE** player_anarace, MessageWindow
 	window[TIMER_WINDOW] = new TimerWindow(this, *anarace, playerNumber);
 	window[STATISTICS_WINDOW]=new StatisticsWindow(this, *anarace, playerNumber);
 	window[INFO_WINDOW] = new InfoWindow(this, *anarace, playerNumber);
-	window[BUILD_ORDER_WINDOW]=new BoWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], &orderList, playerNumber);
+	window[BUILD_ORDER_WINDOW]=new BoWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], msgWindow, &orderList, playerNumber);
 	window[BO_GRAPH_WINDOW] = new BoGraphWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], &orderList, playerNumber);
 	window[BO_DIAGRAM_WINDOW]=new BoDiagramWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], playerNumber);
 	// to set infoWindow above all others
@@ -193,8 +193,6 @@ Size(  (stats[(*anarace)->getRace()][sortedList[k]->getUnit()/*(*anarace)->getPh
 void Player::drawGeneString(DC* dc, const Rect position) const
 {
 	//TODO
-	return;
-	#if 0
 	int stringheight=0;
 	int currentType=-1;
 	Point points1[200];
@@ -223,7 +221,7 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 		for(int i=0;i<MAX_LENGTH;i++)
 			if(colors[i])
 			{
-				int k=1;
+				int k=1; // TODO
 				while((i<MAX_LENGTH)&&((!colors[i])||((stats[(*anarace)->getRace()][colors[i]].facilityType)&&((currentType==-1)||(stats[(*anarace)->getRace()][colors[i]].facilityType==currentType)))))
 				{
 					i++;
@@ -236,14 +234,13 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 																				
 				for(int j=0;j<k+1;j++)
 				{
-					points1[j].x=10+(stringheight+j)*(position.width-20)/(boanzahl)+position.x-1;
-					points2[j].x=10+(stringheight+j)*(position.width-20)/(boanzahl)+position.x-1;
-					points1[j].y=(int)((cos((float)((stringheight+j)+geneAnimation)*10.0*3.1416/200.0)*0.9*position.height/2)+position.y+position.height/2.1);
-					points2[j].y=(int)((sin(((float)((stringheight+j)+geneAnimation)+13.0)*10.0*3.1416/200.0)*0.9*position.height/2)+position.y+position.height/2.1);
-					points3[j].x=10+(stringheight+j)*(position.width-20)/(boanzahl)+position.x-1;
-					points4[j].x=10+(stringheight+j)*(position.width-20)/(boanzahl)+position.x-1;
-					points3[j].y=(int)((cos(((float)((stringheight+j)+geneAnimation)+26.0)*10.0*3.1416/200.0)*0.9*position.height/2)+position.y+position.height/2.1);
-					points4[j].y=(int)((sin(((float)((stringheight+j)+geneAnimation)+39.0)*10.0*3.1416/200.0)*0.9*position.height/2)+position.y+position.height/2.1);
+					points1[j] = Point(10+(stringheight+j)*(position.GetWidth()-20)/(boanzahl)-1, (int)((cos((float)((stringheight+j)+geneAnimation)*10.0*3.1416/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
+					
+					points2[j] = Point(10+(stringheight+j)*(position.GetWidth()-20)/(boanzahl)-1, (int)((sin(((float)((stringheight+j)+geneAnimation)+13.0)*10.0*3.1416/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
+					
+					points3[j] = Point(10+(stringheight+j)*(position.GetWidth()-20)/(boanzahl)-1, (int)((cos(((float)((stringheight+j)+geneAnimation)+26.0)*10.0*3.1416/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
+					
+					points4[j] = Point(10+(stringheight+j)*(position.GetWidth()-20)/(boanzahl)-1, (int)((sin(((float)((stringheight+j)+geneAnimation)+39.0)*10.0*3.1416/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
 				} //end for(j=0;j<k;j++)
 				stringheight+=k;
 				k++;
@@ -253,40 +250,31 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 					Pen bla2=Pen(*theme.lookUpPen((ePen)(UNIT_TYPE_0_PEN+stats[(*anarace)->getRace()][colors[i-1]].unitType)));
 																				
 					dc->SetPen(bla1);
-					dc->DrawSpline(k,points1);
-					for(int j=0;j<k;j++) points1[j].y-=2;
+					dc->DrawSpline(k, points1, position.GetTopLeft());
 					dc->SetPen(bla2);
-					dc->DrawSpline(k,points1);
-					for(int j=0;j<k;j++) points1[j].y+=4;
-					dc->DrawSpline(k,points1);
-																				
+					dc->DrawSpline(k, points1, position.GetTopLeft() - Size(0,1));
+					dc->DrawSpline(k, points1, position.GetTopLeft() + Size(0,1));
+
 					dc->SetPen(bla1);
-					dc->DrawSpline(k,points2);
-					for(int j=0;j<k;j++) points2[j].y-=2;
+					dc->DrawSpline(k, points2, position.GetTopLeft());
 					dc->SetPen(bla2);
-					dc->DrawSpline(k,points2);
-					for(int j=0;j<k;j++) points2[j].y+=4;
-					dc->DrawSpline(k,points2);
-																				
+					dc->DrawSpline(k, points2, position.GetTopLeft() - Size(0,1));
+					dc->DrawSpline(k, points2, position.GetTopLeft() + Size(0,1));
+	
 					dc->SetPen(bla1);
-					dc->DrawSpline(k,points3);
-					for(int j=0;j<k;j++) points3[j].y-=2;
+					dc->DrawSpline(k, points3, position.GetTopLeft());
 					dc->SetPen(bla2);
-					dc->DrawSpline(k,points3);
-					for(int j=0;j<k;j++) points3[j].y+=4;
-					dc->DrawSpline(k,points3);
-																				
+					dc->DrawSpline(k, points3, position.GetTopLeft() - Size(0,1));
+					dc->DrawSpline(k, points3, position.GetTopLeft() + Size(0,1));
+	
 					dc->SetPen(bla1);
-					dc->DrawSpline(k,points4);
-					for(int j=0;j<k;j++) points4[j].y-=2;
+					dc->DrawSpline(k, points4, position.GetTopLeft());
 					dc->SetPen(bla2);
-					dc->DrawSpline(k,points4);
-					for(int j=0;j<k;j++) points4[j].y+=4;
-					dc->DrawSpline(k,points4);
+					dc->DrawSpline(k, points4, position.GetTopLeft() - Size(0,1));
+					dc->DrawSpline(k, points4, position.GetTopLeft() + Size(0,1));
 				}
 			} //end blend
 	} //end if(isOptimizing)
-	#endif
 }
 																			
 
@@ -294,8 +282,8 @@ void Player::draw(DC* dc) const
 {
 	if(!isShown())
 		return;
-	drawGeneString(dc,Rect(getAbsolutePosition()+Point(40,40+(*anarace)->getPlayerNum()*300), Size(1200, 240)));
 	// TODO
+	drawGeneString(dc,Rect(getAbsolutePosition()+Point(0,100+(*anarace)->getPlayerNum()*300), Size(1024, 240)));
 	UI_Object::draw(dc);
 }
 
@@ -372,8 +360,8 @@ void Player::process()
 	}
 // ------ END COMMUNICATION BETWEEN THE WINDOWS ------
 
-	if((*anarace)->isOptimizing())
-		geneAnimation++;
+//	if((*anarace)->isOptimizing())
+//		geneAnimation++;
 // ------ PROCESS MEMBER VARIABLES ------	
 	MoveOrders();
 // ------ END PROCESSING MEMBER VARIABLES ------

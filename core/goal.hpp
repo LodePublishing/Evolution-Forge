@@ -1,6 +1,8 @@
 #ifndef _CORE_GOAL_HPP
 #define _CORE_GOAL_HPP
 
+#include "configuration.hpp"
+
 class GOAL
 {
 	public:

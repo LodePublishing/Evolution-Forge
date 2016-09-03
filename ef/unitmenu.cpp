@@ -1,8 +1,7 @@
 #include "unitmenu.hpp"
 
 UnitMenu::UnitMenu(UI_Object* unit_parent, ANARACE* unit_anarace, Rect unit_rect) : 
-	Menu(unit_parent, unit_rect),
-	markedUnit(0),
+	Menu(unit_parent, unit_rect, false),
 	anarace(unit_anarace),
 	facilityMode(false),
 	facilityNumber(1)
@@ -10,8 +9,7 @@ UnitMenu::UnitMenu(UI_Object* unit_parent, ANARACE* unit_anarace, Rect unit_rect
     for(int i=0;i<UNIT_TYPE_COUNT;i++) //TODO
     {
         MenuEntry* entry = new MenuEntry(this,
-                        Rect(0, 0,110, FONT_SIZE+4),
-                        Rect(0, 0,110, FONT_SIZE+4), "ERROR"); //TODO maybe already initialize with name string
+                        Rect(0, 0,120, FONT_SIZE+4), "ERROR"); //TODO maybe already initialize with name string
         menuEntries.push_back(entry);
     }
 	
@@ -20,7 +18,6 @@ UnitMenu::UnitMenu(UI_Object* unit_parent, ANARACE* unit_anarace, Rect unit_rect
 
 UnitMenu::UnitMenu(const UnitMenu& object) :
     Menu((Menu)object),
-    markedUnit(object.markedUnit),
     anarace(object.anarace),
     facilityMode(object.facilityMode),
     facilityNumber(object.facilityNumber)
@@ -32,7 +29,6 @@ UnitMenu::UnitMenu(const UnitMenu& object) :
 UnitMenu& UnitMenu::operator=(const UnitMenu& object)
 {
 	((UnitMenu)(*this)) = ((UnitMenu)object);
-	markedUnit = object.markedUnit;
 	anarace = object.anarace;
 	facilityMode = object.facilityMode;
 	facilityNumber = object.facilityNumber;
@@ -47,7 +43,6 @@ UnitMenu::~UnitMenu()
 
 void UnitMenu::resetData()
 {
-	markedUnit=0;
 	facilityNumber=1;
 	for(unsigned int i=1;i<=GAS_SCV;i++)
 		// cut out those [CS], [NS] temporary facilities
@@ -65,11 +60,6 @@ void UnitMenu::resetData()
 	}
 }
 
-const unsigned int UnitMenu::getMarkedUnit() const
-{
-	return(markedUnit);
-}
-
 void UnitMenu::setFacilityModus(const bool facilityMode)
 {
 	this->facilityMode=facilityMode;
@@ -77,11 +67,10 @@ void UnitMenu::setFacilityModus(const bool facilityMode)
 
 void UnitMenu::process()
 {
+	Menu::process();
 	if(!isShown())
 		return;
-	Menu::process();
-	
-	markedUnit = 0;
+	height = 3;
 	// check for Pressed Units
 	eButton color;
     switch((*anarace->getStartCondition())->getRace())
@@ -111,8 +100,6 @@ void UnitMenu::process()
 	//				if (fitItemToClientRect(edge, 1))
 					{
 						(*m)->Show();
-//						if ((i<=2)&&((*m)->isCurrentlyHighlighted())) // TODO
-//							markedUnit = i;
 						(*m)->setButton(eButton(UNIT_TYPE_0_BUTTON+i));
 						(*m)->updateText(*theme.lookUpString((eString)(UNIT_TYPE_0_STRING+i)));
 						(*m)->adjustRelativeRect(edge);
@@ -135,8 +122,6 @@ void UnitMenu::process()
     //              if (fitItemToClientRect(edge, 1))
                     {
                         (*m)->Show();
-//                        if ((i<=2)&&((*m)->isCurrentlyHighlighted())) // TODO
-  //                          markedUnit = facility[i]; //?
                         (*m)->setButton(color); // TODO
                         (*m)->updateText(stats[(*anarace->getStartCondition())->getRace()][facility[i]].name);
                         (*m)->adjustRelativeRect(edge);
@@ -162,8 +147,6 @@ void UnitMenu::process()
 		//			if (parent->fitItemToRelativeRect(edge, 1)) 
 					{
 						(*m)->Show();
-//						if ((*m)->isCurrentlyHighlighted())
-//							markedUnit = i;
 						(*m)->setButton(eButton(UNIT_TYPE_0_BUTTON+menuLevel));
 						(*m)->updateText(stats[(*anarace->getStartCondition())->getRace()][i].name);
 						(*m)->adjustRelativeRect(edge);
@@ -187,8 +170,6 @@ void UnitMenu::process()
 			//		if (parent->fitItemToRelativeRect(edge, 1)) 
 					{
 						(*m)->Show();
-//						if ((*m)->isCurrentlyHighlighted())
-//							markedUnit = i;
     							
 						(*m)->setButton(color); 
 						(*m)->updateText(stats[(*anarace->getStartCondition())->getRace()][i].name);
@@ -202,15 +183,15 @@ void UnitMenu::process()
 	else
 		for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 			(*m)->Hide();
-	int i = 0;
-	for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+
+// special rules for sub menu...
+	if(pressedItem>-1)
 	{
-		i++;
-		if ((*m)->isLeftClicked())
+		int i = pressedItem+1;
+		pressedItem = -1;
+		if(!facilityMode)
 		{
-			if(!facilityMode)
-			{
-				if ((menuLevel == 1) && (i == 1))  //scv
+			if ((menuLevel == 1) && (i == 1))  //scv
 					pressedItem = SCV;
 		// TODO: pruefen ob das Goal schon vorhanden ist, wenn ja => hasChanged nicht aufrufen
 				else if ((menuLevel == 1) && (i == 2))   //gasscv
@@ -219,30 +200,31 @@ void UnitMenu::process()
 					menuLevel = i;
 				else if (menuLevel > 1)
 					pressedItem = i;
-			} else
-			{
-				if(menuLevel == 1)
-					menuLevel = i+1;
-				else if(menuLevel > 1) 
-					pressedItem=i;
-			}
-		}
-		if ((*m)->isCurrentlyHighlighted())
+		} else
 		{
-            if(!facilityMode)
-            {
-                if ((menuLevel == 1) && (i == 1))  //scv
-                    markedUnit = SCV;
-        // TODO: pruefen ob das Goal schon vorhanden ist, wenn ja => hasChanged nicht aufrufen
-                else if ((menuLevel == 1) && (i == 2))   //gasscv
-                    markedUnit = GAS_SCV;
-                else if (menuLevel > 1)
-                    markedUnit = i;
-            } else
-            {
-                if(menuLevel > 1)
-                    markedUnit=i;
-            }
+			if(menuLevel == 1)
+				menuLevel = i+1;
+			else if(menuLevel > 1) 
+				pressedItem=i;
+		}
+	}
+	if(markedItem>-1)
+	{
+		int i = markedItem;
+		markedItem = -1;
+		if(!facilityMode)
+		{
+			if ((menuLevel == 1) && (i == 1))  //scv
+				markedItem = SCV;
+// TODO: pruefen ob das Goal schon vorhanden ist, wenn ja => hasChanged nicht aufrufen
+			else if ((menuLevel == 1) && (i == 2))   //gasscv
+				markedItem = GAS_SCV;
+			else if (menuLevel > 1)
+				markedItem = i;
+		} else
+		{
+			if(menuLevel > 1)
+				markedItem=i;
 		}
 	}
 	height+=4;

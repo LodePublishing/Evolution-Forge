@@ -1,5 +1,4 @@
 #include "goal.hpp"
-
 #include "defs.hpp"
 
 GOAL::GOAL() :
@@ -45,7 +44,7 @@ void GOAL::setUnit(const unsigned int goal_unit)
 void GOAL::setTime(const unsigned int goal_time)
 {
 #ifdef _SCC_DEBUG
-    if((goal_time >= MAX_TIME)) {
+    if((goal_time > configuration.getMaxTime())) {
          toLog("DEBUG: (GOAL::setTime): Value goal_time out of range.");return;
     }
 #endif
@@ -75,7 +74,7 @@ void GOAL::setLocation(const unsigned int goal_location)
 void GOAL::setFinalTime(const unsigned int goal_final_time)
 {
 #ifdef _SCC_DEBUG
-    if((goal_final_time >= MAX_TIME)) {
+    if((goal_final_time > configuration.getMaxTime())) {
          toLog("DEBUG: (GOAL::setTime): Value goal_final_time out of range.");return;
     }
 #endif
@@ -96,7 +95,7 @@ const unsigned int GOAL::getUnit() const
 const unsigned int GOAL::getTime() const
 {
 #ifdef _SCC_DEBUG
-    if((time >= MAX_TIME)) {
+    if((time > configuration.getMaxTime())) {
          toLog("DEBUG: (GOAL::getTime): Variable not initialized.");return(0);
     }
 #endif
@@ -126,7 +125,7 @@ const unsigned int GOAL::getLocation() const
 const unsigned int GOAL::getFinalTime() const
 {
 #ifdef _SCC_DEBUG
-    if((finalTime >= MAX_TIME)) {
+    if((finalTime > configuration.getMaxTime())) {
          toLog("DEBUG: (GOAL::getFinalTime): Variable not initialized.");return(0);
     }
 #endif

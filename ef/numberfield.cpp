@@ -13,7 +13,9 @@ NumberField& NumberField::operator=(const NumberField& object)
 	text = (object.text?new UI_StaticText(*(object.text)):NULL);
 	delete number;
 	number = new UI_StaticText(*(object.number));
-
+	min = object.min;
+	max = object.max;
+	steps = object.steps;
 	return(*this);
 }
 
@@ -24,29 +26,25 @@ NumberField::NumberField(const NumberField& object) :
     addbutton(new UI_Button(*(object.addbutton))),
     subbutton(new UI_Button(*(object.subbutton))),
     text(object.text?new UI_StaticText(*(object.text)):NULL),
-    number(new UI_StaticText(*(object.number)))
+    number(new UI_StaticText(*(object.number))),
+	min(object.min),
+	max(object.max),
+	steps(object.steps)
 { }
 
-NumberField::NumberField(UI_Object* parent, const Rect rect, const eString txt, const eString tooltip, const int number, const eFieldType field_type):
+NumberField::NumberField(UI_Object* parent, const Rect rect, const int min, const int max, const unsigned int steps, const int number, const eString txt, const eString tooltip, const eFieldType field_type) :
 	UI_Object(parent, rect, rect),
 	fieldType(field_type),
-    addbutton(new UI_Button(this, Rect(Point(136, 3),Size(8,8)), Rect(Point(0,0), getSize()), ADD_BUTTON, PRESS_BUTTON_MODE)),
-    subbutton(new UI_Button(this, Rect(Point(150, 3),Size(8,8)), Rect(Point(0,0), getSize()), SUB_BUTTON, PRESS_BUTTON_MODE)),
-    text(new UI_StaticText(this, txt, Rect(Point(0,0), getSize()), NO_TEXT_MODE, FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT)),
-    number(new UI_StaticText(this, Rect(Point(120,1), Size(20,20)), NO_TEXT_MODE, FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT))
+    addbutton(new UI_Button(this, Rect(Point(150, 3),Size(8,8)), Rect(Point(0,0), getSize()), ADD_BUTTON, PRESS_BUTTON_MODE)),
+    subbutton(new UI_Button(this, Rect(Point(160, 3),Size(8,8)), Rect(Point(0,0), getSize()), SUB_BUTTON, PRESS_BUTTON_MODE)),
+    text(txt==NULL_STRING?NULL:new UI_StaticText(this, txt, Rect(Point(0,0), Size(110,0)), RIGHT_BOUNDED_TEXT_MODE, FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT)),
+    number(new UI_StaticText(this, Rect(Point(120,1), Size(20,20)), NO_TEXT_MODE, FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT)),
+	min(min),
+	max(max),
+	steps(steps)
 {
-	text->updateToolTip(*theme.lookUpString(tooltip)); // TODO
-	updateNumber(number);
-}
-
-NumberField::NumberField(UI_Object* parent, const Rect rect, const int number, const eFieldType field_type):
-	UI_Object(parent, rect, rect),
-	fieldType(field_type),
-    addbutton(new UI_Button(this, Rect(Point(getWidth()-20, 2),Size(8,8)), Rect(Point(0,0), getSize()), ADD_BUTTON, PRESS_BUTTON_MODE)),
-    subbutton(new UI_Button(this, Rect(Point(getWidth()-10, 2),Size(8,8)), Rect(Point(0,0), getSize()), SUB_BUTTON, PRESS_BUTTON_MODE)),
-	text(NULL),
-    number(new UI_StaticText(this, Rect(Point(getWidth()-50,0), Size(20,20)), NO_TEXT_MODE, FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT))
-{
+	if(tooltip!=NULL_STRING)
+		text->updateToolTip(tooltip); // TODO
 	updateNumber(number);
 }
 
@@ -56,6 +54,10 @@ NumberField::~NumberField()
 	delete subbutton;
 	delete text;
 	delete number;
+}
+
+const int NumberField::getNumber() const {
+	return(num);
 }
 const bool NumberField::addClicked() const {
 	return(addbutton->isLeftClicked());
@@ -71,6 +73,7 @@ const bool NumberField::subRightClicked() const {
 }
 void NumberField::updateNumber(const int number)
 {
+	num = number;
 	std::ostringstream os;
 	switch(fieldType)
 	{
@@ -92,6 +95,35 @@ void NumberField::process()
 	if(!isShown())
 		return;
 	UI_Object::process();
+    if(subClicked())
+    {
+        if(num > min+(signed int)steps)
+        	num-=steps;
+        else num = min;
+        updateNumber(num);
+    }
+    if(addClicked())
+    {
+        if(num < max-(signed int)steps)
+            num += steps;
+        else num = max;
+		updateNumber(num);
+    }
+    if(subRightClicked())
+    {
+        if(num > min + 10*(signed int)steps)
+            num -= 10*steps;
+        else num = min;
+		updateNumber(num);
+    }
+                                                                                                                                                            
+    if(addRightClicked())
+    {
+        if(num < max - 10*(signed int)steps)
+            num += 10*steps;
+		else num = max;
+		updateNumber(num);
+    }
 }
 
 void NumberField::draw(DC* dc) const

@@ -3,9 +3,7 @@
 
 #include "../ui/window.hpp"
 #include "../core/anarace.hpp"
-
 #include "math.h"
-#include "numberfield.hpp"
 
 class StatisticsWindow:public UI_Window
 {
@@ -56,7 +54,6 @@ class StatisticsWindow:public UI_Window
 		unsigned int maxfps;
 		unsigned int average[100];
 		unsigned int averagecounter;
-		NumberField* speed;
 };
 #endif
 

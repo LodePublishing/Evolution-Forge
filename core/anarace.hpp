@@ -37,7 +37,7 @@ class ANARACE: public PRERACE
 		unsigned int currentRun;
 		bool optimizing;
 		bool active;
-		unsigned int generation;
+		unsigned int totalGeneration;
 		unsigned int maxpFitness;
 		unsigned int maxsFitness;
 		unsigned int maxtFitness;
@@ -48,17 +48,20 @@ class ANARACE: public PRERACE
 		unsigned int phaenoCode[MAX_LENGTH];		// the final build order: an array of unit numbers (as defined in main.h)
 
 		PROGRAM program[MAX_LENGTH];
-		STATISTICS statistics[MAX_TIME];
+		STATISTICS statistics[MAX_LENGTH];
 	
 		static unsigned int successType; //type of error
 		static unsigned int successUnit; //unit number
 
-//		const unsigned int needTime(const unsigned int unit) const;
-//		const unsigned int maximum(const unsigned int unit) const;
 		void setCurrentpFitness(unsigned int num);
 		
 		const bool buildGene(const unsigned int build_unit);
 	public:
+		ANARACE();
+		~ANARACE();
+		ANARACE& operator=(const ANARACE& anarace);
+		ANARACE(const ANARACE& anarace);
+	
 		unsigned int fitnessAverage;
        	unsigned int fitnessVariance;
 		unsigned int positiveCrossover;
@@ -116,7 +119,7 @@ class ANARACE: public PRERACE
 
 		const unsigned int getUnchangedGenerations() const;	// gets number of generations where no change in fitness took place
 		const unsigned int getRun() const;					// gets number of runs (one run is complete when no <unchangedGenerations> > <maxGenerations>)
-		const unsigned int getGeneration() const;			// gets number of total generations of this run
+		const unsigned int getTotalGeneration() const;			// gets number of total generations of this run
 		const unsigned int getMaxpFitness() const;			// gets primary fitness (goal and time)
 		const unsigned int getMaxsFitness() const;			// gets secondary fitness (ressources)
 		const unsigned int getMaxtFitness() const;			// gets tertiary fitness (build order appearance, some heuristics)
@@ -128,7 +131,7 @@ class ANARACE: public PRERACE
 // internal control structures, do not touch ;-)
 		void setUnchangedGenerations(const unsigned int unchangedGenerations); 
 		void setRun(const unsigned int run);
-		void setGeneration(const unsigned int generations);
+		void setTotalGeneration(const unsigned int total_generations);
 		void setMaxpFitness(const unsigned int maxpFitness);
 		void setMaxsFitness(const unsigned int maxsFitness);
 		void setMaxtFitness(const unsigned int maxtFitness);
@@ -156,11 +159,6 @@ class ANARACE: public PRERACE
 		void resetData();				// resets all data to standard values
 		void prepareForNewGeneration();				// resets all data to standard values
 //		void analyzeBuildOrder();		// sets the isGoal of program
-// Constructor
-		ANARACE& operator=(const ANARACE& anarace);
-		ANARACE(const ANARACE& anarace);
-		ANARACE();
-		~ANARACE();
 };
 
 //int getProgramSuccessType(int IP);

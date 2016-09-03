@@ -6,7 +6,7 @@ class ProgressBar
 		ProgressBar(const Rect& area):bar(area), p(1), h(0) {};
 		~ProgressBar() {};
 		void draw(DC* dc, const unsigned int dp);
-		void draw(DC* dc, const unsigned int dp, const string& text);
+		void draw(DC* dc, const unsigned int dp, const std::string& text);
 	private:
 		Rect bar;
 		unsigned int p;

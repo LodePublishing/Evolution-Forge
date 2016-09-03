@@ -12,8 +12,7 @@ MAP_LOCATION::MAP_LOCATION():
 }
 
 MAP_LOCATION::~MAP_LOCATION()
-{
-}
+{ }
 
 void MAP_LOCATION::resetData()
 {
@@ -24,6 +23,33 @@ void MAP_LOCATION::resetData()
 		setDistance(i,0);
 		nearest[i]=0;
 	}		
+}
+
+MAP_LOCATION::MAP_LOCATION(const MAP_LOCATION& object) :
+	name(object.name),
+	mineralPatches(object.mineralPatches),
+	vespeneGeysirs(object.vespeneGeysirs),
+	mineralDistance(object.mineralDistance)
+{
+	for(int i = MAX_LOCATIONS;i--;)
+	{
+		distance[i] = object.distance[i];
+		nearest[i] = object.nearest[i];
+	}
+}
+
+MAP_LOCATION& MAP_LOCATION::operator=(const MAP_LOCATION& object)
+{
+	name = object.name;
+	mineralPatches = object.mineralPatches;
+	vespeneGeysirs = object.vespeneGeysirs;
+	mineralDistance = object.mineralDistance;
+	for(int i = MAX_LOCATIONS;i--;)
+	{
+		distance[i] = object.distance[i];
+		nearest[i] = object.nearest[i];
+	}
+	return(*this);					
 }
 
 
@@ -147,13 +173,5 @@ const int MAP_LOCATION::getDistance(const int location) const
 #endif
 	return(distance[location]);
 }
-
-
-		
-/*inline const int MAP_LOCATION::getMineralDistance() const;
-inline const int MAP_LOCATION::getDistance(const int location) const;
-inline const int MAP_LOCATION::getNearest(const int step) const;
-inline const int MAP_LOCATION::getMineralPatches() const;
-inline const int MAP_LOCATION::getVespeneGeysirs() const;*/
 
 

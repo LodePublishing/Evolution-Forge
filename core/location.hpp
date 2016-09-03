@@ -2,8 +2,6 @@
 #define _CORE_LOCATION_HPP
 #include "defs.hpp"
 
-//extern const int GLOBAL;
-
 class MAP_LOCATION
 {
 	private:
@@ -16,6 +14,8 @@ class MAP_LOCATION
 	public:
 		MAP_LOCATION();
 		~MAP_LOCATION();
+		MAP_LOCATION& operator=(const MAP_LOCATION& object);
+		MAP_LOCATION(const MAP_LOCATION& object);
 		
 		const std::string& getName() const;
 		const int getMineralDistance() const;

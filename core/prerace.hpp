@@ -1,14 +1,12 @@
 #ifndef _CORE_PRERACE_HPP
 #define _CORE_PRERACE_HPP
 
-#include "basicmap.hpp"
-#include "ga.hpp"
-#include "location.hpp"
 #include "building.hpp"
+#include "configuration.hpp"
 #include "start.hpp"
-#include <queue>
-#include <deque>
 #include <functional>
+#include <deque>
+#include <queue>
 
 class PRERACE
 {
@@ -24,7 +22,7 @@ protected:
 	static const BASIC_MAP* const* pMap; // MAP is all the same for all players using 'start
 //------------- end -------------------------------
 
-	std::priority_queue<Building, std::deque<Building> > buildingQueue;
+	priority_queue<Building, deque<Building> > buildingQueue;
 
 // global best time so far
 	static signed int noise[MAX_TIME];
@@ -37,7 +35,6 @@ protected:
 	unsigned int neededMinerals, neededGas;
 	
 	static START* pStart;
-	static GA* ga;
 	
 	void createSpecial();
 	void resetSpecial();
@@ -60,8 +57,12 @@ protected:
 	}
 
 	bool ready;
-private:
+	
+	unsigned int Code[MAX_LENGTH];
+	unsigned int Marker[MAX_LENGTH];
+
 	GOAL_ENTRY** pGoal; // pStart->getGoal()
+private:
 	unsigned int playerNum;
 	unsigned int minerals, gas, timer;
 	unsigned int IP;
@@ -71,23 +72,23 @@ private:
 	unsigned int wastedMinerals, wastedGas;
 	unsigned int needSupply;		// free supply
 	unsigned int haveSupply; // total supply
-//	int ftime[MAX_GOALS]; //when the goal is reached / when the last item is produced (ALL locations...*/
 	unsigned int length;
 	unsigned int timeout;
 
-	unsigned int Code[MAX_LENGTH];
-	unsigned int Marker[MAX_LENGTH];
 
 public:
 
-// ------ PUBLIC VARIABLES ------
-
-
 	static void assignStart(START* start);
-	static void assignGA(GA* pga);
+//	static void assignConfiguration(Configuration* pconfiguration);
 	static void initNoise();
 	static void copyMap(); //copies the startforce from map to static 'units'
 	static const BASIC_MAP* const* getMap(); 	
+
+	PRERACE();
+	virtual ~PRERACE();
+
+	PRERACE& operator=(const PRERACE& object);
+	PRERACE(const PRERACE& object);
 
 // ------ HARVEST ROUTINES ------
 	void adjustMineralHarvest(const unsigned int location);
@@ -183,17 +184,9 @@ public:
 	const unsigned int getIP() const;
 	void setIP(const unsigned int IP);
 
-	//void setFinalTime(const unsigned int goal, const unsigned int time);
-//	const unsigned int getFinalTime(const unsigned int goal) const;
-	
 	const unsigned int getLength() const;
 	void setLength(const unsigned int length);
 
-	PRERACE& operator=(const PRERACE& prerace);
-	PRERACE(const PRERACE& prerace);
-
-	PRERACE();
-	virtual ~PRERACE();
 };
 
 #endif // __PRERACE_H

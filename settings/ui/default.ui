@@ -118,6 +118,11 @@
 		length of build order in items
 		minimum number of generations left
 
+		Reset and restart from the scratch
+		Save build order as bitmap or html
+
+		Continue the optimization
+
 		Simple interface and basic options
 		All options are availible
 		The build order will be tested against rushes
@@ -133,6 +138,7 @@
 		Preprocess
 		Max length
 		Number of runs
+		Number of generations
 		Max timeout
 		Allow goal adaption
 		Breeding factor
@@ -142,9 +148,9 @@
 		Full graphic
 		Custom
 # Radiobutton + Eingabefeld
-		Max framerate
-		Dynamic
-		Static
+		Allow static framerate
+		Frames per second
+		Frames per generation
 # an, aus
 		Smooth movements
 # an, aus
@@ -164,6 +170,7 @@
 		Shall a randomly created or a preprocessed build order used at the beginning?
 		Maximum length of a build order
 		How often shall the program restart to get an optimal build order?
+		After how many unchanged generations shall the program restart with a newly created build order?
 		How many seconds may be between two orders?
 		Is the program allowed to make some small adjustments on the goal list?
 		What percentage of the next generation shall be created out of the best build order of this one?
@@ -173,13 +180,19 @@
 		Set the graphics to nice :)
 		Click yourself around
 # Radiobutton + Eingabefeld
-		The higher this setting the more CPU power is needed and the faster is the program
-		Shall the program (as far as possible) hold a constant framerate?
+		Shall the program hold (as far as possible) a constant framerate (on) or should it depend solely on computer speed (off)?
+		How often shall the screen be updated per second?
 		How often shall the screen be updated between two generations?
 # an, aus
 		Shall the objects move around slowly or shall they directly jump to their destinations?
+		Shall buttons and items glow when the mouse is over the item?
+		Shall the rectangles have rounded edges and borders? (needs a little CPU)
+		Shall there be a nice background image? (needs some CPU in this version)
 		Transparent objects (needs some CPU :) )
+		Switch between window and fullscreen (needs a program restart on some systems)
 		8[ Don't ya like these texts?
+
+		Settings will be saved to settings/default.cfg when quitting the program
 
 		Language
 		ERROR
@@ -207,6 +220,10 @@
 		Yellow
 		Grey
 		Monochrome
+
+		Reload from file
+		Load failsafe defaults
+		Save to file
 		
 	@END
 
@@ -325,6 +342,11 @@
         length of build order in items
         minimum number of generations left
 
+		Reset and restart from the scratch
+        Save build order as bitmap or html
+
+		Continue the optimization
+				
 		Simple interface and basic options
 		All options are availible
 		The build order will be tested against rushes
@@ -339,6 +361,7 @@
 		Vorberechnung
 		Maximale Laenge
 		Zahl der Versuche
+		Zahl der Generationen
 		maximaler Timeout
 		Zielanpassung erlaubt
 		Vermehrungsfaktor
@@ -348,9 +371,9 @@
 		Volle Grafikpracht
 		benutzerdefiniert
 # Radiobutton + Eingabefeld
-		maximale Bildwiederholfrequenz
-		Dynamisch 
-		Statisch
+		Konstante Bildwiederholfrequenz
+		Bilder pro Sekunde
+		Bilder pro Generation
 # an, aus
 		gleichmaessige Bewegung
 # an, aus
@@ -370,6 +393,7 @@
 		Soll eine zufaellige oder eine vorberechnete Baureihenfolge zu Beginn genommen werden?
 		Maximale Laenge einer Baureihenfolge
 		Wie oft soll das Programm neustarten um eine optimale Baureihenfolge zu erhalten?
+		Nach wievielen unveraenderten Generationen soll der aktuelle Versuch verworfen und mit einer neuerstellten Baureihenfolge begonnen werden?
 		Wieviel Sekunden duerfen zwischen zwei Befehlen maximal liegen?
 		Ist es dem Programm gestattet minimale Anpassungen an den Zielen vorzunehmen?
 		Wieviel Prozent des besten Programms einer Generation soll in die naechste uebernommen werden?
@@ -379,13 +403,19 @@
 		Grafik auf schoen stellen :)
 		Selber rumklicken
 # Radiobutton + Eingabefeld
-		Je hoeher desto staerker ist die CPU ausgelastet und desto schneller ist das Programm
-		Soll das Programm (soweit moeglich) eine konstante Framerate halten?
-		Wie oft soll der Schirm zwischen zwei Generationen geupdatet werden?
+		Soll das Programm (soweit moeglich) eine konstante Bildwiederholfrequenz halten (an) oder soll dies nur ueber die CPU Geschwindigkeit geregelt sein?
+		Wieviele Bilder pro Sekunde sollen dargestellt werden?
+		Wie oft soll der Schirm zwischen zwei Generationen erneuert werden?
 # an, aus
 		Sollen sich Objekte langsam hin und herbewegen oder auf ihren Zielpunkt springen?
+		Sollen Knoepfe pulsierende Animation besitzen?
+		Sollen Rechtecke abgerundete Ecken und Kanten besitzen? (Benoetigt minimal CPU)
+		Soll als Hintergrund ein schoenes Bild gemalt werden? (Benoetigt in der Version noch etwas CPU)
 		Durchsichtige Objekte (zieht etwas CPU :) )
+		Wechsel zwischen Vollbild und Fenstermodus (Benoetigt einen Neustart auf manchen Systemen)
 		8[ Gefallen Dir die Texte etwa nicht?
+
+		Einstellungen werden in settings/default.cfg gespeichert sobald das Programm verlassen wird
 	
 		Sprache
 		Fehler
@@ -413,6 +443,10 @@
 		Gelb
 		Grau
 		Monochrom
+
+		Lade von Datei
+		Lade sichere Standardeinstellung
+		Speichere in datei
 	
 	@END
 
@@ -889,6 +923,9 @@
 			mouse2
 			mouse3
 			mouse
+			radio_off
+			radio_on
+			space
 		@END
 
 	@END
@@ -922,6 +959,9 @@
 			mouse2
 			mouse3
 			mouse
+			radio_off
+			radio_on
+			space
 		@END
 
 	@END
@@ -955,6 +995,9 @@
 			mouse2
 			mouse3
 			mouse
+			radio_off
+			radio_on
+			space
 		@END
 
 	@END
@@ -977,7 +1020,7 @@
 #			Build order graph window, dock with lower border of, Build order diagram window, dock with left border of, Build order window, 500, 50
 			Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
 			Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
-			Settings window, dock left inside of, Main window, dock top inside of, Main window, 600, 400
+			Settings window, dock center inside of, Main window, 600, 400
 		@END
 
 		@ADVANCED_TAB
@@ -1117,8 +1160,8 @@
 			Build order diagram window, dock with right border of, Force window, dock with lower border of, Statistics window, 500, 110
 #			Build order graph window, dock with lower border of, Build order diagram window, dock with left border of, Build order window, 500, 50
 			Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
-			Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
-			Settings window, dock left inside of, Main window, dock top inside of, Main window, 600, 400
+			Info window, dock with left border of, Build order window, dock top inside of, Main window, 250, 150
+			Settings window, dock left inside of, Main window, dock top inside of, Main window, 300, 400
 		@END
 
 		@ADVANCED_TAB
@@ -1134,8 +1177,8 @@
 			Build order diagram window, dock with right border of, Force window, dock with lower border of, Statistics window, 500, 110
 #			Build order graph window, dock with lower border of, Build order diagram window, dock with left border of, Build order window, 500, 50
 			Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
-			Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
-			Settings window, dock left inside of, Main window, dock top inside of, Main window, 600, 400
+			Info window, dock with left border of, Build order window, dock top inside of, Main window, 250, 150
+			Settings window, dock left inside of, Main window, dock top inside of, Main window, 450, 400
 		@END
 
 		@EXPERT_TAB
@@ -1151,8 +1194,8 @@
 			Statistics window, dock with right border of, Force window, dock top inside of, Main window, 420, 120
 			Build order diagram window, dock with right border of, Force window, dock with lower border of, Statistics window, 500, 110
 			Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
-			Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
-			Settings window, dock left inside of, Main window, dock top inside of, Main window, 600, 400
+			Info window, dock with left border of, Build order window, dock top inside of, Main window, 250, 150
+			Settings window, dock left inside of, Main window, dock top inside of, Main window, 450, 400
 		@END
 
 		@GOSU_TAB
@@ -1168,8 +1211,8 @@
 			Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 120
 			Build order diagram window, absolute y coordinate, 400, dock with left border of, Build order window, 500, 110
 			Build order graph window, dock with lower border of, Build order diagram window, dock with left border of, Build order window, 500, 50
-			Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
-			Settings window, dock left inside of, Main window, dock top inside of, Main window, 600, 400
+			Info window, dock with left border of, Build order window, dock top inside of, Main window, 250, 150
+			Settings window, dock left inside of, Main window, dock top inside of, Main window, 450, 400
 		@END
 
 		@COMPARE_TAB
@@ -1185,8 +1228,8 @@
 			Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 120
 			Build order diagram window, dock with right border of, Force window, dock with lower border of, Statistics window, 500, 110
 			Build order graph window, dock with lower border of, Build order diagram window, dock with right border of, Force window, 500, 50
-			Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
-			Settings window, dock left inside of, Main window, dock top inside of, Main window, 600, 400
+			Info window, dock with left border of, Build order window, dock top inside of, Main window, 250, 150
+			Settings window, dock left inside of, Main window, dock top inside of, Main window, 450, 400
 		@END
 
 		@MAP_TAB
@@ -1202,8 +1245,8 @@
 			Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 120
 			Build order diagram window, dock with right border of, Force window, dock with lower border of, Statistics window, 500, 110
 			Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
-			Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
-			Settings window, dock left inside of, Main window, dock top inside of, Main window, 600, 400
+			Info window, dock with left border of, Build order window, dock top inside of, Main window, 250, 150
+			Settings window, dock left inside of, Main window, dock top inside of, Main window, 450, 400
 		@END
 
 		@SETTINGS_TAB
@@ -1219,8 +1262,8 @@
 			Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 120
 			Build order diagram window, dock with right border of, Force window, dock with lower border of, Statistics window, 500, 110
 			Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
-			Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
-			Settings window, dock left inside of, Main window, dock top inside of, Main window, 600, 400
+			Info window, dock with left border of, Build order window, dock top inside of, Main window, 250, 150
+			Settings window, dock center inside of, Main window, 335, 400
 		@END
 
 		@TUTORIAL_TAB
@@ -1235,7 +1278,7 @@
 			Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 120
 			Build order diagram window, dock with right border of, Force window, dock with lower border of, Statistics window, 500, 110
 			Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
-			Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
+			Info window, dock with left border of, Build order window, dock top inside of, Main window, 250, 150
 			Settings window, dock left inside of, Main window, dock top inside of, Main window, 600, 400
 		@END
 
@@ -1848,6 +1891,8 @@
 	20, 2,  6,  6,  6,  5,  6,   6,  6,  6,  5,  6,   1,  1,  1,  1,  1,   1,  1,  1,  1,  1,   0,  0,  0,  3,  3,   0,  0,  0, 14,  14,  20, 20, 20, 20, 20
 # time button
 	20, 2,  6,  6,  6,  5,  6,   6,  6,  6,  5,  6,   1,  1,  1,  1,  1,   1,  1,  1,  1,  1,   0,  0,  0,  3,  3,   0,  0,  0, 14,  14,  21, 21, 21, 21, 21
+# checkButton
+	20, 2,  6,  6,  6,  5,  6,   6,  6,  6,  5,  6,   1,  1,  1,  1,  1,   1,  1,  1,  1,  1,  16, 16, 16, 16, 16,   0,  0,  0, 17,  17,   26, 26, 27, 26,  27
 
 @END
 

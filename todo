@@ -1,4 +1,4 @@
-- immer wenn ein Gebaeude FERTIG wird neue Moeglichkeiten hinzufuegen!
+- immer wenn ein Gebaeude FERTIG wird neue Moeglichkeiten hinzufuegen!  ~~~ schwer zu machen ma guggn
 
 - scrollbalken
 
@@ -84,20 +84,22 @@ sobald refinery fertig ist automatisch einen reinschicken...done
 
 units unterschiedliche Farbe (unit, upgrade/research, building)...done
 
-statt "analogen" Balken abzaehlbare BLoecke!
+- statt "analogen" Balken abzaehlbare BLoecke!
 
-noise verfeinern! v.a. auch Bauverzoegerungen (warten vor Baubeginn) einfuegen
-mehrere Durchlaeufe machen und Fitnessdurchschnitt bilden, ueberarbeiten mit dem "Besten" in anaplayer, evtl einfach race 0 hernehmen...
-Zeitanzeige +/- noise angeben, also beste und schlechteste Loesung und Mittelwert bilden
+- noise verfeinern! v.a. auch Bauverzoegerungen (warten vor Baubeginn) einfuegen
 
-maxscrolly anpassen, damit nicht noch schon am ende nach unten gedrueckt werden kann
+- mehrere Durchlaeufe machen und Fitnessdurchschnitt bilden, ueberarbeiten mit dem "Besten" in anaplayer, evtl einfach race 0 hernehmen...
 
-location[0] in der map belegen
+- Zeitanzeige +/- noise angeben, also beste und schlechteste Loesung und Mittelwert bilden
+
+- maxscrolly anpassen, damit nicht noch schon am ende nach unten gedrueckt werden kann
+
+location[0] in der map belegen...DONE
 
 - so ne art parser machen, der die bo in einen verstaendlichen Text uebersetzt...
 evtl so machen, dass gewisse Merkmale (lange Zeiten, mehrere Befehle auf einmal) besonders behansdelt werden...
 
-bug ueberpruefen goal unit>0 anstatt count>0
+bug ueberpruefen goal unit>0 anstatt count>0... ???
 
 bug wenn ich goal entferne wird von sfitness ja mehr oder weniger abgezogen...
 
@@ -191,3 +193,10 @@ total harvested gas/mins direkt bei statistics hinschreiben, nicht ueber tooltip
 
 - menues ueberarbeiten!
 
+- bei manchen Aenderungen in setwindow die engine neustarten (z.B. maxTime, sprache etc.)
+
+- sprache updaten
+
+- 2534345345 templars bei nem archon :/
+
+- UI_Radio ueberarbeiten!! v.a. damit immer ein button gepresst ist

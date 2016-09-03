@@ -4,6 +4,7 @@
 #define _CORE_DEFS_HPP
 
 #include <string>
+#include <list>
 
 #define MAX_RACES 3
 #define UNIT_TYPE_COUNT 101
@@ -41,8 +42,8 @@ extern const unsigned int MIN_BREED_FACTOR;
 extern const unsigned int MAX_MODE;
 extern const unsigned int MIN_MODE;
 
-extern const unsigned int MAX_CROSSOVER;
-extern const unsigned int MIN_CROSSOVER;
+extern const unsigned int MAX_CROSSING_OVER;
+extern const unsigned int MIN_CROSSING_OVER;
 #define MAX_TIME 3601
 //extern const unsigned int MAX_TIME;
 extern const unsigned int MIN_TIME;
@@ -57,16 +58,25 @@ extern const unsigned int MIN_LENGTH;
 //extern const unsigned int MAX_RUNS;
 extern const unsigned int MIN_RUNS;
 
-extern const unsigned int MAX_PREPROCESS_BUILDORDER;
-extern const unsigned int MIN_PREPROCESS_BUILDORDER;
-
-
 extern const unsigned int MAX_TFITNESS;
 extern const unsigned int MAX_PFITNESS;
+
+extern const unsigned int MIN_NOISE;
+extern const unsigned int MAX_NOISE;
+
+extern const unsigned int MIN_DYNAMIC_FRAMERATE;
+extern const unsigned int MAX_DYNAMIC_FRAMERATE;
+
+extern const unsigned int MIN_MUTATION_FACTOR;
+extern const unsigned int MAX_MUTATION_FACTOR;
+
+extern const unsigned int MIN_STATIC_FRAMERATE;
+extern const unsigned int MAX_STATIC_FRAMERATE;
 
 //extern const unsigned int MAX_RACES;
 
 extern void toLog(const std::string& msg);
+extern void fillInfluenceList();
 
 #define NEUTRAL_PLAYER 0
 
@@ -437,6 +447,7 @@ struct UNIT_STATISTICS
 };
 
 
+extern std::list<unsigned int> influenceList[MAX_RACES][UNIT_TYPE_COUNT];
 extern const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT];
 extern const std::string raceString[MAX_RACES];
 // TODO: automatic building units/buildings for spells and larvaes

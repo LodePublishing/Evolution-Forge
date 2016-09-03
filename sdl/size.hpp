@@ -92,12 +92,7 @@ class Size
 		    return height;
 		}
 	
-		void move(const Size& startSize, const Size& targetSize)
-		{
-			mv(width, startSize.width, targetSize.width);
-			mv(height, startSize.height, targetSize.height);
-		}	
-
+		void move(const Size& startSize, const Size& targetSize);
 		static void mv(unsigned int& x, const unsigned int sx, const unsigned int tx);
 	private:
 		unsigned int width;

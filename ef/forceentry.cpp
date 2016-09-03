@@ -5,7 +5,7 @@
 
 ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const Rect entry_max_rect, const string& entry_unit):
     UI_Button(entry_parent, Rect(entry_rect.GetTopLeft(), Size(entry_rect.GetWidth(), entry_rect.GetHeight())), entry_max_rect, entry_unit, entry_unit, FORCE_ENTRY_BUTTON, NO_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE),
-	timeEntryBox(new NumberField(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 40, -11), Size(10,10)), 0, TIME_NUMBER_TYPE)),
+	timeEntryBox(new NumberField(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 210, -14), Size(10,10)), 0, configuration.getMaxTime(), 6, 0, NULL_STRING, NULL_STRING, TIME_NUMBER_TYPE)),
 //	makeLocationGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 30, -11), Size(10,10)), entry_max_rect, GOAL_LOCATION_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
 	makeTimeGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 29, -11), Size(16,10)), entry_max_rect, GOAL_TIME_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
 
@@ -86,38 +86,6 @@ void ForceEntry::process()
         return;
     Size::mv(currentForce, startForce, targetForce);
     UI_Button::process();
-
-	if(timeEntryBox->subClicked())
-	{
-		if(goal->getTime() > 5)
-			goal->setTime(goal->getTime()-5);
-		else goal->setTime(0);
-		timeEntryBox->updateNumber(goal->getTime());
-	}
-		
-	if(timeEntryBox->addClicked())
-	{
-		if(goal->getTime() < MAX_TIME-5)//settings.getGa()->maxTime-5) TODO
-			goal->setTime(goal->getTime()+5);
-		else goal->setTime(MAX_TIME);//settings.getGa()->maxTime); TODO
-		timeEntryBox->updateNumber(goal->getTime());
-	}
-	if(timeEntryBox->subRightClicked())
-	{
-		if(goal->getTime() > 60)
-			goal->setTime(goal->getTime()-60);
-		else goal->setTime(0);
-		timeEntryBox->updateNumber(goal->getTime());
-	}
-		
-	if(timeEntryBox->addRightClicked())
-	{
-		if(goal->getTime() < MAX_TIME-60)//settings.getGa()->maxTime-5) TODO
-			goal->setTime(goal->getTime()+60);
-		else goal->setTime(MAX_TIME);//settings.getGa()->maxTime); TODO
-		timeEntryBox->updateNumber(goal->getTime());
-	}
-					
 	if(makeTimeGoal->isLeftClicked())
 	{
 		timeEntryBox->Show(!timeEntryBox->isShown());
@@ -138,6 +106,10 @@ void ForceEntry::process()
 	}
 	else
 	{
+//		if(goal->getTime() != timeEntryBox->getNumber())
+//		{
+//			if(goal->getTime()>0)
+		goal->setTime(timeEntryBox->getNumber());
 		Rect r;
 		r.SetTopLeft(getAbsolutePosition());
 		r.SetHeight(buttonPlacementArea.GetHeight());

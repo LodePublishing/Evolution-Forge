@@ -20,7 +20,7 @@ MainWindow::MainWindow():UI_Window( NULL, MAIN_WINDOW_TITLE_STRING, MAIN_WINDOW,
 
 	for(int i=BASIC_TAB;i<=MAP_TAB;i++)
 	{
-		tab[i]->updateToolTip(*theme.lookUpString((eString)(BASIC_TAB_TOOLTIP_STRING+i-1)));
+		tab[i]->updateToolTip((eString)(BASIC_TAB_TOOLTIP_STRING+i-1));
 		addTab(tab[i]);
 		tab[i]->setFrameNumber((i-1)*step);
 	}

@@ -50,15 +50,94 @@ PRERACE::PRERACE():
 	}
 	resetSpecial();
 }
-/*
-PRERACE::PRERACE(const PRERACE& prerace)
+
+PRERACE::PRERACE(const PRERACE& object) :
+	location(object.location),
+	pStartCondition(object.pStartCondition),
+	buildingQueue(object.buildingQueue),
+	lastcounter(object.lastcounter),
+	lastunit(object.lastunit),
+	pStats(object.pStats),
+	neededMinerals(object.neededMinerals),
+	neededGas(object.neededGas),
+	ready(object.ready),
+	pGoal(object.pGoal),
+	playerNum(object.playerNum),
+	minerals(object.minerals),
+	gas(object.gas),
+	timer(object.timer),
+	IP(object.IP),
+	harvestedMinerals(object.harvestedMinerals),
+	harvestedGas(object.harvestedGas),
+	wastedMinerals(object.wastedMinerals),
+	wastedGas(object.wastedGas),
+	needSupply(object.needSupply),
+	haveSupply(object.haveSupply),
+	length(object.length),
+	timeout(object.timeout)
 {
-	*this = prerace;
+	for(int i=MAX_LENGTH;i--;)
+	{
+		last[i] = object.last[i];
+		Code[i] = object.Code[i];
+		Marker[i] = object.Marker[i];
+	}
+		
+	for(int i=MAX_LOCATIONS;i--;)
+	{
+		larvaInProduction[i] = object.larvaInProduction[i];
+		for(int j = 0; j<45; j++)
+			mineralHarvestPerSecond[i][j] = object.mineralHarvestPerSecond[i][j];
+		for(int j = 0; j<5; j++)
+			gasHarvestPerSecond[i][j] = object.gasHarvestPerSecond[i][j];
+	}	
+	
 }
 
-PRERACE& PRERACE::operator=(PRERACE)
-TODO
-*/
+PRERACE& PRERACE::operator=(const PRERACE& object)
+{
+    location = object.location;
+    pStartCondition = object.pStartCondition;
+    buildingQueue = object.buildingQueue;
+    lastcounter = object.lastcounter;
+    lastunit = object.lastunit;
+    pStats = object.pStats;
+    neededMinerals = object.neededMinerals;
+    neededGas = object.neededGas;
+    ready = object.ready;
+    pGoal = object.pGoal;
+    playerNum = object.playerNum;
+    minerals = object.minerals;
+    gas = object.gas;
+    timer = object.timer;
+    IP = object.IP;
+    harvestedMinerals = object.harvestedMinerals;
+    harvestedGas = object.harvestedGas;
+    wastedMinerals = object.wastedMinerals;
+    wastedGas = object.wastedGas;
+    needSupply = object.needSupply;
+    haveSupply = object.haveSupply;
+    length = object.length;
+    timeout = object.timeout;
+    for(int i=MAX_LENGTH;i--;)
+    {
+        last[i] = object.last[i];
+        Code[i] = object.Code[i];
+        Marker[i] = object.Marker[i];
+    }
+                                                                                                                                                            
+    for(int i=MAX_LOCATIONS;i--;)
+    {
+        larvaInProduction[i] = object.larvaInProduction[i];
+        for(int j = 0; j<45; j++)
+            mineralHarvestPerSecond[i][j] = object.mineralHarvestPerSecond[i][j];
+        for(int j = 0; j<5; j++)
+            gasHarvestPerSecond[i][j] = object.gasHarvestPerSecond[i][j];
+    }
+	return(*this);
+}
+
+
 void PRERACE::prepareForNewGeneration()
 {
     setHarvestedGas(0);setHarvestedMinerals(0);
@@ -66,7 +145,7 @@ void PRERACE::prepareForNewGeneration()
 
     setMinerals((*pStartCondition)->getMinerals());
     setGas((*pStartCondition)->getGas());
-    setTimer(ga->maxTime-(*pStartCondition)->getStartTime());
+    setTimer(configuration.getMaxTime()-(*pStartCondition)->getStartTime());
     setNeedSupply((*pStartCondition)->getNeedSupply());
     setHaveSupply((*pStartCondition)->getHaveSupply());
                                                                                                             
@@ -83,8 +162,8 @@ void PRERACE::prepareForNewGeneration()
         last[i].count=0;
     }
     lastcounter=4;
-    setTimeOut(ga->maxTimeOut);
-    setIP(ga->maxLength-1);
+    setTimeOut(configuration.getMaxTimeOut());
+    setIP(configuration.getMaxLength()-1);
     ready=false;
 
     resetSpecial();
@@ -361,7 +440,7 @@ const unsigned int PRERACE::calculatePrimaryFitness(const bool ready)
 //						else setpFitness(getpFitness()+sumup/i->getCount());
 //TODO...~~~
 //						else while(true); // <- kann eigentlich nicht auftreten!
-//						  setpFitness(getpFitness()+(i->getTime()*sumup)/(i->getCount()*ga->maxTime));
+//						  setpFitness(getpFitness()+(i->getTime()*sumup)/(i->getCount()*configuration.maxTime));
 //					  }
 					else
 						tpF+=sumup/i->getCount();
@@ -399,7 +478,7 @@ const unsigned int PRERACE::calculatePrimaryFitness(const bool ready)
 		// TODO time
 
 /*				if(((*pGoal)->goal[build.getType(i)].time>0)&&(getLocationTotal(build.getLocation(i),build.getType(i))==0))
-					pFitness+=(build.getRemainingBuildTime(i)*100*(*pGoal)->goal[build.getType(i)].time*getLocationTotal(0,i))/((*pGoal)->goal[build.getType(i)].count*(*pStats)[build.getType(i)].BT*ga->maxTime);//hier auch ProgramBT
+					pFitness+=(build.getRemainingBuildTime(i)*100*(*pGoal)->goal[build.getType(i)].time*getLocationTotal(0,i))/((*pGoal)->goal[build.getType(i)].count*(*pStats)[build.getType(i)].BT*configuration.maxTime);//hier auch ProgramBT
 				else
 					pFitness+=((build.getRemainingBuildTime(i)*100)/((*pGoal)->goal[build.getType(i)].count*(*pStats)[build.getType(i)].BT));*/
 
@@ -582,16 +661,6 @@ const unsigned int PRERACE::harvestGas() const
 // ----- INITIALIZATION ROUTINES ------ 
 // ------------------------------------
 
-void PRERACE::assignGA(GA* pga)
-{
-#ifdef _SCC_DEBUG
-	if(!pga) {
-		toLog("DEBUG: (PRERACE::assignGA): Variable pga not initialized.");return;
-	}
-#endif
-	ga=pga;
-}
-
 /* staticly assigns 'start' and sets a pointer to the corresponding pointer * 
  * in start. This means, whenever the map changes in start, it is also	  *
  * changed for all players. This must be set only once per program call	 */ 
@@ -615,9 +684,9 @@ void PRERACE::copyMap()
 
 void PRERACE::initNoise()
 {
-//	if(ga->noise>0)
+//	if(configuration.noise>0)
 //		for(int j=0;j<MAX_TIME;j++)
-//			noise[j]=rand()%ga->noise-rand()%ga->noise;
+//			noise[j]=rand()%configuration.noise-rand()%configuration.noise;
 //	else TODO
 		for(int j=MAX_TIME;j--;)
 			noise[j]=0;
@@ -683,7 +752,7 @@ void PRERACE::initializePlayer()
 {
 	setMinerals((*pStartCondition)->getMinerals());
 	setGas((*pStartCondition)->getGas());
-	setTimer(ga->maxTime-(*pStartCondition)->getStartTime());
+	setTimer(configuration.getMaxTime()-(*pStartCondition)->getStartTime());
 	setNeedSupply((*pStartCondition)->getNeedSupply());
 	setHaveSupply((*pStartCondition)->getHaveSupply());
 }
@@ -732,75 +801,67 @@ void PRERACE::mutateGeneCode()
 //	return;
 // TODO logger machen, welche Mutationsart besonders erfolgreich ist
 	if(getLength()==0) 
-		setLength(MAX_LENGTH);
-//		return;
-/*	if(rand()%100==0)
+		setLength(MAX_LENGTH);//configuration.getMaxLength()); // TODO
+
+	unsigned int force[GAS_SCV+1];
+	bool buildable[GAS_SCV+1];
+	unsigned int tMaxBuildTypes;
+	unsigned int tGeno[GAS_SCV+1]; // !! keine anderen units drueber nehmen!
+
+	for(unsigned int i=GAS_SCV+1;i--;)
 	{
-	   		if(mutationRate>50)
-			mutationRate-=rand()%50;
-		else mutationRate+=rand()%50;
-	}*/
-    int force[GAS_SCV+1];
-    bool buildable[GAS_SCV+1];
-    int tMaxBuildTypes;
-    int tGeno[GAS_SCV+1]; // !! keine anderen units drueber nehmen!
-    for(int i=GAS_SCV+1;i--;)
-    if((*pGoal)->getIsBuildable(i))
-    {
-        force[i]=((*pStartCondition)->getLocationTotal(GLOBAL,i)>0); //set start force
-        if(force[i]) buildable[i]=true;
         tGeno[i]=0;
-    }
-    else
-    {
-        force[i]=0;
-        buildable[i]=false;
-        tGeno[i]=0;
-    }
+    	if((*pGoal)->getIsBuildable(i))
+	    {
+    	    force[i]=((*pStartCondition)->getLocationTotal(GLOBAL,i)>0); //set start force
+        	if(force[i]) buildable[i]=true;
+    	}
+	    else
+    	{
+        	force[i]=0;
+	        buildable[i]=false;
+	    }
+	}
                                                                                                                                                             
-    for(int x=MAX_LENGTH;x--;) //length
+    for(unsigned int x=MAX_LENGTH;x--;) //length
     {
         if(x<MAX_LENGTH-1) { // erstes nicht einbeziehen
             force[(*pGoal)->toPhaeno(Code[x+1])]=1;
         }
                                                                                                                                                             
-        for(int i=GAS_SCV+1;i--;)
+        tMaxBuildTypes=0;
+        for(unsigned int i=GAS_SCV+1;i--;)
         {
             if(force[i]) buildable[i]=true;
-            if(((*pStats)[i].prerequisite[0])&&(force[(*pStats)[i].prerequisite[0]])) buildable[i]=true;
-            if(((*pStats)[i].prerequisite[1])&&(force[(*pStats)[i].prerequisite[1]])) buildable[i]=true;
-            if(((*pStats)[i].prerequisite[2])&&(force[(*pStats)[i].prerequisite[2]])) buildable[i]=true;
-            if(((*pStats)[i].facility[0])&&(force[(*pStats)[i].facility[0]])) buildable[i]=true;
-            if(((*pStats)[i].facility[1])&&(force[(*pStats)[i].facility[1]])) buildable[i]=true;
-            if(((*pStats)[i].facility[2])&&(force[(*pStats)[i].facility[2]])) buildable[i]=true;
+            if(  ( ((*pGoal)->getIsBuildable(i) ) &&		
+			   (((*pStats)[i].prerequisite[0]==0)||(force[(*pStats)[i].prerequisite[0]]))&&
+               (((*pStats)[i].prerequisite[1]==0)||(force[(*pStats)[i].prerequisite[1]]))&&
+               (((*pStats)[i].prerequisite[2]==0)||(force[(*pStats)[i].prerequisite[2]]))&&
+               ((((*pStats)[i].facility[0]>0)&&(force[(*pStats)[i].facility[0]]))||
+			   (((*pStats)[i].facility[1]>0)&&(force[(*pStats)[i].facility[1]]))||
+			   (((*pStats)[i].facility[2]>0)&&(force[(*pStats)[i].facility[2]]))||
+			   (((*pStats)[i].facility[0]==(*pStats)[i].facility[1]==(*pStats)[i].facility[2]==0)))))
+				{
+					tGeno[tMaxBuildTypes]=(*pGoal)->toGeno(i);
+            	    tMaxBuildTypes++;
+					buildable[i]=true;
+				}
         }
-        tMaxBuildTypes=0;
-        for(int i=GAS_SCV+1;i--;)
-            if(buildable[i])
-            {
-                if(!(*pGoal)->getIsBuildable(i))
-                    buildable[i]=false;
-                else
-                {
-                    tGeno[tMaxBuildTypes]=(*pGoal)->toGeno(i);
-                    tMaxBuildTypes++;
-                }
-            }
                                                                                                                                                             
 //alle ueberpruefen, ob die ueberhaupt baubar sind... aber von hinten her!
                                                                                                                                                             
-        if(ga->getMutationFactor()==0)
+        if(configuration.getMutationFactor()==0)
             return;
-        if(rand() % (MAX_LENGTH*100/ga->getMutationFactor())==0)
+        if(rand() % (MAX_LENGTH*100/configuration.getMutationFactor())==0)
         {
-            switch(rand() % 4)
+            switch(rand() % 5)
             {
                 //TODO: wenn generateBuildOrder==1 dann bleibts stehen!
                 case 0://delete one variabel entry and move - Mehrere Schmieden/Kasernen etc. zulassen!
                 {
-//                  if((((*pGoal)->isVariable[Code[0][x]]==1)&&((*pGoal)->isVariable[Code[1][x]]==1))||(!ga->preprocessBuildOrder)) TODO
+//                  if((((*pGoal)->isVariable[Code[0][x]]==1)&&((*pGoal)->isVariable[Code[1][x]]==1))||(!configuration.preprocessBuildOrder)) TODO
                         //TODO: ueberlegen, ob Code evtl struct sein sollte... mmmh
-                        for(int i=x;i<MAX_LENGTH-1;i++)
+                        for(unsigned int i=x;i<MAX_LENGTH-1;i++)
                         {
                             Code[i]=Code[i+1];
                             Marker[i]=Marker[i+1];
@@ -808,12 +869,12 @@ void PRERACE::mutateGeneCode()
                     // TODO hier auch das buildable und tMaxBuildTypes rein... irgendwie den Code als "mutier mich" markieren und spaetereinfuegen
                     markerCounter++;Marker[MAX_LENGTH-1]=markerCounter;
                     int y;
-//                  if(ga->preprocessBuildOrder) // TODO
+//                  if(configuration.preprocessBuildOrder) // TODO
 //                  while((*pGoal)->isVariable[y]==0) y=rand()%(*pGoal)->getMaxBuildTypes();
 //                  else
                     y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
                     Code[MAX_LENGTH-1]=y;
-//                  if(ga->preprocessBuildOrder) // TODO
+//                  if(configuration.preprocessBuildOrder) // TODO
 //                  while((*pGoal)->isVariable[y]==0) y=rand()%(*pGoal)->getMaxBuildTypes();
 //                  else
 //                  y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
@@ -821,21 +882,19 @@ void PRERACE::mutateGeneCode()
                 }break;
                 case 1://add one variable entry
                 {
-                    for(int i=MAX_LENGTH-1;i>x;i--)
+                    for(unsigned int i=MAX_LENGTH-1;i>x;i--)
                     {
                         Code[i]=Code[i-1];
                         Marker[i]=Marker[i-1];
-                                                                                                                                                            
                     }
-                    //todo: BUG! player not initialized!very rare
                     markerCounter++;Marker[x]=markerCounter;
-                    int y;
-//                  if(ga->preprocessBuildOrder) TODO
+                    unsigned int y;
+//                  if(configuration.preprocessBuildOrder) TODO
 //                      while((*pGoal)->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
 //                  else
                     y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
                     Code[x]=y;
-//                  if(ga->preprocessBuildOrder)
+//                  if(configuration.preprocessBuildOrder)
 //                      while((*pGoal)->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//rand()%(*pGoal)->getMaxBuildTypes();
 //                  else
                 }break;
@@ -845,7 +904,7 @@ void PRERACE::mutateGeneCode()
                     {
                         int y;
                         //int y=rand()%(*pGoal)->getMaxBuildTypes();//Optimieren
-//                      if(ga->preprocessBuildOrder) TODO
+//                      if(configuration.preprocessBuildOrder) TODO
 //                          while((*pGoal)->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//rand()%(*pGoal)->getMaxBuildTypes();
 //                      else
                         y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
@@ -854,77 +913,54 @@ void PRERACE::mutateGeneCode()
                     }
                 }break;
                 case 3://exchange two entries
+					if(x < MAX_LENGTH)
                     {
                         //hier erst recht
-                        int y=rand()%MAX_LENGTH/2+rand()%MAX_LENGTH/2-x;
+                        unsigned int y=rand()%(MAX_LENGTH-x) + x;
 //                      y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
 //                      if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH;
-                        if((y>0)&&(x!=y)&&
-                           (buildable[(*pGoal)->toPhaeno(Code[y])]))
+                        if(buildable[(*pGoal)->toPhaeno(Code[y])])
                         {
                             int l;
                             l=Code[x];Code[x]=Code[y];Code[y]=l;
                             l=Marker[x];Marker[x]=Marker[y];Marker[y]=l;
                         }
                     }break;
-//              case 5://move a block of orders  [a..b..ta..tb..c..d] -> [a..ta..tb..b..c..d]
+					case 4://move a block of orders  [a..b..ta..tb..c..d] -> [a..ta..tb..b..c..d]
                     //~~~TODO bug, marker und code wird nicht richtig verschoben
-/*                  if(getLength()>2)
+					if((getLength()>2)&&(x>0))
                     {
-                        int i,ta,tb,ttt,y;
-                        ta=rand()%(getLength()-2)+1; //>0   <getLength()-2
-                        tb=rand()%(getLength()-1)+2; //>1   <getLength()-1
-                        while(ta==tb) tb=rand()%(getLength()-1)+2;
-                        if(ta>tb) {ttt=tb;tb=ta;ta=ttt;} //~~
-                        y=rand()%getLength(); //move it here
-                        while((y<=tb)&&(y>=ta)) y=rand()%getLength();
-                        int tmp[MAX_LENGTH];
-                        if(y>tb)
-                        {
-                            for(i=0;i<y-tb;i++) tmp[i]=Code[0][i+tb];
-                            for(i=ta;i<tb;i++) Code[0][i+y-tb]=Code[0][i];
-                            for(i=0;i<y-tb;i++) Code[0][ta+i]=tmp[i];
-                                                                                                                                                            
-                            for(i=0;i<y-tb;i++) tmp[i]=Code[1][i+tb];
-                            for(i=ta;i<tb;i++) Code[1][i+y-tb]=Code[1][i];
-                            for(i=0;i<y-tb;i++) Code[1][ta+i]=tmp[i];
-                                                                                                                                                            
-                            for(i=0;i<y-tb;i++) tmp[i]=Marker[0][i+tb];
-                            for(i=ta;i<tb;i++) Marker[0][i+y-tb]=Marker[0][i];
-                            for(i=0;i<y-tb;i++) Marker[0][ta+i]=tmp[i];
-                            for(i=0;i<y-tb;i++) tmp[i]=Marker[1][i+tb];
-                            for(i=ta;i<tb;i++) Marker[1][i+y-tb]=Marker[1][i];
-                            for(i=0;i<y-tb;i++) Marker[1][ta+i]=tmp[i];
-                                                                                                                                                            
+						unsigned int block_length = rand()%(MAX_LENGTH-x);
+	                    unsigned int target_position = rand()%x;
+						if(block_length > 0)
+						{
+							unsigned int tmpCode[MAX_LENGTH];
+							unsigned int tmpMarker[MAX_LENGTH];
+							
+							for(unsigned int i = 0; i < block_length; i++)
+							{
+								tmpCode[i] = Code[x + i];
+								tmpMarker[i] = Marker[x + i];
+							}							
+								
+							for(unsigned int i = target_position; i < x; i++)
+							{
+								Code[i+block_length] = Code[i];
+								Marker[i+block_length] = Marker[i];
+							}
+
+							for(unsigned int i = 0; i<block_length; i++)
+							{
+								Code[target_position + i] = tmpCode[i];
+								Marker[target_position + i] = tmpMarker[i];
+							}
                         }
-                        else
-                        if(y<ta)
-                        {
-                            for(i=0;i<ta-y;i++) tmp[i]=Code[0][i+y];
-                            for(i=ta;i<tb;i++) Code[0][y+i-ta]=Code[0][i];
-                            for(i=0;i<ta-y;i++) Code[0][tb-y]=tmp[i];
-                                                                                                                                                            
-                            for(i=0;i<ta-y;i++) tmp[i]=Code[1][i+y];
-                            for(i=ta;i<tb;i++) Code[1][y+i-ta]=Code[1][i];
-                            for(i=0;i<ta-y;i++) Code[1][tb-y]=tmp[i];
-                                                                                                                                                            
-                            for(i=0;i<ta-y;i++) tmp[i]=Marker[0][i+y];
-                            for(i=ta;i<tb;i++) Marker[0][y+i-ta]=Marker[0][i];
-                            for(i=0;i<ta-y;i++) Marker[0][tb-y]=tmp[i];
-                                                                                                                                                            
-                            for(i=0;i<ta-y;i++) tmp[i]=Marker[1][i+y];
-                            for(i=ta;i<tb;i++) Marker[1][y+i-ta]=Marker[1][i];
-                            for(i=0;i<ta-y;i++) Marker[1][tb-y]=tmp[i];
-                        }
-                    }*///break;
-//              case 6://flip entries
-//                  {
-                        // neutral :o
-//                      int l;
-//                      l=Code[0][x];Code[0][x]=Code[1][x];Code[1][x]=l;
-//                      l=Marker[0][x];Marker[0][x]=Marker[1][x];Marker[1][x]=l;
-//                  }break;
-				default:break; // TODO ERROR
+                    }break;
+				default:
+#ifdef _SCC_DEBUG
+				toLog("ERROR in PRERACE::mutateGeneCode: rand out of Range");
+#endif
+				break; // TODO ERROR
             }
         }
     }
@@ -932,12 +968,11 @@ void PRERACE::mutateGeneCode()
 
 
 
-
 //Reinitialize programs with random orders
 void PRERACE::resetGeneCode()
 {
 //	mutationRate=500+rand()%1000;
-/*	if((ga->preprocessBuildOrder)&&(basicLength>0))
+/*	if((configuration.preprocessBuildOrder)&&(basicLength>0))
 	{
 		memcpy(Code,basicBuildOrder,MAX_LENGTH*4);
 		for(int i=MAX_LENGTH;i--;)
@@ -1538,7 +1573,7 @@ const START_CONDITION* const* PRERACE::getStartCondition()
 void PRERACE::setTimer(const unsigned int time)
 {
 #ifdef _SCC_DEBUG
-	if(time>=MAX_TIME) {
+	if(time>configuration.getMaxTime()) {
 		toLog("DEBUG: (PRERACE::setTimer): Value time out of range.");return;
 	}
 #endif
@@ -1548,7 +1583,7 @@ void PRERACE::setTimer(const unsigned int time)
 const unsigned int PRERACE::getTimer() const
 {
 #ifdef _SCC_DEBUG
-	if(timer>=MAX_TIME) {
+	if(timer>configuration.getMaxTime()) {
 		toLog("DEBUG: (PRERACE::getTimer): Variable timer not initialized.");return(0);
 	}
 #endif
@@ -1559,11 +1594,11 @@ const unsigned int PRERACE::getTimer() const
 const unsigned int PRERACE::getRealTimer() const
 {
 #ifdef _SCC_DEBUG
-	if(timer>=MAX_TIME) {
+	if(timer>configuration.getMaxTime()) {
 		toLog("DEBUG: (PRERACE::getRealTimer): Variable timer not initialized.");return(0);
 	}
 #endif
-	return(ga->maxTime-timer);
+	return(configuration.getMaxTime()-timer);
 	// TODO auf > checken
 }
 
@@ -1658,7 +1693,7 @@ void PRERACE::setLength(const unsigned int length)
 void PRERACE::setTimeOut(const unsigned int time_out)
 {
 #ifdef _SCC_DEBUG
-	if(time_out>MAX_TIMEOUT) {
+	if(time_out>configuration.getMaxTimeOut()) {
 		toLog("DEBUG: (PRERACE::setTimeOut): Value time_out out of range.");return;
 	}
 #endif
@@ -1668,7 +1703,7 @@ void PRERACE::setTimeOut(const unsigned int time_out)
 const unsigned int PRERACE::getTimeOut() const
 {
 #ifdef _SCC_DEBUG
-	if(timeout>MAX_TIMEOUT) {
+	if(timeout>configuration.getMaxTimeOut()) {
 		toLog("DEBUG: (PRERACE::getTimeOut): Variable timeout not initialized.");return(0);
 	}
 #endif
@@ -1689,7 +1724,7 @@ const BASIC_MAP* const* PRERACE::getMap()
 // ------ END OF GET/SET FUNCTIONS ------
 // --------------------------------------
 
-GA* PRERACE::ga;
+//Configuration* PRERACE::configuration;
 START* PRERACE::pStart;
 const BASIC_MAP* const* PRERACE::pMap;
 

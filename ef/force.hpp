@@ -12,6 +12,7 @@
 
 #include "../core/anarace.hpp"
 #include "../core/settings.hpp"
+#include "../ui/radio.hpp"
 
 enum eMenu
 {

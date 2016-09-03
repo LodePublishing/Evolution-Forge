@@ -15,7 +15,6 @@ class ForceMenu : public Menu
 		void process();
 		void draw(DC* dc) const;
 	private:
-		ANARACE* anarace;
 };
 
 #endif // _GUI_FORCEMENU_HPP

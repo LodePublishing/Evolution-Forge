@@ -640,7 +640,7 @@ void GOAL_ENTRY::addGoal(const unsigned int unit, const signed int count, const 
 	if(globalGoal[location][unit] + count>MAX_TOTAL_UNITS) {
 		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value count out of range.");return;
 	}
-	if(time>=MAX_TIME) {
+	if(time>configuration.getMaxTime()) {
 		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value time out of range.");return;
 	}
 	if(location>=MAX_LOCATIONS) {

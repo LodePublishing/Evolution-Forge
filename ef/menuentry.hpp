@@ -7,7 +7,8 @@ class MenuEntry : public UI_Button
 {
 	public:
 		MenuEntry(const MenuEntry& object);
-		MenuEntry(UI_Object* parent, Rect rahmen, Rect maxSize, const string& unit);
+		MenuEntry(UI_Object* parent, Rect rect, const eString unit);
+		MenuEntry(UI_Object* parent, Rect rect, const string& unit);
 		~MenuEntry();
 		MenuEntry& operator=(const MenuEntry& object);
 		void updateText(const string& utext);

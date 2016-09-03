@@ -1,4 +1,5 @@
-#include "button.hpp"
+#include "radio.hpp"
+#include "../core/configuration.hpp"
 #include "math.h"
 
 // Button flags
@@ -27,10 +28,10 @@ UI_Button::UI_Button(const UI_Button& object) :
     UI_Object((UI_Object)object),
     radio(object.radio), //?
     forcedPress(object.forcedPress),
+    buttonPlacementArea(object.buttonPlacementArea),
     moved(object.moved),
     originalPosition(object.originalPosition),
     hasBitmap(object.hasBitmap),
-    buttonPlacementArea(object.buttonPlacementArea),
     gradient(object.gradient),
     timeStamp(object.timeStamp),
     pressdepth(object.pressdepth),
@@ -53,10 +54,10 @@ UI_Button& UI_Button::operator=(const UI_Button& object)
 
     radio = object.radio;                                                                                                                                                          
     forcedPress = object.forcedPress;
+    buttonPlacementArea = object.buttonPlacementArea;
     moved = object.moved;
     originalPosition = object.originalPosition;
     hasBitmap = object.hasBitmap;
-    buttonPlacementArea = object.buttonPlacementArea;
     gradient = object.gradient;
     timeStamp = object.timeStamp;
     pressdepth = object.pressdepth;
@@ -86,10 +87,10 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Rec
 	radio(0), //?
 
 	forcedPress(false),
+	buttonPlacementArea(button_rect),
 	moved(false),
 	originalPosition(false),
 	hasBitmap(false),
-	buttonPlacementArea(button_rect),
 	gradient(0),
 	timeStamp(0),
 	pressdepth(0),
@@ -128,11 +129,10 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Rec
 	UI_Object(button_parent, button_rect, button_max_rect),
     radio(0), //?
     forcedPress(false),
+    buttonPlacementArea(button_rect),
 	moved(false),
     originalPosition(false),
     hasBitmap(false),
-
-    buttonPlacementArea(button_rect),
 	gradient(0),
 	timeStamp(0),
 	pressdepth(0),
@@ -171,10 +171,10 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Rec
 	UI_Object(button_parent, button_rect, button_max_rect),
     radio(0), //?
     forcedPress(false),
+    buttonPlacementArea(button_rect),
 	moved(false),
     originalPosition(false),
     hasBitmap(true),
-    buttonPlacementArea(button_rect),
 	
 	gradient(0),
     timeStamp(0),
@@ -273,7 +273,7 @@ void UI_Button::adjustButtonSize(const Size& size)
 		}break;
 		case ARRANGE_TOP_RIGHT:
 		{
-			setPosition(buttonPlacementArea.GetTopLeft()+Size(buttonPlacementArea.GetWidth(), 0) - Size(getParent()->getMinTopRightX() + getWidth(), 0));
+			setPosition(buttonPlacementArea.GetTopLeft()+Size(buttonPlacementArea.GetWidth(), 0) - Size(getParent()->getMinTopRightX() + getWidth() + 40, 0));
 			getParent()->addMinTopRightX(getWidth() + MIN_DISTANCE);
 		}break;
 		case ARRANGE_BOTTOM_LEFT:
@@ -283,7 +283,7 @@ void UI_Button::adjustButtonSize(const Size& size)
 		}break;
 		case ARRANGE_BOTTOM_RIGHT:
 		{
-			setPosition(buttonPlacementArea.GetTopLeft()+buttonPlacementArea.GetSize() - Size(getParent()->getMinBottomRightX() + getWidth(), getHeight()));
+			setPosition(buttonPlacementArea.GetTopLeft()+buttonPlacementArea.GetSize() - Size(getParent()->getMinBottomRightX() + 30+ getWidth(), 40+getHeight()));
 			getParent()->addMinBottomRightX(getWidth() + MIN_DISTANCE);
 		}break;
 		case ARRANGE_LEFT:
@@ -326,6 +326,14 @@ void UI_Button::draw(DC* dc) const
 	if(isDisabled())
 		animation_phase=DISABLED_BUTTON_PHASE;
 	else 
+	if((statusFlags & BF_STATIC)&&(originalPosition))
+	{
+        if((statusFlags & BF_HIGHLIGHTED) || (gradient < 100 ))
+	        animation_phase=PRESSED_HIGHLIGHTED_BUTTON_PHASE;
+	    else
+        	animation_phase=PRESSED_BUTTON_PHASE;
+	}
+	else
 	if(statusFlags & BF_DOWN)
 	{
 		if((statusFlags & BF_HIGHLIGHTED) || (gradient < 100 ))
@@ -611,7 +619,7 @@ void UI_Button::mouseRightButtonReleased()
 
 UI_Object* UI_Button::checkHighlight()
 {
-	if( (isDisabled()) || (!getAbsoluteRect().Inside(mouse - Size(pressdepth, pressdepth) )) )
+	if( (!isShown()) || (isDisabled()) || (!getAbsoluteRect().Inside(mouse - Size(pressdepth, pressdepth) )) )
 		return(0);
 	return((UI_Object*)this);
 }
@@ -734,10 +742,18 @@ void UI_Button::process()
 	// TODO evtl Animation fuer jede Phase in die config datei
 	// dann waere sowas moeglich, dass ich maus reinfahr und das langsam verblasst
 	// evtl auch einfach brightencolor ueberlegen...
+	if(!configuration.isGlowingButtons())
+	{
+	    if(!(statusFlags & BF_HIGHLIGHTED))
+			gradient=100;
+		else 
+		if(frameNumber<theme.lookUpButtonAnimation(button)->speed/2) gradient=100;
+		else 
+		gradient=0;
+	} else			
 	if(!(statusFlags & BF_HIGHLIGHTED))
 		gradient += (100 - gradient) / 5 + 1;
 	else
-	
 	switch(theme.lookUpButtonAnimation(button)->type)
 	{
     	case NO_ANIMATION:if(gradient<100) gradient++;else gradient=100;break;

@@ -58,22 +58,22 @@ class START
 
 // Benutzer waehlt: Karte, Spielmodus, Harvestspeed, und fuegt Spieler mit Rasse, Startforce (default), StartPosition (absolut / zufaellig), Siegbedingungen (goals), 
 	public:
-		const unsigned int getBasicMineralHarvestSpeedPerSecond(const unsigned int player, const unsigned int worker) const; // 'player' noch rausoptimieren!
-		const unsigned int getBasicGasHarvestSpeedPerSecond(const unsigned int player, const unsigned int worker) const;
+		const unsigned int getBasicMineralHarvestSpeedPerSecond(const unsigned int playerNum, const unsigned int worker) const; // 'player' noch rausoptimieren!
+		const unsigned int getBasicGasHarvestSpeedPerSecond(const unsigned int playerNum, const unsigned int worker) const;
 		void assignMap(const BASIC_MAP* map); 
 		void setHarvestSpeed(const eRace race, const HARVEST_SPEED* harvest); // copy data (pointers) from settings 
 		// assign Mode ?
-		void setStartPosition(const unsigned int player, const unsigned int startPosition);
-		void setPlayerRace(const unsigned int player, const eRace race); // => gleichzeitig wird harvestspeed geaendert und condition und goal muessen u.U. neugewaehlt werden!
-		void assignStartcondition(const unsigned int player, const START_CONDITION* startcondition);
+		void setStartPosition(const unsigned int playerNum, const unsigned int startPosition);
+		void setPlayerRace(const unsigned int playerNum, const eRace race); // => gleichzeitig wird harvestspeed geaendert und condition und goal muessen u.U. neugewaehlt werden!
+		void assignStartcondition(const unsigned int playerNum, const START_CONDITION* startcondition);
 		
 		void fillGroups();
 		
-		void assignGoal(const unsigned int player, const GOAL_ENTRY* goal);
+		void assignGoal(const unsigned int playerNum, const GOAL_ENTRY* goal);
 
 		const UNIT_STATISTICS* const* getpStats(const unsigned int playerNum) const;
 		
-		const START_CONDITION* const* getStartcondition(const unsigned int player) const; 
+		const START_CONDITION* const* getStartcondition(const unsigned int playerNum) const; 
 		void copyStartForce(void* target) const;
 		const BASIC_MAP* const* getMap() const;
 		GOAL_ENTRY** getCurrentGoal(const unsigned int playerNum);

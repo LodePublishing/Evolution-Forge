@@ -25,7 +25,7 @@ class UI_StaticText:public UI_Object
 
 		UI_StaticText(UI_Object* st_parent, const eString st_text, const Rect st_pos, const eTextMode st_mode = NO_TEXT_MODE, const eColor st_color = NULL_COLOR, const eFont st_font = NULL_FONT);
 		
-		UI_StaticText(UI_Object* st_parent, const string st_text, const Rect st_pos, const eTextMode st_mode = NO_TEXT_MODE, const eColor st_color = NULL_COLOR, const eFont st_font = NULL_FONT);
+		UI_StaticText(UI_Object* st_parent, const string& st_text, const Rect st_pos, const eTextMode st_mode = NO_TEXT_MODE, const eColor st_color = NULL_COLOR, const eFont st_font = NULL_FONT);
 
 		~UI_StaticText();
 		
@@ -56,10 +56,13 @@ class UI_StaticText:public UI_Object
 //		bool editable;
 		
 		string text;
+		
         eFont font;
         Color color;
 		unsigned int position;
-		
+		eString eText;
+		bool textMode;
+	
 };
 
 #endif // _UI_STATICTEXT_HPP

@@ -18,7 +18,7 @@ ANARACE::ANARACE():
 	currentRun(0),
 	optimizing(false),
 	active(true),
-	generation(0),
+	totalGeneration(0),
 	maxpFitness(0),
 	maxsFitness(0),
 	maxtFitness(MAX_TFITNESS),
@@ -38,10 +38,73 @@ ANARACE::ANARACE():
 ANARACE::~ANARACE()
 { }
 
+ANARACE::ANARACE(const ANARACE& object) :
+	PRERACE((PRERACE)object),
+	unitsTotal( object.unitsTotal ),
+	unitsTotalMax( object.unitsTotalMax ),
+	unchangedGenerations( object.unchangedGenerations ),
+	currentRun( object.currentRun ),
+	optimizing( object.optimizing ),
+	active( object.active ),
+	totalGeneration( object.totalGeneration ),
+	maxpFitness( object.maxpFitness ),
+	maxsFitness( object.maxsFitness ),
+	maxtFitness( object.maxtFitness ),
+	timePercentage( object.timePercentage ),
+	goalPercentage( object.goalPercentage ),
+	currentpFitness( object.currentpFitness ),
+	averageLength( object.averageLength ),
+	fitnessAverage( object.fitnessAverage ),
+	fitnessVariance( object.fitnessVariance ),
+	positiveCrossover( object.positiveCrossover ),
+	wayneCrossover( object.wayneCrossover ), 
+	negativeCrossover( object.negativeCrossover )
+{
+	for(int i = MAX_LENGTH;i--;)
+	{
+		phaenoCode[i] = object.phaenoCode[i];
+		program[i] = object.program[i];
+		statistics[i] = object.statistics[i];
+	}		
+}
+
+ANARACE& ANARACE::operator=(const ANARACE& object)
+{
+	(PRERACE)(*this) = (PRERACE)object;
+    unitsTotal = object.unitsTotal;
+    unitsTotalMax = object.unitsTotalMax;
+    unchangedGenerations = object.unchangedGenerations;
+    currentRun = object.currentRun;
+    optimizing = object.optimizing;
+    active = object.active;
+    totalGeneration = object.totalGeneration;
+    maxpFitness = object.maxpFitness;
+    maxsFitness = object.maxsFitness;
+    maxtFitness = object.maxtFitness;
+    timePercentage = object.timePercentage;
+    goalPercentage = object.goalPercentage;
+    currentpFitness = object.currentpFitness;
+    averageLength = object.averageLength;
+    fitnessAverage = object.fitnessAverage;
+    fitnessVariance = object.fitnessVariance;
+    positiveCrossover = object.positiveCrossover;
+    wayneCrossover = object.wayneCrossover;
+    negativeCrossover = object.negativeCrossover;
+    for(int i = MAX_LENGTH;i--;)
+    {
+        phaenoCode[i] = object.phaenoCode[i];
+        program[i] = object.program[i];
+        statistics[i] = object.statistics[i];
+    }
+	return(*this);
+}
+
+
+
 void ANARACE::resetData()
 {
 	resetSpecial();
-	setGeneration(0);
+	setTotalGeneration(0);
 	setMaxpFitness(0);
 	setMaxsFitness(0);
 	setMaxtFitness(MAX_TFITNESS);
@@ -61,7 +124,6 @@ void ANARACE::prepareForNewGeneration() // resets all data to standard starting 
 	PRERACE::prepareForNewGeneration();
 	setCurrentpFitness(0);
 
-//	for(int i=MAX_TIME;i--;)
 	for(int i=MAX_LENGTH;i--;)
 	{
 		setStatisticsHaveSupply(i, 0);
@@ -104,7 +166,7 @@ const bool ANARACE::calculateStep()
 
 	if((!getTimer())||(ready=calculateReady())||(!getIP()))
 	{
-		setLength(ga->maxLength-getIP());
+		setLength(configuration.getMaxLength()-getIP());
 		if(!ready) 
 			setTimer(0);
 		while(!buildingQueue.empty())
@@ -153,7 +215,7 @@ const bool ANARACE::calculateStep()
 			if(ok) {
 				setProgramTime(getIP(), getTimer());
 			} else {
-				setProgramTime(getIP(),ga->maxTime);
+				setProgramTime(getIP(),configuration.getMaxTime());
 				setProgramSuccessType(getIP(), TIMEOUT_ERROR);
 				setProgramSuccessUnit(getIP(), 0);
 //				setProgramSuccessLocation(0);
@@ -163,7 +225,7 @@ const bool ANARACE::calculateStep()
 				setProgramAvailibleCount(getIP(),i,getLocationAvailible(GLOBAL, i));
 			}
 	
-			setTimeOut(ga->maxTimeOut);
+			setTimeOut(configuration.getMaxTimeOut());
 			setIP(getIP()-1);
 		}
 	}
@@ -831,7 +893,7 @@ void ANARACE::setProgramTime(const unsigned int IP, const unsigned int time)
 	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::setProgramTime): Value IP out of range.");return;
 	}
-	if(time>=MAX_TIME) {
+	if(time>configuration.getMaxTime()) {
 		toLog("DEBUG: (ANARACE::setProgramTime): Value time out of range.");return;
 	}
 #endif
@@ -1029,7 +1091,7 @@ const unsigned int ANARACE::getProgramTime(const unsigned int IP) const
 	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::getProgramTime): Value IP out of range.");return(0);
 	}
-	if(program[IP].time>=MAX_TIME) {
+	if(program[IP].time>configuration.getMaxTime()) {
 		toLog("DEBUG: (ANARACE::getProgramTime): Variable not initialized.");return(0);
 	}
 #endif
@@ -1043,7 +1105,7 @@ const unsigned int ANARACE::getRealProgramTime(const unsigned int IP) const
         toLog("DEBUG: (ANARACE::getProgramLocation): Value IP out of range.");return(0);
     }
 #endif
-	return(ga->maxTime - getProgramTime(IP));
+	return(configuration.getMaxTime() - getProgramTime(IP));
 }
 
 const unsigned int ANARACE::getStatisticsHaveMinerals(const unsigned int IP) const
@@ -1158,7 +1220,7 @@ void ANARACE::setCurrentpFitness(const unsigned int num)
 const unsigned int ANARACE::getUnchangedGenerations() const
 {
 #ifdef _SCC_DEBUG	
-	if(unchangedGenerations>MAX_GENERATIONS) {
+	if(unchangedGenerations>configuration.getMaxGenerations()) {
 		toLog("DEBUG: (ANARACE::getUnchangedGenerations): Variable unchangedGenerations not initialized.");return(0);
 	}
 #endif
@@ -1168,22 +1230,16 @@ const unsigned int ANARACE::getUnchangedGenerations() const
 const unsigned int ANARACE::getRun() const
 {
 #ifdef _SCC_DEBUG	
-	if(currentRun>MAX_RUNS) {
+	if(currentRun>configuration.getMaxRuns()) {
 		toLog("DEBUG: (ANARACE::getRun): Variable currentRun not initialized.");return(0);
 	}
 #endif
 	return(currentRun);
 }
 
-const unsigned int ANARACE::getGeneration() const
+const unsigned int ANARACE::getTotalGeneration() const
 {
-#ifdef _SCC_DEBUG	
-	//TODO ga->maxgeneration?
-	if(generation>MAX_GENERATIONS) {
-		toLog("DEBUG: (ANARACE::getGeneration): Variable generation not initialized.");return(0);
-	}
-#endif
-	return(generation);
+	return(totalGeneration);
 }
 
 const unsigned int ANARACE::getMaxpFitness() const
@@ -1220,7 +1276,7 @@ const unsigned int ANARACE::getMaxtFitness() const
 void ANARACE::setUnchangedGenerations(const unsigned int unchangedGenerations)
 {
 #ifdef _SCC_DEBUG	
-	if(unchangedGenerations>MAX_GENERATIONS) {
+	if(unchangedGenerations>configuration.getMaxGenerations()) {
 		toLog("DEBUG: (ANARACE::setUnchangedGenerations): Value num out of range.");return;
 	}
 #endif
@@ -1230,21 +1286,16 @@ void ANARACE::setUnchangedGenerations(const unsigned int unchangedGenerations)
 void ANARACE::setRun(const unsigned int run)
 {
 #ifdef _SCC_DEBUG
-	if(run>MAX_RUNS) {
+	if(run>configuration.getMaxRuns()) {
 		toLog("DEBUG: (ANARACE::setRun): Value run out of range.");return;
 	}
 #endif
 	currentRun=run;
 }
 
-void ANARACE::setGeneration(const unsigned int generation)
+void ANARACE::setTotalGeneration(const unsigned int total_generation)
 {
-#ifdef _SCC_DEBUG
-	if(generation>MAX_GENERATIONS) {
-		toLog("DEBUG: (ANARACE::setGeneration): Value out of range.");return;
-	}
-#endif
-	this->generation=generation;
+	totalGeneration=total_generation;
 }
 
 void ANARACE::setMaxpFitness(const unsigned int maxpFitness) 

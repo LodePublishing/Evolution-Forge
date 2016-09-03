@@ -62,7 +62,7 @@ void BoDiagramWindow::process()
 //return;
 	if(anarace->getRealTimer()<2) return;
 	
-//	if(anarace->getTimer()==settings.getGa()->maxTime) time=0;
+//	if(anarace->getTimer()==configuration.getMaxTime()) time=0;
 //		else 
 //time=anarace->getTimer()+1;
 	float time = (getClientRectWidth()-6) / (float)(anarace->getRealTimer());
@@ -70,7 +70,7 @@ void BoDiagramWindow::process()
 	unsigned int haveSupply=10; // TODO
 	unsigned int maxMins=(*anarace->getStartCondition())->getMinerals();
 	unsigned int maxGas=(*anarace->getStartCondition())->getGas();
-	for(unsigned int i = settings.getGa()->maxLength - anarace->getLength(); i<settings.getGa()->maxLength; i++)
+	for(unsigned int i = configuration.getMaxLength() - anarace->getLength(); i<configuration.getMaxLength(); i++)
 	{
 		if(anarace->getStatisticsHaveMinerals(i)>maxMins) 
 			maxMins=anarace->getStatisticsHaveMinerals(i);
@@ -157,8 +157,8 @@ void BoDiagramWindow::process()
         }
 	}
 	count++;
-	unsigned int s=settings.getGa()->maxLength-1;// - anarace->getLength();
-	while(s > settings.getGa()->maxLength - anarace->getLength())
+	unsigned int s=configuration.getMaxLength()-1;// - anarace->getLength();
+	while(s > configuration.getMaxLength() - anarace->getLength())
 	{
 		if(!anarace->getProgramIsBuilt(s))
 		{
@@ -167,7 +167,7 @@ void BoDiagramWindow::process()
 		}
 		int y1;
 		if(maxMins) y1=anarace->getStatisticsHaveMinerals(s)*75/maxMins; else y1=0;
-		Point p=Point( 3+anarace->getRealProgramTime(s)*time, -y1-2);
+		Point p=Point( 3+(int)(anarace->getRealProgramTime(s)*time), -y1-2);
         if(targetMinerals[count]==Point(0,0))
         {
             targetMinerals[count]=p;
@@ -180,7 +180,7 @@ void BoDiagramWindow::process()
 		}
 																																						
 		if(maxGas) y1=anarace->getStatisticsHaveGas(s)*75/maxGas; else y1=0;
-		p=Point( 3+anarace->getRealProgramTime(s)*time, -y1-2);
+		p=Point( 3+(int)(anarace->getRealProgramTime(s)*time), -y1-2);
 		// first round
 		if(targetGas[count]==Point(0,0))
 		{
@@ -203,7 +203,7 @@ void BoDiagramWindow::process()
 		}		*/
 		
 		if(haveSupply) y1=anarace->getStatisticsHaveSupply(s)*75/haveSupply; else y1=0;
-		p=Point(3+anarace->getRealProgramTime(s)*time, -y1-2);
+		p=Point(3+(int)(anarace->getRealProgramTime(s)*time), -y1-2);
         if(targetHneedSupply[count]==Point(0,0))
         {
             targetHneedSupply[count]=p;
@@ -216,7 +216,7 @@ void BoDiagramWindow::process()
 		}
 		
 		if(haveSupply) y1=anarace->getStatisticsNeedSupply(s)*75/haveSupply; else y1=0;
-		p=Point(3+anarace->getRealProgramTime(s)*time, -y1-2);
+		p=Point(3+(int)(anarace->getRealProgramTime(s)*time), -y1-2);
         if(targetNneedSupply[count]==Point(0,0))
         {
             targetNneedSupply[count]=p;
@@ -370,7 +370,7 @@ void BoDiagramWindow::draw(DC* dc) const
 		
 			dc->SetBrush(*theme.lookUpBrush(BODIAGRAM_SUPPLY_BRUSH));
 			dc->SetPen(*theme.lookUpPen(BODIAGRAM_SUPPLY_PEN));
-			for(int i = 0;i<(count-1);i++)
+			for(unsigned int i = 0;i<(count-1);i++)
 			{
 				if(hneedSupply[i].y > nneedSupply[i].y)
 					dc->DrawRectangle(getAbsoluteClientRectPosition() + Point(0, getClientRectHeight()) + hneedSupply[i], Size(hneedSupply[i+1].x - hneedSupply[i].x, hneedSupply[i].y - nneedSupply[i].y));
@@ -402,11 +402,11 @@ void BoDiagramWindow::draw(DC* dc) const
 				ostringstream os;
 				dc->SetTextForeground(*theme.lookUpColor(BRIGHT_MINERALS_TEXT_COLOR));
 				unsigned int t = anarace->getRealTimer() * (mouse.x - getAbsoluteClientRectLeftBound()) / getClientRectWidth();
-				unsigned int s = settings.getGa()->maxLength;
+				unsigned int s = configuration.getMaxLength();
 
 
 				
-				while(s > settings.getGa()->maxLength - anarace->getLength())
+				while(s > configuration.getMaxLength() - anarace->getLength())
 				if(anarace->getProgramIsBuilt(s))
 				{
 					if(anarace->getRealProgramTime(s) > t)

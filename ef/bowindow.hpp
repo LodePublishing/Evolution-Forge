@@ -3,6 +3,7 @@
 
 #include "../ui/window.hpp"
 #include "numberfield.hpp"
+#include "message.hpp"
 
 #include "info.hpp"
 #include <map>
@@ -30,7 +31,7 @@ class BoWindow:public UI_Window
 	public:
 		BoWindow(const BoWindow& object);
 		BoWindow& operator=(const BoWindow& object);
-		BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_info_window, std::map <long, Order>* bo_order_list, const unsigned int bo_window_number);
+		BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_info_window, MessageWindow* message_window, std::map <long, Order>* bo_order_list, const unsigned int bo_window_number);
 		~BoWindow();
 		void resetData();
 		void draw(DC* dc) const;
@@ -64,6 +65,8 @@ class BoWindow:public UI_Window
 
 		UI_Button* resetButton;
 		UI_Button* saveBuildOrderButton;
+
+		MessageWindow* msgWindow;
 
 //		NumberField* speed;
 };

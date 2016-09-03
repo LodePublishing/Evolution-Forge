@@ -8,7 +8,11 @@
 class Menu : public UI_Object
 {
 	public:
-		Menu(UI_Object* parent, Rect rect/*, const unsigned int width, const unsigned int number*/);
+// Anzahl, Position, coloumns, height / width, first string, Button
+// TODO Button noch rein evtl
+		Menu(UI_Object* parent, Rect rect, const bool chooseMenu);
+		Menu(UI_Object* parent, Rect rect, const int entryNumber, const int coloumns, const Size& s, const eString firstString, const eButton button, const bool chooseMenu);
+		
 		Menu(const Menu& object);
 		~Menu();
 		Menu& operator=(const Menu& object);
@@ -26,6 +30,7 @@ class Menu : public UI_Object
 		signed int pressedItem;
 		signed int markedItem;
 		unsigned int height;
+		bool chooseMenu;
 	private:
 		Point p1, p2;
 };

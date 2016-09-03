@@ -1,4 +1,4 @@
-#include "button.hpp"
+#include "radio.hpp"
 
 
 UI_Radio& UI_Radio::operator=(const UI_Radio& object)
@@ -6,19 +6,22 @@ UI_Radio& UI_Radio::operator=(const UI_Radio& object)
 	((UI_Object)(*this)) = ((UI_Object)object);
 	markedItem = object.markedItem;
 	changed = object.changed;
+	alwaysOn = object.alwaysOn;
 	return(*this);
 }
 
 UI_Radio::UI_Radio(const UI_Radio& object):
 	UI_Object((UI_Object)object),
     markedItem(object.markedItem),
-    changed(object.changed)
+    changed(object.changed),
+	alwaysOn(object.alwaysOn)
 { }
 
-UI_Radio::UI_Radio(UI_Object* radio_parent):
+UI_Radio::UI_Radio(UI_Object* radio_parent, const bool alwaysOn) :
 	UI_Object(radio_parent),
 	markedItem(0),
-	changed(false)
+	changed(false),
+	alwaysOn(alwaysOn)
 { }
 
 UI_Radio::~UI_Radio()
@@ -108,8 +111,7 @@ void UI_Radio::leftButtonPressed(UI_Button* button)
 		else markedItem=i;
 		i++;
 		tmp=(UI_Button*)tmp->getNextBrother();
-	}
-	while(tmp!=(UI_Button*)getChildren());
+	} while(tmp!=(UI_Button*)getChildren());
 }
 
 void UI_Radio::leftButtonReleased(UI_Button* button) // allow release?
@@ -123,8 +125,7 @@ void UI_Radio::leftButtonReleased(UI_Button* button) // allow release?
         	markedItem=i;
         i++;
         tmp=(UI_Button*)tmp->getNextBrother();
-    }
-    while(tmp!=(UI_Button*)getChildren());
+    } while(tmp!=(UI_Button*)getChildren());
 	
 	// allow it. :|
 }
@@ -138,8 +139,6 @@ void UI_Radio::rightButtonReleased(UI_Button* button) // allow release?
 {
 	leftButtonReleased(button);
 }
-
-
 
 void UI_Radio::process()
 {

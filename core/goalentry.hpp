@@ -5,9 +5,6 @@
 #include "unit.hpp"
 #include "goal.hpp"
 
-#include <list>
-
-
 struct GOAL_TREE
 {
     bool checked[GAS_SCV+1];

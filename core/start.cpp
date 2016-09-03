@@ -16,8 +16,6 @@ void START::fillGroups()
 {
 	for(int i=MAX_PLAYER;i--;)
 		totalForce[i].resetData();
-//	for(int i=MAX_LOCATIONS;i--;)
-//		group[j].clear();
 	int maxp=tmpmap->getMaxPlayer();
 
 	for(int j=MAX_LOCATIONS;j--;)
@@ -57,12 +55,16 @@ void START::setHarvestSpeed(const eRace race, const HARVEST_SPEED* harvest)
 	this->harvest[race]=harvest;
 }
 
-void START::assignGoal(const unsigned int player, const GOAL_ENTRY* goal)
+void START::assignGoal(const unsigned int playerNum, const GOAL_ENTRY* goal)
 {
-	tmpgoal[player]=goal;
-	currentGoal[player].copy(goal);
-	currentGoal[player].adjustGoals(&(totalForce[player]));
-
+#ifdef _SCC_DEBUG
+    if((playerNum<1)||(playerNum>=MAX_PLAYER)) {
+        toLog("DEBUG: (START::assignGoal): Value playerNum out of range.");return;
+    }
+#endif
+	tmpgoal[playerNum]=goal;
+	currentGoal[playerNum].copy(goal);
+	currentGoal[playerNum].adjustGoals(&(totalForce[playerNum]));
 }
 
 void START::assignStartcondition(const unsigned int player, const START_CONDITION* startcondition)
@@ -77,14 +79,24 @@ void START::assignMap(const BASIC_MAP* map)
 	// player 0 ?
 }
 
-const unsigned int START::getBasicMineralHarvestSpeedPerSecond(const unsigned int player, const unsigned int worker) const // 'player' noch rausoptimieren!
+const unsigned int START::getBasicMineralHarvestSpeedPerSecond(const unsigned int playerNum, const unsigned int worker) const // 'player' noch rausoptimieren!
 {
-	return(harvest[playerRace[player]]->getHarvestMineralSpeed(worker));
+#ifdef _SCC_DEBUG
+    if((playerNum<1)||(playerNum>=MAX_PLAYER)) {
+        toLog("DEBUG: (START::getCurrentGoal): Value playerNum out of range.");return(0);
+    }
+#endif
+	return(harvest[playerRace[playerNum]]->getHarvestMineralSpeed(worker));
 }
 
-const unsigned int START::getBasicGasHarvestSpeedPerSecond(const unsigned int player, const unsigned int worker) const
+const unsigned int START::getBasicGasHarvestSpeedPerSecond(const unsigned int playerNum, const unsigned int worker) const
 {
-	return(harvest[playerRace[player]]->getHarvestGasSpeed(worker));
+#ifdef _SCC_DEBUG
+    if((playerNum<1)||(playerNum>=MAX_PLAYER)) {
+        toLog("DEBUG: (START::getBasicGasHarvestSpeedPerSecond): Value playerNum out of range.");return(0);
+    }
+#endif
+	return(harvest[playerRace[playerNum]]->getHarvestGasSpeed(worker));
 			
 }
 				
@@ -98,35 +110,64 @@ void START::copyStartForce(void* target) const
 	memcpy(target, &(startForce[0][0]), sizeof(startForce));
 }
 
-const START_CONDITION* const* START::getStartcondition(const unsigned int player) const
+const START_CONDITION* const* START::getStartcondition(const unsigned int playerNum) const
 {
-	return(&(startcondition[player]));
+#ifdef _SCC_DEBUG
+    if((playerNum<1)||(playerNum>=MAX_PLAYER)) {
+        toLog("DEBUG: (START::getStartcondition): Value playerNum out of range.");return(NULL);
+    }
+#endif
+	return(&(startcondition[playerNum]));
 }
 
-void START::setStartPosition(const unsigned int player, const unsigned int startPosition)
+void START::setStartPosition(const unsigned int playerNum, const unsigned int startPosition)
 {
-	this->startPosition[player]=startPosition;
+#ifdef _SCC_DEBUG
+    if((playerNum<1)||(playerNum>=MAX_PLAYER)) {
+        toLog("DEBUG: (START::setStartPosition): Value playerNum out of range.");return;
+    }
+#endif
+	this->startPosition[playerNum]=startPosition;
 }
 
 const eRace START::getPlayerRace(const unsigned int playerNum) const
 {
+#ifdef _SCC_DEBUG
+    if((playerNum<1)||(playerNum>=MAX_PLAYER)) {
+        toLog("DEBUG: (START::getPlayerRace): Value playerNum out of range.");return(TERRA);
+    }
+#endif
 	return(playerRace[playerNum]);
 }
 
-void START::setPlayerRace(const unsigned int player, const eRace race)
+void START::setPlayerRace(const unsigned int playerNum, const eRace race)
 {
-	playerRace[player]=race; // TODO
-	pStats[player]=&(stats[race][0]);
+#ifdef _SCC_DEBUG
+    if((playerNum<1)||(playerNum>=MAX_PLAYER)) {
+        toLog("DEBUG: (START::setPlayerRace): Value playerNum out of range.");return;
+    }
+#endif
+	playerRace[playerNum]=race; // TODO
+	pStats[playerNum]=&(stats[race][0]);
 }
 
 GOAL_ENTRY** START::getCurrentGoal(const unsigned int playerNum)
 {
-	// TODO Fehlercheck
+#ifdef _SCC_DEBUG
+	if((playerNum<1)||(playerNum>=MAX_PLAYER)) {
+		toLog("DEBUG: (START::getCurrentGoal): Value playerNum out of range.");return(NULL);
+	}
+#endif
 	return(&(pCurrentGoal[playerNum]));
 }
 
 const UNIT_STATISTICS* const* START::getpStats(const unsigned int playerNum) const
 {
+#ifdef _SCC_DEBUG
+    if((playerNum<1)||(playerNum>=MAX_PLAYER)) {
+        toLog("DEBUG: (START::getpStats): Value playerNum out of range.");return(NULL);
+    }
+#endif
 	return(&(pStats[playerNum]));
 }
 

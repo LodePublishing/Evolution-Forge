@@ -1,5 +1,5 @@
 #include "statistics.hpp"
-#include "../core/settings.hpp"
+#include "../core/configuration.hpp"
 
 enum eStatEntry
 {
@@ -29,10 +29,10 @@ StatisticsWindow::StatisticsWindow(UI_Object* stat_parent, const ANARACE* stat_a
 	maxaFitness(0),
 	maxvFitness(0),
 //	maxForce(0),
-	maxfps(0),
 	maxHarvestedRessources(1000),
-	averagecounter(0),
-    speed(new NumberField(this, Rect(getRelativeClientRectPosition() + Point(210, 111), Size(100, 100)), SPEED_STRING, SETTING_FRAMERATE_TOOLTIP_STRING, 25))
+	maxfps(0),
+	averagecounter(0)
+//    speed(new NumberField(this, Rect(getRelativeClientRectPosition() + Point(210, 111), Size(100, 100)), 0, 100, 1, 25, SPEED_STRING, SETTING_FRAMERATE_TOOLTIP_STRING))
 {
 	ani=0;
 	resetData();
@@ -44,22 +44,21 @@ StatisticsWindow::StatisticsWindow(UI_Object* stat_parent, const ANARACE* stat_a
 	for(int i=0;i<MAX_STAT_ENTRY;i++)
 		statEntry[i] = new UI_Button(this, Rect(l1+Point(0,i*12), l2), Rect(l1+Point(0,i*12), l2), (eString)(FORCE_STAT_STRING+i), (eString)(FORCE_STAT_STRING+i), (eButton)(FORCE_STAT_BUTTON+i), NO_TEXT_MODE, NO_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE);
 
-	statEntry[FORCE_STAT_ENTRY]->updateToolTip(*theme.lookUpString(FORCE_STAT_TOOLTIP_STRING));
-	statEntry[TIME_STAT_ENTRY]->updateToolTip(*theme.lookUpString(TIME_STAT_TOOLTIP_STRING));
-	statEntry[MINERALS_STAT_ENTRY]->updateToolTip(*theme.lookUpString(MINERALS_STAT_TOOLTIP_STRING));
-	statEntry[GAS_STAT_ENTRY]->updateToolTip(*theme.lookUpString(GAS_STAT_TOOLTIP_STRING));
-	statEntry[FITNESS_AVERAGE_STAT_ENTRY]->updateToolTip(*theme.lookUpString(FITNESS_AVERAGE_STAT_TOOLTIP_STRING));
-	statEntry[FITNESS_VARIANCE_STAT_ENTRY]->updateToolTip(*theme.lookUpString(FITNESS_VARIANCE_STAT_TOOLTIP_STRING));
-	statEntry[AVERAGE_BO_LENGTH_STAT_ENTRY]->updateToolTip(*theme.lookUpString(AVERAGE_BO_LENGTH_STAT_TOOLTIP_STRING));
-	statEntry[GENERATIONS_LEFT_STAT_ENTRY]->updateToolTip(*theme.lookUpString(GENERATIONS_LEFT_STAT_TOOLTIP_STRING));
-//	statEntry[GENERATIONS_LEFT_STAT_ENTRY]->updateToolTip(*theme.lookUpString(GENERATIONS_LEFT_STAT_TOOLTIP_STRING));
+	statEntry[FORCE_STAT_ENTRY]->updateToolTip(FORCE_STAT_TOOLTIP_STRING);
+	statEntry[TIME_STAT_ENTRY]->updateToolTip(TIME_STAT_TOOLTIP_STRING);
+	statEntry[MINERALS_STAT_ENTRY]->updateToolTip(MINERALS_STAT_TOOLTIP_STRING);
+	statEntry[GAS_STAT_ENTRY]->updateToolTip(GAS_STAT_TOOLTIP_STRING);
+	statEntry[FITNESS_AVERAGE_STAT_ENTRY]->updateToolTip(FITNESS_AVERAGE_STAT_TOOLTIP_STRING);
+	statEntry[FITNESS_VARIANCE_STAT_ENTRY]->updateToolTip(FITNESS_VARIANCE_STAT_TOOLTIP_STRING);
+	statEntry[AVERAGE_BO_LENGTH_STAT_ENTRY]->updateToolTip(AVERAGE_BO_LENGTH_STAT_TOOLTIP_STRING);
+	statEntry[GENERATIONS_LEFT_STAT_ENTRY]->updateToolTip(GENERATIONS_LEFT_STAT_TOOLTIP_STRING);
 }
 
 StatisticsWindow::~StatisticsWindow()
 {
 	for(int i=0;i<MAX_STAT_ENTRY;i++)
 		delete statEntry[i];
-	delete speed;
+//	delete speed;
 }
 																				
 void StatisticsWindow::showGraph(DC* dc, const unsigned int* data, const unsigned int min, const unsigned int max, const Color col) const
@@ -108,7 +107,7 @@ void StatisticsWindow::resetData()
 		alength[i]=0; //ok
 		time[i]=0;
 		force[i]=5; //5 units at the beginning!
-		generation[i]=settings.getGa()->maxGenerations;
+		generation[i]=configuration.getMaxGenerations();
 	};
 																				
 	for(int i=20;i--;)
@@ -173,9 +172,9 @@ void StatisticsWindow::draw(DC* dc) const
 
 // ------ GENERATIONS ------
     if(statEntry[GENERATIONS_LEFT_STAT_ENTRY]->isCurrentlyHighlighted())
-		showGraph(dc,generation,0,settings.getGa()->maxGenerations, dc->mixColor(theme.lookUpColor(BRIGHT_TEXT_COLOR), theme.lookUpColor(IMPORTANT_COLOR)));
+		showGraph(dc,generation,0,configuration.getMaxGenerations(), dc->mixColor(theme.lookUpColor(BRIGHT_TEXT_COLOR), theme.lookUpColor(IMPORTANT_COLOR)));
 	else
-	    showGraph(dc,generation,0,settings.getGa()->maxGenerations,*theme.lookUpColor(IMPORTANT_COLOR));
+	    showGraph(dc,generation,0,configuration.getMaxGenerations(), *theme.lookUpColor(IMPORTANT_COLOR));
 // ------ END GENERATIONS ------
 
 
@@ -207,9 +206,9 @@ void StatisticsWindow::draw(DC* dc) const
 
 // ------ TIME ------
     if(statEntry[TIME_STAT_ENTRY]->isCurrentlyHighlighted())
-		showGraph(dc,time,0,settings.getGa()->maxTime, dc->mixColor(theme.lookUpColor(BRIGHT_TEXT_COLOR), theme.lookUpColor(TIME_TEXT_COLOR)));
+		showGraph(dc, time, 0, configuration.getMaxTime(), dc->mixColor(theme.lookUpColor(BRIGHT_TEXT_COLOR), theme.lookUpColor(TIME_TEXT_COLOR)));
 	else
-	    showGraph(dc,time,0,settings.getGa()->maxTime,*theme.lookUpColor(TIME_TEXT_COLOR));
+	    showGraph(dc, time, 0, configuration.getMaxTime(), *theme.lookUpColor(TIME_TEXT_COLOR));
 // ------ END TIME ------
 
 // ------ AVERAGE FITNESS ------
@@ -236,11 +235,7 @@ void StatisticsWindow::process()
 		return;
 	
 	UI_Window::process();
-    speed->updateNumber(settings.getSpeed());
-    if(speed->subClicked() && (settings.getSpeed()>0))
-        settings.setSpeed(settings.getSpeed()-1);
-    if(speed->addClicked() && (settings.getSpeed()<100))
-        settings.setSpeed(settings.getSpeed()+1);
+//	configuration.setSpeed(speed->getNumber());
 
 	if(!anarace->isOptimizing()) //~~ fehlt noch ein run am Anfang
 		return;
@@ -288,7 +283,7 @@ void StatisticsWindow::process()
 	alength[199]=anarace->getLength();
 	time[199]=anarace->getRealTimer();
 //	force[199]=anarace->getUnitsTotal();
-	generation[199]=settings.getGa()->maxGenerations - anarace->getUnchangedGenerations();
+	generation[199]=configuration.getMaxGenerations() - anarace->getUnchangedGenerations();
 	fps[199]=1000/av;
 
 	maxpFitness=0;
@@ -462,14 +457,14 @@ void StatisticsWindow::process()
 	statEntry[FITNESS_VARIANCE_STAT_ENTRY]->updateNormalText(theme.lookUpFormattedString(FITNESS_VARIANCE_STAT_STRING, vFitness[199]));
 	statEntry[AVERAGE_BO_LENGTH_STAT_ENTRY]->updateNormalText(theme.lookUpFormattedString(AVERAGE_BO_LENGTH_STAT_STRING, alength[199]));
 	}
-	statEntry[GENERATIONS_LEFT_STAT_ENTRY]->updateNormalText(theme.lookUpFormattedString(GENERATIONS_LEFT_STAT_STRING, settings.getGa()->maxGenerations - anarace->getUnchangedGenerations(), anarace->getGeneration()));
+	statEntry[GENERATIONS_LEFT_STAT_ENTRY]->updateNormalText(theme.lookUpFormattedString(GENERATIONS_LEFT_STAT_STRING, configuration.getMaxGenerations() - anarace->getUnchangedGenerations(), anarace->getTotalGeneration()));
 
 	ostringstream os;
 	os << fps[199] << " fps ";/* [" << UI_Object::rectnumber << " updates]";*/
-	if(anarace->isOptimizing())
-		os << "[" << (int)(1000.0*(MAX_PROGRAMS+(*anarace->getMap())->getMaxPlayer()-1)/((float)(av*(1+settings.getSpeed())))) << " BOps]";
-		
-	statEntry[FPS_STAT_ENTRY]->updateNormalText(os.str());
+//	if(anarace->isOptimizing())
+//		os << "[" << (int)(1000.0*(MAX_PROGRAMS+(*anarace->getMap())->getMaxPlayer()-1)/((float)(av*(1+configuration.getSpeed())))) << " BOps]";
+//		TODO alles in eine FPS Klasse oder so
+//	statEntry[FPS_STAT_ENTRY]->updateNormalText(os.str());
 
 }
 

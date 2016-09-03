@@ -103,7 +103,7 @@ class Point
 		{
 			signed int z = (signed int)(((x>sx)?(2*(x-sx)<(tx-sx)?(double)(x-sx)/2:(double)(tx-x)/2):(2*(x-sx)>(tx-sx)?(double)(x-sx)/1.5:(double)(tx-x)/1.5)));
 			if(z==0)
-				z=((x>tx)?-1:0)+((x<tx)?1:0);
+				z=((x>tx)?-2:0)+((x<tx)?1:0);
 			x+=z;
 		}	
 		

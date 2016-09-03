@@ -86,11 +86,12 @@ class UI_Object
 		    else return(Point(0,0));
 		}
 
-	    const Point getAbsolutePosition() const	{
+	    const Point getAbsolutePosition() const;
+		/*{
 		    if(parent)
 		        return(relativeRect.GetTopLeft() + parent->getAbsolutePosition());
 		    else return(relativeRect.GetTopLeft());
-		}
+		}*/
 		
 		const Rect getAbsoluteRect() const {
 		    if(parent)
@@ -163,7 +164,7 @@ class UI_Object
 
 
 	
-		void updateToolTip(const string& tooltip);
+		void updateToolTip(const eString tooltip);
 
 		static void assignStartTime();
 		static const unsigned long int getTimeStampMs(const unsigned long int timeSpan);
@@ -250,7 +251,7 @@ class UI_Object
 		Rect maxRect;
 		unsigned int doAdjustments;
 		
-		string toolTip;
+		eString toolTip;
 	
 		static unsigned long int startTime;
 

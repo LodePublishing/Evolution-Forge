@@ -3,33 +3,28 @@
 RaceMenu& RaceMenu::operator=(const RaceMenu& object)
 {
 	((Menu)(*this)) = ((Menu)object);
-	anarace = object.anarace;
 	return(*this);
 }
 
 RaceMenu::RaceMenu(const RaceMenu& object) :
-	Menu((Menu)object),
-	anarace(object.anarace)
+	Menu((Menu)object)
 { }
 
-RaceMenu::RaceMenu(UI_Object* race_parent, ANARACE* race_anarace, Rect race_rect) :
-	Menu(race_parent, race_rect), // 75
-	anarace(race_anarace)
+RaceMenu::RaceMenu(UI_Object* race_parent, Rect race_rect) :
+	Menu(race_parent, race_rect, true)
 {
-	for(int i=0;i<3;i++)
+	height = 3;
+	for(int i=0;i<MAX_RACES;i++)
 	{
-		MenuEntry* entry = new MenuEntry(this,
-						Rect(0, 0, 75, FONT_SIZE+4), 
-						Rect(0, 0, 75, FONT_SIZE+4), *theme.lookUpString((eString)(TERRA_STRING+i)));
+		MenuEntry* entry = new MenuEntry(this, Rect(Point(10 + i * 90, height * (FONT_SIZE+9)), Size(75, FONT_SIZE+3)), (eString)(TERRA_STRING+i));
+    	entry->updateToolTip((eString)(TERRA_STRING+i));
 		menuEntries.push_back(entry);
 	}
     list<MenuEntry*>::iterator m = menuEntries.begin();
-    (*m)->updateToolTip(*theme.lookUpString(TERRA_STRING));
 	(*m)->setButton(eButton(UNIT_TYPE_5_BUTTON));m++;
-    (*m)->updateToolTip(*theme.lookUpString(PROTOSS_STRING));
 	(*m)->setButton(eButton(UNIT_TYPE_7_BUTTON));m++;
-    (*m)->updateToolTip(*theme.lookUpString(ZERG_STRING));
 	(*m)->setButton(eButton(UNIT_TYPE_3_BUTTON));
+	height+=1;
 }
 	
 RaceMenu::~RaceMenu()
@@ -37,35 +32,9 @@ RaceMenu::~RaceMenu()
 
 void RaceMenu::process()
 {
+	Menu::process();
 	if(!isShown())
 		return;
-	Menu::process();
-
-	if(menuLevel)
-	{
-		int i=0;
-    	for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
-		{
-			(*m)->Show();
-			Rect edge = Rect(Point(10 + i * 90, height * (FONT_SIZE+9)), Size(75, FONT_SIZE+3));
-//			if (parent->fitItemToRelativeRect(edge, 1)) 
-			{
-				(*m)->adjustRelativeRect(edge);
-			}
-       		if ((*m)->isLeftClicked())
-			{
-       	        pressedItem = i;
-				open();
-				break;
-			}
-			i++;
-		}
-		height++;
-	}
-	else
-    	for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
-				(*m)->Hide();
-
 }
 
 void RaceMenu::draw(DC* dc) const

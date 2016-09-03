@@ -1,0 +1,12 @@
+@GOAL
+        "Name" "settings/goals/Terra/goal87.gol"
+        "Race" "Terra"
+        "Refinery" "1" "0" "0"
+        "Factory[MS]" "1" "0" "0"
+        "Command Center" "1" "0" "0"
+        "Barracks" "1" "0" "0"
+        "Siege Tank" "1" "0" "0"
+        "SCV" "1" "0" "0"
+        "Firebat" "2" "0" "0"
+        "Academy" "1" "0" "0"
+@END

@@ -15,11 +15,9 @@ class UnitMenu : public Menu
 		~UnitMenu();
 		void process();
 		void draw(DC* dc) const;
-		const unsigned int getMarkedUnit() const;
 		void setFacilityModus(const bool facilityModus=true);
 		void resetData();
 	private:
-		unsigned int markedUnit;
 		ANARACE* anarace;
 // sort units in the addgoal menu rather by facility than by unitType		
 		bool facilityMode;

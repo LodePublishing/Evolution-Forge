@@ -148,7 +148,7 @@ void START_CONDITION::setGas(const unsigned int gas)
 const unsigned int START_CONDITION::getStartTime() const
 {
 #ifdef _SCC_DEBUG
-	if(startTime>=MAX_TIME) {
+	if(startTime>=MAX_TIME) { // TODO was wenn im Nachhinein settings.maxtime veraendert wird? 
 		toLog("DEBUG: (START_CONDITION::getStartTime): Variable startTime out of range.");return(0);
 	}
 #endif

@@ -5,23 +5,27 @@
 UI_StaticText& UI_StaticText::operator=(const UI_StaticText& object)
 {
 	((UI_Object)(*this)) = ((UI_Object)object);
-    mode = object.mode;
-    text = object.text;
-    font = object.font;
-    color = object.color;
+	mode = object.mode;
+	text = object.text;
+	font = object.font;
+	color = object.color;
 //	editable = object.editable;
+	eText = object.eText;
+	textMode = object.textMode;
 	return(*this);
 }
 
 UI_StaticText::UI_StaticText(const UI_StaticText& object) :
-    UI_Object((UI_Object)object),
-    mode(object.mode),
-    text(object.text),
-    font(object.font),
-    color(object.color)
+	UI_Object((UI_Object)object),
+	mode(object.mode),
+	text(object.text),
+	font(object.font),
+	color(object.color),
+	eText(object.eText),
+	textMode(object.textMode)
 //	editable(object.editable)
 {
-    updateText(object.text);
+	updateText(object.text);
 }
 
 UI_StaticText::UI_StaticText(UI_Object* st_parent, const Rect st_pos, const eTextMode st_mode, const eColor st_color, const eFont st_font) :
@@ -29,27 +33,33 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const Rect st_pos, const eTex
 	mode(st_mode),
 	text("ERROR"),
 	font(st_font),
-	color(*theme.lookUpColor(st_color))
+	color(*theme.lookUpColor(st_color)),
+	eText(NULL_STRING),
+	textMode(true)
 //	editable(false)
 { }
 
 UI_StaticText::UI_StaticText(UI_Object* st_parent, const eString st_text, const Rect st_pos, const eTextMode st_mode, const eColor st_color, const eFont st_font) :
 	UI_Object(st_parent, st_pos, st_pos),
-    mode(st_mode),
+	mode(st_mode),
 	text("ERROR"),
-    font(st_font),
-    color(*theme.lookUpColor(st_color))
+	font(st_font),
+	color(*theme.lookUpColor(st_color)),
+	eText(NULL_STRING),
+	textMode(true)
 //	editable(false)
 {
 	updateText(st_text);
 }
 
-UI_StaticText::UI_StaticText(UI_Object* st_parent, const string st_text, const Rect st_pos, const eTextMode st_mode, const eColor st_color, const eFont st_font) :
+UI_StaticText::UI_StaticText(UI_Object* st_parent, const string& st_text, const Rect st_pos, const eTextMode st_mode, const eColor st_color, const eFont st_font) :
 	UI_Object(st_parent, st_pos, st_pos),
-    mode(st_mode),
-    text("ERROR"),
-    font(st_font),
-    color(*theme.lookUpColor(st_color))
+	mode(st_mode),
+	text("ERROR"),
+	font(st_font),
+	color(*theme.lookUpColor(st_color)),
+	eText(NULL_STRING),
+	textMode(true)
 //	editable(false)
 {
 	updateText(st_text);
@@ -84,14 +94,15 @@ void UI_StaticText::draw(DC* dc) const
 
 	if(font!=NULL_FONT)
 		dc->SetFont(theme.lookUpFont(font));
-//	if(color!=NULL_COLOR) 
+	if(color!=NULL_COLOR) 
 		dc->SetTextForeground(color); //~~
 
 	
 	Size s;
 	std::string t_text;
 	if(mode == FORMATTED_TEXT_MODE)
-		t_text= text.substr(0, position) + "#";
+		t_text = text;
+//		t_text= text.substr(0, position) + "#";
 	else
 	{
 		t_text= text;//.substr(0, position);
@@ -119,81 +130,82 @@ void UI_StaticText::draw(DC* dc) const
 			temp.SetLeft(temp.GetLeft() + (temp.GetWidth() - s.GetWidth())/2);
 			temp.SetTop(temp.GetTop() + (temp.GetHeight() - s.GetHeight())/4 );break;
 		case FORMATTED_TEXT_MODE:
-
 		{
-		    unsigned int twidth = 0;
+			unsigned int twidth = 0;
 			unsigned int textCursorX = 5;
 			bool bold = false;
 			bool mustNotMakeNewLine = false;
-		    unsigned int firstCharPosition=0;
-		    unsigned int lastCharPosition=0;
+			unsigned int firstCharPosition=0;
+			unsigned int lastCharPosition=0;
 			unsigned int currentRow=0;
 			unsigned int maxdy=0;
-		    for(unsigned int i=0;i<t_text.length();i++)
-		    {
+			for(unsigned int i=0;i<t_text.length();i++)
+			{
 				bool newLine=false;
 				if(t_text[i]=='&') {
 					mustNotMakeNewLine = !mustNotMakeNewLine;
 
 				} else 
 // set new 'milestone' when reaching end of a word:
-		        if((t_text[i]==' ')&&(!mustNotMakeNewLine)) {
-		            lastCharPosition = i;
+				if((t_text[i]==' ')&&(!mustNotMakeNewLine)) {
+					lastCharPosition = i;
 					twidth = textCursorX;
-		        }
+				}
 // ... or a line:
-	    	    else if(t_text[i]=='#') {
-		            lastCharPosition = i;
-    		        twidth=(temp.GetWidth()+textCursorX)/2;
+				else if(t_text[i]=='#') {
+					lastCharPosition = i;
+					twidth=(temp.GetWidth()+textCursorX)/2;
 					newLine=true;
-	        	} else
+				} else
 // move the textcursor forward:
 				{
 					std::ostringstream os;
 					os << t_text[i];
-			        textCursorX += dc->GetTextExtent(os.str()).GetWidth() + 1;
+					textCursorX += dc->GetTextExtent(os.str()).GetWidth() + 1;
 				}
 				
 // reached end of line? Calculate line and draw it
-		        if((textCursorX>temp.GetWidth()-5)||(newLine))
-        		{
+				if((textCursorX>temp.GetWidth()-5)||(newLine))
+				{
 					newLine = false;
-		            textCursorX = 5;
-        		    int d = 1;
+					textCursorX = 5;
+					int d = 1;
+					if(twidth>temp.GetWidth()-10)
+						twidth=temp.GetWidth()-10; // ~~
 					if(!newLine)
-	                	d = 1+(temp.GetWidth()-10-twidth)/2;
-					if(d<1)
-						d = 1;
+						d = (temp.GetWidth()-10-twidth)/2;
+//					if(d<1)
+//						d = 0;
 				
-		            for(unsigned int j = firstCharPosition; j < lastCharPosition; j++)
-        		    {
-                    	std::ostringstream os;
+					for(unsigned int j = firstCharPosition; j < lastCharPosition; j++)
+					{
+						std::ostringstream os;
 						os << t_text[j];
-		                if(t_text[j]=='$')
-		                {
-        		            if(bold){bold=false;dc->SetTextForeground(color);} else
-                		        {bold=true;dc->SetTextForeground(dc->brightenColor(&color, 40));}
-	        	            continue;
-    		            } else if(t_text[j]=='#')
+						if(t_text[j]=='$')
+						{
+							if(bold){bold=false;dc->SetTextForeground(color);} else
+								{bold=true;dc->SetTextForeground(dc->brightenColor(&color, 40));}
+							continue;
+						} else if(t_text[j]=='#')
 							continue;
 						else if(t_text[j]=='&')
 							continue;
-		                dc->DrawText(os.str(), temp.GetLeft()+textCursorX+d*(j-firstCharPosition)/(lastCharPosition-firstCharPosition+1), temp.GetTop()+currentRow);
-		                s = dc->GetTextExtent(os.str());
+						dc->DrawText(os.str(), temp.GetLeft()+textCursorX+d*(j-firstCharPosition)/(lastCharPosition-firstCharPosition+1), temp.GetTop()+currentRow);
+						s = dc->GetTextExtent(os.str());
 						if(s.GetHeight() > maxdy)
 							maxdy = s.GetHeight();
-		                textCursorX+=s.GetWidth();
-		            }
-        		    currentRow+=maxdy;
-		            twidth=0;
-		            firstCharPosition=lastCharPosition+1;
-        		    i=lastCharPosition;
-		            lastCharPosition = 0;
-        	    	textCursorX = 5;
+						textCursorX+=s.GetWidth();
+					}
+					currentRow+=maxdy;
+					twidth=0;
+					firstCharPosition=lastCharPosition+1;
+					i=lastCharPosition;
+					lastCharPosition = 0;
+					textCursorX = 5;
 // this must be resetted!					
 					mustNotMakeNewLine = false;
-		        }
-    		}
+				}
+			}
 		}break;
 		default:break;
 	}
@@ -238,6 +250,10 @@ void UI_StaticText::process()
 	if(position < text.size()-1)
 		position+=2;
 	else position = text.size();
+
+//	if(eText != NULL_STRING)
+  //  	updateText(*theme.lookUpString(eText));
+//	updateText(eText);
 }
 
 void UI_StaticText::updateText(const string& st_text)
@@ -250,11 +266,16 @@ void UI_StaticText::updateText(const string& st_text)
 		setSize(getTextSize()); // TODO size ist falsch
 
 	position = 1;
+	textMode = true;
 }
 
 void UI_StaticText::updateText(const eString st_text)
 {
+	if(st_text==eText)
+		return;
+	eText = st_text;
 	updateText(*theme.lookUpString(st_text));
+	textMode = false;
 }
 
 void UI_StaticText::setColor(const eColor st_color)

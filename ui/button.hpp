@@ -52,40 +52,7 @@ class UI_3dTextButton:public UI_TextButton
 		int color;
 		
 };
-
-class UI_TabButton:public UI_TextButton
-{
-	public:
-	private:
-};
-
-
-// general things - move it later to EF_Gadget!
-// -------
-                                                                                                                                                            
-// ------
-                                                                                                                                                            
-// ------ button behaviour ------
-//      int m_press_linger; // timestamp for hold a pressed state animation ?
-//      int hotkey_if_focus;    // hotkey for button that only works if it has focus ?
-//      int force_draw_frame;   // frame number to draw next time (override default) ?
-//      int first_callback;  // true until first time callback function is called for button highlight ?
-// ------
-                                                                                                                                                            
-//  Used to index into bmap_ids[] array to locate right bitmap for button
-        enum { B_NORMAL = 0 };
-        enum { B_HIGHLIGHT = 1 };
-        enum { B_PRESSED = 2 };
-        enum { B_DISABLED = 3 };
-        enum { B_REPEAT_TIME = 100 };  // ms
-                                                                                                                                                            
-//      void frame_reset(); // reset flags ?
-//      virtual void process(int focus = 0); ?
-//      virtual void destroy(); ?
-                                                                                                                                                            
-                                                                                                                                                            
-    public:
-};*/
+*/
 
 enum ePositionMode
 {
@@ -241,32 +208,6 @@ protected:
 
 };
 
-class UI_Radio : public UI_Object
-{
-	public:
-		UI_Radio& operator=(const UI_Radio& object);
-		UI_Radio(const UI_Radio& object);
-		UI_Radio(UI_Object* radio_parent);
-		~UI_Radio();
-		void addButton(UI_Button* button);
-		const unsigned int getMarked();
-		void forcePress(const unsigned int button);
-
-		void leftButtonPressed(UI_Button* button);
-		void leftButtonReleased(UI_Button* button); // allow release?		
-		void rightButtonPressed(UI_Button* button);
-		void rightButtonReleased(UI_Button* button); // allow release?		
-
-		void process();
-		void draw(DC* dc) const;
-		
-		const bool hasChanged() const;
-		void forceUnpressAll();
-
-	private:
-		unsigned int markedItem;
-		bool changed;
-};
 
 #endif // _UI_BUTTON_HPP
 

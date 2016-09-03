@@ -5,45 +5,17 @@
 
 SETTINGS::SETTINGS():
 	loadedMap(),
-	ga(),
 	soup(),
-	start(),
-	currentMap(0),
-	speed(2)
+	start()
 {
 	srand(time(NULL));
-	initDefaults();
+//	initDefaults();
 }
 
 SETTINGS::~SETTINGS()
 { }
 
 SETTINGS settings;
-
-const unsigned int SETTINGS::getSpeed() const
-{
-	return(speed);
-}
-
-void SETTINGS::setSpeed(const unsigned int set_speed)
-{
-	speed=set_speed;
-}
-
-
-void SETTINGS::initDefaults()
-{
-	currentMap=0;
-	setAllowGoalAdaption(true);
-	setMaxTime(MAX_TIME-1);
-	setMaxTimeOut(MAX_TIMEOUT);
-	setMaxLength(MAX_LENGTH);
-	setMaxRuns(MAX_RUNS);
-	setMaxGenerations(MAX_GENERATIONS);
-	setPreprocessBuildOrder(false);
-	setCrossOver(MIN_CROSSOVER);
-	setBreedFactor(20);
-}
 
 // -------------------------------
 // ------ CONTROL FUNCTIONS ------
@@ -53,7 +25,7 @@ void SETTINGS::assignRunParametersToSoup()
 {
 //	soup.initializeMap(start.getMap()); //???? TODO
 	// set GA and START on prerace and soup
-	soup.setParameters(&ga, &start);
+	soup.setParameters(&start);
 	// allocate memory for players ~~
 }
 
@@ -76,87 +48,6 @@ void SETTINGS::checkForChange() const
 {
 	soup.checkForChange();	
 }
-
-// ------------------------------------------
-// ------ PARSING TOOLS AND ERROR LOGS ------
-// ------------------------------------------
-
-
-void parse_line(string& text, list<string>& words)
-{
-	size_t n = text.length();
-	size_t stop;
-	bool inParantheses=false;
-	// " gefunden? ignoriere alle Sonderzeichen bis naechstes "
-	size_t start = text.find_first_not_of("\t ");
-	while (start!=string::npos) 
-	{
-		if(text[start]=='\"')
-		{
-			inParantheses=true;
-			start++;
-		}
-	
-		if(inParantheses)
-			stop = text.find_first_of("\"", start);
-		else 
-			stop = text.find_first_of(",\t\" =", start);
-		inParantheses=false;
-		if(stop==string::npos)
-			stop = n;
-		string bla=text.substr(start, stop - start);
-		words.push_back(bla);
-	   
-		start = text.find_first_not_of(",\t =", stop+1);
-	}
-}
-
-void parse_block(ifstream& stream, map<string, list<string> >& block)
-{
-	char line[1024];
-	string text;
-	while(stream.getline(line, sizeof line))
-	{
-		if(stream.fail())
-			stream.clear(stream.rdstate() & ~ios::failbit);
-		text=line;
-		if(text.find("@END")!=string::npos) return;
-		size_t start=text.find_first_not_of("\t\" ");
-		if((start==string::npos)||(text[0]=='#')||(text[0]=='\0')) 
-			continue; // ignore line
-		
-		list<string> words;
-		parse_line(text, words);
-		string bla=words.front();
-//		string bla=text.substr(start);
-		block.insert(pair<string, list<string> >(bla, words));
-	}
-}
-
-void parse_2nd_block(ifstream& stream, map<string, map<string, list<string> > >& block)
-{
-	char line[1024];
-	string text;
-	while(stream.getline(line, sizeof line))
-	{
-		if(stream.fail())
-			stream.clear(stream.rdstate() & ~ios::failbit);
-		text=line;
-		if(text.find("@END")!=string::npos) return;
-		size_t start=text.find_first_not_of("\t ");
-		if((start==string::npos)||(text[0]=='#')||(text[0]=='\0')) 
-			continue; // ignore line
-		map<string, list<string> > words;
-		parse_block(stream, words);
-		block.insert(pair<string, map<string, list<string> > > (text.substr(start), words));
-	}
-}
-
-// -----------------------------------------------
-// ------  END PARSING TOOLS AND ERROR LOGS ------
-// -----------------------------------------------
-
-
 
 // ---------------------------
 // ------- FILE LOADING ------
@@ -239,74 +130,7 @@ void SETTINGS::loadGoalFile(const string& goalFile)
 
 	loadedGoal[goal.getRace()].push_back(goal);
 	
-//  loadedGoal[getGoalCount()].adjustGoals(ga.allowGoalAdaption);
-} // schoen :)
-
-void SETTINGS::loadSettingsFile(const string& settingsFile)
-{
-	ifstream pFile(settingsFile.c_str());
-	if(!pFile.is_open())
-	{
-		toLog("ERROR: (loadSettingsFile): File not found.");
-		return;
-	}
-	char line[1024];
-	string text;
-	while(pFile.getline(line, sizeof line))
-	{
-		if(pFile.fail())
-			pFile.clear(pFile.rdstate() & ~ios::failbit);
-		text=line;
-		size_t start=text.find_first_not_of("\t ");
-		if((start==string::npos)||(text[0]=='#')||(text[0]=='\0'))
-				continue; // ignore line
-		size_t stop=text.find_first_of("\t ", start);
-		if(stop==string::npos) stop=text.size();
-		string index=text.substr(start, stop);
-		string value;
-		map<string, list<string> >::iterator i;
-		if(index=="@SETTINGS")
-		{
-			map<string, list<string> > block;
-			parse_block(pFile, block);
-			if((i=block.find("Allow goal adaption"))!=block.end()){
-				i->second.pop_front();
-			   	setAllowGoalAdaption(atoi(i->second.front().c_str()));
-			}
-			if((i=block.find("Max Time"))!=block.end()){
-				i->second.pop_front();
-			   	setMaxTime(atoi(i->second.front().c_str()));
-			}
-			if((i=block.find("Max Timeout"))!=block.end()){
-				i->second.pop_front();
-			   	setMaxTimeOut(atoi(i->second.front().c_str()));
-			}
-			if((i=block.find("Max Length"))!=block.end()){
-				i->second.pop_front();
-			   	setMaxLength(atoi(i->second.front().c_str()));
-			}
-			if((i=block.find("Max Runs"))!=block.end()){
-				i->second.pop_front();
-			   	setMaxRuns(atoi(i->second.front().c_str()));
-			}
-			if((i=block.find("Preprocess Buildorder"))!=block.end()){
-				i->second.pop_front();
-			   	setPreprocessBuildOrder(atoi(i->second.front().c_str()));
-			}
-			if((i=block.find("Breed Factor"))!=block.end()){
-				i->second.pop_front();
-			   	setBreedFactor(atoi(i->second.front().c_str()));
-			}
-			if((i=block.find("Crossing Over"))!=block.end()){ 
-				i->second.pop_front();
-				setCrossOver(atoi(i->second.front().c_str()));
-			}
-			if((i=block.find("Max unchanged Generations"))!=block.end()){
-				i->second.pop_front();
-			   	setMaxGenerations(atoi(i->second.front().c_str()));
-			}
-		}
-	}// END while
+//  loadedGoal[getGoalCount()].adjustGoals(configuration.allowGoalAdaption);
 } // schoen :)
 
 void SETTINGS::loadHarvestFile(const string& harvestFile)
@@ -703,70 +527,15 @@ const BASIC_MAP* SETTINGS::getMap(const unsigned int mapNumber) const
 	return(&loadedMap[mapNumber]);
 }
 
-void SETTINGS::setAllowGoalAdaption(const bool allowGoalAdaption) // allow the program to change goals (for example ignore command center when command center [NS] is already a goal
-{
-	ga.allowGoalAdaption=allowGoalAdaption;
-}
-
-void SETTINGS::setMaxTime(const unsigned int maxTime) //maximum time of build order in seconds
-{
-#ifdef _SCC_DEBUG
-	if((maxTime<MIN_TIME)||(maxTime>=MAX_TIME)) {
-		toLog("WARNING: (SETTINGS::setMaxTime): Value out of range.");return;
-	}
-#endif
-	ga.maxTime=maxTime;
-}
-
-void SETTINGS::setMaxTimeOut(const unsigned int maxTimeOut) //timeout for building
-{
-#ifdef _SCC_DEBUG
-	if((maxTimeOut<MIN_TIMEOUT)||(maxTimeOut>MAX_TIMEOUT)) {
-		toLog("WARNING: (SETTINGS::setMaxTimeOut): Value out of range.");return;
-	}
-#endif
-	ga.maxTimeOut=maxTimeOut;
-}
-
-void SETTINGS::setMaxLength(const unsigned int maxLength)
-{
-#ifdef _SCC_DEBUG
-	if((maxLength<MIN_LENGTH)||(maxLength>MAX_LENGTH)) {
-		toLog("WARNING: (SETTINGS::setMaxLength): Value out of range.");return;
-	}
-#endif
-	ga.maxLength=maxLength;
-}
-
-void SETTINGS::setMaxRuns(const unsigned int maxRuns)
-{
-#ifdef _SCC_DEBUG
-	if((maxRuns<MIN_RUNS)||(maxRuns>MAX_RUNS)) {
-		toLog("WARNING: (SETTINGS::setMaxRuns): Value out of range.");return;
-	}
-#endif
-	ga.maxRuns=maxRuns;
-}
-
-void SETTINGS::setMaxGenerations(const unsigned int maxGenerations)
-{
-#ifdef _SCC_DEBUG
-	if((maxGenerations<MIN_GENERATIONS)||(maxGenerations>MAX_GENERATIONS)) {
-		toLog("WARNING: (SETTINGS::setMaxGenerations): Value out of range.");return;
-	}
-#endif
-	ga.maxGenerations=maxGenerations;
-}
-
 GOAL_ENTRY* SETTINGS::getCurrentGoal(const unsigned int player)
 {
 	return(*(start.getCurrentGoal(player)));
 }
 
-void SETTINGS::setPreprocessBuildOrder(const bool preprocess)
-{
-	ga.preprocessBuildOrder=preprocess;
-}
+//void SETTINGS::setPreprocessBuildOrder(const bool preprocess)
+//{
+//	configuration.setPreprocessBuildOrder(preprocess);
+//}
 
 void SETTINGS::assignMap(const unsigned int mapNumber)
 {
@@ -815,66 +584,6 @@ void SETTINGS::assignGoal(const unsigned int player, const unsigned int goal)
 	start.assignGoal(player, &loadedGoal[start.getPlayerRace(player)][goal]);
 }
 
-void SETTINGS::setBreedFactor(const unsigned int breedFactor)
-{
-#ifdef _SCC_DEBUG
-	if((breedFactor<MIN_BREED_FACTOR)||(breedFactor>MAX_BREED_FACTOR)) {
-		toLog("WARNING: (SETTINGS::setBreedFactor): Value out of range.");return;
-	}
-#endif
-	ga.setBreedFactor(breedFactor);
-}
-
-void SETTINGS::setCrossOver(const unsigned int crossOver)
-{
-#ifdef _SCC_DEBUG
-	if((crossOver<MIN_CROSSOVER)||(crossOver>MAX_CROSSOVER)) {
-		toLog("WARNING: (SETTINGS::setCrossOver): Value out of range.");return;
-	}
-#endif
-	ga.setCrossOver(crossOver);
-}
-
-const unsigned int SETTINGS::getBreedFactor() const
-{
-	return(ga.getBreedFactor());
-}
-
-const unsigned int SETTINGS::getCrossOver() const
-{
-	return(ga.getCrossOver());
-}
-
-const unsigned int SETTINGS::getMaxTime() const
-{
-	return(ga.maxTime);
-}
-
-const unsigned int SETTINGS::getMaxTimeOut() const
-{
-	return(ga.maxTimeOut);
-}
-
-const unsigned int SETTINGS::getMaxLength() const
-{
-	return(ga.maxLength);
-}
-
-const unsigned int SETTINGS::getMaxRuns() const
-{
-	return(ga.maxRuns);
-}
-
-const unsigned int SETTINGS::getMaxGenerations() const
-{
-	return(ga.maxGenerations);
-}
-
-const bool SETTINGS::getPreprocessBuildOrder() const
-{
-	return(ga.preprocessBuildOrder);
-}
-
 const unsigned int SETTINGS::getStartconditionCount(const unsigned int player) const
 {
 	return(loadedStartcondition[start.getPlayerRace(player)].size());
@@ -913,10 +622,6 @@ const START_CONDITION* SETTINGS::getStartcondition(const unsigned int player, co
 	return(&loadedStartcondition[start.getPlayerRace(player)][startconditionNumber]);
 }
 
-const GA* SETTINGS::getGa() const
-{
-	return(&ga);
-}
 // --------------------------------------
 // ------ END OF GET/SET FUNCTIONS ------
 // --------------------------------------

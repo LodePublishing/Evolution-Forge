@@ -148,8 +148,8 @@ UI_Theme::~UI_Theme()
 			delete colorList[i][j];
 		for(int j = MAX_RESOLUTIONS;j--;)
 		{
-//			for(int k = MAX_BITMAPS-2;k--;) // !!! TODO
-//				delete bitmapList[i][j][k];
+			for(int k = MAX_BITMAPS;k--;)
+				delete bitmapList[i][j][k];
 	 		for(int k = MAX_PENS;k--;)
 				delete penList[i][j][k];
 		}
@@ -223,7 +223,7 @@ const string* UI_Theme::lookUpString(const eString id) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_STRINGS)) {
-        toLog("ERROR: (UI_Theme::looUpString) id out of range.");return(stringList[language][0]);
+        toLog("ERROR: (UI_Theme::lookUpString) id out of range.");return(stringList[language][0]);
 	}
 #endif
 

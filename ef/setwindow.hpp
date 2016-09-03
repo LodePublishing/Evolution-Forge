@@ -2,22 +2,15 @@
 #define _GUI_SETTINGS_HPP
 
 #include "../ui/window.hpp"
+#include "../ui/group.hpp"
+#include "../ui/radio.hpp"
 
 #include "../core/settings.hpp"
 #include "numberfield.hpp"
 #include "languagemenu.hpp"
-
-
-/*class ResolutionMenu : public Menu
-{
-    public:
-        ResolutionMenu(UI_Object* resolution_parent, Rect resolution_rect):
-			Menu(resolution_parent, NULL, resolution_rect, 120)
-		{ }
-		~ResolutionMenu() {};
-        void process();
-        void draw(DC* dc) const;
-};*/
+#include "resolutionmenu.hpp"
+#include "thememenu.hpp"
+#include "checkbutton.hpp"
 
 class SettingsWindow:public UI_Window
 {
@@ -29,79 +22,56 @@ class SettingsWindow:public UI_Window
 		void process();
 		void draw(DC* dc) const;
 	private:
-/*
-//		UI_Radio* radio;
-		UI_Radio* menuRadio;
-//		UI_Button* goalButton[3];
-		UI_Button* menuButton[MAX_MENUS];*/
 
+		void updateItems();
+		void reloadFromFile();
+		void loadFailsafeDefaults();
 
-/*		UI_Button* addMaxTime, subMaxTime;
-		UI_Button* addMaxLength, subMaxLength;
-		UI_Button* addMaxTimeOut, subMaxTimeOut;
-		UI_Button* addFramerate, subFramerate;*/
-		
-
+		UI_Group* coreSettings;
+		UI_Group* guiSettings;
+		UI_Group* defaultSettings;
 
 // boolean
-/*		UI_StaticText* preprocessText;
-		UI_StaticText* allowGoalAdaptionText;
-		UI_StaticText* staticFramerateText;
+		CheckButton* preprocessBuildorder;
+		CheckButton* allowGoalAdaption;
+		CheckButton* allowStaticFramerate;
+		CheckButton* glowingButtons;
+		CheckButton* backgroundBitmap;
+		CheckButton* fullscreen;
+		CheckButton* tooltips;
+
+		CheckButton* transparency;
+		CheckButton* smoothMovement;
 
 // radio
-		UI_StaticText* minimalistText;
-		UI_StaticText* fullText;
-		UI_StaticText* customText;
+		UI_Button* minimalistButton;
+		UI_Button* fullButton;
+		UI_Button* customButton;
+		UI_Radio* graphicRadio;
 
-		UI_StaticText* smoothMovementText;
-		
-		UI_StaticText* glowingText;
-		UI_StaticText* backgroundBitmapText;
-		UI_StaticText* transparencyText;
-		UI_StaticText* resolutionText;
-		UI_StaticText* fullscreenText;
+		UI_Button* reloadFromFileButton;
+		UI_Button* loadFailsafeDefaultsButton;
+		UI_Button* saveToFileButton;
 
 // number
 		NumberField* maxTime;
 		NumberField* maxLength;
 		NumberField* maxRuns;
+		NumberField* maxGenerations;
 		NumberField* maxTimeOut;
 		NumberField* breedFactor;
 		NumberField* crossingOver;
-		NumberField* framerate;
-//		NumberField* dynamicFramerateText;
-
-		UI_Radio* languageRadio;
-		UI_StaticText* languageText;
-
-		UI_
-
-		UI_Button* languageButton[MAX_LANGUAGES];
-		UI_Button* resolutionButton[MAX_RESOLUTIONS];
-		UI_Button* themeButton[MAX_THEMES];*/
-
-/*
-		void closeMenus();
-
-		ForceEntry* forceEntry[GAS_SCV+1];
-		
-		int markedUnit;
-//		int oldForceList[UNIT_TYPE_COUNT];
-		int currentUnitType;
-
-		int unitTypeCount[UNIT_TYPE_TYPES];
-		int startUnitTypeCount[UNIT_TYPE_TYPES];
-		int currentUnitTypeCount[UNIT_TYPE_TYPES];
-		int targetUnitTypeCount[UNIT_TYPE_TYPES];
-	    int totalUnits;
-
-		UnitMenu* unitMenu;
-		GoalMenu* goalMenu;
-		ForceMenu* forceMenu;
-		RaceMenu* raceMenu;*/
-
+		NumberField* staticFramerate;
+		NumberField* dynamicFramerate;
+	
+	
+		ThemeMenu* themeMenu;
+		UI_Button* themeMenuButton;
+		ResolutionMenu* resolutionMenu;
+		UI_Button* resolutionMenuButton;
 		LanguageMenu* languageMenu;
 		UI_Button* languageMenuButton;
+		UI_Radio* menuRadio;
 };
 
 #endif

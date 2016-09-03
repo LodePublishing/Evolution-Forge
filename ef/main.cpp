@@ -1,787 +1,120 @@
-#include "main.hpp"
-
+#include "guimain.hpp"
 #include "../sdl/framerate.hpp"
-#include "progressbar.hpp"
-
-#include <dirent.h>
-#include <sys/types.h>
-
-#ifdef __linux__
-#else 
-#include <windows.h>
-#endif
-
-#include <fstream>
-
-ProgressBar* bar;
-
-unsigned int SCREEN_X;
-unsigned int SCREEN_Y;
-//int gizmor;
-//int grey; //0-100%
-
-void get_bg(DC* dc, SDL_Surface *surface, int x, int y) {
-    /* Blits a surface sized chunk of background to that surface */
-    SDL_Rect src;
-    SDL_Rect dst;
-                                                                                
-    src.x = x;
-    src.y = y;
-    src.w = dc->GetSurface()->w;
-    src.h = dc->GetSurface()->h;
-                                                                                
-    dst.x = 0;
-    dst.y = 0;
-    dst.w = dc->GetSurface()->w;
-    dst.h = dc->GetSurface()->h;
-    SDL_BlitSurface(dc->GetSurface(), &src, surface, &dst);
-}
-
-void RS_Blit(DC* dc, SDL_Surface *bitmap, Sint16 x, Sint16 y) {
-    SDL_Rect dest;
-                                                                                
-    dest.x = x;
-    dest.y = y;
-    dest.w = bitmap->w;
-    dest.h = bitmap->h;
-    SDL_BlitSurface(bitmap, NULL, dc->GetSurface(), &dest);
-}
-
-/*static SDL_Cursor *init_system_cursor(const char *image[])
-{
-  int i, row, col;
-  Uint8 data[4*32];
-  Uint8 mask[4*32];
-  int hot_x, hot_y;
-
-  i = -1;
-  for ( row=0; row<32; ++row ) {
-    for ( col=0; col<32; ++col ) {
-      if ( col % 8 ) {
-        data[i] <<= 1;
-        mask[i] <<= 1;
-      } else {
-        ++i;
-        data[i] = mask[i] = 0;
-      }
-      switch (image[4+row][col]) {
-        case 'X':
-          data[i] |= 0x01;
-          mask[i] |= 0x01;
-          break;
-        case '.':
-          mask[i] |= 0x01;
-          break;
-        case ' ':
-          break;
-      }
-    }
-  }
-  sscanf(image[4+row], "%d,%d", &hot_x, &hot_y);
-  return SDL_CreateCursor(data, mask, 32, 32, hot_x, hot_y);
-}*/
-
-void Main::resetData()
-{
-	refresh=0;
-	endrun=false;
-//	gizmor=rand()%GIZMO_NUMBER;
-	for(int i=MAX_PLAYER;i--;)
-		anarace[i]=NULL;
-	update=0;
-}
-
-void Main::process()
-{
-	if(isOptimizing()) 
-	{
-		if(ani2>1)
-		{
-			ani++;
-			ani2=0;
-		} else ani2++;
-	}
-	else ani=1;
-	if(ani>30) ani=1;
-
-
-//	if(update==2)
-	{
-		for(int i=settings.getMap(0)->getMaxPlayer();i--;)
-			if(player[i]->isShown())
-				player[i]->CheckOrders();
-	}
-	update=1;
-	UI_Object::editTextFeld = NULL;
-	mainWindow->process();
-	if(mainWindow->tabWasChanged())
-	{
-		gizmo=false;
-		eTab ctab = mainWindow->getCurrentTab();
-		switch(ctab)
-		{
-			case BASIC_TAB:
-				msgWindow->Show();
-				settingsWindow->Hide();
-				theCore->Hide();
-				tutorialWindow->Hide();
-				gizmo=true;
-			break;
-			case ADVANCED_TAB: //1 player
-				msgWindow->Show();
-				settingsWindow->Hide();
-				theCore->Hide();
-				tutorialWindow->Hide();
-				gizmo=true;
-			break;
-			case EXPERT_TAB: //2 player rushversuche
-				msgWindow->Show();
-				settingsWindow->Hide();
-				theCore->Hide();
-				tutorialWindow->Hide();
-			break;
-			case GOSU_TAB: // 2 player - Spieler spielt
-				msgWindow->Show();
-				settingsWindow->Hide();
-				theCore->Hide();
-				tutorialWindow->Hide();
-			break;
-			
-			case COMPARE_TAB: // 2 player - 2 Computer
-				msgWindow->Show();
-				settingsWindow->Hide();
-				theCore->Hide();
-				tutorialWindow->Hide();
-			break;
-			case MAP_TAB:
-                msgWindow->Show();
-                settingsWindow->Hide();
-                theCore->Hide();
-                tutorialWindow->Hide();
-            break;
-			case SETTINGS_TAB:
-				msgWindow->Hide();
-				settingsWindow->Show();
-				theCore->Hide();
-				tutorialWindow->Hide();
-			break;
-			case TUTORIAL_TAB:
-				msgWindow->Hide();
-				settingsWindow->Hide();
-				theCore->Hide();			
-				tutorialWindow->Show();
-			break;
-			default:break;		
-		} // end switch getCurrentTabs
-		for(int i=0;i<2;i++)
-			player[i]->setMode(ctab, i);
-//		player[0]->CheckOrders();
-//		player[1]->CheckOrders();
-
-		UI_Object::theme.setTab(ctab);
-		
-		mainWindow->updateRectangles(0);
-		msgWindow->updateRectangles(0);
-		settingsWindow->updateRectangles(0);
-		theCore->updateRectangles(0);
-		tutorialWindow->updateRectangles(0);
-		int maxPlayer=0;
-		if(player[0]->isShown()) 
-			maxPlayer++;
-		if(player[1]->isShown()) 
-			maxPlayer++;
-		if(player[0]->isShown())
-			player[0]->updateRectangles(maxPlayer-1);
-		if(player[1]->isShown()) 
-			player[1]->updateRectangles(maxPlayer-1);
-		
-/*			settings.initSoup();
-			resetData();*/
-		update=2;
-	} // end tabwasChanged
-
-	for(int i=0;i<2;i++)
-		player[i]->checkForChange();
-	
-	settings.checkForChange();
-
-
-	if(endrun)
-	{
-		ostringstream os;
-		os << "Final time round " << anarace[0]->getRun() << " : ["  
-			<< setw(2) << (ga->maxTime-anarace[0]->getTimer())/60 << ":" 
-			<< setw(2) << (ga->maxTime-anarace[0]->getTimer())%60 << "]";
-		msgWindow->addMessage(os.str());
-		endrun=false;
-//		resetData();
-	}
-}
-
-void Main::stopOptimizing()
-{
-	for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-		   if(player[i]->isShown())
-			player[i]->setOptimizing(false);
-}
-
-void Main::startOptimizing()
-{
-	for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-		   if(player[i]->isShown())
-				player[i]->setOptimizing(true);
-}
-
-const bool Main::isOptimizing() const
-{
-	for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
-		if(player[i]->isOptimizing())
-			return(true);
-	return(false);
-}
-
-const Size Main::helper(DC* dc, const unsigned int dx, const int i, const string& str) const
-{
-	dc->SetTextForeground(toSDL_Color(
-				(Uint8)((0==ani%(20+i))*35+((0==ani%(19+i))+(0==ani%(21+i)))*15+20),
-				(Uint8)((0==ani%(20+i))*35+((0==ani%(19+i))+(0==ani%(21+i)))*15+20),
-				(Uint8)((0==ani%(20+i))*35+((0==ani%(19+i))+(0==ani%(21+i)))*30+60)));
-	dc->DrawText(str.substr(str.size()-1, str.size()), mainWindow->getAbsoluteClientRectPosition()+Point(20+dx,20));
-	return(dc->GetTextExtent(str.c_str()));
-}
-
-void Main::drawGizmo(DC* dc) const
-{
-	dc->SetFont(UI_Object::theme.lookUpFont(HUGE_DEFAULT_BOLD_FONT));
-	string str="Evolution";
-	Size s;
-	for(unsigned int i=0;i<str.size();i++)
-		s = helper(dc, s.GetWidth(), i, str.substr(0,i+1));
-
-	dc->SetTextForeground(toSDL_Color(25,25,85));
-	dc->DrawText("Forge",mainWindow->getAbsoluteClientRectPosition()+Point(50,60));
-	dc->SetTextForeground(toSDL_Color(0,0,85));
-	dc->DrawText("v1.59 BetaTest",mainWindow->getAbsoluteClientRectPosition()+Point(78,98));
-	dc->SetTextForeground(toSDL_Color(50,50,85));
-	dc->DrawText("v1.59 BetaTest",mainWindow->getAbsoluteClientRectPosition()+Point(75,95));
-
-/*		dc->SetFont(font3);
-		dc->SetTextForeground(toSDL_Color(155*grey*(100-grey)/2500,0,0));
-		dc->DrawText(String::Format(T("Final time round %i: [%.2i:%.2i]"),anarace[0]->getRun(),(ga->maxTime-anarace[0]->getTimer())/60,(ga->maxTime-anarace[0]->getTimer())%60)),27,203);
-																				
-		dc->SetTextForeground(toSDL_Color(255*grey*(100-grey)/2500,0,0));
-		dc->DrawText(String::Format(T("Final time round %i: [%.2i:%.2i]"),anarace[0]->getRun(),(ga->maxTime-anarace[0]->getTimer())/60,(ga->maxTime-anarace[0]->getTimer())%60)),25,200);
-		if(grey==100)
-		grey-=2;
-		if(grey<=0) resetData();
-	} else
-	if(grey<100)
-	{
-		dc->SetTextForeground(toSDL_Color(130*grey*(100-grey)/2500,0,0));
-		dc->SetFont(font3);
-		dc->DrawText(String::Format(T("Round %i"),anarace[0]->getRun()+1)),msgWindow->getAbsoluteClientRectLeftBound()+18,msgWindow->getClientRectUpperBound()+13);
-		dc->SetFont(font3);
-		dc->DrawText(String::Format(T("%s"),gizmo[gizmor])),msgWindow->getAbsoluteClientRectLeftBound()+18,msgWindow->getClientRectUpperBound()+63);
-																				
-		dc->SetTextForeground(toSDL_Color(230*grey*(100-grey)/2500,0,0));
-		dc->SetFont(font3);
-		dc->DrawText(String::Format(T("Round %i"),anarace[0]->getRun()+1)),msgWindow->getAbsoluteClientRectLeftBound()+15,msgWindow->getClientRectUpperBound()+10);
-		dc->SetFont(font3);
-		dc->DrawText(String::Format(T("%s"),gizmo[gizmor])),msgWindow->getAbsoluteClientRectLeftBound()+15,msgWindow->getClientRectUpperBound()+60);
-																				
-		grey+=2;
-	}*/
-	
-}
-
-void Main::draw(DC* dc) const
-{
-	if(mainWindow->isShown())
-	{
-		mainWindow->draw(dc);
-		if(gizmo)
-			drawGizmo(dc);
-	}
-	SDL_Rect c;
-	c.x=maus.x;
-	c.y=maus.y;
-	c.w=32;
-	c.h=32;	
-//	get_bg(dc, cursor_save, maus.x, maus.y);
-//	SDL_BlitSurface(*UI_Object::theme.lookUpBitmap(MAUS_BITMAP) , 0, dc->GetSurface(), &c );
-//	RS_Blit(dc, cursor, maus.x, maus.y);
-	//RS_Blit(dc, cursor_save, maus.x, maus.y);
-}
-
-										
-//settings: log level (none, debug only, +final result, +result of each run, +snapshot every X generations, +snapshot every generation, EVERYTHING (~2MB/generation!)
-
-void Main::OnIdle()
-{
-	if((!endrun)&&(!refresh)&&(isOptimizing()))
-	{
-		update=2;
-		ANARACE** temp;
-//TODO: nach Ende eines Durchlaufs ist anarace 0, aber viele anderen Teile des Codes greifen noch drauf zu!!
-		if((temp=settings.newGeneration(anarace)))
-		{
-			for(int i=settings.getMap(0)->getMaxPlayer();i--;)
-			{
-				anarace[i]=temp[i];
-			}
-			if(anarace[0]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=true;}
-		}
-	}
-	if(settings.getIsNewRun())
-	{
-		player[0]->resetData();
-		player[1]->resetData();
-	}
-//	if(update==1)
-//	{
-//		update=2;
-//	}
-
-	refresh++;
-	if(refresh>=settings.getSpeed())
-		refresh=0;		
-}
-
-void toConsole(const string& str)
-{
-    ofstream pFile("error.log", ios_base::app);
-    pFile << str << endl;
-		
-//	cout << str << endl;
-}
-
-
-Main::Main(DC* dc):
-	mainWindow(NULL),
-	msgWindow(NULL),
-	infoWindow(NULL),
-	tutorialWindow(NULL),
-	theCore(NULL),
-	settingsWindow(NULL),
-	maus(),
-	cursor_save(NULL),
-	cursor(NULL),
-	buttonPressed(false),
-	hasAlreadyLeft(false),
-	button(NULL),
-	oldrun(0),
-	endrun(false),
-	gizmo(true),
-	ga(NULL),
-	update(0),
-	refresh(0),
-	ani(1),
-	ani2(0)
-{
-	toConsole("Loading ui settings, bitmaps and fonts (settings/ui/default.ui, data/bitmaps, data/fonts...");
-	UI_Object::theme.loadDataFiles("settings/ui/default.ui","data/bitmaps","data/fonts",dc);
-	bar->draw(dc, 20, "Data files loaded");
-	
-// Always do loadHarvestFile (mining speeds) before loadMapFile, because at the moment the mapfile also sets the gathering speed
-	toConsole("Loading harvest data file (settings/harvest/default.hvt)...");
-	settings.loadHarvestFile("settings/harvest/default.hvt");
-	bar->draw(dc, 2, "Harvest files loaded");
-	
-	toConsole("Loading core settings (settings/default.cfg)...");
-	settings.loadSettingsFile("settings/default.cfg");
-	bar->draw(dc, 2, "Core settings loaded");
-	
-	toConsole("Loading maps (settings/maps)...");
-	settings.loadMapFile("settings/maps/lt42.map");
-	bar->draw(dc, 2, "Maps loaded");
-	
-	toConsole("Loading start conditions (settings/start)...");
-
-	settings.loadStartconditionFile("settings/start/default_terra.start");
-	settings.loadStartconditionFile("settings/start/default_protoss.start");
-	settings.loadStartconditionFile("settings/start/default_zerg.start");
-	bar->draw(dc, 4, "Startconditions loaded");
-	
-	toConsole("Loading goals (settings/goals)...");
-#ifdef __linux__
-	for(int i = 0; i < MAX_RACES; i++)
-	{
-		DIR *dir;
-		struct dirent *entry;
-		ostringstream os;
-		os << "settings/goals/" << raceString[i];
-		if ((dir = opendir(os.str().c_str())) == NULL)
-		{
-			os.str("");
-			os << "ERROR Loading " << raceString[i] << "  goals... Directory settings/goals/" << raceString[i] << " not found...";
-			toConsole(os.str());
-		}
-		else {
-			while ((entry = readdir(dir)) != NULL)
-			{
-				ostringstream oss;
-				oss << os.str() << "/" << entry->d_name;
-				settings.loadGoalFile(oss.str());
-			}
-			closedir(dir);
-		}
-	}
-#else
-	settings.loadGoalFile("settings\\goals\\Terra\\zzz.gol");
-	settings.loadGoalFile("settings\\goals\\Protoss\\reaverdrop.gol");
-	settings.loadGoalFile("settings\\goals\\Zerg\\lurker.gol"); // TODO
-/*				
-{
-   WIN32_FIND_DATA dir;
-   HANDLE fhandle;
-   if ((fhandle=FindFirstFile("settings\\goals\\terra",&dir)) !=INVALID_HANDLE_VALUE)
-      {
-         do {
-		        ostringstream os;
-		        os << "settings\\goals\\terra\\" << dir.cFileName;
-		        settings.loadGoalFile(os.str());
-				toConsole(os.str());
-            } while(FindNextFile(fhandle,&dir));
-	}
-   FindClose(fhandle);
-}*/
-
-#endif
-	bar->draw(dc, 12, "Goals loaded");
-// goal beschreibt Rasse, Ziele und Modus
-	
-	toConsole("Assigning and analyzing data...");
-// Map in "map.txt" is now map[0]
-// choose the first map we loaded (map[0])
-	settings.assignMap(0); // first map (lt) and ums = false
-//	settings.setMode(0); // TODO
-	settings.setHarvestSpeed(TERRA, 0);
-	settings.setHarvestSpeed(PROTOSS, 1);
-	settings.setHarvestSpeed(ZERG, 2);
-
-	settings.assignStartRace(1, TERRA);
-	settings.assignStartRace(2, TERRA);
-
-	settings.assignStartcondition(1, 0);
-	settings.assignStartcondition(2, 0);
-
-	settings.setStartPosition(1, 1);
-	settings.setStartPosition(2, 7);
-	settings.fillGroups();
-
-	settings.assignGoal(1, 0);
-	settings.assignGoal(2, 0); //~~
-	bar->draw(dc, 8, "Data initialized");
-	// TODO FEHLERMELDUNG FALLS FALSCHES GOAL ZU FALSCHER RASSE
-
-//	settings.assignStartconditionHarvestSpeed();
-		
-	toConsole("Preparing soup for first run...");
-	settings.assignRunParametersToSoup(); // assign START and GA of settings to soup
-	// initializes players, initializes Map
-	bar->draw(dc, 2, "Soup for first generation prepared");
-	
-// initialize the soup, set the parameters, load the players etc.
-	ga=settings.getGa();
-//	grey=0;
-	resetData(); // TODO 
-	if(ANARACE** temp=settings.newGeneration(anarace))
-	{
-		for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-			anarace[i]=temp[i];
-	}
-
-	anarace[0]->setMaxpFitness(0);
-
-	UI_Object::assignStartTime();
-	
-	bar->draw(dc, 2, "First generation executed");
-	toConsole("Initializing GUI...");
-	mainWindow=new MainWindow();
-	ostringstream os;
-	//os << "[GUI: " << setprecision(2) << GUI_VERSION << "] [CORE: " << setprecision(2) << CORE_VERSION << "]";
-	//mainWindow->setTitleParameter(os.str());
-	
-	theCore=new CoreWindow(mainWindow);
-	tutorialWindow=new TutorialWindow(mainWindow);
-	settingsWindow = new SettingsWindow(mainWindow);
-	msgWindow=new MessageWindow(mainWindow);
-
-//TODO: scc2 player und scc2dll player Zusammenhang nachschaun! loadPlayer wird net aufgerufen... goals ueberschneiden etc...
-
-	for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-		player[i]=new Player(mainWindow, &(anarace[i]), msgWindow, i);
-	for(unsigned int i = settings.getMap(0)->getMaxPlayer();i<MAX_PLAYER;i++)
-		player[i]=0;
-
-	msgWindow->setParent(mainWindow); // process AFTER player
-
-
-//TODO grey wieder rein... evtl bei draw
-
-	bar->draw(dc, 4, "GUI Windows initialized");
-	mainWindow->Show();
-	msgWindow->Show();
-	theCore->Hide();
-	tutorialWindow->Hide();
-	settingsWindow->Hide();
-
-	player[0]->Show();
-	player[1]->Hide();
-
-	
-	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG1_STRING)));
-	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG2_STRING)));
-	msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(PLAYERS_LOADED_STRING, settings.getMap(0)->getMaxPlayer()));
-	toConsole("Main initialization complete.");
-	bar->draw(dc, 4, "Main initialization complete");
-//	cursor=init_system_cursor(arrow);
-//	SDL_ShowCursor(SDL_DISABLE);
-//	cursor = (UI_Object::theme.lookUpBitmap(MAUS_BITMAP))->getSurface();
-
-//  SDL_SetColorKey(cursor, SDL_SRCCOLORKEY|SDL_RLEACCEL, SDL_MapRGB(cursor->format, 255, 255, 255));
-			
-//	cursor_save = *UI_Object::theme.lookUpBitmap(MAUS_BITMAP);
-	
-//	get_bg(dc, cursor_save, 0, 0);
-//    SDL_SetAlpha(cursor, SDL_SRCALPHA, 127);
-}
-
-
-
-Main::~Main()
-{
-    delete mainWindow;
-    delete msgWindow;
-    delete theCore;
-    delete tutorialWindow;
-    delete settingsWindow;
-    for(int i=0;i<MAX_PLAYER;i++)
-        delete player[i];
-}
-
-void Main::leftDown()
-{
-	if(button)
-	{
-		button->mouseLeftButtonPressed();
-		buttonPressed=true;
-	}
-		
-}
-
-void Main::leftUp(const Point p)
-{
-	if((button)&&(buttonPressed))
-		button->mouseLeftButtonReleased();
-	buttonPressed=false;
-	hasAlreadyLeft=false;
-	setMouse(p);
-}
-
-void Main::rightDown()
-{
-	if(button)
-	{
-		button->mouseRightButtonPressed();
-		buttonPressed=true;
-	}
-		
-}
-
-void Main::rightUp(const Point p)
-{
-	if((button)&&(buttonPressed))
-		button->mouseRightButtonReleased();
-	buttonPressed=false;
-	hasAlreadyLeft=false;
-	setMouse(p);
-}
-
-void Main::setMouse(const Point p)
-{
-	if(p == UI_Object::mouse)
-		return;
-	maus=p;
-	UI_Object::mouse=p;
-	((BoGraphWindow*)(player[0]->window[BO_GRAPH_WINDOW]))->mouseHasMoved();
-//	else if(player[1]->window[BO_GRAPH_WINDOW]->Inside(p))
-//		(BoGraphWindow*)(player[1]->window[BO_GRAPH_WINDOW])->mouseHasMoved();
-	
-	if(hasAlreadyLeft)
-	{
-		if((button)&&(button->getAbsoluteRect().Inside(p)))
-		{
-			button->mouseHasEnteredArea();
-			hasAlreadyLeft=false;
-		}
-		else return;
-	}
-	if((button)&&(!button->getAbsoluteRect().Inside(p)))
-	{
-		button->mouseHasLeftArea();
-		if(!buttonPressed)
-			button=0;
-		else
-			hasAlreadyLeft=true;
-	}
-// ignore mousemove if button is still pressed		
-	if(button)
-	{
-		if(buttonPressed)
-		{
-			button->forceHighlighted();
-//			button->mouseHasMoved();
-		}
-		return;
-	}
-	button = (UI_Button*) (player[0]->checkHighlight());
-	if(!button)
-		button = (UI_Button*) (player[1]->checkHighlight());
-	if(!button)
-		button = (UI_Button*) (mainWindow->checkHighlight());
-	if(!button)
-		button = (UI_Button*) (settingsWindow->checkHighlight());
-	if(button)
-	{
-		button->mouseHasEnteredArea();
-		hasAlreadyLeft=false;
-	}
-}
-
 
 int main(int argc, char *argv[])
 {
-	toConsole("Starting ... ");
-	long unsigned int ss = SDL_GetTicks();
-	SDL_Event event;
-	DC* screen;
-	toConsole("Initializing SDL ... ");
+	//fillInfluenceList();
+
+	toLog("Starting ... ");
+	long unsigned int startTime = SDL_GetTicks();
+	toLog("Loading core settings (settings/default.cfg)...");
+	configuration.loadConfigurationFile();
+	
+// ------ INIT SDL ------
+	toLog("Initializing SDL ... ");
+	
 	if ( SDL_Init(SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE) < 0 )
 	{
 		ostringstream os;
 		os << "Unable to init SDL: " << SDL_GetError();
-		toConsole(os.str());
+		toLog(os.str());
 		return(1);
 	}
-	bool FULLSCREEN=false;
- 	SDL_Rect c;c.x=0;c.y=0;c.w=1024;c.h=768;
-	toConsole("Initializing videomode...");
+	atexit(SDL_Quit);
+	SDL_Event event;
+// ------ END INIT SDL -------
+
+
+// ------ INIT WINDOW ------
+	toLog("Initializing videomode...");
 	
-	if (FULLSCREEN)
-	{
-		toConsole("Setting fullscreen...");
-		screen=new DC(SDL_SetVideoMode(c.w, c.h, 32, SDL_SWSURFACE|SDL_DOUBLEBUF|SDL_ANYFORMAT|SDL_FULLSCREEN));
+ 	SDL_Rect clientWindow;
+	clientWindow.x=0;clientWindow.y=0;clientWindow.w=1024;clientWindow.h=768;
+	DC* screen;
+	if (configuration.isFullScreen()) {
+		toLog("Setting fullscreen...");
+		screen=new DC(SDL_SetVideoMode(clientWindow.w, clientWindow.h, 32, SDL_SWSURFACE|SDL_DOUBLEBUF|SDL_ANYFORMAT|SDL_FULLSCREEN));
 	}
-	else
-	{
-		toConsole("Setting window mode...");
-		screen=new DC(SDL_SetVideoMode(c.w, c.h, 32, SDL_SWSURFACE|SDL_DOUBLEBUF|SDL_ANYFORMAT));
+	else {
+		toLog("Setting window mode...");
+		screen=new DC(SDL_SetVideoMode(clientWindow.w, clientWindow.h, 32, SDL_SWSURFACE|SDL_DOUBLEBUF|SDL_ANYFORMAT));
 	}
 	if ( screen == NULL )
 	{
-		toConsole("Error setting video mode");
+		toLog("Error setting video mode");
 		return(1);
 	}
-	screen->setResolution(c.w, c.h);
-	UI_Object::max_x=c.w;
-	UI_Object::max_y=c.h;
-	c.x = 0;
-	c.y = 0;
+	screen->setResolution(clientWindow.w, clientWindow.h);
+	UI_Object::max_x=clientWindow.w;
+	UI_Object::max_y=clientWindow.h;
+	SDL_WM_SetCaption("EVOLUTION FORGE (C) CLEMENS LODE, 2004 www.clawsoftware.de","");
+	if(configuration.isSoftwareMouse())
+		SDL_ShowCursor(SDL_DISABLE);
+// ------ END INIT WINDOW ------
 
+
+// ------ INTRO PICTURE ------
 	Bitmap progress("data/bitmaps/back2.bmp");
 	Bitmap claw("data/bitmaps/clawsoftware.bmp");
-
-	screen->DrawBitmap(progress, (c.w - progress->w)/2, (c.h - progress->h)/2);
-	screen->DrawBitmap(claw, c.w - claw->w, c.h - claw->h);
+	screen->DrawBitmap(progress, (clientWindow.w - progress->w)/2, (clientWindow.h - progress->h)/2);
+	screen->DrawBitmap(claw, clientWindow.w - claw->w, clientWindow.h - claw->h);
 	screen->SetPen(Pen(Color(screen->GetSurface(), 255, 255, 255), 1, SOLID_PEN_STYLE));
 	screen->SetBrush(Brush(Color(screen->GetSurface(), 100, 150, 255), SOLID_BRUSH_STYLE));
-	
-	bar = new ProgressBar(Rect((c.w-progress->w)/2 + 10, (c.h - progress->h)/2 + 10, progress->w - 20, progress->h - 20));
-	bar->draw(screen, 5);
+	Main::bar = new ProgressBar(Rect((clientWindow.w-progress->w)/2 + 10, (clientWindow.h - progress->h)/2 + 10, progress->w - 20, progress->h - 20));
+	Main::bar->draw(screen, 5);
+// ------ END INTRO PICTURE -------
 
-	SDL_WM_SetCaption("EVOLUTION FORGE (C) CLEMENS LODE, 2004 www.clawsoftware.de","");
 
-	toConsole("Initializing SDL truetype fonts ... ");
-	/* start SDL_ttf */
+// ------ INIT SDL_TTF ------
+	toLog("Initializing SDL truetype fonts ... ");
 	if(TTF_Init()==-1)
 	{
 		ostringstream os;
 		os << "TTF_Init: " << TTF_GetError();
-		toConsole(os.str());		
+		toLog(os.str());		
 		return 2;
 	}
-	atexit(TTF_Quit); /* remember to quit SDL_ttf */
-	atexit(SDL_Quit);
-	bar->draw(screen, 5);
+	atexit(TTF_Quit); 
+// ------- END INIT SDL_TTF -------
 
-	toConsole("Initializing graphic engine and core ...");
+
+	Main::bar->draw(screen, 5);
+	toLog("Initializing graphic engine and core ...");
 	Main m(screen);
 
 // ------ CAP FRAMERATE ------
 	FPS* fps=new FPS();
-	fps->setFramerate(50);
+	fps->setFramerate(99);
+	unsigned int screenshot=100;
+	bool screenCapturing=false;
+	bool warning = false;
 // ------ END CAP FRAMERATE
 
-	bar->draw(screen, 100, "Graphic engine and core initialized");
-
-	bool fullupdate=false;
-	unsigned int screenshot=100;
-	Rect text;
-//	UI_StaticText* t=new UI_StaticText(NULL, "Software", Rect(-200, 0, 0, 0), NO_TEXT_MODE, FITNESS_TEXT_COLOR, VERY_LARGE_NORMAL_BOLD_FONT);
-//	t->adjustRelativeRect(Rect(800, 700, 0, 0));
-	toConsole("System ready ...");
+	Main::bar->draw(screen, 100, "Graphic engine and core initialized");
+	toLog("System ready ...");
 	ostringstream oss;
-	oss << ((float)(ss - SDL_GetTicks()))/1000000000.0;
-	toConsole("Initialization time: "+oss.str());
-
-	bool BITMAP_MOUSE=false;
-	bool warning = false;
-
-	if(BITMAP_MOUSE)
-	{
-		SDL_ShowCursor(SDL_DISABLE);
-	}
+	oss << ((float)(startTime - SDL_GetTicks()))/1000000000.0;
+	toLog("Initialization time: "+oss.str());
+	delete Main::bar;
 
 
+#if 0
 // ------ INTRO ------
-	Rect t((c.w-650)/2 + 10, (c.h - 750)/2 + 10, 650 - 20, 750 - 20);
-	Rect t2((c.w-600)/2 + 10, (c.h - 700)/2 + 10, 600 - 20, 700 - 20);
-    // draw outer border:
-//	UI_StaticText introText(NULL, "15.  Thus it is that in war the victorious strategist only seeks battle after the victory has been won, whereas he who is destined to defeat first fights and afterwards looks for victory.# ]#19.  A victorious army opposed to a routed one,  is as a pound's weight placed in the scale against a single grain.# # #$---- When you won a skirmish on the battle field, the psychological effect on the opponent is often greater than the actual numbers he lost -----$# # PRESS A KEY TO CONTINUE..."
-	/*
-   #                                                                                                                     
-     1.  Sun Tzu said:  The control of a large force is the same
-principle as the control of a few men:  it is merely a question
-of dividing up their numbers.
-  #                                                                                                                      
-     [That is,  cutting up the army into regiments,  companies,
-etc.,  with subordinate officers in command of each.  Tu Mu
-reminds us of Han Hsin's famous reply to the first Han Emperor,
-who once said to him:  \"How large an army do you think I could
-lead?\"   \"Not more than 100,000 men, your Majesty.\"   \"And you?\"
-asked the Emperor.  \"Oh!\" he answered, \"the more the better.\"]
- #                                                                                                                       
-     2.  Fighting with a large army under your command is nowise
-different from fighting with a small one:   it is merely a
-question of instituting signs and signals.
-#                                                                                                                        
------ Know the hotkeys, assign team numbers and let certain groups follow other groups by right-clicking on a unit -----
-"*/
-
-
-UI_StaticText introText(NULL, "$Welcome to Evolution Forge 0.60 BETA Test :)$# # $ABOUT THE BETA TEST:$#- $How can I help?$#$Most important:$ Post your ideas, discuss or report bugs at the forums at $evolutionforge.com$!#- $It's a beta test... so what do I have to do?$#Test the program on different pcs, different configurations, color settings, drivers etc. and report back any crashes, bugs etc.#Try out many different, especially unusual goal lists to test the core, let the program run some hours, test the command line options, change the settings, ...#$DO NOT MESS WITH THE DATA FILES :D$ The loading do not take notice of any error. In the worst case the programm will crash.# # $ABOUT THE PROGRAM ITSELF:$# # - $What does this program?$#The program $simulates an abstract StarCraft : Broodwar environment$, $calculates the time$ a certain build order needs and $optimizes randomly created build orders$ to a given goal list using $evolutionary algorithms$.#- $Is it accurate, where are the limits?$#Depending on the $map$, the $latency$, your $mouse speed$ and many other small factors there might be slightly faster build orders. Also the program is based on $one second steps$ and minerals/gas are gathered per second. Because of that you have to exercise the build orders and adapt them to your needs.#- $Is it useful?$#Hard question, you have to decide for yourself. I think that is certainly useful for beginners who want to improve their gaming. Personally I look at the program as a well sorted collection of build orders but also as a sort of toy or game :) It is always fun trying something new :D#- $Why Starcraft?$Stupid question.# # NOW HAVE FUN! 8-D", t2, FORMATTED_TEXT_MODE, BRIGHT_TEXT_COLOR, SMALL_MIDDLE_NORMAL_FONT);
+	Rect t((clientWindow.w-650)/2 + 10, (clientWindow.h - 750)/2 + 10, 650 - 20, 750 - 20);
+	Rect t2((clientWindow.w-600)/2 + 10, (clientWindow.h - 700)/2 + 10, 600 - 20, 700 - 20);
+	
+UI_StaticText introText(NULL, "$Welcome to Evolution Forge 0.60 BETA Test :)$# # $ABOUT THE BETA TEST:$#- $How can I help?$#$Most important:$ Post your ideas, discuss or report bugs at the forums at $evolutionforge.com$!#- $It's a beta test... so what do I have to do?$#Test the program on different pcs, different configurations, color settings, drivers etc and report back any crashes, bugs etc#Try out many different, especially unusual goal lists to test the core, let the program run some hours, test the command line options, change the settings, ...#$DO NOT MESS WITH THE DATA FILES :D$ The loading do not take notice of any error. In the worst case the programm will crash.# # $ABOUT THE PROGRAM ITSELF:$# # - $What does this program?$#The program $simulates an abstract StarCraft : Broodwar environment$, $calculates the time$ a certain build order needs and $optimizes randomly created build orders$ to a given goal list using $evolutionary algorithms$.#- $Is it accurate, where are the limits?$#Depending on the $map$, the $latency$, your $mouse speed$ and many other small factors there might be slightly faster build orders. Also the program is based on $one second steps$ and minerals/gas are gathered per second. Because of that you have to exercise the build orders and adapt them to your needs.#- $Is it useful?$#Hard question, you have to decide for yourself. I think that is certainly useful for beginners who want to improve their gaming. Personally I look at the program as a well sorted collection of build orders but also as a sort of toy or game :) It is always fun trying something new :D#- $Why Starcraft?$Stupid question.# # NOW HAVE FUN! 8-D", t2, FORMATTED_TEXT_MODE, BRIGHT_TEXT_COLOR, SMALL_MIDDLE_NORMAL_FONT);
 	bool done = false;
 	while(!done)
 	{
 		introText.process();
 	    screen->SetPen(Pen(Color(screen->GetSurface(), 0, 0, 0), 1, TRANSPARENT_PEN_STYLE));
 		screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
-		screen->DrawRectangle(Rect(c.x, c.y, c.w-1, c.h-1));
+		screen->DrawRectangle(Rect(clientWindow.x, clientWindow.y, clientWindow.w-1, clientWindow.h-1));
 	    screen->SetPen(*UI_Object::theme.lookUpPen(OUTER_BORDER_PEN));
 		screen->SetBrush(*UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
 		screen->DrawEdgedRoundedRectangle(t,6);
-		screen->DrawBitmap(claw, c.w - claw->w, c.h - claw->h);
+		screen->DrawBitmap(claw, clientWindow.w - claw->w, clientWindow.h - claw->h);
 		introText.draw(screen);
         screen->updateScreen();
         fps->delay();
@@ -800,12 +133,15 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge 0.60 BETA Test :)$# #
 	}
 
 // ------ END INTRO ------
-	
+#endif	
 
-	
+	bool drawing = true;;
+	int oldDynamicFramerate = configuration.getDynamicFramerate();
+	bool oldAllowStaticFramerate = configuration.isAllowStaticFramerate();
+
 	while(true)
 	{
-		if(settings.getSpeed())
+		if(drawing)
 			m.process();
 		else			
 			m.player[0]->window[STATISTICS_WINDOW]->process();
@@ -813,17 +149,23 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge 0.60 BETA Test :)$# #
 		m.OnIdle();
 
 // ------ DRAWING ------
-		if(settings.getSpeed())
+		if(drawing)
 		{
 			warning=false;
-//			SDL_BlitSurface(*UI_Object::theme.lookUpBitmap(BACKGROUND_SPACE_BITMAP) , 0, screen->GetSurface(), &c );
-		    screen->SetPen(Pen(Color(screen->GetSurface(), 0, 0, 0), 1, TRANSPARENT_PEN_STYLE));
-			screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
-			screen->DrawRectangle(Rect(c.x, c.y, c.w-1, c.h-1));
-			screen->DrawBitmap(claw, c.w - claw->w, c.h - claw->h);
+			if(configuration.isBackgroundBitmap())
+			{
+				SDL_BlitSurface(*UI_Object::theme.lookUpBitmap(BACKGROUND_BITMAP) , 0, screen->GetSurface(), &clientWindow );
+			}
+			else
+			{
+			    screen->SetPen(Pen(Color(screen->GetSurface(), 0, 0, 0), 1, SOLID_PEN_STYLE));
+				screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
+				screen->DrawRectangle(Rect(clientWindow.x, clientWindow.y, clientWindow.w-1, clientWindow.h-1));
+			}
+			screen->DrawBitmap(claw, clientWindow.w - claw->w, clientWindow.h - claw->h);
 			m.draw(screen);
 // ------ MOUSE DRAWING ------
-			if(BITMAP_MOUSE)
+			if(configuration.isSoftwareMouse())
 			{
 				Point p = UI_Object::mouse - Size(20,10);//Point(90, 140);
 				screen->SetFont(UI_Object::theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
@@ -856,129 +198,116 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge 0.60 BETA Test :)$# #
 // ------ END DRAWING ------
 		else if(!warning)
 		{
-			screen->SetTextForeground(toSDL_Color(255,100,100));
+			screen->SetTextForeground(toSDL_Color(255, 100, 100));
 			screen->SetFont(UI_Object::theme.lookUpFont(LARGE_NORMAL_BOLD_FONT));
-            screen->DrawText("DRAWING SUSPENDED FOR MAXIMUM SPEED, PRESS A BUTTON TO STOP.", 20, 300);	
+            screen->DrawText("DRAWING SUSPENDED FOR MAXIMUM SPEED, PRESS A BUTTON OR KEY TO STOP.", 100, 350);	
 			//warning = true;
 			m.player[0]->window[STATISTICS_WINDOW]->draw(screen);
 		}
 		
 // ------ SCREENCAPTURE ------		
-		if(fullupdate) {
+		if(screenCapturing) {
 			ostringstream os;os << "shot" << screenshot << ".bmp";
 			SDL_SaveBMP(screen->GetSurface() , os.str().c_str());os.str("");screenshot++;
-			os << " saved (" << (c.w * c.h)/256 << "kb) [" << (screenshot * c.w * c.h)/(1024*256)<<"MB total]";
+			os << " saved (" << (clientWindow.w * clientWindow.h)/256 << "kb) [" << (screenshot * clientWindow.w * clientWindow.h)/(1024*256)<<"MB total]";
 			screen->DrawText(os.str(), 50, 600);
 		}
 // ------ END SCREENCAPTURE -----
-
-
-/*		ostringstream os;
-		os << m.maus.x << ":" << m.maus.y << " " << m.buttonPressed << " " << m.hasAlreadyLeft << " | ";
-		if(m.button)
-			os << "button: " << m.button->getAbsoluteLeftBound() << ":" << m.button->getAbsoluteUpperBound() << ":" << m.button->getAbsoluteRightBound() << ":" << m.button->getAbsoluteLowerBound();
-		screen->SetBrush(*UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
-		screen->DrawRectangle(600,500,200,20);
-		screen->SetFont(UI_Object::theme.lookUpFont(SMALL_NORMAL_BOLD_FONT));
-		screen->SetTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
-		screen->DrawText(os.str(), 605, 505);*/
-		
-
-//    if ( (screen->GetSurface()->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF ) {
-    //    SDL_Flip(screen->GetSurface());
-  //  } else {
-//		SDL_UpdateRects(screen->GetSurface(), UI_Object::rectnumber, &(UI_Object::rectlist[0]));
-//	}
-//		SDL_SetClipRect(screen->GetSurface(), &c);
 
 		screen->updateScreen();
 		fps->delay();
 
 		while (SDL_PollEvent(&event))
 		{
-			
-		switch (event.type)
-		{
-			case SDL_QUIT:
-				return(0);break;
-			case SDL_KEYDOWN:
-				if(UI_Object::editTextFeld)
-				{
-					if((event.key.keysym.sym >= SDLK_a)&&(event.key.keysym.sym <= SDLK_z))
+			switch (event.type)
+			{
+				case SDL_QUIT:
+					delete fps;
+					delete screen;
+					return(0);
+					break;
+				case SDL_KEYDOWN:
+					if(!drawing)
 					{
-						UI_Object::editTextFeld->addChar(event.key.keysym.sym - SDLK_a + 'a');			
+						configuration.setAllowStaticFramerate(oldAllowStaticFramerate);
+						configuration.setDynamicFramerate(oldDynamicFramerate);
+						drawing=true;
 					}
-				}
-
-				if(settings.getSpeed() == 0)
-					settings.setSpeed(1);
-				
-				switch(event.key.keysym.sym)
-				{
-					case SDLK_ESCAPE:delete fps;return(0);break;
-					case SDLK_SPACE:
-						fullupdate=!fullupdate;break;
-/*						{
+					else
+					switch(event.key.keysym.sym)
+					{
+						case SDLK_ESCAPE:
+						{
+							delete fps;fps=NULL;
+							delete screen;screen=NULL;
+							return(0);
+						}break;
+						case SDLK_SPACE:
+						{
 							if(m.isOptimizing())
 								m.stopOptimizing();
 							else m.startOptimizing();
-						};break;*/
-					case SDLK_RETURN:
-						if(event.key.keysym.mod & (KMOD_LALT | KMOD_RALT | KMOD_ALT))
-							SDL_WM_ToggleFullScreen(screen->GetSurface());
+						}break;					
+						case SDLK_p:
+							if(event.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL))
+								screenCapturing=!screenCapturing;
+							break;
+						case SDLK_s:
+							if(event.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL))
+							{
+								drawing=false;
+								oldAllowStaticFramerate=configuration.isAllowStaticFramerate();
+								oldDynamicFramerate=configuration.getDynamicFramerate();
+								configuration.setAllowStaticFramerate(false);
+							}
+							break;
+						
+						case SDLK_RETURN:
+							if(event.key.keysym.mod & (KMOD_LALT | KMOD_RALT | KMOD_ALT))
+								SDL_WM_ToggleFullScreen(screen->GetSurface());
+						break;
+						case SDLK_PLUS:
+								if(UI_Object::theme.getResolution()<RESOLUTION_1280x1024)
+									UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() + 1));
+								break;
+						case SDLK_MINUS:
+								if(UI_Object::theme.getResolution()>RESOLUTION_800x600)
+									UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() - 1));
+								break;
+						case SDLK_F1:m.mainWindow->forcePressTab(BASIC_TAB);break;
+						case SDLK_F2:m.mainWindow->forcePressTab(ADVANCED_TAB);break;
+						case SDLK_F3:m.mainWindow->forcePressTab(EXPERT_TAB);break;
+						case SDLK_F4:m.mainWindow->forcePressTab(GOSU_TAB);break;
+						case SDLK_F5:m.mainWindow->forcePressTab(COMPARE_TAB);break;
+						case SDLK_F6:m.mainWindow->forcePressTab(MAP_TAB);break;
+						case SDLK_F7:m.mainWindow->forcePressTab(SETTINGS_TAB);break;
+						case SDLK_F8:m.mainWindow->forcePressTab(TUTORIAL_TAB);break;
+						default:break;
+					}
 					break;
-					case SDLK_PLUS:
-							if(UI_Object::theme.getResolution()<RESOLUTION_1280x1024)
-							{
-								UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() + 1));
-							}
-							break;
-					case SDLK_MINUS:
-							if(UI_Object::theme.getResolution()>RESOLUTION_800x600)
-							{
-								UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() - 1));
-							}
-							break;
-				
-					case SDLK_F1:m.mainWindow->forcePressTab(BASIC_TAB);break;
-					case SDLK_F2:m.mainWindow->forcePressTab(ADVANCED_TAB);break;
-					case SDLK_F3:m.mainWindow->forcePressTab(EXPERT_TAB);break;
-					case SDLK_F4:m.mainWindow->forcePressTab(GOSU_TAB);break;
-					
-					case SDLK_F5:m.mainWindow->forcePressTab(COMPARE_TAB);break;
-					case SDLK_F6:m.mainWindow->forcePressTab(MAP_TAB);break;
-					case SDLK_F7:m.mainWindow->forcePressTab(SETTINGS_TAB);break;
-					case SDLK_F8:m.mainWindow->forcePressTab(TUTORIAL_TAB);break;
+				case SDL_MOUSEBUTTONDOWN:
+                    if(!drawing)
+                    {
+                        configuration.setAllowStaticFramerate(oldAllowStaticFramerate);
+                        configuration.setDynamicFramerate(oldDynamicFramerate);
+                        drawing=true;
+                    }
+					if(event.button.button == SDL_BUTTON_LEFT)
+						m.leftDown();
+					else if(event.button.button == SDL_BUTTON_RIGHT)
+						m.rightDown();
+					break;
+				case SDL_MOUSEBUTTONUP:
+					if(event.button.button == SDL_BUTTON_LEFT)
+						m.leftUp(Point(event.motion.x, event.motion.y));
+					else if(event.button.button == SDL_BUTTON_RIGHT)
+						m.rightUp(Point(event.motion.x, event.motion.y));
+					break;
+				case SDL_MOUSEMOTION:
+					m.setMouse(Point(event.motion.x, event.motion.y));break;
 					default:break;
-				}
-				break;
-			case SDL_MOUSEBUTTONDOWN:
-                if(settings.getSpeed() == 0)
-                    settings.setSpeed(1);
-				if(event.button.button == SDL_BUTTON_LEFT)
-					m.leftDown();
-				else if(event.button.button == SDL_BUTTON_RIGHT)
-					m.rightDown();
-				break;
-			case SDL_MOUSEBUTTONUP:
-				if(event.button.button == SDL_BUTTON_LEFT)
-					m.leftUp(Point(event.motion.x, event.motion.y));
-				else if(event.button.button == SDL_BUTTON_RIGHT)
-					m.rightUp(Point(event.motion.x, event.motion.y));
-				break;
-			case SDL_MOUSEMOTION:
-				m.setMouse(Point(event.motion.x, event.motion.y));break;
-			default:break;
-	/*					
-void Main::OnMouseWheelScroll(MouseEvent& event)
-{
-	controls.scrollMouseWheel(event.GetWheelRotation());
-}*/				
+			}
 		}
-	}
-
-
-		
 	}
 }
 					

@@ -47,8 +47,8 @@ const unsigned int MIN_BREED_FACTOR = 0;
 const unsigned int MAX_MODE = 2;
 const unsigned int MIN_MODE = 0;
 
-const unsigned int MAX_CROSSOVER = 40;
-const unsigned int MIN_CROSSOVER = 0;
+const unsigned int MAX_CROSSING_OVER = 40;
+const unsigned int MIN_CROSSING_OVER = 0;
 
 //const unsigned int MAX_TIME = 3600;
 const unsigned int MIN_TIME = 300;
@@ -56,15 +56,20 @@ const unsigned int MIN_TIME = 300;
 const unsigned int MAX_TIMEOUT = 266;
 const unsigned int MIN_TIMEOUT = 40;
 
+const unsigned int MAX_MUTATION_FACTOR = 400;
+const unsigned int MIN_MUTATION_FACTOR = 1;
+
+const unsigned int MIN_DYNAMIC_FRAMERATE = 0;
+const unsigned int MAX_DYNAMIC_FRAMERATE = 100;
+
+const unsigned int MIN_NOISE = 0;
+const unsigned int MAX_NOISE = 100;
+
 //const unsigned int MAX_LENGTH = 96;
 const unsigned int MIN_LENGTH = 32;
 
 //const unsigned int MAX_RUNS = 10;
 const unsigned int MIN_RUNS = 1;
-
-const unsigned int MAX_PREPROCESS_BUILDORDER = 1;
-const unsigned int MIN_PREPROCESS_BUILDORDER = 0;
-
 
 const unsigned int MAX_TFITNESS = 99999;
 const unsigned int MAX_PFITNESS = 99999;
@@ -73,9 +78,33 @@ const unsigned int MAX_PFITNESS = 99999;
 
 //const unsigned int MAX_RACES = (ZERG+1);
 
+const unsigned int MIN_STATIC_FRAMERATE = 1;
+const unsigned int MAX_STATIC_FRAMERATE = 100;
 
 const std::string raceString[MAX_RACES] = 
 { "Terra", "Protoss", "Zerg" };
+
+std::list<unsigned int> influenceList[MAX_RACES][UNIT_TYPE_COUNT];
+
+void fillInfluenceList()
+{
+	for(int i=0;i<MAX_RACES;i++)
+	{
+		for(unsigned int j=0;j<UNIT_TYPE_COUNT;j++)
+		{
+			for(int k=0;k<3;k++)
+			{
+				if(stats[i][j].prerequisite[k])
+					influenceList[i][stats[i][j].prerequisite[k]].push_front(j);
+				if(stats[i][j].facility[k])
+					influenceList[i][stats[i][j].facility[k]].push_front(j);
+			}
+			for(int k=0;k<2;k++)
+				if(stats[i][j].upgrade[k])
+					influenceList[i][stats[i][j].upgrade[k]].push_front(j);
+		}
+	}
+}
 
 const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {

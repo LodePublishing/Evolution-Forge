@@ -15,7 +15,7 @@ TimerWindow::TimerWindow(UI_Object* timer_parent, ANARACE* timer_anarace, const 
 // TODO irgendwas stimmt hier mit der Hoehe nicht
 	continueButton(new UI_Button(this, getRelativeClientRect(), getRelativeClientRect(), CLICK_TO_CONTINUE_STRING, CLICK_TO_PAUSE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, BOTTOM_CENTER, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH))
 {
-	continueButton->updateToolTip("Continue the optimization");
+	continueButton->updateToolTip(CONTINUE_OPTIMIZATION_TOOLTIP_STRING);
 	resetData(); // TODO
 }
 

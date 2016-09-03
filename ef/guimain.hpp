@@ -10,6 +10,8 @@ const float GUI_VERSION=0.50;
 #include "mainwindow.hpp"
 #include "setwindow.hpp"
 
+#include "progressbar.hpp"
+
 #include <math.h>
 #include <iostream>
 #include <sstream>
@@ -32,6 +34,8 @@ class Main
 		Player* player[MAX_PLAYER];
 		CoreWindow* theCore;
 		SettingsWindow* settingsWindow;
+		static ProgressBar* bar;
+		
 		const bool isOptimizing() const;
 		void stopOptimizing();
 		void startOptimizing();
@@ -56,7 +60,6 @@ class Main
 		unsigned int oldrun;
 		bool endrun;
 		bool gizmo;
-		const GA* ga;
 		void drawGizmo(DC* dc) const;
 		const Size helper(DC* dc, const unsigned int dx, const int i, const string& str) const;
 		ANARACE* anarace[MAX_PLAYER];

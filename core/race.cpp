@@ -18,6 +18,23 @@ RACE::RACE():
 RACE::~RACE()
 { }
 
+RACE::RACE(const RACE& object) :
+	PRERACE((PRERACE)(object)),
+    mutationRate( object.mutationRate ),
+    pFitness( object.pFitness ),
+    sFitness( object.sFitness ),
+    tFitness( object.tFitness )
+{ }
+
+RACE& RACE::operator=(const RACE& object)
+{
+	(PRERACE)(*this) = (PRERACE)(object);
+    mutationRate = object.mutationRate;
+    pFitness = object.pFitness;
+    sFitness = object.sFitness;
+    tFitness = object.tFitness;
+	return(*this);
+}
 
 const unsigned int RACE::calculateSecondaryFitness() const
 {
@@ -39,7 +56,7 @@ const bool RACE::calculateStep()
 	
 	if((!getTimer())||(ready=calculateReady())||(!getIP())) 
 	{
-		setLength(ga->maxLength-getIP());
+		setLength(configuration.getMaxLength()-getIP());
 		if(!ready) 
 			setTimer(0);
 //		if(getpGoal()->getMode()==0)
@@ -51,6 +68,7 @@ const bool RACE::calculateStep()
 		settFitness(gettFitness()-getLength());
 		setsFitness(calculateSecondaryFitness());
 // ----- END RACE SPECIFIC ------
+
 	
 		return(true);
 	}
@@ -74,7 +92,9 @@ const bool RACE::calculateStep()
 			if(!getTimeOut())
 				settFitness(gettFitness()-5);
 			
-			setTimeOut(ga->maxTimeOut);
+			setTimeOut(configuration.getMaxTimeOut());
+
+
 			setIP(getIP()-1);
 		}
 	}
@@ -151,12 +171,6 @@ const bool RACE::calculateStep()
 			}
 			lastcounter++;
 // ------ END OF LAST ITEM
-			
-// berechne 'FinalTime', die angibt, wann alle Einheiten (bzw. die letzte Einheit) unsereres Zieles fertiggestellt wurden
-// Quasi wie "ready" nur ohne Zeit
-//TODO CHECKEN!!
-// Did we reach the right number at the right time?
-//			  i=MAX_GOALS;  TODO? koennen wir mehrere goals gleichzeitig erfuell0rn?
 			buildingQueue.pop();
 // oder: irgendeine location... TODO: Problem: die Einheiten koennen irgendwo sein, also nicht gesammelt an einem Fleck...
 		} // END of if(build.getBuildFinishedTime()==getTimer())
@@ -174,7 +188,6 @@ const bool RACE::calculateStep()
 //FEHLER MUSS HIER SEIN!! TODO
 
 //TODO: pFitness wird total falsch berechnet fuer races die nicht alle Ziele erfuellt haben!1 [location problem halt...]
-
 
 const bool RACE::buildGene(const unsigned int build_unit)
 {
@@ -440,7 +453,7 @@ const bool RACE::buildGene(const unsigned int build_unit)
 void RACE::prepareForNewGeneration() // resets all data to standard starting values
 {
 	PRERACE::prepareForNewGeneration();
-	
+
 	setpFitness(0);
 	setsFitness(0);
 	settFitness(MAX_TFITNESS);

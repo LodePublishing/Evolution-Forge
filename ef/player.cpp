@@ -2,7 +2,7 @@
 
 Player::~Player()
 {
-};
+}
 
 Player::Player(UI_Object* parent, ANARACE** anarace, const int playerNumber):UI_Object(parent)
 {
@@ -17,7 +17,7 @@ Player::Player(UI_Object* parent, ANARACE** anarace, const int playerNumber):UI_
 	window[BO_GRAPH_WINDOW] = new BoGraphWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], &orderList, playerNumber);
 	window[BO_DIAGRAM_WINDOW]=new BoDiagramWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], playerNumber);
 	setMode(BASIC_TAB, playerNumber);
-};
+}
 
 
 void Player::drawGeneString(DC* dc, const Rect position) const
@@ -133,7 +133,7 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 		geneAnimation++;
 	} //end if(isOptimizing)
 #endif
-};
+}
 
 #if 0
 void Player::InitPositions(UI_Window* parentWindow)
@@ -289,7 +289,7 @@ void Player::InitPositions(UI_Window* parentWindow)
 		boGraphWindowMax[i]=Rect(boGraphWindowMax[i].GetPosition()+mainWindow->getClientRectPosition(),boGraphWindowMax[i].GetSize());
 		infoWindowMax[i]=Rect(infoWindowMax[i].GetPosition()+mainWindow->getClientRectPosition(),infoWindowMax[i].GetSize());
 	}
-};
+}
 #endif 
 																				
 
@@ -298,7 +298,7 @@ void Player::draw(DC* dc) const
 //	drawGeneString(dc,Rect(mainWindow->getPosition()+Point(0,20+i*(mainWindow->getClientRectHeight()/(UI_Object::settings.getMap(0)->getMaxPlayer()-1))),Size(mainWindow->getWidth(),mainWindow->getClientRectHeight()/(UI_Object::settings.getMap(0)->getMaxPlayer()-1)-40))); TODO
 	
 	UI_Object::draw(dc);
-};
+}
 
 void Player::setMode(const eTab tab, const int playerNum)//, int player1, int player2)
 {
@@ -324,9 +324,9 @@ void Player::setMode(const eTab tab, const int playerNum)//, int player1, int pl
 		case 14:this->Show();(*anarace)->setActive(1);break; // first player
 		case 15:this->Hide();(*anarace)->setActive(0);break; // second player
 		default:break;
-	};
+	}
 	// TODO modes der einzelnen Windows (z.B> timer oder force)
-};
+}
 
 void Player::process()
 {
@@ -344,7 +344,7 @@ void Player::process()
 // ------ PROCESS MEMBER VARIABLES ------	
 	MoveOrders();
 // ------ END PROCESSING MEMBER VARIABLES ------
-};
+}
 
 const bool Player::getChangedFlag() const
 {
@@ -352,23 +352,23 @@ const bool Player::getChangedFlag() const
 		if(window[(eWindow)i]->getChangedFlag())
 			return(1);
 	return(0);
-};
+}
 
 void Player::updateRectangles(const int maxPlayer)
 {
 	for(int i=BUILD_ORDER_WINDOW;i<MAX_WINDOWS;i++)
 		window[(eWindow)i]->updateRectangles(maxPlayer);
-};
+}
 
 const bool Player::isOptimizing() const
 {
 	return((*anarace)->isOptimizing());
-};
+}
 
 void Player::setOptimizing(const bool opt)
 {
 	(*anarace)->setOptimizing(opt);
-};
+}
 
 void Player::changeAccepted()
 {
@@ -376,22 +376,22 @@ void Player::changeAccepted()
 		window[(eWindow)i]->changeAccepted();
 	//if((*anarace)->getPlayer()->isChanged())  //TODO, Informationsfluss ist sehr unsauber!
 	//	(*anarace)->getPlayer()->changeAccepted();
-};
+}
 
 
 void Player::resetData()
 {
-	/*(*BoWindow)window[BUILD_ORDER_WINDOW]->resetData();
-	(*ForceWindow)window[FORCE_WINDOW]->resetData();
-	(*BoGraphWindow)window[BO_GRAPH_WINDOW]->resetData();
-	(*StatisticsWindow)window[STATISTICS_WINDOW]->resetData();
-	(*BoDiagramWindow)window[BO_DIAGRAM_WINDOW]->resetData();
-	(*TimerWindow)window[TIMER_WINDOW]->resetData();
-	(*InfoWindow)window[INFO_WINDOW]->resetData();*/
+	((BoWindow*)window[BUILD_ORDER_WINDOW])->resetData();
+	((ForceWindow*)window[FORCE_WINDOW])->resetData();
+	((BoGraphWindow*)window[BO_GRAPH_WINDOW])->resetData();
+	((StatisticsWindow*)window[STATISTICS_WINDOW])->resetData();
+	((BoDiagramWindow*)window[BO_DIAGRAM_WINDOW])->resetData();
+	((TimerWindow*)window[TIMER_WINDOW])->resetData();
+	((InfoWindow*)window[INFO_WINDOW])->resetData();
 //	geneAnimation=0;
 //	shown=0;
 	orderList.clear();
-};
+}
 
 void Player::checkForChange()
 {
@@ -399,10 +399,10 @@ void Player::checkForChange()
 	{
 		resetData();
 		(*anarace)->resetData();
-		(*(*anarace)->getCurrentGoal())->adjustGoals(1);
+		(*(*anarace)->getCurrentGoal())->adjustGoals(true, (*   (*anarace)->getStartCondition()   )->getUnit(0) );
 		window[FORCE_WINDOW]->changeAccepted();
-	};
-};
+	}
+}
 
 void Player::CheckOrders()
 {
@@ -494,17 +494,13 @@ void Player::CheckOrders()
 				order->second.checked=false;
 				order++;
 			}
-		};
-};
+		}
+}
 
 void Player::MoveOrders() 
 {
 	for(map<long, Order>::iterator order=orderList.begin(); order!=orderList.end(); ++order)
 	{
-//		TODO!
-/*		order->second.rect=order->second.target;
-		order->second.brect=order->second.btarget;
-		order->second.blend=order->second.blendTarget;*/
 		move(order->second.rect.x,order->second.start.x,order->second.target.x);
 		move(order->second.rect.y,order->second.start.y,order->second.target.y);
 		move(order->second.rect.width,order->second.start.width,order->second.target.width);
@@ -517,6 +513,6 @@ void Player::MoveOrders()
 
 		move(order->second.blend, order->second.blendStart, order->second.blendTarget);
 	}
-};
+}
 
 

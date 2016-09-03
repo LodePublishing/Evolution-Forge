@@ -5,11 +5,8 @@
 #include "timer.hpp"
 #include "bograph.hpp"
 #include "force.hpp"
-#include "info.hpp"
 #include "bodiagram.hpp"
 #include "bowindow.hpp"
-
-#include "../ui/object.hpp"
 
 #include "math.h"
 #include  <list>

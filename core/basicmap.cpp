@@ -3,11 +3,11 @@
 BASIC_MAP::BASIC_MAP()
 {
 	resetData();
-};
+}
 
 BASIC_MAP::~BASIC_MAP()
 {
-};
+}
 
 void BASIC_MAP::resetData()
 {
@@ -18,13 +18,13 @@ void BASIC_MAP::resetData()
 	name="ERROR";
 	maxLocations=0;
 	maxPlayer=0;
-};
+}
 
 void BASIC_MAP::calculateLocationsDistances()
 {
 	for(int i=1;i<MAX_LOCATIONS;i++)
 		location[i].calculateDistances();
-};
+}
 
 // -------------------------------
 // ------ GET/SET FUNCTIONS ------
@@ -33,7 +33,7 @@ void BASIC_MAP::calculateLocationsDistances()
 const string& BASIC_MAP::getName() const
 {
 	return(name);
-};
+}
 
 const int BASIC_MAP::getMaxLocations() const
 {
@@ -43,7 +43,7 @@ const int BASIC_MAP::getMaxLocations() const
 	}
 #endif
 	return(maxLocations);
-};
+}
 
 const int BASIC_MAP::getMaxPlayer() const
 {
@@ -53,12 +53,12 @@ const int BASIC_MAP::getMaxPlayer() const
 	}
 #endif
 	return(maxPlayer);
-};
+}
 
 void BASIC_MAP::setName(const string& name)
 {
 	this->name=name;
-};
+}
 
 void BASIC_MAP::setLocationName(const int location, const string& name)
 {
@@ -68,7 +68,7 @@ void BASIC_MAP::setLocationName(const int location, const string& name)
 	}
 #endif
 	this->location[location].setName(name);
-};
+}
 
 const int BASIC_MAP::getLocationMineralPatches(const int location) const
 {
@@ -78,7 +78,7 @@ const int BASIC_MAP::getLocationMineralPatches(const int location) const
 	}
 #endif
 	return(this->location[location].getMineralPatches());
-};
+}
 
 const int BASIC_MAP::getLocationVespeneGeysirs(const int location) const
 {
@@ -88,7 +88,7 @@ const int BASIC_MAP::getLocationVespeneGeysirs(const int location) const
 	}
 #endif
 	return(this->location[location].getVespeneGeysirs());
-};
+}
 
 void BASIC_MAP::setLocationMineralPatches(const int location, const int mineralPatches)
 {
@@ -98,7 +98,7 @@ void BASIC_MAP::setLocationMineralPatches(const int location, const int mineralP
 	}
 #endif
 	this->location[location].setMineralPatches(mineralPatches);
-};
+}
 
 void BASIC_MAP::setLocationVespeneGeysirs(const int location, const int vespeneGeysirs)
 {
@@ -108,7 +108,7 @@ void BASIC_MAP::setLocationVespeneGeysirs(const int location, const int vespeneG
 	}
 #endif
 	this->location[location].setVespeneGeysirs(vespeneGeysirs);
-};
+}
 
 void BASIC_MAP::setLocationMineralDistance(const int location, const int mineralDistance)
 {
@@ -118,7 +118,7 @@ void BASIC_MAP::setLocationMineralDistance(const int location, const int mineral
 	}
 #endif
 	this->location[location].setMineralDistance(mineralDistance);
-};
+}
 	
 void BASIC_MAP::setLocationDistance(const int location, const list<string> distances)
 {
@@ -128,7 +128,7 @@ void BASIC_MAP::setLocationDistance(const int location, const list<string> dista
 	}
 	if(location>=(int)distances.size()) {
 		toLog("DEBUG: (MAP::setLocationDistance): Too many locations.");return;
-	};
+	}
 #endif
 	list<string>::const_iterator i=distances.begin();
 	int j=0;
@@ -141,9 +141,9 @@ void BASIC_MAP::setLocationDistance(const int location, const list<string> dista
 #ifdef _SCC_DEBUG
 	if(j<location) {
 		toLog("DEBUG: (MAP::setLocationDistance): Not enough locations.");return;
-	};
+	}
 #endif		
-};
+}
 
 void BASIC_MAP::setMaxLocations(const int maxLocations)
 {
@@ -153,7 +153,7 @@ void BASIC_MAP::setMaxLocations(const int maxLocations)
 	}
 #endif
 	this->maxLocations=maxLocations;
-};
+}
 
 void BASIC_MAP::setMaxPlayer(const int maxPlayer)
 {
@@ -163,7 +163,7 @@ void BASIC_MAP::setMaxPlayer(const int maxPlayer)
 	}
 #endif
 	this->maxPlayer=maxPlayer;
-};
+}
 
 const MAP_LOCATION* EXPORT BASIC_MAP::getLocation(const int location) const
 {
@@ -173,7 +173,7 @@ const MAP_LOCATION* EXPORT BASIC_MAP::getLocation(const int location) const
 	}
 #endif
 	return(&this->location[location]);
-};
+}
 
 
 	

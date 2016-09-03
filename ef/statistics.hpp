@@ -18,6 +18,7 @@ class StatisticsWindow:public UI_Window
 		void resetData();
 		
 	private:
+		long int start_time;
 		const ANARACE* anarace;
 		void showGraph(DC* dc, const int* data, const int min, const int max, const Color col) const;
 		int harvestedMinerals[200];
@@ -42,6 +43,7 @@ class StatisticsWindow:public UI_Window
 		int maxHarvestedRessources;
 		int average[100];
 		int averagecounter;
+		int av;
 };
 #endif
 

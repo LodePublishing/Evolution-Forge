@@ -35,14 +35,15 @@
 		24, Researchs...
 		25, Special...
 		26, Starting force:
-		27, Click here to add a goal
-		28, (Click here to close)
-		29, (Click here to go back)
-		30, non-goals:
-		31, add this as goal
-		32, Load goal list...
-		33, Close goal list
-		34, Use Map Settings
+		27, non-goals:
+		28, forces / goals
+		29, add this as goal
+		30, close
+		31, add goal
+		32, goal list
+		33, startforce
+		34, choose race
+
 		35, Terra
 		36, Protoss
 		37, Zerg
@@ -52,45 +53,47 @@
 #		(Click here to go back)
 		39, Optimize everything
 		40, Optimize selected
+		41, Restart
+		42, Speed
 # timer window
-		41, %i % of goals fulfilled
-		42, (paused)
-		43, Searching...
-		44, %i % of theoretical optimum
-		45, Optimizing...
-		46, %i/%i/%i res./units/struc.
-		47, Total: %i
-		48, Click to continue
-		49, Click to pause
+		43, %i % of goals fulfilled
+		44, (paused)
+		45, Searching...
+		46, %i % of theoretical optimum
+		47, Optimizing...
+		48, %i/%i/%i res./units/struc.
+		49, Total: %i
+		50, Click to continue
+		51, Click to pause
 # statistics window
-		50, Force : %i
-		51, Time : %i:%2i
-		52, Minerals : %i
-		53, Gas : %i
-		54, Fitness average : %i [%i]
-		55, Fitness variance : %i
-		56, Build order length : %i
-		57, %i+ generations left
+		52, Force : %i
+		53, Time : %i:%2i
+		54, Minerals : %i
+		55, Gas : %i
+		56, Fitness average : %i [%i]
+		57, Fitness variance : %i
+		58, Build order length : %i
+		59, %i+ generations left
 # window title parameter strings
-		58, INVISIBLE
-		59, Player
-		60, Advanced Player
-		61, Expert (Player)
-		62, 1st Computer enemy
-		63, GOSU (Player)
+		60, INVISIBLE
+		61, Player
+		62, Advanced Player
+		63, Expert (Player)
 		64, 1st Computer enemy
-		65, 2nd Computer enemy
-		66, ERROR - Check playermodes
+		65, GOSU (Player)
+		66, 1st Computer enemy
+		67, 2nd Computer enemy
+		68, ERROR - Check playermodes
 #tabs
-		67, Zero Tab
-		68, Beginner
-		69, Advanced
-		70, Expert
-		71, Gosu
-		72, Transcendend
-		73, Map
-		74, Settings
-		75, Help
+		69, Zero Tab
+		70, Beginner
+		71, Advanced
+		72, Expert
+		73, Gosu
+		74, Transcendend
+		75, Map
+		76, Settings
+		77, Help
 	@END
 
 	@GERMAN
@@ -127,14 +130,14 @@
 		24, Forschung...
 		25, Spezial...
 		26, Einheiten zu Beginn:
-		27, Hier klicken um Ziel hinzuzufuegen
-		28, (Hier klicken zum schliessen)
-		29, (Hier klicken um zurueckzukehren)
-		30, zusaetzliche Einheiten (keine Ziele):
-		31, diese Einheit als Ziel hinzufuegen
-		32, Lade Ziele-Liste...
-		33, Schliesse Ziel-Liste
-		34, Karteneinstellungen
+		27, sonstige:
+		28, Einheiten / Ziele:
+		29, Hier klicken um Ziel hinzuzufuegen
+		30, Schliessen
+		31, Ziel hinzu
+		32, Ziele laden
+		33, Starteinheiten
+		34, Waehle Rasse
 		35, Terraner
 		36, Protoss
 		37, Zerg
@@ -144,45 +147,47 @@
 #	   (Click here to go back)
 		39, Alles optimieren
 		40, Optimiere nur Auswahl
+		41, Neustart
+		42, Geschwindigkeit
 # timer window
-		41, %i % der Ziele erfuellt
-		42, (unterbrochen)
-		43, Suche...
-		44, %i%% des theoretischen Optimums
-		45, Optimiere...
-		46, %i/%i/%i Res./Einh./Geb.
-		47, Gesamt: %i
-		48, Klicken um fortzufahren
-		49, Klicken um zu unterbrechen
+		43, %i % der Ziele erfuellt
+		44, (unterbrochen)
+		45, Suche...
+		46, %i%% des theoretischen Optimums
+		47, Optimiere...
+		48, %i/%i/%i Res./Einh./Geb.
+		49, Gesamt: %i
+		50, Klicken um fortzufahren
+		51, Klicken um zu unterbrechen
 # statistics window
-		50, Einheitenzahl : %i
-		51, Zeit : %i:%2i
-		52, Mineralien : %i
-		53, Vespine Gas : %i
-		54, durchschnittliche Fitness : %i [%i]
-		55, Varianz der Fitness : %i
-		56, Laenge der Befehlsliste : %i
-		57, %i+ Generationen uebrig
+		52, Einheitenzahl : %i
+		53, Zeit : %i:%2i
+		54, Mineralien : %i
+		55, Vespine Gas : %i
+		56, durchschnittliche Fitness : %i [%i]
+		57, Varianz der Fitness : %i
+		58, Laenge der Befehlsliste : %i
+		59, %i+ Generationen uebrig
 # window title parameter strings
-		58, INVISIBLE
-		59, Spieler
-		60, Erfahrener Spieler
-		61, Experte (Spieler)
-		62, 1. Computerspieler
-		63, GOSU (Spieler)
+		60, INVISIBLE
+		61, Spieler
+		62, Erfahrener Spieler
+		63, Experte (Spieler)
 		64, 1. Computerspieler
-		65, 2. Computerspieler
-		66, ERROR - Check playermodes
+		65, GOSU (Spieler)
+		66, 1. Computerspieler
+		67, 2. Computerspieler
+		68, ERROR - Check playermodes
 #tabs
-		67, Zero Tab
-		68, Anfaenger
-		69, Erfahren
-		70, Experte
-		71, Gosu
-		72, Transzendent
-		73, Karte
-		74, Einstellungen
-		75, Hilfe
+		69, Zero Tab
+		70, Anfaenger
+		71, Erfahren
+		72, Experte
+		73, Gosu
+		74, Transzendent
+		75, Karte
+		76, Einstellungen
+		77, Hilfe
 	@END
 
 @END
@@ -346,7 +351,7 @@
 # basic bitmap pen
 			17, 1, 255,  255,  255, SOLID
 # bodiagram supply, mins, gas pen
-			18, 1, 120,  120,  120, SOLID
+			18, 1,  60,   60,   60, SOLID
 			19, 2,  80,   80,  255, SOLID
 			20, 2,  40,  255,   40, SOLID
 # unit list colours:
@@ -390,12 +395,12 @@
 		3,	5,  15,  30, SOLID
 
 # bo dark color
-		4,  100, 100, 100, SOLID
+		4,   50,  50, 150, SOLID
 # bo bright color
-		5,  150, 150, 150, SOLID
+		5,  100, 100, 250, SOLID
 
 # force list colour
-		6,  100,  100, 100, SOLID
+		6,   50,   50, 150, SOLID
 
 # force add goal button brush
 		7,   50,   50,  50, SOLID
@@ -486,7 +491,7 @@
 			5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
 			6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
 			7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
-			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
+			8,  Statistics window, dock with right border of, Force window, dock top inside of, Main window, 500, 120
 			9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
 #			10, Build order graph window, dock with lower border of, Build order diagram window, dock with left border of, Build order window, 500, 50
 			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
@@ -745,7 +750,7 @@
 # continue button brush
 	0,	30, 2, 30, 30, 30, 31, 30,  30, 31, 30, 30, 30,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,   5,  5,  5,  5,  5,   5,  5,  5,  7,  7,   0,  0,  0,  0,  0
 # non-button force entry
-	1,	20, 2,  6,  6,  6,  5,  6,   6,  6,  6,  5,  6,   1,  1,  1,  1,  1,   1,  1,  1,  1,  1,   0,  0,  0,  3,  0,   0,  0,  0,  5,  0,   0,  0,  0,  0,  0
+	1,	20, 2,  6,  6,  6,  5,  6,   6,  6,  6,  6,  6,   16,  16,  16,  16,  16,   16,  16,  16,  16,  16,   0,  0,  0,  3,  0,   0,  0,  0,  5,  0,   0,  0,  0,  0,  0
 # add button
 	2,	20, 2,  6,  6,  6,  5,  6,   6,  6,  6,  5,  6,   1,  1,  1,  1,  1,   1,  1,  1,  1,  1,   0,  0,  0, 17, 17,   0,  0,  0, 14,  14,   1,  1,  1,  1,  1
 # sub button
@@ -755,7 +760,7 @@
 
 # bo list
 	5,	15, 2,  8,  8,  8,  8,  8,   8,  8, 19, 19, 19,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  21, 21, 21, 21, 21,  21, 21, 32, 32, 32,   0,  0,  0,  0,  0
-	6,	15, 2,  9,  9,  9,  9,  9,   9,  9, 20, 20, 20,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  22, 22, 22, 22, 22,  22, 22, 33, 33, 33,   0,  0,  0,  0,  0
+	6,	15, 2,  9,  9,  9,  9,  9,   9,  9, 20, 20, 20,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  22, 22, 22, 22, 22,  33, 33, 33, 33, 33,   0,  0,  0,  0,  0
 	7,	15, 2, 10, 10, 10, 10, 10,  10, 10, 21, 21, 21,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  23, 23, 23, 23, 23,  23, 23, 34, 34, 34,   0,  0,  0,  0,  0
 	8,	15, 2, 11, 11, 11, 11, 11,  11, 11, 22, 22, 22,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  24, 24, 24, 24, 24,  24, 24, 35, 35, 35,   0,  0,  0,  0,  0
 	9,	15, 2, 12, 12, 12, 12, 12,  12, 12, 23, 23, 23,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  25, 25, 25, 25, 25,  25, 25, 36, 36, 36,   0,  0,  0,  0,  0

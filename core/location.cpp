@@ -1,14 +1,15 @@
 #include "location.hpp"
 
+//const int GLOBAL = 0;
 
 MAP_LOCATION::MAP_LOCATION()
 {
 	resetData();
-};
+}
 
 MAP_LOCATION::~MAP_LOCATION()
 {
-};
+}
 
 void MAP_LOCATION::resetData()
 {
@@ -18,8 +19,8 @@ void MAP_LOCATION::resetData()
 	{
 		setDistance(i,0);
 		nearest[i]=0;
-	};		
-};
+	}		
+}
 
 
 void MAP_LOCATION::calculateDistances()
@@ -41,23 +42,23 @@ void MAP_LOCATION::calculateDistances()
 					nearest[step]=loc;
 				}
 			}
-	};
-};
+	}
+}
 
 void MAP_LOCATION::setName(const string& name)
 {
 	this->name=name;
-};
+}
 
 const int MAP_LOCATION::getMineralPatches() const
 {
 	return(mineralPatches);
-};
+}
 
 const int MAP_LOCATION::getVespeneGeysirs() const
 {
 	return(vespeneGeysirs);
-};
+}
 
 void MAP_LOCATION::setMineralPatches(const int mineralPatches)
 {
@@ -68,7 +69,7 @@ void MAP_LOCATION::setMineralPatches(const int mineralPatches)
 	}
 #endif
 	this->mineralPatches=mineralPatches;
-};
+}
 
 void MAP_LOCATION::setVespeneGeysirs(const int vespeneGeysirs)
 {
@@ -79,7 +80,7 @@ void MAP_LOCATION::setVespeneGeysirs(const int vespeneGeysirs)
 	}
 #endif
 	this->vespeneGeysirs=vespeneGeysirs;
-};
+}
 
 void MAP_LOCATION::setMineralDistance(const int mineralDistance)
 {
@@ -89,7 +90,7 @@ void MAP_LOCATION::setMineralDistance(const int mineralDistance)
 	}
 #endif
 	this->mineralDistance=mineralDistance;
-};
+}
 
 const int MAP_LOCATION::getNearest(const int step) const
 {
@@ -99,7 +100,7 @@ const int MAP_LOCATION::getNearest(const int step) const
 	}
 #endif
 	return(nearest[step]);
-};
+}
 
 
 void MAP_LOCATION::setDistance(const int target, const int distance)
@@ -113,12 +114,12 @@ void MAP_LOCATION::setDistance(const int target, const int distance)
 	}
 #endif
 	this->distance[target]=distance;
-};
+}
 
 const string& MAP_LOCATION::getName() const
 {
 	return(name);
-};
+}
 
 const int MAP_LOCATION::getMineralDistance() const
 {
@@ -128,21 +129,27 @@ const int MAP_LOCATION::getMineralDistance() const
 	}
 #endif
 	return(mineralDistance);
-};
+}
 
-const int MAP_LOCATION::getDistance(const int num) const
+const int MAP_LOCATION::getDistance(const int location) const
 {
 #ifdef _SCC_DEBUG
-	if((num<0)||(num>=MAX_LOCATIONS)) {
+	if((location<0)||(location>=MAX_LOCATIONS)) {
 		toLog("DEBUG: (MAP_LOCATION::getDistance): Value out of range.");return(0);
 	}
-	if((distance[num]<0)||(distance[num]>500)) {
+	if((distance[location]<0)||(distance[location]>500)) {
 		toLog("DEBUG: (MAP_LOCATION::getDistance): Value distance out of range.");return(0);
 	}
 #endif
-	return(distance[num]);
-};
+	return(distance[location]);
+}
 
 
+		
+/*inline const int MAP_LOCATION::getMineralDistance() const;
+inline const int MAP_LOCATION::getDistance(const int location) const;
+inline const int MAP_LOCATION::getNearest(const int step) const;
+inline const int MAP_LOCATION::getMineralPatches() const;
+inline const int MAP_LOCATION::getVespeneGeysirs() const;*/
 
 

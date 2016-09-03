@@ -2,7 +2,6 @@
 #define _GUI_TIMER_HPP
 
 #include "../ui/window.hpp"
-#include "../ui/button.hpp"
 
 #include "../core/anarace.hpp"
 
@@ -20,6 +19,7 @@ class TimerWindow : public UI_Window
 		void setMode(const int mode);
 	private:
 		int oldTimeCounter[20],oldTime[20];
+		int currentTime;
 		int lastTime;
 		int mode;
 		ANARACE* anarace;

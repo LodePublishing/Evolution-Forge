@@ -3,11 +3,11 @@
 UNIT::UNIT()
 {
 	resetData();
-};
+}
 
 UNIT::~UNIT()
 {
-};
+}
 
 void UNIT::resetData()
 {
@@ -16,7 +16,7 @@ void UNIT::resetData()
 		setAvailible(i,0);
 		setTotal(i,0);
 	}		
-};
+}
 
 void UNIT::copy(const UNIT* unit)
 {
@@ -30,7 +30,7 @@ void UNIT::copy(const UNIT* unit)
 		setAvailible(i,unit->getAvailible(i));
 		setTotal(i,unit->getTotal(i));
 	}
-};
+}
 
 void UNIT::adjustSupply(const eRace race, int& needSupply, int& haveSupply)
 {
@@ -54,12 +54,12 @@ void UNIT::adjustSupply(const eRace race, int& needSupply, int& haveSupply)
 				}
 			} else
 				needSupply-=stats[race][j].needSupply*total[j];*/
-		};
+		}
 #ifdef _SCC_DEBUG
 	if(needSupply>haveSupply)
 		toLog("DEBUG: (UNIT::adjustSupply): Too many units :/");
 #endif
-};
+}
 
 void UNIT::adjustResearches(const eRace race) // only use this on location ZERO
 {
@@ -77,7 +77,7 @@ void UNIT::adjustResearches(const eRace race) // only use this on location ZERO
 				basicResearch=STIM_PACKS-firstResearch;
 				firstUpgrade=R_INFANTRY_ARMOR;
 				lastUpgrade=R_SHIP_WEAPONS;
-			};break;
+			}break;
 		case PROTOSS:
 			{
 				firstResearch=R_PSIONIC_STORM;
@@ -85,7 +85,7 @@ void UNIT::adjustResearches(const eRace race) // only use this on location ZERO
 				basicResearch=PSIONIC_STORM-firstResearch;
 				firstUpgrade=R_ARMOR;
 				lastUpgrade=R_PLASMA_SHIELDS;
-			};break;
+			}break;
 		case ZERG:
 			{
 				firstResearch=R_VENTRAL_SACKS;
@@ -93,7 +93,7 @@ void UNIT::adjustResearches(const eRace race) // only use this on location ZERO
 				basicResearch=VENTRAL_SACKS-firstResearch;
 				firstUpgrade=R_CARAPACE;
 				lastUpgrade=R_FLYER_ATTACKS;
-			};break;
+			}break;
 	}
 
 	for(int j=firstResearch;j<=lastResearch;j++)
@@ -106,88 +106,138 @@ void UNIT::adjustResearches(const eRace race) // only use this on location ZERO
 		total[j]=3-total[j+basicResearch];
 		availible[j]=(3-total[j+basicResearch]>0);
 		//temporary researches and upgrades
-	};
-};
+	}
+}
 //TODO debug
 
-const int UNIT::getAvailible(const int unit) const
+const int UNIT::getAvailible(const int unitType) const
 {
 #ifdef _SCC_DEBUG
-	if((unit<0)||(unit>=UNIT_TYPE_COUNT)) {
-		toLog("DEBUG: (UNIT::getAvailible): Value unit out of range.");return(0);
+	if((unitType<0)||(unitType>=UNIT_TYPE_COUNT)) {
+		toLog("DEBUG: (UNIT::getAvailible): Value unitType out of range.");return(0);
 	}
-	if((availible[unit]<0)||(availible[unit]>MAX_SUPPLY)) {
+	if((availible[unitType]<0)||(availible[unitType]>MAX_SUPPLY)) {
 		toLog("DEBUG: (UNIT::getAvailible): Variable availible not initialized.");return(0);
 	}
 #endif
-	return(availible[unit]);
+	return(availible[unitType]);
 }
 
-const int UNIT::getTotal(const int unit) const
+const int UNIT::getTotal(const int unittype) const
 {
 #ifdef _SCC_DEBUG
-	if((unit<0)||(unit>=UNIT_TYPE_COUNT)) {
-		toLog("DEBUG: (UNIT::getTotal): Value unit out of range.");return(0);
+	if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
+		toLog("DEBUG: (UNIT::getTotal): Value unittype out of range.");return(0);
 	}
-	if((total[unit]<0)||(total[unit]>MAX_SUPPLY)) {
+	if((total[unittype]<0)||(total[unittype]>MAX_SUPPLY)) {
 		toLog("DEBUG: (UNIT::getTotal): Variable total not initialized.");return(0);
 	}
 #endif
-	return(total[unit]);
-};
+	return(total[unittype]);
+}
 
-void UNIT::setAvailible(const int unit, const int availible)
+void UNIT::setAvailible(const int unittype, const int availible)
 {
 #ifdef _SCC_DEBUG
-	if((unit<0)||(unit>=UNIT_TYPE_COUNT)) {
-		toLog("DEBUG: (UNIT::setAvailible): Value unit out of range.");return;
+	if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
+		toLog("DEBUG: (UNIT::setAvailible): Value unittype out of range.");return;
 	}
 	if((availible<0)||(availible>MAX_SUPPLY)) {
 		toLog("DEBUG: (UNIT::setAvailible): Value availible out of range.");return;
 	}
 #endif
-	this->availible[unit]=availible;
-};
+	this->availible[unittype]=availible;
+}
 
-void UNIT::setTotal(const int unit, const int total)
+void UNIT::setTotal(const int unittype, const int total)
 {
 #ifdef _SCC_DEBUG
-	if((unit<0)||(unit>=UNIT_TYPE_COUNT)) {
-		toLog("DEBUG: (UNIT::setTotal): Value unit out of range.");return;
+	if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
+		toLog("DEBUG: (UNIT::setTotal): Value unittype out of range.");return;
 	}
 	if((total<0)||(total>MAX_SUPPLY)) {
 		toLog("DEBUG: (UNIT::setTotal): Value total out of range.");return;
 	}
 #endif
-	this->total[unit]=total;
-};
+	this->total[unittype]=total;
+}
 
-void UNIT::addAvailible(const int unit, const int availible)
+void UNIT::addAvailible(const int unittype, const int availible)
 {
 #ifdef _SCC_DEBUG
-	if((unit<0)||(unit>=UNIT_TYPE_COUNT)) {
-		toLog("DEBUG: (UNIT::addAvailible): Value unit out of range.");return;
+	if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
+		toLog("DEBUG: (UNIT::addAvailible): Value unittype out of range.");return;
 	}
-	if((this->availible[unit]+availible<0)||(this->availible[unit]+availible>MAX_SUPPLY)) {
+	if((this->availible[unittype]+availible<0)||(this->availible[unittype]+availible>MAX_SUPPLY)) {
 		toLog("DEBUG: (UNIT::addAvailible): Value num out of range.");return;
 	}
 
 #endif
-	this->availible[unit]+=availible;
-};
+	this->availible[unittype]+=availible;
+}
 
-void UNIT::addTotal(const int unit, const int total)
+void UNIT::addTotal(const int unittype, const int total)
 {
 #ifdef _SCC_DEBUG
-	if((unit<0)||(unit>=UNIT_TYPE_COUNT)) {
-		toLog("DEBUG: (UNIT::addTotal): Value unit out of range.");return;
+	if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
+		toLog("DEBUG: (UNIT::addTotal): Value unittype out of range.");return;
 	}
-	if((this->total[unit]+total<0)||(this->total[unit]+total>MAX_SUPPLY)) {
+	if((this->total[unittype]+total<0)||(this->total[unittype]+total>MAX_SUPPLY)) {
 		toLog("DEBUG: (UNIT::addTotal): Value num out of range.");return;
 	}
 #endif
-	this->total[unit]+=total;
-};
+	this->total[unittype]+=total;
+}
 
+void UNIT::addOneAvailible(const int unittype)
+{
+#ifdef _SCC_DEBUG
+    if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
+        toLog("DEBUG: (UNIT::addOneAvailible): Value unittype out of range.");return;
+    }
+    if((availible[unittype]+1<0)||(availible[unittype]+1>MAX_SUPPLY)) {
+        toLog("DEBUG: (UNIT::addOneAvailible): Value num out of range.");return;
+    }
+#endif
+    this->availible[unittype]++;
+}
+                                                                                                                                                            
+void UNIT::addOneTotal(const int unittype)
+{
+#ifdef _SCC_DEBUG
+    if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
+        toLog("DEBUG: (UNIT::addOneTotal): Value unittype out of range.");return;
+    }
+    if((total[unittype]+1<0)||(total[unittype]+1>MAX_SUPPLY)) {
+        toLog("DEBUG: (UNIT::addOneTotal): Value num out of range.");return;
+    }
+#endif
+    this->total[unittype]++;
+}
 
+void UNIT::removeOneAvailible(const int unittype)
+{
+#ifdef _SCC_DEBUG
+    if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
+        toLog("DEBUG: (UNIT::removeOneAvailible): Value unittype out of range.");return;
+    }
+    if((availible[unittype]-1<0)||(availible[unittype]-1>MAX_SUPPLY)) {
+        toLog("DEBUG: (UNIT::removeOneAvailible): Value num out of range.");return;
+    }
+#endif
+    this->availible[unittype]--;
+}
+                                                                                                                                                            
+void UNIT::removeOneTotal(const int unittype)
+{
+#ifdef _SCC_DEBUG
+    if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
+        toLog("DEBUG: (UNIT::removeOneTotal): Value unittype out of range.");return;
+    }
+    if((total[unittype]-1<0)||(total[unittype]-1>MAX_SUPPLY)) {
+        toLog("DEBUG: (UNIT::removeOneTotal): Value num out of range.");return;
+    }
+#endif
+    this->total[unittype]--;
+}
 

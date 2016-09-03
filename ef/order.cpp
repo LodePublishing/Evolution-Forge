@@ -17,11 +17,11 @@ Order::Order()
 	unit=0;
 	IP=0;
 	row=0;
-};
+}
 
 Order::~Order()
 {
-};
+}
 
 void Order::setUnit(const int unit)
 {
@@ -31,7 +31,7 @@ void Order::setUnit(const int unit)
     }
 #endif
 	this->unit=unit;
-};
+}
 
 void Order::setIP(const int IP)
 {
@@ -51,7 +51,7 @@ void Order::setRow(const int row)
     }
 #endif
 	this->row=row;
-};
+}
 
 const int Order::getUnit() const
 {
@@ -61,7 +61,7 @@ const int Order::getUnit() const
     }
 #endif
 	return(unit);
-};
+}
 
 const int Order::getIP() const
 {
@@ -71,7 +71,7 @@ const int Order::getIP() const
     }
 #endif
 	return(IP);
-};
+}
 
 const int Order::getRow() const
 {
@@ -81,5 +81,5 @@ const int Order::getRow() const
     }
 #endif
 	return(row);
-};
+}
 	

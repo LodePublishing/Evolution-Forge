@@ -2,12 +2,23 @@
 #define _GUI_FORCE_HPP
 
 #include "../ui/window.hpp"
-#include "../ui/button.hpp"
 
 #include "unitmenu.hpp"
+#include "goalmenu.hpp"
+#include "forcemenu.hpp"
+#include "racemenu.hpp"
 
 #include "../core/anarace.hpp"
 #include "../core/settings.hpp"
+
+enum eMenu
+{
+	RACE_MENU,
+	UNIT_MENU,
+	GOAL_MENU,
+	FORCE_MENU,
+	MAX_MENUS
+};
 
 class ForceEntry : public UI_Button
 {
@@ -44,21 +55,27 @@ class ForceWindow:public UI_Window
 		const bool hasChanged();		
 	private:
 		bool changed;
-		UI_Radio* radio;
-		UI_Button* goalButton[4];
+//		UI_Radio* radio;
+		UI_Radio* menuRadio;
+//		UI_Button* goalButton[3];
+		UI_Button* menuButton[MAX_MENUS];
+
 		UI_StaticText* nongoals;
+		UI_StaticText* goals;
+
+		void closeMenus();
 
 		ForceEntry* forceEntry[GAS_SCV+1];
 		
 		int markedUnit;
 		ANARACE* anarace;
 		int oldForceList[UNIT_TYPE_COUNT];
-//		int addGoalButton;
 		int currentUnitType;
-//		int buttonType[11]; //button ID -> unit
-//		int selectGoalButton[100];
-//		int goalFileListButton;
+
 		UnitMenu* unitMenu;
+		GoalMenu* goalMenu;
+		ForceMenu* forceMenu;
+		RaceMenu* raceMenu;
 };
 
 #endif

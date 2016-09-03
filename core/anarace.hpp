@@ -28,7 +28,7 @@ struct PROGRAM
 	int BT;		//real buildtime, incl. moving scv etc.
 //	int isConstant; //this build order may not be moved. In addition no order may be inserted before the order, if the previous order is also constant.
 // TODO: Zeitfenster machen!
-}; 
+};
 
 EXPORT class ANARACE: public PRERACE
 {
@@ -151,7 +151,7 @@ EXPORT class ANARACE: public PRERACE
 
 		const bool calculateStep();			// calculates another time step of current generation
 		void resetData();				// resets all data to standard values
-		void newRun();				// resets all data to standard values
+		void prepareForNewGeneration();				// resets all data to standard values
 //		void analyzeBuildOrder();		// sets the isGoal of program
 // Constructor
 		ANARACE();

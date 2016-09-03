@@ -23,6 +23,7 @@ PRERACE::PRERACE()
 	setHaveSupply(0);
 	harvestedGas=0;
 	harvestedMinerals=0;
+	playerNum=0;
 	setLength(0);
 	for(int i=MAX_LOCATIONS;i--;)
 	{
@@ -30,20 +31,61 @@ PRERACE::PRERACE()
 			setMineralHarvestPerSecond(i,j,0);
 		for(int j=5;j--;)
 			setGasHarvestPerSecond(i,j,0);
-	};
+	}
 	for(int i=MAX_LENGTH;i--;)
 	{
 		Code[i]=0;
 		last[i].unit=0;
 		last[i].location=0;
 		last[i].count=0;
-	};
+	}
 	resetSpecial();
-};
+}
+
+
+void PRERACE::prepareForNewGeneration()
+{
+    setHarvestedGas(0);
+    setHarvestedMinerals(0);
+    setMinerals((*pStartCondition)->getMinerals());
+    setGas((*pStartCondition)->getGas());
+    setTimer(ga->maxTime-(*pStartCondition)->getStartTime());
+    setNeedSupply((*pStartCondition)->getNeedSupply());
+    setHaveSupply((*pStartCondition)->getHaveSupply());
+                                                                                                            
+    for(int i=4;i--;) //TODO
+    {
+        last[i].location=1;
+        last[i].unit=SCV;
+        last[i].count=1;
+    }
+    for(int i=4;i<MAX_LENGTH;i++)
+    {
+        last[i].location=0;
+        last[i].unit=0;
+        last[i].count=0;
+    }
+    lastcounter=4;
+    setTimeOut(ga->maxTimeOut);
+    setIP(ga->maxLength-1);
+    ready=false;
+
+    for(int i=MAX_GOALS;i--;)
+        setFinalTime(i, 0);
+    resetSpecial();
+                                                                                                            
+    for(int i=MAX_GOALS;i--;)
+        setFinalTime(i,0);
+}                                                                                                                                                            
 
 PRERACE::~PRERACE()
 {
-};
+}
+
+const eRace PRERACE::getRace() const
+{
+	return(pStart->getPlayerRace(playerNum));
+}
 
 // -----------------------------------
 // ------ CONTROLS FROM OUTSIDE ------
@@ -61,7 +103,7 @@ void PRERACE::replaceCode(const int IP, const int num)
 #endif
 	Code[IP]=num;
 	markerCounter++;Marker[IP]=markerCounter;
-};
+}
 
 // ------------------------------------------
 // ------ END OF CONTROLS FROM OUTSIDE ------
@@ -106,8 +148,71 @@ const int PRERACE::calculateIdleTime() const
 		toLog("ERROR idle time < 0");
 #endif
 	return(idle_time);
-	
-};
+}
+
+// called within the calculateStep function
+void PRERACE::adjustLocationUnitsAfterCompletion(const int location, const eFacilityType facilityType, const int facility, const int facility2)
+{
+	switch(facilityType)
+	{
+		case NO_FACILITY:break;
+		case IS_LOST:
+			if(facility)
+				removeOneLocationTotal(location, facility);
+				//availible was already taken account when starting the building
+			if(facility2)
+				removeOneLocationTotal(location, facility2);
+			break;
+		case NEEDED_ONCE:break;
+		case NEEDED_UNTIL_COMPLETE:
+			if(facility)
+				addOneLocationAvailible(location, facility);
+			break; // fuer spaeter mal: Wenn in 2 Fabriken produziert wuerde wirds probmelatisch, da
+//in Buiding nur eine facility gespeichert wird...
+		case NEEDED_ONCE_IS_LOST:
+			if(facility2)
+				removeOneLocationTotal(location, facility2);
+			break;
+		case NEEDED_UNTIL_COMPLETE_IS_LOST:
+			// this is a research, no supply needed, applied to GLOBAL
+			if(facility)
+				addOneLocationAvailible(location, facility);
+			if(facility2)
+				removeOneLocationTotal(GLOBAL, facility2);
+//r_researches need location 0
+			break;
+		case NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE:
+			// this is an update, no supply, applies to GLOBAL
+			if(facility)
+				addOneLocationAvailible(location, facility);
+			if(facility2) // special rule for upgrades!
+			{
+				removeOneLocationTotal(GLOBAL, facility2);
+				addOneLocationAvailible(GLOBAL, facility2);
+			}
+			break;
+		case NEEDED_ALWAYS:break;
+		case NO_FACILITY_BEHAVIOUR_DEFINED:
+		default:
+#ifdef _SCC_DEBUG
+				toLog("ERROR: UNDEFINED FACILITY BEHAVIOUR DETECTED!");
+#endif
+				break;
+	} // end switch facilityType
+}
+
+void PRERACE::calculateFinalTimes(const int location, const int type)
+{
+	for(int i=MAX_GOALS;i--;)
+// ist dieses goal belegt?
+		if(((*pGoal)->goal[i].unit>0)&&
+// befinden wir uns am richtigen Ort?
+		  (((*pGoal)->goal[i].location==0)||( location == (*pGoal)->goal[i].location ))&&
+// und untersuchen wir das zum Unittype gehoerende Goal?
+			( type == (*pGoal)->goal[i].unit) )
+				setFinalTime(i,ga->maxTime-getTimer());
+}
+
 
 
 void PRERACE::adjustAvailibility(const int loc, const int fac, const UNIT_STATISTICS* stat)
@@ -180,6 +285,7 @@ void PRERACE::adjustAvailibility(const int loc, const int fac, const UNIT_STATIS
 }
 
 /* compares the current force on the map and the finnishing times of the unit types with our predefined goals */
+// TODO optimize this
 const bool PRERACE::calculateReady() const
 {
 	bool ready=true;
@@ -343,12 +449,12 @@ void EXPORT PRERACE::adjustMineralHarvest(const int location)
 //			k=0;
 //			for(j=0;j<45;j++)
 //				if(i*8<=j*pMap->location[num].getTotal(0][MINERAL_PATCH]) 
-//				{ k=j;j=45;};
+//				{ k=j;j=45;}
 			setMineralHarvestPerSecond(location, i, pStart->getBasicMineralHarvestSpeedPerSecond(getPlayerNum(), i/*k*/));//*pMap->location[num].getTotal(0][MINERAL_PATCH])/8;
 		}	//ab hier funzt alles... nur scheint startPlayer->getBasic... nicht richtig initialisiert zu sein...
 	
 	}
-};
+}
 
 void EXPORT PRERACE::adjustGasHarvest(const int location)
 {
@@ -384,7 +490,7 @@ void EXPORT PRERACE::adjustGasHarvest(const int location)
 //						gasharvestps ist zu gross, evtl wegen zu vieler refineries!
 		}
 	}
-};
+}
 
 void EXPORT PRERACE::adjustHarvestAllLocations()
 {
@@ -448,7 +554,7 @@ const int EXPORT PRERACE::harvestGas() const
 		}
 	}
 	return(sum);
-};
+}
 
 // --------------------------------------
 // ------ END OF HARVEST FUNCTIONS ------
@@ -471,13 +577,13 @@ void PRERACE::assignStart(START* start)
 #endif
 	pStart=start;
 	pMap=pStart->getMap();
-};
+}
 /* copies the precalculated startforce from pStart into our map (unit[][]
  * this is done 1:1, i.e. with memcpy */
 void PRERACE::copyMap()
 {
 	pStart->copyStartForce(&(unit[0][0]));
-};
+}
 
 
 void PRERACE::initNoise()
@@ -488,17 +594,43 @@ void PRERACE::initNoise()
 //	else TODO
 		for(int j=MAX_TIME;j--;)
 			noise[j]=0;
-};
+}
 
 void PRERACE::resetGeneMarker()
 {
 	markerCounter=1;
-};
+}
 
 void EXPORT PRERACE::resetSpecial()
 {
 	for(int i=MAX_LOCATIONS;i--;)
 		larvaInProduction[i]=0;
+}
+
+void PRERACE::removeLarvaFromQueue(const int location)
+{
+#ifdef _SCC_DEBUG
+    if((location<1)||(location>=MAX_LOCATIONS)) {
+	        toLog("DEBUG: (PRERACE::removeLarvaFromQueue): Value location out of range.");return;
+    }
+	if((larvaInProduction[location]<1)||(larvaInProduction[location]>=MAX_SUPPLY)) {
+	        toLog("DEBUG: (PRERACE::removeLarvaFromQueue): Variable larvaInProduction not initialized or out of range.");return;
+    }
+#endif
+	larvaInProduction[location]--;
+}
+
+void PRERACE::addLarvaToQueue(const int location)
+{
+#ifdef _SCC_DEBUG
+    if((location<1)||(location>=MAX_LOCATIONS)) {
+	        toLog("DEBUG: (PRERACE::addLarvaFromQueue): Value location out of range.");return;
+    }
+	if((larvaInProduction[location]<0)||(larvaInProduction[location]>=MAX_SUPPLY)) {
+	        toLog("DEBUG: (PRERACE::addLarvaFromQueue): Variable larvaInProduction not initialized or out of range.");return;
+    }
+#endif
+	larvaInProduction[location]++;
 }
 
 void EXPORT PRERACE::setPlayerNum(const int playerNum)
@@ -518,7 +650,7 @@ void EXPORT PRERACE::setPlayerNum(const int playerNum)
 	setpStats(pStart->getpStats(playerNum));
 
 //	global=&unit[playerNum][0];
-};
+}
 
 void EXPORT PRERACE::initializePlayer()
 {
@@ -527,7 +659,7 @@ void EXPORT PRERACE::initializePlayer()
 	setTimer(ga->maxTime-(*pStartCondition)->getStartTime());
 	setNeedSupply((*pStartCondition)->getNeedSupply());
 	setHaveSupply((*pStartCondition)->getHaveSupply());
-};
+}
 
 
 // -------------------------------------------------------------------
@@ -547,7 +679,7 @@ const int EXPORT PRERACE::getMapLocationAvailible(const int player, const int lo
 	}
 #endif
 	return(unit[player][location].getAvailible(unittype));
-};
+}
 
 const int EXPORT PRERACE::getMapLocationTotal(const int player, const int location, const int unittype)
 {
@@ -560,7 +692,7 @@ const int EXPORT PRERACE::getMapLocationTotal(const int player, const int locati
 	}
 #endif
 	return(unit[player][location].getTotal(unittype));
-};
+}
 
 void EXPORT PRERACE::setMapLocationAvailible(const int player, const int location, const int unittype, const int num)
 {
@@ -573,7 +705,7 @@ void EXPORT PRERACE::setMapLocationAvailible(const int player, const int locatio
 	}
 #endif
 	unit[player][location].setAvailible(unittype, num);
-};
+}
 
 void EXPORT PRERACE::setMapLocationTotal(const int player, const int location, const int unittype, const int num)
 {
@@ -586,7 +718,7 @@ void EXPORT PRERACE::setMapLocationTotal(const int player, const int location, c
 	}
 #endif
 	unit[player][location].setTotal(unittype, num);
-};
+}
 
 void EXPORT PRERACE::addMapLocationAvailible(const int player, const int location, const int unittype, const int num)
 {
@@ -599,7 +731,7 @@ void EXPORT PRERACE::addMapLocationAvailible(const int player, const int locatio
 	}
 #endif
 	unit[player][location].addAvailible(unittype, num);
-};
+}
 
 
 void EXPORT PRERACE::addMapLocationTotal(const int player, const int location, const int unittype, const int num)
@@ -613,7 +745,7 @@ void EXPORT PRERACE::addMapLocationTotal(const int player, const int location, c
 	}
 #endif
 	unit[player][location].addTotal(unittype, num);
-};
+}
 
 const int EXPORT PRERACE::getLocationAvailible(const int location, const int unittype) const
 {
@@ -623,7 +755,7 @@ const int EXPORT PRERACE::getLocationAvailible(const int location, const int uni
 	}
 #endif
 	return(this->location[location].getAvailible(unittype));
-};
+}
 
 const int EXPORT PRERACE::getLocationTotal(const int location, const int unittype) const
 {
@@ -633,7 +765,7 @@ const int EXPORT PRERACE::getLocationTotal(const int location, const int unittyp
 	}
 #endif
 	return(this->location[location].getTotal(unittype));
-};
+}
 
 
 void EXPORT PRERACE::setLocationAvailible(const int location, const int unittype, const int num)
@@ -644,7 +776,7 @@ void EXPORT PRERACE::setLocationAvailible(const int location, const int unittype
 	}
 #endif
 	this->location[location].setAvailible(unittype, num);
-};
+}
 
 void EXPORT PRERACE::setLocationTotal(const int location, const int unittype, const int num)
 {
@@ -654,19 +786,19 @@ void EXPORT PRERACE::setLocationTotal(const int location, const int unittype, co
 	}
 #endif
 	this->location[location].setTotal(unittype, num);
-};
+}
 
-void EXPORT PRERACE::addLocationAvailible(const int location, const int unit, const int num)
+void EXPORT PRERACE::addLocationAvailible(const int location, const int unittype, const int num)
 {
 #ifdef _SCC_DEBUG
 	if((location<0)||(location>=MAX_LOCATIONS)) {
 		toLog("DEBUG: (PRERACE::addLocationAvailible): Value location out of range.");return;
 	}
 #endif	
-	this->location[location].addAvailible(unit, num);
+	this->location[location].addAvailible(unittype, num);
 	if(location>0) //sonst waers ja doppelt...
-		this->location[0].addAvailible(unit, num);
-};
+		this->location[0].addAvailible(unittype, num);
+}
 
 void EXPORT PRERACE::addLocationTotal(const int location, const int unittype, const int num)
 {
@@ -676,10 +808,59 @@ void EXPORT PRERACE::addLocationTotal(const int location, const int unittype, co
 	}
 #endif
 	this->location[location].addTotal( unittype, num );
-	if(location>0) // sonst waers ja doppelt wenn location = 0
-		this->location[0].addTotal(unittype, num);
-};
+	if(location>GLOBAL) // sonst waers ja doppelt wenn location = 0
+		this->location[GLOBAL].addTotal(unittype, num);
+}
 
+void PRERACE::addOneLocationAvailible(const int location, const int unittype)
+{
+#ifdef _SCC_DEBUG
+    if((location<0)||(location>=MAX_LOCATIONS)) {
+        toLog("DEBUG: (PRERACE::addLocationAvailible): Value location out of range.");return;
+    }
+#endif
+    this->location[location].addOneAvailible( unittype );
+// also add one unit to the global location if global location was not already specified
+    if(location>GLOBAL) 
+        this->location[GLOBAL].addOneAvailible( unittype );
+}
+
+void PRERACE::addOneLocationTotal(const int location, const int unittype)
+{
+#ifdef _SCC_DEBUG
+    if((location<0)||(location>=MAX_LOCATIONS)) {
+        toLog("DEBUG: (PRERACE::addLocationTotal): Value location out of range.");return;
+    }
+#endif
+    this->location[location].addOneTotal( unittype );
+    if(location>GLOBAL) // sonst waers ja doppelt wenn location = 0
+        this->location[GLOBAL].addOneTotal( unittype );
+}
+
+void PRERACE::removeOneLocationAvailible(const int location, const int unittype)
+{
+#ifdef _SCC_DEBUG
+    if((location<0)||(location>=MAX_LOCATIONS)) {
+        toLog("DEBUG: (PRERACE::removeOneLocationAvailible): Value location out of range.");return;
+    }
+#endif
+    this->location[location].removeOneAvailible( unittype );
+// also add one unit to the global location if global location was not already specified
+    if(location>GLOBAL)
+        this->location[GLOBAL].removeOneAvailible( unittype );
+}
+
+void PRERACE::removeOneLocationTotal(const int location, const int unittype)
+{
+#ifdef _SCC_DEBUG
+    if((location<0)||(location>=MAX_LOCATIONS)) {
+        toLog("DEBUG: (PRERACE::removeOneLocationTotal): Value location out of range.");return;
+    }
+#endif
+    this->location[location].removeOneTotal( unittype );
+    if(location>0) 
+        this->location[0].removeOneTotal( unittype );
+}
 // ------ END UNITS -----
 
 
@@ -692,7 +873,7 @@ void EXPORT PRERACE::setNeedSupply(const int needSupply)
 	}
 #endif
 	this->needSupply=needSupply;
-};
+}
 
 const int EXPORT PRERACE::getNeedSupply() const
 {
@@ -702,7 +883,7 @@ const int EXPORT PRERACE::getNeedSupply() const
 	}
 #endif
 	return(needSupply);
-};
+}
 
 void EXPORT PRERACE::setHaveSupply(const int haveSupply)
 {
@@ -712,7 +893,7 @@ void EXPORT PRERACE::setHaveSupply(const int haveSupply)
 	}
 #endif
 	this->haveSupply=haveSupply;
-};
+}
 
 const int EXPORT PRERACE::getHaveSupply() const
 {
@@ -722,7 +903,7 @@ const int EXPORT PRERACE::getHaveSupply() const
 	}
 #endif
 	return(haveSupply);
-};
+}
 // ----- END SUPPLY ------
 
 // ----- HARVEST ------
@@ -735,7 +916,7 @@ void EXPORT PRERACE::setMinerals(const int minerals)
 	}
 #endif
 	this->minerals=minerals;
-};
+}
 
 const int EXPORT PRERACE::getMinerals() const
 {
@@ -745,7 +926,7 @@ const int EXPORT PRERACE::getMinerals() const
 	}
 #endif
 	return(minerals);
-};
+}
 
 void EXPORT PRERACE::setGas(const int gas)
 {
@@ -755,7 +936,7 @@ void EXPORT PRERACE::setGas(const int gas)
 	}
 #endif
 	this->gas=gas;
-};
+}
 
 const int EXPORT PRERACE::getGas() const
 {
@@ -765,7 +946,7 @@ const int EXPORT PRERACE::getGas() const
 	}
 #endif
 	return(gas);
-};
+}
 
 void EXPORT PRERACE::setMineralHarvestPerSecond( const int location, const int worker, const int minerals )
 {
@@ -781,7 +962,7 @@ void EXPORT PRERACE::setMineralHarvestPerSecond( const int location, const int w
 	}
 #endif
 	mineralHarvestPerSecond[location][worker]=minerals;
-};
+}
 
 const int EXPORT PRERACE::getMineralHarvestPerSecond( const int location, const int worker ) const
 {
@@ -807,7 +988,7 @@ void EXPORT PRERACE::setGasHarvestPerSecond( const int location, const int worke
 	}
 #endif
 	gasHarvestPerSecond[location][worker]=num;
-};
+}
 
 const int EXPORT PRERACE::getGasHarvestPerSecond( const int location, const int worker ) const
 {
@@ -833,7 +1014,7 @@ void EXPORT PRERACE::setHarvestedMinerals( const int num )
 	}
 #endif
 	harvestedMinerals=num;
-};
+}
 
 const int EXPORT PRERACE::getHarvestedMinerals() const
 {
@@ -843,7 +1024,7 @@ const int EXPORT PRERACE::getHarvestedMinerals() const
 	}
 #endif
 	return(harvestedMinerals);
-};
+}
 
 void EXPORT PRERACE::setHarvestedGas(const int num)
 {
@@ -853,7 +1034,7 @@ void EXPORT PRERACE::setHarvestedGas(const int num)
 	}
 #endif
 	harvestedGas=num;
-};
+}
 
 const int EXPORT PRERACE::getHarvestedGas() const
 {
@@ -863,7 +1044,7 @@ const int EXPORT PRERACE::getHarvestedGas() const
 	}
 #endif
 	return(harvestedGas);
-};
+}
 
 // ----- END HARVEST -----
 
@@ -875,7 +1056,7 @@ void PRERACE::setCurrentGoal(GOAL_ENTRY** pGoal)
 	}
 #endif
 	this->pGoal=pGoal;
-};
+}
 
 const int EXPORT PRERACE::getPlayerNum() const
 {
@@ -885,12 +1066,12 @@ const int EXPORT PRERACE::getPlayerNum() const
 	}
 #endif
 	return(playerNum);
-};
+}
 
 const START_CONDITION* const* PRERACE::getStartCondition()
 {
 	return(pStartCondition);
-};
+}
 
 
 void EXPORT PRERACE::setTimer(const int time)
@@ -901,7 +1082,7 @@ void EXPORT PRERACE::setTimer(const int time)
 	}
 #endif
 	timer=time;
-};
+}
 
 const int EXPORT PRERACE::getTimer() const
 {
@@ -911,7 +1092,7 @@ const int EXPORT PRERACE::getTimer() const
 	}
 #endif
 	return(timer);
-};
+}
 
 void EXPORT PRERACE::setpStats(const UNIT_STATISTICS* const* pStats)
 {
@@ -921,7 +1102,7 @@ void EXPORT PRERACE::setpStats(const UNIT_STATISTICS* const* pStats)
 	}
 #endif
 	this->pStats=pStats;
-};
+}
 
 const UNIT_STATISTICS* const * EXPORT PRERACE::getpStats() const
 {
@@ -931,7 +1112,7 @@ const UNIT_STATISTICS* const * EXPORT PRERACE::getpStats() const
 	}
 #endif
 	return(pStats);
-};
+}
 
 void EXPORT PRERACE::setIP(const int IP)
 {
@@ -941,7 +1122,7 @@ void EXPORT PRERACE::setIP(const int IP)
 	}
 #endif
 	this->IP=IP;
-};
+}
 
 const int EXPORT PRERACE::getIP() const
 {
@@ -964,7 +1145,7 @@ const int EXPORT PRERACE::getFinalTime(const int goal) const
 	}
 #endif
 	return(ftime[goal]);
-};
+}
 
 const int EXPORT PRERACE::getLength() const
 {
@@ -974,7 +1155,7 @@ const int EXPORT PRERACE::getLength() const
 	}
 #endif
 	return(length);
-};
+}
 
 void EXPORT PRERACE::setFinalTime(const int goal, const int time)
 {
@@ -987,7 +1168,7 @@ void EXPORT PRERACE::setFinalTime(const int goal, const int time)
 	}
 #endif
 	ftime[goal]=time;
-};
+}
 
 void EXPORT PRERACE::setLength(const int length)
 {
@@ -998,7 +1179,7 @@ void EXPORT PRERACE::setLength(const int length)
 	}
 #endif
 	this->length=length;
-};
+}
 
 
 void EXPORT PRERACE::setTimeOut(const int time)
@@ -1009,7 +1190,7 @@ void EXPORT PRERACE::setTimeOut(const int time)
 	}
 #endif
 	timeout=time;
-};
+}
 
 const int EXPORT PRERACE::getTimeOut() const
 {
@@ -1019,12 +1200,17 @@ const int EXPORT PRERACE::getTimeOut() const
 	}
 #endif
 	return(timeout);
-};
+}
 
 GOAL_ENTRY** PRERACE::getCurrentGoal() const
 {
 	return(pGoal);
-};
+}
+
+const BASIC_MAP* const* PRERACE::getMap()
+{
+	return(pMap);
+}
 
 // --------------------------------------
 // ------ END OF GET/SET FUNCTIONS ------
@@ -1051,4 +1237,5 @@ void PRERACE::addMapLocationAvailible(const int player, const int loc, const int
 void PRERACE::addMapLocationTotal(const int player, const int loc, const int unit, const int num);
 void PRERACE::resetGeneMarker();
 GA* PRERACE::ga;
+BASIC_MAP* const* getMap();
 

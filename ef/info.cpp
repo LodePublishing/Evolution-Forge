@@ -4,46 +4,46 @@ InfoWindow::InfoWindow(UI_Object* parent, ANARACE* anarace, const int windowNumb
 {
 	this->anarace=anarace;
 	resetData();
-};
+}
 
 InfoWindow::~InfoWindow()
 {
-};
+}
 
 const int InfoWindow::getBx() const
 {
 	return bx;
-};
+}
 
 const int InfoWindow::getBWidth() const
 {
 	return bwidth;
-};
+}
 
 const int InfoWindow::getUnit() const
 {
 	return unit;
-};
+}
 
 void InfoWindow::setBx(int bx)
 {
 	this->bx=bx;
-};
+}
 
 void InfoWindow::setBWidth(int bwidth)
 {
 	this->bwidth=bwidth;
-};
+}
 
 void InfoWindow::setIP(int IP)
 {
 	this->IP=IP;
-};
+}
 
 void InfoWindow::setUnit(int unit)
 {
 	this->unit=unit;
-};
+}
 
 void InfoWindow::resetData()
 {
@@ -52,37 +52,38 @@ void InfoWindow::resetData()
 	unit=0;
 	IP=0;
 	setup=0;
-};
+}
 
 const int InfoWindow::isSet() const
 {
 	return(setup);
-};
+}
 
 void InfoWindow::setupOk(int ok)
 {
 	setup=ok;
-};
+}
 
 const int InfoWindow::getIP() const
 {
 	return(IP);
-};
+}
 
 void InfoWindow::process()
 {
 	if(!shown) return;
 	UI_Window::process();
-};
+}
 
 void InfoWindow::draw(DC* dc) const
 {
 	if(!shown) return;
 	UI_Window::draw(dc);
-#if 0
-	if(!order)
-				return;
-		newTextPage();
+	stringstream os;
+	os << stats[anarace->getRace()][unit].name << ": " << anarace->getProgramTime(IP);
+	dc->DrawText(os.str(), getAbsoluteClientRectPosition());
+	
+/*	newTextPage();
 		writeLongText(_T("#"), dc);
 		if(!anarace->getProgramSuccessUnit(order->IP))
 		{
@@ -114,6 +115,6 @@ void InfoWindow::draw(DC* dc) const
 				anarace->getProgramTime(order->IP)%60)),dc);
 			
 		}
-#endif
-};
+#endif*/
+}
 

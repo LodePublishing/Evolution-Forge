@@ -6,17 +6,17 @@ BoGraphWindow::BoGraphWindow(UI_Object* parent, ANARACE* anarace, InfoWindow* in
 	this->infoWindow=infoWindow;
 	this->anarace=anarace;
 	resetData();
-};
+}
 
 BoGraphWindow::~BoGraphWindow()
 {
-};
+}
 
 
 void BoGraphWindow::setMarkedUnit(int unit)
 {
 	markedUnit=unit;
-};
+}
 
 void BoGraphWindow::checkForInfoWindow()
 {
@@ -36,7 +36,7 @@ void BoGraphWindow::checkForInfoWindow()
 			return;
 		}
 	}
-};
+}
 	
 void BoGraphWindow::resetData()
 {
@@ -50,7 +50,7 @@ void BoGraphWindow::resetData()
 		bograph[i].lines=0;
 		bograph[i].edge=Rect(0,0,0,0);
 	}
-};
+}
 
 void BoGraphWindow::process()
 {
@@ -70,14 +70,15 @@ void BoGraphWindow::process()
 	int faccount=0;
 																				
 																				
-	for(int i=0;i<UNIT_TYPE_COUNT;i++)
+	for(int i=UNIT_TYPE_COUNT;i--;) 
 	{
 		for(int j=0;j<MAX_LENGTH;j++)
 			unitCounter[i][j]=0;
 		height[i]=0;
 		lines[i]=0;
 	}
-	for(int i=0;i<20;i++)
+	
+	for(int i=20;i--;)
 	{
 		bograph[i].type=0;
 		bograph[i].position=0;
@@ -94,29 +95,33 @@ void BoGraphWindow::process()
 		if(anarace->getProgramFacility(IP)&&
 		  (anarace->getProgramTotalCount(IP, anarace->getProgramFacility(IP))-anarace->getProgramAvailibleCount(IP,anarace->getProgramFacility(IP))>height[anarace->getProgramFacility(IP)]))
 			 height[anarace->getProgramFacility(IP)]=anarace->getProgramTotalCount(IP,anarace->getProgramFacility(IP))-anarace->getProgramAvailibleCount(IP,anarace->getProgramFacility(IP));
+		// total - availible at that time equals used facilities
 	}
 	//=>  height[i] = max used i-facilities
 																				
 //calculate number of lines per facility and adjust the height
 	for(int i=UNIT_TYPE_COUNT;i--;)
 	{
-		while(height[i]>MIN_HEIGHT)
-		{
+// at maximum MIN_HEIGHT items in one row
+		while(height[i]>MIN_HEIGHT)	{
 			height[i]-=MIN_HEIGHT;
 			lines[i]++;
 		}
-		if(height[i]>0) lines[i]++;
+		if(height[i]>0) 
+			lines[i]++;
 		if(lines[i]>1)
 			height[i]=MIN_HEIGHT;
 	}
 																				
 //make a list of facilities that are needed...
+// TODO WARUM = 1 und nicht = 0?
 	faccount=1;
 	for(map<long, Order>::const_iterator order=orderList->begin(); order!=orderList->end(); ++order)
 	{
 		if(anarace->getProgramFacility(order->second.getIP()))
 		{
-			int i=-1;
+			int i;
+			// search for 'untaken' facilities
 			for(i=1;(i<faccount)&&(fac[i]!=anarace->getProgramFacility(order->second.getIP()));i++);
 					
 			if(i==faccount)
@@ -127,18 +132,14 @@ void BoGraphWindow::process()
 		}
 	}
 																				
-// ...and sort them
+// ...and sort them (just an optical issue, scvs last)
 	for(int i=0;i<20;i++)
 		if(fac[i])
 			for(int j=0;j<i;j++)
-// scvs last
-				if(fac[i]>fac[j])
-				{
-					int temp=fac[i];
-					fac[i]=fac[j];
-					fac[j]=temp;
-//					xchg(fac[i],fac[j]);
-				}
+				if(fac[j])
+					if(fac[i]>fac[j]) {
+						int temp=fac[i];fac[i]=fac[j];fac[j]=temp;
+					}
 																				
 // now put all together
 	int position=0;
@@ -149,49 +150,79 @@ void BoGraphWindow::process()
 		bograph[position].height=height[fac[i]];
 		position+=lines[fac[i]];
 	}
-//sort the order after IPs
-// now calculate the rectangles :)
-	//orderList->Sort();
+
+// create a temporary sorted by IP - list
+	Order* sortedList[MAX_LENGTH];
+	int l=0;
+	for(map<long, Order>::iterator order=orderList->begin(); order!=orderList->end(); ++order) {
+		sortedList[l]=&(order->second);l++;
+	}
+
+	for(int i=0;i<l;i++)
+		for(int j=0;j<i;j++)
+			if(sortedList[i]->getIP() > sortedList[j]->getIP())
+				// > =>  earlier! first IP is MAX_LENGTH
+			{
+				Order* temp = sortedList[i];
+				sortedList[i]=sortedList[j];
+				sortedList[j]=temp;	
+			}
+	
 	int hoehe=0;
-	for(map<long, Order>::iterator order=orderList->begin(); order!=orderList->end(); ++order)
+//	for(map<long, Order>::iterator order=orderList->begin(); order!=orderList->end(); ++order)
+	for(int k=0;k<l;k++)
 	{
-		if(anarace->getProgramFacility(order->second.getIP()))
+		if(anarace->getProgramFacility(sortedList[k]->getIP()))
 			for(int i=0;i<20;i++)
-				if(bograph[i].type==anarace->getProgramFacility(order->second.getIP()))
+				if(bograph[i].type==anarace->getProgramFacility(sortedList[k]->getIP()))
 				{
 //order->time muesste vorsortiert sein
+// hoehen! Positionen anordnen damits keine ueberschneidungen gibt
+
+		// calculate the y-position of this specific order, THIS HAS TO BEGIN WITH 0 -> MAX_LENGTH, DO NOT USE -- OPTIMIZATION!
 					for(int j=0;j<MAX_LENGTH;j++)
-						if(unitCounter[bograph[i].type][j]<=anarace->getProgramTime(order->second.getIP()))
+						if(unitCounter[bograph[i].type][j]<=anarace->getProgramTime(sortedList[k]->getIP()))
 						{
-							unitCounter[bograph[i].type][j]=anarace->getProgramTime(order->second.getIP())+stats[(*anarace->getStartCondition())->getRace()][anarace->getPhaenoCode(order->second.getIP())].BT;
+// if we have found a unitCounter which has a lower time (all unitCounter start with 0) we set the unit time to starttime + buildtime
+// at the end all unitCounter have the time at which programTime ... TODO
+// the items are in REAL TIME, i.e. time 0 is the beginning, ga->maxTime is the end
+							
+							unitCounter[bograph[i].type][j]=anarace->getProgramTime(sortedList[k]->getIP())+stats[anarace->getRace()][sortedList[k]->getUnit()/*anarace->getPhaenoCode(sortedList[k]->getIP())*/].BT;
 							hoehe=j;
 							j=MAX_LENGTH;
-						   }
+						}
+
+					
 					Rect t=Rect(
-Point( (anarace->getProgramTime(order->second.getIP())*getClientRectWidth())/(anarace->ga->maxTime-anarace->getTimer()),
+Point( ( anarace->getProgramTime(sortedList[k]->getIP())*getClientRectWidth())/(anarace->ga->maxTime-anarace->getTimer()),
 	 (1+i+hoehe/MIN_HEIGHT)*(FONT_SIZE+5)+(hoehe%MIN_HEIGHT)*(FONT_SIZE+4)/bograph[i].height),
-Size(  (stats[(*anarace->getStartCondition())->getRace()][anarace->getPhaenoCode(order->second.getIP())].BT/*anarace->getProgramBT(s)*/*getClientRectWidth())/(anarace->ga->maxTime-anarace->getTimer()),
+
+Size(  (stats[anarace->getRace()][sortedList[k]->getUnit()/*anarace->getPhaenoCode(sortedList[k]->getIP())*/].BT/*anarace->getProgramBT(s)*/*getClientRectWidth())/(anarace->ga->maxTime-anarace->getTimer()),
 	 (FONT_SIZE+4)/(bograph[i].height)));
-					if(t!=order->second.btarget)
-						order->second.bstart=order->second.brect;
-					order->second.btarget=t;
-					if(order->second.bonew)
+					if(t!=sortedList[k]->btarget)
+						sortedList[k]->bstart=sortedList[k]->brect;
+					sortedList[k]->btarget=t;
+					if(sortedList[i]->bonew)
 					{
-						order->second.bonew=false;
-						order->second.brect=order->second.btarget;
+						sortedList[k]->brect=sortedList[k]->btarget;
+						sortedList[k]->bstart=sortedList[k]->btarget;
 					}
 				}
 	}
-		for(int i=0;i<20;i++)
-			if(bograph[i].type>0)
-				for(int j=i;j<i+bograph[i].lines;j++)
-				{
-					bograph[i].edge=Rect(getRelativeClientRectPosition(),Size(10000,FONT_SIZE+4));
-					bograph[i].edge.SetTop(getRelativeClientRectUpperBound()+(j+1)*(FONT_SIZE+5));
-					if(fitItemToRelativeClientRect(bograph[i].edge,1))
-						lastbographY=bograph[i].edge.y+bograph[i].edge.height;
-				}
-};
+
+
+// assign the coordinates for the lines where the orders are printed on
+	int j=0;
+	for(int i=0;i<20;i++)
+		if(bograph[i].type>0)
+		{
+			bograph[i].edge=Rect(getAbsoluteClientRectPosition(),Size(10000,bograph[i].lines*(FONT_SIZE+5)));
+			bograph[i].edge.SetTop(getAbsoluteClientRectUpperBound()+(j+1)*(FONT_SIZE+5));
+			j+=bograph[i].lines;
+			if(fitItemToAbsoluteClientRect(bograph[i].edge,1))
+				lastbographY=bograph[i].edge.y+bograph[i].edge.height;
+		}
+}
 
 void BoGraphWindow::draw(DC* dc) const
 {
@@ -201,25 +232,31 @@ void BoGraphWindow::draw(DC* dc) const
 	if(!orderList) return;
 
 	// now print the lines...
-	dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
+	dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
 	for(int i=0;i<20;i++)
-		if((bograph[i].type>0)&&(insideRelativeClientRect(bograph[i].edge)))
-			for(int j=i;j<i+bograph[i].lines;j++)
+		if(bograph[i].type>0)
+	//		for(int j=0;j<bograph[i].lines;j++)
 			{
-					if(j%2==0)
-						dc->SetBrush(*theme.lookUpBrush(BO_DARK_BRUSH));
-					else dc->SetBrush(*theme.lookUpBrush(BO_BRIGHT_BRUSH));
-					dc->DrawRoundedRectangle(Rect(getAbsolutePosition()+bograph[i].edge.GetPosition(), bograph[i].edge.GetSize()),2);
+				Rect rec=Rect(bograph[i].edge.GetPosition()/*+Point(0,j*(FONT_SIZE+5))*/, bograph[i].edge.GetSize());
+				if(insideAbsoluteClientRect(rec))
+				// TODO BUTTONS drausmachen...
+				{
+				//	if(j%2==0)
+				//		dc->SetBrush(*theme.lookUpBrush(BO_DARK_BRUSH));
+				//	else 
+					dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+					dc->DrawRoundedRectangle(rec,2);
+				}
 			}
 
 // and the time steps on the top
 	dc->SetTextForeground(*theme.lookUpColor(TIMESTEPS_TEXT_COLOUR));
-//	dc->SetPen(*BLACK_PEN); TODO
+// dc->SetPen(*BLACK_PEN); TODO
 	int timesteps=((anarace->ga->maxTime-anarace->getTimer())/30)/10+1; // TODO <- wird 0? bei Protoss? :-/
 	for(int i=0;i<(anarace->ga->maxTime-anarace->getTimer())/30;i++)
 		if(i%timesteps==0)
 		{
-			  dc->DrawLine(getAbsoluteClientRectPosition()+Point(30*(i+timesteps)*getClientRectWidth()/(anarace->ga->maxTime-anarace->getTimer()),0),
+			dc->DrawLine(getAbsoluteClientRectPosition()+Point(30*(i+timesteps)*getClientRectWidth()/(anarace->ga->maxTime-anarace->getTimer()),0),
 				  getAbsoluteClientRectPosition()+Point(30*(i+timesteps)*getClientRectWidth()/(anarace->ga->maxTime-anarace->getTimer()),lastbographY));
 			ostringstream os;
 			os << i/2 << ":" << 3*(i%2) << "0";
@@ -256,33 +293,36 @@ void BoGraphWindow::draw(DC* dc) const
 		if(anarace->getProgramFacility(order->second.getIP()))
 		{
 			Rect edge=Rect(getRelativeClientRectPosition()+order->second.brect.GetPosition(), order->second.brect.GetSize());
-			if(insideRelativeClientRect(edge))
+//			if(insideRelativeClientRect(edge))
 			{
-				dc->SetBrush(*theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[(*anarace->getStartCondition())->getRace()][anarace->getPhaenoCode(order->second.getIP())].unitType)));
+				dc->SetBrush(*theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][anarace->getPhaenoCode(order->second.getIP())].unitType)));
 #if 0
 							Color(dc->GetSurface(),
-(100*(infoWindow.isShown())*(order->first==infoWindow.getKey())+COLOR1R+BOcolor[stats[(*anarace->getStartCondition())->getRace()][anarace->phaenoCode[order->IP]].type].Red())*order->blend/50,
-(100*(infoWindow.isShown())*(node->fist==infoWindow.getKey())/*+(optimizeMode*anarace->isConstant(order->IP))*255+(1-(optimizeMode*anarace->isConstant(order->IP)))**/(COLOR1G+BOcolor[stats[(*anarace->getStartCondition())->getRace()][anarace->phaenoCode[order->IP]].type].Green())*order->blend/50),
-(100*(infoWindow.isShown())*(node->first==infoWindow.getKey())+COLOR1B+BOcolor[stats[(*anarace->getStartCondition())->getRace()][anarace->phaenoCode[order->IP]].type].Blue())*order->blend/50),SOLID_BRUSH_STYLE));
+(100*(infoWindow.isShown())*(order->first==infoWindow.getKey())+COLOR1R+BOcolor[stats[anarace->getRace()][anarace->phaenoCode[order->IP]].type].Red())*order->blend/50,
+(100*(infoWindow.isShown())*(node->fist==infoWindow.getKey())/*+(optimizeMode*anarace->isConstant(order->IP))*255+(1-(optimizeMode*anarace->isConstant(order->IP)))**/(COLOR1G+BOcolor[stats[anarace->getRace()][anarace->phaenoCode[order->IP]].type].Green())*order->blend/50),
+(100*(infoWindow.isShown())*(node->first==infoWindow.getKey())+COLOR1B+BOcolor[stats[anarace->getRace()][anarace->phaenoCode[order->IP]].type].Blue())*order->blend/50),SOLID_BRUSH_STYLE));
 #endif
-				int bright=0;
-				if(( (infoWindow->isShown())&&(order->second.getIP()==infoWindow->getIP()) )||((markedUnit>0)&&(order->second.getUnit()==markedUnit)))
-						bright=50;//+markAni; TODO
+	//			int bright=0;
+	///			if(( (infoWindow->isShown())&&(order->second.getIP()==infoWindow->getIP()) )||((markedUnit>0)&&(order->second.getUnit()==markedUnit)))
+	//					bright=50;//+markAni; TODO
 //				dc->SetBrush(*theme.lookUpBrush(BO_DARK_BRUSH));				//TODO
 //				dc->SetBrush(Brush(dc->doColor(
 //		((anarace->getProgramCode(order->second.IP)+1)*155/(1+anarace->getPlayer()->getGoal()->getMaxBuildTypes()/2))%156+bright,
 //		((anarace->getProgramCode(order->second.IP)+1)*155/(1+anarace->getPlayer()->getGoal()->getMaxBuildTypes()/4))%156+bright,
 //		((anarace->getProgramCode(order->second.IP)+1)*155/(1+anarace->getPlayer()->getGoal()->getMaxBuildTypes()/8))%156+bright),SOLID_BRUSH_STYLE));
-				dc->SetPen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN+stats[(*anarace->getStartCondition())->getRace()][anarace->getPhaenoCode(order->second.getIP())].unitType)));
+				dc->SetPen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN+stats[anarace->getRace()][anarace->getPhaenoCode(order->second.getIP())].unitType)));
 				dc->DrawRoundedRectangle(Rect(getAbsolutePosition()+edge.GetPosition(), edge.GetSize()),2);
 			}
 		}
 	}
 	//finally print the legend
-	dc->SetTextForeground(*theme.lookUpColor(IMPORTANT_COLOUR));
+	dc->SetTextForeground(*theme.lookUpColor(BRIGHT_TEXT_COLOUR));
 	for(int i=0;i<20;i++)
 		if(bograph[i].type>0)
-			dc->DrawText(" "+stats[(*anarace->getStartCondition())->getRace()][bograph[i].type].name,getAbsoluteClientRectPosition()+Point(0,1+(i+1)*(FONT_SIZE+5)));
-};
+			dc->DrawText(" "+stats[anarace->getRace()][bograph[i].type].name,getAbsoluteClientRectPosition()+Point(0,1+(i+1)*(FONT_SIZE+5)));
+}
+
+
+
 
 

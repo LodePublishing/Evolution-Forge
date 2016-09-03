@@ -2,7 +2,7 @@
 #define _UI_THEME_HPP
 
 #include "sdlwrapper.hpp"
-#include "../core/main.hpp"
+#include "../core/defs.hpp"
 /*const char gizmo[GIZMO_NUMBER][40]=
 {
 	"Perfection is the key",
@@ -18,7 +18,7 @@
 	"!!!!! 3VS3 BGH NO NOOBS !!!!",
 	"<ý¦<¬ ;) ýJ<¼ýD Ìýt<Üý >_<",
 	"60 Minutes no Rush!"
-};*/
+}*/
 
 
 const int FONT_SIZE = 7;
@@ -119,7 +119,7 @@ enum eResolution
 	RESOLUTION_1280x1024,
 	RESOLUTION_1600x1200,
 
-	MAX_RESOLUTIONS,
+	MAX_RESOLUTIONS
 };
 // ------ END RESOLUTIONS ------
 
@@ -337,15 +337,15 @@ enum eString
 	UNIT_TYPE_10_STRING,
 
 	STARTING_FORCE_STRING,
-	CLICK_TO_ADD_GOAL_STRING,
-	CLICK_TO_CLOSE_STRING,
-	CLICK_TO_GO_BACK_STRING,
 	NON_GOALS_STRING,
-	ADD_AS_GOAL_STRING,
-	LOAD_GOAL_LIST_STRING,
-	CLOSE_GOAL_LIST_STRING,
-
-	USE_MAP_SETTINGS_STRING,
+	GOALS_STRING,
+	CLICK_TO_ADD_GOAL_STRING,
+	CLOSE_STRING,
+	ADD_GOAL_STRING,
+	GOAL_LIST_STRING,
+	STARTFORCE_STRING,
+	CHOOSE_RACE_STRING,
+	
 	TERRA_STRING,
 	PROTOSS_STRING,
 	ZERG_STRING,
@@ -356,6 +356,8 @@ enum eString
 
 	OPTIMIZE_EVERYTHING_STRING,
 	OPTIMIZE_SELECTED_STRING,
+	RESET_BUILD_ORDER_STRING,
+	SPEED_STRING,
 	
 // timer window
 	OF_GOALS_FULFILLED_STRING,

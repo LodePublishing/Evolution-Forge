@@ -1,5 +1,5 @@
 #include "window.hpp"
-
+const int MIN_HEIGHT = 2;
 void UI_Window::updateRectangles(const int maxPlayer)
 {
 // ------ PROCESSING
@@ -11,7 +11,7 @@ void UI_Window::updateRectangles(const int maxPlayer)
 	setFreeMove();
 	adjustRelativeRect(theme.lookUpRect(window, windowNumber, maxPlayer));
 //	originalRect=getRelativeRect(); ?
-};
+}
 
 UI_Window::UI_Window(UI_Object* parent, const eString titleString, const eWindow window, const int windowNumber, const eIsScrolled isScrollable, const eIsAutoAdjust isAutoAdjust, const eIsTabbed isTabbed, const Rect clientArea):UI_Object(parent, theme.lookUpRect(window, windowNumber), theme.lookUpMaxRect(window, windowNumber))
 {
@@ -70,7 +70,7 @@ UI_Window::UI_Window(UI_Object* parent, const eString titleString, const eWindow
 		tabRow=new UI_Radio(this);
 		forcePressTab(ADVANCED_TAB);		
 	}
-};
+}
 
 UI_Window::~UI_Window()
 {
@@ -83,112 +83,112 @@ void UI_Window::addTab(UI_Button* tab)
 	if(isTabbed==NOT_TABBED)
 		return;
 	tabRow->addButton(tab);
-};
+}
 
 void UI_Window::forcePressTab(const eTab tab)
 {
 	if(isTabbed==NOT_TABBED) return;
 	tabRow->forceTabPressed(tab);	
-};
+}
 
 const bool UI_Window::tabWasChanged() const
 {
 	if(isTabbed==NOT_TABBED) return false;
 	return(tabRow->hasChanged());
-};
+}
 
 const eTab UI_Window::getCurrentTab() const
 {
 	if(isTabbed==NOT_TABBED) return (eTab)0;
 	return((eTab)(tabRow->getMarked()+1));
-};
+}
 
 void UI_Window::setTitleParameter(const string p)
 {
 	titleParameter=p;
-};
+}
 
 const Rect UI_Window::getRelativeClientRect() const
 {
 	return(clientRect);
-};
+}
 
 const Rect UI_Window::getAbsoluteClientRect() const
 {
 	return(Rect(getAbsoluteClientRectPosition(),getClientRectSize()));
-};
+}
 
 const int UI_Window::getClientRectHeight() const
 {
 	return(clientRect.height);
-};
+}
 
 const int UI_Window::getClientRectWidth() const
 {
 	return(clientRect.width);
-};
+}
 
 const Point UI_Window::getRelativeClientRectPosition() const
 {
 	return(clientRect.GetPosition());
-};
+}
 
 const int UI_Window::getRelativeClientRectUpperBound() const
 {
 	return(clientRect.y);
-};
+}
 
 const int UI_Window::getRelativeClientRectLeftBound() const
 {
 	return(clientRect.x);
-};
+}
 
 const int UI_Window::getRelativeClientRectRightBound() const
 {
 	return(clientRect.x+clientRect.width);
-};
+}
 
 const int UI_Window::getRelativeClientRectLowerBound() const
 {
 	return(clientRect.y+clientRect.height);
-};
+}
 
 const int UI_Window::getAbsoluteClientRectLeftBound() const
 {
 	return(getAbsoluteClientRectPosition().x);
-};
+}
 
 const int UI_Window::getAbsoluteClientRectRightBound() const
 {
 	return(getAbsoluteClientRectPosition().x+getClientRectWidth());
-};
+}
 
 const int UI_Window::getAbsoluteClientRectUpperBound() const
 {
 	return(getAbsoluteClientRectPosition().y);
-};
+}
 
 const int UI_Window::getAbsoluteClientRectLowerBound() const
 {
 	return(getAbsoluteClientRectPosition().y+getClientRectHeight());
-};
+}
 
 const Point UI_Window::getAbsoluteClientRectPosition() const
 {
 	return(clientRect.GetPosition()+getAbsolutePosition());
-};
+}
 
 const Size UI_Window::getClientRectSize() const
 {
 	return(clientRect.GetSize());
-};
+}
 
 const bool UI_Window::insideClientRect(const Point pos) const
 {
 	return(clientRect.Inside(pos-getAbsolutePosition())); //?
 //  return(clientArea.Inside(rectangle.x,rectangle.y)||clientArea.Inside(rectangle.x+rectangle.width,rectangle.y+rectangle.height)||clientArea.Inside(rectangle.x+rectangle.width,rectangle.y)||clientArea.Inside(rectangle.x,rectangle.y+rectangle.height));
 //	TODO: wenns auf beiden Seiten ueberlappt?
-};
+}
 
 void UI_Window::adjustClientRect()
 {
@@ -201,13 +201,13 @@ void UI_Window::adjustClientRect()
 		clientStartRect.width=clientRect.width;
 	clientTargetRect.width=width;
 	clientTargetRect.height=height;
-};
+}
 
 void UI_Window::updateBorders()
 {
 	border=Rect(Point(3,8), getSize()+Size(-6,-11));
 	outerBorder=Rect(Point(1,6),getSize()+Size(-2,-7));
-};
+}
 
 //void UI_Window::updateWindow()
 //{
@@ -242,7 +242,36 @@ void UI_Window::updateBorders()
 void UI_Window::process()
 {
 	if(!shown) return;
+
+	Rect r = getAbsoluteRect();
+	rectlist[rectnumber].x = r.x;rectlist[rectnumber].y = r.y;rectlist[rectnumber].w = r.width; rectlist[rectnumber].h = r.height;
+
 	UI_Object::process();
+	
+	r = getAbsoluteRect();
+	if( r.x < rectlist[rectnumber].x)	
+	{
+		rectlist[rectnumber].w += rectlist[rectnumber].x - r.x;
+		rectlist[rectnumber].x = r.x;
+	} else
+	if( r.x > rectlist[rectnumber].x)	
+		rectlist[rectnumber].w += r.x - rectlist[rectnumber].x;
+	if( r.y < rectlist[rectnumber].y)	
+	{
+		rectlist[rectnumber].h += rectlist[rectnumber].y - r.y;
+		rectlist[rectnumber].y = r.y;
+	} else
+	if( r.y > rectlist[rectnumber].y)	
+		rectlist[rectnumber].h += r.y - rectlist[rectnumber].y;
+
+	if( r.width > rectlist[rectnumber].w )
+		rectlist[rectnumber].w = r.width;
+
+	if( r.height > rectlist[rectnumber].h )
+		rectlist[rectnumber].h = r.height;
+
+	rectnumber++;
+		
 //  int i;
 //  if(WindowMove) ~~
 //	  adjustClientRect(Rect(controls.getX()-WindowMoveX,controls.getY()-WindowMoveY,Border.width,Border.height));
@@ -312,11 +341,11 @@ void UI_Window::drawTitle(DC* dc) const
 	
 	int dx,dy;
 	dc->GetTextExtent(text,&dx,&dy);
-	Rect titleRect=Rect(border.GetPosition()+getAbsolutePosition()+Point(0,-dy/2-3), Size(dx+5,dy+2));
+	Rect titleRect=Rect(border.GetPosition()+getAbsolutePosition()+Point(0,-dy/2-2), Size(dx+5,dy));
 	dc->DrawRoundedRectangle(titleRect, 2);
-	
+	titleRect.SetPosition(titleRect.GetPosition()+Point(2,2));
 	dc->DrawText(text, titleRect.GetPosition());
-};
+}
 
 void UI_Window::draw(DC* dc) const
 {
@@ -441,26 +470,27 @@ void UI_Window::draw(DC* dc) const
 	dc->DrawPolygon(3,points,PfeilDown.GetX()+rect.GetX(),PfeilDown.GetY()+rect.GetY());*/
 
 	UI_Object::draw(dc);
-};
+
+}
 
 const int UI_Window::getScrollY() const
 {
 	return 0;
-};
+}
 
 const bool UI_Window::insideRelativeClientRect(const Rect& rect) const
 {
 	if((rect.width<=0)||(rect.y<getRelativeClientRectUpperBound())||(rect.y+rect.height>getRelativeClientRectLowerBound()))
 	return false;
 	else return true;
-};
+}
 
 const bool UI_Window::insideAbsoluteClientRect(const Rect& rect) const
 {
 	if((rect.width<=0)||(rect.y<getAbsoluteClientRectUpperBound())||(rect.y+rect.height>getAbsoluteClientRectLowerBound())) 
 	return false;
 	else return true;
-};
+}
 
 const bool UI_Window::fitItemToRelativeClientRect(Rect& rect, const int adjust)
 {
@@ -479,7 +509,7 @@ const bool UI_Window::fitItemToRelativeClientRect(Rect& rect, const int adjust)
 			lastItemY=getMaxRect().height;
 	}
 	if((rect.width<=0)||(rect.y<getRelativeClientRectUpperBound())||(rect.y+rect.height>getRelativeClientRectLowerBound())) 
-	return false;
+		return false;
 	else return true;
 }
 
@@ -507,18 +537,20 @@ const bool UI_Window::fitItemToAbsoluteClientRect(Rect& rect, const int adjust)
 void UI_Window::setChangedFlag(const bool flag)
 {
 	changedFlag=flag;
-};
+}
 
 const bool UI_Window::getChangedFlag() const
 {
 	return(changedFlag);
-};
+}
 
 void UI_Window::changeAccepted()
 {
-	changedFlag=0;
-};
+	changedFlag=false;
+}
 
 // TODO evtl in UI_Object und alle Kinder immer aufrufen!
 
-	
+int UI_Window::rectnumber;
+SDL_Rect UI_Window::rectlist[100];
+

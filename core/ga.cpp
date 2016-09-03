@@ -3,28 +3,29 @@
 EXPORT void GA::setMutationFactor(const int num)
 {
 	mutationFactor=num; //~~
-};
+}
 EXPORT void GA::setCrossOver(const int num)
 {
 	crossOver=num;
-};
+}
+
 EXPORT void GA::setBreedFactor(const int num)
 {
 	breedFactor=num;
-};
+}
 
 EXPORT const int GA::getMutationFactor() const
 {
         return(mutationFactor); //~~
-};
+}
 EXPORT const int GA::getCrossOver() const
 {
         return(crossOver);
-};
+}
 const int EXPORT GA::getBreedFactor() const
 {
         return(breedFactor);
-};
+}
 
 
 GA::GA()
@@ -47,5 +48,5 @@ GA::GA()
 
 GA::~GA()
 {
-};
+}
 

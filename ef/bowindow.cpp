@@ -1,4 +1,5 @@
 #include "bowindow.hpp"
+#include "../core/settings.hpp"
 
 BoEntry::BoEntry(UI_Object* parent, Rect rect, Rect maxRect, string unit):UI_Button(parent, rect, maxRect, unit, unit, FORCE_ENTRY_BUTTON, NO_TEXT_MODE, NO_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE)
 	// TODO!
@@ -6,28 +7,28 @@ BoEntry::BoEntry(UI_Object* parent, Rect rect, Rect maxRect, string unit):UI_But
 /*	addUnit = new UI_Button(this, Rect(Point(getWidth()-117,2),Size(8,8)), Rect(Point(0,0),getSize()), ADD_BUTTON, PRESS_BUTTON_MODE);
 	subUnit = new UI_Button(this, Rect(Point(getWidth()-107,2),Size(8,8)), Rect(Point(0,0),getSize()), SUB_BUTTON, PRESS_BUTTON_MODE);
 	cancelUnit = new UI_Button(this, Rect(Point(getWidth()-97,2),Size(8,8)), Rect(Point(0,0),getSize()), CANCEL_BUTTON, PRESS_BUTTON_MODE);*/
-};
+}
 
 BoEntry::~BoEntry()
 {
 /*	delete(addUnit);
 	delete(subUnit);
 	delete(cancelUnit);*/
-};
+}
 
 void BoEntry::draw(DC* dc) const
 {
 	if(!shown)
 		return;
 	UI_Button::draw(dc);	
-};
+}
 
 void BoEntry::process()
 {
 	if(!shown)
 		return;
 	UI_Button::process();
-};
+}
 
 int BoEntry::changed()
 {
@@ -35,13 +36,13 @@ int BoEntry::changed()
   //  if(subUnit->isPressed()) return(2);
 //	if(cancelUnit->isPressed()) return(3);
 	return(0);
-};
+}
 
 void BoEntry::updateText(string utext)
 {
 	updateNormalText(utext);
 	updatePressedText(utext);
-};
+}
 
 BoWindow::BoWindow(UI_Object* parent, ANARACE* anarace, InfoWindow* infoWindow, map <long, Order>* orderList, const int windowNumber):UI_Window(parent, BOWINDOW_TITLE_STRING, BUILD_ORDER_WINDOW, windowNumber, SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0,50,1000,1000))
 {
@@ -54,17 +55,27 @@ BoWindow::BoWindow(UI_Object* parent, ANARACE* anarace, InfoWindow* infoWindow, 
 	for(int i=MAX_LENGTH;i--;)
 	{
 		boEntry[i]=new BoEntry(this, Rect(getRelativeClientRectPosition()+Point(200,200), Size(getClientRectWidth(),FONT_SIZE+5)),
-				Rect(getRelativeClientRectPosition(), getClientRectSize()+Size(0, getMaxRect().height)),  // max size -y? TODO
+				Rect(getRelativeClientRectPosition(), getClientRectSize()+Size(-150, 100/*getMaxRect().height*/)),  // max size -y? TODO
 						stats[(*anarace->getStartCondition())->getRace()][i].name);
 		boEntry[i]->Hide();
-	};
-};
+	}
+	resetButton = new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), Rect(Point(0,0),getSize()), RESET_BUILD_ORDER_STRING, RESET_BUILD_ORDER_STRING, MY_BUTTON, RIGHT_BOUNDED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE);
+	speedText = new UI_StaticText(this, SPEED_STRING, Rect(getRelativeClientRectPosition(), getClientRectSize()), NO_TEXT_MODE, FORCE_TEXT_COLOUR);
+    addSpeed = new UI_Button(this, Rect(Point(getWidth()-117,42),Size(8,8)), Rect(Point(0,0), getSize()), ADD_BUTTON, PRESS_BUTTON_MODE);
+    subSpeed = new UI_Button(this, Rect(Point(getWidth()-107,42),Size(8,8)), Rect(Point(0,0), getSize()), SUB_BUTTON, PRESS_BUTTON_MODE);
+	
+	resetButton->updateToolTip("Reset and restart from the scratch");
+}
 
 BoWindow::~BoWindow()
 {
 	for(int i=MAX_LENGTH;i--;)
 		delete boEntry[i]; 
-};
+	delete resetButton;
+	delete speedText;
+	delete addSpeed;
+	delete subSpeed;
+}
 
 void BoWindow::resetData()
 {
@@ -76,7 +87,7 @@ void BoWindow::resetData()
 	markedUnit=0;
 //	for(i=0;i<MAX_LENGTH;i++)
 //		selection[i]=1;
-};
+}
 
 void BoWindow::process()
 {
@@ -84,7 +95,6 @@ void BoWindow::process()
 	UI_Window::process();
 
 	
-	checkForInfoWindow();
 #if 0
 	if(isActivated(makeSpaceButton))
 	{
@@ -232,11 +242,20 @@ void BoWindow::process()
 	for(map<long, Order>::iterator order=orderList->begin(); order!=orderList->end(); ++order)
 	{
 		int row=((boInsertPoint>-1)&&(order->second.getRow()>=boInsertPoint))*(boEndPoint-boInsertPoint);
-		Rect edge=Rect(getRelativeClientRectPosition()+order->second.rect.GetPosition()+Point(0,row*(FONT_SIZE+5)-getScrollY()),order->second.rect.GetSize());
+		Rect edge=Rect(getRelativeClientRectPosition()+order->second.rect.GetPosition()+Point(0,row*(FONT_SIZE+5)-getScrollY()), order->second.rect.GetSize());
 		if(fitItemToRelativeClientRect(edge,1))
 		{
 			boEntry[line]->Show();
-			if(boEntry[line]->isCurrentlyHighlighted()) markedUnit = line;
+			if(boEntry[line]->isCurrentlyHighlighted())
+			{
+				markedUnit = line;
+	            infoWindow->setUnit(order->second.getUnit());
+    			infoWindow->setIP(order->second.getIP());
+	            infoWindow->setBx(order->second.brect.x);
+    	        infoWindow->setBWidth(order->second.brect.width);
+        	    infoWindow->Show(1);
+			}
+			
 			boEntry[line]->adjustRelativeRect(edge);
 			boEntry[line]->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->second.getUnit()].unitType));
 
@@ -262,9 +281,11 @@ void BoWindow::process()
 
 					if(anarace->getProgramTime(order->second.getIP())!=oldTime)
 						for(int i=UNIT_TYPE_COUNT;i--;)
-								tempForceCount[i]=0;
-					if(edge.width<110)
+							tempForceCount[i]=0;
+					if((boEntry[line]->getWidth()<110)||(boEntry[line]->getRelativePosition().x>50))
+					{
 						boEntry[line]->updateText(" ");
+					}
 					else	
 					{
 						ostringstream os;
@@ -300,16 +321,28 @@ void BoWindow::process()
 		} // end fit item
 		else 
 		{
-			boEntry[line]->Hide();
+//			boEntry[line]->Hide();
 			boEntry[line]->adjustRelativeRect(Rect(getRelativeClientRectPosition()+Point(200,200), Size(getClientRectWidth(),FONT_SIZE+5)));			
 		}
 		line++;
 	} // end for ...
 	for(;line<MAX_LENGTH;line++)
-		boEntry[line]->Hide();
-	
+            boEntry[line]->adjustRelativeRect(Rect(getRelativeClientRectPosition()+Point(200,200), Size(getClientRectWidth(),FONT_SIZE+5)));
+		
+//		boEntry[line]->Hide();
 
-};
+	for(int i=0;i<MAX_LENGTH;i++)
+		if((boEntry[i]->getRelativeLeftBound()>300)&&(boEntry[i]->targetRect.x>100))
+			boEntry[i]->Hide();
+	
+	if(resetButton->isPressed())
+		settings.initSoup();
+
+	if(addSpeed->isPressed() && (settings.getSpeed()>0))
+		settings.setSpeed(settings.getSpeed()-1);
+	if(subSpeed->isPressed() && (settings.getSpeed()<100))
+		settings.setSpeed(settings.getSpeed()+1);
+}
 
 
 void BoWindow::draw(DC* dc) const
@@ -318,6 +351,10 @@ void BoWindow::draw(DC* dc) const
 	UI_Window::draw(dc);
 
 	drawSelectionStuff(dc);
+
+	ostringstream os;
+	os << (int)(100/(settings.getSpeed()+1)) << "%";
+	dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(30,0));
 	
 	
 	/*if((orderList->getMakeSpace()>-1)&&(boGoalListOpened==0))
@@ -401,7 +438,7 @@ void BoWindow::draw(DC* dc) const
 				}
 			}
 		}
-/*		edge.x=20;
+//...		edge.x=20;
 		edge.y=line*(FONT_SIZE+5)+9-getScrollY();
 		edge.width=getClientRectWidth()-40;
 		edge.height=2;
@@ -420,7 +457,7 @@ void BoWindow::draw(DC* dc) const
 //	if(makeSpace!=99999) TODO
 //		makeSpaceButton=addButton(Rect(getClientRectPosition()+Point(0,makeSpace*(FONT_SIZE+5)-getScrollY()),Size(SECOND_COLOUMN-8,FONT_SIZE+4)));
 //	else makeSpaceButton=99999;
-};
+}
 
 void BoWindow::drawSelectionStuff(DC* dc) const
 {
@@ -516,7 +553,7 @@ void BoWindow::drawSelectionStuff(DC* dc) const
 		}
 }
 */
-};
+}
 
 
 
@@ -524,26 +561,6 @@ void BoWindow::drawSelectionStuff(DC* dc) const
 void BoWindow::setMarkedUnit(int unit)
 {
 	markedUnit=unit;
-};
+}
 
-void BoWindow::checkForInfoWindow()
-{
-	for(map<long, Order>::iterator order=orderList->begin(); order!=orderList->end(); ++order)
-	{
-//		int row=((boInsertPoint>-1)&&(order->row>=boInsertPoint))*(boEndPoint-boInsertPoint);
-//	  mouse on order in player reinschieben, da is ja auch orderList zuhause
-		Rect edge(order->second.rect.GetPosition()+getRelativeClientRectPosition()+Point(0,-getScrollY()+((boInsertPoint>-1)&&(order->second.getRow()>=boInsertPoint))*(boEndPoint-boInsertPoint)*(FONT_SIZE+5)-1),Size(order->second.rect.GetWidth(),FONT_SIZE+6));
-
-		if((fitItemToRelativeClientRect(edge)&&edge.Inside(controls.getCurrentPosition())))
-		{
-//window[INFO_WINDOW]->adjustWindow(Rect(Point(window[INFO_WINDOW]->getPosition().x,500)/*order->second.rect.GetBottom()+getClientRectUpperBound()-getScrollY()+((boInsertPoint>-1)&&(order->row>=boInsertPoint))*(boEndPoint-boInsertPoint)*(FONT_SIZE+5)-1)*/,window[INFO_WINDOW]->getSize()));
-			infoWindow->setUnit(order->second.getUnit());
-			infoWindow->setIP(order->second.getIP());
-			infoWindow->setBx(order->second.brect.x);
-			infoWindow->setBWidth(order->second.brect.width);
-			infoWindow->Show(1);
-			return;
-		}
-	}
-};
 

@@ -2,11 +2,11 @@
 
 START_CONDITION::START_CONDITION()
 {
-};
+}
 
 START_CONDITION::~START_CONDITION()
 {
-};
+}
 
 void START_CONDITION::adjustSupply()
 {
@@ -18,23 +18,23 @@ void START_CONDITION::adjustSupply()
 	
 	setNeedSupply(needSupply);
 	setHaveSupply(haveSupply);
-};
+}
 
 void START_CONDITION::adjustResearches()
 {
 //	for(int i=1;i<MAX_LOCATIONS;i++)
 		unit[0].adjustResearches(race);
-};
+}
 
 void START_CONDITION::assignRace(const eRace race)
 {
 	this->race=race;
-};
+}
 			
 const eRace START_CONDITION::getRace() const
 {
 	return(race);
-};
+}
 
 const UNIT* START_CONDITION::getUnit(const int location) const 
 {
@@ -44,17 +44,17 @@ const UNIT* START_CONDITION::getUnit(const int location) const
 	} 
 #endif
 	return(&unit[location]);
-};
+}
 
 const string& START_CONDITION::getName() const
 {
 	return(name);
-};
+}
 
 void START_CONDITION::setName(const string& name)
 {
 	this->name=name;
-};
+}
 
 const int START_CONDITION::getHaveSupply() const
 {
@@ -64,7 +64,7 @@ const int START_CONDITION::getHaveSupply() const
 	}
 #endif
 	return(haveSupply);
-};
+}
 
 void START_CONDITION::setHaveSupply(const int haveSupply)
 {
@@ -74,7 +74,7 @@ void START_CONDITION::setHaveSupply(const int haveSupply)
 	}
 #endif
 	this->haveSupply=haveSupply;
-};
+}
 		
 const int START_CONDITION::getNeedSupply() const
 {
@@ -84,7 +84,7 @@ const int START_CONDITION::getNeedSupply() const
 	}
 #endif
 	return(needSupply);
-};
+}
 
 void START_CONDITION::setNeedSupply(const int needSupply)
 {
@@ -94,7 +94,7 @@ void START_CONDITION::setNeedSupply(const int needSupply)
 	}
 #endif
 	this->needSupply=needSupply;
-};
+}
 
 const int START_CONDITION::getGas() const
 {
@@ -104,7 +104,7 @@ const int START_CONDITION::getGas() const
 	}
 #endif
 	return(gas);
-};
+}
 
 const int START_CONDITION::getMinerals() const
 {
@@ -116,7 +116,7 @@ const int START_CONDITION::getMinerals() const
 	}
 #endif
 	return(minerals);
-};
+}
 	
 void START_CONDITION::setMinerals(const int minerals)
 {
@@ -126,7 +126,7 @@ void START_CONDITION::setMinerals(const int minerals)
 	}
 #endif
 	this->minerals=minerals;
-};
+}
 
 void START_CONDITION::setGas(const int gas)
 {
@@ -136,7 +136,7 @@ void START_CONDITION::setGas(const int gas)
 	}
 #endif
 	this->gas=gas;	
-};
+}
 
 const int START_CONDITION::getStartTime() const
 {
@@ -146,7 +146,7 @@ const int START_CONDITION::getStartTime() const
 	}
 #endif
 	return(startTime);
-};
+}
 
 void START_CONDITION::setStartTime(const int startTime)
 {
@@ -156,7 +156,7 @@ void START_CONDITION::setStartTime(const int startTime)
 	}
 #endif
 	this->startTime=startTime;
-};
+}
 
 void START_CONDITION::setLocationAvailible(const int location, const int unit, const int num)
 {
@@ -167,7 +167,7 @@ void START_CONDITION::setLocationAvailible(const int location, const int unit, c
 #endif
 	this->unit[location].setAvailible(unit, num);
 	this->unit[0].addAvailible(unit, num);
-};
+}
 
 const int START_CONDITION::getLocationAvailible(const int location, const int unit) const
 {
@@ -177,7 +177,7 @@ const int START_CONDITION::getLocationAvailible(const int location, const int un
 	}
 #endif
 	return(this->unit[location].getAvailible(unit));
-};
+}
 
 const int START_CONDITION::getLocationTotal(const int location, const int unit) const
 {
@@ -187,7 +187,7 @@ const int START_CONDITION::getLocationTotal(const int location, const int unit) 
 	}
 #endif
 	return(this->unit[location].getTotal(unit));
-};
+}
 
 
 void START_CONDITION::setLocationTotal(const int location, const int unit, const int num)
@@ -199,12 +199,12 @@ void START_CONDITION::setLocationTotal(const int location, const int unit, const
 #endif
 	this->unit[location].setTotal(unit, num);
 	this->unit[0].addTotal(unit, num);
-};
+}
 
 
 void START_CONDITION::resetUnits()
 {
 	for(int i=MAX_LOCATIONS;i--;)
 		unit[i].resetData();
-};
+}
 

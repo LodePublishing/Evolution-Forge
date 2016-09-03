@@ -3,19 +3,16 @@
 
 const float GUI_VERSION=0.50;
 
-#include "../ui/window.hpp"
-#include "../ui/theme.hpp"
-
 #include "player.hpp"
 #include "message.hpp"
 #include "tutorial.hpp"
 #include "corewindow.hpp"
 #include "mainwindow.hpp"
 
-#include "../core/anarace.hpp"
-
 #include <math.h>
 #include <iostream>
+
+#include "SDL/SDL_framerate.h"
 
 class Main
 {

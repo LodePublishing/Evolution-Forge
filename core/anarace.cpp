@@ -18,14 +18,15 @@ ANARACE::ANARACE()
 	optimizing=false;
 	active=true;
 
-};
+}
 
 ANARACE::~ANARACE()
 {
-};
+}
 
 void ANARACE::resetData()
 {
+	resetSpecial();
 	setGeneration(0);
 	setMaxpFitness(0);
 	setMaxsFitness(0);
@@ -35,16 +36,14 @@ void ANARACE::resetData()
 	unitsTotalMax=4;
 	timePercentage=0;
 	goalPercentage=0;
-};
+}
+
 
 // Reset all ongoing data (between two runs)
-void EXPORT ANARACE::newRun() // resets all data to standard starting values
+void EXPORT ANARACE::prepareForNewGeneration() // resets all data to standard starting values
 {
+	PRERACE::prepareForNewGeneration();
 	setCurrentpFitness(0);
-
-	for(int i=MAX_GOALS;i--;)
-		setFinalTime(i, 0);
-	resetSpecial();
 
 	for(int i=MAX_TIME;i--;)
 	{
@@ -59,9 +58,8 @@ void EXPORT ANARACE::newRun() // resets all data to standard starting values
 	{
 		setProgramSuccessType(i, 0);
 		setProgramSuccessUnit(i, 0);
-//		program[i].successLocation=0;
 		setProgramIsBuilt(i, false);
-		setProgramTime(i,MAX_TIME);
+		setProgramTime(i, MAX_TIME);
 		for(int j=UNIT_TYPE_COUNT;j--;)
 		{
 			setProgramAvailibleCount(i, j, 0);
@@ -74,30 +72,6 @@ void EXPORT ANARACE::newRun() // resets all data to standard starting values
 		setProgramBT(i,0);
 		phaenoCode[i]=0;
 	}
-	setHarvestedGas(0);
-	setHarvestedMinerals(0);
-	setMinerals((*pStartCondition)->getMinerals());
-	setGas((*pStartCondition)->getGas());
-	setTimer(ga->maxTime-(*pStartCondition)->getStartTime());
-	setNeedSupply((*pStartCondition)->getNeedSupply());
-	setHaveSupply((*pStartCondition)->getHaveSupply());
-
-	for(int i=4;i--;) //TODO
-	{
-		last[i].location=1;
-		last[i].unit=SCV;
-		last[i].count=1;
-	}
-	for(int i=4;i<MAX_LENGTH;i++)
-	{
-		last[i].location=0;
-		last[i].unit=0;
-		last[i].count=0;
-	}
-	lastcounter=4;
-	setTimeOut(ga->maxTimeOut);
-	setIP(ga->maxLength-1);
-	ready=0;
 }
 
 // ----------------------------------------
@@ -116,88 +90,80 @@ const bool EXPORT ANARACE::calculateStep()
 	setStatisticsHaveGas(getTimer(),getGas());
 	setStatisticsFitness(getTimer(),calculatePrimaryFitness(ready));
 
-	if((!getTimer())||(ready=calculateReady())||(!getIP()))//||(((*pGoal)->bestTime*4<3*ga->maxTime)&&(4*getTimer()<3*(*pGoal)->bestTime))) //TODO calculateReady optimieren
+	if((!getTimer())||(ready=calculateReady())||(!getIP()))
 	{
 		setLength(ga->maxLength-getIP());
-		if(!ready) setTimer(0);
+		if(!ready) 
+			setTimer(0);
+		while(!buildingQueue.empty())
+            buildingQueue.pop();
+	
 		for(int i=MAX_LENGTH;i--;)
 			phaenoCode[i]=(*pGoal)->toPhaeno(Code[i]);
 	//	if((*pGoal)->getMode()==0)
 			setCurrentpFitness(calculatePrimaryFitness(ready));
-        while(!buildingQueue.empty())
-            buildingQueue.pop();
+		
+// ------ ANARACE SPECIFIC ------
 		countUnitsTotal();
-
 		int maxPoints=0;
 		for(int i=MAX_GOALS;i--;)
 			if((*pGoal)->goal[i].count>0)
 				maxPoints+=100;
-		
 		if(maxPoints>0)
 			goalPercentage = 100 * currentpFitness / maxPoints;
 		else goalPercentage = 0;
+// ------ END ANARACE SPECIFIC ------
+		
 		return(true);
 	}
 
 	bool ok=true;
 	while((ok)&&(getIP()))
 	{
+// set needed_ to maximum to determine the minimum of minerals/gas our jobs need (needed_ is set in buildGene)
 		neededMinerals=MAX_MINERALS;
 		neededGas=MAX_GAS;
 		ok=buildGene((*pGoal)->toPhaeno(Code[getIP()]));
+		
 		if(successType>0)
 		{
 			setProgramSuccessType(getIP(),successType);
-//			setProgramSuccessLocation(successLocation);
 			setProgramSuccessUnit(getIP(),successUnit);
 		}
-//PROBLEM: wenn Einheit gebaut wurde (also in die build list incl. IP eingefuegt wurde) aber gleichzeitig ein timeout war, wird die Einheit als TIMEOUT markiert aber trotzdem gebaut
+		
+//TODO PROBLEM: wenn Einheit gebaut wurde (also in die build list incl. IP eingefuegt wurde) aber gleichzeitig ein timeout war, wird die Einheit als TIMEOUT markiert aber trotzdem gebaut
 // Problemloesung: Ueberpruefen, dass utnen auch wirklich das Mininimum gewaehlt fuer t gewaehlt wird! 
-		if((ok)||(!getTimeOut()))
-		{
-			if(ok)
-			{
-				setProgramTime(getIP(),ga->maxTime-getTimer()); //ANA~
-			}
-			else 
-			{
+
+		if((ok)||(!getTimeOut())) {
+			if(ok) {
+				setProgramTime(getIP(), ga->maxTime-getTimer());
+			} else {
 				setProgramTime(getIP(),ga->maxTime);
 				setProgramSuccessType(getIP(),TIMEOUT_ERROR);
 				setProgramSuccessUnit(getIP(),0);
 //				setProgramSuccessLocation(0);
 			}
-//			program[getIP()].temp=location[1].availible[COMMAND_CENTER];
-			for(int i=UNIT_TYPE_COUNT;i--;)
-			{
-				setProgramTotalCount(getIP(),i,getLocationTotal(GLOBAL,i));
-				setProgramAvailibleCount(getIP(),i,getLocationAvailible(0,i));
+			for(int i=UNIT_TYPE_COUNT;i--;)	{
+				setProgramTotalCount(getIP(),i,getLocationTotal(GLOBAL, i));
+				setProgramAvailibleCount(getIP(),i,getLocationAvailible(GLOBAL, i));
 			}
-
-//TODO Warum addiert er das hier und setzt es nicht einfach??
-
-//TODO ueber getPlayer etc. den PhaenoCode rauszufinden erscheint mir etwas umstaendlich... evtl in "program" integrieren...
-	
+			
 			setTimeOut(ga->maxTimeOut);
 			setIP(getIP()-1);
 		}
 	}
 
+//  ------ LEAP FORWARD IN TIME ------
 	int t=calculateIdleTime();
-
-	int mult=0;
-	for(int i=getTimer()-t;i<getTimer();i++) {
-			mult+=noise[i];
-	}
 	t=1;
-//	mult=mult/t;
-	mult=0;
-	setMinerals(getMinerals()+harvestMinerals()*(100+mult)*t/100);
-	setHarvestedMinerals(getHarvestedMinerals()+harvestMinerals()*(100+mult)*t/100);
-	setGas(getGas()+harvestGas()*(100+mult)*t/100);
-	setHarvestedGas(getHarvestedGas()+harvestGas()*(100+mult)*t/100);
-	
+	setMinerals(getMinerals()+harvestMinerals()*t);
+	setHarvestedMinerals(getHarvestedMinerals()+harvestMinerals()*t);
+	setGas(getGas()+harvestGas()*t);
+	setHarvestedGas(getHarvestedGas()+harvestGas()*t);
 	setTimeOut(getTimeOut()-t);
 	setTimer(getTimer()-t);
+//  ------ END LEAP FORWARD IN TIME ------
+	
 	bool foundAnother=true;
     while((!buildingQueue.empty())&&(foundAnother==true))
     {
@@ -206,151 +172,60 @@ const bool EXPORT ANARACE::calculateStep()
 			foundAnother=true;
         	const Building build = buildingQueue.top();
 			const UNIT_STATISTICS* stat=&((*pStats)[build.getType()]);
-			setProgramFacility(build.getIP(), build.getFacility());
-			switch(stat->facilityType)
-			{
-				case NO_FACILITY:break;
-				case IS_LOST:
-					if(build.getFacility())
-					{
-						addLocationTotal(build.getLocation(),build.getFacility(),-1);
-//						setProgramFacility(build.getIP(),build.getFacility());
-						//availible was already taken account when starting the building
-					}
-					if(stat->facility2)
-						addLocationTotal(build.getLocation(),stat->facility2,-1);
-					break;
-				case NEEDED_ONCE:break;//TODO ueberlegen ob man nicht jedem programdings ein facility zuweist... mmmh
-				case NEEDED_UNTIL_COMPLETE:
-					if(build.getFacility())
-					{
-						addLocationAvailible(build.getLocation(),build.getFacility(),1);
-//						setProgramFacility(build.getIP(),build.getFacility());
-					}
-					break; // TODO: fuer spaeter mal: Wenn in 2 Fabriken produziert wuerde wirds probmelatisch, da
-//in Buiding nur eine facility gespeichert wird...??
-				case NEEDED_ONCE_IS_LOST:
-					if(stat->facility2)
-						addLocationTotal(build.getLocation(),stat->facility2,-1);
-					break;
-				case NEEDED_UNTIL_COMPLETE_IS_LOST:
-					if(build.getFacility())
-					{
-						addLocationAvailible(build.getLocation(),build.getFacility(),1);
-//						setProgramFacility(build.getIP(),build.getFacility());
-//						setNeedSupply(getNeedSupply()-(*pStats)[build.getFacility()].needSupply); //<- ?
-//						setHaveSupply(getHaveSupply()-(*pStats)[build.getFacility()].haveSupply); //<- ?
-					}
-					if(stat->facility2)
-						addLocationTotal(GLOBAL/*build.getLocation()*/,stat->facility2,-1);
-//r_researches need location 0~~ TODO
-					break;
-				case NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE:
-					{
-						if(build.getFacility())
-						{
-							addLocationAvailible(build.getLocation(),build.getFacility(),1);
-//							setProgramFacility(build.getIP(),build.getFacility()); //?
-						}
-						if(stat->facility2) // special rule for upgrades! need 0 location
-						{
-							addLocationTotal(GLOBAL/*build.getLocation()*/,stat->facility2,-1);
-							addLocationAvailible(0/*build.getLocation()*/,stat->facility2,1);
-						};
-					}
-					break;
-				case NEEDED_ALWAYS:break;
-				case NO_FACILITY_BEHAVIOUR_DEFINED:
-				default:
-				#ifdef _SCC_DEBUG
-						toLog("ERROR: UNDEFINED FACILITY BEHAVIOUR DETECTED!");
-				#endif
-						break;
-			}
 
+// ------ ACTUAL BUILDING ------
+			adjustLocationUnitsAfterCompletion(build.getLocation(), stat->facilityType, build.getFacility(), stat->facility2);			
 			setHaveSupply(getHaveSupply()+stat->haveSupply);
-//			setNeedSupply(getNeedSupply()+stat->needSupply); ?
-
-/*			if(stat->needSupply<0) 
-			{
-				if(getHaveSupply()-stat->needSupply>MAX_SUPPLY)
-				{
-					if(getHaveSupply()<MAX_SUPPLY)
-					{
-						setNeedSupply(getNeedSupply()+(MAX_SUPPLY-getHaveSupply()));
-						setHaveSupply(MAX_SUPPLY);//problem beim abbrechen!
-					}
-				}
-				else
-				{
-					setNeedSupply(getNeedSupply()-stat->needSupply);
-					setHaveSupply(getHaveSupply()-stat->needSupply);
-				}
-			};*/
-			//~~~~
 			addLocationTotal(build.getLocation(),build.getType(),build.getUnitCount());
 			addLocationAvailible(build.getLocation(),build.getType(),build.getUnitCount());
+// ------ END OF ACTUAL BUILDING ------
 
-			if(build.getType()==REFINERY) 
-			{
+			
+// ------ SPECIAL RULES ------
+			if(build.getType()==REFINERY) {
 				addMapLocationTotal(GLOBAL, build.getLocation(),VESPENE_GEYSIR,-1);
 				adjustGasHarvest(build.getLocation());
-			}
-			else
-			if((build.getType()==COMMAND_CENTER)&&(!getLocationTotal(build.getLocation(),COMMAND_CENTER)))
-			{
+			} else
+			if((build.getType()==COMMAND_CENTER)&&(!getLocationTotal(build.getLocation(),COMMAND_CENTER))) {
 				adjustMineralHarvest(build.getLocation());
 				adjustGasHarvest(build.getLocation());
+			} else 
+			if((build.getType()==LARVA)&&((*pGoal)->getRace()==ZERG)&&(!buildGene(LARVA))) {
+				removeLarvaFromQueue(build.getLocation());
 			}
- else if((build.getType()==LARVA)&&((*pGoal)->getRace()==ZERG))
-			{
-				if(!buildGene(LARVA))
-					larvaInProduction[build.getLocation()]--;
-//					  if(
-//TODO Was wenn Gebaeude zerstoert? etc.? eigentlich is das hier net noetig...
-//								  (((getLocationTotal(tloc, HATCHERY)+getLocationTotal(tloc, LAIR)+getLocationTotal(tloc, HIVE))*3>
-//									(larvaInProduction[tloc]+getLocationTotal(tloc, LARVA)))&&
-//								   ((getLocationTotal(tloc, HATCHERY)+getLocationTotal(tloc, LAIR)+getLocationTotal(tloc, HIVE)<larvaInProduction[tloc])))) // => zuwenig Larven da!
-//						  {
-//							  if(buildGene(LARVA))
-//								  larvaInProduction[tloc]++;
-//						  }
-//					  };
-//				  };
-			};
+// ------ END SPECIAL RULES ------
 
+			
+// ------ CHECK WHETHER WE ARE READY ------
+			calculateFinalTimes(build.getLocation(), build.getType());
+			ready=calculateReady();
+// ------ END CHECK ------
+
+			
+// ------ ENQUEUE THE LAST ITEM SO IT CAN BE ACCESSED BY THE MOVING ROUTINES ------
 			last[lastcounter].unit=build.getType();
 			last[lastcounter].count=build.getUnitCount();
 			last[lastcounter].location=build.getLocation();
 
 			if((stat->create)&&(!build.getOnTheRun())) //one additional unit (zerglings, scourge, comsat, etc.)
 			{ //here no unitCount! ~~~
-				addLocationTotal(build.getLocation(),stat->create,1);
-				addLocationAvailible(build.getLocation(),stat->create,1);
+				addOneLocationTotal(build.getLocation(),stat->create);
+				addOneLocationAvailible(build.getLocation(),stat->create);
 				if(last[lastcounter].unit==stat->create) last[lastcounter].count++; //TODO ???
 				// ~~~~ Ja... geht schon... aber kann ja auch mal was anderes sein...
 			}
 					//evtl noch location==0 als 'egal wo' einfuehren
 			lastcounter++;
-
-			//ANA~
+// ------ END OF LAST ITEM ------
+			
+// ------ RECORD THE BUILDING ------
+			setProgramFacility(build.getIP(), build.getFacility());
 			setProgramIsBuilt(build.getIP(),true);
 			setProgramLocation(build.getIP(),build.getLocation());
 			setProgramBT(build.getIP(),build.getTotalBuildTime()); //~~~
-//			IP zeugs checken... length is immer 2 :/	 ??
-
-				for(int i=MAX_GOALS;i--;)
-// ist dieses goal belegt?
-					if(((*pGoal)->goal[i].unit>0)&&
-// befinden wir uns am richtigen Ort?
-						(((*pGoal)->goal[i].location==0)||(build.getLocation()==(*pGoal)->goal[i].location))&&
-// und untersuchen wir das zum Unittype gehoerende Goal?
-						(build.getType()==(*pGoal)->goal[i].unit))
-								setFinalTime(i,ga->maxTime-getTimer());
-// Did we reach the right number at the right time?
-//			  i=MAX_GOALS;  TODO? koennen wir mehrere goals gleichzeitig erfuell0rn?
-
-			ready=calculateReady();
+// ------ END OF RECORD -------
+			
+			
 			buildingQueue.pop();
 		} // end while(getremainingbuildorder) ~|~
 		else foundAnother=false;
@@ -373,31 +248,21 @@ const bool ANARACE::buildGene(const int unit)
 
 	successType=0;
 	successUnit=0;
-//	successLocation=0;
-
-//	if(unit==1)
-//		successType=0; //?
 
 	if(unit<=REFINERY+1)
 	{
-		if((stat->prerequisite[0]>0)&&(getLocationTotal(GLOBAL,stat->prerequisite[0])==0))
-		{
+		if((stat->prerequisite[0]>0)&&(getLocationTotal(GLOBAL,stat->prerequisite[0])==0)) {
 			successUnit=stat->prerequisite[0];
-//			successLocation=0;
 			successType=PREREQUISITE_WAS_FULFILLED;
 		}
 		else		
-		if((stat->prerequisite[1]>0)&&(getLocationTotal(GLOBAL,stat->prerequisite[1])==0))
-		{
+		if((stat->prerequisite[1]>0)&&(getLocationTotal(GLOBAL,stat->prerequisite[1])==0)) {
 			successUnit=stat->prerequisite[1];
-//			successLocation=0;
 			successType=PREREQUISITE_WAS_FULFILLED;
 		}
 		else 
-		if((stat->prerequisite[2]>0)&&(getLocationTotal(GLOBAL,stat->prerequisite[2])==0))
-		{
+		if((stat->prerequisite[2]>0)&&(getLocationTotal(GLOBAL,stat->prerequisite[2])==0)) {
 			successUnit=stat->prerequisite[2];
-//			successLocation=0;
 			successType=PREREQUISITE_WAS_FULFILLED;
 		}
 		else
@@ -416,29 +281,24 @@ const bool ANARACE::buildGene(const int unit)
 				successUnit=stat->facility[1];
 			else if(stat->facility[2]>0)
 				successUnit=stat->facility[2];
-//			successLocation=0;
 			successType=FACILITY_BECAME_AVAILIBLE;
 		}
 		else
-		if((stat->facility2>0)&&(getLocationAvailible(0,stat->facility2)==0))
+		if((stat->facility2>0)&&(getLocationAvailible(GLOBAL, stat->facility2)==0))
 		{
 			successUnit=stat->facility2;
-//			successLocation=0;
 			successType=FACILITY_BECAME_AVAILIBLE;
 		}
 //TODO: evtl success 2 Schritte zurueckverfolgen...
 		else
-		if(((getHaveSupply()<getNeedSupply()+stat->needSupply-stat->haveSupply)||(stat->needSupply+getNeedSupply()>MAX_SUPPLY))&&(stat->needSupply!=0))
-		{
+		if(((getHaveSupply()<getNeedSupply()+stat->needSupply-stat->haveSupply)||(stat->needSupply+getNeedSupply()>MAX_SUPPLY))&&(stat->needSupply!=0)) {
 			successUnit=0;
-//			  successLocation=0;
 			successType=SUPPLY_WAS_SATISFIED;
 		}
 		else
 		if(getMinerals()<stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL,unit))
 		{
 			successUnit=0;
-//			successLocation=0;
 			successType=ENOUGH_MINERALS_WERE_GATHERED;
 			if(neededMinerals>stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL,unit)-getMinerals())
 				neededMinerals=stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL,unit)-getMinerals();
@@ -449,7 +309,6 @@ const bool ANARACE::buildGene(const int unit)
 		if(getGas()<stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL,unit))
 		{
 			successUnit=0;
-//			successLocation=0;
 			successType=ENOUGH_GAS_WAS_GATHERED;
 			if(neededGas>stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL,unit)-getGas())
 				neededGas=stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL,unit)-getGas();
@@ -515,12 +374,12 @@ const bool ANARACE::buildGene(const int unit)
 						if((*pStats)[unit].facility[0]==LARVA)
 						{
 							if(
-									(((getLocationTotal(tloc, HATCHERY)+getLocationTotal(tloc, LAIR)+getLocationTotal(tloc, HIVE))*3==
+									(((getLocationTotal(tloc, HATCHERY)+getLocationTotal(tloc, LAIR)+getLocationTotal(tloc, HIVE))*3>
 									  (larvaInProduction[tloc]+getLocationTotal(tloc, LARVA)))&&
-									 ((getLocationTotal(tloc, HATCHERY)+getLocationTotal(tloc, LAIR)+getLocationTotal(tloc, HIVE)<larvaInProduction[tloc])))) // => zuwenig Larven da!
+									 ((getLocationTotal(tloc, HATCHERY)+getLocationTotal(tloc, LAIR)+getLocationTotal(tloc, HIVE)>larvaInProduction[tloc])))) // => zuwenig Larven da!
 							{
 								if(buildGene(LARVA))
-									larvaInProduction[tloc]++;
+									addLarvaToQueue(tloc);
 							}
 						};
 					};
@@ -544,10 +403,9 @@ const bool ANARACE::buildGene(const int unit)
 				adjustAvailibility(tloc,fac,stat);
 
 				buildingQueue.push(build);
-				
-			} //kk!=1?
+			} // end if (ok)
 		} // if resources prere etc ok
-	}
+	} // end unit <= REFINERY+1
 //TODO: error wenn facilities net gefunden...
 	else // unit > REFINERY+1
 	{
@@ -776,7 +634,7 @@ const int ANARACE::maximum(const int unit) const
 		}
 	return(max);*/
 	return(0);
-};
+}
 
 const int ANARACE::needTime(const int unit) const
 {
@@ -784,7 +642,7 @@ const int ANARACE::needTime(const int unit) const
 //		return(stats[(*pGoal)->getRace()][unit].BT+maximum(unit)); //eigene Bauzeit + Bauzeit der Prerequisites/Facilities
 //	else return(0);
 	return(0);
-};
+}
 
 void EXPORT ANARACE::countUnitsTotal()
 {
@@ -798,7 +656,7 @@ void EXPORT ANARACE::countUnitsTotal()
 			unitsTotalMax = (*pGoal)->allGoal[i];
 		unitsTotal += getLocationTotal(GLOBAL, i);;
 	}
-};
+}
 
 // -----------------------------------
 // ------ END OF MISC FUNCTIONS ------
@@ -816,7 +674,7 @@ const int EXPORT ANARACE::getUnitsTotalMax() const
 	}
 #endif
 	return(unitsTotalMax);
-};
+}
 
 const int EXPORT ANARACE::getUnitsTotal() const
 {
@@ -826,27 +684,27 @@ const int EXPORT ANARACE::getUnitsTotal() const
 	}
 #endif
 	return(unitsTotal);
-};
+}
 
 const bool EXPORT ANARACE::isActive() const
 {
 	return(active);
-};
+}
 
 void EXPORT ANARACE::setActive(const bool active)
 {
 	this->active=active;
-};
+}
 
 const bool EXPORT ANARACE::isOptimizing() const
 {
 	return(optimizing);
-};
+}
 
 void EXPORT ANARACE::setOptimizing(const bool optimizing)
 {
 	this->optimizing=optimizing;
-};
+}
 
 const int EXPORT ANARACE::getMarker(const int IP) const
 {
@@ -856,18 +714,7 @@ const int EXPORT ANARACE::getMarker(const int IP) const
 	}
 #endif
 	return(Marker[IP]); 
-};
-
-/*const int EXPORT ANARACE::getProgramSuccessLocation(cons tint IP) const
-{
-	if((IP<0)||(IP>=MAX_LENGTH)) {
-		toLog("DEBUG: (ANARACE::getProgramSuccessLocation): Value IP [%i] out of range.",IP);return(0);
-	}
-	if((program[IP].successLocation<0)||(program[IP].successLocation>=MAX_LOCATIONS)) {
-		toLog("DEBUG: (ANARACE::getProgramSuccessLocation): Variable not initialized [%i].",program[IP].successLocation);return(0);
-	}
-	return(program[IP].successLocation);
-};*/
+}
 
 const int EXPORT ANARACE::getProgramCode(int IP) const
 {
@@ -919,7 +766,7 @@ const int EXPORT ANARACE::getProgramSuccessType(const int IP) const
 	}
 #endif
 	return(program[IP].successType);
-};
+}
 
 const int EXPORT ANARACE::getProgramSuccessUnit(const int IP) const
 {
@@ -932,7 +779,7 @@ const int EXPORT ANARACE::getProgramSuccessUnit(const int IP) const
 	}
 #endif
 	return(program[IP].successUnit);
-};
+}
 
 /*void EXPORT ANARACE::setProgramIsConstant(const int IP, const bool isConstant)
 {
@@ -956,7 +803,7 @@ void EXPORT ANARACE::setProgramAvailibleCount(const int IP, const int unit, cons
 	}
 #endif
 	program[IP].availibleCount[unit]=count;
-};
+}
 
 void EXPORT ANARACE::setProgramTotalCount(const int IP, const int unit, const int count)
 {
@@ -972,7 +819,7 @@ void EXPORT ANARACE::setProgramTotalCount(const int IP, const int unit, const in
 	}
 #endif
 	program[IP].forceCount[unit]=count;
-};
+}
 
 void EXPORT ANARACE::setStatisticsNeedSupply(const int time, const int needSupply)
 {
@@ -985,7 +832,7 @@ void EXPORT ANARACE::setStatisticsNeedSupply(const int time, const int needSuppl
 	}
 #endif
 	statistics[time].needSupply=needSupply;
-};
+}
 void EXPORT ANARACE::setStatisticsHaveSupply(const int time, const int needSupply)
 {
 #ifdef _SCC_DEBUG
@@ -997,8 +844,9 @@ void EXPORT ANARACE::setStatisticsHaveSupply(const int time, const int needSuppl
 	}
 #endif
 	statistics[time].haveSupply=needSupply;
-};
+}
 
+// first time is 0!
 void EXPORT ANARACE::setProgramTime(const int IP, const int time)
 {
 #ifdef _SCC_DEBUG
@@ -1010,7 +858,7 @@ void EXPORT ANARACE::setProgramTime(const int IP, const int time)
 	}
 #endif
 	program[IP].time=time;
-};
+}
 
 void EXPORT ANARACE::setStatisticsHaveMinerals(const int time, const int minerals)
 {
@@ -1023,7 +871,7 @@ void EXPORT ANARACE::setStatisticsHaveMinerals(const int time, const int mineral
 	}
 #endif
 	statistics[time].minerals=minerals;
-};
+}
 																				
 void EXPORT ANARACE::setStatisticsHaveGas(const int time, const int gas)
 {
@@ -1036,7 +884,7 @@ void EXPORT ANARACE::setStatisticsHaveGas(const int time, const int gas)
 	}
 #endif
 	statistics[time].gas=gas;
-};
+}
 void EXPORT ANARACE::setProgramBT(const int IP, const int time)
 {
 #ifdef _SCC_DEBUG
@@ -1048,7 +896,7 @@ void EXPORT ANARACE::setProgramBT(const int IP, const int time)
 	}
 #endif
 	program[IP].BT=time;
-};
+}
 
 void EXPORT ANARACE::setProgramIsBuilt(const int IP, const bool isBuilt)
 {
@@ -1058,7 +906,7 @@ void EXPORT ANARACE::setProgramIsBuilt(const int IP, const bool isBuilt)
 	}
 #endif
 	program[IP].built=isBuilt;
-};
+}
 
 void EXPORT ANARACE::setProgramLocation(const int IP, const int location)
 {
@@ -1097,7 +945,7 @@ const int EXPORT ANARACE::getProgramTotalCount(const int IP, const int unit) con
 	}
 #endif
 	return(program[IP].forceCount[unit]);
-};
+}
 
 // how many units of the type at phaenoCode[s] do exist at that time?
 const int EXPORT ANARACE::getProgramAvailibleCount(const int IP, const int unit) const	   
@@ -1111,7 +959,7 @@ const int EXPORT ANARACE::getProgramAvailibleCount(const int IP, const int unit)
 	}
 #endif
 	return(program[IP].availibleCount[unit]);
-};
+}
 
 void EXPORT ANARACE::setProgramFacility(const int IP, const int facility)
 {
@@ -1124,7 +972,7 @@ void EXPORT ANARACE::setProgramFacility(const int IP, const int facility)
 	}
 #endif
 	program[IP].facility=facility;
-};
+}
 
 void EXPORT ANARACE::setProgramSuccessType(const int IP, const int type)
 {
@@ -1137,7 +985,7 @@ void EXPORT ANARACE::setProgramSuccessType(const int IP, const int type)
 	}
 #endif
 	program[IP].successType=type;
-};
+}
 
 void EXPORT ANARACE::setProgramSuccessUnit(const int IP, const int unit)
 {
@@ -1150,15 +998,7 @@ void EXPORT ANARACE::setProgramSuccessUnit(const int IP, const int unit)
 	}
 #endif
 	program[IP].successUnit=unit;
-};
-
-/*void EXPORT ANARACE::setProgramSuccessLocation(const int num)
-{
-	if((num<0)||(num>=MAX_LOCATIONS)) {
-		toLog("DEBUG: (ANARACE::setProgramSuccessLocation): Value out of range.");return(0);
-	}
-	program[getIP()].successLocation=num;
-};*/
+}
 
 const int EXPORT ANARACE::getStatisticsNeedSupply(const int time) const
 {
@@ -1171,7 +1011,7 @@ const int EXPORT ANARACE::getStatisticsNeedSupply(const int time) const
 	}
 #endif
 	return(statistics[time].needSupply);
-};
+}
 
 const int EXPORT ANARACE::getStatisticsHaveSupply(const int time) const
 {
@@ -1184,7 +1024,7 @@ const int EXPORT ANARACE::getStatisticsHaveSupply(const int time) const
 	}
 #endif
 	return(statistics[time].haveSupply);
-};
+}
 const bool EXPORT ANARACE::getProgramIsBuilt(const int IP) const
 {
 #ifdef _SCC_DEBUG
@@ -1193,7 +1033,7 @@ const bool EXPORT ANARACE::getProgramIsBuilt(const int IP) const
 	}
 #endif
 	return(program[IP].built);
-};
+}
 
 /*const bool EXPORT ANARACE::getProgramIsConstant(const int IP)
 {
@@ -1203,6 +1043,7 @@ const bool EXPORT ANARACE::getProgramIsBuilt(const int IP) const
 	return(program[IP].isConstant);
 };*/
 
+// first program time is
 const int EXPORT ANARACE::getProgramTime(const int IP) const
 {
 #ifdef _SCC_DEBUG
@@ -1214,7 +1055,7 @@ const int EXPORT ANARACE::getProgramTime(const int IP) const
 	}
 #endif
 	return(program[IP].time);
-};
+}
 
 const int EXPORT ANARACE::getProgramTemp(const int IP) const
 {
@@ -1224,7 +1065,7 @@ const int EXPORT ANARACE::getProgramTemp(const int IP) const
 	}
 #endif
 	return(program[IP].temp);
-};
+}
 
 const int EXPORT ANARACE::getStatisticsHaveMinerals(const int time) const
 {
@@ -1237,7 +1078,7 @@ const int EXPORT ANARACE::getStatisticsHaveMinerals(const int time) const
 	}
 #endif
 	return(statistics[time].minerals);
-};
+}
 
 const int EXPORT ANARACE::getStatisticsHaveGas(const int time) const
 {
@@ -1250,7 +1091,7 @@ const int EXPORT ANARACE::getStatisticsHaveGas(const int time) const
 	}
 #endif
 	return(statistics[time].gas);
-};
+}
 
 const int EXPORT ANARACE::getProgramLocation(const int IP) const
 {
@@ -1263,7 +1104,7 @@ const int EXPORT ANARACE::getProgramLocation(const int IP) const
 	}
 #endif
 	return(program[IP].location);
-};
+}
 
 const int EXPORT ANARACE::getStatisticsFitness(const int time) const
 {
@@ -1277,16 +1118,16 @@ const int EXPORT ANARACE::getStatisticsFitness(const int time) const
 	}
 #endif
 	return(statistics[time].fitness);
-};
+}
 const int EXPORT ANARACE::getTimePercentage() const
 {
 	return(timePercentage);
-};
+}
 
 const int EXPORT ANARACE::getGoalPercentage() const
 {
 	return(goalPercentage);
-};
+}
 
 void EXPORT ANARACE::setPhaenoCode(const int IP, const int num)
 {
@@ -1299,7 +1140,7 @@ void EXPORT ANARACE::setPhaenoCode(const int IP, const int num)
 	}
 #endif
 	phaenoCode[IP]=num;
-};
+}
 
 const int EXPORT ANARACE::getPhaenoCode(const int IP) const
 {
@@ -1309,17 +1150,17 @@ const int EXPORT ANARACE::getPhaenoCode(const int IP) const
 	}
 #endif
 	return(phaenoCode[IP]);
-};
+}
 
 const int EXPORT ANARACE::getCurrentpFitness() const
 {
 	return(currentpFitness);
-};
+}
 
 void ANARACE::setCurrentpFitness(const int num)
 {
 	currentpFitness=num;
-};
+}
 
 const int EXPORT ANARACE::getUnchangedGenerations() const
 {
@@ -1329,7 +1170,7 @@ const int EXPORT ANARACE::getUnchangedGenerations() const
 	}
 #endif
 	return(unchangedGenerations);
-};
+}
 
 const int EXPORT ANARACE::getRun() const
 {
@@ -1339,7 +1180,7 @@ const int EXPORT ANARACE::getRun() const
 	}
 #endif
 	return(currentRun);
-};
+}
 
 const int EXPORT ANARACE::getGeneration() const
 {
@@ -1350,7 +1191,7 @@ const int EXPORT ANARACE::getGeneration() const
 	}
 #endif
 	return(generation);
-};
+}
 
 const int EXPORT ANARACE::getMaxpFitness() const
 {
@@ -1361,7 +1202,7 @@ const int EXPORT ANARACE::getMaxpFitness() const
 	}
 #endif
 	return(maxpFitness);
-};
+}
 
 const int EXPORT ANARACE::getMaxsFitness() const
 {
@@ -1371,7 +1212,7 @@ const int EXPORT ANARACE::getMaxsFitness() const
 	}
 #endif
 	return(maxsFitness);
-};
+}
 
 const int EXPORT EXPORT ANARACE::getMaxtFitness() const
 {
@@ -1381,7 +1222,7 @@ const int EXPORT EXPORT ANARACE::getMaxtFitness() const
 	}
 #endif
 	return(maxtFitness);
-};
+}
 
 void EXPORT ANARACE::setUnchangedGenerations(const int unchangedGenerations)
 {
@@ -1392,7 +1233,7 @@ void EXPORT ANARACE::setUnchangedGenerations(const int unchangedGenerations)
 	}
 #endif
 	this->unchangedGenerations=unchangedGenerations;
-};
+}
 
 void EXPORT ANARACE::setRun(const int run)
 {
@@ -1402,7 +1243,7 @@ void EXPORT ANARACE::setRun(const int run)
 	}
 #endif
 	currentRun=run;
-};
+}
 
 void EXPORT ANARACE::setGeneration(const int generation)
 {
@@ -1413,7 +1254,7 @@ void EXPORT ANARACE::setGeneration(const int generation)
 	}
 #endif
 	this->generation=generation;
-};
+}
 
 void EXPORT ANARACE::setMaxpFitness(const int maxpFitness) 
 {
@@ -1424,7 +1265,7 @@ void EXPORT ANARACE::setMaxpFitness(const int maxpFitness)
 	}
 #endif
 	this->maxpFitness=maxpFitness;
-};
+}
 
 void EXPORT ANARACE::setMaxsFitness(const int maxsFitness)
 {
@@ -1434,7 +1275,7 @@ void EXPORT ANARACE::setMaxsFitness(const int maxsFitness)
 	}
 #endif
 	this->maxsFitness=maxsFitness;
-};
+}
 
 void EXPORT ANARACE::setMaxtFitness(const int maxtFitness)
 {
@@ -1444,7 +1285,7 @@ void EXPORT ANARACE::setMaxtFitness(const int maxtFitness)
 	}
 #endif
 	this->maxtFitness=maxtFitness;
-};
+}
 
 /*void EXPORT ANARACE::analyzeBuildOrder()
 {
@@ -1472,5 +1313,4 @@ void EXPORT ANARACE::setMaxtFitness(const int maxtFitness)
 
 int EXPORT ANARACE::successType;
 int EXPORT ANARACE::successUnit;
-//int EXPORT ANARACE::successLocation;
 

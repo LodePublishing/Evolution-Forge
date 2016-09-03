@@ -1,7 +1,6 @@
 #ifndef _GUI_MAINWINDOW_HPP
 #define _GUI_MAINWINDOW_HPP
 
-#include "../ui/button.hpp"
 #include "../ui/window.hpp"
 
 class MainWindow : public UI_Window

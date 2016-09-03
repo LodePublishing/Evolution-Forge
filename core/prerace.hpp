@@ -1,7 +1,6 @@
 #ifndef _CORE_PRERACE_HPP
 #define _CORE_PRERACE_HPP
 
-#include "main.hpp"
 #include "basicmap.hpp"
 #include "ga.hpp"
 #include "location.hpp"
@@ -28,7 +27,8 @@ protected:
 //------------- end -------------------------------
 
 	priority_queue<Building, deque<Building> >	buildingQueue;
-	
+
+// global best time so far
 	static int noise[MAX_TIME];
 	static int markerCounter;
 	static UNIT unit[MAX_PLAYER][MAX_LOCATIONS]; // player 0 is neutral player!
@@ -44,8 +44,11 @@ protected:
 	const int harvestMinerals() const;
 	const int harvestGas() const; 
 
+
 	const bool calculateReady() const;
 	void adjustAvailibility(const int location, const int fac, const UNIT_STATISTICS* stat);
+	void adjustLocationUnitsAfterCompletion(const int location, const eFacilityType facilityType, const int facility, const int facility2);
+	void calculateFinalTimes(const int location, const int type);
 	const int calculatePrimaryFitness(const bool ready) const;
 	void replaceCode(const int IP, const int num);
 
@@ -75,6 +78,7 @@ public:
 	static void assignStart(START* start);
 	static void initNoise();
 	static void copyMap(); //copies the startforce from map to static 'units'
+	static const BASIC_MAP* const* getMap(); 	
 
 // ------ HARVEST ROUTINES ------
 	void adjustMineralHarvest(const int location);
@@ -93,9 +97,14 @@ public:
 	static void resetGeneMarker();
 	void setPlayerNum(const int playerNum); // assigns player data from start (start minerals, supply etc.) and sets the appropriate optimized pointers (global, location, pMap etc.) CALL IT AFTER EACH MAP CHANGE AND PLAYER CHANGE!!
 	void initializePlayer();
+	void prepareForNewGeneration();
 
 // ------ GET/SET ROUTINES ------
 
+	void addLarvaToQueue(const int location);
+	void removeLarvaFromQueue(const int location);
+
+	const eRace getRace() const;
 	GOAL_ENTRY** getCurrentGoal() const;
 	void setCurrentGoal(GOAL_ENTRY** pGoal);
 	
@@ -118,6 +127,11 @@ public:
 																				
 	void addLocationAvailible(const int location, const int unittype, const int num);
 	void addLocationTotal(const int location, const int unittype, const int num);
+
+	void addOneLocationAvailible(const int location, const int unittype);
+	void addOneLocationTotal(const int location, const int unittype);
+	void removeOneLocationAvailible(const int location, const int unittype);
+	void removeOneLocationTotal(const int location, const int unittype);
 
 	void setNeedSupply(const int needSupply);
 	void setHaveSupply(const int haveSupply);

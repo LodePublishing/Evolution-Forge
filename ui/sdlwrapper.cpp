@@ -6,10 +6,11 @@ SDL_Color toSDL_Color(const int r, const int g, const int b)
 	c.r=r;
 	c.g=g;
 	c.b=b;
+	c.unused=0;
 	return(c);	
-};
+}
 
-Rect::Rect(const Point& topLeft, const Point& bottomRight)
+inline Rect::Rect(const Point& topLeft, const Point& bottomRight)
 {
   x = topLeft.x;
   y = topLeft.y;
@@ -35,14 +36,6 @@ Rect::Rect(const Point& point, const Size& size)
 	width = size.x; height = size.y;
 }
 
-const bool Rect::operator==(const Rect& rect) const
-{
-  return ((x == rect.x) &&
-		  (y == rect.y) &&
-		  (width == rect.width) &&
-		  (height == rect.height));
-}
-
 Rect& Rect::operator += (const Rect& rect)
 {
 	*this = (*this + rect);
@@ -57,10 +50,10 @@ const bool Rect::Inside(const int cx, const int cy) const
 		  );
 }
 
-Bitmap::Bitmap(const string& name):Surface(IMG_Load(name.c_str())) {};
-Bitmap::Bitmap(const Bitmap& bmp):Surface(bmp) {};
-Bitmap::Bitmap():Surface() {};
-Bitmap::~Bitmap() {};
+Bitmap::Bitmap(const string& name):Surface(IMG_Load(name.c_str())) {}
+Bitmap::Bitmap(const Bitmap& bmp):Surface(bmp) {}
+Bitmap::Bitmap():Surface() {}
+Bitmap::~Bitmap() {}
 
 Color::Color(const Uint32 ucol, const SDL_Color scol) 
 {
@@ -69,7 +62,7 @@ Color::Color(const Uint32 ucol, const SDL_Color scol)
 	this->scol.g=scol.g;
 	this->scol.b=scol.b;
 	this->scol.unused=scol.unused;
-};
+}
 
 Color::Color(const Color& col)
 {
@@ -78,32 +71,33 @@ Color::Color(const Color& col)
 	scol.g=col.scol.b;
 	scol.b=col.scol.g;
 	scol.unused=col.scol.unused;
-};
+}
 
 Color::Color(SDL_Surface* surface, const int r, const int g, const int b)
 {
 	scol.r=r;
 	scol.g=g;
 	scol.b=b;
+	scol.unused=100;
 	ucol=SDL_MapRGB(surface->format, r, g, b);
-};
+}
 
-Color::Color() {};
+Color::Color() {}
 
-Color::operator SDL_Color() const {return(scol);};
+Color::operator SDL_Color() const {return(scol);}
 //Color::operator SDL_Color*() const {return(&scol);};
-Color::operator Uint32() const {return(ucol);};
+Color::operator Uint32() const {return(ucol);}
 //Color::operator Uint32*() const {return(&ucol);};
-const int Color::r() const {return(scol.r);};
-const int Color::g() const {return(scol.g);};
-const int Color::b() const {return(scol.b);};
-Color::~Color() {};
+const int Color::r() const {return(scol.r);}
+const int Color::g() const {return(scol.g);}
+const int Color::b() const {return(scol.b);}
+Color::~Color() {}
 
 
 Font::Font(const string& fname, const int size)
 {
 	font=TTF_OpenFont(fname.c_str(), size);
-	SDL_Color fg={0,0,0,255};
+	SDL_Color fg={0,0,0,100};
 	for(int i=0; i<128; i++)
 	{
 	   	text[i]=TTF_RenderGlyph_Blended(font,i,fg);
@@ -115,7 +109,7 @@ Font::Font(const string& fname, const int size)
 					&gm[i].advance);
    	};
 //	cout << fname << " loaded." << endl;
-};
+}
 
 void Font::GetTextExtent(const string& text, int* dx, int* dy) const
 {
@@ -127,7 +121,7 @@ void Font::GetTextExtent(const string& text, int* dx, int* dy) const
 			*dy=gm[(int)text[i]].maxy+gm[(int)text[i]].miny;
 	}
 	*dy+=8;
-};
+}
 
 Font::~Font()
 {
@@ -139,7 +133,7 @@ Font::~Font()
 			SDL_FreeSurface(text[i]);
 		text[i]=0;
 	}
-};
+}
 	
 
 void Font::DrawText(SDL_Surface* surface, const SDL_Color& color, const string& text, const int x, const int y) const
@@ -168,11 +162,11 @@ void Font::DrawText(SDL_Surface* surface, const SDL_Color& color, const string& 
 	SDL_FreeSurface( sText );
 }
 
-void DC::SetBrush(const Brush& brush) {this->brush=brush;};
-void DC::SetPen(const Pen& pen) {this->pen=pen;};
-void DC::SetColor(Color* color) {this->color=color;};
-void DC::SetFont(Font* font) {this->font=font;};
-void DC::SetTextForeground(const SDL_Colour& textColor) {this->textColor=textColor;};
+void DC::SetBrush(const Brush& brush) {this->brush=brush;}
+void DC::SetPen(const Pen& pen) {this->pen=pen;}
+void DC::SetColor(Color* color) {this->color=color;}
+void DC::SetFont(Font* font) {this->font=font;}
+void DC::SetTextForeground(const SDL_Colour& textColor) {this->textColor=textColor;}
 
 
 void DC::DrawBitmap(const Bitmap& bitmap, const int x, const int y) const
@@ -184,7 +178,7 @@ void DC::DrawBitmap(const Bitmap& bitmap, const int x, const int y) const
 	drect.h = bitmap->h;
 	SDL_BlitSurface(bitmap , 0, surface, &drect );
 	
-};
+}
 
 const Color DC::mixColor(const Color* id1, const Color* id2)  const
 {
@@ -193,7 +187,7 @@ const Color DC::mixColor(const Color* id1, const Color* id2)  const
 					id1->g()+id2->g(),
 					id1->b() +id2->b());
 			return(c); // TODO
-};
+}
 
 const Color DC::mixColor(const Color* id1, const Color* id2, const int gradient) const
 {
@@ -201,7 +195,7 @@ const Color DC::mixColor(const Color* id1, const Color* id2, const int gradient)
 		(id1->g()*gradient+id2->g()*(100-gradient))/100,
 		(id1->b()*gradient +id2->b()*(100-gradient))/100);
 	return(c);
-};
+}
 
 const Color DC::brightenColor(const Color* id, const int brightness) const
 {
@@ -209,18 +203,27 @@ const Color DC::brightenColor(const Color* id, const int brightness) const
 			id->g()+brightness,
 			id->b() +brightness);
 	return(c);
-};
+}
 
 void DC::DrawSpline(const int c, const Point* p) const
 {
 	if((pen.GetStyle() == TRANSPARENT_PEN_STYLE)||(c<2))
 		return;
 	for(int i=0;i<c-1;i++)
+//	{
+//		aalineColor(surface, p[i].x, p[i].y, p[i+1].x, p[i+1].y, (Uint32)(*pen.GetColor()));
+//		aalineColor(surface, p[i].x, p[i].y+1, p[i+1].x, p[i+1].y+1, (Uint32)(*pen.GetColor()));
+//	}
+	{
 		DrawBresLine(p[i].x, p[i].y, p[i+1].x, p[i+1].y);
-};
+		DrawBresLine(p[i].x, p[i].y+1, p[i+1].x, p[i+1].y+1);
+	}
+	
+}
+
 void DC::DrawRoundedRectangle(const int x, const int y, const int w, const int h, const int radius) const
 {
-	if((x<0)||(y<0)||(x+w>1280)||(y+h>1024)) // TODO
+	if((x<0)||(y<0)||(x+w>1280)||(y+h>1024)) // TODO clipping
 		return;
 	// CMB: if radius is zero use DrawRectangle() instead to avoid
 	// X drawing errors with small radii
@@ -230,7 +233,7 @@ void DC::DrawRoundedRectangle(const int x, const int y, const int w, const int h
 		return;
 	};
 
-	int dd = 4;
+	int dd=radius*2;
 	if (dd > w) dd = w;
 	if (dd > h) dd = h;
 	int rr = dd / 2;
@@ -247,10 +250,10 @@ void DC::DrawRoundedRectangle(const int x, const int y, const int w, const int h
 		rc.x=x+rr+1;rc.y=y+h-rr-1;rc.w=w-dd-2;rc.h=rr;
 		SDL_FillRect(surface, &rc, (Uint32)(*brush.GetColor()) );
 
-///		XFillArc( (Display*) m_display, (Window) m_window, (GC) m_brushGC, x, y, dd, dd, 90*64, 90*64 );
-  //	  XFillArc( x+w-dd, y, dd, dd, 0, 90*64 );
-	//	XFillArc( x+w-dd, y+h-dd, dd, dd, 270*64, 90*64 );
-	//	XFillArc( x, y+h-dd, dd, dd, 180*64, 90*64 );
+        filledpieColor(surface, x+rr, y+rr, rr, 180, 270, Color(surface, 0, 0, 255)/* (Uint32)(*brush.GetColor())*/ );
+        filledpieColor(surface, x+w-rr, y+rr, rr, 270, 0, (Uint32)(*brush.GetColor()));
+        filledpieColor(surface, x+w-rr, y+h-rr, rr, 0, 90, (Uint32)(*brush.GetColor()));
+        filledpieColor(surface, x+rr, y+h-rr, rr, 90, 180, (Uint32)(*brush.GetColor()));
 	}
 
 	if (pen.GetStyle() != TRANSPARENT_PEN_STYLE)
@@ -268,18 +271,14 @@ void DC::DrawRoundedRectangle(const int x, const int y, const int w, const int h
 // right to down
 		rc.x=x+w-1-(pen.GetWidth()>>1);rc.y=y+rr-(pen.GetWidth()>>1);rc.w=pen.GetWidth();rc.h=h-dd;
 		SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
-//schraeg1
-		DrawBresLine(x-(pen.GetWidth()>>1), y+rr-(pen.GetWidth()>>1), x+rr-(pen.GetWidth()>>1), y-(pen.GetWidth()>>1));
-		DrawBresLine(x+w-rr-(pen.GetWidth()>>1)-1, y+(pen.GetWidth()>>1), x+w-(pen.GetWidth()>>1)-1, y+rr-(pen.GetWidth()>>1));
-		DrawBresLine(x, y+h-rr-(pen.GetWidth()>>1), x+rr-(pen.GetWidth()>>1), y+h-1-(pen.GetWidth()>>1));
-		DrawBresLine(x+w-1, y+h-rr-(pen.GetWidth()>>1), x+w-rr-(pen.GetWidth()>>1), y+h-1);
-		
-	  //  XDrawArc( x, y, dd, dd, 90*64, 90*64 );
-		//XDrawArc( x+w-dd, y, dd, dd, 0, 90*64 );
-//		XDrawArc( x+w-dd, y+h-dd, dd, dd, 270*64, 90*64 );
-  //  	XDrawArc( x, y+h-dd, dd, dd, 180*64, 90*64 );
+
+		pieColor(surface, x+rr, y+rr, rr, 180, 270, (Uint32)(*pen.GetColor()));
+		pieColor(surface, x+w-rr, y+rr, rr, 270, 0, (Uint32)(*pen.GetColor()));
+		pieColor(surface, x+w-rr, y+h-rr, rr, 0, 90, (Uint32)(*pen.GetColor()));
+		pieColor(surface, x+rr, y+h-rr, rr, 90, 180, (Uint32)(*pen.GetColor()));
 	}
-};
+}
+
 
 void DC::DrawRectangle(const int x, const int y, const int w, const int h) const
 {
@@ -291,7 +290,7 @@ void DC::DrawRectangle(const int x, const int y, const int w, const int h) const
 		SDL_FillRect(surface, &rc, (Uint32)(*brush.GetColor()) );
 	};
 	DrawEmptyRectangle(x,y,w,h);	
-};
+}
 
 void DC::DrawEmptyRectangle(const int x, const int y, const int w, const int h) const
 {
@@ -309,36 +308,45 @@ void DC::DrawEmptyRectangle(const int x, const int y, const int w, const int h) 
 	
 	rc.x=x+w-1-(pen.GetWidth()>>1);rc.y=y-(pen.GetWidth()>>1);rc.w=pen.GetWidth();rc.h=h;
 	SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
-};
+}
 
 void DC::DrawLine(const int x1, const int y1, const int x2, const int y2) const
 {
 	if(pen.GetStyle()==TRANSPARENT_PEN_STYLE) return;
+	if((x2-x1==0)||(y2-y1==0))
+		return;
 	SDL_Rect rc;
-	rc.x=x1-(pen.GetWidth()>>1);rc.y=y1-(pen.GetWidth()>>1);rc.w=x2-x1;rc.h=y2-y1;
+	rc.x=x1-(pen.GetWidth()>>1);rc.y=y1-(pen.GetWidth()>>1);
+	if(x2<x1) {
+		rc.w=x1-x2;rc.x-=rc.w;
+	} else rc.w=x2-x1;
+		
+	if(y2<y1) {
+		rc.h=y1-y2;rc.y-=rc.h;
+	} else rc.h=y2-y1;
 	SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
-};
+}
 
 void DC::DrawText(const string& text, const int x, const int y) const
 {
 	font->DrawText(surface, textColor, text, x, y);
-};
+}
 
 const bool DC::Lock() const {
 if(SDL_MUSTLOCK(surface)) {
 return SDL_LockSurface(surface) == 0;
 }
 else return true;
-};
+}
 
 void DC::Unlock() const {
-if(SDL_MUSTLOCK(surface)) {
-SDL_UnlockSurface(surface);
+	if(SDL_MUSTLOCK(surface)) {
+		SDL_UnlockSurface(surface);
+	}
 }
-};
 
 const int DC::Blit(const DC& src, const SDL_Rect& srcrect, SDL_Rect& dstrect) const {
-return SDL_BlitSurface(src.surface, const_cast<SDL_Rect*>(&srcrect), surface, &dstrect);
+	return SDL_BlitSurface(src.surface, const_cast<SDL_Rect*>(&srcrect), surface, &dstrect);
 }
 
 const int DC::Blit(const DC& src, const SDL_Rect& srcrect, const Point& dstpoint) const {
@@ -367,37 +375,37 @@ return SDL_FillRect(surface, 0, color) == 0;
 
 const bool DC::FillRect(SDL_Rect& dstrect, const Color color) const{
 return SDL_FillRect(surface, &dstrect, color) == 0;
-};
+}
 
 // Set various things
 const bool DC::SetColorKey(const Uint32 flag, const Color key) const {
 return SDL_SetColorKey(surface, flag, key) == 0;
-};
+}
 
 const bool DC::SetAlpha(const Uint32 flag, const Uint8 alpha) const {
 return SDL_SetAlpha(surface, flag, alpha) == 0;
-};
+}
 
 void DC::SetClipRect(const SDL_Rect& rect) const {
 SDL_SetClipRect(surface, const_cast<SDL_Rect*>(&rect));
-};
+}
 
 void DC::ResetClipRect() const {
 SDL_SetClipRect(surface, 0);
-};
+}
 
 void DC::GetClipRect(SDL_Rect& rect) const {
 SDL_GetClipRect(surface, &rect);
-};
+}
 
 bool DC::SaveBMP(const char *file) const 
 {
 	if(surface) return SDL_SaveBMP(surface, file) == 0;
 	return false;
-};
+}
 
 Brush::Brush(const Color color, const eBrushStyle style) 
-{this->color=color;this->style=style;};
+{this->color=color;this->style=style;}
 
 Brush::Brush(SDL_Surface* surface, const int r, const int g, const int b, const eBrushStyle style) 
 {
@@ -406,11 +414,11 @@ Brush::Brush(SDL_Surface* surface, const int r, const int g, const int b, const 
 	color.scol.b=b;
 	color.ucol=SDL_MapRGB(surface->format, r, g, b);
 	this->style=style;
-};
+}
 
 
 Pen::Pen(const Color color, const int width, const ePenStyle style)
-{this->color=color;this->width=width;this->style=style;};
+{this->color=color;this->width=width;this->style=style;}
 
 Pen::Pen(SDL_Surface* surface, const int r, const int g, const int b, const int width, const ePenStyle style)
 {
@@ -419,7 +427,8 @@ Pen::Pen(SDL_Surface* surface, const int r, const int g, const int b, const int 
 	color.scol.b=b;
 	color.ucol=SDL_MapRGB(surface->format, r, g, b);
 	this->width=width;this->style=style;
-};
+}
+
 
 
 //----------------------------------------------------------

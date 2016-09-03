@@ -6,11 +6,11 @@ HARVEST_SPEED::HARVEST_SPEED()
 		setHarvestMineralSpeed(i,0);
 	for(int i=5;i--;)
 		setHarvestGasSpeed(i,0);
-};
+}
 
 HARVEST_SPEED::~HARVEST_SPEED()
 {
-};
+}
 
 const int HARVEST_SPEED::getHarvestMineralSpeed(const int num) const
 {
@@ -21,7 +21,7 @@ const int HARVEST_SPEED::getHarvestMineralSpeed(const int num) const
 	}
 #endif
 	return(minerals[num]);
-};
+}
 
 const int HARVEST_SPEED::getHarvestGasSpeed(const int num) const
 {
@@ -31,7 +31,7 @@ const int HARVEST_SPEED::getHarvestGasSpeed(const int num) const
 	}
 #endif
 	return(gas[num]);
-};
+}
 
 void HARVEST_SPEED::setHarvestMineralSpeed(const int num, const int speed)
 {
@@ -41,7 +41,7 @@ void HARVEST_SPEED::setHarvestMineralSpeed(const int num, const int speed)
 	}
 #endif
 	minerals[num]=speed;
-};
+}
 
 void HARVEST_SPEED::setHarvestGasSpeed(const int num, const int speed)
 {
@@ -51,5 +51,5 @@ void HARVEST_SPEED::setHarvestGasSpeed(const int num, const int speed)
 	}
 #endif
 	gas[num]=speed;
-};
+}
 

@@ -4,11 +4,13 @@
 #include "SDL/SDL.h"
 #include "SDL/SDL_ttf.h"
 #include "SDL/SDL_image.h"
+#include "SDL/SDL_gfxPrimitives.h"
 
 #include <sstream>
 #include <iomanip>
 #include <string>
 #include <iostream>
+
 using namespace std;
 
 
@@ -134,7 +136,7 @@ class Font
 		SDL_Surface* text[128];
 		GlyphMetrics gm[128];
 	public:
-		void Font::DrawText(SDL_Surface* surface, const SDL_Color& color, const string& text, const int x, const int y) const;
+		void DrawText(SDL_Surface* surface, const SDL_Color& color, const string& text, const int x, const int y) const;
 	    void GetTextExtent(const string& text, int* dx, int* dy) const;
 	
 		Font(const string& fname, const int size);
@@ -196,12 +198,8 @@ public:
 class Rect
 {
 public:
-    Rect()
-        : x(0), y(0), width(0), height(0)
-        { }
-    Rect(const int xx, const int yy, const int ww, const int hh)
-        : x(xx), y(yy), width(ww), height(hh)
-        { };
+    Rect() : x(0), y(0), width(0), height(0) { }
+    Rect(const int xx, const int yy, const int ww, const int hh) : x(xx), y(yy), width(ww), height(hh) { };
     Rect(const Point& topLeft, const Point& bottomRight);
     Rect(const Point& pos, const Size& size);
 // default copy ctor and assignment operators ok
@@ -234,8 +232,9 @@ public:
 	void operator=(const Rect& rect) {x=rect.x;y=rect.y;width=rect.width;height=rect.height;};
                                                                                                                                                             
     // compare rectangles
-    const bool operator==(const Rect& rect) const;
-    const bool operator!=(const Rect& rect) const { return !(*this == rect); };
+    const bool operator==(const Rect& rect) const { if((x!=rect.x)||(y!=rect.y)||(width!=rect.width)||(height!=rect.height)) return false;return true; };
+
+    const bool operator!=(const Rect& rect) const { if((x!=rect.x)||(y!=rect.y)||(width!=rect.width)||(height!=rect.height)) return true;return false; };
                                                                                                                                                             
     // return TRUE if the point is (not strcitly) inside the rect
     const bool Inside(const int x, const int y) const;
@@ -299,6 +298,7 @@ class DC
 		void DrawBitmap(const Bitmap& bitmap, const Point& p) const {DrawBitmap(bitmap, p.x, p.y);};
 		void DrawBitmap(const Bitmap& bitmap, const int x, const int y) const;
 
+		
 		void DrawEmptyRectangle(const int x1, const int y1, const int x2, const int y2) const;
 		void DrawRectangle(const int x1, const int y1, const int x2, const int y2) const;
 		void DrawRectangle(const Rect& rect) const { DrawRectangle(rect.x, rect.y, rect.width, rect.height);};

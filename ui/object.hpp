@@ -52,7 +52,7 @@ class UI_Object
 
 		static void assignStartTime();
 		static const long int getTimeStampMs(const long int timeSpan);
-		static const bool isTimeSpanElapsed(const long int time);
+		static const bool isTimeSpanElapsed(const long int timeSpan);
 		
 		int min_top_x, min_left_y, min_right_y, min_bottom_x;
 
@@ -114,7 +114,7 @@ class UI_Object
 		bool isFreeMove;
 		int doAdjustments;
 
-		static long startTime;
+		static long int startTime;
 
 		string toolTip;
 		void maybeShowToolTip(DC* dc) const;

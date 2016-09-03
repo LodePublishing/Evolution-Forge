@@ -1,21 +1,23 @@
 #ifndef _UI_WINDOW_HPP
 #define _UI_WINDOW_HPP
 
+extern const int MIN_HEIGHT;
+
 #include "object.hpp"
 #include "button.hpp"
-
-const int MIN_HEIGHT=2;
 
 enum eIsScrolled
 {
 	NOT_SCROLLED,
 	SCROLLED
 };
+
 enum eIsTabbed
 {
 	NOT_TABBED,
 	TABBED
 };
+
 enum eIsAutoAdjust
 {
 	NO_AUTO_SIZE_ADJUST,
@@ -76,6 +78,9 @@ class UI_Window : public UI_Object
 
 		void forcePressTab(const eTab tab);
 
+		static SDL_Rect rectlist[100];
+		static int rectnumber;
+
 	protected:
 //		bool isMouseInsideClientArea();
 
@@ -90,6 +95,7 @@ class UI_Window : public UI_Object
 	private:
 		UI_Radio* tabRow;
 		UI_Button* tab[MAX_TABS];
+
 	
 // key to communicate with other windows		
 		int key;

@@ -11,7 +11,7 @@ Building::Building()
 	setLocation(0);
 	setGoal(0);
 	setOnTheRun(false);
-};
+}
 
 const int EXPORT Building::getTotalBuildTime() const
 {
@@ -21,7 +21,7 @@ const int EXPORT Building::getTotalBuildTime() const
 	}
 #endif
 	return(totalBuildTime);
-};
+}
 																				
 const int EXPORT Building::getBuildFinishedTime() const
 {
@@ -31,7 +31,7 @@ const int EXPORT Building::getBuildFinishedTime() const
 	}
 #endif
 	return(buildFinishedTime);
-};
+}
 																				
 const int EXPORT Building::getType() const
 {
@@ -41,7 +41,7 @@ const int EXPORT Building::getType() const
 	}
 #endif
 	return(type);
-};
+}
 
 const int EXPORT Building::getUnitCount() const
 {
@@ -51,7 +51,7 @@ const int EXPORT Building::getUnitCount() const
 	}
 #endif
 	return(unitCount);
-};
+}
 																				
 const int EXPORT Building::getFacility() const
 {
@@ -61,7 +61,7 @@ const int EXPORT Building::getFacility() const
 	}
 #endif
 	return(facility);
-};
+}
 																				
 const int EXPORT Building::getIP() const
 {
@@ -71,7 +71,7 @@ const int EXPORT Building::getIP() const
 	}
 #endif
 	return(IP);
-};
+}
 																				
 const int EXPORT Building::getLocation() const
 {
@@ -81,7 +81,7 @@ const int EXPORT Building::getLocation() const
 	}
 #endif
 	return(location);
-};
+}
 																				
 const int EXPORT Building::getGoal() const
 {
@@ -91,12 +91,12 @@ const int EXPORT Building::getGoal() const
 	}
 #endif
 	return(goal);
-};
+}
 																				
 const bool EXPORT Building::getOnTheRun() const
 {
 	return(onTheRun);
-};
+}
 
 void EXPORT Building::setTotalBuildTime(const int totalBuildTime)
 {
@@ -106,7 +106,7 @@ void EXPORT Building::setTotalBuildTime(const int totalBuildTime)
 	}
 #endif
 	this->totalBuildTime=totalBuildTime;
-};
+}
 																				
 void EXPORT Building::setBuildFinishedTime(const int buildFinishedTime)
 {
@@ -116,7 +116,7 @@ void EXPORT Building::setBuildFinishedTime(const int buildFinishedTime)
 	}
 #endif
 	this->buildFinishedTime=buildFinishedTime;
-};
+}
 																				
 void EXPORT Building::setType(const int type)
 {
@@ -126,7 +126,7 @@ void EXPORT Building::setType(const int type)
 	}
 #endif
 	this->type=type;
-};
+}
 																				
 void EXPORT Building::setUnitCount(const int count)
 {
@@ -136,7 +136,7 @@ void EXPORT Building::setUnitCount(const int count)
 	}
 #endif
 	unitCount=count;
-};
+}
 																				
 void EXPORT Building::setFacility(const int facility)
 {
@@ -146,7 +146,7 @@ void EXPORT Building::setFacility(const int facility)
 	}
 #endif
 	this->facility=facility;
-};
+}
 																				
 void EXPORT Building::setIP(const int IP)
 {
@@ -156,7 +156,7 @@ void EXPORT Building::setIP(const int IP)
 	}
 #endif
 	this->IP=IP;
-};
+}
 																				
 void EXPORT Building::setLocation(const int location)
 {
@@ -166,7 +166,7 @@ void EXPORT Building::setLocation(const int location)
 	}
 #endif
 	this->location=location;
-};
+}
 																				
 void EXPORT Building::setGoal(const int goal)
 {
@@ -176,10 +176,10 @@ void EXPORT Building::setGoal(const int goal)
 	}
 #endif
 	this->goal=goal;
-};
+}
 																				
 void EXPORT Building::setOnTheRun(const bool onTheRun)
 {
 	this->onTheRun=onTheRun;
-};
+}
 

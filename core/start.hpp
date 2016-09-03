@@ -44,7 +44,7 @@ class START
 // ----- DATA WHICH IS COPIED EACH GENERATION ON THE PLAYERS -------
 //		list<GROUP> group[MAX_LOCATIONS]; // ~~~
 		
-		int totalForce[MAX_PLAYER][UNIT_TYPE_COUNT]; // !!! 0 is neutral player !!!
+		UNIT totalForce[MAX_PLAYER]; // !!! 0 is neutral player !!! TODO bischen Speicherverschwendung...
 		UNIT startForce[MAX_PLAYER][MAX_LOCATIONS]; // !!! 0 is neutral player !!!
 
 // ----- GOALS ARE NOT COPIED AS THEY DO NOT CHANGE DURNING A RUN (yet)
@@ -77,6 +77,8 @@ class START
 		void copyStartForce(void* target);
 		const BASIC_MAP* const* getMap() const;
 		GOAL_ENTRY** getCurrentGoal(const int playerNum);
+
+		const eRace getPlayerRace(const int playerNum);
 
 		START();
 		~START();

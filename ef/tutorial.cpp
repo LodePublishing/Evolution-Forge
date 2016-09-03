@@ -3,17 +3,17 @@
 TutorialWindow::TutorialWindow(UI_Window* parentWindow):UI_Window(parentWindow, TUTORIAL_WINDOW_TITLE_STRING, TUTORIAL_WINDOW, 0, NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, TABBED)
 {
 	tutorialChapter=120; // TODO => in tabs einteilen
-};
+}
 
 TutorialWindow::~TutorialWindow()
 {
-};
+}
 
 void TutorialWindow::process()
 {
 	if(!isShown()) return;
 	UI_Window::process();
-};
+}
 
 
 void TutorialWindow::draw(DC* dc) const
@@ -60,7 +60,7 @@ void TutorialWindow::draw(DC* dc) const
                     tutorialWindow->textButton("Chapter 6: The core"),dc);
                     tutorialWindow->textButton("Chapter 7: The web"),dc);
                     tutorialWindow->textButton("Chapter 8: Development of EF"),dc);
-                };break;
+                }break;
             case 100:
                 {
                     tutorialWindow->writeHeader("1. Introduction"),dc,1);
@@ -76,7 +76,7 @@ void TutorialWindow::draw(DC* dc) const
                 {
                     tutorialWindow->writeHeader("1.1: What does this program?"),dc,2);
                     tutorialWindow->writeLongText("The program simulates an abstract $StarCraft:Broodwar$ environment and calculates the time a certain build order needs.#By comparing different build orders, randomly changing them and taking the best build order for the next generation, the build order is improved step by step.#$StarCraft$ build orders fit perfectly for this algorithm called $HillClimbing$.#"),dc);
-                };break;
+                }break;
             case 120:
                 {
                                                                                                                                                             
@@ -119,27 +119,27 @@ void TutorialWindow::draw(DC* dc) const
 // Problem: da das hier ja oefters aufgerufen wird, wuerde jede Veraenderung durch andere Teile des Programms der Hoehe und Breite hier wieder zu nichte gemacht werden!                        boDiagramWindow->adjustClientRect(Rect(boDiagramWindow->getRelativeLeftBound(),theCore->getLowerBound()+5+150,boDiagramWindow->getWidth(),boDiagramWindow->getHeight
                         tutorialWindow->adjustClientRect(Rect(theCore->getRelativeLeftBound(),mainWindow->getClientRectUpperBound(),tutorialWindow->getTargetWidth(),500));
                     }
-                };break;
+                }break;
             case 130:
                 {
                     tutorialWindow->writeHeader("1.3: Overview of the modes"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 140:
                 {
                     tutorialWindow->writeHeader("1.4: Is it useful?"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 150:
                 {
                     tutorialWindow->writeHeader("1.5: Where are the limits?"),dc,2);
                     tutorialWindow->writeLongText(" - It only calculates a general build order. Depending on the map, the latency, your mousespeed and many other small factors there might be a better build order.# - Goals consisting of many units will result in exponential growth of time needed for the calculation.# - The program is based on one-second steps. This might lead to some inaccurate calculation.# - In most cases the build orders cannot be applied directly 1:1 in the game but you have to exercise them and adapt them to your needs.#"),dc);
-                };break;
+                }break;
             case 160:
                 {
                     tutorialWindow->writeHeader("1.6: Is it cheating?"),dc,2);
                     tutorialWindow->writeLongText("Well... in a way... yes.#If you use the program correctly you might get an advantage over your enemy: You learn to get a better starting in the game so that you can concentrate on the main thing, strategies and tactics!#While you can get the same information by watching replays, reading strategy articles or just playing the game it is much more fun to interactivly trying out combinations to compare them.#"),dc);
-                };break;
+                }break;
                                                                                                                                                             
             case 200:
                 {
@@ -155,28 +155,28 @@ void TutorialWindow::draw(DC* dc) const
                 {
                     tutorialWindow->writeHeader("2.1: The goal window"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 220:
                 {
                     tutorialWindow->writeHeader("2.2: The build order window"),dc,2);
-                    tutorialWindow->writeLongText(""),dc);                 };break;             case 230:
+                    tutorialWindow->writeLongText(""),dc);                 }break;             case 230:
                 {                     tutorialWindow->writeHeader("2.3: The statistics window"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 240:
                 {
                     tutorialWindow->writeHeader("2.4: The overview window"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 250:
                 {
                     tutorialWindow->writeHeader("2.5: The graphical window"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 260:
                 {
                     tutorialWindow->writeHeader("2.6: The timer window"),dc,2);
-                    tutorialWindow->writeLongText(""),dc);                 };break;                                                                                                                                                                          case 300:
+                    tutorialWindow->writeLongText(""),dc);                 }break;                                                                                                                                                                          case 300:
                 {
                     tutorialWindow->writeHeader("3. How to use the results"),dc,1);
                     tutorialWindow->textButton("3.1: About time and numbers"),dc);
@@ -190,32 +190,32 @@ void TutorialWindow::draw(DC* dc) const
                 {
                     tutorialWindow->writeHeader("3.1: About time and numbers"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 320:
                 {
                     tutorialWindow->writeHeader("3.2: HTML output"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 330:
                 {
                     tutorialWindow->writeHeader("3.3: Printing output"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 340:
                 {
                     tutorialWindow->writeHeader("3.4: During a game"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 350:
                 {
                     tutorialWindow->writeHeader("3.5: Using the database"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 360:
                 {
                     tutorialWindow->writeHeader("3.6: Publishing your database"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
                                                                                                                                                             
             case 400:
                 {
@@ -232,32 +232,32 @@ void TutorialWindow::draw(DC* dc) const
                 {
                     tutorialWindow->writeHeader("4.1: Testing the bo in Advanced Mode"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 420:
                 {
                     tutorialWindow->writeHeader("4.2: New settings in Advanced mode"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 430:
                 {
                     tutorialWindow->writeHeader("4.3: New settings in Expert mode"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 440:
                 {
                     tutorialWindow->writeHeader("4.4: A guide to finetune your bo I"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 450:
                 {
                     tutorialWindow->writeHeader("4.5: A guide to finetune your bo II"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 460:
                 {
                     tutorialWindow->writeHeader("4.6: A guide to finetune your bo III"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
                                                                                                                                                             
             case 500:
                 {
@@ -274,32 +274,32 @@ void TutorialWindow::draw(DC* dc) const
                 {
                     tutorialWindow->writeHeader("5.1: Gosu mode - Can you beat it?"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 520:
                 {
                     tutorialWindow->writeHeader("5.2: Strategies, hints, tricks"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 530:
                 {
                     tutorialWindow->writeHeader("5.3: What to learn from such tournaments"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 540:
                 {
                     tutorialWindow->writeHeader("5.4: Transcendend mode - silicium alife!"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 550:
                 {
                     tutorialWindow->writeHeader("5.5: What to learn from the computer"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 560:
                 {
                     tutorialWindow->writeHeader("5.6: Short analysis of such tournaments"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
                                                                                                                                                             
             case 600:
                 {
@@ -316,32 +316,32 @@ void TutorialWindow::draw(DC* dc) const
                 {
                     tutorialWindow->writeHeader("6.1: Basic underlying algorithm"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 620:
                 {
                     tutorialWindow->writeHeader("6.2: Internal representation of an order list"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 630:
                 {
                     tutorialWindow->writeHeader("6.3: Flexibility/Scalability of the core"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 640:
                 {
                     tutorialWindow->writeHeader("6.4: A chapter about Genetic Algorithms"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 650:
                 {
                     tutorialWindow->writeHeader("6.5: Comparison with other algorithms"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 660:
                 {
                     tutorialWindow->writeHeader("6.6: Problems of crossing over"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
                                                                                                                                                             
             case 700:
                 {
@@ -358,32 +358,32 @@ void TutorialWindow::draw(DC* dc) const
                 {
                     tutorialWindow->writeHeader("7.1: www.clawsoftware.de"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 720:
                 {
                     tutorialWindow->writeHeader("7.2: www.nix-step.com"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 730:
                 {
                     tutorialWindow->writeHeader("7.3: www.my-friendly-publishers.com"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 740:
                 {
                     tutorialWindow->writeHeader("7.4: Read news about EF"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 750:
                 {
                     tutorialWindow->writeHeader("7.5: Browse the database"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 760:
                 {
                     tutorialWindow->writeHeader("7.6: Check for updates"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
                                                                                                                                                             
             case 800:
                 {
@@ -400,33 +400,33 @@ void TutorialWindow::draw(DC* dc) const
                 {
                     tutorialWindow->writeHeader("8.1: Things 'todo'"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 820:
                 {
                     tutorialWindow->writeHeader("8.2: Things that will not be implemented"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 830:
                 {
                     tutorialWindow->writeHeader("8.3: About the past"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 840:
                 {
                     tutorialWindow->writeHeader("8.4: About the future"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 850:
                 {
                     tutorialWindow->writeHeader("8.5: About the programmer"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
             case 860:
                 {
                     tutorialWindow->writeHeader("8.6: Join the crew - join the development"),dc,2);
                     tutorialWindow->writeLongText(""),dc);
-                };break;
+                }break;
                                                                                                                                                             
             default:break;
         }*/
-};
+}

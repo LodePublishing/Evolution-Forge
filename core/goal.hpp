@@ -23,7 +23,6 @@ class EXPORT GOAL_ENTRY
 //		void setMode(int mode);
 //TODO: evtl linked list draus machen
 		GOAL goal[MAX_GOALS];
-//		int bestTime; // cancel calculation if this calculation is worse than 25%
 
 		int goalCount;
 		int allGoal[UNIT_TYPE_COUNT];
@@ -31,11 +30,11 @@ class EXPORT GOAL_ENTRY
 		bool isBuildable[UNIT_TYPE_COUNT];
 		bool isVariable[UNIT_TYPE_COUNT];
 	
-		void copy(const GOAL_ENTRY* goal, const int* unit=0);
+		void copy(const GOAL_ENTRY* goal, const UNIT* unit=0);
 		void resetData();
 
 		void addGoal(const int unit, const int count, const int time, const int location);
-		void adjustGoals(const bool allowGoalAdaption, const int* unit=0);
+		void adjustGoals(const bool allowGoalAdaption, const UNIT* unit=0);
 
 		const bool isChanged() const;
 		void changeAccepted();

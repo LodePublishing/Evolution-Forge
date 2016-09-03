@@ -2,7 +2,7 @@
 #define _GUI_BOWINDOW_HPP
 
 #include "../ui/window.hpp"
-#include "../ui/button.hpp"
+
 #include "info.hpp"
 #include <map>
 
@@ -33,7 +33,6 @@ class BoWindow:public UI_Window
 		void setMarkedUnit(int unit);
 	private:
 		void drawSelectionStuff(DC* dc) const;
-		void checkForInfoWindow();
         BoEntry* boEntry[MAX_LENGTH];
 	
 //		void resetButtons();
@@ -49,6 +48,12 @@ class BoWindow:public UI_Window
 //		int orderButton[2*MAX_LENGTH];
 		int boGoalListOpened;
 		int lastBogoal;
+
+		UI_Button* resetButton;
+
+		UI_StaticText* speedText;
+		UI_Button* addSpeed;
+		UI_Button* subSpeed;
 };
 
 #endif // _GUI_BOWINDOW_HPP

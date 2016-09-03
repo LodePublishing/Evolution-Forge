@@ -2,7 +2,6 @@
 #define _CORE_SETTINGS_HPP
 
 #include "soup.hpp"
-#include "main.hpp"
 #include "goal.hpp"	
 #include "harvest.hpp"
 #include "basicmap.hpp"
@@ -32,7 +31,11 @@ private:
 	void setStartconditionCount(const int startconditionCount);
 	void setGoalCount(const int goalCount);
 	int currentMap;
+	int speed;
 public:
+	const int getSpeed() const;
+	void setSpeed(const int speed);	
+	
 	void assignMap(const int mapNumber);
 	void setMode(const int mode);
 	void setHarvestSpeed(const eRace race, const int harvest); // copy data (pointers) from settings
@@ -75,6 +78,7 @@ public:
 	const int getStartconditionCount() const;
 	
 	const GOAL_ENTRY* getGoal(const int goalNumber) const;
+	const START_CONDITION* getStartcondition(const int startconditionNumber) const;
 
 	void initDefaults(); 
 

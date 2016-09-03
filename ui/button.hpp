@@ -3,7 +3,6 @@
 
 #include "statictext.hpp"
 
-using std::string;
 
 // Button terminology:
 //   Up = button is in up state (also called pressed)
@@ -13,24 +12,6 @@ using std::string;
 //   Clicked = a trigger type effect caused by 'just pressed' event or repeat while 'down'
 //   Double clicked = 2 'just pressed' events occuring within a short amount of time
 
-// Button flags
-//const int BF_UP                          = (1<<0) ??
-const int BF_DOWN  = (1<<0);
-const int BF_JUST_PRESSED            = (1<<1);
-const int BF_JUST_RELEASED           = (1<<2);
-const int BF_CLICKED                 = (1<<3);
-const int BF_DOUBLE_CLICKED          = (1<<4);
-const int BF_HIGHLIGHTED             = (1<<5);  // button is not highlighted (ie mouse is not over)
-const int BF_JUST_HIGHLIGHTED    = (1<<6);  // button has just been highlighted, true for 1 frame
-const int BF_REPEATS = (1<<7);
-const int BF_STATIC	= (1<<8);
-const int BF_STATIC_PRESSED = (1<<9);
-const int BF_NOT_CLICKABLE = (1<<10);
-const int BF_IS_TAB = (1<<11);
-//const int BF_IGNORE_FOCUS            = (1<<8)  // button should not use focus to accept space/enter keypresses
-//const int BF_HOTKEY_JUST_PRESSED = (1<<9)  // button hotkey was just pressed
-//const int BF_REPEATS                 = (1<<10) // if held down, generates repeating presses
-//const int BF_SKIP_FIRST_HIGHLIGHT_CALLBACK (1<<11)    // skip first callback for mouse over event
 
 
 /*class UI_LongText:public UI_StaticText
@@ -123,7 +104,7 @@ enum ePositionMode
 	ARRANGE_TOP,
 	ARRANGE_BOTTOM,
 	ARRANGE_LEFT,
-	ARRANGE_RIGHT,
+	ARRANGE_RIGHT
 };
 
 enum eAutoSize
@@ -188,13 +169,13 @@ class UI_Button:public UI_Object
 		void setFrameNumber(const int num);
 	
 		Rect buttonPlacementArea;
+		void frameReset();
 	protected:
 		UI_StaticText* normalText;
 		UI_StaticText* pressedText;
 	
         long int nextRepeat;     // timestamp for next repeat if held down
 	private:
-
 		long int timeStamp;
 		
 		void adjustButtonSize(const Size size);
@@ -205,7 +186,6 @@ class UI_Button:public UI_Object
 		eAutoSize autoSize;
 		ePositionMode mode;
 		
-		void frameReset();
 		int frameNumber;
 		int statusFlags;
         bool firstPressed; // first press-message after the button was not pressed
@@ -231,6 +211,7 @@ class UI_Radio:public UI_Object
 		void process();
 		void draw(DC* dc) const;
 		const bool hasChanged() const;
+		void forceUnpressAll();
 	private:
 		bool changed;
 };

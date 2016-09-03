@@ -6,7 +6,7 @@ TimerWindow::TimerWindow(UI_Object* parent, ANARACE* anarace, const int windowNu
 
 	goalsFulFilledText = new UI_StaticText(this, getRelativeClientRect(), HORIZONTALLY_CENTERED_TEXT_MODE, IMPORTANT_COLOUR, SMALL_NORMAL_BOLD_FONT);
 	currentActionText = new UI_StaticText(this, getRelativeClientRect(), UPPER_CENTERED_TEXT_MODE, IMPORTANT_COLOUR, LARGE_NORMAL_BOLD_FONT);
-	timeText = new UI_StaticText(this, getRelativeClientRect(), LOWER_CENTERED_TEXT_MODE, IMPORTANT_COLOUR, VERY_LARGE_NORMAL_BOLD_FONT);
+	timeText = new UI_StaticText(this, getRelativeClientRect(), TOTAL_CENTERED_TEXT_MODE, IMPORTANT_COLOUR, VERY_LARGE_NORMAL_BOLD_FONT);
 
 // TODO irgendwas stimmt hier mit der Hoehe nicht
 	continueButton = new UI_Button(this, getRelativeClientRect(), getRelativeClientRect(), CLICK_TO_CONTINUE_STRING, CLICK_TO_PAUSE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, BOTTOM_CENTER, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH);
@@ -14,7 +14,8 @@ TimerWindow::TimerWindow(UI_Object* parent, ANARACE* anarace, const int windowNu
 			
 	resetData();
 	mode=1;
-};
+	currentTime=MAX_TIME;
+}
 
 TimerWindow::~TimerWindow()
 {
@@ -23,7 +24,7 @@ TimerWindow::~TimerWindow()
 	delete(timeText);
 	delete(continueButton);
 //	delete(cbut);
-};
+}
 																				
 void TimerWindow::resetData()
 {
@@ -33,7 +34,8 @@ void TimerWindow::resetData()
 		oldTime[i]=anarace->ga->maxTime;
 	}
 	lastTime=anarace->ga->maxTime;
-};
+	currentTime=MAX_TIME;
+}
 
 void TimerWindow::process()
 {
@@ -106,8 +108,15 @@ void TimerWindow::process()
 		else
 			currentActionText->updateText(OPTIMIZING_STRING);
 	}
+	if(anarace->ga->maxTime-anarace->getTimer()<currentTime)
+	{
+		currentTime -= (currentTime - (anarace->ga->maxTime-anarace->getTimer()))/2;
+	    if(anarace->ga->maxTime-anarace->getTimer()<currentTime)
+			currentTime--;
+	}
 	ostringstream os;
-	os << "[" << (anarace->ga->maxTime-anarace->getTimer())/60 << ":" << setfill('0') << setw(2) << (anarace->ga->maxTime-anarace->getTimer())%60 << "]";
+//	os << "[" << (anarace->ga->maxTime-anarace->getTimer())/60 << ":" << setfill('0') << setw(2) << (anarace->ga->maxTime-anarace->getTimer())%60 << "]";
+	os << "[" << currentTime/60 << ":" << setfill('0') << setw(2) << currentTime%60 << "]";
 	timeText->updateText(os.str());
 
 	}
@@ -122,20 +131,21 @@ void TimerWindow::process()
 	}
 
 
-};
+}
 
 void TimerWindow::setMode(const int mode) // for different tabs different behaviour
 {
 	this->mode=mode;
-};
+}
 
 const int TimerWindow::getCurrentMode() const
 {
 	return(mode);
-};
+}
 
 void TimerWindow::draw(DC* dc) const
 {
 	if(!shown) return;
 	UI_Window::draw(dc);
 }
+

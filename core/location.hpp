@@ -1,9 +1,9 @@
 #ifndef _CORE_LOCATION_HPP
 #define _CORE_LOCATION_HPP
+#include "defs.hpp"
 
-#include "main.hpp"
-
-const int GLOBAL = 0;
+#define GLOBAL 0
+//extern const int GLOBAL;
 
 class EXPORT MAP_LOCATION
 {
@@ -20,7 +20,7 @@ class EXPORT MAP_LOCATION
 		
 		const string& getName() const;
 		const int getMineralDistance() const;
-		const int getDistance(const int distance) const;
+		const int getDistance(const int location) const;
 		const int getNearest(const int step) const;
 		const int getMineralPatches() const;
 		const int getVespeneGeysirs() const;
@@ -34,8 +34,9 @@ class EXPORT MAP_LOCATION
 		void resetData();
 		void calculateDistances();
 		void adjustDistances();
-
 };
+
+	  	
 
 #endif // _CORE_LOCATION_HPP
 

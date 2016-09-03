@@ -41,7 +41,7 @@ UI_Theme::UI_Theme()
 	resolution=RESOLUTION_1280x1024;
 	language=ENGLISH_LANGUAGE;
 	colorTheme=DARK_BLUE_THEME;
-};
+}
 
 UI_Theme::~UI_Theme()
 {
@@ -75,71 +75,71 @@ UI_Theme::~UI_Theme()
 			}	
 	for(int i=MAX_BUTTONS;i--;)
 		delete buttonAnimationList[i];
-};
+}
 
 void UI_Theme::setColorTheme(const eTheme colorTheme)
 {
 	this->colorTheme=colorTheme;
-};
+}
 
 const eTheme UI_Theme::getColorTheme() const
 {
 	return(colorTheme);
-};
+}
 
 const eLanguage UI_Theme::getLanguage() const
 {
 	return(language);
-};
+}
 
 void UI_Theme::setLanguage(const eLanguage language)
 {
 	this->language=language;
-};
+}
 
 const eResolution UI_Theme::getResolution() const
 {
 	return(resolution);
-};
+}
 
 void UI_Theme::setResolution(const eResolution resolution)
 {
 	this->resolution=resolution;
-};
+}
 
 void UI_Theme::setTab(const eTab tab)
 {
 	this->tab=tab;
-};
+}
 
 const eTab UI_Theme::getTab() const
 { 
 	return(tab);
-};
+}
 
 const ButtonAnimation* UI_Theme::lookUpButtonAnimation(const eButton id) const
 {
 	return(buttonAnimationList[id]);
-};
+}
 
 
 const string* UI_Theme::lookUpString(const eString id) const
 {
 	return(stringList[language][id]);
-};
+}
 
 void findandreplace( string& source, const string& find, const string& replace )
 {
 	size_t j = source.find(find);source.replace(j,find.length(),replace);
 	// TODO wenn nix gefunden wird...
-};
+}
 
 const string UI_Theme::lookUpFormattedString(const eString id, const string& text) const
 {
 	string bla=*(stringList[language][id]);
 	findandreplace(bla, "%s", text);
 	return(bla);
-};
+}
 
 const string UI_Theme::lookUpFormattedString(const eString id, const int i) const
 {
@@ -148,7 +148,7 @@ const string UI_Theme::lookUpFormattedString(const eString id, const int i) cons
 	os << i; 
 	findandreplace(bla, "%i", os.str());
 	return(bla);
-};
+}
 const string UI_Theme::lookUpFormattedString(const eString id, const int i, const int j, const int k) const
 {
 	string bla=*(stringList[language][id]);
@@ -157,7 +157,7 @@ const string UI_Theme::lookUpFormattedString(const eString id, const int i, cons
 	os << j;findandreplace(bla, "%i", os.str());os.str("");
 	os << k;findandreplace(bla, "%i", os.str());
 	return(bla);
-};
+}
 
 const string UI_Theme::lookUpFormattedString(const eString id, const int i, const int j) const
 {
@@ -184,33 +184,33 @@ const string UI_Theme::lookUpFormattedString(const eString id, const int i, cons
 		findandreplace(bla, "%i", os.str());os.str("");
 	}
 	return(bla);
-};
+}
 
 
 Color* UI_Theme::lookUpColor(const eColor id) const
 {
 	return(colorList[colorTheme][id]);
-};
+}
 
 const Bitmap* UI_Theme::lookUpBitmap(const eBitmap id) const 
 {
 	return(bitmapList[resolution][colorTheme][id]);
-};
+}
 
 Pen* UI_Theme::lookUpPen(const ePen id) const
 {
 	return(penList[resolution][colorTheme][id]);
-};
+}
 
 Brush* UI_Theme::lookUpBrush(const eBrush id) const
 {
 	return(brushList[colorTheme][id]);
-};
+}
 
 Font* UI_Theme::lookUpFont(const eFont id) const
 {
 	return(fontList[resolution][language][id]);
-};
+}
 
 const Point UI_Theme::lookUpRealDistance(const eWindow id, const int windowNumber) const // ~~ Name
 {
@@ -222,8 +222,8 @@ const Point UI_Theme::lookUpRealDistance(const eWindow id, const int windowNumbe
 		case ARRANGE_TOP_TO_DOWN:return(Point(0,windowNumber*rectList[resolution][tab][id]->height));break;
 		case ARRANGE_DOWN_TO_TOP:return(Point(0,-windowNumber*rectList[resolution][tab][id]->height));break;
 		default:return(Point(0,0));
-	};
-};
+	}
+}
 
 const Point UI_Theme::lookUpMaxRealDistance(const eWindow id, const int windowNumber) const // ~~ Name
 {
@@ -235,8 +235,8 @@ const Point UI_Theme::lookUpMaxRealDistance(const eWindow id, const int windowNu
 		case ARRANGE_TOP_TO_DOWN:return(Point(0, windowNumber*maxRectList[resolution][tab][id]->height));break;
 		case ARRANGE_DOWN_TO_TOP:return(Point(0, -windowNumber*maxRectList[resolution][tab][id]->height));break;
 		default:return(Point(0,0));
-	};
-};
+	}
+}
 
 const Rect UI_Theme::lookUpRect(const eWindow id, const int windowNumber, const int maxPlayer) const
 {
@@ -247,9 +247,9 @@ const Rect UI_Theme::lookUpRect(const eWindow id, const int windowNumber, const 
         case ARRANGE_RIGHT_TO_LEFT:p=lookUpRealDistance(id, windowNumber) + Point(lookUpRealDistance(xwindow[resolution][tab][id], maxPlayer).x, 0);break;
         case ARRANGE_TOP_TO_DOWN:
         case ARRANGE_DOWN_TO_TOP:p=lookUpRealDistance(id, windowNumber) + Point(0,lookUpRealDistance(ywindow[resolution][tab][id], maxPlayer).y);break;
-    };
+    }
 	return(Rect(rectList[resolution][tab][id]->GetPosition()+p, rectList[resolution][tab][id]->GetSize()));
-};
+}
 
 const Rect UI_Theme::lookUpMaxRect(const eWindow id, const int windowNumber, const int maxPlayer) const 
 {
@@ -260,9 +260,9 @@ const Rect UI_Theme::lookUpMaxRect(const eWindow id, const int windowNumber, con
         case ARRANGE_RIGHT_TO_LEFT:p=lookUpMaxRealDistance(id, windowNumber) + Point(lookUpMaxRealDistance(xwindow[resolution][tab][id], maxPlayer).x, 0);break;
         case ARRANGE_TOP_TO_DOWN:
         case ARRANGE_DOWN_TO_TOP:p=lookUpMaxRealDistance(id, windowNumber) + Point(0,lookUpMaxRealDistance(ywindow[resolution][tab][id], maxPlayer).y);break;
-    };
+    }
 	return(Rect(maxRectList[resolution][tab][id]->GetPosition()+p, maxRectList[resolution][tab][id]->GetSize()));
-};
+}
 
 const eDataType getDataType(const string& item)
 {
@@ -276,7 +276,7 @@ const eDataType getDataType(const string& item)
 	if(item=="@MAX_RECTANGLES") return(MAX_RECT_DATA_TYPE);else
 	if(item=="@BUTTONS") return(BUTTON_DATA_TYPE);else
 	return(ZERO_DATA_TYPE);
-};
+}
 
 const eSubDataType getSubDataType(const eDataType mode)
 {
@@ -291,8 +291,8 @@ const eSubDataType getSubDataType(const eDataType mode)
 		case RECT_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
 		case MAX_RECT_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
 		default:return(ZERO_SUB_DATA_TYPE);
-	};
-};
+	}
+}
 
 const eSubSubDataType getSubSubDataType(const eDataType mode)
 {
@@ -304,8 +304,8 @@ const eSubSubDataType getSubSubDataType(const eDataType mode)
 		case RECT_DATA_TYPE:return(TAB_SUB_SUB_DATA_TYPE);
 		case MAX_RECT_DATA_TYPE:return(TAB_SUB_SUB_DATA_TYPE);
 		default:return(ZERO_SUB_SUB_DATA_TYPE);
-	};
-};
+	}
+}
 
 const eLanguage getLanguageSubDataEntry(const string& item)
 {
@@ -319,7 +319,7 @@ const eLanguage getLanguageSubDataEntry(const string& item)
 	if(item=="@CHINESE") return(CHINESE_LANGUAGE);else
 	if(item=="@RUSSKI") return(RUSSKI_LANGUAGE);else
 	return(ZERO_LANGUAGE);
-};
+}
 
 const eResolution getResolutionSubDataEntry(const string& item)
 {
@@ -330,7 +330,7 @@ const eResolution getResolutionSubDataEntry(const string& item)
 	if(item=="@1280x1024") return(RESOLUTION_1280x1024);else
 	if(item=="@1600x1200") return(RESOLUTION_1600x1200);else
 	return(ZERO_RESOLUTION);
-};
+}
 
 const eTheme getThemeSubDataEntry(const string& item)
 {
@@ -341,7 +341,7 @@ const eTheme getThemeSubDataEntry(const string& item)
 	if(item=="@GREY_THEME") return(GREY_THEME);else
 	if(item=="@MONOCHROME_THEME") return(MONOCHROME_THEME);else
 	return(ZERO_THEME);
-};
+}
 
 const eTab getTabSubDataEntry(const string& item)
 {
@@ -354,7 +354,7 @@ const eTab getTabSubDataEntry(const string& item)
 	if(item=="@SETTINGS_TAB") return(SETTINGS_TAB);else
 	if(item=="@TUTORIAL_TAB") return(TUTORIAL_TAB);else
 	return(ZERO_TAB);
-};
+}
 
 const eBrushStyle get_brush_style(const string& item)
 {
@@ -379,7 +379,7 @@ const ePenStyle get_pen_style(const string& item)
 	if(item=="SHORT_DASH") return(SHORT_DASH_PEN_STYLE);else
 	if(item=="DOT_DASH") return(DOT_DASH_PEN_STYLE);else
 	return(TRANSPARENT_PEN_STYLE);
-};
+}
 /*
 int get_font_style1(const string& item)
 {
@@ -387,21 +387,21 @@ int get_font_style1(const string& item)
 			if(item=="normal") return(DEFAULT);else
 			return(DEFAULT);
 // TODO!
-};
+}
 int get_font_style2(const string& item)
 {
 			if(item=="italics") return(FONTSTYLE_ITALIC);else
 			if(item=="normal") return(DEFAULT);else
 			return(DEFAULT);
 // TODO!
-};
+}
 int get_font_style3(const string& item)
 {
 			if(item=="bold") return(BOLD);else
 			if(item=="normal") return(DEFAULT);else
 			return(DEFAULT);
 // TODO!
-};*/
+}*/
 
 eWindow parse_window(const string& item)
 {
@@ -418,7 +418,7 @@ eWindow parse_window(const string& item)
 	if(item=="Build order graph window") return(BO_GRAPH_WINDOW);else
 	if(item=="Info window") return(INFO_WINDOW);else
 	return(NULL_WINDOW);
-};
+}
 
 
 
@@ -442,7 +442,7 @@ eCommand parse_commands(const string& item)
 	if(item=="calculate maxheight") return(CALCULATE_MAXHEIGHT_COMMAND);else
 	if(item=="same as above") return(SAME_AS_ABOVE_COMMAND);else
 	return(NO_COMMAND);
-};
+}
 
 // Rueckgabewert: Richtung
 
@@ -514,16 +514,16 @@ eArrangeDirection parse_complete_command(const string* p, eCommand* e, Rect& rec
 				case DOCK_TOP_INSIDE_OF_COMMAND:
 												  {
 													  e[i]=k;window=true;ycomplete=true;direction=ARRANGE_TOP_TO_DOWN;
-												  };break;
+												  }break;
 				case DOCK_BOTTOM_INSIDE_OF_COMMAND:e[i]=k;window=true;ycomplete=true;direction=ARRANGE_DOWN_TO_TOP;break;
 				default:e[i]=k;break;			
-			};
+			}
 			
 		}
-	};
+	}
 	rect=Rect(x,y,dx,dy);
 	return(direction);
-};
+}
 
 void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, const string& fontDir, DC* dc)
 {
@@ -561,7 +561,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 	{
 		p[i]="";
 		v[i]=0;
-	};
+	}
 
 	ifstream pFile(dataFile.c_str());
 	
@@ -581,7 +581,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 			toLog("WARNING: (UI_Theme::loadDataFiles) Long line!");
 #endif
 			pFile.clear(pFile.rdstate() & ~ios::failbit);
-		};
+		}
 			
 		++ln;
 		//line[strlen(line)-1]='\0';
@@ -590,7 +590,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 		{
 			p[i]="";
 			v[i]=0;
-		};
+		}
 		char* line2=line;		
 		while(((*line2)==32)||((*line2)==9))
 			line2++;
@@ -609,7 +609,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 				buffer++;
 			p[k]=buffer;
 			k++;
-		};
+		}
 		if((buffer=strtok(NULL,",\0"))!=NULL)
 		{
 #ifdef _SCC_DEBUG
@@ -677,7 +677,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 					sub_mode=ZERO_SUB_DATA_TYPE;
 					sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
 					current_line=0;
-				};
+				}
 			}
 			else
 			if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(current_language==ZERO_LANGUAGE)&&(current_resolution==ZERO_RESOLUTION)&&(current_theme==ZERO_THEME))
@@ -688,7 +688,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 					case RESOLUTION_SUB_DATA_TYPE:current_resolution=getResolutionSubDataEntry(line2);break;
 					case COLOUR_THEME_SUB_DATA_TYPE:current_theme=getThemeSubDataEntry(line2);break;
 					default:break;
-				};
+				}
 				current_line=0;
 			}
 			// => hat nur 1 Ebene => Position festgestellt!
@@ -700,7 +700,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 					case COLOUR_DATA_TYPE:colorList[current_theme][current_line]=new Color(dc->GetSurface(),v[1],v[2],v[3]);break;
 					case BRUSH_DATA_TYPE:brushList[current_theme][current_line]=new Brush(dc->GetSurface(),v[1],v[2],v[3],get_brush_style(p[4]));break;
 					default:break;
-				};
+				}
 				current_line++;
 			}
 			// 0 ebenen -> buttons :) BUTTON_DATA_TYPE?? TODO
@@ -731,7 +731,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 					case COLOUR_THEME_SUB_SUB_DATA_TYPE:current_theme=getThemeSubDataEntry(line2);break;
 					case TAB_SUB_SUB_DATA_TYPE:current_tab=getTabSubDataEntry(line2);break;
 					default:break;
-				};			
+				}			
  				current_line=0;				
 			}
 			// => hat 2 Ebenen => Position festgestellt!
@@ -743,29 +743,29 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 						{
 							string t=fontDir+"/"+p[1]+".ttf";
 							fontList[current_resolution][current_language][current_line]=new Font(t, v[2]/*, get_font_style1(p[2]), get_font_style2(p[3]), get_font_style3(p[4]), false, _T(""), FONTENCODING_DEFAULT*/);
-						};break;
+						}break;
 					case BITMAP_DATA_TYPE:
 						{
 							string t=bitmapDir+"/"+p[1]+".bmp";
 							bitmapList[current_resolution][current_theme][current_line]=new Bitmap(t);
-						};break;
+						}break;
 					case PEN_DATA_TYPE:penList[current_resolution][current_theme][current_line]=new Pen(dc->GetSurface(),v[2],v[3],v[4],v[1],get_pen_style(p[5]));break;
 					case RECT_DATA_TYPE:
 						{
 							rectList[current_resolution][current_tab][parse_window(p[1])]=new Rect();
 							arrangeDirection[current_resolution][current_tab][parse_window(p[1])]=parse_complete_command(p, &(trectList[current_resolution][current_tab][parse_window(p[1])][0]), *(rectList[current_resolution][current_tab][parse_window(p[1])]));
-						};break;
+						}break;
 					case MAX_RECT_DATA_TYPE:
 						{
 							maxRectList[current_resolution][current_tab][parse_window(p[1])]=new Rect();
 							parse_complete_command(p, &(tmaxRectList[current_resolution][current_tab][parse_window(p[1])][0]), *(maxRectList[current_resolution][current_tab][parse_window(p[1])]));
-						};break;					
+						}break;					
 					default:break;
-				};
+				}
 				current_line++;
-			};
-		}; // end if mode != ZERO_DATA_TYPE
-	}; // end while
+			}
+		} // end if mode != ZERO_DATA_TYPE
+	} // end while
 
 	int change=1;
 	while(change)
@@ -787,57 +787,57 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 								rectList[i][j][k]->SetLeft(-5+rectList[i][j][trectList[i][j][k][l+1]]->GetLeft()-rectList[i][j][k]->GetWidth());
 								xwindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
 								l++;
-							};break;
+							}break;
 							case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:
 							{
 								rectList[i][j][k]->SetLeft(5+rectList[i][j][trectList[i][j][k][l+1]]->GetLeft()+rectList[i][j][trectList[i][j][k][l+1]]->GetWidth());
 								xwindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
 								l++;
-							};break;
+							}break;
 							case DOCK_WITH_LOWER_BORDER_OF_COMMAND:
 							{
 								rectList[i][j][k]->SetTop(5+rectList[i][j][trectList[i][j][k][l+1]]->GetTop()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight());
 	                            ywindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
 								l++;
-							};break;
+							}break;
 							case DOCK_WITH_UPPER_BORDER_OF_COMMAND:
 							{
 								rectList[i][j][k]->SetTop(-5+rectList[i][j][trectList[i][j][k][l+1]]->GetLeft()-rectList[i][j][k]->GetHeight());
 	                            ywindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
 								l++;
-							};break;
+							}break;
 							case DOCK_CENTER_INSIDE_OF_COMMAND:
 							{
 								rectList[i][j][k]->SetLeft((rectList[i][j][trectList[i][j][k][l+1]]->GetLeft()+rectList[i][j][trectList[i][j][k][l+1]]->GetWidth()-rectList[i][j][k]->GetWidth())/2);
 								rectList[i][j][k]->SetTop((rectList[i][j][trectList[i][j][k][l+1]]->GetTop()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight()-rectList[i][j][k]->GetHeight())/2);
 	                            xwindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
 								l++;
-							};break;
+							}break;
 							case DOCK_LEFT_INSIDE_OF_COMMAND:
 							{
 								rectList[i][j][k]->SetLeft(10+rectList[i][j][trectList[i][j][k][l+1]]->GetLeft());
 	                            xwindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
 								l++;
-							};break;
+							}break;
 								
 							case DOCK_RIGHT_INSIDE_OF_COMMAND:
 							{
 								rectList[i][j][k]->SetLeft(-10+rectList[i][j][trectList[i][j][k][l+1]]->GetLeft()+rectList[i][j][trectList[i][j][k][l+1]]->GetWidth()-rectList[i][j][k]->GetWidth());
 	                            xwindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
 								l++;
-							};break;
+							}break;
 							case DOCK_TOP_INSIDE_OF_COMMAND:
 							{
 								rectList[i][j][k]->SetTop(10+rectList[i][j][trectList[i][j][k][l+1]]->GetTop());
 	                            ywindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
 								l++;
-							};break;
+							}break;
 							case DOCK_BOTTOM_INSIDE_OF_COMMAND:
 							{
 								rectList[i][j][k]->SetTop(-30+rectList[i][j][trectList[i][j][k][l+1]]->GetTop()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight()-rectList[i][j][k]->GetHeight());
 	                            ywindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
 								l++;
-							};break;
+							}break;
 							default:
 #ifdef _SCC_DEBUG								
 								toLog("error... same as above oder so");
@@ -894,7 +894,7 @@ while(change)
 								{
 									maxRectList[i][j][k]->SetPosition(rectList[i][j][k]->GetPosition());
 									maxRectList[i][j][k]->SetSize(rectList[i][j][k]->GetSize());
-								};break;
+								}break;
 							default:
 #ifdef _SCC_DEBUG								
 								toLog("max error... same as above oder so");
@@ -907,6 +907,6 @@ while(change)
 	}
 
 
-};
+}
 
 

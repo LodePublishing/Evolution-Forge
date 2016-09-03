@@ -3,7 +3,7 @@
 
 
 // TODO irgendwohinverfrachten :/
-#include "main.hpp"
+#include "defs.hpp"
 
 class EXPORT GA
 {

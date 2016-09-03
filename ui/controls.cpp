@@ -6,51 +6,51 @@ Controls::Controls()
 	mouseEventWasProcessed();
 	shiftPressed = 0;
 	button = 0;
-};
+}
 
 Controls::~Controls()
 {
-};
+}
 
 int Controls::getX()
 {
 	return (currentPosition.x);
-};
+}
 
 int Controls::getY()
 {
 	return (currentPosition.y);
-};
+}
 
 void Controls::setShiftPressed(int shift_pressed)
 {
 	shiftPressed = shift_pressed;
-};
+}
 
 int Controls::isShiftPressed()
 {
 	return (shiftPressed);
-};
+}
 
 Point Controls::getCurrentPosition()
 {
 	return (currentPosition);
-};
+}
 
 Point Controls::getCurrentPosition(const Point relativePosition)
 {
 	return (currentPosition - relativePosition);
-};
+}
 
 void Controls::setMouse(Point position)
 {
 	currentPosition = position;
-};
+}
 
 void Controls::scrollMouseWheel(int scroll)
 {
 	mouseWheelY+=scroll;
-};
+}
 
 // TODO mouseWheel
 
@@ -59,44 +59,44 @@ void Controls::rightDown()
 	button |= RIGHT_BUTTON;
 	dragStartPosition = currentPosition;
 	dragEndPosition = Point(-1, -1);
-};
+}
 
 void Controls::rightUp()
 {
 	button &= ~RIGHT_BUTTON;
 	dragEndPosition = currentPosition;
-};
+}
 
 void Controls::leftDown()
 {
 	button |= LEFT_BUTTON;
 	dragStartPosition = currentPosition;
 	dragEndPosition = Point(-1, -1);
-};
+}
 
 void Controls::leftUp()
 {
 	button &= ~LEFT_BUTTON;
 	dragEndPosition = currentPosition;
-};
+}
 
 void Controls::middleDown()
 {
 	button |= LEFT_BUTTON;
 	dragStartPosition = currentPosition;
 	dragEndPosition = Point(-1, -1);
-};
+}
 
 void Controls::middleUp()
 {
 	button &= ~LEFT_BUTTON;
 	dragEndPosition = currentPosition;
-};
+}
 
 Point Controls::getDragStartPosition()
 {
 	return (dragStartPosition);
-};
+}
 
 int Controls::getPressConditionOf(Rect rect)
 {
@@ -145,6 +145,6 @@ void Controls::mouseEventWasProcessed()
 {
 	dragStartPosition = Point(-1, -1);
 	dragEndPosition = Point(-1, -1);
-};
+}
 
 Controls controls;

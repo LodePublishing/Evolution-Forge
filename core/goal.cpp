@@ -3,11 +3,11 @@
 GOAL_ENTRY::GOAL_ENTRY()
 {
 	resetData();
-};
+}
 
 GOAL_ENTRY::~GOAL_ENTRY()
 {
-};
+}
 
 void GOAL_ENTRY::resetData()
 {
@@ -33,10 +33,9 @@ void GOAL_ENTRY::resetData()
 			globalGoal[j][i]=0;
 	}
 //	initialized=true;
-//	bestTime=0;
-};
+}
 
-void EXPORT GOAL_ENTRY::copy(const GOAL_ENTRY* goal, const int* unit)
+void EXPORT GOAL_ENTRY::copy(const GOAL_ENTRY* goal, const UNIT* unit)
 {
 #ifdef _SCC_DEBUG
 	if(!goal) {
@@ -56,7 +55,7 @@ void EXPORT GOAL_ENTRY::copy(const GOAL_ENTRY* goal, const int* unit)
 			globalGoal[j][i]=goal->globalGoal[j][i];
 		genoToPhaenotype[i]=goal->genoToPhaenotype[i];
 		phaenoToGenotype[i]=goal->phaenoToGenotype[i];
-	};
+	}
 	pStats=goal->getpStats();
 	for(int i=MAX_GOALS;i--;)
 	{
@@ -64,9 +63,10 @@ void EXPORT GOAL_ENTRY::copy(const GOAL_ENTRY* goal, const int* unit)
 		this->goal[i].time=goal->goal[i].time;
 		this->goal[i].count=goal->goal[i].count;
 		this->goal[i].location=goal->goal[i].location;
-	};
+	}
+	this->goalCount=goal->goalCount;
 	adjustGoals(true, unit);
-};
+}
 
 void EXPORT GOAL_ENTRY::setRace(const eRace race)
 {
@@ -74,15 +74,25 @@ void EXPORT GOAL_ENTRY::setRace(const eRace race)
 	pStats=&(stats[this->race=race][0]);
 //	raceInitialized=true;
 	changed=true;
-};
+}
 
-void EXPORT GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const int* unit)
+void EXPORT GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 {
-// if free-mode  set all isbuildable to 1
+    for(int i=UNIT_TYPE_COUNT;i--;)
+	{
+		genoToPhaenotype[i]=-1;
+		phaenoToGenotype[i]=-1;
+		isVariable[i]=0; //?
+		isBuildable[i]=0;
+	}
+	maxBuildTypes=0;
+
+	// if free-mode  set all isbuildable to 1
 // else ...
 	int oldGoal[UNIT_TYPE_COUNT]; //goals we got from the user which we MAY NOT ignore
-	for(int i=UNIT_TYPE_COUNT;i--;)
+	for(int i=UNIT_TYPE_COUNT;i--;) {
 		oldGoal[i]=allGoal[i];
+	}
 //	fill(oldGoal)
 //TODO: Reset hier rein!
 	
@@ -92,11 +102,11 @@ void EXPORT GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const int* uni
 		  //isBuildable[INTRON]=1; // :-)
 	if(unit)
 		for(int i=GAS_SCV+1;i--;)
-			if(unit[i])
-		{
-			if(allGoal[i]<unit[i])
-				addGoal(i, unit[i]-allGoal[i], 0, 0);
-		}
+			if(unit->getTotal(i))
+			{
+				if(allGoal[i]<unit->getTotal(i))
+					addGoal(i, unit->getTotal(i)-allGoal[i], 0, 0);
+			}
 	//TODO addgoal evtl machen hier!
 
 	for(int j=6;j--;) // Nuclear Warhead needs 6 steps (?) ~~~~
@@ -159,7 +169,7 @@ void EXPORT GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const int* uni
 					   addGoal(REFINERY,1,0,0); //ASSIMILATOR == EXTRACTOR == REFINERY
 				isBuildable[GAS_SCV]=1; //ONE_MINERAL_SCV... = ONE_MINERAL_PROBE... = ONE_MINERAL_DRONE...
 				isVariable[GAS_SCV]=1;
-		}; 
+		} 
 
 	switch(getRace())
 	{
@@ -175,7 +185,7 @@ void EXPORT GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const int* uni
 			genoToPhaenotype[maxBuildTypes]=i;
 			phaenoToGenotype[i]=maxBuildTypes;
 			maxBuildTypes++;
-		};
+		}
 
 	// hack for unit who cannot be built but needs to be translated by phaenoToGenotype! (for the forcewindow)
 	if(getRace()==ZERG)
@@ -186,7 +196,7 @@ void EXPORT GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const int* uni
 	}
 
 	//TODO: ueberlegen ob nicht einfach Move+ und Move- reichen...
-};
+}
 
 // -------------------------------
 // ------ SET/GET FUNCTIONS ------
@@ -200,7 +210,7 @@ const UNIT_STATISTICS* EXPORT GOAL_ENTRY::getpStats() const
 	}
 #endif
 	return(pStats);
-};
+}
 
 void EXPORT GOAL_ENTRY::addGoal(const int unit, const int count, const int time, const int location)
 {
@@ -219,6 +229,8 @@ void EXPORT GOAL_ENTRY::addGoal(const int unit, const int count, const int time,
 	}
 #endif
 //TODO goal loeschen einbauen
+	if((race==ZERG)&&(unit==LARVA))
+		return;
 	allGoal[unit]+=count;
 	if(allGoal[unit]==0)
 	{
@@ -229,6 +241,7 @@ void EXPORT GOAL_ENTRY::addGoal(const int unit, const int count, const int time,
 	globalGoal[location][unit]+=count;
 
 	int i=0;
+	// TODO wenn Einheiten an mehreren verschiedenen Positionen und location 0 geloescht wird aufsammeln!!
 	for(i=0;i<goalCount;i++)
 		if((goal[i].unit==unit)&&(goal[i].time==time)&&(goal[i].location==location))
 		{
@@ -236,6 +249,7 @@ void EXPORT GOAL_ENTRY::addGoal(const int unit, const int count, const int time,
 			goal[i].count+=count;
 			i=goalCount+1;
 		}
+	// TODO Liste draus machen!
 	if(i<goalCount+1)
 	{
 		goal[goalCount].unit=unit;
@@ -245,7 +259,7 @@ void EXPORT GOAL_ENTRY::addGoal(const int unit, const int count, const int time,
 		goalCount++;
 	}
 	changed=true;
-};
+}
 
 const bool EXPORT GOAL_ENTRY::isGoal(const int unit) const
 {
@@ -259,7 +273,7 @@ const bool EXPORT GOAL_ENTRY::isGoal(const int unit) const
 	}
 #endif
 	return(allGoal[unit]>0);
-};
+}
 const int EXPORT GOAL_ENTRY::getMaxBuildTypes() const
 {
 #ifdef _SCC_DEBUG
@@ -268,12 +282,12 @@ const int EXPORT GOAL_ENTRY::getMaxBuildTypes() const
 	}
 #endif
 	return(maxBuildTypes);
-};
+}
 
 /*const bool EXPORT GOAL_ENTRY::getInitialized() const
 {
 	return(initialized);
-};*/
+}*/
 
 const int EXPORT GOAL_ENTRY::toGeno(const int phaeno) const
 {
@@ -305,43 +319,42 @@ const int EXPORT GOAL_ENTRY::toPhaeno(const int geno) const
 const bool EXPORT GOAL_ENTRY::isChanged() const
 {
 	return(changed);
-};
+}
 
 void EXPORT GOAL_ENTRY::changeAccepted()
 {
-//	adjustGoals(true); PROBLEM: unitforce wird nicht mit einbezogen!
-//	bestTime=0;
+//	adjustGoals(true); //PROBLEM: unitforce wird nicht mit einbezogen!
 	changed=false;
-};
+}
 
 const string& EXPORT GOAL_ENTRY::getName() const
 {
 	return name;
-};
+}
 
 const eRace EXPORT GOAL_ENTRY::getRace() const
 {
 	return race;
-};
+}
 
 void EXPORT GOAL_ENTRY::setName(const string& name)
 {
 	this->name=name;
-};
+}
 
 /*const int EXPORT GOAL_ENTRY::getMode() const // TODO
 {
 	return(mode);
-};
+}
 
 void EXPORT GOAL_ENTRY::setMode(const int mode)
 {
 	this->mode=mode;
-};*/
+}*/
 
 /*const bool EXPORT GOAL_ENTRY::isRaceInitialized() const
 {
 	return(raceInitialized);
-};*/
+}*/
 
 

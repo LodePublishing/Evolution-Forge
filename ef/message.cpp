@@ -3,11 +3,11 @@
 MessageWindow::MessageWindow( UI_Window* parentWindow ):UI_Window( parentWindow, MESSAGE_WINDOW_TITLE_STRING, MESSAGE_WINDOW, SCROLLED )
 {
 //		resetData();
-};
+}
 
 MessageWindow::~MessageWindow()
 {
-};
+}
 
 void MessageWindow::addMessage( string bla )
 {
@@ -20,7 +20,7 @@ void MessageWindow::addMessage( string bla )
 	message.push_back(msg);
 	if(message.size()>5)
 		message.pop_front();
-};
+}
 
 void MessageWindow::process()
 {
@@ -39,7 +39,7 @@ void MessageWindow::process()
 			t++;
 		}
 //	  setMaxScrollY(t*(FONT_SIZE+5));
-};
+}
 
 void MessageWindow::draw( DC* dc ) const
 {
@@ -61,5 +61,5 @@ void MessageWindow::draw( DC* dc ) const
 				dc->DrawText(m->string, m->edge.GetPosition());
 			}
 		}
-};
+}
 

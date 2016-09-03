@@ -1,7 +1,7 @@
 #ifndef _CORE_HARVEST_HPP
 #define _CORE_HARVEST_HPP
 
-#include "main.hpp"
+#include "defs.hpp"
 
 class HARVEST_SPEED
 {

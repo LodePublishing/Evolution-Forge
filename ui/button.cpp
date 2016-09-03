@@ -1,26 +1,58 @@
 #include "button.hpp"
 #include "math.h"
 
+// Button flags
+
+const int BF_DOWN=1;
+const int BF_JUST_PRESSED            = 2;
+const int BF_JUST_RELEASED           = 4;
+const int BF_CLICKED                 = 8;
+const int BF_DOUBLE_CLICKED          = 16;
+const int BF_HIGHLIGHTED             = 32;  // button is not highlighted (ie mouse is not over)
+const int BF_JUST_HIGHLIGHTED    = 64;  // button has just been highlighted, true for 1 frame
+const int BF_REPEATS = 128;
+const int BF_STATIC	= 256;
+const int BF_STATIC_PRESSED = 512;
+const int BF_NOT_CLICKABLE = 1024;
+const int BF_IS_TAB = 2048;
+//const int BF_IGNORE_FOCUS            = 4096  // button should not use focus to accept space/enter keypresses
+//const int BF_HOTKEY_JUST_PRESSED = 8192  // button hotkey was just pressed
+//const int BF_REPEATS                 = 16384 // if held down, generates repeating presses
+//const int BF_SKIP_FIRST_HIGHLIGHT_CALLBACK 32768    // skip first callback for mouse over event
+
+
+
 UI_Radio::UI_Radio(UI_Object* parent):UI_Object(parent)
 {
 	changed=true;
-};
+}
 
 UI_Radio::~UI_Radio()
 {
-};
+}
 
 void UI_Radio::addButton(UI_Button* button)
 {
 	if(!button)
 		return;
 	button->setParent(this);
-};
+}
 
 const bool UI_Radio::hasChanged() const
 {
 	return(changed);
-};
+}
+
+void UI_Radio::forceUnpressAll()
+{
+    UI_Button* tmp=(UI_Button*)getChildren();
+    if(!tmp) return;
+    do
+    {
+		tmp->forceUnpress();
+        tmp=(UI_Button*)tmp->getNextBrother();
+    } while(tmp!=getChildren());
+}
 
 void UI_Radio::forceTabPressed(const int tab)
 {
@@ -33,11 +65,11 @@ void UI_Radio::forceTabPressed(const int tab)
 		{
 			tmp->forcePressed();
 			return;
-		};
+		}
         i++;
         tmp=(UI_Button*)tmp->getNextBrother();
     } while(tmp!=getChildren());
-};
+}
 
 const int UI_Radio::getMarked() const
 {
@@ -54,14 +86,14 @@ const int UI_Radio::getMarked() const
 		tmp=(UI_Button*)tmp->getNextBrother();
 	} while(tmp!=getChildren());
 	return(0);
-};
+}
 
 void UI_Radio::draw(DC* dc) const
 {
 	if(!shown)
 		return;
 	UI_Object::draw(dc);
-};
+}
 
 void UI_Radio::process()
 {
@@ -108,12 +140,12 @@ void UI_Radio::process()
         i++;
         tmp=(UI_Button*)tmp->getNextBrother();
     } while(tmp!=(UI_Button*)getChildren());
-};
+}
 
 void UI_Button::setFrameNumber(const int num)
 {
 	frameNumber=num;
-};
+}
 
 UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eString normalText, eString pressedText, eButton button, eTextMode textMode, eButtonMode buttonMode, ePositionMode mode, eFont font, eAutoSize autoSize):UI_Object(parent, rect, maxRect)
 {
@@ -128,7 +160,7 @@ UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eString normalT
 		case PUSH_BUTTON_MODE:statusFlags |= BF_REPEATS;break;
 		case TAB_BUTTON_MODE:statusFlags |= BF_IS_TAB;statusFlags |= BF_STATIC;break;
 		default:break;
-	}; 
+	} 
 						   
 	this->buttonPlacementArea=rect;
 	this->autoSize=autoSize;
@@ -145,7 +177,7 @@ UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eString normalT
 
 //	for(int i=DISABLED_BUTTON_PHASE;i<MAX_BUTTON_ANIMATION_PHASES;i++)
 //		text[i]=new UI_StaticText(this, normalText, Rect(0,0,0,0), HORIZONTALLY_CENTERED_TEXT_MODE, theme.lookUpButtonAnimation(button)->startTextColor[i], font
-};
+}
 
 UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, string normalText, string pressedText, eButton button, eTextMode textMode, eButtonMode buttonMode, ePositionMode mode, eFont font, eAutoSize autoSize):UI_Object(parent, rect, maxRect)
 {
@@ -160,7 +192,7 @@ UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, string normalTe
 		case PUSH_BUTTON_MODE:statusFlags |= BF_REPEATS;break;
         case TAB_BUTTON_MODE:statusFlags |= BF_IS_TAB; statusFlags |= BF_STATIC;break;
 		default:break;
-	}; 
+	} 
 						   
 	this->buttonPlacementArea=rect;
 	this->autoSize=autoSize;
@@ -177,7 +209,7 @@ UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, string normalTe
 
 //	for(int i=DISABLED_BUTTON_PHASE;i<MAX_BUTTON_ANIMATION_PHASES;i++)
 //		text[i]=new UI_StaticText(this, normalText, Rect(0,0,0,0), HORIZONTALLY_CENTERED_TEXT_MODE, font, theme.lookUpButtonAnimation(button)->startTextColor[i]);
-};
+}
 
 // -> bitmap button!
 UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eButton button, eButtonMode buttonMode, ePositionMode mode):UI_Object(parent, rect, maxRect)
@@ -194,7 +226,7 @@ UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eButton button,
 		case PUSH_BUTTON_MODE:statusFlags |= BF_REPEATS;break;
         case TAB_BUTTON_MODE:statusFlags |= BF_IS_TAB; statusFlags |= BF_STATIC;break;
 		default:break;
-	}; 
+	} 
 						   
 	this->buttonPlacementArea=rect;
 	this->autoSize=NO_AUTO_SIZE;
@@ -203,7 +235,7 @@ UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eButton button,
 	this->font=NULL_FONT;
 	this->normalText=0;
 	this->pressedText=0;
-};
+}
 
 UI_Button::~UI_Button()
 {
@@ -211,7 +243,7 @@ UI_Button::~UI_Button()
 		delete normalText;
 	if(pressedText)
 		delete pressedText;
-};
+}
 
 void UI_Button::resetData()
 {
@@ -220,13 +252,13 @@ void UI_Button::resetData()
 	frameNumber=0;
 	timeStamp=0;
 	forcedPress=false;
-};
+}
 
 
 void UI_Button::setButton(const eButton button)
 {
 	this->button=button;
-};
+}
 
 void UI_Button::adjustButtonSize(const Size size)
 {
@@ -238,7 +270,7 @@ void UI_Button::adjustButtonSize(const Size size)
 		case AUTO_SIZE:break;
 		case AUTO_HEIGHT_FULL_WIDTH:setWidth(buttonPlacementArea.GetWidth()-5);break;
 		case CONSTANT_SIZE:setWidth(120);break;// ~~ nur fuer tabs naja
-	};
+	}
 
 	setPosition(buttonPlacementArea.GetPosition());
 	
@@ -263,7 +295,7 @@ void UI_Button::adjustButtonSize(const Size size)
 		case BOTTOM_RIGHT:setPosition(buttonPlacementArea.GetPosition()+Point(buttonPlacementArea.GetWidth() - getWidth(), 
 									  											buttonPlacementArea.GetHeight() - getHeight()));break;
 		case BOTTOM_CENTER:setPosition(buttonPlacementArea.GetPosition()+Point((buttonPlacementArea.GetWidth() - getWidth())/2, 
-									   											buttonPlacementArea.GetHeight() - 2*getHeight()));break;
+									   											buttonPlacementArea.GetHeight() - getHeight()));break;
 		case BOTTOM_LEFT:setPosition(buttonPlacementArea.GetPosition()+Point(0, 
 									 											buttonPlacementArea.GetHeight() - getHeight()));break;
 		case CENTER_LEFT:setPosition(buttonPlacementArea.GetPosition()+Point(0, 
@@ -273,7 +305,7 @@ void UI_Button::adjustButtonSize(const Size size)
 						 {
 							 setPosition(buttonPlacementArea.GetPosition()+Point(getParent()->min_top_x, 0));
 							 getParent()->min_top_x += getWidth() + MIN_DISTANCE;
-						 };break;
+						 }break;
 		case ARRANGE_BOTTOM:setPosition(buttonPlacementArea.GetPosition()+Point(getParent()->min_bottom_x, buttonPlacementArea.GetHeight() - getHeight()));
 							getParent()->min_bottom_x+=getWidth()+MIN_DISTANCE;
 							break;
@@ -283,28 +315,24 @@ void UI_Button::adjustButtonSize(const Size size)
 		case ARRANGE_RIGHT:setPosition(buttonPlacementArea.GetPosition()+Point(buttonPlacementArea.GetWidth() - getWidth(), getParent()->min_right_y));
 						   getParent()->min_right_y+=getHeight()+MIN_DISTANCE;
 						   break;
-	};
-};
+	}
+}
 
 void UI_Button::updatePressedText(const string utext)
 {
 	pressedText->updateText(utext);
-};
+}
 
 void UI_Button::updateNormalText(const string utext)
 {
 	normalText->updateText(utext);
-};
+}
 
 // Render button.  How it draws exactly depends on it's current state.
 void UI_Button::draw(DC* dc) const
 {
 	if(!shown)
 		return;
-
-	Point m=Point(0,0);
-	if(statusFlags & BF_DOWN)
-		m=Point(1,1);
 		
 	eButtonAnimationPhase animation_phase;
 	if(disabledFlag)
@@ -316,7 +344,6 @@ void UI_Button::draw(DC* dc) const
 			animation_phase=PRESSED_HIGHLIGHTED_BUTTON_PHASE;
 		else
 		animation_phase=PRESSED_BUTTON_PHASE;
-//		setPosition(getPosition()+m);
 	}
 	else
 	if(statusFlags & BF_HIGHLIGHTED)
@@ -328,7 +355,7 @@ void UI_Button::draw(DC* dc) const
 	{
 		dc->SetBrush(*theme.lookUpBrush(NULL_BRUSH));
 		dc->SetPen(*theme.lookUpPen(DARK_BACKGROUND_PEN));
-		dc->DrawRectangle(Rect(getAbsolutePosition()-Point(1,1)-m, getSize() + Size(2,2)));
+		dc->DrawRectangle(Rect(getAbsolutePosition()-Point(1,1), getSize() + Size(2,2)));
 
 //		dc->SetBrush(*theme.lookUpBrush(NULL_BRUSH)); //?
 //		dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
@@ -348,7 +375,7 @@ void UI_Button::draw(DC* dc) const
 		case GLOWING_ANIMATION:gradient=(int)(50*(sin(3.141*frameNumber/theme.lookUpButtonAnimation(button)->speed)+1));break;
 		case BLINKING_ANIMATION:if(frameNumber<theme.lookUpButtonAnimation(button)->speed/2) gradient=100;else gradient=0;break;
 		default:break;
-	};
+	}
 // TODO evtl ueberlegen, dass markierte buttons langsam verblassen wenn sie nicht mehr gehighlighted sind
 	// Problem: die mixColor arbeitet mit animation_phase, wenn ausserhalb der phase wird gradient ignoriert auf 
 	dc->SetPen(Pen(dc->mixColor(
@@ -384,6 +411,8 @@ void UI_Button::draw(DC* dc) const
 		dc->DrawLine(getAbsolutePosition() + Point(getWidth()-1, 0), getAbsolutePosition() + Point(getWidth()-1, getHeight()));
 	} ??? */
 
+//	dc->DrawRectangle(Rect(buttonPlacementArea.GetPosition() + getAbsolutePosition(), buttonPlacementArea.GetSize()));
+		
 	UI_Object::draw(dc);	
 /*    int offset, frame_num = -1;
 
@@ -448,8 +477,6 @@ void UI_Button::draw(DC* dc) const
 //	if(statusFlags & BF_HIGHLIGHTED)
 //		maybeShowToolTip(dc);
 
-//	if(statusFlags & BF_DOWN)
-//		setPosition(getPosition()-m);
 }
 
 
@@ -477,28 +504,47 @@ void UI_Button::frameReset()
 }
                                                                                
 
-// process all kind of messages
-
 void UI_Button::process()
 {
-//	if(!shown) //~~
-//		return;
-	// first check getChildren()
+	if(!shown) 
+	{
+		frameReset();
+		return;
+	}
 	
 	Point absoluteCoord = getRelativePosition() - buttonPlacementArea.GetPosition();
-	
-	UI_Object::process();
+    UI_Object::process();
 
 	buttonPlacementArea.SetPosition( getRelativePosition() - absoluteCoord );
+	if( !(statusFlags & BF_DOWN))
+        {
+            if(!hasBitmap)
+            {
+                pressedText->Hide();
+                normalText->Show();
+                adjustButtonSize(normalText->getSize());
+                normalText->setSize(getSize());
+            }
+        } else
+        {
+            if(!hasBitmap)
+            {
+                pressedText->Show();
+                normalText->Hide();
+                adjustButtonSize(pressedText->getSize());
+                pressedText->setSize(getSize());
+            }
+		}
 	
 	Rect r = getAbsoluteRect();
 	//Rect(getParent()->getAbsolutePosition() + getRelativePosition(), getSize());	
 	int condition;
-	if(statusFlags & BF_DOWN)
-		r.SetPosition(r.GetPosition()+Point(-1,-1));
 //	else 
 //		r.SetPosition(r.GetPosition()+Point(-1,-1));
 	condition = controls.getPressConditionOf(r);
+
+	if(statusFlags & BF_DOWN)
+		setPosition(getRelativePosition()+Point(1,1));
 
 	int old_status_flags = statusFlags;
 	frameReset();
@@ -551,43 +597,43 @@ void UI_Button::process()
 					statusFlags |= BF_CLICKED;
 				}
 			}
-			if(!hasBitmap)
+/*			if(!hasBitmap)
 			{
 				pressedText->Hide();
 				normalText->Show();
 				adjustButtonSize(normalText->getSize());
 				normalText->setSize(getSize());
-			}
+			}*/
 		} else
 		{
-			if(!hasBitmap)
+/*			if(!hasBitmap)
 			{
 				pressedText->Show();
 				normalText->Hide();
 				adjustButtonSize(pressedText->getSize());
 				pressedText->setSize(getSize());
-			}
+			}*/
 
-		if( !(old_status_flags & BF_DOWN))
-		{
-       		statusFlags |= BF_JUST_PRESSED;
-	        timeStamp = getTimeStampMs(100);
+			if( !(old_status_flags & BF_DOWN))
+			{
+       			statusFlags |= BF_JUST_PRESSED;
+	        	timeStamp = getTimeStampMs(100000);
        //		if (user_function)
 	  //          user_function(); TODO
                                                                               
-	        if (statusFlags & BF_REPEATS) 
+		        if (statusFlags & BF_REPEATS) 
+				{
+       			    nextRepeat = getTimeStampMs(300000); // TODO
+		    	    statusFlags |= BF_CLICKED;
+		        }
+		    } 
+		    // check if a repeat event should occur
+		    if ( isTimeSpanElapsed(nextRepeat) && (statusFlags & BF_REPEATS) ) 
 			{
-       		    nextRepeat = getTimeStampMs(300); // TODO
-		        statusFlags |= BF_CLICKED;
-	        }
-	    } 
-	    // check if a repeat event should occur
-	    if ( isTimeSpanElapsed(nextRepeat) && (statusFlags & BF_REPEATS) ) 
-		{
-			nextRepeat = getTimeStampMs(100); //TODO
-    		statusFlags |= BF_CLICKED;
-      		timeStamp = getTimeStampMs(100);
-	    }
+				nextRepeat = getTimeStampMs(100000); //TODO
+	    		statusFlags |= BF_CLICKED;
+    	  		timeStamp = getTimeStampMs(100000);
+	    	}
                                                                                
     // check for double click occurance
   //  if (B1_DOUBLE_CLICKED && mouse_on_me) {
@@ -601,10 +647,16 @@ void UI_Button::process()
 
 	} // end shown
 	forcedPress=false;
+
+	if(statusFlags & BF_DOWN)
+		setPosition(getRelativePosition()-Point(1,1));
+
 }				
 
 const bool UI_Button::isPressed() const
 {
+	if(!shown)
+		return false;
 	if (statusFlags & BF_CLICKED)
 		return true;
 	else
@@ -614,48 +666,58 @@ const bool UI_Button::isPressed() const
 
 const bool UI_Button::isJustPressed() const
 {
+	if(!shown)
+		return false;
     if ( statusFlags & BF_JUST_PRESSED )
         return true;
     else
         return false;
-};
+}
 
 const bool UI_Button::isJustReleased() const
 {
+    if(!shown)
+	        return false;
     if ( statusFlags & BF_JUST_RELEASED )
         return true;
     else
         return false;
-};
+}
  			
                                                                               
 const bool UI_Button::isJustHighlighted() const
 {
+	if(!shown)
+		return false;
     if ( statusFlags & BF_JUST_HIGHLIGHTED )
         return true;
     else
         return false;
-};
+}
 
 const bool UI_Button::isCurrentlyPressed() const
 {
+    if(!shown)
+	        return false;
     if ( (statusFlags & BF_DOWN) || !isTimeSpanElapsed(timeStamp) )
         return true;
     else
     	return false;
-};
+}
 
 // Is the mouse over this button?
 const bool UI_Button::isCurrentlyHighlighted() const
 {
+    if(!shown)
+		return false;
     return (statusFlags & BF_HIGHLIGHTED);
-};
+}
                                                                                
 // Is the mouse over this button?
 void UI_Button::forceHighlighted()
 {
     statusFlags |= BF_HIGHLIGHTED;
-};
+}
                                                                                
 // Force button to get pressed
 void UI_Button::forcePressed()
@@ -666,7 +728,7 @@ void UI_Button::forcePressed()
 //        timeStamp = getTimeStampMs(100);
 	      statusFlags |= BF_DOWN | BF_CLICKED;// */| BF_JUST_PRESSED;
     }
-};
+}
 
 void UI_Button::forceUnpress()
 {
@@ -676,15 +738,15 @@ void UI_Button::forceUnpress()
 //		statusFlags &= ~BF_JUST_RELEASED; // ~~
 	//	frameReset();
 	
-	};
-};
+	}
+}
                                                                                
 // reset the "pressed" timestamps
 void UI_Button::resetTimestamps()
 {
 	timeStamp=0; //1?
 	nextRepeat=0;
-};
+}
                                                                                
 //void UI_Button::skip_first_highlight_callback()
 //{
@@ -703,7 +765,7 @@ void UI_Button::maybeShowCustomCursor()
   //          previous_cursor_bmap = gr_get_cursor_bitmap();
     //        gr_set_cursor_bitmap(custom_cursor_bmap, GR_CURSOR_LOCK);  // set and lock
 //        }
-};
+}
                                                                                
 void UI_Button::restorePreviousCursor()
 {
@@ -713,7 +775,7 @@ void UI_Button::restorePreviousCursor()
     //    gr_set_cursor_bitmap(previous_cursor_bmap, GR_CURSOR_UNLOCK);       // restore and unlock
       //  previous_cursor_bmap = -1;
     //}
-};*/
+}*/
 #endif
 
 

@@ -5,21 +5,21 @@ BoDiagramWindow::BoDiagramWindow(UI_Object* parent, ANARACE* anarace, InfoWindow
 	resetData();
 	this->anarace=anarace;
 	this->infoWindow=infoWindow;
-};
+}
 
 BoDiagramWindow::~BoDiagramWindow()
 {
-};
+}
 
 void BoDiagramWindow::resetData()
 {
-};
+}
 
 void BoDiagramWindow::process()
 {
 	if(!shown) return;
 	UI_Window::process();
-};
+}
 
 void BoDiagramWindow::draw(DC* dc) const
 {
@@ -62,7 +62,7 @@ void BoDiagramWindow::draw(DC* dc) const
 			if(anarace->getStatisticsHaveGas(i)>maxGas) maxGas=anarace->getStatisticsHaveGas(i);
 			if(anarace->getStatisticsNeedSupply(i)>haveSupply) haveSupply=anarace->getStatisticsNeedSupply(i);
 			if(anarace->getStatisticsHaveSupply(i)>haveSupply) haveSupply=anarace->getStatisticsHaveSupply(i);
-		};
+		}
 			
 		int s=anarace->ga->maxTime-1;
 		while(s>=time)
@@ -109,15 +109,21 @@ void BoDiagramWindow::draw(DC* dc) const
 				} else*/
 //				{
 //						dc->SetTextForeground(dc->doColor(255,160,160)); for fitness
-						dc->SetPen(*theme.lookUpPen(BODIAGRAM_SUPPLY_PEN));
 						dc->SetBrush(*theme.lookUpBrush(BODIAGRAM_SUPPLY_BRUSH));
-						for(int i=count;i--;)
+						dc->SetPen(*theme.lookUpPen(BODIAGRAM_SUPPLY_PEN));
+/*						for(int i=count;i--;)
 						{
 							if(i>0)
-dc->DrawRectangle(hneedSupply[i].x, hneedSupply[i].y, 5/*+hneedSupply[i].x - hneedSupply[i-1].x*/, nneedSupply[i].y - hneedSupply[i].y+1);//hneedSupply[i].y - getAbsoluteClientRectLowerBound());
+								dc->DrawRectangle(hneedSupply[i].x, hneedSupply[i].y, hneedSupply[i].x - hneedSupply[i-1].x, nneedSupply[i].y-hneedSupply[i].y+1);
 //							dc->DrawLine(hneedSupply[i],nneedSupply[i]);
-						} // TODO
-//						dc->DrawSpline(count,needSupply);
+						} // TODO*/
+
+						dc->SetPen(*theme.lookUpPen(BODIAGRAM_SUPPLY_PEN));
+//						dc->DrawSpline(count,nneedSupply);
+//						dc->DrawSpline(count,hneedSupply);
+						for(int i=0;i<getClientRectWidth();i++)
+							dc->DrawLine(getAbsoluteClientRectLeftBound()+i, hneedSupply[count*i/getClientRectWidth()].y, getAbsoluteClientRectLeftBound()+i+1, nneedSupply[count*i/getClientRectWidth()].y+1);
+						
 						dc->SetPen(*theme.lookUpPen(BODIAGRAM_MINERALS_PEN));
 						dc->DrawSpline(count, &(minerals[0]));
 						dc->SetPen(*theme.lookUpPen(BODIAGRAM_GAS_PEN));

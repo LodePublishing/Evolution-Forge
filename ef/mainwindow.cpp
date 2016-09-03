@@ -28,23 +28,23 @@ MainWindow::MainWindow():UI_Window( NULL, MAIN_WINDOW_TITLE_STRING, MAIN_WINDOW,
 	int step=theme.lookUpButtonAnimation(TAB_BUTTON)->speed/(MAX_TABS-1);
 	for(int i=BASIC_TAB;i<MAX_TABS;i++)
 		tab[i]->setFrameNumber((i-1)*step);
-};
+}
 
 
 MainWindow::~MainWindow()
 {
 	for(int i=BASIC_TAB;i<MAX_TABS;i++)
 		delete tab[i];
-};
+}
 
 void MainWindow::process()
 {
 	UI_Window::process();
-};
+}
 
 void MainWindow::draw(DC* dc) const
 {
 	UI_Window::draw(dc);
-};
+}
 
 

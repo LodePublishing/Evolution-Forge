@@ -1,4 +1,5 @@
 #include "main.hpp"
+#include "SDL/SDL_gfxPrimitives.h"
 
 int SCREEN_X;
 int SCREEN_Y;
@@ -119,22 +120,21 @@ void Main::process()
 		msgWindow->addMessage(os.str());
 		resetData();
 	}
-
-};
+}
 
 void Main::stopOptimizing()
 {
 	for(int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
 		   if(player[i]->isShown())
 			player[i]->setOptimizing(false);
-};
+}
 
 void Main::startOptimizing()
 {
 	for(int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
 		   if(player[i]->isShown())
 				player[i]->setOptimizing(true);
-};
+}
 
 const int Main::isOptimizing()
 {
@@ -142,7 +142,7 @@ const int Main::isOptimizing()
 		if(player[i]->isOptimizing())
 			return(1);
 	return(0);
-};
+}
 
 void Main::helper(DC* dc, int i, int &dx, int &dy, const string& str) const
 {
@@ -159,7 +159,7 @@ void Main::drawGizmo(DC* dc) const
 	dc->SetFont(UI_Object::theme.lookUpFont(HUGE_DEFAULT_BOLD_FONT));
 	int dx=0;int dy=0;
 	string str="Evolution";
-	for(int i=0;i<str.size();i++)
+	for(unsigned int i=0;i<str.size();i++)
 		helper(dc, i, dx, dy, str.substr(0,i+1));
 
 	dc->SetTextForeground(toSDL_Color(25,25,85));
@@ -168,7 +168,7 @@ void Main::drawGizmo(DC* dc) const
 	dc->DrawText("v1.21",mainWindow->getAbsoluteClientRectPosition()+Point(158,98));
 	dc->SetTextForeground(toSDL_Color(50,50,85));
 	dc->DrawText("v1.21",mainWindow->getAbsoluteClientRectPosition()+Point(155,95));
-};
+}
 
 void Main::draw(DC* dc) const
 {
@@ -209,7 +209,7 @@ void Main::draw(DC* dc) const
 		grey+=2;
 	}*/
 // TODO evtl player in mainwindow als UI_Object einhaengen
-};
+}
 
 										
 //settings: log level (none, debug only, +final result, +result of each run, +snapshot every X generations, +snapshot every generation, EVERYTHING (~2MB/generation!)
@@ -236,17 +236,18 @@ void Main::OnIdle()
 //	}
 
 	refresh++;
-	if(refresh>8)
+	if(refresh>settings.getSpeed())
 		refresh=0;		
 }
+
 
 void Main::Init(DC* dc)
 {
 	UI_Object::theme.loadDataFiles("settings/ui/default.ui","data/bitmaps","data/fonts",dc);
 // Always do loadHarvestFile (mining speeds) before loadMapFile, because at the moment the mapfile also sets the gathering speed
 	settings.loadHarvestFile("settings/harvest/default.hvt");
-	// harvest file VOR startcondition file!!!!!!!!!!----------------
 	settings.loadSettingsFile("settings/default.cfg");
+
 	settings.loadMapFile("settings/maps/lt42.map");
 	settings.loadStartconditionFile("settings/start/default_terra.start");
 	settings.loadStartconditionFile("settings/start/default_protoss.start");
@@ -264,18 +265,19 @@ void Main::Init(DC* dc)
 	settings.setHarvestSpeed(PROTOSS, 1);
 	settings.setHarvestSpeed(ZERG, 2);
 
-	settings.setStartRace(1, PROTOSS);
-	settings.setStartRace(2, PROTOSS);
+	settings.setStartRace(1, TERRA);
+	settings.setStartRace(2, TERRA);
 
-	settings.setStartcondition(1, 1);
-	settings.setStartcondition(2, 1);
+	settings.setStartcondition(1, TERRA);
+	settings.setStartcondition(2, TERRA);
 
 	settings.setStartPosition(1, 1);
 	settings.setStartPosition(2, 7);
 	settings.fillGroups();
 
-	settings.setGoal(1, PROTOSS);
-	settings.setGoal(2, PROTOSS); //~~
+	settings.setGoal(1, TERRA);
+	settings.setGoal(2, TERRA); //~~
+	// TODO FEHLERMELDUNG FALLS FALSCHES GOAL ZU FALSCHER RASSE
 
 //	settings.assignStartconditionHarvestSpeed();
 		
@@ -329,9 +331,7 @@ void Main::Init(DC* dc)
 	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG1_STRING)));
 	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG2_STRING)));
 	msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(PLAYERS_LOADED_STRING, settings.getMap(0)->getMaxPlayer()));
-
-
-};
+}
 
 int main(/*int argc, char **argv*/)
 {
@@ -369,15 +369,34 @@ int main(/*int argc, char **argv*/)
 	Main m;
 	m.Init(screen);
 
+	FPSmanager* fpsmanager=new FPSmanager;
+	SDL_initFramerate(fpsmanager);
+	// cap framerate
+	SDL_setFramerate(fpsmanager, 50);
+	bool fullupdate=false;
+	int screenshot=100;
 	while(true)
 	{
-	
+		UI_Window::rectnumber=0;
 		m.process();
-		m.draw(screen);
 		m.OnIdle();
+		m.draw(screen);
+		
+//		SDL_UpdateRects(screen->GetSurface(), 7, &(UI_Window::rectlist[0]));
+		
+		SDL_framerateDelay(fpsmanager);
 
-		SDL_UpdateRect(screen->GetSurface(), 0, 0, 0, 0);
-		SDL_SetClipRect(screen->GetSurface(), &c);	
+		
+//		if(fullupdate)
+			SDL_UpdateRect(screen->GetSurface(),0,0,0,0);
+
+		if(fullupdate)
+		{
+			ostringstream os;os << "shot" << screenshot << ".bmp";
+			SDL_SaveBMP(screen->GetSurface() , os.str().c_str());os.str("");screenshot++;
+		}
+
+		//SDL_SetClipRect(screen->GetSurface(), &c);	
 		while (SDL_PollEvent(&event))
 		{
 			switch (event.type)
@@ -388,11 +407,12 @@ int main(/*int argc, char **argv*/)
 							  {
 									case SDLK_ESCAPE:return(0);break;
 									case SDLK_SPACE:
+													 fullupdate=!fullupdate;break;/*
 									 {
 										if(m.isOptimizing())
 											m.stopOptimizing();
 										else m.startOptimizing();
-										};break;
+										};break;*/
 									case SDLK_RETURN:
 									 if(event.key.keysym.mod & (KMOD_LALT | KMOD_RALT | KMOD_ALT))
 											SDL_WM_ToggleFullScreen(screen->GetSurface());
@@ -431,7 +451,8 @@ int main(/*int argc, char **argv*/)
 			}
 		}
 	}
-};
+	delete fpsmanager;
+}
 					
 /*					
 void Main::OnMouseWheelScroll(MouseEvent& event)

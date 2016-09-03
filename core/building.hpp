@@ -1,7 +1,7 @@
 #ifndef _CORE_BUILDING_HPP
 #define _CORE_BUILDING_HPP
 
-#include "main.hpp"
+#include "defs.hpp"
 
 class EXPORT Building
 {

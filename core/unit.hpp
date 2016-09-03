@@ -1,7 +1,7 @@
 #ifndef _CORE_UNIT_HPP
 #define _CORE_UNIT_HPP
 
-#include "main.hpp"
+#include "defs.hpp"
 
 /*1. researches + erforschungen werden nur fuer location 0 gezaehlt, wie bisher
 2. globales array, also locations x unit x spieler
@@ -17,12 +17,18 @@ class EXPORT UNIT
 	public:
 		//TODO evtl noch nen paar get/set Funktionen rein... 
 		void copy(const UNIT* unit);
-		const int getAvailible(const int unit) const;
-		const int getTotal(const int unit) const;
-		void setAvailible(const int unit, const int availible);
-		void setTotal(const int unit, const int total);
-		void addAvailible(const int unit, const int availible);
-		void addTotal(const int unit, const int total);
+		const int getAvailible(const int unittype) const;
+		const int getTotal(const int unittype) const;
+		void setAvailible(const int unittype, const int availible);
+		void setTotal(const int unittype, const int total);
+		void addAvailible(const int unittype, const int availible);
+		void addTotal(const int unittype, const int total);
+
+		void addOneAvailible(const int unittype);
+		void addOneTotal(const int unittype);
+		void removeOneAvailible(const int unittype);
+		void removeOneTotal(const int unittype);
+		
 		void adjustResearches(const eRace race);
 		void adjustSupply(const eRace race, int& needSupply, int& haveSupply);
 		void resetData();

@@ -1,14 +1,20 @@
 #include "statistics.hpp"
+#include "../core/settings.hpp"
+#include <sys/time.h>
 
 StatisticsWindow::StatisticsWindow(UI_Object* parent, const ANARACE* anarace, const int windowNumber):UI_Window(parent, STATISTICS_WINDOW_TITLE_STRING, STATISTICS_WINDOW, windowNumber, NOT_SCROLLED)
 {
 	this->anarace=anarace;
 	resetData();
-};
+    timeval tim;
+    gettimeofday(&tim, NULL);
+    start_time=tim.tv_sec*1000000+tim.tv_usec;
+	av=0;
+}
 
 StatisticsWindow::~StatisticsWindow()
 {
-};
+}
 																				
 void StatisticsWindow::showGraph(DC* dc, const int* data, const int min, const int max, const Color col) const
 {
@@ -28,9 +34,9 @@ void StatisticsWindow::showGraph(DC* dc, const int* data, const int min, const i
 		} else k++;
 	}
 	blub[0]=Point(getAbsoluteClientRectPosition()+Point(0,100-100*(data[0]-min)/(max+1)));
-	blub[j]=Point(getAbsoluteClientRectPosition()+Point(199,100-100*(data[199]-min)/(max+1)));
+blub[j]=Point(getAbsoluteClientRectPosition()+Point(199,100-100*(data[199]-min)/(max+1)));
 	dc->DrawSpline(j+1,blub);
-};
+}
 
 void StatisticsWindow::resetData()
 {
@@ -65,7 +71,7 @@ void StatisticsWindow::resetData()
 		oldMineralsCounter[i]=0;
 		oldMinerals[i]=0;
 	}
-};
+}
 
 void StatisticsWindow::draw(DC* dc) const
 {
@@ -103,7 +109,7 @@ void StatisticsWindow::draw(DC* dc) const
 																				
 	dc->DrawRoundedRectangle(Legend2.x,Legend2.y+12,Legend3.x,Legend3.y,4);
 	dc->SetTextForeground(*theme.lookUpColor(TIME_TEXT_COLOUR));
-	dc->DrawText(theme.lookUpFormattedString(TIME_STRING, time[199]/60, time[199]%60),Legend2.x, Legend2.y+12);
+	dc->DrawText(theme.lookUpFormattedString(TIME_STRING,time[199]%60,time[199]/60),Legend2.x, Legend2.y+12);
 //	addButton(Rect(Legend2.x, Legend2.y+12, Legend3.x, Legend3.y), "time of the best build order"); TODO
 	
 																				
@@ -176,43 +182,30 @@ void StatisticsWindow::draw(DC* dc) const
 	dc->SetTextForeground(*theme.lookUpColor(GENERATIONS_LEFT_TEXT_COLOUR));
 	dc->DrawText(theme.lookUpFormattedString(GENERATIONS_LEFT_STRING, anarace->ga->maxGenerations-anarace->getUnchangedGenerations()),Legend2.x,Legend2.y+84);
 //	addButton(Rect(Legend2.x, Legend2.y+84, Legend3.x, Legend3.y), "minimum expected number of generations until final solution"); TODO
-	
-#if 0	
-		dt1=DateTime::UNow();
-	  TimeSpan ts=dt1.Subtract(dt2);
-	dt2=dt1;
-																				
-		if(averagecounter<100)
-		averagecounter++;
-	for(int i=averagecounter-1;i--;)
-		average[i+1]=average[i];
-	average[0]=ts.GetMilliseconds().ToLong();
-																				
-	int av=0;
-	for(int i=0;i<averagecounter;i++)
-		av+=average[i];
-	av/=averagecounter;
 //	  int tlength=force[199]/100-5;
 
-//	  haxor->Draw(dc);
-
 	int dx,dy;
-	String bla;
-	dc->SetTextForeground(dc->doColor(100,100,255));
+	dc->SetTextForeground(*theme.lookUpColor(BRIGHT_TEXT_COLOUR));
 
-	bla=_T(String::Format(T("%i ms/frame"),av));dc->GetTextExtent(bla,&dx,&dy);
-		dc->DrawText(bla,getAbsoluteClientRectLeftBound()+getClientRectWidth()-dx-5,getAbsoluteClientRectUpperBound()+getClientRectHeight()-3*dy-5);
-	bla=_T(String::Format(T("%.2f fps"),1000.0/((float)(av))));dc->GetTextExtent(bla,&dx,&dy);
-		dc->DrawText(bla,getAbsoluteClientRectLeftBound()+getClientRectWidth()-dx-5,getAbsoluteClientRectUpperBound()+getClientRectHeight()-2*dy-5);
+	ostringstream os;
+	os << av << "ms/frame";
+	dc->GetTextExtent(os.str(),&dx,&dy);
+	dc->DrawText(os.str(),getAbsoluteClientRectLeftBound()+getClientRectWidth()-dx-5,getAbsoluteClientRectUpperBound()+getClientRectHeight()-3*dy-5);
+
+	os.str("");
+	os << 1000.0/((float)(av)) << " fps";
+	dc->GetTextExtent(os.str(),&dx,&dy);
+	dc->DrawText(os.str(),getAbsoluteClientRectLeftBound()+getClientRectWidth()-dx-5,getAbsoluteClientRectUpperBound()+getClientRectHeight()-2*dy-5);
 	if(anarace->isOptimizing())
 	{
-		bla=_T(String::Format(T("%.2f bops"),1000.0*(MAX_PROGRAMS+anarace->getMap()->getMaxPlayer()-1)/((float)(av))));dc->GetTextExtent(bla,&dx,&dy);
-			dc->DrawText(bla,getAbsoluteClientRectLeftBound()+getClientRectWidth()-dx-5,getAbsoluteClientRectUpperBound()+getClientRectHeight()-dy-5);
+		os.str("");
+		os << 1000.0*(MAX_PROGRAMS+(*anarace->getMap())->getMaxPlayer()-1)/((float)(av*(1+settings.getSpeed()))) << " bops";
+		dc->GetTextExtent(os.str(),&dx,&dy);
+		dc->DrawText(os.str(),getAbsoluteClientRectLeftBound()+getClientRectWidth()-dx-5,getAbsoluteClientRectUpperBound()+getClientRectHeight()-dy-5);
 	}
 																				
 //	dc->DrawText(_T(String::Format(T("%i of %.0f billion possible build orders checked [%.6f%%]."),anarace[0]->getGeneration()*(MAX_PROGRAMS+anarace[0]->getMap()->getMaxPlayer()-1),pow(tlength,anarace[0]->getPlayer()->goal->getMaxBuildTypes())/1000000000.0,(anarace[0]->getGeneration()*(MAX_PROGRAMS+anarace[0]->getMap()->getMaxPlayer()-1))/pow(tlength,anarace[0]->getPlayer()->goal->getMaxBuildTypes()))),haxor->getAbsoluteClientRectLeftBound(),haxor->getAbsoluteClientRectUpperBound());
 
-#endif																	
 /*	if(!run)
 		dc->DrawText(_T(String::Format(T("%i ms/frame (%.2f fps)."),av,1000.0/((float)(av)))),haxor->getAbsoluteClientRectLeftBound(),haxor->getAbsoluteClientRectUpperBound()+20);
 	else
@@ -259,13 +252,16 @@ void StatisticsWindow::draw(DC* dc) const
 	showGraph(dc,aFitness,0,maxaFitness,*theme.lookUpColor(FITNESS_AVERAGE_TEXT_COLOUR));
 	showGraph(dc,vFitness,0,maxvFitness,*theme.lookUpColor(FITNESS_VARIANCE_TEXT_COLOUR));
 //	  showGraph(dc,pFitness,maxpFitness,dc->doColor(255,40,40));
-};
+
+}
 
 // TODO ueberpruefen ob is shown
 void StatisticsWindow::process()
 {
 	if(!shown)
 		return;
+	
+	
 	UI_Window::process();
 	for(int i=0;i<199;i++)
 	{
@@ -415,5 +411,20 @@ void StatisticsWindow::process()
 				oldMinerals[j]=tee;
 			}
 		}
-};
+	timeval tim;
+    gettimeofday(&tim, NULL);
+	long int new_time=tim.tv_sec*1000000+tim.tv_usec;
+	long int difference = (new_time - start_time)/1000;
+	start_time=new_time;
+	if(averagecounter<100)
+		averagecounter++;
+	for(int i=averagecounter-1;i--;)
+		average[i+1]=average[i];
+	average[0]=difference;
+																				
+	for(int i=0;i<averagecounter;i++)
+		av+=average[i];
+	av/=averagecounter;
+
+}
 

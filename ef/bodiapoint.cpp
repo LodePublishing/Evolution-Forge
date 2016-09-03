@@ -3,14 +3,19 @@
 BoDiagramPoint::BoDiagramPoint():
 	initialized(false)
 {
-	for(unsigned int i = TOTAL_STATS; i--;)
-		highlight[i] = 0;
+	current_y1.assign(MAX_ENTRIES, 0);
+	current_y2.assign(MAX_ENTRIES, 0);
+	start_y1.assign(MAX_ENTRIES, 0);
+	start_y2.assign(MAX_ENTRIES, 0);
+	target_y1.assign(MAX_ENTRIES, 0);
+	target_y2.assign(MAX_ENTRIES, 0);
+	highlight.assign(MAX_ENTRIES, 0);
 }
 
 BoDiagramPoint::~BoDiagramPoint()
 {}
 
-void BoDiagramPoint::setTargetY(eHaveStats stat_num, unsigned int number_y1, unsigned int number_y2)
+void BoDiagramPoint::setTargetY(unsigned int stat_num, unsigned int number_y1, unsigned int number_y2)
 {
 	if((number_y1 != target_y1[stat_num]) || ( number_y2 != target_y2[stat_num]))
 		highlight[stat_num] = 150;
@@ -53,5 +58,6 @@ void BoDiagramPoint::setTargetX(unsigned int number_x)
 	}
 }
 
-unsigned int BoDiagramPoint::max[TOTAL_STATS];
+std::vector<unsigned int> BoDiagramPoint::max;
+unsigned int BoDiagramPoint::MAX_ENTRIES = 0;
 

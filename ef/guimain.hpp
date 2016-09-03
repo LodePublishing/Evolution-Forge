@@ -1,7 +1,6 @@
 #ifndef _GUI_MAIN_HPP
 #define _GUI_MAIN_HPP
 
-#include "game.hpp"
 #include "msgwindow.hpp"
 //#include "info.hpp"
 #include "helpwindow.hpp"
@@ -9,6 +8,9 @@
 #include "datawindow.hpp"
 #include "mainwindow.hpp"
 #include "setwindow.hpp"
+#include "debug.hpp"
+
+#include "gamemenu.hpp"
 
 //#include "progressbar.hpp"
 
@@ -56,6 +58,7 @@ class Main
 		const bool hasResolutionChanged() const;
 		const bool hasFullScreenChanged() const;
 		const bool hasThemeChanged() const;
+		const bool hasGameTypeChanged() const;
 
 		void resetDataChange();
 
@@ -74,7 +77,10 @@ class Main
 		MainWindow* mainWindow;
 
 		void goBack();
+		
+		void poll(const eTicks etick);
 	private:
+
 
 		void checkTab();
 
@@ -82,10 +88,14 @@ class Main
 		HelpWindow* helpWindow;
 		SettingsWindow* settingsWindow;
 		DataBaseWindow* dataBaseWindow;
+
+		DebugWindow* debugWindow;
+		
 //		MapWindow* mapWindow;
 
 		SaveBox* saveBox;
-		LanguageMenu* languageMenu;		
+		LanguageMenu* languageMenu;
+		GameMenu* gameMenu;
 		
 		Point maus;
 		unsigned int gameCount; 
@@ -96,7 +106,7 @@ class Main
 		const bool loadGoals();
 		const bool loadBuildOrders();
 		const bool loadStartConditions();
-		const bool loadHarvestData();
+//		const bool loadHarvestData();
 		const bool loadMaps();
 
 		signed int tabToGameList[MAX_TABS];
@@ -105,7 +115,13 @@ class Main
 		eTabs currentTab;
 
 		unsigned int currentGame; // for openRaceMenu
+
+		bool gameTypeHasChanged;
 };
+
+inline void Main::poll(const eTicks etick) {
+	debugWindow->poll(etick);
+}
 
 inline const bool Main::hasBitDepthChanged() const {
 	return(settingsWindow->hasBitDepthChanged());
@@ -121,6 +137,10 @@ inline const bool Main::hasFullScreenChanged() const {
 
 inline const bool Main::hasThemeChanged() const {
 	return(settingsWindow->hasThemeChanged());
+}
+
+inline const bool Main::hasGameTypeChanged() const {
+	return(gameTypeHasChanged);
 }
 
 																		

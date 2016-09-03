@@ -37,7 +37,7 @@ const bool Size::mv2(unsigned int& x, const unsigned int sx, const unsigned int 
 	return(true);
 //	signed int z = (signed int)(((x>sx)?(2*(x-sx)<(tx-sx)?(double)(x-sx)/2:(double)(tx-x)/2):(2*(x-sx)>(tx-sx)?(double)(x-sx)/2:(double)(tx-x)/2)));
 	
-	signed int mx = (tx + sx)/2;
+/*	signed int mx = (tx + sx)/2;
 	signed int z = 0;
 	if((tx >= mx)&&(mx >= sx)&&(sx >=  x)) z = (tx-x)/2; else
 	if((tx >= mx)&&(mx >=  x)&&(x >= sx)) z = (x-sx)/2; else
@@ -50,5 +50,5 @@ const bool Size::mv2(unsigned int& x, const unsigned int sx, const unsigned int 
 	if(( x <= tx)&&(tx <= mx)&&(mx <= sx)) z = (tx-x)/2;
 
 	x+=z;
-	return(true);
+	return(true);*/
 }

@@ -6,11 +6,11 @@
 			$Evolution Forge Help Index$###
 			~BULLET_BITMAP~@Chapter  1: Introduction@100@##
 			~BULLET_BITMAP~@Chapter  2: Detailed description@200@##
-			~BULLET_BITMAP~@Chapter  3: How to use the results@300@##
+			~BULLET_BITMAP~@Chapter  3: Troubleshoot@300@##
 			~BULLET_BITMAP~@Chapter  4: Configuration@400@##
 			~BULLET_BITMAP~@Chapter  5: Program Mechanics@500@##
 			~BULLET_BITMAP~@Chapter  6: Interactive Mode@600@##
-			~BULLET_BITMAP~@Chapter  7: The core of the program@700@##
+			~BULLET_BITMAP~@Chapter  7: Evolutionary Algorithms: The core of the program@700@##
 			~BULLET_BITMAP~@Chapter  8: Communication@800@##
 			~BULLET_BITMAP~@Chapter  9: Development of EF@900@##
 			~BULLET_BITMAP~@Chapter 10: Philosophy and EF@1000@#
@@ -31,25 +31,25 @@
 
 		@110
 			@1.1: What does this program?@100@##
-			The program simulates an abstract $StarCraft:Broodwar$ environment and calculates the time a certain build order needs.#By comparing different build orders, randomly changing them and taking the best build order for the next generation, the build order is improved step by step.#$StarCraft$ build orders fit perfectly for this algorithm called $HillClimbing$.#
-			You can either type in the build order manually and let the program improve it or you can just type in the goals you want and the program will calculate an optimal build order.#
+			The program calculates the fastest build orders for certain goals (e.g. '4 wraiths'). You can either click in the build order manually and let the program improve it or you can just @click in the goals@220@ you want and the program will calculate an optimal build order. To start/stop the calculation you can either press SPACE or click on the @calculation button@210@.#
+			The program simulates an abstract $StarCraft:Broodwar$ environment and calculates the time a certain build order needs.# By comparing different build orders, randomly changing them and taking the best build orders into the next calculation the build order is improved step by step.# The program uses @evolutionary algorithms@700@ which fit perfectly for this kind of task.#
 		@END
 
 #	INTRODUCTION_QUICKSTART_CHAPTER = 120
 		@120
 			@1.2: Quickstart@100@##
 			It's easy:#
-			- In the @score window@210@ click on $'Add player'$#
-			- Choose a race by clicking on the $'race'$ button#
+			- In the @score window@210@ choose a race by clicking on the $'race'$ button#
 			- In the @unit list window@230@ click on ~ADD_BITMAP~, choose a category and pick your goals#
-			- Finally click on $'(paused)'$ button in the @score window@210@ and sit back to watch the progress#
-			- You will see items moving around in window named @build order@260@. The program now will optimize the build order by adding, removing and rearranging the items#
+			- Finally click on $'(paused)'$ button in the @score window@210@ and sit back to watch the calculation#
+			- You will see items moving around in a window named @build order@260@. The program will optimize the build order by adding, removing and rearranging the items.#
 			- In the @score window@210@ you will see the current status of the calculation. $'searching'$ means that it still looks for a valid solution (i.e. a solution that fulfills your goals), $'optimizing'$ means that it will try to reduce the time the build order needs#
 			- The @overview@240@ window shows how supply, minerals and gas develop over the time span of the build order#
 			- The @graphical build order@250@ window shows graphically where and when units and buildings are constructed#
-			- After a while you will notice that there are no more changes on the screen. Probably the fastest build order is found. 
+			- After a while you will notice that there are no more changes on the screen. Probably the fastest build order is found.#
 			- Now you might want to save the build order by clicking on ~SAVE_BITMAP~ in the @build order window@260@. You can also save your goal list by doing the same with the @unit list window@230@#
 			- Saved build orders and goal lists can be loaded again by clicking on ~LOAD_BITMAP~#
+			- When you have saved several build orders you might want to check the database.# TODO
 		@END
 
 # INTRODUCTION_OVERVIEW_CHAPTER = 130
@@ -61,25 +61,30 @@
 # INTRODUCTION_USE_CHAPTER = 140
 		@140
 			@1.4: Is it useful?@100@##
-			It's fun (I heard) and you maybe save some time trying the strategy inside the game. I doubt that people with a lot of skill profit from it but maybe they will use the results of this program as an inspiration for trying new strategies that make the game more exciting :)#
-			A lot of good build orders were already 'discovered' in the years since the release of StarCraft but I look at Evolution Forge more as a steppingstone to apply the same engine on other games. Certainly WarCraft and Dawn of War, maybe StarCraft2 some day later?
+			Naah, it's just fun (I heard). ~UGLY_KING_BITMAP~##	
+			Well, you *could* try some build orders in the game. But that will just result in even more fun...#
+			Personally I doubt that people who already have a lot of skill in playing StarCraft will profit (i.e. more winning!) from this program. A lot of good build orders already were 'discovered' in the many years since the release of StarCraft. But maybe you will take it as an inspiration for trying out something new :)#
+			For the unexperienced players I think it is of some help. When watching how Evolution Forge optimizes the build orders you certainly will learn what makes a build order *fast* and what makes it *slow*.#
+			If you are into computer science you might find the program itself more interesting. I have put several small articles about the program in the help section. If you are further interested about how this all 'computes' please feel free to ask me in the forums.#
+			For myself 'Evolution Forge' was/is a very TODO lehrreich. I see EF as a steppingstone for future programs. I certainly will apply the same program engine on other games, like WarCraft, Dawn of War or, maybe, StarCraft2.#
 		@END
 
 # INTRODUCTION_LIMITS_CHAPTER = 150
 		@150
 			@1.5: Where are the limits?@100@##
-			- It only calculates a general build order. Depending on the map, the latency, your mousespeed and many other small factors there might be a better build order.#
+			- 'Fast' does not necessarily equal 'good'. If you want 'good' build orders then watch replays :)
+			- It only calculates only a general build order. Depending on the map, the latency, your mouse speed and many other small factors there might be a better build order.#
 			- Goals consisting of many units will result in exponential growth of time needed for the calculation.#
-			- The program is based on one-second steps. This might lead to some inaccurate calculation.#
-			- In most cases the build orders cannot be applied directly 1:1 in the game but you have to exercise them and adapt them to your needs.
+			- In most cases the build orders cannot be applied directly 1:1 in the game. You have to exercise them and adapt them to your needs.
+			- Enemy movements, expansions or even combat is not (yet) part of the program
 		@END
 
 # INTRODUCTION_PROBLEMS_CHAPTER = 160
 		@160
 			@1.6: Is it cheating?@100@##
 			Well... in a way... yes.#
-			If you use the program correctly you might get an advantage over your enemy: You learn to get a better starting in the game so that you can concentrate on the main thing, strategies and tactics!#
-			While you can get the same information by watching replays, reading strategy articles or just playing the game it is much more fun to interactivly trying out combinations to compare them.
+			If you use the program correctly you might get an advantage over your enemy: You learn to get a better starting in the game so that you can concentrate on the main thing, strategies and tactics.#
+			While you can get the same information by watching replays, reading strategy articles or just playing the game it is much more fun to interactivly trying out combinations to compare them directly on the screen.#
 		@END
 
 
@@ -98,7 +103,7 @@
 			@2.1: The score window@200@##
 			~SCORE_EMPTY_BITMAP~   
 			(1) $Choose a map$#   
-			A map contains a unit list for each player (normally workers and a main building), start conditions (minerals, gas, ...) and a list of locations and their distances.#   
+			A map contains a unit list for each player (normally workers and a main building), start conditions (minerals, gas, ...) and a list of locations and their distances.#
 			(2) $Add a player$#   
 			Add a player to the list. All players in the list will play on the map you have chosen.##
 			~BULLET_BITMAP~   
@@ -112,6 +117,7 @@
 			Here is the time the current solution needs. Please remember that the time is the same as a game with $speed 5$. For example a worker needs 20 seconds to build.#   
 			(7) $Percent of goals fulfilled / Percent of optimal solution$#   
 			If the calculation is still in $searching$ mode you will see here how much percent of the goals are fulfilled. In $optimizing$ mode the percentage gives a comparison of the time with the theoretical best time. Note that it is hardly possible to reach 100% as the theoretical best time is measured using infinite ressources and workers.#
+			TODO
 		@END
 	
 # DESCRIPTION_UNIT_LIST_WINDOW_CHAPTER = 220
@@ -170,12 +176,16 @@
 			@2.6: The map window@200@##
 			TEXT
 		@END
+		@270
+			@2.7: The database window@200@##
+			TEXT
+		@END
 	
 
 # RESULTS_MAIN_CHAPTER = 300
 		@300
-			~SMALL_ARROW_LEFT_BITMAP~@Chapter 3. How to use the results@0@###
-			~BULLET_BITMAP~@3.1: About time and numbers@310@##
+			~SMALL_ARROW_LEFT_BITMAP~@Chapter 3. Troubleshoot@0@###
+			~BULLET_BITMAP~@3.1: About game speed, times and numbers@310@##
 			~BULLET_BITMAP~@3.2: HTML output@320@##
 			~BULLET_BITMAP~@3.3: Using the database@330@##
 			~BULLET_BITMAP~@3.4: Results during the run@340@#
@@ -183,8 +193,17 @@
 
 # RESULTS_TIME_AND_NUMBERS_CHAPTER = 310
 		@310
-			@3.1: About time and numbers@300@##
-			TEXT
+			@3.1: About game speed, times and numbers@300@##
+			StarCraft counts the time in $frames$. For example a SCV needs 300 game frames to be completed. In the starcraft editor (and on various sites and tables) you will find all times in seconds. These times are a little misleading as each time corresponds to a game with speed 4 ($normal$ speed) where 15 frames per second are displayed in the game StarCraft. Thus with speed 4 a SCV would need 20 seconds to complete.#
+			In Evolution Forge you can set to what time format all times should be transformed. Internally all times are calculated by frames, so when you save your build order while being in $normal$ speed mode and reload it in $fastest$ speed mode you will notice that the time the build order needs is a little smaller. Here the whole transformation list :#
+			- $slowest$: $6$ frames / second#
+			- $slower$: $9$ frames / second#
+			- $slow$: $12$ frames / second#
+			- $normal$: $15$ frames / second#
+			- $fast$: $18$ frames / second#
+			- $faster$: $21$ frames / second#
+			- $fastest$: $24$ frames / second##
+			Thus a build order that needs 10 minutes in $slowest$ mode will need $2:30$ minutes in '$astest$ mode
 		@END
 
 # RESULTS_OUTPUT_CHAPTER = 320
@@ -278,7 +297,7 @@
 			~SMALL_ARROW_LEFT_BITMAP~@Chapter 5. Mechanics of the program@0@###
 			~BULLET_BITMAP~@5.1: How the build order is processed@510@##
 			~BULLET_BITMAP~@5.2: How multiplayer works@520@##
-			~BULLET_BITMAP~@5.3: How the algorithm works@540@##
+			~BULLET_BITMAP~@5.3: How the Game is simulated@540@##
 			~BULLET_BITMAP~@5.4: How to finetune the build order@530@##
 		@END
 
@@ -347,9 +366,9 @@
 		@END
 # CORE_MAIN_CHAPTER = 700
 		@700
-			~SMALL_ARROW_LEFT_BITMAP~@Chapter 7. The core of the program@0@###
+			~SMALL_ARROW_LEFT_BITMAP~@Chapter 7. Evolutionary Algorithms: The core of the program@0@###
 			~BULLET_BITMAP~@7.1: The algorithm of the core@710@##
-			~BULLET_BITMAP~@7.2: Buildorder TODO@720@##
+			~BULLET_BITMAP~@7.2: Build order TODO@720@##
 			~BULLET_BITMAP~@7.3: Scalability@730@##
 			~BULLET_BITMAP~@7.4: Comparison?@740@##
 			~BULLET_BITMAP~@7.5: Problems with the algorithm@750@#
@@ -359,34 +378,38 @@
 # CORE_ALGORITHM_CHAPTER = 710
 		@710
 			@7.1: The algorithm of the core@700@##
-			That is very simple. If you understand a little of computer science this should be no problem:##
+			If you understand a little of computer science this should be no problem:##
 			- create 100 random build orders#
 			- loop#
-			-   determine fitness of each build order#
-			-   pick the best build orders#
+			-   determine $fitness$ of each build order#
+			-   $pick the best and worst$ build orders#
 			-   overwrite the worst with best build orders#
-			-   randomly mutate the build orders#
+			-   $randomly mutate$ the build orders#
 			- loop end##
-			$fitness$ is in this case how fast the build order can build the goals. There are several possible approaches how to pick the best and worst build orders, 
+			In this case $fitness$ is how fast the build order can fulfill the given goals in a StarCraft-like environment.#
+			If there are two build orders which need the same time then the amount of gathered minerals and gas is compared.#
+			There are several possible approaches how to $pick the best and worst$ build orders, for example the program could take the best 10% and overwrite the worst 10%.#
+			When $randomly mutating$ the program randomly swaps, adds, removes or moves whole blocks of orders within a build order.##
 			
-			The main problems I ran into were optimizing that algorithm to allow a fast fitness determination and to let the mutation only create valid solutions. A mutation which creates a battle cruiser as the first entry of a build order will certainly fail.#
-			In addition the communcation with the user was a very complicated part of coding, especially letting the user changing the build order and allowing different sets of start conditions.#
-			TEXT
+			The main prerequsite of this algorithm is that small changes in the build order result in small changes in the final time. If that is the case the algorithm builds the final solution step by step until it reaches a (near) optimal point.#
+			The most important tasks (for the programmer) is to improve the part where the build order is mutated and where its fitness is determined. A purely random mutation will probably result in an invalid solution while checking for a valid solution will decrease the program speed. The fitness determination on the other hand needs a very exact simulation of the 'real' game and needs to track all statistics for the output on the screen.#
 		@END
 
 # CORE_BUILDORDER_CHAPTER = 720
 		@720		
-			@7.2: Buildorder TODO@700@##
-			TEXT
+			@7.2: Build order TODO@700@##
+			Build orders itself are represented internally as a string of numbers. To improve the speed only such units can be build that are needed for the current build order. In addition the time when each build order will be executed is determined dynamically: Each order is executed as soon as all prerequsites (minerals, gas, supply, facilities etc.) are met, 'wait orders' can be used to delay the execution. Also instead of calculating each second of the game the program jumps from one point in time to the next, whenever a new event is predicted (i.e. when it is expected that another prerequisite of the current order is fulfilled).#
+			After a code item is translated into a real unit it is put into a building queue sorted by the time the unit will be finished. In each step the top of the building queue is processed and the item, if the is is completed, is added to the global map where it can interact with other units and other players (well, not yet).#
+			The code itself is represented as a linked list which allows fast mutation while slowing down the access on each element a little.#
+			At a later date I will program some sort of internal databases where I will put all build orders that were calculated so far. This should save a lot of time because at many times equally build orders are calculated and cpu time is wasted.#
 		@END
 
 # CORE_SCALABILITY_CHAPTER = 730
 		@730
 			@7.3: Scalability@700@##
-			Ah well, using genetic algorithms does very nice when it comes to scalability :) When I can get a hand on a parallel computer and/or study networking there will be a version that allows to speed up the calculation using a whole network of computers. This can be done because the main cpu usage is in the fitness calculation.#
-			In addition the speed of the calculation improves if the size of the population (currently 128) is increased.#
-			TODO
-			TEXT
+			Using evolutionary algorithms is very nice when it comes to scalability :) Internally there is not just one but hundreds of build orders calculated in parallel. Theoretically (if the program itself supports it) I could let Evolution Forge run on 128 different computers and get a speedup of 5000%-10000%. While speed of generating the statistics for and the graphics output itself cannot be improved as the elements are heavily interconnected each build order can be executed and mutated in parallel because each build order is independent to the others.#
+			To really value this trait of EAs you have to understand that many algorithms do not support running it on several machines (or CPUs) in parallel and therefore do not gain any advantage.#
+			When Evolution Forge gets (even) more computationally demanding I will think about putting in some parallel code (threads, networking etc.)...
 		@END
 
 # CORE_COMPARISON_CHAPTER = 740
@@ -398,8 +421,10 @@
 # CORE_PROBLEMS_GAS_CHAPTER = 750
 		@750
 			@7.5: Problems with the algorithm@700@##
-			In the algorithm itself you might have noticed the word $random$. Well, after all this is a random algorithm. It might not give you the optimal solution. But that is not quite neccessary as there are some inaccuracies between the 'real game' and the simulation anyways. TODO
-			TEXT
+			In the algorithm itself you might have noticed the word $random$ at several points in the documentation. Well, after all this is a random algorithm. It might not give you the optimal solution. But that is not quite neccessary as there are some inaccuracies between the 'real game' and the simulation anyways. If you are $extremely$ unlucky you might never get a result when using this program ;)#
+			The dependance on the random generator can be reduced when using so-called $crossing over$ which mixes the code of build orders together to create a new build order. Unfortunately this is suited better for other problems because Evolution Forge uses linear code while $crossing over$ works best on tree-like structures. It is still a big mystery how crossing over effectivly works in real biological cells without creating lots of bad copies but after all the genetic code is just the 'genotype' (the code) and not the phaenotype (the animal/plant) and there are several additional organization layers and networks between the code and the final manifestation...#
+			A big problem I am still facing is that when using location orders (e.g. move 5 marines to enemy's entrance) the complexity of the calculation increases (and therefore the calculation speed drops) significantly.#
+			The biggest disadvantage of such an algorithm is of course that it is not a real-time code. It hardly can *react* on events (like enemy movements) and when it comes to real strategic decisions it totally fails. At that point one has to use the algorithm no longer on lists but on neural networks instead.#
 		@END
 
 
@@ -419,7 +444,7 @@
 # COMMUNICATION_ABOUT_CHAPTER = 830
 		@830
 			@8.3: About myself@800@##
-			~CLEMENS_BITMAP~ My name is Clemens and I am living in germany and currently studying Computer Science in Karlsruhe. I am programming since about 12 years doing small projects until 2000. Then I started my work on Evolution Forge (called Starcraft Calculator back then).#
+			~CLEMENS_BITMAP~ My name is Clemens, I am living in germany and currently studying Computer Science in Karlsruhe. I am programming since about 12 years doing small projects until 2000. Then I started my work on Evolution Forge (called Starcraft Calculator back then).#
 		@END
 
 # DEVELOPMENT_MAIN_CHAPTER = 900
@@ -436,6 +461,7 @@
 # DEVELOPMENT_HISTORY_CHAPTER = 910
 		@910
 			@9.1: History@900@##
+			It all began about 4 years ago when I wrote a small program for VOR 
 			TEXT
 		@END
 

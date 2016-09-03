@@ -1,0 +1,36 @@
+@BO_HEADER
+		"Name" "wraith rush"
+		"Race" "Terra"
+		"Time" "446"
+@END
+@GOAL
+		"Name" "wraith rush"
+		"Race" "Terra"
+		"SCV" "1" "0" "0"
+		"Command Center" "1" "0" "0"
+		"Wraith" "4" "0" "0"
+		"Starport" "1" "0" "0"
+		"Factory" "1" "0" "0"
+		"Barracks" "1" "0" "0"
+		"Refinery" "1" "0" "0"
+@END
+@BUILDORDER
+		"SCV"
+		"SCV"
+		"SCV"
+		"SCV"
+		"SCV"
+		"Barracks"
+		"Refinery"
+		"SCV"
+		"Gas SCV"
+		"Gas SCV"
+		"Factory"
+		"Supply Depot"
+		"Starport"
+		"Starport"
+		"Wraith"
+		"Wraith"
+		"Wraith"
+		"Wraith"
+@END

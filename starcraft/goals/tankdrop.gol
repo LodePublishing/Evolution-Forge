@@ -1,0 +1,6 @@
+@GOAL 
+	"Name" "Tank drop"
+	"Race" "Terra"
+	"Siege Tank" "2" "0" "0"
+	"Dropship" "1" "0" "0"
+@END

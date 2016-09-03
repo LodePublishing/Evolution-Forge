@@ -1,7 +1,7 @@
 #ifndef _CORE_CONFIGURATION_HPP
 #define _CORE_CONFIGURATION_HPP
 
-#include "starcraft.hpp"
+#include "game.hpp"
 #include <list>
 #include <map>
 #include "../stl/misc.hpp"
@@ -39,6 +39,8 @@ class CoreConfiguration
 		const unsigned int getMaxLength() const;
 		const unsigned int getNoise() const;
 
+		const unsigned int getGameType() const;
+
 		const bool isPreprocessBuildOrder() const;
 		const bool isAllowGoalAdaption() const;
 		
@@ -57,6 +59,8 @@ class CoreConfiguration
 
 		const bool setPreprocessBuildOrder(const bool preprocess_build_order);
 		const bool setAllowGoalAdaption(const bool allow_goal_adaption);
+
+		const bool setGameType(const unsigned int game_type_number);
 
 		void setConfigurationFile(const std::string& configuration_file);
 		void loadConfigurationFile();
@@ -81,11 +85,22 @@ class CoreConfiguration
 		bool allowWaitOrders;
 		unsigned int waitAccuracy;
 
+		unsigned int gameType;
+
 		std::string configurationFile;
 	
 };
 
 extern CoreConfiguration coreConfiguration;
+
+inline const unsigned int CoreConfiguration::getGameType() const {
+#ifdef _SCC_DEBUG
+	if(gameType > GAME::MAX_GAME_TYPES) {
+		toErrorLog("DEBUG (CoreConfiguration::getGameType()): Variable gameType not initialized.");return(0);
+	}
+#endif
+	return(gameType);
+}
 
 inline const bool CoreConfiguration::isFastCalculation() const {
 	return(fastCalculation);

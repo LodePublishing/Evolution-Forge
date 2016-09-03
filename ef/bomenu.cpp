@@ -5,7 +5,7 @@ BoMenu::BoMenu(UI_Object* bo_parent, const Rect bo_rect, const Size distance_bot
 	UI_Menu(bo_parent, bo_rect, distance_bottom_right, position_mode, true, ONE_COLOUMN_MENU),
 	number(0),
 	anarace(NULL),
-	lastRace(TERRA),
+	lastRace(0),
 	lastGoal(NULL)
 { }
 
@@ -72,7 +72,7 @@ void BoMenu::resetData()
 		for(std::list<PROGRAM>::const_iterator j = my_bo->getProgramList().begin();(entries < 20) && (j!=my_bo->getProgramList().end());++j)
 		{
 			entries++;
-			os << stats[lastRace][j->getUnit()].name;
+			os << GAME::lookUpUnitString(lastRace, j->getUnit());
 			if(j->getTime()>0)
 				os << " [" << formatTime(j->getTime(), efConfiguration.getGameSpeed()) << "]"; 
 			os << "#";

@@ -1,0 +1,12 @@
+@GOAL
+        "Name" "Hallo_wie_gehts_dir_so"
+        "Race" "Terra"
+        "Dropship" "1" "0" "0"
+        "Vulture" "4" "0" "0"
+        "Starport[CT]" "1" "0" "0"
+        "Factory" "1" "0" "0"
+        "SCV" "1" "0" "0"
+        "Barracks" "1" "0" "0"
+        "Command Center" "1" "0" "0"
+        "Refinery" "1" "0" "0"
+@END

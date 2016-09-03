@@ -18,7 +18,7 @@ class GoalMenu : public UI_Menu
 		const bool addKey(unsigned int key, unsigned int mod);
 	private:
 		ANABUILDORDER* anarace;
-		eRace lastRace;
+		unsigned int lastRace;
 	
 		GoalMenu(const GoalMenu& object);
 		GoalMenu& operator=(const GoalMenu& object);

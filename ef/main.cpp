@@ -1,12 +1,14 @@
 #include "guimain.hpp"
-#include "fpssystem.hpp"
 
 #include "configuration.hpp"
 #include "../ui/configuration.hpp"
-#include "../core/configuration.hpp"
+
+#include "../core/starcraft.hpp"
+#include "../core/broodwar.hpp"
+#include "../core/warcraft3.hpp"
 
 #include <sstream>
-
+#include "files.hpp"
 class ExitInfo
 {
 	public:
@@ -22,12 +24,9 @@ ExitInfo::ExitInfo():
 ExitInfo::~ExitInfo()
 {
 	if(!smoothExit)
-	{
 		toInitLog("If you need help with the error message please post it on www.clawsoftware.de in the forums or contact me at ghoul@clawsoftware.de");
-	} else
-	{
+	else
 		toInitLog("Exiting...");
-	}
 }
 
 #ifndef _NO_FMOD_SOUND
@@ -73,10 +72,7 @@ int main(int argc, char *argv[])
 //	dum, weil sind ja noch gar keine Sprachen geladen
 	
 	toInitLog("Loading language files...");
-	std::list<std::string> stringFiles = findFiles("settings", "strings", "");
-	for(std::list<std::string>::iterator j = stringFiles.begin(); j!=stringFiles.end(); ++j)
-		UI_Object::theme.loadStringFile(*j);
-	
+	UI_Object::theme.loadStringFiles();
 	toInitLog(UI_Object::theme.lookUpString(START_LOAD_UI_CONFIGURATION_STRING));
 	uiConfiguration.loadConfigurationFile();
 	
@@ -90,8 +86,8 @@ int main(int argc, char *argv[])
 			return(EXIT_FAILURE);
 		}
 	}
-	stringFiles = findFiles("settings", "help", "");
-	for(std::list<std::string>::iterator j = stringFiles.begin(); j!=stringFiles.end(); ++j)
+	std::list<std::string> string_files = findFiles("settings", "help", "");
+	for(std::list<std::string>::iterator j = string_files.begin(); j != string_files.end(); ++j)
 		UI_Object::theme.loadHelpChapterStringFile(*j);
 	
 	toInitLog(UI_Object::theme.lookUpString(START_LOAD_CORE_CONFIGURATION_STRING));
@@ -246,41 +242,36 @@ int main(int argc, char *argv[])
 	atexit(TTF_Quit); 
 // ------- END INIT SDL_TTF -------
 
+	BROODWAR bw;
+	STARCRAFT sc;
+	WARCRAFT3 wc3;
+
 	
 // ------- INIT GRAPHIC ENGINE ------
 	toInitLog(UI_Object::theme.lookUpString(START_INIT_GRAPHIC_ENGINE_CORE_STRING));
 	Main m;
-	if((!m.initGUI(screen))||(!m.initCore()))
+	if(!m.initGUI(screen))
 	{
 		delete screen;
 		return(EXIT_FAILURE);
 	}
-
-	toInitLog(UI_Object::theme.lookUpString(START_MAIN_INIT_COMPLETE_STRING));	
-	m.initializeGame(0);
-
-	unsigned int screenshot = 100;
-//	if(efConfiguration.isAutoSaveRuns())
-//		m.startAllOptimizing();
-//	else
-//		m.stopAllOptimizing(); TODO
-
-	unsigned int screenCapturing=0;
 	SDL_SetCursor(UI_Object::theme.lookUpCursor(ARROW_CURSOR, 0));
-
-//	toLog(SDL_SetGamma(1.2, 1.5, 1.5)); TODO?
-// ------ END INIT GRAPHIC ENGINE ------
-
 // ------ CAP FRAMERATE ------
 	toInitLog(UI_Object::theme.lookUpString(START_INIT_FRAMERATE_STRING)); 
 	unsigned int original_desired_cpu = efConfiguration.getDesiredCPU();
 	unsigned int original_desired_framerate = efConfiguration.getDesiredFramerate();
 	efConfiguration.setDesiredCPU(99);
 	efConfiguration.setDesiredFramerate(15); // for the intro
-	FPS_SYSTEM* fps = new FPS_SYSTEM();
 // ------ END CAP FRAMERATE
-	
+
+
 	toInitLog(UI_Object::theme.lookUpString(START_SYSTEM_READY_STRING));
+
+//	unsigned int screenshot = 100;
+//	unsigned int screenCapturing=0;
+// ------ END INIT GRAPHIC ENGINE ------
+
+	
 	
 //				- Introwindow mit languageauswahl (bzw. schwarzer Bildschirm mit raceMenu :o )
 	
@@ -292,16 +283,6 @@ int main(int argc, char *argv[])
 	ExitInfo exitInfo;
 	while(!done)
 	{
-//TODO
-//		for(std::list<UI_Object*>::iterator i = UI_Object::processArray.begin(); i!=UI_Object::processArray.end(); ++i)
-//			(*i)->process();
-//		{
-//			std::ostringstream os;os.str("");os << "length :" << UI_Object::processArray.size();toLog(os.str());
-//		}
-	
-//		UI_Object::copyToNextProcessArray();
-
-
 		bool ignore_rest = false;
 		while (SDL_PollEvent(&event))
 		{
@@ -462,7 +443,7 @@ int main(int argc, char *argv[])
 				default:break;
 			}
 		}
-		fps->poll(MESSAGE_TICKS);
+		m.poll(MESSAGE_TICKS);
 		
 		if(picture_num==INTRO_ANIMATION_FRAMES)
 		{
@@ -498,9 +479,50 @@ int main(int argc, char *argv[])
 			m.needRedraw();
 		}
 
+		if(m.hasGameTypeChanged())
+		{
+			bool new_game_type = true;
+			switch(coreConfiguration.getGameType())
+			{
+				case 1:sc.init();break;
+				case 2:bw.init();break;
+				case 3:wc3.init();break;
+				default:toErrorLog("DEBUG (main()): Game type not initialized.");new_game_type = false;break; // not initialized
+			}
+			if(new_game_type)
+			{
+				std::ostringstream harvest_file;
+#ifdef __linux__
+				harvest_file << GAME::gameDirectory << "/" << "harvest.hvt";
+#elif __WIN32__
+				harvest_file << GAME::gameDirectory << "\\" << "harvest.hvt";
+#endif 
+				if(!FILES::loadHarvestFile(harvest_file.str()))
+				{
+					toInitLog("Generating harvest data...");
+					GAME::initResources();
+					FILES::saveHarvestFile(harvest_file.str());
+				}
+
+				if(!GAME::setLanguage(UI_Object::theme.getLanguage()))
+				{
+					toErrorLog("GAME::setLanguage failed!");
+					toErrorLog(UI_Object::theme.getLanguage());
+				}
+					
+				if(!m.initCore())
+				{
+					delete screen;
+					return(EXIT_FAILURE);
+				}
+				m.initializeGame(0);
+				toInitLog(UI_Object::theme.lookUpString(START_MAIN_INIT_COMPLETE_STRING));
+			}
+		}
+
 		m.resetDataChange();
 
-		fps->poll(PROCESS_TICKS);
+		m.poll(PROCESS_TICKS);
 
 #ifndef _NO_FMOD_SOUND
 // ------ SOUND ENGINE -------
@@ -569,7 +591,7 @@ int main(int argc, char *argv[])
 			UI_Object::sound.sound->update();
 		}
 		UI_Object::sound.soundsToPlay.clear();
-		fps->poll(SOUND_TICKS);
+		m.poll(SOUND_TICKS);
 #endif
 
 // ------ END SOUND ENGINE -------
@@ -726,14 +748,6 @@ int main(int argc, char *argv[])
 
 /// ------ END DRAWING ------
 
-//
-//
-// 
-// ------ FPS DEBUG 
-
-		if((efConfiguration.isShowDebug())&&(picture_num==INTRO_ANIMATION_FRAMES)&&(!m.isIntro()))
-			fps->draw(screen);
-// ------ END FPS DEBUG
 // ------ SCREENCAPTURE ------ 
 /*                if(screenCapturing==100) {
 			std::ostringstream os;os.str("");os << "shot" << screenshot << ".bmp";
@@ -747,22 +761,11 @@ int main(int argc, char *argv[])
                 }*/
 // ------ END SCREENCAPTURE -----
 		screen->updateScreen();
-		fps->poll(DRAW_TICKS);
+		m.poll(DRAW_TICKS);
 // ------ FRAMERATE AND CALCULATION ------	
-		fps->delay(m.isAnyOptimizing()); 
-		fps->poll(IDLE_TICKS);
-		while(fps->allowCalculation())
-		{
-			if((picture_num==INTRO_ANIMATION_FRAMES)&&(!m.isIntro()))
-				m.newGeneration();
-		}
-		fps->poll(GENERATION_TICKS);
+		m.newGeneration();
 // ------ END FRAMERATE AND CALCULATION 
-
-		fps->process();
-		fps->updateConfiguration();
 	}
-	delete fps;
 	toInitLog("* " + UI_Object::theme.lookUpString(END_CLOSING_SDL_STRING));
 	delete screen;
 	exitInfo.smoothExit = true;

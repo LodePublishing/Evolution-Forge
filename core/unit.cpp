@@ -10,31 +10,42 @@ UNIT::~UNIT()
 
 UNIT::UNIT(const UNIT& object)
 {
-	memcpy(availible, object.availible, UNIT_TYPE_COUNT*sizeof(int));
-	memcpy(total, object.total, UNIT_TYPE_COUNT*sizeof(int));
+	availible = object.availible;
+	total = object.total;
 }
 
 UNIT& UNIT::operator=(const UNIT& object)
 {
-	memcpy(availible, object.availible, UNIT_TYPE_COUNT*sizeof(int));
-	memcpy(total, object.total, UNIT_TYPE_COUNT*sizeof(int));
+	availible = object.availible;
+	total = object.total;
 	return(*this);
 }
 
 void UNIT::resetData()
 {
-	memset(availible, 0, UNIT_TYPE_COUNT * sizeof(int));
-	memset(total, 0, UNIT_TYPE_COUNT * sizeof(int));
+	availible.assign(RACE::UNIT_TYPE_COUNT, 0);
+	total.assign(RACE::UNIT_TYPE_COUNT, 0);
 }
 
-void UNIT::adjustSupply(const eRace race, unsigned int& needSupply, unsigned int& haveSupply)
+void UNIT::adjustSupply(const unsigned int race, unsigned int& needSupply, unsigned int& haveSupply)
 {
+#ifdef _SCC_DEBUG
+	if(race >= GAME::MAX_RACES) {
+		toErrorLog("DEBUG (UNIT::adjustSupply()): Value race out of range.");return;
+	}	
+	if(needSupply >= 2*GAME::MAX_SUPPLY) { // TODO
+		toErrorLog("DEBUG (UNIT::adjustSupply()): Value needSupply out of range.");return;
+	}
+	if(haveSupply >= 2*GAME::MAX_SUPPLY) { // TODO
+		toErrorLog("DEBUG (UNIT::adjustSupply()): Value haveSupply out of range.");return;
+	}
+#endif
 	// TODO wenn mehr Einheiten als Versorgung da is, wirds negativ... :/
-	for(unsigned int j=UNIT_TYPE_COUNT;j--;)
+	for(unsigned int j=RACE::UNIT_TYPE_COUNT;j--;)
 		if(total[j])
 		{
-			needSupply+=stats[race][j].needSupply*total[j];
-			haveSupply+=stats[race][j].haveSupply*total[j];
+			needSupply += GAME::race[race].stats[j].needSupply * total[j];
+			haveSupply += GAME::race[race].stats[j].haveSupply * total[j];
 /*				if(needSupply+haveSupply+stats[race][j].haveSupply*total[j]>MAX_SUPPLY)
 				{
 					if(haveSupply<MAX_SUPPLY)
@@ -56,52 +67,27 @@ void UNIT::adjustSupply(const eRace race, unsigned int& needSupply, unsigned int
 #endif
 }
 
-void UNIT::adjustResearches(const eRace race) // only use this on location ZERO
+void UNIT::adjustResearches(const unsigned int race) 
 {
-	unsigned int firstResearch=0;
-	unsigned int basicResearch=0;
-	unsigned int lastResearch=0;
-	unsigned int firstUpgrade=0;
-	unsigned int lastUpgrade=0;
-	switch(race)
+#ifdef _SCC_DEBUG
+	if(race >= GAME::MAX_RACES) {
+		toErrorLog("DEBUG (UNIT::adjustResearches()): Value race out of range.");return;
+	}	
+#endif
+	
+// Setze verfuegbare Research/Upgrademoeglichkeiten auf 1 bzw. 3 minus bereits vorhandene (z.B. ueber Starteinheiten) Researches/Upgrades
+	for(unsigned int j = GAME::race[race].research.first; j <= GAME::race[race].research.last; ++j)
 	{
-		case TERRA:
+		unsigned int count = total[j - GAME::race[race].research.first + GAME::race[race].research.basic];
+#ifdef _SCC_DEBUG
+		if(count > 1)
 		{
-			firstResearch=R_STIM_PACKS;
-			lastResearch=R_CHARON_BOOSTER;
-			basicResearch=STIM_PACKS-firstResearch;
-			firstUpgrade=R_INFANTRY_ARMOR;
-			lastUpgrade=R_SHIP_WEAPONS;
-		}break;
-		case PROTOSS:
-		{
-			firstResearch=R_PSIONIC_STORM;
-			lastResearch=R_ARGUS_TALISMAN;
-			basicResearch=PSIONIC_STORM-firstResearch;
-			firstUpgrade=R_ARMOR;
-			lastUpgrade=R_PLASMA_SHIELDS;
-		}break;
-		case ZERG:
-		{
-			firstResearch=R_VENTRAL_SACKS;
-			lastResearch=R_LURKER_ASPECT;
-			basicResearch=VENTRAL_SACKS-firstResearch;
-			firstUpgrade=R_CARAPACE;
-			lastUpgrade=R_FLYER_ATTACKS;
-		}break;
-		default:break;
-	}
-
-	for(unsigned int j=firstResearch; j<=lastResearch; ++j)
-	{
-		setTotal(j, 1-total[j+basicResearch]);
-		setAvailible(j, 1-total[j+basicResearch]);
-	}
-	for(unsigned int j=firstUpgrade; j<=lastUpgrade; ++j)
-	{
-		setTotal(j, 3-total[j+basicResearch]);
-		setAvailible(j, 3-total[j+basicResearch]); // >0 !? wtf? TODO
-		//temporary researches and upgrades
+			toErrorLog("DEBUG (UNIT::adjustResearches()): More researches than availible were set.");
+			count = 1;
+		}
+#endif
+		setTotal(j, 1 - count);
+		setAvailible(j, 1 - count);
 	}
 }
 

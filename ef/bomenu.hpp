@@ -1,7 +1,6 @@
 #ifndef _GUI_BOMENU_HPP
 #define _GUI_BOMENU_HPP
 
-#include "../ui/menu.hpp"
 #include "../core/database.hpp"
 
 class BoMenu : public UI_Menu
@@ -17,7 +16,7 @@ class BoMenu : public UI_Menu
 	private:
 		unsigned int number;
 		ANABUILDORDER* anarace;
-		eRace lastRace;
+		unsigned int lastRace;
 		GOAL_ENTRY* lastGoal;
 		BoMenu(const BoMenu& object);
 		BoMenu& operator=(const BoMenu& object);

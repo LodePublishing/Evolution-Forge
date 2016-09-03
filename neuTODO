@@ -26,3 +26,8 @@ CheckButton!... ~
 
 
 Beim parallelen Bauen ergibt sich das PRoblem, dass 'programList' ja sich nach ausgefuehrten Befehlen richtet... ( 'buildIt' )
+
+
+Option fuer Autorun: * bei Forceentries: es wird X mal neugestartet und jeweils n = 1..X Einheiten verwendet, sehr empfehlenswert fuer WBFs...
+
+Auch ueberlegen ob WBFs beim Goalvergleich nicht ignoriert werden sollten... mmmh

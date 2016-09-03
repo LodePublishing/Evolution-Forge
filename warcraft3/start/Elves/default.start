@@ -1,0 +1,17 @@
+# default settings for tvb
+# no locations -> all are relative to the start location specified in the map
+
+# --- Races ---
+@STARTCONDITIONS
+	"Race" = "Elves"
+	"Name" = "Default Elves start"
+	"Gold" = "450"
+	"Wood" = "200"
+	"Time" = "0"
+@END
+
+# location forces... 2 = LOCATION MAIN
+@LOCATION "2"
+	"Tree of life" = "1"
+	"Wisp" = "5"
+@END

@@ -1,7 +1,7 @@
 #include "radio.hpp"
 
-UI_Radio::UI_Radio(UI_Object* radio_parent, Rect initial_rect, Size bottom_right_distance, const eGroupType group_type, const ePositionMode position_mode, const eString radio_title) :
-	UI_Group(radio_parent, initial_rect, bottom_right_distance, group_type, position_mode, radio_title),
+UI_Radio::UI_Radio(UI_Object* radio_parent, Rect initial_rect, Size bottom_right_distance, const eGroupType group_type, const bool draw_background, const ePositionMode position_mode, const eString radio_title) :
+	UI_Group(radio_parent, initial_rect, bottom_right_distance, group_type, draw_background, position_mode, radio_title),
 	markedItem(-1),
 	reorder(false),
 	buttonWasPressed(NULL)

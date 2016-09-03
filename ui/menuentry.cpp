@@ -10,6 +10,11 @@ UI_MenuEntry::UI_MenuEntry(UI_Object* menuentry_parent, const Rect rect, const s
 	color(NULL_COLOR)
 {}
 
+UI_MenuEntry::UI_MenuEntry(UI_Object* menuentry_parent, const Rect rect, const eButtonColorsType button) :
+	UI_Button(menuentry_parent, rect, Size(4, 2), button, true, PRESS_BUTTON_MODE, NULL_STRING),
+	color(NULL_COLOR)
+{}
+
 UI_MenuEntry::~UI_MenuEntry()
 { }
 

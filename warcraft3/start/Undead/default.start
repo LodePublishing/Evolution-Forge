@@ -1,0 +1,21 @@
+# default settings for tvb
+# no locations -> all are relative to the start location specified in the map
+
+# --- Races ---
+@STARTCONDITIONS
+	"Race" = "Undead"
+	"Name" = "Default Undead start"
+# classic: 800/200
+	"Gold" = "450"
+	"Wood" = "200"
+	"Time" = "0"
+@END
+
+# location forces... 2 = LOCATION MAIN
+@LOCATION "2"
+	"Necropolis" = "1"
+	"Acolyte" = "4"
+	"Ghoul" = "1"
+	"Haunted gold mine" = "1"
+# ?
+@END

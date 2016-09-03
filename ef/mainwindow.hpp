@@ -34,17 +34,54 @@ class MainWindow : public UI_Window
 		// nach Reihenfolge:
 		void activateTabNumber(unsigned int tab_number);
 		const eTabs getCurrentTab() const;
+
+		const bool  markedForRemove() const;
+		const bool  markedForNewGame() const;
+		const bool hasTabChanged() const;
+		const unsigned int getNewGameTab() const;
 	private:
 		UI_Button* tab[MAX_TABS];
+
+		void scrollLeft();
+		void scrollRight();
+		UI_Button* removeCurrentTabButton;
+		UI_Button* scrollLeftButton;
+		UI_Button* scrollRightButton;
 
 		unsigned int gameTabCount;
 		unsigned int gameNumber;
 		unsigned int gameNumbers[MAX_TABS];
+
+		void adjustView();
+		unsigned int viewTabs;
 	
 		UI_Group* leftTabs;
 		UI_Group* rightTabs;
-		eTabs oldTab;	
+		eTabs oldTab;
+
+		bool markForRemove;
+		bool markForNewGame;
+		bool tabHasChanged;
+		unsigned int newGameTab;
 };
 
+inline const bool MainWindow::hasTabChanged() const {
+	return(tabHasChanged);
+}
+
+inline const unsigned int MainWindow::getGameTabCount() const {
+	return gameTabCount;
+}
+
+inline const unsigned int MainWindow::getNewGameTab() const {
+	return(newGameTab);
+}
+
+inline const bool MainWindow::markedForNewGame() const {
+	return(markForNewGame);
+}
+inline const bool MainWindow::markedForRemove() const {
+	return(markForRemove);
+}
 #endif
 

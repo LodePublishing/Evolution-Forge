@@ -1,418 +1,780 @@
 //TODO: Problem: auf goals muessen sowohl ueber jeweiligen Ort (also gGoal[MAX_LOCATIONS][MAX_GOALS]), als auch einzelne Goals, wenn z.B. nach 5 und 10 Minuten 3 und 5 Marines an einem Ort sein sollen...
 
 #include "starcraft.hpp"
-#include <string>
 
-const std::string CORE_VERSION="Beta 1.76";
-
-/*const unsigned int MAX_RACES = 3;
-const unsigned int MAX_LOCATIONS = 20;
-
-const unsigned int MAX_GAME_TABS = 6;
-const unsigned int MAX_SIMULTANEOUS_GAMES = 2;
-const unsigned int MAX_GAME = MAX_SIMULTANEOUS_GAMES * MAX_GAME_TABS;
-const unsigned int MAX_PLAYER = 4;
-const unsigned int MAX_INTERNAL_PLAYER = 5;
-const unsigned int GLOBAL = 0;*/
-
-//const unsigned int MAX_LOCATIONS = 9;
-const unsigned int MIN_LOCATIONS = 2; // global, main
-
-//const unsigned int MAX_PLAYER = 3;
-const unsigned int MIN_PLAYER = 1;
-
-//const unsigned int MAX_GOAL_ENTRIES = 25;
-const unsigned int MIN_GOAL_ENTRIES = 0;
-
-const unsigned int MAX_MINERALS = 50000000;
-const unsigned int MAX_GAS = 50000000;
-
-//const unsigned int MAX_PROGRAMS = 128; //must be multiplier of (16*player)
-const unsigned int LARVA_MAX = 200;
-//const unsigned int MAX_GOALS = 100; // count of possible different goals
-//const unsigned int MAX_HARVEST_SPEEDS = 100;
-const unsigned int MAX_SUPPLY = 200;
-
-const unsigned int MAX_TOTAL_UNITS = 600; // 600 because larva max is 600... in addition 600 should be low enough to find bugs concerning uninitialized values
-
-//const unsigned int MAX_TIME = 3600;
-const unsigned int MIN_TIME = 300;
-
-const unsigned int MAX_TIMEOUT = 266;
-const unsigned int MIN_TIMEOUT = 40;
-
-
-
-//const unsigned int MAX_LENGTH = 96;
-const unsigned int MIN_LENGTH = 32;
-
-//const unsigned int MAX_RUNS = 10;
-const unsigned int MIN_RUNS = 1;
-
-const unsigned int MAX_TFITNESS = 99999;
-const unsigned int MAX_PFITNESS = 99999;
-
-//const unsigned int MAX_START_CONDITIONS = 99; // ~~
-
-const std::string raceString[MAX_RACES] = 
-{ "Terra", "Protoss", "Zerg" };
-
-//std::list<unsigned int> influenceList[MAX_RACES][UNIT_TYPE_COUNT];
-
-/*void fillInfluenceList()
+STARCRAFT::STARCRAFT() : 
+	GAME()
 {
-	for(int i=0;i<MAX_RACES; ++i)
-	{
-		for(unsigned int j=0;j<UNIT_TYPE_COUNT; ++j)
-		{
-			for(int k=0;k<3; ++k)
-			{
-				if(stats[i][j].prerequisite[k])
-					influenceList[i][stats[i][j].prerequisite[k]].push_front(j);
-				if(stats[i][j].facility[k])
-					influenceList[i][stats[i][j].facility[k]].push_front(j);
-			}
-			for(int k=0;k<2; ++k)
-				if(stats[i][j].upgrade[k])
-					influenceList[i][stats[i][j].upgrade[k]].push_front(j);
-		}
-	}
-}*/
-// BUILD FREE ADDON PLACE FOR FACTORY, STARPORT ETC. WIE BEI RESEARCHES
-const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
-{
-{//n                          t     m     g  ns hs uc up      prere       fac     fac2    facility_type         create speed  unit type
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 100, REMAINING_UNIT_TYPE, 0},
-{"SCV",						300, 5000,    0,  1, 0, 0, {0, 0}, {0 ,0, 0}, {COMMAND_CENTER, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, WORKER_UNIT_TYPE, 0},
-{"Space Marine", 				360, 5000,    0,  1, 0, 0, {0, 0}, {0 ,0, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE, 0},
-{"Ghost",					750, 2500, 7500,  1, 0, 0, {0, 0}, {ACADEMY ,SCIENCE_FACILITY_CO, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE, 0},
-{"Vulture",					450, 7500,    0,  2, 0, 0, {0, 0}, {0, 0, 0}, {FACTORY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE, 0},
-{"Goliath",					600,10000, 5000,  2, 0, 0, {0, 0}, {ARMORY, 0, 0}, {FACTORY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE, 0},
-{"Siege Tank", 					750,15000,10000,  2, 0, 0, {0, 0}, {0 ,0, 0}, {FACTORY_MS, 0, 0}, FACTORY, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE, 0},
-{"Firebat",					360, 5000, 2500,  1, 0, 0, {0, 0}, {ACADEMY ,0, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE, 0},
-{"Medic", 					450, 5000, 2500,  1, 0, 0, {0, 0}, {ACADEMY ,0, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE, 1},
-{"Wraith", 					900,15000,10000,  2, 0, 0, {0, 0}, {0 ,0, 0}, {STARPORT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE, 0},
-{"Science Vessel",			       1200,10000,22500,  2, 0, 0, {0, 0}, {SCIENCE_FACILITY, 0, 0}, {STARPORT_CT, 0, 0}, STARPORT, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE, 0},
-{"Dropship",					750,10000,10000,  2, 0, 0, {0, 0}, {0, 0, 0}, {STARPORT_CT, 0, 0}, STARPORT, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE, 0},
-{"Battle Cruiser",			       2000,40000,30000,  6, 0, 0, {0, 0}, {SCIENCE_FACILITY_PL, 0, 0}, {STARPORT_CT, 0, 0}, STARPORT, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE, 0},
-{"Valkyrie", 					750,25000,12500,  3, 0, 0, {0, 0}, {ARMORY, 0, 0}, {STARPORT_CT, 0, 0}, STARPORT, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE, 1},
-{"Nuclear Warhead",			       1500,20000,20000,  8, 0, 0, {0, 0}, {0, 0, 0}, {NUCLEAR_SILO, 0, 0}, 0, NEEDED_ALWAYS, 0, 0, SUPPORT_UNIT_TYPE, 0},
-{"Supply Depot", 				600,10000,    0,  0, 8, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0, SUPPLY_UNIT_TYPE, 0},
-{"Barracks", 				       1200,15000,    0,  0, 0, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, PRODUCE_UNIT_TYPE, 0},
-{"Academy", 				       1200,15000,    0,  0, 0, 0, {0, 0}, {BARRACKS ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Factory", 				       1200,20000,10000,  0, 0, 0, {0, 0}, {BARRACKS ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, F_FACTORY_ADDON, 10, PRODUCE_UNIT_TYPE, 0},
-{"Command Center",			       1800,40000,    0,  0,10, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, F_COMMAND_CENTER_ADDON, 10, SUPPLY_UNIT_TYPE, 0},
-{"Starport", 				       1050,15000,10000,  0, 0, 0, {0, 0}, {FACTORY ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, F_STARPORT_ADDON, 10, PRODUCE_UNIT_TYPE, 0},
-{"Science Facility", 				900,10000,15000,  0, 0, 0, {0, 0}, {STARPORT ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, F_SCIENCE_FACILITY_ADDON, 10, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Engineering Bay", 				900,12500,    0,  0, 0, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Armory", 				       1200,10000, 5000,  0, 0, 0, {0, 0}, {FACTORY, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Missile Turret", 				450, 7500,    0,  0, 0, 0, {0, 0}, {ENGINEERING_BAY, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0, SUPPORT_UNIT_TYPE, 0},
-{"Bunker", 					450,10000,    0,  0, 0, 0, {0, 0}, {BARRACKS, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0, SUPPORT_UNIT_TYPE, 0},
-{"Comsat Station",  				  0,    0,    0,  0, 0, 0, {0, 0}, {COMSAT_STATION, COMMAND_CENTER_CS, 0}, {0, 0 ,0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0}, 
-{"Nuclear Silo",  				  0,    0,    0,  0, 0, 0, {0, 0}, {NUCLEAR_SILO, COMMAND_CENTER_NS, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"Control Tower",  				  0,    0,    0,  0, 0, 0, {0, 0}, {CONTROL_TOWER, STARPORT_CT, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"Covert Ops",  				  0,    0,    0,  0, 0, 0, {0, 0}, {COVERT_OPS, SCIENCE_FACILITY_CO, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"Physics Lab",  				  0,    0,    0,  0, 0, 0, {0, 0}, {PHYSICS_LAB, SCIENCE_FACILITY_PL, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"Machine Shop",  				  0,    0,    0,  0, 0, 0, {0, 0}, {MACHINE_SHOP, FACTORY_MS, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"Command Center[CS]", 				600, 5000, 5000,  0,10, 0, {0, 0}, {ACADEMY, 0, 0}, {COMMAND_CENTER, 0, 0}, F_COMMAND_CENTER_ADDON, NEEDED_UNTIL_COMPLETE, COMSAT_STATION, 0, ADD_ON_UNIT_TYPE, 0}, //TODO: Beim Abheben zerstoeren...
-{"Command Center[NS]", 				600,10000,10000,  0,10, 0, {0, 0}, {SCIENCE_FACILITY_CO, 0, 0}, {COMMAND_CENTER, 0, 0}, F_COMMAND_CENTER_ADDON, NEEDED_UNTIL_COMPLETE, NUCLEAR_SILO, 0, ADD_ON_UNIT_TYPE, 0},
-{"Starport[CT]", 			       1200, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {STARPORT, 0, 0}, F_STARPORT_ADDON, NEEDED_UNTIL_COMPLETE, CONTROL_TOWER, 0, ADD_ON_UNIT_TYPE, 0},
-{"Science Facility[CO]", 			600, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, F_SCIENCE_FACILITY_ADDON, NEEDED_UNTIL_COMPLETE, COVERT_OPS, 0, ADD_ON_UNIT_TYPE, 0},
-{"Science Facility[PL]", 			600, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, F_SCIENCE_FACILITY_ADDON, NEEDED_UNTIL_COMPLETE, PHYSICS_LAB, 0, ADD_ON_UNIT_TYPE, 0},
-{"Factory[MS]", 				600, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {FACTORY, 0, 0}, F_FACTORY_ADDON, NEEDED_UNTIL_COMPLETE, MACHINE_SHOP, 0, ADD_ON_UNIT_TYPE, 0},
-{"Stim Packs", 				       1200,10000,10000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_STIM_PACKS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Lockdown",				       1500,20000,20000,  0, 0, 0, {0, 0}, {SCIENCE_FACILITY_CO, 0, 0}, {COVERT_OPS, 0, 0}, R_LOCKDOWN, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"EMP Shockwave",			       1800,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, R_EMP_SHOCKWAVE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Spider Mines", 			       1200,10000,10000,  0, 0, 0, {0, 0}, {FACTORY_MS ,0, 0}, {MACHINE_SHOP, 0, 0}, R_SPIDER_MINES, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Siege Mode", 				       1200,15000,15000,  0, 0, 0, {0, 0}, {FACTORY_MS ,0, 0}, {MACHINE_SHOP, 0, 0}, R_TANK_SIEGE_MODE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Irradiate", 				       1200,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, R_IRRADIATE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Yamato Gun",				       1800,10000,10000,  0, 0, 0, {0, 0}, {SCIENCE_FACILITY_PL ,0, 0}, {PHYSICS_LAB, 0, 0}, R_YAMATO_GUN, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Cloaking Field",			       1500,15000,15000,  0, 0, 0, {0, 0}, {STARPORT_CT ,0, 0}, {CONTROL_TOWER, 0, 0}, R_CLOAKING_FIELD, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Personnel Cloaking", 			       1200,10000,10000,  0, 0, 0, {0, 0}, {SCIENCE_FACILITY_CO ,0, 0}, {COVERT_OPS, 0, 0}, R_PERSONNEL_CLOAKING, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Restoration", 			       1200,10000,10000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_RESTORATION, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 1},
-{"Optical Flare",			       1800,10000,10000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_OPTICAL_FLARE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 1},
-{"U-238 Shells",			       1500,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_U238_SHELLS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Ion Thrusters",			       1500,10000,10000,  0, 0, 0, {0, 0}, {FACTORY_MS ,0, 0}, {MACHINE_SHOP, 0, 0}, R_ION_THRUSTERS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Titan Reactor",			       2500,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, R_TITAN_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Ocular Implants",			       2500,10000,10000,  0, 0, 0, {0, 0}, {SCIENCE_FACILITY_CO ,0, 0}, {COVERT_OPS, 0, 0}, R_OCULAR_IMPLANTS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Moebius Reactor",			       2500,20000,20000,  0, 0, 0, {0, 0}, {SCIENCE_FACILITY_CO ,0, 0}, {COVERT_OPS, 0, 0}, R_MOEBIUS_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Apollo Reactor",			       2500,20000,20000,  0, 0, 0, {0, 0}, {STARPORT_CT ,0, 0}, {CONTROL_TOWER, 0, 0}, R_APOLLO_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Colossus Reactor",			       2500,15000,15000,  0, 0, 0, {0, 0}, {SCIENCE_FACILITY_PL ,0, 0}, {PHYSICS_LAB, 0, 0}, R_COLOSSUS_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Caduceus Reactor",			       2500,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_CADUCEUS_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 1},
-{"Charon Booster",			       2000,10000,10000,  0, 0, 0, {0, 0}, {FACTORY_MS ,0, 0}, {MACHINE_SHOP, 0, 0}, R_CHARON_BOOSTER, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 1},
-{"Infantry Armor",			       4000,10000,10000,  0, 0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ENGINEERING_BAY, 0, 0}, R_INFANTRY_ARMOR, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Infantry Weapons",			       4000,10000,10000,  0, 0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ENGINEERING_BAY, 0, 0}, R_INFANTRY_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Vehicle Plating",			       4000,10000,10000,  0, 0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_VEHICLE_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Vehicle Weapons",			       4000,10000,10000,  0, 0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_VEHICLE_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Ship Plating",			       4000,15000,15000,  0, 0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_SHIP_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Ship Weapons",			       4000,10000,10000,  0, 0, 5000, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_SHIP_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Refinery", 					600,10000,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCV, 0, 0}, 0/*VESPENE_GEYSIR*/, NEEDED_UNTIL_COMPLETE_IS_LOST/*_IS_LOST*/, GAS_SCV, 0, SUPPLY_UNIT_TYPE, 0}, //~~~ueberlegen...
-{"Gas SCV",					  3,    0,    0,  0, 0, 0, {0, 0}, {REFINERY ,0, 0}, {SCV/*REFINERY*/, 0, 0}, /*SCV*/0, /*NEEDED_ONCE_*/IS_MORPHING, 0, 0, GAS_MINER_UNIT_TYPE, 0},	//~~~~  warum 3,0,0,1?
-{"Build parallel 2",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
-{"Build parallel 4",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
-{"Build parallel 8",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
-{"Build parallel 16",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
-{"Wait",					 25,    0 ,   0,  0, 0, 0, {0, 0}, {0, 0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"Send all Gas to Minerals",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {GAS_SCV, 0, 0}, 0, IS_MORPHING, 0, 0, WORKER_UNIT_TYPE, 0},
-{"Move to here",				  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
-
-{"Vespene Geysir",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"Minerals",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Stim Packs",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Lockdown",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_EMP Shockwave",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Spider Mines",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Siege Mode",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Irradiate",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Yamato Gun",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Cloaking Field",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Personnel Cloaking",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Restoration",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 1},
-{"R_Optical Flare",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 1},
-{"R_U-238 Shells",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Ion Thrusters",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Titan Reactor",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Ocular Implants",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Moebius Reactor",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Apollo Reactor",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Colossus Reactor",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Caduceus Reactor",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 1},
-{"R_Charon Booster",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 1},
-{"R_Infantry Armor",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Infantry Weapons",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Vehicle Plating",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Vehicle Weapons",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Ship Plating",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Ship Weapons",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-
-{"F_Factory Addon",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"F_Starport Addon",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"F_Command Center Addon",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"F_Science Facility Addon",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0}
-},
-
- //for colors... 0= rest, 1= scv, 2= gas scv, 3= combat units, 4=support, 5=supply/refinery, 6=produce buildings, 7=research buildigns, 8= addons, 9=researchs, 10= special
-
-
-{
-{"NULL",  					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"Probe",					300, 5000,    0,  1, 0, 0, {0, 0}, {0 ,0, 0}, {NEXUS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, WORKER_UNIT_TYPE, 0},
-{"Dark Templar",				750,12500,10000,  2, 0, 0, {0, 0}, {TEMPLAR_ARCHIVES ,0, 0}, {GATEWAY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE, 1},
-{"Dark Archon",					300,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {DARK_TEMPLAR, 0, 0}, DARK_TEMPLAR, IS_MORPHING, 0, 100, COMBAT_UNIT_TYPE, 1},
-{"Zealot",					600,10000,    0,  2, 0, 0, {0, 0}, {0 ,0, 0}, {GATEWAY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE, 0},
-{"Dragoon",					750,12500, 5000,  2, 0, 0, {0, 0}, {CYBERNETICS_CORE ,0, 0}, {GATEWAY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE, 0},
-{"High Templar",				750, 5000,15000,  2, 0, 0, {0, 0}, {TEMPLAR_ARCHIVES ,0, 0}, {GATEWAY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE, 0},
-{"Archon",					300,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {HIGH_TEMPLAR, 0, 0}, HIGH_TEMPLAR, IS_MORPHING, 0, 100, COMBAT_UNIT_TYPE, 0},
-{"Reaver",					1050,20000,10000,  4, 0, 0, {0, 0}, {ROBOTICS_SUPPORT_BAY ,0, 0}, {ROBOTICS_FACILITY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE, 0}, 
-{"5xScarab",					525, 7500,    0,  0, 0, 0, {0, 0}, {0, 0, 0}, {REAVER, 0, 0}, 0, NEEDED_ALWAYS, 0, 0, SPECIAL_UNIT_TYPE, 0},
-{"10xScarab",					525, 7500,    0,  0, 0, 0, {0, 0}, {REAVER_CAPACITY, 0, 0}, {HALF_SCARAB, 0, 0}, 0, IS_LOST, 0, 0, SPECIAL_UNIT_TYPE, 0}, //~~ special rule... reaver is no longer availible :/
-{"Corsair",					600,15000,10000,  2, 0, 0, {0, 0}, {0 ,0, 0}, {STARGATE, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE, 1},
-{"Shuttle",					900,20000,    0,  2, 0, 0, {0, 0}, {0 ,0, 0}, {ROBOTICS_FACILITY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE, 0},
-{"Scout",				       1200,27500,12500,  3, 0, 0, {0, 0}, {0 ,0, 0}, {STARGATE, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE, 0},
-{"Arbiter",				       2400,10000,35000,  4, 0, 0, {0, 0}, {ARBITER_TRIBUNAL ,0, 0}, {STARGATE, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE, 0},
-{"Carrier",				       2100,35000,25000,  6, 0, 0, {0, 0}, {FLEET_BEACON ,0, 0}, {STARGATE, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE, 0},
-{"5xInterceptor",			       1500,25000,    0,  0, 0, 0, {0, 0}, {0, 0, REMAINING_UNIT_TYPE}, {CARRIER, 0, 0}, 0, NEEDED_ALWAYS, 0, 0, SPECIAL_UNIT_TYPE, 0},
-{"8xInterceptor",				900,15000,    0,  0, 0, 0, {0, 0}, {CARRIER_CAPACITY, 0, REMAINING_UNIT_TYPE}, {HALF_INTERCEPTOR, 0, 0}, 0, IS_LOST, 0, 0, SPECIAL_UNIT_TYPE, 0}, //~~~ Special rule... carrier is no longer availible :/
-{"Observer",					600, 2500, 7500,  1, 0, 0, {0, 0}, {OBSERVATORY ,0, 0}, {ROBOTICS_FACILITY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE, 0},
-{"Nexus",				       1800,40000,    0,  0, 9, 0, {0, 0}, {0 ,0, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, SUPPLY_UNIT_TYPE, 0},
-{"Robotics Facility",			       1200,20000,20000,  0, 0, 0, {0, 0}, {CYBERNETICS_CORE ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, PRODUCE_UNIT_TYPE, 0},
-{"Pylon",					450,10000,    0,  0, 8, 0, {0, 0}, {0 ,0, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, SUPPLY_UNIT_TYPE, 0},
-{"Observatory",					450, 5000,10000,  0, 0, 0, {0, 0}, {ROBOTICS_FACILITY ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Gateway",					900,15000,    0,  0, 0, 0, {0, 0}, {PYLON ,0, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, PRODUCE_UNIT_TYPE, 0},
-{"Photon Cannon",				750,15000,    0,  0, 0, 0, {0, 0}, {FORGE, PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, SUPPORT_UNIT_TYPE, 0},
-{"Cybernetics Core",				900,20000,    0,  0, 0, 0, {0, 0}, {GATEWAY, PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Citadel Of Adun",				900,15000,10000,  0, 0, 0, {0, 0}, {CYBERNETICS_CORE, PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Templar Archives",				900,15000,20000,  0, 0, 0, {0, 0}, {CITADEL_OF_ADUN, PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Forge",					600,15000,    0,  0, 0, 0, {0, 0}, {PYLON, 0, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Stargate",					1050,15000,15000,  0, 0, 0, {0, 0}, {CYBERNETICS_CORE, PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, PRODUCE_UNIT_TYPE, 0},
-{"Fleet Beacon",				900,30000,20000,  0, 0, 0, {0, 0}, {STARGATE, PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Arbiter Tribunal",				900,20000,15000,  0, 0, 0, {0, 0}, {TEMPLAR_ARCHIVES, STARGATE, PYLON}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Robotics Support Bay",			450,15000,10000,  0, 0, 0, {0, 0}, {ROBOTICS_FACILITY, PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Shield Battery",				450,10000,    0,  0, 0, 0, {0, 0}, {GATEWAY, PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, SUPPORT_UNIT_TYPE, 0},
-{"Psionic Storm",			       1800,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_PSIONIC_STORM, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Hallucination",			       1200,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_HALLUCINATION, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Recall",				       1800,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {ARBITER_TRIBUNAL, 0, 0}, R_RECALL, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Stasis Field",			       1500,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {ARBITER_TRIBUNAL, 0, 0}, R_STASIS_FIELD, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Disruption Web",			       1200,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {FLEET_BEACON, 0, 0}, R_DISRUPTION_WEB, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 1},
-{"Mind Control",			       1800,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_MIND_CONTROL, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 1},
-{"Maelstrom",				       1500,10000,10000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_MAELSTROM, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 1},
-{"Singularity Charge",			       2500,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {CYBERNETICS_CORE, 0, 0}, R_SINGULARITY_CHARGE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Leg Enhancements",			       2000,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {CITADEL_OF_ADUN, 0, 0}, R_LEG_ENHANCEMENTS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Scarab Damage",			       2500,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {ROBOTICS_SUPPORT_BAY, 0, 0}, R_SCARAB_DAMAGE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Reaver Capacity",			       2500,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {ROBOTICS_SUPPORT_BAY, 0, 0}, R_REAVER_CAPACITY, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Gravitic Drive",			       2500,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {ROBOTICS_SUPPORT_BAY, 0, 0}, R_GRAVITIC_DRIVE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Sensor Array",			       2000,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {OBSERVATORY, 0, 0}, R_SENSOR_ARRAY, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Gravitic Boosters",			       2000,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {OBSERVATORY, 0, 0}, R_GRAVITIC_BOOSTERS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Khaydarin Amulet",			       2500,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_KHAYDARIN_AMULET, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Apial Sensors",			       2500,10000,10000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {FLEET_BEACON, 0, 0}, R_APIAL_SENSORS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Gravitic Thrusters",			       2500,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {FLEET_BEACON, 0, 0}, R_GRAVITIC_THRUSTERS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Carrier Capacity",			       1500,10000,10000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {FLEET_BEACON, 0, 0}, R_CARRIER_CAPACITY, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Khaydarin Core",			       2500,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {ARBITER_TRIBUNAL, 0, 0}, R_KHAYDARIN_CORE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 1}, //?
-{"Argus Jewel",				       2500,10000,10000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {FLEET_BEACON, 0, 0}, R_ARGUS_JEWEL, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 1},
-{"Argus Talisman",			       2500,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_ARGUS_TALISMAN, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Armor",				       4000,10000,10000,  0, 0, 7500, {TEMPLAR_ARCHIVES, TEMPLAR_ARCHIVES}, {0 ,0, 0}, {FORGE, 0, 0}, R_ARMOR, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Plating",				       4000,15000,15000,  0, 0, 7500, {FLEET_BEACON, FLEET_BEACON}, {0 ,0, 0}, {CYBERNETICS_CORE, 0, 0}, R_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Ground Weapons",			       4000,10000,10000,  0, 0, 5000, {TEMPLAR_ARCHIVES, TEMPLAR_ARCHIVES}, {0 ,0, 0}, {FORGE, 0, 0}, R_GROUND_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Air Weapons",				       4000,10000,10000,  0, 0, 7500, {FLEET_BEACON, FLEET_BEACON}, {0 ,0, 0}, {CYBERNETICS_CORE, 0, 0}, R_AIR_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Plasma Shields",			       4000,20000,20000,  0, 0, 10000, {0, 0}, {0 ,0, 0}, {FORGE, 0, 0}, R_PLASMA_SHIELDS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"Assimilator",					600,10000,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {PROBE, 0, 0}, /*VESPENE_GEYSIR*/0, NEEDED_ONCE/*_IS_LOST*/, 0, 0, SUPPLY_UNIT_TYPE, 0},
-{"Gas Probe",					  3,    0,    0,  0, 0, 0, {0, 0}, {ASSIMILATOR ,0, 0}, {PROBE/*ASSIMILATOR*/, 0, 0}, 0/*PROBE*/, /*NEEDED_ONCE_*/IS_MORPHING, 0, 0, GAS_MINER_UNIT_TYPE, 0},	//Needed once? ~~~ wenn hier ne Aenderung, Facility2 in race und anarace wieder auf location availible checken !TODO
-{"Build parallel 2",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
-{"Build parallel 4",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
-{"Build parallel 8",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
-{"Build parallel 16",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
-{"Wait",					 25,    0 ,   0,  0, 0, 0, {0, 0}, {0, 0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"Send all Gas to Minerals",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {GAS_SCV, 0, 0}, 0, IS_MORPHING, 0, 0, WORKER_UNIT_TYPE, 0},
-{"Move to here",				  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
-
-{"Vespene Geysir",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"Minerals",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Psionic Storm",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Hallucination",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Recall",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Stasis Field",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Disruption Web",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 1},
-{"R_Mind Control",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 1},
-{"R_Maelstrom",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 1},
-{"R_Singularity Charge",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Leg Enhancements",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Scarab Damage",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Reaver Capacity",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Gravitic Drive",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Sensor Array",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Gravitic Boosters",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Khaydarin Amulet",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Apial Sensors",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Gravitic Thrusters",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Carrier Capacity",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Khaydarin Core",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Argus Jewel",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 1},
-{"R_Argus Talisman",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Armor",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Plating",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Ground Weapons",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Air Weapons",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Plasma Shields",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0}
-},
- //for colors... 0= rest, 1= scv, 2= gas scv, 3= combat units, 4=support, 5=supply/refinery, 6=produce buildings, 7=research buildigns, 8= addons, 9=researchs, 10= special
-{
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0, 0, 0}, {0 ,0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"Drone",					300, 5000,    0,  1, 0, 0, {0, 0}, {0 ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, WORKER_UNIT_TYPE, 0},
-{"Larva",					300,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NEEDED_ONCE, 0, 0, SPECIAL_UNIT_TYPE, 0},
-{"Zergling",					420, 5000,    0,  1, 0, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, ZERGLING, 100, COMBAT_UNIT_TYPE, 0},
-{"Hydralisk",					420, 7500, 2500,  1, 0, 0, {0, 0}, {HYDRALISK_DEN ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE, 0}, //Hier stand ein Zergling als facility2!?
-{"Ultralisk",					900,20000,20000,  6, 0, 0, {0, 0}, {ULTRALISK_CAVERN ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE, 0},
-{"Defiler",					750, 5000,15000,  2, 0, 0, {0, 0}, {DEFILER_MOUND ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, SUPPORT_UNIT_TYPE, 0},
-{"Lurker",					600, 5000,10000,  0, 0, 0, {0, 0}, {HYDRALISK_DEN ,LURKER_ASPECT, 0}, {HYDRALISK, 0, 0}, 0, IS_MORPHING, 0, 100, COMBAT_UNIT_TYPE, 1},
-{"Overlord",					600,10000,    0,  0, 8, 0, {0, 0}, {0 ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, SUPPLY_UNIT_TYPE, 0},
-{"Mutalisk",					600,10000,10000,  2, 0, 0, {0, 0}, {SPIRE ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE, 0},
-{"Guardien",					600, 5000,10000,  0, 0, 0, {0, 0}, {GREATER_SPIRE ,0, 0}, {MUTALISK, 0, 0}, 0, IS_MORPHING, 0, 100, COMBAT_UNIT_TYPE, 0}, 
-{"Queen",					750,10000,10000,  2, 0, 0, {0, 0}, {QUEENS_NEST ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, SUPPORT_UNIT_TYPE, 0},
-{"Scourge",					450, 2500, 7500,  1, 0, 0, {0, 0}, {SPIRE ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, SCOURGE, 100, COMBAT_UNIT_TYPE, 0},
-{"Devourer",					600,10000, 5000,  0, 0, 0, {0, 0}, {GREATER_SPIRE ,0, 0}, {MUTALISK, 0, 0}, 0, IS_MORPHING, 0, 100, COMBAT_UNIT_TYPE, 1}, 
-{"Lair",				       1500,15000,10000,  0, 0, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {HATCHERY, 0, 0}, 0, IS_MORPHING, 0, 0, ADD_ON_UNIT_TYPE, 0},
-{"Hive",				       1800,20000,15000,  0, 0, 0, {0, 0}, {QUEENS_NEST ,0, 0}, {LAIR, 0, 0}, 0, IS_MORPHING, 0, 0, ADD_ON_UNIT_TYPE, 0},
-{"Nydus Canal",					600,15000,    0,  0, 0, 0, {0, 0}, {HIVE ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, SUPPORT_UNIT_TYPE, 0},
-{"Hydralisk den",				600,10000, 5000,  0, 0, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Defiler mound",				900,10000,10000,  0, 0, 0, {0, 0}, {HIVE ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Hatchery",				       1800,30000,    0,  0, 1, 0, {0, 0}, {0 ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, LARVA, 0, PRODUCE_UNIT_TYPE, 0}, //create 1 Larva when done :-) TODO: add another "create"field for "CREEP"
-{"Greater Spire",			       1800,10000,15000,  0, 0, 0, {0, 0}, {HIVE ,0, 0}, {SPIRE, 0, 0}, 0, IS_MORPHING, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Queen's Nest",				900,15000,10000,  0, 0, 0, {0, 0}, {LAIR ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Evolution Chamber",				600, 7500,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Ultralisk Cavern",			       1200,15000,20000,  0, 0, 0, {0, 0}, {HIVE ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Spire",				       1800,20000,15000,  0, 0, 0, {0, 0}, {LAIR ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Spawning Pool",			       1200,20000,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE, 0},
-{"Creep Colony",				300, 7500,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, SUPPORT_UNIT_TYPE, 0},
-{"Spore Colony",				300, 5000,    0,  0, 0, 0, {0, 0}, {EVOLUTION_CHAMBER ,0, 0}, {CREEP_COLONY, 0, 0}, 0, IS_LOST, 0, 0, ADD_ON_UNIT_TYPE, 0},
-{"Sunken Colony",				300, 5000,    0,  0, 0, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {CREEP_COLONY, 0, 0}, 0, IS_LOST, 0, 0, ADD_ON_UNIT_TYPE, 0},
-{"Ventral Sacs",			       2400,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {LAIR, HIVE, 0}, R_VENTRAL_SACKS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE,0 }, 
-{"Antennae",				       2000,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {LAIR, HIVE, 0}, R_ANTENNAE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Pneumatized Carapace",		       2000,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {LAIR, HIVE, 0}, R_PNEUMATIZED_CARAPACE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Metabolic Boost",			       1500,10000,10000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SPAWNING_POOL, 0, 0}, R_METABOLIC_BOOST, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Adrenal Glands",			       1500,20000,20000,  0, 0, 0, {0, 0}, {HIVE ,0, 0}, {SPAWNING_POOL, 0, 0}, R_ADRENAL_GLANDS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Muscular Augments",			       1500,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {HYDRALISK_DEN, 0, 0}, R_MUSCULAR_AUGMENTS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Grooved Spines",			       1500,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {HYDRALISK_DEN, 0, 0}, R_GROOVED_SPINES, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Gamete Meiosis",			       2500,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {QUEENS_NEST, 0, 0}, R_GAMETE_MEIOSIS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Metasynaptic Node",			       2500,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {DEFILER_MOUND, 0, 0}, R_METASYNAPTIC_NODE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Chitinous Plating",			       2000,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {ULTRALISK_CAVERN, 0, 0}, R_CHITINOUS_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 1},
-{"Anabolic Synthesis",			       2000,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {ULTRALISK_CAVERN, 0, 0}, R_ANABOLIC_SYNTHESIS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 1},
-{"Burrowing",				       1200,10000,10000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {HATCHERY, LAIR, HIVE}, R_BURROWING, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Spawn Broodling",			       1200,10000,10000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {QUEENS_NEST, 0, 0}, R_SPAWN_BROODLING, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Plague",				       1500,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {DEFILER_MOUND, 0, 0}, R_PLAGUE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Consume",				       1500,10000,10000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {DEFILER_MOUND, 0, 0}, R_CONSUME, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Ensnare",				       1200,10000,10000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {QUEENS_NEST, 0, 0}, R_ENSNARE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Lurker Aspect",			       1800,20000,20000,  0, 0, 0, {0, 0}, {LAIR ,0, 0}, {HYDRALISK_DEN, 0, 0}, R_LURKER_ASPECT, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE, 1}, 
-{"Carapace",				       4000,15000,15000,  0, 0, 7500, {LAIR, HIVE}, {0 ,0, 0}, {EVOLUTION_CHAMBER, 0, 0}, R_CARAPACE, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Flyer Carapace",			       4000,15000,15000,  0, 0, 7500, {LAIR, HIVE}, {0 ,0, 0}, {SPIRE, GREATER_SPIRE, 0}, R_FLYER_CARAPACE, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Melee Attacks",			       4000,10000,10000,  0, 0, 5000, {LAIR, HIVE}, {0 ,0, 0}, {EVOLUTION_CHAMBER, 0, 0}, R_MELEE_ATTACKS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Missile Attacks",			       4000,10000,10000,  0, 0, 5000, {LAIR, HIVE}, {0 ,0, 0}, {EVOLUTION_CHAMBER, 0, 0}, R_MISSILE_ATTACKS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"Flyer Attacks",			       4000,10000,10000,  0, 0, 7500, {LAIR, HIVE}, {0 ,0, 0}, {SPIRE, GREATER_SPIRE, 0}, R_FLYER_ATTACKS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"Extractor",					600, 5000,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {/*VESPENE_GEYSIR*/DRONE, 0, 0}, 0/*DRONE*/, IS_LOST, 0, 0, SUPPLY_UNIT_TYPE, 0}, //~~ //TODO HAE?
-{"Gas Drone",					  3,    0,    0,  0, 0, 0, {0, 0}, {EXTRACTOR ,0, 0}, {/*EXTRACTOR*/DRONE, 0, 0}, /*DRONE*/0, /*NEEDED_ONCE_*/IS_MORPHING, 0, 0, GAS_MINER_UNIT_TYPE, 0}, //~~~~
-{"Build parallel 2",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
-{"Build parallel 4",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
-{"Build parallel 8",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
-{"Build parallel 16",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
-{"Wait",					 25,    0 ,   0,  0, 0, 0, {0, 0}, {0, 0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"Send all Gas to Minerals",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {GAS_SCV, 0, 0}, 0, IS_MORPHING, 0, 0, WORKER_UNIT_TYPE, 0},
-{"Move to here",				  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE, 0},
-
-{"Vespene Geysir",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"Minerals",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"Break up Building",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Ventral Sacs",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Antennae",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Pneumati. Carapace",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Metabolic Boost",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Adrenal Glands",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Muscular Augments",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Grooved Spines",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Gamete Meiosis",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Metasynaptic Node",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Chitinous Plating",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 1},
-{"R_Anabolic Synthesis",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 1},
-{"R_Burrowing",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Spawn Broodling",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Plague",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Consume",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Ensnare",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Lurker Aspect",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Carapace",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Flyer Carapace",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Melee Attacks",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Missile Attacks",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"R_Flyer Attacks",				  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0},
-{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE, 0}
+	GAME::MAX_GAME_TYPES += 1;
 }
-};
 
-// TODO: automatic building units/buildings for spells and larvaes
+void STARCRAFT::init()
+{
+	GAME::MAX_RACES = 3;
+	GAME::MAX_TOTAL_UNITS = 600;
+	GAME::MAX_SUPPLY = 200;
+	unsigned int max_unit_type_count = UNIT_TYPE_COUNT_TERRA;
+	if(UNIT_TYPE_COUNT_PROTOSS > max_unit_type_count)
+		max_unit_type_count = UNIT_TYPE_COUNT_PROTOSS;
+	if(UNIT_TYPE_COUNT_ZERG > max_unit_type_count)
+		max_unit_type_count = UNIT_TYPE_COUNT_ZERG;
+
+
+	GAME::MAX_GAME_STRINGS = MAX_STARCRAFT_STRINGS;
+	GAME::MAX_RESOURCES = 50000000;
+
+	RACE::UNIT_TYPE_COUNT = max_unit_type_count;
+	RACE::MAX_RESOURCE_TYPES = 2;
+
+	RESOURCE::MAX_RESOURCE_WORKERS = 64;
+	RESOURCE::MAX_RESOURCE_PROVIDER_PER_LOCATION = 32;
+	RESOURCE::MAX_RESOURCE_DISTANCE = 10;
+
+	for(unsigned int i = GAME::MAX_RACES; i--;)
+	{
+		GAME::race[i].resource.resize(RACE::MAX_RESOURCE_TYPES);
+		GAME::race[i].stats.resize(RACE::UNIT_TYPE_COUNT);
+	}
+
+	GAME::race.resize(GAME::MAX_RACES);
+	GAME::race[TERRA].raceString = "Terra";
+	GAME::race[PROTOSS].raceString = "Protoss";
+	GAME::race[ZERG].raceString = "Zerg";
+
+	GAME::gameDirectory = "starcraft";
+
+	GAME::gameSpeedFrames.resize(GAME_SPEED_FASTEST+1);
+	GAME::gameSpeedFrames[GAME_SPEED_SLOWEST] = 6;
+	GAME::gameSpeedFrames[GAME_SPEED_SLOWER] = 9;
+	GAME::gameSpeedFrames[GAME_SPEED_SLOW] = 12;
+	GAME::gameSpeedFrames[GAME_SPEED_NORMAL] = 15;
+	GAME::gameSpeedFrames[GAME_SPEED_FAST] = 18;
+	GAME::gameSpeedFrames[GAME_SPEED_FASTER] = 21;
+	GAME::gameSpeedFrames[GAME_SPEED_FASTEST] = 24;
+
+	GAME::race[TERRA].resource[MINERALS].provider = MINERAL_PATCH;
+	GAME::race[TERRA].resource[VESPENE_GAS].provider = REFINERY;
+	GAME::race[TERRA].resource[MINERALS].gatherer = SCV;
+	GAME::race[TERRA].resource[VESPENE_GAS].gatherer = GAS_SCV;
+	GAME::race[TERRA].resource[MINERALS].accepter.push_back(COMMAND_CENTER);
+	GAME::race[TERRA].resource[VESPENE_GAS].accepter.push_back(COMMAND_CENTER);
+	
+	GAME::race[PROTOSS].resource[MINERALS].provider = MINERAL_PATCH;
+	GAME::race[PROTOSS].resource[VESPENE_GAS].provider = ASSIMILATOR;
+	GAME::race[PROTOSS].resource[MINERALS].gatherer = PROBE;
+	GAME::race[PROTOSS].resource[VESPENE_GAS].gatherer = GAS_PROBE;
+	GAME::race[PROTOSS].resource[MINERALS].accepter.push_back(NEXUS);
+	GAME::race[PROTOSS].resource[VESPENE_GAS].accepter.push_back(NEXUS);
+	
+	GAME::race[ZERG].resource[MINERALS].provider = MINERAL_PATCH;
+	GAME::race[ZERG].resource[VESPENE_GAS].provider = EXTRACTOR;
+	GAME::race[ZERG].resource[MINERALS].gatherer = DRONE;
+	GAME::race[ZERG].resource[VESPENE_GAS].gatherer = GAS_DRONE;
+	GAME::race[ZERG].resource[MINERALS].accepter.push_back(COMMAND_CENTER);
+	GAME::race[ZERG].resource[MINERALS].accepter.push_back(LAIR);
+	GAME::race[ZERG].resource[MINERALS].accepter.push_back(HIVE);
+	GAME::race[ZERG].resource[VESPENE_GAS].accepter.push_back(COMMAND_CENTER);
+	GAME::race[ZERG].resource[VESPENE_GAS].accepter.push_back(LAIR);
+	GAME::race[ZERG].resource[VESPENE_GAS].accepter.push_back(HIVE);
+	
+	GAME::race[TERRA].resource[MINERALS].gatherAmount = 800;
+	GAME::race[TERRA].resource[MINERALS].harvestTime = 75;
+	GAME::race[TERRA].resource[VESPENE_GAS].gatherAmount = 800;
+	GAME::race[TERRA].resource[VESPENE_GAS].harvestTime = 75;
+	
+	GAME::race[PROTOSS].resource[MINERALS].gatherAmount = 800;
+	GAME::race[PROTOSS].resource[MINERALS].harvestTime = 75;
+	GAME::race[PROTOSS].resource[VESPENE_GAS].gatherAmount = 800;
+	GAME::race[PROTOSS].resource[VESPENE_GAS].harvestTime = 75;
+
+	GAME::race[ZERG].resource[MINERALS].gatherAmount = 800;
+	GAME::race[ZERG].resource[MINERALS].harvestTime = 75;
+	GAME::race[ZERG].resource[VESPENE_GAS].gatherAmount = 800;
+	GAME::race[ZERG].resource[VESPENE_GAS].harvestTime = 75;
+
+	GAME::race[TERRA].supply.push_back(SUPPLY_DEPOT);
+	GAME::race[PROTOSS].supply.push_back(PYLON);
+	GAME::race[ZERG].supply.push_back(OVERLORD);
+
+	GAME::CANCELING_BUILDING_RETURN = 75; // in %
+
+	GAME::race[TERRA].hotkey = 't';
+	GAME::race[PROTOSS].hotkey = 'p';
+	GAME::race[ZERG].hotkey = 'z';
+	
+
+//	Eigentlich je nach Arbeiter?
+
+	race[TERRA].setResearchParameters(R_STIM_PACKS, R_SHIP_WEAPONS, STIM_PACKS);
+	race[PROTOSS].setResearchParameters(R_PSIONIC_STORM, R_PLASMA_SHIELDS, PSIONIC_STORM);
+	race[ZERG].setResearchParameters(R_VENTRAL_SACKS, R_FLYER_ATTACKS, VENTRAL_SACKS);
+
+// TODO life, armor, rate of fire, damage, damage, speed etc.
+// TODO: Protoss: ein Amulett/Energieteil raus (wahrscheinlich corsair)
+//                                                time   min   gas  ns  hs  prereq    facility  fac2    facility_type         create  unit_type
+race[TERRA].stats[NONE] = 		UNIT_STATISTICS(  0,    0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+
+race[TERRA].stats[VESPENE_GEYSIR] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[MINERAL_PATCH] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+
+race[TERRA].stats[SCV] = 		UNIT_STATISTICS( 300, 5000,    0,  1, 0, 0, 0, 0, COMMAND_CENTER, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, WORKER_UNIT_TYPE, AFFECTS_MINERALS);
+race[TERRA].stats[GAS_SCV] = 		UNIT_STATISTICS(  15,    0,    0,  0, 0, REFINERY ,0, 0, SCV, 0, 0, 0, IS_MORPHING, 0, GAS_MINER_UNIT_TYPE, AFFECTS_MINERALS_AND_GAS);
+race[TERRA].stats[SCV_FROM_GAS_TO_MINERALS] = 	UNIT_STATISTICS(  15,    0,    0,  0, 0, 0, 0, 0, GAS_SCV, 0, 0, 0, IS_MORPHING, SCV, ORDER_UNIT_TYPE, AFFECTS_MINERALS_AND_GAS);
+
+race[TERRA].stats[TERRA_WAIT] =		UNIT_STATISTICS(1500,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, ORDER_UNIT_TYPE);
+
+race[TERRA].stats[MARINE] = 		UNIT_STATISTICS( 360, 5000,    0,  1, 0, 0, 0, 0, BARRACKS, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, COMBAT_UNIT_TYPE);
+race[TERRA].stats[GHOST] = 		UNIT_STATISTICS( 750, 2500, 7500,  1, 0, ACADEMY ,SCIENCE_FACILITY_CO, 0, BARRACKS, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, SUPPORT_UNIT_TYPE);
+race[TERRA].stats[VULTURE] = 		UNIT_STATISTICS( 450, 7500,    0,  2, 0, 0, 0, 0, FACTORY, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, COMBAT_UNIT_TYPE);
+race[TERRA].stats[GOLIATH] = 		UNIT_STATISTICS( 600,10000, 5000,  2, 0, ARMORY, 0, 0, FACTORY, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, COMBAT_UNIT_TYPE);
+race[TERRA].stats[SIEGE_TANK] =		UNIT_STATISTICS( 750,15000,10000,  2, 0, 0, 0, 0, FACTORY_MS, 0, 0, FACTORY, NEEDED_UNTIL_COMPLETE, 0, COMBAT_UNIT_TYPE);
+race[TERRA].stats[FIREBAT] = 		UNIT_STATISTICS( 360, 5000, 2500,  1, 0, ACADEMY ,0, 0, BARRACKS, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, COMBAT_UNIT_TYPE);
+race[TERRA].stats[WRAITH] = 		UNIT_STATISTICS( 900,15000,10000,  2, 0, 0, 0, 0, STARPORT, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, COMBAT_UNIT_TYPE);
+race[TERRA].stats[SCIENCE_VESSEL] = 	UNIT_STATISTICS(1200,10000,22500,  2, 0, SCIENCE_FACILITY, 0, 0, STARPORT_CT, 0, 0, STARPORT, NEEDED_UNTIL_COMPLETE, 0, SUPPORT_UNIT_TYPE);
+race[TERRA].stats[DROPSHIP] = 		UNIT_STATISTICS( 750,10000,10000,  2, 0, 0, 0, 0, STARPORT_CT, 0, 0, STARPORT, NEEDED_UNTIL_COMPLETE, 0, SUPPORT_UNIT_TYPE);
+race[TERRA].stats[BATTLE_CRUISER] = 	UNIT_STATISTICS(2000,40000,30000,  6, 0, SCIENCE_FACILITY_PL, 0, 0, STARPORT_CT, 0, 0, STARPORT, NEEDED_UNTIL_COMPLETE, 0, COMBAT_UNIT_TYPE);
+race[TERRA].stats[NUCLEAR_WARHEAD] = 	UNIT_STATISTICS(1500,20000,20000,  8, 0, 0, 0, 0, NUCLEAR_SILO, 0, 0, 0, NEEDED_ALWAYS, 0, SUPPORT_UNIT_TYPE);
+
+race[TERRA].stats[REFINERY] = 		UNIT_STATISTICS( 600,10000,    0,  0, 0, 0, 0, 0, SCV, 0, 0, VESPENE_GEYSIR, NEEDED_UNTIL_COMPLETE_IS_LOST_GLOBALLY, GAS_SCV, SUPPLY_UNIT_TYPE, AFFECTS_GAS);
+race[TERRA].stats[COMMAND_CENTER] = 	UNIT_STATISTICS(1800,40000,    0,  0,10, 0, 0, 0, SCV, 0, 0, 0, NEEDED_UNTIL_COMPLETE, F_COMMAND_CENTER_ADDON, SUPPLY_UNIT_TYPE, AFFECTS_MINERALS_AND_GAS_GLOBALLY); // GLOBALLY?
+race[TERRA].stats[SUPPLY_DEPOT] = 	UNIT_STATISTICS( 600,10000,    0,  0, 8, 0, 0, 0, SCV, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, SUPPLY_UNIT_TYPE);
+race[TERRA].stats[BARRACKS] = 		UNIT_STATISTICS(1200,15000,    0,  0, 0, 0, 0, 0, SCV, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, PRODUCE_UNIT_TYPE);
+race[TERRA].stats[ACADEMY] = 		UNIT_STATISTICS(1200,15000,    0,  0, 0, BARRACKS ,0, 0, SCV, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[TERRA].stats[FACTORY] = 		UNIT_STATISTICS(1200,20000,10000,  0, 0, BARRACKS ,0, 0, SCV, 0, 0, 0, NEEDED_UNTIL_COMPLETE, F_FACTORY_ADDON, PRODUCE_UNIT_TYPE);
+race[TERRA].stats[STARPORT] = 		UNIT_STATISTICS(1050,15000,10000,  0, 0, FACTORY ,0, 0, SCV, 0, 0, 0, NEEDED_UNTIL_COMPLETE, F_STARPORT_ADDON, PRODUCE_UNIT_TYPE);
+race[TERRA].stats[SCIENCE_FACILITY] = 	UNIT_STATISTICS( 900,10000,15000,  0, 0, STARPORT ,0, 0, SCV, 0, 0, 0, NEEDED_UNTIL_COMPLETE, F_SCIENCE_FACILITY_ADDON, RESEARCH_FACILITY_UNIT_TYPE);
+race[TERRA].stats[ENGINEERING_BAY] = 	UNIT_STATISTICS( 900,12500,    0,  0, 0, 0, 0, 0, SCV, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[TERRA].stats[ARMORY] = 		UNIT_STATISTICS(1200,10000, 5000,  0, 0, FACTORY, 0, 0, SCV, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[TERRA].stats[MISSILE_TURRET] = 	UNIT_STATISTICS( 450, 7500,    0,  0, 0, ENGINEERING_BAY, 0, 0, SCV, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, SUPPORT_UNIT_TYPE);
+race[TERRA].stats[BUNKER] = 		UNIT_STATISTICS( 450,10000,    0,  0, 0, BARRACKS, 0, 0, SCV, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, SUPPORT_UNIT_TYPE);
+
+race[TERRA].stats[COMSAT_STATION] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, COMSAT_STATION, COMMAND_CENTER_CS, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[NUCLEAR_SILO] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, NUCLEAR_SILO, COMMAND_CENTER_NS, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[CONTROL_TOWER] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, CONTROL_TOWER, STARPORT_CT, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[COVERT_OPS] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, COVERT_OPS, SCIENCE_FACILITY_CO, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[PHYSICS_LAB] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, PHYSICS_LAB, SCIENCE_FACILITY_PL, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[MACHINE_SHOP] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, MACHINE_SHOP, FACTORY_MS, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[COMMAND_CENTER_CS] = 	UNIT_STATISTICS( 600, 5000, 5000,  0,10, ACADEMY, 0, 0, COMMAND_CENTER, 0, 0, F_COMMAND_CENTER_ADDON, NEEDED_UNTIL_COMPLETE, COMSAT_STATION, ADD_ON_UNIT_TYPE);
+race[TERRA].stats[COMMAND_CENTER_NS] = 	UNIT_STATISTICS( 600,10000,10000,  0,10, SCIENCE_FACILITY_CO, 0, 0, COMMAND_CENTER, 0, 0, F_COMMAND_CENTER_ADDON, NEEDED_UNTIL_COMPLETE, NUCLEAR_SILO, ADD_ON_UNIT_TYPE);
+race[TERRA].stats[STARPORT_CT] = 	UNIT_STATISTICS(1200, 5000, 5000,  0, 0, 0, 0, 0, STARPORT, 0, 0, F_STARPORT_ADDON, NEEDED_UNTIL_COMPLETE, CONTROL_TOWER, ADD_ON_UNIT_TYPE);
+race[TERRA].stats[SCIENCE_FACILITY_CO] =UNIT_STATISTICS( 600, 5000, 5000,  0, 0, 0, 0, 0, SCIENCE_FACILITY, 0, 0, F_SCIENCE_FACILITY_ADDON, NEEDED_UNTIL_COMPLETE, COVERT_OPS, ADD_ON_UNIT_TYPE);
+race[TERRA].stats[SCIENCE_FACILITY_PL] =UNIT_STATISTICS( 600, 5000, 5000,  0, 0, 0, 0, 0, SCIENCE_FACILITY, 0, 0, F_SCIENCE_FACILITY_ADDON, NEEDED_UNTIL_COMPLETE, PHYSICS_LAB, ADD_ON_UNIT_TYPE);
+race[TERRA].stats[FACTORY_MS] = 	UNIT_STATISTICS( 600, 5000, 5000,  0, 0, 0, 0, 0, FACTORY, 0, 0, F_FACTORY_ADDON, NEEDED_UNTIL_COMPLETE, MACHINE_SHOP, ADD_ON_UNIT_TYPE);
+
+race[TERRA].stats[STIM_PACKS] = 	UNIT_STATISTICS(1200,10000,10000,  0, 0, 0, 0, 0, ACADEMY, 0, 0, R_STIM_PACKS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[LOCKDOWN] = 		UNIT_STATISTICS(1500,20000,20000,  0, 0, SCIENCE_FACILITY_CO, 0, 0, COVERT_OPS, 0, 0, R_LOCKDOWN, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[EMP_SHOCKWAVE] = 	UNIT_STATISTICS(1800,20000,20000,  0, 0, 0, 0, 0, SCIENCE_FACILITY, 0, 0, R_EMP_SHOCKWAVE, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[SPIDER_MINES] = 	UNIT_STATISTICS(1200,10000,10000,  0, 0, FACTORY_MS ,0, 0, MACHINE_SHOP, 0, 0, R_SPIDER_MINES, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[TANK_SIEGE_MODE] = 	UNIT_STATISTICS(1200,15000,15000,  0, 0, FACTORY_MS ,0, 0, MACHINE_SHOP, 0, 0, R_TANK_SIEGE_MODE, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[IRRADIATE] = 		UNIT_STATISTICS(1200,20000,20000,  0, 0, 0, 0, 0, SCIENCE_FACILITY, 0, 0, R_IRRADIATE, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[YAMATO_GUN] = 	UNIT_STATISTICS(1800,10000,10000,  0, 0, SCIENCE_FACILITY_PL ,0, 0, PHYSICS_LAB, 0, 0, R_YAMATO_GUN, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[CLOAKING_FIELD] = 	UNIT_STATISTICS(1500,15000,15000,  0, 0, STARPORT_CT ,0, 0, CONTROL_TOWER, 0, 0, R_CLOAKING_FIELD, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[PERSONNEL_CLOAKING] = UNIT_STATISTICS(1200,10000,10000,  0, 0, SCIENCE_FACILITY_CO ,0, 0, COVERT_OPS, 0, 0, R_PERSONNEL_CLOAKING, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[U238_SHELLS] = 	UNIT_STATISTICS(1500,15000,15000,  0, 0, 0, 0, 0, ACADEMY, 0, 0, R_U238_SHELLS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[ION_THRUSTERS] = 	UNIT_STATISTICS(1500,10000,10000,  0, 0, FACTORY_MS ,0, 0, MACHINE_SHOP, 0, 0, R_ION_THRUSTERS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[OCULAR_IMPLANTS] = 	UNIT_STATISTICS(2500,10000,10000,  0, 0, SCIENCE_FACILITY_CO ,0, 0, COVERT_OPS, 0, 0, R_OCULAR_IMPLANTS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[TITAN_REACTOR] = 	UNIT_STATISTICS(2500,15000,15000,  0, 0, 0, 0, 0, SCIENCE_FACILITY, 0, 0, R_TITAN_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[MOEBIUS_REACTOR] = 	UNIT_STATISTICS(2500,20000,20000,  0, 0, SCIENCE_FACILITY_CO ,0, 0, COVERT_OPS, 0, 0, R_MOEBIUS_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[APOLLO_REACTOR] = 	UNIT_STATISTICS(2500,20000,20000,  0, 0, STARPORT_CT ,0, 0, CONTROL_TOWER, 0, 0, R_APOLLO_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[COLOSSUS_REACTOR] = 	UNIT_STATISTICS(2500,15000,15000,  0, 0, SCIENCE_FACILITY_PL ,0, 0, PHYSICS_LAB, 0, 0, R_COLOSSUS_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+	
+race[TERRA].stats[INFANTRY_ARMOR_1] = 	UNIT_STATISTICS(4000,10000,10000,  0, 0, 0, 0, 0, ENGINEERING_BAY, 0, 0, R_INFANTRY_ARMOR, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[INFANTRY_ARMOR_2] = 	UNIT_STATISTICS(4500,17500,17500,  0, 0, SCIENCE_FACILITY, 0, 0, ENGINEERING_BAY, 0, 0, INFANTRY_ARMOR_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[INFANTRY_ARMOR_3] = 	UNIT_STATISTICS(5000,25000,25000,  0, 0, SCIENCE_FACILITY, 0, 0, ENGINEERING_BAY, 0, 0, INFANTRY_ARMOR_2, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[INFANTRY_WEAPONS_1] = UNIT_STATISTICS(4000,10000,10000,  0, 0, 0, 0, 0, ENGINEERING_BAY, 0, 0, R_INFANTRY_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[INFANTRY_WEAPONS_2] = UNIT_STATISTICS(4500,17500,17500,  0, 0, SCIENCE_FACILITY, 0, 0, ENGINEERING_BAY, 0, 0, INFANTRY_WEAPONS_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[INFANTRY_WEAPONS_3] = UNIT_STATISTICS(5000,25000,25000,  0, 0, SCIENCE_FACILITY, 0, 0, ENGINEERING_BAY, 0, 0, INFANTRY_WEAPONS_2, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[VEHICLE_PLATING_1] = 	UNIT_STATISTICS(4000,10000,10000,  0, 0, 0, 0, 0, ARMORY, 0, 0, R_VEHICLE_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[VEHICLE_PLATING_2] = 	UNIT_STATISTICS(4500,17500,17500,  0, 0, SCIENCE_FACILITY, 0, 0, ARMORY, 0, 0, VEHICLE_PLATING_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[VEHICLE_PLATING_3] = 	UNIT_STATISTICS(5000,25000,25000,  0, 0, SCIENCE_FACILITY, 0, 0, ARMORY, 0, 0, VEHICLE_PLATING_2, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[VEHICLE_WEAPONS_1] = 	UNIT_STATISTICS(4000,10000,10000,  0, 0, 0, 0, 0, ARMORY, 0, 0, R_VEHICLE_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[VEHICLE_WEAPONS_2] = 	UNIT_STATISTICS(4500,17500,17500,  0, 0, SCIENCE_FACILITY, 0, 0, ARMORY, 0, 0, VEHICLE_WEAPONS_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[VEHICLE_WEAPONS_3] = 	UNIT_STATISTICS(5000,25000,25000,  0, 0, SCIENCE_FACILITY, 0, 0, ARMORY, 0, 0, VEHICLE_WEAPONS_2, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[SHIP_PLATING_1] = 	UNIT_STATISTICS(4000,15000,15000,  0, 0, 0, 0, 0, ARMORY, 0, 0, R_SHIP_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[SHIP_PLATING_2] = 	UNIT_STATISTICS(4500,22500,22500,  0, 0, SCIENCE_FACILITY, 0, 0, ARMORY, 0, 0, SHIP_PLATING_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[SHIP_PLATING_3] = 	UNIT_STATISTICS(5000,30000,30000,  0, 0, SCIENCE_FACILITY, 0, 0, ARMORY, 0, 0, SHIP_PLATING_2, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[SHIP_WEAPONS_1] = 	UNIT_STATISTICS(4000,10000,10000,  0, 0, 0, 0, 0, ARMORY, 0, 0, R_SHIP_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[SHIP_WEAPONS_2] = 	UNIT_STATISTICS(4500,15000,15000,  0, 0, SCIENCE_FACILITY, 0, 0, ARMORY, 0, 0, SHIP_WEAPONS_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[TERRA].stats[SHIP_WEAPONS_3] = 	UNIT_STATISTICS(5000,20000,20000,  0, 0, SCIENCE_FACILITY, 0, 0, ARMORY, 0, 0, SHIP_WEAPONS_2, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+
+race[TERRA].stats[R_STIM_PACKS] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_LOCKDOWN] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_EMP_SHOCKWAVE] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_SPIDER_MINES] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_TANK_SIEGE_MODE] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_IRRADIATE] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_YAMATO_GUN] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_CLOAKING_FIELD] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_PERSONNEL_CLOAKING] =	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_U238_SHELLS] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_ION_THRUSTERS] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_TITAN_REACTOR] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_OCULAR_IMPLANTS] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_MOEBIUS_REACTOR] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_APOLLO_REACTOR] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_COLOSSUS_REACTOR] = UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_INFANTRY_ARMOR] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_INFANTRY_WEAPONS] = UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_VEHICLE_PLATING] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_VEHICLE_WEAPONS] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_SHIP_PLATING] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[R_SHIP_WEAPONS] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+
+race[TERRA].stats[F_FACTORY_ADDON] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[F_STARPORT_ADDON] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[F_COMMAND_CENTER_ADDON] =UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[TERRA].stats[F_SCIENCE_FACILITY_ADDON] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+
+
+
+race[PROTOSS].stats[NONE] = 		UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+
+race[PROTOSS].stats[MINERAL_PATCH] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[VESPENE_GEYSIR] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+
+race[PROTOSS].stats[PROBE] = 		UNIT_STATISTICS( 300, 5000,    0,  1, 0, 0, 0, 0, NEXUS, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, WORKER_UNIT_TYPE, AFFECTS_MINERALS);
+race[PROTOSS].stats[GAS_PROBE] = 	UNIT_STATISTICS(  15,    0,    0,  0, 0, ASSIMILATOR ,0, 0, PROBE, 0, 0, 0, IS_MORPHING, 0, GAS_MINER_UNIT_TYPE, AFFECTS_MINERALS_AND_GAS),	//Needed once? ~~~ wenn hier ne Aenderung, Facility2 in race und anarace wieder auf location availible checken !TOD;
+
+race[PROTOSS].stats[PROBE_FROM_GAS_TO_MINERALS] = UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE, AFFECTS_MINERALS_AND_GAS);
+race[PROTOSS].stats[PROTOSS_WAIT] = 		UNIT_STATISTICS(1500,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, ORDER_UNIT_TYPE);
+
+race[PROTOSS].stats[ZEALOT] = 		UNIT_STATISTICS( 600,10000,    0,  2, 0, 0, 0, 0, GATEWAY, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, COMBAT_UNIT_TYPE);
+race[PROTOSS].stats[DRAGOON] = 		UNIT_STATISTICS( 750,12500, 5000,  2, 0, CYBERNETICS_CORE ,0, 0, GATEWAY, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, COMBAT_UNIT_TYPE);
+race[PROTOSS].stats[HIGH_TEMPLAR] = 	UNIT_STATISTICS( 750, 5000,15000,  2, 0, TEMPLAR_ARCHIVES ,0, 0, GATEWAY, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, SUPPORT_UNIT_TYPE);
+race[PROTOSS].stats[ARCHON] = 		UNIT_STATISTICS( 300,    0,    0,  0, 0, 0, 0, 0, HIGH_TEMPLAR, 0, 0, HIGH_TEMPLAR, IS_MORPHING, 0, COMBAT_UNIT_TYPE);
+race[PROTOSS].stats[REAVER] = 		UNIT_STATISTICS(1050,20000,10000,  4, 0, ROBOTICS_SUPPORT_BAY ,0, 0, ROBOTICS_FACILITY, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, COMBAT_UNIT_TYPE);
+race[PROTOSS].stats[HALF_SCARAB] = 	UNIT_STATISTICS( 525, 7500,    0,  0, 0, 0, 0, 0, REAVER, 0, 0, 0, NEEDED_ALWAYS, 0, SPECIAL_UNIT_TYPE);
+race[PROTOSS].stats[FULL_SCARAB] = 	UNIT_STATISTICS( 525, 7500,    0,  0, 0, REAVER_CAPACITY, 0, 0, HALF_SCARAB, 0, 0, 0, IS_LOST, 0, SPECIAL_UNIT_TYPE);
+race[PROTOSS].stats[SHUTTLE] = 		UNIT_STATISTICS( 900,20000,    0,  2, 0, 0, 0, 0, ROBOTICS_FACILITY, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, SUPPORT_UNIT_TYPE);
+race[PROTOSS].stats[SCOUT] = 		UNIT_STATISTICS(1200,27500,12500,  3, 0, 0, 0, 0, STARGATE, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, COMBAT_UNIT_TYPE);
+race[PROTOSS].stats[ARBITER] = 		UNIT_STATISTICS(2400,10000,35000,  4, 0, ARBITER_TRIBUNAL ,0, 0, STARGATE, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, SUPPORT_UNIT_TYPE);
+race[PROTOSS].stats[CARRIER] = 		UNIT_STATISTICS(2100,35000,25000,  6, 0, FLEET_BEACON ,0, 0, STARGATE, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, COMBAT_UNIT_TYPE);
+race[PROTOSS].stats[HALF_INTERCEPTOR] = UNIT_STATISTICS(1500,25000,    0,  0, 0, 0, 0, 0, CARRIER, 0, 0, 0, NEEDED_ALWAYS, 0, SPECIAL_UNIT_TYPE);
+race[PROTOSS].stats[FULL_INTERCEPTOR] = UNIT_STATISTICS( 900,15000,    0,  0, 0, CARRIER_CAPACITY, 0, 0, HALF_INTERCEPTOR, 0, 0, 0, IS_LOST, 0, SPECIAL_UNIT_TYPE);
+race[PROTOSS].stats[OBSERVER] = 	UNIT_STATISTICS( 600, 2500, 7500,  1, 0, OBSERVATORY ,0, 0, ROBOTICS_FACILITY, 0, 0, 0, NEEDED_UNTIL_COMPLETE, 0, SUPPORT_UNIT_TYPE);
+
+race[PROTOSS].stats[ASSIMILATOR] = 	UNIT_STATISTICS( 600,10000,    0,  0, 0, 0, 0, 0, PROBE, 0, 0, VESPENE_GEYSIR, NEEDED_ONCE_IS_LOST_GLOBALLY, 0, SUPPLY_UNIT_TYPE, AFFECTS_GAS);
+race[PROTOSS].stats[NEXUS] = 		UNIT_STATISTICS(1800,40000,    0,  0, 9, 0, 0, 0, PROBE, 0, 0, 0, NEEDED_ONCE, 0, SUPPLY_UNIT_TYPE, AFFECTS_MINERALS_AND_GAS_GLOBALLY);
+race[PROTOSS].stats[ROBOTICS_FACILITY] =UNIT_STATISTICS(1200,20000,20000,  0, 0, CYBERNETICS_CORE ,PYLON, 0, PROBE, 0, 0, 0, NEEDED_ONCE, 0, PRODUCE_UNIT_TYPE);
+race[PROTOSS].stats[PYLON] = 		UNIT_STATISTICS( 450,10000,    0,  0, 8, 0, 0, 0, PROBE, 0, 0, 0, NEEDED_ONCE, 0, SUPPLY_UNIT_TYPE);
+race[PROTOSS].stats[OBSERVATORY] = 	UNIT_STATISTICS( 450, 5000,10000,  0, 0, ROBOTICS_FACILITY ,PYLON, 0, PROBE, 0, 0, 0, NEEDED_ONCE, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[PROTOSS].stats[GATEWAY] = 		UNIT_STATISTICS( 900,15000,    0,  0, 0, PYLON ,0, 0, PROBE, 0, 0, 0, NEEDED_ONCE, 0, PRODUCE_UNIT_TYPE);
+race[PROTOSS].stats[PHOTON_CANNON] = 	UNIT_STATISTICS( 750,15000,    0,  0, 0, FORGE, PYLON, 0, PROBE, 0, 0, 0, NEEDED_ONCE, 0, SUPPORT_UNIT_TYPE);
+race[PROTOSS].stats[CYBERNETICS_CORE] = UNIT_STATISTICS( 900,20000,    0,  0, 0, GATEWAY, PYLON, 0, PROBE, 0, 0, 0, NEEDED_ONCE, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[PROTOSS].stats[CITADEL_OF_ADUN] = 	UNIT_STATISTICS( 900,15000,10000,  0, 0, CYBERNETICS_CORE, PYLON, 0, PROBE, 0, 0, 0, NEEDED_ONCE, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[PROTOSS].stats[TEMPLAR_ARCHIVES] = UNIT_STATISTICS( 900,15000,20000,  0, 0, CITADEL_OF_ADUN, PYLON, 0, PROBE, 0, 0, 0, NEEDED_ONCE, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[PROTOSS].stats[FORGE] = 		UNIT_STATISTICS( 600,15000,    0,  0, 0, PYLON, 0, 0, PROBE, 0, 0, 0, NEEDED_ONCE, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[PROTOSS].stats[STARGATE] = 	UNIT_STATISTICS(1050,15000,15000,  0, 0, CYBERNETICS_CORE, PYLON, 0, PROBE, 0, 0, 0, NEEDED_ONCE, 0, PRODUCE_UNIT_TYPE);
+race[PROTOSS].stats[FLEET_BEACON] = 	UNIT_STATISTICS( 900,30000,20000,  0, 0, STARGATE, PYLON, 0, PROBE, 0, 0, 0, NEEDED_ONCE, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[PROTOSS].stats[ARBITER_TRIBUNAL] = UNIT_STATISTICS( 900,20000,15000,  0, 0, TEMPLAR_ARCHIVES, STARGATE, PYLON, PROBE, 0, 0, 0, NEEDED_ONCE, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[PROTOSS].stats[ROBOTICS_SUPPORT_BAY] =	UNIT_STATISTICS( 450,15000,10000,  0, 0, ROBOTICS_FACILITY, PYLON, 0, PROBE, 0, 0, 0, NEEDED_ONCE, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[PROTOSS].stats[SHIELD_BATTERY] = 	UNIT_STATISTICS( 450,10000,    0,  0, 0, GATEWAY, PYLON, 0, PROBE, 0, 0, 0, NEEDED_ONCE, 0, SUPPORT_UNIT_TYPE);
+
+race[PROTOSS].stats[PSIONIC_STORM] = 	UNIT_STATISTICS(1800,20000,20000,  0, 0, 0, 0, 0, TEMPLAR_ARCHIVES, 0, 0, R_PSIONIC_STORM, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[HALLUCINATION] = 	UNIT_STATISTICS(1200,15000,15000,  0, 0, 0, 0, 0, TEMPLAR_ARCHIVES, 0, 0, R_HALLUCINATION, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[RECALL] = 		UNIT_STATISTICS(1800,15000,15000,  0, 0, 0, 0, 0, ARBITER_TRIBUNAL, 0, 0, R_RECALL, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[STASIS_FIELD] = 	UNIT_STATISTICS(1500,15000,15000,  0, 0, 0, 0, 0, ARBITER_TRIBUNAL, 0, 0, R_STASIS_FIELD, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[SINGULARITY_CHARGE] =UNIT_STATISTICS(2500,15000,15000,  0, 0, 0, 0, 0, CYBERNETICS_CORE, 0, 0, R_SINGULARITY_CHARGE, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[LEG_ENHANCEMENTS] = UNIT_STATISTICS(2000,15000,15000,  0, 0, 0, 0, 0, CITADEL_OF_ADUN, 0, 0, R_LEG_ENHANCEMENTS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[SCARAB_DAMAGE] = 	UNIT_STATISTICS(2500,20000,20000,  0, 0, 0, 0, 0, ROBOTICS_SUPPORT_BAY, 0, 0, R_SCARAB_DAMAGE, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[REAVER_CAPACITY] = 	UNIT_STATISTICS(2500,20000,20000,  0, 0, 0, 0, 0, ROBOTICS_SUPPORT_BAY, 0, 0, R_REAVER_CAPACITY, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[GRAVITIC_DRIVE] = 	UNIT_STATISTICS(2500,20000,20000,  0, 0, 0, 0, 0, ROBOTICS_SUPPORT_BAY, 0, 0, R_GRAVITIC_DRIVE, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[SENSOR_ARRAY] = 	UNIT_STATISTICS(2000,15000,15000,  0, 0, 0, 0, 0, OBSERVATORY, 0, 0, R_SENSOR_ARRAY, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[GRAVITIC_BOOSTERS] =UNIT_STATISTICS(2000,15000,15000,  0, 0, 0, 0, 0, OBSERVATORY, 0, 0, R_GRAVITIC_BOOSTERS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[KHAYDARIN_AMULET] = UNIT_STATISTICS(2500,15000,15000,  0, 0, 0, 0, 0, TEMPLAR_ARCHIVES, 0, 0, R_KHAYDARIN_AMULET, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[APIAL_SENSORS] = 	UNIT_STATISTICS(2500,10000,10000,  0, 0, 0, 0, 0, FLEET_BEACON, 0, 0, R_APIAL_SENSORS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[GRAVITIC_THRUSTERS] =UNIT_STATISTICS(2500,20000,20000,  0, 0, 0, 0, 0, FLEET_BEACON, 0, 0, R_GRAVITIC_THRUSTERS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[CARRIER_CAPACITY] = UNIT_STATISTICS(1500,10000,10000,  0, 0, 0, 0, 0, FLEET_BEACON, 0, 0, R_CARRIER_CAPACITY, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[KHAYDARIN_CORE] = 	UNIT_STATISTICS(2500,15000,15000,  0, 0, 0, 0, 0, ARBITER_TRIBUNAL, 0, 0, R_KHAYDARIN_CORE, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+
+race[PROTOSS].stats[ARMOR_1] = 		UNIT_STATISTICS(4000,10000,10000,  0, 0, 0, 0, 0, FORGE, 0, 0, R_ARMOR, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[ARMOR_2] = 		UNIT_STATISTICS(4500,17500,17500,  0, 0, TEMPLAR_ARCHIVES, 0, 0, FORGE, 0, 0, ARMOR_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[ARMOR_3] = 		UNIT_STATISTICS(5000,25000,25000,  0, 0, TEMPLAR_ARCHIVES, 0, 0, FORGE, 0, 0, ARMOR_2, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[PLATING_1] =	UNIT_STATISTICS(4000,15000,15000,  0, 0, 0, 0, 0, CYBERNETICS_CORE, 0, 0, R_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[PLATING_2] =	UNIT_STATISTICS(4500,22500,22500,  0, 0, FLEET_BEACON, 0, 0, CYBERNETICS_CORE, 0, 0, PLATING_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[PLATING_3] =	UNIT_STATISTICS(5000,30000,30000,  0, 0, FLEET_BEACON, 0, 0, CYBERNETICS_CORE, 0, 0, PLATING_2, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[GROUND_WEAPONS_1] =	UNIT_STATISTICS(4000,10000,10000,  0, 0, 0, 0, 0, FORGE, 0, 0, R_GROUND_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[GROUND_WEAPONS_2] =	UNIT_STATISTICS(4500,15000,15000,  0, 0, TEMPLAR_ARCHIVES, 0, 0, FORGE, 0, 0, GROUND_WEAPONS_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[GROUND_WEAPONS_3] =	UNIT_STATISTICS(5000,20000,20000,  0, 0, TEMPLAR_ARCHIVES, 0, 0, FORGE, 0, 0, GROUND_WEAPONS_2, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[AIR_WEAPONS_1] = 	UNIT_STATISTICS(4000,17500,17500,  0, 0, 0, 0, 0, CYBERNETICS_CORE, 0, 0, R_AIR_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[AIR_WEAPONS_2] = 	UNIT_STATISTICS(4500,25000,25000,  0, 0, FLEET_BEACON, 0, 0, CYBERNETICS_CORE, 0, 0, AIR_WEAPONS_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[AIR_WEAPONS_3] = 	UNIT_STATISTICS(5000,10000,10000,  0, 0, FLEET_BEACON, 0, 0, CYBERNETICS_CORE, 0, 0, AIR_WEAPONS_2, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[PLASMA_SHIELDS_1] = UNIT_STATISTICS(4000,20000,20000,  0, 0, 0, 0, 0, FORGE, 0, 0, R_PLASMA_SHIELDS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[PLASMA_SHIELDS_2] = UNIT_STATISTICS(4500,30000,30000,  0, 0, TEMPLAR_ARCHIVES, 0, 0, FORGE, 0, 0, PLASMA_SHIELDS_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[PROTOSS].stats[PLASMA_SHIELDS_3] = UNIT_STATISTICS(5000,40000,40000,  0, 0, TEMPLAR_ARCHIVES, 0, 0, FORGE, 0, 0, PLASMA_SHIELDS_2, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+
+
+race[PROTOSS].stats[R_PSIONIC_STORM] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_HALLUCINATION] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_RECALL] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_STASIS_FIELD] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_SINGULARITY_CHARGE] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_LEG_ENHANCEMENTS] =UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_SCARAB_DAMAGE] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_REAVER_CAPACITY] =UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_GRAVITIC_DRIVE] = UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_SENSOR_ARRAY] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_GRAVITIC_BOOSTERS] =UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_KHAYDARIN_AMULET] =UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_APIAL_SENSORS] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_GRAVITIC_THRUSTERS] =UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_CARRIER_CAPACITY] = UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_KHAYDARIN_CORE] = UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_ARMOR] = 		UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_PLATING] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_GROUND_WEAPONS] = UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_AIR_WEAPONS] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[PROTOSS].stats[R_PLASMA_SHIELDS] = UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+
+
+race[ZERG].stats[NONE] = 		UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE),
+
+race[ZERG].stats[MINERAL_PATCH] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[VESPENE_GEYSIR] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, INVALID_UNIT_TYPE);
+
+race[ZERG].stats[DRONE] = 		UNIT_STATISTICS( 300, 5000,    0,  1, 0, 0, 0, 0, LARVA, 0, 0, 0, IS_LOST, 0, WORKER_UNIT_TYPE, AFFECTS_MINERALS);
+race[ZERG].stats[GAS_DRONE] = 		UNIT_STATISTICS(  15,    0,    0,  0, 0, EXTRACTOR ,0, 0, DRONE, 0, 0, 0, IS_MORPHING, 0, GAS_MINER_UNIT_TYPE, AFFECTS_MINERALS_AND_GAS);
+race[ZERG].stats[DRONE_FROM_GAS_TO_MINERALS] =UNIT_STATISTICS(   15,    0,    0,  0, 0, 0, 0, 0, GAS_DRONE, 0, 0, 0, IS_MORPHING, DRONE, ORDER_UNIT_TYPE);
+
+race[ZERG].stats[BREAK_UP_BUILDING] = 	UNIT_STATISTICS(  15,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, ORDER_UNIT_TYPE);
+race[ZERG].stats[ZERG_WAIT] = 		UNIT_STATISTICS(1500,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY, 0, ORDER_UNIT_TYPE);
+
+race[ZERG].stats[LARVA] = 		UNIT_STATISTICS( 300,    0,    0,  0, 0, HATCHERY, LAIR, HIVE, 0, 0, 0, 0, NEEDED_ONCE, 0, SPECIAL_UNIT_TYPE);
+race[ZERG].stats[ZERGLING] = 		UNIT_STATISTICS( 420, 5000,    0,  1, 0, SPAWNING_POOL ,0, 0, LARVA, 0, 0, 0, IS_LOST, ZERGLING, COMBAT_UNIT_TYPE);
+race[ZERG].stats[HYDRALISK] = 		UNIT_STATISTICS( 420, 7500, 2500,  1, 0, HYDRALISK_DEN ,0, 0, LARVA, 0, 0, 0, IS_LOST, 0, COMBAT_UNIT_TYPE);
+race[ZERG].stats[ULTRALISK] = 		UNIT_STATISTICS( 900,20000,20000,  6, 0, ULTRALISK_CAVERN ,0, 0, LARVA, 0, 0, 0, IS_LOST, 0, COMBAT_UNIT_TYPE);
+race[ZERG].stats[DEFILER] = 		UNIT_STATISTICS( 750, 5000,15000,  2, 0, DEFILER_MOUND ,0, 0, LARVA, 0, 0, 0, IS_LOST, 0, SUPPORT_UNIT_TYPE);
+race[ZERG].stats[OVERLORD] = 		UNIT_STATISTICS( 600,10000,    0,  0, 8, 0, 0, 0, LARVA, 0, 0, 0, IS_LOST, 0, SUPPLY_UNIT_TYPE);
+race[ZERG].stats[MUTALISK] = 		UNIT_STATISTICS( 600,10000,10000,  2, 0, SPIRE ,0, 0, LARVA, 0, 0, 0, IS_LOST, 0, COMBAT_UNIT_TYPE);
+race[ZERG].stats[GUARDIEN] = 		UNIT_STATISTICS( 600, 5000,10000,  0, 0, GREATER_SPIRE ,0, 0, MUTALISK, 0, 0, 0, IS_MORPHING, 0, COMBAT_UNIT_TYPE);
+race[ZERG].stats[QUEEN] = 		UNIT_STATISTICS( 750,10000,10000,  2, 0, QUEENS_NEST ,0, 0, LARVA, 0, 0, 0, IS_LOST, 0, SUPPORT_UNIT_TYPE);
+race[ZERG].stats[SCOURGE] = 		UNIT_STATISTICS( 450, 2500, 7500,  1, 0, SPIRE ,0, 0, LARVA, 0, 0, 0, IS_LOST, SCOURGE, COMBAT_UNIT_TYPE);
+
+race[ZERG].stats[EXTRACTOR] = 		UNIT_STATISTICS( 600, 5000,    0,  0, 0, 0, 0, 0, DRONE, 0, 0, VESPENE_GEYSIR, IS_LOST_GLOBALLY, 0, SUPPLY_UNIT_TYPE, AFFECTS_GAS); // affects gas globally?
+race[ZERG].stats[HATCHERY] = 		UNIT_STATISTICS(1800,30000,    0,  0, 1, 0, 0, 0, DRONE, 0, 0, 0, IS_LOST, LARVA, PRODUCE_UNIT_TYPE, AFFECTS_MINERALS_AND_GAS_GLOBALLY);
+race[ZERG].stats[LAIR] = 		UNIT_STATISTICS(1500,15000,10000,  0, 0, SPAWNING_POOL ,0, 0, HATCHERY, 0, 0, 0, IS_MORPHING, 0, ADD_ON_UNIT_TYPE);
+race[ZERG].stats[HIVE] = 		UNIT_STATISTICS(1800,20000,15000,  0, 0, QUEENS_NEST ,0, 0, LAIR, 0, 0, 0, IS_MORPHING, 0, ADD_ON_UNIT_TYPE);
+race[ZERG].stats[NYDUS_CANAL] = 	UNIT_STATISTICS( 600,15000,    0,  0, 0, HIVE ,0, 0, DRONE, 0, 0, 0, IS_LOST, 0, SUPPORT_UNIT_TYPE);
+race[ZERG].stats[HYDRALISK_DEN] = 	UNIT_STATISTICS( 600,10000, 5000,  0, 0, SPAWNING_POOL ,0, 0, DRONE, 0, 0, 0, IS_LOST, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[ZERG].stats[DEFILER_MOUND] = 	UNIT_STATISTICS( 900,10000,10000,  0, 0, HIVE ,0, 0, DRONE, 0, 0, 0, IS_LOST, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[ZERG].stats[GREATER_SPIRE] = 	UNIT_STATISTICS(1800,10000,15000,  0, 0, HIVE ,0, 0, SPIRE, 0, 0, 0, IS_MORPHING, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[ZERG].stats[QUEENS_NEST] = 	UNIT_STATISTICS( 900,15000,10000,  0, 0, LAIR ,0, 0, DRONE, 0, 0, 0, IS_LOST, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[ZERG].stats[EVOLUTION_CHAMBER] = 	UNIT_STATISTICS( 600, 7500,    0,  0, 0, 0, 0, 0, DRONE, 0, 0, 0, IS_LOST, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[ZERG].stats[ULTRALISK_CAVERN] = 	UNIT_STATISTICS(1200,15000,20000,  0, 0, HIVE ,0, 0, DRONE, 0, 0, 0, IS_LOST, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[ZERG].stats[SPIRE] = 		UNIT_STATISTICS(1800,20000,15000,  0, 0, LAIR ,0, 0, DRONE, 0, 0, 0, IS_LOST, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[ZERG].stats[SPAWNING_POOL] = 	UNIT_STATISTICS(1200,20000,    0,  0, 0, 0, 0, 0, DRONE, 0, 0, 0, IS_LOST, 0, RESEARCH_FACILITY_UNIT_TYPE);
+race[ZERG].stats[CREEP_COLONY] = 	UNIT_STATISTICS( 300, 7500,    0,  0, 0, 0, 0, 0, DRONE, 0, 0, 0, IS_LOST, 0, SUPPORT_UNIT_TYPE);
+race[ZERG].stats[SPORE_COLONY] = 	UNIT_STATISTICS( 300, 5000,    0,  0, 0, EVOLUTION_CHAMBER ,0, 0, CREEP_COLONY, 0, 0, 0, IS_LOST, 0, ADD_ON_UNIT_TYPE);
+race[ZERG].stats[SUNKEN_COLONY] = 	UNIT_STATISTICS( 300, 5000,    0,  0, 0, SPAWNING_POOL ,0, 0, CREEP_COLONY, 0, 0, 0, IS_LOST, 0, ADD_ON_UNIT_TYPE);
+
+race[ZERG].stats[VENTRAL_SACKS] = 	UNIT_STATISTICS(2400,20000,20000,  0, 0, 0, 0, 0, LAIR, HIVE, 0, R_VENTRAL_SACKS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[ANTENNAE] = 		UNIT_STATISTICS(2000,15000,15000,  0, 0, 0, 0, 0, LAIR, HIVE, 0, R_ANTENNAE, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[PNEUMATIZED_CARAPACE] =UNIT_STATISTICS(2000,15000,15000,  0, 0, 0, 0, 0, LAIR, HIVE, 0, R_PNEUMATIZED_CARAPACE, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[METABOLIC_BOOST] = 	UNIT_STATISTICS(1500,10000,10000,  0, 0, 0, 0, 0, SPAWNING_POOL, 0, 0, R_METABOLIC_BOOST, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[ADRENAL_GLANDS] = 	UNIT_STATISTICS(1500,20000,20000,  0, 0, HIVE ,0, 0, SPAWNING_POOL, 0, 0, R_ADRENAL_GLANDS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[MUSCULAR_AUGMENTS] = 	UNIT_STATISTICS(1500,15000,15000,  0, 0, 0, 0, 0, HYDRALISK_DEN, 0, 0, R_MUSCULAR_AUGMENTS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[GROOVED_SPINES] = 	UNIT_STATISTICS(1500,15000,15000,  0, 0, 0, 0, 0, HYDRALISK_DEN, 0, 0, R_GROOVED_SPINES, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[GAMETE_MEIOSIS] = 	UNIT_STATISTICS(2500,15000,15000,  0, 0, 0, 0, 0, QUEENS_NEST, 0, 0, R_GAMETE_MEIOSIS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[METASYNAPTIC_NODE] = 	UNIT_STATISTICS(2500,15000,15000,  0, 0, 0, 0, 0, DEFILER_MOUND, 0, 0, R_METASYNAPTIC_NODE, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[BURROWING] = 		UNIT_STATISTICS(1200,10000,10000,  0, 0, 0, 0, 0, HATCHERY, LAIR, HIVE, R_BURROWING, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[SPAWN_BROODLING] = 	UNIT_STATISTICS(1200,10000,10000,  0, 0, 0, 0, 0, QUEENS_NEST, 0, 0, R_SPAWN_BROODLING, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[PLAGUE] = 		UNIT_STATISTICS(1500,20000,20000,  0, 0, 0, 0, 0, DEFILER_MOUND, 0, 0, R_PLAGUE, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[CONSUME] = 		UNIT_STATISTICS(1500,10000,10000,  0, 0, 0, 0, 0, DEFILER_MOUND, 0, 0, R_CONSUME, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[ENSNARE] = 		UNIT_STATISTICS(1200,10000,10000,  0, 0, 0, 0, 0, QUEENS_NEST, 0, 0, R_ENSNARE, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+
+race[ZERG].stats[CARAPACE_1] = 		UNIT_STATISTICS(4000,15000,15000,  0, 0, 0, 0, 0, EVOLUTION_CHAMBER, 0, 0, R_CARAPACE, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[CARAPACE_2] = 		UNIT_STATISTICS(4500,22500,22500,  0, 0, LAIR, 0, 0, EVOLUTION_CHAMBER, 0, 0, CARAPACE_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+//race[ZERG].stats[CARAPACE_2_T] = 	UNIT_STATISTICS(4500,22500,22500,  0, 0, HIVE, 0, 0, EVOLUTION_CHAMBER, 0, 0, CARAPACE_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, CARAPACE_2, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[CARAPACE_3] = 		UNIT_STATISTICS(5000,30000,30000,  0, 0, HIVE, 0, 0, EVOLUTION_CHAMBER, 0, 0, CARAPACE_2, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+
+race[ZERG].stats[FLYER_CARAPACE_1] = 	UNIT_STATISTICS(4000,15000,15000,  0, 0, 0, 0, 0, SPIRE, GREATER_SPIRE, 0, R_FLYER_CARAPACE, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[FLYER_CARAPACE_2] = 	UNIT_STATISTICS(4500,22500,22500,  0, 0, LAIR, 0, 0, SPIRE, GREATER_SPIRE, 0, R_FLYER_CARAPACE, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+//race[ZERG].stats[FLYER_CARAPACE_2_T] = 	UNIT_STATISTICS(4500,22500,22500,  0, 0, HIVE, 0, 0, SPIRE, GREATER_SPIRE, 0, R_FLYER_CARAPACE, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, FLYER_CARAPACE_2, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[FLYER_CARAPACE_3] = 	UNIT_STATISTICS(5000,30000,30000,  0, 0, HIVE, 0, 0, SPIRE, GREATER_SPIRE, 0, R_FLYER_CARAPACE, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+
+race[ZERG].stats[MELEE_ATTACKS_1] = 	UNIT_STATISTICS(4000,10000,10000,  0, 0, 0, 0, 0, EVOLUTION_CHAMBER, 0, 0, R_MELEE_ATTACKS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[MELEE_ATTACKS_2] = 	UNIT_STATISTICS(4500,15000,15000,  0, 0, LAIR, 0, 0, EVOLUTION_CHAMBER, 0, 0, MELEE_ATTACKS_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+//race[ZERG].stats[MELEE_ATTACKS_2_T] = 	UNIT_STATISTICS(4500,15000,15000,  0, 0, HIVE, 0, 0, EVOLUTION_CHAMBER, 0, 0, MELEE_ATTACKS_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, MELEE_ATTACKS_2, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[MELEE_ATTACKS_3] = 	UNIT_STATISTICS(5000,20000,20000,  0, 0, HIVE, 0, 0, EVOLUTION_CHAMBER, 0, 0, MELEE_ATTACKS_2, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+
+race[ZERG].stats[MISSILE_ATTACKS_1] = 	UNIT_STATISTICS(4000,10000,10000,  0, 0, 0, 0, 0, EVOLUTION_CHAMBER, 0, 0, R_MISSILE_ATTACKS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[MISSILE_ATTACKS_2] = 	UNIT_STATISTICS(4500,15000,15000,  0, 0, 0, 0, 0, EVOLUTION_CHAMBER, 0, 0, MISSILE_ATTACKS_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+//race[ZERG].stats[MISSILE_ATTACKS_2_T] = UNIT_STATISTICS(4500,15000,15000,  0, 0, 0, 0, 0, EVOLUTION_CHAMBER, 0, 0, MISSILE_ATTACKS_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, MISSILE_ATTACKS_2, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[MISSILE_ATTACKS_3] = 	UNIT_STATISTICS(5000,20000,20000,  0, 0, 0, 0, 0, EVOLUTION_CHAMBER, 0, 0, MISSILE_ATTACKS_2, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+
+race[ZERG].stats[FLYER_ATTACKS_1] = 	UNIT_STATISTICS(4000,10000,10000,  0, 0, 0, 0, 0, SPIRE, GREATER_SPIRE, 0, R_FLYER_ATTACKS, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[FLYER_ATTACKS_2] = 	UNIT_STATISTICS(4500,17500,17500,  0, 0, 0, 0, 0, SPIRE, GREATER_SPIRE, 0, FLYER_ATTACKS_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+//race[ZERG].stats[FLYER_ATTACKS_2_T] = 	UNIT_STATISTICS(4500,17500,17500,  0, 0, 0, 0, 0, SPIRE, GREATER_SPIRE, 0, FLYER_ATTACKS_1, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, FLYER_ATTACKS_2, RESEARCH_UNIT_TYPE);
+race[ZERG].stats[FLYER_ATTACKS_3] = 	UNIT_STATISTICS(5000,25000,25000,  0, 0, 0, 0, 0, SPIRE, GREATER_SPIRE, 0, FLYER_ATTACKS_2, NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE, 0, RESEARCH_UNIT_TYPE);
+
+race[ZERG].stats[R_VENTRAL_SACKS] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_ANTENNAE] = 		UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_PNEUMATIZED_CARAPACE] =UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_METABOLIC_BOOST] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_ADRENAL_GLANDS] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_MUSCULAR_AUGMENTS] = UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_GROOVED_SPINES] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_GAMETE_MEIOSIS] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_METASYNAPTIC_NODE] = UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_BURROWING] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_SPAWN_BROODLING] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_PLAGUE] = 		UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_CONSUME] = 		UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_ENSNARE] = 		UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_CARAPACE] = 		UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_FLYER_CARAPACE] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_MELEE_ATTACKS] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_MISSILE_ATTACKS] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+race[ZERG].stats[R_FLYER_ATTACKS] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0, 0, 0, 0, 0, 0, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, INVALID_UNIT_TYPE);
+	
+	for(unsigned int k = MAX_RACES; k--;)
+		race[k].fillInfluenceList(); // 'allows' and 'needs'
+	initStringIdentifier();
+}
+
+STARCRAFT::~STARCRAFT()
+{}
+
+void STARCRAFT::initStringIdentifier()
+{
+	gameStringIdentifier.resize(MAX_GAME_STRINGS);
+	gameStringIdentifier[NULL_STRING] = "NULL_STRING";
+	gameStringIdentifier[TERRA_STRING] = "TERRA_STRING";
+	gameStringIdentifier[PROTOSS_STRING] = "PROTOSS_STRING";
+	gameStringIdentifier[ZERG_STRING] = "ZERG_STRING";
+
+	gameStringIdentifier[MINERAL_STRING] = "MINERALS_STRING";
+	gameStringIdentifier[VESPENE_GAS_STRING] = "VESPENE_GAS_STRING";
+
+	gameStringIdentifier[UNIT_TYPE_0_STRING] = "UNIT_TYPE_0_STRING";
+	gameStringIdentifier[UNIT_TYPE_1_STRING] = "UNIT_TYPE_1_STRING";
+	gameStringIdentifier[UNIT_TYPE_2_STRING] = "UNIT_TYPE_2_STRING";
+	gameStringIdentifier[UNIT_TYPE_3_STRING] = "UNIT_TYPE_3_STRING";
+	gameStringIdentifier[UNIT_TYPE_4_STRING] = "UNIT_TYPE_4_STRING";
+	gameStringIdentifier[UNIT_TYPE_5_STRING] = "UNIT_TYPE_5_STRING";
+	gameStringIdentifier[UNIT_TYPE_6_STRING] = "UNIT_TYPE_6_STRING";
+	gameStringIdentifier[UNIT_TYPE_7_STRING] = "UNIT_TYPE_7_STRING";
+	gameStringIdentifier[UNIT_TYPE_8_STRING] = "UNIT_TYPE_8_STRING";
+	gameStringIdentifier[UNIT_TYPE_9_STRING] = "UNIT_TYPE_9_STRING";
+	gameStringIdentifier[UNIT_TYPE_10_STRING] = "UNIT_TYPE_10_STRING";
+	
+	gameStringIdentifier[GAME_SPEED_SLOWEST_STRING] = "GAME_SPEED_SLOWEST_STRING";
+	gameStringIdentifier[GAME_SPEED_SLOWER_STRING] = "GAME_SPEED_SLOWER_STRING";
+	gameStringIdentifier[GAME_SPEED_SLOW_STRING]	= "GAME_SPEED_SLOW_STRING";
+	gameStringIdentifier[GAME_SPEED_NORMAL_STRING] = "GAME_SPEED_NORMAL_STRING";
+	gameStringIdentifier[GAME_SPEED_FAST_STRING] = "GAME_SPEED_FAST_STRING";
+	gameStringIdentifier[GAME_SPEED_FASTER_STRING] = "GAME_SPEED_FASTER_STRING";
+	gameStringIdentifier[GAME_SPEED_FASTEST_STRING] = "GAME_SPEED_FASTEST_STRING";
+
+	race[TERRA].unitsStringIdentifier.resize(RACE::UNIT_TYPE_COUNT);
+	race[PROTOSS].unitsStringIdentifier.resize(RACE::UNIT_TYPE_COUNT);
+	race[ZERG].unitsStringIdentifier.resize(RACE::UNIT_TYPE_COUNT);
+	
+	race[TERRA].unitsStringIdentifier[NONE] = "NONE";
+	
+	race[TERRA].unitsStringIdentifier[VESPENE_GEYSIR] = "VESPENE_GEYSIR";
+	race[TERRA].unitsStringIdentifier[MINERAL_PATCH] = "MINERAL_PATCH";	
+
+	race[TERRA].unitsStringIdentifier[SCV] = "SCV";
+	race[TERRA].unitsStringIdentifier[GAS_SCV] = "GAS_SCV";
+	race[TERRA].unitsStringIdentifier[SCV_FROM_GAS_TO_MINERALS] = "SCV_FROM_GAS_TO_MINERALS";
+	
+	race[TERRA].unitsStringIdentifier[TERRA_WAIT] = "TERRA_WAIT";
+
+	race[TERRA].unitsStringIdentifier[MARINE] = "MARINE";
+	race[TERRA].unitsStringIdentifier[GHOST] = "GHOST";
+	race[TERRA].unitsStringIdentifier[VULTURE] = "VULTURE";
+	race[TERRA].unitsStringIdentifier[GOLIATH] = "GOLIATH";
+	race[TERRA].unitsStringIdentifier[SIEGE_TANK] = "SIEGE_TANK";
+	race[TERRA].unitsStringIdentifier[FIREBAT] = "FIREBAT";
+	race[TERRA].unitsStringIdentifier[WRAITH] = "WRAITH";
+	race[TERRA].unitsStringIdentifier[SCIENCE_VESSEL] = "SCIENCE_VESSEL";
+	race[TERRA].unitsStringIdentifier[DROPSHIP] = "DROPSHIP";
+	race[TERRA].unitsStringIdentifier[BATTLE_CRUISER] = "BATTLE_CRUISER";
+	race[TERRA].unitsStringIdentifier[NUCLEAR_WARHEAD] = "NUCLEAR_WARHEAD";
+	
+	race[TERRA].unitsStringIdentifier[REFINERY] = "REFINERY";
+	race[TERRA].unitsStringIdentifier[SUPPLY_DEPOT] = "SUPPLY_DEPOT";
+	race[TERRA].unitsStringIdentifier[BARRACKS] = "BARRACKS";
+	race[TERRA].unitsStringIdentifier[ACADEMY] = "ACADEMY";
+	race[TERRA].unitsStringIdentifier[FACTORY] = "FACTORY";
+	race[TERRA].unitsStringIdentifier[COMMAND_CENTER] = "COMMAND_CENTER";
+	race[TERRA].unitsStringIdentifier[STARPORT] = "STARPORT";
+	race[TERRA].unitsStringIdentifier[SCIENCE_FACILITY] = "SCIENCE_FACILITY";
+	race[TERRA].unitsStringIdentifier[ENGINEERING_BAY] = "ENGINEERING_BAY";
+	race[TERRA].unitsStringIdentifier[ARMORY] = "ARMORY";
+	race[TERRA].unitsStringIdentifier[MISSILE_TURRET] = "MISSILE_TURRET";
+	race[TERRA].unitsStringIdentifier[BUNKER] = "BUNKER";
+	
+	race[TERRA].unitsStringIdentifier[COMSAT_STATION] = "COMSAT_STATION";
+	race[TERRA].unitsStringIdentifier[NUCLEAR_SILO] = "NUCLEAR_SILO";
+	race[TERRA].unitsStringIdentifier[CONTROL_TOWER] = "CONTROL_TOWER";
+	race[TERRA].unitsStringIdentifier[COVERT_OPS] = "COVERT_OPS";
+	race[TERRA].unitsStringIdentifier[PHYSICS_LAB] = "PHYSICS_LAB";
+	race[TERRA].unitsStringIdentifier[MACHINE_SHOP] = "MACHINE_SHOP";
+	race[TERRA].unitsStringIdentifier[COMMAND_CENTER_CS] = "COMMAND_CENTER_CS";
+	race[TERRA].unitsStringIdentifier[COMMAND_CENTER_NS] = "COMMAND_CENTER_NS";
+	race[TERRA].unitsStringIdentifier[STARPORT_CT] = "STARPORT_CT";
+	race[TERRA].unitsStringIdentifier[SCIENCE_FACILITY_CO] = "SCIENCE_FACILITY_CO";
+	race[TERRA].unitsStringIdentifier[SCIENCE_FACILITY_PL] = "SCIENCE_FACILITY_PL";
+	race[TERRA].unitsStringIdentifier[FACTORY_MS] = "FACTORY_MS";
+	
+	race[TERRA].unitsStringIdentifier[STIM_PACKS] = "STIM_PACKS";
+	race[TERRA].unitsStringIdentifier[LOCKDOWN] = "LOCKDOWN";
+	race[TERRA].unitsStringIdentifier[EMP_SHOCKWAVE] = "EMP_SHOCKWAVE";
+	race[TERRA].unitsStringIdentifier[SPIDER_MINES] = "SPIDER_MINES";
+	race[TERRA].unitsStringIdentifier[TANK_SIEGE_MODE] = "TANK_SIEGE_MODE";
+	race[TERRA].unitsStringIdentifier[IRRADIATE] = "IRRADIATE";
+	race[TERRA].unitsStringIdentifier[YAMATO_GUN] = "YAMATO_GUN";
+	race[TERRA].unitsStringIdentifier[CLOAKING_FIELD] = "CLOAKING_FIELD";
+	race[TERRA].unitsStringIdentifier[PERSONNEL_CLOAKING] = "PERSONNEL_CLOAKING";
+	race[TERRA].unitsStringIdentifier[U238_SHELLS] = "U238_SHELLS";
+	race[TERRA].unitsStringIdentifier[ION_THRUSTERS] = "ION_THRUSTERS";
+	race[TERRA].unitsStringIdentifier[TITAN_REACTOR] = "TITAN_REACTOR";
+	race[TERRA].unitsStringIdentifier[OCULAR_IMPLANTS] = "OCULAR_IMPLANTS";
+	race[TERRA].unitsStringIdentifier[MOEBIUS_REACTOR] = "MOEBIUS_REACTOR";
+	race[TERRA].unitsStringIdentifier[APOLLO_REACTOR] = "APOLLO_REACTOR";
+	race[TERRA].unitsStringIdentifier[COLOSSUS_REACTOR] = "COLOSSUS_REACTOR";
+	
+	race[TERRA].unitsStringIdentifier[INFANTRY_ARMOR_1] = "INFANTRY_ARMOR_1";
+	race[TERRA].unitsStringIdentifier[INFANTRY_ARMOR_2] = "INFANTRY_ARMOR_2";
+	race[TERRA].unitsStringIdentifier[INFANTRY_ARMOR_3] = "INFANTRY_ARMOR_3";
+	race[TERRA].unitsStringIdentifier[INFANTRY_WEAPONS_1] = "INFANTRY_WEAPONS_1";
+	race[TERRA].unitsStringIdentifier[INFANTRY_WEAPONS_2] = "INFANTRY_WEAPONS_2";
+	race[TERRA].unitsStringIdentifier[INFANTRY_WEAPONS_3] = "INFANTRY_WEAPONS_3";
+	race[TERRA].unitsStringIdentifier[VEHICLE_PLATING_1] = "VEHICLE_PLATING_1";
+	race[TERRA].unitsStringIdentifier[VEHICLE_PLATING_2] = "VEHICLE_PLATING_2";
+	race[TERRA].unitsStringIdentifier[VEHICLE_PLATING_3] = "VEHICLE_PLATING_3";
+	race[TERRA].unitsStringIdentifier[VEHICLE_WEAPONS_1] = "VEHICLE_WEAPONS_1";
+	race[TERRA].unitsStringIdentifier[VEHICLE_WEAPONS_2] = "VEHICLE_WEAPONS_2";
+	race[TERRA].unitsStringIdentifier[VEHICLE_WEAPONS_3] = "VEHICLE_WEAPONS_3";
+	race[TERRA].unitsStringIdentifier[SHIP_PLATING_1] = "SHIP_PLATING_1";
+	race[TERRA].unitsStringIdentifier[SHIP_PLATING_2] = "SHIP_PLATING_2";
+	race[TERRA].unitsStringIdentifier[SHIP_PLATING_3] = "SHIP_PLATING_3";
+	race[TERRA].unitsStringIdentifier[SHIP_WEAPONS_1] = "SHIP_WEAPONS_1";
+	race[TERRA].unitsStringIdentifier[SHIP_WEAPONS_2] = "SHIP_WEAPONS_2";
+	race[TERRA].unitsStringIdentifier[SHIP_WEAPONS_3] = "SHIP_WEAPONS_3";
+	
+	race[TERRA].unitsStringIdentifier[R_STIM_PACKS] = "R_STIM_PACKS";
+	race[TERRA].unitsStringIdentifier[R_LOCKDOWN] = "R_LOCKDOWN";
+	race[TERRA].unitsStringIdentifier[R_EMP_SHOCKWAVE] = "R_EMP_SHOCKWAVE";
+	race[TERRA].unitsStringIdentifier[R_SPIDER_MINES] = "R_SPIDER_MINES";
+	race[TERRA].unitsStringIdentifier[R_TANK_SIEGE_MODE] = "R_TANK_SIEGE_MODE";
+	race[TERRA].unitsStringIdentifier[R_IRRADIATE] = "R_IRRADIATE";
+	race[TERRA].unitsStringIdentifier[R_YAMATO_GUN] = "R_YAMATO_GUN";
+	race[TERRA].unitsStringIdentifier[R_CLOAKING_FIELD] = "R_CLOAKING_FIELD";
+	race[TERRA].unitsStringIdentifier[R_PERSONNEL_CLOAKING] = "R_PERSONNEL_CLOAKING";
+	race[TERRA].unitsStringIdentifier[R_U238_SHELLS] = "R_U238_SHELLS";
+	race[TERRA].unitsStringIdentifier[R_ION_THRUSTERS] = "R_ION_THRUSTERS";
+	race[TERRA].unitsStringIdentifier[R_TITAN_REACTOR] = "R_TITAN_REACTOR";
+	race[TERRA].unitsStringIdentifier[R_OCULAR_IMPLANTS] = "R_OCULAR_IMPLANTS";
+	race[TERRA].unitsStringIdentifier[R_MOEBIUS_REACTOR] = "R_MOEBIUS_REACTOR";
+	race[TERRA].unitsStringIdentifier[R_APOLLO_REACTOR] = "R_APOLLO_REACTOR";
+	race[TERRA].unitsStringIdentifier[R_COLOSSUS_REACTOR] = "R_COLOSSUS_REACTOR";
+	race[TERRA].unitsStringIdentifier[R_INFANTRY_ARMOR] = "R_INFANTRY_ARMOR";
+	race[TERRA].unitsStringIdentifier[R_INFANTRY_WEAPONS] = "R_INFANTRY_WEAPONS";
+	race[TERRA].unitsStringIdentifier[R_VEHICLE_PLATING] = "R_VEHICLE_PLATING";
+	race[TERRA].unitsStringIdentifier[R_VEHICLE_WEAPONS] = "R_VEHICLE_WEAPONS";
+	race[TERRA].unitsStringIdentifier[R_SHIP_PLATING] = "R_SHIP_PLATING";
+	race[TERRA].unitsStringIdentifier[R_SHIP_WEAPONS] = "R_SHIP_WEAPONS";
+	
+	race[TERRA].unitsStringIdentifier[F_FACTORY_ADDON] = "F_FACTORY_ADDON";
+	race[TERRA].unitsStringIdentifier[F_STARPORT_ADDON] = "F_STARPORT_ADDON";
+	race[TERRA].unitsStringIdentifier[F_COMMAND_CENTER_ADDON] = "F_COMMAND_CENTER_ADDON";
+	race[TERRA].unitsStringIdentifier[F_SCIENCE_FACILITY_ADDON] = "F_SCIENCE_FACILITY_ADDON";
+
+	
+	race[PROTOSS].unitsStringIdentifier[NONE] = "NONE";
+	
+	race[PROTOSS].unitsStringIdentifier[VESPENE_GEYSIR] = "VESPENE_GEYSIR";
+	race[PROTOSS].unitsStringIdentifier[MINERAL_PATCH] = "MINERAL_PATCH";
+
+	race[PROTOSS].unitsStringIdentifier[PROBE] = "PROBE";
+	race[PROTOSS].unitsStringIdentifier[GAS_PROBE] = "GAS_PROBE";
+	race[PROTOSS].unitsStringIdentifier[PROBE_FROM_GAS_TO_MINERALS] = "PROBE_FROM_GAS_TO_MINERALS";
+	
+	race[PROTOSS].unitsStringIdentifier[PROTOSS_WAIT] = "PROTOSS_WAIT";
+
+	race[PROTOSS].unitsStringIdentifier[ZEALOT] = "ZEALOT";
+	race[PROTOSS].unitsStringIdentifier[DRAGOON] = "DRAGOON";
+	race[PROTOSS].unitsStringIdentifier[HIGH_TEMPLAR] = "HIGH_TEMPLAR";
+	race[PROTOSS].unitsStringIdentifier[ARCHON] = "ARCHON";
+	race[PROTOSS].unitsStringIdentifier[REAVER] = "REAVER";
+	race[PROTOSS].unitsStringIdentifier[HALF_SCARAB] = "HALF_SCARAB";
+	race[PROTOSS].unitsStringIdentifier[FULL_SCARAB] = "FULL_SCARAB";
+	race[PROTOSS].unitsStringIdentifier[SHUTTLE] = "SHUTTLE";
+	race[PROTOSS].unitsStringIdentifier[SCOUT] = "SCOUT";
+	race[PROTOSS].unitsStringIdentifier[ARBITER] = "ARBITER";
+	race[PROTOSS].unitsStringIdentifier[CARRIER] = "CARRIER";
+	race[PROTOSS].unitsStringIdentifier[HALF_INTERCEPTOR] = "HALF_INTERCEPTOR";
+	race[PROTOSS].unitsStringIdentifier[FULL_INTERCEPTOR] = "FULL_INTERCEPTOR";
+	race[PROTOSS].unitsStringIdentifier[OBSERVER] = "OBSERVER";
+	
+	race[PROTOSS].unitsStringIdentifier[ASSIMILATOR] = "ASSIMILATOR";
+	race[PROTOSS].unitsStringIdentifier[NEXUS] = "NEXUS";
+	race[PROTOSS].unitsStringIdentifier[ROBOTICS_FACILITY] = "ROBOTICS_FACILITY";
+	race[PROTOSS].unitsStringIdentifier[PYLON] = "PYLON";
+	race[PROTOSS].unitsStringIdentifier[OBSERVATORY] = "OBSERVATORY";
+	race[PROTOSS].unitsStringIdentifier[GATEWAY] = "GATEWAY";
+	race[PROTOSS].unitsStringIdentifier[PHOTON_CANNON] = "PHOTON_CANNON";
+	race[PROTOSS].unitsStringIdentifier[CYBERNETICS_CORE] = "CYBERNETICS_CORE";
+	race[PROTOSS].unitsStringIdentifier[CITADEL_OF_ADUN] = "CITADEL_OF_ADUN";
+	race[PROTOSS].unitsStringIdentifier[TEMPLAR_ARCHIVES] = "TEMPLAR_ARCHIVES";
+	race[PROTOSS].unitsStringIdentifier[FORGE] = "FORGE";
+	race[PROTOSS].unitsStringIdentifier[STARGATE] = "STARGATE";
+	race[PROTOSS].unitsStringIdentifier[FLEET_BEACON] = "FLEET_BEACON";
+	race[PROTOSS].unitsStringIdentifier[ARBITER_TRIBUNAL] = "ARBITER_TRIBUNAL";
+	race[PROTOSS].unitsStringIdentifier[ROBOTICS_SUPPORT_BAY] = "ROBOTICS_SUPPORT_BAY";
+	race[PROTOSS].unitsStringIdentifier[SHIELD_BATTERY] = "SHIELD_BATTERY";
+	
+	race[PROTOSS].unitsStringIdentifier[PSIONIC_STORM] = "PSIONIC_STORM";
+	race[PROTOSS].unitsStringIdentifier[HALLUCINATION] = "HALLUCINATION";
+	race[PROTOSS].unitsStringIdentifier[RECALL] = "RECALL";
+	race[PROTOSS].unitsStringIdentifier[STASIS_FIELD] = "STASIS_FIELD";
+	race[PROTOSS].unitsStringIdentifier[SINGULARITY_CHARGE] = "SINGULARITY_CHARGE";
+	race[PROTOSS].unitsStringIdentifier[LEG_ENHANCEMENTS] = "LEG_ENHANCEMENTS";
+	race[PROTOSS].unitsStringIdentifier[SCARAB_DAMAGE] = "SCARAB_DAMAGE";
+	race[PROTOSS].unitsStringIdentifier[REAVER_CAPACITY] = "REAVER_CAPACITY";
+	race[PROTOSS].unitsStringIdentifier[GRAVITIC_DRIVE] = "GRAVITIC_DRIVE";
+	race[PROTOSS].unitsStringIdentifier[SENSOR_ARRAY] = "SENSOR_ARRAY";
+	race[PROTOSS].unitsStringIdentifier[GRAVITIC_BOOSTERS] = "GRAVITIC_BOOSTERS";
+	race[PROTOSS].unitsStringIdentifier[KHAYDARIN_AMULET] = "KHAYDARIN_AMULET";
+	race[PROTOSS].unitsStringIdentifier[APIAL_SENSORS] = "APIAL_SENSORS";
+	race[PROTOSS].unitsStringIdentifier[GRAVITIC_THRUSTERS] = "GRAVITIC_THRUSTERS";
+	race[PROTOSS].unitsStringIdentifier[CARRIER_CAPACITY] = "CARRIER_CAPACITY";
+	race[PROTOSS].unitsStringIdentifier[KHAYDARIN_CORE] = "KHAYDARIN_CORE";
+	
+	race[PROTOSS].unitsStringIdentifier[ARMOR_1] = "ARMOR_1";
+	race[PROTOSS].unitsStringIdentifier[ARMOR_2] = "ARMOR_2";
+	race[PROTOSS].unitsStringIdentifier[ARMOR_3] = "ARMOR_3";
+	race[PROTOSS].unitsStringIdentifier[PLATING_1] = "PLATING_1";
+	race[PROTOSS].unitsStringIdentifier[PLATING_2] = "PLATING_2";
+	race[PROTOSS].unitsStringIdentifier[PLATING_3] = "PLATING_3";
+	race[PROTOSS].unitsStringIdentifier[GROUND_WEAPONS_1] = "GROUND_WEAPONS_1";
+	race[PROTOSS].unitsStringIdentifier[GROUND_WEAPONS_2] = "GROUND_WEAPONS_2";
+	race[PROTOSS].unitsStringIdentifier[GROUND_WEAPONS_3] = "GROUND_WEAPONS_3";
+	race[PROTOSS].unitsStringIdentifier[AIR_WEAPONS_1] = "AIR_WEAPONS_1";
+	race[PROTOSS].unitsStringIdentifier[AIR_WEAPONS_2] = "AIR_WEAPONS_2";
+	race[PROTOSS].unitsStringIdentifier[AIR_WEAPONS_3] = "AIR_WEAPONS_3";
+	race[PROTOSS].unitsStringIdentifier[PLASMA_SHIELDS_1] = "PLASMA_SHIELDS_1";
+	race[PROTOSS].unitsStringIdentifier[PLASMA_SHIELDS_2] = "PLASMA_SHIELDS_2";
+	race[PROTOSS].unitsStringIdentifier[PLASMA_SHIELDS_3] = "PLASMA_SHIELDS_3";
+	
+	race[PROTOSS].unitsStringIdentifier[R_PSIONIC_STORM] = "R_PSIONIC_STORM";
+	race[PROTOSS].unitsStringIdentifier[R_HALLUCINATION] = "R_HALLUCINATION";
+	race[PROTOSS].unitsStringIdentifier[R_RECALL] = "R_RECALL";
+	race[PROTOSS].unitsStringIdentifier[R_STASIS_FIELD] = "R_STASIS_FIELD";
+	race[PROTOSS].unitsStringIdentifier[R_SINGULARITY_CHARGE] = "R_SINGULARITY_CHARGE";
+	race[PROTOSS].unitsStringIdentifier[R_LEG_ENHANCEMENTS] = "R_LEG_ENHANCEMENTS";
+	race[PROTOSS].unitsStringIdentifier[R_SCARAB_DAMAGE] = "R_SCARAB_DAMAGE";
+	race[PROTOSS].unitsStringIdentifier[R_REAVER_CAPACITY] = "R_REAVER_CAPACITY";
+	race[PROTOSS].unitsStringIdentifier[R_GRAVITIC_DRIVE] = "R_GRAVITIC_DRIVE";
+	race[PROTOSS].unitsStringIdentifier[R_SENSOR_ARRAY] = "R_SENSOR_ARRAY";
+	race[PROTOSS].unitsStringIdentifier[R_GRAVITIC_BOOSTERS] = "R_GRAVITIC_BOOSTERS";
+	race[PROTOSS].unitsStringIdentifier[R_KHAYDARIN_AMULET] = "R_KHAYDARIN_AMULET";
+	race[PROTOSS].unitsStringIdentifier[R_APIAL_SENSORS] = "R_APIAL_SENSORS";
+	race[PROTOSS].unitsStringIdentifier[R_GRAVITIC_THRUSTERS] = "R_GRAVITIC_THRUSTERS";
+	race[PROTOSS].unitsStringIdentifier[R_CARRIER_CAPACITY] = "R_CARRIER_CAPACITY";
+	race[PROTOSS].unitsStringIdentifier[R_KHAYDARIN_CORE] = "R_KHAYDARIN_CORE";
+	race[PROTOSS].unitsStringIdentifier[R_ARMOR] = "R_ARMOR";
+	race[PROTOSS].unitsStringIdentifier[R_PLATING] = "R_PLATING";
+	race[PROTOSS].unitsStringIdentifier[R_GROUND_WEAPONS] = "R_GROUND_WEAPONS";
+	race[PROTOSS].unitsStringIdentifier[R_AIR_WEAPONS] = "R_AIR_WEAPONS";
+	race[PROTOSS].unitsStringIdentifier[R_PLASMA_SHIELDS] = "R_PLASMA_SHIELDS";
+
+	race[ZERG].unitsStringIdentifier[NONE] = "NONE";
+	
+	race[ZERG].unitsStringIdentifier[VESPENE_GEYSIR] = "VESPENE_GEYSIR";
+	race[ZERG].unitsStringIdentifier[MINERAL_PATCH] = "MINERAL_PATCH";
+	
+	race[ZERG].unitsStringIdentifier[DRONE] = "DRONE";
+	race[ZERG].unitsStringIdentifier[GAS_DRONE] = "GAS_DRONE";
+	
+	race[ZERG].unitsStringIdentifier[DRONE_FROM_GAS_TO_MINERALS] = "DRONE_FROM_GAS_TO_MINERALS";
+	race[ZERG].unitsStringIdentifier[ZERG_WAIT] = "ZERG_WAIT";
+	race[ZERG].unitsStringIdentifier[BREAK_UP_BUILDING] = "BREAK_UP_BUILDING";
+
+	race[ZERG].unitsStringIdentifier[LARVA] = "LARVA";
+	race[ZERG].unitsStringIdentifier[ZERGLING] = "ZERGLING";
+	race[ZERG].unitsStringIdentifier[HYDRALISK] = "HYDRALISK";
+	race[ZERG].unitsStringIdentifier[ULTRALISK] = "ULTRALISK";
+	race[ZERG].unitsStringIdentifier[DEFILER] = "DEFILER";
+	race[ZERG].unitsStringIdentifier[OVERLORD] = "OVERLORD";
+	race[ZERG].unitsStringIdentifier[MUTALISK] = "MUTALISK";
+	race[ZERG].unitsStringIdentifier[GUARDIEN] = "GUARDIEN";
+	race[ZERG].unitsStringIdentifier[QUEEN] = "QUEEN";
+	race[ZERG].unitsStringIdentifier[SCOURGE] = "SCOURGE";
+	
+	race[ZERG].unitsStringIdentifier[EXTRACTOR] = "EXTRACTOR";
+	race[ZERG].unitsStringIdentifier[HATCHERY] = "HATCHERY";
+	race[ZERG].unitsStringIdentifier[LAIR] = "LAIR";
+	race[ZERG].unitsStringIdentifier[HIVE] = "HIVE";
+	race[ZERG].unitsStringIdentifier[NYDUS_CANAL] = "NYDUS_CANAL";
+	race[ZERG].unitsStringIdentifier[HYDRALISK_DEN] = "HYDRALISK_DEN";
+	race[ZERG].unitsStringIdentifier[DEFILER_MOUND] = "DEFILER_MOUND";
+	race[ZERG].unitsStringIdentifier[GREATER_SPIRE] = "GREATER_SPIRE";
+	race[ZERG].unitsStringIdentifier[QUEENS_NEST] = "QUEENS_NEST";
+	race[ZERG].unitsStringIdentifier[EVOLUTION_CHAMBER] = "EVOLUTION_CHAMBER";
+	race[ZERG].unitsStringIdentifier[ULTRALISK_CAVERN] = "ULTRALISK_CAVERN";
+	race[ZERG].unitsStringIdentifier[SPIRE] = "SPIRE";
+	race[ZERG].unitsStringIdentifier[SPAWNING_POOL] = "SPAWNING_POOL";
+	race[ZERG].unitsStringIdentifier[CREEP_COLONY] = "CREEP_COLONY";
+	
+	race[ZERG].unitsStringIdentifier[SPORE_COLONY] = "SPORE_COLONY";
+	race[ZERG].unitsStringIdentifier[SUNKEN_COLONY] = "SUNKEN_COLONY";
+	
+	race[ZERG].unitsStringIdentifier[VENTRAL_SACKS] = "VENTRAL_SACKS";
+	race[ZERG].unitsStringIdentifier[ANTENNAE] = "ANTENNAE";
+	race[ZERG].unitsStringIdentifier[PNEUMATIZED_CARAPACE] = "PNEUMATIZED_CARAPACE";
+	race[ZERG].unitsStringIdentifier[METABOLIC_BOOST] = "METABOLIC_BOOST";
+	race[ZERG].unitsStringIdentifier[ADRENAL_GLANDS] = "ADRENAL_GLANDS";
+	race[ZERG].unitsStringIdentifier[MUSCULAR_AUGMENTS] = "MUSCULAR_AUGMENTS";
+	race[ZERG].unitsStringIdentifier[GROOVED_SPINES] = "GROOVED_SPINES";
+	race[ZERG].unitsStringIdentifier[GAMETE_MEIOSIS] = "GAMETE_MEIOSIS";
+	race[ZERG].unitsStringIdentifier[METASYNAPTIC_NODE] = "METASYNAPTIC_NODE";
+	race[ZERG].unitsStringIdentifier[BURROWING] = "BURROWING";
+	race[ZERG].unitsStringIdentifier[SPAWN_BROODLING] = "SPAWN_BROODLING";
+	race[ZERG].unitsStringIdentifier[PLAGUE] = "PLAGUE";
+	race[ZERG].unitsStringIdentifier[CONSUME] = "CONSUME";
+	race[ZERG].unitsStringIdentifier[ENSNARE] = "ENSNARE";
+	
+	race[ZERG].unitsStringIdentifier[CARAPACE_1] = "CARAPACE_1";
+	race[ZERG].unitsStringIdentifier[CARAPACE_2] = "CARAPACE_2";
+	race[ZERG].unitsStringIdentifier[CARAPACE_3] = "CARAPACE_3";
+	race[ZERG].unitsStringIdentifier[FLYER_CARAPACE_1] = "FLYER_CARAPACE_1";
+	race[ZERG].unitsStringIdentifier[FLYER_CARAPACE_2] = "FLYER_CARAPACE_2";
+	race[ZERG].unitsStringIdentifier[FLYER_CARAPACE_3] = "FLYER_CARAPACE_3";
+	race[ZERG].unitsStringIdentifier[MELEE_ATTACKS_1] = "MELEE_ATTACKS_1";
+	race[ZERG].unitsStringIdentifier[MELEE_ATTACKS_2] = "MELEE_ATTACKS_2";
+	race[ZERG].unitsStringIdentifier[MELEE_ATTACKS_3] = "MELEE_ATTACKS_3";
+	race[ZERG].unitsStringIdentifier[MISSILE_ATTACKS_1] = "MISSILE_ATTACKS_1";
+	race[ZERG].unitsStringIdentifier[MISSILE_ATTACKS_2] = "MISSILE_ATTACKS_2";
+	race[ZERG].unitsStringIdentifier[MISSILE_ATTACKS_3] = "MISSILE_ATTACKS_3";
+	race[ZERG].unitsStringIdentifier[FLYER_ATTACKS_1] = "FLYER_ATTACKS_1";
+	race[ZERG].unitsStringIdentifier[FLYER_ATTACKS_2] = "FLYER_ATTACKS_2";
+	race[ZERG].unitsStringIdentifier[FLYER_ATTACKS_3] = "FLYER_ATTACKS_3";
+	
+	race[ZERG].unitsStringIdentifier[R_VENTRAL_SACKS] = "R_VENTRAL_SACKS";
+	race[ZERG].unitsStringIdentifier[R_ANTENNAE] = "R_ANTENNAE";
+	race[ZERG].unitsStringIdentifier[R_PNEUMATIZED_CARAPACE] = "R_PNEUMATIZED_CARAPACE";
+	race[ZERG].unitsStringIdentifier[R_METABOLIC_BOOST] = "R_METABOLIC_BOOST";
+	race[ZERG].unitsStringIdentifier[R_ADRENAL_GLANDS] = "R_ADRENAL_GLANDS";
+	race[ZERG].unitsStringIdentifier[R_MUSCULAR_AUGMENTS] = "R_MUSCULAR_AUGMENTS";
+	race[ZERG].unitsStringIdentifier[R_GROOVED_SPINES] = "R_GROOVED_SPINES";
+	race[ZERG].unitsStringIdentifier[R_GAMETE_MEIOSIS] = "R_GAMETE_MEIOSIS";
+	race[ZERG].unitsStringIdentifier[R_METASYNAPTIC_NODE] = "R_METASYNAPTIC_NODE";
+	race[ZERG].unitsStringIdentifier[R_BURROWING] = "R_BURROWING";
+	race[ZERG].unitsStringIdentifier[R_SPAWN_BROODLING] = "R_SPAWN_BROODLING";
+	race[ZERG].unitsStringIdentifier[R_PLAGUE] = "R_PLAGUE";
+	race[ZERG].unitsStringIdentifier[R_CONSUME] = "R_CONSUME";
+	race[ZERG].unitsStringIdentifier[R_ENSNARE] = "R_ENSNARE";
+	race[ZERG].unitsStringIdentifier[R_CARAPACE] = "R_CARAPACE";
+	race[ZERG].unitsStringIdentifier[R_FLYER_CARAPACE] = "R_FLYER_CARAPACE";
+	race[ZERG].unitsStringIdentifier[R_MELEE_ATTACKS] = "R_MELEE_ATTACKS";
+	race[ZERG].unitsStringIdentifier[R_MISSILE_ATTACKS] = "R_MISSILE_ATTACKS";
+	race[ZERG].unitsStringIdentifier[R_FLYER_ATTACKS] = "R_FLYER_ATTACKS";
+
+	GAME::init();
+}
 
 

@@ -3,12 +3,6 @@
 #include "string.h"
 #include "wchar.h"
 
-#define PRESSED_BRIGHTEN 50
-#define PRESSED_DARKEN 130
-#define PRESSED_NORMAL 90
-#define NOT_PRESSED_DARKEN 60
-#define NOT_PRESSED_BRIGHTEN 140
-
 // for 24bit:
 #define SDL_DRAW_PUTPIXEL_BPP_3_AUX \
 	if (SDL_BYTEORDER == SDL_BIG_ENDIAN) { \
@@ -1387,7 +1381,10 @@ void DC::DrawFilledEdgedRound_8bit(const signed int x, const signed int y, const
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 col = (Uint32)(*brush.getColor());
+	Uint32 brush_col;
+	if(!pressedRectangle)
+		brush_col = (Uint32)(*brush.getColor());
+	else brush_col = (Uint32)(changeRelativeBrightness(*brush.getColor(), NOT_PRESSED_DARKEN));
 
 // Rechteck von linker Kante nach rechter Kante
 	if(dy > 0)
@@ -1395,7 +1392,7 @@ void DC::DrawFilledEdgedRound_8bit(const signed int x, const signed int y, const
 		SDL_Rect r;
 		r.x = x+1; r.y = Ycenter;
 		r.w = width-1; r.h = dy;
-		SDL_FillRect(surface, &r, col);
+		SDL_FillRect(surface, &r, brush_col);
 	}
 
 	// Rechteck entlang der oberen und entlang der unteren Kante
@@ -1404,11 +1401,11 @@ void DC::DrawFilledEdgedRound_8bit(const signed int x, const signed int y, const
 		SDL_Rect r;
 		r.x = Xcenter; r.y = y+1;
 		r.w = dx; r.h = corner-1;
-		SDL_FillRect(surface, &r, col);
+		SDL_FillRect(surface, &r, brush_col);
 
 		r.x = x+1; r.y = Y2center;
 		r.w = width-corner-1; r.h = corner;
-		SDL_FillRect(surface, &r, col);
+		SDL_FillRect(surface, &r, brush_col);
 	}
 
 	unsigned int rightInc = 6;
@@ -1422,15 +1419,15 @@ void DC::DrawFilledEdgedRound_8bit(const signed int x, const signed int y, const
 	{
 		for(unsigned int k=i; k--;)
 		{
-			*((Uint8*)((Uint8*)surface->pixels + k + (Ycenter-radius)*surface->pitch + (Xcenter - i))) = col;
-			*((Uint8*)((Uint8*)surface->pixels + k + (Ycenter-radius)*surface->pitch + X2center)) = col;
-			*((Uint8*)((Uint8*)surface->pixels + k + (Y2center+radius)*surface->pitch + X2center)) = col;
+			*((Uint8*)((Uint8*)surface->pixels + k + (Ycenter-radius)*surface->pitch + (Xcenter - i))) = brush_col;
+			*((Uint8*)((Uint8*)surface->pixels + k + (Ycenter-radius)*surface->pitch + X2center)) = brush_col;
+			*((Uint8*)((Uint8*)surface->pixels + k + (Y2center+radius)*surface->pitch + X2center)) = brush_col;
 		}
 		for(unsigned int k=radius; k--;)
 		{
-			*((Uint8*)((Uint8*)surface->pixels + k + (Ycenter-i)*surface->pitch + (Xcenter - radius))) = col;
-			*((Uint8*)((Uint8*)surface->pixels + k + (Ycenter-i)*surface->pitch + X2center)) = col;
-			*((Uint8*)((Uint8*)surface->pixels + k + (Y2center+i)*surface->pitch + X2center)) = col;
+			*((Uint8*)((Uint8*)surface->pixels + k + (Ycenter-i)*surface->pitch + (Xcenter - radius))) = brush_col;
+			*((Uint8*)((Uint8*)surface->pixels + k + (Ycenter-i)*surface->pitch + X2center)) = brush_col;
+			*((Uint8*)((Uint8*)surface->pixels + k + (Y2center+i)*surface->pitch + X2center)) = brush_col;
 		}
 		if (d >= 0) 
 		{
@@ -1460,7 +1457,10 @@ void DC::DrawFilledEdgedRound_16bit(const signed int x, const signed int y, cons
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 col = (Uint32)(*brush.getColor());
+	Uint32 brush_col;
+	if(!pressedRectangle)
+		brush_col = (Uint32)(*brush.getColor());
+	else brush_col = (Uint32)(changeRelativeBrightness(*brush.getColor(), NOT_PRESSED_DARKEN));
 
 // Rechteck von linker Kante nach rechter Kante
 	if(dy > 0)
@@ -1468,7 +1468,7 @@ void DC::DrawFilledEdgedRound_16bit(const signed int x, const signed int y, cons
 		SDL_Rect r;
 		r.x = x+1; r.y = Ycenter;
 		r.w = width-1; r.h = dy;
-		SDL_FillRect(surface, &r, col);
+		SDL_FillRect(surface, &r, brush_col);
 	}
 
 // Rechteck entlang der oberen und entlang der unteren Kante
@@ -1477,11 +1477,11 @@ void DC::DrawFilledEdgedRound_16bit(const signed int x, const signed int y, cons
 		SDL_Rect r;
 		r.x = Xcenter; r.y = y+1;
 		r.w = dx; r.h = corner-1;
-		SDL_FillRect(surface, &r, col);
+		SDL_FillRect(surface, &r, brush_col);
 
 		r.x = x+1; r.y = Y2center;
 		r.w = width-corner-1; r.h = corner;
-		SDL_FillRect(surface, &r, col);
+		SDL_FillRect(surface, &r, brush_col);
 	}
 
 	unsigned int rightInc = 6;
@@ -1496,15 +1496,15 @@ void DC::DrawFilledEdgedRound_16bit(const signed int x, const signed int y, cons
 	{
 		for(unsigned int k=i;k--;)
 		{
-			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((k + Xcenter - i)<<1) )) = col;
-			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((k + X2center)<<1) )) = col;
-			*((Uint16*)((Uint8*)surface->pixels + (Y2center+radius)*surface->pitch + ((k + X2center)<<1) )) = col;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((k + Xcenter - i)<<1) )) = brush_col;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((k + X2center)<<1) )) = brush_col;
+			*((Uint16*)((Uint8*)surface->pixels + (Y2center+radius)*surface->pitch + ((k + X2center)<<1) )) = brush_col;
 		}
 		for(unsigned int k=radius;k--;)
 		{
-			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((k + Xcenter - radius)<<1) )) = col;
-			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((k + X2center)<<1) )) = col;
-			*((Uint16*)((Uint8*)surface->pixels + (Y2center+i)*surface->pitch + ((k + X2center)<<1) )) = col;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((k + Xcenter - radius)<<1) )) = brush_col;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((k + X2center)<<1) )) = brush_col;
+			*((Uint16*)((Uint8*)surface->pixels + (Y2center+i)*surface->pitch + ((k + X2center)<<1) )) = brush_col;
 		}
 
 		if (d >= 0) 
@@ -1534,7 +1534,10 @@ void DC::DrawFilledEdgedRound_24bit(const signed int x, const signed int y, cons
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 col = (Uint32)(*brush.getColor());
+	Uint32 brush_col;
+	if(!pressedRectangle)
+		brush_col = (Uint32)(*brush.getColor());
+	else brush_col = (Uint32)(changeRelativeBrightness(*brush.getColor(), NOT_PRESSED_DARKEN));
 
 // Rechteck von linker Kante nach rechter Kante
 	if(dy > 0)
@@ -1542,7 +1545,7 @@ void DC::DrawFilledEdgedRound_24bit(const signed int x, const signed int y, cons
 		SDL_Rect r;
 		r.x = x+1; r.y = Ycenter;
 		r.w = width-1; r.h = dy;
-		SDL_FillRect(surface, &r, col);
+		SDL_FillRect(surface, &r, brush_col);
 	}
 
 // Rechteck entlang der oberen und entlang der unteren Kante
@@ -1551,16 +1554,16 @@ void DC::DrawFilledEdgedRound_24bit(const signed int x, const signed int y, cons
 		SDL_Rect r;
 		r.x = Xcenter; r.y = y+1;
 		r.w = dx; r.h = corner-1;
-		SDL_FillRect(surface, &r, col);
+		SDL_FillRect(surface, &r, brush_col);
 
 		r.x = x+1; r.y = Y2center;
 		r.w = width-corner-1; r.h = corner;
-		SDL_FillRect(surface, &r, col);
+		SDL_FillRect(surface, &r, brush_col);
 	}
 
-	Uint8 colorbyte0 = (Uint8) (col & 0xff);
-	Uint8 colorbyte1 = (Uint8) ((col >> 8) & 0xff);
-	Uint8 colorbyte2 = (Uint8) ((col >> 16) & 0xff);
+	Uint8 colorbyte0 = (Uint8) (brush_col & 0xff);
+	Uint8 colorbyte1 = (Uint8) ((brush_col >> 8) & 0xff);
+	Uint8 colorbyte2 = (Uint8) ((brush_col >> 16) & 0xff);
 
 	unsigned int rightInc = 6;
 	signed int diagonalInc = 10 - (corner<<2);
@@ -1608,7 +1611,10 @@ void DC::DrawFilledEdgedRound_32bit(const signed int x, const signed int y, cons
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 col = (Uint32)(*brush.getColor());
+	Uint32 brush_col;
+	if(!pressedRectangle)
+		brush_col = (Uint32)(*brush.getColor());
+	else brush_col = (Uint32)(changeRelativeBrightness(*brush.getColor(), NOT_PRESSED_DARKEN));
 
 
 	// Rechteck von linker Kante nach rechter Kante
@@ -1617,7 +1623,7 @@ void DC::DrawFilledEdgedRound_32bit(const signed int x, const signed int y, cons
 		SDL_Rect r;
 		r.x = x+1; r.y = Ycenter;
 		r.w = width-1; r.h = dy;
-		SDL_FillRect(surface, &r, col);
+		SDL_FillRect(surface, &r, brush_col);
 	}
 
 	// Rechteck entlang der oberen und entlang der unteren Kante
@@ -1626,11 +1632,11 @@ void DC::DrawFilledEdgedRound_32bit(const signed int x, const signed int y, cons
 		SDL_Rect r;
 		r.x = Xcenter; r.y = y+1;
 		r.w = dx; r.h = corner-1;
-		SDL_FillRect(surface, &r, col);
+		SDL_FillRect(surface, &r, brush_col);
 
 		r.x = x+1; r.y = Y2center;
 		r.w = width-corner-1; r.h = corner;
-		SDL_FillRect(surface, &r, col);
+		SDL_FillRect(surface, &r, brush_col);
 	}
 	
 	unsigned int rightInc = 6;
@@ -1646,15 +1652,15 @@ void DC::DrawFilledEdgedRound_32bit(const signed int x, const signed int y, cons
 // Nur Ecken:
 		for(unsigned int k=i;k--;)
 		{
-			*((Uint32*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((k + Xcenter - i)<<2))) = col;
-			*((Uint32*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((k + X2center)<<2))) = col;
-			*((Uint32*)((Uint8*)surface->pixels + (Y2center+radius)*surface->pitch + ((k + X2center)<<2))) = col;
+			*((Uint32*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((k + Xcenter - i)<<2))) = brush_col;
+			*((Uint32*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((k + X2center)<<2))) = brush_col;
+			*((Uint32*)((Uint8*)surface->pixels + (Y2center+radius)*surface->pitch + ((k + X2center)<<2))) = brush_col;
 		}
 		for(unsigned int k=radius;k--;)
 		{
-			*((Uint32*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((k + Xcenter - radius)<<2))) = col;
-			*((Uint32*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((k + X2center)<<2))) = col;
-			*((Uint32*)((Uint8*)surface->pixels + (Y2center+i)*surface->pitch + ((k + X2center)<<2))) = col;
+			*((Uint32*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((k + Xcenter - radius)<<2))) = brush_col;
+			*((Uint32*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((k + X2center)<<2))) = brush_col;
+			*((Uint32*)((Uint8*)surface->pixels + (Y2center+i)*surface->pitch + ((k + X2center)<<2))) = brush_col;
 		}
 
 		if (d >= 0) 
@@ -1688,7 +1694,10 @@ void DC::DrawFilledEdgedBorderRound_8bit(const signed int x, const signed int y,
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 brush_col = (Uint32)(*brush.getColor());
+	Uint32 brush_col;
+	if(!pressedRectangle)
+		brush_col = (Uint32)(*brush.getColor());
+	else brush_col = (Uint32)(changeRelativeBrightness(*brush.getColor(), NOT_PRESSED_DARKEN));
 
 // Rechteck von linker Kante nach rechter Kante
 	
@@ -1838,7 +1847,10 @@ void DC::DrawFilledEdgedBorderRound_16bit(const signed int x, const signed int y
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 brush_col = (Uint32)(*brush.getColor());
+	Uint32 brush_col;
+	if(!pressedRectangle)
+		brush_col = (Uint32)(*brush.getColor());
+	else brush_col = (Uint32)(changeRelativeBrightness(*brush.getColor(), NOT_PRESSED_DARKEN));
 
 // Rechteck von linker Kante nach rechter Kante
 	
@@ -1998,7 +2010,10 @@ void DC::DrawFilledEdgedBorderRound_24bit(const signed int x, const signed int y
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 brush_col = (Uint32)(*brush.getColor());
+	Uint32 brush_col;
+	if(!pressedRectangle)
+		brush_col = (Uint32)(*brush.getColor());
+	else brush_col = (Uint32)(changeRelativeBrightness(*brush.getColor(), NOT_PRESSED_DARKEN));
 
 // Rechteck von linker Kante nach rechter Kante
 	if(dy > 0)
@@ -2166,7 +2181,10 @@ void DC::DrawFilledEdgedBorderRound_32bit(const signed int x, const signed int y
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 brush_col = (Uint32)(*brush.getColor());
+	Uint32 brush_col;
+	if(!pressedRectangle)
+		brush_col = (Uint32)(*brush.getColor());
+	else brush_col = (Uint32)(changeRelativeBrightness(*brush.getColor(), NOT_PRESSED_DARKEN));
 
 // Rechteck von linker Kante nach rechter Kante
 	if(dy > 0)
@@ -2339,15 +2357,17 @@ void DC::DrawTab_8bit(const signed int x, const signed int y, const unsigned int
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 brush_col = (Uint32)(*brush.getColor());
+	Uint32 brush_col;
+	if(pressedRectangle)
+		brush_col = (Uint32)(*brush.getColor());
+	else brush_col = (Uint32)(changeRelativeBrightness(*brush.getColor(), NOT_PRESSED_DARKEN));
 
 // Rechteck von linker Kante nach rechter Kante
-	
 	if(dy > 0)
 	{
 		SDL_Rect r;
 		r.x = x+1; r.y = Ycenter;
-		r.w = width-1; r.h = height - corner;
+		r.w = width-1; r.h = dy + corner;
 		SDL_FillRect(surface, &r, brush_col);
 	}
 
@@ -2364,13 +2384,13 @@ void DC::DrawTab_8bit(const signed int x, const signed int y, const unsigned int
 
 // ------ TOP AND LOWER HORIZONTAL LINE ------
 	Uint32 dark_pen_col, bright_pen_col, pen_col;
-	if(pressedRectangle)
+/*	if(pressedRectangle)
 	{
 		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), PRESSED_DARKEN));
 		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), PRESSED_BRIGHTEN));
 		pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), PRESSED_NORMAL));
 	
-	} else
+	} else*/
 	{
 		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), NOT_PRESSED_DARKEN));
 		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), NOT_PRESSED_BRIGHTEN));
@@ -2477,15 +2497,17 @@ void DC::DrawTab_16bit(const signed int x, const signed int y, const unsigned in
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 brush_col = (Uint32)(*brush.getColor());
+	Uint32 brush_col;
+	if(pressedRectangle)
+		brush_col = (Uint32)(*brush.getColor());
+	else brush_col = (Uint32)(changeRelativeBrightness(*brush.getColor(), NOT_PRESSED_DARKEN));
 
 // Rechteck von linker Kante nach rechter Kante
-	
 	if(dy > 0)
 	{
 		SDL_Rect r;
 		r.x = x+1; r.y = Ycenter;
-		r.w = width-1; r.h = dy;
+		r.w = width-1; r.h = dy + corner;
 		SDL_FillRect(surface, &r, brush_col);
 	}
 
@@ -2638,14 +2660,17 @@ void DC::DrawTab_24bit(const signed int x, const signed int y, const unsigned in
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 brush_col = (Uint32)(*brush.getColor());
+	Uint32 brush_col;
+	if(pressedRectangle)
+		brush_col = (Uint32)(*brush.getColor());
+	else brush_col = (Uint32)(changeRelativeBrightness(*brush.getColor(), NOT_PRESSED_DARKEN));
 
 // Rechteck von linker Kante nach rechter Kante
 	if(dy > 0)
 	{
 		SDL_Rect r;
 		r.x = x+1; r.y = Ycenter;
-		r.w = width-1; r.h = dy;
+		r.w = width-1; r.h = dy + corner;
 		SDL_FillRect(surface, &r, brush_col);
 	}
 
@@ -2807,7 +2832,10 @@ void DC::DrawTab_32bit(const signed int x, const signed int y, const unsigned in
 // Ecke rechts unten
 	signed int X2center = Xcenter + dx - 1;
 	signed int Y2center = Ycenter + dy - 1;
-	Uint32 brush_col = (Uint32)(*brush.getColor());
+	Uint32 brush_col;
+	if(pressedRectangle)
+		brush_col = (Uint32)(*brush.getColor());
+	else brush_col = (Uint32)(changeRelativeBrightness(*brush.getColor(), NOT_PRESSED_DARKEN));
 
 // Rechteck von linker Kante nach rechter Kante
 	if(dy > 0)
@@ -2828,13 +2856,13 @@ void DC::DrawTab_32bit(const signed int x, const signed int y, const unsigned in
 	}
 // ------- END OF Rechteck oben und unten ------
 	Uint32 dark_pen_col, bright_pen_col, pen_col;
-	if(pressedRectangle)
+/*	if(pressedRectangle)
 	{
 		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), PRESSED_DARKEN));
 		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), PRESSED_BRIGHTEN));
 		pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), PRESSED_NORMAL));
 	
-	} else
+	} else*/
 	{
 		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), NOT_PRESSED_DARKEN));
 		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.getColor(), NOT_PRESSED_BRIGHTEN));

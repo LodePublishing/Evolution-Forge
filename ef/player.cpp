@@ -35,14 +35,8 @@ Player::~Player()
 	delete boDiagramWindow;
 }
 
-const signed int Player::getLoadedBuildOrder() const {
-	return(boWindow->getLoadedBuildOrder());
-}
 
-const signed int Player::getAssignedGoal() const {
-	return(forceWindow->getAssignedGoal());
-}
-
+//TODO nach reset bograph und bodiagram window korrekt benachrichtigen...
 void Player::assignAnarace(ANABUILDORDER* player_anarace)
 {
 	anarace = player_anarace;
@@ -69,14 +63,14 @@ void Player::draw(DC* dc) const
 {
 	if(!isShown())
 		return;
-	if(efConfiguration.isRaceSpecificTheme())
+/*	if(efConfiguration.isRaceSpecificTheme())
 		switch(anarace->getRace())
 		{
 			case TERRA:UI_Object::theme.setColorTheme(DARK_BLUE_THEME);break;
 			case PROTOSS:UI_Object::theme.setColorTheme(YELLOW_THEME);break;
 			case ZERG:UI_Object::theme.setColorTheme(DARK_RED_THEME);break;
 			default:break;
-		}
+		}*/ // TODO
 
 	// TODO
 	UI_Object::draw(dc);
@@ -87,40 +81,10 @@ void Player::process()
 	if(!isShown())
 		return;
 	UI_Object::process();
-/*	{
-		boWindow->resetData();
-		boGraphWindow->resetData();
-		boDiagramWindow->resetData();
-	}*/
+	if(checkForNeedRedraw())
+		setNeedRedrawMoved();
 	
-// TODO!
-// ------ COMMUNICATION BETWEEN THE WINDOWS ------ TODO
-/*	if(window[FORCE_WINDOW]->isShown())
-	{
-		int markedUnit=((ForceWindow*)window[FORCE_WINDOW])->getMarkedUnit();
-		int markedIP=((BoGraphWindow*)window[BO_GRAPH_WINDOW])->getMarkedIP();
-		if(!markedIP)
-			markedIP=((BoWindow*)window[BUILD_ORDER_WINDOW])->getMarkedIP();
-
-		((BoGraphWindow*)window[BO_GRAPH_WINDOW])->setMarkedUnit(markedUnit);
-//	((BoWindow*)window[BUILD_ORDER_WINDOW])->setMarkedUnit(markedUnit);
-		
-		((BoGraphWindow*)window[BO_GRAPH_WINDOW])->setMarkedIP(markedIP);
-//		((BoWindow*)window[BUILD_ORDER_WINDOW])->setMarkedIP(markedIP);
-	
-		if(!markedUnit)
-			markedUnit=((BoGraphWindow*)window[BO_GRAPH_WINDOW])->getMarkedUnit();
-		if(!markedUnit)
-			markedUnit=((BoWindow*)window[BUILD_ORDER_WINDOW])->getMarkedUnit();
-		((ForceWindow*)window[FORCE_WINDOW])->setMarkedUnit(markedUnit);
-		if(!markedIP)
-			window[INFO_WINDOW]->Hide();
-	}*/
-// ------ END COMMUNICATION BETWEEN THE WINDOWS ------
-
-// ------ PROCESS MEMBER VARIABLES ------	
-// ------ END PROCESSING MEMBER VARIABLES ------
-
+// ------ COMMUNICATION BETWEEN THE WINDOWS ------
 	if(boGraphWindow->getSelectedItems().size() > 0)
 		boWindow->setSelected(boGraphWindow->getSelectedItems());
 	else if(boWindow->getSelectedItems().size() > 0)
@@ -130,6 +94,7 @@ void Player::process()
 		boWindow->setSelected(boDiagramWindow->getSelectedItems());
 		boGraphWindow->setSelected(boDiagramWindow->getSelectedItems());
 	}
+// ------ END COMMUNICATION BETWEEN THE WINDOWS ------
 }
 
 const bool Player::openMenu(const ePlayerOrder order)
@@ -191,6 +156,7 @@ void Player::resetData()
 void Player::recheckSomeDataAfterChange()
 {
 	boWindow->recheckSomeDataAfterChange();
+	boGraphWindow->processList();  // ~
 }
 
 void Player::CheckOrders()

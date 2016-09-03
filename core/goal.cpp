@@ -1,5 +1,4 @@
 #include "goal.hpp"
-#include "starcraft.hpp"
 
 GOAL::GOAL() :
 	unit(0),

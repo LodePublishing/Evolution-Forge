@@ -127,9 +127,11 @@ class UI_Button : public UI_Object
 		static void setMouseMovePoint(const Point& mouse_move_point);
 
 		static void setCurrentButton(UI_Button* current_button);
-
 		
 		UI_StaticText* getText() const;
+		static bool wasResetted;
+
+		const bool isBitmapButton() const;
 	private:
 		static bool doClickedSound;
 		static bool doClickSound;
@@ -143,6 +145,7 @@ class UI_Button : public UI_Object
 		static UI_Button* currentButton;
 
 		static bool doMouseEnterSound;
+
 	
 		
 		bool moved; // did this item move one pixel down (pressed)
@@ -151,6 +154,7 @@ class UI_Button : public UI_Object
 		bool wasPressed;
 
 		unsigned int gradient;
+		unsigned int oldGradient;
 
 		unsigned int pressdepth;
 		
@@ -185,6 +189,10 @@ class UI_Button : public UI_Object
 		UI_Button& operator=(const UI_Button& object);		
 		UI_Button(const UI_Button& object);
 };
+
+inline const bool UI_Button::isBitmapButton() const {
+	return(hasBitmap);
+}
 
 inline UI_StaticText* UI_Button::getText() const {
 	return(text);

@@ -51,6 +51,10 @@ void UI_Menu::updateItemPositions()
 {
 	unsigned int i = 0;
 	height = 0;
+//	Size s;
+//	if(positionMode == TOTAL_CENTERED) // TODO
+//		s = 
+		
 	switch(menuType)
 	{
 		case CUSTOM_MENU:break;
@@ -58,7 +62,11 @@ void UI_Menu::updateItemPositions()
 		for(std::list<UI_MenuEntry*>::iterator m = menuEntries.begin(); m != menuEntries.end(); ++m)
 			if((*m)->isShown())
 			{
-				(*m)->setOriginalPosition(Point(0, i*((*m)->getTextHeight()+(*m)->getDistanceBottomRight().getHeight())));
+				unsigned int item_height;
+				if((*m)->isBitmapButton())
+					item_height = (*m)->getHeight();
+				else item_height = (*m)->getTextHeight();
+				(*m)->setOriginalPosition(Point(0, i*(item_height+(*m)->getDistanceBottomRight().getHeight())));
 				i++;
 				height++;
 			}
@@ -67,7 +75,11 @@ void UI_Menu::updateItemPositions()
 		for(std::list<UI_MenuEntry*>::iterator m = menuEntries.begin(); m != menuEntries.end(); ++m)
 			if((*m)->isShown())
 			{
-				(*m)->setOriginalPosition(Point((i%2) * ((*m)->getWidth() + (*m)->getDistanceBottomRight().getWidth()), (i/2)*((*m)->getTextHeight()+(*m)->getDistanceBottomRight().getHeight())));
+				unsigned int item_height;
+				if((*m)->isBitmapButton())
+					item_height = (*m)->getHeight();
+				else item_height = (*m)->getTextHeight();
+				(*m)->setOriginalPosition(Point((i%2) * ((*m)->getWidth() + (*m)->getDistanceBottomRight().getWidth()), (i/2)*(item_height+(*m)->getDistanceBottomRight().getHeight())));
 				i++;
 				if(i%2==0) height++;
 			}
@@ -83,6 +95,29 @@ void UI_Menu::updateItemPositions()
 		break;	
 		default:break;
 	}
+
+	unsigned int maxWidth = 0;
+	unsigned int maxHeight = 0;
+	UI_Object* tmp = getChildren();
+	if(tmp==NULL)
+		return;
+	do
+	{
+		if(tmp->isShown())
+		{
+			Rect r = tmp->getTargetRect();
+			if(maxWidth < r.getRight())
+				maxWidth = r.getRight();
+			if(maxHeight < r.getBottom())
+				maxHeight = r.getBottom();
+		}
+		tmp = tmp->getNextBrother();
+	}
+	while(tmp!=getChildren());
+	Size s = Size(maxWidth+7, maxHeight+7);
+//	setOriginalSize(s);
+	adjustRelativeRect(Rect(getTargetPosition(), s));
+
 }
 
 const bool UI_Menu::isOpen() const

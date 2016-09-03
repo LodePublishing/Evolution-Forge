@@ -6,16 +6,18 @@ TechTreeWindow::TechTreeWindow(UI_Object* techtree_parent) :
 	unitChanged(false),
 	currentGoalUnit(0),
 	anarace(NULL),
-	s(Size(100, 15)),
-	s2(Size(120, 25))
+	s(),
+	s2()
 {	
-	for(unsigned int i = LAST_UNIT;i--;)
+	node.resize(RACE::UNIT_TYPE_COUNT);
+	for(unsigned int i = RACE::UNIT_TYPE_COUNT;i--;)
 		node[i] = new UI_Object(this, Rect(Point((getWidth() - s.getWidth())/2, 15),s));
+	reloadOriginalSize();
 }
 
 TechTreeWindow::~TechTreeWindow()
 {
-	for(unsigned int i = LAST_UNIT;i--;)
+	for(unsigned int i = RACE::UNIT_TYPE_COUNT;i--;)
 		delete node[i];
 }
 
@@ -31,6 +33,10 @@ void TechTreeWindow::reloadOriginalSize()
 {
 	setOriginalRect(UI_Object::theme.lookUpGlobalRect(TECHTREE_WINDOW));
 	setMaxHeight(UI_Object::theme.lookUpGlobalMaxHeight(TECHTREE_WINDOW));
+
+	s = Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), FONT_SIZE);
+	s2 = Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)+10, FONT_SIZE+2);
+
 	UI_Window::reloadOriginalSize();
 }
 
@@ -43,11 +49,9 @@ void TechTreeWindow::processList()
 	signed int max_width = 0;
 	signed int max_height = 0;
 
-	bool checked[LAST_UNIT];
+	std::vector<bool> checked(RACE::UNIT_TYPE_COUNT);
+	checked.assign(RACE::UNIT_TYPE_COUNT, false);
 	tree = anarace->getGoalTree(currentGoalUnit);
-
-	for(unsigned int i = LAST_UNIT;i--;)
-		checked[i]=false;
 
 	x1=9999;
 	for(unsigned int k = 0; k<10; ++k)
@@ -62,7 +66,7 @@ void TechTreeWindow::processList()
 				foundOne=true;
 				if(x1 > px - (signed int)(s.getWidth())/2)
 					x1 = px - (s.getWidth())/2;
-				Rect edge = Rect(Point(px - s.getWidth()/2, 15+k*s2.getHeight()), s);
+				Rect edge = Rect(Point(px - s.getWidth()/2, 5+k*s2.getHeight()), s);
 				node[*i]->adjustRelativeRect(edge);
 				if(edge.getRight() > max_width)
 					max_width = edge.getRight();
@@ -80,7 +84,7 @@ void TechTreeWindow::processList()
 			if(foundOne)
 				y2 = k*s2.getHeight()+3+s.getHeight();
 		}
-	for(unsigned int i = LAST_UNIT;i--;)
+	for(unsigned int i = RACE::UNIT_TYPE_COUNT;i--;)
 		if(!checked[i])
 		{
 			node[i]->setPosition(Point((getWidth() - s.getWidth())/2, 15));
@@ -130,10 +134,10 @@ void TechTreeWindow::draw(DC* dc) const
 			unsigned int x=0;
 			for(std::list<unsigned int>::const_iterator i = tree.unit[k].begin(); i!=tree.unit[k].end();++i)
 			{
-				dc->setBrush(*theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][*i].unitType)));
-				dc->setPen(*theme.lookUpPen((ePen)(UNIT_TYPE_0_BOLD_PEN+stats[anarace->getRace()][*i].unitType)));
+				dc->setBrush(*theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH + GAME::race[anarace->getRace()].stats[*i].unitType)));
+				dc->setPen(*theme.lookUpPen((ePen)(UNIT_TYPE_0_BOLD_PEN + GAME::race[anarace->getRace()].stats[*i].unitType)));
 				
-				for(std::list<unsigned int>::const_iterator j = tree.con[*i].begin(); j!= tree.con[*i].end(); ++j)
+				for(std::list<unsigned int>::const_iterator j = tree.connection[*i].begin(); j!= tree.connection[*i].end(); ++j)
 				{
 					Point start = node[*i]->getAbsolutePosition();
 					Point target = node[*j]->getAbsolutePosition();
@@ -187,15 +191,15 @@ void TechTreeWindow::draw(DC* dc) const
 	dc->setTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
 	dc->setPressedRectangle(false);	
 	dc->setFont(UI_Object::theme.lookUpFont(SMALL_BOLD_FONT));
-	for(unsigned int i = LAST_UNIT;i--;)
+	for(unsigned int i = RACE::UNIT_TYPE_COUNT;i--;)
 		if(node[i]->isShown())
 		{
-			dc->setBrush(*theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][i].unitType)));
-			dc->setPen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN+stats[anarace->getRace()][i].unitType)));
+			dc->setBrush(*theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH + GAME::race[anarace->getRace()].stats[i].unitType)));
+			dc->setPen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN + GAME::race[anarace->getRace()].stats[i].unitType)));
 			dc->DrawEdgedRoundedRectangle(node[i]->getAbsoluteRect(), 4);
-			std::string text = UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i));
+			std::string text = GAME::lookUpUnitString(anarace->getRace(), i);
 			Size text_size = dc->getTextExtent(text);
-			dc->DrawText(text, node[i]->getAbsolutePosition() + Point(2 + (s.getWidth())/2, 5) - Size(text_size.getWidth()/2, 0));
+			dc->DrawText(text, node[i]->getAbsolutePosition() + s/2 - text_size/2);
 		}
 		
 		

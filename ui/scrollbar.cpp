@@ -19,8 +19,7 @@ UI_ScrollBar::UI_ScrollBar(UI_Object* scroll_parent, const unsigned int start_y,
 	clientTargetHeight(0),
 	totalHeight(0),
 	maxHeight(max_height)
-{ 
-}
+{}
 
 UI_ScrollBar::~UI_ScrollBar()
 {
@@ -28,54 +27,23 @@ UI_ScrollBar::~UI_ScrollBar()
 	delete sub;
 }
 
-void UI_ScrollBar::setClientHeight(const unsigned int height)
-{
-	clientHeight = height-12;
-}
 
-void UI_ScrollBar::setClientTargetHeight(const unsigned int height)
-{
-	clientTargetHeight = height;
-}
-
-void UI_ScrollBar::moveUp()
-{
-	targetScrollY-=clientHeight/40;
-}
-
-void UI_ScrollBar::moveDown()
-{
-	targetScrollY+=clientHeight/40;
-}
-
-// TODO: Wenn Scrollbereich ausserhalb des Fensters rutscht moechte das Programm verstaendlicherweise neumalen, da es nicht weiss, dass die entsprechenden Eintraege versteckt werden... :-/
-void UI_ScrollBar::moveToTop()
-{
-	if(currentScrollY==0)
-		return;
-	targetScrollY = 0;
-}
-
-void UI_ScrollBar::moveToBottom()
-{
-	targetScrollY = 99999;
-}
 
 void UI_ScrollBar::checkBoundsOfChildren(const signed int upper_bound, const signed int lower_bound)
 {
 	UI_Object* tmp = getChildren();
 	if (tmp) {
 		do {
-			if((tmp!=add)&&(tmp!=sub))
+			if((tmp != add) && (tmp != sub))
 			{
-				if(((tmp->getAbsoluteUpperBound() < upper_bound + 10) || (tmp->getAbsoluteLowerBound() > lower_bound - 10)))
+				if(((tmp->getAbsoluteUpperBound() < upper_bound) || (tmp->getAbsoluteLowerBound() > lower_bound)))
 				{
 					if(tmp->isClipped)
 					{
-						if((tmp->getAbsoluteLowerBound() > upper_bound + 10) && (tmp->getAbsoluteUpperBound() +5 < lower_bound - 10))
+						if((tmp->getAbsoluteLowerBound() > upper_bound) && (tmp->getAbsoluteUpperBound() < lower_bound))
 						{
 							tmp->Show();
-							tmp->clipRect = Rect(tmp->getAbsoluteLeftBound(), upper_bound + 10, tmp->getWidth(), lower_bound - upper_bound - 20);
+							tmp->clipRect = Rect(tmp->getAbsoluteLeftBound(), upper_bound, tmp->getWidth(), lower_bound - upper_bound);
 						} else 
 						{
 							tmp->Hide();
@@ -188,3 +156,34 @@ void UI_ScrollBar::draw(DC* dc) const
 	dc->DrawText(os.str(), p + Size(20, 2));	*/
 }
 
+void UI_ScrollBar::setClientHeight(const unsigned int height) {
+#ifdef _SCC_DEBUG
+	if(height < 12) {
+		toErrorLog("DEBUG (UI_ScrollBar::setClientHeight()): Value height out of range.");return;
+	}
+#endif
+	clientHeight = height - 12;
+}
+
+void UI_ScrollBar::setClientTargetHeight(const unsigned int height) {
+	clientTargetHeight = height;
+}
+
+void UI_ScrollBar::moveUp() {
+	targetScrollY -= clientHeight / 40;
+}
+
+void UI_ScrollBar::moveDown() {
+	targetScrollY += clientHeight / 40;
+}
+
+// TODO: Wenn Scrollbereich ausserhalb des Fensters rutscht moechte das Programm verstaendlicherweise neumalen, da es nicht weiss, dass die entsprechenden Eintraege versteckt werden... :-/
+void UI_ScrollBar::moveToTop() {
+	if(currentScrollY==0)
+		return;
+	targetScrollY = 0;
+}
+
+void UI_ScrollBar::moveToBottom() {
+	targetScrollY = 99999;
+}

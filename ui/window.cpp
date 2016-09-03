@@ -2,7 +2,7 @@
 #include "configuration.hpp"
 
 UI_Window::UI_Window(UI_Object* window_parent, const eString window_title_string, const Rect rect, const unsigned int max_height, const eIsScrolled window_is_scrollable, const eIsAutoAdjust window_is_auto_adjust, const Rect window_client_area, eIsTransparent transparent) :
-	UI_Object(window_parent, isScrollable==SCROLLED ? Rect(rect.getTopLeft(), rect.getSize() - Size(0, 0)): rect),
+	UI_Object(window_parent, rect),
 	filledHeight(0),
 	doAdjustments(false),
 	isTransparent(transparent),
@@ -45,24 +45,28 @@ void UI_Window::calculateClientRect()
 {
 	Rect oldClientRect = clientRect;
 	clientRect.setSize(getTargetRect().getSize());
-	if(clientRect.getLeft() < 5) clientRect.setLeft(5);
-   	if(clientRect.getTop() < 5) clientRect.setTop(5);
+	
+	if(clientRect.getLeft() < 5) 
+		clientRect.setLeft(5);
+	if(clientRect.getLeft() > ((signed int)getWidth()) - 5)
+		clientRect.setLeft(((signed int)getWidth()) -5);
+	
+	if(clientRect.getTop() < 5) 
+		clientRect.setTop(5);
+	if(clientRect.getTop() > ((signed int)getHeight()) - 5)
+		clientRect.setTop(((signed int)getHeight()) - 5);
+
 	if(clientRect.getBottom() > ((signed int)getHeight()) - 5) 
 		clientRect.setBottom(((signed int)getHeight()) - 5);
-//	{
-		
-//		if(clientRect.getRight() > border.getRight() - 19) 
-//			clientRect.setRight(border.getRight()-19);
-//		if(clientRect.getRight() > ScrollRect.getLeft()-3) clientRect.setRight(ScrollRect.getLeft()-3); TODO
-//	} else
-//	{
-		if(clientRect.getRight() > ((signed int)getWidth()) - 5) 
-			clientRect.setRight(((signed int)getWidth()) - 5);
-//	}
+
+	if(clientRect.getRight() > ((signed int)getWidth()) - 5) 
+		clientRect.setRight(((signed int)getWidth()) - 5);
 
 	originalClientRect = clientRect;
 	clientStartRect = oldClientRect;
 	clientTargetRect = clientRect;
+	if(scrollBar)
+		scrollBar->setStartY(getRelativeClientRectUpperBound());
 }
 
 void UI_Window::reloadOriginalSize()
@@ -186,14 +190,20 @@ void UI_Window::process()
 	{
 		if(uiConfiguration.isSmoothMovements())
 		{
-			if(clientRect.moveSmooth(clientStartRect, clientTargetRect))
+			eRectMovement t = clientRect.moveSmooth(clientStartRect, clientTargetRect);
+			if(t == GOT_BIGGER)
+				setNeedRedrawNotMoved();
+			else if(t == GOT_SMALLER_OR_MOVED)
 				setNeedRedrawMoved();
 		}
 		else 
 		{
-			if(clientRect.move(clientStartRect, clientTargetRect))
+			eRectMovement t = clientRect.move(clientStartRect, clientTargetRect);
+			if(t == GOT_BIGGER)
+				setNeedRedrawNotMoved();
+			else if(t == GOT_SMALLER_OR_MOVED)
 				setNeedRedrawMoved();
-		}	
+		}
 	}
 
 	if(/*(!UI_Object::windowSelected)&&*/(((isMouseInside())||( (scrollBar!=NULL) && (Rect(getAbsolutePosition() + Point(getWidth(), 0), Size(12, getHeight())).Inside(mouse))))))//&&(!isTopItem()))) // => main window! WHY? TODO
@@ -344,7 +354,7 @@ void UI_Window::drawWindow(DC* dc) const
 		dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 		
 		dc->DrawEdgedRoundedRectangle(Point(3, 3) + getAbsolutePosition(), getSize() - Size(6, 6), 6);
-
+		
 		drawTitle(dc);
 	}
 

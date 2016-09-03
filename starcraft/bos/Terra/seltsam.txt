@@ -1,0 +1,22 @@
+@BO_HEADER
+		"Name" "seltsam"
+		"Race" "Terra"
+		"Time" "4715"
+@END
+@GOAL
+		"Name" "seltsam"
+		"Race" "Terra"
+		"SCV" "4" "0" "0"
+		"Command Center" "3" "0" "0"
+@END
+@BUILDORDER
+		"SCV"
+		"SCV"
+		"SCV"
+		"SCV"
+		"SCV"
+		"SCV"
+		"Command Center"
+		"Command Center"
+		"Command Center"
+@END

@@ -5,7 +5,7 @@
 #include "configuration.hpp"
 #include <sstream>
 
-ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std::string& entry_unit):
+ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std::string& entry_unit, const unsigned int unit_num, const eUnitType unit_type, GOAL* unit_goal):
 	UI_Button(entry_parent, entry_rect, Size(0,0), FORCE_ENTRY_BUTTON, false, PRESS_BUTTON_MODE, entry_unit, SPECIAL_BUTTON_LEFT, SMALL_SHADOW_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH),
 	oldGoalCount(0),
 	oldGoalTime(0),
@@ -15,10 +15,12 @@ ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std
 	currentForce(0),
 	totalNumber(1),
 	highlight(0),
-	unit(0),
-	type(REMAINING_UNIT_TYPE),
-	goal(NULL)
-{}	
+	unit(unit_num),
+	type(unit_type),
+	goal(unit_goal)
+{
+	//toErrorLog(entry_unit);
+}	
 
 ForceEntry::~ForceEntry()
 {
@@ -34,21 +36,6 @@ ForceEntry::~ForceEntry()
 		delete timeEntryBox;
 		timeEntryBox = NULL;
 	}
-}
-
-void ForceEntry::reloadOriginalSize()
-{
-	UI_Object::reloadOriginalSize();
-}
-
-UI_Object* ForceEntry::checkToolTip()
-{
-	return(UI_Button::checkToolTip());
-}
-
-UI_Object* ForceEntry::checkHighlight()
-{
-	return(UI_Button::checkHighlight());
 }
 
 void ForceEntry::process()
@@ -71,22 +58,24 @@ void ForceEntry::process()
 	{
 		// wichtig: Speichern des forceentries damit nicht KOnkurrenz zwischen den entries betsteht!
 		Rect r = getAbsoluteRect();
-		r.setWidth(16);
-		r.setLeft(getParent()->getAbsoluteRightBound()-10);
+		r.setWidth(14);
+		r.setLeft(getParent()->getAbsoluteRightBound()-18);
 // situation 1: mouse just entered, both timeentrybox and maketimegoal is hidden => Show makeTimeGoalButton
 
 		if(!ForceEntry::timeEntryBox)
 		{
-			if((ForceEntry::currentForceEntry == NULL) && (r.Inside(mouse)) && (!ForceEntry::makeTimeGoalButton))
+			if((ForceEntry::currentForceEntry == NULL) && (r.Inside(mouse)) && (ForceEntry::makeTimeGoalButton==NULL))
 			{
 				setOriginalSize(Size(getParent()->getWidth()-30, getHeight()));
-				ForceEntry::makeTimeGoalButton = new UI_Button(getParent(), Rect(Point(getRelativePosition() + Size(getParent()->getWidth()-26, 0)), Size(16,10)), Size(0,0), GOAL_TIME_BUTTON, true, STATIC_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST);
+				ForceEntry::makeTimeGoalButton = new UI_Button(getParent(), Rect(Point(getRelativePosition() + Size(getParent()->getWidth()-28, 0)), Size(16,10)), Size(0,0), GOAL_TIME_BUTTON, true, STATIC_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST);
 				ForceEntry::makeTimeGoalButton->updateToolTip(FORCEENTRY_TIME_TOOLTIP_STRING);
 				ForceEntry::currentForceEntry = this;
+				UI_Button::resetButton();
+				UI_Button::setCurrentButton(ForceEntry::makeTimeGoalButton);
 			} else 
 			if((ForceEntry::currentForceEntry == this) && (!r.Inside(mouse)))
 			{
-				if(ForceEntry::makeTimeGoalButton)
+				if((ForceEntry::makeTimeGoalButton)&&(!ForceEntry::makeTimeGoalButton->isCurrentlyActivated()))
 				{
 // situation 2: mouse is outside and timeEntryBox is not shown => Remove makeTimeGoalButton
 			// EVTL PROBLEM: Ich loesche es hier, es ist aber Kind vom Parent das gerade noch proces durchlaeuft... evtl an parent benachrichtigen, dass button geloescht werden soll... :o
@@ -96,7 +85,7 @@ void ForceEntry::process()
 					ForceEntry::makeTimeGoalButton = NULL;
 				}
 // situation 3: nothing is pressed, mouse is outside => return to normal width
-				else if(!ForceEntry::makeTimeGoalButton)
+				else if(ForceEntry::makeTimeGoalButton == NULL)
 				{
 					setOriginalSize(Size(getParent()->getWidth()-10, getHeight()));
 					ForceEntry::currentForceEntry = NULL;
@@ -134,7 +123,7 @@ void ForceEntry::process()
 
 	if(ForceEntry::currentForceEntry == this)
 	{
-		Rect r = getAbsoluteRect();
+/*		Rect r = getAbsoluteRect();
 		r.setWidth(getParent()->getWidth());
 		if(!r.Inside(mouse))
 		{
@@ -144,7 +133,7 @@ void ForceEntry::process()
 			ForceEntry::makeTimeGoalButton = NULL;
 			delete ForceEntry::timeEntryBox;	
 			ForceEntry::timeEntryBox = NULL;
-		}
+		}*/
 	
 		if((ForceEntry::makeTimeGoalButton)&&(ForceEntry::makeTimeGoalButton->isLeftClicked()))
 		{
@@ -156,9 +145,10 @@ void ForceEntry::process()
 			}
 			else
 			{
-				ForceEntry::timeEntryBox = new UI_NumberField(getParent(), Rect(Point(getRelativePosition() + Size(getParent()->getWidth()-UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)-90, 0)), Size(0, 0)), Size(0,0), DO_NOT_ADJUST, 0, coreConfiguration.getMaxTime(), NULL_STRING, NULL_STRING, 6, getTime(), false, TIME_NUMBER_TYPE);
-				setOriginalSize(Size(getParent()->getWidth()*2/3, getHeight()));
+				ForceEntry::timeEntryBox = new UI_NumberField(getParent(), Rect(Point(getRelativePosition() + Size(getParent()->getWidth() - UI_Object::theme.lookUpButtonWidth(LARGE_BUTTON_WIDTH)-20, 0)), Size(0, 0)), Size(0,0), DO_NOT_ADJUST, 0, coreConfiguration.getMaxTime(), NULL_STRING, NULL_STRING, 150, getTime(), false, TIME_NUMBER_TYPE);
+				setOriginalSize(Size(getParent()->getWidth() - UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)-20, getHeight()));
 			}
+			// evtl ohne time button? mmmh.. => ueberlegen
 		}
 		if((ForceEntry::timeEntryBox)&&(ForceEntry::timeEntryBox->hasNumberChanged()))
 		{
@@ -279,22 +269,6 @@ void ForceEntry::draw(DC* dc) const
 	}
 }
 																																							
-void ForceEntry::assignGoal(GOAL* assign_goal)
-{
-	goal = assign_goal;
-}
-
-void ForceEntry::HideIt()
-{
-	Hide();
-}
-
-void ForceEntry::setTime(const unsigned int time) 
-{
-	goal->setTime(time);
-}
-
-
 void ForceEntry::setTotalNumber(const unsigned int total_number)
 {
 	if(totalNumber != total_number)

@@ -1,0 +1,32 @@
+@STRINGS
+	@GERMAN
+						  "NULL_STRING" = "NULL"
+		                                 "HUMAN_STRING" = "Menschen"
+		                                   "ORC_STRING" = "Orks"
+		                                 "ELVES_STRING" = "Elfen"
+		                                "UNDEAD_STRING" = "Untote"
+
+					          "GOLD_STRING" = "Gold"
+					          "WOOD_STRING" = "Holz"
+
+					   "UNIT_TYPE_0_STRING" = "rest"
+		                           "UNIT_TYPE_1_STRING" = "WBF"
+		                           "UNIT_TYPE_2_STRING" = "Gas WBF"
+		                           "UNIT_TYPE_3_STRING" = "Kampfeinheiten..."
+		                           "UNIT_TYPE_4_STRING" = "Unterstützungseinheiten..."
+		                           "UNIT_TYPE_5_STRING" = "Versorgung/Raffinerie..."
+		                           "UNIT_TYPE_6_STRING" = "Produzierende Gebäude..."
+		                           "UNIT_TYPE_7_STRING" = "Forschungseinrichtungen..."
+		                           "UNIT_TYPE_8_STRING" = "Gebäudezusätze..."
+		                           "UNIT_TYPE_9_STRING" = "Forschung..."
+		                          "UNIT_TYPE_10_STRING" = "Spezial..."
+
+				    "GAME_SPEED_SLOWEST_STRING" = "Am langsamsten"
+				     "GAME_SPEED_SLOWER_STRING" = "Langsamer"
+				       "GAME_SPEED_SLOW_STRING" = "Langsam"
+				     "GAME_SPEED_NORMAL_STRING" = "Normal"
+				       "GAME_SPEED_FAST_STRING" = "Schnell"
+				     "GAME_SPEED_FASTER_STRING" = "Schneller"
+				    "GAME_SPEED_FASTEST_STRING" = "Am schnellsten"	
+	@END
+@END

@@ -54,5 +54,13 @@ class Player : public UI_Object
 		unsigned int playerMax;
 };
 
+inline const signed int Player::getLoadedBuildOrder() const {
+	return(boWindow->getLoadedBuildOrder());
+}
+
+inline const signed int Player::getAssignedGoal() const {
+	return(forceWindow->getAssignedGoal());
+}
+
 #endif
 

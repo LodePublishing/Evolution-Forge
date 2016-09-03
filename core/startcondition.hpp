@@ -13,8 +13,8 @@ class START_CONDITION
 		void adjustResearches();		// fill the remaining items with either 0, 1 or 3, depending on NULL, research, upgrade
 		void adjustSupply();
 		
-		void assignRace(const eRace start_race);
-		const eRace getRace() const;
+		void assignRace(const unsigned int start_race);
+		const unsigned int getRace() const;
 
 		const std::string& getName() const;
 		void setName(const std::string& startcondition_name);
@@ -25,11 +25,8 @@ class START_CONDITION
 		const unsigned int getNeedSupply() const;
 		void setNeedSupply(const unsigned int start_need_supply);
 
-		const unsigned int getGas() const;
-		const unsigned int getMinerals() const;
-
-		void setMinerals(const unsigned int start_minerals);
-		void setGas(const unsigned int start_gas);
+		const unsigned int getResource(const unsigned int resource_type) const;
+		void setResource(const unsigned int resource_type, const unsigned int start_resource);
 
 		const unsigned int getStartTime() const;
 		void setStartTime(const unsigned int start_time);
@@ -40,38 +37,47 @@ class START_CONDITION
 		const unsigned int getLocationTotal(const unsigned int loc, const unsigned int unit_type) const;
 		const unsigned int getLocationAvailible(const unsigned int loc, const unsigned int unit_type) const;
 
-		const UNIT* getUnit(const unsigned int location) const;
+		const UNIT& getUnit(const unsigned int location) const;
 	
 	private:
-		UNIT unit[MAX_LOCATIONS]; // sehr seltsam, bei [2] funzts, bei [3] funzts net :[ ?
-		eRace race;
+		UNIT unit[MAX_LOCATIONS];
+		unsigned int race;
 		std::string name;
 		
 		unsigned int haveSupply;
 		unsigned int needSupply;
-		unsigned int minerals;
-		unsigned int gas;
+		std::vector<unsigned int> resource;
 		unsigned int startTime;
 		START_CONDITION(const START_CONDITION& object);
 		START_CONDITION& operator=(const START_CONDITION& object);
 };
 
-inline void START_CONDITION::assignRace(const eRace start_race) {
+inline void START_CONDITION::assignRace(const unsigned int start_race) {
+#ifdef _SCC_DEBUG
+	if(start_race >= GAME::MAX_RACES) {
+		toErrorLog("DEBUG (START_CONDITION::assignRace()): start_race out of range.");
+	}
+#endif
 	race = start_race;
 }
 			
-inline const eRace START_CONDITION::getRace() const {
+inline const unsigned int START_CONDITION::getRace() const {
+#ifdef _SCC_DEBUG
+	if(race >= GAME::MAX_RACES) {
+		toErrorLog("DEBUG (START_CONDITION::getRace()): race not initialized.");
+	}
+#endif
 	return(race);
 }
 
-inline const UNIT* START_CONDITION::getUnit(const unsigned int location) const 
+inline const UNIT& START_CONDITION::getUnit(const unsigned int location) const 
 {
 #ifdef _SCC_DEBUG
 	if(location >= MAX_LOCATIONS) { // TODO
-		toErrorLog("DEBUG: (START_CONDITION::getUnit): Value location out of range.");return(0);
+		toErrorLog("DEBUG: (START_CONDITION::getUnit): Value location out of range.");return(unit[0]);
 	} 
 #endif
-	return(&unit[location]);
+	return(unit[location]);
 }
 
 inline const std::string& START_CONDITION::getName() const {
@@ -85,7 +91,7 @@ inline void START_CONDITION::setName(const std::string& startcondition_name) {
 inline const unsigned int START_CONDITION::getHaveSupply() const 
 {
 #ifdef _SCC_DEBUG
-	if(haveSupply > MAX_SUPPLY) {
+	if(haveSupply > 2*GAME::MAX_SUPPLY) {
 		toErrorLog("DEBUG: (START_CONDITION::getHaveSupply): Value haveSupply out of range.");return(0);
 	}
 #endif
@@ -95,7 +101,7 @@ inline const unsigned int START_CONDITION::getHaveSupply() const
 inline void START_CONDITION::setHaveSupply(const unsigned int start_have_supply) 
 {
 #ifdef _SCC_DEBUG
-	if(start_have_supply > MAX_SUPPLY) {
+	if(start_have_supply > 2*GAME::MAX_SUPPLY) {
 		toErrorLog("DEBUG: (START_CONDITION::setHaveSupply): Value start_have_supply out of range.");return;
 	}
 #endif
@@ -105,7 +111,7 @@ inline void START_CONDITION::setHaveSupply(const unsigned int start_have_supply)
 inline const unsigned int START_CONDITION::getNeedSupply() const
 {
 #ifdef _SCC_DEBUG
-	if(needSupply > MAX_SUPPLY) { // TODO
+	if(needSupply > 2*GAME::MAX_SUPPLY) { // TODO
 		toErrorLog("DEBUG: (START_CONDITION::getNeedSupply): Value needSupply out of range.");return(0);
 	}
 #endif
@@ -115,53 +121,37 @@ inline const unsigned int START_CONDITION::getNeedSupply() const
 inline void START_CONDITION::setNeedSupply(const unsigned int start_need_supply)
 {
 #ifdef _SCC_DEBUG
-	if(start_need_supply > MAX_SUPPLY) {
+	if(start_need_supply > 2*GAME::MAX_SUPPLY) {
 		toErrorLog("DEBUG: (START_CONDITION::getNeedSupply): Value start_need_supply out of range.");return;
 	}
 #endif
 	needSupply = start_need_supply;
 }
 
-inline const unsigned int START_CONDITION::getGas() const
+inline const unsigned int START_CONDITION::getResource(const unsigned int resource_type) const
 {
 #ifdef _SCC_DEBUG
-	if(gas > MAX_GAS) {
-		toErrorLog("DEBUG: (START_CONDITION::getGas): Variable gas out of range.");return(0);
+	if(resource_type >= RACE::MAX_RESOURCE_TYPES) {
+		toErrorLog("DEBUG (START_CONDITION::getResource): Value resource_type out of range.");return(0);
+	}
+	if(resource[resource_type] > GAME::MAX_RESOURCES) {
+		toErrorLog("DEBUG (START_CONDITION::getResource): Variable resource not initialized.");return(0);
 	}
 #endif
-	return(gas);
-}
-
-inline const unsigned int START_CONDITION::getMinerals() const
-{
-#ifdef _SCC_DEBUG
-	if(minerals > MAX_MINERALS)
-	{
-		toErrorLog("DEBUG: (START_CONDITION::getMinerals): Variable minerals out of range.");
-		return(0);
-	}
-#endif
-	return(minerals);
+	return(resource[resource_type]);
 }
 	
-inline void START_CONDITION::setMinerals(const unsigned int start_minerals)
+inline void START_CONDITION::setResource(const unsigned int resource_type, const unsigned int start_resource)
 {
 #ifdef _SCC_DEBUG
-	if(start_minerals > MAX_MINERALS) {
-		toErrorLog("DEBUG: (START_CONDITION::setMinerals): Value start_minerals out of range.");return;
+	if(resource_type >= RACE::MAX_RESOURCE_TYPES) {
+		toErrorLog("DEBUG (START_CONDITION::setResource): Value resource_type out of range.");return;
+	}
+	if(start_resource > GAME::MAX_RESOURCES) {
+		toErrorLog("DEBUG: (START_CONDITION::setResource): Value start_resource out of range.");return;
 	}
 #endif
-	minerals = start_minerals;
-}
-
-inline void START_CONDITION::setGas(const unsigned int start_gas)
-{
-#ifdef _SCC_DEBUG
-	if(start_gas > MAX_GAS) {
-		toErrorLog("DEBUG: (START_CONDITION::setGas): Value start_gas out of range.");return;
-	}
-#endif
-	gas = start_gas;	
+	resource[resource_type] = start_resource;
 }
 
 inline const unsigned int START_CONDITION::getStartTime() const
@@ -187,12 +177,12 @@ inline void START_CONDITION::setStartTime(const unsigned int start_time)
 inline void START_CONDITION::setLocationAvailible(const unsigned int location, const unsigned int unit_type, const unsigned int unit_count)
 {
 #ifdef _SCC_DEBUG
-	if((location == 0) || (location >= MAX_LOCATIONS)) {
+	if((location == GLOBAL) || (location >= MAX_LOCATIONS)) {
 		toErrorLog("DEBUG: (START_CONDITION::setLocationAvailible): Value location out of range.");return;
 	}
 #endif
 	unit[location].setAvailible(unit_type, unit_count);
-	unit[GLOBAL].addAvailible(unit_type, unit_count);
+	unit[GLOBAL].modifyAvailible(unit_type, unit_count);
 	// TODO UNSAUBER!
 }
 
@@ -220,12 +210,12 @@ inline const unsigned int START_CONDITION::getLocationTotal(const unsigned int l
 inline void START_CONDITION::setLocationTotal(const unsigned int location, const unsigned int unit_type, const unsigned int unit_count)
 {
 #ifdef _SCC_DEBUG
-	if((location == 0)||(location >= MAX_LOCATIONS)) { // TODO
+	if((location == GLOBAL)||(location >= MAX_LOCATIONS)) { // TODO
 		toErrorLog("DEBUG: (START_CONDITION::setLocationTotal): Value location out of range.");return;
 	}
 #endif
 	unit[location].setTotal(unit_type, unit_count);
-	unit[GLOBAL].addTotal(unit_type, unit_count);
+	unit[GLOBAL].modifyTotal(unit_type, unit_count);
 	// TODO UNSAUBER!
 }
 

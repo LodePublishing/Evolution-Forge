@@ -21,6 +21,8 @@ class UI_ScrollBar : public UI_Object
 
 		void setClientHeight(const unsigned int height);
 		void setClientTargetHeight(const unsigned int height);
+
+		void setStartY(const unsigned int start_y);
 		
 		void setFirstItemY(const signed int first_item_y);
 		void setLastItemY(const signed int last_item_y);
@@ -55,6 +57,17 @@ class UI_ScrollBar : public UI_Object
 		UI_ScrollBar& operator=(const UI_ScrollBar& object);
 		UI_ScrollBar(const UI_ScrollBar& object);
 };
+
+inline void UI_ScrollBar::setStartY(const unsigned int start_y) {
+#ifdef _SCC_DEBUG
+	if(start_y > 90000)
+	{
+		toErrorLog("DEBUG: (UI_ScrollBar::setStartY): Value start_y out of range.");return;
+	}
+#endif
+
+	startY = start_y;
+}
 
 inline void UI_ScrollBar::setFirstItemY(const signed int first_item_y) 
 {

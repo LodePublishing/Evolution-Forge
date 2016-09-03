@@ -1,8 +1,13 @@
 #ifndef _SDL_RECT_HPP
 #define _SDL_RECT_HPP
 
-#include "size.hpp"
 #include "point.hpp"
+
+enum eRectMovement {
+	NO_CHANGE,
+	GOT_BIGGER,
+	GOT_SMALLER_OR_MOVED
+};
 
 class Rect
 {
@@ -35,7 +40,7 @@ class Rect
 				
 		const Rect operator+(const Point p) const;
 		Rect& operator=(const Rect& rect);
-		const bool operator==(const Rect& rect) const ;
+		const bool operator==(const Rect& rect) const;
 		const bool operator!=(const Rect& rect) const;
 		const bool Inside(const signed int x, const signed int y) const;
 		const bool Inside(const Point& point) const;
@@ -43,8 +48,8 @@ class Rect
 
 		const bool overlaps(const Rect& rect) const;
 
-		const bool moveSmooth(const Rect& startRect, const Rect& targetRect);
-		const bool move(const Rect& startRect, const Rect& targetRect);
+		const eRectMovement moveSmooth(const Rect& startRect, const Rect& targetRect);
+		const eRectMovement move(const Rect& startRect, const Rect& targetRect);
 	private:
 		Point topLeftCorner;
 		Point bottomRightCorner;
@@ -166,7 +171,15 @@ inline Rect& Rect::operator=(const Rect& rect)
 	rectSize = rect.getSize();
 	return(*this);
 }
-		
+	
+inline const bool Rect::overlaps(const Rect& rect) const {
+	return(Inside(rect.getTopLeft()) || Inside(rect.getBottomLeft()) || Inside(rect.getBottomRight()) || Inside(rect.getTopRight()));	
+}
+
+inline const bool Rect::Inside(const Rect& rect) const {
+	return( ( rect.getTopLeft() >= topLeftCorner ) && ( rect.getBottomRight() <= bottomRightCorner ) );
+}
+
 inline const bool Rect::operator==(const Rect& rect) const 
 { 
 	if( ( getTopLeft() != rect.getTopLeft() ) || ( getSize() != rect.getSize() ) ) 

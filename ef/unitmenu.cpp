@@ -4,10 +4,11 @@
 UnitMenu::UnitMenu(UI_Object* unit_parent, const Rect unit_rect, const Size distance_bottom_right, const ePositionMode position_mode) :
 	UI_Menu(unit_parent, unit_rect, distance_bottom_right, position_mode, false),
 	anarace(NULL),
+	facility(RACE::UNIT_TYPE_COUNT),
 	facilityNumber(1),
-	lastRace(TERRA)
+	lastRace(0)
 {
-	for(unsigned int i=0;i<LAST_UNIT;++i) //TODO
+	for(unsigned int i=0; i<RACE::UNIT_TYPE_COUNT; ++i) //TODO
 	{
 		UI_MenuEntry* entry = new UI_MenuEntry(this, Rect(), "");
 		menuEntries.push_back(entry);
@@ -44,22 +45,21 @@ void UnitMenu::reloadOriginalSize()
 void UnitMenu::resetData()
 {
 	facilityNumber=1;
-	for(unsigned int i=1;i<LAST_UNIT;++i)
+	for(unsigned int i=1; i < RACE::UNIT_TYPE_COUNT; ++i)
 		// cut out those [CS], [NS] temporary facilities
-//	if(stats[lastRace][i].unitType != ADD_ON_UNIT_TYPE)
+//	if(GAME::race[lastRace].stats[i].unitType != ADD_ON_UNIT_TYPE)
 	{
-		for(unsigned int j=1;j<LAST_UNIT;++j)
-			if((coreConfiguration.isExpansionSet())||(stats[lastRace][i].bwunit==0))
+		for(unsigned int j=1; j < RACE::UNIT_TYPE_COUNT; ++j)
+		{
+			if((GAME::race[lastRace].stats[j].facility[0] == i)||
+			   (GAME::race[lastRace].stats[j].facility[1] == i)||
+			   (GAME::race[lastRace].stats[j].facility[2] == i))
 			{
-				if((stats[lastRace][j].facility[0] == i)||
-				   (stats[lastRace][j].facility[1] == i)||
-				   (stats[lastRace][j].facility[2] == i))
-				{
-					facility[facilityNumber] = i;
-					++facilityNumber;
-					break;
-				}
+				facility[facilityNumber] = i;
+				++facilityNumber;
+				break;
 			}
+		}
 	}
 }
 		
@@ -90,7 +90,7 @@ void UnitMenu::processMenu()
 				for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					++i;
-					if((i >=10 ))// || ((coreConfiguration.isExpansionSet())&&(stats[lastRace][i].bwunit==1)))					
+					if(i >=10 )
 					{
 						(*m)->Hide();
 						continue;
@@ -103,39 +103,36 @@ void UnitMenu::processMenu()
 						if((i==1)||(i==2))
 						{
 							int unit_type = 0;
-							if(i==1)
-								unit_type = SCV;
-							else if(i==2)
-								unit_type = GAS_SCV;
+							if(i==1); // TODO
+//								unit_type = SCV;
+							else if(i==2); // TODO
+//								unit_type = GAS_SCV;
 							std::ostringstream os;
 							
-							os << theme.lookUpString((eString)(unit_type+UNIT_TYPE_COUNT*lastRace));
+							os << GAME::lookUpUnitString(lastRace, unit_type);
 							if(UI_Object::focus == this)
 								os << " [" << i << "]";
 							(*m)->updateText(os.str());
 							os.str("");
-							os << UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*lastRace+unit_type)) << "#" << "  " << UI_Object::theme.lookUpFormattedString(BOWINDOW_BUILD_TIME_STRING, stats[lastRace][unit_type].BT/(efConfiguration.getGameSpeed()*3+6)) << "#";
-							
-							if(stats[lastRace][unit_type].minerals>0)
-								os << "  $" << stats[lastRace][unit_type].minerals/100 << "$ " << UI_Object::theme.lookUpString(BOWINDOW_MINERALS_STRING) << "#";
-							if(stats[lastRace][unit_type].gas>0)
-								os << "  $" << stats[lastRace][unit_type].gas/100 << "$ " << UI_Object::theme.lookUpString(BOWINDOW_GAS_STRING) << "#";
-							
+							os << GAME::lookUpUnitString(lastRace, unit_type) << "#" << "  " << UI_Object::theme.lookUpFormattedString(BOWINDOW_BUILD_TIME_STRING, GAME::race[lastRace].stats[unit_type].BT/(efConfiguration.getGameSpeed()*3+6)) << "#";
+							for(unsigned int k = RACE::MAX_RESOURCE_TYPES; k--;)
+								if(GAME::race[lastRace].stats[unit_type].resource[k]>0)
+									os << "  $" << GAME::race[lastRace].stats[unit_type].resource[k]/100 << "$ " << GAME::lookUpGameString(GAME::FIRST_RESOURCE_STRING+k) << "#";
 							(*m)->updateToolTip(os.str());
 						}
 						else
 						{
 							std::ostringstream os;
-							os << theme.lookUpString((eString)(UNIT_TYPE_0_STRING+i));
+							os << GAME::lookUpGameString(GAME::FIRST_UNIT_MENU_STRING+i);
 							if(UI_Object::focus == this)
 								os << " [" << i << "]";
 							(*m)->updateText(os.str());
 							os.str("");
-							os << "$" << theme.lookUpString((eString)(UNIT_TYPE_0_STRING+i)) << "$#";
+							os << "$" << GAME::lookUpGameString(GAME::FIRST_UNIT_MENU_STRING+i) << "$#";
 
-							for(unsigned int j = 0; j < LAST_UNIT; ++j)
-								if((stats[lastRace][j].unitType == i) &&((coreConfiguration.isExpansionSet())||(stats[lastRace][i].bwunit==0)))
-									os << stats[lastRace][j].name << "#";
+							for(unsigned int j = 0; j < RACE::UNIT_TYPE_COUNT; ++j)
+								if(GAME::race[lastRace].stats[j].unitType == i) 
+									os << GAME::lookUpUnitString(lastRace, j) << "#";
 								
 							(*m)->updateToolTip(os.str());
 						}
@@ -148,7 +145,7 @@ void UnitMenu::processMenu()
 				for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					++i;
-					if((i >= facilityNumber)) //|| ((efConfiguration.isExpansionSet())/*&&(stats[lastRace][i].bwunit==1)*/))
+					if(i >= facilityNumber)
 					{
 						(*m)->Hide();
 						continue;
@@ -157,20 +154,20 @@ void UnitMenu::processMenu()
 	//			  if (fitItemToClientRect(edge, true))
 					{
 						(*m)->Show();
-						(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[lastRace][facility[i]].unitType));
+						(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+GAME::race[lastRace].stats[facility[i]].unitType));
 						std::ostringstream os;
-						os << UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*lastRace+facility[i])) << "...";
+						os << GAME::lookUpUnitString(lastRace, facility[i]) << "...";
 						if(UI_Object::focus == this)
 							os << " [" << i << "]";
 						(*m)->updateText(os.str());
 						os.str("");
-						os << "$" << stats[lastRace][facility[i]].name << "$#";
+						os << "$" << GAME::lookUpUnitString(lastRace, facility[i]) << "$#";
 
-						for(unsigned int j = 0; j < LAST_UNIT; ++j)
-							if( ( (stats[lastRace][j].facility[0] == facility[i])||
-								(stats[lastRace][j].facility[1] == facility[i])||
-								(stats[lastRace][j].facility[2] == facility[i]))									&&((coreConfiguration.isExpansionSet())||(stats[lastRace][i].bwunit==0)))
-								os << stats[lastRace][j].name << "#";
+						for(unsigned int j = 0; j < RACE::UNIT_TYPE_COUNT; ++j)
+							if( ( (GAME::race[lastRace].stats[j].facility[0] == facility[i])||
+								(GAME::race[lastRace].stats[j].facility[1] == facility[i])||
+								(GAME::race[lastRace].stats[j].facility[2] == facility[i])))
+								os << GAME::lookUpUnitString(lastRace, j) << "#";
 						(*m)->updateToolTip(os.str());
 
 						(*m)->adjustRelativeRect(edge);
@@ -188,7 +185,7 @@ void UnitMenu::processMenu()
 				for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					++i;
-					if(/*(i >= facilityNumber ) ||*/ (stats[lastRace][i].unitType != (signed int)(menuLevel)) || ((!coreConfiguration.isExpansionSet())&&(stats[lastRace][i].bwunit==1)))
+					if(/*(i >= facilityNumber ) ||*/ (GAME::race[lastRace].stats[i].unitType != (signed int)(menuLevel)))
 					{
 						(*m)->Hide();
 						continue;
@@ -198,24 +195,23 @@ void UnitMenu::processMenu()
 					(*m)->Show();
 					(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+menuLevel));
 					std::ostringstream os;
-					os << UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*lastRace+i));
+					os << GAME::lookUpUnitString(lastRace, i);
 					if(UI_Object::focus == this)
 						os << " [" << unit_number << "]";
 					(*m)->updateText(os.str());
 					os.str("");
-					os << "$" << stats[lastRace][i].name << "$#" <<
-						"  build time $" << stats[lastRace][i].BT << "$ sec.#";
-						if(stats[lastRace][i].minerals>0)
-							os << "  $" << stats[lastRace][i].minerals/100 << "$ minerals#";
-						if(stats[lastRace][i].gas>0)
-							os << "  $" << stats[lastRace][i].gas/100 << "$ gas#";
-/*							<< stats[lastRace][unit_type].prerequisite[]
-							<< stats[lastRace][unit_type].facility[]
-							<< stats[lastRace][unit_type].needSupply
-							<< stats[lastRace][unit_type].haveSupply
-							<< stats[lastRace][unit_type].facilityType
-							<< stats[lastRace][unit_type].create
-							<< stats[lastRace][unit_type].bwunit*/
+					os << "$" << GAME::lookUpUnitString(lastRace, i) << "$#" <<
+						"  build time $" << GAME::race[lastRace].stats[i].BT << "$ sec.#";
+					for(unsigned int j = RACE::MAX_RESOURCE_TYPES; j--;)
+						if(GAME::race[lastRace].stats[i].resource[j]>0)
+							os << "  $" << GAME::race[lastRace].stats[i].resource[j]/100 << "$ " << GAME::lookUpGameString(GAME::FIRST_RESOURCE_STRING+j) << "#";
+
+/*							<< GAME::race[lastRace].stats[unit_type].prerequisite[]
+							<< GAME::race[lastRace].stats[unit_type].facility[]
+							<< GAME::race[lastRace].stats[unit_type].needSupply
+							<< GAME::race[lastRace].stats[unit_type].haveSupply
+							<< GAME::race[lastRace].stats[unit_type].facilityType
+							<< GAME::race[lastRace].stats[unit_type].create*/
 								
 					(*m)->updateToolTip(os.str());					
 					(*m)->adjustRelativeRect(edge);
@@ -228,10 +224,10 @@ void UnitMenu::processMenu()
 				for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					++i;
-					if((i >= LAST_UNIT  ) || 
-						(((stats[lastRace][i].facility[0] != facility[menuLevel-1])&&
-				   		(stats[lastRace][i].facility[1] != facility[menuLevel-1])&&
-					   (stats[lastRace][i].facility[2] != facility[menuLevel-1]))))
+					if((i >= RACE::UNIT_TYPE_COUNT  ) || 
+						(((GAME::race[lastRace].stats[i].facility[0] != facility[menuLevel-1])&&
+				   		(GAME::race[lastRace].stats[i].facility[1] != facility[menuLevel-1])&&
+					   (GAME::race[lastRace].stats[i].facility[2] != facility[menuLevel-1]))))
 						{
 							(*m)->Hide();
 							continue;
@@ -240,26 +236,24 @@ void UnitMenu::processMenu()
 			//		if (parent->fitItemToRelativeRect(edge, true)) 
 					{
 						(*m)->Show();
-						(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[lastRace][i].unitType));
+						(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+GAME::race[lastRace].stats[i].unitType));
 						std::ostringstream os;
-						os << UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*lastRace+i));
+						os << GAME::lookUpUnitString(lastRace, i);
 						if(UI_Object::focus == this)
 							os << " [" << unit_number << "]";
 						(*m)->updateText(os.str());
 						os.str("");
-						os << "$" << stats[lastRace][i].name << "$#" <<
-							"  build time $" << stats[lastRace][i].BT << "$ sec.#";
-							if(stats[lastRace][i].minerals>0)
-								os << "  $" << stats[lastRace][i].minerals/100 << "$ minerals#";
-							if(stats[lastRace][i].gas>0)
-								os << "  $" << stats[lastRace][i].gas/100 << "$ gas#";
-/*							<< stats[lastRace][unit_type].prerequisite[]
-							<< stats[lastRace][unit_type].facility[]
-							<< stats[lastRace][unit_type].needSupply
-							<< stats[lastRace][unit_type].haveSupply
-							<< stats[lastRace][unit_type].facilityType
-							<< stats[lastRace][unit_type].create
-							<< stats[lastRace][unit_type].bwunit*/
+						os << "$" << GAME::lookUpUnitString(lastRace, i) << "$#" <<
+							"  build time $" << GAME::race[lastRace].stats[i].BT << "$ sec.#";
+						for(unsigned int j = RACE::MAX_RESOURCE_TYPES; j--;)
+							if(GAME::race[lastRace].stats[i].resource[j]>0)
+								os << "  $" << GAME::race[lastRace].stats[i].resource[j]/100 << "$ " << GAME::lookUpGameString(GAME::FIRST_RESOURCE_STRING+j) << "#";
+/*							<< GAME::race[lastRace].stats[unit_type].prerequisite[]
+							<< GAME::race[lastRace].stats[unit_type].facility[]
+							<< GAME::race[lastRace].stats[unit_type].needSupply
+							<< GAME::race[lastRace].stats[unit_type].haveSupply
+							<< GAME::race[lastRace].stats[unit_type].facilityType
+							<< GAME::race[lastRace].stats[unit_type].create*/
 								
 							(*m)->updateToolTip(os.str());					
 					
@@ -292,14 +286,14 @@ void UnitMenu::process()
 		processMenu();
 	}
 	// check for Pressed Units
-	eButtonColorsType button_colors_type;
-	switch(lastRace)
+	eButtonColorsType button_colors_type = UNIT_TYPE_5_BUTTON; // TODO
+/*	switch(lastRace)
 	{
 		case TERRA:button_colors_type=UNIT_TYPE_5_BUTTON;break;
 		case PROTOSS:button_colors_type=UNIT_TYPE_7_BUTTON;break;
 		case ZERG:button_colors_type=UNIT_TYPE_3_BUTTON;break;
 		default:break;
-	}
+	}*/
 			
 
 // special rules for sub menu...
@@ -309,11 +303,11 @@ void UnitMenu::process()
 		pressedItem = -1;
 		if(!efConfiguration.isFacilityMode())
 		{
-			if ((menuLevel == 1) && (i == 1))  //scv
-					pressedItem = SCV;
+			if ((menuLevel == 1) && (i == 1));  //scv TODO
+//					pressedItem = SCV;
 		// TODO: pruefen ob das Goal schon vorhanden ist, wenn ja => hasChanged nicht aufrufen
-				else if ((menuLevel == 1) && (i == 2))   //gasscv
-					pressedItem = GAS_SCV;
+				else if ((menuLevel == 1) && (i == 2));   //gasscv
+//					pressedItem = GAS_SCV; // TODO
 				else if (menuLevel == 1)
 					setMenuLevel(i);
 				else if (menuLevel > 1)
@@ -333,11 +327,11 @@ void UnitMenu::process()
 		markedItem = -1;
 		if(!efConfiguration.isFacilityMode())
 		{
-			if ((menuLevel == 1) && (i == 1))  //scv
-				markedItem = SCV;
+			if ((menuLevel == 1) && (i == 1));  //scv TODO
+//				markedItem = SCV;
 // TODO: pruefen ob das Goal schon vorhanden ist, wenn ja => hasChanged nicht aufrufen
-			else if ((menuLevel == 1) && (i == 2))   //gasscv
-				markedItem = GAS_SCV;
+			else if ((menuLevel == 1) && (i == 2));   //gasscv TODO
+//				markedItem = GAS_SCV;
 			else if (menuLevel > 1)
 				markedItem = i;
 		} else

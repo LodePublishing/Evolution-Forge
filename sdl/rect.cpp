@@ -1,35 +1,30 @@
 #include "rect.hpp"
 
-const bool Rect::moveSmooth(const Rect& startRect, const Rect& targetRect)
+const enum eRectMovement Rect::moveSmooth(const Rect& startRect, const Rect& targetRect)
 {
 	if((startRect == targetRect)||(*this == targetRect))
-		return(false);
+		return(NO_CHANGE); // no action
 	Rect oldRect = *this;
 	topLeftCorner.move(startRect.getTopLeft(), targetRect.getTopLeft());
 	rectSize.move(startRect.getSize(), targetRect.getSize());
 	bottomRightCorner = topLeftCorner + rectSize;
-	if(oldRect==*this)
-		return(false);
-	else return(true);
+
+	if(oldRect.Inside(*this))
+		return(GOT_BIGGER); // => bigger => not moved
+	else
+		return(GOT_SMALLER_OR_MOVED); // smaller  or moved => moved
 }
 
-const bool Rect::move(const Rect& startRect, const Rect& targetRect)
+const enum eRectMovement Rect::move(const Rect& startRect, const Rect& targetRect)
 {
 	if((startRect == targetRect)||(*this == targetRect))
-		return(false);
+		return(NO_CHANGE);
+
+	bool got_bigger = Inside(targetRect);
 	*this = targetRect;
-	return(true);
+	if(got_bigger)
+		return(GOT_BIGGER); // bigger
+	else return(GOT_SMALLER_OR_MOVED); // smaller or moved
 }
 
-const bool Rect::overlaps(const Rect& rect) const
-{
-	return(Inside(rect.getTopLeft()) || Inside(rect.getBottomLeft()) || Inside(rect.getBottomRight()) || Inside(rect.getTopRight()));	
-}
-
-const bool Rect::Inside(const Rect& rect) const 
-{
-	if( ( rect.getTopLeft() >= topLeftCorner ) && ( rect.getBottomRight() <= bottomRightCorner ) )
-		return(true);
-	else return(false);
-}
 

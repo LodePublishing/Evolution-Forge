@@ -14,6 +14,7 @@ class Size
 		Size(const unsigned int w, const unsigned int h);
 		Size& operator=(const Size& size);
 		const bool operator==(const Size& size) const;
+		const bool operator<(const Size& size) const;
 		const bool operator!=(const Size& size) const;
 		const Size operator+(const Size& size) const;
 		const Size operator-(const Size& size) const;
@@ -63,7 +64,11 @@ inline Size& Size::operator=(const Size& size)
 inline const bool Size::operator==(const Size& size) const {
 	return ( (width == size.width) && (height == size.height) );
 }
-		
+
+inline const bool Size::operator<(const Size& size) const {
+	return ( (width < size.width) && (height < size.height) );
+}	
+
 inline const bool Size::operator!=(const Size& size) const {
 	return ( !(*this == size));
 }

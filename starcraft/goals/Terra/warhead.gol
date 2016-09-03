@@ -1,0 +1,15 @@
+@GOAL
+		"Name" "warhead"
+		"Race" "Terra"
+		"SCV" "1" "0" "0"
+		"Command Center" "1" "0" "0"
+		"Nuclear Warhead" "1" "0" "0"
+		"Nuclear Silo" "1" "0" "0"
+		"Command Center[NS]" "1" "0" "0"
+		"Science Facility[CO]" "1" "0" "0"
+		"Science Facility" "1" "0" "0"
+		"Starport" "1" "0" "0"
+		"Factory" "1" "0" "0"
+		"Barracks" "1" "0" "0"
+		"Refinery" "1" "0" "0"
+@END

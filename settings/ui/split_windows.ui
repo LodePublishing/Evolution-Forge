@@ -1,16 +1,16 @@
 @640x480
 	@MAIN
-		Game window, 320, 440, 440, absolute coordinates, 0, 25 
-		Score window, 160, 40, 50, dock right inside of, Game window, dock top inside of, Game window
+		Game window, 315, 455, 455, absolute coordinates, 5, 10
+		Score window, 170, 40, 50, dock top left inside of, Game window
 	@END
 
 	@1PLAYER
 		@PLAYER_ONE
-			Player window, 315, 440, 440, absolute coordinates, 0, 15
-			Force window, 160, 100, 170, dock top left inside of, Player window
-			Build order window, 140, 100, 260, dock right inside of, Player window, absolute y coordinate, 50 
-			Build order diagram window, 175, 80, 80, dock left inside of, Player window, absolute y coordinate, 200
-			Build order graph window, 175, 75, 120, dock left inside of, Player window, dock with lower border of, Build order diagram window
+			Player window, 315, 410, 410, absolute coordinates, 0, 10
+			Force window, 140, 100, 170, dock top right inside of, Player window
+			Build order window, 140, 30, 360, dock right inside of, Player window, absolute y coordinate, 180 
+			Build order diagram window, 170, 80, 80, dock left inside of, Player window, absolute y coordinate, 200
+			Build order graph window, 170, 75, 120, dock left inside of, Player window, dock with lower border of, Build order diagram window
 		@END
 	@END
 @END

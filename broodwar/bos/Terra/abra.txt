@@ -1,0 +1,51 @@
+@BO_HEADER
+		"Name" "abra"
+		"Race" "Terra"
+		"Time" "5627"
+@END
+@GOAL
+		"Name" "abra"
+		"Race" "Terra"
+		"SCV" "1" "0" "0"
+		"Command Center" "4" "0" "0"
+@END
+@BUILDORDER
+		"SCV"
+		"SCV"
+		"SCV"
+		"SCV"
+		"SCV"
+		"SCV"
+		"Command Center"
+		"Command Center"
+		"Command Center"
+		"SCV"
+@END
+1
+19
+1
+19
+1
+1
+1
+19
+1
+19
+1
+1
+1
+1
+1
+1
+1
+1
+19
+19
+19
+15
+19
+19
+19
+1
+1
+1

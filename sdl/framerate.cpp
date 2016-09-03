@@ -21,13 +21,18 @@ FPS::FPS():
 FPS::~FPS()
 { }
 
+#ifdef _SCC_DEBUG
 #include "../stl/misc.hpp"
+#endif
+
 void FPS::setTotalTicks(const long unsigned int total_ticks) 
 {
+#ifdef _SCC_DEBUG
 	if(total_ticks > 10000)
 	{
 		toErrorLog("WARNING (FPS::setTotalTicks()): total_ticks out of range.");
 	}
+#endif
 	totalTicks = total_ticks;
 }
 
@@ -97,7 +102,7 @@ void FPS::delay()
 	if((delayTicks < cpu_delay)&&(delayTicks<1000))
 		delayTicks+=(cpu_delay - delayTicks)/5 + 1;
 	else if((delayTicks > cpu_delay))
-		delayTicks-=(delayTicks - cpu_delay)/5 + 1;
+		delayTicks-=(delayTicks - cpu_delay)/2 + 1; // reduce delayTicks very fast because smooth drawing has priority over processor usage!
 	SDL_Delay(delayTicks);
 }
 

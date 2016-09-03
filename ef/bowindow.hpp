@@ -4,8 +4,6 @@
 #include "../ui/window.hpp"
 #include "../ui/group.hpp"
 
-#include "../core/anabuildorder.hpp"
-
 #include "boentry.hpp"
 #include "bomenu.hpp"
 #include "unitmenu.hpp"

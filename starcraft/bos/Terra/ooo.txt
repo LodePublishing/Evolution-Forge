@@ -1,0 +1,18 @@
+@BO_HEADER
+		"Name" "ooo"
+		"Race" "Terra"
+		"Time" "448"
+@END
+@GOAL
+		"Name" "ooo"
+		"Race" "Terra"
+		"Command Center" "3" "0" "0"
+		"SCV" "1" "0" "0"
+@END
+@BUILDORDER
+		"SCV"
+		"SCV"
+		"SCV"
+		"Command Center"
+		"Command Center"
+@END

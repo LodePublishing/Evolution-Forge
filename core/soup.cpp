@@ -1,12 +1,20 @@
 #include "soup.hpp"
+#include "database.hpp"
 #include <sstream>
 
+// analyzedBO direkt in GAME spaeter
+
 SOUP::SOUP() :
-	mapPlayerNum(0),
-	mapPlayerNumInitialized(false)
+	map(NULL),
+	mapInitialized(false),
+	mapPlayerCount(999),
+	mapPlayerCountInitialized(false)
 {
 	memset(buildOrder, 0, MAX_PROGRAMS * sizeof(BUILDORDER*));
 	memset(analyzedBuildOrder, 0, MAX_PLAYER * sizeof(ANABUILDORDER*));
+		
+	for(unsigned int i = MAX_PLAYER; i--;)
+		start[i] = new START(startForce[i]);
 }
 
 SOUP::~SOUP()
@@ -17,78 +25,82 @@ SOUP::~SOUP()
 	toInitLog("* Freeing analyzed data..."); // TODO... :/
 	for(unsigned int i=MAX_PLAYER;i--;)
 		delete analyzedBuildOrder[i];
+
+	toInitLog(" Freeing start data..."); // TODO ... :|
+	for(unsigned int i=MAX_PLAYER;i--;)
+		delete start[i];
 }
 
 
-void SOUP::initSoup(unsigned int player_number, START* start)
+void SOUP::initSoup(unsigned int player_number)
 {
 #ifdef _SCC_DEBUG
-	if(!mapPlayerNumInitialized) {
-		toErrorLog("DEBUG (SOUP::initSoup()): Variable mapPlayerNum not initialized.");return;
-	}
-	if(player_number >= mapPlayerNum) {
+	if(player_number >= getMapPlayerCount()) {
 		toErrorLog("DEBUG (SOUP::initSoup()): Value player_number out of range.");return;
 	}
 #endif
-
-	unsigned int groupSize = MAX_PROGRAMS / mapPlayerNum;
-//differenzieren, damit auch restarts/updates moeglich sind waehrend dem run! TODO
+	unsigned int groupSize = MAX_PROGRAMS / getMapPlayerCount();
+	unsigned int first_player = player_number * groupSize;
 	for(unsigned int i = groupSize; i--;)
 	{
-		if(buildOrder[i + player_number*groupSize] == NULL)
-			buildOrder[i + player_number*groupSize]=new BUILDORDER();
+		if(buildOrder[first_player + i] == NULL)
+			buildOrder[first_player + i] = new BUILDORDER(player_number, start[player_number], temporaryForce);
 		else
-			buildOrder[i + player_number*groupSize]->resetData();
-		buildOrder[i + player_number*groupSize]->assignStart(start);
-		buildOrder[i + player_number*groupSize]->setPlayerNumber(player_number+1);
-		buildOrder[i + player_number*groupSize]->assignUnits(&temporaryForce);
+			buildOrder[first_player + i]->resetData();
 	}
 
 	if(analyzedBuildOrder[player_number] == NULL)
-		analyzedBuildOrder[player_number] = new ANABUILDORDER();
+		analyzedBuildOrder[player_number] = new ANABUILDORDER(player_number, start[player_number], temporaryForce);
 	else
 		analyzedBuildOrder[player_number]->resetData();
-	
-	analyzedBuildOrder[player_number]->assignStart(start);
-	analyzedBuildOrder[player_number]->setPlayerNumber(player_number+1);
-	analyzedBuildOrder[player_number]->assignUnits(&temporaryForce);
 }
 
-void SOUP::initSoup(START* (*start)[MAX_INTERNAL_PLAYER])
+void SOUP::initSoup()
 {
-#ifdef _SCC_DEBUG
-	if(!mapPlayerNumInitialized) {
-		toErrorLog("DEBUG (SOUP::initSoup()): Variable mapPlayerNum not initialized.");return;
-	}
-#endif
-	unsigned int groupSize = MAX_PROGRAMS / mapPlayerNum;
+	unsigned int groupSize = MAX_PROGRAMS / getMapPlayerCount();
 	
-	unsigned int player;
-	for(player = mapPlayerNum; player--;)
+	for(unsigned int player_number = getMapPlayerCount(); player_number--;)
 	{
+		unsigned int first_player = player_number * groupSize;
 		for(unsigned int i = groupSize; i--;)
 		{
-			if(buildOrder[i + player*groupSize] == NULL)
-				buildOrder[i + player*groupSize]=new BUILDORDER();
+			if(buildOrder[first_player + i] == NULL)
+				buildOrder[first_player + i] = new BUILDORDER(player_number, start[player_number], temporaryForce);
 			else 
-				buildOrder[i + player*groupSize]->resetData();
-			buildOrder[i + player*groupSize]->assignStart((*start)[player+1]);
-			buildOrder[i + player*groupSize]->setPlayerNumber(player+1);
-			buildOrder[i + player*groupSize]->assignUnits(&temporaryForce);
+				buildOrder[first_player + i]->resetData();
 		}
-		if(analyzedBuildOrder[player] == NULL)
-			analyzedBuildOrder[player] = new ANABUILDORDER();
+		if(analyzedBuildOrder[player_number] == NULL)
+			analyzedBuildOrder[player_number] = new ANABUILDORDER(player_number, start[player_number], temporaryForce);
 		else
-			analyzedBuildOrder[player]->resetData();
-		analyzedBuildOrder[player]->assignStart((*start)[player+1]);
-		analyzedBuildOrder[player]->setPlayerNumber(player+1);
-		analyzedBuildOrder[player]->assignUnits(&temporaryForce);
+			analyzedBuildOrder[player_number]->resetData();
 	}
-	for(player = mapPlayerNum; player < MAX_PLAYER; ++player)
+	for(unsigned int player_number = getMapPlayerCount(); player_number < MAX_PLAYER; ++player_number)
 	{
-		delete analyzedBuildOrder[player];
-		analyzedBuildOrder[player] = NULL;
+		delete analyzedBuildOrder[player_number];
+		analyzedBuildOrder[player_number] = NULL;
 	}
+}
+
+void SOUP::assignGoal(const unsigned int player_num, const unsigned int player_goal)
+{
+#ifdef _SCC_DEBUG
+        if(player_num >= getMapPlayerCount()) {
+                toErrorLog("DEBUG (SOUP::assignGoal()): Value player_num out of range.");return;
+        }       
+#endif
+	start[player_num]->assignGoal(database.getGoal(start[player_num]->getPlayerRace(), player_goal));
+}
+
+void SOUP::assignRace(const unsigned int player_num, const unsigned int assigned_race)
+{
+	start[player_num]->setPlayerRace(assigned_race);
+	start[player_num]->assignStartCondition(database.getStartCondition(assigned_race, 0)); // assign default startcondition, make a menu later
+	if(mapInitialized)
+		start[player_num]->fillMapWithStartUnits(); // ? oder alle?
+	assignGoal(player_num, 0); // assign default goal
+//TODO	
+//	setChangedFlag(); ?
+	initSoup(player_num);
 }
 
 
@@ -96,255 +108,251 @@ void SOUP::initSoup(START* (*start)[MAX_INTERNAL_PLAYER])
 
 struct SoupPlayerDescendingFitnessSort {
         bool operator()(BUILDORDER* const& first_build_order, BUILDORDER* const& last_build_order) {
-                return ((first_build_order->getpFitness()>last_build_order->getpFitness()) || ((first_build_order->getpFitness()==last_build_order->getpFitness())  &&  ( first_build_order->getsFitness() > last_build_order->getsFitness()) ) || ((first_build_order->getpFitness()==last_build_order->getpFitness())&&(first_build_order->getsFitness() == last_build_order->getsFitness())&&(first_build_order->gettFitness()>last_build_order->gettFitness())) );
+                return ((first_build_order->getpFitness()>last_build_order->getpFitness()) || ((first_build_order->getpFitness()==last_build_order->getpFitness())  &&  ( first_build_order->getsFitness() > last_build_order->getsFitness()) ));
         }
 };
 
 void SOUP::calculateAnalyzedBuildOrder()
 {
-#ifdef _SCC_DEBUG
-	if(!mapPlayerNumInitialized) {
-		toErrorLog("DEBUG (SOUP::calculateAnalyzedBuildOrder()): Variable mapPlayerNum not initialized.");return;
-	}
-#endif
-	for(unsigned int k = mapPlayerNum; k--;)
+	for(unsigned int k = getMapPlayerCount(); k--;)
 		if(analyzedBuildOrder[k]->isOptimizing())
 		{
+			analyzedBuildOrder[k]->eraseIllegalCode();
 			analyzedBuildOrder[k]->prepareForNewGeneration();
-			analyzedBuildOrder[k]->initializePlayer();
-			analyzedBuildOrder[k]->adjustHarvestAllLocations();
 		}
-// supply is nicht resettet... bzw. falsch... in resetSupply
+	
 	bool complete=false;
 	while(!complete)
 	{
 		complete = true;
-		for(unsigned int k = mapPlayerNum; k--;)
+		for(unsigned int k = getMapPlayerCount(); k--;)
 			if(analyzedBuildOrder[k]->isOptimizing())
 				complete &= analyzedBuildOrder[k]->calculateStep();
 	}
-//		analyzedBuildOrder[0]->backupMap();  backup&&restore map currently off-line!!!
-//	} else
-//		analyzedBuildOrder[0]->restoreMap();
+	for(unsigned int k = getMapPlayerCount(); k--;)
+		analyzedBuildOrder[k]->getGoal()->resetWasRemoved();
 }
 
 void SOUP::calculateBuildOrder(const unsigned int bo_num)
 {
-#ifdef _SCC_DEBUG
-	if(!mapPlayerNumInitialized) {
-		toErrorLog("DEBUG (SOUP::calculateBuildOrder()): Variable mapPlayerNum not initialized.");return;
-	}
-#endif
-// Map mit Startwerten initialisieren, muss JEDEN Durchlauf passieren!! sonst sammeln sich in der statischen loc variable Haufenweise Commando Centers an 8-)
-/* copies the precalculated startforce from pStart into our map (temporaryForce[][])
- * this is done 1:1, i.e. with memcpy */
-	const unsigned int groupSize=MAX_PROGRAMS/mapPlayerNum;
+	const unsigned int groupSize = MAX_PROGRAMS/getMapPlayerCount();
 	//reset code && calculate 
-	for(unsigned int k = mapPlayerNum; k--;)
+	for(unsigned int k = getMapPlayerCount(); k--;)
 		if(analyzedBuildOrder[k]->isOptimizing())
 		{
 			buildOrder[k*groupSize+bo_num]->setAlwaysBuildWorkers( analyzedBuildOrder[k]->isAlwaysBuildWorkers());
 			buildOrder[k*groupSize+bo_num]->setOnlySwapOrders( analyzedBuildOrder[k]->isOnlySwapOrders());
-			buildOrder[k*groupSize+bo_num]->prepareForNewGeneration();
-			buildOrder[k*groupSize+bo_num]->initializePlayer();
-			buildOrder[k*groupSize+bo_num]->adjustHarvestAllLocations();
-		
-		// evtl noch switch ohne mutation...
-			buildOrder[k*groupSize+bo_num]->eraseIllegalCode();
-//			buildOrder[k*groupSize+bo_num]->eraseUselessCode(); //TODO Problem beim switchen, falls schon goals gesetzt waren
-// preserve buildOrder[0]s genes					
-			if(bo_num!=0)
-				buildOrder[k*groupSize+bo_num]->mutateGeneCode(/*analyzedBuildOrder[k]->getFixed()*/);
-		}
+
+// !! mutateGeneCode() has to be executed BEFORE prepareForNewGeneration() because IP has to be set to the first item in Code!
 			
-	bool complete=false;
+			buildOrder[k*groupSize+bo_num]->eraseIllegalCode();
+	
+	// preserve buildOrder[0]s genes					
+			if(bo_num!=0)
+				buildOrder[k*groupSize+bo_num]->mutateGeneCode();
+			buildOrder[k*groupSize+bo_num]->prepareForNewGeneration();
+	
+		// evtl noch switch ohne mutation...
+		}
+
+			
+	bool complete = false;
 	while(!complete)
 	{
-		complete=true;
-		for(unsigned int k=mapPlayerNum;k--;)
+		complete = true;
+		for(unsigned int k = getMapPlayerCount(); k--;)
 			if(analyzedBuildOrder[k]->isOptimizing())
-				complete&=buildOrder[k*groupSize+bo_num]->calculateStep();
+				complete &= buildOrder[k*groupSize+bo_num]->calculateStep();
 	}
+	
+	for(unsigned int k = getMapPlayerCount(); k--;)
+		analyzedBuildOrder[k]->getGoal()->resetWasRemoved();
 }
 
 
-const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER], const UNIT (*start_force)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]) 
+const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER]) 
 	//reset: have the goals/settings been changed?
 {
-#ifdef _SCC_DEBUG
-	if(!mapPlayerNumInitialized) {
-		toErrorLog("DEBUG (SOUP::newGeneration()): Variable mapPlayerNum not initialized.");return(false);
-	}
-#endif
-// TODO evtl checken ob alles richtig initialisiert wurde
-//	if(analyzedBuildOrder[0]->getRun()>=ga->getMaxRuns()) //~~
-//		return(0);
-
-	const unsigned int groupSize=MAX_PROGRAMS/mapPlayerNum;
-
-	// Veraendert? Dann zurueckkopieren
-/*	for(unsigned int k = mapPlayerNum; k--;)
-		if((previous_analyzed_buildorder[k])&&(analyzedBuildOrder[k]->writeProgramBackToCode(previous_analyzed_buildorder[k]->getProgramList()))) // irrefuehrend, previous ist ja dasselbe...
-			for(unsigned int i = groupSize;i--;)
-				buildOrder[k*groupSize+i]->copyCode(*(analyzedBuildOrder[k]));*/
-	// TODO: wenn Ziele veraendert wurden wird u.U. alter falscher Code mit neuem guten Code vermixt (andere phaeno/geno Tabellen)
-	// TODO Zurueckkopieren ist auch nur wichtig wenn man Editieren erlaubt
-
-//	PREBUILDORDER::initNoise();
-
+	const unsigned int groupSize = MAX_PROGRAMS/getMapPlayerCount();
 // This part needs the most CPU power:
-	for(unsigned int i=groupSize;i--;)
+	for(unsigned int i = groupSize; i--;)
 	{
-		memcpy(&temporaryForce, &((*start_force)[0][0]), sizeof(temporaryForce));
+		for(unsigned int p = MAX_PLAYER; p--;)
+			for(unsigned int l = MAX_LOCATIONS; l--;)
+				temporaryForce[p][l] = startForce[p][l];
+//		memcpy(&temporaryForce, &(startForce[0][0]), sizeof(temporaryForce));
+//		toErrorLog(sizeof(temporaryForce));
 		calculateBuildOrder(i); // <- this command :o
 	}
 //NOW: all pFitness of the players are calculated
 
 // SORT players	
-	for(unsigned int k=mapPlayerNum;k--;)
+	for(unsigned int k = getMapPlayerCount(); k--;)
 		if(analyzedBuildOrder[k]->isOptimizing())
 		{
-			std::sort(buildOrder+k*groupSize, buildOrder+(k+1)*groupSize, SoupPlayerDescendingFitnessSort());
+			unsigned int i = k*groupSize;
+			std::stable_sort(buildOrder+i, buildOrder+i+groupSize, SoupPlayerDescendingFitnessSort());
 	//NOW: all players are sorted
 			
-			for(unsigned int i=coreConfiguration.getBreedFactor()*groupSize/100;i--;) // % are replaced by the uber-program :-o
+			for(unsigned int b = coreConfiguration.getBreedFactor()*groupSize / 100; b--;) // % are replaced by the uber-program :-o
 			{
-				int l=rand() % (groupSize*coreConfiguration.getBreedFactor()/100) + groupSize*(100-coreConfiguration.getBreedFactor())/100;
-                                if((buildOrder[k*groupSize+l]->getpFitness()*1.1<buildOrder[k*groupSize]->getpFitness())||
-                                          ((buildOrder[k*groupSize+l]->getpFitness()==buildOrder[k*groupSize]->getpFitness())&&(buildOrder[k*groupSize+l]->getsFitness()*1.1<buildOrder[k*groupSize]->getsFitness()))||
-                                          ((buildOrder[k*groupSize+l]->getpFitness()==buildOrder[k*groupSize]->getpFitness())&&(buildOrder[k*groupSize+l]->getsFitness()==buildOrder[k*groupSize]->getsFitness())&&(buildOrder[k*groupSize+l]->gettFitness()*1.1<buildOrder[k*groupSize]->gettFitness())) )
-					buildOrder[k*groupSize+l]->copyCode(*buildOrder[k*groupSize]);
+				int l = rand() % (groupSize*coreConfiguration.getBreedFactor()/100) + groupSize*(100-coreConfiguration.getBreedFactor())/100;
+                                if((buildOrder[i+l]->getpFitness()*1.1<buildOrder[i]->getpFitness())||
+                                          ((buildOrder[i+l]->getpFitness()==buildOrder[i]->getpFitness())&&(buildOrder[i+l]->getsFitness()*1.1<buildOrder[i]->getsFitness())))
+					buildOrder[i+l]->assignCode(*buildOrder[i]);
 			}
 		}
 
 // Do we have a new best player?
 //
 		bool newcalc = false;
-                for(unsigned int k=mapPlayerNum;k--;)
+                for(unsigned int k = getMapPlayerCount(); k--;)
                         if(analyzedBuildOrder[k]->isOptimizing())
                         {
-                                if((buildOrder[k*groupSize]->getpFitness()>analyzedBuildOrder[k]->getMaxpFitness())||
-
-                                  ((buildOrder[k*groupSize]->getpFitness()>=analyzedBuildOrder[k]->getMaxpFitness())
-                                 &&(buildOrder[k*groupSize]->getsFitness()>analyzedBuildOrder[k]->getMaxsFitness()))||
-
-                                  ((buildOrder[k*groupSize]->getpFitness()>=analyzedBuildOrder[k]->getMaxpFitness())
-                                 &&(buildOrder[k*groupSize]->getsFitness()>=analyzedBuildOrder[k]->getMaxsFitness())
-                                 &&(buildOrder[k*groupSize]->gettFitness()>analyzedBuildOrder[k]->getMaxtFitness())))
+				BUILDORDER& bo = *buildOrder[k*groupSize];
+                                if((bo.getpFitness()>analyzedBuildOrder[k]->getMaxpFitness()) || ((bo.getpFitness()==analyzedBuildOrder[k]->getMaxpFitness())&&(bo.getsFitness()>analyzedBuildOrder[k]->getMaxsFitness())) || ((bo.getpFitness()==analyzedBuildOrder[k]->getMaxpFitness())&&(bo.getsFitness()==analyzedBuildOrder[k]->getMaxsFitness()) &&(bo.getLength() < analyzedBuildOrder[k]->getLength())))
                                 {
-
-                                        if(buildOrder[k*groupSize]->gettFitness()>analyzedBuildOrder[k]->getMaxtFitness())
-                                                analyzedBuildOrder[k]->setMaxtFitness(buildOrder[k*groupSize]->gettFitness());
-                                        if(buildOrder[k*groupSize]->getsFitness()>analyzedBuildOrder[k]->getMaxsFitness())
+                                        if(bo.getsFitness()>analyzedBuildOrder[k]->getMaxsFitness())
+                                                analyzedBuildOrder[k]->setMaxsFitness(bo.getsFitness());
+                                        if(bo.getpFitness()>analyzedBuildOrder[k]->getMaxpFitness())
                                         {
-                                                analyzedBuildOrder[k]->setMaxsFitness(buildOrder[k*groupSize]->getsFitness());
-                                                analyzedBuildOrder[k]->setMaxtFitness(buildOrder[k*groupSize]->gettFitness());
-                                        }
-                                        if(buildOrder[k*groupSize]->getpFitness()>analyzedBuildOrder[k]->getMaxpFitness())
-                                        {
-                                                analyzedBuildOrder[k]->setMaxpFitness(buildOrder[k*groupSize]->getpFitness());
-                                                analyzedBuildOrder[k]->setMaxsFitness(buildOrder[k*groupSize]->getsFitness());
-                                                analyzedBuildOrder[k]->setMaxtFitness(buildOrder[k*groupSize]->gettFitness());
+                                                analyzedBuildOrder[k]->setMaxpFitness(bo.getpFitness());
+                                                analyzedBuildOrder[k]->setMaxsFitness(bo.getsFitness());
                                         }
                                         newcalc = true;
-                                        analyzedBuildOrder[k]->copyCode(*buildOrder[k*groupSize]);
+                                        analyzedBuildOrder[k]->assignCode(bo);
                                 }
                         }
 
-//TODO: Kinder sofort neuberechnen
-// Anzahl Tournaments pro Spieler: (MAX_PROGRAMS/mapPlayerNum)/(100/coreConfiguration.getCrossOver())
-/*	int tournaments=t*coreConfiguration.getCrossOver()/100;
-	if(tournaments>0)
-	{
-//jetzt: sortieren
-		for(int k=0;k<mapPlayerNum-1; ++k)
-		if(analyzedBuildOrder[k]->isOptimizing())
-			for(int i=0;i<tournaments; ++i)
-			{
-				for(int j=(k*groupSize)+i*(100/ga->getCrossOver());j<(k*groupSize)+(i+1)*(100/ga->getCrossOver()); ++j) //diese (100/ga->crossOver) Programme untereinander sortieren
-				{
-					for(int l=(k*groupSize)+i*(100/ga->getCrossOver());l<j; ++l)
-						if((buildOrder[j]->getpFitness()>buildOrder[l]->getpFitness())||
-						  ((buildOrder[j]->getpFitness()==buildOrder[l]->getpFitness())&&(buildOrder[j]->getsFitness()>buildOrder[l]->getsFitness()))))
-							  std::swap(buildOrder[l], buildOrder[j]);
-				}
-			}
-//JETZT: Player in z.B. 20er (bei crossOver=5) Gruppen sortiert => besten 2 herausnehmen, schlechtesten 2 ersetzen
-																				
-																				
-//		for(int k=0;k<mapPlayerNum-1; ++k)
-//		if(analyzedBuildOrder[k]->isOptimizing())
-//			for(int i=0;i<tournaments; ++i)
-//			{
-//				int p1=i*(100/ga->getCrossOver())+(k*groupSize);
-//				int p2=i*(100/ga->getCrossOver())+(k*groupSize)+1; //evtl nur unterschiedlichen nehmen? => phaenocode zusammenzaehlen ~
-//				int c1=(i+1)*(100/ga->getCrossOver())+(k*groupSize)-1;
-//				int c2=(i+1)*(100/ga->getCrossOver())+(k*groupSize)-2;
-//				buildOrder[p1]->crossOver(buildOrder[p2],buildOrder[c1],buildOrder[c2]);
-//			}
-	}*/
-																				
-//evtl breed hinter crossover, aber vorher neue Kinder neu berechnen!
-
 	if(newcalc)
 	{
-		memcpy(&temporaryForce, &((*start_force)[0][0]), sizeof(temporaryForce));
+		for(unsigned int p = MAX_PLAYER; p--;)
+			for(unsigned int l = MAX_LOCATIONS; l--;)
+				temporaryForce[p][l] = startForce[p][l];
+
+//		memcpy(&temporaryForce, &(startForce[0][0]), sizeof(temporaryForce));
 		calculateAnalyzedBuildOrder();
 
+#if 0
 #ifdef _SCC_DEBUG
-		for(unsigned int k=mapPlayerNum;k--;)
-			if((analyzedBuildOrder[k]->getHarvestedMinerals() != buildOrder[k*groupSize]->getHarvestedMinerals())||
-				(analyzedBuildOrder[k]->getHarvestedGas() != buildOrder[k*groupSize]->getHarvestedGas())||
-				(analyzedBuildOrder[k]->getTimer() != buildOrder[k*groupSize]->getTimer()))
-				{
-					std::ostringstream os;
-					for(unsigned int i = MAX_LENGTH;i--;)
-						os << analyzedBuildOrder[k]->getCode(i);
-					toErrorLog("CurrentCode: " + os.str());
-					toErrorLog("^^^^^^^^^^^^ WARNING: genetic core and analysis core are not synchronized!");
-				}
-#endif			
-
-
-// SOME POST PROCESSING
-// CALCULATE FITNESS AVERAGE & VARIANCE
-		for(unsigned int k=mapPlayerNum;k--;)
-			if(analyzedBuildOrder[k]->isOptimizing())
+		for(unsigned int k=getMapPlayerCount();k--;)
+		{
+			if((analyzedBuildOrder[k]->getHarvestedMinerals() != buildOrder[k*groupSize]->getHarvestedMinerals()) ||
+				(analyzedBuildOrder[k]->getHarvestedGas() != buildOrder[k*groupSize]->getHarvestedGas()) ||
+			((analyzedBuildOrder[k]->getLength() != buildOrder[k*groupSize]->getLength())) ||
+			(analyzedBuildOrder[k]->getTimer() != buildOrder[k*groupSize]->getTimer()))
 			{
-				analyzedBuildOrder[k]->fitnessAverage=0;
-				for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
-					analyzedBuildOrder[k]->fitnessAverage+=buildOrder[i]->getpFitness();
-				analyzedBuildOrder[k]->fitnessAverage/=(MAX_PROGRAMS/mapPlayerNum);
-				analyzedBuildOrder[k]->fitnessVariance=0;
-				
-				for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
-				{
-					unsigned int z = analyzedBuildOrder[k]->fitnessAverage-buildOrder[i]->getpFitness();
-					analyzedBuildOrder[k]->fitnessVariance += (z*z);
-				}
-				analyzedBuildOrder[k]->fitnessVariance/=MAX_PROGRAMS;
+				std::ostringstream os;
+/*				{
+					std::list<PROGRAM>::const_iterator i;
+					std::list<PROGRAM>::const_iterator j;
+					std::list<PROGRAM>::const_iterator end;
+					if(buildOrder[k*groupSize]->getProgramList().size() > analyzedBuildOrder[k]->getProgramList().size())
+					{
+						end = analyzedBuildOrder[k]->getProgramList().end();
+						i = analyzedBuildOrder[k]->getProgramList().begin();
+						j = buildOrder[k*groupSize]->getProgramList().begin();
+						toErrorLog("ana / bo");
+					}
+					else
+					{
+						end = buildOrder[k*groupSize]->getProgramList().end();
+						i = buildOrder[k*groupSize]->getProgramList().begin();
+						j = analyzedBuildOrder[k]->getProgramList().begin();
+						toErrorLog("bo / ana");
+					}
+					for(;i != end; ++i, ++j)
+					{
+						os << "\n" << stats[analyzedBuildOrder[k]->getRace()][i->getUnit()].name << "/" << stats[analyzedBuildOrder[k]->getRace()][j->getUnit()].name << ":" << i->getRealTime() << "/" << j->getRealTime() << " - " << i->before.getHaveMinerals()/100 << "/" << j->before.getHaveMinerals()/100 << "{" << i->successType << "|" << i->successUnit << " - " << j->successType << "|" << j->successUnit << "}";
+					
+						std::priority_queue<Building, std::vector<Building> > bq1 = i->buildingQueue;
+						std::priority_queue<Building, std::vector<Building> > bq2 = j->buildingQueue;
+						while((!bq1.empty()) && (!bq2.empty()))
+						{
+							os << "[" << stats[analyzedBuildOrder[k]->getRace()][bq1.top().getType()].name << "/" << stats[analyzedBuildOrder[k]->getRace()][bq2.top().getType()].name << ":" << bq1.top().getBuildFinishedTime() << "/" << bq2.top().getBuildFinishedTime() << "] ";
+							bq1.pop();
+							bq2.pop();
+						}
+					}
+					toErrorLog(os.str());
+					os.str("");
+					for(std::list<unsigned int>::const_iterator l = analyzedBuildOrder[k]->getCode().begin(); l != analyzedBuildOrder[k]->getCode().end(); ++l)
+						os << analyzedBuildOrder[k]->getGoal()->toPhaeno(*l) << ", ";
+					toErrorLog(os.str());
+				}*/
+				os.str("");
+				os << "Ressources: " << buildOrder[k*groupSize]->getHarvestedMinerals() << " / " << analyzedBuildOrder[k]->getHarvestedMinerals();
+				os << "\nTime: " << buildOrder[k*groupSize]->getTimer() << " / " << analyzedBuildOrder[k]->getTimer();
+				toErrorLog(os.str());
+				toErrorLog("^^^^^^^^^^^^ WARNING: genetic core and analysis core are not synchronized! [time]");
 			}
+		}
+#endif
+#endif
 	}
-	for(unsigned int i=MAX_PLAYER;i--;)
-		previous_analyzed_buildorder[i]=analyzedBuildOrder[i];
-
-	//	~~
+	for(unsigned int i = MAX_PLAYER; i--;)
+		previous_analyzed_buildorder[i] = analyzedBuildOrder[i];
 	return(true);
-//	return(&(analyzedBuildOrder[0])); TODO
+}
+
+void SOUP::setStartPosition(const unsigned int player_num, const unsigned int player_position) 
+{
+#ifdef _SCC_DEBUG
+        if(player_num >= getMapPlayerCount()) {
+                toErrorLog("DEBUG (SOUP::setStartPosition()): Value player_num out of range.");return;
+        }
+#endif
+	start[player_num]->setStartPosition(player_position);
+}
+
+void SOUP::assignStartCondition(const unsigned int player_num, const START_CONDITION* start_condition) 
+{
+#ifdef _SCC_DEBUG
+	if(player_num >= getMapPlayerCount()) {
+		toErrorLog("DEBUG (SOUP::assignStartCondition()): Value player_num out of range.");return;
+	}
+#endif
+	start[player_num]->assignStartCondition(start_condition);
 }
 
 
-// just recalculate the soup, don't mutate
-const bool SOUP::recalculateGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER], const UNIT (*start_force)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS], const bool active[MAX_PLAYER]) 
+void SOUP::assignMap(const BASIC_MAP* basic_map)
 {
 #ifdef _SCC_DEBUG
-	if(!mapPlayerNumInitialized) {
-		toErrorLog("DEBUG (SOUP::recalculateGeneration()): Variable mapPlayerNum not initialized.");return(false);
+	if(basic_map == NULL) {
+		toErrorLog("DEBUG (SOUP::assignMap()): Value basic_map not initialized.");return;
 	}
 #endif
-//	TODO  Abfragen was initialisiert wurde...
+	setMapPlayerCount(basic_map->getMaxPlayer());
+	map = basic_map;
+	for(unsigned int i = getMapPlayerCount(); i--;)
+	{
+		start[i]->assignMap(basic_map);
+//		if(startConditionInitialized)
+//			start[i]->fillMapWithStartUnits(); ? mmh
+	}
+	mapInitialized = true;
+}
+
+
+void SOUP::setMapPlayerCount(const unsigned int map_player_count)
+{
+#ifdef _SCC_DEBUG
+	if(map_player_count > MAX_PLAYER) {
+		toErrorLog("DEBUG (SOUP::setMapPlayerCount()): Value map_player_count out of range.");return;
+	}
+#endif
+	mapPlayerCount = map_player_count;
+	mapPlayerCountInitialized = true;
+}
+
+
+
+// just recalculate the soup, don't mutate
+const bool SOUP::recalculateGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER], const bool active[MAX_PLAYER]) 
+{
 	bool changed_bo=false;
-	for(unsigned int k = mapPlayerNum; (k--)&&(!changed_bo);)
+	for(unsigned int k = getMapPlayerCount(); (k--)&&(!changed_bo);)
 		if(active[k])
 		{
 			if(previous_analyzed_buildorder[k]!=NULL)
@@ -361,113 +369,63 @@ const bool SOUP::recalculateGeneration(ANABUILDORDER* previous_analyzed_buildord
 		}
 	if(!changed_bo)
 		return(false);
-	toErrorLog("recalculate");
-	const unsigned int groupSize=MAX_PROGRAMS/mapPlayerNum;
+	const unsigned int groupSize=MAX_PROGRAMS/getMapPlayerCount();
 
-	for(unsigned int k=mapPlayerNum;k--;)
+	for(unsigned int k = getMapPlayerCount(); k--;)
 		if(active[k])
 //		if(analyzedBuildOrder[k]->isOnlySwapOrders())  //?
 //			for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
 //				buildOrder[i]->copyCode(*analyzedBuildOrder[k]);
 //		else
-			buildOrder[k*groupSize]->copyCode(*analyzedBuildOrder[k]);
-		
-	memcpy(&temporaryForce, &((*start_force)[0][0]), sizeof(temporaryForce));
+			buildOrder[k*groupSize]->assignCode(*analyzedBuildOrder[k]);
+	
+		for(unsigned int p = MAX_PLAYER; p--;)
+			for(unsigned int l = MAX_LOCATIONS; l--;)
+				temporaryForce[p][l] = startForce[p][l];
+
+//	memcpy(&temporaryForce, &(startForce[0][0]), sizeof(temporaryForce));
 
 	//reset code && calculate 
-	for(unsigned int k = mapPlayerNum; k--;)
+	for(unsigned int k = getMapPlayerCount(); k--;)
 		if(active[k])
-		{
-			buildOrder[k*groupSize]->assignUnits(&temporaryForce); //?
 			buildOrder[k*groupSize]->prepareForNewGeneration();
-			buildOrder[k*groupSize]->initializePlayer();
-			buildOrder[k*groupSize]->adjustHarvestAllLocations();
-			// evtl noch switch ohne mutation...
-//			buildOrder[k*groupSize]->eraseIllegalCode();
-		}
+	
 	bool complete=false;
 	while(!complete)
 	{
 		complete=true;
-		for(unsigned int k=mapPlayerNum;k--;)
+		for(unsigned int k = getMapPlayerCount(); k--;)
 			if(active[k])
 				complete&=buildOrder[k*groupSize]->calculateStep();
 	}
 
-	for(unsigned int k = mapPlayerNum; k--;)
+	for(unsigned int k = getMapPlayerCount(); k--;)
 		if(active[k])
 		{
 			analyzedBuildOrder[k]->setMaxpFitness(buildOrder[k*groupSize]->getpFitness());
 			analyzedBuildOrder[k]->setMaxsFitness(buildOrder[k*groupSize]->getsFitness());
-			analyzedBuildOrder[k]->setMaxtFitness(buildOrder[k*groupSize]->gettFitness());
 		}
-	memcpy(&temporaryForce, &((*start_force)[0][0]), sizeof(temporaryForce));
+		for(unsigned int p = MAX_PLAYER; p--;)
+			for(unsigned int l = MAX_LOCATIONS; l--;)
+				temporaryForce[p][l] = startForce[p][l];
 
-	for(unsigned int k = mapPlayerNum; k--;)
+//	memcpy(&temporaryForce, &(startForce[0][0]), sizeof(temporaryForce));
+
+	for(unsigned int k = getMapPlayerCount(); k--;)
 		if(active[k])
-		{
-		//	if(previous_analyzed_buildorder[k])
-	//		analyzedBuildOrder[k]->writeProgramBackToCode(previous_analyzed_buildorder[k]->getProgramList());
-			analyzedBuildOrder[k]->assignUnits(&temporaryForce); //?
 			analyzedBuildOrder[k]->prepareForNewGeneration();
-			analyzedBuildOrder[k]->initializePlayer();
-			analyzedBuildOrder[k]->adjustHarvestAllLocations();
-		}
 // supply is nicht resettet... bzw. falsch... in resetSupply
 	complete=false;
 	while(!complete)
 	{
 		complete = true;
-		for(unsigned int k = mapPlayerNum; k--;)
+		for(unsigned int k = getMapPlayerCount(); k--;)
 			if(active[k])
 				complete&=analyzedBuildOrder[k]->calculateStep();
 	}
-//		analyzedBuildOrder[0]->backupMap();  backup&&restore map currently off-line!!!
-//	} else
-//		analyzedBuildOrder[0]->restoreMap();
-
-
-// SOME POST PROCESSING
-// CALCULATE FITNESS AVERAGE & VARIANCE
-	for(unsigned int k=mapPlayerNum;k--;)
-		if(active[k])
-		{
-			analyzedBuildOrder[k]->fitnessAverage=0;
-			for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
-				analyzedBuildOrder[k]->fitnessAverage+=buildOrder[i]->getpFitness();
-			analyzedBuildOrder[k]->fitnessAverage/=(MAX_PROGRAMS/mapPlayerNum);
-			analyzedBuildOrder[k]->fitnessVariance=0;
-		
-			for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
-			{
-				unsigned int z = analyzedBuildOrder[k]->fitnessAverage-buildOrder[i]->getpFitness();
-				analyzedBuildOrder[k]->fitnessVariance += (z*z);
-			}
-			analyzedBuildOrder[k]->fitnessVariance/=MAX_PROGRAMS;
-		}
-
-// SOME POST PROCESSING
-// CALCULATE FITNESS AVERAGE & VARIANCE
-	for(unsigned int i=MAX_PLAYER;i--;)
-		previous_analyzed_buildorder[i]=analyzedBuildOrder[i];
-
-	//	~~
-
-	
-		
+	for(unsigned int i = getMapPlayerCount(); i--;)
+		previous_analyzed_buildorder[i] = analyzedBuildOrder[i];
 	return(true);
-//	return(&(analyzedBuildOrder[0])); TODO
-}
-
-void SOUP::setMapPlayerNum(const unsigned int map_player_num)
-{
-#ifdef _SCC_DEBUG
-	if((map_player_num < 1) || (map_player_num > MAX_PLAYER)) {
-		toErrorLog("DEBUG (SOUP::setMapPlayerNum()): Value map_player_num out of range.");return;
-	}
-#endif
-	mapPlayerNum = map_player_num;
-	mapPlayerNumInitialized = true;
 }
 
 

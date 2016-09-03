@@ -14,29 +14,36 @@ BoDiagramWindow::BoDiagramWindow(UI_Object* bod_parent, const unsigned int game_
 	gameMax(game_max),
 	playerNumber(player_number),
 	playerMax(player_max),
-	minerals(new UI_StaticText(this, BODIAGRAM_MINERALS_STRING, Rect(Point(8, 15), Size(0,0)), Size(0,0), MINERALS_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST)),
-	gas(new UI_StaticText(this, BODIAGRAM_GAS_STRING, Rect(Point(8, 26), Size(0,0)), Size(0,0), GAS_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST)),
-	supply(new UI_StaticText(this, BODIAGRAM_SUPPLY_STRING, Rect(Point(8, 37), Size(0,0)), Size(0,0), SUPPLY_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST)),
-	time(new UI_StaticText(this, BODIAGRAM_TIME_STRING, Rect(Point(8, 48), Size(0,0)), Size(0,0), FITNESS_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST)),
-	mineralsNumber(new UI_StaticText(this, Rect(Point(75, 16), Size(0,0)), Size(0,0), BRIGHT_MINERALS_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST)),
-	gasNumber(new UI_StaticText(this, Rect(Point(75, 27), Size(0,0)), Size(0,0), BRIGHT_GAS_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST)),
+	resourceText(RACE::MAX_RESOURCE_TYPES),
+	supplyText(new UI_StaticText(this, BODIAGRAM_SUPPLY_STRING, Rect(Point(8, 37), Size(0,0)), Size(0,0), SUPPLY_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST)),
+	timeText(new UI_StaticText(this, BODIAGRAM_TIME_STRING, Rect(Point(8, 48), Size(0,0)), Size(0,0), FITNESS_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST)),
+	resourceNumber(RACE::MAX_RESOURCE_TYPES),
 	supplyNumber(new UI_StaticText(this, Rect(Point(75, 38), Size(0,0)), Size(0,0), BRIGHT_SUPPLY_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST)),
 	timeNumber(new UI_StaticText(this, Rect(Point(75, 49), Size(0,0)), Size(0,0), BRIGHT_FITNESS_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST))	
 {
+	for(unsigned int i = 0; i < RACE::MAX_RESOURCE_TYPES; i++)
+	{
+		resourceText[i] = new UI_StaticText(this, GAME::lookUpGameString(GAME::FIRST_RESOURCE_STRING + i), Rect(Point(8, 15+11*i), Size(0,0)), Size(0,0), (eColor)(MINERALS_TEXT_COLOR+i), SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST); // TODO
+		resourceNumber[i] = new UI_StaticText(this, Rect(Point(75, 16+11*i), Size(0,0)), Size(0,0), (eColor)(BRIGHT_MINERALS_TEXT_COLOR+i), SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST);
+	} // TODO falls mehr
 	resetData();
 	addHelpButton(DESCRIPTION_BODIAGRAM_WINDOW_CHAPTER);
+	BoDiagramPoint::MAX_ENTRIES = RACE::MAX_RESOURCE_TYPES+2;
+	HAVE_SUPPLY = RACE::MAX_RESOURCE_TYPES+0;
+	NEED_SUPPLY = RACE::MAX_RESOURCE_TYPES+1;
 }
 
 
 BoDiagramWindow::~BoDiagramWindow()
 { 
-	delete minerals;
-	delete mineralsNumber;
-	delete gas;
-	delete gasNumber;
-	delete supply;
+	for(unsigned int i = 0; i < RACE::MAX_RESOURCE_TYPES; i++)
+	{
+		delete resourceText[i];
+		delete resourceNumber[i];
+	}
+	delete supplyText;
 	delete supplyNumber;
-	delete time;
+	delete timeText;
 	delete timeNumber;
 }
 
@@ -77,84 +84,93 @@ void BoDiagramWindow::process()
 {
 	if(!isShown()) 
 		return;
-
 	UI_Window::process();
-	bool has_changed = false;	
-		for(std::list<BoDiagramPoint>::iterator i = diagramList.begin(); i!=diagramList.end(); ++i)
+	bool has_changed = false;
+	for(std::list<BoDiagramPoint>::iterator i = diagramList.begin(); i!=diagramList.end(); ++i)
+	{
+		if(uiConfiguration.isSmoothMovements())
 		{
-			if(uiConfiguration.isSmoothMovements())
+			if(Size::mv2(i->current_x,  i->start_x,  i->target_x))
+				has_changed = true;
+			for(unsigned int j = BoDiagramPoint::MAX_ENTRIES;j--;)
 			{
-				if(Size::mv2(i->current_x,  i->start_x,  i->target_x))
+				if(Size::mv2(i->current_y1[j], i->start_y1[j], i->target_y1[j]))
 					has_changed = true;
-
-				for(unsigned int j = TOTAL_STATS;j--;)
-				{
-					if(Size::mv2(i->current_y1[j], i->start_y1[j], i->target_y1[j]))
-						has_changed = true;
-					if(Size::mv2(i->current_y2[j], i->start_y2[j], i->target_y2[j]))
-						has_changed = true;
-					if(Size::mv(i->highlight[j], 150, 100))
-						has_changed = true;
-				}
+				if(Size::mv2(i->current_y2[j], i->start_y2[j], i->target_y2[j]))
+					has_changed = true;
+				if(Size::mv2(i->highlight[j], 150, 100))
+					has_changed = true;
 			}
 		}
+	}
 	
 	if(has_changed)
 		setNeedRedrawNotMoved();
 	
 	
 	bold = false;
-	selectedItems.clear();
 	if((diagramList.size()>1) && (getAbsoluteClientRect().Inside(mouse)) && (totalTime>0))
 	{
 		bold = true;
-		if(oldMouse!=mouse)
-			setNeedRedrawNotMoved();
-		mouseTime = totalTime * (mouse.x - getAbsoluteClientRectLeftBound()) / getClientRectWidth();
-	
-		unsigned int number = 0;
-		for(std::list<PROGRAM>::const_iterator k = anarace->getProgramList().begin(); k != anarace->getProgramList().end(); ++k, ++number)
-			if((k->getTime() - k->getBT() < coreConfiguration.getMaxTime()-mouseTime)&&(k->getTime() > coreConfiguration.getMaxTime() - mouseTime))
-				selectedItems.push_back(number);
-
-
-		timeNumber->updateText(formatTime(mouseTime, efConfiguration.getGameSpeed()));
-		
-		unsigned int my_time = coreConfiguration.getMaxTime() - mouseTime;
-		for(std::list<STATISTICS>::const_iterator i = anarace->getTimeStatisticsList().begin(); i != anarace->getTimeStatisticsList().end(); ++i)
+		unsigned int new_mouse_time = totalTime * (mouse.x - getAbsoluteClientRectLeftBound()) / getClientRectWidth();
+		if((mouseTime != new_mouse_time) || (has_changed))
 		{
-			std::list<STATISTICS>::const_iterator j = i;
-			++j;
-			if(i->getTime() == j->getTime())
-				continue;
-			
-			if((i->getTime() == my_time)||(j==anarace->getTimeStatisticsList().end()))
-			{
-				std::ostringstream os;
-				os << i->getHaveMinerals()/100;mineralsNumber->updateText(os.str());os.str("");
-				os << i->getHaveGas()/100;gasNumber->updateText(os.str());os.str("");
-				os << i->getNeedSupply() << "/" << i->getHaveSupply();supplyNumber->updateText(os.str());
-				break;
-			} else
-			if((i->getTime() > my_time) && (j->getTime() < my_time))
-			{
-				// => Interpolieren zwischen i und j
-				std::ostringstream os;
-				os << (i->getHaveMinerals() + (j->getHaveMinerals() - i->getHaveMinerals()) * (i->getTime() - my_time) / (i->getTime() - j->getTime()))/100; mineralsNumber->updateText(os.str());os.str("");
-				os << (i->getHaveGas() + (j->getHaveGas() - i->getHaveGas()) * (i->getTime() - my_time) / (i->getTime() - j->getTime()))/100; gasNumber->updateText(os.str());os.str("");
-				os << i->getNeedSupply() << "/" << i->getHaveSupply();supplyNumber->updateText(os.str());
-				break;
-			}
-		}
+			mouseTime = new_mouse_time;
+			setNeedRedrawNotMoved();
+	
+			unsigned int number = 0;
+			selectedItems.clear();
+			for(std::list<PROGRAM>::const_iterator k = anarace->getProgramList().begin(); k != anarace->getProgramList().end(); ++k, ++number)
+				if((k->getTime() - k->getBT() < coreConfiguration.getMaxTime()-mouseTime)&&(k->getTime() > coreConfiguration.getMaxTime() - mouseTime))
+					selectedItems.push_back(number);
 
-		mineralsNumber->Show();
-		gasNumber->Show();
-		supplyNumber->Show();
-		timeNumber->Show();
+
+			timeNumber->updateText(formatTime(mouseTime, efConfiguration.getGameSpeed()));
+		
+			unsigned int my_time = coreConfiguration.getMaxTime() - mouseTime;
+			for(std::list<STATISTICS>::const_iterator i = anarace->getTimeStatisticsList().begin(); i != anarace->getTimeStatisticsList().end(); ++i)
+			{
+				std::list<STATISTICS>::const_iterator j = i;
+				++j;
+				if(i->getTime() == j->getTime())
+					continue;
+			
+				if((i->getTime() == my_time)||(j==anarace->getTimeStatisticsList().end()))
+				{
+					std::ostringstream os;
+					for(unsigned int k = RACE::MAX_RESOURCE_TYPES; k--;)
+					{
+						os << i->getHaveResource(k)/100;
+						resourceNumber[k]->updateText(os.str());os.str("");
+					}
+					os << i->getNeedSupply() << "/" << i->getHaveSupply();supplyNumber->updateText(os.str());
+					break;
+				} else
+				if((i->getTime() > my_time) && (j->getTime() < my_time))
+				{
+					// => Interpolieren zwischen i und j
+					std::ostringstream os;
+					for(unsigned int k = RACE::MAX_RESOURCE_TYPES; k--;)
+					{
+						os << (i->getHaveResource(k) + (j->getHaveResource(k) - i->getHaveResource(k)) * (i->getTime() - my_time) / (i->getTime() - j->getTime()))/100; 
+						resourceNumber[k]->updateText(os.str());os.str("");
+					}
+					os << i->getNeedSupply() << "/" << i->getHaveSupply();supplyNumber->updateText(os.str());
+					break;
+				}
+			}
+
+			
+			for(unsigned int k = RACE::MAX_RESOURCE_TYPES; k--;)
+				resourceNumber[k]->Show();
+			supplyNumber->Show();
+			timeNumber->Show();
+		}
 	} else
 	{
-		mineralsNumber->Hide();
-		gasNumber->Hide();
+		selectedItems.clear();
+		for(unsigned int k = RACE::MAX_RESOURCE_TYPES; k--;)
+			resourceNumber[k]->Hide();
 		supplyNumber->Hide();
 		timeNumber->Hide();
 	}
@@ -166,7 +182,6 @@ void BoDiagramWindow::processList()
 {
 	if((anarace==NULL))
 		return;
-
 //	if(anarace->getProgramList().size()==0)
 		// TODO
 	totalTime = anarace->getRealTimer();
@@ -178,8 +193,8 @@ void BoDiagramWindow::processList()
 				totalTime = t->getRealTime() + t->getBT();
 	}
 	
-	for(unsigned int i = TOTAL_STATS; i--;)
-		BoDiagramPoint::max[i] = 1;
+	for(unsigned int i = BoDiagramPoint::MAX_ENTRIES; i--;)
+	BoDiagramPoint::max.assign(BoDiagramPoint::MAX_ENTRIES, 1);
 
 	if(diagramList.size()==0)
 	{
@@ -203,8 +218,8 @@ void BoDiagramWindow::processList()
 			}
 			unsigned int x = 1 + (int)(order->getRealTime() * (getClientTargetWidth()-5) / (float)(totalTime));
 			k->setTargetX(x);
-			k->setTargetY(HAVE_MINERALS, order->getStatisticsBefore().getHaveMinerals(), order->getStatisticsAfter().getHaveMinerals());
-			k->setTargetY(HAVE_GAS, order->getStatisticsBefore().getHaveGas(), order->getStatisticsAfter().getHaveGas());
+			for(unsigned int i = RACE::MAX_RESOURCE_TYPES; i--;)
+				k->setTargetY(i, order->getStatisticsBefore().getHaveResource(i), order->getStatisticsAfter().getHaveResource(i));
 			k->setTargetY(HAVE_SUPPLY, order->getStatisticsBefore().getHaveSupply(), order->getStatisticsAfter().getHaveSupply());
 			k->setTargetY(NEED_SUPPLY, order->getStatisticsBefore().getNeedSupply(), order->getStatisticsAfter().getNeedSupply());
 			k->unit = order->getUnit();
@@ -222,22 +237,22 @@ void BoDiagramWindow::processList()
 	}
 
 	diagramList.front().setTargetX(1);
-	diagramList.front().setTargetY(HAVE_MINERALS, 0, (*anarace->getStartCondition())->getMinerals());
-	diagramList.front().setTargetY(HAVE_GAS, 0, (*anarace->getStartCondition())->getGas());
+	for(unsigned int i = RACE::MAX_RESOURCE_TYPES; i--;)
+		diagramList.front().setTargetY(i, 0, (*anarace->getStartCondition())->getResource(i));
 	diagramList.front().setTargetY(HAVE_SUPPLY, 0, (*anarace->getStartCondition())->getHaveSupply());
 	diagramList.front().setTargetY(NEED_SUPPLY, 0, (*anarace->getStartCondition())->getNeedSupply());
 	diagramList.front().initialized = true;
 
 	diagramList.back().initialized = false; // letzten Eintrag immer sofort anpassen
 	diagramList.back().setTargetX(1 + getClientTargetWidth()-5);
-	diagramList.back().setTargetY(HAVE_MINERALS, anarace->getMinerals(), 0);
-	diagramList.back().setTargetY(HAVE_GAS, anarace->getGas(), 0);
+	for(unsigned int i = RACE::MAX_RESOURCE_TYPES; i--;)
+		diagramList.back().setTargetY(i, anarace->getResource(i), 0);
 	diagramList.back().setTargetY(HAVE_SUPPLY, anarace->getHaveSupply(), 0);
 	diagramList.back().setTargetY(NEED_SUPPLY, anarace->getNeedSupply(), 0);
 	diagramList.back().initialized = true;	
 
 	for(std::list<BoDiagramPoint>::iterator i = diagramList.begin(); i != diagramList.end(); ++i)
-		for(unsigned int j = TOTAL_STATS; j--;)
+		for(unsigned int j = BoDiagramPoint::MAX_ENTRIES; j--;)
 		{
 			if(i->current_y1[j] > i->max[j]) i->max[j] = i->current_y1[j];
 			if(i->current_y2[j] > i->max[j]) i->max[j] = i->current_y2[j];
@@ -265,8 +280,16 @@ void BoDiagramWindow::draw(DC* dc) const
 //		dc->setBrush(*theme.lookUpBrush(BODIAGRAM_BACK2));
 	dc->DrawRectangle(getAbsoluteClientRectPosition()+Point(0,10), getClientRectSize() - Size(0,10));
 
-	float scale[TOTAL_STATS];
-	for(unsigned int i = TOTAL_STATS; i--;)
+	dc->setPen(*UI_Object::theme.lookUpPen(OUTER_BORDER_PEN));
+	for(unsigned int x = 1; x < 10; x++)
+		dc->DrawVerticalLine(x * getClientRectWidth() / 10 + getAbsoluteClientRectLeftBound() + 1, getAbsoluteClientRectUpperBound()+11, getAbsoluteClientRectLowerBound()-1);
+
+	for(unsigned int y = 1; y < 10; y++)
+		dc->DrawHorizontalLine(getAbsoluteClientRectLeftBound()+1, y * (getClientRectHeight()-10) / 10 + getAbsoluteClientRectUpperBound()+11, getAbsoluteClientRectRightBound()-1);
+	if(anarace==NULL)
+		return;
+	std::vector<float> scale(BoDiagramPoint::MAX_ENTRIES);
+	for(unsigned int i = BoDiagramPoint::MAX_ENTRIES; i--;)
 		scale[i] = (float)(getClientRectHeight() - 20)/(float)BoDiagramPoint::max[i];
 	
 	if(diagramList.size()>0)
@@ -282,19 +305,22 @@ void BoDiagramWindow::draw(DC* dc) const
 			Pen* pen;
 			
 					
-			int x = p.x + i->current_x;
-			int y1 = p.y - i->current_y1[HAVE_GAS]*scale[HAVE_GAS];
-			int y2 =  p.y - i->current_y2[HAVE_GAS]*scale[HAVE_GAS];
-	
-			if(y1 + 10 < y2) pen = theme.lookUpPen(DASHED_GAS_PEN);else pen = theme.lookUpPen(BODIAGRAM_GAS_PEN);
-			dc->setPen(Pen(dc->changeRelativeBrightness(*pen->getColor(), i->highlight[HAVE_GAS]), pen->getWidth(), pen->getStyle()));
-			if(y1<y2) dc->DrawVerticalLine(x, y1, y2);else  dc->DrawVerticalLine(x, y2, y1);
+			
+			int x, y1, y2;
+			x = p.x + i->current_x;
+			
 
-			y1 = p.y - i->current_y1[HAVE_MINERALS] * scale[HAVE_MINERALS];
-			y2 = p.y - i->current_y2[HAVE_MINERALS] * scale[HAVE_MINERALS];
-			if(y1 + 10 < y2) pen = theme.lookUpPen(DASHED_MINERALS_PEN);else pen = theme.lookUpPen(BODIAGRAM_MINERALS_PEN);
-			dc->setPen(Pen(dc->changeRelativeBrightness(*pen->getColor(), i->highlight[HAVE_MINERALS]), pen->getWidth(), pen->getStyle()));
-			if(y1<y2) dc->DrawVerticalLine(x, y1, y2);else  dc->DrawVerticalLine(x, y2, y1);
+			for(unsigned int k = RACE::MAX_RESOURCE_TYPES; k--;)
+			{
+				y1 = p.y - i->current_y1[k] * scale[k];
+				y2 =  p.y - i->current_y2[k] * scale[k];
+	
+				if(y1 + 10 < y2) pen = theme.lookUpPen((ePen)(DASHED_MINERALS_PEN+k));
+				else pen = theme.lookUpPen((ePen)(BODIAGRAM_MINERALS_PEN+k));
+			
+				dc->setPen(Pen(dc->changeRelativeBrightness(*pen->getColor(), i->highlight[k]), pen->getWidth(), pen->getStyle()));
+				if(y1<y2) dc->DrawVerticalLine(x, y1, y2);else  dc->DrawVerticalLine(x, y2, y1);
+			}
 
 			if(j!=diagramList.end())
 			{
@@ -317,17 +343,18 @@ void BoDiagramWindow::draw(DC* dc) const
 						Point(i->current_x, 0) - Size(0, i->current_y2[HAVE_SUPPLY]*scale[HAVE_SUPPLY]),
 						Size(j->current_x - i->current_x, y*scale[HAVE_SUPPLY]) );
 
-				pen = theme.lookUpPen((ePen)(BODIAGRAM_MINERALS_PEN+(((bold)||(i->highlight[HAVE_MINERALS]>100))?3:0)));
-				dc->setPen(Pen(dc->changeRelativeBrightness(*pen->getColor(), i->highlight[HAVE_MINERALS]), pen->getWidth(), pen->getStyle()));
-				dc->DrawLine(p.x + i->current_x, p.y - i->current_y2[HAVE_MINERALS] * scale[HAVE_MINERALS], p.x + j->current_x, p.y - j->current_y1[HAVE_MINERALS] * scale[HAVE_MINERALS]);
+			
+				for(unsigned int k = 0; k < RACE::MAX_RESOURCE_TYPES; k++)
+				{
+					pen = theme.lookUpPen((ePen)(BODIAGRAM_MINERALS_PEN+k+(((bold)||(i->highlight[k]>100))?3:0)));
+					dc->setPen(Pen(dc->changeRelativeBrightness(*pen->getColor(), i->highlight[k]), pen->getWidth(), pen->getStyle()));
+					dc->DrawLine(p.x + i->current_x, p.y - i->current_y2[k] * scale[k], p.x + j->current_x, p.y - j->current_y1[k] * scale[k]);
+				}
 	
-				pen = theme.lookUpPen((ePen)(BODIAGRAM_GAS_PEN+(((bold)||(i->highlight[HAVE_GAS]>100))?3:0)));
-				dc->setPen(Pen(dc->changeRelativeBrightness(*pen->getColor(), i->highlight[HAVE_GAS]), pen->getWidth(), pen->getStyle()));
-				dc->DrawLine(p.x + i->current_x, p.y - i->current_y2[HAVE_GAS]*scale[HAVE_GAS], p.x + j->current_x, p.y - j->current_y1[HAVE_GAS]*scale[HAVE_GAS]);
 				if(i!=diagramList.begin())
 				{
 					dc->setTextForeground(*theme.lookUpColor(BRIGHT_TEXT_COLOR));
-					unsigned int width = (theme.lookUpFont(SMALL_SHADOW_BOLD_FONT)->getTextExtent(stats[(*anarace->getStartCondition())->getRace()][i->unit].name)).getWidth();
+					unsigned int width = (theme.lookUpFont(SMALL_SHADOW_BOLD_FONT)->getTextExtent(GAME::lookUpUnitString(anarace->getRace(), i->unit))).getWidth();
 					unsigned int tx;
 					if(x - width/2 < getAbsoluteClientRectLeftBound())
 						tx = getAbsoluteClientRectLeftBound();
@@ -335,7 +362,7 @@ void BoDiagramWindow::draw(DC* dc) const
 						tx = getAbsoluteClientRectRightBound() - width;
 					else 
 						tx = x - width/2;
-					dc->DrawText(stats[(*anarace->getStartCondition())->getRace()][i->unit].name, Point(tx, y1 + (y2 - y1)/2));
+					dc->DrawText(GAME::lookUpUnitString(anarace->getRace(), i->unit), Point(tx, y1 + (y2 - y1)/2));
 				}
 			}
 		}
@@ -391,4 +418,6 @@ void BoDiagramWindow::draw(DC* dc) const
 
 }
 
+unsigned int BoDiagramWindow::HAVE_SUPPLY = 0;
+unsigned int BoDiagramWindow::NEED_SUPPLY = 0;
 

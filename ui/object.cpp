@@ -165,8 +165,10 @@ void UI_Object::adjustSize(const eAdjustMode adjust_mode, const Size& size)
 			case NO_AUTO_SIZE:break;
 			case AUTO_SIZE:break;
 			case AUTO_HEIGHT_FULL_WIDTH:
+			case AUTO_DOUBLE_HEIGHT_FULL_WIDTH:
 			case FULL_WIDTH:setWidth(full_width);break;
 			case AUTO_HEIGHT_CONST_WIDTH:break;
+			case AUTO_DOUBLE_HEIGHT_CONST_WIDTH:break;
 			case CONST_SIZE:break;
 			default:break; // TODO ERROR
 		}
@@ -182,8 +184,10 @@ void UI_Object::adjustSize(const eAdjustMode adjust_mode, const Size& size)
 			case NO_AUTO_SIZE:setSize(originalRect.getSize());break;
 			case AUTO_SIZE:setSize(size+Size(6, 0));break;
 			case AUTO_HEIGHT_FULL_WIDTH:setSize(Size(full_width, size.getHeight()));break;
+			case AUTO_DOUBLE_HEIGHT_FULL_WIDTH:setSize(Size(full_width, 2*size.getHeight()));break;
 			case FULL_WIDTH:setSize(Size(full_width, getHeight()));break;
 			case AUTO_HEIGHT_CONST_WIDTH:setSize(Size(originalRect.getWidth(), size.getHeight()));break;
+			case AUTO_DOUBLE_HEIGHT_CONST_WIDTH:setSize(Size(originalRect.getWidth(), 2*size.getHeight()));break;
 			case CONST_SIZE:setSize(Size(originalRect.getWidth(), originalRect.getHeight()));break;
 			default:break; // TODO ERROR
 		}
@@ -334,18 +338,19 @@ void UI_Object::process()
 	{
 		if(uiConfiguration.isSmoothMovements())
 		{
-
-			if(relativeRect.moveSmooth(startRect, targetRect))
-			{
+			eRectMovement t = relativeRect.moveSmooth(startRect, targetRect);
+			if(t == GOT_BIGGER)
+				setNeedRedrawNotMoved();
+			else if(t == GOT_SMALLER_OR_MOVED)
 				setNeedRedrawMoved();
-			}
 		}
 		else 
 		{
-			if(relativeRect.move(startRect, targetRect))
-			{
+			eRectMovement t = relativeRect.move(startRect, targetRect);
+			if(t == GOT_BIGGER)
+				setNeedRedrawNotMoved();
+			else if(t == GOT_SMALLER_OR_MOVED)
 				setNeedRedrawMoved();
-			}
 		}
 		if(oldSize != relativeRect.getSize())
 			setSizeHasChanged();
@@ -463,6 +468,10 @@ void UI_Object::draw(DC* dc) const
 	// if hidden, hide children as well
 	if (!isShown())
 		return;
+	// for 'redraw' optimizations - to see which window is redrawn
+//	dc->setPen(*theme.lookUpPen((ePen)(5+(rand()%2))));
+//	dc->DrawEmptyRectangle(getAbsoluteRect());
+
 	UI_Object* tmp = children;
 	if (tmp) {
 		do {
@@ -501,10 +510,13 @@ void UI_Object::setRect(const Rect& rect)
 {
 	if(rect == relativeRect)
 		return;
+	if(rect.Inside(relativeRect))
+		setNeedRedrawMoved();
+	else setNeedRedrawNotMoved();
+
 	startRect = rect;
 	targetRect = rect;
 	relativeRect = rect;
-	setNeedRedrawMoved();
 	setSizeHasChanged();
 //	UI_Object::addToProcessArray(this);
 }
@@ -530,12 +542,14 @@ void UI_Object::setHeight(const unsigned int height)
 {
 	if(getTargetHeight() == height)
 		return;
-	toInitLog("set height");
+	if(height < relativeRect.getHeight())
+		setNeedRedrawMoved();
+	else setNeedRedrawNotMoved();
+	
 	setSizeHasChanged();
 	relativeRect.setHeight(height);
 	startRect.setHeight(height);
 	targetRect.setHeight(height);
-	setNeedRedrawNotMoved(); // TODO wenns kleiner wird
 //	UI_Object::addToProcessArray(this);
 }
 
@@ -543,25 +557,29 @@ void UI_Object::setWidth(const unsigned int width)
 {
 	if(relativeRect.getWidth() == width)
 		return;
-//	UI_Object::addToProcessArray(this);
+	if(width < relativeRect.getWidth())
+		setNeedRedrawMoved();
+	else setNeedRedrawNotMoved();
 	setSizeHasChanged();
 	relativeRect.setWidth(width);
 	startRect.setWidth(width);
 	targetRect.setWidth(width);
-	setNeedRedrawNotMoved(); // TODO Wenns kleiner wird!
+//	UI_Object::addToProcessArray(this);
 }
 
 void UI_Object::setSize(const Size size)
 {
 	if(relativeRect.getSize() == size)
 		return;
-//	UI_Object::addToProcessArray(this);
+	if(size < relativeRect.getSize())
+		setNeedRedrawMoved();
+	else setNeedRedrawNotMoved();
 	setSizeHasChanged();
 	relativeRect.setSize(size);
 	startRect.setSize(size);
 	targetRect.setSize(size);
 	
-	setNeedRedrawNotMoved(); // TODO Wenns kleiner wird!
+//	UI_Object::addToProcessArray(this);
 }
 
 void UI_Object::setLeft(const signed int x) 
@@ -590,13 +608,13 @@ void UI_Object::Show(const bool show)
 	if((show)&&(!shown))
 	{
 		shown = true;
-		setNeedRedrawMoved(true);
+		setNeedRedrawNotMoved(true);
 		if(getParent())
 			getParent()->childrenWereChanged = true;
 	} 
 	else if((!show)&&(shown))
 	{
-		setNeedRedrawMoved(true);
+		setNeedRedrawNotMoved(true);
 //		setNeedRedrawMoved(false); // ~~ ?
 		shown = false;
 		if(getParent())

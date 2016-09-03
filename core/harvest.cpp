@@ -2,10 +2,8 @@
 
 HARVEST_SPEED::HARVEST_SPEED()
 {
-	for(unsigned int i=45;i--;)
-		setHarvestMineralSpeed(i,0);
-	for(unsigned int i=5;i--;)
-		setHarvestGasSpeed(i,0);
+	memset(minerals, 0, 45 * sizeof(int));
+	memset(gas, 0, 5 * sizeof(int));
 }
 
 HARVEST_SPEED::~HARVEST_SPEED()

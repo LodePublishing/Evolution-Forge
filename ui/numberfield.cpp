@@ -41,6 +41,7 @@ UI_NumberField::UI_NumberField(UI_Object* numberfield_parent, const Rect& rect, 
 	if(tool_tip!=NULL_STRING)
 		this->updateToolTip(tool_tip);
 	updateNumber(num);
+	reloadOriginalSize();
 }
 
 UI_NumberField::~UI_NumberField()
@@ -68,11 +69,11 @@ void UI_NumberField::updateText(const eString txt) {
 
 void UI_NumberField::reloadOriginalSize()
 {
-	setOriginalSize(Size(3*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)/2,text->getTextSize().getHeight()));
+	setOriginalSize(Size(UI_Object::theme.lookUpButtonWidth(LARGE_BUTTON_WIDTH),text->getTextSize().getHeight()));
 		
 	addButton->setOriginalPosition(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 40, 1));
 	subButton->setOriginalPosition(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 50, 1));
-	numberText->setOriginalPosition(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 10, 1));
+	numberText->setOriginalPosition(Point(addButton->getRelativeLeftBound() - numberText->getTextSize().getWidth() - 5, 0));
 	UI_Object::reloadOriginalSize();
 }
 
@@ -105,6 +106,7 @@ void UI_NumberField::process()
 			default:break;
 		}
 		numberText->updateText(os.str());
+		numberText->setOriginalPosition(Point(addButton->getRelativeLeftBound() - numberText->getTextSize().getWidth() - 5, 0));
 	//	setNeedRedrawMoved();
 	//	adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, numberText->getTextSize()); // TODO
 	}
@@ -141,7 +143,8 @@ void UI_NumberField::process()
 		text->doHighlight(isMouseInside());
 	numberText->doHighlight(isMouseInside());
 
-	if((numberText->checkForNeedRedraw())||((text)&&(text->checkForNeedRedraw()))||(addButton->checkForNeedRedraw())||(subButton->checkForNeedRedraw()))
+//	if(/*(numberText->checkForNeedRedraw())||((text)&&(text->checkForNeedRedraw())))||*/(addButton->checkForNeedRedraw())||(subButton->checkForNeedRedraw()))
+	if(checkForNeedRedraw())
 		setNeedRedrawMoved();
 }
 

@@ -7,9 +7,9 @@
 class MessageWindow:public UI_Window
 {
 	public:
-		MessageWindow(UI_Window* parentWindow);
+		MessageWindow(UI_Window* parent_window);
 		~MessageWindow();
-		void addMessage(const std::string& bla);
+		void addMessage(const std::string& msg);
 		void resetData();
 		void process();
 		void draw(DC* dc) const;

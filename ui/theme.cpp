@@ -18,13 +18,14 @@ UI_Theme::UI_Theme():
 	currentColorTheme(DARK_BLUE_THEME),
 	currentMainColorTheme(DARK_BLUE_THEME),
 	loadedBitmaps(),
-	defaultCursor(NULL)
+	defaultCursor(NULL),
+	stringList(MAX_LANGUAGES),
+	stringIdentifier(MAX_LANGUAGES),
+	languageInitialized(MAX_LANGUAGES)
 {
 	for(unsigned int i = MAX_LANGUAGES; i--;)
 	{
-		for(unsigned int j = MAX_STRINGS; j--;)
-			if(stringList[i][j] == "")
-				stringList[i][j] = "ERROR";
+		stringList[i].assign(MAX_STRINGS, "ERROR");
 		languageInitialized[i] = false;
 	}
 	for(unsigned int i = MAX_RESOLUTIONS;i--;)
@@ -430,24 +431,6 @@ const eSubSubDataType getSubSubDataType(const eDataType mode)
 	}
 }
 
-const eLanguage getLanguageSubDataEntry(const std::string& item)
-{
-	if(item=="@ENGLISH") return(ENGLISH_LANGUAGE);else
-	if(item=="@GERMAN") return(GERMAN_LANGUAGE);else
-	if(item=="@ITALIAN") return(ITALIAN_LANGUAGE);else
-	if(item=="@PORTUGESE") return(PORTUGESE_LANGUAGE);else
-	if(item=="@DUTCH") return(DUTCH_LANGUAGE);else
-	if(item=="@FINNISH") return(FINNISH_LANGUAGE);else
-	if(item=="@GREEK") return(GREEK_LANGUAGE);else
-	if(item=="@FRENCH") return(FRENCH_LANGUAGE);else
-	if(item=="@SPANISH") return(SPANISH_LANGUAGE);else
-	if(item=="@POLSKI") return(POLSKI_LANGUAGE);else
-	if(item=="@KOREAN") return(KOREAN_LANGUAGE);else
-	if(item=="@CHINESE") return(CHINESE_LANGUAGE);else
-	if(item=="@RUSSIAN") return(RUSSIAN_LANGUAGE);else
-	return(ZERO_LANGUAGE);
-}
-
 const eResolution getResolutionSubDataEntry(const std::string& item)
 {
 	if(item=="@640x480") return(RESOLUTION_640x480);else
@@ -529,6 +512,7 @@ eGlobalWindow parse_global_window(const std::string& item)
 	if(item=="Info window") return(INFO_WINDOW);else
 	if(item=="Tech tree window") return(TECHTREE_WINDOW);else
 	if(item=="Save box window") return(SAVE_BOX_WINDOW);else
+	if(item=="Debug window") return(DEBUG_WINDOW);else
 	return(NULL_GLOBAL_WINDOW);
 }
 
@@ -676,18 +660,18 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 				case ABSOLUTE_Y_COORDINATE_COMMAND:--i;ypart=true;break;
 				case DOCK_WITH_LEFT_BORDER_OF_COMMAND:rect->setLeft(-10 + windows[win]->getLeft() - rect->getWidth());break;
 				case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:rect->setLeft(0 + windows[win]->getRight());break;
-				case DOCK_WITH_LOWER_BORDER_OF_COMMAND:rect->setTop(10 + windows[win]->getBottom());break;
+				case DOCK_WITH_LOWER_BORDER_OF_COMMAND:rect->setTop(5 + windows[win]->getBottom());break;
 				case DOCK_WITH_UPPER_BORDER_OF_COMMAND:rect->setTop(20 + windows[win]->getTop() - rect->getHeight());break;
 
 				case DOCK_CENTER_INSIDE_OF_COMMAND:rect->setTopLeft(Point(15 + windows[win]->getWidth() / 2 - rect->getWidth() / 2, 15 + windows[win]->getHeight() / 2 - rect->getHeight() / 2));break;
-				case DOCK_BOTTOM_CENTER_INSIDE_OF_COMMAND:rect->setTopLeft(Point(windows[win]->getWidth() / 2 - rect->getWidth() / 2, windows[win]->getHeight() - rect->getHeight() - 10));break;
+				case DOCK_BOTTOM_CENTER_INSIDE_OF_COMMAND:rect->setTopLeft(Point(windows[win]->getWidth() / 2 - rect->getWidth() / 2, windows[win]->getHeight() - rect->getHeight()));break;
 				case DOCK_TOP_CENTER_INSIDE_OF_COMMAND:rect->setTopLeft(Point(windows[win]->getWidth() / 2 - rect->getWidth() / 2, 35));break;
 				case DOCK_LEFT_INSIDE_OF_COMMAND:rect->setLeft(0);break;
 				case DOCK_RIGHT_INSIDE_OF_COMMAND:rect->setLeft(windows[win]->getWidth() - rect->getWidth());break;
 				case DOCK_TOP_INSIDE_OF_COMMAND:rect->setTop(0);break;
 				case DOCK_TOP_LEFT_INSIDE_OF_COMMAND:rect->setTopLeft(Point(0, 0));break;
-				case DOCK_TOP_RIGHT_INSIDE_OF_COMMAND:rect->setTopLeft(Point(windows[win]->getWidth() - rect->getWidth(), 15));break;
-				case DOCK_BOTTOM_INSIDE_OF_COMMAND:rect->setTop(-15+windows[win]->getHeight() - rect->getHeight());break;
+				case DOCK_TOP_RIGHT_INSIDE_OF_COMMAND:rect->setTopLeft(Point(windows[win]->getWidth() - rect->getWidth(), 10));break;
+				case DOCK_BOTTOM_INSIDE_OF_COMMAND:rect->setTop(-5+windows[win]->getHeight() - rect->getHeight());break;
 	
 								   
 				case DOCK_CLOSE_WITH_LEFT_BORDER_OF_COMMAND:rect->setLeft(windows[win]->getLeft() - rect->getWidth());break;
@@ -710,7 +694,7 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 				case DOCK_RIGHT_INSIDE_OF_COMMAND:rect->setLeft(-15+windows[win]->getRight() - rect->getWidth());break;
 				case DOCK_TOP_INSIDE_OF_COMMAND:rect->setTop(windows[win]->getTop());break;
 				case DOCK_BOTTOM_INSIDE_OF_COMMAND:rect->setTop(-15+windows[win]->getBottom() - rect->getHeight());break;*/
-				default:--i;;break;
+				default:--i;break;
 			}
 		}
 	}
@@ -853,21 +837,16 @@ const bool UI_Theme::loadHelpChapterStringFile(const std::string& help_file)
 	return(true);
 }
 
-/*
-
-Moeglichkeit 1:
-zweite Datei mit geordneter (wie in UI_Theme) Liste um die in den Sprachdateien gelesenen Strings in Zahlen umzuwandeln
-Moeglichkeit 2:
-Zugriff auf Strings direkt ueber Erkennungsstring (langsamer aber schneller beim proggen :/ )
-*/
-const bool UI_Theme::loadStringFile(const std::string& string_file)
+#if 0
+const bool UI_Theme::loadStringFile(const std::string& string_file, const std::vector<std::string>& string_identifier, const std::vector<bool> language_std::vector<std::string>)
+//		std::string stringIdentifier[MAX_STRINGS];
+//		std::string stringList[MAX_LANGUAGES][MAX_STRINGS];
+//		bool languageInitialized[MAX_LANGUAGES];
 {
 	if((string_file.substr(string_file.size()-2,2) == "..") ||(string_file.substr(string_file.size()-1,1) == "."))
 		return(true);
 	eDataType mode=ZERO_DATA_TYPE;
 	eSubDataType sub_mode=ZERO_SUB_DATA_TYPE;
-	eSubSubDataType sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
-
 	eLanguage current_language=ZERO_LANGUAGE;
 
 	std::ifstream pFile(string_file.c_str());
@@ -899,58 +878,50 @@ const bool UI_Theme::loadStringFile(const std::string& string_file)
 			stop = text.size();
 		std::string index = text.substr(start, stop);
 		std::string value;
-		if(mode==ZERO_DATA_TYPE)
+		if(mode == ZERO_DATA_TYPE)
 		{
 			mode = getDataType(index);
-			if(mode==ZERO_DATA_TYPE)
+			if(mode == ZERO_DATA_TYPE)
 			{
-				if(index=="@END")
+				if(index == "@END")
 					toErrorLog("WARNING (UI_Theme::loadStringFile()): Lonely @END => ignoring line.");
 				else
 					toErrorLog("WARNING (UI_Theme::loadStringFile()): Line '" + index + "' is outside a block but is not marked as comment => ignoring line.");
 			} else
-			{
-				sub_mode=getSubDataType(mode);
-				sub_sub_mode=getSubSubDataType(mode);
-			}
+				sub_mode = getSubDataType(mode);
 		}  else
-		if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(current_language==ZERO_LANGUAGE))
+		if((sub_mode != ZERO_SUB_DATA_TYPE) && (current_language == ZERO_LANGUAGE))
 		{
 			switch(sub_mode)
 			{
 				case LANGUAGE_SUB_DATA_TYPE:
 					current_language = getLanguageSubDataEntry(index);
-					if(current_language==ZERO_LANGUAGE)
-					{
-						toErrorLog("ERROR (UI_Theme::loadStringFile()): Invalid language entry '" + index + "'.");
-						return(false);
-					} else if(languageInitialized[current_language])
-					{
-						toErrorLog("ERROR (UI_Theme::loadStringFile()): Language '" + index + "' already initialized.");
-						return(false);
+					if(current_language==ZERO_LANGUAGE) {
+						toErrorLog("ERROR (UI_Theme::loadStringFile()): Invalid language entry '" + index + "'.");return(false);
+					} else if(languageInitialized[current_language]) {
+						toErrorLog("ERROR (UI_Theme::loadStringFile()): Language '" + index + "' already initialized.");return(false);
 					}
 					else
 					{
 						found_language_block[current_language] = true;
 						found_any_language_block = true;
 					}
-					    break;
+					break;
 				default:break;
 			}
 		}
 		// => hat nur 1 Ebene => Position festgestellt!
-		else if((sub_mode != ZERO_SUB_DATA_TYPE)&&(sub_sub_mode == ZERO_SUB_SUB_DATA_TYPE)&&(current_language!=ZERO_LANGUAGE))
+		else if((sub_mode != ZERO_SUB_DATA_TYPE) && (current_language != ZERO_LANGUAGE))
 		{
 			std::map<std::string, std::list<std::string> >::iterator i;
 			std::map<std::string, std::list<std::string> > block;
 			pFile.seekg(old_pos);
-			if(!parse_block_map(pFile, block))
-			{
+			if(!parse_block_map(pFile, block)) {
 				toErrorLog("WARNING (UI_Theme::loadStringFile()): No concluding @END for @STRINGS block was found in file " + string_file + " => trying to parse what we have so far.");
 			}
 			for(unsigned int j = 0; j < MAX_STRINGS; j++)
 			{
-				if((i=block.find(stringIdentifier[j]))!=block.end())
+				if((i=block.find(stringIdentifier[j])) != block.end())
 				{
 					i->second.pop_front();
 					stringList[current_language][j] = i->second.front();
@@ -971,6 +942,17 @@ const bool UI_Theme::loadStringFile(const std::string& string_file)
 		if(found_language_block[i])
 			languageInitialized[i] = true;
 	return(true);
+}
+#endif
+
+
+void UI_Theme::loadStringFiles()
+{
+	languageInitialized.resize(MAX_LANGUAGES);
+	languageInitialized.assign(MAX_LANGUAGES, false);
+	std::list<std::string> string_files = findFiles("data", "strings", "");
+	for(std::list<std::string>::iterator j = string_files.begin(); j != string_files.end(); ++j)
+		loadStringFile(*j, stringIdentifier, stringList, languageInitialized, MAX_STRINGS);
 }
 
 const bool UI_Theme::loadWindowDataFile(const std::string& window_data_file, const unsigned int game_number, const unsigned int max_games)
@@ -1852,282 +1834,34 @@ void UI_Theme::initBitmapIdentifier()
 	bitmapIdentifier[LIST_BITMAP] = "LIST_BITMAP";
 //	bitmapIdentifier[OPEN_TREE_BITMAP] = "OPEN_TREE_BITMAP";
 	bitmapIdentifier[HELP_MAIN_BITMAP] = "HELP_MAIN_BITMAP";
+	bitmapIdentifier[ARROW_LEFT_BITMAP] = "ARROW_LEFT_BITMAP";
+	bitmapIdentifier[ARROW_LEFT_CLICKED_BITMAP] = "ARROW_LEFT_CLICKED_BITMAP";
+	bitmapIdentifier[ARROW_RIGHT_BITMAP] = "ARROW_RIGHT_BITMAP";
+	bitmapIdentifier[ARROW_RIGHT_CLICKED_BITMAP] = "ARROW_RIGHT_CLICKED_BITMAP";
+
+	bitmapIdentifier[ARROW_UP_BITMAP] = "ARROW_UP_BITMAP";
+	bitmapIdentifier[ARROW_UP_CLICKED_BITMAP] = "ARROW_UP_CLICKED_BITMAP";
+	bitmapIdentifier[ARROW_DOWN_BITMAP] = "ARROW_DOWN_BITMAP";
+	bitmapIdentifier[ARROW_DOWN_CLICKED_BITMAP] = "ARROW_DOWN_CLICKED_BITMAP";
+
+	bitmapIdentifier[LEMMINGS_BITMAP] = "LEMMINGS_BITMAP";
+
+	bitmapIdentifier[UGLY_UP_BITMAP] = "UGLY_UP_BITMAP";
+	bitmapIdentifier[UGLY_KING_BITMAP] = "UGLY_KING_BITMAP";
+	bitmapIdentifier[OH_BITMAP] = "OH_BITMAP";
+	bitmapIdentifier[COOL_BITMAP] = "COOL_BITMAP";
+	bitmapIdentifier[BIGGRIN_BITMAP] = "BIGGRIN_BITMAP";
+	bitmapIdentifier[BIGGRINHAT_BITMAP] = "BIGGRINHAT_BITMAP";
+	
+	bitmapIdentifier[TITLE_SC_BITMAP] = "TITLE_SC_BITMAP";
+	bitmapIdentifier[TITLE_BW_BITMAP] = "TITLE_BW_BITMAP";
+	bitmapIdentifier[TITLE_WC3_BITMAP] = "TITLE_WC3_BITMAP";
 }
 
 void UI_Theme::initStringIdentifier()
 {
-	for(unsigned int i = MAX_STRINGS; i--;)
-		stringIdentifier[i] = "NULL_STRING";
-	stringIdentifier[NONE] = "NONE";
-	stringIdentifier[SCV] = "SCV";
-	stringIdentifier[MARINE] = "MARINE";
-	stringIdentifier[GHOST] = "GHOST";
-	stringIdentifier[VULTURE] = "VULTURE";
-	stringIdentifier[GOLIATH] = "GOLIATH";
-	stringIdentifier[SIEGE_TANK] = "SIEGE_TANK";
-	stringIdentifier[FIREBAT] = "FIREBAT";
-	stringIdentifier[MEDIC] = "MEDIC";
-	stringIdentifier[WRAITH] = "WRAITH";
-	stringIdentifier[SCIENCE_VESSEL] = "SCIENCE_VESSEL";
-	stringIdentifier[DROPSHIP] = "DROPSHIP";
-	stringIdentifier[BATTLE_CRUISER] = "BATTLE_CRUISER";
-	stringIdentifier[VALKYRIE] = "VALKYRIE";
-	stringIdentifier[NUCLEAR_WARHEAD] = "NUCLEAR_WARHEAD";
-	stringIdentifier[SUPPLY_DEPOT] = "SUPPLY_DEPOT";
-	stringIdentifier[BARRACKS] = "BARRACKS";
-	stringIdentifier[ACADEMY] = "ACADEMY";
-	stringIdentifier[FACTORY] = "FACTORY";
-	stringIdentifier[COMMAND_CENTER] = "COMMAND_CENTER";
-	stringIdentifier[STARPORT] = "STARPORT";
-	stringIdentifier[SCIENCE_FACILITY] = "SCIENCE_FACILITY";
-	stringIdentifier[ENGINEERING_BAY] = "ENGINEERING_BAY";
-	stringIdentifier[ARMORY] = "ARMORY";
-	stringIdentifier[MISSILE_TURRET] = "MISSILE_TURRET";
-	stringIdentifier[BUNKER] = "BUNKER";
-	stringIdentifier[COMSAT_STATION] = "COMSAT_STATION";
-	stringIdentifier[NUCLEAR_SILO] = "NUCLEAR_SILO";
-	stringIdentifier[CONTROL_TOWER] = "CONTROL_TOWER";
-	stringIdentifier[COVERT_OPS] = "COVERT_OPS";
-	stringIdentifier[PHYSICS_LAB] = "PHYSICS_LAB";
-	stringIdentifier[MACHINE_SHOP] = "MACHINE_SHOP";
-	stringIdentifier[COMMAND_CENTER_CS] = "COMMAND_CENTER_CS";
-	stringIdentifier[COMMAND_CENTER_NS] = "COMMAND_CENTER_NS";
-	stringIdentifier[STARPORT_CT] = "STARPORT_CT";
-	stringIdentifier[SCIENCE_FACILITY_CO] = "SCIENCE_FACILITY_CO";
-	stringIdentifier[SCIENCE_FACILITY_PL] = "SCIENCE_FACILITY_PL";
-	stringIdentifier[FACTORY_MS] = "FACTORY_MS";
-	stringIdentifier[STIM_PACKS] = "STIM_PACKS";
-	stringIdentifier[LOCKDOWN] = "LOCKDOWN";
-	stringIdentifier[EMP_SHOCKWAVE] = "EMP_SHOCKWAVE";
-	stringIdentifier[SPIDER_MINES] = "SPIDER_MINES";
-	stringIdentifier[TANK_SIEGE_MODE] = "TANK_SIEGE_MODE";
-	stringIdentifier[IRRADIATE] = "IRRADIATE";
-	stringIdentifier[YAMATO_GUN] = "YAMATO_GUN";
-	stringIdentifier[CLOAKING_FIELD] = "CLOAKING_FIELD";
-	stringIdentifier[PERSONNEL_CLOAKING] = "PERSONNEL_CLOAKING";
-	stringIdentifier[RESTORATION] = "RESTORATION";
-	stringIdentifier[OPTICAL_FLARE] = "OPTICAL_FLARE";
-	stringIdentifier[U238_SHELLS] = "U238_SHELLS";
-	stringIdentifier[ION_THRUSTERS] = "ION_THRUSTERS";
-	stringIdentifier[TITAN_REACTOR] = "TITAN_REACTOR";
-	stringIdentifier[OCULAR_IMPLANTS] = "OCULAR_IMPLANTS";
-	stringIdentifier[MOEBIUS_REACTOR] = "MOEBIUS_REACTOR";
-	stringIdentifier[APOLLO_REACTOR] = "APOLLO_REACTOR";
-	stringIdentifier[COLOSSUS_REACTOR] = "COLOSSUS_REACTOR";
-	stringIdentifier[CADUCEUS_REACTOR] = "CADUCEUS_REACTOR";
-	stringIdentifier[CHARON_BOOSTER] = "CHARON_BOOSTER";
-	stringIdentifier[INFANTRY_ARMOR] = "INFANTRY_ARMOR";
-	stringIdentifier[INFANTRY_WEAPONS] = "INFANTRY_WEAPONS";
-	stringIdentifier[VEHICLE_PLATING] = "VEHICLE_PLATING";
-	stringIdentifier[VEHICLE_WEAPONS] = "VEHICLE_WEAPONS";
-	stringIdentifier[SHIP_PLATING] = "SHIP_PLATING";
-	stringIdentifier[SHIP_WEAPONS] = "SHIP_WEAPONS";
-	stringIdentifier[REFINERY] = "REFINERY";
-	stringIdentifier[GAS_SCV] = "GAS_SCV";
-	stringIdentifier[BUILD_PARALLEL_2] = "BUILD_PARALLEL_2";
-	stringIdentifier[BUILD_PARALLEL_4] = "BUILD_PARALLEL_4";
-	stringIdentifier[BUILD_PARALLEL_8] = "BUILD_PARALLEL_8";
-	stringIdentifier[BUILD_PARALLEL_16] = "BUILD_PARALLEL_16";
-	stringIdentifier[FROM_GAS_TO_MINERALS] = "FROM_GAS_TO_MINERALS";
-	stringIdentifier[LAST_UNIT] = "LAST_UNIT";
-	stringIdentifier[VESPENE_GEYSIR] = "VESPENE_GEYSIR";
-	stringIdentifier[MINERAL_PATCH] = "MINERAL_PATCH";
-	stringIdentifier[R_STIM_PACKS] = "R_STIM_PACKS";
-	stringIdentifier[R_LOCKDOWN] = "R_LOCKDOWN";
-	stringIdentifier[R_EMP_SHOCKWAVE] = "R_EMP_SHOCKWAVE";
-	stringIdentifier[R_SPIDER_MINES] = "R_SPIDER_MINES";
-	stringIdentifier[R_TANK_SIEGE_MODE] = "R_TANK_SIEGE_MODE";
-	stringIdentifier[R_IRRADIATE] = "R_IRRADIATE";
-	stringIdentifier[R_YAMATO_GUN] = "R_YAMATO_GUN";
-	stringIdentifier[R_CLOAKING_FIELD] = "R_CLOAKING_FIELD";
-	stringIdentifier[R_PERSONNEL_CLOAKING] = "R_PERSONNEL_CLOAKING";
-	stringIdentifier[R_RESTORATION] = "R_RESTORATION";
-	stringIdentifier[R_OPTICAL_FLARE] = "R_OPTICAL_FLARE";
-	stringIdentifier[R_U238_SHELLS] = "R_U238_SHELLS";
-	stringIdentifier[R_ION_THRUSTERS] = "R_ION_THRUSTERS";
-	stringIdentifier[R_TITAN_REACTOR] = "R_TITAN_REACTOR";
-	stringIdentifier[R_OCULAR_IMPLANTS] = "R_OCULAR_IMPLANTS";
-	stringIdentifier[R_MOEBIUS_REACTOR] = "R_MOEBIUS_REACTOR";
-	stringIdentifier[R_APOLLO_REACTOR] = "R_APOLLO_REACTOR";
-	stringIdentifier[R_COLOSSUS_REACTOR] = "R_COLOSSUS_REACTOR";
-	stringIdentifier[R_CADUCEUS_REACTOR] = "R_CADUCEUS_REACTOR";
-	stringIdentifier[R_CHARON_BOOSTER] = "R_CHARON_BOOSTER";
-	stringIdentifier[R_INFANTRY_ARMOR] = "R_INFANTRY_ARMOR";
-	stringIdentifier[R_INFANTRY_WEAPONS] = "R_INFANTRY_WEAPONS";
-	stringIdentifier[R_VEHICLE_PLATING] = "R_VEHICLE_PLATING";
-	stringIdentifier[R_VEHICLE_WEAPONS] = "R_VEHICLE_WEAPONS";
-	stringIdentifier[R_SHIP_PLATING] = "R_SHIP_PLATING";
-	stringIdentifier[R_SHIP_WEAPONS] = "R_SHIP_WEAPONS";
-	stringIdentifier[F_FACTORY_ADDON] = "F_FACTORY_ADDON";
-	stringIdentifier[F_STARPORT_ADDON] = "F_STARPORT_ADDON";
-	stringIdentifier[F_COMMAND_CENTER_ADDON] = "F_COMMAND_CENTER_ADDON";
-	stringIdentifier[F_SCIENCE_FACILITY_ADDON] = "F_SCIENCE_FACILITY_ADDON";
-	stringIdentifier[INTRON] = "INTRON";
-
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+PROBE] = "PROBE";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+DARK_TEMPLAR] = "DARK_TEMPLAR";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+DARK_ARCHON] = "DARK_ARCHON";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+ZEALOT] = "ZEALOT";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+DRAGOON] = "DRAGOON";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+HIGH_TEMPLAR] = "HIGH_TEMPLAR";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+ARCHON] = "ARCHON";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+REAVER] = "REAVER";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+HALF_SCARAB] = "HALF_SCARAB";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+FULL_SCARAB] = "FULL_SCARAB";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+CORSAIR] = "CORSAIR";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+SHUTTLE] = "SHUTTLE";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+SCOUT] = "SCOUT";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+ARBITER] = "ARBITER";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+CARRIER] = "CARRIER";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+HALF_INTERCEPTOR] = "HALF_INTERCEPTOR";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+FULL_INTERCEPTOR] = "FULL_INTERCEPTOR";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+OBSERVER] = "OBSERVER";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+NEXUS] = "NEXUS";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+ROBOTICS_FACILITY] = "ROBOTICS_FACILITY";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+PYLON] = "PYLON";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+OBSERVATORY] = "OBSERVATORY";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+GATEWAY] = "GATEWAY";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+PHOTON_CANNON] = "PHOTON_CANNON";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+CYBERNETICS_CORE] = "CYBERNETICS_CORE";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+CITADEL_OF_ADUN] = "CITADEL_OF_ADUN";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+TEMPLAR_ARCHIVES] = "TEMPLAR_ARCHIVES";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+FORGE] = "FORGE";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+STARGATE] = "STARGATE";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+FLEET_BEACON] = "FLEET_BEACON";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+ARBITER_TRIBUNAL] = "ARBITER_TRIBUNAL";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+ROBOTICS_SUPPORT_BAY] = "ROBOTICS_SUPPORT_BAY";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+SHIELD_BATTERY] = "SHIELD_BATTERY";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+PSIONIC_STORM] = "PSIONIC_STORM";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+HALLUCINATION] = "HALLUCINATION";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+RECALL] = "RECALL";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+STASIS_FIELD] = "STASIS_FIELD";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+DISRUPTION_WEB] = "DISRUPTION_WEB";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+MIND_CONTROL] = "MIND_CONTROL";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+MAELSTROM] = "MAELSTROM";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+SINGULARITY_CHARGE] = "SINGULARITY_CHARGE";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+LEG_ENHANCEMENTS] = "LEG_ENHANCEMENTS";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+SCARAB_DAMAGE] = "SCARAB_DAMAGE";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+REAVER_CAPACITY] = "REAVER_CAPACITY";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+GRAVITIC_DRIVE] = "GRAVITIC_DRIVE";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+SENSOR_ARRAY] = "SENSOR_ARRAY";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+GRAVITIC_BOOSTERS] = "GRAVITIC_BOOSTERS";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+KHAYDARIN_AMULET] = "KHAYDARIN_AMULET";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+APIAL_SENSORS] = "APIAL_SENSORS";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+GRAVITIC_THRUSTERS] = "GRAVITIC_THRUSTERS";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+CARRIER_CAPACITY] = "CARRIER_CAPACITY";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+KHAYDARIN_CORE] = "KHAYDARIN_CORE";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+ARGUS_JEWEL] = "ARGUS_JEWEL";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+ARGUS_TALISMAN] = "ARGUS_TALISMAN";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+ARMOR] = "ARMOR";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+PLATING] = "PLATING";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+GROUND_WEAPONS] = "GROUND_WEAPONS";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+AIR_WEAPONS] = "AIR_WEAPONS";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+PLASMA_SHIELDS] = "PLASMA_SHIELDS";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+ASSIMILATOR] = "ASSIMILATOR";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+GAS_PROBE] = "GAS_PROBE";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_PSIONIC_STORM] = "R_PSIONIC_STORM";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_HALLUCINATION] = "R_HALLUCINATION";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_RECALL] = "R_RECALL";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_STASIS_FIELD] = "R_STASIS_FIELD";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_DISRUPTION_WEB] = "R_DISRUPTION_WEB";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_MIND_CONTROL] = "R_MIND_CONTROL";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_MAELSTROM] = "R_MAELSTROM";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_SINGULARITY_CHARGE] = "R_SINGULARITY_CHARGE";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_LEG_ENHANCEMENTS] = "R_LEG_ENHANCEMENTS";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_SCARAB_DAMAGE] = "R_SCARAB_DAMAGE";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_REAVER_CAPACITY] = "R_REAVER_CAPACITY";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_GRAVITIC_DRIVE] = "R_GRAVITIC_DRIVE";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_SENSOR_ARRAY] = "R_SENSOR_ARRAY";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_GRAVITIC_BOOSTERS] = "R_GRAVITIC_BOOSTERS";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_KHAYDARIN_AMULET] = "R_KHAYDARIN_AMULET";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_APIAL_SENSORS] = "R_APIAL_SENSORS";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_GRAVITIC_THRUSTERS] = "R_GRAVITIC_THRUSTERS";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_CARRIER_CAPACITY] = "R_CARRIER_CAPACITY";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_KHAYDARIN_CORE] = "R_KHAYDARIN_CORE";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_ARGUS_JEWEL] = "R_ARGUS_JEWEL";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_ARGUS_TALISMAN] = "R_ARGUS_TALISMAN";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_ARMOR] = "R_ARMOR";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_PLATING] = "R_PLATING";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_GROUND_WEAPONS] = "R_GROUND_WEAPONS";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_AIR_WEAPONS] = "R_AIR_WEAPONS";
-	stringIdentifier[UNIT_TYPE_COUNT*PROTOSS+R_PLASMA_SHIELDS] = "R_PLASMA_SHIELDS";
-
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+DRONE] = "DRONE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+LARVA] = "LARVA";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+ZERGLING] = "ZERGLING";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+HYDRALISK] = "HYDRALISK";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+ULTRALISK] = "ULTRALISK";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+DEFILER] = "DEFILER";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+LURKER] = "LURKER";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+OVERLORD] = "OVERLORD";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+MUTALISK] = "MUTALISK";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+GUARDIEN] = "GUARDIEN";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+QUEEN] = "QUEEN";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+SCOURGE] = "SCOURGE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+DEVOURER] = "DEVOURER";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+LAIR] = "LAIR";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+HIVE] = "HIVE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+NYDUS_CANAL] = "NYDUS_CANAL";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+HYDRALISK_DEN] = "HYDRALISK_DEN";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+DEFILER_MOUND] = "DEFILER_MOUND";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+HATCHERY] = "HATCHERY";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+GREATER_SPIRE] = "GREATER_SPIRE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+QUEENS_NEST] = "QUEENS_NEST";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+EVOLUTION_CHAMBER] = "EVOLUTION_CHAMBER";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+ULTRALISK_CAVERN] = "ULTRALISK_CAVERN";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+SPIRE] = "SPIRE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+SPAWNING_POOL] = "SPAWNING_POOL";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+CREEP_COLONY] = "CREEP_COLONY";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+SPORE_COLONY] = "SPORE_COLONY";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+SUNKEN_COLONY] = "SUNKEN_COLONY";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+VENTRAL_SACKS] = "VENTRAL_SACKS";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+ANTENNAE] = "ANTENNAE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+PNEUMATIZED_CARAPACE] = "PNEUMATIZED_CARAPACE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+METABOLIC_BOOST] = "METABOLIC_BOOST";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+ADRENAL_GLANDS] = "ADRENAL_GLANDS";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+MUSCULAR_AUGMENTS] = "MUSCULAR_AUGMENTS";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+GROOVED_SPINES] = "GROOVED_SPINES";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+GAMETE_MEIOSIS] = "GAMETE_MEIOSIS";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+METASYNAPTIC_NODE] = "METASYNAPTIC_NODE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+CHITINOUS_PLATING] = "CHITINOUS_PLATING";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+ANABOLIC_SYNTHESIS] = "ANABOLIC_SYNTHESIS";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+BURROWING] = "BURROWING";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+SPAWN_BROODLING] = "SPAWN_BROODLING";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+PLAGUE] = "PLAGUE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+CONSUME] = "CONSUME";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+ENSNARE] = "ENSNARE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+LURKER_ASPECT] = "LURKER_ASPECT";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+CARAPACE] = "CARAPACE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+FLYER_CARAPACE] = "FLYER_CARAPACE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+MELEE_ATTACKS] = "MELEE_ATTACKS";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+MISSILE_ATTACKS] = "MISSILE_ATTACKS";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+FLYER_ATTACKS] = "FLYER_ATTACKS";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+EXTRACTOR] = "EXTRACTOR";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+GAS_DRONE] = "GAS_DRONE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+BREAK_UP_BUILDING] = "BREAK_UP_BUILDING";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_VENTRAL_SACKS] = "R_VENTRAL_SACKS";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_ANTENNAE] = "R_ANTENNAE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_PNEUMATIZED_CARAPACE] = "R_PNEUMATIZED_CARAPACE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_METABOLIC_BOOST] = "R_METABOLIC_BOOST";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_ADRENAL_GLANDS] = "R_ADRENAL_GLANDS";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_MUSCULAR_AUGMENTS] = "R_MUSCULAR_AUGMENTS";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_GROOVED_SPINES] = "R_GROOVED_SPINES";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_GAMETE_MEIOSIS] = "R_GAMETE_MEIOSIS";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_METASYNAPTIC_NODE] = "R_METASYNAPTIC_NODE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_CHITINOUS_PLATING] = "R_CHITINOUS_PLATING";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_ANABOLIC_SYNTHESIS] = "R_ANABOLIC_SYNTHESIS";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_BURROWING] = "R_BURROWING";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_SPAWN_BROODLING] = "R_SPAWN_BROODLING";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_PLAGUE] = "R_PLAGUE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_CONSUME] = "R_CONSUME";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_ENSNARE] = "R_ENSNARE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_LURKER_ASPECT] = "R_LURKER_ASPECT";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_CARAPACE] = "R_CARAPACE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_FLYER_CARAPACE] = "R_FLYER_CARAPACE";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_MELEE_ATTACKS] = "R_MELEE_ATTACKS";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_MISSILE_ATTACKS] = "R_MISSILE_ATTACKS";
-	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_FLYER_ATTACKS] = "R_FLYER_ATTACKS";
-
+	stringIdentifier.assign(MAX_STRINGS, "ERROR");
+	
 	stringIdentifier[START_LOAD_LANGUAGE_FILES_STRING] = "START_LOAD_LANGUAGE_FILES_STRING";
 	stringIdentifier[START_LOAD_UI_CONFIGURATION_STRING] = "START_LOAD_UI_CONFIGURATION_STRING";
 	stringIdentifier[START_LOAD_CORE_CONFIGURATION_STRING] = "START_LOAD_CORE_CONFIGURATION_STRING";
@@ -2276,6 +2010,7 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[DATABASE_WINDOW_TITLE_STRING] = "DATABASE_WINDOW_TITLE_STRING";
 	stringIdentifier[INFO_WINDOW_TITLE_STRING] = "INFO_WINDOW_TITLE_STRING";
 	stringIdentifier[TECHTREE_WINDOW_TITLE_STRING] = "TECHTREE_WINDOW_TITLE_STRING";
+	stringIdentifier[DEBUG_WINDOW_TITLE_STRING] = "DEBUG_WINDOW_TITLE_STRING";
 	stringIdentifier[BOGRAPH_WINDOW_TITLE_STRING] = "BOGRAPH_WINDOW_TITLE_STRING";
 	stringIdentifier[BODIAGRAM_WINDOW_TITLE_STRING] = "BODIAGRAM_WINDOW_TITLE_STRING";
 	stringIdentifier[STATISTICS_WINDOW_TITLE_STRING] = "STATISTICS_WINDOW_TITLE_STRING";
@@ -2304,17 +2039,16 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[HELP_WINDOW_BACK_STRING] = "HELP_WINDOW_BACK_STRING";
 	stringIdentifier[SAVE_BOX_OK_STRING] = "SAVE_BOX_OK_STRING";
 	stringIdentifier[SAVE_BOX_CANCEL_STRING] = "SAVE_BOX_CANCEL_STRING";
-	stringIdentifier[UNIT_TYPE_0_STRING] = "UNIT_TYPE_0_STRING";
-	stringIdentifier[UNIT_TYPE_1_STRING] = "UNIT_TYPE_1_STRING";
-	stringIdentifier[UNIT_TYPE_2_STRING] = "UNIT_TYPE_2_STRING";
-	stringIdentifier[UNIT_TYPE_3_STRING] = "UNIT_TYPE_3_STRING";
-	stringIdentifier[UNIT_TYPE_4_STRING] = "UNIT_TYPE_4_STRING";
-	stringIdentifier[UNIT_TYPE_5_STRING] = "UNIT_TYPE_5_STRING";
-	stringIdentifier[UNIT_TYPE_6_STRING] = "UNIT_TYPE_6_STRING";
-	stringIdentifier[UNIT_TYPE_7_STRING] = "UNIT_TYPE_7_STRING";
-	stringIdentifier[UNIT_TYPE_8_STRING] = "UNIT_TYPE_8_STRING";
-	stringIdentifier[UNIT_TYPE_9_STRING] = "UNIT_TYPE_9_STRING";
-	stringIdentifier[UNIT_TYPE_10_STRING] = "UNIT_TYPE_10_STRING";
+	
+	stringIdentifier[DRAW_TICKS_STRING] = "DRAW_TICKS_STRING";
+	stringIdentifier[GENERATION_TICKS_STRING] = "GENERATION_TICKS_STRING";
+	stringIdentifier[PROCESS_TICKS_STRING] = "PROCESS_TICKS_STRING";
+	stringIdentifier[MESSAGE_TICKS_STRING] = "MESSAGE_TICKS_STRING";
+	stringIdentifier[SOUND_TICKS_STRING] = "SOUND_TICKS_STRING";
+	stringIdentifier[IDLE_TICKS_STRING] = "IDLE_TICKS_STRING";
+	stringIdentifier[FPS_TEXT_STRING] = "FPS_TEXT_STRING";
+	stringIdentifier[GPS_TEXT_STRING] = "GPS_TEXT_STRING";
+	
 	stringIdentifier[STARTING_FORCE_STRING] = "STARTING_FORCE_STRING";
 	stringIdentifier[NON_GOALS_STRING] = "NON_GOALS_STRING";
 	stringIdentifier[GOALS_STRING] = "GOALS_STRING";
@@ -2333,23 +2067,17 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[GIVE_GOAL_A_NAME_STRING] = "GIVE_GOAL_A_NAME_STRING";
 	stringIdentifier[SAVE_BUILD_ORDER_AS_STRING] = "SAVE_BUILD_ORDER_AS_STRING";
 	stringIdentifier[GIVE_BO_A_NAME_STRING] = "GIVE_BO_A_NAME_STRING";
-	stringIdentifier[BODIAGRAM_MINERALS_STRING] = "BODIAGRAM_MINERALS_STRING";
-	stringIdentifier[BODIAGRAM_GAS_STRING] = "BODIAGRAM_GAS_STRING";
 	stringIdentifier[BODIAGRAM_SUPPLY_STRING] = "BODIAGRAM_SUPPLY_STRING";
 	stringIdentifier[BODIAGRAM_TIME_STRING] = "BODIAGRAM_TIME_STRING";
-	stringIdentifier[TERRA_STRING] = "TERRA_STRING";
-	stringIdentifier[PROTOSS_STRING] = "PROTOSS_STRING";
-	stringIdentifier[ZERG_STRING] = "ZERG_STRING";
 	stringIdentifier[CLICK_TO_INSERT_ORDER_STRING] = "CLICK_TO_INSERT_ORDER_STRING";
 	stringIdentifier[OPTIMIZE_EVERYTHING_STRING] = "OPTIMIZE_EVERYTHING_STRING";
 	stringIdentifier[OPTIMIZE_SELECTED_STRING] = "OPTIMIZE_SELECTED_STRING";
+
 	stringIdentifier[RESET_BUILD_ORDER_STRING] = "RESET_BUILD_ORDER_STRING";
 	stringIdentifier[SAVE_BUILD_ORDER_STRING] = "SAVE_BUILD_ORDER_STRING";
 	stringIdentifier[LOAD_BUILD_ORDER_STRING] = "LOAD_BUILD_ORDER_STRING";
 
 	stringIdentifier[BOWINDOW_BUILD_TIME_STRING] = "BOWINDOW_BUILD_TIME_STRING";
-	stringIdentifier[BOWINDOW_MINERALS_STRING] = "BOWINDOW_MINERALS_STRING";
-	stringIdentifier[BOWINDOW_GAS_STRING] = "BOWINDOW_GAS_STRING";
 	stringIdentifier[BOWINDOW_EACH_TOTAL_STRING] = "BOWINDOW_EACH_TOTAL_STRING";
 		
 	stringIdentifier[SPEED_STRING] = "SPEED_STRING";
@@ -2362,8 +2090,6 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[RES_UNITS_STRUCT_STRING] = "RES_UNITS_STRUCT_STRING";
 	stringIdentifier[TOTAL_STRING] = "TOTAL_STRING";
 	stringIdentifier[ADD_PLAYER_STRING] = "ADD_PLAYER_STRING";
-	stringIdentifier[MINERALS_STAT_STRING] = "MINERALS_STAT_STRING";
-	stringIdentifier[GAS_STAT_STRING] = "GAS_STAT_STRING";
 	stringIdentifier[TIME_STAT_STRING] = "TIME_STAT_STRING";
 	stringIdentifier[FORCE_STAT_STRING] = "FORCE_STAT_STRING";
 	stringIdentifier[AVERAGE_BO_LENGTH_STAT_STRING] = "AVERAGE_BO_LENGTH_STAT_STRING";
@@ -2381,8 +2107,6 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[ADD_GOALS_TOOLTIP_STRING] = "ADD_GOALS_TOOLTIP_STRING";
 	stringIdentifier[CHOOSE_GOALS_TOOLTIP_STRING] = "CHOOSE_GOALS_TOOLTIP_STRING";
 	stringIdentifier[CHOOSE_STARTING_FORCE_TOOLTIP_STRING] = "CHOOSE_STARTING_FORCE_TOOLTIP_STRING";
-	stringIdentifier[MINERALS_STAT_TOOLTIP_STRING] = "MINERALS_STAT_TOOLTIP_STRING";
-	stringIdentifier[GAS_STAT_TOOLTIP_STRING] = "GAS_STAT_TOOLTIP_STRING";
 	stringIdentifier[TIME_STAT_TOOLTIP_STRING] = "TIME_STAT_TOOLTIP_STRING";
 	stringIdentifier[FORCE_STAT_TOOLTIP_STRING] = "FORCE_STAT_TOOLTIP_STRING";
 	stringIdentifier[AVERAGE_BO_LENGTH_STAT_TOOLTIP_STRING] = "AVERAGE_BO_LENGTH_STAT_TOOLTIP_STRING";
@@ -2466,14 +2190,6 @@ void UI_Theme::initStringIdentifier()
 	
 	stringIdentifier[SETTINGS_SAVED_STRING] = "SETTINGS_SAVED_STRING";
 	
-	stringIdentifier[GAME_SPEED_SLOWEST_STRING] = "GAME_SPEED_SLOWEST_STRING";
-	stringIdentifier[GAME_SPEED_SLOWER_STRING] = "GAME_SPEED_SLOWER_STRING";
-	stringIdentifier[GAME_SPEED_SLOW_STRING] = "GAME_SPEED_SLOW_STRING";
-	stringIdentifier[GAME_SPEED_NORMAL_STRING] = "GAME_SPEED_NORMAL_STRING";
-	stringIdentifier[GAME_SPEED_FAST_STRING] = "GAME_SPEED_FAST_STRING";
-	stringIdentifier[GAME_SPEED_FASTER_STRING] = "GAME_SPEED_FASTER_STRING";
-	stringIdentifier[GAME_SPEED_FASTEST_STRING] = "GAME_SPEED_FASTEST_STRING";
-	
 	stringIdentifier[LANGUAGE_HAS_CHANGED_STRING] = "LANGUAGE_HAS_CHANGED_STRING";
 	stringIdentifier[SETTING_LANGUAGE_STRING] = "SETTING_LANGUAGE_STRING";
 	stringIdentifier[SETTING_ZERO_LANGUAGE_STRING] = "SETTING_ZERO_LANGUAGE_STRING";
@@ -2522,4 +2238,6 @@ void UI_Theme::initStringIdentifier()
 	
 	stringIdentifier[DATA_ENTRY_OPEN_BUTTON_TOOLTIP_STRING] = "DATA_ENTRY_OPEN_BUTTON_TOOLTIP_STRING";
 	stringIdentifier[DATA_ENTRY_CHECK_BUTTON_TOOLTIP_STRING] = "DATA_ENTRY_CHECK_BUTTON_TOOLTIP_STRING";
+
+	
 }

@@ -11,7 +11,7 @@ BUILD_ORDER::~BUILD_ORDER()
 
 BO_HEADER::BO_HEADER():
 	name(""),
-	race(TERRA),
+	race(0),
 	time(0)
 {}
 

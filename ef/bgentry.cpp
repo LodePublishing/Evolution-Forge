@@ -13,7 +13,7 @@ void BoGraphEntry::process()
 {
 	UI_Button::process();
 	if(checkForNeedRedraw())
-		getParent()->setNeedRedrawMoved();
+		getParent()->setNeedRedrawMoved(); // TODO
 }
 
 void BoGraphEntry::draw(DC* dc) const

@@ -5,7 +5,7 @@
 GoalMenu::GoalMenu(UI_Object* goal_parent, const Rect& goal_rect, const Size distance_bottom_right, const ePositionMode position_mode):
 	UI_Menu(goal_parent, goal_rect, distance_bottom_right, position_mode, true, TWO_COLOUMNS_MENU, STANDARD_BUTTON_WIDTH),
 	anarace(NULL),
-	lastRace(TERRA)
+	lastRace(0)
 { }
 
 GoalMenu::~GoalMenu()
@@ -79,7 +79,7 @@ void GoalMenu::resetData()
 		os.str("");
 		for(std::list<GOAL>::const_iterator j = my_goal->goalList.begin();j!=my_goal->goalList.end();++j)
 		{
-			os << j->getCount() << "x $" << stats[lastRace][j->getUnit()].name << "$";
+			os << j->getCount() << "x $" << GAME::lookUpUnitString(lastRace, j->getUnit()) << "$";
 			if(j->getTime()>0)
 				os << " [" << formatTime(j->getTime(), efConfiguration.getGameSpeed()) << "]"; 
 			os << "#";

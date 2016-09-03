@@ -1,0 +1,89 @@
+@BO_HEADER
+		"Name" "kaput2"
+		"Race" "Terra"
+		"Time" "15719"
+@END
+@GOAL
+		"Name" "kaput2"
+		"Race" "Terra"
+		"SCV" "1" "0" "0"
+		"Command Center" "1" "0" "0"
+		"Wraith" "4" "0" "0"
+		"Starport" "1" "0" "0"
+		"Factory" "1" "0" "0"
+		"Barracks" "1" "0" "0"
+		"Refinery" "1" "0" "0"
+@END
+@BUILDORDER
+		"SCV"
+		"SCV"
+		"SCV"
+		"SCV"
+		"SCV"
+		"SCV"
+		"Supply Depot"
+		"SCV"
+		"Supply Depot"
+		"Barracks"
+		"SCV"
+		"Refinery"
+		"SCV"
+		"SCV"
+		"Gas SCV"
+		"SCV"
+		"Factory"
+		"SCV"
+		"Gas SCV"
+		"SCV"
+		"Supply Depot"
+		"SCV"
+		"SCV"
+		"Starport"
+		"Starport"
+		"Wraith"
+		"Supply Depot"
+		"Command Center"
+		"SCV"
+		"Wraith"
+		"Wraith"
+		"SCV"
+		"Supply Depot"
+		"Wraith"
+		"Gas SCV"
+@END
+20
+1
+1
+1
+1
+1
+1
+15
+1
+15
+16
+1
+64
+1
+1
+65
+1
+18
+1
+65
+1
+15
+1
+1
+20
+20
+9
+15
+19
+1
+9
+9
+1
+15
+9
+65

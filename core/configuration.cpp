@@ -17,7 +17,8 @@ CoreConfiguration::CoreConfiguration() :
 	expansionSet(true),
 	allowWaitOrders(true),
 	waitAccuracy(100),
-	configurationFile("settings/core.cfg")
+	configurationFile("settings/core.cfg"),
+	gameType(0)
 { }
 
 CoreConfiguration::~CoreConfiguration()
@@ -167,6 +168,19 @@ void CoreConfiguration::loadConfigurationFile()
 		old_pos = pFile.tellg();
 	}// END while
 } // schoen :)
+
+const bool CoreConfiguration::setGameType(const unsigned int game_type_number)
+{
+	if(gameType == game_type_number)
+		return(false);
+#ifdef _SCC_DEBUG
+	if((game_type_number==0) || (game_type_number>GAME::MAX_GAME_TYPES)) {
+		toErrorLog("DEBUG (CoreConfiguration::setGameType()): Value game_type_number out of range.");return(false);
+	}
+#endif
+	gameType = game_type_number;
+	return(true);
+}
 
 const bool CoreConfiguration::setFastCalculation(const bool fast_calculation) 
 {

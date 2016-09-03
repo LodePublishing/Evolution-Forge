@@ -1,210 +1,264 @@
 #include "prebuildorder.hpp"
 #include <string.h>
-/* PREBUILDORDER.CPP - last changed: 6/23/04								*
- * Author: Clemens Lode												*
- * Copyright: Clemens Lode											*
- *																	*
- *  PURPPOSE OF THIS FILE:											*
- *		Supply various functions for the classes RACE and ANARACE,  *
- * 		mainly concerning harvesting, supply and units				*/
+#include <math.h>
 
+PREBUILDORDER::PREBUILDORDER(unsigned int player_number, START* start, UNIT (&units)[MAX_PLAYER][MAX_LOCATIONS]):
+	buildingQueue(),
 
-PREBUILDORDER::PREBUILDORDER():
-//	location(0),
-//	pStartCondition(NULL),
-	buildingQueue(), // TODO
-	parallelCommandQueues(),
-//	lastcounter(0),
-//	lastunit(0),
-	neededMinerals(0),
-	neededGas(0),
+	successType(OK),
+	successUnit(0),
+
+	anaraceBuildFacility(0),
+	anaraceBuildLocation(0),
+	anaraceBuildTotalTime(0),
+	anaraceBuildUnit(0),
+	anaraceBuildFinishedTime(0),
+	
 	ready(false),
+
+	Code(),
+	IP(Code.begin()),
+	unit(units),
+	
+	pStart(start),
+	conditionsChanged(true),
 	alwaysBuildWorkers(false),
 	onlySwapOrders(false),
 
-	unit(NULL),
-//	pMap(NULL),
-//	pStats(NULL),
-	pStart(NULL),
-//	pGoal(NULL),
-	conditionsChanged(true),
-	
-	playerNum(0),
-	minerals(0),
-	gas(0),
+	playerNum(player_number),
 	timer(0), //? max_time-1?
-	IP(0),
-	harvestedMinerals(0),
-	harvestedGas(0),
-	wastedMinerals(0),
-	wastedGas(0),
+
+	resource(RACE::MAX_RESOURCE_TYPES),
+	neededResource(RACE::MAX_RESOURCE_TYPES),
+	harvestedResource(RACE::MAX_RESOURCE_TYPES),
+	
 	needSupply(0),
 	haveSupply(0),
-	length(0),
-	timeout(0),
-
-	playerNumInitialized(false),
-//	goalInitialized(false),
-//	mapInitialized(false),
-//	pStatsInitialized(false),
-	unitsInitialized(false),
-	pStartInitialized(false)
+	timeout(0)
 {
-	memset(mineralHarvestPerSecond, 0, 45 * MAX_LOCATIONS*sizeof(int));
-	memset(gasHarvestPerSecond, 0, 5 * MAX_LOCATIONS*sizeof(int));
+	for(unsigned int i = MAX_LOCATIONS; i--;)
+	{
+//		resourceHarvestPerFrame[i].resize(RACE::MAX_RESOURCE_TYPES);
+		accepterDistance[i].resize(RACE::MAX_RESOURCE_TYPES);
+	}
+	
 	resetGeneCode();
-	resetSpecial();
+//	resetSpecial();
 }
 
 PREBUILDORDER::~PREBUILDORDER()
 {
-	std::list<PARALLEL_COMMAND*>::iterator i = parallelCommandQueues.begin();
-	while(i!=parallelCommandQueues.end())
-	{
-		delete *i;
-		i = parallelCommandQueues.erase(i);
-	}
-
 	while(!buildingQueue.empty())
 		buildingQueue.pop();
 }
 
+void PREBUILDORDER::postProcessing()
+{}
 
 void PREBUILDORDER::resetData()
 {
-//	location = NULL;
 	conditionsChanged = true;
-//	pStartCondition = NULL;
 	while(!buildingQueue.empty())
 		buildingQueue.pop();
-//	unit = NULL;
-//	pStats = NULL;
-	neededMinerals = 0;
-	neededGas = 0;
-//	pStart = NULL;
+
+	// ? mmmh...  TODO
+//	resources.resize(GAME::
+//	for(unsigned int i = MAX_LOCATIONS; i--;)
+//		resourcesHarvestPerFrame.resize(RACE::MAX_RESOURCE_TYPES);
+//	neededResources.
+//	harvestedResources
 	ready = false;
-//	pGoal = NULL;
-//	playerNum = 0;
-	minerals = 0;
-	gas = 0;
-	timer = 0; //? max_time-1?
-	IP = 0;
-	harvestedMinerals = 0;
-	harvestedGas = 0;
-	wastedMinerals = 0;
-	wastedGas = 0;
+	timer = 0;
+	resetGeneCode();
+	resetInstructionPointer();
 	needSupply = 0;
 	haveSupply = 0;
-	length = 0;
 	timeout = 0;
-	// pMap == NULL?
-	memset(mineralHarvestPerSecond, 0, 45 * MAX_LOCATIONS*sizeof(int));
-	memset(gasHarvestPerSecond, 0, 5 * MAX_LOCATIONS*sizeof(int));
-	resetGeneCode();
-	resetSpecial();
+//	resetSpecial();
 }
+
+void PREBUILDORDER::eraseRemainingCode() 
+{
+	if(IP != Code.end())
+		Code.erase(IP, Code.end());
+}
+
+/*const bool PREBUILDORDER::buildGene(const unsigned int build_unit)
+{
+	const UNIT_STATISTICS* stat = &((*getpStats())[build_unit]);
+	bool ok = false;
+	successType = OK;
+	successUnit = 0;
+
+	if(build_unit <= UNIT_TYPE_COUNT)
+	{
+		if((stat->prerequisite[0] > 0)&&(getLocationTotal(GLOBAL, stat->prerequisite[0]) == 0)) {
+			successUnit = stat->prerequisite[0];
+			successType = PREREQUISITE_WAS_FULFILLED;
+		}
+		else		
+		if((stat->prerequisite[1] > 0)&&(getLocationTotal(GLOBAL, stat->prerequisite[1]) == 0)) {
+			successUnit = stat->prerequisite[1];
+			successType = PREREQUISITE_WAS_FULFILLED;
+		}
+		else 
+		if((stat->prerequisite[2] > 0)&&(getLocationTotal(GLOBAL, stat->prerequisite[2]) == 0)) {
+			successUnit = stat->prerequisite[2];
+			successType = PREREQUISITE_WAS_FULFILLED;
+		}
+		else
+		if //ANA~
+//TODO, < ((stat->facilityType==IS_LOST)&&(stat->facility[fac]==stat->facility2)) einfuegen....
+			( ((stat->facility[0] == 0)||(getLocationAvailible(GLOBAL, stat->facility[0]) == 0))&&
+			  ((stat->facility[1] == 0)||(getLocationAvailible(GLOBAL, stat->facility[1]) == 0))&&
+			  ((stat->facility[2] == 0)||(getLocationAvailible(GLOBAL, stat->facility[2]) == 0))&&
+			  ((stat->facility[0] > 0)||(stat->facility[1] > 0)||(stat->facility[2] > 0))
+			)
+ //TODO: availible/force[0] auf 100 setzen... naj ama guggn
+		{
+			if(stat->facility[0] > 0)
+				successUnit = stat->facility[0];
+			else if(stat->facility[1] > 0)
+				successUnit = stat->facility[1];
+			else if(stat->facility[2] > 0)
+				successUnit = stat->facility[2];
+			successType = FACILITY_BECAME_AVAILIBLE;
+		}
+		else
+		if(((stat->facility2 > 0) && (getLocationAvailible(GLOBAL, stat->facility2) == 0))||
+		   ((stat->facility2 == build_unit) && (getLocationAvailible(GLOBAL, stat->facility2) < 2)))
+		{
+			successUnit = stat->facility2;
+			successType = FACILITY_BECAME_AVAILIBLE;
+		}
+//TODO: evtl success 2 Schritte zurueckverfolgen...
+		else
+		if(((getHaveSupply() < getNeedSupply() + stat->needSupply - stat->haveSupply) ||
+			(stat->needSupply + getNeedSupply() > MAX_SUPPLY)) &&
+			(stat->needSupply != 0)) {
+			successUnit = 0;
+			successType = SUPPLY_WAS_SATISFIED;
+		}
+		else
+		if(getMinerals() < stat->minerals + stat->upgrade_cost * getLocationTotal(GLOBAL, build_unit))
+		{
+			successUnit = 0;
+			successType = ENOUGH_MINERALS_WERE_GATHERED;
+			if(neededMinerals > stat->minerals + stat->upgrade_cost * getLocationTotal(GLOBAL, build_unit) - getMinerals())
+				neededMinerals = stat->minerals + stat->upgrade_cost * getLocationTotal(GLOBAL, build_unit) - getMinerals();
+//Fehler is wahrscheinlich hier irgendwoe...
+		}
+		else
+		if(getGas() < stat->gas + stat->upgrade_cost * getLocationTotal(GLOBAL, build_unit))
+		{
+			successUnit = 0;
+			successType = ENOUGH_GAS_WAS_GATHERED;
+			if(neededGas > stat->gas + stat->upgrade_cost * getLocationTotal(GLOBAL, build_unit) - getGas())
+				neededGas = stat->gas + stat->upgrade_cost * getLocationTotal(GLOBAL, build_unit) - getGas();
+		}
+		else
+		if((stat->upgrade[0] > 0) && (getLocationTotal(GLOBAL, build_unit) >= 2) && (!getLocationTotal(GLOBAL, stat->upgrade[0])))
+		{
+			successUnit = stat->upgrade[0];
+			successType = PREREQUISITE_WAS_FULFILLED;
+		}
+		else
+		if((stat->upgrade[1] > 0) && (getLocationTotal(GLOBAL, build_unit) >= 3) && (!getLocationTotal(GLOBAL, stat->upgrade[1])))
+		{
+			successUnit = stat->upgrade[1];
+			successType = PREREQUISITE_WAS_FULFILLED;
+		}
+		else	
+		{
+			ok = putInBuildingQueue(build_unit);
+		} // if resources prere etc ok
+	} // end build_unit <= REFINERY+1
+	return(ok);
+}*/
+
+const bool PREBUILDORDER::buildGene(const unsigned int build_unit)
+{
+#ifdef _SCC_DEBUG
+	if(build_unit >= RACE::UNIT_TYPE_COUNT) {
+		toErrorLog("DEBUG (PREBUILDORDER::buildGene()): build_unit out of range.");return(false);
+	}
+#endif
+	const UNIT_STATISTICS& stat = (*getpStats())[build_unit];
+
+	
+	//TODO: Array und testen wo der comp am meisten haengenbleibt und abbricht... moeglichst dann nach oben bringen!
+	if(
+		((stat.prerequisite[0] == 0)||(getLocationTotal(GLOBAL, stat.prerequisite[0]) > 0))&&
+		((stat.prerequisite[1] == 0)||(getLocationTotal(GLOBAL, stat.prerequisite[1]) > 0))&&
+		((stat.prerequisite[2] == 0)||(getLocationTotal(GLOBAL, stat.prerequisite[2]) > 0))
+		
+		&&
+		( ((stat.facility[0] > 0)&&(getLocationAvailible(GLOBAL, stat.facility[0]) > 0))||
+		  ((stat.facility[1] > 0)&&(getLocationAvailible(GLOBAL, stat.facility[1]) > 0))||
+		  ((stat.facility[2] > 0)&&(getLocationAvailible(GLOBAL, stat.facility[2]) > 0))||
+		  ((stat.facility[0]==0)&&(stat.facility[1]==0)&&(stat.facility[2] == 0))
+		)
+		&&
+		(((getHaveSupply() >= stat.needSupply + getNeedSupply() - stat.haveSupply) && (stat.needSupply+getNeedSupply() <= GAME::MAX_SUPPLY)) || (stat.needSupply == 0)) 
+		// TODO: IS_LOST einfuegen! ?
+		&&
+		((stat.facility2 == 0) || (getLocationAvailible(GLOBAL, stat.facility2) > 0)))
+	{
+		bool ok = true;
+		for(unsigned int i = RACE::MAX_RESOURCE_TYPES; i--;)
+			if(getResource(i) < stat.resource[i])
+			{
+				if(neededResource[i] > stat.resource[i] - getResource(i))
+					neededResource[i] = stat.resource[i] - getResource(i);
+				ok = false;
+				// kein break, damit wir alle neededResource schreiben koennen!
+			}
+		if(ok)
+			return(putInBuildingQueue(build_unit));
+	} //end prere/fac else
+	return(false);
+}
+
 
 
 void PREBUILDORDER::prepareForNewGeneration()
 {
-#ifdef _SCC_DEBUG
-	if(!pStartInitialized) {
-		toErrorLog("DEBUG (PREBUILDORDER::prepareForNewGeneration()): pStart not initialized.");
-	}
-#endif
-	std::list<PARALLEL_COMMAND*>::iterator i = parallelCommandQueues.begin();
-	while(i!=parallelCommandQueues.end())
+	for(unsigned int i = RACE::MAX_RESOURCE_TYPES; i--;)
 	{
-		delete *i;
-		i = parallelCommandQueues.erase(i);
+		setHarvestedResource(i, 0);
+		setResource(i, (*(getStartCondition()))->getResource(i));
+		adjustAccepterDistanceAllLocations(i);
+//		adjustHarvestAllLocations(i);
 	}
-
-	if(isAlwaysBuildWorkers())
-	{
-		PARALLEL_COMMAND* gimme = new PARALLEL_COMMAND();
-		gimme->unit = SCV;
-		gimme->count = 64;
-		parallelCommandQueues.push_back(gimme);
-	}
-								
-	setHarvestedGas(0);setHarvestedMinerals(0);
-	setWastedGas(0);setWastedMinerals(0);
-	setMinerals((*(getStartCondition()))->getMinerals());
-	setGas((*(getStartCondition()))->getGas());
-	setTimer(coreConfiguration.getMaxTime()-(*(getStartCondition()))->getStartTime());
+	
+	setTimer( coreConfiguration.getMaxTime() - (*(getStartCondition()))->getStartTime() );
 	setNeedSupply((*(getStartCondition()))->getNeedSupply());
 	setHaveSupply((*(getStartCondition()))->getHaveSupply());
 	
-	const UNIT* start_units = (*(getStartCondition()))->getUnit(0);
-//	int j = 0;
-	for(unsigned int k=LAST_UNIT;k--;)
-		if(start_units->getTotal(k))
-		{
-			getGoal()->calculateFinalTimesAtBeginning(0, k, start_units->getTotal(k), 0);
-/*			last[j].location = 1;
-			last[j].unit = k;
-			last[j].count = 1;
-			last[j].
-			TODO liste oder Vektor*/
-		}
+	const UNIT& start_units = (*(getStartCondition()))->getUnit(0);
+	for(unsigned int k=RACE::UNIT_TYPE_COUNT; k--;) // TODO
+		if(start_units.getTotal(k))
+			getGoal()->calculateFinalTimesAtBeginning(0, k, start_units.getTotal(k), 0);
+	setTimeOut(coreConfiguration.getMaxTimeOut());
+
+	resetInstructionPointer();
+	
 		
 	
-/*	for(int k=4;k--;) //TODO
-	{
-		last[k].location=1;
-		last[k].unit=SCV;
-		last[k].count=1;
-	}
-	for(unsigned int int k=4;i<MAX_LENGTH; ++k)
-	{
-		last[k].location=0;
-		last[k].unit=0;
-		last[k].count=0;
-	}
-	lastcounter=4;*/
-	setTimeOut(coreConfiguration.getMaxTimeOut());
-	setIP(coreConfiguration.getMaxLength()-1);
-	ready=false;
+	ready = false;
 
-	if(getRace() == ZERG)
-		resetSpecial();
+//	resetSpecial();
 }																																							
-// -----------------------------------
-// ------ CONTROLS FROM OUTSIDE ------
-// -----------------------------------
-
-const bool PREBUILDORDER::replaceCode(const unsigned int ip, const unsigned int code)
-{
-#ifdef _SCC_DEBUG
-	if(ip >= MAX_LENGTH) {
-		toErrorLog("DEBUG: (PREBUILDORDER::replaceCode): Value ip out of range.");return(false);
-	}
-	if(code >= getGoal()->getMaxBuildTypes()) {
-		toErrorLog("DEBUG: (PREBUILDORDER::replaceCode): Value code out of range.");return(false);
-	}
-#endif
-	bool changed_bo = false;
-	if(getCode(ip)!=code)
-		changed_bo=true;
-	setCode(ip, code);
-	return(changed_bo);
-}
-
-// ------------------------------------------
-// ------ END OF CONTROLS FROM OUTSIDE ------
-// ------------------------------------------
-
-
-
 // --------------------------------------------------------------
 // ------ FUNCTIONS THAT ARE PRIMARILY USED DURING THE RUN ------
 // --------------------------------------------------------------
 
 const unsigned int PREBUILDORDER::calculateIdleTime() const
 {
-	unsigned int idle_time=getTimer();
-	unsigned int harvest_minerals = harvestMinerals();
-	unsigned int harvest_gas = harvestGas();
+	unsigned int idle_time = getTimer();
+	std::vector<unsigned int> harvest_resource(RACE::MAX_RESOURCE_TYPES);
+	for(unsigned int i = RACE::MAX_RESOURCE_TYPES; i--;)
+		harvest_resource[i] = harvestResource(i);
 
 	if((!buildingQueue.empty())&&(buildingQueue.top().canBeCompleted())) {
 		// buildingRemaining = time until the building will be completed
@@ -215,36 +269,39 @@ const unsigned int PREBUILDORDER::calculateIdleTime() const
 			toErrorLog("ERROR: PREBUILDORDER::calculateIdleTime(): FinishedTime > getTimer...");
 		}
 #endif
-		unsigned int buildingRemaining = getTimer() - buildingQueue.top().getBuildFinishedTime();
+		unsigned int time_until_next_building = getTimer() - buildingQueue.top().getBuildFinishedTime();
 		// TODO
-		if(idle_time > buildingRemaining) 
-			idle_time = buildingRemaining;
+		if(idle_time > time_until_next_building) 
+			idle_time = time_until_next_building;
 	}
 
-	if( harvest_gas )
-//	  ( harvest_minerals || 
-  //		(neededGas + harvest_gas - neededGas % harvest_gas)/harvestGas() < (neededMinerals+(harvest_minerals - neededMinerals % harvest_minerals))/harvest_minerals)) 
-	{
-		unsigned int gasRemaining = ( neededGas + ( harvest_gas - neededGas % harvest_gas)) / harvest_gas;
-		if(idle_time > gasRemaining) 
-			idle_time = gasRemaining;
+	unsigned int idle_time_resources = MAX_TIME;
+	
+	for(unsigned int i = RACE::MAX_RESOURCE_TYPES; i--;)
+		if(harvest_resource[i] > 0)
+		{
+	// Zeit berechnen bei der bei momentaner Sammelgeschwindigkeit das Ziel erfuellt sein wird
+			unsigned int time_until_enough_resources = ( neededResource[i] + ( harvest_resource[i] - neededResource[i] % harvest_resource[i])) / harvest_resource[i];
+			if(time_until_enough_resources > idle_time_resources)
+				idle_time_resources = time_until_enough_resources;
+		}
+	
+  //		(neededGas + harvest_gas - neededGas % harvest_gas)/harvestGas() < (neededMinerals+(harvest_minerals - neededMinerals % harvest_minerals))/harvest_minerals))  ?
+	if(idle_time > idle_time_resources)
+		idle_time = idle_time_resources;
+	
+	if(idle_time > getTimeOut()) {
+		idle_time = getTimeOut();
 	}
-	else if(harvest_minerals) {
-		unsigned int mineralsRemaining=(neededMinerals + ( harvest_minerals - neededMinerals % harvest_minerals)) / harvest_minerals;
-		if(idle_time>mineralsRemaining) 
-			idle_time=mineralsRemaining;
-	}
-	if(idle_time>getTimeOut()) {
-		idle_time=getTimeOut();
-	}
+	
 	return(idle_time);
 }
 
 // called within the calculateStep function
-void PREBUILDORDER::adjustLocationUnitsAfterCompletion(const unsigned int location_number, const eFacilityType facilityType, const unsigned int facility, const unsigned int facility2, const unsigned int count)
+void PREBUILDORDER::adjustLocationUnitsAfterCompletion(const unsigned int location_number, const eFacilityType facility_type, const unsigned int facility, const unsigned int facility2, const unsigned int count)
 	// TODO count?
 {
-	switch(facilityType)
+	switch(facility_type)
 	{
 		case NO_FACILITY:break;
 		case IS_LOST:
@@ -281,97 +338,131 @@ void PREBUILDORDER::adjustLocationUnitsAfterCompletion(const unsigned int locati
 			// this is a research, no supply needed, applied to GLOBAL
 			if(facility)
 				addOneLocationAvailible(location_number, facility);
-			if(facility2)
-				removeOneLocationTotal(GLOBAL, facility2);
+			if(facility2) 
+				removeOneLocationTotal(GLOBAL, facility2); // mmmh... fehlerquelle TODO
 //r_researches need location 0
 			break;
-		case NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE:
-			// this is an update, no supply, applies to GLOBAL
+		case NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE:
 			if(facility)
 				addOneLocationAvailible(location_number, facility);
-			if(facility2) // special rule for upgrades!
-			{
-				removeOneLocationTotal(GLOBAL, facility2);
-				if(getLocationTotal(GLOBAL, facility2) > 0)
-					addOneLocationAvailible(GLOBAL, facility2);
-			}
+			if(facility2)
+				removeOneTotalEverywhere(facility2);
 			break;
 		case NEEDED_ALWAYS:break;
+		
+		case IS_LOST_GLOBALLY:
+			if(facility)
+				removeOneLocationTotal(location_number, facility);
+		case NEEDED_ONCE_IS_LOST_GLOBALLY:
+			if(facility2)
+				removeOneLocationTotalAllPlayers(location_number, facility2);
+			break;
+		
+		case NEEDED_UNTIL_COMPLETE_IS_LOST_GLOBALLY:
+			if(facility)
+				addOneLocationAvailible(location_number, facility);
+			if(facility2)
+				removeOneLocationTotalAllPlayers(location_number, facility2);
+			break;
 		case NO_FACILITY_BEHAVIOUR_DEFINED:
-		case FACILITY_TYPES:
+		case FACILITY_TYPES:				    
 		default:
 #ifdef _SCC_DEBUG
 			toErrorLog("ERROR: UNDEFINED FACILITY BEHAVIOUR DETECTED!");
 #endif
 		break;
-	} // end switch facilityType
+	} // end switch facility_type
 }
 
-void PREBUILDORDER::adjustAvailibility(const unsigned int loc, const unsigned int fac, const UNIT_STATISTICS* stat)
+// called when the building starts to be build
+void PREBUILDORDER::adjustAvailibility(const unsigned int location, const eFacilityType facility_type, const unsigned int facility, const unsigned int facility2, const signed int count)
 {
-	switch(stat->facilityType)
+	switch(facility_type)
 	{
 		case NO_FACILITY:break;
 		case IS_LOST:
-			if(stat->facility[fac]>0)
+			if(facility)
 			{
-				removeOneLocationAvailible(loc, stat->facility[fac]);
-				setNeedSupply(getNeedSupply()-(*getpStats())[stat->facility[fac]].needSupply);
-				setHaveSupply(getHaveSupply()-(*getpStats())[stat->facility[fac]].haveSupply);
+				modifyLocationAvailible(location, facility, -count);
+				setNeedSupply(getNeedSupply() - count * (*getpStats())[facility].needSupply);
+				setHaveSupply(getHaveSupply() - count * (*getpStats())[facility].haveSupply);
 			}
-			if(stat->facility2>0)
+			if(facility2)
 			{
-				removeOneLocationAvailible(loc, stat->facility2);
-				setNeedSupply(getNeedSupply()-(*getpStats())[stat->facility2].needSupply);
-				setHaveSupply(getHaveSupply()-(*getpStats())[stat->facility2].haveSupply);
+				modifyLocationAvailible(location, facility2, -count);
+				setNeedSupply(getNeedSupply() - count * (*getpStats())[facility2].needSupply);
+				setHaveSupply(getHaveSupply() - count * (*getpStats())[facility2].haveSupply);
 			}
 			break;
 		case IS_MORPHING:
-			if(stat->facility[fac]>0)
-				removeOneLocationAvailible(loc, stat->facility[fac]);
-			if(stat->facility2>0)
-				removeOneLocationAvailible(loc, stat->facility2);
+			if(facility)
+				modifyLocationAvailible(location, facility, -count);
+			if(facility2)
+				modifyLocationAvailible(location, facility2, -count);
 			break;
 		case NEEDED_ONCE:
 			break;
 		case NEEDED_UNTIL_COMPLETE:
-			if(stat->facility[fac]>0)
-				removeOneLocationAvailible(loc, stat->facility[fac]);
-			if(stat->facility2>0)
-				removeOneLocationAvailible(loc, stat->facility2);
+			if(facility)
+				modifyLocationAvailible(location, facility, -count);
+			if(facility2)
+				modifyLocationAvailible(location, facility2, -count);
 				//kommt glaub nicht vor...
 			break;
 		case NEEDED_ONCE_IS_LOST:
-			if(stat->facility2>0)
+			if(facility2)
 			{
-				removeOneLocationAvailible(loc, stat->facility2);
-				setNeedSupply(getNeedSupply()-(*getpStats())[stat->facility2].needSupply);
-				setHaveSupply(getHaveSupply()-(*getpStats())[stat->facility2].haveSupply);	
+				modifyLocationAvailible(location, facility2, -count);
+				setNeedSupply(getNeedSupply() - count * (*getpStats())[facility2].needSupply);
+				setHaveSupply(getHaveSupply() - count * (*getpStats())[facility2].haveSupply);	
 				// <- nicht noetig :/ eigentlich schon... bei gas scv z.B. :/
 			}
 			break;
 		case NEEDED_UNTIL_COMPLETE_IS_LOST:
-			if(stat->facility2>0)
+			if(facility)
+				modifyLocationAvailible(location, facility, -count);
+			if(facility2)
 			{
-				removeOneLocationAvailible(GLOBAL/*location*/ ,stat->facility2); // primarily for temporary R_researches, have to be location 0
-// TODO				 setNeedSupply(getNeedSupply()+(*getpStats())[stat->facility2].needSupply); // <- nicht noetig :/
+				modifyLocationAvailible(GLOBAL/*location*/ ,facility2, -count); // primarily for temporary R_researches, have to be location 0
+// TODO				 setNeedSupply(getNeedSupply()+(*getpStats())[facility2].needSupply); // <- nicht noetig :/
 			}
-			if(stat->facility[fac]>0)
-				removeOneLocationAvailible(loc, stat->facility[fac]);
 			break;
-		case NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE:
-			if(stat->facility2>0)
-				removeOneLocationAvailible(GLOBAL/*loc*/,stat->facility2);
-			// no needSupply gain as the item is recovered... well or not? mmmh... ~~~~
-			if(stat->facility[fac]>0)
-				removeOneLocationAvailible(loc, stat->facility[fac]);
+		case NEEDED_UNTIL_COMPLETE_IS_LOST_EVERYWHERE:
+			if(facility)
+				modifyLocationAvailible(location, facility, -count);
+			if(facility2)
+			{
+				removeOneAvailibleEverywhere(facility2); // count?
+//				modifyLocationAvailible(GLOBAL/*location*/ ,facility2, -count); // primarily for temporary R_researches, have to be location 0
+// TODO				 setNeedSupply(getNeedSupply()+(*getpStats())[facility2].needSupply); // <- nicht noetig :/
+			}
 			break;
 		case NEEDED_ALWAYS:
-			if(stat->facility[fac]>0)
-				removeOneLocationAvailible(loc, stat->facility[fac]);
+			if(facility)
+				modifyLocationAvailible(location, facility, -count);
 				// needSupply?
-			if(stat->facility2>0)
-				removeOneLocationAvailible(loc, stat->facility2);
+			if(facility2)
+				modifyLocationAvailible(location, facility2, -count);
+			break;
+
+		case IS_LOST_GLOBALLY:
+			if(facility)
+			{
+				modifyLocationAvailible(location, facility, -count);
+				setNeedSupply(getNeedSupply() - count * (*getpStats())[facility].needSupply);
+				setHaveSupply(getHaveSupply() - count * (*getpStats())[facility].haveSupply);
+			}
+		case NEEDED_ONCE_IS_LOST_GLOBALLY:
+			if(facility2)
+				removeOneLocationAvailibleAllPlayers(location, facility2);
+			// supply koennen wir uns sparen... bis jetzt...
+			break;
+		
+		case NEEDED_UNTIL_COMPLETE_IS_LOST_GLOBALLY:
+			if(facility)
+				modifyLocationAvailible(location, facility, -count);
+			if(facility2)
+				removeOneLocationAvailibleAllPlayers(location, facility2);
 			break;
 		case NO_FACILITY_BEHAVIOUR_DEFINED:
 		case FACILITY_TYPES:
@@ -383,10 +474,303 @@ void PREBUILDORDER::adjustAvailibility(const unsigned int loc, const unsigned in
 	}
 }
 
-/* compares the current force on the map and the finnishing times of the unit types with our predefined goals */
-const bool PREBUILDORDER::calculateReady() const
+// nur fuer Zerg
+void PREBUILDORDER::cancelBuilding(const Building& build)
 {
-	return(getGoal()->calculateReady((*unit)[playerNum]));
+	const UNIT_STATISTICS* stat = &((*getpStats())[build.getType()]);
+	for(unsigned int i = RACE::MAX_RESOURCE_TYPES; i--;)
+		setResource(i, getResource(i) + GAME::CANCELING_BUILDING_RETURN * stat->resource[i] / 100);
+	setNeedSupply(getNeedSupply()-stat->needSupply);
+
+//	if(build.getFacility()!=LARVA)
+		adjustAvailibility(build.getLocation(), stat->facilityType, build.getFacility(), stat->facility2, -1);
+//	else if(build.getFacility() == LARVA)
+//		removeOneLocationTotal(build.getLocation(), LARVA); TODO !!
+}
+
+void PREBUILDORDER::processBuildingQueue()
+{
+	bool found_another = true;
+	while((!buildingQueue.empty()) && (found_another == true))
+	{
+		if((buildingQueue.top().canBeCompleted()) && (buildingQueue.top().getBuildFinishedTime() == getTimer()))
+		{
+			found_another = true;
+			const Building& build(buildingQueue.top());
+/*			if(build.getType() == INTRON)
+			{
+				buildingQueue.pop();
+				continue;
+			}*/ // mmmh... das hier ist ne Optimierung, wir *wissen*, dass Intron nichts verursacht... naja... lieber raus :o
+
+			const UNIT_STATISTICS* stat = &((*getpStats())[build.getType()]);
+
+// ------ ACTUAL BUILDING ------
+			adjustLocationUnitsAfterCompletion(build.getLocation(), stat->facilityType, build.getFacility(), stat->facility2, build.getUnitCount());
+			setHaveSupply(getHaveSupply()+stat->haveSupply);
+			modifyLocationTotal(build.getLocation(), build.getType(), build.getUnitCount());
+			modifyLocationAvailible(build.getLocation(), build.getType(), build.getUnitCount());
+
+
+// ------ END OF ACTUAL BUILDING ------
+
+// ------ CHECK HARVESTING ------
+			if(stat->affectsResource > 0)
+			{
+				for(unsigned int i = RACE::MAX_RESOURCE_TYPES; i--;)
+				{
+					int j = (1 << i); // 1, 2, 4, 8, ...
+					if(stat->affectsResource & j)
+					{
+						if(stat->affectsResource & 128)
+							adjustAccepterDistanceAllLocations(i);
+//							adjustHarvestAllLocations(i);
+//						else
+//							adjustResourceDistance(i, build.getLocation()); // TODO... eigentlich nie... wenn neuer accepter gebaut wird betrifft es alle locations... 
+					}
+				}
+			}
+// ------ END CHECK ------
+			
+// ------ SPECIAL RULES ------
+/*			else if((getRace() == ZERG))
+			{
+				if(build.getType() == LARVA)
+				{
+					removeLarvaFromQueue(build.getLocation());
+					if(checkForLarva(build.getLocation()))
+						putInBuildingQueue(LARVA);
+				} else if(build.getType() == BREAK_UP_BUILDING)
+				{
+					// LARVEN WERDEN GETOETET!
+					unsigned int command_time = (getTimer() + build.getTotalBuildTime());
+// suche Einheit mit kleinstem groesserem Startzeitpunkt:
+					std::list<Building> b_list;
+					while(!buildingQueue.empty())
+					{
+						const Building& my_build = buildingQueue.top();
+						unsigned int start_time = my_build.getBuildFinishedTime() + my_build.getTotalBuildTime();
+						// PROBLEM: das holt nur das oberste von der building queue!
+						if((start_time > command_time) && (build.getType() != LARVA) && (build.getFacility() != LARVA))
+						{
+							cancelBuilding(my_build);
+							buildingQueue.pop();
+							break;
+						}
+						b_list.push_back(buildingQueue.top());
+						buildingQueue.pop();
+					}
+					std::list<Building>::iterator i = b_list.begin();
+					while(i!=b_list.end())
+					{
+						buildingQueue.push(*i);
+						++i;
+					}
+				}
+			}*/ // TODO!
+// ------ END SPECIAL RULES ------
+
+			
+// ------ CHECK WHETHER WE ARE READY ------
+			getGoal()->calculateFinalTimes(build.getLocation(), build.getType(), getLocationTotal(build.getLocation(), build.getType()), getRealTimer());
+// ------ END CHECK ------
+
+			if((stat->create) && (stat->create != build.getType()))// && (!build.getOnTheRun())) //one additional unit (zerglings, scourge, comsat, etc.)
+                        { //here no unitCount! ~~~
+	                        addOneLocationTotal(build.getLocation(), stat->create);
+	                        addOneLocationAvailible(build.getLocation(), stat->create);
+																			//                              if(last[lastcounter].unit==stat->create) ++last[lastcounter].count; //TODO ???
+               // ~~~~ Ja... geht schon... aber kann ja auch mal was anderes sein... ?
+	       		}
+
+	       
+	       // ------ ENQUEUE THE LAST ITEM SO IT CAN BE ACCESSED BY THE MOVING ROUTINES ------
+
+
+// ------ END OF LAST ITEM ------
+			
+			buildingQueue.pop();
+			
+		} // end while(getremainingbuildorder) ~|~
+		else found_another = false;
+	} //end while
+	ready = calculateReady();
+}
+
+const std::list<unsigned int>& PREBUILDORDER::getCode() const {
+	return(Code);
+}
+
+void PREBUILDORDER::leapForwardInTime()
+{
+	unsigned int time_span = calculateIdleTime();
+	for(unsigned int i = RACE::MAX_RESOURCE_TYPES; i--;)
+	{
+		unsigned int delta = time_span * harvestResource(i);
+		setResource(i, getResource(i) + delta);
+		setHarvestedResource(i, getHarvestedResource(i) + delta);
+	}
+	
+	setTimeOut(getTimeOut() - time_span);
+	setTimer(getTimer() - time_span);
+}
+
+const bool PREBUILDORDER::executeNextInstruction()
+{
+	for(unsigned int i = RACE::MAX_RESOURCE_TYPES; i--;)
+		neededResource[i] = GAME::MAX_RESOURCES;
+	unsigned int command = getGoal()->toPhaeno(getCurrentCode());
+
+	bool ok = buildGene(command);
+	if((ok) || (isTimeOut()))
+	{
+		resetTimeOut();
+		moveToNextInstruction();
+	}
+	return(ok);
+}
+
+const bool PREBUILDORDER::putInBuildingQueue(const unsigned int build_unit)
+{
+	//Zuerst: availible pruefen ob am Ort gebaut werden kann
+	//Wenn nicht => +/- absteigen bis alle locations durch sind
+	
+	const UNIT_STATISTICS* stat = &((*getpStats())[build_unit]);
+	bool ok = false;
+	unsigned int picked_facility = 0;
+	unsigned int current_location_window = 1; // TODO
+
+//	if((!buildingQueue.empty())&&(buildingQueue.top().getType() == INTRON))
+//		return(false); TODO evtl in stats reinschreiben
+		
+	// = = = > INTRON? Ignoriere alle folgenden Befehle
+	// Larva? Larva ermoeglichen, aber gleichzeitig noch ein INTRON einfuegen TODO
+	
+	if(stat->facility[0]==0)
+		ok=true;
+	else
+	// special rule for morphing units of protoss
+	if((stat->facility2>0) && ((stat->facilityType == IS_LOST) || (stat->facilityType == IS_MORPHING)) && (stat->facility[0] == stat->facility2))
+	{
+		if(getLocationAvailible(current_location_window, stat->facility2) >=2)
+		{
+			ok = true;
+			picked_facility = 0;
+		}
+	} else
+	{
+		// research/upgrade:
+		if((stat->facility2==0) || (getLocationAvailible(current_location_window, stat->facility2)>=1))
+		// pick one availible facility: 
+			for(picked_facility = 0; picked_facility<3; ++picked_facility)
+				if((stat->facility[picked_facility]>0)&&(getLocationAvailible(current_location_window, stat->facility[picked_facility])>0))
+				{
+					ok=true;
+					break;
+				}
+	}
+				
+        if(ok)
+        {
+		// tja, theoretisch muesste jeder Player ein Geysir pro Standort zugewiesen bekommen und dann muesste der neutrale Player pruefen ob 
+		// eine Aenderung aufgetreten ist TODO
+/*                if(build_unit==REFINERY)
+                {
+                        if(getUnit(NEUTRAL_PLAYER, current_location_window).getAvailible(VESPENE_GEYSIR) <=0) // TODO!
+                                ok=false;
+                        else
+				getUnit(NEUTRAL_PLAYER, current_location_window).removeOneAvailible(VESPENE_GEYSIR);
+                } */
+//		else
+//              if(build_unit==GAS_SCV)
+//              {
+//                      if(getLocationTotal(current_location_window, REFINERY)*4 <= getLocationTotal(current_location_window, GAS_SCV))
+//                              ok=false;
+//
+ //             } // Optimierung?! TODO
+        }
+//TODO: Wenn verschiedene facilities moeglich sind, dann das letzte nehmen
+//			  bewegliche Sachen ueberdenken...
+//				  evtl zusaetzliche Eigenschaft 'speed' einbauen (muss sowieso noch...)... bei speed>0 ... mmmh... trifft aber auch nur auf scvs zu ... weil bringt ja wenig erst mit der hydra rumzulaufen und dann zum lurker... mmmh... aber waere trotzdem zu ueberlegen...
+//				  auch noch ueberlegen, wenn z.B. mit scv ohne kommandozentrale woanders gesammelt wird...
+//	  Phagen ueber Phagen...
+	if(ok)
+	{ 
+		Building build;
+		build.setFacility(stat->facility[picked_facility]);
+		build.setLocation(current_location_window);
+//		if(build_unit == FROM_GAS_TO_MINERALS)
+//			build.setUnitCount(getLocationAvailible(current_location_window, GAS_SCV)); // TODO falls wir ALLE gas scvs rueberschicken wollen
+//		else
+			build.setUnitCount(1+(stat->create == build_unit));
+/*		if(build_unit == INTRON) // TODO
+		{
+			build.setBuildFinishedTime(getTimer() - coreConfiguration.getWaitAccuracy());
+			build.setTotalBuildTime(coreConfiguration.getWaitAccuracy());
+		} else*/
+		{	
+			build.setBuildFinishedTime(getTimer()-stat->BT);
+			build.setTotalBuildTime(stat->BT);
+		}
+		// if it's a larva we don't want it displayed  PLUS  it may overwrite the data we had already! (see **) !! TODO
+//		if((getRace() != ZERG) || (build_unit != LARVA)) TODO
+		{
+			anaraceBuildTotalTime = build.getTotalBuildTime();
+			anaraceBuildLocation = current_location_window;
+			anaraceBuildFacility = stat->facility[picked_facility];
+			anaraceBuildUnit = build_unit;
+			anaraceBuildFinishedTime = build.getBuildFinishedTime();
+		}
+		build.setType(build_unit);
+		for(unsigned int i = RACE::MAX_RESOURCE_TYPES; i--;)
+			setResource(i, getResource(i) - stat->resource[i]);
+		
+		setNeedSupply(getNeedSupply()+stat->needSupply);
+//		if((stat->needSupply>0)||(((*getpStats())[stat->facility[0]].needSupply<0)&&(stat->facilityType==IS_LOST)))  TODO!!!!
+//		setNeedSupply(getNeedSupply()-stat->needSupply); //? Beschreibung!
+		adjustAvailibility(current_location_window, stat->facilityType, stat->facility[picked_facility], stat->facility2, 1);
+		buildingQueue.push(build);
+
+// ---- SPECIAL RULES -----		
+/*		if(getGoal()->getRace()==ZERG)
+		{
+			if(build_unit==LARVA)
+				addLarvaToQueue(current_location_window);
+			else
+			if(((*getpStats())[build_unit].facility[0]==LARVA)&&(checkForLarva(current_location_window)))
+				putInBuildingQueue(LARVA); // ( ** ) this call will destroy anaraceBuild* ... :o
+		}*/ // TODO!
+// ----- END SPECIAL RULES -----
+
+		
+	/*	if(build.getType() == INTRON)
+		{
+			std::list<Building> b_list;
+			// fuege ein 'erinnerungsintron' vor jeden Befehl der frueher fertig wird (und somit dem INTRON die Spitzenposition streitig machen wuerde) TODO
+			while((!buildingQueue.empty())&&(buildingQueue.top().getBuildFinishedTime() > build.getBuildFinishedTime()))
+			{
+				b_list.push_back(buildingQueue.top());
+				buildingQueue.pop();
+				
+			}
+			std::list<Building>::iterator i = b_list.begin();
+			while(i!=b_list.end())
+			{
+				build.setBuildFinishedTime(i->getBuildFinishedTime());
+				build.setTotalBuildTime(getTimer() - i->getBuildFinishedTime());
+				buildingQueue.push(build);
+				buildingQueue.push(*i);
+				++i;
+			}		
+		}*/ // TODO
+	} //end if(ok)
+	
+	return(ok);
+}
+
+/* compares the current force on the map and the finnishing times of the unit types with our predefined goals */
+const bool PREBUILDORDER::calculateReady() const {
+	return(getGoal()->calculateReady(unit[playerNum]));
 }
 
 // nicht const da buildingqueue verzehrt wird :/
@@ -398,10 +782,11 @@ const unsigned int PREBUILDORDER::calculatePrimaryFitness(const bool is_ready)
 	unsigned int tpF=0;
 	if(!is_ready)
 	{
-		unsigned int bonus[MAX_LOCATIONS][LAST_UNIT]; 
-		memset(bonus, 0, LAST_UNIT * MAX_LOCATIONS * sizeof(int));
+		std::vector<unsigned int> bonus[MAX_LOCATIONS]; 
+		for(unsigned int i = MAX_LOCATIONS; i--;)
+			bonus[i].assign(RACE::UNIT_TYPE_COUNT, 0);
 
-		tpF = getGoal()->calculateFitness((*unit)[playerNum], bonus);
+		tpF = getGoal()->calculateFitness(unit[playerNum], bonus);
 		
 		std::priority_queue<Building, std::vector<Building> >  save = buildingQueue;
 		while(!buildingQueue.empty())
@@ -419,152 +804,168 @@ const unsigned int PREBUILDORDER::calculatePrimaryFitness(const bool is_ready)
 	else   // all goals fulfilled, fitness <- timer
 	{
 		tpF += getTimer();
-		tpF += getGoal()->countGoals()*100;
+		tpF += getGoal()->countGoals()*1000;
 	}
 	return(tpF);
 }
 // end of calculatePrimaryFitness
-
-const bool PREBUILDORDER::isDifferent(const unsigned int* code) const
-{
-	for(unsigned int i = coreConfiguration.getMaxLength() - getLength(); i < coreConfiguration.getMaxLength(); ++i)
-		if(getCode(i)!=code[i])
-			return(true);
-	return(false);	
-}
-
 // ------------------------------
 // ------ HARVEST ROUTINES ------
 // ------------------------------
 
-void PREBUILDORDER::adjustMineralHarvest(const unsigned int location_number)
+// TODO evtl spaeter: Arbeiter automatisch zur naechsten Ressourcenstelle mit Gather > 0 schicken falls zu viele Arbeiter schon vor Ort
+
+// evtl nur eine temporaere 'distance' (je location) list fuehren, die auf Basis der vorhandenen Accepterstellen die Sammelmenge bestimmen
+// race, resource_type, 'distance', mineral patches, worker
+// RACE::resourceHarvestPerFrame
+
+
+void PREBUILDORDER::adjustAccepterDistance(const unsigned int location_number, const unsigned int resource_type) 
 {
-	//TODO Zerg hatchery,lair etc.
-	
-// WAYNE Location,	  kein Command Center 							und keine Mineralien
-	if((location_number == 0) || ((!getLocationTotal(location_number, COMMAND_CENTER)) && (getUnit(GLOBAL, location_number).getTotal(MINERAL_PATCH) == 0)))
-	{
-		for(unsigned int i=45;i--;)
-			setMineralHarvestPerSecond(location_number, i, 0);
+#ifdef _SCC_DEBUG
+	if(location_number >= (*getMap())->getMaxLocations()) {
+		toErrorLog("DEBUG (PREBUILDORDER::adjustAccepterDistance()): location_number out of range.");return;
 	}
-//	else if((!pMap->location[num].getTotal(playerNum][COMMAND_CENTER])&&(pMap->location[num].getTotal(0][MINERAL_PATCH]))
-//	{
-	//nach naehestem command_center suchen
-//	}
-//	else if((pMap->location[num].getTotal(playerNum][COMMAND_CENTER])&&(!pMap->location[num].getTotal(0][MINERAL_PATCH]))
-//	{
-	//nach naehesten Mineralien suchen
-//	} TODO
-
-	//TODO: Wenn 2 SPieler an einem sammeln, beide einberechnen!
-	else if(pStart->getBasicMineralHarvestSpeedPerSecond(1)) // SONST: Falls wir ne minimalSammelgeschwindigkeit haben eintragen
-	{
-//		int k;
-		for(unsigned int i=45;i--;)
-		{
-//			k=0;
-//			for(j=0;j<45;++j)
-//				if(i*8<=j*pMap->location[num].getTotal(0][MINERAL_PATCH]) 
-//				{ k=j;j=45;}
-			setMineralHarvestPerSecond(location_number, i, pStart->getBasicMineralHarvestSpeedPerSecond(i/*k*/));//*pMap->location[num].getTotal(0][MINERAL_PATCH])/8;
-		}	//ab hier funzt alles... nur scheint startPlayer->getBasic... nicht richtig initialisiert zu sein...
-	
+	if(resource_type >= RACE::MAX_RESOURCE_TYPES) {
+		toErrorLog("DEBUG (PREBUILDORDER::adjustAccepterDistance()): resource_type out of range.");return;
 	}
-}
-
-void PREBUILDORDER::adjustGasHarvest(const unsigned int location_number)
-{
-	if((location_number == 0)||((!getLocationTotal(location_number, COMMAND_CENTER)) && (!getLocationTotal(location_number, REFINERY))))
+#endif
+	std::list<unsigned int>& t = GAME::race[getRace()].resource[resource_type].accepter;
+	bool found = false;
+	for(unsigned int i = 0; (!found)&&(i < MAX_LOCATIONS); ++i)
 	{
-		for(unsigned int i=5;i--;)
-			setGasHarvestPerSecond(location_number, i, 0);
-	}
-/*	else if((!pMap->location[num].getTotal(playerNum][COMMAND_CENTER])&&(pMap->location[num].getTotal(playerNum][REFINERY]))
-	{
-	//nach naehestem command_center suchen
-	}
-	else if((pMap->location[num].getTotal(playerNum][COMMAND_CENTER])&&(!pMap->location[num].getTotal(playerNum][REFINERY]))
-	{
-	//nach naehesten Mineralien suchen
-	}*/
-	else if(pStart->getBasicMineralHarvestSpeedPerSecond(1))
-	{
-//		int k;
-		for(unsigned int i=5;i--;)
-		{
-//			k=0;
-//			for(j=0;j<5;++j)
-//				if(i<=j*pMap->location[num].getTotal(playerNum][REFINERY]) { k=j;j=5;}
-					setGasHarvestPerSecond(location_number, i, pStart->getBasicGasHarvestSpeedPerSecond(i/*k*/)*getLocationTotal(location_number, REFINERY));
-
-//					hier liegts problem wegen gas
-//						gasharvestps ist zu gross, evtl wegen zu vieler refineries!
-		}
-	}
-}
-
-void PREBUILDORDER::adjustHarvestAllLocations()
-{
-	for(unsigned int i = (*getMap())->getMaxLocations();i--;)
-	{
-		adjustMineralHarvest(i);
-		adjustGasHarvest(i);
-	}
-}
-
-const unsigned int PREBUILDORDER::harvestMinerals() const
-{
-	unsigned int sum=0;
-//	  int t=(rand()%10)-5;
-	for(unsigned int i=1;i<(*getMap())->getMaxLocations();++i)//~~
-	{
-		unsigned int s=getLocationAvailible(i, SCV);
-		if(s)
-		{
-			//availible is 0, harvestSpeed ist ok!
-			if(s<44) //~~ war 56
-				sum+=getMineralHarvestPerSecond(i,s);
-			else
-				sum+=getMineralHarvestPerSecond(i,44);
-/*		{
-			setMinerals(getMinerals()+getMineralHarvestPerSecond(i,s));
-			//~~~ neu berechnen / Tabelle anlegen! sind ja nicht bei jeder Exe gleichviel Mineralien... <- das sollte sich mit adjustHarvest erledigt haben
-			harvestedMinerals+=getMineralHarvestPerSecond(i,s); //~~~
-		}
-		else
-		{
-			setMinerals(getMinerals()+getMineralHarvestPerSecond(i,44)); //war 56
-			harvestedMinerals+=getMineralHarvestPerSecond(i,44);
-		}*/
-		}
-	}
-	return(sum);
-}
-
-
-const unsigned int PREBUILDORDER::harvestGas() const
-{
-	unsigned int sum=0;
-//	int t=(rand()%10)-5;
-	for(unsigned int i=1;i<(*getMap())->getMaxLocations();++i)//~~
-	{
-		unsigned int s = getLocationAvailible(i, GAS_SCV);
-		if(s)
-		{
-			if(s<4)
-				sum+=getGasHarvestPerSecond(i, s);
-			else
-				sum+=getGasHarvestPerSecond(i, 4); //TODO
-	/*
-				harvestedGas+=getGasHarvestPerSecond(i,s);
-			}
-			else
+		unsigned int nearest = (*getMap())->getLocation(location_number)->getNearest(i);
+		for(std::list<unsigned int>::const_iterator j = t.begin(); (!found)&&(j != t.end()); ++j)
+			if(getLocationTotal(nearest, *j) > 0)
 			{
-				setGas(getGas()+getGasHarvestPerSecond(i,4));
-				harvestedGas+=getGasHarvestPerSecond(i,4);
-			}*/
-		}
+				accepterDistance[location_number][resource_type] = (*getMap())->getLocation(location_number)->getDistance(nearest) + (*getMap())->getLocation(location_number)->getResourceDistance(resource_type);
+				found = true;
+			}
 	}
+	if(!found)
+		accepterDistance[location_number][resource_type] = RESOURCE::MAX_RESOURCE_DISTANCE; // ~
+}
+
+const unsigned int PREBUILDORDER::getResourceHarvestPerFrame( const unsigned int resource_type, const unsigned int location_number, const unsigned int worker ) const {
+#ifdef _SCC_DEBUG
+	if(resource_type >= RACE::MAX_RESOURCE_TYPES) {
+		toErrorLog("DEBUG (PREBUILDORDER::getResourceHarvestPerFrame()): Value resource_type out of range.");return(0);
+	}
+	if((location_number >= (*getMap())->getMaxLocations()))	{
+		toErrorLog("DEBUG (PREBUILDORDER::getResourceHarvestPerFrame()): Value location_number out of range.");return(0);
+	}
+	if(worker>=999) {
+		toErrorLog("DEBUG (PREBUILDORDER::getResourceHarvestPerFrame()): Value worker out of range.");return(0);
+	}
+#endif
+	if(accepterDistance[location_number][resource_type] == RESOURCE::MAX_RESOURCE_DISTANCE)
+		return(0);
+	unsigned int workers = worker;
+	if(worker > RESOURCE::MAX_RESOURCE_WORKERS)
+		workers = RESOURCE::MAX_RESOURCE_WORKERS;
+	unsigned int resource_provider = getLocationTotal(location_number, GAME::race[getRace()].resource[resource_type].provider);
+	if((resource_provider == 0) || (workers == 0))
+		return(0);
+	return(GAME::race[getRace()].resource[resource_type].resourceHarvestPerFrame[accepterDistance[location_number][resource_type]][getLocationTotal(location_number, GAME::race[getRace()].resource[resource_type].provider)][workers]);
+}
+
+
+#if 0
+void PREBUILDORDER::adjustHarvest(const unsigned int location_number, const unsigned int resource_type)
+{
+#ifdef _SCC_DEBUG
+	if(location_number >= (*getMap())->getMaxLocations()) {
+		toErrorLog("DEBUG (PREBUILDORDER::adjustHarvest()): location_number out of range.");return;
+	}
+	if(resource_type >= RACE::MAX_RESOURCE_TYPES) {
+		toErrorLog("DEBUG (PREBUILDORDER::adjustHarvest()): resource_type out of range.");return;
+	}
+#endif
+
+	// 1. kein provider => 0
+	// 2. naehesten acceptor suchen
+	// 3. 
+	// naehesten provider sucehn
+	// 
+	// 
+	
+	unsigned int resource_provider = getLocationTotal(location_number, GAME::race[getRace()].resource[resource_type].provider);
+	if(resource_provider == 0)	
+	{
+		resourceHarvestPerFrame[location_number][resource_type].resize(0);
+		return;
+	}
+	
+	bool accepter_availible = false;
+	for(std::list<unsigned int>::const_iterator i = GAME::race[getRace()].resource[resource_type].accepter.begin(); i != GAME::race[getRace()].resource[resource_type].accepter.end(); ++i)
+		if(getLocationTotal(location_number, *i)>0)
+		{
+			accepter_availible = true;
+			break;
+		}
+	if(!accepter_availible)
+	{
+		resourceHarvestPerFrame[location_number][resource_type].resize(0);
+		return;
+	}
+	unsigned int gather_amount = GAME::race[getRace()].resource[resource_type].gatherAmount;
+	if(gather_amount == 0)
+	{
+		resourceHarvestPerFrame[location_number][resource_type].resize(0);
+		return;
+	}
+
+	
+// TODO worker speed mit rein in distance
+	unsigned int distance_time = (*getMap())->getLocation(location_number)->getResourceDistance(resource_type);
+	unsigned int harvest_time = GAME::race[getRace()].resource[resource_type].harvestTime;
+
+// nach naehestem command_center suchen TODO
+// nach naehesten Mineralien suchen TODO
+//TODO: Wenn 2 SPieler an einem sammeln, beide einberechnen!
+
+	bool change = true;
+	unsigned int worker = 0;
+	unsigned int value = 0;
+	unsigned int old_value = 9999;
+	while((value != old_value)&&(worker < 50))
+	{
+	//	Wahrscheinlichkeit besetzt:
+	//		(worker-1) *
+		
+                if(worker <= 8)
+       	                value = worker * gather_amount / (harvest_time + 2.0 * distance_time);
+                else
+       	                value = worker * gather_amount / ( harvest_time + 2.0 * distance_time + (0.5 * (sqrt(2.0 * distance_time + harvest_time + 4 * (worker-1) * harvest_time ) - 2.0 * distance_time - harvest_time)));
+		old_value = value;
+		resourceHarvestPerFrame[location_number][resource_type].push_back(value);
+		worker++;
+	}
+}
+#endif
+
+void PREBUILDORDER::adjustAccepterDistanceAllLocations(const unsigned int resource_type)
+{
+#ifdef _SCC_DEBUG
+	if(resource_type >= RACE::MAX_RESOURCE_TYPES) {
+		toErrorLog("DEBUG (PREBUILDORDER::adjustAccepterDistanceAllLocations()): resource_type out of range.");return;
+	}
+#endif
+	for(unsigned int i = (*getMap())->getMaxLocations();i--;)
+		adjustAccepterDistance(i, resource_type);
+}
+
+
+const unsigned int PREBUILDORDER::harvestResource(const unsigned int resource_type) const
+{
+#ifdef _SCC_DEBUG
+	if(resource_type >= RACE::MAX_RESOURCE_TYPES) {
+		toErrorLog("DEBUG (PREBUILDORDER::harvestResource()): resource_type out of range.");return(0);
+	}
+#endif
+	unsigned int sum = 0;
+	for(unsigned int i = 1; i < (*getMap())->getMaxLocations(); ++i)
+		sum += (getResourceHarvestPerFrame(resource_type, i, getLocationAvailible(i, GAME::race[getRace()].resource[resource_type].gatherer)));
 	return(sum);
 }
 
@@ -580,119 +981,37 @@ const unsigned int PREBUILDORDER::harvestGas() const
 /* assigns 'start' and sets a pointer to the corresponding pointer * 
  * in start. This means, whenever the map changes in start, it is also	  *
  * changed for all players. This must be set whenever startCondition, Goal, pStats, start itself or map is changed!  */ 
-void PREBUILDORDER::assignStart(START* start)
-{
-#ifdef _SCC_DEBUG
-	if(start == NULL) {
-		toErrorLog("DEBUG: (PREBUILDORDER::assignStart): Variable pStart not initialized.");return;
-	}
-#endif
-	pStart = start;
-	pStartInitialized = true;
-
-//	Optimierungen...
-	
-//	setpMap(pStart->getMap());
-//	setGoal(pStart->getCurrentGoal());
-//	setpStats(pStart->getpStats());
-//
-//	pStartCondition = getStartCondition();
-//	memset(noise, 0, MAX_TIME * sizeof(int));
-//	setPlayerNumber(playerNum);
-	
-	
-}
-
-/*void PREBUILDORDER::initNoise()
-{
-//	if(coreCnfiguration.noise>0)
-//		for(int j=0;j<MAX_TIME;++j)
-//			noise[j]=rand()%coreConfiguration.noise-rand()%coreConfiguration.noise;
-//	else TODO
-	memset(noise, 0, MAX_TIME * sizeof(int));
-}*/
 
 void PREBUILDORDER::resetSpecial()
 {
 	memset(larvaInProduction, 0, MAX_LOCATIONS * sizeof(int));
 }
 
-void PREBUILDORDER::setPlayerNumber(const unsigned int player_number)
-{
-#ifdef _SCC_DEBUG
-	if((player_number < 1) || (player_number > (*getMap())->getMaxPlayer())) {
-		toErrorLog("DEBUG: (PREBUILDORDER::setPlayerNumber): Value out of range.");return;
-	}
-#endif
-	playerNum = player_number;
-	playerNumInitialized = true;
-}
-
-void PREBUILDORDER::assignUnits(UNIT (*units)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS])
-{
-#ifdef _SCC_DEBUG
-	if(units == NULL) {
-		toErrorLog("DEBUG: (PREBUILDORDER::assignUnits()): Variable units not initialized.");return;
-	}
-#endif
-	unit = units;
-	unitsInitialized = true;
-}
-
-void PREBUILDORDER::initializePlayer()
-{
-	setMinerals((*(getStartCondition()))->getMinerals());
-	setGas((*(getStartCondition()))->getGas());
-	setTimer(coreConfiguration.getMaxTime()-(*(getStartCondition()))->getStartTime());
-	setNeedSupply((*(getStartCondition()))->getNeedSupply());
-	setHaveSupply((*(getStartCondition()))->getHaveSupply());
-}
-
 void PREBUILDORDER::eraseIllegalCode()
 {
-	for(unsigned int i=MAX_LENGTH;i--;)
-		if(getCode(i) >= getGoal()->getMaxBuildTypes())
-			setCode(i, 0);
-/*		{
-			for(int k=i;k--;)
-				Code[k+1]=Code[k];
-			Code[0]=0;
-		}*/
-}
-
-/*void PREBUILDORDER::assignStartCondition(const START_CONDITION* start_condition, const bool neutral_player) 
-{
-	pStart->assignStartCondition(start_condition);
-	if(neutral_player)
-		pStart->fillAsNeutralPlayer();
-	else
-		pStart->fillAsActivePlayer();
-}*/
-
-void PREBUILDORDER::eraseUselessCode()
-{
-	unsigned int allUnits[LAST_UNIT];
-	for(int i=LAST_UNIT; i--;)
-		allUnits[i] = getLocationTotal(GLOBAL,i);
-	for(unsigned int i=MAX_LENGTH;i--;)
+	unsigned int removed = getGoal()->getWasRemoved();
+	if(removed != 999)
 	{
-		bool ok=true;
-		for(unsigned int k=3;k--;)
-			ok&=((stats[getGoal()->getRace()][getGoal()->toPhaeno(getCode(i))].prerequisite[k]==0)||
-				 (allUnits[stats[getGoal()->getRace()][getGoal()->toPhaeno(getCode(i))].prerequisite[k]]));
-//WTF? allUnits mit prerequisite vergleichen!?
-
-//TODO so ganz sauber is des net
-		if(!ok)
-		{
-			for(unsigned int k=i;k--;)
-				setCode(k+1, getCode(k));
-			setCode(0, 0);
-		}
-		else
-			++allUnits[getGoal()->toPhaeno(getCode(i))];
+		for(std::list<unsigned int>::iterator i = Code.begin(); i != Code.end();)
+			if(*i == removed)
+				i = Code.erase(i);
+			else 
+			{
+				if(*i > removed)
+					--(*i);
+				++i;
+			}
 	}
+	
+	for(std::list<unsigned int>::iterator i = Code.begin(); i != Code.end(); ++i)
+		if(*i >= getGoal()->getMaxBuildTypes())
+			*i = 0;
+	// TODO => eher checken und woanders resetten als hier herummachen...
+//	remove_if(Code.begin(), Code.end(), greater_equal<unsigned int>(getGoal()->getMaxBuildTypes()));
 }
+
+
+
 
 // TODO OPTIMIZE
 void PREBUILDORDER::mutateGeneCode()
@@ -700,69 +1019,36 @@ void PREBUILDORDER::mutateGeneCode()
 // TODO logger machen, welche Mutationsart besonders erfolgreich ist
 	if(coreConfiguration.getMutationFactor()==0)
 		return;
-	if(getLength()==0) 
-		setLength(coreConfiguration.getMaxLength());
 
-	bool t_checked[LAST_UNIT];
-	bool t_buildable[LAST_UNIT];
-	unsigned int t_max_build_types = 0;
-	unsigned int t_geno[LAST_UNIT]; // !! keine anderen units drueber nehmen!
-	NEED t_need[LAST_UNIT];
+	std::vector<NEED> t_need = getGoal()->getNeedsAtStart(); // Auf Basis der Starteinheiten angepasste verbleibenden Voraussetzungen
+	std::vector<bool> t_buildable = getGoal()->getIsBuildableAtStart();
+	std::vector<bool> t_checked = getGoal()->getIsCheckedAtStart();
+	std::vector<unsigned int> t_geno = getGoal()->getGenoAtStart();
+	unsigned int t_max_build_types = getGoal()->getMaxBuildTypesAtStart();
 
-	for(unsigned int i = LAST_UNIT; i--;)
-	{
-		t_need[i] = getGoal()->need[i];
-
-		t_checked[i] = false;
-	}
-	
-	memset(t_checked
-	t_buildable[i] = getGoal()->getStartIsBuildable(i)
-	
-	memset(t_geno, 0, LAST_UNIT*sizeof(int));
- 
-	ALLOW* t_allow = getGoal()->allow;
-
-	for(unsigned int i = LAST_UNIT;i--;)
-		if(getGoal()->getIsBuildable(i))
-		{
-			t_buildable[i]=true;
-			t_geno[t_max_build_types] = getGoal()->toGeno(i);
-			++t_max_build_types;
-			if((*(getStartCondition()))->getLocationTotal(GLOBAL,i))
-			{
-				std::list<unsigned int> new_buildable;
-				for(std::list<unsigned int>::iterator j = t_allow[i].facility.begin(); j != t_allow[i].facility.end(); ++j) 
-					if(t_need[*j].facilityIsDone())
-						new_buildable.push_back(*j);
-				for(std::list<unsigned int>::iterator j = t_allow[i].facility2.begin(); j != t_allow[i].facility2.end(); ++j) 
-					if(t_need[*j].facility2IsDone())
-						new_buildable.push_back(*j);
-				for(std::list<unsigned int>::iterator j = t_allow[i].prerequisite.begin(); j != t_allow[i].prerequisite.end(); ++j) 
-					if(t_need[*j].prerequisiteIsDone())
-						new_buildable.push_back(*j);
-				t_checked[i] = true;
-				for(std::list<unsigned int>::iterator j = new_buildable.begin(); j!=new_buildable.end(); ++j)
-				{
-					t_buildable[*j]=true;
-					t_geno[t_max_build_types] = getGoal()->toGeno(*j);
-					t_max_build_types++;
-				}
-			}
-		}
 #ifdef _SCC_DEBUG
-	if(t_max_build_types <= 1)
-	{
+	if(t_max_build_types == 0) {
 		toErrorLog("ERROR: PREBUILDORDER::mutateGeneCode(): No units can be build with current configuration!");return;
 	}
 #endif
-		
-	for(unsigned int x = coreConfiguration.getMaxLength()-1; x > coreConfiguration.getMaxLength() - getLength(); --x)
+	if(Code.size() == 0)
 	{
-// IS_LOST ETC!!!
-		if(rand() % (coreConfiguration.getMaxLength()*100/coreConfiguration.getMutationFactor())==0)
+		unsigned int new_item;
+		if(isAlwaysBuildWorkers())
+			new_item = t_geno[(rand()%(t_max_build_types-1))+1];
+		else
+			new_item = t_geno[rand()%t_max_build_types];
+		Code.insert(Code.begin(), new_item);
+	}
+	std::list<unsigned int>::iterator x = Code.begin();
+	while(x != Code.end())
+	{
+// IS_LOST ETC!!! ?
+	// => mehrmals durchlaufen damit auch mehrfache Mutationen an einem Punkt stattfinden koennen
+//		for(unsigned int z = coreConfiguration.getMutationFactor(); z--;) TODO
+		if(rand() % (1 + Code.size() * 100 / coreConfiguration.getMutationFactor())==0)
 		{
-			int new_item;
+			unsigned int new_item;
 			if(isAlwaysBuildWorkers())
 				new_item = t_geno[(rand()%(t_max_build_types-1))+1];
 			else 
@@ -770,70 +1056,71 @@ void PREBUILDORDER::mutateGeneCode()
 			int random=4;
 			if(isOnlySwapOrders())
 				random = (rand()%3) +3;
-			else if(x == coreConfiguration.getMaxLength()-1)
-		// <- we need at least one entry to switch with after the current one => no h
-				random = rand()%3;
 			else random = rand()%6;
 			switch(random)
 			{
 				case 0://remove
 				{
-					memmove(Code+x, Code+x+1, (coreConfiguration.getMaxLength()-x-1) * sizeof(int));
-					Code[coreConfiguration.getMaxLength()-1] = new_item;
-				}break;
+					x = Code.erase(x);
+					std::list<unsigned int>::iterator y = Code.begin();
+					while(y != Code.end())
+						++y;
+					while(y != Code.begin())
+						--y;
+				}
+				break;
 				case 1://add
-				{
-					memmove(Code+x+1, Code+x, (coreConfiguration.getMaxLength()-x-1) * sizeof(int));
-					Code[x] = new_item;
-				}break;
+					if(Code.size() < coreConfiguration.getMaxLength()-1)
+						x = Code.insert(x, new_item);
+				break;
 				case 2://change one entry
-				{
-					Code[x] = new_item;
-				}break;
+					*x = new_item;
+				break;
 				case 3://move one entry (no new_item) here
 				{
-					{
-
-
-						unsigned int y = rand()%(coreConfiguration.getMaxLength()-x-1) + x + 1;
-						if(t_buildable[getGoal()->toPhaeno(Code[y])])
-						{
-							unsigned int l = Code[y];
-							memmove(Code+x+1, Code+x, (y-x) * sizeof(int));
-							Code[x] = l;
-						}
-					}
+					std::list<unsigned int>::iterator y = x;
+					do {
+						++y;
+					} while((y != Code.end())&&((rand()%16)||(!t_buildable[getGoal()->toPhaeno(*y)])));
+					if(y != Code.end())
+						Code.splice(x, Code, y);
 				}break;
 				case 4://exchange two entries
 				{
+					std::list<unsigned int>::iterator y = x;
+					do {
+						++y;
+					} while((y != Code.end())&&((rand()%16)||(!t_buildable[getGoal()->toPhaeno(*y)])));
+					if(y != Code.end())
 					{
-						unsigned int y = rand()%(coreConfiguration.getMaxLength()-x) + x;
-						if(t_buildable[getGoal()->toPhaeno(Code[y])])
-						{
-							unsigned int l;
-							l=Code[x];Code[x]=Code[y];Code[y]=l;
-						}
+						unsigned int swap = *x;
+						*x = *y;
+						*y = swap;
 					}
 				}break;
-				case 5://move a block of orders  [a..b..ta..tb..c..d] -> [a..ta..tb..b..c..d]
-					//~~~TODO bug, code wird nicht richtig verschoben ?
+				case 5:// move block 
 				{
-					if(x < coreConfiguration.getMaxLength()-1)
+	// search random valid entry:
+					std::list<unsigned int>::iterator y = x;
+					do {
+						++y;
+					} while((y != Code.end())&&((rand()%16)||(!t_buildable[getGoal()->toPhaeno(*y)])));
+					if(y != Code.end())
 					{
-						unsigned int source_position = rand()%(coreConfiguration.getMaxLength() - x - 1) + x + 1;
-						unsigned int block_length = rand()%(coreConfiguration.getMaxLength() - source_position)+1;
-// TODO beschleunigbar indem erstmal alle verschiebbaren Elemente aufgesammelt werden
-						for(unsigned int i = source_position; i < source_position+block_length; i++)
+	// proceed until a random end or an invalid unit:
+						std::list<unsigned int>::iterator z = y;
+						do {
+							++z;
+						} while((z != Code.end())&&(rand()%16)&&(t_buildable[getGoal()->toPhaeno(*z)]));
+						if(z != Code.end())
 						{
-							if(t_buildable[getGoal()->toPhaeno(Code[i])])
-							{
-								unsigned int l = Code[i];
-								memmove(Code+x+1, Code+x, (i-x) * sizeof(int));
-								Code[x] = l;
-							}
+	// move block [y..z] in front of x:
+							++z; 
+	 						Code.splice(x, Code, y, z);
 						}
 					}
-				}break; 
+					
+				}break;	
 				default:
 #ifdef _SCC_DEBUG		       
 					toErrorLog("ERROR (PREBUILDORDER::mutateGeneCode()): rand out of range");
@@ -841,64 +1128,71 @@ void PREBUILDORDER::mutateGeneCode()
 				break;
 			}
 		}
-			int i = getGoal()->toPhaeno(getCode(x));
+		if(x == Code.end())
+			break;
+		int i = getGoal()->toPhaeno(*x);
+
+//		if(!t_buildable[i]) // !
+//		{
+			// remove;
+			// continue;
+//		} TODO falls zufaellige bos...
+		
+		++x;
+		
+		std::list<unsigned int> new_buildable;
+		
+		if(!t_checked[i])
+		{
+			GAME::race[getRace()].allows[i].updateBuildableList(t_need, new_buildable, i);
+			t_checked[i]=true;
+			
+			// if it is marked as singular item then remove entry, don't build this anymore from now on				
+/*			if(getGoal()->getIsSingleOccurence(i))
+				for(unsigned int j = t_max_build_types;j--;)
+					if(t_geno[j] == getGoal()->toGeno(i))
+					{
+						--t_max_build_types;
+						for(unsigned int k = j; k < t_max_build_types; ++k)
+							t_geno[k] = t_geno[k+1];
+					}*/
+		}
+		
+		if((*getpStats())[i].create)
+		{
+			i = (*getpStats())[i].create;
 			if(!t_checked[i])
 			{
-				{
-					std::list<unsigned int> new_buildable;
-					for(std::list<unsigned int>::iterator j = t_allow[i].facility.begin(); j!=t_allow[i].facility.end(); ++j)
-					if(t_need[*j].facilityIsDone())
-						new_buildable.push_back(*j);
-					for(std::list<unsigned int>::iterator j = t_allow[i].facility2.begin(); j!=t_allow[i].facility2.end(); ++j)
-					if(t_need[*j].facility2IsDone())
-						new_buildable.push_back(*j);
-					for(std::list<unsigned int>::iterator j = t_allow[i].prerequisite.begin(); j!=t_allow[i].prerequisite.end(); ++j)
-					if(t_need[*j].prerequisiteIsDone())
-						new_buildable.push_back(*j);
-					t_checked[i]=true;
-					if(getGoal()->getIsStatic(i))
-					// remove
-						for(unsigned int j = t_max_build_types;j--;)
-							if(t_geno[j] == getGoal()->toGeno(i))
-							{
-								--t_max_build_types;
-								for(unsigned int k = j; k < t_max_build_types; ++k)
-									t_geno[k] = t_geno[k+1];
-							}
-			
-					for(std::list<unsigned int>::iterator j = new_buildable.begin(); j!= new_buildable.end(); ++j) 
-					{
-						t_buildable[*j]=true;
-						t_geno[t_max_build_types] = getGoal()->toGeno(*j);
-						++t_max_build_types;
-					}
-				}
-				if(((*getpStats())[i].create>0)&&((*getpStats())[i].create<LAST_UNIT))
-				{
-					i = (*getpStats())[i].create;
-					if(!t_checked[i])
-					{
-						std::list<unsigned int> new_buildable;
-			       			for(std::list<unsigned int>::iterator j = t_allow[i].facility.begin(); j != t_allow[i].facility.end(); ++j)
-							if(t_need[*j].facilityIsDone())
-								new_buildable.push_back(*j);
-						for(std::list<unsigned int>::iterator j = t_allow[i].facility2.begin(); j != t_allow[i].facility2.end(); ++j)
-							if(t_need[*j].facility2IsDone())
-								new_buildable.push_back(*j);
-						for(std::list<unsigned int>::iterator j = t_allow[i].prerequisite.begin(); j != t_allow[i].prerequisite.end(); ++j)
-							if(t_need[*j].prerequisiteIsDone())
-								new_buildable.push_back(*j);
-				       		t_checked[i]=true;
-						for(std::list<unsigned int>::iterator j = new_buildable.begin(); j != new_buildable.end(); ++j)
-						{
-							t_buildable[*j]=true;
-							t_geno[t_max_build_types]=getGoal()->toGeno(*j);
-							++t_max_build_types;
-						}
-					}
-				}
+				GAME::race[getRace()].allows[i].updateBuildableList(t_need, new_buildable, i);
+				t_checked[i]=true;
 			}
+		}
+		for(std::list<unsigned int>::iterator j = new_buildable.begin(); j != new_buildable.end(); ++j)
+			if(getGoal()->getIsBuildable(*j)) // wirklich noetig?
+			{
+				t_buildable[*j]=true;
+				t_geno[t_max_build_types]=getGoal()->toGeno(*j);
+				++t_max_build_types;
+			}
+		
+	} //while
+}
+
+const bool PREBUILDORDER::calculationDone()
+{
+	if((ready) || (!getTimer()) || (codeFinished() && (buildingQueue.empty() || (!getTimeOut()))))
+	{
+//		eraseRemainingCode();
+		if(!ready) 
+		{
+			ready = calculateReady();
+			if(!ready)
+				setTimer(0);
+		}
+		postProcessing();
+		return(true);
 	}
+	return(false);
 }
 
 #include <sstream>
@@ -910,7 +1204,7 @@ const bool PREBUILDORDER::checkForLarva(const unsigned int current_location_wind
 
 // Falls mehr Produktionsstaetten existieren als Larven in Produktion und Larven auf dem Feld sind...
 	
-	if(((   getLocationTotal(current_location_window, HATCHERY)+
+/*	if(((   getLocationTotal(current_location_window, HATCHERY)+
 		getLocationTotal(current_location_window, LAIR)+
 		getLocationTotal(current_location_window, HIVE)) *3 > 
 		(larvaInProduction[current_location_window]+getLocationTotal(current_location_window, LARVA)))  &&
@@ -923,7 +1217,7 @@ const bool PREBUILDORDER::checkForLarva(const unsigned int current_location_wind
 // ... dann baue eine Larve
 	{
 		return true;
-	} else return false;
+	} else */return false; // TODO!
 }
 
 
@@ -931,89 +1225,14 @@ const bool PREBUILDORDER::checkForLarva(const unsigned int current_location_wind
 //Reinitialize programs with random orders
 void PREBUILDORDER::resetGeneCode()
 {
-//	mutationRate=500+rand()%1000;
-/*	if((coreConfiguration.preprocessBuildOrder)&&(basicLength>0))
-	{
-		memcpy(Code,basicBuildOrder,MAX_LENGTH*4);
-	}
-	else*/
-//	{
-//		unsigned int y=0;
-/*		switch(getGoal()->getRace())
-		{
-			case TERRA:y=SUPPLY_DEPOT;break;
-			case PROTOSS:y=PYLON;break;
-			case ZERG:y=OVERLORD;break;
-			default:break; // TODO ERROR
-		}*/
-		memset(Code, 0, MAX_LENGTH * sizeof(int));
-//		for(int i=MAX_LENGTH;i--;)
-//		{
-//			if((i+4)%stats[getGoal()->getRace()][y].needSupply==0)
-//			{
-//				setCode(i, 0);//rand()%getGoal()->getMaxBuildTypes());
-				
-//			} else
-//			{
-//				Code[0][i]=/*rand()%*/getGoal()->toGeno(SCV);//getMaxBuildTypes();
-//				Code[1][i]=/*rand()%*/getGoal()->toGeno(SCV);//getMaxBuildTypes();
-//			}
-//		}
-//	}
+	Code.clear();
+	resetInstructionPointer();
 }
-
-#if 0
-void PREBUILDORDER::crossOver(PREBUILDORDER* parent2, PREBUILDORDER* child1, PREBUILDORDER* child2)
-{
-/*	int counter=MAX_LENGTH;
-	for(int i=0;i<MAX_LENGTH; ++i)
-	{
-		if(rand()%counter<5)
-		{
-			int num=MAX_LENGTH-counter;
-			memcpy(&child1->Code[0][i-num],&Code[0][i-num],num*4);
-
-			memcpy(&child1->Code[1][i-num],&parent2->Code[1][i-num],num*4);
-
-			memcpy(&child2->Code[1][i-num],&Code[1][i-num],num*4);
-
-			memcpy(&child2->Code[0][i-num],&parent2->Code[0][i-num],num*4);
-
-			counter=MAX_LENGTH; //~~ TODO
-			RACE* c=child1;
-			child1=child2;
-			child2=c;
-		}
-		--counter;
-	}
-	int num=MAX_LENGTH-counter;
-	memcpy(&child1->Code[0][counter],&Code[0][counter],num*4);
-
-	memcpy(&child1->Code[1][counter],&parent2->Code[1][counter],num*4);
-
-	memcpy(&child2->Code[1][counter],&Code[1][counter],num*4);
-
-	memcpy(&child2->Code[0][counter],&parent2->Code[0][counter],num*4);
-
-	child1->mutationRate=(2*mutationRate+parent2->mutationRate)/3;
-	child2->mutationRate=(2*parent2->mutationRate+mutationRate)/3;*/
-}
-#endif
 
 
 // -------------------------------------------------------------------
 // ------ BELOW ALL THE GET/SET FUNCTIONS, PRETTY UNINTERESTING ------
 // -------------------------------------------------------------------
-
-void PREBUILDORDER::copyCode(PREBUILDORDER& player)
-{
-	memcpy(Code, player.Code, sizeof(int) * player.getLength());
-}
-
-void PREBUILDORDER::copyCode(unsigned int* dst) const
-{
-	memcpy(dst, Code, getLength() * sizeof(int));
-}
 
 void PREBUILDORDER::setConditionsChanged(const bool conditions_changed) 
 {
@@ -1045,84 +1264,3 @@ const bool PREBUILDORDER::setOnlySwapOrders(const bool only_swap_orders)
 // --------------------------------------
 // ------ END OF GET/SET FUNCTIONS ------
 // --------------------------------------
-
-
-/*PREBUILDORDER::PREBUILDORDER(const PREBUILDORDER& object) :
-//	location(object.location),
-//	pStartCondition(object.pStartCondition),
-	buildingQueue(object.buildingQueue),
-//	lastcounter(object.lastcounter),
-//	lastunit(object.lastunit),
-	unit(object.unit),
-	pStats(object.pStats),
-	neededMinerals(object.neededMinerals),
-	neededGas(object.neededGas),
-	pStart(object.pStart),
-	ready(object.ready),
-	pGoal(object.pGoal),
-	alwaysBuildWorkers(object.alwaysBuildWorkers),
-	onlySwapOrders(object.onlySwapOrders),
-	conditionsChanged(true),
-	playerNum(object.playerNum),
-	minerals(object.minerals),
-	gas(object.gas),
-	timer(object.timer),
-	IP(object.IP),
-	harvestedMinerals(object.harvestedMinerals),
-	harvestedGas(object.harvestedGas),
-	wastedMinerals(object.wastedMinerals),
-	wastedGas(object.wastedGas),
-	needSupply(object.needSupply),
-	haveSupply(object.haveSupply),
-	length(object.length),
-	timeout(object.timeout)
-{
-	memcpy(Code, object.Code, MAX_LENGTH * sizeof(int));
-	//memcpy(last, object.last, MAX_LENGTH * sizeof(int));
-	
-	memcpy(larvaInProduction, object.larvaInProduction, MAX_LOCATIONS * sizeof(int));
-	memcpy(mineralHarvestPerSecond, object.mineralHarvestPerSecond, MAX_LOCATIONS * 45 * sizeof(int));
-	memcpy(gasHarvestPerSecond, object.gasHarvestPerSecond, MAX_LOCATIONS * 5 * sizeof(int));
-}
-
-PREBUILDORDER& PREBUILDORDER::operator=(const PREBUILDORDER& object)
-{
-//	location = object.location;
-//	pStartCondition = object.pStartCondition;
-	buildingQueue = object.buildingQueue;
-//	lastcounter = object.lastcounter;
-  //  lastunit = object.lastunit;
-	unit = object.unit;
-	pStats = object.pStats;
-	neededMinerals = object.neededMinerals;
-	neededGas = object.neededGas;
-	pStart = object.pStart;
-	ready = object.ready;
-	pGoal = object.pGoal;
-	
-	alwaysBuildWorkers = object.alwaysBuildWorkers;
-	onlySwapOrders = object.onlySwapOrders;
-	conditionsChanged = true;
-
-	playerNum = object.playerNum;
-	minerals = object.minerals;
-	gas = object.gas;
-	timer = object.timer;
-	IP = object.IP;
-	harvestedMinerals = object.harvestedMinerals;
-	harvestedGas = object.harvestedGas;
-	wastedMinerals = object.wastedMinerals;
-	wastedGas = object.wastedGas;
-	needSupply = object.needSupply;
-	haveSupply = object.haveSupply;
-	length = object.length;
-	timeout = object.timeout;
-	memcpy(Code, object.Code, MAX_LENGTH * sizeof(int));
-	//memcpy(last, object.last, MAX_LENGTH * sizeof(int));
-
-	memcpy(larvaInProduction, object.larvaInProduction, MAX_LOCATIONS * sizeof(int));	
-	memcpy(mineralHarvestPerSecond, object.mineralHarvestPerSecond, MAX_LOCATIONS * 45 * sizeof(int));
-	memcpy(mineralHarvestPerSecond, object.mineralHarvestPerSecond, MAX_LOCATIONS * 5 * sizeof(int));
-
-	return(*this);
-}*/

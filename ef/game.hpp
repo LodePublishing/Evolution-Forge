@@ -2,10 +2,14 @@
 #define _GUI_GAME_HPP
 
 #include "../core/soup.hpp"
-#include "configuration.hpp"
 
 #include "player.hpp"
 #include "score.hpp"
+
+#define MAX_GAME_TABS 20
+#define MAX_SIMULTANEOUS_GAMES 2
+#define MAX_GAME (MAX_SIMULTANEOUS_GAMES*MAX_GAME_TABS)
+
 
 class Game : public UI_Window
 {
@@ -33,6 +37,7 @@ class Game : public UI_Window
 		const bool isSplitGame() const;
 		const bool isRemoveGame() const;
 
+		void doReset();
 		const bool getResetFlag();
 		void setResetFlag(const bool flag=true);
 
@@ -54,9 +59,9 @@ class Game : public UI_Window
 //		void setTotalGeneration(const unsigned int total_generations);
 
 		void assignMap(const BASIC_MAP* game_map);
-		void assignRace(const unsigned int player_num, const eRace race);
+		void assignRace(const unsigned int player_num, const unsigned int race);
 		void resetPlayer(const unsigned int player_num);
-		void setHarvestSpeed(const unsigned int player_num, const eRace harvest_race, const HARVEST_SPEED* harvest_speed);
+//		void setHarvestSpeed(const unsigned int player_num, const eRace harvest_race, const HARVEST_SPEED* harvest_speed);
 //		void setStartRace(const unsigned int player_num, const eRace player_race);
 		void initSoup();
 		void initSoup(unsigned int player_number);
@@ -64,10 +69,10 @@ class Game : public UI_Window
 		void loadBuildOrder(const unsigned int player_num, const unsigned int number);
 		void setStartPosition(const unsigned int player_num, const unsigned int player_position);
 		void assignGoal(const unsigned int player_num, const unsigned int player_goal);
-		void fillGroups(); // TODO
 
-		const bool isCompletelyInitialized() const;
+
 	private:
+		const bool isCompletelyInitialized() const;
 		Player* player[MAX_PLAYER];
 		ScoreWindow* scoreWindow;
 
@@ -76,10 +81,9 @@ class Game : public UI_Window
 		unsigned int gameMax;
 
 		SOUP* soup;
-		START* start[MAX_INTERNAL_PLAYER];
 		ANABUILDORDER* anarace[MAX_PLAYER];
-		unsigned int oldCode[MAX_PLAYER][MAX_LENGTH];
-		UNIT startForce[MAX_INTERNAL_PLAYER][MAX_LOCATIONS];
+		std::list<unsigned int> oldCode[MAX_PLAYER];
+
 		unsigned int mapPlayerCount;
 		const BASIC_MAP* map;
 		
@@ -94,13 +98,11 @@ class Game : public UI_Window
 		bool mapPlayerCountInitialized;
 		bool anaraceInitialized;
 
-//		UI_Group* buttonGroup;
 //		UI_Button* splitGameButton;
-//		UI_Button* removeButton; // remove Game
 };
 
 inline const bool Game::isRemoveGame() const {
-	return false;//removeButton->isLeftClicked();
+	return(false);
 }
 
 inline const bool Game::isSplitGame() const {
@@ -108,6 +110,11 @@ inline const bool Game::isSplitGame() const {
 }
 
 inline const unsigned int Game::getMapPlayerCount() const {
+#ifdef _SCC_DEBUG
+	if(!mapPlayerCountInitialized) {
+		toErrorLog("DEBUG (Game::getMapPlayerCount()): Variable mapPlayerCount was not initialized.");return(0);
+	}
+#endif
 	return(mapPlayerCount);
 }
 

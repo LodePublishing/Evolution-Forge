@@ -235,4 +235,119 @@ const std::string formatTime(const int time, const unsigned int speed)
 // ------  END PARSING TOOLS AND ERROR LOGS ------
 // -----------------------------------------------
 
+const eLanguage getLanguageSubDataEntry(const std::string& item)
+{
+	if(item=="@ENGLISH") return(ENGLISH_LANGUAGE);else
+	if(item=="@GERMAN") return(GERMAN_LANGUAGE);else
+	if(item=="@ITALIAN") return(ITALIAN_LANGUAGE);else
+	if(item=="@PORTUGESE") return(PORTUGESE_LANGUAGE);else
+	if(item=="@DUTCH") return(DUTCH_LANGUAGE);else
+	if(item=="@FINNISH") return(FINNISH_LANGUAGE);else
+	if(item=="@GREEK") return(GREEK_LANGUAGE);else
+	if(item=="@FRENCH") return(FRENCH_LANGUAGE);else
+	if(item=="@SPANISH") return(SPANISH_LANGUAGE);else
+	if(item=="@POLSKI") return(POLSKI_LANGUAGE);else
+	if(item=="@KOREAN") return(KOREAN_LANGUAGE);else
+	if(item=="@CHINESE") return(CHINESE_LANGUAGE);else
+	if(item=="@RUSSIAN") return(RUSSIAN_LANGUAGE);else
+	return(ZERO_LANGUAGE);
+}
+
+const bool loadStringFile(const std::string& string_file, const std::vector<std::string>& string_identifier, std::vector< std::vector<std::string> >& string_list, std::vector<bool>& language_loaded, const unsigned int max_strings)
+{
+	if((string_file.substr(string_file.size()-2,2) == "..") ||(string_file.substr(string_file.size()-1,1) == "."))
+		return(true);
+	
+	bool string_mode = false;
+	bool language_mode = false;
+	eLanguage current_language = ZERO_LANGUAGE;
+
+	std::ifstream pFile(string_file.c_str());
+
+	if(!checkStreamIsOpen(pFile, "loadStringFile", string_file))
+		return(false);
+
+//	toInitLog("* " + lookUpString(START_LOADING_STRING) + " " + string_file);
+//problem: Stringfile ist ja noch nicht geladen :>
+	toInitLog("* Loading " + string_file);
+	bool found_any_language_block = false;
+	bool found_language_block[MAX_LANGUAGES];
+	for(unsigned int i = MAX_LANGUAGES; i--;)
+		found_language_block[i] = false;
+	
+	std::fstream::pos_type old_pos = pFile.tellg();
+	char line[1024];
+	while(pFile.getline(line, sizeof line))
+	{
+		if(!checkStreamForFailure(pFile, "loadStringFile", string_file))
+			return(false);
+		
+		std::string text = line;
+		size_t start = text.find_first_not_of("\t ");
+		if((start == std::string::npos) || (text[0] == '#') || (text[0] == '\0'))
+			continue; // ignore line
+		size_t stop = text.find_first_of("\t ", start);
+		if(stop == std::string::npos) 
+			stop = text.size();
+		std::string index = text.substr(start, stop);
+		if(!string_mode)
+		{
+			string_mode = (index == "@STRINGS");
+			if(!string_mode)
+			{
+				if(index == "@END")
+					toErrorLog("WARNING (loadStringFile()): Lonely @END => ignoring line.");
+				else
+					toErrorLog("WARNING (loadStringFile()): Line '" + index + "' is outside a block but is not marked as comment => ignoring line.");
+			} else
+				language_mode = true;
+		}  else
+		if((language_mode) && (current_language == ZERO_LANGUAGE))
+		{
+			current_language = getLanguageSubDataEntry(index);
+			if(current_language==ZERO_LANGUAGE) {
+				toErrorLog("ERROR (loadStringFile()): Invalid language entry '" + index + "'.");return(false);
+			} else if(language_loaded[current_language]) {
+				toErrorLog("ERROR (loadStringFile()): Language '" + index + "' already initialized.");return(false);
+			}
+			else
+			{
+				found_language_block[current_language] = true;
+				found_any_language_block = true;
+				string_list[current_language].resize(max_strings);
+			}
+		}
+		// => hat nur 1 Ebene => Position festgestellt!
+		else if((language_mode) && (current_language != ZERO_LANGUAGE))
+		{
+			std::map<std::string, std::list<std::string> >::iterator i;
+			std::map<std::string, std::list<std::string> > block;
+			pFile.seekg(old_pos);
+			if(!parse_block_map(pFile, block)) {
+				toErrorLog("WARNING (loadStringFile()): No concluding @END for @STRINGS block was found in file " + string_file + " => trying to parse what we have so far.");
+			}
+			for(unsigned int j = 0; j < max_strings; j++)
+			{
+				if((i=block.find(string_identifier[j])) != block.end())
+				{
+					i->second.pop_front();
+					string_list[current_language][j] = i->second.front();
+					block.erase(i);
+				}
+			}
+			// TODO nicht gefundene Eintraege bemaengeln
+		}
+		old_pos = pFile.tellg();
+	} // end while
+
+	if(!found_any_language_block)
+	{
+		toErrorLog("ERROR (loadStringFile()): No language block (@ENGLISH, @GERMAN etc.) was found in file " + string_file + " => ignoring file.");
+		return(false);
+	}
+	for(unsigned int i = MAX_LANGUAGES; i--;)
+		if(found_language_block[i])
+			language_loaded[i] = true;
+	return(true);
+}
 

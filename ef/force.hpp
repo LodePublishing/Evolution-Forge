@@ -10,9 +10,6 @@
 
 #include "../ui/radio.hpp"
 
-#include "../core/anabuildorder.hpp"
-#include "../core/database.hpp"
-
 enum eMenu
 {
 //	RACE_MENU,
@@ -97,7 +94,7 @@ inline const signed int ForceWindow::getAssignedGoal() const {
 inline void ForceWindow::setMarkedUnit(const unsigned int marked_unit)
 {
 #ifdef _SCC_DEBUG
-	if(marked_unit >= LAST_UNIT) {
+	if(marked_unit >= RACE::UNIT_TYPE_COUNT) {
 		toErrorLog("DEBUG: (ForceWindow::setMarkedUnit): Value marked_unit out of range.");return;
 	}
 #endif
@@ -107,7 +104,7 @@ inline void ForceWindow::setMarkedUnit(const unsigned int marked_unit)
 inline const unsigned int ForceWindow::getMarkedUnit() const
 {
 #ifdef _SCC_DEBUG
-	if(markedUnit >= LAST_UNIT) {
+	if(markedUnit >= RACE::UNIT_TYPE_COUNT) {
 		toErrorLog("DEBUG: (ForceWindow::getMarkedUnit): Value markedUnit out of range.");return(0);
 	}
 #endif

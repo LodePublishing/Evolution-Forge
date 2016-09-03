@@ -1,13 +1,12 @@
 #include "startcondition.hpp"
 
 START_CONDITION::START_CONDITION():
-	race(TERRA),
+	race(0),
 //am Namen liegts... seltsam... checken... ! o_O ?
 	name("ERROR"),
 	haveSupply(0),
 	needSupply(0),
-	minerals(0),
-	gas(0),
+	resource(RACE::MAX_RESOURCE_TYPES),
 	startTime(0)
 { }
 
@@ -19,12 +18,11 @@ START_CONDITION::START_CONDITION(const START_CONDITION& object) :
 	name(object.name),
 	haveSupply(object.haveSupply),
 	needSupply(object.needSupply),
-	minerals(object.minerals),
-	gas(object.gas),
 	startTime(object.startTime)
 {
 	for(unsigned int i = MAX_LOCATIONS; i--;)
 		unit[i] = object.unit[i];
+	resource = object.resource;
 }
 
 START_CONDITION& START_CONDITION::operator=(const START_CONDITION& object)
@@ -33,8 +31,7 @@ START_CONDITION& START_CONDITION::operator=(const START_CONDITION& object)
 	name = object.name;
 	haveSupply = object.haveSupply;
 	needSupply = object.needSupply;
-	minerals = object.minerals;
-	gas = object.gas;
+	resource = object.resource;
 	startTime = object.startTime;
 	for(unsigned int i = MAX_LOCATIONS; i--;)
 		unit[i] = object.unit[i];
@@ -55,8 +52,9 @@ void START_CONDITION::adjustSupply()
 
 void START_CONDITION::adjustResearches()
 {
-//	for(unsigned int i=1; i<MAX_LOCATIONS; ++i)
-		unit[0].adjustResearches(race);
+// set researches on all locations because when a research is completed it is removed everywhere!
+	for(unsigned int i=0; i<MAX_LOCATIONS; ++i)
+		unit[i].adjustResearches(race);
 }
 
 

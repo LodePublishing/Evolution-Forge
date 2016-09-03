@@ -11,15 +11,11 @@ class BASIC_MAP
 		unsigned int maxLocations; // constant
 		unsigned int maxPlayer; // constant ?
 		void resetData();
-//		unsigned int startPosition[MAX_PLAYER];
 		MAP_LOCATION location[MAX_LOCATIONS];
 		unsigned int calculateDistance(unsigned int i, unsigned int j);
 	public:		
 		BASIC_MAP();
 		~BASIC_MAP();
-
-		const unsigned int getLocationMineralPatches(const unsigned int mineral_location) const;
-		const unsigned int getLocationVespeneGeysirs(const unsigned int gas_location) const;
 
 		const unsigned int getStartPlayerPosition(const unsigned int player) const;
 		const MAP_LOCATION* getLocation(const unsigned int location_number) const;
@@ -30,24 +26,36 @@ class BASIC_MAP
 		const bool setMaxLocations(const unsigned int max_locations);  // sets the number of locations of this map
 		const bool setMaxPlayer(const unsigned int max_player);	// sets the number of player that are part of this map
 
-		void setLocationName(const unsigned int location_number, const std::string& location_name);
-		void setLocationMineralDistance(const unsigned int location_number, const unsigned int mineralDistance);
-		void setLocationDistance(const unsigned int location_number, const unsigned int target, const unsigned int distance);
-		void setLocationMineralPatches(const unsigned int location_number, const unsigned int mineralPatches);
-		void setLocationVespeneGeysirs(const unsigned int location_number, const unsigned int vespeneGeysirs);
-		void calculateLocationsDistances();
-};
+		void setLocationUnitTotal(const unsigned int location_number, const unsigned int unit, const unsigned int total);
 
-inline const std::string& BASIC_MAP::getName() const
-{
+		void setLocationName(const unsigned int location_number, const std::string& location_name);
+		void setLocationResourceDistance(const unsigned int location_number, const unsigned int resource_type, const unsigned int resource_distance);
+		void setLocationDistance(const unsigned int location_number, const unsigned int target, const unsigned int distance);
+		void calculateLocationDistances();
+};
+		
+inline void BASIC_MAP::setLocationUnitTotal(const unsigned int location_number, const unsigned int unit, const unsigned int total) {
+#ifdef _SCC_DEBUG
+	if(location_number >= getMaxLocations()) {
+		toErrorLog("DEBUG (BASIC_MAP::setLocationUnitTotal()): Value location_number out of range.");return;
+	}
+#endif
+	location[location_number].setUnit(unit, total);
+}
+		
+inline const std::string& BASIC_MAP::getName() const {
 	return(name);
+}
+
+inline void BASIC_MAP::setName(const std::string& map_name) {
+	name = map_name;
 }
 
 inline const unsigned int BASIC_MAP::getMaxLocations() const
 {
 #ifdef _SCC_DEBUG
 	if(maxLocations > MAX_LOCATIONS) {
-		toErrorLog("DEBUG (BASIC_MAP::getMaxLocations()): Variable not initialized.");return(0);
+		toErrorLog("DEBUG (BASIC_MAP::getMaxLocations()): Variable maxLocations not initialized.");return(0);
 	}
 #endif
 	return(maxLocations);
@@ -63,10 +71,6 @@ inline const unsigned int BASIC_MAP::getMaxPlayer() const
 	return(maxPlayer);
 }
 
-inline void BASIC_MAP::setName(const std::string& map_name)
-{
-	name = map_name;
-}
 
 inline void BASIC_MAP::setLocationName(const unsigned int location_number, const std::string& location_name)
 {
@@ -78,54 +82,20 @@ inline void BASIC_MAP::setLocationName(const unsigned int location_number, const
 	location[location_number].setName(location_name);
 }
 
-inline const unsigned int BASIC_MAP::getLocationMineralPatches(const unsigned int location_number) const
+inline void BASIC_MAP::setLocationResourceDistance(const unsigned int location_number, const unsigned int resource_type, const unsigned int resource_distance)
 {
 #ifdef _SCC_DEBUG
 	if((location_number >= maxLocations)) {
-		toErrorLog("DEBUG (BASIC_MAP::getLocationMineralPatches()): Value out of range.");return(0);	 
+		toErrorLog("DEBUG (BASIC_MAP::setLocationResourceDistance()): Value location_number out of range.");return;
+	}
+	if(resource_type >= RACE::MAX_RESOURCE_TYPES) {
+		toErrorLog("DEBUG (BASIC_MAP::setLocationResourceDistance()): Value resource_type out of range.");return;
+	}
+	if(resource_distance > 9999) {
+		toErrorLog("DEBUG (BASIC_MAP::setLocationResourceDistance()): Value resource_distance out of range.");return;
 	}
 #endif
-	return(location[location_number].getMineralPatches());
-}
-
-inline const unsigned int BASIC_MAP::getLocationVespeneGeysirs(const unsigned int location_number) const
-{
-#ifdef _SCC_DEBUG
-	if((location_number >= maxLocations)) {
-		toErrorLog("DEBUG (BASIC_MAP::getLocationVespeneGeysirs()): Value out of range.");return(0);	 
-	}
-#endif
-	return(location[location_number].getVespeneGeysirs());
-}
-
-inline void BASIC_MAP::setLocationMineralPatches(const unsigned int location_number, const unsigned int mineral_patches)
-{
-#ifdef _SCC_DEBUG
-	if((location_number >= maxLocations)) {
-		toErrorLog("DEBUG (BASIC_MAP::setLocationMineralPatches()): Value out of range.");return;	 
-	}
-#endif
-	location[location_number].setMineralPatches(mineral_patches);
-}
-
-inline void BASIC_MAP::setLocationVespeneGeysirs(const unsigned int location_number, const unsigned int vespene_geysirs)
-{
-#ifdef _SCC_DEBUG
-	if((location_number >= maxLocations)) {
-		toErrorLog("DEBUG (BASIC_MAP::setLocationVespeneGeysirs()): Value out of range.");return;	 
-	}
-#endif
-	location[location_number].setVespeneGeysirs(vespene_geysirs);
-}
-
-inline void BASIC_MAP::setLocationMineralDistance(const unsigned int location_number, const unsigned int mineral_distance)
-{
-#ifdef _SCC_DEBUG
-	if((location_number >= maxLocations)) {
-		toErrorLog("DEBUG (BASIC_MAP::setMineralDistance()): Value out of range.");return;
-	}
-#endif
-	location[location_number].setMineralDistance(mineral_distance);
+	location[location_number].setResourceDistance(resource_type, resource_distance);
 }
 	
 inline void BASIC_MAP::setLocationDistance(const unsigned int location_number, const unsigned int target, const unsigned int distance)

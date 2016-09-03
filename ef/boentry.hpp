@@ -7,7 +7,7 @@
 class BoEntry : public UI_Button
 {
 	public:
-		BoEntry(UI_Object* bo_parent, const Point top_left, const Size distance_bottom_right, const eString bo_unit, const PROGRAM& bo_program, const unsigned int unit_count, const unsigned int my_id);
+		BoEntry(UI_Object* bo_parent, const Point top_left, const Size distance_bottom_right, const std::string& bo_unit, const PROGRAM& bo_program, const unsigned int unit_count, const unsigned int my_id);
 		~BoEntry();
 
 		const unsigned int changed();

@@ -37,7 +37,7 @@ class GOAL
 inline void GOAL::setUnit(const unsigned int goal_unit)
 {
 #ifdef _SCC_DEBUG
-	if((goal_unit >= LAST_UNIT)) {
+	if((goal_unit >= RACE::UNIT_TYPE_COUNT)) {
 		 toErrorLog("DEBUG: (GOAL::setUnit): Value goal_unit out of range.");return;
 	}
 #endif
@@ -57,7 +57,7 @@ inline void GOAL::setTime(const unsigned int goal_time)
 inline void GOAL::setCount(const unsigned int goal_count)
 {
 #ifdef _SCC_DEBUG
-	if((goal_count >= MAX_SUPPLY)) {
+	if((goal_count >= GAME::MAX_SUPPLY)) {
 		 toErrorLog("DEBUG: (GOAL::setCount): Value goal_count out of range.");return;
 	}
 #endif
@@ -78,7 +78,7 @@ inline void GOAL::setLocation(const unsigned int goal_location)
 inline const unsigned int GOAL::getUnit() const
 {
 #ifdef _SCC_DEBUG
-	if((unit >= LAST_UNIT)) {
+	if((unit >= RACE::UNIT_TYPE_COUNT)) {
 		 toErrorLog("DEBUG: (GOAL::getUnit): Variable not initialized.");return(0);
 	}
 #endif
@@ -98,7 +98,7 @@ inline const unsigned int GOAL::getTime() const
 inline const unsigned int GOAL::getCount() const
 {
 #ifdef _SCC_DEBUG
-	if((count >= MAX_SUPPLY)) {
+	if((count >= GAME::MAX_SUPPLY)) {
 		 toErrorLog("DEBUG: (GOAL::getCount): Variable not initialized.");return(0);
 	}
 #endif

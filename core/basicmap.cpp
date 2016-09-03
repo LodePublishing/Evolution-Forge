@@ -15,8 +15,6 @@ void BASIC_MAP::resetData()
 {
 	for(unsigned int i=MAX_LOCATIONS;i--;)
 		location[i].resetData();
-//	for(unsigned int i=MAX_PLAYER;i--;)
-//		startPosition[i] = 0;
 	name = "ERROR";
 	maxLocations = 0;
 	maxPlayer = 0;
@@ -40,13 +38,17 @@ unsigned int BASIC_MAP::calculateDistance(unsigned int i, unsigned int j)
 }
 
 
-void BASIC_MAP::calculateLocationsDistances()
+void BASIC_MAP::calculateLocationDistances()
 {
-	for(unsigned int i=1;i<getMaxLocations();++i)
-		for(unsigned int j=1;j<getMaxLocations();++j)
+	for(unsigned int i = 1; i<getMaxLocations(); ++i) // MaxLocations^2 Durchlaeufe damit wir sicher alle Verbindungen bekommen
+		for(unsigned int j = 1; j<getMaxLocations(); ++j)
+		{
+			if(i == j)
+				location[j].setDistance(i, 0);
+			else
 			if(location[i].getDistance(j) < 9999)
 				location[j].setDistance(i, location[i].getDistance(j));
-
+		}
 /*	for(unsigned int i = 1; i < getMaxLocations(); ++i)
 	{
 		std::cout << "Location " << i << " ";
@@ -68,7 +70,7 @@ void BASIC_MAP::calculateLocationsDistances()
 	}*/
 
 	for(unsigned int i=1;i<getMaxLocations(); ++i)
-		location[i].calculateDistances();
+		location[i].calculateDistances(i);
 }
 
 // -------------------------------

@@ -1,6 +1,6 @@
 #include "bgline.hpp"
 
-BoGraphLine::BoGraphLine(UI_Object* bg_parent, const Rect& initial_rect, const eRace bg_race, const unsigned int bg_facility, const unsigned int bg_line_height, const unsigned int bg_lines) :
+BoGraphLine::BoGraphLine(UI_Object* bg_parent, const Rect& initial_rect, const unsigned int bg_race, const unsigned int bg_facility, const unsigned int bg_line_height, const unsigned int bg_lines) :
 	UI_Object(bg_parent, initial_rect),
 	boGraphList(),
 	firstAvailible(0),
@@ -9,8 +9,11 @@ BoGraphLine::BoGraphLine(UI_Object* bg_parent, const Rect& initial_rect, const e
 	lineHeight(bg_line_height),
 	lines(bg_lines),
 	facilityChanged(false),
-	facilityName(new UI_StaticText(this, UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*race + facility)), Rect(2,2,0,0), Size(), BRIGHT_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST))
-{}
+	facilityName(new UI_StaticText(this, GAME::lookUpUnitString(race, facility), Rect(2,2,0,0), Size(), BRIGHT_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST))
+{
+	if(lineHeight == 0)
+		toErrorLog(" :`-(");
+}
 
 BoGraphLine::~BoGraphLine()
 {
@@ -28,12 +31,12 @@ void BoGraphLine::resetData()
 	facility = 0;
 	lineHeight = 0;
 	lines = 0;
-	race = TERRA;
+	race = 0;
 }
 
 void BoGraphLine::reloadStrings()
 {
-	facilityName->updateText(UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*race + facility)));
+	facilityName->updateText(GAME::lookUpUnitString(race, facility));
 }
 
 void BoGraphLine::process()
@@ -43,7 +46,7 @@ void BoGraphLine::process()
 	if(facilityChanged)
 	{
 		facilityChanged = false;
-		facilityName->updateText(UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*race + facility)));
+		facilityName->updateText(GAME::lookUpUnitString(race, facility));
 	}
 	UI_Object::process();
 }
@@ -57,7 +60,7 @@ void BoGraphLine::draw(DC* dc) const
 		if(firstAvailible > 0)
 		{
 			dc->setPen(*theme.lookUpPen(NULL_PEN));
-			dc->setBrush(*theme.lookUpBrush(NULL_BRUSH));
+			dc->setBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
 			dc->DrawRectangle(Rect(getAbsolutePosition(), Size(firstAvailible, getHeight())));
 //			for(std::list<Not_Availible>::const_iterator i = notAvailibleList.begin(); i != notAvailibleList.end(); ++i)
 //				dc->DrawRectangle(Rect(getAbsolutePosition() + Size(i->begin, 0), Size(i->end - i->begin, getHeight())));

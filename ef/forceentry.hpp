@@ -14,7 +14,7 @@ enum eForceEntryMessage
 class ForceEntry : public UI_Button
 {
 	public:
-		ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std::string& entry_unit);
+		ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std::string& entry_unit, const unsigned int unit_num, const eUnitType unit_type, GOAL* unit_goal);
 		~ForceEntry();
 	
 		void process();
@@ -37,11 +37,6 @@ class ForceEntry : public UI_Button
 		
 		void HideIt();
 
-		void reloadOriginalSize();
-			
-		UI_Object* checkToolTip();
-		UI_Object* checkHighlight();
-	
 		static eForceEntryMessage changed;
 		static bool forceEntryIsGoal;
 		static unsigned int forceEntryUnit;
@@ -76,6 +71,18 @@ class ForceEntry : public UI_Button
 		ForceEntry(const ForceEntry& object);
 		ForceEntry& operator=(const ForceEntry& object);
 };
+
+inline void ForceEntry::assignGoal(GOAL* assign_goal) {
+	goal = assign_goal;
+}
+
+inline void ForceEntry::HideIt() {
+	Hide();
+}
+
+inline void ForceEntry::setTime(const unsigned int time) {
+	goal->setTime(time);
+}
 
 inline const unsigned int ForceEntry::getTime() const {
 	return(goal->getTime());

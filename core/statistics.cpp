@@ -1,13 +1,14 @@
 #include "statistics.hpp"
+#include "configuration.hpp"
 
 STATISTICS::STATISTICS():
 	needSupply(0),
 	haveSupply(0),
-	minerals(0),
-	gas(0),
 	fitness(0),
-	time(0)
-{ }
+	time(coreConfiguration.getMaxTime())
+{ 
+	resource.assign(RACE::MAX_RESOURCE_TYPES, 0);
+}
 
 STATISTICS::~STATISTICS() {}
 
@@ -15,18 +16,16 @@ void STATISTICS::resetData()
 {
 	needSupply = 0;
 	haveSupply = 0;
-	minerals = 0;
-	gas = 0;
+	resource.assign(RACE::MAX_RESOURCE_TYPES, 0);
 	fitness = 0;
-	time = 0;
+	time = coreConfiguration.getMaxTime();
 }
 
 STATISTICS& STATISTICS::operator=(const STATISTICS& object)
 {
 	needSupply = object.needSupply;
 	haveSupply = object.haveSupply;
-	minerals = object.minerals;
-	gas = object.gas;
+	resource = object.resource;
 	fitness = object.fitness;
 	time = object.time;
 	return(*this);
@@ -36,8 +35,7 @@ STATISTICS& STATISTICS::operator=(const STATISTICS& object)
 STATISTICS::STATISTICS(const STATISTICS& object) :
 	needSupply(object.needSupply),
 	haveSupply(object.haveSupply),
-	minerals(object.minerals),
-	gas(object.gas),
+	resource(object.resource),
 	fitness(object.fitness),
 	time(object.time)
 { }

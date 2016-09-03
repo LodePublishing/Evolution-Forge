@@ -14,7 +14,7 @@
 class BoGraphLine : public UI_Object
 {
 	public:
-		BoGraphLine(UI_Object* bg_parent, const Rect& initial_rect, const eRace bg_race, const unsigned int bg_facility, const unsigned int bg_line_height, const unsigned int bg_lines);
+		BoGraphLine(UI_Object* bg_parent, const Rect& initial_rect, const unsigned int bg_race, const unsigned int bg_facility, const unsigned int bg_line_height, const unsigned int bg_lines);
 		~BoGraphLine();
 		
 		void resetData();
@@ -24,12 +24,12 @@ class BoGraphLine : public UI_Object
 		void draw(DC* dc) const;
 		void reloadStrings();
 
-		void setRace(const eRace race);
+		void setRace(const unsigned int race);
 		void setFacility(const unsigned int bg_facility);
 		void setLineHeight(const unsigned int bg_line_height);
 		void setLines(const unsigned int bg_lines);
 
-		const eRace getRace() const;
+		const unsigned int getRace() const;
 		const unsigned int getFacility() const;
 		const unsigned int getLineHeight() const;
 		const unsigned int getLines() const;
@@ -37,7 +37,7 @@ class BoGraphLine : public UI_Object
 //		std::list<Not_Availible> notAvailibleList;
 		unsigned int firstAvailible;
 	private:
-		eRace race;
+		unsigned int race;
 		unsigned int facility;
 		unsigned int lineHeight; // number of entries per line
 		unsigned int lines; // number of lines
@@ -45,7 +45,12 @@ class BoGraphLine : public UI_Object
 		UI_StaticText* facilityName;
 };
 
-inline void BoGraphLine::setRace(const eRace bg_race) {
+inline void BoGraphLine::setRace(const unsigned int bg_race) {
+#ifdef _SCC_DEBUG
+	if(bg_race >= GAME::MAX_RACES) {
+		toErrorLog("DEBUG (BoGraphLine::setRace()): Value race out of range.");return;
+	}
+#endif 
 	if(bg_race == race)
 		return;
 	race = bg_race;
@@ -59,15 +64,16 @@ inline void BoGraphLine::setFacility(const unsigned int bg_facility) {
 	facilityChanged = true;
 }
 
-inline void BoGraphLine::setLineHeight(const unsigned int bg_line_height) {
-	lineHeight = bg_line_height;
-}
-
 inline void BoGraphLine::setLines(const unsigned int bg_lines) {
 	lines = bg_lines;
 }
 
-inline const eRace BoGraphLine::getRace() const {
+inline const unsigned int BoGraphLine::getRace() const {
+#ifdef _SCC_DEBUG
+	if(race >= GAME::MAX_RACES) {
+		toErrorLog("DEBUG (BoGraphLine::getRace()): Variable race not initialized.");return(0);
+	}
+#endif 
 	return(race);
 }
 
@@ -82,6 +88,12 @@ inline const unsigned int BoGraphLine::getLineHeight() const {
 inline const unsigned int BoGraphLine::getLines() const {
 	return(lines);
 }
+
+inline void BoGraphLine::setLineHeight(const unsigned int bg_line_height) {
+	lineHeight = bg_line_height;
+}
+
+
 
 
 #endif

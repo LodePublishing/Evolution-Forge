@@ -12,9 +12,9 @@ class IntroWindow : public UI_Window
 		void process();
 		void draw(DC* dc) const;
 		void reloadOriginalSize();
-		void gotoChapter(unsigned int chapter);
-
+		void init();	
 	private:
+		bool was_initialized;
 		UI_LongText* text;
 		UI_Button* doneButton;
 };

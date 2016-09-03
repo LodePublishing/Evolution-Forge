@@ -1,0 +1,32 @@
+@STRINGS
+	@ENGLISH
+						  "NULL_STRING" = "NULL"
+		                                 "TERRA_STRING" = "Terra"
+		                               "PROTOSS_STRING" = "Protoss"
+		                                  "ZERG_STRING" = "Zerg"
+
+					      "MINERALS_STRING" = "Minerals"
+					   "VESPENE_GAS_STRING" = "Gas"
+	
+		                           "UNIT_TYPE_0_STRING" = "rest"
+		                           "UNIT_TYPE_1_STRING" = "SCV"
+		                           "UNIT_TYPE_2_STRING" = "Gas SCV"
+		                           "UNIT_TYPE_3_STRING" = "Combat units..."
+		                           "UNIT_TYPE_4_STRING" = "Support units..."
+		                           "UNIT_TYPE_5_STRING" = "Supply/Refinery..."
+		                           "UNIT_TYPE_6_STRING" = "Producing buildings..."
+		                           "UNIT_TYPE_7_STRING" = "Research buildings..."
+		                           "UNIT_TYPE_8_STRING" = "Building addons..."
+		                           "UNIT_TYPE_9_STRING" = "Research..."
+		                          "UNIT_TYPE_10_STRING" = "Special..."
+
+				    "GAME_SPEED_SLOWEST_STRING" = "Slowest"
+				     "GAME_SPEED_SLOWER_STRING" = "Slower"
+				       "GAME_SPEED_SLOW_STRING" = "Slow"
+				     "GAME_SPEED_NORMAL_STRING" = "Normal"
+				       "GAME_SPEED_FAST_STRING" = "Fast"
+				     "GAME_SPEED_FASTER_STRING" = "Faster"
+				    "GAME_SPEED_FASTEST_STRING" = "Fastest"
+	@END
+@END
+

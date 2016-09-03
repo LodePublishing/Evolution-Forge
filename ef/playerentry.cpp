@@ -11,13 +11,13 @@ PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size d
 	scoreMode(SCORE_FULFILL_MODE),
 // TODO UI_Object:: arrange top left :(
 // 
-	playerText(new UI_StaticText(this, "Player 1:", Rect(Point(/*UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*/12, 0), Size(0,0)), Size(0, 0), IMPORTANT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
-	currentActionButton(new UI_Button(this, Rect(Point(playerText->getRelativeRect().getLeft()+playerText->getTextSize().getWidth()+5, 0), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*9/10, 0)), Size(0,0), MY_BUTTON, false, STATIC_BUTTON_MODE, PAUSED_STRING, DO_NOT_ADJUST, SMALL_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+	playerText(new UI_StaticText(this, "Player 1:", Rect(), Size(0, 0), IMPORTANT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
+	currentActionButton(new UI_Button(this, Rect(), Size(0,0), MY_BUTTON, false, STATIC_BUTTON_MODE, PAUSED_STRING, DO_NOT_ADJUST, MIDDLE_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	raceMenuButton(new UI_Button(this, Rect(Point(0, FONT_SIZE+8), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2, 0)), Size(0, 0), TAB_BUTTON, false, STATIC_BUTTON_MODE, CHOOSE_RACE_STRING, DO_NOT_ADJUST, SMALL_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
-	raceMenu(new RaceMenu(this, Rect(10, 15, 0, 0), Size(0,0), DO_NOT_ADJUST )),
-//	removePlayerButton(new UI_Button(this, Rect(Point(0, 1), Size(8, 8)), Size(5, 0), CANCEL_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST)), // Evtl bitmap
-	scoreText(new UI_StaticText(this, Rect(Point(currentActionButton->getRelativeRightBound()+5, -2), Size(0, 0)), Size(5, 0), IMPORTANT_COLOR, LARGE_BOLD_FONT, DO_NOT_ADJUST)),
-	speedText(new UI_StaticText(this, Rect(Point(currentActionButton->getRelativeRightBound()-5, -10), Size(0, 0)), Size(5, 0), IMPORTANT_COLOR, SMALL_FONT, DO_NOT_ADJUST)),
+	raceMenu(new RaceMenu(this, Rect(), Size(0,0), DO_NOT_ADJUST )),
+//	removePlayerButton(new UI_Button(this, Rect(Point(0, 1), Size(8, 8)), Size(5, 0), CANCEL_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST)),
+	scoreText(new UI_StaticText(this, Rect(), Size(5, 0), IMPORTANT_COLOR, LARGE_SHADOW_BOLD_FONT, DO_NOT_ADJUST)),
+	speedText(new UI_StaticText(this, Rect(), Size(5, 0), IMPORTANT_COLOR, SMALL_FONT, DO_NOT_ADJUST)),
 	goalsFulfilledText(new UI_StaticText(this, Rect(Point(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2 + 5, FONT_SIZE+8), Size(0, 0)), Size(5, 0), IMPORTANT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
 //	addPlayerButton(new UI_Button(this, Rect(Point(5, 0), Size(60, 0)), Size(5, 0), MY_BUTTON, false, PRESS_BUTTON_MODE, ADD_PLAYER_STRING, TOP_CENTER, LARGE_BOLD_FONT, AUTO_SIZE)),
 	optimizing(false),
@@ -49,17 +49,18 @@ PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size d
 
 void PlayerEntry::reloadOriginalSize()
 {
-	playerText->setOriginalPosition(Point(12/*UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*/, 0));
+	playerText->setOriginalPosition(Point(0, 0));
 //	removePlayerButton->setOriginalPosition(Point(0, 1));
 	goalsFulfilledText->setOriginalPosition(Point(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2 + 5, FONT_SIZE+8));
 
-	currentActionButton->setOriginalSize(Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*9/10, 0));
-	currentActionButton->setOriginalPosition(Point(playerText->getRelativeRect().getLeft()+playerText->getTextSize().getWidth()+5, 0));
+	currentActionButton->setOriginalSize(Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*10/9, 0));
+	currentActionButton->setOriginalPosition(Point(playerText->getRelativeRect().getLeft()+playerText->getTextSize().getWidth()+5, -1));
 	scoreText->setOriginalPosition(Point(currentActionButton->getRelativeRightBound()+5, -2));
 	raceMenuButton->setOriginalPosition(Point(0, FONT_SIZE+8));
 	raceMenuButton->setOriginalSize(Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2, 0));
-
+	raceMenu->setOriginalPosition(Point(0, 2*raceMenuButton->getTextHeight()));
 	UI_Object::reloadOriginalSize();
+	speedText->setOriginalPosition(Point(scoreText->getRelativeRightBound() - speedText->getTextSize().getWidth(), -speedText->getTextSize().getHeight()));
 }
 
 const unsigned int PlayerEntry::getLineHeight() const
@@ -184,12 +185,10 @@ void PlayerEntry::setOptimizing(const bool opt)
 
 void PlayerEntry::setInitMode(const eInitMode init_mode)
 {
-	if(initMode == init_mode)
-		return;
 	initMode = init_mode;
 	if(initMode == INITIALIZED)
 	{
-		raceMenuButton->updateText((eString)(TERRA_STRING+assignRace));
+		raceMenuButton->updateText(GAME::lookUpGameString(GAME::FIRST_RACE_STRING + assignRace));
 		currentActionButton->Show();
 		goalsFulfilledText->Show();	
 	}
@@ -250,7 +249,7 @@ void PlayerEntry::process()
 			else
 				currentActionButton->updateText(OPTIMIZING_STRING);
 			speedText->Show();
-			speedText->updateText((eString)(efConfiguration.getGameSpeed() + GAME_SPEED_SLOWEST_STRING));
+			speedText->updateText(GAME::lookUpGameString(GAME::FIRST_GAME_SPEED_STRING + efConfiguration.getGameSpeed()));
 		} 
 // else see below
 /*	else if(surrentMode==SCORE_MODE

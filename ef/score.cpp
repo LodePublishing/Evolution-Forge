@@ -61,8 +61,9 @@ void ScoreWindow::setUnchangedGenerations(const unsigned int unchanged_generatio
 {
 	if(unchangedGenerations == unchanged_generations)
 		return;
+	if((efConfiguration.isAutoRuns())&&(unchangedGenerations < unchanged_generations))
+		setNeedRedrawNotMoved();
 	unchangedGenerations = unchanged_generations;
-	setNeedRedrawNotMoved();
 }
 
 void ScoreWindow::resetPlayerTime(unsigned int player_number)
@@ -154,7 +155,7 @@ void ScoreWindow::process()
 		else 
 		{
 			player[i]->Show();
-			player[i]->adjustRelativeRect(Rect(getRelativeClientRectLeftBound()+5, line*16, getRelativeClientRect().getWidth()-10, 12));
+			player[i]->adjustRelativeRect(Rect(getRelativeClientRectLeftBound()+5, line*(2*FONT_SIZE+10), getRelativeClientRect().getWidth()-10, 12)); // TODO
 			line+=player[i]->getLineHeight(); // height of menu <-
 			if(player[i]->checkForNeedRedraw())
 				setNeedRedrawNotMoved();
@@ -163,7 +164,7 @@ void ScoreWindow::process()
 	
 // Alle Player durchlaufen, evtl Hoehe anpassen: 
 // TODO
-	fitItemToRelativeClientRect(Rect(Point(0, 16*(line-1)), Size(100,12)), true);
+	fitItemToRelativeClientRect(Rect(Point(0, (2*FONT_SIZE+10)*(line-1)), Size(100,12)), true);
 }
 
 
@@ -178,14 +179,14 @@ void ScoreWindow::draw(DC* dc) const
 	if(efConfiguration.isAutoRuns())
 	{
 		dc->setPen(*UI_Object::theme.lookUpPen(BODIAGRAM_FITNESS_PEN));
-		dc->DrawHorizontalLine(getAbsoluteLeftBound() + 10, getAbsoluteLowerBound() - 24, getAbsoluteLeftBound() + 10 + ((getWidth()-35)*unchangedGenerations)  / efConfiguration.getMaxGenerations() );
+		dc->DrawHorizontalLine(getAbsoluteLeftBound() + 10, getAbsoluteLowerBound() - 6, getAbsoluteLeftBound() + 10 + ((getWidth()-35)*unchangedGenerations)  / efConfiguration.getMaxGenerations() );
 		std::ostringstream os;
 		os.str("");
-		os << 100 * unchangedGenerations / efConfiguration.getMaxGenerations() << "%";
+		os << 100 * unchangedGenerations / efConfiguration.getMaxGenerations() << "% (" << unchangedGenerations << "/" << efConfiguration.getMaxGenerations() << ")";
 	
 		dc->setTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
 		dc->setFont(UI_Object::theme.lookUpFont(SMALL_BOLD_FONT));
-		dc->DrawText(os.str(), getAbsolutePosition() + Size(getWidth() - 20, getHeight() - 30));
+		dc->DrawText(os.str(), getAbsolutePosition() + Size(getWidth() - 55, getHeight() - 12));
 	}
 }
 

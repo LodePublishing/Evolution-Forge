@@ -6,8 +6,6 @@
 #include "startcondition.hpp"
 #include "harvest.hpp"
 
-#include <list>
-
 // this is newly created/changed everytime the startconditions (map, force, goals etc.) change
 
 /*Settingsfiles
@@ -27,54 +25,52 @@ A RESET will reload the data from the loaded default pointers*/
 class START
 {
 	public:
-		START(UNIT (*start_force)[MAX_LOCATIONS]);
+		START(UNIT (&start_force)[MAX_LOCATIONS]);
 		~START();
 
 		const bool isCompletelyInitialized() const;
 		const bool assignMap(const BASIC_MAP* map); 
-		const bool setHarvestSpeed(const eRace race, const HARVEST_SPEED* harvest_speed); // copy data (pointers) from settings 
-		// assign Mode ?
+		const bool setHarvestSpeed(const unsigned int race, const HARVEST_SPEED* harvest_speed); // copy data (pointers) from settings 
 		const bool setStartPosition(const unsigned int startPosition);
-		const bool setPlayerRace(const eRace race); // => gleichzeitig wird harvestspeed geaendert und condition und goal muessen u.U. neugewaehlt werden!
+		const bool setPlayerRace(const unsigned int race); // => gleichzeitig wird harvestspeed geaendert und condition und goal muessen u.U. neugewaehlt werden!
 		const bool assignStartCondition(const START_CONDITION* start_condition);
 		const bool assignGoal(const GOAL_ENTRY* goal);
+		void readjustGoals();
 
-		void fillAsActivePlayer();
-		void fillAsNeutralPlayer();
+		void fillMapWithStartUnits();
 
-		const UNIT_STATISTICS* const* getpStats() const;
+		const std::vector<UNIT_STATISTICS>* getpStats() const;
+		
 		const START_CONDITION* const* getStartCondition() const; 
-//		void copyStartForce(UNIT (*target)[MAX_LOCATIONS]) const;
 		const BASIC_MAP* const* getMap() const;
 		GOAL_ENTRY* getCurrentGoal();
-		const eRace getPlayerRace() const;
-		const unsigned int getBasicMineralHarvestSpeedPerSecond(const unsigned int worker) const; // 'player' noch rausoptimieren!
-		const unsigned int getBasicGasHarvestSpeedPerSecond(const unsigned int worker) const;
+		const unsigned int getPlayerRace() const;
+//		const unsigned int getBasicMineralHarvestSpeedPerSecond(const unsigned int worker) const; // 'player' noch rausoptimieren!
+//		const unsigned int getBasicGasHarvestSpeedPerSecond(const unsigned int worker) const;
 	private:
+
+		const unsigned int getStartPosition() const;
 // ----- Pointers to current basic configuration ------
 		const BASIC_MAP* tmpmap;
-		const HARVEST_SPEED* harvest[MAX_RACES]; // pointer to harvest data in settings
+		std::vector<const HARVEST_SPEED*> harvest; // pointer to harvest data in settings
 		const START_CONDITION* startCondition; // units are here!
 		const GOAL_ENTRY* tmpgoal; // basic 
 	
 // ----- DATA WHICH IS COPIED EACH GENERATION ON THE PLAYERS -------
-//		list<GROUP> group[MAX_LOCATIONS]; // ~~~
 		
-		UNIT totalForce; // !!! 0 is neutral player !!! TODO bischen Speicherverschwendung...
-		UNIT (*startForce)[MAX_LOCATIONS]; // !!! 0 is neutral player !!!
+		UNIT (&startForce)[MAX_LOCATIONS];
 
 // ----- GOALS ARE NOT COPIED AS THEY DO NOT CHANGE DURNING A RUN (yet)
-		GOAL_ENTRY currentGoal; // initialized things
+		GOAL_ENTRY* currentGoal; // initialized things
 		unsigned int startPosition;
-		eRace playerRace;
-		const UNIT_STATISTICS* pStats;
+		unsigned int playerRace;
+		const std::vector<UNIT_STATISTICS>* pStats;
 // TODO Funktion zum verteilen von startcondition auf units abhaengig von tmpmap (startposition) und startPositions
 
 
 		bool mapInitialized;
-		bool harvestSpeedInitialized[MAX_RACES];
+		std::vector<bool> harvestSpeedInitialized;
 		bool startConditionInitialized;
-		bool totalForceInitialized;
 		bool startForceInitialized;
 		bool tmpgoalInitialized;
 		bool currentGoalInitialized;
@@ -83,14 +79,14 @@ class START
 		bool pStatsInitialized;
 		
 // Benutzer waehlt: Karte, Spielmodus, Harvestspeed, und fuegt Spieler mit Rasse, Startforce (default), StartPosition (absolut / zufaellig), Siegbedingungen (goals), 
-		START& operator=(const START& start);
-		START(const START& start);
+//		START& operator=(const START& start);
+//		START(const START& start);
 };
 
-inline const bool START::setHarvestSpeed(const eRace race, const HARVEST_SPEED* harvest_speed)
+inline const bool START::setHarvestSpeed(const unsigned int race, const HARVEST_SPEED* harvest_speed)
 {
 #ifdef _SCC_DEBUG
-	if((race < TERRA) || (race >= MAX_RACES)) {
+	if(race >= GAME::MAX_RACES) {
 		toErrorLog("DEBUG (START::setHarvestSpeed()): Value race out of range.");return(false);
 	}
 	if(harvest_speed == NULL) {
@@ -99,7 +95,7 @@ inline const bool START::setHarvestSpeed(const eRace race, const HARVEST_SPEED* 
 #endif
 	if(harvest_speed == harvest[race])
 		return(false);
-	harvest[race]=harvest_speed;
+	harvest[race] = harvest_speed;
 
 	harvestSpeedInitialized[race] = true;
 	return(true);
@@ -107,45 +103,48 @@ inline const bool START::setHarvestSpeed(const eRace race, const HARVEST_SPEED* 
 
 inline const bool START::setStartPosition(const unsigned int start_position)
 {
-	if(startPosition == start_position)
-		return(false);
 #ifdef _SCC_DEBUG
 	if(mapInitialized == false) {
-		toErrorLog("DEBUG (START::setStartPosition()): Variable tmpmap not initialzed.");return(false);
+		toErrorLog("DEBUG (START::setStartPosition()): Map not initialzed.");return(false);
 	}
 	if((start_position < 1) || (start_position >= tmpmap->getMaxLocations())) {
 		toErrorLog("DEBUG (START::setStartPosition()): Value start_position out of range.");return(false);
 	}
 #endif
+	if(startPosition == start_position)
+		return(false);
 	startPosition = start_position;
 	startPositionInitialized = true;
 	return(true);
 }
 
-inline const unsigned int START::getBasicMineralHarvestSpeedPerSecond(const unsigned int worker) const // 'player' noch rausoptimieren! 
+inline const unsigned int START::getStartPosition() const {
+#ifdef _SCC_DEBUG
+	if(startPositionInitialized == false) {
+		toErrorLog("DEBUG (START::getStartPosition()): Variable startPosition not initialzed.");return(0);
+	}
+#endif
+	return(startPosition);
+}
+
+/*inline const unsigned int START::getBasicMineralHarvestSpeedPerSecond(const unsigned int worker) const // 'player' noch rausoptimieren! 
 {
 #ifdef _SCC_DEBUG
-	if(playerRaceInitialized == false) {
-		toErrorLog("DEBUG (START::getBasicMineralHarvestSpeedPerSecond()): Variable playerRace not initialized.");return(0);
-	}
-	if(harvestSpeedInitialized[playerRace] == false) {
+	if(harvestSpeedInitialized[getPlayerRace()] == false) {
 		toErrorLog("DEBUG (START::getBasicMineralHarvestSpeedPerSecond()): Variable harvest not initialized.");return(0);
 	}
 #endif
-	return(harvest[playerRace]->getHarvestMineralSpeed(worker));
+	return(harvest[getPlayerRace()]->getHarvestMineralSpeed(worker));
 }
 
 inline const unsigned int START::getBasicGasHarvestSpeedPerSecond(const unsigned int worker) const {
 #ifdef _SCC_DEBUG
-	if(playerRaceInitialized == false) {
-		toErrorLog("DEBUG (START::getBasicGasHarvestSpeedPerSecond()): Variable playerRace not initialized.");return(0);
-	}
-	if(harvestSpeedInitialized[playerRace] == false) {
+	if(harvestSpeedInitialized[getPlayerRace()] == false) {
 		toErrorLog("DEBUG (START::getBasicGasHarvestSpeedPerSecond()): Variable harvest not initialized.");return(0);
 	}
 #endif
-	return(harvest[playerRace]->getHarvestGasSpeed(worker));
-}
+	return(harvest[getPlayerRace()]->getHarvestGasSpeed(worker));
+}*/
 				
 inline const BASIC_MAP* const* START::getMap() const
 {
@@ -168,11 +167,11 @@ inline const START_CONDITION* const* START::getStartCondition() const
 }
 
 
-inline const eRace START::getPlayerRace() const 
+inline const unsigned int START::getPlayerRace() const 
 {
 #ifdef _SCC_DEBUG
-	if(playerRaceInitialized == false) {
-		toErrorLog("DEBUG (START::getPlayerRace()): Variable playerRace not initialized.");return(TERRA);
+	if((playerRaceInitialized == false) || (playerRace >= GAME::MAX_RACES)){
+		toErrorLog("DEBUG (START::getPlayerRace()): Variable playerRace not initialized.");return(0);
 	}
 #endif
 	return(playerRace);
@@ -185,17 +184,17 @@ inline GOAL_ENTRY* START::getCurrentGoal()
 		toErrorLog("DEBUG (START::getCurrentGoal()): Variable currentGoal not initialized.");
 	}
 #endif
-	return(&(currentGoal));
+	return(currentGoal);
 }
 
-inline const UNIT_STATISTICS* const* START::getpStats() const 
+inline const std::vector<UNIT_STATISTICS>* START::getpStats() const 
 {
 #ifdef _SCC_DEBUG
 	if(pStatsInitialized == false) {
 		toErrorLog("DEBUG (START::getpStats()): Variable pStats not initialized.");
 	}
 #endif
-	return(&(pStats));
+	return(pStats);
 }
 
 

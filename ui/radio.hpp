@@ -7,7 +7,7 @@
 class UI_Radio : public UI_Group
 {
 	public:
-		UI_Radio(UI_Object* radio_parent=NULL, Rect initial_rect=Rect(0,0,0,0), Size distance_bottom_right=Size(0,0), const eGroupType group_type = ONE_COLOUMN_GROUP, const ePositionMode position_mode = DO_NOT_ADJUST, const eString radio_title = NULL_STRING);
+		UI_Radio(UI_Object* radio_parent=NULL, Rect initial_rect=Rect(0,0,0,0), Size distance_bottom_right=Size(0,0), const eGroupType group_type = ONE_COLOUMN_GROUP, const bool draw_background = false, const ePositionMode position_mode = DO_NOT_ADJUST, const eString radio_title = NULL_STRING);
 		~UI_Radio();
 		void addButton(UI_Button* button, const unsigned int button_id);
 		void removeButton(const unsigned int button_id);

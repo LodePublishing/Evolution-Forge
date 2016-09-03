@@ -23,7 +23,7 @@ class TechTreeWindow : public UI_Window
 		ANABUILDORDER* anarace;
 		Size s, s2;
 		GOAL_TREE tree;
-		UI_Object* node[LAST_UNIT];
+		std::vector<UI_Object*> node;
 };
 
 inline void TechTreeWindow::setCurrentGoalUnit(unsigned int current_goal_unit)

@@ -1,22 +1,16 @@
 #include "datawindow.hpp"
-#include "../core/database.hpp"
 
 DataBaseWindow::DataBaseWindow(UI_Object* database_parent) :
 	UI_Window(database_parent, DATABASE_WINDOW_TITLE_STRING, theme.lookUpGlobalRect(DATABASE_WINDOW), theme.lookUpGlobalMaxHeight(DATABASE_WINDOW), NOT_SCROLLED),
 	dataList(),
 	dataListWindow(new UI_Window(this, NULL_STRING, theme.lookUpGlobalRect(DATALIST_WINDOW), theme.lookUpGlobalMaxHeight(DATALIST_WINDOW), SCROLLED)),
-	raceMenuButton(new UI_Button(this, Rect(Point(5, FONT_SIZE+8), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2, 0)), Size(0, 0), TAB_BUTTON, false, STATIC_BUTTON_MODE, CHOOSE_RACE_STRING, DO_NOT_ADJUST, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
-	raceMenu(new RaceMenu(this, Rect(15, 15, 0, 0), Size(0,0), DO_NOT_ADJUST )),
-	// TODO staticText 'race' oder Beschreibung
-	currentRace(TERRA),
+	currentRace(0),
+	currentBuildOrder(999),
+	currentGoal(NULL),
 	game(NULL),
-	raceMenuOpenedExternally(false),
-	lastBoLoaded(999),
-	lastGoalLoaded(NULL)
+	needUpdate(true)
 {
 //	dataListWindow->Hide();
-	raceMenu->setPositionParent(raceMenuButton);
-
 }
 
 DataBaseWindow::~DataBaseWindow()
@@ -28,21 +22,10 @@ DataBaseWindow::~DataBaseWindow()
 		i = dataList.erase(i);
 	}
 	delete dataListWindow;
-	delete raceMenuButton;
-	delete raceMenu;
 }
 
 void DataBaseWindow::mouseHasLeft()
-{
-	if(!raceMenuOpenedExternally)
-	{
-		if(raceMenuButton->isCurrentlyActivated())
-		{
-			raceMenuButton->forceUnpress();	
-			raceMenu->close();
-		}
-	}
-}
+{}
 
 void DataBaseWindow::updateItemPositions()
 {
@@ -66,28 +49,41 @@ void DataBaseWindow::updateList()
 			i = dataList.erase(i);
 		}
 	}
-	unsigned int goal_count = database.getGoalCount(currentRace);
-	for(unsigned int i = 1; i < goal_count; i++)
+	for(unsigned int r = 3; r--;)
 	{
-		const GOAL_ENTRY* my_goal = database.getGoal(currentRace, i);
-		unsigned int bo_count = database.getBuildOrderCount(currentRace, my_goal);
+		unsigned int goal_count = database.getGoalCount(r); 
 		{
-			DataBaseEntry* entry = new DataBaseEntry(dataListWindow, Rect(Point(), Size(100, 12)), Size(0,0), DO_NOT_ADJUST, my_goal->getName(), true, bo_count);
-			entry->myBO = 0;
-			entry->myGoal = i;
+		// -1 is 'clear list'
+			DataBaseEntry* entry = new DataBaseEntry(dataListWindow, Rect(Point(), Size(100, 12)), Size(0,0), DO_NOT_ADJUST, GAME::lookUpGameString(GAME::FIRST_RACE_STRING + r), DATA_RACE_ENTRY, goal_count-1);
+			entry->Show();
 			dataList.push_back(entry);
 		}
-		for(unsigned int j = 0; j < bo_count; j++)
+		for(unsigned int i = 1; i < goal_count; i++)
 		{
-			BUILD_ORDER* my_bo = database.getBuildOrder(currentRace, my_goal, j);
-			DataBaseEntry* entry = new DataBaseEntry(dataListWindow, Rect(Point(), Size(100, 12)), Size(0,0), DO_NOT_ADJUST, my_bo->getName(), false);
-			entry->myBO = j;
-			entry->myGoal = i;
-			entry->Hide();
-			dataList.push_back(entry);
+			const GOAL_ENTRY* my_goal = database.getGoal(r, i);
+			unsigned int bo_count = database.getBuildOrderCount(r, my_goal);
+			{
+				DataBaseEntry* entry = new DataBaseEntry(dataListWindow, Rect(Point(), Size(100, 12)), Size(0,0), DO_NOT_ADJUST, my_goal->getName(), DATA_GOAL_ENTRY, bo_count);
+				entry->myBO = 0;
+				entry->myGoal = i;
+				entry->myRace = r;
+				entry->Hide();
+				dataList.push_back(entry);
+			}
+			for(unsigned int j = 0; j < bo_count; j++)
+			{
+				BUILD_ORDER* my_bo = database.getBuildOrder(r, my_goal, j);
+				DataBaseEntry* entry = new DataBaseEntry(dataListWindow, Rect(Point(), Size(100, 12)), Size(0,0), DO_NOT_ADJUST, my_bo->getName(), DATA_BO_ENTRY, coreConfiguration.getMaxTime() - my_bo->getTime());
+				entry->myBO = j;
+				entry->myGoal = i;
+				entry->myRace = r;
+				entry->Hide();
+				dataList.push_back(entry);
+			}
 		}
 	}
 	updateItemPositions();
+	needUpdate = false;
 }
 
 void DataBaseWindow::activateGame()
@@ -99,9 +95,9 @@ void DataBaseWindow::activateGame()
 	game = new Game(getParent(), database.getMap(0), 1, 2);
 	game->setStartPosition(1, 1);
 	toInitLog("* " + UI_Object::theme.lookUpString(START_ASSIGNING_HARVEST_SPEED_STRING));
-	game->setHarvestSpeed(1, TERRA, database.getHarvestSpeed(TERRA, 0));
-	game->setHarvestSpeed(1, PROTOSS, database.getHarvestSpeed(PROTOSS, 0));
-	game->setHarvestSpeed(1, ZERG, database.getHarvestSpeed(ZERG, 0));
+//	game->setHarvestSpeed(1, TERRA, database.getHarvestSpeed(TERRA, 0));
+//	game->setHarvestSpeed(1, PROTOSS, database.getHarvestSpeed(PROTOSS, 0));
+//	game->setHarvestSpeed(1, ZERG, database.getHarvestSpeed(ZERG, 0));
 	toInitLog("* " + UI_Object::theme.lookUpString(START_SHOWING_GAME_STRING));
 	game->Show();
 
@@ -120,11 +116,8 @@ void DataBaseWindow::reloadOriginalSize()
 	dataListWindow->setOriginalRect(theme.lookUpGlobalRect(DATALIST_WINDOW));
 	dataListWindow->setMaxHeight(theme.lookUpGlobalMaxHeight(DATALIST_WINDOW));
 
-	raceMenuButton->setOriginalSize(Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2, 0));
 	UI_Window::reloadOriginalSize();
 }
-
-
 
 void DataBaseWindow::resetData()
 {}
@@ -140,79 +133,110 @@ void DataBaseWindow::process()
 		game->Show();
 	UI_Window::process();
 
-	int assignRace=-1;
-	if((assignRace = raceMenu->getPressedItem())>=0)
-	{	
-		raceMenuButton->updateText((eString)(TERRA_STRING+assignRace));
-		raceMenuButton->forceUnpress();
-		currentRace = (eRace)assignRace;
-		activateGame();
-		updateList();
-	} else
-	if(raceMenuButton->isLeftClicked())
-	{
-		raceMenu->open();
-		if(!raceMenu->isOpen())
-		{
-			raceMenuButton->forceUnpress();		
-			raceMenu->close();
-			raceMenuOpenedExternally = false;
-		} else
-		{
-			raceMenu->close();
-			raceMenu->open();
-		}
-	}
-	
 	if(!isMouseInside()) 
 		mouseHasLeft();
 
+	if(needUpdate)
+		updateList();
 	bool reorder = false;
 	bool was_loaded = false;
 	for(std::list<DataBaseEntry*>::iterator i = dataList.begin(); i != dataList.end(); ++i)
-		if((*i)->isGoal())
+	{
+		if((*i)->isShown())
+		switch((*i)->getEntryType())
 		{
-			std::list<DataBaseEntry*>::iterator j = i;
-			++j;
-			while((j != dataList.end())&&(!(*j)->isGoal()))
+			case DATA_RACE_ENTRY:
 			{
-				if((!(*i)->isMarked())&&((*j)->isShown()))
-				{
-					(*j)->Hide();
-					reorder = true;
-				}
-				else if(((*i)->isMarked())&&(!(*j)->isShown()))
-				{
-					(*j)->Show();
-					reorder = true;
-				}
-				if((*j)->isClicked() && (*j)->isMarked())
-				{
-					game->assignGoal(0, (*i)->myGoal);
-					game->loadBuildOrder(0, (*j)->myBO);
-					was_loaded = true;
-					lastBoLoaded = (*j)->myBO;
-					lastGoalLoaded = (*i)->myGoal;
-					setNeedRedrawMoved();
-				}
+				std::list<DataBaseEntry*>::iterator j = i;
 				++j;
-			}
+				for(;(j!=dataList.end()) && ((*j)->getEntryType() != DATA_RACE_ENTRY);++j)
+					if((*j)->getEntryType() == DATA_GOAL_ENTRY)
+					{
+						if(((*i)->isCurrentlyActivated()) && (!(*j)->isShown()))
+						{
+							(*j)->Show();
+							reorder = true;
+						} else 
+						if((!(*i)->isCurrentlyActivated()) && ((*j)->isShown()))
+						{
+							(*j)->Hide();
+							std::list<DataBaseEntry*>::iterator k = j;
+							++k;
+							for(;(k != dataList.end()) && ((*k)->getEntryType() == DATA_BO_ENTRY); ++k)
+								(*k)->Hide();
+							reorder = true;
+						}
+							
+					}
+			}break;
+			case DATA_GOAL_ENTRY:
+			{
+				std::list<DataBaseEntry*>::iterator j = i;
+				++j;
+				for(; (j != dataList.end()) && ((*j)->getEntryType() == DATA_BO_ENTRY); ++j)
+				{
+					if(((*i)->isCurrentlyActivated()) && (!(*j)->isShown()))
+					{
+						(*j)->Show();
+						reorder = true;
+					} else 
+					if((!(*i)->isCurrentlyActivated()) && ((*j)->isShown()))
+					{
+						(*j)->Hide();
+						reorder = true;
+					}
+					if((*j)->isClicked() && (*j)->isCurrentlyActivated())
+					{
+						currentBuildOrder = (*j)->myBO;
+						currentGoal = (*i)->myGoal;
+						currentRace = (*i)->myRace;
+						activateGame();
+						game->doReset();
+						game->assignGoal(0, (*i)->myGoal);
+						game->loadBuildOrder(0, (*j)->myBO);
+						was_loaded = true;
+						setNeedRedrawMoved();
+					}
+				}
+			}break;	
+			default:break;
 		}
+	}
+	
 	if(was_loaded)
 	for(std::list<DataBaseEntry*>::iterator i = dataList.begin(); i != dataList.end(); ++i)
-		if((*i)->isGoal())
+		if((*i)->getEntryType()==DATA_GOAL_ENTRY)
 		{
 			std::list<DataBaseEntry*>::iterator j = i;
 			++j;
-			while((j != dataList.end())&&(!(*j)->isGoal()))
+			while((j != dataList.end())&&((*j)->getEntryType()==DATA_BO_ENTRY))
 			{
-				if(((*j)->isMarked()) && (((*j)->myBO != lastBoLoaded)||((*i)->myGoal != lastGoalLoaded)))
+				if(((*j)->isCurrentlyActivated()) && (((*j)->myBO != currentBuildOrder) || ((*i)->myGoal != currentGoal)))
 					(*j)->forceUnpress();
 				++j;
 			}
 		}
 	
-//				if((!was_loaded) && ((*j)->isCurrentlyHighlighted()) && (((*j)->myBO != lastBoLoaded) || ((*i)->myGoal != lastGoalLoaded)))
+	for(std::list<DataBaseEntry*>::iterator i = dataList.begin(); i != dataList.end(); ++i)
+	{
+		if((*i)->isJustChecked())
+		{
+			std::list<DataBaseEntry*>::iterator j = i;
+			++j;
+			for(;j != dataList.end(); ++j)
+			{
+						
+				if( (((*i)->getEntryType() == DATA_GOAL_ENTRY) && ((*j)->getEntryType() == DATA_BO_ENTRY) && ((*i)->myGoal == (*j)->myGoal) && ((*i)->myRace == (*j)->myRace)) ||
+				(((*i)->getEntryType() == DATA_RACE_ENTRY) && ((*j)->getEntryType() == DATA_BO_ENTRY) && ((*i)->myRace == (*j)->myRace)) ||
+				(((*i)->getEntryType() == DATA_RACE_ENTRY) && ((*j)->getEntryType() == DATA_GOAL_ENTRY) && ((*i)->myRace == (*j)->myRace)))
+					(*j)->check((*i)->isCurrentlyActivated());
+//				TODO
+			}
+		}
+	}
+	
+	
+//				if((!was_loaded) && ((*j)->isCurrentlyHighlighted()) && (((*j)->myBO != currentBuildOrder) || ((*i)->myGoal != currentGoal)))
 //				{
 //					if((*j)->isClicked())
 //											

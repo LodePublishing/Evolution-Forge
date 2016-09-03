@@ -1,9 +1,7 @@
 #ifndef _GUI_DATABASE_WINDOW_HPP
 #define _GUI_DATABASE_WINDOW_HPP
 
-#include "../ui/window.hpp"
 #include "dataentry.hpp"
-#include "racemenu.hpp"
 #include "game.hpp"
 
 class DataBaseWindow : public UI_Window
@@ -35,13 +33,14 @@ class DataBaseWindow : public UI_Window
 	
 		std::list<DataBaseEntry*> dataList;
 		UI_Window* dataListWindow;
-		UI_Button* raceMenuButton;
-		RaceMenu* raceMenu;
-		eRace currentRace;
+		
+		unsigned int currentRace;
+		unsigned int currentBuildOrder;
+		unsigned int currentGoal;
+		
  		Game* game;
-		bool raceMenuOpenedExternally;
-		unsigned int lastBoLoaded;
-		unsigned int lastGoalLoaded;
+		bool needUpdate;
+		
 //		UI_Button* executeButton; // apply changes to the disk
 //		UI_Button* exportDataBase; // write everything in one file
 //		UI_Button* importDataBase; // import such a file and add it to the database without overwriting things ~~

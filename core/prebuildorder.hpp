@@ -2,7 +2,6 @@
 #define _CORE_PREBUILDORDER_HPP
 
 #include "building.hpp"
-#include "configuration.hpp"
 #include "start.hpp"
 #include <functional>
 #include <queue>
@@ -14,12 +13,23 @@ struct PARALLEL_COMMAND
 	unsigned int count;
 };
 
+
 class PREBUILDORDER
 {
 	public:
-		PREBUILDORDER();
-		virtual ~PREBUILDORDER();
-	
+// ------ INITIALIZATION ------
+                void setStartPosition(const unsigned int start_position);
+		void setStartRace(const unsigned int race); // => gleichzeitig wird harvestspeed geaendert und condition und goal muessen u.U. neugewaehlt werden!
+                void assignStartCondition(const START_CONDITION* start_condition, const bool neutral_player = false);
+                void assignStartGoal(const GOAL_ENTRY* goal);		
+// assigns player data from start (start minerals, supply etc.) and sets the appropriate optimized pointers (global, location, pMap etc.) CALL IT AFTER EACH MAP CHANGE AND PLAYER CHANGE!!
+
+// ------ CALCULATION ------
+		virtual void prepareForNewGeneration();
+		virtual void postProcessing();
+
+		
+// ------ STATISTICS ------
 		const bool haveConditionsChanged() const;
 		
 		const bool setAlwaysBuildWorkers(const bool always_build_workers = true);
@@ -27,242 +37,181 @@ class PREBUILDORDER
 
 		const bool isAlwaysBuildWorkers() const;
 		const bool isOnlySwapOrders() const;
-	
-		void assignStart(START* start);
-		void assignUnits(UNIT (*units)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]);
 
-                void setStartPosition(const unsigned int start_position);
-		void setStartRace(const eRace race); // => gleichzeitig wird harvestspeed geaendert und condition und goal muessen u.U. neugewaehlt werden!
-                void assignStartCondition(const START_CONDITION* start_condition, const bool neutral_player = false);
-                void assignStartGoal(const GOAL_ENTRY* goal);		
-		
-//		static map<CODE, SITUATION*> situationHashMap;
-
-//		static void assignConfiguration(Configuration* pconfiguration);
-//		static void initNoise();
 		const BASIC_MAP* const* getMap() const; 	
-//		void setpMap(const BASIC_MAP* const* my_map);
 		GOAL_ENTRY* getGoal() const;
 
-		const bool isDifferent(const unsigned int* code) const;
-
-// ------ HARVEST ROUTINES ------
-		void adjustMineralHarvest(const unsigned int location_number);
-		void adjustGasHarvest(const unsigned int location_number);
-		void adjustHarvestAllLocations();
-		void setMineralHarvestPerSecond(const unsigned int location_number, const unsigned int worker, const unsigned int harvest_minerals);
-		const unsigned int getMineralHarvestPerSecond(const unsigned int location_number, const unsigned int worker) const;
-		void setGasHarvestPerSecond(const unsigned int location_number, const unsigned int worker, const unsigned int harvest_gas);
-		const unsigned int getGasHarvestPerSecond(const unsigned int location_nubmer, const unsigned int worker) const;
-		const unsigned int getHarvestedMinerals() const;
-		const unsigned int getHarvestedGas() const;
-		void setHarvestedMinerals(const unsigned int harvested_minerals);
-		void setHarvestedGas(const unsigned int harvested_gas);
+		const unsigned int getHarvestedResource(const unsigned int resource_type) const;
+		const unsigned int getResource(const unsigned int resource_type) const;
 	
-		const unsigned int getWastedMinerals() const;
-		const unsigned int getWastedGas() const;
-		void setWastedMinerals(const unsigned int wasted_minerals);
-		void setWastedGas(const unsigned int wasted_gas);
-
-// ------ INITIALIZATION ROUTINES ------
-		void setPlayerNumber(const unsigned int player_number); // assigns player data from start (start minerals, supply etc.) and sets the appropriate optimized pointers (global, location, pMap etc.) CALL IT AFTER EACH MAP CHANGE AND PLAYER CHANGE!!
-		void initializePlayer();
-		void prepareForNewGeneration();
-
-		void eraseIllegalCode();
-		void eraseUselessCode();
-		void mutateGeneCode(/*const bool* fixed_list*/);
-		void resetGeneCode();//resets either to a pre-processed buildorder or a completely random one*/
-//		void crossOver(PREBUILDORDER* parent2, PREBUILDORDER* child1, PREBUILDORDER* child2); TODO
-
-
-	
-// ------ GET/SET ROUTINES ------
-		void setCode(const unsigned int ip, const unsigned int value);
-		const unsigned int* getCodePointer() const; 
-		const unsigned int getCode(const unsigned int ip) const;
-		const unsigned int getCurrentCode() const;
-		void copyCode(PREBUILDORDER& player);
-		void copyCode(unsigned int* dst) const;
-
-		void addLarvaToQueue(const unsigned int location_number);
-		void removeLarvaFromQueue(const unsigned int location_number);
-
-		const eRace getRace() const;
-//		void setpGoal(GOAL_ENTRY* current_goal);
-	
-		const START_CONDITION* const* getStartCondition() const; //pointer to player in start
-	
-		void setConditionsChanged(const bool conditions_changed = true);
-		
-		const unsigned int getLocationTotal(const unsigned int location_number, const unsigned int unit_type) const;
-		const unsigned int getLocationAvailible(const unsigned int location_number, const unsigned int unit_type) const;
-		void addLocationAvailible(const unsigned int location_number, const unsigned int unit_type, const unsigned int availible);
-		void addLocationTotal(const unsigned int location_number, const unsigned int unit_type, const unsigned int total);
-		void addOneLocationAvailible(const unsigned int location_number, const unsigned int unit_type);
-		void addOneLocationTotal(const unsigned int location_number, const unsigned int unit_type);
-		void removeOneLocationAvailible(const unsigned int location_number, const unsigned int unit_type);
-		void removeOneLocationTotal(const unsigned int location_number, const unsigned int unit_type);
-
-		void setNeedSupply(const unsigned int need_supply);
-		void setHaveSupply(const unsigned int have_supply);
-		void setMinerals(const unsigned int have_minerals);
-		void setGas(const unsigned int have_gas);
-
-//		void setpStats(const UNIT_STATISTICS* const* player_stats);
-		const UNIT_STATISTICS* const* getpStats() const;
-
-
 		const unsigned int getPlayerNumber() const;
 		const unsigned int getNeedSupply() const;
 		const unsigned int getHaveSupply() const;
-		const unsigned int getMinerals() const;
-		const unsigned int getGas() const;
-
 		void setTimer(const unsigned int time);
 		const unsigned int getTimer() const;
 		const unsigned int getRealTimer() const;
-
-		void setTimeOut(const unsigned int time);
-		const unsigned int getTimeOut() const;
-
-		const unsigned int getIP() const;
-		void setIP(const unsigned int ip);
-
 		const unsigned int getLength() const;
-		void setLength(const unsigned int bo_length);
+		const unsigned int getLocationTotal(const unsigned int location_number, const unsigned int unit_type) const;
+		const unsigned int getLocationAvailible(const unsigned int location_number, const unsigned int unit_type) const;
+
+		const unsigned int getRace() const;
+		const START_CONDITION* const* getStartCondition() const; //pointer to player in start
+		void setConditionsChanged(const bool conditions_changed = true);
+
+		std::priority_queue<Building, std::vector<Building> > buildingQueue;
+
+// ------ CODE CONTROL ------
+		void eraseIllegalCode();
+		void mutateGeneCode(/*const bool* fixed_list*/);
+		void resetGeneCode();//resets either to a pre-processed buildorder or a completely random one*/
+		void assignCode(const PREBUILDORDER& player);
+		void assignCode(const std::list<unsigned int>& src);
+		void copyCode(std::list<unsigned int>& dst) const;
+		const std::list<unsigned int>& getCode() const;
+		const bool isDifferent(const std::list<unsigned int>& code) const;
+		
+		START* getpStart() const;
 
 	protected:
-		std::priority_queue<Building, std::vector<Building> > buildingQueue;
-		std::list<PARALLEL_COMMAND*> parallelCommandQueues;
+		PREBUILDORDER(unsigned int player_number, START* start, UNIT (&units)[MAX_PLAYER][MAX_LOCATIONS]);
+		virtual ~PREBUILDORDER();
 
-// global best time so far
-//		static signed int noise[MAX_TIME];
-		UNIT& getUnit(const unsigned int player_number, const unsigned int location_number) const;
-		START* getpStart() const;
-//		LAST last[MAX_LENGTH]; // last* is to save the last position, for movements
-//		unsigned int lastcounter;
-//		unsigned int lastunit;
-		unsigned int neededMinerals, neededGas;
-	
-	
-		void createSpecial();
-		void resetSpecial();
-		virtual void resetData();
-
-		const unsigned int harvestMinerals() const;
-		const unsigned int harvestGas() const; 
-
+		const bool calculationDone();
+		const bool executeNextInstruction();
+		const bool codeFinished() const;
+		void processBuildingQueue();
+		void resetInstructionPointer();
+		void eraseRemainingCode();
+		void resetTimeOut();
+		void leapForwardInTime();
 		const bool calculateReady() const;
-		void adjustAvailibility(const unsigned int location_number, const unsigned int fac, const UNIT_STATISTICS* stat);
-		void adjustLocationUnitsAfterCompletion(const unsigned int location_number, const eFacilityType facilityType, const unsigned int facility, const unsigned int facility2, const unsigned int count);
 		const unsigned int calculatePrimaryFitness(const bool ready);
-		const bool replaceCode(const unsigned int ip, const unsigned int code);
+	
+		virtual void resetData();
+		void resetSpecial();
+
+
+// HACK for anarace:
+		eErrorMessages successType;
+		unsigned int successUnit;
+
+		unsigned int anaraceBuildFacility;
+		unsigned int anaraceBuildLocation;
+		unsigned int anaraceBuildTotalTime;
+		unsigned int anaraceBuildUnit;
+		unsigned int anaraceBuildFinishedTime;
+
+		const std::vector<UNIT_STATISTICS>* getpStats() const;
+		UNIT& getUnit(const unsigned int player_number, const unsigned int location_number) const;
+		bool ready;
+
+	private:
+	
+		void modifyLocationAvailible(const unsigned int location_number, const unsigned int unit_type, const signed int availible);
+		void modifyLocationTotal(const unsigned int location_number, const unsigned int unit_type, const signed int total);
+		void addOneLocationAvailible(const unsigned int location_number, const unsigned int unit_type);
+		void addOneLocationTotal(const unsigned int location_number, const unsigned int unit_type);
+		void removeLocationAvailible(const unsigned int location_number, const unsigned int unit_type, const unsigned int availible);
+		void removeLocationTotal(const unsigned int location_number, const unsigned int unit_type, const unsigned int total);
+
+		void removeOneLocationAvailible(const unsigned int location_number, const unsigned int unit_type);
+		void removeOneLocationTotal(const unsigned int location_number, const unsigned int unit_type);
+
+		void removeOneLocationTotalAllPlayers(const unsigned int location_number, const unsigned int unit_type);
+		void removeOneLocationAvailibleAllPlayers(const unsigned int location_number, const unsigned int unit_type);
+
+		void removeOneTotalEverywhere(const unsigned int unit_type);
+		void removeOneAvailibleEverywhere(const unsigned int unit_type);
+
+	
+
+//		void setResourceHarvestPerFrame(const unsigned int resource_type, const unsigned int location_number, const unsigned int worker, const unsigned int harvest_speed);
+		const unsigned int getResourceHarvestPerFrame(const unsigned int resource_type, const unsigned int location_number, const unsigned int worker) const;
+		void setHarvestedResource(const unsigned int resource_type, const unsigned int harvested_resource);
+
+		const unsigned int harvestResource(const unsigned int resource_type) const;
+
+//		void adjustHarvest(const unsigned int resource_type, const unsigned int location_number);
+//		void adjustHarvestAllLocations(const unsigned int resource_type);
+
+		void adjustAccepterDistance(const unsigned int resource_type, const unsigned int location_number);
+		void adjustAccepterDistanceAllLocations(const unsigned int resource_type);
+			
+		std::list<unsigned int> Code;
+		std::list<unsigned int>::iterator IP;
+		UNIT (&unit)[MAX_PLAYER][MAX_LOCATIONS];
+		
+		void setTimeOut(const unsigned int time);
+		const unsigned int getTimeOut() const;
+		
+		void moveToNextInstruction();
+		const unsigned int getCurrentCode() const;
+		const unsigned int calculateIdleTime() const; // calculate the next time something significant will happen, CONST MACHEN
+		const bool buildGene(const unsigned int build_unit);
+		const bool putInBuildingQueue(const unsigned int build_unit);
+		
+		void adjustLocationUnitsAfterCompletion(const unsigned int location_number, const eFacilityType facility_type, const unsigned int facility, const unsigned int facility2, const unsigned int count);
+		void adjustAvailibility(const unsigned int location, const eFacilityType facility_type, const unsigned int facility, const unsigned int facility2, signed int count);
+		void cancelBuilding(const Building& build);
+
+		void createSpecial();
+		const bool checkForLarva(const unsigned int current_location_window);
+		const bool isTimeOut() const;
+		void addLarvaToQueue(const unsigned int location_number);
+		void removeLarvaFromQueue(const unsigned int location_number);
+
+		void setNeedSupply(const unsigned int need_supply);
+		void setHaveSupply(const unsigned int have_supply);
+
+		void setResource(const unsigned int resource_type, const unsigned int have_resource);
 
 		unsigned int larvaInProduction[MAX_LOCATIONS]; // well... one of that ugly race-specific variables saves a lot of trouble...
+		
+		START* pStart;
 
-//TODO: PlayerNum von anarace ist irgendwie 2 statt 1 oder so ... auch ist die Frage wie was upgedatet wird...
-//		 Deutlich durchsichtiger machen...
-		const unsigned int calculateIdleTime() const; // calculate the next time something significant will happen, CONST MACHEN
-		
-		const bool checkForLarva(const unsigned int current_location_window);
-	
-		bool ready;
-	
-		
+		bool conditionsChanged;
 		bool alwaysBuildWorkers;
 		bool onlySwapOrders;
 
-	private:
-		UNIT (*unit)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]; // player 0 is neutral player!
-//		const BASIC_MAP* const* pMap; // MAP is all the same for all players using 'start
-//		const UNIT_STATISTICS* const* pStats;
-		START* pStart;
-//		GOAL_ENTRY* pGoal; // pStart->getGoal()
-
-		bool conditionsChanged;
-		unsigned int Code[MAX_LENGTH];
-
 		unsigned int playerNum;
-		unsigned int minerals, gas, timer;
-		unsigned int IP;
-		unsigned int mineralHarvestPerSecond[MAX_LOCATIONS][45];
-		unsigned int gasHarvestPerSecond[MAX_LOCATIONS][5];
-		unsigned int harvestedMinerals, harvestedGas;
-		unsigned int wastedMinerals, wastedGas;
+		unsigned int timer;
+
+		std::vector<unsigned int> resource;
+		std::vector<unsigned int> neededResource;
+		std::vector<unsigned int> accepterDistance[MAX_LOCATIONS];
+//		std::vector< std::vector< unsigned int > > resourceHarvestPerFrame[MAX_LOCATIONS];
+		std::vector<unsigned int> harvestedResource;
+		
 		unsigned int needSupply;		// free supply
 		unsigned int haveSupply; // total supply
-		unsigned int length;
 		unsigned int timeout;
 
-		bool playerNumInitialized;
-//		bool goalInitialized;
-//		bool mapInitialized;
-//		bool pStatsInitialized;
-		bool unitsInitialized;
-		bool pStartInitialized;
+//		bool playerNumInitialized;
+//		bool unitsInitialized;
+//		bool pStartInitialized;
 	
 		PREBUILDORDER& operator=(const PREBUILDORDER& object);
 		PREBUILDORDER(const PREBUILDORDER& object);
 };
-
-inline const unsigned int PREBUILDORDER::getPlayerNumber() const
-{
-#ifdef _SCC_DEBUG
-	if(!playerNumInitialized) {
-		toErrorLog("DEBUG (PREBUILDORDER::getPlayerNumber()()): Variable playerNum not initialized.");return(0);
-	}
-#endif
-	return(playerNum);
+		
+inline START* PREBUILDORDER::getpStart() const {
+	return(pStart);
 }
 
-inline START* PREBUILDORDER::getpStart() const
-{
-#ifdef _SCC_DEBUG
-	if(!pStartInitialized)	{
-		toErrorLog("DEBUG (PREBUILDORDER::getpStart()()): Variable pStart not initialized.");
-	}
-#endif
-	return(pStart);
+inline const unsigned int PREBUILDORDER::getPlayerNumber() const {
+	return(playerNum);
 }
 
 inline const bool PREBUILDORDER::haveConditionsChanged() const {
 	return(conditionsChanged);
 }
 
-inline const eRace PREBUILDORDER::getRace() const {
-	return(getpStart()->getPlayerRace());
+inline const unsigned int PREBUILDORDER::getRace() const {
+	return(pStart->getPlayerRace());
 }
 
-inline const BASIC_MAP* const* PREBUILDORDER::getMap() const
-{
-	return(getpStart()->getMap());
-}
-
-/*inline void PREBUILDORDER::setpMap(const BASIC_MAP* const* my_map) 
-{
-	pMap = my_map;
-	mapInitialized = true;
-}*/
-
-inline void PREBUILDORDER::setIP(const unsigned int ip)
-{
-#ifdef _SCC_DEBUG
-	if(ip >= MAX_LENGTH) {
-		toErrorLog("DEBUG (PREBUILDORDER::setIP()): Value out of range.");return;
-	}
-#endif
-	IP = ip;
-}
-
-inline const unsigned int PREBUILDORDER::getIP() const
-{
-#ifdef _SCC_DEBUG
-	if(IP >= MAX_LENGTH) {
-		toErrorLog("DEBUG (PREBUILDORDER::getIP()): Variable IP not initialized.");return(0);
-	}
-#endif
-	return(IP);
+inline const BASIC_MAP* const* PREBUILDORDER::getMap() const {
+	return(pStart->getMap());
 }
 
 inline GOAL_ENTRY* PREBUILDORDER::getGoal() const 
@@ -273,117 +222,84 @@ inline GOAL_ENTRY* PREBUILDORDER::getGoal() const
 	}
 #endif
 	return(pGoal);*/
-	return(getpStart()->getCurrentGoal());
+	return(pStart->getCurrentGoal());
 }
 
 inline void PREBUILDORDER::setStartPosition(const unsigned int start_position) 
 {
-	if(getpStart()->setStartPosition(start_position))
+	if(pStart->setStartPosition(start_position))
 		setConditionsChanged();
 }
 
-inline void PREBUILDORDER::setStartRace(const eRace start_race) // => gleichzeitig wird harvestspeed geaendert und condition und goal muessen u.U. neugewaehlt werden!
+inline void PREBUILDORDER::setStartRace(const unsigned int start_race) // => gleichzeitig wird harvestspeed geaendert und condition und goal muessen u.U. neugewaehlt werden!
 {
-	if(getpStart()->setPlayerRace(start_race))
+	if(pStart->setPlayerRace(start_race))
 		setConditionsChanged();
 }
 
 inline void PREBUILDORDER::assignStartGoal(const GOAL_ENTRY* start_goal) {
-	if(getpStart()->assignGoal(start_goal))
+	if(pStart->assignGoal(start_goal))
 		setConditionsChanged();
 }
 
 
-
-inline void PREBUILDORDER::setCode(const unsigned int ip, const unsigned int value)
-{
-#ifdef _SCC_DEBUG
-	if(ip >= MAX_LENGTH) {
-		toErrorLog("DEBUG (PREBUILDORDER::setCode()): Value ip out of range.");return;
-	}	
-	if(value >= LAST_UNIT) {
-		toErrorLog("DEBUG (PREBUILDORDER::setCode()): Value out of range.");return;
-	}
-#endif
-	Code[ip]=value;
+inline void PREBUILDORDER::moveToNextInstruction() {
+	if(IP != Code.end())
+		++IP;
 }
 
-inline const unsigned int* PREBUILDORDER::getCodePointer() const {
-	return(Code);
+inline const bool PREBUILDORDER::codeFinished() const {
+	return(IP == Code.end());
 }
 
-inline const unsigned int PREBUILDORDER::getCode(const unsigned int ip) const
-{
-#ifdef _SCC_DEBUG
-	if(ip >= MAX_LENGTH) {
-		toErrorLog("DEBUG (PREBUILDORDER::getCode()): Value ip out of range.");return(0);
-	}	
-	if(Code[ip] >= LAST_UNIT) {
-		toErrorLog("DEBUG (PREBUILDORDER::getCode()): Variable Code not initialized.");return(0);
-	}
-#endif
-	return(Code[ip]);
+inline void PREBUILDORDER::resetInstructionPointer() {
+	IP = Code.begin();
 }
 
 inline const unsigned int PREBUILDORDER::getCurrentCode() const
 {
 #ifdef _SCC_DEBUG
-	if(Code[getIP()] >= LAST_UNIT) {
+	if(*IP >= RACE::UNIT_TYPE_COUNT) {
 		toErrorLog("DEBUG (PREBUILDORDER::getCurrentCode()): Variable Code not initialized.");return(0);
 	}
 #endif
-	return(Code[getIP()]);
+	return(*IP);
 }
 
 // ------ UNITS ------
 
 inline UNIT& PREBUILDORDER::getUnit(const unsigned int player_number, const unsigned int location_number) const {
 #ifdef _SCC_DEBUG
-	if(!unitsInitialized) {
-		toErrorLog("DEBUG (PREBUILDORDER::getUnit()()): Variable unit not initialized.");
-	}
-	if(player_number > (*getMap())->getMaxPlayer()) {
+	if(player_number >= (*getMap())->getMaxPlayer()) {
 		toErrorLog("DEBUG (PREBUILDORDER::getUnit()()): Value player_number out of range.");
 	}
 	if((location_number >= (*getMap())->getMaxLocations())) {
 		toErrorLog("DEBUG (PREBUILDORDER::getUnit()()): Value location_number out of range.");
 	}
 #endif
-	return((*unit)[player_number][location_number]);
+	return(unit[player_number][location_number]);
 }
 
-inline const unsigned int PREBUILDORDER::getLocationTotal(const unsigned int location_number, const unsigned int unit_type) const
-{
+inline const unsigned int PREBUILDORDER::getLocationTotal(const unsigned int location_number, const unsigned int unit_type) const {
 	return(getUnit(playerNum, location_number).getTotal(unit_type));
-//      return((*location)[location_number].getTotal(unit_type));
 }
 
-inline const unsigned int PREBUILDORDER::getLocationAvailible(const unsigned int location_number, const unsigned int unit_type) const
-{
+inline const unsigned int PREBUILDORDER::getLocationAvailible(const unsigned int location_number, const unsigned int unit_type) const {
 	return(getUnit(playerNum, location_number).getAvailible(unit_type));
-//      return((*location)[location_number].getAvailible(unit_type));
 }
 
-inline void PREBUILDORDER::addLocationAvailible(const unsigned int location_number, const unsigned int unit_type, const unsigned int availible)
+inline void PREBUILDORDER::modifyLocationAvailible(const unsigned int location_number, const unsigned int unit_type, const signed int availible)
 {
-	getUnit(getPlayerNumber(), location_number).addAvailible(unit_type, availible);
+	getUnit(getPlayerNumber(), location_number).modifyAvailible(unit_type, availible);
 	if(location_number!=GLOBAL) //sonst waers ja doppelt...
-		getUnit(getPlayerNumber(), GLOBAL).addAvailible(unit_type, availible);
-
-//	(*location)[location_number].addAvailible(unit_type, availible);
-//	if(location_number!=GLOBAL) //sonst waers ja doppelt...
-//		(*location)[GLOBAL].addAvailible(unit_type, availible);
+		getUnit(getPlayerNumber(), GLOBAL).modifyAvailible(unit_type, availible);
 }
 
-inline void PREBUILDORDER::addLocationTotal(const unsigned int location_number, const unsigned int unit_type, const unsigned int total)
+inline void PREBUILDORDER::modifyLocationTotal(const unsigned int location_number, const unsigned int unit_type, const signed int total)
 {
-	getUnit(getPlayerNumber(), location_number).addTotal( unit_type, total );
+	getUnit(getPlayerNumber(), location_number).modifyTotal( unit_type, total );
 	if(location_number!=GLOBAL) // sonst waers ja doppelt wenn location = 0
-		getUnit(getPlayerNumber(), GLOBAL).addTotal(unit_type, total);
-
-//	(*location)[location_number].addTotal( unit_type, total );
-//	if(location_number!=GLOBAL) // sonst waers ja doppelt wenn location = 0
-//		(*location)[GLOBAL].addTotal(unit_type, total);
+		getUnit(getPlayerNumber(), GLOBAL).modifyTotal(unit_type, total);
 }
 
 inline void PREBUILDORDER::addOneLocationAvailible(const unsigned int location_number, const unsigned int unit_type)
@@ -392,11 +308,6 @@ inline void PREBUILDORDER::addOneLocationAvailible(const unsigned int location_n
 // also add one unit to the global location if global location was not already specified
 	if(location_number!=GLOBAL) 
 		getUnit(getPlayerNumber(), GLOBAL).addOneAvailible( unit_type );
-
-//	(*location)[location_number].addOneAvailible( unit_type );
-// also add one unit to the global location if global location was not already specified
-//	if(location_number!=GLOBAL) 
-//		(*location)[GLOBAL].addOneAvailible( unit_type );
 }
 
 inline void PREBUILDORDER::addOneLocationTotal(const unsigned int location_number, const unsigned int unit_type)
@@ -404,10 +315,6 @@ inline void PREBUILDORDER::addOneLocationTotal(const unsigned int location_numbe
 	getUnit(getPlayerNumber(), location_number).addOneTotal( unit_type );
 	if(location_number!=GLOBAL) // sonst waers ja doppelt wenn location = 0
 		getUnit(getPlayerNumber(), GLOBAL).addOneTotal( unit_type );
-
-//	(*location)[location_number].addOneTotal( unit_type );
-//	if(location_number!=GLOBAL) // sonst waers ja doppelt wenn location = 0
-//		(*location)[GLOBAL].addOneTotal( unit_type );
 }
 
 inline void PREBUILDORDER::removeOneLocationAvailible(const unsigned int location_number, const unsigned int unit_type)
@@ -416,11 +323,6 @@ inline void PREBUILDORDER::removeOneLocationAvailible(const unsigned int locatio
 // also add one unit to the global location if global location was not already specified
 	if(location_number!=GLOBAL)
 		getUnit(getPlayerNumber(), GLOBAL).removeOneAvailible( unit_type );
-
-//	(*location)[location_number].removeOneAvailible( unit_type );
-// also add one unit to the global location if global location was not already specified
-//	if(location_number!=GLOBAL)
-//		(*location)[GLOBAL].removeOneAvailible( unit_type );
 }
 
 inline void PREBUILDORDER::removeOneLocationTotal(const unsigned int location_number, const unsigned int unit_type)
@@ -428,50 +330,66 @@ inline void PREBUILDORDER::removeOneLocationTotal(const unsigned int location_nu
 	getUnit(getPlayerNumber(), location_number).removeOneTotal( unit_type );
 	if(location_number!=GLOBAL) 
 		getUnit(getPlayerNumber(), GLOBAL).removeOneTotal( unit_type );
+}
 
-//	(*location)[location_number].removeOneTotal( unit_type );
-//	if(location_number!=GLOBAL) 
-//		(*location)[GLOBAL].removeOneTotal( unit_type );
+inline void PREBUILDORDER::removeOneLocationTotalAllPlayers(const unsigned int location_number, const unsigned int unit_type)
+{
+	for(unsigned int i = (*getMap())->getMaxPlayer(); i--;)
+		getUnit(i, location_number).removeOneTotal( unit_type );
+}
+
+inline void PREBUILDORDER::removeOneLocationAvailibleAllPlayers(const unsigned int location_number, const unsigned int unit_type)
+{
+	for(unsigned int i = (*getMap())->getMaxPlayer(); i--;)
+		getUnit(i, location_number).removeOneAvailible( unit_type );
+}
+
+inline void PREBUILDORDER::removeOneTotalEverywhere(const unsigned int unit_type) // for researchs
+{
+	for(unsigned int i = (*getMap())->getMaxLocations(); i--;)
+		getUnit(getPlayerNumber(), i).removeOneTotal( unit_type );
+}
+
+inline void PREBUILDORDER::removeOneAvailibleEverywhere(const unsigned int unit_type) // for researchs
+{
+	for(unsigned int i = (*getMap())->getMaxLocations(); i--;)
+		getUnit(getPlayerNumber(), i).removeOneAvailible( unit_type );
 }
 
 // ------ END UNITS -----
 
 
 // ----- SUPPLY ------
-inline void PREBUILDORDER::setNeedSupply(const unsigned int need_supply)
-{
+inline void PREBUILDORDER::setNeedSupply(const unsigned int need_supply) {
 #ifdef _SCC_DEBUG
-	if(need_supply > 10*MAX_SUPPLY) {
+	if(need_supply > 2*GAME::MAX_SUPPLY) {
 		toErrorLog("DEBUG (PREBUILDORDER::setNeedSupply()): Value need_supply out of range.");return;
 	}
 #endif
 	needSupply = need_supply;
 }
 
-inline const unsigned int PREBUILDORDER::getNeedSupply() const
-{
+inline const unsigned int PREBUILDORDER::getNeedSupply() const {
 #ifdef _SCC_DEBUG
-	if(needSupply > 10*MAX_SUPPLY) {
+	if(needSupply > 2*GAME::MAX_SUPPLY) {
 		toErrorLog("DEBUG (PREBUILDORDER::getNeedSupply()): Variable not initialized.");return(0);
 	}
 #endif
 	return(needSupply);
 }
 
-inline void PREBUILDORDER::setHaveSupply(const unsigned int have_supply)
-{
+inline void PREBUILDORDER::setHaveSupply(const unsigned int have_supply) {
 #ifdef _SCC_DEBUG
-	if(have_supply > 10*MAX_SUPPLY) {
+	if(have_supply > 2*GAME::MAX_SUPPLY) {
 		toErrorLog("DEBUG (PREBUILDORDER::setHaveSupply()): Value have_supply out of range.");return;
 	}
 #endif
 	haveSupply = have_supply;
 }
 
-inline const unsigned int PREBUILDORDER::getHaveSupply() const
-{
+inline const unsigned int PREBUILDORDER::getHaveSupply() const {
 #ifdef _SCC_DEBUG
-	if(haveSupply>10*MAX_SUPPLY) {
+	if(haveSupply > 2*GAME::MAX_SUPPLY) {
 		toErrorLog("DEBUG (PREBUILDORDER::getHaveSupply()): Variable not initialized.");return(0);
 	}
 #endif
@@ -481,211 +399,83 @@ inline const unsigned int PREBUILDORDER::getHaveSupply() const
 
 // ----- HARVEST ------
 
-inline void PREBUILDORDER::setMinerals(const unsigned int have_minerals)
-{
+inline void PREBUILDORDER::setResource(const unsigned int resource_type, const unsigned int have_resource) {
 #ifdef _SCC_DEBUG
-	if(have_minerals > MAX_MINERALS) {
-		toErrorLog("DEBUG (PREBUILDORDER::setMinerals()): Value have_minerals out of range.");return;
+	if(resource_type >= RACE::MAX_RESOURCE_TYPES) {
+		toErrorLog("DEBUG (PREBUILDORDER::setResource()): Value resource_type out of range.");return;
+	}
+	if(have_resource > GAME::MAX_RESOURCES) {
+		toErrorLog("DEBUG (PREBUILDORDER::setResource()): Value have_resource out of range.");return;
 	}
 #endif
-	minerals = have_minerals;
+	resource[resource_type] = have_resource;
 }
 
-inline const unsigned int PREBUILDORDER::getMinerals() const
-{
+inline const unsigned int PREBUILDORDER::getResource(const unsigned int resource_type) const {
 #ifdef _SCC_DEBUG
-	if(minerals > MAX_MINERALS) {
-		toErrorLog("DEBUG (PREBUILDORDER::getMinerals()): Variable minerals not initialized.");return(0);
+	if(resource_type >= RACE::MAX_RESOURCE_TYPES) {
+		toErrorLog("DEBUG (PREBUILDORDER::getResource()): Value resource_type out of range.");return(0);
+	}
+	if(resource[resource_type] > GAME::MAX_RESOURCES) {
+		toErrorLog("DEBUG (PREBUILDORDER::getResource()): Variable resource not initialized.");return(0);
 	}
 #endif
-	return(minerals);
+	return(resource[resource_type]);
 }
-
-inline void PREBUILDORDER::setGas(const unsigned int have_gas)
-{
+/*
+inline void PREBUILDORDER::setResourceHarvestPerFrame( const unsigned int resource_type, const unsigned int location_number, const unsigned int worker, const unsigned int resource_harvest_per_frame ) {
 #ifdef _SCC_DEBUG
-	if(have_gas > MAX_GAS) {
-		toErrorLog("DEBUG (PREBUILDORDER::setGas()): Value have_gas out of range.");return;
+	if(resource_type >= RACE::MAX_RESOURCE_TYPES) {
+		toErrorLog("DEBUG (PREBUILDORDER::setResourceHarvestPerFrame()): Value resource_type out of range.");return;
 	}
-#endif
-	gas = have_gas;
-}
-
-inline const unsigned int PREBUILDORDER::getGas() const
-{
-#ifdef _SCC_DEBUG
-	if(gas > MAX_GAS) {
-		toErrorLog("DEBUG (PREBUILDORDER::getGas()): Variable gas not initialized.");return(0);
-	}
-#endif
-	return(gas);
-}
-
-inline void PREBUILDORDER::setMineralHarvestPerSecond( const unsigned int location_number, const unsigned int worker, const unsigned int mineral_harvest_per_second )
-{
-#ifdef _SCC_DEBUG
-	if(mineral_harvest_per_second >= MAX_MINERALS) {
-		toErrorLog("DEBUG (PREBUILDORDER::setMineralHarvestPerSecond()): Value mineral_harvest_per_second out of range.");return;
+	if(resource_harvest_per_frame >= GAME::MAX_RESOURCES) {
+		toErrorLog("DEBUG (PREBUILDORDER::setResourceHarvestPerFrame()): Value resource_harvest_per_frame out of range.");return;
 	}
 	if((location_number >= (*getMap())->getMaxLocations())) {
-		toErrorLog("DEBUG (PREBUILDORDER::setMineralHarvestPerSecond()): Value location_number out of range.");return;
+		toErrorLog("DEBUG (PREBUILDORDER::setResourceHarvestPerFrame()): Value location_number out of range.");return;
 	}
-	if(worker>=45) {
-		toErrorLog("DEBUG (PREBUILDORDER::setMineralHarvestPerSecond()): Value worker out of range.");return;
-	}
-#endif
-	mineralHarvestPerSecond[location_number][worker] = mineral_harvest_per_second;
-}
-
-inline const unsigned int PREBUILDORDER::getMineralHarvestPerSecond( const unsigned int location_number, const unsigned int worker ) const
-{
-#ifdef _SCC_DEBUG
-	if((location_number >= (*getMap())->getMaxLocations()))	{
-		toErrorLog("DEBUG (PREBUILDORDER::getMineralHarvestPerSecond()): Value location_number out of range.");return(0);
-	}
-	if(worker>=45) {
-		toErrorLog("DEBUG (PREBUILDORDER::getMineralHarvestPerSecond()): Value worker out of range.");return(0);
-	}
-	if(mineralHarvestPerSecond[location_number][worker]>MAX_MINERALS) {
-		toErrorLog("DEBUG (PREBUILDORDER::getMineralHarvestPerSecond()): Variable mineralHarvestPerSecond not initialized.");return(0);
+	if(worker>=45) { // TODO
+		toErrorLog("DEBUG (PREBUILDORDER::setResourceHarvestPerFrame()): Value worker out of range.");return;
 	}
 #endif
-	return(mineralHarvestPerSecond[location_number][worker]);
-}
-
-inline void PREBUILDORDER::setGasHarvestPerSecond( const unsigned int location_number, const unsigned int worker, const unsigned int gas_harvest_per_second )
-{
-#ifdef _SCC_DEBUG
-	if(gas_harvest_per_second >= MAX_GAS) {
-		toErrorLog("DEBUG (PREBUILDORDER::setGasHarvestPerSecond()): Value gas_harvest_per_second out of range.");return;
-	}
-	if((location_number >= (*getMap())->getMaxLocations())) {
-		toErrorLog("DEBUG (PREBUILDORDER::setGasHarvestPerSecond()): Value location_number out of range.");return;
-	}
-	if(worker >= 5) {
-		toErrorLog("DEBUG (PREBUILDORDER::setGasHarvestPerSecond()): Value worker out of range.");return;
-	}
-#endif
-	gasHarvestPerSecond[location_number][worker] = gas_harvest_per_second;
-}
-
-inline const unsigned int PREBUILDORDER::getGasHarvestPerSecond( const unsigned int location_number, const unsigned int worker ) const
-{
-#ifdef _SCC_DEBUG
-	if((location_number >= (*getMap())->getMaxLocations()))	{
-		toErrorLog("DEBUG (PREBUILDORDER::getGasHarvestPerSecond()): Value location_number out of range.");return(0);
-	}
-	if(worker>=5)	{
-		toErrorLog("DEBUG (PREBUILDORDER::getGasHarvestPerSecond()): Value worker out of range.");return(0);
-	}
-	if(gasHarvestPerSecond[location_number][worker]>MAX_GAS) {
-		toErrorLog("DEBUG (PREBUILDORDER::getGasHarvestPerSecond()): Variable gasHarvestPerSecond not initialized.");return(0);
-	}
-#endif
-	return(gasHarvestPerSecond[location_number][worker]);
-}
-
-inline void PREBUILDORDER::setHarvestedMinerals( const unsigned int harvested_minerals )
-{
-#ifdef _SCC_DEBUG
-	if(harvested_minerals >= MAX_MINERALS) {
-		toErrorLog("DEBUG (PREBUILDORDER::setHarvestedMinerals()): Value out of range.");return;
-	}
-#endif
-	harvestedMinerals = harvested_minerals;
-}
-
-inline const unsigned int PREBUILDORDER::getHarvestedMinerals() const
-{
-#ifdef _SCC_DEBUG
-	if(harvestedMinerals>MAX_MINERALS) {
-		toErrorLog("DEBUG (PREBUILDORDER::getHarvestedMinerals()): Variable harvestedMinerals not initialized.");return(0);
-	}
-#endif
-	return(harvestedMinerals);
-}
-
-inline void PREBUILDORDER::setHarvestedGas( const unsigned int harvested_gas )
-{
-#ifdef _SCC_DEBUG
-	if(harvested_gas >= MAX_GAS) {
-		toErrorLog("DEBUG (PREBUILDORDER::setHarvestedGas()): Value out of range.");return;
-	}
-#endif
-	harvestedGas = harvested_gas;
-}
-
-inline const unsigned int PREBUILDORDER::getHarvestedGas() const
-{
-#ifdef _SCC_DEBUG
-	if(harvestedGas > MAX_GAS) {
-		toErrorLog("DEBUG (PREBUILDORDER::getHarvestedGas()): Variable harvestedGas not initialized.");return(0);
-	}
-#endif
-	return(harvestedGas);
-}
-
-
-inline void PREBUILDORDER::setWastedMinerals( const unsigned int wasted_minerals )
-{
-#ifdef _SCC_DEBUG
-	if(wasted_minerals >= MAX_MINERALS*MAX_TIME) {
-		toErrorLog("DEBUG (PREBUILDORDER::setWastedMinerals()): Value out of range.");return;
-	}
-#endif
-	wastedMinerals = wasted_minerals;
-}
-
-inline const unsigned int PREBUILDORDER::getWastedMinerals() const
-{
-#ifdef _SCC_DEBUG
-	if(wastedMinerals >= MAX_MINERALS*MAX_TIME) {
-		toErrorLog("DEBUG (PREBUILDORDER::getWastedMinerals()): Variable wastedMinerals not initialized.");return(0);
-	}
-#endif
-	return(wastedMinerals);
-}
-
-inline void PREBUILDORDER::setWastedGas(const unsigned int wasted_gas)
-{
-#ifdef _SCC_DEBUG
-	if(wasted_gas >= MAX_GAS*MAX_TIME) {
-		toErrorLog("DEBUG (PREBUILDORDER::setWastedGas()): Value out of range.");return;
-	}
-#endif
-	wastedGas = wasted_gas;
-}
-
-inline const unsigned int PREBUILDORDER::getWastedGas() const
-{
-#ifdef _SCC_DEBUG
-	if(wastedGas >= MAX_GAS*MAX_TIME) {
-		toErrorLog("DEBUG (PREBUILDORDER::getWastedGas()): Variable wastedGas not initialized.");return(0);
-	}
-#endif
-	return(wastedGas);
-}
-// ----- END HARVEST -----
-
-/*inline void PREBUILDORDER::setpGoal(GOAL_ENTRY* current_goal)
-{
-#ifdef _SCC_DEBUG
-	if(current_goal == NULL) {
-		toErrorLog("DEBUG (PREBUILDORDER::setpGoal()()): Variable current_goal not initialized.");return;
-	}
-#endif
-	pGoal = current_goal;
-	goalInitialized = true;
+	resourceHarvestPerFrame[location_number][resource_type][worker] = resource_harvest_per_frame;
 }*/
 
-inline const START_CONDITION* const* PREBUILDORDER::getStartCondition() const
-{
-	return(getpStart()->getStartCondition());
+
+
+inline void PREBUILDORDER::setHarvestedResource( const unsigned int resource_type, const unsigned int harvested_resource ) {
+#ifdef _SCC_DEBUG
+	if(resource_type >= RACE::MAX_RESOURCE_TYPES) {
+		toErrorLog("DEBUG (PREBUILDORDER::setHarvestedResource()): Value resource_type out of range.");return;
+	}
+	if(harvested_resource >= GAME::MAX_RESOURCES) {
+		toErrorLog("DEBUG (PREBUILDORDER::setHarvestedResource()): Value harvest_resource, out of range.");return;
+	}
+#endif
+	harvestedResource[resource_type] = harvested_resource;
+}
+
+inline const unsigned int PREBUILDORDER::getHarvestedResource( const unsigned int resource_type ) const {
+#ifdef _SCC_DEBUG
+	if(resource_type >= RACE::MAX_RESOURCE_TYPES) {
+		toErrorLog("DEBUG (PREBUILDORDER::getHarvestedResource()): Value resource_type out of range.");return(0);
+	}
+	if(harvestedResource[resource_type] > GAME::MAX_RESOURCES) {
+		toErrorLog("DEBUG (PREBUILDORDER::getHarvestedResource()): Variable harvestedResource not initialized.");return(0);
+	}
+#endif
+	return(harvestedResource[resource_type]);
+}
+
+// ----- END HARVEST -----
+
+
+inline const START_CONDITION* const* PREBUILDORDER::getStartCondition() const {
+	return(pStart->getStartCondition());
 }
 
 
-inline void PREBUILDORDER::setTimer(const unsigned int time)
-{
+inline void PREBUILDORDER::setTimer(const unsigned int time) {
 #ifdef _SCC_DEBUG
 	if(time > coreConfiguration.getMaxTime()) {
 		toErrorLog("DEBUG (PREBUILDORDER::setTimer()): Value time out of range.");return;
@@ -694,8 +484,7 @@ inline void PREBUILDORDER::setTimer(const unsigned int time)
 	timer = time;
 }
 
-inline const unsigned int PREBUILDORDER::getTimer() const
-{
+inline const unsigned int PREBUILDORDER::getTimer() const {
 #ifdef _SCC_DEBUG
 	if(timer > coreConfiguration.getMaxTime()) {
 		toErrorLog("DEBUG (PREBUILDORDER::getTimer()): Variable timer not initialized.");return(0);
@@ -704,9 +493,7 @@ inline const unsigned int PREBUILDORDER::getTimer() const
 	return(timer);
 }
 
-
-inline const unsigned int PREBUILDORDER::getRealTimer() const
-{
+inline const unsigned int PREBUILDORDER::getRealTimer() const {
 #ifdef _SCC_DEBUG
 	if(timer > coreConfiguration.getMaxTime()) {
 		toErrorLog("DEBUG (PREBUILDORDER::getRealTimer()): Variable timer not initialized.");return(0);
@@ -716,54 +503,31 @@ inline const unsigned int PREBUILDORDER::getRealTimer() const
 	// TODO auf > checken
 }
 
-/*
-inline void PREBUILDORDER::setpStats(const UNIT_STATISTICS* const* player_stats)
-{
-#ifdef _SCC_DEBUG
-	if((*player_stats)[0].minerals!=0) { // TODO
-		toErrorLog("DEBUG (PREBUILDORDER::setpStats()): Variable not initialized.");return;
-	}
-#endif
-	pStats = player_stats;
-	pStatsInitialized = true;
-}*/
-
-
-inline const UNIT_STATISTICS* const * PREBUILDORDER::getpStats() const
-{
+inline const std::vector<UNIT_STATISTICS>* PREBUILDORDER::getpStats() const {
 /*#ifdef _SCC_DEBUG
 	if(!pStatsInitialized)	{
 		toErrorLog("DEBUG (PREBUILDORDER::getpStats()()): Variable pStats not initialized.");return(0);
 	}
 #endif
 	return(pStats);*/
-	return(getpStart()->getpStats());
+	return(pStart->getpStats());
 }
 
 inline const unsigned int PREBUILDORDER::getLength() const
 {
 #ifdef _SCC_DEBUG
-	if(length > MAX_LENGTH) {
-		toErrorLog("DEBUG (PREBUILDORDER::getLength()): Variable length not initialized.");return(0);
+	if(Code.size() >= MAX_LENGTH) {
+		toErrorLog("DEBUG (PREBUILDORDER::getLength()): Variable Code too long.");return(0);
 	}
 #endif
-	return(length);
+	return(Code.size());
 }
 
-inline void PREBUILDORDER::setLength(const unsigned int bo_length)
-{
-#ifdef _SCC_DEBUG
-	if(bo_length > MAX_LENGTH)
-	{
-		toErrorLog("DEBUG (PREBUILDORDER::setLength()): Value bo_length out of range.");return;
-	}
-#endif
-	length = bo_length;
+inline void PREBUILDORDER::resetTimeOut() {
+	timeout = coreConfiguration.getMaxTimeOut();
 }
 
-
-inline void PREBUILDORDER::setTimeOut(const unsigned int time_out)
-{
+inline void PREBUILDORDER::setTimeOut(const unsigned int time_out) {
 	if(timeout == time_out)
 		return;		
 #ifdef _SCC_DEBUG
@@ -774,8 +538,16 @@ inline void PREBUILDORDER::setTimeOut(const unsigned int time_out)
 	timeout = time_out;
 }
 
-inline const unsigned int PREBUILDORDER::getTimeOut() const
-{
+inline const bool PREBUILDORDER::isTimeOut() const {
+#ifdef _SCC_DEBUG
+	if(timeout > coreConfiguration.getMaxTimeOut()) {
+		toErrorLog("DEBUG (PREBUILDORDER::isTimeOut()): Variable timeout not initialized.");return(0);
+	}
+#endif
+	return(timeout==0);
+}
+
+inline const unsigned int PREBUILDORDER::getTimeOut() const {
 #ifdef _SCC_DEBUG
 	if(timeout > coreConfiguration.getMaxTimeOut()) {
 		toErrorLog("DEBUG (PREBUILDORDER::getTimeOut()): Variable timeout not initialized.");return(0);
@@ -789,26 +561,24 @@ inline const unsigned int PREBUILDORDER::getTimeOut() const
 // ------ END OF GET/SET FUNCTIONS ------
 // --------------------------------------
 
-inline void PREBUILDORDER::removeLarvaFromQueue(const unsigned int location_number)
-{
+inline void PREBUILDORDER::removeLarvaFromQueue(const unsigned int location_number) {
 #ifdef _SCC_DEBUG
 	if((location_number<1) || (location_number >= (*getMap())->getMaxLocations())) {
 		toErrorLog("DEBUG (PREBUILDORDER::removeLarvaFromQueue()): Value location_number out of range.");return;
 	}
-	if((larvaInProduction[location_number]<1)||(larvaInProduction[location_number]>=MAX_SUPPLY)) {
+	if((larvaInProduction[location_number]<1)||(larvaInProduction[location_number] >= GAME::MAX_SUPPLY)) {
 		toErrorLog("DEBUG (PREBUILDORDER::removeLarvaFromQueue()): Variable larvaInProduction not initialized or out of range.");return;
 	}
 #endif
 	--larvaInProduction[location_number];
 }
 
-inline void PREBUILDORDER::addLarvaToQueue(const unsigned int location_number)
-{
+inline void PREBUILDORDER::addLarvaToQueue(const unsigned int location_number) {
 #ifdef _SCC_DEBUG
 	if((location_number<1) || (location_number >= (*getMap())->getMaxLocations())) {
 		toErrorLog("DEBUG (PREBUILDORDER::addLarvaFromQueue()): Value location_number out of range.");return;
 	}
-	if(larvaInProduction[location_number]>=MAX_SUPPLY) {
+	if(larvaInProduction[location_number] >= GAME::MAX_SUPPLY) {
 		toErrorLog("DEBUG (PREBUILDORDER::addLarvaFromQueue()): Variable larvaInProduction not initialized or out of range.");return;
 	}
 #endif
@@ -824,5 +594,24 @@ inline const bool PREBUILDORDER::isOnlySwapOrders() const {
 	return(onlySwapOrders);
 }
 
+inline void PREBUILDORDER::assignCode(const PREBUILDORDER& player) {
+	Code = player.Code;
+}
+
+inline void PREBUILDORDER::assignCode(const std::list<unsigned int>& src) {
+	Code = src;
+}
+
+inline void PREBUILDORDER::copyCode(std::list<unsigned int>& dst) const {
+	dst = Code;
+}
+
+inline const bool PREBUILDORDER::isDifferent(const std::list<unsigned int>& code) const {
+	return(Code != code);
+}
+
+
 #endif // __PREBUILDORDER_H
+
+
 

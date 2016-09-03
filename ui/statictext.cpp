@@ -136,8 +136,8 @@ void UI_StaticText::process()
 {
 	UI_Object::process();
 	tempColorIsSet = false;
-	if( (isShown()) && (Rect(getAbsolutePosition(), getTextSize()).Inside(mouse )) )
-		setNeedRedrawMoved();
+//	if( (isShown()) && (Rect(getAbsolutePosition(), getTextSize()).Inside(mouse )) )
+//		setNeedRedrawMoved(); ??
 	if(textWasChanged)
 	{
 		if(eText != NULL_STRING)
@@ -161,6 +161,7 @@ void UI_StaticText::updateText(const std::string& st_text)
 	textWasChanged=true;
 	Size old_size = getTextSize();
 	text = st_text;
+	eText = NULL_STRING;
 	setSize(getTextSize());	
 }
 

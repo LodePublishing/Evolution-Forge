@@ -35,7 +35,7 @@ class SettingsWindow:public UI_Window
 		const bool hasFullScreenChanged() const;
 		const bool hasCompactDisplayModeChanged() const;
 		const bool hasAllowWaitOrdersChanged() const;
-		const bool hasGameSpeedChanged() const;
+//		const bool hasGameSpeedChanged() const;
 	private:
 
 		void reloadFromFile();
@@ -76,7 +76,7 @@ class SettingsWindow:public UI_Window
 		UI_Button* alwaysBuildWorkers;
 		UI_Button* allowWaitOrders;
 		UI_NumberField* waitAccuracy;
-		UI_NumberField* gameSpeed;
+//		UI_NumberField* gameSpeed;
 		UI_Button* autoRuns;
 		UI_NumberField* maxGenerations;
 		
@@ -125,7 +125,7 @@ class SettingsWindow:public UI_Window
 		bool fullScreenHasChanged;
 		bool compactDisplayModeHasChanged;
 		bool allowWaitOrdersHasChanged;
-		bool gameSpeedHasChanged;
+//		bool gameSpeedHasChanged;
 };
 
 inline const bool SettingsWindow::hasLanguageChanged() const {
@@ -156,9 +156,9 @@ inline const bool SettingsWindow::hasAllowWaitOrdersChanged() const {
 	return(allowWaitOrdersHasChanged);
 }
 
-inline const bool SettingsWindow::hasGameSpeedChanged() const {
-	return(gameSpeedHasChanged);
-}
+//inline const bool SettingsWindow::hasGameSpeedChanged() const {
+//	return(gameSpeedHasChanged);
+//}
 
 inline void SettingsWindow::forceResolutionChange() {
 	resolutionHasChanged = true;

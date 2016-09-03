@@ -275,7 +275,7 @@ void UI_LongText::updateText(const std::string& lt_text)
 					else ty = current_row+maxdy/2-height/2+2;
 					UI_Button* t = new UI_Button(scrollBar==NULL?this:scrollBar, Rect(p+Point(first_text_cursor_x-1, ty), Size(0, 0)), Size(0, 0), button, false, PRESS_BUTTON_MODE, realstring.str(), DO_NOT_ADJUST, (eFont)(font+4), AUTO_SIZE);
 					longButton.push_back(t);
-					text_cursor_x = first_text_cursor_x + t->getTextWidth();
+					text_cursor_x = first_text_cursor_x + t->getTextWidth() + UI_Object::theme.lookUpFont(current_font)->getTextExtent(" ").getWidth();
 				} else if((textbutton==1)&&(!end_of_order))
 				{
 					// abgebrochener button

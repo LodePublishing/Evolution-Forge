@@ -13,7 +13,7 @@ BoGraphWindow::BoGraphWindow(UI_Object* bograph_parent, const unsigned int game_
 	gameMax(game_max),
 	playerNumber(player_number),
 	playerMax(player_max),
-	lastRace(TERRA),
+	lastRace(0),
 	totalTime(1)
 {
 	addHelpButton(DESCRIPTION_BOGRAPH_WINDOW_CHAPTER);
@@ -76,16 +76,16 @@ void BoGraphWindow::processList()
 				totalTime = t->getRealTime() + t->getBT();
 	}
 	
-	unsigned int height[LAST_UNIT];
-	unsigned int lines[LAST_UNIT];
-	unsigned int unitCounter[LAST_UNIT][MAX_LENGTH];
-	memset(unitCounter, 0, MAX_LENGTH * LAST_UNIT * sizeof(int));
-
+	std::vector<unsigned int> height(RACE::UNIT_TYPE_COUNT);
+	std::vector<unsigned int> lines(RACE::UNIT_TYPE_COUNT);
+	std::vector< std::vector<unsigned int> > unitCounter(RACE::UNIT_TYPE_COUNT);
 	std::priority_queue<unsigned int, std::vector<unsigned int> > endOfBuild;
 
-	memset(height, 0, LAST_UNIT * sizeof(int));
-	memset(lines, 0, LAST_UNIT * sizeof(int));
-	eRace my_race = anarace->getRace();
+	for(unsigned int i = RACE::UNIT_TYPE_COUNT; i--;)
+		unitCounter[i].assign(MAX_LENGTH, 0);
+	height.assign(RACE::UNIT_TYPE_COUNT, 0);
+	lines.assign(RACE::UNIT_TYPE_COUNT, 0);
+	unsigned int my_race = anarace->getRace();
 
 // ------ CALCULATE NUMBER OF ENTRIES FOR EACH FACILITY ------ 
 // = maximum of force - availible for each facility
@@ -97,11 +97,11 @@ void BoGraphWindow::processList()
 				endOfBuild.pop();
 			if(order->getFacility())
 			{
-				if((my_race == PROTOSS)&&(stats[PROTOSS][order->getUnit()].facility[0] == PROBE))
+				if(GAME::race[my_race].stats[order->getUnit()].facilityType == NEEDED_ONCE) // probe !
 				{
 					endOfBuild.push(order->getTime() - order->getBT());
-					if(endOfBuild.size() > height[PROBE])
-						height[PROBE] = endOfBuild.size();
+					if(endOfBuild.size() > height[GAME::race[my_race].stats[order->getUnit()].facility[0]])
+						height[GAME::race[my_race].stats[order->getUnit()].facility[0]] = endOfBuild.size();
 				}
 				else
 				if(order->getUsedFacilityCount() > height[order->getFacility()])
@@ -113,7 +113,7 @@ void BoGraphWindow::processList()
 
 
 //calculate number of lines per facility and adjust the height
-	for(unsigned int i=LAST_UNIT; i--;)
+	for(unsigned int i=RACE::UNIT_TYPE_COUNT; i--;)
 	{
 // at maximum MIN_HEIGHT items in one row
 		while(height[i]>MIN_HEIGHT) {
@@ -145,7 +145,6 @@ void BoGraphWindow::processList()
 	fac.sort();
 
 // not yet availible times:
-//	std::list<std::list<Not_Availible> > not_availible_list;
 	std::list<unsigned int > first_availible;
 	{
 		for(std::list<unsigned int>::iterator i = fac.begin(); i!=fac.end(); ++i)
@@ -159,14 +158,13 @@ void BoGraphWindow::processList()
 			else first_availible_item = anarace->getRealTimer();
 			
 			for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
-				if((order->getUnit() == *i) || (stats[my_race][order->getUnit()].create == *i))
+				if((order->getUnit() == *i) || (GAME::race[my_race].stats[order->getUnit()].create == *i))
 				{
 					if(order->getRealTime() + order->getBT() < first_availible_item)
 						first_availible_item = order->getRealTime() + order->getBT();
 				}
 			first_availible.push_back(1+( first_availible_item*(getClientRectWidth()-10)) / totalTime);
 		}
-		
 	}
 
 					
@@ -222,15 +220,14 @@ void BoGraphWindow::processList()
 	unsigned int position = 0; 
 	Rect edge;
 	std::list<BoGraphLine*>::iterator j = boGraphLine.begin();
-//	std::list<std::list<Not_Availible> >::const_iterator k = not_availible_list.begin();
 	std::list<unsigned int>::const_iterator k = first_availible.begin();
 	for(std::list<unsigned int>::iterator i = fac.begin(); i!=fac.end(); ++i, ++j, ++k)
 	{
-		edge = Rect(Point(5, 10+position * (FONT_SIZE+11)), Size(getClientRectWidth()-10, lines[*i] * (FONT_SIZE+11)));
+		edge = Rect(Point(5, 10+position * (FONT_SIZE*2+5)), Size(getClientRectWidth()-10, lines[*i] * (FONT_SIZE*2+5)));
 		
 		if(j == boGraphLine.end())
 		{
-			BoGraphLine* t = new BoGraphLine(getScrollBar(), edge, my_race, *i, lines[*i], height[*i]);
+			BoGraphLine* t = new BoGraphLine(getScrollBar(), edge, my_race, *i, height[*i], lines[*i]);
 			t->firstAvailible = *k;
 			boGraphLine.push_back(t);
 			j = --boGraphLine.end();
@@ -246,11 +243,16 @@ void BoGraphWindow::processList()
 		}
 		position += (*j)->getLines();
 	}
+	while(j!=boGraphLine.end())
+	{
+		delete *j;
+		j = boGraphLine.erase(j);
+	}
 
 	// let the window adjust to the last line
 
 	if(boGraphLine.size())
-		fitItemToRelativeClientRect(Rect(Point(5, position * (FONT_SIZE+11)), Size(getClientRectWidth()-10, (FONT_SIZE+11))), true);
+		fitItemToRelativeClientRect(Rect(Point(5, position * (FONT_SIZE*2+5)), Size(getClientRectWidth()-10, (FONT_SIZE*2+5))), true);
 	else
 		fitItemToRelativeClientRect(Rect(), true);
 	}
@@ -275,11 +277,10 @@ void BoGraphWindow::processList()
 
 			std::ostringstream os;
 			{
-				os << "$" << formatTime(order->getRealTime(), efConfiguration.getGameSpeed()) << " - " << formatTime(order->getRealTime() + order->getBT(), efConfiguration.getGameSpeed()) << "$: " << UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*my_race+my_unit)) << "#" << "  " << UI_Object::theme.lookUpFormattedString(BOWINDOW_BUILD_TIME_STRING, stats[my_race][my_unit].BT/(efConfiguration.getGameSpeed()*3+6)) << "#";
-				if(stats[my_race][my_unit].minerals>0)
-					os << "  $" << stats[my_race][my_unit].minerals/100 << "$ " << UI_Object::theme.lookUpString(BOWINDOW_MINERALS_STRING) << "#";
-				if(stats[my_race][my_unit].gas>0)
-					os << "  $" << stats[my_race][my_unit].gas/100 << "$ " << UI_Object::theme.lookUpString(BOWINDOW_GAS_STRING) << "#";
+				os << "$" << formatTime(order->getRealTime(), efConfiguration.getGameSpeed()) << " - " << formatTime(order->getRealTime() + order->getBT(), efConfiguration.getGameSpeed()) << "$: " << GAME::lookUpUnitString(my_race, my_unit) << "#" << "  " << UI_Object::theme.lookUpFormattedString(BOWINDOW_BUILD_TIME_STRING, GAME::race[my_race].stats[my_unit].BT/(efConfiguration.getGameSpeed()*3+6)) << "#";
+				for(unsigned int i = RACE::MAX_RESOURCE_TYPES; i--;)
+					if(GAME::race[my_race].stats[my_unit].resource[i]>0)
+						os << "  $" << GAME::race[my_race].stats[my_unit].resource[i]/100 << "$ " << GAME::lookUpGameString(GAME::FIRST_RESOURCE_STRING+i) << "#";
 			}
 			
 			// search through the boGraphList, result is an iterator on 'end()' or on an entry :o :/
@@ -287,21 +288,21 @@ void BoGraphWindow::processList()
 			std::list<std::list<BoGraphEntry*>::iterator>::iterator j = entry.begin();
 			std::list<BoGraphLine*>::iterator i = boGraphLine.begin();
 			for(; i!=boGraphLine.end(); ++i, ++j)
-				if((*i)->getFacility() == order->getFacility())
+				if((order->getFacility()) &&((*i)->getFacility() == order->getFacility()))
 				{
 					unsigned int k;
-					for(k = 0; k < MAX_TIME; ++k)
+					for(k = 0; k < MAX_LENGTH; ++k)
 						if(unitCounter[(*i)->getFacility()][k] <= order->getRealTime())
 						{
 							unitCounter[(*i)->getFacility()][k] = order->getRealTime() + order->getBT();
 							break;
 						}
-					// k hat mit MAX_TIME im Grunde nichts zu tun, MAX_TIME waere nur das oberste Limit an simultanen Befehlen!
+					// k hat mit MAX_LENGTH im Grunde nichts zu tun, MAX_LENGTH waere nur das oberste Limit an simultanen Befehlen!
 					edge = Rect(Point(
 						1+( order->getRealTime()*(getClientRectWidth()-10)) / totalTime, 
-							1+(k/MIN_HEIGHT)*(FONT_SIZE+11)+(k%MIN_HEIGHT)*(FONT_SIZE+11)/((*i)->getLineHeight())), 
+							1+(k/MIN_HEIGHT)*(FONT_SIZE*2+5)+(k%MIN_HEIGHT)*(FONT_SIZE*2+5)/((*i)->getLineHeight())), 
 						Size((order->getBT()*(getClientRectWidth()-10)) / totalTime,
-							(FONT_SIZE+10)/((*i)->getLineHeight())));
+							(FONT_SIZE*2+5 - 1)/((*i)->getLineHeight())));
 					break;
 				}
 
@@ -315,7 +316,7 @@ void BoGraphWindow::processList()
 			{
 				BoGraphEntry* t = new BoGraphEntry(*i, edge, Size(0,0), *order, number); // TODO
 				t->adjustRelativeRect(edge);
-				t->setButtonColorsType(eButtonColorsType(BRIGHT_UNIT_TYPE_0_BUTTON+stats[my_race][my_unit].unitType));
+				t->setButtonColorsType(eButtonColorsType(BRIGHT_UNIT_TYPE_0_BUTTON + GAME::race[my_race].stats[my_unit].unitType));
 				t->updateToolTip(os.str());
 				(*i)->boGraphList.push_back(t);
 			} else
@@ -346,7 +347,7 @@ void BoGraphWindow::processList()
 				{
 					BoGraphEntry* t = new BoGraphEntry(*i, edge, Size(0,0), *order, number); // TODO
 					t->adjustRelativeRect(edge);
-					t->setButtonColorsType(eButtonColorsType(BRIGHT_UNIT_TYPE_0_BUTTON+stats[my_race][my_unit].unitType));
+					t->setButtonColorsType(eButtonColorsType(BRIGHT_UNIT_TYPE_0_BUTTON+GAME::race[my_race].stats[my_unit].unitType));
 					t->updateToolTip(os.str());
 					*j = (*i)->boGraphList.insert(*j, t);
 					++(*j);
@@ -366,17 +367,27 @@ void BoGraphWindow::processList()
 			}
 		}
 
-
-// clear the remaining buttons
-	std::list<std::list<BoGraphEntry*>::iterator>::iterator j = entry.begin();
-	for(std::list<BoGraphLine*>::iterator i = boGraphLine.begin();  i!=boGraphLine.end(); ++i, ++j)
-		while(*j != (*i)->boGraphList.end())
+// clear the remaining buttons ?
+	{
+	std::list<std::list<BoGraphEntry*>::iterator>::iterator k = entry.begin();
+	for(std::list<BoGraphLine*>::iterator i = boGraphLine.begin();  i!=boGraphLine.end(); ++i, ++k)
+		while(*k != (*i)->boGraphList.end())
 		{
-			if(UI_Button::getCurrentButton() == (**j)) 
+			if(UI_Button::getCurrentButton() == (**k)) 
 				UI_Button::resetButton();
-			delete(**j);
-			*j = (*i)->boGraphList.erase(*j);
+			delete(**k);
+			*k = (*i)->boGraphList.erase(*k);
 		}
+	}
+// ... and the remaining lines (after switching races or goals)
+	{	
+	std::list<BoGraphLine*>::iterator k = boGraphLine.begin();
+	for(std::list<unsigned int>::iterator i = fac.begin(); i!=fac.end(); ++i, ++k)
+	{}
+	while(k!=boGraphLine.end())
+		k = boGraphLine.erase(k);
+	}
+
 
 
 // --------------------------------- END BUILD ORDER GRAPH ------------------------------
@@ -407,7 +418,7 @@ void BoGraphWindow::process()
 	UI_Window::process();
 	
 //	if(boGraphLine.size())
-//	fitItemToRelativeClientRect(boGraphLine.back()->getRelativeRect(),1);//Rect(Point(5, 35+10 * (FONT_SIZE+10)), Size(getClientRectWidth()-10, (FONT_SIZE+10))), true);
+//	fitItemToRelativeClientRect(boGraphLine.back()->getRelativeRect(),1);//Rect(Point(5, 35+10 * (FONT_SIZE*2+5)), Size(getClientRectWidth()-10, (FONT_SIZE*2+5))), true);
 	
 	checkForInfoWindow();
 	getScrollBar()->checkBoundsOfChildren(getAbsoluteClientRectUpperBound(), getAbsoluteClientRectLowerBound());

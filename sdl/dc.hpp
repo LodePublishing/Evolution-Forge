@@ -1,15 +1,19 @@
 #ifndef _SDL_DC_HPP
 #define _SDL_DC_HPP
 
-#include <SDL.h>
-
 #include "rect.hpp"
 #include "pen.hpp"
 #include "brush.hpp"
 #include "font.hpp"
 
-#include <string>
 #include <list>
+
+#define PRESSED_BRIGHTEN 50
+#define PRESSED_DARKEN 130
+#define PRESSED_NORMAL 90
+#define NOT_PRESSED_DARKEN 60
+#define NOT_PRESSED_BRIGHTEN 140
+
 
 enum eChooseDriverError
 {

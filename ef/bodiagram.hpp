@@ -26,6 +26,8 @@ class BoDiagramWindow : public UI_Window
 
 		const std::list<unsigned int>& getSelectedItems() const;
 	private:
+		static unsigned int HAVE_SUPPLY;
+		static unsigned int NEED_SUPPLY;
 		ANABUILDORDER* anarace;
 		
 		std::list<unsigned int> selectedItems;
@@ -44,12 +46,10 @@ class BoDiagramWindow : public UI_Window
 		unsigned int playerNumber;
 		unsigned int playerMax;
 
-		UI_StaticText* minerals;
-		UI_StaticText* gas;
-		UI_StaticText* supply;
-		UI_StaticText* time;
-		UI_StaticText* mineralsNumber;
-		UI_StaticText* gasNumber;
+		std::vector<UI_StaticText*> resourceText;
+		UI_StaticText* supplyText;
+		UI_StaticText* timeText;
+		std::vector<UI_StaticText*> resourceNumber;
 		UI_StaticText* supplyNumber;
 		UI_StaticText* timeNumber;	
 };

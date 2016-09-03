@@ -1,7 +1,7 @@
 #include "msgwindow.hpp"
 
-MessageWindow::MessageWindow( UI_Window* parentWindow ) :
-	UI_Window( parentWindow, MESSAGE_WINDOW_TITLE_STRING, theme.lookUpGlobalRect(MESSAGE_WINDOW), theme.lookUpGlobalMaxHeight(MESSAGE_WINDOW), SCROLLED, NO_AUTO_SIZE_ADJUST, Rect(0, 10, 1280, 1024) ),
+MessageWindow::MessageWindow( UI_Window* parent_window ) :
+	UI_Window( parent_window, MESSAGE_WINDOW_TITLE_STRING, theme.lookUpGlobalRect(MESSAGE_WINDOW), theme.lookUpGlobalMaxHeight(MESSAGE_WINDOW), SCROLLED, NO_AUTO_SIZE_ADJUST, Rect(0, 10, 1280, 1024) ),
 	message()
 { }
 
@@ -56,11 +56,11 @@ void MessageWindow::reloadOriginalSize()
 	resetData();
 }
 
-void MessageWindow::addMessage( const std::string& bla )
+void MessageWindow::addMessage( const std::string& msg )
 {
 	setNeedRedrawNotMoved();
-	Message* msg = new Message(getScrollBar(), Rect(Point(10, 20  /*message.size() * (FONT_SIZE+5)*/), Size(getClientRectWidth(), FONT_SIZE+5)), 1, bla, 100);
-	message.push_front(msg);
+	Message* my_message = new Message(getScrollBar(), Rect(Point(10, 20  /*message.size() * (FONT_SIZE+5)*/), Size(getClientRectWidth(), FONT_SIZE+5)), 1, msg, 100);
+	message.push_front(my_message);
 	resetData();
 //	addToProcessArray(this);
 	

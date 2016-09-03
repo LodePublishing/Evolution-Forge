@@ -1,0 +1,27 @@
+@BO_HEADER
+		"Name" "wheee"
+		"Race" "Protoss"
+		"Time" "249"
+@END
+@GOAL
+		"Name" "wheee"
+		"Race" "Protoss"
+		"Gateway" "1" "0" "0"
+		"Nexus" "1" "0" "0"
+		"Probe" "1" "0" "0"
+		"Pylon" "1" "0" "0"
+		"Zealot" "4" "0" "0"
+@END
+@BUILDORDER
+		"Probe"
+		"Pylon"
+		"Gateway"
+		"Probe"
+		"Probe"
+		"Zealot"
+		"Gateway"
+		"Zealot"
+		"Zealot"
+		"Zealot"
+		"Probe"
+@END

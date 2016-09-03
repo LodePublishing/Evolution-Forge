@@ -39,8 +39,10 @@ enum eAutoSize
 	NO_AUTO_SIZE,
 	AUTO_SIZE,
 	AUTO_HEIGHT_FULL_WIDTH,
+	AUTO_DOUBLE_HEIGHT_FULL_WIDTH,
 	FULL_WIDTH,
 	AUTO_HEIGHT_CONST_WIDTH,
+	AUTO_DOUBLE_HEIGHT_CONST_WIDTH,
 	CONST_SIZE //~~ constant width
 };
 
@@ -60,8 +62,10 @@ class UI_Object
 		UI_Object(UI_Object* parent_object, const Rect relative_rect = Rect(0, 0, 0, 0), const Size distance_bottom_right = Size(0, 0), const ePositionMode position_mode = DO_NOT_ADJUST, const eAutoSize auto_size = NOTHING);
 		UI_Object(UI_Object* parent_object, UI_Object* position_parent_object, const Rect relative_rect = Rect(0, 0, 0, 0), const Size distance_bottom_right = Size(0, 0), const ePositionMode position_mode = DO_NOT_ADJUST, const eAutoSize auto_size = NOTHING);
 
-		virtual ~UI_Object();
-	
+		virtual ~UI_Object(); 
+
+		// TODO Konstruktoren protected machen
+
 		void Show(const bool show=true);
 		void Hide(const bool hide=true);
 
@@ -175,6 +179,8 @@ class UI_Object
 		Rect clipRect;
 		void setWidth(const unsigned int width);
 	protected:
+
+		
 		void setRect(const Rect& rect);
 
 		void checkForChildrenOverlap(const Rect& rect);
@@ -185,6 +191,7 @@ class UI_Object
 		UI_Object* getChildren() const;
 		
 		bool childrenWereChanged;
+		ePositionMode positionMode;
 	private:
 //		bei wechsel alle rekursiv (-> virtual) durchlaufen und Liste bilden, das aktuelle heraussuchen und aktivieren
 //		Ansonsten bei klick Focus legen, Esc/anderer Klick entfernt den Focus (NULL bzw. anderer Fokus)
@@ -211,7 +218,6 @@ class UI_Object
 		void setSize(const unsigned int width, const unsigned int height);
 
 
-		ePositionMode positionMode;
 		eAutoSize autoSize;
 		
 		bool shown;

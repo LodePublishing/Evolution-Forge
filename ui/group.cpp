@@ -1,10 +1,11 @@
 #include "group.hpp"
 
-UI_Group::UI_Group(UI_Object* group_parent, const Rect& initial_rect, const Size bottom_right_distance, const eGroupType group_type, const ePositionMode position_mode, const eString txt ) :
+UI_Group::UI_Group(UI_Object* group_parent, const Rect& initial_rect, const Size bottom_right_distance, const eGroupType group_type, const bool draw_background, const ePositionMode position_mode, const eString txt ) :
 	UI_Object(group_parent, initial_rect, bottom_right_distance, position_mode, NOTHING),
 	title(txt==NULL_STRING?NULL:new UI_StaticText(this, txt, Rect(Point(0,0) - Size(3, 14), Size(0,0)), Size(0,0), BRIGHT_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
 	highlighted(false),
-	groupType(group_type)
+	groupType(group_type),
+	drawBackground(draw_background)
 { }
 
 UI_Group::~UI_Group() 
@@ -17,8 +18,6 @@ void UI_Group::calculateBoxSize()
 	UI_Object* tmp = getChildren();
 	if(!tmp)
 		return;
-	unsigned int maxWidth = 0;
-	unsigned int maxHeight = 0;
 	unsigned int i = 0;
 	unsigned int current_height = 2;
 	do
@@ -50,6 +49,8 @@ void UI_Group::calculateBoxSize()
 		tmp=tmp->getNextBrother();
 	} while(tmp!=getChildren());
 	
+	unsigned int maxWidth = 0;
+	unsigned int maxHeight = 0;
 	tmp = getChildren();
 	do
 	{
@@ -90,10 +91,6 @@ void UI_Group::draw(DC* dc) const
 {
 	if(checkForNeedRedraw())
 	{
-/*		if(highlighted)
-			dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-		else	
-			dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));*/
 		if(title!=NULL)
 		{
 //			dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
@@ -105,10 +102,14 @@ void UI_Group::draw(DC* dc) const
 			dc->setBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
 			dc->DrawEdgedRoundedRectangle(titleRect, 2);
 		}
-		else
+		if(drawBackground)
 		{
-//			dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-//			dc->DrawEdgedRoundedRectangle(getAbsolutePosition()-Size(3,0), getSize()+Size(6,0), 4);
+			if(highlighted)
+				dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+			else	
+				dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));
+			dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
+			dc->DrawEdgedRoundedRectangle(getAbsolutePosition()-Size(3,0), getSize()+Size(6,0), 4);
 		}
 	}
 	UI_Object::draw(dc);
@@ -141,8 +142,8 @@ void UI_Group::process()
 			highlighted = false;
 		}
 	
-	if((checkForNeedRedraw())&&(getParent()))
-		setNeedRedrawMoved();
+//	if((checkForNeedRedraw())&&(getParent()))
+//		setNeedRedrawMoved(); ?
 }
 
 

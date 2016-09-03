@@ -26,11 +26,12 @@ struct SaveBoxParameter
 class UI_Window : public UI_Object
 {
 	public:
-
 		UI_Window(UI_Object* window_parent, const eString window_title_string, const Rect rect, const unsigned int max_height, const eIsScrolled window_is_scrolled=NOT_SCROLLED, const eIsAutoAdjust win_is_auto_adjust=NO_AUTO_SIZE_ADJUST, const Rect win_client_area=Rect(0,0,1280,1024), eIsTransparent transparent = NOT_TRANSPARENT);
 		~UI_Window();
+		// TODO protected machen (->datawindow)
 
-// returns position and size of the client area
+
+	// returns position and size of the client area
 		const Rect& getRelativeClientRect() const;
 		const Rect getAbsoluteClientRect() const;
 		const Point getRelativeClientRectPosition() const;
@@ -48,7 +49,8 @@ class UI_Window : public UI_Object
 		const signed int getAbsoluteClientRectRightBound() const;
 		const unsigned int getClientTargetHeight() const;
 		const unsigned int getClientTargetWidth() const;
-		
+
+		void setRelativeClientRectPosition(const Point p);
 
 		void process();
 
@@ -74,6 +76,7 @@ class UI_Window : public UI_Object
 		const bool fitItemToAbsoluteClientRect(const Rect& rectangle, const bool adjust = false);
 
 		UI_ScrollBar* getScrollBar() const;
+		void setScrollBarPosition(const Point p);
 		const unsigned int getMaxHeight() const;
 
 		void setMaxHeight(const unsigned int max_height);
@@ -93,6 +96,7 @@ class UI_Window : public UI_Object
 		static std::string saveBoxString;
 		static SaveBoxParameter saveBoxParameter;
 	protected:
+	
 	private:
 	// do windows size changes smoothly		
 		void adjustClientRect();
@@ -136,6 +140,16 @@ class UI_Window : public UI_Object
 		UI_Window& operator=(const UI_Window& object);
 		UI_Window(const UI_Window& object);
 };
+		
+inline void UI_Window::setScrollBarPosition(const Point p) {
+	scrollBar->setPosition(p);
+}
+		
+inline void UI_Window::setRelativeClientRectPosition(const Point p) 
+{
+	clientRect.setTopLeft(p);
+	scrollBar->setStartY(p.y);
+}
 
 inline const unsigned int UI_Window::getMaxHeight() const {
 	return(maxHeight);

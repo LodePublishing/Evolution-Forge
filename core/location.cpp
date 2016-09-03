@@ -2,9 +2,8 @@
 
 MAP_LOCATION::MAP_LOCATION():
 	name("ERROR"),
-	mineralPatches(0),
-	vespeneGeysirs(0),
-	mineralDistance(0)
+	units(),
+	resourceDistance(RACE::MAX_RESOURCE_TYPES)
 {
 	for(unsigned int i=MAX_LOCATIONS;i--;)
 	{
@@ -19,7 +18,7 @@ MAP_LOCATION::~MAP_LOCATION()
 void MAP_LOCATION::resetData()
 {
 	name="ERROR";
-	mineralDistance=0;
+	resourceDistance.resize(RACE::MAX_RESOURCE_TYPES);
 	for(unsigned int i = MAX_LOCATIONS;i--;)
 	{
 		distance[i] = 9999;
@@ -29,9 +28,8 @@ void MAP_LOCATION::resetData()
 
 MAP_LOCATION::MAP_LOCATION(const MAP_LOCATION& object) :
 	name(object.name),
-	mineralPatches(object.mineralPatches),
-	vespeneGeysirs(object.vespeneGeysirs),
-	mineralDistance(object.mineralDistance)
+	units(object.units),
+	resourceDistance(object.resourceDistance)
 {
 	for(unsigned int i = MAX_LOCATIONS;i--;)
 	{
@@ -43,9 +41,8 @@ MAP_LOCATION::MAP_LOCATION(const MAP_LOCATION& object) :
 MAP_LOCATION& MAP_LOCATION::operator=(const MAP_LOCATION& object)
 {
 	name = object.name;
-	mineralPatches = object.mineralPatches;
-	vespeneGeysirs = object.vespeneGeysirs;
-	mineralDistance = object.mineralDistance;
+	units = object.units;
+	resourceDistance = object.resourceDistance;
 	for(unsigned int i = MAX_LOCATIONS;i--;)
 	{
 		distance[i] = object.distance[i];
@@ -55,10 +52,11 @@ MAP_LOCATION& MAP_LOCATION::operator=(const MAP_LOCATION& object)
 }
 
 
-void MAP_LOCATION::calculateDistances()
+void MAP_LOCATION::calculateDistances(const unsigned int this_location_number)
 {
 	for(unsigned int i=MAX_LOCATIONS;i--;)
 		nearest[i] = 0;
+	nearest[0] = this_location_number;
 	for(unsigned int step = 1; step < getMaxLocations(); ++step)
 	{
 		unsigned int min = 200;
@@ -67,7 +65,8 @@ void MAP_LOCATION::calculateDistances()
 			{
 				bool alreadyProcessed = false;
 				for(unsigned int k=1; k<step; ++k)
-					if(nearest[k] == loc) alreadyProcessed = true;
+					if(nearest[k] == loc) 
+						alreadyProcessed = true;
 				if(!alreadyProcessed)
 				{
 					min = getDistance(loc);

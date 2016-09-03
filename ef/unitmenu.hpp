@@ -22,10 +22,10 @@ class UnitMenu : public UI_Menu
 		ANABUILDORDER* anarace;
 // sort units in the addgoal menu rather by facility than by unitType		
 		unsigned int facilityNumber;
-		unsigned int facility[LAST_UNIT];
+		std::vector<unsigned int> facility;
 		// facility number -> real facility 
 		void processMenu();
-		eRace lastRace;
+		unsigned int lastRace;
 		UnitMenu(const UnitMenu& object);
 		UnitMenu& operator=(const UnitMenu& object);
 };

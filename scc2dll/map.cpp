@@ -1,18 +1,6 @@
 #include "map.h"
 #include "string.h"
 #include "debug.h"
-#include "location.h"
-
-int MAP::getUMS()
-{
-	return(UMS);
-};
-
-void MAP::setUMS(int UMS)
-{
-	if(UMS)
-		this->UMS=UMS;
-};
 
 int MAP::getStartPlayerRace(int player)
 {
@@ -38,23 +26,21 @@ PLAYER* MAP::getStartPlayer(int player)
 	return(&(startPlayer[player]));
 };
 
-int MAP::setStartPlayerGoal(int player, GOAL_ENTRY* goal)
+void MAP::setStartPlayerGoal(int player, GOAL_ENTRY* goal)
 {
 #ifdef _SCC_DEBUG
 	if((player<0)||(player>=MAX_PLAYER))
 	{
 		   debug.toLog(0,"DEBUG: (MAP::setStartPlayerGoal): Value player [%i] out of range.",player);
-		return(0);
-														
+		return;
 	};	   
 	if(!goal)
 	{
 		   debug.toLog(0,"DEBUG: (MAP::setStartPlayerGoal): Variable goal not initialized [%i].",goal);
-		   return(0);
-														
+		   return;
 	};
 #endif
-	return(startPlayer[player].setGoal(goal));
+	startPlayer[player].setGoal(goal);
 };
 
 int MAP::setStartPlayerRace(int player, int race)
@@ -64,7 +50,6 @@ int MAP::setStartPlayerRace(int player, int race)
 	{
 		   debug.toLog(0,"DEBUG: (MAP::setStartPlayerRace): Value player [%i] out of range.",player);
 		return(0);
-														
 	};
 #endif
 	return(startPlayer[player].setRace(race));
@@ -145,7 +130,7 @@ int MAP::setStartPlayerTime(int player, int time)
 																					                                                
 	};
 #endif
-	return(startPlayer[player].setTime(time));
+	return(startPlayer[player].setTimer(time));
 };
 
 
@@ -280,6 +265,13 @@ int MAP::setLocationName(int loc, const char* name)
 
 const char* MAP::getName()
 {
+#ifdef _SCC_DEBUG
+    if(!name)
+    {
+        debug.toLog(0,"DEBUG: (MAP::gatName): Variable name not initialized [%i].",name);
+        return(0);
+    }
+#endif
 	return(name);
 };
 
@@ -346,46 +338,24 @@ int MAP::setMaxPlayer(int num)
 	return(1);
 };
 
-int MAP::adjustSupply()
+void MAP::adjustSupply()
 {
 	//initialized?
 	for(int k=0;k<MAX_PLAYER;k++)
 	{
-		startPlayer[k].setSupply(0);
-		startPlayer[k].setMaxSupply(0);
+		int supply=0;
+		int maxSupply=0;
 		for(int i=0;i<MAX_LOCATIONS;i++)
-			for(int j=UNIT_TYPE_COUNT;j--;)
-			{
-				if(i>0)
-				{
-					if(stats[startPlayer[k].getRace()][j].supply<0)
-					{
-						if(startPlayer[k].getMaxSupply()-stats[startPlayer[k].getRace()][j].supply*location[i].getForce(k,j)>MAX_SUPPLY)
-						{
-							if(startPlayer[k].getMaxSupply()<MAX_SUPPLY)
-							{
-								startPlayer[k].setSupply(startPlayer[k].getSupply()+(MAX_SUPPLY-startPlayer[k].getMaxSupply()));
-								startPlayer[k].setMaxSupply(MAX_SUPPLY);
-							}
-						}
-						else
-						{
-							startPlayer[k].setSupply(startPlayer[k].getSupply()-stats[startPlayer[k].getRace()][j].supply*location[i].getForce(k,j));
-							startPlayer[k].setMaxSupply(startPlayer[k].getMaxSupply()-stats[startPlayer[k].getRace()][j].supply*location[i].getForce(k,j));
-						}
-					} else
-					startPlayer[k].setSupply(startPlayer[k].getSupply()-stats[startPlayer[k].getRace()][j].supply*location[i].getForce(k,j));
-				}
-			};
+			location[i].adjustSupply(k,startPlayer[k].getRace(),supply,maxSupply);
+		startPlayer[k].setSupply(supply);
+		startPlayer[k].setMaxSupply(maxSupply);
 	}
-	return(1);
 };
 
-int MAP::adjustDistanceList()
+void MAP::adjustDistanceList()
 {
 	//initialized?
 	for(int i=1;i<MAX_LOCATIONS;i++)
-	{
 		for(int counter=1;counter<MAX_LOCATIONS;counter++)
 		{
 			int min=200;
@@ -399,63 +369,115 @@ int MAP::adjustDistanceList()
 					{
 						min=location[i].getDistance(j);
 						locationList[i][counter]=j;
-			   			}
-				   	}
+		   			}
+			   	}
 		}
-	}
-	return(1);
 };
 
-int MAP::adjustResearches()
+void MAP::adjustResearches()
 {
-	for(int k=0;k<getMaxPlayer();k++)
-		switch(startPlayer[k].getRace())
-		{
-			case TERRA:
-				for(int j=R_STIM_PACKS;j<=R_CHARON_BOOSTER;j++)
-				{
-					setLocationForce(0,k,j,1-getLocationForce(0,k,j+STIM_PACKS-R_STIM_PACKS));
-					setLocationAvailible(0,k,j,1-getLocationForce(0,k,j+STIM_PACKS-R_STIM_PACKS));
-				}
-				for(int j=R_INFANTRY_ARMOR;j<=R_SHIP_WEAPONS;j++)
-				{
-					setLocationForce(0,k,j,3-getLocationForce(0,k,j+STIM_PACKS-R_STIM_PACKS));
-					setLocationAvailible(0,k,j,1-getLocationForce(0,k,j+STIM_PACKS-R_STIM_PACKS));
-					//temporary researches and upgrades
-				};break;
-			case PROTOSS:
-				for(int j=R_PSIONIC_STORM;j<=R_ARGUS_TALISMAN;j++)
-				{
-					setLocationForce(0,k,j,1-getLocationForce(0,k,j+PSIONIC_STORM-R_PSIONIC_STORM));
-					setLocationAvailible(0,k,j,1-getLocationForce(0,k,j+PSIONIC_STORM-R_PSIONIC_STORM));
-				}
-				for(int j=R_ARMOR;j<=R_PLASMA_SHIELDS;j++)
-				{
-					setLocationForce(0,k,j,3-getLocationForce(0,k,j+PSIONIC_STORM-R_PSIONIC_STORM));
-					setLocationAvailible(0,k,j,1-getLocationForce(0,k,j+PSIONIC_STORM-R_PSIONIC_STORM));
-					//temporary researches and upgrades
-				};break;
-			case ZERG:
-				for(int j=R_VENTRAL_SACKS;j<R_LURKER_ASPECT;j++)
-				{
-					 setLocationForce(0,k,j,1-getLocationForce(0,k,j+VENTRAL_SACKS-R_VENTRAL_SACKS));
-					 setLocationAvailible(0,k,j,1-getLocationForce(0,k,j+VENTRAL_SACKS-R_VENTRAL_SACKS));
-				}
-				for(int j=R_CARAPACE;j<R_FLYER_ATTACKS;j++)
-				{
-					setLocationForce(0,k,j,3-getLocationForce(0,k,j+VENTRAL_SACKS-R_VENTRAL_SACKS));
-					setLocationAvailible(0,k,j,1-getLocationForce(0,k,j+VENTRAL_SACKS-R_VENTRAL_SACKS));
-						   //temporary researches and upgrades
-				};break;
-			default:break;//error ?
-		}
-	return(0);
+	for(int k=1;k<getMaxPlayer();k++)
+		location[0].adjustResearches(k,startPlayer[k].getRace());
+};
+
+MAP_LOCATION* EXPORT MAP::getLocation(int loc)
+{
+#ifdef _SCC_DEBUG
+    if((loc<0)||(loc>=MAX_LOCATIONS))
+    {
+        debug.toLog(0,"DEBUG: (MAP::getLocation): Value loc [%i] out of range.",loc);
+        return(0);
+    }
+#endif
+	return(&location[loc]);
 };
 
 void MAP::resetForce()
 {
 	for(int i=0;i<MAX_LOCATIONS;i++)
 		location[i].resetData();
+};
+
+void MAP::adjustGoals(int player)
+{
+#ifdef _SCC_DEBUG
+    if((player<0)||(player>=getMaxPlayer()))
+    {
+        debug.toLog(0,"DEBUG: (MAP::adjustGoals): Value player [%i] out of range.",player);
+        return;
+    }
+#endif
+	startPlayer[player].adjustGoals(1, location[0].getUnits(player));
+};
+
+void MAP::copyBasic(MAP* map)
+{
+#ifdef _SCC_DEBUG
+    if(!map)
+    {
+        debug.toLog(0,"DEBUG: (MAP::copyBasic): Variable map not initialized [%i].",map);
+        return;
+    }
+#endif
+    setName(map->getName());
+    setMaxPlayer(map->getMaxPlayer());
+    setMaxLocations(map->getMaxLocations());
+    for(int i=0;i<MAX_PLAYER;i++)
+    //  startPlayer[i].copyBasic(map->getStartPlayer(i));
+        startPlayer[i].setPosition(map->getStartPlayerPosition(i));
+    for(int i=0;i<MAX_LOCATIONS;i++)
+	{
+		location[i].resetForce(); //TODO: optimization: player 0 needs not be resetted.
+	 	location[i].copyBasic(map->getLocation(i)); // copy only the locations, not the units
+		location[i].copy(0, map->getLocation(i)->getUnits(0)); // copy player 0
+	}
+	// the remaining units will be written by default
+    for(int i=0;i<MAX_LOCATIONS;i++) //~~ TODO
+        for(int j=0;j<MAX_LOCATIONS;j++)
+            locationList[i][j]=map->locationList[i][j];
+};
+
+
+
+void MAP::copy(MAP* map)
+{
+#ifdef _SCC_DEBUG
+    if(!map)
+    {
+        debug.toLog(0,"DEBUG: (MAP::copy): Variable map not initialized [%i].",map);
+        return;
+    }
+#endif
+	setName(map->getName());
+	setMaxPlayer(map->getMaxPlayer());
+	setMaxLocations(map->getMaxLocations());
+	for(int i=0;i<MAX_PLAYER;i++)
+	{
+		startPlayer[i].copy(map->getStartPlayer(i));
+		startPlayer[i].setPosition(map->getStartPlayerPosition(i));
+	}
+	for(int i=0;i<MAX_LOCATIONS;i++)
+		location[i].copy(map->getLocation(i));
+	for(int i=0;i<MAX_LOCATIONS;i++) //~~ TODO
+		for(int j=0;j<MAX_LOCATIONS;j++)
+			locationList[i][j]=map->locationList[i][j];
+};
+
+void MAP::copy(DEFAULT* defaults)
+{
+#ifdef _SCC_DEBUG
+    if(!defaults)
+    {
+        debug.toLog(0,"DEBUG: (MAP::copy): Variable defaults not initialized [%i].",defaults);
+        return;
+    }
+#endif
+	for(int i=1;i<getMaxPlayer();i++)
+	{
+		location[startPlayer[i].getPosition()].copy(i, defaults->getUnits(startPlayer[i].getRace()));
+		location[0].copy(i, defaults->getUnits(startPlayer[i].getRace()));
+		startPlayer[i].copy(defaults->getPlayer(startPlayer[i].getRace()));
+	}	
 };
 
 void MAP::resetData()
@@ -469,7 +491,6 @@ void MAP::resetData()
 	strcpy(name,"Error!");
 	maxLocations=0;
 	maxPlayer=0;
-	UMS=0;
 	resetForce();
 };
 

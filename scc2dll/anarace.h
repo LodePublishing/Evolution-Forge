@@ -55,6 +55,7 @@ EXPORT class ANARACE: public PRERACE
 		int currentpFitness;
 		int phaenoCode[MAX_LENGTH];		// the final build order: an array of unit numbers (as defined in main.h)
 	public:
+		
 		int getPhaenoCode(int IP);
 		void setPhaenoCode(int IP, int num);		
 

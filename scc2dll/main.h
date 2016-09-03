@@ -73,7 +73,6 @@ struct LAST
 };
 
 
-
 struct GOAL
 {
 	int unit;//!
@@ -81,6 +80,7 @@ struct GOAL
 	int count;
 	int location;
 };
+
 
 #define ERROR_MESSAGES 8
 
@@ -310,7 +310,7 @@ struct GOAL
 
 
 #define DRONE 				1
-#define LARVA                           2
+#define LARVA               2
 #define ZERGLING 			3
 #define HYDRALISK			4
 #define ULTRALISK 			5
@@ -632,8 +632,8 @@ const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 {"Move to here",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
 
 	
-{"Minerals",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
 {"Vespene Geysir",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
+{"Minerals",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
 {"R_Psionic Storm",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
 {"R_Hallucination",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
 {"R_Recall",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
@@ -739,8 +739,8 @@ const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 {"Move from here",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
 {"Move to here",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
 	
-{"Minerals",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
 {"Vespene Geysir",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
+{"Minerals",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
 {"Break up Building",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
 {"R_Ventral Sacs",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
 {"R_Antennae",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},

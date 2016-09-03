@@ -16,6 +16,8 @@ ForceWindow::ForceWindow(wxRect rahmen, wxRect maxSize):GraphixScrollWindow(0,ra
 	buttonText[1]=_T("Terra");
 	buttonText[2]=_T("Protoss");
 	buttonText[3]=_T("Zerg");
+	goalFileListOpened=0;
+	goalListOpened=0;
 	resetData();
 };
 
@@ -26,21 +28,22 @@ void ForceWindow::processButtons()
 	{
 		if(isActivated(buttonType[i*3]))
 		{
+			// TODO: Pruefen, welche Goals nicht veraendert wurden und entsprechend speichern
 			anarace->getPlayer()->getGoal()->addGoal(i,1,0,0);
 //			msgWindow->addMessage(_T(wxString::Format(wxT("Increased number of goals of %s."),stats[anarace->getPlayer()->getRace()][i].name)));
-			wasChanged();
+//			wasChanged();  <- Bei + kann sich nichts an den goals veraendern!
 		}
 		if(isActivated(buttonType[i*3+1]))
 		{
 			anarace->getPlayer()->getGoal()->addGoal(i,-1,0,0);
-  //			  msgWindow->addMessage(_T(wxString::Format(wxT("Decreased number of goals of %s."),stats[anarace->getPlayer()->getRace()][i].name)));
-			wasChanged();
+//			msgWindow->addMessage(_T(wxString::Format(wxT("Decreased number of goals of %s."),stats[anarace->getPlayer()->getRace()][i].name)));
+			wasChanged(); // <- Bei - sehr wohl
 		}
 		if(isActivated(buttonType[i*3+2]))
 		{
 			anarace->getPlayer()->getGoal()->addGoal(i,-anarace->getPlayer()->getGoal()->globalGoal[0][i],0,0);
 	//			msgWindow->addMessage(_T(wxString::Format(wxT("Removed %s from the goal list."),stats[anarace->getPlayer()->getRace()][i].name)));
-			wasChanged();
+			wasChanged(); // <- und auch bei X natuerlich
 		}
 	}
 								
@@ -80,15 +83,27 @@ void ForceWindow::processButtons()
 	
 		if(isActivated(goalButton[i]))
 		{
-			anarace->getPlayer()->getGoal()->resetData();
+//			anarace->getPlayer()->getGoal()->resetData();
 			switch(i)
 			{
-				case 0:anarace->getPlayer()->setUseMapSettings(1);break;
-				case (TERRA+1):anarace->getPlayer()->setUseMapSettings(0);anarace->getPlayer()->setRace(TERRA);break;
-				case (PROTOSS+1):anarace->getPlayer()->setUseMapSettings(0);anarace->getPlayer()->setRace(PROTOSS);break;
-				case (ZERG+1):anarace->getPlayer()->setUseMapSettings(0);anarace->getPlayer()->setRace(ZERG);break;
+				case 0:settings.setMap(USE_MAP_SETTINGS);break;
+				case (TERRA+1):
+						{
+						   settings.setStartRace(anarace->getPlayerNum(),TERRA);
+						   settings.setMap(MELEE);
+						};break;
+				case (PROTOSS+1):
+						{
+							settings.setStartRace(anarace->getPlayerNum(),PROTOSS);
+							settings.setMap(MELEE);
+						};break;
+				case (ZERG+1):
+						{
+							settings.setStartRace(anarace->getPlayerNum(),ZERG); // race setzen NACH setMap, da setMap die default race von geladener Map laedt
+							settings.setMap(MELEE);
+						};break;
 			}
-			anarace->getPlayer()->getGoal()->adjustGoals(1);
+//			anarace->getPlayer()->getGoal()->adjustGoals(1); // <--- wtf?
 			wasChanged();
 		}
 	}
@@ -107,6 +122,7 @@ void ForceWindow::processButtons()
 		{
 			if((goalListOpened==1)&&(i==0)) //scv
 			{
+// TODO: pruefen ob das Goal schon vorhanden ist, wenn ja => wasChanged nicht aufrufen
 				anarace->getPlayer()->getGoal()->addGoal(SCV,1,0,0);					 
 //				msgWindow->addMessage(_T(wxString::Format(wxT("Added %s to the goal list."),stats[anarace->getPlayer()->getRace()][SCV].name)));
 				wasChanged();
@@ -149,29 +165,31 @@ void ForceWindow::resetData()
 	for(int i=0;i<UNIT_TYPE_COUNT*3;i++)
 		buttonType[i]=99999;
 	for(int i=0;i<UNIT_TYPE_COUNT;i++) // muss global in der Klasse sein und nicht lokal in drawGoalList, weil die Balken vergroessern/verkleinern sich ja 
-	oldForceList[i]=0;
-	goalListOpened=0;
+	{
+		globalForcelog[i].count=0;
+		globalForcelog[i].order=0;
+		oldForceList[i]=0;
+	}
  	addGoalButton=99999;
 	for(int i=0;i<4;i++)
 		goalButton[i]=99999;
 	maxUnitForce=1;
 	markedUnit=0;
-	goalFileListOpened=0;
 	goalFileListButton=99999;
-	goalFileListButtonAni=0;	
+	goalFileListButtonAni=0;
 };
 																				
 void ForceWindow::drawGoalList(wxDC* dc)
 {
 	markedUnit=0;
-	int percent[UNIT_TYPE_COUNT];
-	int counter[UNIT_TYPE_COUNT]; //number of different goals
-	for(int i=0;i<UNIT_TYPE_COUNT;i++) {percent[i]=0;counter[i]=0;}
-	for(int i=0;i<MAX_GOALS;i++)
+//	int percent[UNIT_TYPE_COUNT];
+//	int counter[UNIT_TYPE_COUNT]; //number of different goals
+//	for(int i=0;i<UNIT_TYPE_COUNT;i++) {percent[i]=0;counter[i]=0;}
+/*	for(int i=0;i<MAX_GOALS;i++) // ???? WTF??
 	{
 		percent[anarace->getPlayer()->getGoal()->goal[i].unit]+=anarace->fitnessCode[i];
 		counter[anarace->getPlayer()->getGoal()->goal[i].unit]++;
-	}
+	}*/
 																				
 // goallist
 	int worstTime[UNIT_TYPE_COUNT];
@@ -191,34 +209,35 @@ void ForceWindow::drawGoalList(wxDC* dc)
 	dc->SetTextForeground(wxColour(50,150,50));
 	dc->DrawText(_T("Starting force:"),getInnerPosition());
 
-		dc->SetTextForeground(wxColour(255,255,255));
-		dc->SetFont(GraphixScrollWindow::font2);
-		dc->SetPen(wxPen(wxColour(100,100,255),1,wxSOLID));
-		for(int i=0;i<4;i++)
+	dc->SetTextForeground(wxColour(255,255,255));
+	dc->SetFont(GraphixScrollWindow::font2);
+	dc->SetPen(wxPen(wxColour(100,100,255),1,wxSOLID));
+	for(int i=0;i<4;i++)
+	{
+		int dx,dy;
+		wxString bla=buttonText[i];
+		dc->GetTextExtent(bla,&dx,&dy);
+		wxRect edge;
+		int bright=goalButtonAni[i];
+		if(i==0)
 		{
-			int dx,dy;
-			wxString bla=buttonText[i];
-			dc->GetTextExtent(bla,&dx,&dy);
-			wxRect edge;
-			int bright=goalButtonAni[i];
-			if(i==0)
-			{
-				if(anarace->getPlayer()->getUseMapSettings())
-					bright+=100;
-				edge=wxRect(getInnerLeftBound()+5,getInnerUpperBound()+15,dx+10,FONT_SIZE+10);
-			}
-			else
-			{
-				if((anarace->getPlayer()->getRace()==i-1)&&(!anarace->getPlayer()->getUseMapSettings()))
-					bright+=100;
-				edge=wxRect(getInnerLeftBound()+getInnerWidth()-t-dx-10,getInnerUpperBound()+15,dx+10,FONT_SIZE+10);
-				t+=dx+13;
-			}
-			dc->SetBrush(wxBrush(wxColour(50+bright,50+bright,100+bright),wxSOLID));
-			dc->DrawRoundedRectangle(edge,3);
-			dc->DrawText(bla,edge.x+5,edge.y+3);
-			goalButton[i]=addButton(edge);
+			if(settings.getUMS())
+				bright+=100;
+			edge=wxRect(getInnerLeftBound()+5,getInnerUpperBound()+15,dx+10,FONT_SIZE+10);
 		}
+		else
+		{
+			if((anarace->getPlayer()->getRace()==i-1)&&(!settings.getUMS()))
+				bright+=100;
+			edge=wxRect(getInnerLeftBound()+getInnerWidth()-t-dx-10,getInnerUpperBound()+15,dx+10,FONT_SIZE+10);
+			t+=dx+13;
+		}
+		dc->SetBrush(wxBrush(wxColour(50+bright,50+bright,100+bright),wxSOLID));
+		dc->DrawRoundedRectangle(edge,3);
+		dc->DrawText(bla,edge.x+5,edge.y+3);
+		goalButton[i]=addButton(edge);
+	}
+	line+=2;
 
 	if(isShown()==1)
 	{
@@ -240,25 +259,26 @@ void ForceWindow::drawGoalList(wxDC* dc)
 		goalFileListButton=addButton(edge);
 		dc->SetPen(*wxBLACK_PEN);
 
-		line+=4;
+		line+=2;
 		if(goalFileListOpened)
 		{
-		for(int i=0;i<MAX_GOALS;i++)
-			if(GOAL_ENTRY* goal=settings.getGoal(i))
+		for(int i=0;i<settings.getGoalCount();i++)
 			{
+				GOAL_ENTRY* goal=settings.getGoal(i);
 				int bright=0;
-                   wxRect edge=wxRect(getInnerPosition()+wxPoint(10,line*(FONT_SIZE+5)-getScrollY()),wxSize(270,FONT_SIZE+5));
-                   if(edge.Inside(controls.getCurrentPosition()))
-                       bright=50;
-                   if(fitToClientArea(edge,1))
-                   {
-                       dc->SetBrush(wxBrush(wxColour(bright+COLOR1R,bright+COLOR1G,bright+COLOR1B),wxSOLID));
-                       dc->DrawRoundedRectangle(edge,4);
-                       dc->SetTextForeground(wxColour(TEXT1R,TEXT1G,TEXT1B));
-                       dc->DrawText(_T(wxString::Format(wxT("%s"),goal->getName())),edge.GetPosition()+wxPoint(10,0));
-//                     selectGoalButton[l]=addButton(edge);
-                   }
-                   line++;				
+				   wxRect edge=wxRect(getInnerPosition()+wxPoint(10,line*(FONT_SIZE+5)-getScrollY()),wxSize(270,FONT_SIZE+5));
+				   if(edge.Inside(controls.getCurrentPosition()))
+					   bright=50;
+				   if(fitToClientArea(edge,1))
+				   {
+					   dc->SetBrush(wxBrush(wxColour(bright+COLOR1R,bright+COLOR1G,bright+COLOR1B),wxSOLID));
+					   dc->DrawRoundedRectangle(edge,4);
+					   dc->SetTextForeground(wxColour(TEXT1R,TEXT1G,TEXT1B));
+					   //TODO
+					   dc->DrawText(_T(wxString::Format(wxT("BLUBB")/*,goal->getName()*/)),edge.GetPosition()+wxPoint(10,0));
+//					 selectGoalButton[l]=addButton(edge);
+				   }
+				   line++;				
 			}
 	}
 		dc->SetFont(GraphixScrollWindow::font);
@@ -346,7 +366,8 @@ void ForceWindow::drawGoalList(wxDC* dc)
 	for(int i=0;i<=GAS_SCV;i++)
 		if(anarace->getPlayer()->getGoal()->allGoal[i]>0)
 		{
-			if(globalForcelog[i].order==anarace->getLocationForce(0,i))
+
+			if(globalForcelog[i].order==anarace->getLocationForce(0,i))  // ORDER == FORCE??? 
 			{
 				if(globalForcelog[i].count<160)
 					globalForcelog[i].count+=3;
@@ -377,6 +398,7 @@ void ForceWindow::drawGoalList(wxDC* dc)
 																				
 				if(oldForceList[i]>0)
 				{
+					//TODO: Was ist mit Einheiten die zwar als force da sind, aber nicht buildable ( = kein Eintrag in phaenoToGenoType) sind?
 dc->SetBrush(wxBrush(wxColour(((anarace->getPlayer()->getGoal()->toGeno(i)+1)*255/(1+anarace->getPlayer()->getGoal()->getMaxBuildTypes()/2))%256,
 					((anarace->getPlayer()->getGoal()->toGeno(i)+1)*255/(1+anarace->getPlayer()->getGoal()->getMaxBuildTypes()/4))%256,
 					((anarace->getPlayer()->getGoal()->toGeno(i)+1)*255/(1+anarace->getPlayer()->getGoal()->getMaxBuildTypes()/8))%256),wxSOLID));																				
@@ -393,7 +415,7 @@ dc->SetBrush(wxBrush(wxColour(((anarace->getPlayer()->getGoal()->toGeno(i)+1)*25
 					dc->DrawRoundedRectangle(edge.GetPosition()+wxPoint(edge.GetWidth()-anarace->getPlayer()->getGoal()->allGoal[i]*100/maxUnitForce,0),wxSize(anarace->getPlayer()->getGoal()->allGoal[i]*100/maxUnitForce+1,FONT_SIZE+4),4);
 
 																				
-				if((percent[i]/counter[i]<100)&&(percent[i]/counter[i]>0))
+/*				if((percent[i]/counter[i]<100)&&(percent[i]/counter[i]>0))
 				{
 			//		  dc->DrawText(_T(wxString::Format(wxT("[%i]"),anarace->getLocationForce(0,i))),edge.GetPosition()+wxPoint(edge.GetWidth()-80-oldForceList[i],0));
 					dc->DrawText(_T(wxString::Format(wxT("%i%%"),percent[i]/counter[i])),edge.GetPosition()+wxPoint(edge.GetWidth()-120-oldForceList[i],0));
@@ -408,7 +430,7 @@ dc->SetBrush(wxBrush(wxColour(((anarace->getPlayer()->getGoal()->toGeno(i)+1)*25
 					wxString bla=_T(wxString::Format(wxT("%2i"),anarace->getLocationForce(0,i)));
 					dc->GetTextExtent(bla,&dx,&dy);
 					dc->DrawText(bla,edge.GetPosition()+wxPoint(edge.GetWidth()-45-dx,0));
-				}
+				}*/
 																				
 				if(isShown()==1)
 				{

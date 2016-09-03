@@ -8,6 +8,7 @@
 #include "location.h"
 #include "building.h"
 #include "blist.h"
+#include "start.h"
 
 struct LARVACOUNTER
 {
@@ -19,34 +20,42 @@ struct LARVACOUNTER
 class EXPORT PRERACE
 {
 protected:
-	static MAP* pMap;
+	static START* start;
+	static MAP* pMap; // MAP is all the same for all players using 'start'
+
+//------------------ optimizations:-----------------
+	UNITS* global; // non-static pointer to player's global total force (location 0.total)
+	UNITS* location; // non-static pointer to players total/availible units
+	PLAYER* startPlayer; //pointer to player in start
+//------------- end -------------------------------
+	
+ 	BuildingList buildingList;
+	static int noise[MAX_TIME];
+	static int markerCounter;
+	static UNITS units[MAX_PLAYER][MAX_LOCATIONS];
+	int larvacounternumber;
+	LARVACOUNTER larva[30]; //koennen larvacounter (hatcheries etc.) auch wegfallen? mmmh... naja, wenn sie zerstoert werden... TODO
 	LAST last[MAX_LENGTH]; // last* is to save the last position, for movements
 	int lastcounter;
 	int lastunit;
-	static int mapInitialized;
-	int harvestMinerals();
-	int harvestGas();
-	const UNIT_STATISTICS* pStats;
+	static int startInitialized;
 	int ready;
-
+	const UNIT_STATISTICS* pStats;
 	int neededMinerals,neededGas;
-
+	
 	void createSpecial();
 	void resetSpecial();
-
-	int larvacounternumber;
-	LARVACOUNTER larva[30]; //koennen larvacounter (hatcheries etc.) auch wegfallen? mmmh... naja, wenn sie zerstoert werden... TODO
+	int harvestMinerals();
+	int harvestGas();
 
 	int calculateReady();
 	void adjustAvailibility(int loc,int fac,const UNIT_STATISTICS* stat);
 	int calculatePrimaryFitness(int ready);
-
+	void replaceCode(int dominant, int IP, int num);
 private:
 //	static int doTransform; // -> a new goal was added so the genetic information is probably wrong... bad thing to do but better than keeping track which goals are already changed
 //	static int transformList[UNIT_TYPE_COUNT]; // old geno type -> new geno type
-	static MAP_LOCATION loc[MAX_PLAYER][MAX_LOCATIONS];
-	MAP_LOCATION* location;
-	PLAYER* player;
+	
 	int playerNum;
 	int mins,gas,timer;
 	int IP;
@@ -58,15 +67,13 @@ private:
 	int ftime[MAX_GOALS]; //when the goal is reached / when the last item is produced (ALL locations...*/
 	int length,timeout;
 	int calculated;
-	BuildingList buildingList;
-	static int noise[MAX_TIME];
-	static int markerCounter;
 public:
-
-	static void copyMap(int mode); //copies the startforce from map to loc
-																				
-	int getMapLocationAvailible(int player, int loc, int type);
-	int getMapLocationForce(int player, int loc, int type);
+	static void setStartConditions(START* pStart);
+	static void initNoise();
+	static void initializeMap(); //copies the startforce from map to static 'units'
+	
+	static int getMapLocationAvailible(int player, int loc, int type);
+	static int getMapLocationForce(int player, int loc, int type);
 																				
 	static int setMapLocationAvailible(int player, int loc, int type, int num);
 	static int setMapLocationForce(int player, int loc, int type, int num);
@@ -94,15 +101,14 @@ public:
 	static GA* ga;
 
 	int getPlayerNum();
-	int setPlayerNum(int num);
+	void setPlayer(int num); // assigns player data from start (start mins, supply etc.) and sets the appropriate optimized pointers (global, location, pMap etc.) CALL IT AFTER EACH MAP CHANGE AND PLAYER CHANGE!!
 
-	int setPlayer(PLAYER* player);
 	PLAYER* getPlayer();
 
 	int getCalculated();
 	int setCalculated(int num);
 
-	int loadPlayer(int num);
+	void initializePlayer();
 	int adjustMineralHarvest(int location);
 	int adjustGasHarvest(int location);
 	int adjustHarvest();
@@ -123,9 +129,10 @@ public:
 	int setTimeOut(int time);
 	int getTimeOut();
 
-	int resetSupply();
-	static int setMap(MAP* map);
-	static void resetMapInitialized();
+	static void resetGeneMarker();
+	//int resetSupply();
+//	static int setMap(MAP* map);
+//	static void resetMapInitialized();
 
 	int getIP();
 	int setIP(int IP);

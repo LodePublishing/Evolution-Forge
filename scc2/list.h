@@ -5,10 +5,9 @@
 
 struct ORDER
 {
-        int blend;
-        int blendTarget;
+		int blend;
+	int blendTarget;
 	int blendStart;
-                                                                               
 //build order list
 	wxRect rect;
 	wxRect brect;
@@ -17,17 +16,15 @@ struct ORDER
 	wxRect start;
 	wxRect bstart;
 		
-                                                                               
 //build order graph
-            
+			
 	int unit;
-        int checked;
-//      int mins,gas,time,location,needSupply,haveSupply,forceFacilityCount,availibleFacilityCount,successType,successUnit,facility,code,forceCount;
-        int /*marker,*/bonew;
-                                                                               
-        int IP;
-        int row;
-//      int mins, color  etc.
+	int checked;
+//	  int mins,gas,time,location,needSupply,haveSupply,forceFacilityCount,availibleFacilityCount,successType,successUnit,facility,code,forceCount;
+	int /*marker,*/bonew;
+	int IP;
+	int row;
+//	  int mins, color  etc.
 };
 
 //evtl nochmal ne ebene 'player' in mydcwindow und da dann das ganze zeugs unterbringen, v.a. orderlist etc.!

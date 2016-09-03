@@ -12,6 +12,16 @@ Controls::~Controls()
 {
 };
 
+int Controls::getX()
+{
+	return(current.x);
+};
+
+int Controls::getY()
+{
+	return(current.y);
+};
+
 void Controls::setShiftPressed(int p)
 {
 	shiftPressed=p;

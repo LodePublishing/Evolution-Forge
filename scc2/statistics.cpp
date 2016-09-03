@@ -35,8 +35,8 @@ void StatisticsWindow::showGraph(wxDC* dc, int* data, int min, int max, wxColour
 
 void StatisticsWindow::resetData()
 {
-        dt1=wxDateTime::UNow();
-        dt2=wxDateTime::UNow();
+//        dt1=wxDateTime::UNow();
+  //      dt2=wxDateTime::UNow();
 	averagecounter=0;
 	for(int i=0;i<100;i++)
 		average[i]=0;
@@ -214,10 +214,11 @@ void StatisticsWindow::drawStatistics(wxDC* dc)
 	dc->DrawRoundedRectangle(Legend2.x+Legend3.x-(anarace->ga->maxGenerations-anarace->getUnchangedGenerations())*Legend3.x/anarace->ga->maxGenerations,Legend2.y+84,(anarace->ga->maxGenerations-anarace->getUnchangedGenerations())*Legend3.x/anarace->ga->maxGenerations ,Legend3.y,4);
 	dc->SetTextForeground(wxColour(100,100,255));
 	dc->DrawText(_T(wxString::Format(wxT("%i+ generations left"),(anarace->ga->maxGenerations-anarace->getUnchangedGenerations()))),Legend2.x,Legend2.y+84);
-																			    
+
+#if 0	
         dt1=wxDateTime::UNow();
-        wxTimeSpan ts=dt1.Subtract(dt2);
-        dt2=dt1;
+      wxTimeSpan ts=dt1.Subtract(dt2);
+    dt2=dt1;
 																			    
         if(averagecounter<100)
 		averagecounter++;
@@ -249,7 +250,7 @@ void StatisticsWindow::drawStatistics(wxDC* dc)
 																			    
 //	dc->DrawText(_T(wxString::Format(wxT("%i of %.0f billion possible build orders checked [%.6f%%]."),anarace[0]->getGeneration()*(MAX_PROGRAMS+anarace[0]->getMap()->getMaxPlayer()-1),pow(tlength,anarace[0]->getPlayer()->goal->getMaxBuildTypes())/1000000000.0,(anarace[0]->getGeneration()*(MAX_PROGRAMS+anarace[0]->getMap()->getMaxPlayer()-1))/pow(tlength,anarace[0]->getPlayer()->goal->getMaxBuildTypes()))),haxor->getInnerLeftBound(),haxor->getInnerUpperBound());
 
-																	    
+#endif																    
 /*	if(!run)
 		dc->DrawText(_T(wxString::Format(wxT("%i ms/frame (%.2f fps)."),av,1000.0/((float)(av)))),haxor->getInnerLeftBound(),haxor->getInnerUpperBound()+20);
 	else

@@ -1,34 +1,54 @@
 #include "prerace.h"
 #include "debug.h"
 
-void PRERACE::copyMap(int mode)
+void PRERACE::setStartConditions(START* pStart)
 {
-	if(mode==4)
-		for(int k=0;k<pMap->getMaxPlayer();k++) //warum -1? nochmal pruefen... TODO
-	//		  if((k>=pMap->getMaxPlayer()-1)||(anaplayer[k]->isActive()))
-			for(int l=0;l<pMap->getMaxLocations();l++)
-				for(int m=0;m<UNIT_TYPE_COUNT;m++) //TODO: Grenzen runter ... brauchts nur gasscv oder so
-				{
-					PRERACE::setMapLocationForce(k,l,m,pMap->getLocationForce(l,k,m)); //in player[k]->setLocation aendern?
-					PRERACE::setMapLocationAvailible(k,l,m,pMap->getLocationForce(l,k,m));
-				}
-	else assignStandardForce(pMap->getPlayer()->goal->getRace());
+#ifdef _SCC_DEBUG
+    if(!pStart)
+    {
+        debug.toLog(0,"DEBUG: (PRERACE::setStartConditions): Variable pStart not initialized [%i].",pStart);
+        return;
+    }
+#endif
+	start=pStart;
+	pMap=start->getMap();
 };
 
-void PRERACE::assignStandardForce(int race)
+void PRERACE::replaceCode(int dominant, int IP, int num)
 {
-	switch(race)
-	{
-		
-	};
+#ifdef _SCC_DEBUG
+    if((IP<0)||(IP>=MAX_LENGTH))
+    {
+        debug.toLog(0,"DEBUG: (PRERACE::replaceCode): Value IP [%i] out of range.",IP);
+        return;
+    }
+    if((num<0)||(num>=getPlayer()->getGoal()->getMaxBuildTypes()))
+    {
+        debug.toLog(0,"DEBUG: (PRERACE::replaceCode): Value num [%i] out of range.",num);
+        return;
+    }
+    if((dominant<0)||(dominant>1))
+    {
+        debug.toLog(0,"DEBUG: (PRERACE::replaceCode): Value dominant [%i] out of range.",dominant);
+        return;
+    }
+#endif
+	Code[dominant][IP]=num;
+	markerCounter++;Marker[dominant][IP]=markerCounter;
 };
 
-
+void PRERACE::initializeMap() // initializes the Map (units[][]) with values from 'start'
+{
+	for(int i=MAX_PLAYER;i--;)
+		for(int j=MAX_LOCATIONS;j--;)
+			units[i][j].copy(start->getMap()->getLocation(j)->getUnits(i));
+};
+	
 int PRERACE::calculatePrimaryFitness(int ready)
 {
 	int tpF=0;
 //TODO evtl noch uebrige availible miteinbeziehen
-//	int bonus[MAX_LOCATIONS][UNIT_TYPE_COUNT]; // temporary data to check whether a bonus is already given (only applies if force > goal)
+//	int bonus[MAX_LOCATIONS][UNIT_TYPE_COUNT]; // temporary data to check whether a bonus is already given (only applies if total > goal)
 //TODO: Nicht alle Einheiten am Ort? => Ort egal sein lassen aber zur Zeit hinzuzaehlen
 	// Nicht alle Einheiten ueberhaupt gebaut UND nicht alle am Ort => nur viertel Bonus fuer Einheiten die nicht am Ort sind
 	if(!ready)
@@ -37,7 +57,7 @@ int PRERACE::calculatePrimaryFitness(int ready)
 		for(int i=MAX_GOALS;i--;)
 			if(getPlayer()->getGoal()->goal[i].count>0)
 			{
-// Haben wir zuwenig Einheiten gebaut?  force < goal
+// Haben wir zuwenig Einheiten gebaut?  total < goal
 if( /*((getPlayer()->getGoal()->goal[i].location==0)&&(getPlayer()->getGoal()->goal[i].count>getLocationForce(0,getPlayer()->getGoal()->goal[i].unit))) || unnuetz*/
   (  /*(getPlayer()->getGoal()->goal[i].location>0)&&*/(getPlayer()->getGoal()->goal[i].count>getLocationForce(getPlayer()->getGoal()->goal[i].location,getPlayer()->getGoal()->goal[i].unit))) )
 				{
@@ -67,7 +87,7 @@ if( /*((getPlayer()->getGoal()->goal[i].location==0)&&(getPlayer()->getGoal()->g
 							sumup+=bon*(100-pMap->getDistance(loc,getPlayer()->getGoal()->goal[i].location));
 					}
 
-//jetzt steht in sumup die gesammelten forces gewichtet mit den Entfernungen zum Ziel
+//jetzt steht in sumup die gesammelten totals gewichtet mit den Entfernungen zum Ziel
 										//TODO: Hier gibts Probleme wenn mehrere goals gleicher Units an unterschiedlichen Orten existieren...
 										// evtl funktionsglobales bonus System wie bei den '@' in scc.cpp einfuegen
 										// bissl komplex da mans ja den einzelnen goals verteilen muss...
@@ -75,18 +95,18 @@ if( /*((getPlayer()->getGoal()->goal[i].location==0)&&(getPlayer()->getGoal()->g
 //									  {
 //											  if(getFinalTime(i)>0) //??? TODO
 //											  if(getFinalTime(i)>getPlayer()->getGoal()->goal[i].time)
-												        tpF+=(getPlayer()->getGoal()->goal[i].time*sumup)/(getPlayer()->getGoal()->goal[i].count*getFinalTime(i));
+														tpF+=(getPlayer()->getGoal()->goal[i].time*sumup)/(getPlayer()->getGoal()->goal[i].count*getFinalTime(i));
 //											  else setpFitness(getpFitness()+sumup/getPlayer()->getGoal()->goal[i].count);
 //TODO...~~~
 //											  else while(true); // <- kann eigentlich nicht auftreten!
-//												      setpFitness(getpFitness()+(getPlayer()->getGoal()->goal[i].time*sumup)/(getPlayer()->getGoal()->goal[i].count*ga->maxTime));
+//													  setpFitness(getpFitness()+(getPlayer()->getGoal()->goal[i].time*sumup)/(getPlayer()->getGoal()->goal[i].count*ga->maxTime));
 //									  }
 										else
 												tpF+=sumup/getPlayer()->getGoal()->goal[i].count;
-								} // END force < goal
+								} // END total < goal
 								else
 //if( /*((getPlayer()->getGoal()->goal[i].location==0)&&(getPlayer()->getGoal()->goal[i].count<=getLocationForce(0,getPlayer()->getGoal()->goal[i].unit))) || ( (getPlayer()->getGoal()->goal[i].location>0)&&*/(getPlayer()->getGoal()->goal[i].count<=getLocationForce(getPlayer()->getGoal()->goal[i].location,getPlayer()->getGoal()->goal[i].unit)))
-								//force >= goal ?
+								//total >= goal ?
 								{
 // Checken wann wir das Ziel erreicht haetten
 										if((getPlayer()->getGoal()->goal[i].time>0)&&(getFinalTime(i)>getPlayer()->getGoal()->goal[i].time))
@@ -99,9 +119,9 @@ if( /*((getPlayer()->getGoal()->goal[i].location==0)&&(getPlayer()->getGoal()->g
 								}
 						} //end of goal checking
 // TODO: Check for very small 'goal.time' values, probably in scc.cpp!!
-												                                                                                                            
+															                                                                                                
 //Bonus: Hier werden Einheiten verarbeitet die noch in Produktion sind, aber Teil der goals sind
-												                                                                                                            
+															                                                                                                
 //Erstmal Maximalbonus errechnen (nicht, dass die engine dann 50 Battlecruiser kurz vor Schluss noch anfaengt oder so :P )
 /*			  for(i=MAX_LOCATIONS;i--;)
 					   for(j=UNIT_TYPE_COUNT;j--;)
@@ -115,14 +135,14 @@ if( /*((getPlayer()->getGoal()->goal[i].location==0)&&(getPlayer()->getGoal()->g
 						{
 						//erstmal ohne Zeit...
 								pFitness+=((build->getRemainingBuildTime(i)*100)/((getLocationForce(build->getLocation(i),build->getType(i))+bonus[build->getLocation(i)][build->getType(i)])*pStats[build->getType(i)].BT)); //TODO in ProgramBT aendern
-												                                                                                                            
+															                                                                                                
 								if((getPlayer()->getGoal()->goal[build->getType(i)].time>0)&&(getLocationForce(build->getLocation(i),build->getType(i))==0))
 										pFitness+=(build->getRemainingBuildTime(i)*100*getPlayer()->getGoal()->goal[build->getType(i)].time*getLocationForce(0,i))/(getPlayer()->getGoal()->goal[build->getType(i)].count*pStats[build->getType(i)].BT*ga->maxTime);//hier auch ProgramBT
 								else
 										pFitness+=((build->getRemainingBuildTime(i)*100)/(getPlayer()->getGoal()->goal[build->getType(i)].count*pStats[build->getType(i)].BT));
 								bonus[build->getLocation(i)][build->getType(i)]--;
 						}*/
-												                                                                                                            
+															                                                                                                
 		} // end of ready=false
 		else   // all goals fulfilled, fitness <- timer
 	{
@@ -155,6 +175,7 @@ void EXPORT PRERACE::createSpecial()
 				}
 			}
 	//TODO energy, regeneration life/shield etc.
+	// TODO linked list draus machen!
 };
 
 int EXPORT PRERACE::getMapLocationAvailible(int player, int loc, int type)
@@ -165,7 +186,6 @@ int EXPORT PRERACE::getMapLocationAvailible(int player, int loc, int type)
 		debug.toLog(0,"DEBUG: (PRERACE::getMapLocationAvailible): Value player [%i] out of range.",player);
 		return(0);
 	}
-
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getMapLocationAvailible): Value loc [%i] out of range.",loc);
@@ -176,13 +196,8 @@ int EXPORT PRERACE::getMapLocationAvailible(int player, int loc, int type)
 		debug.toLog(0,"DEBUG: (PRERACE::getMapLocationAvailible): Value type [%i] out of range.",type);
 		return(0);
 	}
-	if((this->loc[player][loc].availible[type]<0)||(this->loc[player][loc].availible[type]>MAX_SUPPLY))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getMapLocationAvailible): Variable loc[%i][%i].availible[%i] not initialized [%i].",player,loc,type,this->loc[player][loc].availible[type]);
-		return(0);
-	}
 #endif
-	return(this->loc[player][loc].availible[type]);
+	return(units[player][loc].getAvailible(type));
 };
 
 int EXPORT PRERACE::getMapLocationForce(int player, int loc, int type)
@@ -204,13 +219,8 @@ int EXPORT PRERACE::getMapLocationForce(int player, int loc, int type)
 		debug.toLog(0,"DEBUG: (PRERACE::getMapLocationForce): Value type [%i] out of range.",type);
 		return(0);
 	}
-	if((this->loc[player][loc].force[type]<0)||(this->loc[player][loc].force[type]>MAX_SUPPLY))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getMapLocationForce): Variable loc[%i][%i].force[%i] not initialized [%i].",player,loc,type,this->loc[player][loc].force[type]);
-		return(0);
-	}
 #endif
-	return(this->loc[player][loc].force[type]);
+	return(units[player][loc].getTotal(type));
 };
 
 //TODO Static machen
@@ -234,7 +244,7 @@ int EXPORT PRERACE::setMapLocationAvailible(int player, int loc, int type, int n
 		return(0);
 	}
 #endif
-	this->loc[player][loc].availible[type]=num;
+	units[player][loc].setAvailible(type, num);
 	return(1);
 };
 																				
@@ -262,7 +272,7 @@ int EXPORT PRERACE::setMapLocationForce(int player, int loc, int type, int num)
 		return(0);
 	}
 #endif
-	this->loc[player][loc].force[type]=num;
+	units[player][loc].setTotal(type, num);
 	return(1);
 };
 
@@ -285,19 +295,8 @@ int EXPORT PRERACE::addMapLocationAvailible(int player, int loc, int type, int n
 		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationAvailible): Value type [%i] out of range.",type);
 		return(0);
 	}
-	if((this->loc[player][loc].availible[type]<0)||(this->loc[player][loc].availible[type]>MAX_SUPPLY))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationAvailible): Variable loc[%i][%i].availible[%i] not initialized [%i].",player,loc,type,this->loc[player][loc].availible[type]);
-		return(0);
-	}
-
-	if((this->loc[player][loc].availible[type]+num<0)||(this->loc[player][loc].availible[type]+num>MAX_SUPPLY))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationAvailible): Value num [%i] out of range.",num);
-		return(0);
-	}
 #endif
-	this->loc[player][loc].availible[type]+=num;
+	units[player][loc].addAvailible(type, num);
 	return(1);
 };
 
@@ -321,19 +320,8 @@ int EXPORT PRERACE::addMapLocationForce(int player, int loc, int type, int num)
 		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationForce): Value type [%i] out of range.",type);
 		return(0);
 	}
-	if((this->loc[player][loc].force[type]<0)||(this->loc[player][loc].force[type]>MAX_SUPPLY))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationForce): Variable loc[%i][%i].force[%i] not initialized [%i].",player,loc,type,this->loc[player][loc].force[type]);
-		return(0);
-	}
-
-	if((this->loc[player][loc].force[type]+num<0)||(this->loc[player][loc].force[type]+num>MAX_SUPPLY))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationForce): Value num [%i] out of range.",num);
-		return(0);
-	}
 #endif
-	this->loc[player][loc].force[type]+=num;
+	units[player][loc].addTotal(type, num);
 	return(1);
 };
 																				
@@ -353,13 +341,13 @@ int EXPORT PRERACE::getLocationAvailible(int loc, int type)
 		debug.toLog(0,"DEBUG: (PRERACE::getLocationAvailible): Value type [%i] out of range.",type);
 		return(0);
 	}
-	if((location[loc].availible[type]<0)||(location[loc].availible[type]>MAX_SUPPLY))
+	if((location[loc].getAvailible(type)<0)||(location[loc].getAvailible(type)>MAX_SUPPLY))
 	{
-		debug.toLog(0,"DEBUG: (PRERACE::getLocationAvailible): Variable location[%i].availible[%i] not initialized [%i].",loc,type,location[loc].availible[type]);
+		debug.toLog(0,"DEBUG: (PRERACE::getLocationAvailible): Variable location[%i].getAvailible(%i] not initialized [%i].",loc,type,location[loc].getAvailible(type));
 		return(0);
 	}
 #endif
-	return(location[loc].availible[type]);
+	return(location[loc].getAvailible(type));
 };
 
 int EXPORT PRERACE::getLocationForce(int loc, int type)
@@ -375,13 +363,13 @@ int EXPORT PRERACE::getLocationForce(int loc, int type)
 		debug.toLog(0,"DEBUG: (PRERACE::getLocationForce): Value type [%i] out of range.",type);
 		return(0);
 	}
-	if((location[loc].force[type]<0)||(location[loc].force[type]>MAX_SUPPLY))
+	if((location[loc].getTotal(type)<0)||(location[loc].getTotal(type)>MAX_SUPPLY))
 	{
-		debug.toLog(0,"DEBUG: (PRERACE::getLocationForce): Variable location[%i].force[%i] not initialized [%i].",loc,type,location[loc].force[type]);
+		debug.toLog(0,"DEBUG: (PRERACE::getLocationForce): Variable location[%i].getTotal(%i) not initialized [%i].",loc,type,location[loc].getTotal(type));
 		return(0);
 	}
 #endif
-	return(location[loc].force[type]);
+	return(location[loc].getTotal(type));
 };
 
 
@@ -404,7 +392,7 @@ int EXPORT PRERACE::setLocationAvailible(int loc, int type, int num)
 		return(0);
 	}
 #endif
-	location[loc].availible[type]=num;
+	location[loc].setAvailible(type,num);
 	return(1);
 };
 
@@ -427,7 +415,7 @@ int EXPORT PRERACE::setLocationForce(int loc, int type, int num)
 		return(0);
 	}
 #endif
-	location[loc].force[type]=num;
+	location[loc].setTotal(type, num);
 	return(1);
 };
 
@@ -445,20 +433,20 @@ int EXPORT PRERACE::addLocationAvailible(int loc, int type, int num)
 		debug.toLog(0,"DEBUG: (PRERACE::addLocationAvailible): Value type [%i] out of range.",type);
 		return(0);
 	}
-	if((location[loc].availible[type]<0)||(location[loc].availible[type]>MAX_SUPPLY)) //location[0] auch pruefen?
+	if((location[loc].getAvailible(type)<0)||(location[loc].getAvailible(type)>MAX_SUPPLY)) //location[0] auch pruefen?
 	{
-		debug.toLog(0,"DEBUG: (PRERACE::addLocationAvailible): Variable location[%i].availible[%i] not initialized [%i].",loc,type,location[loc].availible[type]);
+		debug.toLog(0,"DEBUG: (PRERACE::addLocationAvailible): Variable location[%i].getAvailible(%i] not initialized [%i].",loc,type,location[loc].getAvailible(type));
 		return(0);
 	}
-	if((location[loc].availible[type]+num<0)||(location[loc].availible[type]+num>MAX_SUPPLY)) //location[0] auch pruefen?
+	if((location[loc].getAvailible(type)+num<0)||(location[loc].getAvailible(type)+num>MAX_SUPPLY)) //location[0] auch pruefen?
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::addLocationAvailible): Value num [%i] out of range.",num);
 		return(0);
 	}
 #endif	
-	location[loc].availible[type]+=num;
+	location[loc].addAvailible(type, num);
 	if(loc>0) //sonst waers ja doppelt...
-		location[0].availible[type]+=num;
+		location[0].addAvailible(type, num);
 	return(1);
 };
 																				
@@ -475,20 +463,20 @@ int EXPORT PRERACE::addLocationForce(int loc, int type, int num)
 		debug.toLog(0,"DEBUG: (PRERACE::addLocationForce): Value type [%i] out of range.",type);
 		return(0);
 	}
-	if((location[loc].force[type]<0)||(location[loc].force[type]>MAX_SUPPLY))
+	if((location[loc].getTotal(type)<0)||(location[loc].getTotal(type)>MAX_SUPPLY))
 	{
-		debug.toLog(0,"DEBUG: (PRERACE::addLocationForce): Variable location[%i].force[%i] not initialized [%i].",loc,type,location[loc].force[type]);
+		debug.toLog(0,"DEBUG: (PRERACE::addLocationForce): Variable location[%i].getTotal[%i] not initialized [%i].",loc,type,location[loc].getTotal(type));
 		return(0);
 	}
-	if((location[loc].force[type]+num<0)||(location[loc].force[type]+num>MAX_SUPPLY))
+	if((location[loc].getTotal(type)+num<0)||(location[loc].getTotal(type)+num>MAX_SUPPLY))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::addLocationForce): Variable num not initialized [%i].",num);
 		return(0);
 	}
 #endif
-	location[0].force[type]+=num;
+	location[0].addTotal(type,num);
 	if(loc>0)
-		location[loc].force[type]+=num;
+		location[loc].addTotal(type, num);
 	return(1);
 };
 
@@ -533,6 +521,11 @@ int EXPORT PRERACE::setTimer(int time)
 		return(0);
 	}
 #endif
+	if(time==0)
+	{
+		timer=0;
+	}
+   	else
 	timer=time;
 	return(1);
 };
@@ -562,7 +555,7 @@ int EXPORT PRERACE::setMaxSupply(int supply)
 	maxSupply=supply;
 	return(1);
 };
-
+/*
 int EXPORT PRERACE::setMap(MAP* map)
 {
 #ifdef _SCC_DEBUG
@@ -575,7 +568,7 @@ int EXPORT PRERACE::setMap(MAP* map)
 	pMap=map;
 	mapInitialized=1;
 	return(1);
-};
+};*/
 
 
 int EXPORT PRERACE::getPlayerNum()
@@ -662,27 +655,27 @@ int EXPORT PRERACE::adjustMineralHarvest(int location)
 		for(int i=45;i--;)
 			setMineralHarvestPerSecond(location,i,0);
 	}
-//	else if((!pMap->location[num].force[playerNum][COMMAND_CENTER])&&(pMap->location[num].force[0][MINERALS]))
+//	else if((!pMap->location[num].getTotal(playerNum][COMMAND_CENTER])&&(pMap->location[num].getTotal(0][MINERALS]))
 //	{
 	//nach naehestem command_center suchen
 //	}
-//	else if((pMap->location[num].force[playerNum][COMMAND_CENTER])&&(!pMap->location[num].force[0][MINERALS]))
+//	else if((pMap->location[num].getTotal(playerNum][COMMAND_CENTER])&&(!pMap->location[num].getTotal(0][MINERALS]))
 //	{
 	//nach naehesten Mineralien suchen
-//	}
+//	} TODO
 
 	//TODO: Wenn 2 SPieler an einem sammeln, beide einberechnen!
-	else if(player->getBasicMineralHarvestPerSecond(1)>0) //???
+	else if(startPlayer->getBasicMineralHarvestPerSecond(1)>0) //???
 	{
 //		int k;
 		for(int i=45;i--;)
 		{
 //			k=0;
 //			for(j=0;j<45;j++)
-//				if(i*8<=j*pMap->location[num].force[0][MINERALS]) 
+//				if(i*8<=j*pMap->location[num].getTotal(0][MINERALS]) 
 //				{ k=j;j=45;};
-			setMineralHarvestPerSecond(location,i,player->getBasicMineralHarvestPerSecond(i/*k*/));//*pMap->location[num].force[0][MINERALS])/8;
-		}	//ab hier funzt alles... nur scheint player->getBasic... nicht richtig initialisiert zu sein...
+			setMineralHarvestPerSecond(location,i,startPlayer->getBasicMineralHarvestPerSecond(i/*k*/));//*pMap->location[num].getTotal(0][MINERALS])/8;
+		}	//ab hier funzt alles... nur scheint startPlayer->getBasic... nicht richtig initialisiert zu sein...
 	
 	}
 	return(1);
@@ -702,11 +695,11 @@ int EXPORT PRERACE::adjustGasHarvest(int location)
 		for(int i=5;i--;)
 			setGasHarvestPerSecond(location,i,0);
 	}
-/*	else if((!pMap->location[num].force[playerNum][COMMAND_CENTER])&&(pMap->location[num].force[playerNum][REFINERY]))
+/*	else if((!pMap->location[num].getTotal(playerNum][COMMAND_CENTER])&&(pMap->location[num].getTotal(playerNum][REFINERY]))
 	{
 	//nach naehestem command_center suchen
 	}
-	else if((pMap->location[num].force[playerNum][COMMAND_CENTER])&&(!pMap->location[num].force[playerNum][REFINERY]))
+	else if((pMap->location[num].getTotal(playerNum][COMMAND_CENTER])&&(!pMap->location[num].getTotal(playerNum][REFINERY]))
 	{
 	//nach naehesten Mineralien suchen
 	}*/
@@ -717,8 +710,8 @@ int EXPORT PRERACE::adjustGasHarvest(int location)
 		{
 			k=0;
 //			for(j=0;j<5;j++)
-//				if(i<=j*pMap->location[num].force[playerNum][REFINERY]) { k=j;j=5;}
-					setGasHarvestPerSecond(location,i,player->getBasicGasHarvestPerSecond(i/*k*/)*getLocationForce(location,REFINERY));
+//				if(i<=j*pMap->location[num].getTotal(playerNum][REFINERY]) { k=j;j=5;}
+					setGasHarvestPerSecond(location,i,startPlayer->getBasicGasHarvestPerSecond(i/*k*/)*getLocationForce(location,REFINERY));
 
 //					hier liegts problem wegen gas
 //						gasharvestps ist zu gross, evtl wegen zu vieler refineries!
@@ -728,36 +721,40 @@ int EXPORT PRERACE::adjustGasHarvest(int location)
 };
 
 
-int EXPORT PRERACE::setPlayerNum(int num)
+void EXPORT PRERACE::setPlayer(int num)
 {
 #ifdef _SCC_DEBUG
 	if((num<0)||(num>=MAX_PLAYER))
 	{
-		debug.toLog(0,"DEBUG: (PRERACE::setPlayerNum): Value [%i] out of range.",num);
-		return(0);
+		debug.toLog(0,"DEBUG: (PRERACE::setPlayer): Value [%i] out of range.",num);
+		return;
 	}
 #endif
 	playerNum=num; //~```~  player[0]?
-	location=(loc[num]);
-	return(1);
+	startPlayer=start->getMap()->getStartPlayer(num);
+	setpStats(startPlayer->getpStats());
+	location=&units[num][0];
+	global=&units[num][0];
 };
+
 
 PLAYER* EXPORT PRERACE::getPlayer()
 {
 #ifdef _SCC_DEBUG
-	if(!player->getInitialized())
+	if(!startPlayer->getInitialized())
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getPlayer): Variable not initialized.");
 		return(0);
 	}
 #endif
-	return(player);
+	return(startPlayer);
 };
 
-int EXPORT PRERACE::setPlayer(PLAYER* player)
+
+/*int EXPORT PRERACE::setPlayer(PLAYER* player)
 {
 #ifdef _SCC_DEBUG
-	if(!player->getInitialized())
+	if(!startPlayer->getInitialized())
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setPlayer): Variable not initialized.");
 		return(0);
@@ -765,7 +762,7 @@ int EXPORT PRERACE::setPlayer(PLAYER* player)
 #endif
 	this->player=player;
 	return(1);
-};
+};*/
 
 int EXPORT PRERACE::setpStats(const UNIT_STATISTICS* pStats)
 {
@@ -794,25 +791,24 @@ const UNIT_STATISTICS* EXPORT PRERACE::getpStats()
 };
 
 
-int EXPORT PRERACE::loadPlayer(int num)
+void EXPORT PRERACE::initializePlayer()
 {
-	setPlayerNum(num);
-	setPlayer(pMap->getStartPlayer(num));
-	setpStats(player->getGoal()->getpStats());
-	setMins(player->getMins());
-	setGas(player->getGas());
-	setTimer(player->getTimer());
-	return(1);
+	setMins(startPlayer->getMins());
+	setGas(startPlayer->getGas());
+	setTimer(ga->maxTime-startPlayer->getTimer());
+	setSupply(startPlayer->getSupply());
+	setMaxSupply(startPlayer->getMaxSupply());
 };
 
 int EXPORT PRERACE::adjustHarvest()
 {
 #ifdef _SCC_DEBUG
-	if(!mapInitialized)
+/*	if(!mapInitialized) 
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::adjustHarvest): Map was not initialized.");
 		return(0);
-	}
+	}*/
+	//TODO
 #endif
 	for(int i=0;i<MAX_LOCATIONS;i++)
 	{
@@ -829,7 +825,7 @@ int EXPORT PRERACE::harvestMinerals()
 //	  int t=(rand()%10)-5;
 	for(int i=1;i<MAX_LOCATIONS;i++)//~~
 	{
-		int s=location[i].availible[SCV];
+		int s=location[i].getAvailible(SCV);
 		if(s)
 		{
 			//availible is 0, harvestSpeed ist ok!
@@ -859,7 +855,7 @@ int EXPORT PRERACE::harvestGas()
 //	int t=(rand()%10)-5;
 	for(int i=1;i<MAX_LOCATIONS;i++)//~~
 	{
-		int s=location[i].availible[GAS_SCV];
+		int s=location[i].getAvailible(GAS_SCV);
 		if(s)
 		{
 			if(s<4)
@@ -904,7 +900,10 @@ int EXPORT PRERACE::setCalculated(int num)
 	return(1);
 };
 
-int EXPORT PRERACE::resetSupply()
+
+// with that deals already the player class!
+
+/*int EXPORT PRERACE::resetSupply()
 {
 #ifdef _SCC_DEBUG
 	if(!mapInitialized)
@@ -920,7 +919,7 @@ int EXPORT PRERACE::resetSupply()
 		{
 			if(pStats[j].supply<0) // -> supply building like depot, cc etc.
 			{
-				if(getMaxSupply()-pStats[j].supply*location[i].force[j]>MAX_SUPPLY)
+				if(getMaxSupply()-pStats[j].supply*location[i].getTotal(playerNum,j)>MAX_SUPPLY)
 				{
 					if(getMaxSupply()<MAX_SUPPLY)
 					{
@@ -932,15 +931,15 @@ int EXPORT PRERACE::resetSupply()
 				else
 				{
 	//TODO handle negative supply at beginning
-					temp-=pStats[j].supply*location[i].force[j];
-					setMaxSupply(getMaxSupply()-pStats[j].supply*location[i].force[j]);
+					temp-=pStats[j].supply*location[i].getTotal(playerNum,j);
+					setMaxSupply(getMaxSupply()-pStats[j].supply*location[i].getTotal(playerNum,j));
 				}
 			} else //unit or something
-				temp-=pStats[j].supply*location[i].force[j];
+				temp-=pStats[j].supply*location[i].getTotal(playerNum,j);
 		}
 	setSupply(temp);
 	return(1);
-};
+};*/
 
 
 int EXPORT PRERACE::getIP()
@@ -1186,10 +1185,10 @@ int EXPORT PRERACE::getTimeOut()
 	return(timeout);
 };
 
-void EXPORT PRERACE::resetMapInitialized()
-{
-	mapInitialized=0;	
-};
+//void EXPORT PRERACE::resetMapInitialized()
+//{
+	//mapInitialized=0;	
+//};
 
 void EXPORT PRERACE::resetSpecial()
 {
@@ -1303,7 +1302,7 @@ int PRERACE::calculateReady()
 PRERACE::PRERACE()
 {
 	calculated=0;
-	player=0;
+	startPlayer=0;
 	mins=0;
 	gas=0;
 	lastcounter=0;
@@ -1343,13 +1342,44 @@ PRERACE::~PRERACE()
 {
 };
 
+void PRERACE::initNoise()
+{
+//	if(ga->noise>0)
+//		for(int j=0;j<MAX_TIME;j++)
+//			noise[j]=rand()%ga->noise-rand()%ga->noise;
+//	else TODO
+		for(int j=0;j<MAX_TIME;j++)
+			noise[j]=0;
+};
+
+void PRERACE::resetGeneMarker()
+{
+	markerCounter=1;
+};
+
 //void PRERACE::resetMapInitialized();
 //int PRERACE::setMap(MAP* map);
 //MAP* PRERACE::getMap();
-int PRERACE::markerCounter;
+START* PRERACE::start;
 MAP* PRERACE::pMap;
-GA* PRERACE::ga;
-int PRERACE::mapInitialized;
 int PRERACE::noise[MAX_TIME];
-MAP_LOCATION PRERACE::loc[MAX_PLAYER][MAX_LOCATIONS];
+int PRERACE::markerCounter;
+UNITS PRERACE::units[MAX_PLAYER][MAX_LOCATIONS];
+int PRERACE::startInitialized;
 
+void PRERACE::setStartConditions(START* pStart);
+void PRERACE::initNoise();
+void PRERACE::initializeMap();
+
+int PRERACE::getMapLocationAvailible(int player, int loc, int type);
+int PRERACE::getMapLocationForce(int player, int loc, int type);
+                                                                                
+int PRERACE::setMapLocationAvailible(int player, int loc, int type, int num);
+int PRERACE::setMapLocationForce(int player, int loc, int type, int num);
+                                                                                
+int PRERACE::addMapLocationAvailible(int player, int loc, int type, int num);
+int PRERACE::addMapLocationForce(int player, int loc, int type, int num);
+void PRERACE::resetGeneMarker();
+
+GA* PRERACE::ga;
+//int PRERACE::mapInitialized;

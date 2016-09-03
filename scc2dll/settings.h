@@ -7,8 +7,9 @@
 #include "harvest.h"
 #include "map.h"
 #include "ga.h"
+#include "default.h"
 
-#define TOP_VS_BOTTOM 0
+#define MELEE 0
 #define USE_MAP_SETTINGS 1 
 
 // generally all function return 0 if there was an error and 1 if there was no error
@@ -16,19 +17,30 @@
 class EXPORT SETTINGS
 {
 private:
-	GOAL_ENTRY goalEntry[MAX_GOAL_ENTRIES];
-	MAP map[MAX_MAPS]; //modes: 0: ignore map settings and make up a default force, 1: use map settings
+	GOAL_ENTRY loadedGoal[MAX_GOAL_ENTRIES];
+	MAP loadedMap[MAX_MAPS]; //modes: 0: ignore map settings and make up a default force, 1: use map settings
 	HARVEST_SPEED harvestSpeed[3];
 	GA ga;
 	SOUP soup;
+	DEFAULT defaults;
+	START start;
 	int setMapCount(int num);
 	int setGoalCount(int num);
+	int currentMap;
+	int UMS;
 public:
 	void calculateAnaplayer();
+	void initializeMap();
 	MAP* getMap(int num);
 
-	void checkForChange();
+	void setMap(int UMS, int num=-1/*, int playerMode=0*/); // evtl noch player dazu
+	// 0 = 1vs1, 1 = ... ma guggn...
 
+	int getUMS();
+	void adjustGoals(int player);
+
+	void checkForChange();
+	void setStartRace(int player, int race);
 //all those nasty range checking stuff :-)
 	int getMAXBreedFactor();
 	int getMAXMode();
@@ -59,8 +71,8 @@ public:
 	int setMaxRuns(int num);
 	int setMaxGenerations(int num);
 	int setPreprocessBuildOrder(int num);
-	int setCurrentMap(int num);
-	int setGoal(int goal, int player);
+//	int setCurrentMap(int num);
+	void setGoal(int goal, int player);
 	int setBreedFactor(int num);
 	int setMode(int num);
 	int setCrossOver(int num);
@@ -74,20 +86,22 @@ public:
 	int getMaxRuns();
 	int getMaxGenerations();
 	int getPreprocessBuildOrder();
-	int getCurrentMap();
+//	int getCurrentMap();
 	int getCurrentGoal();
 	int getHarvestMineralsSpeed(int race, int workers); // get basic mineral harvest speed of <race> with <workers> workers
 	int getHarvestGasSpeed(int race, int workers); // get basic mineral harvest speed of <race> with <workers> workers
-	int getDistance(int l1,int l2); // get distance between location 1 and 2
+//	int getDistance(int l1,int l2); // get distance between location 1 and 2
 	GA* getGa();
 	int getGoalCount();
 	int getMapCount();
 	GOAL_ENTRY* getGoal(int num);
 
-	void loadDefaults();
+	void initDefaults();
+
+	void loadDefaultsFile(const char* defaultFile);
 	int loadGoalFile(const char* goalFile);
 	int loadSettingsFile(const char* settingsFile);
-	int loadMapFile(const char* mapFile, int UMS);
+	int loadMapFile(const char* mapFile);
 	int loadHarvestFile(const char* harvestFile);
 	ANARACE** newGeneration(ANARACE* oldAnarace[MAX_PLAYER]);
 

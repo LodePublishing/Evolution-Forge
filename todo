@@ -126,3 +126,14 @@ Use Map settings / tvb
 !1vs1 / 2vs2
 
 
+KI SCRIPT ANSCHAUEN! LOOP, parallele Ausfuehrung etc.!!!
+TOURNAMENT MODUS zwischen mehreren vorgegebenen bos!
+
+AI Befehle:
+ein Code fuer jede Location
+ifs, loops, gotos und stops rein
+if abfrage ist das heikelste, evtl Rasse, primaerer Einheitentyp, Armeegroesse, Expansionen, Mobilitaet
+evtl das ganze auf den Speicher abwaelzen und bei jedem Ast auf jeden Fall absteigen oder Aeste so plazieren/belegen, dass es STOP Zeichen gibt und die benachbarten Aeste dann je nach dem genommen werden... so ne Art kleines ANN
+
+
+

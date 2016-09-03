@@ -188,7 +188,7 @@ void Player::InitPositions(GraphixScrollWindow* mainWindow)
 
 // 2 Player: 1st player [GOSU], the human - freestyle
 	boWindowRect[4]=wxRect(wxPoint(mainWindow->getInnerWidth()-THIRD_COLOUMN,0),wxSize(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
-	boWindowMax[4]=wxRect(boWindowRect[4].GetPosition(),wxSize(boWindowRect[4].GetWidth(),mainWindow->getInnerHeight()));
+	boWindowMax[4]=wxRect(boWindowRect[4].GetPosition(),wxSize(boWindowRect[4].GetWidth(),mainWindow->getInnerHeight()*2/3));
 																			    
 	forceWindowRect[4]=wxRect(0,SECOND_ROW,FIRST_COLOUMN,14*(FONT_SIZE+5));
 	forceWindowMax[4]=wxRect(forceWindowRect[4].GetPosition(),wxSize(FIRST_COLOUMN,mainWindow->getInnerHeight()/3-5));
@@ -209,7 +209,7 @@ void Player::InitPositions(GraphixScrollWindow* mainWindow)
 
 // 2 Player: 2nd player [GOSU/TRANSCEND], the computer - freestyle
 	boWindowRect[5]=wxRect(wxPoint(mainWindow->getInnerWidth()-2*THIRD_COLOUMN,0),wxSize(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
-	boWindowMax[5]=wxRect(boWindowRect[5].GetPosition(),wxSize(boWindowRect[5].GetWidth(),mainWindow->getInnerHeight()));
+	boWindowMax[5]=wxRect(boWindowRect[5].GetPosition(),wxSize(boWindowRect[5].GetWidth(),mainWindow->getInnerHeight()*2/3));
 																			    
 	forceWindowRect[5]=wxRect(FIRST_COLOUMN,SECOND_ROW,FIRST_COLOUMN,14*(FONT_SIZE+5));
 	forceWindowMax[5]=wxRect(forceWindowRect[5].GetPosition(),wxSize(FIRST_COLOUMN,mainWindow->getInnerHeight()/3-5));
@@ -227,7 +227,7 @@ void Player::InitPositions(GraphixScrollWindow* mainWindow)
 
 // 2 Player: 1st player [TRANSCEND], the computer - freestyle
 	boWindowRect[6]=wxRect(wxPoint(mainWindow->getInnerWidth()-THIRD_COLOUMN,0),wxSize(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
-	boWindowMax[6]=wxRect(boWindowRect[6].GetPosition(),wxSize(boWindowRect[6].GetWidth(),mainWindow->getInnerHeight()));
+	boWindowMax[6]=wxRect(boWindowRect[6].GetPosition(),wxSize(boWindowRect[6].GetWidth(),mainWindow->getInnerHeight()*2/3));
 																			    
 	forceWindowRect[6]=wxRect(0,SECOND_ROW,FIRST_COLOUMN,14*(FONT_SIZE+5));
 	forceWindowMax[6]=wxRect(forceWindowRect[6].GetPosition(),wxSize(FIRST_COLOUMN,mainWindow->getInnerHeight()/3-5));
@@ -285,7 +285,7 @@ Player::Player(ANARACE** anarace, int mode)
 	assignAnarace(anarace);
 	setTitles(mode);
 
-	Show(0);
+	//Show(0);
 	resetData();
 };
 
@@ -375,11 +375,11 @@ void Player::Show(int type)//, int player1, int player2)
 		boGraphWindow->Show(show[type][4]);
        	timerWindow->Show(show[type][5]);
 		statisticsWindow->Show(show[type][6]);
-		(*anarace)->setActive(1);
+//		(*anarace)->setActive(1);
 	} else 
 	{
 		shown=0; //?
-		(*anarace)->setActive(1);
+//		(*anarace)->setActive(1);
 	}
 
 	switch(type)
@@ -394,7 +394,7 @@ void Player::Show(int type)//, int player1, int player2)
 		case 7:setTitles(2);break;
 		default:break;
 	}
-	(*anarace)->setActive(1);
+//	(*anarace)->setActive(1);
 };
 
 void Player::processButtons()
@@ -410,11 +410,11 @@ void Player::processButtons()
 
 int Player::hasChanged()
 {
-//	if((forceWindow->hasChanged())&&(forceWindow->goalReset))
-//	{
-//		resetData();
-//		return(1);
-//	}
+	if(forceWindow->hasChanged())
+	{
+		forceWindow->resetData();
+		return(1);
+	}
 	if(boWindow->hasChanged()||forceWindow->hasChanged()||infoWindow->hasChanged()||boDiagramWindow->hasChanged()||boGraphWindow->hasChanged()||timerWindow->hasChanged()||statisticsWindow->hasChanged())
 		return(1);
 	else return(0);
@@ -550,7 +550,6 @@ void Player::CheckOrders()
 			node=node->GetNext();
 		}
 	}
-	CheckForInfoWindow();
 	orderList.Sort();	
 };
 
@@ -672,7 +671,6 @@ void Player::update()
 	statisticsWindow->currentForce=t;
 	if(statisticsWindow->isShown()) //they are sorted there, otherwise we get an infinite loop
 		statisticsWindow->ProgressGraph();
-	infoWindow->Show(0);
 	CheckOrders();
 };
 

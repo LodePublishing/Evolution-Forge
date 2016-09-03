@@ -193,7 +193,12 @@ void BoGraphWindow::showBoGraph(wxDC* dc, OrderList* orderList)
 			for(int j=0;j<i;j++)
 // scvs last
 				if(fac[i]>fac[j])
-					xchg(fac[i],fac[j]);
+				{
+					int temp=fac[i];
+					fac[i]=fac[j];
+					fac[j]=temp;
+//					xchg(fac[i],fac[j]);
+				}
 																			    
 // now put all together
 	int position=0;
@@ -225,7 +230,7 @@ void BoGraphWindow::showBoGraph(wxDC* dc, OrderList* orderList)
 					       }
 					wxRect t=wxRect(
 wxPoint( (anarace->getProgramTime(order->IP)*getInnerWidth())/(anarace->ga->maxTime-anarace->getTimer()),
-	 (i+hoehe/MIN_HEIGHT)*(FONT_SIZE+5)+(hoehe%MIN_HEIGHT)*(FONT_SIZE+4)/bograph[i].height),
+	 (1+i+hoehe/MIN_HEIGHT)*(FONT_SIZE+5)+(hoehe%MIN_HEIGHT)*(FONT_SIZE+4)/bograph[i].height),
 wxSize(  (stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->IP)].BT/*anarace->getProgramBT(s)*/*getInnerWidth())/(anarace->ga->maxTime-anarace->getTimer()),
 	 (FONT_SIZE+4)/(bograph[i].height)));
 					if(t!=order->btarget)
@@ -239,20 +244,40 @@ wxSize(  (stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->I
 				}
 		node=node->GetNext();
 	}
-																			    
+	// now print the lines...
+	int lastbograph=-1;
+	dc->SetPen(wxPen(wxColour(PEN1R,PEN1G,PEN1B),1,wxSOLID));
+	{
+		wxRect edge=wxRect(getInnerPosition(),wxSize(10000,FONT_SIZE+4));
+		for(int i=0;i<20;i++)
+			if(bograph[i].type>0)
+				for(int j=i;j<i+bograph[i].lines;j++)
+				{
+					edge.SetY(getInnerUpperBound()+(j+1)*(FONT_SIZE+5));
+					if(fitToClientArea(edge,1))
+					{
+						if(j%2==0)
+							dc->SetBrush(wxBrush(wxColour(COLOR1G,COLOR1G,COLOR1B),wxSOLID));
+						else dc->SetBrush(wxBrush(wxColour(COLOR2R,COLOR2G,COLOR2B),wxSOLID));
+						dc->DrawRoundedRectangle(edge,4);
+						lastbograph=edge.y+edge.height;
+					}
+				}
+	}
+																		    
 
 // and the time steps on the top
 	dc->SetTextForeground(wxColour(50,200,50));
-	dc->SetPen(wxPen(wxColour(200,0,0),1,wxSOLID));
+	dc->SetPen(*wxBLACK_PEN);
 	int timesteps=((anarace->ga->maxTime-anarace->getTimer())/30)/10+1; // TODO <- wird 0? bei Protoss? :-/
 	for(int i=0;i<(anarace->ga->maxTime-anarace->getTimer())/30;i++)
 		if(i%timesteps==0)
 		{
-//		      dc->DrawLine(getInnerLeftBound()+(i+timesteps)*(getInnerWidth()/((anarace->ga->maxTime-anarace->getTimer())/30)),getInnerUpperBound(),
-//			      getInnerLeftBound()+(i+timesteps)*(getInnerWidth()/((anarace->ga->maxTime-anarace->getTimer())/30)),getInnerUpperBound()+FONT_SIZE+4);
+		      dc->DrawLine(getInnerLeftBound()+(i+timesteps)*(getInnerWidth()/((anarace->ga->maxTime-anarace->getTimer())/30)),getInnerUpperBound(),
+			      getInnerLeftBound()+(i+timesteps)*(getInnerWidth()/((anarace->ga->maxTime-anarace->getTimer())/30)),lastbograph);
 			dc->DrawText(_T(wxString::Format(wxT("%i:%i0"),i/2,3*(i%2))),getInnerLeftBound()+5+i*((getInnerWidth()-20)/((anarace->ga->maxTime-anarace->getTimer())/30)),getInnerUpperBound());
+			
 		}
-																			    
 	for(int i=0;i<(anarace->ga->maxTime-anarace->getTimer())/30;i++)
 		if(i%timesteps==0)
 		{
@@ -264,25 +289,7 @@ wxSize(  (stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->I
 // --------------------------------- END BUILD ORDER GRAPH ------------------------------
 																			    
 																			    
-// now print the lines...
-	dc->SetPen(wxPen(wxColour(PEN1R,PEN1G,PEN1B),1,wxSOLID));
-	{
-		wxRect edge=wxRect(getInnerPosition(),wxSize(10000,FONT_SIZE+4));
-		int lastbograph=-1;
-		for(int i=0;i<20;i++)
-			if(bograph[i].type>0)
-				for(int j=i;j<i+bograph[i].lines;j++)
-				{
-					edge.SetY(getInnerUpperBound()+j*(FONT_SIZE+5));
-					if(fitToClientArea(edge,1))
-					{
-						if(j%2==0)
-							dc->SetBrush(wxBrush(wxColour(COLOR1G,COLOR1G,COLOR1B),wxSOLID));
-						else dc->SetBrush(wxBrush(wxColour(COLOR2R,COLOR2G,COLOR2B),wxSOLID));
-						dc->DrawRoundedRectangle(edge,4);
-					}
-				}
-	}
+
 
 	if(markedUnit==0)
 		markAni=0;
@@ -325,7 +332,7 @@ wxSize(  (stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->I
 	dc->SetTextForeground(wxColour(0,0,0));
 	for(int i=0;i<20;i++)
 		if(bograph[i].type>0)
-			dc->DrawText(_T(wxString::Format(wxT("%s"),stats[anarace->getPlayer()->getRace()][bograph[i].type].name)),getInnerPosition()+wxPoint(0,i*(FONT_SIZE+5)));
+			dc->DrawText(_T(wxString::Format(wxT("%s"),stats[anarace->getPlayer()->getRace()][bograph[i].type].name)),getInnerPosition()+wxPoint(0,(i+1)*(FONT_SIZE+5)));
 	markedUnit=0;
 };
 

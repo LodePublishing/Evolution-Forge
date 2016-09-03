@@ -44,48 +44,42 @@ bool APIENTRY DllMain( HANDLE hModule,
 #endif
 
 
-int SOUP::setMap(MAP* map)
+void SOUP::initializeMap(MAP* map)
 {
-#ifdef _SCC_DEBUG
-	if(!map)
-	{
-		debug.toLog(0,"DEBUG: (SOUP::setMap): Variable map not initialized [%i].",map);
-		return(0);
-	}
-#endif
 	mapInitialized=1;
-	pMap=map;
-	return(1);
+	pMap=map;//start->getMap();
+	initSoup();
+	PRERACE::initializeMap();
 };
 
 
-int SOUP::setGoal(GOAL_ENTRY* goal, int player)
+void SOUP::setGoal(GOAL_ENTRY* goal, int player)
 {
 #ifdef _SCC_DEBUG
 	if(!mapInitialized)
 	{
 		debug.toLog(0,"DEBUG: (SOUP::setGoal): Map not initialized.");
-		return(0);
+		return;
 	}
 	if((player<=0)||(player>=pMap->getMaxPlayer()))
 	{
 		debug.toLog(0,"DEBUG: (SOUP::setGoal): Value player [%i] out of range.",player);
-		return(0);
+		return;
 	}
 	if(!goal)
 	{
 		debug.toLog(0,"DEBUG: (SOUP::setGoal): Value goal [%i] not initialized.",goal);
-		return(0);
+		return;
 	}
 #endif
 //	goalCount++; //wtf? TODO
 //	if(goalCount==pMap->getMaxPlayer()-1)
 	goalsInitialized=1;
 	this->goal[player]=goal;
-	return(pMap->setStartPlayerGoal(player,goal));
+	pMap->setStartPlayerGoal(player,goal);
 };
 
-int SOUP::setParameters(GA* ga)
+int SOUP::setParameters(GA* ga, START* start)
 {
 #ifdef _SCC_DEBUG
 	if(!ga)
@@ -96,14 +90,16 @@ int SOUP::setParameters(GA* ga)
 #endif
 	gaInitialized=1;
 	this->ga=ga;
+	this->start=start;
 	PRERACE::ga=ga;
+	PRERACE::setStartConditions(start);
 	return(1);
 };
 
 int SOUP::initSoup()
 {
 #ifdef _SCC_DEBUG
-	if(!mapInitialized)
+/*	if(!mapInitialized)
 	{
 		debug.toLog(0,"ERROR: (SOUP::initSoup) Map not initialized.");
 		return(0);
@@ -117,23 +113,23 @@ int SOUP::initSoup()
 	{
 		debug.toLog(0,"ERROR: (SOUP::initSoup) GA not initialized.");
 		return(0);
-	}
+	}*/
 #endif
 //	if(playerInitialized)
 //	{
 //		debug.toLog(0,"ERROR: (SOUP::initSoup) SOUP is already initialzed.");
 //		return(0);
 //	}
-	PRERACE::resetMapInitialized();
-	if(!(PRERACE::setMap(pMap)))
+//	PRERACE::resetMapInitialized();
+/*	if(!(PRERACE::setMap(pMap)))
 	{
 		debug.toLog(0,"ERROR: (SOUP::initSoup) Map not initialized.");
 		return(0);
-	}
+	}*/
 	int t=MAX_PROGRAMS/(pMap->getMaxPlayer()-1);
 	
 //differenzieren, damit auch restarts/updates moeglich sind waehrend dem run! TODO
-	PRERACE::markerCounter=1;
+	PRERACE::resetGeneMarker();
 	int k;
 	for(k=0;k<pMap->getMaxPlayer()-1;k++)
 	{
@@ -145,7 +141,7 @@ int SOUP::initSoup()
 				player[i+k*t]=0;
 			}
 			player[i+k*t]=new RACE();
-			player[i+k*t]->loadPlayer(k+1);
+			player[i+k*t]->setPlayer(k+1);
 			player[i+k*t]->resetGeneCode();
 		}
 		if(anaplayer[k])
@@ -154,7 +150,7 @@ int SOUP::initSoup()
 			anaplayer[k]=0;
 		}
 		anaplayer[k]=new ANARACE();
-		anaplayer[k]->loadPlayer(k+1);
+		anaplayer[k]->setPlayer(k+1);
 	};
 	for(;k<MAX_PLAYER;k++)
 	{
@@ -203,24 +199,13 @@ void SOUP::checkForChange()
 
 void EXPORT SOUP::calculateAnaplayer()
 {
-	for(int k=0;k<pMap->getMaxPlayer()-1;k++) //warum net -1?
-//		if(anaplayer[k]->isActive())
-		{
-// map reset
-			for(int l=0;l<pMap->getMaxLocations();l++) // warum -1 !??!
-				for(int m=0;m<UNIT_TYPE_COUNT;m++)
-				{
-					anaplayer[0]->setMapLocationForce(k,l,m,pMap->getLocationForce(l,k,m));
-					anaplayer[0]->setMapLocationAvailible(k,l,m,pMap->getLocationForce(l,k,m));
-				}
-		}
+	PRERACE::initializeMap();
 
-//! NEED TO BE 2 DIFFERENT loops!
 	for(int k=0;k<pMap->getMaxPlayer()-1;k++)
 //		if(anaplayer[k]->isActive())
 		{
 			anaplayer[k]->resetData();
-			anaplayer[k]->resetSupply();
+			anaplayer[k]->initializePlayer();
 			anaplayer[k]->adjustHarvest();
 		}
 // supply is nicht resettet... bzw. falsch... in resetSupply
@@ -232,7 +217,7 @@ void EXPORT SOUP::calculateAnaplayer()
 //			if(anaplayer[k]->isActive())
 				complete&=anaplayer[k]->calculateStep();
 	}
-//		anaplayer[0]->backupMap();
+//		anaplayer[0]->backupMap();  backup&&restore map currently off-line!!!
 //	} else
 //		anaplayer[0]->restoreMap();
 }
@@ -241,7 +226,7 @@ void EXPORT SOUP::calculateAnaplayer()
 ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the goals/settings been changed?
 {
 #ifdef _SCC_DEBUG
-	if(!mapInitialized)
+	/*if(!mapInitialized)
 	{
 		debug.toLog(0,"ERROR: (SOUP::newGeneration) Map not initialized.");
 		return(0);
@@ -255,22 +240,13 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 	{
 		debug.toLog(0,"ERROR: (SOUP::newGeneration) GA not initialized.");
 		return(0);
-	}
+	}*/
 #endif
 	if(anaplayer[0]->getRun()>=ga->maxRuns) //~~
 		return(0);
 	int t=MAX_PROGRAMS/(pMap->getMaxPlayer()-1);
 
-	if(ga->noise>0)
-	{
-		for(int j=0;j<MAX_TIME;j++)
-			RACE::noise[j]=rand()%ga->noise-rand()%ga->noise;
-	}
-	else
-	{
-		for(int j=0;j<MAX_TIME;j++)
-			RACE::noise[j]=0;
-	}
+	PRERACE::initNoise();
 
 
 // Set players on given code and parameters
@@ -294,40 +270,21 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 	for(int i=0;i<t;i++)
 	{
 // Map mit Startwerten initialisieren, muss JEDEN Durchlauf passieren!! sonst sammeln sich in der statischen loc variable Haufenweise Commando Centers an 8-)
-	if(pMap->useMapSettings())
-		PRERACE::copyMap(3);
-	else PRERACE::copyMap(pMap->getPlayer()->goal->getRace());
 
-	
-	{
-		for(int k=0;k<pMap->getMaxPlayer();k++) //warum -1? nochmal pruefen... TODO
-//			if((k>=pMap->getMaxPlayer()-1)||(anaplayer[k]->isActive()))
-				for(int l=0;l<pMap->getMaxLocations();l++)
-					for(int m=0;m<UNIT_TYPE_COUNT;m++) //TODO: Grenzen runter ... brauchts nur gasscv oder so
-					{
-						PRERACE::setMapLocationForce(k,l,m,pMap->getLocationForce(l,k,m)); //in player[k]->setLocation aendern?
-						PRERACE::setMapLocationAvailible(k,l,m,pMap->getLocationForce(l,k,m));
-					}
-	} else
-	{
-		switch(pMap->getPlayer()->goal->getRace())
-		{
-				
-		}
-	}
+		PRERACE::initializeMap();
 
-	//reset code && calculate 
+		//reset code && calculate 
 		for(int k=0;k<pMap->getMaxPlayer()-1;k++)
 //			if(anaplayer[k]->isActive())
 			{
 				player[k*t+i]->resetData();
-				player[k*t+i]->resetSupply();
+				player[k*t+i]->initializePlayer();
 				player[k*t+i]->adjustHarvest();
 //				if(anaplayer[k]->isOptimizing())
 				{
 					if(i!=0)
 						player[k*t+i]->mutateGeneCode();
-					player[k*t+i]->eraseIllegalCode();
+					player[k*t+i]->eraseIllegalCode(); //TODO Problem beim switchen, falls schon goals gesetzt waren
 				}
 			}
 		int complete=0;
@@ -387,14 +344,14 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 		for(int k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
 //			if(anaplayer[k]->isActive())
 			{
-				if((player[k*t]->getpFitness()>anaplayer[k]->getMaxpFitness())||
+/*				if((player[k*t]->getpFitness()>anaplayer[k]->getMaxpFitness())||
 
 				  ((player[k*t]->getpFitness()>=anaplayer[k]->getMaxpFitness())
 				 &&(player[k*t]->getsFitness()>anaplayer[k]->getMaxsFitness()))||
 
 				  ((player[k*t]->getpFitness()>=anaplayer[k]->getMaxpFitness())
 				 &&(player[k*t]->getsFitness()>=anaplayer[k]->getMaxsFitness())
-				 &&(player[k*t]->gettFitness()>anaplayer[k]->getMaxtFitness())))
+				 &&(player[k*t]->gettFitness()>anaplayer[k]->getMaxtFitness())))*/
 				{
 
 					if(player[k*t]->gettFitness()>anaplayer[k]->getMaxtFitness())
@@ -499,7 +456,7 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 			for(int i=k*t;i<(k+1)*t;i++)
 				player[i]->resetGeneCode();
 
-			Save[anaplayer[k]->getRun()][k]=new ANARACE;
+/*			Save[anaplayer[k]->getRun()][k]=new ANARACE;
 			ANARACE* s[MAX_PLAYER];
 			s[k]=Save[anaplayer[k]->getRun()][k];
 		//TODO...	
@@ -563,7 +520,7 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 					s[k]->Code[p][q]=anaplayer[k]->Code[p][q];
 					s[k]->Marker[p][q]=anaplayer[k]->Marker[p][q];
 				}
-		//TODO: statistical values ?!
+		//TODO: statistical values ?!*/
 					
 			anaplayer[k]->setRun(anaplayer[k]->getRun()+1);
 			anaplayer[k]->setGeneration(0);
@@ -572,8 +529,8 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 			anaplayer[k]->setMaxtFitness(0);
 			anaplayer[k]->setUnchangedGenerations(0);
 
-			debug.toLog(0,"FITNESS: %s: [%.2i:%.2i]",s[k]->getPlayer()->getGoal()->getName(),(ga->maxTime-s[k]->getTimer())/60,(ga->maxTime-s[k]->getTimer())%60);
-			return(Save[anaplayer[k]->getRun()]); //~~~~
+//			debug.toLog(0,"FITNESS: %s: [%.2i:%.2i]",s[k]->getPlayer()->getGoal()->getName(),(ga->maxTime-s[k]->getTimer())/60,(ga->maxTime-s[k]->getTimer())%60);
+			return(anaplayer/*Save[anaplayer[k]->getRun()]*/); //~~~~
 		}
 	}
 	//	~~

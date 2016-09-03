@@ -129,6 +129,7 @@ public:
 	int isOptimizing();
 	void stopOptimizing();
 private:
+	void initEngine();
 	wxTimer wxtimer;
 	int userIsNewbie;
 	

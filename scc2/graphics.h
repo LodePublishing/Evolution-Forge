@@ -155,12 +155,11 @@ public:
 	void transformClientWidth(int width); //handle with care O_O
 	void transformClientHeight(int height); //handle with care O_O
 
-	void textButton(wxString bla, wxDC* dc);
+	void textButton(wxString text, wxDC* dc);
 	void newTextPage();
-	void writeText(wxString bla, wxDC* dc);
-	void writeHeader(wxString bla, wxDC* dc, int mode);
-	void writeLongText(wxString bla, wxDC* dc);
-	void writeLine(wxString bla, wxDC* dc, wxColour color);
+	void writeText(wxString text, wxDC* dc);
+	void writeHeader(wxString text, wxDC* dc, int mode);
+	void writeLongText(wxString text, wxDC* dc, wxColour color=wxColour(150,150,200));
 
 
 	int isActivated(int num);
@@ -195,6 +194,7 @@ public:
 	static wxBitmap bmpArrowDown;
 	static wxBitmap bmpClemens;
 	static wxBitmap bmpClawsoftware;
+	static wxBitmap bmpBack;
 
 
 private:
@@ -203,7 +203,8 @@ private:
 	int ScrollBalkenMove,ScrollBalkenMoveY,scrolled;
 	int WindowMove,WindowMoveX,WindowMoveY;
 	int PfeilUpPressed,PfeilDownPressed;
-	int currentRow;
+
+	wxRect textCursor;
 
 	wxRect originalInnerRect;
 	wxRect originalRect;

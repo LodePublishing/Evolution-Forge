@@ -12,22 +12,22 @@
 
 class Player
 {
-        public:
-                Player(ANARACE** anarace, int mode);
-                ~Player();
-                void update();
-                StatisticsWindow* statisticsWindow;
-                BoWindow* boWindow;
-                TimerWindow* timerWindow;
-                BoDiagramWindow* boDiagramWindow;
-                BoGraphWindow* boGraphWindow;
-                ForceWindow* forceWindow;
-                InfoWindow* infoWindow;
-                void resetData();
+	public:
+		Player(ANARACE** anarace, int mode);
+		~Player();
+		void update();
+		StatisticsWindow* statisticsWindow;
+		BoWindow* boWindow;
+		TimerWindow* timerWindow;
+		BoDiagramWindow* boDiagramWindow;
+		BoGraphWindow* boGraphWindow;
+		ForceWindow* forceWindow;
+		InfoWindow* infoWindow;
+		void resetData();
 		void setTitles(int mode);
 		void assignAnarace(ANARACE** anarace);
-                void DrawMe(wxDC* dc);
-                void drawGeneString(wxDC* dc, wxRect position);
+		void DrawMe(wxDC* dc);
+		void drawGeneString(wxDC* dc, wxRect position);
 		void Show(int type); 
 		void processButtons();
 		int isShown();
@@ -53,8 +53,8 @@ class Player
 		void CheckForInfoWindow();
 		void CheckOrders();
 		void MoveOrders();
-        private:
-                ANARACE** anarace; //pointer auf pointer, weil sich der pointer ja veraendert!
+	private:
+		ANARACE** anarace; //pointer auf pointer, weil sich der pointer ja veraendert!
 		int shown;
 		int geneAnimation;
 		OrderList orderList;		

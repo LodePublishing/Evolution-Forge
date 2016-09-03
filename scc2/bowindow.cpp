@@ -33,6 +33,11 @@ void BoWindow::resetData()
 
 void BoWindow::drawBuildOrder(wxDC* dc, OrderList* orderList)
 {
+	int tempForceCount[UNIT_TYPE_COUNT];
+	int oldTime=0;
+	
+	for(int i=UNIT_TYPE_COUNT;i--;)
+		tempForceCount[i]=0;
 	boEndPoint=0;
 
 	if((makeSpace>-1)&&(boGoalListOpened==0))
@@ -165,9 +170,12 @@ void BoWindow::drawBuildOrder(wxDC* dc, OrderList* orderList)
 					dc->DrawRoundedRectangle(edge,4);
 					dc->SetTextForeground(BOcolor[stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->IP)].type]);
 
+					if(anarace->getProgramTime(order->IP)!=oldTime)
+                        for(int i=UNIT_TYPE_COUNT;i--;)
+	                            tempForceCount[i]=0;
 					if(edge.width>=110)
 					{
-						dc->DrawText(_T(wxString::Format(wxT("%i."),anarace->getProgramForceCount(order->IP,anarace->getPhaenoCode(order->IP))+1)),edge.GetPosition()+wxPoint(5,0));
+						dc->DrawText(_T(wxString::Format(wxT("%i."),tempForceCount[anarace->getPhaenoCode(order->IP)]+anarace->getProgramForceCount(order->IP,anarace->getPhaenoCode(order->IP))+1)),edge.GetPosition()+wxPoint(5,0));
 						dc->DrawText(_T(wxString::Format(wxT("%s"),stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->IP)].name)),edge.GetPosition()+wxPoint(20,0));
 	//					if(row+order->row==boEndPoint) //~~
 	//						dc->DrawBitmap(bmpArrowDown,edge.x+edge.width-12,edge.y+1);
@@ -177,6 +185,11 @@ void BoWindow::drawBuildOrder(wxDC* dc, OrderList* orderList)
 //							optButton[row+t]=addButton(wxRect(getInnerLeftBound()+edge.width,edge.y,getWidth()-edge.width,FONT_SIZE+5));
 						orderButton[order->IP]=addButton(edge);
 					}
+					
+					if(anarace->getProgramTime(order->IP)==oldTime)
+						tempForceCount[anarace->getPhaenoCode(order->IP)]++;
+					else					
+                        oldTime=anarace->getProgramTime(order->IP);
 /*					if(edge.width>=140)
 						dc->DrawText(_T(wxString::Format(wxT("%i"),order->mins)),110+edge.x,edge.y);
 					if(edge.width>=180)

@@ -1,6 +1,5 @@
 #include "list.h"
 
-                                                                              
 NODE::NODE(NODE* prev, int key)
 {
 	SetData(0);
@@ -87,7 +86,6 @@ OrderList::OrderList()
 {
 	head=0;
 	tail=0;
-		
 };
 
 OrderList::~OrderList()

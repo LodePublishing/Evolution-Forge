@@ -2,14 +2,48 @@
 #include <string.h>
 #include "debug.h"
 
+void EXPORT GOAL_ENTRY::copy(GOAL_ENTRY* goal)
+{
+#ifdef _SCC_DEBUG
+    if(!goal)
+    {
+        debug.toLog(0,"DEBUG: (GOAL_ENTRY:copy): Variable goal not initialized [%i].",goal);
+        return;
+    }
+#endif
+//	race=goal->getRace();
+	maxBuildTypes=goal->getMaxBuildTypes();
+	initialized=goal->getInitialized();
+	raceInitialized=1; //TODO!
+	for(int i=UNIT_TYPE_COUNT;i--;)
+	{
+		allGoal[i]=goal->allGoal[i];
+		isBuildable[i]=goal->isBuildable[i];
+		isVariable[i]=goal->isVariable[i];
+		for(int j=MAX_LOCATIONS;j--;)
+			globalGoal[j][i]=goal->globalGoal[j][i];
+		genoToPhaenotype[i]=goal->genoToPhaenotype[i];
+		phaenoToGenotype[i]=goal->phaenoToGenotype[i];
+	};
+	pStats=goal->getpStats();
+	for(int i=MAX_GOALS;i--;)
+	{
+		this->goal[i].unit=goal->goal[i].unit;
+		this->goal[i].time=goal->goal[i].time;
+		this->goal[i].count=goal->goal[i].count;
+		this->goal[i].location=goal->goal[i].location;
+	};
+};
+
+
 int EXPORT GOAL_ENTRY::isChanged()
 {
 #ifdef _SCC_DEBUG
-        if((changed<0)||(changed>1))
-        {
-                debug.toLog(0,"DEBUG: (GOAL_ENTRY::isChanged): Variable changed not initialized [%i].",changed);
-                return(0);
-        }
+		if((changed<0)||(changed>1))
+		{
+				debug.toLog(0,"DEBUG: (GOAL_ENTRY::isChanged): Variable changed not initialized [%i].",changed);
+				return(0);
+		}
 #endif
 	return(changed);
 };
@@ -21,17 +55,17 @@ void EXPORT GOAL_ENTRY::changeAccepted()
 	changed=0;
 };
 
-const char* EXPORT GOAL_ENTRY::getName()
+/*const char* EXPORT GOAL_ENTRY::getName()
 {
 #ifdef _SCC_DEBUG
-        if(name==NULL)
-        {
-                debug.toLog(0,"DEBUG: (GOAL_ENTRY::getName): Variable name not initialized [%i].",name);
-                return(0);
-        }
+		if(name==NULL)
+		{
+				debug.toLog(0,"DEBUG: (GOAL_ENTRY::getName): Variable name not initialized [%i].",name);
+				return(0);
+		}
 #endif
 	return name;
-};
+};*/
 
 int EXPORT GOAL_ENTRY::getRace()
 {
@@ -45,27 +79,27 @@ int EXPORT GOAL_ENTRY::getRace()
 	return race;
 };
 
-int EXPORT GOAL_ENTRY::setName(const char* line)
+/*int EXPORT GOAL_ENTRY::setName(const char* line)
 {
 #ifdef _SCC_DEBUG
-        if(line==NULL)
-        {
-                debug.toLog(0,"DEBUG: (GOAL_ENTRY::setName): Variable line not initialized [%i].",line);
-                return(0);
-        }
+		if(line==NULL)
+		{
+				debug.toLog(0,"DEBUG: (GOAL_ENTRY::setName): Variable line not initialized [%i].",line);
+				return(0);
+		}
 #endif
 	strcpy(name,line);
 	return(1);
-};
+};*/
 
 int EXPORT GOAL_ENTRY::isRaceInitialized()
 {
 #ifdef _SCC_DEBUG
-        if((raceInitialized<0)||(raceInitialized>1))
-        {
-                debug.toLog(0,"DEBUG: (GOAL_ENTRY::isRaceInitialized): Variable raceInitialized not initialized [%i].",raceInitialized);
-                return(0);
-        }
+		if((raceInitialized<0)||(raceInitialized>1))
+		{
+				debug.toLog(0,"DEBUG: (GOAL_ENTRY::isRaceInitialized): Variable raceInitialized not initialized [%i].",raceInitialized);
+				return(0);
+		}
 #endif
 	if(raceInitialized==1)
 		return(1);
@@ -82,6 +116,7 @@ int EXPORT GOAL_ENTRY::setRace(int num)
 		return(0);
 	}
 #endif
+	resetData();	
 	pStats=&(stats[race=num][0]);
 	raceInitialized=1;
 	changed=1;
@@ -91,18 +126,18 @@ int EXPORT GOAL_ENTRY::setRace(int num)
 const UNIT_STATISTICS* EXPORT GOAL_ENTRY::getpStats()
 {
 #ifdef _SCC_DEBUG
-        if(pStats==NULL)
-        {
-                debug.toLog(0,"DEBUG: (GOAL_ENTRY::getpStats): Variable pStats not initialized [%i].",pStats);
-                return(0);
-        }
+		if(pStats==NULL)
+		{
+				debug.toLog(0,"DEBUG: (GOAL_ENTRY::getpStats): Variable pStats not initialized [%i].",pStats);
+				return(0);
+		}
 #endif
 
 	return(pStats);
 };
 
 
-int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption)
+int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption, UNITS* units)
 {
 // if free-mode  set all isbuildable to 1
 // else ...
@@ -112,19 +147,16 @@ int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption)
 //	fill(oldGoal)
 //TODO: Reset hier rein!
 	
-//        isBuildable[MOVE_ONE_1_FORWARD]=1;isVariable[MOVE_ONE_1_FORWARD]=1;
-  //      isBuildable[MOVE_ONE_3_FORWARD]=1;isVariable[MOVE_ONE_3_FORWARD]=1;
-    //    isBuildable[MOVE_ONE_1_BACKWARD]=1;isVariable[MOVE_ONE_1_BACKWARD]=1;
-                                                                                                                                                            
-          //isBuildable[INTRON]=1; // :-)
-                                                                                                                                                            
-                switch(getRace())
-                {
-                        case TERRA:isBuildable[SUPPLY_DEPOT]=1;isVariable[SUPPLY_DEPOT]=1;break;
-                        case PROTOSS:isBuildable[PYLON]=1;isVariable[PYLON]=1;break;
-                        case ZERG:isBuildable[OVERLORD]=1;isVariable[OVERLORD]=1;isBuildable[LARVA]=0;isVariable[LARVA]=0;break;
-                        default:break;
-                }
+//		isBuildable[MOVE_ONE_1_FORWARD]=1;isVariable[MOVE_ONE_1_FORWARD]=1;
+  //	  isBuildable[MOVE_ONE_3_FORWARD]=1;isVariable[MOVE_ONE_3_FORWARD]=1;
+	//	isBuildable[MOVE_ONE_1_BACKWARD]=1;isVariable[MOVE_ONE_1_BACKWARD]=1;
+											                                                                                                                
+		  //isBuildable[INTRON]=1; // :-)
+	if(units)
+		for(int i=GAS_SCV;i--;)
+			if((units->getTotal(i))&&(allGoal[i]<units->getTotal(i)))
+				addGoal(i, units->getTotal(i)-allGoal[i], 0, 0);
+	//TODO addgoal evtl machen hier!
 
 	for(int j=6;j--;) // Nuclear Warhead needs 6 steps (?) ~~~~
 		for(int i=UNIT_TYPE_COUNT;i--;)
@@ -176,18 +208,25 @@ int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption)
 			isVariable[pStats[i].create]=0;
 		}
 	
-        long Need_Gas=0;
-        for(int i=UNIT_TYPE_COUNT;i--;)
-                Need_Gas+=(allGoal[i]*pStats[i].gas);
-        if(Need_Gas>0)
-        {
-                isBuildable[REFINERY]=1;
-                if(allGoal[REFINERY]==0)
-                       addGoal(REFINERY,1,0,0); //ASSIMILATOR == EXTRACTOR == REFINERY
-                isBuildable[GAS_SCV]=1; //ONE_MINERAL_SCV... = ONE_MINERAL_PROBE... = ONE_MINERAL_DRONE...
-                isVariable[GAS_SCV]=1;
-        }; 
+		long Need_Gas=0;
+		for(int i=UNIT_TYPE_COUNT;i--;)
+				Need_Gas+=(allGoal[i]*pStats[i].gas);
+		if(Need_Gas>0)
+		{
+				isBuildable[REFINERY]=1;
+				if(allGoal[REFINERY]==0)
+					   addGoal(REFINERY,1,0,0); //ASSIMILATOR == EXTRACTOR == REFINERY
+				isBuildable[GAS_SCV]=1; //ONE_MINERAL_SCV... = ONE_MINERAL_PROBE... = ONE_MINERAL_DRONE...
+				isVariable[GAS_SCV]=1;
+		}; 
 
+	switch(getRace())
+	{
+		case TERRA:isBuildable[SUPPLY_DEPOT]=1;isVariable[SUPPLY_DEPOT]=1;break;
+		case PROTOSS:isBuildable[PYLON]=1;isVariable[PYLON]=1;break;
+		case ZERG:isBuildable[OVERLORD]=1;isVariable[OVERLORD]=1;isBuildable[LARVA]=0;isVariable[LARVA]=0;break;
+		default:break;
+	}
 
 	for(int i=UNIT_TYPE_COUNT;i--;)
 		if((isBuildable[i]==1)&&(phaenoToGenotype[i]==-1)) // a goal && not set yet
@@ -196,6 +235,15 @@ int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption)
 			phaenoToGenotype[i]=maxBuildTypes;
 			maxBuildTypes++;
 		};
+
+	// hack for units who cannot be built but needs to be translated by phaenoToGenotype! (for the forcewindow)
+	if(getRace()==ZERG)
+	{
+		genoToPhaenotype[maxBuildTypes]=LARVA;
+		phaenoToGenotype[LARVA]=maxBuildTypes;
+		// further units need to temporarily increment maxBuildTypes
+	}
+
 	//TODO: ueberlegen ob nicht einfach Move+ und Move- reichen...
 	return(1);
 };
@@ -204,17 +252,17 @@ int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption)
 int EXPORT GOAL_ENTRY::isGoal(int unit)
 {
 #ifdef _SCC_DEBUG
-        if((unit<0)||(unit>=UNIT_TYPE_COUNT))
-        {
-                debug.toLog(0,"DEBUG: (GOAL_ENTRY::isGoal): Value unit [%i] out of range.",unit);
-                return(0);
-        }
+		if((unit<0)||(unit>=UNIT_TYPE_COUNT))
+		{
+				debug.toLog(0,"DEBUG: (GOAL_ENTRY::isGoal): Value unit [%i] out of range.",unit);
+				return(0);
+		}
 
-        if((allGoal[unit]<0)||(allGoal[unit]>=UNIT_TYPE_COUNT))
-        {
-                debug.toLog(0,"DEBUG: (GOAL_ENTRY::isGoal): Variable allGoal[%i] not initialized [%i].",unit,allGoal[unit]);
-                return(0);
-        }
+		if((allGoal[unit]<0)||(allGoal[unit]>=UNIT_TYPE_COUNT))
+		{
+				debug.toLog(0,"DEBUG: (GOAL_ENTRY::isGoal): Variable allGoal[%i] not initialized [%i].",unit,allGoal[unit]);
+				return(0);
+		}
 #endif
 	return(allGoal[unit]>0);
 };
@@ -222,28 +270,28 @@ int EXPORT GOAL_ENTRY::isGoal(int unit)
 int EXPORT GOAL_ENTRY::addGoal(int unit, int count, int time, int location)
 {
 #ifdef _SCC_DEBUG
-        if((unit<=0)||(unit>=UNIT_TYPE_COUNT))
-        {
-                debug.toLog(0,"DEBUG: (GOAL_ENTRY::addGoal): Value unit [%i] out of range.",unit);
-                return(0);
-        }
+		if((unit<=0)||(unit>=UNIT_TYPE_COUNT))
+		{
+				debug.toLog(0,"DEBUG: (GOAL_ENTRY::addGoal): Value unit [%i] out of range.",unit);
+				return(0);
+		}
 
-        if((count+globalGoal[location][unit]<0)||(count>MAX_SUPPLY)) //~~
-        {
-                debug.toLog(0,"DEBUG: (GOAL_ENTRY::addGoal): Value count [%i] out of range.",count);
-                return(0);
-        }
-        if((time<0)||(time>=MAX_TIME))
-        {
-                debug.toLog(0,"DEBUG: (GOAL_ENTRY::addGoal): Value time [%i] out of range.",time);
-                return(0);
-        }
+		if((count+globalGoal[location][unit]<0)||(count>MAX_SUPPLY)) //~~
+		{
+				debug.toLog(0,"DEBUG: (GOAL_ENTRY::addGoal): Value count [%i] out of range.",count);
+				return(0);
+		}
+		if((time<0)||(time>=MAX_TIME))
+		{
+				debug.toLog(0,"DEBUG: (GOAL_ENTRY::addGoal): Value time [%i] out of range.",time);
+				return(0);
+		}
 
-        if((location<0)||(location>=MAX_LOCATIONS))
-        {
-                debug.toLog(0,"DEBUG: (GOAL_ENTRY::addGoal): Value location [%i] out of range.",location);
-                return(0);
-        }
+		if((location<0)||(location>=MAX_LOCATIONS))
+		{
+				debug.toLog(0,"DEBUG: (GOAL_ENTRY::addGoal): Value location [%i] out of range.",location);
+				return(0);
+		}
 #endif
 
 //TODO goal loeschen einbauen
@@ -292,11 +340,11 @@ int EXPORT GOAL_ENTRY::getMaxBuildTypes()
 int EXPORT GOAL_ENTRY::getInitialized()
 {
 #ifdef _SCC_DEBUG
-        if((initialized<0)||(initialized>1))
-        {
-                debug.toLog(0,"DEBUG: (GOAL_ENTRY::getInitialized): Variable initialized not initialized [%i].",initialized);
-                return(0);
-        }
+		if((initialized<0)||(initialized>1))
+		{
+				debug.toLog(0,"DEBUG: (GOAL_ENTRY::getInitialized): Variable initialized not initialized [%i].",initialized);
+				return(0);
+		}
 #endif
 	return(initialized);
 };
@@ -315,6 +363,10 @@ int EXPORT GOAL_ENTRY::toGeno(int num)
 		return(0);
 	}
 #endif
+	if(num==FACTORY)
+	{
+		int i=1;
+	}
 	return(phaenoToGenotype[num]);
 }
 
@@ -338,27 +390,27 @@ int EXPORT GOAL_ENTRY::toPhaeno(int num)
 void GOAL_ENTRY::resetData()
 {
 	raceInitialized=0;
-        goalCount=0;
-        maxBuildTypes=0;
-        for(int i=0;i<MAX_GOALS;i++)
-        {
-                goal[i].count=0;
-                goal[i].time=0;
-                goal[i].unit=0;
-                goal[i].location=0;
-        }
-        for(int i=UNIT_TYPE_COUNT;i--;)
-        {
-                genoToPhaenotype[i]=-1;
-                phaenoToGenotype[i]=-1;
-                allGoal[i]=0;
-                isVariable[i]=0;
-                isBuildable[i]=0;
-                for(int j=0;j<MAX_LOCATIONS;j++)
-                        globalGoal[j][i]=0;
-        }
-        initialized=1;
-        bestTime=0;
+	goalCount=0;
+	maxBuildTypes=0;
+	for(int i=0;i<MAX_GOALS;i++)
+	{
+		goal[i].count=0;
+		goal[i].time=0;
+		goal[i].unit=0;
+		goal[i].location=0;
+	}
+	for(int i=UNIT_TYPE_COUNT;i--;)
+	{
+		genoToPhaenotype[i]=-1;
+		phaenoToGenotype[i]=-1;
+		allGoal[i]=0;
+		isVariable[i]=0;
+		isBuildable[i]=0;
+		for(int j=0;j<MAX_LOCATIONS;j++)
+			globalGoal[j][i]=0;
+	}
+	initialized=1;
+	bestTime=0;
 };
 
 GOAL_ENTRY::GOAL_ENTRY()

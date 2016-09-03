@@ -2,6 +2,7 @@
 #include "scc2.h"
 #include "../scc2dll/race.h"
 #include "../scc2dll/anarace.h"
+#include "../scc2dll/default.h"
 #include "math.h"
 
 IMPLEMENT_APP(MyApp)
@@ -85,32 +86,64 @@ MyDCWindow::MyDCWindow(wxFrame *parent)
 	GraphixScrollWindow::font6=wxFont(12,wxDECORATIVE,wxNORMAL,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);
 	GraphixScrollWindow::font7=wxFont(16,wxDECORATIVE,wxNORMAL,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);
 		
+/*
+
+(- lade spielregeln)
+- lade alle maps in maps
+- lade defaults
+- lade mining/gasing speed
+------ map/defaults are set -----
+
+- Bewertungsschema entsprechend den Vorgaben setzen
+- je nach modus (tab: basic, advanced etc.) und Anzahl Spieler die goals setzen
+- 
+
+*/
+
+	initEngine();
+
+};
+
+void MyDCWindow::initEngine()
+{
 // Always do loadHarvestFile (mining speeds) before loadMapFile, because at the moment the mapfile also sets the gathering speed
 	GraphixScrollWindow::settings.loadHarvestFile("mining.txt");
 	GraphixScrollWindow::settings.loadSettingsFile("settings.txt");
-// Map in "map.txt" is now map[0]
+	GraphixScrollWindow::settings.loadMapFile("LostTemple");
+	GraphixScrollWindow::settings.loadDefaultsFile("default.map");
 
-	GraphixScrollWindow::settings.loadMapFile("LostTemple",USE_MAP_SETTINGS);
-	GraphixScrollWindow::settings.loadMapFile("LostTemple",TOP_VS_BOTTOM);
-// choose the first map we loaded (map[0])
-	GraphixScrollWindow::settings.setCurrentMap(0);
-
-// MAPS: Startforce
-// Goals: 
-	
-// Goal in "goal.txt" is now goal[0]
 	GraphixScrollWindow::settings.loadGoalFile("goalp1.txt");
 	GraphixScrollWindow::settings.loadGoalFile("goalp0.txt");
 	GraphixScrollWindow::settings.loadGoalFile("goalp0.txt");
 	GraphixScrollWindow::settings.loadGoalFile("goalp0.txt");
 	GraphixScrollWindow::settings.loadGoalFile("goalp0.txt");
 	GraphixScrollWindow::settings.loadGoalFile("goalp0.txt");
+
+// goal beschreibt Rasse, Ziele und Modus
+
+	
+// Map in "map.txt" is now map[0]
+//	GraphixScrollWindow::settings.loadMapFile("LostTemple",USE_MAP_SETTINGS);
+//	GraphixScrollWindow::settings.loadMapFile("LostTemple",TOP_VS_BOTTOM);
+// choose the first map we loaded (map[0])
+	GraphixScrollWindow::settings.initSoup(); // assign START of settings
+	// initializes players, initializes Map
+	GraphixScrollWindow::settings.setMap(0, 0); // first map (lt) and ums = false
+	
+//	for(int i=1;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer();i++)
+//		GraphixScrollWindow::settings.setGoal(0, i);
+	
+	//setMap VOR initsoup um v.a. die Zahl der Spieler zu bestimmen
+
+// MAPS: Startforce
+// Goals: 
+	
+// Goal in "goal.txt" is now goal[0]
 // assign goal 0 to all players
-	for(int i=1;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer();i++)
-		GraphixScrollWindow::settings.setGoal(0,i);
+//GOALS are set by setMap, each startPlayer has now its own goal entry
+	
 	update=0;
 // initialize the soup, set the parameters, load the players etc.
-	GraphixScrollWindow::settings.initSoup();
 	ga=GraphixScrollWindow::settings.getGa();
 	oldrun=0;
 	grey=0;
@@ -130,7 +163,7 @@ MyDCWindow::MyDCWindow(wxFrame *parent)
 	mainWindow->addTab(250,_T("Expert"));
 	mainWindow->addTab(370,_T("Gosu >_<"));
 	mainWindow->addTab(490,_T("Transcend"));
-    mainWindow->addTab(610,_T("Map&Goals"));
+	mainWindow->addTab(610,_T("Map&Goals"));
 	mainWindow->addTab(730,_T("Settings"));
 	mainWindow->addTab(890,_T("Tutorial"));
 
@@ -140,7 +173,7 @@ msgWindow->setTitle(0,"Messages");
 	theCore=new GraphixScrollWindow(0,wxRect(FIRST_COLOUMN+5,mainWindow->getInnerUpperBound()+SECOND_ROW,SECOND_COLOUMN,220),wxRect(FIRST_COLOUMN+5,mainWindow->getInnerUpperBound()+SECOND_ROW,SECOND_COLOUMN,220),NOT_SCROLLED);
 	theCore->setTitle(0,"The Core of Evolution Forge");
 
-	tutorialWindow=new GraphixScrollWindow(0,wxRect(mainWindow->getInnerWidth()-theCore->getWidth(),SECOND_ROW,theCore->getWidth(),500),wxRect(mainWindow->getInnerLeftBound(),mainWindow->getInnerUpperBound(),mainWindow->getInnerWidth(),500),NOT_SCROLLED,0,TABBED);
+	tutorialWindow=new GraphixScrollWindow(0,wxRect(mainWindow->getInnerWidth()-theCore->getWidth(),SECOND_ROW,theCore->getWidth(),500),wxRect(mainWindow->getInnerLeftBound(),mainWindow->getInnerUpperBound(),mainWindow->getInnerWidth(),1000),NOT_SCROLLED,0,TABBED);
 	tutorialWindow->setTitle(0,"Evolution Forge Tutorial");
 
 	Player::InitPositions(mainWindow);
@@ -168,6 +201,7 @@ msgWindow->setTitle(0,"Messages");
 	msgWindow->addMessage(_T("Click above to add new goals."));
 	msgWindow->addMessage(_T(wxString::Format(wxT("%i players loaded..."),GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1))),
 
+	GraphixScrollWindow::bmpBack.LoadFile("backstar.bmp", wxBITMAP_TYPE_BMP);
 	GraphixScrollWindow::bmpClawsoftware.LoadFile("clawsoftware.bmp", wxBITMAP_TYPE_BMP);
 	GraphixScrollWindow::bmpClemens.LoadFile("clemens.bmp", wxBITMAP_TYPE_BMP);
 	GraphixScrollWindow::bmpCancel.LoadFile("cancel.bmp", wxBITMAP_TYPE_BMP);
@@ -204,7 +238,7 @@ void MyDCWindow::OnEraseBackground(wxEraseEvent& event)
 
 // frame constructor
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, long style)
-       : wxFrame(NULL, -1, title, pos, size, style)
+	   : wxFrame(NULL, -1, title, pos, size, style)
 {
 //	msgBox=NULL;
 	SetIcon(wxICON(icon));
@@ -219,7 +253,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
 	menuHelp->Append(EF_About, _T("&About...\tF1"), _T("Show about dialog"));
 	menuFile->Append(EF_Open, _T("&Open\tAlt-O"), _T("Load Build Order"));
 //evtl nen strich mit save/load
-/*      menuFile->Append(EF_Open, _T("&Open\tAlt-O"), _T("Load Population"));
+/*	  menuFile->Append(EF_Open, _T("&Open\tAlt-O"), _T("Load Population"));
 	menuFile->Append(EF_Open, _T("&Open\tAlt-O"), _T("Save Build Order"));
 	menuFile->Append(EF_Open, _T("&Open\tAlt-O"), _T("Save Population"));*/
 //	menuFile->Append(EF_Start, _T("&Start\tAlt-S"), _T("Start/Continue calculation"));
@@ -289,8 +323,8 @@ void MyDCWindow::processButtons()
 		if(mainWindow->isActivated(i))
 		{
 			update=2;
-			player[0]->resetData();
-			player[1]->resetData();
+//			player[0]->resetData();
+//			player[1]->resetData();
 			mainWindow->currentTab=i;
 			mainWindow->clearButtons();
 			switch(mainWindow->currentTab)
@@ -302,8 +336,8 @@ void MyDCWindow::processButtons()
 					msgWindow->Show(0);
 					theCore->Show(0);
 					tutorialWindow->Show(0);
-					GraphixScrollWindow::settings.setGoal(1,1); // share same goal with advanced
-					GraphixScrollWindow::settings.setGoal(0,2); //zero goal!
+//					GraphixScrollWindow::settings.setGoal(1,1); // share same goal with advanced
+//					GraphixScrollWindow::settings.setGoal(0,2); //zero goal!
 				break;
 				case ADVANCED: //1 player
 					player[0]->Show(2);
@@ -311,8 +345,8 @@ void MyDCWindow::processButtons()
 					msgWindow->Show(0);
 					theCore->Show(1);
 					tutorialWindow->Show(0);
-                                        GraphixScrollWindow::settings.setGoal(1,1); //share same goal with basic
-                                        GraphixScrollWindow::settings.setGoal(0,2); //zero goal!
+//					GraphixScrollWindow::settings.setGoal(1,1); //share same goal with basic
+//					GraphixScrollWindow::settings.setGoal(0,2); //zero goal!
 				break;
 				case EXPERT: //2 player rushversuche
 					player[0]->Show(3);
@@ -320,8 +354,8 @@ void MyDCWindow::processButtons()
 					msgWindow->Show(0);
 					theCore->Show(0);
 					tutorialWindow->Show(0);
-                                        GraphixScrollWindow::settings.setGoal(1,1); // share same goal as advanced
-                                        GraphixScrollWindow::settings.setGoal(0,2); // zero goal!  -> computer!
+//					GraphixScrollWindow::settings.setGoal(1,1); // share same goal as advanced
+//					GraphixScrollWindow::settings.setGoal(0,2); // zero goal!  -> computer!
 				break;
 				case GOSU: // 2 player - Spieler spielt
 					player[0]->Show(5);
@@ -330,8 +364,8 @@ void MyDCWindow::processButtons()
 					theCore->Show(0);
 					tutorialWindow->Show(0);
 // TODO wenn zero goal -> absturz beim aendern
-                                        GraphixScrollWindow::settings.setGoal(0,1); // zero goal! -> human
-                                        GraphixScrollWindow::settings.setGoal(0,2); // zero goal!  -> computer!
+//					GraphixScrollWindow::settings.setGoal(0,1); // zero goal! -> human
+//					GraphixScrollWindow::settings.setGoal(0,2); // zero goal!  -> computer!
 				break;
 				case TRANSCENDEND: // 2 player - 2 Computer
 					player[0]->Show(7); //~~
@@ -339,8 +373,8 @@ void MyDCWindow::processButtons()
 					msgWindow->Show(0);
 					theCore->Show(0);
 					tutorialWindow->Show(0);
-                                        GraphixScrollWindow::settings.setGoal(0,1); // zero goal!  -> computer!
-                                        GraphixScrollWindow::settings.setGoal(0,2); // zero goal!  -> computer!
+//					GraphixScrollWindow::settings.setGoal(0,1); // zero goal!  -> computer!
+//					GraphixScrollWindow::settings.setGoal(0,2); // zero goal!  -> computer!
 				break;
 				case TUTORIAL:
 					player[0]->Show(1);
@@ -352,35 +386,38 @@ void MyDCWindow::processButtons()
 					msgWindow->Show(0);
 					theCore->Show(0);			
 					tutorialWindow->Show(1);
-                                        GraphixScrollWindow::settings.setGoal(1,1); // same goal as basic
-                                        GraphixScrollWindow::settings.setGoal(0,2); // zero goal!  -> computer!
+//					GraphixScrollWindow::settings.setGoal(1,1); // same goal as basic
+//					GraphixScrollWindow::settings.setGoal(0,2); // zero goal!  -> computer!
 				break;
 				default:break;		
 			} // end switch
 
 			player[0]->update();
 			player[1]->update();
-
+			
 /*			GraphixScrollWindow::settings.initSoup();
-		        resetData();
-		        if(ANARACE** temp=GraphixScrollWindow::settings.newGeneration(anarace))
-		        {                 for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
-                			        anarace[i]=temp[i];
-		                update=2;
-//              if(anarace[0]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=1;} TODO?
-		        };
-		        for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
-                		player[i]->assignAnarace(&(anarace[i]));*/
+				resetData();
+				if(ANARACE** temp=GraphixScrollWindow::settings.newGeneration(anarace))
+				{				 for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
+									anarace[i]=temp[i];
+						update=2;
+//			  if(anarace[0]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=1;} TODO?
+				};
+				for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
+						player[i]->assignAnarace(&(anarace[i]));*/
 	
 //			GraphixScrollWindow::settings.checkForChange();
 		} // end mainwindow is activated
+
+	player[0]->CheckForInfoWindow();
+	player[1]->CheckForInfoWindow();
 
 	GraphixScrollWindow::settings.checkForChange();
 	for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
 		if(player[i]->isShown())
 		{
 			player[i]->processButtons();
-//			if(player[i]->hasChanged())
+			if(player[i]->hasChanged())
 			{
 				if(!isOptimizing())
 					update=2;
@@ -418,7 +455,7 @@ void MyDCWindow::processButtons()
 				ga->setMutationFactor(ga->getMutationFactor()-20);
 			else if(ga->getMutationFactor()>30)
 				ga->setMutationFactor(ga->getMutationFactor()-10);
-		       	else if(ga->getMutationFactor()>10)
+			   	else if(ga->getMutationFactor()>10)
 				ga->setMutationFactor(ga->getMutationFactor()-5);
 			else if(ga->getMutationFactor()>0)
 				ga->setMutationFactor(ga->getMutationFactor()-1);
@@ -427,7 +464,7 @@ void MyDCWindow::processButtons()
 				if(ga->getMutationFactor()==0)
 				{
 					if(ga->getCrossOver()==0)
-		       				msgWindow->addMessage(_T("Deactivated mutations! Evolution will no longer occur."));
+			   				msgWindow->addMessage(_T("Deactivated mutations! Evolution will no longer occur."));
 					else
 						msgWindow->addMessage(_T("Deactivated mutations. From now on evolution will only occur through cross over."));
 				}
@@ -466,7 +503,7 @@ void MyDCWindow::processButtons()
 				msgWindow->addMessage(_T("Take a look in the ""help"" menu (settings / breed factor)."));
 			}
 		}
-																			    
+																				
 		if(theCore->isPressed(4))
 		{
 			int old=ga->getBreedFactor();
@@ -519,7 +556,7 @@ void MyDCWindow::processButtons()
 				msgWindow->addMessage(_T("Take a look in the ""help"" menu (settings / cross over)."));
 			}
 		}
-																			    
+																				
 		if(theCore->isPressed(7))
 		{
 			int old=ga->getCrossOver();
@@ -543,7 +580,7 @@ void MyDCWindow::processButtons()
 			else if(old==0)
 				msgWindow->addMessage(_T("Cross over is already at minimum (0%%)."));
 		}
-																			    
+																				
 		if(theCore->isPressed(8))
 		{
 			if((ga->getBreedFactor()==0)||(ga->getMutationFactor()==0))
@@ -561,14 +598,14 @@ void MyDCWindow::processButtons()
 void MyDCWindow::stopOptimizing()
 {
 	for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
-	       if(player[i]->isShown())
+		   if(player[i]->isShown())
 			player[i]->setOptimizing(0);
 };
 
 int MyDCWindow::isOptimizing()
 {
 	for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
- 	       if(player[i]->isOptimizing())
+ 		   if(player[i]->isOptimizing())
 			return(1);
 	return(0);
 };
@@ -633,9 +670,9 @@ void MyDCWindow::showCoreAnimation()
 wxColour chooseColour(int num,int row)
 {
 	if((num<50+row*50)&&(num>=row*50))
-		return(wxColour(200-(num%50)*2,200-(num%50)*2,250-num%50));
+		return(wxColour(250-(num%50)*2,250-(num%50)*2,250));
 	else
-		return(wxColour(50,50,100));
+		return(wxColour(100,100,150));
 };
 
 void MyDCWindow::OnPaint(wxPaintEvent& event)
@@ -643,11 +680,14 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 	if(dc) delete(dc);
 	dc=new wxMemoryDC();
 	dc->SelectObject(wxBitmap(SCREEN_X,SCREEN_Y));
+    dc->DrawBitmap(GraphixScrollWindow::bmpBack,0,0);
+		
 	dc->SetBrush(*wxBLACK_BRUSH);
 	animationNumbers++;
 	if(animationNumbers>150)
 	animationNumbers=1;
 
+	processButtons();
 
 	if(mainWindow->isShown())
 	{
@@ -657,28 +697,34 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 
 	if(userIsNewbie)
 	{
-		dc->SetBrush(*wxBLACK_BRUSH);
-		dc->SetPen(*wxTRANSPARENT_PEN);
-		dc->DrawBitmap(GraphixScrollWindow::bmpArrowRight,mainWindow->getLeftBound()+mainWindow->getWidth()-130-animationNumbers%4,mainWindow->getUpperBound()-5);
+//		dc->SetBrush(*wxBLACK_BRUSH);
+//		dc->SetPen(*wxTRANSPARENT_PEN);
+		dc->DrawBitmap(GraphixScrollWindow::bmpArrowRight,mainWindow->getLeftBound()+mainWindow->getWidth()-150-animationNumbers/4%6,mainWindow->getUpperBound()-8);
 	}
 
-//	if(update==2)
-//	{
+	if(update==2)
+	{
 		for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
 			if(player[i]->isShown())
 				player[i]->update();
-//	}
+	}
 
 	update=1;
+
+	for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
+		player[i]->drawGeneString(dc,wxRect(mainWindow->getPosition()+wxPoint(0,20+i*(mainWindow->getInnerHeight()/(GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1))),wxSize(mainWindow->getWidth(),mainWindow->getInnerHeight()/(GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1)-40)));
+
 
 	if(tutorialWindow->isShown())
 	{
 		tutorialWindow->DrawButtons(dc);	
+		tutorialWindow->checkButtons();
 		userIsNewbie=0;
 		int t=0;
 		for(t=0;t<8;t++)
 		if(tutorialWindow->isActivated(t))
 		{
+			tutorialWindow->clearButtons();
 			tutorialAnimation=1;
 			if(tutorialChapter==0)
 				tutorialChapter=100+t*100;
@@ -695,7 +741,6 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 					tutorialChapter-=tutorialChapter%100;
 			}
 		}
-		tutorialWindow->clearButtons();
 		tutorialAnimation++;
 		if((tutorialAnimation==400)&&(!isOptimizing()))
 			tutorialAnimation=399;
@@ -740,14 +785,14 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 					tutorialWindow->writeHeader(_T("1.2: Quickstart"),dc,2);
 					chooseColour(tutorialAnimation/2,0);
 					tutorialWindow->writeLongText(_T("It's easy:#"),dc);
-					tutorialWindow->writeLine(_T(" - Click on the left side in the goal list window $'Click here to add goal'$, choose a category and pick your goals.#"),dc,chooseColour(tutorialAnimation/4,0));
-					tutorialWindow->writeLine(_T("  - Click on the top right on the flashing $'Click to continue'$ button and sit back to watch the progress.#"),dc,chooseColour(tutorialAnimation/4,1));
-					tutorialWindow->writeLine(_T("  - You will see items moving around in window named $'Build Order'$ on the bottom right. The program now will optimize the build order by rearranging the items.#"),dc,chooseColour(tutorialAnimation/4,2));
-					tutorialWindow->writeLine(_T("  - On the top right you will see the current best time in the $'Timer window'$. If you read there a $'Searching'$ it means, the program is still searching for a valid solution which will need a moment depending how many goals you have entered while $'Optimizing'$ means that a valid solution is found and the program tries to optimize it.#"),dc,chooseColour(tutorialAnimation/4,3));
-					tutorialWindow->writeLine(_T("  - On the top you will see the $'Statistical Data'$ window which displays changes in time, fitness and ressources of the best program over the last few seconds. It is interesting for the advanced user, this window is availible on $'Advanced'$ mode or higher.#"),dc,chooseColour(tutorialAnimation/4,4));
+					tutorialWindow->writeLongText(_T(" - Click on the left side in the goal list window $'Click here to add goal'$, choose a category and pick your goals.#"),dc,chooseColour(tutorialAnimation/4,0));
+					tutorialWindow->writeLongText(_T("  - Click on the top right on the flashing $'Click to continue'$ button and sit back to watch the progress.#"),dc,chooseColour(tutorialAnimation/4,1));
+					tutorialWindow->writeLongText(_T("  - You will see items moving around in window named $'Build Order'$ on the bottom right. The program now will optimize the build order by rearranging the items.#"),dc,chooseColour(tutorialAnimation/4,2));
+					tutorialWindow->writeLongText(_T("  - On the top right you will see the current best time in the $'Timer window'$. If you read there a $'Searching'$ it means, the program is still searching for a valid solution which will need a moment depending how many goals you have entered while $'Optimizing'$ means that a valid solution is found and the program tries to optimize it.#"),dc,chooseColour(tutorialAnimation/4,3));
+					tutorialWindow->writeLongText(_T("  - On the top you will see the $'Statistical Data'$ window which displays changes in time, fitness and ressources of the best program over the last few seconds. It is interesting for the advanced user, this window is availible on $'Advanced'$ mode or higher.#"),dc,chooseColour(tutorialAnimation/4,4));
 					
-					tutorialWindow->writeLine(_T("  - Evolution forge also allows you to see a graphical illustration (through the $'Graphical illustration of the build order'$ window) of the build order to see what buildings are built at the same time, how long they need and when to build them. In addition there is the $'Overview of the build order'$ window where you can see how much minerals, gas and supply you have at a certain time if you play this build order.#"),dc,chooseColour(tutorialAnimation/4,5));
-					tutorialWindow->writeLine(_T("  - After a while you will notice that there are no more changes on the screen. Probably the best build order is found. Press $ALT+T$ to stop and let program print out the build order via the File menu.#"),dc,chooseColour(tutorialAnimation/4,6));
+					tutorialWindow->writeLongText(_T("  - Evolution forge also allows you to see a graphical illustration (through the $'Graphical illustration of the build order'$ window) of the build order to see what buildings are built at the same time, how long they need and when to build them. In addition there is the $'Overview of the build order'$ window where you can see how much minerals, gas and supply you have at a certain time if you play this build order.#"),dc,chooseColour(tutorialAnimation/4,5));
+					tutorialWindow->writeLongText(_T("  - After a while you will notice that there are no more changes on the screen. Probably the best build order is found. Press $ALT+T$ to stop and let program print out the build order via the File menu.#"),dc,chooseColour(tutorialAnimation/4,6));
 					if(tutorialAnimation>1450)
 					{
 						tutorialAnimation=1;
@@ -767,8 +812,7 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 					else
 					if(tutorialAnimation<600)
 					{
-// TODO: hoehe vom tutwindow passt net irgendwie... guten moregn ;)
-						tutorialWindow->adjustWindow(wxRect(theCore->getLeftBound(),mainWindow->getInnerUpperBound()+125,tutorialWindow->getTargetWidth(),500));
+												tutorialWindow->adjustWindow(wxRect(theCore->getLeftBound(),mainWindow->getInnerUpperBound()+125,tutorialWindow->getTargetWidth(),500));
 						player[0]->timerWindow->Show(0);
 						player[0]->boWindow->Show(1);
 					}
@@ -1110,7 +1154,6 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 	{
 		theCore->Draw(dc);
 //		showCoreAnimation();
-//		drawGeneString();
 		theCore->DrawButtons(dc);
 	}
 
@@ -1122,13 +1165,13 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 
 	if(endrun)
 	{
-	       msgWindow->addMessage(_T(wxString::Format(wxT("Final time round %i: [%.2i:%.2i]"),anarace[0]->getRun(),(ga->maxTime-anarace[0]->getTimer())/60,(ga->maxTime-anarace[0]->getTimer())%60)));
+		   msgWindow->addMessage(_T(wxString::Format(wxT("Final time round %i: [%.2i:%.2i]"),anarace[0]->getRun(),(ga->maxTime-anarace[0]->getTimer())/60,(ga->maxTime-anarace[0]->getTimer())%60)));
 		resetData();
 	}
 /*		dc->SetFont(font3);
 		dc->SetTextForeground(wxColour(155*grey*(100-grey)/2500,0,0));
 		dc->DrawText(_T(wxString::Format(wxT("Final time round %i: [%.2i:%.2i]"),anarace[0]->getRun(),(ga->maxTime-anarace[0]->getTimer())/60,(ga->maxTime-anarace[0]->getTimer())%60)),27,203);
-																			    
+																				
 		dc->SetTextForeground(wxColour(255*grey*(100-grey)/2500,0,0));
 		dc->DrawText(_T(wxString::Format(wxT("Final time round %i: [%.2i:%.2i]"),anarace[0]->getRun(),(ga->maxTime-anarace[0]->getTimer())/60,(ga->maxTime-anarace[0]->getTimer())%60)),25,200);
 		if(grey==100)
@@ -1142,26 +1185,22 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 		dc->DrawText(_T(wxString::Format(wxT("Round %i"),anarace[0]->getRun()+1)),msgWindow->getInnerLeftBound()+18,msgWindow->getInnerUpperBound()+13);
 		dc->SetFont(font3);
 		dc->DrawText(_T(wxString::Format(wxT("%s"),gizmo[gizmor])),msgWindow->getInnerLeftBound()+18,msgWindow->getInnerUpperBound()+63);
-																			    
+																				
 		dc->SetTextForeground(wxColour(230*grey*(100-grey)/2500,0,0));
 		dc->SetFont(font3);
 		dc->DrawText(_T(wxString::Format(wxT("Round %i"),anarace[0]->getRun()+1)),msgWindow->getInnerLeftBound()+15,msgWindow->getInnerUpperBound()+10);
 		dc->SetFont(font3);
 		dc->DrawText(_T(wxString::Format(wxT("%s"),gizmo[gizmor])),msgWindow->getInnerLeftBound()+15,msgWindow->getInnerUpperBound()+60);
-																			    
+																				
 		grey+=2;
 	}*/
-
-
 	for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
 		if(player[i]->isShown())
 			player[i]->DrawMe(dc);
 
 //	if(theCore->isShown())
-//		player[0]->drawGeneString(dc,wxRect(theCore->getPosition()+wxPoint(0,10),theCore->getSize()+wxSize(0,-4)));
 	wxPaintDC dcp(this);
 
-	processButtons();
 //	wxScreenDC* dcp2=new wxScreenDC();
 //	dcp2->StartDrawingOnTop();
 	dcp.Blit(0, 0, SCREEN_X, SCREEN_Y, dc, 0, 0);
@@ -1213,8 +1252,8 @@ void MyDCWindow::OnIdle(wxIdleEvent& WXUNUSED(event))
 //		Refresh(false);
 //	}
 
-	refresh++;
-	if(refresh>2)
+//	refresh++;
+//	if(refresh>2)
 		refresh=0;		
 	Refresh(false);
 }
@@ -1277,11 +1316,11 @@ void MyDCWindow::OnMouseLeftUp(wxMouseEvent& event)
 /*
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-    // TRUE is to force the frame to close
-    Close(TRUE);
+	// TRUE is to force the frame to close
+	Close(TRUE);
 }*/
 
-#if 0													    
+#if 0														
 void MyFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
 {
 	wxFileDialog fileDialog(this, wxT("Select a file"));
@@ -1370,7 +1409,7 @@ void MyFrame::OnGoalImport(wxCommandEvent& event)
 
 void MyFrame::OnGeneralSettings(wxCommandEvent& WXUNUSED(event))
 {
-	wxStaticText *text1,*text2,*text3,*text4,*text5,*text7,*text8,*text9,*text10;
+/*	wxStaticText *text1,*text2,*text3,*text4,*text5,*text7,*text8,*text9,*text10;
 	menuSettings->Enable(EF_GeneralSettings,false);
 	if(run==1) run=2;
 	dia=new wxDialog(this,EF_SettingsDialog,_T("General settings"),wxPoint(100,100),wxSize(450,260),wxDEFAULT_DIALOG_STYLE,_T("lala"));
@@ -1428,7 +1467,7 @@ void MyFrame::OnGeneralSettings(wxCommandEvent& WXUNUSED(event))
 		if((temp==wxID_CANCEL)||(temp==wxID_OK)) break;
 	}
 	if(run==2) run=1;
-	menuSettings->Enable(EF_GeneralSettings,true);
+	menuSettings->Enable(EF_GeneralSettings,true);*/
 }
 #endif
 /*
@@ -1451,7 +1490,7 @@ void MyFrame::OnStop(wxCommandEvent& WXUNUSED(event))
 	menuFile->Enable(EF_Start,true);
 }
 */
-#if 0																			    
+#if 0																				
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
 	wxStaticText* text1;

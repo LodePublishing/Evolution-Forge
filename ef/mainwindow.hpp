@@ -59,9 +59,9 @@ class MainWindow : public UI_Window
 		UI_Group* rightTabs;
 		eTabs oldTab;
 
+		bool tabHasChanged;
 		bool markForRemove;
 		bool markForNewGame;
-		bool tabHasChanged;
 		unsigned int newGameTab;
 };
 

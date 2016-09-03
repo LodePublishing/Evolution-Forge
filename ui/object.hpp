@@ -100,9 +100,12 @@ class UI_Object
 		const bool isMouseInside() const;
 
 		const bool checkForNeedRedraw() const;
-		void setNeedRedrawMoved(const bool need_redraw=true);
-		void setNeedRedrawNotMoved(const bool need_redraw=true);
-		void setNeedRedrawNotMovedFirstChild(const bool need_redraw=true);
+
+		void setNeedRedrawAllThatOverlaps(const Rect& absolute_rect);
+		void setNeedRedrawArea(const Rect& absolute_rect);
+		void setNeedRedrawMoved(const Rect& old_absolute_rect, const Rect& new_absolute_rect);
+		void setNeedRedrawNotMoved();
+		void setNeedRedrawNotMovedFirstChild();
 
 // returns the object the mouse cursor is currently over
 		virtual UI_Object* checkToolTip();
@@ -129,9 +132,7 @@ class UI_Object
 		static unsigned int redrawnObjects;
 		static void setResolution(const Size resolution);
 		static UI_Theme theme;
-#ifndef _NO_FMOD_SOUND
 		static UI_Sound sound;
-#endif
 		static UI_Window* currentWindow;
 		static bool windowSelected;
 		
@@ -177,7 +178,10 @@ class UI_Object
 
 		bool isClipped;
 		Rect clipRect;
+
+		void setClipRect(const Rect& rect);
 		void setWidth(const unsigned int width);
+
 	protected:
 
 		
@@ -223,6 +227,7 @@ class UI_Object
 		bool shown;
 
 		bool needRedraw;
+		std::list<Rect> redrawArea;
 			
 		void addChild(UI_Object* child);
 		UI_Object* parent; // = NULL means that this is the screen (x=0/y=0)
@@ -399,7 +404,7 @@ inline const Rect& UI_Object::getTargetRect() const {
 }
 
 inline const bool UI_Object::isMouseInside() const {
-	return(getAbsoluteRect().Inside(mouse));
+	return(getAbsoluteRect().isInside(mouse));
 }
 
 

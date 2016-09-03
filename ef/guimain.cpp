@@ -1,6 +1,8 @@
 #include "guimain.hpp"
 #include "files.hpp"
+//#include "../ui/editfield.hpp"
 #include "../ui/tooltip.hpp"
+#include "configuration.hpp"
 #include <iomanip>
 
 Main::Main():
@@ -12,7 +14,6 @@ Main::Main():
 //	mapWindow(NULL),
 	saveBox(NULL),
 	languageMenu(NULL),
-	gameMenu(NULL),
 	maus(),
 	gameCount(0),
 	currentTab((eTabs)0),
@@ -34,17 +35,13 @@ const bool Main::initGUI(DC* dc)
 	toInitLog(UI_Object::theme.lookUpString(START_LOAD_UI_BITMAPS_FONTS_STRING));
 #ifdef __linux__
 	UI_Object::theme.loadData("settings/ui/default.ui", "data/bitmaps/", "data/fonts/", dc);
-#ifndef _NO_FMOD_SOUND
 	UI_Object::sound.loadSoundDataFile("data/sounds/");
-#endif
 	UI_Object::theme.loadWindowDataFile("settings/ui/windows.ui", 0, 1);
 	UI_Object::theme.loadWindowDataFile("settings/ui/split_windows.ui", 0, 2);
 	UI_Object::theme.loadWindowDataFile("settings/ui/split_windows.ui", 1, 2);
 #elif __WIN32__
 	UI_Object::theme.loadData("settings\\ui\\default.ui", "data\\bitmaps\\", "data\\fonts\\", dc);
-#ifndef _NO_FMOD_SOUND
 	UI_Object::sound.loadSoundDataFile("data\\sounds\\");
-#endif
 	UI_Object::theme.loadWindowDataFile("settings\\ui\\windows.ui", 0, 1);
 	UI_Object::theme.loadWindowDataFile("settings\\ui\\split_windows.ui", 0, 2);
 	UI_Object::theme.loadWindowDataFile("settings\\ui\\split_windows.ui", 1, 2);
@@ -71,20 +68,16 @@ const bool Main::initGUI(DC* dc)
 	toInitLog("* " + UI_Object::theme.lookUpString(START_INIT_MSG_WINDOW_STRING));
 	Main::msgWindow = new MessageWindow(mainWindow);
 	
-	toInitLog("* " + UI_Object::theme.lookUpString(START_INIT_TECHTREE_WINDOW_STRING));
-//	ForceWindow::techTreeWindow = new TechTreeWindow(mainWindow);
-	
 	toInitLog("* " + UI_Object::theme.lookUpString(START_INIT_INTRO_WINDOW_STRING));
 	introWindow = new IntroWindow(NULL);
 	languageMenu = new LanguageMenu(NULL, Rect(Point((UI_Object::max_x - UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH))/2, UI_Object::max_y/2), Size(0,0)), Size(0,0), DO_NOT_ADJUST); 
-	gameMenu = new GameMenu(mainWindow, //Rect(Point((UI_Object::max_x - UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH))/2, UI_Object::max_y/2), Size(0,0)), Size(0,0), DO_NOT_ADJUST);
-		 Rect(), Size(0,0), DO_NOT_ADJUST); 
-	gameMenu->Show();
-	
 	debugWindow = new DebugWindow(mainWindow);
 	
+	toInitLog("* " + UI_Object::theme.lookUpString(START_INIT_TECHTREE_WINDOW_STRING));
+	ForceWindow::techTreeWindow = new TechTreeWindow(mainWindow);
+	
 	toInitLog("* " + UI_Object::theme.lookUpString(START_HIDING_WINDOWS_STRING));
-//	ForceWindow::techTreeWindow->Hide();
+	ForceWindow::techTreeWindow->Hide();
 	mainWindow->Hide();
 	introWindow->Show();
 	helpWindow->Hide();
@@ -152,22 +145,20 @@ void Main::reloadOriginalSize()
 		introWindow->reloadOriginalSize();
 	if(languageMenu->isShown())
 		languageMenu->reloadOriginalSize();
-	if(gameMenu->isShown())
-		gameMenu->reloadOriginalSize();
 	if(saveBox)
 		saveBox->reloadOriginalSize();
-//	ForceWindow::techTreeWindow->reloadOriginalSize();
+	ForceWindow::techTreeWindow->reloadOriginalSize();
 }
 
 void Main::reloadStrings()
 {
 	mainWindow->reloadStrings();
-//	ForceWindow::techTreeWindow->reloadStrings();
+	ForceWindow::techTreeWindow->reloadStrings();
 }
 
 const bool Main::isIntro() const
 {
-	return((introWindow->isShown()) || (languageMenu->isShown()) || (helpWindow->isShown()) || (gameMenu->isShown()));
+	return((introWindow->isShown()) || (languageMenu->isShown()) || (helpWindow->isShown()));
 }
 
 void Main::initializeGame(const unsigned int tab_number)
@@ -182,6 +173,8 @@ void Main::initializeGame(const unsigned int tab_number)
 			break;
 	if(game_number == MAX_GAME)
 		return;
+
+	
 
 	toInitLog("* " + UI_Object::theme.lookUpString(START_CHOOSING_GAME_TAB_STRING));
 
@@ -235,8 +228,7 @@ Main::~Main()
 	delete mainWindow;
 	delete introWindow;
 	delete languageMenu;
-	delete gameMenu;
-//	delete ForceWindow::techTreeWindow;
+	delete ForceWindow::techTreeWindow;
 	delete msgWindow;
 	delete helpWindow;
 	delete settingsWindow;
@@ -280,6 +272,7 @@ void Main::process()
 	UI_Window::gotoHelpChapter = -1;
 	UI_Object::windowSelected = false;
 
+	BoEntry::entryIsMoving = false;
 // ------ PROCESSING ------
 	if((efConfiguration.isToolTips())&&(UI_Object::tooltip))
 		UI_Object::tooltip->process();
@@ -288,17 +281,15 @@ void Main::process()
 		languageMenu->process();
 	else if(introWindow->isShown())
 		introWindow->process();
-	else if(gameMenu->isShown())
-		gameMenu->process();
 	else if(saveBox)
 		saveBox->process();
-	if((!introWindow->isShown())&&(!languageMenu->isShown())&&(!saveBox) && (!gameMenu->isShown()))
+	if((!introWindow->isShown())&&(!languageMenu->isShown())&&(!saveBox))
 	{
 		mainWindow->Show();
 		mainWindow->process();
 		debugWindow->Show(efConfiguration.isShowDebug());
 	}
-//	ForceWindow::techTreeWindow->process();
+	ForceWindow::techTreeWindow->process();
 // ------ PROCESSING ------
 
 	checkTab();
@@ -351,12 +342,11 @@ void Main::process()
 	}
 	
 	{
-		int pressed = -1;
-		if(((pressed = gameMenu->getPressedItem())>=0))
+		unsigned int pressed = 0;
+		if((pressed = introWindow->getGameType())>0)
 		{
-			if(coreConfiguration.setGameType(pressed+1))
+			if(coreConfiguration.setGameType(pressed))
 			{
-				gameMenu->Hide();
 				gameTypeHasChanged = true;
 				UI_Button::resetButton();
 			}
@@ -366,7 +356,7 @@ void Main::process()
 	if(settingsWindow->hasLanguageChanged())
 	{
 		mainWindow->reloadStrings();
-//		ForceWindow::techTreeWindow->reloadStrings();
+		ForceWindow::techTreeWindow->reloadStrings();
 		msgWindow->addMessage(UI_Object::theme.lookUpString(LANGUAGE_HAS_CHANGED_STRING));
 	}
 
@@ -396,6 +386,7 @@ void Main::process()
 		msgWindow->addMessage(*i);
 		i = UI_Object::msgList.erase(i);
 	}
+	database.changeAccepted();
 }
 
 void Main::checkTab()
@@ -595,7 +586,7 @@ void Main::draw(DC* dc) const
 // TODO!!!!!!!!!!!!! besonders das background bitmap nicht UEBERALL neu zeichnen
 	if(redraw)
 	{
-		if((!introWindow->isShown())&&(!languageMenu->isShown())&&(!gameMenu->isShown()))
+		if((!introWindow->isShown())&&(!languageMenu->isShown()))
 		{
 			SDL_Rect rc;
 			rc.x = 0;rc.y = 0; rc.w = UI_Object::max_x; rc.h = UI_Object::max_y;
@@ -626,12 +617,10 @@ void Main::draw(DC* dc) const
 	}
 	else if(introWindow->isShown())
 		introWindow->draw(dc);
-	else if(gameMenu->isShown())
-		gameMenu->draw(dc);
 	else
 	{
 		mainWindow->draw(dc);
-//		ForceWindow::techTreeWindow->draw(dc);
+		ForceWindow::techTreeWindow->draw(dc);
 		if(saveBox)
 			saveBox->draw(dc);
 	}
@@ -645,17 +634,20 @@ void Main::newGeneration()
 	debugWindow->delay(isAnyOptimizing()); 
 	poll(IDLE_TICKS);
 
-	if(languageMenu->isShown() || introWindow->isShown() || gameMenu->isShown())
+	if(languageMenu->isShown() || introWindow->isShown())
 		return;
 // evtl savebox oder so
 //	if(UI_Object::focus==NULL) // TODO, bei Force/Bowindow abfragen
 	while(debugWindow->allowCalculation())
 	{
+		if((!BoEntry::entryIsMoving) || (!efConfiguration.isWaitAfterChange()))
+		{
 		for(unsigned int i=MAX_GAME;i--;)
 			if((game[i])&&(game[i]->isShown()))
 				game[i]->newGeneration();
 		if(dataBaseWindow->isShown())
 			dataBaseWindow->newGeneration();
+		} else SDL_Delay(50);
 	}
 	poll(GENERATION_TICKS);
 	debugWindow->updateConfiguration();
@@ -792,7 +784,7 @@ void Main::setMouse(const Point p)
 	
 	if(UI_Button::isCurrentButtonHasAlreadyLeft())
 	{
-		if((UI_Button::getCurrentButton()!=NULL)&&(UI_Button::getCurrentButton()->getAbsoluteRect().Inside(p)))
+		if((UI_Button::getCurrentButton()!=NULL)&&(UI_Button::getCurrentButton()->getAbsoluteRect().isInside(p)))
 		{
 			UI_Button::getCurrentButton()->mouseHasEnteredArea();
 			UI_Button::setCurrentButtonHasAlreadyLeft(false);
@@ -800,7 +792,7 @@ void Main::setMouse(const Point p)
 		else return;
 	}
 	
-	if((UI_Button::getCurrentButton())&&(!UI_Button::getCurrentButton()->getAbsoluteRect().Inside(p)))
+	if((UI_Button::getCurrentButton())&&(!UI_Button::getCurrentButton()->getAbsoluteRect().isInside(p)))
 	{
 		UI_Button::getCurrentButton()->mouseHasLeftArea();
 		if(!UI_Button::isCurrentButtonPressed())
@@ -830,8 +822,6 @@ void Main::setMouse(const Point p)
 			else
 			if(introWindow->isShown())
 				temp_button = introWindow->checkHighlight();
-			else if(gameMenu->isShown())
-				temp_button = gameMenu->checkHighlight();
 			else if(saveBox)
 				temp_button = saveBox->checkHighlight();
 			else
@@ -877,8 +867,6 @@ void Main::setMouse(const Point p)
 					temp2 = languageMenu->checkToolTip();
 				else if(introWindow->isShown())
 					temp2 = introWindow->checkToolTip();
-				else if(gameMenu->isShown())
-					temp2 = gameMenu->checkToolTip();
 				else if(saveBox)
 					temp2 = saveBox->checkToolTip();
 				else 

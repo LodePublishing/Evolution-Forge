@@ -4,7 +4,6 @@
 #include "../core/soup.hpp"
 
 #include "player.hpp"
-#include "score.hpp"
 
 #define MAX_GAME_TABS 20
 #define MAX_SIMULTANEOUS_GAMES 2
@@ -69,8 +68,7 @@ class Game : public UI_Window
 		void loadBuildOrder(const unsigned int player_num, const unsigned int number);
 		void setStartPosition(const unsigned int player_num, const unsigned int player_position);
 		void assignGoal(const unsigned int player_num, const unsigned int player_goal);
-
-
+	
 	private:
 		const bool isCompletelyInitialized() const;
 		Player* player[MAX_PLAYER];

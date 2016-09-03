@@ -28,7 +28,6 @@ class CoreConfiguration
 		void initDefaults();
 
 		const bool isFastCalculation() const;
-		const bool isExpansionSet() const;
 		const bool isAllowWaitOrders() const;
 		const unsigned int getWaitAccuracy() const;
 		const unsigned int getCrossingOver() const;
@@ -45,7 +44,6 @@ class CoreConfiguration
 		const bool isAllowGoalAdaption() const;
 		
 		const bool setFastCalculation(const bool fast_calculation);
-		const bool setExpansionSet(const bool expansion_set);
 		const bool setAllowWaitOrders(const bool allow_wait_orders);
 		const bool setWaitAccuracy(const unsigned int wait_accuracy);
 
@@ -80,7 +78,6 @@ class CoreConfiguration
 
 	// external:
 		bool fastCalculation;
-		bool expansionSet;
 
 		bool allowWaitOrders;
 		unsigned int waitAccuracy;
@@ -104,10 +101,6 @@ inline const unsigned int CoreConfiguration::getGameType() const {
 
 inline const bool CoreConfiguration::isFastCalculation() const {
 	return(fastCalculation);
-}
-
-inline const bool CoreConfiguration::isExpansionSet() const {
-	return(expansionSet);
 }
 
 inline const bool CoreConfiguration::isAllowWaitOrders() const {

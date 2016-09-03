@@ -47,6 +47,7 @@ class PlayerEntry : public UI_Object
 		void process();
 
 		void reloadOriginalSize();
+		void reloadStrings();
 		
 		const unsigned int getLineHeight() const;
 

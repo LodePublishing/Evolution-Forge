@@ -5,7 +5,9 @@ GOAL::GOAL() :
 	time(0),
 	count(0),
 	location(0),
-	finalTime(MAX_TIME)
+	finalTime(MAX_TIME),
+	isAlwaysBuild(false),
+	isBuildAsMuchAsPossible(false)
 { }
 
 GOAL::~GOAL()
@@ -16,7 +18,9 @@ GOAL::GOAL(const GOAL& object) :
 	time(object.time),
 	count(object.count),
 	location(object.location),
-	finalTime(object.finalTime)
+	finalTime(object.finalTime),
+	isAlwaysBuild(object.isAlwaysBuild),
+	isBuildAsMuchAsPossible(object.isBuildAsMuchAsPossible)
 { }
 
 GOAL& GOAL::operator=(const GOAL& object)
@@ -26,6 +30,8 @@ GOAL& GOAL::operator=(const GOAL& object)
 	count = object.count;
 	location = object.location;
 	finalTime = object.finalTime;
+	isAlwaysBuild = object.isAlwaysBuild;
+	isBuildAsMuchAsPossible = object.isBuildAsMuchAsPossible;
 	return(*this);
 }
 

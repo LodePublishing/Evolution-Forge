@@ -57,17 +57,17 @@ void UI_Group::calculateBoxSize()
 		if((tmp->isShown())&&(tmp!=title))
 		{
 			Rect r = tmp->getTargetRect();
-			if(maxWidth < r.getRight())
+			if((r.getRight()>0) && (maxWidth < (unsigned int)(r.getRight())))
 				maxWidth = r.getRight();
-			if(maxHeight < r.getBottom())
+			if((r.getBottom()>0) && (maxHeight < (unsigned int)(r.getBottom())))
 				maxHeight = r.getBottom();
 		}
 		tmp = tmp->getNextBrother();
 	} while(tmp!=getChildren());
 	Size s = Size(maxWidth+7, maxHeight+7);
 
-//	setOriginalSize(s);
-	adjustRelativeRect(Rect(getTargetPosition(), s));
+	setOriginalSize(s); // ?
+//	adjustRelativeRect(Rect(getTargetPosition(), s));
 }
 
 void UI_Group::alignWidth(const unsigned int width)
@@ -128,7 +128,7 @@ void UI_Group::process()
 		calculateBoxSize();
 		childrenWereChanged = false;
 	}
-	if(getAbsoluteRect().Inside(mouse))
+	if(getAbsoluteRect().isInside(mouse))
 	{
 		if(!highlighted)
 		{
@@ -136,14 +136,13 @@ void UI_Group::process()
 			setNeedRedrawNotMoved();
 		}
 	} else
+	{
 		if(highlighted)
 		{
 			setNeedRedrawNotMoved();
 			highlighted = false;
 		}
-	
-//	if((checkForNeedRedraw())&&(getParent()))
-//		setNeedRedrawMoved(); ?
+	}
 }
 
 

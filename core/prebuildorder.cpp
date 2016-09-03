@@ -290,9 +290,8 @@ const unsigned int PREBUILDORDER::calculateIdleTime() const
 	if(idle_time > idle_time_resources)
 		idle_time = idle_time_resources;
 	
-	if(idle_time > getTimeOut()) {
+	if(idle_time > getTimeOut())
 		idle_time = getTimeOut();
-	}
 	
 	return(idle_time);
 }
@@ -615,10 +614,23 @@ void PREBUILDORDER::leapForwardInTime()
 	setTimer(getTimer() - time_span);
 }
 
-const bool PREBUILDORDER::executeNextInstruction()
+void PREBUILDORDER::resetNeededResources()
 {
 	for(unsigned int i = RACE::MAX_RESOURCE_TYPES; i--;)
 		neededResource[i] = GAME::MAX_RESOURCES;
+}
+
+const bool PREBUILDORDER::executeAlwaysBuildInstructions()
+{
+	bool ok = false;
+	for(std::list<GOAL>::const_iterator i = getGoal()->goalList.begin(); i != getGoal()->goalList.end(); ++i)
+		if(i->getIsAlwaysBuild() && buildGene(i->getUnit()))
+			ok = true;
+	return(ok);
+}
+
+const bool PREBUILDORDER::executeNextInstruction()
+{
 	unsigned int command = getGoal()->toPhaeno(getCurrentCode());
 
 	bool ok = buildGene(command);

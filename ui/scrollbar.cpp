@@ -7,8 +7,8 @@ UI_ScrollBar::UI_ScrollBar(UI_Object* scroll_parent, const unsigned int start_y,
 	firstItemY(0),
 	lastItemY(0),
 	startY(start_y),
-	add(new UI_Button(this, Rect(getParent()->getWidth()-10, 0, 8, 8), Size(0,0), SMALL_ARROW_DOWN_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING)),
-	sub(new UI_Button(this, Rect(getParent()->getWidth()-10, 0, 8, 8), Size(0,0), SMALL_ARROW_UP_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING)),
+	add(new UI_Button(this, Rect(getParent()->getWidth()-10, 0, 8, 8), Size(0,0), ARROW_BUTTON, SMALL_ARROW_DOWN_BITMAP, PRESS_BUTTON_MODE, NULL_STRING)),
+	sub(new UI_Button(this, Rect(getParent()->getWidth()-10, 0, 8, 8), Size(0,0), ARROW_BUTTON, SMALL_ARROW_UP_BITMAP, PRESS_BUTTON_MODE, NULL_STRING)),
 	hideable(scroll_hideable),
 	internalScrollY(0),
 	internalHeight(0),
@@ -43,11 +43,11 @@ void UI_ScrollBar::checkBoundsOfChildren(const signed int upper_bound, const sig
 						if((tmp->getAbsoluteLowerBound() > upper_bound) && (tmp->getAbsoluteUpperBound() < lower_bound))
 						{
 							tmp->Show();
-							tmp->clipRect = Rect(tmp->getAbsoluteLeftBound(), upper_bound, tmp->getWidth(), lower_bound - upper_bound);
+							tmp->setClipRect(Rect(tmp->getAbsoluteLeftBound(), upper_bound, tmp->getWidth(), lower_bound - upper_bound));
 						} else 
 						{
 							tmp->Hide();
-							tmp->clipRect = Rect();
+							tmp->setClipRect(Rect());
 						}
 					}	
 					else
@@ -86,8 +86,8 @@ void UI_ScrollBar::process() // process messages, continue animation etc.
 	currentScrollY = targetScrollY;
 	if(currentScrollY < 0)
 		currentScrollY = 0;
-	if(currentScrollY > (signed int)clientHeight - barHeight)
-		currentScrollY = (signed int)clientHeight - barHeight;
+	if(currentScrollY > (signed int)clientHeight - (signed int)barHeight)
+		currentScrollY = (signed int)clientHeight - (signed int)barHeight;
 	
 
 
@@ -100,7 +100,7 @@ void UI_ScrollBar::process() // process messages, continue animation etc.
 	add->setPosition(Point(getParent()->getWidth() -12, clientHeight + position + 6));
 	sub->setPosition(Point(getParent()->getWidth() -12, position - 4));
 
-	if(Rect(getParent()->getAbsolutePosition(), getParent()->getSize() + Size(8, 0)).Inside(UI_Object::mouse))
+	if(Rect(getParent()->getAbsolutePosition(), getParent()->getSize() + Size(8, 0)).isInside(UI_Object::mouse))
 	{
 		add->Show();
 		sub->Show();
@@ -113,8 +113,8 @@ void UI_ScrollBar::process() // process messages, continue animation etc.
 	
 	UI_Object::process();
 
-	if((currentScrollY != oldScrollY)||(barHeight != oldBarHeight)||(add->checkForNeedRedraw())||(sub->checkForNeedRedraw()))
-		setNeedRedrawMoved();
+//	if((currentScrollY != oldScrollY)||(barHeight != oldBarHeight)||(add->checkForNeedRedraw())||(sub->checkForNeedRedraw()))
+//		setNeedRedrawMoved(); TODO
 
 	if(add->isLeftClicked())
 		moveDown();
@@ -133,7 +133,7 @@ void UI_ScrollBar::draw(DC* dc) const
 	if(checkForNeedRedraw())
 	{
 		dc->setBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
-		if(Rect(getParent()->getAbsolutePosition() + Point(getWidth(), startY+5) - Size(14, 0), Size(12, getHeight()+12)).Inside(mouse))
+		if(Rect(getParent()->getAbsolutePosition() + Point(getWidth(), startY+5) - Size(14, 0), Size(12, getHeight()+12)).isInside(mouse))
 			dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 		else
 			dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));

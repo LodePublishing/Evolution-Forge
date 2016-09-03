@@ -20,10 +20,10 @@ enum eResolution
 enum eTheme
 {
 	ZERO_THEME,
-	DARK_RED_THEME,
 	DARK_BLUE_THEME,
-	GREEN_THEME,
 	YELLOW_THEME,
+	DARK_RED_THEME,
+	GREEN_THEME,
 	GREY_THEME,
 
 	MAX_COLOR_THEMES
@@ -50,7 +50,6 @@ class UI_Configuration
 		const eBitDepth getBitDepth() const;
 		const eTheme getTheme() const;
 
-#ifndef _NO_FMOD_SOUND
 		const unsigned int getMusicVolume() const;
 		const unsigned int getSoundVolume() const;
 
@@ -58,7 +57,6 @@ class UI_Configuration
 
 		const bool isMusic() const;
 		const bool isSound() const;
-#endif
 		
 		const bool isGlowingButtons() const;
 		const bool isTransparency() const;
@@ -72,14 +70,13 @@ class UI_Configuration
 		const bool setLanguage(const eLanguage current_language);
 		const bool setTheme(const eTheme current_theme);
 
-#ifndef _NO_FMOD_SOUND
 		const bool setMusicVolume(const unsigned int music_volume);
 		const bool setSoundVolume(const unsigned int sound_volume);
 		const bool setChannels(const unsigned int channel_num);
 		
 		const bool setMusic(const bool use_music);
 		const bool setSound(const bool use_sound);
-#endif
+		
 		const bool setGlowingButtons(const bool glowing_buttons);
 		const bool setTransparency(const bool trans_parency);
 		const bool setSmoothMovements(const bool smooth_movements);
@@ -96,7 +93,6 @@ class UI_Configuration
 		eBitDepth bitdepth;
 		eTheme theme;
 
-#ifndef _NO_FMOD_SOUND
 		unsigned int musicVolume;
 		unsigned int soundVolume;
 
@@ -104,7 +100,7 @@ class UI_Configuration
 	
 		bool useMusic;
 		bool useSound;
-#endif
+		
 		bool glowingButtons;
 		bool transparency;
 		bool smoothMovements;
@@ -143,7 +139,6 @@ inline const eTheme UI_Configuration::getTheme() const {
 	return(theme);
 }
 
-#ifndef _NO_FMOD_SOUND
 inline const unsigned int UI_Configuration::getChannels() const {
 	return(channels);
 }
@@ -163,7 +158,6 @@ inline const bool UI_Configuration::isMusic() const {
 inline const bool UI_Configuration::isSound() const {
 	return(useSound);
 }
-#endif
 
 inline const bool UI_Configuration::isGlowingButtons() const {
 	return(glowingButtons);

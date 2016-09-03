@@ -3,7 +3,6 @@
 
 #include "prebuildorder.hpp"
 #include "program.hpp"
-#include "statistics.hpp"
 
 class ANABUILDORDER : public PREBUILDORDER
 {

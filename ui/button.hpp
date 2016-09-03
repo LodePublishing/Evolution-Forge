@@ -2,6 +2,7 @@
 #define _UI_BUTTON_HPP
 
 #include "statictext.hpp"
+#include "bitmap.hpp"
 
 enum eButtonMode
 {
@@ -28,7 +29,7 @@ class UI_Button : public UI_Object
 				const Rect button_rect, 
 				const Size distance_bottom_right,
 				const eButtonColorsType button_colors_type, 
-				const bool has_bitmap,
+				const eBitmap button_bitmap,
 				const eButtonMode button_mode,
 				
 				const eString button_text, 
@@ -41,7 +42,7 @@ class UI_Button : public UI_Object
 				const Rect button_rect, 
 				const Size distance_bottom_right,
 				const eButtonColorsType button_colors_type, 
-				const bool has_bitmap,
+				const eBitmap button_bitmap,
 				const eButtonMode button_mode,
 				
 				const eString button_text, 
@@ -55,7 +56,7 @@ class UI_Button : public UI_Object
 				const Rect button_rect, 
 				const Size distance_bottom_right, 
 				const eButtonColorsType button_colors_type,
-				const bool has_bitmap,
+				const eBitmap button_bitmap,
 				const eButtonMode button_mode, 
 				
 				const std::string& button_text, 
@@ -77,8 +78,8 @@ class UI_Button : public UI_Object
 		void doHighlight(const bool high_light=true);	// force button to be highlighted
 
 		void check(const bool is_checked=true);
-		void forcePress();	  // force button to get pressed
-		void forceUnpress();
+		void forcePress(const bool click_message=true);	  // force button to get pressed
+		void forceUnpress(const bool click_message=true);
 
 		void updateText(const std::string& utext);
 		void updateText(const eString utext);
@@ -102,6 +103,9 @@ class UI_Button : public UI_Object
 		void draw(DC* dc) const;
 		void setButtonColorsType(const eButtonColorsType button_colors_type);
 		const eButtonColorsType getButtonColorsType() const;
+
+		void setBitmap(const eBitmap button_bitmap);
+		
 		void resetGradient();
 		UI_Radio* radio;
 
@@ -146,11 +150,8 @@ class UI_Button : public UI_Object
 
 		static bool doMouseEnterSound;
 
-	
-		
 		bool moved; // did this item move one pixel down (pressed)
 		bool isOriginalPosition; // always false (not pressed) for non-static buttons
-		bool hasBitmap;
 		bool wasPressed;
 
 		unsigned int gradient;
@@ -160,6 +161,7 @@ class UI_Button : public UI_Object
 		
 		eFont font;
 		eButtonColorsType buttonColorsType;	
+		UI_Bitmap* bitmap;
 		
 		unsigned int statusFlags;
 		unsigned int frameNumber;
@@ -190,8 +192,12 @@ class UI_Button : public UI_Object
 		UI_Button(const UI_Button& object);
 };
 
+inline void UI_Button::setBitmap(const eBitmap button_bitmap) {
+	bitmap->setBitmap(button_bitmap);
+}
+
 inline const bool UI_Button::isBitmapButton() const {
-	return(hasBitmap);
+	return(bitmap != NULL);
 }
 
 inline UI_StaticText* UI_Button::getText() const {
@@ -217,7 +223,7 @@ inline const eButtonColorsType UI_Button::getButtonColorsType() const {
 inline void UI_Button::setButtonColorsType(const eButtonColorsType button_colors_type)
 {
 #ifdef _SCC_DEBUG
-	if((button_colors_type<0)&&(button_colors_type>=MAX_BUTTON_COLORS_TYPES)) {
+	if((button_colors_type<0)||(button_colors_type>=MAX_BUTTON_COLORS_TYPES)) {
 		toErrorLog("WARNING (UI_Button::setButtonColorsType()): Value button_colors_type out of range.");return;
 	}
 #endif

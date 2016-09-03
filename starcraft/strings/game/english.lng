@@ -1,9 +1,9 @@
 @STRINGS
 	@ENGLISH
 						  "NULL_STRING" = "NULL"
-		                                 "TERRA_STRING" = "Terra"
-		                               "PROTOSS_STRING" = "Protoss"
-		                                  "ZERG_STRING" = "Zerg"
+		                                 "TERRA_STRING" = "&Terra"
+		                               "PROTOSS_STRING" = "&Protoss"
+		                                  "ZERG_STRING" = "&Zerg"
 
 					      "MINERALS_STRING" = "Minerals"
 					   "VESPENE_GAS_STRING" = "Gas"

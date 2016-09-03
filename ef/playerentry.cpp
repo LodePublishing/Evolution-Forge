@@ -11,9 +11,9 @@ PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size d
 	scoreMode(SCORE_FULFILL_MODE),
 // TODO UI_Object:: arrange top left :(
 // 
-	playerText(new UI_StaticText(this, "Player 1:", Rect(), Size(0, 0), IMPORTANT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
-	currentActionButton(new UI_Button(this, Rect(), Size(0,0), MY_BUTTON, false, STATIC_BUTTON_MODE, PAUSED_STRING, DO_NOT_ADJUST, MIDDLE_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
-	raceMenuButton(new UI_Button(this, Rect(Point(0, FONT_SIZE+8), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2, 0)), Size(0, 0), TAB_BUTTON, false, STATIC_BUTTON_MODE, CHOOSE_RACE_STRING, DO_NOT_ADJUST, SMALL_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+	playerText(new UI_StaticText(this, "", Rect(), Size(0, 0), IMPORTANT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
+	currentActionButton(new UI_Button(this, Rect(), Size(0,0), STANDARD_BUTTON, NULL_BITMAP, STATIC_BUTTON_MODE, PAUSED_STRING, DO_NOT_ADJUST, MIDDLE_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+	raceMenuButton(new UI_Button(this, Rect(Point(0, FONT_SIZE+8), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2, 0)), Size(0, 0), TAB_BUTTON, NULL_BITMAP, STATIC_BUTTON_MODE, CHOOSE_RACE_STRING, DO_NOT_ADJUST, SMALL_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	raceMenu(new RaceMenu(this, Rect(), Size(0,0), DO_NOT_ADJUST )),
 //	removePlayerButton(new UI_Button(this, Rect(Point(0, 1), Size(8, 8)), Size(5, 0), CANCEL_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST)),
 	scoreText(new UI_StaticText(this, Rect(), Size(5, 0), IMPORTANT_COLOR, LARGE_SHADOW_BOLD_FONT, DO_NOT_ADJUST)),
@@ -43,6 +43,7 @@ PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size d
 		oldScoreCounter[i] = 0;
 		oldScore[i] = MAX_TIME-1;
 	}
+	reloadStrings();
 	process();
 	reloadOriginalSize();
 }
@@ -106,14 +107,16 @@ const bool PlayerEntry::openRaceMenu()
 	}
 }
 
+void PlayerEntry::reloadStrings()
+{
+	playerText->updateText(UI_Object::theme.lookUpFormattedString(PLAYER_STRING, number));
+	UI_Object::reloadStrings();
+}
 
 void PlayerEntry::setNumber(const unsigned int player_number)
 {
 	number = player_number;
-	std::ostringstream os;
-	os.str("");
-	os << "Player " << number << ":";
-	playerText->updateText(os.str());
+	reloadStrings();
 }
 
 PlayerEntry::~PlayerEntry()
@@ -165,7 +168,6 @@ void PlayerEntry::setScore(const unsigned int score)
 	if(score==programScore)
 		return;
 	programScore = score;
-	setNeedRedrawMoved();
 }
 
 void PlayerEntry::setGoalComplete(const unsigned int goal_complete)
@@ -173,7 +175,6 @@ void PlayerEntry::setGoalComplete(const unsigned int goal_complete)
 	if(goal_complete==goalComplete)
 		return;
 	goalComplete = goal_complete;
-	setNeedRedrawMoved();
 }
 
 void PlayerEntry::setOptimizing(const bool opt)
@@ -192,7 +193,6 @@ void PlayerEntry::setInitMode(const eInitMode init_mode)
 		currentActionButton->Show();
 		goalsFulfilledText->Show();	
 	}
-	setNeedRedrawMoved();
 }
 
 void PlayerEntry::setScoreMode(const eScoreMode score_mode)
@@ -200,7 +200,6 @@ void PlayerEntry::setScoreMode(const eScoreMode score_mode)
 	if(score_mode == scoreMode)
 		return;
 	scoreMode = score_mode;
-	setNeedRedrawMoved();
 }
 
 const bool PlayerEntry::isOptimizing() const
@@ -233,7 +232,7 @@ void PlayerEntry::process()
 		if(scoreMode==SCORE_FULFILL_MODE)
 		{
 			goalsFulfilledText->updateToolTip(OF_GOALS_FULFILLED_TOOLTIP_STRING);
-			goalsFulfilledText->updateText(theme.lookUpFormattedString(OF_GOALS_FULFILLED_STRING, goalComplete/100));
+			goalsFulfilledText->updateText(theme.lookUpFormattedString(OF_GOALS_FULFILLED_STRING, goalComplete));
 			if(!isOptimizing()) 
 				currentActionButton->updateText(PAUSED_STRING);
 			else

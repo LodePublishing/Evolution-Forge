@@ -3,7 +3,6 @@
 #ifndef _CORE_BROODWAR_HPP
 #define _CORE_BROODWAR_HPP
 
-#include <string>
 #include "game.hpp"
 
 class BROODWAR : public GAME

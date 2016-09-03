@@ -1,6 +1,7 @@
 //TODO: Problem: auf goals muessen sowohl ueber jeweiligen Ort (also gGoal[MAX_LOCATIONS][MAX_GOALS]), als auch einzelne Goals, wenn z.B. nach 5 und 10 Minuten 3 und 5 Marines an einem Ort sein sollen...
 
 #include "starcraft.hpp"
+#include <string>
 
 STARCRAFT::STARCRAFT() : 
 	GAME()
@@ -30,16 +31,17 @@ void STARCRAFT::init()
 	RESOURCE::MAX_RESOURCE_PROVIDER_PER_LOCATION = 32;
 	RESOURCE::MAX_RESOURCE_DISTANCE = 10;
 
+	GAME::race.resize(GAME::MAX_RACES);
+	GAME::race[TERRA].raceString = "Terra";
+	GAME::race[PROTOSS].raceString = "Protoss";
+	GAME::race[ZERG].raceString = "Zerg";
+
 	for(unsigned int i = GAME::MAX_RACES; i--;)
 	{
 		GAME::race[i].resource.resize(RACE::MAX_RESOURCE_TYPES);
 		GAME::race[i].stats.resize(RACE::UNIT_TYPE_COUNT);
 	}
 
-	GAME::race.resize(GAME::MAX_RACES);
-	GAME::race[TERRA].raceString = "Terra";
-	GAME::race[PROTOSS].raceString = "Protoss";
-	GAME::race[ZERG].raceString = "Zerg";
 
 	GAME::gameDirectory = "starcraft";
 

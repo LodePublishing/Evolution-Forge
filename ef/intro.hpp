@@ -12,12 +12,18 @@ class IntroWindow : public UI_Window
 		void process();
 		void draw(DC* dc) const;
 		void reloadOriginalSize();
-		void init();	
+		void init();
+		const unsigned int getGameType() const;
 	private:
 		bool was_initialized;
 		UI_LongText* text;
 		UI_Button* doneButton;
+		unsigned int gameType;
 };
+
+inline const unsigned int IntroWindow::getGameType() const {
+	return(gameType);
+}
 
 #endif
 

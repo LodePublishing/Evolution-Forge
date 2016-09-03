@@ -225,7 +225,6 @@ void Game::setMode(const unsigned int game_number, const unsigned int game_max)
 	
 // ---------------	
 	reloadOriginalSize();
-	setNeedRedrawMoved();
 
 //	if((game_max>1)||(game_number==1))
 //		splitGameButton->Hide();
@@ -244,6 +243,7 @@ void Game::draw(DC* dc) const
 		return;
 	UI_Object::theme.setColorTheme(UI_Object::theme.getMainColorTheme());
 	UI_Object::draw(dc);
+	UI_Object::theme.setColorTheme(UI_Object::theme.getMainColorTheme());
 }
 
 void Game::doReset()
@@ -277,8 +277,12 @@ void Game::process()
 	if(!isShown())
 		return;
 
-	if(checkForNeedRedraw())
-		setNeedRedrawMoved();
+/*	for(unsigned int i = MAX_PLAYER;i--;)
+		if(player[i]->checkForNeedRedraw())
+		{
+			setNeedRedrawMoved();
+			break;
+		}*/ // TODO !
 
 	UI_Window::process();
 

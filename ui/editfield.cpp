@@ -8,7 +8,7 @@ UI_EditField::UI_EditField(UI_Object* edit_parent, const Rect& edit_rect, const 
 	ani(5),
 	pressedEnter(false),
 	pressedEscape(false),
-	editField(new UI_Button(this, Rect(Point(120, 0), Size(200, FONT_SIZE+8)), Size(0,0), EDIT_FIELD_BUTTON, false, TAB_BUTTON_MODE, name_proposal, SPECIAL_BUTTON_LEFT, st_font)),
+	editField(new UI_Button(this, Rect(Point(120, 0), Size(200, FONT_SIZE+8)), Size(0,0), EDIT_FIELD_BUTTON, NULL_BITMAP, TAB_BUTTON_MODE, name_proposal, SPECIAL_BUTTON_LEFT, st_font)),
 	descriptionText(new UI_StaticText(this, description_text, Rect(Point(0, 2), Size(100, FONT_SIZE+8)), Size(0,0), FORCE_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST))
 
 { }
@@ -19,7 +19,7 @@ UI_EditField::UI_EditField(UI_Object* edit_parent, const Rect& edit_rect, const 
 	ani(5),
 	pressedEnter(false),
 	pressedEscape(false),
-	editField(new UI_Button(this, Rect(Point(120, 0), Size(200, FONT_SIZE+8)), Size(0,0), EDIT_FIELD_BUTTON, false, TAB_BUTTON_MODE, name_proposal, SPECIAL_BUTTON_LEFT, st_font)),
+	editField(new UI_Button(this, Rect(Point(120, 0), Size(200, FONT_SIZE+8)), Size(0,0), EDIT_FIELD_BUTTON, NULL_BITMAP, TAB_BUTTON_MODE, name_proposal, SPECIAL_BUTTON_LEFT, st_font)),
 	descriptionText(new UI_StaticText(this, description_text, Rect(Point(0, 2), Size(100, FONT_SIZE+8)), Size(0,0), FORCE_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST))
 
 { }

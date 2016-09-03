@@ -2,9 +2,9 @@
 #define _CORE_PROGRAM_HPP
 
 #include "statistics.hpp"
+#include "configuration.hpp"
 #include "building.hpp"
 
-#include <vector>
 #include <queue>
 
 class PROGRAM

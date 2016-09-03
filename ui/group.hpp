@@ -26,8 +26,8 @@ class UI_Group : public UI_Object
 		void reloadOriginalSize();
 
 		void alignWidth(const unsigned int width);
-	private:
 		void calculateBoxSize();
+	private:
 		UI_StaticText* title;
 		unsigned int number;
 		bool highlighted;

@@ -54,7 +54,7 @@ SDL_Cursor* DC::createCursor(char* xpm_image[])
 				data[i] = mask[i] = 0;
 			}
 			switch (xpm_image[4+row][col]) {
-				case 'X':
+				case '+':
 					data[i] |= 0x01;
 					mask[i] |= 0x01;
 					break;
@@ -168,6 +168,66 @@ void DC::updateScreen()
 
 	SDL_UpdateRects(surface, changedRectangles, changedRectangle);
 	changedRectangles=0;
+}
+
+void DC::DrawBrightenedBitmap(SDL_Surface* bitmap, const signed x, const signed y, const Rect& clip_rect, const unsigned int brightness) const
+{
+//	if(brightness == 100)
+//	{
+		SDL_SetAlpha(bitmap, SDL_SRCALPHA, brightness * 255 / 100);
+		DrawBitmap(bitmap, x, y, clip_rect);
+		SDL_SetAlpha(bitmap, SDL_SRCALPHA, 255);
+		return;
+//	}
+	double brightness_percent = brightness / 100;
+	SDL_Surface* neu = SDL_CreateRGBSurface(SDL_SWSURFACE, bitmap->w, bitmap->h, 8, 0, 0, 0, 0);
+	Uint32* pc = (Uint32*)(bitmap->pixels);
+	Uint32* dst = (Uint32*)(neu->pixels);
+
+	for(unsigned int i = bitmap->w * bitmap->h; i--;)
+	{
+		Uint8 r,g,b;
+		SDL_GetRGB(*pc, bitmap->format, &r, &g, &b);
+//		r = r/2;// * brightness_percent; if(r > 255) r = 255;
+//		g = g/2;// * brightness_percent; if(g > 255) g = 255;
+//		b = b/2;// * brightness_percent; if(b > 255) b = 255;
+		*dst = SDL_MapRGB(bitmap->format, r, g, b);
+		++pc;
+		++dst;
+	}
+	DrawBitmap(neu, x, y, clip_rect);
+	SDL_FreeSurface(neu);
+}
+
+void DC::DrawBrightenedBitmap(SDL_Surface* bitmap, const signed x, const signed y, const unsigned int brightness) const
+{
+//	if(brightness == 100)
+//	{
+		SDL_SetAlpha(bitmap, SDL_SRCALPHA, brightness * 255 / 100);
+		DrawBitmap(bitmap, x, y);
+		SDL_SetAlpha(bitmap, SDL_SRCALPHA, 255);
+		return;
+//	}
+
+	double brightness_percent = brightness / 100;
+	SDL_Surface* neu = SDL_CreateRGBSurface(SDL_SWSURFACE, bitmap->w, bitmap->h, 8, 0, 0, 0, 0);
+	Uint32* pc = (Uint32*)(bitmap->pixels);
+	Uint32* dst = (Uint32*)(neu->pixels);
+
+	for(unsigned int i = bitmap->w * bitmap->h; i--;)
+	{
+		Uint8 r,g,b;
+		SDL_GetRGB(*pc, bitmap->format, &r, &g, &b);
+//		r = r /2;//* brightness_percent; if(r > 255) r = 255;
+//		g = g /2;//* brightness_percent; if(g > 255) g = 255;
+//		b = b /2;//* brightness_percent; if(b > 255) b = 255;
+//		*((Uint32*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((Xcenter - radius)<<2) )) = pen_col;
+		*dst = SDL_MapRGB(bitmap->format, r, g, b);
+		++pc;
+		++dst;
+	}
+	DrawBitmap(neu, x, y);
+	SDL_FreeSurface(neu);
 }
 
 void DC::DrawBitmap(SDL_Surface* bitmap, const signed int x, const signed int y) const

@@ -159,7 +159,7 @@
 @MAIN
 	@640x480
 		Main window, 640, 480, 480, absolute coordinates, 0, 0
-		Intro window, 600, 400, 400, dock center inside of, Main window
+		Intro window, 600, 470, 470, dock center inside of, Main window
 		Message window, 180, 75, 75, absolute x coordinate, 205, dock bottom inside of, Main window
 		Help window, 600, 400, 400, dock center inside of, Main window
 		Settings window, 300, 400, 460, dock center inside of, Main window
@@ -168,12 +168,12 @@
 		Map window, 600, 450, 450, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 500, 200, 200, dock bottom center inside of, Main window
-		Save box window, 350, 150, 150, dock bottom center inside of, Main window
+		Save box window, 350, 150, 150, dock center inside of, Main window
 		Debug window, 80, 75, 75, dock with right border of, Message window, dock bottom inside of, Main window
 	@END
 	@800x600
 		Main window, 800, 600, 600, absolute coordinates, 0, 0
-		Intro window, 750, 500, 500, dock center inside of, Main window
+		Intro window, 750, 580, 550, dock center inside of, Main window
 		Message window, 230, 125, 125, absolute x coordinate, 250, dock bottom inside of, Main window
 		Help window, 750, 500, 500, dock center inside of, Main window
 		Settings window, 325, 400, 450, dock center inside of, Main window
@@ -182,13 +182,13 @@
 		Map window, 750, 550, 550, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 600, 250, 250, dock bottom center inside of, Main window
-		Save box window, 400, 150, 150, dock bottom center inside of, Main window
+		Save box window, 400, 150, 150, dock center inside of, Main window
 		Debug window, 105, 125, 125, dock with right border of, Message window, dock bottom inside of, Main window
 	@END
 	
 	@1024x768
 		Main window, 1024, 768, 768, Main window, absolute coordinates, 0, 0
-		Intro window, 900, 600, 600, dock center inside of, Main window
+		Intro window, 900, 700, 700, dock center inside of, Main window
 		Message window, 289, 160, 160, absolute x coordinate, 310, dock bottom inside of, Main window
 		Help window, 900, 600, 600, dock center inside of, Main window
 		Settings window, 350, 350, 450, dock center inside of, Main window
@@ -197,12 +197,12 @@
 		Map window, 950, 700, 700, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 700, 300, 300, dock bottom center inside of, Main window
-		Save Box window, 400, 150, 150, dock bottom center inside of, Main window
+		Save Box window, 400, 150, 150, dock center inside of, Main window
 		Debug window, 200, 160, 160, dock with right border of, Message window, dock bottom inside of, Main window
 	@END
 	@1280x1024
 		Main window, 1280, 1024, 1024, Main window, absolute coordinates, 0, 0
-		Intro window, 1100, 900, 700, dock center inside of, Main window
+		Intro window, 1100, 950, 950, dock center inside of, Main window
 		Message window, 400, 180, 180, absolute x coordinate, 360, dock bottom inside of, Main window
 		Help window, 1100, 900, 700, dock center inside of, Main window
 		Settings window, 375, 450, 510, dock center inside of, Main window
@@ -211,73 +211,13 @@
 		Map window, 1200, 900, 900, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 800, 350, 350, dock bottom center inside of, Main window
-		Save Box window, 450, 150, 150, dock bottom center inside of, Main window
+		Save Box window, 450, 150, 150, dock center inside of, Main window
 		Debug window, 265, 180, 180, dock with right border of, Message window, dock bottom inside of, Main window
 	@END
 @END
 
 
 @COLORS
-	@DARK_RED_THEME
-		0,   0,   0
-# Text color
-		1,   1,   1
-# window text color
-		150, 150, 200
-# bright window text color
-		200, 200, 250
-# title color
-		100, 100, 200
-# important text (time etc. red in the original)
-		200,   0,   0
-# fulfilled & not fulfilled
-		0, 100,   0
-		100,   0,   0
-# force add goal button color
-		0, 200,   0
-# force text color
-		50, 150,  50
-# big text buttons color 10
-		255, 255, 255
-# bodiagram
-# bright minerals text color
-		180, 180, 255
-# bright gas text color
-		140, 255, 140
-# supply text color
-		160, 160, 160
-# bright supply text color
-		220, 220, 220
-# timesteps text color
-		50, 200,  50
-# minerals text color
-		80,  80, 255
-# gas text color
-		40, 255,  40
-# 	time text color
-		255, 255,  40
-# statistics force text color
-		40, 255, 255
-#   bo length text color 
-		100, 150, 200
-# 	fitness average text color
-		200, 200, 200
-#   fitness variance text color
-		100, 100, 100
-#	generations left text color
-		200,   0,   0
-#  fps text color
-		255, 255, 255
-#  fitness diagram text color
-		200,  40,  40
-# bright fitness diagram text color
-		255,  80,  80
-# disabled text color
-		100,   80,   80
-# dark important text for bright backgrounds
-		100,   0,   0
-	@END
-
 	@DARK_BLUE_THEME
 		0,   0,   0
 # Text color
@@ -290,7 +230,7 @@
 		100, 100, 200
 # important text (time etc. red in the original)
 		200,   0,   0
-# fulfilled & not fulfilled
+# fulfilled and not fulfilled
 		0, 100,   0
 		100,   0,   0
 # force add goal button color
@@ -396,6 +336,65 @@
 # dark important text for bright backgrounds
 		100,   0,   0	
 	@END
+	@DARK_RED_THEME
+		0,   0,   0
+# Text color
+		1,   1,   1
+# window text color
+		150, 150, 200
+# bright window text color
+		200, 200, 250
+# title color
+		100, 100, 200
+# important text (time etc. red in the original)
+		200,   0,   0
+# fulfilled & not fulfilled
+		0, 100,   0
+		100,   0,   0
+# force add goal button color
+		0, 200,   0
+# force text color
+		50, 150,  50
+# big text buttons color 10
+		255, 255, 255
+# bodiagram
+# bright minerals text color
+		180, 180, 255
+# bright gas text color
+		140, 255, 140
+# supply text color
+		160, 160, 160
+# bright supply text color
+		220, 220, 220
+# timesteps text color
+		50, 200,  50
+# minerals text color
+		80,  80, 255
+# gas text color
+		40, 255,  40
+# 	time text color
+		255, 255,  40
+# statistics force text color
+		40, 255, 255
+#   bo length text color 
+		100, 150, 200
+# 	fitness average text color
+		200, 200, 200
+#   fitness variance text color
+		100, 100, 100
+#	generations left text color
+		200,   0,   0
+#  fps text color
+		255, 255, 255
+#  fitness diagram text color
+		200,  40,  40
+# bright fitness diagram text color
+		255,  80,  80
+# disabled text color
+		100,   80,   80
+# dark important text for bright backgrounds
+		100,   0,   0
+	@END
 	@GREEN_THEME
 		0,   0,   0
 # Text color
@@ -455,7 +454,6 @@
 # dark important text for bright backgrounds
 		  0, 100,   0	  
 	@END
-
 	@GREY_THEME
 		0,   0,   0
 # Text color
@@ -518,113 +516,13 @@
 @END
 
 @PENS
-	@DARK_RED_THEME
-# null pen
-		1,   0,   0,   0, TRANSPARENT
-# border pen
-		1,  100,  40, 30, SOLID
-# outer border pen
-		1,   80,  50, 20, SOLID
-# inner border pen
-		1,  80,  0,  0, SOLID
-# inner border higlight pen
-		1,  100, 50, 50, SOLID
-# big buttons pen
-		1, 155, 100, 100, SOLID
-# rectangle pen
-		1,   0,   0,   0, SOLID
-# marked bitmap pen
-		1, 255, 255, 255, SOLID
-# dashed minerals pen was width 2
-		1, 120, 120, 255, SHORT_DASH
-# dashed gas pen was width 2
-		1,  80, 255,  80, SHORT_DASH
-# dashed supply pen was width 2
-		1, 160, 160, 160, SHORT_DASH
-# dashed marker pen was width 2
-		1, 150,   0,   0, SHORT_DASH
-# select pen
-		1, 100, 200, 100, SOLID
-# dark background button pen
-		1,   0,   5,  10, SOLID	
-# marked bitmap green
-		1,   0, 255,   0, SOLID	
-# marked bitmap yellow
-		1, 100, 100,   0, SOLID	
-# marked bitmap red
-		1, 200,   0,   0, SOLID
-# basic bitmap pen
-		1, 255,  255,  255, SOLID
-# bodiagram supply, mins, gas pen
-		1,  60,   60,   60, SOLID
-		1,  80,   80,  255, SOLID
-		1,  40,  255,   40, SOLID
-		2, 120,  120,  120, SOLID
-		2,  80,   80,  255, SOLID
-		2,  40,  255,   40, SOLID
-# unit list colors:
-		1,  25,  25,  25, SOLID
-		1,  75,  75,  75, SOLID
-		1,  50, 100,  50, SOLID
-		1, 100,  50,  50, SOLID
-		1, 100,  50, 100, SOLID
-		1,  50,  50, 100, SOLID
-		1,  50, 100, 100, SOLID
-		1, 100, 100,  50, SOLID
-		1,  50,  50,  75, SOLID
-		1,  75,  50,  50, SOLID
-		1,  50,  75,  50, SOLID
-	
-		2,  25,  25,  25, SOLID
-		2,  75,  75,  75, SOLID
-		2,  50, 100,  50, SOLID
-		2, 100,  50,  50, SOLID
-		2, 100,  50, 100, SOLID
-		2,  50,  50, 100, SOLID
-		2,  50, 100, 100, SOLID
-		2, 100, 100,  50, SOLID
-		2,  50,  50,  75, SOLID
-		2,  75,  50,  50, SOLID
-		2,  50,  75,  50, SOLID
-		
-# bright unit list colors:
-		1,  60,  60,  60, SOLID
-		1, 150, 150, 150, SOLID
-		1,  75, 225,  75, SOLID
-		1, 225,  75,  75, SOLID
-		1, 225,  75, 225, SOLID
-		1,  75,  75, 225, SOLID
-		1,  75, 225, 225, SOLID
-		1, 225, 225,  75, SOLID
-		1,  75,  75, 150, SOLID
-		1, 150,  75,  75, SOLID
-		1,  75, 150,  75, SOLID
-
-		2,  60,  60,  60, SOLID
-		2, 150, 150, 150, SOLID
-		2,  75, 225,  75, SOLID
-		2, 225,  75,  75, SOLID
-		2, 225,  75, 225, SOLID
-		2,  75,  75, 225, SOLID
-		2,  75, 225, 225, SOLID
-		2, 225, 225,  75, SOLID
-		2,  75,  75, 150, SOLID
-		2, 150,  75,  75, SOLID
-		2,  75, 150,  75, SOLID
-# green timesteps pen
-		1,  20, 100,  20, SOLID
-# fitness diagram pen
-		2, 155,  40,  40, SOLID
-# disabled border pen
-		1, 110, 100, 100, SOLID
-	@END
 	@DARK_BLUE_THEME
 # null pen
 		1,   0,   0,   0, TRANSPARENT
 # border pen
 		1,  40,  30, 120, SOLID
 # outer border pen
-		1,   10,  25, 50, SOLID
+		1,  20,  50, 80, SOLID
 # inner border pen
 		1,  0,  0,  100, SOLID
 # inner border higlight pen
@@ -822,6 +720,107 @@
 # disabled border pen
 		1, 105, 105, 100, SOLID
 	@END
+	@DARK_RED_THEME
+# null pen
+		1,   0,   0,   0, TRANSPARENT
+# border pen
+		1,  100,  40, 30, SOLID
+# outer border pen
+		1,   80,  50, 20, SOLID
+# inner border pen
+		1,  80,  0,  0, SOLID
+# inner border higlight pen
+		1,  100, 50, 50, SOLID
+# big buttons pen
+		1, 155, 100, 100, SOLID
+# rectangle pen
+		1,   0,   0,   0, SOLID
+# marked bitmap pen
+		1, 255, 255, 255, SOLID
+# dashed minerals pen was width 2
+		1, 120, 120, 255, SHORT_DASH
+# dashed gas pen was width 2
+		1,  80, 255,  80, SHORT_DASH
+# dashed supply pen was width 2
+		1, 160, 160, 160, SHORT_DASH
+# dashed marker pen was width 2
+		1, 150,   0,   0, SHORT_DASH
+# select pen
+		1, 100, 200, 100, SOLID
+# dark background button pen
+		1,   0,   5,  10, SOLID	
+# marked bitmap green
+		1,   0, 255,   0, SOLID	
+# marked bitmap yellow
+		1, 100, 100,   0, SOLID	
+# marked bitmap red
+		1, 200,   0,   0, SOLID
+# basic bitmap pen
+		1, 255,  255,  255, SOLID
+# bodiagram supply, mins, gas pen
+		1,  60,   60,   60, SOLID
+		1,  80,   80,  255, SOLID
+		1,  40,  255,   40, SOLID
+		2, 120,  120,  120, SOLID
+		2,  80,   80,  255, SOLID
+		2,  40,  255,   40, SOLID
+# unit list colors:
+		1,  25,  25,  25, SOLID
+		1,  75,  75,  75, SOLID
+		1,  50, 100,  50, SOLID
+		1, 100,  50,  50, SOLID
+		1, 100,  50, 100, SOLID
+		1,  50,  50, 100, SOLID
+		1,  50, 100, 100, SOLID
+		1, 100, 100,  50, SOLID
+		1,  50,  50,  75, SOLID
+		1,  75,  50,  50, SOLID
+		1,  50,  75,  50, SOLID
+	
+		2,  25,  25,  25, SOLID
+		2,  75,  75,  75, SOLID
+		2,  50, 100,  50, SOLID
+		2, 100,  50,  50, SOLID
+		2, 100,  50, 100, SOLID
+		2,  50,  50, 100, SOLID
+		2,  50, 100, 100, SOLID
+		2, 100, 100,  50, SOLID
+		2,  50,  50,  75, SOLID
+		2,  75,  50,  50, SOLID
+		2,  50,  75,  50, SOLID
+		
+# bright unit list colors:
+		1,  60,  60,  60, SOLID
+		1, 150, 150, 150, SOLID
+		1,  75, 225,  75, SOLID
+		1, 225,  75,  75, SOLID
+		1, 225,  75, 225, SOLID
+		1,  75,  75, 225, SOLID
+		1,  75, 225, 225, SOLID
+		1, 225, 225,  75, SOLID
+		1,  75,  75, 150, SOLID
+		1, 150,  75,  75, SOLID
+		1,  75, 150,  75, SOLID
+
+		2,  60,  60,  60, SOLID
+		2, 150, 150, 150, SOLID
+		2,  75, 225,  75, SOLID
+		2, 225,  75,  75, SOLID
+		2, 225,  75, 225, SOLID
+		2,  75,  75, 225, SOLID
+		2,  75, 225, 225, SOLID
+		2, 225, 225,  75, SOLID
+		2,  75,  75, 150, SOLID
+		2, 150,  75,  75, SOLID
+		2,  75, 150,  75, SOLID
+# green timesteps pen
+		1,  20, 100,  20, SOLID
+# fitness diagram pen
+		2, 155,  40,  40, SOLID
+# disabled border pen
+		1, 110, 100, 100, SOLID
+	@END
+
 	@GREEN_THEME
 # null pen
 		1,   0,   0,   0, TRANSPARENT
@@ -1026,75 +1025,6 @@
 @END
 
 @BRUSHES
-
-	@DARK_RED_THEME
-		0,   0,   0, SOLID
-# main window is transparent
-		0,   0,   0, TRANSPARENT
-# window foreground
-		15,  10,  10, SOLID
-# window background
-		30,  15,  5, SOLID
-# bo dark color
-		125,  40, 40, SOLID
-# bo bright color
-		225,  75,  75, SOLID
-# force list color
-		150,   50, 50, SOLID
-
-# force add goal button brush
-		50,   50,  50, SOLID
-
-# unit list colors:
-		15,  15,  15, SOLID
-		35,  35,  35, SOLID
-		 0,  75,   0, SOLID
-		75,   0,   0, SOLID
-		75,   0,  75, SOLID
-		 0,   0,  75, SOLID
-		 0,  75,  75, SOLID
-		75,  75,   0, SOLID
-		 0,   0,  35, SOLID
-		35,   0,   0, SOLID
-		 0,  35,   0, SOLID
-
-# bright unit list colors:
-		30,  30,  30, SOLID
-		110, 110, 110, SOLID
-		35, 180,  35, SOLID
-		180,  35,  35, SOLID
-		180,  35, 180, SOLID
-		35,  35, 180, SOLID
-		35, 180, 180, SOLID
-		180, 180,  35, SOLID
-		35,  35, 110, SOLID
-		110,  35,  35, SOLID
-		35, 110,  35, SOLID
-		
-		255, 255, 255, SOLID
-
-# continue button brush
-		125,  50, 50, SOLID
-		50,  20,  20, SOLID
-		200, 125, 125, SOLID
-
-
-# bodiagram background brush
-		30,  30,  30, CROSS_HATCH
-		50,  50,  50, CROSS_HATCH
-# bodiagram bar.jpg 
-		40,  40,  40, SOLID
-# supply brush
-		120, 120, 120, SOLID
-# statistics window (generations left brush)
-#		40,  40, 100, SOLID
-		100,  40, 40, SOLID
-# tooltip
-		200, 200,  20, SOLID
-# disabled item
-		60,   50,  50, SOLID
-	@END
-
 	@DARK_BLUE_THEME
 		0,   0,   0, SOLID
 # main window is transparent
@@ -1225,6 +1155,74 @@
 # disabled item
 		55,   55,  50, SOLID
 	@END
+	@DARK_RED_THEME
+		0,   0,   0, SOLID
+# main window is transparent
+		0,   0,   0, TRANSPARENT
+# window foreground
+		15,  10,  10, SOLID
+# window background
+		30,  15,  5, SOLID
+# bo dark color
+		125,  40, 40, SOLID
+# bo bright color
+		225,  75,  75, SOLID
+# force list color
+		150,   50, 50, SOLID
+
+# force add goal button brush
+		50,   50,  50, SOLID
+
+# unit list colors:
+		15,  15,  15, SOLID
+		35,  35,  35, SOLID
+		 0,  75,   0, SOLID
+		75,   0,   0, SOLID
+		75,   0,  75, SOLID
+		 0,   0,  75, SOLID
+		 0,  75,  75, SOLID
+		75,  75,   0, SOLID
+		 0,   0,  35, SOLID
+		35,   0,   0, SOLID
+		 0,  35,   0, SOLID
+
+# bright unit list colors:
+		30,  30,  30, SOLID
+		110, 110, 110, SOLID
+		35, 180,  35, SOLID
+		180,  35,  35, SOLID
+		180,  35, 180, SOLID
+		35,  35, 180, SOLID
+		35, 180, 180, SOLID
+		180, 180,  35, SOLID
+		35,  35, 110, SOLID
+		110,  35,  35, SOLID
+		35, 110,  35, SOLID
+		
+		255, 255, 255, SOLID
+
+# continue button brush
+		125,  50, 50, SOLID
+		50,  20,  20, SOLID
+		200, 125, 125, SOLID
+
+
+# bodiagram background brush
+		30,  30,  30, CROSS_HATCH
+		50,  50,  50, CROSS_HATCH
+# bodiagram bar.jpg 
+		40,  40,  40, SOLID
+# supply brush
+		120, 120, 120, SOLID
+# statistics window (generations left brush)
+#		40,  40, 100, SOLID
+		100,  40, 40, SOLID
+# tooltip
+		200, 200,  20, SOLID
+# disabled item
+		60,   50,  50, SOLID
+	@END
+
 
 	@GREEN_THEME
 		0,   0,   0, SOLID
@@ -1364,8 +1362,8 @@
 
 # TODO: keine einfache Liste sondern Namen fuer die Bilder vergeben, wie bei STRINGS auch... alle nicht aufgefuehrten Namen in zwei Ebenen (Theme und Resolution) aufgeteilten generellen Bitmaps legen.
 
-# bitmaps independant from theme and resolution
-@GENERAL_BITMAPS
+# bitmaps independant from theme
+@BITMAPS
 	"NULL_BITMAP" = "null"
 	"INCREASE_BITMAP" = "increase"
 	"SUB_BITMAP" = "sub"
@@ -1384,9 +1382,9 @@
 	"KEY_BITMAP" = "key.bmp"
 	"CLAWSOFTWARE_BITMAP" = "clawsoftware.jpg", (SOLID)
 	"CLAWSOFTWARE_MONO_BITMAP" = "clawsoftware.png", (SOLID)
-	"HELP_BITMAP" = "help"
-	"MAP_BITMAP" = "map"
-	"SETTING_BITMAP" = "settings"
+	"HELP_BITMAP" = "help", (SCALE)
+	"MAP_BITMAP" = "map", (SCALE)
+	"SETTING_BITMAP" = "settings", (SCALE)
 	"SCORE_ACTIVE_BITMAP" = "score_active.jpg"
 	"SCORE_EMPTY_BITMAP" = "score_empty.jpg"
 	"FORCE_WINDOW_BITMAP" = "force_window.jpg"
@@ -1411,80 +1409,25 @@
 	"COOL_BITMAP" = "cool.gif"
 	"BIGGRIN_BITMAP" = "biggrin.gif"
 	"BIGGRINHAT_BITMAP" = "biggrinhat.gif"
+	"THE_QUESTION_BITMAP" = "question.jpg", (SOLID)
+	
+	"BACKGROUND_SC_BITMAP" = "back_sc.jpg", (SOLID), (SCALE)
+	"BACKGROUND_WH40K_BITMAP" = "back_wh40k.jpg", (SOLID), (SCALE)
+	"TITLE_SC_BITMAP" = "title_sc.jpg", (SOLID), (SCALE)
+	"TITLE_BW_BITMAP" = "title_bw.jpg", (SOLID), (SCALE)
+	"TITLE_WC3_BITMAP" = "title_wc3.jpg", (SOLID), (SCALE)
+	"NEW_BITMAP" = "new", (SCALE)
+	"LOAD_BITMAP" = "open", (SCALE)
+	"SAVE_BITMAP" = "save", (SCALE)
+	"REFRESH_BITMAP" = "refresh", (SCALE)
+	"BACK_BITMAP" = "back", (SCALE)
+	"FORWARD_BITMAP" = "forward", (SCALE)
+	"ADD_BITMAP" = "add", (SCALE)
+	"DELETE_BITMAP" = "delete", (SCALE)
 @END
 
-# bitmaps independant from themes
-@GENERAL_RESOLUTION_BITMAPS
-	@640x480
-		"BACKGROUND_SC_BITMAP" = "back_sc_640.jpg", (SOLID)
-		"BACKGROUND_WH40K_BITMAP" = "back_wh40k_640.jpg", (SOLID)
-		"TITLE_SC_BITMAP" = "title_sc_640.jpg", (SOLID)
-		"TITLE_BW_BITMAP" = "title_bw_640.jpg", (SOLID)
-		"TITLE_WC3_BITMAP" = "title_wc3_640.jpg", (SOLID)
-		"NEW_BITMAP" = "new_640"
-		"LOAD_BITMAP" = "open_640"
-		"SAVE_BITMAP" = "save_640"
-		"REFRESH_BITMAP" = "refresh_640"
-		"BACK_BITMAP" = "back_640"
-		"FORWARD_BITMAP" = "forward_640"
-		"ADD_BITMAP" = "add_640"
-		"DELETE_BITMAP" = "delete_640"	
-	@END
-	@800x600
-		"BACKGROUND_SC_BITMAP" = "back_sc_800.jpg", (SOLID)
-		"BACKGROUND_WH40K_BITMAP" = "back_wh40k_800.jpg", (SOLID)
-		"TITLE_SC_BITMAP" = "title_sc_800.jpg", (SOLID)
-		"TITLE_BW_BITMAP" = "title_bw_800.jpg", (SOLID)
-		"TITLE_WC3_BITMAP" = "title_wc3_800.jpg", (SOLID)
-		"NEW_BITMAP" = "new_800"
-		"LOAD_BITMAP" = "open_800"
-		"SAVE_BITMAP" = "save_800"
-		"REFRESH_BITMAP" = "refresh_800"
-		"BACK_BITMAP" = "back_800"
-		"FORWARD_BITMAP" = "forward_800"
-		"ADD_BITMAP" = "add_800"
-		"DELETE_BITMAP" = "delete_800"	
-	@END
-	@1024x768
-		"BACKGROUND_SC_BITMAP" = "back_sc_1024.jpg", (SOLID)
-		"BACKGROUND_WH40K_BITMAP" = "back_wh40k_1024.jpg", (SOLID)
-		"TITLE_SC_BITMAP" = "title_sc_1024.jpg", (SOLID)
-		"TITLE_BW_BITMAP" = "title_bw_1024.jpg", (SOLID)
-		"TITLE_WC3_BITMAP" = "title_wc3_1024.jpg", (SOLID)
-		"NEW_BITMAP" = "new_1024"
-		"LOAD_BITMAP" = "open_1024"
-		"SAVE_BITMAP" = "save_1024"
-		"REFRESH_BITMAP" = "refresh_1024"
-		"BACK_BITMAP" = "back_1024"
-		"FORWARD_BITMAP" = "forward_1024"
-		"ADD_BITMAP" = "add_1024"
-		"DELETE_BITMAP" = "delete_1024"	
-	@END
-	@1280x1024
-		"BACKGROUND_SC_BITMAP" = "back_sc_1280.jpg", (SOLID)
-		"BACKGROUND_WH40K_BITMAP" = "back_wh40k_1280.jpg", (SOLID)
-		"TITLE_SC_BITMAP" = "title_sc_1280.jpg", (SOLID)
-		"TITLE_BW_BITMAP" = "title_bw_1280.jpg", (SOLID)
-		"TITLE_WC3_BITMAP" = "title_wc3_1280.jpg", (SOLID)
-		"NEW_BITMAP" = "new_1280"
-		"LOAD_BITMAP" = "open_1280"
-		"SAVE_BITMAP" = "save_1280"
-		"REFRESH_BITMAP" = "refresh_1280"
-		"BACK_BITMAP" = "back_1280"
-		"FORWARD_BITMAP" = "forward_1280"
-		"ADD_BITMAP" = "add_1280"
-		"DELETE_BITMAP" = "delete_1280"	
-	@END
-@END
-
-# bitmaps independant from resolution
-@GENERAL_THEME_BITMAPS
-	@DARK_RED_THEME
-		"RADIO_OFF" = "red_radio_off"
-		"RADIO_ON" = "red_radio_on"
-		"BULLET_BITMAP" = "red_bullet"
-	@END
-
+# bitmaps dependant from theme
+@THEME_BITMAPS
 	@DARK_BLUE_THEME
 		"RADIO_OFF" = "blue_radio_off"
 		"RADIO_ON" = "blue_radio_on"
@@ -1496,6 +1439,12 @@
 		"RADIO_ON" = "yellow_radio_on"
 		"BULLET_BITMAP" = "yellow_bullet"
 	@END
+	@DARK_RED_THEME
+		"RADIO_OFF" = "red_radio_off"
+		"RADIO_ON" = "red_radio_on"
+		"BULLET_BITMAP" = "red_bullet"
+	@END
+
 
 	@GREEN_THEME
 		"RADIO_OFF" = "green_radio_off"
@@ -1510,60 +1459,6 @@
 	@END
 @END
 
-@BITMAPS
-	@640x480
-		@DARK_RED_THEME
-		@END
-		@DARK_BLUE_THEME
-		@END
-		@YELLOW_THEME
-		@END
-		@GREEN_THEME
-		@END
-		@GREY_THEME
-		@END
-	@END
-	@800x600
-		@DARK_RED_THEME
-		@END
-		@DARK_BLUE_THEME
-		@END
-		@YELLOW_THEME
-		@END
-		@GREEN_THEME
-		@END
-		@GREY_THEME
-		@END
-	@END
-
-	@1024x768
-		@DARK_RED_THEME
-		@END
-		@DARK_BLUE_THEME
-		@END
-		@YELLOW_THEME
-		@END
-		@GREEN_THEME
-		@END
-		@GREY_THEME
-		@END
-	@END
-	@1280x1024
-		@DARK_RED_THEME
-		@END
-		@DARK_BLUE_THEME
-		@END
-		@YELLOW_THEME
-		@END
-		@GREEN_THEME
-		@END
-		@GREY_THEME
-		@END
-	@END
-
-@END
-
-
 #00111
 #00011
 #00000
@@ -1573,114 +1468,53 @@
 
 
 @BUTTON_COLORS
-# speed, type, startbrush, endbrush, starttextcolor, endtextcolor, startborderpen, endborderpen, bitmap
+# speed, type, startbrush, endbrush, starttextcolor, endtextcolor, startborderpen, endborderpen
 #	types: no animation, jumpy (0,1,...,99,100,0,1,...), glowing (1,0,1,2,...,99,100,99,...), blinking (100,0,100,0,...)
 #	5 phases: DISABLED_BUTTON_PHASE,  NORMAL_BUTTON_PHASE,  PRESSED_BUTTON_PHASE,  HIGHLIGHT_BUTTON_PHASE, PRESSED_HIGHLIGHTED_BUTTON_PHASE
-# continue button brush
-	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,    0,  0,  0,  0,  0
-# force entry button
-	20, 2,   38, 38, 38, 38, 38,   38, 38, 38,  5,  5,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    3,  3,  3,  3,  3,    3,  3,  3,  4,  4,    0,  0,  0,  0,  0
-# increase button
-	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,    1,  1,  1,  1,  1
-# sub button
-	20, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   15, 15, 15, 15, 15,   17, 17, 17, 17, 17,    2,  2,  2,  2,  2
-# cancel button
-	20, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   16, 16, 16, 16, 16,   17, 17, 17, 17, 17,    3,  3,  3,  3,  3
 
-# bo list
-	40, 2,    8,  8,  8,  8,  8,    8,  8, 19, 19, 19,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   24, 24, 24, 24, 24,   24, 24, 35, 35, 35,    0,  0,  0,  0,  0
-	40, 2,    9,  9,  9,  9,  9,    9,  9, 20, 20, 20,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   25, 25, 25, 25, 25,   25, 25, 36, 36, 36,    0,  0,  0,  0,  0
-	40, 2,   10, 10, 10, 10, 10,   10, 10, 21, 21, 21,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   26, 26, 26, 26, 26,   26, 26, 37, 37, 37,    0,  0,  0,  0,  0
-	40, 2,   11, 11, 11, 11, 11,   11, 11, 22, 22, 22,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   27, 27, 27, 27, 27,   27, 27, 38, 38, 38,    0,  0,  0,  0,  0
-	40, 2,   12, 12, 12, 12, 12,   12, 12, 23, 23, 23,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   28, 28, 28, 28, 28,   28, 28, 39, 39, 39,    0,  0,  0,  0,  0
-	40, 2,   13, 13, 13, 13, 13,   13, 13, 24, 24, 24,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   29, 29, 29, 29, 29,   29, 29, 40, 40, 40,    0,  0,  0,  0,  0
-	40, 2,   14, 14, 14, 14, 14,   14, 14, 25, 25, 25,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   30, 30, 30, 30, 30,   30, 30, 41, 41, 41,    0,  0,  0,  0,  0
-	40, 2,   15, 15, 15, 15, 15,   15, 15, 26, 26, 26,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   31, 31, 31, 31, 31,   31, 31, 42, 42, 42,    0,  0,  0,  0,  0
-	40, 2,   16, 16, 16, 16, 16,   16, 16, 27, 27, 27,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   32, 32, 32, 32, 32,   32, 32, 43, 43, 43,    0,  0,  0,  0,  0
-	40, 2,   17, 17, 17, 17, 17,   17, 17, 28, 28, 28,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   33, 33, 33, 33, 33,   33, 33, 44, 44, 44,    0,  0,  0,  0,  0
-	40, 2,   18, 18, 18, 18, 18,   18, 18, 29, 29, 29,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   34, 34, 34, 34, 34,   34, 34, 45, 45, 45,    0,  0,  0,  0,  0
+# build order entries, unit menu entries
+	"UNIT_TYPE_0_BUTTON" = 		40, 2,   8, 8, 8, 8, 8,   8, 8,19,19,19,   3, 3,10, 3,10,   3, 3,10,10,10,  24,24,24,24,24,  24,24,35,35,35
+	"UNIT_TYPE_1_BUTTON" = 		40, 2,   9, 9, 9, 9, 9,   9, 9,20,20,20,   3, 3,10, 3,10,   3, 3,10,10,10,  25,25,25,25,25,  25,25,36,36,36
+	"UNIT_TYPE_2_BUTTON" = 		40, 2,  10,10,10,10,10,  10,10,21,21,21,   3, 3,10, 3,10,   3, 3,10,10,10,  26,26,26,26,26,  26,26,37,37,37
+	"UNIT_TYPE_3_BUTTON" = 		40, 2,  11,11,11,11,11,  11,11,22,22,22,   3, 3,10, 3,10,   3, 3,10,10,10,  27,27,27,27,27,  27,27,38,38,38
+	"UNIT_TYPE_4_BUTTON" = 		40, 2,  12,12,12,12,12,  12,12,23,23,23,   3, 3,10, 3,10,   3, 3,10,10,10,  28,28,28,28,28,  28,28,39,39,39
+	"UNIT_TYPE_5_BUTTON" = 		40, 2,  13,13,13,13,13,  13,13,24,24,24,   3, 3,10, 3,10,   3, 3,10,10,10,  29,29,29,29,29,  29,29,40,40,40
+	"UNIT_TYPE_6_BUTTON" = 		40, 2,  14,14,14,14,14,  14,14,25,25,25,   3, 3,10, 3,10,   3, 3,10,10,10,  30,30,30,30,30,  30,30,41,41,41
+	"UNIT_TYPE_7_BUTTON" = 		40, 2,  15,15,15,15,15,  15,15,26,26,26,   3, 3,10, 3,10,   3, 3,10,10,10,  31,31,31,31,31,  31,31,42,42,42
+	"UNIT_TYPE_8_BUTTON" = 		40, 2,  16,16,16,16,16,  16,16,27,27,27,   3, 3,10, 3,10,   3, 3,10,10,10,  32,32,32,32,32,  32,32,43,43,43
+	"UNIT_TYPE_9_BUTTON" = 		40, 2,  17,17,17,17,17,  17,17,28,28,28,   3, 3,10, 3,10,   3, 3,10,10,10,  33,33,33,33,33,  33,33,44,44,44
+	"UNIT_TYPE_10_BUTTON" = 	40, 2,  18,18,18,18,18,  18,18,29,29,29,   3, 3,10, 3,10,   3, 3,10,10,10,  34,34,34,34,34,  34,34,45,45,45
 
-# bright bo list
-	40, 2,   19, 19, 19, 19, 19,   19, 19, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   24, 24, 24, 24, 24,   24, 24, 35, 35, 35,    0,  0,  0,  0,  0
-	40, 2,   20, 20, 20, 20, 20,   20, 20, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   25, 25, 25, 25, 25,   25, 25, 36, 36, 36,    0,  0,  0,  0,  0
-	40, 2,   21, 21, 21, 21, 21,   21, 21, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   26, 26, 26, 26, 26,   26, 26, 37, 37, 37,    0,  0,  0,  0,  0
-	40, 2,   22, 22, 22, 22, 22,   22, 22, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   27, 27, 27, 27, 27,   27, 27, 38, 38, 38,    0,  0,  0,  0,  0
-	40, 2,   23, 23, 23, 23, 23,   23, 23, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   28, 28, 28, 28, 28,   28, 28, 39, 39, 39,    0,  0,  0,  0,  0
-	40, 2,   24, 24, 24, 24, 24,   24, 24, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   29, 29, 29, 29, 29,   29, 29, 40, 40, 40,    0,  0,  0,  0,  0
-	40, 2,   25, 25, 25, 25, 25,   25, 25, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   30, 30, 30, 30, 30,   30, 30, 41, 41, 41,    0,  0,  0,  0,  0
-	40, 2,   26, 26, 26, 26, 26,   26, 26, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   31, 31, 31, 31, 31,   31, 31, 42, 42, 42,    0,  0,  0,  0,  0
-	40, 2,   27, 27, 27, 27, 27,   27, 27, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   32, 32, 32, 32, 32,   32, 32, 43, 43, 43,    0,  0,  0,  0,  0
-	40, 2,   28, 28, 28, 28, 28,   28, 28, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   33, 33, 33, 33, 33,   33, 33, 44, 44, 44,    0,  0,  0,  0,  0
-	40, 2,   29, 29, 29, 29, 29,   29, 29, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   34, 34, 34, 34, 34,   34, 34, 45, 45, 45,    0,  0,  0,  0,  0
+	"BRIGHT_UNIT_TYPE_0_BUTTON" = 	40, 2,  19,19,19,19,19,  19,19,30,30,30,   3, 3,10, 3,10,   3, 3,10,10,10,  24,24,24,24,24,  24,24,35,35,35
+	"BRIGHT_UNIT_TYPE_1_BUTTON" = 	40, 2,  20,20,20,20,20,  20,20,30,30,30,   3, 3,10, 3,10,   3, 3,10,10,10,  25,25,25,25,25,  25,25,36,36,36
+	"BRIGHT_UNIT_TYPE_2_BUTTON" = 	40, 2,  21,21,21,21,21,  21,21,30,30,30,   3, 3,10, 3,10,   3, 3,10,10,10,  26,26,26,26,26,  26,26,37,37,37
+	"BRIGHT_UNIT_TYPE_3_BUTTON" = 	40, 2,  22,22,22,22,22,  22,22,30,30,30,   3, 3,10, 3,10,   3, 3,10,10,10,  27,27,27,27,27,  27,27,38,38,38
+	"BRIGHT_UNIT_TYPE_4_BUTTON" = 	40, 2,  23,23,23,23,23,  23,23,30,30,30,   3, 3,10, 3,10,   3, 3,10,10,10,  28,28,28,28,28,  28,28,39,39,39
+	"BRIGHT_UNIT_TYPE_5_BUTTON" = 	40, 2,  24,24,24,24,24,  24,24,30,30,30,   3, 3,10, 3,10,   3, 3,10,10,10,  29,29,29,29,29,  29,29,40,40,40
+	"BRIGHT_UNIT_TYPE_6_BUTTON" = 	40, 2,  25,25,25,25,25,  25,25,30,30,30,   3, 3,10, 3,10,   3, 3,10,10,10,  30,30,30,30,30,  30,30,41,41,41
+	"BRIGHT_UNIT_TYPE_7_BUTTON" = 	40, 2,  26,26,26,26,26,  26,26,30,30,30,   3, 3,10, 3,10,   3, 3,10,10,10,  31,31,31,31,31,  31,31,42,42,42
+	"BRIGHT_UNIT_TYPE_8_BUTTON" = 	40, 2,  27,27,27,27,27,  27,27,30,30,30,   3, 3,10, 3,10,   3, 3,10,10,10,  32,32,32,32,32,  32,32,43,43,43
+	"BRIGHT_UNIT_TYPE_9_BUTTON" = 	40, 2,  28,28,28,28,28,  28,28,30,30,30,   3, 3,10, 3,10,   3, 3,10,10,10,  33,33,33,33,33,  33,33,44,44,44
+	"BRIGHT_UNIT_TYPE_10_BUTTON" = 	40, 2,  29,29,29,29,29,  29,29,30,30,30,   3, 3,10, 3,10,   3, 3,10,10,10,  34,34,34,34,34,  34,34,45,45,45
 
-	40, 2,   30, 30, 30, 30, 30,   30, 30, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   35, 35, 35, 35, 35,   35, 35, 46, 46, 46,    0,  0,  0,  0,  0
-# main window tabs 
-	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,    0,  0,  0,  0,  0
-# force window add goal
-	30, 2,    3,  3,  7,  3,  7,    3,  7,  3,  7,  3,    8,  8,  8,  8,  8,   10,  9,  9,  9,  9,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,    0,  0,  0,  0,  0
-# edit field button
-	30, 2,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,    0,  0,  0,  0,  0
+	"VERY_BRIGHT_UNIT_TYPE_BUTTON" =40, 2,  30,30,30,30,30,  30,30,30,30,30,   3, 3,10, 3,10,   3, 3,10,10,10,  35,35,35,35,35,  35,35,46,46,46
 
-# arrow buttons
-	20, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0, 17, 17,    0,  0,  0, 14, 14,    4,  4,  4,  4,  4
-	20, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0, 17, 17,    0,  0,  0, 14, 14,    5,  5,  5,  5,  5
-	20, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0, 17, 17,    0,  0,  0, 14, 14,    6,  6,  6,  6,  6
-	20, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0, 17, 17,    0,  0,  0, 14, 14,    7,  7,  7,  7,  7
-# big arrows:	
-	20, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0, 17, 17,    0,  0,  0, 14, 14,   42, 42, 43, 42, 43
-	20, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0, 17, 17,    0,  0,  0, 14, 14,   44, 44, 45, 44, 45
-	20, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0, 17, 17,    0,  0,  0, 14, 14,   46, 46, 47, 46, 47
-	20, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0, 17, 17,    0,  0,  0, 14, 14,   48, 48, 49, 48, 49
-
-# location button
-	40, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0,  3,  3,    0,  0,  0, 14,  14,    5,  5,  5,  5,  5
-# time button
-	40, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0,  3,  3,    0,  0,  0, 14,  14,    9,  9,  9,  9,  9
-# checkButton
-	25, 2,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    3,  3,  3,  3,  3,    3,  3,  3, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,   14, 14, 15, 14, 15
-# open tree
-	40, 2,    3,  3,  3,  3,  3,    3,  3,  3,  3,  3,    3,  3,  3,  3,  3,    3,  3,  3, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,    2,  2,  1,  2,  1
-# non-goal bo-entry dataentry (with setting bitmap)
-	40, 2,    3,  3,  4,  3,  4,    3,  3,  6,  9,  6,    3,  3,  3,  3,  3,    3,  3,  3, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,   41, 41, 41, 41, 41
-
-# text button
-	40, 2,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    2,  2,  2,  2,  2,    2,  2,  2, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,    0,  0,  0,  0,  0
-# visited text button
-	40, 2,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    4,  4,  4,  4,  4,    4,  4,  4,  2,  2,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,    0,  0,  0,  0,  0
-
-# new button
-	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   21, 21, 21, 21, 21
-# load button
-	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   22, 22, 22, 22, 22
-# save button
-	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   23, 23, 23, 23, 23
-# refresh button
-	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   24, 24, 24, 24, 24
-# back button
-	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   25, 25, 25, 25, 25
-# forward button
-	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   26, 26, 26, 26, 26
-# add button
-	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   27, 27, 27, 27, 27
-# delete button
-	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   28, 28, 28, 28, 28
-# help button
-	20, 2,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   29, 29, 29, 29, 29
-# help tab
-	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   29, 29, 29, 29, 29
-# database tab
-	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   30, 30, 30, 30, 30
-# map tab
-	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   30, 30, 30, 30, 30
-# settings tab
-	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   31, 31, 31, 31, 31
-
-# starcraft
-	20, 1,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,   58, 58, 58, 58, 58
-# broodwar
-	20, 1,    0,  0,  0,  0,  0,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,   59, 59, 59, 59, 59
-# wc3
-	20, 1,    0,  0,  0,  0,  0,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,   60, 60, 60, 60, 60
+	"STANDARD_BUTTON" = 		30, 2,  31,31,31,31,31,  31,32,33,33,33,   3, 3,10, 3,10,   3, 3,10,10,10,   5, 5, 5, 5, 5,   5, 5, 5, 7, 7
+	"FORCE_ENTRY_BUTTON" = 		20, 2,  38,38,38,38,38,  38,38,38, 5, 5,   3, 3,10, 3,10,   3, 3,10,10,10,   3, 3, 3, 3, 3,   3, 3, 3, 4, 4
+	"MODIFY_BUTTON" = 		20, 1,   6, 6, 6, 5, 6,   6, 6, 6, 5, 6,   1, 1, 1, 1, 1,   1, 1, 1, 1, 1,  14,14,14,14,14,  17,17,17,17,17
+	"TAB_BUTTON" = 			30, 2,  31,31,31,31,31,  31,32,33,33,33,   3, 3,10, 3,10,   3, 3,10,10,10,   5, 5, 5, 5, 5,   5, 5, 5, 7, 7
+	"MENU_ENTRY_BUTTON" = 		30, 2,   3, 3, 7, 3, 7,   3, 7, 3, 7, 3,   8, 8, 8, 8, 8,  10, 9, 9, 9, 9,   5, 5, 5, 5, 5,   5, 5, 5, 7, 7
+	"EDIT_FIELD_BUTTON" = 		30, 2,   0, 0, 0, 0, 0,   0, 0, 0, 0, 0,   3, 3,10, 3,10,   3, 3,10,10,10,   5, 5, 5, 5, 5,   5, 5, 5, 7, 7
+	"ARROW_BUTTON" = 		20, 2,   6, 6, 6, 5, 6,   6, 6, 6, 5, 6,   1, 1, 1, 1, 1,   1, 1, 1, 1, 1,   0, 0, 0,17,17,   0, 0, 0,14,14
+	"GOAL_LOCATION_BUTTON" =	40, 2,   6, 6, 6, 5, 6,   6, 6, 6, 5, 6,   1, 1, 1, 1, 1,   1, 1, 1, 1, 1,   0, 0, 0, 3, 3,   0, 0, 0,14,14
+	"GOAL_TIME_BUTTON" = 		40, 2,   6, 6, 6, 5, 6,   6, 6, 6, 5, 6,   1, 1, 1, 1, 1,   1, 1, 1, 1, 1,   0, 0, 0, 3, 3,   0, 0, 0,14,14
+	"CHECK_BUTTON" = 		25, 2,   1, 1, 1, 1, 1,   1, 1, 1, 1, 1,   3, 3, 3, 3, 3,   3, 3, 3,10,10,   0, 0, 0, 0, 0,   0, 0, 0, 0, 0
+	"OPEN_TREE_BUTTON" = 		40, 2,   3, 3, 3, 3, 3,   3, 3, 3, 3, 3,   3, 3, 3, 3, 3,   3, 3, 3,10,10,   0, 0, 0, 0, 0,   0, 0, 0, 0, 0
+	"NON_GOAL_ENTRY_BUTTON" = 	40, 2,   3, 3, 4, 3, 4,   3, 3, 6, 9, 6,   3, 3, 3, 3, 3,   3, 3, 3,10,10,   0, 0, 0, 0, 0,   0, 0, 0, 0, 0
+	"TEXT_BUTTON" = 		40, 0,   1, 1, 1, 1, 1,   1, 1, 1, 1, 1,   2, 2, 2, 2, 2,   2, 2, 2,10,10,   0, 0, 0, 0, 0,   0, 0, 0, 0, 0
+	"VISITED_TEXT_BUTTON" = 	40, 0,   1, 1, 1, 1, 1,   1, 1, 1, 1, 1,   4, 4, 4, 4, 4,   4, 4, 4, 2, 2,   0, 0, 0, 0, 0,   0, 0, 0, 0, 0
+	"MENU_BUTTON" = 		20, 1,   6, 6, 6, 5, 6,   6, 6, 6, 5, 6,   1, 1, 1, 1, 1,   1, 1, 1, 1, 1,  14,14,14,14,14,  17,17,17,17,17
+	"HELP_BUTTON" = 		20, 2,   0, 0, 0, 0, 0,   0, 0, 0, 0, 0,   0, 0, 0, 0, 0,   0, 0, 0, 0, 0,   5, 5, 5, 5, 5,   5, 5, 5, 7, 7
 
 @END
 

@@ -3,7 +3,6 @@
 #ifndef _CORE_WARCRAFT3_HPP
 #define _CORE_WARCRAFT3_HPP
 
-#include <string>
 #include "game.hpp"
 
 class WARCRAFT3 : public GAME

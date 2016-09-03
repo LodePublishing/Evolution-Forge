@@ -40,6 +40,8 @@ class BoWindow : public UI_Window
 		const bool openBoMenu();
 		void mouseHasLeft();
 		const signed int getLoadedBuildOrder() const;
+
+		const bool areBosStillMoving() const;
 	private:
 		float geneAnimation;
 		void drawGeneString(DC* dc) const;

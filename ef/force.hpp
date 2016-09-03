@@ -10,6 +10,8 @@
 
 #include "../ui/radio.hpp"
 
+#include "../core/database.hpp"
+
 enum eMenu
 {
 //	RACE_MENU,
@@ -63,6 +65,8 @@ class ForceWindow : public UI_Window
 //		UI_StaticText* locationName[2][MAX_LOCATIONS];
 		UI_StaticText* legend;
 
+		UI_Button* goalName;
+
 		std::list<ForceEntry*> goalForceList;
 		std::list<ForceEntry*> nongoalForceList;
 
@@ -79,12 +83,14 @@ class ForceWindow : public UI_Window
 		unsigned int playerMax;
 		bool saveBox;
 
-		signed int assignGoal;
 
 		void mouseHasLeft();
 		
 		bool goalMenuOpenedExternally;
 		bool unitMenuOpenedExternally;
+
+		bool savingGoal;
+		signed int assignGoal;
 };
 
 inline const signed int ForceWindow::getAssignedGoal() const {

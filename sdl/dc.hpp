@@ -13,7 +13,12 @@
 #define PRESSED_NORMAL 90
 #define NOT_PRESSED_DARKEN 60
 #define NOT_PRESSED_BRIGHTEN 140
-
+ 
+#include <math.h>
+#ifndef M_PI
+	#define M_PI 3.14159265358979323846
+#endif
+// Windows kotz
 
 enum eChooseDriverError
 {
@@ -29,6 +34,18 @@ enum eBitDepth
 	DEPTH_24BIT,
 	DEPTH_32BIT
 };
+
+typedef struct tColorRGBA {
+	Uint8 r;
+	Uint8 g;
+	Uint8 b;
+	Uint8 a;
+} tColorRGBA;
+
+typedef struct tColorY {
+	Uint8 y;
+} tColorY;
+
 
 class DC
 {
@@ -93,6 +110,12 @@ class DC
 		void DrawText(const std::string& text, const Point& p) const;
 		void DrawText(const std::string& text, const signed int x, const signed int y) const;
 		
+		void DrawBrightenedBitmap(SDL_Surface* bitmap, const Point& p, const unsigned int brightness) const;
+		void DrawBrightenedBitmap(SDL_Surface* bitmap, const signed x, const signed y, const unsigned int brightness) const;
+	
+		void DrawBrightenedBitmap(SDL_Surface* bitmap, const Point& p, const Rect& clip_rect, const unsigned int brightness) const;
+		void DrawBrightenedBitmap(SDL_Surface* bitmap, const signed x, const signed y, const Rect& clip_rect, const unsigned int brightness) const;
+	
 		void DrawBitmap(SDL_Surface* bitmap, const Point& p) const;
 		void DrawBitmap(SDL_Surface* bitmap, const signed int x, const signed int y) const;
 		
@@ -138,6 +161,15 @@ class DC
 		void setPressedRectangle(const bool pressed = true);
 
 		static void addRectangle(const Rect& rect);
+
+
+		static SDL_Surface* rotozoomSurface(SDL_Surface* src, double angle, double zoom, int smooth);
+		static SDL_Surface* rotozoomSurfaceXY(SDL_Surface * src, double angle, double zoomx, double zoomy, int smooth);
+		static void rotozoomSurfaceSize(int width, int height, double angle, double zoom, int* dstwidth, int* dstheight);
+		static void rotozoomSurfaceSizeXY(int width, int height, double angle, double zoomx, double zoomy, int* dstwidth, int* dstheight);
+		static SDL_Surface* zoomSurface(SDL_Surface* src, double zoomx, double zoomy, int smooth);
+//		static void zoomSurfaceSize(int width, int height, double zoomx, double zoomy, int* dstwidth, int* dstheight);
+			
 	private:
 
 		static unsigned int changedRectangles;
@@ -316,6 +348,14 @@ inline const Size DC::getTextExtent(const std::string& text) const {
 	return(font->getTextExtent(text));
 }
 		
+inline void DC::DrawBrightenedBitmap(SDL_Surface* bitmap, const Point& p, const unsigned int brightness) const {
+	DrawBrightenedBitmap(bitmap, p.x, p.y, brightness);
+}
+
+inline void DC::DrawBrightenedBitmap(SDL_Surface* bitmap, const Point& p, const Rect& clip_rect, const unsigned int brightness) const {
+	DrawBrightenedBitmap(bitmap, p.x, p.y, clip_rect, brightness);
+}
+
 inline void DC::DrawBitmap(SDL_Surface* bitmap, const Point& p) const {
 	DrawBitmap(bitmap, p.x, p.y);
 }

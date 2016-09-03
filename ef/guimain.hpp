@@ -1,6 +1,7 @@
 #ifndef _GUI_MAIN_HPP
 #define _GUI_MAIN_HPP
 
+#include "game.hpp"
 #include "msgwindow.hpp"
 //#include "info.hpp"
 #include "helpwindow.hpp"
@@ -95,7 +96,6 @@ class Main
 
 		SaveBox* saveBox;
 		LanguageMenu* languageMenu;
-		GameMenu* gameMenu;
 		
 		Point maus;
 		unsigned int gameCount; 

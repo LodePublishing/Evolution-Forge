@@ -2,7 +2,6 @@
 #define _CORE_GOALENTRY_HPP
 
 #include "location.hpp"
-#include "unit.hpp"
 #include "goal.hpp"
 
 struct GOAL_TREE
@@ -35,6 +34,8 @@ class GOAL_ENTRY
 		void calculateFinalTimesAtBeginning(const unsigned int location, const unsigned int unit, const unsigned int count, const unsigned int time);
 		const unsigned int calculateFitness(const UNIT (&units)[MAX_LOCATIONS], std::vector<unsigned int> (&bonus)[MAX_LOCATIONS]) const;
 		const bool calculateReady(const UNIT (&units)[MAX_LOCATIONS]) const;
+
+		const unsigned int calculateMaxFitness() const;
 	
 		const unsigned int getGlobalGoal(const unsigned int location, const unsigned int unit) const;
 		

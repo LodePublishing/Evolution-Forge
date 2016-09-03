@@ -7,13 +7,11 @@ UI_Configuration::UI_Configuration():
 	resolution(RESOLUTION_640x480),
 	bitdepth(DEPTH_32BIT),
 	theme(DARK_BLUE_THEME),
-#ifndef _NO_FMOD_SOUND
 	musicVolume(75),
 	soundVolume(75),
 	channels(16),
 	useMusic(true),
 	useSound(true),
-#endif
 	glowingButtons(true),
 	transparency(false),
 	smoothMovements(true),
@@ -32,13 +30,11 @@ void UI_Configuration::initDefaults()
 	setResolution(RESOLUTION_640x480);
 	setBitDepth(DEPTH_32BIT);
 	setTheme(DARK_BLUE_THEME);
-#ifndef _NO_FMOD_SOUND
 	setMusicVolume(75);
 	setSoundVolume(75);
 	setChannels(16);
 	setMusic(true);
 	setSound(true);
-#endif
 	setGlowingButtons(true);
 	setTransparency(false);
 	setSmoothMovements(true);
@@ -72,7 +68,6 @@ void UI_Configuration::saveToFile() const
 	pFile << "# 1 = dark red theme, 2 = dark blue theme, 4 = yellow theme" << std::endl;
 	pFile << "    \"Theme\" = \"" << (int)getTheme() << "\"" << std::endl;
 		
-#ifndef _NO_FMOD_SOUND
 	pFile << "# use music (1: on, 0: off)" << std::endl;
 	pFile << "    \"Music\" = \"" << (int)isMusic() << "\"" << std::endl;
 	pFile << "# use sound (1: on, 0: off)" << std::endl;
@@ -84,7 +79,6 @@ void UI_Configuration::saveToFile() const
 	pFile << "    \"Sound volume\" = \"" << (int)getSoundVolume() << "\"" << std::endl;
 	pFile << "# max number of simultaneously played sounds" << std::endl;
 	pFile << "    \"Channels\" = \"" << (int)getChannels() << "\"" << std::endl;
-#endif
 	
 	pFile << "# glowing effects" << std::endl;
 	pFile << "    \"Glowing buttons\" = \"" << (int)isGlowingButtons() << "\"" << std::endl;
@@ -158,7 +152,6 @@ void UI_Configuration::loadConfigurationFile()
 				i->second.pop_front();
 			   	setTheme((eTheme)(atoi(i->second.front().c_str())));
 			}	
-#ifndef _NO_FMOD_SOUND
 			if((i=block.find("Music"))!=block.end()){
 				i->second.pop_front();
 			   	setMusic(atoi(i->second.front().c_str()));
@@ -179,7 +172,6 @@ void UI_Configuration::loadConfigurationFile()
 				i->second.pop_front();
 			   	setChannels(atoi(i->second.front().c_str()));
 			}
-#endif
 			if((i=block.find("Glowing buttons"))!=block.end()){
 				i->second.pop_front();
 			   	setGlowingButtons(atoi(i->second.front().c_str()));
@@ -257,7 +249,6 @@ const bool UI_Configuration::setTheme(const eTheme current_theme)
 	return(true);
 }
 
-#ifndef _NO_FMOD_SOUND
 const bool UI_Configuration::setMusic(const bool use_music) 
 {
 	if(useMusic == use_music)
@@ -297,7 +288,6 @@ const bool UI_Configuration::setChannels(const unsigned int channel_num)
 	channels = channel_num;
 	return(true);
 }
-#endif
 
 const bool UI_Configuration::setGlowingButtons(const bool glowing_buttons) 
 {

@@ -7,8 +7,8 @@
 
 SaveBox::SaveBox(UI_Object* savebox_parent, const eString savebox_text, const eString description_text, const eString ok_string, const eString cancel_string, const std::string& name_proposal) :
 	UI_Window(savebox_parent, savebox_text, theme.lookUpGlobalRect(SAVE_BOX_WINDOW), theme.lookUpGlobalMaxHeight(SAVE_BOX_WINDOW)),
-	OK_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), MY_BUTTON, false, PRESS_BUTTON_MODE, ok_string, BOTTOM_CENTER, MIDDLE_BOLD_FONT, AUTO_SIZE)),
-	Cancel_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), MY_BUTTON, false, PRESS_BUTTON_MODE, cancel_string, BOTTOM_RIGHT, MIDDLE_BOLD_FONT, AUTO_SIZE)),
+	OK_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), STANDARD_BUTTON, NULL_BITMAP, PRESS_BUTTON_MODE, ok_string, BOTTOM_CENTER, MIDDLE_BOLD_FONT, AUTO_SIZE)),
+	Cancel_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), STANDARD_BUTTON, NULL_BITMAP, PRESS_BUTTON_MODE, cancel_string, BOTTOM_RIGHT, MIDDLE_BOLD_FONT, AUTO_SIZE)),
 	editField(new UI_EditField(this, Rect(getRelativeClientRectPosition() + Point(30, 50), Size(getClientRectWidth()-60, FONT_SIZE+6)), Size(0,0), MIDDLE_BOLD_FONT, DO_NOT_ADJUST, description_text, name_proposal))
 { 
 	UI_Object::focus = editField;
@@ -16,11 +16,12 @@ SaveBox::SaveBox(UI_Object* savebox_parent, const eString savebox_text, const eS
 
 SaveBox::SaveBox(UI_Object* savebox_parent, const SaveBoxParameter savebox_parameter):
 	UI_Window(savebox_parent, savebox_parameter.saveboxText, theme.lookUpGlobalRect(SAVE_BOX_WINDOW), theme.lookUpGlobalMaxHeight(SAVE_BOX_WINDOW)),
-	OK_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), MY_BUTTON, false, PRESS_BUTTON_MODE, savebox_parameter.okString, BOTTOM_CENTER, MIDDLE_BOLD_FONT, AUTO_SIZE)),
-	Cancel_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), MY_BUTTON, false, PRESS_BUTTON_MODE, savebox_parameter.cancelString, BOTTOM_RIGHT, MIDDLE_BOLD_FONT, AUTO_SIZE)),
+	OK_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), STANDARD_BUTTON, NULL_BITMAP, PRESS_BUTTON_MODE, savebox_parameter.okString, BOTTOM_CENTER, MIDDLE_BOLD_FONT, AUTO_SIZE)),
+	Cancel_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), STANDARD_BUTTON, NULL_BITMAP, PRESS_BUTTON_MODE, savebox_parameter.cancelString, BOTTOM_RIGHT, MIDDLE_BOLD_FONT, AUTO_SIZE)),
 	editField(new UI_EditField(this, Rect(getRelativeClientRectPosition() + Point(30, 50), Size(getClientRectWidth()-60, FONT_SIZE+6)), Size(0,0), MIDDLE_BOLD_FONT, DO_NOT_ADJUST, savebox_parameter.descriptionText, savebox_parameter.inputProposal))
 { 
 	UI_Object::focus = editField;
+	process();
 }
 
 SaveBox::~SaveBox()
@@ -51,7 +52,7 @@ void SaveBox::draw(DC* dc) const
 	{
 		dc->setBrush(*theme.lookUpBrush(BRIGHT_UNIT_TYPE_3_BRUSH));
 		dc->setPen(*theme.lookUpPen(RECTANGLE_PEN));
-		dc->DrawEdgedRoundedRectangle(Rect(getAbsolutePosition()-Size(5,5), getSize() + Size(10,10)),6);
+		dc->DrawEdgedRoundedRectangle(Rect(getAbsolutePosition()-Size(1,1), getSize() + Size(2,2)),6);
 	}
 	UI_Window::draw(dc);
 }
@@ -65,14 +66,14 @@ void SaveBox::process()
 
 UI_Object* SaveBox::checkToolTip()
 {
-	if(!getAbsoluteRect().Inside(mouse))
+	if(!getAbsoluteRect().isInside(mouse))
 		return(NULL);
 	return(UI_Window::checkToolTip());
 }
 
 UI_Object* SaveBox::checkHighlight()
 {
-	if(!getAbsoluteRect().Inside(mouse))
+	if(!getAbsoluteRect().isInside(mouse))
 		return(NULL);
 	return(UI_Window::checkHighlight());
 }

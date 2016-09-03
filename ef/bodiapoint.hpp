@@ -23,6 +23,7 @@ class BoDiagramPoint
 		std::vector<unsigned int> highlight;
 		bool initialized;
 		unsigned int unit;
+		unsigned int id;
 };
 
 #endif

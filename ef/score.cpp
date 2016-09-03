@@ -179,14 +179,14 @@ void ScoreWindow::draw(DC* dc) const
 	if(efConfiguration.isAutoRuns())
 	{
 		dc->setPen(*UI_Object::theme.lookUpPen(BODIAGRAM_FITNESS_PEN));
-		dc->DrawHorizontalLine(getAbsoluteLeftBound() + 10, getAbsoluteLowerBound() - 6, getAbsoluteLeftBound() + 10 + ((getWidth()-35)*unchangedGenerations)  / efConfiguration.getMaxGenerations() );
+		dc->DrawHorizontalLine(getAbsoluteLeftBound() + 10, getAbsoluteLowerBound() - 6, getAbsoluteLeftBound() + 10 + ((getWidth()-10)*unchangedGenerations)  / efConfiguration.getMaxGenerations() );
 		std::ostringstream os;
 		os.str("");
-		os << 100 * unchangedGenerations / efConfiguration.getMaxGenerations() << "% (" << unchangedGenerations << "/" << efConfiguration.getMaxGenerations() << ")";
+		os << 100 * unchangedGenerations / efConfiguration.getMaxGenerations() << "%";// (" << unchangedGenerations << "/" << efConfiguration.getMaxGenerations() << ")";
 	
 		dc->setTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
 		dc->setFont(UI_Object::theme.lookUpFont(SMALL_BOLD_FONT));
-		dc->DrawText(os.str(), getAbsolutePosition() + Size(getWidth() - 55, getHeight() - 12));
+		dc->DrawText(os.str(), getAbsolutePosition() + Size(getWidth() - 40, getHeight() - 13));
 	}
 }
 

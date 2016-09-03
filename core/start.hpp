@@ -6,6 +6,7 @@
 #include "startcondition.hpp"
 #include "harvest.hpp"
 
+
 // this is newly created/changed everytime the startconditions (map, force, goals etc.) change
 
 /*Settingsfiles

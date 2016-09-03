@@ -21,9 +21,27 @@ class UI_Bitmap : public UI_Object
 		const unsigned int getBitmapWidth() const;
 		const unsigned int getBitmapHeight() const;
 		const Size getBitmapSize() const;
+
+		void setBrightness(const unsigned int bitmap_brightness);
+		void setPressed(const bool bitmap_pressed = true);  // for buttons... 
+		void setChecked(const bool bitmap_checked = true);  // for buttons... 
+
+		void setBitmap(const eBitmap new_bitmap);
+		
 	private:
 		eBitmap bitmap;
+		bool pressed;
+		bool checked;
+		unsigned int brightness;
 };
+
+inline void UI_Bitmap::setPressed(const bool bitmap_pressed) {
+	pressed = bitmap_pressed;
+}
+
+inline void UI_Bitmap::setChecked(const bool bitmap_checked) {
+	checked = bitmap_checked;
+}
 
 inline const unsigned int UI_Bitmap::getBitmapWidth() const {
 	return(UI_Object::theme.lookUpBitmap(bitmap)->w);

@@ -1,6 +1,7 @@
 #ifndef _GUI_DATABASE_WINDOW_HPP
 #define _GUI_DATABASE_WINDOW_HPP
 
+#include "../ui/window.hpp"
 #include "dataentry.hpp"
 #include "game.hpp"
 

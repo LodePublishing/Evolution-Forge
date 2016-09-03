@@ -15,8 +15,12 @@ DATABASE::DATABASE():
 	goalDataInitialized(false),
 	buildOrderDataInitialized(true), // we don't need bos...
 	startConditionDataInitialized(false),
-	mapDataInitialized(false)
-//	harvestDataInitialized(false)
+	mapDataInitialized(false),
+//	harvestDataInitialized(false),
+	goalsWereChanged(false),
+	bosWereChanged(false),
+	mapsWereChanged(false),
+	startConditionsWereChanged(false)
 {}
 
 DATABASE::~DATABASE()
@@ -37,6 +41,14 @@ DATABASE::~DATABASE()
 		loadedGoal[j].clear();
 		loadedBuildOrder[j].clear();
 	}
+}
+
+void DATABASE::changeAccepted() 
+{
+	goalsWereChanged = false;
+	bosWereChanged = false;
+	mapsWereChanged = false;
+	startConditionsWereChanged = false;
 }
 
 void DATABASE::init() // TODO spaeter in den Konstruktor
@@ -84,12 +96,14 @@ void DATABASE::addGoal(GOAL_ENTRY* my_goal)
 {
 	loadedGoal[my_goal->getRace()].push_back(my_goal);
 	goalDataInitialized = true;
+	goalsWereChanged = true;
 }
 
 void DATABASE::addMap(BASIC_MAP* basic_map)
 {
 	loadedMap.push_back(basic_map);
 	mapDataInitialized = true;
+	mapsWereChanged = true;
 }
 
 
@@ -97,6 +111,7 @@ void DATABASE::addBuildOrder(BUILD_ORDER* build_order)
 {
 	loadedBuildOrder[build_order->getRace()].push_back(build_order);
 	buildOrderDataInitialized = true;
+	bosWereChanged = true;
 }
 
 void DATABASE::addStartCondition(START_CONDITION* start_condition)
@@ -110,7 +125,8 @@ void DATABASE::addStartCondition(START_CONDITION* start_condition)
 		{
 			startConditionDataInitialized = false;
 			break;
-		}		
+		}
+	startConditionsWereChanged = true;
 }
 
 const unsigned int DATABASE::getBuildOrderCount(const unsigned int race, const GOAL_ENTRY* goal) const 

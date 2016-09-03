@@ -1,7 +1,6 @@
 #ifndef _CORE_DATABASE_HPP
 #define _CORE_DATABASE_HPP
 
-#include "goalentry.hpp"	
 #include "boentry.hpp"	
 //#include "harvest.hpp"
 #include "basicmap.hpp"
@@ -49,6 +48,11 @@ class DATABASE
 //		const HARVEST_SPEED* getHarvestSpeed(const unsigned int race, const unsigned int harvest_number) const;
 //		const bool isHarvestDataInitialized() const;
 
+		const bool wereGoalsChanged() const;
+		const bool wereBosChanged() const;
+		const bool wereMapsChanged() const;
+		const bool wereStartConditionsChanged() const;
+		void changeAccepted();
 	private:
 		std::vector< std::vector<GOAL_ENTRY*> > loadedGoal;
 		std::vector< std::vector<BUILD_ORDER*> > loadedBuildOrder;
@@ -61,7 +65,26 @@ class DATABASE
 		bool startConditionDataInitialized;
 		bool mapDataInitialized;
 		bool harvestDataInitialized;	
+
+		bool goalsWereChanged;
+		bool bosWereChanged;
+		bool mapsWereChanged;
+		bool startConditionsWereChanged;
 };
+
+inline const bool DATABASE::wereGoalsChanged() const {
+	return (goalsWereChanged);
+}
+inline const bool DATABASE::wereBosChanged() const {
+	return (bosWereChanged);
+}
+inline const bool DATABASE::wereMapsChanged() const {
+	return (mapsWereChanged);
+}
+inline const bool DATABASE::wereStartConditionsChanged() const {
+	return (startConditionsWereChanged);
+}
+
 
 // -------------------------------
 // ------ GET/SET FUNCTIONS ------

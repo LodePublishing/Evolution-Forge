@@ -3,7 +3,7 @@
 #include <sstream>
 
 BoEntry::BoEntry(UI_Object* bo_parent, const Point top_left, const Size distance_bottom_right, const std::string& bo_unit, const PROGRAM& bo_program, const unsigned int unit_count, const unsigned int my_id) :
-	UI_Button(bo_parent, Rect(top_left, Size(0,0)), distance_bottom_right, FORCE_ENTRY_BUTTON, false, PRESS_BUTTON_MODE, bo_unit, DO_NOT_ADJUST, SMALL_SHADOW_BOLD_FONT, NOTHING),
+	UI_Button(bo_parent, Rect(top_left, Size(0,0)), distance_bottom_right, FORCE_ENTRY_BUTTON, NULL_BITMAP, PRESS_BUTTON_MODE, bo_unit, DO_NOT_ADJUST, SMALL_SHADOW_BOLD_FONT, NOTHING),
 	program(bo_program),
 	id(my_id),
 	count(unit_count)
@@ -41,11 +41,12 @@ void BoEntry::process()
 //	if(!isShown())
 //		return;
 	bool different = isMoving();
+	if(different)
+		BoEntry::entryIsMoving = true;
+
 	UI_Button::process();
-#ifndef _NO_FMOD_SOUND
 	if(different && (!isMoving()))
 		UI_Object::sound.playSound(SWISHLOCK_SOUND, (getAbsolutePosition() + getSize()/2).x);
-#endif
 //	if(isRightClicked())
 //		lock(!fixed);
 }
@@ -73,3 +74,4 @@ const bool BoEntry::locked() const
 	return(fixed);
 }*/
 
+bool BoEntry::entryIsMoving = false;

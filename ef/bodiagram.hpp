@@ -25,12 +25,14 @@ class BoDiagramWindow : public UI_Window
 		void reloadOriginalSize();
 
 		const std::list<unsigned int>& getSelectedItems() const;
+		void setSelected(const std::list<unsigned int>& selected);
 	private:
 		static unsigned int HAVE_SUPPLY;
 		static unsigned int NEED_SUPPLY;
 		ANABUILDORDER* anarace;
 		
 		std::list<unsigned int> selectedItems;
+		std::list<unsigned int> tempSelectedItems;
 		
 		unsigned int count;
 		bool bold;
@@ -52,6 +54,9 @@ class BoDiagramWindow : public UI_Window
 		std::vector<UI_StaticText*> resourceNumber;
 		UI_StaticText* supplyNumber;
 		UI_StaticText* timeNumber;	
+
+		unsigned int firstTime;
+		unsigned int lastTime;
 };
 
 inline const std::list<unsigned int>& BoDiagramWindow::getSelectedItems() const {

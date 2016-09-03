@@ -49,6 +49,17 @@ const bool GOAL_ENTRY::calculateReady(const UNIT (&units)[MAX_LOCATIONS]) const
 	return(true);
 }
 
+const unsigned int GOAL_ENTRY::calculateMaxFitness() const
+{
+	unsigned int max_fit = 0;
+	for(std::list<GOAL>::const_iterator i = goalList.begin(); i != goalList.end(); ++i)
+		max_fit += 200 * bonusTable[i->getUnit()];
+//	for(unsigned int i = RACE::UNIT_TYPE_COUNT; i--;)
+//		if(getIsBuildable(i))
+//			max_fit += 100 * bonusTable[i];
+	return(max_fit);
+}
+
 const unsigned int GOAL_ENTRY::calculateFitness(const UNIT (&units)[MAX_LOCATIONS], std::vector<unsigned int> (&bonus)[MAX_LOCATIONS]) const
 {
 #ifdef _SCC_DEBUG
@@ -88,12 +99,12 @@ const unsigned int GOAL_ENTRY::calculateFitness(const UNIT (&units)[MAX_LOCATION
 		}
 	}
 
-	for(unsigned int i = RACE::UNIT_TYPE_COUNT; i--;)
-		if(getIsBuildable(i) && (checked[i]==false) && units[GLOBAL].getTotal(i))
-		{
-			checked[i] = true;
-			tpF += bonus_value * bonusTable[i];
-		}	
+//	for(unsigned int i = RACE::UNIT_TYPE_COUNT; i--;)
+//		if(getIsBuildable(i) && (checked[i]==false) && units[GLOBAL].getTotal(i))
+//		{
+//			checked[i] = true;
+//			tpF += bonus_value * bonusTable[i];
+//		} // ???
 	return(tpF);
 }
 
@@ -197,7 +208,6 @@ const unsigned int GOAL_ENTRY::calculateFastestBO(const UNIT& startForce) const
 	}
 #endif
 	return(0);
-#if 0
 	std::vector<unsigned int> min_time(RACE::UNIT_TYPE_COUNT);
 
 	for(unsigned int i = RACE::UNIT_TYPE_COUNT; i--;)
@@ -207,7 +217,7 @@ const unsigned int GOAL_ENTRY::calculateFastestBO(const UNIT& startForce) const
 			min_time[i] = MAX_TIME;
 
 	for(unsigned int j = 10; j--;) // Nuclear Warhead needs 6 steps (?) ~~~~
-		for(unsigned int i = UNIT_TYPE_COUNT; i--;)
+		for(unsigned int i = RACE::UNIT_TYPE_COUNT; i--;)
 			if( (getIsGoal(i)) || (getIsBuildable(i)) )
 			{
 				unsigned int pre=0;
@@ -242,12 +252,11 @@ const unsigned int GOAL_ENTRY::calculateFastestBO(const UNIT& startForce) const
 				}
 			}
 	unsigned int min = 0;
-	for(unsigned int i = UNIT_TYPE_COUNT;i--;)
+	for(unsigned int i = RACE::UNIT_TYPE_COUNT;i--;)
 		if(getIsGoal(i))
 			if(min < min_time[i])
 				min = min_time[i];
 	return(min);
-#endif
 }
 
 
@@ -578,7 +587,10 @@ void GOAL_ENTRY::calculateBonus(std::vector<unsigned int> (&bonus)[MAX_LOCATIONS
 {
 	for(std::list<GOAL>::const_iterator i = goalList.begin(); i != goalList.end(); ++i)
 	{
-		if((i->getTime() == 0) || (i->getCount() == 0))
+		// ignore if it's a time goal, if it's build always or if it should be build as much as possible
+		// why? because the amount of units *at the end* (and that's what 'bonus' is for) is not important
+		// for time units or alwaysBuild units. This is even clearer with the 'build as much as possible'
+		if((i->getTime() > 0) || (i->getCount() == 0) || (i->getIsAlwaysBuild()) || (i->getIsBuildAsMuchAsPossible()))
 			continue;
 			
 		bool ok = true;

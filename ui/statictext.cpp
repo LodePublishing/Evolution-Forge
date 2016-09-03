@@ -47,12 +47,12 @@ void UI_StaticText::doHighlight(const bool high_light)
 {
 	if(high_light == highlight)
 		return;
-	setNeedRedrawMoved();
+//	setNeedRedrawMoved(); TODO
 	highlight = high_light;
 }
 
 UI_Object* UI_StaticText::checkToolTip() {
-	if( (!isShown()) || (!Rect(getAbsolutePosition(), getTextSize()).Inside(mouse )) )
+	if( (!isShown()) || (!Rect(getAbsolutePosition(), getTextSize()).isInside(mouse )) )
 		return(0);
 	return((UI_Object*)this);
 }
@@ -65,26 +65,49 @@ void UI_StaticText::draw(DC* dc) const
 	{
 	//	if(font!=NULL_FONT)
 			dc->setFont(theme.lookUpFont(font));
+		Color normal;
+		Color highlighted;
 		if(color!=NULL_COLOR) 
 		{
 			if(tempColorIsSet)
 			{
-				if(highlight==true)
-					dc->setTextForeground(dc->changeAbsoluteBrightness(tempColor, 60));
-				else
-					dc->setTextForeground(tempColor);
+				highlighted = dc->changeAbsoluteBrightness(tempColor, 60);
+				normal = tempColor;
 			} else
 			{
-				if(highlight==true)
-					dc->setTextForeground(dc->changeAbsoluteBrightness(*UI_Object::theme.lookUpColor(color), 60));
-				else
-					dc->setTextForeground(*UI_Object::theme.lookUpColor(color));
+				highlighted = dc->changeAbsoluteBrightness(*UI_Object::theme.lookUpColor(color), 60);
+				normal = *UI_Object::theme.lookUpColor(color);
 			}
+			if(highlight)
+				dc->setTextForeground(highlighted);
+			else
+				dc->setTextForeground(normal);
 		}
-		if(pressed)
-			dc->DrawText(text, getAbsolutePosition() + Size(1, 4));
-		else
-			dc->DrawText(text, getAbsolutePosition() + Size(0, 3));
+		Point p = getAbsolutePosition() + Size(0,3);
+		if(pressed) 
+			p = p + Size(1,1);
+		bool done = false;
+		if(color!=NULL_COLOR)
+		for(unsigned int i = 0; i < text.size(); i++)
+			if(text[i] == '&')
+			{
+				if(i > 0)
+					dc->DrawText(text.substr(0, i), p);
+				dc->setTextForeground(*UI_Object::theme.lookUpColor(FORCE_TEXT_COLOR));
+				if(i + 1 < text.size())
+					dc->DrawText(text.substr(i+1, 1), p + Size(dc->getTextExtent(text.substr(0,i)).getWidth(),0));
+
+				if(highlight)
+					dc->setTextForeground(highlighted);
+				else
+					dc->setTextForeground(normal);
+				if((i+2) < text.size())
+					dc->DrawText(text.substr(i+2, text.size() - i - 2), p + Size(dc->getTextExtent(text.substr(i+1, 1)).getWidth() + dc->getTextExtent(text.substr(0,i)).getWidth(), 0));	
+				done = true;
+				break;
+			}
+		if(!done)
+			dc->DrawText(text, p);
 	}
 	UI_Object::draw(dc);
 }
@@ -157,7 +180,7 @@ void UI_StaticText::updateText(const std::string& st_text)
 {
 	if(st_text==text)
 		return; //?
-	setNeedRedrawMoved();
+//	setNeedRedrawMoved(); TODO
 	textWasChanged=true;
 	Size old_size = getTextSize();
 	text = st_text;
@@ -177,7 +200,7 @@ void UI_StaticText::updateText(const eString st_text)
 
 void UI_StaticText::reloadText(const std::string& st_text)
 {
-	setNeedRedrawMoved();
+//	setNeedRedrawMoved(); TODO
 	textWasChanged=true;
 	text = st_text;
 	setSize(getTextSize());

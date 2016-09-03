@@ -26,6 +26,7 @@ class BoEntry : public UI_Button
 		const unsigned int getCount() const;
 
 		static bool doLockSound;		
+		static bool entryIsMoving;
 	private:
 		unsigned int id;
 		unsigned int count;
@@ -35,6 +36,7 @@ class BoEntry : public UI_Button
 //		UI_Button* cancelUnit; TODO
 		BoEntry(const BoEntry& object);
 		BoEntry& operator=(const BoEntry& object);
+
 };
 
 inline void BoEntry::setId(const unsigned int my_id) {

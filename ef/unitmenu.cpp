@@ -4,8 +4,8 @@
 UnitMenu::UnitMenu(UI_Object* unit_parent, const Rect unit_rect, const Size distance_bottom_right, const ePositionMode position_mode) :
 	UI_Menu(unit_parent, unit_rect, distance_bottom_right, position_mode, false),
 	anarace(NULL),
-	facility(RACE::UNIT_TYPE_COUNT),
 	facilityNumber(1),
+	facility(RACE::UNIT_TYPE_COUNT),
 	lastRace(0)
 {
 	for(unsigned int i=0; i<RACE::UNIT_TYPE_COUNT; ++i) //TODO
@@ -20,7 +20,7 @@ UnitMenu::~UnitMenu()
 
 const Rect calculateRect(const unsigned int width, const unsigned int height)
 {
-	return(Rect(Point((width/2-10)*(height%2), (1+height/2)*(FONT_SIZE+8)), Size(width/2-15, FONT_SIZE+7)));
+	return(Rect(Point((width/2-8)*(height%2), (height/2)*(FONT_SIZE+8)) + Size(3,3), Size(width/2-8, FONT_SIZE+7)));
 }
 
 const bool UnitMenu::addKey(unsigned int key, unsigned int mod)
@@ -36,7 +36,7 @@ const bool UnitMenu::addKey(unsigned int key, unsigned int mod)
 void UnitMenu::reloadOriginalSize()
 {
 	for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
-		(*m)->setOriginalSize(Size(getParent()->getWidth()/2-15, FONT_SIZE+7));
+		(*m)->setOriginalSize(Size(getParent()->getWidth()/2-8, FONT_SIZE+7));
 
 	processMenu();
 	UI_Menu::reloadOriginalSize();
@@ -80,6 +80,7 @@ void UnitMenu::assignAnarace(ANABUILDORDER* goal_anarace)
 #include <sstream>
 void UnitMenu::processMenu()
 {
+	height=0;
 	if(menuLevel)
 	{
 		if(menuLevel==1)
@@ -281,10 +282,7 @@ void UnitMenu::process()
 		return;
 	UI_Menu::process();
 	if(menuHasChanged());
-	{
-		height=0;
 		processMenu();
-	}
 	// check for Pressed Units
 	eButtonColorsType button_colors_type = UNIT_TYPE_5_BUTTON; // TODO
 /*	switch(lastRace)
@@ -340,7 +338,6 @@ void UnitMenu::process()
 				markedItem=i;
 		}
 	}
-	height+=3;
 }
 
 

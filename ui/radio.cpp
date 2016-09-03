@@ -25,6 +25,7 @@ void UI_Radio::addButton(UI_Button* button, const unsigned int id)
 	button->radio = this;
 	buttonId[id] = button;
 
+	calculateBoxSize();
 	reorder=true;
 }
 
@@ -39,6 +40,7 @@ void UI_Radio::removeButton(const unsigned int button_id)
 	buttonId[button_id]->radio = NULL;
 	buttonId[button_id] = NULL;
 
+	calculateBoxSize();
 	reorder=true;
 }
 

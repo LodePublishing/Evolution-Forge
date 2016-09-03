@@ -37,7 +37,7 @@ UI_Window::~UI_Window()
 
 void UI_Window::addHelpButton(eHelpChapter help_chapter)
 {
-	helpButton = new UI_Button(this, Rect(Point(0,10), Size(13, 14)), Size(5 + (isScrollable==SCROLLED?8:0),10), HELP_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, TOP_RIGHT);
+	helpButton = new UI_Button(this, Rect(Point(0,10), Size(13, 14)), Size(5 + (isScrollable==SCROLLED?8:0),10), HELP_BUTTON, HELP_BITMAP, PRESS_BUTTON_MODE, NULL_STRING, TOP_RIGHT);
 	helpChapter = help_chapter;	
 }
 
@@ -93,7 +93,7 @@ UI_Object* UI_Window::checkToolTip()
 
 UI_Object* UI_Window::checkHighlight()
 {
-	if((!isMouseInside())&&( (scrollBar==NULL) || (!Rect(getAbsolutePosition() + Point(getWidth(), 0), Size(12, getHeight())).Inside(mouse))))
+	if((!isMouseInside())&&( (scrollBar==NULL) || (!Rect(getAbsolutePosition() + Point(getWidth(), 0), Size(12, getHeight())).isInside(mouse))))
 		return(NULL);
 	return(UI_Object::checkHighlight());
 }
@@ -154,6 +154,7 @@ void UI_Window::process()
 {
 	if(!isShown()) 
 		return;
+	
 	if((getScrollBar())&&(getScrollBar()->checkForNeedRedraw()))
 		setNeedRedrawNotMoved();
 
@@ -188,25 +189,15 @@ void UI_Window::process()
 	
 	if(clientRect != clientTargetRect)
 	{
-		if(uiConfiguration.isSmoothMovements())
-		{
-			eRectMovement t = clientRect.moveSmooth(clientStartRect, clientTargetRect);
-			if(t == GOT_BIGGER)
-				setNeedRedrawNotMoved();
-			else if(t == GOT_SMALLER_OR_MOVED)
-				setNeedRedrawMoved();
-		}
-		else 
-		{
-			eRectMovement t = clientRect.move(clientStartRect, clientTargetRect);
-			if(t == GOT_BIGGER)
-				setNeedRedrawNotMoved();
-			else if(t == GOT_SMALLER_OR_MOVED)
-				setNeedRedrawMoved();
-		}
+                Rect old_rect = clientRect;
+                eRectMovement t = uiConfiguration.isSmoothMovements() ? clientRect.moveSmooth(clientStartRect, clientTargetRect) : clientRect.move(clientTargetRect);
+                if(t == GOT_BIGGER)
+                        setNeedRedrawNotMoved();
+                else if(t == GOT_SMALLER_OR_MOVED)
+                        setNeedRedrawMoved(old_rect, clientRect);
 	}
 
-	if(/*(!UI_Object::windowSelected)&&*/(((isMouseInside())||( (scrollBar!=NULL) && (Rect(getAbsolutePosition() + Point(getWidth(), 0), Size(12, getHeight())).Inside(mouse))))))//&&(!isTopItem()))) // => main window! WHY? TODO
+	if(/*(!UI_Object::windowSelected)&&*/(((isMouseInside())||( (scrollBar!=NULL) && (Rect(getAbsolutePosition() + Point(getWidth(), 0), Size(12, getHeight())).isInside(mouse))))))//&&(!isTopItem()))) // => main window! WHY? TODO
 	{
 		bool new_window = false;
 		if(UI_Object::currentWindow != this)
@@ -357,8 +348,8 @@ void UI_Window::drawWindow(DC* dc) const
 		
 		drawTitle(dc);
 	}
-
 }
+
 void UI_Window::draw(DC* dc) const
 {
 	drawWindow(dc);	

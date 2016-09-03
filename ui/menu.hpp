@@ -15,7 +15,7 @@ class UI_Menu : public UI_Object
 {
 	public:
 		// if all items to 'choose_menu' are used then it is a custom menu and reloadOriginalSize, updateItemPositions etc will not be called
-		UI_Menu(UI_Object* menu_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const bool choose_menu, eMenuType menu_type = CUSTOM_MENU, const eButtonWidthType button_width_type = STANDARD_BUTTON_WIDTH, const unsigned int entryNumber = 0, const eString firstString = NULL_STRING, const eButtonColorsType button_colors_type = MY_BUTTON);
+		UI_Menu(UI_Object* menu_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const bool choose_menu, eMenuType menu_type = CUSTOM_MENU, const eButtonWidthType button_width_type = STANDARD_BUTTON_WIDTH, const unsigned int entryNumber = 0, const eString firstString = NULL_STRING, const eButtonColorsType button_colors_type = STANDARD_BUTTON);
 		~UI_Menu();
 		void process();
 		void draw(DC* dc) const;

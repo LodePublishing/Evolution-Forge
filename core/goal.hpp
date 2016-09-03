@@ -18,11 +18,17 @@ class GOAL
 		void setLocation(const unsigned int goal_location);
 		void setFinalTime(const unsigned int goal_final_time);
 
+		void setIsAlwaysBuild(const bool always_build);
+		void setIsBuildAsMuchAsPossible(const bool build_much);
+
 		const unsigned int getUnit() const;
 		const unsigned int getTime() const;
 		const unsigned int getCount() const;
 		const unsigned int getLocation() const;
 		const unsigned int getFinalTime() const;
+
+		const bool getIsAlwaysBuild() const;
+		const bool getIsBuildAsMuchAsPossible() const;
 
 	private:
 		unsigned int unit;//!
@@ -32,7 +38,25 @@ class GOAL
 
 		unsigned int finalTime; // temporary! ?
 
+		bool isAlwaysBuild;
+		bool isBuildAsMuchAsPossible;
 };
+
+inline void GOAL::setIsAlwaysBuild(const bool always_build) {
+	isAlwaysBuild = always_build;
+}
+
+inline void GOAL::setIsBuildAsMuchAsPossible(const bool build_much) {
+	isBuildAsMuchAsPossible = build_much;
+}
+
+inline const bool GOAL::getIsAlwaysBuild() const {
+	return(isAlwaysBuild);
+}
+
+inline const bool GOAL::getIsBuildAsMuchAsPossible() const {
+	return(isBuildAsMuchAsPossible);
+}
 
 inline void GOAL::setUnit(const unsigned int goal_unit)
 {

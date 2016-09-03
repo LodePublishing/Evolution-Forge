@@ -2,7 +2,6 @@
 #define _UI_LONGTEXT_HPP
 
 #include "button.hpp"
-#include "bitmap.hpp"
 
 class UI_LongText : public UI_Object
 {

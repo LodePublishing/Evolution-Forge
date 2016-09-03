@@ -3,8 +3,6 @@
 
 #include "bgentry.hpp"
 
-#include <list>
-
 /*struct Not_Availible
 {
 	unsigned int begin;

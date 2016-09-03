@@ -17,7 +17,7 @@ void Message::process()
 		if(col>5) 
 		{
 			col -= col/5+1;
-			setNeedRedrawMoved();
+//			setNeedRedrawMoved(); TODO
 		}
 		else col=0;
 	}

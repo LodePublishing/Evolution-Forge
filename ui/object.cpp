@@ -5,6 +5,7 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const S
 	clipRect(),
 	children(NULL),
 	childrenWereChanged(false),
+	positionMode(position_mode),
 	relativeRect(relative_rect),
 	startRect(relative_rect),
 	targetRect(relative_rect),
@@ -13,11 +14,11 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const S
 	oldSize(relative_rect.getSize()),
 	sizeHasChanged(true),
 
-	positionMode(position_mode),
 	autoSize(auto_size),
 	shown(true),
 
 	needRedraw(true),
+	redrawArea(),
 	parent(NULL),
 	positionParent(NULL),
 	prevBrother(this),
@@ -34,6 +35,7 @@ UI_Object::UI_Object(UI_Object* parent_object, UI_Object* position_parent_object
 	clipRect(),
 	children(NULL),
 	childrenWereChanged(false),
+	positionMode(position_mode),
 	relativeRect(relative_rect),
 	startRect(relative_rect),
 	targetRect(relative_rect),
@@ -42,11 +44,11 @@ UI_Object::UI_Object(UI_Object* parent_object, UI_Object* position_parent_object
 	oldSize(relative_rect.getSize()),
 	sizeHasChanged(true),
 
-	positionMode(position_mode),
 	autoSize(auto_size),
 	shown(true),
 
 	needRedraw(true),
+	redrawArea(),
 	parent(NULL),
 	positionParent(NULL),
 	prevBrother(this),
@@ -57,63 +59,6 @@ UI_Object::UI_Object(UI_Object* parent_object, UI_Object* position_parent_object
 	setParent(parent_object);
 	setPositionParent(position_parent_object);
 //	addToProcessArray(this);
-}
-
-UI_Object& UI_Object::operator=(const UI_Object& object)
-{
-	children = object.children;
-	
-	relativeRect = object.relativeRect;
-	startRect = object.startRect;
-	targetRect = object.targetRect;
-	
-	originalRect = object.originalRect;
-	distanceBottomRight = object.distanceBottomRight;
-	oldSize = object.oldSize;
-	setSizeHasChanged();
-
-	positionMode = object.positionMode;
-	autoSize = object.autoSize;
-	shown = object.shown;
-	
-	needRedraw = object.needRedraw;
-	prevBrother = this; // !!
-	nextBrother = this; // !!
-	parent = NULL; // !!
-	positionParent = NULL; //!?
-	toolTipEString = object.toolTipEString;
-	toolTipString = object.toolTipString;
-	
-	setParent(object.parent);
-	
-	return(*this);
-}
-
-UI_Object::UI_Object(const UI_Object& object) :
-	children( object.children ),
-	relativeRect( object.relativeRect ),
-	startRect( object.startRect ),
-	targetRect( object.targetRect ),
-	originalRect( object.originalRect ),
-	distanceBottomRight( object.distanceBottomRight ),
-	oldSize( object.oldSize ),
-	sizeHasChanged( true ),
-
-	positionMode( object.positionMode ),
-	autoSize( object.autoSize ),
-	
-	shown( object.shown ), 
-
-	needRedraw( object.needRedraw ),
-
-	parent( NULL ), // !!
-	positionParent( NULL ), // !!
-	prevBrother( this ), // !!
-	nextBrother( this ), // !!
-	toolTipEString( object.toolTipEString ),
-	toolTipString( object.toolTipString )
-{ 
-	setParent(object.parent);
 }
 
 UI_Object::~UI_Object()
@@ -143,7 +88,6 @@ void UI_Object::reloadOriginalSize()
 void UI_Object::adjustSize(const eAdjustMode adjust_mode, const Size& size)
 {
 //	UI_Object::addToProcessArray(this);
-	Size old_size = getSize();
 	signed int left = originalRect.getLeft();
 	unsigned int full_width;
 	if(getParent() != NULL)
@@ -192,8 +136,6 @@ void UI_Object::adjustSize(const eAdjustMode adjust_mode, const Size& size)
 			default:break; // TODO ERROR
 		}
 	}
-	if(old_size != getSize())
-		setSizeHasChanged();
 }
 	
 void UI_Object::adjustPosition()
@@ -334,24 +276,14 @@ void UI_Object::process()
 {
 //	if (!isShown()) //~~
 //		return;
-	if(startRect != targetRect)
+	if(relativeRect != targetRect)
 	{
-		if(uiConfiguration.isSmoothMovements())
-		{
-			eRectMovement t = relativeRect.moveSmooth(startRect, targetRect);
-			if(t == GOT_BIGGER)
-				setNeedRedrawNotMoved();
-			else if(t == GOT_SMALLER_OR_MOVED)
-				setNeedRedrawMoved();
-		}
-		else 
-		{
-			eRectMovement t = relativeRect.move(startRect, targetRect);
-			if(t == GOT_BIGGER)
-				setNeedRedrawNotMoved();
-			else if(t == GOT_SMALLER_OR_MOVED)
-				setNeedRedrawMoved();
-		}
+		Rect old_rect = relativeRect;
+		eRectMovement t = uiConfiguration.isSmoothMovements() ? relativeRect.moveSmooth(startRect, targetRect) : relativeRect.move(targetRect);
+		if(t == GOT_BIGGER)
+			setNeedRedrawNotMoved();
+		else if(t == GOT_SMALLER_OR_MOVED)
+			setNeedRedrawMoved(old_rect, relativeRect);
 		if(oldSize != relativeRect.getSize())
 			setSizeHasChanged();
 	}
@@ -384,6 +316,18 @@ void UI_Object::process()
 		} while (tmp != children);
 	}
 	oldSize = relativeRect.getSize();
+}
+
+void UI_Object::setClipRect(const Rect& rect)
+{
+	UI_Object* tmp=children;  // process all children of gadget
+	if (tmp) {
+		do {
+			tmp->setClipRect(rect);
+			tmp = tmp->nextBrother;
+		} while (tmp != children);
+	}
+	clipRect = rect;
 }
 
 void UI_Object::setSizeHasChanged(const bool size_has_changed)
@@ -468,6 +412,15 @@ void UI_Object::draw(DC* dc) const
 	// if hidden, hide children as well
 	if (!isShown())
 		return;
+	
+	if(redrawArea.size())
+	{
+		dc->setBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
+		dc->setPen(*theme.lookUpPen(NULL_PEN));
+		for(std::list<Rect>::const_iterator i = redrawArea.begin(); i!= redrawArea.end(); ++i)
+			dc->DrawRectangle(*i);
+	}
+	
 	// for 'redraw' optimizations - to see which window is redrawn
 //	dc->setPen(*theme.lookUpPen((ePen)(5+(rand()%2))));
 //	dc->DrawEmptyRectangle(getAbsoluteRect());
@@ -508,15 +461,16 @@ const bool UI_Object::isMoving() const
 
 void UI_Object::setRect(const Rect& rect) 
 {
-	if(rect == relativeRect)
-		return;
-	if(rect.Inside(relativeRect))
-		setNeedRedrawMoved();
-	else setNeedRedrawNotMoved();
-
+	Rect old_rect = relativeRect;	
+	eRectMovement movement = relativeRect.move(rect);
+	switch(movement)
+	{
+		case NO_CHANGE:return;
+		case GOT_SMALLER_OR_MOVED:setNeedRedrawMoved(old_rect, relativeRect);break;
+		case GOT_BIGGER:setNeedRedrawNotMoved();break;
+	}
 	startRect = rect;
 	targetRect = rect;
-	relativeRect = rect;
 	setSizeHasChanged();
 //	UI_Object::addToProcessArray(this);
 }
@@ -531,10 +485,13 @@ void UI_Object::setPosition(const Point& position)
 		toErrorLog("DEBUG (UI_Object::setPosition()): Value position out of range.");return;
 	}
 #endif
+	
+	Rect old_rect = relativeRect;
 	startRect.setTopLeft(position);
 	targetRect.setTopLeft(position);
 	relativeRect.setTopLeft(position);
-	setNeedRedrawMoved();
+	
+	setNeedRedrawMoved(old_rect, relativeRect);
 //	UI_Object::addToProcessArray(this);
 }
 
@@ -542,14 +499,17 @@ void UI_Object::setHeight(const unsigned int height)
 {
 	if(getTargetHeight() == height)
 		return;
-	if(height < relativeRect.getHeight())
-		setNeedRedrawMoved();
-	else setNeedRedrawNotMoved();
 	
-	setSizeHasChanged();
+	Rect old_rect = relativeRect;
 	relativeRect.setHeight(height);
 	startRect.setHeight(height);
 	targetRect.setHeight(height);
+	
+	setSizeHasChanged();
+	if(height < relativeRect.getHeight())
+		setNeedRedrawMoved(old_rect, relativeRect);
+	else setNeedRedrawNotMoved();
+	
 //	UI_Object::addToProcessArray(this);
 }
 
@@ -557,13 +517,17 @@ void UI_Object::setWidth(const unsigned int width)
 {
 	if(relativeRect.getWidth() == width)
 		return;
-	if(width < relativeRect.getWidth())
-		setNeedRedrawMoved();
-	else setNeedRedrawNotMoved();
-	setSizeHasChanged();
+	
+	Rect old_rect = relativeRect;
 	relativeRect.setWidth(width);
 	startRect.setWidth(width);
 	targetRect.setWidth(width);
+	
+	setSizeHasChanged();
+	if(width < relativeRect.getWidth())
+		setNeedRedrawMoved(old_rect, relativeRect);
+	else setNeedRedrawNotMoved();
+
 //	UI_Object::addToProcessArray(this);
 }
 
@@ -571,13 +535,17 @@ void UI_Object::setSize(const Size size)
 {
 	if(relativeRect.getSize() == size)
 		return;
-	if(size < relativeRect.getSize())
-		setNeedRedrawMoved();
-	else setNeedRedrawNotMoved();
-	setSizeHasChanged();
+	
+	Rect old_rect = relativeRect;
 	relativeRect.setSize(size);
 	startRect.setSize(size);
 	targetRect.setSize(size);
+	
+	setSizeHasChanged();
+	if(size < relativeRect.getSize())
+		setNeedRedrawMoved(old_rect, relativeRect);
+	else setNeedRedrawNotMoved();
+
 	
 //	UI_Object::addToProcessArray(this);
 }
@@ -586,21 +554,28 @@ void UI_Object::setLeft(const signed int x)
 {
 	if(relativeRect.getLeft() == x)
 		return;
-//	UI_Object::addToProcessArray(this);
+
+	Rect old_rect = relativeRect;
 	relativeRect.setLeft(x);
 	startRect.setLeft(x);
 	targetRect.setLeft(x);
-	setNeedRedrawMoved();
+
+	setNeedRedrawMoved(old_rect, relativeRect);
+
+//	UI_Object::addToProcessArray(this);
 }
 		
 void UI_Object::setTop(const signed int y) 
 {
 	if(relativeRect.getTop() == y)
 		return;
+	
+	Rect old_rect = relativeRect;
 	relativeRect.setTop(y);
 	startRect.setTop(y);
 	targetRect.setTop(y);
-	setNeedRedrawMoved();
+	
+	setNeedRedrawMoved(old_rect, relativeRect);
 }
 
 void UI_Object::Show(const bool show)
@@ -608,64 +583,88 @@ void UI_Object::Show(const bool show)
 	if((show)&&(!shown))
 	{
 		shown = true;
-		setNeedRedrawNotMoved(true);
+		setNeedRedrawNotMoved();
 		if(getParent())
 			getParent()->childrenWereChanged = true;
 	} 
 	else if((!show)&&(shown))
 	{
-		setNeedRedrawNotMoved(true);
+		setNeedRedrawNotMoved();
 //		setNeedRedrawMoved(false); // ~~ ?
 		shown = false;
 		if(getParent())
 			getParent()->childrenWereChanged = true;
 	}
 }
+/*
+oldrect
+newrect
 
-void UI_Object::setNeedRedrawMoved(const bool need_redraw)  // moved item
+'newrect < oldrect':
+	->redraw itself and children, redraw parent's oldrect
+'newrect > oldrect :
+	moved
+	notmoved
+redrawbackground
+*/
+
+// called when old rectangle is bigger/smaller than the old
+// call this directly when only the size has changed
+void UI_Object::setNeedRedrawAllThatOverlaps(const Rect& rect)
 {
-	if(!isShown())
-		return;
-	setNeedRedrawNotMoved(need_redraw);
-	if((need_redraw)&&(getParent()))
+	if(getParent())
 	{
-//		getParent()->checkForChildrenOverlap(getRelativeRect()); TODO
-		
-		if(!getParent()->getAbsoluteRect().Inside(getAbsoluteRect()))
-			getParent()->setNeedRedrawMoved(true);
-		else
-			getParent()->setNeedRedrawNotMoved(true);
-	}
+		getParent()->setNeedRedrawArea(rect);
+	        UI_Object* tmp = getParent()->children;
+        	if (tmp) {
+                	do {
+				if(rect.overlaps(tmp->getRelativeRect()))
+		                        tmp->setNeedRedrawNotMoved();
+                	        tmp = tmp->nextBrother;
+	                } while (tmp != getParent()->children);
+        	}
+	} else
+		setNeedRedrawNotMoved();
 }
 
-void UI_Object::checkForChildrenOverlap(const Rect& rect)
+void UI_Object::setNeedRedrawArea(const Rect& rect)
 {
-        UI_Object* tmp = children;
-        if (tmp) {
-                do {
-			if(rect.overlaps(tmp->getRelativeRect()))
-	                        tmp->setNeedRedrawNotMoved(true);
-                        tmp = tmp->nextBrother;
-                } while (tmp != children);
-        }
+	Rect absolute_rect = Rect(rect.getTopLeft() + getAbsolutePosition(), rect.getSize());
+// check if it's inside
+	if(getAbsoluteRect().isInside(absolute_rect))
+		redrawArea.push_back(absolute_rect);
+	else 
+		setNeedRedrawAllThatOverlaps(Rect(rect.getTopLeft() + getRelativePosition(), rect.getSize()));
 }
 
-void UI_Object::setNeedRedrawNotMoved(const bool need_redraw)
+void UI_Object::setNeedRedrawMoved(const Rect& old_rect, const Rect& new_rect)
+{
+	if(old_rect.isInside(new_rect))
+	{
+		setNeedRedrawAllThatOverlaps(old_rect);
+		return;
+	} else if(new_rect.isInside(old_rect))
+	{
+		setNeedRedrawAllThatOverlaps(new_rect);
+		return;
+	}
+	setNeedRedrawAllThatOverlaps(old_rect);
+	setNeedRedrawAllThatOverlaps(new_rect);
+}
+
+void UI_Object::setNeedRedrawNotMoved()
 {
 	if(!isShown())
 		return;
 
-	needRedraw = need_redraw;
-
-	if(!need_redraw)
-		return;
+	needRedraw = true;
 
 	DC::addRectangle(Rect(getAbsolutePosition(), getSize()+Size(1,1))); // TODO Hack fuer buttons
         UI_Object* tmp = children;
 
         if (tmp) {
                 do {
-                        tmp->setNeedRedrawNotMoved(needRedraw);
+                        tmp->setNeedRedrawNotMoved();
                         tmp = tmp->nextBrother;
                 } while (tmp != children);
         }
@@ -680,19 +679,16 @@ void UI_Object::makeFirstChild()
 	setParent(old_parent);
 }
 
-void UI_Object::setNeedRedrawNotMovedFirstChild(const bool need_redraw)
+void UI_Object::setNeedRedrawNotMovedFirstChild()
 {
 	if(!isShown())
 		return;
 
-	needRedraw = need_redraw;
-
-	if(!need_redraw)
-		return;
+	needRedraw = true;
 
 	DC::addRectangle(Rect(getAbsolutePosition(), getSize()+Size(1,1))); // TODO Hack fuer buttons
 	if(children)
-		children->setNeedRedrawNotMoved(needRedraw);
+		children->setNeedRedrawNotMoved();
 }
 
 void UI_Object::clearRedrawFlag()
@@ -700,10 +696,14 @@ void UI_Object::clearRedrawFlag()
 	if(!isShown())
 	{
 		needRedraw = false;
+		redrawArea.clear();
 		return;
 	}
 	if(needRedraw)
+	{
 		needRedraw = false;
+		redrawArea.clear();
+	}
 	UI_Object* tmp = children;
 	if (tmp) {
 		do {
@@ -761,9 +761,7 @@ void UI_Object::resetWindow()
 UI_Object* UI_Object::focus(NULL);
 
 UI_Theme UI_Object::theme;
-#ifndef _NO_FMOD_SOUND
 UI_Sound UI_Object::sound;
-#endif
 
 UI_ToolTip* UI_Object::tooltip(NULL);
 UI_Object* UI_Object::toolTipParent(NULL);

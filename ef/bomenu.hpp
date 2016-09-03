@@ -1,6 +1,7 @@
 #ifndef _GUI_BOMENU_HPP
 #define _GUI_BOMENU_HPP
 
+#include "../ui/menu.hpp"
 #include "../core/database.hpp"
 
 class BoMenu : public UI_Menu

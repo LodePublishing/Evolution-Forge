@@ -63,16 +63,8 @@ void Player::draw(DC* dc) const
 {
 	if(!isShown())
 		return;
-/*	if(efConfiguration.isRaceSpecificTheme())
-		switch(anarace->getRace())
-		{
-			case TERRA:UI_Object::theme.setColorTheme(DARK_BLUE_THEME);break;
-			case PROTOSS:UI_Object::theme.setColorTheme(YELLOW_THEME);break;
-			case ZERG:UI_Object::theme.setColorTheme(DARK_RED_THEME);break;
-			default:break;
-		}*/ // TODO
-
-	// TODO
+	if(efConfiguration.isRaceSpecificTheme())
+		UI_Object::theme.setColorTheme((eTheme)(DARK_BLUE_THEME + anarace->getRace()));
 	UI_Object::draw(dc);
 }
 
@@ -81,14 +73,20 @@ void Player::process()
 	if(!isShown())
 		return;
 	UI_Object::process();
-	if(checkForNeedRedraw())
-		setNeedRedrawMoved();
+//	if(checkForNeedRedraw()) TODO
+//		setNeedRedrawMoved();
 	
 // ------ COMMUNICATION BETWEEN THE WINDOWS ------
 	if(boGraphWindow->getSelectedItems().size() > 0)
+	{
 		boWindow->setSelected(boGraphWindow->getSelectedItems());
+		boDiagramWindow->setSelected(boGraphWindow->getSelectedItems());
+	}
 	else if(boWindow->getSelectedItems().size() > 0)
+	{
 		boGraphWindow->setSelected(boWindow->getSelectedItems());
+		boDiagramWindow->setSelected(boWindow->getSelectedItems());
+	}
 	else if(boDiagramWindow->getSelectedItems().size() > 0)
 	{
 		boWindow->setSelected(boDiagramWindow->getSelectedItems());

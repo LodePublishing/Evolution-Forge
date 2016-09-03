@@ -2,7 +2,6 @@
 #define _GUI_SETTINGS_HPP
 
 #include "../ui/window.hpp"
-#include "../ui/group.hpp"
 #include "../ui/radio.hpp"
 #include "../ui/numberfield.hpp"
 
@@ -62,9 +61,8 @@ class SettingsWindow:public UI_Window
 		UI_Group* uberSettings;
 
 		UI_Group* coreSettings;
-#ifndef _NO_FMOD_SOUND
 		UI_Group* soundSettings;
-#endif
+		
 		UI_Group* guiSettings;
 		UI_Group* graphicSettings;
 
@@ -72,7 +70,6 @@ class SettingsWindow:public UI_Window
 		UI_Group* loadSaveSettings;
 
 		UI_Button* fastCalculation;
-		UI_Button* expansionSet;
 		UI_Button* alwaysBuildWorkers;
 		UI_Button* allowWaitOrders;
 		UI_NumberField* waitAccuracy;
@@ -80,13 +77,12 @@ class SettingsWindow:public UI_Window
 		UI_Button* autoRuns;
 		UI_NumberField* maxGenerations;
 		
-#ifndef _NO_FMOD_SOUND
 		UI_Button* useMusic;
 		UI_NumberField* musicVolume;
 		UI_Button* useSound;
 		UI_NumberField* soundVolume;
 		UI_NumberField* channels; // TODO evtl raus
-#endif
+		
 		UI_Button* backgroundBitmap;
 		UI_Button* smoothMovement;
 		UI_Button* waitAfterChange;

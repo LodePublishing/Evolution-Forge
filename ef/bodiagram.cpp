@@ -19,7 +19,9 @@ BoDiagramWindow::BoDiagramWindow(UI_Object* bod_parent, const unsigned int game_
 	timeText(new UI_StaticText(this, BODIAGRAM_TIME_STRING, Rect(Point(8, 48), Size(0,0)), Size(0,0), FITNESS_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST)),
 	resourceNumber(RACE::MAX_RESOURCE_TYPES),
 	supplyNumber(new UI_StaticText(this, Rect(Point(75, 38), Size(0,0)), Size(0,0), BRIGHT_SUPPLY_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST)),
-	timeNumber(new UI_StaticText(this, Rect(Point(75, 49), Size(0,0)), Size(0,0), BRIGHT_FITNESS_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST))	
+	timeNumber(new UI_StaticText(this, Rect(Point(75, 49), Size(0,0)), Size(0,0), BRIGHT_FITNESS_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST)),
+	firstTime(0),
+	lastTime(0)	
 {
 	for(unsigned int i = 0; i < RACE::MAX_RESOURCE_TYPES; i++)
 	{
@@ -64,6 +66,7 @@ void BoDiagramWindow::reloadOriginalSize()
 	setMaxHeight(UI_Object::theme.lookUpPlayerMaxHeight(BUILD_ORDER_DIAGRAM_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
 
 	UI_Window::reloadOriginalSize();
+	resetData();
 }
 
 void BoDiagramWindow::assignAnarace(ANABUILDORDER* bod_anarace)
@@ -109,7 +112,7 @@ void BoDiagramWindow::process()
 	
 	
 	bold = false;
-	if((diagramList.size()>1) && (getAbsoluteClientRect().Inside(mouse)) && (totalTime>0))
+	if((diagramList.size()>1) && (getAbsoluteClientRect().isInside(mouse)) && (totalTime>0))
 	{
 		bold = true;
 		unsigned int new_mouse_time = totalTime * (mouse.x - getAbsoluteClientRectLeftBound()) / getClientRectWidth();
@@ -120,6 +123,8 @@ void BoDiagramWindow::process()
 	
 			unsigned int number = 0;
 			selectedItems.clear();
+			tempSelectedItems.clear();
+			firstTime = lastTime = 0;
 			for(std::list<PROGRAM>::const_iterator k = anarace->getProgramList().begin(); k != anarace->getProgramList().end(); ++k, ++number)
 				if((k->getTime() - k->getBT() < coreConfiguration.getMaxTime()-mouseTime)&&(k->getTime() > coreConfiguration.getMaxTime() - mouseTime))
 					selectedItems.push_back(number);
@@ -132,6 +137,8 @@ void BoDiagramWindow::process()
 			{
 				std::list<STATISTICS>::const_iterator j = i;
 				++j;
+				if(j == anarace->getTimeStatisticsList().end())
+					break;
 				if(i->getTime() == j->getTime())
 					continue;
 			
@@ -169,6 +176,8 @@ void BoDiagramWindow::process()
 	} else
 	{
 		selectedItems.clear();
+		tempSelectedItems.clear();
+		firstTime = lastTime = 0;
 		for(unsigned int k = RACE::MAX_RESOURCE_TYPES; k--;)
 			resourceNumber[k]->Hide();
 		supplyNumber->Hide();
@@ -177,6 +186,25 @@ void BoDiagramWindow::process()
 	oldMouse = mouse;
 }
 
+void BoDiagramWindow::setSelected(const std::list<unsigned int>& selected)
+{
+	tempSelectedItems.clear();
+	if(selected.empty() || (totalTime == 0))
+		return;
+	tempSelectedItems = selected;
+	unsigned int id = 0;
+	for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order, ++id)
+	{
+		if(selected.front() == id)
+			firstTime = order->getRealTime() * getClientRectWidth() / totalTime;
+		if(selected.back() == id)
+		{
+			lastTime = (order->getRealTime() + order->getBT()) * getClientRectWidth() / totalTime;
+			setNeedRedrawNotMoved();
+			break;
+		}
+	}
+}
 
 void BoDiagramWindow::processList()
 {
@@ -207,6 +235,7 @@ void BoDiagramWindow::processList()
 	{
 		std::list<BoDiagramPoint>::iterator k = diagramList.begin();
 		++k;
+		unsigned int id = 0;
 		for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
 		{
 			if(k==diagramList.end())
@@ -223,8 +252,10 @@ void BoDiagramWindow::processList()
 			k->setTargetY(HAVE_SUPPLY, order->getStatisticsBefore().getHaveSupply(), order->getStatisticsAfter().getHaveSupply());
 			k->setTargetY(NEED_SUPPLY, order->getStatisticsBefore().getNeedSupply(), order->getStatisticsAfter().getNeedSupply());
 			k->unit = order->getUnit();
+			k->id = id;
 			k->initialized = true;
 			++k;
+			++id;
 		}
 		while(k!=diagramList.end())
 			k = diagramList.erase(k);
@@ -294,34 +325,12 @@ void BoDiagramWindow::draw(DC* dc) const
 	
 	if(diagramList.size()>0)
 	{
-		dc->setFont(theme.lookUpFont(SMALL_SHADOW_BOLD_FONT));
 
+// first draw the supply:
 		for(std::list<BoDiagramPoint>::const_iterator i = diagramList.begin(); i!=diagramList.end(); ++i)
 		{
 			std::list<BoDiagramPoint>::const_iterator j = i;
 			++j;
-			
-			Point p = getAbsoluteClientRectPosition()+Point(0,getClientRectHeight());
-			Pen* pen;
-			
-					
-			
-			int x, y1, y2;
-			x = p.x + i->current_x;
-			
-
-			for(unsigned int k = RACE::MAX_RESOURCE_TYPES; k--;)
-			{
-				y1 = p.y - i->current_y1[k] * scale[k];
-				y2 =  p.y - i->current_y2[k] * scale[k];
-	
-				if(y1 + 10 < y2) pen = theme.lookUpPen((ePen)(DASHED_MINERALS_PEN+k));
-				else pen = theme.lookUpPen((ePen)(BODIAGRAM_MINERALS_PEN+k));
-			
-				dc->setPen(Pen(dc->changeRelativeBrightness(*pen->getColor(), i->highlight[k]), pen->getWidth(), pen->getStyle()));
-				if(y1<y2) dc->DrawVerticalLine(x, y1, y2);else  dc->DrawVerticalLine(x, y2, y1);
-			}
-
 			if(j!=diagramList.end())
 			{
 				dc->setBrush(*theme.lookUpBrush(BODIAGRAM_SUPPLY_BRUSH));
@@ -336,24 +345,79 @@ void BoDiagramWindow::draw(DC* dc) const
 					high_light = i->highlight[HAVE_SUPPLY];
 				else high_light = i->highlight[NEED_SUPPLY];
 			
-				pen = theme.lookUpPen(BODIAGRAM_SUPPLY_PEN);
+				Pen* pen = theme.lookUpPen(BODIAGRAM_SUPPLY_PEN);
 				dc->setPen(Pen(dc->changeRelativeBrightness(*pen->getColor(), high_light), pen->getWidth(), pen->getStyle()));
 				
 				dc->DrawRectangle(getAbsoluteClientRectPosition() + Point(0, getClientRectHeight()) +
 						Point(i->current_x, 0) - Size(0, i->current_y2[HAVE_SUPPLY]*scale[HAVE_SUPPLY]),
 						Size(j->current_x - i->current_x, y*scale[HAVE_SUPPLY]) );
+			} // end of  j != diagramList.end()
+		} // end of for
 
+// then the resources:		
+		for(std::list<BoDiagramPoint>::const_iterator i = diagramList.begin(); i!=diagramList.end(); ++i)
+		{
+			std::list<BoDiagramPoint>::const_iterator j = i;
+			++j;
 			
+			Point p = getAbsoluteClientRectPosition()+Point(0,getClientRectHeight());
+			Pen* pen;
+			
+			int x = p.x + i->current_x;
+			
+			for(unsigned int k = RACE::MAX_RESOURCE_TYPES; k--;)
+			{
+				int y1 = p.y - i->current_y1[k] * scale[k];
+				int y2 = p.y - i->current_y2[k] * scale[k];
+	
+				if(y1 + 10 < y2) pen = theme.lookUpPen((ePen)(DASHED_MINERALS_PEN+k));
+				else pen = theme.lookUpPen((ePen)(BODIAGRAM_MINERALS_PEN+k));
+			
+				dc->setPen(Pen(dc->changeRelativeBrightness(*pen->getColor(), i->highlight[k]), pen->getWidth(), pen->getStyle()));
+				if(y1<y2) dc->DrawVerticalLine(x, y1, y2);else  dc->DrawVerticalLine(x, y2, y1);
+			}
+
+			if(j!=diagramList.end())
+			{
 				for(unsigned int k = 0; k < RACE::MAX_RESOURCE_TYPES; k++)
 				{
 					pen = theme.lookUpPen((ePen)(BODIAGRAM_MINERALS_PEN+k+(((bold)||(i->highlight[k]>100))?3:0)));
 					dc->setPen(Pen(dc->changeRelativeBrightness(*pen->getColor(), i->highlight[k]), pen->getWidth(), pen->getStyle()));
 					dc->DrawLine(p.x + i->current_x, p.y - i->current_y2[k] * scale[k], p.x + j->current_x, p.y - j->current_y1[k] * scale[k]);
 				}
-	
+			} // end of  j != diagramList.end()
+		} // end of for
+
+// and finally the unit text:
+		dc->setFont(theme.lookUpFont(SMALL_SHADOW_BOLD_FONT));
+		for(std::list<BoDiagramPoint>::const_iterator i = diagramList.begin(); i!=diagramList.end(); ++i)
+		{
+			std::list<BoDiagramPoint>::const_iterator j = i;
+			++j;
+			
+			Point p = getAbsoluteClientRectPosition()+Point(0,getClientRectHeight());
+			
+			if(j!=diagramList.end())
+			{
 				if(i!=diagramList.begin())
 				{
-					dc->setTextForeground(*theme.lookUpColor(BRIGHT_TEXT_COLOR));
+					int y1 = p.y - i->current_y1[0] * scale[0];
+					int y2 =  p.y - i->current_y2[0] * scale[0];
+					int x = p.x + i->current_x;
+
+					// TODO sehr ungenau...
+					bool mark = false;
+					for(std::list<unsigned int>::const_iterator l = tempSelectedItems.begin(); l != tempSelectedItems.end(); ++l)
+						if(*l == i->id)
+						{
+							mark = true;
+							break;
+						}
+						
+					if(mark)	
+						dc->setTextForeground(*theme.lookUpColor(IMPORTANT_COLOR));
+					else
+						dc->setTextForeground(*theme.lookUpColor(BRIGHT_TEXT_COLOR));
 					unsigned int width = (theme.lookUpFont(SMALL_SHADOW_BOLD_FONT)->getTextExtent(GAME::lookUpUnitString(anarace->getRace(), i->unit))).getWidth();
 					unsigned int tx;
 					if(x - width/2 < getAbsoluteClientRectLeftBound())
@@ -364,14 +428,22 @@ void BoDiagramWindow::draw(DC* dc) const
 						tx = x - width/2;
 					dc->DrawText(GAME::lookUpUnitString(anarace->getRace(), i->unit), Point(tx, y1 + (y2 - y1)/2));
 				}
-			}
-		}
-	}
-	if(bold)
+			} // end of  j != diagramList.end()
+		} // end of for
+
+	
+		
+	} // end of diagramList.size() > 0
+	if(bold && (totalTime > 0))
 	{
 		dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 		dc->setPen(*theme.lookUpPen(SELECT_PEN));
 		dc->DrawEmptyRectangle( getAbsoluteClientRectLeftBound() - 2 + (mouseTime * getClientRectWidth()) / totalTime, getAbsoluteClientRectUpperBound()+10, 4, getClientRectHeight()-10);
+	} else if(firstTime != lastTime)
+	{
+		dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+		dc->setPen(*theme.lookUpPen(SELECT_PEN));
+		dc->DrawEmptyRectangle( getAbsoluteClientRectLeftBound() - 2 + firstTime, getAbsoluteClientRectUpperBound()+10, lastTime - firstTime, getClientRectHeight()-10);	
 	}
 
 	dc->setPen(*theme.lookUpPen(RECTANGLE_PEN));

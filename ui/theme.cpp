@@ -17,10 +17,10 @@ UI_Theme::UI_Theme():
 	currentLanguage(ENGLISH_LANGUAGE),
 	currentColorTheme(DARK_BLUE_THEME),
 	currentMainColorTheme(DARK_BLUE_THEME),
-	loadedBitmaps(),
 	defaultCursor(NULL),
-	stringList(MAX_LANGUAGES),
+	loadedBitmaps(),
 	stringIdentifier(MAX_LANGUAGES),
+	stringList(MAX_LANGUAGES),
 	languageInitialized(MAX_LANGUAGES)
 {
 	for(unsigned int i = MAX_LANGUAGES; i--;)
@@ -79,6 +79,7 @@ UI_Theme::UI_Theme():
 			cursorList[i][j] = NULL;
 	initStringIdentifier();
 	initBitmapIdentifier();
+	initButtonIdentifier();
 }
 
 UI_Theme::~UI_Theme()
@@ -136,6 +137,14 @@ UI_Theme::~UI_Theme()
 				delete fontList[i][k];
 }
 
+void UI_Theme::initCursors()
+{
+	cursorList[ARROW_CURSOR][0] = DC::createCursor(arrow_xpm);cursorList[ARROW_CURSOR][1] = NULL;
+	cursorList[CLOCK_CURSOR][0] = DC::createCursor(clock1_xpm);cursorList[CLOCK_CURSOR][1] = DC::createCursor(clock2_xpm);
+	cursorList[HAND_CURSOR][0] = DC::createCursor(hand_xpm);cursorList[HAND_CURSOR][1] = NULL;
+	defaultCursor = SDL_GetCursor();
+}
+
 void UI_Theme::unloadGraphics()
 {
 	for(std::list<BitmapEntry>::iterator i = loadedBitmaps.begin(); i!=loadedBitmaps.end(); ++i)
@@ -153,9 +162,9 @@ void UI_Theme::unloadGraphics()
 			i->used = false;
 }
 
-const Size UI_Theme::getResolutionSize() const
+const Size UI_Theme::getResolutionSize(const eResolution resolution) const
 {
-	switch(currentResolution)
+	switch(resolution)
 	{
 		case RESOLUTION_640x480:return(Size(640, 480));break;
 		case RESOLUTION_800x600:return(Size(800, 600));break;
@@ -364,7 +373,7 @@ const unsigned int UI_Theme::lookUpPlayerMaxHeight(const ePlayerWindow id, const
 	return(maxPlayerHeightList[currentResolution][game_number][max_games-1][max_player-1][player_number][id]);
 }
 
-const ePlayerType getPlayerType(const std::string& item)
+const ePlayerType get_player_type(const std::string& item)
 {
 	if(item=="@PLAYER_ONE") return(PLAYER_ONE_TYPE); else
 	if(item=="@PLAYER_TWO") return(PLAYER_TWO_TYPE); else
@@ -373,7 +382,7 @@ const ePlayerType getPlayerType(const std::string& item)
 	return(ZERO_PLAYER_TYPE);
 }
 
-const eGameType getGameType(const std::string& item)
+const eGameType get_game_type(const std::string& item)
 {
 	if(item=="@MAIN") return(GAME_MAIN_TYPE); else
 	if(item=="@1PLAYER") return(GAME_1PLAYER_TYPE); else
@@ -383,7 +392,7 @@ const eGameType getGameType(const std::string& item)
 	return(ZERO_GAME_TYPE);
 }
 
-const eDataType getDataType(const std::string& item)
+const eDataType get_data_type(const std::string& item)
 {
 	if(item=="@STRINGS") return(STRING_DATA_TYPE);else
 	if(item=="@HELP_STRINGS") return(HELP_STRING_DATA_TYPE);else
@@ -392,46 +401,50 @@ const eDataType getDataType(const std::string& item)
 	if(item=="@COLORS") return(COLOR_DATA_TYPE);else
 	if(item=="@PENS") return(PEN_DATA_TYPE);else
 	if(item=="@BRUSHES") return(BRUSH_DATA_TYPE);else
-	if(item=="@GENERAL_BITMAPS") return(GENERAL_BITMAP_DATA_TYPE);else
-	if(item=="@GENERAL_RESOLUTION_BITMAPS") return(GENERAL_RESOLUTION_BITMAP_DATA_TYPE);else
-	if(item=="@GENERAL_THEME_BITMAPS") return(GENERAL_THEME_BITMAP_DATA_TYPE);else
 	if(item=="@BITMAPS") return(BITMAP_DATA_TYPE);else
+	if(item=="@THEME_BITMAPS") return(THEME_BITMAP_DATA_TYPE);else
 	if(item=="@BUTTON_COLORS") return(BUTTON_COLOR_DATA_TYPE);else
 	if(item=="@BUTTON_WIDTH") return(BUTTON_WIDTH_DATA_TYPE);else
 	return(ZERO_DATA_TYPE);
 }
 
-const eSubDataType getSubDataType(const eDataType mode)
+
+const eSubDataType get_sub_data_type(const eDataType mode)
 {
 	switch(mode)
 	{	
-		case HELP_STRING_DATA_TYPE:return(LANGUAGE_SUB_DATA_TYPE);
-		case STRING_DATA_TYPE:return(LANGUAGE_SUB_DATA_TYPE);
-		case FONT_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
-		case BUTTON_WIDTH_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
-		case WINDOW_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
-		case COLOR_DATA_TYPE:return(COLOR_THEME_SUB_DATA_TYPE);
-		case GENERAL_RESOLUTION_BITMAP_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
-		case BITMAP_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
-		case GENERAL_THEME_BITMAP_DATA_TYPE:return(COLOR_THEME_SUB_DATA_TYPE);
-		case PEN_DATA_TYPE:return(COLOR_THEME_SUB_DATA_TYPE);
-		case BRUSH_DATA_TYPE:return(COLOR_THEME_SUB_DATA_TYPE);
-		default:return(ZERO_SUB_DATA_TYPE);
+		case HELP_STRING_DATA_TYPE: return(LANGUAGE_SUB_DATA_TYPE);
+		case STRING_DATA_TYPE: return(LANGUAGE_SUB_DATA_TYPE);
+		case FONT_DATA_TYPE: return(RESOLUTION_SUB_DATA_TYPE);
+		case BUTTON_WIDTH_DATA_TYPE: return(RESOLUTION_SUB_DATA_TYPE);
+		case WINDOW_DATA_TYPE: return(RESOLUTION_SUB_DATA_TYPE);
+		case COLOR_DATA_TYPE: return(COLOR_THEME_SUB_DATA_TYPE);
+		case THEME_BITMAP_DATA_TYPE: return(COLOR_THEME_SUB_DATA_TYPE);
+		case PEN_DATA_TYPE: return(COLOR_THEME_SUB_DATA_TYPE);
+		case BRUSH_DATA_TYPE: return(COLOR_THEME_SUB_DATA_TYPE);
+		default: return(ZERO_SUB_DATA_TYPE);
 	}
 }
 
-const eSubSubDataType getSubSubDataType(const eDataType mode)
+const eLanguage get_language_sub_data_entry(const std::string& item)
 {
-	switch(mode)
-	{
-//		case FONT_DATA_TYPE:return(LANGUAGE_SUB_SUB_DATA_TYPE);
-		case BITMAP_DATA_TYPE:return(COLOR_THEME_SUB_SUB_DATA_TYPE);
-//		case PEN_DATA_TYPE:return(COLOR_THEME_SUB_SUB_DATA_TYPE);
-		default:return(ZERO_SUB_SUB_DATA_TYPE);
-	}
+	if(item=="@ENGLISH") return(ENGLISH_LANGUAGE);else
+	if(item=="@GERMAN") return(GERMAN_LANGUAGE);else
+	if(item=="@ITALIAN") return(ITALIAN_LANGUAGE);else
+	if(item=="@PORTUGESE") return(PORTUGESE_LANGUAGE);else
+	if(item=="@DUTCH") return(DUTCH_LANGUAGE);else
+	if(item=="@FINNISH") return(FINNISH_LANGUAGE);else
+	if(item=="@GREEK") return(GREEK_LANGUAGE);else
+	if(item=="@FRENCH") return(FRENCH_LANGUAGE);else
+	if(item=="@SPANISH") return(SPANISH_LANGUAGE);else
+	if(item=="@POLSKI") return(POLSKI_LANGUAGE);else
+	if(item=="@KOREAN") return(KOREAN_LANGUAGE);else
+	if(item=="@CHINESE") return(CHINESE_LANGUAGE);else
+	if(item=="@RUSSIAN") return(RUSSIAN_LANGUAGE);else
+	return(ZERO_LANGUAGE);
 }
 
-const eResolution getResolutionSubDataEntry(const std::string& item)
+const eResolution get_resolution_sub_data_entry(const std::string& item)
 {
 	if(item=="@640x480") return(RESOLUTION_640x480);else
 	if(item=="@800x600") return(RESOLUTION_800x600);else
@@ -441,7 +454,7 @@ const eResolution getResolutionSubDataEntry(const std::string& item)
 	return(ZERO_RESOLUTION);
 }
 
-const eTheme getThemeSubDataEntry(const std::string& item)
+const eTheme get_theme_sub_data_entry(const std::string& item)
 {
 	if(item=="@DARK_RED_THEME") return(DARK_RED_THEME);else
 	if(item=="@DARK_BLUE_THEME") return(DARK_BLUE_THEME);else
@@ -476,28 +489,6 @@ const ePenStyle get_pen_style(const std::string& item)
 	if(item=="DOT_DASH") return(DOT_DASH_PEN_STYLE);else
 	return(TRANSPARENT_PEN_STYLE);
 }
-/*
-int get_font_style1(const std::string& item)
-{
-			if(item=="decorative") return(DECORATIVE);else
-			if(item=="normal") return(DEFAULT);else
-			return(DEFAULT);
-// TODO!
-}
-int get_font_style2(const std::string& item)
-{
-			if(item=="italics") return(FONTSTYLE_ITALIC);else
-			if(item=="normal") return(DEFAULT);else
-			return(DEFAULT);
-// TODO!
-}
-int get_font_style3(const std::string& item)
-{
-			if(item=="bold") return(BOLD);else
-			if(item=="normal") return(DEFAULT);else
-			return(DEFAULT);
-// TODO!
-}*/
 
 eGlobalWindow parse_global_window(const std::string& item)
 {
@@ -663,7 +654,7 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 				case DOCK_WITH_LOWER_BORDER_OF_COMMAND:rect->setTop(5 + windows[win]->getBottom());break;
 				case DOCK_WITH_UPPER_BORDER_OF_COMMAND:rect->setTop(20 + windows[win]->getTop() - rect->getHeight());break;
 
-				case DOCK_CENTER_INSIDE_OF_COMMAND:rect->setTopLeft(Point(15 + windows[win]->getWidth() / 2 - rect->getWidth() / 2, 15 + windows[win]->getHeight() / 2 - rect->getHeight() / 2));break;
+				case DOCK_CENTER_INSIDE_OF_COMMAND:rect->setTopLeft(Point(windows[win]->getWidth() / 2 - rect->getWidth() / 2, windows[win]->getHeight() / 2 - rect->getHeight() / 2));break;
 				case DOCK_BOTTOM_CENTER_INSIDE_OF_COMMAND:rect->setTopLeft(Point(windows[win]->getWidth() / 2 - rect->getWidth() / 2, windows[win]->getHeight() - rect->getHeight()));break;
 				case DOCK_TOP_CENTER_INSIDE_OF_COMMAND:rect->setTopLeft(Point(windows[win]->getWidth() / 2 - rect->getWidth() / 2, 35));break;
 				case DOCK_LEFT_INSIDE_OF_COMMAND:rect->setLeft(0);break;
@@ -708,11 +699,7 @@ const bool UI_Theme::loadHelpChapterStringFile(const std::string& help_file)
 		return(true);
 	eDataType mode = ZERO_DATA_TYPE;
 	eSubDataType sub_mode = ZERO_SUB_DATA_TYPE;
-	eSubSubDataType sub_sub_mode = ZERO_SUB_SUB_DATA_TYPE;
 	eLanguage current_language = ZERO_LANGUAGE;
-	eResolution current_resolution=ZERO_RESOLUTION;
-
-	eTheme current_theme=ZERO_THEME;
 	eHelpChapter chapter = MAX_HELP_CHAPTER;
 	
 	std::ifstream pFile(help_file.c_str());
@@ -739,7 +726,7 @@ const bool UI_Theme::loadHelpChapterStringFile(const std::string& help_file)
 		// mode	
 		if(mode==ZERO_DATA_TYPE)
 		{
-			mode=getDataType(entry);
+			mode = get_data_type(entry);
 #ifdef _SCC_DEBUG
 			if(mode==ZERO_DATA_TYPE)
 			{
@@ -749,77 +736,54 @@ const bool UI_Theme::loadHelpChapterStringFile(const std::string& help_file)
 					toErrorLog("WARNING: (UI_Theme::loadHelpChapterStringFile) Line is outside a block but is not marked as comment.");
 			}
 #endif				
-			sub_mode=getSubDataType(mode);
-			sub_sub_mode=getSubSubDataType(mode);
+			sub_mode = get_sub_data_type(mode);
 		}
-		else if(mode!=ZERO_DATA_TYPE)
+		else if(mode != ZERO_DATA_TYPE)
 		{
-			if(entry=="@END")
+			if(entry == "@END")
 			{
 			// TODO! 
 				// @END of 1st sub area => return to begin of data type
 
 // - deepness |1|: end of SUB-MODE
-				if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE)&&
-				  ((current_language!=ZERO_LANGUAGE)||(current_resolution!=ZERO_RESOLUTION)||(current_theme!=ZERO_THEME)))
+				if((sub_mode != ZERO_SUB_DATA_TYPE)&&(current_language != ZERO_LANGUAGE))
 				{
 					if(chapter!=MAX_HELP_CHAPTER)
 						chapter = MAX_HELP_CHAPTER;
 					else
-					{
 						current_language=ZERO_LANGUAGE;
-						current_resolution=ZERO_RESOLUTION;
-						current_theme=ZERO_THEME;
-					}
 				}
 				// @END of 2nd sub area => return to begin of sub data type
 				else 
-				if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
+				if(current_language!=ZERO_LANGUAGE)
 // - deepness |2|: end of SUB-SUB-MODE
-				((current_language!=ZERO_LANGUAGE)||(current_theme!=ZERO_THEME)))
-				{
-					current_language=ZERO_LANGUAGE;
-					current_theme=ZERO_THEME;
-				}
+					current_language = ZERO_LANGUAGE;
 				// @END  of 1st sub area (with an existing sub sub area...)
 // - deepness |2|: end of SUB-MODE
-				else if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
-// sub-sub-items already closed -> close sub-item
-						(current_resolution!=ZERO_RESOLUTION)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
-				{
-					current_resolution=ZERO_RESOLUTION;
-				}
 				// @END of 0 area => reset mode
 				else
 				{
 					mode=ZERO_DATA_TYPE;
 					sub_mode=ZERO_SUB_DATA_TYPE;
-					sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
 				}
 			}
 			else
-			if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(current_language==ZERO_LANGUAGE)&&(current_resolution==ZERO_RESOLUTION)&&(current_theme==ZERO_THEME))
+			if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(current_language==ZERO_LANGUAGE))
 			{
-				switch(sub_mode)
-				{
-					case LANGUAGE_SUB_DATA_TYPE:current_language = getLanguageSubDataEntry(entry);break;
-					case RESOLUTION_SUB_DATA_TYPE:current_resolution = getResolutionSubDataEntry(entry);break;
-					case COLOR_THEME_SUB_DATA_TYPE:current_theme = getThemeSubDataEntry(entry);break;
-					default:break;
-				}
+				if(sub_mode == LANGUAGE_SUB_DATA_TYPE)
+					current_language = get_language_sub_data_entry(entry);
 			}
 			// => hat nur 1 Ebene => Position festgestellt!
-			else if((sub_mode != ZERO_SUB_DATA_TYPE)&&(sub_sub_mode == ZERO_SUB_SUB_DATA_TYPE))
+			else if((sub_mode != ZERO_SUB_DATA_TYPE))
 			{
 				if(chapter == MAX_HELP_CHAPTER)
 				{
 					if(entry[0] == '@')
 						chapter = (eHelpChapter)atoi(entry.substr(1).c_str());
 				} else
-				switch(mode)
-				{
-					case HELP_STRING_DATA_TYPE:
-						if(helpChapterStringMap[current_language].find(chapter)==helpChapterStringMap[current_language].end())
+					if(mode == HELP_STRING_DATA_TYPE)
+					{
+						if(helpChapterStringMap[current_language].find(chapter) == helpChapterStringMap[current_language].end())
 							helpChapterStringMap[current_language].insert(std::pair<const eHelpChapter, const std::string>(chapter, entry));
 						else
 						{
@@ -827,9 +791,7 @@ const bool UI_Theme::loadHelpChapterStringFile(const std::string& help_file)
 							helpChapterStringMap[current_language].erase(chapter);
 							helpChapterStringMap[current_language].insert(std::pair<const eHelpChapter, const std::string>(chapter, entry));
 						}
-						break;
-					default:break;
-				}
+					}
 			}
 			// 0 ebenen -> buttons :) BUTTON_COLORS_DATA_TYPE?? TODO
 		} // end if mode != ZERO_DATA_TYPE
@@ -837,120 +799,11 @@ const bool UI_Theme::loadHelpChapterStringFile(const std::string& help_file)
 	return(true);
 }
 
-#if 0
-const bool UI_Theme::loadStringFile(const std::string& string_file, const std::vector<std::string>& string_identifier, const std::vector<bool> language_std::vector<std::string>)
-//		std::string stringIdentifier[MAX_STRINGS];
-//		std::string stringList[MAX_LANGUAGES][MAX_STRINGS];
-//		bool languageInitialized[MAX_LANGUAGES];
-{
-	if((string_file.substr(string_file.size()-2,2) == "..") ||(string_file.substr(string_file.size()-1,1) == "."))
-		return(true);
-	eDataType mode=ZERO_DATA_TYPE;
-	eSubDataType sub_mode=ZERO_SUB_DATA_TYPE;
-	eLanguage current_language=ZERO_LANGUAGE;
-
-	std::ifstream pFile(string_file.c_str());
-
-	if(!checkStreamIsOpen(pFile, "UI_Theme::loadStringFile", string_file))
-		return(false);
-
-//	toInitLog("* " + lookUpString(START_LOADING_STRING) + " " + string_file);
-//problem: Stringfile ist ja noch nicht geladen :>
-	toInitLog("* Loading " + string_file);
-	bool found_any_language_block = false;
-	bool found_language_block[MAX_LANGUAGES];
-	for(unsigned int i = MAX_LANGUAGES; i--;)
-		found_language_block[i] = false;
-	
-	std::fstream::pos_type old_pos = pFile.tellg();
-	char line[1024];
-	while(pFile.getline(line, sizeof line))
-	{
-		if(!checkStreamForFailure(pFile, "UI_Theme::loadStringFile", string_file))
-			return(false);
-		
-		std::string text = line;
-		size_t start = text.find_first_not_of("\t ");
-		if((start == std::string::npos) || (text[0] == '#') || (text[0] == '\0'))
-			continue; // ignore line
-		size_t stop = text.find_first_of("\t ", start);
-		if(stop == std::string::npos) 
-			stop = text.size();
-		std::string index = text.substr(start, stop);
-		std::string value;
-		if(mode == ZERO_DATA_TYPE)
-		{
-			mode = getDataType(index);
-			if(mode == ZERO_DATA_TYPE)
-			{
-				if(index == "@END")
-					toErrorLog("WARNING (UI_Theme::loadStringFile()): Lonely @END => ignoring line.");
-				else
-					toErrorLog("WARNING (UI_Theme::loadStringFile()): Line '" + index + "' is outside a block but is not marked as comment => ignoring line.");
-			} else
-				sub_mode = getSubDataType(mode);
-		}  else
-		if((sub_mode != ZERO_SUB_DATA_TYPE) && (current_language == ZERO_LANGUAGE))
-		{
-			switch(sub_mode)
-			{
-				case LANGUAGE_SUB_DATA_TYPE:
-					current_language = getLanguageSubDataEntry(index);
-					if(current_language==ZERO_LANGUAGE) {
-						toErrorLog("ERROR (UI_Theme::loadStringFile()): Invalid language entry '" + index + "'.");return(false);
-					} else if(languageInitialized[current_language]) {
-						toErrorLog("ERROR (UI_Theme::loadStringFile()): Language '" + index + "' already initialized.");return(false);
-					}
-					else
-					{
-						found_language_block[current_language] = true;
-						found_any_language_block = true;
-					}
-					break;
-				default:break;
-			}
-		}
-		// => hat nur 1 Ebene => Position festgestellt!
-		else if((sub_mode != ZERO_SUB_DATA_TYPE) && (current_language != ZERO_LANGUAGE))
-		{
-			std::map<std::string, std::list<std::string> >::iterator i;
-			std::map<std::string, std::list<std::string> > block;
-			pFile.seekg(old_pos);
-			if(!parse_block_map(pFile, block)) {
-				toErrorLog("WARNING (UI_Theme::loadStringFile()): No concluding @END for @STRINGS block was found in file " + string_file + " => trying to parse what we have so far.");
-			}
-			for(unsigned int j = 0; j < MAX_STRINGS; j++)
-			{
-				if((i=block.find(stringIdentifier[j])) != block.end())
-				{
-					i->second.pop_front();
-					stringList[current_language][j] = i->second.front();
-					block.erase(i);
-				}
-			}
-			// TODO nicht gefundene Eintraege bemaengeln
-		}
-		old_pos = pFile.tellg();
-	} // end while
-
-	if(!found_any_language_block)
-	{
-		toErrorLog("ERROR (UI_Theme::loadStringFile()): No language block (@ENGLISH, @GERMAN etc.) was found in file " + string_file + " => ignoring file.");
-		return(false);
-	}
-	for(unsigned int i = MAX_LANGUAGES; i--;)
-		if(found_language_block[i])
-			languageInitialized[i] = true;
-	return(true);
-}
-#endif
-
-
 void UI_Theme::loadStringFiles()
 {
 	languageInitialized.resize(MAX_LANGUAGES);
 	languageInitialized.assign(MAX_LANGUAGES, false);
-	std::list<std::string> string_files = findFiles("data", "strings", "");
+	std::list<std::string> string_files = findFiles("data", "strings", "program");
 	for(std::list<std::string>::iterator j = string_files.begin(); j != string_files.end(); ++j)
 		loadStringFile(*j, stringIdentifier, stringList, languageInitialized, MAX_STRINGS);
 }
@@ -1027,7 +880,7 @@ const bool UI_Theme::loadWindowDataFile(const std::string& window_data_file, con
 	
 		if(current_resolution==ZERO_RESOLUTION)
 		{
-			current_resolution = getResolutionSubDataEntry(parameter[0]);
+			current_resolution = get_resolution_sub_data_entry(parameter[0]);
 #ifdef _SCC_DEBUG
 //			if(mode!=ZERO_DATA_TYPE)
 //				toInitLog("Loading "+parameter[0]+"...");
@@ -1052,11 +905,11 @@ const bool UI_Theme::loadWindowDataFile(const std::string& window_data_file, con
 			}
 			else if(current_resolution==ZERO_RESOLUTION)
 			{
-				current_resolution = getResolutionSubDataEntry(line2);
+				current_resolution = get_resolution_sub_data_entry(line2);
 				current_line=0;
 			} else if(game_type==ZERO_GAME_TYPE)
 			{
-				game_type=getGameType(line2);
+				game_type=get_game_type(line2);
 				current_line=0;
 			} else if(game_type==GAME_MAIN_TYPE)
 			{
@@ -1069,7 +922,7 @@ const bool UI_Theme::loadWindowDataFile(const std::string& window_data_file, con
 			}
 			else if(player_type==ZERO_PLAYER_TYPE)
 			{
-				player_type=getPlayerType(line2);
+				player_type=get_player_type(line2);
 				current_line=0;
 			} else
 			{
@@ -1106,13 +959,12 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 	char* buffer;
 	std::string parameter[MAX_PARAMETERS];
 	unsigned int value[MAX_PARAMETERS];
-	eDataType mode=ZERO_DATA_TYPE;
-	eSubDataType sub_mode=ZERO_SUB_DATA_TYPE;
-	eSubSubDataType sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
+	eDataType mode = ZERO_DATA_TYPE;
+	eSubDataType sub_mode = ZERO_SUB_DATA_TYPE;
 
-	eLanguage current_language=ZERO_LANGUAGE;
-	eTheme current_theme=ZERO_THEME;
-	eResolution current_resolution=ZERO_RESOLUTION;
+	eLanguage current_language = ZERO_LANGUAGE;
+	eTheme current_theme = ZERO_THEME;
+	eResolution current_resolution = ZERO_RESOLUTION;
 
 	unsigned int current_line = 0;
 	
@@ -1191,7 +1043,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 		// mode	
 		if(mode==ZERO_DATA_TYPE)
 		{
-			mode=getDataType(parameter[0]);
+			mode = get_data_type(parameter[0]);
 #ifdef _SCC_DEBUG
 //			if(mode!=ZERO_DATA_TYPE)
 //				toInitLog("lookUpString(START_LOADING_STRING) + " " + parameter[0]);
@@ -1203,53 +1055,46 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 					toErrorLog("WARNING: (UI_Theme::loadGraphicData) Line is outside a block but is not marked as comment.");
 			}
 #endif				
-			sub_mode=getSubDataType(mode);
-			sub_sub_mode=getSubSubDataType(mode);
+			sub_mode = get_sub_data_type(mode);
 		}
 		else if(mode!=ZERO_DATA_TYPE)
 		{
 			if(parameter[0]=="@END")
 			{
-
-			
 			// TODO! 
 				// @END of 1st sub area => return to begin of data type
-
 // - deepness |1|: end of SUB-MODE
-				if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE)&&
-				  ((current_language!=ZERO_LANGUAGE)||(current_resolution!=ZERO_RESOLUTION)||(current_theme!=ZERO_THEME)))
+				if((sub_mode!=ZERO_SUB_DATA_TYPE)&&((current_language!=ZERO_LANGUAGE)||(current_resolution!=ZERO_RESOLUTION)||(current_theme!=ZERO_THEME)))
 				{
-					current_language=ZERO_LANGUAGE;
-					current_resolution=ZERO_RESOLUTION;
-					current_theme=ZERO_THEME;
-					current_line=0;
+					current_language = ZERO_LANGUAGE;
+					current_resolution = ZERO_RESOLUTION;
+					current_theme = ZERO_THEME;
+					current_line = 0;
 				}
 				// @END of 2nd sub area => return to begin of sub data type
 				else 
-				if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
+				if(
 // - deepness |2|: end of SUB-SUB-MODE
 				((current_language!=ZERO_LANGUAGE)||(current_theme!=ZERO_THEME)))
 				{
-					current_language=ZERO_LANGUAGE;
-					current_theme=ZERO_THEME;
-					current_line=0;
+					current_language = ZERO_LANGUAGE;
+					current_theme = ZERO_THEME;
+					current_line = 0;
 				}
 				// @END  of 1st sub area (with an existing sub sub area...)
 // - deepness |2|: end of SUB-MODE
-				else if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
+				else if((current_resolution!=ZERO_RESOLUTION)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
 // sub-sub-items already closed -> close sub-item
-						(current_resolution!=ZERO_RESOLUTION)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
 				{
-					current_resolution=ZERO_RESOLUTION;
-					current_line=0;
+					current_resolution = ZERO_RESOLUTION;
+					current_line = 0;
 				}
 				// @END of 0 area => reset mode
 				else
 				{
-					mode=ZERO_DATA_TYPE;
-					sub_mode=ZERO_SUB_DATA_TYPE;
-					sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
-					current_line=0;
+					mode = ZERO_DATA_TYPE;
+					sub_mode = ZERO_SUB_DATA_TYPE;
+					current_line = 0;
 				}
 			}
 			else
@@ -1257,15 +1102,15 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 			{
 				switch(sub_mode)
 				{
-					case LANGUAGE_SUB_DATA_TYPE:current_language=getLanguageSubDataEntry(line2);break;
-					case RESOLUTION_SUB_DATA_TYPE:current_resolution=getResolutionSubDataEntry(line2);break;
-					case COLOR_THEME_SUB_DATA_TYPE:current_theme=getThemeSubDataEntry(line2);break;
+					case LANGUAGE_SUB_DATA_TYPE:current_language = get_language_sub_data_entry(line2);break;
+					case RESOLUTION_SUB_DATA_TYPE:current_resolution = get_resolution_sub_data_entry(line2);break;
+					case COLOR_THEME_SUB_DATA_TYPE:current_theme = get_theme_sub_data_entry(line2);break;
 					default:break;
 				}
 				current_line=0;
 			}
 			// => hat nur 1 Ebene => Position festgestellt!
-			else if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE))
+			else if((sub_mode!=ZERO_SUB_DATA_TYPE))
 			{
 				switch(mode)
 				{
@@ -1323,60 +1168,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 							setMaxGlobalHeight(current_resolution, current_line+1, max_height);
 						}
 						break;
-					case GENERAL_RESOLUTION_BITMAP_DATA_TYPE:
-					{
-						if(!loading_bitmaps)
-						{
-							loading_bitmaps = true;
-							toInitLog("  - " + lookUpString(START_LOAD_BITMAPS_STRING));
-						}
-			                        std::map<std::string, std::list<std::string> > block;
-			                        pFile.seekg(old_pos);
-			                        if(!parse_block_map(pFile, block))
-			                        {
-			                                toErrorLog("WARNING (UI_Theme::loadDataFile()): No concluding @END for @GENERAL_RESOLUTION_BITMAP_DATA_TYPE block was found in file " + data_file + " => trying to parse what we have so far.");
-			                        }
-			                        for(unsigned int j = 0; j < MAX_BITMAPS; j++)
-			                        {
-							std::map<std::string, std::list<std::string> >::iterator i;
-                        			        if((i = block.find(bitmapIdentifier[j])) != block.end())
-			                                {
-			                                        i->second.pop_front(); // Identifier loeschen
-								std::string name = i->second.front();
-								if((name.size()<4)||(name[name.size()-4]!='.'))
-									name = bitmap_dir + name + ".bmp";
-								else name = bitmap_dir + name;
-								bool found_bitmap = false;
-								for(std::list<BitmapEntry>::iterator l = loadedBitmaps.begin(); l!=loadedBitmaps.end(); ++l)
-							// already loaded?
-									if(l->name == name)
-									{
-										found_bitmap = true;
-										for(unsigned int n = MAX_COLOR_THEMES; n--;)
-											bitmapAccessTable[current_resolution][n][j] = &(*l);
-										break;
-									}
-								if(!found_bitmap)
-								{
-									BitmapEntry entry;
-//									entry.resolution = current_resolution; //?
-//									entry.theme = current_theme;
-									entry.line = j;
-									entry.name = name;
-									entry.bitmap = NULL;//temp;
-									entry.used = false;
-									i->second.pop_front();
-									entry.solid = ((i->second.size()>0)&&(i->second.front() == "(SOLID)"));
-									loadedBitmaps.push_back(entry);
-									for(unsigned int n = MAX_COLOR_THEMES; n--;)
-										bitmapAccessTable[current_resolution][n][j] = &(loadedBitmaps.back());
-								}
-			                                        block.erase(i);
-			                                }
-                        			}
-						current_resolution = ZERO_RESOLUTION;
-					}break;
-					case GENERAL_THEME_BITMAP_DATA_TYPE:
+					case THEME_BITMAP_DATA_TYPE:
 					{
 						if(!loading_bitmaps)
 						{
@@ -1386,80 +1178,112 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 			                        std::map<std::string, std::list<std::string> > block;
 			                        pFile.seekg(old_pos);
 			                        if(!parse_block_map(pFile, block))
-			                        {
-			                                toErrorLog("WARNING (UI_Theme::loadDataFile()): No concluding @END for @GENERAL_THEME_BITMAP_DATA_TYPE block was found in file " + data_file + " => trying to parse what we have so far.");
+		        	                {
+		                	                toErrorLog("WARNING (UI_Theme::loadDataFile()): No concluding @END for @THEME_BITMAP_DATA_TYPE block was found in file " + data_file + " => trying to parse what we have so far.");
 			                        }
 			                        for(unsigned int j = 0; j < MAX_BITMAPS; j++)
 			                        {
 							std::map<std::string, std::list<std::string> >::iterator i;
-                        			        if((i = block.find(bitmapIdentifier[j])) != block.end())
-			                                {
-			                                        i->second.pop_front(); // Identifier loeschen
-								std::string name = i->second.front();
-								if((name.size()<4)||(name[name.size()-4]!='.'))
-									name = bitmap_dir + name + ".bmp";
-								else name = bitmap_dir + name;
-								bool found_bitmap = false;
-								for(std::list<BitmapEntry>::iterator l = loadedBitmaps.begin(); l!=loadedBitmaps.end(); ++l)
-							// already loaded?
-									if(l->name == name)
-									{
-										found_bitmap = true;
-										for(unsigned int n = MAX_RESOLUTIONS; n--;)
-											bitmapAccessTable[n][current_theme][j] = &(*l);
-										break;
-									}
-								if(!found_bitmap)
+                       				        if((i = block.find(bitmapIdentifier[j])) != block.end())
+		                        	        {
+		                                		i->second.pop_front(); // Identifier loeschen
+								if(!i->second.size())
 								{
+			                                		toErrorLog("WARNING (UI_Theme::loadDataFile()): String identifier without string for @THEME_BITMAP_DATA_TYPE block was found in file " + data_file + " => ignoring line.");
+								} else
+								{
+									std::string name = i->second.front();
+									i->second.pop_front();
+									if((name.size()<4)||(name[name.size()-4]!='.'))
+										name = bitmap_dir + name + ".bmp";
+									else name = bitmap_dir + name;
+									bool solid = false;
+									bool scale = false;
+									if(i->second.size())
+									{
+										if(i->second.front() == "(SOLID)")
+											solid = true;
+										else if(i->second.front() == "(SCALE)")
+											scale = true;
+										i->second.pop_front();
+										if(i->second.size())
+										{
+											if(i->second.front() == "(SOLID)")
+												solid = true;
+											else if(i->second.front() == "(SCALE)")
+												scale = true;
+											i->second.pop_front();
+										}
+									}
 									BitmapEntry entry;
-//									entry.resolution = current_resolution; //?
-//									entry.theme = current_theme;
 									entry.line = j;
 									entry.name = name;
-									entry.bitmap = NULL;//temp;
+									entry.bitmap = NULL;
 									entry.used = false;
-									i->second.pop_front();
-									entry.solid = ((i->second.size()>0)&&(i->second.front() == "(SOLID)"));
-									loadedBitmaps.push_back(entry);
-									for(unsigned int n = MAX_RESOLUTIONS; n--;)
-										bitmapAccessTable[n][current_theme][j] = &(loadedBitmaps.back());
+									entry.solid = solid;
+									entry.scale = scale;
+									for(unsigned int m = MAX_RESOLUTIONS; m--;)
+									{
+										loadedBitmaps.push_back(entry);
+										bitmapAccessTable[m][current_theme][j] = &(loadedBitmaps.back());
+									}
 								}
 			                                        block.erase(i);
-			                                }
-                        			}
-                        // TODO nicht gefundene Eintraege bemaengeln
+		        	                        }
+                       				}
 						current_theme = ZERO_THEME;
+                        // TODO nicht gefundene Eintraege bemaengeln
 					}break;
 					default:break;
 				}
 				++current_line;
 			}
 			// 0 ebenen -> buttons :) BUTTON_COLORS_DATA_TYPE?? TODO
-			else if((sub_mode==ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE))
+			else if(sub_mode == ZERO_SUB_DATA_TYPE)
 			{
-				if(mode==BUTTON_COLOR_DATA_TYPE)
+				if(mode == BUTTON_COLOR_DATA_TYPE)
 				{
 					if(!loading_buttons)
 					{
 						loading_buttons = true;
 						toInitLog("  - " + lookUpString(START_LOAD_BUTTONS_STRING));
 					}
-					buttonColorsList[current_line] = new ButtonColorsType;
-					buttonColorsList[current_line]->speed=value[0];
-					buttonColorsList[current_line]->type=(eButtonAnimationType)value[1];
-					for(unsigned int i=MAX_BUTTON_ANIMATION_PHASES;i--;)
-					{
-						buttonColorsList[current_line]->startBrush[i]=(eBrush)(value[0*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-						buttonColorsList[current_line]->endBrush[i]=(eBrush)(value[1*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-						buttonColorsList[current_line]->startTextColor[i]=(eColor)(value[2*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-						buttonColorsList[current_line]->endTextColor[i]=(eColor)(value[3*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-						buttonColorsList[current_line]->startBorderPen[i]=(ePen)(value[4*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-						buttonColorsList[current_line]->endBorderPen[i]=(ePen)(value[5*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-						buttonColorsList[current_line]->bitmap[i]=(eBitmap)(value[6*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-	//					buttonColorsList[current_line]->text[i]=(eString)(value[7*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					}
-					++current_line;
-				} else if(mode == GENERAL_BITMAP_DATA_TYPE)
+		                        
+					std::map<std::string, std::list<std::string> > block;
+		                        pFile.seekg(old_pos);
+		                        if(!parse_block_map(pFile, block))
+		                        {
+		                                toErrorLog("WARNING (UI_Theme::loadDataFile()): No concluding @END for @BUTTON_COLORS block was found in file " + data_file + " => trying to parse what we have so far.");
+		                        }
+		                        for(unsigned int j = 0; j < MAX_BUTTON_COLORS_TYPES; j++)
+		                        {
+						std::map<std::string, std::list<std::string> >::iterator i;
+                       			        if((i = block.find(buttonIdentifier[j])) != block.end())
+		                                {
+		                                        i->second.pop_front(); // Identifier loeschen
+							unsigned int o = 1;
+							for(std::list<std::string>::const_iterator p = i->second.begin(); p != i->second.end(); ++p, ++o)
+								value[o]=atoi(p->c_str());
+							// TODO :(
+
+
+							buttonColorsList[j] = new ButtonColorsType;
+							buttonColorsList[j]->speed=value[1];
+							buttonColorsList[j]->type=(eButtonAnimationType)value[2];
+							for(unsigned int p=MAX_BUTTON_ANIMATION_PHASES;p--;)
+							{
+								buttonColorsList[j]->startBrush[p] = (eBrush)(value[0*MAX_BUTTON_ANIMATION_PHASES+3+p]);
+								buttonColorsList[j]->endBrush[p] = (eBrush)(value[1*MAX_BUTTON_ANIMATION_PHASES+3+p]);
+								buttonColorsList[j]->startTextColor[p] = (eColor)(value[2*MAX_BUTTON_ANIMATION_PHASES+3+p]);
+								buttonColorsList[j]->endTextColor[p] = (eColor)(value[3*MAX_BUTTON_ANIMATION_PHASES+3+p]);
+								buttonColorsList[j]->startBorderPen[p] = (ePen)(value[4*MAX_BUTTON_ANIMATION_PHASES+3+p]);
+								buttonColorsList[j]->endBorderPen[p] = (ePen)(value[5*MAX_BUTTON_ANIMATION_PHASES+3+p]);
+							}
+		                                        block.erase(i);
+		                                }
+                       			}
+					mode = ZERO_DATA_TYPE;
+				} else if(mode == BITMAP_DATA_TYPE)
 				{
 					if(!loading_bitmaps)
 					{
@@ -1470,7 +1294,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 		                        pFile.seekg(old_pos);
 		                        if(!parse_block_map(pFile, block))
 		                        {
-		                                toErrorLog("WARNING (UI_Theme::loadDataFile()): No concluding @END for @GENERAL_BITMAP_DATA_TYPE block was found in file " + data_file + " => trying to parse what we have so far.");
+		                                toErrorLog("WARNING (UI_Theme::loadDataFile()): No concluding @END for @BITMAP_DATA_TYPE block was found in file " + data_file + " => trying to parse what we have so far.");
 		                        }
 		                        for(unsigned int j = 0; j < MAX_BITMAPS; j++)
 		                        {
@@ -1478,36 +1302,47 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
                        			        if((i = block.find(bitmapIdentifier[j])) != block.end())
 		                                {
 		                                        i->second.pop_front(); // Identifier loeschen
-							std::string name = i->second.front();
-							if((name.size()<4)||(name[name.size()-4]!='.'))
-								name = bitmap_dir + name + ".bmp";
-							else name = bitmap_dir + name;
-							bool found_bitmap = false;
-							for(std::list<BitmapEntry>::iterator l = loadedBitmaps.begin(); l!=loadedBitmaps.end(); ++l)
-						// already loaded?
-								if(l->name == name)
-								{
-									found_bitmap = true;
-									for(unsigned int m = MAX_RESOLUTIONS; m--;)
-										for(unsigned int n = MAX_COLOR_THEMES; n--;)
-											bitmapAccessTable[m][n][j] = &(*l);
-									break;
-								}
-							if(!found_bitmap)
+							if(!i->second.size())
 							{
+		                                		toErrorLog("WARNING (UI_Theme::loadDataFile()): String identifier without string for @BITMAP_DATA_TYPE block was found in file " + data_file + " => ignoring line.");
+							} else
+							{
+								std::string name = i->second.front();
+								i->second.pop_front();
+								if((name.size()<4)||(name[name.size()-4]!='.'))
+									name = bitmap_dir + name + ".bmp";
+								else name = bitmap_dir + name;
+								bool solid = false;
+								bool scale = false;
+								if(i->second.size())
+								{
+									if(i->second.front() == "(SOLID)")
+										solid = true;
+									else if(i->second.front() == "(SCALE)")
+										scale = true;
+									i->second.pop_front();
+									if(i->second.size())
+									{
+										if(i->second.front() == "(SOLID)")
+											solid = true;
+										else if(i->second.front() == "(SCALE)")
+											scale = true;
+										i->second.pop_front();
+									}
+								}
 								BitmapEntry entry;
-//								entry.resolution = current_resolution; //?
-//								entry.theme = current_theme;
 								entry.line = j;
 								entry.name = name;
-								entry.bitmap = NULL;//temp;
+								entry.bitmap = NULL;
 								entry.used = false;
-								i->second.pop_front();
-								entry.solid = ((i->second.size()>0)&&(i->second.front() == "(SOLID)"));
-								loadedBitmaps.push_back(entry);
+								entry.solid = solid;
+								entry.scale = scale;
 								for(unsigned int m = MAX_RESOLUTIONS; m--;)
+								{
+									loadedBitmaps.push_back(entry);
 									for(unsigned int n = MAX_COLOR_THEMES; n--;)
 										bitmapAccessTable[m][n][j] = &(loadedBitmaps.back());
+								}
 							}
 		                                        block.erase(i);
 		                                }
@@ -1515,86 +1350,9 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 					mode = ZERO_DATA_TYPE;
 				}
 			}
-			// => es gibt noch eine 2. Ebene
-			else if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
-			{
-				switch(sub_sub_mode)
-				{
-					case LANGUAGE_SUB_SUB_DATA_TYPE:current_language=getLanguageSubDataEntry(line2);break;
-					case COLOR_THEME_SUB_SUB_DATA_TYPE:current_theme=getThemeSubDataEntry(line2);break;
-					default:break;
-				}			
- 				current_line=0;				
-			}
-			// => hat 2 Ebenen => Position festgestellt!
-			else
-			{
-				switch(mode)
-				{
-					case BITMAP_DATA_TYPE:
-					{
-						if(!loading_bitmaps)
-						{
-							loading_bitmaps = true;
-							toInitLog("  - " + lookUpString(START_LOAD_BITMAPS_STRING));
-						}					
-			                        std::map<std::string, std::list<std::string> > block;
-			                        pFile.seekg(old_pos);
-			                        if(!parse_block_map(pFile, block))
-			                        {
-			                                toErrorLog("WARNING (UI_Theme::loadDataFile()): No concluding @END for @BITMAP_DATA_TYPE block was found in file " + data_file + " => trying to parse what we have so far.");
-			                        }
-			                        for(unsigned int j = 0; j < MAX_BITMAPS; j++)
-			                        {
-							std::map<std::string, std::list<std::string> >::iterator i;
-                        			        if((i = block.find(bitmapIdentifier[j])) != block.end())
-			                                {
-			                                        i->second.pop_front(); // Identifier loeschen
-								std::string name = i->second.front();
-								if((name.size()<4)||(name[name.size()-4]!='.'))
-									name = bitmap_dir + name + ".bmp";
-								else name = bitmap_dir + name;
-								bool found_bitmap = false;
-								for(std::list<BitmapEntry>::iterator l = loadedBitmaps.begin(); l!=loadedBitmaps.end(); ++l)
-							// already loaded?
-									if(l->name == name)
-									{
-										found_bitmap = true;
-										bitmapAccessTable[current_resolution][current_theme][j] = &(*l);
-										break;
-									}
-								if(!found_bitmap)
-								{
-									BitmapEntry entry;
-//									entry.resolution = current_resolution; //?
-//									entry.theme = current_theme;
-									entry.line = j;
-									entry.name = name;
-									entry.bitmap = NULL;//temp;
-									entry.used = false;
-									i->second.pop_front();
-									entry.solid = ((i->second.size()>0)&&(i->second.front() == "(SOLID)"));
-									loadedBitmaps.push_back(entry);
-									bitmapAccessTable[current_resolution][current_theme][j] = &(loadedBitmaps.back());
-								}
-			                                        block.erase(i);
-			                                }
-                        			}
-                        // TODO nicht gefundene Eintraege bemaengeln
-						current_theme = ZERO_THEME;
-					}break;
-					default:break;
-				}
-				++current_line;
-			}
 		} // end if mode != ZERO_DATA_TYPE
 		old_pos = pFile.tellg();
 	} // end while
-
-	cursorList[ARROW_CURSOR][0] = DC::createCursor(arrow_xpm);cursorList[ARROW_CURSOR][1] = NULL;
-	cursorList[CLOCK_CURSOR][0] = DC::createCursor(clock1_xpm);cursorList[CLOCK_CURSOR][1] = DC::createCursor(clock2_xpm);
-	cursorList[HAND_CURSOR][0] = DC::createCursor(hand_xpm);cursorList[HAND_CURSOR][1] = NULL;
-	defaultCursor = SDL_GetCursor();
 }
 
 void UI_Theme::setMaxGlobalHeight(unsigned int current_resolution, unsigned int id, unsigned int max_height)
@@ -1672,34 +1430,60 @@ SDL_Surface* UI_Theme::lookUpBitmap(const eBitmap id)
 		toErrorLog("ERROR: (UI_Theme::lookUpBitmap) id out of range.");return(NULL); // TODO
 	}
 #endif
+
 	if(bitmapList[currentResolution][currentColorTheme][id] == NULL)
 // reload
 	{
 //		toLog("Loading " + bitmapAccessTable[currentResolution][currentColorTheme][id]->name);
 		
 		SDL_Surface* temp = NULL;
-		
 		if(bitmapAccessTable[currentResolution][currentColorTheme][id]==NULL)
 		{
 			toErrorLog("ERROR (UI_Theme::lookUpBitmap()): Bitmap " + bitmapIdentifier[id] + " was not initialized for resolution '" + lookUpString((eString)(SETTING_RESOLUTION_ZERO_STRING + currentResolution)) + "' and theme '" + lookUpString((eString)(SETTING_ZERO_THEME_STRING + currentColorTheme)) + "'. Check 'settings/ui/default.ui' and 'data/bitmaps'.");
 			return(NULL);
-		} else if((temp=IMG_Load(bitmapAccessTable[currentResolution][currentColorTheme][id]->name.c_str()))==NULL)
+		} else 
+		// picture already loaded? (unscaled)
+		if((bitmapAccessTable[(eResolution)(MAX_RESOLUTIONS-1)][currentColorTheme][id]->bitmap!=NULL) && (bitmapAccessTable[currentResolution][currentColorTheme][id]->scale))
+		{
+			temp = bitmapAccessTable[(eResolution)(MAX_RESOLUTIONS-1)][currentColorTheme][id]->bitmap;
+		} else
+		// no? then load it.
+		if((temp = IMG_Load(bitmapAccessTable[currentResolution][currentColorTheme][id]->name.c_str()))==NULL)
 		{
 			toErrorLog("ERROR (UI_Theme::lookUpBitmap()): Could not load Bitmap " + bitmapAccessTable[currentResolution][currentColorTheme][id]->name + " : " + IMG_GetError());
 			return(NULL);
 		}
+		if(temp == NULL)
+			toErrorLog("error");
+		
 		if(!bitmapAccessTable[currentResolution][currentColorTheme][id]->solid)
-			SDL_SetColorKey(temp, SDL_SRCCOLORKEY , SDL_MapRGB(temp->format, 0,0,0));
-//		SDL_SetAlpha(temp, SDL_SRCALPHA, 128);
-		bitmapAccessTable[currentResolution][currentColorTheme][id]->bitmap = temp;
-		bitmapList[currentResolution][currentColorTheme][id] = temp;
+		{
+			SDL_SetColorKey(temp, SDL_SRCCOLORKEY , SDL_MapRGB(temp->format, 0, 0, 0));
+//			SDL_SetAlpha(temp, SDL_SRCALPHA, 128);
+		}
+		if((bitmapAccessTable[currentResolution][currentColorTheme][id]->scale) && (currentResolution != (eResolution)(MAX_RESOLUTIONS-1)))
+		{
+			Size size_orig = getResolutionSize(currentResolution);
+			Size size_max = getResolutionSize((eResolution)(MAX_RESOLUTIONS-1));
+			double zoomx = (double)(size_orig.getWidth()) / (double)(size_max.getWidth());
+			double zoomy = (double)(size_orig.getHeight()) / (double)(size_max.getHeight());
+			SDL_Surface* scaled = DC::zoomSurface(temp, zoomx, zoomy, 1);
+			
+			bitmapAccessTable[currentResolution][currentColorTheme][id]->bitmap = scaled;
+			bitmapList[currentResolution][currentColorTheme][id] = scaled;
+		} else
+		{
+			bitmapAccessTable[currentResolution][currentColorTheme][id]->bitmap = temp;
+			bitmapList[currentResolution][currentColorTheme][id] = temp;
+		}
 	}
 	bitmapAccessTable[currentResolution][currentColorTheme][id]->used = true;
 	return(bitmapList[currentResolution][currentColorTheme][id]);
 }
 
 
-const bool UI_Theme::setLanguage(const eLanguage theme_language) {
+const bool UI_Theme::setLanguage(const eLanguage theme_language) 
+{
 	if(languageInitialized[theme_language])
 	{
 		currentLanguage = theme_language;
@@ -1786,6 +1570,51 @@ std::string UI_Theme::printSurfaceInformation(DC* surface)
 	return(os.str());
 }
 
+void UI_Theme::initButtonIdentifier()
+{
+	for(unsigned int i = MAX_BUTTON_COLORS_TYPES; i--;)
+		buttonIdentifier[i] = "null";
+	buttonIdentifier[UNIT_TYPE_0_BUTTON] = "UNIT_TYPE_0_BUTTON";
+	buttonIdentifier[UNIT_TYPE_1_BUTTON] = "UNIT_TYPE_1_BUTTON";
+	buttonIdentifier[UNIT_TYPE_2_BUTTON] = "UNIT_TYPE_2_BUTTON";
+	buttonIdentifier[UNIT_TYPE_3_BUTTON] = "UNIT_TYPE_3_BUTTON";
+	buttonIdentifier[UNIT_TYPE_4_BUTTON] = "UNIT_TYPE_4_BUTTON";
+	buttonIdentifier[UNIT_TYPE_5_BUTTON] = "UNIT_TYPE_5_BUTTON";
+	buttonIdentifier[UNIT_TYPE_6_BUTTON] = "UNIT_TYPE_6_BUTTON";
+	buttonIdentifier[UNIT_TYPE_7_BUTTON] = "UNIT_TYPE_7_BUTTON";
+	buttonIdentifier[UNIT_TYPE_8_BUTTON] = "UNIT_TYPE_8_BUTTON";
+	buttonIdentifier[UNIT_TYPE_9_BUTTON] = "UNIT_TYPE_9_BUTTON";
+	buttonIdentifier[UNIT_TYPE_10_BUTTON] = "UNIT_TYPE_10_BUTTON";
+	buttonIdentifier[BRIGHT_UNIT_TYPE_0_BUTTON] = "BRIGHT_UNIT_TYPE_0_BUTTON";
+	buttonIdentifier[BRIGHT_UNIT_TYPE_1_BUTTON] = "BRIGHT_UNIT_TYPE_1_BUTTON";
+	buttonIdentifier[BRIGHT_UNIT_TYPE_2_BUTTON] = "BRIGHT_UNIT_TYPE_2_BUTTON";
+	buttonIdentifier[BRIGHT_UNIT_TYPE_3_BUTTON] = "BRIGHT_UNIT_TYPE_3_BUTTON";
+	buttonIdentifier[BRIGHT_UNIT_TYPE_4_BUTTON] = "BRIGHT_UNIT_TYPE_4_BUTTON";
+	buttonIdentifier[BRIGHT_UNIT_TYPE_5_BUTTON] = "BRIGHT_UNIT_TYPE_5_BUTTON";
+	buttonIdentifier[BRIGHT_UNIT_TYPE_6_BUTTON] = "BRIGHT_UNIT_TYPE_6_BUTTON";
+	buttonIdentifier[BRIGHT_UNIT_TYPE_7_BUTTON] = "BRIGHT_UNIT_TYPE_7_BUTTON";
+	buttonIdentifier[BRIGHT_UNIT_TYPE_8_BUTTON] = "BRIGHT_UNIT_TYPE_8_BUTTON";
+	buttonIdentifier[BRIGHT_UNIT_TYPE_9_BUTTON] = "BRIGHT_UNIT_TYPE_9_BUTTON";
+	buttonIdentifier[BRIGHT_UNIT_TYPE_10_BUTTON] = "BRIGHT_UNIT_TYPE_10_BUTTON";
+	buttonIdentifier[STANDARD_BUTTON] = "STANDARD_BUTTON";
+	buttonIdentifier[FORCE_ENTRY_BUTTON] = "FORCE_ENTRY_BUTTON";
+	buttonIdentifier[MODIFY_BUTTON] = "MODIFY_BUTTON";
+	buttonIdentifier[VERY_BRIGHT_UNIT_TYPE_BUTTON] = "VERY_BRIGHT_UNIT_TYPE_BUTTON";
+	buttonIdentifier[TAB_BUTTON] = "TAB_BUTTON";
+	buttonIdentifier[MENU_ENTRY_BUTTON] = "MENU_ENTRY_BUTTON";
+	buttonIdentifier[EDIT_FIELD_BUTTON] = "EDIT_FIELD_BUTTON";
+	buttonIdentifier[ARROW_BUTTON] = "ARROW_BUTTON";
+	buttonIdentifier[GOAL_LOCATION_BUTTON] = "GOAL_LOCATION_BUTTON";
+	buttonIdentifier[GOAL_TIME_BUTTON] = "GOAL_TIME_BUTTON";
+	buttonIdentifier[CHECK_BUTTON] = "CHECK_BUTTON";
+	buttonIdentifier[OPEN_TREE_BUTTON] = "OPEN_TREE_BUTTON";
+	buttonIdentifier[NON_GOAL_ENTRY_BUTTON] = "NON_GOAL_ENTRY_BUTTON";
+	buttonIdentifier[TEXT_BUTTON] = "TEXT_BUTTON";
+	buttonIdentifier[VISITED_TEXT_BUTTON] = "VISITED_TEXT_BUTTON";
+	buttonIdentifier[MENU_BUTTON] = "MENU_BUTTON";
+	buttonIdentifier[HELP_BUTTON] = "HELP_BUTTON";
+}
+
 void UI_Theme::initBitmapIdentifier()
 {
 	for(unsigned int i = MAX_BITMAPS; i--;)
@@ -1856,6 +1685,8 @@ void UI_Theme::initBitmapIdentifier()
 	bitmapIdentifier[TITLE_SC_BITMAP] = "TITLE_SC_BITMAP";
 	bitmapIdentifier[TITLE_BW_BITMAP] = "TITLE_BW_BITMAP";
 	bitmapIdentifier[TITLE_WC3_BITMAP] = "TITLE_WC3_BITMAP";
+
+	bitmapIdentifier[THE_QUESTION_BITMAP] = "THE_QUESTION_BITMAP";
 }
 
 void UI_Theme::initStringIdentifier()
@@ -1916,6 +1747,7 @@ void UI_Theme::initStringIdentifier()
         stringIdentifier[START_LOAD_BITMAPS_STRING] = "START_LOAD_BITMAPS_STRING";
         stringIdentifier[START_LOAD_BUTTONS_STRING] = "START_LOAD_BUTTONS_STRING";
         stringIdentifier[START_LOAD_SOUNDS_STRING] = "START_LOAD_SOUNDS_STRING";
+        stringIdentifier[START_LOAD_MUSIC_STRING] = "START_LOAD_MUSIC_STRING";
 	
 	stringIdentifier[START_SET_DESIRED_FRAMERATE_STRING] = "START_SET_DESIRED_FRAMERATE_STRING";
 	stringIdentifier[START_SET_DESIRED_CPU_STRING] = "START_SET_DESIRED_CPU_STRING";
@@ -1983,7 +1815,6 @@ void UI_Theme::initStringIdentifier()
         stringIdentifier[START_SDL_BLIT_USES_ALPHA_BLENDING_STRING] = "START_SDL_BLIT_USES_ALPHA_BLENDING_STRING";
 	stringIdentifier[START_SDL_SURFACE_USES_PREALLOCATED_MEMORY_STRING] = "START_SDL_SURFACE_USES_PREALLOCATED_MEMORY_STRING";
 	stringIdentifier[START_SDL_SURFACE_NEEDS_LOCKING_STRING] = "START_SDL_SURFACE_NEEDS_LOCKING_STRING";
-
 
 
 	stringIdentifier[END_RESET_MOUSE_CURSOR_STRING] = "END_RESET_MOUSE_CURSOR_STRING";
@@ -2065,6 +1896,8 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[SAVE_GOAL_STRING] = "SAVE_GOAL_STRING";
 	stringIdentifier[SAVE_GOALS_AS_STRING] = "SAVE_GOALS_AS_STRING";
 	stringIdentifier[GIVE_GOAL_A_NAME_STRING] = "GIVE_GOAL_A_NAME_STRING";
+	stringIdentifier[CHOOSE_GOAL_NAME_STRING] = "CHOOSE_GOAL_NAME_STRING";
+	
 	stringIdentifier[SAVE_BUILD_ORDER_AS_STRING] = "SAVE_BUILD_ORDER_AS_STRING";
 	stringIdentifier[GIVE_BO_A_NAME_STRING] = "GIVE_BO_A_NAME_STRING";
 	stringIdentifier[BODIAGRAM_SUPPLY_STRING] = "BODIAGRAM_SUPPLY_STRING";
@@ -2080,6 +1913,7 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[BOWINDOW_BUILD_TIME_STRING] = "BOWINDOW_BUILD_TIME_STRING";
 	stringIdentifier[BOWINDOW_EACH_TOTAL_STRING] = "BOWINDOW_EACH_TOTAL_STRING";
 		
+	stringIdentifier[PLAYER_STRING] = "PLAYER_STRING";
 	stringIdentifier[SPEED_STRING] = "SPEED_STRING";
 	stringIdentifier[OF_GOALS_FULFILLED_STRING] = "OF_GOALS_FULFILLED_STRING";
 	stringIdentifier[OF_TIME_FULFILLED_STRING] = "OF_TIME_FULFILLED_STRING";
@@ -2090,12 +1924,6 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[RES_UNITS_STRUCT_STRING] = "RES_UNITS_STRUCT_STRING";
 	stringIdentifier[TOTAL_STRING] = "TOTAL_STRING";
 	stringIdentifier[ADD_PLAYER_STRING] = "ADD_PLAYER_STRING";
-	stringIdentifier[TIME_STAT_STRING] = "TIME_STAT_STRING";
-	stringIdentifier[FORCE_STAT_STRING] = "FORCE_STAT_STRING";
-	stringIdentifier[AVERAGE_BO_LENGTH_STAT_STRING] = "AVERAGE_BO_LENGTH_STAT_STRING";
-	stringIdentifier[FITNESS_AVERAGE_STAT_STRING] = "FITNESS_AVERAGE_STAT_STRING";
-	stringIdentifier[FITNESS_VARIANCE_STAT_STRING] = "FITNESS_VARIANCE_STAT_STRING";
-	stringIdentifier[GENERATIONS_LEFT_STAT_STRING] = "GENERATIONS_LEFT_STAT_STRING";
 	stringIdentifier[HELP_TAB_STRING] = "HELP_TAB_STRING";
 	stringIdentifier[SETTINGS_TAB_STRING] = "SETTINGS_TAB_STRING";
 	stringIdentifier[DATABASE_TAB_STRING] = "DATABASE_TAB_STRING";
@@ -2107,17 +1935,12 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[ADD_GOALS_TOOLTIP_STRING] = "ADD_GOALS_TOOLTIP_STRING";
 	stringIdentifier[CHOOSE_GOALS_TOOLTIP_STRING] = "CHOOSE_GOALS_TOOLTIP_STRING";
 	stringIdentifier[CHOOSE_STARTING_FORCE_TOOLTIP_STRING] = "CHOOSE_STARTING_FORCE_TOOLTIP_STRING";
-	stringIdentifier[TIME_STAT_TOOLTIP_STRING] = "TIME_STAT_TOOLTIP_STRING";
-	stringIdentifier[FORCE_STAT_TOOLTIP_STRING] = "FORCE_STAT_TOOLTIP_STRING";
-	stringIdentifier[AVERAGE_BO_LENGTH_STAT_TOOLTIP_STRING] = "AVERAGE_BO_LENGTH_STAT_TOOLTIP_STRING";
-	stringIdentifier[FITNESS_AVERAGE_STAT_TOOLTIP_STRING] = "FITNESS_AVERAGE_STAT_TOOLTIP_STRING";
-	stringIdentifier[FITNESS_VARIANCE_STAT_TOOLTIP_STRING] = "FITNESS_VARIANCE_STAT_TOOLTIP_STRING";
-	stringIdentifier[GENERATIONS_LEFT_STAT_TOOLTIP_STRING] = "GENERATIONS_LEFT_STAT_TOOLTIP_STRING";
-	stringIdentifier[FPS_STAT_TOOLTIP_STRING] = "FPS_STAT_TOOLTIP_STRING";
 	stringIdentifier[SAVE_GOAL_TOOLTIP_STRING] = "SAVE_GOAL_TOOLTIP_STRING";
 	stringIdentifier[RESET_BUILD_ORDER_TOOLTIP_STRING] = "RESET_BUILD_ORDER_TOOLTIP_STRING";
 	stringIdentifier[SAVE_BUILD_ORDER_TOOLTIP_STRING] = "SAVE_BUILD_ORDER_TOOLTIP_STRING";
 	stringIdentifier[LOAD_BUILD_ORDER_TOOLTIP_STRING] = "LOAD_BUILD_ORDER_TOOLTIP_STRING";
+
+	
 	stringIdentifier[CONTINUE_OPTIMIZATION_TOOLTIP_STRING] = "CONTINUE_OPTIMIZATION_TOOLTIP_STRING";
 	stringIdentifier[PAUSE_OPTIMIZATION_TOOLTIP_STRING] = "PAUSE_OPTIMIZATION_TOOLTIP_STRING";
 	stringIdentifier[OF_GOALS_FULFILLED_TOOLTIP_STRING] = "OF_GOALS_FULFILLED_TOOLTIP_STRING";
@@ -2127,10 +1950,10 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[DATABASE_TAB_TOOLTIP_STRING] = "DATABASE_TAB_TOOLTIP_STRING";
 	stringIdentifier[MAP_TAB_TOOLTIP_STRING] = "MAP_TAB_TOOLTIP_STRING";
 	stringIdentifier[FORCEENTRY_TIME_TOOLTIP_STRING] = "FORCEENTRY_TIME_TOOLTIP_STRING";
+	stringIdentifier[FORCEENTRY_ALWAYS_BUILD_TOOLTIP_STRING] = "FORCEENTRY_ALWAYS_BUILD_TOOLTIP_STRING";
+	stringIdentifier[FORCEENTRY_BUILD_MUCH_TOOLTIP_STRING] = "FORCEENTRY_BUILD_MUCH_TOOLTIP_STRING";
 
 	stringIdentifier[SETTING_FAST_CALCULATION_STRING] = "SETTING_FAST_CALCULATION_STRING";
-	stringIdentifier[SETTING_EXPANSION_SET_STRING] = "SETTING_EXPANSION_SET_STRING";
-	stringIdentifier[SETTING_ALWAYS_BUILD_WORKERS_STRING] = "SETTING_ALWAYS_BUILD_WORKERS_STRING";
 	stringIdentifier[SETTING_ALLOW_WAIT_ORDERS_STRING] = "SETTING_ALLOW_WAIT_ORDERS_STRING";
 	stringIdentifier[SETTING_WAIT_ACCURACY_STRING] = "SETTING_WAIT_ACCURACY_STRING";
 	stringIdentifier[SETTING_GAME_SPEED_STRING] = "SETTING_GAME_SPEED_STRING";
@@ -2161,8 +1984,6 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[SETTING_LOAD_DEFAULTS_STRING] = "SETTING_LOAD_DEFAULTS_STRING";
 
 	stringIdentifier[SETTING_FAST_CALCULATION_TOOLTIP_STRING] = "SETTING_FAST_CALCULATION_TOOLTIP_STRING";
-	stringIdentifier[SETTING_EXPANSION_SET_TOOLTIP_STRING] = "SETTING_EXPANSION_SET_TOOLTIP_STRING";
-	stringIdentifier[SETTING_ALWAYS_BUILD_WORKERS_TOOLTIP_STRING] = "SETTING_ALWAYS_BUILD_WORKERS_TOOLTIP_STRING";
 	stringIdentifier[SETTING_ALLOW_WAIT_ORDERS_TOOLTIP_STRING] = "SETTING_ALLOW_WAIT_ORDERS_TOOLTIP_STRING";
 	stringIdentifier[SETTING_WAIT_ACCURACY_TOOLTIP_STRING] = "SETTING_WAIT_ACCURACY_TOOLTIP_STRING";
 	stringIdentifier[SETTING_GAME_SPEED_TOOLTIP_STRING] = "SETTING_GAME_SPEED_TOOLTIP_STRING";

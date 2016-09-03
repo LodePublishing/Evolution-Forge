@@ -3,7 +3,7 @@
 	@ENGLISH
 # INDEX_CHAPTER = 0
 		@0	
-			$Evolution Forge Help Index$###
+			`$Evolution Forge Help Index$`###
 			~BULLET_BITMAP~@Chapter  1: Introduction@100@##
 			~BULLET_BITMAP~@Chapter  2: Detailed description@200@##
 			~BULLET_BITMAP~@Chapter  3: Troubleshoot@300@##
@@ -184,6 +184,7 @@
 
 # RESULTS_MAIN_CHAPTER = 300
 		@300
+			>~LEMMINGS_BITMAP~
 			~SMALL_ARROW_LEFT_BITMAP~@Chapter 3. Troubleshoot@0@###
 			~BULLET_BITMAP~@3.1: About game speed, times and numbers@310@##
 			~BULLET_BITMAP~@3.2: HTML output@320@##

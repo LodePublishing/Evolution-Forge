@@ -8,7 +8,9 @@ enum eForceEntryMessage
 {
 	NO_MESSAGE,
 	NUMBER_HAS_CHANGED,
-	GOAL_TIME_HAS_CHANGED
+	GOAL_TIME_HAS_CHANGED,
+	GOAL_ALWAYS_BUILD_CHANGED,
+	GOAL_BUILD_MUCH_CHANGED
 };
 
 class ForceEntry : public UI_Button
@@ -29,6 +31,7 @@ class ForceEntry : public UI_Button
 		const eUnitType getType() const;
 		const unsigned int getUnit() const;
 		const unsigned int getTime() const;
+		void setTime(const unsigned int time);
 
 //		const unsigned int getHeight() const;
 
@@ -47,9 +50,11 @@ class ForceEntry : public UI_Button
 		static bool doCompleteSound;
 
 		static ForceEntry* currentForceEntry;
-		void setTime(const unsigned int time);
+
+		static void mouseHasLeftWindow();
 	private:
-		
+		static UI_Button* alwaysBuildButton;
+		static UI_Button* buildMuchButton;
 		static UI_Button* makeTimeGoalButton;
 		static UI_NumberField* timeEntryBox;
 
@@ -65,6 +70,7 @@ class ForceEntry : public UI_Button
 
 		unsigned int highlight;
 		unsigned int unit;
+		
 		eUnitType type;
 		GOAL* goal;
 //		bool showLocMenu;

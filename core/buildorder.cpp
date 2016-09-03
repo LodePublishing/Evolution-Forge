@@ -84,7 +84,11 @@ const bool BUILDORDER::calculateStep()
 		return(true);
 	bool ok = true;
 	while((ok)&&(!codeFinished()))
-		ok = executeNextInstruction();
+	{
+		resetNeededResources();
+		if(!(ok = executeAlwaysBuildInstructions()))
+			ok = executeNextInstruction();
+	}
 	ready = calculateReady();
 	
 	leapForwardInTime();

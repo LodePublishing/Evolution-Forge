@@ -36,7 +36,8 @@ UI_Menu::~UI_Menu()
 
 void UI_Menu::reloadOriginalSize()
 {
-	updateItemSizes(UI_Object::theme.lookUpButtonWidth(buttonWidthType));
+	if(buttonWidthType != MAX_BUTTON_WIDTH_TYPES)
+		updateItemSizes(UI_Object::theme.lookUpButtonWidth(buttonWidthType));
 	updateItemPositions();
 	UI_Object::reloadOriginalSize();	 //?
 }
@@ -66,7 +67,7 @@ void UI_Menu::updateItemPositions()
 				if((*m)->isBitmapButton())
 					item_height = (*m)->getHeight();
 				else item_height = (*m)->getTextHeight();
-				(*m)->setOriginalPosition(Point(0, i*(item_height+(*m)->getDistanceBottomRight().getHeight())));
+				(*m)->setOriginalPosition(Point(0, i*(item_height+(*m)->getDistanceBottomRight().getHeight())) + Size(3,3));
 				i++;
 				height++;
 			}
@@ -79,7 +80,7 @@ void UI_Menu::updateItemPositions()
 				if((*m)->isBitmapButton())
 					item_height = (*m)->getHeight();
 				else item_height = (*m)->getTextHeight();
-				(*m)->setOriginalPosition(Point((i%2) * ((*m)->getWidth() + (*m)->getDistanceBottomRight().getWidth()), (i/2)*(item_height+(*m)->getDistanceBottomRight().getHeight())));
+				(*m)->setOriginalPosition(Point((i%2) * ((*m)->getWidth() + (*m)->getDistanceBottomRight().getWidth()), (i/2)*(item_height+(*m)->getDistanceBottomRight().getHeight())) + Size(3,3));
 				i++;
 				if(i%2==0) height++;
 			}
@@ -88,7 +89,7 @@ void UI_Menu::updateItemPositions()
 		for(std::list<UI_MenuEntry*>::iterator m = menuEntries.begin(); m != menuEntries.end(); ++m)
 			if((*m)->isShown())
 			{
-				(*m)->setOriginalPosition(Point(i * ((*m)->getWidth() + (*m)->getDistanceBottomRight().getWidth()), 0));
+				(*m)->setOriginalPosition(Point(i * ((*m)->getWidth() + (*m)->getDistanceBottomRight().getWidth()), 0)  + Size(3,3));
 				i++;
 			}
 		height = 1;
@@ -106,9 +107,9 @@ void UI_Menu::updateItemPositions()
 		if(tmp->isShown())
 		{
 			Rect r = tmp->getTargetRect();
-			if(maxWidth < r.getRight())
+			if((r.getRight() > 0) && (maxWidth < (unsigned int)(r.getRight())))
 				maxWidth = r.getRight();
-			if(maxHeight < r.getBottom())
+			if((r.getBottom() > 0) && (maxHeight < (unsigned int)(r.getBottom())))
 				maxHeight = r.getBottom();
 		}
 		tmp = tmp->getNextBrother();
@@ -247,7 +248,7 @@ void UI_Menu::draw(DC* dc) const
 		return;
 	if(checkForNeedRedraw())
 	{
-		Rect edge = Rect(p1 - Size(3,3), Size(p2.x-p1.x+6, p2.y-p1.y+6) );
+		Rect edge = Rect(p1 - Size(3,3), Size(p2.x-p1.x, p2.y-p1.y) + Size(6,6) );
 		dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
 //		dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 		dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));

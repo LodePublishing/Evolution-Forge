@@ -2,10 +2,10 @@
 #define _CORE_PREBUILDORDER_HPP
 
 #include "building.hpp"
+#include "configuration.hpp"
 #include "start.hpp"
 #include <functional>
 #include <queue>
-#include <map>
 
 struct PARALLEL_COMMAND
 {
@@ -77,6 +77,8 @@ class PREBUILDORDER
 		virtual ~PREBUILDORDER();
 
 		const bool calculationDone();
+		void resetNeededResources();
+		const bool executeAlwaysBuildInstructions();
 		const bool executeNextInstruction();
 		const bool codeFinished() const;
 		void processBuildingQueue();

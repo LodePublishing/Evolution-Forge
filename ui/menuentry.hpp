@@ -8,7 +8,7 @@ class UI_MenuEntry : public UI_Button
 	public:
 		UI_MenuEntry(UI_Object* menuentry_parent, const Rect rect, const eString unit);
 		UI_MenuEntry(UI_Object* menuentry_parent, const Rect rect, const std::string& unit);
-		UI_MenuEntry(UI_Object* menuentry_parent, const Rect rect, const eButtonColorsType button);
+//		UI_MenuEntry(UI_Object* menuentry_parent, const Rect rect, const eButtonColorsType button); TODO bitmaps...
 		~UI_MenuEntry();
 		void process();
 		void draw(DC* dc) const;

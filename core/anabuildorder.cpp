@@ -63,12 +63,19 @@ void ANABUILDORDER::prepareForNewGeneration() // resets all data to standard sta
 void ANABUILDORDER::postProcessing()
 {
 	countUnitsTotal();
-	unsigned int maxPoints=getGoal()->countGoals();
-	if(maxPoints>0)
-		goalPercentage = 100 * currentpFitness / maxPoints;
-	else goalPercentage = 0;
-	
 	setCurrentpFitness(calculatePrimaryFitness(ready));
+	
+	unsigned int max_fitness = getGoal()->calculateMaxFitness();
+	if(max_fitness > 0)
+		goalPercentage = 100 * currentpFitness / max_fitness;
+	else goalPercentage = 100;
+	
+	toErrorLog("------------");
+	toErrorLog(goalPercentage);
+	toErrorLog(currentpFitness);
+	toErrorLog(max_fitness);
+	toErrorLog("------------");
+	
 	while(!buildingQueue.empty())
 		buildingQueue.pop();
 
@@ -78,10 +85,7 @@ void ANABUILDORDER::postProcessing()
 		while(i!=programList.end())
 		{
 			if((getTimer() < i->getBT()) || (i->getTime() < getTimer() - i->getBT()))
-			{
 				i = programList.erase(i);
-				toErrorLog("deleted something");
-			}
 			else ++i;
 		}
 	}
@@ -107,13 +111,17 @@ const bool ANABUILDORDER::calculateStep()
 	bool ok = true;
 	while((ok)&&(!codeFinished()))
 	{
+		resetNeededResources();
 		PROGRAM program;
 		program.buildingQueue = buildingQueue;
 		program.before = generateStatistics();
 		program.successUnit = successUnit;
 		program.successType = successType;
 
-		ok = executeNextInstruction();
+		if(!(ok = executeAlwaysBuildInstructions()))
+			ok = executeNextInstruction();
+		
+		// TODO timeout irgendwie anzeigen...
 		
 		if(ok) // && ((getRace()!=ZERG) || (anaraceBuildUnit != LARVA))) TODO... evtl nur von der Oberflaeche entscheiden was denn angezeigt werden soll
 		{
@@ -128,7 +136,6 @@ const bool ANABUILDORDER::calculateStep()
 			
 			programList.push_back(program);
 		}
-
 	}
 	ready = calculateReady();
 	timeStatisticsList.push_back(generateStatistics());

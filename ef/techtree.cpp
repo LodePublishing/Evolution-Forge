@@ -8,25 +8,28 @@ TechTreeWindow::TechTreeWindow(UI_Object* techtree_parent) :
 	anarace(NULL),
 	s(),
 	s2()
-{	
-	node.resize(RACE::UNIT_TYPE_COUNT);
-	for(unsigned int i = RACE::UNIT_TYPE_COUNT;i--;)
-		node[i] = new UI_Object(this, Rect(Point((getWidth() - s.getWidth())/2, 15),s));
+{
 	reloadOriginalSize();
 }
 
 TechTreeWindow::~TechTreeWindow()
 {
-	for(unsigned int i = RACE::UNIT_TYPE_COUNT;i--;)
-		delete node[i];
+	if(node.size() > 0)
+		for(unsigned int i = RACE::UNIT_TYPE_COUNT;i--;)
+			delete node[i];
 }
 
 void TechTreeWindow::assignAnarace(ANABUILDORDER* techtree_anarace)
 {
 	if((!anarace)||(anarace->getRace() != techtree_anarace->getRace()))
 		unitChanged = true;
+	if(anarace == NULL)
+	{
+		node.resize(RACE::UNIT_TYPE_COUNT);
+		for(unsigned int i = RACE::UNIT_TYPE_COUNT;i--;)
+			node[i] = new UI_Object(this, Rect(Point((getWidth() - s.getWidth())/2, 15),s));
+	}
 	anarace = techtree_anarace;
-	
 }
 
 void TechTreeWindow::reloadOriginalSize()

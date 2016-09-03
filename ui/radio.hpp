@@ -1,8 +1,8 @@
 #ifndef _UI_RADIO_HPP
 #define _UI_RADIO_HPP
 
-#include "button.hpp"
 #include "group.hpp"
+#include "button.hpp"
 
 class UI_Radio : public UI_Group
 {

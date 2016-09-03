@@ -1,6 +1,7 @@
 #ifndef _SDL_RECT_HPP
 #define _SDL_RECT_HPP
 
+#include "size.hpp"
 #include "point.hpp"
 
 enum eRectMovement {
@@ -42,14 +43,14 @@ class Rect
 		Rect& operator=(const Rect& rect);
 		const bool operator==(const Rect& rect) const;
 		const bool operator!=(const Rect& rect) const;
-		const bool Inside(const signed int x, const signed int y) const;
-		const bool Inside(const Point& point) const;
-		const bool Inside(const Rect& rect) const;
+		const bool isInside(const signed int x, const signed int y) const;
+		const bool isInside(const Point& point) const;
+		const bool isInside(const Rect& rect) const;
 
 		const bool overlaps(const Rect& rect) const;
 
-		const eRectMovement moveSmooth(const Rect& startRect, const Rect& targetRect);
-		const eRectMovement move(const Rect& startRect, const Rect& targetRect);
+		const eRectMovement moveSmooth(const Rect& start_rect, const Rect& target_rect);
+		const eRectMovement move(const Rect& target_rect);
 	private:
 		Point topLeftCorner;
 		Point bottomRightCorner;
@@ -173,10 +174,10 @@ inline Rect& Rect::operator=(const Rect& rect)
 }
 	
 inline const bool Rect::overlaps(const Rect& rect) const {
-	return(Inside(rect.getTopLeft()) || Inside(rect.getBottomLeft()) || Inside(rect.getBottomRight()) || Inside(rect.getTopRight()));	
+	return(isInside(rect.getTopLeft()) || isInside(rect.getBottomLeft()) || isInside(rect.getBottomRight()) || isInside(rect.getTopRight()));	
 }
 
-inline const bool Rect::Inside(const Rect& rect) const {
+inline const bool Rect::isInside(const Rect& rect) const {
 	return( ( rect.getTopLeft() >= topLeftCorner ) && ( rect.getBottomRight() <= bottomRightCorner ) );
 }
 
@@ -191,15 +192,15 @@ inline const bool Rect::operator!=(const Rect& rect) const {
 	return (!(*this == rect));
 }
 
-inline const bool Rect::Inside(const Point& point) const 
+inline const bool Rect::isInside(const Point& point) const 
 {
 	if( ( point >= topLeftCorner ) && ( point <= bottomRightCorner ) )
 		return(true);
 	else return(false);
 }
 
-inline const bool Rect::Inside(const signed int x, const signed int y) const {
-	return(Inside(Point(x,y)));
+inline const bool Rect::isInside(const signed int x, const signed int y) const {
+	return(isInside(Point(x,y)));
 }
 
 inline void Rect::setRight(const signed int right) 

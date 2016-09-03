@@ -14,7 +14,6 @@ CoreConfiguration::CoreConfiguration() :
 	preprocessBuildOrder(false),
 	allowGoalAdaption(true),
 	fastCalculation(false),
-	expansionSet(true),
 	allowWaitOrders(true),
 	waitAccuracy(100),
 	configurationFile("settings/core.cfg"),
@@ -38,7 +37,6 @@ void CoreConfiguration::initDefaults()
 	setAllowWaitOrders(true);
 	setWaitAccuracy(100);
 	setFastCalculation(false);
-	setExpansionSet(true);
 	configurationFile = "settings/core.cfg";
 }
 
@@ -51,7 +49,6 @@ void CoreConfiguration::saveToFile() const
 	pFile << "# fast calculation?" << std::endl;
 	pFile << "\"Fast calculation\" = \"" << (int)isFastCalculation() << "\"" << std::endl;
 	pFile << "# use broodwar units?" << std::endl;
-	pFile << "\"Expansion set\" = \"" << (int)isExpansionSet() << "\"" << std::endl;
 	pFile << "# allow orders to let the build order wait a certain time instead of building units and buildings as soon as possible?" << std::endl;
 	pFile << "\"Allow wait orders\" = \"" << (int)isAllowWaitOrders() << "\"" << std::endl;
 	pFile << "# time in seconds to wait (less = the more accurate but needs also much more time to calculate)" << std::endl;
@@ -119,10 +116,6 @@ void CoreConfiguration::loadConfigurationFile()
 				i->second.pop_front();
 			   	setFastCalculation(atoi(i->second.front().c_str()));
 			}
-			if((i=block.find("Expansion set"))!=block.end()){
-				i->second.pop_front();
-			   	setExpansionSet(atoi(i->second.front().c_str()));
-			}
 			if((i=block.find("Allow wait orders"))!=block.end()){
 				i->second.pop_front();
 			   	setAllowWaitOrders(atoi(i->second.front().c_str()));
@@ -179,6 +172,7 @@ const bool CoreConfiguration::setGameType(const unsigned int game_type_number)
 	}
 #endif
 	gameType = game_type_number;
+	toErrorLog(gameType);
 	return(true);
 }
 
@@ -187,14 +181,6 @@ const bool CoreConfiguration::setFastCalculation(const bool fast_calculation)
 	if(fastCalculation == fast_calculation)
 		return(false);
 	fastCalculation = fast_calculation;
-	return(true);
-}
-
-const bool CoreConfiguration::setExpansionSet(const bool expansion_set) 
-{
-	if(expansionSet == expansion_set)
-		return(false);
-	expansionSet = expansion_set;
 	return(true);
 }
 

@@ -104,10 +104,8 @@ enum eDataType
 	FONT_DATA_TYPE,
 	WINDOW_DATA_TYPE,
 	COLOR_DATA_TYPE,
-	GENERAL_BITMAP_DATA_TYPE,
-	GENERAL_RESOLUTION_BITMAP_DATA_TYPE,
-	GENERAL_THEME_BITMAP_DATA_TYPE,
 	BITMAP_DATA_TYPE,
+	THEME_BITMAP_DATA_TYPE,
 	PEN_DATA_TYPE,
 	BRUSH_DATA_TYPE,
 	BUTTON_COLOR_DATA_TYPE,
@@ -130,22 +128,6 @@ enum eSubDataType
 };
 
 // ------ END SUB DATA TYPES ------
-
-// ------ SUB SUB DATA TYPES ------
-
-enum eSubSubDataType
-{
-	ZERO_SUB_SUB_DATA_TYPE,
-	LANGUAGE_SUB_SUB_DATA_TYPE,
-	COLOR_THEME_SUB_SUB_DATA_TYPE,
-	TAB_SUB_SUB_DATA_TYPE,
-
-	MAX_SUB_SUB_DATA_TYPES
-};
-
-// ------ END SUB DATA TYPES ------
-
-
 
 // ------ FONTS ------
 enum eFont
@@ -484,6 +466,7 @@ enum eString
 	START_LOAD_BITMAPS_STRING,
 	START_LOAD_BUTTONS_STRING,
 	START_LOAD_SOUNDS_STRING,
+	START_LOAD_MUSIC_STRING,
 
 	START_SET_DESIRED_FRAMERATE_STRING,
 	START_SET_DESIRED_CPU_STRING,
@@ -650,6 +633,8 @@ enum eString
 
 	SAVE_GOALS_AS_STRING,
 	GIVE_GOAL_A_NAME_STRING,
+
+	CHOOSE_GOAL_NAME_STRING,
 	
 	SAVE_BUILD_ORDER_AS_STRING,
 	GIVE_BO_A_NAME_STRING, //40
@@ -671,6 +656,7 @@ enum eString
 	BOWINDOW_BUILD_TIME_STRING,
 	BOWINDOW_EACH_TOTAL_STRING,
 
+	PLAYER_STRING,
 	SPEED_STRING,
 	
 // timer window
@@ -684,14 +670,6 @@ enum eString
 	TOTAL_STRING,
 
 	ADD_PLAYER_STRING,
-
-// statistics window
-	TIME_STAT_STRING,
-	FORCE_STAT_STRING,	// 60
-	AVERAGE_BO_LENGTH_STAT_STRING,
-	FITNESS_AVERAGE_STAT_STRING, 
-	FITNESS_VARIANCE_STAT_STRING,
-	GENERATIONS_LEFT_STAT_STRING,
 
 // Tabs
 	HELP_TAB_STRING,
@@ -709,19 +687,12 @@ enum eString
 	CHOOSE_GOALS_TOOLTIP_STRING,
 	CHOOSE_STARTING_FORCE_TOOLTIP_STRING,
 
-	TIME_STAT_TOOLTIP_STRING, 
-	FORCE_STAT_TOOLTIP_STRING,
-	AVERAGE_BO_LENGTH_STAT_TOOLTIP_STRING,
-	FITNESS_AVERAGE_STAT_TOOLTIP_STRING,
-	FITNESS_VARIANCE_STAT_TOOLTIP_STRING,
-	GENERATIONS_LEFT_STAT_TOOLTIP_STRING, // 100
-	FPS_STAT_TOOLTIP_STRING,
-
 	SAVE_GOAL_TOOLTIP_STRING,
 
 	RESET_BUILD_ORDER_TOOLTIP_STRING,
 	SAVE_BUILD_ORDER_TOOLTIP_STRING,
 	LOAD_BUILD_ORDER_TOOLTIP_STRING,
+
 // timer:
 	CONTINUE_OPTIMIZATION_TOOLTIP_STRING, 
 	PAUSE_OPTIMIZATION_TOOLTIP_STRING, 
@@ -734,11 +705,11 @@ enum eString
 	MAP_TAB_TOOLTIP_STRING,
 
 	FORCEENTRY_TIME_TOOLTIP_STRING,
+	FORCEENTRY_ALWAYS_BUILD_TOOLTIP_STRING,
+	FORCEENTRY_BUILD_MUCH_TOOLTIP_STRING,
 
 // settings:
 	SETTING_FAST_CALCULATION_STRING,
-	SETTING_EXPANSION_SET_STRING,
-	SETTING_ALWAYS_BUILD_WORKERS_STRING,
 	SETTING_ALLOW_WAIT_ORDERS_STRING,
 	SETTING_WAIT_ACCURACY_STRING,
 	SETTING_GAME_SPEED_STRING,
@@ -773,8 +744,6 @@ enum eString
 
 // tooltips	
 	SETTING_FAST_CALCULATION_TOOLTIP_STRING,
-	SETTING_EXPANSION_SET_TOOLTIP_STRING,
-	SETTING_ALWAYS_BUILD_WORKERS_TOOLTIP_STRING,
 	SETTING_ALLOW_WAIT_ORDERS_TOOLTIP_STRING,
 	SETTING_WAIT_ACCURACY_TOOLTIP_STRING,
 	SETTING_GAME_SPEED_TOOLTIP_STRING,
@@ -860,7 +829,6 @@ enum eString
 	MAX_STRINGS
 };
 // ------ END STRINGS ------
-
 
 // ------ BITMAPS ------
 enum eBitmap
@@ -952,7 +920,8 @@ enum eBitmap
 	CLICKED_ARROW_DOWN_BITMAP,*/
 	
 	HELP_MAIN_BITMAP,
-	
+
+	THE_QUESTION_BITMAP,
 	
 	MAX_BITMAPS
 };
@@ -1045,13 +1014,6 @@ enum eCommand
 
 enum eButtonColorsType // TODO ueberarbeiten... 
 {
-// timer window
-	MY_BUTTON,
-	FORCE_ENTRY_BUTTON,
-// force window
-	INCREASE_BUTTON,
-	SUB_BUTTON,
-	CANCEL_BUTTON,
 /*	UMS_BUTTON,
 	TERRA_BUTTON,
 	PROTOSS_BUTTON,
@@ -1081,58 +1043,28 @@ enum eButtonColorsType // TODO ueberarbeiten...
 	BRIGHT_UNIT_TYPE_9_BUTTON,
 	BRIGHT_UNIT_TYPE_10_BUTTON,
 
-	
 	VERY_BRIGHT_UNIT_TYPE_BUTTON,
-	TAB_BUTTON,
-	ADD_GOAL_BUTTON,
-
-	EDIT_FIELD_BUTTON,
-
-// statistics window
 	
-	SMALL_ARROW_LEFT_BUTTON,
-	SMALL_ARROW_RIGHT_BUTTON,
-	SMALL_ARROW_UP_BUTTON,
-	SMALL_ARROW_DOWN_BUTTON,
-	ARROW_LEFT_BUTTON,
-	ARROW_RIGHT_BUTTON,
-	ARROW_UP_BUTTON,
-	ARROW_DOWN_BUTTON,
-
+	STANDARD_BUTTON,
+	FORCE_ENTRY_BUTTON,
+	MODIFY_BUTTON,
+	TAB_BUTTON,
+	MENU_ENTRY_BUTTON,
+	EDIT_FIELD_BUTTON,
+	ARROW_BUTTON,
 	GOAL_LOCATION_BUTTON,
 	GOAL_TIME_BUTTON,
-
 	CHECK_BUTTON,
 	OPEN_TREE_BUTTON,
 	NON_GOAL_ENTRY_BUTTON,
-	
 	TEXT_BUTTON,
 	VISITED_TEXT_BUTTON,
-
-	NEW_BUTTON,
-	LOAD_BUTTON,
-	SAVE_BUTTON,
-	REFRESH_BUTTON,
-	
-	BACK_BUTTON,
-	FORWARD_BUTTON,
-	ADD_BUTTON,
-	DELETE_BUTTON,
-
+	MENU_BUTTON,
 	HELP_BUTTON,
 	
-	HELP_TAB_BUTTON,
-	DATABASE_TAB_BUTTON,
-	MAP_TAB_BUTTON,
-	SETTINGS_TAB_BUTTON,
-
 //	COMPARE_GAME_BUTTON TODO
 //	REMOVE_GAME_BUTTON,
 	
-	STARCRAFT_BUTTON,
-	BROODWAR_BUTTON,
-	WARCRAFT3_BUTTON,
-
 	MAX_BUTTON_COLORS_TYPES
 };
 
@@ -1178,7 +1110,7 @@ struct ButtonColorsType
 	ePen startBorderPen[MAX_BUTTON_ANIMATION_PHASES];
 	ePen endBorderPen[MAX_BUTTON_ANIMATION_PHASES];
 	
-	eBitmap bitmap[MAX_BUTTON_ANIMATION_PHASES];// bitmap animation is fixed... for now
+//	eBitmap bitmap[MAX_BUTTON_ANIMATION_PHASES];// bitmap animation is fixed... for now
 
 	unsigned int speed; // 100 = 100 steps for full animation
 	eButtonAnimationType type;
@@ -1194,8 +1126,7 @@ Alternativ: Globale Namen fuer jedes item (Konstantennamen?) der in den Konfigur
 struct BitmapEntry
 {
 	std::string name;
-//	eResolution resolution;
-//	eTheme theme;
+	bool scale;
 	unsigned int line;
 	SDL_Surface* bitmap;
 	bool used;
@@ -1219,7 +1150,8 @@ class UI_Theme
 		const eResolution getResolution() const;
 		void setResolution(const eResolution theme_resolution);
 
-		const Size getResolutionSize() const;
+		const Size getResolutionSize(const eResolution resolution) const;
+		const Size getCurrentResolutionSize() const;
 
 		const eBitDepth getBitDepth() const;
 		void setBitDepth(const eBitDepth theme_bitdepth);
@@ -1232,6 +1164,7 @@ class UI_Theme
 		
 		void loadData(const std::string& data_file, const std::string& bitmap_dir, const std::string& font_dir, DC* dc); //currently all data hard coded, move it to file later! TODO
 		const bool loadWindowDataFile(const std::string& window_data_file, const unsigned int game_number, const unsigned int max_games);
+		void initCursors();
 
 		const std::string& lookUpString(const eString id) const;
 		const std::string& lookUpHelpChapterString(const eHelpChapter id) const;
@@ -1274,12 +1207,15 @@ class UI_Theme
 		eTheme currentColorTheme;
 		eTheme currentMainColorTheme;
 
+		SDL_Cursor* cursorList[MAX_CURSORS][2];
+		SDL_Cursor* defaultCursor;
+
 		void initBitmapIdentifier();
 		std::string bitmapIdentifier[MAX_BITMAPS];
 		SDL_Surface* bitmapList[MAX_RESOLUTIONS][MAX_COLOR_THEMES][MAX_BITMAPS];
 		std::list<BitmapEntry> loadedBitmaps;
 		BitmapEntry* bitmapAccessTable[MAX_RESOLUTIONS][MAX_COLOR_THEMES][MAX_BITMAPS];
-	
+		
 		void initStringIdentifier();
 		std::vector<std::string> stringIdentifier;
 		std::vector< std::vector<std::string> > stringList;
@@ -1288,12 +1224,9 @@ class UI_Theme
 		
 		Color* colorList[MAX_COLOR_THEMES][MAX_COLORS];
 		
-		
 		Pen* penList[MAX_COLOR_THEMES][MAX_PENS];
 		Brush* brushList[MAX_COLOR_THEMES][MAX_BRUSHES];
 
-		SDL_Cursor* cursorList[MAX_CURSORS][2];
-		SDL_Cursor* defaultCursor;
 
 		Rect* globalRectList[MAX_RESOLUTIONS][MAX_GLOBAL_WINDOWS];
 		Rect* gameRectList[MAX_RESOLUTIONS][MAX_COMPARE_GAMES][MAX_COMPARE_GAMES][MAX_GAME_WINDOWS];
@@ -1304,11 +1237,14 @@ class UI_Theme
 
 		Font* fontList[MAX_RESOLUTIONS][MAX_FONTS];
 		ButtonColorsType* buttonColorsList[MAX_BUTTON_COLORS_TYPES];
+		std::string buttonIdentifier[MAX_BUTTON_COLORS_TYPES];
+		void initButtonIdentifier();
 		unsigned int buttonWidthList[MAX_RESOLUTIONS][MAX_BUTTON_WIDTH_TYPES];
 };
 
-inline const bool UI_Theme::isLanguageInitialized(const eLanguage language) const {
-	return(currentLanguage);
+inline const bool UI_Theme::isLanguageInitialized(const eLanguage language) const 
+{
+	return(languageInitialized[language]);
 }
 
 inline void UI_Theme::setColorTheme(const eTheme color_theme) {
@@ -1355,6 +1291,9 @@ inline SDL_Cursor* UI_Theme::lookUpCursor(const eCursor id, const unsigned int a
 	return(cursorList[id][animation_phase]);
 }
 
+inline const Size UI_Theme::getCurrentResolutionSize() const {
+	return(getResolutionSize(currentResolution));
+}
 	
 
 inline const ButtonColorsType* UI_Theme::lookUpButtonColors(const eButtonColorsType id) const

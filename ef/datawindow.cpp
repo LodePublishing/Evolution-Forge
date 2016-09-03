@@ -1,4 +1,5 @@
 #include "datawindow.hpp"
+#include "../core/database.hpp"
 
 DataBaseWindow::DataBaseWindow(UI_Object* database_parent) :
 	UI_Window(database_parent, DATABASE_WINDOW_TITLE_STRING, theme.lookUpGlobalRect(DATABASE_WINDOW), theme.lookUpGlobalMaxHeight(DATABASE_WINDOW), NOT_SCROLLED),
@@ -93,7 +94,7 @@ void DataBaseWindow::activateGame()
 	if(game) 
 		delete game;
 	game = new Game(getParent(), database.getMap(0), 1, 2);
-	game->setStartPosition(1, 1);
+	game->setStartPosition(0, 1);
 	toInitLog("* " + UI_Object::theme.lookUpString(START_ASSIGNING_HARVEST_SPEED_STRING));
 //	game->setHarvestSpeed(1, TERRA, database.getHarvestSpeed(TERRA, 0));
 //	game->setHarvestSpeed(1, PROTOSS, database.getHarvestSpeed(PROTOSS, 0));
@@ -131,6 +132,10 @@ void DataBaseWindow::process()
 		return;
 	} else if(game)
 		game->Show();
+
+	if(database.wereBosChanged() || database.wereGoalsChanged())
+		needUpdate = true;		
+			
 	UI_Window::process();
 
 	if(!isMouseInside()) 
@@ -195,7 +200,7 @@ void DataBaseWindow::process()
 						game->assignGoal(0, (*i)->myGoal);
 						game->loadBuildOrder(0, (*j)->myBO);
 						was_loaded = true;
-						setNeedRedrawMoved();
+//						setNeedRedrawMoved(); TODO
 					}
 				}
 			}break;	

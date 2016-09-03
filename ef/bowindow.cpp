@@ -13,6 +13,7 @@ BoWindow::BoWindow(const BoWindow& object) :
 	lastBogoal(object.lastBogoal),
 	startLine(0),
 	selectedItem(0),
+	newItem(false),
 	saveBuildOrderButton(new UI_Button(*(object.saveBuildOrderButton))),
 	loadBuildOrderButton(new UI_Button(*(object.loadBuildOrderButton))),
 	boMenu(new BoMenu(this, Rect(10, 40, 100, 0), Size(0,0), DO_NOT_ADJUST)),
@@ -32,6 +33,7 @@ BoWindow& BoWindow::operator=(const BoWindow& object)
 	lastBogoal = object.lastBogoal;
 	startLine = 0;
 	selectedItem = 0;
+	newItem = false;
 	delete saveBuildOrderButton;
 	saveBuildOrderButton = new UI_Button(*(object.saveBuildOrderButton));
 	delete loadBuildOrderButton;
@@ -56,6 +58,7 @@ BoWindow::BoWindow(UI_Object* bo_parent, const unsigned int game_number, const u
 	lastBogoal(0),
 	startLine(0),
 	selectedItem(0),
+	newItem(false),
 	restartBuildOrderButton(new UI_Button(this, Rect(Point(10,15), Size(0,0)), Size(5,5), REFRESH_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, ARRANGE_TOP_LEFT)),
 	saveBuildOrderButton(new UI_Button(this, Rect(Point(10,15), Size(0,0)), Size(5,5), SAVE_BUTTON, true, STATIC_BUTTON_MODE, NULL_STRING, ARRANGE_TOP_LEFT)),
 	loadBuildOrderButton(new UI_Button(this, Rect(Point(10,15), Size(0,0)), Size(5,5), LOAD_BUTTON, true, STATIC_BUTTON_MODE, NULL_STRING, ARRANGE_TOP_LEFT)),
@@ -153,6 +156,16 @@ void BoWindow::closeMenus()
 {
 //	unitMenu->close();
 	boMenu->close();
+}
+
+void BoWindow::wave(SDL_snd& sound)
+{
+	if(newItem)
+	{
+		newItem = false;
+		sound.play(UI_Object::theme.lookUpSound(SWISHIN_SOUND));
+	}
+	UI_Window::wave(sound);
 }
 
 #include <sstream>
@@ -327,6 +340,7 @@ void BoWindow::processList()
 			BoEntry* t = new BoEntry((UI_Object*)getScrollBar(), Point(UI_Object::max_x, getRelativeClientRectPosition().y+205), Size(5,5),
 			// max size -y? TODO
 				(eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()+UNIT_NULL_STRING), *order, number); // (*anarace->getStartCondition())->getRace()?
+			newItem = true;
 			t->setAllowMoveByMouse();
 			t->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
 			t->adjustRelativeRect(edge);
@@ -356,6 +370,7 @@ void BoWindow::processList()
 				if((edge != old->getTargetRect())&&((UI_Button::getCurrentButton()!=old)||(!UI_Button::isMoveByMouse())))
 				{
 					old->adjustRelativeRect(edge);
+					newItem = true;
 					old->resetGradient();
 				}
 				old->setNumber(number);
@@ -363,10 +378,14 @@ void BoWindow::processList()
 			} else // => not found, insert a new one
 			{
 				BoEntry* t = new BoEntry((UI_Object*)getScrollBar(), Point(UI_Object::max_x, getRelativeClientRectPosition().y+205), Size(5,5), (eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()+UNIT_NULL_STRING), *order, number); // (*anarace->getStartCondition())->getRace()?
+				newItem = true;
 				t->setAllowMoveByMouse();
 				t->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
 				if((edge != t->getTargetRect())&&((UI_Button::getCurrentButton()!=t)||(!UI_Button::isMoveByMouse())))
+				{
 					t->adjustRelativeRect(edge);
+					newItem = true;
+				}
 				entry = boList.insert(entry, t);
 				++entry;
 

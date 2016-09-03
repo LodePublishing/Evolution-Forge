@@ -2,8 +2,10 @@
 #define _UI_THEME_HPP
 
 #include "../sdl/dc.hpp"
+#include "SDL_image.h"
 #include "../core/starcraft.hpp"
 #include "configuration.hpp"
+#include "../sdl/sound.hpp"
 
 extern unsigned int FONT_SIZE;
 //#define FONT_SIZE 6
@@ -27,6 +29,7 @@ enum eDataType
 	WINDOW_DATA_TYPE,
 	COLOR_DATA_TYPE,
 	BITMAP_DATA_TYPE,
+	SOUND_DATA_TYPE,
 	PEN_DATA_TYPE,
 	BRUSH_DATA_TYPE,
 	BUTTON_COLOR_DATA_TYPE,
@@ -803,12 +806,25 @@ enum eBitmap
 };
 // ------ END BITMAPS ------
 
+enum eSound
+{
+	NULL_SOUND,
+	LALA_SOUND,
+	MOUSEOVER_SOUND,
+	SWISHIN_SOUND,
+	COMPLETE_SOUND,
+	ERROR_SOUND,
+	MAX_SOUNDS
+};
+
+
 // ------ GENERAL RECTANGLES ------
 enum eGlobalWindow
 {
 	NULL_GLOBAL_WINDOW,
 	
 	MAIN_WINDOW,
+	INTRO_WINDOW,
 	MESSAGE_WINDOW,
 	HELP_WINDOW,
 //	STATISTICS_WINDOW, ?
@@ -1035,6 +1051,14 @@ struct BitmapEntry
 	bool solid;
 };
 
+struct SoundEntry
+{
+	unsigned int line;
+	std::string name;
+	const SndInfo* sound;
+	bool used;
+};
+
 class UI_Theme
 {
 	public:
@@ -1055,12 +1079,13 @@ class UI_Theme
 		const eBitDepth getBitDepth() const;
 		void setBitDepth(const eBitDepth theme_bitdepth);
 		
-		void unloadGraphics();
+		void unloadGraphicsAndSounds();
 
-		void loadHelpChapterStringFile(const std::string& dataFile);
-		void loadStringFile(const std::string& dataFile);
-		void loadGraphicData(const std::string& dataFile, const std::string& bitmapDir, const std::string& fontDir, DC* dc); //currently all data hard coded, move it to file later! TODO
-		void loadWindowData(const std::string& dataFile, const unsigned int gameNumber, const unsigned int maxGames);
+		void loadHelpChapterStringFile(const std::string& data_file);
+		void loadStringFile(const std::string& data_file);
+		void loadData(const std::string& data_file, const std::string& bitmap_dir, const std::string& sound_dir, const std::string& font_dir, DC* dc, SDL_snd& sound); //currently all data hard coded, move it to file later! TODO
+		void loadSoundData(const std::string& sound_file);
+		void loadWindowData(const std::string& data_file, const unsigned int game_number, const unsigned int max_games);
 
 		const std::string& lookUpString(const eString id) const;
 		const std::string& lookUpHelpChapterString(const eHelpChapter id) const;
@@ -1070,6 +1095,7 @@ class UI_Theme
 		const std::string lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j, const unsigned int k) const;
 		Color* lookUpColor(const eColor id) const;
 		/*const */SDL_Surface* lookUpBitmap(const eBitmap id);
+		const SndInfo* lookUpSound(const eSound id);
 		Pen* lookUpPen(const ePen id) const;
 		Brush* lookUpBrush(const eBrush id) const;
 		Font* lookUpFont(const eFont id) const;
@@ -1088,6 +1114,7 @@ class UI_Theme
 
 		void updateColors(SDL_Surface* surface);
 
+
 	private:
 		void setMaxGlobalHeight(unsigned int current_resolution, unsigned int id, unsigned int max_height);
 		void setMaxGameHeight(unsigned int current_resolution, unsigned int gameNumber, unsigned int maxGames, unsigned int id, unsigned int max_height);
@@ -1101,12 +1128,18 @@ class UI_Theme
 
 		std::list<BitmapEntry> loadedBitmaps;
 		BitmapEntry* bitmapAccessTable[MAX_RESOLUTIONS][MAX_COLOR_THEMES][MAX_BITMAPS];
+	
+		std::list<SoundEntry> loadedSounds;
+		SoundEntry* soundAccessTable[MAX_SOUNDS];
 		
 		std::string stringList[MAX_LANGUAGES][MAX_STRINGS];
 		std::map<eHelpChapter, const std::string> helpChapterStringMap[MAX_LANGUAGES];
 		
 		Color* colorList[MAX_COLOR_THEMES][MAX_COLORS];
+		
 		SDL_Surface* bitmapList[MAX_RESOLUTIONS][MAX_COLOR_THEMES][MAX_BITMAPS];
+		const SndInfo* soundList[MAX_SOUNDS];
+		
 		Pen* penList[MAX_COLOR_THEMES][MAX_PENS];
 		Brush* brushList[MAX_COLOR_THEMES][MAX_BRUSHES];
 
@@ -1165,7 +1198,7 @@ inline void UI_Theme::setBitDepth(const eBitDepth theme_bitdepth) {
 inline const ButtonColorsType* UI_Theme::lookUpButtonColors(const eButtonColorsType id) const
 {
 #ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_BUTTON_COLORS_TYPES)) {
+	if((id<0)||(id>=MAX_BUTTON_COLORS_TYPES)||(buttonColorsList[id]==NULL)) {
 		toLog("ERROR: (UI_Theme::lookUpButtonColors) id out of range.");return(buttonColorsList[0]);
 	}
 #endif
@@ -1175,7 +1208,7 @@ inline const ButtonColorsType* UI_Theme::lookUpButtonColors(const eButtonColorsT
 inline const unsigned int UI_Theme::lookUpButtonWidth(const eButtonWidthType id) const
 {
 #ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_BUTTON_WIDTH_TYPES)) {
+	if((id<0)||(id>=MAX_BUTTON_WIDTH_TYPES)||(buttonWidthList[id]==NULL)) {
 		toLog("ERROR: (UI_Theme::lookUpButtonWidth) id out of range.");return(buttonWidthList[0][0]);
 	}
 #endif

@@ -25,13 +25,12 @@ GOAL_ENTRY::GOAL_ENTRY(const GOAL_ENTRY& object) :
 {
 	memcpy(genoToPhaenotype, object.genoToPhaenotype, UNIT_TYPE_COUNT * sizeof(int));
 	memcpy(phaenoToGenotype, object.phaenoToGenotype, UNIT_TYPE_COUNT * sizeof(int));
-	memcpy(allGoal, object.allGoal, UNIT_TYPE_COUNT * sizeof(int));
 
 	memcpy(isStatic, object.isStatic, UNIT_TYPE_COUNT * sizeof(bool));
 	memcpy(isBuildable, object.isBuildable, UNIT_TYPE_COUNT * sizeof(bool));
 	memcpy(isHaveable, object.isHaveable, UNIT_TYPE_COUNT * sizeof(bool));
+	memcpy(isGoal, object.isGoal, UNIT_TYPE_COUNT * sizeof(bool));
 
-	memcpy(globalGoal, object.globalGoal, UNIT_TYPE_COUNT * MAX_LOCATIONS * sizeof(int));
 }
 
 GOAL_ENTRY& GOAL_ENTRY::operator=(const GOAL_ENTRY& object)
@@ -49,13 +48,12 @@ GOAL_ENTRY& GOAL_ENTRY::operator=(const GOAL_ENTRY& object)
 	//goal = object.goal; // optimize?
 	memcpy(genoToPhaenotype, object.genoToPhaenotype, UNIT_TYPE_COUNT * sizeof(int));
 	memcpy(phaenoToGenotype, object.phaenoToGenotype, UNIT_TYPE_COUNT * sizeof(int));
-	memcpy(allGoal, object.allGoal, UNIT_TYPE_COUNT * sizeof(int));
-		
+
 	memcpy(isStatic, object.isStatic, UNIT_TYPE_COUNT * sizeof(bool));
 	memcpy(isBuildable, object.isBuildable, UNIT_TYPE_COUNT * sizeof(bool));
 	memcpy(isHaveable, object.isHaveable, UNIT_TYPE_COUNT * sizeof(bool));
+	memcpy(isGoal, object.isGoal, UNIT_TYPE_COUNT * sizeof(bool));
 
-	memcpy(globalGoal, object.globalGoal, UNIT_TYPE_COUNT * MAX_LOCATIONS * sizeof(int));
 		
 	return(*this);
 }
@@ -76,10 +74,9 @@ void GOAL_ENTRY::resetData()
 		isStatic[i] = true;
 		isBuildable[i] = false;
 		isHaveable[i] = false;
+		isGoal[i] = false;
 	}
 
-	memset(allGoal, 0, UNIT_TYPE_COUNT * sizeof(int));
-	memset(globalGoal, 0, UNIT_TYPE_COUNT * MAX_LOCATIONS * sizeof(int));
 //	initialized=true;
 }
 
@@ -100,6 +97,29 @@ const bool GOAL_ENTRY::calculateReady(const UNIT* units) const
 		if(i->getCount())
 			ready&=( (i->getCount() <= units[i->getLocation()].getTotal(i->getUnit())) && ((i->getTime()==0) || (i->getTime()>=i->getFinalTime())) );
 	return(ready);
+}
+
+const unsigned int GOAL_ENTRY::calculateFitness(const UNIT* units, unsigned int (&bonus)[MAX_LOCATIONS][UNIT_TYPE_COUNT]) const
+{
+	unsigned int tpF = 0;
+	for(std::list<GOAL>::const_iterator i = goal.begin(); i!= goal.end(); ++i)
+// goal nicht erfuellt?
+		if(i->getCount() > units[i->getLocation()].getTotal(i->getUnit()))
+		{
+			bonus[i->getLocation()][i->getUnit()] += i->getCount() - units[i->getLocation()].getTotal(i->getUnit());
+		
+			if((i->getTime()>0)&&(i->getFinalTime()>i->getTime()))
+				tpF+=(i->getTime()*units[i->getLocation()].getTotal(i->getUnit()))*100/(i->getCount()*i->getFinalTime());
+			else
+				tpF+=units[i->getLocation()].getTotal(i->getUnit())*100/i->getCount();
+		}
+		else
+		{
+			if((i->getTime()>0)&&(i->getFinalTime()>i->getTime()))
+				tpF+=(i->getTime()*100/i->getFinalTime());
+			else tpF+=100;
+		}
+	return(tpF);
 }
 
 const bool GOAL_ENTRY::operator==(const GOAL_ENTRY& other) const
@@ -174,94 +194,7 @@ void GOAL_ENTRY::setRace(const eRace goal_race)
 	changed = true;
 }
 
-const std::list<unsigned int> GOAL_ENTRY::allowDeletion(const unsigned int unitType) const
-{
-	std::list<unsigned int> prefList;
-#ifdef _SCC_DEBUG
-	if((unitType==0)||(unitType>UNIT_TYPE_COUNT)) {
-		toLog("DEBUG: (GOAL_ENTRY::allowDeletion): Value unitType out of range.");return(prefList);
-	}
-#endif
 
-	for(unsigned int i=UNIT_TYPE_COUNT;i--;)
-		if((allGoal[i]))//||(isBuildable[i]))
-		{
-			bool error=false;
-
-			if(pStats[i].facility[0] > 0)
-			{
-				if(pStats[i].facility[0] == unitType)
-				{
-				// pruefe ob andere Gebaeude als goals drin sind
-					if(pStats[i].facility[1]>0)
-					{
-						if(isGoal(pStats[i].facility[1]) == false)
-						{
-							if(pStats[i].facility[2]>0)
-							{
-								if(isGoal(pStats[i].facility[2]) == false)
-									error=true;
-							} else error=true;
-						}
-					} else error=true;
-				} else
-				if(pStats[i].facility[1] == unitType)
-				{
-				// pruefe ob andere Gebaeude als goals drin sind
-					if(isGoal(pStats[i].facility[0]) == false)
-					{
-						if(pStats[i].facility[2]>0)
-						{
-							if(isGoal(pStats[i].facility[2]) == false)
-								error=true;
-						} else error=true;
-						   	}
-						} else
-						if(pStats[i].facility[2] == unitType)
-						{
-					// pruefe ob andere Gebaeude als goals drin sind
-					if(isGoal(pStats[i].facility[0]) == false)
-					{
-						if(isGoal(pStats[i].facility[2]) == false )
-							error=true;
-					}
-				}
-			}
-			if(!((pStats[i].facilityType==NEEDED_ONCE)||(pStats[i].facilityType==NEEDED_UNTIL_COMPLETE)||(pStats[i].facilityType==NEEDED_ALWAYS)||(pStats[i].facilityType==NEEDED_UNTIL_COMPLETE_IS_LOST)))
-				error=false;
-
-			for(unsigned int k=0;k<3; ++k)
-				if(pStats[i].prerequisite[k]==unitType)
-					error=true;
-			if((pStats[i].facility2>0)&&(pStats[i].facility2 == unitType)&&(pStats[i].facilityType!=NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE)&&(pStats[i].facilityType!=NEEDED_UNTIL_COMPLETE_IS_LOST))
-				error=false;
-			if((pStats[i].gas>0)&&(unitType==REFINERY))
-				error=true;
-			if(pStats[i].unitType==REMAINING_UNIT_TYPE)
-				error=false;			
-			if((pStats[unitType].create>0)&&(pStats[unitType].create==i)&&(isGoal(pStats[unitType].create))&&(pStats[unitType].create!=unitType))
-				error=true;
-			if(error)
-				prefList.push_back(i);
-		} 
-	if(isGoal(unitType) == false)
-		prefList.push_back(unitType);
-	
-	return(prefList);
-}
-
-const std::list<unsigned int> GOAL_ENTRY::allowAddition(const unsigned int unitType) const
-{
-	std::list<unsigned int> prefList;
-#ifdef _SCC_DEBUG
-	if((unitType==0)||(unitType>UNIT_TYPE_COUNT)) {
-		toLog("DEBUG: (GOAL_ENTRY::allowAddition): Value unitType out of range.");return(prefList);
-	}
-#endif
-	if(((pStats[unitType].upgrade[0]>0)&&(allGoal[unitType]>=3))||((pStats[unitType].upgrade[0]==0)&&(pStats[unitType].unitType == RESEARCH_UNIT_TYPE)&&(allGoal[unitType]>=1))) // TODO HACK :/
-		prefList.push_back(unitType);
-	return(prefList);
-}
 
 
 // fastest time to reach the goals, ignoring workers, minerals, gas, count etc. < - TODO 
@@ -270,7 +203,7 @@ const unsigned int GOAL_ENTRY::calculateFastestBO(const UNIT* startForce) const
 	unsigned int min_time[UNIT_TYPE_COUNT];
 	unsigned int goals[UNIT_TYPE_COUNT];
 
-	for(unsigned int i = UNIT_TYPE_COUNT;i--;)
+	for(unsigned int i = LAST_UNIT;i--;)
 	{
 		if(startForce->getTotal(i))
 		{
@@ -279,7 +212,7 @@ const unsigned int GOAL_ENTRY::calculateFastestBO(const UNIT* startForce) const
 		}
 		else
 		{ 
-			if((isGoal(i))||(isBuildable[i]))
+			if((getIsGoal(i))||(getIsBuildable(i)))
 				goals[i]=1;
 			else goals[i]=0;
 			min_time[i]=MAX_TIME;
@@ -287,7 +220,7 @@ const unsigned int GOAL_ENTRY::calculateFastestBO(const UNIT* startForce) const
 	}
 
 	for(unsigned int j=10;j--;) // Nuclear Warhead needs 6 steps (?) ~~~~
-		for(unsigned int i=UNIT_TYPE_COUNT;i--;)
+		for(unsigned int i=LAST_UNIT;i--;)
 			if(goals[i])
 			{
 				unsigned int pre=0;
@@ -322,8 +255,8 @@ const unsigned int GOAL_ENTRY::calculateFastestBO(const UNIT* startForce) const
 				}
 			}
 	unsigned int min = 0;
-	for(unsigned int i = UNIT_TYPE_COUNT;i--;)
-		if(isGoal(i))
+	for(unsigned int i = LAST_UNIT;i--;)
+		if(getIsGoal(i))
 			if(min < min_time[i])
 				min = min_time[i];
 	return(min);
@@ -335,9 +268,9 @@ const GOAL_TREE GOAL_ENTRY::getGoalTree(const UNIT* startForce, const unsigned i
 	bool buildable[GAS_SCV+1];
 	for(unsigned int i = 1;i<=GAS_SCV; ++i)
 	{
-		if(isBuildable[i])
-			buildable[i]=true;
-		else buildable[i]=false;
+		if(getIsBuildable(i))
+			buildable[i] = true;
+		else buildable[i] = false;
 	}
 // TODO evtl die neuen Units hell darstellen!	
 	if(currentGoalUnit>0)
@@ -474,7 +407,7 @@ const GOAL_TREE GOAL_ENTRY::getGoalTree(const UNIT* startForce, const unsigned i
 	return(tree);
 }
 
-
+/*
 void GOAL_ENTRY::removeDouble(const unsigned int goal_unit, const unsigned int goal_location, const unsigned int goal_time, const unsigned int goal_count)
 {
 	for(std::list<GOAL>::iterator l=goal.begin(); l!=goal.end(); ++l)
@@ -487,7 +420,8 @@ void GOAL_ENTRY::removeDouble(const unsigned int goal_unit, const unsigned int g
 //	remove the goal
 	addGoal(goal_unit, -goal_count, goal_time, goal_location);
 }
-
+*/
+//	if(!getIsGoal(unit))
 
 void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 {
@@ -498,92 +432,75 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 		isStatic[i] = true;
 		isBuildable[i] = false;
 		isHaveable[i] = false;
+//		isGoal[i] = false;
 	}
 	
 	maxBuildTypes=0;
 
 	// if free-mode  set all isbuildable to 1
 // else ...
-	unsigned int oldGoal[UNIT_TYPE_COUNT]; //goals we got from the user which we MAY NOT ignore
-	memcpy(oldGoal, allGoal, UNIT_TYPE_COUNT * sizeof(int));
-
 //	fill(oldGoal)
 //TODO: Reset hier rein!
 	
-//		isBuildable[MOVE_ONE_1_FORWARD]=true;isVariable[MOVE_ONE_1_FORWARD]=true;
-  //	  isBuildable[MOVE_ONE_3_FORWARD]=true;isVariable[MOVE_ONE_3_FORWARD]=true;
-	//	isBuildable[MOVE_ONE_1_BACKWARD]=true;isVariable[MOVE_ONE_1_BACKWARD]=true;
 		  //isBuildable[INTRON]=true; // :-)
 	if(unit)
 		for(unsigned int i=LAST_UNIT; i--;)
 			if(unit->getTotal(i))
-			{
-				isBuildable[i]=true;
-//				if(allGoal[i]<unit->getTotal(i))
-//					addGoal(i, unit->getTotal(i)-allGoal[i], 0, 0);
-			}
+				setIsBuildable(i);
 	//TODO addgoal evtl machen hier!
 // TODO Locations fehlen hier, man muesste durch alle goals laufen und die jeweiligen Bedingungen u.U. AM ORT durchfuehren... mmmh... da ist natuerlich die Frage an welchem Ort... ok, ueberzeugt, Ort ist egal
 	for(unsigned int j=6;j--;) // Nuclear Warhead needs 6 steps (?) ~~~~
+	{
 		for(unsigned int i=LAST_UNIT;i--;)
-			if(isGoal(i)||(isBuildable[i]))
+			if(getIsGoal(i)||(getIsBuildable(i)))
 			{
 			
-				if((i==GAS_SCV)&&(isGoal(REFINERY)==false))
-					addGoal(REFINERY,1,0,0); //~~
-				isBuildable[i]=true;
+				if((i==GAS_SCV)&&(getIsGoal(REFINERY)==false))
+					addNewGoalToList(REFINERY, 0, 0, 1); //~~
+				setIsBuildable(i);
 				//gather all prerequisites and mark them as goals
 				for(unsigned int k=3;k--;)
-					if((pStats[i].prerequisite[k]>0)&&(isGoal(pStats[i].prerequisite[k])==false))
-						addGoal(pStats[i].prerequisite[k], 1, 0, 0);
+					if((pStats[i].prerequisite[k]>0)&&(getIsGoal(pStats[i].prerequisite[k])==false))
+						addNewGoalToList(pStats[i].prerequisite[k], 0, 0, 1);
 						
-				if((pStats[i].facility2>0)&&(!isGoal(pStats[i].facility2))&&
+				if((pStats[i].facility2>0)&&(!getIsGoal(pStats[i].facility2))&&
 				   (pStats[i].facilityType!=NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE)&&(pStats[i].facilityType!=NEEDED_UNTIL_COMPLETE_IS_LOST)&&(pStats[pStats[i].facility2].unitType!=REMAINING_UNIT_TYPE)) 
 				{
-//					isVariable[pStats[i].facility2] = true;
 					if((pStats[i].facilityType!=IS_LOST)&&(pStats[i].facilityType!=IS_MORPHING))//do not set those morph-facilities as goals...
-						addGoal(pStats[i].facility2, 1, 0, 0);
-					else isBuildable[pStats[i].facility2]=true;// ... but make them buildable :)
+						addNewGoalToList(pStats[i].facility2, 0, 0, 1);
+					else setIsBuildable(pStats[i].facility2);// ... but make them buildable :)
 				}
 				unsigned int fac = 0;
-				if(((pStats[i].facility[0]>0)&&(!isGoal(pStats[i].facility[0])))&&
-				   ((pStats[i].facility[1]==0)||(!isGoal(pStats[i].facility[1])))&&
-				   ((pStats[i].facility[2]==0)||(!isGoal(pStats[i].facility[2]))))
+				if(((pStats[i].facility[0]>0)&&(!getIsGoal(pStats[i].facility[0])))&&
+				   ((pStats[i].facility[1]==0)||(!getIsGoal(pStats[i].facility[1])))&&
+				   ((pStats[i].facility[2]==0)||(!getIsGoal(pStats[i].facility[2]))))
 					fac = pStats[i].facility[0];
 				else
-				if(((pStats[i].facility[0]>0)&&(!isGoal(pStats[i].facility[0])))&&
-				   ((pStats[i].facility[1]>0)&&(!isGoal(pStats[i].facility[1])))&&
-				   ((pStats[i].facility[2]==0)||(!isGoal(pStats[i].facility[2]))))
+				if(((pStats[i].facility[0]>0)&&(!getIsGoal(pStats[i].facility[0])))&&
+				   ((pStats[i].facility[1]>0)&&(!getIsGoal(pStats[i].facility[1])))&&
+				   ((pStats[i].facility[2]==0)||(!getIsGoal(pStats[i].facility[2]))))
 					fac = pStats[i].facility[1];
 				else
-				if(((pStats[i].facility[0]>0)&&(!isGoal(pStats[i].facility[0])))&&
-				   ((pStats[i].facility[1]>0)&&(!isGoal(pStats[i].facility[1])))&&
-				   ((pStats[i].facility[2]>0)&&(!isGoal(pStats[i].facility[2]))))
+				if(((pStats[i].facility[0]>0)&&(!getIsGoal(pStats[i].facility[0])))&&
+				   ((pStats[i].facility[1]>0)&&(!getIsGoal(pStats[i].facility[1])))&&
+				   ((pStats[i].facility[2]>0)&&(!getIsGoal(pStats[i].facility[2]))))
 					fac = pStats[i].facility[2];
 				if(fac>0)
 				{
-//					isVariable[fac]=true;
 					if((pStats[i].facilityType==NEEDED_ONCE)||(pStats[i].facilityType==NEEDED_UNTIL_COMPLETE)||(pStats[i].facilityType==NEEDED_UNTIL_COMPLETE_IS_LOST)||(pStats[i].facilityType==NEEDED_ALWAYS))
-						addGoal(fac, 1, 0, 0);
-					else isBuildable[fac]=true; // ... same as above...
+						addNewGoalToList(fac, 0, 0, 1);
+					else setIsBuildable(fac); // ... same as above...
 				}
-				
-				if((allGoal[i]>1)&&(pStats[i].upgrade[0]>0) && (!isGoal(pStats[i].upgrade[0])))
-				{
-//					isVariable[pStats[i].upgrade[0]]=true;
-//					if((pStats[i].facilityType==NEEDED_ONCE)||(pStats[i].facilityType==NEEDED_UNTIL_COMPLETE)||(pStats[i].facilityType==NEEDED_ALWAYS))
-					addGoal(pStats[i].upgrade[0], 1, 0, 0);
-//					else isBuildable[pStats[i].facility[0]]=1; // ... same as above...				
-				}
-				if((allGoal[i]>2)&& (pStats[i].upgrade[1]>0) && (!isGoal(pStats[i].upgrade[1])))
-				{
-//					isVariable[pStats[i].upgrade[1]]=true;
-//					if((pStats[i].facilityType==NEEDED_ONCE)||(pStats[i].facilityType==NEEDED_UNTIL_COMPLETE)||(pStats[i].facilityType==NEEDED_ALWAYS))
-					addGoal(pStats[i].upgrade[1], 1, 0, 0);
-//					else isBuildable[pStats[i].facility[0]]=1; // ... same as above...				
-				}
-			
 			}
+
+		for(std::list<GOAL>::iterator l=goal.begin(); l!=goal.end(); ++l)
+		{
+			if((l->getCount()>1)&&(pStats[l->getUnit()].upgrade[0]>0) && (!getIsGoal(pStats[l->getUnit()].upgrade[0])))
+				addNewGoalToList(pStats[l->getUnit()].upgrade[0], 0, 0, 1);
+			if((l->getCount()>2)&&(pStats[l->getUnit()].upgrade[1]>0) && (!getIsGoal(pStats[l->getUnit()].upgrade[1])))
+				addNewGoalToList(pStats[l->getUnit()].upgrade[1], 0, 0, 1);
+		}
+	}
 
 
 //	now recheck whether we got too many goals
@@ -592,51 +509,50 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 //	jeweils alle facilities von rechts nach links anguggn
 //	sobald eins gefunden das Teil der goals ist, alle weiter links streichen (aber buildable lassen)
 // Beispiel: Wenn wir schon 'Starport[CT]' haben brauchen wir u.U. kein 'Starport' mehr
-	for(unsigned int i=UNIT_TYPE_COUNT;i--;)
-		if((isGoal(i))||(isBuildable[i]))
+	for(unsigned int i=LAST_UNIT;i--;)
+		if((getIsGoal(i))||(getIsBuildable(i)))
 		{
 			for(unsigned int j=3;j--;)
-				if((pStats[i].facility[j]>0)&&(isGoal(pStats[i].facility[j])))
+				if((pStats[i].facility[j]>0)&&(getIsGoal(pStats[i].facility[j])))
 				{
 					for(unsigned int k=0; k<j; ++k)
 					{
-						if((allowGoalAdaption)&&(isGoal(pStats[i].facility[k])))
+						if((allowGoalAdaption)&&(getIsGoal(pStats[i].facility[k])))
 						{
 							for(std::list<GOAL>::iterator l=goal.begin(); l!=goal.end(); ++l)
 								if(l->getUnit()==pStats[i].facility[k])
 									l=goal.erase(l); //~~
 									// evtl addgoal(-1,...	
-							allGoal[pStats[i].facility[k]] = 0;//~~
-//							addGoal(pStats[i].facility[k],  TODO!
 						}
 // TODO wenn Locations wichtig werden!!
-						else 
-							allGoal[pStats[i].facility[k]] = oldGoal[pStats[i].facility[k]];
 					}
 					j=0;
 				}
 				// why?
-//			isBuildable[pStats[i].create]=false; //~~ ?? TODO?
-//			isVariable[pStats[i].create]=false; ??
+//			setIsBuildable(pStats[i].create, false); //~~ ?? TODO?
 		}
 	
-	long Need_Gas = 0;
-	for(unsigned int i = UNIT_TYPE_COUNT; i--;)
-		Need_Gas+=(allGoal[i]*pStats[i].gas);
-	if(Need_Gas > 0)
+	bool need_gas = false;
+	for(std::list<GOAL>::const_iterator l=goal.begin(); l!=goal.end(); ++l)
+		if(pStats[l->getUnit()].gas)
+		{
+			need_gas = true;
+			break;
+		}
+	if(need_gas)
 	{
-		isBuildable[REFINERY] = true;
-		if(!isGoal(REFINERY))
-			   addGoal(REFINERY, 1, 0, 0); //ASSIMILATOR == EXTRACTOR == REFINERY
-		isBuildable[GAS_SCV] = true; //ONE_MINERAL_SCV... = ONE_MINERAL_PROBE... = ONE_MINERAL_DRONE...
-		isStatic[GAS_SCV] = false;
+		setIsBuildable(REFINERY);
+		if(!getIsGoal(REFINERY))
+			   addNewGoalToList(REFINERY, 0, 0, 1); //ASSIMILATOR == EXTRACTOR == REFINERY
+		setIsBuildable(GAS_SCV); //ONE_MINERAL_SCV... = ONE_MINERAL_PROBE... = ONE_MINERAL_DRONE...
+		setIsStatic(GAS_SCV, false);
 	} 
 
 	switch(getRace())
 	{
-		case TERRA:isBuildable[SUPPLY_DEPOT]=true;isStatic[SUPPLY_DEPOT]=false;break;
-		case PROTOSS:isBuildable[PYLON]=true;isStatic[PYLON]=false;break;
-		case ZERG:isBuildable[OVERLORD]=true;isStatic[OVERLORD]=false;isBuildable[LARVA]=false;break;
+		case TERRA:setIsBuildable(SUPPLY_DEPOT);setIsStatic(SUPPLY_DEPOT, false);break;
+		case PROTOSS:setIsBuildable(PYLON);setIsStatic(PYLON, false);break;
+		case ZERG:setIsBuildable(OVERLORD);setIsStatic(OVERLORD, false);setIsBuildable(LARVA, false);break;
 		default:break;
 	}
 
@@ -646,8 +562,8 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 //	isBuildable[BUILD_PARALLEL_16] = true;
 //	isBuildable[FROM_GAS_TO_MINERALS] = true;
 
-	for(unsigned int i=UNIT_TYPE_COUNT;i--;)
-		if((isBuildable[i])&&(phaenoToGenotype[i]==999)) // a goal && not set yet
+	for(unsigned int i=LAST_UNIT;i--;)
+		if((getIsBuildable(i))&&(phaenoToGenotype[i]==999)) // a goal && not set yet
 		{
 			genoToPhaenotype[maxBuildTypes] = i;
 			phaenoToGenotype[i] = maxBuildTypes;
@@ -664,16 +580,16 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 
 
 	
-	for(unsigned int i=1;i<UNIT_TYPE_COUNT; ++i)
-		if(((isBuildable[i])||(isGoal(i)))&&(pStats[i].create>0))
-			isHaveable[pStats[i].create]=true;
+	for(unsigned int i=1;i<LAST_UNIT; ++i)
+		if(((getIsBuildable(i))||(getIsGoal(i)))&&(pStats[i].create>0))
+			setIsHaveable(pStats[i].create);
 
-	for(unsigned int i=1;i<UNIT_TYPE_COUNT; ++i)
+	for(unsigned int i=1;i<LAST_UNIT; ++i)
 	{
-		if(isGoal(i))
-			isHaveable[i]=false;
-		else if(isBuildable[i])
-			isHaveable[i]=true;
+		if(getIsGoal(i))
+			setIsHaveable(i, false);
+		else if(getIsBuildable(i))
+			setIsHaveable(i);
 	}
 	//TODO: ueberlegen ob nicht einfach Move+ und Move- reichen...
 
@@ -683,12 +599,12 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 
 
 	for(unsigned int i = LAST_UNIT;i--;)
-		if(isGoal(i))
+		if(getIsGoal(i))
 		{
-			isStatic[pStats[i].facility[0]]=false;
-			isStatic[pStats[i].facility[1]]=false;
-			isStatic[pStats[i].facility[2]]=false;
-			isStatic[pStats[i].facility2]=false;
+			setIsStatic(pStats[i].facility[0], false);
+			setIsStatic(pStats[i].facility[1], false);
+			setIsStatic(pStats[i].facility[2], false);
+			setIsStatic(pStats[i].facility2, false);
 		}
 
 	for(unsigned int i = UNIT_TYPE_COUNT;i--;)
@@ -701,8 +617,8 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 		need[i].prerequisite = 0;;
 	}
 
-	for(unsigned int i = UNIT_TYPE_COUNT;i--;)
-		if(isBuildable[i])
+	for(unsigned int i = LAST_UNIT;i--;)
+		if(getIsBuildable(i))
 		{
 			for(unsigned int j = 3;j--;)
 			{
@@ -765,96 +681,164 @@ NEED& NEED::operator=(const NEED& object)
 	return(*this);
 }
 
+const bool GOAL_ENTRY::isError(const unsigned int j, const unsigned int unit) const
+{
+	bool error = false;
+	if(pStats[j].facility[0] > 0)
+	{
+		if(pStats[j].facility[0] == unit)
+		{
+		// pruefe ob andere Gebaeude als goals drin sind
+			if(pStats[j].facility[1]>0)
+			{
+				if(!getIsGoal(pStats[j].facility[1]))
+				{
+					if(pStats[j].facility[2]>0)
+					{
+						if(!getIsGoal(pStats[j].facility[2]))
+							error = true;
+					} else error = true;
+				}
+			} else error=true;
+		} else
+		if(pStats[j].facility[1] == unit)
+		{
+		// pruefe ob andere Gebaeude als goals drin sind
+			if(getIsGoal(pStats[j].facility[0]))
+			{
+				if(pStats[j].facility[2]>0)
+				{
+					if(!getIsGoal(pStats[j].facility[2]))
+						error=true;
+				} else error=true;
+			}
+		} else
+		if(pStats[j].facility[2] == unit)
+		{
+	// pruefe ob andere Gebaeude als goals drin sind
+			if(!getIsGoal(pStats[j].facility[0]))
+			{
+				if(!getIsGoal(pStats[j].facility[2]))
+					error=true;
+			}
+		}
+	}
+	if(!((pStats[j].facilityType==NEEDED_ONCE)||(pStats[j].facilityType==NEEDED_UNTIL_COMPLETE)||(pStats[j].facilityType==NEEDED_ALWAYS)||(pStats[j].facilityType==NEEDED_UNTIL_COMPLETE_IS_LOST)))
+		error=false;
+
+	for(unsigned int k=0;k<3; ++k)
+		if(pStats[j].prerequisite[k]==unit)
+			error=true;
+	if((pStats[j].facility2>0)&&(pStats[j].facility2 == unit)&&(pStats[j].facilityType!=NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE)&&(pStats[j].facilityType!=NEEDED_UNTIL_COMPLETE_IS_LOST))
+		error=false;
+	if((pStats[j].gas>0)&&(unit==REFINERY))
+		error=true;
+	if(pStats[j].unitType==REMAINING_UNIT_TYPE)
+		error=false;			
+	if((pStats[unit].create>0)&&(pStats[unit].create==j)&&(getIsGoal(pStats[unit].create))&&(pStats[unit].create!=unit))
+		error = true;
+	return(error);
+}
 // -------------------------------
 // ------ SET/GET FUNCTIONS ------
 // -------------------------------
 
 
-
-
-void GOAL_ENTRY::removeDouble(const unsigned int goal_unit, const unsigned int goal_location, const unsigned int goal_time, const unsigned int goal_count)
+const std::list<GOAL> GOAL_ENTRY::tryToAddGoal(const unsigned int unit, const unsigned int time, const unsigned int location, const signed int count)
 {
-	for(std::list<GOAL>::iterator l=goal.begin(); l!=goal.end(); ++l)
-		if((l->getUnit() == goal_unit) && (l->getLocation() == goal_location)&&(l->getTime() == 0)) 
-		{
-			if(l->getCount() < goal_count)
-			{
-				addGoal(goal_unit, goal_count - l->getCount() , 0, goal_location);
-				return;
-			}
-			break;
-			addGoal(goal_unit, -goal_count, goal_time, goal_location);
-		}
-//	remove the goal
-}
-todo
-void GOAL_ENTRY::addGoal(const unsigned int unit, const signed int count, const unsigned int time, const unsigned int location)
-{
+	std::list<GOAL> prefList;
 #ifdef _SCC_DEBUG
-	if(unit >= UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value unit out of range.");return;
-	}
-	if(globalGoal[location][unit] + count > MAX_TOTAL_UNITS) {
-		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value count out of range.");return;
-	}
-	if(time > coreConfiguration.getMaxTime()) {
-		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value time out of range.");return;
-	}
-	if(location >= MAX_LOCATIONS) { // TODO
-		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value location out of range.");return;
+	if((unit==0)||(unit>UNIT_TYPE_COUNT)) {
+		toLog("DEBUG: (GOAL_ENTRY::tryToAddGoal): Value unitType out of range.");return(prefList);
 	}
 #endif
-	signed int unit_count = count;
-	
+	for(std::list<GOAL>::iterator i=goal.begin(); i!=goal.end(); ++i)
+		if((i->getUnit() == unit) && (i->getLocation() == location)&&(i->getTime() == time))
+		{
+			if(count > 0)
+			{
+				// too much units? (upgrades, researches)
+				if(((pStats[unit].upgrade[0]>0)&&(i->getCount() + count>3))||
+				   ((pStats[unit].upgrade[0]==0)&&(pStats[unit].unitType == RESEARCH_UNIT_TYPE)&&(i->getCount() + count > 1)))
+				{
+					prefList.push_back(*i);
+					return(prefList);
+				}
+				i->setCount(i->getCount() + count);
+				return(prefList);
+			} else if(count < 0)
+			{
+
+				if(i->getCount() + count > 0)
+				{
+					i->setCount(i->getCount() + count);
+					return(prefList);
+				}
+				else // -> delete!
+				{
+					std::list<GOAL>::iterator temp = i;
+					++i;
+					for(; i!=goal.end(); ++i)
+						if((i->getUnit() == unit) && (i->getLocation() == location))
+						{
+							// anderes goal noch verfuegbar, keine Pruefung auf Voraussetzungen noetig
+							i = goal.erase(i);
+							setIsBuildable(unit, false);
+							return(prefList);
+						}
+					i = temp;
+					
+// diesen Loeschen, aber vorher noch schauen ob ein anderes Goal das Gebaeude abdeckt!
+// Nein, dies ist das einzige Gebaeude
+// => pruefen ob andere Goals das Goal benoetigen
+					
+					for(unsigned int j=UNIT_TYPE_COUNT;j--;)
+						if((getIsGoal(j)))//||(getIsBuildable(i)))
+						{
+							if(isError(j, unit))
+							{
+								GOAL goal_error;
+								goal_error.setUnit(j);
+								goal_error.setLocation(GLOBAL);
+								goal_error.setTime(0);
+								goal_error.setCount(1);
+								prefList.push_back(goal_error);
+							}
+						}
+					// kein Fehler? -> Loeschen
+					if(!prefList.size())
+					{
+						i = goal.erase(i);
+						setIsGoal(unit, false);
+						setIsBuildable(unit, false);
+					}
+					return(prefList);
+				}
+			}
+		}
+// nothing found? => create new goal
+#if _SCC_DEBUG
+	if(count<=0)
+	{
+		toLog("DEBUG: (GOAL_ENTRY::tryToAddGoal): Tried to remove units that does not exist.");return(prefList);
+	}
+#endif
+	addNewGoalToList(unit, time, location, count);
+	return(prefList);
+}
+
+void GOAL_ENTRY::addNewGoalToList(const unsigned int unit, const unsigned int time, const unsigned int location, const signed int count)
+{
 	if((race == ZERG)&&(unit == LARVA))
 		return;
-	if((pStats[unit].upgrade[0] > 0)&&(allGoal[unit] >= 3)&&(unit_count > 0)) // TODO HACK :/
-		return;
-//	if(pStats[unit].unitType==REMAINING_UNIT_TYPE)
-//		return;
-
-
-Es gibt zeitfreies Goal mit mehr Einheiten -> eigenes Goal loeschen
-Es gibt zeitfreies Goal mit weniger Einheiten -> jenes Goal erhoehen
-
-
-	
-allGoal nur veraendern falls:
-- kein goal mit selben Parametern (ausser count) existiert
--  
-
-//ALLGOAL in BOOL aendern! Und was fuer upgrades ueberlegen mmmh
-	
-	allGoal[unit] += unit_count;
-	if(!isGoal(unit))
-		isBuildable[unit] = false;
-
-	globalGoal[location][unit] += unit_count;
-	bool found=false;
-	// TODO wenn Einheiten an mehreren verschiedenen Positionen und location 0 geloescht wird aufsammeln!!
-	for(std::list<GOAL>::iterator i=goal.begin(); (i!=goal.end())&&(!found); ++i)
-	{
-		if((i->getUnit()==unit)&&(i->getTime()==time)&&(i->getLocation()==location))
-		{
-			i->setCount( i->getCount() + unit_count);
-			changed=true;
-			found=true;
-			if(i->getCount() == 0)
-				i = goal.erase(i);
-			return;
-		}
-	}
-	// neue goal erstellen
-	if(!found)
-	{
-		GOAL new_goal;
-		new_goal.setUnit(unit);
-		new_goal.setTime(time);
-		new_goal.setLocation(location);
-		new_goal.setCount(unit_count);
-		new_goal.setFinalTime(coreConfiguration.getMaxTime());
-		goal.push_back(new_goal);
-	}
+	setIsGoal(unit, true);
+	GOAL new_goal;
+	new_goal.setUnit(unit);
+	new_goal.setTime(time);
+	new_goal.setLocation(location);
+	new_goal.setCount(count);
+	new_goal.setFinalTime(coreConfiguration.getMaxTime());
+	goal.push_back(new_goal);
 	changed=true;
 }
 

@@ -84,7 +84,7 @@ void Player::drawGeneString(DC* dc) const
 		//Rect(getAbsolutePosition()+Point(210, 200+anarace->getPlayerNumber()*300), Size(600, 120));
 	dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
 	dc->SetPen(*theme.lookUpPen(BRIGHT_UNIT_TYPE_1_PEN));
-	dc->DrawRectangle(position);
+	dc->DrawRectangle(Rect(position.GetTopLeft() - Size(1,2), position.GetSize() + Size(2,4)));
 	DC::addRectangle(position);
 
 	unsigned int stringheight=0;

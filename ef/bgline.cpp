@@ -32,6 +32,8 @@ void BoGraphLine::resetData()
 
 void BoGraphLine::process()
 {
+	if(checkForNeedRedraw())
+		getParent()->setNeedRedrawNotMoved();
 	if(facilityChanged)
 	{
 		facilityChanged = false;
@@ -50,10 +52,7 @@ void BoGraphLine::draw(DC* dc) const
 		dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 		dc->DrawRectangle(getAbsoluteRect());
 		facilityName->Hide();
-	}
-	UI_Object::draw(dc);
-	if(!facilityName->isShown())
-	{
+		UI_Object::draw(dc);
 		facilityName->Show();
 		facilityName->draw(dc);
 	}

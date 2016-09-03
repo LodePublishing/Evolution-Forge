@@ -554,6 +554,19 @@ void UI_Object::draw(DC* dc) const
 	}
 }
 
+void UI_Object::wave(SDL_snd& sound)
+{
+	if(!isShown())
+		return;
+	UI_Object* tmp = children;
+	if (tmp) {
+		do {
+			tmp->wave(sound);
+			tmp = tmp->nextBrother;
+		} while (tmp != children);
+	}
+}
+
 void UI_Object::setOriginalRect(const Rect& rect) {
 	originalRect = rect;
 	setRect(rect);

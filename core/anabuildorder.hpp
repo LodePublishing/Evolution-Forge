@@ -19,7 +19,6 @@ class ANABUILDORDER: public PREBUILDORDER
 		unsigned int wayneCrossover;
 		unsigned int negativeCrossover;
 
-		const unsigned int getUnitsTotalMax() const;
 		const unsigned int getNonGoalsUnitsTotalMax() const;
 		const unsigned int getUnitsTotal() const;
 		
@@ -69,7 +68,6 @@ class ANABUILDORDER: public PREBUILDORDER
 		void restartData();				// resets all data to standard values
 		static void resetStaticData();
 		void prepareForNewGeneration();				// resets all data to standard values
-//		void analyzeBuildOrder();		// sets the isGoal of program
 	
 		const bool writeProgramBackToCode(std::list<PROGRAM>& program_list);
 		void copyProgramList(std::list<PROGRAM>& program_list);
@@ -128,16 +126,6 @@ inline STATISTICS* ANABUILDORDER::getTimeStatistics() {
 
 inline const unsigned int ANABUILDORDER::getAverageLength() const {
 	return(averageLength);
-}
-
-inline const unsigned int ANABUILDORDER::getUnitsTotalMax() const
-{
-#ifdef _SCC_DEBUG
-	if(unitsTotalMax > MAX_TOTAL_UNITS*UNIT_TYPE_COUNT * MAX_LOCATIONS) {
-		toLog("DEBUG: (ANABUILDORDER::getUnitsTotalMax): Variable not initialized.");return(0);
-	}
-#endif
-	return(unitsTotalMax);
 }
 
 inline const unsigned int ANABUILDORDER::getNonGoalsUnitsTotalMax() const

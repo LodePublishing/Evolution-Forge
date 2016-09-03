@@ -47,22 +47,27 @@ BUILDORDER& BUILDORDER::operator=(const BUILDORDER& object)
 #include <sstream>
 const unsigned int BUILDORDER::calculateSecondaryFitness() const
 {
+	unsigned int bonus[MAX_LOCATIONS][UNIT_TYPE_COUNT];
+	memset(bonus, 0, MAX_LOCATIONS * UNIT_TYPE_COUNT * sizeof(int));
+	
 	//TODO: evtl gas und minerals (wie urspruenglich eigentlich) in Verhaeltnis setyen wieviel es jeweils Geysire/Mineralien gibt...	
 	unsigned int penalty = 0;
-	for(unsigned int i=GAS_SCV+1; i--;)
-		if((i!=SCV)&&(i!=GAS_SCV))
-	{
-		unsigned int total = getGoal()->getAllGoal(i);
-		if(total>0)
-		{
-			if((*(pStart->getStartCondition()))->getLocationTotal(GLOBAL, i) > total)
-				total = (*(pStart->getStartCondition()))->getLocationTotal(GLOBAL, i);
-			if(getLocationTotal(GLOBAL, i) > total)
-				penalty += (getLocationTotal(GLOBAL,i) - total) * (stats[getGoal()->getRace()][i].gas+stats[getGoal()->getRace()][i].minerals);
-		}
-	}
+	for(std::list<GOAL>::const_iterator i = getGoal()->goal.begin(); i!=getGoal()->goal.end(); ++i)
+		if((i->getTime() == 0)&&(i->getUnit() != SCV)&&(i->getUnit() != GAS_SCV))
+			bonus[i->getLocation()][i->getUnit()] += i->getCount();
 
-#if _SCC_DEBUG	
+	for(unsigned int j = MAX_LOCATIONS; j--;)
+		for(unsigned int i = UNIT_TYPE_COUNT; i--;)
+			if(bonus[j][i]>0)
+			{
+				unsigned int total = bonus[j][i];
+				if((*(pStart->getStartCondition()))->getLocationTotal(j, i) > total)
+					total = (*(pStart->getStartCondition()))->getLocationTotal(j, i);
+				if(getLocationTotal(j, i) > total)
+					penalty += (getLocationTotal(GLOBAL,i) - total) * (stats[getGoal()->getRace()][i].gas + stats[getGoal()->getRace()][i].minerals);
+			}
+	// TODO
+/*#if _SCC_DEBUG
 	if(getHarvestedMinerals() + getHarvestedGas() < penalty)
 	{
 		std::ostringstream os; os.str("");
@@ -85,7 +90,7 @@ const unsigned int BUILDORDER::calculateSecondaryFitness() const
 		os << "Penalty/Ressources: " << penalty << " / " << getHarvestedMinerals() + getHarvestedGas() << " workers: " << getLocationTotal(GLOBAL, 1);
 		toLog(os.str());
 	}
-#endif
+#endif*/
 	return(getHarvestedMinerals() + getHarvestedGas() - penalty);
 }
 

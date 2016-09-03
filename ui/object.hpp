@@ -141,6 +141,7 @@ class UI_Object
 		void makeFirstChild();
 		
 		virtual void draw(DC* dc) const;
+		virtual void wave(SDL_snd& sound);	
 		virtual void process();
 		virtual void resetData();
 

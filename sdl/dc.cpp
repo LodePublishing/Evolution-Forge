@@ -561,22 +561,31 @@ void DC::DrawGridEdgedRoundedRectangle(const signed int x, const signed y, const
 
 void DC::DrawEdgedRoundedRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int radius) const
 {
-	if((width<2)||(height<2)||(x+width>=max_x)||(y+height>=max_y)||(x<0)||(y<0)) return;
+	if((width<2)||(height<2)||(x>=max_x)||(y>=max_y)||(x<0)||(y<0))
+		return;
 	
-	if((radius <= 1)||(width<2*radius)||(height<2*radius))	{
-		DrawRectangle(x,y,width,height);
+	unsigned int mw = width;
+	unsigned int mh = height;
+
+	if(x + width >= max_x)
+		mw = max_x - x;
+	if(y + height >= max_y)
+		mh = max_y - y;
+	
+	if((radius <= 1)||(mw<2*radius)||(mh<2*radius))	{
+		DrawRectangle(x,y,mw,mh);
 		return;
 	}
 
 	if(brush.GetStyle() == TRANSPARENT_BRUSH_STYLE)
 	{
 		if(pen.GetStyle() != TRANSPARENT_PEN_STYLE)
-			(*this.*DrawEmptyEdgedRound)(x, y, width, height, radius);
+			(*this.*DrawEmptyEdgedRound)(x, y, mw, mh, radius);
 	} else
 	if(pen.GetStyle() == TRANSPARENT_PEN_STYLE)
-		(*this.*DrawFilledEdgedRound)(x, y, width, height, radius);
+		(*this.*DrawFilledEdgedRound)(x, y, mw, mh, radius);
 	else 
-		(*this.*DrawFilledEdgedBorderRound)(x, y, width, height, radius);
+		(*this.*DrawFilledEdgedBorderRound)(x, y, mw, mh, radius);
 }
 
 void DC::DrawRoundedRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int radius) const

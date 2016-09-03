@@ -3,7 +3,7 @@
 #include "../ui/tooltip.hpp"
 #include "configuration.hpp"
 
-Main::Main(DC* dc):
+Main::Main(DC* dc, SDL_snd& sound):
 	mainWindow(NULL),
 	helpWindow(NULL),
 	settingsWindow(NULL),
@@ -16,12 +16,12 @@ Main::Main(DC* dc):
 // ----- INITIALIZE DATABASE -----	
 	toLog(UI_Object::theme.lookUpString(START_LOAD_UI_BITMAPS_FONTS_STRING));
 #ifdef __linux__
-	UI_Object::theme.loadGraphicData("settings/ui/default.ui","data/bitmaps/","data/fonts/",dc);
+	UI_Object::theme.loadData("settings/ui/default.ui", "data/bitmaps/", "data/sounds/", "data/fonts/", dc, sound);
 	UI_Object::theme.loadWindowData("settings/ui/windows.ui", 0, 1);
 	UI_Object::theme.loadWindowData("settings/ui/split_windows.ui", 0, 2);
 	UI_Object::theme.loadWindowData("settings/ui/split_windows.ui", 1, 2);
 #elif __WIN32__
-	UI_Object::theme.loadGraphicData("settings\\ui\\default.ui","data\\bitmaps\\","data\\fonts\\",dc);
+	UI_Object::theme.loadData("settings\\ui\\default.ui", "data\\bitmaps\\", "data\\sounds\\", "data\\fonts\\", dc, sound);
 	UI_Object::theme.loadWindowData("settings\\ui\\windows.ui", 0, 1);
 	UI_Object::theme.loadWindowData("settings\\ui\\split_windows.ui", 0, 2);
 	UI_Object::theme.loadWindowData("settings\\ui\\split_windows.ui", 1, 2);
@@ -44,6 +44,7 @@ Main::Main(DC* dc):
 	toLog(UI_Object::theme.lookUpString(START_INIT_GUI_STRING));
 	
 	mainWindow = new MainWindow();
+	introWindow = new IntroWindow(mainWindow);
 	helpWindow = new HelpWindow(mainWindow);
 	settingsWindow = new SettingsWindow(mainWindow);
 	dataBaseWindow = new DataBaseWindow(mainWindow);
@@ -53,6 +54,7 @@ Main::Main(DC* dc):
 	ForceWindow::techTreeWindow->Hide();
 	
 	mainWindow->Show();
+	introWindow->Show();
 	helpWindow->Hide();
 	settingsWindow->Hide();
 	mapWindow->Hide();
@@ -144,6 +146,7 @@ void Main::initializeGame(const unsigned int tab_number)
 Main::~Main()
 {
 	delete mainWindow;
+	delete introWindow;
 	delete ForceWindow::techTreeWindow;
 	delete msgWindow;
 	delete helpWindow;
@@ -174,6 +177,8 @@ void Main::resetDataChange()
 
 void Main::process()
 {
+	if(!introWindow->isShown())
+		mainWindow->Show();
 	UI_Window::gotoHelpChapter = -1;
 	mainWindow->resetMinXY();
 //	ForceWindow::techTreeWindow->Hide();
@@ -189,7 +194,11 @@ void Main::process()
 		i = UI_Object::msgList.erase(i);
 	}
 
-	mainWindow->process();
+	if(!introWindow->isShown())
+	{
+		mainWindow->process();
+	} else
+		introWindow->process();
 
 	if((UI_Object::tooltip)&&(UI_Object::toolTipParent->checkForNeedRedraw()))
 		UI_Object::tooltip->setNeedRedrawNotMoved();
@@ -232,6 +241,10 @@ void Main::process()
 		helpWindow->gotoChapter(UI_Window::gotoHelpChapter);
 	}
 
+	if(introWindow->isShown())
+	{
+	}
+	else
 	if(mainWindow->getCurrentTab()>=0)
 	{
 		currentTab = mainWindow->getCurrentTab();
@@ -383,6 +396,11 @@ void Main::needRedraw()
 }
 
 
+void Main::wave(SDL_snd& sound)
+{
+	mainWindow->wave(sound);
+}
+
 void Main::draw(DC* dc) const
 {
 	if(mainWindow->isShown())
@@ -411,9 +429,10 @@ void Main::draw(DC* dc) const
 			mainWindow->setNeedRedrawNotMoved();
 		}
 		UI_Object::theme.setColorTheme(UI_Object::theme.getMainColorTheme());
-		mainWindow->draw(dc);
 	}
+	mainWindow->draw(dc);
 	ForceWindow::techTreeWindow->draw(dc);
+//	introWindow->draw(dc);
 }
 
 										
@@ -659,6 +678,8 @@ void Main::setMouse(const Point p)
 					temp_button = game[i]->checkHighlight();
 			if(!temp_button)
 				temp_button = mainWindow->checkHighlight();
+			if((!temp_button)&&(introWindow->isShown()))
+				temp_button = introWindow->checkHighlight();
 			if(!temp_button)
 				temp_button = settingsWindow->checkHighlight();
 			if(!temp_button)
@@ -704,6 +725,8 @@ void Main::setMouse(const Point p)
 				temp2=NULL;
 				if(UI_Object::toolTipParent==NULL)
 					temp2 = settingsWindow->checkToolTip();
+				if((temp2==NULL)&&(introWindow->isShown()))
+					temp2 = introWindow->checkToolTip();
 				if(temp2==NULL)
 					temp2 = dataBaseWindow->checkToolTip();
 				if(temp2==NULL)

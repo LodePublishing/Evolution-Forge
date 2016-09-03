@@ -50,16 +50,21 @@ class GOAL_ENTRY
 		unsigned int genoToPhaenotype[UNIT_TYPE_COUNT];
 //		int mode;
 
-		unsigned int allGoal[UNIT_TYPE_COUNT];
-		unsigned int globalGoal[MAX_LOCATIONS][UNIT_TYPE_COUNT];
+		const bool isError(const unsigned int j, const unsigned int unit) const;
+
 		bool changed;
 		bool raceInitialized;
 		bool isBuildable[UNIT_TYPE_COUNT];
 		bool isStatic[UNIT_TYPE_COUNT];	
 		bool isHaveable[UNIT_TYPE_COUNT]; // all units that are goals, can be build or are build by the bo (larva etc.)
-		std::list<GOAL> goal; // private?
+		bool isGoal[UNIT_TYPE_COUNT];
 
+		void setIsBuildable(const unsigned int unit, const bool is_buildable = true);
+		void setIsStatic(const unsigned int unit, const bool is_static = true);
+		void setIsHaveable(const unsigned int unit, const bool is_haveable = true);
+		void setIsGoal(const unsigned int unit, const bool is_goal = true);
 	public:
+		std::list<GOAL> goal; // private?
 		NEED need[UNIT_TYPE_COUNT];
 		ALLOW allow[UNIT_TYPE_COUNT];
 		
@@ -73,25 +78,27 @@ class GOAL_ENTRY
 //		const unsigned int getMode() const; // 0: normal, 1: based on success of enemy
 //		void setMode(int mode);
 
-		const std::list<unsigned int> allowDeletion(const unsigned int unitType) const;
-		const std::list<unsigned int> allowAddition(const unsigned int unitType) const;
-
 		const unsigned int countGoals() const;
 		void calculateFinalTimes(const unsigned int location, const unsigned int unit, const unsigned int count, const unsigned int time);
+		const unsigned int calculateFitness(const UNIT* units, unsigned int (&bonus)[MAX_LOCATIONS][UNIT_TYPE_COUNT]) const;
 		const bool calculateReady(const UNIT* units) const;
-		const unsigned int getAllGoal(const unsigned int unit) const;
+//		const unsigned int getAllGoal(const unsigned int unit) const;
 		const unsigned int getGlobalGoal(const unsigned int location, const unsigned int unit) const;
 		const bool getIsBuildable(const unsigned int unit) const;
 		const bool getIsHaveable(const unsigned int unit) const;
 		const bool getIsStatic(const unsigned int unit) const;
+		const bool getIsGoal(const unsigned int unit) const;
 
 		void resetData();
 
 //		const GOAL& getGoal(const int goal_number) const;
 //		const bool getNextGoal(std::list<GOAL>::const_iterator& current, const bool first) const;
-		void addGoal(const unsigned int unit, const signed int count, const unsigned int time, const unsigned int location);
+
+		
+		const std::list<GOAL> tryToAddGoal(const unsigned int unit, const unsigned int time, const unsigned int location, const signed int count);
+		void addNewGoalToList(const unsigned int unit, const unsigned int time, const unsigned int location, const signed int count);
+		
 		void adjustGoals(const bool allowGoalAdaption, const UNIT* unit=0);
-		void removeDouble(const unsigned int goal_unit, const unsigned int goal_location, const unsigned int goal_time, const unsigned int goal_count);
 		const unsigned int calculateFastestBO(const UNIT* startForce) const;
 		const GOAL_TREE getGoalTree(const UNIT* startForce, const unsigned int currentGoalUnit) const;
 
@@ -106,10 +113,50 @@ class GOAL_ENTRY
 		const bool isRaceInitialized() const;
 		void setName(const std::string& goal_name);
 		void setRace(const eRace goal_race);
-		const bool isGoal(const unsigned int unit) const;
 		const bool getInitialized() const;
 
 };
+
+
+inline void GOAL_ENTRY::setIsBuildable(const unsigned int unit, const bool is_buildable)
+{
+#ifdef _SCC_DEBUG
+	if(unit>=UNIT_TYPE_COUNT) {
+		toLog("DEBUG: (GOAL_ENTRY::setIsBuildable): Value unit out of range.");return;
+	}
+#endif
+	isBuildable[unit] = is_buildable;
+}
+
+inline void GOAL_ENTRY::setIsStatic(const unsigned int unit, const bool is_static)
+{
+#ifdef _SCC_DEBUG
+	if(unit>=UNIT_TYPE_COUNT) {
+		toLog("DEBUG: (GOAL_ENTRY::setIsStatic): Value unit out of range.");return;
+	}
+#endif
+	isStatic[unit] = is_static;
+}
+
+inline void GOAL_ENTRY::setIsHaveable(const unsigned int unit, const bool is_haveable)
+{
+#ifdef _SCC_DEBUG
+	if(unit>=UNIT_TYPE_COUNT) {
+		toLog("DEBUG: (GOAL_ENTRY::setIsHaveable): Value unit out of range.");return;
+	}
+#endif
+	isHaveable[unit] = is_haveable;
+}
+
+inline void GOAL_ENTRY::setIsGoal(const unsigned int unit, const bool is_goal)
+{
+#ifdef _SCC_DEBUG
+	if(unit>=UNIT_TYPE_COUNT) {
+		toLog("DEBUG: (GOAL_ENTRY::setIsGoal): Value unit out of range.");return;
+	}
+#endif
+	isGoal[unit] = is_goal;
+}
 
 inline const UNIT_STATISTICS* GOAL_ENTRY::getpStats() const
 {
@@ -121,18 +168,15 @@ inline const UNIT_STATISTICS* GOAL_ENTRY::getpStats() const
 	return(pStats);
 }
 
-inline const bool GOAL_ENTRY::isGoal(const unsigned int unit) const
+inline const bool GOAL_ENTRY::getIsGoal(const unsigned int unit) const
 {
 #ifdef _SCC_DEBUG
 	if(unit>=UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (GOAL_ENTRY::isGoal): Value unit out of range.");return(0);
+		toLog("DEBUG: (GOAL_ENTRY::getIsGoal): Value unit out of range.");return(0);
 	}
 	// TODO UNIT_TYPE_COUNT ist nicht obere Grenze fuer Zahl der Units...
-	if(allGoal[unit]>=MAX_TOTAL_UNITS) {
-		toLog("DEBUG: (GOAL_ENTRY::isGoal): Variable allGoal not initialized.");return(0);
-	}
 #endif
-	return(allGoal[unit]>0);
+	return(isGoal[unit]);
 }
 
 inline const unsigned int GOAL_ENTRY::getMaxBuildTypes() const
@@ -209,7 +253,7 @@ inline void GOAL_ENTRY::setName(const std::string& goal_name)
 	name.assign(goal_name);
 }
 
-inline const unsigned int GOAL_ENTRY::getAllGoal(const unsigned int unit) const
+/*inline const unsigned int GOAL_ENTRY::getAllGoal(const unsigned int unit) const
 {
 #ifdef _SCC_DEBUG
 	if(unit >= LAST_UNIT) {
@@ -220,24 +264,7 @@ inline const unsigned int GOAL_ENTRY::getAllGoal(const unsigned int unit) const
 	}	
 #endif
 	return(allGoal[unit]);		
-}
-
-inline const unsigned int GOAL_ENTRY::getGlobalGoal(const unsigned int location, const unsigned int unit) const
-{
-#ifdef _SCC_DEBUG
-	if(location>=MAX_LOCATIONS) {
-		toLog("DEBUG: (GOAL_ENTRY::getGlobalGoal): Value location out of range.");return(0);
-	}
-	if(unit >= LAST_UNIT) {
-		toLog("DEBUG: (GOAL_ENTRY::getGlobalGoal): Value unit out of range.");return(0);
-	}
-	if(globalGoal[location][unit]>200) {
-		toLog("DEBUG: (GOAL_ENTRY::getGlobalGoal): Variable globalGoal out of range.");return(0);
-	}	
-#endif
-	return(globalGoal[location][unit]);		
-}
-
+}*/
 
 inline const bool GOAL_ENTRY::getIsStatic(const unsigned int unit) const
 {

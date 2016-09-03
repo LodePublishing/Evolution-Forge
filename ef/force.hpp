@@ -36,6 +36,7 @@ class ForceWindow : public UI_Window
 		
 		void processList();
 		void process();
+		void wave(SDL_snd& sound);
 		void draw(DC* dc) const;
 		const unsigned int getMarkedUnit() const;
 		void setMarkedUnit(const unsigned int marked_unit);
@@ -46,9 +47,6 @@ class ForceWindow : public UI_Window
 
 		void resetData();
 	private:
-		unsigned int addUnit, addTime, addLocation;
-		signed int addCount;
-		
 		unsigned int currentGoalUnit; // which goal is currently highlighted?
 		unsigned int startLine;
 	
@@ -64,6 +62,8 @@ class ForceWindow : public UI_Window
 
 		std::list<ForceEntry*> goalForceList;
 		std::list<ForceEntry*> nongoalForceList;
+
+		bool doErrorSound;
 		
 		unsigned int markedUnit, oldMarkedUnit;
 		ANABUILDORDER* anarace;

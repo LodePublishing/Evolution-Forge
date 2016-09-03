@@ -4,10 +4,6 @@
 
 ForceWindow::ForceWindow(UI_Object* force_parent, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_players) :
 	UI_Window(force_parent, FORCE_WINDOW_TITLE_STRING, theme.lookUpPlayerRect(FORCE_WINDOW, game_number, max_games, player_number, max_players), theme.lookUpPlayerMaxHeight(FORCE_WINDOW, game_number, max_games, player_number, max_players), NOT_SCROLLED),
-	addUnit(0),
-	addTime(0),
-	addLocation(0),
-	addCount(0),
 	currentGoalUnit(0),
 	startLine(0),
 	menuRadio(new UI_Radio(this, Rect(getRelativeClientRectPosition() + Point(5, 10), Size(0,0)) )),
@@ -16,6 +12,7 @@ ForceWindow::ForceWindow(UI_Object* force_parent, const unsigned int game_number
 	legend(new UI_StaticText(this, TIME_LEGEND_STRING, Rect(Point(200, 0), Size(0,0)), Size(0,0), FORCE_TEXT_COLOR, SMALL_FONT, DO_NOT_ADJUST)), // TODO
 	goalForceList(),
 	nongoalForceList(),
+	doErrorSound(false),
 	markedUnit(0),
 	oldMarkedUnit(0),
 	anarace(NULL),
@@ -114,13 +111,30 @@ void ForceWindow::closeMenus()
 //	locationMenu->close();
 }
 
+void ForceWindow::wave(SDL_snd& sound)
+{
+	if(doErrorSound==true)
+	{
+		doErrorSound = false;
+		sound.play(UI_Object::theme.lookUpSound(ERROR_SOUND));
+	}
+	if(ForceEntry::doCompleteSound==true)
+	{
+		ForceEntry::doCompleteSound=false;
+		sound.play(UI_Object::theme.lookUpSound(COMPLETE_SOUND));
+	}
+	UI_Window::wave(sound);
+}
+
 void ForceWindow::process()
 {
 	if(!isShown())
 		return;
 	ForceEntry::changed = NO_MESSAGE;
+
+	bool line_has_changed = false;
 	
-	unsigned int oldStartLine = -1;
+	signed int oldStartLine = -1;
 	if(unitMenu->getHeight()/2 > oldStartLine)
 		oldStartLine = unitMenu->getHeight()/2;
 	if(goalMenu->getHeight() > oldStartLine)
@@ -133,11 +147,6 @@ void ForceWindow::process()
 	oldMarkedUnit = markedUnit;
 	markedUnit = 0;
 
-	addUnit = 0;
-	addTime = 0;
-	addLocation = 0;
-	addCount = 0;
-	
 	int assignGoal = -1;
 
 
@@ -145,97 +154,50 @@ void ForceWindow::process()
 	{
 		if(ForceEntry::forceEntryIsGoal)
 		{
-			if(ForceEntry::changed == LEFT_CLICKED)
+			if(ForceEntry::changed == NUMBER_HAS_CHANGED)
 			{
-				bool allow = true;
-				const std::list<unsigned int> errorList = anarace->getGoal()->allowAddition(ForceEntry::forceEntryUnit);
-				if(errorList.size()>0)
-				{
-					for(std::list<unsigned int>::const_iterator blink = errorList.begin(); blink != errorList.end(); ++blink)
+				const std::list<GOAL> error_list = anarace->getGoal()->tryToAddGoal(ForceEntry::forceEntryUnit, ForceEntry::forceEntryTime, ForceEntry::forceEntryLocation, ForceEntry::forceEntryCount);
+
+				// TODO in addGoal rein
+//				addCount = -1  - ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); 
+				
+				if(error_list.size()>0)
+					for(std::list<GOAL>::const_iterator blink = error_list.begin(); blink != error_list.end(); ++blink)
 					{
+						doErrorSound = true;
 						for(std::list<ForceEntry*>::iterator f = goalForceList.begin(); f != goalForceList.end(); ++f)
-							if((*f)->getUnit() == (*blink))
+							if(((*f)->getUnit() == blink->getUnit())&&((*f)->getTime() == blink->getTime()))//&&((*f)->getLocation() == blink->getLocation()))
 							{
 								(*f)->resetGradient();
 								break;
 							}
 						for(std::list<ForceEntry*>::iterator f = nongoalForceList.begin(); f != nongoalForceList.end(); ++f)
-							if((*f)->getUnit() == (*blink))
+							if((*f)->getUnit() == blink->getUnit())
 							{
 								(*f)->resetGradient();
 								break;
 							}
 					}					
-					allow=false;
-				}			
-				if(allow)
+				else
 				{
-					addUnit = ForceEntry::forceEntryUnit;	
-					addCount = 1 + ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); 
-					addTime = ForceEntry::forceEntryTime;	
-					addLocation = ForceEntry::forceEntryLocation;
-					UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(ADDED_ONE_GOAL_STRING, UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+ForceEntry::forceEntryUnit+UNIT_NULL_STRING))));
-					setChangedFlag();
-				}
-			} else
-		
-			if(ForceEntry::changed == RIGHT_CLICKED)
-			{
-				bool allow=true;
-				if(anarace->getGoal()->getAllGoal(ForceEntry::forceEntryUnit)==1)
-				{
-					const std::list<unsigned int> errorList = anarace->getGoal()->allowDeletion(ForceEntry::forceEntryUnit);
-					if(errorList.size()>0)
-					{
-						for(std::list<unsigned int>::const_iterator blink = errorList.begin(); blink != errorList.end(); ++blink)
-						{
-							for(std::list<ForceEntry*>::iterator f = goalForceList.begin(); f != goalForceList.end(); ++f)
-								if((*f)->getUnit() == (*blink))
-								{
-									(*f)->resetGradient();
-									break;
-								}
-							for(std::list<ForceEntry*>::iterator f = nongoalForceList.begin(); f != nongoalForceList.end(); ++f)
-								if((*f)->getUnit() == (*blink))
-								{
-									(*f)->resetGradient();
-									break;
-								}
-						}						
-						allow=false;
-					}
-				}
-				if(allow)
-				{
-					addUnit = ForceEntry::forceEntryUnit;	
-					addCount = -1  - ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); 
-					addTime = ForceEntry::forceEntryTime;	
-					addLocation = ForceEntry::forceEntryLocation;
-					UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(REMOVED_ONE_GOAL_STRING, UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+ForceEntry::forceEntryUnit+UNIT_NULL_STRING))));
+					if(ForceEntry::forceEntryCount >0)
+						UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(ADDED_ONE_GOAL_STRING, UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+ForceEntry::forceEntryUnit+UNIT_NULL_STRING))));
+					else if(ForceEntry::forceEntryCount <0)
+						UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(REMOVED_ONE_GOAL_STRING, UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+ForceEntry::forceEntryUnit+UNIT_NULL_STRING))));
 					setChangedFlag();
 				}
 			} else 
-
 			if(ForceEntry::changed == GOAL_TIME_HAS_CHANGED)
 			{
 				setChangedFlag();
 			}
 			
-		} else if(!ForceEntry::forceEntryIsGoal)
+		} else if((!ForceEntry::forceEntryIsGoal)&&(ForceEntry::changed == NUMBER_HAS_CHANGED))
 		{
-			if(ForceEntry::changed == LEFT_CLICKED)
-			{
-				addUnit = ForceEntry::forceEntryUnit;	
-				addCount = 1 + ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); 
-				addTime = 0;	
-				addLocation = 0;
-				UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(MOVED_NON_GOAL_STRING, UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+ForceEntry::forceEntryUnit+UNIT_NULL_STRING))));
-				setChangedFlag();
-//				movedForceEntry=*forceEntry;
-			} else 
-			if(ForceEntry::changed == RIGHT_CLICKED)
-			{} // do nothing
-		}
+			anarace->getGoal()->tryToAddGoal(ForceEntry::forceEntryUnit, ForceEntry::forceEntryTime, ForceEntry::forceEntryLocation, ForceEntry::forceEntryCount);
+			UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(MOVED_NON_GOAL_STRING, UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+ForceEntry::forceEntryUnit+UNIT_NULL_STRING))));
+			setChangedFlag();
+		} 
 	}
 
 // TODO rechtsklick -> entfernen, auch im unitmenu!
@@ -249,34 +211,27 @@ void ForceWindow::process()
 // ------ CHECK FOR PRESSED UNIT ITEM
 	if(unitMenu->getPressedItem()>=0)
 	{
-		bool allow = true;
-		const std::list<unsigned int> errorList = anarace->getGoal()->allowAddition(unitMenu->getPressedItem());
-		if(errorList.size()>0)
-		{
-			for(std::list<unsigned int>::const_iterator blink = errorList.begin(); blink != errorList.end(); ++blink)
+		const std::list<GOAL> error_list = anarace->getGoal()->tryToAddGoal(unitMenu->getPressedItem(), 0, 0, 1);
+		if(error_list.size()>0)
+			for(std::list<GOAL>::const_iterator blink = error_list.begin(); blink != error_list.end(); ++blink)
 			{
+				doErrorSound = true;
 				for(std::list<ForceEntry*>::iterator f = goalForceList.begin(); f!=goalForceList.end(); ++f)
-					if((*f)->getUnit() == (*blink))
+					if(((*f)->getUnit() == blink->getUnit())&&((*f)->getTime() == blink->getTime()))//&&((*f)->getLocation() == blink->getLocation()))
 					{
 						(*f)->resetGradient();
 						break;
 					}
 				for(std::list<ForceEntry*>::iterator f = nongoalForceList.begin(); f!=nongoalForceList.end(); ++f)
-					if((*f)->getUnit() == (*blink))
+					if((*f)->getUnit() == blink->getUnit())
 					{
 						(*f)->resetGradient();
 						break;
 					}
 			}
-			allow = false;
-		}
-		if(allow)
 		{
-			addUnit = unitMenu->getPressedItem(); 
-			addCount = 1 + ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); 
-			addTime = 0; 
-			addLocation = 0;
 			UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(ADDED_GOAL_STRING, UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+unitMenu->getPressedItem()+UNIT_NULL_STRING))));
+			setChangedFlag();
 		}
 	}
 
@@ -367,14 +322,6 @@ void ForceWindow::process()
 		closeMenus();
 	}
 	
-	
-	if(addCount!=0)
-	{
-//		bool new_unit = (anarace->getGoal()->getAllGoal(addUnit)==0);
-		anarace->getGoal()->addGoal(addUnit, addCount, addTime, addLocation);
-//		if((anarace->getGoal()->getAllGoal(addUnit)==0)||new_unit) TODO: 3. Status fuer ChangedFlag machen, damit zwar BO resetted aber die Goals nicht neuberechnet werden muessen
-		setChangedFlag();
-	}
 	if(assignGoal>=0)
 	{
 		anarace->assignGoal(database.getGoal(anarace->getRace(), goalMenu->getPressedItem()));
@@ -417,12 +364,8 @@ void ForceWindow::process()
 	
 	if((startLine!=oldStartLine)||(getChangedFlag()))
 	{
-		if(ForceEntry::forceEntryTimeRemoved)
-		{
-			ForceEntry::forceEntryTimeRemoved = false;
-			anarace->getGoal()->removeDouble(ForceEntry::forceEntryUnit, ForceEntry::forceEntryLocation, ForceEntry::forceEntryTime, ForceEntry::forceEntryCount);
-		}
-		anarace->getGoal()->adjustGoals(true, (*anarace->getStartCondition())->getUnit(0) );
+		if(getChangedFlag())
+			anarace->getGoal()->adjustGoals(true, (*anarace->getStartCondition())->getUnit(0) );
 		processList();
 	}
 
@@ -558,7 +501,7 @@ void ForceWindow::processList()
 
 
 		for (unsigned int i = GAS_SCV+1; i--;)
-//		if ( (anarace->getGoal()->getAllGoal(i) == 0) && ((anarace->getGoal()->getIsBuildable(i))||(anarace->getLocationTotal(0,i))))
+//		if ( (!anarace->getGoal()->isGoal(i)) && ((anarace->getGoal()->getIsBuildable(i))||(anarace->getLocationTotal(0,i))))
 //	if (anarace->getGoal()->getIsHaveable(i)) 
 			if ((anarace->getGoal()->getIsHaveable(i))&&(!checkedUnits[i])) //&&(anarace->getLocationTotal(loc, i)))
 
@@ -602,7 +545,7 @@ void ForceWindow::processList()
 		}	   
 
 		for (unsigned int i = GAS_SCV+1; i--;)
-//		if ( (anarace->getGoal()->getAllGoal(i) == 0) && ((anarace->getGoal()->getIsBuildable(i))||(anarace->getLocationTotal(0,i))))
+//		if ( (!anarace->getGoal()->isGoal(i)) && ((anarace->getGoal()->getIsBuildable(i))||(anarace->getLocationTotal(0,i))))
 //	if (anarace->getGoal()->getIsHaveable(i)) 
 			if ((anarace->getGoal()->getIsHaveable(i))&&(anarace->getLocationTotal(loc, i))&&(!checkedUnits[i]))
 //			nonGoalList[i]=true;
@@ -742,7 +685,7 @@ void ForceWindow::processList()
 		}
 	
 /*		for (unsigned int i = GAS_SCV+1; i--;)
-//			if ((anarace->getGoal()->getAllGoal(i) == 0) && ((anarace->getGoal()->getIsBuildable(i))|| ( anarace->getLocationTotal(0,i))))
+//			if ((!anarace->getGoal()->isGoal(i)) && ((anarace->getGoal()->getIsBuildable(i))|| ( anarace->getLocationTotal(0,i))))
 			if ((anarace->getGoal()->getIsHaveable(i)))//&&(anarace->getLocationTotal(loc, i)))
 			{
 				checkedUnits[i]=true;
@@ -780,7 +723,7 @@ void ForceWindow::processList()
 		++line;
 
 		for (unsigned int i = GAS_SCV+1; i--;)
-//			if ((anarace->getGoal()->getAllGoal(i) == 0) && ((anarace->getGoal()->getIsBuildable(i))|| ( anarace->getLocationTotal(0,i))))
+//			if ((!anarace->getGoal()->isGoal(i)) && ((anarace->getGoal()->getIsBuildable(i))|| ( anarace->getLocationTotal(0,i))))
 			if ((anarace->getGoal()->getIsHaveable(i))&&(anarace->getLocationTotal(loc, i))&&(!checkedUnits[i]))
 			{
 				checkedUnits[i]=true;

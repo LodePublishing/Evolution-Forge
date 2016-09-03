@@ -26,6 +26,8 @@ BoGraphEntry::~BoGraphEntry()
 void BoGraphEntry::process()
 {
 	UI_Button::process();
+	if(checkForNeedRedraw())
+		getParent()->setNeedRedrawMoved();
 }
 
 void BoGraphEntry::draw(DC* dc) const

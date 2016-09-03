@@ -7,8 +7,7 @@
 enum eForceEntryMessage
 {
 	NO_MESSAGE,
-	LEFT_CLICKED,
-	RIGHT_CLICKED,
+	NUMBER_HAS_CHANGED,
 	GOAL_TIME_HAS_CHANGED
 };
 
@@ -47,11 +46,12 @@ class ForceEntry : public UI_Button
 	
 		static eForceEntryMessage changed;
 		static bool forceEntryIsGoal;
-		static bool forceEntryTimeRemoved;
-		static unsigned int forceEntryCount;
 		static unsigned int forceEntryUnit;
 		static unsigned int forceEntryTime;
 		static unsigned int forceEntryLocation;
+		static signed int forceEntryCount;
+
+		static bool doCompleteSound;
 
 	private:
 		void setTime(const unsigned int time);

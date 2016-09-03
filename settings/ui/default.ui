@@ -159,6 +159,7 @@
 @MAIN
 	@640x480
 		Main window, 640, 480, 480, absolute coordinates, 0, 0
+		Intro window, 600, 400, 400, dock center inside of, Main window
 		Message window, 200, 75, 75, dock bottom center inside of, Main window
 		Help window, 600, 400, 400, dock center inside of, Main window
 		Settings window, 425, 368, 368, dock center inside of, Main window
@@ -170,6 +171,7 @@
 	@END
 	@800x600
 		Main window, 800, 600, 600, absolute coordinates, 0, 0
+		Intro window, 750, 500, 500, dock center inside of, Main window
 		Message window, 250, 100, 100, dock bottom center inside of, Main window
 		Help window, 750, 500, 500, dock center inside of, Main window
 		Settings window, 500, 400, 400, dock center inside of, Main window
@@ -182,6 +184,7 @@
 	
 	@1024x768
 		Main window, 1024, 768, 768, Main window, absolute coordinates, 0, 0
+		Intro window, 900, 600, 600, dock center inside of, Main window
 		Message window, 300, 125, 125, dock bottom center inside of, Main window
 		Help window, 900, 600, 600, dock center inside of, Main window
 		Settings window, 600, 450, 450, dock center inside of, Main window
@@ -193,7 +196,8 @@
 	@END
 	@1280x1024
 		Main window, 1280, 1024, 1024, Main window, absolute coordinates, 0, 0
-		Message window, 330, 150, 150, dock top center inside of, Main window
+		Intro window, 1100, 900, 700, dock center inside of, Main window
+		Message window, 400, 150, 150, dock top center inside of, Main window
 		Help window, 1100, 900, 700, dock center inside of, Main window
 		Settings window, 700, 500, 500, dock center inside of, Main window
 		Database window, 1200, 900, 900, dock center inside of, Main window
@@ -1064,7 +1068,7 @@
 # bodiagram background brush
 		30,  30,  30, CROSS_HATCH
 		50,  50,  50, CROSS_HATCH
-# bodiagram bar 
+# bodiagram bar.jpg 
 		40,  40,  40, SOLID
 # supply brush
 		120, 120, 120, SOLID
@@ -1131,7 +1135,7 @@
 # bodiagram background brush
 		30,  30,  30, CROSS_HATCH
 		50,  50,  50, CROSS_HATCH
-# bodiagram bar 
+# bodiagram bar.jpg 
 		40,  40,  40, SOLID
 # supply brush
 		120, 120, 120, SOLID
@@ -1196,7 +1200,7 @@
 # bodiagram background brush
 		30,  30,  30, CROSS_HATCH
 		50,  50,  50, CROSS_HATCH
-# bodiagram bar 
+# bodiagram bar.jpg 
 		40,  40,  40, SOLID
 # supply brush
 		120, 120, 120, SOLID
@@ -1263,7 +1267,7 @@
 # bodiagram background brush
 		30,  30,  30, CROSS_HATCH
 		50,  50,  50, CROSS_HATCH
-# bodiagram bar 
+# bodiagram bar.jpg 
 		40,  40,  40, SOLID
 # supply brush
 		120, 120, 120, SOLID
@@ -1330,7 +1334,7 @@
 # bodiagram background brush
 		30,  30,  30, CROSS_HATCH
 		50,  50,  50, CROSS_HATCH
-# bodiagram bar 
+# bodiagram bar.jpg 
 		40,  40,  40, SOLID
 # supply brush
 		120, 120, 120, SOLID
@@ -1363,10 +1367,10 @@
 			mouse3
 			red_radio_off
 			red_radio_on
-			back_wh40k_640, (SOLID)
-			bar
-			key
-			clawsoftware
+			back_wh40k_640.jpg, (SOLID)
+			bar.jpg
+			key.bmp
+			clawsoftware.jpg, (SOLID)
 			new_640
 			open_640
 			save_640
@@ -1378,15 +1382,15 @@
 			help
 			map
 			settings
-			background_640, (SOLID)
-			red_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			background_640.jpg, (SOLID)
+			red_bullet.bmp
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 
 		@DARK_BLUE_THEME
@@ -1406,10 +1410,10 @@
 			mouse3
 			blue_radio_off
 			blue_radio_on
-			back_wh40k_640, (SOLID)
-			bar
+			back_wh40k_640.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new_640
 			open_640
 			save_640
@@ -1421,15 +1425,15 @@
 			help
 			map
 			settings
-			background_640, (SOLID)
+			background_640.jpg, (SOLID)
 			blue_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 		@YELLOW_THEME
 			null
@@ -1448,10 +1452,10 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			back_wh40k_640, (SOLID)
-			bar
+			back_wh40k_640.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new_640
 			open_640
 			save_640
@@ -1463,15 +1467,15 @@
 			help
 			map
 			settings
-			background_640, (SOLID)
+			background_640.jpg, (SOLID)
 			yellow_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 	
 		@GREEN_THEME
@@ -1491,10 +1495,10 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			back_wh40k_640, (SOLID)
-			bar
+			back_wh40k_640.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new_640
 			open_640
 			save_640
@@ -1506,15 +1510,15 @@
 			help
 			map
 			settings
-			background_640, (SOLID)
+			background_640.jpg, (SOLID)
 			yellow_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 		@GREY_THEME
 			null
@@ -1533,10 +1537,10 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			back_wh40k_640, (SOLID)
-			bar
+			back_wh40k_640.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new_640
 			open_640
 			save_640
@@ -1548,15 +1552,15 @@
 			help
 			map
 			settings
-			background_640, (SOLID)
+			background_640.jpg, (SOLID)
 			yellow_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 
 	@END
@@ -1578,10 +1582,10 @@
 			mouse3
 			red_radio_off
 			red_radio_on
-			background_800, (SOLID)
-			bar
+			background_800.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new_800
 			open_800
 			save_800
@@ -1593,15 +1597,15 @@
 			help
 			map
 			settings
-			back_wh40k_800, (SOLID)
+			back_wh40k_800.jpg, (SOLID)
 			red_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 
 		@DARK_BLUE_THEME
@@ -1621,10 +1625,10 @@
 			mouse3
 			blue_radio_off
 			blue_radio_on
-			background_800, (SOLID)
-			bar
+			background_800.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new_800
 			open_800
 			save_800
@@ -1636,15 +1640,15 @@
 			help
 			map
 			settings
-			back_wh40k_800, (SOLID)
+			back_wh40k_800.jpg, (SOLID)
 			blue_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 		@YELLOW_THEME
 			null
@@ -1663,10 +1667,10 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			background_800, (SOLID)
-			bar
+			background_800.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new_800
 			open_800
 			save_800
@@ -1678,15 +1682,15 @@
 			help
 			map
 			settings
-			back_wh40k_800, (SOLID)
+			back_wh40k_800.jpg, (SOLID)
 			yellow_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 		@GREEN_THEME
 			null
@@ -1705,10 +1709,10 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			background_800, (SOLID)
-			bar
+			background_800.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new_800
 			open_800
 			save_800
@@ -1720,15 +1724,15 @@
 			help
 			map
 			settings
-			back_wh40k_800, (SOLID)
+			back_wh40k_800.jpg, (SOLID)
 			yellow_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 
 		@GREY_THEME
@@ -1748,10 +1752,10 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			background_800, (SOLID)
-			bar
+			background_800.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new_800
 			open_800
 			save_800
@@ -1763,15 +1767,15 @@
 			help
 			map
 			settings
-			back_wh40k_800, (SOLID)
+			back_wh40k_800.jpg, (SOLID)
 			yellow_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 
 	@END
@@ -1794,10 +1798,10 @@
 			mouse3
 			red_radio_off
 			red_radio_on
-			background_1024, (SOLID)
-			bar
+			background_1024.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new_1024
 			open_1024
 			save_1024
@@ -1809,15 +1813,15 @@
 			help
 			map
 			settings
-			back_wh40k_1024, (SOLID)
+			back_wh40k_1024.jpg, (SOLID)
 			red_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 
 		@DARK_BLUE_THEME
@@ -1837,10 +1841,10 @@
 			mouse3
 			blue_radio_off
 			blue_radio_on
-			background_1024, (SOLID)
-			bar
+			background_1024.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new_1024
 			open_1024
 			save_1024
@@ -1852,15 +1856,15 @@
 			help
 			map
 			settings
-			back_wh40k_1024, (SOLID)
+			back_wh40k_1024.jpg, (SOLID)
 			blue_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 		@YELLOW_THEME
 			null
@@ -1879,10 +1883,10 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			background_1024, (SOLID)
-			bar
+			background_1024.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new_1024
 			open_1024
 			save_1024
@@ -1894,15 +1898,15 @@
 			help
 			map
 			settings
-			back_wh40k_1024, (SOLID)
+			back_wh40k_1024.jpg, (SOLID)
 			yellow_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 		@GREEN_THEME
 			null
@@ -1921,10 +1925,10 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			background_1024, (SOLID)
-			bar
+			background_1024.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new_1024
 			open_1024
 			save_1024
@@ -1936,15 +1940,15 @@
 			help
 			map
 			settings
-			back_wh40k_1024, (SOLID)
+			back_wh40k_1024.jpg, (SOLID)
 			yellow_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 		@GREY_THEME
 			null
@@ -1963,10 +1967,10 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			background_1024, (SOLID)
-			bar
+			background_1024.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new_1024
 			open_1024
 			save_1024
@@ -1978,15 +1982,15 @@
 			help
 			map
 			settings
-			back_wh40k_1024, (SOLID)
+			back_wh40k_1024.jpg, (SOLID)
 			yellow_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 
 	@END
@@ -2008,10 +2012,10 @@
 			mouse3
 			red_radio_off
 			red_radio_on
-			background_1280, (SOLID)
-			bar
+			background_1280.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new
 			open
 			save
@@ -2023,15 +2027,15 @@
 			help
 			map
 			settings
-			back_wh40k_1280, (SOLID)
+			back_wh40k_1280.jpg, (SOLID)
 			red_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 
 		@DARK_BLUE_THEME
@@ -2051,10 +2055,10 @@
 			mouse3
 			blue_radio_off
 			blue_radio_on
-			background_1280, (SOLID)
-			bar
+			background_1280.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new
 			open
 			save
@@ -2066,15 +2070,15 @@
 			help
 			map
 			settings
-			back_wh40k_1280, (SOLID)
+			back_wh40k_1280.jpg, (SOLID)
 			blue_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 		@YELLOW_THEME
 			null
@@ -2093,10 +2097,10 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			background_1280, (SOLID)
-			bar
+			background_1280.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new
 			open
 			save
@@ -2108,15 +2112,15 @@
 			help
 			map
 			settings
-			back_wh40k_1280, (SOLID)
+			back_wh40k_1280.jpg, (SOLID)
 			yellow_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 		@GREEN_THEME
 			null
@@ -2135,10 +2139,10 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			background_1280, (SOLID)
-			bar
+			background_1280.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new
 			open
 			save
@@ -2150,15 +2154,15 @@
 			help
 			map
 			settings
-			back_wh40k_1280, (SOLID)
+			back_wh40k_1280.jpg, (SOLID)
 			yellow_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 
 		@GREY_THEME
@@ -2178,10 +2182,10 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			background_1280, (SOLID)
-			bar
+			background_1280.jpg, (SOLID)
+			bar.jpg
 			key
-			clawsoftware
+			clawsoftware.jpg, (SOLID)
 			new
 			open
 			save
@@ -2193,15 +2197,15 @@
 			help
 			map
 			settings
-			back_wh40k_1280, (SOLID)
+			back_wh40k_1280.jpg, (SOLID)
 			yellow_bullet
-			score_active
-			score_empty
-			force_window
-			bodiagram_window
-			bograph_window
-			bo_window
-			clemens
+			score_active.jpg
+			score_empty.jpg
+			force_window.jpg
+			bodiagram_window.jpg
+			bograph_window.jpg
+			bo_window.jpg
+			clemens.jpg
 		@END
 	@END
 
@@ -2347,5 +2351,17 @@
 		100
 	@END
 @END
+
+
+@SOUNDS
+	t.wav
+	audiodump.wav
+	mouseover.wav
+	swishin.wav
+	trescue.wav
+	buzz.wav
+@END
+
+
 
 

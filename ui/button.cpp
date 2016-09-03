@@ -340,6 +340,8 @@ void UI_Button::mouseHasEnteredArea()
 {
 //	UI_Object::addToProcessArray(this);
 	resetGradient();
+	if(!(statusFlags & BF_HIGHLIGHTED))
+		statusFlags |= BF_JUST_HIGHLIGHTED;
 	statusFlags |= BF_HIGHLIGHTED;
 	if(statusFlags & BF_WAS_PRESSED)
 	{
@@ -484,6 +486,15 @@ UI_Object* UI_Button::checkHighlight()
 	if(!getAbsoluteRect().Inside(mouse - Size(pressdepth, pressdepth) ))
 		return(UI_Object::checkHighlight());
 	return((UI_Object*)this);
+}
+
+void UI_Button::wave(SDL_snd& sound) {
+	if(statusFlags & BF_JUST_HIGHLIGHTED)
+	{
+		sound.play(UI_Object::theme.lookUpSound(MOUSEOVER_SOUND));
+		statusFlags &= ~BF_JUST_HIGHLIGHTED;
+	}
+	UI_Object::wave(sound);
 }
 
 void UI_Button::process()

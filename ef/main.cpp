@@ -83,10 +83,8 @@ int main(int argc, char *argv[])
 	
 	toLog(UI_Object::theme.lookUpString(efConfiguration.isFullScreen()?START_SET_FULLSCREEN_MODE_STRING:START_SET_WINDOW_MODE_STRING));
 	
-	DC* screen = new DC(UI_Object::theme.getResolution(), UI_Object::theme.getBitDepth(), (efConfiguration.isFullScreen()?SDL_FULLSCREEN:0)|SDL_HWSURFACE|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC|SDL_DOUBLEBUF, SDL_INIT_NOPARACHUTE);
+	DC* screen = new DC(UI_Object::theme.getResolution(), UI_Object::theme.getBitDepth(), (efConfiguration.isFullScreen()?SDL_FULLSCREEN:0)|SDL_HWSURFACE|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC|SDL_DOUBLEBUF, SDL_INIT_NOPARACHUTE | SDL_INIT_VIDEO | SDL_INIT_AUDIO); // TODO ueber Flag setzen ob Audio initialisiert werden soll
 
-	{
-	}
 
 		
 	if(!screen->initializationOK())	{
@@ -103,6 +101,7 @@ int main(int argc, char *argv[])
 	UI_Object::setResolution(resolution);
 
 	toLog(DC::printSurfaceInformation(screen));
+	
 	
 	SDL_Event event;
 	SDL_WM_SetCaption("EVOLUTION FORGE BETA - www.clawsoftware.de","");
@@ -163,9 +162,12 @@ int main(int argc, char *argv[])
 // ------ END CAP FRAMERATE
 
 
+	SDL_snd sound;
+	sound.init(44100);
+	SDL_PauseAudio(0);
 // ------- INIT GRAPHIC ENGINE ------
 	toLog(UI_Object::theme.lookUpString(START_INIT_GRAPHIC_ENGINE_CORE_STRING));
-	Main m(screen); 
+	Main m(screen, sound); 
 	toLog(UI_Object::theme.lookUpString(START_MAIN_INIT_COMPLETE_STRING));
 
 	unsigned int screenshot = 100;
@@ -179,39 +181,13 @@ int main(int argc, char *argv[])
 
 // ------ END INIT GRAPHIC ENGINE ------
 
-// ------ INTRO ------
-//	Rect t((resolution.GetWidth()-650)/2 + 10, (resolution.GetHeight() - 750)/2 + 10, 650 - 20, 650 - 20);
-//	Rect t2((resolution.w-600)/2 + 10, (resolution.h - 700)/2 + 10, 600 - 20, 600 - 20);
+// ------ INIT SOUND ENGINE -------
+
+	sound.play(UI_Object::theme.lookUpSound(LALA_SOUND), true);
+
+
+// ------ END INIT SOUND ENGINE -------
 	
-//UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " :)$# # $ABOUT THE BETA TEST:$# #- $How can I help?$# Post your ideas, discuss or report bugs at the forums at $clawsoftware.de$!#- $It's a beta test... so what do I have to do?$#Test the program on different pcs, different configurations, color settings, drivers etc and report back any crashes, bugs etc#Try out many different, especially unusual goal lists to test the core, let the program run some hours, change the settings, ...# Please do not mess with the data files, the loading routines do not take notice of every error. In the worst case the programm will crash.# # $ABOUT THE PROGRAM ITSELF:$# # - $What does this program?$#The program simulates an abstract StarCraft : Broodwar environment, calculates the time a certain build order needs and optimizes randomly created build orders to a given goal list using evolutionary algorithms.# # $USER INTERFACE:$# # $Keyboard$# - $SPACE$: deactivate drawing (less CPU usage / faster calculation)# - $ALT + ENTER$: switch between fullscreen and window mode# - $ESC$: quits the program without saving# - $PAUSE$: stop/continue calculation# # $Mouse$# - $LEFT BUTTON$: activates buttons and adds items# - $RIGHT BUTTON$: removes items (units) or adds very many items (+/- buttons) # # - $Saving/Loading$: Saved build orders are placed in output/bos/<the race>/, goals are placed in settings/goals/<the race>/ # # NOW HAVE FUN! 8-D # # Best regards, # Clemens Lode", t2, Size(0,0), BRIGHT_TEXT_COLOR, SMALL_MIDDLE_NORMAL_FONT, FORMATTED_TEXT_MODE); // TODO
-/*	bool done = false;
-	while(!done)
-	{
-		introText.process();
-		screen->SetPen(Pen(Color(screen->GetSurface(), 0, 0, 0), 1, TRANSPARENT_PEN_STYLE));
-		screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
-		screen->DrawRectangle(Rect(resolution.x, resolution.y, resolution.w-1, resolution.h-1));
-		screen->SetPen(*UI_Object::theme.lookUpPen(OUTER_BORDER_PEN));
-		screen->SetBrush(*UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
-		screen->DrawEdgedRoundedRectangle(t,6);
-//		screen->DrawBitmap(claw, resolution.w - claw->w, resolution.h - claw->h);
-		introText.draw(screen);
-		fps->delay();
-		while (SDL_PollEvent(&event))
-		{
-			switch (event.type)
-			{
-				case SDL_QUIT:
-					return(EXIT_SUCCESS);break;
-				case SDL_MOUSEBUTTONDOWN:
-				case SDL_KEYDOWN:
-					done=true;break;
-			}
-		}
-	}*/
-
-// ------ END INTRO ------
-
 	toLog(UI_Object::theme.lookUpString(START_SYSTEM_READY_STRING));
 // MAIN LOOP
 	while(true)
@@ -226,8 +202,6 @@ int main(int argc, char *argv[])
 //		}
 	
 //		UI_Object::copyToNextProcessArray();
-		
-		
 		
 		current_ticks = SDL_GetTicks();
 		bool ignore_rest = false;
@@ -264,7 +238,8 @@ int main(int argc, char *argv[])
 					if((UI_Object::focus==NULL)||(!UI_Object::focus->addKey(event.key.keysym.sym, event.key.keysym.mod)))
 					switch(event.key.keysym.sym)
 					{
-						case SDLK_TAB://UI_Object::rotateEditField();
+						case SDLK_TAB:sound.play(UI_Object::theme.lookUpSound(MOUSEOVER_SOUND));
+							//UI_Object::rotateEditField();
 							break;
 						case SDLK_KP_ENTER:
 						case SDLK_RETURN:
@@ -366,6 +341,7 @@ int main(int argc, char *argv[])
 		}
 		ticks[MESSAGE_TICKS][tick_intervall] = SDL_GetTicks() - current_ticks;
 		current_ticks = SDL_GetTicks();
+		m.wave(sound);
 		m.process();
 	
 		if(m.hasBitDepthChanged())
@@ -408,7 +384,7 @@ int main(int argc, char *argv[])
 
 		m.draw(screen);
 		if(uiConfiguration.isUnloadGraphics())
-			UI_Object::theme.unloadGraphics();
+			UI_Object::theme.unloadGraphicsAndSounds();
 // ------ END DRAWING ------
 
 //

@@ -446,7 +446,7 @@ void BoDiagramWindow::draw(DC* dc) const
 				int ns = anarace->getTimeStatistics()[coreConfiguration.getMaxTime()-time].getNeedSupply();
 				int hs = anarace->getTimeStatistics()[coreConfiguration.getMaxTime()-time].getHaveSupply();
 				
-				os << ns << ":" << hs;
+				os << ns << "/" << hs;
 				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(50,37));
 				
 				dc->SetTextForeground(*theme.lookUpColor(BRIGHT_FITNESS_TEXT_COLOR));

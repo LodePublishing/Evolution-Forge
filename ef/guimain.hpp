@@ -21,13 +21,16 @@ const float GUI_VERSION=0.51;
 #include <string>
 
 #include "endrundialog.hpp"
+#include "intro.hpp"
 
 class Main
 {
 	public:
-		Main(DC* dc);
+		Main(DC* dc, SDL_snd& sound);
 		~Main();
 		void draw(DC* dc) const;
+		void wave(SDL_snd& sound);
+		
 		void process();
 		void resetData();
 		
@@ -65,6 +68,7 @@ class Main
 	private:
 		void initializeGame(const unsigned int game_number);
 		MainWindow* mainWindow;
+		IntroWindow* introWindow;
 		HelpWindow* helpWindow;
 		SettingsWindow* settingsWindow;
 		DataBaseWindow* dataBaseWindow;

@@ -155,17 +155,16 @@ void ForceEntry::process()
 		}
 		if((ForceEntry::timeEntryBox)&&(ForceEntry::timeEntryBox->hasNumberChanged()))
 		{
+			// time removed from goal -> try to remove the goal!
 			if(getTime() && (!ForceEntry::timeEntryBox->getNumber()))
 			{
-				ForceEntry::forceEntryTimeRemoved = true;
 				ForceEntry::forceEntryUnit = getUnit();
 				ForceEntry::forceEntryLocation = goal->getLocation();
 				ForceEntry::forceEntryTime = goal->getTime();
-				ForceEntry::forceEntryCount = goal->getCount();
+				ForceEntry::forceEntryCount = -goal->getCount();
 			}
 			else
 			{
-				ForceEntry::forceEntryTimeRemoved = false;
 				setTime(ForceEntry::timeEntryBox->getNumber());
 			}
 		}
@@ -174,15 +173,14 @@ void ForceEntry::process()
 
 	bool left_clicked = isLeftClicked();
 	bool right_clicked = isRightClicked();
-	if(left_clicked || right_clicked)
+	if(left_clicked || ((right_clicked) && (goal!=NULL)))
 	{
-		if(left_clicked)
-			changed = LEFT_CLICKED;
-		else changed = RIGHT_CLICKED;
+		ForceEntry::changed = NUMBER_HAS_CHANGED;
 		ForceEntry::forceEntryUnit = getUnit();
 		ForceEntry::forceEntryIsGoal = (goal!=NULL);
-		ForceEntry::forceEntryLocation = goal->getLocation();
-		ForceEntry::forceEntryTime = goal->getTime();
+		ForceEntry::forceEntryLocation = goal?goal->getLocation():GLOBAL;
+		ForceEntry::forceEntryTime = goal?goal->getTime():0;
+		ForceEntry::forceEntryCount = left_clicked?1:-1;
 	}
 	
 	if((goal)&&(oldGoalCount != goal->getCount()))
@@ -292,18 +290,20 @@ void ForceEntry::setTotalNumber(const unsigned int total_number)
 {
 	if(totalNumber != total_number)
 	{
-		totalNumber = total_number;
 		highlight = 50;
+		if((goal)&&(totalNumber < goal->getCount())&&(total_number >= goal->getCount()))
+			doCompleteSound = true;
+		totalNumber = total_number;
 	}
 }
 
-eForceEntryMessage ForceEntry::changed = LEFT_CLICKED;
+eForceEntryMessage ForceEntry::changed = NO_MESSAGE;
 bool ForceEntry::forceEntryIsGoal = false;
-bool ForceEntry::forceEntryTimeRemoved = false;
 unsigned int ForceEntry::forceEntryUnit = 0;
 unsigned int ForceEntry::forceEntryLocation = 0;
 unsigned int ForceEntry::forceEntryTime = 0;
-unsigned int ForceEntry::forceEntryCount = 0;
+signed int ForceEntry::forceEntryCount = 0;
+bool ForceEntry::doCompleteSound = false;
 
 UI_Button* ForceEntry::makeTimeGoalButton = NULL;
 UI_NumberField* ForceEntry::timeEntryBox = NULL;

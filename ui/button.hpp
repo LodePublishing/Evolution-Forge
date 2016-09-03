@@ -83,6 +83,7 @@ class UI_Button:public UI_Object
 		void updateText(const std::string& utext);
 		void updateText(const eString utext);
 
+		void wave(SDL_snd& sound);
 		void process(); // process messages, continue animation etc.
 		UI_Object* checkToolTip();
 		UI_Object* checkHighlight();

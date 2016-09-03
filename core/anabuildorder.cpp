@@ -825,16 +825,12 @@ void ANABUILDORDER::copyProgramList(std::list<PROGRAM>& program_list)
 void ANABUILDORDER::countUnitsTotal()
 {
 	unitsTotal = 0;
-	unitsTotalMax = 1;
+//	unitsTotalMax = 1;
 	nonGoalsUnitsTotalMax = 1;
 	for (unsigned int i = GAS_SCV+1; i--;)
 	{
-		if (getLocationTotal(GLOBAL, i) > unitsTotalMax)
-			unitsTotalMax = getLocationTotal(GLOBAL, i);
-		if (getGoal()->getAllGoal(i) > unitsTotalMax)
-			unitsTotalMax = getGoal()->getAllGoal(i);
 		unitsTotal += getLocationTotal(GLOBAL, i);
-		if ((getGoal()->isGoal(i) == false) && (getLocationTotal(GLOBAL, i) > nonGoalsUnitsTotalMax))
+		if ((!getGoal()->getIsGoal(i)) && (getLocationTotal(GLOBAL, i) > nonGoalsUnitsTotalMax))
 			nonGoalsUnitsTotalMax = getLocationTotal(GLOBAL, i);
 	}
 }
@@ -857,31 +853,6 @@ const unsigned int ANABUILDORDER::getGoalPercentage() const
 			return(100*optimalTime/getRealTimer());
 	}
 }
-
-
-
-/*void ANABUILDORDER::analyzeBuildOrder()
-{
-//keeps track of the '@' symbol on the left of each build order entry
-//if the goal is set to 10 marines, the eleventh won't be marked as a 'fulfilled goal' with a '@'
-	int tGoal[UNIT_TYPE_COUNT];
-// reset the tgGoals (to sign with '@' the units which are part of the goal list)
-// and subtract the units that are already on the map
-	for(int i=0;i<UNIT_TYPE_COUNT; ++i)
-	{
-		tGoal[i]=0;
-		for(int j=1;j<MAX_LOCATIONS; ++j)
-			tGoal[i]+=getGoal()->globalGoal[j][i]-pStartcondition->getLocationTotal(j,i);
-	}
-
-	for(int i=0;i<MAX_LENGTH; ++i)
-		if(tGoal[phaenoCode[i]]>0) //~~~~~~ location=0?
-		{
-			--tGoal[phaenoCode[i]];
-			setProgramIsGoal(i,true);
-		}
-	else setProgramIsGoal(i,false);
-};*/
 
 
 unsigned int ANABUILDORDER::successType;

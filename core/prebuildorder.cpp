@@ -488,109 +488,20 @@ const bool PREBUILDORDER::calculateReady() const
 const unsigned int PREBUILDORDER::calculatePrimaryFitness(const bool is_ready)
 {
 	unsigned int tpF=0;
-//TODO evtl noch uebrige availible miteinbeziehen
-//TODO: Nicht alle Einheiten am Ort? => Ort egal sein lassen aber zur Zeit hinzuzaehlen
-	// Nicht alle Einheiten ueberhaupt gebaut UND nicht alle am Ort => nur viertel Bonus fuer Einheiten die nicht am Ort sind
 	if(!is_ready)
 	{
-// ------ INIT THE BONUS SYSTEM FOR REMAINING BUILD ORDERS IN THE BUILDING LIST ------
-// temporary data to check whether a bonus is already given (only applies if total > goal)
 		unsigned int bonus[MAX_LOCATIONS][UNIT_TYPE_COUNT]; 
 		memset(bonus, 0, UNIT_TYPE_COUNT * MAX_LOCATIONS * sizeof(int));
-// ------ END BONUSSYSTEM INIT ------
 
-//				bool first=true;
-		for(std::list<GOAL>::const_iterator i = getGoal()->goal.begin(); i!= getGoal()->goal.end(); ++i)
-//		while(getGoal()->getNextGoal(i, first))
-		{
-//			first=false;
-// ------ NOT ENOUGH UNITS BUILD OF THIS TYPE? -------
-				if(i->getCount() > getLocationTotal(i->getLocation(), i->getUnit()))
-				{
-// ------ ADD TO MAX BONUS -----
-					bonus[i->getLocation()][i->getUnit()]+=i->getCount()-getLocationTotal(i->getLocation(), i->getUnit());
-					//total points: (Am Ort befindliche Einheiten + (Summe aller Locations(100-distance)/100)) / Goalcount
-					//TODO: Absteigen und markieren der benutzten wbfs! Also zuerst die eigentliche location abchecken, dann nach links und rechts die naehesten hinzuziehen
-					//evtl direkt von den locations die wbfs erstmal abziehen und am Schluss nochmal alle goals durchlaufen und den Rest verteilen!
-					unsigned int sumup=0;
-// location 0? Dann ist es trivial
-					if(i->getLocation()==0)
-						sumup=getLocationTotal(0, i->getUnit())*100;
-					else
-					{
-				// location != 0 ? Dann schaun wir mal, ob wir auf der Karte noch wo Units verstreut haben
-				// mehr als goalcount koennen wir keinen Bonus vergeben
-						unsigned int j=1;
-						unsigned int bon = i->getCount();
-						unsigned int loc=(*pMap)->getLocation(i->getLocation())->getNearest(j);
-						while((j<(*getMap())->getMaxLocations()) && (bon>getLocationTotal(loc, i->getUnit())))
-						{
-							sumup+=getLocationTotal(loc, i->getUnit())*(100-(*pMap)->getLocation(loc)->getDistance(i->getLocation())); //was pMap->location[j]...
-							bon-=getLocationTotal(loc, i->getUnit());
-							++j;
-							loc = (*pMap)->getLocation(i->getLocation())->getNearest(j);
-						}
-						// Falls j<MAX_LOCATIONS => unser "Bon" wurde schon vorher aufgebraucht => An dieser Stelle j den Rest draufgeben... 
-						if(j<(*getMap())->getMaxLocations())
-							sumup+=bon*(100-(*pMap)->getLocation(loc)->getDistance(i->getLocation()));
-
-//						TODO 'bonus' veraendern?
-					}
-
-//jetzt steht in sumup die gesammelten totals gewichtet mit den Entfernungen zum Ziel
-										//TODO: Hier gibts Probleme wenn mehrere goals gleicher Units an unterschiedlichen Orten existieren...
-										// evtl funktionsglobales bonus System wie bei den '@' in scc.cpp einfuegen
-										// bissl komplex da mans ja den einzelnen goals verteilen muss...
-					if((i->getTime()>0)&&(i->getFinalTime()>i->getTime()))
-//					{
-//						if(getFinalTime(i)>0) //??? TODO
-//						if(getFinalTime(i)>i->getTime())
-						tpF+=(i->getTime()*sumup)/(i->getCount()*i->getFinalTime());
-//						else setpFitness(getpFitness()+sumup/i->getCount());
-//TODO...~~~
-//						else while(true); // <- kann eigentlich nicht auftreten!
-//						  setpFitness(getpFitness()+(i->getTime()*sumup)/(i->getCount()*coreConfiguration.maxTime));
-//					  }
-					else
-						tpF+=sumup/i->getCount();
-				} // END total < goal
-				else
-//if( /*((i->getLocation()==0)&&(i->getCount()<=getLocationTotal(0,i->getUnit()))) || ( (i->getLocation()>0)&&*/(i->getCount()<=getLocationTotal(i->getLocation(),i->getUnit())))
-								//total >= goal ?
-				{
-// Checken wann wir das Ziel erreicht haetten
-					if((i->getTime()>0)&&(i->getFinalTime()>i->getTime()))
-// aha, wir haben die Zeit ueberschritten => trotzdem anteilig Bonus geben
-						tpF+=(i->getTime()*100/i->getFinalTime());
-// keine Zeitbeschraenkung + wir haben genuegend Einheiten am Zielort => gg
-					else tpF+=100;
-// does not work yet, if this is uncommented, sFitness occasionally jumps to -1222000 or something like that... :/
-// include the final location maybe...
-				}
-		} //end of goal checking
-// TODO: Check for very small 'goal.time' values, probably in scc.cpp!!
-
-// ------ EXTRACT SOME INFORMATIONS OF THE REMAINING BUILD ORDER LIST ------
-// bonus is filled with all goals sorted by location and time
+		tpF = getGoal()->calculateFitness((*unit)[playerNum], bonus);
+		
 		std::priority_queue<Building, std::vector<Building> >  save = buildingQueue;
 		while(!buildingQueue.empty())
 		{
 			const Building& build = buildingQueue.top();
-// ------ IS THIS BUILDING PART OF THE GOAL LIST? ------
 			if(bonus[build.getLocation()][build.getType()] > 0)
 			{
-// as 'ready' is false we hit the time limit. Therefore buildFinishedTime is 
-// negative and adding totalBuildTime results in the time the item was already
-// in the queue 
 				tpF+=(build.getTotalBuildTime()+build.getBuildFinishedTime())*100/bonus[build.getLocation()][build.getType()];
-
-		// TODO time
-
-/*				if((getGoal()->goal[build.getType(i)].time>0)&&(getLocationTotal(build.getLocation(i),build.getType(i))==0))
-					pFitness+=(build.getRemainingBuildTime(i)*100*getGoal()->goal[build.getType(i)].time*getLocationTotal(0,i))/(getGoal()->goal[build.getType(i)].count*(*pStats)[build.getType(i)].BT*coreConfiguration.maxTime);//hier auch ProgramBT
-				else
-					pFitness+=((build.getRemainingBuildTime(i)*100)/((getGoal()->goal[build.getType(i)].count*(*pStats)[build.getType(i)].BT));*/
-
 				--bonus[build.getLocation()][build.getType()];
 			}
 			buildingQueue.pop();
@@ -601,14 +512,6 @@ const unsigned int PREBUILDORDER::calculatePrimaryFitness(const bool is_ready)
 	{
 		tpF += getTimer();
 		tpF += getGoal()->countGoals()*100;
-//		for(std::list<GOAL>::const_iterator i = getGoal()->goal.begin();i!=getGoal()->goal.end();++i)
-//				{
-//						if(i->getCount()>0)
-//								tpF+=100;
-/*					  if((i->getUnit()!=GAS_SCV)&&(i->getUnit()!=SCV)) //do not punish 'too much' workers!
-								if(i->getCount()<getLocationTotal(i->getLocation(),i->getUnit()))
-										setsFitness(getsFitness()+(-getLocationTotal(i->getLocation(),i->getUnit())+i->getCount())*(stats[getGoal()->getRace()][i->getUnit()].minerals+stats[getGoal()->getRace()][i->getUnit()].gas));*/
-//				}
 	}
 	return(tpF);
 }
@@ -1059,6 +962,12 @@ void PREBUILDORDER::mutateGeneCode()
 				}
 			}
 		}
+#ifdef _SCC_DEBUG
+	if(tMaxBuildTypes <= 1)
+	{
+		toLog("ERROR: PREBUILDORDER::mutateGeneCode(): No units can be build with current configuration!");return;
+	}
+#endif
 		
 	for(unsigned int x=MAX_LENGTH-1;x>MAX_LENGTH-getLength(); --x) //length
 	{

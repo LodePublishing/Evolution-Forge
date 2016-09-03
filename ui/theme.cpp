@@ -61,8 +61,10 @@ UI_Theme::UI_Theme():
 		for(unsigned int j=MAX_BUTTON_WIDTH_TYPES;j--;)
 			buttonWidthList[i][j] = 0;
 	}
-	for(unsigned int i=MAX_BUTTON_COLORS_TYPES;i--;)
+	for(unsigned int i = MAX_BUTTON_COLORS_TYPES;i--;)
 		buttonColorsList[i] = NULL;
+	for(unsigned int i = MAX_SOUNDS;i--;)
+		soundList[i] = NULL;
 
 }
 
@@ -104,21 +106,32 @@ UI_Theme::~UI_Theme()
 		delete buttonColorsList[i];
 }
 
-void UI_Theme::unloadGraphics()
+void UI_Theme::unloadGraphicsAndSounds()
 {
 	for(std::list<BitmapEntry>::iterator i = loadedBitmaps.begin(); i!=loadedBitmaps.end(); ++i)
 		if(!i->used)
 		{
-			SDL_FreeSurface(i->bitmap);
 			for(unsigned int j = MAX_RESOLUTIONS;j--;)
 				for(unsigned int k = MAX_COLOR_THEMES;k--;)
 					for(unsigned int l = MAX_BITMAPS;l--;)
 						if(i->bitmap == bitmapList[j][k][l])
 							bitmapList[j][k][l] = NULL;
+			SDL_FreeSurface(i->bitmap);
 			i->bitmap = NULL;
 			i->used = true;
 		} else if(i->bitmap!=NULL)
 			i->used = false;
+/*	for(std::list<SoundEntry>::iterator i = loadedSounds.begin(); i!=loadedSounds.end(); ++i)
+		if(!i->used)
+		{
+			for(unsigned int j = MAX_SOUNDS;j--;)
+				if(i->sound == soundList[j])
+					soundList[j] = NULL;
+			soundEngine.unload(i->sound);
+			i->sound = NULL;
+			i->used = true;
+		} else if(i->sound!=NULL)
+			i->used = false;*/
 }
 
 void UI_Theme::setResolution(const eResolution theme_resolution) 
@@ -349,6 +362,7 @@ const eDataType getDataType(const std::string& item)
 	if(item=="@BRUSHES") return(BRUSH_DATA_TYPE);else
 	if(item=="@BITMAPS") return(BITMAP_DATA_TYPE);else
 	if(item=="@BUTTON_COLORS") return(BUTTON_COLOR_DATA_TYPE);else
+	if(item=="@SOUNDS") return(SOUND_DATA_TYPE);else
 	if(item=="@BUTTON_WIDTH") return(BUTTON_WIDTH_DATA_TYPE);else
 	return(ZERO_DATA_TYPE);
 }
@@ -470,6 +484,7 @@ int get_font_style3(const std::string& item)
 eGlobalWindow parse_global_window(const std::string& item)
 {
 	if(item=="Main window") return(MAIN_WINDOW);else
+	if(item=="Intro window") return(INTRO_WINDOW);else
 	if(item=="Message window") return(MESSAGE_WINDOW);else
 	if(item=="Help window") return(HELP_WINDOW);else
 	if(item=="Settings window") return(SETTINGS_WINDOW);else
@@ -667,9 +682,9 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 }
 
 
-void UI_Theme::loadHelpChapterStringFile(const std::string& dataFile)
+void UI_Theme::loadHelpChapterStringFile(const std::string& data_file)
 {
-	if((dataFile.substr(dataFile.size()-2,2) == "..") ||(dataFile.substr(dataFile.size()-1,1) == "."))
+	if((data_file.substr(data_file.size()-2,2) == "..") ||(data_file.substr(data_file.size()-1,1) == "."))
 		return;
 	char line[1024];
 	std::string entry;
@@ -682,12 +697,12 @@ void UI_Theme::loadHelpChapterStringFile(const std::string& dataFile)
 	eTheme current_theme=ZERO_THEME;
 	eHelpChapter chapter = MAX_HELP_CHAPTER;
 	
-	std::ifstream pFile(dataFile.c_str());
+	std::ifstream pFile(data_file.c_str());
 	
 	if(!pFile.is_open())
 	{
 #ifdef _SCC_DEBUG
-		toLog("ERROR: (UI_Theme::loadHelpChapterStringFile) Could not open file! [" + dataFile + "]");
+		toLog("ERROR: (UI_Theme::loadHelpChapterStringFile) Could not open file! [" + data_file + "]");
 #endif
 		return;
 	}
@@ -814,9 +829,9 @@ void UI_Theme::loadHelpChapterStringFile(const std::string& dataFile)
 }
 
 
-void UI_Theme::loadStringFile(const std::string& dataFile)
+void UI_Theme::loadStringFile(const std::string& data_file)
 {
-	if((dataFile.substr(dataFile.size()-2,2) == "..") ||(dataFile.substr(dataFile.size()-1,1) == "."))
+	if((data_file.substr(data_file.size()-2,2) == "..") ||(data_file.substr(data_file.size()-1,1) == "."))
 		return;
 	const unsigned int MAX_PARAMETERS = 50;
 	char line[1024], old[1024];
@@ -839,12 +854,12 @@ void UI_Theme::loadStringFile(const std::string& dataFile)
 		value[i]=0;
 	}
 
-	std::ifstream pFile(dataFile.c_str());
+	std::ifstream pFile(data_file.c_str());
 	
 	if(!pFile.is_open())
 	{
 #ifdef _SCC_DEBUG
-		toLog("ERROR: (UI_Theme::loadStringFile) Could not open file! [" + dataFile + "]");
+		toLog("ERROR: (UI_Theme::loadStringFile) Could not open file! [" + data_file + "]");
 #endif
 		return;
 	}
@@ -989,7 +1004,7 @@ void UI_Theme::loadStringFile(const std::string& dataFile)
 
 }
 
-void UI_Theme::loadWindowData(const std::string& dataFile, const unsigned int gameNumber, const unsigned int maxGames)
+void UI_Theme::loadWindowData(const std::string& data_file, const unsigned int gameNumber, const unsigned int maxGames)
 {
 	const unsigned int MAX_PARAMETERS = 50;
 	char line[1024], old[1024];
@@ -1009,7 +1024,7 @@ void UI_Theme::loadWindowData(const std::string& dataFile, const unsigned int ga
 		value[i]=0;
 	}
 
-	std::ifstream pFile(dataFile.c_str());
+	std::ifstream pFile(data_file.c_str());
 	
 	if(!pFile.is_open())
 	{
@@ -1137,7 +1152,7 @@ void UI_Theme::updateColors(SDL_Surface* surface)
 	}
 }
 
-void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& bitmapDir, const std::string& fontDir, DC* dc)
+void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_dir, const std::string& sound_dir, const std::string& font_dir, DC* dc, SDL_snd& sound)
 {
 	const unsigned int MAX_PARAMETERS = 50;
 	char line[1024], old[1024];
@@ -1160,7 +1175,7 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 		value[i]=0;
 	}
 
-	std::ifstream pFile(dataFile.c_str());
+	std::ifstream pFile(data_file.c_str());
 	
 	if(!pFile.is_open())
 	{
@@ -1206,6 +1221,7 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 			parameter[k]=buffer;
 			++k;
 		}
+		
 		if((buffer=strtok(NULL,",\0"))!=NULL)
 		{
 #ifdef _SCC_DEBUG
@@ -1305,7 +1321,7 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 					case BRUSH_DATA_TYPE:brushList[current_theme][current_line]=new Brush(dc->GetSurface(),(Uint8)value[0],(Uint8)value[1],(Uint8)value[2],get_brush_style(parameter[3]));break;
 					case FONT_DATA_TYPE:
 					{
-						std::string t=fontDir+parameter[0]+".ttf";
+						std::string t=font_dir+parameter[0]+".ttf";
 						bool is_under_lined = (parameter[2] == "underlined") || (parameter[3] == "underlined");
 						bool is_shadow = (parameter[2] == "shadow") || (parameter[3] == "shadow");
 						fontList[current_resolution]/*[current_language]*/[current_line] = new Font(t, value[1], is_under_lined, is_shadow/*, get_font_style1(parameter[2]), get_font_style2(parameter[3]), get_font_style3(parameter[4]), false, _T(""), FONTENCODING_DEFAULT*/);
@@ -1329,23 +1345,68 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 				++current_line;
 			}
 			// 0 ebenen -> buttons :) BUTTON_COLORS_DATA_TYPE?? TODO
-			else if((sub_mode==ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE)&&(mode==BUTTON_COLOR_DATA_TYPE))
+			else if((sub_mode==ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE))
 			{
-				buttonColorsList[current_line] = new ButtonColorsType;
-				buttonColorsList[current_line]->speed=value[0];
-				buttonColorsList[current_line]->type=(eButtonAnimationType)value[1];
-				for(unsigned int i=MAX_BUTTON_ANIMATION_PHASES;i--;)
+				if(mode==BUTTON_COLOR_DATA_TYPE)
 				{
-					buttonColorsList[current_line]->startBrush[i]=(eBrush)(value[0*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonColorsList[current_line]->endBrush[i]=(eBrush)(value[1*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonColorsList[current_line]->startTextColor[i]=(eColor)(value[2*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonColorsList[current_line]->endTextColor[i]=(eColor)(value[3*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonColorsList[current_line]->startBorderPen[i]=(ePen)(value[4*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonColorsList[current_line]->endBorderPen[i]=(ePen)(value[5*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonColorsList[current_line]->bitmap[i]=(eBitmap)(value[6*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-//					buttonColorsList[current_line]->text[i]=(eString)(value[7*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonColorsList[current_line] = new ButtonColorsType;
+					buttonColorsList[current_line]->speed=value[0];
+					buttonColorsList[current_line]->type=(eButtonAnimationType)value[1];
+					for(unsigned int i=MAX_BUTTON_ANIMATION_PHASES;i--;)
+					{
+						buttonColorsList[current_line]->startBrush[i]=(eBrush)(value[0*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+						buttonColorsList[current_line]->endBrush[i]=(eBrush)(value[1*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+						buttonColorsList[current_line]->startTextColor[i]=(eColor)(value[2*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+						buttonColorsList[current_line]->endTextColor[i]=(eColor)(value[3*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+						buttonColorsList[current_line]->startBorderPen[i]=(ePen)(value[4*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+						buttonColorsList[current_line]->endBorderPen[i]=(ePen)(value[5*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+						buttonColorsList[current_line]->bitmap[i]=(eBitmap)(value[6*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+	//					buttonColorsList[current_line]->text[i]=(eString)(value[7*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					}
+					++current_line;
+				} else if(mode == SOUND_DATA_TYPE)
+				{
+					std::string name;
+						
+					if((parameter[0].size()<4)||(parameter[0][parameter[0].size()-4]!='.'))
+						name = sound_dir + parameter[0] + ".mp3";
+					else name = sound_dir + parameter[0];
+					bool found_sound = false;
+					for(std::list<SoundEntry>::iterator i = loadedSounds.begin(); i!=loadedSounds.end(); ++i)
+						// already loaded?
+						if(i->name == name)
+						{
+							found_sound = true;
+							soundAccessTable[current_line] = &(*i);
+							break;
+						}
+					if(!found_sound)
+					{
+						SoundEntry entry;
+						entry.line = current_line;
+						entry.name = name;
+						entry.sound = NULL;//temp;
+						entry.used = false;
+						loadedSounds.push_back(entry);
+						soundAccessTable[current_line] = &(loadedSounds.back());
+					}
+					
+//					if(soundList[id] == NULL)
+// reload
+					{
+						toLog("Loading " + soundAccessTable[current_line]->name);
+						const SndInfo* temp = sound.load(soundAccessTable[current_line]->name.c_str());
+						if(temp == NULL)
+						{
+							toLog("Could not load sound " + soundAccessTable[current_line]->name + " : " + SDL_GetError());
+							return;
+						}
+						soundAccessTable[current_line]->sound = temp;
+						soundList[current_line] = temp;
+					}
+					soundAccessTable[current_line]->used = true;
+					++current_line;
 				}
-				++current_line;				
 			}
 			// => es gibt noch eine 2. Ebene
 			else if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
@@ -1364,31 +1425,35 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 				switch(mode)
 				{
 					case BITMAP_DATA_TYPE:
-						{
-							std::string name = bitmapDir+parameter[0]+".bmp";
-							bool found_bitmap = false;
-							for(std::list<BitmapEntry>::iterator i = loadedBitmaps.begin(); i!=loadedBitmaps.end(); ++i)
-								// already loaded?
-								if(i->name == name)
-								{
-									found_bitmap = true;
-									bitmapAccessTable[current_resolution][current_theme][current_line] = &(*i);
-									break;
-								}
-							if(!found_bitmap)
+					{
+						std::string name;
+						
+						if((parameter[0].size()<4)||(parameter[0][parameter[0].size()-4]!='.'))
+							name = bitmap_dir + parameter[0] + ".bmp";
+						else name = bitmap_dir + parameter[0];
+						bool found_bitmap = false;
+						for(std::list<BitmapEntry>::iterator i = loadedBitmaps.begin(); i!=loadedBitmaps.end(); ++i)
+							// already loaded?
+							if(i->name == name)
 							{
-								BitmapEntry entry;
-								entry.resolution = current_resolution;
-								entry.theme = current_theme;
-								entry.line = current_line;
-								entry.name = name;
-								entry.bitmap = NULL;//temp;
-								entry.used = false;
-								entry.solid = (parameter[1] == "(SOLID)");
-								loadedBitmaps.push_back(entry);
-								bitmapAccessTable[current_resolution][current_theme][current_line] = &(loadedBitmaps.back());
+								found_bitmap = true;
+								bitmapAccessTable[current_resolution][current_theme][current_line] = &(*i);
+								break;
 							}
-						}break;
+						if(!found_bitmap)
+						{
+							BitmapEntry entry;
+							entry.resolution = current_resolution;
+							entry.theme = current_theme;
+							entry.line = current_line;
+							entry.name = name;
+							entry.bitmap = NULL;//temp;
+							entry.used = false;
+							entry.solid = (parameter[1] == "(SOLID)");
+							loadedBitmaps.push_back(entry);
+							bitmapAccessTable[current_resolution][current_theme][current_line] = &(loadedBitmaps.back());
+						}
+					}break;
 					default:break;
 				}
 				++current_line;
@@ -1481,12 +1546,10 @@ SDL_Surface* UI_Theme::lookUpBitmap(const eBitmap id)
 // reload
 	{
 //		toLog("Loading " + bitmapAccessTable[resolution][colorTheme][id]->name);
-		SDL_Surface* temp = SDL_LoadBMP(bitmapAccessTable[resolution][colorTheme][id]->name.c_str());
-		
+		SDL_Surface* temp = IMG_Load(bitmapAccessTable[resolution][colorTheme][id]->name.c_str());
 		if(temp == NULL)
 		{
-			toLog("Could not load Bitmap " + bitmapAccessTable[resolution][colorTheme][id]->name);
-			SDL_FreeSurface(temp);
+			toLog("Could not load Bitmap " + bitmapAccessTable[resolution][colorTheme][id]->name + " : " + IMG_GetError());
 			return(NULL);
 		}
 		if(!bitmapAccessTable[resolution][colorTheme][id]->solid)
@@ -1496,6 +1559,30 @@ SDL_Surface* UI_Theme::lookUpBitmap(const eBitmap id)
 	}
 	bitmapAccessTable[resolution][colorTheme][id]->used = true;
 	return(bitmapList[resolution][colorTheme][id]);
+}
+
+const SndInfo* UI_Theme::lookUpSound(const eSound id)
+{
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_SOUNDS)) {
+		toLog("ERROR: (UI_Theme::lookUpSound) id out of range.");return(NULL); // TODO
+	}
+#endif
+/*	if(soundList[id] == NULL)
+// reload
+	{
+		toLog("Loading " + soundAccessTable[id]->name);
+		SndInfo* temp = sound.load(soundAccessTable[id]->name.c_str());
+		if(temp == NULL)
+		{
+			toLog("Could not load Sound " + soundAccessTable[id]->name + " : " + SDL_GetError());
+			return(NULL);
+		}
+		soundAccessTable[id]->sound = temp;
+		soundList[id] = temp;
+	}
+	soundAccessTable[id]->used = true;*/
+	return(soundList[id]);
 }
 
 

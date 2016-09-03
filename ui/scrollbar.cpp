@@ -192,7 +192,6 @@ void UI_ScrollBar::draw(DC* dc) const
 {
 	if(!isShown())
 		return;
-
 	if(checkForNeedRedraw())
 	{
 		dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));

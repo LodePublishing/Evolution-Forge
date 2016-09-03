@@ -25,6 +25,7 @@ class BoWindow : public UI_Window
 		void reloadStrings();
 		void processList();
 		void process();
+		void wave(SDL_snd& sound);
 		void assignAnarace(ANABUILDORDER* bo_anarace);
 		void reloadOriginalSize();
 
@@ -55,6 +56,8 @@ class BoWindow : public UI_Window
 		unsigned int lastBogoal;
 		unsigned int startLine;
 		signed int selectedItem;
+
+		bool newItem;
 
 		UI_StaticText* timeSlot[60];
 

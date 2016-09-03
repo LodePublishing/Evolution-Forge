@@ -139,7 +139,7 @@ GOAL_ENTRY* parseGoalBlock(std::list< std::list<std::string> >::iterator& i, std
 						++l;int count=atoi(l->c_str());
 						++l;int location=atoi(l->c_str());
 						++l;int time=atoi(l->c_str());
-						goal->addGoal(unit, count, time, location);
+						goal->addNewGoalToList(unit, time, location, count);
 					}
 				}
 			}

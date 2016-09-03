@@ -1,12 +1,13 @@
-PROGRAM=scc2
+PROGRAM=ef
+UI=ui
 DEPENDFILE=.depend
 CXX=g++
-DLLPATH=$(PROGRAM)dll
-OBJDLL=$(DLLPATH)/anarace.o $(DLLPATH)/debug.o $(DLLPATH)/ga.o $(DLLPATH)/goal.o  $(DLLPATH)/harvest.o  $(DLLPATH)/location.o  $(DLLPATH)/basicmap.o  $(DLLPATH)/player.o  $(DLLPATH)/prerace.o  $(DLLPATH)/race.o  $(DLLPATH)/settings.o  $(DLLPATH)/soup.o $(DLLPATH)/building.o $(DLLPATH)/start.o $(DLLPATH)/unit.o $(DLLPATH)/blist.o $(DLLPATH)/startcondition.o
+COREPATH=core
+OBJDLL=$(COREPATH)/anarace.o $(COREPATH)/ga.o $(COREPATH)/goal.o  $(COREPATH)/harvest.o  $(COREPATH)/location.o  $(COREPATH)/basicmap.o  $(COREPATH)/prerace.o  $(COREPATH)/race.o  $(COREPATH)/settings.o  $(COREPATH)/soup.o $(COREPATH)/building.o $(COREPATH)/start.o $(COREPATH)/unit.o $(COREPATH)/blist.o $(COREPATH)/startcondition.o
 
 SOURCEDLL=$(OBJDLL:%.o=%.cpp)
 
-OBJMAIN=$(PROGRAM)/scc2.o $(PROGRAM)/defs.o $(PROGRAM)/UI_Theme.o $(PROGRAM)/UI_Window.o $(PROGRAM)/UI_Button.o $(PROGRAM)/UI_Object.o $(PROGRAM)/controls.o $(PROGRAM)/bodiagram.o $(PROGRAM)/bograph.o $(PROGRAM)/bowindow.o $(PROGRAM)/force.o $(PROGRAM)/info.o $(PROGRAM)/message.o $(PROGRAM)/player.o $(PROGRAM)/statistics.o $(PROGRAM)/timer.o $(PROGRAM)/util.o $(PROGRAM)/UI_StaticText.o $(PROGRAM)/mainwindow.o $(PROGRAM)/tutorial.o $(PROGRAM)/corewindow.o
+OBJMAIN=$(UI)/sdlwrapper.o $(UI)/object.o $(UI)/window.o $(UI)/button.o $(UI)/statictext.o $(UI)/theme.o $(UI)/controls.o $(PROGRAM)/bodiagram.o $(PROGRAM)/bograph.o $(PROGRAM)/bowindow.o $(PROGRAM)/force.o $(PROGRAM)/info.o $(PROGRAM)/message.o $(PROGRAM)/statistics.o $(PROGRAM)/timer.o $(PROGRAM)/mainwindow.o $(PROGRAM)/tutorial.o $(PROGRAM)/corewindow.o $(PROGRAM)/player.o $(PROGRAM)/main.o
 
 SOURCEMAIN=$(OBJMAIN:%.o=%.cpp)
 
@@ -18,16 +19,13 @@ CXXFLAGS = -g -Wall -D_SCC_DEBUG
 
 -include $(DEPENDFILE)
 
-.SUFFIXES: .o .cpp .rc _resources.o
-.rc_resources.o:
-	$(RESCOMP) -i $< -o $@ $(LRESFLAGS)
-
+.SUFFIXES: .o .cpp
 bin:	$(OBJMAIN) $(OBJHEADER)
-	$(CXX) $(CXXFLAGS) -o $(PROGRAM).bin $(OBJMAIN) $(LIBS) $(LDLIBS) $(LIBRARIES) -lSDL -lSDL_ttf -lSDL_image
+	$(CXX) $(CXXFLAGS) -o $(PROGRAM)b $(OBJMAIN) $(LIBS) $(LDLIBS) $(LIBRARIES) -lSDL -lSDL_ttf -lSDL_image
 		
 lib:	$(SOURCEDLL) $(SOURCEHEADER)
 	$(CXX) $(CXXFLAGS) -fPIC -c $(SOURCEDLL)
-	@mv *.o $(DLLPATH)
+	@mv *.o $(COREPATH)
 	$(CXX) $(CXXFLAGS) -shared -Wl,-soname,$(PROGRAM).so.1 -o $(PROGRAM).so.1.0 $(SOURCEDLL)
 
 dep: $(SOURCEDLL) $(SOURCEMAIN)
@@ -36,15 +34,22 @@ dep: $(SOURCEDLL) $(SOURCEMAIN)
 clean:
 	@rm -vf ./*.o
 	@rm -vf $(PROGRAM)/*.o
-	@rm -vf $(PROGRAM).bin
+	@rm -vf $(PROGRAM)b
+	@rm -vf $(UI)/*.o
+libclean:
+	@rm -vf $(COREPATH)/*.o
+	@rm -vf $(COREPATH)/*.d
+	@rm $(PROGRAM).so.1.0
 
 allclean:
 	@rm -vf ./*.o
 	@rm -vf ./*.d
-	@rm -vf $(DLLPATH)/*.d
-	@rm -vf $(DLLPATH)/*.o
+	@rm -vf $(COREPATH)/*.d
+	@rm -vf $(COREPATH)/*.o
 	@rm -vf $(PROGRAM)/*.d
 	@rm -vf $(PROGRAM)/*.o
+	@rm -vf $(UI)/*.d
+	@rm -vf $(UI)/*.o
 	@rm -vf $(PROGRAM).dll
 	@rm -vf $(PROGRAM).a
 	@rm -vf $(PROGRAM).bin

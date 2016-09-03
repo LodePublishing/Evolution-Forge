@@ -1,5 +1,8 @@
 #!/bin/sh
-indent "$1" -cbi0 -bli0 -nbad -bap -bbo -nbc -bl -bls -c33 -cd33 -cp33 -cdb -ce -cli2 -cs -d16 -fc1 -nfca -i4 -ip0 -l125 -lp -npcs -nprs -npsl -saf -sai -saw -sc -sob -nss -cdw -di16 -ts4 -nhnl
+indent "$1" -cbi0 -bli0 -nbad -bap -bbo -nbc -bls -c33 -cd33 -cp33 -cdb -nce -cli2 -cs -fc1 -nfca -i4 -ip0 -l125 -lp -npcs -nprs -npsl -saf -sai -saw -sc -sob -nss 
+#-cdw -di16 -ts4 -nhnl
+
+#-bl
 
 #			-bli0
 # no blank lines after declarations

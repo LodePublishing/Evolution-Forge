@@ -32,6 +32,7 @@ class Font
 		
 		const Size getTextExtent(const std::string& text) const;
 		void DrawText(SDL_Surface* surface, const SDL_Color& color, const std::string& text, const signed int x, const signed int y) const;
+		void DrawText(SDL_Surface* surface, const SDL_Color& color, const SDL_Color& back_color, const std::string& font_text, const signed int x, const signed int y) const;
 };
 
 inline Font::operator TTF_Font*() {

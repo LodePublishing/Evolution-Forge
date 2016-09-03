@@ -28,5 +28,9 @@
 				       "GAME_SPEED_FAST_STRING" = "Schnell"
 				     "GAME_SPEED_FASTER_STRING" = "Schneller"
 				    "GAME_SPEED_FASTEST_STRING" = "Am schnellsten"	
+
+				        "DIAGRAM_SUPPLY_STRING" = "Nahrung: "
+				          "DIAGRAM_TIME_STRING" = "Zeit: "
+			    
 	@END
 @END

@@ -100,7 +100,7 @@ void UI_ScrollBar::process() // process messages, continue animation etc.
 	add->setPosition(Point(getParent()->getWidth() -12, clientHeight + position + 6));
 	sub->setPosition(Point(getParent()->getWidth() -12, position - 4));
 
-	if(Rect(getParent()->getAbsolutePosition(), getParent()->getSize() + Size(8, 0)).isInside(UI_Object::mouse))
+	if(Rect(getParent()->getAbsolutePosition(), getParent()->getSize() + Size(8, 0)).isTopLeftCornerInside(UI_Object::mouse))
 	{
 		add->Show();
 		sub->Show();
@@ -124,25 +124,25 @@ void UI_ScrollBar::process() // process messages, continue animation etc.
 	// TODO: nicht zeichnen falls Hoehe zu klein
 }
 
+void UI_ScrollBar::object_info()
+{
+	toErrorLog("ui_scrollbar");
+}
 
 #include <sstream>
-void UI_ScrollBar::draw(DC* dc) const
+void UI_ScrollBar::draw() const
 {
-	if(!isShown())
-		return;
-	if(checkForNeedRedraw())
-	{
-		dc->setBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
-		if(Rect(getParent()->getAbsolutePosition() + Point(getWidth(), startY+5) - Size(14, 0), Size(12, getHeight()+12)).isInside(mouse))
-			dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-		else
-			dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));
-			
-		dc->DrawRectangle(Rect(getParent()->getAbsolutePosition() + Size(getParent()->getWidth()-13, startY+5), Size(10, clientHeight)));
-		dc->setBrush(*theme.lookUpBrush(CONTINUE_BUTTON_BRUSH));
-		dc->DrawRectangle(Rect(getParent()->getAbsolutePosition() + Point(getParent()->getWidth()-12, startY+currentScrollY+5), Size(8, barHeight)));
-	}
-	UI_Object::draw(dc);
+	// TODO!
+	dc->setBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
+	if(Rect(getParent()->getAbsolutePosition() + Point(getWidth(), startY+5) - Size(14, 0), Size(12, getHeight()+12)).isTopLeftCornerInside(mouse))
+		dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+	else
+		dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));
+		
+	dc->DrawRectangle(Rect(getParent()->getAbsolutePosition() + Size(getParent()->getWidth()-13, startY+5) - Size(getAbsolutePosition().x, getAbsolutePosition().y), Size(10, clientHeight)));
+	dc->setBrush(*theme.lookUpBrush(CONTINUE_BUTTON_BRUSH));
+	dc->DrawRectangle(Rect(getParent()->getAbsolutePosition() + Point(getParent()->getWidth()-12, startY+currentScrollY+5) - Size(getAbsolutePosition().x, getAbsolutePosition().y), Size(8, barHeight)));
+	UI_Object::draw();
 		
 	/*Point p = Point(100, 300);
 	dc->setTextForeground(DC::toSDL_Color(255, 20, 20));
@@ -171,10 +171,12 @@ void UI_ScrollBar::setClientTargetHeight(const unsigned int height) {
 
 void UI_ScrollBar::moveUp() {
 	targetScrollY -= clientHeight / 40;
+	toErrorLog(targetScrollY);
 }
 
 void UI_ScrollBar::moveDown() {
 	targetScrollY += clientHeight / 40;
+	toErrorLog(targetScrollY);
 }
 
 // TODO: Wenn Scrollbereich ausserhalb des Fensters rutscht moechte das Programm verstaendlicherweise neumalen, da es nicht weiss, dass die entsprechenden Eintraege versteckt werden... :-/
@@ -182,8 +184,10 @@ void UI_ScrollBar::moveToTop() {
 	if(currentScrollY==0)
 		return;
 	targetScrollY = 0;
+	toErrorLog("move to top");
 }
 
 void UI_ScrollBar::moveToBottom() {
 	targetScrollY = 99999;
+	toErrorLog("move to bottom");
 }

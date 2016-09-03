@@ -8,10 +8,10 @@ DataBaseEntry::DataBaseEntry(UI_Object* entry_parent, const Rect& entry_rect, co
 	myBO(0),
 	myRace(0),
 	entry(new UI_Button(this, Rect(Point(data_entry_type==DATA_RACE_ENTRY?15:data_entry_type==DATA_GOAL_ENTRY?30:45, 0), 
-					Size(getWidth() - 40 - (data_entry_type==DATA_RACE_ENTRY?15:data_entry_type==DATA_GOAL_ENTRY?30:45), 12)), Size(1, 1), 
+					Size(getWidth() - 40 - (data_entry_type==DATA_RACE_ENTRY?15:data_entry_type==DATA_GOAL_ENTRY?30:45), 12)), Size(), 
 				data_entry_type==DATA_BO_ENTRY?NON_GOAL_ENTRY_BUTTON:OPEN_TREE_BUTTON, INCREASE_BITMAP, 
 				((data_entry_type!=DATA_BO_ENTRY) && (entry_count==0))?NO_BUTTON_MODE:CHECK_BUTTON_MODE, text, SPECIAL_BUTTON_LEFT)),
-	checkButton(new UI_Button(this, Rect(Point(getWidth() - 30, 0), Size(12, 12)), Size(1, 1), CHECK_BUTTON, RADIO_OFF, CHECK_BUTTON_MODE, NULL_STRING, DATA_ENTRY_CHECK_BUTTON_TOOLTIP_STRING)),
+	checkButton(new UI_Button(this, Rect(Point(getWidth() - 30, 0), Size(12, 12)), Size(), CHECK_BUTTON, RADIO_OFF, CHECK_BUTTON_MODE, NULL_STRING, DATA_ENTRY_CHECK_BUTTON_TOOLTIP_STRING)),
 	entryType(data_entry_type),
 	entryCount(entry_count),
 	entryText(text)
@@ -71,9 +71,7 @@ void DataBaseEntry::process()
 //		setNeedRedrawMoved();
 }
 
-void DataBaseEntry::draw(DC* dc) const
+void DataBaseEntry::draw() const
 {
-	if(!isShown())
-		return;
-	UI_Object::draw(dc);
+	UI_Object::draw();
 }

@@ -368,8 +368,14 @@ void UI_Sound::playSound(const eSound id, const unsigned int x)
 
 
 #ifdef _SDL_MIXER_SOUND
-void UI_Sound::transitionMusic()
+static void transitionMusic(void)
 {
+	UI_Sound::transitionMusic();
+}
+
+void UI_Sound::transitionMusic(void)
+{
+	toInitLog("callback called");
 	if(music != NULL)
 	{
 		Mix_HaltMusic(); // Just in case there was a misunderstanding, halt the music
@@ -391,7 +397,7 @@ void UI_Sound::transitionMusic()
 }
 #endif
 
-void UI_Sound::playMusic(const eMusic id)
+void UI_Sound::playMusic(const eMusic id, const bool loop)
 {
 #ifdef _FMOD_SOUND
 	if(!sound)
@@ -408,18 +414,30 @@ void UI_Sound::playMusic(const eMusic id)
 		if(id != MAX_MUSIC)
 		{
 			currentMusic = id;
-			nextMusic = lookUpMusic(currentMusic);
-			Mix_HookMusicFinished(transitionMusic);
+			if(loop)
+				nextMusic = lookUpMusic(currentMusic);
+			else 
+				nextMusic = NULL;
+			Mix_HookMusicFinished(::transitionMusic);
+//			toErrorLog("fading out");
 			success = Mix_FadeOutMusic(MUSIC_TRANSITION_DURATION/2);
-			toInitLog("fadeout");
 		} else 
+		{
+//			toErrorLog("fading out");
 			success = Mix_FadeOutMusic(MUSIC_TRANSITION_DURATION);
+		}
 	} else {
 		if(id != MAX_MUSIC)
 		{
-			toInitLog("fadein new");
-			toInitLog(id);
-			success = Mix_FadeInMusic(lookUpMusic(id), -1, MUSIC_TRANSITION_DURATION);
+			currentMusic = id;
+			music = lookUpMusic(id);
+			if(loop)
+				nextMusic = lookUpMusic(currentMusic);
+			else 
+				nextMusic = NULL;
+			Mix_HookMusicFinished(::transitionMusic);
+//			toErrorLog("fading in");
+			success = Mix_FadeInMusic(music, -1, MUSIC_TRANSITION_DURATION);
 		}
 		else success = 0;
 	}
@@ -547,17 +565,19 @@ void UI_Sound::processChannels()
 		{
 			int mychannel = -1;
 			mychannel = Mix_PlayChannel(-1, i->first, 0);
-#ifdef _SCC_DEBUG
 			if(mychannel == -1) {
+#ifdef _SCC_DEBUG
 				std::ostringstream os;
 				os << "ERROR (UI_Sound::processChannels()): " << Mix_GetError();
 				toErrorLog(os.str());
-				continue;
-			}
 #endif
-//			mychannel->setPan(i->second);
-//			mychannel->setVolume((float)(uiConfiguration.getSoundVolume())/100.0);
-			soundChannel.push_back(mychannel);
+				continue;
+			} else
+			{
+//				mychannel->setPan(i->second);
+//				mychannel->setVolume((float)(uiConfiguration.getSoundVolume())/100.0);
+				soundChannel.push_back(mychannel);
+			}
 		}
 #endif
 }
@@ -600,9 +620,9 @@ void UI_Sound::initSoundAndMusicIdentifier()
 	soundIdentifier[COMPLETE_SOUND] = "COMPLETE_SOUND";
 	soundIdentifier[ERROR_SOUND] = "ERROR_SOUND";
 	soundIdentifier[RING_SOUND] = "RING_SOUND";
-	soundIdentifier[INTRO_SOUND] = "INTRO_SOUND";
 	
 	musicIdentifier[NULL_MUSIC] = "NULL_MUSIC";
+	musicIdentifier[INTRO_MUSIC] = "INTRO_MUSIC";
 	musicIdentifier[LALA_MUSIC] = "LALA_MUSIC";
 	musicIdentifier[DIABLO_MUSIC] = "DIABLO_MUSIC";
 }

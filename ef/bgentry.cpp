@@ -16,9 +16,9 @@ void BoGraphEntry::process()
 //		getParent()->setNeedRedrawMoved(); // TODO
 }
 
-void BoGraphEntry::draw(DC* dc) const
+void BoGraphEntry::draw() const
 {
-	UI_Button::draw(dc);
+	UI_Button::draw();
 }
 
 

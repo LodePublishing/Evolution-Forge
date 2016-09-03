@@ -20,7 +20,7 @@ class ForceEntry : public UI_Button
 		~ForceEntry();
 	
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 
 		void setTargetForce(const unsigned int force);
 		void setTotalNumber(const unsigned int total_number);

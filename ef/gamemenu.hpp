@@ -9,7 +9,7 @@ class GameMenu : public UI_Menu
 		GameMenu(UI_Object* game_parent, const Rect& game_rect, const Size distance_bottom_right, const ePositionMode position_mode);
 		~GameMenu();
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 };
 
 #endif

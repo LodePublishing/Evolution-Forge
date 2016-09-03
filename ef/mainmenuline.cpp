@@ -1,10 +1,10 @@
-#include "mainwindow.hpp"
+#include "mainmenuline.hpp"
 #include "game.hpp"
 
 const unsigned int MAX_VISIBLE_GAME_TABS = 5;
 
-MainWindow::MainWindow() : 
-	UI_Window( NULL, NULL_STRING, theme.lookUpGlobalRect(MAIN_WINDOW), theme.lookUpGlobalMaxHeight(MAIN_WINDOW), NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, Rect(0, 0, 1280, 1024), TRANSPARENT ),
+MainMenuLine::MainMenuLine(UI_Object* main_parent) : 
+	UI_Object( main_parent, Rect(), Size()),
 	removeCurrentTabButton(new UI_Button(this, Rect( Point((theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)+2)*MAX_VISIBLE_GAME_TABS + 30, 2), Size()), Size(), MENU_BUTTON, CANCEL_BITMAP, PRESS_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST)),
 	scrollLeftButton(new UI_Button(this, Rect(0, 2, 8, 8), Size(0,0), ARROW_BUTTON, SMALL_ARROW_LEFT_BITMAP, PRESS_BUTTON_MODE, NULL_STRING)),
 	scrollRightButton(new UI_Button(this, Rect( Point((theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)+2)*MAX_VISIBLE_GAME_TABS + 15, 2), Size(8, 8)), Size(0,0), ARROW_BUTTON, SMALL_ARROW_RIGHT_BITMAP, PRESS_BUTTON_MODE, NULL_STRING)),
@@ -24,10 +24,10 @@ MainWindow::MainWindow() :
 
 	for(unsigned int i = MAX_TABS;i--;)
 	{
-		gameNumbers[i]=0;
-		tab[i]=NULL;
+		gameNumbers[i] = 0;
+		tab[i] = NULL;
 	}
- 	tab[0] = new UI_Button(leftTabs, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), TAB_BUTTON, NULL_BITMAP, TOP_TAB_BUTTON_MODE, NEW_GAME_STRING, DO_NOT_ADJUST, MIDDLE_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	tab[0] = new UI_Button(leftTabs, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), TAB_BUTTON, NULL_BITMAP, TOP_TAB_BUTTON_MODE, NEW_GAME_STRING, DO_NOT_ADJUST, MIDDLE_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 // right:
 	tab[DATABASE_TAB] = new UI_Button(rightTabs, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), TAB_BUTTON, MAP_BITMAP, TOP_TAB_BUTTON_MODE, DATABASE_TAB_STRING, DO_NOT_ADJUST, MIDDLE_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH); // TODO
 //	tab[MAP_TAB] = new UI_Button(NULL, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), MAP_TAB_BUTTON, true, TOP_TAB_BUTTON_MODE, MAP_TAB_STRING, DO_NOT_ADJUST, MIDDLE_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
@@ -38,9 +38,12 @@ MainWindow::MainWindow() :
 //	tab[MAP_TAB]->updateToolTip(MAP_TAB_TOOLTIP_STRING);
 	tab[SETTINGS_TAB]->updateToolTip(SETTINGS_TAB_TOOLTIP_STRING);
 	tab[HELP_TAB]->updateToolTip(HELP_TAB_TOOLTIP_STRING);
+
+	setDrawType(TRANSPARENT_OBJECT);
+	reloadOriginalSize();
 }
 
-MainWindow::~MainWindow()
+MainMenuLine::~MainMenuLine()
 {
 	for(unsigned int i=MAX_TABS;i--;)
 		delete tab[i];
@@ -49,30 +52,29 @@ MainWindow::~MainWindow()
 	delete scrollRightButton;
 }
 
-void MainWindow::reloadOriginalSize()
+void MainMenuLine::reloadOriginalSize()
 {
+	setOriginalRect(Rect(0,0,UI_Object::theme.getCurrentResolutionSize().getWidth(), 30));
 	for(unsigned int i = 0; i < MAX_TABS; i++)
 		if(tab[i])
 		{
 			tab[i]->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
 			tab[i]->reloadOriginalSize();
 		}
-	setOriginalRect(theme.lookUpGlobalRect(MAIN_WINDOW));
-	setMaxHeight(theme.lookUpGlobalMaxHeight(MAIN_WINDOW));
 	removeCurrentTabButton->setOriginalPosition(Point((theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)+2)*MAX_VISIBLE_GAME_TABS + 30, 2));
 	scrollRightButton->setOriginalPosition(Point((theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)+2)*MAX_VISIBLE_GAME_TABS + 15, 2));
-	UI_Window::reloadOriginalSize();
+	UI_Object::reloadOriginalSize();
 }
 
-void MainWindow::reloadStrings()
+void MainMenuLine::reloadStrings()
 {
 	for(unsigned int i = MAX_TABS;i--;)
 		if((i < gameTabCount) && (tab[i]))
 			tab[i]->updateText(UI_Object::theme.lookUpFormattedString(GAME_NUMBER_STRING, gameNumbers[i]));
-	UI_Window::reloadStrings();
+	UI_Object::reloadStrings();
 }
 
-const eTabs MainWindow::getCurrentTab() const
+const eTabs MainMenuLine::getCurrentTab() const
 {
 	for(unsigned int i = MAX_TABS; i--;)
 		if((tab[i])&&(tab[i]->isCurrentlyActivated()))
@@ -80,11 +82,11 @@ const eTabs MainWindow::getCurrentTab() const
 	return((eTabs)0);
 }
 
-void MainWindow::activateTab(const eTabs tab_number)
+void MainMenuLine::activateTab(const eTabs tab_number)
 {
 #ifdef _SCC_DEBUG
 	if(tab_number<0) {
-		toErrorLog("DEBUG (MainWindow::activateTab()): Value tab_number out of range.");return;
+		toErrorLog("DEBUG (MainMenuLine::activateTab()): Value tab_number out of range.");return;
 	}
 #endif
 	for(unsigned int i = MAX_TABS; i--;)
@@ -97,7 +99,7 @@ void MainWindow::activateTab(const eTabs tab_number)
 		}
 }
 
-void MainWindow::activateTabNumber(unsigned int tab_number)
+void MainMenuLine::activateTabNumber(unsigned int tab_number)
 {
 	unsigned int n = 0;
 	for(unsigned int i = 0; i < MAX_TABS; ++i)
@@ -111,7 +113,7 @@ void MainWindow::activateTabNumber(unsigned int tab_number)
 		}
 }
 
-void MainWindow::addNewGameTab()
+void MainMenuLine::addNewGameTab()
 {
 	delete(tab[gameTabCount]); // 'new game' loeschen
 	
@@ -133,7 +135,7 @@ void MainWindow::addNewGameTab()
 
 }
 
-void MainWindow::adjustView()
+void MainMenuLine::adjustView()
 {
 	for(unsigned int i = MAX_GAME_TABS; i--;)
 		if(tab[i])
@@ -145,7 +147,7 @@ void MainWindow::adjustView()
 	leftTabs->reloadOriginalSize();
 }
 
-void MainWindow::scrollLeft()
+void MainMenuLine::scrollLeft()
 {
 	leftTabs->reloadOriginalSize();
 	if(viewTabs == 0)
@@ -154,7 +156,7 @@ void MainWindow::scrollLeft()
 	adjustView();
 }
 
-void MainWindow::scrollRight()
+void MainMenuLine::scrollRight()
 {
 	leftTabs->reloadOriginalSize();
 	if(viewTabs + MAX_VISIBLE_GAME_TABS > gameTabCount)
@@ -163,11 +165,11 @@ void MainWindow::scrollRight()
 	adjustView();
 }
 		
-void MainWindow::removeGameTab(const unsigned int game_number)
+void MainMenuLine::removeGameTab(const unsigned int game_number)
 {
 #ifdef _SCC_DEBUG
 	if(game_number>=gameTabCount) {
-		toErrorLog("DEBUG: (MainWindow::removeGameTab): Value game_number out of range.");return;
+		toErrorLog("DEBUG: (MainMenuLine::removeGameTab): Value game_number out of range.");return;
 	}
 #endif
 	bool was_pressed = tab[game_number]->isCurrentlyActivated();
@@ -194,10 +196,9 @@ void MainWindow::removeGameTab(const unsigned int game_number)
 	}
 }
 
-void MainWindow::process()
+void MainMenuLine::process()
 {
-	clearRedrawFlag();
-	UI_Window::process();
+	UI_Object::process();
 
 	markForRemove = false;
 	markForNewGame = false;
@@ -209,14 +210,11 @@ void MainWindow::process()
 			break;
 		}
 	
-	if(leftTabs->checkForNeedRedraw() || rightTabs->checkForNeedRedraw())
-		setNeedRedrawNotMoved();
-
 	tabHasChanged = false;
 	eTabs t = getCurrentTab();
 #ifdef _SCC_DEBUG
 	if(t < 0)
-		toErrorLog("DEBUG (MainWindow::process()): getCurrentTab out of range.");
+		toErrorLog("DEBUG (MainMenuLine::process()): getCurrentTab out of range.");
 #endif
 	if(oldTab != t)
 	{
@@ -247,97 +245,26 @@ void MainWindow::process()
 		scrollRight();
 }
 
-void MainWindow::draw(DC* dc) const
+void MainMenuLine::draw() const
 {
-/*	if(checkForNeedRedraw())
+	int y = tab[HELP_TAB]->getHeight();
+
+	if(tab[getCurrentTab()]->isShown())
 	{
-		int y = tab[HELP_TAB]->getHeight();
-
-		dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
-	// draw outer border:
-		dc->setPen(*theme.lookUpPen(OUTER_BORDER_PEN));
-		dc->DrawEdgedRoundedRectangle(Point(1, 6) + getAbsolutePosition(), getSize() - Size(2, 7), 6);
-	// draw inner border:
-		if(UI_Object::currentWindow == this)
-			dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-		else
-			dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));
-		dc->DrawEdgedRoundedRectangle(Point(3, 8) + getAbsolutePosition(), getSize() - Size(6, 11), 6);
-	}*/
-	if(checkForNeedRedraw())
+		dc->setPen(Pen(dc->changeRelativeBrightness(*UI_Object::theme.lookUpPen(UI_Object::theme.lookUpButtonColors(TAB_BUTTON)->startBorderPen[NORMAL_BUTTON_PHASE])->getColor(), NOT_PRESSED_BRIGHTEN), 1, SOLID_PEN_STYLE));
+		dc->DrawHorizontalLine(Point(0, tab[getCurrentTab()]->getAbsoluteLowerBound()), tab[getCurrentTab()]->getAbsoluteLeftBound());
+		dc->setPen(Pen(dc->changeRelativeBrightness(*UI_Object::theme.lookUpPen(UI_Object::theme.lookUpButtonColors(TAB_BUTTON)->startBorderPen[NORMAL_BUTTON_PHASE])->getColor(), NOT_PRESSED_DARKEN), 1, SOLID_PEN_STYLE));
+		dc->DrawHorizontalLine(Point(tab[getCurrentTab()]->getAbsoluteRightBound(), tab[getCurrentTab()]->getAbsoluteLowerBound()), UI_Object::max_x);
+	} else if(getCurrentTab() > viewTabs)
 	{
-	// draw outer border:
-/*		dc->setPen(*theme.lookUpPen(OUTER_BORDER_PEN));
-		dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
-		dc->DrawEdgedRoundedRectangle(Point(1, 20) + getAbsolutePosition(), getSize() - Size(2, 2), 6);
-		
-	// draw inner border:
-		if(UI_Object::currentWindow == this)
-			dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-		else
-			dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));
-		dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
-		
-		dc->DrawEdgedRoundedRectangle(
-				tab[getCurrentTab()]->getAbsoluteLowerBound()
-				
-				Point(3, 22) + getAbsolutePosition(), getSize() - Size(6, 6), 6);*/
-
-		if(tab[getCurrentTab()]->isShown())
-		{
-			dc->setPen(Pen(dc->changeRelativeBrightness(*UI_Object::theme.lookUpPen(UI_Object::theme.lookUpButtonColors(TAB_BUTTON)->startBorderPen[NORMAL_BUTTON_PHASE])->getColor(), NOT_PRESSED_BRIGHTEN), 1, SOLID_PEN_STYLE));
-			dc->DrawHorizontalLine(0, tab[getCurrentTab()]->getAbsoluteLowerBound(), tab[getCurrentTab()]->getAbsoluteLeftBound());
-			dc->setPen(Pen(dc->changeRelativeBrightness(*UI_Object::theme.lookUpPen(UI_Object::theme.lookUpButtonColors(TAB_BUTTON)->startBorderPen[NORMAL_BUTTON_PHASE])->getColor(), NOT_PRESSED_DARKEN), 1, SOLID_PEN_STYLE));
-			dc->DrawHorizontalLine(tab[getCurrentTab()]->getAbsoluteRightBound(), tab[getCurrentTab()]->getAbsoluteLowerBound(), UI_Object::max_x);
-		} else if(getCurrentTab() > viewTabs)
-		{
-			dc->setPen(Pen(dc->changeRelativeBrightness(*UI_Object::theme.lookUpPen(UI_Object::theme.lookUpButtonColors(TAB_BUTTON)->startBorderPen[NORMAL_BUTTON_PHASE])->getColor(), NOT_PRESSED_BRIGHTEN), 1, SOLID_PEN_STYLE));
-			dc->DrawHorizontalLine(0, tab[getCurrentTab()]->getAbsoluteLowerBound(), UI_Object::max_x);
-		} else
-		{
-			dc->setPen(Pen(dc->changeRelativeBrightness(*UI_Object::theme.lookUpPen(UI_Object::theme.lookUpButtonColors(TAB_BUTTON)->startBorderPen[NORMAL_BUTTON_PHASE])->getColor(), NOT_PRESSED_DARKEN), 1, SOLID_PEN_STYLE));
-			dc->DrawHorizontalLine(0, tab[getCurrentTab()]->getAbsoluteLowerBound(), UI_Object::max_x);
-
-		}
-	
+		dc->setPen(Pen(dc->changeRelativeBrightness(*UI_Object::theme.lookUpPen(UI_Object::theme.lookUpButtonColors(TAB_BUTTON)->startBorderPen[NORMAL_BUTTON_PHASE])->getColor(), NOT_PRESSED_BRIGHTEN), 1, SOLID_PEN_STYLE));
+		dc->DrawHorizontalLine(Point(0, tab[getCurrentTab()]->getAbsoluteLowerBound()), UI_Object::max_x);
+	} else
+	{
+		dc->setPen(Pen(dc->changeRelativeBrightness(*UI_Object::theme.lookUpPen(UI_Object::theme.lookUpButtonColors(TAB_BUTTON)->startBorderPen[NORMAL_BUTTON_PHASE])->getColor(), NOT_PRESSED_DARKEN), 1, SOLID_PEN_STYLE));
+		dc->DrawHorizontalLine(Point(0, tab[getCurrentTab()]->getAbsoluteLowerBound()), UI_Object::max_x);
 	}
-	UI_Object::draw(dc);
-//	
-#if 0
-// ------ MOUSE DRAWING ------
-		if(efConfiguration.isSoftwareMouse())
-		{
-//			SDL_ShowCursor(SDL_DISABLE);
-			Point p = UI_Object::mouse - Size(20,10);//Point(90, 140);
-			dc->setFont(UI_Object::theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
-			switch(UI_Object::mouseType)
-			{
-				case 0://dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_NONE), p);
-					break;
-				case 1:
-//					dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_LEFT), p);
-					dc->setTextForeground(DC::toSDL_Color(179,0,0));
-					dc->DrawText("Add a unit", p.x-50, p.y+2);
-				break;
-				case 2:
-//					dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_RIGHT), p);
-					dc->setTextForeground(DC::toSDL_Color(0,177,188));
-					dc->DrawText("Remove a unit", p.x+38, p.y+1);
-				break;
-				case 3:
-//					dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_BOTH), p);
-					dc->setTextForeground(DC::toSDL_Color(179,0,0));
-					dc->DrawText("Add a unit", p.x-50, p.y+2);
-					dc->setTextForeground(DC::toSDL_Color(0,177,188));
-					dc->DrawText("Remove a unit", p.x+38, p.y+1);
-				break;
-				default:toLog("error, mouseType out of range");break;
-			}
-		}
-//		else
-//			SDL_ShowCursor(SDL_ENABLE);
-#endif
-// ------ END MOUSE DRAWING ------
+	UI_Object::draw();
 }
 
 

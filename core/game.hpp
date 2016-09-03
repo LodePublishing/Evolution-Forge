@@ -52,11 +52,11 @@ class GAME
 		virtual ~GAME();
 
 		// ARRR P-) Never write over these variables until I found a way to make them const! maybe with protected set routines...
-		static unsigned int MAX_GAME_TYPES;
 		static unsigned int MAX_RACES;
 		static unsigned int MAX_SUPPLY;
 		static unsigned int MAX_TOTAL_UNITS;
 		static unsigned int MAX_RESOURCES;
+		static unsigned int MAX_GAME_TYPES;
 		
 		enum eGameStrings
 		{
@@ -64,12 +64,14 @@ class GAME
 			FIRST_RACE_STRING = 1,
 			FIRST_RESOURCE_STRING = 10,
 			FIRST_UNIT_MENU_STRING = 20,
-			FIRST_GAME_SPEED_STRING = 40
+			FIRST_GAME_SPEED_STRING = 40,
+			GAME_DIAGRAM_SUPPLY_STRING = 50,
+			GAME_DIAGRAM_TIME_STRING,
+			MAX_GAME_STRINGS
+
 		};
 
 		
-		static unsigned int MAX_GAME_STRINGS;
-
 		static unsigned int CANCELING_BUILDING_RETURN;
 
 		static std::string gameDirectory;
@@ -97,6 +99,8 @@ class GAME
 		static const bool setLanguage(const eLanguage language);
 
 		virtual void init();
+		static void initGameStrings();
+		static void initRaceStrings();
 
 	protected:
 	private:
@@ -116,15 +120,6 @@ inline const std::string& GAME::lookUpUnitString(const unsigned int unit_race, c
 	return(race[unit_race].unitsStringList[currentLanguage][unit_string_id]);
 }
 
-inline const std::string& GAME::lookUpGameString(const unsigned int game_string_id)
-{
-#ifdef _SCC_DEBUG
-	if(game_string_id >= MAX_GAME_STRINGS) {
-		toErrorLog("ERROR (GAME::lookUpGameString()): Value game_string_id out of range.");return(gameStringList[currentLanguage][0]);
-	}
-#endif
-	return(gameStringList[currentLanguage][game_string_id]);
-}
 
 
 

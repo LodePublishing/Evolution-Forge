@@ -19,14 +19,10 @@ GameMenu::~GameMenu()
 void GameMenu::process()
 {
 	UI_Menu::process();
-	if(!isShown())
-		return;
 }
 	
-void GameMenu::draw(DC* dc) const
+void GameMenu::draw() const
 {
-	if(!isShown())
-		return;
-	UI_Menu::draw(dc);
+	UI_Menu::draw();
 }	
 

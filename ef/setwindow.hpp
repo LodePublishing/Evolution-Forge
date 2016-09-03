@@ -5,11 +5,7 @@
 #include "../ui/radio.hpp"
 #include "../ui/numberfield.hpp"
 
-
-#include "bitdepthmenu.hpp"
-#include "languagemenu.hpp"
-#include "resolutionmenu.hpp"
-#include "thememenu.hpp"
+#include "../ui/menu.hpp"
 
 class SettingsWindow:public UI_Window
 {
@@ -33,6 +29,7 @@ class SettingsWindow:public UI_Window
 		const bool hasThemeChanged() const;
 		const bool hasFullScreenChanged() const;
 		const bool hasCompactDisplayModeChanged() const;
+		const bool hasBackGroundChanged() const;
 		const bool hasAllowWaitOrdersChanged() const;
 //		const bool hasGameSpeedChanged() const;
 	private:
@@ -109,10 +106,10 @@ class SettingsWindow:public UI_Window
 		UI_Button* resolutionMenuButton;
 		UI_Button* bitDepthMenuButton;
 		UI_Button* themeMenuButton;
-		LanguageMenu* languageMenu;
-		ResolutionMenu* resolutionMenu;
-		BitDepthMenu* bitDepthMenu;
-		ThemeMenu* themeMenu;
+		UI_Menu* languageMenu;
+		UI_Menu* resolutionMenu;
+		UI_Menu* bitDepthMenu;
+		UI_Menu* themeMenu;
 
 		bool languageHasChanged;
 		bool resolutionHasChanged;
@@ -120,6 +117,7 @@ class SettingsWindow:public UI_Window
 		bool themeHasChanged;
 		bool fullScreenHasChanged;
 		bool compactDisplayModeHasChanged;
+		bool backGroundHasChanged;
 		bool allowWaitOrdersHasChanged;
 //		bool gameSpeedHasChanged;
 };
@@ -146,6 +144,10 @@ inline const bool SettingsWindow::hasFullScreenChanged() const {
 
 inline const bool SettingsWindow::hasCompactDisplayModeChanged() const {
 	return(compactDisplayModeHasChanged);
+}
+
+inline const bool SettingsWindow::hasBackGroundChanged() const {
+	return(backGroundHasChanged);
 }
 
 inline const bool SettingsWindow::hasAllowWaitOrdersChanged() const {

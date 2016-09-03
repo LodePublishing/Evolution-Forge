@@ -12,7 +12,7 @@ class UI_ScrollBar : public UI_Object
 		~UI_ScrollBar();
 
 		void process(); // process messages, continue animation etc.
-		void draw(DC* dc) const;
+		void draw() const;
 
 		void moveUp();
 		void moveDown();
@@ -30,7 +30,7 @@ class UI_ScrollBar : public UI_Object
 		const signed int getLastItemY() const;
 
 		void checkBoundsOfChildren(const signed int upper_bound, const signed int lower_bound);
-	
+		void object_info();
 	protected:
 	private:
 		signed int firstItemY;

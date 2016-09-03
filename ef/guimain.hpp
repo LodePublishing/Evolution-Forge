@@ -7,15 +7,18 @@
 #include "helpwindow.hpp"
 //#include "mapwindow.hpp"
 #include "datawindow.hpp"
-#include "mainwindow.hpp"
+#include "mainmenuline.hpp"
 #include "setwindow.hpp"
 #include "debug.hpp"
+#include "../ui/framerate.hpp"
+//#include "message.hpp"
+#include "../ui/background.hpp"
 
 #include "gamemenu.hpp"
 
 //#include "progressbar.hpp"
 
-#include "intro.hpp"
+#include "introwindow.hpp"
 #include "savebox.hpp"
 
 class Main
@@ -24,11 +27,11 @@ class Main
 		Main();
 		~Main();
 
-		const bool initGUI(DC* dc);
+		const bool initGUI();
 		const bool initCore();
 		
 		
-		void draw(DC* dc) const;
+		void draw() const;
 		
 		void process();
 		void resetData();
@@ -66,7 +69,6 @@ class Main
 		void reloadOriginalSize();
 		void reloadStrings();
 
-		void needRedraw();
 	
 		void initializeGame(const unsigned int game_number);
 
@@ -75,13 +77,17 @@ class Main
 
 		const bool openMenu(const ePlayerOrder order);
 		
-		MainWindow* mainWindow;
+		MainMenuLine* mainMenuLine;
 
 		void goBack();
 		
 		void poll(const eTicks etick);
+		UI_Button* testb;
 	private:
+		UI_FrameRateControl frameRateControl;
+		UI_BackGround* backGround;
 
+		UI_LongText* text;
 
 		void checkTab();
 
@@ -95,14 +101,13 @@ class Main
 //		MapWindow* mapWindow;
 
 		SaveBox* saveBox;
-		LanguageMenu* languageMenu;
+		UI_Menu* languageMenu;
 		
 		Point maus;
 		unsigned int gameCount; 
 		Game* game[MAX_GAME];
 //		static InfoWindow* infoWindow;
-		static MessageWindow* msgWindow;
-//		StatisticsWindow* statisticsWindow;
+//		static MessageWindow* msgWindow;
 		const bool loadGoals();
 		const bool loadBuildOrders();
 		const bool loadStartConditions();
@@ -120,7 +125,7 @@ class Main
 };
 
 inline void Main::poll(const eTicks etick) {
-	debugWindow->poll(etick);
+	frameRateControl.poll(etick);
 }
 
 inline const bool Main::hasBitDepthChanged() const {

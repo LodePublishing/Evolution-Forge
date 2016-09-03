@@ -2,23 +2,21 @@
 #define _GUI_BODIAGRAM_HPP
 
 #include "../ui/window.hpp"
+#include "../ui/diagram.hpp"
 #include "../core/database.hpp"
 #include "../core/anabuildorder.hpp"
 #include "configuration.hpp"
-#include "bodiapoint.hpp"
 
 class BoDiagramWindow : public UI_Window 
 {
 	public:
 		BoDiagramWindow(UI_Object* bod_parent, const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max);
-		BoDiagramWindow(const BoDiagramWindow& object);
-		BoDiagramWindow& operator=(const BoDiagramWindow& object);
 		~BoDiagramWindow();
 
 		void resetData();
 		void process();
 		void processList();
-		void draw(DC * dc) const;
+		void draw() const;
 
 		void assignAnarace(ANABUILDORDER* bod_anarace);
 		void setMode(const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max);
@@ -27,6 +25,7 @@ class BoDiagramWindow : public UI_Window
 		const std::list<unsigned int>& getSelectedItems() const;
 		void setSelected(const std::list<unsigned int>& selected);
 	private:
+		UI_Diagram* diagram;
 		static unsigned int HAVE_SUPPLY;
 		static unsigned int NEED_SUPPLY;
 		ANABUILDORDER* anarace;
@@ -40,23 +39,16 @@ class BoDiagramWindow : public UI_Window
 		unsigned int totalTime;
 		Point oldMouse;
 
-
-		std::list<BoDiagramPoint> diagramList;
-
 		unsigned int gameNumber;
 		unsigned int gameMax;
 		unsigned int playerNumber;
 		unsigned int playerMax;
 
-		std::vector<UI_StaticText*> resourceText;
-		UI_StaticText* supplyText;
-		UI_StaticText* timeText;
-		std::vector<UI_StaticText*> resourceNumber;
-		UI_StaticText* supplyNumber;
-		UI_StaticText* timeNumber;	
-
 		unsigned int firstTime;
 		unsigned int lastTime;
+	
+		BoDiagramWindow(const BoDiagramWindow& object);
+		BoDiagramWindow& operator=(const BoDiagramWindow& object);
 };
 
 inline const std::list<unsigned int>& BoDiagramWindow::getSelectedItems() const {

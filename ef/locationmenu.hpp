@@ -11,7 +11,7 @@ class LocationMenu : public UI_Menu
 		LocationMenu(UI_Object* location_parent, const std::list<std::string>& location_list, const Rect& location_rect);
 		~LocationMenu();
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 		void resetData();
 		void assignMap(const BASIC_MAP* location_map);
 		void assignMap(const std::list<std::string>& string_list);

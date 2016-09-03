@@ -76,8 +76,8 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
  	fullscreen(new UI_Button(graphicSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, RADIO_OFF, CHECK_BUTTON_MODE, SETTING_FULLSCREEN_STRING, SETTING_FULLSCREEN_TOOLTIP_STRING, SPECIAL_BUTTON_LEFT, SMALL_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	unloadGraphics(new UI_Button(graphicSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, RADIO_OFF, CHECK_BUTTON_MODE, SETTING_UNLOAD_GRAPHICS_STRING, SETTING_UNLOAD_GRAPHICS_TOOLTIP_STRING, SPECIAL_BUTTON_LEFT, SMALL_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	showDebug(new UI_Button(graphicSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, RADIO_OFF, CHECK_BUTTON_MODE, SETTING_SHOW_DEBUG_STRING, SETTING_SHOW_DEBUG_TOOLTIP_STRING, SPECIAL_BUTTON_LEFT, SMALL_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
-	desiredFramerate(new UI_NumberField(graphicSettings, Rect(Point(10, 0), Size(200, 12)), Size(2,2), DO_NOT_ADJUST,  EF_Configuration::MIN_DESIRED_FRAMERATE, EF_Configuration::MAX_DESIRED_FRAMERATE, SETTING_DESIRED_FRAMERATE_STRING, SETTING_DESIRED_FRAMERATE_TOOLTIP_STRING, 1, efConfiguration.getDesiredFramerate())),
- 	desiredCPU(new UI_NumberField(graphicSettings, Rect(Point(10, 0), Size(200, 12)), Size(2,2), DO_NOT_ADJUST, EF_Configuration::MIN_CPU_USAGE, EF_Configuration::MAX_CPU_USAGE, SETTING_DESIRED_CPU_USAGE_STRING, SETTING_DESIRED_CPU_USAGE_TOOLTIP_STRING, 1, efConfiguration.getDesiredCPU(), false, PERCENT_NUMBER_TYPE)),
+	desiredFramerate(new UI_NumberField(graphicSettings, Rect(Point(10, 0), Size(200, 12)), Size(2,2), DO_NOT_ADJUST,  UI_Configuration::MIN_DESIRED_FRAMERATE, UI_Configuration::MAX_DESIRED_FRAMERATE, SETTING_DESIRED_FRAMERATE_STRING, SETTING_DESIRED_FRAMERATE_TOOLTIP_STRING, 1, uiConfiguration.getDesiredFramerate())),
+ 	desiredCPU(new UI_NumberField(graphicSettings, Rect(Point(10, 0), Size(200, 12)), Size(2,2), DO_NOT_ADJUST, UI_Configuration::MIN_CPU_USAGE, UI_Configuration::MAX_CPU_USAGE, SETTING_DESIRED_CPU_USAGE_STRING, SETTING_DESIRED_CPU_USAGE_TOOLTIP_STRING, 1, uiConfiguration.getDesiredCPU(), false, PERCENT_NUMBER_TYPE)),
 
 	reloadFromFileButton(new UI_Button(loadSaveSettings, Rect(Point(0, 0), Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0)), Size(0, 2), STANDARD_BUTTON, NULL_BITMAP, PRESS_BUTTON_MODE, SETTING_RELOAD_FROM_FILE_STRING, DO_NOT_ADJUST, SMALL_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	saveToFileButton(new UI_Button(loadSaveSettings, Rect(Point(0, 0), Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0)), Size(0, 2), STANDARD_BUTTON, NULL_BITMAP, PRESS_BUTTON_MODE, SETTING_SAVE_TO_FILE_STRING, DO_NOT_ADJUST, SMALL_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
@@ -88,10 +88,12 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
 	bitDepthMenuButton(new UI_Button(uiSettingsRadio, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(0, 2), STANDARD_BUTTON, NULL_BITMAP, STATIC_BUTTON_MODE, SETTING_BITDEPTH_STRING, DO_NOT_ADJUST, SMALL_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	themeMenuButton(new UI_Button(uiSettingsRadio, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(0, 2), STANDARD_BUTTON, NULL_BITMAP, STATIC_BUTTON_MODE, SETTING_THEME_STRING, DO_NOT_ADJUST, SMALL_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 
-	languageMenu(new LanguageMenu(this, Rect(Point(0, 20), Size(50, 0)), Size(0, 0), DO_NOT_ADJUST)),
-	resolutionMenu(new ResolutionMenu(this, Rect(Point(0, 20), Size(50, 0)), Size(0, 0), DO_NOT_ADJUST)),
-	bitDepthMenu(new BitDepthMenu(this, Rect(Point(0, 20), Size(50, 0)), Size(0, 0), DO_NOT_ADJUST)),
-	themeMenu(new ThemeMenu(this, Rect(Point(0, 20), Size(50, 0)), Size(0, 0), DO_NOT_ADJUST)),
+	languageMenu(new UI_Menu(this, Rect(Point(0, 20), Size(50, 0)), Size(0, 0), DO_NOT_ADJUST, true, ONE_COLOUMN_MENU, SMALL_BUTTON_WIDTH, 2, SETTING_ENGLISH_LANGUAGE_STRING, UNIT_TYPE_5_BUTTON)),
+	
+	resolutionMenu(new UI_Menu(this, Rect(Point(0, 20), Size(50, 0)), Size(0, 0), DO_NOT_ADJUST, true, ONE_COLOUMN_MENU, SMALL_BUTTON_WIDTH, MAX_RESOLUTIONS-1, SETTING_RESOLUTION_640x480_STRING, UNIT_TYPE_6_BUTTON)),		
+
+	bitDepthMenu(new UI_Menu(this, Rect(Point(0, 20), Size(50, 0)), Size(0, 0), DO_NOT_ADJUST, true, ONE_COLOUMN_MENU, SMALL_BUTTON_WIDTH, 1+DEPTH_32BIT-DEPTH_8BIT, SETTING_DEPTH_8BIT_STRING, UNIT_TYPE_7_BUTTON)),
+	themeMenu(new UI_Menu(this, Rect(Point(0, 20), Size(50, 0)), Size(0, 0), DO_NOT_ADJUST, true, ONE_COLOUMN_MENU, SMALL_BUTTON_WIDTH, MAX_COLOR_THEMES-1, SETTING_DARK_RED_THEME_STRING, UNIT_TYPE_4_BUTTON)),
 
 	languageHasChanged(false),
 	resolutionHasChanged(false),
@@ -99,7 +101,8 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
 	themeHasChanged(false),
 	fullScreenHasChanged(false),
 	compactDisplayModeHasChanged(false),
-	allowWaitOrdersHasChanged(false)
+	allowWaitOrdersHasChanged(false),
+	backGroundHasChanged(false)
 //	gameSpeedHasChanged(false)
 {
 	updateItems();
@@ -226,6 +229,7 @@ void SettingsWindow::resetDataChange()
 	themeHasChanged = false;
 	fullScreenHasChanged = false;
 	compactDisplayModeHasChanged = false;
+	backGroundHasChanged = false;
 	allowWaitOrdersHasChanged = false;
 //	gameSpeedHasChanged = false;
 }
@@ -238,8 +242,7 @@ void SettingsWindow::closeMenus()
 		resolutionMenu->close();
 		bitDepthMenu->close();
 		themeMenu->close();
-		
-		setNeedRedrawNotMoved();
+		makePufferInvalid();
 	}
 }
 
@@ -329,7 +332,7 @@ void SettingsWindow::process()
 		}
 		languageMenuButton->forceUnpress();
 		languageMenu->close();
-		setNeedRedrawNotMoved();
+		makePufferInvalid();
 	} 
 	else if((pressed=resolutionMenu->getPressedItem())>=0)
 	{
@@ -342,7 +345,7 @@ void SettingsWindow::process()
 		}
 		resolutionMenuButton->forceUnpress();
 		resolutionMenu->close();
-		setNeedRedrawNotMoved();
+		makePufferInvalid(); //?
 	} 
 	else if((pressed=bitDepthMenu->getPressedItem())>=0)
 	{
@@ -355,7 +358,7 @@ void SettingsWindow::process()
 		}
 		bitDepthMenuButton->forceUnpress();
 		bitDepthMenu->close();
-		setNeedRedrawNotMoved(); // to update mainwindow
+		makePufferInvalid(); //?
 	}
 	else if((pressed=themeMenu->getPressedItem())>=0)
 	{
@@ -368,7 +371,7 @@ void SettingsWindow::process()
 		}
 		themeMenuButton->forceUnpress();
 		themeMenu->close();
-		setNeedRedrawNotMoved(); // to update mainwindow
+		makePufferInvalid();
 	}
 
 	coreConfiguration.setFastCalculation ( fastCalculation->isCurrentlyActivated() );
@@ -415,8 +418,8 @@ void SettingsWindow::process()
 	}
 	uiConfiguration.setChannels( channels->getNumber() );
 	
-	if( efConfiguration.setBackgroundBitmap ( backgroundBitmap->isCurrentlyActivated())); // TODO
-//		setNeedRedrawMoved();
+	if( uiConfiguration.setBackgroundBitmap ( backgroundBitmap->isCurrentlyActivated()))
+		backGroundHasChanged = true;
 	uiConfiguration.setSmoothMovements ( smoothMovement->isCurrentlyActivated() );
 	efConfiguration.setWaitAfterChange ( waitAfterChange->isCurrentlyActivated() );
 	efConfiguration.setToolTips ( tooltips->isCurrentlyActivated() );
@@ -427,11 +430,11 @@ void SettingsWindow::process()
 		compactDisplayModeHasChanged = true;
 	efConfiguration.setFacilityMode( facilityMode->isCurrentlyActivated() );
 	
-	fullScreenHasChanged = efConfiguration.setFullScreen ( fullscreen->isCurrentlyActivated());
+	fullScreenHasChanged = uiConfiguration.setFullScreen ( fullscreen->isCurrentlyActivated());
 	uiConfiguration.setUnloadGraphics( unloadGraphics->isCurrentlyActivated());
 	efConfiguration.setShowDebug( showDebug->isCurrentlyActivated());
-	efConfiguration.setDesiredFramerate ( desiredFramerate->getNumber() );
-	efConfiguration.setDesiredCPU ( desiredCPU->getNumber() );
+	uiConfiguration.setDesiredFramerate ( desiredFramerate->getNumber() );
+	uiConfiguration.setDesiredCPU ( desiredCPU->getNumber() );
 
 	if(reloadFromFileButton->isLeftClicked())
 		reloadFromFile();
@@ -487,7 +490,9 @@ void SettingsWindow::updateItems()
 	soundVolume->updateNumber( uiConfiguration.getSoundVolume() );
 	channels->updateNumber( uiConfiguration.getChannels() );
 
-	backgroundBitmap->check ( efConfiguration.isBackgroundBitmap() );
+	if(backgroundBitmap->isCurrentlyActivated() != uiConfiguration.isBackgroundBitmap())
+		backGroundHasChanged = true;
+	backgroundBitmap->check ( uiConfiguration.isBackgroundBitmap() );
 	smoothMovement->check ( uiConfiguration.isSmoothMovements() );
 	waitAfterChange->check ( efConfiguration.isWaitAfterChange() );
 	tooltips->check ( efConfiguration.isToolTips() );
@@ -495,17 +500,17 @@ void SettingsWindow::updateItems()
 	raceSpecificTheme->check( efConfiguration.isRaceSpecificTheme() );
 	glowingButtons->check ( uiConfiguration.isGlowingButtons() );
 	if(compactDisplayMode->isCurrentlyActivated() != efConfiguration.isCompactDisplayMode())
-		compactDisplayModeHasChanged=true;
+		compactDisplayModeHasChanged = true;
 	compactDisplayMode->check ( efConfiguration.isCompactDisplayMode() );
 	facilityMode->check ( efConfiguration.isFacilityMode() );
 
-	if(fullscreen->isCurrentlyActivated() != efConfiguration.isFullScreen())
+	if(fullscreen->isCurrentlyActivated() != uiConfiguration.isFullScreen())
 		fullScreenHasChanged=true;
-	fullscreen->check ( efConfiguration.isFullScreen() );
+	fullscreen->check ( uiConfiguration.isFullScreen() );
 	unloadGraphics->check( uiConfiguration.isUnloadGraphics() );
 	showDebug->check(efConfiguration.isShowDebug() );
-	desiredFramerate->updateNumber ( efConfiguration.getDesiredFramerate() );
-	desiredCPU->updateNumber ( efConfiguration.getDesiredCPU() );
+	desiredFramerate->updateNumber ( uiConfiguration.getDesiredFramerate() );
+	desiredCPU->updateNumber ( uiConfiguration.getDesiredCPU() );
 	
 	eLanguage newLanguage = uiConfiguration.getLanguage();
 	if(newLanguage!=UI_Object::theme.getLanguage())
@@ -546,7 +551,7 @@ void SettingsWindow::forceFullScreenChange()
 	fullScreenHasChanged = true;
 	fullscreen->check(!fullscreen->isCurrentlyActivated());
 	if(!isShown())
-		efConfiguration.setFullScreen(!efConfiguration.isFullScreen());
+		uiConfiguration.setFullScreen(!uiConfiguration.isFullScreen());
 //	fullscreen->setNeedRedrawMoved(); TODO
 }
 

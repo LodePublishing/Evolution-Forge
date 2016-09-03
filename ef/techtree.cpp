@@ -45,6 +45,7 @@ void TechTreeWindow::reloadOriginalSize()
 
 void TechTreeWindow::processList()
 {
+	return;
 	signed int x1 = 0;
 	signed int x2 = 5*s2.getWidth();
 	signed int y2 = 10 * s2.getHeight() + 10;
@@ -113,12 +114,10 @@ void TechTreeWindow::process()
 	UI_Window::process();
 }
 
-void TechTreeWindow::draw(DC* dc) const
+void TechTreeWindow::draw() const
 {
-	if(!isShown())
-		return;
-	UI_Window::draw(dc);
-
+	UI_Window::draw();
+	return; // TODO
 
 // TODO umformen
 /*	// draw outer border:

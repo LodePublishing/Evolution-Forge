@@ -341,11 +341,9 @@ void UnitMenu::process()
 }
 
 
-void UnitMenu::draw(DC* dc) const
+void UnitMenu::draw() const
 {
-	if(!isShown())
-		return;
-	UI_Menu::draw(dc);
+	UI_Menu::draw();
 }
 
 const bool UnitMenu::secondLevel() const

@@ -118,7 +118,7 @@ struct RESOURCE
 	unsigned int harvestTime;
 
 	void calculateHarvestSpeed();
-	std::vector< std::vector< std::vector< unsigned int > > > resourceHarvestPerFrame;
+	std::vector< std::vector< std::vector< unsigned int > > > resourceHarvestPerFrame; // distance, provider-count, gatherer-count 
 
 
 	static unsigned int MAX_RESOURCE_WORKERS;

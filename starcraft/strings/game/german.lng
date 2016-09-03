@@ -1,5 +1,6 @@
 @STRINGS
 	@GERMAN
+						  "NULL_STRING" = "NULL"
 		                                 "TERRA_STRING" = "Terra"
 		                               "PROTOSS_STRING" = "Protoss"
 		                                  "ZERG_STRING" = "Zerg"
@@ -26,5 +27,9 @@
 				       "GAME_SPEED_FAST_STRING" = "Schnell"
 				     "GAME_SPEED_FASTER_STRING" = "Schneller"
 				    "GAME_SPEED_FASTEST_STRING" = "Am schnellsten"	
+
+				        "DIAGRAM_SUPPLY_STRING" = "Versorgung: "
+				          "DIAGRAM_TIME_STRING" = "Zeit: "
+
 	@END
 @END

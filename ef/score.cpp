@@ -62,7 +62,7 @@ void ScoreWindow::setUnchangedGenerations(const unsigned int unchanged_generatio
 	if(unchangedGenerations == unchanged_generations)
 		return;
 	if((efConfiguration.isAutoRuns())&&(unchangedGenerations < unchanged_generations))
-		setNeedRedrawNotMoved();
+		makePufferInvalid();
 	unchangedGenerations = unchanged_generations;
 }
 
@@ -157,8 +157,8 @@ void ScoreWindow::process()
 			player[i]->Show();
 			player[i]->adjustRelativeRect(Rect(getRelativeClientRectLeftBound()+5, line*(2*FONT_SIZE+10), getRelativeClientRect().getWidth()-10, 12)); // TODO
 			line+=player[i]->getLineHeight(); // height of menu <-
-			if(player[i]->checkForNeedRedraw())
-				setNeedRedrawNotMoved();
+			if(player[i]->isPufferInvalid())
+				makePufferInvalid();
 		}
 	}
 	
@@ -168,25 +168,21 @@ void ScoreWindow::process()
 }
 
 
-void ScoreWindow::draw(DC* dc) const
+void ScoreWindow::draw() const
 {
-	if(!isShown()) 
-		return;
-	UI_Window::draw(dc);
-	if(!checkForNeedRedraw())
-		return;
+	UI_Window::draw();
 	
 	if(efConfiguration.isAutoRuns())
 	{
 		dc->setPen(*UI_Object::theme.lookUpPen(BODIAGRAM_FITNESS_PEN));
-		dc->DrawHorizontalLine(getAbsoluteLeftBound() + 10, getAbsoluteLowerBound() - 6, getAbsoluteLeftBound() + 10 + ((getWidth()-10)*unchangedGenerations)  / efConfiguration.getMaxGenerations() );
+		dc->DrawHorizontalLine(Point(10, getHeight() - 6), getWidth() + 10 + ((getWidth()-10)*unchangedGenerations)  / efConfiguration.getMaxGenerations() );
 		std::ostringstream os;
 		os.str("");
 		os << 100 * unchangedGenerations / efConfiguration.getMaxGenerations() << "%";// (" << unchangedGenerations << "/" << efConfiguration.getMaxGenerations() << ")";
 	
 		dc->setTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
 		dc->setFont(UI_Object::theme.lookUpFont(SMALL_BOLD_FONT));
-		dc->DrawText(os.str(), getAbsolutePosition() + Size(getWidth() - 40, getHeight() - 13));
+		dc->DrawText(os.str(), Point(getWidth() - 40, getHeight() - 13));
 	}
 }
 

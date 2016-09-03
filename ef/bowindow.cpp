@@ -147,10 +147,8 @@ const bool BoWindow::areBosStillMoving() const
 // eigene processList machen falls anarace sich sicher nicht veraendert hat (optimieren = aus)
 void BoWindow::processList()
 {
-//	if(!isShown())
-//		return;
 	if(anarace==NULL) return;
-	setNeedRedrawNotMoved();
+	makePufferInvalid();
 	
 	bool new_item = false;
 	bool deleted_item = false;
@@ -417,8 +415,6 @@ void BoWindow::processList()
 			(*entry)->program = *order;
 			if(edge != (*entry)->getTargetRect())
 			{
-//				if((*entry)->getAbsoluteRightBound() > getAbsoluteClientRectRightBound()) TODO
-//					setNeedRedrawMoved(); // <-- TODO schoen und gut, aber wird nur 1x aufgerufen!
 				if((edge != (*entry)->getTargetRect())&&((UI_Button::getCurrentButton()!=(*entry))||(!UI_Button::isMoveByMouse())))
 				{
 	     				(*entry)->adjustRelativeRect(edge);
@@ -628,9 +624,6 @@ void BoWindow::process()
 
 	while(entry != boList.end())
 	{
-//		if((*entry)->getAbsoluteRightBound() > getAbsoluteClientRectRightBound()) TODO
-//			setNeedRedrawMoved();
-		
 /*		if((*entry)->isRightClicked())
 		{
 			delete(*entry);
@@ -873,7 +866,7 @@ void BoWindow::process()
 	getScrollBar()->checkBoundsOfChildren(getAbsoluteClientRectUpperBound(), getAbsoluteClientRectLowerBound());
 }
 
-void BoWindow::drawGene(DC* dc, unsigned int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const
+void BoWindow::drawGene(unsigned int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const
 {
 	if(points[0].y<points[1].y) dc->setPen(bla1);else dc->setPen(bla2);
 	dc->DrawSpline(k, points, position);
@@ -881,18 +874,18 @@ void BoWindow::drawGene(DC* dc, unsigned int k, const Point* points, const Point
 	dc->DrawSpline(k, points, position + Size(0,1));
 }
 
-void BoWindow::drawGeneString(DC* dc) const
+void BoWindow::drawGeneString() const
 {
 	unsigned int orderCount = anarace->getProgramList().size();
 	if(orderCount<2)
 		return;
 
-	Rect position = Rect(getAbsolutePosition()+Size(5, menuGroup->getHeight() + 1), Size(getClientRectWidth()-5, 2*(FONT_SIZE+8)));
-//		Rect(getAbsolutePosition()+Point(210, 200), Size(256, 128));
+	Rect position = Rect(Point(5, menuGroup->getHeight() + 1), Size(getClientRectWidth()-5, 2*(FONT_SIZE+8)));
+//		Rect(Point(210, 200), Size(256, 128));
 	dc->setBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
 	dc->setPen(*theme.lookUpPen(NULL_PEN));
 	dc->DrawRectangle(Rect(position.getTopLeft() - Size(1,2), position.getSize() + Size(2,4)));
-	DC::addRectangle(Rect(position.getTopLeft() - Size(1,2), position.getSize() + Size(2,4)));
+//	DC::addRectangle(Rect(position.getTopLeft() - Size(1,2), position.getSize() + Size(2,4))); TODO
 
 	unsigned int stringheight=0;
 	Point points1[2];
@@ -919,50 +912,50 @@ void BoWindow::drawGeneString(DC* dc) const
 		}
 		stringheight+=1;
 
-		Pen bla1=Pen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN + GAME::race[anarace->getRace()].stats[colors[i/2]].unitType)));
-		Pen bla2=Pen(*theme.lookUpPen((ePen)(UNIT_TYPE_0_PEN + GAME::race[anarace->getRace()].stats[colors[i/2]].unitType)));
+		Pen bla1 = Pen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN + GAME::race[anarace->getRace()].stats[colors[i/2]].unitType)));
+		Pen bla2 = Pen(*theme.lookUpPen((ePen)(UNIT_TYPE_0_PEN + GAME::race[anarace->getRace()].stats[colors[i/2]].unitType)));
 		unsigned int k=2;
 		if(points1[0].y>points1[1].y) // faellt -> hinten
 		{
 			if(points1[0].y>points2[0].y)
 			{
-				drawGene(dc, k, points1, position.getTopLeft(), bla1, bla2);
-				drawGene(dc, k, points2, position.getTopLeft(), bla1, bla2);
+				drawGene(k, points1, position.getTopLeft(), bla1, bla2);
+				drawGene(k, points2, position.getTopLeft(), bla1, bla2);
 			}
 			else
 			{
-				drawGene(dc, k, points2, position.getTopLeft(), bla1, bla2);
-				drawGene(dc, k, points1, position.getTopLeft(), bla1, bla2);
+				drawGene(k, points2, position.getTopLeft(), bla1, bla2);
+				drawGene(k, points1, position.getTopLeft(), bla1, bla2);
 			}
 			if(points3[0].y>points4[0].y)
 			{
-				drawGene(dc, k, points3, position.getTopLeft(), bla1, bla2);
-				drawGene(dc, k, points4, position.getTopLeft(), bla1, bla2);
+				drawGene(k, points3, position.getTopLeft(), bla1, bla2);
+				drawGene(k, points4, position.getTopLeft(), bla1, bla2);
 			} else
 			{
-				drawGene(dc, k, points4, position.getTopLeft(), bla1, bla2);
-				drawGene(dc, k, points3, position.getTopLeft(), bla1, bla2);
+				drawGene(k, points4, position.getTopLeft(), bla1, bla2);
+				drawGene(k, points3, position.getTopLeft(), bla1, bla2);
 			}
 		} else
 		{
 			if(points3[0].y>points4[0].y)
 			{
-				drawGene(dc, k, points3, position.getTopLeft(), bla1, bla2);
-				drawGene(dc, k, points4, position.getTopLeft(), bla1, bla2);
+				drawGene(k, points3, position.getTopLeft(), bla1, bla2);
+				drawGene(k, points4, position.getTopLeft(), bla1, bla2);
 			} else
 			{
-				drawGene(dc, k, points4, position.getTopLeft(), bla1, bla2);
-				drawGene(dc, k, points3, position.getTopLeft(), bla1, bla2);
+				drawGene(k, points4, position.getTopLeft(), bla1, bla2);
+				drawGene(k, points3, position.getTopLeft(), bla1, bla2);
 			}
 			if(points1[0].y>points2[0].y)
 			{
-				drawGene(dc, k, points1, position.getTopLeft(), bla1, bla2);
-				drawGene(dc, k, points2, position.getTopLeft(), bla1, bla2);
+				drawGene(k, points1, position.getTopLeft(), bla1, bla2);
+				drawGene(k, points2, position.getTopLeft(), bla1, bla2);
 			}
 			else
 			{
-				drawGene(dc, k, points2, position.getTopLeft(), bla1, bla2);
-				drawGene(dc, k, points1, position.getTopLeft(), bla1, bla2);
+				drawGene(k, points2, position.getTopLeft(), bla1, bla2);
+				drawGene(k, points1, position.getTopLeft(), bla1, bla2);
 			}
 		}
 	}
@@ -970,13 +963,11 @@ void BoWindow::drawGeneString(DC* dc) const
 																			
 
 
-void BoWindow::draw(DC* dc) const
+void BoWindow::draw() const
 {
-	if(!isShown()) 
-		return;
-	UI_Window::draw(dc);
+	UI_Window::draw();
 	if((efConfiguration.isDnaSpiral())&&(!boMenu->isOpen()))
-		drawGeneString(dc);
+		drawGeneString();
 
 /*	if((UI_Button::getCurrentButton()!=NULL)&&(UI_Button::isMoveByMouse())&&(moveTarget!=Rect(0,0,0,0)))
 	{
@@ -1233,7 +1224,7 @@ void BoWindow::needSaveBox()
 void BoWindow::saveBoxIsCanceled()
 {
 	saveBuildOrderButton->forceUnpress();
-	setNeedRedrawNotMoved();
+	makePufferInvalid();
 }
 
 void BoWindow::saveBoxIsDone(std::string input_string)
@@ -1249,7 +1240,7 @@ void BoWindow::saveBoxIsDone(std::string input_string)
 	UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(SAVED_BUILD_ORDER_STRING, input_string));
 // TODO datawindow benachrichtigen!	
 	saveBuildOrderButton->forceUnpress();
-	setNeedRedrawNotMoved();
+	makePufferInvalid(); // ?
 }
 
 

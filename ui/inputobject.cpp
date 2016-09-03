@@ -3,8 +3,15 @@
 // TODO: Tatsaechliches Eingabefeld seperat machen
 // ISO-LEVEL 2 
 
-UI_EditField::UI_EditField(UI_Object* edit_parent, const Rect& edit_rect, const Size& edit_size, const eColor st_color, const eFont st_font, const ePositionMode position_mode, const std::string& name_proposal) :
-	UI_StaticText(edit_parent, name_proposal, edit_rect, edit_size, st_color, st_font, position_mode),
+UI_EditField::UI_EditField(UI_Object* edit_parent, 
+		const Rect& edit_rect, 
+		const Size& edit_size, 
+		const signed int zcoord,
+		const ePositionMode position_mode, 
+		const eColor st_color, 
+		const eFont st_font, 
+		const std::string& name_proposal) :
+	UI_StaticText(edit_parent, name_proposal, edit_rect, edit_size, zcoord, st_color, st_font, position_mode),
 	position(name_proposal.size()),
 	ani(5),
 	pressedEnter(false),
@@ -79,13 +86,10 @@ void UI_EditField::removeCharDelete()
 	ani=5;
 }
 
-void UI_EditField::draw(DC* dc) const
+void UI_EditField::draw() const
 {
-	if(!checkForNeedRedraw())
-		return; // TODO
-
-	UI_StaticText::draw(dc);
-	Rect entry_rect = Rect(getAbsolutePosition() - Size(5, 0), Size(getOriginalRect().GetWidth(), getTextSize().GetHeight()));
+	UI_StaticText::draw();
+	Rect entry_rect = Rect(Point(0,0), Size(getOriginalRect().GetWidth(), getTextSize().GetHeight()));
 	if(entry_rect.Inside(mouse))
 		dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 	else
@@ -94,7 +98,7 @@ void UI_EditField::draw(DC* dc) const
 	dc->DrawEdgedRoundedRectangle(entry_rect, 4);
 	
 	dc->SetPen(Pen(dc->mixColor(*theme.lookUpColor(FORCE_TEXT_COLOR), *theme.lookUpColor(BRIGHT_TEXT_COLOR), (unsigned int)(50*(sin(3.141*ani/10)+1))), 1, SOLID_PEN_STYLE));
-	dc->DrawVerticalLine(getAbsolutePosition().x + getTextPosSize(position).GetWidth(), entry_rect.GetTop() + 2, entry_rect.GetBottom() - 2);
+	dc->DrawVerticalLine(getTextPosSize(position).GetWidth(), entry_rect.GetTop() + 2, entry_rect.GetBottom() - 2);
 }
 
 void UI_EditField::process()

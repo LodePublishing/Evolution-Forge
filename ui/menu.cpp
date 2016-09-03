@@ -1,6 +1,15 @@
 #include "menu.hpp"
 
-UI_Menu::UI_Menu(UI_Object* menu_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const bool choose_menu, const eMenuType menu_type, const eButtonWidthType button_width_type, const unsigned int entryNumber, const eString firstString, const eButtonColorsType button_colors_type):
+UI_Menu::UI_Menu(UI_Object* menu_parent, 
+		const Rect& rect, 
+		const Size distance_bottom_right, 
+		const ePositionMode position_mode, 
+		const bool choose_menu, 
+		const eMenuType menu_type, 
+		const eButtonWidthType button_width_type, 
+		const unsigned int entryNumber, 
+		const eString firstString, 
+		const eButtonColorsType button_colors_type) :
 	UI_Object(menu_parent, rect, distance_bottom_right, position_mode),
 	menuEntries(),
 	menuLevel(0),
@@ -190,12 +199,7 @@ void UI_Menu::setMenuHasChanged(const bool has_changed)
 	if(has_changed == menuChanged)
 		return;
 	menuChanged = has_changed;
-	setNeedRedrawNotMoved();
-}
-
-const signed int UI_Menu::getMarkedItem() const
-{
-	return(markedItem);
+	makePufferInvalid();
 }
 
 void UI_Menu::process()
@@ -242,26 +246,20 @@ void UI_Menu::process()
 		close();
 }
 
-void UI_Menu::draw(DC* dc) const
+void UI_Menu::draw() const
 {
-	if((!isShown())||(p1 > p2))
+	return; // TODO
+	if(p1 > p2)
 		return;
-	if(checkForNeedRedraw())
-	{
-		Rect edge = Rect(p1 - Size(3,3), Size(p2.x-p1.x, p2.y-p1.y) + Size(6,6) );
-		dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-//		dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
-		dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-		dc->DrawRoundedRectangle(edge,4);
-	}
-	UI_Object::draw(dc);
+	Rect edge = Rect(p1 - Size(3,3), Size(p2.x-p1.x, p2.y-p1.y) + Size(6,6) );
+	dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
+//	dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+	dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+	dc->DrawRoundedRectangle(edge,4);
+	UI_Object::draw();
 }
 
-const bool UI_Menu::menuHasChanged() const
-{
-	return(menuChanged);
-}
-	
+
 void UI_Menu::forcePressItem(const unsigned int number)
 {
 	if(number > menuEntries.size())

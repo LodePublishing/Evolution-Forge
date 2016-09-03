@@ -11,7 +11,7 @@ class RaceMenu : public UI_Menu
 		const bool addKey(unsigned int key, unsigned int mod);
 		void reloadStrings();
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 	private:
 };
 

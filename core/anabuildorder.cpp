@@ -70,11 +70,11 @@ void ANABUILDORDER::postProcessing()
 		goalPercentage = 100 * currentpFitness / max_fitness;
 	else goalPercentage = 100;
 	
-	toErrorLog("------------");
-	toErrorLog(goalPercentage);
-	toErrorLog(currentpFitness);
-	toErrorLog(max_fitness);
-	toErrorLog("------------");
+//	toErrorLog("------------");
+//	toErrorLog(goalPercentage);
+//	toErrorLog(currentpFitness);
+//	toErrorLog(max_fitness);
+//	toErrorLog("------------");
 	
 	while(!buildingQueue.empty())
 		buildingQueue.pop();

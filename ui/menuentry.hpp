@@ -11,7 +11,7 @@ class UI_MenuEntry : public UI_Button
 //		UI_MenuEntry(UI_Object* menuentry_parent, const Rect rect, const eButtonColorsType button); TODO bitmaps...
 		~UI_MenuEntry();
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 		void setColor(const eColor entry_color);
 	private:
 		eColor color;

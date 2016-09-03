@@ -15,8 +15,30 @@ enum eFieldType
 class UI_NumberField : public UI_Object
 {
 	public:
-		UI_NumberField(UI_Object* numberfield_parent, const Rect& field_rect, const Size distance_bottom_right, const ePositionMode position_mode, const unsigned int number_min, const unsigned int number_max, const eString txt, const eString tool_tip=NULL_STRING, const unsigned int number_steps=1, const unsigned int num=0, const bool shift_right = false, const eFieldType field_type = NORMAL_NUMBER_TYPE);
-		UI_NumberField(UI_Object* numberfield_parent, const Rect& field_rect, const Size distance_bottom_right, const ePositionMode position_mode, const unsigned int number_min, const unsigned int number_max, const std::string& txt, const eString tool_tip=NULL_STRING, const unsigned int number_steps=1, const unsigned int num=0, const bool shift_right = false, const eFieldType field_type = NORMAL_NUMBER_TYPE);
+		UI_NumberField(UI_Object* numberfield_parent, 
+				const Rect& field_rect, 
+				const Size distance_bottom_right, 
+				const ePositionMode position_mode, 
+				const unsigned int number_min, 
+				const unsigned int number_max, 
+				const eString txt, 
+				const eString tool_tip=NULL_STRING, 
+				const unsigned int number_steps=1, 
+				const unsigned int num=0, 
+				const bool shift_right = false, 
+				const eFieldType field_type = NORMAL_NUMBER_TYPE);
+		UI_NumberField(UI_Object* numberfield_parent, 
+				const Rect& field_rect, 
+				const Size distance_bottom_right, 
+				const ePositionMode position_mode, 
+				const unsigned int number_min, 
+				const unsigned int number_max, 
+				const std::string& txt, 
+				const eString tool_tip=NULL_STRING, 
+				const unsigned int number_steps=1, 
+				const unsigned int num=0, 
+				const bool shift_right = false, 
+				const eFieldType field_type = NORMAL_NUMBER_TYPE);
 
 		~UI_NumberField();
 		UI_Object* checkToolTip();
@@ -34,7 +56,7 @@ class UI_NumberField : public UI_Object
 		const unsigned int getNumber() const;
 		void updateNumber(const unsigned int num);
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 		const bool hasNumberChanged() const;
 	private:
 		eFieldType fieldType;

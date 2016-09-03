@@ -31,7 +31,7 @@ class ForceWindow : public UI_Window
 		void processList();
 		void process();
 
-		void draw(DC* dc) const;
+		void draw() const;
 		const unsigned int getMarkedUnit() const;
 		void setMarkedUnit(const unsigned int marked_unit);
 		void assignAnarace(ANABUILDORDER* force_anarace);

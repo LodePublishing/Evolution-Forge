@@ -59,13 +59,11 @@ void Player::reloadStrings() //TODO
 	UI_Object::reloadStrings(); 
 }
 
-void Player::draw(DC* dc) const
+void Player::draw() const
 {
-	if(!isShown())
-		return;
 	if(efConfiguration.isRaceSpecificTheme())
 		UI_Object::theme.setColorTheme((eTheme)(DARK_BLUE_THEME + anarace->getRace()));
-	UI_Object::draw(dc);
+	UI_Object::draw();
 }
 
 void Player::process()

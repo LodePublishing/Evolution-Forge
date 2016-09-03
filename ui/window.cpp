@@ -1,11 +1,17 @@
 #include "window.hpp"
 #include "configuration.hpp"
 
-UI_Window::UI_Window(UI_Object* window_parent, const eString window_title_string, const Rect rect, const unsigned int max_height, const eIsScrolled window_is_scrollable, const eIsAutoAdjust window_is_auto_adjust, const Rect window_client_area, eIsTransparent transparent) :
-	UI_Object(window_parent, rect),
+UI_Window::UI_Window(UI_Object* window_parent, 
+		const eString window_title_string, 
+		const Rect rect, 
+		const unsigned int max_height,
+		const eIsScrolled window_is_scrollable, 
+		const eIsAutoAdjust window_is_auto_adjust, 
+		const Rect window_client_area,
+		const eTransparentWindow transparent_window) :
+	UI_Object(window_parent, rect, Size()),
 	filledHeight(0),
 	doAdjustments(false),
-	isTransparent(transparent),
 	titleString(window_title_string), // ??
 	titleParameter(""),
 	clientRect(window_client_area),
@@ -18,7 +24,8 @@ UI_Window::UI_Window(UI_Object* window_parent, const eString window_title_string
 	highlighted(false),
 	scrollBar(isScrollable==NOT_SCROLLED?NULL:new UI_ScrollBar(this, getRelativeClientRectUpperBound(), getMaxHeight())),
 	helpButton(NULL),
-	helpChapter(INDEX_CHAPTER)
+	helpChapter(INDEX_CHAPTER),
+	transparentWindow(transparent_window)
 {
 
 // ------ PROCESSING
@@ -76,12 +83,11 @@ void UI_Window::reloadOriginalSize()
 	clientRect.setSize(getOriginalRect().getSize());
 	calculateClientRect();
 	adjustClientRect();
-//	setNeedRedrawMoved(); //?
 	UI_Object::reloadOriginalSize();
 }
 
 void UI_Window::setTitleParameter(const std::string& p) {
-	titleParameter=p;
+	titleParameter = p;
 }
 
 UI_Object* UI_Window::checkToolTip()
@@ -93,7 +99,7 @@ UI_Object* UI_Window::checkToolTip()
 
 UI_Object* UI_Window::checkHighlight()
 {
-	if((!isMouseInside())&&( (scrollBar==NULL) || (!Rect(getAbsolutePosition() + Point(getWidth(), 0), Size(12, getHeight())).isInside(mouse))))
+	if((!isMouseInside())&&( (scrollBar==NULL) || (!Rect(getAbsolutePosition() + Point(getWidth(), 0), Size(12, getHeight())).isTopLeftCornerInside(mouse))))
 		return(NULL);
 	return(UI_Object::checkHighlight());
 }
@@ -155,8 +161,8 @@ void UI_Window::process()
 	if(!isShown()) 
 		return;
 	
-	if((getScrollBar())&&(getScrollBar()->checkForNeedRedraw()))
-		setNeedRedrawNotMoved();
+//	if((getScrollBar())&&(getScrollBar()->isPufferInvalid()))
+//		makePufferInvalid(); //?
 
 	adjustClientRect();
 	if(doAdjustments==true)
@@ -187,17 +193,11 @@ void UI_Window::process()
 	}
 	
 	
-	if(clientRect != clientTargetRect)
-	{
-                Rect old_rect = clientRect;
-                eRectMovement t = uiConfiguration.isSmoothMovements() ? clientRect.moveSmooth(clientStartRect, clientTargetRect) : clientRect.move(clientTargetRect);
-                if(t == GOT_BIGGER)
-                        setNeedRedrawNotMoved();
-                else if(t == GOT_SMALLER_OR_MOVED)
-                        setNeedRedrawMoved(old_rect, clientRect);
-	}
+	if(uiConfiguration.isSmoothMovements())
+		clientRect.moveSmooth(clientStartRect, clientTargetRect);
+	else  clientRect.move(clientTargetRect);
 
-	if(/*(!UI_Object::windowSelected)&&*/(((isMouseInside())||( (scrollBar!=NULL) && (Rect(getAbsolutePosition() + Point(getWidth(), 0), Size(12, getHeight())).isInside(mouse))))))//&&(!isTopItem()))) // => main window! WHY? TODO
+	if(/*(!UI_Object::windowSelected)&&*/(((isMouseInside())||( (scrollBar!=NULL) && (Rect(getAbsolutePosition() + Point(getWidth(), 0), Size(12, getHeight())).isTopLeftCornerInside(mouse))))))//&&(!isTopItem()))) // => main window! WHY? TODO
 	{
 		bool new_window = false;
 		if(UI_Object::currentWindow != this)
@@ -208,9 +208,9 @@ void UI_Window::process()
    			    (UI_Object::currentWindow->getAbsolutePosition() < getAbsolutePosition())||
 			    (UI_Object::currentWindow->getAbsoluteRect().getBottomRight() > getAbsoluteRect().getBottomRight()) ) 
 			{
-				setNeedRedrawNotMoved();
+				makePufferInvalid();
 				if(UI_Object::currentWindow)
-					UI_Object::currentWindow->setNeedRedrawNotMoved();
+					UI_Object::currentWindow->makePufferInvalid();
 				new_window = true;
 			}
 		} else new_window = true;
@@ -300,7 +300,7 @@ const bool UI_Window::fitItemToAbsoluteClientRect(const Rect& rect, const bool a
 }
 
 
-void UI_Window::drawTitle(DC* dc) const
+void UI_Window::drawTitle() const
 {
 	if(titleString==NULL_STRING)
 		return;
@@ -311,52 +311,54 @@ void UI_Window::drawTitle(DC* dc) const
 
 	std::string text;
 
-
-	// TODO UI_StaticText einfuegen!
-	if(titleParameter!="")
+// TODO UI_StaticText einfuegen!
+	if(titleParameter != "")
 		text=theme.lookUpFormattedString(titleString, titleParameter);
 	else text = theme.lookUpString(titleString);
 	
 	Size s = dc->getTextExtent(text);
-	Rect titleRect = Rect(getAbsolutePosition() - Size(0,0), s - Size(0, 0) + Size(5,0));
+	Rect titleRect = Rect(Point(), s + Size(5, 0));
 	
 	dc->DrawRectangle(titleRect);
-	titleRect.setTopLeft(titleRect.getTopLeft()+Point(2,3));
+	titleRect.setTopLeft(titleRect.getTopLeft() + Point(2, 3));
 	dc->DrawText(text, titleRect.getTopLeft());
 }
 
-void UI_Window::drawWindow(DC* dc) const
+void UI_Window::drawWindow() const
 {
-	if(checkForNeedRedraw())
-	{
-	// draw outer border:
-		dc->setPen(*theme.lookUpPen(OUTER_BORDER_PEN));
-		if(isTransparent==TRANSPARENT) // => main window!
-			dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
-		else
-			dc->setBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
-		dc->DrawEdgedRoundedRectangle(Point(1, 1) + getAbsolutePosition(), getSize() - Size(2, 2), 6);
-		
-	// draw inner border:
-		if(UI_Object::currentWindow == this)
-			dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-		else
-			dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));
+// draw outer border:
+	dc->setPen(*theme.lookUpPen(OUTER_BORDER_PEN));
+	if(transparentWindow == TRANSPARENT_WINDOW)
 		dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
-		
-		dc->DrawEdgedRoundedRectangle(Point(3, 3) + getAbsolutePosition(), getSize() - Size(6, 6), 6);
-		
-		drawTitle(dc);
-	}
+	else
+		dc->setBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
+
+	dc->DrawEdgedRoundedRectangle(Point(1, 1), getSize() - Size(2, 2), 6);
+	
+// draw inner border:
+	if(UI_Object::currentWindow == this)
+		dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+	else
+		dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));
+	dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+	
+	dc->DrawEdgedRoundedRectangle(Point(3, 3), getSize() - Size(6, 6), 6);
+	
+	drawTitle();
+//	toErrorLog("draw window");
 }
 
-void UI_Window::draw(DC* dc) const
+void UI_Window::draw() const
 {
-	drawWindow(dc);	
-	UI_Object::draw(dc);
+	drawWindow();	
+	UI_Object::draw();
 }
 
-
+void UI_Window::object_info()
+{
+	toErrorLog("ui_window");
+	toErrorLog(getZ());
+}
 
 bool UI_Window::changedFlag=false;
 signed int UI_Window::gotoHelpChapter=-1;

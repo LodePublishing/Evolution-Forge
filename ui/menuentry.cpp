@@ -25,11 +25,9 @@ void UI_MenuEntry::process()
 	UI_Button::process();
 }
 
-void UI_MenuEntry::draw(DC* dc) const
+void UI_MenuEntry::draw() const
 {
-	if(!isShown()) 
-		return;
-	UI_Button::draw(dc);
+	UI_Button::draw();
 }
 
 void UI_MenuEntry::setColor(const eColor entry_color)

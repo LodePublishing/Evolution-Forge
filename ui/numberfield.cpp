@@ -54,7 +54,10 @@ UI_NumberField::~UI_NumberField()
 
 UI_Object* UI_NumberField::checkToolTip() 
 {
-	if( (!isShown()) || ((!addButton->getAbsoluteRect().isInside(mouse)) && (!subButton->getAbsoluteRect().isInside(mouse)) && ((!text)||(!text->getAbsoluteRect().isInside(mouse))) && (!numberText->getAbsoluteRect().isInside(mouse))))
+	if( (!isShown()) || ((!addButton->getAbsoluteRect().isTopLeftCornerInside(mouse)) && 
+			    (!subButton->getAbsoluteRect().isTopLeftCornerInside(mouse)) && 
+			    ((!text)||(!text->getAbsoluteRect().isTopLeftCornerInside(mouse))) && 
+			    (!numberText->getAbsoluteRect().isTopLeftCornerInside(mouse))))
 		return(NULL);
 	return((UI_Object*)this);
 }
@@ -148,14 +151,12 @@ void UI_NumberField::process()
 //		setNeedRedrawMoved(); TODO
 }
 
-void UI_NumberField::draw(DC* dc) const
+void UI_NumberField::draw() const
 {
-	if(!isShown())
-		return;
-	UI_Object::draw(dc);
+	UI_Object::draw();
 	
 	if(shiftRight)
-		dc->DrawBitmap(theme.lookUpBitmap(LIST_BITMAP), getAbsolutePosition());
+		dc->DrawBitmap(theme.lookUpBitmap(LIST_BITMAP), Point());
 	
 /*	dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 	dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));

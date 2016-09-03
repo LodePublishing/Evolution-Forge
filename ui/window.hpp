@@ -9,24 +9,30 @@ enum eIsAutoAdjust
 	AUTO_SIZE_ADJUST
 };
 
-enum eIsTransparent
-{
-	TRANSPARENT,
-	NOT_TRANSPARENT
-};
-
-
 struct SaveBoxParameter
 {
 	eString saveboxText, descriptionText, okString, cancelString;
 	std::string inputProposal;
 };
 
+enum eTransparentWindow
+{
+	NOT_TRANSPARENT_WINDOW,
+	TRANSPARENT_WINDOW
+};
+
 
 class UI_Window : public UI_Object
 {
 	public:
-		UI_Window(UI_Object* window_parent, const eString window_title_string, const Rect rect, const unsigned int max_height, const eIsScrolled window_is_scrolled=NOT_SCROLLED, const eIsAutoAdjust win_is_auto_adjust=NO_AUTO_SIZE_ADJUST, const Rect win_client_area=Rect(0,0,1280,1024), eIsTransparent transparent = NOT_TRANSPARENT);
+		UI_Window(UI_Object* window_parent, 
+				const eString window_title_string, 
+				const Rect rect, 
+				const unsigned int max_height, 
+				const eIsScrolled window_is_scrolled = NOT_SCROLLED, 
+				const eIsAutoAdjust win_is_auto_adjust = NO_AUTO_SIZE_ADJUST, 
+				const Rect win_client_area = Rect(0,0,1280,1024),
+				const eTransparentWindow transparent_window = NOT_TRANSPARENT_WINDOW);
 		~UI_Window();
 		// TODO protected machen (->datawindow)
 
@@ -54,9 +60,10 @@ class UI_Window : public UI_Object
 
 		void process();
 
-		void drawWindow(DC* dc) const;
+		void drawWindow() const;
 		
-		void draw(DC* dc) const;
+		void draw() const;
+		void object_info();
 
 		UI_Object* checkToolTip();
 		UI_Object* checkHighlight();
@@ -104,8 +111,7 @@ class UI_Window : public UI_Object
 
 		bool doAdjustments;
 
-		eIsTransparent isTransparent;
-
+		eTransparentWindow transparentWindow;
 // no set/get for title as this is unique and does not change
 		eString titleString;
 		std::string titleParameter;
@@ -121,8 +127,8 @@ class UI_Window : public UI_Object
 		unsigned int maxHeight;
 
 		void calculateClientRect();
-		void drawTitle(DC* dc) const;
-		void drawToolTip(DC* dc, const Point p, const std::string* tip) const;
+		void drawTitle() const;
+//		void drawToolTip(DC* dc, const Point p, const std::string* tip) const;
 
 		eIsAutoAdjust isAutoAdjust;
 // has this window a ScrollBar?

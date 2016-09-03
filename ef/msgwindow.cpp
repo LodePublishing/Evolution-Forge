@@ -19,23 +19,33 @@ void MessageWindow::process()
 {
 	if(!isShown()) 
 		return;
+	if(remainingMessages.size())
+	{
+		makePufferInvalid();
+		for(std::list<std::string>::iterator i = UI_Object::remainingMessages.begin(); i != UI_Object::remainingMessages.end(); )
+		{
+			Message* my_message = new Message(getScrollBar(), Rect(Point(10, 20  /*message.size() * (FONT_SIZE+5)*/), Size(getClientRectWidth(), FONT_SIZE+5)), 1, *i, 100);
+			message.push_front(my_message);
+			i = remainingMessages.erase(i);
+		}
+		resetData();
+//	addToProcessArray(this);
+//	if(message.size() > 20)
+//		message.pop_front();
+//	moveScrollbarToBottom();
+	}
 	UI_Window::process();
 	getScrollBar()->checkBoundsOfChildren(getAbsoluteClientRectUpperBound()-15, getAbsoluteClientRectLowerBound());
 }
 
-void MessageWindow::draw( DC* dc ) const
+void MessageWindow::draw() const
 {
-	if(!isShown()) 
-		return;
-	drawWindow(dc);
-	if(checkForNeedRedraw())
-	{
-		dc->setFont(UI_Object::theme.lookUpFont(LARGE_SHADOW_BOLD_FONT));
-		Point point = Point(getAbsoluteClientRectPosition() + Size(10, getHeight()*11/16));
-		dc->setTextForeground(DC::toSDL_Color(70, 70, 100));
-		dc->DrawText("Evolution Forge", point);
-	}
-	UI_Object::draw(dc);
+	drawWindow();
+	dc->setFont(UI_Object::theme.lookUpFont(LARGE_SHADOW_BOLD_FONT));
+	Point point = Point(getRelativeClientRectPosition() + Size(10, getHeight()*11/16));
+	dc->setTextForeground(DC::toSDL_Color(70, 70, 100));
+	dc->DrawText("Evolution Forge", point);
+	UI_Object::draw();
 }
 
 void MessageWindow::resetData()
@@ -55,20 +65,5 @@ void MessageWindow::reloadOriginalSize()
 	UI_Window::reloadOriginalSize();
 	resetData();
 }
-
-void MessageWindow::addMessage( const std::string& msg )
-{
-	setNeedRedrawNotMoved();
-	Message* my_message = new Message(getScrollBar(), Rect(Point(10, 20  /*message.size() * (FONT_SIZE+5)*/), Size(getClientRectWidth(), FONT_SIZE+5)), 1, msg, 100);
-	message.push_front(my_message);
-	resetData();
-//	addToProcessArray(this);
-	
-//	if(message.size() > 20)
-//		message.pop_front();
-//	moveScrollbarToBottom();
-//	process();
-}
-
 
 

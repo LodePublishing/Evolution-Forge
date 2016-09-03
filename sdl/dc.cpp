@@ -3,6 +3,7 @@
 
 DC::DC(const Size current_resolution, const eBitDepth bit_depth, const Uint32 nflags, const Uint32 initflags) :
 	surface(NULL),
+	oldSurface(NULL),
 	pressedRectangle(false),
 	initOK(true),
 	brush(),
@@ -12,6 +13,7 @@ DC::DC(const Size current_resolution, const eBitDepth bit_depth, const Uint32 nf
 	font(NULL),
 // evtl gar nicht initialisieren...
 	bitDepth(bit_depth),
+	bits(0),
 	resolution(current_resolution),
 	Draw_HLine(NULL),
 	Draw_VLine(NULL),
@@ -28,12 +30,39 @@ DC::DC(const Size current_resolution, const eBitDepth bit_depth, const Uint32 nf
 		return;
 	}
 	atexit(SDL_Quit);
-	setScreen(resolution, bit_depth, nflags);
+	setScreen(resolution, bitDepth, nflags);
 }
 
 DC::~DC()
 {
 	SDL_FreeSurface(surface);
+}
+
+void DC::switchToSurface(SDL_Surface* temp_surface) 
+{
+#ifdef _SCC_DEBUG
+	if(oldSurface != NULL) {
+		toErrorLog("DEBUG (DC::switchToSurface()): Original Surface was not restored!");return;
+	}
+#endif
+	oldSurface = surface;
+	surface = temp_surface;
+}
+
+void DC::switchToOriginalSurface()
+{
+#ifdef _SCC_DEBUG
+	if(oldSurface == NULL) {
+		toErrorLog("DEBUG (DC::switchToOriginalSurface()): Already at original surface!");return;
+	}
+#endif
+	surface = oldSurface;
+	oldSurface = NULL;
+}
+
+const bool DC::isSurfacePuffered() const
+{
+	return(oldSurface != NULL);
 }
 
 SDL_Cursor* DC::createCursor(char* xpm_image[])
@@ -123,15 +152,15 @@ void DC::addRectangle(const Rect& rect)
 	else 
 		r.y = rect.getTop();
 	
-	if(rect.getRight() > max_x)
+	if(rect.getRight() >= max_x)
 		r.w = max_x - r.x;
 	else 
-		r.w = rect.getRight() - r.x;
+		r.w = 1 + rect.getRight() - r.x;
 
-	if(rect.getBottom() > max_y)
+	if(rect.getBottom() >= max_y)
 		r.h = max_y - r.y;
 	else 
-		r.h = rect.getBottom() - r.y;
+		r.h = 1 + rect.getBottom() - r.y;
 
 	for(unsigned int i = 0; i < changedRectangles; i ++)
 	{
@@ -160,12 +189,11 @@ void DC::addRectangle(const Rect& rect)
 
 void DC::updateScreen()
 {
-/*	for(unsigned int i = changedRectangles; i--;)
-	{
-		setPen(Pen(surface, rand()%256, rand()%256, rand()%256, 2, SOLID_PEN_STYLE)); 
-		DrawEmptyRectangle(changedRectangle[i].x, changedRectangle[i].y, changedRectangle[i].w, changedRectangle[i].h);
-	}*/
-
+//	for(unsigned int i = changedRectangles; i--;)
+//	{
+//		setPen(Pen(surface, rand()%256, rand()%256, rand()%256, 1, SOLID_PEN_STYLE)); 
+//		DrawEmptyRectangle(changedRectangle[i].x+2, changedRectangle[i].y+2, changedRectangle[i].w-4, changedRectangle[i].h-4);
+//	}
 	SDL_UpdateRects(surface, changedRectangles, changedRectangle);
 	changedRectangles=0;
 }
@@ -409,7 +437,7 @@ void DC::DrawSpline(const unsigned int c, const Point* p, const Point s) const
 void DC::DrawText(const std::string& text, const signed int x, const signed int y) const 
 {
 	if(font->isShadow())
-		font->DrawText(surface, toSDL_Color(0,0,0), text, x+font->getSize()/6, y+font->getSize()/6); 
+		font->DrawText(surface, toSDL_Color(0,0,0), text, x+font->getSize()/6, y+font->getSize()/6);
 
 	font->DrawText(surface, textColor, text, x, y);
 	if(font->isUnderlined())
@@ -422,7 +450,6 @@ void DC::DrawText(const std::string& text, const signed int x, const signed int 
 
 }
 
-
 void DC::setScreen(const Size current_resolution, const eBitDepth bit_depth, const Uint32 nflags)
 {
 	if((current_resolution == resolution) && (bit_depth == bitDepth) && (surface!=NULL))
@@ -430,7 +457,6 @@ void DC::setScreen(const Size current_resolution, const eBitDepth bit_depth, con
 	resolution = current_resolution;
 	max_x = resolution.getWidth();
 	max_y = resolution.getHeight();
-	unsigned int bits;
 	switch(bit_depth)
 	{
 		case DEPTH_8BIT:bits=8;break;
@@ -747,22 +773,38 @@ void DC::Unlock() const {
 }
 
 #include <sstream>
-const eChooseDriverError DC::chooseDriver(std::string& driver_name)
+const eChooseDriverError DC::chooseDriver(std::list<std::string>& parameter_list, std::string& current_driver)
 {
+	if(getenv("SDL_VIDEODRIVER")!=NULL)
+		current_driver = getenv("SDL_VIDEODRIVER");
+
+	bool no_vo_argument = false; // TODO
+
+	for(std::list<std::string>::iterator i = parameter_list.begin(); i != parameter_list.end(); ++i)
+		if((*i) == "-vo")
+		{
+			i = parameter_list.erase(i);
+			if(i == parameter_list.end())
+				no_vo_argument = true;
+			else current_driver = *i;
+			parameter_list.erase(i);
+			break;
+		}
+	
 	std::list<std::string> availible_drivers = DC::getAvailibleDrivers();
 	if(availible_drivers.empty())
 		return(NO_VIDEO_DRIVERS_AVAILIBLE);
-	if(driver_name=="")
-		driver_name = *availible_drivers.begin();
-	for(std::list<std::string>::const_iterator j = availible_drivers.begin();j!=availible_drivers.end();++j)
-		if(driver_name == *j)
+	if(current_driver == "")
+		current_driver = *availible_drivers.begin();
+	for(std::list<std::string>::const_iterator j = availible_drivers.begin(); j != availible_drivers.end(); ++j)
+		if(current_driver == *j)
 		{
 			std::ostringstream video;
 			video.str("");
-			video << "SDL_VIDEODRIVER=" << driver_name;
+			video << "SDL_VIDEODRIVER=" << current_driver;
 			char* video_cstr = new char[strlen(video.str().c_str())];
 			strcpy(video_cstr, video.str().c_str());
-//			putenv(video_cstr);
+			putenv(video_cstr);
 			return(NO_DRIVER_ERROR);
 		}
 	return(SDL_DRIVER_NOT_SUPPORTED);

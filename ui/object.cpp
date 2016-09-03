@@ -5,20 +5,25 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const S
 	clipRect(),
 	children(NULL),
 	childrenWereChanged(false),
+
 	positionMode(position_mode),
+	
+	blitRectList(),
+	pufferInvalid(true),
+	drawPuffer(NULL),
+	drawType(SOLID_OBJECT),
+	
 	relativeRect(relative_rect),
 	startRect(relative_rect),
 	targetRect(relative_rect),
 	originalRect(relative_rect),
 	distanceBottomRight(distance_bottom_right),
-	oldSize(relative_rect.getSize()),
+	oldRect(relative_rect),
 	sizeHasChanged(true),
 
 	autoSize(auto_size),
-	shown(true),
+	shown(false),
 
-	needRedraw(true),
-	redrawArea(),
 	parent(NULL),
 	positionParent(NULL),
 	prevBrother(this),
@@ -28,6 +33,8 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const S
 {
 	setParent(parent_object);
 //	addToProcessArray(this);
+	UI_Object::objectList.push_back(this);
+	Show();
 }
 
 UI_Object::UI_Object(UI_Object* parent_object, UI_Object* position_parent_object, const Rect relative_rect, const Size distance_bottom_right, const ePositionMode position_mode, const eAutoSize auto_size) :
@@ -36,19 +43,23 @@ UI_Object::UI_Object(UI_Object* parent_object, UI_Object* position_parent_object
 	children(NULL),
 	childrenWereChanged(false),
 	positionMode(position_mode),
+
+	blitRectList(),
+	pufferInvalid(true),
+	drawPuffer(NULL),
+	drawType(SOLID_OBJECT),
+
 	relativeRect(relative_rect),
 	startRect(relative_rect),
 	targetRect(relative_rect),
 	originalRect(relative_rect),
 	distanceBottomRight(distance_bottom_right),
-	oldSize(relative_rect.getSize()),
+	oldRect(relative_rect),
 	sizeHasChanged(true),
 
 	autoSize(auto_size),
 	shown(true),
 
-	needRedraw(true),
-	redrawArea(),
 	parent(NULL),
 	positionParent(NULL),
 	prevBrother(this),
@@ -59,13 +70,131 @@ UI_Object::UI_Object(UI_Object* parent_object, UI_Object* position_parent_object
 	setParent(parent_object);
 	setPositionParent(position_parent_object);
 //	addToProcessArray(this);
+	UI_Object::objectList.push_back(this);
+	Show();
 }
 
 UI_Object::~UI_Object()
 {
+	oldRectList.push_back(getAbsoluteRect());
 	if(UI_Object::focus == this)
 		UI_Object::focus = NULL;
 	removeFromFamily(); // !!!!!
+	for(std::list<UI_Object*>::iterator i = objectList.begin(); i != objectList.end();)
+		if(*i == this)
+		{
+			i = objectList.erase(i);
+//			toErrorLog("erase " + getAbsoluteRect().toString());
+			return;
+		} else i++;
+}
+
+#include <sstream>
+const bool UI_Object::initSDL(std::list<std::string>& arguments, std::string window_title)
+{
+	toInitLog("Loading language files...");
+	theme.loadStringFiles();
+	std::list<std::string> string_files = findFiles("data", "strings", "help", "");
+	for(std::list<std::string>::iterator j = string_files.begin(); j != string_files.end(); ++j)
+		theme.loadHelpChapterStringFile(*j);
+
+	toInitLog(theme.lookUpString(START_LOAD_UI_CONFIGURATION_STRING));
+	uiConfiguration.loadConfigurationFile();
+	
+	toInitLog(theme.lookUpString(START_SET_LANGUAGE_STRING) + theme.lookUpString((eString)(SETTING_ZERO_LANGUAGE_STRING + uiConfiguration.getLanguage())));
+	if(!theme.setLanguage(uiConfiguration.getLanguage()))
+	{
+		toErrorLog("Could not load language, trying default language english... ");
+		if(!theme.setLanguage(ENGLISH_LANGUAGE))
+		{
+			toErrorLog("ERROR (main()): Cannot set any language, please reinstall language files (in 'data/strings/program') or the whole program.");
+			return(EXIT_FAILURE);
+		}
+	}
+
+	uiConfiguration.parseParameters(arguments);
+	
+	if((!uiConfiguration.isSound()) && (!uiConfiguration.isMusic()))
+		toInitLog(theme.lookUpString(START_INIT_NOSOUND_STRING));
+// ------ INIT SDL AND WINDOW ------
+	toInitLog(theme.lookUpString(START_INIT_SDL_STRING));
+	{
+		std::ostringstream os;
+		os.str("");
+		os << "* " << theme.lookUpString(START_AVAILIBLE_GRAPHIC_DRIVERS_STRING);
+		std::list<std::string> s = DC::getAvailibleDrivers();
+		for(std::list<std::string>::const_iterator i = s.begin(); i!=s.end(); i++)
+			os << *i << " ";
+		toInitLog(os.str());
+	}
+
+	std::string current_driver;
+	switch(DC::chooseDriver(arguments, current_driver))
+	{
+//			toErrorLog(theme.lookUpString(START_WARNING_VO_ARGUMENT_STRING)); TODO
+		case NO_DRIVER_ERROR:toInitLog("* " + theme.lookUpFormattedString(START_SDL_USING_DRIVER_STRING, current_driver));break;
+		case NO_VIDEO_DRIVERS_AVAILIBLE:toErrorLog("* " + theme.lookUpString(START_ERROR_NO_DRIVER_AVAILIBLE_STRING));return(false);break;
+		case SDL_DRIVER_NOT_SUPPORTED:toErrorLog("* " + theme.lookUpFormattedString(START_ERROR_DRIVER_NOT_SUPPORTED_STRING, current_driver));return(false);break;
+	}
+
+
+	setResolution(uiConfiguration.getResolution(), true);
+	
+	toInitLog("* " + theme.lookUpString(uiConfiguration.isFullScreen() ? START_SET_FULLSCREEN_MODE_STRING : START_SET_WINDOW_MODE_STRING));
+	Uint32 flags = SDL_HWSURFACE|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC|SDL_DOUBLEBUF;
+	if(uiConfiguration.isFullScreen())
+		flags |= SDL_FULLSCREEN;
+#ifdef _SDL_MIXER_SOUND
+	flags |= SDL_INIT_AUDIO;
+#endif
+	dc = new DC(UI_Object::theme.getCurrentResolutionSize(), UI_Object::theme.getBitDepth(), flags, SDL_INIT_NOPARACHUTE | SDL_INIT_VIDEO);
+		
+	if(!dc->initializationOK())	{
+		toErrorLog(UI_Object::theme.lookUpString(START_UNABLE_TO_INIT_SDL_STRING) + " [SDL ERROR: \"" + SDL_GetError() + "\"]");
+		delete dc;
+		return(false);
+	}
+	
+	if ( !dc->valid() ) {
+		toErrorLog(UI_Object::theme.lookUpString(START_ERROR_SETTING_VIDEO_MODE_STRING) + " [SDL ERROR: \"" + SDL_GetError() + "\"]");
+		delete dc;
+		return(false);
+	}
+
+	UI_Object::theme.initCursors();
+	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+
+	toInitLog(UI_Object::theme.printHardwareInformation());
+	toInitLog("* " + UI_Object::theme.lookUpString(START_CREATED_SURFACE_STRING) + " " + UI_Object::theme.printSurfaceInformation(dc));
+// ------ END INIT SDL AND WINDOW ------
+
+	SDL_WM_SetCaption(window_title.c_str(),"");
+
+// ------ INIT SOUND ENGINE -------
+	bool sound_not_initialized = true;
+	if((uiConfiguration.isSound())||(uiConfiguration.isMusic()))
+	{
+		toInitLog(UI_Object::theme.lookUpString(START_INIT_SOUND_STRING)); 
+		if(!UI_Object::sound.init())
+		{
+			uiConfiguration.setSound(false);
+			uiConfiguration.setMusic(false);
+		} else
+			sound_not_initialized = false;
+	}
+// ------ END INIT SOUND ENGINE -------
+
+
+// ------ INIT SDL_TTF ------
+	toInitLog("* " + UI_Object::theme.lookUpString(START_INIT_SDL_TRUETYPE_FONTS_STRING));
+	if(TTF_Init()==-1) {
+		toErrorLog(UI_Object::theme.lookUpString(START_INIT_SDL_TTF_ERROR_STRING) + " [\"" + TTF_GetError() + "\"]");
+		delete dc;
+		return(false);
+	}
+	atexit(TTF_Quit); 
+
+	return(true);
 }
 
 const bool UI_Object::addKey(unsigned int key, unsigned int mod)
@@ -76,13 +205,14 @@ const bool UI_Object::addKey(unsigned int key, unsigned int mod)
 void UI_Object::reloadOriginalSize()
 {
 //	UI_Object::addToProcessArray(this);
-	UI_Object* tmp=children;  // process all children of gadget
+	UI_Object* tmp = children;  // process all children of gadget
 	if (tmp) {
 		do {
 			tmp->reloadOriginalSize();
 			tmp = tmp->nextBrother;
-			} while (tmp != children);
-		}	
+		} while (tmp != children);
+	}
+
 }
 
 void UI_Object::adjustSize(const eAdjustMode adjust_mode, const Size& size)
@@ -119,9 +249,9 @@ void UI_Object::adjustSize(const eAdjustMode adjust_mode, const Size& size)
 	} else
 	if(adjust_mode == CHILD_WAS_CHANGED)
 	{
+		childrenWereChanged = true;
 // called if the object is dependant on the child's size (e.g. Button - StaticText)
 // TODO maybe update other children too
-		childrenWereChanged = true;
 		switch(autoSize)
 		{
 			case NOTHING:break;
@@ -246,6 +376,9 @@ void UI_Object::setParent(UI_Object* daddy)
 	setPositionParent(daddy);
 	removeFromFamily();
 	parent = daddy;
+	if(parent)
+		setZ(parent->getZ()-5);
+	else setZ(100);
 
 	if(!daddy)
 		return;
@@ -272,23 +405,132 @@ void UI_Object::addChild(UI_Object* child)
 	}
 }
 
-void UI_Object::process()
+struct sort_by_z
 {
-//	if (!isShown()) //~~
-//		return;
-	if(relativeRect != targetRect)
+	bool operator()(UI_Object const* p1, UI_Object const* p2)
 	{
-		Rect old_rect = relativeRect;
-		eRectMovement t = uiConfiguration.isSmoothMovements() ? relativeRect.moveSmooth(startRect, targetRect) : relativeRect.move(targetRect);
-		if(t == GOT_BIGGER)
-			setNeedRedrawNotMoved();
-		else if(t == GOT_SMALLER_OR_MOVED)
-			setNeedRedrawMoved(old_rect, relativeRect);
-		if(oldSize != relativeRect.getSize())
-			setSizeHasChanged();
+		if(!p1)
+			return true;
+		if(!p2)
+			return false;
+		return p1->getZ() < p2->getZ();
+	}
+};
+
+void UI_Object::updateScreen()
+{
+	objectList.sort(sort_by_z());
+
+	for(std::list<UI_Object*>::const_iterator i = objectList.begin(); i != objectList.end(); ++i)
+		if((*i)->isShown() && ((*i)->isPufferInvalid()) && ((*i)->getDrawType() == ANTI_ALIASED_OBJECT))
+			oldRectList.push_back((*i)->getAbsoluteRect());
+	
+	Rect::connectRects(oldRectList);
+
+// Objekt befindet sich vor dem neu zu malenden Bereich => diesen Bereich nicht neukopieren => aus newRectList loeschen
+	for(std::list<UI_Object*>::const_iterator i = objectList.begin(); i != objectList.end(); ++i)
+		if((*i)->isShown() && ((*i)->getDrawType() == SOLID_OBJECT))
+		{
+			for(std::list<std::pair<signed int, Rect> >::iterator j = newRectList.begin(); j != newRectList.end(); )
+	// objekt vor dem zu uebermalendem Gebiet
+				if((*i)->getZ() < j->first)
+				{
+					std::list<Rect> t;
+					t = j->second.withoutRect((*i)->getAbsoluteRect());
+					for(std::list<Rect>::iterator l = t.begin(); l != t.end(); ++l)
+					{
+						newRectList.insert(j, std::pair<signed int, Rect>(j->first, *l));
+					}
+					j = newRectList.erase(j);
+				} else ++j;				
+		}
+	int zz = 0;
+	for(std::list<UI_Object*>::const_iterator i = objectList.begin(); i != objectList.end(); ++i)
+		if((*i)->isShown())
+	{
+//		++zz;
+//		toErrorLog(zz);
+
+//		von allen 'oldrects' die absolut-rects abziehen
+		for(std::list<Rect>::iterator j = oldRectList.begin(); j != oldRectList.end(); )
+		{
+	//		toErrorLog(".");
+	//		toErrorLog(oldRectList.size());
+			Rect r = j->commonRect((*i)->getAbsoluteRect());
+			if(r != Rect())
+			{
+//				std::ostringstream os;
+//				os << r.getLeft() << " " << r.getTop() << " " << r.getRight() << " " << r.getBottom();
+//				os << " / " << j->getLeft() << " " << j->getTop() << " " << j->getRight() << " " << j->getBottom();
+//				toErrorLog("push " + os.str());
+//				toErrorLog(j->touches((*i)->getAbsoluteRect()));
+				(*i)->blitRectList.push_back(r);
+				if((*i)->getDrawType() == SOLID_OBJECT)
+				{
+					std::list<Rect> t;
+					t = j->withoutRect((*i)->getAbsoluteRect());
+					oldRectList.splice(j, t);
+					j = oldRectList.erase(j);	
+				} 
+				else ++j;
+			} else ++j;
+		}
+// newrect Maske ueber Objekt legen und Schnitt dem Objekt mitteilen
+		for(std::list<std::pair<signed int, Rect> >::iterator j = newRectList.begin(); j != newRectList.end(); )
+		// z vergleich unnoetig weil ich ja sortiert von vorne nach hinten durchgehe
+		{
+			Rect r = j->second.commonRect((*i)->getAbsoluteRect());
+//			toErrorLog(".");
+			if(r != Rect())
+			{
+//				toErrorLog("---");
+//				toErrorLog(j->second.toString());
+//				toErrorLog((*i)->getAbsoluteRect().toString());
+//				toErrorLog(r.toString());
+				(*i)->blitRectList.push_back(r);
+				if((*i)->getDrawType() == SOLID_OBJECT) //?
+				{
+					std::list<Rect> t;
+					t = j->second.withoutRect((*i)->getAbsoluteRect());
+					for(std::list<Rect>::iterator l = t.begin(); l != t.end(); ++l)
+					{
+						newRectList.insert(j, std::pair<signed int, Rect>(j->first, *l));
+					}
+					j = newRectList.erase(j);
+				} else ++j;
+			} else ++j;
+		}	
+	}
+	for(std::list<UI_Object*>::const_iterator i = objectList.end(); i != objectList.begin(); )
+	{
+		--i;
+		if(((*i)->getWidth()>0)&&((*i)->getHeight()>0)) // TODO
+			(*i)->putOnScreen();
 	}
 
-	if(hasSizeChanged())
+	oldRectList.clear();
+	newRectList.clear();
+// put it in the graphic memory
+	dc->updateScreen();
+}
+
+void UI_Object::processAll() // TODO, processList machen
+{
+	for(std::list<UI_Object*>::const_iterator i = objectList.begin(); i != objectList.end(); ++i)
+		if((*i)->isShown())
+			(*i)->process();			
+}
+
+
+void UI_Object::process()
+{
+	if(!isShown())
+		return; //?
+	if(uiConfiguration.isSmoothMovements())
+		relativeRect.moveSmooth(startRect, targetRect);
+	else relativeRect.move(targetRect);
+
+	if((oldRect.getSize() != getSize()) || (hasSizeChanged()))
 	{
 //		adjustSize(CHILD_WAS_CHANGED, getSize()); // TODO ? muesste hier nicht die Groesse des Kinds stehen?
 		if(getParent())
@@ -303,19 +545,8 @@ void UI_Object::process()
 		}
 		
 		adjustPosition();
-		setSizeHasChanged(false);
 	}
-
-
-	// hier wird height des fensters veraendert!
-	UI_Object* tmp=children;  // process all children of gadget
-	if (tmp) {
-		do {
-			tmp->process();
-			tmp = tmp->nextBrother;
-		} while (tmp != children);
-	}
-	oldSize = relativeRect.getSize();
+	checkRectHasChanged();
 }
 
 void UI_Object::setClipRect(const Rect& rect)
@@ -330,17 +561,14 @@ void UI_Object::setClipRect(const Rect& rect)
 	clipRect = rect;
 }
 
-void UI_Object::setSizeHasChanged(const bool size_has_changed)
+void UI_Object::checkRectHasChanged()
 {
-	if(size_has_changed == true)
-	{
-		sizeHasChanged = true;
-	}
-	else if(size_has_changed == false)
-	{
-		sizeHasChanged = false;
-	}
-		
+	if(oldRect == getAbsoluteRect())
+		return;
+	sizeHasChanged = (oldRect.getSize() != getSize());
+	newRectList.push_back(std::pair<signed int, Rect> (getZ(), getAbsoluteRect()));
+	oldRectList.push_back(oldRect);
+	oldRect = getAbsoluteRect();
 }
 
 void UI_Object::resetData()
@@ -407,36 +635,126 @@ UI_Object* UI_Object::checkHighlight()
 	return(result);
 }
 
-void UI_Object::draw(DC* dc) const
+void UI_Object::object_info()
 {
-	// if hidden, hide children as well
+	toErrorLog("ui_object");
+}
+	
+void UI_Object::putOnScreen()
+{
 	if (!isShown())
 		return;
-	
-	if(redrawArea.size())
-	{
-		dc->setBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
-		dc->setPen(*theme.lookUpPen(NULL_PEN));
-		for(std::list<Rect>::const_iterator i = redrawArea.begin(); i!= redrawArea.end(); ++i)
-			dc->DrawRectangle(*i);
-	}
-	
-	// for 'redraw' optimizations - to see which window is redrawn
-//	dc->setPen(*theme.lookUpPen((ePen)(5+(rand()%2))));
-//	dc->DrawEmptyRectangle(getAbsoluteRect());
 
-	UI_Object* tmp = children;
-	if (tmp) {
-		do {
-			tmp->draw(dc);
-			tmp = tmp->nextBrother;
-		} while (tmp != children);
+	if(getDrawType() != ANTI_ALIASED_OBJECT)
+	{
+		bool clear_puffer = false;
+		if(sizeHasChanged)
+		{
+//			toErrorLog("size has changed");
+			SDL_FreeSurface(drawPuffer);
+			drawPuffer = NULL;
+		}
+		if(drawPuffer == NULL)
+		{
+//			toErrorLog("create new surface");
+			if((getWidth() == 0) || (getHeight() == 0))
+			{
+				toErrorLog(":/");
+			}
+			drawPuffer = SDL_CreateRGBSurface( SDL_SWSURFACE, getWidth(), getHeight(), dc->getBits(), 0,0,0,0);
+			SDL_SetColorKey(drawPuffer, SDL_SRCCOLORKEY , SDL_MapRGB(drawPuffer->format, 0, 0, 0));
+			makePufferInvalid();
+		} else 
+			if(getDrawType() == TRANSPARENT_OBJECT)
+				clear_puffer = true;
+		Rect::connectRects(blitRectList);
+		if(isPufferInvalid())
+		{
+//			toErrorLog("puffer invalid");
+			if(clear_puffer)
+				SDL_FillRect(drawPuffer, NULL, 0);
+			dc->switchToSurface(drawPuffer);
+		}
+	} else 
+		dc->drawFromPoint(getAbsolutePosition());
+	
+	if(isPufferInvalid())
+	{
+//		toErrorLog("draw");
+		if(getDrawType() == ANTI_ALIASED_OBJECT)
+			draw();
+		else
+		{
+//			toErrorLog("puffer invalid -> draw");
+			draw(); // fill puffer or draw directly to screen
+			dc->switchToOriginalSurface();
+			makePufferValid();
+		}
+//		toErrorLog("draw ok");
+	}
+
+	if(getDrawType() != ANTI_ALIASED_OBJECT)
+	{
+//		if(blitRectList.size()>0)
+//			object_info();
+		for(std::list<Rect>::iterator i = blitRectList.begin(); i != blitRectList.end(); )
+		{
+//			toErrorLog("blit " + i->toString());
+			SDL_Rect source;
+			SDL_Rect target;
+			target.x = i->getLeft();
+			target.y = i->getTop();
+			Point p = getAbsolutePosition();
+			source.x = i->getLeft() - p.x;
+			source.y = i->getTop() - p.y;
+			source.w = i->getWidth();
+			source.h = i->getHeight();
+			SDL_BlitSurface(drawPuffer, &source, dc->getSurface(), &target); // TODO
+			DC::addRectangle(*i);
+			i = blitRectList.erase(i);
+//			toErrorLog("blit ok");
+		}
+/*		if(blitRectList.size()>0)
+		{
+			toErrorLog(blitRectList.size());
+			SDL_Rect target;
+			target.x = getAbsolutePosition().x;
+			target.y = getAbsolutePosition().y;
+			SDL_BlitSurface(drawPuffer, NULL, dc->getSurface(), &target); // TODO
+			DC::addRectangle(getAbsoluteRect());
+			for(std::list<Rect>::iterator i = blitRectList.begin(); i != blitRectList.end();)
+			{
+				toErrorLog("long draw " + i->toString());
+				i = blitRectList.erase(i);
+			}
+		}*/
+	} 
+	else if(blitRectList.size()>0)
+	{ // TODO
+		blitRectList.clear();
+		DC::addRectangle(getAbsoluteRect());
+		dc->drawFromPoint(Point(0,0));
 	}
 }
 
-void UI_Object::setSize(const unsigned int width, const unsigned int height) 
+void UI_Object::draw() const
+{}
+
+	// if hidden, hide children as well
+// for 'redraw' optimizations - to see which window is redrawn
+//	dc->setPen(*theme.lookUpPen((ePen)(5+(rand()%2))));
+//	dc->DrawEmptyRectangle(getAbsoluteRect());
+
+void UI_Object::setZ(const signed int zcoord)
 {
-	setSize(Size(width, height));
+	zCoordinate = zcoord;
+	UI_Object* tmp = children;
+	if (tmp) {
+		do {
+			tmp->setZ(zcoord - 10);
+			tmp = tmp->nextBrother;
+		} while (tmp != children);
+	}
 }
 
 void UI_Object::setOriginalRect(const Rect& rect) {
@@ -454,6 +772,7 @@ void UI_Object::setOriginalWidth(const unsigned int width) {
 	setWidth(width);
 }
 
+
 const bool UI_Object::isMoving() const
 {
 	return((isShown())&&(relativeRect.getLeft() != targetRect.getLeft()));
@@ -461,18 +780,9 @@ const bool UI_Object::isMoving() const
 
 void UI_Object::setRect(const Rect& rect) 
 {
-	Rect old_rect = relativeRect;	
-	eRectMovement movement = relativeRect.move(rect);
-	switch(movement)
-	{
-		case NO_CHANGE:return;
-		case GOT_SMALLER_OR_MOVED:setNeedRedrawMoved(old_rect, relativeRect);break;
-		case GOT_BIGGER:setNeedRedrawNotMoved();break;
-	}
+	relativeRect = rect;
 	startRect = rect;
 	targetRect = rect;
-	setSizeHasChanged();
-//	UI_Object::addToProcessArray(this);
 }
 
 void UI_Object::setPosition(const Point& position)
@@ -485,97 +795,54 @@ void UI_Object::setPosition(const Point& position)
 		toErrorLog("DEBUG (UI_Object::setPosition()): Value position out of range.");return;
 	}
 #endif
-	
-	Rect old_rect = relativeRect;
 	startRect.setTopLeft(position);
 	targetRect.setTopLeft(position);
 	relativeRect.setTopLeft(position);
-	
-	setNeedRedrawMoved(old_rect, relativeRect);
-//	UI_Object::addToProcessArray(this);
 }
 
 void UI_Object::setHeight(const unsigned int height) 
 {
 	if(getTargetHeight() == height)
 		return;
-	
-	Rect old_rect = relativeRect;
 	relativeRect.setHeight(height);
 	startRect.setHeight(height);
 	targetRect.setHeight(height);
-	
-	setSizeHasChanged();
-	if(height < relativeRect.getHeight())
-		setNeedRedrawMoved(old_rect, relativeRect);
-	else setNeedRedrawNotMoved();
-	
-//	UI_Object::addToProcessArray(this);
 }
 
 void UI_Object::setWidth(const unsigned int width) 
 {
 	if(relativeRect.getWidth() == width)
 		return;
-	
-	Rect old_rect = relativeRect;
 	relativeRect.setWidth(width);
 	startRect.setWidth(width);
 	targetRect.setWidth(width);
-	
-	setSizeHasChanged();
-	if(width < relativeRect.getWidth())
-		setNeedRedrawMoved(old_rect, relativeRect);
-	else setNeedRedrawNotMoved();
-
-//	UI_Object::addToProcessArray(this);
 }
 
 void UI_Object::setSize(const Size size)
 {
 	if(relativeRect.getSize() == size)
 		return;
-	
-	Rect old_rect = relativeRect;
 	relativeRect.setSize(size);
 	startRect.setSize(size);
 	targetRect.setSize(size);
-	
-	setSizeHasChanged();
-	if(size < relativeRect.getSize())
-		setNeedRedrawMoved(old_rect, relativeRect);
-	else setNeedRedrawNotMoved();
-
-	
-//	UI_Object::addToProcessArray(this);
 }
 
 void UI_Object::setLeft(const signed int x) 
 {
 	if(relativeRect.getLeft() == x)
 		return;
-
-	Rect old_rect = relativeRect;
 	relativeRect.setLeft(x);
 	startRect.setLeft(x);
 	targetRect.setLeft(x);
-
-	setNeedRedrawMoved(old_rect, relativeRect);
-
-//	UI_Object::addToProcessArray(this);
 }
 		
 void UI_Object::setTop(const signed int y) 
 {
 	if(relativeRect.getTop() == y)
 		return;
-	
-	Rect old_rect = relativeRect;
 	relativeRect.setTop(y);
 	startRect.setTop(y);
 	targetRect.setTop(y);
-	
-	setNeedRedrawMoved(old_rect, relativeRect);
 }
 
 void UI_Object::Show(const bool show)
@@ -583,92 +850,41 @@ void UI_Object::Show(const bool show)
 	if((show)&&(!shown))
 	{
 		shown = true;
-		setNeedRedrawNotMoved();
+		newRectList.push_back(std::pair<signed int, Rect>(getZ(), getAbsoluteRect()));
 		if(getParent())
 			getParent()->childrenWereChanged = true;
 	} 
 	else if((!show)&&(shown))
 	{
-		setNeedRedrawNotMoved();
-//		setNeedRedrawMoved(false); // ~~ ?
+		oldRectList.push_back(getAbsoluteRect());
 		shown = false;
 		if(getParent())
 			getParent()->childrenWereChanged = true;
 	}
-}
-/*
-oldrect
-newrect
-
-'newrect < oldrect':
-	->redraw itself and children, redraw parent's oldrect
-'newrect > oldrect :
-	moved
-	notmoved
-redrawbackground
-*/
-
-// called when old rectangle is bigger/smaller than the old
-// call this directly when only the size has changed
-void UI_Object::setNeedRedrawAllThatOverlaps(const Rect& rect)
-{
-	if(getParent())
-	{
-		getParent()->setNeedRedrawArea(rect);
-	        UI_Object* tmp = getParent()->children;
-        	if (tmp) {
-                	do {
-				if(rect.overlaps(tmp->getRelativeRect()))
-		                        tmp->setNeedRedrawNotMoved();
-                	        tmp = tmp->nextBrother;
-	                } while (tmp != getParent()->children);
-        	}
-	} else
-		setNeedRedrawNotMoved();
-}
-
-void UI_Object::setNeedRedrawArea(const Rect& rect)
-{
-	Rect absolute_rect = Rect(rect.getTopLeft() + getAbsolutePosition(), rect.getSize());
-// check if it's inside
-	if(getAbsoluteRect().isInside(absolute_rect))
-		redrawArea.push_back(absolute_rect);
-	else 
-		setNeedRedrawAllThatOverlaps(Rect(rect.getTopLeft() + getRelativePosition(), rect.getSize()));
-}
-
-void UI_Object::setNeedRedrawMoved(const Rect& old_rect, const Rect& new_rect)
-{
-	if(old_rect.isInside(new_rect))
-	{
-		setNeedRedrawAllThatOverlaps(old_rect);
-		return;
-	} else if(new_rect.isInside(old_rect))
-	{
-		setNeedRedrawAllThatOverlaps(new_rect);
-		return;
+	UI_Object* tmp = children;  // process all children of gadget
+	if (tmp) {
+		do {
+			tmp->Show(show);
+			tmp = tmp->nextBrother;
+		} while (tmp != children);
 	}
-	setNeedRedrawAllThatOverlaps(old_rect);
-	setNeedRedrawAllThatOverlaps(new_rect);
 }
 
-void UI_Object::setNeedRedrawNotMoved()
-{
-	if(!isShown())
-		return;
-
-	needRedraw = true;
-
-	DC::addRectangle(Rect(getAbsolutePosition(), getSize()+Size(1,1))); // TODO Hack fuer buttons
-        UI_Object* tmp = children;
-
-        if (tmp) {
-                do {
-                        tmp->setNeedRedrawNotMoved();
-                        tmp = tmp->nextBrother;
-                } while (tmp != children);
-        }
+void UI_Object::redrawWholeObject() {
+	pufferInvalid = true;
+	newRectList.push_back(std::pair<signed int, Rect> (getZ(), getAbsoluteRect()));
 }
+
+void UI_Object::makePufferInvalid() {
+	pufferInvalid = true;
+}
+
+void UI_Object::makePufferValid() {
+	pufferInvalid = false;
+}
+
+
+
 
 void UI_Object::makeFirstChild()
 {
@@ -679,55 +895,66 @@ void UI_Object::makeFirstChild()
 	setParent(old_parent);
 }
 
-void UI_Object::setNeedRedrawNotMovedFirstChild()
+void UI_Object::clearFlags()
 {
-	if(!isShown())
-		return;
-
-	needRedraw = true;
-
-	DC::addRectangle(Rect(getAbsolutePosition(), getSize()+Size(1,1))); // TODO Hack fuer buttons
-	if(children)
-		children->setNeedRedrawNotMoved();
+	sizeHasChanged = false;
 }
 
-void UI_Object::clearRedrawFlag()
+void UI_Object::clearAllFlags()
 {
-	if(!isShown())
-	{
-		needRedraw = false;
-		redrawArea.clear();
-		return;
-	}
-	if(needRedraw)
-	{
-		needRedraw = false;
-		redrawArea.clear();
-	}
-	UI_Object* tmp = children;
-	if (tmp) {
-		do {
-			tmp->clearRedrawFlag();
-			tmp = tmp->nextBrother;
-		} while (tmp != children);
-	}
+	for(std::list<UI_Object*>::iterator i = objectList.begin(); i != objectList.end(); ++i)
+		(*i)->clearFlags();
 }
 
-const bool UI_Object::checkForNeedRedraw() const
+void UI_Object::addMessage(const eString msg)
 {
-	if(needRedraw)
-	{
-		++redrawnObjects;
-		return(true);
-	} else return(false);
+	remainingMessages.push_back(UI_Object::theme.lookUpString(msg));
 }
 
-void UI_Object::setResolution(const Size resolution)
+void UI_Object::addMessage(const std::string& msg)
 {
-	max_x = resolution.getWidth();
-	max_y = resolution.getHeight();
+	remainingMessages.push_back(msg);
 }
 
+
+const bool UI_Object::setResolution(const eResolution resolution, const bool first_call)
+{
+	if((resolution > RESOLUTION_1280x1024) || (resolution < RESOLUTION_640x480))
+		return(false);
+	if(!first_call)
+		SDL_SetCursor(UI_Object::theme.lookUpCursor(CLOCK_CURSOR, 0));
+	theme.setResolution(resolution);
+	if(dc)
+		dc->setResolution(theme.getCurrentResolutionSize());
+	Size s = theme.getCurrentResolutionSize();
+	max_x = s.getWidth();
+	max_y = s.getHeight();
+	uiConfiguration.setResolution(UI_Object::theme.getResolution());
+	std::ostringstream os;os.str("");
+	os << max_x << "x" << max_y;
+	toInitLog(theme.lookUpFormattedString(CHANGED_RESOLUTION_STRING, os.str()));
+	resetWindow();
+	if(!first_call)
+		SDL_SetCursor(UI_Object::theme.lookUpCursor(ARROW_CURSOR, 0));
+
+	return(true);
+}
+
+const bool UI_Object::setBitDepth(const eBitDepth bitdepth)
+{
+	if((bitdepth > DEPTH_32BIT) || (bitdepth < DEPTH_8BIT))
+		return(false);
+	SDL_SetCursor(UI_Object::theme.lookUpCursor(CLOCK_CURSOR, 0));
+	theme.setBitDepth(bitdepth);
+	dc->setBitDepth(theme.getBitDepth());
+	uiConfiguration.setBitDepth(theme.getBitDepth());
+	theme.updateColors(UI_Object::dc->getSurface());
+	// TODO bitDepth im theme aendern! ?
+	toInitLog(theme.lookUpFormattedString(CHANGED_BIT_DEPTH_STRING, (unsigned int)dc->getSurface()->format->BitsPerPixel));
+	resetWindow();
+	SDL_SetCursor(UI_Object::theme.lookUpCursor(ARROW_CURSOR, 0));
+	return(true);
+}
 
 /*void UI_Object::addToProcessArray(UI_Object* item)
 {
@@ -775,9 +1002,13 @@ UI_Window* UI_Object::currentWindow = NULL;
 bool UI_Object::windowSelected = false;
 unsigned int UI_Object::redrawnObjects(0);
 std::list<std::string> UI_Object::msgList;
+std::list<UI_Object*> UI_Object::objectList;
 
 //std::list<UI_Object*> UI_Object::processArray;
 //std::list<UI_Object*> UI_Object::nextProcessArray;
 
-bool UI_Object::toolTipWasDeleted = false;
+std::list<std::pair<signed int, Rect> > UI_Object::newRectList;
+std::list<Rect> UI_Object::oldRectList;
 
+DC* UI_Object::dc = NULL;
+std::list<std::string> UI_Object::remainingMessages;

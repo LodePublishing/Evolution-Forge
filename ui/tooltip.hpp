@@ -11,7 +11,8 @@ class UI_ToolTip : public UI_LongText
 		~UI_ToolTip();
 	
 		void reloadOriginalSize();
-		void draw(DC* dc) const;
+		void object_info();
+		void draw() const;
 		void process();
 	private:
 		Rect boxSize;

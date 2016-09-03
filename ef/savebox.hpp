@@ -12,7 +12,7 @@ class SaveBox : public UI_Window
 		SaveBox(UI_Object* savebox_parent, SaveBoxParameter savebox_parameter);
 		~SaveBox();
 
-		void draw(DC* dc) const;
+		void draw() const;
 		void process();
 		
 		UI_Object* checkToolTip();

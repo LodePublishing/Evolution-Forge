@@ -18,10 +18,16 @@ enum eGroupType
 class UI_Group : public UI_Object
 {
 	public:
-		UI_Group(UI_Object* group_parent, const Rect& initial_rect, const Size bottom_right_distance, const eGroupType group_type, const bool draw_background = false, const ePositionMode position_mode = DO_NOT_ADJUST, const eString txt = NULL_STRING);
+		UI_Group(UI_Object* group_parent, 
+				const Rect& initial_rect, 
+				const Size bottom_right_distance, 
+				const eGroupType group_type, 
+				const bool draw_background = false, 
+				const ePositionMode position_mode = DO_NOT_ADJUST, 
+				const eString txt = NULL_STRING);
 		~UI_Group();
 
-		void draw(DC* dc) const;
+		void draw() const;
 		void process();
 		void reloadOriginalSize();
 

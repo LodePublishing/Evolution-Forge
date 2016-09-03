@@ -19,7 +19,7 @@ void WARCRAFT3::init()
         if(UNIT_TYPE_COUNT_UNDEAD > max_unit_type_count)
                 max_unit_type_count = UNIT_TYPE_COUNT_UNDEAD;
 
-        GAME::MAX_GAME_STRINGS = MAX_WARCRAFT3_STRINGS;
+//        GAME::MAX_GAME_STRINGS = MAX_WARCRAFT3_STRINGS;
         GAME::MAX_RESOURCES = 50000000;
 
         RACE::UNIT_TYPE_COUNT = max_unit_type_count;
@@ -501,6 +501,10 @@ void WARCRAFT3::initStringIdentifier()
         gameStringIdentifier[GAME_SPEED_FAST_STRING] = "GAME_SPEED_FAST_STRING";
         gameStringIdentifier[GAME_SPEED_FASTER_STRING] = "GAME_SPEED_FASTER_STRING";
         gameStringIdentifier[GAME_SPEED_FASTEST_STRING] = "GAME_SPEED_FASTEST_STRING";
+
+	
+	gameStringIdentifier[DIAGRAM_SUPPLY_STRING] = "DIAGRAM_SUPPLY_STRING";
+	gameStringIdentifier[DIAGRAM_TIME_STRING] = "DIAGRAM_TIME_STRING";
 
 	for(unsigned int i = GAME::MAX_RACES; i--;)
         	race[i].unitsStringIdentifier.resize(RACE::UNIT_TYPE_COUNT); // mmh...

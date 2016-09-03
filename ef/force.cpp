@@ -92,7 +92,6 @@ void ForceWindow::setMode(const unsigned int game_number, const unsigned int gam
 
 void ForceWindow::reloadOriginalSize()
 {
-	toErrorLog("reload force");
 	setOriginalRect(UI_Object::theme.lookUpPlayerRect(FORCE_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
 	setMaxHeight(UI_Object::theme.lookUpPlayerMaxHeight(FORCE_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
 	
@@ -492,7 +491,7 @@ void ForceWindow::saveBoxIsCanceled()
 		menuButton[SAVE_GOALS]->forceUnpress();
 	else 
 		goalName->forceUnpress();
-	setNeedRedrawNotMoved();
+	makePufferInvalid();
 }
 
 void ForceWindow::saveBoxIsDone(std::string& input_string)
@@ -868,11 +867,9 @@ void ForceWindow::processList()
 	markedUnit = 0;
 }
 
-void ForceWindow::draw(DC* dc) const
+void ForceWindow::draw() const
 {
-	if(!isShown())
-		return;
-	UI_Window::draw(dc);
+	UI_Window::draw();
 /*	mouseType=0;
 	for(std::list<ForceEntry*>::const_iterator j = forceList.begin(); (!mouseType)&&(j!= forceList.end()); ++j)
 		if((*j)->isCurrentlyHighlighted())

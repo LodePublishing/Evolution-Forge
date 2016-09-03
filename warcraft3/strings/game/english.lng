@@ -28,6 +28,10 @@
 				       "GAME_SPEED_FAST_STRING" = "Fast"
 				     "GAME_SPEED_FASTER_STRING" = "Faster"
 				    "GAME_SPEED_FASTEST_STRING" = "Fastest"
+				    
+				        "DIAGRAM_SUPPLY_STRING" = "Food: "
+				          "DIAGRAM_TIME_STRING" = "Time: "
+			    
 	@END
 @END
 

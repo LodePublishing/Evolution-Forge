@@ -17,17 +17,15 @@ void Message::process()
 		if(col>5) 
 		{
 			col -= col/5+1;
-//			setNeedRedrawMoved(); TODO
+			makePufferInvalid();
 		}
 		else col=0;
 	}
 }
 
-void Message::draw(DC* dc) const
+void Message::draw() const
 {
-	if(!isShown())
-		return;
 	const_cast<Message*>(this)->setTemporaryColor(dc->doColor(col+155, col+155, col+155));
-	UI_StaticText::draw(dc);
+	UI_StaticText::draw();
 }
 

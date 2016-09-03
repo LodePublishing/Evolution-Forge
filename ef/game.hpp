@@ -18,7 +18,7 @@ class Game : public UI_Window
 		
 		void resetData();
 
-		void draw(DC* dc) const;
+		void draw() const;
 		void process();
 		void reloadOriginalSize();
 

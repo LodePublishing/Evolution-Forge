@@ -46,15 +46,12 @@ void SaveBox::reloadOriginalSize()
 	UI_Window::reloadOriginalSize();
 }
 
-void SaveBox::draw(DC* dc) const
+void SaveBox::draw() const
 {
-	if(checkForNeedRedraw())
-	{
-		dc->setBrush(*theme.lookUpBrush(BRIGHT_UNIT_TYPE_3_BRUSH));
-		dc->setPen(*theme.lookUpPen(RECTANGLE_PEN));
-		dc->DrawEdgedRoundedRectangle(Rect(getAbsolutePosition()-Size(1,1), getSize() + Size(2,2)),6);
-	}
-	UI_Window::draw(dc);
+	dc->setBrush(*theme.lookUpBrush(BRIGHT_UNIT_TYPE_3_BRUSH));
+	dc->setPen(*theme.lookUpPen(RECTANGLE_PEN));
+	dc->DrawEdgedRoundedRectangle(Rect(Point(0,0), getSize() + Size(2,2)),6);
+	UI_Window::draw();
 }
 
 void SaveBox::process()
@@ -66,14 +63,14 @@ void SaveBox::process()
 
 UI_Object* SaveBox::checkToolTip()
 {
-	if(!getAbsoluteRect().isInside(mouse))
+	if(!getAbsoluteRect().isTopLeftCornerInside(mouse))
 		return(NULL);
 	return(UI_Window::checkToolTip());
 }
 
 UI_Object* SaveBox::checkHighlight()
 {
-	if(!getAbsoluteRect().isInside(mouse))
+	if(!getAbsoluteRect().isTopLeftCornerInside(mouse))
 		return(NULL);
 	return(UI_Window::checkHighlight());
 }

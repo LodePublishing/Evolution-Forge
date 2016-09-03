@@ -20,7 +20,7 @@ class Player : public UI_Object
 		
 		void assignAnarace(ANABUILDORDER* anarace);
 
-		void draw(DC* dc) const;
+		void draw() const;
 		void process();
 
 		void CheckOrders();

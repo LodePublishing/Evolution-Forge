@@ -1,6 +1,12 @@
 #include "radio.hpp"
 
-UI_Radio::UI_Radio(UI_Object* radio_parent, Rect initial_rect, Size bottom_right_distance, const eGroupType group_type, const bool draw_background, const ePositionMode position_mode, const eString radio_title) :
+UI_Radio::UI_Radio(UI_Object* radio_parent, 
+		Rect initial_rect, 
+		Size bottom_right_distance, 
+		const eGroupType group_type, 
+		const bool draw_background, 
+		const ePositionMode position_mode, 
+		const eString radio_title) :
 	UI_Group(radio_parent, initial_rect, bottom_right_distance, group_type, draw_background, position_mode, radio_title),
 	markedItem(-1),
 	reorder(false),
@@ -60,11 +66,9 @@ void UI_Radio::updateIds()
 	}
 }
 
-void UI_Radio::draw(DC* dc) const
+void UI_Radio::draw() const
 {
-	if(!isShown())
-		return;
-	UI_Group::draw(dc);
+	UI_Group::draw();
 }
 
 void UI_Radio::forceUnpressAll()

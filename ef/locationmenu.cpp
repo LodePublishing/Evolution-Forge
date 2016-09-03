@@ -65,14 +65,10 @@ void LocationMenu::assignMap(const BASIC_MAP* location_map)
 void LocationMenu::process()
 {
 	UI_Menu::process();
-	if(!isShown())
-		return;
 }
 
-void LocationMenu::draw(DC* dc) const
+void LocationMenu::draw() const
 {
-	if(!isShown())
-		return;
-	UI_Menu::draw(dc);
+	UI_Menu::draw();
 }
 

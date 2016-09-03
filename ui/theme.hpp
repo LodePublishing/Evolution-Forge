@@ -5,6 +5,13 @@
 #include "../core/game.hpp"
 #include "configuration.hpp"
 
+#include <math.h>
+#ifndef M_PI
+	#define M_PI 3.14159265358979323846
+#endif
+// Windows kotz
+
+
 extern unsigned int FONT_SIZE;
 //#define FONT_SIZE 6
 // TODO!!!
@@ -266,10 +273,10 @@ enum ePen
 	BITMAP_MARKED_PEN,
 	
 // bodiagram
-	DASHED_MINERALS_PEN,
-	DASHED_GAS_PEN,
-	DASHED_SUPPLY_PEN,
-	DASHED_MARKER_PEN,
+	BODIAGRAM_DASHED_MINERALS_PEN,
+	BODIAGRAM_DASHED_GAS_PEN,
+	BODIAGRAM_DASHED_SUPPLY_PEN,
+	BODIAGRAM_DASHED_MARKER_PEN,
 // bowindow
 	SELECT_PEN,
 // transparent
@@ -639,8 +646,6 @@ enum eString
 	SAVE_BUILD_ORDER_AS_STRING,
 	GIVE_BO_A_NAME_STRING, //40
 
-	BODIAGRAM_SUPPLY_STRING,
-	BODIAGRAM_TIME_STRING,
 
 // bowindow
 	CLICK_TO_INSERT_ORDER_STRING, //44

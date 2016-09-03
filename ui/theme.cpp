@@ -803,7 +803,7 @@ void UI_Theme::loadStringFiles()
 {
 	languageInitialized.resize(MAX_LANGUAGES);
 	languageInitialized.assign(MAX_LANGUAGES, false);
-	std::list<std::string> string_files = findFiles("data", "strings", "program");
+	std::list<std::string> string_files = findFiles("data", "strings", "program", "");
 	for(std::list<std::string>::iterator j = string_files.begin(); j != string_files.end(); ++j)
 		loadStringFile(*j, stringIdentifier, stringList, languageInitialized, MAX_STRINGS);
 }
@@ -1900,8 +1900,6 @@ void UI_Theme::initStringIdentifier()
 	
 	stringIdentifier[SAVE_BUILD_ORDER_AS_STRING] = "SAVE_BUILD_ORDER_AS_STRING";
 	stringIdentifier[GIVE_BO_A_NAME_STRING] = "GIVE_BO_A_NAME_STRING";
-	stringIdentifier[BODIAGRAM_SUPPLY_STRING] = "BODIAGRAM_SUPPLY_STRING";
-	stringIdentifier[BODIAGRAM_TIME_STRING] = "BODIAGRAM_TIME_STRING";
 	stringIdentifier[CLICK_TO_INSERT_ORDER_STRING] = "CLICK_TO_INSERT_ORDER_STRING";
 	stringIdentifier[OPTIMIZE_EVERYTHING_STRING] = "OPTIMIZE_EVERYTHING_STRING";
 	stringIdentifier[OPTIMIZE_SELECTED_STRING] = "OPTIMIZE_SELECTED_STRING";

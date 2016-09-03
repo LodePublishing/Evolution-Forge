@@ -36,6 +36,7 @@ UI_Button::UI_Button(UI_Object* button_parent,
 	frameNumber(0),
 	text(NULL)
 {
+// 	if(((theme.lookUpButtonColors(buttonColorsType)->startBrush[0] == TRANSPARENT_BRUSH) && (text != NULL))||(bitmap)) TODO
 	switch(button_mode)
 	{
 		case NO_BUTTON_MODE:statusFlags |= BF_NOT_CLICKABLE;break;
@@ -69,7 +70,10 @@ UI_Button::UI_Button(UI_Object* button_parent,
 		setOriginalSize(bitmap_size);
 }
 
-UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Size distance_bottom_right, const eButtonColorsType button_colors_type, /*const bool has_bitmap*/ const eBitmap button_bitmap, const eButtonMode button_mode, const eString button_text, const eString button_tooltip, const ePositionMode button_position_mode, const eFont button_font, const eAutoSize button_auto_size) :
+UI_Button::UI_Button(UI_Object* button_parent, 
+		const Rect button_rect, 
+		const Size distance_bottom_right, 
+		const eButtonColorsType button_colors_type, /*const bool has_bitmap*/ const eBitmap button_bitmap, const eButtonMode button_mode, const eString button_text, const eString button_tooltip, const ePositionMode button_position_mode, const eFont button_font, const eAutoSize button_auto_size) :
 	UI_Object(button_parent, button_rect, distance_bottom_right, 
 			button_position_mode == SPECIAL_BUTTON_LEFT ? DO_NOT_ADJUST : button_position_mode, button_auto_size),
 	radio(NULL), //?
@@ -124,8 +128,10 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Siz
 
 }
 
-UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Size distance_bottom_right, const eButtonColorsType button_colors_type, /*const bool has_bitmap*/ const eBitmap button_bitmap, const eButtonMode button_mode, const std::string& button_text, const ePositionMode button_position_mode, const eFont button_font, const eAutoSize button_auto_size) :
-	UI_Object(button_parent, button_rect, distance_bottom_right, 
+UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, 
+		const Size distance_bottom_right, 
+		const eButtonColorsType button_colors_type, /*const bool has_bitmap*/ const eBitmap button_bitmap, const eButtonMode button_mode, const std::string& button_text, const ePositionMode button_position_mode, const eFont button_font, const eAutoSize button_auto_size) :
+	UI_Object(button_parent, button_rect, distance_bottom_right,
 					button_position_mode == SPECIAL_BUTTON_LEFT ? DO_NOT_ADJUST : 
 					button_position_mode, 
 					button_auto_size),
@@ -189,6 +195,7 @@ UI_Button::~UI_Button()
 {
 	if(UI_Button::currentButton == this)
 		UI_Button::resetButton();
+	delete bitmap; // ~_~
 	delete text;
 }
 
@@ -207,54 +214,42 @@ void UI_Button::setPressDepth(const unsigned int depth)
 //	UI_Object::addToProcessArray(this);
 	pressdepth = depth;
 	wasPressed = true;
-	if(bitmap)
-	{
-		if(pressdepth==0)
-			bitmap->setPressed(false);
-		else bitmap->setPressed(true);
-	}
 	if(statusFlags & BF_IS_CHECKBUTTON)
 	{
 		if(pressdepth == 0)
 			bitmap->setChecked(false);
 		else bitmap->setChecked(true);
-	} else
-	if(text)
-	{
-		if(pressdepth==0)
-			text->setPressed(false);
-		else text->setPressed(true);
 	}
 }
-
-// Render button.  How it draws exactly depends on it's current state.
-void UI_Button::draw(DC* dc) const
+void UI_Button::object_info()
 {
-	if(!isShown())
-		return;
-
-	if(checkForNeedRedraw())
+	toErrorLog("ui_button");
+}
+	
+// Render button.  How it draws exactly depends on it's current state.
+void UI_Button::draw() const
+{
+//	toErrorLog("button draw");
+	eButtonAnimationPhase animation_phase;
+	if((statusFlags & BF_STATIC)&&(isOriginalPosition))
 	{
- 	 	eButtonAnimationPhase animation_phase;
-		if((statusFlags & BF_STATIC)&&(isOriginalPosition))
-		{
-			if((statusFlags & BF_HIGHLIGHTED) || (gradient < 100 ))
-				animation_phase=PRESSED_HIGHLIGHTED_BUTTON_PHASE;
-			else
-				animation_phase=PRESSED_BUTTON_PHASE;
-		}
+		if((statusFlags & BF_HIGHLIGHTED) || (gradient < 100 ))
+			animation_phase=PRESSED_HIGHLIGHTED_BUTTON_PHASE;
 		else
-		if(statusFlags & BF_DOWN)
-		{
-			if((statusFlags & BF_HIGHLIGHTED) || (gradient < 100 ))
-				animation_phase=PRESSED_HIGHLIGHTED_BUTTON_PHASE;
-			else
 			animation_phase=PRESSED_BUTTON_PHASE;
-		}
+	}
+	else
+	if(statusFlags & BF_DOWN)
+	{
+		if((statusFlags & BF_HIGHLIGHTED) || (gradient < 100 ))
+			animation_phase=PRESSED_HIGHLIGHTED_BUTTON_PHASE;
 		else
-		if((statusFlags & BF_HIGHLIGHTED)||(gradient < 100))
-			animation_phase=HIGHLIGHT_BUTTON_PHASE;
-		else animation_phase=NORMAL_BUTTON_PHASE;
+		animation_phase=PRESSED_BUTTON_PHASE;
+	}
+	else
+	if((statusFlags & BF_HIGHLIGHTED)||(gradient < 100))
+		animation_phase=HIGHLIGHT_BUTTON_PHASE;
+	else animation_phase=NORMAL_BUTTON_PHASE;
 
 //		if(!(statusFlags & BF_NOT_CLICKABLE)) // ?? TODO
 //		{
@@ -267,40 +262,40 @@ void UI_Button::draw(DC* dc) const
 //			dc->DrawRoundedRectangle(Rect(getAbsolutePosition(), getSize()), 2);
 //		}
 
-		dc->setPen(Pen(dc->mixColor(
-				*(theme.lookUpPen(theme.lookUpButtonColors(buttonColorsType)->startBorderPen[animation_phase])->getColor()), 
-				*(theme.lookUpPen(theme.lookUpButtonColors(buttonColorsType)->endBorderPen[animation_phase])->getColor()), gradient), 
-				theme.lookUpPen(theme.lookUpButtonColors(buttonColorsType)->startBorderPen[animation_phase])->getWidth(), 
-				theme.lookUpPen(theme.lookUpButtonColors(buttonColorsType)->startBorderPen[animation_phase])->getStyle()));
+	dc->setPen(Pen(dc->mixColor(
+			*(theme.lookUpPen(theme.lookUpButtonColors(buttonColorsType)->startBorderPen[animation_phase])->getColor()), 
+			*(theme.lookUpPen(theme.lookUpButtonColors(buttonColorsType)->endBorderPen[animation_phase])->getColor()), gradient), 
+			theme.lookUpPen(theme.lookUpButtonColors(buttonColorsType)->startBorderPen[animation_phase])->getWidth(), 
+			theme.lookUpPen(theme.lookUpButtonColors(buttonColorsType)->startBorderPen[animation_phase])->getStyle()));
 
-		if((text!=NULL)||((text==NULL)&&(!bitmap))) // textbutton/bitmaptextbutton or empty button (e.g. bograph)
-		{
-			dc->setBrush(Brush(dc->mixColor(
-				*(theme.lookUpBrush(theme.lookUpButtonColors(buttonColorsType)->startBrush[animation_phase])->getColor()), 
-				*(theme.lookUpBrush(theme.lookUpButtonColors(buttonColorsType)->endBrush[animation_phase])->getColor()), gradient),
-				theme.lookUpBrush(theme.lookUpButtonColors(buttonColorsType)->startBrush[animation_phase])->getStyle()));
+	if((text!=NULL)||((text==NULL)&&(!bitmap))) // textbutton/bitmaptextbutton or empty button (e.g. bograph)
+	{
+		dc->setBrush(Brush(dc->mixColor(
+			*(theme.lookUpBrush(theme.lookUpButtonColors(buttonColorsType)->startBrush[animation_phase])->getColor()), 
+			*(theme.lookUpBrush(theme.lookUpButtonColors(buttonColorsType)->endBrush[animation_phase])->getColor()), gradient),
+			theme.lookUpBrush(theme.lookUpButtonColors(buttonColorsType)->startBrush[animation_phase])->getStyle()));
 //TODO: eigene tab-button klasse
-		
+	
 //			dc->setPen(*theme.lookUpPen(NULL_PEN));
 //			if(statusFlags & BF_DOWN)
-			if(text!=NULL)
-				text->setTemporaryColor(dc->mixColor(
-					*(theme.lookUpColor(theme.lookUpButtonColors(buttonColorsType)->startTextColor[animation_phase])), 
-					*(theme.lookUpColor(theme.lookUpButtonColors(buttonColorsType)->endTextColor[animation_phase])), gradient));
+		if(text!=NULL)
+			text->setTemporaryColor(dc->mixColor(
+				*(theme.lookUpColor(theme.lookUpButtonColors(buttonColorsType)->endTextColor[animation_phase])), 
+				*(theme.lookUpColor(theme.lookUpButtonColors(buttonColorsType)->startTextColor[animation_phase])), gradient));
 // TODO TAB-BUTTON MODE
-			if(pressdepth>0)
-				dc->setPressedRectangle(true);
-			else
-				dc->setPressedRectangle(false);
-			if(statusFlags & BF_IS_RECTANGLE)
-//				dc->DrawRectangle(getAbsolutePosition()+Size(pressdepth, pressdepth), getSize()/*+Size(1,1)*/);
-				dc->DrawEdgedRoundedRectangle(getAbsolutePosition() + Size(pressdepth, pressdepth), getSize(), 2);
-			else if(statusFlags & BF_IS_TOP_TAB)
-				dc->DrawTabRectangle(getAbsolutePosition() + Size(pressdepth, pressdepth), getSize());
-			else
-				dc->DrawEdgedRoundedRectangle(getAbsolutePosition() + Size(pressdepth, pressdepth), getSize(), 4);
+		if(pressdepth>0)
+			dc->setPressedRectangle(true);
+		else
 			dc->setPressedRectangle(false);
-		}
+		if(statusFlags & BF_IS_RECTANGLE)
+//			dc->DrawRectangle(getAbsolutePosition()+Size(pressdepth, pressdepth), getSize()/*+Size(1,1)*/);
+			dc->DrawEdgedRoundedRectangle(Point(0, 0), getSize(), 2);
+		else if(statusFlags & BF_IS_TOP_TAB)
+			dc->DrawTabRectangle(Point(0,0), getSize());
+		else
+			dc->DrawEdgedRoundedRectangle(Point(0,0), getSize(), 4);
+		dc->setPressedRectangle(false);
+	}
 
  // empty rectangle (e.g. bograph)
 	
@@ -312,8 +307,7 @@ void UI_Button::draw(DC* dc) const
 		} ??? */
 
 //		dc->DrawRectangle(Rect(originalButtonRect.getTopLeft() + getAbsolutePosition(), originalButtonRect.getSize()));
-	}
-	UI_Object::draw(dc);	
+	UI_Object::draw();
 //	dc->setPen(*theme.lookUpPen(RECTANGLE_PEN));
 //	dc->DrawRectangle(getAbsoluteRect());
 }
@@ -483,7 +477,7 @@ void UI_Button::mouseRightButtonReleased()
 
 UI_Object* UI_Button::checkToolTip() 
 {
-	if( (!isShown()) || (!getAbsoluteRect().isInside(mouse - Size(pressdepth, pressdepth))))
+	if( (!isShown()) || (!getAbsoluteRect().isTopLeftCornerInside(mouse)))
 		return(NULL);
 	return((UI_Object*)this);
 }
@@ -492,7 +486,7 @@ UI_Object* UI_Button::checkHighlight()
 {
 	if(!isShown())
 		return(NULL);
-	if(!getAbsoluteRect().isInside(mouse - Size(pressdepth, pressdepth) ))
+	if(!getAbsoluteRect().isTopLeftCornerInside(mouse))
 		return(UI_Object::checkHighlight());
 	return((UI_Object*)this);
 }
@@ -539,11 +533,7 @@ void UI_Button::process()
 	
 	if(gradient != oldGradient)
 	{
-		if(((theme.lookUpButtonColors(buttonColorsType)->startBrush[0] == TRANSPARENT_BRUSH) && (text != NULL))||(bitmap))
-			setNeedRedrawAllThatOverlaps(getRelativeRect());
-		else
-			setNeedRedrawNotMoved();
-//		UI_Object::addToNextProcessArray(this);
+		redrawWholeObject();
 		oldGradient = gradient;
 	}
 
@@ -644,8 +634,12 @@ const bool UI_Button::isRightClicked()
 
 void UI_Button::resetGradient()
 {
-	gradient=0;
-	frameNumber=0;
+	if(gradient != 0)
+	{
+		gradient=0;
+		frameNumber=0;
+		makePufferInvalid();
+	}
 }
 
 const bool UI_Button::isCurrentlyActivated() const
@@ -685,7 +679,7 @@ void UI_Button::check(const bool is_checked)
                         forceUnpress();
                 else
                         forcePress();
-                setNeedRedrawNotMoved(); // TODO
+		makePufferInvalid();
         }
 }
 

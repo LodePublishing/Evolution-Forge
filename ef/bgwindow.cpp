@@ -444,92 +444,60 @@ void BoGraphWindow::mouseHasMoved()
 #endif
 }
 
-void BoGraphWindow::draw(DC* dc) const
+void BoGraphWindow::draw() const
 {
-	if(!isShown()) 
-		return;
 	if(anarace==NULL) 
 		return;
 
-	if(checkForNeedRedraw())
-	{
-		UI_Window::drawWindow(dc);
+	UI_Window::drawWindow();
 	
-		dc->setFont(UI_Object::theme.lookUpFont(SMALL_FONT));
+	dc->setFont(UI_Object::theme.lookUpFont(SMALL_FONT));
 // and the time steps on the top
-		dc->setTextForeground(*theme.lookUpColor(TIMESTEPS_TEXT_COLOR));
+	dc->setTextForeground(*theme.lookUpColor(TIMESTEPS_TEXT_COLOR));
 // dc->setPen(*BLACK_PEN); TODO
-		unsigned int time = totalTime / (6+efConfiguration.getGameSpeed()*3);
-		unsigned int timesteps=(time/30)/10+1; // TODO <- wird 0? bei Protoss? :-/ ?
-		dc->setPen(*theme.lookUpPen(DASHED_MINERALS_PEN));
-		unsigned int y = getAbsoluteClientRectLowerBound() - 5;
-		std::list<BoGraphLine*>::const_iterator j = boGraphLine.end();
-		if(j!=boGraphLine.begin())
+	unsigned int time = totalTime / (6+efConfiguration.getGameSpeed()*3);
+	unsigned int timesteps=(time/30)/10+1; // TODO <- wird 0? bei Protoss? :-/ ?
+	dc->setPen(*theme.lookUpPen(BODIAGRAM_DASHED_MINERALS_PEN));
+	unsigned int y = getRelativeClientRectLowerBound() - 5;
+	std::list<BoGraphLine*>::const_iterator j = boGraphLine.end();
+	if(j!=boGraphLine.begin())
+	{
+		--j;
+		if(y > (*j)->getHeight() - 2)
+			y = (*j)->getHeight() - 2;
+	}
+	for(unsigned int i=0;i<time/30;++i)
+		if(i%timesteps==0)
 		{
-			--j;
-			if(y > (*j)->getAbsoluteLowerBound() - 2)
-				y = (*j)->getAbsoluteLowerBound() - 2;
-		}
-		for(unsigned int i=0;i<time/30;++i)
-			if(i%timesteps==0)
+			if(i>0) 
 			{
-				if(i>0) 
-				{
-					dc->DrawVerticalLine(getAbsoluteClientRectLeftBound()+30*i*(getClientRectWidth()-10)/time,
-								   getAbsoluteClientRectUpperBound(), 
-								   y);
-					dc->DrawHorizontalLine(getAbsoluteClientRectLeftBound()+30*i*(getClientRectWidth()-10)/time, 
-							getAbsoluteClientRectUpperBound(), 
-							getAbsoluteClientRectLeftBound()+30*i*(getClientRectWidth()-10)/time + 5);
-				}
-				
-				std::ostringstream os;
-				os.str("");
-				os << i/2 << ":" << 3*(i%2) << "0";
-				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(2+30*i*(getClientRectWidth()-10)/time, 1));
+				dc->DrawVerticalLine(getRelativeClientRectPosition() + Size(30*i*(getClientRectWidth()-10)/time, 0), y);
+				dc->DrawHorizontalLine(getRelativeClientRectPosition() + Size(30*i*(getClientRectWidth()-10)/time, 0), getRelativeClientRectLeftBound()+30*i*(getClientRectWidth()-10)/time + 5);
 			}
+			
+			std::ostringstream os;
+			os.str("");
+			os << i/2 << ":" << 3*(i%2) << "0";
+			dc->DrawText(os.str(), getRelativeClientRectPosition()+Point(2+30*i*(getClientRectWidth()-10)/time, 1));
+		}
 
 // --------------------------------- END BUILD ORDER GRAPH ------------------------------
-	}
-	UI_Object::draw(dc);
-	
+	UI_Object::draw();
+
 }
 
 void BoGraphWindow::assignAnarace(ANABUILDORDER* bograph_anarace) 
 {
-	bool race_has_changed = false;
-	if((anarace==NULL)||(lastRace != bograph_anarace->getRace()))
-		race_has_changed = true;
-	anarace = bograph_anarace;
-	if(race_has_changed)
-	{
-		lastRace = anarace->getRace();
-		for(std::list<BoGraphLine*>::iterator i = boGraphLine.begin(); i != boGraphLine.end(); ++i)
-			delete(*i);
+bool race_has_changed = false;
+if((anarace==NULL)||(lastRace != bograph_anarace->getRace()))
+	race_has_changed = true;
+anarace = bograph_anarace;
+if(race_has_changed)
+{
+	lastRace = anarace->getRace();
+	for(std::list<BoGraphLine*>::iterator i = boGraphLine.begin(); i != boGraphLine.end(); ++i)
+		delete(*i);
 		boGraphLine.clear();
 	}
 }
-
-/*
-BoGraphWindow::BoGraphWindow(const BoGraphWindow& object) :
-	UI_Window((UI_Window)object),
-	markAni(object.markAni),
-	anarace(object.anarace),
-	selectedItem(-1)
-{
-	for(unsigned int i = BOGRAPH_MAX_LINES;i--;)
-		boGraphLine[i] = object.boGraphLine[i];
-}
-
-BoGraphWindow& BoGraphWindow::operator=(const BoGraphWindow& object)
-{
-	((UI_Window)(*this)) = ((UI_Window)object);
-	markAni = object.markAni;
-	anarace = object.anarace;
-	selectedItem = -1;
-	for(unsigned int i = BOGRAPH_MAX_LINES;i--;)
-		boGraphLine[i] = object.boGraphLine[i];
-	return(*this);
-}*/
-
 

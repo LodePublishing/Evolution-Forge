@@ -19,7 +19,7 @@ class BoGraphLine : public UI_Object
 		void checkSelected(const unsigned int selected);
 
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 		void reloadStrings();
 
 		void setRace(const unsigned int race);

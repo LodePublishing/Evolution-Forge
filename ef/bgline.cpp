@@ -41,8 +41,6 @@ void BoGraphLine::reloadStrings()
 
 void BoGraphLine::process()
 {
-	if(checkForNeedRedraw())
-		getParent()->setNeedRedrawNotMoved();
 	if(facilityChanged)
 	{
 		facilityChanged = false;
@@ -51,28 +49,24 @@ void BoGraphLine::process()
 	UI_Object::process();
 }
 
-void BoGraphLine::draw(DC* dc) const
+void BoGraphLine::draw() const
 {
-	if(!isShown())
-		return;
-	if(checkForNeedRedraw())
+	if(firstAvailible > 0)
 	{
-		if(firstAvailible > 0)
-		{
-			dc->setPen(*theme.lookUpPen(NULL_PEN));
-			dc->setBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
-			dc->DrawRectangle(Rect(getAbsolutePosition(), Size(firstAvailible, getHeight())));
+		dc->setPen(*theme.lookUpPen(NULL_PEN));
+		dc->setBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
+		dc->DrawRectangle(Rect(Point(), Size(firstAvailible, getHeight())));
 //			for(std::list<Not_Availible>::const_iterator i = notAvailibleList.begin(); i != notAvailibleList.end(); ++i)
 //				dc->DrawRectangle(Rect(getAbsolutePosition() + Size(i->begin, 0), Size(i->end - i->begin, getHeight())));
-		}
-		dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));
-		dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
-		dc->DrawRectangle(getAbsoluteRect());
-		facilityName->Hide();
-		UI_Object::draw(dc);
-		facilityName->Show();
-		facilityName->draw(dc);
 	}
+	dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));
+	dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+	dc->DrawRectangle(Rect(Point(), getSize()));
+
+//	facilityName->Hide(); // TODO
+	UI_Object::draw();
+//	facilityName->Show();
+//	facilityName->draw();
 }
 
 void BoGraphLine::checkSelected(const unsigned int selected)

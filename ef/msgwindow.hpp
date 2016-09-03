@@ -9,10 +9,9 @@ class MessageWindow:public UI_Window
 	public:
 		MessageWindow(UI_Window* parent_window);
 		~MessageWindow();
-		void addMessage(const std::string& msg);
 		void resetData();
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 		void reloadOriginalSize();
 	private:
 		std::list<Message*> message;

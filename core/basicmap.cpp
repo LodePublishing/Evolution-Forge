@@ -71,6 +71,12 @@ void BASIC_MAP::calculateLocationDistances()
 
 	for(unsigned int i=1;i<getMaxLocations(); ++i)
 		location[i].calculateDistances(i);
+#ifdef _SCC_DEBUG
+	for(unsigned int i=1; i < getMaxLocations(); ++i)
+		for(unsigned int j=1; j < getMaxLocations(); ++j)
+			if(location[i].getDistance(j) == 9999)
+				toErrorLog("DEBUG (BASIC_MAP::calculateLocationDistances()): Distance not correctly initialized.");
+#endif
 }
 
 // -------------------------------

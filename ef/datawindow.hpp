@@ -13,7 +13,7 @@ class DataBaseWindow : public UI_Window
 		
 		void resetData();
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 
 		void reloadOriginalSize();
 

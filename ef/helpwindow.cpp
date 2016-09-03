@@ -1,6 +1,6 @@
 #include "helpwindow.hpp"
 
-HelpWindow::HelpWindow(UI_Window* parent_window) :
+HelpWindow::HelpWindow(UI_Object* parent_window) :
 	UI_Window(parent_window, HELP_WINDOW_TITLE_STRING, theme.lookUpGlobalRect(HELP_WINDOW), theme.lookUpGlobalMaxHeight(HELP_WINDOW), SCROLLED),
 	helpChapter(INDEX_CHAPTER),
 	text(new UI_LongText(this, Rect(Point(20, 30), Size(getSize()-Size(80, 60))), Size(0, 0), UI_Object::theme.lookUpHelpChapterString(helpChapter), BRIGHT_TEXT_COLOR, FORCE_TEXT_COLOR, LARGE_FONT, TEXT_BUTTON, VISITED_TEXT_BUTTON, getScrollBar(), true)),
@@ -21,26 +21,28 @@ HelpWindow::~HelpWindow()
 
 void HelpWindow::reloadOriginalSize()
 {
+	toErrorLog("reload original size help1");
 	setOriginalRect(UI_Object::theme.lookUpGlobalRect(HELP_WINDOW));
 	setMaxHeight(UI_Object::theme.lookUpGlobalMaxHeight(HELP_WINDOW));
 	UI_Window::reloadOriginalSize();
 	text->setOriginalSize(Size(getSize()-Size(80, 60)));
+	toErrorLog("reload original size help2");
 }
 
-void HelpWindow::draw(DC* dc) const
+void HelpWindow::draw() const
 {
-	if(!isShown()) 
-		return;
-	UI_Window::draw(dc);
+	UI_Window::draw();
 	if(helpChapter == INDEX_CHAPTER)
 	{
-		dc->DrawBitmap(UI_Object::theme.lookUpBitmap(HELP_MAIN_BITMAP), getAbsoluteRect().getTopRight() - Size(UI_Object::theme.lookUpBitmap(HELP_MAIN_BITMAP)->w+10, 0) + Size(0, 25));
-		dc->addRectangle(Rect(getAbsoluteRect().getTopRight() - Size(UI_Object::theme.lookUpBitmap(HELP_MAIN_BITMAP)->w+10, 0) + Size(0, 25), Size(UI_Object::theme.lookUpBitmap(HELP_MAIN_BITMAP)->w, UI_Object::theme.lookUpBitmap(HELP_MAIN_BITMAP)->h)));
+//		dc->DrawBitmap(UI_Object::theme.lookUpBitmap(HELP_MAIN_BITMAP), getAbsoluteRect().getTopRight() - Size(UI_Object::theme.lookUpBitmap(HELP_MAIN_BITMAP)->w+10, 0) + Size(0, 25));
+//		dc->addRectangle(Rect(getAbsoluteRect().getTopRight() - Size(UI_Object::theme.lookUpBitmap(HELP_MAIN_BITMAP)->w+10, 0) + Size(0, 25), Size(UI_Object::theme.lookUpBitmap(HELP_MAIN_BITMAP)->w, UI_Object::theme.lookUpBitmap(HELP_MAIN_BITMAP)->h)));
+//		TODO in den Text-Code
 	}
 }
 
 void HelpWindow::process()
 {
+	if(!isShown()) return;
 	UI_Window::process();
 
 	if(indexButton->isLeftClicked())

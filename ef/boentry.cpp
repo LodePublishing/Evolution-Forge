@@ -22,17 +22,15 @@ BoEntry::~BoEntry()
 	delete(cancelUnit);*/
 }
 
-void BoEntry::draw(DC* dc) const
+void BoEntry::draw() const
 {
-	if(!isShown())
-		return;
-	UI_Button::draw(dc);
+	UI_Button::draw();
 //	if(fixed)
 //		dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(KEY_BITMAP), getAbsolutePosition() + Size(getWidth()-24, 2));
-	if((checkForNeedRedraw())&&(efConfiguration.isCompactDisplayMode())&&(count>1))
+	if((efConfiguration.isCompactDisplayMode())&&(count>1))
 	{
 		std::ostringstream os; os << count << " x";
-		dc->DrawText(os.str(), getAbsolutePosition() + Size(5,3));
+		dc->DrawText(os.str(), Point(5,3));
 	}
 }
 

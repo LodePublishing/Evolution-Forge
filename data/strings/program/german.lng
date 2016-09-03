@@ -1,6 +1,6 @@
 @STRINGS
 	@GERMAN
-						  "NULL_STRING" = "NULL!"
+						        "ERROR" = "ERROR"
 			     "START_LOAD_LANGUAGE_FILES_STRING" = "Lade Sprachdateien..."
 		           "START_LOAD_UI_CONFIGURATION_STRING" = "Lade Konfiguration der Benutzerschnittstelle..."
 		         "START_LOAD_CORE_CONFIGURATION_STRING" = "Lade Konfiguration des Kerns..."
@@ -111,7 +111,7 @@
 		  "START_SDL_SURFACE_IS_DOUBLE_BUFFERED_STRING" = "Oberfläche ist zweifach gepuffert"
 		  "START_SDL_SURFACE_HAS_OPENGL_CONTEXT_STRING" = "Oberfläche besitzt eine OpenGL Umgebung"
 	    "START_SDL_SURFACE_SUPPORTS_OPENGL_BLITTING_STRING" = "Oberfläche unterstützt das Kopieren mit OpenGL"
-			"START_SDL_SURFACE_IS_RESIZABLE_STRING" = "Die Grö der Oberfläche ist veränderbar"
+			"START_SDL_SURFACE_IS_RESIZABLE_STRING" = "Die Größe der Oberfläche ist veränderbar"
      "START_SDL_SURFACE_BLIT_USES_HARDWARE_ACCELERATION_STRING" = "Oberfläche benutzt Hardwarebeschleunigung zum Kopieren"
 	      "START_SDL_SURFACE_USES_COLORKEY_BLITTING_STRING" = "Oberfläche benutzt transparentes Kopieren"
 	   "START_SDL_COLORKEY_BLITTING_RLE_ACCELERATED_STRING" = "Transparentes Kopieren ist beschleunigt mit RLE"
@@ -199,8 +199,6 @@
 				      "CHOOSE_GOAL_NAME_STRING" = "Wähle einen Namen..."
 		                   "SAVE_BUILD_ORDER_AS_STRING" = "Speichere Baureihenfolge als"
 		                        "GIVE_BO_A_NAME_STRING" = "Gebe der Baureihenfolge einen Namen:"
-				      "BODIAGRAM_SUPPLY_STRING" = "Versorgung: "
-					"BODIAGRAM_TIME_STRING" = "Zeit: "
 		                 "CLICK_TO_INSERT_ORDER_STRING" = "(Hier klicken um ein Befehl einzufügen)"
 		                   "OPTIMIZE_EVERYTHING_STRING" = "Alles optimieren"
 		                     "OPTIMIZE_SELECTED_STRING" = "Optimiere nur Auswahl"

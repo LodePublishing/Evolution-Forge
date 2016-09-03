@@ -20,6 +20,7 @@ enum eSound
 enum eMusic
 {
 	NULL_MUSIC,
+	INTRO_MUSIC,
 	LALA_MUSIC,
 	DIABLO_MUSIC,
 	MAX_MUSIC
@@ -75,7 +76,7 @@ class UI_Sound
 #endif
 		void printSoundInformation() const;
 		void playSound(const eSound id, const unsigned int x);
-		void playMusic(const eMusic id);
+		void playMusic(const eMusic id, const bool loop = true);
 		
 		void releaseSoundEngine();
 
@@ -84,6 +85,7 @@ class UI_Sound
 		void update();
 		void processChannels();
 		void stopMusic();
+		static void transitionMusic(void);
 	private:
 #ifdef _FMOD_SOUND
 		FMOD::Channel* musicChannel;
@@ -99,7 +101,6 @@ class UI_Sound
 		Mix_Chunk* soundList[MAX_SOUNDS];
 		Mix_Music* musicList[MAX_MUSIC];
 		static std::list<int> soundChannel;
-		static void transitionMusic();
 		static void channelDone(int channel);
 #endif
 		static eMusic currentMusic;

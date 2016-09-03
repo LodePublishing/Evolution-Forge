@@ -7,11 +7,17 @@ UI_Configuration::UI_Configuration():
 	resolution(RESOLUTION_640x480),
 	bitdepth(DEPTH_32BIT),
 	theme(DARK_BLUE_THEME),
+	backgroundBitmap(false),
 	musicVolume(75),
 	soundVolume(75),
 	channels(16),
 	useMusic(true),
 	useSound(true),
+	desiredFramerate(25),
+	desiredCPU(75),
+	currentFramerate(1),
+	currentFramesPerGeneration(1),
+	fullScreen(false),
 	glowingButtons(true),
 	transparency(false),
 	smoothMovements(true),
@@ -30,17 +36,72 @@ void UI_Configuration::initDefaults()
 	setResolution(RESOLUTION_640x480);
 	setBitDepth(DEPTH_32BIT);
 	setTheme(DARK_BLUE_THEME);
+	setBackgroundBitmap(false);
 	setMusicVolume(75);
 	setSoundVolume(75);
 	setChannels(16);
 	setMusic(true);
 	setSound(true);
+	setDesiredFramerate(25);
+	setDesiredCPU(75);
+	setCurrentFramerate(1);
+	setCurrentFramesPerGeneration(1),
+	setFullScreen(false);
 	setGlowingButtons(true);
 	setTransparency(false);
 	setSmoothMovements(true);
 	setUnloadGraphics(false);
 	setFirstStart(false);
 	configurationFile = "settings/ui.cfg";
+}
+
+void UI_Configuration::parseParameters(std::list<std::string>& arguments)
+{
+	for(std::list<std::string>::iterator i = arguments.begin(); i != arguments.end(); )
+	{
+		bool not_found = false;
+		if((*i) == "-nosound")
+		{
+			setSound(false);
+			setMusic(false);
+		} 
+		else if((*i) == "-640")
+		{
+			setResolution(RESOLUTION_640x480);
+		} else if((*i) == "-800")
+		{
+			setResolution(RESOLUTION_800x600);
+		} else if((*i) == "-1024")
+		{
+			setResolution(RESOLUTION_1024x768);
+		} else if((*i) == "-1280")
+		{
+			setResolution(RESOLUTION_1280x1024);
+		} else if((*i) == "-8bit")
+		{
+			setBitDepth(DEPTH_8BIT);
+		} else if((*i) == "-16bit")
+		{
+			setBitDepth(DEPTH_16BIT);
+		} else if((*i) == "-24bit")
+		{
+			setBitDepth(DEPTH_24BIT);
+		} else if((*i) == "-32bit")
+		{
+			setBitDepth(DEPTH_32BIT);
+		} else if((*i) == "-fs")
+		{
+			setFullScreen(true);
+		} else if((*i) == "-window")
+		{
+			setFullScreen(false);
+		} else 
+			not_found = true;
+		if(not_found)
+			i++;
+		else i = arguments.erase(i);
+	}
+
 }
 
 void UI_Configuration::visitHelpChapter(const unsigned int chapter)
@@ -67,7 +128,9 @@ void UI_Configuration::saveToFile() const
 	pFile << "    \"Bit depth\" = \"" << (int)getBitDepth() << "\"" << std::endl;
 	pFile << "# 1 = dark red theme, 2 = dark blue theme, 4 = yellow theme" << std::endl;
 	pFile << "    \"Theme\" = \"" << (int)getTheme() << "\"" << std::endl;
-		
+	pFile << "# use background bitmap, saves some cpu power if deactivated" << std::endl;
+	pFile << "    \"Background bitmap\" = \"" << (int)isBackgroundBitmap() << "\"" << std::endl;
+	
 	pFile << "# use music (1: on, 0: off)" << std::endl;
 	pFile << "    \"Music\" = \"" << (int)isMusic() << "\"" << std::endl;
 	pFile << "# use sound (1: on, 0: off)" << std::endl;
@@ -80,6 +143,12 @@ void UI_Configuration::saveToFile() const
 	pFile << "# max number of simultaneously played sounds" << std::endl;
 	pFile << "    \"Channels\" = \"" << (int)getChannels() << "\"" << std::endl;
 	
+	pFile << "    \"Desired framerate\" = \"" << getDesiredFramerate() << "\"" << std::endl;
+	pFile << "# Desired CPU usage" << std::endl;
+	pFile << "    \"Desired CPU usage\" = \"" << getDesiredCPU() << "\"" << std::endl;
+	pFile << "" << std::endl;
+
+	pFile << "    \"Fullscreen\" = \"" << (int)isFullScreen() << "\"" << std::endl;
 	pFile << "# glowing effects" << std::endl;
 	pFile << "    \"Glowing buttons\" = \"" << (int)isGlowingButtons() << "\"" << std::endl;
 	pFile << "# moving rectangles, 2 = all objects move smoothly, 1 = some objects move smoothly, 0 = all objects jump directly to their destination" << std::endl;
@@ -152,6 +221,11 @@ void UI_Configuration::loadConfigurationFile()
 				i->second.pop_front();
 			   	setTheme((eTheme)(atoi(i->second.front().c_str())));
 			}	
+			if((i=block.find("Background bitmap"))!=block.end()){
+				i->second.pop_front();
+			   	setBackgroundBitmap(atoi(i->second.front().c_str()));
+			}
+		
 			if((i=block.find("Music"))!=block.end()){
 				i->second.pop_front();
 			   	setMusic(atoi(i->second.front().c_str()));
@@ -172,6 +246,19 @@ void UI_Configuration::loadConfigurationFile()
 				i->second.pop_front();
 			   	setChannels(atoi(i->second.front().c_str()));
 			}
+			if((i=block.find("Desired framerate"))!=block.end()){
+				i->second.pop_front();
+			   	setDesiredFramerate(atoi(i->second.front().c_str()));
+			}		
+			if((i=block.find("Desired CPU usage"))!=block.end()){
+				i->second.pop_front();
+			   	setDesiredCPU(atoi(i->second.front().c_str()));
+			}		
+			if((i=block.find("Fullscreen"))!=block.end()){
+				i->second.pop_front();
+			   	setFullScreen(atoi(i->second.front().c_str()));
+			}
+
 			if((i=block.find("Glowing buttons"))!=block.end()){
 				i->second.pop_front();
 			   	setGlowingButtons(atoi(i->second.front().c_str()));
@@ -249,6 +336,14 @@ const bool UI_Configuration::setTheme(const eTheme current_theme)
 	return(true);
 }
 
+const bool UI_Configuration::setBackgroundBitmap(const bool background_bitmap) 
+{
+	if(backgroundBitmap == background_bitmap)
+		return(false);
+	backgroundBitmap = background_bitmap;
+	return(true);
+}
+
 const bool UI_Configuration::setMusic(const bool use_music) 
 {
 	if(useMusic == use_music)
@@ -286,6 +381,56 @@ const bool UI_Configuration::setChannels(const unsigned int channel_num)
 	if(channels == channel_num)
 		return(false);
 	channels = channel_num;
+	return(true);
+}
+
+const bool UI_Configuration::setCurrentFramerate(const unsigned int frame_rate) 
+{
+	if(currentFramerate == frame_rate)
+		return(false);
+	currentFramerate = frame_rate;
+	return(true);
+}
+
+const bool UI_Configuration::setCurrentFramesPerGeneration(const unsigned int frames_per_generation) 
+{
+	if(currentFramesPerGeneration == frames_per_generation)
+		return(false);
+	currentFramesPerGeneration = frames_per_generation;
+	return(true);
+}
+
+const bool UI_Configuration::setDesiredCPU(const unsigned int desired_cpu_usage)
+{
+	if(desiredCPU == desired_cpu_usage)
+		return(false);
+#ifdef _SCC_DEBUG
+	if((desired_cpu_usage<1)||(desired_cpu_usage>100)) {
+		toErrorLog("WARNING: (UI_Configuration::setDesiredCPU): Value out of range.");return(false);
+	}
+#endif
+	desiredCPU = desired_cpu_usage;
+	return(true);
+}
+
+const bool UI_Configuration::setDesiredFramerate(const unsigned int desired_frame_rate)
+{
+	if(desiredFramerate == desired_frame_rate)
+		return(false);
+#ifdef _SCC_DEBUG
+	if((desired_frame_rate<MIN_DESIRED_FRAMERATE)||(desired_frame_rate>MAX_DESIRED_FRAMERATE)) {
+		toErrorLog("WARNING: (UI_Configuration::setDesiredFramerate): Value out of range.");return(false);
+	}
+#endif
+	desiredFramerate = desired_frame_rate;
+	return(true);
+}
+
+const bool UI_Configuration::setFullScreen(const bool full_screen) 
+{
+	if(fullScreen == full_screen)
+		return(false);
+	fullScreen = full_screen;
 	return(true);
 }
 

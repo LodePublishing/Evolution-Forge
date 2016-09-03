@@ -10,9 +10,11 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const Rect st_pos, const Size
 	tempColor(),
 	tempColorIsSet(false),
 	eText(NULL_STRING),
-	pressed(false),
 	highlight(false)
-{ }
+{ 
+	setDrawType(TRANSPARENT_OBJECT);
+//	setDrawType(ANTI_ALIASED_OBJECT);
+}
 
 UI_StaticText::UI_StaticText(UI_Object* st_parent, const eString st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode) :
 	UI_Object(st_parent, st_pos, distance_bottom_right, position_mode, NO_AUTO_SIZE),
@@ -23,9 +25,12 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const eString st_text, const 
 	tempColor(),
 	tempColorIsSet(false),
 	eText(st_text),
-	pressed(false),
 	highlight(false)
-{}
+{
+	setDrawType(TRANSPARENT_OBJECT);
+//	setDrawType(ANTI_ALIASED_OBJECT);
+	updateText(theme.lookUpString(st_text)); //?
+}
 
 UI_StaticText::UI_StaticText(UI_Object* st_parent, const std::string& st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode) :
 	UI_Object(st_parent, st_pos, distance_bottom_right, position_mode, NO_AUTO_SIZE),
@@ -36,9 +41,11 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const std::string& st_text, c
 	tempColor(),
 	tempColorIsSet(false),
 	eText(NULL_STRING),
-	pressed(false),
 	highlight(false)
-{}
+{
+	setDrawType(TRANSPARENT_OBJECT);
+//	setDrawType(ANTI_ALIASED_OBJECT);
+}
 
 UI_StaticText::~UI_StaticText()
 {}
@@ -47,69 +54,69 @@ void UI_StaticText::doHighlight(const bool high_light)
 {
 	if(high_light == highlight)
 		return;
-//	setNeedRedrawMoved(); TODO
 	highlight = high_light;
 }
 
 UI_Object* UI_StaticText::checkToolTip() {
-	if( (!isShown()) || (!Rect(getAbsolutePosition(), getTextSize()).isInside(mouse )) )
+	if( (!isShown()) || (!Rect(getAbsolutePosition(), getTextSize()).isTopLeftCornerInside(mouse )) )
 		return(0);
 	return((UI_Object*)this);
 }
 
-void UI_StaticText::draw(DC* dc) const
+void UI_StaticText::object_info()
 {
-	if(!isShown())
-		return;
-	if(checkForNeedRedraw())
-	{
-	//	if(font!=NULL_FONT)
-			dc->setFont(theme.lookUpFont(font));
-		Color normal;
-		Color highlighted;
-		if(color!=NULL_COLOR) 
-		{
-			if(tempColorIsSet)
-			{
-				highlighted = dc->changeAbsoluteBrightness(tempColor, 60);
-				normal = tempColor;
-			} else
-			{
-				highlighted = dc->changeAbsoluteBrightness(*UI_Object::theme.lookUpColor(color), 60);
-				normal = *UI_Object::theme.lookUpColor(color);
-			}
-			if(highlight)
-				dc->setTextForeground(highlighted);
-			else
-				dc->setTextForeground(normal);
-		}
-		Point p = getAbsolutePosition() + Size(0,3);
-		if(pressed) 
-			p = p + Size(1,1);
-		bool done = false;
-		if(color!=NULL_COLOR)
-		for(unsigned int i = 0; i < text.size(); i++)
-			if(text[i] == '&')
-			{
-				if(i > 0)
-					dc->DrawText(text.substr(0, i), p);
-				dc->setTextForeground(*UI_Object::theme.lookUpColor(FORCE_TEXT_COLOR));
-				if(i + 1 < text.size())
-					dc->DrawText(text.substr(i+1, 1), p + Size(dc->getTextExtent(text.substr(0,i)).getWidth(),0));
+	toErrorLog("ui_statictext");
+	toErrorLog(getZ());
+}
 
-				if(highlight)
-					dc->setTextForeground(highlighted);
-				else
-					dc->setTextForeground(normal);
-				if((i+2) < text.size())
-					dc->DrawText(text.substr(i+2, text.size() - i - 2), p + Size(dc->getTextExtent(text.substr(i+1, 1)).getWidth() + dc->getTextExtent(text.substr(0,i)).getWidth(), 0));	
-				done = true;
-				break;
-			}
-		if(!done)
-			dc->DrawText(text, p);
+void UI_StaticText::draw() const
+{
+
+//	if(font!=NULL_FONT)
+		dc->setFont(theme.lookUpFont(font));
+	Color normal;
+	Color highlighted;
+	if(color!=NULL_COLOR) 
+	{
+		if(tempColorIsSet)
+		{
+			highlighted = dc->changeAbsoluteBrightness(tempColor, 60);
+			normal = tempColor;
+		} else
+		{
+			highlighted = dc->changeAbsoluteBrightness(*UI_Object::theme.lookUpColor(color), 60);
+			normal = *UI_Object::theme.lookUpColor(color);
+		}
+		if(highlight)
+			dc->setTextForeground(highlighted);
+		else
+			dc->setTextForeground(normal);
 	}
-	UI_Object::draw(dc);
+	Point p = Point(0,3);
+	bool done = false;
+	if(color!=NULL_COLOR)
+	for(unsigned int i = 0; i < text.size(); i++)
+		if(text[i] == '&')
+		{
+			if(i > 0)
+				dc->DrawText(text.substr(0, i), p);
+			dc->setTextForeground(*UI_Object::theme.lookUpColor(FORCE_TEXT_COLOR));
+			if(i + 1 < text.size())
+				dc->DrawText(text.substr(i+1, 1), p + Size(dc->getTextExtent(text.substr(0,i)).getWidth(),0));
+
+//			if(highlight)
+//				dc->setTextForeground(highlighted);
+//			else
+				dc->setTextForeground(normal);
+			if((i+2) < text.size())
+				dc->DrawText(text.substr(i+2, text.size() - i - 2), p + Size(dc->getTextExtent(text.substr(i+1, 1)).getWidth() + dc->getTextExtent(text.substr(0,i)).getWidth(), 0));	
+			done = true;
+			break;
+		}
+	if(!done)
+		dc->DrawText(text, p);
+	
+	UI_Object::draw();
 }
 
 void UI_StaticText::addChar(const unsigned int pos, const char key)
@@ -118,11 +125,10 @@ void UI_StaticText::addChar(const unsigned int pos, const char key)
 	os.str("");
 	if(pos>=text.size())
 		os << text << key;
-	else
-	if(pos==0)
+	else if(pos==0)
 		os << key << text;
 	else
-		os << text.substr(0, pos) << key << text.substr(pos);
+			os << text.substr(0, pos) << key << text.substr(pos);
 	updateText(os.str());
 }
 
@@ -163,11 +169,15 @@ void UI_StaticText::process()
 //		setNeedRedrawMoved(); ??
 	if(textWasChanged)
 	{
-		if(eText != NULL_STRING)
-			reloadText(theme.lookUpString(eText));
-		else reloadText(text);
+		makePufferInvalid();
+		setSize(getTextSize() + Size(1+theme.lookUpFont(font)->getSize()/6, theme.lookUpFont(font)->getSize()/6)); // if it has shadow...
 		textWasChanged=false;
 	}
+}
+
+void UI_StaticText::setTextWasChanged() 
+{
+	textWasChanged = true; 
 }
 
 void UI_StaticText::reloadOriginalSize()
@@ -176,41 +186,32 @@ void UI_StaticText::reloadOriginalSize()
 	UI_Object::reloadOriginalSize();
 }
 
-void UI_StaticText::updateText(const std::string& st_text)
+void UI_StaticText::updateText(const std::string& st_text, const bool etext_change)
 {
-	if(st_text==text)
+	if((st_text==text) && (!etext_change))
 		return; //?
-//	setNeedRedrawMoved(); TODO
-	textWasChanged=true;
-	Size old_size = getTextSize();
 	text = st_text;
 	eText = NULL_STRING;
-	setSize(getTextSize());	
+	setTextWasChanged();
 }
 
 void UI_StaticText::updateText(const eString st_text)
 {
 	if(eText==st_text) // o_O
 		return;
-	eText = st_text;
-	textWasChanged=true;
-	text = theme.lookUpString(st_text);
-	updateText(theme.lookUpString(st_text));
+	updateText(theme.lookUpString(st_text), true);
+	eText = st_text; //?
 }
 
 void UI_StaticText::reloadText(const std::string& st_text)
 {
-//	setNeedRedrawMoved(); TODO
-	textWasChanged=true;
 	text = st_text;
-	setSize(getTextSize());
+	setTextWasChanged();
 }
 
 void UI_StaticText::reloadText(const eString st_text)
 {
 	eText = st_text;
-	textWasChanged=true;
-	text = theme.lookUpString(st_text);
 	reloadText(theme.lookUpString(st_text));
 }
 

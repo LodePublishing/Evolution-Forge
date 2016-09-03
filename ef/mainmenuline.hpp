@@ -1,5 +1,5 @@
-#ifndef _GUI_MAINWINDOW_HPP
-#define _GUI_MAINWINDOW_HPP
+#ifndef _GUI_MAINMENULINE_HPP
+#define _GUI_MAINMENULINE_HPP
 
 #include "../ui/window.hpp"
 #include "../ui/group.hpp"
@@ -13,13 +13,13 @@ enum eTabs
 	MAX_TABS
 };
 
-class MainWindow : public UI_Window
+class MainMenuLine : public UI_Object
 {
 	public:
-		MainWindow();
-		~MainWindow();
+		MainMenuLine(UI_Object* main_parent);
+		~MainMenuLine();
 		void process();
-		void draw( DC* dc ) const;
+		void draw() const;
 		void reloadOriginalSize();
 	
 		void addNewGameTab();
@@ -65,23 +65,24 @@ class MainWindow : public UI_Window
 		unsigned int newGameTab;
 };
 
-inline const bool MainWindow::hasTabChanged() const {
+inline const bool MainMenuLine::hasTabChanged() const {
 	return(tabHasChanged);
 }
 
-inline const unsigned int MainWindow::getGameTabCount() const {
+inline const unsigned int MainMenuLine::getGameTabCount() const {
 	return gameTabCount;
 }
 
-inline const unsigned int MainWindow::getNewGameTab() const {
+inline const unsigned int MainMenuLine::getNewGameTab() const {
 	return(newGameTab);
 }
 
-inline const bool MainWindow::markedForNewGame() const {
+inline const bool MainMenuLine::markedForNewGame() const {
 	return(markForNewGame);
 }
-inline const bool MainWindow::markedForRemove() const {
+inline const bool MainMenuLine::markedForRemove() const {
 	return(markForRemove);
 }
-#endif
+
+#endif // _GUI_MAINMENULINE_HPP
 

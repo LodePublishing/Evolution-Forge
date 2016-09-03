@@ -6,12 +6,19 @@
 class UI_InputObject : public UI_Object
 {
 	public:
-		UI_InputObject(UI_Object* input_parent, const Rect& edit_rect, const Size& edit_size, const eColor st_color, const eFont st_font, const ePositionMode position_mode, const std::string& name_proposal);
+		UI_InputObject(UI_Object* input_parent, 
+				const Rect& edit_rect, 
+				const Size& edit_size, 
+				const signed int zcoord,
+				const ePositionMode position_mode, 
+				const eColor st_color, 
+				const eFont st_font, 
+				const std::string& name_proposal);
 		~UI_InputObject();
 		UI_InputObject(const UI_InputObject& object);
 		UI_InputObject& operator=(const UI_InputObject& object);
 
-		void draw(DC* dc) const;
+		void draw() const;
 		void process();
 		
 		void addChar(char a);

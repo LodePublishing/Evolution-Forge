@@ -49,6 +49,7 @@ class UI_Configuration
 		const eResolution getResolution() const;
 		const eBitDepth getBitDepth() const;
 		const eTheme getTheme() const;
+		const bool isBackgroundBitmap() const;
 
 		const unsigned int getMusicVolume() const;
 		const unsigned int getSoundVolume() const;
@@ -58,17 +59,32 @@ class UI_Configuration
 		const bool isMusic() const;
 		const bool isSound() const;
 		
+		const unsigned int getDesiredFramerate() const;
+		const unsigned int getDesiredCPU() const;
+		const unsigned int getCurrentFramerate() const;
+		const unsigned int getCurrentFramesPerGeneration() const;
+		
+		const bool isFullScreen() const;
 		const bool isGlowingButtons() const;
 		const bool isTransparency() const;
 		const bool isSmoothMovements() const;
 		const bool isUnloadGraphics() const;
 		
+		const bool setBackgroundBitmap(const bool background_bitmap);
 		const bool isFirstStart() const;
 		
 		const bool setResolution(const eResolution current_resolution);
 		const bool setBitDepth(const eBitDepth current_bitdepth);
 		const bool setLanguage(const eLanguage current_language);
 		const bool setTheme(const eTheme current_theme);
+
+		const bool setDesiredFramerate(const unsigned int desired_frame_rate);
+		const bool setDesiredCPU(const unsigned int cpu_usage);
+		const bool setCurrentFramerate(const unsigned int frame_rate);
+		const bool setCurrentFramesPerGeneration(const unsigned int frames_per_generation);
+
+		
+		const bool setFullScreen(const bool full_screen);
 
 		const bool setMusicVolume(const unsigned int music_volume);
 		const bool setSoundVolume(const unsigned int sound_volume);
@@ -86,12 +102,18 @@ class UI_Configuration
 		void setConfigurationFile(const std::string& configuration_file);
 		
 		const bool isVisitedHelpChapter(const unsigned int chapter) const;
-		
+		void parseParameters(std::list<std::string>& arguments);
+	
+		static const unsigned int MIN_CPU_USAGE = 1;
+		static const unsigned int MAX_CPU_USAGE = 99;
+		static const unsigned int MIN_DESIRED_FRAMERATE = 1;
+		static const unsigned int MAX_DESIRED_FRAMERATE = 1000;
 	private:
 		eLanguage language;
 		eResolution resolution;
 		eBitDepth bitdepth;
 		eTheme theme;
+		bool backgroundBitmap;
 
 		unsigned int musicVolume;
 		unsigned int soundVolume;
@@ -101,6 +123,12 @@ class UI_Configuration
 		bool useMusic;
 		bool useSound;
 		
+		unsigned int desiredFramerate; // X Frames per generation
+		unsigned int desiredCPU; // hold X FPS
+		unsigned int currentFramerate;
+		unsigned int currentFramesPerGeneration;
+
+		bool fullScreen;
 		bool glowingButtons;
 		bool transparency;
 		bool smoothMovements;
@@ -114,6 +142,10 @@ class UI_Configuration
 };
 
 extern UI_Configuration uiConfiguration;
+
+inline const bool UI_Configuration::isBackgroundBitmap() const {
+	return(backgroundBitmap);
+}
 
 inline void UI_Configuration::setConfigurationFile(const std::string& configuration_file) {
 	configurationFile = configuration_file;
@@ -157,6 +189,40 @@ inline const bool UI_Configuration::isMusic() const {
 
 inline const bool UI_Configuration::isSound() const {
 	return(useSound);
+}
+
+inline const unsigned int UI_Configuration::getDesiredFramerate() const
+{
+#ifdef _SCC_DEBUG
+	if((desiredFramerate<MIN_DESIRED_FRAMERATE)||(desiredFramerate>MAX_DESIRED_FRAMERATE)) {
+		toErrorLog("WARNING: (UI_Configuration::getDesiredFramerate): Value out of range.");return(MIN_DESIRED_FRAMERATE);
+	}
+#endif
+	return(desiredFramerate);
+}
+
+inline const unsigned int UI_Configuration::getDesiredCPU() const
+{
+#ifdef _SCC_DEBUG
+	if((desiredCPU<MIN_CPU_USAGE)||(desiredCPU>MAX_CPU_USAGE)) {
+		toErrorLog("WARNING: (UI_Configuration::getDesiredCPU): Value out of range.");
+		if(desiredCPU<MIN_CPU_USAGE) return(MIN_CPU_USAGE);
+		else return(MAX_CPU_USAGE);
+	}
+#endif
+	return(desiredCPU);
+}
+
+inline const unsigned int UI_Configuration::getCurrentFramerate() const {
+	return(currentFramerate);
+}
+
+
+inline const unsigned int UI_Configuration::getCurrentFramesPerGeneration() const {
+	return(currentFramesPerGeneration);
+}
+inline const bool UI_Configuration::isFullScreen() const {
+	return(fullScreen);
 }
 
 inline const bool UI_Configuration::isGlowingButtons() const {

@@ -16,7 +16,7 @@ class BoWindow : public UI_Window
 		BoWindow(UI_Object* bo_parent, const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max);
 		~BoWindow();
 		void resetData();
-		void draw(DC* dc) const;
+		void draw() const;
 		void reloadStrings();
 		void processList();
 		void process();
@@ -44,11 +44,11 @@ class BoWindow : public UI_Window
 		const bool areBosStillMoving() const;
 	private:
 		float geneAnimation;
-		void drawGeneString(DC* dc) const;
-		void drawGene(DC* dc, unsigned int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const;
+		void drawGeneString() const;
+		void drawGene(unsigned int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const;
 
 		void closeMenus();
-		void drawSelectionStuff(DC* dc) const;
+		void drawSelectionStuff() const;
 		void checkForInfoWindow();
 //		void resetButtons();
 		ANABUILDORDER* anarace;

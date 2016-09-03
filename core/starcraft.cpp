@@ -21,7 +21,7 @@ void STARCRAFT::init()
 		max_unit_type_count = UNIT_TYPE_COUNT_ZERG;
 
 
-	GAME::MAX_GAME_STRINGS = MAX_STARCRAFT_STRINGS;
+//	GAME::MAX_GAME_STRINGS = MAX_STARCRAFT_STRINGS;
 	GAME::MAX_RESOURCES = 50000000;
 
 	RACE::UNIT_TYPE_COUNT = max_unit_type_count;
@@ -468,6 +468,9 @@ void STARCRAFT::initStringIdentifier()
 	gameStringIdentifier[GAME_SPEED_FASTER_STRING] = "GAME_SPEED_FASTER_STRING";
 	gameStringIdentifier[GAME_SPEED_FASTEST_STRING] = "GAME_SPEED_FASTEST_STRING";
 
+	gameStringIdentifier[DIAGRAM_SUPPLY_STRING] = "DIAGRAM_SUPPLY_STRING";
+	gameStringIdentifier[DIAGRAM_TIME_STRING] = "DIAGRAM_TIME_STRING";
+
 	race[TERRA].unitsStringIdentifier.resize(RACE::UNIT_TYPE_COUNT);
 	race[PROTOSS].unitsStringIdentifier.resize(RACE::UNIT_TYPE_COUNT);
 	race[ZERG].unitsStringIdentifier.resize(RACE::UNIT_TYPE_COUNT);
@@ -775,7 +778,7 @@ void STARCRAFT::initStringIdentifier()
 	race[ZERG].unitsStringIdentifier[R_MELEE_ATTACKS] = "R_MELEE_ATTACKS";
 	race[ZERG].unitsStringIdentifier[R_MISSILE_ATTACKS] = "R_MISSILE_ATTACKS";
 	race[ZERG].unitsStringIdentifier[R_FLYER_ATTACKS] = "R_FLYER_ATTACKS";
-
+	
 	GAME::init();
 }
 

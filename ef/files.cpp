@@ -615,7 +615,7 @@ const bool FILES::loadMapFile(const std::string& map_file)
 			return(false);
 		}
 	
-	std::ostringstream os;
+/*	std::ostringstream os;
 	os << "--------\n";
 	for(unsigned int i = 0; i < basic_map->getMaxLocations(); ++i)
 	{	
@@ -623,9 +623,9 @@ const bool FILES::loadMapFile(const std::string& map_file)
 		for(unsigned int j = 0; j < basic_map->getMaxLocations(); ++j)
 			os << basic_map->getLocation(i)->getDistance(j) << " ";
 		os << "\n";
-	}
+	}*/
 	basic_map->calculateLocationDistances();
-	for(unsigned int i = 0; i < basic_map->getMaxLocations(); ++i)
+/*	for(unsigned int i = 0; i < basic_map->getMaxLocations(); ++i)
 	{	
 		os << "Location " << i << " ";
 		for(unsigned int j = 0; j < basic_map->getMaxLocations(); ++j)
@@ -633,7 +633,7 @@ const bool FILES::loadMapFile(const std::string& map_file)
 		os << "\n";
 	}
 	os << "----------\n";
-	toErrorLog(os.str());
+	toErrorLog(os.str());*/
 	
 	database.addMap(basic_map);
 	return(true);

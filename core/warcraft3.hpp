@@ -442,6 +442,9 @@ class WARCRAFT3 : public GAME
                         GAME_SPEED_FASTER_STRING, // 21
                         GAME_SPEED_FASTEST_STRING, // 24
 
+			DIAGRAM_SUPPLY_STRING = 50,
+			DIAGRAM_TIME_STRING,
+
                         MAX_WARCRAFT3_STRINGS
                 };
 		enum eGameSpeedFrames

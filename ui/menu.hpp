@@ -18,7 +18,7 @@ class UI_Menu : public UI_Object
 		UI_Menu(UI_Object* menu_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const bool choose_menu, eMenuType menu_type = CUSTOM_MENU, const eButtonWidthType button_width_type = STANDARD_BUTTON_WIDTH, const unsigned int entryNumber = 0, const eString firstString = NULL_STRING, const eButtonColorsType button_colors_type = STANDARD_BUTTON);
 		~UI_Menu();
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 		const unsigned int getHeight() const;
 		const signed int getPressedItem();
 		const signed int getMarkedItem() const;
@@ -49,6 +49,15 @@ class UI_Menu : public UI_Object
 		UI_Menu& operator=(const UI_Menu& object);
 		UI_Menu(const UI_Menu& object);
 };
+
+inline const bool UI_Menu::menuHasChanged() const {
+	return(menuChanged);
+}
+	
+inline const signed int UI_Menu::getMarkedItem() const {
+	return(markedItem);
+}
+
 
 #endif // _UI_MENU_HPP
 

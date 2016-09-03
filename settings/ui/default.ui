@@ -1073,8 +1073,8 @@
 		
 # continue button brush
 		75,  75, 125, SOLID
-		25,  25,  50, SOLID
-		200, 200, 255, SOLID
+		40,  40,  75, SOLID
+		150, 150, 175, SOLID
 
 # bodiagram background brush
 		30,  30,  30, CROSS_HATCH
@@ -1137,9 +1137,9 @@
 		35, 110,  35, SOLID
 		255, 255, 255, SOLID
 # continue button brush
-		115,  115, 75, SOLID
-		45,  45,  25, SOLID
-		200, 200, 100, SOLID
+		110,  110, 75, SOLID
+		50,  50,  30, SOLID
+		140, 140, 100, SOLID
 
 # bodiagram background brush
 		30,  30,  30, CROSS_HATCH
@@ -1203,8 +1203,8 @@
 
 # continue button brush
 		125,  50, 50, SOLID
-		50,  20,  20, SOLID
-		200, 125, 125, SOLID
+		75,  40,  40, SOLID
+		175, 150, 150, SOLID
 
 
 # bodiagram background brush
@@ -1271,9 +1271,9 @@
 		255, 255, 255, SOLID
 
 # continue button brush
-		50, 125, 50, SOLID
-		20,  50,  20, SOLID
-		125, 200, 125, SOLID
+		60, 120, 60, SOLID
+		30,  50,  30, SOLID
+		100, 160, 100, SOLID
 
 
 # bodiagram background brush
@@ -1337,9 +1337,9 @@
 		255, 255, 255, SOLID
 
 # continue button brush
-		90, 90, 90, SOLID
+		80, 80, 80, SOLID
 		30,  30,  30, SOLID
-		150, 150, 150, SOLID
+		130, 130, 130, SOLID
 
 
 # bodiagram background brush

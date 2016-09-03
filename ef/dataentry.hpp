@@ -25,7 +25,7 @@ class DataBaseEntry : public UI_Object
 
 		void check(const bool do_check = true);
 
-		void draw(DC* dc) const;
+		void draw() const;
 		void process();
 		void reloadOriginalSize();
 		

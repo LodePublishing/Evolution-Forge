@@ -1,6 +1,6 @@
 @STRINGS
 	@ENGLISH
-						  "NULL_STRING" = "NULL!"
+						        "ERROR" = "ERROR"
 			     "START_LOAD_LANGUAGE_FILES_STRING" = "Loading language files..."
 		           "START_LOAD_UI_CONFIGURATION_STRING" = "Loading configuration of the user interface..."
 		         "START_LOAD_CORE_CONFIGURATION_STRING" = "Loading configuration of the core..."
@@ -202,8 +202,6 @@
 				      "CHOOSE_GOAL_NAME_STRING" = "Choose goal name..."
 		                   "SAVE_BUILD_ORDER_AS_STRING" = "Save build order as"
 		                        "GIVE_BO_A_NAME_STRING" = "Give the build order a name:"
-				      "BODIAGRAM_SUPPLY_STRING" = "Supply: "
-					"BODIAGRAM_TIME_STRING" = "Time: "
 		                 "CLICK_TO_INSERT_ORDER_STRING" = "(Click here to insert order)"
 		                   "OPTIMIZE_EVERYTHING_STRING" = "Optimize everything"
 		                     "OPTIMIZE_SELECTED_STRING" = "Optimize selected"

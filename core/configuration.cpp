@@ -172,7 +172,7 @@ const bool CoreConfiguration::setGameType(const unsigned int game_type_number)
 	}
 #endif
 	gameType = game_type_number;
-	toErrorLog(gameType);
+//	toErrorLog(gameType);
 	return(true);
 }
 

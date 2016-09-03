@@ -12,7 +12,7 @@ class BoEntry : public UI_Button
 
 		const unsigned int changed();
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 //		void lock(const bool close=true);
 //		void unlock(const bool open=true);
 //		const bool locked() const;

@@ -20,8 +20,8 @@ void BROODWAR::init()
                 max_unit_type_count = UNIT_TYPE_COUNT_ZERG;
 
 
-        GAME::MAX_GAME_STRINGS = MAX_BROODWAR_STRINGS;
         GAME::MAX_RESOURCES = 50000000;
+//        GAME::MAX_GAME_STRINGS = MAX_BROODWAR_STRINGS;
 
         RACE::UNIT_TYPE_COUNT = max_unit_type_count;
         RACE::MAX_RESOURCE_TYPES = 2;
@@ -472,6 +472,7 @@ race[ZERG].stats[R_FLYER_ATTACKS] = 	UNIT_STATISTICS(   0,    0,    0,  0, 0, 0,
 	for(unsigned int k = MAX_RACES; k--;)
 		race[k].fillInfluenceList(); // 'allows' and 'needs'
 	initStringIdentifier();
+	GAME::init();
 }
 
 BROODWAR::~BROODWAR()
@@ -507,6 +508,9 @@ void BROODWAR::initStringIdentifier()
         gameStringIdentifier[GAME_SPEED_FAST_STRING] = "GAME_SPEED_FAST_STRING";
         gameStringIdentifier[GAME_SPEED_FASTER_STRING] = "GAME_SPEED_FASTER_STRING";
         gameStringIdentifier[GAME_SPEED_FASTEST_STRING] = "GAME_SPEED_FASTEST_STRING";
+
+	gameStringIdentifier[DIAGRAM_SUPPLY_STRING] = "DIAGRAM_SUPPLY_STRING";
+	gameStringIdentifier[DIAGRAM_TIME_STRING] = "DIAGRAM_TIME_STRING";
 
         race[TERRA].unitsStringIdentifier.resize(RACE::UNIT_TYPE_COUNT);
         race[PROTOSS].unitsStringIdentifier.resize(RACE::UNIT_TYPE_COUNT);
@@ -862,7 +866,5 @@ void BROODWAR::initStringIdentifier()
 	race[ZERG].unitsStringIdentifier[R_MELEE_ATTACKS] = "R_MELEE_ATTACKS";
 	race[ZERG].unitsStringIdentifier[R_MISSILE_ATTACKS] = "R_MISSILE_ATTACKS";
 	race[ZERG].unitsStringIdentifier[R_FLYER_ATTACKS] = "R_FLYER_ATTACKS";
-
-	GAME::init();
 }
 

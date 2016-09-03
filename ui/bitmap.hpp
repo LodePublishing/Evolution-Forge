@@ -8,7 +8,7 @@ class UI_Bitmap : public UI_Object
 	public:
 		UI_Bitmap(UI_Object* bitmap_parent, 
 				const Rect& bitmap_rect, 
-				const Size distance_bottom_right, 
+				const Size distance_bottom_right,
 				const eBitmap my_bitmap, 
 				const ePositionMode bitmap_position_mode = DO_NOT_ADJUST);
 		~UI_Bitmap();
@@ -17,27 +17,22 @@ class UI_Bitmap : public UI_Object
 		void process(); // process messages, continue animation etc.
 		UI_Object* checkToolTip();
 		UI_Object* checkHighlight();
-		void draw(DC* dc) const;
+		void object_info();
+		void draw() const;
 		const unsigned int getBitmapWidth() const;
 		const unsigned int getBitmapHeight() const;
 		const Size getBitmapSize() const;
 
 		void setBrightness(const unsigned int bitmap_brightness);
-		void setPressed(const bool bitmap_pressed = true);  // for buttons... 
 		void setChecked(const bool bitmap_checked = true);  // for buttons... 
 
 		void setBitmap(const eBitmap new_bitmap);
 		
 	private:
 		eBitmap bitmap;
-		bool pressed;
 		bool checked;
 		unsigned int brightness;
 };
-
-inline void UI_Bitmap::setPressed(const bool bitmap_pressed) {
-	pressed = bitmap_pressed;
-}
 
 inline void UI_Bitmap::setChecked(const bool bitmap_checked) {
 	checked = bitmap_checked;

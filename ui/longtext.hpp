@@ -6,7 +6,19 @@
 class UI_LongText : public UI_Object
 {
 	public:
-		UI_LongText(UI_Object* lt_parent, const Rect lt_pos, const Size distance_bottom_right, const std::string& lt_text, const eColor lt_color1, const eColor lt_color2, const eFont lt_font, const eButtonColorsType lt_button, const eButtonColorsType lt_visited_button = TEXT_BUTTON, UI_Object* scroll_bar=NULL, const bool use_help_chapters = false, const ePositionMode lt_mode = DO_NOT_ADJUST, const eAutoSize auto_size=NO_AUTO_SIZE);
+		UI_LongText(UI_Object* lt_parent, 
+				const Rect lt_pos,
+				const Size distance_bottom_right, 
+				const std::string& lt_text, 
+				const eColor lt_color1, 
+				const eColor lt_color2, 
+				const eFont lt_font, 
+				const eButtonColorsType lt_button, 
+				const eButtonColorsType lt_visited_button = TEXT_BUTTON, 
+				UI_Object* scroll_bar = NULL, 
+				const bool use_help_chapters = false, 
+				const ePositionMode lt_mode = DO_NOT_ADJUST, 
+				const eAutoSize auto_size = NO_AUTO_SIZE);
 
 		~UI_LongText();
 		void updateText(const std::string& lt_text);
@@ -14,7 +26,8 @@ class UI_LongText : public UI_Object
 		void reloadOriginalSize();
 		void reloadStrings();
 		
-		void draw(DC* dc) const;
+		void draw() const;
+		void object_info();
 		void process();
 
 		const signed int getPressed() const;

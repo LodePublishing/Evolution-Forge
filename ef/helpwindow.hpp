@@ -8,10 +8,10 @@
 class HelpWindow : public UI_Window
 {
 	public:
-		HelpWindow(UI_Window* parent_window);
+		HelpWindow(UI_Object* parent_window);
 		~HelpWindow();
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 		void reloadOriginalSize();
 		void gotoChapter(unsigned int chapter);
 		void goBack();

@@ -254,11 +254,9 @@ void DataBaseWindow::process()
 		updateItemPositions();
 }
 
-void DataBaseWindow::draw(DC* dc) const
+void DataBaseWindow::draw() const
 {
-	if(!isShown())
-		return;
-	UI_Window::draw(dc);
+	UI_Window::draw();
 }
 
 void DataBaseWindow::newGeneration()

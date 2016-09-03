@@ -10,7 +10,7 @@ class MapMenu : public UI_Menu
 		MapMenu(UI_Object* map_parent, const Rect map_rect, const Size distance_bottom_right, const ePositionMode position_mode);
 		~MapMenu();
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 		void resetData();
 		void reloadOriginalSize();
 	private:

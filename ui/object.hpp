@@ -4,11 +4,12 @@
 #include "theme.hpp"
 #include "sound.hpp"
 
-#include <math.h>
-#ifndef M_PI
-	#define M_PI 3.14159265358979323846
-#endif
-// Windows kotz
+enum eDrawType
+{
+	SOLID_OBJECT,
+	TRANSPARENT_OBJECT,
+	ANTI_ALIASED_OBJECT	
+};
 
 enum eIsScrolled
 {
@@ -59,15 +60,21 @@ class UI_Window;
 class UI_Object
 {
 	public:
-		UI_Object(UI_Object* parent_object, const Rect relative_rect = Rect(0, 0, 0, 0), const Size distance_bottom_right = Size(0, 0), const ePositionMode position_mode = DO_NOT_ADJUST, const eAutoSize auto_size = NOTHING);
-		UI_Object(UI_Object* parent_object, UI_Object* position_parent_object, const Rect relative_rect = Rect(0, 0, 0, 0), const Size distance_bottom_right = Size(0, 0), const ePositionMode position_mode = DO_NOT_ADJUST, const eAutoSize auto_size = NOTHING);
+		UI_Object(UI_Object* parent_object, 
+				const Rect relative_rect = Rect(0, 0, 0, 0), 
+				const Size distance_bottom_right = Size(0, 0), 
+				const ePositionMode position_mode = DO_NOT_ADJUST, 
+				const eAutoSize auto_size = NOTHING);
+		UI_Object(UI_Object* parent_object, 
+				UI_Object* position_parent_object, 
+				const Rect relative_rect = Rect(0, 0, 0, 0), 
+				const Size distance_bottom_right = Size(0, 0), 
+				const ePositionMode position_mode = DO_NOT_ADJUST, 
+				const eAutoSize auto_size = NOTHING);
 
 		virtual ~UI_Object(); 
 
 		// TODO Konstruktoren protected machen
-
-		void Show(const bool show=true);
-		void Hide(const bool hide=true);
 
 		const bool isShown() const;
 		const bool isTopItem() const;
@@ -96,16 +103,21 @@ class UI_Object
 		const Rect& getTargetRect() const;
 
 		void adjustRelativeRect(const Rect& rect);
+
+		void redrawWholeObject();
+		void makePufferInvalid();
+		void makePufferValid();
+		const bool isPufferInvalid() const;
+		
+		void Show(const bool show=true);
+		void Hide(const bool hide=true);
+
+		virtual void draw() const;
+		void putOnScreen();
 		
 		const bool isMouseInside() const;
 
-		const bool checkForNeedRedraw() const;
-
-		void setNeedRedrawAllThatOverlaps(const Rect& absolute_rect);
-		void setNeedRedrawArea(const Rect& absolute_rect);
-		void setNeedRedrawMoved(const Rect& old_absolute_rect, const Rect& new_absolute_rect);
-		void setNeedRedrawNotMoved();
-		void setNeedRedrawNotMovedFirstChild();
+		virtual void object_info();
 
 // returns the object the mouse cursor is currently over
 		virtual UI_Object* checkToolTip();
@@ -113,11 +125,12 @@ class UI_Object
 		virtual void reloadStrings();
 		virtual void reloadOriginalSize();
 
-		virtual void draw(DC* dc) const;
 		virtual void process();
 		virtual void resetData();
 		
-		void clearRedrawFlag();
+//		void clearRedrawFlag();
+		void clearFlags();
+		static void clearAllFlags();
 
 		void updateToolTip(const eString tool_tip_string);
 		void updateToolTip(const std::string& tool_tip_string);
@@ -130,7 +143,9 @@ class UI_Object
 		static UI_Object* toolTipParent;
 
 		static unsigned int redrawnObjects;
-		static void setResolution(const Size resolution);
+		static const bool setResolution(const eResolution resolution, const bool first_call = false);
+		static const bool setBitDepth(const eBitDepth bitdepth);
+		
 		static UI_Theme theme;
 		static UI_Sound sound;
 		static UI_Window* currentWindow;
@@ -159,7 +174,6 @@ class UI_Object
 		virtual const bool addKey(unsigned int key, unsigned int mod);
 		static UI_Object* focus;
 
-		static bool toolTipWasDeleted;
 		const bool isMoving() const;
 		
 		void adjustSize(const eAdjustMode adjust_mode, const Size& size = Size(0,0));
@@ -182,9 +196,23 @@ class UI_Object
 		void setClipRect(const Rect& rect);
 		void setWidth(const unsigned int width);
 
-	protected:
+		static const bool initSDL(std::list<std::string>& arguments, std::string window_title);
+		static DC* dc;
 
-		
+		static void updateScreen();
+		static void processAll();
+
+		const eDrawType getDrawType() const;
+		void setDrawType(const eDrawType draw_type);
+
+
+		const signed int getZ() const;
+		void setZ(const signed int zcoord);
+		static void addMessage(const std::string& msg);
+		static void addMessage(const eString msg);
+
+		static std::list<UI_Object*> objectList;
+	protected:
 		void setRect(const Rect& rect);
 
 		void checkForChildrenOverlap(const Rect& rect);
@@ -193,10 +221,22 @@ class UI_Object
 		UI_Object* getParent() const; // TODO make const correctness!
 		UI_Object* getPositionParent() const; // TODO make const correctness!
 		UI_Object* getChildren() const;
-		
-		bool childrenWereChanged;
+	
+		bool childrenWereChanged;	
 		ePositionMode positionMode;
+
+		std::list<Rect> blitRectList;
+		static std::list<std::string> remainingMessages;
+
 	private:
+		bool pufferInvalid;
+		SDL_Surface* drawPuffer;
+		eDrawType drawType;
+	
+		void move();
+		static std::list<Rect> oldRectList;
+		static std::list<std::pair<signed int, Rect> > newRectList;
+		
 //		bei wechsel alle rekursiv (-> virtual) durchlaufen und Liste bilden, das aktuelle heraussuchen und aktivieren
 //		Ansonsten bei klick Focus legen, Esc/anderer Klick entfernt den Focus (NULL bzw. anderer Fokus)
 
@@ -212,23 +252,23 @@ class UI_Object
 	
 		Rect originalRect;
 		Size distanceBottomRight;
-		Size oldSize;
+
+		Rect oldRect;
+
 
 		const bool hasSizeChanged() const;
-		void setSizeHasChanged(const bool size_has_changed = true);
+		void checkRectHasChanged();
 		bool sizeHasChanged;
 
 		void setHeight(const unsigned int height);
 		void setSize(const unsigned int width, const unsigned int height);
 
+		signed int zCoordinate;
 
 		eAutoSize autoSize;
 		
 		bool shown;
 
-		bool needRedraw;
-		std::list<Rect> redrawArea;
-			
 		void addChild(UI_Object* child);
 		UI_Object* parent; // = NULL means that this is the screen (x=0/y=0)
 		UI_Object* positionParent; // = NULL means that this is the screen (x=0/y=0)
@@ -239,10 +279,26 @@ class UI_Object
 		std::string toolTipString;
 
 
-		UI_Object& operator=(const UI_Object& object);
-		UI_Object(const UI_Object& object);
+//		UI_Object& operator=(const UI_Object& object);
+//		UI_Object(const UI_Object& object);
 	
 };
+
+inline const signed int UI_Object::getZ() const {
+	return zCoordinate;
+}
+
+inline const eDrawType UI_Object::getDrawType() const {
+	return drawType;
+}
+
+inline void UI_Object::setDrawType(const eDrawType draw_type) {
+	drawType = draw_type;
+}
+
+inline const bool UI_Object::isPufferInvalid() const {
+	return pufferInvalid;
+}
 
 inline const Size& UI_Object::getDistanceBottomRight() const {
 	return(distanceBottomRight);
@@ -404,7 +460,7 @@ inline const Rect& UI_Object::getTargetRect() const {
 }
 
 inline const bool UI_Object::isMouseInside() const {
-	return(getAbsoluteRect().isInside(mouse));
+	return(getAbsoluteRect().isTopLeftCornerInside(mouse));
 }
 
 
@@ -412,6 +468,11 @@ inline const bool UI_Object::isMouseInside() const {
 inline void UI_Object::setPosition(const unsigned int x, const unsigned int y) {
 	setPosition(Point(x, y));
 }
+
+inline void UI_Object::setSize(const unsigned int width, const unsigned int height) {
+	setSize(Size(width, height));
+}
+
 
 inline const bool UI_Object::isTopItem() const {
 	return(positionParent==NULL);
@@ -428,6 +489,7 @@ inline const std::string& UI_Object::getToolTipString() const {
 inline const bool UI_Object::hasSizeChanged() const {
 	return(sizeHasChanged);
 }
+
 
 
 #endif

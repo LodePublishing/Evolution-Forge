@@ -2,7 +2,7 @@
 #include <sstream>
 
 Game::Game(UI_Object* game_parent, const BASIC_MAP* game_map, const unsigned int game_number, const unsigned int game_max) :
-	UI_Window(game_parent, GAME_WINDOW_TITLE_STRING, theme.lookUpGameRect(GAME_WINDOW, game_number, game_max), theme.lookUpGameMaxHeight(GAME_WINDOW, game_number, game_max), NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, Rect(0,0,1280,1024), TRANSPARENT),
+	UI_Window(game_parent, GAME_WINDOW_TITLE_STRING, theme.lookUpGameRect(GAME_WINDOW, game_number, game_max), theme.lookUpGameMaxHeight(GAME_WINDOW, game_number, game_max), NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, Rect(0,0,1280,1024), TRANSPARENT_WINDOW),
 	scoreWindow(new ScoreWindow(this, game_number, game_max)),
 	gameNumber(0),
 	gameMax(0),
@@ -237,12 +237,10 @@ void Game::setMode(const unsigned int game_number, const unsigned int game_max)
 	scoreWindow->setTitleParameter(UI_Object::theme.lookUpFormattedString(GAME_WINDOW_TITLE_STRING, os.str()));
 }
 
-void Game::draw(DC* dc) const
+void Game::draw() const
 {
-	if(!isShown())
-		return;
-	UI_Object::theme.setColorTheme(UI_Object::theme.getMainColorTheme());
-	UI_Object::draw(dc);
+	UI_Object::theme.setColorTheme(UI_Object::theme.getMainColorTheme()); // TODO
+	UI_Object::draw();
 	UI_Object::theme.setColorTheme(UI_Object::theme.getMainColorTheme());
 }
 
@@ -280,7 +278,7 @@ void Game::process()
 /*	for(unsigned int i = MAX_PLAYER;i--;)
 		if(player[i]->checkForNeedRedraw())
 		{
-			setNeedRedrawMoved();
+//			setNeedRedrawMoved();
 			break;
 		}*/ // TODO !
 
@@ -369,7 +367,7 @@ void Game::newGeneration()
 	{
 		if(soup->recalculateGeneration(anarace, active)) // <- konstant
 		{
-			toErrorLog((int)anarace[0]);
+		//	toErrorLog((int)anarace[0]);
 			anaraceInitialized = true;
 			for(unsigned int i = getMapPlayerCount(); i--;)
 				if(anarace[i]->isDifferent(oldCode[i]))

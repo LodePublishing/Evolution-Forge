@@ -88,7 +88,10 @@ inline void MAP_LOCATION::setResourceDistance(const unsigned int resource_type, 
 inline const unsigned int MAP_LOCATION::getNearest(const unsigned int step) const {
 #ifdef _SCC_DEBUG
 	if(step >= maxLocations) {
-		toErrorLog("DEBUG ((MAP_LOCATION::getNearest()): Value out of range.");return(0);
+		toErrorLog("DEBUG ((MAP_LOCATION::getNearest()): Value step out of range.");return(0);
+	}
+	if(nearest[step] >= 9999) {
+		toErrorLog("DEBUG ((MAP_LOCATION::getNearest()): Variable nearest not initialized.");return(0);
 	}
 #endif
 	return(nearest[step]);

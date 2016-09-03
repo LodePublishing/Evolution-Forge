@@ -36,7 +36,7 @@ extern void toErrorLog(const std::string& msg);
 extern void toErrorLog(int msg);
 extern void toInitLog(const std::string& msg);
 extern void toInitLog(int msg);
-extern std::list<std::string> findFiles(const std::string& directory1, const std::string& directory2, const std::string& directory3);
+extern std::list<std::string> findFiles(const std::string& directory1, const std::string& directory2, const std::string& directory3, const std::string& directory4);
 extern const bool checkStreamIsOpen(std::ifstream& stream, const std::string function_name, const std::string& file_name);
 extern const bool checkStreamIsOpen(std::ofstream& stream, const std::string function_name, const std::string& file_name);
 extern const bool checkStreamForFailure(std::ifstream& stream, const std::string function_name, const std::string& file_name);

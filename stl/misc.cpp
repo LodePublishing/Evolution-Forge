@@ -7,6 +7,7 @@
 #include <sstream>
 #include <iomanip>
 #include "../core/configuration.hpp"
+
 void toErrorLog(const std::string& msg) {
 	std::cout << msg << "\n";
 }
@@ -34,7 +35,7 @@ void toInitLog(int msg)
 #include <windows.h>
 #endif
 
-std::list<std::string> findFiles(const std::string& directory1, const std::string& directory2, const std::string& directory3)
+std::list<std::string> findFiles(const std::string& directory1, const std::string& directory2, const std::string& directory3, const std::string&   directory4)
 {
 	std::list<std::string> fileList;
 	std::ostringstream os;
@@ -42,7 +43,9 @@ std::list<std::string> findFiles(const std::string& directory1, const std::strin
 #ifdef __linux__
 	DIR *dir;
 	struct dirent *entry;
-	if(directory3!="")
+	if(directory4!="")
+		os << directory1 << "/" << directory2 << "/" << directory3 << "/" << directory4;
+	else if(directory3!="")
 		os << directory1 << "/" << directory2 << "/" << directory3;
 	else if(directory2!="")
 		os << directory1 << "/" << directory2;
@@ -60,14 +63,14 @@ std::list<std::string> findFiles(const std::string& directory1, const std::strin
 #elif __WIN32__
 	WIN32_FIND_DATA dir;
 	HANDLE fhandle;
-	os << directory1 << "\\" << directory2 << "\\" << directory3 << "\\" << "*.*";
+	os << directory1 << "\\" << directory2 << "\\" << directory3 << "\\" << directory4 << "\\" << "*.*";
 	if ((fhandle=FindFirstFile(os.str().c_str(), &dir)) !=INVALID_HANDLE_VALUE)
 	{
 		do
-			fileList.push_back(directory1 + "\\" + directory2 + "\\" + directory3 + "\\" + dir.cFileName);
+			fileList.push_back(directory1 + "\\" + directory2 + "\\" + directory3 + "\\" + directory4 + "\\" + dir.cFileName);
 		while(FindNextFile(fhandle, &dir));
 	} else
-		toErrorLog("ERROR (findFiles()): Cannot load " + directory1 + "\\" + directory2 + "\\" + directory3 + ".");
+		toErrorLog("ERROR (findFiles()): Cannot load " + directory1 + "\\" + directory2 + "\\" + directory3 + "\\" + directory4 + ".");
 	FindClose(fhandle);
 #endif
 	return fileList;
@@ -302,6 +305,15 @@ const bool loadStringFile(const std::string& string_file, const std::vector<std:
 			} else
 				language_mode = true;
 		}  else
+		if((language_mode) && (index == "@END"))
+		{
+			current_language = ZERO_LANGUAGE;
+			language_mode = false;
+		} else		
+		if(string_mode && (index == "@END"))
+		{
+			string_mode = false;
+		} else
 		if((language_mode) && (current_language == ZERO_LANGUAGE))
 		{
 			current_language = getLanguageSubDataEntry(index);
@@ -328,16 +340,31 @@ const bool loadStringFile(const std::string& string_file, const std::vector<std:
 			}
 			for(unsigned int j = 0; j < max_strings; j++)
 			{
-				if((i=block.find(string_identifier[j])) != block.end())
+				if(string_identifier[j] == "")
+				{
+#ifdef _SCC_DEBUG
+/*					std::ostringstream os;
+					os << "DEBUG (loadStringFile()): Entry number " << j << " not found in file " << string_file << ".";
+					toErrorLog(os.str());*/
+#endif
+				}
+				else if((i=block.find(string_identifier[j])) != block.end())
 				{
 					i->second.pop_front();
 					string_list[current_language][j] = i->second.front();
 					block.erase(i);
-				}
+				} 
+				else
+					toErrorLog("WARNING (loadStringFile()): Entry " + string_identifier[j] + " not found in file " + string_file + ".");
 			}
+			for(std::map<std::string, std::list<std::string> >::iterator j = block.begin(); j != block.end(); ++j)
+				if(j->first != "")
+					toErrorLog("WARNING (loadStringFile()): Entry " + j->first + " not identified in file " + string_file + ".");
+					
+			current_language = ZERO_LANGUAGE;
 			// TODO nicht gefundene Eintraege bemaengeln
-		}
-		old_pos = pFile.tellg();
+		} 
+			old_pos = pFile.tellg();
 	} // end while
 
 	if(!found_any_language_block)

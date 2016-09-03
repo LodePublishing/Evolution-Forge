@@ -20,7 +20,7 @@ class BoGraphWindow : public UI_Window
 		void resetData();
 		void process();
 		void processList();
-		void draw(DC* dc) const;
+		void draw() const;
 	    	void mouseHasMoved();
 		void assignAnarace(ANABUILDORDER* bograph_anarace);
 		

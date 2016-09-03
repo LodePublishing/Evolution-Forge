@@ -6,16 +6,33 @@
 class UI_StaticText : public UI_Object
 {
 	public:
-		UI_StaticText(UI_Object* st_parent, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode = HORIZONTALLY_CENTERED);
-		UI_StaticText(UI_Object* st_parent, const eString st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode = HORIZONTALLY_CENTERED);
-		UI_StaticText(UI_Object* st_parent, const std::string& st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode = HORIZONTALLY_CENTERED);
+		UI_StaticText(UI_Object* st_parent, 
+				const Rect st_pos, 
+				const Size distance_bottom_right, 
+				const eColor st_color, 
+				const eFont st_font, 
+				const ePositionMode position_mode = HORIZONTALLY_CENTERED);
+		UI_StaticText(UI_Object* st_parent, 
+				const eString st_text, 
+				const Rect st_pos, 
+				const Size distance_bottom_right, 
+				const eColor st_color, 
+				const eFont st_font, 
+				const ePositionMode position_mode = HORIZONTALLY_CENTERED);
+		UI_StaticText(UI_Object* st_parent, 
+				const std::string& st_text, 
+				const Rect st_pos, 
+				const Size distance_bottom_right, 
+				const eColor st_color, 
+				const eFont st_font, 
+				const ePositionMode position_mode = HORIZONTALLY_CENTERED);
 		~UI_StaticText();
 
 		void setTemporaryColor(const Color& st_color);
 		void setColor(const eColor st_color);
 		void setFont(const eFont st_font);
 		const std::string& getString() const;
-		void updateText(const std::string& st_text);
+		void updateText(const std::string& st_text, const bool etext_change = false);
 		void reloadText(const std::string& st_text);
 		void reloadOriginalSize();
 
@@ -29,15 +46,16 @@ class UI_StaticText : public UI_Object
 		void updateText(const eString st_text);
 		void reloadText(const eString st_text);
 		void reloadStrings();
+		void setTextWasChanged();
 		
-		void draw(DC* dc) const;
+		void draw() const;
+		void object_info();
 		void process();
 
 		const Size getTextSize() const;
 		const Rect& getTextBox() const;
 		const Size getTextPosSize(const unsigned int pos) const;
 
-		void setPressed(const bool press=false);
 		void doHighlight(const bool high_light=true);
 	private:
 		std::string text;
@@ -47,18 +65,11 @@ class UI_StaticText : public UI_Object
 		Color tempColor;
 		bool tempColorIsSet;
 		eString eText;
-		bool pressed; // for buttons only, draw the text +(1,1)	
 		bool highlight;
 	
 		UI_StaticText& operator=(const UI_StaticText& object);
 		UI_StaticText(const UI_StaticText& object);
 };
-
-
-
-inline void UI_StaticText::setPressed(const bool press) {
-	pressed = press;
-}
 
 inline UI_Object* UI_StaticText::checkHighlight() {
 	return(UI_Object::checkHighlight());

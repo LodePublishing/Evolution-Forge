@@ -11,7 +11,7 @@ class GoalMenu : public UI_Menu
 		~GoalMenu();
 		
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 		void resetData();
 		void assignAnarace(ANABUILDORDER* goal_anarace);
 		void reloadOriginalSize();

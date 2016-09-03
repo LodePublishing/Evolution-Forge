@@ -2,7 +2,19 @@
 
 #include <sstream>
 
-UI_LongText::UI_LongText(UI_Object* lt_parent, const Rect lt_pos, const Size distance_bottom_right, const std::string& lt_text, const eColor lt_color1, const eColor lt_color2, const eFont lt_font, const eButtonColorsType lt_button, const eButtonColorsType lt_visited_button, UI_Object* scroll_bar, const bool use_help_chapters, const ePositionMode position_mode, const eAutoSize auto_size) :
+UI_LongText::UI_LongText(UI_Object* lt_parent, 
+		const Rect lt_pos, 
+		const Size distance_bottom_right, 
+		const std::string& lt_text, 
+		const eColor lt_color1, 
+		const eColor lt_color2, 
+		const eFont lt_font, 
+		const eButtonColorsType lt_button, 
+		const eButtonColorsType lt_visited_button, 
+		UI_Object* scroll_bar, 
+		const bool use_help_chapters, 
+		const ePositionMode position_mode, 
+		const eAutoSize auto_size) :
 	UI_Object(lt_parent, lt_pos, distance_bottom_right, position_mode, auto_size),
 	scrollBar(scroll_bar),
 	longText(),
@@ -17,7 +29,9 @@ UI_LongText::UI_LongText(UI_Object* lt_parent, const Rect lt_pos, const Size dis
 	visitedButton(lt_visited_button),
 	textWasChanged(true),
 	useHelpChapters(use_help_chapters)
-{}
+{
+	setDrawType(TRANSPARENT_OBJECT);
+}
 
 UI_LongText::~UI_LongText()
 {
@@ -40,14 +54,14 @@ UI_LongText::~UI_LongText()
 		k = longBitmap.erase(k);
 	}
 }
-
-void UI_LongText::draw(DC* dc) const
+void UI_LongText::object_info()
 {
-	if(!isShown())
-		return;
-	if(!checkForNeedRedraw())
-		return;
-	UI_Object::draw(dc);
+	toErrorLog("ui_longtext");
+}
+
+void UI_LongText::draw() const
+{
+	UI_Object::draw();
 }
 
 void UI_LongText::process()
@@ -59,15 +73,17 @@ void UI_LongText::process()
 		textWasChanged=false;
 	}
 
-
+// TODO irgendwie alle invalid machen...  mmmh... oder Groesse von UI_LongText mal anschaun
+#if 0
 	std::list<UI_StaticText*>::iterator i = longText.begin();
 	while(i!=longText.end())
 	{
-		if((*i)->checkForNeedRedraw())
+		if((*i)->isPufferInvalid())
 		{
-//			setNeedRedrawMoved(); TODO
+			makePufferInvalid();
+			setNeedRedrawMoved(); TODO
 			return;
-		}
+//		}
 		++i;
 	}
 	std::list<UI_Button*>::iterator j = longButton.begin();
@@ -90,12 +106,13 @@ void UI_LongText::process()
 		}
 		++k;
 	}
+#endif
 }
 
 void UI_LongText::reloadOriginalSize()
 {
-	reloadStrings();
 	UI_Object::reloadOriginalSize();
+	reloadStrings();
 }
 
 void UI_LongText::updateText(const std::string& lt_text)
@@ -132,21 +149,22 @@ void UI_LongText::updateText(const std::string& lt_text)
 	
 	eColor current_color = color1;
 	eFont current_font = font;
-
-
 	{
 		std::list<UI_StaticText*>::iterator i = longText.begin();
 		while(!longText.empty())
 		{
 			delete(*i);
 			i = longText.erase(i);
-		}	
+		}
+		
+
 		std::list<UI_Button*>::iterator j = longButton.begin();
 		while(!longButton.empty())
 		{
 			delete(*j);
 			j = longButton.erase(j);
 		}
+		
 		std::list<signed int>::iterator k = longNumber.begin();
 		while(!longNumber.empty())
 			k = longNumber.erase(k);
@@ -158,9 +176,7 @@ void UI_LongText::updateText(const std::string& lt_text)
 			delete(*l);
 			l = longBitmap.erase(l);
 		}
-	
 	}
-
 	
 	eBitmap bitmap_number = NULL_BITMAP;
 	for(unsigned int i=0;i<text.length();i++)
@@ -213,10 +229,13 @@ void UI_LongText::updateText(const std::string& lt_text)
 // button:			
 		} else if(text[i]=='@')
 		{
+			if(textbutton>0)
+			{
+				new_check = true;
+				end_of_order=true;
+			}
 			textbutton++;
 			last_char_position = i;
-			new_check = true;
-			end_of_order=true;
 // bitmap			
 		} else if(text[i]=='~')
 		{
@@ -324,9 +343,12 @@ void UI_LongText::updateText(const std::string& lt_text)
 						bitmap_left_border = text_cursor_x;
 						bitmap_lower_border = current_row + UI_Object::theme.lookUpBitmap(bitmap_number)->h;
 					}
-					t = new UI_Button(scrollBar==NULL?this:scrollBar, Rect(p+Point(first_text_cursor_x-1, ty), Size(0, 0)), Size(0, 0), button, NULL_BITMAP, PRESS_BUTTON_MODE, realstring.str(), DO_NOT_ADJUST, (eFont)(font+4), AUTO_SIZE);
-					longButton.push_back(t);
-					text_cursor_x = first_text_cursor_x + t->getTextWidth() + UI_Object::theme.lookUpFont(current_font)->getTextExtent(" ").getWidth();
+					if(realstring.str() != "")
+					{
+						t = new UI_Button(scrollBar==NULL?this:scrollBar, Rect(p+Point(first_text_cursor_x+5, ty), Size(0, 0)), Size(0, 0), button, NULL_BITMAP, PRESS_BUTTON_MODE, realstring.str(), DO_NOT_ADJUST, (eFont)(font+4), AUTO_SIZE);
+						longButton.push_back(t);
+						text_cursor_x = first_text_cursor_x + t->getTextWidth() + UI_Object::theme.lookUpFont(current_font)->getTextExtent(" ").getWidth();
+					}
 				} else if((textbutton==1)&&(!end_of_order))
 				{
 					// abgebrochener button
@@ -347,7 +369,7 @@ void UI_LongText::updateText(const std::string& lt_text)
 							bitmap_left_border = text_cursor_x;
 							bitmap_lower_border = current_row + UI_Object::theme.lookUpBitmap(bitmap_number)->h;
 						}
-						t = new UI_Button(scrollBar==NULL?this:scrollBar, Rect(p+Point(first_text_cursor_x-1, ty), Size(0, 0)), Size(0, 0), button, NULL_BITMAP, PRESS_BUTTON_MODE, realstring.str(), DO_NOT_ADJUST, (eFont)(font+4), AUTO_SIZE);
+						t = new UI_Button(scrollBar==NULL?this:scrollBar, Rect(p+Point(first_text_cursor_x+5, ty), Size(0, 0)), Size(0, 0), button, NULL_BITMAP, PRESS_BUTTON_MODE, realstring.str(), DO_NOT_ADJUST, (eFont)(font+4), AUTO_SIZE);
 						longButton.push_back(t);
 						textbutton=3;
 					} else continue;
@@ -423,6 +445,7 @@ void UI_LongText::updateText(const std::string& lt_text)
 		}
 	}
 //	textWasChanged=true; ?
+
 }
 
 const unsigned int UI_LongText::getTextHeight() const

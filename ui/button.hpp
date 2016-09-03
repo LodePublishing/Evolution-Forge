@@ -100,7 +100,8 @@ class UI_Button : public UI_Object
 
 		const bool addKey(unsigned int key, unsigned int mod);
 		
-		void draw(DC* dc) const;
+		void object_info();
+		void draw() const;
 		void setButtonColorsType(const eButtonColorsType button_colors_type);
 		const eButtonColorsType getButtonColorsType() const;
 

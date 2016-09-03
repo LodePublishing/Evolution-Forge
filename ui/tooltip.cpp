@@ -1,14 +1,14 @@
 #include "tooltip.hpp"
 
 UI_ToolTip::UI_ToolTip(UI_Object* parent_object, const std::string& tooltip_text) :
-	UI_LongText::UI_LongText(parent_object, Rect(2, 2, 2*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) , 0), Size(0, 0), tooltip_text, TEXT_COLOR, DARK_IMPORTANT_COLOR, SMALL_FONT, TEXT_BUTTON),
+	UI_LongText::UI_LongText(parent_object, Rect(3, 3, 2*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) , 0), Size(0, 0), tooltip_text, TEXT_COLOR, DARK_IMPORTANT_COLOR, SMALL_FONT, TEXT_BUTTON),
 	boxSize()
 { 
 	process();
 }
 
 UI_ToolTip::UI_ToolTip(UI_Object* parent_object, const eString tooltip_text) :
-	UI_LongText::UI_LongText(parent_object, Rect(2, 2, 2*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 0), Size(0, 0), UI_Object::theme.lookUpString(tooltip_text), TEXT_COLOR, DARK_IMPORTANT_COLOR, SMALL_FONT, TEXT_BUTTON),
+	UI_LongText::UI_LongText(parent_object, Rect(3, 3, 2*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 0), Size(0, 0), UI_Object::theme.lookUpString(tooltip_text), TEXT_COLOR, DARK_IMPORTANT_COLOR, SMALL_FONT, TEXT_BUTTON),
 	boxSize()
 { 
 	process();
@@ -16,7 +16,11 @@ UI_ToolTip::UI_ToolTip(UI_Object* parent_object, const eString tooltip_text) :
 
 UI_ToolTip::~UI_ToolTip()
 { 
-	UI_Object::toolTipWasDeleted = true;
+}
+
+void UI_ToolTip::object_info()
+{
+	toErrorLog("ui_tooltip");
 }
 
 void UI_ToolTip::reloadOriginalSize()
@@ -37,13 +41,11 @@ void UI_ToolTip::process()
 	UI_LongText::process();
 }
                                                                                 
-void UI_ToolTip::draw(DC* dc) const
+void UI_ToolTip::draw() const
 {
-	if(!checkForNeedRedraw())
-		return;
 	dc->setPen(*theme.lookUpPen(RECTANGLE_PEN));
 	dc->setBrush(*theme.lookUpBrush(TOOLTIP_BRUSH));
-	dc->DrawRectangle(Rect(getAbsolutePosition()-Size(1,1), Size(5 + getTextWidth(), 5 + getTextHeight())));
-	UI_LongText::draw(dc);	
+	dc->DrawRectangle(Rect(Point(0,0), Size(6 + getTextWidth(), 6 + getTextHeight())));
+	UI_LongText::draw();	
 }
 

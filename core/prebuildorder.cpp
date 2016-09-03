@@ -1,6 +1,7 @@
 #include "prebuildorder.hpp"
 #include <string.h>
 #include <math.h>
+#include <sstream>
 
 PREBUILDORDER::PREBUILDORDER(unsigned int player_number, START* start, UNIT (&units)[MAX_PLAYER][MAX_LOCATIONS]):
 	buildingQueue(),
@@ -855,19 +856,35 @@ void PREBUILDORDER::adjustAccepterDistance(const unsigned int location_number, c
 			}
 	}
 	if(!found)
+	{
 		accepterDistance[location_number][resource_type] = RESOURCE::MAX_RESOURCE_DISTANCE; // ~
+		toErrorLog(accepterDistance[location_number][resource_type]);
+	}
 }
 
 const unsigned int PREBUILDORDER::getResourceHarvestPerFrame( const unsigned int resource_type, const unsigned int location_number, const unsigned int worker ) const {
 #ifdef _SCC_DEBUG
-	if(resource_type >= RACE::MAX_RESOURCE_TYPES) {
-		toErrorLog("DEBUG (PREBUILDORDER::getResourceHarvestPerFrame()): Value resource_type out of range.");return(0);
-	}
 	if((location_number >= (*getMap())->getMaxLocations()))	{
 		toErrorLog("DEBUG (PREBUILDORDER::getResourceHarvestPerFrame()): Value location_number out of range.");return(0);
 	}
-	if(worker>=999) {
-		toErrorLog("DEBUG (PREBUILDORDER::getResourceHarvestPerFrame()): Value worker out of range.");return(0);
+	if((resource_type >= GAME::race[getRace()].resource.size()/*RACE::MAX_RESOURCE_TYPES*/) || (resource_type >= accepterDistance[location_number].size())) {
+		toErrorLog("DEBUG (PREBUILDORDER::getResourceHarvestPerFrame()): Value resource_type out of range.");return(0);
+	}
+	if(accepterDistance[location_number][resource_type] >= GAME::race[getRace()].resource[resource_type].resourceHarvestPerFrame.size()) 
+	{
+		std::ostringstream os;
+		os << "DEBUG (PREBUILDORDER::getResourceHarvestPerFrame()): Variable accepterDistance [" << accepterDistance[location_number][resource_type] << "] out of range or resourceHarvestPerFrame [" << GAME::race[getRace()].resource[resource_type].resourceHarvestPerFrame.size() << " entries] not initialized.";
+		toErrorLog(os.str());
+		return(0);
+	}
+	if(getLocationTotal(location_number, GAME::race[getRace()].resource[resource_type].provider) >= GAME::race[getRace()].resource[resource_type].resourceHarvestPerFrame[accepterDistance[location_number][resource_type]].size()) {
+		toErrorLog("DEBUG (PREBUILDORDER::getResourceHarvestPerFrame()): Variable getLocationTotal out of range or resourceHarvestPerFrame not initialized.");return(0);
+	}
+	if(worker >= GAME::race[getRace()].resource[resource_type].resourceHarvestPerFrame[ accepterDistance[location_number][resource_type] ][getLocationTotal(location_number, GAME::race[getRace()].resource[resource_type].provider)].size()) {
+		std::ostringstream os;
+		os << "DEBUG (PREBUILDORDER::getResourceHarvestPerFrame()): Value worker [" << worker << "] out of range or resourceHarvestPerFrame [" << GAME::race[getRace()].resource[resource_type].resourceHarvestPerFrame[ accepterDistance[location_number][resource_type] ][getLocationTotal(location_number, GAME::race[getRace()].resource[resource_type].provider)].size() << " entries] not initialized.";
+		toErrorLog(os.str());
+		return(0);
 	}
 #endif
 	if(accepterDistance[location_number][resource_type] == RESOURCE::MAX_RESOURCE_DISTANCE)

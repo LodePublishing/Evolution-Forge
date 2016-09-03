@@ -14,15 +14,11 @@ GoalMenu::~GoalMenu()
 void GoalMenu::process()
 {
 	UI_Menu::process();
-	if(!isShown())
-		return;
 }
 
-void GoalMenu::draw(DC* dc) const
+void GoalMenu::draw() const
 {
-	if(!isShown())
-		return;
-	UI_Menu::draw(dc);
+	UI_Menu::draw();
 }
 
 void GoalMenu::assignAnarace(ANABUILDORDER* goal_anarace)

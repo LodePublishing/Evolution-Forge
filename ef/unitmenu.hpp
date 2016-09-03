@@ -10,7 +10,7 @@ class UnitMenu : public UI_Menu
 		UnitMenu(UI_Object* unit_parent, const Rect unit_rect, const Size distance_bottom_right, const ePositionMode position_mode);
 		~UnitMenu();
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 		void setFacilityModus(const bool facility_mode=true);
 		void resetData();
 		void assignAnarace(ANABUILDORDER* unit_anarace);

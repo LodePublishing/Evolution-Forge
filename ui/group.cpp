@@ -1,12 +1,20 @@
 #include "group.hpp"
 
-UI_Group::UI_Group(UI_Object* group_parent, const Rect& initial_rect, const Size bottom_right_distance, const eGroupType group_type, const bool draw_background, const ePositionMode position_mode, const eString txt ) :
+UI_Group::UI_Group(UI_Object* group_parent, 
+		const Rect& initial_rect, 
+		const Size bottom_right_distance, 
+		const eGroupType group_type, 
+		const bool draw_background, 
+		const ePositionMode position_mode, 
+		const eString txt ) :
 	UI_Object(group_parent, initial_rect, bottom_right_distance, position_mode, NOTHING),
 	title(txt==NULL_STRING?NULL:new UI_StaticText(this, txt, Rect(Point(0,0) - Size(3, 14), Size(0,0)), Size(0,0), BRIGHT_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
 	highlighted(false),
 	groupType(group_type),
 	drawBackground(draw_background)
-{ }
+{ 
+	setDrawType(TRANSPARENT_OBJECT);
+}
 
 UI_Group::~UI_Group() 
 {
@@ -87,32 +95,29 @@ void UI_Group::reloadOriginalSize()
 	calculateBoxSize();
 }
 
-void UI_Group::draw(DC* dc) const
+void UI_Group::draw() const
 {
-	if(checkForNeedRedraw())
+	if(title!=NULL)
 	{
-		if(title!=NULL)
-		{
-//			dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-//			dc->DrawRoundedRectangle(getAbsolutePosition() - Size(4, 5), getSize(), 4);
+//		dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
+//		dc->DrawRoundedRectangle(getAbsolutePosition() - Size(4, 5), getSize(), 4);
 		
-			Size s = title->getTextSize();
-		  	Rect titleRect = Rect(getAbsolutePosition() - Size(5, 15), s + Size(5,2));
-			dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-			dc->setBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
-			dc->DrawEdgedRoundedRectangle(titleRect, 2);
-		}
-		if(drawBackground)
-		{
-			if(highlighted)
-				dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-			else	
-				dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));
-			dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-			dc->DrawEdgedRoundedRectangle(getAbsolutePosition()-Size(3,0), getSize()+Size(6,0), 4);
-		}
+		Size s = title->getTextSize();
+	  	Rect titleRect = Rect(Point(0,0), s + Size(5,2));
+		dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+		dc->setBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
+		dc->DrawEdgedRoundedRectangle(titleRect, 2);
 	}
-	UI_Object::draw(dc);
+	if(drawBackground)
+	{
+		if(highlighted)
+			dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+		else	
+			dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));
+		dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
+		dc->DrawEdgedRoundedRectangle(Point(0,0), getSize()+Size(6,0), 4);
+	}
+	UI_Object::draw();
 }
 
 void UI_Group::process()
@@ -128,18 +133,18 @@ void UI_Group::process()
 		calculateBoxSize();
 		childrenWereChanged = false;
 	}
-	if(getAbsoluteRect().isInside(mouse))
+	if(getAbsoluteRect().isTopLeftCornerInside(mouse))
 	{
 		if(!highlighted)
 		{
 			highlighted = true;
-			setNeedRedrawNotMoved();
+			makePufferInvalid();
 		}
 	} else
 	{
 		if(highlighted)
 		{
-			setNeedRedrawNotMoved();
+			makePufferInvalid();
 			highlighted = false;
 		}
 	}

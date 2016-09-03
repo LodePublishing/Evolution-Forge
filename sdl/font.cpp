@@ -71,4 +71,13 @@ void Font::DrawText(SDL_Surface* surface, const SDL_Color& color, const std::str
 	SDL_FreeSurface( sText );
 }
 
+void Font::DrawText(SDL_Surface* surface, const SDL_Color& color, const SDL_Color& back_color, const std::string& font_text, const signed int x, const signed int y) const // TODO
+{
+	SDL_Surface *sText = TTF_RenderUTF8_Shaded( font, font_text.c_str(), color, back_color);
+	if(sText==NULL)
+		return;
+	SDL_Rect rcDest = {x,y-4,0,0};
+	SDL_BlitSurface( sText, NULL, surface, &rcDest );
+	SDL_FreeSurface( sText );
+}
 

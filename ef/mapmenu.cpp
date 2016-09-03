@@ -47,10 +47,8 @@ void MapMenu::process()
 		return;
 }
 
-void MapMenu::draw(DC* dc) const
+void MapMenu::draw() const
 {
-	if(!isShown())
-		return;
-	UI_Menu::draw(dc);
+	UI_Menu::draw();
 }
 

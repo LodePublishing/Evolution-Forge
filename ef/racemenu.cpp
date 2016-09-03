@@ -51,10 +51,8 @@ void RaceMenu::process()
 		return;
 }
 
-void RaceMenu::draw(DC* dc) const
+void RaceMenu::draw() const
 {
-	if(!isShown())
-		return;
-	UI_Menu::draw(dc);
+	UI_Menu::draw();
 }
 

@@ -12,7 +12,7 @@ class TechTreeWindow : public UI_Window
 		~TechTreeWindow();
 		
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 		void assignAnarace(ANABUILDORDER* techtree_anarace);
 		void setCurrentGoalUnit(unsigned int current_goal_unit);
 		void reloadOriginalSize();

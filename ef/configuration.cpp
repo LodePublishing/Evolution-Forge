@@ -7,17 +7,11 @@ const unsigned int MAX_GENERATIONS = 10000;
 const unsigned int MIN_GENERATIONS = 100;
 
 EF_Configuration::EF_Configuration():
-	desiredFramerate(25),
-	desiredCPU(75),
-	currentFramerate(1),
-	currentFramesPerGeneration(1),
 	autoRuns(false),
 	waitAfterChange(false),
 	compactDisplayMode(false),
 	facilityMode(true),
-	fullScreen(false),
 	softwareMouse(false),
-	backgroundBitmap(false),
 	raceSpecificTheme(true),
 	dnaSpiral(true),
 	toolTips(true),
@@ -32,16 +26,10 @@ EF_Configuration::~EF_Configuration()
 
 void EF_Configuration::initDefaults()
 {
-	setDesiredFramerate(25);
-	setDesiredCPU(75);
-	setCurrentFramerate(1);
-	setCurrentFramesPerGeneration(1),
 	setAutoRuns(false);
 	setWaitAfterChange(false);
 	setCompactDisplayMode(false);
 	setFacilityMode(true);
-	setFullScreen(false);
-	setBackgroundBitmap(false);
 	setRaceSpecificTheme(true);
 	setDnaSpiral(true);
 	setToolTips(true);
@@ -66,10 +54,6 @@ void EF_Configuration::saveToFile() const
 	pFile << "    \"Auto runs\" = \"" << (int)isAutoRuns() << "\"" << std::endl;
 	pFile << "    \"Max unchanged Generations\" = \"" << getMaxGenerations() << "\"" << std::endl;
 	pFile << "# Desired framerate: If the computer is fast the calculation speed is improved, if the computer is slow the calculation speed is decreased" << std::endl;
-	pFile << "    \"Desired framerate\" = \"" << getDesiredFramerate() << "\"" << std::endl;
-	pFile << "# Desired CPU usage" << std::endl;
-	pFile << "    \"Desired CPU usage\" = \"" << getDesiredCPU() << "\"" << std::endl;
-	pFile << "" << std::endl;
 	pFile << "# Wait briefly after each change in the build order or just progress as fast as possible? (1 / 0)" << std::endl;
 	pFile << "    \"Wait after change\" = \"" << (int)isWaitAfterChange() << "\"" << std::endl;
 	pFile << "# Display entries in the build order window compact (i.e. '6x Zergling' instead of Zergling, Zergling, Zergling, ...)" << std::endl;
@@ -78,11 +62,8 @@ void EF_Configuration::saveToFile() const
 	pFile << "    \"Facility mode\" = \"" << (int)isFacilityMode() << "\"" << std::endl;
 	pFile << "# Show nice DNA spiral?" << std::endl;
 	pFile << "    \"DNA Spiral\" = \"" << (int)isDnaSpiral() << "\"" << std::endl;
-	pFile << "# use background bitmap, saves some cpu power if deactivated" << std::endl;
-	pFile << "    \"Background bitmap\" = \"" << (int)isBackgroundBitmap() << "\"" << std::endl;
 	pFile << "# use global theme (0) or race specific themes + the global theme (1)?" << std::endl;
 	pFile << "    \"Race specific theme\" = \"" << (int)isRaceSpecificTheme() << "\"" << std::endl;
-	pFile << "    \"Fullscreen\" = \"" << (int)isFullScreen() << "\"" << std::endl;
 	pFile << "    \"Tooltips\" = \"" << (int)isToolTips() << "\"" << std::endl;
 	pFile << "# show which part of the program needs how much CPU resources" << std::endl;
 	pFile << "    \"Show debug\" = \"" << (int)isShowDebug() << "\"" << std::endl;
@@ -155,10 +136,6 @@ void EF_Configuration::loadConfigurationFile()
 			   	setFacilityMode(atoi(i->second.front().c_str()));
 			}
 	
-			if((i=block.find("Fullscreen"))!=block.end()){
-				i->second.pop_front();
-			   	setFullScreen(atoi(i->second.front().c_str()));
-			}
 			if((i=block.find("Tooltips"))!=block.end()){
 				i->second.pop_front();
 				setToolTips(atoi(i->second.front().c_str()));
@@ -167,23 +144,10 @@ void EF_Configuration::loadConfigurationFile()
 				i->second.pop_front();
 				setShowDebug(atoi(i->second.front().c_str()));
 			}
-			if((i=block.find("Background bitmap"))!=block.end()){
-				i->second.pop_front();
-			   	setBackgroundBitmap(atoi(i->second.front().c_str()));
-			}
 			if((i=block.find("Race specific theme"))!=block.end()){
 				i->second.pop_front();
 			   	setRaceSpecificTheme(atoi(i->second.front().c_str()));
 			}
-			if((i=block.find("Desired framerate"))!=block.end()){
-				i->second.pop_front();
-			   	setDesiredFramerate(atoi(i->second.front().c_str()));
-			}		
-			if((i=block.find("Desired CPU usage"))!=block.end()){
-				i->second.pop_front();
-			   	setDesiredCPU(atoi(i->second.front().c_str()));
-			}		
-		
 			if((i=block.find("DNA Spiral"))!=block.end()){
 				i->second.pop_front();
 			   	setDnaSpiral(atoi(i->second.front().c_str()));
@@ -230,22 +194,6 @@ const bool EF_Configuration::setFacilityMode(const bool facility_mode)
 	return(true);
 }
 
-const bool EF_Configuration::setFullScreen(const bool full_screen) 
-{
-	if(fullScreen == full_screen)
-		return(false);
-	fullScreen = full_screen;
-	return(true);
-}
-
-const bool EF_Configuration::setBackgroundBitmap(const bool background_bitmap) 
-{
-	if(backgroundBitmap == background_bitmap)
-		return(false);
-	backgroundBitmap = background_bitmap;
-	return(true);
-}
-
 const bool EF_Configuration::setRaceSpecificTheme(const bool race_specific_theme) 
 {
 	if(raceSpecificTheme == race_specific_theme)
@@ -282,48 +230,6 @@ const bool EF_Configuration::setMaxGenerations(const unsigned int max_generation
 	if(maxGenerations == max_generations)
 		return(false);
 	maxGenerations = max_generations;
-	return(true);
-}
-
-const bool EF_Configuration::setCurrentFramerate(const unsigned int frame_rate) 
-{
-	if(currentFramerate == frame_rate)
-		return(false);
-	currentFramerate = frame_rate;
-	return(true);
-}
-
-const bool EF_Configuration::setCurrentFramesPerGeneration(const unsigned int frames_per_generation) 
-{
-	if(currentFramesPerGeneration == frames_per_generation)
-		return(false);
-	currentFramesPerGeneration = frames_per_generation;
-	return(true);
-}
-
-const bool EF_Configuration::setDesiredCPU(const unsigned int desired_cpu_usage)
-{
-	if(desiredCPU == desired_cpu_usage)
-		return(false);
-#ifdef _SCC_DEBUG
-	if((desired_cpu_usage<1)||(desired_cpu_usage>99)) {
-		toErrorLog("WARNING: (EF_Configuration::setDesiredCPU): Value out of range.");return(false);
-	}
-#endif
-	desiredCPU = desired_cpu_usage;
-	return(true);
-}
-
-const bool EF_Configuration::setDesiredFramerate(const unsigned int desired_frame_rate)
-{
-	if(desiredFramerate == desired_frame_rate)
-		return(false);
-#ifdef _SCC_DEBUG
-	if((desired_frame_rate<MIN_DESIRED_FRAMERATE)||(desired_frame_rate>MAX_DESIRED_FRAMERATE)) {
-		toErrorLog("WARNING: (EF_Configuration::setDesiredFramerate): Value out of range.");return(false);
-	}
-#endif
-	desiredFramerate = desired_frame_rate;
 	return(true);
 }
 

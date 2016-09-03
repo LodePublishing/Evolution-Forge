@@ -61,10 +61,10 @@ void ForceEntry::process()
 	{
 		highlight--;
 		highlight=highlight*5/6;
-		setNeedRedrawNotMoved();
+		makePufferInvalid();
 	} else
 	if(targetForce!=currentForce)
-		setNeedRedrawNotMoved();
+		makePufferInvalid();
 	Size::mv(currentForce, startForce, targetForce);
 	
 	UI_Button::process();
@@ -83,7 +83,7 @@ void ForceEntry::process()
 			if(ForceEntry::currentForceEntry == NULL)
 			{
 				// just entered the right_side of the entry => show time button
-				if((rect_right.isInside(mouse)) && (ForceEntry::makeTimeGoalButton==NULL))
+				if((rect_right.isTopLeftCornerInside(mouse)) && (ForceEntry::makeTimeGoalButton==NULL))
 				{
 					setOriginalSize(Size(getParent()->getWidth()-60, getHeight()));
 					ForceEntry::makeTimeGoalButton = new UI_Button(getParent(), Rect(getRelativePosition() + Size(getParent()->getWidth()-52, 0), Size(16,10)), Size(0,0), GOAL_TIME_BUTTON, TIME_BUTTON_BITMAP, STATIC_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST);
@@ -107,7 +107,7 @@ void ForceEntry::process()
 			if(ForceEntry::currentForceEntry == this)
 			{
 			
-				if(!rect_right.isInside(mouse))
+				if(!rect_right.isTopLeftCornerInside(mouse))
 				{
 					if((ForceEntry::makeTimeGoalButton)&&(!ForceEntry::makeTimeGoalButton->isCurrentlyActivated()))
 					{
@@ -133,7 +133,7 @@ void ForceEntry::process()
 					}
 				}
 
-/*				if((!rect_left.isInside(mouse)) && (ForceEntry::alwaysBuildButton!=NULL))
+/*				if((!rect_left.isTopLeftCornerInside(mouse)) && (ForceEntry::alwaysBuildButton!=NULL))
 				{
 					setOriginalPosition(rect_left.getTopLeft());
 					setOriginalSize(Size(getParent()->getWidth()-10, getHeight()));
@@ -173,7 +173,7 @@ void ForceEntry::process()
 	{
 /*		Rect r = getAbsoluteRect();
 		r.setWidth(getParent()->getWidth());
-		if(!r.isInside(mouse))
+		if(!r.isTopLeftCornerInside(mouse))
 		{
 			if(UI_Button::getCurrentButton() == ForceEntry::makeTimeGoalButton)
 				UI_Button::resetButton();
@@ -270,19 +270,15 @@ void ForceEntry::setTargetForce(const unsigned int force)
 	{
 		startForce = currentForce;
 		targetForce = force;
-		setNeedRedrawNotMoved();
+		makePufferInvalid();
 		highlight = 50;
 		resetGradient();
 	}
 }
 
-void ForceEntry::draw(DC* dc) const
+void ForceEntry::draw() const
 {
-	if(!isShown()) 
-		return;
-	if(!checkForNeedRedraw())
-		return;
-	UI_Button::draw(dc);
+	UI_Button::draw();
 	Brush b = *theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+getType()));
 
 	if(highlight>0)
@@ -295,7 +291,7 @@ void ForceEntry::draw(DC* dc) const
 	else
 		dc->setPen(p);
 
-	dc->DrawEdgedRoundedRectangle(Rect(getAbsolutePosition()+Point(getWidth()-currentForce-1, 1), Size(currentForce+1, FONT_SIZE+4)), 3);
+	dc->DrawEdgedRoundedRectangle(Rect(Point(getWidth()-currentForce-1, 1), Size(currentForce+1, FONT_SIZE+4)), 3);
 
 	std::ostringstream os;
 	os.str("");
@@ -326,7 +322,7 @@ void ForceEntry::draw(DC* dc) const
 		
 	//dc->setFont(UI_Object::theme.lookUpFont(SMALL_BOLD_FONT));
 	Size s = dc->getTextExtent(os.str());
-	dc->DrawText(os.str(), getAbsolutePosition() + Point(getWidth() - s.getWidth() - 2, 1+(FONT_SIZE+12-s.getHeight())/2));
+	dc->DrawText(os.str(), Point(getWidth() - s.getWidth() - 2, 1+(FONT_SIZE+12-s.getHeight())/2));
   
 // ------ Time
 	if((goal) && (goal->getTime()>0) && (ForceEntry::timeEntryBox==NULL)) // nur fuer tatsaechliche goals und nur wenn timeentrybox gerade nicht angezeigt wird
@@ -347,7 +343,7 @@ void ForceEntry::draw(DC* dc) const
 			os << "[" << formatTime(goal->getTime(), efConfiguration.getGameSpeed()) << "]";
 		}
 		s = dc->getTextExtent(os.str());
-		dc->DrawText(os.str(), getAbsolutePosition() + Point(getWidth() - s.getWidth() - getParent()->getWidth()/3, 1+(FONT_SIZE+12-s.getHeight())/2 ));
+		dc->DrawText(os.str(), Point(getWidth() - s.getWidth() - getParent()->getWidth()/3, 1+(FONT_SIZE+12-s.getHeight())/2 ));
 	}
 }
 																																							

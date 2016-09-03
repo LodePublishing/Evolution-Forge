@@ -27,7 +27,7 @@ class ScoreWindow : public UI_Window
 		void resetData();
 		void resetPlayerTime(unsigned int player_number);
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 
 		const eScoreMode getScoreMode(const unsigned int player_number) const;
 		void setScoreMode(const unsigned int player_number, const eScoreMode score_mode);

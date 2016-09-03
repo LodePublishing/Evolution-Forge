@@ -11,7 +11,7 @@ class BoGraphEntry : public UI_Button
 		~BoGraphEntry();
 		
 		void process();
-		void draw(DC* dc) const;
+		void draw() const;
 		PROGRAM program;
 
 		void setNumber(const unsigned int my_number);

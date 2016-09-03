@@ -143,16 +143,13 @@ void UI_EditField::removeCharDelete()
 	ani=5;
 }
 
-void UI_EditField::draw(DC* dc) const
+void UI_EditField::draw() const
 {
-//	if(!checkForNeedRedraw())
-//		return; // TODO
-
-	UI_Object::draw(dc);
+	UI_Object::draw();
 	if(UI_Object::focus != this)
 		return;
 	
-	Rect entry_rect = Rect(getAbsolutePosition(), getOriginalRect().getSize());
+	Rect entry_rect = Rect(Point(0,0), getOriginalRect().getSize());
 //	if(entry_rect.Inside(mouse))
 //		dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 //	else
@@ -162,7 +159,7 @@ void UI_EditField::draw(DC* dc) const
 
 	
 	dc->setPen(Pen(dc->mixColor(*theme.lookUpColor(FORCE_TEXT_COLOR), *theme.lookUpColor(BRIGHT_TEXT_COLOR), (unsigned int)(50*(sin(3.141*ani/10)+1))), 1, SOLID_PEN_STYLE));
-	dc->DrawVerticalLine(editField->getAbsolutePosition().x + 5 + editField->getText()->getTextPosSize(position).getWidth(), editField->getAbsoluteUpperBound()+2, editField->getAbsoluteLowerBound()-3);
+	dc->DrawVerticalLine(editField->getRelativePosition() + Point(5 + editField->getText()->getTextPosSize(position).getWidth(), 2), editField->getHeight()-3);
 }
 
 void UI_EditField::process()
@@ -178,7 +175,7 @@ void UI_EditField::process()
 	else
 		editField->forcePress();
 	++ani;
-	editField->setNeedRedrawNotMoved();
+	editField->makePufferInvalid();
 	editField->doHighlight(isMouseInside());
 	descriptionText->doHighlight(isMouseInside());
 }

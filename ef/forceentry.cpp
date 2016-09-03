@@ -4,11 +4,11 @@
 #include "../core/configuration.hpp"
 #include <sstream>
 
-ForceEntry::ForceEntry(UI_Object* entry_parent, const Point top_left, const std::string& entry_unit):
-	UI_Button(entry_parent, top_left, Size(5, 0), entry_unit, FORCE_ENTRY_BUTTON, NO_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH),
-	timeEntryBox(new UI_NumberField(this, Point(entry_rect.GetWidth() - 210, -14), Size(10,10), 0, coreConfiguration.getMaxTime(), 6, 0, NULL_STRING, NULL_STRING, TIME_NUMBER_TYPE)),
+ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std::string& entry_unit):
+	UI_Button(entry_parent, entry_rect, Size(0,0), entry_unit, FORCE_ENTRY_BUTTON, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH),
+	timeEntryBox(new UI_NumberField(this, Rect(entry_rect.GetWidth() - 210, -14, 0, 0), Size(10,10), DO_NOT_ADJUST, 0, coreConfiguration.getMaxTime(), 6, 0, NULL_STRING, NULL_STRING, TIME_NUMBER_TYPE)),
 //	makeLocationGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 60, -11), Size(10,10)), entry_max_rect, GOAL_LOCATION_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
-	makeTimeGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 29, -11), Size(16,10)), GOAL_TIME_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
+	makeTimeGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 29, -11), Size(16,10)), Size(0,0), GOAL_TIME_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
 
 	startForce(0),
 	targetForce(0),
@@ -118,7 +118,6 @@ void ForceEntry::process()
 {
 	if(!isShown())
 		return;
-	doNotAdaptSize();
 	Size::mv(currentForce, startForce, targetForce);
 	showLocMenu=false;
 	if(makeTimeGoal->isLeftClicked())
@@ -137,7 +136,7 @@ void ForceEntry::process()
 	{
 //		makeLocationGoal->Hide();
 		makeTimeGoal->Hide();
-		buttonPlacementArea.SetWidth(((UI_Window*)getParent())->getClientRectWidth());
+//		buttonPlacementArea.SetWidth(((UI_Window*)getParent())->getClientRectWidth()); TODO
 	}
 	else
 	{
@@ -153,7 +152,7 @@ void ForceEntry::process()
 		
 		Rect r;
 		r.SetTopLeft(getAbsolutePosition());
-		r.SetHeight(buttonPlacementArea.GetHeight());
+//		r.SetHeight(buttonPlacementArea.GetHeight()); TODO
 		r.SetWidth(((UI_Window*)getParent())->getClientRectWidth());
 		if(r.Inside(mouse))
 		{
@@ -165,29 +164,27 @@ void ForceEntry::process()
 			makeTimeGoal->Show();
 			if(r.GetWidth() < getWidth())
 				setNeedRedrawMoved();
-			setWidth(r.GetWidth());
+//			setWidth(r.GetWidth());
 		}
 		else
 		if(!((UI_Window*)getParent())->getAbsoluteRect().Inside(mouse))
 		{
-			doNotAdaptSize();
 //			makeLocationGoal->forceUnpress();
 			makeTimeGoal->forceUnpress();
 //			makeLocationGoal->Hide();
 			makeTimeGoal->Hide();
 			timeEntryBox->Hide();
 //			buttonPlacementArea.SetWidth(r.GetWidth());
-			setWidth(r.GetWidth());
+//			setWidth(r.GetWidth());
 		} else //if(!makeTimeGoal->isCurrentlyPressed())
 		{
-			doNotAdaptSize();
 //			makeLocationGoal->forceUnpress();
 			makeTimeGoal->forceUnpress();
 //			makeLocationGoal->Hide();
 			makeTimeGoal->Hide();
 			timeEntryBox->Hide();
 //			buttonPlacementArea.SetWidth(r.GetWidth());
-			setWidth(r.GetWidth());
+//			setWidth(r.GetWidth());
 		} 
 	}
 	UI_Button::process();

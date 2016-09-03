@@ -5,7 +5,7 @@
 
 EndRunDialog::EndRunDialog(UI_Object* edit_parent, const std::string& name_proposal) :
 	UI_EditField(edit_parent, NULL, ENDRUN_DIALOG_TITLE_STRING, ENDRUN_QUESTION_STRING, ENDRUN_SAVE_AND_CONTINUE_STRING, ENDRUN_DONT_SAVE_AND_CONTINUE_STRING, name_proposal),
-	autoSaveRuns(new UI_CheckButton(this, Rect(Point(25, 80), Size(200, 15)), SETTING_AUTO_SAVE_RUNS_STRING, SETTING_AUTO_SAVE_RUNS_TOOLTIP_STRING, efConfiguration.isAutoSaveRuns()))
+	autoSaveRuns(new UI_CheckButton(this, Rect(Point(25, 80), Size(200, 15)), Size(5, 5), DO_NOT_ADJUST, SETTING_AUTO_SAVE_RUNS_STRING, SETTING_AUTO_SAVE_RUNS_TOOLTIP_STRING, efConfiguration.isAutoSaveRuns()))
 { }
 
 EndRunDialog::~EndRunDialog()

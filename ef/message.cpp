@@ -1,7 +1,7 @@
 #include "message.hpp"
 
 Message::Message(UI_Object* msg_parent, Rect rect, const unsigned int msg_type, const std::string& msg_string, const unsigned int msg_color) :
-	UI_StaticText(msg_parent, msg_string, rect, FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT), 
+	UI_StaticText(msg_parent, msg_string, rect, Size(0,0), FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT), 
 	type(msg_type),
 	col(msg_color)
 { }

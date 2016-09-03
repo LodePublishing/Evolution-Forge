@@ -11,56 +11,28 @@ Main::Main(DC* dc):
 	currentTab(0)
 {
 // ----- INITIALIZE DATABASE -----	
-//	UI_Object::theme.setTab(BASIC_TAB);
 	toLog(*UI_Object::theme.lookUpString(START_LOAD_UI_BITMAPS_FONTS_STRING));
 #ifdef __linux__
 	UI_Object::theme.loadGraphicData("settings/ui/default.ui","data/bitmaps/","data/fonts/",dc);
-
 	UI_Object::theme.loadWindowData("settings/ui/windows.ui", 0, 1);
 	UI_Object::theme.loadWindowData("settings/ui/split_windows.ui", 0, 2);
 	UI_Object::theme.loadWindowData("settings/ui/split_windows.ui", 1, 2);
-//	bar->draw(dc, 20, START_UI_BITMAPS_FONTS_LOADED_STRING);
-// Always do loadHarvestFile (mining speeds) before loadMapFile, because at the moment the mapfile also sets the gathering speed
-//	bar->draw(dc, 2, START_LOAD_HARVEST_STRING);
-//	database.loadHarvestFile("settings/harvest/default.hvt");
-	
-//	bar->draw(dc, 2, START_LOAD_MAPS_STRING);
-//	database.loadMapFile("settings/maps/lt41.map");
-//	bar->draw(dc, 4, START_LOAD_STARTCONDITIONS_STRING);
-//	database.loadStartConditionFile("settings/start/default_terra.start");
-//	database.loadStartConditionFile("settings/start/default_protoss.start");
-//	database.loadStartConditionFile("settings/start/default_zerg.start");
 #elif __WIN32__
 	UI_Object::theme.loadGraphicData("settings\\ui\\default.ui","data\\bitmaps\\","data\\fonts\\",dc);
 	UI_Object::theme.loadWindowData("settings\\ui\\windows.ui", 0, 1);
 	UI_Object::theme.loadWindowData("settings\\ui\\split_windows.ui", 0, 2);
 	UI_Object::theme.loadWindowData("settings\\ui\\split_windows.ui", 1, 2);
-//	bar->draw(dc, 20, START_UI_BITMAPS_FONTS_LOADED_STRING);
-// Always do loadHarvestFile (mining speeds) before loadMapFile, because at the moment the mapfile also sets the gathering speed
-//	bar->draw(dc, 2, START_LOAD_HARVEST_STRING);
-//	database.loadHarvestFile("settings\\harvest\\default.hvt");
-	
-//	bar->draw(dc, 2, START_LOAD_MAPS_STRING);
-//	database.loadMapFile("settings\\maps\\lt41.map");
-//	bar->draw(dc, 4, START_LOAD_STARTCONDITIONS_STRING);
-//	database.loadStartConditionFile("settings\\start\\default_terra.start");
-//	database.loadStartConditionFile("settings\\start\\default_protoss.start");
-//	database.loadStartConditionFile("settings\\start\\default_zerg.start");
 #endif
 	loadHarvestData();
 	loadMaps();
 	loadStartConditions();
-//	bar->draw(dc, 12, START_LOAD_GOALS_STRING);
 	loadGoals();
 
 // goal beschreibt Rasse, Ziele und Modus
 	
-//	bar->draw(dc, 8, START_ASSIGN_AND_ANALYZE_STRING);
 // Map in "map.txt" is now map[0]
 // choose the first map we loaded (map[0])
 // ----- END OF INITIALIZING DATABASE -----
-	UI_Object::assignStartTime();
-//	bar->draw(dc, 2, START_INIT_GUI_STRING);
 	mainWindow = new MainWindow();
 	tutorialWindow = new TutorialWindow(mainWindow);
 	settingsWindow = new SettingsWindow(mainWindow);
@@ -72,9 +44,7 @@ Main::Main(DC* dc):
 	settingsWindow->Hide();
 	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG1_STRING)));
 	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG2_STRING)));
-//	msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(GAMES_LOADED_STRING, database.getMap(0)->getMaxPlayer()));
-//	bar->draw(dc, 8, START_MAIN_INIT_COMPLETE_STRING);
-//	mainWindow->forcePressTab(0);//BASIC_TAB); // !!
+	msgWindow->addMessage("Visit www.clawsoftware.de - - - ");
 
 	for(unsigned int i = MAX_TABS;i--;)
 	{
@@ -86,10 +56,6 @@ Main::Main(DC* dc):
 	
 	initializeGame(0);
 }
-
-/*void Main::closeGame()
-{
-}*/
 
 void Main::initializeGame(const unsigned int tab_number)
 {
@@ -157,7 +123,6 @@ Main::~Main()
 
 void Main::resetData()
 {
-	endrun = false;
 	for(unsigned int i=MAX_GAME;i--;)
 		if(game[i])
 			game[i]->resetData();
@@ -174,11 +139,8 @@ void Main::process()
 	
 	UI_Object::windowSelected = false;
 	
-//	mainWindow->continueOptimizingAnimation(isOptimizing());
-	
 	if((efConfiguration.isToolTips())&&(UI_Object::tooltip))
 		UI_Object::tooltip->process();
-
 	
 	for(std::list<std::string>::iterator i = UI_Object::msgList.begin(); i!= UI_Object::msgList.end(); i++)
 	{
@@ -186,10 +148,9 @@ void Main::process()
 		i = UI_Object::msgList.erase(i);
 	}
 
-				
-
 	mainWindow->process();
-
+//	if(UI_Object::currentButton==NULL) // TODO verschaerfen, boolvariable setzen wenn currentButton von !NULL auf NULL gesetzt wurde
+		setMouse(maus);
 
 	if(!UI_Object::windowSelected)
 	{
@@ -197,6 +158,7 @@ void Main::process()
 			UI_Object::currentWindow->setNeedRedrawNotMoved();
 		UI_Object::currentWindow=NULL;
 	}
+	
 	if(settingsWindow->hasLanguageChanged())
 	{
 		for(unsigned int i = MAX_GAME;i--;)
@@ -209,7 +171,6 @@ void Main::process()
 
 	if(mainWindow->tabWasChanged())
 	{
-//		boHasChanged = true; an entsprechende (?) Games weiterleiten
 //		mainWindow->setGizmo(false);
 		for(unsigned int i = MAX_GAME; i--;)
 			if(game[i]!=NULL)
@@ -343,7 +304,6 @@ const bool Main::isAnyOptimizing() const
 }
 
 
-
 void Main::draw(DC* dc) const
 {
 	if(mainWindow->isShown())
@@ -363,20 +323,6 @@ void Main::draw(DC* dc) const
 		}
 		mainWindow->draw(dc);
 	}
-//	std::ostringstream os;os << "TAB NUMBER: " << currentTab << " / " << mainWindow->getGameTabCount();
-//	dc->DrawText(os.str(), 50, 600);
-									
-
-	
-/*	SDL_Rect c;
-	c.x=maus.x;
-	c.y=maus.y;
-	c.w=32;
-	c.h=32;	
-//	get_bg(dc, cursor_save, maus.x, maus.y);
-//	SDL_BlitSurface(*UI_Object::theme.lookUpBitmap(MAUS_BITMAP) , 0, dc->GetSurface(), &c );
-//	RS_Blit(dc, cursor, maus.x, maus.y);
-	//RS_Blit(dc, cursor_save, maus.x, maus.y);*/
 }
 
 										
@@ -646,6 +592,5 @@ void Main::setMouse(const Point p)
 }
 
 
-//ProgressBar* Main::bar;
 InfoWindow* Main::infoWindow = NULL;
 MessageWindow* Main::msgWindow = NULL;

@@ -13,7 +13,7 @@ UI_ToolTip::UI_ToolTip(const UI_ToolTip& object) :
 { }
 
 UI_ToolTip::UI_ToolTip(UI_Object* parent_object, const eString tooltip_text) :
-	UI_StaticText(parent_object, tooltip_text==NULL_STRING?START_START_STRING:tooltip_text, Rect(5, 5, 150, 30), TEXT_COLOR, SMALL_ITALICS_BOLD_FONT, FORMATTED_NON_BLOCK_TEXT_MODE),
+	UI_StaticText(parent_object, tooltip_text==NULL_STRING?START_START_STRING:tooltip_text, Rect(5, 5, 150, 30), Size(0,0), TEXT_COLOR, SMALL_ITALICS_BOLD_FONT),
 	boxSize()
 { 
 	process();

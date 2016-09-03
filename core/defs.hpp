@@ -4,18 +4,30 @@
 #define _CORE_DEFS_HPP
 
 #include <string>
-//#include <list>
+
+//extern const unsigned int MAX_RACES;
+//extern const unsigned int UNIT_TYPE_COUNT;
+//extern const unsigned int MAX_LOCATIONS;
 
 #define MAX_RACES 3
 #define UNIT_TYPE_COUNT 105
 #define MAX_LOCATIONS 20
 
 // max simultaneous games/maps in the TAB LIST!
+//extern const unsigned int MAX_GAME_TABS;
+//extern const unsigned int MAX_SIMULTANEOUS_GAMES;
+//extern const unsigned int MAX_GAME;
+
 #define MAX_GAME_TABS 6
 #define MAX_SIMULTANEOUS_GAMES 2
 #define MAX_GAME (MAX_SIMULTANEOUS_GAMES*MAX_GAME_TABS)
 
 // max simultaneous players
+
+//extern const unsigned int MAX_PLAYER;
+//extern const unsigned int MAX_INTERNAL_PLAYER;
+
+
 #define MAX_PLAYER 4 // TODO FEHLER BEI 1
 #define MAX_INTERNAL_PLAYER 5 // inclusive neutral player!
 
@@ -24,6 +36,8 @@
 	#define M_PI 3.14159265358979323846
 #endif
 // Windows kotz
+
+//extern const unsigned int GLOBAL;
 
 #define GLOBAL 0
 
@@ -42,6 +56,7 @@ extern const unsigned int MAX_GAS;
 //extern const unsigned int MAX_PROGRAMS; //must be multiplier of (16*player)
 extern const unsigned int LARVA_MAX;
 //extern const unsigned int UNIT_TYPE_COUNT;
+
 #define MAX_HARVEST_SPEEDS 100
 //extern const unsigned int MAX_HARVEST_SPEEDS;
 extern const unsigned int MAX_SUPPLY;

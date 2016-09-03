@@ -13,8 +13,8 @@ Game::Game(UI_Object* game_parent, const unsigned int game_number, const unsigne
 	totalGeneration(0),
 	gameNumber(game_number),
 	gameMax(game_max),
-	splitGameButton(new UI_Button(this, Point(0, 10), Size(10, 0), "Compare Game to...", MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	removeButton(new UI_Button(this, Point(0, 10), Size(10, 0), "Remove Game...", MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE))
+	splitGameButton(new UI_Button(this, Rect(0, 10, 0, 0), Size(10, 0), "Compare Game to...", MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	removeButton(new UI_Button(this, Rect(0, 10, 0, 0), Size(10, 0), "Remove Game...", MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE))
 {
 	if(game_max>1)
 		splitGameButton->Hide();
@@ -25,14 +25,8 @@ Game::Game(UI_Object* game_parent, const unsigned int game_number, const unsigne
 		player[i]->Hide();
 		// TODO Player hinzufuegen/entfernen
 	}
-//	for(unsigned int i = mapPlayerCount;i<MAX_PLAYER;i++)
-//	{
-//		player[i]=NULL;
-//		anarace[i]=NULL;
-//	}
 	for(unsigned int i=MAX_INTERNAL_PLAYER;i--;)
 		start[i] = new START(&(startForce[i]));
-//	Hide();
 }
 
 Game::~Game()
@@ -45,22 +39,6 @@ Game::~Game()
 	delete scoreWindow;
 	delete splitGameButton;
 	delete removeButton;
-}
-
-/*void Game::addPlayer(...)
-{
-	map->getMaxPlayer()
-}*/
-
-/*void Game::removePlayer(...)
-{
-}*/
-
-void Game::draw(DC* dc) const
-{
-	if(!isShown())
-		return;
-	UI_Window::draw(dc);
 }
 
 void Game::assignMap(const BASIC_MAP* game_map) 
@@ -88,56 +66,11 @@ void Game::assignMap(const BASIC_MAP* game_map)
 	setResetFlag();
 }
 
-void Game::setHarvestSpeed(const unsigned int player_num, const eRace harvest_race, const HARVEST_SPEED* harvest_speed) {
-#ifdef _SCC_DEBUG
-        if((player_num < 1) || (player_num > mapPlayerCount)) {
-                toLog("DEBUG: (Game::setHarvestSpeed): Value player_num out of range.");return;
-        }
-#endif
-	start[player_num]->setHarvestSpeed(harvest_race, harvest_speed);
-}
-
-void Game::setStartRace(const unsigned int player_num, const eRace player_race) {
-#ifdef _SCC_DEBUG
-	if((player_num < 1) || (player_num > mapPlayerCount)) {
-		toLog("DEBUG: (Game::setStartRace): Value player_num out of range.");return;
-	}
-#endif
-	start[player_num]->setPlayerRace(player_race);
-}
-
-void Game::assignStartCondition(const unsigned int player_num, const START_CONDITION* start_condition) {
-#ifdef _SCC_DEBUG
-	if((player_num < 1) || (player_num > mapPlayerCount)) {
-		toLog("DEBUG: (Game::assignStartCondition): Value player_num out of range.");return;
-	}                       
-#endif
-	start[player_num]->assignStartCondition(start_condition);
-}
-
 void Game::initSoup() 
 {
 // TODO pruefen ob alles initiiert wurde...
 	ANABUILDORDER::resetStaticData(); // TODO
 	soup->initSoup(&start);
-}
-
-void Game::setStartPosition(const unsigned int player_num, const unsigned int player_position) {
-#ifdef _SCC_DEBUG
-        if((player_num < 1) || (player_num > mapPlayerCount)) {
-                toLog("DEBUG: (Game::setStartPosition): Value player_num out of range.");return;
-        }
-#endif
-	start[player_num]->setStartPosition(player_position);
-}
-
-void Game::assignGoal(const unsigned int player_num, const GOAL_ENTRY* player_goal) {
-#ifdef _SCC_DEBUG
-        if((player_num < 1) || (player_num > mapPlayerCount)) {
-                toLog("DEBUG: (Game::assignGoal): Value player_num out of range.");return;
-        }       
-#endif
-	start[player_num]->assignGoal(player_goal);
 }
 
 void Game::fillGroups() 
@@ -171,14 +104,16 @@ void Game::setMode(const unsigned int game_number, const unsigned int game_max)
 	}
 	else splitGameButton->Show();
 }
-const bool Game::isRemoveGame() const
+
+
+void Game::draw(DC* dc) const
 {
-	return removeButton->isLeftClicked();
+	if(!isShown())
+		return;
+	UI_Window::draw(dc);
 }
-const bool Game::isSplitGame() const
-{
-	return splitGameButton->isLeftClicked();
-}
+
+
 #include <sstream>
 void Game::process()
 {
@@ -228,9 +163,9 @@ void Game::process()
 		}
 
 		
-		anarace[i]->setOptimizing(scoreWindow->isOptimizing(i));
-		std::ostringstream os; os << scoreWindow->isOptimizing(i);
-		toLog(os.str());
+//		anarace[i]->setOptimizing(scoreWindow->isOptimizing(i));
+//		std::ostringstream os; os << scoreWindow->isOptimizing(i);
+//		toLog(os.str());
 	}		
 		
 	if(scoreWindow->getAssignedMap()>=0)
@@ -325,26 +260,6 @@ void Game::newGeneration()
 				boHasChanged=true;
 			player[i]->assignAnarace(anarace[i]);
 		}
-}
-
-const unsigned int Game::getMapPlayerCount() const
-{
-	return(mapPlayerCount);
-}
-
-const bool Game::isOptimizing(const unsigned int player_number) const
-{
-	return(scoreWindow->isOptimizing(player_number));
-}
-
-void Game::setOptimizing(const bool opt)
-{
-//	scoreWindow->setOptimizing(opt);
-}
-
-void Game::resetData()
-{
-	boHasChanged = true;
 }
 
 //virtual machen

@@ -41,7 +41,8 @@ enum eDataType
 	BITMAP_DATA_TYPE,
 	PEN_DATA_TYPE,
 	BRUSH_DATA_TYPE,
-	BUTTON_DATA_TYPE,
+	BUTTON_ANIMATION_DATA_TYPE,
+	BUTTON_WIDTH_DATA_TYPE,
 
 	MAX_DATA_TYPES
 };
@@ -95,6 +96,7 @@ enum eTheme
 enum eResolution
 {
 	ZERO_RESOLUTION,
+	RESOLUTION_640x480,
 	RESOLUTION_800x600,
 	RESOLUTION_1024x768,
 	RESOLUTION_1280x1024,
@@ -639,6 +641,7 @@ enum eString
 
 	SETTING_RESOLUTION_STRING,
 	SETTING_RESOLUTION_ZERO_STRING,
+	SETTING_RESOLUTION_640x480_STRING,
 	SETTING_RESOLUTION_800x600_STRING,
 	SETTING_RESOLUTION_1024x768_STRING,
 	SETTING_RESOLUTION_1280x1024_STRING,
@@ -945,6 +948,7 @@ class UI_Theme
 		const unsigned int lookUpPlayerMaxHeight(const ePlayerWindow id, const unsigned int gameNumber, const unsigned int maxGames, const unsigned int playerNumber, const unsigned int maxPlayer) const;
 
 		const ButtonAnimation* lookUpButtonAnimation(const eButton id) const;
+		const unsigned int lookUpButtonWidth(const eButton id) const;
 
 // tools:
 //		const Color mixColor(const Color* id1, const Color* id2);
@@ -995,6 +999,7 @@ class UI_Theme
 
 		Font* fontList[MAX_RESOLUTIONS][MAX_FONTS];
 		ButtonAnimation* buttonAnimationList[MAX_BUTTONS];
+		unsigned int buttonWidth[MAX_RESOLUTIONS][MAX_BUTTONS];
 };
 
 inline void UI_Theme::setColorTheme(const eTheme color_theme) {
@@ -1038,6 +1043,16 @@ inline const ButtonAnimation* UI_Theme::lookUpButtonAnimation(const eButton id) 
 	}
 #endif
 	return(buttonAnimationList[id]);
+}
+
+inline const unsigned int UI_Theme::lookUpButtonWidth(const eButton id) const
+{
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_BUTTONS)) {
+		toLog("ERROR: (UI_Theme::lookUpButtonWidth) id out of range.");return(buttonWidth[0][0]);
+	}
+#endif
+	return(buttonWidth[resolution][id]);
 }
 
 inline const std::string* UI_Theme::lookUpString(const eString id) const

@@ -11,8 +11,8 @@ EF_Configuration::EF_Configuration():
 	autoSaveRuns(false),
 	restrictSC(true),
 	facilityMode(true),
-	softwareMouse(false),
 	fullScreen(false),
+	softwareMouse(false),
 	backgroundBitmap(false),
 	allowStaticFramerate(false),
 	dnaSpiral(true),
@@ -32,8 +32,8 @@ void EF_Configuration::initDefaults()
 	setAutoSaveRuns(false);
 	setRestrictSC(false);
 	setFacilityMode(true);
-	setSoftwareMouse(false);
 	setFullScreen(false);
+	setSoftwareMouse(false);
 	setBackgroundBitmap(false);
 	setAllowStaticFramerate(false);
 	setDnaSpiral(true);
@@ -129,14 +129,15 @@ void EF_Configuration::loadConfigurationFile()
 			   	setFacilityMode(atoi(i->second.front().c_str()));
 			}
 	
-			if((i=block.find("Software mouse"))!=block.end()){
-				i->second.pop_front();
-			   	setSoftwareMouse(atoi(i->second.front().c_str()));
-			}
 			if((i=block.find("Fullscreen"))!=block.end()){
 				i->second.pop_front();
 			   	setFullScreen(atoi(i->second.front().c_str()));
 			}
+			if((i=block.find("Software mouse"))!=block.end()){
+				i->second.pop_front();
+			   	setSoftwareMouse(atoi(i->second.front().c_str()));
+			}
+		
 			if((i=block.find("Background bitmap"))!=block.end()){
 				i->second.pop_front();
 			   	setBackgroundBitmap(atoi(i->second.front().c_str()));

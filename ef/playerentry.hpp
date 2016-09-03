@@ -31,7 +31,7 @@ enum ePlayerEntryMenu
 class PlayerEntry : public UI_Object
 {
 	public:
-		PlayerEntry(UI_Object* player_parent, Rect rect);
+		PlayerEntry(UI_Object* player_parent, const Rect rect, const Size distance_bottom_right);
 		~PlayerEntry();
 
 		void setScore(const unsigned int score);

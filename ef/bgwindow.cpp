@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+const unsigned int MIN_HEIGHT = 3;
+
 BoGraphWindow::BoGraphWindow(const BoGraphWindow& object) :
 	UI_Window((UI_Window)object),
 	markAni(object.markAni),
@@ -132,7 +134,7 @@ void BoGraphWindow::processList()
 	if(!isShown())
 		return;
 	resetData();
-	filledHeight = 0;
+//	filledHeight = 0; ?
 	
 	unsigned int unitCounter[UNIT_TYPE_COUNT][MAX_TIME];
 	unsigned int height[UNIT_TYPE_COUNT];
@@ -253,7 +255,7 @@ void BoGraphWindow::processList()
  		
 		if(entry[i] == bograph[i].boGraphList.end())
 		{
-			BoGraphEntry* t = new BoGraphEntry(this, edge.GetTopLeft(), Size(0,0), *order); // TODO
+			BoGraphEntry* t = new BoGraphEntry(this, edge, Size(0,0), *order); // TODO
 			t->adjustRelativeRect(edge);
 			t->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
 			bograph[i].boGraphList.push_back(t);
@@ -273,7 +275,7 @@ void BoGraphWindow::processList()
 				entry[i] = bograph[i].boGraphList.insert(entry[i], old);
 				entry[i]++;
 				bograph[i].boGraphList.erase(k);
-				if(edge != old->targetRect)
+				if(edge != old->getTargetRect())
 				{
 					old->adjustRelativeRect(edge);
 					old->resetGradient();
@@ -281,7 +283,7 @@ void BoGraphWindow::processList()
 				old->program = *order;
 			} else // => not found, insert a new one
 			{
-				BoGraphEntry* t = new BoGraphEntry(this, edge.GetTopLeft(), Size(0,0), *order); // TODO
+				BoGraphEntry* t = new BoGraphEntry(this, edge, Size(0,0), *order); // TODO
 				t->adjustRelativeRect(edge);
 				t->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
 				entry[i] = bograph[i].boGraphList.insert(entry[i], t);
@@ -291,7 +293,7 @@ void BoGraphWindow::processList()
 //		  if((*entry)->getUnit() == (*order)->getUnit())
 		{
 			(*entry[i])->program = *order;
-			if(edge!=(*entry[i])->targetRect)
+			if(edge!=(*entry[i])->getTargetRect())
 			{
 				(*entry[i])->adjustRelativeRect(edge);
 				(*entry[i])->resetGradient();

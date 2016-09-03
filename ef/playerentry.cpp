@@ -1,19 +1,20 @@
 #include "playerentry.hpp"
 
-PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect) :
-	UI_Object(player_parent, rect),
+PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size distance_bottom_right) :
+	UI_Object(player_parent, rect, distance_bottom_right),
 	currentScore(MAX_TIME),
 	programScore(MAX_TIME),
 	goalComplete(0),
 	initMode(INACTIVE),
 	scoreMode(SCORE_FULFILL_MODE),
-	currentActionButton(new UI_Button(this, Rect(Point(45,0), Size(70,12)), CLICK_TO_CONTINUE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, BOTTOM_CENTER, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE)),
-	scoreText(new UI_StaticText(this, Rect(Point(170, 0), rect.GetSize()), IMPORTANT_COLOR, SMALL_NORMAL_BOLD_FONT, NO_TEXT_MODE)),
-	playerText(new UI_StaticText(this, "Player 1:", Rect(Point(0,0), rect.GetSize()), IMPORTANT_COLOR, SMALL_NORMAL_BOLD_FONT, NO_TEXT_MODE)),
-	addPlayerButton(new UI_Button(this, Rect(Point(0,0), Size(60, 12)), ADD_PLAYER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, BOTTOM_CENTER, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE)),
-	removePlayerButton(new UI_Button(this, Rect(Point(205,2), Size(8,8)), CANCEL_BUTTON, PRESS_BUTTON_MODE)), // Evtl bitmap
+
+	currentActionButton(new UI_Button(this, Rect(Point(0,0), Size(70, 12)), Size(5,0), CLICK_TO_CONTINUE_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE)),
+	scoreText(new UI_StaticText(this, Rect(Point(170, 0), rect.GetSize()), Size(5,0), IMPORTANT_COLOR, SMALL_NORMAL_BOLD_FONT)),
+	playerText(new UI_StaticText(this, "Player 1:", Rect(Point(5, 0), rect.GetSize()), Size(0, 0), IMPORTANT_COLOR, SMALL_NORMAL_BOLD_FONT, DO_NOT_ADJUST)),
+	addPlayerButton(new UI_Button(this, Rect(Point(0,0), Size(60, 12)), Size(5,0), ADD_PLAYER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, BOTTOM_CENTER, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+	removePlayerButton(new UI_Button(this, Rect(Point(205,2), Size(8,8)), Size(5,0), CANCEL_BUTTON, PRESS_BUTTON_MODE)), // Evtl bitmap
 	optimizing(false),
-	menuRadio(new UI_Radio(this, Point(120, 0))),
+	menuRadio(new UI_Radio(this, Rect(Point(120, 0), Size(0,0)))),
 	raceMenu(new RaceMenu(this, Rect(120, 0, getWidth()-100, 0))),
 	assignRace(-1)
 {
@@ -21,10 +22,10 @@ PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect) :
 - Startposition
 - Startbedingungen
  * */
-
-
 	
-	menuButton[RACE_MENU] = new UI_Button(this, Rect(Point(0, 0), Size(100,100)), CHOOSE_RACE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE_ONCE);
+	//menuButton[RACE_MENU] = new UI_Button(this, Rect(Point(0, 0), Size(0,0)), Size(0,0), CHOOSE_RACE_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE);
+	menuButton[RACE_MENU] = new UI_Button(this, Rect(Point(0, 0), Size(0,0)), Size(0,0), CHOOSE_RACE_STRING, TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+//	tab[TUTORIAL_TAB] = new UI_Button(NULL, Rect(10, 1, theme.lookUpButtonWidth(TAB_BUTTON), 10), Size(20, 0), TUTORIAL_TAB_STRING, TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 	raceMenu->Hide();
 	for(unsigned int i=0; i<MAX_PLAYER_ENTRY_MENUS; i++)
 		menuRadio->addButton(menuButton[i], i);

@@ -55,7 +55,6 @@ int main(int argc, char *argv[])
 	std::list<std::string> stringFiles = database.findFiles("settings", "strings", "");
 	for(std::list<std::string>::iterator j = stringFiles.begin(); j!=stringFiles.end(); j++)
 		UI_Object::theme.loadStringFile(*j);
-	//fillInfluenceList();
 	toLog(*UI_Object::theme.lookUpString(START_START_STRING));
 	toLog(*UI_Object::theme.lookUpString(START_LOAD_CORE_SETTINGS_STRING));
 	coreConfiguration.loadConfigurationFile();
@@ -76,18 +75,18 @@ int main(int argc, char *argv[])
 
 	toLog(*UI_Object::theme.lookUpString(START_INIT_SDL_STRING));
  	SDL_Rect clientWindow;
-	clientWindow.x=0;clientWindow.y=0;clientWindow.w=1280;clientWindow.h=1024;
-	UI_Object::theme.setResolution(RESOLUTION_1280x1024);
+	clientWindow.x=0;clientWindow.y=0;clientWindow.w=640;clientWindow.h=480;
+	UI_Object::theme.setResolution(RESOLUTION_640x480);
 	DC* screen;
 	if (efConfiguration.isFullScreen()) 
 	{
 		toLog(*UI_Object::theme.lookUpString(START_SET_FULLSCREEN_MODE_STRING));
-		screen = new DC(clientWindow.w, clientWindow.h, SDL_DRAW_BPP*8, SDL_HWSURFACE|SDL_ANYFORMAT|SDL_FULLSCREEN|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC|SDL_DOUBLEBUF, SDL_INIT_NOPARACHUTE);
+		screen = new DC(clientWindow.w, clientWindow.h, 24, SDL_HWSURFACE|SDL_FULLSCREEN|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC|SDL_DOUBLEBUF, SDL_INIT_NOPARACHUTE);
 	}
 	else 
 	{
 		toLog(*UI_Object::theme.lookUpString(START_SET_WINDOW_MODE_STRING));
-		screen = new DC(clientWindow.w, clientWindow.h, SDL_DRAW_BPP*8, SDL_HWSURFACE|SDL_ANYFORMAT|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC|SDL_DOUBLEBUF, SDL_INIT_NOPARACHUTE);
+		screen = new DC(clientWindow.w, clientWindow.h, 24, SDL_HWSURFACE|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC|SDL_DOUBLEBUF, SDL_INIT_NOPARACHUTE);
 	}
 	toLog("Scanning Graphic-Hardware...");
 	toLog(DC::printHardwareInformation());
@@ -105,22 +104,19 @@ int main(int argc, char *argv[])
 	
 	SDL_Event event;
 
-	UI_Object::max_x=clientWindow.w;UI_Object::max_y=clientWindow.h;
+	UI_Object::max_x = clientWindow.w; UI_Object::max_y = clientWindow.h;
 
 	SDL_WM_SetCaption("EVOLUTION FORGE BETA - www.clawsoftware.de","");
 // ------ END INIT SDL AND WINDOW ------
 
 
 // ------ INTRO PICTURE ------
-	SDL_Surface* progress = SDL_LoadBMP("data/bitmaps/bar.bmp");
+//	SDL_Surface* progress = SDL_LoadBMP("data/bitmaps/bar.bmp");
 //	Bitmap claw("data/bitmaps/clawsoftware.bmp");
-	screen->DrawBitmap(progress, (clientWindow.w - progress->w)/2, (clientWindow.h - progress->h)/2-60);
+//	screen->DrawBitmap(progress, (clientWindow.w - progress->w)/2, (clientWindow.h - progress->h)/2-60);
 //	screen->DrawBitmap(claw, clientWindow.w - claw->w, clientWindow.h - claw->h);
-	screen->SetPen(Pen(Color(screen->GetSurface(), 255, 255, 255), 1, SOLID_PEN_STYLE));
-	screen->SetBrush(Brush(Color(screen->GetSurface(), 100, 150, 255), SOLID_BRUSH_STYLE));
-
-//	Main::bar = new ProgressBar(Rect((clientWindow.w-progress->w)/2 + 10, (clientWindow.h - progress->h)/2 - 50, progress->w - 20, progress->h - 20));
-//	Main::bar->draw(screen, 5);
+//	screen->SetPen(Pen(Color(screen->GetSurface(), 255, 255, 255), 1, SOLID_PEN_STYLE));
+//	screen->SetBrush(Brush(Color(screen->GetSurface(), 100, 150, 255), SOLID_BRUSH_STYLE));
 // ------ END INTRO PICTURE -------
 
 
@@ -140,7 +136,6 @@ int main(int argc, char *argv[])
 
 
 // ------- INIT GRAPHIC ENGINE ------
-//	Main::bar->draw(screen, 5);
 	toLog(*UI_Object::theme.lookUpString(START_INIT_GRAPHIC_ENGINE_CORE_STRING));
 	Main m(screen);
 
@@ -154,16 +149,14 @@ int main(int argc, char *argv[])
 	bool endrun = false;
 	int screenCapturing=0;
 
-//	Main::bar->draw(screen, 100, START_SYSTEM_READY_STRING);
-//	delete Main::bar;
 // ------ END INIT GRAPHIC ENGINE ------
 
 // ------ INTRO ------
-	Rect t((clientWindow.w-650)/2 + 10, (clientWindow.h - 750)/2 + 10, 650 - 20, 650 - 20);
-	Rect t2((clientWindow.w-600)/2 + 10, (clientWindow.h - 700)/2 + 10, 600 - 20, 600 - 20);
+//	Rect t((clientWindow.w-650)/2 + 10, (clientWindow.h - 750)/2 + 10, 650 - 20, 650 - 20);
+//	Rect t2((clientWindow.w-600)/2 + 10, (clientWindow.h - 700)/2 + 10, 600 - 20, 600 - 20);
 	
-UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " :)$# # $ABOUT THE BETA TEST:$# #- $How can I help?$# Post your ideas, discuss or report bugs at the forums at $clawsoftware.de$!#- $It's a beta test... so what do I have to do?$#Test the program on different pcs, different configurations, color settings, drivers etc and report back any crashes, bugs etc#Try out many different, especially unusual goal lists to test the core, let the program run some hours, change the settings, ...# Please do not mess with the data files, the loading routines do not take notice of every error. In the worst case the programm will crash.# # $ABOUT THE PROGRAM ITSELF:$# # - $What does this program?$#The program simulates an abstract StarCraft : Broodwar environment, calculates the time a certain build order needs and optimizes randomly created build orders to a given goal list using evolutionary algorithms.# # $USER INTERFACE:$# # $Keyboard$# - $SPACE$: deactivate drawing (less CPU usage / faster calculation)# - $ALT + ENTER$: switch between fullscreen and window mode# - $ESC$: quits the program without saving# - $PAUSE$: stop/continue calculation# # $Mouse$# - $LEFT BUTTON$: activates buttons and adds items# - $RIGHT BUTTON$: removes items (units) or adds very many items (+/- buttons) # # - $Saving/Loading$: Saved build orders are placed in output/bos/<the race>/, goals are placed in settings/goals/<the race>/ # # NOW HAVE FUN! 8-D # # Best regards, # Clemens Lode", t2, BRIGHT_TEXT_COLOR, SMALL_MIDDLE_NORMAL_FONT, FORMATTED_TEXT_MODE);
-	bool done = false;
+//UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " :)$# # $ABOUT THE BETA TEST:$# #- $How can I help?$# Post your ideas, discuss or report bugs at the forums at $clawsoftware.de$!#- $It's a beta test... so what do I have to do?$#Test the program on different pcs, different configurations, color settings, drivers etc and report back any crashes, bugs etc#Try out many different, especially unusual goal lists to test the core, let the program run some hours, change the settings, ...# Please do not mess with the data files, the loading routines do not take notice of every error. In the worst case the programm will crash.# # $ABOUT THE PROGRAM ITSELF:$# # - $What does this program?$#The program simulates an abstract StarCraft : Broodwar environment, calculates the time a certain build order needs and optimizes randomly created build orders to a given goal list using evolutionary algorithms.# # $USER INTERFACE:$# # $Keyboard$# - $SPACE$: deactivate drawing (less CPU usage / faster calculation)# - $ALT + ENTER$: switch between fullscreen and window mode# - $ESC$: quits the program without saving# - $PAUSE$: stop/continue calculation# # $Mouse$# - $LEFT BUTTON$: activates buttons and adds items# - $RIGHT BUTTON$: removes items (units) or adds very many items (+/- buttons) # # - $Saving/Loading$: Saved build orders are placed in output/bos/<the race>/, goals are placed in settings/goals/<the race>/ # # NOW HAVE FUN! 8-D # # Best regards, # Clemens Lode", t2, Size(0,0), BRIGHT_TEXT_COLOR, SMALL_MIDDLE_NORMAL_FONT, FORMATTED_TEXT_MODE); // TODO
+/*	bool done = false;
 	while(!done)
 	{
 		introText.process();
@@ -188,10 +181,9 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 					done=true;break;
 			}
 		}
-	}
+	}*/
 
 // ------ END INTRO ------
-
 
 
 // MAIN LOOP
@@ -212,8 +204,8 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 		}
 		if(screenCapturing>0) {
 			screenCapturing--;
-			std::ostringstream os;os << "shot" << (screenshot-1) << ".bmp" << " saved (" << (clientWindow.w * clientWindow.h * SDL_DRAW_BPP)/1024 << "kb)";
-                        screen->DrawText(os.str(), 50, 600);
+			std::ostringstream os;os << "shot" << (screenshot-1) << ".bmp" << " saved (" << (clientWindow.w * clientWindow.h * (int)(screen->GetSurface()->format->BitsPerPixel))/1024 << "kb)";
+                        screen->DrawText(os.str(), 50, 300);
                 }
 // ------ END SCREENCAPTURE -----
 
@@ -406,7 +398,7 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 //									UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() + 1));
 //								break;
 //						case SDLK_MINUS:
-//								if(UI_Object::theme.getResolution()>RESOLUTION_800x600)
+//								if(UI_Object::theme.getResolution()>RESOLUTION_640x480)
 //									UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() - 1));
 //								break;
 //						case SDLK_F1:m.mainWindow->forcePressTab(BASIC_TAB);break;

@@ -1,11 +1,9 @@
 #include "group.hpp"
 #include "button.hpp"
 
-UI_Group::UI_Group(UI_Object* group_parent, Point position, const eString txt) :
-	UI_Object(group_parent, Rect(position, Size(0,0))),
-	title(txt==NULL_STRING?NULL:new UI_StaticText(this, txt, Rect(Point(0,0) - Size(3, 19), Size(0,0)), BRIGHT_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT, NO_TEXT_MODE)),
-	boxSize(),
-	maxWidth(0)
+UI_Group::UI_Group(UI_Object* group_parent, Rect initial_rect, Size bottom_right_distance, const eString txt, const ePositionMode position_mode ) :
+	UI_Object(group_parent, initial_rect, bottom_right_distance, position_mode, AUTO_SIZE),
+	title(txt==NULL_STRING?NULL:new UI_StaticText(this, txt, Rect(Point(0,0) - Size(3, 19), Size(0,0)), Size(0,0), BRIGHT_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT, DO_NOT_ADJUST, AUTO_SIZE))
 { }
 
 UI_Group::~UI_Group() {
@@ -14,9 +12,7 @@ UI_Group::~UI_Group() {
 
 UI_Group::UI_Group(const UI_Group& object) :
 	UI_Object((UI_Object)object),
-	title(object.title==NULL?NULL:new UI_StaticText(*object.title)),
-	boxSize(object.boxSize),		
-	maxWidth(object.maxWidth)
+	title(object.title==NULL?NULL:new UI_StaticText(*object.title))
 { }
 
 UI_Group& UI_Group::operator=(const UI_Group& object)
@@ -25,8 +21,6 @@ UI_Group& UI_Group::operator=(const UI_Group& object)
 	delete title;
 	if(object.title)
 		title = new UI_StaticText(*object.title);
-	boxSize = object.boxSize;
-	maxWidth = object.maxWidth;
 	return(*this);
 }
 
@@ -39,8 +33,8 @@ void UI_Group::calculateBoxSize(const bool horizontal)
 	if(!getChildren())
 		return;
 	UI_Object* tmp = getChildren();
-	maxWidth=0;
-	int number=0;
+	unsigned int maxWidth = 0;
+	unsigned int number=0;
 	do
 	{
 		if(maxWidth < tmp->getWidth())
@@ -48,13 +42,12 @@ void UI_Group::calculateBoxSize(const bool horizontal)
 		tmp=tmp->getNextBrother();
 		number++;
 	} while(tmp!=getChildren());
-	maxWidth+=3;
+//	maxWidth += 3;
 	if(horizontal)
-		boxSize = Size(maxWidth*number, getChildren()->getHeight());
+		adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, Size(maxWidth * number, getChildren()->getHeight()));
 	else
 	{
-		//boxSize = Size(maxWidth, 13+number*(getChildren()->getHeight()));
-		boxSize = Size(maxWidth, getChildren()->getPrevBrother()->getAbsoluteLowerBound() - getChildren()->getAbsoluteUpperBound() + 13);
+		adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, Size(maxWidth, getChildren()->getPrevBrother()->getAbsoluteLowerBound() - getChildren()->getAbsoluteUpperBound() + 13));
 	}
 }
 
@@ -66,7 +59,7 @@ void UI_Group::calculateSameWidthOfButtons(const bool horizontal)
 	calculateBoxSize(horizontal);
 	do
 	{
-		tmp->setWidth(maxWidth);
+//		tmp->setWidth(maxWidth); TODO
 //		tmp->adjustButtonPlacementSize(); TODO
 		tmp=tmp->getNextBrother();
 	} while(tmp!=getChildren());
@@ -76,7 +69,7 @@ void UI_Group::draw(DC* dc) const
 {
 	if(checkForNeedRedraw())
 	{
-		if((Rect(getAbsolutePosition(), boxSize).Inside(mouse)))
+		if(getAbsoluteRect().Inside(mouse))
 			dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 		else	
 			dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
@@ -84,9 +77,9 @@ void UI_Group::draw(DC* dc) const
 		{
 			title->setColor(BRIGHT_TEXT_COLOR);
 			dc->SetBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-			dc->DrawEdgedRoundedRectangle(getAbsolutePosition() - Size(5, 13), boxSize + Size(12, 0) - Size(0, 10), 4);
+			dc->DrawEdgedRoundedRectangle(getAbsolutePosition() - Size(5, 13), getSize() + Size(12, 0) - Size(0, 10), 4);
 		
-			Size s = title->getBoxSize();
+			Size s = title->getTextSize();
 		  	Rect titleRect = Rect(getAbsolutePosition() - Size(5, 20), s + Size(5,2));
 			dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 			dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
@@ -95,7 +88,7 @@ void UI_Group::draw(DC* dc) const
 		else
 		{
 			dc->SetBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-			dc->DrawEdgedRoundedRectangle(getAbsolutePosition() - Size(3, 3), boxSize + Size(12, 6), 4);
+			dc->DrawEdgedRoundedRectangle(getAbsolutePosition() - Size(3, 3), getSize() + Size(12, 6), 4);
 		}
 	}
 	UI_Object::draw(dc);

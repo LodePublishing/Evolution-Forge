@@ -40,9 +40,9 @@ BoWindow::BoWindow(UI_Object* bo_parent, const unsigned int game_number, const u
 	boEndPoint(-1),
 	boGoalListOpened(0),
 	lastBogoal(0),
-	saveBuildOrderButton(new UI_Button(this, getRelativeClientRectPosition(), Size(5,5), SAVE_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	loadBuildOrderButton(new UI_Button(this, getRelativeClientRectPosition(), Size(5,5), LOAD_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	alwaysBuildWorker(new UI_CheckButton(this, Point(5, 40), Size(5, 5), DO_NOT_ADJUST, SETTING_ALWAYS_BUILD_WORKER_STRING, SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING, coreConfiguration.isAlwaysBuildWorker())) // TODO
+	saveBuildOrderButton(new UI_Button(this, getRelativeClientRect(), Size(5,5), SAVE_BUILD_ORDER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	loadBuildOrderButton(new UI_Button(this, getRelativeClientRect(), Size(5,5), LOAD_BUILD_ORDER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	alwaysBuildWorker(new UI_CheckButton(this, Rect(5, 40, 200, 15), Size(5, 5), DO_NOT_ADJUST, SETTING_ALWAYS_BUILD_WORKER_STRING, SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING, coreConfiguration.isAlwaysBuildWorker())) // TODO
 //	fixed(fixed_list)
 {
 	resetData();
@@ -100,9 +100,6 @@ void BoWindow::processList()
 		return;
 	setNeedRedrawNotMoved();
 	
-	firstItemY = 0;
-	lastItemY = 0;
-
 	new_one=0;
 	same=0;
 	moved=0;
@@ -145,7 +142,7 @@ void BoWindow::processList()
 				entry = boList.insert(entry, old);
 				entry++;
 				boList.erase(k);
-				if(edge != old->targetRect)
+				if(edge != old->getTargetRect())
 				{
 					old->adjustRelativeRect(edge);
 					old->resetGradient();
@@ -167,9 +164,9 @@ void BoWindow::processList()
 //		if((*entry)->getUnit() == order->getUnit())
 	       	{
 			(*entry)->program = *order;
-			if(edge != (*entry)->targetRect)
+			if(edge != (*entry)->getTargetRect())
 			{
-				if((((*entry)->getAbsoluteUpperBound() < getAbsoluteClientRectUpperBound()+25)||((*entry)->getAbsoluteLowerBound() > getAbsoluteClientRectLowerBound())))//&&((*entry)->getRelativeRect()==(*entry)->targetRect))
+				if((((*entry)->getAbsoluteUpperBound() < getAbsoluteClientRectUpperBound()+25)||((*entry)->getAbsoluteLowerBound() > getAbsoluteClientRectLowerBound())))//&&((*entry)->getRelativeRect()==(*entry)->getTargetRect()))
 				{
 					(*entry)->Hide();
 //					(*entry)->jumpToPosition((*entry)->getTargetPosition());
@@ -252,7 +249,7 @@ void BoWindow::process()
 	std::list<BoEntry*>::iterator entry = boList.begin();
 	while(entry != boList.end())
 	{
-		if((((*entry)->getAbsoluteUpperBound() < getAbsoluteClientRectUpperBound()+25)||((*entry)->getAbsoluteLowerBound() > getAbsoluteClientRectLowerBound())))//&&((*entry)->getRelativeRect()==(*entry)->targetRect))
+		if((((*entry)->getAbsoluteUpperBound() < getAbsoluteClientRectUpperBound()+25)||((*entry)->getAbsoluteLowerBound() > getAbsoluteClientRectLowerBound())))//&&((*entry)->getRelativeRect()==(*entry)->getTargetRect()))
 		{
 			(*entry)->Hide();
 //			(*entry)->jumpToPosition((*entry)->getTargetPosition());

@@ -16,7 +16,7 @@ class UI_NumberField : public UI_Object
 		UI_NumberField& operator=(const UI_NumberField& object);
 		UI_NumberField(const UI_NumberField& object);
 		
-		UI_NumberField(UI_Object* numberfield_parent, const Rect rect, const unsigned int number_min, const unsigned int number_max, const unsigned int number_steps=1, const unsigned int num=0, const eString txt=NULL_STRING, const eString tool_tip=NULL_STRING, const eFieldType field_type = NORMAL_NUMBER_TYPE);
+		UI_NumberField(UI_Object* numberfield_parent, const Rect field_rect, const Size distance_bottom_right, const ePositionMode position_mode, const unsigned int number_min, const unsigned int number_max, const unsigned int number_steps=1, const unsigned int num=0, const eString txt=NULL_STRING, const eString tool_tip=NULL_STRING, const eFieldType field_type = NORMAL_NUMBER_TYPE);
 
 		~UI_NumberField();
 		UI_Object* checkTooltip();
@@ -35,7 +35,7 @@ class UI_NumberField : public UI_Object
 		UI_Button* addbutton;
 		UI_Button* subbutton;
 		UI_StaticText* text;
-		UI_StaticText* number_text;
+		UI_StaticText* numberText;
 		unsigned int number;
 		unsigned int min;
 		unsigned int max;

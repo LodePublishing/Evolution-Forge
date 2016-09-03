@@ -14,13 +14,13 @@ MainWindow::MainWindow() :
 
 	for(unsigned int i = MAX_TABS;i--;)
 		tab[i]=NULL;
- 	tab[0] = new UI_Button(this, Point(10, 20), Size(20, 0), "New Game", TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+ 	tab[0] = new UI_Button(NULL, Rect(10, 1, theme.lookUpButtonWidth(TAB_BUTTON), 10), Size(20, 0), "New Game", TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 // right:
-	tab[TUTORIAL_TAB] = new UI_Button(this, Point(10, 20), Size(20, 0), TUTORIAL_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
-	tab[SETTINGS_TAB] = new UI_Button(this, Point(10, 20), Size(20, 0), SETTINGS_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
-	tab[MAP_TAB] = new UI_Button(this, Point(10, 20), Size(20, 0), MAP_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+	tab[TUTORIAL_TAB] = new UI_Button(NULL, Rect(10, 1, theme.lookUpButtonWidth(TAB_BUTTON), 10), Size(20, 0), TUTORIAL_TAB_STRING, TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	tab[SETTINGS_TAB] = new UI_Button(NULL, Rect(10, 1, theme.lookUpButtonWidth(TAB_BUTTON), 10), Size(20, 0), SETTINGS_TAB_STRING, TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	tab[MAP_TAB] = new UI_Button(NULL, Rect(10, 1, theme.lookUpButtonWidth(TAB_BUTTON), 10), Size(20, 0), MAP_TAB_STRING, TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 
-	int step=theme.lookUpButtonAnimation(TAB_BUTTON)->speed/(MAX_TABS-1);
+//	int step=theme.lookUpButtonAnimation(TAB_BUTTON)->speed/(MAX_TABS-1);
 	for(unsigned int i=MAX_TABS;i--;)
 	if(tab[i]!=NULL)
 	{
@@ -44,13 +44,13 @@ void MainWindow::addNewGameTab()
 	
 	std::ostringstream os;
 	os << "Game " << gameTabCount+1;
-	tab[gameTabCount] = new UI_Button(this, Point(10, 20), Size(20, 0), os.str(), TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+	tab[gameTabCount] = new UI_Button(this, Rect(10, 1, theme.lookUpButtonWidth(TAB_BUTTON), 0), Size(20, 0), os.str(), TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 	addTab(tab[gameTabCount], gameTabCount);
 	gameTabCount++;
 
 	if(gameTabCount<MAX_GAME_TABS)
 	{
-	 	tab[gameTabCount] = new UI_Button(this, Point(10, 20), Size(20, 0), "New Game", TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+	 	tab[gameTabCount] = new UI_Button(this, Rect(10, 1, theme.lookUpButtonWidth(TAB_BUTTON), 0), Size(20, 0), "New Game", TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 		addTab(tab[gameTabCount], gameTabCount);
 	}
 }
@@ -69,13 +69,14 @@ void MainWindow::removeGameTab(const unsigned int game_number)
 #endif
 	removeTab(game_number);
 //	UI_Object::currentButton = NULL;
+	UI_Object::currentWindow = NULL;
 	delete(tab[game_number]);
 	for(unsigned int i = game_number; i < gameTabCount-1;i++)
 		tab[i] = tab[i+1];
 	gameTabCount--;	
 	if(gameTabCount==MAX_GAME_TABS-1) // alles voll => letztes durch new game ersetzen
 	{
-	 	tab[gameTabCount] = new UI_Button(this, Point(10, 20), Size(20, 0), "New Game", TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+	 	tab[gameTabCount] = new UI_Button(this, Rect(10, 1, theme.lookUpButtonWidth(TAB_BUTTON), 0), Size(20, 0), "New Game", TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 		addTab(tab[gameTabCount], gameTabCount);
 	} else 
 	{
@@ -142,6 +143,7 @@ void MainWindow::draw(DC* dc) const
 //			UI_Object::tooltip->draw(dc);
 	}
 //	
+#if 0
 // ------ MOUSE DRAWING ------
 		if(efConfiguration.isSoftwareMouse())
 		{
@@ -169,10 +171,12 @@ void MainWindow::draw(DC* dc) const
 					dc->SetTextForeground(DC::toSDL_Color(0,177,188));
 					dc->DrawText("Remove a unit", p.x+38, p.y+1);
 				break;
+				default:toLog("error, mouseType out of range");break;
 			}
 		}
 //		else
 //			SDL_ShowCursor(SDL_ENABLE);
+#endif
 // ------ END MOUSE DRAWING ------
 }
 

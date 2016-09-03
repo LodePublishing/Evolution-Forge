@@ -10,9 +10,6 @@
 #include <string>
 #include <list>
 
-#define SDL_DRAW_BPP 4
-
-
 class DC
 {
 	public:
@@ -98,14 +95,13 @@ class DC
 		void DrawRectangle(const Rect& rect) const; 
 		void DrawRectangle(const Point& p, const Size& s) const;
 		
-		void DrawEmptyRound(const Rect& rect, const unsigned int corner) const;
+//		void DrawEmptyRound(const Rect& rect, const unsigned int corner) const;
 	
 		void DrawSpline(const unsigned int c, const Point* p) const;
 		void DrawSpline(const unsigned int c, const Point* p, const Point s) const;
 
 		void DrawLine(const Point& p1, const Point& p2) const;
 		
-		void Draw_Line(signed int x1, signed int y1, signed int x2, signed int y2) const;
 		void DrawLine(const signed int x1, const signed int y1, const signed int x2, const signed int y2) const;
 //		void aalineColorInt(const int x1, const int y1, const int x2, const int y2) const;
 
@@ -148,21 +144,53 @@ class DC
 		SDL_Color textColor;
 		Font* font;
 
-		void Draw_VLine(const signed int x0, const signed int y0, const signed int y1) const;
-
-		void Draw_HLine(const signed int x0, const signed int y0, const signed int x1) const;
+		void (DC::*Draw_Line)(signed int x1, signed int y1, signed int x2, signed int y2) const;
+		void Draw_Line_8bit(signed int x1, signed int y1, signed int x2, signed int y2) const;
+		void Draw_Line_16bit(signed int x1, signed int y1, signed int x2, signed int y2) const;
+		void Draw_Line_24bit(signed int x1, signed int y1, signed int x2, signed int y2) const;
+		void Draw_Line_32bit(signed int x1, signed int y1, signed int x2, signed int y2) const;
 		
-//		void Draw_HLine_8bit(const signed int x0, const signed int y0, const signed int x1) const;
-//		void Draw_HLine_16bit(const signed int x0, const signed int y0, const signed int x1) const;
-//		void Draw_HLine_24bit(const signed int x0, const signed int y0, const signed int x1) const;
-//		void Draw_HLine_32bit(const signed int x0, const signed int y0, const signed int x1) const;
+		void (DC::*Draw_VLine)(const signed int x0, const signed int y0, const signed int y1) const;
+		void Draw_VLine_8bit(const signed int x0, const signed int y0, const signed int y1) const;
+		void Draw_VLine_16bit(const signed int x0, const signed int y0, const signed int y1) const;
+		void Draw_VLine_24bit(const signed int x0, const signed int y0, const signed int y1) const;
+		void Draw_VLine_32bit(const signed int x0, const signed int y0, const signed int y1) const;
 
-		void DrawFilledRound(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
-		void DrawFilledEdgedRound(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
-		void DrawEmptyEdgedRound(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
-		void DrawEmptyRound(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
-		void DrawFilledEdgedBorderRound(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void (DC::*Draw_HLine)(const signed int x0, const signed int y0, const signed int x1) const;
+		void Draw_HLine_8bit(const signed int x0, const signed int y0, const signed int x1) const;
+		void Draw_HLine_16bit(const signed int x0, const signed int y0, const signed int x1) const;
+		void Draw_HLine_24bit(const signed int x0, const signed int y0, const signed int x1) const;
+		void Draw_HLine_32bit(const signed int x0, const signed int y0, const signed int x1) const;
 
+		void (DC::*DrawFilledRound)(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawFilledRound_8bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawFilledRound_16bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawFilledRound_24bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawFilledRound_32bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		
+		void (DC::*DrawFilledEdgedRound)(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawFilledEdgedRound_8bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawFilledEdgedRound_16bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawFilledEdgedRound_24bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawFilledEdgedRound_32bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		
+		void (DC::*DrawEmptyEdgedRound)(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawEmptyEdgedRound_8bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawEmptyEdgedRound_16bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawEmptyEdgedRound_24bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawEmptyEdgedRound_32bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		
+		void (DC::*DrawEmptyRound)(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawEmptyRound_8bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawEmptyRound_16bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawEmptyRound_24bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawEmptyRound_32bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		
+		void (DC::*DrawFilledEdgedBorderRound)(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawFilledEdgedBorderRound_8bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawFilledEdgedBorderRound_16bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawFilledEdgedBorderRound_24bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+		void DrawFilledEdgedBorderRound_32bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
 };
 
 inline DC& DC::operator=(const DC& other) {
@@ -309,9 +337,9 @@ inline void DC::DrawRectangle(const Point& p, const Size& s) const {
 	DrawRectangle(p.x, p.y, s.GetWidth(), s.GetHeight());
 }
 
-inline void DC::DrawEmptyRound(const Rect& rect, const unsigned int corner) const {
-	DrawEmptyRound(rect.GetLeft(), rect.GetTop(), rect.GetWidth(), rect.GetHeight(), corner);
-}	
+//inline void DC::DrawEmptyRound(const Rect& rect, const unsigned int corner) const {
+//	DrawEmptyRound(rect.GetLeft(), rect.GetTop(), rect.GetWidth(), rect.GetHeight(), corner);
+//}	
 
 inline const bool DC::SetColorKey(const Uint32 flag, const Color key) const {
 	return SDL_SetColorKey(surface, flag, key) == 0;

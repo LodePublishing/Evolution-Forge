@@ -1,23 +1,17 @@
 #include "object.hpp"
 #include "configuration.hpp"
 
-
-UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const Size distance_bottom_right) :
+UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const Size distance_bottom_right, const ePositionMode position_mode, const eAutoSize auto_size) :
+	children(NULL),
 	startRect(relative_rect),
 	targetRect(relative_rect),
+	originalRect(relative_rect),
 	distanceBottomRight(distance_bottom_right),
 
-	filledHeight(relative_rect.GetHeight()),
-//	notDrawRectList(),
-	firstItemY(0),
-	lastItemY(0),
-	children(NULL),
-	background(NULL),
-	oldRect(),
-	updateRelativePositions(false),
-
+	positionMode(position_mode),
+	autoSize(auto_size),
+	sizeHasChanged(true),
 	shown(true),
-	disabledFlag(false),
 
 	min_top_left_x(0),
 	min_left_y(0),
@@ -27,41 +21,27 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const S
 	min_bottom_right_x(0),	
 
 	needRedraw(true),
-//	tempSurface(NULL),
 	prevBrother(this),
 	nextBrother(this),
 	parent(NULL),
 	relativeRect(relative_rect),
-//	lastRect(),
-	doAdjustments(1),
 	toolTipString(NULL_STRING)
 {
 	setParent(parent_object);
-//	lastRect=getAbsoluteRect();
-}
-
-UI_Object::~UI_Object()
-{
-	removeFromFamily(); // !!!!!
-	SDL_FreeSurface(background);
 }
 
 UI_Object& UI_Object::operator=(const UI_Object& object)
 {
 	startRect = object.startRect;
 	targetRect = object.targetRect;
+	originalRect = object.originalRect;
 	distanceBottomRight = object.distanceBottomRight;
-		
-	firstItemY = object.firstItemY;
-	lastItemY = object.lastItemY;
-	filledHeight = object.filledHeight;
 	children = object.children;
-	background = object.background;
-	oldRect = object.oldRect;
-	updateRelativePositions = false;
-//	notDrawRectList = object.notDrawRectList,
+
+	positionMode = object.positionMode;
+	autoSize = object.autoSize;
+	sizeHasChanged = true;	
 	shown = object.shown;
-	disabledFlag = object.disabledFlag;
 
 	min_top_left_x = object.min_top_left_x;
 	min_left_y = object.min_left_y;
@@ -70,15 +50,10 @@ UI_Object& UI_Object::operator=(const UI_Object& object)
 	min_top_right_x = object.min_top_right_x;
 	min_bottom_right_x = object.min_bottom_right_x;
 	needRedraw = object.needRedraw;
-//	SDL_FreeSurface(tempSurface);
-//DL_Crate
-//	tempSurface = object.tempSurface;
 	prevBrother = this; // !!
 	nextBrother = this; // !!
 	parent = NULL; // !!
 	relativeRect = object.relativeRect;
-//  lastRect = object.lastRect;
-	doAdjustments = object.doAdjustments;
 	toolTipString = object.toolTipString;
 	
 	setParent(object.parent);
@@ -87,21 +62,17 @@ UI_Object& UI_Object::operator=(const UI_Object& object)
 }
 
 UI_Object::UI_Object(const UI_Object& object) :
+	children( object.children ),
 	startRect( object.startRect ),
 	targetRect( object.targetRect ),
+	originalRect( object.originalRect ),
 	distanceBottomRight( object.distanceBottomRight ),
-	
-	filledHeight( object.filledHeight ),
-//	notDrawRectList( object.notDrawRectList ),
-	firstItemY( object.firstItemY ), 
-	lastItemY( object.lastItemY ), 
-	children( object.children ),
-	background( object.background ),
-	oldRect( object.oldRect),
-	updateRelativePositions( false ),
+	sizeHasChanged( true ),
 
+	positionMode( object.positionMode ),
+	autoSize( object.autoSize ),
+	
 	shown( object.shown ), 
-	disabledFlag( object.disabledFlag ),
 
 	min_top_left_x( object.min_top_left_x ),
 	min_left_y( object.min_left_y ),
@@ -111,70 +82,161 @@ UI_Object::UI_Object(const UI_Object& object) :
 	min_bottom_right_x( object.min_bottom_right_x ),
 
 	needRedraw( object.needRedraw ),
-//	tempSurface( object.tempSurface ),
 	prevBrother( this ), // !!
 	nextBrother( this ), // !!
 	parent( NULL ), // !!
 	relativeRect( object.relativeRect ),
-//	lastRect( object.lastRect ),
-	doAdjustments( object.doAdjustments ),
 	toolTipString( object.toolTipString )
 { 
 	setParent(object.parent);
 }
 
-/*
-void UI_Object::addRect(const Rect& rect)
+UI_Object::~UI_Object()
 {
-	notDrawRectList.push_back(rect);
-}*/
-
-
-
-
-/*
-void UI_Object::getHasFocus()
-{
-	return(hasFocus)
-}
-const bool UI_Object::setNextFocus()
-{
-	UI_Object* tmp=children;  // process all children of gadget
-   	if (tmp) {
-	   	do {
-			if(tmp->getHasFocus() && (tmp->nextBrother!=children))
-			{
-				if(tmp->nextBrother->setFocus())
-				return(true);
-			}
-			tmp = tmp->nextBrother;
-   		} while (tmp != children);
-	}
-	return(false);
+	removeFromFamily(); // !!!!!
 }
 
-const bool UI_Object::setFocus()
+
+#include <sstream>
+void UI_Object::adjustPositionAndSize(const eAdjustMode adjust_mode, const Size& size)
 {
-	if(canGetFocus)
+	sizeHasChanged=false;
+	signed int left = originalRect.GetLeft();
+	signed int top = originalRect.GetTop();
+	
+	unsigned int full_width;
+	unsigned int full_height;
+	if(getParent()!=NULL)
 	{
-		hasFocus=true;
-		return true;
+		full_width = getParent()->getWidth() - left - distanceBottomRight.GetWidth();
+		full_height = getParent()->getHeight() - top - distanceBottomRight.GetHeight();
+		// Parent nicht initialisiert :[
+	} 
+	else
+	{
+		full_width = getWidth();
+		full_height = getHeight();
 	}
-	else 
+
+	if(adjust_mode == ADJUST_ONLY_POSITION)
 	{
-		hasFocus=false;
-		UI_Object* tmp=children;  // process all children of gadget
-		if (tmp) {
-			do {
-				if(tmp->setFocus())
-					return(true);
-				tmp = tmp->nextBrother;
-			} while (tmp != children);
+//		if(size!=Size(0,0))
+//			setSize(size);
+//		if(getParent()!=NULL)
+//			getParent()->adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, getSize());
+// called after size was changed
+	} else
+	if(adjust_mode == ADJUST_AFTER_PARENT_WAS_CHANGED)
+	{
+// called by PARENT after PARENT's size was changed
+		switch(autoSize)
+		{
+			case NOTHING:break;
+			case NO_AUTO_SIZE:break;
+			case AUTO_SIZE_ONCE:
+			case AUTO_SIZE_TWICE:
+			case AUTO_SIZE:;break;
+			case AUTO_HEIGHT_FULL_WIDTH:
+			case FULL_WIDTH:setWidth(full_width);break;
+			case AUTO_HEIGHT_CONST_WIDTH:break;// ~~ nur fuer tabs naja
+			case CONST_SIZE:break;// ~~ nur fuer tabs naja
+			default:break; // TODO ERROR
 		}
-		return(false);
+	} else
+	if(adjust_mode == ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED)
+	{
+// called if the object is dependant on the child's size (e.g. Button - StaticText)
+// TODO maybe update other children too
+	
+		switch(autoSize)
+		{
+			case NOTHING:break;
+			case NO_AUTO_SIZE:setSize(originalRect.GetSize());break;
+			case AUTO_SIZE_ONCE:
+/*				setSize(size+Size(6, 0));
+				autoSize = AUTO_SIZE_TWICE;
+				break;*/
+			case AUTO_SIZE_TWICE:
+//					setSize(size+Size(6, 0));
+//					autoSize = NO_AUTO_SIZE;break;
+			case AUTO_SIZE:setSize(size+Size(6, 0));break;
+			case AUTO_HEIGHT_FULL_WIDTH:setSize(Size(full_width, size.GetHeight()));break;
+			case FULL_WIDTH:setSize(Size(full_width, getHeight()));break;
+			case AUTO_HEIGHT_CONST_WIDTH:setSize(Size(originalRect.GetWidth(), size.GetHeight()));break;// ~~ nur fuer tabs naja
+			case CONST_SIZE:setSize(Size(originalRect.GetWidth(), originalRect.GetHeight()));break;// ~~ nur fuer tabs naja
+			default:break; // TODO ERROR
+		}
 	}
+	
+	signed int hor_center = left + (full_width - getWidth())/2;
+	signed int right = full_width - left - getWidth();
+
+	signed int ver_center = top + (full_height - getHeight())/2;
+	signed int bottom = full_height - top - getHeight();
+
+/*	if((positionMode==TOTAL_CENTERED)&&(getParent()))
+	{
+		std::ostringstream os;
+		os << "2. " << hor_center << ":" << ver_center << "[" << getWidth() << ":" << getHeight() << "]" << " " << getParent()->getWidth() << "-" << left << "-" << distanceBottomRight.GetWidth() << "/ " << getParent()->getHeight() << "-" << top << "-" << distanceBottomRight.GetHeight() << " [" << full_width << ":" << full_height << "]";
+						
+		toLog(os.str());
+	}*/
+
+//	setPosition(originalButtonRect.GetTopLeft());
+	
+	//relativeRect ok... aber was ist mit startRect, targetRect etc??
+
+ 	switch(positionMode)
+	{
+		case DO_NOT_ADJUST:break;//setPosition(originalButtonRect.GetTopLeft());break;
+		case TOTAL_CENTERED:setPosition(hor_center, ver_center);break;
+		case HORIZONTALLY_CENTERED:setLeft(hor_center);break;
+		case VERTICALLY_CENTERED:setTop(ver_center);break;
+		case TOP_LEFT:setPosition(left, top);break;
+		case TOP_CENTER:setPosition(hor_center, top);break;
+		case TOP_RIGHT:setPosition(right, top);break;
+		case CENTER_RIGHT:setPosition(right, ver_center);break;
+		case BOTTOM_RIGHT:setPosition(right, bottom);break;
+		case BOTTOM_CENTER:setPosition(hor_center, bottom);break;
+		case BOTTOM_LEFT:setPosition(left, bottom);break;
+		case CENTER_LEFT:setPosition(left, ver_center);break;
+		case ARRANGE_TOP_LEFT:
+		{
+			setPosition(left + getParent()->getMinTopLeftX(), top);
+			getParent()->addMinTopLeftX(getWidth() + MIN_DISTANCE);
+		}break;
+		case ARRANGE_TOP_RIGHT:
+		{
+			setPosition(right - getParent()->getMinTopRightX(), top);
+			getParent()->addMinTopRightX(getWidth() + MIN_DISTANCE);
+		}break;
+		case ARRANGE_BOTTOM_LEFT:
+		{ 
+			setPosition(left + getParent()->getMinBottomLeftX(), bottom);
+			getParent()->addMinBottomLeftX(getWidth()+MIN_DISTANCE);
+		}break;
+		case ARRANGE_BOTTOM_RIGHT:
+		{
+			setPosition(right - getParent()->getMinBottomRightX() - 20, bottom);
+			getParent()->addMinBottomRightX(getWidth() + MIN_DISTANCE);
+		}break;
+		case ARRANGE_LEFT:
+		{
+			setPosition(left, top + getParent()->getMinLeftY());
+			getParent()->addMinLeftY(getHeight()+MIN_DISTANCE);
+		}break;
+		case ARRANGE_RIGHT:
+		{
+			setPosition(right, top + getParent()->getMinRightY()); // TODO
+			getParent()->addMinRightY(getHeight()+MIN_DISTANCE);
+		}break;
+		default:
+			toLog("Wheee");
+		break;//TODO error
+	}
+	
 }
-*/
+
 
 void UI_Object::adjustRelativeRect(Rect edge)
 {
@@ -201,9 +263,6 @@ void UI_Object::adjustRelativeRect(Rect edge)
 }
 
 
-
-
-
 // Take gadget out of family.  Children of this gadget stay with gadget, though.
 //
 // A family is basically the whole parent/sibling/children hierarchy for gadgets.  Any gadget
@@ -215,15 +274,12 @@ void UI_Object::adjustRelativeRect(Rect edge)
 //
 void UI_Object::removeFromFamily()
 {
-	if (parent) 
+	if((parent)&&(parent->children == this))
 	{
-		if (parent->children == this) 
-		{
-			if (nextBrother == this)  // the only child?
-				parent->children = NULL;  // if so, parent now has no children
-			else
-				parent->children = nextBrother;  // next sibling is now the eldest
-		}
+		if (nextBrother == this)  // the only child?
+			parent->children = NULL;  // if so, parent now has no children
+		else
+			parent->children = nextBrother;  // next sibling is now the eldest
 	} 
 	parent = NULL;
 	if (nextBrother != this) {  // does this object have siblings?
@@ -233,11 +289,6 @@ void UI_Object::removeFromFamily()
 	
 	nextBrother = prevBrother = this;
 }
-
-// Put gadget into a new family (removing from old one if needed first).
-// See remove_from_family() for definition of what a family is.
-//
-
 
 void UI_Object::setParent(UI_Object* daddy) 
 {
@@ -266,72 +317,16 @@ void UI_Object::addChild(UI_Object* child)
 		eldest_sibling->prevBrother = child;
 		youngest_sibling->nextBrother = child;
 
-//		children = child;
+//		children = child; ?
 	}
 }
 
-// TODO
-#if 0
-void UI_Object::addRectToBeDrawn(Rect& lastRect, const Rect currentRect)
-{
-/*	rectlist[rectnumber].x = lastRect.x;rectlist[rectnumber].y = lastRect.y;
-	rectlist[rectnumber].w = lastRect.width; rectlist[rectnumber].h = lastRect.height;
-	
-	lastRect = currentRect;
-	if( lastRect.x < rectlist[rectnumber].x)
-	{
-		rectlist[rectnumber].w += rectlist[rectnumber].x - lastRect.x;
-	rectlist[rectnumber].x = lastRect.x;
-	} else
-	if( lastRect.x > rectlist[rectnumber].x)	
-		rectlist[rectnumber].w += lastRect.x - rectlist[rectnumber].x;
-	if( lastRect.y < rectlist[rectnumber].y)	
-	{
-		rectlist[rectnumber].h += rectlist[rectnumber].y - lastRect.y;
-		rectlist[rectnumber].y = lastRect.y;
-	} else
-	if( lastRect.y > rectlist[rectnumber].y)	
-		rectlist[rectnumber].h += lastRect.y - rectlist[rectnumber].y;
-
-	if( lastRect.width > rectlist[rectnumber].w )
-		rectlist[rectnumber].w = lastRect.width;
-
-	if( lastRect.height > rectlist[rectnumber].h )
-		rectlist[rectnumber].h = lastRect.height;
-	if((rectlist[rectnumber].x<max_x)&&(rectlist[rectnumber].y<max_y)&&(rectlist[rectnumber].x + rectlist[rectnumber].w>0)&&(rectlist[rectnumber].y + rectlist[rectnumber].h > 0))
-	{
-		if(rectlist[rectnumber].x +rectlist[rectnumber].w > max_x) rectlist[rectnumber].w = max_x - rectlist[rectnumber].x;
-		if(rectlist[rectnumber].y +rectlist[rectnumber].h > max_y) rectlist[rectnumber].h = max_y - rectlist[rectnumber].y;
-		if(rectlist[rectnumber].x < 0) {rectlist[rectnumber].w += rectlist[rectnumber].x;rectlist[rectnumber].x=0;}
-		if(rectlist[rectnumber].y < 0) {rectlist[rectnumber].h += rectlist[rectnumber].y;rectlist[rectnumber].y=0;}
-#ifdef _SCC_DEBUG
-		if(rectnumber>=2999) {
-			toLog("WARNING: (UI_Object::process): Value rectnumber out of range.");return;
-		}
-#endif
-		rectnumber++;
-	}*/
-}
-#endif
 void UI_Object::process()
 {
-//	if (/*(disabledFlag)||*/(!isShown())) //~~
+//	if (!isShown()) //~~
 //		return;
 
-//	while(!notDrawRectList.empty())
-//		notDrawRectList.pop_front();
-
-	if(doAdjustments==1)
-	{
-		adjustRelativeRect(Rect(Point(targetRect.GetTopLeft()), Size(targetRect.GetWidth(), filledHeight+25))); // TODO!
-//		ARGH
-		doAdjustments=2;
-	}
-
-	if(relativeRect.getSize() != targetRect.getSize())
-		updateRelativePositions=true;
-	else updateRelativePositions=false;
-
+	Size old_size  = relativeRect.GetSize();
 	if(uiConfiguration.isSmoothMovements())
 	{
 		if(relativeRect.moveSmooth(startRect, targetRect))
@@ -341,26 +336,24 @@ void UI_Object::process()
 	{
 		if(relativeRect.move(startRect, targetRect))
 			setNeedRedrawMoved();
-	}	
-	
-#if 0
-	if((lastRect!=getAbsoluteRect())||(needRedraw))
-	{
-		if(needRedraw) 
-			needRedraw=true;
-		else needRedraw=true;
-/*		if(lastRect!=getAbsoluteRect())
-		{
-			tempRect.x=getAbsolutePosition().x;
-			tempRect.y=getAbsolutePosition().y;
-			tempRect.w=getWidth();
-			tempRect.h=getHeight();
-			SDL_GetClipRect(tempSurface, &tempRect);
-		}*/
-		addRectToBeDrawn(lastRect, getAbsoluteRect());
-
 	}
-#endif
+	if(old_size != relativeRect.GetSize())
+		sizeHasChanged=true;
+
+	if(sizeHasChanged==true)
+	{
+		adjustPositionAndSize(ADJUST_ONLY_POSITION);
+		UI_Object* tmp=children;  // process all children of gadget
+		if (tmp) {
+			do {
+				tmp->adjustPositionAndSize(ADJUST_AFTER_PARENT_WAS_CHANGED);
+				tmp = tmp->nextBrother;
+			} while (tmp != children);
+		}
+		sizeHasChanged=false;
+	}
+//	if(adjust_mode == ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED)	
+	
 	min_top_right_x = min_bottom_right_x = min_bottom_left_x = min_left_y = min_top_left_x = min_right_y = 0;
 
 	UI_Object* tmp=children;  // process all children of gadget
@@ -395,21 +388,18 @@ UI_Object* UI_Object::checkToolTip()
 //	if(!(getAbsoluteRect().Inside(p)))
 //		return(0); 0 size players ?
 	UI_Object* tmp=children;  // process all children of gadget
+	
 	if(!tmp)
 		return(NULL); // return 0 as this is an object and no button!
-
 	UI_Object* result=NULL;
 	do 
 	{
 		result = tmp->checkToolTip();
 		tmp = tmp->nextBrother;
-	}
-	while((tmp!=children)&&(result==NULL));
+	} while((tmp!=children)&&(result==NULL));
+	
 	return(result);
 }
-
-void UI_Object::adjustButtonPlacementSize()
-{ }
 
 void UI_Object::reloadStrings()
 {
@@ -431,54 +421,26 @@ UI_Object* UI_Object::checkHighlight()
 		return(NULL);
 //	if(!(getAbsoluteRect().Inside(p)))
 //		return(0); 0 size players ?
+
 	UI_Object* tmp=children;  // process all children of gadget
 	if(!tmp)
 		return(NULL); // return 0 as this is an object and no button!
-
 	UI_Object* result=NULL;
 	do 
 	{
 		result = tmp->checkHighlight();
 		tmp = tmp->nextBrother;
-	}
-	while((tmp!=children)&&(result==NULL));
+	} while((tmp!=children)&&(result==NULL));
+	
 	return(result);
 }
 
 void UI_Object::draw(DC* dc) const
 {
 	// if hidden, hide children as well
-//	if (!isShown())
-//		return;
-/*	
-		SDL_Rect temp;
-		if(background!=NULL)
-		{
-			temp.x = oldRect.GetLeft();
-			temp.y = oldRect.GetTop();
-			temp.w = oldRect.GetWidth();
-			temp.h = oldRect.GetHeight();
-			SDL_BlitSurface(background, NULL, dc->GetSurface(), &temp); // erase old
-			SDL_FreeSurface(background);
-			const_cast< UI_Object* > (this)->background = NULL;
-		}
-		const_cast< UI_Object* > (this)->background = SDL_CreateRGBSurface(SDL_SWSURFACE, getWidth(), getHeight(), 24, 0, 0, 0, 0);
-		temp.x = getAbsoluteLeftBound();
-		temp.y = getAbsoluteUpperBound();
-		temp.w = getWidth();
-		temp.h = getHeight();	
-		SDL_BlitSurface(dc->GetSurface(), &temp, background, NULL); // save new background
-	}*/
-
-//	if(getParent())
-//	{
-//	dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-//	dc->DrawEmptyRectangle(getParent()->getAbsolutePosition() + targetRect.GetTopLeft(), targetRect.GetSize());
-//	dc->DrawEmptyRectangle(getParent()->getAbsolutePosition() + startRect.GetTopLeft(), startRect.GetSize());
-//	}
-
+	if (!isShown())
+		return;
 	UI_Object* tmp = children;
-	
 	if (tmp) {
 		do {
 			tmp->draw(dc);
@@ -487,18 +449,7 @@ void UI_Object::draw(DC* dc) const
 	}
 }
 
-/*void UI_Object::setPosition(const Point& position)
-{
-	if(position == relativeRect.GetTopLeft())
-		return;
-	startRect.SetTopLeft(startRect.GetTopLeft() + (position - relativeRect.GetTopLeft()));
-	targetRect.SetTopLeft(targetRect.GetTopLeft() + (position - relativeRect.GetTopLeft()));
-	relativeRect.SetTopLeft(position);
-	setNeedRedraw();
-}*/
-
 void UI_Object::setPosition(const Point& position)
-//void UI_Object::jumpToPosition(const Point& position)
 {
 	if(position == relativeRect.GetTopLeft())
 		return;
@@ -510,8 +461,9 @@ void UI_Object::setPosition(const Point& position)
 
 void UI_Object::setHeight(const unsigned int height) 
 {
-	if(relativeRect.GetHeight() == height)
+	if(getTargetHeight() == height)
 		return;
+	sizeHasChanged = true;
 	relativeRect.SetHeight(height);
 	startRect.SetHeight(height);
 	targetRect.SetHeight(height);
@@ -522,6 +474,7 @@ void UI_Object::setWidth(const unsigned int width)
 {
 	if(relativeRect.GetWidth() == width)
 		return;
+	sizeHasChanged = true;
 	relativeRect.SetWidth(width);
 	startRect.SetWidth(width);
 	targetRect.SetWidth(width);
@@ -532,6 +485,7 @@ void UI_Object::setSize(const Size size)
 {
 	if(relativeRect.GetSize() == size)
 		return;
+	sizeHasChanged = true;
 	relativeRect.SetSize(size);
 	startRect.SetSize(size);
 	targetRect.SetSize(size);
@@ -557,20 +511,10 @@ void UI_Object::setTop(const signed int y)
 	targetRect.SetTop(y);
 	setNeedRedrawMoved();
 }
-	
-
-/*const Point UI_Object::getAbsolutePosition() const	
-{
-	if(parent)
-		return(relativeRect.GetTopLeft() + parent->getAbsolutePosition());
-	else return(relativeRect.GetTopLeft());
-}*/
 
 const bool UI_Object::isTopItem() const
 {
-	if(parent)
-		return(false);
-	else return(true);
+	return(parent==NULL);
 }
 
 
@@ -585,7 +529,6 @@ void UI_Object::Show(const bool show)
 	else if((!show)&&(shown))
 	{
 		setNeedRedrawMoved(true);
-		
 		setNeedRedrawMoved(false); // ~~
 		shown = false;
 	}
@@ -598,7 +541,7 @@ void UI_Object::setNeedRedrawMoved(const bool need_redraw)  // moved item
 	setNeedRedrawNotMoved(need_redraw);
 	if((need_redraw)&&(getParent()))
 	{
-		getParent()->checkForChildrenOverlap(oldRect);
+		getParent()->checkForChildrenOverlap(getRelativeRect());
 		getParent()->setNeedRedrawNotMoved(true);
 	}
 }
@@ -606,7 +549,6 @@ void UI_Object::setNeedRedrawMoved(const bool need_redraw)  // moved item
 void UI_Object::checkForChildrenOverlap(const Rect& rect)
 {
         UI_Object* tmp = children;
-
         if (tmp) {
                 do {
 			if(rect.overlaps(tmp->getRelativeRect()))
@@ -636,11 +578,6 @@ void UI_Object::setNeedRedrawNotMoved(const bool need_redraw)
         }
 }
 
-const bool UI_Object::isUpdateRelativePositions() const
-{
-	return(updateRelativePositions());
-}
-
 void UI_Object::clearRedrawFlag()
 {
 //	if(!isShown())
@@ -666,18 +603,6 @@ const bool UI_Object::checkForNeedRedraw() const
 //		const_cast< UI_Object* > (this)->needRedraw=false;
 		return(true);
 	} else return(false);
-}
-
-const unsigned long int UI_Object::getTimeStampMs(const unsigned long int timeSpan)
-{
-	return(timeSpan + SDL_GetTicks() - startTime);
-}
-
-const bool UI_Object::isTimeSpanElapsed(const unsigned long int timeSpan)
-{
-	if(timeSpan==0)
-		return(true);
-	return(timeSpan < SDL_GetTicks());
 }
 
 void UI_Object::addMinTopLeftX(signed int dx)
@@ -730,9 +655,6 @@ void UI_Object::resetButton()
 }
 	
 UI_Theme UI_Object::theme;
-long unsigned int UI_Object::startTime(0);
-//SDL_Rect UI_Object::rectlist[3000];
-//unsigned int UI_Object::rectnumber(0);
 UI_ToolTip* UI_Object::tooltip(NULL);
 UI_Object* UI_Object::toolTipParent(NULL);
 unsigned int UI_Object::max_x(0);
@@ -740,7 +662,6 @@ unsigned int UI_Object::max_y(0);
 Point UI_Object::mouse(Point(0,0));
 
 UI_EditField* UI_Object::editTextField(NULL);
-//UI_EndRunDialog* UI_Object::endRunDialog(NULL);
 unsigned int UI_Object::mouseType(0);
 
 bool UI_Object::currentButtonPressed = false;

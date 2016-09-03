@@ -34,6 +34,8 @@ class SettingsWindow:public UI_Window
 		UI_Group* guiSettings;
 //		UI_Group* defaultSettings;
 		UI_Group* loadSaveSettings;
+		
+		UI_Radio* defaultSettingsRadio;
 
 		UI_NumberField* maxTime;
 		UI_NumberField* maxLength;
@@ -66,7 +68,6 @@ class SettingsWindow:public UI_Window
 		UI_Button* minimalistButton;
 		UI_Button* fullButton;
 		UI_Button* customButton;
-		UI_Radio* defaultSettingsRadio;
 
 		UI_Button* reloadFromFileButton;
 		UI_Button* loadFailsafeDefaultsButton;

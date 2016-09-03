@@ -123,7 +123,76 @@ inline void Game::setTotalGeneration(const unsigned int total_generation) {
 	totalGeneration = total_generation;
 }
 
+inline void Game::setHarvestSpeed(const unsigned int player_num, const eRace harvest_race, const HARVEST_SPEED* harvest_speed) {
+#ifdef _SCC_DEBUG
+        if((player_num < 1) || (player_num > mapPlayerCount)) {
+                toLog("DEBUG: (Game::setHarvestSpeed): Value player_num out of range.");return;
+        }
+#endif
+	start[player_num]->setHarvestSpeed(harvest_race, harvest_speed);
+}
 
+inline void Game::setStartRace(const unsigned int player_num, const eRace player_race) {
+#ifdef _SCC_DEBUG
+	if((player_num < 1) || (player_num > mapPlayerCount)) {
+		toLog("DEBUG: (Game::setStartRace): Value player_num out of range.");return;
+	}
+#endif
+	start[player_num]->setPlayerRace(player_race);
+}
+
+inline void Game::assignStartCondition(const unsigned int player_num, const START_CONDITION* start_condition) {
+#ifdef _SCC_DEBUG
+	if((player_num < 1) || (player_num > mapPlayerCount)) {
+		toLog("DEBUG: (Game::assignStartCondition): Value player_num out of range.");return;
+	}                       
+#endif
+	start[player_num]->assignStartCondition(start_condition);
+}
+
+
+
+inline void Game::setStartPosition(const unsigned int player_num, const unsigned int player_position) {
+#ifdef _SCC_DEBUG
+        if((player_num < 1) || (player_num > mapPlayerCount)) {
+                toLog("DEBUG: (Game::setStartPosition): Value player_num out of range.");return;
+        }
+#endif
+	start[player_num]->setStartPosition(player_position);
+}
+
+inline void Game::assignGoal(const unsigned int player_num, const GOAL_ENTRY* player_goal) {
+#ifdef _SCC_DEBUG
+        if((player_num < 1) || (player_num > mapPlayerCount)) {
+                toLog("DEBUG: (Game::assignGoal): Value player_num out of range.");return;
+        }       
+#endif
+	start[player_num]->assignGoal(player_goal);
+}
+
+inline const bool Game::isRemoveGame() const {
+	return removeButton->isLeftClicked();
+}
+
+inline const bool Game::isSplitGame() const {
+	return splitGameButton->isLeftClicked();
+}
+
+inline const unsigned int Game::getMapPlayerCount() const {
+	return(mapPlayerCount);
+}
+
+inline const bool Game::isOptimizing(const unsigned int player_number) const {
+	return(scoreWindow->isOptimizing(player_number));
+}
+
+inline void Game::setOptimizing(const bool opt) {
+//	scoreWindow->setOptimizing(opt);
+}
+
+inline void Game::resetData() {
+	boHasChanged = true;
+}
 
 #endif
 

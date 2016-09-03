@@ -32,7 +32,7 @@ Menu& Menu::operator=(const Menu& object)
 	chooseMenu = object.chooseMenu;
 	p1 = object.p1;
 	p2 = object.p2;
-	setMenuHasChanged(false);//object.menuChanged);
+	setMenuHasChanged(false);
 	return(*this);
 }
 
@@ -124,16 +124,7 @@ void Menu::setMenuHasChanged(const bool has_changed)
 {
 	if(has_changed == menuChanged)
 		return;
-	if(has_changed)
-	{
-		menuChanged = true;
-		toLog("true");
-	}
-	else
-	{
-		menuChanged = false;
-		toLog("false");
-	}
+	menuChanged = has_changed;
 }
 
 const signed int Menu::getMarkedItem() const
@@ -150,7 +141,7 @@ void Menu::process()
 	UI_Object::process();
 	pressedItem = -1;
 	markedItem = -1;
-		p1 = Point(9999, 9999);
+	p1 = Point(9999, 9999);
 	p2 = Point(0, 0);
 
 	unsigned int i = 0;
@@ -160,9 +151,6 @@ void Menu::process()
 		if(!(*m)->isShown())
 		{
 			(*m)->setPosition(Point(0, 0));
-			(*m)->targetRect=(*m)->getRelativeRect();
-			(*m)->startRect=(*m)->getRelativeRect();
-			(*m)->adjustButtonPlacementPosition();
 			(*m)->frameReset();
 		}
 		else
@@ -205,3 +193,5 @@ const bool Menu::menuHasChanged() const
 {
 	return(menuChanged);
 }
+
+

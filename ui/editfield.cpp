@@ -6,10 +6,10 @@
 
 UI_EditField::UI_EditField(UI_Object* edit_parent, UI_Object* edit_caller, const eString edit_text, const eString description_text, const eString ok_string, const eString cancel_string, const std::string& name_proposal) :
 	UI_Window(edit_parent, edit_text, theme.lookUpGlobalRect(EDIT_FIELD_WINDOW), theme.lookUpGlobalMaxHeight(EDIT_FIELD_WINDOW)),
-	OK_Button(new UI_Button(this, getRelativeClientRect(), ok_string, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	Cancel_Button(new UI_Button(this, getRelativeClientRect(), cancel_string, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	editText(new UI_StaticText(this, description_text, Rect(getRelativeClientRectPosition() + Point(10, 15), getClientRectSize()), FORCE_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),
-	userText(new UI_StaticText(this, name_proposal, Rect(getRelativeClientRectPosition() + Point(17, 37), getClientRectSize()), BRIGHT_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),
+	OK_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), ok_string, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	Cancel_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), cancel_string, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	editText(new UI_StaticText(this, description_text, Rect(getRelativeClientRectPosition() + Point(10, 15), getClientRectSize()), Size(0,0), FORCE_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),
+	userText(new UI_StaticText(this, name_proposal, Rect(getRelativeClientRectPosition() + Point(17, 37), getClientRectSize()), Size(0,0), BRIGHT_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),
 	position(name_proposal.size()),
 	caller(edit_caller),
 	ani(5)

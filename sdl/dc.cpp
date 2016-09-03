@@ -24,7 +24,6 @@ DC::DC(const DC& other):
 	textColor(other.textColor),
 	font(other.font)
 { }
-// TODO?
 
 DC::DC(const unsigned int width, const unsigned int height, const unsigned int bitdepth, Uint32 nflags, Uint32 initflags) :
 	surface(NULL),
@@ -45,15 +44,46 @@ DC::DC(const unsigned int width, const unsigned int height, const unsigned int b
 	atexit(SDL_Quit);
 	surface = SDL_SetVideoMode(width, height, bitdepth, nflags);
 
-/*	switch(surface->format->BitsPerPixel)
+	switch(surface->format->BitsPerPixel)
 	{
-		case 8:(DC::Draw_HLine) = (void (unsigned int, unsigned int, unsigned int)) Draw_HLine_8bit;break;
-//		case 15:
-//		case 16:Draw_HLine = &DC::Draw_HLine_16bit;break;
-//		case 24:Draw_HLine = &DC::Draw_HLine_24bit;break;
-//		case 32:Draw_HLine = &DC::Draw_HLine_32bit;break;
-		default:toLog("Bit Error");break;
-	}*/
+		case 8:Draw_HLine = &DC::Draw_HLine_8bit;
+		       Draw_VLine = &DC::Draw_VLine_8bit;
+		       Draw_Line = &DC::Draw_Line_8bit;
+		       DrawFilledRound = &DC::DrawFilledRound_8bit;
+		       DrawFilledEdgedRound = &DC::DrawFilledEdgedRound_8bit;
+		       DrawEmptyEdgedRound = &DC::DrawEmptyEdgedRound_8bit;
+		       DrawEmptyRound = &DC::DrawEmptyRound_8bit;
+		       DrawFilledEdgedBorderRound = &DC::DrawFilledEdgedBorderRound_8bit;
+		       break;
+		case 16:Draw_HLine = &DC::Draw_HLine_16bit;
+		        Draw_VLine = &DC::Draw_VLine_16bit;
+		        Draw_Line = &DC::Draw_Line_16bit;
+		        DrawFilledRound = &DC::DrawFilledRound_16bit;
+		        DrawFilledEdgedRound = &DC::DrawFilledEdgedRound_16bit;
+		        DrawEmptyEdgedRound = &DC::DrawEmptyEdgedRound_16bit;
+		        DrawEmptyRound = &DC::DrawEmptyRound_16bit;
+		        DrawFilledEdgedBorderRound = &DC::DrawFilledEdgedBorderRound_16bit;
+			break;
+		case 24:Draw_HLine = &DC::Draw_HLine_24bit;
+		        Draw_VLine = &DC::Draw_VLine_24bit;
+		        Draw_Line = &DC::Draw_Line_24bit;
+		        DrawFilledRound = &DC::DrawFilledRound_24bit;
+		        DrawFilledEdgedRound = &DC::DrawFilledEdgedRound_24bit;
+		        DrawEmptyEdgedRound = &DC::DrawEmptyEdgedRound_24bit;
+		        DrawEmptyRound = &DC::DrawEmptyRound_24bit;
+		        DrawFilledEdgedBorderRound = &DC::DrawFilledEdgedBorderRound_24bit;
+			break;
+		case 32:Draw_HLine = &DC::Draw_HLine_32bit;
+		        Draw_VLine = &DC::Draw_VLine_32bit;
+		        Draw_Line = &DC::Draw_Line_32bit;
+		        DrawFilledRound = &DC::DrawFilledRound_32bit;
+		        DrawFilledEdgedRound = &DC::DrawFilledEdgedRound_32bit;
+		        DrawEmptyEdgedRound = &DC::DrawEmptyEdgedRound_32bit;
+		        DrawEmptyRound = &DC::DrawEmptyRound_32bit;
+		        DrawFilledEdgedBorderRound = &DC::DrawFilledEdgedBorderRound_32bit;
+			break;
+		default:break;
+	}
 }
 
 #include <sstream>
@@ -75,8 +105,8 @@ std::string DC::printHardwareInformation()
 				os << "  " << modes[i]->w << " x " << modes[i]->h << std::endl;
 		}
 	}
-	os << "Video Hardware:" << std::endl;
 	const SDL_VideoInfo* hardware = SDL_GetVideoInfo();
+	os << "Max color depth:" << hardware->vfmt->BitsPerPixel << std::endl;
 //	if(hardware->hw_availible) os << "- It is possible to create hardware surfaces" << std::endl;
 	if(hardware->wm_available) os << "- There is a window manager available" << std::endl;
 	if(hardware->blit_hw) os << "- Hardware to hardware blits are accelerated" << std::endl;
@@ -92,10 +122,8 @@ std::string DC::printHardwareInformation()
 
 std::string DC::printSurfaceInformation(DC* surface)
 {
-	const SDL_VideoInfo* hardware = SDL_GetVideoInfo();
-	int bits = hardware->vfmt->BitsPerPixel;
 	std::ostringstream os;
-	os << "Created Surface :  " << surface->GetSurface()->w << " x " << surface->GetSurface()->h << " @ " << bits << std::endl;
+	os << "Created Surface :  " << surface->GetSurface()->w << " x " << surface->GetSurface()->h << " @ " << (int)(surface->GetSurface()->format->BitsPerPixel) << std::endl;
 	if (surface->flags() & SDL_SWSURFACE) os << "- Surface is stored in system memory" << std::endl;
 	else if(surface->flags() & SDL_HWSURFACE) os << "- Surface is stored in video memory" << std::endl;
 	if(surface->flags() & SDL_ASYNCBLIT) os << "- Surface uses asynchronous blits if possible" << std::endl;
@@ -209,14 +237,14 @@ void DC::DrawLine(const signed x1, const signed y1, const signed x2, const signe
 	if((xx1<pen.GetWidth())||(yy1<pen.GetWidth())||(xx1>=max_x-pen.GetWidth())||(yy1>=max_y-pen.GetWidth())||(xx2<pen.GetWidth())||(yy2<pen.GetWidth())||(xx2>=max_x-pen.GetWidth())||(yy2>=max_y-pen.GetWidth()))
 		return;
 
-	Draw_Line(x1, y1, x2, y2);
+	(*this.*Draw_Line)(x1, y1, x2, y2);
 	if(pen.GetWidth()>1)
 	{
 //		Color c = *pen.GetColor();
 //		const_cast<DC*>(this)->pen.SetColor(Color(surface, (Uint8)(pen.GetColor()->r()*0.5),  (Uint8)(pen.GetColor()->g()*0.5), (Uint8)(pen.GetColor()->b()*0.5)));
-		Draw_Line(x1, y1+1, x2, y2+1);
-		Draw_Line(x1+1, y1, x2+1, y2);
-		Draw_Line(x1+1, y1+1, x2+1, y2+1);
+		(*this.*Draw_Line)(x1, y1+1, x2, y2+1);
+		(*this.*Draw_Line)(x1+1, y1, x2+1, y2);
+		(*this.*Draw_Line)(x1+1, y1+1, x2+1, y2+1);
 //		const_cast<DC*>(this)->pen.SetColor(c);
 	}
 }
@@ -352,12 +380,12 @@ void DC::DrawEdgedRoundedRectangle(const signed int x, const signed int y, const
 	if(brush.GetStyle() == TRANSPARENT_BRUSH_STYLE)
 	{
 		if(pen.GetStyle() != TRANSPARENT_PEN_STYLE)
-			DrawEmptyEdgedRound(x, y, ww, hh, radius);
+			(*this.*DrawEmptyEdgedRound)(x, y, ww, hh, radius);
 	} else
 	if(pen.GetStyle() == TRANSPARENT_PEN_STYLE)
-		DrawFilledEdgedRound(x, y, ww, hh, radius);
+		(*this.*DrawFilledEdgedRound)(x, y, ww, hh, radius);
 	else 
-		DrawFilledEdgedBorderRound(x, y, ww, hh, radius);
+		(*this.*DrawFilledEdgedBorderRound)(x, y, ww, hh, radius);
 }
 
 void DC::DrawRoundedRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int radius) const
@@ -376,9 +404,9 @@ void DC::DrawRoundedRectangle(const signed int x, const signed int y, const unsi
 	}
 
 	if (brush.GetStyle() != TRANSPARENT_BRUSH_STYLE)
-		DrawFilledRound(x, y, ww, hh, radius);
+		(*this.*DrawFilledRound)(x, y, ww, hh, radius);
 	if (pen.GetStyle() != TRANSPARENT_PEN_STYLE)
-		DrawEmptyRound(x, y, ww, hh, radius);
+		(*this.*DrawEmptyRound)(x, y, ww, hh, radius);
 }
 
 
@@ -434,7 +462,7 @@ void DC::DrawVerticalLine(const signed int x0, const signed int y0, const signed
 		yy1=max_y-1;
 	else 
 		yy1=y1;
-	Draw_VLine(x0, yy0, yy1);		
+	(*this.*Draw_VLine)(x0, yy0, yy1);
 }
 
 void DC::DrawHorizontalLine(const signed int x0, const signed int y0, const signed int x1) const
@@ -455,7 +483,7 @@ void DC::DrawHorizontalLine(const signed int x0, const signed int y0, const sign
 		xx1=max_x-1;
 	else
 		xx1=x1;
-	Draw_HLine(xx0, y0, xx1);
+	(*this.*Draw_HLine)(xx0, y0, xx1);
 }
 
 const bool DC::Lock() const {

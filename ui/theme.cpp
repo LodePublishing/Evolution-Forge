@@ -6,7 +6,7 @@
 #include <string>
 
 UI_Theme::UI_Theme():
-	resolution(RESOLUTION_1280x1024),
+	resolution(RESOLUTION_640x480),
 	language(GERMAN_LANGUAGE),
 	colorTheme(DARK_BLUE_THEME)
 {
@@ -294,7 +294,8 @@ const eDataType getDataType(const std::string& item)
 	if(item=="@PENS") return(PEN_DATA_TYPE);else
 	if(item=="@BRUSHES") return(BRUSH_DATA_TYPE);else
 	if(item=="@BITMAPS") return(BITMAP_DATA_TYPE);else
-	if(item=="@BUTTONS") return(BUTTON_DATA_TYPE);else
+	if(item=="@BUTTON_ANIMATION") return(BUTTON_ANIMATION_DATA_TYPE);else
+	if(item=="@BUTTON_WIDTH") return(BUTTON_WIDTH_DATA_TYPE);else
 	return(ZERO_DATA_TYPE);
 }
 
@@ -304,6 +305,7 @@ const eSubDataType getSubDataType(const eDataType mode)
 	{	
 		case STRING_DATA_TYPE:return(LANGUAGE_SUB_DATA_TYPE);
 		case FONT_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
+		case BUTTON_WIDTH_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
 		case WINDOW_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
 		case COLOR_DATA_TYPE:return(COLOR_THEME_SUB_DATA_TYPE);
 		case BITMAP_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
@@ -344,6 +346,7 @@ const eLanguage getLanguageSubDataEntry(const std::string& item)
 
 const eResolution getResolutionSubDataEntry(const std::string& item)
 {
+	if(item=="@640x480") return(RESOLUTION_640x480);else
 	if(item=="@800x600") return(RESOLUTION_800x600);else
 	if(item=="@1024x768") return(RESOLUTION_1024x768);else
 	if(item=="@1280x1024") return(RESOLUTION_1280x1024);else
@@ -1041,6 +1044,10 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 //						os << "- " << current_resolution << " " << current_line << " " << t << " " << value[1];
 //						toLog(os.str());
 					}break;
+					case BUTTON_WIDTH_DATA_TYPE:
+					{
+						buttonWidth[current_resolution][current_line] = value[0];
+					}break;
 					case WINDOW_DATA_TYPE:
 					{
 						unsigned int max_height = 0;
@@ -1052,7 +1059,7 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 				current_line++;
 			}
 			// 0 ebenen -> buttons :) BUTTON_DATA_TYPE?? TODO
-			else if((sub_mode==ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE))
+			else if((sub_mode==ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE)&&(mode==BUTTON_ANIMATION_DATA_TYPE))
 			{
 				buttonAnimationList[current_line] = new ButtonAnimation;
 				buttonAnimationList[current_line]->speed=value[0];

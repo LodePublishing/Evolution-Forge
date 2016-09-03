@@ -5,6 +5,8 @@
 UI_Scrollbar& UI_Scrollbar::operator=(const UI_Scrollbar& object)
 {
 	((UI_Object)(*this)) = ((UI_Object)object);
+	firstItemY = object.firstItemY;
+	lastItemY = object.lastItemY;
 	delete add;
 	add = new UI_Button(*(object.add));
 	delete sub;
@@ -22,6 +24,8 @@ UI_Scrollbar& UI_Scrollbar::operator=(const UI_Scrollbar& object)
 
 UI_Scrollbar::UI_Scrollbar(const UI_Scrollbar& object) :
 	UI_Object((UI_Object)object),
+	firstItemY(object.firstItemY),
+	lastItemY(object.lastItemY),
 	add(new UI_Button(*(object.add))),
 	sub(new UI_Button(*(object.sub))),
 	hideable(object.hideable),
@@ -36,8 +40,10 @@ UI_Scrollbar::UI_Scrollbar(const UI_Scrollbar& object) :
 
 UI_Scrollbar::UI_Scrollbar(UI_Object* scroll_parent, /*const Rect& clientRect TODO */ const unsigned int start_y, const unsigned int max_height, const bool scroll_hideable) :
 	UI_Object(scroll_parent, Rect(0, 0, scroll_parent->getWidth(), scroll_parent->getHeight())), // TODO
-	add(new UI_Button(this, Rect(getParent()->getWidth()-3, start_y, 8, 8), SMALL_ARROW_DOWN_BUTTON, PRESS_BUTTON_MODE)),
-	sub(new UI_Button(this, Rect(getParent()->getWidth()-3, 4, 8, 8), SMALL_ARROW_UP_BUTTON, PRESS_BUTTON_MODE)),
+	firstItemY(0),
+	lastItemY(0),
+	add(new UI_Button(this, Rect(getParent()->getWidth()-3, start_y, 8, 8), Size(0,0), SMALL_ARROW_DOWN_BUTTON, PRESS_BUTTON_MODE)),
+	sub(new UI_Button(this, Rect(getParent()->getWidth()-3, 4, 8, 8), Size(0,0), SMALL_ARROW_UP_BUTTON, PRESS_BUTTON_MODE)),
 	hideable(scroll_hideable),
 	internalScrollY(0),
 	internalHeight(0),
@@ -99,12 +105,12 @@ void UI_Scrollbar::process() // process messages, continue animation etc.
 		return;
 	UI_Object::process();
 
-	totalHeight = getParent()->lastItemY - getParent()->firstItemY; //???
+	totalHeight = lastItemY - firstItemY; //???
 
 	unsigned int oldBarHeight = barHeight;
 	unsigned int oldScrollY = currentScrollY;
 
-	if(getParent()->lastItemY == getParent()->firstItemY)
+	if(lastItemY == firstItemY)
 		barHeight = clientHeight;
 	else 
 		barHeight = clientHeight * clientHeight / totalHeight;
@@ -127,7 +133,7 @@ void UI_Scrollbar::process() // process messages, continue animation etc.
 	if(currentScrollY != oldScrollY)
 		setNeedRedrawMoved();
 
-	setHeight(clientHeight);
+//	setHeight(clientHeight); TODO
 
 	if(clientHeight <= 0)
 		setPosition(Point(0, 0));

@@ -30,14 +30,14 @@ void MapMenu::resetData()
 		(*m)->Show();
 		(*m)->setButton(eButton(UNIT_TYPE_4_BUTTON));
 		(*m)->updateText(database.getMap(i)->getName());
-		Rect edge = Rect(Point(10, height * (FONT_SIZE + 9)), Size(160,0));
+		Rect edge = Rect(Point(10, height * (FONT_SIZE + 9)), Size(0,0));
 		(*m)->adjustRelativeRect(edge);
 		height++;
 		i++;
 	}
 	for(;i<database.getMapCount();i++)
 	{
-		MenuEntry* entry = new MenuEntry(this, Rect(Point(10, height * (FONT_SIZE + 9)), Size(160, FONT_SIZE)), database.getMap(i)->getName());
+		MenuEntry* entry = new MenuEntry(this, Rect(Point(10, height * (FONT_SIZE + 9)), Size(0, FONT_SIZE)), database.getMap(i)->getName());
 		entry->setButton(eButton(UNIT_TYPE_4_BUTTON));
 		menuEntries.push_back(entry);
 		height++;

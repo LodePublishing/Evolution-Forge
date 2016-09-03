@@ -26,6 +26,9 @@ class UI_Scrollbar : public UI_Object
 
 		void reloadStrings();
 
+		signed int firstItemY;
+		signed int lastItemY;
+
 	protected:
 	private:
 		UI_Button* add;

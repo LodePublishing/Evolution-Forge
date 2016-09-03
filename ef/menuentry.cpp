@@ -1,12 +1,12 @@
 #include "menuentry.hpp"
 
 MenuEntry::MenuEntry(UI_Object* menuentry_parent, Rect rect, const eString unit) :
-	UI_Button(menuentry_parent, rect, unit, ADD_GOAL_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH),
+	UI_Button(menuentry_parent, rect, Size(0, 0), unit, ADD_GOAL_BUTTON, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH),
 	color(NULL_COLOR)
 { }
 
 MenuEntry::MenuEntry(UI_Object* menuentry_parent, Rect rect, const std::string& unit) :
-	UI_Button(menuentry_parent, rect, unit, ADD_GOAL_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH),
+	UI_Button(menuentry_parent, rect, Size(0, 0), unit, ADD_GOAL_BUTTON, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH),
 	color(NULL_COLOR)
 { }
 

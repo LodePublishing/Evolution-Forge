@@ -8,7 +8,7 @@ class UI_CheckButton : public UI_Object
 	public:
 		UI_CheckButton& operator=(const UI_CheckButton& object);
 		UI_CheckButton(const UI_CheckButton& object);
-		UI_CheckButton(UI_Object* checkbutton_parent, const Point top_left, const Size distance_bottom_right, const ePositionMode position_mode, const eString txt, const eString tooltip_string, const bool is_checked=false);
+		UI_CheckButton(UI_Object* checkbutton_parent, const Rect checkbutton_rect, const Size distance_bottom_right, const ePositionMode position_mode, const eString txt, const eString tooltip_string, const bool is_checked=false);
 		~UI_CheckButton();
 		UI_Object* checkTooltip();
 		const bool isChecked() const;

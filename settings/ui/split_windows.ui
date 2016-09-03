@@ -1,3 +1,90 @@
+@640x480
+	@MAIN
+		Game window, 200, 120, 120, absolute coordinates, 0, 0 
+		Score window, 200, 120, 120, dock right inside of, Game window, dock top inside of, Game window
+		Database window, 300, 500, 500, dock left inside of, Game window, dock top inside of, Game window
+	@END
+
+	@1PLAYER
+		@PLAYER_ONE
+			Player window, 300, 400, 400, absolute coordinates, 0, 0
+			Force window, 300, 100, 100, absolute coordinates, 100, 150
+			Build order window, 200, 100, 100, absolute coordinates, 500, 150
+			Build order diagram window, 500, 140, 300, dock with right border of, Force window, dock top inside of, Player window
+			Build order graph window, 500, 75, 300, dock with right border of, Force window, dock with lower border of, Build order diagram window
+		@END
+	@END
+	@2PLAYER
+		@PLAYER_ONE
+			Player window, 300, 500, 500, absolute coordinates, 0, 0
+			Force window, 300, 100, 100, absolute coordinates, 100, 150
+			Build order window, 200, 100, 100, absolute coordinates, 500, 150
+			Build order diagram window, 500, 140, 300, dock with right border of, Force window, dock top inside of, Player window
+			Build order graph window, 500, 75, 300, dock with right border of, Force window, dock with lower border of, Build order diagram window
+		@END
+		@PLAYER_TWO
+			Player window, 300, 500, 500, absolute coordinates, 0, 0
+			Force window, 300, 100, 100, absolute coordinates, 100, 150
+			Build order window, 200, 100, 100, absolute coordinates, 500, 150
+			Build order diagram window, 500, 140, 300, dock with right border of, Force window, dock top inside of, Player window
+			Build order graph window, 500, 75, 300, dock with right border of, Force window, dock with lower border of, Build order diagram window
+		@END
+	@END
+	@3PLAYER
+		@PLAYER_ONE
+			Player window, 300, 500, 500, absolute coordinates, 0, 0
+			Force window, 300, 100, 100, absolute coordinates, 100, 150
+			Build order window, 200, 100, 100, absolute coordinates, 500, 150
+			Build order diagram window, 500, 140, 300, dock with right border of, Force window, dock top inside of, Player window
+			Build order graph window, 500, 75, 300, dock with right border of, Force window, dock with lower border of, Build order diagram window
+		@END
+		@PLAYER_TWO
+			Player window, 300, 500, 500, absolute coordinates, 0, 0
+			Force window, 300, 100, 100, absolute coordinates, 100, 150
+			Build order window, 200, 100, 100, absolute coordinates, 500, 150
+			Build order diagram window, 500, 140, 300, dock with right border of, Force window, dock top inside of, Player window
+			Build order graph window, 500, 75, 300, dock with right border of, Force window, dock with lower border of, Build order diagram window
+		@END
+		@PLAYER_THREE
+			Player window, 300, 500, 500, absolute coordinates, 0, 0
+			Force window, 300, 100, 100, absolute coordinates, 100, 150
+			Build order window, 200, 100, 100, absolute coordinates, 500, 150
+			Build order diagram window, 500, 140, 300, dock with right border of, Force window, dock top inside of, Player window
+			Build order graph window, 500, 75, 300, dock with right border of, Force window, dock with lower border of, Build order diagram window
+		@END
+	@END
+	@4PLAYER
+		@PLAYER_ONE
+			Player window, 300, 500, 500, absolute coordinates, 0, 0
+			Force window, 300, 100, 100, absolute coordinates, 100, 150
+			Build order window, 200, 100, 100, absolute coordinates, 500, 150
+			Build order diagram window, 500, 140, 300, dock with right border of, Force window, dock top inside of, Player window
+			Build order graph window, 500, 75, 300, dock with right border of, Force window, dock with lower border of, Build order diagram window
+		@END
+		@PLAYER_TWO
+			Player window, 300, 500, 500, absolute coordinates, 0, 0
+			Force window, 300, 100, 100, absolute coordinates, 100, 150
+			Build order window, 200, 100, 100, absolute coordinates, 500, 150
+			Build order diagram window, 500, 140, 300, dock with right border of, Force window, dock top inside of, Player window
+			Build order graph window, 500, 75, 300, dock with right border of, Force window, dock with lower border of, Build order diagram window
+		@END
+		@PLAYER_THREE
+			Player window, 300, 500, 500, absolute coordinates, 0, 0
+			Force window, 300, 100, 100, absolute coordinates, 100, 150
+			Build order window, 200, 100, 100, absolute coordinates, 500, 150
+			Build order diagram window, 500, 140, 300, dock with right border of, Force window, dock top inside of, Player window
+			Build order graph window, 500, 75, 300, dock with right border of, Force window, dock with lower border of, Build order diagram window
+		@END
+		@PLAYER_FOUR
+			Player window, 300, 500, 500, absolute coordinates, 0, 0
+			Force window, 300, 100, 100, absolute coordinates, 100, 150
+			Build order window, 200, 100, 100, absolute coordinates, 500, 150
+			Build order diagram window, 500, 140, 300, dock with right border of, Force window, dock top inside of, Player window
+			Build order graph window, 500, 75, 300, dock with right border of, Force window, dock with lower border of, Build order diagram window
+		@END
+	@END
+@END
+
 @800x600
 	@MAIN
 		Game window, 200, 120, 120, absolute coordinates, 0, 0 
@@ -84,7 +171,6 @@
 		@END
 	@END
 @END
-
 
 
 @1024x768

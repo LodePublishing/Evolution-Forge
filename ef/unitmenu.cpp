@@ -67,8 +67,8 @@ void UnitMenu::assignAnarace(ANABUILDORDER* goal_anarace)
 //vereinfachen, wie bei goalmenu in ein resetdata rein
 void UnitMenu::processMenu()
 {
-	return;
-	std::ostringstream os;os << "processMenu " << (rand()%10);toLog(os.str());
+//	return;
+//	std::ostringstream os;os << "processMenu " << (rand()%10);toLog(os.str());
 	if(menuLevel)
 	{
 		if(menuLevel==1)
@@ -191,7 +191,7 @@ void UnitMenu::process()
 	Menu::process();
 	if(menuHasChanged());
 	{
-		std::ostringstream os;os << "menuHasChanged " << (rand()%10);toLog(os.str());
+//		std::ostringstream os;os << "menuHasChanged " << (rand()%10);toLog(os.str());
 		height=3;
 		processMenu();
 	}

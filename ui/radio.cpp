@@ -5,7 +5,8 @@ UI_Radio& UI_Radio::operator=(const UI_Radio& object)
 	((UI_Group)(*this)) = ((UI_Group)object);
 	setButtonHasChanged(object.changed);
 	alwaysOn = object.alwaysOn;
-	for(unsigned int i = 50;i--;) buttonId[i]=object.buttonId[i];
+	for(unsigned int i = 50;i--;) 
+		buttonId[i]=object.buttonId[i];
 	return(*this);
 }
 
@@ -14,15 +15,18 @@ UI_Radio::UI_Radio(const UI_Radio& object):
 	changed(object.changed),
 	alwaysOn(object.alwaysOn)
 {
-	for(unsigned int i = 50;i--;) buttonId[i]=object.buttonId[i];
+	for(unsigned int i = 50;i--;) 
+		buttonId[i]=object.buttonId[i];
 }
-
-UI_Radio::UI_Radio(UI_Object* radio_parent, Point position, const bool always_on, const eString radio_title) :
-	UI_Group(radio_parent, position, radio_title),
+#include <sstream>
+UI_Radio::UI_Radio(UI_Object* radio_parent, Rect initial_rect, Size bottom_right_distance, const bool always_on, const eString radio_title, const ePositionMode position_mode) :
+	UI_Group(radio_parent, initial_rect, bottom_right_distance, radio_title, position_mode),
 	changed(false),
 	alwaysOn(always_on)
 { 
-	for(unsigned int i = 50;i--;) buttonId[i]=NULL;
+
+	for(unsigned int i = 50;i--;) 
+		buttonId[i]=NULL;
 }
 
 UI_Radio::~UI_Radio()
@@ -56,7 +60,8 @@ void UI_Radio::updateIds()
 {
 	for(unsigned int i = 0; i < 50;i++)
 	{
-		while((i<50)&&(buttonId[i]!=NULL)) i++;
+		while((i<50)&&(buttonId[i]!=NULL)) 
+			i++;
 		if(i<50)
 		{
 			for(int j = i;j<9;j++)
@@ -74,16 +79,6 @@ void UI_Radio::draw(DC* dc) const
 	UI_Group::draw(dc);
 }
 
-const bool UI_Radio::buttonHasChanged() const
-{
-	return(changed);
-}
-
-void UI_Radio::setButtonHasChanged(const bool has_changed)
-{
-	changed = has_changed;
-}
-
 void UI_Radio::forceUnpressAll()
 {
 	UI_Button* tmp=(UI_Button*)getChildren();
@@ -97,7 +92,6 @@ void UI_Radio::forceUnpressAll()
 
 void UI_Radio::forcePress(const unsigned int button_id)
 {
-	UI_Button* tmp=(UI_Button*)getChildren();
 #ifdef _SCC_DEBUG
         if(!buttonId[button_id]) {
                 toLog("DEBUG: (UI_Radio::forcePress): Variable buttonId not initialized.");return;
@@ -134,7 +128,7 @@ void UI_Radio::leftButtonPressed(UI_Button* button) // Unpress all except one
 	} while(tmp!=(UI_Button*)getChildren());
 }
 
-void UI_Radio::leftButtonReleased(UI_Button* button) // allow release?
+void UI_Radio::leftButtonReleased(UI_Button* button) // allow release? TODO
 {
 	setButtonHasChanged();
 //	UI_Button* tmp = (UI_Button*)getChildren();

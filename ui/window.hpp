@@ -1,9 +1,6 @@
 #ifndef _UI_WINDOW_HPP
 #define _UI_WINDOW_HPP
 
-extern const unsigned int MIN_HEIGHT; // TODO in bograph?
-
-#include "object.hpp"
 #include "radio.hpp"
 #include "scrollbar.hpp"
 
@@ -65,14 +62,9 @@ class UI_Window : public UI_Object
 		const signed int getAbsoluteClientRectLeftBound() const;
 		const signed int getAbsoluteClientRectLowerBound() const;
 		const signed int getAbsoluteClientRectRightBound() const;
-
 		const unsigned int getClientTargetHeight() const;
 		const unsigned int getClientTargetWidth() const;
 		
-// do windows size changes smoothly		
-		void adjustClientRect();
-
-//		void setRahmen(Rect rahmen);
 		void addTab(UI_Button* tab_button, const unsigned int button_id);
 		void removeTab(const unsigned int button_id);
 		const bool tabWasChanged() const;
@@ -96,8 +88,6 @@ class UI_Window : public UI_Object
 
 		void setTitleParameter(const std::string& p);
 
-		void updateBorders();
-
 		const unsigned int getCurrentTab() const;
 		void forcePressTab(const unsigned int press_tab);
 
@@ -114,24 +104,22 @@ class UI_Window : public UI_Object
 		void moveScrollbarToBottom();
 
 	protected:
-//		bool isMouseInsideClientArea();
 		UI_Radio* tabRow;
 	private:
+	// do windows size changes smoothly		
+		void adjustClientRect();
+		unsigned int filledHeight;
+
+		bool doAdjustments;
 		UI_Button* tab[MAX_TABS];
 
 		eIsTransparent isTransparent;
-		unsigned int currentTab; // maybe move to 'theme'
 
 // no set/get for title as this is unique and does not change
 		eString titleString;
 		std::string titleParameter;
 		
 		Rect originalRect;
-
-// actual painted borders
-		Rect border;
-		Rect outerBorder;
-
 // client area
 		Rect clientRect;
 		Rect clientStartRect;
@@ -228,6 +216,14 @@ inline const signed int UI_Window::getAbsoluteClientRectLowerBound() const {
 
 inline const signed int UI_Window::getAbsoluteClientRectRightBound() const {
 	return(getAbsoluteClientRectPosition().x + getClientRectWidth() -1 );
+}
+
+inline const unsigned int UI_Window::getClientTargetWidth() const {
+	return(clientTargetRect.GetWidth());
+}
+
+inline const unsigned int UI_Window::getClientTargetHeight() const {
+	return(clientTargetRect.GetHeight());
 }
 
 inline void UI_Window::setChangedFlag(const bool flag) {

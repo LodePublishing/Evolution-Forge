@@ -5,6 +5,48 @@
 #include <list>
 #include <string>
 
+enum ePositionMode
+{
+	DO_NOT_ADJUST,
+	TOTAL_CENTERED,
+	HORIZONTALLY_CENTERED,
+	VERTICALLY_CENTERED,
+	TOP_LEFT,
+	TOP_CENTER,
+	TOP_RIGHT,
+	CENTER_RIGHT,
+	BOTTOM_RIGHT,
+	BOTTOM_CENTER,
+	BOTTOM_LEFT,
+	CENTER_LEFT,
+	ARRANGE_TOP_LEFT,
+	ARRANGE_TOP_RIGHT,
+	ARRANGE_BOTTOM_LEFT,
+	ARRANGE_BOTTOM_RIGHT,
+	ARRANGE_LEFT,
+	ARRANGE_RIGHT
+};
+
+enum eAutoSize
+{
+	NOTHING,
+	NO_AUTO_SIZE,
+	AUTO_SIZE_ONCE,
+	AUTO_SIZE_TWICE,
+	AUTO_SIZE,
+	AUTO_HEIGHT_FULL_WIDTH, // fehlerhaft! TODO
+	FULL_WIDTH,
+	AUTO_HEIGHT_CONST_WIDTH,
+	CONST_SIZE //~~ constant width
+};
+
+enum eAdjustMode
+{
+	ADJUST_ONLY_POSITION,
+	ADJUST_AFTER_PARENT_WAS_CHANGED,
+	ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED
+};
+
 class UI_Object;
 class UI_EditField;
 class UI_ToolTip;
@@ -16,27 +58,19 @@ class UI_Object
 	public:
 		UI_Object& operator=(const UI_Object& object);
 		UI_Object(const UI_Object& object);
-		UI_Object(UI_Object* parent_object, const Rect relative_rect = Rect(0,0,0,0), const Size distance_bottom_right = Size(0,0));
+		UI_Object(UI_Object* parent_object, const Rect relative_rect = Rect(0, 0, 0, 0), const Size distance_bottom_right = Size(0, 0), const ePositionMode position_mode = DO_NOT_ADJUST, const eAutoSize auto_size = NO_AUTO_SIZE);
+
 		virtual ~UI_Object();
 	
-		void setRelativeRect(const Rect& rect);
 		void Show(const bool show=true);
 		void Hide(const bool hide=true);
 
-		void Enable(const bool enable=true);
-		void Disable(const bool disable=true);
-		
 		const bool isShown() const;
-		const bool isDisabled() const;
-
 		const bool isTopItem() const;
 		
 		const Point& getRelativePosition() const;
-		void setWidth(const unsigned int width);
-		void setHeight(const unsigned int height);
-		void setSize(const Size size);
 		void setPosition(const Point& position);
-//		void jumpToPosition(const Point& position);
+		void setPosition(const unsigned int x, const unsigned int y);
 		
 		void setLeft(const signed int x);
 		void setTop(const signed int y);
@@ -56,27 +90,29 @@ class UI_Object
 		const signed int getAbsoluteLeftBound() const;
 		const signed int getAbsoluteRightBound() const;
 
+		const unsigned int getTargetWidth() const;
+		const unsigned int getTargetHeight() const;
+		const Point getTargetPosition() const;
+		const Rect& getTargetRect() const;
+
+		void adjustRelativeRect(Rect rect);
+		
+		const bool isMouseInside() const;
+		
+		
 		void checkForChildrenOverlap(const Rect& rect);
 		const bool checkForNeedRedraw() const;
 		void setNeedRedrawMoved(const bool need_redraw=true);
 		void setNeedRedrawNotMoved(const bool need_redraw=true);
 
-		const unsigned int getTargetWidth() const;
-		const unsigned int getTargetHeight() const;
-		const Point getTargetPosition() const;
-
-		const unsigned int getDoAdjustments() const;
-		void setDoAdjustments(const unsigned int doAdjustments=1);
-		void adjustRelativeRect(Rect rect);
-
-//		void resetToOriginalValues(); // ~~
-
 		virtual UI_Object* checkHighlight();
 		virtual UI_Object* checkToolTip();
 		virtual void reloadStrings();
-		virtual void adjustButtonPlacementSize();
-		const bool isMouseInside() const;
 
+		UI_Object* getNextBrother() const;
+		UI_Object* getPrevBrother() const;
+		UI_Object* getParent() const; // TODO make const correctness!
+		UI_Object* getChildren() const;
 		void setParent(UI_Object* daddy);
 		void removeFromFamily();
 		void makeFirstChild();
@@ -85,38 +121,13 @@ class UI_Object
 		virtual void process();
 		virtual void resetData();
 
-		UI_Object* getNextBrother() const;
-		UI_Object* getPrevBrother() const;
-		UI_Object* getParent() const; // TODO make const correctness!
-		UI_Object* getChildren() const;
-
 		void updateToolTip(const eString tooltip);
 		const eString getToolTipString() const;
 
-		static void assignStartTime();
-		static const unsigned long int getTimeStampMs(const unsigned long int timeSpan);
-		static const bool isTimeSpanElapsed(const unsigned long int timeSpan);
-		
-		// we added an item at this y position
-
-		Rect startRect; // TODO private machen
-		Rect targetRect;
-
-		Size distanceBottomRight;
-		
-		unsigned int filledHeight;
-		
-		signed int firstItemY;
-		signed int lastItemY;
-
 		static unsigned int redrawnObjects;
-
-//		static SDL_Rect rectlist[3000];
-//		static unsigned int rectnumber;
 		static unsigned int max_x;
 		static unsigned int max_y;
 		static UI_Theme theme;
-
 		static bool currentButtonPressed;
 		static bool currentButtonHasAlreadyLeft;
 		static UI_Button* currentButton;
@@ -153,89 +164,47 @@ class UI_Object
 
 		static std::list<std::string> msgList;
 
-//		void addRect(const Rect& rect);
-
-//		const bool setFocus(); TODO
-		const bool isUpdateRelativePositions() const;
+		void adjustPositionAndSize(const eAdjustMode adjust_mode, const Size& size = Size(0,0));
+		void setSize(const Size size);
 	protected:
-
 		UI_Object* children; // pointer to the head of the linked list of children
-//		std::list<Rect> notDrawRectList;
-		SDL_Surface* background;
-		Rect oldRect;
-		bool updateRelativePositions;
-
 	private:
+		Rect relativeRect; // every object needs a current position and size, position is >> RELATIVE << to parent!
+		Rect startRect; // TODO private machen
+		Rect targetRect;
+		Rect originalRect;
+		Size distanceBottomRight;
+		bool sizeHasChanged;
+
+		void setWidth(const unsigned int width);
+		void setHeight(const unsigned int height);
+		void setSize(const unsigned int width, const unsigned int height);
+
+		ePositionMode positionMode;
+		eAutoSize autoSize;
 		
 		bool shown;
-		bool disabledFlag;
 
 		signed int min_top_left_x, min_left_y, min_right_y, min_bottom_left_x;
 		signed int min_top_right_x/*, min_left_y, min_right_y*/, min_bottom_right_x;
 	
-		void addChild(UI_Object* child);
-//		bool canGetFocus;
-//		bool hasFocus; TODO
-		// returns false if it (and none of its children) cannot get focus
-
 // needs redraw?
 		bool needRedraw;
 			
+		void addChild(UI_Object* child);
+		UI_Object* parent; // = NULL means that this is the screen (x=0/y=0)
 		UI_Object* prevBrother;
 		UI_Object* nextBrother; 
 
-		UI_Object* parent; // = NULL means that this is the screen (x=0/y=0)
-
-		Rect relativeRect; // every object needs a current position and size, position is >> RELATIVE << to parent!
-//		Rect lastRect;
-		
-	// to adjust object smoothly
-		unsigned int doAdjustments;
-		
 		eString toolTipString;
-
-		static unsigned long int startTime;
-
-//		list<Rect> changedRects;
-
-//		static void addRectToBeDrawn(Rect& lastRect, const Rect currentRect);
-//		int linkedToHotSpot; // is this item linked constantly to a hotspot? Or is his position determined by hardcoded functions?
-
-//		int hasFocus; // make every object accessible with the keyboard (TAB)
-//		int canTransform; // is the width/height constant or can it be transformed?
-//		int isBoundToParent; // is the width/height somehow bound to the parent? (e.g. scrollBar)
-	
-	
-//		int hotkey;
-
 };
-
-inline void UI_Object::setRelativeRect(const Rect& rect) {
-	this->relativeRect=rect;
-}
 
 inline void UI_Object::Hide(const bool hide) {
 	Show(!hide);
 }
 
-inline void UI_Object::Enable(const bool enable) {
-	disabledFlag = !enable;
-}
-
-inline void UI_Object::Disable(const bool disable) {
-	disabledFlag = disable;
-}
-
 inline const bool UI_Object::isShown() const {
 	return(shown);
-}
-
-inline const bool UI_Object::isDisabled() const {
-	return(disabledFlag);
-}
-
-inline void UI_Object::assignStartTime() {
-	startTime = SDL_GetTicks();
 }
 
 inline const Point& UI_Object::getRelativePosition() const {
@@ -347,14 +316,6 @@ inline const eString UI_Object::getToolTipString() const {
 	return(toolTipString);
 }
 
-inline const unsigned int UI_Object::getDoAdjustments() const {
-	return(doAdjustments);
-}
-
-inline void UI_Object::setDoAdjustments(const unsigned int do_adjustments) {
-	doAdjustments=do_adjustments;
-}
-
 inline const unsigned int UI_Object::getTargetWidth() const {
 	return(targetRect.GetWidth());
 }
@@ -367,9 +328,20 @@ inline const Point UI_Object::getTargetPosition() const {
 	return(targetRect.GetTopLeft());
 }
 
+inline const Rect& UI_Object::getTargetRect() const {
+	return(targetRect);
+}
+
 inline const bool UI_Object::isMouseInside() const {
 	return(getAbsoluteRect().Inside(mouse));
 }
 
+inline void UI_Object::setSize(const unsigned int width, const unsigned int height) {
+	setSize(Size(width, height));
+}
+
+inline void UI_Object::setPosition(const unsigned int x, const unsigned int y) {
+	setPosition(Point(x, y));
+}
 #endif
 

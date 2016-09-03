@@ -379,9 +379,9 @@ void BoDiagramWindow::draw(DC* dc) const
 			dc->SetPen(*theme.lookUpPen(BODIAGRAM_SUPPLY_PEN));
 			for(unsigned int i = 0;i<(count-1);i++)
 			{
-				if((hneedSupply[i].y > nneedSupply[i].y)&&(hneedSupply[i].x < getClientTargetWidth()-2))
+				if((hneedSupply[i].y > nneedSupply[i].y)&&(hneedSupply[i].x < (unsigned int)(getClientTargetWidth()-2)))
 					dc->DrawRectangle(getAbsoluteClientRectPosition() + Point(0, getClientRectHeight()) + hneedSupply[i], Size(hneedSupply[i+1].x - hneedSupply[i].x, hneedSupply[i].y - nneedSupply[i].y));
-				else if((hneedSupply[i].y < nneedSupply[i].y)&&(hneedSupply[i].x < getClientTargetWidth()-2))
+				else if((hneedSupply[i].y < nneedSupply[i].y)&&(hneedSupply[i].x < (unsigned int)(getClientTargetWidth()-2)))
 					dc->DrawRectangle(getAbsoluteClientRectPosition() + Point(0, getClientRectHeight()) + hneedSupply[i], Size(hneedSupply[i+1].x - hneedSupply[i].x, nneedSupply[i].y - hneedSupply[i].y));
 			}
 				

@@ -30,7 +30,7 @@ InfoWindow::InfoWindow(UI_Object* info_parent, ANABUILDORDER* info_anarace):
 	bo(NULL),
 	bg(NULL),
 	unit(0),
-	text(new UI_StaticText(this, "nothing", getRelativeClientRect(), BRIGHT_TEXT_COLOR, SMALL_MIDDLE_NORMAL_FONT, FORMATTED_NON_BLOCK_TEXT_MODE)),
+	text(new UI_StaticText(this, "nothing", getRelativeClientRect(), Size(0,0), BRIGHT_TEXT_COLOR, SMALL_MIDDLE_NORMAL_FONT)),
 	program(),
 	anarace(info_anarace)
 { }

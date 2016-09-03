@@ -50,20 +50,13 @@ class Main
 		const bool newRun();
 	
 	private:
-//		SDL_Surface* cursor_save;
-//		SDL_Surface* cursor;
 		void initializeGame(const unsigned int game_number);
 		MainWindow* mainWindow;
 		TutorialWindow* tutorialWindow;
 		SettingsWindow* settingsWindow;
 		Point maus;
-//		static ProgressBar* bar;
-
-		bool endrun;
-
 		unsigned int gameCount; 
 		Game* game[MAX_GAME];
-		
 		static InfoWindow* infoWindow;
 		static MessageWindow* msgWindow;
 //		StatisticsWindow* statisticsWindow;

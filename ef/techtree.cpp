@@ -58,7 +58,6 @@ void TechTreeWindow::process()
 			if(foundOne)
 				y2 = k*s2.GetHeight()+3+s.GetHeight();
 		}
-//	setRelativeRect(Rect(x1, p.y, (unsigned int)(x2-x1+6), (unsigned int)(y2 - p.y + 16)));
 }
 
 void TechTreeWindow::draw(DC* dc) const

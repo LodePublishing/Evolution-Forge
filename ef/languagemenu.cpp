@@ -6,7 +6,7 @@ LanguageMenu::LanguageMenu(UI_Object* language_parent, Rect language_rect) :
     for(int i=0;i<2;i++)
     {
 		Rect edge = Rect(Point(10 + (i%2) * 75, (i/2)*20 + height * (FONT_SIZE+9)), Size(75, FONT_SIZE+3));
-        MenuEntry* entry = new MenuEntry(this, edge, (eString)(SETTING_ENGLISH_LANGUAGE_STRING+i));
+		MenuEntry* entry = new MenuEntry(this, edge, (eString)(SETTING_ENGLISH_LANGUAGE_STRING+i));
 		entry->setButton(eButton(UNIT_TYPE_5_BUTTON));
    		menuEntries.push_back(entry);
     }

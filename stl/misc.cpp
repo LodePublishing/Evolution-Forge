@@ -10,8 +10,8 @@
 std::string lastMsg;
 void toLog(const std::string& msg)
 {
-	if(msg == lastMsg)
-		return;
+//	if(msg == lastMsg)
+//		return;
 	lastMsg=msg;
 	std::cout << msg << std::endl;
 //	ofstream pFile("error.log", std::ios_base::app);

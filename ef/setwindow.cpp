@@ -5,62 +5,65 @@
 #include "configuration.hpp"
 
 SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
-	UI_Window(setwindow_parent, SETTINGS_WINDOW_TITLE_STRING, theme.lookUpGlobalRect(SETTINGS_WINDOW), theme.lookUpGlobalMaxHeight(SETTINGS_WINDOW), SCROLLED),
-	coreSettings(new UI_Group(this, Point(20, 50), SETWINDOW_CORE_SETTINGS_STRING)),
-	guiSettings(new UI_Group(this, Point(20, 200), SETWINDOW_GUI_SETTINGS_STRING)),
-	loadSaveSettings(new UI_Group(this, Point(245, getHeight() - 81), SETWINDOW_GUI_SETTINGS_STRING/*SETWINDOW_LOADSAVE_SETTINGS_STRING*/)),
-	
-	maxTime(new UI_NumberField(coreSettings, Rect(Point(20, 0), Size(200, 15)), MIN_TIME, MAX_TIME, 6, coreConfiguration.getMaxTime(), SETTING_MAX_TIME_STRING, SETTING_MAX_TIME_TOOLTIP_STRING, TIME_NUMBER_TYPE)),
-	maxLength(new UI_NumberField(coreSettings, Rect(Point(20, 15), Size(200, 15)), MIN_LENGTH, MAX_LENGTH, 1, coreConfiguration.getMaxLength(), SETTING_MAX_LENGTH_STRING, SETTING_MAX_LENGTH_TOOLTIP_STRING)),
-	maxRuns(new UI_NumberField(coreSettings, Rect(Point(20, 30), Size(200, 15)), MIN_RUNS, MAX_RUNS, 1, coreConfiguration.getMaxRuns(), SETTING_MAX_RUNS_STRING, SETTING_MAX_RUNS_TOOLTIP_STRING)),
-	maxGenerations(new UI_NumberField(coreSettings, Rect(Point(20, 45), Size(200, 15)), MIN_GENERATIONS, MAX_GENERATIONS, 10, coreConfiguration.getMaxGenerations(), SETTING_MAX_GENERATIONS_STRING, SETTING_MAX_GENERATIONS_TOOLTIP_STRING)),
-	maxTimeOut(new UI_NumberField(coreSettings, Rect(Point(20, 60), Size(200, 15)), MIN_TIMEOUT, MAX_TIMEOUT, 1, coreConfiguration.getMaxTimeOut(), SETTING_MAX_TIMEOUT_STRING, SETTING_MAX_TIMEOUT_TOOLTIP_STRING)),
-	breedFactor(new UI_NumberField(coreSettings, Rect(Point(20, 75), Size(200, 15)), MIN_BREED_FACTOR, MAX_BREED_FACTOR, 1, coreConfiguration.getBreedFactor(), SETTING_BREED_FACTOR_STRING, SETTING_BREED_FACTOR_TOOLTIP_STRING, PERCENT_NUMBER_TYPE)),
-	//crossingOver(new UI_NumberField(coreSettings, Rect(Point(20, 90), Size(200, 15)), MIN_CROSSING_OVER, MAX_CROSSING_OVER, 1, coreConfiguration.getCrossingOver(), SETTING_CROSSING_OVER_STRING, SETTING_CROSSING_OVER_TOOLTIP_STRING, PERCENT_NUMBER_TYPE)),
+	UI_Window(setwindow_parent, SETTINGS_WINDOW_TITLE_STRING, theme.lookUpGlobalRect(SETTINGS_WINDOW), theme.lookUpGlobalMaxHeight(SETTINGS_WINDOW), NOT_SCROLLED),
 
-	autoSaveRuns(new UI_CheckButton(coreSettings, Rect(Point(20, 90), Size(200, 15)), SETTING_AUTO_SAVE_RUNS_STRING, SETTING_AUTO_SAVE_RUNS_TOOLTIP_STRING, efConfiguration.isAutoSaveRuns())),
-	alwaysBuildWorker(new UI_CheckButton(coreSettings, Rect(Point(20, 105), Size(200, 15)), SETTING_ALWAYS_BUILD_WORKER_STRING, SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING, coreConfiguration.isAlwaysBuildWorker())),
+	coreSettings(new UI_Group(this, Rect(Point(15, 30), Size(0,0)), Size(5, 5), SETWINDOW_CORE_SETTINGS_STRING, TOP_LEFT)),
+	guiSettings(new UI_Group(this, Rect(Point(15, 0), Size(0,0)), Size(0, 0), SETWINDOW_GUI_SETTINGS_STRING, BOTTOM_LEFT)),
+	loadSaveSettings(new UI_Group(this, Rect(Point(0, 0), Size(0,0)), Size(20, 0), SETWINDOW_GUI_SETTINGS_STRING/*SETWINDOW_LOADSAVE_SETTINGS_STRING*/, BOTTOM_RIGHT)),
+	
+	defaultSettingsRadio(new UI_Radio(this, Rect(Point(0, 30), Size(0,0)), Size(20, 0), true, TITLE_PREDEFINED_SETTINGS_STRING, TOP_RIGHT)),
+	autoSaveRuns(new UI_CheckButton(coreSettings, Rect(Point(0, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_AUTO_SAVE_RUNS_STRING, SETTING_AUTO_SAVE_RUNS_TOOLTIP_STRING, efConfiguration.isAutoSaveRuns())),
+	alwaysBuildWorker(new UI_CheckButton(coreSettings, Rect(Point(0, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_ALWAYS_BUILD_WORKER_STRING, SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING, coreConfiguration.isAlwaysBuildWorker())),
+	maxTime(new UI_NumberField(coreSettings, Rect(Point(0, 0), Size(200, 15)), Size(5,5), ARRANGE_LEFT, MIN_TIME, MAX_TIME, 6, coreConfiguration.getMaxTime(), SETTING_MAX_TIME_STRING, SETTING_MAX_TIME_TOOLTIP_STRING, TIME_NUMBER_TYPE)),
+	maxLength(new UI_NumberField(coreSettings, Rect(Point(0, 0), Size(200, 15)), Size(5,5), ARRANGE_LEFT,  MIN_LENGTH, MAX_LENGTH, 1, coreConfiguration.getMaxLength(), SETTING_MAX_LENGTH_STRING, SETTING_MAX_LENGTH_TOOLTIP_STRING)),
+	maxRuns(new UI_NumberField(coreSettings, Rect(Point(0, 0), Size(200, 15)), Size(5,5), ARRANGE_LEFT,  MIN_RUNS, MAX_RUNS, 1, coreConfiguration.getMaxRuns(), SETTING_MAX_RUNS_STRING, SETTING_MAX_RUNS_TOOLTIP_STRING)),
 
-	restrictSC(new UI_CheckButton(guiSettings, Rect(Point(20, 0), Size(200, 15)), SETTING_RESTRICT_SC_STRING, SETTING_RESTRICT_SC_TOOLTIP_STRING, efConfiguration.isRestrictSC())),
-	facilityMode(new UI_CheckButton(guiSettings, Rect(Point(20, 15), Size(200, 15)), SETTING_FACILITY_MODE_STRING, SETTING_FACILITY_MODE_TOOLTIP_STRING, efConfiguration.isFacilityMode())),
-//	preprocessBuildorder(new UI_CheckButton(coreSettings, Rect(Point(20, 105), Size(200, 15)), SETTING_PREPROCESS_BUILDORDER_STRING, SETTING_PREPROCESS_BUILDORDER_TOOLTIP_STRING, coreConfiguration.isPreprocessBuildOrder())),
-//	allowGoalAdaption(new UI_CheckButton(coreSettings, Rect(Point(20, 120), Size(200, 15)), SETTING_ALLOW_GOAL_ADAPTION_STRING, SETTING_ALLOW_GOAL_ADAPTION_TOOLTIP_STRING, coreConfiguration.isAllowGoalAdaption())),
 
-	glowingButtons(new UI_CheckButton(guiSettings, Rect(Point(20, 30), Size(200, 15)), SETTING_GLOWING_BUTTONS_STRING, SETTING_GLOWING_BUTTONS_TOOLTIP_STRING, uiConfiguration.isGlowingButtons())),
-	dnaSpiral(new UI_CheckButton(guiSettings, Rect(Point(20, 45), Size(200, 15)), SETTING_DNA_SPIRAL_STRING, SETTING_DNA_SPIRAL_TOOLTIP_STRING, efConfiguration.isDnaSpiral())),
-	backgroundBitmap(new UI_CheckButton(guiSettings, Rect(Point(20, 60), Size(200, 15)), SETTING_BACKGROUND_BITMAP_STRING, SETTING_BACKGROUND_BITMAP_TOOLTIP_STRING, efConfiguration.isBackgroundBitmap())),
-	fullscreen(new UI_CheckButton(guiSettings, Rect(Point(20, 75), Size(200, 15)), SETTING_FULLSCREEN_STRING, SETTING_FULLSCREEN_TOOLTIP_STRING, efConfiguration.isFullScreen())),
-	tooltips(new UI_CheckButton(guiSettings, Rect(Point(20, 90), Size(200, 15)), SETTING_TOOLTIPS_STRING, SETTING_TOOLTIPS_TOOLTIP_STRING, efConfiguration.isToolTips())),
-//	softwareMouse(new UI_CheckButton(guiSettings, Rect(Point(20, 90), Size(200, 15)), SETTING_SOFTWARE_MOUSE_STRING, SETTING_SOFTWARE_MOUSE_TOOLTIP_STRING, efConfiguration.isSoftwareMouse())),
-//	transparency(new UI_CheckButton(guiSettings, Rect(Point(20, 105), Size(200, 15)), SETTING_TRANSPARENCY_STRING, SETTING_TRANSPARENCY_TOOLTIP_STRING, uiConfiguration.isTransparency())),
-	smoothMovement(new UI_CheckButton(guiSettings, Rect(Point(20,  105), Size(200, 15)), SETTING_SMOOTH_MOVEMENT_STRING, SETTING_SMOOTH_MOVEMENT_TOOLTIP_STRING, uiConfiguration.isSmoothMovements())),
-	allowStaticFramerate(new UI_CheckButton(guiSettings, Rect(Point(20,  120), Size(200, 15)), SETTING_ALLOW_STATIC_FRAMERATE_STRING, SETTING_ALLOW_STATIC_FRAMERATE_TOOLTIP_STRING, efConfiguration.isAllowStaticFramerate())),
-	staticFramerate(new UI_NumberField(guiSettings, Rect(Point(20, 135), Size(200, 15)), EF_Configuration::MIN_STATIC_FRAMERATE, EF_Configuration::MAX_STATIC_FRAMERATE, 1, efConfiguration.getStaticFramerate(), SETTING_STATIC_FRAMERATE_STRING, SETTING_STATIC_FRAMERATE_TOOLTIP_STRING)),
-	dynamicFramerate(new UI_NumberField(guiSettings, Rect(Point(20, 135), Size(200, 15)), EF_Configuration::MIN_DYNAMIC_FRAMERATE, EF_Configuration::MAX_DYNAMIC_FRAMERATE, 1, efConfiguration.getDynamicFramerate(), SETTING_DYNAMIC_FRAMERATE_STRING, SETTING_DYNAMIC_FRAMERATE_TOOLTIP_STRING)),
+	maxGenerations(new UI_NumberField(coreSettings, Rect(Point(0, 0), Size(200, 15)), Size(5,5), ARRANGE_LEFT,  MIN_GENERATIONS, MAX_GENERATIONS, 10, coreConfiguration.getMaxGenerations(), SETTING_MAX_GENERATIONS_STRING, SETTING_MAX_GENERATIONS_TOOLTIP_STRING)),
+	maxTimeOut(new UI_NumberField(coreSettings, Rect(Point(0, 0), Size(200, 15)), Size(5,5), ARRANGE_LEFT,  MIN_TIMEOUT, MAX_TIMEOUT, 1, coreConfiguration.getMaxTimeOut(), SETTING_MAX_TIMEOUT_STRING, SETTING_MAX_TIMEOUT_TOOLTIP_STRING)),
+	breedFactor(new UI_NumberField(coreSettings, Rect(Point(0, 0), Size(200, 15)), Size(5,5), ARRANGE_LEFT,  MIN_BREED_FACTOR, MAX_BREED_FACTOR, 1, coreConfiguration.getBreedFactor(), SETTING_BREED_FACTOR_STRING, SETTING_BREED_FACTOR_TOOLTIP_STRING, PERCENT_NUMBER_TYPE)),
+	//crossingOver(new UI_NumberField(coreSettings, Rect(Point(20, 90), Size(200, 15)), Size(5, 5), ARRANGE_LEFT,  MIN_CROSSING_OVER, MAX_CROSSING_OVER, 1, coreConfiguration.getCrossingOver(), SETTING_CROSSING_OVER_STRING, SETTING_CROSSING_OVER_TOOLTIP_STRING, PERCENT_NUMBER_TYPE)),
 
-	minimalistButton(new UI_Button(this, Rect(Point(0,0), Size(0, 15)), SETTING_MINIMALIST_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, CONSTANT_SIZE/*AUTO_SIZE_ONCE*/)),
+//TODO
+	restrictSC(new UI_CheckButton(guiSettings, Rect(Point(20, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_RESTRICT_SC_STRING, SETTING_RESTRICT_SC_TOOLTIP_STRING, efConfiguration.isRestrictSC())),
+ 	facilityMode(new UI_CheckButton(guiSettings, Rect(Point(20, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_FACILITY_MODE_STRING, SETTING_FACILITY_MODE_TOOLTIP_STRING, efConfiguration.isFacilityMode())),
+//	preprocessBuildorder(new UI_CheckButton(coreSettings, Rect(Point(20, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_PREPROCESS_BUILDORDER_STRING, SETTING_PREPROCESS_BUILDORDER_TOOLTIP_STRING, coreConfiguration.isPreprocessBuildOrder())),
+//	allowGoalAdaption(new UI_CheckButton(coreSettings, Rect(Point(20, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_ALLOW_GOAL_ADAPTION_STRING, SETTING_ALLOW_GOAL_ADAPTION_TOOLTIP_STRING, coreConfiguration.isAllowGoalAdaption())),
+
+ 	glowingButtons(new UI_CheckButton(guiSettings, Rect(Point(20, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_GLOWING_BUTTONS_STRING, SETTING_GLOWING_BUTTONS_TOOLTIP_STRING, uiConfiguration.isGlowingButtons())),
+ 	dnaSpiral(new UI_CheckButton(guiSettings, Rect(Point(20, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_DNA_SPIRAL_STRING, SETTING_DNA_SPIRAL_TOOLTIP_STRING, efConfiguration.isDnaSpiral())),
+ 	backgroundBitmap(new UI_CheckButton(guiSettings, Rect(Point(20, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_BACKGROUND_BITMAP_STRING, SETTING_BACKGROUND_BITMAP_TOOLTIP_STRING, efConfiguration.isBackgroundBitmap())),
+ 	fullscreen(new UI_CheckButton(guiSettings, Rect(Point(20, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_FULLSCREEN_STRING, SETTING_FULLSCREEN_TOOLTIP_STRING, efConfiguration.isFullScreen())),
+ 	tooltips(new UI_CheckButton(guiSettings, Rect(Point(20, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_TOOLTIPS_STRING, SETTING_TOOLTIPS_TOOLTIP_STRING, efConfiguration.isToolTips())),
+//	softwareMouse(new UI_CheckButton(guiSettings, Rect(Point(20, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_SOFTWARE_MOUSE_STRING, SETTING_SOFTWARE_MOUSE_TOOLTIP_STRING, efConfiguration.isSoftwareMouse())),
+//	transparency(new UI_CheckButton(guiSettings, Rect(Point(20, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_TRANSPARENCY_STRING, SETTING_TRANSPARENCY_TOOLTIP_STRING, uiConfiguration.isTransparency())),
+	smoothMovement(new UI_CheckButton(guiSettings, Rect(Point(20, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_SMOOTH_MOVEMENT_STRING, SETTING_SMOOTH_MOVEMENT_TOOLTIP_STRING, uiConfiguration.isSmoothMovements())),
+ 	allowStaticFramerate(new UI_CheckButton(guiSettings, Rect(Point(20, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_ALLOW_STATIC_FRAMERATE_STRING, SETTING_ALLOW_STATIC_FRAMERATE_TOOLTIP_STRING, efConfiguration.isAllowStaticFramerate())),
+ //	staticFramerate(new UI_NumberField(guiSettings, Rect(Point(20, 0), Size(200, 15)), Size(5,5), ARRANGE_LEFT,  EF_Configuration::MIN_STATIC_FRAMERATE, EF_Configuration::MAX_STATIC_FRAMERATE, 1, efConfiguration.getStaticFramerate(), SETTING_STATIC_FRAMERATE_STRING, SETTING_STATIC_FRAMERATE_TOOLTIP_STRING)),
+ // 	dynamicFramerate(new UI_NumberField(guiSettings, Rect(Point(20, 0), Size(200, 15)), Size(5,5), ARRANGE_LEFT,  EF_Configuration::MIN_DYNAMIC_FRAMERATE, EF_Configuration::MAX_DYNAMIC_FRAMERATE, 1, efConfiguration.getDynamicFramerate(), SETTING_DYNAMIC_FRAMERATE_STRING, SETTING_DYNAMIC_FRAMERATE_TOOLTIP_STRING)),
+
+	minimalistButton(new UI_Button(this, Rect(Point(0,0), Size(0, 15)), Size(5,5), SETTING_MINIMALIST_STRING, MY_BUTTON, TAB_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH/*AUTO_SIZE_ONCE*/)),
 	
 
-	fullButton(new UI_Button(this, Rect(Point(0,0), Size(0, 15)), SETTING_FULL_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, CONSTANT_SIZE/*AUTO_SIZE_ONCE*/)),
+	fullButton(new UI_Button(this, Rect(Point(0,0), Size(0, 15)), Size(5,5), SETTING_FULL_STRING, MY_BUTTON, TAB_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH/*AUTO_SIZE_ONCE*/)),
 	
-	customButton(new UI_Button(this, Rect(Point(0,0), Size(0, 15)), SETTING_CUSTOM_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, CONSTANT_SIZE/*AUTO_SIZE_ONCE*/)),
+	customButton(new UI_Button(this, Rect(Point(0,0), Size(0, 15)), Size(5,5), SETTING_CUSTOM_STRING, MY_BUTTON, TAB_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH/*AUTO_SIZE_ONCE*/)),
 	
-	defaultSettingsRadio(new UI_Radio(this, Point(245, 55), true, TITLE_PREDEFINED_SETTINGS_STRING)),
 	
-	reloadFromFileButton(new UI_Button(loadSaveSettings, Rect(Point(0, 0), Size(0, 15)), SETTING_RELOAD_FROM_FILE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, CONSTANT_SIZE/*AUTO_SIZE_ONCE*/)),
-	loadFailsafeDefaultsButton(new UI_Button(loadSaveSettings, Rect(Point(0, 0), Size(0, 15)), SETTING_LOAD_FAILSAFE_DEFAULTS_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, CONSTANT_SIZE/*AUTO_SIZE_ONCE*/)),
-	saveToFileButton(new UI_Button(loadSaveSettings, Rect(Point(0, 0), Size(0, 15)), SETTING_SAVE_TO_FILE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, CONSTANT_SIZE/*AUTO_SIZE_ONCE*/)),
+	reloadFromFileButton(new UI_Button(loadSaveSettings, Rect(Point(0, 0), Size(0, 15)), Size(5,5), SETTING_RELOAD_FROM_FILE_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH/*AUTO_SIZE_ONCE*/)),
+	loadFailsafeDefaultsButton(new UI_Button(loadSaveSettings, Rect(Point(0, 0), Size(0, 15)), Size(5,5), SETTING_LOAD_FAILSAFE_DEFAULTS_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH/*AUTO_SIZE_ONCE*/)),
+	saveToFileButton(new UI_Button(loadSaveSettings, Rect(Point(0, 0), Size(0, 15)), Size(5,5), SETTING_SAVE_TO_FILE_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH/*AUTO_SIZE_ONCE*/)),
 	languageMenu(new LanguageMenu(this, Rect(Point(230, 145),Size(200,100)))),
-	languageMenuButton(new UI_Button(this, Rect(240, 120, 0,0), SETTING_LANGUAGE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	languageMenuButton(new UI_Button(this, Rect(240, 120, 0,0), Size(5,5), SETTING_LANGUAGE_STRING, MY_BUTTON, STATIC_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
 	languageHasChanged(false)
 {
 
 
-/*	resolutionMenuButton = new UI_Button(this, getRelativeRect(), Rect(Point(250,215), Size(200, 15)), SETTING_RESOLUTION_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE);
+/*	resolutionMenuButton = new UI_Button(this, getRelativeRect(), Rect(Point(250,215), Size(200, 15)), SETTING_RESOLUTION_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE);
 	resolutionMenu = new ResolutionMenu(this, Rect(Point(230,50),Size(200,100)));
 	resolutionMenu->Hide();
 
-	themeMenuButton = new UI_Button(this, getRelativeRect(), Rect(Point(250,215), Size(200, 15)), SETTING_THEME_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE);
+	themeMenuButton = new UI_Button(this, getRelativeRect(), Rect(Point(250,215), Size(200, 15)), SETTING_THEME_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE);
 	themeMenu = new ThemeMenu(this, Rect(Point(230,50),Size(200,100)));
 	themeMenu->Hide();*/
 
@@ -96,8 +99,8 @@ SettingsWindow::~SettingsWindow()
 	delete maxTimeOut;
 	delete breedFactor;
 //	delete crossingOver;
-	delete staticFramerate;
-	delete dynamicFramerate;
+ //	delete staticFramerate;
+ //	delete dynamicFramerate;
 
 	delete restrictSC;
 	delete facilityMode;
@@ -146,6 +149,11 @@ void SettingsWindow::process()
 	if(!isShown())
 		return;
 	UI_Window::process();
+		defaultSettingsRadio->calculateSameWidthOfButtons();
+	coreSettings->calculateBoxSize();
+	guiSettings->calculateBoxSize();
+	loadSaveSettings->calculateSameWidthOfButtons();
+
 
 
 	if(languageMenuButton->isLeftClicked())
@@ -192,13 +200,13 @@ void SettingsWindow::process()
 
 	if(!allowStaticFramerate->isChecked())
 	{
-		staticFramerate->Hide();
-		dynamicFramerate->Show();
+ //		staticFramerate->Hide();
+ //		dynamicFramerate->Show();
 	}
 	else 
 	{
-		staticFramerate->Show();
-		dynamicFramerate->Hide();
+ //		staticFramerate->Show();
+ //		dynamicFramerate->Hide();
 	}
 	
 	coreConfiguration.setMaxTime ( maxTime->getNumber() );
@@ -208,8 +216,8 @@ void SettingsWindow::process()
 	coreConfiguration.setMaxTimeOut ( maxTimeOut->getNumber() );
 	coreConfiguration.setBreedFactor ( breedFactor->getNumber() );
 //	coreConfiguration.setCrossingOver ( crossingOver->getNumber() );
-	efConfiguration.setStaticFramerate ( staticFramerate->getNumber() );
-	efConfiguration.setDynamicFramerate ( dynamicFramerate->getNumber() );
+ //	efConfiguration.setStaticFramerate ( staticFramerate->getNumber() );
+ //	efConfiguration.setDynamicFramerate ( dynamicFramerate->getNumber() );
 
 	efConfiguration.setRestrictSC( restrictSC->isChecked() );
 	efConfiguration.setFacilityMode( facilityMode->isChecked() );
@@ -240,8 +248,8 @@ void SettingsWindow::process()
 
 	if(minimalistButton->isLeftClicked())
 	{
-		staticFramerate->updateNumber ( 10 );
-		dynamicFramerate->updateNumber ( 1 );
+ //		staticFramerate->updateNumber ( 10 );
+ //		dynamicFramerate->updateNumber ( 1 );
 		allowStaticFramerate->check ( false );
 		glowingButtons->check ( false );
 		dnaSpiral->check ( false );
@@ -254,8 +262,8 @@ void SettingsWindow::process()
 	} else
 	if(fullButton->isLeftClicked())
 	{
-		staticFramerate->updateNumber ( 35 );
-		dynamicFramerate->updateNumber ( 10 );
+ //		staticFramerate->updateNumber ( 35 );
+ //		dynamicFramerate->updateNumber ( 10 );
 		allowStaticFramerate->check ( true );
 		glowingButtons->check ( true );
 		dnaSpiral->check ( true );
@@ -297,8 +305,8 @@ void SettingsWindow::updateItems()
 	maxTimeOut->updateNumber ( coreConfiguration.getMaxTimeOut());
 	breedFactor->updateNumber ( coreConfiguration.getBreedFactor() );
 //	crossingOver->updateNumber ( coreConfiguration.getCrossingOver() );
-	staticFramerate->updateNumber ( efConfiguration.getStaticFramerate() );
-	dynamicFramerate->updateNumber ( efConfiguration.getDynamicFramerate() );
+ //	staticFramerate->updateNumber ( efConfiguration.getStaticFramerate() );
+ //	dynamicFramerate->updateNumber ( efConfiguration.getDynamicFramerate() );
 	
 	eLanguage newLanguage = uiConfiguration.getLanguage();
 	languageHasChanged=false;
@@ -313,16 +321,16 @@ void SettingsWindow::updateItems()
 	facilityMode->check ( efConfiguration.isFacilityMode() );
 	autoSaveRuns->check ( efConfiguration.isAutoSaveRuns() );
 	alwaysBuildWorker->check ( coreConfiguration.isAlwaysBuildWorker() );
-//  preprocessBuildorder->check ( coreConfiguration.isPreprocessBuildOrder() );
-//  allowGoalAdaption->check ( coreConfiguration.isAllowGoalAdaption() );
+//	preprocessBuildorder->check ( coreConfiguration.isPreprocessBuildOrder() );
+//	allowGoalAdaption->check ( coreConfiguration.isAllowGoalAdaption() );
 	allowStaticFramerate->check ( efConfiguration.isAllowStaticFramerate() );
 	glowingButtons->check ( uiConfiguration.isGlowingButtons() );
 	dnaSpiral->check ( efConfiguration.isDnaSpiral() );
 	backgroundBitmap->check ( efConfiguration.isBackgroundBitmap() );
 	fullscreen->check ( efConfiguration.isFullScreen() );
 	tooltips->check ( efConfiguration.isToolTips() );
-//  softwareMouse->check ( efConfiguration.isSoftwareMouse() );
-//  transparency->check ( uiConfiguration.isTransparency() );
+//	softwareMouse->check ( efConfiguration.isSoftwareMouse() );
+//	transparency->check ( uiConfiguration.isTransparency() );
 	smoothMovement->check ( uiConfiguration.isSmoothMovements() );
 }
 

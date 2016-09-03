@@ -9,7 +9,7 @@ class UI_Radio : public UI_Group
 	public:
 		UI_Radio& operator=(const UI_Radio& object);
 		UI_Radio(const UI_Radio& object);
-		UI_Radio(UI_Object* radio_parent=NULL, Point position=Point(0,0), const bool always_on=false, const eString radio_title = NULL_STRING);
+		UI_Radio(UI_Object* radio_parent=NULL, Rect initial_rect=Rect(0,0,0,0), Size distance_bottom_right=Size(0,0), const bool always_on=false, const eString radio_title = NULL_STRING, const ePositionMode position_mode = DO_NOT_ADJUST);
 		~UI_Radio();
 		void addButton(UI_Button* button, const unsigned int button_id);
 		void removeButton(const unsigned int button_id);
@@ -45,6 +45,15 @@ inline void UI_Radio::rightButtonPressed(UI_Button* button) {
 inline void UI_Radio::rightButtonReleased(UI_Button* button) { // allow release?
 	leftButtonReleased(button);
 }
+
+inline const bool UI_Radio::buttonHasChanged() const {
+	return(changed);
+}
+
+inline void UI_Radio::setButtonHasChanged(const bool has_changed) {
+	changed = has_changed;
+}
+
 
 #endif
 

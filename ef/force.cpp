@@ -10,11 +10,11 @@ ForceWindow::ForceWindow(UI_Object* force_parent, const unsigned int game_number
 	addCount(0),
 	currentGoalUnit(0),
 	startLine(0),
-	menuRadio(new UI_Radio(this, getRelativeClientRectPosition() + Point(0,10) )),
-	saveGoalButton(new UI_Button(this, Rect(getRelativeClientRectPosition() + Size(0, 10), getClientRectSize()), SAVE_GOAL_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	nongoalsText(new UI_StaticText(this, NON_GOALS_STRING, Rect(Point(0,20), getClientRectSize()), FORCE_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),
-	goalsText(new UI_StaticText(this, GOALS_STRING, Rect(Point(0,20), getClientRectSize()), FORCE_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),
-	legend(new UI_StaticText(this, TIME_LEGEND_STRING, Rect(Point(0,20), getClientRectSize()), FORCE_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT, RIGHT_BOUNDED_TEXT_MODE)),
+	menuRadio(new UI_Radio(this, Rect(getRelativeClientRectPosition() + Point(0,10), Size(0,0)) )),
+	saveGoalButton(new UI_Button(this, Rect(getRelativeClientRectPosition() + Size(0, 10), getClientRectSize()), Size(5,5), SAVE_GOAL_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	nongoalsText(new UI_StaticText(this, NON_GOALS_STRING, Rect(Point(0,20), getClientRectSize()), Size(0,0), FORCE_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),
+	goalsText(new UI_StaticText(this, GOALS_STRING, Rect(Point(0,20), getClientRectSize()), Size(0,0), FORCE_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),
+	legend(new UI_StaticText(this, TIME_LEGEND_STRING, Rect(Point(0,20), getClientRectSize()), Size(0,0), FORCE_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),
 	goalForceList(),
 	nongoalForceList(),
 	markedUnit(0),
@@ -26,9 +26,9 @@ ForceWindow::ForceWindow(UI_Object* force_parent, const unsigned int game_number
 //	locationMenu(new LocationMenu(this, anarace, getRelativeClientRect())),
 	
 {	
-//	menuButton[RACE_MENU] = new UI_Button(this, Rect(Point(0, 0), getClientRectSize()), CHOOSE_RACE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE_ONCE);
-	menuButton[UNIT_MENU] = new UI_Button(this, Rect(Point(0, 0), getClientRectSize()), ADD_GOAL_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE_ONCE);
-	menuButton[GOAL_MENU] = new UI_Button(this, Rect(Point(0, 0), getClientRectSize()), GOAL_LIST_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE_ONCE);
+//	menuButton[RACE_MENU] = new UI_Button(this, Rect(Point(0, 0), getClientRectSize()), CHOOSE_RACE_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE_ONCE);
+	menuButton[UNIT_MENU] = new UI_Button(this, Rect(Point(0, 0), getClientRectSize()), Size(5,5), ADD_GOAL_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE_ONCE);
+	menuButton[GOAL_MENU] = new UI_Button(this, Rect(Point(0, 0), getClientRectSize()), Size(5,5), GOAL_LIST_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE_ONCE);
 //	menuButton[RACE_MENU]->updateToolTip(CHOOSE_RACE_TOOLTIP_STRING);
 	menuButton[UNIT_MENU]->updateToolTip(ADD_GOALS_TOOLTIP_STRING);
 	menuButton[GOAL_MENU]->updateToolTip(CHOOSE_GOALS_TOOLTIP_STRING);
@@ -116,7 +116,6 @@ void ForceWindow::process()
 	addCount = 0;
 	
 	int assignGoal = -1;
-	int assignRace = -1;
 
 	if(ForceEntry::changed)
 	{
@@ -471,7 +470,7 @@ void ForceWindow::processList()
 	if(!isShown())
 		return;
 
-	filledHeight = 0;
+//	filledHeight = 0; ? TODO
 	
 	std::list<ForceEntry*>::iterator goal_entry = goalForceList.begin();
 

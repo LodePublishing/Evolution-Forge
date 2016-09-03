@@ -5,6 +5,17 @@
 
 const std::string CORE_VERSION="Beta 1.63b";
 
+/*const unsigned int MAX_RACES = 3;
+const unsigned int UNIT_TYPE_COUNT = 105;
+const unsigned int MAX_LOCATIONS = 20;
+
+const unsigned int MAX_GAME_TABS = 6;
+const unsigned int MAX_SIMULTANEOUS_GAMES = 2;
+const unsigned int MAX_GAME = MAX_SIMULTANEOUS_GAMES * MAX_GAME_TABS;
+const unsigned int MAX_PLAYER = 4;
+const unsigned int MAX_INTERNAL_PLAYER = 5;
+const unsigned int GLOBAL = 0;*/
+
 //const unsigned int MAX_LOCATIONS = 9;
 const unsigned int MIN_LOCATIONS = 0; //this does not mean that maps with 0 locations can exist....
 
@@ -60,8 +71,6 @@ const unsigned int MAX_TFITNESS = 99999;
 const unsigned int MAX_PFITNESS = 99999;
 
 //const unsigned int MAX_START_CONDITIONS = 99; // ~~
-
-//const unsigned int MAX_RACES = (ZERG+1);
 
 const std::string raceString[MAX_RACES] = 
 { "Terra", "Protoss", "Zerg" };

@@ -48,7 +48,13 @@ std::list<std::string> DATABASE::findFiles(const std::string& directory1, const 
 #ifdef __linux__
 	DIR *dir;
 	struct dirent *entry;
-	os << directory1 << "/" << directory2 << "/" << directory3;
+	if(directory3!="")
+		os << directory1 << "/" << directory2 << "/" << directory3;
+	else if(directory2!="")
+		os << directory1 << "/" << directory2;
+	else if(directory1!="")
+		os << directory1;
+	
 	if ((dir = opendir(os.str().c_str())) == NULL)
 		toLog("ERROR opening directory " + os.str());
 	else 
@@ -249,9 +255,8 @@ void DATABASE::loadHarvestFile(const std::string& harvestFile)
 
 void DATABASE::loadMapFile(const std::string& mapFile)
 {
-	if((mapFile.compare(mapFile.size()-4, mapFile.size(), ".map")==1))
+	if((mapFile.size()<20)||(mapFile.compare(mapFile.size()-4, mapFile.size(), ".map")==1))
 		return;
-
 	std::ifstream pFile(mapFile.c_str());
 	if(!pFile.is_open())
 	{

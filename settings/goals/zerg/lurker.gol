@@ -1,0 +1,6 @@
+@GOAL 
+	"Name" "Lurker Rush"
+	"Race" "Zerg"
+	"Lurker" "2" "0" "0"
+	"Lurker aspect" "1" "0" "0"
+@END

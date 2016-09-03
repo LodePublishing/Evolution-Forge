@@ -7,8 +7,9 @@
 
 class BoDiagramWindow:public UI_Window {
 	public:
-		BoDiagramWindow(UI_Object * parent, ANARACE * anarace,
-						InfoWindow * infoWindow, const int windowNumber);
+		BoDiagramWindow(UI_Object * bod_parent, ANARACE * bod_anarace, InfoWindow * bod_info_window, const unsigned int bod_window_number);
+		BoDiagramWindow(const BoDiagramWindow& object);
+		BoDiagramWindow& operator=(const BoDiagramWindow& object);
 		~BoDiagramWindow();
 
 		void resetData();
@@ -19,22 +20,25 @@ class BoDiagramWindow:public UI_Window {
 		ANARACE* anarace;
 		InfoWindow* infoWindow;
 
-		int count;
+		unsigned int count;
 
 		Point minerals[MAX_TIME];
 		Point gas[MAX_TIME];
 		Point hneedSupply[MAX_TIME];
 		Point nneedSupply[MAX_TIME];
+		Point fitness[MAX_TIME];
 
 		Point startMinerals[MAX_TIME];
 		Point startGas[MAX_TIME];
 		Point startHneedSupply[MAX_TIME];
 		Point startNneedSupply[MAX_TIME];
+		Point startFitness[MAX_TIME];
 
 		Point targetMinerals[MAX_TIME];
 		Point targetGas[MAX_TIME];
 		Point targetHneedSupply[MAX_TIME];
 		Point targetNneedSupply[MAX_TIME];
+		Point targetFitness[MAX_TIME];
 	
 };
 

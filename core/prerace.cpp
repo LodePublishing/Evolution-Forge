@@ -9,22 +9,31 @@
  * 		mainly concerning harvesting, supply and units				*/
 
 
-PRERACE::PRERACE()
+PRERACE::PRERACE():
+	location(0),
+	pStartCondition(0),
+	buildingQueue(), // TODO
+	lastcounter(0),
+	lastunit(0),
+	pStats(0),
+	neededMinerals(0),
+	neededGas(0),
+	ready(false),
+	pGoal(0),
+	playerNum(0),
+	minerals(0),
+	gas(0),
+	timer(0), //? max_time-1?
+	IP(0),
+	harvestedMinerals(0),
+	harvestedGas(0),
+	wastedMinerals(0),
+	wastedGas(0),
+	needSupply(0),
+	haveSupply(0),
+	length(0),
+	timeout(0)
 {
-	location=0;
-	pStartCondition=0;
-	pGoal=0;
-	minerals=0;
-	gas=0;
-	lastcounter=0;
-	lastunit=0;
-	timer=MAX_TIME;
-	setNeedSupply(0);
-	setHaveSupply(0);
-	harvestedGas=0;
-	harvestedMinerals=0;
-	playerNum=0;
-	setLength(0);
 	for(int i=MAX_LOCATIONS;i--;)
 	{
 		for(int j=45;j--;)
@@ -41,8 +50,15 @@ PRERACE::PRERACE()
 	}
 	resetSpecial();
 }
+/*
+PRERACE::PRERACE(const PRERACE& prerace)
+{
+	*this = prerace;
+}
 
-
+PRERACE& PRERACE::operator=(PRERACE)
+TODO
+*/
 void PRERACE::prepareForNewGeneration()
 {
     setHarvestedGas(0);setHarvestedMinerals(0);
@@ -87,13 +103,13 @@ const eRace PRERACE::getRace() const
 // ------ CONTROLS FROM OUTSIDE ------
 // -----------------------------------
 
-void PRERACE::replaceCode(const int IP, const int code)
+void PRERACE::replaceCode(const unsigned int IP, const unsigned int code)
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if(IP>=MAX_LENGTH) {
 		toLog("DEBUG: (PRERACE::replaceCode): Value IP out of range.");return;
 	}
-	if((code<0)||(code>=(*pGoal)->getMaxBuildTypes())) {
+	if(code>=(*pGoal)->getMaxBuildTypes()) {
 		toLog("DEBUG: (PRERACE::replaceCode): Value code out of range.");return;
 	}
 #endif
@@ -111,43 +127,48 @@ void PRERACE::replaceCode(const int IP, const int code)
 // ------ FUNCTIONS THAT ARE PRIMARILY USED DURING THE RUN ------
 // --------------------------------------------------------------
 
-const int PRERACE::calculateIdleTime() const
+const unsigned int PRERACE::calculateIdleTime() const
 {
-    int idle_time=getTimer();
-	int harvest_minerals = harvestMinerals();
-	int harvest_gas = harvestGas();
+    unsigned int idle_time=getTimer();
+	unsigned int harvest_minerals = harvestMinerals();
+	unsigned int harvest_gas = harvestGas();
 
-    if(!buildingQueue.empty()) {
+    if((!buildingQueue.empty())&&(buildingQueue.top().canBeCompleted())) {
 		// buildingRemaining = time until the building will be completed
-        int buildingRemaining = getTimer() - buildingQueue.top().getBuildFinishedTime();
+#ifdef _SCC_DEBUG
+		if(buildingQueue.top().getBuildFinishedTime() > getTimer())
+		{
+	// => Gebaeude sollte garnicht mehr in der buildingqueue sein...
+			toLog("ERROR: PRERACE::calculateIdleTime(): FinishedTime > getTimer...");
+		}
+#endif
+        unsigned int buildingRemaining = getTimer() - buildingQueue.top().getBuildFinishedTime();
+		// TODO
         if(idle_time > buildingRemaining) 
 			idle_time = buildingRemaining;
     }
 
-    if( harvest_gas ) //&& 
+    if( harvest_gas )
 //	  ( harvest_minerals || 
   //    	(neededGas + harvest_gas - neededGas % harvest_gas)/harvestGas() < (neededMinerals+(harvest_minerals - neededMinerals % harvest_minerals))/harvest_minerals)) 
 	{
-        int gasRemaining=(neededGas+(harvest_gas-neededGas % harvest_gas))/harvest_gas;
-        if(idle_time>gasRemaining) 
-			idle_time=gasRemaining;
+        unsigned int gasRemaining = ( neededGas + ( harvest_gas - neededGas % harvest_gas)) / harvest_gas;
+        if(idle_time > gasRemaining) 
+			idle_time = gasRemaining;
     }
     else if(harvest_minerals) {
-        int mineralsRemaining=(neededMinerals+(harvest_minerals-neededMinerals%harvest_minerals))/harvest_minerals;
-        if(idle_time>mineralsRemaining) idle_time=mineralsRemaining;
+        unsigned int mineralsRemaining=(neededMinerals + ( harvest_minerals - neededMinerals % harvest_minerals)) / harvest_minerals;
+        if(idle_time>mineralsRemaining) 
+			idle_time=mineralsRemaining;
     }
     if(idle_time>getTimeOut()) {
         idle_time=getTimeOut();
     }
-#ifdef _SCC_DEBUG
-	if(idle_time<0)
-		toLog("ERROR idle time < 0");
-#endif
 	return(idle_time);
 }
 
 // called within the calculateStep function
-void PRERACE::adjustLocationUnitsAfterCompletion(const int location, const eFacilityType facilityType, const int facility, const int facility2)
+void PRERACE::adjustLocationUnitsAfterCompletion(const unsigned int location, const eFacilityType facilityType, const unsigned int facility, const unsigned int facility2)
 {
 	switch(facilityType)
 	{
@@ -189,6 +210,7 @@ void PRERACE::adjustLocationUnitsAfterCompletion(const int location, const eFaci
 			break;
 		case NEEDED_ALWAYS:break;
 		case NO_FACILITY_BEHAVIOUR_DEFINED:
+		case FACILITY_TYPES:
 		default:
 #ifdef _SCC_DEBUG
 				toLog("ERROR: UNDEFINED FACILITY BEHAVIOUR DETECTED!");
@@ -197,7 +219,7 @@ void PRERACE::adjustLocationUnitsAfterCompletion(const int location, const eFaci
 	} // end switch facilityType
 }
 
-void PRERACE::adjustAvailibility(const int loc, const int fac, const UNIT_STATISTICS* stat)
+void PRERACE::adjustAvailibility(const unsigned int loc, const unsigned int fac, const UNIT_STATISTICS* stat)
 {
 	switch(stat->facilityType)
 	{
@@ -205,13 +227,13 @@ void PRERACE::adjustAvailibility(const int loc, const int fac, const UNIT_STATIS
 		case IS_LOST:
 			if(stat->facility[fac]>0)
 			{
-				addLocationAvailible(loc,stat->facility[fac],-1);
+				removeOneLocationAvailible(loc, stat->facility[fac]);
 				setNeedSupply(getNeedSupply()-(*pStats)[stat->facility[fac]].needSupply);
 				setHaveSupply(getHaveSupply()-(*pStats)[stat->facility[fac]].haveSupply);
 			}
 			if(stat->facility2>0)
 			{
-				addLocationAvailible(loc,stat->facility2,-1);
+				removeOneLocationAvailible(loc, stat->facility2);
 				setNeedSupply(getNeedSupply()-(*pStats)[stat->facility2].needSupply);
 				setHaveSupply(getHaveSupply()-(*pStats)[stat->facility2].haveSupply);
 			}
@@ -220,15 +242,15 @@ void PRERACE::adjustAvailibility(const int loc, const int fac, const UNIT_STATIS
 			break;
 		case NEEDED_UNTIL_COMPLETE:
 			if(stat->facility[fac]>0)
-				addLocationAvailible(loc,stat->facility[fac],-1);
+				removeOneLocationAvailible(loc, stat->facility[fac]);
 			if(stat->facility2>0)
-				addLocationAvailible(loc,stat->facility2,-1);
+				removeOneLocationAvailible(loc, stat->facility2);
 				//kommt glaub nicht vor...
 			break;
 		case NEEDED_ONCE_IS_LOST:
 			if(stat->facility2>0)
 			{
-				addLocationAvailible(loc,stat->facility2,-1);
+				removeOneLocationAvailible(loc, stat->facility2);
 				setNeedSupply(getNeedSupply()-(*pStats)[stat->facility2].needSupply);
 				setHaveSupply(getHaveSupply()-(*pStats)[stat->facility2].haveSupply);	
 				// <- nicht noetig :/ eigentlich schon... bei gas scv z.B. :/
@@ -237,27 +259,28 @@ void PRERACE::adjustAvailibility(const int loc, const int fac, const UNIT_STATIS
 		case NEEDED_UNTIL_COMPLETE_IS_LOST:
 			if(stat->facility2>0)
 			{
-				addLocationAvailible(0/*location*/ ,stat->facility2,-1); // primarily for temporary R_researches, have to be location 0
+				removeOneLocationAvailible(GLOBAL/*location*/ ,stat->facility2); // primarily for temporary R_researches, have to be location 0
 // TODO				 setNeedSupply(getNeedSupply()+(*pStats)[stat->facility2].needSupply); // <- nicht noetig :/
 			}
 			if(stat->facility[fac]>0)
-				addLocationAvailible(loc,stat->facility[fac],-1);
+				removeOneLocationAvailible(loc, stat->facility[fac]);
 			break;
 		case NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE:
 			if(stat->facility2>0)
-				addLocationAvailible(0/*loc*/,stat->facility2,-1);
+				removeOneLocationAvailible(GLOBAL/*loc*/,stat->facility2);
 			// no needSupply gain as the item is recovered... well or not? mmmh... ~~~~
 			if(stat->facility[fac]>0)
-				addLocationAvailible(loc,stat->facility[fac],-1);
+				removeOneLocationAvailible(loc, stat->facility[fac]);
 			break;
 		case NEEDED_ALWAYS:
 			if(stat->facility[fac]>0)
-				addLocationAvailible(loc,stat->facility[fac],-1);
+				removeOneLocationAvailible(loc, stat->facility[fac]);
 				// needSupply?
 			if(stat->facility2>0)
-				addLocationAvailible(loc,stat->facility2,-1);
+				removeOneLocationAvailible(loc, stat->facility2);
 			break;
 		case NO_FACILITY_BEHAVIOUR_DEFINED:
+		case FACILITY_TYPES:
 		default:
 #ifdef _SCC_DEBUG
 			  toLog("ERROR: UNDEFINED FACILITY BEHAVIOUR DETECTED!");
@@ -267,50 +290,56 @@ void PRERACE::adjustAvailibility(const int loc, const int fac, const UNIT_STATIS
 }
 
 /* compares the current force on the map and the finnishing times of the unit types with our predefined goals */
-// TODO optimize this
 const bool PRERACE::calculateReady() const
 {
 	return((*pGoal)->calculateReady(location));
 }
 
-
-
-const int PRERACE::calculatePrimaryFitness(const bool ready) const
+// nicht const da buildingqueue verzehrt wird :/
+// TODO OPTIMIZE
+const unsigned int PRERACE::calculatePrimaryFitness(const bool ready)
 {
 	int tpF=0;
 //TODO evtl noch uebrige availible miteinbeziehen
-//	int bonus[MAX_LOCATIONS][UNIT_TYPE_COUNT]; // temporary data to check whether a bonus is already given (only applies if total > goal)
 //TODO: Nicht alle Einheiten am Ort? => Ort egal sein lassen aber zur Zeit hinzuzaehlen
 	// Nicht alle Einheiten ueberhaupt gebaut UND nicht alle am Ort => nur viertel Bonus fuer Einheiten die nicht am Ort sind
 	if(!ready)
 	{
-		list<GOAL>::const_iterator i;
+// ------ INIT THE BONUS SYSTEM FOR REMAINING BUILD ORDERS IN THE BUILDING LIST ------
+// temporary data to check whether a bonus is already given (only applies if total > goal)
+		int bonus[MAX_LOCATIONS][UNIT_TYPE_COUNT]; 
+		for(int i=MAX_LOCATIONS;i--;)
+			for(int j=UNIT_TYPE_COUNT;j--;)
+				bonus[i][j]=0;
+// ------ END BONUSSYSTEM INIT ------
+		std::list<GOAL>::const_iterator i;
 		bool first=true;
 		while((*pGoal)->getNextGoal(i, first))
 		{
 			first=false;
-		//calculate number of fulfilled goals & their time & their distance to goal position
-// Haben wir zuwenig Einheiten gebaut?  total < goal
+// ------ NOT ENOUGH UNITS BUILD OF THIS TYPE? -------
 				if(i->count>getLocationTotal(i->location,i->unit))
 				{
+// ------ ADD TO MAX BONUS -----
+					bonus[i->location][i->unit]+=i->count-getLocationTotal(i->location, i->unit);
 					//total points: (Am Ort befindliche Einheiten + (Summe aller Locations(100-distance)/100)) / Goalcount
 					//TODO: Absteigen und markieren der benutzten wbfs! Also zuerst die eigentliche location abchecken, dann nach links und rechts die naehesten hinzuziehen
 					//evtl direkt von den locations die wbfs erstmal abziehen und am Schluss nochmal alle goals durchlaufen und den Rest verteilen!
 					int sumup=0;
 // location 0? Dann ist es trivial
 					if(i->location==0)
-						sumup=getLocationTotal(0,i->unit)*100;
+						sumup=getLocationTotal(0, i->unit)*100;
 					else
 					{
 				// location != 0 ? Dann schaun wir mal, ob wir auf der Karte noch wo Units verstreut haben
 				// mehr als goalcount koennen wir keinen Bonus vergeben
 						int j=1;
-						int bon=i->count;
-						int loc=(*pMap)->getLocation(i->location)->getNearest(j);
-						while((j<MAX_LOCATIONS)&&(bon>getLocationTotal(loc,i->unit)))
+						unsigned int bon=i->count;
+						unsigned int loc=(*pMap)->getLocation(i->location)->getNearest(j);
+						while((j<MAX_LOCATIONS) && (bon>getLocationTotal(loc, i->unit)))
 						{
-							sumup+=getLocationTotal(loc,i->unit)*(100-(*pMap)->getLocation(loc)->getDistance(i->location)); //was pMap->location[j]...
-							bon-=getLocationTotal(loc,i->unit);
+							sumup+=getLocationTotal(loc, i->unit)*(100-(*pMap)->getLocation(loc)->getDistance(i->location)); //was pMap->location[j]...
+							bon-=getLocationTotal(loc, i->unit);
 							j++;
 						}
 						// Falls j<MAX_LOCATIONS => unser "Bon" wurde schon vorher aufgebraucht => An dieser Stelle j den Rest draufgeben... 
@@ -350,26 +379,33 @@ const int PRERACE::calculatePrimaryFitness(const bool ready) const
 				}
 		} //end of goal checking
 // TODO: Check for very small 'goal.time' values, probably in scc.cpp!!
-//Bonus: Hier werden Einheiten verarbeitet die noch in Produktion sind, aber Teil der goals sind
-//Erstmal Maximalbonus errechnen (nicht, dass die engine dann 50 Battlecruiser kurz vor Schluss noch anfaengt oder so :P )
-/*			  for(i=MAX_LOCATIONS;i--;)
-					   for(j=UNIT_TYPE_COUNT;j--;)
-							   bonus[i][j]=0;
-				for(i=MAX_GOALS;i--;)
-						if(getLocationTotal(i->location,i->unit)<i->count)
-								bonus[i->location][i->unit]+=i->count-getLocationTotal(i->location,i->unit);
-//bonus ist jetzt mit den uebrigen Einheiten bis zur Zielerfuellung belegt
-				for(i=MAX_BUILDINGS;i--;)
-						if((build->getRemainingBuildTime(i)>0)&&(bonus[build->getLocation(i)][build->getType(i)]>0))
-						{
-						//erstmal ohne Zeit...
-								pFitness+=((build->getRemainingBuildTime(i)*100)/((getLocationTotal(build->getLocation(i),build->getType(i))+bonus[build->getLocation(i)][build->getType(i)])*(*pStats)[build->getType(i)].BT)); //TODO in ProgramBT aendern
-								if(((*pGoal)->goal[build->getType(i)].time>0)&&(getLocationTotal(build->getLocation(i),build->getType(i))==0))
-										pFitness+=(build->getRemainingBuildTime(i)*100*(*pGoal)->goal[build->getType(i)].time*getLocationTotal(0,i))/((*pGoal)->goal[build->getType(i)].count*(*pStats)[build->getType(i)].BT*ga->maxTime);//hier auch ProgramBT
-								else
-										pFitness+=((build->getRemainingBuildTime(i)*100)/((*pGoal)->goal[build->getType(i)].count*(*pStats)[build->getType(i)].BT));
-								bonus[build->getLocation(i)][build->getType(i)]--;
-						}*/
+
+// ------ EXTRACT SOME INFORMATIONS OF THE REMAINING BUILD ORDER LIST ------
+// bonus is filled with all goals sorted by location and time
+    	std::priority_queue<Building, std::deque<Building> >  save = buildingQueue;
+		while(!buildingQueue.empty())
+		{
+			const Building& build = buildingQueue.top();
+// ------ IS THIS BUILDING PART OF THE GOAL LIST? ------
+			if(bonus[build.getLocation()][build.getType()] > 0)
+			{
+// as 'ready' is false we hit the time limit. Therefore buildFinishedTime is 
+// negative and adding totalBuildTime results in the time the item was already
+// in the queue 
+				tpF+=(build.getTotalBuildTime()+build.getBuildFinishedTime())*100/bonus[build.getLocation()][build.getType()];
+
+		// TODO time
+
+/*				if(((*pGoal)->goal[build.getType(i)].time>0)&&(getLocationTotal(build.getLocation(i),build.getType(i))==0))
+					pFitness+=(build.getRemainingBuildTime(i)*100*(*pGoal)->goal[build.getType(i)].time*getLocationTotal(0,i))/((*pGoal)->goal[build.getType(i)].count*(*pStats)[build.getType(i)].BT*ga->maxTime);//hier auch ProgramBT
+				else
+					pFitness+=((build.getRemainingBuildTime(i)*100)/((*pGoal)->goal[build.getType(i)].count*(*pStats)[build.getType(i)].BT));*/
+
+				bonus[build.getLocation()][build.getType()]--;
+			}
+			buildingQueue.pop();
+		}
+		buildingQueue = save;
 	} // end of ready=false
 	else   // all goals fulfilled, fitness <- timer
 	{
@@ -395,10 +431,10 @@ const int PRERACE::calculatePrimaryFitness(const bool ready) const
 // ------ HARVEST ROUTINES ------
 // ------------------------------
 
-void EXPORT PRERACE::adjustMineralHarvest(const int location)
+void PRERACE::adjustMineralHarvest(const unsigned int location)
 {
 #ifdef _SCC_DEBUG
-	if((location<0)||(location>=MAX_LOCATIONS)) {
+	if((location>=MAX_LOCATIONS)) {
 		toLog("DEBUG: (PRERACE::adjustMineralHarvest): Value location out of range.");return;
 	}
 #endif
@@ -435,10 +471,10 @@ void EXPORT PRERACE::adjustMineralHarvest(const int location)
 	}
 }
 
-void EXPORT PRERACE::adjustGasHarvest(const int location)
+void PRERACE::adjustGasHarvest(const unsigned int location)
 {
 #ifdef _SCC_DEBUG
-	if((location<0)||(location>=MAX_LOCATIONS))	{
+	if((location>=MAX_LOCATIONS))	{
 		toLog("DEBUG: (PRERACE::adjustGasHarvest): Value location out of range.");return;
 	}
 #endif
@@ -471,7 +507,7 @@ void EXPORT PRERACE::adjustGasHarvest(const int location)
 	}
 }
 
-void EXPORT PRERACE::adjustHarvestAllLocations()
+void PRERACE::adjustHarvestAllLocations()
 {
 	for(int i=MAX_LOCATIONS;i--;) {
 		adjustMineralHarvest(i);
@@ -479,7 +515,7 @@ void EXPORT PRERACE::adjustHarvestAllLocations()
 	}
 }
 
-const int EXPORT PRERACE::harvestMinerals() const
+const unsigned int PRERACE::harvestMinerals() const
 {
 	int sum=0;
 //	  int t=(rand()%10)-5;
@@ -509,7 +545,7 @@ const int EXPORT PRERACE::harvestMinerals() const
 }
 
 
-const int EXPORT PRERACE::harvestGas() const
+const unsigned int PRERACE::harvestGas() const
 {
 	int sum=0;
 //	int t=(rand()%10)-5;
@@ -590,13 +626,13 @@ void PRERACE::resetGeneMarker()
 	markerCounter=1;
 }
 
-void EXPORT PRERACE::resetSpecial()
+void PRERACE::resetSpecial()
 {
 	for(int i=MAX_LOCATIONS;i--;)
 		larvaInProduction[i]=0;
 }
 
-void PRERACE::removeLarvaFromQueue(const int location)
+void PRERACE::removeLarvaFromQueue(const unsigned int location)
 {
 #ifdef _SCC_DEBUG
     if((location<1)||(location>=MAX_LOCATIONS)) {
@@ -609,20 +645,20 @@ void PRERACE::removeLarvaFromQueue(const int location)
 	larvaInProduction[location]--;
 }
 
-void PRERACE::addLarvaToQueue(const int location)
+void PRERACE::addLarvaToQueue(const unsigned int location)
 {
 #ifdef _SCC_DEBUG
     if((location<1)||(location>=MAX_LOCATIONS)) {
 	        toLog("DEBUG: (PRERACE::addLarvaFromQueue): Value location out of range.");return;
     }
-	if((larvaInProduction[location]<0)||(larvaInProduction[location]>=MAX_SUPPLY)) {
+	if(larvaInProduction[location]>=MAX_SUPPLY) {
 	        toLog("DEBUG: (PRERACE::addLarvaFromQueue): Variable larvaInProduction not initialized or out of range.");return;
     }
 #endif
 	larvaInProduction[location]++;
 }
 
-void EXPORT PRERACE::setPlayerNum(const int playerNum)
+void PRERACE::setPlayerNum(const unsigned int playerNum)
 {
 #ifdef _SCC_DEBUG
 	if((playerNum<1)||(playerNum>=MAX_PLAYER)) {
@@ -641,7 +677,7 @@ void EXPORT PRERACE::setPlayerNum(const int playerNum)
 //	global=&unit[playerNum][0];
 }
 
-void EXPORT PRERACE::initializePlayer()
+void PRERACE::initializePlayer()
 {
 	setMinerals((*pStartCondition)->getMinerals());
 	setGas((*pStartCondition)->getGas());
@@ -650,7 +686,7 @@ void EXPORT PRERACE::initializePlayer()
 	setHaveSupply((*pStartCondition)->getHaveSupply());
 }
 
-void EXPORT PRERACE::eraseIllegalCode()
+void PRERACE::eraseIllegalCode()
 {
 	for(int i=MAX_LENGTH;i--;)
 		if(Code[i]>=getpGoal()->getMaxBuildTypes())
@@ -662,7 +698,7 @@ void EXPORT PRERACE::eraseIllegalCode()
 		}*/
 }
 
-void EXPORT PRERACE::eraseUselessCode()
+void PRERACE::eraseUselessCode()
 {
 	int allUnits[UNIT_TYPE_COUNT];
 	for(int i=UNIT_TYPE_COUNT;i--;)
@@ -687,7 +723,9 @@ void EXPORT PRERACE::eraseUselessCode()
 	}
 }
 
-void EXPORT PRERACE::mutateGeneCode()
+
+// TODO OPTIMIZE
+void PRERACE::mutateGeneCode()
 {
 //	return;
 // TODO logger machen, welche Mutationsart besonders erfolgreich ist
@@ -751,9 +789,9 @@ void EXPORT PRERACE::mutateGeneCode()
                                                                                                                                                             
         if(ga->getMutationFactor()==0)
             return;
-        if(rand()%(MAX_LENGTH*100/ga->getMutationFactor())==0)
+        if(rand() % (MAX_LENGTH*100/ga->getMutationFactor())==0)
         {
-            switch(rand()%4)
+            switch(rand() % 4)
             {
                 //TODO: wenn generateBuildOrder==1 dann bleibts stehen!
                 case 0://delete one variabel entry and move - Mehrere Schmieden/Kasernen etc. zulassen!
@@ -884,6 +922,7 @@ void EXPORT PRERACE::mutateGeneCode()
 //                      l=Code[0][x];Code[0][x]=Code[1][x];Code[1][x]=l;
 //                      l=Marker[0][x];Marker[0][x]=Marker[1][x];Marker[1][x]=l;
 //                  }break;
+				default:break; // TODO ERROR
             }
         }
     }
@@ -912,6 +951,7 @@ void PRERACE::resetGeneCode()
 			case TERRA:y=SUPPLY_DEPOT;break;
 			case PROTOSS:y=PYLON;break;
 			case ZERG:y=OVERLORD;break;
+			default:break; // TODO ERROR
 		}
 		for(int i=MAX_LENGTH;i--;)
 		{
@@ -928,6 +968,7 @@ void PRERACE::resetGeneCode()
 	}
 }
 
+#if 0
 void PRERACE::crossOver(PRERACE* parent2, PRERACE* child1, PRERACE* child2)
 {
 /*	int counter=MAX_LENGTH;
@@ -971,40 +1012,40 @@ void PRERACE::crossOver(PRERACE* parent2, PRERACE* child1, PRERACE* child2)
 	child1->mutationRate=(2*mutationRate+parent2->mutationRate)/3;
 	child2->mutationRate=(2*parent2->mutationRate+mutationRate)/3;*/
 }
-
+#endif
 
 
 // -------------------------------------------------------------------
 // ------ BELOW ALL THE GET/SET FUNCTIONS, PRETTY UNINTERESTING ------
 // -------------------------------------------------------------------
 
-const int PRERACE::getCode(const int IP) const
+const unsigned int PRERACE::getCode(const unsigned int IP) const
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if(IP>=MAX_LENGTH) {
         toLog("DEBUG: (PRERACE::getCode): Value IP out of range.");return(0);
 	}	
-	if((Code[IP]<0)||(Code[IP]>=UNIT_TYPE_COUNT)) {
+	if(Code[IP]>=UNIT_TYPE_COUNT) {
 		toLog("DEBUG: (PRERACE::getCode): Variable Code not initialized.");return(0);
 	}
 #endif
 	return(Code[IP]);
 }
 
-const int PRERACE::getCurrentCode() const
+const unsigned int PRERACE::getCurrentCode() const
 {
 #ifdef _SCC_DEBUG
-    if((Code[getIP()]<0)||(Code[getIP()]>=UNIT_TYPE_COUNT)) {
+    if(Code[getIP()]>=UNIT_TYPE_COUNT) {
         toLog("DEBUG: (PRERACE::getCurrentCode): Variable Code not initialized.");return(0);
     }
 #endif
 	return(Code[getIP()]);
 }
 
-const int PRERACE::getMarker(const int IP) const
+const unsigned int PRERACE::getMarker(const unsigned int IP) const
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>MAX_LENGTH)) {
+	if(IP>MAX_LENGTH) {
 		toLog("DEBUG: (PRERACE::getMarker): Value IP out of range.");return(0);
 	}
 #endif
@@ -1020,99 +1061,125 @@ void PRERACE::copyCode(PRERACE& player)
 }
 
 // ------ UNITS ------
-const int EXPORT PRERACE::getMapLocationAvailible(const int player, const int location, const int unittype)
+const unsigned int PRERACE::getMapLocationAvailible(const unsigned int player, const unsigned int location, const unsigned int unittype)
 {
 #ifdef _SCC_DEBUG
-	if((player<0)||(player>=(*pMap)->getMaxPlayer())) {
+	if(player>=(*pMap)->getMaxPlayer()) {
 		toLog("DEBUG: (PRERACE::getMapLocationAvailible): Value player out of range.");return(0);
 	}
-	if((location<0)||(location>=MAX_LOCATIONS))	{
+	if((location>=MAX_LOCATIONS))	{
 		toLog("DEBUG: (PRERACE::getMapLocationAvailible): Value location out of range.");return(0);
 	}
 #endif
 	return(unit[player][location].getAvailible(unittype));
 }
 
-const int EXPORT PRERACE::getMapLocationTotal(const int player, const int location, const int unittype)
+const unsigned int PRERACE::getMapLocationTotal(const unsigned int player, const unsigned int location, const unsigned int unittype)
 {
 #ifdef _SCC_DEBUG
-	if((player<0)||(player>=(*pMap)->getMaxPlayer())) {
+	if(player>=(*pMap)->getMaxPlayer()) {
 		toLog("DEBUG: (PRERACE::getMapLocationTotal): Value player out of range.");return(0);
 	}
-	if((location<0)||(location>=MAX_LOCATIONS))	{
+	if((location>=MAX_LOCATIONS))	{
 		toLog("DEBUG: (PRERACE::getMapLocationTotal): Value location out of range.");return(0);
 	}
 #endif
 	return(unit[player][location].getTotal(unittype));
 }
 
-void EXPORT PRERACE::setMapLocationAvailible(const int player, const int location, const int unittype, const int availible)
+void PRERACE::setMapLocationAvailible(const unsigned int player, const unsigned int location, const unsigned int unittype, const unsigned int availible)
 {
 #ifdef _SCC_DEBUG
-	if((player<0)||(player>=(*pMap)->getMaxPlayer())) {
+	if(player>=(*pMap)->getMaxPlayer()) {
 		toLog("DEBUG: (PRERACE::setMapLocationAvailible): Value player out of range.");return;
 	}
-	if((location<0)||(location>=MAX_LOCATIONS))	{
+	if((location>=MAX_LOCATIONS))	{
 		toLog("DEBUG: (PRERACE::setMapLocationAvailible): Value location out of range.");return;
 	}
 #endif
 	unit[player][location].setAvailible(unittype, availible);
 }
 
-void EXPORT PRERACE::setMapLocationTotal(const int player, const int location, const int unittype, const int total)
+void PRERACE::setMapLocationTotal(const unsigned int player, const unsigned int location, const unsigned int unittype, const unsigned int total)
 {
 #ifdef _SCC_DEBUG
-	if((player<0)||(player>=(*pMap)->getMaxPlayer())) {
+	if(player>=(*pMap)->getMaxPlayer()) {
 		toLog("DEBUG: (PRERACE::setMapLocationTotal): Value player out of range.");return;
 	}
-	if((location<0)||(location>=MAX_LOCATIONS))	{
+	if((location>=MAX_LOCATIONS))	{
 		toLog("DEBUG: (PRERACE::setMapLocationTotal): Value location out of range.");return;
 	}
 #endif
 	unit[player][location].setTotal(unittype, total);
 }
 
-void EXPORT PRERACE::addMapLocationAvailible(const int player, const int location, const int unittype, const int availible)
+void PRERACE::addOneMapLocationAvailible(const unsigned int player, const unsigned int location, const unsigned int unittype)
 {
 #ifdef _SCC_DEBUG
-	if((player<0)||(player>=(*pMap)->getMaxPlayer())) {
-		toLog("DEBUG: (PRERACE::addMapLocationAvailible): Value player out of range.");return;
+	if(player>=(*pMap)->getMaxPlayer()) {
+		toLog("DEBUG: (PRERACE::addOneMapLocationAvailible): Value player out of range.");return;
 	}
-	if((location<0)||(location>=MAX_LOCATIONS)) {
-		toLog("DEBUG: (PRERACE::addMapLocationAvailible): Value location out of range.");return;
+	if((location>=MAX_LOCATIONS)) {
+		toLog("DEBUG: (PRERACE::addOneMapLocationAvailible): Value location out of range.");return;
 	}
 #endif
-	unit[player][location].addAvailible(unittype, availible);
+	unit[player][location].addOneAvailible(unittype);
+}
+
+void PRERACE::addOneMapLocationTotal(const unsigned int player, const unsigned int location, const unsigned int unittype)
+{
+#ifdef _SCC_DEBUG
+	if(player>=(*pMap)->getMaxPlayer()) {
+		toLog("DEBUG: (PRERACE::addOneMapLocationTotal): Value player out of range.");return;
+	}
+	if((location>=MAX_LOCATIONS)) {
+		toLog("DEBUG: (PRERACE::addOneMapLocationTotal): Value location out of range.");return;
+	}
+#endif
+	unit[player][location].addOneTotal(unittype);
+}
+
+void PRERACE::removeOneMapLocationAvailible(const unsigned int player, const unsigned int location, const unsigned int unittype)
+{
+#ifdef _SCC_DEBUG
+	if(player>=(*pMap)->getMaxPlayer()) {
+		toLog("DEBUG: (PRERACE::addOneMapLocationAvailible): Value player out of range.");return;
+	}
+	if((location>=MAX_LOCATIONS)) {
+		toLog("DEBUG: (PRERACE::addOneMapLocationAvailible): Value location out of range.");return;
+	}
+#endif
+	unit[player][location].removeOneAvailible(unittype);
 }
 
 
-void EXPORT PRERACE::addMapLocationTotal(const int player, const int location, const int unittype, const int total)
+void PRERACE::removeOneMapLocationTotal(const unsigned int player, const unsigned int location, const unsigned int unittype)
 {
 #ifdef _SCC_DEBUG
-	if((player<0)||(player>=(*pMap)->getMaxPlayer())) {
-		toLog("DEBUG: (PRERACE::addMapLocationTotal): Value player out of range.");return;
+	if(player>=(*pMap)->getMaxPlayer()) {
+		toLog("DEBUG: (PRERACE::addOneMapLocationTotal): Value player out of range.");return;
 	}
-	if((location<0)||(location>=MAX_LOCATIONS)) {
-		toLog("DEBUG: (PRERACE::addMapLocationTotal): Value location out of range.");return;
+	if((location>=MAX_LOCATIONS)) {
+		toLog("DEBUG: (PRERACE::addOneMapLocationTotal): Value location out of range.");return;
 	}
 #endif
-	unit[player][location].addTotal(unittype, total);
+	unit[player][location].removeOneTotal(unittype);
 }
 
-const int EXPORT PRERACE::getLocationAvailible(const int location, const int unittype) const
+const unsigned int PRERACE::getLocationAvailible(const unsigned int location, const unsigned int unittype) const
 {
 #ifdef _SCC_DEBUG
-	if((location<0)||(location>=MAX_LOCATIONS))	{
+	if((location>=MAX_LOCATIONS))	{
 		toLog("DEBUG: (PRERACE::getLocationAvailible): Value location out of range.");return(0);
 	}
 #endif
 	return(this->location[location].getAvailible(unittype));
 }
 
-const int EXPORT PRERACE::getLocationTotal(const int location, const int unittype) const
+const unsigned int PRERACE::getLocationTotal(const unsigned int location, const unsigned int unittype) const
 {
 #ifdef _SCC_DEBUG
-	if((location<0)||(location>=MAX_LOCATIONS)) {
+	if((location>=MAX_LOCATIONS)) {
 		toLog("DEBUG: (PRERACE::getLocationTotal): Value location out of range.");return(0);
 	}
 #endif
@@ -1120,137 +1187,137 @@ const int EXPORT PRERACE::getLocationTotal(const int location, const int unittyp
 }
 
 
-void EXPORT PRERACE::setLocationAvailible(const int location, const int unittype, const int availible)
+void PRERACE::setLocationAvailible(const unsigned int location, const unsigned int unittype, const unsigned int availible)
 {
 #ifdef _SCC_DEBUG
-	if((location<0)||(location>=MAX_LOCATIONS)) {
+	if((location>=MAX_LOCATIONS)) {
 		toLog("DEBUG: (PRERACE::setLocationAvailible): Value location out of range.");return;
 	}
 #endif
 	this->location[location].setAvailible(unittype, availible);
 }
 
-void EXPORT PRERACE::setLocationTotal(const int location, const int unittype, const int total)
+void PRERACE::setLocationTotal(const unsigned int location, const unsigned int unittype, const unsigned int total)
 {
 #ifdef _SCC_DEBUG
-	if((location<0)||(location>=MAX_LOCATIONS))	{
+	if(location>=MAX_LOCATIONS)	{
 		toLog("DEBUG: (PRERACE::setLocationTotal): Value location out of range.");return;
 	}
 #endif
 	this->location[location].setTotal(unittype, total);
 }
 
-void EXPORT PRERACE::addLocationAvailible(const int location, const int unittype, const int availible)
+void PRERACE::addLocationAvailible(const unsigned int location, const unsigned int unittype, const unsigned int availible)
 {
 #ifdef _SCC_DEBUG
-	if((location<0)||(location>=MAX_LOCATIONS)) {
+	if(location>=MAX_LOCATIONS) {
 		toLog("DEBUG: (PRERACE::addLocationAvailible): Value location out of range.");return;
 	}
 #endif	
 	this->location[location].addAvailible(unittype, availible);
-	if(location>0) //sonst waers ja doppelt...
-		this->location[0].addAvailible(unittype, availible);
+	if(location!=GLOBAL) //sonst waers ja doppelt...
+		this->location[GLOBAL].addAvailible(unittype, availible);
 }
 
-void EXPORT PRERACE::addLocationTotal(const int location, const int unittype, const int total)
+void PRERACE::addLocationTotal(const unsigned int location, const unsigned int unittype, const unsigned int total)
 {
 #ifdef _SCC_DEBUG
-	if((location<0)||(location>=MAX_LOCATIONS))	{
+	if(location>=MAX_LOCATIONS)	{
 		toLog("DEBUG: (PRERACE::addLocationTotal): Value location out of range.");return;
 	}
 #endif
 	this->location[location].addTotal( unittype, total );
-	if(location>GLOBAL) // sonst waers ja doppelt wenn location = 0
+	if(location!=GLOBAL) // sonst waers ja doppelt wenn location = 0
 		this->location[GLOBAL].addTotal(unittype, total);
 }
 
-void PRERACE::addOneLocationAvailible(const int location, const int unittype)
+void PRERACE::addOneLocationAvailible(const unsigned int location, const unsigned int unittype)
 {
 #ifdef _SCC_DEBUG
-    if((location<0)||(location>=MAX_LOCATIONS)) {
+    if(location>=MAX_LOCATIONS) {
         toLog("DEBUG: (PRERACE::addLocationAvailible): Value location out of range.");return;
     }
 #endif
     this->location[location].addOneAvailible( unittype );
 // also add one unit to the global location if global location was not already specified
-    if(location>GLOBAL) 
+    if(location!=GLOBAL) 
         this->location[GLOBAL].addOneAvailible( unittype );
 }
 
-void PRERACE::addOneLocationTotal(const int location, const int unittype)
+void PRERACE::addOneLocationTotal(const unsigned int location, const unsigned int unittype)
 {
 #ifdef _SCC_DEBUG
-    if((location<0)||(location>=MAX_LOCATIONS)) {
+    if(location>=MAX_LOCATIONS) {
         toLog("DEBUG: (PRERACE::addLocationTotal): Value location out of range.");return;
     }
 #endif
     this->location[location].addOneTotal( unittype );
-    if(location>GLOBAL) // sonst waers ja doppelt wenn location = 0
+    if(location!=GLOBAL) // sonst waers ja doppelt wenn location = 0
         this->location[GLOBAL].addOneTotal( unittype );
 }
 
-void PRERACE::removeOneLocationAvailible(const int location, const int unittype)
+void PRERACE::removeOneLocationAvailible(const unsigned int location, const unsigned int unittype)
 {
 #ifdef _SCC_DEBUG
-    if((location<0)||(location>=MAX_LOCATIONS)) {
+    if((location>=MAX_LOCATIONS)) {
         toLog("DEBUG: (PRERACE::removeOneLocationAvailible): Value location out of range.");return;
     }
 #endif
     this->location[location].removeOneAvailible( unittype );
 // also add one unit to the global location if global location was not already specified
-    if(location>GLOBAL)
+    if(location!=GLOBAL)
         this->location[GLOBAL].removeOneAvailible( unittype );
 }
 
-void PRERACE::removeOneLocationTotal(const int location, const int unittype)
+void PRERACE::removeOneLocationTotal(const unsigned int location, const unsigned int unittype)
 {
 #ifdef _SCC_DEBUG
-    if((location<0)||(location>=MAX_LOCATIONS)) {
+    if((location>=MAX_LOCATIONS)) {
         toLog("DEBUG: (PRERACE::removeOneLocationTotal): Value location out of range.");return;
     }
 #endif
     this->location[location].removeOneTotal( unittype );
-    if(location>0) 
-        this->location[0].removeOneTotal( unittype );
+    if(location!=GLOBAL) 
+        this->location[GLOBAL].removeOneTotal( unittype );
 }
 // ------ END UNITS -----
 
 
 // ----- SUPPLY ------
-void EXPORT PRERACE::setNeedSupply(const int needSupply)
+void PRERACE::setNeedSupply(const unsigned int needSupply)
 {
 #ifdef _SCC_DEBUG
-	if((needSupply<0)||(needSupply>10*MAX_SUPPLY)) {
+	if(needSupply>10*MAX_SUPPLY) {
 		toLog("DEBUG: (PRERACE::setNeedSupply): Value needSupply out of range.");return;
 	}
 #endif
 	this->needSupply=needSupply;
 }
 
-const int EXPORT PRERACE::getNeedSupply() const
+const unsigned int PRERACE::getNeedSupply() const
 {
 #ifdef _SCC_DEBUG
-	if((needSupply<0)||(needSupply>10*MAX_SUPPLY)) {
+	if(needSupply>10*MAX_SUPPLY) {
 		toLog("DEBUG: (PRERACE::getNeedSupply): Variable not initialized.");return(0);
 	}
 #endif
 	return(needSupply);
 }
 
-void EXPORT PRERACE::setHaveSupply(const int haveSupply)
+void PRERACE::setHaveSupply(const unsigned int haveSupply)
 {
 #ifdef _SCC_DEBUG
-	if((haveSupply<0)||(haveSupply>10*MAX_SUPPLY)) {
+	if(haveSupply>10*MAX_SUPPLY) {
 		toLog("DEBUG: (PRERACE::setHaveSupply): Value haveSupply out of range.");return;
 	}
 #endif
 	this->haveSupply=haveSupply;
 }
 
-const int EXPORT PRERACE::getHaveSupply() const
+const unsigned int PRERACE::getHaveSupply() const
 {
 #ifdef _SCC_DEBUG
-	if((haveSupply<0)||(haveSupply>10*MAX_SUPPLY)) {
+	if(haveSupply>10*MAX_SUPPLY) {
 		toLog("DEBUG: (PRERACE::getHaveSupply): Variable not initialized.");return(0);
 	}
 #endif
@@ -1260,138 +1327,138 @@ const int EXPORT PRERACE::getHaveSupply() const
 
 // ----- HARVEST ------
 
-void EXPORT PRERACE::setMinerals(const int minerals)
+void PRERACE::setMinerals(const unsigned int minerals)
 {
 #ifdef _SCC_DEBUG
-	if((minerals<0)||(minerals>MAX_MINERALS)) {
+	if(minerals>MAX_MINERALS) {
 		toLog("DEBUG: (PRERACE::setMinerals): Value minerals out of range.");return;
 	}
 #endif
 	this->minerals=minerals;
 }
 
-const int EXPORT PRERACE::getMinerals() const
+const unsigned int PRERACE::getMinerals() const
 {
 #ifdef _SCC_DEBUG
-	if((minerals<0)||(minerals>MAX_MINERALS)) {
+	if(minerals>MAX_MINERALS) {
 		toLog("DEBUG: (PRERACE::getMinerals): Variable minerals not initialized.");return(0);
 	}
 #endif
 	return(minerals);
 }
 
-void EXPORT PRERACE::setGas(const int gas)
+void PRERACE::setGas(const unsigned int gas)
 {
 #ifdef _SCC_DEBUG
-	if((gas<0)||(gas>MAX_GAS)) {
+	if(gas>MAX_GAS) {
 		toLog("DEBUG: (PRERACE::setGas): Value gas out of range.");return;
 	}
 #endif
 	this->gas=gas;
 }
 
-const int EXPORT PRERACE::getGas() const
+const unsigned int PRERACE::getGas() const
 {
 #ifdef _SCC_DEBUG
-	if((gas<0)||(gas>MAX_GAS)) {
+	if(gas>MAX_GAS) {
 		toLog("DEBUG: (PRERACE::getGas): Variable gas not initialized.");return(0);
 	}
 #endif
 	return(gas);
 }
 
-void EXPORT PRERACE::setMineralHarvestPerSecond( const int location, const int worker, const int mineralHarvestPerSecond )
+void PRERACE::setMineralHarvestPerSecond( const unsigned int location, const unsigned int worker, const unsigned int mineralHarvestPerSecond )
 {
 #ifdef _SCC_DEBUG
-	if((mineralHarvestPerSecond<0)||(mineralHarvestPerSecond>=MAX_MINERALS)) {
+	if(mineralHarvestPerSecond>=MAX_MINERALS) {
 		toLog("DEBUG: (PRERACE::setMineralHarvestPerSecond): Value mineralHarvestPerSecond out of range.");return;
 	}
-	if((location<0)||(location>=MAX_LOCATIONS)) {
+	if((location>=MAX_LOCATIONS)) {
 		toLog("DEBUG: (PRERACE::setMineralHarvestPerSecond): Value location out of range.");return;
 	}
-	if((worker<0)||(worker>=45)) {
+	if(worker>=45) {
 		toLog("DEBUG: (PRERACE::setMineralHarvestPerSecond): Value worker out of range.");return;
 	}
 #endif
 	this->mineralHarvestPerSecond[location][worker]=mineralHarvestPerSecond;
 }
 
-const int EXPORT PRERACE::getMineralHarvestPerSecond( const int location, const int worker ) const
+const unsigned int PRERACE::getMineralHarvestPerSecond( const unsigned int location, const unsigned int worker ) const
 {
 #ifdef _SCC_DEBUG
-	if((location<0)||(location>=MAX_LOCATIONS))	{
+	if((location>=MAX_LOCATIONS))	{
 		toLog("DEBUG: (PRERACE::getMineralHarvestPerSecond): Value location out of range.");return(0);
 	}
-	if((worker<0)||(worker>=45)) {
+	if(worker>=45) {
 		toLog("DEBUG: (PRERACE::getMineralHarvestPerSecond): Value worker out of range.");return(0);
 	}
-	if((mineralHarvestPerSecond[location][worker]<0)||(mineralHarvestPerSecond[location][worker]>MAX_MINERALS))	{
+	if(mineralHarvestPerSecond[location][worker]>MAX_MINERALS) {
 		toLog("DEBUG: (PRERACE::getMineralHarvestPerSecond): Variable mineralHarvestPerSecond not initialized.");return(0);
 	}
 #endif
 	return(mineralHarvestPerSecond[location][worker]);
 }
 
-void EXPORT PRERACE::setGasHarvestPerSecond( const int location, const int worker, const int gasHarvestPerSecond )
+void PRERACE::setGasHarvestPerSecond( const unsigned int location, const unsigned int worker, const unsigned int gasHarvestPerSecond )
 {
 #ifdef _SCC_DEBUG
-	if((gasHarvestPerSecond<0)||(gasHarvestPerSecond>=MAX_GAS)||(location<0)||(location>=MAX_LOCATIONS)||(worker<0)||(worker>=5)) {
+	if((gasHarvestPerSecond>=MAX_GAS)||(location>=MAX_LOCATIONS)||(worker>=5)) {
 		toLog("DEBUG: (PRERACE::setGasHarvestPerSecond): Value out of range.");return;
 	}
 #endif
 	this->gasHarvestPerSecond[location][worker]=gasHarvestPerSecond;
 }
 
-const int EXPORT PRERACE::getGasHarvestPerSecond( const int location, const int worker ) const
+const unsigned int PRERACE::getGasHarvestPerSecond( const unsigned int location, const unsigned int worker ) const
 {
 #ifdef _SCC_DEBUG
-	if((location<0)||(location>=MAX_LOCATIONS))	{
+	if((location>=MAX_LOCATIONS))	{
 		toLog("DEBUG: (PRERACE::getGasHarvestPerSecond): Value location out of range.");return(0);
 	}
-	if((worker<0)||(worker>=5))	{
+	if(worker>=5)	{
 		toLog("DEBUG: (PRERACE::getGasHarvestPerSecond): Value worker out of range.");return(0);
 	}
-	if((gasHarvestPerSecond[location][worker]<0)||(gasHarvestPerSecond[location][worker]>MAX_GAS)) {
+	if(gasHarvestPerSecond[location][worker]>MAX_GAS) {
 		toLog("DEBUG: (PRERACE::getGasHarvestPerSecond): Variable gasHarvestPerSecond not initialized.");return(0);
 	}
 #endif
 	return(gasHarvestPerSecond[location][worker]);
 }
 
-void EXPORT PRERACE::setHarvestedMinerals( const int harvestedMinerals )
+void PRERACE::setHarvestedMinerals( const unsigned int harvestedMinerals )
 {
 #ifdef _SCC_DEBUG
-	if((harvestedMinerals<0)||(harvestedMinerals>=MAX_MINERALS)) {
+	if(harvestedMinerals>=MAX_MINERALS) {
 		toLog("DEBUG: (PRERACE::setHarvestedMinerals): Value out of range.");return;
 	}
 #endif
 	this->harvestedMinerals=harvestedMinerals;
 }
 
-const int EXPORT PRERACE::getHarvestedMinerals() const
+const unsigned int PRERACE::getHarvestedMinerals() const
 {
 #ifdef _SCC_DEBUG
-	if((harvestedMinerals<0)||(harvestedMinerals>MAX_MINERALS)) {
+	if(harvestedMinerals>MAX_MINERALS) {
 		toLog("DEBUG: (PRERACE::getHarvestedMinerals): Variable harvestedMinerals not initialized.");return(0);
 	}
 #endif
 	return(harvestedMinerals);
 }
 
-void EXPORT PRERACE::setHarvestedGas( const int harvestedGas )
+void PRERACE::setHarvestedGas( const unsigned int harvestedGas )
 {
 #ifdef _SCC_DEBUG
-	if((harvestedGas<0)||(harvestedGas>=MAX_GAS)) {
+	if(harvestedGas>=MAX_GAS) {
 		toLog("DEBUG: (PRERACE::setHarvestedGas): Value out of range.");return;
 	}
 #endif
 	this->harvestedGas=harvestedGas;
 }
 
-const int EXPORT PRERACE::getHarvestedGas() const
+const unsigned int PRERACE::getHarvestedGas() const
 {
 #ifdef _SCC_DEBUG
-	if((harvestedGas<0)||(harvestedGas>MAX_GAS)) {
+	if(harvestedGas>MAX_GAS) {
 		toLog("DEBUG: (PRERACE::getHarvestedGas): Variable harvestedGas not initialized.");return(0);
 	}
 #endif
@@ -1399,40 +1466,40 @@ const int EXPORT PRERACE::getHarvestedGas() const
 }
 
 
-void EXPORT PRERACE::setWastedMinerals( const int wastedMinerals )
+void PRERACE::setWastedMinerals( const unsigned int wastedMinerals )
 {
 #ifdef _SCC_DEBUG
-	if((wastedMinerals<0)||(wastedMinerals>=MAX_MINERALS*MAX_TIME)) {
+	if(wastedMinerals>=MAX_MINERALS*MAX_TIME) {
 		toLog("DEBUG: (PRERACE::setWastedMinerals): Value out of range.");return;
 	}
 #endif
 	this->wastedMinerals=wastedMinerals;
 }
 
-const int EXPORT PRERACE::getWastedMinerals() const
+const unsigned int PRERACE::getWastedMinerals() const
 {
 #ifdef _SCC_DEBUG
-	if((wastedMinerals<0)||(wastedMinerals>MAX_MINERALS*MAX_TIME)) {
+	if(wastedMinerals>=MAX_MINERALS*MAX_TIME) {
 		toLog("DEBUG: (PRERACE::getWastedMinerals): Variable wastedMinerals not initialized.");return(0);
 	}
 #endif
 	return(wastedMinerals);
 }
 
-void EXPORT PRERACE::setWastedGas(const int wastedGas)
+void PRERACE::setWastedGas(const unsigned int wastedGas)
 {
 #ifdef _SCC_DEBUG
-	if((wastedGas<0)||(wastedGas>=MAX_GAS*MAX_TIME)) {
+	if(wastedGas>=MAX_GAS*MAX_TIME) {
 		toLog("DEBUG: (PRERACE::setWastedGas): Value out of range.");return;
 	}
 #endif
 	this->wastedGas=wastedGas;
 }
 
-const int EXPORT PRERACE::getWastedGas() const
+const unsigned int PRERACE::getWastedGas() const
 {
 #ifdef _SCC_DEBUG
-	if((wastedGas<0)||(wastedGas>MAX_GAS*MAX_TIME)) {
+	if(wastedGas>=MAX_GAS*MAX_TIME) {
 		toLog("DEBUG: (PRERACE::getWastedGas): Variable wastedGas not initialized.");return(0);
 	}
 #endif
@@ -1450,10 +1517,10 @@ void PRERACE::setCurrentGoal(GOAL_ENTRY** pGoal)
 	this->pGoal=pGoal;
 }
 
-const int EXPORT PRERACE::getPlayerNum() const
+const unsigned int PRERACE::getPlayerNum() const
 {
 #ifdef _SCC_DEBUG
-	if((playerNum<0)||(playerNum>=MAX_PLAYER)) {
+	if(playerNum>=MAX_PLAYER) {
 		toLog("DEBUG: (PRERACE::getPlayer): Variable not initialized.");return(0);
 	}
 #endif
@@ -1466,20 +1533,20 @@ const START_CONDITION* const* PRERACE::getStartCondition()
 }
 
 
-void EXPORT PRERACE::setTimer(const int time)
+void PRERACE::setTimer(const unsigned int time)
 {
 #ifdef _SCC_DEBUG
-	if((time<0)||(time>MAX_TIME)) {
+	if(time>=MAX_TIME) {
 		toLog("DEBUG: (PRERACE::setTimer): Value time out of range.");return;
 	}
 #endif
 	timer=time;
 }
 
-const int EXPORT PRERACE::getTimer() const
+const unsigned int PRERACE::getTimer() const
 {
 #ifdef _SCC_DEBUG
-	if((timer<0)||(timer>MAX_TIME)) {
+	if(timer>=MAX_TIME) {
 		toLog("DEBUG: (PRERACE::getTimer): Variable timer not initialized.");return(0);
 	}
 #endif
@@ -1487,17 +1554,18 @@ const int EXPORT PRERACE::getTimer() const
 }
 
 
-const int EXPORT PRERACE::getRealTimer() const
+const unsigned int PRERACE::getRealTimer() const
 {
 #ifdef _SCC_DEBUG
-	if((timer<0)||(timer>MAX_TIME)) {
+	if(timer>=MAX_TIME) {
 		toLog("DEBUG: (PRERACE::getRealTimer): Variable timer not initialized.");return(0);
 	}
 #endif
 	return(ga->maxTime-timer);
+	// TODO auf > checken
 }
 
-void EXPORT PRERACE::setpStats(const UNIT_STATISTICS* const* pStats)
+void PRERACE::setpStats(const UNIT_STATISTICS* const* pStats)
 {
 #ifdef _SCC_DEBUG
 	if((*pStats)[0].minerals!=0) { // TODO
@@ -1507,7 +1575,7 @@ void EXPORT PRERACE::setpStats(const UNIT_STATISTICS* const* pStats)
 	this->pStats=pStats;
 }
 
-const UNIT_STATISTICS* const * EXPORT PRERACE::getpStats() const
+const UNIT_STATISTICS* const * PRERACE::getpStats() const
 {
 #ifdef _SCC_DEBUG
 	if(!pStats)	{
@@ -1517,53 +1585,53 @@ const UNIT_STATISTICS* const * EXPORT PRERACE::getpStats() const
 	return(pStats);
 }
 
-void EXPORT PRERACE::setIP(const int IP)
+void PRERACE::setIP(const unsigned int IP)
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if(IP>=MAX_LENGTH) {
 		toLog("DEBUG: (PRERACE::setIP): Value IP out of range.");return;
 	}
 #endif
 	this->IP=IP;
 }
 
-const int EXPORT PRERACE::getIP() const
+const unsigned int PRERACE::getIP() const
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>MAX_LENGTH)) {
+	if(IP>MAX_LENGTH) {
 		toLog("DEBUG: (PRERACE::getIP): Variable IP not initialized.");return(0);
 	}
 #endif
 	return(IP);
 }
 
-/*const int EXPORT PRERACE::getFinalTime(const int goal) const
+/*const unsigned int PRERACE::getFinalTime(const unsigned int goal) const
 {
 #ifdef _SCC_DEBUG
 	if((goal<0)||(goal>=MAX_GOALS))	{
 		toLog("DEBUG: (PRERACE::getFinalTime): Value goal out of range.");return(0);
 	}
-	if((ftime[goal]<0)||(ftime[goal]>MAX_TIME)) {
+	if((ftime[goal]<0)||(ftime[goal]>=MAX_TIME)) {
 		toLog("DEBUG: (PRERACE::getFinalTime): Variable ftime not initialized.");return(0);
 	}
 #endif
 	return(ftime[goal]);
 }*/
 
-const int EXPORT PRERACE::getLength() const
+const unsigned int PRERACE::getLength() const
 {
 #ifdef _SCC_DEBUG
-	if((length<0)||(length>MAX_LENGTH)) {
+	if(length>MAX_LENGTH) {
 		toLog("DEBUG: (PRERACE::getLength): Variable length not initialized.");return(0);
 	}
 #endif
 	return(length);
 }
 
-/*void EXPORT PRERACE::setFinalTime(const int goal, const int time)
+/*void PRERACE::setFinalTime(const unsigned int goal, const unsigned int time)
 {
 #ifdef _SCC_DEBUG
-	if((time<0)||(time>MAX_TIME)) {
+	if((time<0)||(time>=MAX_TIME)) {
 		toLog("DEBUG: (PRERACE::setFinalTime): Value time out of range.");return;
 	}
 	if((goal<0)||(goal>=MAX_GOALS)) {
@@ -1573,10 +1641,10 @@ const int EXPORT PRERACE::getLength() const
 	ftime[goal]=time;
 }*/
 
-void EXPORT PRERACE::setLength(const int length)
+void PRERACE::setLength(const unsigned int length)
 {
 #ifdef _SCC_DEBUG
-	if((length<0)||(length>MAX_LENGTH))
+	if(length>MAX_LENGTH)
 	{
 		toLog("DEBUG: (PRERACE::setLength): Value length out of range.");return;
 	}
@@ -1585,20 +1653,20 @@ void EXPORT PRERACE::setLength(const int length)
 }
 
 
-void EXPORT PRERACE::setTimeOut(const int time)
+void PRERACE::setTimeOut(const unsigned int time_out)
 {
 #ifdef _SCC_DEBUG
-	if((time<0)||(time>MAX_TIMEOUT)) {
-		toLog("DEBUG: (PRERACE::setTimeOut): Value time out of range.");return;
+	if(time_out>MAX_TIMEOUT) {
+		toLog("DEBUG: (PRERACE::setTimeOut): Value time_out out of range.");return;
 	}
 #endif
-	timeout=time;
+	timeout=time_out;
 }
 
-const int EXPORT PRERACE::getTimeOut() const
+const unsigned int PRERACE::getTimeOut() const
 {
 #ifdef _SCC_DEBUG
-	if((timeout<0)||(timeout>MAX_TIMEOUT)) {
+	if(timeout>MAX_TIMEOUT) {
 		toLog("DEBUG: (PRERACE::getTimeOut): Variable timeout not initialized.");return(0);
 	}
 #endif
@@ -1619,27 +1687,12 @@ const BASIC_MAP* const* PRERACE::getMap()
 // ------ END OF GET/SET FUNCTIONS ------
 // --------------------------------------
 
+GA* PRERACE::ga;
 START* PRERACE::pStart;
 const BASIC_MAP* const* PRERACE::pMap;
 
-int PRERACE::noise[MAX_TIME];
-int PRERACE::markerCounter;
+signed int PRERACE::noise[MAX_TIME];
+unsigned int PRERACE::markerCounter;
 UNIT PRERACE::unit[MAX_PLAYER][MAX_LOCATIONS];
 
-void PRERACE::assignGA(GA* pga);
-void PRERACE::assignStart(START* start);
-void PRERACE::initNoise();
-void PRERACE::copyMap();
-
-const int PRERACE::getMapLocationAvailible(const int player, const int loc, const int unit);
-const int PRERACE::getMapLocationTotal(const int player, const int loc, const int unit);
-
-void PRERACE::setMapLocationAvailible(const int player, const int loc, const int unit, const int availible);
-void PRERACE::setMapLocationTotal(const int player, const int loc, const int unit, const int total);
-
-void PRERACE::addMapLocationAvailible(const int player, const int loc, const int unit, const int availible);
-void PRERACE::addMapLocationTotal(const int player, const int loc, const int unit, const int total);
-void PRERACE::resetGeneMarker();
-GA* PRERACE::ga;
-BASIC_MAP* const* getMap();
 

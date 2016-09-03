@@ -4,65 +4,65 @@
 #include "location.hpp"
 #include "unit.hpp"
 #include <list>
-using namespace std;
 
-
-class EXPORT GOAL_ENTRY
+class GOAL_ENTRY
 {
 	private:
-		int number; // to look up in the goal name list
-		string name;
+		unsigned int number; // to look up in the goal name list //???? TODO
+		std::string name;
 		eRace race;
-		bool raceInitialized;
-		int maxBuildTypes;
+		unsigned int maxBuildTypes;
 		const UNIT_STATISTICS* pStats;
 //		bool initialized;
-		int phaenoToGenotype[UNIT_TYPE_COUNT];
-		int genoToPhaenotype[UNIT_TYPE_COUNT];
-		bool changed;
+		unsigned int phaenoToGenotype[UNIT_TYPE_COUNT];
+		unsigned int genoToPhaenotype[UNIT_TYPE_COUNT];
 //		int mode;
 
-		int allGoal[UNIT_TYPE_COUNT];
-		int globalGoal[MAX_LOCATIONS][UNIT_TYPE_COUNT];
+		unsigned int allGoal[UNIT_TYPE_COUNT];
+		unsigned int globalGoal[MAX_LOCATIONS][UNIT_TYPE_COUNT];
+		bool changed;
+		bool raceInitialized;
 		bool isBuildable[UNIT_TYPE_COUNT];
 		bool isVariable[UNIT_TYPE_COUNT];	
-		list<GOAL> goal;
+		std::list<GOAL> goal;
 	public:
-//		const int getMode() const; // 0: normal, 1: based on success of enemy
-//		void setMode(int mode);
+		GOAL_ENTRY();
+		GOAL_ENTRY(const GOAL_ENTRY& object);
+		~GOAL_ENTRY();
+		GOAL_ENTRY& operator=(const GOAL_ENTRY& object);
 
+//		const unsigned int getMode() const; // 0: normal, 1: based on success of enemy
+//		void setMode(int mode);
 //		GOAL goal[MAX_GOALS];
 
-		const int countGoals() const;
-		void calculateFinalTimes(const int location, const int unit, const int time);
+		const unsigned int countGoals() const;
+		void calculateFinalTimes(const unsigned int location, const unsigned int unit, const unsigned int time);
 		const bool calculateReady(const UNIT* units) const;
-		const int getAllGoal(const int unit) const;
-		const int getGlobalGoal(const int location, const int unit) const;
-		const bool getIsBuildable(const int unit) const;
-		
-		void copy(const GOAL_ENTRY* goal, const UNIT* unit=0);
+		const unsigned int getAllGoal(const unsigned int unit) const;
+		const unsigned int getGlobalGoal(const unsigned int location, const unsigned int unit) const;
+		const bool getIsBuildable(const unsigned int unit) const;
+
+		void copy(const GOAL_ENTRY* goal_entry); // TODO!
 		void resetData();
 
-		const bool getNextGoal(list<GOAL>::const_iterator& current, const bool first) const;
-		void addGoal(const int unit, const int count, const int time, const int location);
+		const bool getNextGoal(std::list<GOAL>::const_iterator& current, const bool first) const;
+		void addGoal(const unsigned int unit, const signed int count, const unsigned int time, const unsigned int location);
 		void adjustGoals(const bool allowGoalAdaption, const UNIT* unit=0);
 
 		const bool isChanged() const;
 		void changeAccepted();
-		const string& getName() const;
+		const std::string& getName() const;
 		const UNIT_STATISTICS* getpStats() const;
-		const int toGeno(const int phaeno) const;
-		const int toPhaeno(const int geno) const;
+		const unsigned int toGeno(const unsigned int phaeno) const;
+		const unsigned int toPhaeno(const unsigned int geno) const;
 		const eRace getRace() const;
-		const int getMaxBuildTypes() const;
+		const unsigned int getMaxBuildTypes() const;
 		const bool isRaceInitialized() const;
-		void setName(const string& name);
+		void setName(const std::string& name);
 		void setRace(const eRace race);
-		const bool isGoal(const int unit) const;
+		const bool isGoal(const unsigned int unit) const;
 		const bool getInitialized() const;
 
-		GOAL_ENTRY();
-		~GOAL_ENTRY();
 };
 
 #endif // _CORE_GOAL_HPP

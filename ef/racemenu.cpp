@@ -1,46 +1,77 @@
 #include "racemenu.hpp"
 
-RaceMenu::RaceMenu(UI_Object* parent, ANARACE* anarace, Rect rect):Menu(parent, anarace, rect)
+RaceMenu& RaceMenu::operator=(const RaceMenu& object)
 {
+	((Menu)(*this)) = ((Menu)object);
+	anarace = object.anarace;
+	return(*this);
+}
+
+RaceMenu::RaceMenu(const RaceMenu& object) :
+	Menu((Menu)object),
+	anarace(object.anarace)
+{ }
+
+RaceMenu::RaceMenu(UI_Object* race_parent, ANARACE* race_anarace, Rect race_rect) :
+	Menu(race_parent, race_rect), // 75
+	anarace(race_anarace)
+{
+	for(int i=0;i<3;i++)
+	{
+		MenuEntry* entry = new MenuEntry(this,
+						Rect(0, 0, 75, FONT_SIZE+4), 
+						Rect(0, 0, 75, FONT_SIZE+4), *theme.lookUpString((eString)(TERRA_STRING+i)));
+		menuEntries.push_back(entry);
+	}
+    list<MenuEntry*>::iterator m = menuEntries.begin();
+    (*m)->updateToolTip(*theme.lookUpString(TERRA_STRING));
+	(*m)->setButton(eButton(UNIT_TYPE_5_BUTTON));m++;
+    (*m)->updateToolTip(*theme.lookUpString(PROTOSS_STRING));
+	(*m)->setButton(eButton(UNIT_TYPE_7_BUTTON));m++;
+    (*m)->updateToolTip(*theme.lookUpString(ZERG_STRING));
+	(*m)->setButton(eButton(UNIT_TYPE_3_BUTTON));
 }
 	
 RaceMenu::~RaceMenu()
-{
-}
+{ }
 
 void RaceMenu::process()
 {
-	if(!shown)
+	if(!isShown())
 		return;
 	Menu::process();
 
 	if(menuLevel)
 	{
-    	for (int i = 0; i < MAX_RACES; i++)
-       		if (menuEntry[i]->isPressed())
-       	        pressedItem = i;
-		
-		for(int i = 0; i<MAX_RACES;	i ++)
+		int i=0;
+    	for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 		{
-			Rect edge = Rect(Point(10, height*(FONT_SIZE+6)), Size(getParent()->getWidth(), FONT_SIZE+5));
+			(*m)->Show();
+			Rect edge = Rect(Point(10 + i * 90, height * (FONT_SIZE+9)), Size(75, FONT_SIZE+3));
 //			if (parent->fitItemToRelativeRect(edge, 1)) 
 			{
-				menuEntry[i]->Show();
-				menuEntry[i]->setButton(eButton(UNIT_TYPE_4_BUTTON));
-				menuEntry[i]->updateText(*theme.lookUpString((eString)(TERRA_STRING+i)));
-				menuEntry[i]->adjustRelativeRect(edge);
+				(*m)->adjustRelativeRect(edge);
 			}
-			height++;
-		} 
-	} else 
-	for(int i=0;i<MAX_RACES;i++)
-		menuEntry[i]->Hide();
+       		if ((*m)->isLeftClicked())
+			{
+       	        pressedItem = i;
+				open();
+				break;
+			}
+			i++;
+		}
+		height++;
+	}
+	else
+    	for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+				(*m)->Hide();
+
 }
 
 void RaceMenu::draw(DC* dc) const
 {
-	if(!shown)
+	if(!isShown())
 		return;
-	UI_Object::draw(dc);
+	Menu::draw(dc);
 }
 

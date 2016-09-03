@@ -1,79 +1,77 @@
 //TODO: Problem: auf goals muessen sowohl ueber jeweiligen Ort (also gGoal[MAX_LOCATIONS][MAX_GOALS]), als auch einzelne Goals, wenn z.B. nach 5 und 10 Minuten 3 und 5 Marines an einem Ort sein sollen...
 
 #include "defs.hpp"
+#include <iostream>
 
-#ifdef BUILD_DLL
-#define EXPORT __declspec(dllexport)
-#elif IMPORT_DLL
-#define EXPORT __declspec(dllimport)
+/*#ifdef _SCC_DEBUG
+	#define toLog((x)) std::cout << x << std::endl
 #else
-#define EXPORT
-#endif
+	#define toLog((x))
+#endif*/
+void toLog(const std::string& msg)
+{
+	std::cout << msg << std::endl;
+//	ofstream pFile("error.log", ios_base::app);
+//	pFile << msg.c_str() << endl;
+}
 
 const float CORE_VERSION=0.50;
 
-//const int MAX_LOCATIONS = 9;
-const int MIN_LOCATIONS = 0; //this does not mean that maps with 0 locations can exist....
+//const unsigned int MAX_LOCATIONS = 9;
+const unsigned int MIN_LOCATIONS = 0; //this does not mean that maps with 0 locations can exist....
 
-//const int MAX_PLAYER = 3;
-const int MIN_PLAYER = 1;
+//const unsigned int MAX_PLAYER = 3;
+const unsigned int MIN_PLAYER = 1;
 
-//const int MAX_GOAL_ENTRIES = 25;
-const int MIN_GOAL_ENTRIES = 0;
+//const unsigned int MAX_GOAL_ENTRIES = 25;
+const unsigned int MIN_GOAL_ENTRIES = 0;
 
-const int MAX_MINERALS = 5000000;
-const int MAX_GAS = 5000000;
+const unsigned int MAX_MINERALS = 5000000;
+const unsigned int MAX_GAS = 5000000;
 
-//const int MAX_MAPS = 25;
-const int MIN_MAPS = 0;
+//const unsigned int MAX_PROGRAMS = 128; //must be multiplier of (16*player)
+const unsigned int LARVA_MAX = 200;
+//const unsigned int UNIT_TYPE_COUNT = 101;
+//const unsigned int MAX_GOALS = 100; // count of possible different goals
+//const unsigned int MAX_HARVEST_SPEEDS = 100;
+const unsigned int MAX_SUPPLY = 200;
 
-//const int MAX_PROGRAMS = 128; //must be multiplier of (16*player)
-const int LARVA_MAX = 200;
-//const int UNIT_TYPE_COUNT = 101;
-//const int MAX_GOALS = 100; // count of possible different goals
-//const int MAX_HARVEST_SPEEDS = 100;
-const int MAX_SUPPLY = 200;
+const unsigned int MAX_TOTAL_UNITS = 600; // 600 because larva max is 600... in addition 600 should be low enough to find bugs concerning uninitialized values
 
-const int MAX_TOTAL_UNITS = 600; // 600 because larva max is 600... in addition 600 should be low enough to find bugs concerning uninitialized values
+const unsigned int MAX_GENERATIONS = 10000;
+const unsigned int MIN_GENERATIONS = 100;
 
-const int MAX_GENERATIONS = 10000;
-const int MIN_GENERATIONS = 100;
+const unsigned int MAX_BREED_FACTOR = 40;
+const unsigned int MIN_BREED_FACTOR = 0;
 
-const int MAX_BREED_FACTOR = 40;
-const int MIN_BREED_FACTOR = 0;
+const unsigned int MAX_MODE = 2;
+const unsigned int MIN_MODE = 0;
 
-const int MAX_MODE = 2;
-const int MIN_MODE = 0;
+const unsigned int MAX_CROSSOVER = 40;
+const unsigned int MIN_CROSSOVER = 0;
 
-const int MAX_CROSSOVER = 40;
-const int MIN_CROSSOVER = 0;
+//const unsigned int MAX_TIME = 3600;
+const unsigned int MIN_TIME = 300;
 
-//const int MAX_TIME = 3600;
-const int MIN_TIME = 300;
+const unsigned int MAX_TIMEOUT = 266;
+const unsigned int MIN_TIMEOUT = 40;
 
-const int MAX_TIMEOUT = 266;
-const int MIN_TIMEOUT = 40;
+//const unsigned int MAX_LENGTH = 96;
+const unsigned int MIN_LENGTH = 32;
 
-//const int MAX_LENGTH = 96;
-const int MIN_LENGTH = 32;
+//const unsigned int MAX_RUNS = 10;
+const unsigned int MIN_RUNS = 1;
 
-//const int MAX_RUNS = 10;
-const int MIN_RUNS = 1;
+const unsigned int MAX_PREPROCESS_BUILDORDER = 1;
+const unsigned int MIN_PREPROCESS_BUILDORDER = 0;
 
-const int MAX_PREPROCESS_BUILDORDER = 1;
-const int MIN_PREPROCESS_BUILDORDER = 0;
 
-const int MAX_TFITNESS = 99999;
+const unsigned int MAX_TFITNESS = 99999;
+const unsigned int MAX_PFITNESS = 99999;
 
-//const int MAX_START_CONDITIONS = 99; // ~~
+//const unsigned int MAX_START_CONDITIONS = 99; // ~~
 
-//const int MAX_RACES = (ZERG+1);
-
-#ifdef _SCC_DEBUG
-#include <fstream>
-void toLog(const string& msg);
-#endif
-
+//const unsigned int MAX_RACES = (ZERG+1);
 
 const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {
@@ -81,7 +79,7 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 100, REMAINING_UNIT_TYPE},
 {"SCV"	,					 20, 5000,    0,  1, 0, 0, {0, 0}, {0 ,0, 0}, {COMMAND_CENTER, COMMAND_CENTER_CS, COMMAND_CENTER_NS}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, WORKER_UNIT_TYPE},
 {"Marine", 			 		 24, 5000,    0,  1, 0, 0, {0, 0}, {0 ,0, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
-{"Ghost",					 50, 2500, 7500,  1, 0, 0, {0, 0}, {ACADEMY ,COVERT_OPS, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
+{"Ghost",					 50, 2500, 7500,  1, 0, 0, {0, 0}, {ACADEMY ,SCIENCE_FACILITY_CO, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
 {"Vulture",					 30, 7500,    0,  2, 0, 0, {0, 0}, {FACTORY ,0, 0}, {FACTORY, FACTORY_MS, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
 {"Goliath",					 40,10000, 5000,  2, 0, 0, {0, 0}, {ARMORY, 0, 0}, {FACTORY, FACTORY_MS, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
 {"Siege Tank", 				 50,15000,10000,  2, 0, 0, {0, 0}, {0 ,0, 0}, {FACTORY_MS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
@@ -111,7 +109,7 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"Physics Lab",  			  0,    0,    0,  0, 0, 0, {0, 0}, {PHYSICS_LAB, SCIENCE_FACILITY_PL, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
 {"Machine Shop",  			  0,    0,    0,  0, 0, 0, {0, 0}, {MACHINE_SHOP, FACTORY_MS, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
 {"Command Center[CS]", 		 40, 5000, 5000,  0,10, 0, {0, 0}, {ACADEMY, 0, 0}, {COMMAND_CENTER, 0, 0}, 0, IS_LOST, COMSAT_STATION, 0, ADD_ON_UNIT_TYPE}, //TODO: Beim Abheben zerstoeren...
-{"Command Center[NS]", 		 40,10000,10000,  0,10, 0, {0, 0}, {COVERT_OPS, 0, 0}, {COMMAND_CENTER, 0, 0}, 0, IS_LOST, NUCLEAR_SILO, 0, ADD_ON_UNIT_TYPE},
+{"Command Center[NS]", 		 40,10000,10000,  0,10, 0, {0, 0}, {SCIENCE_FACILITY_CO, 0, 0}, {COMMAND_CENTER, 0, 0}, 0, IS_LOST, NUCLEAR_SILO, 0, ADD_ON_UNIT_TYPE},
 {"Starport[CT]", 			 80, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {STARPORT, 0, 0}, 0, IS_LOST, CONTROL_TOWER, 0, ADD_ON_UNIT_TYPE},
 {"Science Facility[CO]", 	 40, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, 0, IS_LOST, COVERT_OPS, 0, ADD_ON_UNIT_TYPE},
 {"Science Facility[PL]", 	 40, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, 0, IS_LOST, PHYSICS_LAB, 0, ADD_ON_UNIT_TYPE},
@@ -298,7 +296,7 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"Hydralisk",				 28, 7500, 2500,  1, 0, 0, {0, 0}, {HYDRALISK_DEN ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE}, //Hier stand ein Zergling als facility2!?
 {"Ultralisk",				 60,20000,20000,  6, 0, 0, {0, 0}, {ULTRALISK_CAVERN ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
 {"Defiler",					 50, 5000,15000,  2, 0, 0, {0, 0}, {DEFILER_MOUND ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, SUPPORT_UNIT_TYPE},
-{"Lurker",					 40, 5000,10000,  2, 0, 0, {0, 0}, {HYDRALISK_DEN ,0, 0}, {HYDRALISK, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
+{"Lurker",					 40, 5000,10000,  2, 0, 0, {0, 0}, {HYDRALISK_DEN ,LURKER_ASPECT, 0}, {HYDRALISK, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
 {"Overlord",				 40,10000,    0,  0, 8, 0, {0, 0}, {0 ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, SUPPLY_UNIT_TYPE},
 {"Mutalisk",				 40,10000,10000,  2, 0, 0, {0, 0}, {SPIRE ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
 {"Guardien",				 40, 5000,10000,  2, 0, 0, {0, 0}, {GREATER_SPIRE ,0, 0}, {MUTALISK, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE}, 

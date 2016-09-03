@@ -5,36 +5,36 @@
 
 #include <list>
 
-class EXPORT BASIC_MAP
+class BASIC_MAP
 {
 	private:
-		string name; // constant
-		int maxLocations; // constant
-		int maxPlayer; // constant ?
+		std::string name; // constant
+		unsigned int maxLocations; // constant
+		unsigned int maxPlayer; // constant ?
 		void resetData();
-		int startPosition[MAX_PLAYER];
+		unsigned int startPosition[MAX_PLAYER];
 		MAP_LOCATION location[MAX_LOCATIONS];
 	public:		
 		BASIC_MAP();
 		~BASIC_MAP();
 
-		const int getLocationMineralPatches(const int location) const;
-		const int getLocationVespeneGeysirs(const int location) const;
+		const unsigned int getLocationMineralPatches(const unsigned int location) const;
+		const unsigned int getLocationVespeneGeysirs(const unsigned int location) const;
 
-		const int getStartPlayerPosition(const int player) const;
-		const MAP_LOCATION* getLocation(const int location) const;
-		const string& getName() const;
-		const int getMaxLocations() const;
-		const int getMaxPlayer() const;
-		void setName(const string& name);
-		void setMaxLocations(const int maxLocations);  // sets the number of locations of this map
-		void setMaxPlayer(const int maxPlayer);	// sets the number of player that are part of this map
+		const unsigned int getStartPlayerPosition(const unsigned int player) const;
+		const MAP_LOCATION* getLocation(const unsigned int location) const;
+		const std::string& getName() const;
+		const unsigned int getMaxLocations() const;
+		const unsigned int getMaxPlayer() const;
+		void setName(const std::string& name);
+		void setMaxLocations(const unsigned int maxLocations);  // sets the number of locations of this map
+		void setMaxPlayer(const unsigned int maxPlayer);	// sets the number of player that are part of this map
 
-		void setLocationName(const int location, const string& name);
-		void setLocationMineralDistance(const int location, const int mineralDistance);
-		void setLocationDistance(const int location, list<string> distances);// needs never be changed so a list is fine
-		void setLocationMineralPatches(const int location, const int mineralPatches);
-		void setLocationVespeneGeysirs(const int location, const int vespeneGeysirs);
+		void setLocationName(const unsigned int location, const std::string& name);
+		void setLocationMineralDistance(const unsigned int location, const unsigned int mineralDistance);
+		void setLocationDistance(const unsigned int location, std::list<std::string> distances);// needs never be changed so a list is fine
+		void setLocationMineralPatches(const unsigned int location, const unsigned int mineralPatches);
+		void setLocationVespeneGeysirs(const unsigned int location, const unsigned int vespeneGeysirs);
 		void calculateLocationsDistances();
 };
 

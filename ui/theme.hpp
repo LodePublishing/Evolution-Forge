@@ -1,7 +1,7 @@
 #ifndef _UI_THEME_HPP
 #define _UI_THEME_HPP
 
-#include "sdlwrapper.hpp"
+#include "../sdl/dc.hpp"
 #include "../core/defs.hpp"
 /*const char gizmo[GIZMO_NUMBER][40]=
 {
@@ -21,10 +21,10 @@
 }*/
 
 
-const int FONT_SIZE = 7;
+const unsigned int FONT_SIZE = 7;
 // TODO!!!
 
-const int MIN_DISTANCE = 3;
+const unsigned int MIN_DISTANCE = 3;
 
 using std::string;
 
@@ -34,7 +34,7 @@ enum eDataType
 	ZERO_DATA_TYPE, 
 	STRING_DATA_TYPE,
 	FONT_DATA_TYPE,
-	COLOUR_DATA_TYPE,
+	COLOR_DATA_TYPE,
 	BITMAP_DATA_TYPE,
 	PEN_DATA_TYPE,
 	BRUSH_DATA_TYPE,
@@ -53,7 +53,7 @@ enum eSubDataType
 	ZERO_SUB_DATA_TYPE,
 	LANGUAGE_SUB_DATA_TYPE,
 	RESOLUTION_SUB_DATA_TYPE,
-	COLOUR_THEME_SUB_DATA_TYPE,
+	COLOR_THEME_SUB_DATA_TYPE,
 
 	MAX_SUB_DATA_TYPES
 };
@@ -66,7 +66,7 @@ enum eSubSubDataType
 {
 	ZERO_SUB_SUB_DATA_TYPE,
 	LANGUAGE_SUB_SUB_DATA_TYPE,
-	COLOUR_THEME_SUB_SUB_DATA_TYPE,
+	COLOR_THEME_SUB_SUB_DATA_TYPE,
 	TAB_SUB_SUB_DATA_TYPE,
 
 	MAX_SUB_SUB_DATA_TYPES
@@ -104,7 +104,7 @@ enum eTheme
 	GREY_THEME,
 	MONOCHROME_THEME,
 
-	MAX_COLOUR_THEMES
+	MAX_COLOR_THEMES
 };
 // ------ END GENERAL THEMES ------
 
@@ -112,13 +112,9 @@ enum eTheme
 enum eResolution
 {
 	ZERO_RESOLUTION,
-	RESOLUTION_320x200,
-	RESOLUTION_640x480,
 	RESOLUTION_800x600,
 	RESOLUTION_1024x768,
 	RESOLUTION_1280x1024,
-	RESOLUTION_1600x1200,
-
 	MAX_RESOLUTIONS
 };
 // ------ END RESOLUTIONS ------
@@ -129,6 +125,7 @@ enum eFont
 	NULL_FONT,
 	SMALL_NORMAL_BOLD_FONT,
 	SMALL_ITALICS_BOLD_FONT,
+	SMALL_MIDDLE_NORMAL_FONT,
 	MIDDLE_NORMAL_BOLD_FONT,
 	LARGE_NORMAL_BOLD_FONT,
 	VERY_LARGE_NORMAL_BOLD_FONT,
@@ -138,52 +135,56 @@ enum eFont
 };
 // ------ END FONTS ------
 
-// ------ COLOURS ------
+// ------ COLORS ------
 enum eColor
 {
-	NULL_COLOUR,
-	TEXT_COLOUR,
-	WINDOW_TEXT_COLOUR,
-	BRIGHT_TEXT_COLOUR,
-	TITLE_COLOUR,
-	IMPORTANT_COLOUR,
+	NULL_COLOR,
+	TEXT_COLOR,
+	WINDOW_TEXT_COLOR,
+	BRIGHT_TEXT_COLOR,
+	TITLE_COLOR,
+	IMPORTANT_COLOR,
 
 // forcewindow
-	FULFILLED_TEXT_COLOUR,
-	NOT_FULFILLED_TEXT_COLOUR,
+	FULFILLED_TEXT_COLOR,
+	NOT_FULFILLED_TEXT_COLOR,
 
-	FORCE_ADD_GOAL_TEXT_COLOUR,
+	FORCE_ADD_GOAL_TEXT_COLOR,
 
-	FORCE_TEXT_COLOUR, //~~
+	FORCE_TEXT_COLOR, //~~
 
-	BIG_BUTTONS_TEXT_COLOUR,
+	BIG_BUTTONS_TEXT_COLOR,
 
 // bodiagram
-	MINERALS_TEXT_COLOUR,
-	BRIGHT_MINERALS_TEXT_COLOUR,
-	GAS_TEXT_COLOUR,
-	BRIGHT_GAS_TEXT_COLOUR,
-	SUPPLY_TEXT_COLOUR,
-	BRIGHT_SUPPLY_TEXT_COLOUR,
+	MINERALS_TEXT_COLOR,
+	BRIGHT_MINERALS_TEXT_COLOR,
+	GAS_TEXT_COLOR,
+	BRIGHT_GAS_TEXT_COLOR,
+	SUPPLY_TEXT_COLOR,
+	BRIGHT_SUPPLY_TEXT_COLOR,
 
-/*	MINERALS_COLOUR,
-	GAS_COLOUR,
-	SUPPLY_COLOUR,*/
+/*	MINERALS_COLOR,
+	GAS_COLOR,
+	SUPPLY_COLOR,*/
 
 // bograph time steps font color
-	TIMESTEPS_TEXT_COLOUR,	
+	TIMESTEPS_TEXT_COLOR,	
 
 // statistics window
-	STATISTICS_FORCE_TEXT_COLOUR,
-	TIME_TEXT_COLOUR,
-	FITNESS_AVERAGE_TEXT_COLOUR,
-	FITNESS_VARIANCE_TEXT_COLOUR,	
-	BOLENGTH_TEXT_COLOUR,
-	GENERATIONS_LEFT_TEXT_COLOUR,
+	STATISTICS_FORCE_TEXT_COLOR,
+	TIME_TEXT_COLOR,
+	FITNESS_AVERAGE_TEXT_COLOR,
+	FITNESS_VARIANCE_TEXT_COLOR,	
+	BOLENGTH_TEXT_COLOR,
+	GENERATIONS_LEFT_TEXT_COLOR,
 
-	MAX_COLOURS
+	FITNESS_TEXT_COLOR,
+
+	DISABLED_TEXT_COLOR,
+
+	MAX_COLORS
 };
-// ------ END COLOURS ------
+// ------ END COLORS ------
 
 //------ PENS ------
 enum ePen
@@ -243,6 +244,10 @@ enum ePen
     BRIGHT_UNIT_TYPE_10_PEN,
 
 	GREEN_TIMESTEPS_PEN,
+
+	BODIAGRAM_FITNESS_PEN,
+
+	DISABLED_PEN,
 	
 	MAX_PENS
 };
@@ -285,6 +290,7 @@ enum eBrush
 	BRIGHT_UNIT_TYPE_8_BRUSH,
 	BRIGHT_UNIT_TYPE_9_BRUSH,
 	BRIGHT_UNIT_TYPE_10_BRUSH,
+	VERY_BRIGHT_UNIT_TYPE_BRUSH,
 
 	CONTINUE_BUTTON_BRUSH,
 	DARK_CONTINUE_BUTTON_BRUSH,
@@ -299,6 +305,8 @@ enum eBrush
 	GENERATIONS_LEFT_BRUSH,	
 
 	TOOLTIP_BRUSH,
+
+	DISABLED_BRUSH,
 
 	MAX_BRUSHES
 };
@@ -319,6 +327,7 @@ enum eString
 	TIMER_WINDOW_TITLE_STRING,
 	FORCE_WINDOW_TITLE_STRING,
 	BOWINDOW_TITLE_STRING,
+
 
 // message window:
 	WELCOME_MSG1_STRING,
@@ -341,6 +350,7 @@ enum eString
 	STARTING_FORCE_STRING,
 	NON_GOALS_STRING,
 	GOALS_STRING,
+	LEGEND_STRING,
 	CLICK_TO_ADD_GOAL_STRING,
 	CLOSE_STRING,
 	ADD_GOAL_STRING,
@@ -420,7 +430,87 @@ enum eString
 	FITNESS_VARIANCE_STAT_TOOLTIP_STRING,
 	AVERAGE_BO_LENGTH_STAT_TOOLTIP_STRING,
 	GENERATIONS_LEFT_STAT_TOOLTIP_STRING,
+
+	BASIC_TAB_TOOLTIP_STRING,
+	ADVANCED_TAB_TOOLTIP_STRING,
+	EXPERT_TAB_TOOLTIP_STRING,
+	GOSU_TAB_TOOLTIP_STRING,
+	TRANSCENDEND_TAB_TOOLTIP_STRING,
+	MAP_TAB_TOOLTIP_STRING,
+	SETTINGS_TAB_TOOLTIP_STRING,
+	TUTORIAL_TAB_TOOLTIP_STRING,	
+
+// settings:
+	SETTINGS_WINDOW_TITLE_STRING,
+// core-settings:
+	SETTING_MAX_TIME_STRING,
+	SETTING_PREPROCESS_BUILDORDER_STRING,
+	SETTING_MAX_LENGTH_STRING,
+	SETTING_MAX_RUNS_STRING,
+	SETTING_MAX_TIMEOUT_STRING,
+	SETTING_ALLOW_GOAL_ADAPTION_STRING,
+	SETTING_BREED_FACTOR_STRING,
+	SETTING_CROSSING_OVER_STRING,
+// gui-settings:
+	SETTING_MINIMALIST_STRING,
+	SETTING_FULL_STRING,
+	SETTING_CUSTOM_STRING,
+	SETTING_FRAMERATE_STRING,
+	SETTING_DYNAMIC_FRAMERATE_STRING,
+	SETTING_STATIC_FRAMERATE_STRING,
+	SETTING_SMOOTH_MOVEMENT_STRING,
+	SETTING_GLOWING_BUTTONS_STRING,
+	SETTING_ROUNDED_RECTANGLES,
+	SETTING_BACKGROUND_BITMAP_STRING,
+	SETTING_TRANSPARENCY_STRING,
+	SETTING_FULLSCREEN_STRING,
+	SETTING_TOOLTIPS_STRING,
+
+	SETTING_MAX_TIME_TOOLTIP_STRING,
+	SETTING_PREPROCESS_BUILDORDER_TOOLTIP_STRING,
+	SETTING_MAX_LENGTH_TOOLTIP_STRING,
+	SETTING_MAX_RUNS_TOOLTIP_STRING,
+	SETTING_MAX_TIMEOUT_TOOLTIP_STRING,
+	SETTING_ALLOW_GOAL_ADAPTION_TOOLTIP_STRING,
+	SETTING_BREED_FACTOR_TOOLTIP_STRING,
+	SETTING_CROSSING_OVER_TOOLTIP_STRING,
+	SETTING_MINIMALIST_TOOLTIP_STRING,
+	SETTING_FULL_TOOLTIP_STRING,
+	SETTING_CUSTOM_TOOLTIP_STRING,
+	SETTING_FRAMERATE_TOOLTIP_STRING,
+	SETTING_DYNAMIC_FRAMERATE_TOOLTIP_STRING,
+	SETTING_STATIC_FRAMERATE_TOOLTIP_STRING,
+	SETTING_SMOOTH_MOVEMENT_TOOLTIP_STRING,
+	SETTING_TRANSPARENCY_TOOLTIP_STRING,
+	SETTING_TOOLTIPS_TOOLTIP_STRING,
 	
+	SETTING_LANGUAGE_STRING,
+	SETTING_ZERO_LANGUAGE_STRING,
+	SETTING_ENGLISH_LANGUAGE_STRING,
+	SETTING_GERMAN_LANGUAGE_STRING,
+	SETTING_FINNISH_LANGUAGE_STRING,
+	SETTING_FRENCH_LANGUAGE_STRING,
+	SETTING_SPANISH_LANGUAGE_STRING,
+	SETTING_POLSKI_LANGUAGE_STRING,
+	SETTING_KOREAN_LANGUAGE_STRING,
+	SETTING_CHINESE_LANGUAGE_STRING,
+	SETTING_RUSSKI_LANGUAGE_STRING,
+
+	SETTING_RESOLUTION_STRING,
+	SETTING_RESOLUTION_ZERO_STRING,
+    SETTING_RESOLUTION_800x600_STRING,
+    SETTING_RESOLUTION_1024x768_STRING,
+    SETTING_RESOLUTION_1280x1024_STRING,
+				
+	SETTING_THEME_STRING,
+	SETTING_ZERO_THEME_STRING,
+	SETTING_DARK_BLUE_THEME_STRING,
+	SETTING_GREEN_THEME_STRING,
+	SETTING_RED_THEME_STRING,
+	SETTING_YELLOW_THEME_STRING,
+	SETTING_GREY_THEME_STRING,
+	SETTING_MONOCHROME_THEME_STRING,
+
 	MAX_STRINGS
 };
 // ------ END STRINGS ------
@@ -433,20 +523,38 @@ enum eBitmap
 	ADD_BITMAP,
 	SUB_BITMAP,
 	CANCEL_BITMAP,
+
+	SMALL_ARROW_LEFT_BITMAP,
+	SMALL_ARROW_RIGHT_BITMAP,
 	ARROW_LEFT_BITMAP,
 	ARROW_RIGHT_BITMAP,
+	SMALL_ARROW_UP_BITMAP,
+	SMALL_ARROW_DOWN_BITMAP,
 	ARROW_UP_BITMAP,
 	ARROW_DOWN_BITMAP,
-	CLAW_BITMAP,
+
+	CLICKED_SMALL_ARROW_LEFT_BITMAP,
+	CLICKED_SMALL_ARROW_RIGHT_BITMAP,
+	CLICKED_ARROW_LEFT_BITMAP,
+	CLICKED_ARROW_RIGHT_BITMAP,
+	CLICKED_SMALL_ARROW_UP_BITMAP,
+	CLICKED_SMALL_ARROW_DOWN_BITMAP,
+	CLICKED_ARROW_UP_BITMAP,
+	CLICKED_ARROW_DOWN_BITMAP,
+
+//	CLAW_BITMAP,
 	CLAWSOFTWARE_BITMAP,
-	BACKGROUND_BITMAP,
-	BACKGROUND_SPACE_BITMAP,
-	IMP1_BITMAP,
-	IMP2_BITMAP,
-	IMP3_BITMAP,
-	IMP4_BITMAP,
-	IMP5_BITMAP,
-	IMP6_BITMAP,
+//	BACKGROUND_BITMAP,
+//	BACKGROUND_SPACE_BITMAP,
+//	IMP1_BITMAP,
+//	IMP2_BITMAP,
+//	IMP3_BITMAP,
+//	IMP4_BITMAP,
+//	IMP5_BITMAP,
+//	IMP6_BITMAP,
+
+//	CLAWS_BITMAP,
+//	MAUS_BITMAP,
 
 	MAX_BITMAPS
 };
@@ -467,6 +575,8 @@ enum eWindow
     BO_DIAGRAM_WINDOW,
     BO_GRAPH_WINDOW,
     INFO_WINDOW,
+
+	SETTINGS_WINDOW,
 
 	MAX_WINDOWS
 };
@@ -513,6 +623,8 @@ enum eCommand
 	CALCULATE_MAXSIZE_COMMAND,
 	CALCULATE_MAXWIDTH_COMMAND,
 	CALCULATE_MAXHEIGHT_COMMAND,
+	SAME_POSITION_AS_ABOVE_COMMAND,
+	SAME_SIZE_AS_ABOVE_COMMAND,
 	SAME_AS_ABOVE_COMMAND,
 
 	MAX_COMMANDS
@@ -543,7 +655,7 @@ enum eButton
     UNIT_TYPE_8_BUTTON,
     UNIT_TYPE_9_BUTTON,
     UNIT_TYPE_10_BUTTON,
-
+	VERY_BRIGHT_UNIT_TYPE_BUTTON,
 	TAB_BUTTON,
 
 	ADD_GOAL_BUTTON,
@@ -557,6 +669,15 @@ enum eButton
     FITNESS_VARIANCE_STAT_BUTTON,
     BUILD_ORDER_LENGTH_STAT_BUTTON,
     GENERATIONS_LEFT_STAT_BUTTON,
+	
+	SMALL_ARROW_LEFT_BUTTON,
+	SMALL_ARROW_RIGHT_BUTTON,
+	ARROW_LEFT_BUTTON,
+	ARROW_RIGHT_BUTTON,
+	SMALL_ARROW_UP_BUTTON,
+	SMALL_ARROW_DOWN_BUTTON,
+	ARROW_UP_BUTTON,
+	ARROW_DOWN_BUTTON,
 	
 	MAX_BUTTONS
 };
@@ -576,7 +697,7 @@ enum eButtonAnimationPhase
 enum eButtonAnimationType
 {
     NO_ANIMATION,
-    JUMPY_COLOURS_ANIMATION, // gets bright and jumps back
+    JUMPY_COLORS_ANIMATION, // gets bright and jumps back
     GLOWING_ANIMATION, // back and forth
     BLINKING_ANIMATION // jumps between start and end colors
 };
@@ -597,13 +718,15 @@ struct ButtonAnimation
     eBitmap bitmap[MAX_BUTTON_ANIMATION_PHASES];// bitmap animation is fixed... for now
 //    eString text[MAX_BUTTON_ANIMATION_PHASES];
 
-	int speed; // 100 = 100 steps for full animation
+	unsigned int speed; // 100 = 100 steps for full animation
     eButtonAnimationType type;
 };
 
 class UI_Theme
 {
     public:
+		UI_Theme& operator=(const UI_Theme& object);
+		UI_Theme(const UI_Theme& object);
         UI_Theme();
         ~UI_Theme();
         
@@ -623,44 +746,44 @@ class UI_Theme
 
         const string* lookUpString(const eString id) const;
 		const string lookUpFormattedString(const eString id, const string& text) const;
-		const string lookUpFormattedString(const eString id, const int i) const;
-		const string lookUpFormattedString(const eString id, const int i, const int j) const;
-		const string lookUpFormattedString(const eString id, const int i, const int j, const int k) const;
+		const string lookUpFormattedString(const eString id, const unsigned int i) const;
+		const string lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j) const;
+		const string lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j, const unsigned int k) const;
         Color* lookUpColor(const eColor id) const;
-        const Bitmap* lookUpBitmap(const eBitmap id) const;
+        /*const */Bitmap* lookUpBitmap(const eBitmap id) const;
         Pen* lookUpPen(const ePen id) const;
         Brush* lookUpBrush(const eBrush id) const;
         Font* lookUpFont(const eFont id) const;
 		
 		
-		const Point lookUpRealDistance(const eWindow id, const int windowNumber=0) const;
-		const Point lookUpMaxRealDistance(const eWindow id, const int windowNumber=0) const;
+		const Point lookUpRealDistance(const eWindow id, const unsigned int windowNumber=0) const;
+		const Point lookUpMaxRealDistance(const eWindow id, const unsigned int windowNumber=0) const;
 		
-		const Rect lookUpRect(const eWindow id, const int windowNumber=0, const int maxPlayer=0) const;
-		const Rect lookUpMaxRect(const eWindow id, const int windowNumber=0, const int maxPlayer=0) const;
+		const Rect lookUpRect(const eWindow id, const unsigned int windowNumber=0, const unsigned int maxPlayer=0) const;
+		const Rect lookUpMaxRect(const eWindow id, const unsigned int windowNumber=0, const unsigned int maxPlayer=0) const;
 
 		const ButtonAnimation* lookUpButtonAnimation(const eButton id) const;
 		
 // tools:
-		const Color mixColor(const Color* id1, const Color* id2);
-		const Color mixColor(const Color* id1, const Color* id2, const int gradient);
-		const Color brightenColor(const Color* id, const int brightness);
+//		const Color mixColor(const Color* id1, const Color* id2);
+//		const Color mixColor(const Color* id1, const Color* id2, const unsigned int gradient);
+//		const Color brightenColor(const Color* id, const unsigned int brightness);
 
-		const Color lookUpMixedColor(const eColor id1, const eColor id2);
-		const Color lookUpMixedColor(const eColor id1, const eColor id2, const int gradient);
-		Color lookUpBrightenedColor(const eColor id, const int brightness);
+//		const Color lookUpMixedColor(const eColor id1, const eColor id2);
+//		const Color lookUpMixedColor(const eColor id1, const eColor id2, const unsigned int gradient);
+//		Color lookUpBrightenedColor(const eColor id, const unsigned int brightness);
 
-		const Brush lookUpMixedBrush(const eBrush id1, const eColor id2);
-		const Brush lookUpMixedBrush(const eBrush id1, const eColor id2, const int gradient);
-		const Brush lookUpMixedBrush(const eBrush id1, const eBrush id2);
-		const Brush lookUpMixedBrush(const eBrush id1, const eBrush id2, const int gradient);
-		Brush lookUpBrightenedBrush(eBrush id, int brightness);
+//		const Brush lookUpMixedBrush(const eBrush id1, const eColor id2);
+//		const Brush lookUpMixedBrush(const eBrush id1, const eColor id2, const unsigned int gradient);
+//		const Brush lookUpMixedBrush(const eBrush id1, const eBrush id2);
+//		const Brush lookUpMixedBrush(const eBrush id1, const eBrush id2, const unsigned int gradient);
+//		Brush lookUpBrightenedBrush(eBrush id, int brightness);
 
-		const Pen lookUpMixedPen(const ePen id1, const eColor id2);
-		const Pen lookUpMixedPen(const ePen id1, const eColor id2, const int gradient);
-		const Pen lookUpMixedPen(const ePen id1, const ePen id2);
-		const Pen lookUpMixedPen(const ePen id1, ePen id2, const int gradient);
-		const Pen lookUpBrightenedPen(const ePen id, const int brightness);
+//		const Pen lookUpMixedPen(const ePen id1, const eColor id2);
+//		const Pen lookUpMixedPen(const ePen id1, const eColor id2, const unsigned int gradient);
+//		const Pen lookUpMixedPen(const ePen id1, const ePen id2);
+//		const Pen lookUpMixedPen(const ePen id1, ePen id2, const unsigned int gradient);
+//		const Pen lookUpBrightenedPen(const ePen id, const unsigned int brightness);
 
     private:
 //memory issue: load maybe all data after a change! TODO
@@ -670,10 +793,10 @@ class UI_Theme
 		eTheme colorTheme;
 		
         string* stringList[MAX_LANGUAGES][MAX_STRINGS];
-        Color* colorList[MAX_COLOUR_THEMES][MAX_COLOURS];
-        Bitmap* bitmapList[MAX_RESOLUTIONS][MAX_COLOUR_THEMES][MAX_BITMAPS];
-		Pen* penList[MAX_RESOLUTIONS][MAX_COLOUR_THEMES][MAX_PENS];
-        Brush* brushList[MAX_COLOUR_THEMES][MAX_BRUSHES];
+        Color* colorList[MAX_COLOR_THEMES][MAX_COLORS];
+        Bitmap* bitmapList[MAX_RESOLUTIONS][MAX_COLOR_THEMES][MAX_BITMAPS];
+		Pen* penList[MAX_RESOLUTIONS][MAX_COLOR_THEMES][MAX_PENS];
+        Brush* brushList[MAX_COLOR_THEMES][MAX_BRUSHES];
 
 		Rect* rectList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
 		Rect* maxRectList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];

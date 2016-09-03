@@ -8,10 +8,14 @@
 class ForceMenu : public Menu
 {
 	public:
-		ForceMenu(UI_Object* parent, ANARACE* anarace, Rect rect);
+		ForceMenu(UI_Object* force_parent, ANARACE* force_anarace, Rect force_rect);
+		ForceMenu(const ForceMenu& object);
+		ForceMenu& operator=(const ForceMenu& object);
 		~ForceMenu();
 		void process();
 		void draw(DC* dc) const;
+	private:
+		ANARACE* anarace;
 };
 
 #endif // _GUI_FORCEMENU_HPP

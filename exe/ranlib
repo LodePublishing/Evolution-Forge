@@ -1,0 +1,6 @@
+#!/bin/sh
+
+i386-mingw32-ranlib ui.a
+i386-mingw32-ranlib core.a
+i386-mingw32-ranlib sdl.a
+

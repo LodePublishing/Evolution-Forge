@@ -7,78 +7,76 @@
 #include "basicmap.hpp"
 #include "ga.hpp"
 
-#include <time.h>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <list>
 #include <map>
 #include <deque>
 
 // generally all function return 0 if there was an error and 1 if there was no error
 
-class EXPORT SETTINGS
+using namespace std;
+
+class SETTINGS
 {
 private:
-	GOAL_ENTRY loadedGoal[MAX_GOAL_ENTRIES];
-	START_CONDITION loadedStartcondition[MAX_START_CONDITIONS];
-	BASIC_MAP loadedMap[MAX_MAPS]; //modes: 0: ignore map settings and make up a default force, 1: use map settings
-	HARVEST_SPEED loadedHarvestSpeed[MAX_HARVEST_SPEEDS];
+	vector<GOAL_ENTRY> loadedGoal[MAX_RACES];
+	vector<START_CONDITION> loadedStartcondition[MAX_RACES];
+	vector<BASIC_MAP> loadedMap; //modes: 0: ignore map settings and make up a default force, 1: use map settings
+	HARVEST_SPEED loadedHarvestSpeed[MAX_RACES];
 	GA ga;
 	SOUP soup;
 	START start;
 	
-	void setMapCount(const int mapCount);
-	void setStartconditionCount(const int startconditionCount);
-	void setGoalCount(const int goalCount);
-	int currentMap;
-	int speed;
+	unsigned int currentMap;
+	unsigned int speed;
 public:
-	const int getSpeed() const;
-	void setSpeed(const int speed);	
+	const unsigned int getSpeed() const;
+	void setSpeed(const unsigned int speed);	
+
+	const bool getIsNewRun();
 	
-	void assignMap(const int mapNumber);
-	void setMode(const int mode);
-	void setHarvestSpeed(const eRace race, const int harvest); // copy data (pointers) from settings
-	void setStartRace(const int player, const eRace race);
-    void setStartcondition(const int player, const int startcondition);
+	void assignMap(const unsigned int mapNumber);
+	void setHarvestSpeed(const eRace race, const unsigned int harvest); // copy data (pointers) from settings
+	void assignStartRace(const unsigned int player, const eRace race);
+    void assignStartcondition(const unsigned int player, const unsigned int startcondition);
 	void fillGroups();
-	void setStartPosition(const int player, const int startposition);
-	void setGoal(const int player, const int goal);
+	void setStartPosition(const unsigned int player, const unsigned int startposition);
+	void assignGoal(const unsigned int player, const unsigned int goal);
 
 	void calculateAnaplayer();
-	const BASIC_MAP* getMap(const int mapNumber) const;
+	const BASIC_MAP* getMap(const unsigned int mapNumber) const;
 	void checkForChange() const;
 
 
-	void setMaxTime(const int maxTime); //sets max Time in minutes
-	void setMaxTimeOut(const int maxTimeOut); //
+	void setMaxTime(const unsigned int maxTime); //sets max Time in minutes
+	void setMaxTimeOut(const unsigned int maxTimeOut); //
 	void setAllowGoalAdaption(const bool allowGoalAdaption=true);
-	void setMaxLength(const int maxLength);
-	void setMaxRuns(const int maxRuns);
-	void setMaxGenerations(const int maxGenerations);
+	void setMaxLength(const unsigned int maxLength);
+	void setMaxRuns(const unsigned int maxRuns);
+	void setMaxGenerations(const unsigned int maxGenerations);
 	void setPreprocessBuildOrder(const bool preprocess);
 //	void setCurrentMap(int num);
-	void setBreedFactor(const int breedFactor);
-	void setCrossOver(const int crossOver);
+	void setBreedFactor(const unsigned int breedFactor);
+	void setCrossOver(const unsigned int crossOver);
 
-	const int getBreedFactor() const;
-	const int getMode() const;
-	const int getCrossOver() const;
-	const int getMaxTime() const;
-	const int getMaxTimeOut() const;
-	const int getMaxLength() const;
-	const int getMaxRuns() const;
-	const int getMaxGenerations() const;
+	const unsigned int getBreedFactor() const;
+	const unsigned int getCrossOver() const;
+	const unsigned int getMaxTime() const;
+	const unsigned int getMaxTimeOut() const;
+	const unsigned int getMaxLength() const;
+	const unsigned int getMaxRuns() const;
+	const unsigned int getMaxGenerations() const;
 	const bool getPreprocessBuildOrder() const;
-	const int getCurrentGoal() const;
+	GOAL_ENTRY* getCurrentGoal(const unsigned int player);
 	const GA* getGa() const;
-	const int getGoalCount() const;
-	const int getMapCount() const;
-	const int getForceCount() const;
-	const int getStartconditionCount() const;
+	const unsigned int getGoalCount(const unsigned int player) const;
+	const unsigned int getMapCount() const;
+	const unsigned int getStartconditionCount(const unsigned int player) const;
 	
-	const GOAL_ENTRY* getGoal(const int goalNumber) const;
-	const START_CONDITION* getStartcondition(const int startconditionNumber) const;
+	const GOAL_ENTRY* getGoal(const unsigned int player, const unsigned int goalNumber) const;
+	const START_CONDITION* getStartcondition(const unsigned int player, const unsigned int startconditionNumber) const;
 
 	void initDefaults(); 
 

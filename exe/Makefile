@@ -1,65 +1,69 @@
-PROGRAM=ef
-UI=ui
-COREPATH=../core
-DEPENDFILE=.depend
-CXX=i386-mingw32msvc-g++
-DLLWRAP=i386-mingw32msvc-dllwrap
-OBJDLL=$(COREPATH)/anarace.o $(COREPATH)/ga.o $(COREPATH)/goal.o  $(COREPATH)/harvest.o  $(COREPATH)/location.o  $(COREPATH)/basicmap.o  $(COREPATH)/prerace.o  $(COREPATH)/race.o  $(COREPATH)/settings.o  $(COREPATH)/soup.o $(COREPATH)/building.o $(COREPATH)/start.o $(COREPATH)/unit.o $(COREPATH)/blist.o $(COREPATH)/startcondition.o
+EF=../ef
+UI=../ui
+SDL=../sdl
+CORE=../core
 
-SOURCEDLL=$(OBJDLL:%.o=%.cpp)
+CORE_OBJ=$(CORE)/defs.o $(CORE)/anarace.o $(CORE)/ga.o $(CORE)/goal.o  $(CORE)/harvest.o  $(CORE)/location.o  $(CORE)/basicmap.o  $(CORE)/prerace.o  $(CORE)/race.o  $(CORE)/settings.o  $(CORE)/soup.o $(CORE)/building.o $(CORE)/start.o $(CORE)/unit.o $(CORE)/startcondition.o
 
-OBJMAIN=../$(UI)/sdlwrapper.o ../$(UI)/object.o ../$(UI)/window.o ../$(UI)/button.o ../$(UI)/statictext.o ../$(UI)/theme.o ../$(UI)/controls.o ../$(PROGRAM)/bodiagram.o ../$(PROGRAM)/bograph.o ../$(PROGRAM)/bowindow.o ../$(PROGRAM)/force.o ../$(PROGRAM)/info.o ../$(PROGRAM)/message.o ../$(PROGRAM)/statistics.o ../$(PROGRAM)/timer.o ../$(PROGRAM)/mainwindow.o ../$(PROGRAM)/tutorial.o ../$(PROGRAM)/corewindow.o ../$(PROGRAM)/player.o ../$(PROGRAM)/main.o
+EF_OBJ=$(EF)/bodiagram.o $(EF)/bograph.o $(EF)/bowindow.o $(EF)/force.o $(EF)/info.o $(EF)/message.o $(EF)/statistics.o $(EF)/timer.o $(EF)/mainwindow.o $(EF)/tutorial.o $(EF)/corewindow.o $(EF)/player.o  $(EF)/order.o $(EF)/main.o  $(EF)/racemenu.o $(EF)/menuentry.o $(EF)/menu.o $(EF)/setwindow.o $(EF)/progressbar.o $(EF)/numberfield.o $(EF)/unitmenu.o $(EF)/goalmenu.o $(EF)/forcemenu.o
 
-SOURCEMAIN=$(OBJMAIN:%.o=%.cpp)
+UI_OBJ=$(UI)/object.o $(UI)/window.o $(UI)/button.o $(UI)/radio.o $(UI)/scrollbar.o $(UI)/statictext.o $(UI)/theme.o 
 
-DLLFLAGS=-DBUILD_DLL
-LIBS=-L./ ../$(PROGRAM).dll
-RESFLAGS=--include-dir $(WXPATH)/include --define __WIN32__ --define __WIN95__ --define __GNUWIN32__
-PICFLAGS = -UWXUSINGDLL -DWXMAKINGDLL=1 -D_DLL=1 -D_WINDLL=1
+SDL_OBJ=$(SDL)/color.o $(SDL)/font.o $(SDL)/pen.o $(SDL)/surface.o $(SDL)/brush.o $(SDL)/dc.o $(SDL)/framerate.o $(SDL)/bitmap.o $(SDL)/draw.o $(SDL)/size.o $(SDL)/rect.o $(SDL)/point.o
 
 
 CPPFLAGS =
-CXXFLAGS = -g -Wall -D_SCC_DEBUG
-CFLAGS = -UWXUSINGDLL -DWXMAKINGDLL=1 -D_DLL=1 -D_WINDLL=1
+CXXFLAGS = -ansi -pedantic-errors -Wall -W -O3 #-g -D_SCC_DEBUG #-Weffc++ #-Wabi -Wmissing-braces -Wredundant-decls -Wundef -Wunused -Wconversion -Woverloaded-virtual -Wmissing-noreturn -Winline -Wdisabled-optimization -Wsign-promo -Wwrite-strings -Wlong-long -Woverloaded-virtual -Wfloat-equal -Wreturn-type -Wparentheses
+#-Wchar-subscripts -Wimplicit -Wswitch -Wswitch-default -Wswitch-enum -Wtrigraphs  -Wendif-labels -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wpadded -Wshadow  -Waggregate-return  -Wunreachable-code
 
--include $(DEPENDFILE)
+#-Wold-style-cast 
+
+CXX=i386-mingw32-g++
+
+LIBS = core.a ui.a sdl.a
+INCLUDES = -I/usr/local/include/SDL -I/usr/include -I/usr/local/include -I/usr/local/i386-mingw32/include/SDL 
 
 .SUFFIXES: .o .cpp
-exe:	$(OBJMAIN) $(OBJHEADER)
-	$(CXX) $(CXXFLAGS) -o ../$(PROGRAM).exe $(OBJMAIN) $(LIBS) $(LDLIBS) $(LIBRARIES) -lSDL -lSDL_ttf -lSDL_image -DIMPORT_DLL
-		
-dll:	$(SOURCEDLL) $(SOURCEHEADER)
-	$(CXX) $(CXXFLAGS) -c $(SOURCEDLL)
-	@mv *.o $(COREPATH)
-	$(DLLWRAP) --output-lib=$(PROGRAM).a --dllname=../$(PROGRAM).dll --driver-name=$(CXX) $(OBJDLL)
+bin:	$(EF_OBJ) 
+	./ranlib
+	$(CXX) $(CXXFLAGS) -o $(EF)b.exe $(EF_OBJ) $(INCLUDES) $(LIBS) /usr/local/i386-mingw32/lib/libSDLmain.a -lmingw32 -lSDLmain -lSDL -mwindows -lSDL_ttf 
 	
-	
+core: core.a($(CORE_OBJ))
+ui: ui.a($(UI_OBJ))
+sdl: sdl.a($(SDL_OBJ))
 
-dep: $(SOURCEDLL) $(SOURCEMAIN)
-	$(CXX) -MM $(SOURCEDLL) $(SOURCEMAIN) > $(DEPENDFILE)
-	
 clean:
 	@rm -vf ./*.o
-	@rm -vf $(PROGRAM)/*.o
-	@rm -vf $(PROGRAM).bin
+	@rm -vf $(EF)/*.o
+	@rm -vf $(EF)b.exe
+efclean:
+	@rm -vf ef.a
+	@rm $(EF)/*.o
+coreclean:
+	@rm -vf core.a
+	@rm $(CORE)/*.o
+uiclean:
+	@rm -vf ui.a
+	@rm $(UI)/*.o
+sdlclean:
+	@rm -vf sdl.a
+	@rm $(SDL)/*.o
 
 allclean:
-	@rm -vf ./*.o
-	@rm -vf ./*.d
-	@rm -vf $(COREPATH)/*.d
-	@rm -vf $(COREPATH)/*.o
-	@rm -vf $(PROGRAM)/*.d
-	@rm -vf $(PROGRAM)/*.o
-	@rm -vf $(UI)/*.d
+	
+	@rm -vf $(CORE)/*.o
+	@rm -vf $(EF)/*.o
 	@rm -vf $(UI)/*.o
-	@rm -vf $(PROGRAM).dll
-	@rm -vf $(PROGRAM).a
-	@rm -vf $(PROGRAM).bin
-	@rm -vf $(PROGRAM).exe
-	@rm -vf $(PROGRAM).so.1.0
-	@rm -vf exe/*.d
-	@rm -vf exe/*.o
-	@rm -vf exe/*.a
-	@rm -vf a.out
+	@rm -vf $(SDL)/*.o
+
+	@rm -vf $(CORE).a
+	@rm -vf $(UI).a
+	@rm -vf $(SDL).a
+	
+	@rm -vf $(EF)b.exe
+	
+	@rm -vf *.o
+	@rm -vf *.a
+	
 	@rm -vf gmon.out
 	@echo "done."

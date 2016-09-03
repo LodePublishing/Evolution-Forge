@@ -157,4 +157,8 @@ maxpfitness wird nicht resettet
 evtl auch ein geladenes oder so :o
 
 3 Sekunden oder so Auszeit fuer Probe beim Bauen
+- step by step Modus (immer bis zur naechsten positiven Aenderung rechnen) mit Anzeige bei jeder Order was sich veraendert hat (supply, fitness, gas, minerals)
+sicher schoen zu maechen :-) Leertaste oder so zum weitermachen
+quiz funktion (which bo is faster? two step to optimal bo etc. fast schon schachprobleme :) )
 
+Techtree darstellen, mit so Linien wie bei bebop 20

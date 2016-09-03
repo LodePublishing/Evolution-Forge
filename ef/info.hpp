@@ -20,28 +20,32 @@ const char error_message[ERROR_MESSAGES][25]=
 class InfoWindow:public UI_Window
 {
 	public:
-		InfoWindow(UI_Object* parent, ANARACE* anarace, const int windowNumber);
+		InfoWindow& operator=(const InfoWindow& object);
+		InfoWindow(const InfoWindow& object);
+		InfoWindow(UI_Object* parent, ANARACE* anarace, const unsigned int windowNumber);
 		~InfoWindow();
 		void resetData();
 		void process();
 		void draw(DC* dc) const;
 
-		const int getBx() const;
-		const int getBWidth() const;
-		const int getUnit() const;
+		const signed int getBx() const;
+		const unsigned int getBWidth() const;
+		const unsigned int getUnit() const;
 
-		void setBx(const int bx);
-		void setBWidth(const int bwidth);
-		void setUnit(const int unit);
-		void setIP(const int key);
-		const int getIP() const; 
-		const int isSet() const;
-		void setupOk(const int ok); // already setuped by bowindow
+		void setBx(const signed int bx);
+		void setBWidth(const unsigned int bwidth);
+		void setUnit(const unsigned int unit);
+		void setIP(const unsigned int key);
+		const unsigned int getIP() const; 
+		const unsigned int isSet() const;
+		void setupOk(const unsigned int ok); // already setuped by bowindow
 		
 	private:
-		int bx,bwidth,unit,key;
-		int setup;
-		int IP;
+		signed int bx;
+		unsigned int bwidth, unit, key;
+		UI_StaticText* text;
+		unsigned int setup;
+		unsigned int IP;
 		ANARACE* anarace;
 };
 

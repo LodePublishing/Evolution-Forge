@@ -2,7 +2,11 @@
 
 //const int GLOBAL = 0;
 
-MAP_LOCATION::MAP_LOCATION()
+MAP_LOCATION::MAP_LOCATION():
+	name("ERROR"),
+	mineralPatches(0),
+	vespeneGeysirs(0),
+	mineralDistance(0)
 {
 	resetData();
 }
@@ -45,9 +49,9 @@ void MAP_LOCATION::calculateDistances()
 	}
 }
 
-void MAP_LOCATION::setName(const string& name)
+void MAP_LOCATION::setName(const std::string& name)
 {
-	this->name=name;
+	this->name.assign(name);
 }
 
 const int MAP_LOCATION::getMineralPatches() const
@@ -116,7 +120,7 @@ void MAP_LOCATION::setDistance(const int target, const int distance)
 	this->distance[target]=distance;
 }
 
-const string& MAP_LOCATION::getName() const
+const std::string& MAP_LOCATION::getName() const
 {
 	return(name);
 }

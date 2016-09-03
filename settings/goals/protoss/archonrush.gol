@@ -1,7 +1,7 @@
 @GOAL 
-	"Name" "Zergling Rush"
-	"Race" "Zerg"
-	"Zergling" "4" "0" "0"
+	"Name" "4 Zealots"
+	"Race" "Protoss"
+		"Zealot" "4" "0" "0"
 #"SCV" "4" "0" "0"
 #"Command Center" "1" "0" "0"
 #"Command Center" "3" "0" "4"
@@ -28,5 +28,4 @@
 		#"Barracks" "15" "0" "0"
 		#"Firebat" "4" "0" "0"
 		#"Vulture" "1" "0" "0"
-	@END
 @END

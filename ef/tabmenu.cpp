@@ -10,7 +10,7 @@ Menu::Menu(UI_Object* parent, ANARACE* anarace, Rect rect):UI_Object(parent, rec
 	menuLevel = 0;
 	height=0;
 	this->anarace = anarace;
-	pressedItem=0;
+	pressedItem = -1;
 
 	for(int i=UNIT_TYPE_COUNT;i--;)
 	{

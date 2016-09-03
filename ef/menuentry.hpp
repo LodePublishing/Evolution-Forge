@@ -6,9 +6,11 @@
 class MenuEntry : public UI_Button
 {
 	public:
-		MenuEntry(UI_Object* parent, Rect rahmen, Rect maxSize, string unit);
+		MenuEntry(const MenuEntry& object);
+		MenuEntry(UI_Object* parent, Rect rahmen, Rect maxSize, const string& unit);
 		~MenuEntry();
-		void updateText(string utext);
+		MenuEntry& operator=(const MenuEntry& object);
+		void updateText(const string& utext);
 		void process();
 		void draw(DC* dc) const;
 		void setColor(const eColor color);

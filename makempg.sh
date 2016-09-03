@@ -1,3 +1,2 @@
 #!/bin/sh
-convert -quality 5 sshot*.bmp asdf.mpg
-
+convert -quality 7 -size 640x480 *.yuv asdf.mpg 

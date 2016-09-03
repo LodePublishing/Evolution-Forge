@@ -9,28 +9,29 @@
 
 eine startforce (auch player 0) zusammenstellen, vorgegebene startforces jeweils relativ zum Startpunkt*/
 
-class EXPORT UNIT
+class UNIT
 {
 	private:
-		int availible[UNIT_TYPE_COUNT];
-		int total[UNIT_TYPE_COUNT];
+		unsigned int availible[UNIT_TYPE_COUNT];
+		unsigned int total[UNIT_TYPE_COUNT];
 	public:
 		//TODO evtl noch nen paar get/set Funktionen rein... 
 		void copy(const UNIT* unit);
-		const int getAvailible(const int unittype) const;
-		const int getTotal(const int unittype) const;
-		void setAvailible(const int unittype, const int availible);
-		void setTotal(const int unittype, const int total);
-		void addAvailible(const int unittype, const int availible);
-		void addTotal(const int unittype, const int total);
+		const unsigned int getAvailible(const unsigned int unittype) const;
+		const unsigned int getTotal(const unsigned int unittype) const;
+		void setAvailible(const unsigned int unittype, const unsigned int availible);
+		void setTotal(const unsigned int unittype, const unsigned int total);
 
-		void addOneAvailible(const int unittype);
-		void addOneTotal(const int unittype);
-		void removeOneAvailible(const int unittype);
-		void removeOneTotal(const int unittype);
+		void addAvailible(const unsigned int unittype, const unsigned int availible);
+		void addTotal(const unsigned int unittype, const unsigned int total);
+
+		void addOneAvailible(const unsigned int unittype);
+		void addOneTotal(const unsigned int unittype);
+		void removeOneAvailible(const unsigned int unittype);
+		void removeOneTotal(const unsigned int unittype);
 		
 		void adjustResearches(const eRace race);
-		void adjustSupply(const eRace race, int& needSupply, int& haveSupply);
+		void adjustSupply(const eRace race, unsigned int& needSupply, unsigned int& haveSupply);
 		void resetData();
 		UNIT();
 		~UNIT();

@@ -1,17 +1,15 @@
 #include "settings.hpp"
 
-void toLog(const string& msg)
-{
-	ofstream pFile("error.log", ios_base::app);
-	pFile << msg.c_str() << endl;
-}
-
-
-SETTINGS::SETTINGS()
+SETTINGS::SETTINGS():
+	loadedMap(),
+	ga(),
+	soup(),
+	start(),
+	currentMap(0),
+	speed(2)
 {
 	srand(time(NULL));
 	initDefaults();
-	speed=2;
 }
 
 SETTINGS::~SETTINGS()
@@ -20,22 +18,22 @@ SETTINGS::~SETTINGS()
 
 SETTINGS settings;
 
-const int SETTINGS::getSpeed() const
+const unsigned int SETTINGS::getSpeed() const
 {
 	return(speed);
 }
 
-void SETTINGS::setSpeed(const int speed)
+void SETTINGS::setSpeed(const unsigned int set_speed)
 {
-	this->speed=speed;
+	speed=set_speed;
 }
 
 
-void EXPORT SETTINGS::initDefaults()
+void SETTINGS::initDefaults()
 {
-	currentMap=-1;
+	currentMap=0;
 	setAllowGoalAdaption(true);
-	setMaxTime(MAX_TIME);
+	setMaxTime(MAX_TIME-1);
 	setMaxTimeOut(MAX_TIMEOUT);
 	setMaxLength(MAX_LENGTH);
 	setMaxRuns(MAX_RUNS);
@@ -43,14 +41,13 @@ void EXPORT SETTINGS::initDefaults()
 	setPreprocessBuildOrder(false);
 	setCrossOver(MIN_CROSSOVER);
 	setBreedFactor(20);
-	setMode(MIN_MODE);
 }
 
 // -------------------------------
 // ------ CONTROL FUNCTIONS ------
 // -------------------------------
 
-void EXPORT SETTINGS::assignRunParametersToSoup()
+void SETTINGS::assignRunParametersToSoup()
 {
 //	soup.initializeMap(start.getMap()); //???? TODO
 	// set GA and START on prerace and soup
@@ -58,22 +55,22 @@ void EXPORT SETTINGS::assignRunParametersToSoup()
 	// allocate memory for players ~~
 }
 
-ANARACE** EXPORT SETTINGS::newGeneration(ANARACE* oldAnarace[MAX_PLAYER])
+ANARACE** SETTINGS::newGeneration(ANARACE* oldAnarace[MAX_PLAYER])
 {
 	return(soup.newGeneration(oldAnarace));
 }
 
-void EXPORT SETTINGS::calculateAnaplayer()
+void SETTINGS::calculateAnaplayer()
 {
 	soup.calculateAnaplayer();
 }
 
-void EXPORT SETTINGS::fillGroups()
+void SETTINGS::fillGroups()
 {
 	start.fillGroups();
 }
 
-void EXPORT SETTINGS::checkForChange() const
+void SETTINGS::checkForChange() const
 {
 	soup.checkForChange();	
 }
@@ -165,14 +162,25 @@ void parse_2nd_block(ifstream& stream, map<string, map<string, list<string> > >&
 
 void SETTINGS::loadGoalFile(const string& goalFile)
 {
+	if((goalFile.compare(goalFile.size()-4, goalFile.size(), ".gol")==1))
+		return;
+
+//	ostringstream os;
+//	os << "Loading " << goalFile << " ...";
+//	toLog(os.str());
+
 	ifstream pFile(goalFile.c_str());
 	if(!pFile.is_open())
 	{
-		toLog("ERROR: (loadGoalFile): File not found.");
+		ostringstream os;
+		os.str("");
+		os << "ERROR: (loadGoalFile): File " << goalFile << " not found.";
+		toLog(os.str());
 		return;
 	}
 	char line[1024];
 	string text;
+	GOAL_ENTRY goal;		
 	while(pFile.getline(line, sizeof line))
 	{
 		if(pFile.fail())
@@ -185,49 +193,51 @@ void SETTINGS::loadGoalFile(const string& goalFile)
 		if(stop==string::npos) stop=text.size();
 		string index=text.substr(start, stop);
 		map<string, list<string> >::iterator i;
+
 		if(index=="@GOAL")
 		{
-				map<string, list<string> > block;
-				parse_block(pFile, block);
-				if((i=block.find("Name"))!=block.end()){
-					i->second.pop_front();
-					loadedGoal[getGoalCount()].setName(i->second.front());
-				}
-				if((i=block.find("Race"))!=block.end()) 
-				{
-					eRace race=TERRA;
-					i->second.pop_front();
-					string estr=i->second.front();
-					if(i->second.front()=="Terra") race=TERRA;
-					else if(i->second.front()=="Protoss") race=PROTOSS;
-					else if(i->second.front()=="Zerg") race=ZERG;
+			map<string, list<string> > block;
+			parse_block(pFile, block);
+			if((i=block.find("Name"))!=block.end()){
+				i->second.pop_front();
+				goal.setName(i->second.front());
+			}
+			if((i=block.find("Race"))!=block.end()) 
+			{
+				eRace race=TERRA;
+				i->second.pop_front();
+				string estr=i->second.front();
+				if(i->second.front()=="Terra") race=TERRA;
+				else if(i->second.front()=="Protoss") race=PROTOSS;
+				else if(i->second.front()=="Zerg") race=ZERG;
 #ifdef _SCC_DEBUG
-					else {
-						toLog("ERROR: (loadSettingsFile): Wrong race entry.");return;
-					}
+				else {
+					toLog("ERROR: (loadSettingsFile): Wrong race entry.");return;
+				}
 #endif
-					loadedGoal[getGoalCount()].setRace(race);
-				}
-				map<string, list<string> >::iterator k;
-				for(int unit=UNIT_TYPE_COUNT;unit--;)
+				goal.setRace(race);
+			}
+			map<string, list<string> >::iterator k;
+			for(int unit=UNIT_TYPE_COUNT;unit--;)
+			{
+				if((k=block.find(stats[goal.getRace()][unit].name))!=block.end())
 				{
-					if((k=block.find(stats[loadedGoal[getGoalCount()].getRace()][unit].name))!=block.end())
+					list<string>::iterator l=k->second.begin();
+					if(l->size()>=3)
 					{
-						list<string>::iterator l=k->second.begin();
-						if(l->size()>=3)
-						{
-							l++;int count=atoi(l->c_str());
-							l++;int location=atoi(l->c_str());
-							l++;int time=atoi(l->c_str());
-							loadedGoal[getGoalCount()].addGoal(unit, count, 60*time, location);
-						}
+						l++;int count=atoi(l->c_str());
+						l++;int location=atoi(l->c_str());
+						l++;int time=atoi(l->c_str());
+						goal.addGoal(unit, count, 60*time, location);
 					}
 				}
-		}
-
+			}
+		} // end index == GOAL
 	}
+
+	loadedGoal[goal.getRace()].push_back(goal);
+	
 //  loadedGoal[getGoalCount()].adjustGoals(ga.allowGoalAdaption);
-	setGoalCount(getGoalCount()+1);
 } // schoen :)
 
 void SETTINGS::loadSettingsFile(const string& settingsFile)
@@ -255,48 +265,44 @@ void SETTINGS::loadSettingsFile(const string& settingsFile)
 		map<string, list<string> >::iterator i;
 		if(index=="@SETTINGS")
 		{
-				map<string, list<string> > block;
-				parse_block(pFile, block);
-				if((i=block.find("Allow goal adaption"))!=block.end()){
-					i->second.pop_front();
-				   	setAllowGoalAdaption(atoi(i->second.front().c_str()));
-				}
-				if((i=block.find("Max Time"))!=block.end()){
-					i->second.pop_front();
-				   	setMaxTime(atoi(i->second.front().c_str()));
-				}
-				if((i=block.find("Max Timeout"))!=block.end()){
-					i->second.pop_front();
-				   	setMaxTimeOut(atoi(i->second.front().c_str()));
-				}
-				if((i=block.find("Max Length"))!=block.end()){
-					i->second.pop_front();
-				   	setMaxLength(atoi(i->second.front().c_str()));
-				}
-				if((i=block.find("Max Runs"))!=block.end()){
-					i->second.pop_front();
-				   	setMaxRuns(atoi(i->second.front().c_str()));
-				}
-				if((i=block.find("Preprocess Buildorder"))!=block.end()){
-					i->second.pop_front();
-				   	setPreprocessBuildOrder(atoi(i->second.front().c_str()));
-				}
-				if((i=block.find("Mode"))!=block.end()){
-					i->second.pop_front();
-				   	setMode(atoi(i->second.front().c_str()));
-				}
-				if((i=block.find("Breed Factor"))!=block.end()){
-					i->second.pop_front();
-				   	setBreedFactor(atoi(i->second.front().c_str()));
-				}
-				if((i=block.find("Crossing Over"))!=block.end()){ 
-					i->second.pop_front();
-					setCrossOver(atoi(i->second.front().c_str()));
-				}
-				if((i=block.find("Max unchanged Generations"))!=block.end()){
-					i->second.pop_front();
-				   	setMaxGenerations(atoi(i->second.front().c_str()));
-				}
+			map<string, list<string> > block;
+			parse_block(pFile, block);
+			if((i=block.find("Allow goal adaption"))!=block.end()){
+				i->second.pop_front();
+			   	setAllowGoalAdaption(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Max Time"))!=block.end()){
+				i->second.pop_front();
+			   	setMaxTime(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Max Timeout"))!=block.end()){
+				i->second.pop_front();
+			   	setMaxTimeOut(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Max Length"))!=block.end()){
+				i->second.pop_front();
+			   	setMaxLength(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Max Runs"))!=block.end()){
+				i->second.pop_front();
+			   	setMaxRuns(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Preprocess Buildorder"))!=block.end()){
+				i->second.pop_front();
+			   	setPreprocessBuildOrder(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Breed Factor"))!=block.end()){
+				i->second.pop_front();
+			   	setBreedFactor(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Crossing Over"))!=block.end()){ 
+				i->second.pop_front();
+				setCrossOver(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Max unchanged Generations"))!=block.end()){
+				i->second.pop_front();
+			   	setMaxGenerations(atoi(i->second.front().c_str()));
+			}
 		}
 	}// END while
 } // schoen :)
@@ -385,7 +391,7 @@ void SETTINGS::loadHarvestFile(const string& harvestFile)
 	}// END while
 } // schoen :)
 
-void EXPORT SETTINGS::loadMapFile(const string& mapFile)
+void SETTINGS::loadMapFile(const string& mapFile)
 {
 	ifstream pFile(mapFile.c_str());
 	if(!pFile.is_open())
@@ -395,6 +401,7 @@ void EXPORT SETTINGS::loadMapFile(const string& mapFile)
 	}
 	char line[1024];
 	string text;
+	BASIC_MAP basicmap;
 	while(pFile.getline(line, sizeof line))
 	{
 		if(pFile.fail())
@@ -402,7 +409,7 @@ void EXPORT SETTINGS::loadMapFile(const string& mapFile)
 		text=line;
 		size_t start=text.find_first_not_of("\t ");
 		if((start==string::npos)||(text[0]=='#')||(text[0]=='\0'))
-				continue; // ignore line
+			continue; // ignore line
 		list<string> words;
 		parse_line(text, words);
 		if(words.empty()) continue;
@@ -415,15 +422,15 @@ void EXPORT SETTINGS::loadMapFile(const string& mapFile)
 				parse_block(pFile, block);
 				if((i=block.find("Name"))!=block.end()){
 					i->second.pop_front();
-				   	loadedMap[getMapCount()].setName(i->second.front());
+				   	basicmap.setName(i->second.front());
 				}
 				if((i=block.find("Max Locations"))!=block.end()){
 					i->second.pop_front();
-				   	loadedMap[getMapCount()].setMaxLocations(atoi(i->second.front().c_str()));
+				   	basicmap.setMaxLocations(atoi(i->second.front().c_str()));
 				}
 				if((i=block.find("Max Player"))!=block.end()){
 					i->second.pop_front();
-				   	loadedMap[getMapCount()].setMaxPlayer(atoi(i->second.front().c_str()));
+				   	basicmap.setMaxPlayer(atoi(i->second.front().c_str()));
 				}
 		}
 		else if(index=="@LOCATION")
@@ -439,36 +446,36 @@ void EXPORT SETTINGS::loadMapFile(const string& mapFile)
 			if((i=block.find("Name"))!=block.end()) 
 			{
 				i->second.pop_front();
-				loadedMap[getMapCount()].setLocationName(location-1, i->second.front().c_str());
+				basicmap.setLocationName(location-1, i->second.front().c_str());
 			}
 			if((i=block.find("Mineral Distance"))!=block.end()) 
 			{
 				i->second.pop_front();
-				loadedMap[getMapCount()].setLocationMineralDistance(location-1, atoi(i->second.front().c_str()));
+				basicmap.setLocationMineralDistance(location-1, atoi(i->second.front().c_str()));
 			}
 			if((i=block.find("Distances"))!=block.end()) 
 			{
 				i->second.pop_front();
-				loadedMap[getMapCount()].setLocationDistance(location-1, i->second);
+				basicmap.setLocationDistance(location-1, i->second);
 			}
 			if((i=block.find("Minerals"))!=block.end())
 			{
 				i->second.pop_front();
-				loadedMap[getMapCount()].setLocationMineralPatches(location-1, atoi(i->second.front().c_str()));
+				basicmap.setLocationMineralPatches(location-1, atoi(i->second.front().c_str()));
 			}
 			if((i=block.find("Geysirs"))!=block.end())
 			{
 				i->second.pop_front();
-				loadedMap[getMapCount()].setLocationVespeneGeysirs(location-1, atoi(i->second.front().c_str()));
+				basicmap.setLocationVespeneGeysirs(location-1, atoi(i->second.front().c_str()));
 			}
 			
 		}
 	}// END while
-	loadedMap[getMapCount()].calculateLocationsDistances();
-	setMapCount(getMapCount()+1);
+	basicmap.calculateLocationsDistances();
+	loadedMap.push_back(basicmap);
 } // schoen :)
 
-void EXPORT SETTINGS::loadStartconditionFile(const string& startconditionFile)
+void SETTINGS::loadStartconditionFile(const string& startconditionFile)
 {
 	ifstream pFile(startconditionFile.c_str());
 	if(!pFile.is_open())
@@ -479,6 +486,7 @@ void EXPORT SETTINGS::loadStartconditionFile(const string& startconditionFile)
 	char line[1024];
 	string text;
 	eRace race=TERRA; 
+	START_CONDITION startcondition;
 	while(pFile.getline(line, sizeof line))
 	{
 		if(pFile.fail())
@@ -511,22 +519,22 @@ void EXPORT SETTINGS::loadStartconditionFile(const string& startconditionFile)
 				if((i=block.find("Name"))!=block.end()) 
 				{
 					i->second.pop_front();
-					loadedStartcondition[getStartconditionCount()].setName(i->second.front());
+					startcondition.setName(i->second.front());
 				}
 				if((i=block.find("Minerals"))!=block.end()) 
 				{
 					i->second.pop_front();
-					loadedStartcondition[getStartconditionCount()].setMinerals(100*atoi(i->second.front().c_str()));
+					startcondition.setMinerals(100*atoi(i->second.front().c_str()));
 				}
 				if((i=block.find("Gas"))!=block.end()) 
 				{
 					i->second.pop_front();
-					loadedStartcondition[getStartconditionCount()].setGas(100*atoi(i->second.front().c_str()));
+					startcondition.setGas(100*atoi(i->second.front().c_str()));
 				}
 				if((i=block.find("Time"))!=block.end()) 
 				{
 					i->second.pop_front();
-					loadedStartcondition[getStartconditionCount()].setStartTime(atoi(i->second.front().c_str()));
+					startcondition.setStartTime(atoi(i->second.front().c_str()));
 				}
 		}
 		else if(index=="@LOCATION")
@@ -548,16 +556,16 @@ void EXPORT SETTINGS::loadStartconditionFile(const string& startconditionFile)
 					{
 						i->second.pop_front();int count=atoi(i->second.front().c_str());
 							//TODO: values checken!
-						loadedStartcondition[getStartconditionCount()].setLocationTotal(location-1, k, count);
-						loadedStartcondition[getStartconditionCount()].setLocationAvailible(location-1, k, count);
+						startcondition.setLocationTotal(location-1, k, count);
+						startcondition.setLocationAvailible(location-1, k, count);
 					}
 			}
 		} // end if == LOCATION
 	}// END while
-	loadedStartcondition[getStartconditionCount()].assignRace(race);
-	loadedStartcondition[getStartconditionCount()].adjustResearches();
-	loadedStartcondition[getStartconditionCount()].adjustSupply();
-	setStartconditionCount(getStartconditionCount()+1);
+	startcondition.assignRace(race);
+	startcondition.adjustResearches();
+	startcondition.adjustSupply();
+	loadedStartcondition[race].push_back(startcondition);
 } // schoen :)
 
 // ---------------------------------
@@ -569,32 +577,37 @@ void EXPORT SETTINGS::loadStartconditionFile(const string& startconditionFile)
 // ------ GET/SET FUNCTIONS ------
 // -------------------------------
 
-const BASIC_MAP* EXPORT SETTINGS::getMap(const int mapNumber) const
+const bool SETTINGS::getIsNewRun()
+{
+	return(soup.getIsNewRun());
+}
+
+const BASIC_MAP* SETTINGS::getMap(const unsigned int mapNumber) const
 {
 #ifdef _SCC_DEBUG
-	if((mapNumber>getMapCount())||(mapNumber<0)) {
+	if(mapNumber>loadedMap.size()) {
 		toLog("WARNING: (SETTINGS::getMap): Value out of range.");return(0);
 	}
 #endif
 	return(&loadedMap[mapNumber]);
 }
 
-void EXPORT SETTINGS::setAllowGoalAdaption(const bool allowGoalAdaption) // allow the program to change goals (for example ignore command center when command center [NS] is already a goal
+void SETTINGS::setAllowGoalAdaption(const bool allowGoalAdaption) // allow the program to change goals (for example ignore command center when command center [NS] is already a goal
 {
 	ga.allowGoalAdaption=allowGoalAdaption;
 }
 
-void EXPORT SETTINGS::setMaxTime(const int maxTime) //maximum time of build order in seconds
+void SETTINGS::setMaxTime(const unsigned int maxTime) //maximum time of build order in seconds
 {
 #ifdef _SCC_DEBUG
-	if((maxTime<MIN_TIME)||(maxTime>MAX_TIME)) {
+	if((maxTime<MIN_TIME)||(maxTime>=MAX_TIME)) {
 		toLog("WARNING: (SETTINGS::setMaxTime): Value out of range.");return;
 	}
 #endif
 	ga.maxTime=maxTime;
 }
 
-void EXPORT SETTINGS::setMaxTimeOut(const int maxTimeOut) //timeout for building
+void SETTINGS::setMaxTimeOut(const unsigned int maxTimeOut) //timeout for building
 {
 #ifdef _SCC_DEBUG
 	if((maxTimeOut<MIN_TIMEOUT)||(maxTimeOut>MAX_TIMEOUT)) {
@@ -604,7 +617,7 @@ void EXPORT SETTINGS::setMaxTimeOut(const int maxTimeOut) //timeout for building
 	ga.maxTimeOut=maxTimeOut;
 }
 
-void EXPORT SETTINGS::setMaxLength(const int maxLength)
+void SETTINGS::setMaxLength(const unsigned int maxLength)
 {
 #ifdef _SCC_DEBUG
 	if((maxLength<MIN_LENGTH)||(maxLength>MAX_LENGTH)) {
@@ -614,7 +627,7 @@ void EXPORT SETTINGS::setMaxLength(const int maxLength)
 	ga.maxLength=maxLength;
 }
 
-void EXPORT SETTINGS::setMaxRuns(const int maxRuns)
+void SETTINGS::setMaxRuns(const unsigned int maxRuns)
 {
 #ifdef _SCC_DEBUG
 	if((maxRuns<MIN_RUNS)||(maxRuns>MAX_RUNS)) {
@@ -624,7 +637,7 @@ void EXPORT SETTINGS::setMaxRuns(const int maxRuns)
 	ga.maxRuns=maxRuns;
 }
 
-void EXPORT SETTINGS::setMaxGenerations(const int maxGenerations)
+void SETTINGS::setMaxGenerations(const unsigned int maxGenerations)
 {
 #ifdef _SCC_DEBUG
 	if((maxGenerations<MIN_GENERATIONS)||(maxGenerations>MAX_GENERATIONS)) {
@@ -634,99 +647,64 @@ void EXPORT SETTINGS::setMaxGenerations(const int maxGenerations)
 	ga.maxGenerations=maxGenerations;
 }
 
-void SETTINGS::setMapCount(const int mapCount)
+GOAL_ENTRY* SETTINGS::getCurrentGoal(const unsigned int player)
 {
-#ifdef _SCC_DEBUG
-	if((mapCount<MIN_MAPS)||(mapCount>=MAX_MAPS)) {
-		toLog("WARNING: (SETTINGS::setMapCount): Value out of range.");return;
-	}
-#endif
-	ga.mapCount=mapCount;
+	return(*(start.getCurrentGoal(player)));
 }
 
-void SETTINGS::setStartconditionCount(const int startconditionCount)
-{
-#ifdef _SCC_DEBUG
-	if((startconditionCount<MIN_GOAL_ENTRIES)||(startconditionCount>=MAX_GOAL_ENTRIES)) {
-		toLog("WARNING: (SETTINGS::setStartconditionCount): Value out of range.");return;
-	}
-#endif
-	ga.startconditionCount=startconditionCount;
-}
-
-
-void SETTINGS::setGoalCount(const int goalCount)
-{
-#ifdef _SCC_DEBUG
-	if((goalCount<MIN_GOAL_ENTRIES)||(goalCount>=MAX_GOAL_ENTRIES)) {
-		toLog("WARNING: (SETTINGS::setGoalCount): Value out of range.");return;
-	}
-#endif
-	ga.goalCount=goalCount;
-}
-
-void EXPORT SETTINGS::setPreprocessBuildOrder(const bool preprocess)
+void SETTINGS::setPreprocessBuildOrder(const bool preprocess)
 {
 	ga.preprocessBuildOrder=preprocess;
 }
 
-void EXPORT SETTINGS::assignMap(const int mapNumber)
+void SETTINGS::assignMap(const unsigned int mapNumber)
 {
 #ifdef _SCC_DEBUG
-	if((mapNumber<0)||(mapNumber>=MAX_MAPS)) {
-		toLog("WARNING: (SETTINGS::setMap): Value out of range.");return;
+	if(mapNumber>=loadedMap.size()) {
+		toLog("WARNING: (SETTINGS::assignMap): Value out of range.");return;
 	}
 #endif
 	start.assignMap(&(loadedMap[mapNumber]));
 //	soup.initializeMap(&(loadedMap[mapNumber])); //?
 }
 
-/// ==> aendern, dass es nicht auf ga zeigt... oder? mmmh... muss ja auch fitnessfunktion zugreifen
-void EXPORT SETTINGS::setMode(const int mode)
-{
-#ifdef _SCC_DEBUG
-	if((mode<MIN_MODE)||(mode>MAX_MODE)) {
-		toLog("WARNING: (SETTINGS::setMode): Value out of range.");return;
-	}
-#endif
-	ga.mode=mode;
-}
-
-void EXPORT SETTINGS::setStartRace(const int player, const eRace race)
+void SETTINGS::assignStartRace(const unsigned int player, const eRace race)
 {
 	start.setPlayerRace(player, race);
 }
 
-void EXPORT SETTINGS::setStartcondition(const int player, const int startcondition)
+void SETTINGS::assignStartcondition(const unsigned int player, const unsigned int startcondition)
 {
-	// TODO Fehlerpruefung
-	start.setStartcondition(player, &(loadedStartcondition[startcondition]));
+#ifdef _SCC_DEBUG
+    if(startcondition>=loadedStartcondition[start.getPlayerRace(player)].size()) {
+        toLog("WARNING: (SETTINGS::setStartcondition): Value out of range.");return;
+    }
+#endif
+	start.assignStartcondition(player, &(loadedStartcondition[start.getPlayerRace(player)][startcondition]));
 }
 
-void EXPORT SETTINGS::setHarvestSpeed(const eRace race, const int harvest)
+void SETTINGS::setHarvestSpeed(const eRace race, const unsigned int harvest)
 {
 	// todo: checken ob harvest dazupasst
 	start.setHarvestSpeed(race, &(loadedHarvestSpeed[harvest]));
 }
 
-void EXPORT SETTINGS::setStartPosition(const int player, const int startPosition)
+void SETTINGS::setStartPosition(const unsigned int player, const unsigned int startPosition)
 {
 	start.setStartPosition(player, startPosition);
 }
 
-void EXPORT SETTINGS::setGoal(const int player, const int goal)
+void SETTINGS::assignGoal(const unsigned int player, const unsigned int goal)
 {
 #ifdef _SCC_DEBUG
-	if((goal<MIN_GOAL_ENTRIES)||(goal>=getGoalCount())||(player<MIN_PLAYER)||(player>=MAX_PLAYER/*loadedMap[getCurrentMap()].getMaxPlayer()*/)) {
-		toLog("WARNING: (SETTINGS::setGoal): Value out of range.");return;
+	if(goal>=loadedGoal[start.getPlayerRace(player)].size()) {
+		toLog("WARNING: (SETTINGS::assignGoal): Value out of range.");return;
 	}
 #endif
-	start.setGoal(player, &loadedGoal[goal]);
+	start.assignGoal(player, &loadedGoal[start.getPlayerRace(player)][goal]);
 }
 
-
-
-void EXPORT SETTINGS::setBreedFactor(const int breedFactor)
+void SETTINGS::setBreedFactor(const unsigned int breedFactor)
 {
 #ifdef _SCC_DEBUG
 	if((breedFactor<MIN_BREED_FACTOR)||(breedFactor>MAX_BREED_FACTOR)) {
@@ -736,7 +714,7 @@ void EXPORT SETTINGS::setBreedFactor(const int breedFactor)
 	ga.setBreedFactor(breedFactor);
 }
 
-void EXPORT SETTINGS::setCrossOver(const int crossOver)
+void SETTINGS::setCrossOver(const unsigned int crossOver)
 {
 #ifdef _SCC_DEBUG
 	if((crossOver<MIN_CROSSOVER)||(crossOver>MAX_CROSSOVER)) {
@@ -746,86 +724,85 @@ void EXPORT SETTINGS::setCrossOver(const int crossOver)
 	ga.setCrossOver(crossOver);
 }
 
-const int EXPORT SETTINGS::getBreedFactor() const
+const unsigned int SETTINGS::getBreedFactor() const
 {
 	return(ga.getBreedFactor());
 }
 
-const int EXPORT SETTINGS::getMode() const
-{
-	return(ga.mode);
-}
-
-const int EXPORT SETTINGS::getCrossOver() const
+const unsigned int SETTINGS::getCrossOver() const
 {
 	return(ga.getCrossOver());
 }
 
-const int EXPORT SETTINGS::getMaxTime() const
+const unsigned int SETTINGS::getMaxTime() const
 {
 	return(ga.maxTime);
 }
 
-const int EXPORT SETTINGS::getMaxTimeOut() const
+const unsigned int SETTINGS::getMaxTimeOut() const
 {
 	return(ga.maxTimeOut);
 }
 
-const int EXPORT SETTINGS::getMaxLength() const
+const unsigned int SETTINGS::getMaxLength() const
 {
 	return(ga.maxLength);
 }
 
-const int EXPORT SETTINGS::getMaxRuns() const
+const unsigned int SETTINGS::getMaxRuns() const
 {
 	return(ga.maxRuns);
 }
 
-const int EXPORT SETTINGS::getMaxGenerations() const
+const unsigned int SETTINGS::getMaxGenerations() const
 {
 	return(ga.maxGenerations);
 }
 
-const bool EXPORT SETTINGS::getPreprocessBuildOrder() const
+const bool SETTINGS::getPreprocessBuildOrder() const
 {
 	return(ga.preprocessBuildOrder);
 }
 
-const int EXPORT SETTINGS::getStartconditionCount() const
+const unsigned int SETTINGS::getStartconditionCount(const unsigned int player) const
 {
-	return(ga.startconditionCount);
+	return(loadedStartcondition[start.getPlayerRace(player)].size());
 }
 
-const int EXPORT SETTINGS::getGoalCount() const
+const unsigned int SETTINGS::getGoalCount(const unsigned int player) const
 {
-	return(ga.goalCount);
+	return(loadedGoal[start.getPlayerRace(player)].size());
 }
 
-const int EXPORT SETTINGS::getMapCount() const
+const unsigned int SETTINGS::getMapCount() const
 {
-	return(ga.mapCount);
+	return(loadedMap.size());
 }
 
-const GOAL_ENTRY* EXPORT SETTINGS::getGoal(const int goalNumber) const
+
+
+const GOAL_ENTRY* SETTINGS::getGoal(const unsigned int player, const unsigned int goal) const
+
 {
 #ifdef _SCC_DEBUG
-	if((goalNumber<MIN_GOAL_ENTRIES)||(goalNumber>=getGoalCount())) {
+	if(goal>=loadedGoal[start.getPlayerRace(player)].size()) {
 		toLog("WARNING: (SETTINGS::getGoal): Value out of range.");return(0);
 	}
 #endif
-	return(&loadedGoal[goalNumber]);
+	return(&loadedGoal[start.getPlayerRace(player)][goal]);
 }
 
-const START_CONDITION* EXPORT SETTINGS::getStartcondition(const int startconditionNumber) const
+const START_CONDITION* SETTINGS::getStartcondition(const unsigned int player, const unsigned int startconditionNumber) const
 {
 #ifdef _SCC_DEBUG
-	if((startconditionNumber<0)||(startconditionNumber>=getStartconditionCount())) {
+	if(startconditionNumber>=loadedStartcondition[start.getPlayerRace(player)].size()) {
 		toLog("WARNING: (SETTINGS::getStartcondition): Value out of range.");return(0);
 	}
 #endif
-	return(&loadedStartcondition[startconditionNumber]);
+	return(&loadedStartcondition[start.getPlayerRace(player)][startconditionNumber]);
 }
-const GA* EXPORT SETTINGS::getGa() const
+
+const GA* SETTINGS::getGa() const
 {
 	return(&ga);
 }

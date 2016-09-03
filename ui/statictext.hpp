@@ -11,32 +11,38 @@ enum eTextMode
 	HORIZONTALLY_CENTERED_TEXT_MODE,
 	TOTAL_CENTERED_TEXT_MODE,
 	LOWER_CENTERED_TEXT_MODE,
-	UPPER_CENTERED_TEXT_MODE
+	UPPER_CENTERED_TEXT_MODE,
+	FORMATTED_TEXT_MODE
 };
 
 class UI_StaticText:public UI_Object
 {
     public:
-        UI_StaticText(UI_Object* parent, const Rect pos, const eTextMode mode = NO_TEXT_MODE, const eColor color=NULL_COLOUR, const eFont font=NULL_FONT);
-
-		UI_StaticText(UI_Object* parent, const eString text, const Rect pos, const eTextMode mode = NO_TEXT_MODE, const eColor color=NULL_COLOUR, const eFont font=NULL_FONT);
+		UI_StaticText& operator=(const UI_StaticText& object);
+		UI_StaticText(const UI_StaticText& object);
 		
-		UI_StaticText(UI_Object* parent, const string text, const Rect pos, const eTextMode mode = NO_TEXT_MODE, const eColor color=NULL_COLOUR, const eFont font=NULL_FONT);
+        UI_StaticText(UI_Object* st_parent, const Rect st_pos, const eTextMode st_mode = NO_TEXT_MODE, const eColor st_color = NULL_COLOR, const eFont st_font = NULL_FONT);
+
+		UI_StaticText(UI_Object* st_parent, const eString st_text, const Rect st_pos, const eTextMode st_mode = NO_TEXT_MODE, const eColor st_color = NULL_COLOR, const eFont st_font = NULL_FONT);
+		
+		UI_StaticText(UI_Object* st_parent, const string st_text, const Rect st_pos, const eTextMode st_mode = NO_TEXT_MODE, const eColor st_color = NULL_COLOR, const eFont st_font = NULL_FONT);
+
 		~UI_StaticText();
 		
-		void setMode(const eTextMode mode);
-		void setColor(const Color color);
-		void setColor(const eColor color);
-		void setFont(const eFont font);
-		void updateText(const string text);
-		void updateText(const eString text);
+		void setMode(const eTextMode st_mode);
+		void setColor(const Color st_color);
+		void setColor(const eColor st_color);
+		void setFont(const eFont st_font);
+		void updateText(const string& st_text);
+		UI_Object* checkHighlight();
+		void updateText(const eString st_text);
 		
         void draw(DC* dc) const;
         void process();
 
 		const Size getTextSize() const;
 	protected:
-        eTextMode  mode; // left-bound=0, right-bound=1, vertically centered=2, horizontally centered=4, block text = 8, FORMATTED = 16
+        eTextMode  mode; 
     private:
 		string text;
         eFont font;

@@ -1,70 +1,69 @@
-PROGRAM=ef
+EF=ef
 UI=ui
-DEPENDFILE=.depend
-CXX=g++
-COREPATH=core
-GFXPATH=/data2/SDL/SDL_gfx-2.0.11
-GFXDLL=$(GFXPATH)/SDL_framerate.o  $(GFXPATH)/SDL_gfxPrimitives.o  $(GFXPATH)/SDL_imageFilter.o  $(GFXPATH)/SDL_rotozoom.o
+SDL=sdl
+CORE=core
 
-OBJDLL=$(COREPATH)/defs.o $(COREPATH)/anarace.o $(COREPATH)/ga.o $(COREPATH)/goal.o  $(COREPATH)/harvest.o  $(COREPATH)/location.o  $(COREPATH)/basicmap.o  $(COREPATH)/prerace.o  $(COREPATH)/race.o  $(COREPATH)/settings.o  $(COREPATH)/soup.o $(COREPATH)/building.o $(COREPATH)/start.o $(COREPATH)/unit.o $(COREPATH)/startcondition.o
+CORE_OBJ=$(CORE)/defs.o $(CORE)/anarace.o $(CORE)/ga.o $(CORE)/goal.o  $(CORE)/harvest.o  $(CORE)/location.o  $(CORE)/basicmap.o  $(CORE)/prerace.o  $(CORE)/race.o  $(CORE)/settings.o  $(CORE)/soup.o $(CORE)/building.o $(CORE)/start.o $(CORE)/unit.o $(CORE)/startcondition.o
 
-SOURCEDLL=$(OBJDLL:%.o=%.cpp)
+EF_OBJ=$(EF)/bodiagram.o $(EF)/bograph.o $(EF)/bowindow.o $(EF)/force.o $(EF)/info.o $(EF)/message.o $(EF)/statistics.o $(EF)/timer.o $(EF)/mainwindow.o $(EF)/tutorial.o $(EF)/corewindow.o $(EF)/player.o  $(EF)/order.o $(EF)/main.o  $(EF)/racemenu.o $(EF)/menuentry.o $(EF)/menu.o $(EF)/setwindow.o $(EF)/progressbar.o $(EF)/numberfield.o $(EF)/unitmenu.o $(EF)/goalmenu.o $(EF)/forcemenu.o
 
-OBJMAIN=$(UI)/sdlwrapper.o $(UI)/object.o $(UI)/window.o $(UI)/button.o $(UI)/statictext.o $(UI)/theme.o $(UI)/controls.o $(PROGRAM)/bodiagram.o $(PROGRAM)/bograph.o $(PROGRAM)/bowindow.o $(PROGRAM)/force.o $(PROGRAM)/info.o $(PROGRAM)/message.o $(PROGRAM)/statistics.o $(PROGRAM)/timer.o $(PROGRAM)/mainwindow.o $(PROGRAM)/tutorial.o $(PROGRAM)/corewindow.o $(PROGRAM)/player.o $(PROGRAM)/unitmenu.o $(PROGRAM)/order.o $(PROGRAM)/main.o $(PROGRAM)/goalmenu.o $(PROGRAM)/forcemenu.o $(PROGRAM)/racemenu.o $(PROGRAM)/menuentry.o $(PROGRAM)/menu.o
-SOURCEMAIN=$(OBJMAIN:%.o=%.cpp)
+UI_OBJ=$(UI)/object.o $(UI)/window.o $(UI)/button.o $(UI)/radio.o $(UI)/scrollbar.o $(UI)/statictext.o $(UI)/theme.o 
 
-DLLFLAGS=-DBUILD_DLL
-#LIBS=-L./ $(PROGRAM).so.1.0 
+SDL_OBJ=$(SDL)/color.o $(SDL)/font.o $(SDL)/pen.o $(SDL)/surface.o $(SDL)/brush.o $(SDL)/dc.o $(SDL)/framerate.o $(SDL)/bitmap.o $(SDL)/draw.o $(SDL)/size.o $(SDL)/rect.o $(SDL)/point.o
+
 
 CPPFLAGS =
-CXXFLAGS = -ansi -pedantic -Wall -g -D_SCC_DEBUG
+CXXFLAGS = -ansi -pedantic-errors -Wall -W -O3 #-g -D_SCC_DEBUG #-Weffc++ #-Wabi -Wmissing-braces -Wredundant-decls -Wundef -Wunused -Wconversion -Woverloaded-virtual -Wmissing-noreturn -Winline -Wdisabled-optimization -Wsign-promo -Wwrite-strings -Wlong-long -Woverloaded-virtual -Wfloat-equal -Wreturn-type -Wparentheses
+#-Wchar-subscripts -Wimplicit -Wswitch -Wswitch-default -Wswitch-enum -Wtrigraphs  -Wendif-labels -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wpadded -Wshadow  -Waggregate-return  -Wunreachable-code
 
--include $(DEPENDFILE)
+#-Wold-style-cast 
+
+CXX=g++
+
+LIBS = -lSDL -lSDL_ttf core.a ui.a sdl.a
+INCLUDES = -I/usr/local/include/SDL
 
 .SUFFIXES: .o .cpp
-bin:	$(OBJMAIN) $(OBJHEADER) 
-	$(CXX) $(CXXFLAGS) -o $(PROGRAM)b $(OBJMAIN) $(LIBS) -lSDL -lSDL_ttf -lSDL_image -I/usr/local/include/SDL gfxlib.a lib.a
+bin:	$(EF_OBJ) 
+	$(CXX) $(CXXFLAGS) -o $(EF)b $(EF_OBJ) $(INCLUDES) $(LIBS) 
 		
-lib:	$(SOURCEDLL) $(SOURCEHEADER)
-	$(CXX) $(CXXFLAGS) -fPIC -c $(SOURCEDLL)
-#	@mv *.o $(COREPATH)
-#	$(CXX) $(CXXFLAGS) -shared -Wl,-soname,$(PROGRAM).so.1 -o $(PROGRAM).so.1.0 $(SOURCEDLL)
+core: core.a($(CORE_OBJ))
+ui: ui.a($(UI_OBJ))
+sdl: sdl.a($(SDL_OBJ))
 
-lib.a: lib.a($(OBJDLL))
-gfxlib.a: gfxlib.a($(GFXDLL))
-
-dep: $(SOURCEDLL) $(SOURCEMAIN)
-	$(CXX) -MM $(SOURCEDLL) $(SOURCEMAIN) > $(DEPENDFILE)
-	
 clean:
 	@rm -vf ./*.o
-	@rm -vf $(PROGRAM)/*.o
-	@rm -vf $(PROGRAM)b
+	@rm -vf $(EF)/*.o
+	@rm -vf $(EF)b
+coreclean:
+	@rm -vf $(CORE)/*.o
+	@rm -vf $(CORE).a
+uiclean:
 	@rm -vf $(UI)/*.o
-libclean:
-	@rm -vf $(COREPATH)/*.o
-	@rm -vf $(COREPATH)/*.d
-	@rm $(PROGRAM).so.1.0
+	@rm -vf $(UI).a
+sdlclean:
+	@rm -vf $(SDL)/*.o
+	@rm -vf $(SDL).a
 
 allclean:
 	@rm -vf ./*.o
-	@rm -vf ./*.d
-	@rm -vf ./lib.a
-	@rm -vf $(COREPATH)/*.d
-	@rm -vf $(COREPATH)/*.o
-	@rm -vf $(COREPATH)/*.a
-	@rm -vf $(PROGRAM)/*.d
-	@rm -vf $(PROGRAM)/*.o
-	@rm -vf $(UI)/*.d
+	
+	@rm -vf $(CORE)/*.o
+	@rm -vf $(EF)/*.o
 	@rm -vf $(UI)/*.o
-	@rm -vf $(PROGRAM).dll
-	@rm -vf $(PROGRAM).a
-	@rm -vf $(PROGRAM).bin
-	@rm -vf $(PROGRAM).exe
-	@rm -vf $(PROGRAM).so.1.0
-	@rm -vf exe/*.d
+	@rm -vf $(SDL)/*.o
+	
+
+	@rm -vf $(CORE).a
+	@rm -vf $(UI).a
+	@rm -vf $(SDL).a
+	
+	@rm -vf $(EF).dll
+	@rm -vf $(EF)b
+	#@rm -vf $(EF).exe
+	
 	@rm -vf exe/*.o
 	@rm -vf exe/*.a
-	@rm -vf a.out
+	
 	@rm -vf gmon.out
 	@echo "done."

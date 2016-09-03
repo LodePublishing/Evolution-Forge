@@ -8,20 +8,20 @@
 class TimerWindow : public UI_Window
 {
 	public:
-		TimerWindow(UI_Object* parent, ANARACE* anarace, const int windowNumber);
+		TimerWindow(UI_Object* timer_parent, ANARACE* timer_anarace, const unsigned int timer_window_wumber);
 		~TimerWindow();
 
 		void resetData();
 		void process();
 		void draw(DC* dc) const;
 
-		const int getCurrentMode() const;
-		void setMode(const int mode);
+		const unsigned int getCurrentMode() const;
+		void setMode(const unsigned int mode);
 	private:
-		int oldTimeCounter[20],oldTime[20];
-		int currentTime;
-		int lastTime;
-		int mode;
+		unsigned int oldTimeCounter[20], oldTime[20];
+		unsigned int currentTime;
+		unsigned int lastTime;
+		unsigned int mode;
 		ANARACE* anarace;
 
 		UI_StaticText* goalsFulFilledText;
@@ -29,7 +29,6 @@ class TimerWindow : public UI_Window
 		UI_StaticText* timeText;
 
 		UI_Button* continueButton;
-		ButtonAnimation* cbut;		
 };
 
 #endif

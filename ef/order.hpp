@@ -6,12 +6,22 @@
 class Order
 {
 	public:
+		Order(const Order& order);
 		Order();
 		~Order();
-		void operator=(const Order& order);
-		int blend;
-		int blendTarget;
-		int blendStart;
+		Order& operator=(const Order& order);
+	
+		void setUnit(const unsigned int unit);
+		void setIP(const unsigned int IP);
+		void setRow(const unsigned int row);
+
+		const unsigned int getUnit() const;
+		const unsigned int getIP() const;
+		const unsigned int getRow() const;
+	
+		unsigned int blend;
+		unsigned int blendTarget;
+		unsigned int blendStart;
 //build order list
 		Rect rect;
 		Rect brect;
@@ -19,24 +29,17 @@ class Order
 		Rect btarget;
 		Rect start;
 		Rect bstart;
-		long marker;
+		unsigned long marker;
 		bool bonew;
 		bool checked;
 
-		void setUnit(const int unit);
-		void setIP(const int IP);
-		void setRow(const int row);
-
-		const int getUnit() const;
-		const int getIP() const;
-		const int getRow() const;
 		
 	private:
 //build order graph
-		int unit;
+		unsigned int unit;
 //	int mins,gas,time,location,needSupply,haveSupply,forceFacilityCount,availibleFacilityCount,successType,successUnit,facility,code,forceCount;
-		int IP;
-		int row;
+		unsigned int IP;
+		unsigned int row;
 //	int mins, color  etc.
 };
 

@@ -4,91 +4,71 @@
 #define _CORE_DEFS_HPP
 
 #include <string>
-using namespace std;
-
-#ifdef BUILD_DLL
-#define EXPORT __declspec(dllexport)
-#elif IMPORT_DLL
-#define EXPORT __declspec(dllimport)
-#else
-#define EXPORT
-#endif
 
 #define MAX_RACES 3
 #define UNIT_TYPE_COUNT 101
 #define MAX_LOCATIONS 9
 #define MAX_PLAYER 3
 
+#define GLOBAL 0
 extern const float CORE_VERSION;
 
-//extern const int MAX_LOCATIONS;
-extern const int MIN_LOCATIONS; //this does not mean that maps with 0 locations can exist....
+//extern const unsigned int MAX_LOCATIONS;
+extern const unsigned int MIN_LOCATIONS; //this does not mean that maps with 0 locations can exist....
 
-//extern const int MAX_PLAYER;
-extern const int MIN_PLAYER;
+//extern const unsigned int MAX_PLAYER;
+extern const unsigned int MIN_PLAYER;
 
-#define MAX_GOAL_ENTRIES 25
-//extern const int MAX_GOAL_ENTRIES;
-extern const int MIN_GOAL_ENTRIES;
-
-extern const int MAX_MINERALS;
-extern const int MAX_GAS;
-
-#define MAX_MAPS 25
-//extern const int MAX_MAPS;
-extern const int MIN_MAPS;
+extern const unsigned int MAX_MINERALS;
+extern const unsigned int MAX_GAS;
 
 #define MAX_PROGRAMS 128
-//extern const int MAX_PROGRAMS; //must be multiplier of (16*player)
-extern const int LARVA_MAX;
-//extern const int UNIT_TYPE_COUNT;
+//extern const unsigned int MAX_PROGRAMS; //must be multiplier of (16*player)
+extern const unsigned int LARVA_MAX;
+//extern const unsigned int UNIT_TYPE_COUNT;
 #define MAX_HARVEST_SPEEDS 100
-//extern const int MAX_HARVEST_SPEEDS;
-extern const int MAX_SUPPLY;
+//extern const unsigned int MAX_HARVEST_SPEEDS;
+extern const unsigned int MAX_SUPPLY;
 
-extern const int MAX_TOTAL_UNITS;
+extern const unsigned int MAX_TOTAL_UNITS;
 
-extern const int MAX_GENERATIONS;
-extern const int MIN_GENERATIONS;
+extern const unsigned int MAX_GENERATIONS;
+extern const unsigned int MIN_GENERATIONS;
 
-extern const int MAX_BREED_FACTOR;
-extern const int MIN_BREED_FACTOR;
+extern const unsigned int MAX_BREED_FACTOR;
+extern const unsigned int MIN_BREED_FACTOR;
 
-extern const int MAX_MODE;
-extern const int MIN_MODE;
+extern const unsigned int MAX_MODE;
+extern const unsigned int MIN_MODE;
 
-extern const int MAX_CROSSOVER;
-extern const int MIN_CROSSOVER;
-#define MAX_TIME 3600
-//extern const int MAX_TIME;
-extern const int MIN_TIME;
+extern const unsigned int MAX_CROSSOVER;
+extern const unsigned int MIN_CROSSOVER;
+#define MAX_TIME 3601
+//extern const unsigned int MAX_TIME;
+extern const unsigned int MIN_TIME;
 
-extern const int MAX_TIMEOUT;
-extern const int MIN_TIMEOUT;
+extern const unsigned int MAX_TIMEOUT;
+extern const unsigned int MIN_TIMEOUT;
 #define MAX_LENGTH 96
-//extern const int MAX_LENGTH;
-extern const int MIN_LENGTH;
+//extern const unsigned int MAX_LENGTH;
+extern const unsigned int MIN_LENGTH;
 
 #define MAX_RUNS 10
-//extern const int MAX_RUNS;
-extern const int MIN_RUNS;
+//extern const unsigned int MAX_RUNS;
+extern const unsigned int MIN_RUNS;
 
-extern const int MAX_PREPROCESS_BUILDORDER;
-extern const int MIN_PREPROCESS_BUILDORDER;
-
-extern const int MAX_TFITNESS;
-
-#define MAX_START_CONDITIONS 99
-//extern const int MAX_START_CONDITIONS; // ~~
-
-//extern const int MAX_RACES;
-
-#ifdef _SCC_DEBUG
-#include <fstream>
-extern void toLog(const string& msg);
-#endif
+extern const unsigned int MAX_PREPROCESS_BUILDORDER;
+extern const unsigned int MIN_PREPROCESS_BUILDORDER;
 
 
+extern const unsigned int MAX_TFITNESS;
+extern const unsigned int MAX_PFITNESS;
+
+//extern const unsigned int MAX_RACES;
+
+extern void toLog(const std::string& msg);
+
+#define NEUTRAL_PLAYER 0
 
 enum eErrorMessages
 {
@@ -432,38 +412,38 @@ enum eUnitType
 
 struct LAST
 {
-	int unit;
-	int location;
-	int count;
+	unsigned int unit;
+	unsigned int location;
+	unsigned int count;
 };
 
 struct GOAL
 {
-	int unit;//!
-	int time;
-	int count;
-	int location;
+	unsigned int unit;//!
+	unsigned int time;
+	unsigned int count;
+	unsigned int location;
 
-	int finalTime; // temporary!
+	unsigned int finalTime; // temporary!
 };
 
 struct UNIT_STATISTICS
 {
-	string name;
-	int BT;
-	int minerals,gas;
-	int needSupply;
-	int haveSupply;
-	int upgrade_cost;	 // upgrade costs in minerals and gas (50, 75, ...)
-	int upgrade[2];		 // what building is needed to go upgrade level 2 and level 3 (templar archives, science facility, fleet beacon, lair, hive)
-	int prerequisite[3]; // these prerequisites buildings need to be anywhere on the map, so that this unit can be build
-	int facility[3];	 // where _can_ the unit be produced? primariliy for zerg and terra
+	std::string name;
+	unsigned int BT;
+	unsigned int minerals,gas;
+	unsigned int needSupply;
+	unsigned int haveSupply;
+	unsigned int upgrade_cost;	 // upgrade costs in minerals and gas (50, 75, ...)
+	unsigned int upgrade[2];		 // what building is needed to go upgrade level 2 and level 3 (templar archives, science facility, fleet beacon, lair, hive)
+	unsigned int prerequisite[3]; // these prerequisites buildings need to be anywhere on the map, so that this unit can be build
+	unsigned int facility[3];	 // where _can_ the unit be produced? primariliy for zerg and terra
 			             // for upgrades: fac[2] and fac[3] are places to hold prequerisities for additional upgrading beyond level 1~~
-	int facility2;		 // additional facilities, primarily for drones or morphing templars
+	unsigned int facility2;		 // additional facilities, primarily for drones or morphing templars
 	eFacilityType facilityType;	 // see above
 						 
-	int create;			 // Additional building created when this item is completed (only for add-ons)
-	int speed;			 // speed of units, not yet implemented
+	unsigned int create;			 // Additional building created when this item is completed (only for add-ons)
+	unsigned int speed;			 // speed of units, not yet implemented
 	eUnitType unitType;		
 };
 

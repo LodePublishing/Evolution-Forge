@@ -8,17 +8,19 @@ const float GUI_VERSION=0.50;
 #include "tutorial.hpp"
 #include "corewindow.hpp"
 #include "mainwindow.hpp"
+#include "setwindow.hpp"
 
 #include <math.h>
 #include <iostream>
-
-#include "SDL/SDL_framerate.h"
+#include <sstream>
+#include <iomanip>
+#include <string>
 
 class Main
 {
 	public:
-		Main() {gizmo=true;};
-		~Main() {};
+		Main(DC* dc);
+		~Main();
 		void draw(DC* dc) const;
 		void process();
 		void OnIdle();
@@ -29,20 +31,38 @@ class Main
 		TutorialWindow* tutorialWindow;
 		Player* player[MAX_PLAYER];
 		CoreWindow* theCore;
-		const int isOptimizing();
+		SettingsWindow* settingsWindow;
+		const bool isOptimizing() const;
 		void stopOptimizing();
 		void startOptimizing();
-		void Init(DC* dc);
-	private:
-		int oldrun,endrun;
+
+		void leftDown();
+		void leftUp(const Point p);
+		void rightDown();
+		void rightUp(const Point p);
+	
+		void setMouse(const Point p);
+	
+		Point maus;
+//	private:
+		SDL_Surface* cursor_save;
+		SDL_Surface* cursor;
+
+		
+		bool buttonPressed;
+		bool hasAlreadyLeft;
+		UI_Button* button;
+
+		unsigned int oldrun;
+		bool endrun;
 		bool gizmo;
 		const GA* ga;
 		void drawGizmo(DC* dc) const;
-		void helper(DC* dc, int i, int &dx, int &dy, const string& str) const;
+		const Size helper(DC* dc, const unsigned int dx, const int i, const string& str) const;
 		ANARACE* anarace[MAX_PLAYER];
-		int update;
-		int refresh;
-		int ani;
+		unsigned int update; // TODO anderer Name
+		unsigned int refresh; // "" 
+		unsigned int ani;
 };
 																				
 #endif

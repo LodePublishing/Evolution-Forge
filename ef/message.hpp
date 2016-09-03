@@ -6,20 +6,23 @@
 #include <list>
 
 using std::list;
+class Message
+{
+	public:
+		Message(const unsigned int msg_type, const string& msg_string, const unsigned int msg_col);
+		~Message();
+		Rect rect;
+		unsigned int type;
+		string messageString;
+		unsigned int col;
+};
 
 class MessageWindow:public UI_Window
 {
-	struct Message
-	{
-		int type;
-		string string;
-		int col;
-		Rect edge;
-	};
 	public:
 		MessageWindow(UI_Window* parentWindow);
 		~MessageWindow();
-		void addMessage(string bla);
+		void addMessage(const string& bla);
 		void resetData();
 		void process();
 		void draw(DC* dc) const;

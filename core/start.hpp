@@ -24,12 +24,12 @@ insert Start Player conditions:
 
 A RESET will reload the data from the loaded default pointers*/
 	
-class GROUP
+class PLAYER_GROUP
 {
-	int player;
-	int count;
-	int type;
-	int location;
+	unsigned int player;
+	unsigned int count;
+	unsigned int type;
+	unsigned int location;
 };
 
 class START
@@ -49,7 +49,7 @@ class START
 
 // ----- GOALS ARE NOT COPIED AS THEY DO NOT CHANGE DURNING A RUN (yet)
 		GOAL_ENTRY currentGoal[MAX_PLAYER]; // initialized things
-		int startPosition[MAX_PLAYER];
+		unsigned int startPosition[MAX_PLAYER];
 		eRace playerRace[MAX_PLAYER];
 // TODO Funktion zum verteilen von startcondition auf units abhaengig von tmpmap (startposition) und startPositions
 
@@ -58,28 +58,30 @@ class START
 
 // Benutzer waehlt: Karte, Spielmodus, Harvestspeed, und fuegt Spieler mit Rasse, Startforce (default), StartPosition (absolut / zufaellig), Siegbedingungen (goals), 
 	public:
-		const int getBasicMineralHarvestSpeedPerSecond(const int player, const int worker) const; // 'player' noch rausoptimieren!
-		const int getBasicGasHarvestSpeedPerSecond(const int player, const int worker) const;
+		const unsigned int getBasicMineralHarvestSpeedPerSecond(const unsigned int player, const unsigned int worker) const; // 'player' noch rausoptimieren!
+		const unsigned int getBasicGasHarvestSpeedPerSecond(const unsigned int player, const unsigned int worker) const;
 		void assignMap(const BASIC_MAP* map); 
 		void setHarvestSpeed(const eRace race, const HARVEST_SPEED* harvest); // copy data (pointers) from settings 
 		// assign Mode ?
-		void setStartPosition(const int player, const int startPosition);
-		void setPlayerRace(const int player, const eRace race); // => gleichzeitig wird harvestspeed geaendert und condition und goal muessen u.U. neugewaehlt werden!
-		void setStartcondition(const int player, const START_CONDITION* startcondition);
+		void setStartPosition(const unsigned int player, const unsigned int startPosition);
+		void setPlayerRace(const unsigned int player, const eRace race); // => gleichzeitig wird harvestspeed geaendert und condition und goal muessen u.U. neugewaehlt werden!
+		void assignStartcondition(const unsigned int player, const START_CONDITION* startcondition);
 		
 		void fillGroups();
 		
-		void setGoal(const int player, const GOAL_ENTRY* goal);
+		void assignGoal(const unsigned int player, const GOAL_ENTRY* goal);
 
-		const UNIT_STATISTICS* const* getpStats(const int playerNum);
+		const UNIT_STATISTICS* const* getpStats(const unsigned int playerNum) const;
 		
-		const START_CONDITION* const* getStartcondition(const int player) const; 
-		void copyStartForce(void* target);
+		const START_CONDITION* const* getStartcondition(const unsigned int player) const; 
+		void copyStartForce(void* target) const;
 		const BASIC_MAP* const* getMap() const;
-		GOAL_ENTRY** getCurrentGoal(const int playerNum);
+		GOAL_ENTRY** getCurrentGoal(const unsigned int playerNum);
 
-		const eRace getPlayerRace(const int playerNum);
-
+		const eRace getPlayerRace(const unsigned int playerNum) const;
+	
+		START& operator=(const START& start);
+		START(const START& start);
 		START();
 		~START();
 };

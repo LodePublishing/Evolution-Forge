@@ -1,10 +1,11 @@
 #ifndef _UI_WINDOW_HPP
 #define _UI_WINDOW_HPP
 
-extern const int MIN_HEIGHT;
+extern const unsigned int MIN_HEIGHT; // TODO in bograph?
 
 #include "object.hpp"
 #include "button.hpp"
+#include "scrollbar.hpp"
 
 enum eIsScrolled
 {
@@ -24,136 +25,136 @@ enum eIsAutoAdjust
 	AUTO_SIZE_ADJUST
 };
 
+
 class UI_Window : public UI_Object
 {
 	public:
+		UI_Window& operator=(const UI_Window& object);
+		UI_Window(const UI_Window& object);
+	
 // returns position and size of the client area
-		const Rect getRelativeClientRect() const {
-		    return(clientRect);
+		const Rect& getRelativeClientRect() const {
+			return(clientRect);
 		}
-			
-		const Rect getAbsoluteClientRect() const {
-		    return(Rect(getAbsoluteClientRectPosition(),getClientRectSize()));
-		}
-	
-		const Point getRelativeClientRectPosition() const {
-		    return(clientRect.GetPosition());
-		}
-	
-		const Point getAbsoluteClientRectPosition() const {
-		    return(clientRect.GetPosition()+getAbsolutePosition());
-		}
-	
-	   	const int getClientRectHeight() const {
-		    return(clientRect.height);
-		}			
 
-		const int getClientRectWidth() const {
-		    return(clientRect.width);
+		const Rect getAbsoluteClientRect() const {
+			return(Rect(getAbsoluteClientRectPosition(), getClientRectSize()));
 		}
-	
-		const Size getClientRectSize() const {
+
+		const Point getRelativeClientRectPosition() const {
+			return(clientRect.GetTopLeft());
+		}
+
+		const Point getAbsoluteClientRectPosition() const {
+    		return(clientRect.GetTopLeft()+getAbsolutePosition());
+		}
+                                                                            
+		const unsigned int getClientRectHeight() const {
+		    return(clientRect.GetHeight());
+		}
+                                                                            
+		const unsigned int getClientRectWidth() const {
+		    return(clientRect.GetWidth());
+		}
+                                                                            
+		const Size& getClientRectSize() const {
 		    return(clientRect.GetSize());
 		}
+                                                                            
+		const signed int getRelativeClientRectUpperBound() const {
+		    return(clientRect.GetTop());
+		}
+                                                                            
+		const signed int getRelativeClientRectLeftBound() const {
+		    return(clientRect.GetLeft());
+        }
+                                                                            
+		const signed int getRelativeClientRectLowerBound() const {
+		    return(clientRect.GetBottom());
+		}
+                                                                            
+		const signed int getRelativeClientRectRightBound() const {
+		    return(clientRect.GetRight());
+		}
+                                                                            
+		const signed int getAbsoluteClientRectUpperBound() const {
+		    return(getAbsoluteClientRectPosition().y);
+		}
+
+		const signed int getAbsoluteClientRectLeftBound() const {
+	    return(getAbsoluteClientRectPosition().x);
+		}
+                                                                            
+		const signed int getAbsoluteClientRectLowerBound() const {
+		    return(getAbsoluteClientRectPosition().y + getClientRectHeight() -1 ); // TODO?
+		}
+
+		const signed int getAbsoluteClientRectRightBound() const {
+		    return(getAbsoluteClientRectPosition().x + getClientRectWidth() -1 );
+		}
+
+/*		const bool insideClientRect(const Point pos) const
+		{
+		    return(clientRect.Inside(pos - getAbsolutePosition())); //?
+		//  return(clientArea.Inside(rectangle.x,rectangle.y)||clientArea.Inside(rectangle.x+rectangle.width,rectangle.y+rectangle.height)||clientArea.Inside(rectangle.x+rectangle.width,rectangle.y)||clientArea.Inside(rectangle.x,rectangle.y+rectangle.height));
+		//  TODO: wenns auf beiden Seiten ueberlappt?
+		}*/ // TODO
 		
-		const int getRelativeClientRectUpperBound() const {
-		    return(clientRect.y);
-		}
-	
-	    const int getRelativeClientRectLeftBound() const {
-		    return(clientRect.x);
-		}
-	
-   		const int getRelativeClientRectLowerBound() const {
-		    return(clientRect.y+clientRect.height);
-		}
-	
-		const int getRelativeClientRectRightBound() const {
-		    return(clientRect.x+clientRect.width);
-		}
-	
-
-		const int getAbsoluteClientRectUpperBound() const {
-			return(getAbsoluteClientRectPosition().y);
-		}
-	    const int getAbsoluteClientRectLeftBound() const {
-		    return(getAbsoluteClientRectPosition().x);
-		}
-	
-   		const int getAbsoluteClientRectLowerBound() const {
-		    return(getAbsoluteClientRectPosition().y+getClientRectHeight());
-		}
-		const int getAbsoluteClientRectRightBound() const {
-		    return(getAbsoluteClientRectPosition().x+getClientRectWidth());
-		}
-	
-
-		
-		const bool insideClientRect(const Point pos) const;
-
-
 // do windows size changes smoothly		
 		void adjustClientRect();
 
 //	    void setRahmen(Rect rahmen);
-	    void addTab(UI_Button* tab);
+	    void addTab(UI_Button* tab_button);
 		const bool tabWasChanged() const;
 
 		void process();
 	    void draw(DC* dc) const;
-		// reconfigure rectangles depending on current theme settings
-		void updateRectangles(const int maxPlayer);
+		UI_Object* checkHighlight();
 
-		UI_Window(UI_Object* parent, const eString titleString, const eWindow window, const int windowNumber, const eIsScrolled isScrolled=SCROLLED, const eIsAutoAdjust isAutoAdjust=NO_AUTO_SIZE_ADJUST, const eIsTabbed isTabbed=NOT_TABBED, const Rect clientArea=Rect(0,0,9999,9999));
+// 		reconfigure rectangles depending on current theme settings
+		void updateRectangles(const unsigned int maxPlayer);
+
+		UI_Window(UI_Object* window_parent, const eString window_title_string, const eWindow window_type, const unsigned int window_number, const eIsScrolled window_is_scrolled=NOT_SCROLLED, const eIsAutoAdjust win_is_auto_adjust=NO_AUTO_SIZE_ADJUST, const eIsTabbed win_is_tabbed=NOT_TABBED, const Rect win_client_area=Rect(0,0,1280,1024));
 		~UI_Window();
 
 		const bool getChangedFlag() const;
 		void setChangedFlag(const bool flag=true);
 		void changeAccepted();
 
-		void setTitleParameter(const string p);
+		void setTitleParameter(const string& p);
 
 		void updateBorders();
 
 		const eTab getCurrentTab() const;
 
-		void forcePressTab(const eTab tab);
+		void forcePressTab(const eTab press_tab);
 
-		static int rectnumber;
+		static unsigned int rectnumber;
+		const bool fitItemToRelativeClientRect(Rect& rectangle, const unsigned int adjust=0);
+		const bool fitItemToAbsoluteClientRect(Rect& rectangle, const unsigned int adjust=0);
 
 	protected:
 //		bool isMouseInsideClientArea();
 
-		const bool insideRelativeClientRect(const Rect& rect) const;
-		const bool insideAbsoluteClientRect(const Rect& rect) const;
-// 		returns true if items is within clientarea + adapts item's size + maybe adjusts the window later to let the item fit into the client area later
-		const bool fitItemToRelativeClientRect(Rect& rectangle, const int adjust=0);
-		const bool fitItemToAbsoluteClientRect(Rect& rectangle, const int adjust=0);
-
-		const int getScrollY() const;
+		const unsigned int getScrollY() const;
 
 	private:
 		UI_Radio* tabRow;
 		UI_Button* tab[MAX_TABS];
-
+		
 	
-// key to communicate with other windows		
-		int key;
-
 		eWindow window;
 		
 		eTab currentTab; // maybe move to 'theme'
 		
-		bool changedFlag; // TODO, raus hier und static oder irgendsowas!
 
 // no set/get for title as this is unique and does not change
 		eString titleString;
 		string titleParameter;
 		
 // this windows may have a scroll bar		
-//		UI_ScrollBar* scrollBar;
+		UI_Scrollbar* scrollBar;
 		
-
 		Rect originalRect;
 
 // actual painted borders
@@ -165,7 +166,6 @@ class UI_Window : public UI_Object
 		Rect clientStartRect;
 		Rect clientTargetRect;
 // rectangle for max size of client area
-		Rect maxClientRect;
 
 		Rect originalClientRect;
 
@@ -173,17 +173,16 @@ class UI_Window : public UI_Object
     	void drawTitle(DC* dc) const;
 	    void drawToolTip(DC* dc, const Point p, const string* tip) const;
 
-// entry in array for original values of this window.
-		int originalValues;
-
-		int windowNumber;
+		unsigned int windowNumber;
 		eIsAutoAdjust isAutoAdjust;
-// do call adjustWindow - size needs to be changed
-		bool haveToDoAdjustments;
 // has this window a ScrollBar?
 		eIsScrolled isScrollable;
 // has this window tab buttons at the top?
 		eIsTabbed isTabbed;
+	
+		bool highlighted;
+		bool changedFlag; // TODO, raus hier und static oder irgendsowas!
+	
 };
 
 #endif

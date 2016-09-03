@@ -1,8 +1,64 @@
 #include "goal.hpp"
 
-GOAL_ENTRY::GOAL_ENTRY()
+GOAL_ENTRY::GOAL_ENTRY():
+	number(0),
+	name("ERROR"),
+	race(TERRA),
+	maxBuildTypes(0),
+	pStats(NULL),
+	changed(false),
+	raceInitialized(false),
+	goal()	
 {
 	resetData();
+}
+
+GOAL_ENTRY::GOAL_ENTRY(const GOAL_ENTRY& object) :
+    number(object.number),
+    name(object.name),
+    race(object.race),
+    maxBuildTypes(object.maxBuildTypes),
+    pStats(object.pStats),
+    changed(object.changed),
+    raceInitialized(object.raceInitialized),
+    goal(object.goal) // optimize?
+{
+    for(int i=UNIT_TYPE_COUNT;i--;)
+    {
+        genoToPhaenotype[i]=object.genoToPhaenotype[i];
+        phaenoToGenotype[i]=object.phaenoToGenotype[i];
+        allGoal[i]=object.allGoal[i];
+        isVariable[i]=object.isVariable[i];
+        isBuildable[i]=object.isBuildable[i];
+        for(int j=MAX_LOCATIONS;j--;)
+            globalGoal[j][i]=object.globalGoal[j][i];
+    }
+}
+
+GOAL_ENTRY& GOAL_ENTRY::operator=(const GOAL_ENTRY& object)
+{
+    number = object.number;
+    name = object.name;
+    race = object.race;
+    maxBuildTypes = object.maxBuildTypes;
+    pStats = object.pStats;
+    changed = object.changed;
+    raceInitialized = object.raceInitialized;
+	this->goal.clear();
+    for(std::list<GOAL>::const_iterator i = object.goal.begin();i!=object.goal.end();++i)
+        this->goal.push_back(*i); // optimize?
+    //goal = object.goal; // optimize?
+    for(int i=UNIT_TYPE_COUNT;i--;)
+    {
+        genoToPhaenotype[i]=object.genoToPhaenotype[i];
+        phaenoToGenotype[i]=object.phaenoToGenotype[i];
+        allGoal[i]=object.allGoal[i];
+        isVariable[i]=object.isVariable[i];
+        isBuildable[i]=object.isBuildable[i];
+        for(int j=MAX_LOCATIONS;j--;)
+            globalGoal[j][i]=object.globalGoal[j][i];
+    }
+	return(*this);
 }
 
 GOAL_ENTRY::~GOAL_ENTRY()
@@ -16,8 +72,8 @@ void GOAL_ENTRY::resetData()
 	maxBuildTypes=0;
 	for(int i=UNIT_TYPE_COUNT;i--;)
 	{
-		genoToPhaenotype[i]=-1;
-		phaenoToGenotype[i]=-1;
+		genoToPhaenotype[i]=999;
+		phaenoToGenotype[i]=999;
 		allGoal[i]=0;
 		isVariable[i]=0;
 		isBuildable[i]=0;
@@ -27,10 +83,10 @@ void GOAL_ENTRY::resetData()
 //	initialized=true;
 }
 
-const int GOAL_ENTRY::countGoals() const
+const unsigned int GOAL_ENTRY::countGoals() const
 {
 	int goalNum=0;
-	for(list<GOAL>::const_iterator i = goal.begin(); i!=goal.end();++i)
+	for(std::list<GOAL>::const_iterator i = goal.begin(); i!=goal.end();++i)
 		if(i->count>0)
 			goalNum++;
 	return(goalNum);
@@ -40,13 +96,13 @@ const int GOAL_ENTRY::countGoals() const
 const bool GOAL_ENTRY::calculateReady(const UNIT* units) const
 {
     bool ready=true;
-    for(list<GOAL>::const_iterator i = goal.begin(); (i!=goal.end())&&(ready);++i)
+    for(std::list<GOAL>::const_iterator i = goal.begin(); (i!=goal.end())&&(ready); ++i)
         if(i->count)
-            ready&=((i->count<=units[i->location].getTotal(i->unit))&&((i->time>=i->finalTime)||(i->time==0)));
+            ready&=( (i->count <= units[i->location].getTotal(i->unit)) && ((i->time==0) || (i->time>=i->finalTime)) );
     return(ready);
 }
 
-const bool GOAL_ENTRY::getNextGoal(list<GOAL>::const_iterator& current, const bool first) const
+const bool GOAL_ENTRY::getNextGoal(std::list<GOAL>::const_iterator& current, const bool first) const
 {
 	if(first)
 		current=goal.begin();
@@ -60,9 +116,9 @@ const bool GOAL_ENTRY::getNextGoal(list<GOAL>::const_iterator& current, const bo
 	else return(true);
 }	
 
-void GOAL_ENTRY::calculateFinalTimes(const int location, const int unit, const int time)
+void GOAL_ENTRY::calculateFinalTimes(const unsigned int location, const unsigned int unit, const unsigned int time)
 {
-    for(list<GOAL>::iterator i=goal.begin();i!=goal.end();++i)
+    for(std::list<GOAL>::iterator i=goal.begin();i!=goal.end();++i)
     {
 // ist dieses goal belegt?
         if(( i->unit>0 )&&
@@ -74,76 +130,54 @@ void GOAL_ENTRY::calculateFinalTimes(const int location, const int unit, const i
     }
 }
 
-const int GOAL_ENTRY::getAllGoal(const int unit) const
+const unsigned int GOAL_ENTRY::getAllGoal(const unsigned int unit) const
 {
 #ifdef _SCC_DEBUG
-	if((unit<0)||(unit>GAS_SCV)) {
+	if(unit>GAS_SCV) {
 		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value unit out of range.");return(0);
     }
-	if((allGoal[unit]<0)||(allGoal[unit]>200)) {
+	if(allGoal[unit]>200) {
 		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Variable allGoal out of range.");return(0);
     }	
 #endif
 	return(allGoal[unit]);		
 }
 
-const int GOAL_ENTRY::getGlobalGoal(const int location, const int unit) const
+const unsigned int GOAL_ENTRY::getGlobalGoal(const unsigned int location, const unsigned int unit) const
 {
 #ifdef _SCC_DEBUG
-	if((location<0)||(location>=MAX_LOCATIONS)) {
+	if(location>=MAX_LOCATIONS) {
 		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value location out of range.");return(0);
     }
-	if((unit<0)||(unit>GAS_SCV)) {
+	if(unit>GAS_SCV) {
 		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value unit out of range.");return(0);
     }
-	if((globalGoal[location][unit]<0)||(globalGoal[location][unit]>200)) {
+	if(globalGoal[location][unit]>200) {
 		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Variable globalGoal out of range.");return(0);
     }	
 #endif
 	return(globalGoal[location][unit]);		
 }
-const bool GOAL_ENTRY::getIsBuildable(const int unit) const
+const bool GOAL_ENTRY::getIsBuildable(const unsigned int unit) const
 {
 #ifdef _SCC_DEBUG
-	if((unit<0)||(unit>GAS_SCV)) {
+	if(unit>GAS_SCV) {
 		toLog("DEBUG: (GOAL_ENTRY::getIsBuildable): Value unit out of range.");return(false);
     }
 #endif
 	return(isBuildable[unit]);		
 }
 
-void EXPORT GOAL_ENTRY::copy(const GOAL_ENTRY* goal, const UNIT* unit)
+// TODO 
+
+void GOAL_ENTRY::copy(const GOAL_ENTRY* goal_entry)
 {
-#ifdef _SCC_DEBUG
-	if(!goal) {
-		toLog("DEBUG: (GOAL_ENTRY::copy): Variable goal not initialized.");return;
-	}
-#endif
-	setRace(goal->getRace());
-	maxBuildTypes=goal->getMaxBuildTypes();
-//	initialized=goal->getInitialized();
-	for(int i=UNIT_TYPE_COUNT;i--;)
-	{
-		allGoal[i]=goal->allGoal[i];
-		isBuildable[i]=goal->isBuildable[i];
-		isVariable[i]=goal->isVariable[i];
-		for(int j=MAX_LOCATIONS;j--;)
-			globalGoal[j][i]=goal->globalGoal[j][i];
-		genoToPhaenotype[i]=goal->genoToPhaenotype[i];
-		phaenoToGenotype[i]=goal->phaenoToGenotype[i];
-	}
-	for(list<GOAL>::const_iterator i = goal->goal.begin();i!=goal->goal.end();++i)
-	{
-		this->goal.push_back(*i);
-/*		this->goal[i].unit=goal->goal[i].unit;
-		this->goal[i].time=goal->goal[i].time;
-		this->goal[i].count=goal->goal[i].count;
-		this->goal[i].location=goal->goal[i].location;*/
-	}
-	adjustGoals(true, unit);
+	*this = *goal_entry;
 }
 
-void EXPORT GOAL_ENTRY::setRace(const eRace race)
+
+
+void GOAL_ENTRY::setRace(const eRace race)
 {
 	resetData();	
 	pStats=&(stats[this->race=race][0]);
@@ -151,12 +185,12 @@ void EXPORT GOAL_ENTRY::setRace(const eRace race)
 	changed=true;
 }
 
-void EXPORT GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
+void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 {
     for(int i=UNIT_TYPE_COUNT;i--;)
 	{
-		genoToPhaenotype[i]=-1;
-		phaenoToGenotype[i]=-1;
+		genoToPhaenotype[i]=999;
+		phaenoToGenotype[i]=999;
 		isVariable[i]=0; //?
 		isBuildable[i]=0;
 	}
@@ -175,13 +209,13 @@ void EXPORT GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* un
   //	  isBuildable[MOVE_ONE_3_FORWARD]=1;isVariable[MOVE_ONE_3_FORWARD]=1;
 	//	isBuildable[MOVE_ONE_1_BACKWARD]=1;isVariable[MOVE_ONE_1_BACKWARD]=1;
 		  //isBuildable[INTRON]=1; // :-)
-	if(unit)
-		for(int i=GAS_SCV+1;i--;)
+	if(unit);
+/*		for(int i=GAS_SCV+1;i--;) TODO
 			if(unit->getTotal(i))
 			{
 				if(allGoal[i]<unit->getTotal(i))
 					addGoal(i, unit->getTotal(i)-allGoal[i], 0, 0);
-			}
+			}*/
 	//TODO addgoal evtl machen hier!
 
 	for(int j=6;j--;) // Nuclear Warhead needs 6 steps (?) ~~~~
@@ -255,7 +289,7 @@ void EXPORT GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* un
 	}
 
 	for(int i=UNIT_TYPE_COUNT;i--;)
-		if((isBuildable[i]==1)&&(phaenoToGenotype[i]==-1)) // a goal && not set yet
+		if((isBuildable[i]==1)&&(phaenoToGenotype[i]==999)) // a goal && not set yet
 		{
 			genoToPhaenotype[maxBuildTypes]=i;
 			phaenoToGenotype[i]=maxBuildTypes;
@@ -277,7 +311,7 @@ void EXPORT GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* un
 // ------ SET/GET FUNCTIONS ------
 // -------------------------------
 
-const UNIT_STATISTICS* EXPORT GOAL_ENTRY::getpStats() const
+const UNIT_STATISTICS* GOAL_ENTRY::getpStats() const
 {
 #ifdef _SCC_DEBUG
 	if(pStats==NULL) {
@@ -287,19 +321,19 @@ const UNIT_STATISTICS* EXPORT GOAL_ENTRY::getpStats() const
 	return(pStats);
 }
 
-void EXPORT GOAL_ENTRY::addGoal(const int unit, const int count, const int time, const int location)
+void GOAL_ENTRY::addGoal(const unsigned int unit, const signed int count, const unsigned int time, const unsigned int location)
 {
 #ifdef _SCC_DEBUG
-	if((unit<=0)||(unit>=UNIT_TYPE_COUNT)) {
+	if(unit>=UNIT_TYPE_COUNT) {
 		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value unit out of range.");return;
 	}
-	if((count+globalGoal[location][unit]<0)||(count>MAX_TOTAL_UNITS)) {
+	if(globalGoal[location][unit] + count>MAX_TOTAL_UNITS) {
 		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value count out of range.");return;
 	}
-	if((time<0)||(time>=MAX_TIME)) {
+	if(time>=MAX_TIME) {
 		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value time out of range.");return;
 	}
-	if((location<0)||(location>=MAX_LOCATIONS)) {
+	if(location>=MAX_LOCATIONS) {
 		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value location out of range.");return;
 	}
 #endif
@@ -317,13 +351,14 @@ void EXPORT GOAL_ENTRY::addGoal(const int unit, const int count, const int time,
 
 	bool found=false;
 	// TODO wenn Einheiten an mehreren verschiedenen Positionen und location 0 geloescht wird aufsammeln!!
-	for(list<GOAL>::iterator i=goal.begin(); (i!=goal.end())&&(!found); ++i)
+	for(std::list<GOAL>::iterator i=goal.begin(); (i!=goal.end())&&(!found); ++i)
 	{
 		if((i->unit==unit)&&(i->time==time)&&(i->location==location)) {
-	//TODO goal loeschen..!!!!!!!!!!!!!!11
-//			asdf
 			i->count += count;
 			found=true;
+			if(i->count == 0)
+				i = goal.erase(i);
+			break;
 		}
 	}
 	// neue goal erstellen
@@ -340,78 +375,78 @@ void EXPORT GOAL_ENTRY::addGoal(const int unit, const int count, const int time,
 	changed=true;
 }
 
-const bool EXPORT GOAL_ENTRY::isGoal(const int unit) const
+const bool GOAL_ENTRY::isGoal(const unsigned int unit) const
 {
 #ifdef _SCC_DEBUG
-	if((unit<0)||(unit>=UNIT_TYPE_COUNT)) {
+	if(unit>=UNIT_TYPE_COUNT) {
 		toLog("DEBUG: (GOAL_ENTRY::isGoal): Value unit out of range.");return(0);
 	}
 	// TODO UNIT_TYPE_COUNT ist nicht obere Grenze fuer Zahl der Units...
-	if((allGoal[unit]<0)||(allGoal[unit]>=UNIT_TYPE_COUNT)) {
+	if(allGoal[unit]>=MAX_TOTAL_UNITS) {
 		toLog("DEBUG: (GOAL_ENTRY::isGoal): Variable allGoal not initialized.");return(0);
 	}
 #endif
 	return(allGoal[unit]>0);
 }
-const int EXPORT GOAL_ENTRY::getMaxBuildTypes() const
+const unsigned int GOAL_ENTRY::getMaxBuildTypes() const
 {
 #ifdef _SCC_DEBUG
-	if((maxBuildTypes<0)||(maxBuildTypes>UNIT_TYPE_COUNT)) {
+	if(maxBuildTypes > UNIT_TYPE_COUNT) {
 		toLog("DEBUG: (GOAL_ENTRY::getMaxBuildTypes): Variable not initialized.");return(0);
 	}
 #endif
 	return(maxBuildTypes);
 }
 
-/*const bool EXPORT GOAL_ENTRY::getInitialized() const
+/*const bool GOAL_ENTRY::getInitialized() const
 {
 	return(initialized);
 }*/
 
-const int EXPORT GOAL_ENTRY::toGeno(const int phaeno) const
+const unsigned int GOAL_ENTRY::toGeno(const unsigned int phaeno) const
 {
 #ifdef _SCC_DEBUG
-	if((phaeno<0)||(phaeno>=UNIT_TYPE_COUNT)) {
+	if(phaeno>=UNIT_TYPE_COUNT) {
 		toLog("DEBUG: (GOAL_ENTRY::toGeno): Value out of range.");return(0);
 	}
-	if((phaenoToGenotype[phaeno]<0)||(phaenoToGenotype[phaeno]>=UNIT_TYPE_COUNT)) {
+	if(phaenoToGenotype[phaeno]>=UNIT_TYPE_COUNT) {
 		toLog("DEBUG: (GOAL_ENTRY::toGeno): Variable not initialized.");return(0);
 	}
 #endif
 	return(phaenoToGenotype[phaeno]);
 }
 
-const int EXPORT GOAL_ENTRY::toPhaeno(const int geno) const
+const unsigned int GOAL_ENTRY::toPhaeno(const unsigned int geno) const
 {
 #ifdef _SCC_DEBUG
 // TODO irgendwie maxbuildtypes statt UNIT_TYPE_COUNT?
-	if((geno<0)||(geno>=UNIT_TYPE_COUNT)) {
+	if(geno>=UNIT_TYPE_COUNT) {
 		toLog("DEBUG: (GOAL_ENTRY::toPhaeno): Value out of range.");return(0);
 	}
-	if((genoToPhaenotype[geno]<0)||(genoToPhaenotype[geno]>=UNIT_TYPE_COUNT)) {
+	if(genoToPhaenotype[geno]>=UNIT_TYPE_COUNT) {
 		toLog("DEBUG: (GOAL_ENTRY::toPhaeno): Variable not initialized.");return(0);
 	}
 #endif
 	return(genoToPhaenotype[geno]);
 }
 
-const bool EXPORT GOAL_ENTRY::isChanged() const
+const bool GOAL_ENTRY::isChanged() const
 {
 	return(changed);
 }
 
-void EXPORT GOAL_ENTRY::changeAccepted()
+void GOAL_ENTRY::changeAccepted()
 {
 //	adjustGoals(true); //PROBLEM: unitforce wird nicht mit einbezogen!
 	changed=false;
 }
 
-const string& EXPORT GOAL_ENTRY::getName() const
+const std::string& GOAL_ENTRY::getName() const
 {
 	return name;
 }
 
-const eRace EXPORT GOAL_ENTRY::getRace() const
+const eRace GOAL_ENTRY::getRace() const
 {
 #ifdef _SCC_DEBUG
 // TODO irgendwie maxbuildtypes statt UNIT_TYPE_COUNT?
@@ -422,17 +457,17 @@ const eRace EXPORT GOAL_ENTRY::getRace() const
 	return race;
 }
 
-void EXPORT GOAL_ENTRY::setName(const string& name)
+void GOAL_ENTRY::setName(const std::string& name)
 {
 	this->name=name;
 }
 
-/*const int EXPORT GOAL_ENTRY::getMode() const // TODO
+/*const unsigned int GOAL_ENTRY::getMode() const // TODO
 {
 	return(mode);
 }
 
-void EXPORT GOAL_ENTRY::setMode(const int mode)
+void GOAL_ENTRY::setMode(const unsigned int mode)
 {
 	this->mode=mode;
 }*/

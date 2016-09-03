@@ -1,7 +1,101 @@
 #include "theme.hpp"
-#include <fstream>
 
-UI_Theme::UI_Theme()
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
+using namespace std;
+
+UI_Theme& UI_Theme::operator=(const UI_Theme& object)
+{
+    resolution = object.resolution;
+    tab = object.tab;
+    language = object.language;
+    colorTheme = object.colorTheme;
+
+    for(int i = MAX_LANGUAGES;i--;)
+        for(int j = MAX_STRINGS;j--;)
+            stringList[i][j]=object.stringList[i][j];
+    for(int i = MAX_RESOLUTIONS;i--;)
+        for(int j = MAX_LANGUAGES;j--;)
+            for(int k = MAX_FONTS;k--;)
+                fontList[i][j][k]=object.fontList[i][j][k];
+    for(int i = MAX_COLOR_THEMES;i--;)
+    {
+        for(int j = MAX_COLORS;j--;)
+			colorList[i][j]=object.colorList[i][j];
+        for(int j = MAX_RESOLUTIONS;j--;)
+        {
+            for(int k = MAX_PENS;k--;)
+                penList[i][j][k]=object.penList[i][j][k];
+             for(int k = MAX_BITMAPS;k--;)
+                bitmapList[i][j][k]=object.bitmapList[i][j][k];
+        }
+                                                                                                                                                            
+        for(int j = MAX_BRUSHES;j--;)
+            brushList[i][j]=object.brushList[i][j];
+    }
+    for(int i = MAX_RESOLUTIONS;i--;)
+        for(int j = MAX_TABS;j--;)
+            for(int k = MAX_WINDOWS;k--;)
+            {
+                rectList[i][j][k]=object.rectList[i][j][k];
+                maxRectList[i][j][k]=object.maxRectList[i][j][k];
+                xwindow[i][j][k]=object.xwindow[i][j][k];
+                ywindow[i][j][k]=object.ywindow[i][j][k];
+            }
+    for(int i=MAX_BUTTONS;i--;)
+        buttonAnimationList[i]=object.buttonAnimationList[i];
+	return(*this);
+}
+
+UI_Theme::UI_Theme(const UI_Theme& object) :
+    resolution( object.resolution ),
+    tab( object.tab ),
+    language( object.language ),
+    colorTheme( object.colorTheme)
+{
+    for(int i = MAX_LANGUAGES;i--;)
+        for(int j = MAX_STRINGS;j--;)
+            stringList[i][j]=object.stringList[i][j];
+    for(int i = MAX_RESOLUTIONS;i--;)
+        for(int j = MAX_LANGUAGES;j--;)
+            for(int k = MAX_FONTS;k--;)
+                fontList[i][j][k]=object.fontList[i][j][k];
+    for(int i = MAX_COLOR_THEMES;i--;)
+    {
+        for(int j = MAX_COLORS;j--;)
+			colorList[i][j]=object.colorList[i][j];
+        for(int j = MAX_RESOLUTIONS;j--;)
+        {
+            for(int k = MAX_PENS;k--;)
+                penList[i][j][k]=object.penList[i][j][k];
+             for(int k = MAX_BITMAPS;k--;)
+                bitmapList[i][j][k]=object.bitmapList[i][j][k];
+        }
+                                                                                                                                                            
+        for(int j = MAX_BRUSHES;j--;)
+            brushList[i][j]=object.brushList[i][j];
+    }
+    for(int i = MAX_RESOLUTIONS;i--;)
+        for(int j = MAX_TABS;j--;)
+            for(int k = MAX_WINDOWS;k--;)
+            {
+                rectList[i][j][k]=object.rectList[i][j][k];
+                maxRectList[i][j][k]=object.maxRectList[i][j][k];
+                xwindow[i][j][k]=object.xwindow[i][j][k];
+                ywindow[i][j][k]=object.ywindow[i][j][k];
+            }
+    for(int i=MAX_BUTTONS;i--;)
+        buttonAnimationList[i]=object.buttonAnimationList[i];
+}
+
+
+UI_Theme::UI_Theme():
+	resolution(RESOLUTION_1024x768),
+	tab(BASIC_TAB),
+	language(ENGLISH_LANGUAGE),
+	colorTheme(DARK_BLUE_THEME)
 {
 	for(int i = MAX_LANGUAGES;i--;)
 		for(int j = MAX_STRINGS;j--;)
@@ -10,9 +104,9 @@ UI_Theme::UI_Theme()
 		for(int j = MAX_LANGUAGES;j--;)
 			for(int k = MAX_FONTS;k--;)
 				fontList[i][j][k]=0;
-	for(int i = MAX_COLOUR_THEMES;i--;)
+	for(int i = MAX_COLOR_THEMES;i--;)
 	{
-		for(int j = MAX_COLOURS;j--;)
+		for(int j = MAX_COLORS;j--;)
 				colorList[i][j]=0;
   		for(int j = MAX_RESOLUTIONS;j--;)
 		{
@@ -23,7 +117,7 @@ UI_Theme::UI_Theme()
 		}
 					
 		for(int j = MAX_BRUSHES;j--;)
-				brushList[i][j]=0;
+			brushList[i][j]=0;
 	}
 	for(int i = MAX_RESOLUTIONS;i--;)
 		for(int j = MAX_TABS;j--;)
@@ -37,10 +131,6 @@ UI_Theme::UI_Theme()
 	for(int i=MAX_BUTTONS;i--;)
 		buttonAnimationList[i]=0;
 
-	tab=BASIC_TAB;
-	resolution=RESOLUTION_1280x1024;
-	language=ENGLISH_LANGUAGE;
-	colorTheme=DARK_BLUE_THEME;
 }
 
 UI_Theme::~UI_Theme()
@@ -52,9 +142,9 @@ UI_Theme::~UI_Theme()
 		for(int j = MAX_LANGUAGES;j--;)
 			for(int k = MAX_FONTS;k--;)
 				delete fontList[i][j][k];
-	for(int i = MAX_COLOUR_THEMES;i--;)
+	for(int i = MAX_COLOR_THEMES;i--;)
 	{
-		for(int j = MAX_COLOURS;j--;)
+		for(int j = MAX_COLORS;j--;)
 			delete colorList[i][j];
 		for(int j = MAX_RESOLUTIONS;j--;)
 		{
@@ -77,9 +167,9 @@ UI_Theme::~UI_Theme()
 		delete buttonAnimationList[i];
 }
 
-void UI_Theme::setColorTheme(const eTheme colorTheme)
+void UI_Theme::setColorTheme(const eTheme color_theme)
 {
-	this->colorTheme=colorTheme;
+	colorTheme=color_theme;
 }
 
 const eTheme UI_Theme::getColorTheme() const
@@ -92,9 +182,9 @@ const eLanguage UI_Theme::getLanguage() const
 	return(language);
 }
 
-void UI_Theme::setLanguage(const eLanguage language)
+void UI_Theme::setLanguage(const eLanguage theme_language)
 {
-	this->language=language;
+	language=theme_language;
 }
 
 const eResolution UI_Theme::getResolution() const
@@ -102,14 +192,15 @@ const eResolution UI_Theme::getResolution() const
 	return(resolution);
 }
 
-void UI_Theme::setResolution(const eResolution resolution)
+void UI_Theme::setResolution(const eResolution theme_resolution)
 {
-	this->resolution=resolution;
+	resolution=theme_resolution;
+	// TODO update whole engine
 }
 
-void UI_Theme::setTab(const eTab tab)
+void UI_Theme::setTab(const eTab theme_tab)
 {
-	this->tab=tab;
+	tab=theme_tab;
 }
 
 const eTab UI_Theme::getTab() const
@@ -157,7 +248,7 @@ const string UI_Theme::lookUpFormattedString(const eString id, const string& tex
 	return(bla);
 }
 
-const string UI_Theme::lookUpFormattedString(const eString id, const int i) const
+const string UI_Theme::lookUpFormattedString(const eString id, const unsigned int i) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_STRINGS)) {
@@ -170,7 +261,7 @@ const string UI_Theme::lookUpFormattedString(const eString id, const int i) cons
 	findandreplace(bla, "%i", os.str());
 	return(bla);
 }
-const string UI_Theme::lookUpFormattedString(const eString id, const int i, const int j, const int k) const
+const string UI_Theme::lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j, const unsigned int k) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_STRINGS)) {
@@ -185,7 +276,7 @@ const string UI_Theme::lookUpFormattedString(const eString id, const int i, cons
 	return(bla);
 }
 
-const string UI_Theme::lookUpFormattedString(const eString id, const int i, const int j) const
+const string UI_Theme::lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_STRINGS)) {
@@ -193,10 +284,10 @@ const string UI_Theme::lookUpFormattedString(const eString id, const int i, cons
 	}
 #endif
 	string bla=*(stringList[language][id]);
-	ostringstream os;
+	std::ostringstream os;
 	if(bla.find("%2i")!=string::npos)
 	{
-		os << setfill('0') << setw(2) << i;
+		os << std::setfill('0') << std::setw(2) << i;
 		findandreplace(bla, "%2i", os.str());os.str("");
 	}
 	else
@@ -206,7 +297,7 @@ const string UI_Theme::lookUpFormattedString(const eString id, const int i, cons
 	}
 	if(bla.find("%2i")!=string::npos)
 	{
-		os << setfill('0') << setw(2) << j;
+		os << std::setfill('0') << std::setw(2) << j;
 		findandreplace(bla, "%2i", os.str());os.str("");
 	}
 	else
@@ -221,14 +312,14 @@ const string UI_Theme::lookUpFormattedString(const eString id, const int i, cons
 Color* UI_Theme::lookUpColor(const eColor id) const
 {
 #ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_COLOURS)) {
+	if((id<0)||(id>=MAX_COLORS)) {
         toLog("ERROR: (UI_Theme::lookUpColor) id out of range.");return(colorList[colorTheme][id]);
 	}
 #endif
 	return(colorList[colorTheme][id]);
 }
 
-const Bitmap* UI_Theme::lookUpBitmap(const eBitmap id) const 
+/*const */Bitmap* UI_Theme::lookUpBitmap(const eBitmap id) const 
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_BITMAPS)) {
@@ -269,25 +360,26 @@ Font* UI_Theme::lookUpFont(const eFont id) const
 	return(fontList[resolution][language][id]);
 }
 
-const Point UI_Theme::lookUpRealDistance(const eWindow id, const int windowNumber) const // ~~ Name
+const Point UI_Theme::lookUpRealDistance(const eWindow id, const unsigned int windowNumber) const // ~~ Name
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_WINDOWS)) {
         toLog("ERROR: (UI_Theme::lookUpRealDistance) id out of range.");return(Point(0,0));
 	}
 #endif
-	if(id==MAIN_WINDOW) return(Point(0,0));
+	if(id==MAIN_WINDOW) 
+		return(Point(0,0));
 	switch(arrangeDirection[resolution][tab][id])
 	{
-		case ARRANGE_LEFT_TO_RIGHT:return(Point(windowNumber*rectList[resolution][tab][id]->width,0));break;
-		case ARRANGE_RIGHT_TO_LEFT:return(Point(-windowNumber*rectList[resolution][tab][id]->width,0));break;
-		case ARRANGE_TOP_TO_DOWN:return(Point(0,windowNumber*rectList[resolution][tab][id]->height));break;
-		case ARRANGE_DOWN_TO_TOP:return(Point(0,-windowNumber*rectList[resolution][tab][id]->height));break;
+		case ARRANGE_LEFT_TO_RIGHT:return(Point(windowNumber*rectList[resolution][tab][id]->GetWidth(), 0));break;
+		case ARRANGE_RIGHT_TO_LEFT:return(Point(-windowNumber*rectList[resolution][tab][id]->GetWidth(), 0));break;
+		case ARRANGE_TOP_TO_DOWN:return(Point(0, windowNumber*rectList[resolution][tab][id]->GetHeight()));break;
+		case ARRANGE_DOWN_TO_TOP:return(Point(0, -windowNumber*rectList[resolution][tab][id]->GetHeight()));break;
 		default:return(Point(0,0));
 	}
 }
 
-const Point UI_Theme::lookUpMaxRealDistance(const eWindow id, const int windowNumber) const // ~~ Name
+const Point UI_Theme::lookUpMaxRealDistance(const eWindow id, const unsigned int windowNumber) const // ~~ Name
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_WINDOWS)) {		
@@ -297,15 +389,15 @@ const Point UI_Theme::lookUpMaxRealDistance(const eWindow id, const int windowNu
 	if(id==MAIN_WINDOW) return(Point(0,0));
 	switch(arrangeDirection[resolution][tab][id])
 	{
-		case ARRANGE_LEFT_TO_RIGHT:return(Point(windowNumber*maxRectList[resolution][tab][id]->width, 0));break;
-		case ARRANGE_RIGHT_TO_LEFT:return(Point(-windowNumber*maxRectList[resolution][tab][id]->width, 0));break;
-		case ARRANGE_TOP_TO_DOWN:return(Point(0, windowNumber*maxRectList[resolution][tab][id]->height));break;
-		case ARRANGE_DOWN_TO_TOP:return(Point(0, -windowNumber*maxRectList[resolution][tab][id]->height));break;
+		case ARRANGE_LEFT_TO_RIGHT:return(Point(windowNumber*maxRectList[resolution][tab][id]->GetWidth(), 0));break;
+		case ARRANGE_RIGHT_TO_LEFT:return(Point(-windowNumber*maxRectList[resolution][tab][id]->GetWidth(), 0));break;
+		case ARRANGE_TOP_TO_DOWN:return(Point(0, windowNumber*maxRectList[resolution][tab][id]->GetHeight()));break;
+		case ARRANGE_DOWN_TO_TOP:return(Point(0, -windowNumber*maxRectList[resolution][tab][id]->GetHeight()));break;
 		default:return(Point(0,0));
 	}
 }
 
-const Rect UI_Theme::lookUpRect(const eWindow id, const int windowNumber, const int maxPlayer) const
+const Rect UI_Theme::lookUpRect(const eWindow id, const unsigned int windowNumber, const unsigned int maxPlayer) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_WINDOWS)) {
@@ -316,14 +408,20 @@ const Rect UI_Theme::lookUpRect(const eWindow id, const int windowNumber, const 
 	switch(arrangeDirection[resolution][tab][id])
 	{
         case ARRANGE_LEFT_TO_RIGHT:
-        case ARRANGE_RIGHT_TO_LEFT:p=lookUpRealDistance(id, windowNumber) + Point(lookUpRealDistance(xwindow[resolution][tab][id], maxPlayer).x, 0);break;
+        case ARRANGE_RIGHT_TO_LEFT:p=lookUpMaxRealDistance(id, windowNumber) + Point(lookUpMaxRealDistance(xwindow[resolution][tab][id], maxPlayer).x, 0);break;
         case ARRANGE_TOP_TO_DOWN:
-        case ARRANGE_DOWN_TO_TOP:p=lookUpRealDistance(id, windowNumber) + Point(0,lookUpRealDistance(ywindow[resolution][tab][id], maxPlayer).y);break;
+        case ARRANGE_DOWN_TO_TOP:p=lookUpMaxRealDistance(id, windowNumber) + Point(0,lookUpMaxRealDistance(ywindow[resolution][tab][id], maxPlayer).y);break;
+		default:
+#ifdef _SCC_DEBUG
+	        toLog("ERROR: (UI_Theme::lookUpRect) arrangeDirection out of range.");return(Rect(0,0,0,0));
+#endif
+		break;
+
     }
-	return(Rect(rectList[resolution][tab][id]->GetPosition()+p, rectList[resolution][tab][id]->GetSize()));
+	return(Rect(rectList[resolution][tab][id]->GetTopLeft()+p, rectList[resolution][tab][id]->GetSize()));
 }
 
-const Rect UI_Theme::lookUpMaxRect(const eWindow id, const int windowNumber, const int maxPlayer) const 
+const Rect UI_Theme::lookUpMaxRect(const eWindow id, const unsigned int windowNumber, const unsigned int maxPlayer) const 
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_WINDOWS)) {
@@ -337,15 +435,16 @@ const Rect UI_Theme::lookUpMaxRect(const eWindow id, const int windowNumber, con
         case ARRANGE_RIGHT_TO_LEFT:p=lookUpMaxRealDistance(id, windowNumber) + Point(lookUpMaxRealDistance(xwindow[resolution][tab][id], maxPlayer).x, 0);break;
         case ARRANGE_TOP_TO_DOWN:
         case ARRANGE_DOWN_TO_TOP:p=lookUpMaxRealDistance(id, windowNumber) + Point(0,lookUpMaxRealDistance(ywindow[resolution][tab][id], maxPlayer).y);break;
+		default:break;
     }
-	return(Rect(maxRectList[resolution][tab][id]->GetPosition()+p, maxRectList[resolution][tab][id]->GetSize()));
+	return(Rect(maxRectList[resolution][tab][id]->GetTopLeft()+p, maxRectList[resolution][tab][id]->GetSize()));
 }
 
 const eDataType getDataType(const string& item)
 {
 	if(item=="@STRINGS") return(STRING_DATA_TYPE);else
 	if(item=="@FONTS") return(FONT_DATA_TYPE);else
-	if(item=="@COLOURS") return(COLOUR_DATA_TYPE);else
+	if(item=="@COLORS") return(COLOR_DATA_TYPE);else
 	if(item=="@PENS") return(PEN_DATA_TYPE);else
 	if(item=="@BRUSHES") return(BRUSH_DATA_TYPE);else
 	if(item=="@BITMAPS") return(BITMAP_DATA_TYPE);else
@@ -361,10 +460,10 @@ const eSubDataType getSubDataType(const eDataType mode)
 	{	
 		case STRING_DATA_TYPE:return(LANGUAGE_SUB_DATA_TYPE);
 		case FONT_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
-		case COLOUR_DATA_TYPE:return(COLOUR_THEME_SUB_DATA_TYPE);
+		case COLOR_DATA_TYPE:return(COLOR_THEME_SUB_DATA_TYPE);
 		case BITMAP_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
 		case PEN_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
-		case BRUSH_DATA_TYPE:return(COLOUR_THEME_SUB_DATA_TYPE);
+		case BRUSH_DATA_TYPE:return(COLOR_THEME_SUB_DATA_TYPE);
 		case RECT_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
 		case MAX_RECT_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
 		default:return(ZERO_SUB_DATA_TYPE);
@@ -376,8 +475,8 @@ const eSubSubDataType getSubSubDataType(const eDataType mode)
 	switch(mode)
 	{
 		case FONT_DATA_TYPE:return(LANGUAGE_SUB_SUB_DATA_TYPE);
-		case BITMAP_DATA_TYPE:return(COLOUR_THEME_SUB_SUB_DATA_TYPE);
-		case PEN_DATA_TYPE:return(COLOUR_THEME_SUB_SUB_DATA_TYPE);
+		case BITMAP_DATA_TYPE:return(COLOR_THEME_SUB_SUB_DATA_TYPE);
+		case PEN_DATA_TYPE:return(COLOR_THEME_SUB_SUB_DATA_TYPE);
 		case RECT_DATA_TYPE:return(TAB_SUB_SUB_DATA_TYPE);
 		case MAX_RECT_DATA_TYPE:return(TAB_SUB_SUB_DATA_TYPE);
 		default:return(ZERO_SUB_SUB_DATA_TYPE);
@@ -400,12 +499,10 @@ const eLanguage getLanguageSubDataEntry(const string& item)
 
 const eResolution getResolutionSubDataEntry(const string& item)
 {
-	if(item=="@320x200") return(RESOLUTION_320x200);else
-	if(item=="@640x480") return(RESOLUTION_640x480);else
 	if(item=="@800x600") return(RESOLUTION_800x600);else
 	if(item=="@1024x768") return(RESOLUTION_1024x768);else
 	if(item=="@1280x1024") return(RESOLUTION_1280x1024);else
-	if(item=="@1600x1200") return(RESOLUTION_1600x1200);else
+//	if(item=="@1600x1200") return(RESOLUTION_1600x1200);else
 	return(ZERO_RESOLUTION);
 }
 
@@ -494,6 +591,7 @@ eWindow parse_window(const string& item)
 	if(item=="Build order diagram window") return(BO_DIAGRAM_WINDOW);else
 	if(item=="Build order graph window") return(BO_GRAPH_WINDOW);else
 	if(item=="Info window") return(INFO_WINDOW);else
+	if(item=="Settings window") return(SETTINGS_WINDOW);else
 	return(NULL_WINDOW);
 }
 
@@ -517,6 +615,8 @@ eCommand parse_commands(const string& item)
 	if(item=="calculate maxsize") return(CALCULATE_MAXSIZE_COMMAND);else
 	if(item=="calculate maxwidth") return(CALCULATE_MAXWIDTH_COMMAND);else
 	if(item=="calculate maxheight") return(CALCULATE_MAXHEIGHT_COMMAND);else
+	if(item=="same position as above") return(SAME_POSITION_AS_ABOVE_COMMAND);else
+	if(item=="same size as above") return(SAME_SIZE_AS_ABOVE_COMMAND);else
 	if(item=="same as above") return(SAME_AS_ABOVE_COMMAND);else
 	return(NO_COMMAND);
 }
@@ -525,7 +625,8 @@ eCommand parse_commands(const string& item)
 
 eArrangeDirection parse_complete_command(const string* p, eCommand* e, Rect& rect)
 {
-	int x=-1;int y=-1;int dx=-1;int dy=-1;
+	signed int x=-1;signed int y=-1;
+	unsigned int dx=0;unsigned int dy=0;
 	bool xpart=false; bool ypart=false; bool xypart=false; bool dxpart=false; bool dypart=false;
 	bool xcomplete=false;bool ycomplete=false;
 	bool window=false;
@@ -533,7 +634,7 @@ eArrangeDirection parse_complete_command(const string* p, eCommand* e, Rect& rec
 // additional windows: arrange left to right = 0, arrange right to left = 1, arrange top to down = 2, arrange down to top = 3 :)
 	eArrangeDirection direction=ARRANGE_LEFT_TO_RIGHT;
 	
-	for(int i = 2; i <50;i++)
+	for(int i = 1; i <50;i++)
 	{
 		if(xcomplete&&ycomplete)
 		{
@@ -598,19 +699,21 @@ eArrangeDirection parse_complete_command(const string* p, eCommand* e, Rect& rec
 			
 		}
 	}
-	rect=Rect(x,y,dx,dy);
+	rect=Rect(x, y, dx, dy);
 	return(direction);
 }
 
 void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, const string& fontDir, DC* dc)
 {
-	const int MAX_PARAMETERS = 50;
+	const unsigned int MAX_PARAMETERS = 50;
 	char line[1024], old[1024];
 	char* buffer;
 	string p[MAX_PARAMETERS];
 	int v[MAX_PARAMETERS];
 	int ln=0;
-
+#ifdef _SCC_DEBUG
+	toLog("Assigning default values...");
+#endif
 	eDataType mode=ZERO_DATA_TYPE;
 	eSubDataType sub_mode=ZERO_SUB_DATA_TYPE;
 	eSubSubDataType sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
@@ -625,7 +728,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 
 	for(int i = MAX_RESOLUTIONS;i--;)
 		for(int j = MAX_TABS;j--;)
-			for(int k = MAX_WINDOWS;k--;)
+			for(int k = MAX_WINDOWS;k--;) //?
 				for(int l = MAX_PARAMETERS;l--;)
 				{
 					trectList[i][j][k][l]=NO_COMMAND;
@@ -640,6 +743,9 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 		v[i]=0;
 	}
 
+#ifdef _SCC_DEBUG
+	toLog("Reading and parsing datafile...");
+#endif
 	ifstream pFile(dataFile.c_str());
 	
 	if(!pFile.is_open())
@@ -678,7 +784,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 		
 		if((buffer=strtok(line2,",\0"))!=NULL)
 			p[0]=buffer;
-		int k=1;
+		unsigned int k=1;
 		
 		while(((buffer=strtok(NULL,",\0"))!=NULL)&&(k<MAX_PARAMETERS))
 		{
@@ -694,11 +800,11 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 #endif
 			continue;
 		}
-		for(int j=0;j<MAX_PARAMETERS;j++)
+		for(unsigned int j=0;j<MAX_PARAMETERS;j++)
 			v[j]=atoi(p[j].c_str());
 /*		if((value1<0)||(value2<0)||(value3<0)||(value4<0)||(value5<0))
 		{
-			debug.toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Line %d [%s]: Value below zero.",dataFile.c_str(),ln,old);
+			toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Line %d [%s]: Value below zero.",dataFile.c_str(),ln,old);
 			continue;
 		}*/
 
@@ -707,6 +813,8 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 		{
 			mode=getDataType(p[0]);
 #ifdef _SCC_DEBUG
+//			if(mode!=ZERO_DATA_TYPE)
+//				toLog("Loading "+p[0]+"...");
 			if(mode==ZERO_DATA_TYPE)
 			{
 				if(p[0]=="@END")
@@ -722,8 +830,14 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 		{
 			if(p[0]=="@END")
 			{
+
+			
+			// TODO! 
 				// @END of 1st sub area => return to begin of data type
-				if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE)&&((current_language!=ZERO_LANGUAGE)||(current_resolution!=ZERO_RESOLUTION)||(current_theme!=ZERO_THEME)))
+
+// - deepness |1|: end of SUB-MODE
+				if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE)&&
+				  ((current_language!=ZERO_LANGUAGE)||(current_resolution!=ZERO_RESOLUTION)||(current_theme!=ZERO_THEME)))
 				{
 					current_language=ZERO_LANGUAGE;
 					current_resolution=ZERO_RESOLUTION;
@@ -732,7 +846,9 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 				}
 				// @END of 2nd sub area => return to begin of sub data type
 				else 
-				if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&((current_tab!=ZERO_TAB)||(current_language!=ZERO_LANGUAGE)||(current_theme!=ZERO_THEME)))
+				if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
+// - deepness |2|: end of SUB-SUB-MODE
+				((current_tab!=ZERO_TAB)||(current_language!=ZERO_LANGUAGE)||(current_theme!=ZERO_THEME)))
 				{
 					current_tab=ZERO_TAB;
 					current_language=ZERO_LANGUAGE;
@@ -740,10 +856,11 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 					current_line=0;
 				}
 				// @END  of 1st sub area (with an existing sub sub area...)
-				else if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&(current_tab==ZERO_TAB)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
+// - deepness |2|: end of SUB-MODE
+				else if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
+// sub-sub-items already closed -> close sub-item
+				        (current_resolution!=ZERO_RESOLUTION)&&(current_tab==ZERO_TAB)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
 				{
-					sub_mode=ZERO_SUB_DATA_TYPE;
-					sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
 					current_resolution=ZERO_RESOLUTION;
 					current_line=0;
 				}
@@ -763,7 +880,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 				{
 					case LANGUAGE_SUB_DATA_TYPE:current_language=getLanguageSubDataEntry(line2);break;
 					case RESOLUTION_SUB_DATA_TYPE:current_resolution=getResolutionSubDataEntry(line2);break;
-					case COLOUR_THEME_SUB_DATA_TYPE:current_theme=getThemeSubDataEntry(line2);break;
+					case COLOR_THEME_SUB_DATA_TYPE:current_theme=getThemeSubDataEntry(line2);break;
 					default:break;
 				}
 				current_line=0;
@@ -773,9 +890,12 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 			{
 				switch(mode)
 				{
-					case STRING_DATA_TYPE:stringList[current_language][current_line]=new string(p[1]);break;
-					case COLOUR_DATA_TYPE:colorList[current_theme][current_line]=new Color(dc->GetSurface(),(Uint8)v[1],(Uint8)v[2],(Uint8)v[3]);break;
-					case BRUSH_DATA_TYPE:brushList[current_theme][current_line]=new Brush(dc->GetSurface(),(Uint8)v[1],(Uint8)v[2],(Uint8)v[3],get_brush_style(p[4]));break;
+					case STRING_DATA_TYPE:stringList[current_language][current_line]=new string(p[0]);
+					//toLog(p[0]);
+					break;
+					case COLOR_DATA_TYPE:
+										  colorList[current_theme][current_line]=new Color(dc->GetSurface(),(Uint8)v[0],(Uint8)v[1],(Uint8)v[2]);break;
+					case BRUSH_DATA_TYPE:brushList[current_theme][current_line]=new Brush(dc->GetSurface(),(Uint8)v[0],(Uint8)v[1],(Uint8)v[2],get_brush_style(p[3]));break;
 					default:break;
 				}
 				current_line++;
@@ -784,18 +904,18 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 			else if((sub_mode==ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE))
 			{
 				buttonAnimationList[current_line] = new ButtonAnimation;
-				buttonAnimationList[current_line]->speed=v[1];
-				buttonAnimationList[current_line]->type=(eButtonAnimationType)v[2];
+				buttonAnimationList[current_line]->speed=v[0];
+				buttonAnimationList[current_line]->type=(eButtonAnimationType)v[1];
 				for(int i=0;i<MAX_BUTTON_ANIMATION_PHASES;i++)
 				{
-					buttonAnimationList[current_line]->startBrush[i]=(eBrush)(v[0*MAX_BUTTON_ANIMATION_PHASES+3+i]);
-					buttonAnimationList[current_line]->endBrush[i]=(eBrush)(v[1*MAX_BUTTON_ANIMATION_PHASES+3+i]);
-					buttonAnimationList[current_line]->startTextColor[i]=(eColor)(v[2*MAX_BUTTON_ANIMATION_PHASES+3+i]);
-					buttonAnimationList[current_line]->endTextColor[i]=(eColor)(v[3*MAX_BUTTON_ANIMATION_PHASES+3+i]);
-					buttonAnimationList[current_line]->startBorderPen[i]=(ePen)(v[4*MAX_BUTTON_ANIMATION_PHASES+3+i]);
-					buttonAnimationList[current_line]->endBorderPen[i]=(ePen)(v[5*MAX_BUTTON_ANIMATION_PHASES+3+i]);
-					buttonAnimationList[current_line]->bitmap[i]=(eBitmap)(v[6*MAX_BUTTON_ANIMATION_PHASES+3+i]);
-//					buttonAnimationList[current_line]->text[i]=(eString)(v[7*MAX_BUTTON_ANIMATION_PHASES+3+i]);
+					buttonAnimationList[current_line]->startBrush[i]=(eBrush)(v[0*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonAnimationList[current_line]->endBrush[i]=(eBrush)(v[1*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonAnimationList[current_line]->startTextColor[i]=(eColor)(v[2*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonAnimationList[current_line]->endTextColor[i]=(eColor)(v[3*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonAnimationList[current_line]->startBorderPen[i]=(ePen)(v[4*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonAnimationList[current_line]->endBorderPen[i]=(ePen)(v[5*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonAnimationList[current_line]->bitmap[i]=(eBitmap)(v[6*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+//					buttonAnimationList[current_line]->text[i]=(eString)(v[7*MAX_BUTTON_ANIMATION_PHASES+2+i]);
 				}
 				current_line++;				
 			}
@@ -805,7 +925,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 				switch(sub_sub_mode)
 				{
 					case LANGUAGE_SUB_SUB_DATA_TYPE:current_language=getLanguageSubDataEntry(line2);break;
-					case COLOUR_THEME_SUB_SUB_DATA_TYPE:current_theme=getThemeSubDataEntry(line2);break;
+					case COLOR_THEME_SUB_SUB_DATA_TYPE:current_theme=getThemeSubDataEntry(line2);break;
 					case TAB_SUB_SUB_DATA_TYPE:current_tab=getTabSubDataEntry(line2);break;
 					default:break;
 				}			
@@ -818,24 +938,39 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 				{
 					case FONT_DATA_TYPE:
 						{
-							string t=fontDir+"/"+p[1]+".ttf";
-							fontList[current_resolution][current_language][current_line]=new Font(t, v[2]/*, get_font_style1(p[2]), get_font_style2(p[3]), get_font_style3(p[4]), false, _T(""), FONTENCODING_DEFAULT*/);
+							string t=fontDir+"/"+p[0]+".ttf";
+#ifdef _SCC_DEBUG
+//							toLog("Loading "+t+"...");
+#endif
+							fontList[current_resolution][current_language][current_line]=new Font(t, v[1]/*, get_font_style1(p[2]), get_font_style2(p[3]), get_font_style3(p[4]), false, _T(""), FONTENCODING_DEFAULT*/);
 						}break;
 					case BITMAP_DATA_TYPE:
 						{
-							string t=bitmapDir+"/"+p[1]+".bmp";
+							string t=bitmapDir+"/"+p[0]+".bmp";
+#ifdef _SCC_DEBUG
+//							toLog("Loading "+t+"...");
+#endif
 							bitmapList[current_resolution][current_theme][current_line]=new Bitmap(t);
+							
+							SDL_SetColorKey(dc->GetSurface(), SDL_SRCCOLORKEY , SDL_MapRGB(bitmapList[current_resolution][current_theme][current_line]->getFormat(), 255, 255, 255));
+		
 						}break;
-					case PEN_DATA_TYPE:penList[current_resolution][current_theme][current_line]=new Pen(dc->GetSurface(),v[2],v[3],v[4],v[1],get_pen_style(p[5]));break;
+					case PEN_DATA_TYPE:penList[current_resolution][current_theme][current_line]=new Pen(dc->GetSurface(),v[1],v[2],v[3],v[0],get_pen_style(p[4]));break;
 					case RECT_DATA_TYPE:
 						{
-							rectList[current_resolution][current_tab][parse_window(p[1])]=new Rect();
-							arrangeDirection[current_resolution][current_tab][parse_window(p[1])]=parse_complete_command(p, &(trectList[current_resolution][current_tab][parse_window(p[1])][0]), *(rectList[current_resolution][current_tab][parse_window(p[1])]));
+							rectList[current_resolution][current_tab][parse_window(p[0])]=new Rect();
+							arrangeDirection[current_resolution][current_tab][parse_window(p[0])]=parse_complete_command(p, &(trectList[current_resolution][current_tab][parse_window(p[0])][0]), *(rectList[current_resolution][current_tab][parse_window(p[0])]));
+							/*ostringstream os;
+							os << rectList[current_resolution][current_tab][parse_window(p[0])]->GetLeft() << ":"
+							 << rectList[current_resolution][current_tab][parse_window(p[0])]->GetTop() << ":"
+							  << rectList[current_resolution][current_tab][parse_window(p[0])]->GetWidth() << ":"
+							   << rectList[current_resolution][current_tab][parse_window(p[0])]->GetHeight();
+							toLog(os.str());*/
 						}break;
 					case MAX_RECT_DATA_TYPE:
 						{
-							maxRectList[current_resolution][current_tab][parse_window(p[1])]=new Rect();
-							parse_complete_command(p, &(tmaxRectList[current_resolution][current_tab][parse_window(p[1])][0]), *(maxRectList[current_resolution][current_tab][parse_window(p[1])]));
+							maxRectList[current_resolution][current_tab][parse_window(p[0])]=new Rect();
+							parse_complete_command(p, &(tmaxRectList[current_resolution][current_tab][parse_window(p[0])][0]), *(maxRectList[current_resolution][current_tab][parse_window(p[0])]));
 						}break;					
 					default:break;
 				}
@@ -855,7 +990,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 					{
 					int oldx=rectList[i][j][k]->GetLeft();
 					int oldy=rectList[i][j][k]->GetTop();
-					for(int l=1;l<MAX_PARAMETERS;l++)
+					for(unsigned int l=0;l<MAX_PARAMETERS;l++)
 						switch(trectList[i][j][k][l])
 						{
 							case NO_COMMAND:break;
@@ -905,13 +1040,13 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 							}break;
 							case DOCK_TOP_INSIDE_OF_COMMAND:
 							{
-								rectList[i][j][k]->SetTop(10+rectList[i][j][trectList[i][j][k][l+1]]->GetTop());
+								rectList[i][j][k]->SetTop(25+rectList[i][j][trectList[i][j][k][l+1]]->GetTop());
 	                            ywindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
 								l++;
 							}break;
 							case DOCK_BOTTOM_INSIDE_OF_COMMAND:
 							{
-								rectList[i][j][k]->SetTop(-30+rectList[i][j][trectList[i][j][k][l+1]]->GetTop()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight()-rectList[i][j][k]->GetHeight());
+								rectList[i][j][k]->SetTop(100+rectList[i][j][trectList[i][j][k][l+1]]->GetTop()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight()-rectList[i][j][k]->GetHeight()); // TODO
 	                            ywindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
 								l++;
 							}break;
@@ -938,7 +1073,7 @@ while(change)
 				{
 					int oldx=maxRectList[i][j][k]->GetLeft();
 					int oldy=maxRectList[i][j][k]->GetTop();
-					for(int l=1;l<MAX_PARAMETERS;l++)
+					for(unsigned int l=0;l<MAX_PARAMETERS;l++)
 						switch(tmaxRectList[i][j][k][l])
 						{
 							case NO_COMMAND:break;
@@ -961,17 +1096,22 @@ while(change)
 								maxRectList[i][j][k]->SetTop(10+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetTop());l++;break;
 							case DOCK_BOTTOM_INSIDE_OF_COMMAND:
 								maxRectList[i][j][k]->SetTop(-10+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetTop()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetHeight()-maxRectList[i][j][k]->GetHeight());l++;break;
-							case CALCULATE_MAXHEIGHT_COMMAND:maxRectList[i][j][k]->SetPosition(rectList[i][j][k]->GetPosition());
+							case CALCULATE_MAXHEIGHT_COMMAND:maxRectList[i][j][k]->SetTopLeft(rectList[i][j][k]->GetTopLeft());
 															 maxRectList[i][j][k]->SetSize(Size(rectList[i][j][k]->GetWidth(), rectList[i][j][MAIN_WINDOW]->GetHeight() + rectList[i][j][MAIN_WINDOW]->GetTop() - rectList[i][j][k]->GetTop() - 30));break;
 															 // main window mal hernehmen... TODO andere Fenster miteinberechnen!!
 							
 							case CALCULATE_MAXSIZE_COMMAND:
 							case CALCULATE_MAXWIDTH_COMMAND: //TODO
+							case SAME_POSITION_AS_ABOVE_COMMAND:
+								maxRectList[i][j][k]->SetTopLeft(rectList[i][j][k]->GetTopLeft());break;
+							case SAME_SIZE_AS_ABOVE_COMMAND:
+								maxRectList[i][j][k]->SetSize(rectList[i][j][k]->GetSize());break;
 							case SAME_AS_ABOVE_COMMAND:
-								{
-									maxRectList[i][j][k]->SetPosition(rectList[i][j][k]->GetPosition());
-									maxRectList[i][j][k]->SetSize(rectList[i][j][k]->GetSize());
-								}break;
+							{
+								maxRectList[i][j][k]->SetTopLeft(rectList[i][j][k]->GetTopLeft());
+								maxRectList[i][j][k]->SetSize(rectList[i][j][k]->GetSize());
+							}
+							break;
 							default:
 #ifdef _SCC_DEBUG								
 								toLog("max error... same as above oder so");

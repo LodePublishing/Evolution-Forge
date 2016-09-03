@@ -8,11 +8,12 @@
  *      This is the core of the core, where the main calculations   *
  *      are made. */
 
-RACE::RACE()
+RACE::RACE():
+	mutationRate(20),
+	pFitness(0),
+	sFitness(0),
+	tFitness(99999)
 {
-	setpFitness(0);
-	setsFitness(0);
-	settFitness(99999);
 }
 
 RACE::~RACE()
@@ -20,7 +21,7 @@ RACE::~RACE()
 }
 
 
-const int RACE::calculateSecondaryFitness() const
+const unsigned int RACE::calculateSecondaryFitness() const
 {
 	// total gathered resources minus minerals that were not used
 	int tsF=getHarvestedMinerals() + getHarvestedGas();// - (getWastedMinerals() + getWastedGas()) / getRealTimer();
@@ -45,7 +46,7 @@ const bool RACE::calculateStep()
 			setTimer(0);
 //		if(getpGoal()->getMode()==0)
 			setpFitness(calculatePrimaryFitness(ready));
-		while(!buildingQueue.empty())
+		while(!buildingQueue.empty()) 
 			buildingQueue.pop();
 
 // ----- RACE SPECIFIC -----
@@ -83,8 +84,8 @@ const bool RACE::calculateStep()
 
 //  ------ LEAP FORWARD IN TIME ------
 	int t=calculateIdleTime();
-	int oldMinerals = getMinerals();
-	int oldGas = getGas();
+//	int oldMinerals = getMinerals();
+//	int oldGas = getGas();
 
 	setMinerals(getMinerals()+harvestMinerals()*t);
 	setHarvestedMinerals(getHarvestedMinerals()+harvestMinerals()*t);
@@ -101,10 +102,10 @@ const bool RACE::calculateStep()
 	bool foundAnother=true;
 	while((!buildingQueue.empty())&&(foundAnother==true))
 	{
-		if(buildingQueue.top().getBuildFinishedTime()==getTimer())
+		if((buildingQueue.top().canBeCompleted())&&(buildingQueue.top().getBuildFinishedTime()==getTimer()))
 		{
 			foundAnother=true;
-		    const Building build = buildingQueue.top();
+		    const Building& build = buildingQueue.top();
 			const UNIT_STATISTICS* stat=&(*pStats)[build.getType()];
 
 // ------ ACTUAL BUILDING ------
@@ -118,7 +119,7 @@ const bool RACE::calculateStep()
 			
 // ------ SPECIAL RULES ------
 			if(build.getType()==REFINERY) {
-				addMapLocationTotal(GLOBAL, build.getLocation(),VESPENE_GEYSIR,-1);
+				removeOneMapLocationTotal(GLOBAL, build.getLocation(), VESPENE_GEYSIR);
 				adjustGasHarvest(build.getLocation());
 			} else
 			if((build.getType()==COMMAND_CENTER)&&(!getLocationTotal(build.getLocation(),COMMAND_CENTER))) {
@@ -177,11 +178,11 @@ const bool RACE::calculateStep()
 //TODO: pFitness wird total falsch berechnet fuer races die nicht alle Ziele erfuellt haben!1 [location problem halt...]
 
 
-const bool RACE::buildGene(const int unit)
+const bool RACE::buildGene(const unsigned int build_unit)
 {
-	const UNIT_STATISTICS* stat=&(*pStats)[unit];
+	const UNIT_STATISTICS* stat=&(*pStats)[build_unit];
 	bool ok=false;
-	if(unit<=REFINERY+1)
+	if(build_unit<=REFINERY+1)
 	{
 		//TODO: Array und testen wo der comp am meisten haengenbleibt und abbricht... moeglichst dann nach oben bringen!
 		if(
@@ -202,16 +203,16 @@ const bool RACE::buildGene(const int unit)
 		{
 		
 			if
-			(getMinerals()<stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, unit))
+			(getMinerals()<stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit))
 			{
-				if(neededMinerals>stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, unit)-getMinerals())
-					neededMinerals=stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, unit)-getMinerals();
+				if(neededMinerals>stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)-getMinerals())
+					neededMinerals=stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)-getMinerals();
 			}
 			else
-			if(getGas()<stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, unit))
+			if(getGas()<stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit))
 			{
-				if(neededGas>stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, unit)-getGas())
-					neededGas=stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, unit)-getGas();
+				if(neededGas>stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)-getGas())
+					neededGas=stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)-getGas();
 			}
 			else
 			{
@@ -257,11 +258,11 @@ const bool RACE::buildGene(const int unit)
 						j++;
 					}
 
-				if((ok)&&(unit==REFINERY)) {
+				if((ok)&&(build_unit==REFINERY)) {
 					if(getMapLocationAvailible(GLOBAL, tloc, VESPENE_GEYSIR) <=0)
 						ok=false;
 					else 
-						addMapLocationAvailible(GLOBAL, tloc, VESPENE_GEYSIR, -1);
+						removeOneMapLocationAvailible(GLOBAL, tloc, VESPENE_GEYSIR);
 				}
 //TODO: Wenn verschiedene facilities moeglich sind, dann das letzte nehmen						
 //				bewegliche Sachen ueberdenken...
@@ -272,7 +273,7 @@ const bool RACE::buildGene(const int unit)
 				{
 					if(getpGoal()->getRace()==ZERG)
 					{
-						if((*pStats)[unit].facility[0]==LARVA)
+						if((*pStats)[build_unit].facility[0]==LARVA)
 						{
 		// Larva wird benoetigt zum Bau? Fein, dann bauen wir eine neue Larva falls nicht schon alle hatcheries etc. belegt sidn
 							if(
@@ -290,19 +291,19 @@ const bool RACE::buildGene(const int unit)
 					}
 
 // ------ RACE SPECIFIC, tFITNESS ------
-					if(getMinerals()*3<4*stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, unit)) settFitness(gettFitness()-2);
-					if(getGas()*3<4*stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, unit)) settFitness(gettFitness()-2);
+					if(getMinerals()*3<4*stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)) settFitness(gettFitness()-2);
+					if(getGas()*3<4*stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)) settFitness(gettFitness()-2);
 //					if((stat->needSupply>0)&&(getNeedSupply()*4<5*stat->needSupply)) settFitness(gettFitness()-2);  TODO
-					if((getMinerals()*5/4<stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, unit))||
-					   (getGas()*5/4<stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, unit)))
+					if((getMinerals()*5/4<stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit))||
+					   (getGas()*5/4<stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)))
 						settFitness(gettFitness()-1);
 // ------ END RACE SPECIFIC, tFITNESS ------
 					
-					if(lastunit==0) lastunit=unit;
-					if(unit!=lastunit)//~~
+					if(lastunit==0) lastunit=build_unit;
+					if(build_unit!=lastunit)//~~
 					{
 						settFitness(gettFitness()-1);
-						lastunit=unit;
+						lastunit=build_unit;
 					}
                                              
 					Building build;					
@@ -310,14 +311,14 @@ const bool RACE::buildGene(const int unit)
                     build.setFacility(stat->facility[fac]);
                     build.setLocation(tloc);
                     build.setUnitCount(1);
-                    build.setBuildFinishedTime(getTimer()-stat->BT/*+3200*(stat->facility2==unit)*/); //~~ hack :/ TODO SINN???????
+                    build.setBuildFinishedTime(getTimer()-stat->BT/*+3200*(stat->facility2==build_unit)*/); //~~ hack :/ TODO SINN???????
                     build.setTotalBuildTime(stat->BT);
-                    build.setType(unit);
+                    build.setType(build_unit);
 //					build.setIP(getIP()); needed only for Anarace!
 					
 // upgrade_cost is 0 if it's no upgrade
-					setMinerals(getMinerals()-(stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL,unit)));
-					setGas(getGas()-(stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL,unit)));
+					setMinerals(getMinerals()-(stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)));
+					setGas(getGas()-(stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)));
 	
 					setNeedSupply(getNeedSupply()+stat->needSupply);
 //					if((stat->needSupply>0)||(((*pStats)[stat->facility[0]].needSupply<0)&&(stat->facilityType==IS_LOST)))  TODO!!!!
@@ -327,15 +328,15 @@ const bool RACE::buildGene(const int unit)
 				} //end if(ok)
 			} //end minerals/gas else
 		} //end prere/fac else
-	} //end unit < REFINERY
-	else // unit > REFINERY+1
+	} //end build_unit < REFINERY
+	else // build_unit > REFINERY+1
 	{
 
 //hier checken!
 
 // TODO ueberlegen was mit scv passiert, das gerade ein Gebaeude fertiggestellt hat... steht das in irgendeinem "last" drin?
 /*		int count=0;
-		switch(unit)
+		switch(build_unit)
 		{
 			case MOVE_ONE_1_FORWARD:count=1;break;
 			case MOVE_ONE_3_FORWARD:count=3;break;
@@ -367,7 +368,7 @@ const bool RACE::buildGene(const int unit)
 				setOnTheRun(nr,1);
 //						building[nr].IP=IP; TODO?
 						// 2x Unit => send 8/All instead of just one unit there
-				if((getIP()>1)&&((Code[0][getIP()-1]==unit)||(Code[1][getIP()-1]==unit)))
+				if((getIP()>1)&&((Code[0][getIP()-1]==build_unit)||(Code[1][getIP()-1]==build_unit)))
 				{
 					if(getLocationAvailible(last[lastcounter].location,last[lastcounter].unit)>=6)
 						setUnitCount(nr,6);
@@ -384,7 +385,7 @@ const bool RACE::buildGene(const int unit)
 	}
 
 /*	  else
-	  if((gRace==ZERG)&&(unit==BREAK_UP_BUILDING)&&(BuildingRunning>0)) // lieber eine variable mit last_gebaeude oder so machen und da die Daten speichern, anstatt Programm oder buildings durchzulaufen...
+	  if((gRace==ZERG)&&(build_unit==BREAK_UP_BUILDING)&&(BuildingRunning>0)) // lieber eine variable mit last_gebaeude oder so machen und da die Daten speichern, anstatt Programm oder buildings durchzulaufen...
 			{
 				int min=5000;
 				int n=0;
@@ -436,60 +437,60 @@ void RACE::prepareForNewGeneration() // resets all data to standard starting val
 // ------ PRETTY UNINTERESTING SET/GET FUNCTIONS ------
 // ----------------------------------------------------
 
-void RACE::setpFitness(const int pFitness) 
+void RACE::setpFitness(const unsigned int pFitness) 
 {
 #ifdef _SCC_DEBUG
-	if(pFitness<0) {
+	if(pFitness>MAX_PFITNESS) {
 		toLog("DEBUG: (RACE::setpFitness): Value pFitness out of range.");return;
 	}
 #endif
 	this->pFitness=pFitness;
 }
 
-void RACE::setsFitness(const int sFitness)
+void RACE::setsFitness(const unsigned int sFitness)
 {
 #ifdef _SCC_DEBUG
-	if((sFitness<0)||(sFitness>MAX_MINERALS+MAX_GAS)) {
+	if(sFitness>MAX_MINERALS+MAX_GAS) {
 		toLog("DEBUG: (RACE::setsFitness): Value sFitness out of range.");return;
 	}
 #endif
 	this->sFitness=sFitness;
 }
 
-void RACE::settFitness(const int tFitness)
+void RACE::settFitness(const unsigned int tFitness)
 {
 #ifdef _SCC_DEBUG
-	if(tFitness<0) {
+	if(tFitness>MAX_TFITNESS) {
 		toLog("DEBUG: (RACE::settFitness): Value tFitness out of range.");return;
 	}
 #endif
 	this->tFitness=tFitness;
 }
 
-const int RACE::getpFitness() const
+const unsigned int RACE::getpFitness() const
 {
 #ifdef _SCC_DEBUG
-	if((pFitness<0)||(pFitness>30000)) { // TODO
+	if(pFitness > MAX_PFITNESS) {
 		toLog("DEBUG: (RACE::getpFitness): Variable pFitness not initialized.");return(0);
 	}
 #endif
 	return(pFitness);
 }
 
-const int RACE::getsFitness() const
+const unsigned int RACE::getsFitness() const
 {
 #ifdef _SCC_DEBUG
-	if((sFitness<0)||(sFitness>MAX_MINERALS+MAX_GAS)) {
+	if(sFitness>MAX_MINERALS+MAX_GAS) {
 		toLog("DEBUG: (RACE::getsFitness): Variable sFitness not initialized.");return(0);
 	}
 #endif
 	return(sFitness);
 }
 
-const int RACE::gettFitness() const
+const unsigned int RACE::gettFitness() const
 {
 #ifdef _SCC_DEBUG
-	if((tFitness<0)||(tFitness>MAX_TFITNESS)) {
+	if(tFitness>MAX_TFITNESS) {
 		toLog("DEBUG: (RACE::gettFitness): Variable tFitness not initialized.");return(0);
 	}
 #endif

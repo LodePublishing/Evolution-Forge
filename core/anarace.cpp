@@ -11,13 +11,28 @@
         preformatted/precalculated -> statistics.				    */
 
 // TODO: reimplement/recheck the speed of the units
-ANARACE::ANARACE()
+ANARACE::ANARACE(): 
+	unitsTotal(4),
+	unitsTotalMax(4),
+	unchangedGenerations(0),
+	currentRun(0),
+	optimizing(false),
+	active(true),
+	generation(0),
+	maxpFitness(0),
+	maxsFitness(0),
+	maxtFitness(MAX_TFITNESS),
+	timePercentage(0),
+	goalPercentage(0),
+	currentpFitness(0),
+	averageLength(0),
+	fitnessAverage(0),
+	fitnessVariance(0),
+	positiveCrossover(0),
+	wayneCrossover(0),
+	negativeCrossover(0)
 {
-	resetData();
-	setRun(0);
-	optimizing=false;
-	active=true;
-
+    resetSpecial();
 }
 
 ANARACE::~ANARACE()
@@ -41,12 +56,13 @@ void ANARACE::resetData()
 
 
 // Reset all ongoing data (between two runs)
-void EXPORT ANARACE::prepareForNewGeneration() // resets all data to standard starting values
+void ANARACE::prepareForNewGeneration() // resets all data to standard starting values
 {
 	PRERACE::prepareForNewGeneration();
 	setCurrentpFitness(0);
 
-	for(int i=MAX_TIME;i--;)
+//	for(int i=MAX_TIME;i--;)
+	for(int i=MAX_LENGTH;i--;)
 	{
 		setStatisticsHaveSupply(i, 0);
 		setStatisticsHaveMinerals(i, 0);
@@ -60,7 +76,7 @@ void EXPORT ANARACE::prepareForNewGeneration() // resets all data to standard st
 		setProgramSuccessType(i, 0);
 		setProgramSuccessUnit(i, 0);
 		setProgramIsBuilt(i, false);
-		setProgramTime(i, MAX_TIME);
+		setProgramTime(i, 0);
 		for(int j=UNIT_TYPE_COUNT;j--;)
 		{
 			setProgramAvailibleCount(i, j, 0);
@@ -79,17 +95,17 @@ void EXPORT ANARACE::prepareForNewGeneration() // resets all data to standard st
 // ------ CORE OF THE CORE FUNCTIONS ------
 // ----------------------------------------
 
-const bool EXPORT ANARACE::calculateStep()
+const bool ANARACE::calculateStep()
 {
 //ZERG: CREEP!
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
 	//TODO: Fehler hier, getHaveSupply - getNeedSupply kann -1 werden!
 	// needSupply war 11, maxneedSupply war 10 :/
-	setStatisticsNeedSupply(getTimer(),getNeedSupply());
-	setStatisticsHaveSupply(getTimer(),getHaveSupply());
-	setStatisticsHaveMinerals(getTimer(),getMinerals());
-	setStatisticsHaveGas(getTimer(),getGas());
-	setStatisticsFitness(getTimer(),calculatePrimaryFitness(ready));
+	setStatisticsNeedSupply(getIP(), getNeedSupply());
+	setStatisticsHaveSupply(getIP(), getHaveSupply());
+	setStatisticsHaveMinerals(getIP(), getMinerals());
+	setStatisticsHaveGas(getIP(), getGas());
+	setStatisticsFitness(getIP(), calculatePrimaryFitness(ready));
 
 	if((!getTimer())||(ready=calculateReady())||(!getIP()))
 	{
@@ -142,7 +158,7 @@ const bool EXPORT ANARACE::calculateStep()
 //				setProgramSuccessLocation(0);
 			}
 			for(int i=UNIT_TYPE_COUNT;i--;)	{
-				setProgramTotalCount(getIP(),i,getLocationTotal(GLOBAL, i));
+				setProgramTotalCount(getIP(), i, getLocationTotal(GLOBAL, i));
 				setProgramAvailibleCount(getIP(),i,getLocationAvailible(GLOBAL, i));
 			}
 			
@@ -153,10 +169,9 @@ const bool EXPORT ANARACE::calculateStep()
 
 //  ------ LEAP FORWARD IN TIME ------
 	int t=calculateIdleTime();
-    int oldMinerals = getMinerals();
-    int oldGas = getGas();
+//    int oldMinerals = getMinerals();
+  //  int oldGas = getGas();
 
-	t=1;
 	setMinerals(getMinerals()+harvestMinerals()*t);
 	setHarvestedMinerals(getHarvestedMinerals()+harvestMinerals()*t);
 //    setWastedMinerals(getWastedMinerals() + oldMinerals*t + (getMinerals() - oldMinerals) * t / 2);
@@ -172,23 +187,23 @@ const bool EXPORT ANARACE::calculateStep()
 	bool foundAnother=true;
     while((!buildingQueue.empty())&&(foundAnother==true))
     {
-        if(buildingQueue.top().getBuildFinishedTime()==getTimer())
+        if((buildingQueue.top().canBeCompleted()) && (buildingQueue.top().getBuildFinishedTime() == getTimer()))
         {
 			foundAnother=true;
-        	const Building build = buildingQueue.top();
+	       	const Building build = buildingQueue.top();
 			const UNIT_STATISTICS* stat=&((*pStats)[build.getType()]);
 
 // ------ ACTUAL BUILDING ------
 			adjustLocationUnitsAfterCompletion(build.getLocation(), stat->facilityType, build.getFacility(), stat->facility2);			
 			setHaveSupply(getHaveSupply()+stat->haveSupply);
-			addLocationTotal(build.getLocation(),build.getType(),build.getUnitCount());
+			addLocationTotal(build.getLocation(),build.getType(), build.getUnitCount());
 			addLocationAvailible(build.getLocation(),build.getType(),build.getUnitCount());
 // ------ END OF ACTUAL BUILDING ------
 
 			
 // ------ SPECIAL RULES ------
 			if(build.getType()==REFINERY) {
-				addMapLocationTotal(GLOBAL, build.getLocation(),VESPENE_GEYSIR,-1);
+				removeOneMapLocationTotal(GLOBAL, build.getLocation(), VESPENE_GEYSIR);
 				adjustGasHarvest(build.getLocation());
 			} else
 			if((build.getType()==COMMAND_CENTER)&&(!getLocationTotal(build.getLocation(),COMMAND_CENTER))) {
@@ -216,7 +231,8 @@ const bool EXPORT ANARACE::calculateStep()
 			{ //here no unitCount! ~~~
 				addOneLocationTotal(build.getLocation(),stat->create);
 				addOneLocationAvailible(build.getLocation(),stat->create);
-				if(last[lastcounter].unit==stat->create) last[lastcounter].count++; //TODO ???
+				if( last[lastcounter].unit == stat->create ) 
+					last[lastcounter].count++; //TODO ???
 				// ~~~~ Ja... geht schon... aber kann ja auch mal was anderes sein...
 			}
 					//evtl noch location==0 als 'egal wo' einfuehren
@@ -229,7 +245,6 @@ const bool EXPORT ANARACE::calculateStep()
 			setProgramLocation(build.getIP(),build.getLocation());
 			setProgramBT(build.getIP(),build.getTotalBuildTime()); //~~~
 // ------ END OF RECORD -------
-			
 			
 			buildingQueue.pop();
 		} // end while(getremainingbuildorder) ~|~
@@ -246,15 +261,15 @@ const bool EXPORT ANARACE::calculateStep()
 
 // falschen Standort ueber distances abrechnen! (100-distance oder so... je nach dem wieviele am falschen Ort sind!)
 
-const bool ANARACE::buildGene(const int unit)
+const bool ANARACE::buildGene(const unsigned int build_unit)
 {
-	const UNIT_STATISTICS* stat=&((*pStats)[unit]);
+	const UNIT_STATISTICS* stat=&((*pStats)[build_unit]);
 	bool ok=false;
 
 	successType=0;
 	successUnit=0;
 
-	if(unit<=REFINERY+1)
+	if(build_unit<=REFINERY+1)
 	{
 		if((stat->prerequisite[0]>0)&&(getLocationTotal(GLOBAL,stat->prerequisite[0])==0)) {
 			successUnit=stat->prerequisite[0];
@@ -273,9 +288,9 @@ const bool ANARACE::buildGene(const int unit)
 		else
 		if //ANA~
 //TODO, < ((stat->facilityType==IS_LOST)&&(stat->facility[fac]==stat->facility2)) einfuegen....
-			( ((stat->facility[0]==0)||(getLocationAvailible(0,stat->facility[0])==0))&&
-			  ((stat->facility[1]==0)||(getLocationAvailible(0,stat->facility[1])==0))&&
-			  ((stat->facility[2]==0)||(getLocationAvailible(0,stat->facility[2])==0))&&
+			( ((stat->facility[0]==0)||(getLocationAvailible(GLOBAL, stat->facility[0])==0))&&
+			  ((stat->facility[1]==0)||(getLocationAvailible(GLOBAL, stat->facility[1])==0))&&
+			  ((stat->facility[2]==0)||(getLocationAvailible(GLOBAL, stat->facility[2])==0))&&
 			  ((stat->facility[0]>0)||(stat->facility[1]>0)||(stat->facility[2]>0))
 			)
  //TODO: availible/force[0] auf 100 setzen... naj ama guggn
@@ -296,27 +311,29 @@ const bool ANARACE::buildGene(const int unit)
 		}
 //TODO: evtl success 2 Schritte zurueckverfolgen...
 		else
-		if(((getHaveSupply()<getNeedSupply()+stat->needSupply-stat->haveSupply)||(stat->needSupply+getNeedSupply()>MAX_SUPPLY))&&(stat->needSupply!=0)) {
+		if(((getHaveSupply()<getNeedSupply()+stat->needSupply-stat->haveSupply) ||
+		    (stat->needSupply+getNeedSupply()>MAX_SUPPLY)) &&
+			(stat->needSupply!=0)) {
 			successUnit=0;
 			successType=SUPPLY_WAS_SATISFIED;
 		}
 		else
-		if(getMinerals()<stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL,unit))
+		if(getMinerals()<stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit))
 		{
 			successUnit=0;
 			successType=ENOUGH_MINERALS_WERE_GATHERED;
-			if(neededMinerals>stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL,unit)-getMinerals())
-				neededMinerals=stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL,unit)-getMinerals();
+			if(neededMinerals>stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)-getMinerals())
+				neededMinerals=stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)-getMinerals();
 //Fehler is wahrscheinlich hier irgendwoe...
 
 		}
 		else
-		if(getGas()<stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL,unit))
+		if(getGas()<stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit))
 		{
 			successUnit=0;
 			successType=ENOUGH_GAS_WAS_GATHERED;
-			if(neededGas>stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL,unit)-getGas())
-				neededGas=stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL,unit)-getGas();
+			if(neededGas>stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)-getGas())
+				neededGas=stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)-getGas();
 		}
 		else
 		{
@@ -364,43 +381,44 @@ const bool ANARACE::buildGene(const int unit)
 //					auch noch ueberlegen, wenn z.B. mit scv ohne kommandozentrale woanders gesammelt wird...
 //		Phagen ueber Phagen...
 
-			if((ok)&&(unit==REFINERY))
+			if((ok)&&(build_unit==REFINERY))
 			{
-				if(getMapLocationAvailible(0,tloc,VESPENE_GEYSIR)<=0)
+				if(getMapLocationAvailible(NEUTRAL_PLAYER, tloc, VESPENE_GEYSIR)<=0)
 					ok=false;
 				else
-					addMapLocationAvailible(0,tloc,VESPENE_GEYSIR,-1);
-			};
+					removeOneMapLocationAvailible(NEUTRAL_PLAYER, tloc, VESPENE_GEYSIR);
+			}
 
 			if(ok)
 			{
 					if(getpGoal()->getRace()==ZERG)
 					{
-						if((*pStats)[unit].facility[0]==LARVA)
+						if((*pStats)[build_unit].facility[0]==LARVA)
 						{
 							if(
-									(((getLocationTotal(tloc, HATCHERY)+getLocationTotal(tloc, LAIR)+getLocationTotal(tloc, HIVE))*3>
-									  (larvaInProduction[tloc]+getLocationTotal(tloc, LARVA)))&&
-									 ((getLocationTotal(tloc, HATCHERY)+getLocationTotal(tloc, LAIR)+getLocationTotal(tloc, HIVE)>larvaInProduction[tloc])))) // => zuwenig Larven da!
+									(((getLocationTotal(tloc, HATCHERY)+getLocationTotal(tloc, LAIR)+getLocationTotal(tloc, HIVE))*3 >
+										  (larvaInProduction[tloc]+getLocationTotal(tloc, LARVA)))&& // zuviel Larven da?
+									 ((getLocationTotal(tloc, HATCHERY)+getLocationTotal(tloc, LAIR)+getLocationTotal(tloc, HIVE) > 
+									 	   larvaInProduction[tloc])))) // zuwenig Larven da?
 							{
 								if(buildGene(LARVA))
 									addLarvaToQueue(tloc);
 							}
-						};
-					};
+						}
+					}
 					
 				Building build;
 				build.setOnTheRun(false);
 				build.setFacility(stat->facility[fac]);
 				build.setLocation(tloc);
 				build.setUnitCount(1);
-				build.setBuildFinishedTime(getTimer()-stat->BT/*+3200*(stat->facility2==unit)*/); //~~ hack :/ TODO SINN???????
+				build.setBuildFinishedTime(getTimer()-stat->BT/*+3200*(stat->facility2==build_unit)*/); //~~ hack :/ TODO SINN???????
 				build.setTotalBuildTime(stat->BT);
-				build.setType(unit);
+				build.setType(build_unit);
 				build.setIP(getIP());
 					
-				setMinerals(getMinerals()-(stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, unit)));
-				setGas(getGas()-(stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, unit)));
+				setMinerals(getMinerals()-(stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)));
+				setGas(getGas()-(stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)));
 				setNeedSupply(getNeedSupply()+stat->needSupply);					 
 //				setHaveSupply(getHaveSupply()-stat->needSupply);
 //				if((stat->needSupply>0)||(((*pStats)[stat->facility[0]].needSupply<0)&&(stat->facilityType==IS_LOST))) 
@@ -410,12 +428,12 @@ const bool ANARACE::buildGene(const int unit)
 				buildingQueue.push(build);
 			} // end if (ok)
 		} // if resources prere etc ok
-	} // end unit <= REFINERY+1
+	} // end build_unit <= REFINERY+1
 //TODO: error wenn facilities net gefunden...
-	else // unit > REFINERY+1
+	else // build_unit > REFINERY+1
 	{
 	/*	int count=0;
-		switch(unit)
+		switch(build_unit)
 		{
 			   case MOVE_ONE_1_FORWARD:count=1;break;
 			   case MOVE_ONE_3_FORWARD:count=3;break;
@@ -448,7 +466,7 @@ const bool ANARACE::buildGene(const int unit)
 					setIP(nr,getIP()); // ~ANA
 						// 2x Unit => send 8/All instead of just one unit there
 			
-					if((getIP()>1)&&((Code[0][getIP()-1]==unit)||(Code[1][getIP()-1]==unit)))
+					if((getIP()>1)&&((Code[0][getIP()-1]==build_unit)||(Code[1][getIP()-1]==build_unit)))
 					{
 										if(getLocationAvailible(last[lastcounter].location,last[lastcounter].unit)>=6)
 									setUnitCount(nr,6);
@@ -468,7 +486,7 @@ const bool ANARACE::buildGene(const int unit)
 	}
 					
 /*	  else
-	  if((gRace==ZERG)&&(unit==BREAK_UP_BUILDING)&&(BuildingRunning>0)) // lieber eine variable mit last_gebaeude oder so machen und da die Daten speichern, anstatt Programm oder buildings durchzulaufen...
+	  if((gRace==ZERG)&&(build_unit==BREAK_UP_BUILDING)&&(BuildingRunning>0)) // lieber eine variable mit last_gebaeude oder so machen und da die Daten speichern, anstatt Programm oder buildings durchzulaufen...
 			{
 				int min=5000;
 				int n=0;
@@ -520,7 +538,7 @@ const bool ANARACE::buildGene(const int unit)
 // -------------------------------
 
 /*
-void EXPORT ANARACE::removeOrder(const int IP)
+void ANARACE::removeOrder(const unsigned int IP)
 {
 		for(int j=IP;j--;)
 		{
@@ -534,7 +552,7 @@ void EXPORT ANARACE::removeOrder(const int IP)
 };
 
 
-void EXPORT ANARACE::insertOrder(int unit, int position)
+void ANARACE::insertOrder(int unit, int position)
 {
 	int l=0;
 	int i;
@@ -566,7 +584,7 @@ void EXPORT ANARACE::insertOrder(int unit, int position)
 	(*pStartCondition)->wasChanged(); // to allow update of time etc. of anarace
 }
 */
-//void EXPORT ANARACE::backupMap()
+//void ANARACE::backupMap()
 //{
 /*	for(int i=0;i<pMap->getMaxPlayer()-1;i++)
 		for(int j=0;j<MAX_LOCATIONS;j++)
@@ -578,7 +596,7 @@ void EXPORT ANARACE::insertOrder(int unit, int position)
 //	return(1);
 //}
 
-//void EXPORT ANARACE::restoreMap()
+//void ANARACE::restoreMap()
 //{
 /*	for(int i=0;i<pMap->getMaxPlayer()-1;i++)
 		for(int j=0;j<MAX_LOCATIONS;j++)
@@ -597,7 +615,8 @@ void EXPORT ANARACE::insertOrder(int unit, int position)
 // ------ MISC FUNCTIONS ------
 // ----------------------------
 
-const int ANARACE::maximum(const int unit) const
+#if 0
+const unsigned int ANARACE::maximum(const unsigned int unit) const
 {
 /*	int max=0;
 	int t=0;
@@ -641,15 +660,16 @@ const int ANARACE::maximum(const int unit) const
 	return(0);
 }
 
-const int ANARACE::needTime(const int unit) const
+
+const unsigned int ANARACE::needTime(const unsigned int unit) const
 {
 //	if(!getMap()->location[0].force[1][unit])
 //		return(stats[getpGoal()->getRace()][unit].BT+maximum(unit)); //eigene Bauzeit + Bauzeit der Prerequisites/Facilities
 //	else return(0);
 	return(0);
 }
-
-void EXPORT ANARACE::countUnitsTotal()
+#endif
+void ANARACE::countUnitsTotal()
 {
 	unitsTotal = 0;
 	unitsTotalMax = 4;
@@ -671,264 +691,265 @@ void EXPORT ANARACE::countUnitsTotal()
 // ------ GET/SET FUNCTIONS ------
 // -------------------------------
 
-const int EXPORT ANARACE::getAverageLength() const
+const unsigned int ANARACE::getAverageLength() const
 {
 	return(averageLength);
 }
 
 
-const int EXPORT ANARACE::getUnitsTotalMax() const
+const unsigned int ANARACE::getUnitsTotalMax() const
 {
 #ifdef _SCC_DEBUG
-	if((unitsTotalMax<0)||(unitsTotalMax>MAX_TOTAL_UNITS*UNIT_TYPE_COUNT*MAX_LOCATIONS)) {
+	if(unitsTotalMax>MAX_TOTAL_UNITS*UNIT_TYPE_COUNT*MAX_LOCATIONS) {
 		toLog("DEBUG: (ANARACE::getUnitsTotalMax): Variable not initialized.");return(0);
 	}
 #endif
 	return(unitsTotalMax);
 }
 
-const int EXPORT ANARACE::getUnitsTotal() const
+const unsigned int ANARACE::getUnitsTotal() const
 {
 #ifdef _SCC_DEBUG
-	if((unitsTotal<0)||(unitsTotal>MAX_TOTAL_UNITS*UNIT_TYPE_COUNT*MAX_LOCATIONS)) {
+	if(unitsTotal>MAX_TOTAL_UNITS*UNIT_TYPE_COUNT*MAX_LOCATIONS) {
 		toLog("DEBUG: (ANARACE::getUnitsTotal): Variable not initialized.");return(0);
 	}
 #endif
 	return(unitsTotal);
 }
 
-const bool EXPORT ANARACE::isActive() const
+const bool ANARACE::isActive() const
 {
 	return(active);
 }
 
-void EXPORT ANARACE::setActive(const bool active)
+void ANARACE::setActive(const bool set_active)
 {
-	this->active=active;
+	active=set_active;
 }
 
-const bool EXPORT ANARACE::isOptimizing() const
+const bool ANARACE::isOptimizing() const
 {
 	return(optimizing);
 }
 
-void EXPORT ANARACE::setOptimizing(const bool optimizing)
+void ANARACE::setOptimizing(const bool set_optimizing)
 {
-	this->optimizing=optimizing;
+	optimizing=set_optimizing;
 }
 
-const int EXPORT ANARACE::getProgramFacility(const int IP) const
+const unsigned int ANARACE::getProgramFacility(const unsigned int IP) const
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if(IP>=MAX_LENGTH) {
 		toLog("DEBUG: (ANARACE::getProgramFacility): Value IP out of range.");return(0);
 	}
-	if((program[IP].facility<0)||(program[IP].facility>=UNIT_TYPE_COUNT)) {
+	if(program[IP].facility>=UNIT_TYPE_COUNT) {
 		toLog("DEBUG: (ANARACE::getProgramFacility): Variable not initialized.");return(0);
 	}
 #endif
 	return(program[IP].facility);
 }
 
-const int EXPORT ANARACE::getProgramBT(const int IP) const
+const unsigned int ANARACE::getProgramBT(const unsigned int IP) const
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::getProgramBT): Value IP out of range.");return(0);
 	}
-	if((program[IP].BT<0)||(program[IP].BT>=MAX_TIME)) {
+	if(program[IP].BT>=MAX_TIME) {
 		toLog("DEBUG: (ANARACE::getProgramBT): Variable not initialized.");return(0);
 	}
 #endif
 	return(program[IP].BT);
 }																	  
 
-const int EXPORT ANARACE::getProgramSuccessType(const int IP) const
+const unsigned int ANARACE::getProgramSuccessType(const unsigned int IP) const
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::getProgramSuccessType): Value IP out of range.");return(0);
 	}
-	if((program[IP].successType<0)||(program[IP].successType>=ERROR_MESSAGES)) {
+	if(program[IP].successType>=ERROR_MESSAGES) {
 		toLog("DEBUG: (ANARACE::getProgramSuccessType): Variable not initialized.");return(0);
 	}
 #endif
 	return(program[IP].successType);
 }
 
-const int EXPORT ANARACE::getProgramSuccessUnit(const int IP) const
+const unsigned int ANARACE::getProgramSuccessUnit(const unsigned int IP) const
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::getProgramSuccessUnit): Value IP out of range.");return(0);
 	}
-	if((program[IP].successUnit<0)||(program[IP].successUnit>=UNIT_TYPE_COUNT)) {
+	if(program[IP].successUnit>=UNIT_TYPE_COUNT) {
 		toLog("DEBUG: (ANARACE::getProgramSuccessUnit): Variable not initialized.");return(0);
 	}
 #endif
 	return(program[IP].successUnit);
 }
 
-/*void EXPORT ANARACE::setProgramIsConstant(const int IP, const bool isConstant)
+/*void ANARACE::setProgramIsConstant(const unsigned int IP, const bool isConstant)
 {
-		if((IP<0)||(IP>=MAX_LENGTH)) {
+		if((IP>=MAX_LENGTH)) {
 				toLog("DEBUG: (ANARACE::setProgramIsConstant): Value IP [%i] out of range.",IP);return(0);
 		}
 		program[IP].isConstant=isConstant;
 };*/
 
-void EXPORT ANARACE::setProgramAvailibleCount(const int IP, const int unit, const int count)
+void ANARACE::setProgramAvailibleCount(const unsigned int IP, const unsigned int unit, const unsigned int count)
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::setProgramAvailibleCount): Value IP out of range.");return;
 	}
-	if((unit<0)||(unit>=UNIT_TYPE_COUNT)) {
+	if(unit>=UNIT_TYPE_COUNT) {
 		toLog("DEBUG: (ANARACE::setProgramAvailibleCount): Value unit out of range.");return;
 	}
-	if((count<0)||(count>=MAX_TOTAL_UNITS)) {
+	if(count>=MAX_TOTAL_UNITS) {
 		toLog("DEBUG: (ANARACE::setProgramAvailibleCount): Value count out of range.");return;
 	}
 #endif
 	program[IP].availibleCount[unit]=count;
 }
 
-void EXPORT ANARACE::setProgramTotalCount(const int IP, const int unit, const int count)
+void ANARACE::setProgramTotalCount(const unsigned int IP, const unsigned int unit, const unsigned int count)
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::setProgramTotalCount): Value IP out of range.");return;
 	}
-	if((unit<0)||(unit>=UNIT_TYPE_COUNT)) {
+	if(unit>=UNIT_TYPE_COUNT) {
 		toLog("DEBUG: (ANARACE::setProgramTotalCount): Value unit out of range.");return;
 	}
-	if((count<0)||(count>=MAX_TOTAL_UNITS)) {
+	if(count>=MAX_TOTAL_UNITS) {
 		toLog("DEBUG: (ANARACE::setProgramTotalCount): Value count out of range.");return;
 	}
 #endif
 	program[IP].forceCount[unit]=count;
 }
 
-void EXPORT ANARACE::setStatisticsNeedSupply(const int time, const int needSupply)
+void ANARACE::setStatisticsNeedSupply(const unsigned int IP, const unsigned int needSupply)
 {
 #ifdef _SCC_DEBUG
-	if((time<0)||(time>MAX_TIME)) {
-		toLog("DEBUG: (ANARACE::setStatisticsNeedSupply): Value time out of range.");return;
-	}
-	if((needSupply<0)||(needSupply>10*MAX_SUPPLY)) {
+    if((IP>=MAX_LENGTH)) {
+        toLog("DEBUG: (ANARACE::setStatisticsNeedSupply): Value IP out of range.");return;
+    }
+	if(needSupply>10*MAX_SUPPLY) {
 		toLog("DEBUG: (ANARACE::setStatisticsNeedSupply): Value needSupply out of range.");return;
 	}
 #endif
-	statistics[time].needSupply=needSupply;
+	statistics[IP].needSupply=needSupply;
 }
-void EXPORT ANARACE::setStatisticsHaveSupply(const int time, const int needSupply)
+void ANARACE::setStatisticsHaveSupply(const unsigned int IP, const unsigned int haveSupply)
 {
 #ifdef _SCC_DEBUG
-	if((time<0)||(time>MAX_TIME)) {
-		toLog("DEBUG: (ANARACE::setStatisticsHaveSupply): Value time out of range.");return;
-	}
-	if((needSupply<0)||(needSupply>10*MAX_SUPPLY)) {
-		toLog("DEBUG: (ANARACE::setStatisticsHaveSupply): Value needSupply out of range.");return;
+    if((IP>=MAX_LENGTH)) {
+        toLog("DEBUG: (ANARACE::setStatisticsHaveSupply): Value IP out of range.");return;
+    }
+	if(haveSupply>10*MAX_SUPPLY) {
+		toLog("DEBUG: (ANARACE::setStatisticsHaveSupply): Value haveSupply out of range.");return;
 	}
 #endif
-	statistics[time].haveSupply=needSupply;
+	statistics[IP].haveSupply=haveSupply;
 }
 
 // first time is 0!
-void EXPORT ANARACE::setProgramTime(const int IP, const int time)
+void ANARACE::setProgramTime(const unsigned int IP, const unsigned int time)
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::setProgramTime): Value IP out of range.");return;
 	}
-	if((time<0)||(time>MAX_TIME)) {
+	if(time>=MAX_TIME) {
 		toLog("DEBUG: (ANARACE::setProgramTime): Value time out of range.");return;
 	}
 #endif
 	program[IP].time=time;
 }
 
-void EXPORT ANARACE::setStatisticsHaveMinerals(const int time, const int minerals)
+void ANARACE::setStatisticsHaveMinerals(const unsigned int IP, const unsigned int minerals)
 {
 #ifdef _SCC_DEBUG
-	if((time<0)||(time>MAX_TIME)) {
-		toLog("DEBUG: (ANARACE::setStatisticsHaveMinerals): Value time out of range.");return;
-	}
-	if((minerals<0)||(minerals>=MAX_MINERALS)) {
+    if((IP>=MAX_LENGTH)) {
+        toLog("DEBUG: (ANARACE::setStatisticsHaveMinerals): Value IP out of range.");return;
+    }
+	if(minerals>=MAX_MINERALS) {
 		toLog("DEBUG: (ANARACE::setStatisticsHaveMinerals): Value minerals out of range.");return;
 	}
 #endif
-	statistics[time].minerals=minerals;
+	statistics[IP].minerals=minerals;
 }
 																				
-void EXPORT ANARACE::setStatisticsHaveGas(const int time, const int gas)
+void ANARACE::setStatisticsHaveGas(const unsigned int IP, const unsigned int gas)
 {
 #ifdef _SCC_DEBUG
-	if((time<0)||(time>MAX_TIME)) {
-		toLog("DEBUG: (ANARACE::setStatisticsHaveGas): Value time out of range.");return;
-	}
-	if((gas<0)||(gas>=MAX_GAS)) {
+    if((IP>=MAX_LENGTH)) {
+        toLog("DEBUG: (ANARACE::setStatisticsHaveGas): Value IP out of range.");return;
+    }
+	if(gas>=MAX_GAS) {
 		toLog("DEBUG: (ANARACE::setStatisticsHaveGas): Value minerals out of range.");return;
 	}
 #endif
-	statistics[time].gas=gas;
+	statistics[IP].gas=gas;
 }
-void EXPORT ANARACE::setProgramBT(const int IP, const int time)
+
+void ANARACE::setProgramBT(const unsigned int IP, const unsigned int time)
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::setProgramBT): Value IP out of range.");return;
 	}
-	if((time<0)||(time>=MAX_TIME)) {
+	if(time>=MAX_TIME) {
 		toLog("DEBUG: (ANARACE::setProgramBT): Value time out of range.");return;
 	}
 #endif
 	program[IP].BT=time;
 }
 
-void EXPORT ANARACE::setProgramIsBuilt(const int IP, const bool isBuilt)
+void ANARACE::setProgramIsBuilt(const unsigned int IP, const bool isBuilt)
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::setProgramIsBuilt): Value IP out of range.");return;
 	}
 #endif
 	program[IP].built=isBuilt;
 }
 
-void EXPORT ANARACE::setProgramLocation(const int IP, const int location)
+void ANARACE::setProgramLocation(const unsigned int IP, const unsigned int location)
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::setProgramLocation): Value IP out of range.");return;
 	}
-	if((location<0)||(location>=MAX_LOCATIONS)) {
+	if(location>=MAX_LOCATIONS) {
 		toLog("DEBUG: (ANARACE::setProgramLocation): Value location out of range.");return;
 	}
 #endif
 	program[IP].location=location;
 }
 
-void EXPORT ANARACE::setStatisticsFitness(const int time, const int fitness)
+void ANARACE::setStatisticsFitness(const unsigned int IP, const unsigned int fitness)
 {
 #ifdef _SCC_DEBUG
-	if((time<0)||(time>MAX_TIME)) {
-		toLog("DEBUG: (ANARACE::setStatisticsFitness): Value time out of range.");return;
-	}
-	if((fitness<0)||(fitness>100000)) { // TODO maxfitness
+    if((IP>=MAX_LENGTH)) {
+        toLog("DEBUG: (ANARACE::setProgramLocation): Value IP out of range.");return;
+    }
+	if(fitness>MAX_PFITNESS) {
 		toLog("DEBUG: (ANARACE::setStatisticsFitness): Value fitness out of range.");return;
 	}
 #endif
-	statistics[time].fitness=fitness;
+	statistics[IP].fitness=fitness;
 }
 
-const int EXPORT ANARACE::getProgramTotalCount(const int IP, const int unit) const	   // how many units of the type at phaenoCode[s] do exist at that time?
+const unsigned int ANARACE::getProgramTotalCount(const unsigned int IP, const unsigned int unit) const	   // how many units of the type at phaenoCode[s] do exist at that time?
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::getProgramTotalCount): Value IP out of range.");return(0);
 	}
-	if((unit<0)||(unit>=UNIT_TYPE_COUNT)) {
+	if(unit>=UNIT_TYPE_COUNT) {
 		toLog("DEBUG: (ANARACE::getProgramTotalCount): Value unit out of range.");return(0);
 	}
 #endif
@@ -936,346 +957,344 @@ const int EXPORT ANARACE::getProgramTotalCount(const int IP, const int unit) con
 }
 
 // how many units of the type at phaenoCode[s] do exist at that time?
-const int EXPORT ANARACE::getProgramAvailibleCount(const int IP, const int unit) const	   
+const unsigned int ANARACE::getProgramAvailibleCount(const unsigned int IP, const unsigned int unit) const	   
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::getProgramAvailibleCount): Value IP out of range.");return(0);
 	}
-	if((unit<0)||(unit>=UNIT_TYPE_COUNT)) {
+	if(unit>=UNIT_TYPE_COUNT) {
 		toLog("DEBUG: (ANARACE::getProgramAvailibleCount): Value unit out of range.");return(0);
 	}
 #endif
 	return(program[IP].availibleCount[unit]);
 }
 
-void EXPORT ANARACE::setProgramFacility(const int IP, const int facility)
+void ANARACE::setProgramFacility(const unsigned int IP, const unsigned int facility)
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::setProgramFacility): Value IP out of range.");return;
 	}
-	if((facility<0)||(facility>=UNIT_TYPE_COUNT)) {
+	if(facility>=UNIT_TYPE_COUNT) {
 		toLog("DEBUG: (ANARACE::setProgramFacility): Value facility out of range.");return;
 	}
 #endif
 	program[IP].facility=facility;
 }
 
-void EXPORT ANARACE::setProgramSuccessType(const int IP, const int type)
+void ANARACE::setProgramSuccessType(const unsigned int IP, const unsigned int type)
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::setProgramSuccessType): Value IP out of range.");return;
 	}
-	if((type<0)||(type>=ERROR_MESSAGES)) {
+	if(type>=ERROR_MESSAGES) {
 		toLog("DEBUG: (ANARACE::setProgramSuccessType): Value type out of range.");return;
 	}
 #endif
 	program[IP].successType=type;
 }
 
-void EXPORT ANARACE::setProgramSuccessUnit(const int IP, const int unit)
+void ANARACE::setProgramSuccessUnit(const unsigned int IP, const unsigned int unit)
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::setProgramSuccessUnit): Value IP out of range.");return;
 	}
-	if((unit<0)||(unit>=UNIT_TYPE_COUNT)) {
+	if(unit>=UNIT_TYPE_COUNT) {
 		toLog("DEBUG: (ANARACE::setProgramSuccessUnit): Value unit out of range.");return;
 	}
 #endif
 	program[IP].successUnit=unit;
 }
 
-const int EXPORT ANARACE::getStatisticsNeedSupply(const int time) const
+const unsigned int ANARACE::getStatisticsNeedSupply(const unsigned int IP) const
 {
 #ifdef _SCC_DEBUG
-	if((time<0)||(time>MAX_TIME)) {
-		toLog("DEBUG: (ANARACE::getStatisticsNeedSupply): Value time [%i] out of range.");return(0);
-	}
-	if((statistics[time].needSupply<0)||(statistics[time].needSupply>10*MAX_SUPPLY)) {
+    if((IP>=MAX_LENGTH)) {
+        toLog("DEBUG: (ANARACE::getStatisticsNeedSupply): Value IP out of range.");return(0);
+    }
+	if(statistics[IP].needSupply>10*MAX_SUPPLY) {
 		toLog("DEBUG: (ANARACE::getStatisticsNeedSupply): Variable not initialized [%i].");	return(0);
 	}
 #endif
-	return(statistics[time].needSupply);
+	return(statistics[IP].needSupply);
 }
 
-const int EXPORT ANARACE::getStatisticsHaveSupply(const int time) const
+const unsigned int ANARACE::getStatisticsHaveSupply(const unsigned int IP) const
 {
 #ifdef _SCC_DEBUG
-	if((time<0)||(time>MAX_TIME)) {
-		toLog("DEBUG: (ANARACE::getStatisticsHaveSupply): Value time out of range.");return(0);
-	}
-	if((statistics[time].haveSupply<0)||(statistics[time].haveSupply>10*MAX_SUPPLY)) {
+    if((IP>=MAX_LENGTH)) {
+        toLog("DEBUG: (ANARACE::getStatisticsHaveSupply): Value IP out of range.");return(0);
+    }
+	if(statistics[IP].haveSupply>10*MAX_SUPPLY) {
 		toLog("DEBUG: (ANARACE::getStatisticsHaveSupply): Variable not initialized.");return(0);
 	}
 #endif
-	return(statistics[time].haveSupply);
+	return(statistics[IP].haveSupply);
 }
-const bool EXPORT ANARACE::getProgramIsBuilt(const int IP) const
+const bool ANARACE::getProgramIsBuilt(const unsigned int IP) const
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::getProgramIsBuilt): Value IP out of range.");return(0);
 	}
 #endif
 	return(program[IP].built);
 }
 
-/*const bool EXPORT ANARACE::getProgramIsConstant(const int IP)
+/*const bool ANARACE::getProgramIsConstant(const unsigned int IP)
 {
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::getProgramIsConstant): Value IP [%i] out of range.",IP);return(false);
 	}
 	return(program[IP].isConstant);
 };*/
 
 // first program time is
-const int EXPORT ANARACE::getProgramTime(const int IP) const
+const unsigned int ANARACE::getProgramTime(const unsigned int IP) const
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::getProgramTime): Value IP out of range.");return(0);
 	}
-	if((program[IP].time<0)||(program[IP].time>MAX_TIME)) {
+	if(program[IP].time>=MAX_TIME) {
 		toLog("DEBUG: (ANARACE::getProgramTime): Variable not initialized.");return(0);
 	}
 #endif
 	return(program[IP].time);
 }
 
-const int EXPORT ANARACE::getProgramTemp(const int IP) const
+const unsigned int ANARACE::getRealProgramTime(const unsigned int IP) const
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
-		toLog("DEBUG: (ANARACE::getProgramTemp): Value IP out of range.");return(0);
-	}
+    if((IP>=MAX_LENGTH)) {
+        toLog("DEBUG: (ANARACE::getProgramLocation): Value IP out of range.");return(0);
+    }
 #endif
-	return(program[IP].temp);
+	return(ga->maxTime - getProgramTime(IP));
 }
 
-const int EXPORT ANARACE::getStatisticsHaveMinerals(const int time) const
+const unsigned int ANARACE::getStatisticsHaveMinerals(const unsigned int IP) const
 {
 #ifdef _SCC_DEBUG
-	if((time<0)||(time>MAX_TIME)) {
-		toLog("DEBUG: (ANARACE::getStatisticsHaveMinerals): Value time out of range.");return(0);
+    if((IP>=MAX_LENGTH)) {
+	        toLog("DEBUG: (ANARACE::getStatisticsHaveMinerals): Value IP out of range.");return(0);
 	}
-	if((statistics[time].minerals<0)||(statistics[time].minerals>MAX_MINERALS)) {
+	if(statistics[IP].minerals>MAX_MINERALS) {
 		toLog("DEBUG: (ANARACE::getStatisticsHaveMinerals): Variable not initialized.");return(0);
 	}
 #endif
-	return(statistics[time].minerals);
+	return(statistics[IP].minerals);
 }
 
-const int EXPORT ANARACE::getStatisticsHaveGas(const int time) const
+const unsigned int ANARACE::getStatisticsHaveGas(const unsigned int IP) const
 {
 #ifdef _SCC_DEBUG
-	if((time<0)||(time>MAX_TIME)) {
-		toLog("DEBUG: (ANARACE::getStatisticsHaveGas): Value timeout of range.");return(0);
-	}
-	if((statistics[time].gas<0)||(statistics[time].gas>MAX_GAS)) {
+    if((IP>=MAX_LENGTH)) {
+        toLog("DEBUG: (ANARACE::getStatisticsHaveGas): Value IP out of range.");return(0);
+    }
+	if(statistics[IP].gas>MAX_GAS) {
 		toLog("DEBUG: (ANARACE::getStatisticsHaveGas): Variable statistics.gas not initialized.");return(0);
 	}
 #endif
-	return(statistics[time].gas);
+	return(statistics[IP].gas);
 }
 
-const int EXPORT ANARACE::getProgramLocation(const int IP) const
+const unsigned int ANARACE::getProgramLocation(const unsigned int IP) const
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::getProgramLocation): Value IP out of range.");return(0);
 	}
-	if((program[IP].location<0)||(program[IP].location>MAX_LOCATIONS)) {
+	if(program[IP].location>MAX_LOCATIONS) {
 		toLog("DEBUG: (ANARACE::getProgramLocation): Variable program.location not initialized.");return(0);
 	}
 #endif
 	return(program[IP].location);
 }
 
-const int EXPORT ANARACE::getStatisticsFitness(const int time) const
+const unsigned int ANARACE::getStatisticsFitness(const unsigned int IP) const
 {
 #ifdef _SCC_DEBUG
-	if((time<0)||(time>MAX_TIME)) {
-		toLog("DEBUG: (ANARACE::getStatisticsFitness): Value time out of range.");return(0);
-	}
+    if((IP>=MAX_LENGTH)) {
+        toLog("DEBUG: (ANARACE::getStatisticsFitness): Value IP out of range.");return(0);
+    }
 	// TODO max pfitness 
-	if((statistics[time].fitness<0)||(statistics[time].fitness>100000)) {
+	if(statistics[IP].fitness>MAX_PFITNESS) {
 		toLog("DEBUG: (ANARACE::getStatisticsFitness): Variable statistics.fitness not initialized.");return(0);
 	}
 #endif
-	return(statistics[time].fitness);
+	return(statistics[IP].fitness);
 }
-const int EXPORT ANARACE::getTimePercentage() const
+const unsigned int ANARACE::getTimePercentage() const
 {
 	return(timePercentage);
 }
 
-const int EXPORT ANARACE::getGoalPercentage() const
+const unsigned int ANARACE::getGoalPercentage() const
 {
 	return(goalPercentage);
 }
 
-void EXPORT ANARACE::setPhaenoCode(const int IP, const int num)
+void ANARACE::setPhaenoCode(const unsigned int IP, const unsigned int num)
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::setPhaenoCode): Value IP out of range.");return;
 	}
-	if((num<0)||(num>=UNIT_TYPE_COUNT)) {
+	if(num>=UNIT_TYPE_COUNT) {
 		toLog("DEBUG: (ANARACE::setPhaenoCode): Value num out of range.");return;
 	}
 #endif
 	phaenoCode[IP]=num;
 }
 
-const int EXPORT ANARACE::getPhaenoCode(const int IP) const
+const unsigned int ANARACE::getPhaenoCode(const unsigned int IP) const
 {
 #ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
+	if((IP>=MAX_LENGTH)) {
 		toLog("DEBUG: (ANARACE::getPhaenoCode): Value IP out of range.");return(0);
 	}
 #endif
 	return(phaenoCode[IP]);
 }
 
-const int EXPORT ANARACE::getCurrentpFitness() const
+const unsigned int ANARACE::getCurrentpFitness() const
 {
 	return(currentpFitness);
 }
 
-void ANARACE::setCurrentpFitness(const int num)
+void ANARACE::setCurrentpFitness(const unsigned int num)
 {
 	currentpFitness=num;
 }
 
-const int EXPORT ANARACE::getUnchangedGenerations() const
+const unsigned int ANARACE::getUnchangedGenerations() const
 {
 #ifdef _SCC_DEBUG	
-	if((unchangedGenerations<0)||(unchangedGenerations>MAX_GENERATIONS)) {
+	if(unchangedGenerations>MAX_GENERATIONS) {
 		toLog("DEBUG: (ANARACE::getUnchangedGenerations): Variable unchangedGenerations not initialized.");return(0);
 	}
 #endif
 	return(unchangedGenerations);
 }
 
-const int EXPORT ANARACE::getRun() const
+const unsigned int ANARACE::getRun() const
 {
 #ifdef _SCC_DEBUG	
-	if((currentRun<0)||(currentRun>MAX_RUNS)) {
+	if(currentRun>MAX_RUNS) {
 		toLog("DEBUG: (ANARACE::getRun): Variable currentRun not initialized.");return(0);
 	}
 #endif
 	return(currentRun);
 }
 
-const int EXPORT ANARACE::getGeneration() const
+const unsigned int ANARACE::getGeneration() const
 {
 #ifdef _SCC_DEBUG	
 	//TODO ga->maxgeneration?
-	if((generation<0)||(generation>MAX_GENERATIONS)) {
+	if(generation>MAX_GENERATIONS) {
 		toLog("DEBUG: (ANARACE::getGeneration): Variable generation not initialized.");return(0);
 	}
 #endif
 	return(generation);
 }
 
-const int EXPORT ANARACE::getMaxpFitness() const
+const unsigned int ANARACE::getMaxpFitness() const
 {
 #ifdef _SCC_DEBUG	
 // TODO max pfitness?
-	if((maxpFitness<0)||(maxpFitness>50000)) {
+	if(maxpFitness>MAX_PFITNESS) {
 		toLog("DEBUG: (ANARACE::getMaxpFitness): Variable maxpFitness not initialized.");return(0);
 	}
 #endif
 	return(maxpFitness);
 }
 
-const int EXPORT ANARACE::getMaxsFitness() const
+const unsigned int ANARACE::getMaxsFitness() const
 {
 #ifdef _SCC_DEBUG	
-	if((maxsFitness<0)||(maxsFitness>MAX_MINERALS+MAX_GAS)) {
+	if(maxsFitness>MAX_MINERALS+MAX_GAS) {
 		toLog("DEBUG: (ANARACE::getMaxsFitness): Variable maxsFitness not initialize.");return(0);
 	}
 #endif
 	return(maxsFitness);
 }
 
-const int EXPORT EXPORT ANARACE::getMaxtFitness() const
+const unsigned int ANARACE::getMaxtFitness() const
 {
 #ifdef _SCC_DEBUG	
-	if((maxtFitness<0)||(maxtFitness>MAX_TFITNESS)) {
+	if(maxtFitness>MAX_TFITNESS) {
 		toLog("DEBUG: (ANARACE::getMaxtFitness): Variable maxtFitness not initialized.");return(0);
 	}
 #endif
 	return(maxtFitness);
 }
 
-void EXPORT ANARACE::setUnchangedGenerations(const int unchangedGenerations)
+void ANARACE::setUnchangedGenerations(const unsigned int unchangedGenerations)
 {
 #ifdef _SCC_DEBUG	
-//	if((num<0)||(num>ga->maxGenerations))
-	if((unchangedGenerations<0)||(unchangedGenerations>MAX_GENERATIONS)) {
+	if(unchangedGenerations>MAX_GENERATIONS) {
 		toLog("DEBUG: (ANARACE::setUnchangedGenerations): Value num out of range.");return;
 	}
 #endif
 	this->unchangedGenerations=unchangedGenerations;
 }
 
-void EXPORT ANARACE::setRun(const int run)
+void ANARACE::setRun(const unsigned int run)
 {
 #ifdef _SCC_DEBUG
-	if((run<0)||(run>MAX_RUNS)) {
+	if(run>MAX_RUNS) {
 		toLog("DEBUG: (ANARACE::setRun): Value run out of range.");return;
 	}
 #endif
 	currentRun=run;
 }
 
-void EXPORT ANARACE::setGeneration(const int generation)
+void ANARACE::setGeneration(const unsigned int generation)
 {
 #ifdef _SCC_DEBUG
-//	if((num<0)||(num>ga->maxGenerations))
-	if((generation<0)||(generation>MAX_GENERATIONS)) {
+	if(generation>MAX_GENERATIONS) {
 		toLog("DEBUG: (ANARACE::setGeneration): Value out of range.");return;
 	}
 #endif
 	this->generation=generation;
 }
 
-void EXPORT ANARACE::setMaxpFitness(const int maxpFitness) 
+void ANARACE::setMaxpFitness(const unsigned int maxpFitness) 
 {
 #ifdef _SCC_DEBUG
 	// TODO maxpitness
-	if((maxpFitness<0)||(maxpFitness>50000)) {
+	if(maxpFitness>MAX_PFITNESS) {
 		toLog("DEBUG: (ANARACE::setMaxpFitness): Value out of range.");return;
 	}
 #endif
 	this->maxpFitness=maxpFitness;
 }
 
-void EXPORT ANARACE::setMaxsFitness(const int maxsFitness)
+void ANARACE::setMaxsFitness(const unsigned int maxsFitness)
 {
 #ifdef _SCC_DEBUG
-	if((maxsFitness<0)||(maxsFitness>MAX_MINERALS+MAX_GAS)) {
+	if(maxsFitness>MAX_MINERALS+MAX_GAS) {
 		toLog("DEBUG: (ANARACE::setMaxsFitness): Value out of range.");return;
 	}
 #endif
 	this->maxsFitness=maxsFitness;
 }
 
-void EXPORT ANARACE::setMaxtFitness(const int maxtFitness)
+void ANARACE::setMaxtFitness(const unsigned int maxtFitness)
 {
 #ifdef _SCC_DEBUG
-	if((maxtFitness<0)||(maxtFitness>MAX_TFITNESS)) {
+	if(maxtFitness>MAX_TFITNESS) {
 		toLog("DEBUG: (ANARACE::setMaxtFitness): Value out of range.");return;
 	}
 #endif
 	this->maxtFitness=maxtFitness;
 }
 
-/*void EXPORT ANARACE::analyzeBuildOrder()
+/*void ANARACE::analyzeBuildOrder()
 {
 //keeps track of the '@' symbol on the left of each build order entry
 //if the goal is set to 10 marines, the eleventh won't be marked as a 'fulfilled goal' with a '@'
@@ -1299,6 +1318,6 @@ void EXPORT ANARACE::setMaxtFitness(const int maxtFitness)
 };*/
 
 
-int EXPORT ANARACE::successType;
-int EXPORT ANARACE::successUnit;
+unsigned int ANARACE::successType;
+unsigned int ANARACE::successUnit;
 

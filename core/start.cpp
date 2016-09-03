@@ -1,6 +1,7 @@
 #include "start.hpp"
 
-START::START()
+START::START():
+	tmpmap(NULL)	
 {
 	for(int i=MAX_PLAYER;i--;)
 		pCurrentGoal[i]=&(currentGoal[i]);
@@ -53,33 +54,35 @@ void START::fillGroups()
 
 void START::setHarvestSpeed(const eRace race, const HARVEST_SPEED* harvest)
 {
-	this->harvest[race]=&harvest[race];
+	this->harvest[race]=harvest;
 }
 
-void START::setGoal(const int player, const GOAL_ENTRY* goal)
+void START::assignGoal(const unsigned int player, const GOAL_ENTRY* goal)
 {
 	tmpgoal[player]=goal;
-	currentGoal[player].copy(goal, &(totalForce[player]));
+	currentGoal[player].copy(goal);
+	currentGoal[player].adjustGoals(&(totalForce[player]));
+
 }
 
-void EXPORT START::setStartcondition(const int player, const START_CONDITION* startcondition)
+void START::assignStartcondition(const unsigned int player, const START_CONDITION* startcondition)
 {
 	this->startcondition[player]=startcondition;
 }
 
-void EXPORT START::assignMap(const BASIC_MAP* map)
+void START::assignMap(const BASIC_MAP* map)
 {
 	this->tmpmap=map;
 	// initialize Map???
 	// player 0 ?
 }
 
-const int START::getBasicMineralHarvestSpeedPerSecond(const int player, const int worker) const // 'player' noch rausoptimieren!
+const unsigned int START::getBasicMineralHarvestSpeedPerSecond(const unsigned int player, const unsigned int worker) const // 'player' noch rausoptimieren!
 {
 	return(harvest[playerRace[player]]->getHarvestMineralSpeed(worker));
 }
 
-const int START::getBasicGasHarvestSpeedPerSecond(const int player, const int worker) const
+const unsigned int START::getBasicGasHarvestSpeedPerSecond(const unsigned int player, const unsigned int worker) const
 {
 	return(harvest[playerRace[player]]->getHarvestGasSpeed(worker));
 			
@@ -90,39 +93,39 @@ const BASIC_MAP* const* START::getMap() const
 	return(&tmpmap);
 }
 
-void START::copyStartForce(void* target)
+void START::copyStartForce(void* target) const
 {
 	memcpy(target, &(startForce[0][0]), sizeof(startForce));
 }
 
-const START_CONDITION* const* START::getStartcondition(const int player) const
+const START_CONDITION* const* START::getStartcondition(const unsigned int player) const
 {
 	return(&(startcondition[player]));
 }
 
-void EXPORT START::setStartPosition(const int player, const int startPosition)
+void START::setStartPosition(const unsigned int player, const unsigned int startPosition)
 {
 	this->startPosition[player]=startPosition;
 }
 
-const EXPORT eRace START::getPlayerRace(const int playerNum)
+const eRace START::getPlayerRace(const unsigned int playerNum) const
 {
 	return(playerRace[playerNum]);
 }
 
-void EXPORT START::setPlayerRace(const int player, const eRace race)
+void START::setPlayerRace(const unsigned int player, const eRace race)
 {
 	playerRace[player]=race; // TODO
 	pStats[player]=&(stats[race][0]);
 }
 
-GOAL_ENTRY** START::getCurrentGoal(const int playerNum)
+GOAL_ENTRY** START::getCurrentGoal(const unsigned int playerNum)
 {
 	// TODO Fehlercheck
 	return(&(pCurrentGoal[playerNum]));
 }
 
-const UNIT_STATISTICS* const* START::getpStats(const int playerNum)
+const UNIT_STATISTICS* const* START::getpStats(const unsigned int playerNum) const
 {
 	return(&(pStats[playerNum]));
 }

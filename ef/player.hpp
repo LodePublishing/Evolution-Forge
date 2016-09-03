@@ -7,9 +7,10 @@
 #include "force.hpp"
 #include "bodiagram.hpp"
 #include "bowindow.hpp"
+#include "message.hpp"
 
 #include "math.h"
-#include  <list>
+//#include  <list>
 
 enum ePlayerMode
 {
@@ -38,14 +39,14 @@ enum ePlayerMode
 class Player : public UI_Object
 {
 	public:
-		Player(UI_Object* parent, ANARACE** anarace, const int playerNumber);
+		Player(UI_Object* parent, ANARACE** anarace, MessageWindow* msgWindow, const unsigned int playerNumber);
 		~Player();
 		
 		void update();
 
 		void resetData();
 		
-		void setMode(const eTab tab, const int playerNum); 
+		void setMode(const eTab tab, const unsigned int playerNum); 
 
 		void draw(DC* dc) const;
 		void process();
@@ -59,16 +60,17 @@ class Player : public UI_Object
 
 		void CheckOrders();
 
-		void updateRectangles(const int maxPlayer);
+		void updateRectangles(const unsigned int maxPlayer);
+		UI_Window* window[MAX_WINDOWS]; 
 		
 	private:
 		void drawGeneString(DC* dc, const Rect position) const;
+		void processBoGraph();
 		
-		UI_Window* window[MAX_WINDOWS]; 
 		ANARACE** anarace; //pointer auf pointer, weil sich der pointer ja veraendert!
-		int geneAnimation;
+		unsigned int geneAnimation;
 		map <long, Order> orderList; // nach markern sortiert
-		int mode;
+		unsigned int mode;
 		void MoveOrders();
 };
 

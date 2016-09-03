@@ -1,54 +1,147 @@
 #include "object.hpp"
-#include <sys/time.h>
 
-void UI_Object::move(int& x, const int sx, const int tx)
+UI_Object& UI_Object::operator=(const UI_Object& object)
 {
-    x+=((x>tx)?-1:0)+((x<tx)?1:0);
-	x+=(int)((x>sx)?(2*(x-sx)<(tx-sx)?(double)(x-sx)/2:(double)(tx-x)/2):(2*(x-sx)>(tx-sx)?(double)(x-sx)/1.5:(double)(tx-x)/1.5));
-}
+    startRect = object.startRect;
+    targetRect = object.targetRect;
+    filledHeight = object.filledHeight;
+    children = object.children;
+    shown = object.shown;
+    disabledFlag = object.disabledFlag;
 
-void UI_Object::move(Point& p, const Point sp, const Point tp)
-{
-	move(p.x, sp.x, tp.x);
-	move(p.y, sp.y, tp.y);
-}
-
-void UI_Object::move(Rect& r, const Rect sr, const Rect tr)
-{
-	move(r.x, sr.x, tr.x);
-	move(r.y, sr.y, tr.y);
-	move(r.width, sr.width, tr.width);
-	move(r.height, sr.height, tr.height);
-}
-
-UI_Object::UI_Object(UI_Object* parent, const Rect relativeRect, const Rect maxRect)
-{
-	this->parent=0;
-	this->relativeRect=relativeRect;
-	disabledFlag=false;
-	isFreeMove=true;
-	this->maxRect=maxRect;
-	doAdjustments=1;
+    min_top_left_x = object.min_top_left_x;
+    min_left_y = object.min_left_y;
+    min_right_y = object.min_right_y;
+    min_bottom_left_x = object.min_bottom_left_x;
+    min_top_right_x = object.min_top_right_x;
+    min_bottom_right_x = object.min_bottom_right_x;
+    needRedraw = object.needRedraw;
+    isFreeMove = object.isFreeMove;
+    tempSurface = object.tempSurface;
+    prevBrother = this; // !!
+    nextBrother = this; // !!
+    parent = NULL; // !!
+    relativeRect = object.relativeRect;
+    lastRect = object.lastRect;
+    maxRect = object.maxRect;
+    doAdjustments = object.doAdjustments;
+	toolTip = object.toolTip;
 	
-	startRect=relativeRect;
-	targetRect=relativeRect;
-	lastItemY=relativeRect.height;
+    setParent(object.parent);
 	
-	startTime=0;
+	return(*this);
+}
 
-	toolTip="";
-	shown=true;
-	nextBrother = prevBrother = this;
-	children=0;
-	min_bottom_x = min_left_y = min_top_x = min_right_y = 0;
-	setParent(parent);
-	needRedraw=true;
+UI_Object::UI_Object(const UI_Object& object) :
+    startRect( object.startRect ),
+    targetRect( object.targetRect ),
+    filledHeight( object.filledHeight ),
+    children( object.children ),
+    shown( object.shown ), 
+    disabledFlag( object.disabledFlag ),
+
+	min_top_left_x( object.min_top_left_x ),
+    min_left_y( object.min_left_y ),
+    min_right_y( object.min_right_y ),
+    min_bottom_left_x( object.min_bottom_left_x ),
+    min_top_right_x( object.min_top_right_x ),
+    min_bottom_right_x( object.min_bottom_right_x ),
+
+    needRedraw( object.needRedraw ),
+    isFreeMove( object.isFreeMove ),
+    tempSurface( object.tempSurface ),
+    prevBrother( this ), // !!
+    nextBrother( this ), // !!
+    parent( NULL ), // !!
+    relativeRect( object.relativeRect ),
+    lastRect( object.lastRect ),
+    maxRect( object.maxRect ),
+    doAdjustments( object.doAdjustments ),
+    toolTip( object.toolTip )
+{ 
+	setParent(object.parent);
+}
+
+/*
+void UI_Object::getHasFocus()
+{
+	return(hasFocus)
+}
+const bool UI_Object::setNextFocus()
+{
+    UI_Object* tmp=children;  // process all children of gadget
+   	if (tmp) {
+       	do {
+			if(tmp->getHasFocus() && (tmp->nextBrother!=children))
+			{
+				if(tmp->nextBrother->setFocus())
+				return(true);
+			}
+            tmp = tmp->nextBrother;
+   	    } while (tmp != children);
+	}
+	return(false);
+}
+
+const bool UI_Object::setFocus()
+{
+	if(canGetFocus)
+	{
+		hasFocus=true;
+		return true;
+	}
+	else 
+	{
+		hasFocus=false;
+	    UI_Object* tmp=children;  // process all children of gadget
+    	if (tmp) {
+        	do {
+				if(tmp->setFocus())
+					return(true);
+	            tmp = tmp->nextBrother;
+    	    } while (tmp != children);
+		}
+		return(false);
+    }
+}
+*/
+
+UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const Rect max_rect):
+	startRect(relative_rect),
+	targetRect(relative_rect),
+
+	filledHeight(relative_rect.GetHeight()),
+	children(NULL),
+	shown(true),
+	disabledFlag(false),
+
+	min_top_left_x(0),
+	min_left_y(0),
+	min_right_y(0),
+	min_bottom_left_x(0),
+	min_top_right_x(0),
+	min_bottom_right_x(0),	
+
+
+	needRedraw(true),
+	isFreeMove(true),
+	tempSurface(NULL),
+	prevBrother(this),
+	nextBrother(this),
+	parent(0),
+	relativeRect(relative_rect),
+	lastRect(),
+	maxRect(max_rect),
+	doAdjustments(1),
+	toolTip()
+{
+	setParent(parent_object);
 	lastRect=getAbsoluteRect();
 }
 
 UI_Object::~UI_Object()
 {
-	// destroy children
+	removeFromFamily(); // !!!!!
 }
 
 UI_Object* UI_Object::getPrevBrother() const
@@ -71,80 +164,78 @@ UI_Object* UI_Object::getChildren() const
 	return(children);
 }
 
-void UI_Object::updateToolTip(const string& toolTip)
+void UI_Object::updateToolTip(const string& tool_tip)
 {
-	this->toolTip=toolTip;
+	toolTip=tool_tip;
 }
 
-const int UI_Object::getDoAdjustments() const
+const unsigned int UI_Object::getDoAdjustments() const
 {
 	return(doAdjustments);
 }
 
-void UI_Object::setDoAdjustments(const int doAdjustments)
+void UI_Object::setDoAdjustments(const unsigned int do_adjustments)
 {
-	this->doAdjustments=doAdjustments;
+	doAdjustments=do_adjustments;
 }
 
-const Rect UI_Object::getMaxRect() const
+const Rect& UI_Object::getMaxRect() const
 {
 	return(maxRect);
 }
 
-const int UI_Object::getTargetWidth() const
+const unsigned int UI_Object::getTargetWidth() const
 {
-    return(targetRect.width);
+    return(targetRect.GetWidth());
 }
 
-const int UI_Object::getTargetHeight() const
+const unsigned int UI_Object::getTargetHeight() const
 {
-    return(targetRect.height);
+    return(targetRect.GetHeight());
 }
 
-void UI_Object::setFreeMove(const bool isFreeMove)
+void UI_Object::setFreeMove(const bool is_free_move)
 {
-	this->isFreeMove=isFreeMove;
-}
-
-void UI_Object::forceSmallY(const int dy)
-{
-	relativeRect.y+=dy;relativeRect.height-=dy;
-	maxRect.y+=dy;maxRect.height-=dy;
-    startRect=relativeRect;
-    targetRect=relativeRect;
+	isFreeMove=is_free_move;
 }
 
 void UI_Object::adjustRelativeRect(Rect edge)
 {
-	//targetRect = edge;
-
-//	if((edge.x!=targetRect.x)&&(edge.width==targetRect.width))
-//	{
+	if(edge != targetRect)
+	{
 // an Raender anpassen		
-		if((edge.x<maxRect.x) && (!isFreeMove))
-			edge.x=maxRect.x;
-		if((edge.x+edge.width>maxRect.x+maxRect.width)&&(!isFreeMove))
-			edge.width=maxRect.x+maxRect.width-edge.x;
-// neues Ziel?		
-		if(edge.x!=targetRect.x)
-			startRect.x=getRelativeLeftBound();	
-		if(edge.width!=targetRect.width)
-			startRect.width=getWidth();
-//	} else
-//	if((edge.x==targetRect.x)&&(edge.width!=targetRect.width))
-//	{
-//	}
-
-// an Raender anpassen
-        if((edge.y<maxRect.y) && (!isFreeMove))
-            edge.y=maxRect.y;
-        if((edge.y+edge.height>maxRect.y+maxRect.height)&&(!isFreeMove))
-            edge.height=maxRect.y+maxRect.height-edge.y;
+		if((edge.GetLeft()<maxRect.GetLeft()) && (!isFreeMove))
+			edge.SetLeft(maxRect.GetLeft());
+			
+		if((edge.GetRight() > maxRect.GetRight())&&(!isFreeMove)&&(maxRect.GetRight() > edge.GetLeft()))
+			edge.SetRight( maxRect.GetRight() );
+			
+        if((edge.GetTop()<maxRect.GetTop()) && (!isFreeMove))
+            edge.SetTop(maxRect.GetTop());
+			
+		if((edge.GetBottom() > maxRect.GetBottom())&&(isFreeMove)&&(maxRect.GetBottom() > edge.GetBottom()))
+			edge.SetBottom(maxRect.GetBottom());
+		 
 // neues Ziel?
-        if(edge.y!=targetRect.y)
-            startRect.y=getRelativeUpperBound();
-      if(edge.height!=targetRect.height)
-            startRect.height=getHeight();
+
+		if((edge.GetLeft()!=targetRect.GetLeft())||(edge.GetRight()!=targetRect.GetRight()))
+		{
+			startRect.SetLeft(getRelativeLeftBound());
+			
+//		if(edge.GetRight()!=targetRect.GetRight())
+			startRect.SetRight(getRelativeRightBound());
+		}
+			
+        if((edge.GetTop()!=targetRect.GetTop())||(edge.GetHeight()!=targetRect.GetHeight()))
+		{
+            startRect.SetTop(getRelativeUpperBound());
+			
+//		if(edge.GetHeight()!=targetRect.GetHeight())
+            startRect.SetBottom(getRelativeLowerBound());
+		}
+		
+
+		
 /*
 	
 	
@@ -208,6 +299,7 @@ void UI_Object::adjustRelativeRect(Rect edge)
     	targetRect.y=edge.y;
 	else targetRect.y=maxRect.y;*/
 	targetRect=edge;
+	}
 
 //	targetRect.width=edge.width;
   //  targetRect.height=edge.height;
@@ -228,14 +320,29 @@ void UI_Object::Show(const bool show)
 	shown=show;
 }
 
-void UI_Object::Hide(const bool show)
+void UI_Object::Hide(const bool hide)
 {
-	shown=show;
+	shown=!hide;
+}
+
+void UI_Object::Enable(const bool enable)
+{
+	disabledFlag = !enable;
+}
+
+void UI_Object::Disable(const bool disable)
+{
+	disabledFlag = disable;
 }
 
 const bool UI_Object::isShown() const
 {
 	return(shown);
+}
+
+const bool UI_Object::isDisabled() const
+{
+	return(disabledFlag);
 }
 
 
@@ -255,7 +362,7 @@ void UI_Object::removeFromFamily()
 	{
         if (parent->children == this) 
 		{
-            if (nextBrother == this)  // an only child?
+            if (nextBrother == this)  // the only child?
                 parent->children = NULL;  // if so, parent now has no children
             else
                 parent->children = nextBrother;  // next sibling is now the eldest
@@ -302,6 +409,48 @@ void UI_Object::addChild(UI_Object* child)
     }
 }
 
+// TODO
+void UI_Object::addRectToBeDrawn(Rect& lastRect, const Rect currentRect)
+{
+/*	rectlist[rectnumber].x = lastRect.x;rectlist[rectnumber].y = lastRect.y;
+	rectlist[rectnumber].w = lastRect.width; rectlist[rectnumber].h = lastRect.height;
+	
+	lastRect = currentRect;
+	if( lastRect.x < rectlist[rectnumber].x)
+	{
+		rectlist[rectnumber].w += rectlist[rectnumber].x - lastRect.x;
+	rectlist[rectnumber].x = lastRect.x;
+	} else
+	if( lastRect.x > rectlist[rectnumber].x)	
+		rectlist[rectnumber].w += lastRect.x - rectlist[rectnumber].x;
+	if( lastRect.y < rectlist[rectnumber].y)	
+	{
+		rectlist[rectnumber].h += rectlist[rectnumber].y - lastRect.y;
+		rectlist[rectnumber].y = lastRect.y;
+	} else
+	if( lastRect.y > rectlist[rectnumber].y)	
+		rectlist[rectnumber].h += lastRect.y - rectlist[rectnumber].y;
+
+	if( lastRect.width > rectlist[rectnumber].w )
+		rectlist[rectnumber].w = lastRect.width;
+
+	if( lastRect.height > rectlist[rectnumber].h )
+		rectlist[rectnumber].h = lastRect.height;
+	if((rectlist[rectnumber].x<max_x)&&(rectlist[rectnumber].y<max_y)&&(rectlist[rectnumber].x + rectlist[rectnumber].w>0)&&(rectlist[rectnumber].y + rectlist[rectnumber].h > 0))
+	{
+		if(rectlist[rectnumber].x +rectlist[rectnumber].w > max_x) rectlist[rectnumber].w = max_x - rectlist[rectnumber].x;
+		if(rectlist[rectnumber].y +rectlist[rectnumber].h > max_y) rectlist[rectnumber].h = max_y - rectlist[rectnumber].y;
+		if(rectlist[rectnumber].x < 0) {rectlist[rectnumber].w += rectlist[rectnumber].x;rectlist[rectnumber].x=0;}
+		if(rectlist[rectnumber].y < 0) {rectlist[rectnumber].h += rectlist[rectnumber].y;rectlist[rectnumber].y=0;}
+#ifdef _SCC_DEBUG
+		if(rectnumber>=2999) {
+			toLog("WARNING: (UI_Object::process): Value rectnumber out of range.");return;
+		}
+#endif
+		rectnumber++;
+	}*/
+}
+
 void UI_Object::process()
 {
 //    if ((disabledFlag)||(!shown)) //~~
@@ -309,56 +458,29 @@ void UI_Object::process()
 
 	if(doAdjustments==1)
 	{
-		adjustRelativeRect(Rect(Point(targetRect.GetPosition()),Size(targetRect.GetWidth(),lastItemY+25)));
+		adjustRelativeRect(Rect(Point(targetRect.GetTopLeft()), Size(targetRect.GetWidth(), filledHeight+25))); // TODO!
 		doAdjustments=2;
 	}	
 
-	move(relativeRect,		startRect,		targetRect);
-
+	relativeRect.move(startRect, targetRect);
 	if((lastRect!=getAbsoluteRect())||(needRedraw))
 	{
-		needRedraw=true;
-		rectlist[rectnumber].x = lastRect.x;rectlist[rectnumber].y = lastRect.y;
-		rectlist[rectnumber].w = lastRect.width; rectlist[rectnumber].h = lastRect.height;
-		
-		lastRect = getAbsoluteRect();
-		if( lastRect.x < rectlist[rectnumber].x)
+		if(needRedraw) 
+			needRedraw=true;
+		else needRedraw=true;
+/*		if(lastRect!=getAbsoluteRect())
 		{
-			rectlist[rectnumber].w += rectlist[rectnumber].x - lastRect.x;
-			rectlist[rectnumber].x = lastRect.x;
-		} else
-		if( lastRect.x > rectlist[rectnumber].x)	
-			rectlist[rectnumber].w += lastRect.x - rectlist[rectnumber].x;
-		if( lastRect.y < rectlist[rectnumber].y)	
-		{
-			rectlist[rectnumber].h += rectlist[rectnumber].y - lastRect.y;
-			rectlist[rectnumber].y = lastRect.y;
-		} else
-		if( lastRect.y > rectlist[rectnumber].y)	
-			rectlist[rectnumber].h += lastRect.y - rectlist[rectnumber].y;
+			tempRect.x=getAbsolutePosition().x;
+			tempRect.y=getAbsolutePosition().y;
+			tempRect.w=getWidth();
+			tempRect.h=getHeight();
+			SDL_GetClipRect(tempSurface, &tempRect);
+		}*/
+		addRectToBeDrawn(lastRect, getAbsoluteRect());
 
-		if( lastRect.width > rectlist[rectnumber].w )
-			rectlist[rectnumber].w = lastRect.width;
-
-		if( lastRect.height > rectlist[rectnumber].h )
-			rectlist[rectnumber].h = lastRect.height;
-		if((rectlist[rectnumber].x<1280)&&(rectlist[rectnumber].y<1024)&&(rectlist[rectnumber].x + rectlist[rectnumber].w>0)&&(rectlist[rectnumber].y + rectlist[rectnumber].h > 0))
-		{
-			if(rectlist[rectnumber].x +rectlist[rectnumber].w > 1280) rectlist[rectnumber].w = 1280 - rectlist[rectnumber].x;
-			if(rectlist[rectnumber].y +rectlist[rectnumber].h > 1024) rectlist[rectnumber].h = 1024 - rectlist[rectnumber].y;
-			if(rectlist[rectnumber].x < 0) {rectlist[rectnumber].w += rectlist[rectnumber].x;rectlist[rectnumber].x=0;}
-			if(rectlist[rectnumber].y < 0) {rectlist[rectnumber].h += rectlist[rectnumber].y;rectlist[rectnumber].y=0;}
-#ifdef _SCC_DEBUG
-			if(rectnumber>=2999) {
-		        toLog("WARNING: (UI_Object::process): Value rectnumber out of range.");return;
-		    }
-#endif
-			rectnumber++;
-			
-		}
 	}
 
-	min_bottom_x = min_left_y = min_top_x = min_right_y = 0;
+	min_top_right_x = min_bottom_right_x = min_bottom_left_x = min_left_y = min_top_left_x = min_right_y = 0;
 
     UI_Object* tmp=children;  // process all children of gadget
     if (tmp) {
@@ -368,14 +490,35 @@ void UI_Object::process()
                                                                                 
         } while (tmp != children);
     }
+	if((isMouseInside())&&(toolTip.size()))
+	{
+		toolTipIsShown=true;
+		toolTipString = toolTip;
+		toolTipPosition = getAbsolutePosition();
+	}
 }
                                                                                 
+UI_Object* UI_Object::checkHighlight()
+{
+//	if(!(getAbsoluteRect().Inside(p)))
+//		return(0); 0 size players ?
+    UI_Object* tmp=children;  // process all children of gadget
+	if(!tmp)
+		return(0); // return 0 as this is an object and no button!
+
+	UI_Object* result=0;
+	do 
+    {
+		result = tmp->checkHighlight();
+        tmp = tmp->nextBrother;
+    }
+	while((tmp!=children)&&(result==0));
+	return(result);
+}
+
 const bool UI_Object::isMouseInside() const
 {
-	Point p = controls.getCurrentPosition(getAbsolutePosition());
-	if((p.x>=0)&&(p.x<getWidth())&&(p.y>=0)&&(p.y<getHeight()))
-		return(true);
-	else return(false);
+	return(getAbsoluteRect().Inside(mouse));
 }
 
 const bool UI_Object::doesNeedRedraw() const
@@ -383,9 +526,9 @@ const bool UI_Object::doesNeedRedraw() const
 	return(needRedraw);
 }
 
-void UI_Object::setNeedRedraw(const bool needRedraw)
+void UI_Object::setNeedRedraw(const bool need_redraw)
 {
-	this->needRedraw=needRedraw;
+	this->needRedraw=need_redraw;
 }
 
 void UI_Object::draw(DC* dc) const
@@ -403,54 +546,114 @@ void UI_Object::draw(DC* dc) const
         } while (tmp != children);
     }
 
-	
-	if(isMouseInside())
-		maybeShowToolTip(dc);
-	
 }
 
-void UI_Object::maybeShowToolTip(DC* dc) const
+void UI_Object::maybeShowToolTip(DC* dc)
 {
-	if(toolTip.size()==0)
+	if(!toolTipIsShown)
 		return;
 	dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
 	dc->SetBrush(*theme.lookUpBrush(TOOLTIP_BRUSH));
-	dc->SetTextForeground(*theme.lookUpColor(TEXT_COLOUR));
+	dc->SetTextForeground(*theme.lookUpColor(TEXT_COLOR));
 	dc->SetFont(theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
-	int dx, dy;
-	dc->GetTextExtent(toolTip, &dx, &dy);
-	dc->DrawRectangle(getAbsolutePosition()+Point(16,16), Size(dx+16, dy));
-	dc->DrawText(toolTip, getAbsolutePosition()+Point(24,20));
+	
+	Rect r(toolTipPosition + Point(16, 16), dc->GetTextExtent(toolTipString) + Size(16, 0));
+
+	if(r.GetRight() >= (signed int)max_x)
+		r.SetLeft(max_x - 1 - r.GetWidth());
+	if(r.GetBottom() >= (signed int)max_y)
+		r.SetBottom(max_y - 1 - r.GetHeight());
+
+	dc->DrawRectangle(r);
+	dc->DrawText(toolTipString, r.GetTopLeft()+Point(8,4));
+    if((lastToolTipRect!=r)||(needToolTipRedraw))
+    {
+        needToolTipRedraw=false;
+    	addRectToBeDrawn(lastToolTipRect, r);
+	}
 }
 
+void UI_Object::setPosition(const Point& position)
+{
+	startRect.SetTopLeft(startRect.GetTopLeft() + (position - relativeRect.GetTopLeft()));
+	targetRect.SetTopLeft(targetRect.GetTopLeft() + (position - relativeRect.GetTopLeft()));
+	relativeRect.SetTopLeft(position);
+}
+
+void UI_Object::hideToolTip()
+{
+	toolTipIsShown=false;
+}
 
 void UI_Object::assignStartTime()
 {
-	timeval tim;
-    gettimeofday(&tim, NULL);
-    startTime=tim.tv_sec*1000000+tim.tv_usec;
+	startTime = SDL_GetTicks();
 }
 
-const long int UI_Object::getTimeStampMs(const long int timeSpan)
+const unsigned long int UI_Object::getTimeStampMs(const unsigned long int timeSpan)
 {
-    timeval tim;
-    gettimeofday(&tim, NULL);
-    long int t = tim.tv_sec * 1000000 + tim.tv_usec - startTime;
-	return(timeSpan + t);
+	return(timeSpan + SDL_GetTicks() - startTime);
 }
 
-const bool UI_Object::isTimeSpanElapsed(const long int timeSpan)
+const bool UI_Object::isTimeSpanElapsed(const unsigned long int timeSpan)
 {
 	if(timeSpan==0)
 		return(true);
-    timeval tim;
-    gettimeofday(&tim, NULL);
-    long int t = tim.tv_sec * 1000000 + tim.tv_usec - startTime;
-	return(timeSpan < t);
+	return(timeSpan < SDL_GetTicks());
 }
 
+void UI_Object::addMinTopLeftX(signed int dx)
+{
+	if((dx + min_top_left_x > (signed int)max_x)||(dx + min_top_left_x < 0))
+		toLog("BUTTON MIN_TOP_LEFT_X out of range");
+	min_top_left_x += dx;		
+}
+
+void UI_Object::addMinLeftY(signed int dy)
+{
+	if((dy + min_left_y > (signed int)max_y)||(dy + min_left_y < 0))
+		toLog("BUTTON MIN_LEFT_Y out of range");
+	min_left_y += dy;
+}
+
+void UI_Object::addMinRightY(signed int dy)
+{
+	if((dy + min_right_y > (signed int)max_y)||(dy + min_right_y < 0))
+		toLog("BUTTON MIN_RIGHT_Y out of range");
+	min_right_y += dy;
+}
+
+void UI_Object::addMinBottomLeftX(signed int dx)
+{
+	if((dx + min_bottom_left_x > (signed int)max_x)||(dx + min_bottom_left_x < 0))
+		toLog("BUTTON MIN_BOTTOM_LEFT_X out of range");
+	min_bottom_left_x += dx;		
+}
+
+void UI_Object::addMinTopRightX(signed int dx)
+{
+	if((dx + min_top_right_x > (signed int)max_x)||(dx + min_top_right_x < 0))
+		toLog("BUTTON MIN_TOP_RIGHT_X out of range");
+	min_top_right_x += dx;		
+}
+
+void UI_Object::addMinBottomRightX(signed int dx)
+{
+	if((dx + min_bottom_right_x > (signed int)max_x)||(dx + min_bottom_right_x < 0))
+		toLog("BUTTON MIN_BOTTOM_RIGHT_X out of range");
+	min_bottom_right_x += dx;		
+}
+	
 UI_Theme UI_Object::theme;
-long int UI_Object::startTime;
+long unsigned int UI_Object::startTime(0);
 SDL_Rect UI_Object::rectlist[3000];
-int UI_Object::rectnumber;
+unsigned int UI_Object::rectnumber(0);
+bool UI_Object::toolTipIsShown(false);
+Point UI_Object::toolTipPosition(Point(0,0));
+string UI_Object::toolTipString("error");
+Rect UI_Object::lastToolTipRect(Rect(0,0,0,0));
+bool UI_Object::needToolTipRedraw(true);
+unsigned int UI_Object::max_x(0);
+unsigned int UI_Object::max_y(0);
+Point UI_Object::mouse(Point(0,0));
 

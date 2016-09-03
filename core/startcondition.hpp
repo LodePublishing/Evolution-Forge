@@ -3,18 +3,18 @@
 
 #include "unit.hpp"
 
-class EXPORT START_CONDITION
+class START_CONDITION
 {
 	private:
 		UNIT unit[MAX_LOCATIONS];
 		eRace race;
-		string name;
+		std::string name;
 		
-		int haveSupply;
-		int needSupply;
-		int minerals;
-		int gas;
-		int startTime;
+		unsigned int haveSupply;
+		unsigned int needSupply;
+		unsigned int minerals;
+		unsigned int gas;
+		unsigned int startTime;
 	public:
 		START_CONDITION();
 		~START_CONDITION();
@@ -26,31 +26,31 @@ class EXPORT START_CONDITION
 		void assignRace(const eRace race);
 		const eRace getRace() const;
 
-		const string& getName() const;
-		void setName(const string& name);
+		const std::string& getName() const;
+		void setName(const std::string& name);
 
-		const int getHaveSupply() const;
-		void setHaveSupply(const int haveSupply);
+		const unsigned int getHaveSupply() const;
+		void setHaveSupply(const unsigned int haveSupply);
 		
-		const int getNeedSupply() const;
-		void setNeedSupply(const int needSupply);
+		const unsigned int getNeedSupply() const;
+		void setNeedSupply(const unsigned int needSupply);
 
-		const int getGas() const;
-		const int getMinerals() const;
+		const unsigned int getGas() const;
+		const unsigned int getMinerals() const;
 
-		void setMinerals(const int minerals);
-		void setGas(const int gas);
+		void setMinerals(const unsigned int minerals);
+		void setGas(const unsigned int gas);
 
-		const int getStartTime() const;
-		void setStartTime(const int startTime);
+		const unsigned int getStartTime() const;
+		void setStartTime(const unsigned int startTime);
 		
-		void setLocationTotal(const int loc, const int unit, const int num);
-		void setLocationAvailible(const int loc, const int unit, const int num);
+		void setLocationTotal(const unsigned int loc, const unsigned int unit, const unsigned int num);
+		void setLocationAvailible(const unsigned int loc, const unsigned int unit, const unsigned int num);
 		
-		const int getLocationTotal(const int loc, const int unit) const;
-		const int getLocationAvailible(const int loc, const int unit) const;
+		const unsigned int getLocationTotal(const unsigned int loc, const unsigned int unit) const;
+		const unsigned int getLocationAvailible(const unsigned int loc, const unsigned int unit) const;
 
-		const UNIT* getUnit(const int location) const;
+		const UNIT* getUnit(const unsigned int location) const;
 		
 };
 

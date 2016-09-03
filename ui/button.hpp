@@ -101,8 +101,10 @@ enum ePositionMode
 	BOTTOM_CENTER,
 	BOTTOM_LEFT,
 	CENTER_LEFT,
-	ARRANGE_TOP,
-	ARRANGE_BOTTOM,
+	ARRANGE_TOP_LEFT,
+	ARRANGE_TOP_RIGHT,
+	ARRANGE_BOTTOM_LEFT,
+	ARRANGE_BOTTOM_RIGHT,
 	ARRANGE_LEFT,
 	ARRANGE_RIGHT
 };
@@ -111,7 +113,8 @@ enum eAutoSize
 {
 	NO_AUTO_SIZE,
 	AUTO_SIZE,
-	AUTO_HEIGHT_FULL_WIDTH, // 
+	AUTO_HEIGHT_FULL_WIDTH, // fehlerhaft! TODO
+	FULL_WIDTH,
 	CONSTANT_SIZE //~~ constant width
 };
 
@@ -126,34 +129,42 @@ enum eButtonMode
 	MAX_BUTTON_MODES
 };
 
-
+class UI_Radio;
 
 class UI_Button:public UI_Object
 {
 	public:
+		UI_Button& operator=(const UI_Button& object);		
+		UI_Button(const UI_Button& object);
 
-		UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eString normalText, eString pressedText, eButton button, eTextMode textMode=HORIZONTALLY_CENTERED_TEXT_MODE, eButtonMode buttonMode = STATIC_BUTTON_MODE, ePositionMode mode = DO_NOT_ADJUST, eFont font=SMALL_NORMAL_BOLD_FONT, eAutoSize autoSize=NO_AUTO_SIZE);
+// TODO Beschreibung der Konstruktoren
+		UI_Button(UI_Object* button_parent, const Rect button_rect, const Rect button_max_rect, 
+		const eString button_normal_text, const eString button_pressed_text, 
+		const eButton button_type, const eTextMode button_text_mode = HORIZONTALLY_CENTERED_TEXT_MODE, const eButtonMode button_mode = STATIC_BUTTON_MODE, const ePositionMode button_position_mode = DO_NOT_ADJUST, const eFont button_font = SMALL_NORMAL_BOLD_FONT, const eAutoSize button_auto_size = NO_AUTO_SIZE);
 
-		UI_Button(UI_Object* parent, Rect rect, Rect maxRect, string normalText, string pressedText, eButton button, eTextMode textMode=HORIZONTALLY_CENTERED_TEXT_MODE, eButtonMode buttonMode = STATIC_BUTTON_MODE, ePositionMode mode = DO_NOT_ADJUST, eFont font=SMALL_NORMAL_BOLD_FONT, eAutoSize autoSize=NO_AUTO_SIZE);
-
-		UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eButton button, eButtonMode buttonMode = STATIC_BUTTON_MODE, ePositionMode mode = DO_NOT_ADJUST);
+		UI_Button(UI_Object* button_parent, const Rect button_rect, const Rect button_max_rect, const string& button_normal_text, const string& button_pressed_text, const eButton button_type, const eTextMode button_text_mode = HORIZONTALLY_CENTERED_TEXT_MODE, const eButtonMode button_mode = STATIC_BUTTON_MODE, ePositionMode button_position_mode = DO_NOT_ADJUST, const eFont button_font = SMALL_NORMAL_BOLD_FONT, const eAutoSize button_auto_size = NO_AUTO_SIZE);
+// Bitmap button
+		UI_Button(UI_Object* button_parent, const Rect button_rect, const Rect button_max_rect, const eButton button_type, const eButtonMode button_mode = STATIC_BUTTON_MODE, const ePositionMode button_position_mode = DO_NOT_ADJUST);
 		~UI_Button();
 		
 //      void set_hotkey_if_focus(int key); TODO
-        const bool isPressed() const;            // has it been selected (ie clicked on)
+        const bool isLeftClicked();            // has it been selected (ie clicked on)
+        const bool isRightClicked();
 //      int double_clicked();   // button was double clicked on
         const bool isJustPressed() const;      // button has just been selected
 		const bool isJustReleased() const;
         const bool isJustHighlighted() const; // button has just had mouse go over it
         const bool isCurrentlyPressed() const; // is the button depressed?
         const bool isCurrentlyHighlighted() const; // is the mouse over this button?
+		const bool isCurrentlyActivated() const;
                                                                                                                                                             
         void forceHighlighted();    // force button to be highlighted
-        void forcePressed();      // force button to get pressed
+        void forceDelighted();    // force button to be de-highlighted
+        void forcePress();      // force button to get pressed
 		void forceUnpress();
 
-		void updateNormalText(const string utext);
-		void updatePressedText(const string utext);
+		void updateNormalText(const string& utext);
+		void updatePressedText(const string& utext);
 
         //void setHighlightAction( void (*user_function)(void) );
         //void setDisabledAction( void (*user_function)(void) );
@@ -163,58 +174,92 @@ class UI_Button:public UI_Object
 //        void set_custom_cursor_bmap(int bmap_id) { custom_cursor_bmap = bmap_id; };
 
 		void process(); // process messages, continue animation etc.
+		UI_Object* checkHighlight();
+
+		void mouseHasMoved();
+		
+		void mouseHasEnteredArea();
+		void mouseHasLeftArea();
+		void mouseLeftButtonPressed();
+		void mouseLeftButtonReleased();
+		void mouseRightButtonPressed();
+		void mouseRightButtonReleased();
+
+		
 		void draw(DC* dc) const;
-		bool forcedPress;
 		void setButton(const eButton button);
-		void setFrameNumber(const int num);
+		void setFrameNumber(const unsigned int frame_number);
 	
-		Rect buttonPlacementArea;
 		void frameReset();
-	protected:
-		UI_StaticText* normalText;
-		UI_StaticText* pressedText;
-	
-        long int nextRepeat;     // timestamp for next repeat if held down
+		void resetGradient();
+		UI_Radio* radio;
+
+		bool forcedPress;
+		void adjustButtonPlacementArea(); // jump to relativeRect
+
 	private:
-		int gradient;
+		bool moved; // did this item move one pixel down (pressed)
+		bool originalPosition; // always false (not pressed) for non-static buttons
+		bool hasBitmap;
+
+
+		Rect buttonPlacementArea;
+		unsigned int gradient;
+		long unsigned int timeStamp;
 		
-		long int timeStamp;
-		
-		void adjustButtonSize(const Size size);
-//		Point absoluteCoord; // modificator if rect.GetPosition != real position
+		void adjustButtonSize(const Size& size);
+
+		unsigned int pressdepth;
 		
 		eFont font;
 		eButton button;	
 		eAutoSize autoSize;
 		ePositionMode mode;
 		
-		int frameNumber;
-		int statusFlags;
-        bool firstPressed; // first press-message after the button was not pressed
+		unsigned int frameNumber;
+		unsigned int statusFlags;
+
 		
 //	TODO    int onMouseOverCursor;                 // bmap handle of special cursor used on mouseovers
   // TODO      int previousCursor;              // store old cursor
 //        void maybeShowCustomCursor();   // show different cursor when onmouseOverCursor is set => process()
   //      void restorePreviousCursor();   // reset to original state => frame_reset()
+
 		void resetData();
+protected:
+		UI_StaticText* normalText;
+		UI_StaticText* pressedText;
+	
+        long unsigned int nextRepeat;     // timestamp for next repeat if held down
 
+		bool moveByMouse;
 
-		bool hasBitmap;
 };
 
-class UI_Radio:public UI_Object
+class UI_Radio : public UI_Object
 {
 	public:
-		UI_Radio(UI_Object* parent);
+		UI_Radio& operator=(const UI_Radio& object);
+		UI_Radio(const UI_Radio& object);
+		UI_Radio(UI_Object* radio_parent);
 		~UI_Radio();
 		void addButton(UI_Button* button);
-		const int getMarked() const;
-		void forceTabPressed(const int tab);
+		const unsigned int getMarked();
+		void forcePress(const unsigned int button);
+
+		void leftButtonPressed(UI_Button* button);
+		void leftButtonReleased(UI_Button* button); // allow release?		
+		void rightButtonPressed(UI_Button* button);
+		void rightButtonReleased(UI_Button* button); // allow release?		
+
 		void process();
 		void draw(DC* dc) const;
+		
 		const bool hasChanged() const;
 		void forceUnpressAll();
+
 	private:
+		unsigned int markedItem;
 		bool changed;
 };
 

@@ -3,25 +3,29 @@
 
 #include "menuentry.hpp"
 #include "../core/anarace.hpp"
+#include <list>
 
 class Menu : public UI_Object
 {
 	public:
-		Menu(UI_Object* parent, ANARACE* anarace, Rect rect);
+		Menu(UI_Object* parent, Rect rect/*, const unsigned int width, const unsigned int number*/);
+		Menu(const Menu& object);
 		~Menu();
+		Menu& operator=(const Menu& object);
 		void process();
 		void draw(DC* dc) const;
-		const int getHeight() const;
-		const int getPressedItem() const;
+		const unsigned int getHeight() const;
+		const signed int getPressedItem() const;
 		void close();
 		void open();		
 		const bool isOpen() const;
 	protected:
-		MenuEntry* menuEntry[UNIT_TYPE_COUNT]; // TODO Vector draus machen
-		int menuLevel;
-		int pressedItem;
-		int height;
-		ANARACE* anarace;
+		list<MenuEntry*> menuEntries;
+		unsigned int menuLevel;
+		signed int pressedItem;
+		unsigned int height;
+	private:
+		Point p1, p2;
 };
 
 #endif // _GUI_MENU_HPP

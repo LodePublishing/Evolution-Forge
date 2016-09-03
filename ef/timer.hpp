@@ -2,13 +2,13 @@
 #define _GUI_TIMER_HPP
 
 #include "../ui/window.hpp"
-
+#include "message.hpp"
 #include "../core/anarace.hpp"
 
 class TimerWindow : public UI_Window
 {
 	public:
-		TimerWindow(UI_Object* timer_parent, ANARACE* timer_anarace, const unsigned int timer_window_wumber);
+		TimerWindow(UI_Object* timer_parent, ANARACE* timer_anarace, MessageWindow* message_window, const unsigned int timer_window_wumber);
 		~TimerWindow();
 
 		void resetData();
@@ -32,6 +32,8 @@ class TimerWindow : public UI_Window
 		UI_StaticText* timeText;
 
 		UI_Button* continueButton;
+		UI_Button* resetButton;
+		MessageWindow* msgWindow;
 };
 
 #endif

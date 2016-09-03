@@ -9,7 +9,7 @@
 #define MAX_RACES 3
 #define UNIT_TYPE_COUNT 105
 #define MAX_LOCATIONS 5
-#define MAX_PLAYER 3
+#define MAX_GAME 5
 
 
 // ------ LANGUAGES ------

@@ -1,5 +1,4 @@
 #include "point.hpp"
-#include "../core/defs.hpp"
 
 void Point::mv(signed int& x, const signed int sx, const signed int tx)
 {

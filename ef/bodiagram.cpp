@@ -4,7 +4,8 @@ BoDiagramWindow::BoDiagramWindow(const BoDiagramWindow& object) :
 	UI_Window((UI_Window)object),
 	anarace(object.anarace),
 	infoWindow(object.infoWindow),
-	count(object.count)
+	count(object.count),
+	bold(object.bold)
 {
 // TODO arrays?
 }
@@ -15,6 +16,7 @@ BoDiagramWindow& BoDiagramWindow::operator=(const BoDiagramWindow& object)
 	anarace = object.anarace;
 	infoWindow = object.infoWindow;
 	count = object.count;
+	bold = object.bold;
 	return(*this);
 }
 
@@ -22,10 +24,11 @@ BoDiagramWindow::BoDiagramWindow(UI_Object* bod_parent, ANARACE* bod_anarace, In
 	UI_Window(bod_parent, BODIAGRAM_WINDOW_TITLE_STRING, BO_DIAGRAM_WINDOW, bod_window_number, NOT_SCROLLED),
 	anarace(bod_anarace),
 	infoWindow(bod_info_window),	
-	count(0)
+	count(0),
+	bold(false)
 {
 	resetData();
-	for(int i=MAX_TIME;i--;)
+	for(unsigned int i=MAX_TIME;i--;)
 	{
 		minerals[i]=Point(0,0);
 		gas[i]=Point(0,0);
@@ -65,7 +68,7 @@ void BoDiagramWindow::process()
 
 	UI_Window::process();
 
-	for(int i=count;i--;)
+	for(unsigned int i=count;i--;)
 	{
 	// TODO in unsigned umwandeln...
 		Point::mv(minerals[i].y, startMinerals[i].y, targetMinerals[i].y);
@@ -79,6 +82,12 @@ void BoDiagramWindow::process()
 		hneedSupply[i].x=targetHneedSupply[i].x;
 		nneedSupply[i].x=targetNneedSupply[i].x;
 //		fitness[i].x=targetFitness[i].x;
+	}
+	bold = false;
+	if((count>2)&&(getAbsoluteClientRect().Inside(mouse))&&(anarace->getRealTimer()>0))
+	{
+		bold=true;
+		setNeedRedrawNotMoved();
 	}
 }
 
@@ -378,9 +387,6 @@ void BoDiagramWindow::draw(DC* dc) const
 					dc->DrawRectangle(getAbsoluteClientRectPosition() + Point(0, getClientRectHeight()) + hneedSupply[i], Size(hneedSupply[i+1].x - hneedSupply[i].x, nneedSupply[i].y - hneedSupply[i].y));
 			}
 				
-			bool bold = false;
-			if((count>2)&&(getAbsoluteClientRect().Inside(mouse))&&(anarace->getRealTimer()>0))
-				bold=true;
 			
 			if(bold)
 				dc->SetPen(*theme.lookUpPen(BODIAGRAM_MINERALS_BOLD_PEN));

@@ -322,7 +322,6 @@
 		Loading core settings ...
 		Initializing SDL ...
 		Unable to init SDL:
-		Initializing video mode ...
 		Error setting video mode.
 		Setting window mode ...
 		Setting fullscreen mode ...
@@ -417,6 +416,7 @@
 		Optimize selected
 		Restart
 		Save build order...
+		Load ...
 		Frames per generation
 # timer window
 		%i % of goals fulfilled
@@ -480,6 +480,7 @@
 
 		Reset and restart from the scratch
 		Save build order as html
+		Load build order
 
 		Continue the optimization
 		Pause the optimization

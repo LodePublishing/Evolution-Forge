@@ -5,16 +5,16 @@ CORE=core
 
 CORE_OBJ=$(CORE)/defs.o $(CORE)/prerace.o $(CORE)/anarace.o $(CORE)/configuration.o $(CORE)/goal.o  $(CORE)/goalentry.o $(CORE)/harvest.o  $(CORE)/location.o  $(CORE)/basicmap.o  $(CORE)/race.o  $(CORE)/settings.o  $(CORE)/soup.o $(CORE)/building.o $(CORE)/start.o $(CORE)/unit.o $(CORE)/startcondition.o $(CORE)/statistics.o $(CORE)/program.o
 
-EF_OBJ=$(EF)/bodiagram.o $(EF)/bograph.o $(EF)/bgwindow.o $(EF)/bowindow.o $(EF)/forceentry.o $(EF)/force.o $(EF)/info.o $(EF)/message.o $(EF)/statistics.o $(EF)/timer.o $(EF)/mainwindow.o $(EF)/tutorial.o $(EF)/player.o  $(EF)/main.o  $(EF)/racemenu.o $(EF)/menuentry.o $(EF)/menu.o $(EF)/setwindow.o $(EF)/progressbar.o $(EF)/unitmenu.o $(EF)/goalmenu.o $(EF)/forcemenu.o $(EF)/languagemenu.o $(EF)/resolutionmenu.o $(EF)/thememenu.o $(EF)/locmenu.o $(EF)/guimain.o $(EF)/boentry.o
+EF_OBJ=$(EF)/bodiagram.o $(EF)/bograph.o $(EF)/bgwindow.o $(EF)/bowindow.o $(EF)/forceentry.o $(EF)/force.o $(EF)/info.o $(EF)/message.o $(EF)/statistics.o $(EF)/timer.o $(EF)/mainwindow.o $(EF)/tutorial.o $(EF)/game.o  $(EF)/main.o  $(EF)/racemenu.o $(EF)/menuentry.o $(EF)/menu.o $(EF)/setwindow.o $(EF)/progressbar.o $(EF)/unitmenu.o $(EF)/goalmenu.o $(EF)/forcemenu.o $(EF)/languagemenu.o $(EF)/resolutionmenu.o $(EF)/thememenu.o $(EF)/locmenu.o $(EF)/guimain.o $(EF)/boentry.o
 
 UI_OBJ=$(UI)/object.o $(UI)/window.o $(UI)/button.o $(UI)/radio.o $(UI)/statictext.o $(UI)/theme.o $(UI)/group.o $(UI)/editfield.o $(UI)/checkbutton.o $(UI)/endrundialog.o $(UI)/tooltip.o $(UI)/numberfield.o $(UI)/scrollbar.o
 
-SDL_OBJ=$(SDL)/color.o $(SDL)/font.o $(SDL)/pen.o $(SDL)/surface.o $(SDL)/brush.o $(SDL)/dc.o $(SDL)/framerate.o $(SDL)/bitmap.o $(SDL)/draw.o $(SDL)/size.o $(SDL)/rect.o $(SDL)/point.o
+SDL_OBJ=$(SDL)/color.o $(SDL)/font.o $(SDL)/pen.o $(SDL)/surface.o $(SDL)/brush.o $(SDL)/dc.o $(SDL)/framerate.o $(SDL)/draw.o $(SDL)/size.o $(SDL)/rect.o $(SDL)/point.o
 
 
 CPPFLAGS =
-FLAGS = -pipe -g -D_SCC_DEBUG -ansi -pedantic-errors -Wall #-W -Wmissing-braces -Wredundant-decls -Wundef -Wunused -Wconversion -Woverloaded-virtual -Wmissing-noreturn -Winline -Wdisabled-optimization -Wsign-promo -Wwrite-strings -Wlong-long -Woverloaded-virtual -Wfloat-equal -Wreturn-type -Wparentheses -Wchar-subscripts -Wimplicit  -Wtrigraphs  -Wendif-labels -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wshadow -Weffc++
-#FLAGS = -pg -O3 -pipe #-fmerge-all-constants -ffast-math #-march=pentium4 --param max-crossjump-edges=2000 --param max-gcse-memory=209715200 --param max-gcse-passes=40 --param max-pending-list-length=1000 --param max-delay-slot-insn-search=2000 --param max-delay-slot-live-search=4000
+#FLAGS = -pipe -g -D_SCC_DEBUG -ansi -pedantic-errors -Wall #-W -Wmissing-braces -Wredundant-decls -Wundef -Wunused -Wconversion -Woverloaded-virtual -Wmissing-noreturn -Winline -Wdisabled-optimization -Wsign-promo -Wwrite-strings -Wlong-long -Woverloaded-virtual -Wfloat-equal -Wreturn-type -Wparentheses -Wchar-subscripts -Wimplicit  -Wtrigraphs  -Wendif-labels -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wshadow -Weffc++
+FLAGS = -pg -O3 -pipe #-fmerge-all-constants -ffast-math #-march=pentium4 --param max-crossjump-edges=2000 --param max-gcse-memory=209715200 --param max-gcse-passes=40 --param max-pending-list-length=1000 --param max-delay-slot-insn-search=2000 --param max-delay-slot-live-search=4000
 #FLAGS = -g -D_SCC_DEBUG -ansi -pedantic-errors -Wall -W -Wmissing-braces -Wredundant-decls -Wundef -Wunused -Wconversion -Woverloaded-virtual -Wmissing-noreturn -Winline -Wdisabled-optimization -Wsign-promo -Wwrite-strings -Wlong-long -Woverloaded-virtual -Wfloat-equal -Wreturn-type -Wparentheses -Wchar-subscripts -Wimplicit  -Wtrigraphs  -Wendif-labels -Wpointer-arith #-Wcast-qual -Wcast-align -Wwrite-strings -Wshadow -Weffc++ 
 #-Wold-style-cast
 #-Wswitch-enum -Wpadded -Waggregate-return -Wunreachable-code -Wswitch -Wswitch-default 

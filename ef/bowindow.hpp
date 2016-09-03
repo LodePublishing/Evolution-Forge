@@ -47,8 +47,8 @@ class BoWindow : public UI_Window
 		unsigned int boGoalListOpened;
 		unsigned int lastBogoal;
 
-		UI_Button* resetButton;
 		UI_Button* saveBuildOrderButton;
+		UI_Button* loadBuildOrderButton;
 
 		MessageWindow* msgWindow;
 		bool* fixed;

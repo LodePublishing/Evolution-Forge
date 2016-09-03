@@ -7,8 +7,6 @@
 #include "pen.hpp"
 #include "brush.hpp"
 #include "font.hpp"
-#include "bitmap.hpp"
-//#include <SDL/SDL_gfxPrimitives.h>
 #include <string>
 
 #define SDL_DRAW_BPP 4
@@ -18,7 +16,7 @@ class DC
 {
 	public:
 		DC();
-		DC(const unsigned int width, const unsigned int height, const unsigned int bitdepth, Uint32 flags);
+		DC(const unsigned int width, const unsigned int height, const unsigned int bitdepth, Uint32 flags, Uint32 initflags);
 		~DC() 
 		{ }
 		
@@ -47,6 +45,8 @@ class DC
 		void *pixels();
 		const void *pixels() const;
 		struct private_hwdata *hwdata() const;
+
+		const bool initializationOK() const;
 		
 		const bool SetColorKey(const Uint32 flag, const Color key) const;
 		const bool SetAlpha(const Uint32 flag, const Uint8 alpha) const;
@@ -86,8 +86,8 @@ class DC
 		void DrawTextA(const std::string& text, const int x, const int y) const;
 		void DrawText(const std::string& text, const signed int x, const signed int y) const;
 		
-		void DrawBitmap(const Bitmap& bitmap, const Point& p) const;
-		void DrawBitmap(const Bitmap& bitmap, const signed int x, const signed int y) const;
+		void DrawBitmap(SDL_Surface* bitmap, const Point& p) const;
+		void DrawBitmap(SDL_Surface* bitmap, const signed int x, const signed int y) const;
 
 		void DrawEmptyRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height) const;
 		void DrawEmptyRectangle(const Rect& rect) const;
@@ -111,7 +111,7 @@ class DC
 		void DrawVerticalLine(const signed int x0, const signed int y0, const signed int y1) const;
 		void DrawHorizontalLine(const signed int x0, const signed int y0, const signed int x1) const;
 		
-		void DrawGridEdgedRoundedRectangle(const signed int x, const signed y, const unsigned width, const unsigned int height, const unsigned int radius, std::list<Rect> notDrawRectList) const;
+//		void DrawGridEdgedRoundedRectangle(const signed int x, const signed y, const unsigned width, const unsigned int height, const unsigned int radius, std::list<Rect> notDrawRectList) const;
 		void DrawRoundedRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int radius) const;
 		void DrawEdgedRoundedRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int radius) const;
 //		void DrawGridEdgedRoundedRectangle(const Point p, const Size& s, const unsigned int radius, std::list<Rect> &notDrawRectList) const {
@@ -125,6 +125,7 @@ class DC
 		void FillRect( SDL_Surface& dest, SDL_Rect *rc, SDL_Color &clr ) const;
 		void setResolution(const unsigned int max_x, const unsigned int max_y);
 		static SDL_Color toSDL_Color(const Uint8 r, const Uint8 g, const Uint8 b);
+		void printInformation() const;
 		
 	protected:
 		SDL_Surface* surface;
@@ -135,6 +136,7 @@ class DC
 		}
 
 	private:
+		bool initOK;
 		Uint16 max_x, max_y;
 		Brush brush;
 		Pen pen;
@@ -283,7 +285,7 @@ inline const Size DC::GetTextExtent(const std::string& text) const {
 	return(font->GetTextExtent(text));
 }
 		
-inline void DC::DrawBitmap(const Bitmap& bitmap, const Point& p) const {
+inline void DC::DrawBitmap(SDL_Surface* bitmap, const Point& p) const {
 	DrawBitmap(bitmap, p.x, p.y);
 }
 		

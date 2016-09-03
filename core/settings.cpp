@@ -37,7 +37,7 @@ SETTINGS::~SETTINGS()
 }
 
 
-list<string> SETTINGS::findFiles(const string directory1, const string directory2, const string directory3) const
+list<string> SETTINGS::findFiles(const string& directory1, const string& directory2, const string& directory3) const
 {
 	list<string> fileList;
 #ifdef __linux__
@@ -46,19 +46,11 @@ list<string> SETTINGS::findFiles(const string directory1, const string directory
 	ostringstream os;
 	os << directory1 << "/" << directory2 << "/" << directory3;
 	if ((dir = opendir(os.str().c_str())) == NULL)
-	{
-		ostringstream os2;
-		os2 << "ERROR opening directory " << os.str();
-		toLog(os2.str());
-	}
+		toLog("ERROR opening directory " + os.str());
 	else 
 	{
 		while ((entry = readdir(dir)) != NULL)
-		{
-			ostringstream os2;
-			os2 << os.str() << "/" << entry->d_name;
-			fileList.push_back(os2.str());
-		}
+			fileList.push_back(os.str() + "/" + entry->d_name);
 		closedir(dir);
 	}
 #elif __WIN32__
@@ -68,18 +60,11 @@ list<string> SETTINGS::findFiles(const string directory1, const string directory
 	os << directory1 << "\\" << directory2 << "\\" << directory3 << "\\" << "*.*";
 	if ((fhandle=FindFirstFile(os.str().c_str(), &dir)) !=INVALID_HANDLE_VALUE)
 	{
-		do {
-			os.str("");
-			os << directory1 << "\\" << directory2 << "\\" << directory3 << "\\" << dir.cFileName;
-			fileList.push_back(os.str());
-			toLog(os.str());
-		} while(FindNextFile(fhandle, &dir));
+		do 
+			fileList.push_back(directory1 + "\\" + directory2 + "\\" + directory3 + "\\" + dir.cFileName);
+		while(FindNextFile(fhandle, &dir));
 	} else
-	{
-		os.str("");
-		os << "ERROR Loading " << directory1 << "\\" << directory2 << "\\" << directory3 << ".";
-		toLog(os.str());
-	}
+		toLog("ERROR Loading " + directory1 + "\\" + directory2 + "\\" + directory3 + ".");
 	FindClose(fhandle);
 #endif
 	return fileList;
@@ -133,16 +118,10 @@ void SETTINGS::loadGoalFile(const string& goalFile)
 	ifstream pFile(goalFile.c_str());
 	if(!pFile.is_open())
 	{
-		ostringstream os;
-		os.str("");
-		os << "ERROR: (loadGoalFile): File " << goalFile << " not found.";
-		toLog(os.str());
+		toLog("ERROR: (loadGoalFile): File " + goalFile + " not found.");
 		return;
 	}
-	ostringstream os;
-	os.str("");
-	os << goalFile << " loaded.";
-	toLog(os.str());
+	toLog(goalFile + " loaded.");
 	
 	char line[1024];
 	string text;
@@ -195,9 +174,6 @@ void SETTINGS::loadGoalFile(const string& goalFile)
 						l++;int location=atoi(l->c_str());
 						l++;int time=atoi(l->c_str());
 						goal->addGoal(unit, count, time, location);
-						ostringstream sdf;
-						sdf << unit << " " << count << " " << time << " " << location;
-						toLog(sdf.str());
 					}
 				}
 			}
@@ -361,7 +337,7 @@ void SETTINGS::loadMapFile(const string& mapFile)
 				int target = atoi(i->second.front().c_str());
 				i->second.pop_front();
 				basicmap->setLocationDistance(location-1, target-1, atoi(i->second.front().c_str()));
-				cout << location-1 << "->" << target-1 << " : " << atoi(i->second.front().c_str()) << std::endl;
+//				cout << location-1 << "->" << target-1 << " : " << atoi(i->second.front().c_str()) << std::endl;
 			}
 			if((i=block.find("Minerals"))!=block.end())
 			{
@@ -377,7 +353,7 @@ void SETTINGS::loadMapFile(const string& mapFile)
 		}
 	}// END while
 	
-	for(unsigned int i = 1; i < basicmap->getMaxLocations(); i++)
+/*DEBUG	for(unsigned int i = 1; i < basicmap->getMaxLocations(); i++)
 	{	
 		std::cout << "Location " << i << " ";
 		for(unsigned int j = 1; j < basicmap->getMaxLocations(); j++)
@@ -393,7 +369,7 @@ void SETTINGS::loadMapFile(const string& mapFile)
 		for(unsigned int j = 1; j < basicmap->getMaxLocations(); j++)
 			std::cout << basicmap->getLocation(i)->getDistance(j) << " ";
 		std::cout << std::endl;
-	}
+	}*/
 	
 	loadedMap.push_back(basicmap);
 } // schoen :)
@@ -502,9 +478,15 @@ void SETTINGS::loadStartconditionFile(const string& startconditionFile)
 void SETTINGS::saveBuildOrder(const string& name, const ANARACE* anarace) const
 {
 	ostringstream os;
+#ifdef __linux__
 	os << "output/bos/";
 	os << raceString[anarace->getRace()] << "/" << name << ".html";
+#elif __WIN32__
+	os << "output\\bos\\";
+	os << raceString[anarace->getRace()] << "\\" << name << ".html";
+#endif
 	ofstream pFile(os.str().c_str(), ios_base::out | ios_base::trunc);
+	
 	if(!pFile.is_open())
 	{
 		toLog("ERROR: Could not create file (write protection? disk space?)");

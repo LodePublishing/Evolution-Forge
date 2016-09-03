@@ -3,7 +3,7 @@
 #include <sstream>
 #include <iomanip>
 
-TimerWindow::TimerWindow(UI_Object* timer_parent, ANARACE* timer_anarace, const unsigned int timer_window_number):
+TimerWindow::TimerWindow(UI_Object* timer_parent, ANARACE* timer_anarace, MessageWindow* message_window, const unsigned int timer_window_number):
 	UI_Window(timer_parent, TIMER_WINDOW_TITLE_STRING, TIMER_WINDOW, timer_window_number, NOT_SCROLLED),
 	currentTime(MAX_TIME-1),
 	lastTime(MAX_TIME-1),
@@ -13,8 +13,11 @@ TimerWindow::TimerWindow(UI_Object* timer_parent, ANARACE* timer_anarace, const 
 	currentActionText(new UI_StaticText(this, getRelativeClientRect(), IMPORTANT_COLOR, LARGE_NORMAL_BOLD_FONT, UPPER_CENTERED_TEXT_MODE)),
 	timeText(new UI_StaticText(this, getRelativeClientRect(), IMPORTANT_COLOR, VERY_LARGE_NORMAL_BOLD_FONT, TOTAL_CENTERED_TEXT_MODE)),
 // TODO irgendwas stimmt hier mit der Hoehe nicht
-	continueButton(new UI_Button(this, getRelativeClientRect(), CLICK_TO_CONTINUE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, BOTTOM_CENTER, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH))
+	continueButton(new UI_Button(this, getRelativeClientRect(), CLICK_TO_CONTINUE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, BOTTOM_CENTER, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH)),
+	resetButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), RESET_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, CENTER_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	msgWindow(message_window)
 {
+        resetButton->updateToolTip(RESET_BUILD_ORDER_TOOLTIP_STRING);
 	continueButton->updateToolTip(CONTINUE_OPTIMIZATION_TOOLTIP_STRING);
 	goalsFulFilledText->updateToolTip(GOALS_FULFILLED_TOOLTIP_STRING);
 	resetData(); // TODO
@@ -22,10 +25,11 @@ TimerWindow::TimerWindow(UI_Object* timer_parent, ANARACE* timer_anarace, const 
 
 TimerWindow::~TimerWindow()
 {
-	delete(goalsFulFilledText);
-	delete(currentActionText);
-	delete(timeText);
-	delete(continueButton);
+	delete goalsFulFilledText;
+	delete currentActionText;
+	delete timeText;
+	delete continueButton;
+	delete resetButton;
 }
 
 void TimerWindow::assignAnarace(ANARACE* timer_anarace)
@@ -114,6 +118,11 @@ void TimerWindow::process()
 			currentActionText->updateText(OPTIMIZING_STRING);
 		timeText->updateText(theme.lookUpFormattedString(TOTAL_STRING, 123));
 	}
+        if(resetButton->isLeftClicked())
+        {
+                setResetFlag();
+                msgWindow->addMessage("Resetted build order...");
+        }
 }
 
 void TimerWindow::setMode(const unsigned int current_mode) // for different tabs different behaviour

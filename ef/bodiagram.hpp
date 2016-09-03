@@ -25,6 +25,7 @@ class BoDiagramWindow : public UI_Window
 		InfoWindow* infoWindow;
 
 		unsigned int count;
+		bool bold;
 
 		Point minerals[MAX_TIME];
 		Point gas[MAX_TIME];

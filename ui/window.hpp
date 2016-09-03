@@ -35,8 +35,6 @@ class UI_Window : public UI_Object
 		UI_Window(UI_Object* window_parent, const eString window_title_string, const eWindow window_type, const unsigned int window_number, const eIsScrolled window_is_scrolled=NOT_SCROLLED, const eIsAutoAdjust win_is_auto_adjust=NO_AUTO_SIZE_ADJUST, const eIsTabbed win_is_tabbed=NOT_TABBED, const Rect win_client_area=Rect(0,0,1280,1024));
 		~UI_Window();
 
-		const unsigned int getScrollY() const;
-
 // returns position and size of the client area
 		const Rect& getRelativeClientRect() const;
 		const Rect getAbsoluteClientRect() const;
@@ -54,12 +52,7 @@ class UI_Window : public UI_Object
 		const signed int getAbsoluteClientRectLowerBound() const;
 		const signed int getAbsoluteClientRectRightBound() const;
 
-/*		const bool insideClientRect(const Point pos) const
-		{
-			return(clientRect.Inside(pos - getAbsolutePosition())); //?
-		//  return(clientArea.Inside(rectangle.x,rectangle.y)||clientArea.Inside(rectangle.x+rectangle.width,rectangle.y+rectangle.height)||clientArea.Inside(rectangle.x+rectangle.width,rectangle.y)||clientArea.Inside(rectangle.x,rectangle.y+rectangle.height));
-		//  TODO: wenns auf beiden Seiten ueberlappt?
-		}*/ // TODO
+		const unsigned int getClientTargetHeight() const;
 		
 // do windows size changes smoothly		
 		void adjustClientRect();
@@ -102,6 +95,8 @@ class UI_Window : public UI_Object
 
 		void wheelUp();
 		void wheelDown();
+		void resetScrollbar();
+		void resetScrollbarToEnd();
 
 	protected:
 //		bool isMouseInsideClientArea();

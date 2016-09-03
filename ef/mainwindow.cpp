@@ -28,7 +28,7 @@ MainWindow::MainWindow() :
 	tab[GOSU_TAB]->Disable();
 	tab[TUTORIAL_TAB]->Disable();
 	tab[MAP_TAB]->Disable();
-	tab[COMPARE_TAB]->Disable();
+//	tab[COMPARE_TAB]->Disable();
 }
 
 

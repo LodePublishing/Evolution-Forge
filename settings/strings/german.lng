@@ -322,7 +322,6 @@
 		Lade Einstellungen des Kerns ...
 		Initialisiere SDL ...
 		Initialisierung von SDL fehlgeschlagen:
-		Initialisiere Videomodus ...
 		Initialisierung des Videomodus fehlgeschlagen.
 		Setze Fenstermodus ...
 		Setze Vollbildmodus ...
@@ -416,6 +415,7 @@
 		Optimiere nur Auswahl
 		Neustart
 		Speichere Baufolge...
+		Lade ...
 		Geschwindigkeit
 # timer window
 		%i % der Ziele erfüllt
@@ -484,6 +484,7 @@
 
 		Starte komplett von Null neu
 		Speichere Baureihenfolge als HTML
+		Lade alte Baufolge
 
 		Fahre mit der Optimierung fort
 		Halte die Optimierung an

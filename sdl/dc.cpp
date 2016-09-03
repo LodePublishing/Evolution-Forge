@@ -8,31 +8,42 @@ DC::DC():
 	pen(),
 	color(NULL),
 	textColor(),
-	font(NULL)
+	font(NULL),
+	initOK(false)
 { }
 
 DC::DC(const DC& other):
 	surface(other.surface),
-	max_x(0),
-	max_y(0),
-	brush(),
-	pen(),
-	color(NULL),
-	textColor(),
-	font(NULL)
+	max_x(other.max_x),
+	max_y(other.max_y),
+	brush(other.brush),
+	pen(other.pen),
+	color(other.color),
+	textColor(other.textColor),
+	font(other.font),
+	initOK(other.initOK)
 { }
 // TODO?
 
-DC::DC(const unsigned int width, const unsigned int height, const unsigned int bitdepth, Uint32 nflags) :
-	surface(SDL_SetVideoMode(width, height, bitdepth, nflags)),
+DC::DC(const unsigned int width, const unsigned int height, const unsigned int bitdepth, Uint32 nflags, Uint32 initflags) :
+	surface(NULL),
 	max_x(0),
 	max_y(0),
 	brush(),
 	pen(),
 	color(NULL),
 	textColor(),
-	font(NULL)
+	font(NULL),
+	initOK(true)
 {
+	if ( SDL_Init(initflags) < 0 )
+	{
+		initOK = false;
+		return;
+	}
+	atexit(SDL_Quit);
+	surface = SDL_SetVideoMode(width, height, bitdepth, nflags);
+
 /*	switch(surface->format->BitsPerPixel)
 	{
 		case 8:(DC::Draw_HLine) = (void (unsigned int, unsigned int, unsigned int)) Draw_HLine_8bit;break;
@@ -42,6 +53,57 @@ DC::DC(const unsigned int width, const unsigned int height, const unsigned int b
 //		case 32:Draw_HLine = &DC::Draw_HLine_32bit;break;
 		default:toLog("Bit Error");break;
 	}*/
+}
+
+
+const bool DC::initializationOK() const
+{
+	return(initOK);
+}
+
+void DC::printInformation() const
+{
+#if 0
+	SDL_Rect **modes;
+	modes=SDL_ListModes(NULL, SDL_FULLSCREEN|SDL_HWSURFACE);
+	if(modes == (SDL_Rect **)0)
+	{
+		toLog("No modes available!");
+	} else
+	{
+		if(modes == (SDL_Rect **)-1)
+			toLog("All resolutions available.");
+		else
+		{
+			toLog("Available Modes:");
+			for(int i=0;modes[i];++i)
+			{
+				std::ostringstream os;
+				os << "  " << modes[i]->w << " x " << modes[i]->h;
+				toLog(os.str());
+			}
+		}
+	}
+
+
+	if (flags() & SDL_SWSURFACE)
+		toLog("Surface is stored in system memory");
+	else if(flags() & SDL_HWSURFACE)
+		toLog("Surface is stored in video memory");
+	if(flags() & SDL_ASYNCBLIT) toLog("Surface uses asynchronous blits if possible");
+	if(flags() & SDL_ANYFORMAT) toLog("Allows any pixel-format");
+	if(flags() & SDL_HWPALETTE) toLog("Surface has exclusive palette");
+	if(flags() & SDL_DOUBLEBUF) toLog("Surface is double buffered");
+	if(flags() & SDL_OPENGL) toLog("Surface has an OpenGL context");
+	if(flags() & SDL_OPENGLBLIT) toLog("Surface supports OpenGL blitting");
+	if(flags() & SDL_RESIZABLE) toLog("Surface is resizable");
+	if(flags() & SDL_HWACCEL) toLog("Surface blit uses hardware acceleration");
+	if(flags() & SDL_SRCCOLORKEY) toLog("Surface use colorkey blitting");
+	if(flags() & SDL_RLEACCEL) toLog("Colorkey blitting is accelerated with RLE");
+	if(flags() & SDL_SRCALPHA) toLog("Surface blit uses alpha blending");
+	if(flags() & SDL_PREALLOC) toLog("Surface uses preallocated memory");
+	if(SDL_MUSTLOCK(surface)) toLog("Surface needs locking");
+#endif
 }
 
 void DC::setFullscreen(const bool full_screen)
@@ -61,9 +123,9 @@ void DC::setFullscreen(const bool full_screen)
 void DC::updateScreen() const
 {
 	SDL_Flip(surface);
-//	SDL_UpdateRect(surface, 0, 0, 1000, 200);
+//	SDL_UpdateRects();//surface, 0, 0, 800, 500);
 }
-void DC::DrawBitmap(const Bitmap& bitmap, const signed int x, const signed int y) const
+void DC::DrawBitmap(SDL_Surface* bitmap, const signed int x, const signed int y) const
 {
 	SDL_Rect drect;
 	drect.x = x;
@@ -180,6 +242,7 @@ void DC::setResolution(const unsigned int dc_max_x, const unsigned int dc_max_y)
 	max_y=dc_max_y;
 }
 
+#if 0
 void DC::DrawGridEdgedRoundedRectangle(const signed int x, const signed y, const unsigned width, const unsigned int height, const unsigned int radius, std::list<Rect> notDrawRectList) const 
 {
 	return;
@@ -233,6 +296,7 @@ void DC::DrawGridEdgedRoundedRectangle(const signed int x, const signed y, const
 	if (pen.GetStyle() != TRANSPARENT_PEN_STYLE)
 		DrawEmptyEdgedRound(x, y, ww, hh, radius);*/
 }
+#endif
 
 void DC::DrawEdgedRoundedRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int radius) const
 {
@@ -322,7 +386,7 @@ void DC::DrawVerticalLine(const signed int x0, const signed int y0, const signed
 	{
 //		std::ostringstream os;
 //		os << "Line out of range: " << x0 << ", " << y0 << ", " << y1;
-		toLog("Line out of range");//os.str());
+//		toLog("Line out of range");//os.str());
 		return;
 	}
 	signed int yy0;
@@ -343,7 +407,7 @@ void DC::DrawHorizontalLine(const signed int x0, const signed int y0, const sign
 	{
 //	  std::ostringstream os;
 //	  os << "Line out of range: " << x0 << ", " << y0 << ", " << y1;
-		toLog("Line out of range");//os.str());
+//		toLog("Line out of range");//os.str());
 		return;
 	}
 	signed int xx0;

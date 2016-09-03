@@ -156,10 +156,6 @@ class UI_Object
 
 //		const bool setFocus(); TODO
 	protected:
-/*		void move(signed int& x, const signed int sx, const signed int tx);
-		void move(Point& p, const Point sp, const Point tp);
-		void move(Rect& r, const Rect sr, const Rect tr);
-		void move(unsigned int& x, const unsigned int sx, const unsigned int tx);*/
 
 		UI_Object* children; // pointer to the head of the linked list of children
 //		std::list<Rect> notDrawRectList;

@@ -64,7 +64,8 @@ class Rect
 
 		const bool overlaps(const Rect& rect) const;
 
-		const bool move(const Rect startRect, const Rect targetRect);
+		const bool moveSmooth(const Rect& startRect, const Rect& targetRect);
+		const bool move(const Rect& startRect, const Rect& targetRect);
 	private:
 		Point topLeftCorner;
 		Point bottomRightCorner;
@@ -80,8 +81,8 @@ inline Rect::Rect(const signed int x, const signed int y, const unsigned int w, 
 	bottomRightCorner(x+w, y+h),
 	rectSize(w, h)
 {
-	if((w > 1280)||(h> 1024))
-		toLog("ERROR, width/height too large");
+//	if((w > 1280)||(h> 1024))
+//		toLog("ERROR, width/height too large");
 }
 
 	
@@ -178,11 +179,11 @@ inline void Rect::SetTop(const signed int top) {
 		
 inline void Rect::SetBottom(const signed int bottom) 
 {
-#ifdef _SCC_DEBUG
+/*#ifdef _SCC_DEBUG
 	if(bottom < GetTop()) {
 		toLog("ERROR: SetBottom was put above of GetTop!");return;
 	}
-#endif
+#endif*/
 	bottomRightCorner.y = bottom;
 	SetHeight(bottom - GetTop());
 }
@@ -219,11 +220,11 @@ inline const bool Rect::Inside(const Point& point) const
 
 inline void Rect::SetRight(const signed int right) 
 {
-#ifdef _SCC_DEBUG
+/*#ifdef _SCC_DEBUG
 	if(right < GetLeft()) {
 		toLog("ERROR: SetRight was put left of GetLeft!");return;
 	}				
-#endif
+#endif*/
 	SetWidth(right - GetLeft());
 	bottomRightCorner.x = right;
 }

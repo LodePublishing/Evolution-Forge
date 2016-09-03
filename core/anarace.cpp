@@ -847,7 +847,6 @@ void ANARACE::countUnitsTotal()
 // ------ END OF MISC FUNCTIONS ------
 // -----------------------------------
 
-
 const unsigned int ANARACE::getGoalPercentage() const
 {
 	if(getTimer()==0)

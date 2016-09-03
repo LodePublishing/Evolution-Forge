@@ -180,6 +180,7 @@ class PRERACE
 		const unsigned int getCurrentCode() const;
 //		const unsigned int getMarker(const unsigned int ip) const;
 		void copyCode(PRERACE& player);
+		void copyCode(unsigned int* dst) const;
 
 		void addLarvaToQueue(const unsigned int location_number);
 		void removeLarvaFromQueue(const unsigned int location_number);

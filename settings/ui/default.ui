@@ -736,7 +736,7 @@
 			arrow_left
 			arrow_right
 			arrow_up
-			arrow_down		
+			arrow_down
 			location_button
 			time_button
 			mouse
@@ -877,7 +877,7 @@
 			Force window, dock left inside of, Main window, dock top inside of, Main window, 300, 100
 			Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
 			Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 120
-			Build order diagram window, dock with right border of, Force window, dock with lower border of, Statistics window, 500, 110
+			Build order diagram window, dock with right border of, Force window, dock top inside of, Main window, 500, 110
 			Build order graph window, dock with lower border of, Build order diagram window, dock with right border of, Force window, 500, 50
 			Info window, dock with left border of, Build order window, dock top inside of, Main window, 250, 150
 			Settings window, dock center inside of, Main window, 425, 358

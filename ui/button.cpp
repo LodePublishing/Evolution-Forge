@@ -213,7 +213,7 @@ void UI_Button::adjustButtonSize(const Size& size)
 		case NO_AUTO_SIZE:setSize(buttonPlacementArea.GetSize());break;
 		case AUTO_SIZE_ONCE:
 			setSize(size+Size(6, 0));
-			autoSize = NO_AUTO_SIZE;//AUTO_SIZE_TWICE;
+			autoSize = AUTO_SIZE_TWICE;
 			break;
 		case AUTO_SIZE_TWICE:setSize(size+Size(6, 0));
 						autoSize = NO_AUTO_SIZE;break;
@@ -231,14 +231,14 @@ void UI_Button::adjustButtonSize(const Size& size)
 
 	switch(mode)
 	{
-		case DO_NOT_ADJUST:setPosition(buttonPlacementArea.GetTopLeft());break;
+		case DO_NOT_ADJUST:break;//setPosition(buttonPlacementArea.GetTopLeft());break;
 		case TOTAL_CENTERED:setPosition(buttonPlacementArea.GetTopLeft()+buttonPlacementArea.GetSize()/2 - Size(getWidth()/2,0) + Size(0, getHeight()/2));break;
 		case HORIZONTAL_CENTERED:setLeft(buttonPlacementArea.GetLeft()+(buttonPlacementArea.GetWidth() - getWidth())/2);break;
 		case VERTICALLY_CENTERED:setTop(buttonPlacementArea.GetTop()+(buttonPlacementArea.GetHeight() - getHeight())/2);break;
 		case TOP_LEFT:break;
 		case TOP_CENTER:setPosition(buttonPlacementArea.GetTopLeft()+Size((buttonPlacementArea.GetWidth() + getWidth())/2, 0));break;
 		case TOP_RIGHT:setPosition(buttonPlacementArea.GetTopLeft()+Size(buttonPlacementArea.GetWidth(), 0) - Size(getWidth(), 0));break;
-		case CENTER_RIGHT:setPosition(buttonPlacementArea.GetTopLeft()+buttonPlacementArea.GetSize()/2 - getSize()/2);break;
+		case CENTER_RIGHT:setPosition(buttonPlacementArea.GetTopLeft()+Size(buttonPlacementArea.GetWidth(), buttonPlacementArea.GetHeight()/2 - getHeight()/2) - Size(getWidth(), 0));break;
 		case BOTTOM_RIGHT:setPosition(buttonPlacementArea.GetTopLeft()+buttonPlacementArea.GetSize() - getSize());break;
 		case BOTTOM_CENTER:setPosition(buttonPlacementArea.GetTopLeft()+Size(buttonPlacementArea.GetWidth()/2,buttonPlacementArea.GetHeight()) - Size(getWidth()/2,getHeight()));break;
 		case BOTTOM_LEFT:setPosition(buttonPlacementArea.GetTopLeft()+Size(0, buttonPlacementArea.GetHeight()) - Size(0,getHeight()));break;
@@ -273,8 +273,11 @@ void UI_Button::adjustButtonSize(const Size& size)
 		}break;
 		case ARRANGE_RIGHT:
 		{
-			setPosition(buttonPlacementArea.GetTopLeft()+Size(buttonPlacementArea.GetWidth(), getParent()->getMinRightY())+Size(getWidth(),0));
+			setPosition(buttonPlacementArea.GetTopLeft()+Size(buttonPlacementArea.GetWidth(), getParent()->getMinRightY()) - Size(getWidth(),0)); // TODO
 			getParent()->addMinRightY(getHeight()+MIN_DISTANCE);
+			startRect=getRelativeRect();
+			targetRect=getRelativeRect();
+			filledHeight=getHeight();
 		}break;
 		default:break;//TODO error
 	}
@@ -283,8 +286,8 @@ void UI_Button::adjustButtonSize(const Size& size)
 // Render button.  How it draws exactly depends on it's current state.
 void UI_Button::draw(DC* dc) const
 {
-//	if(!isShown())
-//		return;
+	if(!isShown())
+		return;
 	if(checkForNeedRedraw())
 	{
 
@@ -354,7 +357,7 @@ void UI_Button::draw(DC* dc) const
 	else 
 	{
 //		dc->DrawRectangle(Rect(getAbsolutePosition()-Size(1,1)+Size(pressdepth, pressdepth), getSize()+Size(2,2))); // kasterl ums bitmap
-		dc->DrawBitmap(*theme.lookUpBitmap(theme.lookUpButtonAnimation(button)->bitmap[animation_phase]), getAbsolutePosition()+Size(pressdepth, pressdepth));
+		dc->DrawBitmap(theme.lookUpBitmap(theme.lookUpButtonAnimation(button)->bitmap[animation_phase]), getAbsolutePosition()+Size(pressdepth, pressdepth));
 	}
 	
 /*	if((animation_phase==PRESSED_BUTTON_PHASE)||(animation_phase==PRESSED_HIGHLIGHTED_BUTTON_PHASE))
@@ -448,7 +451,7 @@ void UI_Button::frameReset()
 
 void UI_Button::mouseHasEnteredArea()
 {
-	gradient=0;frameNumber=0;
+	resetGradient();
 	statusFlags |= BF_HIGHLIGHTED;
 	if(statusFlags & BF_WAS_PRESSED)
 	{
@@ -490,7 +493,6 @@ void UI_Button::mouseLeftButtonReleased()
 {
 	if((statusFlags & BF_NOT_CLICKABLE))
 		return;
-	setNeedRedrawMoved();
 //	if(forcedPress)
 //		return;
 	statusFlags &= ~BF_WAS_PRESSED;
@@ -504,7 +506,6 @@ void UI_Button::mouseLeftButtonReleased()
 				originalPosition=false;
 			else if(!originalPosition)
 				originalPosition=true;
-			setNeedRedrawMoved();
 		}
 		else
 			setPressDepth(0);
@@ -549,7 +550,6 @@ void UI_Button::mouseRightButtonReleased()
 				originalPosition=false;
 			else if(!originalPosition)
 				originalPosition=true;
-			setNeedRedrawMoved();
 		}
 		else
 			setPressDepth(0);
@@ -574,6 +574,7 @@ UI_Object* UI_Button::checkHighlight()
 {
 	if( (!isShown()) || (isDisabled()) || (!getAbsoluteRect().Inside(mouse - Size(pressdepth, pressdepth) )) )
 		return(NULL);
+	resetGradient();
 	return((UI_Object*)this);
 }
 
@@ -589,20 +590,21 @@ void UI_Button::process()
 	// TODO evtl Animation fuer jede Phase in die config datei
 	// dann waere sowas moeglich, dass ich maus reinfahr und das langsam verblasst
 	// evtl auch einfach brightencolor ueberlegen...
+	unsigned int oldgradient = gradient;
 	if(!configuration.isGlowingButtons())
 	{
 		if(!(statusFlags & BF_HIGHLIGHTED))
 			gradient = 100;
 		else 
-			if(frameNumber<theme.lookUpButtonAnimation(button)->speed/2) gradient=100;
+			if(frameNumber<theme.lookUpButtonAnimation(button)->speed/2) gradient=20;
 		else 
-			gradient = 0;
+			gradient = 100;
 	} else
-		if(!(statusFlags & BF_HIGHLIGHTED))
-			gradient += (100 - gradient) / 5 + 1;
+	if(!(statusFlags & BF_HIGHLIGHTED))
+		gradient += (100 - gradient) / 5 + 1;
 	else
 	switch(theme.lookUpButtonAnimation(button)->type)
-	{
+	{	
 		case NO_ANIMATION:if(gradient < 100) gradient++;else gradient = 100;break;
 		case JUMPY_COLORS_ANIMATION:gradient=(frameNumber%theme.lookUpButtonAnimation(button)->speed)*100/theme.lookUpButtonAnimation(button)->speed;break;
 		case GLOWING_ANIMATION:gradient=(unsigned int)(50*(sin(3.141*frameNumber/theme.lookUpButtonAnimation(button)->speed)+1));break;
@@ -613,7 +615,7 @@ void UI_Button::process()
 	if(gradient > 100)
 		gradient = 100;
 
-	if(gradient != 100)
+	if(gradient != oldgradient)
 		setNeedRedrawNotMoved();
 
 	Point absoluteCoord = getRelativePosition();
@@ -633,19 +635,22 @@ void UI_Button::process()
 		buttonPlacementArea.SetWidth( buttonPlacementArea.GetWidth() + getWidth() - absoluteSize.GetWidth());
 		buttonPlacementArea.SetHeight( buttonPlacementArea.GetHeight() + getHeight() - absoluteSize.GetHeight());
 	} else doNotSetSize=false;
-
+*/
 	if(!hasBitmap)
 	{
 		adjustButtonSize(text->getTextSize());
 		text->setSize(getSize());
 	}
 
-*/
 	if(statusFlags & BF_WAS_PRESSED)
 		statusFlags |= BF_HIGHLIGHTED;
-	if(frameNumber<theme.lookUpButtonAnimation(button)->speed)
-		frameNumber++;
-	else frameNumber=0;
+
+	if(statusFlags & BF_HIGHLIGHTED)
+	{
+		if(frameNumber<theme.lookUpButtonAnimation(button)->speed)
+			frameNumber+=2;
+		else frameNumber=0;
+	}
 	
 // button was disabled -> set status as if button was just released ~	
 //	if(disabledFlag)
@@ -756,6 +761,7 @@ const bool UI_Button::isRightClicked()
 void UI_Button::resetGradient()
 {
 	gradient=0;
+	frameNumber=0;
 }
 
 const bool UI_Button::isJustPressed() const
@@ -832,8 +838,7 @@ void UI_Button::forcePress()
 //			{
    			statusFlags &= ~BF_DOWN;
 			setPressDepth(1);
-		} 
-		else if((!(statusFlags & BF_STATIC)) && (!(statusFlags & BF_DOWN)))
+		} else if((!(statusFlags & BF_STATIC)) && (!(statusFlags & BF_DOWN)))
 		{
 			statusFlags |= BF_LEFT_CLICKED | BF_DOWN;			 //~
 			setPressDepth(1); //?

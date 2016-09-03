@@ -40,7 +40,7 @@ UI_NumberField::UI_NumberField(UI_Object* numberfield_parent, const Rect rect, c
 	addbutton(new UI_Button(this, Rect(Point(150, 3),Size(8,8)), ADD_BUTTON, PRESS_BUTTON_MODE)),
 	subbutton(new UI_Button(this, Rect(Point(160, 3),Size(8,8)), SUB_BUTTON, PRESS_BUTTON_MODE)),
 	text(txt==NULL_STRING?NULL:new UI_StaticText(this, txt, Rect(Point(0,0), Size(110,0)), FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT, RIGHT_BOUNDED_TEXT_MODE)),
-	number_text(new UI_StaticText(this, Rect(Point(125, 1), Size(20,20)), FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT)),
+	number_text(new UI_StaticText(this, Rect(Point(120, 1), Size(20,20)), FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT)),
 	number(num),
 	min(number_min),
 	max(number_max),
@@ -80,6 +80,7 @@ void UI_NumberField::updateNumber(const unsigned int num)
 		default:break;
 	}
 	number_text->updateText(os.str());
+	setNeedRedrawMoved();
 }
 
 void UI_NumberField::process()
@@ -119,13 +120,15 @@ void UI_NumberField::process()
 
 void UI_NumberField::draw(DC* dc) const
 {
+	if(!isShown())
+		return;
 	UI_Object::draw(dc);
 	dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 	dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 	Rect edge;
-	edge.SetTopLeft(getAbsolutePosition()+Size(getWidth(),0) - Size(52,0));
-	edge.SetWidth(54);
+	edge.SetTopLeft(getAbsolutePosition()+Size(115,1));
+	edge.SetWidth(58);
 	edge.SetHeight(12);
-//	dc->DrawRoundedRectangle(edge,2);
+	dc->DrawRoundedRectangle(edge,2);
 }
 

@@ -124,8 +124,8 @@ void UI_StaticText::draw(DC* dc) const
 					mustNotMakeNewLine = !mustNotMakeNewLine;
 				} else 
 // set new 'milestone' when reaching end of a word:
-				if((t_text[i]==' ')&&(!mustNotMakeNewLine)) {
-					std::ostringstream os;
+				if((t_text[i]==' ')&&(!mustNotMakeNewLine)) 
+				{
 //					textCursorX += dc->GetTextExtent(t_text.substr(firstCharPosition, lastCharPosition - firstCharPosition + 1)).GetWidth() + 1;
 					twidth = textCursorX;
 					lastCharPosition = i;

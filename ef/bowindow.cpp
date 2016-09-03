@@ -11,8 +11,8 @@ BoWindow::BoWindow(const BoWindow& object) :
 	boEndPoint(object.boEndPoint),
 	boGoalListOpened(object.boGoalListOpened),
 	lastBogoal(object.lastBogoal),
-	resetButton(new UI_Button(*(object.resetButton))),
 	saveBuildOrderButton(new UI_Button(*(object.saveBuildOrderButton))),
+	loadBuildOrderButton(new UI_Button(*(object.loadBuildOrderButton))),
 	msgWindow(object.msgWindow)
 //	fixed(object.fixed),
 { }
@@ -27,10 +27,10 @@ BoWindow& BoWindow::operator=(const BoWindow& object)
 	boEndPoint = object.boEndPoint;
 	boGoalListOpened = object.boGoalListOpened;
 	lastBogoal = object.lastBogoal;
-	delete resetButton;
-	resetButton = new UI_Button(*(object.resetButton));
 	delete saveBuildOrderButton;
 	saveBuildOrderButton = new UI_Button(*(object.saveBuildOrderButton));
+	delete loadBuildOrderButton;
+	loadBuildOrderButton = new UI_Button(*(object.loadBuildOrderButton));
 	msgWindow = object.msgWindow;
 //	fixed = object.fixed;
 	return(*this);
@@ -45,14 +45,14 @@ BoWindow::BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_inf
 	boEndPoint(-1),
 	boGoalListOpened(0),
 	lastBogoal(0),
-	resetButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), RESET_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	saveBuildOrderButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), SAVE_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	saveBuildOrderButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), SAVE_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	loadBuildOrderButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), LOAD_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
 	msgWindow(message_window)
 //	fixed(fixed_list)
 {
 	resetData();
-	resetButton->updateToolTip(RESET_BUILD_ORDER_TOOLTIP_STRING);
 	saveBuildOrderButton->updateToolTip(SAVE_BUILD_ORDER_TOOLTIP_STRING);
+	loadBuildOrderButton->updateToolTip(LOAD_BUILD_ORDER_TOOLTIP_STRING);
 }
 
 BoWindow::~BoWindow()
@@ -63,8 +63,8 @@ BoWindow::~BoWindow()
 		delete(*i);
 		i = boList.erase(i);
 	}
-	delete resetButton;
 	delete saveBuildOrderButton;
+	delete loadBuildOrderButton;
 }
 
 void BoWindow::assignAnarace(ANARACE* bo_anarace)
@@ -102,6 +102,8 @@ void BoWindow::processList()
 {
 	if(!isShown())
 		return;
+	setNeedRedrawNotMoved();
+	
 	firstItemY = 0;
 	lastItemY = 0;
 	
@@ -111,7 +113,6 @@ void BoWindow::processList()
 	{
 		Rect edge=Rect(getRelativeClientRectPosition()+Point(0, row*(FONT_SIZE+6)), Size(180, FONT_SIZE+5));//(*order)->rect.GetSize());// TODO
 		fitItemToRelativeClientRect(edge, 1);
-//		edge.SetTopLeft(edge.GetTopLeft() - Size(0, getScrollY()));
 		row++;
 		if(entry == boList.end())
 		{
@@ -225,12 +226,17 @@ void BoWindow::process()
 	std::list<BoEntry*>::iterator entry = boList.begin();
 	while(entry != boList.end())
 	{
-		if((((*entry)->getAbsoluteUpperBound() < getAbsoluteClientRectUpperBound()+30)||((*entry)->getAbsoluteLowerBound() > getAbsoluteClientRectLowerBound())))//&&((*entry)->getRelativeRect()==(*entry)->targetRect))
+		if((((*entry)->getAbsoluteUpperBound() < getAbsoluteClientRectUpperBound()+25)||((*entry)->getAbsoluteLowerBound() > getAbsoluteClientRectLowerBound())))//&&((*entry)->getRelativeRect()==(*entry)->targetRect))
 		{
 			(*entry)->Hide();
 //			(*entry)->jumpToPosition((*entry)->getTargetPosition());
 		}
-		else (*entry)->Show();
+		else 
+		{
+			if((*entry)->getAbsoluteRightBound() > getAbsoluteClientRectRightBound())
+				setNeedRedrawMoved();
+			(*entry)->Show();
+		}
 		entry++;
 	}
 
@@ -358,7 +364,7 @@ void BoWindow::process()
 
 /*		if(controls.isShiftPressed()&&insideClientRect(controls.getCurrentPosition()-Point(0,(FONT_SIZE+5))))
 		{
-				int temp=(controls.getCurrentPosition().y-getClientRectUpperBound()-getScrollY())/(FONT_SIZE+5);
+				int temp=(controls.getCurrentPosition().y-getClientRectUpperBound())/(FONT_SIZE+5);
 				if((boInsertPoint>-1)&&(temp>=boInsertPoint)&&(temp<=boEndPoint))
 						temp=-1;
 				if((orderList->getMakeSpace()!=temp)&&(temp>-1)&&(boGoalListOpened==1))
@@ -389,12 +395,6 @@ void BoWindow::process()
 
 	checkForInfoWindow();
 	
-	if(resetButton->isLeftClicked())
-	{
-		setResetFlag();
-		msgWindow->addMessage("Resetted build order...");
-	}
-
 	if(saveBuildOrderButton->isLeftClicked()&&(!UI_Object::editTextField))
 		UI_Object::editTextField = new UI_EditField(getParent(), saveBuildOrderButton, SAVE_BUILD_ORDER_AS_STRING, GIVE_BO_A_NAME_STRING);
 
@@ -411,9 +411,7 @@ void BoWindow::process()
 			if(UI_Object::editTextField->getString().length()>0)
 			{
 				settings.saveBuildOrder(UI_Object::editTextField->getString(), anarace);
-				ostringstream os;
-				os << "Saved build order.";  // TODO
-				msgWindow->addMessage(os.str());
+				msgWindow->addMessage("Saved build order.");
 			}
 			delete UI_Object::editTextField;
 			UI_Object::resetButton();
@@ -457,14 +455,14 @@ void BoWindow::draw(DC* dc) const
 	/*if((orderList->getMakeSpace()>-1)&&(boGoalListOpened==0))
 	{
 		dc->SetTextForeground(dc->doColor(0,200,0));
-		dc->DrawText(*theme.lookUpString(CLICK_TO_INSERT_ORDER_STRING),getClientRectPosition()+Point(0,orderList->getMakeSpace()*(FONT_SIZE+5)-getScrollY()));
+		dc->DrawText(*theme.lookUpString(CLICK_TO_INSERT_ORDER_STRING),getClientRectPosition()+Point(0,orderList->getMakeSpace()*(FONT_SIZE+5)));
 	}*/ // TODO
 
 /*	dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
 	if(boInsertPoint>-1)
 	{
 		int line=boInsertPoint;
-		Rect edge=Rect(getAbsoluteClientRectPosition()+Point(0,line*(FONT_SIZE+5)-getScrollY()),Size(270,FONT_SIZE+4));
+		Rect edge=Rect(getAbsoluteClientRectPosition()+Point(0,line*(FONT_SIZE+5)),Size(270,FONT_SIZE+4));
 		if(fitItemToAbsoluteClientRect(edge,1))
 		{
 			int bright=0;
@@ -494,7 +492,7 @@ void BoWindow::draw(DC* dc) const
 		{
 			for(int i=1;i<11;i++)
 			{
-				Rect edge=Rect(getAbsoluteClientRectPosition()+Point(10,line*(FONT_SIZE+5)-getScrollY()),Size(270,FONT_SIZE+4));
+				Rect edge=Rect(getAbsoluteClientRectPosition()+Point(10,line*(FONT_SIZE+5)),Size(270,FONT_SIZE+4));
 				int bright=0;
 				if(edge.Inside(controls.getCurrentPosition()))
 						bright=50;
@@ -517,7 +515,7 @@ void BoWindow::draw(DC* dc) const
 			{
 				if(stats[(*anarace->getStartCondition())->getRace()][i].facilityType==type)
 				{
-					Rect edge=Rect(getAbsoluteClientRectPosition()+Point(20,line*(FONT_SIZE+5)-getScrollY()),Size(270,FONT_SIZE+4));
+					Rect edge=Rect(getAbsoluteClientRectPosition()+Point(20,line*(FONT_SIZE+5)),Size(270,FONT_SIZE+4));
 					int bright=0;
 					if(edge.Inside(controls.getCurrentPosition()))
 						bright=50;
@@ -536,7 +534,7 @@ void BoWindow::draw(DC* dc) const
 			}
 		}
 //...		edge.x=20;
-		edge.y=line*(FONT_SIZE+5)+9-getScrollY();
+		edge.y=line*(FONT_SIZE+5)+9;
 		edge.width=getClientRectWidth()-40;
 		edge.height=2;
 		if(fitItemToClientRect(edge))
@@ -552,7 +550,7 @@ void BoWindow::draw(DC* dc) const
 
 	
 //	if(makeSpace!=99999) TODO
-//		makeSpaceButton=addButton(Rect(getClientRectPosition()+Point(0,makeSpace*(FONT_SIZE+5)-getScrollY()),Size(SECOND_COLOUMN-8,FONT_SIZE+4)));
+//		makeSpaceButton=addButton(Rect(getClientRectPosition()+Point(0,makeSpace*(FONT_SIZE+5)),Size(SECOND_COLOUMN-8,FONT_SIZE+4)));
 //	else makeSpaceButton=99999;
 }
 
@@ -598,8 +596,8 @@ void BoWindow::drawSelectionStuff(DC* dc) const
 		{
 			inrow=0;
 			Point pointsKlammer[9];
-			int h1=start*(FONT_SIZE+5)-getScrollY()+11+getClientRectUpperBound();
-			int h2=(l+1)*(FONT_SIZE+5)-getScrollY()-2+getClientRectUpperBound();
+			int h1=start*(FONT_SIZE+5)+11+getClientRectUpperBound();
+			int h2=(l+1)*(FONT_SIZE+5)-2+getClientRectUpperBound();
 																				
 			if((h1<getClientRectUpperBound())&&(h2>getClientRectUpperBound()))
 				h1=getClientRectUpperBound(); //~~

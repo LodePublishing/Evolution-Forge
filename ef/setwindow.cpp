@@ -144,9 +144,15 @@ void SettingsWindow::process()
 	if(languageMenuButton->isLeftClicked())
 	{
 		languageMenu->open();
+
 		if(!languageMenu->isOpen())
-			languageMenu->Hide();
-		else languageMenu->Show();
+			languageMenu->close();
+		else
+		{
+			languageMenu->close();
+			languageMenu->open();
+		}
+		languageMenu->setNeedRedrawMoved();
 	} 
 	/*else
 	if(resolutionMenuButton->isLeftClicked())

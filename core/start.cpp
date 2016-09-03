@@ -5,7 +5,7 @@ START::START():
 	startConditionsInitialized(false),
 	mapInitialized(false)
 {
-	for(int i = MAX_PLAYER; i--;)
+	for(unsigned int i = MAX_PLAYER; i--;)
 	{
 		pCurrentGoal[i] = &(currentGoal[i]);
 		startcondition[i] = NULL;
@@ -30,7 +30,7 @@ void START::fillGroups()
 		toLog("DEBUG: (START::fillGroups): Not all startConditions were initialized.");return;
 	}
 #endif
-	for(int i=MAX_PLAYER;i--;)
+	for(unsigned int i=MAX_PLAYER;i--;)
 		totalForce[i].resetData();
 	unsigned int maxp = tmpmap->getMaxPlayer();
 
@@ -41,14 +41,14 @@ void START::fillGroups()
 		startForce[0][j].setAvailible(MINERAL_PATCH, tmpmap->getLocationMineralPatches(j));
 		startForce[0][j].setAvailible(VESPENE_GEYSIR, tmpmap->getLocationVespeneGeysirs(j));
 	}
-	for(int i=maxp;i--;)
+	for(unsigned int i=maxp;i--;)
 	{
 		startForce[i+1][0] = *startcondition[i+1]->getUnit(0);
 		startForce[i+1][startPosition[i+1]] = *startcondition[i+1]->getUnit(0);
 		// TODO bei mehreren Spielern!
 		for(unsigned int j=1;j<tmpmap->getMaxLocations();j++)
 		{
-			for(int k=UNIT_TYPE_COUNT;k--;)
+			for(unsigned int k=UNIT_TYPE_COUNT;k--;)
 				if(startForce[i+1][j].getTotal(k))
 				{
 //					GROUP g;
@@ -85,7 +85,7 @@ void START::assignStartcondition(const unsigned int player, const START_CONDITIO
 	if(mapInitialized)
 	{
 		startConditionsInitialized=true;
-		for(int i=tmpmap->getMaxPlayer();i--;)
+		for(unsigned int i=tmpmap->getMaxPlayer();i--;)
 			if(!startcondition[i+1])
 				startConditionsInitialized=false;
 	}

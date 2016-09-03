@@ -172,9 +172,15 @@ UI_Object* UI_Window::checkHighlight()
 	return(UI_Object::checkHighlight());
 }
 
+const unsigned int UI_Window::getClientTargetHeight() const
+{
+	return(clientTargetRect.GetHeight());
+}
+
 // ----------------------
 // ------ MOVEMENT ------
 // ----------------------
+
 
 void UI_Window::adjustClientRect()
 {
@@ -228,13 +234,31 @@ void UI_Window::updateBorders()
 void UI_Window::wheelUp()
 {
 	if(scrollBar)
+	{
 		scrollBar->moveUp();
+		setNeedRedrawNotMoved();
+	}
 }
 
 void UI_Window::wheelDown()
 {
 	if(scrollBar)
+	{
 		scrollBar->moveDown();
+		setNeedRedrawNotMoved();
+	}
+}
+
+void UI_Window::resetScrollbar()
+{
+	if(scrollBar)
+		scrollBar->reset();
+}
+
+void UI_Window::resetScrollbarToEnd()
+{
+	if(scrollBar)
+		scrollBar->resetToEnd();
 }
 
 void UI_Window::process()
@@ -244,6 +268,12 @@ void UI_Window::process()
 	
 	/*Rect r = getAbsoluteRect();
 	rectlist[rectnumber].x = r.x;rectlist[rectnumber].y = r.y;rectlist[rectnumber].w = r.width; rectlist[rectnumber].h = r.height;*/
+
+	if(scrollBar)
+	{
+		scrollBar->setClientHeight(getClientRectHeight());
+		scrollBar->setClientTargetHeight(getClientTargetHeight());
+	}
 
 	UI_Object::process();
 	
@@ -279,7 +309,18 @@ void UI_Window::process()
 		scrollBar->Show();*/
 	
 	if(clientRect.GetHeight() != clientTargetRect.GetHeight())
-		clientRect.move(clientStartRect, clientTargetRect);
+	{
+		if(configuration.isSmoothMovements())
+		{
+			if(clientRect.moveSmooth(clientStartRect, clientTargetRect))
+				setNeedRedrawMoved();
+		}
+		else 
+		{
+			if(clientRect.move(clientStartRect, clientTargetRect))
+				setNeedRedrawMoved();
+		}	
+	}
 
 	if((!UI_Object::windowSelected)&&(((isMouseInside())||( (scrollBar!=NULL) && (Rect(getAbsolutePosition() + Point(getWidth(), 0), Size(12, getHeight())).Inside(mouse))))&&(!isTopItem()))) // => main window!
 	{
@@ -343,8 +384,6 @@ const bool UI_Window::fitItemToRelativeClientRect(const Rect& rect, const unsign
 		if((rect.GetBottom()>0) &&((unsigned int)(rect.GetBottom())/*-getRelativeClientRectUpperBound()*/>filledHeight))
 		filledHeight = rect.GetBottom()/*-getRelativeClientRectUpperBound()*/;
 	
-/*		if(scrollBar)
-			scrollBar->setMaxScrollY(filledHeight);*/
 		if(filledHeight>getMaxHeight()) 
 			filledHeight=getMaxHeight();
 	}
@@ -387,11 +426,6 @@ const bool UI_Window::fitItemToAbsoluteClientRect(const Rect& rect, const unsign
 }
 
 
-const unsigned int UI_Window::getScrollY() const {
-	return(0);
-//	return(scrollBar?scrollBar->getScrollY():0);
-}
-
 void UI_Window::drawTitle(DC* dc) const
 {
 	dc->SetBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
@@ -430,12 +464,12 @@ void UI_Window::draw(DC* dc) const
 		if(isTopItem()) // => main window!
 		{
 			dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
-			SDL_Rect rc;
+/*			SDL_Rect rc;
 			rc.x = getRelativeLeftBound();rc.y = getRelativeUpperBound(); rc.w = getWidth(); rc.h = getHeight();
 			if(configuration.isBackgroundBitmap())
 				SDL_BlitSurface(*UI_Object::theme.lookUpBitmap(BACKGROUND_BITMAP) , 0, dc->GetSurface(), &rc);
 			else
-				SDL_FillRect(dc->GetSurface(), &rc, 0);
+				SDL_FillRect(dc->GetSurface(), &rc, 0);*/
 		}
 		else
 //		{

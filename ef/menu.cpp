@@ -92,6 +92,8 @@ void Menu::open()
 		menuLevel=0;
 	else menuLevel=1;
 
+//	setNeedRedrawNotMoved();
+
 	if(menuLevel)
 		Show();
 	else Hide();
@@ -115,8 +117,8 @@ void Menu::process()
 	markedItem = -1;
 	if(!isShown())
 		return;
-	p1=Point(9999,9999);
-	p2=Point(0,0);
+	p1 = Point(9999, 9999);
+	p2 = Point(0, 0);
 
 	int i = 0;
 
@@ -124,7 +126,7 @@ void Menu::process()
 	{
 		if(!(*m)->isShown())
 		{
-			(*m)->setPosition(Point(0,0));
+			(*m)->setPosition(Point(0, 0));
 			(*m)->targetRect=(*m)->getRelativeRect();
 			(*m)->startRect=(*m)->getRelativeRect();
 			(*m)->adjustButtonPlacementPosition();
@@ -149,7 +151,7 @@ void Menu::process()
 		i++;
 	}
 
-	if((pressedItem>=0)&&(chooseMenu))
+	if((pressedItem >= 0)&&(chooseMenu))
 		close();
 }
 

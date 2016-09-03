@@ -5,86 +5,67 @@
 
 int main(int argc, char *argv[])
 {
+//	putenv("SDL_VIDEODRIVER=directfb");
+
+// ------ LOAD CONFIGURATION FILES ------
 	toLog("Loading messages / Lade Nachrichten ...");
 	list<string> stringFiles = settings.findFiles("settings", "strings", "");
 	for(list<string>::iterator j = stringFiles.begin(); j!=stringFiles.end(); j++)
 		UI_Object::theme.loadStringFile(*j);
-	//UI_Object::theme.loadStringFile("settings/strings/strings.ui");
 	//fillInfluenceList();
 	toLog(*UI_Object::theme.lookUpString(START_START_STRING));
-	
-//	long unsigned int startTime = SDL_GetTicks();
 	toLog(*UI_Object::theme.lookUpString(START_LOAD_CORE_SETTINGS_STRING));
 	configuration.loadConfigurationFile();
 	UI_Object::theme.setLanguage(configuration.getLanguage());
-	
-// ------ INIT SDL ------
+// ------ END LOAD CONFIGURATION FILES -------
+
+
+
+// ------ INIT SDL AND WINDOW ------
 	toLog(*UI_Object::theme.lookUpString(START_INIT_SDL_STRING));
-	
-	if ( SDL_Init(SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE) < 0 )
-	{
-		ostringstream os;
-		os << UI_Object::theme.lookUpString(START_UNABLE_TO_INIT_SDL_STRING) << SDL_GetError();
-		toLog(os.str());
-		return(1);
-	}
-	atexit(SDL_Quit);
-	SDL_Event event;
-// ------ END INIT SDL -------
-
-
-// ------ INIT WINDOW ------
-	toLog(*UI_Object::theme.lookUpString(START_INIT_VIDEO_STRING));
 	
  	SDL_Rect clientWindow;
 	clientWindow.x=0;clientWindow.y=0;clientWindow.w=1024;clientWindow.h=768;
 	DC* screen;
-//	putenv("SDL_VIDEODRIVER=dga"); windows
-	if (configuration.isFullScreen()) {
+	if (configuration.isFullScreen()) 
+	{
 		toLog(*UI_Object::theme.lookUpString(START_SET_FULLSCREEN_MODE_STRING));
-		screen=new DC(clientWindow.w, clientWindow.h, SDL_DRAW_BPP*8, SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_ANYFORMAT|SDL_FULLSCREEN/*|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC*/);
+		screen=new DC(clientWindow.w, clientWindow.h, SDL_DRAW_BPP*8, SDL_HWSURFACE|SDL_ANYFORMAT|SDL_FULLSCREEN|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC|SDL_DOUBLEBUF, SDL_INIT_NOPARACHUTE);
 	}
-	else {
+	else 
+	{
 		toLog(*UI_Object::theme.lookUpString(START_SET_WINDOW_MODE_STRING));
-		screen=new DC(clientWindow.w, clientWindow.h, SDL_DRAW_BPP*8, SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_ANYFORMAT/*|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC*/);
+		screen = new DC(clientWindow.w, clientWindow.h, SDL_DRAW_BPP*8, SDL_HWSURFACE|SDL_ANYFORMAT|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC|SDL_DOUBLEBUF, SDL_INIT_NOPARACHUTE);
 	}
 	
-	if ( screen == NULL )
+	if(!screen->initializationOK())
 	{
-		toLog(*UI_Object::theme.lookUpString(START_ERROR_SETTING_VIDEO_MODE_STRING));
-		return(1);
+		toLog(*UI_Object::theme.lookUpString(START_UNABLE_TO_INIT_SDL_STRING) + SDL_GetError());
+		return(EXIT_FAILURE);
+	}
+	
+	if ( screen->GetSurface() == NULL )
+	{
+		toLog(*UI_Object::theme.lookUpString(START_ERROR_SETTING_VIDEO_MODE_STRING) + SDL_GetError());
+		return(EXIT_FAILURE);
 	}
 	
 	screen->setResolution(clientWindow.w, clientWindow.h);
+	screen->printInformation();
+	
+	SDL_Event event;
 
-	if (screen->flags() & SDL_SWSURFACE)
-		toLog("Surface is stored in system memory");
-	else if(screen->flags() & SDL_HWSURFACE)
-		toLog("Surface is stored in video memory");
-	if(screen->flags() & SDL_ASYNCBLIT) toLog("Surface uses asynchronous blits if possible");
-	if(screen->flags() & SDL_ANYFORMAT) toLog("Allows any pixel-format");
-	if(screen->flags() & SDL_HWPALETTE) toLog("Surface has exclusive palette");
-	if(screen->flags() & SDL_DOUBLEBUF) toLog("Surface is double buffered");
-	if(screen->flags() & SDL_OPENGL) toLog("Surface has an OpenGL context");
-	if(screen->flags() & SDL_OPENGLBLIT) toLog("Surface supports OpenGL blitting");
-	if(screen->flags() & SDL_RESIZABLE)	toLog("Surface is resizable");
-	if(screen->flags() & SDL_HWACCEL) toLog("Surface blit uses hardware acceleration");
-	if(screen->flags() & SDL_SRCCOLORKEY) toLog("Surface use colorkey blitting");
-	if(screen->flags() & SDL_RLEACCEL) toLog("Colorkey blitting is accelerated with RLE");
-	if(screen->flags() & SDL_SRCALPHA) toLog("Surface blit uses alpha blending");
-	if(screen->flags() & SDL_PREALLOC) toLog("Surface uses preallocated memory");
-
-	UI_Object::max_x=clientWindow.w;
-	UI_Object::max_y=clientWindow.h;
+	UI_Object::max_x=clientWindow.w;UI_Object::max_y=clientWindow.h;
 
 	SDL_WM_SetCaption("EVOLUTION FORGE BETA - www.clawsoftware.de","");
 //	if(configuration.isSoftwareMouse())
 //		SDL_ShowCursor(SDL_DISABLE);
-// ------ END INIT WINDOW ------
+// ------ END INIT SDL AND WINDOW ------
+
 
 
 // ------ INTRO PICTURE ------
-	Bitmap progress("data/bitmaps/bar.bmp");
+	SDL_Surface* progress = SDL_LoadBMP("data/bitmaps/bar.bmp");
 //	Bitmap claw("data/bitmaps/clawsoftware.bmp");
 	screen->DrawBitmap(progress, (clientWindow.w - progress->w)/2, (clientWindow.h - progress->h)/2-60);
 //	screen->DrawBitmap(claw, clientWindow.w - claw->w, clientWindow.h - claw->h);
@@ -95,40 +76,41 @@ int main(int argc, char *argv[])
 // ------ END INTRO PICTURE -------
 
 
+
+
 // ------ INIT SDL_TTF ------
 	toLog(*UI_Object::theme.lookUpString(START_INIT_SDL_TRUETYPE_FONTS_STRING));
 	if(TTF_Init()==-1)
 	{
-		ostringstream os;
-		os << "TTF_Init: " << TTF_GetError();
-		toLog(os.str());		
-		return 2;
+		toLog(std::string("TTF_Init: ") + TTF_GetError());
+		return(EXIT_FAILURE);
 	}
 	atexit(TTF_Quit); 
 // ------- END INIT SDL_TTF -------
 
-
-	Main::bar->draw(screen, 5);
-	toLog(*UI_Object::theme.lookUpString(START_INIT_GRAPHIC_ENGINE_CORE_STRING));
-	Main m(screen);
-
-
-//	delete Main::bar;return(0);
-	// Problem: das eine kommt vor dem anderen...
 // ------ CAP FRAMERATE ------
 	FPS* fps=new FPS();
 	fps->setDesiredFramerate(configuration.getStaticFramerate());
 	fps->setAllowStaticFramerate(configuration.isAllowStaticFramerate());
-//	unsigned int screenshot=100;
-//	bool screenCapturing=false;
-	bool warning = false;
 // ------ END CAP FRAMERATE
-	Main::bar->draw(screen, 100, START_SYSTEM_READY_STRING);
-//	ostringstream oss;
-//	oss << ((float)(SDL_GetTicks()-startTime))/1000000000.0;
-//	toLog(*UI_Object::theme.lookUpString(START_INITIALIZATION_TIME_STRING) + ": " + oss.str());
-	delete Main::bar;
 
+
+// ------- INIT GRAPHIC ENGINE ------
+	Main::bar->draw(screen, 5);
+	toLog(*UI_Object::theme.lookUpString(START_INIT_GRAPHIC_ENGINE_CORE_STRING));
+	Main m(screen);
+
+	unsigned int refresh = fps->getFramesPerGeneration();
+	if(configuration.isAutoSaveRuns())
+		m.startOptimizing();
+	else
+		m.stopOptimizing();
+
+	bool endrun = false;
+
+	Main::bar->draw(screen, 100, START_SYSTEM_READY_STRING);
+	delete Main::bar;
+// ------ END INIT GRAPHIC ENGINE ------
 
 // ------ INTRO ------
 	Rect t((clientWindow.w-650)/2 + 10, (clientWindow.h - 750)/2 + 10, 650 - 20, 650 - 20);
@@ -154,7 +136,7 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 			switch (event.type)
 			{
 				case SDL_QUIT:
-					return(0);break;
+					return(EXIT_SUCCESS);break;
 				case SDL_MOUSEBUTTONDOWN:
 				case SDL_KEYDOWN:
 					done=true;break;
@@ -164,33 +146,13 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 
 // ------ END INTRO ------
 	
-	int oldDynamicFramerate = configuration.getDynamicFramerate();
-	bool oldAllowStaticFramerate = configuration.isAllowStaticFramerate();
-	unsigned int refresh = fps->getFramesPerGeneration();
-	if(configuration.isAutoSaveRuns())
-	{
-		m.drawing=false;
-		m.startOptimizing();
-	}
-	else
-	{
-		m.drawing=true;
-		m.stopOptimizing();
-	}
-
-	screen->SetPen(Pen(Color(screen->GetSurface(), 0, 0, 0), 1, SOLID_PEN_STYLE));
-	screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
-	screen->DrawRectangle(Rect(clientWindow.x, clientWindow.y, clientWindow.w-1, clientWindow.h-1));
-
-	bool firstRun = true;
-	bool endrun = false;
-//	SDL_BlitSurface(*UI_Object::theme.lookUpBitmap(BACKGROUND_BITMAP) , 0, screen->GetSurface(), &clientWindow );
 	while(true)
 	{
+// ------ FRAMERATE AND CALCULATION ------	
 		unsigned int frames_per_generation = fps->getFramesPerGeneration();
 		unsigned int frames_per_second = fps->getCurrentFramerate();
-		if(!endrun)
-		if(((UI_Object::editTextField==NULL)&&(m.isOptimizing()))||(configuration.isAllowStaticFramerate()))
+		
+		if((!endrun)&&(((UI_Object::editTextField==NULL)&&(m.isOptimizing()))||(configuration.isAllowStaticFramerate())))
 		{
 			if(configuration.isAllowStaticFramerate())
 				fps->setDesiredFramerate(configuration.getStaticFramerate());
@@ -206,64 +168,33 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 			while((refresh > frames_per_generation) && (!(endrun = settings.getIsNewRun())))
 			{
 				m.OnIdle();
-				firstRun=false;
 				if(frames_per_generation > refresh)
 					refresh = 0;
 				else
 					refresh -= frames_per_generation;
 			}
 		}
-		
-//		if((settings.getIsNewRun())&&(!firstRun))
-//			endrun = true;
 		if(endrun)
 			endrun = m.newRun();
-
-//		if(m.drawing) // Problem: wenn run zuende ist....???
-//		else			
-//			m.player[0]->window[STATISTICS_WINDOW]->process();
-
+// ------ END FRAMERATE AND CALCULATION 
 
 // ------ DRAWING ------
-		if(m.drawing)
-		{
-			UI_Object::redrawnObjects = 0;
-			m.process();
-			warning=false;
-			m.draw(screen);
-			screen->SetTextForeground(DC::toSDL_Color(255, 20, 20));
-			screen->SetFont(UI_Object::theme.lookUpFont(LARGE_NORMAL_BOLD_FONT));
-			ostringstream os;
-			screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
-			screen->DrawRectangle(110,350,200,20);
-			os << "Objects: " << UI_Object::redrawnObjects << "   FPS: " << configuration.getCurrentFramerate();
-			screen->DrawText(os.str(), 100, 350);	
-		}
+		UI_Object::redrawnObjects = 0;
+		m.process();
+		m.draw(screen);
+		
 // ------ END DRAWING ------
-		else if(!warning)
-		{
-			screen->SetTextForeground(DC::toSDL_Color(255, 20, 20));
-			screen->SetFont(UI_Object::theme.lookUpFont(LARGE_NORMAL_BOLD_FONT));
-			screen->DrawText("DRAWING SUSPENDED FOR MAXIMUM SPEED, PRESS A BUTTON OR KEY TO STOP.", 100, 350);	
-			warning = true;
-			m.player[0]->window[STATISTICS_WINDOW]->draw(screen);
-		}
 
-// ------ SCREENCAPTURE ------		
-		/*if(screenCapturing) {
-			ostringstream os;os << "shot" << screenshot << ".bmp";
-			SDL_SaveBMP(screen->GetSurface() , os.str().c_str());os.str("");screenshot++;
-			os << " saved (" << (clientWindow.w * clientWindow.h)/256 << "kb) [" << (screenshot * clientWindow.w * clientWindow.h)/(1024*256)<<"MB total]";
-			screen->DrawText(os.str(), 50, 600);
-		}*/
-// ------ END SCREENCAPTURE -----
 
 // ------ FPS DEBUG
-//		screen->SetTextForeground(toSDL_Color(255, 100, 100));
+//		screen->SetTextForeground(DC::toSDL_Color(255, 20, 20));
 //		screen->SetFont(UI_Object::theme.lookUpFont(LARGE_NORMAL_BOLD_FONT));
+//		screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
+//		screen->DrawRectangle(110,350,200,20);
+
 //		ostringstream os;
-//		os << frames_per_generation << ":" << frames_per_second << "[" << configuration.getDynamicFramerate() << "]";
-//		screen->DrawText(os.str(), 100, 350);
+//		os << "Objects: " << UI_Object::redrawnObjects << "   FPS: " << configuration.getCurrentFramerate();
+//		screen->DrawText(os.str(), 100, 350);	
 // ------ END FPS DEBUG
 
 		screen->updateScreen();
@@ -276,15 +207,9 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 				case SDL_QUIT:
 					delete fps;
 					delete screen;
-					return(0);
+					return(EXIT_SUCCESS);
 					break;
 				case SDL_MOUSEBUTTONDOWN:
-					if(!m.drawing)
-					{
-						configuration.setAllowStaticFramerate(oldAllowStaticFramerate);
-						configuration.setDynamicFramerate(oldDynamicFramerate);
-						m.drawing=true;
-					}
 					if(event.button.button == SDL_BUTTON_LEFT)
 						m.leftDown();
 					else if(event.button.button == SDL_BUTTON_RIGHT)
@@ -307,13 +232,6 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 				case SDL_MOUSEMOTION:
 					m.setMouse(Point(event.motion.x, event.motion.y));break;
 				case SDL_KEYDOWN:
-					if(!m.drawing)
-					{
-						configuration.setAllowStaticFramerate(oldAllowStaticFramerate);
-						configuration.setDynamicFramerate(oldDynamicFramerate);
-						m.drawing=true;
-					}
-					else
 					switch(event.key.keysym.sym)
 					{
 						case SDLK_BACKSPACE:
@@ -341,7 +259,7 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 							{
 								delete fps;fps=NULL;
 								delete screen;screen=NULL;
-								return(0);
+								return(EXIT_SUCCESS);
 							} else
 								UI_Object::editTextField->forceCancel();
 							break;
@@ -354,11 +272,9 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 						case SDLK_SPACE:
 							if(UI_Object::editTextField==NULL)
 							{
-								m.drawing=false;
-								oldAllowStaticFramerate=configuration.isAllowStaticFramerate();
-								oldDynamicFramerate=configuration.getDynamicFramerate();
-								configuration.setAllowStaticFramerate(false);
-								configuration.setDynamicFramerate(0);
+								if(m.isOptimizing())
+									m.stopOptimizing();
+								else m.startOptimizing();
 							} else
 							UI_Object::editTextField->addChar(' ');
 							break;
@@ -423,11 +339,7 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 							break;
 
 
-//						case SDLK_PRINT:
-//							if(event.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL))
-//								screenCapturing=!screenCapturing;
-//							break;
-						
+//						case SDLK_PRINT:break;
 /*						case SDLK_PLUS:
 								if(UI_Object::theme.getResolution()<RESOLUTION_1280x1024)
 									UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() + 1));

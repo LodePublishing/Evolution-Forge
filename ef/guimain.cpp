@@ -2,10 +2,6 @@
 #include "../ui/editfield.hpp"
 #include "../ui/tooltip.hpp"
 
-
-//int gizmor;
-//int grey; //0-100%
-
 Main::Main(DC* dc):
 	mainWindow(NULL),
 	msgWindow(NULL),
@@ -13,22 +9,16 @@ Main::Main(DC* dc):
 	tutorialWindow(NULL),
 	settingsWindow(NULL),
 	maus(),
-//	buttonPressed(false),
-//	hasAlreadyLeft(false),
-//	button(NULL),
-	drawing(true),
 	oldrun(0),
 	gizmo(true),
-	update(0),
-	refresh(0),
 	ani(1),
 	ani2(0),
 	boHasChanged(true)
 {
 	UI_Object::theme.setTab(BASIC_TAB);
 	resetData(); // TODO 
-	for(int i=0;i<MAX_PLAYER;i++)
-		player[i]=NULL;
+	for(int i=0;i<MAX_GAME;i++)
+		game[i]=NULL;
 	toLog(*UI_Object::theme.lookUpString(START_LOAD_UI_BITMAPS_FONTS_STRING));
 #ifdef __linux__
 	UI_Object::theme.loadDataFiles("settings/ui/default.ui","data/bitmaps/","data/fonts/",dc);
@@ -92,7 +82,6 @@ Main::Main(DC* dc):
 	settings.assignRunParametersToSoup(); // assign START and GA of settings to soup
 	// initializes players, initializes Map
 // initialize the soup, set the parameters, load the players etc.
-//	grey=0;
 	if(ANARACE** temp=settings.newGeneration(anarace))
 	{
 		for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
@@ -116,30 +105,28 @@ Main::Main(DC* dc):
 //	{
 //		player[i] = new Player(mainWindow, &(anarace[i]), msgWindow, i);
 //	}
-//	for(unsigned int i = settings.getMap(0)->getMaxPlayer();i<MAX_PLAYER;i++)
+//	for(unsigned int i = settings.getMap(0)->getMaxPlayer();i<MAX_GAME;i++)
 //		player[i]=0;
 
 	for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-		player[i] = new Player(mainWindow, &(anarace[i]), msgWindow, 0);
+		game[i] = new Game(mainWindow, &(anarace[i]), msgWindow, 0);
 		
 //	player[1] = new Player(mainWindow, &(anarace[1]), msgWindow, 1);
 //	player[2] = 0; TODO restliche 0
 
 //	msgWindow->setParent(mainWindow); // process AFTER player
 	
-//TODO grey wieder rein... evtl bei draw
-
 	mainWindow->Show();
 	msgWindow->Show();
 	tutorialWindow->Hide();
 	settingsWindow->Hide();
 
-	player[0]->Show();
-//	player[0]->Hide(); //~~
+	game[0]->Show();
+//	game[0]->Hide(); //~~
 
 	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG1_STRING)));
 	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG2_STRING)));
-//	msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(PLAYERS_LOADED_STRING, settings.getMap(0)->getMaxPlayer()));
+//	msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(GAMES_LOADED_STRING, settings.getMap(0)->getMaxPlayer()));
 	bar->draw(dc, 8, START_MAIN_INIT_COMPLETE_STRING);
 //	cursor=init_system_cursor(arrow);
 //	SDL_ShowCursor(SDL_DISABLE);
@@ -161,19 +148,15 @@ Main::~Main()
 	delete msgWindow;
 	delete tutorialWindow;
 	delete settingsWindow;
-	for(int i=0;i<MAX_PLAYER;i++)
-		delete player[i];
+	for(int i=0;i<MAX_GAME;i++)
+		delete game[i];
 }
 
 void Main::resetData()
 {
-	refresh = 0;
 	endrun = false;
-//	gizmor=rand()%GIZMO_NUMBER;
-	for(int i=MAX_PLAYER;i--;)
+	for(unsigned int i=MAX_GAME;i--;)
 		anarace[i] = NULL;
-	update = 0;
-	drawing = true;
 	boHasChanged = true;
 }
 
@@ -200,13 +183,14 @@ void Main::process()
 	{
 		boHasChanged = false;
 		for(unsigned int i = settings.getMap(0)->getMaxPlayer();i--;)
-			if(player[i]->isShown())
-				player[i]->CheckOrders();
+			if(game[i]->isShown())
+				game[i]->CheckOrders();
 	}
-	update = 1;
 	if((configuration.isTooltips())&&(UI_Object::tooltip))
 		UI_Object::tooltip->process();
 	mainWindow->process();
+
+	
 	if(!UI_Object::windowSelected)
 	{
 		if(UI_Object::currentWindow)
@@ -216,7 +200,7 @@ void Main::process()
 	if(settingsWindow->hasLanguageChanged())
 	{
 		for(unsigned int i = settings.getMap(0)->getMaxPlayer();i--;)
-			player[i]->reloadStrings();
+			game[i]->reloadStrings();
 		mainWindow->reloadStrings();
 		settingsWindow->reloadStrings();
 		msgWindow->addMessage(*UI_Object::theme.lookUpString(LANGUAGE_HAS_CHANGED_STRING));
@@ -275,10 +259,8 @@ void Main::process()
 			break;
 			default:break;		
 		} // end switch getCurrentTabs
-		for(int i=settings.getMap(0)->getMaxPlayer();i--;)
-			player[i]->setMode(ctab, i);
-//		player[0]->CheckOrders();
-//		player[1]->CheckOrders();
+		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
+			game[i]->setMode(ctab, i);
 
 		UI_Object::theme.setTab(ctab);
 		
@@ -286,16 +268,13 @@ void Main::process()
 		msgWindow->updateRectangles(0);
 		settingsWindow->updateRectangles(0);
 		tutorialWindow->updateRectangles(0);
-		int maxPlayer=0;
-		for(int i=settings.getMap(0)->getMaxPlayer();i--;)
-			if(player[i]->isShown()) 
+		unsigned int maxPlayer=0;
+		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
+			if(game[i]->isShown()) 
 				maxPlayer++;
-		for(int i=settings.getMap(0)->getMaxPlayer();i--;)
-			if(player[i]->isShown())
-				player[i]->updateRectangles(maxPlayer-1);
-/*		settings.initSoup();
-		resetData();*/
-		update=2;
+		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
+			if(game[i]->isShown())
+				game[i]->updateRectangles(maxPlayer-1);
 	} // end tabwasChanged
 	
 //	settings.checkForChange();
@@ -305,8 +284,8 @@ void Main::process()
 		bool was_optimizing = isOptimizing();
 		for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
 		{
-			player[i]->resetData();
-			player[i]->restartAnarace(); //?
+			game[i]->resetData();
+			game[i]->restartAnarace(); //?
 		}
 		if(was_optimizing)
 			startOptimizing();
@@ -319,8 +298,8 @@ void Main::process()
 		bool was_optimizing = isOptimizing();
 		for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
 		{
-			player[i]->resetData();
-			player[i]->restartAnarace(); //?
+			game[i]->resetData();
+			game[i]->restartAnarace(); //?
 		}
 		settings.assignRunParametersToSoup();
 		if(ANARACE** temp=settings.newGeneration(anarace))
@@ -329,7 +308,7 @@ void Main::process()
 				anarace[i] = temp[i];
 		}
 		for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-			player[i]->assignAnarace(&(anarace[i]));
+			game[i]->assignAnarace(&(anarace[i]));
 		if(was_optimizing)
 			startOptimizing();
 		else stopOptimizing();
@@ -338,27 +317,34 @@ void Main::process()
 		UI_Window::changeAccepted();
 		boHasChanged=true;
 	}
+	if(game[0]->checkForNeedRedraw())
+	{
+		mainWindow->setNeedRedrawNotMoved();
+		msgWindow->setNeedRedrawNotMoved();
+		settingsWindow->setNeedRedrawNotMoved();
+		mainWindow->setNeedRedrawMoved();
+	}
 	
 }
 
 void Main::stopOptimizing()
 {
 	for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-		if(player[i]->isShown())
-			player[i]->setOptimizing(false);
+		if(game[i]->isShown())
+			game[i]->setOptimizing(false);
 }
 
 void Main::startOptimizing()
 {
 	for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-	   if(player[i]->isShown())
-			player[i]->setOptimizing(true);
+		if(game[i]->isShown())
+			game[i]->setOptimizing(true);
 }
 
 const bool Main::isOptimizing() const
 {
 	for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
-		if((player[i]->isShown())&&(player[i]->isOptimizing()))
+		if((game[i]->isShown())&&(game[i]->isOptimizing()))
 			return(true);
 	return(false);
 }
@@ -384,17 +370,24 @@ void Main::drawGizmo(DC* dc) const
 	dc->SetTextForeground(DC::toSDL_Color(25, 25, 85));
 	dc->DrawText("Forge", mainWindow->getAbsoluteClientRectPosition() + Point(50, 58));
 	dc->SetTextForeground(DC::toSDL_Color(0,0,85));
-	ostringstream os;
-	os << CORE_VERSION;
-	dc->DrawText(os.str(), mainWindow->getAbsoluteClientRectPosition()+Point(78, 98));
+	dc->DrawText(CORE_VERSION, mainWindow->getAbsoluteClientRectPosition()+Point(78, 98));
 	dc->SetTextForeground(DC::toSDL_Color(50, 50, 85));
-	dc->DrawText(os.str(), mainWindow->getAbsoluteClientRectPosition()+Point(75, 95));
+	dc->DrawText(CORE_VERSION, mainWindow->getAbsoluteClientRectPosition()+Point(75, 95));
 }
 
 void Main::draw(DC* dc) const
 {
 	if(mainWindow->isShown())
 	{
+		if((mainWindow->checkForNeedRedraw())||(game[0]->checkForNeedRedraw()))
+		{
+			SDL_Rect rc;
+			rc.x = 0;rc.y = 0; rc.w = UI_Object::max_x; rc.h = UI_Object::max_y;
+			if(configuration.isBackgroundBitmap())
+				SDL_BlitSurface(UI_Object::theme.lookUpBitmap(BACKGROUND_BITMAP) , 0, dc->GetSurface(), &rc);
+			else
+				SDL_FillRect(dc->GetSurface(), &rc, 0);
+		}
 		mainWindow->draw(dc);
 		if(gizmo)
 			drawGizmo(dc);
@@ -438,7 +431,7 @@ void Main::draw(DC* dc) const
 // ------ END MOUSE DRAWING ------
 		
 	}
-	SDL_Rect c;
+/*	SDL_Rect c;
 	c.x=maus.x;
 	c.y=maus.y;
 	c.w=32;
@@ -446,7 +439,7 @@ void Main::draw(DC* dc) const
 //	get_bg(dc, cursor_save, maus.x, maus.y);
 //	SDL_BlitSurface(*UI_Object::theme.lookUpBitmap(MAUS_BITMAP) , 0, dc->GetSurface(), &c );
 //	RS_Blit(dc, cursor, maus.x, maus.y);
-	//RS_Blit(dc, cursor_save, maus.x, maus.y);
+	//RS_Blit(dc, cursor_save, maus.x, maus.y);*/
 }
 
 										
@@ -456,16 +449,10 @@ void Main::OnIdle()
 {
 	if((!UI_Object::editTextField)&&(isOptimizing()))
 	{
-		update = 2;
 		ANARACE** temp;
-		unsigned int oldCode[MAX_PLAYER][MAX_LENGTH];
-//		unsigned int oldMarker[MAX_PLAYER][MAX_LENGTH];
+		unsigned int oldCode[MAX_GAME][MAX_LENGTH];
 		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
-			for(unsigned int j = MAX_LENGTH;j--;)
-			{
-				oldCode[i][j] = anarace[i]->getCode(j);
-//				oldMarker[i][j] = anarace[i]->getMarker(j);
-			}
+			anarace[i]->copyCode(oldCode[i]);
 			
 //TODO: nach Ende eines Durchlaufs ist anarace 0, aber viele anderen Teile des Codes greifen noch drauf zu!!
 		if((temp=settings.newGeneration(anarace)))
@@ -477,18 +464,8 @@ void Main::OnIdle()
 					
 				anarace[i]=temp[i];
 			}
-	//		if(anarace[0]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=true;}
 		}
 	}
-	
-
-
-
-//	if(update==1)
-//	{
-//		update=2;
-//	}
-
 }
 
 
@@ -525,7 +502,6 @@ const bool Main::newRun()
 		{
 			if((UI_Object::editTextField->isDone())&&(UI_Object::editTextField->getCaller()==NULL))
 			{
-				drawing=true;
 				if(UI_Object::editTextField->getString().length()>0)
 				{
 					ostringstream os;
@@ -541,7 +517,6 @@ const bool Main::newRun()
 			} else
 			if((UI_Object::editTextField->isCanceled())&&(UI_Object::editTextField->getCaller()==NULL))
 			{
-				drawing=true;
 				delete UI_Object::editTextField;
 				UI_Object::resetButton();
 				UI_Object::editTextField=NULL;
@@ -551,7 +526,7 @@ const bool Main::newRun()
 	}
 	if(!endrun)
 		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
-			player[i]->resetData();
+			game[i]->resetData();
 	return(endrun);
 }	
 
@@ -559,7 +534,7 @@ const bool Main::newRun()
 
 void Main::loadGoals()
 {
-	for(int i = 0; i < MAX_RACES; i++)
+	for(unsigned int i = 0; i < MAX_RACES; i++)
 	{
 		list<string> goalFiles = settings.findFiles("settings", "goals", raceString[i]);
 		for(list<string>::iterator j = goalFiles.begin(); j!=goalFiles.end(); j++)
@@ -623,9 +598,9 @@ void Main::setMouse(const Point p)
 //		return;
 	maus=p;
 	UI_Object::mouse=p;
-	((BoGraphWindow*)(player[0]->window[BO_GRAPH_WINDOW]))->mouseHasMoved(); // TODO
-//	else if(player[1]->window[BO_GRAPH_WINDOW]->Inside(p))
-//		(BoGraphWindow*)(player[1]->window[BO_GRAPH_WINDOW])->mouseHasMoved();
+	((BoGraphWindow*)(game[0]->window[BO_GRAPH_WINDOW]))->mouseHasMoved(); // TODO
+//	else if(game[1]->window[BO_GRAPH_WINDOW]->Inside(p))
+//		(BoGraphWindow*)(game[1]->window[BO_GRAPH_WINDOW])->mouseHasMoved();
 	
 	if(UI_Object::currentButtonHasAlreadyLeft)
 	{
@@ -659,7 +634,7 @@ void Main::setMouse(const Point p)
 	{
 		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
 			if(!UI_Object::currentButton)
-				UI_Object::currentButton = (UI_Button*) (player[i]->checkHighlight());
+				UI_Object::currentButton = (UI_Button*) (game[i]->checkHighlight());
 				
 		if(!UI_Object::currentButton)
 			UI_Object::currentButton = (UI_Button*) (mainWindow->checkHighlight());
@@ -682,7 +657,7 @@ void Main::setMouse(const Point p)
 		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
 		{
 			if(UI_Object::toolTipParent==NULL)
-				temp2 = player[i]->checkTooltip();
+				temp2 = game[i]->checkTooltip();
 			if((temp2!=NULL) && (temp2->getToolTipString()!=NULL_STRING))
 				UI_Object::toolTipParent = temp2;
 			temp2=NULL;
@@ -704,12 +679,14 @@ void Main::setMouse(const Point p)
 			if(/*(temp!=NULL)&&*/(UI_Object::toolTipParent==NULL))
 				UI_Object::tooltip=NULL;
 			else
-				UI_Object::tooltip=new UI_Tooltip(NULL/*UI_Object::toolTipParent*/, (UI_Object::toolTipParent)->getToolTipString());
+				UI_Object::tooltip=new UI_Tooltip(mainWindow, (UI_Object::toolTipParent)->getToolTipString());
+			mainWindow->setNeedRedrawNotMoved();
 		}
 	} else if(UI_Object::tooltip)
 	{
 		delete UI_Object::tooltip;
 		UI_Object::tooltip=NULL;
+		mainWindow->setNeedRedrawNotMoved();
 	}
 }
 

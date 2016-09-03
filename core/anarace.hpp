@@ -79,6 +79,7 @@ class ANARACE: public PRERACE
 //		void analyzeBuildOrder();		// sets the isGoal of program
 	
 		std::list<PROGRAM> programList; // TODO private machen
+
 	private:
 		unsigned int unitsTotal; // total number of all unit types at the end
 		unsigned int unitsTotalMax; // maximum number of one unit type at the end

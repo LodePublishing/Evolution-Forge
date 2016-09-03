@@ -15,7 +15,7 @@ void DC::Draw_VLine(const signed int x0, const signed int y0, const signed int y
 	register Uint8 *p = (Uint8*)surface->pixels + y0 * surface->pitch + x0 * SDL_DRAW_BPP;
 	register Sint16 i = y1-y0+1;
 	Uint32 pen_col = (Uint32)(*pen.GetColor());
-
+	Lock();
 #if SDL_DRAW_BPP == 1
 	switch( i % 4 ) {					
 		do{								 
@@ -65,6 +65,7 @@ void DC::Draw_VLine(const signed int x0, const signed int y0, const signed int y
 		*(Uint32*)p = pen_col;
 // ------ END OF LEFT AND RIGHT VERTICAL LINE ------
 #endif
+	Unlock();
 
 }/*Draw_VLine*/
 #if 0
@@ -140,7 +141,7 @@ void DC::Draw_HLine(const signed int x0, const signed int y0, const signed int x
 		return;
 // ------ TOP AND LOWER HORIZONTAL LINE ------
 	Uint32 pen_col = (Uint32)(*pen.GetColor());
-	
+	Lock();
 	if (sizeof(wchar_t) == sizeof(Uint32)) { 
 #ifdef __linux__
 		wmemset((wchar_t*)( (Uint8*)surface->pixels +  y0 * surface->pitch + (x0<<2)), pen_col, x1-x0);
@@ -154,6 +155,7 @@ void DC::Draw_HLine(const signed int x0, const signed int y0, const signed int x
 		for(;i--;p+=4)
 			*(Uint32*)p = pen_col;
 	}
+	Unlock();
 // ------ END OF TOP AND LOWER HORIZONTAL LINE ------
 }/*Draw_HLine*/
 
@@ -202,6 +204,7 @@ void DC::Draw_Line(signed int x1, signed int y1, signed int x2, signed int y2) c
 	y = y1;
 
 	lineAddr = ((Uint8 *)(surface->pixels)) + (y * surface->pitch);
+	Lock();
 	if (ax>ay)
 	{						/* x dominant */
 		d = ay - (ax >> 1);
@@ -240,6 +243,7 @@ void DC::Draw_Line(signed int x1, signed int y1, signed int x2, signed int y2) c
 			d += ax;
 		}
 	}
+	Unlock();
 }
 
 void DC::DrawFilledRound(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const
@@ -284,7 +288,7 @@ void DC::DrawFilledRound(const signed int x, const signed int y, const unsigned 
 		r.w = dx; r.h = radius;
 		SDL_FillRect(surface, &r, col);
 	}
-	
+	Lock();
 	unsigned int i = 0;
 	while (i <= radius) 
 	{
@@ -332,6 +336,7 @@ void DC::DrawFilledRound(const signed int x, const signed int y, const unsigned 
 		rightInc += 4;
 		++i;
 	}/*while*/
+	Unlock();
 
 }/*Draw_FillRound*/
 
@@ -380,6 +385,7 @@ void DC::DrawFilledEdgedRound(const signed int x, const signed int y, const unsi
 		SDL_FillRect(surface, &r, col);
 	}
 
+	Lock();
 // Halbkreis
 	int i = 0;
 	while (i <= (signed int)radius) 
@@ -455,6 +461,7 @@ void DC::DrawFilledEdgedRound(const signed int x, const signed int y, const unsi
 		rightInc += 4;
 		++i;
 	}
+	Unlock();
 
 }/*Draw_FillRound*/
 
@@ -472,7 +479,7 @@ void DC::DrawEmptyEdgedRound(const signed int x, const signed int y, const unsig
 
 // ------ TOP AND LOWER HORIZONTAL LINE ------
 	Uint32 pen_col = (Uint32)(*pen.GetColor());
-	
+	Lock();
 	if (sizeof(wchar_t) == sizeof(Uint32)) { 
 #ifdef __linux__
 		wmemset((wchar_t*)( (Uint8*)surface->pixels +  y * surface->pitch + (Xcenter<<2)), pen_col, dx);
@@ -549,6 +556,7 @@ void DC::DrawEmptyEdgedRound(const signed int x, const signed int y, const unsig
 		rightInc += 4;
 		++i;
 	}/*while*/
+	Unlock();
 
 }/*Draw_Round*/
 
@@ -595,7 +603,7 @@ void DC::DrawFilledEdgedBorderRound(const signed int x, const signed int y, cons
 
 // ------ TOP AND LOWER HORIZONTAL LINE ------
 	Uint32 pen_col = (Uint32)(*pen.GetColor());
-	
+	Lock();
 	if (sizeof(wchar_t) == sizeof(Uint32)) { 
 #ifdef __linux__
 		wmemset((wchar_t*)( (Uint8*)surface->pixels +  y * surface->pitch + (Xcenter<<2)), pen_col, dx);
@@ -714,6 +722,7 @@ void DC::DrawFilledEdgedBorderRound(const signed int x, const signed int y, cons
 		++i;
 	}
 	}
+	Unlock();
 
 }/*DrawFilledEdgedBorderRound*/
 
@@ -753,6 +762,7 @@ void DC::DrawEmptyRound(const signed int x, const signed int y, const unsigned i
 	p0 = (Uint8*)surface->pixels +	y	* surface->pitch + Xcenter*SDL_DRAW_BPP;
 	p1 = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + Xcenter*SDL_DRAW_BPP;
 
+	Lock();
 #ifdef __linux__
 #define SDL_DRAW_WMEMSET_START \
 	if (sizeof(wchar_t) == sizeof(Uint32)) {		\
@@ -833,6 +843,7 @@ SDL_DRAW_WMEMSET_END
 		rightInc += 4;
 		++i;
 	}/*while*/
+	Unlock();
 
 }/*Draw_Round*/
 

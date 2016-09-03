@@ -3,7 +3,7 @@
 
 const float GUI_VERSION=0.51;
 
-#include "player.hpp"
+#include "game.hpp"
 #include "message.hpp"
 #include "tutorial.hpp"
 #include "mainwindow.hpp"
@@ -34,7 +34,7 @@ class Main
 		MessageWindow* msgWindow;
 		UI_Window* infoWindow;
 		TutorialWindow* tutorialWindow;
-		Player* player[MAX_PLAYER];
+		Game* game[MAX_PLAYER];
 		SettingsWindow* settingsWindow;
 		static ProgressBar* bar;
 		
@@ -57,12 +57,9 @@ class Main
 		const bool newRun();
 	
 		Point maus;
-		bool drawing;
 	private:
 //		SDL_Surface* cursor_save;
 //		SDL_Surface* cursor;
-
-		
 
 		unsigned int oldrun;
 		bool endrun;
@@ -70,8 +67,6 @@ class Main
 		void drawGizmo(DC* dc) const;
 		const Size helper(DC* dc, const unsigned int dx, const int i, const string& str) const;
 		ANARACE* anarace[MAX_PLAYER];
-		unsigned int update; // TODO anderer Name
-		unsigned int refresh; // "" 
 		unsigned int ani, ani2;
 
 		bool boHasChanged;	

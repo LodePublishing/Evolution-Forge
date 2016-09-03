@@ -68,10 +68,10 @@ inline const Point Point::operator-(const Size& size) const {
 	
 inline const Size Point::operator-(const Point& point) const
 {
-#ifdef _SCC_DEBUG
+/*#ifdef _SCC_DEBUG
 	if(((x > point.x)&&(y < point.y))||((x < point.x)&&(y > point.y)))
 		toLog("POINT: wrong subtraction!");
-#endif
+#endif*/
 	return Size(x > point.x?x - point.x:point.x - x, y > point.y?y - point.y:point.y - y);
 	// TODO ERROR wenn nicht beide > bzw beide <
 }

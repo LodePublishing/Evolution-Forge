@@ -33,7 +33,7 @@ class SETTINGS
 		const BASIC_MAP* getMap(const unsigned int mapNumber) const;
 		void checkForChange() const;
 
-		list<string> findFiles(const string directory1, const string directory2, const string directory3) const;
+		list<string> findFiles(const string& directory1, const string& directory2, const string& directory3) const;
 //		void clearGoalFiles();
 	
 /*		void setMaxTime(const unsigned int maxTime); //sets max Time in minutes

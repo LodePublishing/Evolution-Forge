@@ -150,7 +150,7 @@ UI_Theme::~UI_Theme()
 		for(int j = MAX_RESOLUTIONS;j--;)
 		{
 			for(int k = MAX_BITMAPS;k--;)
-				delete bitmapList[i][j][k];
+				SDL_FreeSurface(bitmapList[i][j][k]);
 //	 		for(int k = MAX_PENS;k--;)
 //				delete penList[i][j][k];
 		}
@@ -640,9 +640,7 @@ void UI_Theme::loadStringFile(const string& dataFile)
 	if(!pFile.is_open())
 	{
 #ifdef _SCC_DEBUG
-		ostringstream os;
-		os << "ERROR: (UI_Theme::loadStringFile) Could not open file! [" << dataFile << "]";
-		toLog(os.str());
+		toLog("ERROR: (UI_Theme::loadStringFile) Could not open file! [" + dataFile + "]");
 #endif
 		return;
 	}
@@ -1030,11 +1028,16 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 				{
 					case BITMAP_DATA_TYPE:
 						{
-							string t=bitmapDir+p[0]+".bmp";
-#ifdef _SCC_DEBUG
-//							toLog("Loading "+t+"...");
-#endif
-							bitmapList[current_resolution][current_theme][current_line]=new Bitmap(t);
+							string name = bitmapDir+p[0]+".bmp";
+							SDL_Surface* temp = SDL_LoadBMP(name.c_str());
+							if(temp == NULL)
+							{
+								toLog("Could not load Bitmap " + name);
+								SDL_FreeSurface(temp);
+								bitmapList[current_resolution][current_theme][current_line] = NULL;
+							}
+							else 
+								bitmapList[current_resolution][current_theme][current_line] = temp;
 							
 //							SDL_SetColorKey(bitmapList[current_resolution][current_theme][current_line]->getSurface(), SDL_SRCCOLORKEY , SDL_MapRGB(bitmapList[current_resolution][current_theme][current_line]->getFormat(), 0,0,0));
 		

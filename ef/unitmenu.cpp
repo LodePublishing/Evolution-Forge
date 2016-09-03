@@ -92,7 +92,7 @@ void UnitMenu::process()
 						(*m)->Hide();
 						continue;
 					}
-					Rect edge = Rect(Point(10/*+130*(height%2)*/, ((height+1)/*/2*/+1-2) * (FONT_SIZE + 9) /*- getScrollY()*/), Size(120, FONT_SIZE+6));
+					Rect edge = Rect(Point(10/*+130*(height%2)*/, ((height+1)/*/2*/+1-2) * (FONT_SIZE + 9)), Size(120, FONT_SIZE+6));
 	//				if (fitItemToClientRect(edge, 1))
 					{
 						(*m)->Show();
@@ -120,7 +120,7 @@ void UnitMenu::process()
 						(*m)->Hide();
 						continue;
 					}
-					Rect edge = Rect(Point(10+135*(height%2), ((height+1)/2+1) * (FONT_SIZE + 9) /*- getScrollY()*/), Size(120, FONT_SIZE+6));
+					Rect edge = Rect(Point(10+135*(height%2), ((height+1)/2+1) * (FONT_SIZE + 9)), Size(120, FONT_SIZE+6));
 	//			  if (fitItemToClientRect(edge, 1))
 					{
 						(*m)->Show();

@@ -1483,8 +1483,8 @@ void PRERACE::mutateGeneCode(/*const bool* fixed_list*/)
 	for(unsigned int i = UNIT_TYPE_COUNT;i--;)
 	{
 		need[i] = (*pGoal)->need[i];
-		checked[i]=false;
-		buildable[i]=false;
+		checked[i] = false;
+		buildable[i] = false;
 	}
 	
 	memset(tGeno, 0, UNIT_TYPE_COUNT*sizeof(int));
@@ -1558,7 +1558,7 @@ void PRERACE::mutateGeneCode(/*const bool* fixed_list*/)
 				}break;
 				case 1://add one variable entry
 				{
-					memmove(Code+x+1, Code+x, MAX_LENGTH-x-1);
+					memmove(Code+x+1, Code+x, (MAX_LENGTH-x-1) * sizeof(int));
 //					memmove(Marker+x+1, Marker+x, MAX_LENGTH-x-1);
 					
 /*					for(unsigned int i=MAX_LENGTH-1;i>x;i--)
@@ -1947,6 +1947,12 @@ void PRERACE::copyCode(PRERACE& player)
 	memcpy(Code, player.Code, sizeof(int) * MAX_LENGTH);
 //	memcpy(Marker, player.Marker, sizeof(int) * MAX_LENGTH);
 }
+
+void PRERACE::copyCode(unsigned int* dst) const
+{
+	memcpy(dst, Code, MAX_LENGTH * sizeof(int));
+}
+
 
 // --------------------------------------
 // ------ END OF GET/SET FUNCTIONS ------

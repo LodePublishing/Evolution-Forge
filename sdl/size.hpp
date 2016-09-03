@@ -1,7 +1,7 @@
 #ifndef _SDL_SIZE_HPP
 #define _SDL_SIZE_HPP
 
-#include "../core/defs.hpp"
+//#include "../core/defs.hpp"
 
 class Size
 {
@@ -57,13 +57,13 @@ inline Size::Size(const unsigned int w, const unsigned int h) :
 
 inline const Size Size::operator-(const Size& size) const 
 {
-#ifdef _SCC_DEBUG
+/*#ifdef _SCC_DEBUG
 	if((size.width > width) || (size.height > height))
 	{
 		toLog("RESIZE ERROR: Negative size is not allowed");
 		return(Size(0,0));
 	}
-#endif
+#endif*/
 	return Size(width - size.width, height - size.height);
 }
 
@@ -102,13 +102,13 @@ inline void Size::SetWidth(const unsigned int w)
 		
 inline void Size::SetHeight(const unsigned int h) 
 {
-#ifdef _SCC_DEBUG
+/*#ifdef _SCC_DEBUG
 	if(h > 1024)
 	{
 		toLog("SIZE ERROR: height out of range");
 		return;
 	}
-#endif
+#endif*/
 	height = h;
 }
 

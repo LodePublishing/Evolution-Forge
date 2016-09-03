@@ -319,10 +319,18 @@ void UI_Object::process()
 //		ARGH
 		doAdjustments=2;
 	}
-	oldRect = getRelativeRect();
-	if(relativeRect.move(startRect, targetRect));
-	if(oldRect != getRelativeRect())
-		setNeedRedrawMoved();
+
+	if(configuration.isSmoothMovements())
+	{
+		if(relativeRect.moveSmooth(startRect, targetRect))
+			setNeedRedrawMoved();
+	}
+	else 
+	{
+		if(relativeRect.move(startRect, targetRect))
+			setNeedRedrawMoved();
+	}	
+	
 #if 0
 	if((lastRect!=getAbsoluteRect())||(needRedraw))
 	{
@@ -437,8 +445,9 @@ void UI_Object::draw(DC* dc) const
 		temp.h = getHeight();	
 		SDL_BlitSurface(dc->GetSurface(), &temp, background, NULL); // save new background
 	}*/
-	
-//	dc->DrawEmptyRectangle(getAbsoluteRect());
+
+//	if(checkForNeedRedraw())
+//		dc->DrawEmptyRectangle(getAbsoluteRect().GetTopLeft() + Size(rand()%3, rand()%3), getSize());
 
 	UI_Object* tmp = children;
 	
@@ -542,8 +551,8 @@ void UI_Object::Show(const bool show)
 {
 	if((show)&&(!shown))
 	{
+		setNeedRedrawMoved(true);
 		process();
-		setNeedRedrawNotMoved(true);
 		shown = true;
 	} 
 	else if((!show)&&(shown))
@@ -557,8 +566,8 @@ void UI_Object::Show(const bool show)
 
 void UI_Object::setNeedRedrawMoved(const bool need_redraw)  // moved item
 {
-	if(!isShown())
-		return;
+//	if(!isShown())
+//		return;
 	setNeedRedrawNotMoved(need_redraw);
 	if((need_redraw)&&(getParent()))
 	{
@@ -582,10 +591,13 @@ void UI_Object::checkForChildrenOverlap(const Rect& rect)
 
 void UI_Object::setNeedRedrawNotMoved(const bool need_redraw)
 {
-	if(!isShown())
-		return;
+	//if(!isShown())
+	//	return;
 
 	needRedraw = need_redraw;
+
+	if(!need_redraw)
+		return;
 
         UI_Object* tmp = children;
 

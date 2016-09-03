@@ -294,7 +294,6 @@ void ForceWindow::process()
 			// TODO in ne eigene Klasse oder so
 			case RACE_MENU:
 			{
-				raceMenu->Show();
 				raceMenu->open();
 			   	if(!raceMenu->isOpen()) 
 				{
@@ -309,7 +308,6 @@ void ForceWindow::process()
 		
 			case UNIT_MENU:
 			{
-				unitMenu->Show();
 				unitMenu->open();
 				if(!unitMenu->isOpen()) 
 				{
@@ -326,7 +324,6 @@ void ForceWindow::process()
 			
 			case GOAL_MENU:
 			{
-				goalMenu->Show();
 				goalMenu->open();
 				if(!goalMenu->isOpen()) 
 				{
@@ -683,7 +680,7 @@ void ForceWindow::processList()
 		{
 			current_location = i->getLocation();
 			locationName[0][current_location]->Show();
-			locationName[0][current_location]->adjustRelativeRect(Rect(getRelativeClientRectPosition() + Point(0, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)-getScrollY()), Size(getClientRectWidth(), FONT_SIZE+5)));
+			locationName[0][current_location]->adjustRelativeRect(Rect(getRelativeClientRectPosition() + Point(0, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)), Size(getClientRectWidth(), FONT_SIZE+5)));
 			line++;
 		}*/
 	
@@ -694,7 +691,7 @@ void ForceWindow::processList()
 			(*forceEntry)->setTargetForce(anarace->getLocationTotal(i->getLocation(), i->getUnit()) * getClientRectWidth() / (3*i->getCount()));
 		(*forceEntry)->setTotalNumber(anarace->getLocationTotal(i->getLocation(), i->getUnit()));
 				
-		Rect edge = Rect(getRelativeClientRectPosition() + Point(0, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)-getScrollY()), Size((*forceEntry)->getWidth(), FONT_SIZE+6));
+		Rect edge = Rect(getRelativeClientRectPosition() + Point(0, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)), Size((*forceEntry)->getWidth(), FONT_SIZE+6));
 		(*forceEntry)->adjustRelativeRect(edge);
 	
 /*		if((*forceEntry)->isLocationGoalClicked())
@@ -732,7 +729,7 @@ void ForceWindow::processList()
 			continue;
 		}
 		locationName[1][loc]->Show();
-		locationName[1][loc]->adjustRelativeRect(Rect(getRelativeClientRectPosition() + Point(0, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)-getScrollY()), Size(getClientRectWidth(), FONT_SIZE+5)));
+		locationName[1][loc]->adjustRelativeRect(Rect(getRelativeClientRectPosition() + Point(0, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)), Size(getClientRectWidth(), FONT_SIZE+5)));
 		line++;*/
 
 		forceEntry = nongoalForceList.begin();
@@ -743,7 +740,7 @@ void ForceWindow::processList()
 //				checkedUnits[i]=true;
 				(*forceEntry)->setTargetForce(anarace->getLocationTotal(loc, (*forceEntry)->getUnit()) * getClientRectWidth() / (3*anarace->getNonGoalsUnitsTotalMax()));
 				(*forceEntry)->setTotalNumber(anarace->getLocationTotal(loc, (*forceEntry)->getUnit()));
-				Rect edge = Rect(getRelativeClientRectPosition() + Point(0, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)/*-getScrollY()*/), 
+				Rect edge = Rect(getRelativeClientRectPosition() + Point(0, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)), 
 							Size((*forceEntry)->getWidth(), FONT_SIZE+6));
 				(*forceEntry)->adjustRelativeRect(edge);
 
@@ -760,7 +757,7 @@ void ForceWindow::processList()
 				checkedUnits[i]=true;
 				(*forceEntry)->setTargetForce(anarace->getLocationTotal(loc, i) * getClientRectWidth() / (3*anarace->getNonGoalsUnitsTotalMax()));
 				(*forceEntry)->setTotalNumber(anarace->getLocationTotal(loc, i));
-				Rect edge = Rect(getRelativeClientRectPosition() + Point(0, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)-getScrollY()), 
+				Rect edge = Rect(getRelativeClientRectPosition() + Point(0, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)), 
 							Size((*forceEntry)->getWidth(), FONT_SIZE+6));
 				(*forceEntry)->adjustRelativeRect(edge);
 
@@ -787,7 +784,7 @@ void ForceWindow::processList()
 			continue;
 		}
 		locationName[1][loc]->Show();
-		locationName[1][loc]->adjustRelativeRect(Rect(getRelativeClientRectPosition() + Point(0, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)-getScrollY()), Size(getClientRectWidth(), FONT_SIZE+5)))
+		locationName[1][loc]->adjustRelativeRect(Rect(getRelativeClientRectPosition() + Point(0, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)), Size(getClientRectWidth(), FONT_SIZE+5)))
 ;
 		line++;
 
@@ -798,7 +795,7 @@ void ForceWindow::processList()
 				checkedUnits[i]=true;
 				(*forceEntry)->setTargetForce(anarace->getLocationTotal(loc, i) * getClientRectWidth() / (3*anarace->getNonGoalsUnitsTotalMax()));
 				(*forceEntry)->setTotalNumber(anarace->getLocationTotal(loc, i));
-				Rect edge = Rect(getRelativeClientRectPosition() + Point(0, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)-getScrollY()),
+				Rect edge = Rect(getRelativeClientRectPosition() + Point(0, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)),
 				Size((*forceEntry)->getWidth(), FONT_SIZE+6));
 				(*forceEntry)->adjustRelativeRect(edge);
 

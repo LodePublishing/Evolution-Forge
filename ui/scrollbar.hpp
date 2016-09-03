@@ -15,12 +15,14 @@ class UI_Scrollbar : public UI_Object
 
 		void process(); // process messages, continue animation etc.
 		void draw(DC* dc) const;
-		const signed int getScrollY() const;
-
-		void setMaxScrollY(const unsigned int max_scrolly);
 
 		void moveUp();
 		void moveDown();
+		void reset();
+		void resetToEnd();
+
+		void setClientHeight(const unsigned int height);
+		void setClientTargetHeight(const unsigned int height);
 
 	protected:
 	private:
@@ -32,8 +34,10 @@ class UI_Scrollbar : public UI_Object
 		unsigned int internalHeight;
 		signed int currentScrollY;
 		unsigned int barHeight;
-		unsigned int maxScrollY;
-		unsigned int startY;
+		
+		unsigned int clientHeight;
+		unsigned int clientTargetHeight;
+		unsigned int totalHeight;
 };
 
 #endif // _UI_SCROLLBAR_HPP

@@ -6,14 +6,14 @@
 #include <list>
 
 using std::list;
-class Message
+class Message : public UI_StaticText
 {
 	public:
-		Message(const unsigned int msg_type, const string& msg_string, const unsigned int msg_col);
+		Message::Message(UI_Object* msg_parent, Rect rect, const unsigned int msg_type, const string& msg_string, const unsigned int color);
 		~Message();
-		Rect rect;
+		void draw(DC* dc) const;
+		void process();
 		unsigned int type;
-		string messageString;
 		unsigned int col;
 };
 

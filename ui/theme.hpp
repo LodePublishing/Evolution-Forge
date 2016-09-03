@@ -336,7 +336,6 @@ enum eString
 	START_LOAD_CORE_SETTINGS_STRING,	
 	START_INIT_SDL_STRING,	
 	START_UNABLE_TO_INIT_SDL_STRING,
-	START_INIT_VIDEO_STRING,
 	START_ERROR_SETTING_VIDEO_MODE_STRING,
 	START_SET_WINDOW_MODE_STRING,	
 	START_SET_FULLSCREEN_MODE_STRING,	
@@ -432,6 +431,7 @@ enum eString
 	OPTIMIZE_SELECTED_STRING,
 	RESET_BUILD_ORDER_STRING,
 	SAVE_BUILD_ORDER_STRING,
+	LOAD_BUILD_ORDER_STRING,
 	SPEED_STRING,
 	
 // timer window
@@ -501,6 +501,7 @@ enum eString
 
 	RESET_BUILD_ORDER_TOOLTIP_STRING,
 	SAVE_BUILD_ORDER_TOOLTIP_STRING,
+	LOAD_BUILD_ORDER_TOOLTIP_STRING,
 // timer:
 	CONTINUE_OPTIMIZATION_TOOLTIP_STRING, 
 	PAUSE_OPTIMIZATION_TOOLTIP_STRING, 
@@ -904,7 +905,7 @@ class UI_Theme
 		const string lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j) const;
 		const string lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j, const unsigned int k) const;
 		Color* lookUpColor(const eColor id) const;
-		/*const */Bitmap* lookUpBitmap(const eBitmap id) const;
+		/*const */SDL_Surface* lookUpBitmap(const eBitmap id) const;
 		Pen* lookUpPen(const ePen id) const;
 		Brush* lookUpBrush(const eBrush id) const;
 		Font* lookUpFont(const eFont id) const;
@@ -948,7 +949,7 @@ class UI_Theme
 		
 		string* stringList[MAX_LANGUAGES][MAX_STRINGS];
 		Color* colorList[MAX_COLOR_THEMES][MAX_COLORS];
-		Bitmap* bitmapList[MAX_COLOR_THEMES][MAX_RESOLUTIONS][MAX_BITMAPS];
+		SDL_Surface* bitmapList[MAX_COLOR_THEMES][MAX_RESOLUTIONS][MAX_BITMAPS];
 		Pen* penList[MAX_RESOLUTIONS][MAX_COLOR_THEMES][MAX_PENS];
 		Brush* brushList[MAX_COLOR_THEMES][MAX_BRUSHES];
 
@@ -1026,7 +1027,7 @@ inline Color* UI_Theme::lookUpColor(const eColor id) const
 	return(colorList[colorTheme][id]);
 }
 
-inline /*const */Bitmap* UI_Theme::lookUpBitmap(const eBitmap id) const 
+inline /*const */SDL_Surface* UI_Theme::lookUpBitmap(const eBitmap id) const 
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_BITMAPS)) {

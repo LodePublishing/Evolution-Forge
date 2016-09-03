@@ -6,8 +6,8 @@
 class RACE : public PRERACE
 {
 	private:
-       	unsigned int mutationRate;
-       	const bool buildGene(const unsigned int build_unit);
+	       	unsigned int mutationRate;
+       		const bool buildGene(const unsigned int build_unit);
 		unsigned int pFitness;
 		unsigned int sFitness;
 		unsigned int tFitness;
@@ -17,6 +17,8 @@ class RACE : public PRERACE
 		~RACE();
 		RACE& operator=(const RACE& object);
 		RACE(const RACE& object);
+		void resetData();
+		static void resetStaticData();
 //Output:
 		void setpFitness(const unsigned int p_fitness);
 		void setsFitness(const unsigned int s_fitness);

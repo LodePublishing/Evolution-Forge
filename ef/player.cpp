@@ -33,6 +33,11 @@ Player::Player(UI_Object* player_parent, ANARACE** player_anarace, MessageWindow
 	setOptimizing(false);
 }
 
+void Player::assignAnarace(ANARACE** player_anarace)
+{
+	anarace = player_anarace;
+}
+
 void Player::processBoGraph()
 {
 	if((!window[BO_GRAPH_WINDOW]->isShown())||(!isShown()))
@@ -423,14 +428,6 @@ void Player::process()
 // ------ END PROCESSING MEMBER VARIABLES ------
 }
 
-const bool Player::getChangedFlag() const
-{
-	for(int i=BUILD_ORDER_WINDOW;i<=INFO_WINDOW;i++)
-		if(window[(eWindow)i]->getChangedFlag())
-			return(1);
-	return(0);
-}
-
 void Player::updateRectangles(const unsigned int maxPlayer)
 {
 	for(int i=BUILD_ORDER_WINDOW;i<=INFO_WINDOW;i++)
@@ -448,13 +445,6 @@ void Player::setOptimizing(const bool opt)
 	((TimerWindow*)window[TIMER_WINDOW])->forcePause(opt);
 }
 
-void Player::changeAccepted()
-{
-	for(int i=BUILD_ORDER_WINDOW;i<=INFO_WINDOW;i++)
-		window[(eWindow)i]->changeAccepted();
-}
-
-
 void Player::resetData()
 {
 	((BoWindow*)window[BUILD_ORDER_WINDOW])->resetData();
@@ -469,18 +459,10 @@ void Player::resetData()
 	orderList.clear();
 }
 
-void Player::checkForChange()
+void Player::restartAnarace()
 {
-	if((window[FORCE_WINDOW]->getChangedFlag())||(window[BUILD_ORDER_WINDOW]->getChangedFlag()))
-	{
-		resetData();
-		(*anarace)->resetData();
-//		(*(*anarace)->getCurrentGoal())->adjustGoals(true, (*   (*anarace)->getStartCondition()   )->getUnit(0) );
-		window[FORCE_WINDOW]->changeAccepted();
-		window[BUILD_ORDER_WINDOW]->changeAccepted();
-	}
+	(*anarace)->restartData();
 }
-
 
 void Player::CheckOrders()
 {
@@ -595,5 +577,4 @@ void Player::MoveOrders()
 		Size::mv(order->second.blend, order->second.blendStart, order->second.blendTarget);
 	}
 }
-
 

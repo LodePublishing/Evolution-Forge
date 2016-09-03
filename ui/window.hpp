@@ -122,9 +122,13 @@ class UI_Window : public UI_Object
 		void updateRectangles(const unsigned int maxPlayer);
 
 		
-		const bool getChangedFlag() const;
-		void setChangedFlag(const bool flag=true);
-		void changeAccepted();
+		static const bool getChangedFlag();
+		static void setChangedFlag(const bool flag=true);
+		static void changeAccepted();
+
+		static const bool getResetFlag();
+		static void setResetFlag(const bool flag=true);
+		static void resetAccepted();
 
 		void setTitleParameter(const string& p);
 
@@ -183,8 +187,9 @@ class UI_Window : public UI_Object
 		eIsTabbed isTabbed;
 	
 		bool highlighted;
-		bool changedFlag; // TODO, raus hier und static oder irgendsowas!
-	
+
+		static bool changedFlag; 
+		static bool resetFlag;
 };
 
 #endif

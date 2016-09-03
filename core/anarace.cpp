@@ -10,8 +10,70 @@
  *      core from outside the library. In addition some data is     *
         preformatted/precalculated -> statistics.				    */
 
+
+STATISTICS::STATISTICS():
+	needSupply(0),
+	haveSupply(0),
+	minerals(0),
+	gas(0),
+	fitness(0)
+{ }
+
+STATISTICS::~STATISTICS() {};
+
+void STATISTICS::resetData()
+{
+	needSupply=0;
+	haveSupply=0;
+	minerals=0;
+	gas=0;
+	fitness=0;
+}
+
+PROGRAM::PROGRAM():
+	built(false),
+	time(0),
+	location(0),
+	successType(0),
+	successUnit(0),
+	facility(0),
+	BT(0)
+{
+	for(int i=UNIT_TYPE_COUNT;i--;)
+	{
+		forceCount[i]=0;
+		availibleCount[i]=0;
+	}
+}
+
+PROGRAM::~PROGRAM() {};
+
+void PROGRAM::resetData()
+{
+	built=false;
+	time=0;
+	location=0;
+	successType=0;
+	successUnit=0;
+	facility=0;
+	BT=0;
+        for(int i=UNIT_TYPE_COUNT;i--;)
+        {
+                forceCount[i]=0;
+                availibleCount[i]=0;
+        }
+}
+
+void ANARACE::resetStaticData()
+{
+	PRERACE::resetStaticPrerace();
+	successType=0;
+	successUnit=0;
+}
+
 // TODO: reimplement/recheck the speed of the units
-ANARACE::ANARACE(): 
+ANARACE::ANARACE():
+	PRERACE(),
 	unitsTotal(4),
 	unitsTotalMax(4),
 	nonGoalsUnitsTotalMax(4),
@@ -33,7 +95,50 @@ ANARACE::ANARACE():
 	wayneCrossover(0),
 	negativeCrossover(0)
 {
-    resetSpecial();
+	
+	for(int i = MAX_LENGTH;i--;)
+	{
+		phaenoCode[i]=0;            // the final build order: an array of unit numbers (as defined in main.h)
+		ipStatistics[i].resetData();
+		ipStatistics[i+1].resetData();
+		program[i].resetData();
+	}
+	for(int i = MAX_TIME;i--;)
+		timeStatistics[i].resetData();
+}
+
+void ANARACE::resetData()
+{
+	PRERACE::resetPrerace();
+        unitsTotal=4;
+        unitsTotalMax=4;
+        nonGoalsUnitsTotalMax=4;
+        unchangedGenerations=0;
+        currentRun=0;
+        optimizing=false;
+        active=true;
+        totalGeneration=0;
+        maxpFitness=0;
+        maxsFitness=0;
+        maxtFitness=MAX_TFITNESS;
+        timePercentage=0;
+        goalPercentage=0;
+        currentpFitness=0;
+        averageLength=0;
+        fitnessAverage=0;
+        fitnessVariance=0;
+        positiveCrossover=0;
+        wayneCrossover=0;
+        negativeCrossover=0;
+        for(int i = MAX_LENGTH;i--;)
+        {
+                phaenoCode[i]=0;            // the final build order: an array of unit numbers (as defined in main.h)
+                ipStatistics[i].resetData();
+                ipStatistics[i+1].resetData();
+                program[i].resetData();
+        }
+        for(int i = MAX_TIME;i--;)
+                timeStatistics[i].resetData();
 }
 
 ANARACE::~ANARACE()
@@ -109,7 +214,7 @@ ANARACE& ANARACE::operator=(const ANARACE& object)
 
 
 
-void ANARACE::resetData()
+void ANARACE::restartData()
 {
 	resetSpecial();
 	setTotalGeneration(0);

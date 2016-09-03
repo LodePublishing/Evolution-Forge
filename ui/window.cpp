@@ -24,7 +24,6 @@ UI_Window& UI_Window::operator=(const UI_Window& object)
     isScrollable = object.isScrollable;
     isTabbed = object.isTabbed;
     highlighted = object.highlighted;
-    changedFlag = object.changedFlag;
 	return(*this);
 }
 
@@ -47,8 +46,7 @@ UI_Window::UI_Window(const UI_Window& object) :
     isAutoAdjust( object.isAutoAdjust ),
     isScrollable( object.isScrollable ),
     isTabbed( object.isTabbed ),
-    highlighted( object.highlighted ),
-    changedFlag( object.changedFlag )
+    highlighted( object.highlighted )
 { }
 
 
@@ -72,8 +70,7 @@ UI_Window::UI_Window(UI_Object* window_parent, const eString window_title_string
 	isAutoAdjust(window_is_auto_adjust), //?
 	isScrollable(NOT_SCROLLED), // TODO
 	isTabbed(window_is_tabbed), //?
-	highlighted(false),
-	changedFlag(false)
+	highlighted(false)
 {
 // ------ PROCESSING
 	updateBorders(); //~~
@@ -514,7 +511,7 @@ void UI_Window::setChangedFlag(const bool flag) {
 	changedFlag=flag;
 }
 
-const bool UI_Window::getChangedFlag() const {
+const bool UI_Window::getChangedFlag() {
 	return(changedFlag);
 }
 
@@ -522,3 +519,17 @@ void UI_Window::changeAccepted() {
 	changedFlag=false;
 }
 
+void UI_Window::setResetFlag(const bool flag) {
+	resetFlag=flag;
+}
+
+const bool UI_Window::getResetFlag() {
+	return(resetFlag);
+}
+
+void UI_Window::resetAccepted() {
+	resetFlag=false;
+}
+
+bool UI_Window::changedFlag=false;
+bool UI_Window::resetFlag=false;

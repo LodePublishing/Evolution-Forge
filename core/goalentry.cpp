@@ -196,13 +196,9 @@ const std::list<unsigned int> GOAL_ENTRY::allowDeletion(const unsigned int unitT
 #endif
 
 	for(int i=UNIT_TYPE_COUNT;i--;)
-		if((allGoal[i])||(isBuildable[i]))
+		if((allGoal[i])/*||(isBuildable[i])*/)
 		{
 			bool error=false;
-			if(i==LURKER_ASPECT)
-			{
-				error=false;	
-			}
 
 			if(pStats[i].facility[0] > 0)
 			{
@@ -215,40 +211,33 @@ const std::list<unsigned int> GOAL_ENTRY::allowDeletion(const unsigned int unitT
 						{
 							if(pStats[i].facility[2]>0)
 							{
-		    	                if(allGoal[pStats[i].facility[2]]==0)
-								{
+								if(allGoal[pStats[i].facility[2]]==0)
 									error=true;
-								}
 							} else error=true;
 						}
 					} else error=true;
 				} else
 				if(pStats[i].facility[1] == unitType)
-                {
+				{
                 // pruefe ob andere Gebaeude als goals drin sind
 					if(allGoal[pStats[i].facility[0]]==0)
-                    {
-                    	if(pStats[i].facility[2]>0)
-                    	{
-                    		if(allGoal[pStats[i].facility[2]]==0)
-                    		{
-                   				error=true;
-                   			}
-                   		} else error=true;
-                   	}
-                } else
-                if(pStats[i].facility[2] == unitType)
-                {
-                // pruefe ob andere Gebaeude als goals drin sind
-                    if(allGoal[pStats[i].facility[0]]==0)
-                    {
-                        if(allGoal[pStats[i].facility[2]]==0)
-                        {
-                            error=true;
-                        }
-                    }
-                }
-		
+					{
+						if(pStats[i].facility[2]>0)
+						{
+							if(allGoal[pStats[i].facility[2]]==0)
+								error=true;
+						} else error=true;
+		                   	}
+		                } else
+		                if(pStats[i].facility[2] == unitType)
+                		{
+	                // pruefe ob andere Gebaeude als goals drin sind
+					if(allGoal[pStats[i].facility[0]]==0)
+					{
+						if(allGoal[pStats[i].facility[2]]==0)
+							error=true;
+					}
+				}
 			}
 			if(!((pStats[i].facilityType==NEEDED_ONCE)||(pStats[i].facilityType==NEEDED_UNTIL_COMPLETE)||(pStats[i].facilityType==NEEDED_ALWAYS)||(pStats[i].facilityType==NEEDED_UNTIL_COMPLETE_IS_LOST)))
 				error=false;
@@ -263,7 +252,7 @@ const std::list<unsigned int> GOAL_ENTRY::allowDeletion(const unsigned int unitT
 			if(pStats[i].unitType==REMAINING_UNIT_TYPE)
 				error=false;			
 			if(error)
-                prefList.push_back(i);
+				prefList.push_back(i);
 		} 
 	
 	return(prefList);
@@ -783,7 +772,7 @@ const bool GOAL_ENTRY::isChanged() const
 
 void GOAL_ENTRY::changeAccepted()
 {
-//	adjustGoals(true); //PROBLEM: unitforce wird nicht mit einbezogen!
+//	ajdjustGoals(true); //PROBLEM: unitforce wird nicht mit einbezogen!
 	changed=false;
 }
 

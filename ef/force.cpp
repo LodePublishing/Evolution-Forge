@@ -5,7 +5,6 @@ ForceWindow::ForceWindow(UI_Object* force_parent, ANARACE* force_anarace, Messag
 	UI_Window(force_parent, FORCE_WINDOW_TITLE_STRING, FORCE_WINDOW, force_window_number, SCROLLED),
 	currentGoalUnit(0),
 	msgWindow(force_msg_window),
-	changed(false),
 	menuRadio(new UI_Radio(this, getRelativeClientRectPosition() + Point(0,10) )),
 	saveGoalButton(new UI_Button(this, Rect(getRelativeClientRectPosition() + Size(0, 10), getClientRectSize()), Rect(Point(0,0), getSize()), SAVE_GOAL_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
 	nongoals(new UI_StaticText(this, NON_GOALS_STRING, Rect(getRelativeClientRectPosition()+Point(0,20), getClientRectSize()), FORCE_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),
@@ -436,15 +435,15 @@ void ForceWindow::process()
 			case ZERG:UI_Object::theme.setColorTheme(DARK_RED_THEME);break;
 			default:break;
 		}
-		setChangedFlag();
+		setResetFlag(); //!
 	}
 
-	if(getChangedFlag())
+/*	if(getChangedFlag())
 	{
-		(*anarace->getCurrentGoal())->adjustGoals(true, (*anarace->getStartCondition())->getUnit(0) );
+//		(*anarace->getCurrentGoal())->adjustGoals(true, (*anarace->getStartCondition())->getUnit(0) );
 		resetData();
 //		unitMenu->resetData(); CHANGED
-	}
+	}*/
 	
 	
 }

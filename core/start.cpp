@@ -80,7 +80,7 @@ void START::assignGoal(const unsigned int playerNum, const GOAL_ENTRY* goal)
 #endif
 	tmpgoal[playerNum] = goal;
 	currentGoal[playerNum] = *goal;
-	currentGoal[playerNum].adjustGoals(&(totalForce[playerNum]));
+	currentGoal[playerNum].adjustGoals(true, &totalForce[playerNum]); // TODO
 }
 
 void START::assignStartcondition(const unsigned int player, const START_CONDITION* start_condition)

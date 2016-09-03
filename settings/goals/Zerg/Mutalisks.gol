@@ -1,0 +1,11 @@
+@GOAL
+        "Name" "Mutalisks"
+        "Race" "Zerg"
+        "Lair" "1" "0" "0"
+        "Spawning Pool" "1" "0" "0"
+        "Extractor" "1" "0" "0"
+        "Mutalisk" "6" "0" "0"
+        "Spire" "1" "0" "0"
+        "Sunken Colony" "1" "0" "300"
+        "Zergling" "3" "0" "300"
+@END

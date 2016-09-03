@@ -46,5 +46,9 @@ Intro seite... DONE
 
 
 Kein starport hinzufuegbar wenn starport CT da ist :|
+Some buildings are not removable because non-goals are there!
+When adding
 
-in output ne Dummy Datei legen
+n output ne Dummy Datei legen
+
+- GOAL TIME is not resettet between switches of race TODO

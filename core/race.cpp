@@ -9,6 +9,7 @@
  *      are made. */
 
 RACE::RACE():
+	PRERACE(),
 	mutationRate(20),
 	pFitness(0),
 	sFitness(0),
@@ -25,6 +26,19 @@ RACE::RACE(const RACE& object) :
     sFitness( object.sFitness ),
     tFitness( object.tFitness )
 { }
+
+void RACE::resetData()
+{
+	PRERACE::resetPrerace();
+	mutationRate=20;
+	pFitness=0;
+	tFitness=99999;
+}
+
+void RACE::resetStaticData()
+{
+	PRERACE::resetStaticPrerace();
+}
 
 RACE& RACE::operator=(const RACE& object)
 {

@@ -38,6 +38,9 @@ protected:
 	
 	void createSpecial();
 	void resetSpecial();
+	void resetPrerace();
+	static void resetStaticPrerace();
+
 	const unsigned int harvestMinerals() const;
 	const unsigned int harvestGas() const; 
 
@@ -109,7 +112,6 @@ public:
 	void setWastedGas(const unsigned int wasted_gas);
 
 // ------ INITIALIZATION ROUTINES ------
-	static void resetGeneMarker();
 	void setPlayerNumber(const unsigned int player_number); // assigns player data from start (start minerals, supply etc.) and sets the appropriate optimized pointers (global, location, pMap etc.) CALL IT AFTER EACH MAP CHANGE AND PLAYER CHANGE!!
 	void initializePlayer();
 	void prepareForNewGeneration();

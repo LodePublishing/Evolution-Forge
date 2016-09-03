@@ -3,37 +3,36 @@
 
 #include "prerace.hpp"
 
-struct IP_STATISTICS
+class STATISTICS
 {
-	unsigned int needSupply;		// supply that is used up by all units
-	unsigned int haveSupply;		// total supply of supply buildings (overlord, supply depot, command center, ...)
-	unsigned int minerals;			// minerals at that time
-	unsigned int gas;			// gas at that time
-	unsigned int fitness;	//fitness at that time
-};
-
-struct TIME_STATISTICS
-{
-	unsigned int needSupply;		// supply that is used up by all units
-	unsigned int haveSupply;		// total supply of supply buildings (overlord, supply depot, command center, ...)
-	unsigned int minerals;			// minerals at that time
-	unsigned int gas;			// gas at that time
-	unsigned int fitness;	//fitness at that time
+	public:
+		STATISTICS();
+		~STATISTICS();
+		void resetData();
+		unsigned int needSupply;		// supply that is used up by all units
+		unsigned int haveSupply;		// total supply of supply buildings (overlord, supply depot, command center, ...)
+		unsigned int minerals;			// minerals at that time
+		unsigned int gas;			// gas at that time
+		unsigned int fitness;	//fitness at that time
 };
 
 struct PROGRAM
 {
-	bool built;			// was this order successfully built?
-	unsigned int time;			// at which time this order was started
-	unsigned int location;		// at which location was this unit built
-	unsigned int successType;	// type of error
-	unsigned int successUnit;	// unit number
-//	int isGoal;			// is this unit part of the goal list? DOES NOT WORK YET :)
-	unsigned int forceCount[UNIT_TYPE_COUNT];
-	unsigned int availibleCount[UNIT_TYPE_COUNT];
-	unsigned int facility; 	// where it was produced
-	unsigned int BT;		//real buildtime, incl. moving scv etc.
-//	int isConstant; //this build order may not be moved. In addition no order may be inserted before the order, if the previous order is also constant.
+	public:
+		PROGRAM();
+		~PROGRAM();
+		void resetData();		
+		bool built;			// was this order successfully built?
+		unsigned int time;			// at which time this order was started
+		unsigned int location;		// at which location was this unit built
+		unsigned int successType;	// type of error
+		unsigned int successUnit;	// unit number
+	//	int isGoal;			// is this unit part of the goal list? DOES NOT WORK YET :)
+		unsigned int forceCount[UNIT_TYPE_COUNT];
+		unsigned int availibleCount[UNIT_TYPE_COUNT];
+		unsigned int facility; 	// where it was produced
+		unsigned int BT;		//real buildtime, incl. moving scv etc.
+//		int isConstant; //this build order may not be moved. In addition no order may be inserted before the order, if the previous order is also constant.
 // TODO: Zeitfenster machen!
 };
 
@@ -58,8 +57,8 @@ class ANARACE: public PRERACE
 		unsigned int phaenoCode[MAX_LENGTH];		// the final build order: an array of unit numbers (as defined in main.h)
 
 		PROGRAM program[MAX_LENGTH];
-		IP_STATISTICS ipStatistics[2*MAX_LENGTH]; // before and after command!
-		TIME_STATISTICS timeStatistics[MAX_TIME];
+		STATISTICS ipStatistics[2*MAX_LENGTH]; // before and after command!
+		STATISTICS timeStatistics[MAX_TIME];
 	
 		static unsigned int successType; //type of error
 		static unsigned int successUnit; //unit number
@@ -184,6 +183,8 @@ class ANARACE: public PRERACE
 
 		const bool calculateStep();			// calculates another time step of current generation
 		void resetData();				// resets all data to standard values
+		void restartData();				// resets all data to standard values
+		static void resetStaticData();
 		void prepareForNewGeneration();				// resets all data to standard values
 //		void analyzeBuildOrder();		// sets the isGoal of program
 };

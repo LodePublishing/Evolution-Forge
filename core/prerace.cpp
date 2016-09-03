@@ -11,15 +11,15 @@
 
 PRERACE::PRERACE():
 	location(0),
-	pStartCondition(0),
+	pStartCondition(NULL),
 	buildingQueue(), // TODO
 //	lastcounter(0),
 //	lastunit(0),
-	pStats(0),
+	pStats(NULL),
 	neededMinerals(0),
 	neededGas(0),
 	ready(false),
-	pGoal(0),
+	pGoal(NULL),
 	playerNum(0),
 	minerals(0),
 	gas(0),
@@ -41,14 +41,63 @@ PRERACE::PRERACE():
 		for(int j=5;j--;)
 			setGasHarvestPerSecond(i,j,0);
 	}
-/*	for(int i=MAX_LENGTH;i--;)
+	for(int i=MAX_LENGTH;i--;)
 	{
 		Code[i]=0;
-		last[i].unit=0;
-		last[i].location=0;
-		last[i].count=0;
-	}*/
+		Marker[i]=0;
+	}
 	resetSpecial();
+}
+
+void PRERACE::resetPrerace()
+{
+	location=NULL;
+	pStartCondition=NULL;
+	while(!buildingQueue.empty())
+		buildingQueue.pop();
+	pStats=NULL;
+	neededMinerals=0;
+	neededGas=0;
+	ready=false;
+	pGoal=NULL;
+	playerNum=0;
+	minerals=0;
+	gas=0;
+	timer=0; //? max_time-1?
+	IP=0;
+	harvestedMinerals=0;
+	harvestedGas=0;
+	wastedMinerals=0;
+	wastedGas=0;
+	needSupply=0;
+	haveSupply=0;
+	length=0;
+	timeout=0;
+	for(int i=MAX_LOCATIONS;i--;)
+	{
+		for(int j=45;j--;)
+			setMineralHarvestPerSecond(i,j,0);
+		for(int j=5;j--;)
+			setGasHarvestPerSecond(i,j,0);
+	}
+	for(int i=MAX_LENGTH;i--;)
+	{
+		Code[i]=0;
+		Marker[i]=0;
+	}
+	resetSpecial();
+}
+
+void PRERACE::resetStaticPrerace()
+{
+	pMap=NULL;
+	for(int i = MAX_TIME;i--;)
+		noise[i]=0;
+	markerCounter=1;
+	for(int i = MAX_PLAYER;i--;)
+		for(int j = MAX_LOCATIONS;j--;)
+			unit[i][j].resetData();
+	pStart=NULL;
 }
 
 PRERACE::PRERACE(const PRERACE& object) :
@@ -837,11 +886,6 @@ void PRERACE::initNoise()
 			noise[j]=0;
 }
 
-void PRERACE::resetGeneMarker()
-{
-	markerCounter=1;
-}
-
 void PRERACE::resetSpecial()
 {
 	for(int i=MAX_LOCATIONS;i--;)
@@ -1144,14 +1188,14 @@ void PRERACE::resetGeneCode()
 	}
 	else*/
 	{
-		unsigned int y=0;
-		switch((*pGoal)->getRace())
+//		unsigned int y=0;
+/*		switch((*pGoal)->getRace())
 		{
 			case TERRA:y=SUPPLY_DEPOT;break;
 			case PROTOSS:y=PYLON;break;
 			case ZERG:y=OVERLORD;break;
 			default:break; // TODO ERROR
-		}
+		}*/
 		for(int i=MAX_LENGTH;i--;)
 		{
 //			if((i+4)%stats[(*pGoal)->getRace()][y].needSupply==0)

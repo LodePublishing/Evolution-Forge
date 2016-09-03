@@ -386,13 +386,13 @@ void BoDiagramWindow::draw(DC* dc) const
 //			dc->DrawSpline(count, &(fitness[0]), getAbsoluteClientRectPosition()+Point(0,getClientRectHeight()));*/
 					
 			dc->SetTextForeground(*theme.lookUpColor(MINERALS_TEXT_COLOR));
-			dc->DrawText("Minerals",getAbsoluteClientRectPosition()+Point(1,10));
+			dc->DrawText("Minerals",getAbsoluteClientRectPosition()+Point(1,15));
 			dc->SetTextForeground(*theme.lookUpColor(GAS_TEXT_COLOR));
-			dc->DrawText("Gas",getAbsoluteClientRectPosition()+Point(1,21));
+			dc->DrawText("Gas",getAbsoluteClientRectPosition()+Point(1,26));
 			dc->SetTextForeground(*theme.lookUpColor(SUPPLY_TEXT_COLOR));
-			dc->DrawText("Supply",getAbsoluteClientRectPosition()+Point(1,32));
+			dc->DrawText("Supply",getAbsoluteClientRectPosition()+Point(1,37));
 			dc->SetTextForeground(*theme.lookUpColor(FITNESS_TEXT_COLOR));
-			dc->DrawText("Time",getAbsoluteClientRectPosition()+Point(1,43));
+			dc->DrawText("Time",getAbsoluteClientRectPosition()+Point(1,48));
 					
 			if(count>2)
 			if((getAbsoluteClientRect().Inside(mouse))&&(anarace->getRealTimer()>0))
@@ -413,25 +413,25 @@ void BoDiagramWindow::draw(DC* dc) const
 				if(mouse.x < getAbsoluteClientRectLeftBound())
 					while(true);
 				os << anarace->getTimeStatisticsHaveMinerals(configuration.getMaxTime()-time)/100;
-				dc->DrawText(os.str(),getAbsoluteClientRectPosition()+Point(50,10));os.str("");
+				dc->DrawText(os.str(),getAbsoluteClientRectPosition()+Point(50,15));os.str("");
 				
 				dc->SetTextForeground(*theme.lookUpColor(BRIGHT_GAS_TEXT_COLOR));
 				os << anarace->getTimeStatisticsHaveGas(configuration.getMaxTime()-time)/100;
-				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(50,21));os.str("");
+				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(50,26));os.str("");
 				
 				dc->SetTextForeground(*theme.lookUpColor(BRIGHT_SUPPLY_TEXT_COLOR));
 				int ns=anarace->getTimeStatisticsNeedSupply(configuration.getMaxTime()-time);
 				int hs=anarace->getTimeStatisticsHaveSupply(configuration.getMaxTime()-time);
 				
 				os << ns << ":" << hs;
-				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(50,32));
+				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(50,37));
 
 				os.str("");
 				os << (time/60) << ":";
 				if((time%60)<10)
 					os << "0";
 				os << (time%60);
-				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(50,43));
+				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(50,48));
 				
 				dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 				dc->SetPen(*theme.lookUpPen(SELECT_PEN));

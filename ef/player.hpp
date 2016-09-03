@@ -48,15 +48,12 @@ class Player : public UI_Object
 		void update();
 
 		void resetData();
+		void restartAnarace();
 		
 		void setMode(const eTab tab, const unsigned int playerNum); 
 
 		void draw(DC* dc) const;
 		void process();
-
-		void changeAccepted();
-		const bool getChangedFlag() const;
-		void checkForChange();
 
 		const bool isOptimizing() const;
 		void setOptimizing(bool opt=true);
@@ -67,6 +64,7 @@ class Player : public UI_Object
 		UI_Window* window[MAX_WINDOWS]; 
 		
 		unsigned int geneAnimation;
+		void assignAnarace(ANARACE** anarace);
 	private:
 		void drawGeneString(DC* dc, const Rect position) const;
 		void drawGene(DC* dc, int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const;

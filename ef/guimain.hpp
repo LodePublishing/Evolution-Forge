@@ -1,12 +1,11 @@
 #ifndef _GUI_MAIN_HPP
 #define _GUI_MAIN_HPP
 
-const float GUI_VERSION=0.50;
+const float GUI_VERSION=0.51;
 
 #include "player.hpp"
 #include "message.hpp"
 #include "tutorial.hpp"
-#include "corewindow.hpp"
 #include "mainwindow.hpp"
 #include "setwindow.hpp"
 
@@ -34,7 +33,6 @@ class Main
 		UI_Window* infoWindow;
 		TutorialWindow* tutorialWindow;
 		Player* player[MAX_PLAYER];
-		CoreWindow* theCore;
 		SettingsWindow* settingsWindow;
 		static ProgressBar* bar;
 		

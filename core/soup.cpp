@@ -95,19 +95,29 @@ void SOUP::initSoup()
 	int groupSize=MAX_PROGRAMS/mapPlayerNum;
 	
 //differenzieren, damit auch restarts/updates moeglich sind waehrend dem run! TODO
-	PRERACE::resetGeneMarker();
+	
 	int k;
 	for(k=mapPlayerNum;k--;)
 	{
 		for(int i=groupSize;i--;)
 		{
-			delete player[i+k*groupSize];
-			player[i+k*groupSize]=new RACE();
+			if(player[i+k*groupSize])
+				player[i+k*groupSize]->resetData();
+			else 
+			{
+				delete player[i+k*groupSize];
+				player[i+k*groupSize]=new RACE();
+			}
 			player[i+k*groupSize]->setPlayerNumber(k+1);
 			player[i+k*groupSize]->resetGeneCode();
 		}
-		delete anaplayer[k];
-		anaplayer[k]=new ANARACE();
+		if(anaplayer[k])
+			anaplayer[k]->resetData();
+		else
+		{
+			delete anaplayer[k];
+			anaplayer[k]=new ANARACE();
+		}
 		anaplayer[k]->setPlayerNumber(k+1);
 	}
 	for(k=mapPlayerNum;k<MAX_PLAYER;k++)
@@ -496,6 +506,7 @@ void SOUP::setParameters(START* start_parameters)
 	}
 #endif
 //	gaInitialized=1;
+	ANARACE::resetStaticData();
 	start = start_parameters;
 	setMapPlayerNum((*start->getMap())->getMaxPlayer()); // ~~~
 	PRERACE::assignStart(start);

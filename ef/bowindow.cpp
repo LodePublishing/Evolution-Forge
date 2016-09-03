@@ -394,11 +394,13 @@ void BoWindow::process()
 	
 	if(resetButton->isLeftClicked())
 	{
-		bool wasOptimizing = anarace->isOptimizing();
-		settings.assignRunParametersToSoup();
-		setChangedFlag();
+//		bool wasOptimizing = anarace->isOptimizing();
+//		settings.assignRunParametersToSoup();
+		setResetFlag();
 		msgWindow->addMessage("Resetted build order...");
-		anarace->setOptimizing(wasOptimizing);
+//		anarace->setOptimizing(wasOptimizing);
+
+		// ANARACE WIRD UNGUELTIG!
 	//	Pointer!???
 	}
 

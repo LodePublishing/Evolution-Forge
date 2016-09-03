@@ -35,8 +35,6 @@ class ForceWindow : public UI_Window
 		const unsigned int getMarkedUnit() const;
 		void setMarkedUnit(const unsigned int marked_unit);
 
-		const bool hasChanged();		
-
 	private:
 		void drawTechTree(DC* dc) const;
 
@@ -46,7 +44,6 @@ class ForceWindow : public UI_Window
 
 		MessageWindow* msgWindow;
 
-		bool changed;
 		UI_Radio* menuRadio;
 		UI_Button* menuButton[MAX_MENUS];
 		UI_Button* saveGoalButton;

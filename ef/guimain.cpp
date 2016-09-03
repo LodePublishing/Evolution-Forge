@@ -12,7 +12,6 @@ Main::Main(DC* dc):
 	msgWindow(NULL),
 	infoWindow(NULL),
 	tutorialWindow(NULL),
-	theCore(NULL),
 	settingsWindow(NULL),
 	maus(),
 //	buttonPressed(false),
@@ -108,7 +107,6 @@ Main::Main(DC* dc):
 	bar->draw(dc, 2, START_INIT_GUI_STRING);
 	mainWindow = new MainWindow();
 
-	theCore = new CoreWindow(mainWindow);
 	tutorialWindow = new TutorialWindow(mainWindow);
 	settingsWindow = new SettingsWindow(mainWindow);
 	msgWindow = new MessageWindow(mainWindow);
@@ -132,7 +130,6 @@ Main::Main(DC* dc):
 
 	mainWindow->Show();
 	msgWindow->Show();
-	theCore->Hide();
 	tutorialWindow->Hide();
 	settingsWindow->Hide();
 
@@ -160,7 +157,6 @@ Main::~Main()
 {
     delete mainWindow;
     delete msgWindow;
-    delete theCore;
     delete tutorialWindow;
     delete settingsWindow;
     for(int i=0;i<MAX_PLAYER;i++)
@@ -225,53 +221,45 @@ void Main::process()
 			case BASIC_TAB:
 				msgWindow->Show();
 				settingsWindow->Hide();
-				theCore->Hide();
 				tutorialWindow->Hide();
 				gizmo=true;
 			break;
 			case ADVANCED_TAB: //1 player
 				msgWindow->Show();
 				settingsWindow->Hide();
-				theCore->Hide();
 				tutorialWindow->Hide();
 				gizmo=true;
 			break;
 			case EXPERT_TAB: //2 player rushversuche
 				msgWindow->Show();
 				settingsWindow->Hide();
-				theCore->Hide();
 				tutorialWindow->Hide();
 			break;
 			case GOSU_TAB: // 2 player - Spieler spielt
 				msgWindow->Show();
 				settingsWindow->Hide();
-				theCore->Hide();
 				tutorialWindow->Hide();
 			break;
 			
 			case COMPARE_TAB: // 2 player - 2 Computer
 				msgWindow->Show();
 				settingsWindow->Hide();
-				theCore->Hide();
 				tutorialWindow->Hide();
 			break;
 			case MAP_TAB:
                 msgWindow->Show();
                 settingsWindow->Hide();
-                theCore->Hide();
                 tutorialWindow->Hide();
             break;
 			case SETTINGS_TAB:
 				msgWindow->Hide();
 				settingsWindow->Show();
 				settingsWindow->updateItems();
-				theCore->Hide();
 				tutorialWindow->Hide();
 			break;
 			case TUTORIAL_TAB:
 				msgWindow->Hide();
 				settingsWindow->Hide();
-				theCore->Hide();			
 				tutorialWindow->Show();
 			break;
 			default:break;		
@@ -286,7 +274,6 @@ void Main::process()
 		mainWindow->updateRectangles(0);
 		msgWindow->updateRectangles(0);
 		settingsWindow->updateRectangles(0);
-		theCore->updateRectangles(0);
 		tutorialWindow->updateRectangles(0);
 		int maxPlayer=0;
 		if(player[0]->isShown()) 
@@ -302,12 +289,47 @@ void Main::process()
 		resetData();*/
 		update=2;
 	} // end tabwasChanged
-
-	for(int i=0;i<2;i++)
-		player[i]->checkForChange();
 	
-	settings.checkForChange();
+//	settings.checkForChange();
+	// TODO nicht gesamt Reset machen sondern je nach dem welcher Player resettet wurde!!
+	if(UI_Window::getChangedFlag())
+	{
+		bool was_optimizing = isOptimizing();
+		for(int i=0;i<2;i++)
+		{
+			player[i]->resetData();
+			player[i]->restartAnarace(); //?
+		}
+		if(was_optimizing)
+			startOptimizing();
+		else stopOptimizing();
+		UI_Window::changeAccepted();
+	
+	} else
+	if(UI_Window::getResetFlag())
+	{
+		bool was_optimizing = isOptimizing();
+		for(int i=0;i<2;i++)
+		{
+			player[i]->resetData();
+			player[i]->restartAnarace(); //?
+		}
+		settings.assignRunParametersToSoup();
+	        if(ANARACE** temp=settings.newGeneration(anarace))
+	        {
+	                for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
+		                anarace[i]=temp[i];
+		}
+		for(int i=0;i<2;i++)
+			player[i]->assignAnarace(&(anarace[i]));
+		if(was_optimizing)
+			startOptimizing();
+		else stopOptimizing();
 
+		UI_Window::resetAccepted();
+		UI_Window::changeAccepted();
+	}
+	
 	if(endrun) // TODO!
 	{
 		if(configuration.isAutoSaveRuns())

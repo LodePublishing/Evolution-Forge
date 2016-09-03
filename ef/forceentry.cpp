@@ -5,10 +5,10 @@
 #include <sstream>
 
 ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std::string& entry_unit):
-	UI_Button(entry_parent, entry_rect, Size(0,0), entry_unit, FORCE_ENTRY_BUTTON, PRESS_BUTTON_MODE, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH),
-	timeEntryBox(new UI_NumberField(this, Rect(entry_rect.GetWidth() - 210, -14, 0, 0), Size(10,10), DO_NOT_ADJUST, 0, coreConfiguration.getMaxTime(), 6, 0, NULL_STRING, NULL_STRING, TIME_NUMBER_TYPE)),
+	UI_Button(entry_parent, entry_rect, Size(0,0), FORCE_ENTRY_BUTTON, false, PRESS_BUTTON_MODE, entry_unit, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH),
+	timeEntryBox(new UI_NumberField(this, Rect(entry_rect.GetWidth() - 210, -14, 0, 0), Size(10,10), DO_NOT_ADJUST, 0, coreConfiguration.getMaxTime(), NULL_STRING, NULL_STRING, 6, 0, TIME_NUMBER_TYPE)),
 //	makeLocationGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 60, -11), Size(10,10)), entry_max_rect, GOAL_LOCATION_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
-	makeTimeGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 29, -11), Size(16,10)), Size(0,0), GOAL_TIME_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
+	makeTimeGoal(new UI_Button(this, Rect(Point(0, 0), Size(16,10)), Size(0,0), GOAL_TIME_BUTTON, true, STATIC_BUTTON_MODE, NULL_STRING, ARRANGE_RIGHT)),
 
 	oldGoalCount(0),	
 	startForce(0),
@@ -65,7 +65,7 @@ ForceEntry& ForceEntry::operator=(const ForceEntry& object)
 
 	return(*this);
 }
-																																						   
+																																					   
 ForceEntry::~ForceEntry()
 {
 	delete makeTimeGoal;
@@ -73,17 +73,23 @@ ForceEntry::~ForceEntry()
 	delete timeEntryBox;
 }
 
-UI_Object* ForceEntry::checkTooltip()
+void ForceEntry::reloadOriginalSize()
 {
-	UI_Object* t = makeTimeGoal->checkTooltip();
+	timeEntryBox->setOriginalPosition(Point(getWidth() - 210, -14));
+	UI_Object::reloadOriginalSize();
+}
+
+UI_Object* ForceEntry::checkToolTip()
+{
+	UI_Object* t = makeTimeGoal->checkToolTip();
 	if(t == NULL)
 	{
-	//	t = makeLocationGoal->checkTooltip();
+	//	t = makeLocationGoal->checkToolTip();
 //		if(t == NULL)
 //		{
-			t = timeEntryBox->checkTooltip();
+			t = timeEntryBox->checkToolTip();
 			if(t == NULL)
-				return(UI_Button::checkTooltip());
+				return(UI_Button::checkToolTip());
 			else return(t);
 //		}
 //		else return(t);
@@ -127,9 +133,12 @@ void ForceEntry::process()
 	{
 		highlight--;
 		highlight=highlight*5/6;
-	}
+		setNeedRedrawNotMoved();
+	} else
+	if(targetForce!=currentForce)
+		setNeedRedrawNotMoved();
 	Size::mv(currentForce, startForce, targetForce);
-	showLocMenu=false;
+	showLocMenu = false;
 	if(makeTimeGoal->isLeftClicked())
 	{
 		timeEntryBox->Show(!timeEntryBox->isShown());
@@ -262,18 +271,18 @@ void ForceEntry::draw(DC* dc) const
 {
 	if(!isShown()) 
 		return;
-	UI_Button::draw(dc);
 	if(!checkForNeedRedraw())
 		return;
+	UI_Button::draw(dc);
 	Brush b = *theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+getType()));
 
 	if(highlight>0)
-		dc->SetBrush(Brush(dc->brightenColor(*b.GetColor(), highlight), b.GetStyle()));
+		dc->SetBrush(Brush(dc->changeAbsoluteBrightness(*b.GetColor(), highlight), b.GetStyle()));
 	else
 		dc->SetBrush(b);
 	Pen p = *theme.lookUpPen((ePen)(UNIT_TYPE_0_PEN+getType()));
 	if(highlight>0)
-		dc->SetPen(Pen(dc->brightenColor(*p.GetColor(), highlight), p.GetWidth(), p.GetStyle()));
+		dc->SetPen(Pen(dc->changeAbsoluteBrightness(*p.GetColor(), highlight), p.GetWidth(), p.GetStyle()));
 	else
 		dc->SetPen(p);
 
@@ -302,7 +311,7 @@ void ForceEntry::draw(DC* dc) const
 		
 	//dc->SetFont(UI_Object::theme.lookUpFont(SMALL_BOLD_FONT));
 	Size s = dc->GetTextExtent(os.str());
-	dc->DrawText(os.str(), getAbsolutePosition() + Point(getWidth() - s.GetWidth() - 2, 4));
+	dc->DrawText(os.str(), getAbsolutePosition() + Point(getWidth() - s.GetWidth() - 2, 1+(FONT_SIZE+12-s.GetHeight())/2));
   
 // ------ Time
 	if((goal)&&(goal->getTime()>0)) // nur fuer tatsaechliche goals
@@ -323,7 +332,7 @@ void ForceEntry::draw(DC* dc) const
 			os << "[" << formatTime(goal->getTime()) << "]";
 		}
 		s = dc->GetTextExtent(os.str());
-		dc->DrawText(os.str(), getAbsolutePosition() + Point(getWidth() - s.GetWidth() - 100, 2));
+		dc->DrawText(os.str(), getAbsolutePosition() + Point(getWidth() - s.GetWidth() - 100, 1+(FONT_SIZE+12-s.GetHeight())/2 ));
 	}
 }
 																																							
@@ -345,7 +354,6 @@ void ForceEntry::setTotalNumber(const unsigned int total_number)
 	if(totalNumber != total_number)
 	{
 		totalNumber = total_number;
-//		setNeedRedraw();
 		highlight = 50;
 	}
 }

@@ -1,9 +1,9 @@
 #ifndef _BITDEPTH_MENU_HPP
 #define _BITDEPTH_MENU_HPP
 
-#include "menu.hpp"
+#include "../ui/menu.hpp"
 
-class BitDepthMenu : public Menu
+class BitDepthMenu : public UI_Menu
 {
 	public:
 		BitDepthMenu(UI_Object* bit_depth_menu_parent, const Rect rect, const Size distance_bottom_right, const ePositionMode position_mode);

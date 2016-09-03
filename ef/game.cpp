@@ -11,22 +11,21 @@ Game::Game(UI_Object* game_parent, const unsigned int game_number, const unsigne
 	unchangedGenerations(0),
 	currentRun(0),
 	totalGeneration(0),
-	gameNumber(game_number),
-	gameMax(game_max),
-	splitGameButton(new UI_Button(this, Rect(50, 0, 0, 0), Size(10, 0), COMPARE_GAME_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_SIZE)),
-	removeButton(new UI_Button(this, Rect(50, 0, 0, 0), Size(10, 0), REMOVE_GAME_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_SIZE))
+	gameNumber(0),
+	gameMax(0),
+	splitGameButton(new UI_Button(this, Rect(40, 0, 0, 0), Size(10, 0), MY_BUTTON, false, PRESS_BUTTON_MODE, COMPARE_GAME_STRING, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_SIZE)),
+	removeButton(new UI_Button(this, Rect(40, 0, 0, 0), Size(10, 0), MY_BUTTON, false, PRESS_BUTTON_MODE, REMOVE_GAME_STRING, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_SIZE))
 {
-	if(game_max>1)
-		splitGameButton->Hide();
 	for(unsigned int i=MAX_PLAYER;i--;) // TODO
 	{
 		anarace[i] = soup->getAnalyzedBuildOrder(i);
-		player[i] = new Player(this, gameNumber, gameMax, 0, 1);
+		player[i] = new Player(this, game_number, game_max, 0, 1);
 		player[i]->Hide();
 		// TODO Player hinzufuegen/entfernen
 	}
 	for(unsigned int i=MAX_INTERNAL_PLAYER;i--;)
 		start[i] = new START(&(startForce[i]));
+	setMode(game_number, game_max);
 }
 
 Game::~Game()
@@ -94,6 +93,8 @@ void Game::setMode(const unsigned int game_number, const unsigned int game_max)
                 toLog("DEBUG: (Game::setMode): Value game_number out of range.");return;
         }
 #endif
+	if((game_number == gameNumber)&&(game_max == gameMax))
+		return;
 	gameNumber = game_number;
 	gameMax = game_max;
 	scoreWindow->setMode(game_number, game_max);
@@ -140,7 +141,6 @@ void Game::process()
                 	anarace[i]->setRace((eRace)scoreWindow->getAssignedRace(i));
 	                anarace[i]->assignGoal(database.getGoal(anarace[i]->getRace(), 0)); // assign default goal
 	                anarace[i]->assignStartCondition(database.getStartCondition(anarace[i]->getRace(), 0)); // assign default startcondition, make a menu later
-
 			scoreWindow->setInitMode(i, INITIALIZED); //?
         
 //                unitMenu->resetData(); // TODO
@@ -173,12 +173,14 @@ void Game::process()
 			
 		}
 
-		
 		anarace[i]->setOptimizing(scoreWindow->isOptimizing(i));
 	}		
 		
 	if(scoreWindow->getAssignedMap()>=0)
+	{
 		assignMap(database.getMap(scoreWindow->getAssignedMap()));
+		fillGroups();
+	}
 
 	if(scoreWindow->getPlayers()>mapPlayerCount)
 	{
@@ -192,7 +194,7 @@ void Game::process()
 	if(UI_Window::getChangedFlag())
 	{
 		for(unsigned int i=mapPlayerCount;i--;)
-			if(scoreWindow->isOptimizing(i))
+//			if(scoreWindow->isOptimizing(i)) // <- :o
 			{
 //				player[i]->resetData();
 				anarace[i]->restartData();
@@ -217,18 +219,20 @@ void Game::process()
 		UI_Window::changeAccepted();
 	}
 	for(unsigned int i = MAX_PLAYER;i--;)
-		player[i]->Hide();
-	for(unsigned int i = mapPlayerCount;i--;)
-		if(scoreWindow->getInitMode(i)==INITIALIZED)
+	{
+		if((i<mapPlayerCount)&&(scoreWindow->getInitMode(i)==INITIALIZED))
 			player[i]->Show();
+		else
+			player[i]->Hide();
+	}
 
 	for(unsigned int i=mapPlayerCount;i--;)
 		if(player[i]->checkForNeedRedraw())
 		{
-			setNeedRedrawMoved();
+			setNeedRedrawNotMoved();
 			scoreWindow->setNeedRedrawNotMoved();
 			break;
-		}
+		} //?
 	if(boHasChanged)
 	{
 		boHasChanged = false;
@@ -257,26 +261,47 @@ void Game::process()
 
 }
 
+const bool Game::isAnyOptimizing() const 
+{
+	for(unsigned int i = mapPlayerCount;i--;)
+		if(scoreWindow->isOptimizing(i))
+			return(true);
+	return(false);
+}
+
 void Game::newGeneration()
 {
-//	unsigned int oldCode[MAX_PLAYER][MAX_LENGTH];
-//	for(unsigned int i=(*start->getMap())->getMaxPlayer();i--;)
-//		anarace[i]->copyCode(oldCode[i]);
-	bool is_any_optimizing = false;
-		for(unsigned int i=mapPlayerCount;i--;)
-			if(scoreWindow->isOptimizing(i))
-			{
-				is_any_optimizing = true;
-				break;
-			}
+	unsigned int oldCode[MAX_PLAYER][MAX_LENGTH];
+	for(unsigned int i=mapPlayerCount;i--;)
+		if(anarace[i])
+		{
+			anarace[i]->copyCode(oldCode[i]);
+		}
+		else
+		{
+			for(unsigned int j = MAX_LENGTH;j--;)
+				oldCode[i][j]=999;
+		}
+	
+	bool is_any_optimizing = isAnyOptimizing();
+	
+	for(unsigned int i=mapPlayerCount;i--;)
+		if((anarace[i]==NULL)||(anarace[i]->isDifferent(oldCode[i])))
+		{
+			is_any_optimizing = false;
+			break;
+		}
 	
 	if(!is_any_optimizing)
 	{
 		if(soup->recalculateGeneration(anarace, &startForce)) // <- konstant
 			for(unsigned int i=mapPlayerCount;i--;)
 			{
-				setBoHasChanged();
-				player[i]->assignAnarace(anarace[i]);
+				if(anarace[i]->isDifferent(oldCode[i]))//, oldMarker[i]))
+				{
+					setBoHasChanged();
+					player[i]->assignAnarace(anarace[i]);
+				}
 			}
 	} else
 	{
@@ -285,9 +310,11 @@ void Game::newGeneration()
 		for(unsigned int i=mapPlayerCount;i--;)
 			if(scoreWindow->isOptimizing(i))
 			{
-//				if(anarace[i]->isDifferent(oldCode[i]))//, oldMarker[i]))
+				if(anarace[i]->isDifferent(oldCode[i]))//, oldMarker[i]))
+				{
 					setBoHasChanged();
-				player[i]->assignAnarace(anarace[i]);
+					player[i]->assignAnarace(anarace[i]);
+				}
 			}
 	}
 					

@@ -23,7 +23,7 @@ void MessageWindow::addMessage( const std::string& bla )
 	setNeedRedrawNotMoved();
 	Message* msg = new Message(getScrollbar(), Rect(Point(10, 20  /*message.size() * (FONT_SIZE+5)*/), Size(getClientRectWidth(), FONT_SIZE+5)), 1, bla, 155);
 	message.push_front(msg);
-	addToProcessArray(this);
+//	addToProcessArray(this);
 	
 //	if(message.size() > 20)
 //		message.pop_front();
@@ -38,7 +38,6 @@ void MessageWindow::reloadOriginalSize()
 	UI_Window::reloadOriginalSize();
 }
 
-
 void MessageWindow::process()
 {
 	if(!isShown()) 
@@ -52,6 +51,8 @@ void MessageWindow::process()
 		if(!fitItemToAbsoluteClientRect((*m)->getAbsoluteRect()))
 			(*m)->Hide();
 		else (*m)->Show();
+		if((*m)->checkForNeedRedraw())
+			setNeedRedrawNotMoved();
 	}
 }
 
@@ -65,7 +66,7 @@ void MessageWindow::draw( DC* dc ) const
 		dc->SetFont(UI_Object::theme.lookUpFont(LARGE_BOLD_FONT));
 //		std::string str="Evolution Forge";
 //		Size s;
-		Point point = Point(getAbsoluteClientRectPosition() + Size(getWidth()/3, getHeight()*2/3));
+		Point point = Point(getAbsoluteClientRectPosition() + Size(getWidth()*9/20, getHeight()*3/4));
 //		for(unsigned int i=0;i<str.size();++i)
 //			s = helper(dc, point, s.GetWidth(), i, str.substr(0, i+1));
 		dc->SetTextForeground(DC::toSDL_Color(10, 10, 100));

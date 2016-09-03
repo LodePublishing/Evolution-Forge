@@ -17,7 +17,7 @@ const unsigned int MAX_INTERNAL_PLAYER = 5;
 const unsigned int GLOBAL = 0;*/
 
 //const unsigned int MAX_LOCATIONS = 9;
-const unsigned int MIN_LOCATIONS = 0; //this does not mean that maps with 0 locations can exist....
+const unsigned int MIN_LOCATIONS = 2; // global, main
 
 //const unsigned int MAX_PLAYER = 3;
 const unsigned int MIN_PLAYER = 1;

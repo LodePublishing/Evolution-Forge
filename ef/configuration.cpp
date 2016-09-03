@@ -4,8 +4,8 @@
 #include <sstream>
 
 EF_Configuration::EF_Configuration():
-	dynamicFramerate(25),
-	staticFramerate(25),
+	desiredFramerate(25),
+	desiredCPU(75),
 	currentFramerate(1),
 	currentFramesPerGeneration(1),
 	autoSaveRuns(false),
@@ -14,7 +14,6 @@ EF_Configuration::EF_Configuration():
 	fullScreen(false),
 	softwareMouse(false),
 	backgroundBitmap(false),
-	allowStaticFramerate(false),
 	dnaSpiral(true),
 	toolTips(true),
 	configurationFile("settings/main.cfg")
@@ -25,8 +24,8 @@ EF_Configuration::~EF_Configuration()
 
 void EF_Configuration::initDefaults()
 {
-	setDynamicFramerate(25);
-	setStaticFramerate(25);
+	setDesiredFramerate(25);
+	setDesiredCPU(75);
 	setCurrentFramerate(1);
 	setCurrentFramesPerGeneration(1),
 	setAutoSaveRuns(false);
@@ -35,7 +34,6 @@ void EF_Configuration::initDefaults()
 	setFullScreen(false);
 	setSoftwareMouse(false);
 	setBackgroundBitmap(false);
-	setAllowStaticFramerate(false);
 	setDnaSpiral(true);
 	setToolTips(true);
 	configurationFile = "settings/main.cfg";
@@ -62,12 +60,10 @@ void EF_Configuration::saveToFile() const
 	pFile << "# CURRENTLY NOT IMPLEMENTED" << std::endl;
 	pFile << "    \"Minimalist\" = \"0\"" << std::endl; // TODO
 	pFile << "" << std::endl;
-	pFile << "# how a frame update is weighted compared to a core update (e.g. 4 means that a new generation is calculated every 4 frames)" << std::endl;
-	pFile << "    \"Allow static framerate\" = \"" << (int)isAllowStaticFramerate() << "\"" << std::endl;
-	pFile << "# allow the program to dynamicly reduce the speed of the core to reach this frame rate. 0 = offline." << std::endl;
-	pFile << "    \"Static framerate\" = \"" << getStaticFramerate() << "\"" << std::endl;
-	pFile << "# Draw X frames per new generation" << std::endl;
-	pFile << "    \"Dynamic framerate\" = \"" << getDynamicFramerate() << "\"" << std::endl;
+	pFile << "# Desired framerate: If the computer is fast the calculation speed is improved, if the computer is slow the calculation speed is decreased" << std::endl;
+	pFile << "    \"Desired framerate\" = \"" << getDesiredFramerate() << "\"" << std::endl;
+	pFile << "# Desired CPU usage" << std::endl;
+	pFile << "    \"Desired CPU usage\" = \"" << getDesiredCPU() << "\"" << std::endl;
 	pFile << "" << std::endl;                                                                                
 	pFile << "# Restrict unit menus to StarCraft (TM) units?" << std::endl;
 	pFile << "    \"Restrict units\" = \"" << (int)isRestrictSC() << "\"" << std::endl;
@@ -142,17 +138,13 @@ void EF_Configuration::loadConfigurationFile()
 				i->second.pop_front();
 			   	setBackgroundBitmap(atoi(i->second.front().c_str()));
 			}
-			if((i=block.find("Allow static framerate"))!=block.end()){
+			if((i=block.find("Desired framerate"))!=block.end()){
 				i->second.pop_front();
-			   	setAllowStaticFramerate(atoi(i->second.front().c_str()));
-			}
-			if((i=block.find("Static framerate"))!=block.end()){
-				i->second.pop_front();
-			   	setStaticFramerate(atoi(i->second.front().c_str()));
+			   	setDesiredFramerate(atoi(i->second.front().c_str()));
 			}		
-			if((i=block.find("Dynamic framerate"))!=block.end()){
+			if((i=block.find("Desired CPU usage"))!=block.end()){
 				i->second.pop_front();
-			   	setDynamicFramerate(atoi(i->second.front().c_str()));
+			   	setDesiredCPU(atoi(i->second.front().c_str()));
 			}		
 		
 			if((i=block.find("DNA Spiral"))!=block.end()){
@@ -163,7 +155,111 @@ void EF_Configuration::loadConfigurationFile()
 	}// END while
 } // schoen :)
 
-	
+const bool EF_Configuration::setAutoSaveRuns(const bool auto_save_runs) 
+{
+	if(autoSaveRuns == auto_save_runs)
+		return(false);		
+	autoSaveRuns = auto_save_runs;
+	return(true);
+}
+
+const bool EF_Configuration::setRestrictSC(const bool restrict_sc) 
+{
+	if(restrictSC == restrict_sc)
+		return(false);
+	restrictSC = restrict_sc;
+	return(true);
+}
+
+const bool EF_Configuration::setFacilityMode(const bool facility_mode) 
+{
+	if(facilityMode == facility_mode)
+		return(false);
+	facilityMode = facility_mode;
+	return(true);
+}
+
+const bool EF_Configuration::setSoftwareMouse(const bool software_mouse) 
+{
+	if(softwareMouse == software_mouse)
+		return(false);
+	softwareMouse = software_mouse;
+	return(true);
+}
+
+const bool EF_Configuration::setFullScreen(const bool full_screen) 
+{
+	if(fullScreen == full_screen)
+		return(false);
+	fullScreen = full_screen;
+	return(true);
+}
+
+const bool EF_Configuration::setBackgroundBitmap(const bool background_bitmap) 
+{
+	if(backgroundBitmap == background_bitmap)
+		return(false);
+	backgroundBitmap = background_bitmap;
+	return(true);
+}
+
+const bool EF_Configuration::setDnaSpiral(const bool dna_spiral) 
+{
+	if(dnaSpiral == dna_spiral)
+		return(false);
+	dnaSpiral = dna_spiral;
+	return(true);
+}
+
+const bool EF_Configuration::setToolTips(const bool tool_tips) 
+{
+	if(toolTips == tool_tips)
+		return(false);
+	toolTips = tool_tips;
+	return(true);
+}
+
+const bool EF_Configuration::setCurrentFramerate(const unsigned int frame_rate) 
+{
+	if(currentFramerate == frame_rate)
+		return(false);
+	currentFramerate = frame_rate;
+	return(true);
+}
+
+const bool EF_Configuration::setCurrentFramesPerGeneration(const unsigned int frames_per_generation) 
+{
+	if(currentFramesPerGeneration == frames_per_generation)
+		return(false);
+	currentFramesPerGeneration = frames_per_generation;
+	return(true);
+}
+
+const bool EF_Configuration::setDesiredCPU(const unsigned int desired_cpu_usage)
+{
+	if(desiredCPU == desired_cpu_usage)
+		return(false);
+#ifdef _SCC_DEBUG
+	if((desired_cpu_usage<1)||(desired_cpu_usage>99)) {
+		toLog("WARNING: (EF_Configuration::setDesiredCPU): Value out of range.");return(false);
+	}
+#endif
+	desiredCPU = desired_cpu_usage;
+	return(true);
+}
+
+const bool EF_Configuration::setDesiredFramerate(const unsigned int desired_frame_rate)
+{
+	if(desiredFramerate == desired_frame_rate)
+		return(false);
+#ifdef _SCC_DEBUG
+	if((desired_frame_rate<MIN_DESIRED_FRAMERATE)||(desired_frame_rate>MAX_DESIRED_FRAMERATE)) {
+		toLog("WARNING: (EF_Configuration::setDesiredFramerate): Value out of range.");return(false);
+	}
+#endif
+	desiredFramerate = desired_frame_rate;
+	return(true);
+}
 EF_Configuration efConfiguration;
 //const unsigned int EF_Configuration::MIN_DYNAMIC_FRAMERATE = 0;
 //const unsigned int EF_Configuration::MAX_DYNAMIC_FRAMERATE = 100;

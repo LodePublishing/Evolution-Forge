@@ -70,6 +70,9 @@ class UI_Window : public UI_Object
 		const bool tabWasChanged() const;
 
 		void process();
+
+		void drawWindow(DC* dc) const;
+		
 		void draw(DC* dc) const;
 
 		UI_Object* checkToolTip();
@@ -106,6 +109,8 @@ class UI_Window : public UI_Object
 		void moveScrollbarToBottom();
 
 		void reloadOriginalSize();
+		static signed int gotoHelpChapter;
+		void addHelpButton(eHelpChapter help_chapter);
 	protected:
 		UI_Radio* tabRow;
 	private:
@@ -150,6 +155,8 @@ class UI_Window : public UI_Object
 		
 // this windows may have a scroll bar		
 		UI_Scrollbar* scrollBar;
+		UI_Button* helpButton;
+		eHelpChapter helpChapter;
 };
 
 inline const unsigned int UI_Window::getMaxHeight() const {

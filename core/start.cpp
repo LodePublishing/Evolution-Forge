@@ -92,10 +92,10 @@ void START::fillAsActivePlayer()
 {
 #ifdef _SCC_DEBUG
 	if(!mapInitialized) {
-		toLog("DEBUG: (START::fillGroups): No map was initialized.");return;
+		toLog("DEBUG: (START::fillAsActivePlayer): No map was initialized.");return;
 	}
 	if(!startConditionsInitialized) {
-		toLog("DEBUG: (START::fillGroups): Not all startConditions were initialized.");return;
+		toLog("DEBUG: (START::fillAsActivePlayer): Not all startConditions were initialized.");return;
 	}
 #endif
 	totalForce.resetData();

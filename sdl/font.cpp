@@ -36,7 +36,7 @@ Font::~Font()
 
 void Font::DrawText(SDL_Surface* surface, const SDL_Color& color, const std::string& font_text, const signed int x, const signed int y) const
 {
-	SDL_Surface *sText = TTF_RenderUTF8_Blended( font, font_text.c_str(), color );
+	SDL_Surface *sText = TTF_RenderUTF8_Blended( font, font_text.c_str(), color);
 	if(sText==NULL)
 		return;
 	SDL_Rect rcDest = {x,y-4,0,0};

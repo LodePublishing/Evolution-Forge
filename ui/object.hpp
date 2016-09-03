@@ -31,7 +31,9 @@ enum ePositionMode
 	ARRANGE_BOTTOM_RIGHT,
 	ARRANGE_LEFT,
 	ARRANGE_RIGHT,
-	SPECIAL_BUTTON_LEFT, // normal button but arrange left text
+	SPECIAL_BUTTON_LEFT, // normal button but arrange text left
+	SPECIAL_BUTTON_ARRANGE_LEFT,
+	SPECIAL_BUTTON_ARRANGE_RIGHT,	
 	SPECIAL_BUTTON_ARRANGE_TOP_LEFT,
 	SPECIAL_BUTTON_ARRANGE_TOP_RIGHT
 };
@@ -114,6 +116,7 @@ class UI_Object
 		const bool checkForNeedRedraw() const;
 		void setNeedRedrawMoved(const bool need_redraw=true);
 		void setNeedRedrawNotMoved(const bool need_redraw=true);
+		void setNeedRedrawNotMovedFirstChild(const bool need_redraw=true);
 
 		virtual UI_Object* checkHighlight();
 		virtual UI_Object* checkToolTip();
@@ -140,14 +143,10 @@ class UI_Object
 		static UI_Theme theme;
 		static UI_Window* currentWindow;
 		static bool windowSelected;
-	
 		
 //		static void maybeShowToolTip(DC* dc);
 //		static void hideToolTip();
-//
-//		
 
-		
 		void resetMinXY();
 		
 		void addMinTopLeftX(signed int dx);
@@ -166,7 +165,6 @@ class UI_Object
 	
 		static unsigned int mouseType;
 		static Point mouse;
-		static UI_EditField* editTextField; //~~
 //		static UI_EndRunDialog* endRunDialog;
 
 		static UI_ToolTip* tooltip;
@@ -180,6 +178,9 @@ class UI_Object
 		void setSize(const Size size);
 		static unsigned int max_x;
 		static unsigned int max_y;
+
+		static void resetWindow();	
+		
 		void setOriginalPosition(const Point& position);
 		void setOriginalSize(const Size& size);
 		void setOriginalRect(const Rect& rect);
@@ -187,16 +188,22 @@ class UI_Object
 		const Rect& getOriginalRect() const;
 		const Size& getDistanceBottomRight() const;
 	
-		static void addToProcessArray(UI_Object* item);
+/*		static void addToProcessArray(UI_Object* item);
 		static void addToNextProcessArray(UI_Object* item);
 		static void copyToNextProcessArray();
 		static std::list<UI_Object*> processArray;
-		static std::list<UI_Object*> nextProcessArray;
-		
+		static std::list<UI_Object*> nextProcessArray;*/
+	
+		virtual const bool addKey(unsigned int key, unsigned int mod);
+		static UI_Object* focus;
+
+		static bool toolTipWasDeleted;
 	protected:
 		UI_Object* children; // pointer to the head of the linked list of children
 	private:
-
+//		bei wechsel alle rekursiv (-> virtual) durchlaufen und Liste bilden, das aktuelle heraussuchen und aktivieren
+//		Ansonsten bei klick Focus legen, Esc/anderer Klick entfernt den Focus (NULL bzw. anderer Fokus)
+		
 				
 		Rect relativeRect; // every object needs a current position and size, position is >> RELATIVE << to parent!
 		Rect startRect; // TODO private machen

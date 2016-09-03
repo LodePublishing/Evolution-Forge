@@ -22,6 +22,7 @@ class Game : public UI_Window
 		void process();
 
 		const bool isOptimizing(const unsigned int player_number) const;
+		const bool isAnyOptimizing() const;
 
 		void newGeneration();
 	

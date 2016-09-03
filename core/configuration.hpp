@@ -67,23 +67,23 @@ public:
 	const bool isAlwaysBuildWorker() const;
 	const bool isOnlySwapOrders() const;
 	
-	void setCrossingOver(const unsigned int crossing_over);
-	void setBreedFactor(const unsigned int breed_factor);
-	void setMutationFactor(const unsigned int mutation_factor);
-	void setMaxTime(const unsigned int max_time);
-	void setMaxTimeOut(const unsigned int time_out);
-	void setMaxLength(const unsigned int max_length);
-	void setMaxRuns(const unsigned int max_runs);
-	void setMaxGenerations(const unsigned int max_generations);
-	void setNoise(const unsigned int desired_noise);
+	const bool setCrossingOver(const unsigned int crossing_over);
+	const bool setBreedFactor(const unsigned int breed_factor);
+	const bool setMutationFactor(const unsigned int mutation_factor);
+	const bool setMaxTime(const unsigned int max_time);
+	const bool setMaxTimeOut(const unsigned int time_out);
+	const bool setMaxLength(const unsigned int max_length);
+	const bool setMaxRuns(const unsigned int max_runs);
+	const bool setMaxGenerations(const unsigned int max_generations);
+	const bool setNoise(const unsigned int desired_noise);
 
-	void setAutoSaveRuns(const bool auto_save_runs);
-	void setRestrictSC(const bool restrict_sc);
-	void setFacilityMode(const bool facility_mode);
-	void setPreprocessBuildOrder(const bool preprocess_build_order);
-	void setAllowGoalAdaption(const bool allow_goal_adaption);
-	void setAlwaysBuildWorker(const bool always_build_scv);
-	void setOnlySwapOrders(const bool only_swap_orders);
+	const bool setAutoSaveRuns(const bool auto_save_runs);
+	const bool setRestrictSC(const bool restrict_sc);
+	const bool setFacilityMode(const bool facility_mode);
+	const bool setPreprocessBuildOrder(const bool preprocess_build_order);
+	const bool setAllowGoalAdaption(const bool allow_goal_adaption);
+	const bool setAlwaysBuildWorker(const bool always_build_scv);
+	const bool setOnlySwapOrders(const bool only_swap_orders);
 
 	void setConfigurationFile(const std::string& configuration_file);
 	void loadConfigurationFile();
@@ -188,111 +188,6 @@ inline const bool CoreConfiguration::isAlwaysBuildWorker() const {
 
 inline const bool CoreConfiguration::isOnlySwapOrders() const {
 	return(onlySwapOrders);
-}
-
-inline void CoreConfiguration::setCrossingOver(const unsigned int crossing_over) 
-{
-#ifdef _SCC_DEBUG
-	if((crossing_over<MIN_CROSSING_OVER)||(crossing_over>MAX_CROSSING_OVER)) {
-		toLog("WARNING: (CoreConfiguration::setCrossingOver): Value out of range.");return;
-	}
-#endif
-	crossingOver = crossing_over;
-}
-
-inline void CoreConfiguration::setBreedFactor(const unsigned int breed_factor) 
-{
-#ifdef _SCC_DEBUG
-	if((breed_factor<MIN_BREED_FACTOR)||(breed_factor>MAX_BREED_FACTOR)) {
-		toLog("WARNING: (CoreConfiguration::setBreedFactor): Value out of range.");return;
-	}
-#endif
-	breedFactor = breed_factor;
-}
-inline void CoreConfiguration::setMutationFactor(const unsigned int mutation_factor) 
-{
-#ifdef _SCC_DEBUG
-	if((mutation_factor<MIN_MUTATION_FACTOR)||(mutation_factor>MAX_MUTATION_FACTOR)) {
-		toLog("WARNING: (CoreConfiguration::setMutationFactor): Value out of range.");return;
-	}
-#endif
-	mutationFactor = mutation_factor;
-}
-
-inline void CoreConfiguration::setMaxTime(const unsigned int max_time) 
-{
-#ifdef _SCC_DEBUG
-	if((max_time<MIN_TIME)||(max_time>MAX_TIME)) {
-		toLog("WARNING: (CoreConfiguration::setMaxTime): Value out of range.");return;
-	}
-#endif
-	maxTime = max_time;
-}
-
-inline void CoreConfiguration::setMaxTimeOut(const unsigned int time_out) 
-{
-#ifdef _SCC_DEBUG
-	if((time_out<MIN_TIMEOUT)||(time_out>MAX_TIMEOUT)) {
-		toLog("WARNING: (CoreConfiguration::setMaxTimeOut): Value out of range.");return;
-	}
-#endif
-	maxTimeOut = time_out;
-}
-
-inline void CoreConfiguration::setMaxLength(const unsigned int max_length) 
-{
-#ifdef _SCC_DEBUG
-	if((max_length<MIN_LENGTH)||(max_length>MAX_LENGTH)) {
-		toLog("WARNING: (CoreConfiguration::setMaxLength): Value out of range.");return;
-	}
-#endif
-	maxLength = max_length;
-}
-
-inline void CoreConfiguration::setMaxRuns(const unsigned int max_runs) 
-{
-#ifdef _SCC_DEBUG
-	if((max_runs<MIN_RUNS)||(max_runs>MAX_RUNS)) {
-		toLog("WARNING: (CoreConfiguration::setMaxRuns): Value out of range.");return;
-	}
-#endif
-	maxRuns = max_runs;
-}
-
-inline void CoreConfiguration::setMaxGenerations(const unsigned int max_generations) 
-{
-#ifdef _SCC_DEBUG
-	if((max_generations<MIN_GENERATIONS)||(max_generations>MAX_GENERATIONS)) {
-		toLog("WARNING: (CoreConfiguration::setMaxGenerations): Value out of range.");return;
-	}
-#endif
-	maxGenerations = max_generations;
-}
-
-inline void CoreConfiguration::setNoise(const unsigned int desired_noise)
-{
-#ifdef _SCC_DEBUG
-	if((desired_noise < MIN_NOISE)||(desired_noise > MAX_NOISE)) {
-		toLog("WARNING: (CoreConfiguration::setNoise): Value out of range.");return;
-	}
-#endif
-	noise = desired_noise;
-}
-
-inline void CoreConfiguration::setPreprocessBuildOrder(const bool preprocess_build_order) {
-	preprocessBuildOrder = preprocess_build_order;
-}
-
-inline void CoreConfiguration::setAllowGoalAdaption(const bool allow_goal_adaption) {
-	allowGoalAdaption = allow_goal_adaption;
-}
-
-inline void CoreConfiguration::setAlwaysBuildWorker(const bool always_build_worker) {
-	alwaysBuildWorker = always_build_worker;
-}
-
-inline void CoreConfiguration::setOnlySwapOrders(const bool only_swap_orders) {
-	onlySwapOrders = only_swap_orders;
 }
 
 inline void CoreConfiguration::setConfigurationFile(const std::string& configuration_file) {

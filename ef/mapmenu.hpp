@@ -1,10 +1,10 @@
 #ifndef _GUI_MAPMENU_HPP
 #define _GUI_MAPMENU_HPP
 
-#include "menu.hpp"
+#include "../ui/menu.hpp"
 #include "../core/database.hpp"
 
-class MapMenu : public Menu
+class MapMenu : public UI_Menu
 {
 	public:
 		MapMenu(UI_Object* map_parent, const Rect map_rect, const Size distance_bottom_right, const ePositionMode position_mode);

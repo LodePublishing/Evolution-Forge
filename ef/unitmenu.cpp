@@ -3,23 +3,23 @@
 
 const Rect calculateRect(const unsigned int width, const unsigned int height)
 {
-	return(Rect(Point((width/2-10)*(height%2), ((height+1)/2+1)*(FONT_SIZE+9)), Size(width/2-15, FONT_SIZE+6)));
+	return(Rect(Point((width/2-10)*(height%2), (1+height/2)*(FONT_SIZE+8)), Size(width/2-15, FONT_SIZE+7)));
 }
 
 UnitMenu::UnitMenu(UI_Object* unit_parent, const Rect unit_rect, const Size distance_bottom_right, const ePositionMode position_mode) :
-	Menu(unit_parent, unit_rect, distance_bottom_right, position_mode, false),
+	UI_Menu(unit_parent, unit_rect, distance_bottom_right, position_mode, false),
 	anarace(NULL),
 	facilityNumber(1)
 {
 	for(unsigned int i=0;i<UNIT_TYPE_COUNT;++i) //TODO
 	{
-		MenuEntry* entry = new MenuEntry(this, calculateRect(unit_parent->getWidth(), 0), "ERROR"); //TODO maybe already initialize with name string
+		UI_MenuEntry* entry = new UI_MenuEntry(this, calculateRect(unit_parent->getWidth(), 0), "ERROR"); //TODO maybe already initialize with name string
 		menuEntries.push_back(entry);
 	}
 }
 
 /*UnitMenu::UnitMenu(const UnitMenu& object) :
-	Menu((Menu)object),
+	UI_Menu((UI_Menu)object),
 	anarace(object.anarace),
 	facilityNumber(object.facilityNumber);
 {
@@ -43,11 +43,11 @@ UnitMenu::~UnitMenu()
 
 void UnitMenu::reloadOriginalSize()
 {
-	for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
-		(*m)->setOriginalSize(Size(getParent()->getWidth()/2-15, FONT_SIZE+6));
+	for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+		(*m)->setOriginalSize(Size(getParent()->getWidth()/2-15, FONT_SIZE+7));
 
 	processMenu();
-	Menu::reloadOriginalSize();
+	UI_Menu::reloadOriginalSize();
 }
 
 void UnitMenu::resetData()
@@ -85,7 +85,7 @@ void UnitMenu::processMenu()
 			unsigned int i=0;
 			if(!efConfiguration.isFacilityMode())
 			{
-				for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+				for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					++i;
 					if((i >=10 ))// || ((efConfiguration.isRestrictSC())&&(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==1)))					
@@ -113,7 +113,7 @@ void UnitMenu::processMenu()
 //				height*=2;
 			} else 
 			{
-				for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+				for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					++i;
 					if((i >= facilityNumber)) //|| ((efConfiguration.isRestrictSC())/*&&(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==1)*/))
@@ -138,7 +138,7 @@ void UnitMenu::processMenu()
 			unsigned int i =0;
 			if(!efConfiguration.isFacilityMode())
 			{
-				for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+				for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					++i;
 					if(/*(i >= facilityNumber ) ||*/ (stats[(*anarace->getStartCondition())->getRace()][i].unitType != (signed int)(menuLevel)) || ((efConfiguration.isRestrictSC())&&(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==1)))
@@ -158,7 +158,7 @@ void UnitMenu::processMenu()
 				}
 			} else
 			{
-				for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+				for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					++i;
 					if((i > GAS_SCV ) || 
@@ -184,7 +184,7 @@ void UnitMenu::processMenu()
 		} // end 'if menuLevel > 1'
 	} // end 'if menuLevel'
 	else
-		for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+		for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 		{
 		//	Rect edge = Rect(0, 0, 10,10);
 		//	(*m)->adjustRelativeRect(edge);
@@ -197,10 +197,10 @@ void UnitMenu::process()
 {
 	if(!isShown())
 		return;
-	Menu::process();
+	UI_Menu::process();
 	if(menuHasChanged());
 	{
-		height=3;
+		height=0;
 		processMenu();
 	}
 	// check for Pressed Units
@@ -258,8 +258,8 @@ void UnitMenu::process()
 				markedItem=i;
 		}
 	}
-	height+=5;
-	height+=height%2;
+	height+=3;
+//	height+=height%2;
 }
 
 
@@ -267,7 +267,7 @@ void UnitMenu::draw(DC* dc) const
 {
 	if(!isShown())
 		return;
-	Menu::draw(dc);
+	UI_Menu::draw(dc);
 }
 
 const bool UnitMenu::secondLevel() const

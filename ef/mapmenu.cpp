@@ -1,17 +1,17 @@
 #include "mapmenu.hpp"
 
 MapMenu::MapMenu(const MapMenu& object) :
-    Menu((Menu)object)
+    UI_Menu((UI_Menu)object)
 { }
 
 MapMenu& MapMenu::operator=(const MapMenu& object)
 {
-	((Menu)(*this)) = ((Menu)object);
+	((UI_Menu)(*this)) = ((UI_Menu)object);
 	return(*this);
 }
 
 MapMenu::MapMenu(UI_Object* map_parent, const Rect map_rect, const Size distance_bottom_right, const ePositionMode position_mode):
-	Menu(map_parent, map_rect, distance_bottom_right, position_mode, true)
+	UI_Menu(map_parent, map_rect, distance_bottom_right, position_mode, true)
 { 
 	resetData();
 }
@@ -22,7 +22,7 @@ void MapMenu::resetData()
 	height=1;
 	
 	
-	for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+	for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 	{
 		if(i >= database.getMapCount())
 		{
@@ -40,7 +40,7 @@ void MapMenu::resetData()
 	for(;i<database.getMapCount();++i)
 	{
 		Rect edge = Rect(Point(0, i*(FONT_SIZE+6) + 25), Size(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), FONT_SIZE+3));
-		MenuEntry* entry = new MenuEntry(this, edge, database.getMap(i)->getName());
+		UI_MenuEntry* entry = new UI_MenuEntry(this, edge, database.getMap(i)->getName());
 		entry->setButtonColorsType(eButtonColorsType(UNIT_TYPE_4_BUTTON));
 		menuEntries.push_back(entry);
 		++height;
@@ -54,7 +54,7 @@ MapMenu::~MapMenu()
 
 void MapMenu::process()
 {
-	Menu::process();
+	UI_Menu::process();
 	if(!isShown())
 		return;
 }
@@ -63,6 +63,6 @@ void MapMenu::draw(DC* dc) const
 {
 	if(!isShown())
 		return;
-	Menu::draw(dc);
+	UI_Menu::draw(dc);
 }
 

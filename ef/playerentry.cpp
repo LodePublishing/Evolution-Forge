@@ -10,15 +10,15 @@ PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size d
 	scoreMode(SCORE_FULFILL_MODE),
 // TODO UI_Object:: arrange top left :(
 // 
-	currentActionButton(new UI_Button(this, Rect(Point(0, 0), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*9/10, 0)), Size(0,0), CLICK_TO_CONTINUE_STRING, MY_BUTTON, STATIC_BUTTON_MODE, DO_NOT_ADJUST, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+	currentActionButton(new UI_Button(this, Rect(Point(0, 0), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*9/10, 0)), Size(0,0), MY_BUTTON, false, STATIC_BUTTON_MODE, PAUSED_STRING, DO_NOT_ADJUST, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	playerText(new UI_StaticText(this, "Player 1:", Rect(Point(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(0,0)), Size(0, 0), IMPORTANT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
 	menuRadio(new UI_Radio(this, Rect(Point(playerText->getRelativeRect().GetLeft()+playerText->getTextSize().GetWidth()+5, 0), Size(0, 0)), Size(0,0), DO_NOT_ADJUST)), // TODO
-	raceMenuButton(new UI_Button(menuRadio, Rect(Point(0, 0), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2, 0)), Size(0, 0), CHOOSE_RACE_STRING, TAB_BUTTON, STATIC_BUTTON_MODE, TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+	raceMenuButton(new UI_Button(menuRadio, Rect(Point(0, 0), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2, 0)), Size(0, 0), TAB_BUTTON, false, STATIC_BUTTON_MODE, CHOOSE_RACE_STRING, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	raceMenu(new RaceMenu(raceMenuButton, Rect(10, 15, 0, 0), Size(0,0), TOP_LEFT )),
 
-	removePlayerButton(new UI_Button(this, Rect(Point(getParent()->getWidth()-20, 1), Size(8, 8)), Size(5, 0), CANCEL_BUTTON, PRESS_BUTTON_MODE, DO_NOT_ADJUST)), // Evtl bitmap
+	removePlayerButton(new UI_Button(this, Rect(Point(getParent()->getWidth()-25, 1), Size(8, 8)), Size(5, 0), CANCEL_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST)), // Evtl bitmap
 	scoreText(new UI_StaticText(this, Rect(Point(getParent()->getWidth()-50, 0), Size(0, 0)), Size(5, 0), IMPORTANT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
-	addPlayerButton(new UI_Button(this, Rect(Point(5, 0), Size(60, 0)), Size(5, 0), ADD_PLAYER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, TOP_CENTER, SMALL_BOLD_FONT, AUTO_SIZE)),
+	addPlayerButton(new UI_Button(this, Rect(Point(5, 0), Size(60, 0)), Size(5, 0), MY_BUTTON, false, PRESS_BUTTON_MODE, ADD_PLAYER_STRING, TOP_CENTER, SMALL_BOLD_FONT, AUTO_SIZE)),
 	optimizing(false),
 	assignRace(-1)
 {
@@ -114,18 +114,24 @@ void PlayerEntry::resetData()
 
 void PlayerEntry::setScore(const unsigned int score)
 {
+	if(score==programScore)
+		return;
 	programScore = score;	
 	setNeedRedrawMoved();
 }
 
 void PlayerEntry::setGoalComplete(const unsigned int goal_complete)
 {
+	if(goal_complete==goalComplete)
+		return;
 	goalComplete = goal_complete;
 	setNeedRedrawMoved();
 }
 
 void PlayerEntry::setOptimizing(const bool opt)
 {
+	if(opt==optimizing)
+		return;
 	if(!opt)
 		currentActionButton->forcePress();
 	else currentActionButton->forceUnpress();
@@ -135,12 +141,16 @@ void PlayerEntry::setOptimizing(const bool opt)
 
 void PlayerEntry::setInitMode(const eInitMode init_mode)
 {
+	if(init_mode == initMode)
+		return;
 	initMode = init_mode;
 	setNeedRedrawMoved();
 }
 
 void PlayerEntry::setScoreMode(const eScoreMode score_mode)
 {
+	if(score_mode == scoreMode)
+		return;
 	scoreMode = score_mode;
 	setNeedRedrawMoved();
 }
@@ -177,14 +187,14 @@ void PlayerEntry::process()
 			if(currentActionButton->isCurrentlyActivated())
 			{
 				optimizing=true;
-//				currentActionButton->updateText(CLICK_TO_PAUSE_STRING);
-				currentActionButton->updateToolTip(PAUSE_OPTIMIZATION_TOOLTIP_STRING);
+//				currentActionButton->updateText(RUNNING_STRING);
+//				currentActionButton->updateToolTip(PAUSE_OPTIMIZATION_TOOLTIP_STRING);
 			}
 			else
 			{
 				optimizing=false;
-//				currentActionButton->updateText(CLICK_TO_CONTINUE_STRING);
-				currentActionButton->updateToolTip(CONTINUE_OPTIMIZATION_TOOLTIP_STRING);
+//				currentActionButton->updateText(PAUSED_STRING);
+//				currentActionButton->updateToolTip(CONTINUE_OPTIMIZATION_TOOLTIP_STRING);
 			}
 		}
 //		currentActionButton->Show();

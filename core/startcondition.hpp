@@ -53,7 +53,6 @@ class START_CONDITION
 		const unsigned int getLocationAvailible(const unsigned int loc, const unsigned int unit_type) const;
 
 		const UNIT* getUnit(const unsigned int location) const;
-		
 };
 
 inline void START_CONDITION::assignRace(const eRace start_race) {

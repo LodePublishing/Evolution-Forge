@@ -1,6 +1,6 @@
 #include "menu.hpp"
 
-const unsigned int Menu::getHeight() const
+const unsigned int UI_Menu::getHeight() const
 {
 	if(!isOpen())
 		return(0);
@@ -8,7 +8,7 @@ const unsigned int Menu::getHeight() const
 		return(height);
 }
 
-Menu::Menu(const Menu& object) :
+UI_Menu::UI_Menu(const UI_Menu& object) :
 	UI_Object((UI_Object)object),
 	menuEntries(object.menuEntries),
 	menuLevel(object.menuLevel),
@@ -21,7 +21,7 @@ Menu::Menu(const Menu& object) :
 	menuChanged(false)
 { }
 
-Menu& Menu::operator=(const Menu& object)
+UI_Menu& UI_Menu::operator=(const UI_Menu& object)
 {
 	((UI_Object)(*this)) = ((UI_Object)object);
 	menuEntries = object.menuEntries;
@@ -36,7 +36,7 @@ Menu& Menu::operator=(const Menu& object)
 	return(*this);
 }
 
-Menu::Menu(UI_Object* menu_parent, const Rect& menu_rect, const Size distance_bottom_right, const ePositionMode position_mode, const bool choose_menu):
+UI_Menu::UI_Menu(UI_Object* menu_parent, const Rect& menu_rect, const Size distance_bottom_right, const ePositionMode position_mode, const bool choose_menu):
 	UI_Object(menu_parent, menu_rect, distance_bottom_right, position_mode),
 	menuEntries(),
 	menuLevel(0),
@@ -49,7 +49,7 @@ Menu::Menu(UI_Object* menu_parent, const Rect& menu_rect, const Size distance_bo
 	menuChanged(false)
 { }
 
-Menu::Menu(UI_Object* menu_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const unsigned int entryNumber, const unsigned int coloumns, const Size& s, const eString firstString, const eButtonColorsType button_colors_type, const bool choose_menu):
+UI_Menu::UI_Menu(UI_Object* menu_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const unsigned int entryNumber, const unsigned int coloumns, const Size& s, const eString firstString, const eButtonColorsType button_colors_type, const bool choose_menu):
 	UI_Object(menu_parent, rect, distance_bottom_right, position_mode),
 	menuEntries(),
 	menuLevel(0),
@@ -64,38 +64,38 @@ Menu::Menu(UI_Object* menu_parent, const Rect& rect, const Size distance_bottom_
 	for(unsigned int i=0;i<entryNumber;++i)
 	{
 		Rect edge = Rect(Point(10 + (i%coloumns) * (s.GetWidth()+10), (i/coloumns)*(s.GetHeight()+12)), s);
-		MenuEntry* entry = new MenuEntry(this, edge, (eString)(firstString+i));
+		UI_MenuEntry* entry = new UI_MenuEntry(this, edge, (eString)(firstString+i));
 		entry->setButtonColorsType(button_colors_type);
 		menuEntries.push_back(entry);
 	}
 }
 
-Menu::~Menu()
+UI_Menu::~UI_Menu()
 {
-	for(std::list<MenuEntry*>::const_iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+	for(std::list<UI_MenuEntry*>::const_iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 		delete (*m);	
 }
 
-void Menu::updateItemSizes(const unsigned int width)
+void UI_Menu::updateItemSizes(const unsigned int width)
 {
-	for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+	for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 		(*m)->setOriginalSize(Size(width, 0));
 }
 
-void Menu::updateItemPositions(const eMenuType menu_type)
+void UI_Menu::updateItemPositions(const eMenuType menu_type)
 {
 	unsigned int i = 0;
 	switch(menu_type)
 	{
 		case CUSTOM_MENU:break;
 		case ONE_COLOUMN_MENU:
-		for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+		for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 		{
 			(*m)->setOriginalPosition(Point(0, i*((*m)->getTextHeight()+(*m)->getDistanceBottomRight().GetHeight())));
 			i++;
 		}break;			 
 		case TWO_COLOUMN_MENU:
-		for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+		for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 		{
 			(*m)->setOriginalPosition(Point((i%2) * ((*m)->getWidth() + (*m)->getDistanceBottomRight().GetWidth()), (i/2)*((*m)->getTextHeight()+(*m)->getDistanceBottomRight().GetHeight())));
 			i++;
@@ -104,19 +104,19 @@ void Menu::updateItemPositions(const eMenuType menu_type)
 	}
 }
 
-const bool Menu::isOpen() const
+const bool UI_Menu::isOpen() const
 {
 	if(menuLevel==0)
 		return(false);
 	else return(true);
 }
 
-const signed int Menu::getPressedItem() const
+const signed int UI_Menu::getPressedItem() const
 {
 	return(pressedItem);
 }
 
-void Menu::open()
+void UI_Menu::open()
 {
 	if(menuLevel==0)
 		menuLevel=1;
@@ -125,7 +125,6 @@ void Menu::open()
 	else menuLevel=1;
 	setMenuHasChanged();
 
-//	setNeedRedrawNotMoved();
 
 	if(menuLevel)
 		Show();
@@ -142,7 +141,7 @@ void Menu::open()
 	}
 }
 
-void Menu::close()
+void UI_Menu::close()
 {
 	if(menuLevel!=0)
 		setMenuHasChanged();
@@ -150,7 +149,7 @@ void Menu::close()
 	Hide();
 }
 
-void Menu::setMenuLevel(const unsigned int menu_level)
+void UI_Menu::setMenuLevel(const unsigned int menu_level)
 {
 	if(menuLevel == menu_level)
 		return;
@@ -158,19 +157,20 @@ void Menu::setMenuLevel(const unsigned int menu_level)
 	setMenuHasChanged();
 }
 
-void Menu::setMenuHasChanged(const bool has_changed)
+void UI_Menu::setMenuHasChanged(const bool has_changed)
 {
 	if(has_changed == menuChanged)
 		return;
 	menuChanged = has_changed;
+	setNeedRedrawNotMoved();
 }
 
-const signed int Menu::getMarkedItem() const
+const signed int UI_Menu::getMarkedItem() const
 {
 	return(markedItem);
 }
 
-void Menu::process()
+void UI_Menu::process()
 {
 	pressedItem = -1;
 	markedItem = -1;
@@ -179,12 +179,13 @@ void Menu::process()
 	setMenuHasChanged(false);
 	
 	UI_Object::process();
+	
 	p1 = Point(9999, 9999);
 	p2 = Point(0, 0);
 
 	unsigned int i = 0;
 
-	for(std::list<MenuEntry*>::const_iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+	for(std::list<UI_MenuEntry*>::const_iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 	{
 		if(!(*m)->isShown())
 		{
@@ -214,20 +215,22 @@ void Menu::process()
 		close();
 }
 
-void Menu::draw(DC* dc) const
+void UI_Menu::draw(DC* dc) const
 {
 	if((!isShown())||(p1 > p2))
 		return;
+	if(checkForNeedRedraw())
+	{
+		Rect edge = Rect(p1 - Size(3,3), Size(p2.x-p1.x+6, p2.y-p1.y+6) );
+		dc->SetBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
+//		dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+		dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+		dc->DrawRoundedRectangle(edge,4);
+	}
 	UI_Object::draw(dc);
-	if(!checkForNeedRedraw())
-		return;
-	Rect edge = Rect(p1 - Size(3,3), Size(p2.x-p1.x+6, p2.y-p1.y+6) );
-	dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
-	dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-	dc->DrawRoundedRectangle(edge,4);
 }
 
-const bool Menu::menuHasChanged() const
+const bool UI_Menu::menuHasChanged() const
 {
 	return(menuChanged);
 }

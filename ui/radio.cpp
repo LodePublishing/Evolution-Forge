@@ -100,9 +100,9 @@ void UI_Radio::forcePress(const unsigned int button_id)
                 toLog("DEBUG: (UI_Radio::forcePress): Variable buttonId not initialized.");return;
         }
 #endif
-	setButtonHasChanged();
 	forceUnpressAll();
 	buttonId[button_id]->forcePress();
+	setButtonHasChanged();
 }
 
 const unsigned int UI_Radio::getMarked()

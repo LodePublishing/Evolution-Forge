@@ -269,7 +269,7 @@ const bool ANABUILDORDER::calculateStep()
 	{
  		timeStatistics[getTimer()-i].setNeedSupply(getNeedSupply());
 		timeStatistics[getTimer()-i].setHaveSupply(getHaveSupply());
-		timeStatistics[getTimer()-i].setHaveMinerals(getMinerals()+harvestMinerals()*i);
+		timeStatistics[getTimer()-i].setHaveMinerals(/*getLocationTotal(GLOBAL, LARVA)*100*/getMinerals()+harvestMinerals()*i);
 		timeStatistics[getTimer()-i].setHaveGas(getGas()+harvestGas()*i);
 		timeStatistics[getTimer()-i].setFitness(calculatePrimaryFitness(ready)); // ~~
 	}
@@ -720,7 +720,7 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 	
 		program.before.setNeedSupply(getNeedSupply());
 		program.before.setHaveSupply(getHaveSupply());
-		program.before.setHaveMinerals(getMinerals());
+		program.before.setHaveMinerals(/*getLocationTotal(GLOBAL, LARVA)*100);*/getMinerals());
 		program.before.setHaveGas(getGas());
 
 // upgrade_cost is 0 if it's no upgrade
@@ -733,7 +733,7 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 		
 		program.after.setNeedSupply(getNeedSupply());
 		program.after.setHaveSupply(getHaveSupply());
-		program.after.setHaveMinerals(getMinerals());
+		program.after.setHaveMinerals(/*getLocationTotal(GLOBAL, LARVA)*100);*/getMinerals());
 		program.after.setHaveGas(getGas());
 
 		program.setUsedFacilityCount(getLocationTotal(GLOBAL, stat->facility[picked_facility]) - getLocationAvailible(GLOBAL, stat->facility[picked_facility])); // TODO evtl nach Ort

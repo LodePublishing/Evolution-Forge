@@ -1,0 +1,411 @@
+@HELP_STRINGS
+	@ENGLISH
+# INDEX_CHAPTER = 0
+		@0	
+			$Help Index$###
+			@Chapter 1: Introduction@100@##\
+			@Chapter 2: Detailed description@200@##\
+			@Chapter 3: How to use the results@300@##\
+			@Chapter 4: Configuration@400@##\
+			@Chapter 4: Program Mechanics@500@##\
+			@Chapter 5: Interactive Mode@600@##\
+			@Chapter 6: The core of the program@700@##\
+			@Chapter 7: Communication@800@##\
+			@Chapter 8: Development of EF@900@##\
+			@Chapter 9: Philosophy and EF@1000@#
+		@END
+		
+# INTRODUCTION_MAIN_CHAPTER = 100
+		@100
+			@Chapter 1: Introduction@0@###\
+			@Chapter 1.1: What does this program?@110@##\
+			@Chapter 1.2: Quickstart@120@##\
+			@Chapter 1.3: Overview of the elements@130@##\
+			@Chapter 1.4: Is it useful?@140@##\
+			@Chapter 1.5: Limits of the Program@150@##\
+			@Chapter 1.6: Problems of the Program@160@##
+		@END
+
+# INTRODUCTION_CHAPTER = 110
+
+		@110
+			@1.1: What does this program?@100@##\
+			The program simulates an abstract $StarCraft:Broodwar$ environment and calculates the time a certain build order needs.#By comparing different build orders, randomly changing them and taking the best build order for the next generation, the build order is improved step by step.#$StarCraft$ build orders fit perfectly for this algorithm called $HillClimbing$.#
+		@END
+
+#	INTRODUCTION_QUICKSTART_CHAPTER = 120
+		@120
+			@1.2: Quickstart@100@##\
+It's easy:#\
+- Click on the left side in the goal list window $'Click here to add goal'$, choose a category and pick your goals.#\
+- Click on the top right on the flashing $'Click to continue'$ button and sit back to watch the progress.#\
+- You will see items moving around in window named $'Build Order'$ on the bottom right. The program now will optimize the build order by rearranging the items.#\
+- On the top right you will see the current best time in the $'Timer window'$. If you read there a $'Searching'$ it means, the program is still searching for a valid solution which will need a moment depending how many goals you have entered while $'Optimizing'$ means that a valid solution is found and the program tries to optimize it.#\
+- On the top you will see the $'Statistical Data'$ window which displays changes in time, fitness and ressources of the best program over the last few seconds. It is interesting for the advanced user, this window is availible on $'Advanced'$ mode or higher.#\
+- Evolution forge also allows you to see a graphical illustration (through the $'Graphical illustration of the build order'$ window) of the build order to see what buildings are built at the same time, how long they need and when to build them. In addition there is the $'Overview of the build order'$ window where you can see how much minerals, gas and supply you have at a certain time if you play this build order.#\
+- After a while you will notice that there are no more changes on the screen. Probably the best build order is found. Press $ALT+T$ to stop and let program print out the build order via the File menu.
+		@END
+
+# INTRODUCTION_OVERVIEW_CHAPTER = 130
+		@130
+			@1.3: Overview of the elements@100@##\
+TEXT  ~2~   
+		@END
+
+# INTRODUCTION_USE_CHAPTER = 140
+		@140
+			@1.4: Is it useful?@100@##\
+TEXT
+		@END
+
+# INTRODUCTION_LIMITS_CHAPTER = 150
+		@150
+			@1.5: Where are the limits?@100@##\
+- It only calculates a general build order. Depending on the map, the latency, your mousespeed and many other small factors there might be a better build order.#\
+- Goals consisting of many units will result in exponential growth of time needed for the calculation.#\
+- The program is based on one-second steps. This might lead to some inaccurate calculation.#\
+- In most cases the build orders cannot be applied directly 1:1 in the game but you have to exercise them and adapt them to your needs.
+		@END
+
+# INTRODUCTION_PROBLEMS_CHAPTER = 160
+		@160
+// TODO
+			@1.6: Is it cheating?@100@##\
+Well... in a way... yes.#\
+If you use the program correctly you might get an advantage over your enemy: You learn to get a better starting in the game so that you can concentrate on the main thing, strategies and tactics!#\
+While you can get the same information by watching replays, reading strategy articles or just playing the game it is much more fun to interactivly trying out combinations to compare them.
+		@END
+
+
+# DESCRIPTION_MAIN_CHAPTER = 200
+		@200
+			@2. Detailed Description@0@###\
+@2.1: The timer window@210@##\
+@2.2: The goal window@220@##\
+@2.3: The force window@230@##\
+@2.4: The build order diagram window@240@##\
+@2.5: The build order graph window@250@##\
+@2.6: The build order window@260@#
+		@END
+
+# DESCRIPTION_SCORE_WINDOW_CHAPTER = 210
+		@210
+			@2.1: The timer window@200@##\
+TEXT
+		@END
+	
+# DESCRIPTION_GOAL_WINDOW_CHAPTER = 220
+		@220
+			@2.2: The goal window@200@##\
+TEXT
+		@END
+
+# DESCRIPTION_FORCE_WINDOW_CHAPTER = 230
+		@230
+			@2.3: The force window@200@##\
+TEXT
+		@END
+	
+# DESCRIPTION_BODIAGRAM_WINDOW_CHAPTER = 240
+		@240
+			@2.4: The build order diagram window@200@##\
+TEXT
+		@END
+
+# DESCRIPTION_BOGRAPH_WINDOW_CHAPTER = 250
+		@250
+			@2.5: The build order graph window@200@##\
+TEXT
+		@END
+
+# DESCRIPTION_BUILD_ORDER_WINDOW_CHAPTER = 260
+		@260
+			@2.6: The build order window@200@##\
+TEXT
+		@END
+
+# DESCRIPTION_FORCE_WINDOW_CHAPTER = 270
+		@270
+			@2.7: The map window@200@##\
+TEXT
+		@END
+	
+
+// TODO
+# RESULTS_MAIN_CHAPTER = 300
+		@300
+			@3. How to use the results@0@###\
+@3.1: About time and numbers@310@##\
+@3.2: HTML output@320@##\
+@3.3: Using the database@330@##\
+@3.4: Results during the run@340@#
+		@END
+
+# RESULTS_TIME_AND_NUMBERS_CHAPTER = 310
+		@310
+			@3.1: About time and numbers@300@##\
+TEXT
+		@END
+
+# RESULTS_OUTPUT_CHAPTER = 320
+		@320
+			@3.2: HTML output@300@##\
+TEXT
+		@END
+
+# RESULTS_DATABASE_CHAPTER = 330
+		@330
+			@3.3: Using the database@300@##\
+TEXT
+		@END
+
+# RESULTS_INGAME_CHAPTER = 340
+		@340
+			@3.4: Results during the run@300@##\
+TEXT
+		@END
+
+
+# CONFIGURATION_MAIN_CHAPTER = 400
+		@400
+			@4. Configuration of the program@0@###\
+@4.1: Loading/Saving Settings@410@##\
+@4.2: Resolution, Color Depth and Language@420@##\
+@4.3: Core Settings@430@##\
+@4.4: GUI Settings@440@##\
+@4.5: Rules settings@450@##
+		@END
+
+
+# CONFIGURATION_LOADING_SAVING_CHAPTER = 410
+		@410
+			@4.1: How the build order is processed@400@##\
+TEXT
+		@END
+
+# CONFIGURATION_RESOLUTION_DEPTH_LANGUAGE_CHAPTER = 420
+		@420
+			@4.2: How multiplayer works@400@##\
+TEXT
+		@END
+
+# CONFIGURATION_CORE_SETTINGS_CHAPTER = 430
+		@430
+			@4.3: How to finetune it additional@400@##\
+TEXT
+		@END
+
+# CONFIGURATION_GUI_SETTINGS_CHAPTER = 440
+		@440
+			@4.4: How the Game is simulated@400@##\
+TEXT
+		@END
+
+# CONFIGURATION_RULES_SETTINGS_CHAPTER = 450
+		@450
+			@4.5: How the Game is simulated@400@##\
+TEXT
+		@END
+
+
+# MECHANICS_MAIN_CHAPTER = 500
+		@500
+			@5. Mechanics of the program@0@###\
+@5.1: How the build order is processed@510@##\
+@5.2: How multiplayer works@520@##\
+@5.3: How to finetune it additional@530@##\
+@5.4: How the algorithm works@540@##
+		@END
+
+
+# MECHANICS_ORDER_CHAPTER = 510
+		@510
+			@5.1: How the build order is processed@500@##\
+			TEXT
+		@END
+
+# MECHANICS_MULTIPLAYER_CHAPTER = 520
+		@520
+			@5.2: How multiplayer works@500@##\
+			TEXT
+		@END
+
+# MECHANICS_FINETUNE_CHAPTER = 530
+		@530
+			@5.3: How to finetune it additional@500@##\
+			TEXT
+		@END
+
+# MECHANICS_SIMULATION_CHAPTER = 540
+		@540
+			@5.4: How the Game is simulated@500@##\
+			TEXT
+		@END
+
+
+
+# INTERACTIVE_MAIN_CHAPTER = 600
+		@600
+			@6. Interactive mode@0@###\
+			@6.1: Editing the build order@610@##\
+			@6.2: Playing against the computer@620@##\
+			@6.3: Letting it play against itself@630@##\
+			@6.4: What to learn from the program@640@#
+		@END
+	
+# INTERACTIVE_EDITING_CHAPTER = 610
+		@610
+			@6.1: Editing the build order@600@##\
+			TEXT
+		@END
+
+# INTERACTIVE_PLAYING_CHAPTER = 620
+		@620
+			@6.2: Playing against the computer@600@##\
+			TEXT
+		@END
+
+# INTERACTIVE_TOURNAMENTS_CHAPTER = 630
+		@630
+			@6.3: Letting it play against itself@600@##\
+			TEXT
+		@END
+
+# INTERACTIVE_WHATTOLEARN_CHAPTER = 640
+		@640
+			@6.4: What to learn from the program@600@##\
+			TEXT
+		@END
+
+
+# CORE_MAIN_CHAPTER = 700
+		@700
+			@7. The core of the program@0@###\
+			@7.1: The algorithm of the core@710@##\
+			@7.2: Buildorder TODO@720@##\
+			@7.3: Scalability@730@##\
+			@7.4: Comparison?@740@##\
+			@7.5: Problems with the algorithm@750@#
+		@END
+
+
+# CORE_ALGORITHM_CHAPTER = 710
+		@710
+			@7.1: The algorithm of the core@700@##\
+			TEXT
+		@END
+
+# CORE_BUILDORDER_CHAPTER = 720
+		@720		
+			@7.2: Buildorder TODO@700@##\
+			TEXT
+		@END
+
+# CORE_SCALABILITY_CHAPTER = 730
+		@730
+			@7.3: Scalability@700@##\
+			TEXT
+		@END
+
+# CORE_COMPARISON_CHAPTER = 740
+		@740
+			@7.4: Comparison?@700@##\
+			TEXT
+		@END
+
+# CORE_PROBLEMS_GAS_CHAPTER = 750
+		@750
+			@7.5: Problems with the algorithm@700@##\
+			TEXT
+		@END
+
+
+# COMMUNICATION_MAIN_CHAPTER = 800
+		@800
+			@8. Communication@0@###\
+			@8.1: ClawSoftware.de@810@##\
+			@8.3: About myself@830@#
+		@END
+
+# COMMUNICATION_CLAWSOFTWARE_CHAPTER = 810
+		@810
+			@8.1: ClawSoftware.de@800@##\
+			~19~TEXTb lbsdlfasdf asdf asdaaagiopjerpgjpgojdgadj kldagj ldkfjg kldfjglkdjglsd gfklsdjf gklsdjfg lskdf gjskldfjldfjg lsdkfjg lskdjf glksdj glksdj gsldkjfg lsdkjgf lskdfjg lksdjfg klsdjf glskdjfklsdj fgklsj dfgjsdlkfjg sldkjfl skdjfgl skdfjgl ksdjf gklsdj gfjkls dflgjk sdlfkgj sldkfg lkjf gsdfg askdfjasl kdflaskdfj alksjdfalejiwjerfl sdifjal sidjf liajsdf liasjdfliasjefijs lidjf alsidj flaisdj filajefiljf lisjdlifjasl idfj alsidfj aslidfj alsidfj alsidjfl asidjf ilasdj filasjdf ailsd fjasildjf asildjf lasidjf lasidjf alsidfj alsidjf alsidfj l
+		@END
+
+
+# COMMUNICATION_ABOUT_CHAPTER = 830
+		@830
+			@8.3: About myself@800@##\
+			TEXT
+		@END
+
+# DEVELOPMENT_MAIN_CHAPTER = 900
+		@900
+			@9. Development@0@###\
+			@9.1: History@910@##\
+			@9.2: Things will never be implemented@920@##\
+			@9.3: Things that will come later@930@##\
+			@9.4: Current developments@940@##\
+			@9.5: Future plans with Evolution Forge@950@#
+		@END
+
+# DEVELOPMENT_HISTORY_CHAPTER = 910
+		@910
+			@9.1: History@900@##\
+			TEXT
+		@END
+
+# DEVELOPMENT_NOTIMPLEMENTED_CHAPTER = 920
+		@920
+			@9.2: Things will never be implemented@900@##\
+			TEXT
+		@END
+
+# DEVELOPMENT_TODO_CHAPTER = 930
+		@930
+			@9.3: Things that will come later@900@##\
+			TEXT
+		@END
+
+# DEVELOPMENT_CURRENT_CHAPTER = 940
+		@940
+			@9.4: Current developments@900@##\
+			TEXT
+		@END
+
+# DEVELOPMENT_FUTURE_CHAPTER = 950
+		@950
+			@9.5: Future plans with Evolution Forge@900@##\
+			TEXT
+		@END
+
+
+# PHILOSOHPY_MAIN_CHAPTER = 1000
+		@1000
+			@10. Philosophy@0@###\
+			@10.1: Evolution@1010@##\
+			@10.2: TODO@1020@##\
+			@10.3: Reality check@1030@#
+		@END
+
+# PHILOSOPHY_EVOLUTION_CHAPTER = 1010
+		@1010
+			@10.1 Evolution@1000@##\
+			TEXT
+		@END
+
+# PHILOSOPHY_GOD_CHAPTER = 1020
+		@1020
+			@10.2 TODO@1000@##\
+			TEXT
+		@END
+
+# PHILOSOPHY_REALITY_CHAPTER = 1030
+		@1030
+			@10.3 Reality check@1000@##\
+			TEXT
+		@END
+	
+
+

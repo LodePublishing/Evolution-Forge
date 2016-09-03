@@ -1,6 +1,7 @@
 #ifndef _GUI_BOWINDOW_HPP
 #define _GUI_BOWINDOW_HPP
 
+#include "unitmenu.hpp"
 #include "../ui/window.hpp"
 #include "../core/anabuildorder.hpp"
 #include <list>
@@ -8,6 +9,8 @@
 #include "boentry.hpp"
 #include "../ui/scrollbar.hpp"
 #include "../ui/checkbutton.hpp"
+
+#include "savebox.hpp"
 
 class BoWindow : public UI_Window
 {
@@ -22,6 +25,7 @@ class BoWindow : public UI_Window
 		void processList();
 		void process();
 		void assignAnarace(ANABUILDORDER* bo_anarace);
+		void reloadOriginalSize();
 	private:
 		void saveBuildOrder(const std::string& name) const;
 		void drawSelectionStuff(DC* dc) const;
@@ -30,6 +34,7 @@ class BoWindow : public UI_Window
 		ANABUILDORDER* anarace;
 		std::list<BoEntry*> boList;
 		unsigned int optimizeMode;
+		signed int addUnit;
 		int new_one;
 		int same;
 		int moved;
@@ -47,11 +52,17 @@ class BoWindow : public UI_Window
 
 		UI_Button* saveBuildOrderButton;
 		UI_Button* loadBuildOrderButton;
+		UI_Button* restartBuildOrderButton;
 
 		bool* fixed;
 		UI_Scrollbar* scrollBar;
 		UI_CheckButton* alwaysBuildWorker;
 		UI_CheckButton* onlySwapOrders;
+		
+		UI_Button* unitMenuButton;
+		UnitMenu* unitMenu;
+
+		SaveBox* saveBox;
 };
 
 #endif // _GUI_BOWINDOW_HPP

@@ -1,7 +1,6 @@
 #include "guimain.hpp"
 #include "../sdl/framerate.hpp"
-
-#include "../ui/editfield.hpp"
+#include "savebox.hpp"
 #include "configuration.hpp"
 #include "../ui/configuration.hpp"
 #include "../core/configuration.hpp"
@@ -112,14 +111,14 @@ int main(int argc, char *argv[])
 
 // ------ CAP FRAMERATE ------
 	FPS* fps = new FPS();
-	fps->setDesiredFramerate(efConfiguration.getStaticFramerate());
-	fps->setAllowStaticFramerate(efConfiguration.isAllowStaticFramerate());
+	fps->setDesiredFramerate(efConfiguration.getDesiredFramerate());
+	fps->setDesiredCPU(efConfiguration.getDesiredCPU());
 // ------ END CAP FRAMERATE
 
 
 // ------- INIT GRAPHIC ENGINE ------
 	toLog(UI_Object::theme.lookUpString(START_INIT_GRAPHIC_ENGINE_CORE_STRING));
-	Main m(screen);
+	Main m(screen); 
 
 	unsigned int screenshot = 100;
 	unsigned int refresh = fps->getFramesPerGeneration();
@@ -130,6 +129,8 @@ int main(int argc, char *argv[])
 
 	bool endrun = false;
 	unsigned int screenCapturing=0;
+
+	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 
 // ------ END INIT GRAPHIC ENGINE ------
 
@@ -167,6 +168,15 @@ int main(int argc, char *argv[])
 
 // ------ END INTRO ------
 
+	long unsigned int current_ticks = 500;
+	long unsigned int process_ticks = 100;
+	long unsigned int draw_ticks = 100;
+	long unsigned int message_ticks = 10;
+	long unsigned int generation_ticks = 190;
+	long unsigned int idle_ticks = 100;
+	long unsigned int total_ticks=500;
+
+	UI_Object::focus=NULL;
 
 // MAIN LOOP
 	while(true)
@@ -180,13 +190,49 @@ int main(int argc, char *argv[])
 //		}
 	
 //		UI_Object::copyToNextProcessArray();
+		
+		current_ticks = SDL_GetTicks();
 		m.process();
-		screen->updateScreen();
+		process_ticks = SDL_GetTicks() - current_ticks;
+		current_ticks = SDL_GetTicks();
 		m.draw(screen);
+	
 // ------ END DRAWING ------
+// ------ FPS DEBUG
+		{
+			Point p = Point(20, resolution.GetHeight() - 110);
+			screen->SetTextForeground(DC::toSDL_Color(255, 20, 20));
+			screen->SetFont(UI_Object::theme.lookUpFont(MIDDLE_BOLD_FONT));
+			screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
+			screen->DrawRectangle(Rect(p, Size(200, 80)));
+			DC::addRectangle(Rect(p, Size(200, 80)));
+
+			std::ostringstream os;
+			os.str("");
+			os << "Objects: (" << UI_Object::redrawnObjects << "/" << DC::changedRectangles << ")   FPS: " << efConfiguration.getCurrentFramerate();
+			screen->DrawText(os.str(), p + Size(20, 5));
+
+			
+			os.str("");
+			os << "process() " << process_ticks*100/total_ticks << "%";screen->DrawText(os.str(), p + Size(20, 25));os.str("");
+			os << "newGeneration() " << generation_ticks*100/total_ticks << "%";screen->DrawText(os.str(), p + Size(20, 35));os.str("");
+			os << "draw() " << draw_ticks*100/total_ticks << "%";screen->DrawText(os.str(), p + Size(20, 45));os.str("");	
+			os << "idle() " << idle_ticks*100/total_ticks << "%";screen->DrawText(os.str(), p + Size(20, 55));os.str("");	
+			os << "message() " << message_ticks*100/total_ticks << "%";screen->DrawText(os.str(), p + Size(20, 65));os.str("");	
+		}
+		screen->SetBrush(*UI_Object::theme.lookUpBrush(TRANSPARENT_BRUSH));
+		for(int i = 0; i < DC::changedRectangles; i++)
+		{
+			screen->SetPen(*UI_Object::theme.lookUpPen((ePen)(NULL_PEN+(rand()%MAX_PENS))));
+			screen->DrawEmptyRectangle(DC::changedRectangle[i].x, DC::changedRectangle[i].y, DC::changedRectangle[i].w, DC::changedRectangle[i].h);
+		}
+// ------ END FPS DEBUG
+		DC::updateScreen(screen->GetSurface());
+		draw_ticks = SDL_GetTicks() - current_ticks;
+		current_ticks = SDL_GetTicks();
 
 // ------ SCREENCAPTURE ------ 
-                if(screenCapturing==100) {
+/*                if(screenCapturing==100) {
 			std::ostringstream os;os.str("");os << "shot" << screenshot << ".bmp";
                         SDL_SaveBMP(screen->GetSurface() , os.str().c_str());
 			++screenshot;
@@ -195,27 +241,29 @@ int main(int argc, char *argv[])
 			--screenCapturing;
 			std::ostringstream os;os.str("");os << "shot" << (screenshot-1) << ".bmp" << " saved (" << (resolution.GetWidth() * resolution.GetHeight() * (int)(screen->GetSurface()->format->BitsPerPixel))/1024 << "kb)";
                         screen->DrawText(os.str(), 50, 300);
-                }
+                }*/
 // ------ END SCREENCAPTURE -----
-
-	
+		
+		
 // ------ FRAMERATE AND CALCULATION ------	
 		unsigned int frames_per_generation = fps->getFramesPerGeneration();
 		unsigned int frames_per_second = fps->getCurrentFramerate();
-		
-		if((!endrun)&&(((UI_Object::editTextField==NULL)&&(m.isAnyOptimizing()))||(efConfiguration.isAllowStaticFramerate()))) // TODO
-		{
-			if(efConfiguration.isAllowStaticFramerate())
-				fps->setDesiredFramerate(efConfiguration.getStaticFramerate());
-			else
-				fps->setDesiredFramerate(efConfiguration.getDynamicFramerate());
-			fps->setAllowStaticFramerate(efConfiguration.isAllowStaticFramerate());
-			fps->delay();
+		bool is_optimizing = (!endrun)&&((/*(!UI_Object::editFieldActive())&&*/(m.isAnyOptimizing())));//TODO
 	
-			efConfiguration.setCurrentFramerate(frames_per_second);
-			efConfiguration.setCurrentFramesPerGeneration(frames_per_generation);
-
-			refresh+=100;
+		fps->setAdaptFramesPerGeneration(is_optimizing);
+		fps->setDesiredFramerate(efConfiguration.getDesiredFramerate());
+		fps->setDesiredCPU(efConfiguration.getDesiredCPU());
+		fps->setTotalTicks(total_ticks);
+		fps->delay();
+		efConfiguration.setCurrentFramerate(frames_per_second);
+		efConfiguration.setCurrentFramesPerGeneration(frames_per_generation);
+	
+		idle_ticks = SDL_GetTicks() - current_ticks;
+		current_ticks = SDL_GetTicks();
+			
+		if(is_optimizing)	
+		{
+			refresh += 100;
 			while((refresh > frames_per_generation))// && (!(endrun = database.getIsNewRun()))) // TODO
 			{
 				m.OnIdle();
@@ -229,24 +277,10 @@ int main(int argc, char *argv[])
 			endrun = m.newRun();
 		endrun=false; // TODO
 // ------ END FRAMERATE AND CALCULATION 
+		generation_ticks = SDL_GetTicks() - current_ticks;
+		current_ticks = SDL_GetTicks();	
 
-
-// ------ FPS DEBUG
-/*		{
-			Point p = Point(20, resolution.GetHeight() - 50);
-			screen->SetTextForeground(DC::toSDL_Color(255, 20, 20));
-			screen->SetFont(UI_Object::theme.lookUpFont(LARGE_BOLD_FONT));
-			screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
-			screen->DrawRectangle(Rect(p, Size(200, 20)));
-
-			std::ostringstream os;
-			os.str("");
-			os << "Objects: " << UI_Object::redrawnObjects << "   FPS: " << efConfiguration.getCurrentFramerate();
-			screen->DrawText(os.str(), p + Size(20, 2));	
-		}*/
-// ------ END FPS DEBUG
-
-	
+		bool ignore_rest = false;
 
 		while (SDL_PollEvent(&event))
 		{
@@ -278,34 +312,27 @@ int main(int argc, char *argv[])
 				case SDL_MOUSEMOTION:
 					m.setMouse(Point(event.motion.x, event.motion.y));break;
 				case SDL_KEYDOWN:
+					if((UI_Object::focus==NULL)||(!UI_Object::focus->addKey(event.key.keysym.sym, event.key.keysym.mod)))
 					switch(event.key.keysym.sym)
 					{
-						case SDLK_BACKSPACE:
-						if(UI_Object::editTextField!=NULL)
-							UI_Object::editTextField->removeCharBackspace();
-						break;
-						case SDLK_TAB:break;//TODO
-						case SDLK_CLEAR:break;//TODO
+						case SDLK_TAB://UI_Object::rotateEditField();
+							break;
 						case SDLK_KP_ENTER:
 						case SDLK_RETURN:
-							if(UI_Object::editTextField==NULL)
+							if(event.key.keysym.mod & (KMOD_LALT | KMOD_RALT | KMOD_ALT))
 							{
-								if(event.key.keysym.mod & (KMOD_LALT | KMOD_RALT | KMOD_ALT))
-								{
-//									screen->setFullscreen(!efConfiguration.isFullScreen());
-									efConfiguration.setFullScreen(!efConfiguration.isFullScreen());
-									m.noticeFullscreen();
-//									toLog(UI_Object::theme.lookUpString(efConfiguration.isFullScreen()?START_SET_FULLSCREEN_MODE_STRING:START_SET_WINDOW_MODE_STRING));
-								}
-							} else
-								UI_Object::editTextField->forceDone();
-							// else: OK bestaetigen!
+//								screen->setFullscreen(!efConfiguration.isFullScreen());
+								efConfiguration.setFullScreen(!efConfiguration.isFullScreen());
+								m.noticeFullscreen();
+//								toLog(UI_Object::theme.lookUpString(efConfiguration.isFullScreen()?START_SET_FULLSCREEN_MODE_STRING:START_SET_WINDOW_MODE_STRING));
+							}
 						break;
 						case SDLK_ESCAPE:
-							if(UI_Object::editTextField==NULL) {
+							if(UI_Object::focus!=NULL)
+								UI_Object::focus=NULL;
+							else {
 								delete fps;delete screen;screen=NULL;return(EXIT_SUCCESS);
-							} else
-								UI_Object::editTextField->forceCancel();
+							}
 							break;
 						case SDLK_PAUSE:
 						{
@@ -314,78 +341,16 @@ int main(int argc, char *argv[])
 //							else m.startAllOptimizing();
 						}break;
 						case SDLK_SPACE:
-							if(UI_Object::editTextField==NULL)
-							{
 								screenCapturing=100;
 //								if(m.isOptimizing())
 //									m.stopAllOptimizing();
 //								else m.startAllOptimizing();
-							} else
-							UI_Object::editTextField->addChar(' ');
 							break;
-						case SDLK_EXCLAIM:break;
-						case SDLK_QUOTEDBL:break;
-						case SDLK_HASH:break;
-						case SDLK_DOLLAR:break;
-						case SDLK_AMPERSAND:break;
-						case SDLK_QUOTE:break;
-						case SDLK_LEFTPAREN:break;
-						case SDLK_RIGHTPAREN:break;
-						case SDLK_KP_MULTIPLY:
-						case SDLK_ASTERISK:break; // TODO
-						case SDLK_KP_PLUS:
-//						case SDLK_PLUS:break;
-						case SDLK_COMMA:break;
-						case SDLK_KP_MINUS:break;
-//						case SDLK_MINUS:
-//							if((event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))&&(UI_Object::editTextField!=NULL))
-//							{
-//								UI_Object::editTextField->addChar('_');
-//								break;
-//							}break;
-						case SDLK_KP_PERIOD:
-						case SDLK_PERIOD:break;//TODO
-						case SDLK_KP_DIVIDE:break;
-						case SDLK_SLASH:break;//TODO
-
-						case SDLK_COLON:break;
-						case SDLK_SEMICOLON:break;
-						case SDLK_LESS:break;//TODO
-						case SDLK_KP_EQUALS:break;
-//						case SDLK_EQUALS:break;
-						case SDLK_GREATER:break;//TODO
-						case SDLK_QUESTION:break;
-						case SDLK_AT:break;
-						case SDLK_BACKSLASH:break;
-						case SDLK_CARET:break;
-						case SDLK_UNDERSCORE:
-							if(UI_Object::editTextField!=NULL)
-								UI_Object::editTextField->addChar('_');
-							break;
-						case SDLK_BACKQUOTE:break;
-						case SDLK_DELETE:
-							if(UI_Object::editTextField!=NULL)
-								UI_Object::editTextField->removeCharDelete();
-							break;
-						case SDLK_KP0:
-						case SDLK_KP1:
-						case SDLK_KP2:
-						case SDLK_KP3:
-						case SDLK_KP4:
-						case SDLK_KP5:
-						case SDLK_KP6:
-						case SDLK_KP7:
-						case SDLK_KP8:
-						case SDLK_KP9:
-							if(UI_Object::editTextField!=NULL)
-								UI_Object::editTextField->addChar('0'+event.key.keysym.sym-SDLK_0);
-							break;
-
-
 //						case SDLK_PRINT:break;
 						case SDLK_EQUALS:
 								if(UI_Object::theme.getResolution()<RESOLUTION_1280x1024)
 								{
+									if(ignore_rest) break;
 									UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() + 1));
 									screen->setResolution(UI_Object::theme.getResolution());
 									uiConfiguration.setResolution(UI_Object::theme.getResolution());
@@ -395,11 +360,13 @@ int main(int argc, char *argv[])
  									os << resolution.GetWidth() << "x" << resolution.GetHeight();
 									toLog(UI_Object::theme.lookUpFormattedString(CHANGED_RESOLUTION_STRING, os.str()));
 									m.reloadOriginalSize();
+									ignore_rest=true;
 								}
 								break;
 						case SDLK_MINUS:
 								if(UI_Object::theme.getResolution()>RESOLUTION_640x480)
 								{
+									if(ignore_rest) break;
 									UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() - 1));
 									screen->setResolution(UI_Object::theme.getResolution());
 									uiConfiguration.setResolution(UI_Object::theme.getResolution());
@@ -409,91 +376,38 @@ int main(int argc, char *argv[])
  									os << resolution.GetWidth() << "x" << resolution.GetHeight();
 									toLog(UI_Object::theme.lookUpFormattedString(CHANGED_RESOLUTION_STRING, os.str()));
 									m.reloadOriginalSize();
+									ignore_rest=true;
 								}
 								break;
 						case SDLK_LEFTBRACKET:
 								if(screen->getBitDepth() > DEPTH_8BIT)
 								{
+									if(ignore_rest) break;
 									UI_Object::theme.setBitDepth((eBitDepth)(screen->getBitDepth()-1));
 									screen->setBitDepth(UI_Object::theme.getBitDepth());
 									uiConfiguration.setBitDepth(UI_Object::theme.getBitDepth());
 									UI_Object::theme.updateColors(screen->GetSurface());
 									// TODO bitDepth im theme aendern!
 									toLog(UI_Object::theme.lookUpFormattedString(CHANGED_BIT_DEPTH_STRING, (unsigned int)screen->GetSurface()->format->BitsPerPixel));
+									ignore_rest=true;
 								}
 								break;
 						case SDLK_RIGHTBRACKET:
 								if(screen->getBitDepth() < DEPTH_32BIT)
 								{
+									if(ignore_rest) break;
 									UI_Object::theme.setBitDepth((eBitDepth)(screen->getBitDepth()+1));
 									screen->setBitDepth(UI_Object::theme.getBitDepth());
 									uiConfiguration.setBitDepth(UI_Object::theme.getBitDepth());
 									UI_Object::theme.updateColors(screen->GetSurface());
 									toLog(UI_Object::theme.lookUpFormattedString(CHANGED_BIT_DEPTH_STRING, (unsigned int)screen->GetSurface()->format->BitsPerPixel));
+									ignore_rest=true;
 								}
 								break;
 							
 //						case SDLK_F6:m.mainWindow->forcePressTab(MAP_TAB);break;
 //						case SDLK_F7:m.mainWindow->forcePressTab(SETTINGS_TAB);break;
 //						case SDLK_F8:m.mainWindow->forcePressTab(HELP_TAB);break;
-						case SDLK_a:
-						case SDLK_b:
-						case SDLK_c:
-						case SDLK_d:
-						case SDLK_e:
-						case SDLK_f:
-						case SDLK_g:
-						case SDLK_h:
-						case SDLK_i:
-						case SDLK_j:
-						case SDLK_k:
-						case SDLK_l:
-						case SDLK_m:
-						case SDLK_n:
-						case SDLK_o:
-						case SDLK_p:
-						case SDLK_q:
-						case SDLK_r:
-						case SDLK_s:
-						case SDLK_t:
-						case SDLK_u:
-						case SDLK_v:
-						case SDLK_w:
-						case SDLK_x:
-						case SDLK_y:
-						case SDLK_z:
-							if(UI_Object::editTextField!=NULL)
-							{
-								if(event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))
-									UI_Object::editTextField->addChar('A'+event.key.keysym.sym-SDLK_a);
-								else
-									UI_Object::editTextField->addChar('a'+event.key.keysym.sym-SDLK_a);
-							}
-							break;
-						case SDLK_0:
-						case SDLK_1:
-						case SDLK_2:
-						case SDLK_3:
-						case SDLK_4:
-						case SDLK_5:
-						case SDLK_6:
-						case SDLK_7:
-						case SDLK_8:
-						case SDLK_9:
-							if(UI_Object::editTextField!=NULL)
-								UI_Object::editTextField->addChar('0'+event.key.keysym.sym-SDLK_0);
-							break;
-
-						case SDLK_LEFT:
-							if(UI_Object::editTextField!=NULL)
-								UI_Object::editTextField->moveLeft();
-							break;
-
-						case SDLK_RIGHT:
-							if(UI_Object::editTextField!=NULL)
-								UI_Object::editTextField->moveRight();
-							break;
-
 						default:break;
 					}
 					break;
@@ -506,8 +420,13 @@ int main(int argc, char *argv[])
 			screen->setBitDepth(UI_Object::theme.getBitDepth());
 			UI_Object::theme.updateColors(screen->GetSurface());
 			toLog(UI_Object::theme.lookUpFormattedString(CHANGED_BIT_DEPTH_STRING, (unsigned int)screen->GetSurface()->format->BitsPerPixel));
-		} else
-	
+			screen->setResolution(UI_Object::theme.getResolution());
+			resolution = screen->getResolutionSize();
+			UI_Object::setResolution(resolution);
+			m.reloadOriginalSize(); //~
+			UI_Button::resetButton();
+			UI_Object::resetWindow();
+		}	
 		if(m.hasResolutionChanged())
 		{
 			screen->setResolution(UI_Object::theme.getResolution());
@@ -518,14 +437,18 @@ int main(int argc, char *argv[])
  			os << resolution.GetWidth() << "x" << resolution.GetHeight();
 			toLog(UI_Object::theme.lookUpFormattedString(CHANGED_RESOLUTION_STRING, os.str()));
 			m.reloadOriginalSize();
-		} else 
-
+			UI_Button::resetButton();
+			UI_Object::resetWindow();
+		}
 		if(m.hasFullScreenChanged())
 		{
 			screen->setFullscreen(efConfiguration.isFullScreen());
 			toLog(UI_Object::theme.lookUpString(efConfiguration.isFullScreen()?START_SET_FULLSCREEN_MODE_STRING:START_SET_WINDOW_MODE_STRING));
 		}
+		message_ticks = SDL_GetTicks() - current_ticks;
+		total_ticks = process_ticks + generation_ticks + draw_ticks + message_ticks + idle_ticks+1;
 	}
+	return(EXIT_SUCCESS);
 }
 					
 

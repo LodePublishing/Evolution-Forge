@@ -68,10 +68,9 @@ class SettingsWindow:public UI_Window
 
 //		UI_CheckButton* transparency;
 		UI_CheckButton* smoothMovement;
-		UI_CheckButton* allowStaticFramerate;
 	
-		UI_NumberField* staticFramerate;
-		UI_NumberField* dynamicFramerate;
+		UI_NumberField* desiredFramerate;
+		UI_NumberField* desiredCPU;
 	
 		UI_Button* minimalistButton;
 		UI_Button* fullButton;

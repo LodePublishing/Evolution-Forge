@@ -2,6 +2,7 @@
 #define _UI_LONGTEXT_HPP
 
 #include "button.hpp"
+#include "bitmap.hpp"
 
 class UI_LongText : public UI_Object
 {
@@ -26,6 +27,7 @@ class UI_LongText : public UI_Object
 		std::list<UI_StaticText*> longText; // parsed text
 		std::list<UI_Button*> longButton; // parsed buttons
 		std::list<signed int> longNumber; // numbers of parsed buttons
+		std::list<UI_Bitmap*> longBitmap; // parsed Bitmaps
 		std::string text;
 		eColor color1;
 		eColor color2;

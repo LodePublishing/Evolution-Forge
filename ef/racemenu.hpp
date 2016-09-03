@@ -1,9 +1,9 @@
 #ifndef _GUI_RACEMENU_HPP
 #define _GUI_RACEMENU_HPP
 
-#include "menu.hpp"
+#include "../ui/menu.hpp"
 
-class RaceMenu : public Menu
+class RaceMenu : public UI_Menu
 {
 	public:
 		RaceMenu& operator=(const RaceMenu& object);

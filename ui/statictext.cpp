@@ -70,7 +70,15 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const std::string& st_text, c
 UI_StaticText::~UI_StaticText()
 {}
 
-UI_Object* UI_StaticText::checkTooltip() {
+void UI_StaticText::doHighlight(const bool high_light) 
+{
+	if(high_light == highlight)
+		return;
+	setNeedRedrawMoved();
+	highlight = high_light;
+}
+
+UI_Object* UI_StaticText::checkToolTip() {
 	if( (!isShown()) || (!Rect(getAbsolutePosition(), getTextSize()).Inside(mouse )) )
 		return(0);
 	return((UI_Object*)this);
@@ -88,7 +96,7 @@ void UI_StaticText::draw(DC* dc) const
 	if(color!=NULL_COLOR) 
 	{
 		if(highlight==true)
-			dc->SetTextForeground(dc->brightenColor(color, 60));
+			dc->SetTextForeground(dc->changeAbsoluteBrightness(color, 60));
 		else
 			dc->SetTextForeground(color);
 	}
@@ -164,8 +172,8 @@ void UI_StaticText::reloadOriginalSize()
 
 void UI_StaticText::updateText(const std::string& st_text)
 {
-//	if(st_text==text)
-//		return;
+	if(st_text==text)
+		return; //?
 	setNeedRedrawMoved();
 	textWasChanged=true;
 	Size old_size = getTextSize();
@@ -175,14 +183,16 @@ void UI_StaticText::updateText(const std::string& st_text)
 	{
 //		getParent()->resetMinXY();
 		getParent()->adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, getSize());
+		adjustPositionAndSize(ADJUST_ONLY_POSITION, getTextSize());
 	}
 }
 
 void UI_StaticText::updateText(const eString st_text)
 {
+	if(eText==st_text) // o_O
+		return;
 	eText = st_text;
-//	if(eText!=st_text)
-		textWasChanged=true;
+	textWasChanged=true;
 	text = theme.lookUpString(st_text);
 	updateText(theme.lookUpString(st_text));
 }

@@ -190,8 +190,8 @@ void Player::draw(DC* dc) const
 
 	// TODO
 	UI_Window::draw(dc);
-	if(efConfiguration.isDnaSpiral())
-		drawGeneString(dc);
+//	if(efConfiguration.isDnaSpiral())
+//		drawGeneString(dc);
 }
 
 void Player::process()
@@ -232,10 +232,13 @@ void Player::process()
 
 void Player::setMode(const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max)
 {
+	if((game_number == gameNumber) && (game_max == gameMax) && (player_number == playerNumber) && (player_max == playerMax))
+		return;
 	gameNumber = game_number;
 	gameMax = game_max;
 	playerNumber = player_number;
 	playerMax = player_max;
+	reloadOriginalSize();
 }
 
 void Player::reloadOriginalSize()
@@ -260,6 +263,8 @@ void Player::reloadOriginalSize()
 
 void Player::resetData()
 {
+	if(anarace == NULL)
+		return;
 	geneAnimation=0;
 	boWindow->resetData();
 	forceWindow->resetData();

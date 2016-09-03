@@ -52,12 +52,12 @@ const unsigned int BUILDORDER::calculateSecondaryFitness() const
 	for(unsigned int i=GAS_SCV+1; i--;)
 	{
 		unsigned int total = getGoal()->getAllGoal(i);
-		if((*pStartCondition)->getLocationTotal(GLOBAL, i) > total)
-				total = (*pStartCondition)->getLocationTotal(GLOBAL, i);					
+		if((total>0)&&((*pStartCondition)->getLocationTotal(GLOBAL, i) > total))
+			total = (*pStartCondition)->getLocationTotal(GLOBAL, i);
 		if(getLocationTotal(GLOBAL, i) > total)
 			penalty += (getLocationTotal(GLOBAL,i) - total) * (stats[getGoal()->getRace()][i].gas+stats[getGoal()->getRace()][i].minerals);
 	}
-/*	if(getHarvestedMinerals() + getHarvestedGas() < penalty)
+	if(getHarvestedMinerals() + getHarvestedGas() < penalty)
 	{
 		std::ostringstream os; os.str("");
 		for(unsigned int i=GAS_SCV+1; i--;)
@@ -73,9 +73,9 @@ const unsigned int BUILDORDER::calculateSecondaryFitness() const
 			}
 		}
 		os.str("");
-		os << "Penalty/Ressources: " << penalty << " / " << getHarvestedMinerals() + getHarvestedGas();
+		os << "Penalty/Ressources: " << penalty << " / " << getHarvestedMinerals() + getHarvestedGas() << " workers: " << getLocationTotal(GLOBAL, 1);
 		toLog(os.str());
-	}*/
+	}
 	return(getHarvestedMinerals() + getHarvestedGas() - penalty);
 }
 

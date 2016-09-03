@@ -56,12 +56,12 @@ public:
 	const bool isTransparency() const;
 	const bool isSmoothMovements() const;
 	
-	void setResolution(const eResolution current_resolution);
-	void setBitDepth(const eBitDepth current_bitdepth);
-	void setLanguage(const eLanguage current_language);
-	void setGlowingButtons(const bool glowing_buttons);
-	void setTransparency(const bool trans_parency);
-	void setSmoothMovements(const bool smooth_movements);
+	const bool setResolution(const eResolution current_resolution);
+	const bool setBitDepth(const eBitDepth current_bitdepth);
+	const bool setLanguage(const eLanguage current_language);
+	const bool setGlowingButtons(const bool glowing_buttons);
+	const bool setTransparency(const bool trans_parency);
+	const bool setSmoothMovements(const bool smooth_movements);
 
 	void setConfigurationFile(const std::string& configuration_file);
 	void loadConfigurationFile();
@@ -94,29 +94,6 @@ inline const bool UI_Configuration::isSmoothMovements() const {
 	return(smoothMovements);
 }
 
-inline void UI_Configuration::setResolution(const eResolution current_resolution) {
-	resolution = current_resolution;
-}
-
-inline void UI_Configuration::setBitDepth(const eBitDepth current_bitdepth) {
-	bitdepth = current_bitdepth;
-}
-
-inline void UI_Configuration::setLanguage(const eLanguage current_language) {
-	language = current_language;
-}
-
-inline void UI_Configuration::setGlowingButtons(const bool glowing_buttons) {
-	glowingButtons = glowing_buttons;
-}
-
-inline void UI_Configuration::setTransparency(const bool trans_parency) {
-	transparency = trans_parency;
-}
-
-inline void UI_Configuration::setSmoothMovements(const bool smooth_movements) {
-	smoothMovements = smooth_movements;
-}
 
 #endif // _UI_CONFIGURATION_HPP
 

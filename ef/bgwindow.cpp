@@ -29,6 +29,7 @@ BoGraphWindow::BoGraphWindow(UI_Object* bograph_parent, const unsigned int game_
 	anarace(NULL)
 {
 //	resetData(); // TODO
+	addHelpButton(DESCRIPTION_BOGRAPH_WINDOW_CHAPTER);
 }
 
 BoGraphWindow::~BoGraphWindow()
@@ -264,7 +265,7 @@ void BoGraphWindow::processList()
 		{
 			BoGraphEntry* t = new BoGraphEntry(this, edge, Size(0,0), *order); // TODO
 			t->adjustRelativeRect(edge);
-			t->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
+			t->setButtonColorsType(eButtonColorsType(BRIGHT_UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
 			bograph[i].boGraphList.push_back(t);
 		} else
 		if((*entry[i])->program.getUnit() != order->getUnit())
@@ -292,7 +293,7 @@ void BoGraphWindow::processList()
 			{
 				BoGraphEntry* t = new BoGraphEntry(this, edge, Size(0,0), *order); // TODO
 				t->adjustRelativeRect(edge);
-				t->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
+				t->setButtonColorsType(eButtonColorsType(BRIGHT_UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
 				entry[i] = bograph[i].boGraphList.insert(entry[i], t);
 				++entry[i];
 			}
@@ -345,7 +346,7 @@ void BoGraphWindow::processList()
 		if(entry == boGraphList.end())
 		{
 			BoGraphEntry* t = new BoGraphEntry(this, edge, getRelativeClientRect(), (*order)->getUnit());
-			t->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][(*order)->getUnit()].unitType));
+			t->setButtonColorsType(eButtonColorsType(BRIGHT_UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][(*order)->getUnit()].unitType));
 			t->setIP((*order)->getIP());
 			boGraphList.push_back(t);
 		} else
@@ -369,7 +370,7 @@ void BoGraphWindow::processList()
 			} else // => not found, insert a new one
 			{
 				BoGraphEntry* t = new BoGraphEntry(this, edge, getRelativeClientRect(), (*order)->getUnit());
-				t->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][(*order)->getUnit()].unitType));
+				t->setButtonColorsType(eButtonColorsType(BRIGHT_UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][(*order)->getUnit()].unitType));
 				t->setIP((*order)->getIP());
 				entry = boGraphList.insert(entry, t);
 				++entry;
@@ -400,7 +401,7 @@ void BoGraphWindow::processList()
 			{
 				BoGraphEntry* t = new BoGraphEntry(this, edge, getRelativeClientRect(), (*order)->second.getUnit());
 				entry = boGraphList.insert(entry, t);
-				(*entry)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][(*order)->second.getUnit()].unitType));
+				(*entry)->setButtonColorsType(eButtonColorsType(BRIGHT_UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][(*order)->second.getUnit()].unitType));
 			} else if((*order)->second.getUnit() != (*entry)->getUnit())
 			{
 				delete *entry;
@@ -409,7 +410,7 @@ void BoGraphWindow::processList()
 			} else
 			{
 				(*entry)->adjustRelativeRect(edge);
-				(*entry)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][(*order)->second.getUnit()].unitType));
+				(*entry)->setButtonColorsType(eButtonColorsType(BRIGHT_UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][(*order)->second.getUnit()].unitType));
 				++entry;
 			}
 		
@@ -421,10 +422,10 @@ void BoGraphWindow::processList()
 //				   ((ownMarkedIP>0)&&((*order)->second.getIP()==ownMarkedIP)))
 //					dc->SetBrush(*theme.lookUpBrush(BRIGHT_CONTINUE_BUTTON_BRUSH));
 //				else
-//					dc->SetBrush(*theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][(*order)->second.getUnit()].unitType)));
+//					dc->SetBrush(*theme.lookUpBrush((eBrush)(BRIGHT_UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][(*order)->second.getUnit()].unitType)));
 				
-//				dc->SetPen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN+stats[anarace->getRace()][(*order)->second.getUnit()].unitType)));
-			//	(*entry)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][(*order)->second.getUnit()].unitType));
+//				dc->SetPen(*theme.lookUpPen((ePen)(UNIT_TYPE_0_PEN+stats[anarace->getRace()][(*order)->second.getUnit()].unitType)));
+			//	(*entry)->setButtonColorsType(eButtonColorsType(BRIGHT_UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][(*order)->second.getUnit()].unitType));
 //				dc->DrawEdgedRoundedRectangle(Rect(getAbsolutePosition()+edge.GetTopLeft(), edge.GetSize()),3);
 			}
 		}
@@ -484,14 +485,9 @@ void BoGraphWindow::draw(DC* dc) const
 	if(anarace==NULL) 
 		return;
 
-	UI_Window::draw(dc);
+	UI_Window::drawWindow(dc);
 
 // print the legend
-	dc->SetFont(UI_Object::theme.lookUpFont(MIDDLE_FONT));
-	dc->SetTextForeground(*theme.lookUpColor(WINDOW_TEXT_COLOR));
-	for(unsigned int i=0; i<BOGRAPH_MAX_LINES; ++i)
-		if(bograph[i].facility>0)
-			dc->DrawText(" "+UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+bograph[i].facility+UNIT_NULL_STRING)), getAbsoluteClientRectPosition()+Point(0, 20+bograph[i].edge.GetTop()));
 
 	dc->SetFont(UI_Object::theme.lookUpFont(SMALL_FONT));
 //	if((signed int)lastbographY > getAbsoluteClientRectUpperBound()+(signed int)(FONT_SIZE+10)) // TODO
@@ -562,6 +558,16 @@ void BoGraphWindow::draw(DC* dc) const
 	}
 	#endif
 	
+	UI_Object::draw(dc);
+	
+	dc->SetFont(UI_Object::theme.lookUpFont(SMALL_BOLD_FONT));
+	dc->SetTextForeground(*theme.lookUpColor(BRIGHT_TEXT_COLOR));
+//	dc->SetTextForeground(*theme.lookUpColor(BIG_BUTTONS_TEXT_COLOR));
+	for(unsigned int i=0; i<BOGRAPH_MAX_LINES; ++i)
+		if(bograph[i].facility>0)
+			dc->DrawText(" "+UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+bograph[i].facility+UNIT_NULL_STRING)), getAbsoluteClientRectPosition()+Point(0, 20+bograph[i].edge.GetTop()));
+
+
 }
 
 void BoGraphWindow::assignAnarace(ANABUILDORDER* bograph_anarace) {

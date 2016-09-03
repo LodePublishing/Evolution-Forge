@@ -14,13 +14,13 @@ BoEntry& BoEntry::operator=(const BoEntry& object)
 	return(*this);
 }
 
-BoEntry::BoEntry(UI_Object* bo_parent, const Point top_left, const Size distance_bottom_right, const std::string& bo_unit, const PROGRAM& bo_program) :
-	UI_Button(bo_parent, Rect(top_left, Size(0,0)), distance_bottom_right, bo_unit, FORCE_ENTRY_BUTTON, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_BOLD_FONT, NOTHING),
+BoEntry::BoEntry(UI_Object* bo_parent, const Point top_left, const Size distance_bottom_right, const eString bo_unit, const PROGRAM& bo_program) :
+	UI_Button(bo_parent, Rect(top_left, Size(0,0)), distance_bottom_right, FORCE_ENTRY_BUTTON, false, PRESS_BUTTON_MODE, bo_unit, DO_NOT_ADJUST, SMALL_BOLD_FONT, NOTHING),
 	program(bo_program)
 //	fixed(false)
 	// TODO!
 {
-/*	addUnit = new UI_Button(this, Rect(Point(getWidth()-117,2),Size(8,8)), Rect(Point(0,0),getSize()), ADD_BUTTON, PRESS_BUTTON_MODE);
+/*	addUnit = new UI_Button(this, Rect(Point(getWidth()-117,2),Size(8,8)), Rect(Point(0,0),getSize()), INCREASE_BUTTON, PRESS_BUTTON_MODE);
 	subUnit = new UI_Button(this, Rect(Point(getWidth()-107,2),Size(8,8)), Rect(Point(0,0),getSize()), SUB_BUTTON, PRESS_BUTTON_MODE);
 	cancelUnit = new UI_Button(this, Rect(Point(getWidth()-97,2),Size(8,8)), Rect(Point(0,0),getSize()), CANCEL_BUTTON, PRESS_BUTTON_MODE);*/
 }

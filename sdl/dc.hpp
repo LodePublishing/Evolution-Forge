@@ -72,14 +72,14 @@ class DC
 		const Color doColor(const Uint8 r, const Uint8 g, const Uint8 b) const;
 		const Color mixColor(const Color& id1, const Color& id2) const;
 		const Color mixColor(const Color& id1, const Color& id2, const unsigned int gradient) const;
-		const Color brightenColor(const Color& id, const unsigned int brightness) const;
-		const Color darkenColor(const Color& id, const unsigned int brightness) const;
+		const Color changeAbsoluteBrightness(const Color& id, const signed int brightness) const;
+		const Color changeRelativeBrightness(const Color& id, const unsigned int brightness_percent) const;
 
 		const bool initializationOK() const;
 		
 		const bool SetColorKey(const Uint32 flag, const Color key) const;
 		const bool SetAlpha(const Uint32 flag, const Uint8 alpha) const;
-		void updateScreen() const;
+		static void updateScreen(SDL_Surface* src);
 		
 		void Blit(SDL_Surface* src, SDL_Rect& dstrect) const;
 		
@@ -137,6 +137,13 @@ class DC
 		static std::string printSurfaceInformation(DC* surface);
 		static std::list<std::string> getAvailibleDrivers();
 		static const eChooseDriverError chooseDriver(std::string& driver_name);
+
+		void setPressedRectangle(const bool pressed = true);
+
+		static void addRectangle(const Rect& rect);
+		static unsigned int changedRectangles;
+		static SDL_Rect changedRectangle[200];
+		static Uint16 max_x, max_y;
 	private:
 		SDL_Surface* surface;
 		void SetSurface(SDL_Surface* sdl_surface) {
@@ -145,8 +152,9 @@ class DC
 			surface = sdl_surface;
 		}
 
+		bool pressedRectangle;
+
 		bool initOK;
-		Uint16 max_x, max_y;
 		Brush brush;
 		Pen pen;
 		const Color* color;
@@ -206,6 +214,10 @@ class DC
 		void DrawFilledEdgedBorderRound_24bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
 		void DrawFilledEdgedBorderRound_32bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
 };
+
+inline void DC::setPressedRectangle(const bool pressed) {
+	pressedRectangle = pressed;
+}
 
 inline DC& DC::operator=(const DC& other) {
 	if(this != &other) SetSurface(other.surface);return *this;

@@ -354,7 +354,7 @@
 		Messages
 		Evolution forge help
 		Settings
-		Map and Goals
+		Maps
 		
 		Order description player %s
 		Techtree
@@ -448,8 +448,6 @@
 		Optimizing...
 		%i/%i/%i res./units/struc.
 		Total: %i
-		Click to continue
-		Click to pause
 		Add player
 # statistics window
 		total harvested Minerals : %i
@@ -463,7 +461,7 @@
 #tabs
 		Help
 		Settings
-		Map & Goals
+		Maps
 				
 # tooltips:
 		add a unit
@@ -483,6 +481,8 @@
 		fitness variance of all programs
 		minimum number of generations left
 		Frames per second [build orders per second]
+	
+		Save goal list as...	
 
 		Reset and restart from the scratch
 		Save build order as html
@@ -496,7 +496,7 @@
 
 		Explanation of the different windows and a tutorial
 		Display and global ef settings
-		Create and configure forces and goals and maps
+		Create and configure starting forces and map configurations
 
 		Click to set latest time these units should be complete
 		
@@ -519,10 +519,9 @@
 		Minimal graphics
 		Full graphic
 		Custom
-# Radiobutton + Eingabefeld
-		Allow static frame rate
-		FPS upper limit
-		desired FPS
+# Eingabefeld
+		Desired number of FPS
+		Desired % CPU usage
 # an aus
 		Smooth movements
 # an aus
@@ -559,10 +558,9 @@
 		Minimum of graphics (all CPU power is allocated for the calculation) (for speed without graphics: check the command line options)
 		Set the graphics to nice :)
 		Click yourself around
-# Radiobutton + Eingabefeld
-		Shall the program hold (as far as possible) a constant framerate (on) or should it depend solely on computer speed (off)?
-		Maximum number of frames per second
-		Desired frames per second (reduces calculation speed and always 100% CPU usage)
+# Eingabefeld
+		Number of frames per second
+		Desired usage of the CPU
 # an aus
 		Shall the objects move around slowly or shall they directly jump to their destinations?
 		Shall buttons and items glow when the mouse is over the item?
@@ -625,6 +623,35 @@
 		General settings
 		Load/Save settings
 
+		Map settings
+		Max player
+		Max locations
+		Map name:
+		Symmetric map
+
+		Locations
+		Players
+		Location
+		Distances
+
+		Mineral blocks
+		Vespine Geysirs
+		Distance to minerals
+
+		How many players may play on this map simultaneosly?
+		How many different locations shall there exist?
+		Is this a symmetric map with same resources/units/distances in each part?
+
+		
+		Create new map
+		Reset map settings
+		Load map
+		Save map
+
+		How many mineral blocks shall be at this location?
+		How many vespine geysirs shall be at this location?
+		How big is the distance between main building and mineral blocks? (in seconds, game speed 5)
+		
 		Unit name
 		Supply
 		Minerals

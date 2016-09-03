@@ -26,6 +26,7 @@ class BoDiagramWindow : public UI_Window
 
 		unsigned int count;
 		bool bold;
+		Point oldMouse;
 
 		Point minerals[MAX_TIME];
 		Point gas[MAX_TIME];

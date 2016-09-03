@@ -39,6 +39,7 @@ class Rect
 		const bool operator!=(const Rect& rect) const;
 		const bool Inside(const signed int x, const signed int y) const;
 		const bool Inside(const Point& point) const;
+		const bool Inside(const Rect& rect) const;
 
 		const bool overlaps(const Rect& rect) const;
 

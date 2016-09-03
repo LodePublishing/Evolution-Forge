@@ -1,6 +1,6 @@
 #include "bowindow.hpp"
 #include "../core/database.hpp"
-#include "../ui/editfield.hpp"
+#include "savebox.hpp"
 
 BoWindow::BoWindow(const BoWindow& object) : 
 	UI_Window((UI_Window)object),
@@ -11,7 +11,8 @@ BoWindow::BoWindow(const BoWindow& object) :
 	boGoalListOpened(object.boGoalListOpened),
 	lastBogoal(object.lastBogoal),
 	saveBuildOrderButton(new UI_Button(*(object.saveBuildOrderButton))),
-	loadBuildOrderButton(new UI_Button(*(object.loadBuildOrderButton)))
+	loadBuildOrderButton(new UI_Button(*(object.loadBuildOrderButton))),
+	saveBox(NULL)
 //	fixed(object.fixed),
 { }
 
@@ -28,26 +29,40 @@ BoWindow& BoWindow::operator=(const BoWindow& object)
 	saveBuildOrderButton = new UI_Button(*(object.saveBuildOrderButton));
 	delete loadBuildOrderButton;
 	loadBuildOrderButton = new UI_Button(*(object.loadBuildOrderButton));
+	saveBox = NULL;
 //	fixed = object.fixed;
 	return(*this);
 }
+
 BoWindow::BoWindow(UI_Object* bo_parent, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_players) :
 	UI_Window(bo_parent, BOWINDOW_TITLE_STRING, theme.lookUpPlayerRect(BUILD_ORDER_WINDOW, game_number, max_games, player_number, max_players), theme.lookUpPlayerMaxHeight(BUILD_ORDER_WINDOW, game_number, max_games, player_number, max_players), SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0, 20, 1000, 1000)),
 	anarace(NULL),
 	optimizeMode(0),
+	addUnit(-1),
 	boInsertPoint(-1),
 	boEndPoint(-1),
 	boGoalListOpened(0),
 	lastBogoal(0),
-	saveBuildOrderButton(new UI_Button(this, getRelativeClientRect(), Size(5,5), SAVE_BUILD_ORDER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_BOLD_FONT, AUTO_SIZE)),
-	loadBuildOrderButton(new UI_Button(this, getRelativeClientRect(), Size(5,5), LOAD_BUILD_ORDER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_SIZE)),
-	alwaysBuildWorker(new UI_CheckButton(this, Rect(5, 40, 200, 15), Size(5, 5), ARRANGE_LEFT, SETTING_ALWAYS_BUILD_WORKER_STRING, SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING, coreConfiguration.isAlwaysBuildWorker())), // TODO
-	onlySwapOrders(new UI_CheckButton(this, Rect(5, 40, 200, 28), Size(5, 5), ARRANGE_LEFT, SETTING_ONLY_SWAP_ORDERS_STRING, SETTING_ONLY_SWAP_ORDERS_TOOLTIP_STRING, coreConfiguration.isOnlySwapOrders())) // TODO
+//	saveBuildOrderButton(new UI_Button(this, getRelativeClientRect(), Size(5,5), SAVE_BUILD_ORDER_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_BOLD_FONT, AUTO_SIZE)),
+//	loadBuildOrderButton(new UI_Button(this, getRelativeClientRect(), Size(5,5), LOAD_BUILD_ORDER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_SIZE)),
+
+	saveBuildOrderButton(new UI_Button(this, Rect(Point(10,15), Size(21,20)), Size(5,5), SAVE_BUTTON, true, STATIC_BUTTON_MODE, NULL_STRING, ARRANGE_TOP_LEFT)),
+	loadBuildOrderButton(new UI_Button(this, Rect(Point(10,15), Size(21,20)), Size(5,5), LOAD_BUTTON, true, STATIC_BUTTON_MODE, NULL_STRING, ARRANGE_TOP_LEFT)),
+	restartBuildOrderButton(new UI_Button(this, Rect(Point(10,15), Size(21,20)), Size(5,5), REFRESH_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, ARRANGE_TOP_LEFT)),
+
+	alwaysBuildWorker(new UI_CheckButton(this, Rect(5, 40, getWidth()-20, 15), Size(5, 5), ARRANGE_LEFT, SETTING_ALWAYS_BUILD_WORKER_STRING, SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING, coreConfiguration.isAlwaysBuildWorker())), // TODO
+	onlySwapOrders(new UI_CheckButton(this, Rect(5, 40, getWidth()-20, 28), Size(5, 5), ARRANGE_LEFT, SETTING_ONLY_SWAP_ORDERS_STRING, SETTING_ONLY_SWAP_ORDERS_TOOLTIP_STRING, coreConfiguration.isOnlySwapOrders())), // TODO
+	unitMenuButton(new UI_Button(this, Rect(Point(0, 0), Size(50,0)), Size(0,0), MY_BUTTON, true, STATIC_BUTTON_MODE, ADD_GOAL_STRING, DO_NOT_ADJUST, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+	unitMenu(new UnitMenu(unitMenuButton, Rect(100, 0, 100, 0), Size(0,0), DO_NOT_ADJUST)),
+	saveBox(NULL)
 //	fixed(fixed_list)
 {
 	resetData();
 	saveBuildOrderButton->updateToolTip(SAVE_BUILD_ORDER_TOOLTIP_STRING);
 	loadBuildOrderButton->updateToolTip(LOAD_BUILD_ORDER_TOOLTIP_STRING);
+//	unitMenu->Hide();
+	unitMenuButton->Hide();
+	addHelpButton(DESCRIPTION_BUILD_ORDER_WINDOW_CHAPTER);
 }
 
 BoWindow::~BoWindow()
@@ -60,13 +75,28 @@ BoWindow::~BoWindow()
 	}
 	delete saveBuildOrderButton;
 	delete loadBuildOrderButton;
+	delete restartBuildOrderButton;
 	delete alwaysBuildWorker;
 	delete onlySwapOrders;
+	delete unitMenuButton;
+	delete unitMenu;
+	delete saveBox;
+}
+
+void BoWindow::reloadOriginalSize()
+{
+	UI_Window::reloadOriginalSize();
+	
+	alwaysBuildWorker->setOriginalSize(Size(getWidth()-20, 0));
+	onlySwapOrders->setOriginalSize(Size(getWidth()-20, 0));
+//	unitMenuButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
 }
 
 void BoWindow::assignAnarace(ANABUILDORDER* bo_anarace)
 {
 	anarace = bo_anarace;
+	unitMenu->assignAnarace(bo_anarace);
+
 }
 
 void BoWindow::resetData()
@@ -95,6 +125,9 @@ void BoWindow::resetData()
 void BoWindow::reloadStrings()
 {
 	processList();
+	for(std::list<BoEntry*>::iterator entry = boList.begin(); entry!=boList.end(); ++entry)
+		(*entry)->reloadStrings();
+	
 	UI_Window::reloadStrings();
 }
 
@@ -168,6 +201,10 @@ void BoWindow::processList()
 	}
 
 	
+	Rect r2 = unitMenuButton->getRelativeRect();
+	r2.SetSize(Size(10, (unitMenu->getHeight()/2+1) * (FONT_SIZE+9)));
+
+	
 	std::list<BoEntry*>::iterator entry = boList.begin();
 	unsigned int row = 4;
 	for(std::list<PROGRAM>::iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
@@ -181,6 +218,29 @@ void BoWindow::processList()
 				row++;
 		}
 
+/*		if((unitMenuButton->isShown())&&(r2.GetTop()<=edge.GetBottom()))
+		{
+			if(addUnit>=0)
+			{
+				PROGRAM o;
+				o.setUnit(addUnit);
+				order = anarace->getProgramList().insert(order, o);
+				
+				BoEntry* t = new BoEntry(getScrollbar()?getScrollbar():this, Point(UI_Object::max_x, getRelativeClientRectPosition().y+200), Size(5,5),
+				UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()+UNIT_NULL_STRING)), *order); // (*anarace->getStartCondition())->getRace()?
+				entry = boList.insert(entry, t);
+				addUnit=-1;
+				unitMenu->Hide();
+			} else
+			
+			while(r2.GetBottom() >= edge.GetTop())
+			{
+				row++;
+				edge = Rect(getRelativeClientRectPosition()+Point(4, row*(FONT_SIZE+6)), Size(getWidth()-20, FONT_SIZE+5));//(*order)->rect.GetSize());// TODO
+			}
+			
+		}*/
+
 		fitItemToRelativeClientRect(edge, 1);
 
 		if(entry == boList.end())
@@ -188,7 +248,7 @@ void BoWindow::processList()
 			// wenn nicht optimieren -> anaraceliste loeschen TODO
 			BoEntry* t = new BoEntry(getScrollbar()?getScrollbar():this, Point(UI_Object::max_x, getRelativeClientRectPosition().y+200), Size(5,5),
 			// max size -y? TODO
-				UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()+UNIT_NULL_STRING)), *order); // (*anarace->getStartCondition())->getRace()?
+				(eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()+UNIT_NULL_STRING), *order); // (*anarace->getStartCondition())->getRace()?
 			t->setAllowMoveByMouse();
 			t->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
 			t->adjustRelativeRect(edge);
@@ -227,7 +287,7 @@ void BoWindow::processList()
 				++moved;
 			} else // => not found, insert a new one
 			{
-				BoEntry* t = new BoEntry(getScrollbar()?getScrollbar():this, Point(UI_Object::max_x, getRelativeClientRectPosition().y+200), Size(5,5), UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()+UNIT_NULL_STRING)), *order); // (*anarace->getStartCondition())->getRace()?
+				BoEntry* t = new BoEntry(getScrollbar()?getScrollbar():this, Point(UI_Object::max_x, getRelativeClientRectPosition().y+200), Size(5,5), (eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()+UNIT_NULL_STRING), *order); // (*anarace->getStartCondition())->getRace()?
 				t->setAllowMoveByMouse();
 				t->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
 				if((edge != t->getTargetRect())&&((UI_Button::getCurrentButton()!=t)||(!UI_Button::isMoveByMouse())))
@@ -330,8 +390,57 @@ void BoWindow::process()
 	bool reloadList = false;
 	// TODO evtl auf move befehl warten
 
+/*	if(isMouseInside())
+	{
+		if(!unitMenuButton->isShown())
+		{
+			unitMenuButton->Show();
+			unitMenuButton->setPosition(10, mouse.y - getAbsolutePosition().y);
+		}
+	}
+	else unitMenuButton->Hide();
+
+	
+	addUnit=-1;
+		if(unitMenuButton->isLeftClicked())
+		{
+			unitMenu->open();
+			if(!unitMenu->isOpen())
+			{
+				unitMenu->close();
+			} else
+			{
+				unitMenuButton->forcePress();
+				unitMenu->close();
+				unitMenu->open();
+			}
+		}
+		
+	if(unitMenu->isShown())
+	{
+		if(unitMenu->getPressedItem()>=0)
+			addUnit = unitMenu->getPressedItem();
+	// TODO: Hier nur jeweils Einheiten in das Menue, welche baubar sind!
+
+        if(unitMenu->menuHasChanged())
+        {
+                if(unitMenu->secondLevel())
+                        unitMenuButton->updateText(BACK_STRING);
+                else if(unitMenu->isOpen())
+                        unitMenuButton->updateText(CLOSE_STRING);
+                else
+                        unitMenuButton->updateText(ADD_GOAL_STRING);
+		reloadList=true;
+        }
+
+
+	}*/
+	
 	std::list<BoEntry*>::iterator entry = boList.begin();
 	std::list<PROGRAM>::iterator order = anarace->getProgramList().begin(); 
+	
+
+
 	
 	while(entry != boList.end())
 	{
@@ -370,6 +479,25 @@ void BoWindow::process()
 
 	if(reloadList)
 		processList();
+
+	if(restartBuildOrderButton->isLeftClicked())
+	{
+		std::list<BoEntry*>::iterator entry2 = boList.begin();
+		while(entry2!=boList.end())
+		{
+			delete(*entry2);
+			entry2 = boList.erase(entry2);
+		}
+/*		std::list<PROGRAM>::iterator order = anarace->getProgramList().begin();
+		while(order!=anarace->getProgramList().end())
+		{
+			order = anarace->getProgramList().erase(order);
+		}
+		anarace->resetGeneCode();*/
+	}
+
+
+	
        /*	std::list<BoEntry*>::iterator entry = boList.begin();
 	if((*entry)->getHeight()==FONT_SIZE+5)
 	{
@@ -524,27 +652,27 @@ void BoWindow::process()
 
 	checkForInfoWindow();
 	
-	if(saveBuildOrderButton->isLeftClicked()&&(!UI_Object::editTextField))
-		UI_Object::editTextField = new UI_EditField(getParent(), saveBuildOrderButton, SAVE_BUILD_ORDER_AS_STRING, GIVE_BO_A_NAME_STRING);
+	if(saveBuildOrderButton->isLeftClicked()&&(!saveBox))
+		saveBox = new SaveBox(getParent(), SAVE_BUILD_ORDER_AS_STRING, GIVE_BO_A_NAME_STRING);
 
-	if((UI_Object::editTextField)&&(UI_Object::editTextField->getCaller()==saveBuildOrderButton))
+	if(saveBox)
 	{
-		if(UI_Object::editTextField->isCanceled())
+		if(saveBox->isCanceled())
 		{
-			delete UI_Object::editTextField;
-			UI_Button::resetButton();
-			UI_Object::editTextField=NULL;
+			delete saveBox;
+			saveBox = NULL;
+			saveBuildOrderButton->forceUnpress();
 		} else
-		if(UI_Object::editTextField->isDone())
+		if(saveBox->isDone())
 		{
-			if(UI_Object::editTextField->getString().length()>0)
+			if(saveBox->getString().length()>0)
 			{
-				saveBuildOrder(UI_Object::editTextField->getString());
+				saveBuildOrder(saveBox->getString());
 				UI_Object::msgList.push_back("Saved build order.");
 			}
-			delete UI_Object::editTextField;
-			UI_Button::resetButton();
-			UI_Object::editTextField=NULL;
+			delete saveBox;
+			saveBox = NULL;
+			saveBuildOrderButton->forceUnpress();
 		}
 	}
 	

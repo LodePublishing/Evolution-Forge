@@ -20,10 +20,9 @@ class UI_Group : public UI_Object
 		void process();
 		UI_Object* checkToolTip();
 		UI_Object* checkHighlight();
+		void calculateBoxSize(const bool horizontal = false);
 
 		void reloadStrings();
-
-		void calculateBoxSize(const bool horizontal=false);
 	private:
 		UI_StaticText* title;
 		unsigned int number;

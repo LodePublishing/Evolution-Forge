@@ -11,6 +11,7 @@ class MAP_LOCATION
 		unsigned int mineralPatches;
 		unsigned int vespeneGeysirs;
 		unsigned int mineralDistance;
+//		unsigned int gasDistance;		
 		unsigned int distance[MAX_LOCATIONS];
 		unsigned int nearest[MAX_LOCATIONS];
 		static unsigned int maxLocations;

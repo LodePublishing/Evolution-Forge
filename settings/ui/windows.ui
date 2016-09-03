@@ -7,11 +7,11 @@
 
 	@1PLAYER
 		@PLAYER_ONE
-			Player window, 632, 450, 450, absolute coordinates, 0, 0
+			Player window, 632, 455, 455, absolute coordinates, 5, 25
 			Force window, 200, 100, 300, dock top left inside of, Player window
-			Build order window, 150, 100, 300, absolute coordinates, 440, 150
-			Build order diagram window, 200, 140, 140, dock with right border of, Force window, dock top inside of, Player window
-			Build order graph window, 200, 75, 300, dock with right border of, Force window, dock with lower border of, Build order diagram window
+			Build order window, 150, 100, 300, absolute coordinates, 440, 125
+			Build order diagram window, 230, 140, 140, dock with right border of, Force window, dock top inside of, Player window
+			Build order graph window, 230, 75, 300, dock with right border of, Force window, dock with lower border of, Build order diagram window
 		@END
 	@END
 	@2PLAYER
@@ -97,8 +97,8 @@
 			Player window, 780, 545, 545, absolute coordinates, 5, 25
 			Force window, 250, 100, 510, dock top left inside of, Player window
 			Build order window, 200, 100, 350, dock right inside of, Player window, absolute y coordinate, 150
-			Build order diagram window, 300, 140, 300, dock with right border of, Force window, dock top inside of, Player window
-			Build order graph window, 300, 75, 300, dock with right border of, Force window, dock with lower border of, Build order diagram window
+			Build order diagram window, 320, 140, 300, dock with right border of, Force window, dock top inside of, Player window
+			Build order graph window, 320, 75, 300, dock with right border of, Force window, dock with lower border of, Build order diagram window
 		@END
 	@END
 	@2PLAYER
@@ -263,7 +263,7 @@
 @1280x1024
 	@MAIN
 		Game window, 1270, 995, 995, absolute coordinates, 5, 25
-		Score window, 275, 100, 600, dock left inside of, Game window, dock top inside of, Game window
+		Score window, 400, 100, 600, dock left inside of, Game window, dock top inside of, Game window
 		Database window, 300, 500, 500, dock left inside of, Game window, dock top inside of, Game window
 	@END
 	

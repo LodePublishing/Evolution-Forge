@@ -28,7 +28,7 @@
 	"Name" = "Choke"
 	"Minerals" = "0"
 	"Geysirs" = "0"
-	"Mineral DIstance" = "2"
+	"Mineral Distance" = "2"
 	"Distance to" 4 = 10
 @END
 
@@ -51,7 +51,7 @@
 	"Name" = "Choke"
 	"Minerals" = "0"
 	"Geysirs" = "0"
-	"Mineral DIstance" = "2"
+	"Mineral Distance" = "2"
 	"Distance to" 4 = 10
 @END
 

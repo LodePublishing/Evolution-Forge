@@ -7,7 +7,7 @@
 #include "goalmenu.hpp"
 //#include "racemenu.hpp"
 #include "forceentry.hpp"
-#include "locmenu.hpp"
+//#include "locationmenu.hpp"
 
 #include "techtree.hpp"
 
@@ -15,6 +15,7 @@
 #include "../core/database.hpp"
 #include "../ui/radio.hpp"
 #include "../ui/checkbutton.hpp"
+#include "savebox.hpp"
 
 
 enum eMenu
@@ -22,6 +23,7 @@ enum eMenu
 //	RACE_MENU,
 	UNIT_MENU,
 	GOAL_MENU,
+	SAVE_GOALS,
 	
 	MAX_FORCE_MENUS
 };
@@ -54,7 +56,6 @@ class ForceWindow : public UI_Window
 
 		UI_Radio* menuRadio;
 		UI_Button* menuButton[MAX_FORCE_MENUS];
-		UI_Button* saveGoalButton;
 
 		UI_StaticText* nongoalsText;
 		UI_StaticText* goalsText;
@@ -69,6 +70,7 @@ class ForceWindow : public UI_Window
 
 		UnitMenu* unitMenu;
 		GoalMenu* goalMenu;
+		SaveBox* saveBox;
 //		RaceMenu* raceMenu;
 //		LocationMenu* locationMenu;
 

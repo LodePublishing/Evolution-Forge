@@ -1,11 +1,9 @@
 #include "dc.hpp"
-
+#include <stdlib.h>
 
 DC::DC():
 	surface(),
 	initOK(true),
-	max_x(0),
-	max_y(0),
 	brush(),
 	pen(),
 	color(NULL),
@@ -21,13 +19,12 @@ DC::DC():
 	DrawEmptyEdgedRound(NULL),
 	DrawEmptyRound(NULL),
 	DrawFilledEdgedBorderRound(NULL)
-{ }
+{ 
+}
 
 DC::DC(const DC& other):
 	surface(other.surface),
 	initOK(other.initOK),
-	max_x(other.max_x),
-	max_y(other.max_y),
 	brush(other.brush),
 	pen(other.pen),
 	color(other.color),
@@ -43,14 +40,14 @@ DC::DC(const DC& other):
 	DrawEmptyEdgedRound(other.DrawEmptyEdgedRound),
 	DrawEmptyRound(other.DrawEmptyRound),
 	DrawFilledEdgedBorderRound(other.DrawFilledEdgedBorderRound)
-{ }
+{ 
+	changedRectangles=0;
+}
 
 
 DC::DC(const eResolution current_resolution, const eBitDepth bit_depth, const Uint32 nflags, const Uint32 initflags) :
 	surface(NULL),
 	initOK(true),
-	max_x(0),
-	max_y(0),
 	brush(),
 	pen(),
 	color(NULL),
@@ -175,10 +172,77 @@ void DC::setFullscreen(const bool full_screen)
 	}										
 }
 
-void DC::updateScreen() const
+void DC::addRectangle(const Rect& rect)
 {
-	SDL_Flip(surface);
-//	SDL_UpdateRects();//surface, 0, 0, 800, 500);
+	if(changedRectangles>199)
+		return;
+	SDL_Rect r;
+	if(rect.GetLeft() < 0)
+		r.x = 0;
+	else if(rect.GetLeft() >= max_x)
+		return;
+	else
+		r.x = rect.GetLeft();
+
+	if(rect.GetTop() < 0)
+		r.y = 0;
+	else if(rect.GetTop() >= max_y)
+		return;
+	else 
+		r.y = rect.GetTop();
+	
+	if(rect.GetRight() < 0)
+		return;
+	else if(rect.GetRight() > max_x)
+		r.w = max_x - r.x;
+	else 
+		r.w = rect.GetWidth();
+
+	if(rect.GetBottom() < 0)
+		return;
+	else if(rect.GetBottom() > max_y)
+		r.h = max_y - r.y;
+	else 
+		r.h = rect.GetHeight();
+
+	for(int i = 0; i < changedRectangles; i ++)
+	{
+		if(
+			(r.x >= changedRectangle[i].x)&&
+			(r.x + r.w <= changedRectangle[i].x + changedRectangle[i].w)&&
+			(r.y >= changedRectangle[i].y)&&
+			(r.y + r.h <= changedRectangle[i].y + changedRectangle[i].h)
+		)
+			return;
+		if(
+			(r.x <= changedRectangle[i].x)&&
+			(r.x + r.w >= changedRectangle[i].x + changedRectangle[i].w)&&
+			(r.y <= changedRectangle[i].y)&&
+			(r.y + r.h >= changedRectangle[i].y + changedRectangle[i].h)
+		)
+		{
+			changedRectangle[i] = r;
+			return;
+		}
+	}
+	
+	changedRectangle[changedRectangles] = r;
+	changedRectangles++;
+}
+
+void DC::updateScreen(SDL_Surface* sdl_surface)
+{
+//	SDL_Flip(sdl_surface);
+/*	for(int i = 0; i < changedRectangles; i ++)
+		if(
+			(r.x >= changedRectangle[i].x)&&
+			(r.x + r.w <= changedRectangle[i].x + changedRectangle[i].w)&&
+			(r.y >= changedRectangle[i].y)&&
+			(r.y + r.h <= changedRectangle[i].y + changedRectangle[i].h)
+		)
+			return;*/	
+	SDL_UpdateRects(sdl_surface, changedRectangles, changedRectangle);
+	changedRectangles=0;
 }
 void DC::DrawBitmap(SDL_Surface* bitmap, const signed int x, const signed int y) const
 {
@@ -206,18 +270,19 @@ const Color DC::mixColor(const Color& id1, const Color& id2, const unsigned int 
 		(id1.b()*gradient +id2.b()*(100-gradient))/100));
 }
 
-const Color DC::brightenColor(const Color& id, const unsigned int brightness) const
+const Color DC::changeAbsoluteBrightness(const Color& id, const signed int brightness) const
 {
-	return(Color(surface, id.r()  +brightness,
-			id.g()+brightness,
-			id.b() +brightness));
+	return(Color(surface, id.r() + brightness,
+			id.g() + brightness,
+			id.b() + brightness));
 }
 
-const Color DC::darkenColor(const Color& id, const unsigned int brightness) const
+const Color DC::changeRelativeBrightness(const Color& id, const unsigned int brightness_percent) const
 {
-	return(Color(surface, id.r() * brightness / 100,
-			id.g() * brightness / 100,
-			id.b() * brightness / 100));
+	int r = id.r() * brightness_percent / 100;if(r>255) r = 255;
+	int g = id.g() * brightness_percent / 100;if(g>255) g = 255;
+	int b = id.b() * brightness_percent / 100;if(b>255) b = 255;
+	return(Color(surface, r, g , b));
 }
 
 void DC::DrawLine(const signed x1, const signed y1, const signed x2, const signed y2) const
@@ -239,7 +304,7 @@ void DC::DrawLine(const signed x1, const signed y1, const signed x2, const signe
 		if(pen.GetWidth()>1)
 		{
 			SDL_Rect rc;
-			rc.x=xx1-pen.GetWidth()/2;rc.y=yy1-pen.GetWidth()/2;rc.w=xx2-xx1+pen.GetWidth();rc.h=pen.GetWidth();
+			rc.x=xx1/*-pen.GetWidth()/2*/;rc.y=yy1/*-pen.GetWidth()/2*/;rc.w=xx2-xx1/*+pen.GetWidth()*/;rc.h=pen.GetWidth();
 			SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()) );
 		} else
 			(*this.*Draw_HLine)(xx1, yy1, xx2);
@@ -251,7 +316,7 @@ void DC::DrawLine(const signed x1, const signed y1, const signed x2, const signe
 		if(pen.GetWidth()>1)
 		{
 			SDL_Rect rc;
-			rc.x=xx1-pen.GetWidth()/2;rc.y=yy1-pen.GetWidth()/2;rc.w=pen.GetWidth();rc.h=yy2-yy1+pen.GetWidth();
+			rc.x=xx1/*-pen.GetWidth()/2*/;rc.y=yy1/*-pen.GetWidth()/2*/;rc.w=pen.GetWidth();rc.h=yy2-yy1/*+pen.GetWidth()*/;
 			SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()) );
 		} else
 			(*this.*Draw_VLine)(xx1, yy1, yy2);
@@ -263,8 +328,8 @@ void DC::DrawLine(const signed x1, const signed y1, const signed x2, const signe
 //			Color c = *pen.GetColor();
 //			const_cast<DC*>(this)->pen.SetColor(Color(surface, (Uint8)(pen.GetColor()->r()*0.5),  (Uint8)(pen.GetColor()->g()*0.5), (Uint8)(pen.GetColor()->b()*0.5)));
 			(*this.*Draw_Line)(xx1, yy1+1, xx2, yy2+1);
-			(*this.*Draw_Line)(xx1+1, yy1, xx2+1, yy2);
-			(*this.*Draw_Line)(xx1+1, yy1+1, xx2+1, yy2+1);
+			(*this.*Draw_Line)(xx1, yy1, xx2, yy2);
+			(*this.*Draw_Line)(xx1, yy1-1, xx2, yy2-1);
 //			const_cast<DC*>(this)->pen.SetColor(c);
 		}
 	}
@@ -472,58 +537,43 @@ void DC::DrawGridEdgedRoundedRectangle(const signed int x, const signed y, const
 
 void DC::DrawEdgedRoundedRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int radius) const
 {
-	if((width<2)||(height<2)) return;
-	if((x>=max_x)||(x<0)) return;
-	if((y>=max_y)||(y<0)) return;
-	unsigned int ww = width;
-	unsigned int hh = height;
-	if(x+ww>=max_x) ww = max_x - 1 - x;
-	if(y+hh>=max_y) hh = max_y - 1 - y;
+	if((width<2)||(height<2)||(x+width>=max_x)||(y+height>=max_y)||(x<0)||(y<0)) return;
 	
-	if((radius <= 1)||(ww<2*radius)||(hh<2*radius))	{
-		DrawRectangle(x,y,ww,hh);
+	if((radius <= 1)||(width<2*radius)||(height<2*radius))	{
+		DrawRectangle(x,y,width,height);
 		return;
 	}
 
 	if(brush.GetStyle() == TRANSPARENT_BRUSH_STYLE)
 	{
 		if(pen.GetStyle() != TRANSPARENT_PEN_STYLE)
-			(*this.*DrawEmptyEdgedRound)(x, y, ww, hh, radius);
+			(*this.*DrawEmptyEdgedRound)(x, y, width, height, radius);
 	} else
 	if(pen.GetStyle() == TRANSPARENT_PEN_STYLE)
-		(*this.*DrawFilledEdgedRound)(x, y, ww, hh, radius);
+		(*this.*DrawFilledEdgedRound)(x, y, width, height, radius);
 	else 
-		(*this.*DrawFilledEdgedBorderRound)(x, y, ww, hh, radius);
+		(*this.*DrawFilledEdgedBorderRound)(x, y, width, height, radius);
 }
 
 void DC::DrawRoundedRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int radius) const
 {
-	if((width<2)||(height<2)) return;
-	if((x>=max_x)||(x<0)) return;
-	if((y>=max_y)||(y<0)) return;
-	unsigned int ww = width;
-	unsigned int hh = height;
-	if(x+ww>=max_x) ww = max_x - 1 - x;
-	if(y+hh>=max_y) hh = max_y - 1 - y;
+	if((width<2)||(height<2)||(x+width>=max_x)||(y+height>=max_y)||(x<0)||(y<0)) return;
 	
-	if((radius <= 1)||(ww<2*radius)||(hh<2*radius))	{
-		DrawRectangle(x,y,ww,hh);
+	if((radius <= 1)||(width<2*radius)||(height<2*radius))	{
+		DrawRectangle(x,y, width, height);
 		return;
 	}
 
 	if (brush.GetStyle() != TRANSPARENT_BRUSH_STYLE)
-		(*this.*DrawFilledRound)(x, y, ww, hh, radius);
+		(*this.*DrawFilledRound)(x, y, width, height, radius);
 	if (pen.GetStyle() != TRANSPARENT_PEN_STYLE)
-		(*this.*DrawEmptyRound)(x, y, ww, hh, radius);
+		(*this.*DrawEmptyRound)(x, y, width, height, radius);
 }
 
 
 void DC::DrawRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height) const
 {
-	if((width<2)||(height<2)) 
-		return;
-	if((x<0)||(y<0)||(x+width>=max_x)||(y+height>=max_y)) // TODO clipping
-		return;
+	if((width<2)||(height<2)||(width>max_x)||(height>max_y)||(x<0)||(y<0)) return;
 	SDL_Rect rc;
 	rc.x=x+1;rc.y=y+1;rc.w=width-2;rc.h=height-2;
 	if(brush.GetStyle() != TRANSPARENT_BRUSH_STYLE)
@@ -535,21 +585,32 @@ void DC::DrawEmptyRectangle(const signed int x, const signed int y, const unsign
 {
 	if(pen.GetStyle()==TRANSPARENT_PEN_STYLE) 
 		return;
-	SDL_Rect rc;
-	if((width<2)||(height<2)||(x<0)||(y<0)||(x+width>=max_x)||(y+height>=max_y)) // TODO clipping
-		return;
+	if((width<2)||(height<2)||(width>max_x)||(height>max_y)||(x<0)||(y<0)) return;
+	
+	Uint32 dark_pen_col, bright_pen_col;
+	if(pressedRectangle)
+	{
+		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 110));
+		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 70));
+	
+	} else
+	{
+		dark_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 80));
+		bright_pen_col = (Uint32)(changeRelativeBrightness(*pen.GetColor(), 120));
+	}
 
+	SDL_Rect rc;
 	rc.x=x-(pen.GetWidth()>>1);rc.y=y-(pen.GetWidth()>>1);rc.w=width;rc.h=pen.GetWidth();
-	SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
+	SDL_FillRect(surface, &rc, bright_pen_col);
 	
 	rc.x=x-(pen.GetWidth()>>1);rc.y=y+height-1-(pen.GetWidth()>>1);rc.w=width;rc.h=pen.GetWidth();
-	SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
+	SDL_FillRect(surface, &rc, dark_pen_col);
 	
 	rc.x=x-(pen.GetWidth()>>1);rc.y=y-(pen.GetWidth()>>1);rc.w=pen.GetWidth();rc.h=height;
-	SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
+	SDL_FillRect(surface, &rc, bright_pen_col);
 	
 	rc.x=x+width-1-(pen.GetWidth()>>1);rc.y=y-(pen.GetWidth()>>1);rc.w=pen.GetWidth();rc.h=height;
-	SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
+	SDL_FillRect(surface, &rc, dark_pen_col);
 }
 
 void DC::DrawVerticalLine(const signed int x0, const signed int y0, const signed int y1) const
@@ -624,9 +685,14 @@ const eChooseDriverError DC::chooseDriver(std::string& driver_name)
 			video << "SDL_VIDEODRIVER=" << driver_name;
 			char* video_cstr = new char[strlen(video.str().c_str())];
 			strcpy(video_cstr, video.str().c_str());
-			putenv(video_cstr);
+//			putenv(video_cstr);
 			return(NO_DRIVER_ERROR);
 		}
 	return(SDL_DRIVER_NOT_SUPPORTED);
 }
+
+SDL_Rect DC::changedRectangle[200];
+unsigned int DC::changedRectangles=0;
+Uint16 DC::max_x = 0;
+Uint16 DC::max_y = 0;
 

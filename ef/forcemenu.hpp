@@ -1,11 +1,11 @@
 #ifndef _GUI_FORCEMENU_HPP
 #define _GUI_FORCEMENU_HPP
 
-#include "menu.hpp"
+#include "../ui/menu.hpp"
 #include "../core/anabuildorder.hpp"
 #include "../core/database.hpp"
 
-class ForceMenu : public Menu
+class ForceMenu : public UI_Menu
 {
 	public:
 		ForceMenu(UI_Object* force_parent, ANABUILDORDER* force_anarace, const Rect force_rect, const Size distance_bottom_right, const ePositionMode position_mode);

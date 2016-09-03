@@ -38,9 +38,10 @@ class UI_Button:public UI_Object
 		UI_Button(UI_Object* button_parent, 
 				const Rect button_rect, 
 				const Size distance_bottom_right,
-				const eString button_text, 
 				const eButtonColorsType button_colors_type, 
-				const eButtonMode button_mode = STATIC_BUTTON_MODE,
+				const bool has_bitmap,
+				const eButtonMode button_mode,
+				const eString button_text, 
 				const ePositionMode button_position_mode = DO_NOT_ADJUST, 
 				const eFont button_font = SMALL_BOLD_FONT, 
 				const eAutoSize button_auto_size = NO_AUTO_SIZE);
@@ -48,19 +49,20 @@ class UI_Button:public UI_Object
 		UI_Button(UI_Object* button_parent, 
 				const Rect button_rect, 
 				const Size distance_bottom_right, 
+				const eButtonColorsType button_colors_type,
+				const bool has_bitmap,
+				const eButtonMode button_mode, 
 				const std::string& button_text, 
-				const eButtonColorsType button_colors_type, 
-				const eButtonMode button_mode = STATIC_BUTTON_MODE, 
-				const ePositionMode button_position_mode = DO_NOT_ADJUST, 
+				const ePositionMode button_position_mode = DO_NOT_ADJUST,
 				const eFont button_font = SMALL_BOLD_FONT, 
 				const eAutoSize button_auto_size = NO_AUTO_SIZE);
 // Bitmap button
-		UI_Button(UI_Object* button_parent, 
+/*		UI_Button(UI_Object* button_parent, 
 				const Rect button_rect, 
 				const Size distance_bottom_right, 
 				const eButtonColorsType button_colors_type, 
 				const eButtonMode button_mode = STATIC_BUTTON_MODE, 
-				const ePositionMode button_position_mode = DO_NOT_ADJUST);
+				const ePositionMode button_position_mode = DO_NOT_ADJUST);*/
 		~UI_Button();
 		
 		const bool isLeftClicked();			// has it been selected (ie clicked on)
@@ -72,18 +74,17 @@ class UI_Button:public UI_Object
 		const unsigned int getGradient() const;
 
 		void reloadOriginalSize();																																							
-		void forceHighlighted();	// force button to be highlighted
-		void forceDelighted();	// force button to be de-highlighted
+		void doHighlight(const bool high_light=true);	// force button to be highlighted
+
 		void forcePress();	  // force button to get pressed
 		void forceUnpress();
 
-		void setPressDepth(const unsigned int press);
 
 		void updateText(const std::string& utext);
 		void updateText(const eString utext);
 
 		void process(); // process messages, continue animation etc.
-		UI_Object* checkTooltip();
+		UI_Object* checkToolTip();
 		UI_Object* checkHighlight();
 
 		void mouseHasMoved();
@@ -106,6 +107,7 @@ class UI_Button:public UI_Object
 // relative 'button placement area'
 		const unsigned int getTextWidth() const;
 		const unsigned int getTextHeight() const;
+		const Size getTextSize() const;
 		void setAllowMoveByMouse(const bool allow_move_by_mouse = true);
 
 		static void resetButton();
@@ -126,8 +128,9 @@ class UI_Button:public UI_Object
 		static void setCurrentButton(UI_Button* current_button);
 
 		
-		
+		UI_StaticText* getText() const;
 	private:
+		void setPressDepth(const unsigned int press);
 		bool allowMoveByMouse;
 		static Point mouseMovePoint;
 		static bool moveByMouse;
@@ -172,6 +175,10 @@ class UI_Button:public UI_Object
 		UI_StaticText* text;
 };
 
+inline UI_StaticText* UI_Button::getText() const {
+	return(text);
+}
+
 inline UI_Button* UI_Button::getCurrentButton() {
 	return(currentButton);
 }
@@ -182,6 +189,10 @@ inline void UI_Button::setAllowMoveByMouse(const bool allow_move_by_mouse) {
 
 inline const unsigned int UI_Button::getGradient() const {
 	return(gradient);
+}
+
+inline const Size UI_Button::getTextSize() const {
+	return(text->getTextSize());
 }
 
 inline const unsigned int UI_Button::getTextWidth() const {
@@ -209,15 +220,6 @@ inline void UI_Button::updateText(const std::string& utext) {
 inline void UI_Button::updateText(const eString utext) {
 	text->updateText(utext);
 }
-
-// Is the mouse over this button?
-inline void UI_Button::forceHighlighted() {
-	statusFlags |= BF_HIGHLIGHTED;
-}
-
-inline void UI_Button::forceDelighted() {
-	statusFlags &= ~BF_HIGHLIGHTED;
-}				   
 
 inline const bool UI_Button::isCurrentButtonPressed() {
 	return(currentButtonPressed);

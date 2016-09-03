@@ -7,7 +7,7 @@ const float GUI_VERSION=0.51;
 #include "msgwindow.hpp"
 #include "info.hpp"
 #include "helpwindow.hpp"
-//#include "mapwindow.hpp"
+#include "mapwindow.hpp"
 #include "mainwindow.hpp"
 #include "setwindow.hpp"
 
@@ -20,7 +20,6 @@ const float GUI_VERSION=0.51;
 #include <string>
 
 #include "endrundialog.hpp"
-//#include "mapwindow.hpp"
 
 class Main
 {
@@ -62,7 +61,7 @@ class Main
 		MainWindow* mainWindow;
 		HelpWindow* helpWindow;
 		SettingsWindow* settingsWindow;
-//		MapWindow* mapWindow;
+		MapWindow* mapWindow;
 		Point maus;
 		unsigned int gameCount; 
 		Game* game[MAX_GAME];

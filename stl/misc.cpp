@@ -13,7 +13,7 @@ void toLog(const std::string& msg)
 //	if(msg == lastMsg)
 //		return;
 	lastMsg=msg;
-	std::cout << msg << std::endl;
+	std::cout << msg << "\n";
 //	ofstream pFile("error.log", std::ios_base::app);
 //	pFile << msg.c_str() << endl;
 }

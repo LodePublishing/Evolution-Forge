@@ -355,7 +355,7 @@
 		Nachrichten
 		Evolution forge Einführung
 		Einstellungen
-		Karten und Ziele
+		Karten
 		
 		Befehlsbeschreibung Spieler %s
 		Techtree
@@ -419,7 +419,7 @@
 		Starteinheiten
 #				Wähle Rasse
 		Rasse
-		Karte
+		Karten
 
 		Speichere Ziele...
 		Speichere Ziele als
@@ -449,8 +449,6 @@
 		Optimiere...
 		%i/%i/%i Res./Einh./Geb.
 		Gesamt: %i
-		Klicken um fortzufahren
-		Klicken um zu unterbrechen
 		Füge Spieler hinzu
 # statistics window
 		Gesamt Mineralien : %i
@@ -466,7 +464,7 @@
 		
 		Hilfe
 		Einstellungen
-		Karte & Ziele
+		Karten
 
 # tooltips:
 		füge Einheit hinzu
@@ -485,8 +483,9 @@
 		durchschn. Tauglichkeit aller Programme
 		Varianz der Tauglichkeit aller Programme
 		Mindestzahl verbleibender Generationen 
-#100
 		Bilder pro Sekunde [Baufolgen pro Sekunde]
+
+		Speichere Zielliste als ...
 
 		Starte komplett von Null neu
 		Speichere Baureihenfolge als HTML
@@ -498,13 +497,13 @@
 
 		Erklränrungen und Hintergrundinformationen
 		Grafische und globale Einstellungen
-		Erstelle und verändere Starteinheiten und Ziele und Karten
+		Erstelle und verändere Starteinheiten und Kartenaufbau
 
 		Klicken um spätesten Zeitpunkt der Produktion einzustellen
 
 		Vordefinierte Einstellungen
 		maximale Zeit
-		Begrenze Einheiten
+		Keine Broodwar Einheiten
 		Produktionsstättenmodus
 		Speicherung am Ende
 		Baue immer Arbeiter
@@ -523,9 +522,8 @@
 		Volle Grafikpracht
 		benutzerdefiniert
 # Radiobutton + Eingabefeld
-		Begrenze Bildfrequenz
-		Maximale FPS
 		Gewünschte FPS
+		CPU Auslastung
 # an aus
 		fliessende Bewegung
 		Pulsierende Knöpfe
@@ -541,7 +539,7 @@
 		Sollen nur StarCraft (TM) Einheiten verwendet werden?
 		Sollen die Einträge im 'Füge Ziel hinzu' Menü nach Einsatzgebiet oder nach Baustätte geordnet werden?
 		Sollen die Baureihenfolgen am Ende eines Durchgangs automatisch gespeichert werden oder soll gefragt werden?
-		Soll versucht werden, dass ununterbrochen Arbeiter produziert werden?
+		Soll versucht werden ununterbrochen Arbeiter zu produzieren?
 		Sollen die Befehle nur getauscht und keine eingefuegt oder geloescht werden?
 		Soll eine zufällige oder eine vorberechnete Baureihenfolge zu Beginn genommen werden?
 		Maximale Länge einer Baureihenfolge
@@ -555,10 +553,9 @@
 		Minimale Grafik (alle CPU Power der Berechnung zuweisen) (Für extreme Minimalisten: siehe Kommandozeilenoptionen)
 		Grafik auf schön stellen :)
 		Selber rumklicken
-# Radiobutton + Eingabefeld
-		Soll das Programm (soweit möglich) eine konstante Bildwiederholfrequenz halten (an) oder soll dies nur über die CPU Geschwindigkeit geregelt sein?
-		Soll die Zahl der Bilder pro Sekunde begrenzt werden?
-		Gewünschte Zahl der Bilder pro Sekunde (auf Kosten der Berechnung und immer 100% CPU Last)
+# Eingabefeld
+		Wie oft in der Sekunde soll das Bild neugezeichnet werden?
+		Wieviel % Last soll die CPU tragen?
 # an aus
 		Sollen sich Objekte langsam hin und herbewegen oder auf ihren Zielpunkt springen?
 		Sollen Knöpfe pulsierende Animation besitzen?
@@ -621,6 +618,34 @@
 		Allgemeine Einstellungen
 		Lade/Speichere Einstellungen
 
+		Karteneinstellungen
+		Spielerzahl
+		Zahl Orte
+		Kartenname:
+		Symmetrische Karte
+
+		Orte
+		Spieler
+		Ort
+		Entfernungen
+
+		Mineralblöcke
+		Vespin Geysire
+		Entfernung Mineralien
+
+		Wieviele Spieler sollen maximal auf dieser Karte spielen können?
+		Wieviele Orte soll es auf dieser Karte geben?
+		Soll die Karte symmetrisch aufgebaut sein mit den selben Ressourcen/Einheiten/Entfernungen in jedem Teil?
+
+		Erstelle neue Karte
+		Stelle alte Werte wieder her
+		Lade Karte
+		Speichere Karte
+
+		Wieviele Mineralblöcke sollen an diesem Ort liegen?
+		Wieviele Vespin Geysire sollen an diesem Ort liegen?
+		Wie gross soll der Abstand zum Hauptgebäude sein? (in Sekunden, Geschwindigkeitsstufe 5)
+		
 		Einheitenname
 		Versorgung
 		Mineralien
@@ -646,7 +671,7 @@
 
 		Baue
 		sobald wie
-		verfgübar wird
+		verfügbar wird
 		bei
 		wenn
 		im Besitz ist von

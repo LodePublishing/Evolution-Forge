@@ -116,6 +116,53 @@ void UI_Configuration::loadConfigurationFile()
 	}// END while
 } // schoen :)
 
+const bool UI_Configuration::setResolution(const eResolution current_resolution) 
+{
+	if(resolution == current_resolution)
+		return(false);
+	resolution = current_resolution;
+	return(true);
+}
+
+const bool UI_Configuration::setBitDepth(const eBitDepth current_bitdepth) 
+{
+	if(bitdepth == current_bitdepth)
+		return(false);
+	bitdepth = current_bitdepth;
+	return(true);
+}
+
+const bool UI_Configuration::setLanguage(const eLanguage current_language) 
+{
+	if(language == current_language)
+		return(false);
+	language = current_language;
+	return(true);
+}
+
+const bool UI_Configuration::setGlowingButtons(const bool glowing_buttons) 
+{
+	if(glowingButtons == glowing_buttons)
+		return(false);
+	glowingButtons = glowing_buttons;
+	return(true);
+}
+
+const bool UI_Configuration::setTransparency(const bool trans_parency) 
+{
+	if(transparency == trans_parency)
+		return(false);
+	transparency = trans_parency;
+	return(true);
+}
+
+const bool UI_Configuration::setSmoothMovements(const bool smooth_movements) 
+{
+	if(smoothMovements == smooth_movements)
+		return(false);
+	smoothMovements = smooth_movements;
+	return(true);
+}
 	
 UI_Configuration uiConfiguration;
 

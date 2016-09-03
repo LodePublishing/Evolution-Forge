@@ -1,73 +1,134 @@
 #include "editfield.hpp"
-#include "button.hpp"
 #include <sstream>
 
+
+// TODO: Tatsaechliches Eingabefeld seperat machen
 // ISO-LEVEL 2 
 
-UI_EditField::UI_EditField(UI_Object* edit_parent, UI_Object* edit_caller, const eString edit_text, const eString description_text, const eString ok_string, const eString cancel_string, const std::string& name_proposal) :
-	UI_Window(edit_parent, edit_text, theme.lookUpGlobalRect(EDIT_FIELD_WINDOW), theme.lookUpGlobalMaxHeight(EDIT_FIELD_WINDOW)),
-	OK_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), ok_string, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, MIDDLE_BOLD_FONT, AUTO_SIZE)),
-	Cancel_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), cancel_string, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, MIDDLE_BOLD_FONT, AUTO_SIZE)),
-	editText(new UI_StaticText(this, description_text, Rect(getRelativeClientRectPosition() + Point(20, 15), getClientRectSize()), Size(0,0), FORCE_TEXT_COLOR, MIDDLE_BOLD_FONT)),
-	userText(new UI_StaticText(this, name_proposal, Rect(getRelativeClientRectPosition() + Point(30, 50), getClientRectSize()), Size(0,0), BRIGHT_TEXT_COLOR, MIDDLE_BOLD_FONT, DO_NOT_ADJUST)),
+UI_EditField::UI_EditField(UI_Object* edit_parent, const Rect& edit_rect, const Size& edit_size, const eFont st_font, const ePositionMode position_mode, const eString description_text, const std::string& name_proposal) :
+	UI_Object(edit_parent, edit_rect, edit_size, position_mode),
+	editField(new UI_Button(this, Rect(Point(100, 0), Size(200, FONT_SIZE+6)), Size(0,0), EDIT_FIELD_BUTTON, false, TAB_BUTTON_MODE, name_proposal, SPECIAL_BUTTON_LEFT, st_font)),
+	descriptionText(new UI_StaticText(this, description_text, Rect(Point(0, 0), Size(100, FONT_SIZE+6)), Size(0,0), FORCE_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
 	position(name_proposal.size()),
-	caller(edit_caller),
-	ani(5)
-{ }
+	ani(5),
+	pressedEnter(false),
+	pressedEscape(false)
+{ 
+//	UI_Object::addEditField(this);
+}
+
+UI_EditField::UI_EditField(UI_Object* edit_parent, const Rect& edit_rect, const Size& edit_size, const eFont st_font, const ePositionMode position_mode, const std::string& description_text, const std::string& name_proposal) :
+	UI_Object(edit_parent, edit_rect, edit_size, position_mode),
+	editField(new UI_Button(this, Rect(Point(100, 0), Size(200, FONT_SIZE+6)), Size(0,0), EDIT_FIELD_BUTTON, false, TAB_BUTTON_MODE, name_proposal, SPECIAL_BUTTON_LEFT, st_font)),
+	descriptionText(new UI_StaticText(this, description_text, Rect(Point(0, 0), Size(100, FONT_SIZE+6)), Size(0,0), FORCE_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
+	position(name_proposal.size()),
+	ani(5),
+	pressedEnter(false),
+	pressedEscape(false)
+{ 
+//	UI_Object::addEditField(this);
+}
+void UI_EditField::resetData()
+{
+	editField->getText()->updateText(" ");
+	pressedEnter = false;
+	pressedEscape = false;
+}
 
 UI_EditField::~UI_EditField()
 {
-	delete OK_Button;
-	delete Cancel_Button;
-	delete editText;
-	delete userText;
+	delete editField;
+	delete descriptionText;
+//	UI_Object::removeEditField(this);
 }
 
 UI_EditField::UI_EditField(const UI_EditField& object) :
-	UI_Window((UI_Window)object),
-	OK_Button(new UI_Button(*object.OK_Button)),
-	Cancel_Button(new UI_Button(*object.Cancel_Button)),
-	editText(new UI_StaticText(*object.editText)),
-	userText(new UI_StaticText(*object.userText)),
+	UI_Object((UI_Object)object),
 	position(object.position),
-	caller(object.caller),
-	ani(object.ani)
+	ani(object.ani),
+	pressedEnter(object.pressedEnter)
 { }
 
 UI_EditField& UI_EditField::operator=(const UI_EditField& object)
 {
-	(UI_Window)(*this) = (UI_Window)object;
-	delete OK_Button;
-	OK_Button = new UI_Button(*object.OK_Button);
-	delete Cancel_Button;
-	Cancel_Button = new UI_Button(*object.Cancel_Button);
-	delete editText;
-	editText = new UI_StaticText(*object.editText);
-	delete userText;
-	userText = new UI_StaticText(*object.userText);
+	(UI_Object)(*this) = (UI_Object)object;
 	position = object.position;
-	caller = object.caller;
 	ani = object.ani;
+	pressedEnter = object.pressedEnter;
 	return(*this);
 }
 
-void UI_EditField::reloadOriginalSize()
+const bool UI_EditField::addKey(unsigned int key, unsigned int mod)
 {
-	setOriginalRect(UI_Object::theme.lookUpGlobalRect(EDIT_FIELD_WINDOW));
-	setMaxHeight(UI_Object::theme.lookUpGlobalMaxHeight(EDIT_FIELD_WINDOW));
-        OK_Button->setOriginalRect(getRelativeClientRect());
-        Cancel_Button->setOriginalRect(getRelativeClientRect());
-        editText->setOriginalRect(Rect(getRelativeClientRectPosition() + Point(20, 15), getClientRectSize()));
-        userText->setOriginalRect(Rect(getRelativeClientRectPosition() + Point(30, 37), getClientRectSize()));
-
-	UI_Window::reloadOriginalSize();
+	switch(key)
+	{
+		case SDLK_KP_ENTER:
+		case SDLK_RETURN:enterWasPressed();UI_Object::focus=NULL;break;
+		case SDLK_ESCAPE:escapeWasPressed();UI_Object::focus=NULL;break;
+		case SDLK_SPACE:addChar(' ');break;
+		case SDLK_UNDERSCORE:addChar('_');break;
+		case SDLK_DELETE:removeCharDelete();break;
+		case SDLK_BACKSPACE:removeCharBackspace();break;
+		case SDLK_KP0:
+		case SDLK_KP1:
+		case SDLK_KP2:
+		case SDLK_KP3:
+		case SDLK_KP4:
+		case SDLK_KP5:
+		case SDLK_KP6:
+		case SDLK_KP7:
+		case SDLK_KP8:
+		case SDLK_KP9:addChar('0'+key-SDLK_0);break;
+		case SDLK_MINUS:if(mod & (KMOD_LSHIFT | KMOD_RSHIFT)) addChar('_'); else return(false);break;
+		case SDLK_a:
+		case SDLK_b:
+		case SDLK_c:
+		case SDLK_d:
+		case SDLK_e:
+		case SDLK_f:
+		case SDLK_g:
+		case SDLK_h:
+		case SDLK_i:
+		case SDLK_j:
+		case SDLK_k:
+		case SDLK_l:
+		case SDLK_m:
+		case SDLK_n:
+		case SDLK_o:
+		case SDLK_p:
+		case SDLK_q:
+		case SDLK_r:
+		case SDLK_s:
+		case SDLK_t:
+		case SDLK_u:
+		case SDLK_v:
+		case SDLK_w:
+		case SDLK_x:
+		case SDLK_y:
+		case SDLK_z:if(mod & (KMOD_LSHIFT | KMOD_RSHIFT)) addChar('A'+ key - SDLK_a);else addChar('a'+ key - SDLK_a);break;
+		case SDLK_0:
+		case SDLK_1:
+		case SDLK_2:
+		case SDLK_3:
+		case SDLK_4:
+		case SDLK_5:
+		case SDLK_6:
+		case SDLK_7:
+		case SDLK_8:
+		case SDLK_9:if(!(mod & (KMOD_LSHIFT | KMOD_RSHIFT))) addChar('0' + key - SDLK_0); else return(false);break;
+		case SDLK_LEFT:moveLeft();break;
+		case SDLK_RIGHT:moveRight();break;
+		default:return(false);break;
+	}
+	return(true);
 }
+
 
 void UI_EditField::addChar(char a)
 {
 	if(position>=28)
 		return;
-	userText->addChar(position, a);
+	editField->getText()->addChar(position, a);
 	++position;
 	ani=5;
 }
@@ -88,14 +149,14 @@ void UI_EditField::moveRight()
 
 void UI_EditField::removeCharBackspace()
 {
-	userText->removeCharBackspace(position);
+	editField->getText()->removeCharBackspace(position);
 	if(position>0) --position;
 	ani=5;
 }
 
 void UI_EditField::removeCharDelete()
 {
-	userText->removeCharDelete(position);
+	editField->getText()->removeCharDelete(position);
 	if(position>0) --position;
 	ani=5;
 }
@@ -105,43 +166,45 @@ void UI_EditField::draw(DC* dc) const
 {
 	if(!checkForNeedRedraw())
 		return; // TODO
-	dc->SetBrush(*theme.lookUpBrush(BRIGHT_UNIT_TYPE_3_BRUSH));
-	dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
-	dc->DrawRectangle(Rect(getAbsolutePosition()-Size(10,10), getSize() + Size(20,20)));
 
-	UI_Window::draw(dc);
-	Rect entry_rect = Rect(userText->getAbsolutePosition() - Size(5, 0), Size(getWidth()-75, userText->getTextSize().GetHeight()));
-	if(entry_rect.Inside(mouse))
-		dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-	else
-		dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
-	dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
-	dc->DrawEdgedRoundedRectangle(entry_rect, 4);
+	UI_Object::draw(dc);
+	if(UI_Object::focus != this)
+		return;
+	
+	Rect entry_rect = Rect(getAbsolutePosition(), getOriginalRect().GetSize());
+//	if(entry_rect.Inside(mouse))
+//		dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+//	else
+//		dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
+//	dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+//	dc->DrawEdgedRoundedRectangle(Rect(100, 100, 200, 200), 4);
+
 	
 	dc->SetPen(Pen(dc->mixColor(*theme.lookUpColor(FORCE_TEXT_COLOR), *theme.lookUpColor(BRIGHT_TEXT_COLOR), (unsigned int)(50*(sin(3.141*ani/10)+1))), 1, SOLID_PEN_STYLE));
-	dc->DrawVerticalLine(userText->getAbsolutePosition().x + userText->getTextPosSize(position).GetWidth(),  entry_rect.GetTop() + 2, entry_rect.GetBottom() - 2);
+	dc->DrawVerticalLine(editField->getAbsolutePosition().x + 2 + editField->getText()->getTextPosSize(position).GetWidth(), entry_rect.GetTop() + 2, entry_rect.GetBottom() - 2);
 }
 
 void UI_EditField::process()
 {
 	if(!isShown())
 		return;
-	UI_Window::process();
+	UI_Object::process();
+	if(UI_Object::focus == editField)
+		UI_Object::focus = this;
+	if(UI_Object::focus != this)
+		editField->forceUnpress();
 	++ani;
+	setNeedRedrawNotMoved();
+	editField->doHighlight(isMouseInside());
+	descriptionText->doHighlight(isMouseInside());
 }
 
-UI_Object* UI_EditField::checkToolTip()
-{
-	if(!getAbsoluteRect().Inside(mouse))
-		return(NULL);
-	return(UI_Window::checkToolTip());
+UI_Object* UI_EditField::checkToolTip() {
+	return(UI_Object::checkToolTip());
 }
 
-UI_Object* UI_EditField::checkHighlight()
-{
-	if(!getAbsoluteRect().Inside(mouse))
-		return(NULL);
-	return(UI_Window::checkHighlight());
+UI_Object* UI_EditField::checkHighlight() {
+	return(UI_Object::checkHighlight());
 }
 
 

@@ -9,6 +9,7 @@ UI_LongText& UI_LongText::operator=(const UI_LongText& object)
 	longText = object.longText;
 	longButton = object.longButton;
 	longNumber = object.longNumber;
+	longBitmap = object.longBitmap;
 	color1 = object.color1;
 	color2 = object.color2;
 	button = object.button;
@@ -21,6 +22,7 @@ UI_LongText::UI_LongText(const UI_LongText& object) :
 	longText(object.longText),
 	longButton(object.longButton),
 	longNumber(object.longNumber),
+	longBitmap(object.longBitmap),
 	text(object.text),
 	color1(object.color1),
 	color2(object.color2),
@@ -33,6 +35,7 @@ UI_LongText::UI_LongText(UI_Object* lt_parent, const Rect lt_pos, const Size dis
 	longText(),
 	longButton(),
 	longNumber(),
+	longBitmap(),
 	text(lt_text),
 	color1(lt_color1),
 	color2(lt_color2),
@@ -55,6 +58,13 @@ UI_LongText::~UI_LongText()
 		delete(*j);
 		j = longButton.erase(j);
 	}
+	std::list<UI_Bitmap*>::iterator k = longBitmap.begin();
+	while(!longBitmap.empty())
+	{
+		delete(*k);
+		k = longBitmap.erase(k);
+	}
+
 }
 
 void UI_LongText::draw(DC* dc) const
@@ -74,6 +84,37 @@ void UI_LongText::process()
 		updateText(text);
 		textWasChanged=false;
 	}
+
+	std::list<UI_StaticText*>::iterator i = longText.begin();
+	while(i!=longText.end())
+	{
+		if((*i)->checkForNeedRedraw())
+		{
+			setNeedRedrawMoved();
+			return;
+		}
+		++i;
+	}
+	std::list<UI_Button*>::iterator j = longButton.begin();
+	while(j!=longButton.end())
+	{
+		if((*j)->checkForNeedRedraw())
+		{
+			setNeedRedrawMoved();
+			return;
+		}
+		++j;
+	}
+	std::list<UI_Bitmap*>::iterator k = longBitmap.begin();
+	while(k!=longBitmap.end())
+	{
+		if((*k)->checkForNeedRedraw())
+		{
+			setNeedRedrawMoved();
+			return;
+		}
+		++k;
+	}
 }
 
 void UI_LongText::reloadOriginalSize()
@@ -88,21 +129,23 @@ void UI_LongText::updateText(const std::string& lt_text)
 //		return; OMFG
 	setNeedRedrawMoved();
 	text = lt_text;
-//	if(getParent()!=NULL)
-//	{
-//		getParent()->resetMinXY();
-//		getParent()->adjustPositionAndSize(ADJUST_ONLY_POSITION);
-//	}
+	if(getParent()!=NULL)
+	{
+		getParent()->adjustPositionAndSize(ADJUST_ONLY_POSITION);
+	}
 
 	unsigned int textCursorX = 5;
 	unsigned int firstTextCursorX = 5;
 	unsigned int bold = 0;
 	unsigned int textbutton = 0;
+	unsigned int bitmap = 0;
 	bool mustNotMakeNewLine = false;
 	unsigned int firstCharPosition=0;
 	unsigned int lastCharPosition=0;
-	unsigned int currentRow=0;
+	unsigned int currentRow=1;
 	unsigned int maxdy=0;
+	unsigned int bitmapLeftBorder = 5;
+	unsigned int bitmapLowerBorder = 0; // TODO, funzt nur mit Bildern links oben...
 
 	maxdy = UI_Object::theme.lookUpFont(SMALL_BOLD_FONT)->GetTextExtent(text).GetHeight()*13/10;
 	
@@ -126,6 +169,14 @@ void UI_LongText::updateText(const std::string& lt_text)
 		while(!longNumber.empty())
 			k = longNumber.erase(k);
 		UI_Button::resetButton();
+	
+		std::list<UI_Bitmap*>::iterator l = longBitmap.begin();
+		while(!longBitmap.empty())
+		{
+			delete(*l);
+			l = longBitmap.erase(l);
+		}
+	
 	}
 	
 	
@@ -163,7 +214,14 @@ void UI_LongText::updateText(const std::string& lt_text)
 			textbutton++;
 			lastCharPosition = i;
 			newCheck = true;
+// bitmap			
+		} else if(text[i]=='~')
+		{
+			bitmap++;
+			lastCharPosition = i;
+			newCheck = true;
 		} else
+		
 		// move the textcursor forward:
 		{
 			std::ostringstream os;
@@ -185,7 +243,7 @@ void UI_LongText::updateText(const std::string& lt_text)
 			realstring.str("");
 			for(unsigned int j = firstCharPosition; j < lastCharPosition; j++)
 			{
-				if((text[j]=='$')||(text[j]=='#')||(text[j]=='&')||(text[j]=='@'))
+				if((text[j]=='$')||(text[j]=='#')||(text[j]=='&')||(text[j]=='@')||(text[j]=='~')||(text[j]<32))
 					continue;
 				realstring << text[j];
 			}
@@ -201,8 +259,18 @@ void UI_LongText::updateText(const std::string& lt_text)
 			} else
 			if(textbutton==2)
 			{
-				UI_Button* t = new UI_Button(this, Rect(Point(firstTextCursorX, currentRow-5), Size(0, 0)), Size(0, 0), realstring.str(), button, PRESS_BUTTON_MODE, DO_NOT_ADJUST, (eFont)(current_font+1), AUTO_SIZE);
+				UI_Button* t = new UI_Button(this, Rect(Point(firstTextCursorX, currentRow-5), Size(0, 0)), Size(0, 0), button, false, PRESS_BUTTON_MODE, realstring.str(), DO_NOT_ADJUST, (eFont)(current_font+1), AUTO_SIZE);
 				longButton.push_back(t);
+			} else if(bitmap==2)
+			{
+				bitmap=0;
+				UI_Bitmap* t = new UI_Bitmap(this, Rect(Point(firstTextCursorX, currentRow), Size(0, 0)), Size(0, 0), (eBitmap)(NULL_BITMAP+atoi(realstring.str().c_str())));
+				longBitmap.push_back(t);
+				textCursorX-= UI_Object::theme.lookUpFont(current_font)->GetTextExtent(realstring.str()).GetWidth();
+				// TODO... ein Zaehler mit linkerRand und linkerRandEnde machen
+				textCursorX+=t->getBitmapWidth();
+				bitmapLeftBorder = textCursorX;
+				bitmapLowerBorder = currentRow+3+t->getBitmapHeight();
 			} else
 			{
 				UI_StaticText* t = new UI_StaticText(this, realstring.str(), Rect(firstTextCursorX, currentRow+(maxdy-height)/2, 0,0), Size(0,0), current_color, current_font, DO_NOT_ADJUST);
@@ -218,8 +286,10 @@ void UI_LongText::updateText(const std::string& lt_text)
 				newLine = false;
 				currentRow+=maxdy;
 				lastCharPosition = 0;
-				firstTextCursorX = 5;
-				textCursorX = 5;
+				if(currentRow >= bitmapLowerBorder)
+					bitmapLeftBorder = 5;
+				firstTextCursorX = bitmapLeftBorder;
+				textCursorX = bitmapLeftBorder;
 // this must be resetted!
 				mustNotMakeNewLine = false;
 			}

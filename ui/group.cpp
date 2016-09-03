@@ -30,6 +30,8 @@ UI_Group& UI_Group::operator=(const UI_Group& object)
 void UI_Group::reloadStrings() {
 	UI_Object::reloadStrings();
 }
+
+
 #include <sstream>
 void UI_Group::calculateBoxSize(const bool horizontal)
 {
@@ -39,30 +41,44 @@ void UI_Group::calculateBoxSize(const bool horizontal)
 	number = 0;
 	unsigned int maxWidth = 0;
 	unsigned int maxHeight = 0;
+	UI_Object* first_child=NULL;
+	UI_Object* last_child=NULL;
 	do
 	{
-		if((maxWidth < tmp->getWidth())&&(tmp!=title))
+		if((tmp->isShown())&&(tmp!=title))
 		{
-			maxWidth = tmp->getWidth();
-			number++;
+			if(maxWidth < tmp->getWidth())
+			{
+				maxWidth = tmp->getWidth();
+				number++;
+				if(maxHeight < tmp->getHeight())
+					maxHeight = tmp->getHeight();
+			} else 
 			if(maxHeight < tmp->getHeight())
+			{
 				maxHeight = tmp->getHeight();
-		} else 
-		if((maxHeight < tmp->getHeight())&&(tmp!=title))
-		{
-			maxHeight = tmp->getHeight();
-			number++;
-		} else if(tmp!=title)
-			number++;
+				number++;
+			} else
+				number++;
+			if(first_child==NULL)
+				first_child = tmp;
+			last_child = tmp;
+			
+		}
 		tmp = tmp->getNextBrother();
 	} while(tmp!=getChildren());
 	Size s;
 	if(horizontal)
-		s = Size((maxWidth + 5) * number, maxHeight+13);
+		s = Size((maxWidth + 5) * number, maxHeight+10);
 	else
-		s =  Size(maxWidth + 5, getChildren()->getPrevBrother()->getAbsoluteLowerBound() - getChildren()->getAbsoluteUpperBound());
+	{
+		if(first_child == NULL)
+			s =  Size(maxWidth + 15, 20);
+		else
+			s =  Size(maxWidth + 15, last_child->getAbsoluteLowerBound() - first_child->getAbsoluteUpperBound() + 10);
+	}
 
-	adjustRelativeRect(Rect(getRelativePosition(), s));
+	adjustRelativeRect(Rect(getTargetPosition(), s));
 //	adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, Size(maxWidth + 5, getChildren()->getPrevBrother()->getAbsoluteLowerBound() - getChildren()->getAbsoluteUpperBound()));
 }
 
@@ -89,7 +105,7 @@ void UI_Group::draw(DC* dc) const
 		else
 		{
 			dc->SetBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-			dc->DrawEdgedRoundedRectangle(getAbsolutePosition() - Size(4, 6), getSize(), 4);
+			dc->DrawEdgedRoundedRectangle(getAbsolutePosition()-Size(3,0), getSize()+Size(6,0), 4);
 		}
 	}
 	UI_Object::draw(dc);
@@ -100,6 +116,20 @@ void UI_Group::process()
 //	if(!isShown())
 //		return; //?
 	UI_Object::process();
+	
+	
+/*	UI_Object* tmp = getChildren();
+	if(!tmp)
+		return;
+	do
+	{
+		if(tmp->checkForNeedRedraw())
+		{
+			setNeedRedrawMoved(); //?
+			return;
+		}
+		tmp = tmp->getNextBrother();
+	} while(tmp!=getChildren());*/	
 }
 
 

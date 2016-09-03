@@ -1,10 +1,10 @@
 #ifndef _GUI_UNITMENU_HPP
 #define _GUI_UNITMENU_HPP
 
-#include "menu.hpp"
+#include "../ui/menu.hpp"
 #include "../core/anabuildorder.hpp"
 
-class UnitMenu : public Menu
+class UnitMenu : public UI_Menu
 {
 	public:
 		UnitMenu(UI_Object* unit_parent, const Rect unit_rect, const Size distance_bottom_right, const ePositionMode position_mode);

@@ -20,7 +20,9 @@ UI_ToolTip::UI_ToolTip(UI_Object* parent_object, const eString tooltip_text) :
 }
 
 UI_ToolTip::~UI_ToolTip()
-{ }
+{ 
+	UI_Object::toolTipWasDeleted = true;
+}
 
 void UI_ToolTip::process()
 {
@@ -32,8 +34,6 @@ void UI_ToolTip::process()
 		p.y =  (signed int)max_y - (signed int)getSize().GetHeight();
 	setPosition(p);
 	UI_StaticText::process();
-//	if(t!=p)
-		setNeedRedrawMoved();
 }
                                                                                 
 void UI_ToolTip::draw(DC* dc) const
@@ -42,7 +42,7 @@ void UI_ToolTip::draw(DC* dc) const
 		return;
 	dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
 	dc->SetBrush(*theme.lookUpBrush(TOOLTIP_BRUSH));
-	dc->DrawRectangle(Rect(getAbsolutePosition()-Size(5,5), getSize()));
+	dc->DrawRectangle(Rect(getAbsolutePosition()-Size(5,3), getSize()+Size(10,6)));
 	UI_StaticText::draw(dc);
 }
 

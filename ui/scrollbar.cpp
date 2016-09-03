@@ -44,8 +44,8 @@ UI_Scrollbar::UI_Scrollbar(UI_Object* scroll_parent, /*const Rect& clientRect TO
 	UI_Object(scroll_parent, Rect(0, 0, scroll_parent->getWidth(), scroll_parent->getHeight())), // TODO
 	firstItemY(0),
 	lastItemY(0),
-	add(new UI_Button(this, Rect(getParent()->getWidth()-8, start_y, 8, 8), Size(0,0), SMALL_ARROW_DOWN_BUTTON, PRESS_BUTTON_MODE)),
-	sub(new UI_Button(this, Rect(getParent()->getWidth()-8, 4, 8, 8), Size(0,0), SMALL_ARROW_UP_BUTTON, PRESS_BUTTON_MODE)),
+	add(new UI_Button(this, Rect(getParent()->getWidth()-8, start_y, 8, 8), Size(0,0), SMALL_ARROW_DOWN_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING)),
+	sub(new UI_Button(this, Rect(getParent()->getWidth()-8, 4, 8, 8), Size(0,0), SMALL_ARROW_UP_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING)),
 	hideable(scroll_hideable),
 	internalScrollY(0),
 	internalHeight(0),
@@ -83,8 +83,12 @@ void UI_Scrollbar::moveDown()
 	currentScrollY+=clientHeight/20;
 }
 
+
+// TODO: Wenn Scrollbereich ausserhalb des Fensters rutscht moechte das Programm verstaendlicherweise neumalen, da es nicht weiss, dass die entsprechenden Eintraege versteckt werden... :-/
 void UI_Scrollbar::moveToTop()
 {
+	if(currentScrollY==0)
+		return;
 	currentScrollY = 0;
 	setNeedRedrawMoved();
 }

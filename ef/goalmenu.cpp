@@ -1,41 +1,47 @@
 #include "goalmenu.hpp"
 
 GoalMenu::GoalMenu(const GoalMenu& object) :
-    Menu((Menu)object),
+	UI_Menu((UI_Menu)object),
 	anarace(object.anarace)
 { }
 
 GoalMenu& GoalMenu::operator=(const GoalMenu& object)
 {
-	((Menu)(*this)) = ((Menu)object);
+	((UI_Menu)(*this)) = ((UI_Menu)object);
 	anarace = object.anarace;
 	return(*this);
 }
 
 GoalMenu::GoalMenu(UI_Object* goal_parent, const Rect goal_rect, const Size distance_bottom_right, const ePositionMode position_mode):
-	Menu(goal_parent, goal_rect, distance_bottom_right, position_mode, true),
+	UI_Menu(goal_parent, goal_rect, distance_bottom_right, position_mode, true),
 	anarace(NULL)
 { }
 
 void GoalMenu::assignAnarace(ANABUILDORDER* goal_anarace)
 {
+	bool race_has_changed = false;
+	if((anarace==NULL)||(anarace->getRace() != goal_anarace->getRace()))
+		race_has_changed = true;
 	anarace = goal_anarace;
-	resetData();
+	if(race_has_changed)
+		resetData();
 }
 
 void GoalMenu::reloadOriginalSize()
 {
-	for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+	for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 		(*m)->setOriginalSize(Size(getParent()->getWidth()-40, FONT_SIZE+6));
-//	resetData();
-	Menu::reloadOriginalSize();
+	resetData();
+	UI_Menu::reloadOriginalSize();
 }
 
 void GoalMenu::resetData()
 {
+	if(!anarace)
+		return;
 	unsigned int i=0;
-	height=3;
-	for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+	height=1;
+	for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 	{
 		if(i >= database.getGoalCount(anarace->getRace()))
 		{
@@ -48,14 +54,14 @@ void GoalMenu::resetData()
 		else
 			(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_1_BUTTON));
 		(*m)->updateText(database.getGoal(anarace->getRace(), i)->getName());
-		Rect edge = Rect(Point(10, height * (FONT_SIZE + 9)), Size(getParent()->getWidth()-40, FONT_SIZE+6));
+		Rect edge = Rect(Point(10, height * (FONT_SIZE + 8)), Size(getParent()->getWidth()-40, FONT_SIZE+6));
 		(*m)->adjustRelativeRect(edge);
 		++height;
 		++i;
 	}
 	for(;i<database.getGoalCount(anarace->getRace());++i)
 	{
-		MenuEntry* entry = new MenuEntry(this, Rect(Point(10, height * (FONT_SIZE + 9)), Size(getParent()->getWidth()-40, FONT_SIZE+6)), database.getGoal(anarace->getRace(), i)->getName());
+		UI_MenuEntry* entry = new UI_MenuEntry(this, Rect(Point(10, height * (FONT_SIZE + 8)), Size(getParent()->getWidth()-40, FONT_SIZE+6)), database.getGoal(anarace->getRace(), i)->getName());
 		if(i==0)
 			entry->setButtonColorsType(eButtonColorsType(UNIT_TYPE_2_BUTTON));
 		else
@@ -72,7 +78,7 @@ GoalMenu::~GoalMenu()
 
 void GoalMenu::process()
 {
-	Menu::process();
+	UI_Menu::process();
 	if(!isShown())
 		return;
 }
@@ -81,6 +87,6 @@ void GoalMenu::draw(DC* dc) const
 {
 	if(!isShown())
 		return;
-	Menu::draw(dc);
+	UI_Menu::draw(dc);
 }
 

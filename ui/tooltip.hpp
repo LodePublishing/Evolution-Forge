@@ -3,7 +3,7 @@
 
 #include "statictext.hpp"
 
-class UI_ToolTip : UI_StaticText
+class UI_ToolTip : public UI_StaticText
 {
 	public:
 		UI_ToolTip& operator=(const UI_ToolTip& object);

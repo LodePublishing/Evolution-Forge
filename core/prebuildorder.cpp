@@ -102,7 +102,7 @@ PREBUILDORDER::PREBUILDORDER(const PREBUILDORDER& object) :
 	//memcpy(last, object.last, MAX_LENGTH * sizeof(int));
 	
 	memcpy(larvaInProduction, object.larvaInProduction, MAX_LOCATIONS * sizeof(int));
-	memcpy(mineralHarvestPerSecond, mineralHarvestPerSecond, MAX_LOCATIONS * 45 * sizeof(int));
+	memcpy(mineralHarvestPerSecond, object.mineralHarvestPerSecond, MAX_LOCATIONS * 45 * sizeof(int));
 	memcpy(gasHarvestPerSecond, object.gasHarvestPerSecond, MAX_LOCATIONS * 5 * sizeof(int));
 }
 
@@ -923,6 +923,15 @@ void PREBUILDORDER::eraseIllegalCode()
 				Code[k+1]=Code[k];
 			Code[0]=0;
 		}*/
+}
+
+void PREBUILDORDER::assignStartCondition(const START_CONDITION* start_condition, const bool neutral_player) 
+{
+	pStart->assignStartCondition(start_condition);
+	if(neutral_player)
+		pStart->fillAsNeutralPlayer();
+	else
+		pStart->fillAsActivePlayer();
 }
 
 void PREBUILDORDER::eraseUselessCode()

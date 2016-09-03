@@ -8,7 +8,7 @@ ScoreWindow::ScoreWindow(UI_Object* score_parent, const unsigned int game_number
 //	resetButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), RESET_BUILD_ORDER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, CENTER_RIGHT, SMALL_BOLD_FONT, AUTO_SIZE))
 	players(0),
 	maxPlayer(0),
-	mapMenuButton(new UI_Button(this, Rect(Point(10, 20), Size(100, 50)), Size(5,5), database.getMap(0)->getName(), MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+	mapMenuButton(new UI_Button(this, Rect(Point(10, 20), Size(100, 50)), Size(5,5), MY_BUTTON, false, STATIC_BUTTON_MODE, database.getMap(0)->getName(), ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	mapMenu(new MapMenu(mapMenuButton, Rect(10, 10, 100, 0), Size(0, 0), DO_NOT_ADJUST)),
 	assignMap(-1)
 {
@@ -21,7 +21,7 @@ ScoreWindow::ScoreWindow(UI_Object* score_parent, const unsigned int game_number
 	mapMenu->Hide();
 	for(unsigned int i = MAX_PLAYER;i--;)
 	{
-		player[i] = new PlayerEntry(this, Rect(0, 20+i*16, getRelativeClientRect().GetWidth(), 12), Size(0,0));
+		player[i] = new PlayerEntry(this, Rect(), Size(5,5));
 		player[i]->setNumber(i+1);
 		player[i]->Hide();
 	}
@@ -29,10 +29,13 @@ ScoreWindow::ScoreWindow(UI_Object* score_parent, const unsigned int game_number
 //      resetButton->updateToolTip(RESET_BUILD_ORDER_TOOLTIP_STRING);
 //	goalsFulfilledText->updateToolTip(GOALS_FULFILLED_TOOLTIP_STRING);
 	resetData(); // TODO
+	addHelpButton(DESCRIPTION_SCORE_WINDOW_CHAPTER);
 }
 
 void ScoreWindow::setMode(const unsigned int game_number, const unsigned int game_max)
 {
+	if((game_number == gameNumber) && (game_max == gameMax))
+		return;
 	gameNumber = game_number;
 	gameMax = game_max;
 }
@@ -43,7 +46,7 @@ void ScoreWindow::reloadOriginalSize()
 	setMaxHeight(theme.lookUpGameMaxHeight(SCORE_WINDOW, gameNumber, gameMax));
 	
 	for(unsigned int i = MAX_PLAYER;i--;)
-		player[i]->setOriginalSize(Size(getRelativeClientRect().GetWidth(), 12));
+		player[i]->setOriginalSize(Size(getRelativeClientRect().GetWidth()-10, 12));
 	UI_Window::reloadOriginalSize();
 }
 
@@ -116,14 +119,16 @@ void ScoreWindow::process()
 		else 
 		{
 			player[i]->Show();
-			player[i]->adjustRelativeRect(Rect(getRelativeClientRectLeftBound(), line*16, getRelativeClientRect().GetWidth(), 12));
+			player[i]->adjustRelativeRect(Rect(getRelativeClientRectLeftBound()+5, line*16, getRelativeClientRect().GetWidth()-10, 12));
 			line+=player[i]->getLineHeight(); // height of menu <-
+			if(player[i]->checkForNeedRedraw())
+				setNeedRedrawNotMoved();
 		}
 	}
 	
 // Alle Player durchlaufen, evtl Hoehe anpassen: 
 
-	fitItemToRelativeClientRect(Rect(0,20*line,10,12)/*playerText[i]->getAbsoluteRect()*/,2); // TODO
+	fitItemToRelativeClientRect(Rect(0,16*(line-1),10,12)/*playerText[i]->getAbsoluteRect()*/,2); // TODO
 
 //        if(resetButton->isLeftClicked())
 //      {

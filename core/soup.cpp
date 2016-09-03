@@ -454,6 +454,7 @@ const bool SOUP::recalculateGeneration(ANABUILDORDER* previous_analyzed_buildord
 			buildOrder[k*groupSize]->copyCode(*analyzedBuildOrder[k]);
 		
 	memcpy(&temporaryForce, &((*startForce)[0][0]), sizeof(temporaryForce));
+
 	//reset code && calculate 
 	for(unsigned int k = mapPlayerNum; k--;)
 	{

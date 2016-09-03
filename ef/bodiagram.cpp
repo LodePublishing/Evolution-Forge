@@ -6,7 +6,8 @@ BoDiagramWindow::BoDiagramWindow(const BoDiagramWindow& object) :
 	UI_Window((UI_Window)object),
 	anarace(object.anarace),
 	count(object.count),
-	bold(object.bold)
+	bold(object.bold),
+	oldMouse()
 {
 // TODO arrays?
 }
@@ -24,9 +25,11 @@ BoDiagramWindow::BoDiagramWindow(UI_Object* bod_parent, const unsigned int game_
 	UI_Window(bod_parent, BODIAGRAM_WINDOW_TITLE_STRING, theme.lookUpPlayerRect(BUILD_ORDER_DIAGRAM_WINDOW, game_number, max_games, player_number, max_players), theme.lookUpPlayerMaxHeight(BUILD_ORDER_DIAGRAM_WINDOW, game_number, max_games, player_number, max_players), NOT_SCROLLED),
 	anarace(NULL),
 	count(0),
-	bold(false)
+	bold(false),
+	oldMouse()
 {
 	resetData();
+	addHelpButton(DESCRIPTION_BODIAGRAM_WINDOW_CHAPTER);
 }
 
 
@@ -99,8 +102,10 @@ void BoDiagramWindow::process()
 	if((count>2)&&(getAbsoluteClientRect().Inside(mouse))&&(anarace->getRealTimer()>0))
 	{
 		bold=true;
-		setNeedRedrawNotMoved();
+		if(oldMouse!=mouse)
+			setNeedRedrawNotMoved();
 	}
+	oldMouse = mouse;
 }
 
 void BoDiagramWindow::processList()
@@ -356,9 +361,9 @@ void BoDiagramWindow::draw(DC* dc) const
 {
 	if(!isShown()) 
 		return;
-	UI_Window::draw(dc);
 	if(!checkForNeedRedraw())
 		return;
+	UI_Window::drawWindow(dc);
 //	if(infoWindow->isShown())
 		dc->SetBrush(*theme.lookUpBrush(BODIAGRAM_BACK1));
 //	else
@@ -409,8 +414,6 @@ void BoDiagramWindow::draw(DC* dc) const
 				os.str("");
 				dc->SetTextForeground(*theme.lookUpColor(BRIGHT_MINERALS_TEXT_COLOR));
 				unsigned int time = anarace->getRealTimer() * (mouse.x - getAbsoluteClientRectLeftBound()) / getClientRectWidth();
-				if(mouse.x < getAbsoluteClientRectLeftBound())
-					while(true);
 				os << anarace->getTimeStatistics()[coreConfiguration.getMaxTime()-time].getHaveMinerals()/100;
 				dc->DrawText(os.str(),getAbsoluteClientRectPosition()+Point(50,15));os.str("");
 				
@@ -485,6 +488,7 @@ void BoDiagramWindow::draw(DC* dc) const
 						 getAbsoluteClientRectLowerBound());
 		}
 		#endif
+	UI_Object::draw(dc);
 
 }
 

@@ -26,7 +26,7 @@ class UI_StaticText : public UI_Object
 		void removeCharBackspace(const unsigned int position);
 		void removeCharDelete(const unsigned int position);
 
-		UI_Object* checkTooltip();
+		UI_Object* checkToolTip();
 		UI_Object* checkHighlight();
 	
 		void updateText(const eString st_text);
@@ -52,9 +52,7 @@ class UI_StaticText : public UI_Object
 		bool highlight;
 };
 
-inline void UI_StaticText::doHighlight(const bool high_light) {
-	highlight = high_light;
-}
+
 
 inline void UI_StaticText::setPressed(const bool press) {
 	pressed = press;

@@ -5,6 +5,23 @@
 #include <iomanip>
 #include <string>
 
+unsigned int FONT_SIZE=6;
+
+void UI_Theme::setResolution(const eResolution theme_resolution) 
+{
+	// TODO auslagern in Conf Datei
+	resolution = theme_resolution;
+	switch(resolution)
+	{
+		case RESOLUTION_640x480:FONT_SIZE=3;break;
+		case RESOLUTION_800x600:FONT_SIZE=6;break;
+		case RESOLUTION_1024x768:FONT_SIZE=8;break;
+		case RESOLUTION_1280x1024:FONT_SIZE=10;break;
+		default:break;
+	}
+	// TODO update whole engine
+}
+
 UI_Theme::UI_Theme():
 	resolution(RESOLUTION_640x480),
 	bitdepth(DEPTH_32BIT),
@@ -13,7 +30,7 @@ UI_Theme::UI_Theme():
 {
 	for(unsigned int i = MAX_LANGUAGES;i--;)
 		for(unsigned int j = MAX_STRINGS;j--;)
-			stringList[i][j] = NULL;
+			stringList[i][j] = "";
 	for(unsigned int i = MAX_RESOLUTIONS;i--;)
 //		for(unsigned int j = MAX_LANGUAGES;j--;)
 			for(unsigned int k = MAX_FONTS;k--;)
@@ -65,9 +82,6 @@ UI_Theme::UI_Theme():
 
 UI_Theme::~UI_Theme()
 {
- 	for(unsigned int i = MAX_LANGUAGES;i--;)
- 		for(unsigned int j = MAX_STRINGS;j--;)
-			delete stringList[i][j];
 	for(unsigned int i = MAX_RESOLUTIONS;i--;)
 //		for(unsigned int j = MAX_LANGUAGES;j--;)
 			for(unsigned int k = MAX_FONTS;k--;)
@@ -106,6 +120,15 @@ UI_Theme::~UI_Theme()
 }
 
 
+const std::string& UI_Theme::lookUpHelpChapterString(const eHelpChapter id) const
+{
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_HELP_CHAPTER)) {
+		toLog("ERROR: (UI_Theme::lookUpHelpChapterString) id out of range.");return(*helpChapterStringsMap[INDEX_CHAPTER]);
+	}
+#endif
+	return(helpChapterStringsMap[id]);
+}
 
 void findandreplace( std::string& source, const std::string& find, const std::string& replace )
 {
@@ -120,7 +143,7 @@ const std::string UI_Theme::lookUpFormattedString(const eString id, const std::s
 		toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
 	}
 #endif
-	std::string bla = *(stringList[language][id]);
+	std::string bla = stringList[language][id];
 	findandreplace(bla, "%s", text);
 	return(bla);
 }
@@ -132,7 +155,7 @@ const std::string UI_Theme::lookUpFormattedString(const eString id, const unsign
 		toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
 	}
 #endif
-	std::string bla = *(stringList[language][id]);
+	std::string bla = stringList[language][id];
 	std::ostringstream os;
 	os.str("");
 	os << i; 
@@ -146,7 +169,7 @@ const std::string UI_Theme::lookUpFormattedString(const eString id, const unsign
 		toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
 	}
 #endif
-	std::string bla = *(stringList[language][id]);
+	std::string bla = stringList[language][id];
 	std::ostringstream os;
 	os.str("");
 	os << i;findandreplace(bla, "%i", os.str());os.str("");
@@ -162,7 +185,7 @@ const std::string UI_Theme::lookUpFormattedString(const eString id, const unsign
 		toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
 	}
 #endif
-	std::string bla=*(stringList[language][id]);
+	std::string bla = stringList[language][id];
 	std::ostringstream os;
 	os.str("");
 	if(bla.find("%2i")!=std::string::npos)
@@ -428,7 +451,7 @@ eGlobalWindow parse_global_window(const std::string& item)
 	if(item=="Map window") return(MAP_WINDOW);else
 	if(item=="Info window") return(INFO_WINDOW);else
 	if(item=="Tech tree window") return(TECHTREE_WINDOW);else
-	if(item=="Edit field window") return(EDIT_FIELD_WINDOW);else
+	if(item=="Save box window") return(SAVE_BOX_WINDOW);else
 	return(NULL_GLOBAL_WINDOW);
 }
 
@@ -557,7 +580,7 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 				case DOCK_LEFT_INSIDE_OF_COMMAND:rect->SetLeft(15);break;
 				case DOCK_RIGHT_INSIDE_OF_COMMAND:rect->SetLeft(windows[win]->GetWidth() - rect->GetWidth());break;
 				case DOCK_TOP_INSIDE_OF_COMMAND:rect->SetTop(0);break;
-				case DOCK_TOP_LEFT_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(0, 0));break;
+				case DOCK_TOP_LEFT_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(0, 15));break;
 				case DOCK_TOP_RIGHT_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() - rect->GetWidth(), 0));break;
 				case DOCK_BOTTOM_INSIDE_OF_COMMAND:rect->SetTop(-15+windows[win]->GetHeight() - rect->GetHeight());break;
 								   
@@ -573,6 +596,180 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 	}
 	return(rect);
 }
+
+void UI_Theme::loadHelpChapterStringFile(const std::string& dataFile)
+{
+	if((dataFile.substr(dataFile.size()-2,2) == "..") ||(dataFile.substr(dataFile.size()-1,1) == "."))
+		return;
+	const unsigned int MAX_PARAMETERS = 50;
+	char line[1024], old[1024];
+	char* buffer;
+	std::string parameter[MAX_PARAMETERS];
+	unsigned int value[MAX_PARAMETERS];
+	eDataType mode=ZERO_DATA_TYPE;
+	eSubDataType sub_mode=ZERO_SUB_DATA_TYPE;
+	eSubSubDataType sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
+
+	eLanguage current_language=ZERO_LANGUAGE;
+
+	unsigned int current_line = 0;
+	
+ 	for(unsigned int i=MAX_PARAMETERS;i--;)
+	{
+		parameter[i]="";
+		value[i]=0;
+	}
+
+	std::ifstream pFile(dataFile.c_str());
+	
+	if(!pFile.is_open())
+	{
+#ifdef _SCC_DEBUG
+		toLog("ERROR: (UI_Theme::loadStringFile) Could not open file! [" + dataFile + "]");
+#endif
+		return;
+	}
+	
+	while(pFile.getline(line, 1024))
+	{
+		if(pFile.fail())
+		{
+#ifdef _SCC_DEBUG
+			toLog("WARNING: (UI_Theme::loadStringFile) Long line!");
+#endif
+			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
+		}
+			
+		//line[strlen(line)-1]='\0';
+		if((line[0]=='#')||(line[0]=='\0')||(line=="")) continue;
+		for(unsigned int i=MAX_PARAMETERS;i--;)
+		{
+			parameter[i]="";
+			value[i]=0;
+		}
+		char* line2=line;		
+		while(((*line2)==32)||((*line2)==9))
+			++line2;
+		if((*line2)=='\0')
+			continue;
+		
+		strcpy(old,line2);
+		
+		if((buffer=strtok(line2,",\0"))!=NULL)
+			parameter[0]=buffer;
+		unsigned int k=1;
+		
+		while(((buffer=strtok(NULL,",\0"))!=NULL)&&(k<MAX_PARAMETERS))
+		{
+			while(((*buffer)==32)||((*buffer)==9))
+				++buffer;
+			parameter[k]=buffer;
+			++k;
+		}
+		if((buffer=strtok(NULL,",\0"))!=NULL)
+		{
+#ifdef _SCC_DEBUG
+			toLog("WARNING: (UI_Theme::loadStringFile) Too many parameters.");
+#endif
+			continue;
+		}
+		for(unsigned int j=MAX_PARAMETERS;j--;)
+			value[j]=atoi(parameter[j].c_str());
+		// mode	
+		if(mode==ZERO_DATA_TYPE)
+		{
+			mode=getDataType(parameter[0]);
+#ifdef _SCC_DEBUG
+//			if(mode!=ZERO_DATA_TYPE)
+//				toLog("Loading "+parameter[0]+"...");
+			if(mode==ZERO_DATA_TYPE)
+			{
+				if(parameter[0]=="@END")
+					toLog("WARNING: (UI_Theme::loadStringFile) Lonely @END.");
+				else
+					toLog("WARNING: (UI_Theme::loadStringFile) Line is outside a block but is not marked as comment.");
+			}
+#endif				
+			sub_mode=getSubDataType(mode);
+			sub_sub_mode=getSubSubDataType(mode);
+		}
+		else if(mode!=ZERO_DATA_TYPE)
+		{
+			if(parameter[0]=="@END")
+			{
+			// TODO! 
+				// @END of 1st sub area => return to begin of data type
+
+// - deepness |1|: end of SUB-MODE
+				if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE)&&
+				  ((current_language!=ZERO_LANGUAGE)||(current_resolution!=ZERO_RESOLUTION)||(current_theme!=ZERO_THEME)))
+				{
+					current_language=ZERO_LANGUAGE;
+					current_resolution=ZERO_RESOLUTION;
+					current_theme=ZERO_THEME;
+					current_line=0;
+				}
+				// @END of 2nd sub area => return to begin of sub data type
+				else 
+				if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
+// - deepness |2|: end of SUB-SUB-MODE
+				((current_language!=ZERO_LANGUAGE)||(current_theme!=ZERO_THEME)))
+				{
+					current_language=ZERO_LANGUAGE;
+					current_theme=ZERO_THEME;
+					current_line=0;
+				}
+				// @END  of 1st sub area (with an existing sub sub area...)
+// - deepness |2|: end of SUB-MODE
+				else if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
+// sub-sub-items already closed -> close sub-item
+						(current_resolution!=ZERO_RESOLUTION)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
+				{
+					current_resolution=ZERO_RESOLUTION;
+					current_line=0;
+				}
+				// @END of 0 area => reset mode
+				else
+				{
+					mode=ZERO_DATA_TYPE;
+					sub_mode=ZERO_SUB_DATA_TYPE;
+					sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
+					current_line=0;
+				}
+			}
+			else
+			if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(current_language==ZERO_LANGUAGE)&&(current_resolution==ZERO_RESOLUTION)&&(current_theme==ZERO_THEME))
+			{
+				switch(sub_mode)
+				{
+					case LANGUAGE_SUB_DATA_TYPE:current_language = getLanguageSubDataEntry(line2);break;
+					case RESOLUTION_SUB_DATA_TYPE:current_resolution = getResolutionSubDataEntry(line2);break;
+					case COLOR_THEME_SUB_DATA_TYPE:current_theme = getThemeSubDataEntry(line2);break;
+					default:break;
+				}
+				current_line = 0;
+			}
+			// => hat nur 1 Ebene => Position festgestellt!
+			else if((sub_mode != ZERO_SUB_DATA_TYPE)&&(sub_sub_mode == ZERO_SUB_SUB_DATA_TYPE))
+			{
+				switch(mode)
+				{
+					case STRING_DATA_TYPE:stringList[current_language][current_line] = parameter[0];
+					default:break;
+				}
+				++current_line;
+			}
+			// 0 ebenen -> buttons :) BUTTON_COLORS_DATA_TYPE?? TODO
+		} // end if mode != ZERO_DATA_TYPE
+	} // end while
+
+	for(unsigned int i = MAX_LANGUAGES; i--;)
+		for(unsigned int j = MAX_STRINGS; j--;)
+			if(stringList[i][j] == "")
+				stringList[i][j] = "ERROR";
+
+}
+
 
 void UI_Theme::loadStringFile(const std::string& dataFile)
 {
@@ -733,7 +930,7 @@ void UI_Theme::loadStringFile(const std::string& dataFile)
 			{
 				switch(mode)
 				{
-					case STRING_DATA_TYPE:stringList[current_language][current_line] = new std::string(parameter[0]);
+					case STRING_DATA_TYPE:stringList[current_language][current_line] = parameter[0];
 					default:break;
 				}
 				++current_line;
@@ -744,8 +941,8 @@ void UI_Theme::loadStringFile(const std::string& dataFile)
 
 	for(unsigned int i = MAX_LANGUAGES; i--;)
 		for(unsigned int j = MAX_STRINGS; j--;)
-			if(stringList[i][j] == NULL)
-				stringList[i][j] = new std::string("ERROR");
+			if(stringList[i][j] == "")
+				stringList[i][j] = "ERROR";
 
 }
 
@@ -1056,7 +1253,7 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 			{
 				switch(mode)
 				{
-					case STRING_DATA_TYPE:stringList[current_language][current_line]=new std::string(parameter[0]);
+					case STRING_DATA_TYPE:stringList[current_language][current_line] = parameter[0];
 					//toLog(parameter[0]);
 					break;
 					case COLOR_DATA_TYPE:
@@ -1133,8 +1330,7 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 							}
 							else 
 								bitmapList[current_resolution][current_theme][current_line] = temp;
-							
-//							SDL_SetColorKey(bitmapList[current_resolution][current_theme][current_line]->getSurface(), SDL_SRCCOLORKEY , SDL_MapRGB(bitmapList[current_resolution][current_theme][current_line]->getFormat(), 0,0,0));
+							SDL_SetColorKey(bitmapList[current_resolution][current_theme][current_line], SDL_SRCCOLORKEY , SDL_MapRGB(bitmapList[current_resolution][current_theme][current_line]->format, 0,0,0));
 		
 						}break;
 					default:break;

@@ -39,7 +39,9 @@ class ForceEntry : public UI_Button
 		
 		void HideIt();
 
-		UI_Object* checkTooltip();
+		void reloadOriginalSize();
+			
+		UI_Object* checkToolTip();
 		UI_Object* checkHighlight();
 	
 		UI_NumberField* timeEntryBox;

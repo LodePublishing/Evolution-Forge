@@ -83,7 +83,7 @@ class PREBUILDORDER
 
                 void setStartPosition(const unsigned int startPosition);
                 void setRace(const eRace race); // => gleichzeitig wird harvestspeed geaendert und condition und goal muessen u.U. neugewaehlt werden!
-                void assignStartCondition(const START_CONDITION* start_condition);
+                void assignStartCondition(const START_CONDITION* start_condition, const bool neutral_player = false);
                 void assignGoal(const GOAL_ENTRY* goal);		
 		
 //		static map<CODE, SITUATION*> situationHashMap;
@@ -241,9 +241,7 @@ inline void PREBUILDORDER::setRace(const eRace race) // => gleichzeitig wird har
 	pStart->setPlayerRace(race);
 }
 
-inline void PREBUILDORDER::assignStartCondition(const START_CONDITION* start_condition) {
-	pStart->assignStartCondition(start_condition);
-}
+
 
 inline void PREBUILDORDER::assignGoal(const GOAL_ENTRY* goal) {
 	pStart->assignGoal(goal);

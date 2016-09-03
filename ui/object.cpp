@@ -29,7 +29,7 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const S
 	toolTipString(NULL_STRING)
 {
 	setParent(parent_object);
-	addToProcessArray(this);
+//	addToProcessArray(this);
 }
 
 UI_Object& UI_Object::operator=(const UI_Object& object)
@@ -103,9 +103,14 @@ UI_Object::~UI_Object()
 	removeFromFamily(); // !!!!!
 }
 
+const bool UI_Object::addKey(unsigned int key, unsigned int mod)
+{
+	return(false);
+}
+
 void UI_Object::reloadOriginalSize()
 {
-	UI_Object::addToProcessArray(this);
+//	UI_Object::addToProcessArray(this);
 	UI_Object* tmp=children;  // process all children of gadget
 	if (tmp) {
 		do {
@@ -119,7 +124,7 @@ void UI_Object::reloadOriginalSize()
 #include <sstream>
 void UI_Object::adjustPositionAndSize(const eAdjustMode adjust_mode, const Size& size)
 {
-	UI_Object::addToProcessArray(this);
+//	UI_Object::addToProcessArray(this);
 	sizeHasChanged = false;
 	signed int left = originalRect.GetLeft();
 	signed int top = originalRect.GetTop();
@@ -265,7 +270,6 @@ void UI_Object::adjustPositionAndSize(const eAdjustMode adjust_mode, const Size&
 			toLog("Wheee");
 		break;//TODO error
 	}
-	
 }
 
 
@@ -294,7 +298,7 @@ void UI_Object::adjustRelativeRect(const Rect& edge)
 		if(edge.GetSize()!=targetRect.GetSize())
 			startRect.SetSize(getSize());
  
-		UI_Object::addToProcessArray(this);
+//		UI_Object::addToProcessArray(this);
 		targetRect=edge;
 	}
 //	targetRect.width=edge.width;
@@ -512,7 +516,8 @@ void UI_Object::setRect(const Rect& rect)
 	targetRect = rect;
 	relativeRect = rect;
 	setNeedRedrawMoved();
-	UI_Object::addToProcessArray(this);
+	sizeHasChanged=true;
+//	UI_Object::addToProcessArray(this);
 }
 
 void UI_Object::setPosition(const Point& position)
@@ -525,32 +530,30 @@ void UI_Object::setPosition(const Point& position)
 		toLog("DEBUG: (UI_Object::setPosition): Value position out of range.");return;
 	}
 #endif
-	UI_Object::addToProcessArray(this);
 	startRect.SetTopLeft(position);
 	targetRect.SetTopLeft(position);
 	relativeRect.SetTopLeft(position);
 	setNeedRedrawMoved();
-	UI_Object::addToProcessArray(this);
+//	UI_Object::addToProcessArray(this);
 }
 
 void UI_Object::setHeight(const unsigned int height) 
 {
 	if(getTargetHeight() == height)
 		return;
-	UI_Object::addToProcessArray(this);
 	sizeHasChanged = true;
 	relativeRect.SetHeight(height);
 	startRect.SetHeight(height);
 	targetRect.SetHeight(height);
 	setNeedRedrawNotMoved(); // TODO wenns kleiner wird
-	UI_Object::addToProcessArray(this);
+//	UI_Object::addToProcessArray(this);
 }
 
 void UI_Object::setWidth(const unsigned int width) 
 {
 	if(relativeRect.GetWidth() == width)
 		return;
-	UI_Object::addToProcessArray(this);
+//	UI_Object::addToProcessArray(this);
 	sizeHasChanged = true;
 	relativeRect.SetWidth(width);
 	startRect.SetWidth(width);
@@ -562,7 +565,7 @@ void UI_Object::setSize(const Size size)
 {
 	if(relativeRect.GetSize() == size)
 		return;
-	UI_Object::addToProcessArray(this);
+//	UI_Object::addToProcessArray(this);
 	sizeHasChanged = true;
 	relativeRect.SetSize(size);
 	startRect.SetSize(size);
@@ -574,7 +577,7 @@ void UI_Object::setLeft(const signed int x)
 {
 	if(relativeRect.GetLeft() == x)
 		return;
-	UI_Object::addToProcessArray(this);
+//	UI_Object::addToProcessArray(this);
 	relativeRect.SetLeft(x);
 	startRect.SetLeft(x);
 	targetRect.SetLeft(x);
@@ -601,20 +604,24 @@ void UI_Object::Show(const bool show)
 	else if((!show)&&(shown))
 	{
 		setNeedRedrawMoved(true);
-		setNeedRedrawMoved(false); // ~~
+//		setNeedRedrawMoved(false); // ~~ ?
 		shown = false;
 	}
 }
 
 void UI_Object::setNeedRedrawMoved(const bool need_redraw)  // moved item
 {
-//	if(!isShown())
-//		return;
+	if(!isShown())
+		return;
 	setNeedRedrawNotMoved(need_redraw);
 	if((need_redraw)&&(getParent()))
 	{
-		getParent()->checkForChildrenOverlap(getRelativeRect());
-		getParent()->setNeedRedrawNotMoved(true);
+//		getParent()->checkForChildrenOverlap(getRelativeRect()); TODO
+		
+		if(!getParent()->getAbsoluteRect().Inside(getAbsoluteRect()))
+			getParent()->setNeedRedrawMoved(true);
+		else
+			getParent()->setNeedRedrawNotMoved(true);
 	}
 }
 
@@ -632,14 +639,15 @@ void UI_Object::checkForChildrenOverlap(const Rect& rect)
 
 void UI_Object::setNeedRedrawNotMoved(const bool need_redraw)
 {
-	//if(!isShown())
-	//	return;
+	if(!isShown())
+		return;
 
 	needRedraw = need_redraw;
 
 	if(!need_redraw)
 		return;
 
+	DC::addRectangle(Rect(getAbsolutePosition(), getSize()+Size(1,1))); // TODO Hack fuer buttons
         UI_Object* tmp = children;
 
         if (tmp) {
@@ -650,14 +658,30 @@ void UI_Object::setNeedRedrawNotMoved(const bool need_redraw)
         }
 }
 
+void UI_Object::setNeedRedrawNotMovedFirstChild(const bool need_redraw)
+{
+	if(!isShown())
+		return;
+
+	needRedraw = need_redraw;
+
+	if(!need_redraw)
+		return;
+
+	DC::addRectangle(Rect(getAbsolutePosition(), getSize()+Size(1,1))); // TODO Hack fuer buttons
+	if(children)
+		children->setNeedRedrawNotMoved(needRedraw);
+}
+
 void UI_Object::clearRedrawFlag()
 {
-//	if(!isShown())
-//		return;
-	if(needRedraw)
+	if(!isShown())
 	{
-//		needRedraw = false;
+		needRedraw = false;
+		return;
 	}
+	if(needRedraw)
+		needRedraw = false;
 	UI_Object* tmp = children;
 	if (tmp) {
 		do {
@@ -671,8 +695,7 @@ const bool UI_Object::checkForNeedRedraw() const
 {
 	if(needRedraw)
 	{
-//		++redrawnObjects;
-//		const_cast< UI_Object* > (this)->needRedraw=false;
+		++redrawnObjects;
 		return(true);
 	} else return(false);
 }
@@ -735,7 +758,7 @@ void UI_Object::setResolution(const Size resolution)
 }
 
 
-void UI_Object::addToProcessArray(UI_Object* item)
+/*void UI_Object::addToProcessArray(UI_Object* item)
 {
 	for(std::list<UI_Object*>::const_iterator i = processArray.begin(); i != processArray.end(); ++i)
 		if(*i == item)
@@ -756,7 +779,71 @@ void UI_Object::copyToNextProcessArray()
 	processArray.clear();
 	processArray = nextProcessArray;
 	nextProcessArray.clear();
+}*/
+
+void UI_Object::resetWindow()
+{
+	UI_Object::windowSelected = false;
+	UI_Object::currentWindow = NULL;
 }
+/*
+bool UI_Object::editFieldActive()
+{
+	if(editFieldList.empty())
+		return(false);
+	else return(true);
+}
+
+void UI_Object::addEditField(UI_EditField* edit_field)
+{
+	if(*editField == edit_field)
+		return;
+	else
+		for(std::list<UI_EditField*>::iterator i = editFieldList.begin(); i != editFieldList.end(); ++i)
+			if(*i==edit_field)
+				return;
+	editField = editFieldList.insert(editFieldList.end(), edit_field);
+}
+
+void UI_Object::removeEditField(UI_EditField* edit_field)
+{
+	if(*editField == edit_field)
+		editField = editFieldList.erase(editField);
+	else
+	{
+		for(std::list<UI_EditField*>::iterator i = editFieldList.begin(); i != editFieldList.end(); ++i)
+		{
+			if(*i==edit_field)
+			{
+				editFieldList.erase(i);
+				break;
+			}
+		}
+	}
+}
+
+void UI_Object::rotateEditField()
+{
+	if(!editFieldActive())
+		return;
+	editField++;
+}
+
+UI_EditField* UI_Object::getEditField()
+{
+	if(!editFieldActive())
+		return(NULL);
+	return(*editField);
+}*/
+
+
+//std::list<UI_EditField*> UI_Object::editFieldList;
+//std::list<UI_EditField*>::iterator UI_Object::editField;
+//UI_Object* hotkey[300];
+
+UI_Object* UI_Object::focus;
+
+//unsigned int UI_Object::key;
 
 UI_Theme UI_Object::theme;
 UI_ToolTip* UI_Object::tooltip(NULL);
@@ -765,7 +852,6 @@ unsigned int UI_Object::max_x(0);
 unsigned int UI_Object::max_y(0);
 Point UI_Object::mouse(Point(0,0));
 
-UI_EditField* UI_Object::editTextField(NULL);
 unsigned int UI_Object::mouseType(0);
 
 UI_Window* UI_Object::currentWindow = NULL;
@@ -773,5 +859,11 @@ bool UI_Object::windowSelected = false;
 unsigned int UI_Object::redrawnObjects(0);
 std::list<std::string> UI_Object::msgList;
 
-std::list<UI_Object*> UI_Object::processArray;
-std::list<UI_Object*> UI_Object::nextProcessArray;
+//std::list<UI_Object*> UI_Object::processArray;
+//std::list<UI_Object*> UI_Object::nextProcessArray;
+
+bool UI_Object::toolTipWasDeleted = false;
+
+//unsigned int UI_Object::key;
+//unsigned int UI_Object::mod;
+

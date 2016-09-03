@@ -454,6 +454,9 @@ void DATABASE::loadStartConditionFile(const std::string& startconditionFile)
 						//TODO: values checken!
 					startcondition->setLocationTotal(location-1, k, count);
 					startcondition->setLocationAvailible(location-1, k, count);
+					std::ostringstream os;
+					os << k << " / " << count;
+					toLog(os.str());
 				}
 			}
 		} // end if == LOCATION

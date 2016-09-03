@@ -62,20 +62,20 @@
 		Message window, 250, 75, 75, dock bottom center inside of, Main window
 		Help window, 500, 400, 400, dock center inside of, Main window
 		Settings window, 425, 368, 368, dock center inside of, Main window
-		Map window, 425, 368, 368, dock center inside of, Main window
+		Map window, 600, 450, 450, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
-		Tech tree window, 300, 300, 300, dock bottom right inside of, Main window
-		Edit field window, 350, 150, 150, dock center inside of, Main window
+		Tech tree window, 500, 200, 200, dock bottom center inside of, Main window
+		Save box window, 350, 150, 150, dock center inside of, Main window
 	@END
 	@800x600
 		Main window, 800, 600, 600, absolute coordinates, 0, 0
 		Message window, 300, 100, 100, dock bottom center inside of, Main window
 		Help window, 600, 500, 500, dock center inside of, Main window
 		Settings window, 500, 400, 400, dock center inside of, Main window
-		Map window, 500, 400, 400, dock center inside of, Main window
+		Map window, 750, 550, 550, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
-		Tech tree window, 500, 500, 500, dock center inside of, Main window
-		Edit field window, 400, 150, 150, dock center inside of, Main window
+		Tech tree window, 600, 250, 250, dock bottom center inside of, Main window
+		Save box window, 400, 150, 150, dock center inside of, Main window
 	@END
 	
 	@1024x768
@@ -83,20 +83,20 @@
 		Message window, 350, 125, 125, dock bottom center inside of, Main window
 		Help window, 800, 600, 600, dock center inside of, Main window
 		Settings window, 600, 450, 450, dock center inside of, Main window
-		Map window, 600, 450, 450, dock center inside of, Main window
+		Map window, 950, 700, 700, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
-		Tech tree window, 500, 500, 500, dock center inside of, Main window
-		Edit field window, 400, 150, 150, dock center inside of, Main window
+		Tech tree window, 700, 300, 300, dock bottom center inside of, Main window
+		Save Box window, 400, 150, 150, dock center inside of, Main window
 	@END
 	@1280x1024
 		Main window, 1280, 1024, 1024, Main window, absolute coordinates, 0, 0
 		Message window, 400, 150, 150, dock top center inside of, Main window
 		Help window, 900, 700, 700, dock center inside of, Main window
 		Settings window, 700, 500, 500, dock center inside of, Main window
-		Map window, 700, 500, 500, dock center inside of, Main window
+		Map window, 1200, 900, 900, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
-		Tech tree window, 500, 500, 500, dock bottom center inside of, Main window
-		Edit field window, 450, 150, 150, dock center inside of, Main window
+		Tech tree window, 800, 350, 350, dock bottom center inside of, Main window
+		Save Box window, 450, 150, 150, dock center inside of, Main window
 	@END
 @END
 
@@ -635,6 +635,7 @@
 		35,  35, 110, SOLID
 		110,  35,  35, SOLID
 		35, 110,  35, SOLID
+		
 		255, 255, 255, SOLID
 
 # continue button brush
@@ -796,7 +797,7 @@
 	@640x480
 		@DARK_RED_THEME
 			null
-			add
+			increase
 			sub
 			cancel
 			arrow_left
@@ -811,14 +812,26 @@
 			mouse3
 			red_radio_off
 			red_radio_on
-			back
+			back_640
 			bar
 			key
+			clawsoftware
+			new
+			open
+			save
+			refresh
+			back
+			forward
+			add
+			delete
+			help
+			map
+			settings
 		@END
 
 		@DARK_BLUE_THEME
 			null
-			add
+			increase
 			sub
 			cancel
 			arrow_left
@@ -833,13 +846,25 @@
 			mouse3
 			blue_radio_off
 			blue_radio_on
-			back
+			back_640
 			bar
 			key
+			clawsoftware
+			new
+			open
+			save
+			refresh
+			back
+			forward
+			add
+			delete
+			help
+			map
+			settings
 		@END
 		@YELLOW_THEME
 			null
-			add
+			increase
 			sub
 			cancel
 			arrow_left
@@ -854,16 +879,28 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			back
+			back_640
 			bar
 			key
+			clawsoftware
+			new
+			open
+			save
+			refresh
+			back
+			forward
+			add
+			delete
+			help
+			map
+			settings
 		@END
 
 	@END
 	@800x600
 		@DARK_RED_THEME
 			null
-			add
+			increase
 			sub
 			cancel
 			arrow_left
@@ -878,14 +915,26 @@
 			mouse3
 			red_radio_off
 			red_radio_on
-			back
+			back_800
 			bar
 			key
+			clawsoftware
+			new
+			open
+			save
+			refresh
+			back
+			forward
+			add
+			delete
+			help
+			map
+			settings
 		@END
 
 		@DARK_BLUE_THEME
 			null
-			add
+			increase
 			sub
 			cancel
 			arrow_left
@@ -900,13 +949,25 @@
 			mouse3
 			blue_radio_off
 			blue_radio_on
-			back
+			back_800
 			bar
 			key
+			clawsoftware
+			new
+			open
+			save
+			refresh
+			back
+			forward
+			add
+			delete
+			help
+			map
+			settings
 		@END
 		@YELLOW_THEME
 			null
-			add
+			increase
 			sub
 			cancel
 			arrow_left
@@ -921,9 +982,21 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			back
+			back_800
 			bar
 			key
+			clawsoftware
+			new
+			open
+			save
+			refresh
+			back
+			forward
+			add
+			delete
+			help
+			map
+			settings
 		@END
 
 	@END
@@ -931,7 +1004,7 @@
 	@1024x768
 		@DARK_RED_THEME
 			null
-			add
+			increase
 			sub
 			cancel
 			arrow_left
@@ -946,14 +1019,26 @@
 			mouse3
 			red_radio_off
 			red_radio_on
-			back
+			back_1024
 			bar
 			key
+			clawsoftware
+			new
+			open
+			save
+			refresh
+			back
+			forward
+			add
+			delete
+			help
+			map
+			settings
 		@END
 
 		@DARK_BLUE_THEME
 			null
-			add
+			increase
 			sub
 			cancel
 			arrow_left
@@ -968,13 +1053,25 @@
 			mouse3
 			blue_radio_off
 			blue_radio_on
-			back
+			back_1024
 			bar
 			key
+			clawsoftware
+			new
+			open
+			save
+			refresh
+			back
+			forward
+			add
+			delete
+			help
+			map
+			settings
 		@END
 		@YELLOW_THEME
 			null
-			add
+			increase
 			sub
 			cancel
 			arrow_left
@@ -989,16 +1086,28 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			back
+			back_1024
 			bar
 			key
+			clawsoftware
+			new
+			open
+			save
+			refresh
+			back
+			forward
+			add
+			delete
+			help
+			map
+			settings
 		@END
 
 	@END
 	@1280x1024
 		@DARK_RED_THEME
 			null
-			add
+			increase
 			sub
 			cancel
 			arrow_left
@@ -1013,14 +1122,26 @@
 			mouse3
 			red_radio_off
 			red_radio_on
-			back
+			back_1280
 			bar
 			key
+			clawsoftware
+			new
+			open
+			save
+			refresh
+			back
+			forward
+			add
+			delete
+			help
+			map
+			settings
 		@END
 
 		@DARK_BLUE_THEME
 			null
-			add
+			increase
 			sub
 			cancel
 			arrow_left
@@ -1035,13 +1156,25 @@
 			mouse3
 			blue_radio_off
 			blue_radio_on
-			back
+			back_1280
 			bar
 			key
+			clawsoftware
+			new
+			open
+			save
+			refresh
+			back
+			forward
+			add
+			delete
+			help
+			map
+			settings
 		@END
 		@YELLOW_THEME
 			null
-			add
+			increase
 			sub
 			cancel
 			arrow_left
@@ -1056,14 +1189,34 @@
 			mouse3
 			yellow_radio_off
 			yellow_radio_on
-			back
+			back_1280
 			bar
 			key
+			clawsoftware
+			new
+			open
+			save
+			refresh
+			back
+			forward
+			add
+			delete
+			help
+			map
+			settings
 		@END
-
 	@END
 
 @END
+
+
+#00111
+#00011
+#00000
+
+# glow always
+# 
+
 
 @BUTTON_COLORS
 # speed, type, startbrush, endbrush, starttextcolor, endtextcolor, startborderpen, endborderpen, bitmap
@@ -1071,9 +1224,9 @@
 #	5 phases: DISABLED_BUTTON_PHASE,  NORMAL_BUTTON_PHASE,  PRESSED_BUTTON_PHASE,  HIGHLIGHT_BUTTON_PHASE, PRESSED_HIGHLIGHTED_BUTTON_PHASE
 # continue button brush
 	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,    0,  0,  0,  0,  0
-# non-button force entry
+# force entry button
 	20, 2,   38, 38, 38, 38, 38,   38, 38, 38,  5,  5,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    3,  3,  3,  3,  3,    3,  3,  3,  4,  4,    0,  0,  0,  0,  0
-# add button
+# increase button
 	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,    1,  1,  1,  1,  1
 # sub button
 	20, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   15, 15, 15, 15, 15,   17, 17, 17, 17, 17,    2,  2,  2,  2,  2
@@ -1093,12 +1246,26 @@
 	40, 2,   17, 17, 17, 17, 17,   17, 17, 28, 28, 28,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   33, 33, 33, 33, 33,   33, 33, 44, 44, 44,    0,  0,  0,  0,  0
 	40, 2,   18, 18, 18, 18, 18,   18, 18, 29, 29, 29,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   34, 34, 34, 34, 34,   34, 34, 45, 45, 45,    0,  0,  0,  0,  0
 
+# bright bo list
+	40, 2,   19, 19, 19, 19, 19,   19, 19, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   24, 24, 24, 24, 24,   24, 24, 35, 35, 35,    0,  0,  0,  0,  0
+	40, 2,   20, 20, 20, 20, 20,   20, 20, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   25, 25, 25, 25, 25,   25, 25, 36, 36, 36,    0,  0,  0,  0,  0
+	40, 2,   21, 21, 21, 21, 21,   21, 21, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   26, 26, 26, 26, 26,   26, 26, 37, 37, 37,    0,  0,  0,  0,  0
+	40, 2,   22, 22, 22, 22, 22,   22, 22, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   27, 27, 27, 27, 27,   27, 27, 38, 38, 38,    0,  0,  0,  0,  0
+	40, 2,   23, 23, 23, 23, 23,   23, 23, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   28, 28, 28, 28, 28,   28, 28, 39, 39, 39,    0,  0,  0,  0,  0
+	40, 2,   24, 24, 24, 24, 24,   24, 24, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   29, 29, 29, 29, 29,   29, 29, 40, 40, 40,    0,  0,  0,  0,  0
+	40, 2,   25, 25, 25, 25, 25,   25, 25, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   30, 30, 30, 30, 30,   30, 30, 41, 41, 41,    0,  0,  0,  0,  0
+	40, 2,   26, 26, 26, 26, 26,   26, 26, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   31, 31, 31, 31, 31,   31, 31, 42, 42, 42,    0,  0,  0,  0,  0
+	40, 2,   27, 27, 27, 27, 27,   27, 27, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   32, 32, 32, 32, 32,   32, 32, 43, 43, 43,    0,  0,  0,  0,  0
+	40, 2,   28, 28, 28, 28, 28,   28, 28, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   33, 33, 33, 33, 33,   33, 33, 44, 44, 44,    0,  0,  0,  0,  0
+	40, 2,   29, 29, 29, 29, 29,   29, 29, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   34, 34, 34, 34, 34,   34, 34, 45, 45, 45,    0,  0,  0,  0,  0
+
 	40, 2,   30, 30, 30, 30, 30,   30, 30, 30, 30, 30,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,   35, 35, 35, 35, 35,   35, 35, 46, 46, 46,    0,  0,  0,  0,  0
 # main window tabs 
 	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,    0,  0,  0,  0,  0
 # force window add goal
 	30, 2,    3,  3,  7,  3,  7,    3,  7,  3,  7,  3,    8,  8,  8,  8,  8,   10,  9,  9,  9,  9,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,    0,  0,  0,  0,  0
-
+# edit field button
+	30, 2,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,    0,  0,  0,  0,  0
 
 # statistics 
 	30, 2,    2,  2,  3,  2,  3,    2,  3,  2,  3,  2,   16, 27, 16, 27, 16,   10, 27, 10, 27, 10,    3,  3,  3,  3,  3,    3,  3,  3,  7,  7,    0,  0,  0,  0,  0
@@ -1129,7 +1296,34 @@
 # checkButton
 	40, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   16, 16, 16, 16, 16,    0,  0,  0, 17,  17,   14, 14, 15, 14, 15
 # text button
-	40, 2,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    2,  2,  2,  2, 10,    2,  2,  2, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,    0,  0,  0,  0,  0
+	40, 2,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    2,  2,  2,  2,  2,    2,  2,  2, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,    0,  0,  0,  0,  0
+
+# new button
+	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   20, 20, 20, 20, 20
+# load button
+	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   21, 21, 21, 21, 21
+# save button
+	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   22, 22, 22, 22, 22
+# refresh button
+	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   23, 23, 23, 23, 23
+# back button
+	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   24, 24, 24, 24, 24
+# forward button
+	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   25, 25, 25, 25, 25
+# add button
+	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   26, 26, 26, 26, 26
+# delete button
+	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   27, 27, 27, 27, 27
+# help button
+	20, 2,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   28, 28, 28, 28, 28
+# help tab
+	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   28, 28, 28, 28, 28
+# map tab
+	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   29, 29, 29, 29, 29
+# settings tab
+	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   30, 30, 30, 30, 30
+
+	
 @END
 
 @BUTTON_WIDTH

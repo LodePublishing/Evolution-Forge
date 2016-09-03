@@ -8,7 +8,7 @@ TechTreeWindow::TechTreeWindow(UI_Object* techtree_parent) :
 	s2(Size(120, 25))
 {	
 	for(unsigned int i = UNIT_TYPE_COUNT;i--;)
-		node[i] = new UI_Object(this, Rect(Point(getWidth()/2, 0),s));
+		node[i] = new UI_Object(this, Rect(Point((getWidth() - s.GetWidth())/2, 15),s));
 }
 
 TechTreeWindow::~TechTreeWindow()
@@ -57,7 +57,7 @@ void TechTreeWindow::process()
 				if(x1 > px - (signed int)(s.GetWidth())/2)
 					x1 = px - (s.GetWidth())/2;
 
-				node[*i]->adjustRelativeRect(Rect(Point(px - (s.GetWidth())/2, k*s2.GetHeight()), s));
+				node[*i]->adjustRelativeRect(Rect(Point(px - s.GetWidth()/2, 15+k*s2.GetHeight()), s));
 				node[*i]->Show();
 				checked[*i]=true;
                                 ++x;
@@ -70,7 +70,7 @@ void TechTreeWindow::process()
 	for(unsigned int i = UNIT_TYPE_COUNT;i--;)
 		if(!checked[i])
 		{
-			node[i]->setPosition(Point(getWidth()/2, 0));
+			node[i]->setPosition(Point((getWidth() - s.GetWidth())/2, 15));
 			node[i]->Hide();
 		}
 	UI_Window::process();
@@ -80,7 +80,7 @@ void TechTreeWindow::draw(DC* dc) const
 {
 	if(!isShown())
 		return;
-	UI_Object::draw(dc);
+	UI_Window::draw(dc);
 
 
 // TODO umformen

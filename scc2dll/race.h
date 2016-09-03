@@ -10,13 +10,13 @@ class RACE: public PRERACE
         	static int basicLength;
         	static int basicBuildOrder[2][MAX_LENGTH];
         	int mutationRate;
-		BUILDING building[MAX_BUILDINGS]; //building declaration in main.h
         	int buildGene(int unit);
        		static void generateBasicBuildOrder(); //pre-process goals to create a b
 		int pFitness;
 		int sFitness;
 		int tFitness;
 	public:
+		static int bestTime; // cancel calculation if this calculation is worse than 25%
 //Output:
 		int setpFitness(int num);
 		int setsFitness(int num);

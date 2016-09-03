@@ -64,18 +64,6 @@
 #define MAX_PREPROCESS_BUILDORDER 1
 #define MIN_PREPROCESS_BUILDORDER 0
 
-struct BUILDING
-{
-	int TB,RB;			// Remaining Buildtime
-	int type;		// Type of Building
-	int unitCount;	// number of units which are moving... currently ONLY for movements...
-	int facility;	// in what facility it was produced
-	int IP;			// for back-tracking certain buildings (especially for the 'cancel building' option of zerg)
-	int location;	// where the building was finished
-	int goal;		// For movement, where the units will move to, not yet fully implemented
-	int onTheRun;	// is this building/unit moving around or is it under construction at some place?
-};
-
 struct LAST
 {
 	int unit;

@@ -15,10 +15,7 @@ LRES_PROGRAM_OBJ = $(PROGRAM)_resourcesl.o
 
 WEXTRALIBS =  -Wl,--subsystem,windows -mwindows -mthreads  -Wl,--version-script,$(WWXPATH)/version-script -lrpcrt4 -loleaut32 -lole32 -luuid -lwinspool -lwinmm -lshell32 -lcomctl32 -lctl3d32 -ladvapi32 -lwsock32 -l$(PROGRAM)
 
-EXTRALIBS = -Wl,--version-script,$(LWXPATH)/version-script -L/usr/lib -L/usr/X11R6/lib -lgtk -lgdk -rdynamic -lgmodule -lglib -ldl -lXi -lXext -lX11 -lm -lpng -ljpeg -ltiff -lz -ldl -lm
-#-lgthread -lglib -ldl -lXi -lXext -lX11 -lm -lpng -ljpeg -ltiff -lz -ldl -lm
- 
-#-pthread   -Wl,--version-script,$(LWXPATH)/version-script -L/usr/lib -L/usr/X11R6/lib -lgtk -lgdk -rdynamic -lgmodule -lgthread -lglib -lpthread -ldl -lXi -lXext -lX11 -lm -lpng -ljpeg -ltiff -lz -ldl -lm $(PROGRAM).so.1.0
+EXTRALIBS =  -pthread   -Wl,--version-script,$(LWXPATH)/version-script -L/usr/lib -L/usr/X11R6/lib -lgtk -lgdk -rdynamic -lgmodule -lgthread -lglib -lpthread -ldl -lXi -lXext -lX11 -lm -lpng -ljpeg -ltiff -lz -ldl -lm $(PROGRAM).so.1.0
 
 WLDLIBS=$(WWXPATH)/lib/libwx_msw-2.4-i386-mingw32msvc.dll $(WEXTRALIBS)
 LDLIBS=$(LWXPATH)/lib/libwx_gtk-2.4.so.0.1.1 $(EXTRALIBS)
@@ -36,7 +33,7 @@ WCPPFLAGS = -I$(WWXPATH)/lib/wx/include/msw-2.4-i386-mingw32msvc -I$(WWXPATH)/in
 CPPFLAGS = -I$(LWXPATH)/lib/wx/include/gtk-2.4 -I$(LWXPATH)/include -I/user/include/gtk-1.2 -I/usr/include/glib-1.2 -I/usr/lib/glib/include -D_REENTRANT -I/usr/X11R6/include -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -D__WXGTK__ -DGTK_NO_CHECK_CASTS
 
 WCXXFLAGS = $(WCPPFLAGS) -fno-pcc-struct-return -MMD -mthreads -Wall
-CXXFLAGS = $(CPPFLAGS) -O3 -MMD -Wall -g
+CXXFLAGS = $(LCPPFLAGS) -O3 -MMD -Wall
 #-pthread -Wall 
 
 #WPICFLAGS = -UWXUSINGDLL -DWXMAKINGDLL=1 -D_DLL=1 -D_WINDLL=1
@@ -49,6 +46,14 @@ CXXFLAGS = $(CPPFLAGS) -O3 -MMD -Wall -g
 .rc_resourcesl.o:
 	$(RESCOMP) -i $< -o $@ $(LRESFLAGS)
 
+
+dll:	$(SOURCEDLL)
+	$(WCXX) $(WCXXFLAGS) -c $(DLLFLAGS) $(SOURCEDLL)
+	@mv *.o $(DLLPATH)
+	$(DLLWRAP) --output-lib=$(PROGRAM).a --dllname=$(PROGRAM).dll --driver-name=$(WCXX) $(OBJDLL)
+
+exe:	$(OBJMAIN) $(WWXPATH)/lib/libwx_msw-2.4-i386-mingw32msvc.dll $(WRES_PROGRAM_OBJ)
+	$(WCXX) $(WCXXFLAGS) -o $(PROGRAM).exe $(OBJMAIN) $(LIBS) $(WLDLIBS) $(LIBRARIES) $(WRES_PROGRAM_OBJ)  -DIMPORT_DLL
 
 bin:	$(OBJMAIN)
 	$(CXX) $(CXXFLAGS) -o $(PROGRAM).bin $(OBJMAIN) $(LIBS) $(LDLIBS) $(LIBRARIES) $(LWXPATH)/lib/libwx_gtk-2.4.so.0.1.1
@@ -64,7 +69,6 @@ clean:
 	@rm -vf ./*.o
 	@rm -vf $(PROGRAM)/*.o
 	@rm -vf $(PROGRAM).exe
-	@rm -vf $(PROGRAM).bin
 	@echo "exe cleared."
 
 allclean:

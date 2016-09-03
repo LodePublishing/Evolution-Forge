@@ -1,6 +1,306 @@
 #include "prerace.h"
 #include "debug.h"
 
+
+
+void resetBuildings()
+int getBuildingTotalBuildTime(int num)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingTotalBuildTime): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((building[num].TB<0)||(building[num].TB>MAX_TIME))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingTotalBuildTime): Variable not initialized [%i].",building[num].TB);
+                return(0);
+        }
+        return(building[num].TB);
+};
+
+int PRERACE::getBuildingRemainingBuildTime(int num)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingRemainingBuildTime): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((building[num].RB<0)||(building[num].RB>MAX_TIME))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingRemainingBuildTime): Variable not initialized [%i].",building[num].RB);
+                return(0);
+        }
+        return(building[num].RB);
+};
+
+int PRERACE::getBuildingType(int num)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingType): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((building[num].type<0)||(building[num].type>UNIT_TYPE_COUNT))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingType): Variable not initialized [%i].",building[num].type);
+                return(0);
+        }
+        return(building[num].type);
+};
+
+int PRERACE::getBuildingUnitCount(int num)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingUnitCount): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((building[num].unitCount<0)||(building[num].unitCount>MAX_SUPPLY))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingUnitCount): Variable not initialized [%i].",building[num].unitCount);
+                return(0);
+        }
+        return(building[num].unitCount);
+};
+
+int PRERACE::getBuildingFacility(int num)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingFacility): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((building[num].facility<0)||(building[num].facility>UNIT_TYPE_COUNT))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingFacility): Variable not initialized [%i].",building[num].facility);
+                return(0);
+        }
+        return(building[num].facility);
+};
+
+int PRERACE::getBuildingIP(int num)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingIP): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((building[num].IP<0)||(building[num].IP>))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingIP): Variable not initialized [%i].",building[num].IP);
+                return(0);
+        }
+        return(building[num].IP);
+};
+
+int PRERACE::getBuildingLocation(int num)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingLocation): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((building[num].location<0)||(building[num].location>MAX_LOCATIONS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingLocation): Variable not initialized [%i].",building[num].location);
+                return(0);
+        }
+        return(building[num].location);
+};
+
+int PRERACE::getBuildingGoal(int num)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingGoal): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((building[num].goal<0)||(building[num].goal>UNIT_TYPE_COUNT))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingGoal): Variable not initialized [%i].",building[num].goal);
+                return(0);
+        }
+        return(building[num].goal);
+};
+
+int PRERACE::getBuildingOnTheRun(int num)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingOnTheRun): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((building[num].onTheRun<0)||(building[num].onTheRun>2))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::getBuildingOnTheRun): Variable not initialized [%i].",building[num].onTheRun);
+                return(0);
+        }
+        return(building[num].onTheRun);
+};
+
+
+int PRERACE::setBuildingTotalBuildTime(int num, int time)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingTotalBuildTime): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((time<0)||(time>=MAX_TIME))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingTotalBuildTime): Value [%i] out of range.",time);
+                return(0);
+        }
+	building[num].TB=time;
+	return(1);
+};
+
+int PRERACE::setBuildingRemainingBuildTime(int num, int time)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingRemainingBuildTime): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((time<0)||(time>=MAX_TIME))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingRemainingBuildTime): Value [%i] out of range.",time);
+                return(0);
+        }
+	building[num].RB=time;
+        return(1);
+};
+
+int PRERACE::setBuildingType(int num, int type)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingType): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((type<0)||(type>=UNIT_TYPE_COUNT))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingType): Value [%i] out of range.",type);
+                return(0);
+        }
+	building[num].type=type;
+        return(1);
+};
+
+int PRERACE::setBuildingUnitCount(int num, int count)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingUnitCount): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((count<0)||(count>=10))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingUnitCount): Value [%i] out of range.",count);
+                return(0);
+        }
+	building[num].unitCount=count;
+        return(1);
+};
+
+int PRERACE::setBuildingFacility(int num, int facility)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingFacility): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((facility<0)||(facility>=UNIT_TYPE_COUNT))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingFacility): Value [%i] out of range.",facility);
+                return(0);
+        }
+	building[num].facility=facility;
+        return(1);
+};
+
+int PRERACE::setBuildingIP(int num, int IP)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingIP): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((IP<0)||(IP>=MAX_LENGTH))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingIP): Value [%i] out of range.",IP);
+                return(0);
+        }
+	building[num].IP=IP;
+        return(1);
+};
+
+int PRERACE::setBuildingLocation(int num, int location)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingLocation): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((location<0)||(location>=MAX_LOCATIONS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingLocation): Value [%i] out of range.",location);
+                return(0);
+        }
+	building[num].location=location;
+        return(1);
+};
+
+int PRERACE::setBuildingGoal(int num, int goal)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingGoal): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((goal<0)||(goal>=UNIT_TYPE_COUNT))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingGoal): Value [%i] out of range.",goal);
+                return(0);
+        }
+	building[num].goal=goal;
+        return(1);
+};
+
+int PRERACE::setBuildingOnTheRun(int num, int onTheRun)
+{
+        if((num<0)||(num>=MAX_BUILDINGS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingOnTheRun): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((onTheRun<0)||(onTheRun>=2))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setBuildingOnTheRun): Value [%i] out of range.",onTheRun);
+                return(0);
+        }
+	building[num].onTheRun=onTheRun;
+        return(1);
+};
+
+void resetBuildings()
+{
+	int i;
+	for(i=0;i<MAX_BUILDINGS;i++)
+	{
+		setBuildingTotalBuildTime(i,MAX_TIME);
+                setBuildingRemainingBuildTIme(i,MAX_TIME);
+                setBuildingType(i,UNIT_TYPE_COUNT);
+                setBuildingUnitCount(i,MAX_SUPPLY);
+                setBuildingFacility(i,UNIT_TYPE_COUNT);
+                setBuildingIP(i,MAX_LENGTH);
+                setBuildingLocation(i,MAX_LOCATIONS);
+                setBuildingGoal(i,MAX_GOALS);
+                setBuildingOnTheRun(i,2);
+	}
+}
+
 MAP* PRERACE::getMap()
 {
 	return(pMap);
@@ -598,10 +898,9 @@ PRERACE::~PRERACE()
 {
 };
 
-
- void PRERACE::resetMapInitialized();
-int PRERACE::setMap(MAP* map);
-MAP* PRERACE::getMap();
+//void PRERACE::resetMapInitialized();
+//int PRERACE::setMap(MAP* map);
+//MAP* PRERACE::getMap();
 MAP* PRERACE::pMap;
 GA* PRERACE::ga;
 int PRERACE::mapInitialized;

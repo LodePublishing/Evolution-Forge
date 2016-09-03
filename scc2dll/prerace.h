@@ -19,6 +19,7 @@ class EXPORT PRERACE
 		const UNIT_STATISTICS* pStats;
 		int time,ready;
 		int timeout;
+	        BUILDING building[MAX_BUILDINGS];
 	private:
 		PLAYER* player;
 		int playerNum;
@@ -31,6 +32,30 @@ class EXPORT PRERACE
 		int maxSupply; // total supply
 		int ftime[MAX_GOALS]; //when the goal is reached / when the last item is produced (ALL locations...*/
 		int length;
+
+                void resetBuildings();
+                                                                                                                                                            
+                int getBuildingTotalBuildTime(int num);
+                int getBuildingRemainingBuildTime(int num);
+                int getBuildingType(int num);
+                int getBuildingUnitCount(int num);
+                int getBuildingFacility(int num);
+                int getBuildingIP(int num);
+                int getBuildingLocation(int num);
+                int getBuildingGoal(int num);
+                int getBuildingOnTheRun(int num);
+
+                int setBuildingTotalBuildTime(int num, int time);
+                int setBuildingRemainingBuildTime(int num, int time);
+                int setBuildingType(int num, int type);
+                int setBuildingUnitCount(int num, int count);
+                int setBuildingFacility(int num, int facility);
+                int setBuildingIP(int num, int IP);
+                int setBuildingLocation(int num, int location);
+                int setBuildingGoal(int num, int goal);
+                int setBuildingOnTheRun(int num, int onTheRun);
+
+
 	public:
 		static MAP_LOCATION loc[MAX_PLAYER][MAX_LOCATIONS];
 		MAP_LOCATION* location;
@@ -93,6 +118,7 @@ class EXPORT PRERACE
 		int getMins();
 		int getGas();
 		int getTimer();
+
 		PRERACE();
 		~PRERACE();
 };

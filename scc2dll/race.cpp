@@ -11,10 +11,8 @@ int RACE::calculateStep()
 	//ZERG: Larvenproduktion!  CREEP!
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
 //mins, gas hier rein...
-//	while((time)&&(!ready)&&(getIP()>0))
-//	{
 //TODO: evtl ueberlegen IP zu springen... also erstmal feststellen, warum nicht gebuildet werden kann und dann in einem Ruck resources und btimes hochsetzen...
-		if((!time)||(ready)||(!getIP()))
+		if((!time)||(ready)||(!getIP())||(4*time<3*bestTime))
 		{
 			setLength(ga->maxLength-getIP());
 //			settFitness(gettFitness()-getLength());
@@ -182,11 +180,7 @@ int RACE::calculateStep()
 		harvestResources();
 		time--;
 		timeout--;
-//	}
-	 //end while
-		
 		return(0);
-	
 	//TODO: Auch voruebergehende Ziele miteinberechnen (Bewegungen!)
 	//Also quasi eine zweite Goalreihe rein um scvs/Einheiten zu belohnen die bestimmte Orte besetzen... erstmal nur scvs... also z.B. int tempGoal...
 	//mmmh... aber was reinschreiben? baue barracks bei Ort bla => belohne EINMAL ein scv bei ort bla
@@ -206,10 +200,10 @@ void RACE::calculateFitness(int ready)
 	setsFitness(getHarvestedMins()+getHarvestedGas()); //TODO: evtl gas und mins (wie urspruenglich eigentlich) in Verhaeltnis setyen wieviel es jeweils Geysire/Mineralien gibt...
 //TODO: Nicht alle Einheiten am Ort? => Ort egal sein lassen aber zur Zeit hinzuzaehlen
 	// Nicht alle Einheiten ueberhaupt gebaut UND nicht alle am Ort => nur viertel Bonus fuer Einheiten die nicht am Ort sind
-
 	if(!ready)
 	{
 		setpFitness(0);
+		//calculate number of fulfilled goals & their time & their distance to goal position
 		 for(i=MAX_GOALS;i--;)
 			 if(getPlayer()->goal->goal[i].count>0)
 			{
@@ -260,7 +254,7 @@ void RACE::calculateFitness(int ready)
 //				if(getPlayer()->goal->goal[i].count<location[getPlayer()->goal->goal[i].location].force[getPlayer()->goal->goal[i].unit])
 //					setsFitness(getsFitness()-location[getPlayer()->goal->goal[i].location].force[getPlayer()->goal->goal[i].unit])*(pStats[i].mins+pStats[i].gas));
 				}
-			}
+			} //end of goal checking
 // TODO: Check for very small 'goal.time' values, probably in scc.cpp!!	
 
 //Bonus: Sind noch Plaetze offen?
@@ -268,15 +262,15 @@ void RACE::calculateFitness(int ready)
 		for(i=MAX_LOCATIONS;i--;)
 		       for(j=UNIT_TYPE_COUNT;j--;)
 			       bonus[i][j]=0;
-	
 		for(i=MAX_GOALS;i--;)
 			if(location[getPlayer()->goal->goal[i].location].force[getPlayer()->goal->goal[i].unit]<getPlayer()->goal->goal[i].count)
 				bonus[getPlayer()->goal->goal[i].location][getPlayer()->goal->goal[i].unit]+=getPlayer()->goal->goal[i].count-location[getPlayer()->goal->goal[i].location].force[getPlayer()->goal->goal[i].unit];
+
 		for(i=MAX_BUILDINGS;i--;)
-			if((building[i].RB>0)&&(bonus[building[i].type][building[i].location]>0))
+			if((building[i].RB>0)&&(bonus[building[i].location][building[i].type]>0))
 			{
 			//erstmal ohne Zeit...
-				pFitness+=((building[i].RB*100)/((location[building[i].location].force[building[i].type]+bonus[building[i].type][building[i].location])*pStats[building[i].type].BT));
+				pFitness+=((building[i].RB*100)/((location[building[i].location].force[building[i].type]+bonus[building[i].location][building[i].type])*pStats[building[i].type].BT));
 				
 				if((getPlayer()->goal->goal[building[i].type].time>0)&&(location[building[i].location].force[building[i].type]==0))
 					pFitness+=(building[i].RB*100*getPlayer()->goal->goal[building[i].type].time*location[0].force[i])/(getPlayer()->goal->goal[building[i].type].count*pStats[building[i].type].BT*ga->maxTime);
@@ -284,7 +278,8 @@ void RACE::calculateFitness(int ready)
 					pFitness+=((building[i].RB*100)/(getPlayer()->goal->goal[building[i].type].count*pStats[building[i].type].BT));
 				bonus[building[i].location][building[i].type]--;
 			}
-	}
+
+	} // end of ready=false
 	else   // all goals fulfilled, fitness <- timer 
 	{
 		for(i=MAX_GOALS;i--;)
@@ -292,7 +287,7 @@ void RACE::calculateFitness(int ready)
 				setpFitness(getpFitness()+100);
 	}
 }
-
+// end of calculateFitness
 
 
 int RACE::buildGene(int unit)
@@ -692,13 +687,7 @@ void RACE::resetData() // resets all data to standard starting values
 	for(i=UNIT_TYPE_COUNT;i--;)
 		setFinalTime(i,0);
 	for(i=MAX_BUILDINGS;i--;)
-	{
-	       building[i].RB=0;
-	       building[i].type=255;
-	       building[i].location=0;
-	       building[i].unitCount=0;
-	       building[i].onTheRun=0;
-	}
+		building[i].reset();
 	for(i=0;i<4;i++)
         {
 			last[i].location=1;
@@ -1007,4 +996,4 @@ RACE::~RACE()
 
 int RACE::basicBuildOrder[2][MAX_LENGTH];
 int RACE::basicLength;
-
+int RACE::bestTime;

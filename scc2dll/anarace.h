@@ -35,7 +35,6 @@ EXPORT class ANARACE: public PRERACE
 	int maxtFitness;
 	
         PROGRAM program[MAX_LENGTH];
-	BUILDING building[MAX_BUILDINGS];
 	static int successType; //type of error
 	static int successUnit; //unit number
 	public:

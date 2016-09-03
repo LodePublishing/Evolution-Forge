@@ -67,32 +67,31 @@ int MAP::adjustSupply()
 	{
 		player[k].setSupply(0);
 		player[k].setMaxSupply(0);
-	for(i=0;i<MAX_LOCATIONS;i++)
-	for(j=UNIT_TYPE_COUNT;j--;)
-		{
-			if(i>0)
+		for(i=0;i<MAX_LOCATIONS;i++)
+			for(j=UNIT_TYPE_COUNT;j--;)
 			{
-				if(stats[player[k].getRace()][j].supply<0)
+				if(i>0)
 				{
-					if(player[k].getMaxSupply()-stats[player[k].getRace()][j].supply*location[i].force[k][j]>MAX_SUPPLY)
+					if(stats[player[k].getRace()][j].supply<0)
 					{
-						if(player[k].getMaxSupply()<MAX_SUPPLY)
+						if(player[k].getMaxSupply()-stats[player[k].getRace()][j].supply*location[i].force[k][j]>MAX_SUPPLY)
 						{
-							player[k].setSupply(player[k].getSupply()+(MAX_SUPPLY-player[k].getMaxSupply()));
-							player[k].setMaxSupply(MAX_SUPPLY);
+							if(player[k].getMaxSupply()<MAX_SUPPLY)
+							{
+								player[k].setSupply(player[k].getSupply()+(MAX_SUPPLY-player[k].getMaxSupply()));
+								player[k].setMaxSupply(MAX_SUPPLY);
+							}
 						}
-					}
-					else
-					{
-						player[k].setSupply(player[k].getSupply()-stats[player[k].getRace()][j].supply*location[i].force[k][j]);
-						player[k].setMaxSupply(player[k].getMaxSupply()-stats[player[k].getRace()][j].supply*location[i].force[k][j]);
-					}
-				} else
+						else
+						{
+							player[k].setSupply(player[k].getSupply()-stats[player[k].getRace()][j].supply*location[i].force[k][j]);
+							player[k].setMaxSupply(player[k].getMaxSupply()-stats[player[k].getRace()][j].supply*location[i].force[k][j]);
+						}
+					} else
 					player[k].setSupply(player[k].getSupply()-stats[player[k].getRace()][j].supply*location[i].force[k][j]);
-			}
-		};
+				}
+			};
 	}
-
 	return(1);
 };
 
@@ -100,23 +99,23 @@ int MAP::adjustDistanceList()
 {
 	//initialized?
 	int i,j,k,counter,ok,min;
-    for(i=1;i<MAX_LOCATIONS;i++)
+	for(i=1;i<MAX_LOCATIONS;i++)
 	{
 		for(counter=1;counter<MAX_LOCATIONS;counter++)
 		{
 			min=200;
-	        for(j=1;j<MAX_LOCATIONS;j++)
+			for(j=1;j<MAX_LOCATIONS;j++)
 				if(location[i].getDistance(j)<min)
-                {
+				{
 					ok=1;
-        	        for(k=1;k<counter;k++)
-                		if(locationList[i][k]==j) ok=0;
+					for(k=1;k<counter;k++)
+						if(locationList[i][k]==j) ok=0;
 					if(ok)
 					{
 						min=location[i].getDistance(j);
-     		            locationList[i][counter]=j;
-       		        }
-               	}
+						locationList[i][counter]=j;
+		       			}
+			       	}
 		}
 	}
 	return(1);

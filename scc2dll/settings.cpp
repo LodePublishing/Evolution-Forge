@@ -118,6 +118,18 @@ int EXPORT SETTINGS::getMINCurrentMap()
 	return(MIN_MAPS);
 };
 
+                                                                                                                                                            
+int EXPORT SETTINGS::setAllowGoalAdaption(int num) // allow the program to change goals (for example ignore command center when command center [NS] is already a goal
+{
+        if((num<0)||(num>1))
+        {
+                debug.toLog(0,"WARNING: (SETTINGS::setAllowGoalAdaption): Value [%i] out of range.",num);
+                return(0);
+        }
+        ga.allowGoalAdaption=num;
+        return(1);
+};
+
 
 int EXPORT SETTINGS::setMaxTime(int num) //maximum time of build order in seconds
 {
@@ -456,11 +468,10 @@ int EXPORT SETTINGS::loadGoalFile(const char* goalFile) //~~~
 
 //Aufbau der goal datei: "Einheitname" LEER "Anzahl" LEER "Zeit" LEER "Ort"
 				for(i=0;i<REFINERY;i++) 
-					if((strstr(stats[goalEntry[getGoalCount()].getRace()][i].name,item)!=NULL)&&(value2<=getMaxTime())&&(value3<=MAX_LOCATIONS)) //TODO: strcmp durch 'erstes auftauchen' vertauschen
+					if((strstr(stats[goalEntry[getGoalCount()].getRace()][i].name,item)!=NULL)&&(value2<=getMaxTime())&&(value3<=MAX_LOCATIONS))
 					{
 						//TODO: values checken!
 			 			//TODO: evtl statt Ortsnummer einfach den Ortsnamen nehmen
-						//TODO: evtl statt Ortsnummer einfach den Ortsnamen nehmen
 						if(!goalEntry[getGoalCount()].addGoal(i,value1,60*value2,value3))
 							debug.toLog(0,"WARNING: (SETTINGS::loadGoalFile) %s: Line %d [%s]: Problems with adding goal.",goalFile,ln,old);
 						i=REFINERY+1;
@@ -472,7 +483,7 @@ int EXPORT SETTINGS::loadGoalFile(const char* goalFile) //~~~
 		}
 	} //end while
 //missing @END ??
-	goalEntry[getGoalCount()].adjustGoals();
+	goalEntry[getGoalCount()].adjustGoals(ga.allowGoalAdaption);
 	setGoalCount(getGoalCount()+1);
 	fclose(pFile);
 	return(1);
@@ -541,7 +552,12 @@ int EXPORT SETTINGS::loadSettingsFile(const char* settingsFile)
 				debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: New @SETTINGS block found within a @SETTINGS block.",settingsFile,ln,old);
 			else if(mode==1)
 			{
-				if(!strcmp(item,"Max Time"))
+				if(!strcmp(item,"Allow goal adaption"))
+				{
+					if(!setAllowGoalAdaption(value))
+						debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: Allow goal adaption out of range.",settingsFile,ln,old);
+				}
+				else if(!strcmp(item,"Max Time"))
 				{
 					//TODO evtl alles in set... rein
 					if(!setMaxTime(value))
@@ -736,6 +752,7 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 	int value1=0,value2=0,value3=0;
 	int mode=0,modeLocation=0,modePlayer=-1;
 	int i=0;
+	int playerCount=0;
 	if((pFile = fopen (mapFile,"r"))==NULL)
 	{
 		debug.toLog(0,"ERROR: (SETTINGS::loadMapFile) %s: Could not open file!",mapFile);
@@ -821,7 +838,7 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 				else if(!strcmp(item,"@END"))
 					mode=0;
 				else 
-					debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Unknown entry. GRR",mapFile,ln,old);
+					debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Unknown entry in MAP Block.",mapFile,ln,old);
 			}
 			else if(mode==2) // LOCATION Block
 			{
@@ -844,7 +861,7 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 					{
 						if(!map[getMapCount()].location[modeLocation-1].setDistance(distanceCount++,(value1=atoi(buffer))) )
 						{
-							debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Values out of range",mapFile,ln,old);
+							debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Values out of range.",mapFile,ln,old);
 							break;
 						}
 						buffer=strtok(NULL," ");
@@ -870,8 +887,8 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 				else if(!strcmp(item,"@END"))
 					mode=0;
 				else 
-					debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Unknown entry!.",mapFile,ln,old);
-			}
+					debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Unknown entry in LOCATION Block.",mapFile,ln,old);
+			} //end LOCATION Block
 			else if(mode==3) //PLAYER Block
 			{
 				if(!strcmp(item,"Race"))
@@ -915,9 +932,12 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Start time out of range.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"@END"))
+				{
+					playerCount++;
 					mode=0;
+				}
 				else
-					debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Unknown entry.",mapFile,ln,old);
+					debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Unknown entry in PLAYER Block.",mapFile,ln,old);
 			}
 			else if(mode==4) // PLAYER Block in LOCATION Block
 			{
@@ -927,22 +947,27 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 				else
 				{
 					for(i=0;i<UNIT_TYPE_COUNT;i++) 
-					if(strstr(stats[map[getMapCount()].player[modePlayer].getRace()][i].name,item)!=NULL)
+						if(strstr(stats[map[getMapCount()].player[modePlayer].getRace()][i].name,item)!=NULL)
 						{
-							map[getMapCount()].location[0].force[modePlayer][i]=value1;
+                                                        map[getMapCount()].location[0].force[modePlayer][i]=value1;
 							map[getMapCount()].location[modeLocation-1].force[modePlayer][i]=value1;
-								//TODO: Begrenzungen bei researches und upgrades und nichtbaubaren Sachen!
-						i=UNIT_TYPE_COUNT+1;
-						break;
+			//TODO: Begrenzungen bei researches und upgrades und nichtbaubaren Sachen!
+							i=UNIT_TYPE_COUNT+1;
+							break;
 						}	
 				};
 				if(i!=UNIT_TYPE_COUNT+1) debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: No matching unit name.",mapFile,ln,item);
 			}
 			else
-				debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Unknown entry. OMFG",mapFile,ln,item);
+				debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Unknown entry in PLAYER Block in LOCATION Block.",mapFile,ln,item);
 
 		}// END if(mode>0)
 	}// END while
+	if(map[getMapCount()].getMaxPlayer()>playerCount+1)
+	{
+		debug.toLog(0,"ERROR: (SETTINGS::loadMapFile) %s: 'Max players' declared as %i but only %i (incl. neutral player) players found.",mapFile,map[getMapCount()].getMaxPlayer(),playerCount+1);
+		return(0);
+	}
 	map[getMapCount()].adjustSupply();
 	map[getMapCount()].adjustDistanceList();
 	setMapCount(getMapCount()+1);
@@ -970,6 +995,7 @@ ANARACE* EXPORT SETTINGS::newGeneration()
 
 void EXPORT SETTINGS::loadDefaults()
 {
+	setAllowGoalAdaption(1);
 	setMaxTime(MAX_TIME);
 	setMaxTimeOut(MAX_TIMEOUT);
 	setMaxLength(MAX_LENGTH);

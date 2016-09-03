@@ -16,7 +16,6 @@ class RACE: public PRERACE
 		int sFitness;
 		int tFitness;
 	public:
-		static int bestTime; // cancel calculation if this calculation is worse than 25%
 //Output:
 		int setpFitness(int num);
 		int setsFitness(int num);

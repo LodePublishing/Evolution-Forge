@@ -8,7 +8,7 @@
                                                                                                                                                             
 // the application icon (under Windows and OS/2 it is in resources)
 #if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
-    #include "/home/clawg/work/sc1035/sc/mondrian.xpm"
+    #include "/home/clawg/work/sc1036/sc/mondrian.xpm"
 //    #include "scc.png"
 #endif
 
@@ -59,7 +59,7 @@ const int BUILD_ORDER_NUMBER=40;
 const int FORCE_LIST_NUMBER=25;
 const int FORCE_LIST_LENGTH=FORCE_LIST_NUMBER*(FONT_SIZE+5)+3;
 const int BUILD_ORDER_GRAPH_NUMBER=10; const int BUILD_ORDER_GRAPH_LENGTH=BUILD_ORDER_GRAPH_NUMBER*(FONT_SIZE+5)+3+FORCE_LIST_LENGTH;
-
+const int MIN_HEIGHT=3;
 
 // Define a new application type, each program should derive a class from wxApp
 class MyApp : public wxApp
@@ -106,15 +106,24 @@ private:
         int pFitness[200];
         int tFitness[200];
         int aFitness[200];
+	int vFitness[200];
+	int length[200];
         int time[200];
         int force[200];
-        int oldTimeCounter[10],oldTime[10];
+        int oldTimeCounter[20],oldTime[20];
+	
+
+//	int oldBuildOrders[BUILD_ORDER_NUMBER];
+	int oldForceList[FORCE_LIST_NUMBER];
+	//int oldData[8];
+
         int maxsFitness;
         int maxpFitness;
         int maxtFitness;
+	int mintFitness;
         int maxForce; //all units
         int maxUnitForce; //single unit
-        wxFont font;
+        wxFont font,font2;
         DECLARE_EVENT_TABLE()
 };
                                                                                 

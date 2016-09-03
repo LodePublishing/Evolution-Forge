@@ -22,6 +22,7 @@ class GA
 		int breedFactor;		// percentage of population that should copy 1:1 their genetic informations 
 
 		int noise;
+		int allowGoalAdaption;
 //constructor
 	GA();
 	~GA();

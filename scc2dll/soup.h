@@ -14,7 +14,7 @@ class SOUP
 	private:
 		RACE* player[MAX_PROGRAMS];
 		MAP* pMap;
-		int run_number,goalsInitialized,playerInitialized,mapInitialized,goalCount,gaInitialized;
+		int run_number,goalsInitialized,playerInitialized,mapInitialized,goalCount,gaInitialized,newcalc;
 		GOAL_ENTRY* goal[MAX_PLAYER];
 		GA* ga;
 		ANARACE* anaplayer[MAX_PLAYER];

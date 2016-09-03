@@ -49,6 +49,7 @@ class EXPORT SETTINGS
 		
 		int setMaxTime(int num); //sets max Time in minutes
 		int setMaxTimeOut(int num); //
+		int setAllowGoalAdaption(int num);
 		int setMaxLength(int num);
 		int setMaxRuns(int num);
 		int setMaxGenerations(int num);

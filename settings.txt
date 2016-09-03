@@ -6,6 +6,8 @@
 "Max Length" = "96"
 "Max Runs" = "1"
 "Max Timeout" = "133"
+# Allow to ignore unnecessary goals (mainly for using for example only "lair" instead of both "lair" and "hatchery")
+"Allow goal adaption" = "1"
 # Mode:
 # 0: One or more players on the same map try to reach the given goals and optimize the build order
 # 1: As above but players signed as enemies are graded by the negative fitness of all players who try to reach the goal (parasites)
@@ -14,10 +16,10 @@
 "Mode" = "0"
 # Breed Factor:
 # This parameter determines how many % of the players will multiply by 1:1 copy
-"Breed Factor" = "20"
+"Breed Factor" = "5"
 # Crossing Over:
 # This parameter determines how many % of the players will multiply by crossover
-"Crossing Over" = "20"
+"Crossing Over" = "10"
 # 10 means that programs will be sorted into 10-program groups, the best 2 are
 # taken for reproduction and the worst two are replaced by their children
 

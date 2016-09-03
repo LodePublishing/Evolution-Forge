@@ -219,7 +219,7 @@ PLAYER::PLAYER()
 	setGas(0);
 	setSupply(0);
 	setMaxSupply(0);
-	setTimer(MAX_TIME);
+	setTimer(0);
 	setPosition(0);
 	setRace(0);
 	initialized=1;

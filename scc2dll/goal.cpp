@@ -49,15 +49,33 @@ const UNIT_STATISTICS* EXPORT GOAL_ENTRY::getpStats()
 };
 
 
-int EXPORT GOAL_ENTRY::adjustGoals()
+int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption)
 {
 	int i,j,k;
+	int oldGoal[UNIT_TYPE_COUNT]; //goals we got from the user which we MAY NOT ignore
+	for(i=0;i<UNIT_TYPE_COUNT;i++)
+		oldGoal[i]=allGoal[i];
+	
+        isBuildable[MOVE_ONE_1_FORWARD]=1;isVariable[MOVE_ONE_1_FORWARD]=1;
+        isBuildable[MOVE_ONE_3_FORWARD]=1;isVariable[MOVE_ONE_3_FORWARD]=1;
+        isBuildable[MOVE_ONE_1_BACKWARD]=1;isVariable[MOVE_ONE_1_BACKWARD]=1;
+                                                                                                                                                            
+        isBuildable[INTRON]=1; // :-)
+                                                                                                                                                            
+                switch(getRace())
+                {
+                        case TERRA:isBuildable[SUPPLY_DEPOT]=1;isVariable[SUPPLY_DEPOT]=1;break;
+                        case PROTOSS:isBuildable[PYLON]=1;isVariable[PYLON]=1;break;
+                        case ZERG:isBuildable[OVERLORD]=1;isVariable[OVERLORD]=1;isBuildable[LARVA]=0;isVariable[LARVA]=0;break;
+                        default:break;
+                }
 
 	for(j=6;j--;) // Nuclear Warhead needs 6 steps (?) ~~~~
 		for(i=UNIT_TYPE_COUNT;i--;)
 			if((allGoal[i]>0)||(isBuildable[i]>0))
 			{
 				isBuildable[i]=1;
+				//gather all prerequisites and mark them as goals
 				for(k=0;k<3;k++)
 					if((pStats[i].prerequisite[k]>0)&&(allGoal[pStats[i].prerequisite[k]]==0))
 						addGoal(pStats[i].prerequisite[k],1,0,0);
@@ -77,31 +95,38 @@ int EXPORT GOAL_ENTRY::adjustGoals()
 					else isBuildable[pStats[i].facility[0]]=1; // ... same as above...
 				}
 			}
-	long Need_Gas=0;
-	for(i=UNIT_TYPE_COUNT;i--;)
-		Need_Gas+=(allGoal[i]*pStats[i].gas);
-	if(Need_Gas>0)
-	{
-		isBuildable[REFINERY]=1;
-		if(allGoal[REFINERY]==0)
-		       addGoal(REFINERY,1,0,0); //ASSIMILATOR == EXTRACTOR == REFINERY
-		isBuildable[GAS_SCV]=1; //ONE_MINERAL_SCV... = ONE_MINERAL_PROBE... = ONE_MINERAL_DRONE...
-		isVariable[GAS_SCV]=1;
-	};
-//      isBuildable[WINDOW_MOVE_ADD_3]=1;isVariable[WINDOW_MOVE_ADD_3]=1;
-//      isBuildable[WINDOW_MOVE_ADD_1]=1;isVariable[WINDOW_MOVE_ADD_1]=1;
-//      isBuildable[WINDOW_MOVE_SUB_1]=1;isVariable[WINDOW_MOVE_SUB_1]=1;
-//		isBuildable[MOVE_ONE_1_FORWARD]=1;isVariable[MOVE_ONE_1_FORWARD]=1;
-//		isBuildable[MOVE_ONE_3_FORWARD]=1;isVariable[MOVE_ONE_3_FORWARD]=1;
-//		isBuildable[MOVE_ONE_1_BACKWARD]=1;isVariable[MOVE_ONE_1_BACKWARD]=1;
 
-		switch(getRace())
+//	now recheck whether we got too many goals
+//	>_<
+//	alle durchlaufen
+//	jeweils alle facilities von rechts nach links anguggn
+//	sobald eins gefunden das Teil der goals ist, alle weiter links streichen (aber buildable lassen)
+	for(i=UNIT_TYPE_COUNT;i--;)
+		if((allGoal[i]>0)||(isBuildable[i]>0))
 		{
-			case TERRA:isBuildable[SUPPLY_DEPOT]=1;isVariable[SUPPLY_DEPOT]=1;break;
-			case PROTOSS:isBuildable[PYLON]=1;isVariable[PYLON]=1;break;
-			case ZERG:isBuildable[OVERLORD]=1;isVariable[OVERLORD]=1;break;
-			default:break;
+			for(j=3;j--;)
+				if(allGoal[pStats[i].facility[j]]>0)
+				{
+					for(k=0;k<j;k++)
+					{
+						if(allowGoalAdaption) allGoal[pStats[i].facility[k]]=0;//~~
+						else allGoal[pStats[i].facility[k]]=oldGoal[pStats[i].facility[k]];
+					}
+					j=0;
+				}
 		}
+	
+        long Need_Gas=0;
+        for(i=UNIT_TYPE_COUNT;i--;)
+                Need_Gas+=(allGoal[i]*pStats[i].gas);
+        if(Need_Gas>0)
+        {
+                isBuildable[REFINERY]=1;
+                if(allGoal[REFINERY]==0)
+                       addGoal(REFINERY,1,0,0); //ASSIMILATOR == EXTRACTOR == REFINERY
+                isBuildable[GAS_SCV]=1; //ONE_MINERAL_SCV... = ONE_MINERAL_PROBE... = ONE_MINERAL_DRONE...
+                isVariable[GAS_SCV]=1;
+        }; 
 
 	maxBuildTypes=0;
 	for(i=UNIT_TYPE_COUNT;i--;)

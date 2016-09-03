@@ -103,12 +103,12 @@ void SOUP::initSoup()
 		{
 			delete player[i+k*groupSize];
 			player[i+k*groupSize]=new RACE();
-			player[i+k*groupSize]->setPlayerNum(k+1);
+			player[i+k*groupSize]->setPlayerNumber(k+1);
 			player[i+k*groupSize]->resetGeneCode();
 		}
 		delete anaplayer[k];
 		anaplayer[k]=new ANARACE();
-		anaplayer[k]->setPlayerNum(k+1);
+		anaplayer[k]->setPlayerNumber(k+1);
 	}
 	for(k=mapPlayerNum;k<MAX_PLAYER;k++)
 	{
@@ -118,30 +118,7 @@ void SOUP::initSoup()
 		//what about 'player'?
 }
 
-
-const signed int compare(const void* a,const void* b)
-{
-	if(( (*(RACE*)a).getpFitness()<(*(RACE*)b).getpFitness())||(((*(RACE*)a).getpFitness()==(*(RACE*)b).getpFitness())&&((*(RACE*)a).getsFitness()<(*(RACE*)b).getsFitness())) || ( ((*(RACE*)a).getpFitness()==(*(RACE*)b).getpFitness())&&((*(RACE*)a).getsFitness()==(*(RACE*)b).getsFitness())&& ((*(RACE*)a).gettFitness()>=(*(RACE*)b).gettFitness())) )
-		return (1);
-	else if(( (*(RACE*)a).getpFitness()>(*(RACE*)b).getpFitness())|| ((*(RACE*)a).getsFitness()>(*(RACE*)b).getsFitness()))
-		return (-1);
-	else return(0);
-} //TODO 
-
-/*
-const unsigned int compare(const RACE* a,const RACE* b)
-{
-	if(( a->getpFitness() <  b->getpFitness())||
-	 ((( a->getpFitness() == b->getpFitness()) && ( a->getsFitness() <  b->getsFitness())) || 
-	 ((( a->getpFitness() == b->getpFitness()) && ((*(RACE*)a).getsFitness()==(*(RACE*)b).getsFitness())&& ((*(RACE*)a).gettFitness()>=(*(RACE*)b).gettFitness())) )
-		return (1);
-	else if(( (*(RACE*)a).getpFitness()>(*(RACE*)b).getpFitness())|| ((*(RACE*)a).getsFitness()>(*(RACE*)b).getsFitness()))
-		return (-1);
-	else return(0);
-}
-*/
 //TODO: Ueber Optionen einstellen, welche Fitness ueberhaupt bzw. wie stark gewertet wird (oder ob z.B. die Fitnesswerte zusammengeschmissen werden sollen etc.)
-
 
 void SOUP::checkForChange() const
 {
@@ -161,6 +138,13 @@ void SOUP::checkForChange() const
 		calculateAnaplayer(); // TODO */
 }
 
+struct SoupPlayerDescendingFitnessSort {
+	bool operator()(RACE* const& playerStart, RACE* const& playerEnd) {
+		return ((playerStart->getpFitness()>playerEnd->getpFitness())||
+               ((playerStart->getpFitness()==playerEnd->getpFitness())&&(playerStart->getsFitness() > playerEnd->getsFitness()))||
+               ((playerStart->getpFitness()==playerEnd->getpFitness())&&(playerStart->getsFitness() == playerEnd->getsFitness())&&(playerStart->gettFitness()>playerEnd->gettFitness())) );
+	}
+};
 
 void SOUP::calculateAnaplayer() const
 {
@@ -254,10 +238,10 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 						player[k*groupSize+i]->mutateGeneCode();
 				}
 			}
-		int complete=0;
+		bool complete=false;
 		while(!complete)
 		{
-			complete=1;
+			complete=true;
 			for(int k=mapPlayerNum;k--;)
 				if(anaplayer[k]->isActive())
 					complete&=player[k*groupSize+i]->calculateStep();
@@ -269,22 +253,9 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 	for(unsigned int k=mapPlayerNum;k--;)
 		if(anaplayer[k]->isActive())
 		{
-			for(unsigned int i=k*groupSize;i<(k+1)*groupSize;i++)
-				for(unsigned int j=k*groupSize;j<i;j++)
-					if((player[i]->getpFitness()>player[j]->getpFitness())||
-					  ((player[i]->getpFitness()==player[j]->getpFitness())&&(player[i]->getsFitness()>player[j]->getsFitness()))||
-					  ((player[i]->getpFitness()==player[j]->getpFitness())&&(player[i]->getsFitness()==player[j]->getsFitness())&&(player[i]->gettFitness()>player[j]->gettFitness())) )
-					{
-						RACE* temp;
-						temp=player[i];
-						player[i]=player[j];
-						player[j]=temp;
-					}
+			std::sort(player+k*groupSize, player+(k+1)*groupSize, SoupPlayerDescendingFitnessSort());
 	//NOW: all players are sorted
 			
-	//		  qsort(player[0],MAX_PROGRAMS/2,sizeof(RACE),compare);
-	//		  qsort(player[MAX_PROGRAMS/2],MAX_PROGRAMS/2,sizeof(RACE),compare);
-
 			for(int i=configuration.getBreedFactor()*groupSize/100;i--;) // % are replaced by the uber-program :-o
 			{
 				int l=rand() % (groupSize*configuration.getBreedFactor()/100) + groupSize*(100-configuration.getBreedFactor())/100;
@@ -362,12 +333,7 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 						if((player[j]->getpFitness()>player[l]->getpFitness())||
 						  ((player[j]->getpFitness()==player[l]->getpFitness())&&(player[j]->getsFitness()>player[l]->getsFitness()))||
 						  ((player[j]->getpFitness()==player[l]->getpFitness())&&(player[j]->getsFitness()==player[l]->getsFitness())&&(player[j]->gettFitness()>player[l]->gettFitness())) )
-						{
-							RACE* temp;
-							temp=player[l];
-							player[l]=player[j];
-							player[j]=temp;
-						}
+							  std::swap(player[l], player[j]);
 				}
 			}
 //JETZT: Player in z.B. 20er (bei crossOver=5) Gruppen sortiert => besten 2 herausnehmen, schlechtesten 2 ersetzen
@@ -457,8 +423,8 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 			s[k]->setMaxsFitness(anaplayer[k]->getMaxsFitness());
 			s[k]->setMaxtFitness(anaplayer[k]->getMaxtFitness());
 
-			s[k]->setPlayerNum(anaplayer[k]->getPlayer());
-			s[k]->setPlayerNum(anaplayer[k]->getPlayerNum());
+			s[k]->setPlayerNumber(anaplayer[k]->getPlayer());
+			s[k]->setPlayerNumber(anaplayer[k]->getPlayerNumber());
 			s[k]->setpStats(anaplayer[k]->getpStats());
 //			s[k]->setCalculated(anaplayer[k]->getCalculated());
 			//loadplayer?
@@ -512,25 +478,25 @@ const bool SOUP::getIsNewRun()
 			
 
 
-void SOUP::setMapPlayerNum(const unsigned int mapPlayerNum)
+void SOUP::setMapPlayerNum(const unsigned int map_player_num)
 {
 #ifdef _SCC_DEBUG
-	if((mapPlayerNum<1)||(mapPlayerNum>=MAX_PLAYER)) {
-		toLog("DEBUG: (SOUP::setMapPlayerNum): mapPlayerNum not initialized.");return;
+	if((map_player_num<1)||(map_player_num>=MAX_PLAYER)) {
+		toLog("DEBUG: (SOUP::setMapPlayerNum): map_player_num not initialized.");return;
 	}
 #endif
-	this->mapPlayerNum=mapPlayerNum;
+	mapPlayerNum = map_player_num;
 }
 
-void SOUP::setParameters(START* start)
+void SOUP::setParameters(START* start_parameters)
 {
 #ifdef _SCC_DEBUG
-	if(!start)	{
+	if(!start_parameters) {
 		toLog("DEBUG: (SOUP::setParameters): Value start not initialized.");return;
 	}
 #endif
 //	gaInitialized=1;
-	this->start=start;
+	start = start_parameters;
 	setMapPlayerNum((*start->getMap())->getMaxPlayer()); // ~~~
 	PRERACE::assignStart(start);
 	initSoup();

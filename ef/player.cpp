@@ -1,27 +1,36 @@
 #include "player.hpp"
 
 Player::~Player()
-{
+{ 
+	for(int i=0;i<MAX_WINDOWS;i++)
+		delete window[i];
 }
 
 Player::Player(UI_Object* player_parent, ANARACE** player_anarace, MessageWindow* msgWindow, const unsigned int playerNumber):
 	UI_Object(player_parent),
-	anarace(player_anarace),
 	geneAnimation(0),
+	anarace(player_anarace),
 	orderList(),
 	mode(0)
 {
-	Hide();
+    for(int i=0;i<MAX_WINDOWS;i++)
+		window[i]=NULL;
 	window[FORCE_WINDOW] = new ForceWindow(this, *anarace, msgWindow, playerNumber);
 	window[TIMER_WINDOW] = new TimerWindow(this, *anarace, playerNumber);
 	window[STATISTICS_WINDOW]=new StatisticsWindow(this, *anarace, playerNumber);
 	window[INFO_WINDOW] = new InfoWindow(this, *anarace, playerNumber);
 	window[BUILD_ORDER_WINDOW]=new BoWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], msgWindow, &orderList, playerNumber);
+	
 	window[BO_GRAPH_WINDOW] = new BoGraphWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], &orderList, playerNumber);
 	window[BO_DIAGRAM_WINDOW]=new BoDiagramWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], playerNumber);
+	
 	// to set infoWindow above all others
 	window[INFO_WINDOW]->removeFromFamily(); window[INFO_WINDOW]->setParent(this);
-	setMode(BASIC_TAB, playerNumber);
+	setOptimizing();
+//	process();
+//	return;
+	Hide();
+	setOptimizing(false);
 }
 
 void Player::processBoGraph()
@@ -34,8 +43,8 @@ void Player::processBoGraph()
     unsigned int lines[UNIT_TYPE_COUNT];
     unsigned int faccount=0;
 	int lastbographY=0;
-                                                                                                                                                            
-    for(int i=UNIT_TYPE_COUNT;i--;)
+
+	for(int i=UNIT_TYPE_COUNT;i--;)
     {
         for(int j=0;j<MAX_LENGTH;j++)
             unitCounter[i][j]=0;
@@ -71,8 +80,10 @@ void Player::processBoGraph()
             lines[i]++;
         if(lines[i]>1)
             height[i]=MIN_HEIGHT;
+		if(height[i]==0) // TODO!
+			height[i]=1;
     }
-                                                                                                                                                            
+
 //make a list of facilities that are needed...
 // TODO WARUM = 1 und nicht = 0?
     faccount=1;
@@ -91,15 +102,9 @@ void Player::processBoGraph()
             }
         }
     }
-                                                                                                                                                            
+
 // ...and sort them (just an optical issue, scvs last)
-    for(int i=0;i<20;i++)
-        if(fac[i])
-            for(int j=0;j<i;j++)
-                if((fac[j]>0)&&(fac[i]>fac[j])) {
-                        int temp=fac[i];fac[i]=fac[j];fac[j]=temp;
-                    }
-                                                                                                                                                            
+	std::sort(fac, fac+20); // Warnung?!
 // now put all together
     int position=0;
     for(int i=0;i<20;i++)
@@ -109,7 +114,7 @@ void Player::processBoGraph()
         bograph[position].height=height[fac[i]];
         position+=lines[fac[i]];
     }
-                                                                                                                                                            
+
 // create a sorted by IP - list
     int orderCount=0;
 	Order* sortedList[MAX_LENGTH];
@@ -117,18 +122,10 @@ void Player::processBoGraph()
         sortedList[orderCount]=&(order->second);
         orderCount++;
     }
-                                                                                                                                                            
-    for(int i=0;i<orderCount;i++)
-        for(int j=0;j<i;j++)
-            if(sortedList[i]->getIP() > sortedList[j]->getIP())
-                // > =>  earlier! first IP is MAX_LENGTH
-            {
-                Order* temp = sortedList[i];
-                sortedList[i]=sortedList[j];
-                sortedList[j]=temp;
-            }
-                                                                                                                                                            
-    int hoehe=0;
+
+	std::sort(sortedList, sortedList+orderCount, Order::OrderDescendingIPSort());
+
+	int hoehe=0;
 //  for(map<long, Order>::iterator order=orderList->begin(); order!=orderList->end(); ++order)
     for(int k=0;k<orderCount;k++)
     {
@@ -190,11 +187,18 @@ Size(  (stats[(*anarace)->getRace()][sortedList[k]->getUnit()/*(*anarace)->getPh
 	// bodiagram braucht eine sortierte IP List
 }
 
+void Player::drawGene(DC* dc, int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const
+{
+	if(points[0].y<points[1].y) dc->SetPen(bla1);else dc->SetPen(bla2);
+	dc->DrawSpline(k, points, position);
+	//dc->SetPen(bla2);
+	dc->DrawSpline(k, points, position - Size(0,1));
+	dc->DrawSpline(k, points, position + Size(0,1));
+}
+
 void Player::drawGeneString(DC* dc, const Rect position) const
 {
-	//TODO
 	int stringheight=0;
-	int currentType=-1;
 	Point points1[200];
 	Point points2[200];
 	Point points3[200];
@@ -206,72 +210,117 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 		points3[i].x=0;points3[i].y=0;
 		points4[i].x=0;points4[i].y=0;
 	}
-	int boanzahl=orderList.size();
 	int colors[MAX_LENGTH];													
 	for(int i=0;i<MAX_LENGTH;i++)
 		colors[i]=0;
+
+	const Order* sortedList[MAX_LENGTH];
+	int orderCount=0;
+    for(map<long, Order>::const_iterator order=orderList.begin(); order!=orderList.end(); ++order) {
+        sortedList[orderCount]=&(order->second);
+        orderCount++;
+    }
+	if(orderCount<2)
+		return;
+    std::sort(sortedList, sortedList+orderCount, Order::OrderDescendingIPSort());
+
+    for(int k=0;k<orderCount;k++)
+        colors[k]=sortedList[k]->getUnit();
 	
-    for(map<long, Order>::const_iterator order=orderList.begin(); order!=orderList.end(); ++order)
-		colors[order->second.getIP()]=order->second.getUnit();
+//    for(map<long, Order>::const_iterator order=orderList.begin(); order!=orderList.end(); ++order)
+//		colors[order->second.getIP()]=order->second.getUnit();
 
-	currentType=-1;
-
-	if((*anarace)->isOptimizing())
+//	if((*anarace)->isOptimizing())
 	{
-		for(int i=0;i<MAX_LENGTH;i++)
+		int current_type=stats[(*anarace)->getRace()][colors[0]].facilityType;
+		for(int i=0;i<2*orderCount;i++)
+		{
+//			int k=2;
+/*			while((i<orderCount)&&(stats[(*anarace)->getRace()][colors[i]].facilityType==current_type))
+			{
+				i++;
+				k++;
+			}*/
+			current_type=stats[(*anarace)->getRace()][colors[i/2]].facilityType;
+			
+			
+/*		for(int i=0;i<MAX_LENGTH;i++)
 			if(colors[i])
 			{
 				int k=1; // TODO
-				while((i<MAX_LENGTH)&&((!colors[i])||((stats[(*anarace)->getRace()][colors[i]].facilityType)&&((currentType==-1)||(stats[(*anarace)->getRace()][colors[i]].facilityType==currentType)))))
+				while((i<MAX_LENGTH)&&((!colors[i])||((stats[(*anarace)->getRace()][colors[i]].facilityType)&&((current_type==-1)||(stats[(*anarace)->getRace()][colors[i]].facilityType==current_type)))))
 				{
 					i++;
 					if(!colors[i]) continue;
-					if(currentType==-1)
-						currentType=stats[(*anarace)->getRace()][colors[i]].facilityType;
+					if(current_type==-1)
+						current_type=stats[(*anarace)->getRace()][colors[i]].facilityType;
 					k++;
 				}
-				currentType=stats[(*anarace)->getRace()][colors[i]].facilityType;
+				current_type=stats[(*anarace)->getRace()][colors[i]].facilityType;*/
 																				
-				for(int j=0;j<k+1;j++)
+				for(int j=0;j<2;j++)
 				{
-					points1[j] = Point(10+(stringheight+j)*(position.GetWidth()-20)/(boanzahl)-1, (int)((cos((float)((stringheight+j)+geneAnimation)*10.0*3.1416/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
+					points1[j] = Point(5+(stringheight+j)*(position.GetWidth()-8)/(orderCount*2)-1, (int)((cos((float)(4*(stringheight+j)+geneAnimation/2)*5.0*M_PI/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
 					
-					points2[j] = Point(10+(stringheight+j)*(position.GetWidth()-20)/(boanzahl)-1, (int)((sin(((float)((stringheight+j)+geneAnimation)+13.0)*10.0*3.1416/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
+					points2[j] = Point(5+(stringheight+j)*(position.GetWidth()-8)/(orderCount*2)-1, (int)((sin(((float)(4*(stringheight+j)+geneAnimation/2)+13.0)*5.0*M_PI/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
 					
-					points3[j] = Point(10+(stringheight+j)*(position.GetWidth()-20)/(boanzahl)-1, (int)((cos(((float)((stringheight+j)+geneAnimation)+26.0)*10.0*3.1416/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
+					points3[j] = Point(5+(stringheight+j)*(position.GetWidth()-8)/(orderCount*2)-1, (int)((cos(((float)(4*(stringheight+j)+geneAnimation/2)+26.0)*5.0*M_PI/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
 					
-					points4[j] = Point(10+(stringheight+j)*(position.GetWidth()-20)/(boanzahl)-1, (int)((sin(((float)((stringheight+j)+geneAnimation)+39.0)*10.0*3.1416/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
+					points4[j] = Point(5+(stringheight+j)*(position.GetWidth()-8)/(orderCount*2)-1, (int)((sin(((float)(4*(stringheight+j)+geneAnimation/2)+39.0)*5.0*M_PI/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
 				} //end for(j=0;j<k;j++)
-				stringheight+=k;
-				k++;
-				if(k>=1)
+				stringheight+=1;
+//				k++;
+//				if(k>=1)
 				{
-					Pen bla1=Pen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN+stats[(*anarace)->getRace()][colors[i-1]].unitType)));
-					Pen bla2=Pen(*theme.lookUpPen((ePen)(UNIT_TYPE_0_PEN+stats[(*anarace)->getRace()][colors[i-1]].unitType)));
-																				
-					dc->SetPen(bla1);
-					dc->DrawSpline(k, points1, position.GetTopLeft());
-					dc->SetPen(bla2);
-					dc->DrawSpline(k, points1, position.GetTopLeft() - Size(0,1));
-					dc->DrawSpline(k, points1, position.GetTopLeft() + Size(0,1));
-
-					dc->SetPen(bla1);
-					dc->DrawSpline(k, points2, position.GetTopLeft());
-					dc->SetPen(bla2);
-					dc->DrawSpline(k, points2, position.GetTopLeft() - Size(0,1));
-					dc->DrawSpline(k, points2, position.GetTopLeft() + Size(0,1));
-	
-					dc->SetPen(bla1);
-					dc->DrawSpline(k, points3, position.GetTopLeft());
-					dc->SetPen(bla2);
-					dc->DrawSpline(k, points3, position.GetTopLeft() - Size(0,1));
-					dc->DrawSpline(k, points3, position.GetTopLeft() + Size(0,1));
-	
-					dc->SetPen(bla1);
-					dc->DrawSpline(k, points4, position.GetTopLeft());
-					dc->SetPen(bla2);
-					dc->DrawSpline(k, points4, position.GetTopLeft() - Size(0,1));
-					dc->DrawSpline(k, points4, position.GetTopLeft() + Size(0,1));
+						
+					Pen bla1=Pen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN+stats[(*anarace)->getRace()][colors[i/2]].unitType)));
+					Pen bla2=Pen(*theme.lookUpPen((ePen)(UNIT_TYPE_0_PEN+stats[(*anarace)->getRace()][colors[i/2]].unitType)));
+					int k=2;
+					if(points1[0].y>points1[1].y) // faellt -> hinten
+					{
+                        if(points1[0].y>points2[0].y)
+                        {
+                            drawGene(dc, k, points1, position.GetTopLeft(), bla1, bla2);
+                            drawGene(dc, k, points2, position.GetTopLeft(), bla1, bla2);
+                        }
+                        else
+                        {
+                            drawGene(dc, k, points2, position.GetTopLeft(), bla1, bla2);
+                            drawGene(dc, k, points1, position.GetTopLeft(), bla1, bla2);
+                        }
+                        if(points3[0].y>points4[0].y)
+                        {
+                            drawGene(dc, k, points3, position.GetTopLeft(), bla1, bla2);
+                            drawGene(dc, k, points4, position.GetTopLeft(), bla1, bla2);
+                        } else
+                        {
+                            drawGene(dc, k, points4, position.GetTopLeft(), bla1, bla2);
+                            drawGene(dc, k, points3, position.GetTopLeft(), bla1, bla2);
+                        }
+					} else
+					{
+        	            if(points3[0].y>points4[0].y)
+						{
+							drawGene(dc, k, points3, position.GetTopLeft(), bla1, bla2);
+							drawGene(dc, k, points4, position.GetTopLeft(), bla1, bla2);
+						} else
+						{
+							drawGene(dc, k, points4, position.GetTopLeft(), bla1, bla2);
+							drawGene(dc, k, points3, position.GetTopLeft(), bla1, bla2);
+						}
+						if(points1[0].y>points2[0].y)
+						{
+							drawGene(dc, k, points1, position.GetTopLeft(), bla1, bla2);
+							drawGene(dc, k, points2, position.GetTopLeft(), bla1, bla2);
+						}
+						else
+						{
+                    	    drawGene(dc, k, points2, position.GetTopLeft(), bla1, bla2);
+	            	        drawGene(dc, k, points1, position.GetTopLeft(), bla1, bla2);
+						}
+					
+					}
+					k--;
 				}
 			} //end blend
 	} //end if(isOptimizing)
@@ -283,8 +332,15 @@ void Player::draw(DC* dc) const
 	if(!isShown())
 		return;
 	// TODO
-	drawGeneString(dc,Rect(getAbsolutePosition()+Point(0,100+(*anarace)->getPlayerNum()*300), Size(1024, 240)));
 	UI_Object::draw(dc);
+	if(configuration.isDnaSpiral())
+	{
+		Rect r = Rect(getAbsolutePosition()+Point(210, 200+(*anarace)->getPlayerNumber()*300), Size(600, 120));
+		dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
+		dc->SetPen(*theme.lookUpPen(BRIGHT_UNIT_TYPE_1_PEN));
+		dc->DrawRectangle(r);
+		drawGeneString(dc, r);
+	}
 }
 
 void Player::setMode(const eTab tab, const unsigned int playerNum)//, int player1, int player2)
@@ -360,8 +416,8 @@ void Player::process()
 	}
 // ------ END COMMUNICATION BETWEEN THE WINDOWS ------
 
-//	if((*anarace)->isOptimizing())
-//		geneAnimation++;
+	if((*anarace)->isOptimizing())
+		geneAnimation++;
 // ------ PROCESS MEMBER VARIABLES ------	
 	MoveOrders();
 // ------ END PROCESSING MEMBER VARIABLES ------
@@ -389,6 +445,7 @@ const bool Player::isOptimizing() const
 void Player::setOptimizing(const bool opt)
 {
 	(*anarace)->setOptimizing(opt);
+	((TimerWindow*)window[TIMER_WINDOW])->forcePause(opt);
 }
 
 void Player::changeAccepted()
@@ -431,10 +488,9 @@ void Player::CheckOrders()
 	for(int s=MAX_LENGTH;s--;)
 		if((*anarace)->getProgramIsBuilt(s)&&((*anarace)->getRealProgramTime(s)<=(*anarace)->getRealTimer()))
 		{
-			map<long, Order>::iterator order=orderList.find((*anarace)->getMarker(s)) ;// => found old one -> update the data!
+			map<long, Order>::iterator order = orderList.find((*anarace)->getMarker(s)) ;// => found old one -> update the data!
 			if(order!=orderList.end())
 			{
-			
 				order->second.setRow(k+1);//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace())); TODO
 				//Rect t=Rect((order->second.getRow()%2)*(window[BUILD_ORDER_WINDOW]->getWidth()/2), (order->second.getRow()/2)*(FONT_SIZE+6),(window[BUILD_ORDER_WINDOW]->getWidth()-8)/2,FONT_SIZE+4);
 				Rect t=Rect(0,order->second.getRow()*(FONT_SIZE+7),500-8,FONT_SIZE+6);
@@ -453,53 +509,53 @@ void Player::CheckOrders()
 			{
 				//TODO: testen ob anderes item da ist, das aber die gleiche Unit besitzt + an die gleiche Position kommt
 				bool found=false;
-				map<long, Order>::iterator order=orderList.begin();
-				while((!found) && (order!=orderList.end()))
+				map<long, Order>::iterator current_order = orderList.begin();
+				while((!found) && (current_order != orderList.end()))
 				{
-					if((order->second.getUnit()!=(*anarace)->getPhaenoCode(s))||(order->second.getRow()!=k+1)||(order->second.target.GetLeft()>0))
-						order++;
+					if((current_order->second.getUnit()!=(*anarace)->getPhaenoCode(s))||(current_order->second.getRow()!=k+1)||(current_order->second.target.GetLeft()>0)||(s!=current_order->second.getIP()))
+						current_order++;
 					else //=> ueberschreiben
 					{
 						found=true;
 						Order neuorder;
 						neuorder.setRow(k+1);//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace())); TODO
 //						Rect t=Rect((order->second.getRow()%2)*(window[BUILD_ORDER_WINDOW]->getWidth()/2), (order->second.getRow()/2)*(FONT_SIZE+6),(window[BUILD_ORDER_WINDOW]->getWidth()-8)/2,FONT_SIZE+4);
-						Rect t=Rect(0,order->second.getRow()*(FONT_SIZE+7),500-8,FONT_SIZE+6);
-						if(order->second.target!=t)
-							neuorder.start=order->second.rect;
-						else neuorder.start=order->second.start;
-						neuorder.target=t;
+						Rect t=Rect(0, current_order->second.getRow()*(FONT_SIZE+7), 500-8, FONT_SIZE+6);
+						if(current_order->second.target != t)
+							neuorder.start = current_order->second.rect;
+						else neuorder.start = current_order->second.start;
+						neuorder.target = t;
 
-						neuorder.brect=order->second.brect;
-						neuorder.bstart=order->second.bstart;
-						neuorder.btarget=order->second.btarget;
+						neuorder.brect = current_order->second.brect;
+						neuorder.bstart = current_order->second.bstart;
+						neuorder.btarget = current_order->second.btarget;
 						
-						neuorder.blendTarget=50;
-						neuorder.blendStart=order->second.blend;
+						neuorder.blendTarget = 50;
+						neuorder.blendStart = current_order->second.blend;
 						neuorder.setUnit((*anarace)->getPhaenoCode(s));
-						neuorder.marker=order->second.marker;
+						neuorder.marker = current_order->second.marker;
 						neuorder.checked=true;
 						neuorder.bonew=true;
 						orderList.insert(pair<long, Order>((*anarace)->getMarker(s), neuorder));
 						
-						map<long, Order>::iterator temp=order;
+						map<long, Order>::iterator temp = current_order;
 						temp++;
-						orderList.erase(order);
-						order=temp;
+						orderList.erase(current_order);
+						current_order = temp;
 					}
 				}
 				if((!found)&&(k+1<MAX_LENGTH)) // neues erstellen!
 				{
 					Order neuorder;
 					neuorder.setRow(k+1);//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace()));
-					neuorder.rect=Rect(170,neuorder.getRow()*(FONT_SIZE+7),0,FONT_SIZE+6);
+					neuorder.rect=Rect(170, neuorder.getRow()*(FONT_SIZE+7), 0, FONT_SIZE+6);
 					//Rect t=Rect((order->second.getRow()%2)*(window[BUILD_ORDER_WINDOW]->getWidth()/2), (order->second.getRow()/2)*(FONT_SIZE+6),(window[BUILD_ORDER_WINDOW]->getWidth()-8)/2,FONT_SIZE+4);
-					Rect t=Rect(0,neuorder.getRow()*(FONT_SIZE+7),500-8,FONT_SIZE+6);
-					neuorder.start=neuorder.rect;
-					neuorder.target=t;
-					neuorder.blend=1;neuorder.blendTarget=50;
-					neuorder.blendStart=neuorder.blend;
-					neuorder.bonew=true;
+					Rect t=Rect(0, neuorder.getRow()*(FONT_SIZE+7), 500-8, FONT_SIZE+6);
+					neuorder.start = neuorder.rect;
+					neuorder.target = t;
+					neuorder.blend = 1;neuorder.blendTarget = 50;
+					neuorder.blendStart = neuorder.blend;
+					neuorder.bonew = true;
 					neuorder.setUnit((*anarace)->getPhaenoCode(s));
 					neuorder.setIP(s);
 					neuorder.checked=true;
@@ -509,19 +565,19 @@ void Player::CheckOrders()
 			k++;
 		}
 
-		map<long, Order>::iterator order=orderList.begin();
-		while(order!=orderList.end())
-			if(!order->second.checked)
+		map<long, Order>::iterator current_order = orderList.begin();
+		while(current_order != orderList.end())
+			if(!current_order->second.checked)
 			{
-				map<long, Order>::iterator temp=order;
+				map<long, Order>::iterator temp = current_order;
 				temp++;
-				orderList.erase(order);
-				order=temp;
+				orderList.erase(current_order);
+				current_order = temp;
 			}
 			else
 			{
-				order->second.checked=false;
-				order++;
+				current_order->second.checked=false;
+				current_order++;
 			}
 		
 	processBoGraph();

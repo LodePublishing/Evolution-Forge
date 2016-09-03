@@ -1,0 +1,5 @@
+@GOAL 
+	"Name" "Tankpush"
+	"Race" "Terra"
+	"Siege Tank" "8" "0" "0"
+@END

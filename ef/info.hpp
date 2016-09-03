@@ -5,18 +5,6 @@
 #include "../core/anarace.hpp"
 #include "order.hpp"
 
-const char error_message[ERROR_MESSAGES][25]=
-{
-	"possible.", //= OK
-	"enough minerals.", 
-	"enough gas.",
-	"supply is satisfied.",
-	"prerequisite",
-	"facility",
-	"hell freezes.", //timeout
-	"SC2 comes out." //unknown
-};
-
 class InfoWindow : public UI_Window
 {
 	public:
@@ -32,10 +20,10 @@ class InfoWindow : public UI_Window
 		const unsigned int getBWidth() const;
 		const unsigned int getUnit() const;
 
-		void setBx(const signed int bx);
-		void setBWidth(const unsigned int bwidth);
-		void setUnit(const unsigned int unit);
-		void setIP(const unsigned int key);
+		void setBx(const signed int b_x);
+		void setBWidth(const unsigned int b_width);
+		void setUnit(const unsigned int unit_type);
+		void setIP(const unsigned int ip);
 		const unsigned int getIP() const; 
 		const unsigned int isSet() const;
 		void setupOk(const unsigned int ok); // already setuped by bowindow

@@ -3,7 +3,16 @@
 
 #include "prerace.hpp"
 
-struct STATISTICS
+struct IP_STATISTICS
+{
+	unsigned int needSupply;		// supply that is used up by all units
+	unsigned int haveSupply;		// total supply of supply buildings (overlord, supply depot, command center, ...)
+	unsigned int minerals;			// minerals at that time
+	unsigned int gas;			// gas at that time
+	unsigned int fitness;	//fitness at that time
+};
+
+struct TIME_STATISTICS
 {
 	unsigned int needSupply;		// supply that is used up by all units
 	unsigned int haveSupply;		// total supply of supply buildings (overlord, supply depot, command center, ...)
@@ -33,6 +42,7 @@ class ANARACE: public PRERACE
 	private:
 		unsigned int unitsTotal; // total number of all unit types at the end
 		unsigned int unitsTotalMax; // maximum number of one unit type at the end
+		unsigned int nonGoalsUnitsTotalMax; // maximum number of one NON GOAL unit type at the end
 		unsigned int unchangedGenerations;
 		unsigned int currentRun;
 		bool optimizing;
@@ -48,14 +58,29 @@ class ANARACE: public PRERACE
 		unsigned int phaenoCode[MAX_LENGTH];		// the final build order: an array of unit numbers (as defined in main.h)
 
 		PROGRAM program[MAX_LENGTH];
-		STATISTICS statistics[MAX_LENGTH];
+		IP_STATISTICS ipStatistics[2*MAX_LENGTH]; // before and after command!
+		TIME_STATISTICS timeStatistics[MAX_TIME];
 	
 		static unsigned int successType; //type of error
 		static unsigned int successUnit; //unit number
 
-		void setCurrentpFitness(unsigned int num);
+		void setCurrentpFitness(unsigned int current_pfitness);
 		
 		const bool buildGene(const unsigned int build_unit);
+
+		void setIPStatisticsNeedSupply(const unsigned int ip, const unsigned int need_supply);
+		void setIPStatisticsHaveSupply(const unsigned int ip, const unsigned int have_supply);
+		void setIPStatisticsFitness(const unsigned int ip, const unsigned int fitness);
+		void setIPStatisticsHaveMinerals(const unsigned int ip, const unsigned int have_minerals);
+		void setIPStatisticsHaveGas(const unsigned int ip, const unsigned int have_gas);
+
+		void setTimeStatisticsNeedSupply(const unsigned int time, const unsigned int need_supply);
+		void setTimeStatisticsHaveSupply(const unsigned int time, const unsigned int have_supply);
+		void setTimeStatisticsFitness(const unsigned int time, const unsigned int fitness);
+		void setTimeStatisticsHaveMinerals(const unsigned int time, const unsigned int have_minerals);
+		void setTimeStatisticsHaveGas(const unsigned int time, const unsigned int have_gas);
+
+		
 	public:
 		ANARACE();
 		~ANARACE();
@@ -69,10 +94,11 @@ class ANARACE: public PRERACE
 		unsigned int negativeCrossover;
 
 		const unsigned int getUnitsTotalMax() const;
+		const unsigned int getNonGoalsUnitsTotalMax() const;
 		const unsigned int getUnitsTotal() const;
 		
-		const unsigned int getPhaenoCode(const unsigned int IP) const;
-		void setPhaenoCode(const unsigned int IP, const unsigned int num);		
+		const unsigned int getPhaenoCode(const unsigned int ip) const;
+		void setPhaenoCode(const unsigned int ip, const unsigned int phaeno_code);		
 
 		void countUnitsTotal(); // to set maxUnitForce and totalUnitForce
 		const unsigned int getCurrentpFitness() const;		
@@ -92,30 +118,36 @@ class ANARACE: public PRERACE
 
 		const GOAL_TREE getGoalTree(const unsigned currentGoalUnit=0) const;
 		
-//		const bool getProgramIsConstant(const unsigned int IP) const;
+//		const bool getProgramIsConstant(const unsigned int ip) const;
 
 		const unsigned int getTimePercentage() const;
 		const unsigned int getGoalPercentage() const;
-		const unsigned int getProgramSuccessType(const unsigned int IP) const;	// determines the type of the last error before the item was built at that IP
-		const unsigned int getProgramSuccessUnit(const unsigned int IP) const;	// what unit was missing? (connected to successtype)
+		const unsigned int getProgramSuccessType(const unsigned int ip) const;	// determines the type of the last error before the item was built at that IP
+		const unsigned int getProgramSuccessUnit(const unsigned int ip) const;	// what unit was missing? (connected to successtype)
 		
-		const unsigned int getStatisticsNeedSupply(const unsigned int IP) const;	// supply that is used up by all units
-		const unsigned int getStatisticsHaveSupply(const unsigned int IP) const;	// total supply of supply buildings (overlord, supply depot, command center, ...)
-		const unsigned int getStatisticsFitness(const unsigned int IP) const;
-		const unsigned int getStatisticsHaveMinerals(const unsigned int IP) const; // minerals at that time
-		const unsigned int getStatisticsHaveGas(const unsigned int IP) const;		// gas at that time
+		const unsigned int getIPStatisticsNeedSupply(const unsigned int ip) const;	// supply that is used up by all units
+		const unsigned int getIPStatisticsHaveSupply(const unsigned int ip) const;	// total supply of supply buildings (overlord, supply depot, command center, ...)
+		const unsigned int getIPStatisticsFitness(const unsigned int ip) const;
+		const unsigned int getIPStatisticsHaveMinerals(const unsigned int ip) const; // minerals at that time
+		const unsigned int getIPStatisticsHaveGas(const unsigned int ip) const;		// gas at that time
 
-		const bool getProgramIsBuilt(const unsigned int IP) const;		// was this order successfully built?
+		const unsigned int getTimeStatisticsNeedSupply(const unsigned int time) const;	// supply that is used up by all units
+		const unsigned int getTimeStatisticsHaveSupply(const unsigned int time) const;	// total supply of supply buildings (overlord, supply depot, command center, ...)
+		const unsigned int getTimeStatisticsFitness(const unsigned int time) const;
+		const unsigned int getTimeStatisticsHaveMinerals(const unsigned int time) const; // minerals at that time
+		const unsigned int getTimeStatisticsHaveGas(const unsigned int time) const;		// gas at that time
 
-		const unsigned int getProgramTime(const unsigned int IP) const;			// at which time this order was started
-		const unsigned int getRealProgramTime(const unsigned int IP) const;			// at which time this order was started
-		const unsigned int getProgramLocation(const unsigned int IP) const;		// at which location was this unit built
-//		const bool getProgramIsGoal(const unsigned int IP) const;		// is this unit part of the goal list? NOT YET WORKING!
-		const unsigned int getProgramTotalCount(const unsigned int IP, const unsigned int unit) const;	// how many units of the type at phaenoCode[s] do exist at that time?
-		const unsigned int getProgramAvailibleCount(const unsigned int IP, const unsigned int unit) const;     // how many units of the type at phaenoCode[s] do exist at that time?
+		const bool getProgramIsBuilt(const unsigned int ip) const;		// was this order successfully built?
 
-		const unsigned int getProgramFacility(const unsigned int IP) const;
-		const unsigned int getProgramBT(const unsigned int IP) const;
+		const unsigned int getProgramTime(const unsigned int ip) const;			// at which time this order was started
+		const unsigned int getRealProgramTime(const unsigned int ip) const;			// at which time this order was started
+		const unsigned int getProgramLocation(const unsigned int ip) const;		// at which location was this unit built
+//		const bool getProgramIsGoal(const unsigned int ip) const;		// is this unit part of the goal list? NOT YET WORKING!
+		const unsigned int getProgramTotalCount(const unsigned int ip, const unsigned int unit_type) const;	// how many units of the type at phaenoCode[s] do exist at that time?
+		const unsigned int getProgramAvailibleCount(const unsigned int ip, const unsigned int unit_type) const;     // how many units of the type at phaenoCode[s] do exist at that time?
+
+		const unsigned int getProgramFacility(const unsigned int ip) const;
+		const unsigned int getProgramBT(const unsigned int ip) const;
 
 		const unsigned int getUnchangedGenerations() const;	// gets number of generations where no change in fitness took place
 		const unsigned int getRun() const;					// gets number of runs (one run is complete when no <unchangedGenerations> > <maxGenerations>)
@@ -129,31 +161,26 @@ class ANARACE: public PRERACE
 
 
 // internal control structures, do not touch ;-)
-		void setUnchangedGenerations(const unsigned int unchangedGenerations); 
-		void setRun(const unsigned int run);
+		void setUnchangedGenerations(const unsigned int unchanged_generations); 
+		void setRun(const unsigned int current_run);
 		void setTotalGeneration(const unsigned int total_generations);
-		void setMaxpFitness(const unsigned int maxpFitness);
-		void setMaxsFitness(const unsigned int maxsFitness);
-		void setMaxtFitness(const unsigned int maxtFitness);
+		void setMaxpFitness(const unsigned int max_pfitness);
+		void setMaxsFitness(const unsigned int max_sfitness);
+		void setMaxtFitness(const unsigned int max_tfitness);
 
-		void setStatisticsNeedSupply(const unsigned int IP, const unsigned int supply);
-		void setStatisticsHaveSupply(const unsigned int IP, const unsigned int supply);
-		void setStatisticsFitness(const unsigned int IP, const unsigned int fitness);
-		void setStatisticsHaveMinerals(const unsigned int IP, const unsigned int minerals);
-		void setStatisticsHaveGas(const unsigned int IP, const unsigned int gas);
 	
 
-//		void setProgramIsConstant(const unsigned int IP, const bool isConstant);
-		void setProgramFacility(const unsigned int IP, const unsigned int num);
-		void setProgramBT(const unsigned int IP, const unsigned int num);
-		void setProgramSuccessType(const unsigned int IP, const unsigned int num);
-		void setProgramSuccessUnit(const unsigned int IP, const unsigned int num);
-		void setProgramIsBuilt(const unsigned int IP, const bool isBuilt);
-		void setProgramLocation(const unsigned int IP, const unsigned int location);
-		void setProgramTime(const unsigned int IP, const unsigned int time);
-//		void setProgramIsGoal(const unsigned int IP, const bool isGoal);	
-		void setProgramTotalCount(const unsigned int IP, const unsigned int unit, const unsigned int count);	
-		void setProgramAvailibleCount(const unsigned int IP, const unsigned int unit, const unsigned int count);
+//		void setProgramIsConstant(const unsigned int ip, const bool isConstant);
+		void setProgramFacility(const unsigned int ip, const unsigned int program_facility);
+		void setProgramBT(const unsigned int ip, const unsigned int program_bt);
+		void setProgramSuccessType(const unsigned int ip, const unsigned int program_success_type);
+		void setProgramSuccessUnit(const unsigned int ip, const unsigned int program_success_unit);
+		void setProgramIsBuilt(const unsigned int ip, const bool program_is_built);
+		void setProgramLocation(const unsigned int ip, const unsigned int program_location);
+		void setProgramTime(const unsigned int ip, const unsigned int program_time);
+//		void setProgramIsGoal(const unsigned int ip, const bool isGoal);	
+		void setProgramTotalCount(const unsigned int ip, const unsigned int unit_type, const unsigned int unit_count);	
+		void setProgramAvailibleCount(const unsigned int ip, const unsigned int unit_type, const unsigned int unit_count);
 
 		const bool calculateStep();			// calculates another time step of current generation
 		void resetData();				// resets all data to standard values

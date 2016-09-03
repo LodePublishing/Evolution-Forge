@@ -3,14 +3,20 @@
 
 #include "theme.hpp"
 
-class UI_StaticText;
+class UI_Object;
+class UI_EditField;
+class UI_Tooltip;
+//class UI_EndRunDialog;
+class UI_Button;
 
 class UI_Object
 {
 	public:
 		UI_Object& operator=(const UI_Object& object);
 		UI_Object(const UI_Object& object);
-		
+		UI_Object(UI_Object* parent_object, const Rect relative_rect = Rect(0,0,0,0), const Rect max_rect = Rect(0,0,0,0));
+		virtual ~UI_Object();
+	
         void Show(const bool show=true);
         void Hide(const bool hide=true);
 
@@ -39,6 +45,7 @@ class UI_Object
 		}
 	
 		void setPosition(const Point& position);
+		void jumpToPosition(const Point& position);
 		
 		void setLeft(const signed int x) {
 			relativeRect.SetLeft(x);
@@ -145,16 +152,18 @@ class UI_Object
 //		void resetToOriginalValues(); // ~~
 
 		virtual UI_Object* checkHighlight();
+		virtual UI_Object* checkTooltip();
+		virtual void reloadStrings();
+		virtual void adjustButtonPlacementSize();
 		const bool isMouseInside() const;
 
 		void setParent(UI_Object* daddy);
 		void removeFromFamily();
+		void makeFirstChild();
 		
 		virtual void draw(DC* dc) const;
 
-		UI_Object(UI_Object* parent_object, const Rect relative_rect = Rect(0,0,0,0), const Rect max_rect = Rect(0,0,0,0));
-		virtual ~UI_Object();
-
+		
 		virtual void process();
 
 		UI_Object* getNextBrother() const;
@@ -165,6 +174,7 @@ class UI_Object
 
 	
 		void updateToolTip(const eString tooltip);
+		const eString getToolTipString() const;
 
 		static void assignStartTime();
 		static const unsigned long int getTimeStampMs(const unsigned long int timeSpan);
@@ -186,8 +196,13 @@ class UI_Object
 		static unsigned int max_y;
 		static UI_Theme theme;
 
-		static void maybeShowToolTip(DC* dc);
-		static void hideToolTip();
+		static bool currentButtonPressed;
+		static bool currentButtonHasAlreadyLeft;
+		static UI_Button* currentButton;
+		static void resetButton();
+
+//		static void maybeShowToolTip(DC* dc);
+//		static void hideToolTip();
 
 		void addMinTopLeftX(signed int dx);
 		void addMinLeftY(signed int dy);
@@ -206,7 +221,12 @@ class UI_Object
 	
 		static unsigned int mouseType;
 		static Point mouse;
-		static UI_StaticText* editTextFeld; //~~
+		static UI_EditField* editTextField; //~~
+//		static UI_EndRunDialog* endRunDialog;
+
+		static UI_Tooltip* tooltip;
+		static UI_Object* toolTipParent;
+
 
 //		const bool setFocus(); TODO
 	protected:
@@ -235,7 +255,7 @@ class UI_Object
 // ignore maxRect for the next adjustWindow calls - important for tutorials
 		bool isFreeMove;
 
-		SDL_Surface* tempSurface;
+//		SDL_Surface* tempSurface;
 		
 		UI_Object* prevBrother;
 		UI_Object* nextBrother; 
@@ -243,7 +263,7 @@ class UI_Object
 		UI_Object* parent; // = NULL means that this is the screen (x=0/y=0)
 
 		Rect relativeRect; // every object needs a current position and size, position is >> RELATIVE << to parent!
-		Rect lastRect;
+//		Rect lastRect;
 		
 	// to adjust object smoothly
 //		Rect startRect;
@@ -251,18 +271,17 @@ class UI_Object
 		Rect maxRect;
 		unsigned int doAdjustments;
 		
-		eString toolTip;
-	
+		eString toolTipString;
+
 		static unsigned long int startTime;
 
+//		static bool toolTipIsShown;
+//		static string toolTipString;
+//		static Point toolTipPosition;
+//		static Rect lastToolTipRect;
+//		static bool needToolTipRedraw;
 
-		static bool toolTipIsShown;
-		static string toolTipString;
-		static Point toolTipPosition;
-		static Rect lastToolTipRect;
-		static bool needToolTipRedraw;
-
-		static void addRectToBeDrawn(Rect& lastRect, const Rect currentRect);
+//		static void addRectToBeDrawn(Rect& lastRect, const Rect currentRect);
 //		int linkedToHotSpot; // is this item linked constantly to a hotspot? Or is his position determined by hardcoded functions?
 
 //		int hasFocus; // make every object accessible with the keyboard (TAB)

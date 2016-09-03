@@ -90,48 +90,71 @@ BoGraphWindow::BoGraphWindow(UI_Object* bograph_parent, ANARACE* bograph_anarace
 BoGraphWindow::~BoGraphWindow()
 { }
 
-const unsigned int BoGraphWindow::getMarkedIP() const {
+const unsigned int BoGraphWindow::getMarkedIP() const 
+{
+#ifdef _SCC_DEBUG
+    if(ownMarkedIP > MAX_LENGTH) {
+        toLog("DEBUG: (BoGraphWindow::getMarkedIP): Value ownMarkedIP out of range.");return(0);
+    }
+#endif
 	return(ownMarkedIP);
 }
 
-void BoGraphWindow::setMarkedIP(const unsigned int markedIP) {
-	this->markedIP=markedIP;
+void BoGraphWindow::setMarkedIP(const unsigned int marked_ip) 
+{
+#ifdef _SCC_DEBUG
+    if(marked_ip > MAX_LENGTH) {
+        toLog("DEBUG: (BoGraphWindow::setMarkedIP): Value marked_ip out of range.");return;
+	}
+#endif
+	markedIP = marked_ip;
 }
 
-const unsigned int BoGraphWindow::getMarkedUnit() const {
+const unsigned int BoGraphWindow::getMarkedUnit() const 
+{
+#ifdef _SCC_DEBUG
+    if(ownMarkedUnit >= UNIT_TYPE_COUNT) {
+        toLog("DEBUG: (BoGraphWindow::getMarkedUnit): Value ownMarkedUnit out of range.");return(0);
+    }
+#endif
 	return(ownMarkedUnit);
 }
 
-void BoGraphWindow::setMarkedUnit(const unsigned int markedUnit) {
-	this->markedUnit=markedUnit;
+void BoGraphWindow::setMarkedUnit(const unsigned int marked_unit) {
+#ifdef _SCC_DEBUG
+    if(marked_unit >= UNIT_TYPE_COUNT) {
+        toLog("DEBUG: (BoGraphWindow::setMarkedUnit): Value marked_unit out of range.");return;
+    }
+#endif
+	markedUnit = marked_unit;
 }
 
 void BoGraphWindow::checkForInfoWindow()
 {
 	for(std::map<long, Order>::const_iterator order=orderList->begin(); order!=orderList->end(); ++order)
-	if(order->second.getIP()==ownMarkedIP)
-	{
-//	  int row=((boInsertPoint>-1)&&(order->row>=boInsertPoint))*(boEndPoint-boInsertPoint);
-//	  mouse on order in player reinschieben, da is ja auch orderList zuhause
-		Rect edge(getRelativeClientRectPosition()+order->second.brect.GetTopLeft()/*-Point(0,getScrollY() TODO)*/,order->second.brect.GetSize());
-/*		if((fitItemToRelativeClientRect(edge)&& edge.Inside(controls.getCurrentPosition()-getAbsolutePosition())))
+		if(order->second.getIP()==ownMarkedIP)
 		{
-			ownMarkedUnit = order->second.getUnit();
-			ownMarkedIP = order->second.getIP();*/
+//		  int row=((boInsertPoint>-1)&&(order->row>=boInsertPoint))*(boEndPoint-boInsertPoint);
+//	  mouse on order in player reinschieben, da is ja auch orderList zuhause
+			Rect edge(getRelativeClientRectPosition()+order->second.brect.GetTopLeft()/*-Point(0,getScrollY() TODO)*/,order->second.brect.GetSize());
+/*			if((fitItemToRelativeClientRect(edge)&& edge.Inside(controls.getCurrentPosition()-getAbsolutePosition())))
+			{
+				ownMarkedUnit = order->second.getUnit();
+				ownMarkedIP = order->second.getIP();*/
 			
-			infoWindow->setUnit(order->second.getUnit());
-			infoWindow->setIP(order->second.getIP());
-			infoWindow->setBx(order->second.brect.GetLeft());
-			infoWindow->setBWidth(order->second.brect.GetWidth());
-			infoWindow->Show(1);
-			infoWindow->setFreeMove();
-			if(edge.GetLeft() + 200 > (signed int)(getWidth()))
-	            infoWindow->adjustRelativeRect(Rect(getRelativeRightBound() - 200, getRelativeLowerBound() + 5, 200, 110));
-			else
-	            infoWindow->adjustRelativeRect(Rect(edge.GetLeft() + getRelativeLeftBound(), getRelativeLowerBound() + 5, 200, 110));
-			return;
-//		}*/
-	}
+				infoWindow->setUnit(order->second.getUnit());
+				infoWindow->setIP(order->second.getIP());
+				infoWindow->setBx(order->second.brect.GetLeft());
+				infoWindow->setBWidth(order->second.brect.GetWidth());
+				infoWindow->Show(1);
+				infoWindow->setFreeMove();
+				if(edge.GetLeft() + 200 > (signed int)(getWidth()))
+		            infoWindow->adjustRelativeRect(Rect(getRelativeRightBound() - 200, getRelativeLowerBound() + 5, 200, 110));
+				else
+	        	    infoWindow->adjustRelativeRect(Rect(edge.GetLeft() + getRelativeLeftBound(), getRelativeLowerBound() + 5, 200, 110));
+				return;
+//			}*/
+		}
 }
 	
 void BoGraphWindow::resetData()
@@ -166,24 +189,24 @@ void BoGraphWindow::process()
 	Size::mv(lastbographY, startbographY, targetbographY);
 }
 
-void BoGraphWindow::copyBoGraph(const BOGRAPH* bograph)
+void BoGraphWindow::copyBoGraph(const BOGRAPH* bo_graph)
 {
 	for(int i=20;i--;)
 	{
-	    this->bograph[i].type=bograph[i].type;
-	    this->bograph[i].position=bograph[i].position;
-	    this->bograph[i].height=bograph[i].height;
-	    this->bograph[i].lines=bograph[i].lines;
-	    this->bograph[i].edge=bograph[i].edge;
+	    bograph[i].type = bo_graph[i].type;
+	    bograph[i].position = bo_graph[i].position;
+	    bograph[i].height = bo_graph[i].height;
+	    bograph[i].lines = bo_graph[i].lines;
+	    bograph[i].edge = bo_graph[i].edge;
 	}
 }
 
-void BoGraphWindow::setBoGraphY(unsigned int lastbographY)
+void BoGraphWindow::setBoGraphY(unsigned int last_bograph_y)
 {
-	if(lastbographY != targetbographY)
+	if(last_bograph_y != targetbographY)
 	{
-		targetbographY = lastbographY;
-		startbographY = this->lastbographY;
+		targetbographY = last_bograph_y;
+		startbographY = lastbographY;
 	}
 }
 
@@ -229,7 +252,7 @@ void BoGraphWindow::draw(DC* dc) const
 				//		dc->SetBrush(*theme.lookUpBrush(BO_DARK_BRUSH));
 				//	else 
 					dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
-					dc->DrawRoundedRectangle(rec,3);
+					dc->DrawEdgedRoundedRectangle(rec,3);
 				}
 			}
 	if((signed int)lastbographY > getAbsoluteClientRectUpperBound()+(signed int)(FONT_SIZE+10))
@@ -251,7 +274,7 @@ void BoGraphWindow::draw(DC* dc) const
 				
 			std::ostringstream os;
 			os << i/2 << ":" << 3*(i%2) << "0";
-			dc->DrawText(os.str(),getAbsoluteClientRectPosition()+Point(5+i*((getClientRectWidth()-20)/((anarace->getRealTimer())/30)),0));
+			dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(5+i*((getClientRectWidth()-20)/((anarace->getRealTimer())/30)), 0));
 		}
 
 // --------------------------------- END BUILD ORDER GRAPH ------------------------------
@@ -273,15 +296,16 @@ void BoGraphWindow::draw(DC* dc) const
 					dc->SetBrush(*theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][order->second.getUnit()].unitType)));
 				
 				dc->SetPen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN+stats[anarace->getRace()][order->second.getUnit()].unitType)));
-				dc->DrawRoundedRectangle(Rect(getAbsolutePosition()+edge.GetTopLeft(), edge.GetSize()),3);
+				dc->DrawEdgedRoundedRectangle(Rect(getAbsolutePosition()+edge.GetTopLeft(), edge.GetSize()),3);
 			}
 		}
 	}
 	//finally print the legend
+	dc->SetFont(UI_Object::theme.lookUpFont(SMALL_MIDDLE_NORMAL_FONT));
 	dc->SetTextForeground(*theme.lookUpColor(BRIGHT_TEXT_COLOR));
 	for(int i=0;i<20;i++)
 		if(bograph[i].type>0)
-			dc->DrawText(" "+stats[anarace->getRace()][bograph[i].type].name,getAbsoluteClientRectPosition()+Point(0,1+(i+1)*(FONT_SIZE+10)));
+			dc->DrawText(" "+*UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+bograph[i].type+UNIT_NULL_STRING)), getAbsoluteClientRectPosition()+Point(0, 4+(i+1)*(FONT_SIZE+10)));
 }
 
 

@@ -51,6 +51,10 @@ class Rect
 			return topLeftCorner; 
 		}
 
+		const Point GetBottomLeft() const {
+			return(Point(topLeftCorner.x, bottomRightCorner.y));
+		}
+
 		void SetTopLeft( const Point& point ) { 
 			topLeftCorner = point; 
 			bottomRightCorner = point + rectSize;

@@ -1,8 +1,0 @@
-@GOAL
-        "Name" "settings/goals/Terra/goal82.gol"
-        "Race" "Terra"
-        "Refinery" "1" "0" "0"
-        "Command Center" "1" "0" "0"
-        "Barracks" "1" "0" "0"
-        "SCV" "1" "0" "0"
-@END

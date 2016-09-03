@@ -1,19 +1,35 @@
 #include "start.hpp"
 
 START::START():
-	tmpmap(NULL)	
+	tmpmap(NULL),
+	startConditionsInitialized(false),
+	mapInitialized(false)
 {
 	for(int i=MAX_PLAYER;i--;)
+	{
 		pCurrentGoal[i]=&(currentGoal[i]);
+		startcondition[i]=NULL;
+		tmpgoal[i]=NULL;
+		startPosition[i]=0;
+		playerRace[i]=TERRA;
+		pStats[i]=NULL;
+	}		
 }
 
 START::~START()
-{
-}
+{ }
 
 // has to be called at the end of each starcondition change!!
 void START::fillGroups()
 {
+#ifdef _SCC_DEBUG
+	if(!mapInitialized) {
+		toLog("DEBUG: (START::fillGroups): No map was initialized.");return;
+    }
+	if(!startConditionsInitialized) {
+		toLog("DEBUG: (START::fillGroups): Not all startConditions were initialized.");return;
+    }
+#endif
 	for(int i=MAX_PLAYER;i--;)
 		totalForce[i].resetData();
 	int maxp=tmpmap->getMaxPlayer();
@@ -27,8 +43,8 @@ void START::fillGroups()
 	}
 	for(int i=maxp;i--;)
 	{
-		startForce[i+1][0].copy(startcondition[i+1]->getUnit(0));
-		startForce[i+1][startPosition[i+1]].copy(startcondition[i+1]->getUnit(0));
+		startForce[i+1][0] = *startcondition[i+1]->getUnit(0);
+		startForce[i+1][startPosition[i+1]] = *startcondition[i+1]->getUnit(0);
 		for(int j=1;j<MAX_LOCATIONS;j++)
 		{
 			for(int k=UNIT_TYPE_COUNT;k--;)
@@ -50,9 +66,9 @@ void START::fillGroups()
 // ------ GET/SET FUNCTIONS ------
 // -------------------------------
 
-void START::setHarvestSpeed(const eRace race, const HARVEST_SPEED* harvest)
+void START::setHarvestSpeed(const eRace race, const HARVEST_SPEED* harvest_speed)
 {
-	this->harvest[race]=harvest;
+	harvest[race]=harvest_speed;
 }
 
 void START::assignGoal(const unsigned int playerNum, const GOAL_ENTRY* goal)
@@ -62,19 +78,32 @@ void START::assignGoal(const unsigned int playerNum, const GOAL_ENTRY* goal)
         toLog("DEBUG: (START::assignGoal): Value playerNum out of range.");return;
     }
 #endif
-	tmpgoal[playerNum]=goal;
-	currentGoal[playerNum].copy(goal);
+	tmpgoal[playerNum] = goal;
+	currentGoal[playerNum] = *goal;
 	currentGoal[playerNum].adjustGoals(&(totalForce[playerNum]));
 }
 
-void START::assignStartcondition(const unsigned int player, const START_CONDITION* startcondition)
+void START::assignStartcondition(const unsigned int player, const START_CONDITION* start_condition)
 {
-	this->startcondition[player]=startcondition;
+	startcondition[player] = start_condition;
+	if(mapInitialized)
+	{
+		startConditionsInitialized=true;
+		for(int i=tmpmap->getMaxPlayer();i--;)
+			if(!startcondition[i+1])
+				startConditionsInitialized=false;
+	}
 }
 
 void START::assignMap(const BASIC_MAP* map)
 {
-	this->tmpmap=map;
+#ifdef _SCC_DEBUG
+    if(!map) {
+        toLog("DEBUG: (START::assignMap): Value map out of range.");return;
+    }
+#endif
+	tmpmap = map;
+	mapInitialized=true;
 	// initialize Map???
 	// player 0 ?
 }
@@ -113,21 +142,24 @@ void START::copyStartForce(void* target) const
 const START_CONDITION* const* START::getStartcondition(const unsigned int playerNum) const
 {
 #ifdef _SCC_DEBUG
-    if((playerNum<1)||(playerNum>=MAX_PLAYER)) {
+    if((playerNum < 1) || (playerNum >= MAX_PLAYER)) {
         toLog("DEBUG: (START::getStartcondition): Value playerNum out of range.");return(NULL);
     }
 #endif
 	return(&(startcondition[playerNum]));
 }
 
-void START::setStartPosition(const unsigned int playerNum, const unsigned int startPosition)
+void START::setStartPosition(const unsigned int playerNum, const unsigned int start_position)
 {
 #ifdef _SCC_DEBUG
-    if((playerNum<1)||(playerNum>=MAX_PLAYER)) {
+    if((playerNum < 1) || (playerNum >= MAX_PLAYER)) {
         toLog("DEBUG: (START::setStartPosition): Value playerNum out of range.");return;
     }
+	if((start_position < 1) || (start_position >= MAX_LOCATIONS)) {
+        toLog("DEBUG: (START::setStartPosition): Value start_position out of range.");return;
+    }
 #endif
-	this->startPosition[playerNum]=startPosition;
+	startPosition[playerNum] = start_position;
 }
 
 const eRace START::getPlayerRace(const unsigned int playerNum) const

@@ -1,6 +1,6 @@
 #include "bowindow.hpp"
 #include "../core/settings.hpp"
-
+#include "../ui/editfield.hpp"
 
 BoEntry::BoEntry(const BoEntry& object) :
 	UI_Button((UI_Button)object)
@@ -13,7 +13,7 @@ BoEntry& BoEntry::operator=(const BoEntry& object)
 }
 
 BoEntry::BoEntry(UI_Object* bo_parent, Rect bo_rect, Rect bo_max_rect, const string& bo_unit):
-	UI_Button(bo_parent, bo_rect, bo_max_rect, bo_unit, bo_unit, FORCE_ENTRY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, NO_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, FULL_WIDTH)
+	UI_Button(bo_parent, bo_rect, bo_max_rect, bo_unit, FORCE_ENTRY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, NO_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, FULL_WIDTH)
 	// TODO!
 {
 /*	addUnit = new UI_Button(this, Rect(Point(getWidth()-117,2),Size(8,8)), Rect(Point(0,0),getSize()), ADD_BUTTON, PRESS_BUTTON_MODE);
@@ -49,14 +49,6 @@ const unsigned int BoEntry::changed()
 //	if(cancelUnit->isLeftClicked()) return(3);
 	return(0);
 }
-
-void BoEntry::updateText(const string& utext)
-{
-	updateNormalText(utext);
-	updatePressedText(utext);
-}
-
-
 
 BoWindow::BoWindow(const BoWindow& object) : 
     UI_Window((UI_Window)object),
@@ -101,7 +93,7 @@ BoWindow& BoWindow::operator=(const BoWindow& object)
 }
 
 BoWindow::BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_info_window, MessageWindow* message_window, std::map <long, Order>* bo_order_list, const unsigned int bo_window_number):
-	UI_Window(bo_parent, BOWINDOW_TITLE_STRING, BUILD_ORDER_WINDOW, bo_window_number, SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0,25,1000,1000)),
+	UI_Window(bo_parent, BOWINDOW_TITLE_STRING, BUILD_ORDER_WINDOW, bo_window_number, SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0, 25, 1000, 1000)),
 	markedUnit(0),
 	ownMarkedUnit(0),
 	markedIP(0),
@@ -114,16 +106,16 @@ BoWindow::BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_inf
 	boEndPoint(-1),
     boGoalListOpened(0),
 	lastBogoal(0),
-	resetButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), Rect(Point(0,0),getSize()), RESET_BUILD_ORDER_STRING, RESET_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	saveBuildOrderButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), Rect(Point(0,0),getSize()), SAVE_BUILD_ORDER_STRING, SAVE_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	resetButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), Rect(Point(0, 0), getSize()), RESET_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	saveBuildOrderButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), Rect(Point(0, 0), getSize()), SAVE_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
 	msgWindow(message_window)
 {
 	resetData();
 	for(int i=MAX_LENGTH;i--;)
 	{
-		boEntry[i]=new BoEntry(this, Rect(getRelativeClientRectPosition()+Point(200,200), Size(getClientRectWidth(), FONT_SIZE+5)),
+		boEntry[i]=new BoEntry(this, Rect(getRelativeClientRectPosition()+Point(200,200), Size(getClientRectWidth(), FONT_SIZE)),
 				Rect(getRelativeClientRectPosition(), getMaxRect().GetSize()/*getClientRectSize()*/),  // max size -y? TODO
-						stats[(*anarace->getStartCondition())->getRace()][i].name);
+				*UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i+UNIT_NULL_STRING))); // (*anarace->getStartCondition())->getRace()?
 		boEntry[i]->Hide();
 	}
 	resetButton->updateToolTip(RESET_BUILD_ORDER_TOOLTIP_STRING);
@@ -136,7 +128,6 @@ BoWindow::~BoWindow()
 		delete boEntry[i]; 
 	delete resetButton;
 	delete saveBuildOrderButton;
-//	delete speed;
 }
 
 void BoWindow::resetData()
@@ -309,9 +300,10 @@ void BoWindow::process()
 	for(std::map<long, Order>::iterator order=orderList->begin(); order!=orderList->end(); ++order)
 	{
 		unsigned int row=0;//((boInsertPoint>-1)&&(order->second.getRow()>=boInsertPoint))*(boEndPoint-boInsertPoint);
-		Rect edge=Rect(getRelativeClientRectPosition()+order->second.rect.GetTopLeft()+Point(0,row*(FONT_SIZE+5)-getScrollY()), order->second.rect.GetSize());
-//		if(fitItemToRelativeClientRect(edge,1))
+		Rect edge=Rect(getRelativeClientRectPosition()+order->second.rect.GetTopLeft()+Point(0,row*(FONT_SIZE+5)), order->second.rect.GetSize());// TODO
+		if(fitItemToRelativeClientRect(edge, 1))
 		{
+			edge.SetTopLeft(edge.GetTopLeft() - Size(0, getScrollY()));
 			boEntry[line]->Show();
 			if(boEntry[line]->isCurrentlyHighlighted())
 			{
@@ -349,7 +341,7 @@ void BoWindow::process()
 					{
 						std::ostringstream os;
 //						os << tempForceCount[order->second.getUnit()]+anarace->getProgramTotalCount(order->second.getIP(), order->second.getUnit())+1 << ".";
-						os <<  stats[(*anarace->getStartCondition())->getRace()][order->second.getUnit()].name;
+						os <<  *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->second.getUnit()+UNIT_NULL_STRING));
 //						dc->DrawText(os.str(),edge.GetPosition()+Point(5,0));os.str("");
 //						dc->DrawText(stats[(*anarace->getStartCondition())->getRace()][anarace->getPhaenoCode(order->second.getIP())].name,edge.GetPosition()+Point(20,0));
 						boEntry[line]->updateText(os.str());
@@ -378,17 +370,15 @@ void BoWindow::process()
 	//	  			dc->DrawText(_T(string::Format(T("%i"),order->second.successType)),190+order->x,order->y);*/
 //					}
 		} // end fit item
-//		else 
-//		{
-//			boEntry[line]->Hide();
+		else 
+		{
+			boEntry[line]->Hide();
 //			boEntry[line]->adjustRelativeRect(Rect(getRelativeClientRectPosition()+Point(200,200), Size(getClientRectWidth(),FONT_SIZE+5)));			
-//		}
+		}
 		line++;
-	(fitItemToRelativeClientRect(edge,1));
 	} // end for ...
 	for(;line<MAX_LENGTH;line++)
 	{
-		
     	boEntry[line]->adjustRelativeRect(Rect(Point(max_x+10,getRelativeClientRectPosition().y+200), Size(getClientRectWidth(), FONT_SIZE+5)));
 		if(boEntry[line]->getAbsoluteRect().GetTopLeft() == (Point(max_x+10,getRelativeClientRectPosition().y+200)))
 			boEntry[line]->Hide(); //TODO
@@ -404,22 +394,39 @@ void BoWindow::process()
 	
 	if(resetButton->isLeftClicked())
 	{
+		bool wasOptimizing = anarace->isOptimizing();
 		settings.assignRunParametersToSoup();
 		setChangedFlag();
 		msgWindow->addMessage("Resetted build order...");
+		anarace->setOptimizing(wasOptimizing);
+	//	Pointer!???
 	}
 
-	if(saveBuildOrderButton->isLeftClicked())
+	if(saveBuildOrderButton->isLeftClicked()&&(!UI_Object::editTextField))
+		UI_Object::editTextField = new UI_EditField(getParent(), saveBuildOrderButton, SAVE_BUILD_ORDER_AS_STRING, GIVE_BO_A_NAME_STRING);
+
+	if((UI_Object::editTextField)&&(UI_Object::editTextField->getCaller()==saveBuildOrderButton))
 	{
-		settings.saveBuildOrder(anarace);
-		msgWindow->addMessage("Saved build order...");
+		if(UI_Object::editTextField->isCanceled())
+		{
+			delete UI_Object::editTextField;
+			UI_Object::resetButton();
+			UI_Object::editTextField=NULL;
+		} else
+		if(UI_Object::editTextField->isDone())
+		{
+			if(UI_Object::editTextField->getString().length()>0)
+			{
+		        settings.saveBuildOrder(UI_Object::editTextField->getString(), anarace);
+		        ostringstream os;
+	    	    os << "Saved build order.";  // TODO
+	        	msgWindow->addMessage(os.str());
+			}
+			delete UI_Object::editTextField;
+			UI_Object::resetButton();
+			UI_Object::editTextField=NULL;
+		}
 	}
-
-//	if(speed->addClicked() && (settings.getSpeed()>0))
-//		settings.setSpeed(settings.getSpeed()-1);
-//	if(speed->subClicked() && (settings.getSpeed()<100))
-//		settings.setSpeed(settings.getSpeed()+1);
-
 //	setMarkedUnit(ownMarkedUnit);
 //	setMarkedIP(ownMarkedIP);
 }
@@ -635,22 +642,42 @@ void BoWindow::drawSelectionStuff(DC* dc) const
 
 const unsigned int BoWindow::getMarkedIP() const
 {
+#ifdef _SCC_DEBUG
+    if(ownMarkedIP > MAX_LENGTH) {
+        toLog("DEBUG: (BoWindow::getMarkedIP): Value ownMarkedIP out of range.");return(0);
+    }
+#endif
 	return(ownMarkedIP);
 }
 
-void BoWindow::setMarkedIP(const unsigned int markedIP)
+void BoWindow::setMarkedIP(const unsigned int marked_ip)
 {
-	this->markedIP=markedIP;
+#ifdef _SCC_DEBUG
+    if(marked_ip > MAX_LENGTH) {
+        toLog("DEBUG: (BoGraphWindow::setMarkedIP): Value marked_ip out of range.");return;
+    }
+#endif
+    markedIP = marked_ip;
 }
 
 const unsigned int BoWindow::getMarkedUnit() const
 {
+#ifdef _SCC_DEBUG
+    if(ownMarkedUnit >= UNIT_TYPE_COUNT) {
+        toLog("DEBUG: (BoWindow::getMarkedUnit): Value ownMarkedUnit out of range.");return(0);
+    }
+#endif
 	return(ownMarkedUnit);
 }
 
-void BoWindow::setMarkedUnit(const unsigned int markedUnit)
+void BoWindow::setMarkedUnit(const unsigned int marked_unit)
 {
-	this->markedUnit=markedUnit;
+#ifdef _SCC_DEBUG
+    if(marked_unit >= UNIT_TYPE_COUNT) {
+        toLog("DEBUG: (BoWindow::setMarkedUnit): Value marked_unit out of range.");return;
+    }
+#endif
+    markedUnit = marked_unit;
 }
 
 

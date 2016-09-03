@@ -12,23 +12,23 @@ Message::~Message()
 
 MessageWindow::MessageWindow( UI_Window* parentWindow ):
 	UI_Window( parentWindow, MESSAGE_WINDOW_TITLE_STRING, MESSAGE_WINDOW, SCROLLED )	
-{
-//		resetData();
-}
+{ }
+//		resetData();?
+
 
 MessageWindow::~MessageWindow()
-{
-}
+{ }
 
 void MessageWindow::addMessage( const string& bla )
 {
-	if(!isShown()) 
-		return;
+//	if(!isShown()) 
+//		return;
 //		setScrollY(0); TODO
 	Message msg(1, bla, 155);
 	message.push_back(msg);
 	if(message.size() > 8)
 		message.pop_front();
+	process();
 }
 
 void MessageWindow::process()
@@ -42,8 +42,9 @@ void MessageWindow::process()
 			if(m->col>5) 
 				m->col-=m->col/5+1;
 			else m->col=0;
-			m->rect = Rect(getAbsoluteClientRectPosition() + Point(5, 8+t*(FONT_SIZE+5)-getScrollY()), Size(getClientRectWidth(), FONT_SIZE+5));
+			m->rect = Rect(getAbsoluteClientRectPosition() + Point(5, 8+t*(FONT_SIZE+5)/*-getScrollY()*/), Size(getClientRectWidth(), FONT_SIZE+5));
 			if(fitItemToAbsoluteClientRect(m->rect));
+			// TODO
 			t++;
 		}
 //	  setMaxScrollY(t*(FONT_SIZE+5));

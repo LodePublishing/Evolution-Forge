@@ -28,9 +28,9 @@ protected:
 	static signed int noise[MAX_TIME];
 	static unsigned int markerCounter;
 	static UNIT unit[MAX_PLAYER][MAX_LOCATIONS]; // player 0 is neutral player!
-	LAST last[MAX_LENGTH]; // last* is to save the last position, for movements
-	unsigned int lastcounter;
-	unsigned int lastunit;
+//	LAST last[MAX_LENGTH]; // last* is to save the last position, for movements
+//	unsigned int lastcounter;
+//	unsigned int lastunit;
 	const UNIT_STATISTICS* const* pStats;
 	unsigned int neededMinerals, neededGas;
 	
@@ -42,10 +42,10 @@ protected:
 	const unsigned int harvestGas() const; 
 
 	const bool calculateReady() const;
-	void adjustAvailibility(const unsigned int location, const unsigned int fac, const UNIT_STATISTICS* stat);
-	void adjustLocationUnitsAfterCompletion(const unsigned int location, const eFacilityType facilityType, const unsigned int facility, const unsigned int facility2);
+	void adjustAvailibility(const unsigned int location_number, const unsigned int fac, const UNIT_STATISTICS* stat);
+	void adjustLocationUnitsAfterCompletion(const unsigned int location_number, const eFacilityType facilityType, const unsigned int facility, const unsigned int facility2);
 	const unsigned int calculatePrimaryFitness(const bool ready);
-	void replaceCode(const unsigned int IP, const unsigned int code);
+	void replaceCode(const unsigned int ip, const unsigned int code);
 
 	unsigned int larvaInProduction[MAX_LOCATIONS]; // well... one of that ugly race-specific variables saves a lot of trouble...
 
@@ -91,26 +91,26 @@ public:
 	PRERACE(const PRERACE& object);
 
 // ------ HARVEST ROUTINES ------
-	void adjustMineralHarvest(const unsigned int location);
-	void adjustGasHarvest(const unsigned int location);
+	void adjustMineralHarvest(const unsigned int location_number);
+	void adjustGasHarvest(const unsigned int location_number);
 	void adjustHarvestAllLocations();
-	void setMineralHarvestPerSecond(const unsigned int location, const unsigned int worker, const unsigned int minerals);
-	const unsigned int getMineralHarvestPerSecond(const unsigned int location, const unsigned int worker) const;
-	void setGasHarvestPerSecond(const unsigned int location, const unsigned int worker, const unsigned int gas);
-	const unsigned int getGasHarvestPerSecond(const unsigned int location, const unsigned int worker) const;
+	void setMineralHarvestPerSecond(const unsigned int location_number, const unsigned int worker, const unsigned int harvest_minerals);
+	const unsigned int getMineralHarvestPerSecond(const unsigned int location_number, const unsigned int worker) const;
+	void setGasHarvestPerSecond(const unsigned int location_number, const unsigned int worker, const unsigned int harvest_gas);
+	const unsigned int getGasHarvestPerSecond(const unsigned int location_nubmer, const unsigned int worker) const;
 	const unsigned int getHarvestedMinerals() const;
 	const unsigned int getHarvestedGas() const;
-	void setHarvestedMinerals(const unsigned int harvestedMinerals);
-	void setHarvestedGas(const unsigned int harvestedGas);
+	void setHarvestedMinerals(const unsigned int harvested_minerals);
+	void setHarvestedGas(const unsigned int harvested_gas);
 	
 	const unsigned int getWastedMinerals() const;
 	const unsigned int getWastedGas() const;
-	void setWastedMinerals(const unsigned int minerals);
-	void setWastedGas(const unsigned int gas);
+	void setWastedMinerals(const unsigned int wasted_minerals);
+	void setWastedGas(const unsigned int wasted_gas);
 
 // ------ INITIALIZATION ROUTINES ------
 	static void resetGeneMarker();
-	void setPlayerNum(const unsigned int playerNum); // assigns player data from start (start minerals, supply etc.) and sets the appropriate optimized pointers (global, location, pMap etc.) CALL IT AFTER EACH MAP CHANGE AND PLAYER CHANGE!!
+	void setPlayerNumber(const unsigned int player_number); // assigns player data from start (start minerals, supply etc.) and sets the appropriate optimized pointers (global, location, pMap etc.) CALL IT AFTER EACH MAP CHANGE AND PLAYER CHANGE!!
 	void initializePlayer();
 	void prepareForNewGeneration();
 
@@ -119,56 +119,59 @@ public:
 	void mutateGeneCode();
 	void resetGeneCode();//resets either to a pre-processed buildorder or a completely random one*/
 //	void crossOver(PRERACE* parent2, PRERACE* child1, PRERACE* child2); TODO
+
+
+	const bool buildIt(const unsigned int build_unit);
 	
 // ------ GET/SET ROUTINES ------
-	const unsigned int getCode(const unsigned int IP) const;
+	const unsigned int getCode(const unsigned int ip) const;
 	const unsigned int getCurrentCode() const;
-	const unsigned int getMarker(const unsigned int IP) const;
+	const unsigned int getMarker(const unsigned int ip) const;
 	void copyCode(PRERACE& player);
 
-	void addLarvaToQueue(const unsigned int location);
-	void removeLarvaFromQueue(const unsigned int location);
+	void addLarvaToQueue(const unsigned int location_number);
+	void removeLarvaFromQueue(const unsigned int location_number);
 
 	const eRace getRace() const;
 	GOAL_ENTRY** getCurrentGoal() const;
-	void setCurrentGoal(GOAL_ENTRY** pGoal);
+	void setCurrentGoal(GOAL_ENTRY** current_goal);
 	
     const START_CONDITION* const* getStartCondition(); //pointer to player in start
 	
-	static const unsigned int getMapLocationAvailible(const unsigned int player, const unsigned int location, const unsigned int unittype);
-	static const unsigned int getMapLocationTotal(const unsigned int player, const unsigned int location, const unsigned int unittype);
+	static const unsigned int getMapLocationAvailible(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
+	static const unsigned int getMapLocationTotal(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
 																				
-	static void setMapLocationAvailible(const unsigned int player, const unsigned int location, const unsigned int unittype, const unsigned int availible);
-	static void setMapLocationTotal(const unsigned int player, const unsigned int location, const unsigned int unittype, const unsigned int total);
+	static void setMapLocationAvailible(const unsigned int player, const unsigned int location_number, const unsigned int unit_type, const unsigned int availible);
+	static void setMapLocationTotal(const unsigned int player, const unsigned int location_number, const unsigned int unit_type, const unsigned int total);
 																				
-	static void addOneMapLocationAvailible(const unsigned int player, const unsigned int location, const unsigned int unittype);
-	static void addOneMapLocationTotal(const unsigned int player, const unsigned int location, const unsigned int unittype);
-	static void removeOneMapLocationAvailible(const unsigned int player, const unsigned int location, const unsigned int unittype);
-	static void removeOneMapLocationTotal(const unsigned int player, const unsigned int location, const unsigned int unittype);
+	static void addOneMapLocationAvailible(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
+	static void addOneMapLocationTotal(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
+	static void removeOneMapLocationAvailible(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
+	static void removeOneMapLocationTotal(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
 																			
-	const unsigned int getLocationAvailible(const unsigned int location, const unsigned int unittype) const;
-	const unsigned int getLocationTotal(const unsigned int location, const unsigned int unittype) const;
+	const unsigned int getLocationAvailible(const unsigned int location_number, const unsigned int unit_type) const;
+	const unsigned int getLocationTotal(const unsigned int location_number, const unsigned int unit_type) const;
 																				
-	void setLocationAvailible(const unsigned int location, const unsigned int unittype, const unsigned int availible);
-	void setLocationTotal(const unsigned int location, const unsigned int unittype, const unsigned int total);
+	void setLocationAvailible(const unsigned int location_number, const unsigned int unit_type, const unsigned int availible);
+	void setLocationTotal(const unsigned int location_number, const unsigned int unit_type, const unsigned int total);
 																				
-	void addLocationAvailible(const unsigned int location, const unsigned int unittype, const unsigned int availible);
-	void addLocationTotal(const unsigned int location, const unsigned int unittype, const unsigned int total);
+	void addLocationAvailible(const unsigned int location_number, const unsigned int unit_type, const unsigned int availible);
+	void addLocationTotal(const unsigned int location_number, const unsigned int unit_type, const unsigned int total);
 
-	void addOneLocationAvailible(const unsigned int location, const unsigned int unittype);
-	void addOneLocationTotal(const unsigned int location, const unsigned int unittype);
-	void removeOneLocationAvailible(const unsigned int location, const unsigned int unittype);
-	void removeOneLocationTotal(const unsigned int location, const unsigned int unittype);
+	void addOneLocationAvailible(const unsigned int location_number, const unsigned int unit_type);
+	void addOneLocationTotal(const unsigned int location_number, const unsigned int unit_type);
+	void removeOneLocationAvailible(const unsigned int location_number, const unsigned int unit_type);
+	void removeOneLocationTotal(const unsigned int location_number, const unsigned int unit_type);
 
-	void setNeedSupply(const unsigned int needSupply);
-	void setHaveSupply(const unsigned int haveSupply);
-	void setMinerals(const unsigned int minerals);
-	void setGas(const unsigned int gas);
+	void setNeedSupply(const unsigned int need_supply);
+	void setHaveSupply(const unsigned int have_supply);
+	void setMinerals(const unsigned int have_minerals);
+	void setGas(const unsigned int have_gas);
 
-	void setpStats(const UNIT_STATISTICS* const* pStats);
+	void setpStats(const UNIT_STATISTICS* const* player_stats);
 	const UNIT_STATISTICS* const* getpStats() const;
 
-	const unsigned int getPlayerNum() const;
+	const unsigned int getPlayerNumber() const;
 	const unsigned int getNeedSupply() const;
 	const unsigned int getHaveSupply() const;
 	const unsigned int getMinerals() const;
@@ -182,10 +185,10 @@ public:
 	const unsigned int getTimeOut() const;
 
 	const unsigned int getIP() const;
-	void setIP(const unsigned int IP);
+	void setIP(const unsigned int ip);
 
 	const unsigned int getLength() const;
-	void setLength(const unsigned int length);
+	void setLength(const unsigned int bo_length);
 
 };
 

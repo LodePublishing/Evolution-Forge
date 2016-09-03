@@ -1,33 +1,35 @@
 #include "mainwindow.hpp"
 
-MainWindow::MainWindow():UI_Window( NULL, MAIN_WINDOW_TITLE_STRING, MAIN_WINDOW, 0, NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, TABBED )
+MainWindow::MainWindow() : 
+	UI_Window( NULL, MAIN_WINDOW_TITLE_STRING, MAIN_WINDOW, 0, NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, TABBED ),
+	url(new UI_StaticText(this, "www.clawsoftware.de", getRelativeRect(), FORCE_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT, LOWER_CENTERED_TEXT_MODE))
 {
 // TODO: nach resolutions ordnen! *theme.lookUpRect etc. in data.txt eintragen
 // left:
-    tab[BASIC_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), BASIC_TAB_STRING, BASIC_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
-    tab[ADVANCED_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), ADVANCED_TAB_STRING, ADVANCED_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
-    tab[EXPERT_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), EXPERT_TAB_STRING, EXPERT_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
-    tab[GOSU_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), GOSU_TAB_STRING, GOSU_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+    tab[BASIC_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), BASIC_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+    tab[ADVANCED_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), ADVANCED_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+    tab[EXPERT_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), EXPERT_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+    tab[GOSU_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), GOSU_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
 
 // right:
-	tab[COMPARE_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), COMPARE_TAB_STRING, COMPARE_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
-	tab[TUTORIAL_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), TUTORIAL_TAB_STRING, TUTORIAL_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
-	tab[SETTINGS_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), SETTINGS_TAB_STRING, SETTINGS_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
-	tab[MAP_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), MAP_TAB_STRING, MAP_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+	tab[COMPARE_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), COMPARE_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+	tab[TUTORIAL_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), TUTORIAL_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+	tab[SETTINGS_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), SETTINGS_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+	tab[MAP_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), MAP_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
 
-    tab[BASIC_TAB]->forcePress();
 	int step=theme.lookUpButtonAnimation(TAB_BUTTON)->speed/(MAX_TABS-1);
-
-	for(int i=BASIC_TAB;i<=MAP_TAB;i++)
+	for(int i=BASIC_TAB;i<MAX_TABS;i++)
 	{
 		tab[i]->updateToolTip((eString)(BASIC_TAB_TOOLTIP_STRING+i-1));
 		addTab(tab[i]);
 		tab[i]->setFrameNumber((i-1)*step);
 	}
-	
-	for(int i = 1+ADVANCED_TAB;i<=MAP_TAB;i++)
-		tab[i]->Disable();
-	tab[SETTINGS_TAB]->Enable();
+
+	tab[EXPERT_TAB]->Disable(); // TODO
+	tab[GOSU_TAB]->Disable();
+	tab[TUTORIAL_TAB]->Disable();
+	tab[MAP_TAB]->Disable();
+	tab[COMPARE_TAB]->Disable();
 }
 
 
@@ -35,19 +37,19 @@ MainWindow::~MainWindow()
 {
 	for(int i=BASIC_TAB;i<MAX_TABS;i++)
 		delete tab[i];
+delete url;
 }
 
 void MainWindow::process()
 {
 	UI_Object::rectnumber=0;
-	UI_Object::hideToolTip();
 	UI_Window::process();
+
 }
 
 void MainWindow::draw(DC* dc) const
 {
 	UI_Window::draw(dc);
-	UI_Object::maybeShowToolTip(dc);
 }
 
 

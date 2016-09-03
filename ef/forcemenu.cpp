@@ -4,9 +4,9 @@ ForceMenu::ForceMenu(UI_Object* force_parent, ANARACE* force_anarace, Rect force
 	Menu(force_parent, force_rect, true)
 {
 	height = 3;
-    for(int i=0;i<settings.getStartconditionCount( force_anarace->getPlayerNum() );i++) // TODO
+    for(unsigned int i=0; i < settings.getStartconditionCount( force_anarace->getPlayerNumber() ); i++) // TODO
     {
-		MenuEntry* entry = new MenuEntry(this, Rect(Point(10, height*(FONT_SIZE+9)), Size(160, FONT_SIZE)), settings.getStartcondition(force_anarace->getPlayerNum(), i)->getName());
+		MenuEntry* entry = new MenuEntry(this, Rect(Point(10, height*(FONT_SIZE+9)), Size(160, FONT_SIZE)), settings.getStartcondition(force_anarace->getPlayerNumber(), i)->getName());
         entry->setButton(eButton(UNIT_TYPE_2_BUTTON));
 		menuEntries.push_back(entry);
         height++;

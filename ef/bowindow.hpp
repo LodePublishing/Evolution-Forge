@@ -2,7 +2,6 @@
 #define _GUI_BOWINDOW_HPP
 
 #include "../ui/window.hpp"
-#include "numberfield.hpp"
 #include "message.hpp"
 
 #include "info.hpp"
@@ -16,7 +15,6 @@ class BoEntry : public UI_Button
         BoEntry(UI_Object* bo_parent, Rect bo_rect, Rect bo_max_rect, const string& bo_unit);
         ~BoEntry();
         const unsigned int changed();
-        void updateText(const string& utext);
 		void process();
 		void draw(DC* dc) const;
     private:
@@ -37,10 +35,10 @@ class BoWindow:public UI_Window
 		void draw(DC* dc) const;
 		void process();
 		
-		void setMarkedIP(const unsigned int IP);
+		void setMarkedIP(const unsigned int marked_ip);
 		const unsigned int getMarkedIP() const;
 		
-		void setMarkedUnit(const unsigned int unit);
+		void setMarkedUnit(const unsigned int marked_unit);
 		const unsigned int getMarkedUnit() const;
 	private:
 		void drawSelectionStuff(DC* dc) const;
@@ -68,7 +66,6 @@ class BoWindow:public UI_Window
 
 		MessageWindow* msgWindow;
 
-//		NumberField* speed;
 };
 
 #endif // _GUI_BOWINDOW_HPP

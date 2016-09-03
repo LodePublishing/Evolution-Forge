@@ -45,7 +45,7 @@ void Size::move(const Size& startSize, const Size& targetSize)
 void Size::mv(unsigned int& x, const unsigned int sx, const unsigned int tx)
 {
 // TODO
-	signed int z = (signed int)(((x>sx)?(2*(((signed int)(x))-((signed int)(sx)))<(((signed int)(tx))-((signed int)(sx)))?(double)(((signed int)(x))-((signed int)(sx)))/2:(double)(((signed int)(tx))-((signed int)(x)))/2):(2*(((signed int)(x))-((signed int)(sx)))>(((signed int)(tx))-((signed int)(sx)))?(double)(((signed int)(x))-((signed int)(sx)))/1.5:(double)(((signed int)(tx))-((signed int)(x)))/1.5)));// TODO?
+	signed int z = (signed int)(((x>sx)?(2*(((signed int)(x))-((signed int)(sx)))<(((signed int)(tx))-((signed int)(sx)))?(double)(((signed int)(x))-((signed int)(sx)))/2:(double)(((signed int)(tx))-((signed int)(x)))/2):(2*(((signed int)(x))-((signed int)(sx)))>(((signed int)(tx))-((signed int)(sx)))?(double)(((signed int)(x))-((signed int)(sx)))/2:(double)(((signed int)(tx))-((signed int)(x)))/2)));// TODO?
 	if(z == 0)
 		x+=((x>tx)?-1:0)+((x<tx)?1:0);
 	else

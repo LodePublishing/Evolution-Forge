@@ -40,16 +40,16 @@ public:
 	const unsigned int getGoal() const;
 	const bool getOnTheRun() const;
 		
-	void setTotalBuildTime(const unsigned int totalBuildTime);
-	void setBuildFinishedTime(const signed int buildFinishedTime);
+	void setTotalBuildTime(const unsigned int total_build_time);
+	void setBuildFinishedTime(const signed int build_finished_time);
 	
-	void setType(const unsigned int type);
-	void setUnitCount(const unsigned int count);
-	void setFacility(const unsigned int facility);
-	void setIP(const unsigned int IP);
-	void setLocation(const unsigned int location);
-	void setGoal(const unsigned int goal);
-	void setOnTheRun(const bool onTheRun);
+	void setType(const unsigned int building_type);
+	void setUnitCount(const unsigned int building_count);
+	void setFacility(const unsigned int building_facility);
+	void setIP(const unsigned int building_IP);
+	void setLocation(const unsigned int building_location);
+	void setGoal(const unsigned int building_goal);
+	void setOnTheRun(const bool building_on_the_run);
 };
 
 #endif

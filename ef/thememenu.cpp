@@ -1,7 +1,7 @@
 #include "thememenu.hpp"
 
-ThemeMenu::ThemeMenu(UI_Object* parent, Rect rect) :
-	Menu(parent, rect, true)
+ThemeMenu::ThemeMenu(UI_Object* thememenu_parent, Rect rect) :
+	Menu(thememenu_parent, rect, true)
 {
     for(int i=0;i<MAX_COLOR_THEMES-1;i++)
     {

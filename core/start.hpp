@@ -56,16 +56,18 @@ class START
 		GOAL_ENTRY* pCurrentGoal[MAX_PLAYER];
 		const UNIT_STATISTICS* pStats[MAX_PLAYER];
 
+        bool startConditionsInitialized;
+        bool mapInitialized;
 // Benutzer waehlt: Karte, Spielmodus, Harvestspeed, und fuegt Spieler mit Rasse, Startforce (default), StartPosition (absolut / zufaellig), Siegbedingungen (goals), 
 	public:
 		const unsigned int getBasicMineralHarvestSpeedPerSecond(const unsigned int playerNum, const unsigned int worker) const; // 'player' noch rausoptimieren!
 		const unsigned int getBasicGasHarvestSpeedPerSecond(const unsigned int playerNum, const unsigned int worker) const;
 		void assignMap(const BASIC_MAP* map); 
-		void setHarvestSpeed(const eRace race, const HARVEST_SPEED* harvest); // copy data (pointers) from settings 
+		void setHarvestSpeed(const eRace race, const HARVEST_SPEED* harvest_speed); // copy data (pointers) from settings 
 		// assign Mode ?
 		void setStartPosition(const unsigned int playerNum, const unsigned int startPosition);
 		void setPlayerRace(const unsigned int playerNum, const eRace race); // => gleichzeitig wird harvestspeed geaendert und condition und goal muessen u.U. neugewaehlt werden!
-		void assignStartcondition(const unsigned int playerNum, const START_CONDITION* startcondition);
+		void assignStartcondition(const unsigned int playerNum, const START_CONDITION* start_condition);
 		
 		void fillGroups();
 		

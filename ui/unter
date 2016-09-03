@@ -1,0 +1,282 @@
+48c48
+< 	textBox()
+---
+> 	textBox(getAbsoluteRect())
+62c62
+< 	textBox()
+---
+> 	textBox(getAbsoluteRect())
+78c78
+< 	textBox()
+---
+> 	textBox(getAbsoluteRect())
+89a90,93
+> //const Rect& UI_StaticText::getTextBox() const {
+> //	return(textBox);
+> //}
+> 
+123,128d126
+< /*	if(UI_Object::editTextFeld == this)
+< 	{
+< 		dc->DrawRectangle(Rect(50,50,500,500));
+< 		//getAbsoluteRect());
+< 	}*/
+< 
+134,135d131
+< 	
+< 	Size s;
+137c133
+< 	if((mode == FORMATTED_TEXT_MODE))//||(mode == FORMATTED_NON_BLOCK_TEXT_MODE))
+---
+> 	if(mode == FORMATTED_TEXT_MODE)
+139d134
+< //		t_text= text.substr(0, position) + "#";
+141,144c136
+< 	{
+< 		t_text= text;//.substr(0, position);
+< 		s = dc->GetTextExtent(t_text);
+< 	}
+---
+> 		t_text= text;
+146,147d137
+< 		
+< 	Rect temp=getAbsoluteRect();
+151,165c141,146
+< 		case VERTICALLY_CENTERED_TEXT_MODE:
+< 			temp.SetTop(temp.GetTop() + (temp.GetHeight() - s.GetHeight())/2 );break;
+< 		case RIGHT_BOUNDED_TEXT_MODE: // TODO
+< 			temp.SetLeft(temp.GetLeft() + temp.GetWidth() - s.GetWidth());break;
+< 		case HORIZONTALLY_CENTERED_TEXT_MODE:
+< 			temp.SetLeft(temp.GetLeft() + (temp.GetWidth() - s.GetWidth())/2);break;
+< 		case TOTAL_CENTERED_TEXT_MODE:
+< 			temp.SetLeft(temp.GetLeft() + (temp.GetWidth() - s.GetWidth())/2);
+< 			temp.SetTop(temp.GetTop() + (temp.GetHeight() - s.GetHeight())/2 );break;
+< 		case LOWER_CENTERED_TEXT_MODE:
+< 			temp.SetLeft(temp.GetLeft() + (temp.GetWidth() - s.GetWidth())/2);
+< 			temp.SetTop(temp.GetTop() + (temp.GetHeight() - s.GetHeight())*2/3 );break;
+< 		case UPPER_CENTERED_TEXT_MODE:
+< 			temp.SetLeft(temp.GetLeft() + (temp.GetWidth() - s.GetWidth())/2);
+< 			temp.SetTop(temp.GetTop() + (temp.GetHeight() - s.GetHeight())/4 );break;
+---
+> 		case VERTICALLY_CENTERED_TEXT_MODE:break;
+> 		case RIGHT_BOUNDED_TEXT_MODE:break;
+> 		case HORIZONTALLY_CENTERED_TEXT_MODE:break;
+> 		case TOTAL_CENTERED_TEXT_MODE:break;
+> 		case LOWER_CENTERED_TEXT_MODE:break;
+> 		case UPPER_CENTERED_TEXT_MODE:break;
+167c148
+< 		{
+---
+> /*		{
+176c157
+< 			s = dc->GetTextExtent(t_text);
+---
+> 			Size s = dc->GetTextExtent(t_text);
+193c174
+< 					twidth=(temp.GetWidth()+textCursorX)/2;
+---
+> 					twidth=(textBox.GetWidth()+textCursorX)/2;
+204c185
+< 				if((textCursorX>temp.GetWidth()-5)||(newLine))
+---
+> 				if((textCursorX>textBox.GetWidth()-5)||(newLine))
+209,210c190,191
+< 					if(twidth>temp.GetWidth()-10)
+< 						twidth=temp.GetWidth()-10; // ~~
+---
+> 					if(twidth>textBox.GetWidth()-10)
+> 						twidth=textBox.GetWidth()-10; // ~~
+212c193
+< 						d = (temp.GetWidth()-10-twidth)/2;
+---
+> 						d = (textBox.GetWidth()-10-twidth)/2;
+229c210
+< 						dc->DrawText(os.str(), temp.GetLeft()+textCursorX+d*(j-firstCharPosition)/(lastCharPosition-firstCharPosition+1), temp.GetTop()+currentRow);
+---
+> 						dc->DrawText(os.str(), textBox.GetLeft()+textCursorX+d*(j-firstCharPosition)/(lastCharPosition-firstCharPosition+1), textBox.GetTop()+currentRow);
+245c226
+< 		}break;
+---
+> 		}*/break;
+247c228
+< 		{
+---
+> 		/*{
+256c237
+< 			s = dc->GetTextExtent(t_text);
+---
+> 			Size s = dc->GetTextExtent(t_text);
+272c253
+< 					twidth=(temp.GetWidth()+textCursorX)/2;
+---
+> 					twidth=(textBox.GetWidth()+textCursorX)/2;
+283c264
+< 				if((textCursorX>temp.GetWidth()-5)||(newLine))
+---
+> 				if((textCursorX>textBox.GetWidth()-5)||(newLine))
+288,289c269,270
+< 					if(twidth>temp.GetWidth()-10)
+< 						twidth=temp.GetWidth()-10; // ~~
+---
+> 					if(twidth>textBox.GetWidth()-10)
+> 						twidth=textBox.GetWidth()-10; // ~~
+291c272
+< 						d = (temp.GetWidth()-10-twidth)/2;
+---
+> 						d = (textBox.GetWidth()-10-twidth)/2;
+295c276
+< 					dc->DrawText(t_text.substr(firstCharPosition, lastCharPosition + 1 - firstCharPosition), temp.GetLeft(), temp.GetTop()+currentRow);
+---
+> 					dc->DrawText(t_text.substr(firstCharPosition, lastCharPosition + 1 - firstCharPosition), textBox.GetLeft(), textBox.GetTop()+currentRow);
+308c289
+< 		}break;
+---
+> 		}*/break;
+313,319c294
+< 	{
+< 		if(pressed)
+< 			dc->DrawText(t_text, temp.GetTopLeft() + Point(1, 4));
+< 		else
+< 			dc->DrawText(t_text, temp.GetTopLeft() + Point(0, 3));
+< 	}
+< 		
+---
+> 		dc->DrawText(t_text, textBox.GetTopLeft());
+321a297
+> 
+379c355,464
+< 	if(mode==FORMATTED_NON_BLOCK_TEXT_MODE)
+---
+> 	std::string t_text;
+> 	if(mode == FORMATTED_TEXT_MODE)
+> 		t_text = text + "#";
+> 	else
+> 	{
+> 		t_text= text;
+> 		textBox.SetSize(theme.lookUpFont(font)->GetTextExtent(t_text));
+> 	}
+> 
+> 	textBox.SetTopLeft(getAbsolutePosition());
+> 	
+> 	switch(mode)
+> 	{
+> 		case NO_TEXT_MODE:break;
+> 		case VERTICALLY_CENTERED_TEXT_MODE:
+> 			textBox.SetTop(textBox.GetTop() + (getHeight() - textBox.GetHeight())/2 );break;
+> 		case RIGHT_BOUNDED_TEXT_MODE: // TODO
+> 			textBox.SetLeft(textBox.GetLeft() + getWidth() - textBox.GetWidth());break;
+> 		case HORIZONTALLY_CENTERED_TEXT_MODE:
+> 			textBox.SetLeft(textBox.GetLeft() + (getWidth() - textBox.GetWidth())/2);break;
+> 		case TOTAL_CENTERED_TEXT_MODE:
+> 			textBox.SetLeft(textBox.GetLeft() + (getWidth() - textBox.GetWidth())/2);
+> 			textBox.SetTop(textBox.GetTop() + (getHeight() - textBox.GetHeight())/2 );break;
+> 		case LOWER_CENTERED_TEXT_MODE:
+> 			textBox.SetLeft(textBox.GetLeft() + (getWidth() - textBox.GetWidth())/2);
+> 			textBox.SetTop(textBox.GetTop() + (getHeight() - textBox.GetHeight())*2/3 );break;
+> 		case UPPER_CENTERED_TEXT_MODE:
+> 			textBox.SetLeft(textBox.GetLeft() + (getWidth() - textBox.GetWidth())/2);
+> 			textBox.SetTop(textBox.GetTop() + (getHeight() - textBox.GetHeight())/4 );break;
+> 		case FORMATTED_TEXT_MODE:break;
+> /*		{
+> 			unsigned int twidth = 0;
+> 			unsigned int textCursorX = 5;
+> 			bool bold = false;
+> 			bool mustNotMakeNewLine = false;
+> 			unsigned int firstCharPosition=0;
+> 			unsigned int lastCharPosition=0;
+> 			unsigned int currentRow=0;
+> 			unsigned int maxdy=0;
+> 			s = dc->GetTextExtent(t_text);
+> 			maxdy = s.GetHeight();
+> 			for(unsigned int i=0;i<t_text.length();i++)
+> 			{
+> 				bool newLine=false;
+> 				if(t_text[i]=='&') {
+> 					mustNotMakeNewLine = !mustNotMakeNewLine;
+> 
+> 				} else 
+> // set new 'milestone' when reaching end of a word:
+> 				if((t_text[i]==' ')&&(!mustNotMakeNewLine)) {
+> 					lastCharPosition = i;
+> 					twidth = textCursorX;
+> 				}
+> // ... or a line:
+> 				else if((t_text[i]=='#')||(i==t_text.length()-1)) {
+> 					lastCharPosition = i;
+> 					twidth=(textBox.GetWidth()+textCursorX)/2;
+> 					newLine=true;
+> 				} else
+> // move the textcursor forward:
+> 				{
+> 					std::ostringstream os;
+> 					os << t_text[i];
+> 					textCursorX += dc->GetTextExtent(os.str()).GetWidth() + 1;
+> 				}
+> 				
+> // reached end of line? Calculate line and draw it
+> 				if((textCursorX>textBox.GetWidth()-5)||(newLine))
+> 				{
+> 					newLine = false;
+> 					textCursorX = 5;
+> 					int d = 1;
+> 					if(twidth>textBox.GetWidth()-10)
+> 						twidth=textBox.GetWidth()-10; // ~~
+> 					if(!newLine)
+> 						d = (textBox.GetWidth()-10-twidth)/2;
+> //					if(d<1)
+> //						d = 0;
+> 				
+> 					for(unsigned int j = firstCharPosition; j < lastCharPosition; j++)
+> 					{
+> 						std::ostringstream os;
+> 						os << t_text[j];
+> 						if(t_text[j]=='$')
+> 						{
+> 							if(bold){bold=false;dc->SetTextForeground(color);} else
+> 								{bold=true;dc->SetTextForeground(dc->brightenColor(&color, 40));}
+> 							continue;
+> 						} else if((t_text[j]=='#')||(j==t_text.length()-1))
+> 							continue;
+> 						else if(t_text[j]=='&')
+> 							continue;
+> 						dc->DrawText(os.str(), textBox.GetLeft()+textCursorX+d*(j-firstCharPosition)/(lastCharPosition-firstCharPosition+1), textBox.GetTop()+currentRow);
+> 						s = dc->GetTextExtent(os.str());
+> //						if(s.GetHeight() > maxdy)
+> //							maxdy = s.GetHeight();
+> 						textCursorX+=s.GetWidth();
+> 					}
+> 					currentRow+=maxdy-4;
+> 					twidth=0;
+> 					firstCharPosition=lastCharPosition+1;
+> 					i=lastCharPosition;
+> 					lastCharPosition = 0;
+> 					textCursorX = 5;
+> // this must be resetted!					
+> 					mustNotMakeNewLine = false;
+> 				}
+> 			}
+> 		}break;*/ // TODO
+> 	case FORMATTED_NON_BLOCK_TEXT_MODE:
+396d480
+< 
+445,446c529
+< 			}
+< 			
+---
+> 			} // end for
+448c531,532
+< 				currentRow+=maxdy;
+---
+> 				textBox.SetSize(Size(maxdx, currentRow + maxdy));
+> 			else 
+449a534,543
+> 		}break;
+> 		default:break;
+> 	}
+> 
+> 	if((mode!=FORMATTED_TEXT_MODE)&&(mode!=FORMATTED_NON_BLOCK_TEXT_MODE))
+> 	{
+> 		if(pressed)
+> 			textBox.SetTopLeft(textBox.GetTopLeft() + Size(1, 4));
+> 		else
+> 			textBox.SetTopLeft(textBox.GetTopLeft() + Size(0, 3));

@@ -1,82 +1,91 @@
-
-/*
-
- SDL_framerate: framerate manager
-
- LGPL (c) A. Schiffler
- 
- */
-
 #include "framerate.hpp"
 
-/* 
-   Initialize the framerate manager
-*/
-
 FPS::FPS():
+	allowStaticFramerate(true),
+	desiredFramerate(FPS_DEFAULT),
+	currentFramerate(FPS_DEFAULT),
+	framesPerGeneration(100),
 	framecount(0),
-	rate(FPS_DEFAULT),
-	rateticks(1000.0 / (float) FPS_DEFAULT),
-	lastticks(SDL_GetTicks())
+	rateTicks(1000.0 / (float) FPS_DEFAULT),
+	startTicks(SDL_GetTicks()),
+	lastTicks(SDL_GetTicks()),
+	averagecounter(0)
 {
+	for(int i=100;i--;)
+		average[i]=0;
 }
 
 FPS::~FPS()
+{ }
+
+void FPS::setDesiredFramerate(const unsigned int desired_frame_rate)
 {
+	if(desiredFramerate == desired_frame_rate)
+		return;
+	framecount = 0;
+	desiredFramerate = desired_frame_rate;
+	rateTicks = (1000.0 / (float) desiredFramerate);
 }
 
-/* 
-   Set the framerate in Hz 
-*/
-
-bool FPS::setFramerate(const unsigned int frame_rate)
+const unsigned int FPS::getFramesPerGeneration() const
 {
-    if ((frame_rate >= FPS_LOWER_LIMIT) && (frame_rate <= FPS_UPPER_LIMIT)) {
-		framecount = 0;
-		rate = frame_rate;
-		rateticks = (1000.0 / (float) rate);
-		return (true);
-    } else {
-		return (false);
-    }
+	return(framesPerGeneration);
 }
 
-/* 
-  Return the current target framerate in Hz 
-*/
-
-const unsigned int FPS::getFramerate()
+const unsigned int FPS::getCurrentFramerate() const
 {
-	return (rate);
+	return (currentFramerate);
 }
 
-/* 
-  Delay execution to maintain a constant framerate. Calculate fps.
-*/
+void FPS::setAllowStaticFramerate(const bool allow_static_framerate)
+{
+	allowStaticFramerate = allow_static_framerate;
+}
 
 void FPS::delay()
 {
-    Uint32 current_ticks;
-    Uint32 target_ticks;
-    Uint32 the_delay;
+// Increase/Reduce the frames per generation
+    long int difference = SDL_GetTicks() - startTicks;
+	if(difference==0)
+		difference=1;
+   	startTicks += difference;
 
-    /*
-     * Next frame 
-     */
-    framecount++;
+    if(averagecounter<2)
+   	    averagecounter++;
+    for(unsigned int i=averagecounter;i--;)
+   	    average[i+1]=average[i];
+    average[0]=difference;
+                                                                                
+   	long int av=0;
+    for(unsigned int i=0;i<averagecounter;i++)
+   	    av += average[i];
+	currentFramerate = 1000*averagecounter / av;
 
-    /*
-     * Get/calc ticks 
-     */
-    current_ticks = SDL_GetTicks();
-    target_ticks = lastticks + (Uint32) ((float) framecount * rateticks);
+	if(!allowStaticFramerate)
+	{
+		if((currentFramerate > desiredFramerate) && (framesPerGeneration>1))
+			framesPerGeneration--;
+		else 
+		if((currentFramerate < desiredFramerate) && (framesPerGeneration<10000))
+			framesPerGeneration++;
+	} else
+	{
+		framesPerGeneration=100;
+	    Uint32 current_ticks;
+	    Uint32 target_ticks;
+    	Uint32 the_delay;
 
-    if (current_ticks <= target_ticks) {
-		the_delay = target_ticks - current_ticks;
-		SDL_Delay(the_delay);
-    } else {
-		framecount = 0;
-		lastticks = SDL_GetTicks();
-    }
+    	framecount++;
+	    current_ticks = SDL_GetTicks();
+    	target_ticks = lastTicks + (Uint32) ((float) framecount * rateTicks);
+
+	    if (current_ticks <= target_ticks) {
+			the_delay = target_ticks - current_ticks;
+			SDL_Delay(the_delay);
+	    } else {
+			framecount = 0;
+			lastTicks = SDL_GetTicks();
+	    }
+	}
 }
 

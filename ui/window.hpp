@@ -5,7 +5,7 @@ extern const unsigned int MIN_HEIGHT; // TODO in bograph?
 
 #include "object.hpp"
 #include "radio.hpp"
-#include "scrollbar.hpp"
+//#include "scrollbar.hpp"
 
 enum eIsScrolled
 {
@@ -31,7 +31,12 @@ class UI_Window : public UI_Object
 	public:
 		UI_Window& operator=(const UI_Window& object);
 		UI_Window(const UI_Window& object);
-	
+
+		UI_Window(UI_Object* window_parent, const eString window_title_string, const eWindow window_type, const unsigned int window_number, const eIsScrolled window_is_scrolled=NOT_SCROLLED, const eIsAutoAdjust win_is_auto_adjust=NO_AUTO_SIZE_ADJUST, const eIsTabbed win_is_tabbed=NOT_TABBED, const Rect win_client_area=Rect(0,0,1280,1024));
+		~UI_Window();
+
+		const unsigned int getScrollY() const;
+
 // returns position and size of the client area
 		const Rect& getRelativeClientRect() const {
 			return(clientRect);
@@ -109,14 +114,14 @@ class UI_Window : public UI_Object
 
 		void process();
 	    void draw(DC* dc) const;
+
+		UI_Object* checkTooltip();
 		UI_Object* checkHighlight();
 
 // 		reconfigure rectangles depending on current theme settings
 		void updateRectangles(const unsigned int maxPlayer);
 
-		UI_Window(UI_Object* window_parent, const eString window_title_string, const eWindow window_type, const unsigned int window_number, const eIsScrolled window_is_scrolled=NOT_SCROLLED, const eIsAutoAdjust win_is_auto_adjust=NO_AUTO_SIZE_ADJUST, const eIsTabbed win_is_tabbed=NOT_TABBED, const Rect win_client_area=Rect(0,0,1280,1024));
-		~UI_Window();
-
+		
 		const bool getChangedFlag() const;
 		void setChangedFlag(const bool flag=true);
 		void changeAccepted();
@@ -135,9 +140,6 @@ class UI_Window : public UI_Object
 
 	protected:
 //		bool isMouseInsideClientArea();
-
-		const unsigned int getScrollY() const;
-
 	private:
 		UI_Radio* tabRow;
 		UI_Button* tab[MAX_TABS];
@@ -153,7 +155,7 @@ class UI_Window : public UI_Object
 		string titleParameter;
 		
 // this windows may have a scroll bar		
-		UI_Scrollbar* scrollBar;
+//		UI_Scrollbar* scrollBar;
 		
 		Rect originalRect;
 

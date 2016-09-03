@@ -1,6 +1,45 @@
 #include "object.hpp"
 #include "../core/configuration.hpp"
 
+
+UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const Rect max_rect):
+	startRect(relative_rect),
+	targetRect(relative_rect),
+
+	filledHeight(relative_rect.GetHeight()),
+	children(NULL),
+	shown(true),
+	disabledFlag(false),
+
+	min_top_left_x(0),
+	min_left_y(0),
+	min_right_y(0),
+	min_bottom_left_x(0),
+	min_top_right_x(0),
+	min_bottom_right_x(0),	
+
+
+	needRedraw(true),
+	isFreeMove(true),
+//	tempSurface(NULL),
+	prevBrother(this),
+	nextBrother(this),
+	parent(0),
+	relativeRect(relative_rect),
+//	lastRect(),
+	maxRect(max_rect),
+	doAdjustments(1),
+	toolTipString(NULL_STRING)
+{
+	setParent(parent_object);
+//	lastRect=getAbsoluteRect();
+}
+
+UI_Object::~UI_Object()
+{
+	removeFromFamily(); // !!!!!
+}
+
 UI_Object& UI_Object::operator=(const UI_Object& object)
 {
     startRect = object.startRect;
@@ -18,15 +57,15 @@ UI_Object& UI_Object::operator=(const UI_Object& object)
     min_bottom_right_x = object.min_bottom_right_x;
     needRedraw = object.needRedraw;
     isFreeMove = object.isFreeMove;
-    tempSurface = object.tempSurface;
+//    tempSurface = object.tempSurface;
     prevBrother = this; // !!
     nextBrother = this; // !!
     parent = NULL; // !!
     relativeRect = object.relativeRect;
-    lastRect = object.lastRect;
+//  lastRect = object.lastRect;
     maxRect = object.maxRect;
     doAdjustments = object.doAdjustments;
-	toolTip = object.toolTip;
+	toolTipString = object.toolTipString;
 	
     setParent(object.parent);
 	
@@ -50,18 +89,19 @@ UI_Object::UI_Object(const UI_Object& object) :
 
     needRedraw( object.needRedraw ),
     isFreeMove( object.isFreeMove ),
-    tempSurface( object.tempSurface ),
+//    tempSurface( object.tempSurface ),
     prevBrother( this ), // !!
     nextBrother( this ), // !!
     parent( NULL ), // !!
     relativeRect( object.relativeRect ),
-    lastRect( object.lastRect ),
+//    lastRect( object.lastRect ),
     maxRect( object.maxRect ),
     doAdjustments( object.doAdjustments ),
-    toolTip( object.toolTip )
+    toolTipString( object.toolTipString )
 { 
 	setParent(object.parent);
 }
+
 
 const Point UI_Object::getAbsolutePosition() const	{
 	if(parent)
@@ -113,96 +153,52 @@ const bool UI_Object::setFocus()
 }
 */
 
-UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const Rect max_rect):
-	startRect(relative_rect),
-	targetRect(relative_rect),
 
-	filledHeight(relative_rect.GetHeight()),
-	children(NULL),
-	shown(true),
-	disabledFlag(false),
-
-	min_top_left_x(0),
-	min_left_y(0),
-	min_right_y(0),
-	min_bottom_left_x(0),
-	min_top_right_x(0),
-	min_bottom_right_x(0),	
-
-
-	needRedraw(true),
-	isFreeMove(true),
-	tempSurface(NULL),
-	prevBrother(this),
-	nextBrother(this),
-	parent(0),
-	relativeRect(relative_rect),
-	lastRect(),
-	maxRect(max_rect),
-	doAdjustments(1),
-	toolTip(NULL_STRING)
-{
-	setParent(parent_object);
-	lastRect=getAbsoluteRect();
-}
-
-UI_Object::~UI_Object()
-{
-	removeFromFamily(); // !!!!!
-}
-
-UI_Object* UI_Object::getPrevBrother() const
-{
+UI_Object* UI_Object::getPrevBrother() const {
 	return(prevBrother);
 }
 
-UI_Object* UI_Object::getNextBrother() const
-{
+UI_Object* UI_Object::getNextBrother() const {
 	return(nextBrother);
 }
 
-UI_Object* UI_Object::getParent() const
-{
+UI_Object* UI_Object::getParent() const {
 	return(parent);
 }
 
-UI_Object* UI_Object::getChildren() const
-{
+UI_Object* UI_Object::getChildren() const {
 	return(children);
 }
 
-void UI_Object::updateToolTip(const eString tool_tip)
-{
-	toolTip=tool_tip;
+void UI_Object::updateToolTip(const eString tool_tip) {
+	toolTipString = tool_tip;
 }
 
-const unsigned int UI_Object::getDoAdjustments() const
-{
+const eString UI_Object::getToolTipString() const {
+	return(toolTipString);
+}
+
+const unsigned int UI_Object::getDoAdjustments() const {
 	return(doAdjustments);
 }
 
-void UI_Object::setDoAdjustments(const unsigned int do_adjustments)
-{
+void UI_Object::setDoAdjustments(const unsigned int do_adjustments) {
 	doAdjustments=do_adjustments;
 }
 
-const Rect& UI_Object::getMaxRect() const
-{
+const Rect& UI_Object::getMaxRect() const {
 	return(maxRect);
 }
 
-const unsigned int UI_Object::getTargetWidth() const
-{
+const unsigned int UI_Object::getTargetWidth() const {
     return(targetRect.GetWidth());
 }
 
-const unsigned int UI_Object::getTargetHeight() const
-{
+const unsigned int UI_Object::getTargetHeight() const {
     return(targetRect.GetHeight());
 }
 
-void UI_Object::setFreeMove(const bool is_free_move)
-{
+void UI_Object::setFreeMove(const bool is_free_move) {
 	isFreeMove=is_free_move;
 }
 
@@ -325,6 +321,8 @@ const bool UI_Object::isTopItem() const
 void UI_Object::Show(const bool show)
 {
 	shown=show;
+	if(show)
+		process();
 }
 
 void UI_Object::Hide(const bool hide)
@@ -387,6 +385,8 @@ void UI_Object::removeFromFamily()
 // Put gadget into a new family (removing from old one if needed first).
 // See remove_from_family() for definition of what a family is.
 //
+
+
 void UI_Object::setParent(UI_Object* daddy) 
 {
     removeFromFamily();
@@ -413,10 +413,13 @@ void UI_Object::addChild(UI_Object* child)
 
 		eldest_sibling->prevBrother = child;
         youngest_sibling->nextBrother = child;
+
+//		children = child;
     }
 }
 
 // TODO
+#if 0
 void UI_Object::addRectToBeDrawn(Rect& lastRect, const Rect currentRect)
 {
 /*	rectlist[rectnumber].x = lastRect.x;rectlist[rectnumber].y = lastRect.y;
@@ -457,10 +460,10 @@ void UI_Object::addRectToBeDrawn(Rect& lastRect, const Rect currentRect)
 		rectnumber++;
 	}*/
 }
-
+#endif
 void UI_Object::process()
 {
-    if ((disabledFlag)||(!shown)) //~~
+    if (/*(disabledFlag)||*/(!shown)) //~~
       return;
 
 	if(doAdjustments==1)
@@ -470,6 +473,7 @@ void UI_Object::process()
 	}	
 
 	relativeRect.move(startRect, targetRect);
+#if 0
 	if((lastRect!=getAbsoluteRect())||(needRedraw))
 	{
 		if(needRedraw) 
@@ -486,7 +490,7 @@ void UI_Object::process()
 		addRectToBeDrawn(lastRect, getAbsoluteRect());
 
 	}
-
+#endif
 	min_top_right_x = min_bottom_right_x = min_bottom_left_x = min_left_y = min_top_left_x = min_right_y = 0;
 
     UI_Object* tmp=children;  // process all children of gadget
@@ -497,31 +501,65 @@ void UI_Object::process()
                                                                                 
         } while (tmp != children);
     }
-	if((configuration.isTooltips())&&(isMouseInside())&&(toolTip!=NULL_STRING))
-	{
-		toolTipIsShown=true;
-		toolTipString = *theme.lookUpString(toolTip);
-		toolTipPosition = getAbsolutePosition();
-	}
+	
+	if((configuration.isTooltips())&&(isMouseInside())&&(toolTipString!=NULL_STRING))
+		toolTipParent = this;
 }
-                                                                                
-UI_Object* UI_Object::checkHighlight()
+
+UI_Object* UI_Object::checkTooltip()
 {
 	if(!isShown())
-		return(0);
+		return(NULL);
 //	if(!(getAbsoluteRect().Inside(p)))
 //		return(0); 0 size players ?
     UI_Object* tmp=children;  // process all children of gadget
 	if(!tmp)
-		return(0); // return 0 as this is an object and no button!
+		return(NULL); // return 0 as this is an object and no button!
 
-	UI_Object* result=0;
+	UI_Object* result=NULL;
+	do 
+    {
+		result = tmp->checkTooltip();
+        tmp = tmp->nextBrother;
+    }
+	while((tmp!=children)&&(result==NULL));
+	return(result);
+}
+
+void UI_Object::adjustButtonPlacementSize()
+{ }
+
+void UI_Object::reloadStrings()
+{
+    UI_Object* tmp=children;  // process all children of gadget
+	if(!tmp)
+		return;
+	do 
+    {
+		tmp->reloadStrings();
+        tmp = tmp->nextBrother;
+    }
+	while(tmp!=children);
+}
+
+
+UI_Object* UI_Object::checkHighlight()
+{
+	if(!isShown())
+		return(NULL);
+//	if(!(getAbsoluteRect().Inside(p)))
+//		return(0); 0 size players ?
+    UI_Object* tmp=children;  // process all children of gadget
+	if(!tmp)
+		return(NULL); // return 0 as this is an object and no button!
+
+	UI_Object* result=NULL;
 	do 
     {
 		result = tmp->checkHighlight();
         tmp = tmp->nextBrother;
     }
-	while((tmp!=children)&&(result==0));
+	while((tmp!=children)&&(result==NULL));
 	return(result);
 }
 
@@ -557,32 +595,6 @@ void UI_Object::draw(DC* dc) const
 
 }
 
-void UI_Object::maybeShowToolTip(DC* dc)
-{
-	if(!toolTipIsShown)
-		return;
-	dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
-	dc->SetBrush(*theme.lookUpBrush(TOOLTIP_BRUSH));
-	dc->SetTextForeground(*theme.lookUpColor(TEXT_COLOR));
-	dc->SetFont(theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
-	
-	Rect r(toolTipPosition + Point(16, 16), dc->GetTextExtent(toolTipString) + Size(16, 0));
-
-	if(r.GetRight() >= (signed int)max_x)
-		r.SetLeft(max_x - 1 - r.GetWidth());
-	if(r.GetBottom() >= (signed int)max_y)
-		r.SetBottom(max_y - 1 - r.GetHeight());
-
-	dc->DrawRectangle(r);
-	dc->DrawText(toolTipString, r.GetTopLeft()+Point(8,4));
-    if((lastToolTipRect!=r)||(needToolTipRedraw))
-   	{
-       	needToolTipRedraw=false;
-    	addRectToBeDrawn(lastToolTipRect, r);
-	}
-	// TODO breite tooltips in 2 Zeilen
-}
-
 void UI_Object::setPosition(const Point& position)
 {
 	startRect.SetTopLeft(startRect.GetTopLeft() + (position - relativeRect.GetTopLeft()));
@@ -590,9 +602,11 @@ void UI_Object::setPosition(const Point& position)
 	relativeRect.SetTopLeft(position);
 }
 
-void UI_Object::hideToolTip()
+void UI_Object::jumpToPosition(const Point& position)
 {
-	toolTipIsShown=false;
+	startRect.SetTopLeft(position);
+	targetRect.SetTopLeft(position);
+	relativeRect.SetTopLeft(position);
 }
 
 void UI_Object::assignStartTime()
@@ -653,20 +667,30 @@ void UI_Object::addMinBottomRightX(signed int dx)
 		toLog("BUTTON MIN_BOTTOM_RIGHT_X out of range");
 	min_bottom_right_x += dx;		
 }
+
+void UI_Object::resetButton()
+{
+	currentButton=NULL;
+	currentButtonHasAlreadyLeft=false;	
+	currentButtonPressed=false;
+}
 	
 UI_Theme UI_Object::theme;
 long unsigned int UI_Object::startTime(0);
 SDL_Rect UI_Object::rectlist[3000];
 unsigned int UI_Object::rectnumber(0);
-bool UI_Object::toolTipIsShown(false);
-Point UI_Object::toolTipPosition(Point(0,0));
-string UI_Object::toolTipString("error");
-Rect UI_Object::lastToolTipRect(Rect(0,0,0,0));
-bool UI_Object::needToolTipRedraw(true);
+UI_Tooltip* UI_Object::tooltip(NULL);
+UI_Object* UI_Object::toolTipParent(NULL);
 unsigned int UI_Object::max_x(0);
 unsigned int UI_Object::max_y(0);
 Point UI_Object::mouse(Point(0,0));
-UI_StaticText* UI_Object::editTextFeld(NULL);
+
+UI_EditField* UI_Object::editTextField(NULL);
+//UI_EndRunDialog* UI_Object::endRunDialog(NULL);
 unsigned int UI_Object::mouseType(0);
+
+bool UI_Object::currentButtonPressed = false;
+bool UI_Object::currentButtonHasAlreadyLeft = false;
+UI_Button* UI_Object::currentButton = NULL;
 
 

@@ -1,7 +1,7 @@
 #ifndef _SDL_COLOR_HPP
 #define _SDL_COLOR_HPP
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 class Color
 {

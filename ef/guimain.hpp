@@ -27,6 +27,8 @@ class Main
 		void process();
 		void OnIdle();
 		void resetData();
+		void loadGoals();
+		
 		UI_Window* mainWindow;
 		MessageWindow* msgWindow;
 		UI_Window* infoWindow;
@@ -40,6 +42,8 @@ class Main
 		void stopOptimizing();
 		void startOptimizing();
 
+		void noticeFullscreen();
+
 		void leftDown();
 		void leftUp(const Point p);
 		void rightDown();
@@ -49,13 +53,10 @@ class Main
 	
 		Point maus;
 //	private:
-		SDL_Surface* cursor_save;
-		SDL_Surface* cursor;
+//		SDL_Surface* cursor_save;
+//		SDL_Surface* cursor;
 
 		
-		bool buttonPressed;
-		bool hasAlreadyLeft;
-		UI_Button* button;
 
 		unsigned int oldrun;
 		bool endrun;
@@ -66,6 +67,7 @@ class Main
 		unsigned int update; // TODO anderer Name
 		unsigned int refresh; // "" 
 		unsigned int ani, ani2;
+		bool drawing;
 };
 																				
 #endif

@@ -1,0 +1,636 @@
+@STRINGS
+
+	@ENGLISH
+		NULL!
+		NONE
+		SCV
+		Space Marine
+		Ghost
+		Vulture
+		Goliath
+		Siege Tank
+		Firebat
+		Medic
+		Wraith
+		Science Vessel
+		Dropship
+		Battle Cruiser
+		Valkyrie
+		Nuclear Warhead
+		Supply Depot
+		Barracks
+		Academy
+		Factory
+		Command Center
+		Starport
+		Science Facility
+		Engineering Bay
+		Armory
+		Missile Turret
+		Bunker
+		Comsat Station
+		Nuclear Silo
+		Control Tower
+		Covert Ops
+		Physics Lab
+		Machine Shop
+		Command Center [CS]
+		Command Center [NS]
+		Starport [CT]
+		Science Facility [CO]
+		Science Facility [PL]
+		Factory [MS]
+		Stim Packs
+		Lockdown
+		EMP Shockwave
+		Spider mines
+		Tank Siege Mode
+		Irradiate
+		Yamato Gun
+		Cloaking Field
+		Personnel Cloaking
+		Restoration
+		Optical Flare
+		U238 Shells
+		Ion Thrusters
+		Tital Reactor
+		Ocular Implants
+		Moebius Reactor
+		Apollo Reactor
+		Colossus Reactor
+		Caduceus Reactor
+		Charon Booster
+		Infantry Armor
+		Infantry Weapons
+		Vehicle Plating
+		Vehicle Weapons
+		Ship Plating
+		Ship Weapons
+		Refinery 
+		Gas SCV
+		MOVE_ONE_3_FORWARD
+		MOVE_ONE_1_FORWARD
+		MOVE_ONE_1_BACKWARD
+		Rotate
+		Follow
+		Reset
+		Vespene Geysir
+		Mineral Patch
+		R_STIM_PACKS
+		R_LOCKDOWN
+		R_EMP_SHOCKWAVE
+		R_SPIDER_MINES
+		R_TANK_SIEGE_MODE
+		R_IRRADIATE
+		R_YAMATO_GUN
+		R_CLOAKING_FIELD
+		R_PERSONNEL_CLOAKING
+		R_RESTORATION
+		R_OPTICAL_FLARE
+		R_U238_SHELLS
+		R_ION_THRUSTERS
+		R_TITAN_REACTOR
+		R_OCULAR_IMPLANTS
+		R_MOEBIUS_REACTOR
+		R_APOLLO_REACTOR
+		R_COLOSSUS_REACTOR
+		R_CADUCEUS_REACTOR
+		R_CHARON_BOOSTER
+		R_INFANTRY_ARMOR		
+		R_INFANTRY_WEAPONS
+		R_VEHICLE_PLATING
+		R_VEHICLE_WEAPONS
+		R_SHIP_PLATING
+		R_SHIP_WEAPONS
+		INTRON
+		NULL
+		Probe
+		Dark Templar
+		Dark Archon
+		Zealot
+		Dragoon
+		High Templar
+		Archon
+		Reaver
+		Half Scarab
+		Full Scarab
+		Corsair
+		Shuttle
+		Scout
+		Arbiter
+		Carrier
+		Half Interceptor
+		Full Interceptor
+		Observer
+		Nexus
+		Robotics Facility
+		Pylon
+		Observatory
+		Gateway
+		Photon Cannon
+		Cybernetics Core
+		Citadel of Adun
+		Templar Archives
+		Forge
+		Stargate
+		Fleet Beacon
+		Arbiter Tribunal
+		Robotics Support Bay
+		Shield Battery
+		Psionic Storm
+		Hallucination
+		Recall
+		Stasis Field
+		Disruption Web
+		Mind Control
+		Maelstrom
+		Singularity Charge
+		Leg Enhancements
+		Scarab Damage
+		Reaver Capacity
+		Gravitic Drive
+		Sensor Array
+		Gravitic Boosters
+		Khaydarin Amulet
+		Apial Sensors
+		Gravitic Thrusters
+		Carrier Capacity
+		Khaydarin Core
+		Argus Jewel
+		Argus Talisman
+		Armor
+		Plating
+		Ground Weapons
+		Air Weapons
+		Plasma Shields
+		NULL
+		NULL
+		NULL
+		NULL
+		Assimilator
+		Gas Probe
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		Vespene Geysir
+		Minerals
+		R_PSIONIC_STORM
+		R_HALLUCINATION
+		R_RECALL
+		R_STASIS_FIELD
+		R_DISRUPTION_WEB
+		R_MIND_CONTROL
+		R_MAELSTROM
+		R_SINGULARITY_CHARGE
+		R_LEG_ENHANCEMENTS
+		R_SCARAB_DAMAGE
+		R_REAVER_CAPACITY
+		R_GRAVITIC_DRIVE
+		R_SENSOR_ARRAY
+		R_GRAVITIC_BOOSTERS
+		R_KHAYDARIN_AMULET
+		R_APIAL_SENSORS
+		R_GRAVITIC_THRUSTERS
+		R_CARRIER_CAPACITY
+		R_KHAYDARIN_CORE
+		R_ARGUS_JEWEL
+		R_ARGUS_TALISMAN
+		R_ARMOR
+		R_PLATING
+		R_GROUND_WEAPONS
+		R_AIR_WEAPONS
+		R_PLASMA_SHIELDS
+		INTRON
+		NULL
+		Drone
+		Larva
+		Zergling
+		Hydralisk
+		Ultralisk
+		Defiler
+		Lurker
+		Overlord
+		Mutalisk
+		Guardien
+		Queen
+		Scourge
+		Devourer
+		Lair
+		Hive
+		Nydus Canal
+		Hydralisk Den 
+		Defiler Mound
+		Hatchery 
+		Greater Spire
+		Queens Nest
+		Evolution Chamber
+		Ultralisk Cavern
+		Spire
+		Spawning Pool
+		Creep Colony
+		Spore Colony 
+		Sunken Colony
+		Ventral Sacks
+		Antennae
+		Pneumatized Carapace
+		Metabolic Boost
+		Adrenal Glands
+		Muscular Augments
+		Grooved Spines
+		Gamete Meiosis
+		Metasynaptic Node
+		Chitinous Plating
+		Anabolic Synthesis
+		Burrowing
+		Spawn Broodling
+		Plague
+		Consume
+		Ensnare
+		Lurker Aspect
+		Carapace
+		Flyer Carapace
+		Melee Attacks
+		Missile Attacks
+		Flyer Attacks
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		Extractor
+		Gas Drone
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		Vespene Geysir
+		Minerals
+		Break up Building
+		R_VENTRAL_SACKS
+		R_ANTENNAE
+		R_PNEUMATIZED_CARAPACE
+		R_METABOLIC_BOOST
+		R_ADRENAL_GLANDS
+		R_MUSCULAR_AUGMENTS
+		R_GROOVED_SPINES
+		R_GAMETE_MEIOSIS
+		R_METASYNAPTIC_NODE
+		R_CHITINOUS_PLATING
+		R_ANABOLIC_SYNTHESIS
+		R_BURROWING
+		R_SPAWN_BROODLING
+		R_PLAGUE
+		R_CONSUME
+		R_ENSNARE
+		R_LURKER_ASPECT
+		R_CARAPACE
+		R_FLYER_CARAPACE
+		R_MELEE_ATTACKS
+		R_MISSILE_ATTACKS
+		R_FLYER_ATTACKS
+		NULL
+		NULL
+		NULL
+		INTRON
+
+		Starting ...
+		Loading core settings ...
+		Initializing SDL ...
+		Unable to init SDL:
+		Initializing video mode ...
+		Error setting video mode.
+		Setting window mode ...
+		Setting fullscreen mode ...
+		Initializing SDL true type fonts ...
+		Initializing graphic engine and core ...
+		Loading ui settings and bitmaps and fonts ...
+		UI settings and bitmaps and fonts loaded.
+		Assigning default values ...
+		Reading and parsing data file ...
+		Loading harvest data file ...
+		Loading maps ...
+		Loading start conditions ...
+		Loading goals ...
+		Assigning and analyzing data ...
+		Preparing soup for first run ...
+		Initializing GUI ...
+		Main initialization complete.
+		System ready.
+		Time for initialization: 
+
+# window titles
+
+		Evolution Forge v%s
+		Messages
+		The core of Evolution Forge
+		Evolution forge tutorial
+		Order description player %s
+		Graphical build order %s
+		Overview %s
+		Statistics %s
+		Best of breed %s
+		Unit list %s
+		Build order %s
+
+# messages
+		Welcome to Evolution Forge!
+		Click above to add new goals.
+		%i players loaded...
+		Added %s as goal.
+		Set %s as goal list.
+		Set %s as race.
+		Added one %s to the goal list.
+		Removed one %s from the goal list.
+		Moved non-goal %s to the goal list.
+		Saved %s.
+
+#edit field window
+		OK
+		Cancel
+
+# force window
+# unit type names TODO
+		rest
+		SCV
+		Gas SCV
+		Combat units...
+		Support units...
+		Supply/Refinery...
+		Producing buildings...
+		Research buildings...
+		Building addons...
+		Research ...
+		Special ...
+		Starting force:
+		non-goals:
+		goals:
+		+surplus / forces / goals
+		[time/goal time]  +surplus / forces / goals
+		add this as goal
+		close
+		goal...
+		goal list...
+		start force...
+		race...
+
+		save goal...
+		Save Goals as
+		Give the goal a name you can recognize later:
+
+		Save build order as
+		Give the build order a name you can recognize later:
+
+		Terra
+		Protoss
+		Zerg
+# bowindow
+		(Click here to insert order)
+#		(Click here to close)
+#		(Click here to go back)
+		Optimize everything
+		Optimize selected
+		Restart
+		Save build order...
+		Frames per generation
+# timer window
+		%i % of goals fulfilled
+		%i % near time optimum
+		(paused)
+		Searching...
+		%i % of theoretical optimum
+		Optimizing...
+		%i/%i/%i res./units/struc.
+		Total: %i
+		Click to continue
+		Click to pause
+# statistics window
+		total harvested Minerals : %i
+		total harvested Gas : %i
+		Time : %i:%2i
+		Force : %i
+		Build order length : %i
+		Fitness average : %i [%i best]
+		Fitness variance : %i
+		%i+ generations left [%i total]
+# window title parameter strings
+		INVISIBLE
+		Player
+		Advanced Player
+		Expert (Player)
+		1st Computer enemy
+		GOSU (Player)
+		1st Computer enemy
+		2nd Computer enemy
+		ERROR - Check playermodes
+#tabs
+		Zero Tab
+		Beginner
+		Advanced
+		Expert
+		Gosu
+		Help
+		Settings
+		Map & Goals
+		Compare Goals
+				
+# tooltips:
+		add a unit
+		remove a unit
+		remove a goal
+		Choose Terra/Protoss/Zerg
+		Add goals to the list
+		Choose predefined goal list
+		Choose predefined starting force
+
+		total harvested minerals
+		total harvested gas
+		time of best build order
+		total amount of units at the end
+		length of build order in items
+		average fitness of all programs
+		fitness variance of all programs
+		minimum number of generations left
+		Frames per second [build orders per second]
+
+		Reset and restart from the scratch
+		Save build order as html
+
+		Continue the optimization
+		Percent of all goals / Percent of theoretical (without minerals/gas) optimum
+
+		Simple interface and basic options
+		All informations are presented
+		The build order will be tested against rushes
+		Play in realtime against the computer or let it play itself
+		
+		Explanation of the different windows and a tutorial
+		Display and global ef settings
+		Create and configure forces and goals and maps
+		Compare current and saved build orders
+
+		Click to set latest time these units should be complete
+		
+		Settings
+		Predefined settings
+		Max time
+		Facility mode
+		Autosave runs
+		Preprocess build order
+		Max length
+		Number of runs
+		Number of generations
+		Max timeout
+		Allow goal adaption
+		Breeding factor
+		Crossing-Over factor
+# Radiobutton
+		Minimal graphics
+		Full graphic
+		Custom
+# Radiobutton + Eingabefeld
+		Allow static frame rate
+		FPS upper limit
+		desired FPS
+# an aus
+		Smooth movements
+# an aus
+		Glowing buttons
+# an aus
+		DNA Spiral
+# an aus
+		Rounded rectangles
+# an aus
+		Background bitmap
+# an aus
+		Transparency
+# an aus
+		Full screen
+# an aus
+		Tool tips
+		Software mouse
+
+		Time a build order may use at maximum (has influence on the time the program needs to find a first solution)
+		Shall the items in the 'add goal' menu be ordered by theme or by facility?
+		Shall the build orders be automaticly saved at the end of a run or should I ask what to do?
+		Shall a randomly created or a preprocessed build order used at the beginning?
+		Maximum length of a build order
+		How often shall the program restart to get an optimal build order?
+		After how many unchanged generations shall the program restart with a newly created build order?
+		How many seconds may be between two orders?
+		Is the program allowed to make some small adjustments on the goal list?
+		What percentage of the next generation shall be created out of the best build order of this one?
+		What percentage of the next generation shall be created by crossing over the genetic information of several programs of this generation?
+# Radiobutton
+		Minimum of graphics (all CPU power is allocated for the calculation) (for speed without graphics: check the command line options)
+		Set the graphics to nice :)
+		Click yourself around
+# Radiobutton + Eingabefeld
+		Shall the program hold (as far as possible) a constant framerate (on) or should it depend solely on computer speed (off)?
+		Maximum number of frames per second
+		Desired frames per second (reduces calculation speed and always 100% CPU usage)
+# an aus
+		Shall the objects move around slowly or shall they directly jump to their destinations?
+		Shall buttons and items glow when the mouse is over the item?
+		Shall a dna spiral representing the build order be drawn?
+		Shall the rectangles have rounded edges and borders? (needs a little CPU)
+		Shall there be a nice background image? (needs some CPU in this version)
+		Transparent objects (needs some CPU :) )
+		Switch between window and fullscreen (needs a program restart on some systems)
+		8[ Don't ya like these texts?
+		Use software mouse or use mouse pointer of the operating system?
+
+		Settings will be saved to settings/default.cfg when quitting the program
+		
+		GUI was changed to english language.
+	
+		Language
+		ERROR
+		English
+		German
+		Italian
+		Portugese
+		Dutch
+		Finnish
+		Greek
+		French
+		Spanish
+		Polski
+		Korean -_-
+		Chinese
+		Russian
+
+		Resolution
+		ERROR
+		800x600
+		1024x768
+		1280x1024
+
+		Theme
+		ERROR
+		Dark blue
+		Green
+		Red
+		Yellow
+		Grey
+		Monochrome
+
+		Reload from file
+		Failsafe settings
+		Save
+
+		Settings of the core
+		Settings of the gui
+		Load/Save settings
+
+		Unit name
+		Supply
+		Minerals
+		Gas
+		Location
+		Time
+		
+		. run finished (final time
+		Saved build order...
+		End of a run
+		Shall the build order be saved?
+		Save
+		Throw away
+#success types
+		possible
+		enough minerals
+		enough gas
+		supply is satisfied
+		prerequisite
+		facility
+		hell freezes
+		unknown
+
+		Build
+		as soon as
+		becomes availible
+		at
+		when
+		having
+		minerals
+		gas
+		supply
+		time
+		
+	@END
+
+@END
+
+

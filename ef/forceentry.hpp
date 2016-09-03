@@ -1,7 +1,7 @@
 #ifndef _FORCEENTRY_HPP
 #define _FORCEENTRY_HPP
 
-#include "numberfield.hpp"
+#include "../ui/numberfield.hpp"
 #include "../core/goal.hpp"
 
 class ForceEntry : public UI_Button
@@ -12,26 +12,26 @@ class ForceEntry : public UI_Button
 		ForceEntry(const ForceEntry& object);
 		ForceEntry& operator=(const ForceEntry& object);
 		
-		void updateText(const string& utext);
 		void process();
 		void draw(DC* dc) const;
 
 		void setTargetForce(const unsigned int force);
-		void setTotalNumber(const unsigned int totalNumber);
-		void assignGoal(GOAL* goal);
-		void setUnit(const unsigned int unit);
-		void setType(const eUnitType type);
+		void setTotalNumber(const unsigned int total_number);
+		void assignGoal(GOAL* assign_goal);
+		void setUnit(const unsigned int unit_type);
+		void setType(const eUnitType unit_type); // ~~
 		const eUnitType getType() const;
 		const unsigned int getUnit() const;
 		
 		void HideIt();
 
-		
+		UI_Object* checkTooltip();
 		UI_Object* checkHighlight();
 	
-		NumberField* timeEntryBox;
+		UI_NumberField* timeEntryBox;
 //		UI_Button* makeLocationGoal;
 		UI_Button* makeTimeGoal;
+		static bool changed;
 	
 	private:
         

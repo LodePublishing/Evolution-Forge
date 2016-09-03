@@ -15,12 +15,11 @@ class UnitMenu : public Menu
 		~UnitMenu();
 		void process();
 		void draw(DC* dc) const;
-		void setFacilityModus(const bool facilityModus=true);
+		void setFacilityModus(const bool facility_mode=true);
 		void resetData();
 	private:
 		ANARACE* anarace;
 // sort units in the addgoal menu rather by facility than by unitType		
-		bool facilityMode;
 		unsigned int facilityNumber;
 		unsigned int facility[GAS_SCV+1];
 		// facility number -> real facility 

@@ -1,6 +1,6 @@
-#ifndef _SDL_framerate_hpp
-#define _SDL_framerate_hpp
-#include <SDL/SDL.h>
+#ifndef _SDL_FRAMERATE_HPP
+#define _SDL_FRAMERATE_hpp
+#include <SDL.h>
 
 /* --------- Definitions */
 
@@ -13,19 +13,31 @@ class FPS
 {
 /* --------- Structure variables */
 	private:
-		unsigned int framecount;
-		unsigned int rate;
-		float rateticks;
-		unsigned int lastticks;
+		bool allowStaticFramerate;
+		unsigned int desiredFramerate;
+		unsigned int currentFramerate;
+		unsigned int framesPerGeneration; // output
 
+		unsigned int framecount;
+		
+		float rateTicks;
+		
+		long unsigned int startTicks;
+		long unsigned int lastTicks;
+		
+		
+		unsigned int averagecounter;
+		unsigned int average[100];
+		
 /* --------- Function prototypes */
 
 	public:
-/* Functions return 0 or value for sucess and -1 for error */
 		FPS();
 		~FPS();
-		bool setFramerate(const unsigned int rate);
-	    const unsigned int getFramerate();
+		void setDesiredFramerate(const unsigned int desired_frame_rate);
+		const unsigned int getFramesPerGeneration() const;
+		const unsigned int getCurrentFramerate() const;
+		void setAllowStaticFramerate(const bool allow_static_framerate=true);
     	void delay();
 
 /* --- */

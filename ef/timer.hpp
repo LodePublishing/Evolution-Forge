@@ -16,7 +16,9 @@ class TimerWindow : public UI_Window
 		void draw(DC* dc) const;
 
 		const unsigned int getCurrentMode() const;
-		void setMode(const unsigned int mode);
+		void setMode(const unsigned int current_mode);
+
+		void forcePause(const bool pause=true);
 	private:
 		unsigned int oldTimeCounter[20], oldTime[20];
 		unsigned int currentTime;

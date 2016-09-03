@@ -34,30 +34,32 @@ Menu& Menu::operator=(const Menu& object)
 	return(*this);
 }
 
-Menu::Menu(UI_Object* menu_parent, Rect menu_rect, const bool chooseMenu):
+Menu::Menu(UI_Object* menu_parent, Rect menu_rect, const bool choose_menu):
 	UI_Object(menu_parent, menu_rect),
+	menuEntries(),
 	menuLevel(0),
 	pressedItem(-1),
 	markedItem(-1),
 	height(0),
-	chooseMenu(chooseMenu),
+	chooseMenu(choose_menu),
 	p1(),
 	p2()
 { }
 
-Menu::Menu(UI_Object* parent, Rect rect, const int entryNumber, const int coloumns, const Size& s, const eString firstString, const eButton button, const bool chooseMenu):
-    UI_Object(parent, rect),
+Menu::Menu(UI_Object* menu_parent, Rect rect, const int entryNumber, const int coloumns, const Size& s, const eString firstString, const eButton button, const bool choose_menu):
+    UI_Object(menu_parent, rect),
+	menuEntries(),
     menuLevel(0),
     pressedItem(-1),
     markedItem(-1),
     height(0),
-    chooseMenu(chooseMenu),
+    chooseMenu(choose_menu),
     p1(),
     p2()
 {
     for(int i=0;i<entryNumber;i++)
     {
-        Rect edge = Rect(Point(10 + (i%coloumns) * (s.GetWidth()+10), (i/coloumns)*(s.GetHeight()+10)), s);
+        Rect edge = Rect(Point(10 + (i%coloumns) * (s.GetWidth()+10), (i/coloumns)*(s.GetHeight()+12)), s);
         MenuEntry* entry = new MenuEntry(this, edge, (eString)(firstString+i));
         entry->setButton(button);
         menuEntries.push_back(entry);
@@ -125,7 +127,7 @@ void Menu::process()
 			(*m)->setPosition(Point(0,0));
 			(*m)->targetRect=(*m)->getRelativeRect();
 			(*m)->startRect=(*m)->getRelativeRect();
-			(*m)->adjustButtonPlacementArea();
+			(*m)->adjustButtonPlacementPosition();
 			(*m)->frameReset();
 		}
 		else

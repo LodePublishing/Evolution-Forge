@@ -17,7 +17,6 @@ RaceMenu::RaceMenu(UI_Object* race_parent, Rect race_rect) :
 	for(int i=0;i<MAX_RACES;i++)
 	{
 		MenuEntry* entry = new MenuEntry(this, Rect(Point(10 + i * 90, height * (FONT_SIZE+9)), Size(75, FONT_SIZE+3)), (eString)(TERRA_STRING+i));
-    	entry->updateToolTip((eString)(TERRA_STRING+i));
 		menuEntries.push_back(entry);
 	}
     list<MenuEntry*>::iterator m = menuEntries.begin();

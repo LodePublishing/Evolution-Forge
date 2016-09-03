@@ -144,13 +144,96 @@ void DC::Draw_HLine(const signed int x0, const signed int y0, const signed int x
 #endif
 }/*Draw_HLine*/
 
+#define sign(a) (((a)<0) ? -1 : (a)>0 ? 1 : 0)
 
+void DC::Draw_Line(signed int x1, signed int y1, signed int x2, signed int y2) const
+{
+	Color col = (*pen.GetColor());
+
+  int d;
+  int x;
+  int y;
+  int ax;
+  int ay;
+  int sx;
+  int sy;
+  int dx;
+  int dy;
+
+  Uint8 *lineAddr;
+  Sint32 yOffset;
+
+  dx = x2 - x1;  
+  ax = abs(dx) << 1;  
+  sx = sign(dx);
+
+  dy = y2 - y1;  
+  ay = abs(dy) << 1;  
+  sy = sign(dy);
+  yOffset = sy * surface->pitch;
+
+  x = x1;
+  y = y1;
+
+  lineAddr = ((Uint8 *)(surface->pixels)) + (y * surface->pitch);
+  if (ax>ay)
+  {                      /* x dominant */
+    d = ay - (ax >> 1);
+    for (;;)
+    {
+      *((Uint32 *)(lineAddr + (x << 2))) = (Uint32)col;
+
+      if (x == x2)
+      {
+        return;
+      }
+      if (d>=0)
+      {
+        y += sy;
+        lineAddr += yOffset;
+        d -= ax;
+      }
+      x += sx;
+      d += ay;
+    }
+  }
+  else
+  {                      /* y dominant */
+    d = ax - (ay >> 1);
+    for (;;)
+    {
+      *((Uint32 *)(lineAddr + (x << 2))) = (Uint32)col;
+
+      if (y == y2)
+      {
+        return;
+      }
+      if (d>=0) 
+      {
+        x += sx;
+        d -= ay;
+      }
+      y += sy;
+      lineAddr += yOffset;
+      d += ax;
+    }
+  }
+}
+#if 0
 
 void DC::DrawLine(const signed int xx1, const signed int yy1, const signed int xx2, const signed int yy2) const
 {
 	if(pen.GetStyle()==TRANSPARENT_PEN_STYLE)
 		return;
-	Uint32 col = (Uint32)(*pen.GetColor());
+	Color col = (*pen.GetColor());
+
+//	aalineRGBA(surface, xx1, yy1, xx2, yy2,	col.r(), col.g(), col.b(), 255);
+//	return; // TODO
+
+	int x0 = xx1;
+	int x1 = xx2;
+	int y0 = yy1;
+	int y1 = yy2;
 
  int i;
 int sx, sy; /* step positive or negative (1 or -1) */
@@ -159,10 +242,6 @@ int dx2, dy2;
 int e;
 int temp;
 
-int x0 = xx1;
-int x1 = xx2;
-int y0 = yy1;
-int y1 = yy2;
 
  dx = x1 - x0;
 sx = (dx > 0) ? 1 : -1;
@@ -244,7 +323,7 @@ e += dy2;
 }
 
 } 
-
+#endif 
 
 // TODO!
 #if 0
@@ -389,14 +468,29 @@ void DC::DrawFilledRound(const signed int x, const signed int y, const unsigned 
 // Nur Ecken:
     // links oben
 #ifdef __linux__
-        wmemset((wchar_t*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (Xcenter - i)*4), col, i);
-        wmemset((wchar_t*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (Xcenter - radius)*4), col, radius);
+
+/*        for(int k=i;k--;)
+        {
+            *((Uint32*)((Uint8*)surface->pixels + k*4 + (Ycenter-radius)*surface->pitch + (Xcenter - i)*4)) = col;
+            *((Uint32*)((Uint8*)surface->pixels + k*4 + (Ycenter-radius)*surface->pitch + X2center*4)) = col;
+            *((Uint32*)((Uint8*)surface->pixels + k*4 + (Y2center+radius-1)*surface->pitch + X2center*4)) = col;
+        }
+        for(int k=radius;k--;)
+        {
+            *((Uint32*)((Uint8*)surface->pixels + k*4 + (Ycenter-i)*surface->pitch + (Xcenter - radius)*4)) = col;
+            *((Uint32*)((Uint8*)surface->pixels + k*4 + (Ycenter-i)*surface->pitch + X2center*4)) = col;
+            *((Uint32*)((Uint8*)surface->pixels + k*4 + (Y2center+i-1)*surface->pitch + X2center*4)) = col;
+        }*/
+
+
+        wmemset((wchar_t*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (Xcenter - i +1)*4), col, i);
+        wmemset((wchar_t*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (Xcenter - radius + 1)*4), col, radius);
     // rechts oben
         wmemset((wchar_t*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + X2center*4), col, i);
         wmemset((wchar_t*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + X2center*4), col, radius);
     // links unten
-        wmemset((wchar_t*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + (Xcenter - i)*4), col, i);
-        wmemset((wchar_t*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + (Xcenter - radius)*4), col, radius);
+        wmemset((wchar_t*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + (Xcenter - i + 1)*4), col, i);
+        wmemset((wchar_t*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + (Xcenter - radius + 1)*4), col, radius);
     // rechts unten
         wmemset((wchar_t*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + X2center*4), col, i);
         wmemset((wchar_t*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + X2center*4), col, radius);
@@ -428,7 +522,7 @@ void DC::DrawFilledRound(const signed int x, const signed int y, const unsigned 
             *((Uint32*)((Uint8*)surface->pixels + k+(Y2center+i-1)*surface->pitch + (Xcenter-radius)*4)) = col;
         }
 
-    #endif
+  #endif
     	if (d >= 0) 
 		{
 			d += diagonalInc;

@@ -1,22 +1,25 @@
 #ifndef _SDL_DC_HPP
 #define _SDL_DC_HPP
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 #include "rect.hpp"
 #include "pen.hpp"
 #include "brush.hpp"
 #include "font.hpp"
 #include "bitmap.hpp"
-
+//#include <SDL/SDL_gfxPrimitives.h>
 #include <string>
+
 
 class DC
 {
 	public:
 		DC();
-		DC(SDL_Surface *sf);
-		~DC() {if(surface) SDL_FreeSurface(surface);};
+		DC(const unsigned int width, const unsigned int height, const unsigned int bitdepth, Uint32 flags);
+		~DC() 
+		{ }
+		
 		DC(const DC& other);
 		DC &operator=(const DC& other) {
 			if(this != &other) SetSurface(other.surface);return *this;
@@ -103,11 +106,16 @@ class DC
 		bool SaveBMP(const std::string& file) const {
 			return SaveBMP(file.c_str()); 
 		}
+
+		void setFullscreen(const bool fullscreen = true);
 		
 		void SetBrush(const Brush& brush);
 		void SetPen(const Pen& pen);
 		void SetColor(Color* color);
 		void SetFont(Font* font);
+
+		Font* GetFont() const;
+
 		void SetTextForeground(const SDL_Color& textColor);
 		
 		const Size GetTextExtent(const std::string& text) const {
@@ -126,6 +134,15 @@ class DC
 		void DrawBitmap(const Bitmap& bitmap, const signed int x, const signed int y) const;
 
 		void DrawEmptyRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height) const;
+		
+		void DrawEmptyRectangle(const Rect& rect) const	{
+			DrawEmptyRectangle(rect.GetLeft(), rect.GetTop(), rect.GetWidth(), rect.GetHeight());
+		}
+		
+		void DrawEmptyRectangle(const Point& p, const Size& s) const {
+			DrawEmptyRectangle(p.x, p.y, s.GetWidth(), s.GetHeight());
+		}
+		
 		void DrawRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height) const;
 		
 		void DrawRectangle(const Rect& rect) const { 
@@ -135,6 +152,10 @@ class DC
 		void DrawRectangle(const Point& p, const Size& s) const { 
 			DrawRectangle(p.x, p.y, s.GetWidth(), s.GetHeight());
 		}
+
+		void DrawEmptyRound(const Rect& rect, const unsigned int corner) const {
+			DrawEmptyRound(rect.GetLeft(), rect.GetTop(), rect.GetWidth(), rect.GetHeight(), corner);
+		}
 	
 		void DrawSpline(const unsigned int c, const Point* p) const;
 		void DrawSpline(const unsigned int c, const Point* p, const Point s) const;
@@ -143,7 +164,9 @@ class DC
 			DrawLine(p1.x, p1.y, p2.x, p2.y);
 		}
 		
+		void Draw_Line(signed int x1, signed int y1, signed int x2, signed int y2) const;
 		void DrawLine(const signed int x1, const signed int y1, const signed int x2, const signed int y2) const;
+//		void aalineColorInt(const int x1, const int y1, const int x2, const int y2) const;
 
 		
 		void DrawVerticalLine(const signed int x0, const signed int y0, const signed int y1) const;
@@ -174,7 +197,8 @@ class DC
 	protected:
 		SDL_Surface* surface;
 		void SetSurface(SDL_Surface *sdl_surface) {
-			if(surface) SDL_FreeSurface(surface);
+			if(surface) 
+				SDL_FreeSurface(surface);
 			surface = sdl_surface;
 		}
 

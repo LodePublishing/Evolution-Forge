@@ -1,0 +1,631 @@
+@STRINGS
+	@GERMAN
+		NULL!
+		NONE
+		WBF
+		Space-Marine
+		Geist
+		Adler
+		Goliath
+		Belagerungspanzer
+		Feuerfresser
+		Sanitäter
+		Raumjäger
+		Forschungsschiff
+		Landefrachter
+		Schwerer Kreuzer
+		Walküre
+		Nuklearrakete
+		Versorgungsdepot
+		Kaserne
+		Akademie
+		Fabrik
+		Kommandozentrale
+		Raumhafen
+		Wiss. Institut
+		Maschinendock
+		Waffenlager
+		Raketenturm
+		Bunker
+		Comsat-Station
+		Nuklearsilo
+		Kontrollturm
+		Geheimdienstzentrum
+		Physiklabor
+		Werkstatt
+		Kommandozentrale [CS]
+		Kommandozentrale [NS]
+		Raumhafen [KT]
+		Wiss. Institut [GD]
+		Wiss. Institut [PL]
+		Fabrik [WS]
+		StimPacks
+		Stopper
+		EMP-Schockwelle
+		Spinnenminen
+		Panzerbelagerungsmodus
+		Bestrahlung
+		Yamato-Kanone
+		Tarnfeld
+		Einzeltarnung
+		Wiederherstellung
+		Blendgranate
+		U-238-Geschosse
+		Ionenantrieb
+		Titan-Reaktor
+		Okular-Implantate
+		Möbius-Reaktor
+		Apollo-Reaktor
+		Kolossus-Reaktor
+		Mercurius-Reaktor
+		Charon-Booster
+		Infanterie-Panzerung
+		Infanterie-Waffen
+		Fahrzeug-Panzerung
+		Fahrzeug-Waffen
+		Schiff-Panzerung
+		Schiff-Waffen
+		Raffinerie
+		Gas WBF
+		MOVE_ONE_3_FORWARD
+		MOVE_ONE_1_FORWARD
+		MOVE_ONE_1_BACKWARD
+		ROTATE
+		FOLLOW
+		RESET
+		Vespin-Geysir
+		Mineralienfeld
+		R_STIM_PACKS
+		R_LOCKDOWN
+		R_EMP_SHOCKWAVE
+		R_SPIDER_MINES
+		R_TANK_SIEGE_MODE
+		R_IRRADIATE
+		R_YAMATO_GUN
+		R_CLOAKING_FIELD
+		R_PERSONNEL_CLOAKING
+		R_RESTORATION
+		R_OPTICAL_FLARE
+		R_U238_SHELLS
+		R_ION_THRUSTERS
+		R_TITAN_REACTOR
+		R_OCULAR_IMPLANTS
+		R_MOEBIUS_REACTOR
+		R_APOLLO_REACTOR
+		R_COLOSSUS_REACTOR
+		R_CADUCEUS_REACTOR
+		R_CHARON_BOOSTER
+		R_INFANTRY_ARMOR		
+		R_INFANTRY_WEAPONS
+		R_VEHICLE_PLATING
+		R_VEHICLE_WEAPONS
+		R_SHIP_PLATING
+		R_SHIP_WEAPONS
+		INTRON
+		NULL
+		Sonde
+		Dunkler Templer
+		Dunkler Archon
+		Berserker
+		Dragoner
+		Hoher Templer
+		Archon
+		Räuber
+		5 Scarabs
+		10 Scarabs
+		Korsar
+		Shuttle
+		Scout
+		Arbiter
+		Träger
+		5 Interceptoren
+		10 Interceptoren
+		Beobachter
+		Nexus
+		Roboterfabrik
+		Pylon
+		Observatorium
+		Warp-Knoten
+		Photonenkanone
+		Kybernetik-Kern
+		Zitadelle von Adun
+		Templer-Archiv
+		Schmiede
+		Raumportal
+		Flottensignalgeber
+		Arbiter-Tribunal
+		Roboter-Supportdock
+		Schutzschildbatterie
+		Psi-Sturm
+		Halluzination
+		Rückruf
+		Stasisfeld
+		Disruptor-Netz
+		Gedankenkontrolle
+		Maelstrom
+		Singularitätsladung
+		Beinverbesserungen
+		Scarab-Schaden
+		Räuber-Kapazität
+		Gravitationsantrieb
+		Sensorfeld
+		Gravitationsbooster
+		Khaydarin-Amulett
+		Apial-Sensoren
+		Gravitationsdüsen
+		Trägerraumschiff-Kapazität
+		Khaydarin-Kern
+		Argus-Juwel
+		Argus-Talisman
+		Panzer
+		Panzerung
+		Boden-Waffen
+		Luft-Waffen
+		Plasma-Schilde
+		NULL
+		NULL
+		NULL
+		NULL
+		Assimilator
+		Gas Sonde
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		Vespene Geysir
+		Mineralienfeld
+		R_PSIONIC_STORM
+		R_HALLUCINATION
+		R_RECALL
+		R_STASIS_FIELD
+		R_DISRUPTION_WEB
+		R_MIND_CONTROL
+		R_MAELSTROM
+		R_SINGULARITY_CHARGE
+		R_LEG_ENHANCEMENTS
+		R_SCARAB_DAMAGE
+		R_REAVER_CAPACITY
+		R_GRAVITIC_DRIVE
+		R_SENSOR_ARRAY
+		R_GRAVITIC_BOOSTERS
+		R_KHAYDARIN_AMULET
+		R_APIAL_SENSORS
+		R_GRAVITIC_THRUSTERS
+		R_CARRIER_CAPACITY
+		R_KHAYDARIN_CORE
+		R_ARGUS_JEWEL
+		R_ARGUS_TALISMAN
+		R_ARMOR
+		R_PLATING
+		R_GROUND_WEAPONS
+		R_AIR_WEAPONS
+		R_PLASMA_SHIELDS
+		INTRON
+		
+		NULL
+		Drone
+		Larve
+		Zergling
+		Hydralish
+		Ultralisk
+		Vergifter
+		Schleicher
+		Overlord
+		Mutalisk
+		Wächter
+		Königin
+		Terror
+		Vernichter
+		Bau
+		Schwarmstock
+		Nydus-Kanal
+		Hydralisken-Bau
+		Vergifter-Hügel
+		Brutstätte
+		Grosser Schößling
+		Königinnen-Nest
+		Evolutionskammer
+		Ultralisken-Höhle
+		Schößling
+		Brutschleim-Pool
+		Kriecherkolonie
+		Sporenkolonie
+		Tiefenkolonie
+		Bauchbeutel
+		Antennen
+		Pneumatischer Panzer
+		Metabolismusschub
+		Adrenalindrüsen
+		Muskelverbesserung
+		Zackenstacheln
+		Gameten-Meiosis
+		Metasynaptischer Knoten
+		Chitin-Panzer
+		Hormon-Synthese
+		Eingraben
+		Brütling legen
+		Verseuchung
+		Fressen
+		Einfangen
+		Schleicher-Aspekt
+		Panzer
+		Fliegerpanzer
+		Nahkampf-Angriff
+		Geschoße
+		Fliegerangriff
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		Extraktor
+		Gas Drone
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		NULL
+		Vespene Geysir
+		Mineralienfeld
+		Breche Gebaeude ab
+		R_VENTRAL_SACKS
+		R_ANTENNAE
+		R_PNEUMATIZED_CARAPACE
+		R_METABOLIC_BOOST
+		R_ADRENAL_GLANDS
+		R_MUSCULAR_AUGMENTS
+		R_GROOVED_SPINES
+		R_GAMETE_MEIOSIS
+		R_METASYNAPTIC_NODE
+		R_CHITINOUS_PLATING
+		R_ANABOLIC_SYNTHESIS
+		R_BURROWING
+		R_SPAWN_BROODLING
+		R_PLAGUE
+		R_CONSUME
+		R_ENSNARE
+		R_LURKER_ASPECT
+		R_CARAPACE
+		R_FLYER_CARAPACE
+		R_MELEE_ATTACKS
+		R_MISSILE_ATTACKS
+		R_FLYER_ATTACKS
+		NULL
+		NULL
+		NULL
+		INTRON
+				
+		Starte ...
+		Lade Einstellungen des Kerns ...
+		Initialisiere SDL ...
+		Initialisierung von SDL fehlgeschlagen:
+		Initialisiere Videomodus ...
+		Initialisierung des Videomodus fehlgeschlagen.
+		Setze Fenstermodus ...
+		Setze Vollbildmodus ...
+		Initialisiere SDL Truetype Schriftarten ...
+		Initialisiere Grafikoberfläche und Kern ...
+		Lade Einstellungen der Oberfläche/Bilder/Schriftarten ...
+		Einstellungen der Oberfläche/Bilder/Schriftarten geladen.
+		Setze Daten auf Standardwerte ...
+		Lese und parse Daten ...
+		Lade Sammelgeschwindigkeiten aus Datei ...
+		Lade Karten ...
+		Lade Startbedingungen ...
+		Lade Ziele ...
+		Weise Daten zu und analysiere ...
+		Bereite Suppe für ersten Durchgang vor ...
+		Initialisiere Graphische Benutzeroberfläche ...
+		Alle Initialisierungen abgeschlossen.
+		System bereit.
+		Dauer der Initialisierung: 
+		
+# window titles
+		Evolution Forge v%s
+		Nachrichten
+		Kern von Evolution Forge
+		Evolution forge Einführung
+		Befehlsbeschreibung Spieler %s
+		Grafische Darstellung der Befehle %s
+		Übersicht über den Verlauf %s
+		Statistiken %s
+		Das beste Programm %s
+		Einheitenliste %s
+		Befehlsreihenfolge %s
+# messages
+		Willkommen zu Evolution Forge!
+		Klicke oben um weitere Ziele hinzuzufügen.
+		%i Spieler geladen ....
+		%s wurde der Zielliste hinzugefügt.
+		%s wurde als neue Zielliste ausgewählt.
+		%s wurde als Rasse gesetzt.
+		Ein %s wurde der Zielliste hinzugefügt.
+		Ein %s wurde von der Zielliste entfernt.
+		%s wurde von in den Zielstatus erhoben.
+		%s wurde gespeichert.
+		
+#edit field window
+		OK
+		Abbruch
+
+# force window
+# unit type names TODO
+		rest
+		WBF
+		Gas WBF
+		Kampfeinheiten...
+		Unterstützungseinheiten...
+#20		
+		Versorgung/Raffinerie...
+		Produzierende Gebäude...
+		Forschungseinrichtungen...
+		Gebäudezusätze...
+		Forschung...
+		Spezial...
+		Einheiten zu Beginn:
+		sonstige:
+		Zieleinheiten:
+		+Überschuss / Einheiten / Ziele:
+		[Zeit/Zielzeit]  +Überschuss / Einheiten / Ziele:
+		Hier klicken um Ziel hinzuzufügen
+		Schliessen
+		Ziel hinzu
+		Ziel laden
+		Starteinheiten
+#				Wähle Rasse
+		Rasse
+
+		Speichere Ziele...
+		Speichere Ziele als
+		Gebe den Zielen einen Namen:
+
+		Speichere Baureihenfolge als
+		Gebe der Baureihenfolge einen Namen:
+		
+		Terraner
+		Protoss
+		Zerg
+# bowindow
+# 40
+		(Hier klicken um ein Befehl einzufügen)
+		Alles optimieren
+		Optimiere nur Auswahl
+		Neustart
+		Speichere Baufolge...
+		Geschwindigkeit
+# timer window
+		%i % der Ziele erfüllt
+		%i % nahe am Zeitoptimum
+		(unterbrochen)
+		Suche...
+		%i%% des theoretischen Optimums
+		Optimiere...
+		%i/%i/%i Res./Einh./Geb.
+		Gesamt: %i
+		Klicken um fortzufahren
+		Klicken um zu unterbrechen
+# statistics window
+		Gesamt Mineralien : %i
+		Gesamt Vespine Gas : %i
+		Zeit : %i:%2i
+		Einheitenzahl : %i
+		Länge Befehlsliste : %i
+	
+# 60
+		durchschn. Qualität : %i [beste %i]
+		Varianz der Qualität : %i
+		%i+ Generationen übrig [%i insg.]
+# window title parameter strings
+		INVISIBLE
+		Spieler
+		Erfahrener Spieler
+		Experte (Spieler)
+		1. Computerspieler
+		GOSU (Spieler)
+		1. Computerspieler
+		2. Computerspieler
+		ERROR - Check player modes
+#tabs
+		Zero Tab
+		Anfänger
+		Erfahren
+		Experte
+# 80
+		Gosu
+		
+		Hilfe
+		Einstellungen
+		Karte & Ziele
+		Vergleiche Ziele
+
+# tooltips:
+		füge Einheit hinzu
+		nehme Einheit weg
+		nehme Ziel weg
+		Wähle Terra/Protoss/Zerg
+		Füge Ziele zur Liste
+		Wähle vordefinierte Zielliste
+		Wähle vordefinierte Starteinheiten
+
+		insg. gesammelte Mineralien
+		insg. gesammeltes Gas
+		Zeit der besten Baureihenfolge
+		insgesamte Zahl an Einheiten am Ende
+		Länge der Baureihenfolge
+		durchschn. Tauglichkeit aller Programme
+		Varianz der Tauglichkeit aller Programme
+		Mindestzahl verbleibender Generationen 
+#100
+		Bilder pro Sekunde [Baufolgen pro Sekunde]
+
+		Starte komplett von Null neu
+		Speichere Baureihenfolge als HTML
+
+		Fahre mit der Optimierung fort
+		Anteil aller Ziele / zeitlicher Anteil am Optimum (Mineralien/Gas ignoriert)
+				
+		Einfache Oberfläche und grundlegende Möglichkeiten
+		Alle Möglichkeiten sind verfügbar
+		Die Baureihenfolge wird auf frühe Angriffe getestet
+		Spiele in Realzeit gegen den Rechner
+		Erklärung der verschiedenen Fenster und eine Einführung
+		Grafische und globale Einstellungen
+		Erstelle und verändere Starteinheiten und Ziele und Karten
+		Vergleiche momentane mit gespeicherten Baureihenfolgen
+
+		Klicken um spätesten Zeitpunkt der Produktion einzustellen
+
+		Einstellungen
+		Vordefinierte Einstellungen
+		maximale Zeit
+		Produktionsstättenmodus
+		Speicherung am Ende
+		Vorberechnung Baufolge
+		Maximale Länge
+		Zahl der Versuche
+		Zahl der Generationen
+#120
+		maximaler Timeout
+		Zielanpassung erlaubt
+		Vermehrungsfaktor
+		Crossing Over Faktor
+# Radiobutton
+		Minimalistisch
+		Volle Grafikpracht
+		benutzerdefiniert
+# Radiobutton + Eingabefeld
+		Begrenze Bildfrequenz
+		Maximale FPS
+		Gewünschte FPS
+# an aus
+		fliessende Bewegung
+		Pulsierende Knöpfe
+		DNS Spirale
+		Abgerundete Rechtecke
+		Hintergrundbild
+		Transparenz
+		Vollbild
+		Tool Tips
+		Software Maus
+
+		Zeit die eine Baureihenfolge maximal benötigen darf (beeinflusst Zeit bis zum Finden der ersten Lösung)
+		Sollen die Einträge im 'Füge Ziel hinzu' Menü nach Einsatzgebiet oder nach Baustätte geordnet werden?
+		Sollen die Baureihenfolgen am Ende eines Durchgans automatisch gespeichert werden oder soll gefragt werden?
+		Soll eine zufällige oder eine vorberechnete Baureihenfolge zu Beginn genommen werden?
+		Maximale Länge einer Baureihenfolge
+		Wie oft soll das Programm neustarten um eine optimale Baureihenfolge zu erhalten?
+		Nach wievielen unveränderten Generationen soll der aktuelle Versuch verworfen und mit einer neuerstellten Baureihenfolge begonnen werden?
+		Wieviel Sekunden dürfen zwischen zwei Befehlen maximal liegen?
+		Ist es dem Programm gestattet minimale Anpassungen an den Zielen vorzunehmen?
+		Wieviel Prozent des besten Programms einer Generation soll in die nächste übernommen werden?
+		Wieviel Prozent der Programme sollen sich per Crossing-Over (Austausch von Geninformationen) fortpflanzen?
+# Radiobutton
+		Minimale Grafik (alle CPU Power der Berechnung zuweisen) (Für extreme Minimalisten: siehe Kommandozeilenoptionen)
+		Grafik auf schön stellen :)
+		Selber rumklicken
+# Radiobutton + Eingabefeld
+		Soll das Programm (soweit möglich) eine konstante Bildwiederholfrequenz halten (an) oder soll dies nur über die CPU Geschwindigkeit geregelt sein?
+		Soll die Zahl der Bilder pro Sekunde begrenzt werden?
+		Gewünschte Zahl der Bilder pro Sekunde (auf Kosten der Berechnung und immer 100% CPU Last)
+# an aus
+		Sollen sich Objekte langsam hin und herbewegen oder auf ihren Zielpunkt springen?
+		Sollen Knöpfe pulsierende Animation besitzen?
+		Soll eine DNS Spirale die die Baureihenfolge darstellt gemalt werden?
+		Sollen Rechtecke abgerundete Ecken und Kanten besitzen? (Benötigt minimal CPU)
+		Soll als Hintergrund ein schönes Bild gemalt werden? (Benötigt in der Version noch etwas CPU)
+		Durchsichtige Objekte (zieht etwas CPU :) )
+		Wechsel zwischen Vollbild und Fenstermodus (Benötigt einen Neustart auf manchen Systemen)
+		8[ Gefallen Dir die Texte etwa nicht?
+		Benutze Software Maus oder Mauszeiger vom Betriebssystem?
+
+		Einstellungen werden in settings/default.cfg gespeichert sobald das Programm verlassen wird
+	
+		Oberfläche wurde auf deutsch umgestellt.
+	
+		Sprache
+		Fehler
+		Englisch
+		Deutsch
+		Italienisch
+		Portugisisch
+		Niederländisch
+		Finnisch
+		Griechisch
+		Französisch
+		Spanisch
+		Polnisch
+		Koreanisch -_-
+		Chinesisch
+		Russisch
+
+		Auflösung
+		Fehler
+		800x600
+		1024x768
+		1280x1024
+
+		Farbwahl
+		Fehler
+		Dunkelblau
+		Grün
+		Rot
+		Gelb
+		Grau
+		Monochrom
+
+		Lade von Datei
+		Standardeinstellung
+		Speichern
+
+		Einstellungen des Kerns
+		Einstellungen der Oberfläche
+		Lade/Speichere Einstellungen
+
+		Einheitenname
+		Versorgung
+		Mineralien
+		Gas
+		Ort
+		Zeit
+
+		. Durchlauf fertig (Zeit: 
+		Baureihenfolge gespeichert
+		Ende eines Durchlaufs
+		Soll aktuelle Baureihenfolge gespeichert werden?
+		Speichern
+		Verwerfen
+#success types
+		möglich
+		genug Mineralien
+		genug Gas
+		genug Versorgung
+		Voraussetzung
+		Baustätte
+		nie~
+		unbekannt
+
+		Baue
+		sobald wie
+		verfgübar wird
+		bei
+		wenn
+		im Besitz ist von
+		Mineralien
+		Gas
+		Versorgung
+		Zeit
+	@END
+@END
+
+

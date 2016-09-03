@@ -10,8 +10,8 @@ UI_Window& UI_Window::operator=(const UI_Window& object)
     currentTab = object.currentTab;
     titleString = object.titleString;
     titleParameter = object.titleParameter;
-	delete scrollBar;
-    scrollBar = (object.scrollBar != NULL? new UI_Scrollbar(*object.scrollBar) : NULL);
+//	delete scrollBar;
+//	scrollBar = (object.scrollBar != NULL? new UI_Scrollbar(*object.scrollBar) : NULL);
     originalRect = object.originalRect;
     border = object.border;
     outerBorder = object.outerBorder;
@@ -35,7 +35,7 @@ UI_Window::UI_Window(const UI_Window& object) :
     currentTab( object.currentTab ),
     titleString( object.titleString ),
     titleParameter( object.titleParameter ),
-    scrollBar((object.scrollBar != NULL? new UI_Scrollbar(*object.scrollBar) : NULL)),
+//    scrollBar((object.scrollBar != NULL? new UI_Scrollbar(*object.scrollBar) : NULL)),
     originalRect( object.originalRect ),
     border( object.border ),
     outerBorder( object.outerBorder ),
@@ -54,13 +54,13 @@ UI_Window::UI_Window(const UI_Window& object) :
 
 // TODO Reihenfolge
 UI_Window::UI_Window(UI_Object* window_parent, const eString window_title_string, const eWindow window_type, const unsigned int  window_number, const eIsScrolled window_is_scrollable, const eIsAutoAdjust window_is_auto_adjust, const eIsTabbed window_is_tabbed, const Rect window_client_area):
-	UI_Object(window_parent, theme.lookUpRect(window_type, window_number), theme.lookUpMaxRect(window_type, window_number)),
-	tabRow(window_is_tabbed==TABBED?new UI_Radio(this):0),
+	UI_Object(window_parent, theme.lookUpRect(window_type, window_number, BASIC_TAB), theme.lookUpMaxRect(window_type, window_number)),
+	tabRow(window_is_tabbed==TABBED?new UI_Radio(this) : NULL),
 	window(window_type), // ?
-	currentTab(window_is_tabbed==TABBED?BASIC_TAB:ZERO_TAB),
+	currentTab(ZERO_TAB),
 	titleString(window_title_string), // ??
 	titleParameter(""),
-	scrollBar(window_is_scrollable?new UI_Scrollbar(this, Rect(Point(getWidth() - 18,2), Size(16, getHeight()-4)), Rect(Point(getWidth() - 18,2), Size(16, getMaxRect().GetHeight()))):0),
+//	scrollBar(false?new UI_Scrollbar(this, Point(getWidth(), 2), getMaxRect().GetHeight()) : NULL),
 	originalRect(getRelativeRect()),
 	border(), // TODO
 	outerBorder(), // TODO
@@ -75,14 +75,14 @@ UI_Window::UI_Window(UI_Object* window_parent, const eString window_title_string
 	highlighted(false),
 	changedFlag(false)
 {
-//	updateRectangles();
 // ------ PROCESSING
 	updateBorders(); //~~
 
 	if(clientRect.GetLeft() < border.GetLeft()+5) clientRect.SetLeft(border.GetLeft()+5);
    	if(clientRect.GetTop() < border.GetTop()+5) clientRect.SetTop(border.GetTop()+5);
 	if(clientRect.GetBottom() > border.GetBottom()-5) clientRect.SetBottom(border.GetBottom()-5);
-	if(this->isScrollable)
+//	if(this->isScrollable)
+	if(false)
 	{
 		if(clientRect.GetRight() > border.GetRight() - 19) 
 			clientRect.SetRight(border.GetRight()-19);
@@ -92,35 +92,31 @@ UI_Window::UI_Window(UI_Object* window_parent, const eString window_title_string
 		if(clientRect.GetRight() > border.GetRight() - 3) 
 			clientRect.SetRight(border.GetRight()-3);
 	}
-	
+
 	originalClientRect=clientRect;
 	clientStartRect=clientRect;
 	clientTargetRect=clientRect;
 
-	filledHeight=clientRect.GetHeight();
+//	filledHeight=clientRect.GetHeight();
 // ------ Buttons, ScrollBars etc.
 
 	if(isTabbed==TABBED)
-	{
-//		tabRow=new UI_Radio(this);
-		forcePressTab(ADVANCED_TAB);		
-	}
+		tabRow->calculateSameWidthOfButtons();
 }
 
 UI_Window::~UI_Window()
 {
-	delete scrollBar;
+//	delete scrollBar;
 	delete tabRow;
 }
 
 void UI_Window::updateRectangles(const unsigned int maxPlayer)
 {
 // ------ PROCESSING
-
-//	setRelativeRect(*theme.lookUpRect(window));
 	setMaxRect(theme.lookUpMaxRect(window, windowNumber, maxPlayer)); //~~
 	setFreeMove();
 	adjustRelativeRect(theme.lookUpRect(window, windowNumber, maxPlayer));
+	adjustClientRect();
 //	originalRect=getRelativeRect(); ?
 }
 
@@ -136,7 +132,8 @@ void UI_Window::forcePressTab(const eTab press_tab)
 {
 	if(isTabbed==NOT_TABBED) 
 		return;
-	tabRow->forcePress(press_tab);	
+	tabRow->forcePress(press_tab);
+	currentTab = press_tab;
 }
 
 const bool UI_Window::tabWasChanged() const
@@ -150,17 +147,27 @@ const eTab UI_Window::getCurrentTab() const
 {
 	if(isTabbed==NOT_TABBED) 
 		return (eTab)0;
-	return((eTab)(tabRow->getMarked()+1));
+	unsigned int tmp = tabRow->getMarked();
+	if(tmp == 99)
+		return (eTab)0;
+	else return((eTab)(tmp+1));
 }
 
 void UI_Window::setTitleParameter(const string& p) {
 	titleParameter=p;
 }
 
+UI_Object* UI_Window::checkTooltip()
+{
+    if(!(isMouseInside()))
+	    return(NULL);
+	return(UI_Object::checkTooltip());
+}
+
 UI_Object* UI_Window::checkHighlight()
 {
     if(!(isMouseInside()))
-	    return(0);
+	    return(NULL);
 	return(UI_Object::checkHighlight());
 }
 
@@ -253,6 +260,11 @@ void UI_Window::process()
 //  int i;
 //  if(WindowMove) ~~
 //	  adjustClientRect(Rect(controls.getX()-WindowMoveX,controls.getY()-WindowMoveY,Border.width,Border.height));
+/*	if((!isMouseInside()) && (scrollBar!=NULL))
+		scrollBar->Hide();
+	else if((isMouseInside()) && (scrollBar!=NULL))
+		scrollBar->Show();*/
+	
 
 	if(clientRect.GetHeight() != clientTargetRect.GetHeight())
 		clientRect.move(clientStartRect, clientTargetRect);
@@ -265,8 +277,6 @@ void UI_Window::process()
 		startx=x;starty=y;
 	}*/
 
-	//	setMaxScrollY(filledHeight);
-// TODO
 
 	if(getDoAdjustments()==2)//||(autoAdjust))
 	{
@@ -304,6 +314,8 @@ const bool UI_Window::fitItemToRelativeClientRect(Rect& rect, const unsigned int
 		setDoAdjustments(1);
 		if((rect.GetBottom()>0) &&((unsigned int)(rect.GetBottom())/*-getRelativeClientRectUpperBound()*/>filledHeight))
 			filledHeight=rect.GetBottom()/*-getRelativeClientRectUpperBound()*/;
+/*		if(scrollBar)
+			scrollBar->setMaxScrollY(filledHeight);*/
 		if(filledHeight>getMaxRect().GetHeight()) 
 			filledHeight=getMaxRect().GetHeight();
 	}
@@ -332,6 +344,8 @@ const bool UI_Window::fitItemToAbsoluteClientRect(Rect& rect, const unsigned int
 		setDoAdjustments(1);
 		if((rect.GetBottom() > getAbsoluteClientRectUpperBound())&&((unsigned int)(rect.GetBottom() - getAbsoluteClientRectUpperBound()) > filledHeight))
 			filledHeight=(unsigned int) (rect.GetBottom()-getAbsoluteClientRectUpperBound());
+/*		if(scrollBar)
+			scrollBar->setMaxScrollY(filledHeight);*/
 		if(filledHeight>getMaxRect().GetHeight()) 
 			filledHeight=getMaxRect().GetHeight();
 	}
@@ -342,10 +356,10 @@ const bool UI_Window::fitItemToAbsoluteClientRect(Rect& rect, const unsigned int
 }
 
 
-
-
-
-
+const unsigned int UI_Window::getScrollY() const {
+	return(0);
+//	return(scrollBar?scrollBar->getScrollY():0);
+}
 
 void UI_Window::drawTitle(DC* dc) const
 {
@@ -361,10 +375,10 @@ void UI_Window::drawTitle(DC* dc) const
 	else text=*theme.lookUpString(titleString);
 	
 	Size s = dc->GetTextExtent(text);
-	Rect titleRect = Rect(getAbsolutePosition() - Size(0,2), s - Size(0,2) + Size(5,0));///*+Point(0,-s.GetHeight()/2-2)
+	Rect titleRect = Rect(getAbsolutePosition() - Size(0,2), s - Size(0, 0) + Size(5,0));///*+Point(0,-s.GetHeight()/2-2)
 	
 	dc->DrawRectangle(titleRect);
-	titleRect.SetTopLeft(titleRect.GetTopLeft()+Point(2,2));
+	titleRect.SetTopLeft(titleRect.GetTopLeft()+Point(2,3));
 	dc->DrawText(text, titleRect.GetTopLeft());
 }
 
@@ -372,6 +386,7 @@ void UI_Window::draw(DC* dc) const
 {
 	if(!isShown()) 
 		return;
+
 	if(doesNeedRedraw())
 	{
 	// draw outer border:
@@ -490,6 +505,7 @@ void UI_Window::draw(DC* dc) const
 		points[2].x=PfeilDown.width-3;points[2].y=2;
 		dc->DrawPolygon(3,points,PfeilDown.GetX()+rect.GetX(),PfeilDown.GetY()+rect.GetY());*/
 	}
+//	dc->DrawEmptyRectangle(getAbsoluteClientRect());
 	UI_Object::draw(dc);
 
 }
@@ -504,11 +520,5 @@ const bool UI_Window::getChangedFlag() const {
 
 void UI_Window::changeAccepted() {
 	changedFlag=false;
-}
-
-// TODO evtl in UI_Object und alle Kinder immer aufrufen!
-
-const unsigned int  UI_Window::getScrollY() const {
-	return 0;
 }
 

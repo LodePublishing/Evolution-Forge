@@ -1,7 +1,7 @@
 #include "resolutionmenu.hpp"
 
-ResolutionMenu::ResolutionMenu(UI_Object* parent, Rect rect) :
-	Menu(parent, rect, true)
+ResolutionMenu::ResolutionMenu(UI_Object* resmenu_parent, Rect rect) :
+	Menu(resmenu_parent, rect, true)
 {
 	for(int i=0;i<MAX_RESOLUTIONS-1;i++)
     {

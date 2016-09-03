@@ -2,13 +2,11 @@
 
 Surface::Surface(SDL_Surface* sdl_surf):
 	surface(sdl_surf)
-{
-}
+{ }
 
 Surface::Surface():
 	surface(NULL)
-{
-}
+{ }
 
 Surface::~Surface() 
 {
@@ -18,8 +16,7 @@ Surface::~Surface()
 
 Surface::Surface(const Surface& surf):
 	surface(surf) // TODO
-{
-}
+{ }
 
 Surface& Surface::operator=(const Surface& sdl_surface) 
 { 

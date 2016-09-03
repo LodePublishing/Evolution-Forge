@@ -10,8 +10,8 @@ class Menu : public UI_Object
 	public:
 // Anzahl, Position, coloumns, height / width, first string, Button
 // TODO Button noch rein evtl
-		Menu(UI_Object* parent, Rect rect, const bool chooseMenu);
-		Menu(UI_Object* parent, Rect rect, const int entryNumber, const int coloumns, const Size& s, const eString firstString, const eButton button, const bool chooseMenu);
+		Menu(UI_Object* menu_parent, Rect rect, const bool choose_menu);
+		Menu(UI_Object* menu_parent, Rect rect, const int entryNumber, const int coloumns, const Size& s, const eString firstString, const eButton button, const bool choose_menu);
 		
 		Menu(const Menu& object);
 		~Menu();

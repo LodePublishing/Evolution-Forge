@@ -5,7 +5,7 @@
 
 #include "unitmenu.hpp"
 #include "goalmenu.hpp"
-#include "forcemenu.hpp"
+//#include "forcemenu.hpp"
 #include "racemenu.hpp"
 #include "message.hpp"
 #include "forceentry.hpp"
@@ -19,7 +19,7 @@ enum eMenu
 	RACE_MENU,
 	UNIT_MENU,
 	GOAL_MENU,
-	FORCE_MENU,
+//	FORCE_MENU,
 	MAX_MENUS
 };
 
@@ -33,7 +33,7 @@ class ForceWindow : public UI_Window
 		void process();
 		void draw(DC* dc) const;
 		const unsigned int getMarkedUnit() const;
-		void setMarkedUnit(const unsigned int markedUnit);
+		void setMarkedUnit(const unsigned int marked_unit);
 
 		const bool hasChanged();		
 
@@ -63,7 +63,7 @@ class ForceWindow : public UI_Window
 
 		UnitMenu* unitMenu;
 		GoalMenu* goalMenu;
-		ForceMenu* forceMenu;
+//		ForceMenu* forceMenu; TODO -> in Map-tab reinschieben
 		RaceMenu* raceMenu;
 };
 

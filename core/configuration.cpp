@@ -2,17 +2,24 @@
 #include "defs.hpp"
 
 Configuration::Configuration(): 
-	crossingOver(0),
-	breedFactor(5),
+	crossingOver(MIN_CROSSING_OVER),
+	breedFactor(20),
 	mutationFactor(200),
-	maxTime(0),
-	maxTimeOut(0),
-	maxLength(0),
-	maxRuns(5),
+	maxTime(MAX_TIME),
+	maxTimeOut(MAX_TIMEOUT),
+	maxLength(MAX_LENGTH),
+	maxRuns(MAX_RUNS),
 	maxGenerations(200),
 	noise(0),
-	dynamicFramerate(2),
+	dynamicFramerate(25),
 	staticFramerate(25),
+	currentFramerate(1),
+	currentFramesPerGeneration(1),
+
+	language(ZERO_LANGUAGE),
+
+	autoSaveRuns(false),
+	facilityMode(true),
 	preprocessBuildOrder(false),
 	allowGoalAdaption(true),
 	softwareMouse(false),
@@ -20,6 +27,7 @@ Configuration::Configuration():
 	backgroundBitmap(false),
 	allowStaticFramerate(false),
 	glowingButtons(true),
+	dnaSpiral(true),
 	tooltips(true),
 	transparency(false),
 	smoothMovements(true),
@@ -32,21 +40,28 @@ Configuration::~Configuration()
 void Configuration::initDefaults()
 {
 	setMaxTime(MAX_TIME-1);
-	setMaxTimeOut(MAX_TIMEOUT);
-	setMaxLength(MAX_LENGTH);
-	setMaxRuns(MAX_RUNS);
-	setMaxGenerations(MAX_GENERATIONS);
-	setDynamicFramerate(2);
+	setMaxTimeOut(MAX_TIMEOUT-1);
+	setMaxLength(MAX_LENGTH-1);
+	setMaxRuns(MAX_RUNS-1);
+	setMaxGenerations(MAX_GENERATIONS-1);
+	setDynamicFramerate(25);
 	setStaticFramerate(25);
+	setCurrentFramerate(1);
 	setCrossingOver(MIN_CROSSING_OVER);
 	setBreedFactor(20);
-	setAllowGoalAdaption(true);
+
+	setLanguage(ENGLISH_LANGUAGE);
+	
+	setAutoSaveRuns(false);
+	setFacilityMode(true);
 	setPreprocessBuildOrder(false);
+	setAllowGoalAdaption(true);
 	setSoftwareMouse(false);
 	setFullScreen(false);
 	setBackgroundBitmap(false);
 	setAllowStaticFramerate(false);
 	setGlowingButtons(true);
+	setDnaSpiral(true),
 	setTooltips(true);
 	setTransparency(false);
 	setSmoothMovements(true);
@@ -124,7 +139,7 @@ const unsigned int Configuration::getMaxGenerations() const
 }
 const unsigned int Configuration::getNoise() const {
 #ifdef _SCC_DEBUG
-    if((noise<MIN_NOISE)||(noise>MAX_NOISE)) {
+    if((noise < MIN_NOISE) || (noise > MAX_NOISE)) {
         toLog("WARNING: (Configuration::getNoise): Value out of range.");return(MIN_NOISE);
     }
 #endif
@@ -151,13 +166,42 @@ const unsigned int Configuration::getDynamicFramerate() const
     return(dynamicFramerate);
 }
 
+const eLanguage Configuration::getLanguage() const {
+	return(language);
+}
+
+const unsigned int Configuration::getCurrentFramerate() const {
+	return(currentFramerate);
+}
+
+void Configuration::setCurrentFramerate(const unsigned int frame_rate) {
+	currentFramerate = frame_rate;
+}
+
+void Configuration::setCurrentFramesPerGeneration(const unsigned int frames_per_generation) {
+	currentFramesPerGeneration = frames_per_generation;
+}
+
+const unsigned int Configuration::getCurrentFramesPerGeneration() const {
+	return(currentFramesPerGeneration);
+}
+
+const bool Configuration::isAutoSaveRuns() const {
+	return(autoSaveRuns);
+}
+
+const bool Configuration::isFacilityMode() const {
+	return(facilityMode);
+}
 
 const bool Configuration::isPreprocessBuildOrder() const {
 	return(preprocessBuildOrder);
 }
+
 const bool Configuration::isAllowGoalAdaption() const {
 	return(allowGoalAdaption);
 }
+
 const bool Configuration::isSoftwareMouse() const {
     return(softwareMouse);
 }
@@ -177,7 +221,11 @@ const bool Configuration::isAllowStaticFramerate() const {
 const bool Configuration::isGlowingButtons() const {
     return(glowingButtons);
 }
-                                                                                                                                                            
+
+const bool Configuration::isDnaSpiral() const {
+    return(dnaSpiral);
+}
+                                                                                                                                                         
 const bool Configuration::isTooltips() const {
     return(tooltips);
 }
@@ -268,14 +316,14 @@ void Configuration::setMaxGenerations(const unsigned int max_generations)
 	maxGenerations = max_generations;
 }
 
-void Configuration::setNoise(const unsigned int noise) 
+void Configuration::setNoise(const unsigned int desired_noise)
 {
 #ifdef _SCC_DEBUG
-    if((noise<MIN_NOISE)||(noise>MAX_NOISE)) {
+    if((desired_noise < MIN_NOISE)||(desired_noise > MAX_NOISE)) {
         toLog("WARNING: (Configuration::setNoise): Value out of range.");return;
     }
 #endif
-	this->noise = noise;
+	noise = desired_noise;
 }
 
 
@@ -299,12 +347,26 @@ void Configuration::setStaticFramerate(const unsigned int frame_rate)
     staticFramerate = frame_rate;
 }
 
+void Configuration::setLanguage(const eLanguage current_language) {
+	language = current_language;
+}
+
+void Configuration::setAutoSaveRuns(const bool auto_save_runs) {
+	autoSaveRuns = auto_save_runs;
+}
+
+void Configuration::setFacilityMode(const bool facility_mode) {
+	facilityMode = facility_mode;
+}
+
 void Configuration::setPreprocessBuildOrder(const bool preprocess_build_order) {
 	preprocessBuildOrder = preprocess_build_order;
 }
+
 void Configuration::setAllowGoalAdaption(const bool allow_goal_adaption) {
 	allowGoalAdaption = allow_goal_adaption;
 }
+
 void Configuration::setSoftwareMouse(const bool software_mouse) {
 	softwareMouse = software_mouse;
 }
@@ -325,6 +387,9 @@ void Configuration::setGlowingButtons(const bool glowing_buttons) {
 	glowingButtons = glowing_buttons;
 }
 
+void Configuration::setDnaSpiral(const bool dna_spiral) {
+	dnaSpiral = dna_spiral;
+}
 void Configuration::setTooltips(const bool tool_tips) {
 	tooltips = tool_tips;
 }
@@ -418,9 +483,9 @@ void parse_2nd_block(ifstream& stream, map<string, map<string, list<string> > >&
 // -----------------------------------------------
 
 
-void Configuration::setConfigurationFile(const string& configurationFile)
+void Configuration::setConfigurationFile(const string& configuration_file)
 {
-	this->configurationFile = configurationFile;
+	configurationFile = configuration_file;
 }
 
 void Configuration::saveToFile() const
@@ -432,8 +497,12 @@ void Configuration::saveToFile() const
         return;
     }
 pFile << "@SETTINGS" << endl;
+pFile << "# 1 = english, 2 = german" << endl;
+pFile << "    \"Language\" = \"" << getLanguage() << "\"" << endl;
 pFile << "# max time in seconds" << endl;
 pFile << "    \"Max Time\" = \"" << getMaxTime() << "\"" << endl;
+pFile << "# Do autosave at the end of a run or ask for it?" << endl;
+pFile << "    \"Autosave runs\" = \"" << (int)isAutoSaveRuns() << "\"" << endl;
 pFile << "# Preprocessing not implemented yet" << endl;
 pFile << "    \"Preprocess Buildorder\" = \"" << (int)isPreprocessBuildOrder() << "\"" << endl;
 pFile << "    \"Max unchanged Generations\" = \"" << getMaxGenerations() << "\"" << endl;
@@ -466,8 +535,12 @@ pFile << "    \"Static framerate\" = \"" << getStaticFramerate() << "\"" << endl
 pFile << "# Draw X frames per new generation" << endl;
 pFile << "    \"Dynamic framerate\" = \"" << getDynamicFramerate() << "\"" << endl;
 pFile << "" << endl;                                                                                
+pFile << "# Order entries in the unitmenu by area or by facility?" << endl;
+pFile << "    \"Facility mode\" = \"" << (int)isFacilityMode() << "\"" << endl;
 pFile << "# glowing effects" << endl;
 pFile << "    \"Glowing buttons\" = \"" << (int)isGlowingButtons() << "\"" << endl;
+pFile << "# Show nice DNA spiral?" << endl;
+pFile << "    \"DNA Spiral\" = \"" << (int)isDnaSpiral() << "\"" << endl;
 pFile << "# moving rectangles, 2 = all objects move smoothly, 1 = some objects move smoothly, 0 = all objects jump directly to their destination" << endl;
 pFile << "    \"Smooth movements\" = \"" << (int)isSmoothMovements() << "\"" << endl;
 pFile << "# Rounded rectangles, saves a little cpu power if deactivated (the computer loves simple object :-D" << endl;
@@ -511,9 +584,24 @@ void Configuration::loadConfigurationFile()
 		{
 			map<string, list<string> > block;
 			parse_block(pFile, block);
+
+			if((i=block.find("Autosave runs"))!=block.end()) {
+				i->second.pop_front();
+			   	setAutoSaveRuns(atoi(i->second.front().c_str()));
+			}
+		
 			if((i=block.find("Allow goal adaption"))!=block.end()){
 				i->second.pop_front();
 			   	setAllowGoalAdaption(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Facility mode"))!=block.end()){
+				i->second.pop_front();
+			   	setFacilityMode(atoi(i->second.front().c_str()));
+			}
+	
+			if((i=block.find("Language"))!=block.end()){
+				i->second.pop_front();
+			   	setLanguage((eLanguage)(atoi(i->second.front().c_str())));
 			}
 			if((i=block.find("Max Time"))!=block.end()){
 				i->second.pop_front();
@@ -570,6 +658,10 @@ void Configuration::loadConfigurationFile()
 			if((i=block.find("Glowing buttons"))!=block.end()){
 				i->second.pop_front();
 			   	setGlowingButtons(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("DNA Spiral"))!=block.end()){
+				i->second.pop_front();
+			   	setDnaSpiral(atoi(i->second.front().c_str()));
 			}
 			if((i=block.find("Tooltips"))!=block.end()){
 				i->second.pop_front();

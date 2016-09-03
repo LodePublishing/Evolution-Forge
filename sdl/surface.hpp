@@ -1,7 +1,7 @@
 #ifndef _SDL_SURFACE_HPP
 #define _SDL_SURFACE_HPP
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 class Surface
 {

@@ -1,7 +1,7 @@
 #ifndef _SDL_BITMAP_HPP
 #define _SDL_BITMAP_HPP
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 #include "surface.hpp"
 #include <string>

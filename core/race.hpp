@@ -18,9 +18,9 @@ class RACE : public PRERACE
 		RACE& operator=(const RACE& object);
 		RACE(const RACE& object);
 //Output:
-		void setpFitness(const unsigned int pFitness);
-		void setsFitness(const unsigned int sFitness);
-		void settFitness(const unsigned int tFitness);
+		void setpFitness(const unsigned int p_fitness);
+		void setsFitness(const unsigned int s_fitness);
+		void settFitness(const unsigned int t_fitness);
 
 		const unsigned int calculateSecondaryFitness() const; //?
 

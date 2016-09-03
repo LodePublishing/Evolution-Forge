@@ -9,8 +9,11 @@
 #include "bowindow.hpp"
 #include "message.hpp"
 
-#include "math.h"
-//#include  <list>
+#include <math.h>
+#ifndef M_PI
+	#define M_PI 3.14159265358979323846
+#endif
+// Windows kotz
 
 enum ePlayerMode
 {
@@ -66,6 +69,7 @@ class Player : public UI_Object
 		unsigned int geneAnimation;
 	private:
 		void drawGeneString(DC* dc, const Rect position) const;
+		void drawGene(DC* dc, int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const;
 		void processBoGraph();
 		
 		ANARACE** anarace; //pointer auf pointer, weil sich der pointer ja veraendert!

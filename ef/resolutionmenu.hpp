@@ -6,7 +6,7 @@
 class ResolutionMenu : public Menu
 {
     public:
-        ResolutionMenu(UI_Object* parent, Rect rect);
+        ResolutionMenu(UI_Object* resmenu_parent, Rect rect);
 		~ResolutionMenu();
         void process();
         void draw(DC* dc) const;

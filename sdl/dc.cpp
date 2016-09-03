@@ -12,7 +12,7 @@ SDL_Color toSDL_Color(const Uint8 r, const Uint8 g, const Uint8 b)
 
 
 DC::DC():
-	surface(NULL),
+	surface(),
 	max_x(0),
 	max_y(0),
 	brush(),
@@ -20,8 +20,7 @@ DC::DC():
 	color(NULL),
 	textColor(),
 	font(NULL)
-{
-}
+{ }
 
 DC::DC(const DC& other):
 	surface(other.surface),
@@ -32,12 +31,11 @@ DC::DC(const DC& other):
 	color(NULL),
 	textColor(),
 	font(NULL)
-{
-}
+{ }
 // TODO?
 
-DC::DC(SDL_Surface *sf): 
-	surface(sf),
+DC::DC(const unsigned int width, const unsigned int height, const unsigned int bitdepth, Uint32 nflags) :
+	surface(SDL_SetVideoMode(width, height, bitdepth, nflags)),
 	max_x(0),
 	max_y(0),
 	brush(),
@@ -45,7 +43,20 @@ DC::DC(SDL_Surface *sf):
 	color(NULL),
 	textColor(),
 	font(NULL)
+{ }
+
+void DC::setFullscreen(const bool full_screen)
 {
+	if(((surface->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN) != full_screen)
+	{
+	#ifdef __linux
+		SDL_WM_ToggleFullScreen(surface);
+	#elif __WIN32__
+		Uint32 nflags = surface->flags;
+		nflags ^= SDL_FULLSCREEN;
+		surface = SDL_SetVideoMode(surface->w, surface->h, surface->format->BitsPerPixel, nflags);
+	#endif
+	}										
 }
 
 void DC::updateScreen() const
@@ -61,6 +72,7 @@ void DC::SetPen(const Pen& dc_pen) {pen=dc_pen;}
 void DC::SetColor(Color* dc_color) {color=dc_color;}
 void DC::SetFont(Font* dc_font) {font=dc_font;}
 void DC::SetTextForeground(const SDL_Color& dc_text_color) {textColor=dc_text_color;}
+Font* DC::GetFont() const {return(font);}
 
 
 void DC::DrawBitmap(const Bitmap& bitmap, const signed int x, const signed int y) const
@@ -77,9 +89,9 @@ void DC::DrawBitmap(const Bitmap& bitmap, const signed int x, const signed int y
 
 const Color DC::mixColor(const Color* id1, const Color* id2)  const
 {
-		   return(Color(surface, id1->r()  +id2->r(),
-					id1->g()+id2->g(),
-					id1->b() +id2->b()));
+   return(Color(surface, id1->r()  +id2->r(),
+			id1->g()+id2->g(),
+			id1->b() +id2->b()));
 }
 
 const Color DC::mixColor(const Color* id1, const Color* id2, const unsigned int gradient) const
@@ -102,6 +114,24 @@ const Color DC::darkenColor(const Color* id, const unsigned int brightness) cons
 			id->g() * brightness / 100,
 			id->b() * brightness / 100));
 }
+
+void DC::DrawLine(const signed x1, const signed y1, const signed x2, const signed y2) const
+{
+    if(pen.GetStyle()==TRANSPARENT_PEN_STYLE)
+	        return;
+	int xx1 = x1;
+	int xx2 = x2;
+	int yy1 = y1;
+	int yy2 = y2;
+
+	if((xx1<0)||(yy1<0)||(xx1>=max_x)||(yy1>=max_y)||(xx2<0)||(yy2<0)||(xx2>=max_x)||(yy2>=max_y))
+		return;
+
+	
+	Draw_Line(x1, y1, x2, y2);
+}
+
+
 void DC::DrawSpline(const unsigned int c, const Point* p) const
 {
 	if((pen.GetStyle() == TRANSPARENT_PEN_STYLE)||(c<2))
@@ -359,8 +389,7 @@ void DC::GetClipRect(SDL_Rect& rect) const {
 	SDL_GetClipRect(surface, &rect);
 }
 
-const Color DC::doColor(const Uint8 r, const Uint8 g, const Uint8 b) const
-{
+const Color DC::doColor(const Uint8 r, const Uint8 g, const Uint8 b) const {
 	return(Color(surface, r, g, b));
 }
 

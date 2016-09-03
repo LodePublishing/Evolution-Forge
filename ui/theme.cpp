@@ -17,9 +17,9 @@ UI_Theme& UI_Theme::operator=(const UI_Theme& object)
         for(int j = MAX_STRINGS;j--;)
             stringList[i][j]=object.stringList[i][j];
     for(int i = MAX_RESOLUTIONS;i--;)
-        for(int j = MAX_LANGUAGES;j--;)
+//        for(int j = MAX_LANGUAGES;j--;)
             for(int k = MAX_FONTS;k--;)
-                fontList[i][j][k]=object.fontList[i][j][k];
+                fontList[i][k]=object.fontList[i][k];
     for(int i = MAX_COLOR_THEMES;i--;)
     {
         for(int j = MAX_COLORS;j--;)
@@ -27,7 +27,7 @@ UI_Theme& UI_Theme::operator=(const UI_Theme& object)
         for(int j = MAX_RESOLUTIONS;j--;)
         {
             for(int k = MAX_PENS;k--;)
-                penList[i][j][k]=object.penList[i][j][k];
+                penList[j][i][k]=object.penList[j][i][k]; // :D
              for(int k = MAX_BITMAPS;k--;)
                 bitmapList[i][j][k]=object.bitmapList[i][j][k];
         }
@@ -59,9 +59,9 @@ UI_Theme::UI_Theme(const UI_Theme& object) :
         for(int j = MAX_STRINGS;j--;)
             stringList[i][j]=object.stringList[i][j];
     for(int i = MAX_RESOLUTIONS;i--;)
-        for(int j = MAX_LANGUAGES;j--;)
+//        for(int j = MAX_LANGUAGES;j--;)
             for(int k = MAX_FONTS;k--;)
-                fontList[i][j][k]=object.fontList[i][j][k];
+                fontList[i][k]=object.fontList[i][k];
     for(int i = MAX_COLOR_THEMES;i--;)
     {
         for(int j = MAX_COLORS;j--;)
@@ -93,17 +93,17 @@ UI_Theme::UI_Theme(const UI_Theme& object) :
 
 UI_Theme::UI_Theme():
 	resolution(RESOLUTION_1024x768),
-	tab(BASIC_TAB),
-	language(ENGLISH_LANGUAGE),
+	tab(ZERO_TAB),
+	language(GERMAN_LANGUAGE),
 	colorTheme(DARK_BLUE_THEME)
 {
 	for(int i = MAX_LANGUAGES;i--;)
 		for(int j = MAX_STRINGS;j--;)
 			stringList[i][j]=0;
 	for(int i = MAX_RESOLUTIONS;i--;)
-		for(int j = MAX_LANGUAGES;j--;)
+//		for(int j = MAX_LANGUAGES;j--;)
 			for(int k = MAX_FONTS;k--;)
-				fontList[i][j][k]=0;
+				fontList[i][k]=0;
 	for(int i = MAX_COLOR_THEMES;i--;)
 	{
 		for(int j = MAX_COLORS;j--;)
@@ -139,22 +139,22 @@ UI_Theme::~UI_Theme()
  		for(int j = MAX_STRINGS;j--;)
 			delete stringList[i][j];
 	for(int i = MAX_RESOLUTIONS;i--;)
-		for(int j = MAX_LANGUAGES;j--;)
+//		for(int j = MAX_LANGUAGES;j--;)
 			for(int k = MAX_FONTS;k--;)
-				delete fontList[i][j][k];
+				delete fontList[i][k];
 	for(int i = MAX_COLOR_THEMES;i--;)
 	{
 		for(int j = MAX_COLORS;j--;)
 			delete colorList[i][j];
+		for(int j = MAX_BRUSHES;j--;)
+			delete brushList[i][j];
 		for(int j = MAX_RESOLUTIONS;j--;)
 		{
 			for(int k = MAX_BITMAPS;k--;)
 				delete bitmapList[i][j][k];
-	 		for(int k = MAX_PENS;k--;)
-				delete penList[i][j][k];
+//	 		for(int k = MAX_PENS;k--;)
+//				delete penList[i][j][k];
 		}
-		for(int j = MAX_BRUSHES;j--;)
-			delete brushList[i][j];
 	}
  	for(int i = MAX_RESOLUTIONS;i--;)
 		for(int j = MAX_TABS;j--;)
@@ -184,7 +184,7 @@ const eLanguage UI_Theme::getLanguage() const
 
 void UI_Theme::setLanguage(const eLanguage theme_language)
 {
-	language=theme_language;
+	language = theme_language;
 }
 
 const eResolution UI_Theme::getResolution() const
@@ -354,10 +354,10 @@ Font* UI_Theme::lookUpFont(const eFont id) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_FONTS)) {
-        toLog("ERROR: (UI_Theme::lookUpFont) id out of range.");return(fontList[resolution][language][id]);
+        toLog("ERROR: (UI_Theme::lookUpFont) id out of range.");return(fontList[resolution]/*[language]*/[id]);
 	}
 #endif
-	return(fontList[resolution][language][id]);
+	return(fontList[resolution]/*[language]*/[id]);
 }
 
 const Point UI_Theme::lookUpRealDistance(const eWindow id, const unsigned int windowNumber) const // ~~ Name
@@ -474,7 +474,7 @@ const eSubSubDataType getSubSubDataType(const eDataType mode)
 {
 	switch(mode)
 	{
-		case FONT_DATA_TYPE:return(LANGUAGE_SUB_SUB_DATA_TYPE);
+//		case FONT_DATA_TYPE:return(LANGUAGE_SUB_SUB_DATA_TYPE);
 		case BITMAP_DATA_TYPE:return(COLOR_THEME_SUB_SUB_DATA_TYPE);
 		case PEN_DATA_TYPE:return(COLOR_THEME_SUB_SUB_DATA_TYPE);
 		case RECT_DATA_TYPE:return(TAB_SUB_SUB_DATA_TYPE);
@@ -487,13 +487,17 @@ const eLanguage getLanguageSubDataEntry(const string& item)
 {
 	if(item=="@ENGLISH") return(ENGLISH_LANGUAGE);else
 	if(item=="@GERMAN") return(GERMAN_LANGUAGE);else
+	if(item=="@ITALIAN") return(ITALIAN_LANGUAGE);else
+	if(item=="@PORTUGESE") return(PORTUGESE_LANGUAGE);else
+	if(item=="@DUTCH") return(DUTCH_LANGUAGE);else
 	if(item=="@FINNISH") return(FINNISH_LANGUAGE);else
+	if(item=="@GREEK") return(GREEK_LANGUAGE);else
 	if(item=="@FRENCH") return(FRENCH_LANGUAGE);else
 	if(item=="@SPANISH") return(SPANISH_LANGUAGE);else
 	if(item=="@POLSKI") return(POLSKI_LANGUAGE);else
 	if(item=="@KOREAN") return(KOREAN_LANGUAGE);else
 	if(item=="@CHINESE") return(CHINESE_LANGUAGE);else
-	if(item=="@RUSSKI") return(RUSSKI_LANGUAGE);else
+	if(item=="@RUSSIAN") return(RUSSIAN_LANGUAGE);else
 	return(ZERO_LANGUAGE);
 }
 
@@ -508,9 +512,9 @@ const eResolution getResolutionSubDataEntry(const string& item)
 
 const eTheme getThemeSubDataEntry(const string& item)
 {
+	if(item=="@DARK_RED_THEME") return(DARK_RED_THEME);else
 	if(item=="@DARK_BLUE_THEME") return(DARK_BLUE_THEME);else
 	if(item=="@GREEN_THEME") return(GREEN_THEME);else
-	if(item=="@RED_THEME") return(RED_THEME);else
 	if(item=="@YELLOW_THEME") return(YELLOW_THEME);else
 	if(item=="@GREY_THEME") return(GREY_THEME);else
 	if(item=="@MONOCHROME_THEME") return(MONOCHROME_THEME);else
@@ -593,6 +597,7 @@ eWindow parse_window(const string& item)
 	if(item=="Build order graph window") return(BO_GRAPH_WINDOW);else
 	if(item=="Info window") return(INFO_WINDOW);else
 	if(item=="Settings window") return(SETTINGS_WINDOW);else
+	if(item=="Edit field window") return(EDIT_FIELD_WINDOW);else
 	return(NULL_WINDOW);
 }
 
@@ -695,6 +700,13 @@ eArrangeDirection parse_complete_command(const string* p, eCommand* e, Rect& rec
 													  e[i]=k;window=true;ycomplete=true;direction=ARRANGE_TOP_TO_DOWN;
 												  }break;
 				case DOCK_BOTTOM_INSIDE_OF_COMMAND:e[i]=k;window=true;ycomplete=true;direction=ARRANGE_DOWN_TO_TOP;break;
+//				case CALCULATE_MAXSIZE_COMMAND:break;
+//				case CALCULATE_MAXWIDTH_COMMAND:break;
+//				case CALCULATE_MAXHEIGHT_COMMAND:break;
+				case SAME_POSITION_AS_ABOVE_COMMAND:e[i]=k;dxpart=true;break;
+//				case SAME_SIZE_AS_ABOVE_COMMAND:break;
+//				case SAME_AS_ABOVE_COMMAND:break;//TODO!
+						
 				default:e[i]=k;break;			
 			}
 			
@@ -704,6 +716,194 @@ eArrangeDirection parse_complete_command(const string* p, eCommand* e, Rect& rec
 	return(direction);
 }
 
+void UI_Theme::loadStringFile(const string& dataFile)
+{
+	if((dataFile.substr(dataFile.size()-2,2) == "..") ||(dataFile.substr(dataFile.size()-1,1) == "."))
+		return;
+	const unsigned int MAX_PARAMETERS = 50;
+	char line[1024], old[1024];
+	char* buffer;
+	string p[MAX_PARAMETERS];
+	int v[MAX_PARAMETERS];
+	int ln=0;
+	eDataType mode=ZERO_DATA_TYPE;
+	eSubDataType sub_mode=ZERO_SUB_DATA_TYPE;
+	eSubSubDataType sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
+
+	eLanguage current_language=ZERO_LANGUAGE;
+	eTheme current_theme=ZERO_THEME;
+	eResolution current_resolution=ZERO_RESOLUTION;
+	eTab current_tab=ZERO_TAB;
+
+	int current_line = 0;
+	
+ 	for(int i=MAX_PARAMETERS;i--;)
+	{
+		p[i]="";
+		v[i]=0;
+	}
+
+	ifstream pFile(dataFile.c_str());
+	
+	if(!pFile.is_open())
+	{
+#ifdef _SCC_DEBUG
+		ostringstream os;
+		os << "ERROR: (UI_Theme::loadStringFile) Could not open file! [" << dataFile << "]";
+		toLog(os.str());
+#endif
+		return;
+	}
+	
+	while(pFile.getline(line,1024))
+	{
+		if(pFile.fail())
+		{
+#ifdef _SCC_DEBUG
+			toLog("WARNING: (UI_Theme::loadDataFiles) Long line!");
+#endif
+			pFile.clear(pFile.rdstate() & ~ios::failbit);
+		}
+			
+		++ln;
+		//line[strlen(line)-1]='\0';
+		if((line[0]=='#')||(line[0]=='\0')||(line=="")) continue;
+		for(int i=MAX_PARAMETERS;i--;)
+		{
+			p[i]="";
+			v[i]=0;
+		}
+		char* line2=line;		
+		while(((*line2)==32)||((*line2)==9))
+			line2++;
+		if((*line2)=='\0')
+			continue;
+		
+		strcpy(old,line2);
+		
+		if((buffer=strtok(line2,",\0"))!=NULL)
+			p[0]=buffer;
+		unsigned int k=1;
+		
+		while(((buffer=strtok(NULL,",\0"))!=NULL)&&(k<MAX_PARAMETERS))
+		{
+			while(((*buffer)==32)||((*buffer)==9))
+				buffer++;
+			p[k]=buffer;
+			k++;
+		}
+		if((buffer=strtok(NULL,",\0"))!=NULL)
+		{
+#ifdef _SCC_DEBUG
+			toLog("WARNING: (UI_Theme::loadDataFiles) Too many parameters.");
+#endif
+			continue;
+		}
+		for(unsigned int j=0;j<MAX_PARAMETERS;j++)
+			v[j]=atoi(p[j].c_str());
+/*		if((value1<0)||(value2<0)||(value3<0)||(value4<0)||(value5<0))
+		{
+			toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Line %d [%s]: Value below zero.",dataFile.c_str(),ln,old);
+			continue;
+		}*/
+
+		// mode	
+		if(mode==ZERO_DATA_TYPE)
+		{
+			mode=getDataType(p[0]);
+#ifdef _SCC_DEBUG
+//			if(mode!=ZERO_DATA_TYPE)
+//				toLog("Loading "+p[0]+"...");
+			if(mode==ZERO_DATA_TYPE)
+			{
+				if(p[0]=="@END")
+					toLog("WARNING: (UI_Theme::loadDataFiles) Lonely @END.");
+				else
+					toLog("WARNING: (UI_Theme::loadDataFiles) Line is outside a block but is not marked as comment.");
+			}
+#endif				
+			sub_mode=getSubDataType(mode);
+			sub_sub_mode=getSubSubDataType(mode);
+		}
+		else if(mode!=ZERO_DATA_TYPE)
+		{
+			if(p[0]=="@END")
+			{
+			// TODO! 
+				// @END of 1st sub area => return to begin of data type
+
+// - deepness |1|: end of SUB-MODE
+				if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE)&&
+				  ((current_language!=ZERO_LANGUAGE)||(current_resolution!=ZERO_RESOLUTION)||(current_theme!=ZERO_THEME)))
+				{
+					current_language=ZERO_LANGUAGE;
+					current_resolution=ZERO_RESOLUTION;
+					current_theme=ZERO_THEME;
+					current_line=0;
+				}
+				// @END of 2nd sub area => return to begin of sub data type
+				else 
+				if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
+// - deepness |2|: end of SUB-SUB-MODE
+				((current_tab!=ZERO_TAB)||(current_language!=ZERO_LANGUAGE)||(current_theme!=ZERO_THEME)))
+				{
+					current_tab=ZERO_TAB;
+					current_language=ZERO_LANGUAGE;
+					current_theme=ZERO_THEME;
+					current_line=0;
+				}
+				// @END  of 1st sub area (with an existing sub sub area...)
+// - deepness |2|: end of SUB-MODE
+				else if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
+// sub-sub-items already closed -> close sub-item
+				        (current_resolution!=ZERO_RESOLUTION)&&(current_tab==ZERO_TAB)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
+				{
+					current_resolution=ZERO_RESOLUTION;
+					current_line=0;
+				}
+				// @END of 0 area => reset mode
+				else
+				{
+					mode=ZERO_DATA_TYPE;
+					sub_mode=ZERO_SUB_DATA_TYPE;
+					sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
+					current_line=0;
+				}
+			}
+			else
+			if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(current_language==ZERO_LANGUAGE)&&(current_resolution==ZERO_RESOLUTION)&&(current_theme==ZERO_THEME))
+			{
+				switch(sub_mode)
+				{
+					case LANGUAGE_SUB_DATA_TYPE:current_language=getLanguageSubDataEntry(line2);break;
+					case RESOLUTION_SUB_DATA_TYPE:current_resolution=getResolutionSubDataEntry(line2);break;
+					case COLOR_THEME_SUB_DATA_TYPE:current_theme=getThemeSubDataEntry(line2);break;
+					default:break;
+				}
+				current_line=0;
+			}
+			// => hat nur 1 Ebene => Position festgestellt!
+			else if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE))
+			{
+				switch(mode)
+				{
+					case STRING_DATA_TYPE:stringList[current_language][current_line]=new string(p[0]);
+					default:break;
+				}
+				current_line++;
+			}
+			// 0 ebenen -> buttons :) BUTTON_DATA_TYPE?? TODO
+		} // end if mode != ZERO_DATA_TYPE
+	} // end while
+
+	for(int i = 0; i < MAX_LANGUAGES; i++)
+		for(int j = 0; j < MAX_STRINGS; j++)
+			if(stringList[i][j]==NULL)
+				stringList[i][j] = new string("ERROR");
+
+}
+
+
 void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, const string& fontDir, DC* dc)
 {
 	const unsigned int MAX_PARAMETERS = 50;
@@ -712,9 +912,6 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 	string p[MAX_PARAMETERS];
 	int v[MAX_PARAMETERS];
 	int ln=0;
-#ifdef _SCC_DEBUG
-	toLog("Assigning default values...");
-#endif
 	eDataType mode=ZERO_DATA_TYPE;
 	eSubDataType sub_mode=ZERO_SUB_DATA_TYPE;
 	eSubSubDataType sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
@@ -744,15 +941,12 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 		v[i]=0;
 	}
 
-#ifdef _SCC_DEBUG
-	toLog("Reading and parsing datafile...");
-#endif
 	ifstream pFile(dataFile.c_str());
 	
 	if(!pFile.is_open())
 	{
 #ifdef _SCC_DEBUG
-		toLog("ERROR: (UI_Theme::loadDataFiles) Could not open file!");
+		toLog("ERROR: (UI_Theme::loadDataFiles) Could not open data file!");
 #endif
 		return;
 	}
@@ -897,6 +1091,11 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 					case COLOR_DATA_TYPE:
 										  colorList[current_theme][current_line]=new Color(dc->GetSurface(),(Uint8)v[0],(Uint8)v[1],(Uint8)v[2]);break;
 					case BRUSH_DATA_TYPE:brushList[current_theme][current_line]=new Brush(dc->GetSurface(),(Uint8)v[0],(Uint8)v[1],(Uint8)v[2],get_brush_style(p[3]));break;
+					case FONT_DATA_TYPE:
+					{
+						string t=fontDir+p[0]+".ttf";
+						fontList[current_resolution]/*[current_language]*/[current_line]=new Font(t, v[1]/*, get_font_style1(p[2]), get_font_style2(p[3]), get_font_style3(p[4]), false, _T(""), FONTENCODING_DEFAULT*/);
+					}break;				
 					default:break;
 				}
 				current_line++;
@@ -937,17 +1136,9 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 			{
 				switch(mode)
 				{
-					case FONT_DATA_TYPE:
-						{
-							string t=fontDir+"/"+p[0]+".ttf";
-#ifdef _SCC_DEBUG
-//							toLog("Loading "+t+"...");
-#endif
-							fontList[current_resolution][current_language][current_line]=new Font(t, v[1]/*, get_font_style1(p[2]), get_font_style2(p[3]), get_font_style3(p[4]), false, _T(""), FONTENCODING_DEFAULT*/);
-						}break;
 					case BITMAP_DATA_TYPE:
 						{
-							string t=bitmapDir+"/"+p[0]+".bmp";
+							string t=bitmapDir+p[0]+".bmp";
 #ifdef _SCC_DEBUG
 //							toLog("Loading "+t+"...");
 #endif
@@ -1009,7 +1200,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 							}break;
 							case DOCK_WITH_LOWER_BORDER_OF_COMMAND:
 							{
-								rectList[i][j][k]->SetTop(5+rectList[i][j][trectList[i][j][k][l+1]]->GetTop()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight());
+								rectList[i][j][k]->SetTop(5+rectList[i][j][trectList[i][j][k][l+1]]->GetTop()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight()); // TODO!
 	                            ywindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
 								l++;
 							}break;
@@ -1124,6 +1315,10 @@ while(change)
 				}
 	}
 
+	for(int i = 0; i < MAX_LANGUAGES; i++)
+		for(int j = 0; j < MAX_STRINGS; j++)
+			if(stringList[i][j]==NULL)
+				stringList[i][j] = new string("ERROR");
 
 }
 

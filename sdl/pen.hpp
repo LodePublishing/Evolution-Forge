@@ -1,7 +1,7 @@
 #ifndef _SDL_PEN_HPP
 #define _SDL_PEN_HPP
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include "color.hpp"
 
 enum ePenStyle

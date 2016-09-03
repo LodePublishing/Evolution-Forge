@@ -1,202 +1,50 @@
-- immer wenn ein Gebaeude FERTIG wird neue Moeglichkeiten hinzufuegen!  ~~~ schwer zu machen ma guggn
-
-- scrollbalken
-
-graph reparieren...done
-irgendwas mit researches falsch :/...done
-buildfacility is falsch, buildgene checken! ...done
-maxForce is manchmal 0 o_O ...done?
-
-- => Inseln (player) ueberarbeiten, auch schlechtere anzeigen
-
-- evtl hin und wieder einen zu nem anderen Pool laufen lassen!
-
-supply bei map file ueberpruefen... done
-mehrere linked lists einfuegen...done
-
-- ueberlegen fuer spaeter, wenn Gebaeude vernichtet werden koennen
-
-"last" ueberpruefen...done
-locations, also move befehle wieder rein...done
-bei bo graph m aguggn...done
-
-- im bo Graphen zerstoerungen auch anzeigen
-- evtl auto-rassenerkennung
-
-Hoehe der Balken im bographen durch getForceCount teilen!...done
-supply depots werden in barracks gebaut, scvs manchmal in NULL oder selber in SCVS o_O...done
-goal list: science facility ist teil der goal list obwohl science facility[co] schon drinis 8[...done
-bei komplexeren Goals spielt sFitness Graph verrueckt und unten im bo graph auch gas scv :-/...done?
-addons werden von race richtig, von anarace falsch verarbeitet 8[...done [lol]
-
-- todo: fuer goal files: Prioritaet setzen "as fast as possible" und "as many as possible" => Bonus mit Gewicht 
-- max out modus - build as many as possible
-
-evtl wieder fitnessCode einsetzen und als Balken im goal Diagramm anzeigen, wieviel % erreicht wurde mmmh...done
-fitness geht bei (!ready) auf 100% obwohl location noch nicht erreicht wurde 8[...done?
-getFinaltime gibt irgendwie nur 0 aus fuer manche goals...done
-am Ende eines runs is die Darstellung kaputt...done
-
-- checken wies mit den maxlocations aussieht... also wenn nur 9 definiert sind oder so
-
-- checken ob auch tatsaechlich goals angegeben wurden
-
-- harvest ueberdenken => an entfernten Punkten sammeln (gas?)
-
-fuer mehrstufige upgrades availible auf 1 aber force auf 3...done
-facility2 packt er irgendwie net :-/ alles availible0 8[...done
-
-goal mit Startforce verbinden, damit man net mapfile dauernd bearbeiten muss... DONE
-
-linked lists v.a. fuer buildings und counters...done
-wenn maus ueber Eintrag is, Hilfefenster anzeigen (und wieder verschwinden lassen, sobald Maus bewegt)...done
-
-fitness, mins und gas unten rechts nicht pro Befehl sondern pro Minute antragen... done
-
-timer fuer animationen... DONE
-
-thread fuer calculate... CANCELED
-
-bei success sowohl dominant als auch rezessiv protokollieren... CANCELED
-
-- am anfang kosten fuer StartForce auf sfitness addieren
-
-addons sind falsch :/...done
-
-- facility wird falsch angezeigt, unit wird falsch angezeigt => falsche build time => zu breit => ueberlappen nach unten im bo graph
-
-- bos bevorzugen, bei denen man z.B. mehrere Einheiten in ne Kaserne schieben kann
-mmmh... naja... ma guggn... auf jeden Fall belohnen, wenn man nicht den Ort wechselt
-
-- irgendwie timeout Befehle loeschen und neu berechnen bzw. zurueckspringen
-
-anarace auf sekundenweise wieder zurueckstellen und program komplett mitdokumentieren (v.a. supply,mins,gas,fitness)... CANCELED
-
-- ueberlegen obs crossover wirklich bringt...
-
-- am Schluss der Berechnung eine Darstellung zum Durchschalten der Save Loesungen
-
-- Mins und Gas Sammelgeschwindigkeit mal ueberpruefen
-
-sobald refinery fertig ist automatisch einen reinschicken...done
-
-- supply checken... z.B. gas scv, nicht dass zuviel supply gebraucht wird...
-
-units unterschiedliche Farbe (unit, upgrade/research, building)...done
-
-- statt "analogen" Balken abzaehlbare BLoecke!
-
-- noise verfeinern! v.a. auch Bauverzoegerungen (warten vor Baubeginn) einfuegen
-
-- mehrere Durchlaeufe machen und Fitnessdurchschnitt bilden, ueberarbeiten mit dem "Besten" in anaplayer, evtl einfach race 0 hernehmen...
-
-- Zeitanzeige +/- noise angeben, also beste und schlechteste Loesung und Mittelwert bilden
-
-- maxscrolly anpassen, damit nicht noch schon am ende nach unten gedrueckt werden kann
-
-location[0] in der map belegen...DONE
-
-- so ne art parser machen, der die bo in einen verstaendlichen Text uebersetzt...
-evtl so machen, dass gewisse Merkmale (lange Zeiten, mehrere Befehle auf einmal) besonders behansdelt werden...
-
-bug ueberpruefen goal unit>0 anstatt count>0... ???
-
-bug wenn ich goal entferne wird von sfitness ja mehr oder weniger abgezogen...
-
-evtl verlaufsdiagram speichern und dazwischen immer mal wieder die bos... waere halt ein grosses Bild/html datei
-
-
-u238 shells und colossus reactor haengen irgendwie zusammen :o
-
-- issue: addons + addonbuildings ([CO] etc.)... ueberarbeiten, dass z.B. CC [NS] als CC zaehlt
-
-- selection markers... anfang und schluss merken und verschieben
-
-- alle goal bts zusammenzaehlen und jeweils durch facilities teilen
-
-- oben den Graphen schoener machen... Veraenderungen etc.... => gui blooper :o
-
-- Bewertungsfunktion:
-Stoerer: Nur Antizeit
-human vs comp / comp vs comp: beide Parteien zaehlen ihre Punkte (gebaut + 2 * vernichtet)
-
-
-goals in linked list schreiben!... DONE
-
-map/goal/startforce neu ordnen
-
-Use Map settings / tvb
-!1vs1 / 2vs2
-
-
-KI SCRIPT ANSCHAUEN! LOOP, parallele Ausfuehrung etc.!!!
-TOURNAMENT MODUS zwischen mehreren vorgegebenen bos!
-
-AI Befehle:
-ein Code fuer jede Location
-ifs, loops, gotos und stops rein
-if abfrage ist das heikelste, evtl Rasse, primaerer Einheitentyp, Armeegroesse, Expansionen, Mobilitaet
-evtl das ganze auf den Speicher abwaelzen und bei jedem Ast auf jeden Fall absteigen oder Aeste so plazieren/belegen, dass es STOP Zeichen gibt und die benachbarten Aeste dann je nach dem genommen werden... so ne Art kleines ANN
-
-- Regler fuer Wichtigkeit
-
-mit goals stimmt was net... da wird irgendwie die Anfangsforce draufgeschlagen bzw. nicht draufgeschlagen (auf die goal->goal[].count)... DONE
-
-durch bauen von gas scv gewinnt man 1 supply!! ... DONE?
-
-
-- ueberlegen wie man beide Player synchronisieren koennte... jo, evtl das speed dingens wieder rausnehmen... evtl auch buildingList fuer beide Player zusammenwerfen...
-
-- evtl wieder Zusammenfassung der Buildorder (4 zealots anstatt zeal zeal zeal zeal)
-- Memo an GNU GCC - optionale Warnung falls Rueckgabewert einer Funktion nicht ausgewertet wird
-
-Groesseres Problem sind nach wie vor die goals, vor allem die Ortsangaben fuer die Einheiten, ist ja je nach Map verschieden!
-
-
-DONE: maxpfitness wird nicht resettet
-
-- eine Art screenshot knopf fuer bowindow, also ein neues Fenster damit der Benutzer das mit dem alten Zustand vergleichen kann
-evtl auch ein geladenes oder so :o
-
-3 Sekunden oder so Auszeit fuer Probe beim Bauen
-- step by step Modus (immer bis zur naechsten positiven Aenderung rechnen) mit Anzeige bei jeder Order was sich veraendert hat (supply, fitness, gas, minerals)
-sicher schoen zu maechen :-) Leertaste oder so zum weitermachen
-quiz funktion (which bo is faster? two step to optimal bo etc. fast schon schachprobleme :) )
-
-Techtree darstellen, mit so Linien wie bei bebop 20
-
-- TODO blinken oben links weniger
-
-total harvested gas/mins direkt bei statistics hinschreiben, nicht ueber tooltip	... DONE
-
-- TODO Dauer der Kalkulation
-
-- Kennzeichnen im Unitmenu ob noch ein weiteres Menu aufklappt (facilities / units)
-
-- Kennzeichnen welche Units hinzugefuegt/abgezogen werden koennen bzw. warum etwas schiefging (aufblinken der benoetigten units oder so )
-
-- im force window ein "save current goal" item machen
-
-- Fenster mit Textzeile! (z.B. um goals abzuspeichern)
-
-- Reihenfolge der Tabs
-
-- Addons sind falsch!
-
-- MAX_TIME <> ga.maxTime checken
-
-- Techtree does not work if startforce scvs is 0
-
-- getProgramFacility does only sometimes give a probe as facility... or no at all... strange... because of that the protoss bograph is screwed up
-
-- addons bug: factory wird als prerequisite von z.B. armory benoetigt, wenn aber factory-MS da ist, passt was nicht... mmmh... allGoal springt immer wieder zurueck auf 0 8[
-
-- menues ueberarbeiten!
-
-- bei manchen Aenderungen in setwindow die engine neustarten (z.B. maxTime, sprache etc.)
-
-- sprache updaten
-
-- 2534345345 templars bei nem archon :/
-
-- UI_Radio ueberarbeiten!! v.a. damit immer ein button gepresst ist
+- Scrollbars ... canceled :/
+Language support... DONE
+Save as... input box... DONE
+static framerate... DONE
+close-bug... DONE
+END OF ROUND Message... DONE~
+'button' zu UI_Object gehoerig machen und auf NULL setzen wenn buttons geloescht werden...DONE
+Shorten german strings... DONE
+ESC/ENTER activates OK/Cancel... DONE
+manche Tooltips auf 2 Zeilen... DONE
+UTF8 Tooltips nicht buchstabenweise schreiben... DONE
+Bops pruefen ... DONE
+Restart checken... DONE
+Ziel laden checken ... DONE
+Startwerte fuer statisticswindow (% INVISIBLE etc.) ... DONE
+Roundedrectangles die 4 pixel... DONE
+Einheitennamen englisch/deutsch... DONE
+tooltip area fuer statisticswindow ueberlegen (wird im ganzen Bereich angezeigt) und fuer checkbox auch gleich... DONE
+force menu: Oben Schrift fuer "Zeit" ... ~DONE
+LARVA ueberpruefen, ist in der BO!! + es gibt nen larvaInProd ueberlauf!... DONE
+Clientwindow too big... DONE
+- *blinking* at the bograph window (markerchange?)
+tooltips werden manchmal nicht aktiviert wenn maus drueber :\... DONE
+tooltips optimieren bei UTF8! ... DONE
+Infowindow reparieren bei UTF8! ... DONE
+tooltip rect reparieren wenn Rand beruehrt... DONE?
+Languagebutton/menue ... DONE
+ADDONS lassen sich nicht entfernen ... DONE
+Successunit etc. ... DONE
+- Theodor Pramer 
+irgendwann mal beim statistics per klick einzelne Graphen zeigen/verschwinden lassen... DONE
+- Disabled Text Color bei statistics
+- Hoehe der boentries
+tooltips schoener machen...DONE
+statisticswindow erhoehungen...DONE
+- SIZE wird nicht adjustiert bei adjustRect...
+Reset Time in timerwindow after restart...DONE?
+- strange restart during runs
+- MAXLENGTH > 96!!!! TODO!!!
+Nuklearrakete... DONE?
+- Produktionsstaettenmodus... DONE
+- Tooltips an aus.. DONE
+settings umstellen => vollbild... DONE
+Intro seite... DONE
+- Repair tooltip of theoretical optimum
+
+
+Kein starport hinzufuegbar wenn starport CT da ist :|
+
+in output ne Dummy Datei legen

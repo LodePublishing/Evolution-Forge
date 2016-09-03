@@ -10,10 +10,17 @@ class Order
 		Order();
 		~Order();
 		Order& operator=(const Order& order);
-	
-		void setUnit(const unsigned int unit);
-		void setIP(const unsigned int IP);
-		void setRow(const unsigned int row);
+
+		// Ascending IP sorting function
+		struct OrderDescendingIPSort {
+			const bool operator()(const Order* const& orderStart, const Order* const& orderEnd) const {
+				return orderStart->getIP() > orderEnd->getIP();
+			}
+		};
+		
+		void setUnit(const unsigned int unit_type);
+		void setIP(const unsigned int ip);
+		void setRow(const unsigned int order_row);
 
 		const unsigned int getUnit() const;
 		const unsigned int getIP() const;

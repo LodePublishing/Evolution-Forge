@@ -12,13 +12,12 @@
 class SETTINGS
 {
 private:
-	vector<GOAL_ENTRY> loadedGoal[MAX_RACES];
-	vector<START_CONDITION> loadedStartcondition[MAX_RACES];
-	vector<BASIC_MAP> loadedMap; //modes: 0: ignore map settings and make up a default force, 1: use map settings
+	vector<GOAL_ENTRY*> loadedGoal[MAX_RACES];
+	vector<START_CONDITION*> loadedStartcondition[MAX_RACES];
+	vector<BASIC_MAP*> loadedMap; //modes: 0: ignore map settings and make up a default force, 1: use map settings
 	HARVEST_SPEED loadedHarvestSpeed[MAX_RACES];
 	SOUP soup;
 	START start;
-	
 public:
 	const bool getIsNewRun();
 	
@@ -34,7 +33,8 @@ public:
 	const BASIC_MAP* getMap(const unsigned int mapNumber) const;
 	void checkForChange() const;
 
-
+	list<string> findFiles(const string directory1, const string directory2, const string directory3) const;
+	
 /*	void setMaxTime(const unsigned int maxTime); //sets max Time in minutes
 	void setMaxTimeOut(const unsigned int maxTimeOut); //
 	void setAllowGoalAdaption(const bool allowGoalAdaption=true);
@@ -60,13 +60,13 @@ public:
 	const unsigned int getMapCount() const;
 	const unsigned int getStartconditionCount(const unsigned int player) const;
 	
-	void saveBuildOrder(const ANARACE* anarace) const;
+	void saveBuildOrder(const string& name, const ANARACE* anarace) const;
 	const GOAL_ENTRY* getGoal(const unsigned int player, const unsigned int goalNumber) const;
 	const START_CONDITION* getStartcondition(const unsigned int player, const unsigned int startconditionNumber) const;
 
 //	void initDefaults(); 
 
-	void saveGoal(const GOAL_ENTRY* goalentry);
+	void saveGoal(const string& name, GOAL_ENTRY* goalentry);
 
 	void loadStartconditionFile(const string& startconditionFile);
 	void loadGoalFile(const string& goalFile);

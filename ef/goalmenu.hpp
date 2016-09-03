@@ -13,7 +13,9 @@ class GoalMenu : public Menu
 		~GoalMenu();
 		void process();
 		void draw(DC* dc) const;
+		void resetData();
 	private:
+		ANARACE* anarace;
 };
 
 #endif // _GUI_GOALMENU_HPP

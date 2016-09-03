@@ -8,29 +8,27 @@ class UI_Scrollbar:public UI_Object
 	public:
 		UI_Scrollbar& operator=(const UI_Scrollbar& object);
 		UI_Scrollbar(const UI_Scrollbar& object);
-		UI_Scrollbar(UI_Object* scroll_parent, Rect scroll_rect, Rect scroll_max_rect, const bool scroll_horizontal = false, const signed int scroll_discrete = 0, const bool scroll_hideable = false, const bool scroll_small = true);
+		UI_Scrollbar(UI_Object* scroll_parent, const Point topRightCorner, const unsigned int max_height, const bool scroll_hideable = false);
 		~UI_Scrollbar();
 
 		void process(); // process messages, continue animation etc.
 		void draw(DC* dc) const;
         const signed int getScrollY() const;
 
+		void setMaxScrollY(const unsigned int max_scrolly);
 	protected:
 	private:
 		UI_Button* add;
 		UI_Button* sub;
 
-		bool horizontal;		
 		bool hideable; // hides if total height is smaller maxheight
-		bool small; // small version? for very small windows
-		signed int discrete; // discrete >0 scrollbar move? here is the maxHeight
-
 		signed int internalScrollY;
 		unsigned int internalHeight;
 		
 		signed int currentScrollY;
 		unsigned int currentHeight;
-		
+
+		unsigned int maxScrollY;
 };
 
 #endif // _UI_SCROLLBAR_HPP

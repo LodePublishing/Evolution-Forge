@@ -13,47 +13,6 @@
 //   Double clicked = 2 'just pressed' events occuring within a short amount of time
 
 
-
-/*class UI_LongText:public UI_StaticText
-{
-	public:
-		draw(DC* dc);
-		nexTextPage();
-	private:
-		Rect textCursor;
-};
-
-
-class UI_InputBox:public UI_StaticText
-{
-
-	private:
-		int inputType; // text, numbers
-		int hasSpinButtons; // only if numeric
-		UI_BitmapButton* up;
-		UI_BitmapButton* down;
-};
-
-
-class UI_TextButton:public UI_Button
-{
-	public:
-	protected;
-		UI_StaticText text;
-	private:
-};
-
-
-class UI_3dTextButton:public UI_TextButton
-{
-	public:
-		void draw(DC* dc);
-	private:
-		int color;
-		
-};
-*/
-
 enum ePositionMode
 {
 	DO_NOT_ADJUST,
@@ -78,7 +37,9 @@ enum ePositionMode
 
 enum eAutoSize
 {
+	NOTHING,
 	NO_AUTO_SIZE,
+	AUTO_SIZE_ONCE,
 	AUTO_SIZE,
 	AUTO_HEIGHT_FULL_WIDTH, // fehlerhaft! TODO
 	FULL_WIDTH,
@@ -106,10 +67,10 @@ class UI_Button:public UI_Object
 
 // TODO Beschreibung der Konstruktoren
 		UI_Button(UI_Object* button_parent, const Rect button_rect, const Rect button_max_rect, 
-		const eString button_normal_text, const eString button_pressed_text, 
+		const eString button_text, 
 		const eButton button_type, const eTextMode button_text_mode = HORIZONTALLY_CENTERED_TEXT_MODE, const eButtonMode button_mode = STATIC_BUTTON_MODE, const ePositionMode button_position_mode = DO_NOT_ADJUST, const eFont button_font = SMALL_NORMAL_BOLD_FONT, const eAutoSize button_auto_size = NO_AUTO_SIZE);
 
-		UI_Button(UI_Object* button_parent, const Rect button_rect, const Rect button_max_rect, const string& button_normal_text, const string& button_pressed_text, const eButton button_type, const eTextMode button_text_mode = HORIZONTALLY_CENTERED_TEXT_MODE, const eButtonMode button_mode = STATIC_BUTTON_MODE, ePositionMode button_position_mode = DO_NOT_ADJUST, const eFont button_font = SMALL_NORMAL_BOLD_FONT, const eAutoSize button_auto_size = NO_AUTO_SIZE);
+		UI_Button(UI_Object* button_parent, const Rect button_rect, const Rect button_max_rect, const string& button_text, const eButton button_type, const eTextMode button_text_mode = HORIZONTALLY_CENTERED_TEXT_MODE, const eButtonMode button_mode = STATIC_BUTTON_MODE, ePositionMode button_position_mode = DO_NOT_ADJUST, const eFont button_font = SMALL_NORMAL_BOLD_FONT, const eAutoSize button_auto_size = NO_AUTO_SIZE);
 // Bitmap button
 		UI_Button(UI_Object* button_parent, const Rect button_rect, const Rect button_max_rect, const eButton button_type, const eButtonMode button_mode = STATIC_BUTTON_MODE, const ePositionMode button_position_mode = DO_NOT_ADJUST);
 		~UI_Button();
@@ -124,14 +85,18 @@ class UI_Button:public UI_Object
         const bool isCurrentlyPressed() const; // is the button depressed?
         const bool isCurrentlyHighlighted() const; // is the mouse over this button?
 		const bool isCurrentlyActivated() const;
+
+		const unsigned int getGradient() const;
                                                                                                                                                             
         void forceHighlighted();    // force button to be highlighted
         void forceDelighted();    // force button to be de-highlighted
         void forcePress();      // force button to get pressed
 		void forceUnpress();
 
-		void updateNormalText(const string& utext);
-		void updatePressedText(const string& utext);
+		void setPressDepth(const unsigned int press);
+
+		void updateText(const string& utext);
+		void updateText(const eString utext);
 
         //void setHighlightAction( void (*user_function)(void) );
         //void setDisabledAction( void (*user_function)(void) );
@@ -141,6 +106,7 @@ class UI_Button:public UI_Object
 //        void set_custom_cursor_bmap(int bmap_id) { custom_cursor_bmap = bmap_id; };
 
 		void process(); // process messages, continue animation etc.
+		UI_Object* checkTooltip();
 		UI_Object* checkHighlight();
 
 		void mouseHasMoved();
@@ -162,7 +128,8 @@ class UI_Button:public UI_Object
 		UI_Radio* radio;
 
 		bool forcedPress;
-		void adjustButtonPlacementArea(); // jump to relativeRect
+		void adjustButtonPlacementPosition(); // jump to relativeRect
+		void adjustButtonPlacementSize();
 		Rect buttonPlacementArea;
 
 		const unsigned int getTextWidth() const;
@@ -199,8 +166,7 @@ class UI_Button:public UI_Object
 
 		void resetData();
 protected:
-		UI_StaticText* normalText;
-		UI_StaticText* pressedText;
+		UI_StaticText* text;
 	
         long unsigned int nextRepeat;     // timestamp for next repeat if held down
 

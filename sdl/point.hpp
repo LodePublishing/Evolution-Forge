@@ -99,13 +99,13 @@ class Point
 			mv(y, startPoint.y, targetPoint.y);
 		}	
 	
-		static void mv(signed int& x, const signed int sx, const signed int tx)
-		{
-			signed int z = (signed int)(((x>sx)?(2*(x-sx)<(tx-sx)?(double)(x-sx)/2:(double)(tx-x)/2):(2*(x-sx)>(tx-sx)?(double)(x-sx)/1.5:(double)(tx-x)/1.5)));
+		static void mv(signed int& x, const signed int sx, const signed int tx);
+/*		{
+			signed int z = (signed int)(((x>sx)?(2*(x-sx)<(tx-sx)?(double)(x-sx)/2:(double)(tx-x)/2):(2*(x-sx)>(tx-sx)?(double)(x-sx)/2:(double)(tx-x)/2)));
 			if(z==0)
 				z=((x>tx)?-2:0)+((x<tx)?1:0);
 			x+=z;
-		}	
+		}	*/
 		
 	    signed int x;
 		signed int y;

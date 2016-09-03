@@ -3,24 +3,21 @@
 UnitMenu::UnitMenu(UI_Object* unit_parent, ANARACE* unit_anarace, Rect unit_rect) : 
 	Menu(unit_parent, unit_rect, false),
 	anarace(unit_anarace),
-	facilityMode(false),
 	facilityNumber(1)
 {
     for(int i=0;i<UNIT_TYPE_COUNT;i++) //TODO
     {
         MenuEntry* entry = new MenuEntry(this,
-                        Rect(0, 0,120, FONT_SIZE+4), "ERROR"); //TODO maybe already initialize with name string
+                        Rect(0, 0, 130, FONT_SIZE+5), "ERROR"); //TODO maybe already initialize with name string
         menuEntries.push_back(entry);
     }
-	
 	resetData();
 }
 
-UnitMenu::UnitMenu(const UnitMenu& object) :
+/*UnitMenu::UnitMenu(const UnitMenu& object) :
     Menu((Menu)object),
     anarace(object.anarace),
-    facilityMode(object.facilityMode),
-    facilityNumber(object.facilityNumber)
+    facilityNumber(object.facilityNumber);
 {
 	for(int i = GAS_SCV+1; i--;)
 		facility[i] = object.facility[i];
@@ -30,12 +27,11 @@ UnitMenu& UnitMenu::operator=(const UnitMenu& object)
 {
 	((UnitMenu)(*this)) = ((UnitMenu)object);
 	anarace = object.anarace;
-	facilityMode = object.facilityMode;
 	facilityNumber = object.facilityNumber;
 	for(int i = GAS_SCV+1; i--;)
 		facility[i] = object.facility[i];
 	return(*this);
-}
+}*/
 
 
 UnitMenu::~UnitMenu()
@@ -60,11 +56,6 @@ void UnitMenu::resetData()
 	}
 }
 
-void UnitMenu::setFacilityModus(const bool facilityMode)
-{
-	this->facilityMode=facilityMode;
-}
-
 void UnitMenu::process()
 {
 	Menu::process();
@@ -86,7 +77,7 @@ void UnitMenu::process()
 		if(menuLevel==1)
 		{
 			unsigned int i=0;
-			if(!facilityMode)
+			if(!configuration.isFacilityMode())
 			{
 		        for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
@@ -96,12 +87,18 @@ void UnitMenu::process()
 						(*m)->Hide();
 						continue;
 					}
-					Rect edge = Rect(Point(10/*+130*(height%2)*/, ((height+1)/*/2*/+1-2) * (FONT_SIZE + 9) /*- getScrollY()*/), Size(0,0));
+					Rect edge = Rect(Point(10/*+130*(height%2)*/, ((height+1)/*/2*/+1-2) * (FONT_SIZE + 9) /*- getScrollY()*/), Size(120, FONT_SIZE+6));
 	//				if (fitItemToClientRect(edge, 1))
 					{
 						(*m)->Show();
 						(*m)->setButton(eButton(UNIT_TYPE_0_BUTTON+i));
-						(*m)->updateText(*theme.lookUpString((eString)(UNIT_TYPE_0_STRING+i)));
+						if(i==1)
+							(*m)->updateText(*theme.lookUpString((eString)(SCV+UNIT_NULL_STRING+UNIT_TYPE_COUNT*anarace->getRace())));
+						else 
+						if(i==2)
+							(*m)->updateText(*theme.lookUpString((eString)(GAS_SCV+UNIT_NULL_STRING+UNIT_TYPE_COUNT*anarace->getRace())));
+						else
+							(*m)->updateText(*theme.lookUpString((eString)(UNIT_TYPE_0_STRING+i)));
 						(*m)->adjustRelativeRect(edge);
 					}
 					height++;
@@ -118,12 +115,12 @@ void UnitMenu::process()
                         (*m)->Hide();
                         continue;
                     }
-                    Rect edge = Rect(Point(10+130*(height%2), ((height+1)/2+1) * (FONT_SIZE + 9) /*- getScrollY()*/), Size(0,0));
+                    Rect edge = Rect(Point(10+135*(height%2), ((height+1)/2+1) * (FONT_SIZE + 9) /*- getScrollY()*/), Size(120, FONT_SIZE+6));
     //              if (fitItemToClientRect(edge, 1))
                     {
                         (*m)->Show();
-                        (*m)->setButton(color); // TODO
-                        (*m)->updateText(stats[(*anarace->getStartCondition())->getRace()][facility[i]].name);
+                        (*m)->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][facility[i]].unitType));
+                        (*m)->updateText(*UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+facility[i]+UNIT_NULL_STRING)) + ". . .");
                         (*m)->adjustRelativeRect(edge);
                     }
                     height++;
@@ -133,7 +130,7 @@ void UnitMenu::process()
 		else if(menuLevel>1)
 		{
 			unsigned int i =0;
-			if(!facilityMode)
+			if(!configuration.isFacilityMode())
 			{
                 for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
                 {
@@ -143,12 +140,12 @@ void UnitMenu::process()
                         (*m)->Hide();
                         continue;
                     }
-					Rect edge = Rect(Point(10+130*(height%2), ((height+1)/2+1)*(FONT_SIZE+9)), Size(0,0));
+					Rect edge = Rect(Point(10+135*(height%2), ((height+1)/2+1)*(FONT_SIZE+9)), Size(120, FONT_SIZE+6));
 		//			if (parent->fitItemToRelativeRect(edge, 1)) 
 					{
 						(*m)->Show();
 						(*m)->setButton(eButton(UNIT_TYPE_0_BUTTON+menuLevel));
-						(*m)->updateText(stats[(*anarace->getStartCondition())->getRace()][i].name);
+						(*m)->updateText(*UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i+UNIT_NULL_STRING)));
 						(*m)->adjustRelativeRect(edge);
 					}
 					height++;
@@ -166,13 +163,13 @@ void UnitMenu::process()
     	                    (*m)->Hide();
         	                continue;
             	        }
-					Rect edge = Rect(Point(10+130*(height%2), ((height+1)/2+1)*(FONT_SIZE+9)), Size(0,0));
+					Rect edge = Rect(Point(10+135*(height%2), ((height+1)/2+1)*(FONT_SIZE+9)), Size(120, FONT_SIZE+6));
 			//		if (parent->fitItemToRelativeRect(edge, 1)) 
 					{
 						(*m)->Show();
-    							
-						(*m)->setButton(color); 
-						(*m)->updateText(stats[(*anarace->getStartCondition())->getRace()][i].name);
+                        (*m)->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][i].unitType));
+						(*m)->updateText(
+						*UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i+UNIT_NULL_STRING)));
 						(*m)->adjustRelativeRect(edge);
 					}
 					height++;
@@ -182,14 +179,18 @@ void UnitMenu::process()
 	} // end 'if menuLevel'
 	else
 		for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+		{
+		//	Rect edge = Rect(0, 0, 10,10);
+		//	(*m)->adjustRelativeRect(edge);
 			(*m)->Hide();
+		}
 
 // special rules for sub menu...
 	if(pressedItem>-1)
 	{
 		int i = pressedItem+1;
 		pressedItem = -1;
-		if(!facilityMode)
+		if(!configuration.isFacilityMode())
 		{
 			if ((menuLevel == 1) && (i == 1))  //scv
 					pressedItem = SCV;
@@ -212,7 +213,7 @@ void UnitMenu::process()
 	{
 		int i = markedItem;
 		markedItem = -1;
-		if(!facilityMode)
+		if(!configuration.isFacilityMode())
 		{
 			if ((menuLevel == 1) && (i == 1))  //scv
 				markedItem = SCV;

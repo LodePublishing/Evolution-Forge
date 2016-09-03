@@ -8,14 +8,18 @@
 #else
 	#define toLog((x))
 #endif*/
+std::string lastMsg;
 void toLog(const std::string& msg)
 {
+	if(msg == lastMsg)
+		return;
+	lastMsg=msg;
 	std::cout << msg << std::endl;
 //	ofstream pFile("error.log", ios_base::app);
 //	pFile << msg.c_str() << endl;
 }
 
-const float CORE_VERSION=0.50;
+const unsigned int CORE_VERSION=60;
 
 //const unsigned int MAX_LOCATIONS = 9;
 const unsigned int MIN_LOCATIONS = 0; //this does not mean that maps with 0 locations can exist....
@@ -233,24 +237,24 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"Scout",					 80,27500,12500,  3, 0, 0, {0, 0}, {0 ,0, 0}, {STARGATE, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
 {"Arbiter",					160,10000,35000,  4, 0, 0, {0, 0}, {ARBITER_TRIBUNAL ,0, 0}, {STARGATE, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
 {"Carrier",					140,35000,25000,  6, 0, 0, {0, 0}, {FLEET_BEACON ,0, 0}, {STARGATE, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
-{"5xInterceptor",			100,25000,    0,  0, 0, 0, {0, 0}, {0,0, REMAINING_UNIT_TYPE}, {CARRIER, 0, 0}, 0, NEEDED_ALWAYS, 0, 0, SPECIAL_UNIT_TYPE},
-{"8xInterceptor",			 60,15000,    0,  0, 0, 0, {0, 0}, {CARRIER_CAPACITY,0, REMAINING_UNIT_TYPE}, {HALF_INTERCEPTOR, 0, 0}, 0, IS_LOST, 0, 0, SPECIAL_UNIT_TYPE}, //~~~ Special rule... carrier is no longer availible :/
+{"5xInterceptor",			100,25000,    0,  0, 0, 0, {0, 0}, {0, 0, REMAINING_UNIT_TYPE}, {CARRIER, 0, 0}, 0, NEEDED_ALWAYS, 0, 0, SPECIAL_UNIT_TYPE},
+{"8xInterceptor",			 60,15000,    0,  0, 0, 0, {0, 0}, {CARRIER_CAPACITY, 0, REMAINING_UNIT_TYPE}, {HALF_INTERCEPTOR, 0, 0}, 0, IS_LOST, 0, 0, SPECIAL_UNIT_TYPE}, //~~~ Special rule... carrier is no longer availible :/
 {"Observer",				 40, 2500, 7500,  1, 0, 0, {0, 0}, {OBSERVATORY ,0, 0}, {ROBOTICS_FACILITY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
 {"Nexus",					120,40000,    0,  0, 9, 0, {0, 0}, {0 ,0, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, SUPPLY_UNIT_TYPE},
 {"Robotics Facility",		 80,20000,20000,  0, 0, 0, {0, 0}, {CYBERNETICS_CORE ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, PRODUCE_UNIT_TYPE},
 {"Pylon",					 30,10000,    0,  0, 8, 0, {0, 0}, {0 ,0, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, SUPPLY_UNIT_TYPE},
 {"Observatory",				 30, 5000,10000,  0, 0, 0, {0, 0}, {ROBOTICS_FACILITY ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
 {"Gateway",					 60,15000,    0,  0, 0, 0, {0, 0}, {PYLON ,0, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, PRODUCE_UNIT_TYPE},
-{"Photon Cannon",			 50,15000,    0,  0, 0, 0, {0, 0}, {FORGE ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, SUPPORT_UNIT_TYPE},
-{"Cybernetics Core",		 60,20000,    0,  0, 0, 0, {0, 0}, {GATEWAY ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
-{"Citadel Of Adun",			 60,15000,10000,  0, 0, 0, {0, 0}, {CYBERNETICS_CORE ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
-{"Templar Archives",		 60,15000,20000,  0, 0, 0, {0, 0}, {CITADEL_OF_ADUN ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
-{"Forge",					 40,15000,    0,  0, 0, 0, {0, 0}, {PYLON ,0, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
-{"Stargate",				 70,15000,15000,  0, 0, 0, {0, 0}, {CYBERNETICS_CORE ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, PRODUCE_UNIT_TYPE},
-{"Fleet Beacon",			 60,30000,20000,  0, 0, 0, {0, 0}, {STARGATE ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
-{"Arbiter Tribunal",		 60,20000,15000,  0, 0, 0, {0, 0}, {TEMPLAR_ARCHIVES ,STARGATE, PYLON}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
-{"Robotics Support Bay",	 30,15000,10000,  0, 0, 0, {0, 0}, {ROBOTICS_FACILITY ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
-{"Shield Battery",			 30,10000,    0,  0, 0, 0, {0, 0}, {GATEWAY ,PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, SUPPORT_UNIT_TYPE},
+{"Photon Cannon",			 50,15000,    0,  0, 0, 0, {0, 0}, {FORGE, PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, SUPPORT_UNIT_TYPE},
+{"Cybernetics Core",		 60,20000,    0,  0, 0, 0, {0, 0}, {GATEWAY, PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Citadel Of Adun",			 60,15000,10000,  0, 0, 0, {0, 0}, {CYBERNETICS_CORE, PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Templar Archives",		 60,15000,20000,  0, 0, 0, {0, 0}, {CITADEL_OF_ADUN, PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Forge",					 40,15000,    0,  0, 0, 0, {0, 0}, {PYLON, 0, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Stargate",				 70,15000,15000,  0, 0, 0, {0, 0}, {CYBERNETICS_CORE, PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, PRODUCE_UNIT_TYPE},
+{"Fleet Beacon",			 60,30000,20000,  0, 0, 0, {0, 0}, {STARGATE, PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Arbiter Tribunal",		 60,20000,15000,  0, 0, 0, {0, 0}, {TEMPLAR_ARCHIVES, STARGATE, PYLON}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Robotics Support Bay",	 30,15000,10000,  0, 0, 0, {0, 0}, {ROBOTICS_FACILITY, PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Shield Battery",			 30,10000,    0,  0, 0, 0, {0, 0}, {GATEWAY, PYLON, 0}, {PROBE, 0, 0}, 0, NEEDED_ONCE, 0, 0, SUPPORT_UNIT_TYPE},
 {"Psionic Storm",			120,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_PSIONIC_STORM, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
 {"Hallucination",			 80,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {TEMPLAR_ARCHIVES, 0, 0}, R_HALLUCINATION, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
 {"Recall",					120,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {ARBITER_TRIBUNAL, 0, 0}, R_RECALL, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},

@@ -12,6 +12,7 @@ class MainWindow : public UI_Window
 		void draw( DC* dc ) const;
 	private:
 		UI_Button* tab[MAX_TABS];
+		UI_StaticText* url;
 };
 
 #endif

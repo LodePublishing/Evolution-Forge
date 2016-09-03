@@ -40,12 +40,12 @@ class BoGraphWindow:public UI_Window
 		void resetData();
 		void process();
 		void draw(DC* dc) const;
-		void setMarkedIP(const unsigned int markedIP);
+		void setMarkedIP(const unsigned int marked_ip);
 		const unsigned int getMarkedIP() const;
-		void setMarkedUnit(const unsigned int markedUnit);
+		void setMarkedUnit(const unsigned int marked_unit);
 		const unsigned int getMarkedUnit() const;
-		void copyBoGraph(const BOGRAPH* bograph);
-		void setBoGraphY(const unsigned int lastbographY);
+		void copyBoGraph(const BOGRAPH* bo_graph);
+		void setBoGraphY(const unsigned int last_bograph_y);
 		void mouseHasMoved();
 	private:
 		void checkForInfoWindow();

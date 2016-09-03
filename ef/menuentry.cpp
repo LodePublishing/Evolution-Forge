@@ -1,12 +1,12 @@
 #include "menuentry.hpp"
 
-MenuEntry::MenuEntry(UI_Object* parent, Rect rect, const eString unit) :
-	UI_Button(parent, rect, rect, unit, unit, ADD_GOAL_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH),
+MenuEntry::MenuEntry(UI_Object* menuentry_parent, Rect rect, const eString unit) :
+	UI_Button(menuentry_parent, rect, rect, unit, ADD_GOAL_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH),
 	color(NULL_COLOR)
 { }
 
-MenuEntry::MenuEntry(UI_Object* parent, Rect rect, const string& unit) :
-	UI_Button(parent, rect, rect, unit, unit, ADD_GOAL_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH),
+MenuEntry::MenuEntry(UI_Object* menuentry_parent, Rect rect, const string& unit) :
+	UI_Button(menuentry_parent, rect, rect, unit, ADD_GOAL_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH),
 	color(NULL_COLOR)
 { }
 
@@ -39,14 +39,8 @@ void MenuEntry::draw(DC* dc) const
 	UI_Button::draw(dc);
 }
 
-void MenuEntry::updateText(const string& utext)
+void MenuEntry::setColor(const eColor entry_color)
 {
-	updateNormalText(utext);
-	updatePressedText(utext);
-}
-
-void MenuEntry::setColor(const eColor color)
-{
-	this->color=color;
+	color = entry_color;
 }
 

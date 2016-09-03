@@ -27,6 +27,13 @@ private:
 	unsigned int dynamicFramerate; // X Frames per generation
 	unsigned int staticFramerate; // hold X FPS
 
+	unsigned int currentFramerate;
+	unsigned int currentFramesPerGeneration;
+
+	eLanguage language;
+
+	bool autoSaveRuns;
+	bool facilityMode;
 	bool preprocessBuildOrder; // should the program create a basic valid solution? TODO: IMPLEMENT IT!
 	bool allowGoalAdaption;
 	bool softwareMouse;
@@ -34,9 +41,11 @@ private:
 	bool backgroundBitmap;
 	bool allowStaticFramerate;
 	bool glowingButtons;
+	bool dnaSpiral;
 	bool tooltips;
 	bool transparency;
 	bool smoothMovements;
+	
 
 	string configurationFile;
 	
@@ -45,7 +54,7 @@ public:
 	~Configuration();
 
 	void initDefaults();
-	
+
 	const unsigned int getCrossingOver() const;
 	const unsigned int getBreedFactor() const;
 	const unsigned int getMutationFactor() const;
@@ -57,7 +66,15 @@ public:
 	const unsigned int getNoise() const;
 	const unsigned int getStaticFramerate() const;
     const unsigned int getDynamicFramerate() const;
-	
+
+	const unsigned int getCurrentFramerate() const;
+	const unsigned int getCurrentFramesPerGeneration() const;
+
+	const eLanguage getLanguage() const;
+
+
+	const bool isAutoSaveRuns() const;
+	const bool isFacilityMode() const;	
 	const bool isPreprocessBuildOrder() const;
 	const bool isAllowGoalAdaption() const;
 	const bool isSoftwareMouse() const;
@@ -65,6 +82,7 @@ public:
 	const bool isBackgroundBitmap() const;
 	const bool isAllowStaticFramerate() const;
 	const bool isGlowingButtons() const;
+	const bool isDnaSpiral() const;
 	const bool isTooltips() const;
 	const bool isTransparency() const;
 	const bool isSmoothMovements() const;
@@ -77,9 +95,14 @@ public:
 	void setMaxLength(const unsigned int max_length);
 	void setMaxRuns(const unsigned int max_runs);
 	void setMaxGenerations(const unsigned int max_generations);
-	void setNoise(const unsigned int noise);
+	void setNoise(const unsigned int desired_noise);
     void setDynamicFramerate(const unsigned int dynamic_framerate);
 	void setStaticFramerate(const unsigned int static_frame_rate);
+
+	void setLanguage(const eLanguage current_language);
+
+	void setAutoSaveRuns(const bool auto_save_runs);
+	void setFacilityMode(const bool facility_mode);
 	void setPreprocessBuildOrder(const bool preprocess_build_order);
 	void setAllowGoalAdaption(const bool allow_goal_adaption);
 	void setSoftwareMouse(const bool software_mouse);
@@ -87,11 +110,15 @@ public:
 	void setBackgroundBitmap(const bool background_bitmap);
 	void setAllowStaticFramerate(const bool allow_static_framerate);
 	void setGlowingButtons(const bool glowing_buttons);
+	void setDnaSpiral(const bool dna_spiral);
 	void setTooltips(const bool tool_tips);
 	void setTransparency(const bool trans_parency);
 	void setSmoothMovements(const bool smooth_movements);
+
+	void setCurrentFramerate(const unsigned int frame_rate);
+	void setCurrentFramesPerGeneration(const unsigned int frames_per_generation);
     
-	void setConfigurationFile(const string& configurationFile);
+	void setConfigurationFile(const string& configuration_file);
 	void loadConfigurationFile();
 	void saveToFile() const;
 };

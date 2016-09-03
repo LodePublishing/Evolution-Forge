@@ -34,6 +34,7 @@ class GOAL_ENTRY
 		bool raceInitialized;
 		bool isBuildable[UNIT_TYPE_COUNT];
 		bool isVariable[UNIT_TYPE_COUNT];	
+		bool isHaveable[UNIT_TYPE_COUNT]; // all units that are goals, can be build or are build by the bo (larva etc.)
 
 	public:
 		std::list<GOAL> goal; // private?
@@ -54,9 +55,17 @@ class GOAL_ENTRY
 		const bool calculateReady(const UNIT* units) const;
 		const unsigned int getAllGoal(const unsigned int unit) const;
 		const unsigned int getGlobalGoal(const unsigned int location, const unsigned int unit) const;
-		const bool getIsBuildable(const unsigned int unit) const;
+		const bool getIsBuildable(const unsigned int unit) const
+{
+#ifdef _SCC_DEBUG
+	if(unit>GAS_SCV) {
+		toLog("DEBUG: (GOAL_ENTRY::getIsBuildable): Value unit out of range.");return(false);
+    }
+#endif
+	return(isBuildable[unit]);		
+}
+		const bool getIsHaveable(const unsigned int unit) const;
 
-		void copy(const GOAL_ENTRY* goal_entry); // TODO!
 		void resetData();
 
 //		const GOAL& getGoal(const int goal_number) const;
@@ -75,8 +84,8 @@ class GOAL_ENTRY
 		const eRace getRace() const;
 		const unsigned int getMaxBuildTypes() const;
 		const bool isRaceInitialized() const;
-		void setName(const std::string& name);
-		void setRace(const eRace race);
+		void setName(const std::string& goal_name);
+		void setRace(const eRace goal_race);
 		const bool isGoal(const unsigned int unit) const;
 		const bool getInitialized() const;
 

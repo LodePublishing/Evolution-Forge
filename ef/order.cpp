@@ -59,41 +59,41 @@ Order& Order::operator=(const Order& order)
 	return(*this);
 }
 
-void Order::setUnit(const unsigned int unit)
+void Order::setUnit(const unsigned int unit_type)
 {
 #ifdef _SCC_DEBUG
-    if(unit>=UNIT_TYPE_COUNT) {
+    if(unit_type >= UNIT_TYPE_COUNT) {
         toLog("WARNING: (Order::setUnit): Value out of range.");return;
     }
 #endif
-	this->unit=unit;
+	unit = unit_type;
 }
 
-void Order::setIP(const unsigned int IP)
+void Order::setIP(const unsigned int ip)
 {
 #ifdef _SCC_DEBUG
-    if(IP>=MAX_LENGTH) {
+    if(ip >= MAX_LENGTH) {
         toLog("WARNING: (Order::setIP): Value out of range.");return;
     }
 #endif
-	this->IP=IP;
+	IP = ip;
 }
 
-void Order::setRow(const unsigned int row)
+void Order::setRow(const unsigned int order_row)
 {
 #ifdef _SCC_DEBUG
-    if(row>=MAX_LENGTH) {
+    if(order_row >= MAX_LENGTH) {
         toLog("WARNING: (Order::setRow): Value out of range.");return;
     }
 #endif
-	this->row=row;
+	row = order_row;
 }
 
 const unsigned int Order::getUnit() const
 {
 #ifdef _SCC_DEBUG
-    if(unit>=UNIT_TYPE_COUNT) {
-	        toLog("WARNING: (Order::getUnit): Variable not initialized.");return(0);
+    if(unit >= UNIT_TYPE_COUNT) {
+        toLog("WARNING: (Order::getUnit): Variable not initialized.");return(0);
     }
 #endif
 	return(unit);
@@ -102,8 +102,8 @@ const unsigned int Order::getUnit() const
 const unsigned int Order::getIP() const
 {
 #ifdef _SCC_DEBUG
-    if(IP>=MAX_LENGTH) {
-	        toLog("WARNING: (Order::getIP): Variable not initialized.");return(0);
+    if(IP >= MAX_LENGTH) {
+        toLog("WARNING: (Order::getIP): Variable not initialized.");return(0);
     }
 #endif
 	return(IP);
@@ -112,7 +112,7 @@ const unsigned int Order::getIP() const
 const unsigned int Order::getRow() const
 {
 #ifdef _SCC_DEBUG
-    if(row>=MAX_LENGTH) {
+    if(row >= MAX_LENGTH) {
         toLog("WARNING: (Order::getRow): Variable not initialized.");return(0);
     }
 #endif

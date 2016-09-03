@@ -24,11 +24,11 @@ class MAP_LOCATION
 		const int getMineralPatches() const;
 		const int getVespeneGeysirs() const;
 	
-		void setName(const std::string& name);
-		void setMineralDistance(const int distance);
-		void setDistance(const int target, const int distance);
-		void setMineralPatches(const int mineralPatches);
-		void setVespeneGeysirs(const int vespeneGeysirs);
+		void setName(const std::string& location_name);
+		void setMineralDistance(const int mineral_distance);
+		void setDistance(const int target, const int location_distance);
+		void setMineralPatches(const int mineral_patches);
+		void setVespeneGeysirs(const int vespene_geysirs);
 
 		void resetData();
 		void calculateDistances();

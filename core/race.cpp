@@ -72,6 +72,27 @@ const bool RACE::calculateStep()
 	
 		return(true);
 	}
+/*		if(getpGoal()->getRace()==ZERG)
+		{
+//		  ((*pStats)[build_unit].facility[0]==LARVA)&&
+		// Larva wird benoetigt zum Bau? Fein, dann bauen wir eine neue Larva falls nicht schon alle hatcheries etc. belegt sidn
+				// Gesamtzahl der Larven < 3 * HATCHERY?
+		   if(((getLocationTotal(1, HATCHERY)+
+		     getLocationTotal(1, LAIR)+
+			 getLocationTotal(1, HIVE)) *3 > 
+			 (larvaInProduction[1]+getLocationTotal(1, LARVA))))
+			 {
+// max 1 larva pro Gebaeude produzieren
+ 		   if(((getLocationTotal(1, HATCHERY)+
+		     getLocationTotal(1, LAIR)+
+			 getLocationTotal(1, HIVE) > larvaInProduction[1]))) // => zuwenig Larven da!
+			 {
+				if(buildIt(LARVA)) // TODO!
+					addLarvaToQueue(1);
+			}
+			}
+		}*/
+	
 	bool ok=true;
 	bool first=true;
 
@@ -145,8 +166,8 @@ const bool RACE::calculateStep()
 				adjustGasHarvest(build.getLocation());
 			} else 
 // if the larva was built reduce the number of larvas in the queue
-			if((build.getType()==LARVA)&&(getRace()==ZERG)&&(!buildGene(LARVA))) {
-					removeLarvaFromQueue(build.getLocation());
+			if((build.getType()==LARVA)&&(getRace()==ZERG)) {
+				removeLarvaFromQueue(build.getLocation());
 			}
 // ------ END SPECIAL RULES ------
 
@@ -158,18 +179,18 @@ const bool RACE::calculateStep()
 			
 
 // ------ ENQUEUE THE LAST ITEM SO IT CAN BE ACCESSED BY THE MOVING ROUTINES ------			
-			last[lastcounter].unit=build.getType();
-			last[lastcounter].count=build.getUnitCount();
-			last[lastcounter].location=build.getLocation();
+//			last[lastcounter].unit=build.getType(); TODO
+//			last[lastcounter].count=build.getUnitCount();
+//			last[lastcounter].location=build.getLocation();
 
 			if((stat->create)&&(!build.getOnTheRun())) //one additional unit (zerglings, scourge, comsat, etc.)
 			{ //here no unitCount! ~~~
-				addOneLocationTotal(build.getLocation(),stat->create);
-				addOneLocationAvailible(build.getLocation(),stat->create);
-				if(last[lastcounter].unit==stat->create) last[lastcounter].count++; //TODO ???
+				addOneLocationTotal(build.getLocation(), stat->create);
+				addOneLocationAvailible(build.getLocation(), stat->create);
+//				if(last[lastcounter].unit==stat->create) last[lastcounter].count++; //TODO ???
 				// ~~~~ Ja... geht schon... aber kann ja auch mal was anderes sein...
 			}
-			lastcounter++;
+//			lastcounter++;
 // ------ END OF LAST ITEM
 			buildingQueue.pop();
 // oder: irgendeine location... TODO: Problem: die Einheiten koennen irgendwo sein, also nicht gesammelt an einem Fleck...
@@ -210,7 +231,7 @@ const bool RACE::buildGene(const unsigned int build_unit)
 			&&
 			(((getHaveSupply()>=stat->needSupply+getNeedSupply()-stat->haveSupply)&&(stat->needSupply+getNeedSupply()<=MAX_SUPPLY)) ||(stat->needSupply==0)) // TODO: IS_LOST einfuegen!
 			&&
-			((stat->facility2==0)||(getLocationAvailible(GLOBAL, stat->facility2)>0)) 
+			((stat->facility2==0)||(getLocationAvailible(GLOBAL, stat->facility2)>0))
 			&&
 			((stat->upgrade[0]==0)||(getLocationTotal(GLOBAL, build_unit)<2) || (getLocationTotal(GLOBAL, stat->upgrade[0]))) 
 			&&
@@ -231,91 +252,9 @@ const bool RACE::buildGene(const unsigned int build_unit)
 			}
 			else
 			{
-				//Zuerst: availible pruefen ob am Ort gebaut werden kann
-				//Wenn nicht => +/- absteigen bis alle locations durch sind
-				int fac=0;
-				int tloc=1;
-				int ttloc=0;
-				int j=0;
-
-				if(lastcounter>0)
-				{	
-					lastcounter--;
-					tloc=last[lastcounter].location;
-				}
-
-
-// TODO! ?!?!?
-//				if((stat->facility2==0)||(getLocationAvailible(/*tloc*/0,stat->facility2)>0))
-//				for(fac=3;fac--;)
-				for(fac=0;fac<3;fac++)
-					if( ((stat->facility[fac]>0)&&(getLocationAvailible(tloc, stat->facility[fac]))&&
-					// special rules for morphing units of protoss
-						((getLocationAvailible(ttloc, stat->facility[fac])>1)||(stat->facilityType!=IS_LOST)&&(stat->facility[fac]!=stat->facility2))) )
-//						||((stat->facility[fac]==0)&&(fac==0))) 
-					{
-						ok=true;
-						break;
-					}
-
-				j=1;
-				if(!ok)
-					while(j<MAX_LOCATIONS)
-					{
-						ttloc=(*pMap)->getLocation(tloc)->getNearest(j);
-//						if((stat->facility2==0)||(getLocationAvailible(ttloc,stat->facility2)>0)) TODO
-//						{
-//            	        for(fac=3;fac--;)
-						for(fac=0;fac<3; fac++)
-                        if(((stat->facility[fac]>0)&&(getLocationAvailible(ttloc, stat->facility[fac]))&&
-                        // special rules for morphing units of protoss
-                        ((getLocationAvailible(ttloc, stat->facility[fac])>1)||(stat->facilityType!=IS_LOST)||(stat->facility[fac]!=stat->facility2)) ))
-//                        || ((stat->facility[fac]==0)&&(fac==0))) //~~
-
-//						for(fac=3;fac--;)
-//							if( ((stat->facility[fac]>0)&&(getLocationAvailible(ttloc,stat->facility[fac])>((stat->facilityType==IS_LOST)&&(stat->facility[fac]==stat->facility2)))) || ((stat->facility[fac]==0)&&(fac==0)))
-							{
-								tloc=ttloc;
-								ok=true;
-								break;
-							}
-						break;
-//					}	
-						j++;
-					}
-
-				if((ok)&&(build_unit==REFINERY)) {
-					if(getMapLocationAvailible(GLOBAL, tloc, VESPENE_GEYSIR) <=0)
-						ok=false;
-					else 
-						removeOneMapLocationAvailible(GLOBAL, tloc, VESPENE_GEYSIR);
-				}
-//TODO: Wenn verschiedene facilities moeglich sind, dann das letzte nehmen						
-//				bewegliche Sachen ueberdenken...
-//					evtl zusaetzliche Eigenschaft 'speed' einbauen (muss sowieso noch...)... bei speed>0 ... mmmh... trifft aber auch nur auf scvs zu ... weil bringt ja wenig erst mit der hydra rumzulaufen und dann zum lurker... mmmh... aber waere trotzdem zu ueberlegen...
-//					auch noch ueberlegen, wenn z.B. mit scv ohne kommandozentrale woanders gesammelt wird...
-//		Phagen ueber Phagen...			
-				if(ok)
+				if(buildIt(build_unit)==true)
 				{
-					if(getpGoal()->getRace()==ZERG)
-					{
-						if((*pStats)[build_unit].facility[0]==LARVA)
-						{
-		// Larva wird benoetigt zum Bau? Fein, dann bauen wir eine neue Larva falls nicht schon alle hatcheries etc. belegt sidn
-							if(
-									// Gesamtzahl der Larven < 3 * HATCHERY?
-									(((getLocationTotal(tloc, HATCHERY)+getLocationTotal(tloc, LAIR)+getLocationTotal(tloc, HIVE))*3>
-									  (larvaInProduction[tloc]+getLocationTotal(tloc, LARVA)))&&
-									 // max 1 larva pro Gebaeude produzieren
-									 ((getLocationTotal(tloc, HATCHERY)+getLocationTotal(tloc, LAIR)+getLocationTotal(tloc, HIVE)>larvaInProduction[tloc])))) // => zuwenig Larven da!
-							{
-								if(buildGene(LARVA))
-									addLarvaToQueue(tloc);
-							}
-					
-						}
-					}
-
+					ok=true;
 // ------ RACE SPECIFIC, tFITNESS ------
 					if(getMinerals()*3<4*stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)) settFitness(gettFitness()-2);
 					if(getGas()*3<4*stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)) settFitness(gettFitness()-2);
@@ -323,35 +262,8 @@ const bool RACE::buildGene(const unsigned int build_unit)
 					if((getMinerals()*5/4<stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit))||
 					   (getGas()*5/4<stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)))
 						settFitness(gettFitness()-1);
+				}
 // ------ END RACE SPECIFIC, tFITNESS ------
-					
-					if(lastunit==0) lastunit=build_unit;
-					if(build_unit!=lastunit)//~~
-					{
-						settFitness(gettFitness()-1);
-						lastunit=build_unit;
-					}
-                                             
-					Building build;					
-					build.setOnTheRun(false);
-                    build.setFacility(stat->facility[fac]);
-                    build.setLocation(tloc);
-                    build.setUnitCount(1);
-                    build.setBuildFinishedTime(getTimer()-stat->BT/*+3200*(stat->facility2==build_unit)*/); //~~ hack :/ TODO SINN???????
-                    build.setTotalBuildTime(stat->BT);
-                    build.setType(build_unit);
-//					build.setIP(getIP()); needed only for Anarace!
-					
-// upgrade_cost is 0 if it's no upgrade
-					setMinerals(getMinerals()-(stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)));
-					setGas(getGas()-(stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)));
-	
-					setNeedSupply(getNeedSupply()+stat->needSupply);
-//					if((stat->needSupply>0)||(((*pStats)[stat->facility[0]].needSupply<0)&&(stat->facilityType==IS_LOST)))  TODO!!!!
-//						setNeedSupply(getNeedSupply()-stat->needSupply); //? Beschreibung!
-					adjustAvailibility(tloc, fac, stat);
-					buildingQueue.push(build);
-				} //end if(ok)
 			} //end minerals/gas else
 		} //end prere/fac else
 	} //end build_unit < REFINERY
@@ -463,34 +375,34 @@ void RACE::prepareForNewGeneration() // resets all data to standard starting val
 // ------ PRETTY UNINTERESTING SET/GET FUNCTIONS ------
 // ----------------------------------------------------
 
-void RACE::setpFitness(const unsigned int pFitness) 
+void RACE::setpFitness(const unsigned int p_fitness) 
 {
 #ifdef _SCC_DEBUG
-	if(pFitness>MAX_PFITNESS) {
-		toLog("DEBUG: (RACE::setpFitness): Value pFitness out of range.");return;
+	if(p_fitness > MAX_PFITNESS) {
+		toLog("DEBUG: (RACE::setpFitness): Value p_fitness out of range.");return;
 	}
 #endif
-	this->pFitness=pFitness;
+	pFitness = p_fitness;
 }
 
-void RACE::setsFitness(const unsigned int sFitness)
+void RACE::setsFitness(const unsigned int s_fitness)
 {
 #ifdef _SCC_DEBUG
-	if(sFitness>MAX_MINERALS+MAX_GAS) {
-		toLog("DEBUG: (RACE::setsFitness): Value sFitness out of range.");return;
+	if(s_fitness > MAX_MINERALS+MAX_GAS) {
+		toLog("DEBUG: (RACE::setsFitness): Value s_fitness out of range.");return;
 	}
 #endif
-	this->sFitness=sFitness;
+	sFitness = s_fitness;
 }
 
-void RACE::settFitness(const unsigned int tFitness)
+void RACE::settFitness(const unsigned int t_fitness)
 {
 #ifdef _SCC_DEBUG
-	if(tFitness>MAX_TFITNESS) {
-		toLog("DEBUG: (RACE::settFitness): Value tFitness out of range.");return;
+	if(t_fitness > MAX_TFITNESS) {
+		toLog("DEBUG: (RACE::settFitness): Value t_fitness out of range.");return;
 	}
 #endif
-	this->tFitness=tFitness;
+	tFitness = t_fitness;
 }
 
 const unsigned int RACE::getpFitness() const

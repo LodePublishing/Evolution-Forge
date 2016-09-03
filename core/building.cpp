@@ -42,7 +42,7 @@ Building& Building::operator=(const Building& object)
 const unsigned int Building::getTotalBuildTime() const
 {
 #ifdef _SCC_DEBUG
-	if(totalBuildTime>MAX_TIME) {
+	if(totalBuildTime > MAX_TIME) {
 		toLog("DEBUG: Building::getTotalBuildTime): Variable totalBuildTime not initialized.");return(0);
 	}
 #endif
@@ -64,7 +64,7 @@ const unsigned int Building::getBuildFinishedTime() const
 const unsigned int Building::getType() const
 {
 #ifdef _SCC_DEBUG
-	if(type>UNIT_TYPE_COUNT) {
+	if(type > UNIT_TYPE_COUNT) {
 		toLog("DEBUG: Building::getType): Variable not initialized.");return(0);
 	}
 #endif
@@ -74,7 +74,7 @@ const unsigned int Building::getType() const
 const unsigned int Building::getUnitCount() const
 {
 #ifdef _SCC_DEBUG
-	if(unitCount>MAX_TOTAL_UNITS) {
+	if(unitCount > MAX_TOTAL_UNITS) {
 		toLog("DEBUG: Building::getUnitCount): Variable not initialized.");return(0);
 	}
 #endif
@@ -84,7 +84,7 @@ const unsigned int Building::getUnitCount() const
 const unsigned int Building::getFacility() const
 {
 #ifdef _SCC_DEBUG
-	if(facility>UNIT_TYPE_COUNT) {
+	if(facility > UNIT_TYPE_COUNT) {
 		toLog("DEBUG: Building::getFacility): Variable not initialized.");return(0);
 	}
 #endif
@@ -94,7 +94,7 @@ const unsigned int Building::getFacility() const
 const unsigned int Building::getIP() const
 {
 #ifdef _SCC_DEBUG
-	if(IP>MAX_LENGTH) {
+	if(IP > MAX_LENGTH) {
 		toLog("DEBUG: Building::getIP): Variable not initialized.");return(0);
 	}
 #endif
@@ -104,7 +104,7 @@ const unsigned int Building::getIP() const
 const unsigned int Building::getLocation() const
 {
 #ifdef _SCC_DEBUG
-	if(location>MAX_LOCATIONS) {
+	if(location > MAX_LOCATIONS) {
 		toLog("DEBUG: Building::getLocation): Variable not initialized.");return(0);
 	}
 #endif
@@ -131,88 +131,88 @@ const bool Building::canBeCompleted() const
 	return(	buildFinishedTime >= 0 );
 }
 
-void Building::setTotalBuildTime(const unsigned int totalBuildTime)
+void Building::setTotalBuildTime(const unsigned int total_build_time)
 {
 #ifdef _SCC_DEBUG
-	if(totalBuildTime>=MAX_TIME) {
+	if(total_build_time>=MAX_TIME) {
 		toLog("DEBUG: Building::setTotalBuildTime): Value out of range.");return;
 	}
 #endif
-	this->totalBuildTime=totalBuildTime;
+	totalBuildTime = total_build_time;
 }
 																				
-void Building::setBuildFinishedTime(const signed int buildFinishedTime)
+void Building::setBuildFinishedTime(const signed int build_finished_time)
 {
 #ifdef _SCC_DEBUG
-	if((buildFinishedTime<-MAX_TIME)||(buildFinishedTime>MAX_TIME)) {
+	if((build_finished_time < -MAX_TIME)||(build_finished_time > MAX_TIME)) {
 		toLog("DEBUG: Building::setBuildFinishedTime): Value out of range.");return;
 	}
 #endif
-	this->buildFinishedTime=buildFinishedTime;
+	buildFinishedTime = build_finished_time;
 }
 																				
-void Building::setType(const unsigned int type)
+void Building::setType(const unsigned int building_type)
 {
 #ifdef _SCC_DEBUG
-	if(type>=UNIT_TYPE_COUNT) {
+	if(building_type >= UNIT_TYPE_COUNT) {
 		toLog("DEBUG: Building::setType): Value out of range.");return;
 	}
 #endif
-	this->type=type;
+	type = building_type;
 }
 																				
-void Building::setUnitCount(const unsigned int count)
+void Building::setUnitCount(const unsigned int building_count)
 {
 #ifdef _SCC_DEBUG
-	if(count>=10) {
+	if(building_count >= 10) {
 		toLog("DEBUG: Building::setUnitCount): Value out of range.");return;
 	}
 #endif
-	unitCount=count;
+	unitCount = building_count;
 }
 																				
-void Building::setFacility(const unsigned int facility)
+void Building::setFacility(const unsigned int building_facility)
 {
 #ifdef _SCC_DEBUG
-	if(facility>=UNIT_TYPE_COUNT) {
+	if(building_facility >= UNIT_TYPE_COUNT) {
 		toLog("DEBUG: Building::setFacility): Value out of range.");return;
 	}
 #endif
-	this->facility=facility;
+	facility = building_facility;
 }
 																				
-void Building::setIP(const unsigned int IP)
+void Building::setIP(const unsigned int building_IP)
 {
 #ifdef _SCC_DEBUG
-	if(IP>=MAX_LENGTH) {
+	if(building_IP >= MAX_LENGTH) {
 		toLog("DEBUG: Building::setIP): Value out of range.");return;
 	}
 #endif
-	this->IP=IP;
+	IP = building_IP;
 }
 																				
-void Building::setLocation(const unsigned int location)
+void Building::setLocation(const unsigned int building_location)
 {
 #ifdef _SCC_DEBUG
-	if(location>=MAX_LOCATIONS) {
+	if(building_location >= MAX_LOCATIONS) {
 		toLog("DEBUG: Building::setLocation): Value out of range.");return;
 	}
 #endif
-	this->location=location;
+	location = building_location;
 }
 																				
-void Building::setGoal(const unsigned int goal)
+void Building::setGoal(const unsigned int building_goal)
 {
 #ifdef _SCC_DEBUG
-	if(goal>=UNIT_TYPE_COUNT) {
+	if(building_goal >= UNIT_TYPE_COUNT) {
 		toLog("DEBUG: Building::setGoal): Value out of range.");return;
 	}
 #endif
-	this->goal=goal;
+	goal = building_goal;
 }
 																				
-void Building::setOnTheRun(const bool onTheRun)
+void Building::setOnTheRun(const bool building_on_the_run)
 {
-	this->onTheRun=onTheRun;
+	onTheRun = building_on_the_run;
 }
 

@@ -22,6 +22,7 @@ class UI_LongText : public UI_Object
 
 		const signed int getPressed() const;
 		const unsigned int getTextHeight() const;
+		const unsigned int getTextWidth() const;
 		
 //	protected:
 //		eTextMode  mode; 

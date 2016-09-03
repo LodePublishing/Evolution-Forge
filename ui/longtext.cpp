@@ -362,6 +362,25 @@ const unsigned int UI_LongText::getTextHeight() const
 	return(text_height);
 }
 
+const unsigned int UI_LongText::getTextWidth() const
+{
+	unsigned int text_width = 0;
+
+	for(std::list<UI_StaticText*>::const_iterator i = longText.begin(); i != longText.end(); ++i)
+		if(text_width < (*i)->getRelativeRightBound())
+			text_width = (*i)->getRelativeRightBound();
+	
+	for(std::list<UI_Button*>::const_iterator i = longButton.begin(); i != longButton.end(); ++i)
+		if(text_width < (*i)->getRelativeRightBound())
+			text_width = (*i)->getRelativeRightBound();
+	
+	for(std::list<UI_Bitmap*>::const_iterator i = longBitmap.begin(); i != longBitmap.end(); ++i)
+		if(text_width < (*i)->getRelativeRightBound())
+			text_width = (*i)->getRelativeRightBound();
+
+	return(text_width);
+}
+
 const signed int UI_LongText::getPressed() const
 {
 	std::list<UI_Button*>::const_iterator i = longButton.begin();

@@ -5,11 +5,11 @@ CORE=core
 
 CORE_OBJ=$(CORE)/starcraft.o $(CORE)/prebuildorder.o $(CORE)/anabuildorder.o $(CORE)/configuration.o $(CORE)/goal.o  $(CORE)/goalentry.o $(CORE)/harvest.o  $(CORE)/location.o  $(CORE)/basicmap.o  $(CORE)/buildorder.o  $(CORE)/database.o  $(CORE)/soup.o $(CORE)/building.o $(CORE)/start.o $(CORE)/unit.o $(CORE)/startcondition.o $(CORE)/statistics.o $(CORE)/program.o $(CORE)/boentry.o
 
-EF_OBJ= $(EF)/mainwindow.o $(EF)/bodiagram.o $(EF)/bgentry.o $(EF)/bgline.o $(EF)/bgwindow.o $(EF)/bowindow.o $(EF)/player.o $(EF)/forceentry.o $(EF)/force.o $(EF)/message.o $(EF)/msgwindow.o $(EF)/score.o $(EF)/game.o $(EF)/racemenu.o $(EF)/bomenu.o $(EF)/unitmenu.o $(EF)/goalmenu.o $(EF)/mapmenu.o $(EF)/forcemenu.o $(EF)/languagemenu.o $(EF)/resolutionmenu.o $(EF)/bitdepthmenu.o $(EF)/thememenu.o $(EF)/boentry.o $(EF)/configuration.o stl/misc.o $(EF)/playerentry.o $(EF)/techtree.o $(EF)/setwindow.o $(EF)/guimain.o $(EF)/main.o $(EF)/helpwindow.o $(EF)/savebox.o $(EF)/locationmenu.o $(EF)/mapwindow.o $(EF)/datawindow.o $(EF)/intro.o
+EF_OBJ= $(EF)/mainwindow.o $(EF)/bodiagram.o $(EF)/bgentry.o $(EF)/bgline.o $(EF)/bgwindow.o $(EF)/bowindow.o $(EF)/player.o $(EF)/forceentry.o $(EF)/force.o $(EF)/message.o $(EF)/msgwindow.o $(EF)/score.o $(EF)/game.o $(EF)/racemenu.o $(EF)/bomenu.o $(EF)/unitmenu.o $(EF)/goalmenu.o $(EF)/mapmenu.o $(EF)/forcemenu.o $(EF)/languagemenu.o $(EF)/resolutionmenu.o $(EF)/bitdepthmenu.o $(EF)/thememenu.o $(EF)/boentry.o $(EF)/configuration.o stl/misc.o $(EF)/playerentry.o $(EF)/techtree.o $(EF)/setwindow.o $(EF)/guimain.o $(EF)/main.o $(EF)/helpwindow.o $(EF)/savebox.o $(EF)/locationmenu.o $(EF)/mapwindow.o $(EF)/datawindow.o $(EF)/intro.o $(EF)/fpssystem.o
 
 UI_OBJ=$(UI)/object.o $(UI)/window.o $(UI)/button.o $(UI)/bitmap.o $(UI)/radio.o $(UI)/statictext.o $(UI)/longtext.o $(UI)/theme.o $(UI)/group.o $(UI)/editfield.o $(UI)/checkbutton.o $(UI)/tooltip.o $(UI)/numberfield.o $(UI)/scrollbar.o $(UI)/configuration.o $(UI)/menuentry.o $(UI)/menu.o 
 
-SDL_OBJ=$(SDL)/color.o $(SDL)/font.o $(SDL)/pen.o $(SDL)/surface.o $(SDL)/brush.o $(SDL)/dc.o $(SDL)/framerate.o $(SDL)/draw.o $(SDL)/size.o $(SDL)/rect.o $(SDL)/point.o $(SDL)/sound.o
+SDL_OBJ=$(SDL)/color.o $(SDL)/font.o $(SDL)/pen.o $(SDL)/surface.o $(SDL)/brush.o $(SDL)/dc.o $(SDL)/framerate.o $(SDL)/draw.o $(SDL)/size.o $(SDL)/rect.o $(SDL)/point.o
 
 CPPFLAGS =
 #FLAGS = -g -pipe -ggdb -D_SCC_DEBUG -ansi -pedantic-errors -Wall -W -Wmissing-braces -Wredundant-decls -Wundef -Wunused -Wconversion -Woverloaded-virtual -Wmissing-noreturn -Wdisabled-optimization -Wsign-promo -Wwrite-strings -Wlong-long -Woverloaded-virtual -Wfloat-equal -Wreturn-type -Wparentheses -Wchar-subscripts -Wimplicit  -Wtrigraphs  -Wendif-labels -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wshadow
@@ -22,10 +22,10 @@ FLAGS = -O3 -pg -pipe -ftracer -fmerge-all-constants -ffast-math -march=pentium4
 #-ffast-math
 #-enable-stack-protector
 
-CXXFLAGS = $(FLAGS) -I/usr/include/SDL
+CXXFLAGS = $(FLAGS) -I/usr/include/SDL -I/usr/local/include/fmodex 
 CXX = g++
 
-INCLUDES = -lSDL -lSDL_ttf -lSDL_image -I/usr/include/SDL
+INCLUDES =  -I/usr/local/include/fmodex -lSDL -lSDL_ttf -lSDL_image -I/usr/include/SDL /usr/local/lib/libfmodex.so
 
 .SUFFIXES: .o .cpp
 release: $(EF_OBJ) $(UI_OBJ)

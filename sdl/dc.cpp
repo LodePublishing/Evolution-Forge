@@ -11,7 +11,7 @@ DC::DC():
 	textColor(),
 	font(NULL),
 	bitDepth(DEPTH_8BIT),
-	resolution(RESOLUTION_640x480),
+	resolution(Size(640,480)),
 	Draw_HLine(NULL),
 	Draw_VLine(NULL),
 	Draw_Line(NULL),
@@ -47,7 +47,7 @@ DC::DC(const DC& other):
 }
 
 
-DC::DC(const eResolution current_resolution, const eBitDepth bit_depth, const Uint32 nflags, const Uint32 initflags) :
+DC::DC(const Size current_resolution, const eBitDepth bit_depth, const Uint32 nflags, const Uint32 initflags) :
 	surface(NULL),
 	pressedRectangle(false),
 	initOK(true),
@@ -82,61 +82,97 @@ DC::~DC()
 	SDL_FreeSurface(surface);
 }
 
+SDL_Cursor* DC::createCursor(char* xpm_image[])
+{
+	int i, row, col;
+	Uint8 data[4*32];
+	Uint8 mask[4*32];
+	int hot_x, hot_y;
+  
+	i = -1;
+	for ( row=0; row<32; ++row ) {
+		for ( col=0; col<32; ++col ) {
+			if ( col % 8 ) {
+				data[i] <<= 1;
+				mask[i] <<= 1;
+			} else {
+				++i;
+				data[i] = mask[i] = 0;
+			}
+			switch (xpm_image[4+row][col]) {
+				case 'X':
+					data[i] |= 0x01;
+					mask[i] |= 0x01;
+					break;
+				case '.':
+					mask[i] |= 0x01;
+					break;
+				case ' ':
+					break;
+			}
+		}
+	}
+	sscanf(xpm_image[4+row], "%d,%d", &hot_x, &hot_y);
+	return SDL_CreateCursor(data, mask, 32, 32, hot_x, hot_y);
+}
+
+
 #include <sstream>
 std::string DC::printHardwareInformation()
 {
+	// TODO: uebersetzen bzw. dem Aufrufer nur Daten uebergeben
 	SDL_Rect **modes;
 	std::ostringstream os;
 	os.str("");
 	modes = SDL_ListModes(NULL, SDL_SWSURFACE);
 	if(modes == (SDL_Rect **)0)
-		os << "No modes available!" << std::endl;
+		os << "* No modes available!" << std::endl;
 	else
 	{
 		if(modes == (SDL_Rect **)-1)
-			os << "All resolutions available." << std::endl;
+			os << "* All resolutions available." << std::endl;
 		else
 		{
-			os << "Available Modes:" << std::endl;
+			os << "* Available Modes:";
 			for(unsigned int i=0;modes[i];++i)
-				os << "  " << modes[i]->w << " x " << modes[i]->h << std::endl;
+				os << "  " << modes[i]->w << " x " << modes[i]->h;
+			os << std::endl;
 		}
 	}
 	const SDL_VideoInfo* hardware = SDL_GetVideoInfo();
-	os << "Max color depth : " << (unsigned int)hardware->vfmt->BitsPerPixel << std::endl;
+	os << " - Max color depth : " << (unsigned int)hardware->vfmt->BitsPerPixel;
 //	if(hardware->hw_availible) os << "- It is possible to create hardware surfaces" << std::endl;
-	if(hardware->wm_available) os << "- There is a window manager available" << std::endl;
-	if(hardware->blit_hw) os << "- Hardware to hardware blits are accelerated" << std::endl;
-	if(hardware->blit_hw_CC) os << "- Hardware to hardware colorkey blits are accelerated" << std::endl;
-	if(hardware->blit_hw_A) os << "- Hardware to hardware alpha blits are accelerated" << std::endl;
-	if(hardware->blit_sw) os << "- Software to hardware blits are accelerated" << std::endl;
-	if(hardware->blit_sw_CC) os << "- Software to hardware colorkey blits are accelerated" << std::endl;
-	if(hardware->blit_sw_A)	os << "- Software to hardware alpha blits are accelerated" << std::endl;
-	if(hardware->blit_fill)	os << "- Color fills are accelerated" << std::endl;
-	if(hardware->video_mem>0) os << "- Total amount of video memory: " << hardware->video_mem << "kb";
+	if(hardware->wm_available) os << "\n - There is a window manager available";
+	if(hardware->blit_hw) os << "\n - Hardware to hardware blits are accelerated";
+	if(hardware->blit_hw_CC) os << "\n - Hardware to hardware colorkey blits are accelerated";
+	if(hardware->blit_hw_A) os << "\n - Hardware to hardware alpha blits are accelerated";
+	if(hardware->blit_sw) os << "\n - Software to hardware blits are accelerated";
+	if(hardware->blit_sw_CC) os << "\n - Software to hardware colorkey blits are accelerated";
+	if(hardware->blit_sw_A)	os << "\n - Software to hardware alpha blits are accelerated";
+	if(hardware->blit_fill)	os << "\n - Color fills are accelerated";
+	if(hardware->video_mem>0) os << "\n - Total amount of video memory: " << hardware->video_mem << "kb";
 	return(os.str());
 }
 
 std::string DC::printSurfaceInformation(DC* surface)
 {
-	std::ostringstream os;
-	os.str("");
-	os << "Created Surface :  " << surface->GetSurface()->w << " x " << surface->GetSurface()->h << " @ " << (unsigned int)(surface->GetSurface()->format->BitsPerPixel) << std::endl;
-	if (surface->flags() & SDL_SWSURFACE) os << "- Surface is stored in system memory" << std::endl;
-	else if(surface->flags() & SDL_HWSURFACE) os << "- Surface is stored in video memory" << std::endl;
-	if(surface->flags() & SDL_ASYNCBLIT) os << "- Surface uses asynchronous blits if possible" << std::endl;
-	if(surface->flags() & SDL_ANYFORMAT) os << "- Allows any pixel-format" << std::endl;
-	if(surface->flags() & SDL_HWPALETTE) os << "- Surface has exclusive palette" << std::endl;
-	if(surface->flags() & SDL_DOUBLEBUF) os << "- Surface is double buffered" << std::endl;
-	if(surface->flags() & SDL_OPENGL) os << "- Surface has an OpenGL context" << std::endl;
-	if(surface->flags() & SDL_OPENGLBLIT) os << "- Surface supports OpenGL blitting" << std::endl;
-	if(surface->flags() & SDL_RESIZABLE) os << "- Surface is resizable" << std::endl;
-	if(surface->flags() & SDL_HWACCEL) os << "- Surface blit uses hardware acceleration" << std::endl;
-	if(surface->flags() & SDL_SRCCOLORKEY) os << "- Surface use colorkey blitting" << std::endl;
-	if(surface->flags() & SDL_RLEACCEL) os << "- Colorkey blitting is accelerated with RLE" << std::endl;
-	if(surface->flags() & SDL_SRCALPHA) os << "- Surface blit uses alpha blending" << std::endl;
-	if(surface->flags() & SDL_PREALLOC) os << "- Surface uses preallocated memory" << std::endl;
-	if(SDL_MUSTLOCK(surface->GetSurface())) os << "- Surface needs locking" << std::endl;
+	std::ostringstream os; os.str("");
+	os << surface->GetSurface()->w << " x " << surface->GetSurface()->h << " @ " << (unsigned int)(surface->GetSurface()->format->BitsPerPixel);
+	if (surface->flags() & SDL_SWSURFACE) os << "\n- Surface is stored in system memory";
+	else if(surface->flags() & SDL_HWSURFACE) os << "\n- Surface is stored in video memory";
+	if(surface->flags() & SDL_ASYNCBLIT) os << "\n- Surface uses asynchronous blits if possible";
+	if(surface->flags() & SDL_ANYFORMAT) os << "\n- Allows any pixel-format";
+	if(surface->flags() & SDL_HWPALETTE) os << "\n- Surface has exclusive palette";
+	if(surface->flags() & SDL_DOUBLEBUF) os << "\n- Surface is double buffered";
+	if(surface->flags() & SDL_OPENGL) os << "\n- Surface has an OpenGL context";
+	if(surface->flags() & SDL_OPENGLBLIT) os << "\n- Surface supports OpenGL blitting";
+	if(surface->flags() & SDL_RESIZABLE) os << "\n- Surface is resizable";
+	if(surface->flags() & SDL_HWACCEL) os << "\n- Surface blit uses hardware acceleration";
+	if(surface->flags() & SDL_SRCCOLORKEY) os << "\n- Surface use colorkey blitting";
+	if(surface->flags() & SDL_RLEACCEL) os << "\n- Colorkey blitting is accelerated with RLE";
+	if(surface->flags() & SDL_SRCALPHA) os << "\n- Surface blit uses alpha blending";
+	if(surface->flags() & SDL_PREALLOC) os << "\n- Surface uses preallocated memory";
+	if(SDL_MUSTLOCK(surface->GetSurface())) os << "\n- Surface needs locking";
 	return(os.str());
 }
 
@@ -405,14 +441,13 @@ void DC::DrawText(const std::string& text, const signed int x, const signed int 
 }
 
 
-void DC::setScreen(const eResolution current_resolution, const eBitDepth bit_depth, const Uint32 nflags)
+void DC::setScreen(const Size current_resolution, const eBitDepth bit_depth, const Uint32 nflags)
 {
 	if((current_resolution == resolution) && (bit_depth == bitDepth) && (surface!=NULL))
 		return;
 	resolution = current_resolution;
-	Size s = Size(getResolutionSize());
-	max_x = s.GetWidth();
-	max_y = s.GetHeight();
+	max_x = resolution.GetWidth();
+	max_y = resolution.GetHeight();
 	unsigned int bits;
 	switch(bit_depth)
 	{
@@ -480,25 +515,14 @@ void DC::setScreen(const eResolution current_resolution, const eBitDepth bit_dep
 	}
 }
 
-const Size DC::getResolutionSize() const
-{
-	switch(resolution)
-	{
-		case RESOLUTION_640x480:return(Size(640, 480));break;
-		case RESOLUTION_800x600:return(Size(800, 600));break;
-		case RESOLUTION_1024x768:return(Size(1024, 768));break;
-		case RESOLUTION_1280x1024:return(Size(1280, 1024));break;
-//		case RESOLUTION_1600x1200:break;
-		default:return(Size(0,0));break;
-	}
-}
+
 
 void DC::setBitDepth(const eBitDepth bit_depth)
 {
 	setScreen(resolution, bit_depth, surface->flags);
 }
 
-void DC::setResolution(const eResolution current_resolution)
+void DC::setResolution(const Size current_resolution)
 {
 	setScreen(current_resolution, bitDepth, surface->flags);
 }

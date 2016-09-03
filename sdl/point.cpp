@@ -1,13 +1,13 @@
 #include "point.hpp"
 
-void Point::mv(signed int& x, const signed int sx, const signed int tx)
+const bool Point::mv(signed int& x, const signed int sx, const signed int tx)
 {
+	if(x == tx)
+		return(false);
 	if(x > tx)
 		--x;
 	else if(x < tx)
 		++x;
-	if(x == tx)
-		return;
 //	signed int z = (signed int)(((x>sx)?(2*(x-sx)<(tx-sx)?(double)(x-sx)/2:(double)(tx-x)/2):(2*(x-sx)>(tx-sx)?(double)(x-sx)/2:(double)(tx-x)/2)));
 	
 	signed int mx = (tx + sx)/2;
@@ -23,6 +23,7 @@ void Point::mv(signed int& x, const signed int sx, const signed int tx)
 	if(( x <= tx)&&(tx <= mx)&&(mx <= sx)) z = (tx-x)/2;
 
 	x+=z;
+	return(true);
 }	
 
 void Point::mv2(signed int& x, const signed int sx, const signed int tx)

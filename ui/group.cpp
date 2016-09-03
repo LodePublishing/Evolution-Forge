@@ -4,7 +4,7 @@
 UI_Group::UI_Group(UI_Object* group_parent, const Rect& initial_rect, const Size bottom_right_distance, const ePositionMode position_mode, const eString txt ) :
 	UI_Object(group_parent, initial_rect, bottom_right_distance, position_mode, AUTO_SIZE),
 	title(txt==NULL_STRING?NULL:new UI_StaticText(this, txt, Rect(Point(0,0) - Size(3, 14), Size(0,0)), Size(0,0), BRIGHT_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST, AUTO_SIZE)),
-	number(0)
+	highlighted(false)
 { }
 
 UI_Group::~UI_Group() {
@@ -14,7 +14,7 @@ UI_Group::~UI_Group() {
 UI_Group::UI_Group(const UI_Group& object) :
 	UI_Object((UI_Object)object),
 	title(object.title==NULL?NULL:new UI_StaticText(*object.title)),
-	number(object.number)
+	highlighted(false)
 { }
 
 UI_Group& UI_Group::operator=(const UI_Group& object)
@@ -23,7 +23,7 @@ UI_Group& UI_Group::operator=(const UI_Group& object)
 	delete title;
 	if(object.title)
 		title = new UI_StaticText(*object.title);
-	number = object.number;
+	highlighted = object.highlighted;
 	return(*this);
 }
 
@@ -31,62 +31,69 @@ void UI_Group::reloadStrings() {
 	UI_Object::reloadStrings();
 }
 
-
 #include <sstream>
-void UI_Group::calculateBoxSize(const bool horizontal)
+void UI_Group::calculateBoxSize(const eGroupType group_type)
 {
 	UI_Object* tmp = getChildren();
 	if(!tmp)
 		return;
-	number = 0;
+//	resetMinXY();
 	unsigned int maxWidth = 0;
 	unsigned int maxHeight = 0;
-	UI_Object* first_child=NULL;
-	UI_Object* last_child=NULL;
+	unsigned int i = 0;
+	do
+	{
+		if((tmp==title)||(!tmp->isShown())) 
+		{
+			tmp=tmp->getNextBrother();
+			continue;
+		}
+		switch(group_type)
+		{
+			case CUSTOM_GROUP:break;
+			case ONE_COLOUMN_GROUP:
+			{
+				tmp->setOriginalPosition(Point(0, i*(tmp->getHeight()+tmp->getDistanceBottomRight().GetHeight())));
+				i++;
+			}break;			 
+			case TWO_COLOUMNS_GROUP:
+			{
+				tmp->setOriginalPosition(Point((i%2) * (tmp->getWidth() + tmp->getDistanceBottomRight().GetWidth() + 5), (i/2)*(tmp->getHeight()+tmp->getDistanceBottomRight().GetHeight()+5)));
+				i++;
+			}break;
+			case HORIZONTAL_GROUP:
+			{
+				tmp->setOriginalPosition(Point(i * (tmp->getWidth() + tmp->getDistanceBottomRight().GetWidth()), 0));
+				i++;
+			}break;	
+		}
+		tmp=tmp->getNextBrother();
+	} while(tmp!=getChildren());
+	
+	tmp = getChildren();
 	do
 	{
 		if((tmp->isShown())&&(tmp!=title))
 		{
-			if(maxWidth < tmp->getWidth())
-			{
-				maxWidth = tmp->getWidth();
-				number++;
-				if(maxHeight < tmp->getHeight())
-					maxHeight = tmp->getHeight();
-			} else 
-			if(maxHeight < tmp->getHeight())
-			{
-				maxHeight = tmp->getHeight();
-				number++;
-			} else
-				number++;
-			if(first_child==NULL)
-				first_child = tmp;
-			last_child = tmp;
-			
+//			tmp->adjustPositionAndSize(ADJUST_ONLY_POSITION);
+			if(maxWidth < tmp->getRelativeRightBound())
+				maxWidth = tmp->getRelativeRightBound();
+			if(maxHeight < tmp->getRelativeLowerBound())
+				maxHeight = tmp->getRelativeLowerBound();
 		}
 		tmp = tmp->getNextBrother();
 	} while(tmp!=getChildren());
-	Size s;
-	if(horizontal)
-		s = Size((maxWidth + 5) * number, maxHeight+10);
-	else
-	{
-		if(first_child == NULL)
-			s =  Size(maxWidth + 15, 20);
-		else
-			s =  Size(maxWidth + 15, last_child->getAbsoluteLowerBound() - first_child->getAbsoluteUpperBound() + 10);
-	}
+	Size s = Size(maxWidth + 10, maxHeight + 10);
 
-	adjustRelativeRect(Rect(getTargetPosition(), s));
-//	adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, Size(maxWidth + 5, getChildren()->getPrevBrother()->getAbsoluteLowerBound() - getChildren()->getAbsoluteUpperBound()));
+//	adjustRelativeRect(Rect(getTargetPosition(), s));
+	adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, s);//Size(maxWidth + 5, getChildren()->getPrevBrother()->getAbsoluteLowerBound() - getChildren()->getAbsoluteUpperBound()));
 }
 
 void UI_Group::draw(DC* dc) const
 {
-	if((checkForNeedRedraw())&&(number>=1))
+	if(checkForNeedRedraw())
 	{
-		if(getAbsoluteRect().Inside(mouse))
+		if(highlighted)
 			dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 		else	
 			dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
@@ -115,7 +122,20 @@ void UI_Group::process()
 //	if(!isShown())
 //		return; //?
 	UI_Object::process();
-	
+
+	if(getAbsoluteRect().Inside(mouse))
+	{
+		if(!highlighted)
+		{
+			highlighted = true;
+			setNeedRedrawNotMoved();
+		}
+	} else
+		if(highlighted)
+		{
+			setNeedRedrawNotMoved();
+			highlighted = false;
+		}
 	
 /*	UI_Object* tmp = getChildren();
 	if(!tmp)

@@ -292,7 +292,7 @@ void ForceEntry::setTotalNumber(const unsigned int total_number)
 	{
 		highlight = 50;
 		if((goal)&&(totalNumber < goal->getCount())&&(total_number >= goal->getCount()))
-			doCompleteSound = true;
+			UI_Object::theme.playSound(COMPLETE_SOUND, (getAbsolutePosition() + getSize()/2).x);
 		totalNumber = total_number;
 	}
 }
@@ -303,7 +303,6 @@ unsigned int ForceEntry::forceEntryUnit = 0;
 unsigned int ForceEntry::forceEntryLocation = 0;
 unsigned int ForceEntry::forceEntryTime = 0;
 signed int ForceEntry::forceEntryCount = 0;
-bool ForceEntry::doCompleteSound = false;
 
 UI_Button* ForceEntry::makeTimeGoalButton = NULL;
 UI_NumberField* ForceEntry::timeEntryBox = NULL;

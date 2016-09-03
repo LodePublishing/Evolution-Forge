@@ -171,7 +171,7 @@ MapWindow::MapWindow(UI_Object* mapwindow_parent):
 	menuRadio->addButton(menuButton[MAPWINDOW_RESET_BUTTON], 1);
 	menuRadio->addButton(menuButton[MAPWINDOW_LOAD_BUTTON], 2);
 	menuRadio->addButton(menuButton[MAPWINDOW_SAVE_BUTTON], 3);
-	menuRadio->calculateBoxSize(true);
+	menuRadio->calculateBoxSize(HORIZONTAL_GROUP);
 	addHelpButton(DESCRIPTION_MAP_WINDOW_CHAPTER);
 }
 
@@ -202,7 +202,7 @@ void MapWindow::reloadOriginalSize()
 	mapSettings->calculateBoxSize();
 	locationSettings->calculateBoxSize();
 	playerSettings->calculateBoxSize();
-	menuRadio->calculateBoxSize(true);
+	menuRadio->calculateBoxSize(HORIZONTAL_GROUP);
 	locationContents->calculateBoxSize();
 }
 
@@ -322,7 +322,7 @@ void MapWindow::process()
 	mapSettings->calculateBoxSize();
 	locationSettings->calculateBoxSize();
 	playerSettings->calculateBoxSize();
-	menuRadio->calculateBoxSize(true);
+	menuRadio->calculateBoxSize(HORIZONTAL_GROUP);
 	locationContents->calculateBoxSize();
 
 //	for(unsigned int i = maxPlayer->getNumber();i--;)

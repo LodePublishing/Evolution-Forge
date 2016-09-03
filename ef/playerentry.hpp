@@ -66,7 +66,7 @@ class PlayerEntry : public UI_Object
 		eScoreMode scoreMode;
 		UI_StaticText* playerText;
 		UI_Button* currentActionButton;
-		UI_Radio* menuRadio;
+//		UI_Radio* menuRadio;
 		UI_Button* raceMenuButton;
 		RaceMenu* raceMenu;
 		UI_Button* removePlayerButton;

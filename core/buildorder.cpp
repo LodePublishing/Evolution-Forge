@@ -29,7 +29,7 @@ BUILDORDER::BUILDORDER(const BUILDORDER& object) :
 
 void BUILDORDER::resetData()
 {
-	PREBUILDORDER::resetPrerace();
+	PREBUILDORDER::resetData();
 	mutationRate = 20;
 	pFitness = 0;
 	tFitness = 99999;

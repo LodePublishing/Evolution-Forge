@@ -36,13 +36,12 @@ struct NEED
 		unsigned int prerequisite; // we need all... no double?
 };
 
-
 class GOAL_ENTRY
 {
 	private:
-		unsigned int number; // to look up in the goal name list //???? TODO
 		std::string name;
 		eRace race;
+		
 		unsigned int maxBuildTypes;
 		const UNIT_STATISTICS* pStats;
 //		bool initialized;

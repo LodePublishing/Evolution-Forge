@@ -1,7 +1,7 @@
 #include "bowindow.hpp"
 #include "../core/database.hpp"
 #include "savebox.hpp"
-
+/*
 BoWindow::BoWindow(const BoWindow& object) : 
 	UI_Window((UI_Window)object),
 	anarace(object.anarace),
@@ -13,7 +13,6 @@ BoWindow::BoWindow(const BoWindow& object) :
 	lastBogoal(object.lastBogoal),
 	startLine(0),
 	selectedItem(0),
-	newItem(false),
 	saveBuildOrderButton(new UI_Button(*(object.saveBuildOrderButton))),
 	loadBuildOrderButton(new UI_Button(*(object.loadBuildOrderButton))),
 	boMenu(new BoMenu(this, Rect(10, 40, 100, 0), Size(0,0), DO_NOT_ADJUST)),
@@ -33,7 +32,6 @@ BoWindow& BoWindow::operator=(const BoWindow& object)
 	lastBogoal = object.lastBogoal;
 	startLine = 0;
 	selectedItem = 0;
-	newItem = false;
 	delete saveBuildOrderButton;
 	saveBuildOrderButton = new UI_Button(*(object.saveBuildOrderButton));
 	delete loadBuildOrderButton;
@@ -43,10 +41,10 @@ BoWindow& BoWindow::operator=(const BoWindow& object)
 	saveBox = NULL;
 //	fixed = object.fixed;
 	return(*this);
-}
+}*/
 
-BoWindow::BoWindow(UI_Object* bo_parent, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_players) :
-	UI_Window(bo_parent, BOWINDOW_TITLE_STRING, theme.lookUpPlayerRect(BUILD_ORDER_WINDOW, game_number, max_games, player_number, max_players), theme.lookUpPlayerMaxHeight(BUILD_ORDER_WINDOW, game_number, max_games, player_number, max_players), SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0, 30, 1000, 1000)),
+BoWindow::BoWindow(UI_Object* bo_parent, const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max) :
+	UI_Window(bo_parent, BOWINDOW_TITLE_STRING, theme.lookUpPlayerRect(BUILD_ORDER_WINDOW, game_number, game_max, player_number, player_max), theme.lookUpPlayerMaxHeight(BUILD_ORDER_WINDOW, game_number, game_max, player_number, player_max), SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0, 30, 1000, 1000)),
 	anarace(NULL),
 	moveTarget(),
 	optimizeMode(0),
@@ -57,8 +55,7 @@ BoWindow::BoWindow(UI_Object* bo_parent, const unsigned int game_number, const u
 	boGoalListOpened(0),
 	lastBogoal(0),
 	startLine(0),
-	selectedItem(0),
-	newItem(false),
+	selectedItems(),
 	restartBuildOrderButton(new UI_Button(this, Rect(Point(10,15), Size(0,0)), Size(5,5), REFRESH_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, ARRANGE_TOP_LEFT)),
 	saveBuildOrderButton(new UI_Button(this, Rect(Point(10,15), Size(0,0)), Size(5,5), SAVE_BUTTON, true, STATIC_BUTTON_MODE, NULL_STRING, ARRANGE_TOP_LEFT)),
 	loadBuildOrderButton(new UI_Button(this, Rect(Point(10,15), Size(0,0)), Size(5,5), LOAD_BUTTON, true, STATIC_BUTTON_MODE, NULL_STRING, ARRANGE_TOP_LEFT)),
@@ -68,8 +65,13 @@ BoWindow::BoWindow(UI_Object* bo_parent, const unsigned int game_number, const u
 //	unitMenuButton(new UI_Button(this, Rect(Point(0, 0), Size(50,0)), Size(0,0), MY_BUTTON, true, STATIC_BUTTON_MODE, ADD_GOAL_STRING, DO_NOT_ADJUST, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 //	unitMenu(new UnitMenu(unitMenuButton, Rect(100, 0, 100, 0), Size(0,0), DO_NOT_ADJUST)),
 	boMenu(new BoMenu(this, Rect(10, 40, 100, 0), Size(0,0), DO_NOT_ADJUST)),
-	saveBox(NULL)
+	saveBox(NULL),
 //	fixed(fixed_list)
+	gameNumber(game_number),
+	gameMax(game_max),
+	playerNumber(player_number),
+	playerMax(player_max)
+
 {
 	for(unsigned int i = MAX_TIME/60;i--;)
 		timeSlot[i]=NULL;
@@ -103,8 +105,21 @@ BoWindow::~BoWindow()
 	delete boMenu;
 }
 
+void BoWindow::setMode(const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max)
+{
+	if((game_number == gameNumber) && (game_max == gameMax) && (player_number == playerNumber) && (player_max == playerMax))
+		return;
+	gameNumber = game_number;
+	gameMax = game_max;
+	playerNumber = player_number;
+	playerMax = player_max;
+}
+
+
 void BoWindow::reloadOriginalSize()
 {
+	setOriginalRect(UI_Object::theme.lookUpPlayerRect(BUILD_ORDER_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
+	setMaxHeight(UI_Object::theme.lookUpPlayerMaxHeight(BUILD_ORDER_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
 	UI_Window::reloadOriginalSize();
 	
 	alwaysBuildWorker->setOriginalSize(Size(getWidth()-20, 0));
@@ -136,7 +151,7 @@ void BoWindow::resetData()
 									
 //	for(i=0;i<MAX_LENGTH;++i)
 //		selection[i]=1;
-	Rect edge = Rect(getRelativeClientRectPosition()+Point(4, 3*(FONT_SIZE+6)), Size(getWidth()-20, FONT_SIZE+5));
+	Rect edge = Rect(getRelativeClientRectPosition()+Point(2, 3*(FONT_SIZE+6)), Size(getWidth()-20, FONT_SIZE+5));
 	fitItemToRelativeClientRect(edge, 1);
 	processList();
 
@@ -158,16 +173,6 @@ void BoWindow::closeMenus()
 	boMenu->close();
 }
 
-void BoWindow::wave(SDL_snd& sound)
-{
-	if(newItem)
-	{
-		newItem = false;
-		sound.play(UI_Object::theme.lookUpSound(SWISHIN_SOUND));
-	}
-	UI_Window::wave(sound);
-}
-
 #include <sstream>
 // eigene processList machen falls anarace sich sicher nicht veraendert hat (optimieren = aus)
 void BoWindow::processList()
@@ -177,6 +182,8 @@ void BoWindow::processList()
 	if(anarace==NULL) return;
 	setNeedRedrawNotMoved();
 	
+	bool new_item = false;
+	bool deleted_item = false;
 	unsigned int last_time = 0;
 
 	std::list<PROGRAM> temp_program_list = anarace->getProgramList();
@@ -276,7 +283,7 @@ void BoWindow::processList()
 	moveTarget = Rect(0, 0, 0, 0);
 	for(std::list<PROGRAM>::iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order, ++number)
 	{
-		Rect edge = Rect(getRelativeClientRectPosition()+Point(4, row*(FONT_SIZE+6)), Size(getWidth()-20, FONT_SIZE+5));// TODO
+		Rect edge = Rect(getRelativeClientRectPosition()+Point(2, row*(FONT_SIZE+6)), Size(getWidth()-20, FONT_SIZE+5));// TODO
 
 		if((UI_Button::getCurrentButton()!=NULL)&&(UI_Button::isMoveByMouse()))
 		{
@@ -297,7 +304,7 @@ void BoWindow::processList()
 				order = anarace->getProgramList().insert(order, o);
 				
 				BoEntry* t = new BoEntry((UI_Object*)getScrollBar(), Point(UI_Object::max_x, getRelativeClientRectPosition().y+205), Size(5,5),
-				UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()+UNIT_NULL_STRING)), *order); // (*anarace->getStartCondition())->getRace()?
+				UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit())), *order); // (*anarace->getStartCondition())->getRace()?
 				entry = boList.insert(entry, t);
 				addUnit=-1;
 				unitMenu->Hide();
@@ -329,18 +336,20 @@ void BoWindow::processList()
 			else 
 				timeSlot[last_time/60]->updateText(os.str());
 			timeSlot[last_time/60]->adjustRelativeRect(edge);
-			edge = Rect(getRelativeClientRectPosition()+Point(4, row*(FONT_SIZE+6)), Size(getWidth()-20, FONT_SIZE+5));//(*order)->rect.GetSize());// TODO
+			edge = Rect(getRelativeClientRectPosition()+Point(2, row*(FONT_SIZE+6)), Size(getWidth()-20, FONT_SIZE+5));//(*order)->rect.GetSize());// TODO
 		}
 		fitItemToRelativeClientRect(edge, 1);
 					
 
 		if(entry == boList.end())
 		{
+			signed int x_pos = max_x/2;
+			if((gameMax>1)&&(gameNumber==0)) x_pos = - getWidth() - max_x/2;
 			// wenn nicht optimieren -> anaraceliste loeschen TODO
-			BoEntry* t = new BoEntry((UI_Object*)getScrollBar(), Point(UI_Object::max_x, getRelativeClientRectPosition().y+205), Size(5,5),
+			BoEntry* t = new BoEntry((UI_Object*)getScrollBar(), Point(x_pos, getRelativeClientRectPosition().y+205), Size(5,5),
 			// max size -y? TODO
-				(eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()+UNIT_NULL_STRING), *order, number); // (*anarace->getStartCondition())->getRace()?
-			newItem = true;
+				(eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()), *order, number); // (*anarace->getStartCondition())->getRace()?
+			new_item = true;
 			t->setAllowMoveByMouse();
 			t->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
 			t->adjustRelativeRect(edge);
@@ -370,21 +379,24 @@ void BoWindow::processList()
 				if((edge != old->getTargetRect())&&((UI_Button::getCurrentButton()!=old)||(!UI_Button::isMoveByMouse())))
 				{
 					old->adjustRelativeRect(edge);
-					newItem = true;
+					new_item = true;
 					old->resetGradient();
-				}
+				} else
+					deleted_item = true;
 				old->setNumber(number);
 				old->program = *order;
 			} else // => not found, insert a new one
 			{
-				BoEntry* t = new BoEntry((UI_Object*)getScrollBar(), Point(UI_Object::max_x, getRelativeClientRectPosition().y+205), Size(5,5), (eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()+UNIT_NULL_STRING), *order, number); // (*anarace->getStartCondition())->getRace()?
-				newItem = true;
+				signed int x_pos = max_x/2;
+				if((gameMax>1)&&(gameNumber==0)) x_pos = - getWidth() - max_x/2;
+				BoEntry* t = new BoEntry((UI_Object*)getScrollBar(), Point(x_pos, getRelativeClientRectPosition().y+205), Size(5,5), (eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()), *order, number); // (*anarace->getStartCondition())->getRace()?
+				new_item = true;
 				t->setAllowMoveByMouse();
 				t->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
 				if((edge != t->getTargetRect())&&((UI_Button::getCurrentButton()!=t)||(!UI_Button::isMoveByMouse())))
 				{
 					t->adjustRelativeRect(edge);
-					newItem = true;
+					new_item = true;
 				}
 				entry = boList.insert(entry, t);
 				++entry;
@@ -413,7 +425,7 @@ void BoWindow::processList()
 	}
 
 	++row;
-	Rect edge = Rect(getRelativeClientRectPosition()+Point(4, row*(FONT_SIZE+6)), Size(getWidth()-20, FONT_SIZE+5));// TODO
+	Rect edge = Rect(getRelativeClientRectPosition()+Point(2, row*(FONT_SIZE+6)), Size(getWidth()-20, FONT_SIZE+5));// TODO
 	fitItemToRelativeClientRect(edge, 1);
 
 	for(unsigned int i = (last_time/60)+1;i<MAX_TIME/60;i++)
@@ -426,21 +438,27 @@ void BoWindow::processList()
 	{
 		delete(*entry);
 		entry = boList.erase(entry);
-		
+		deleted_item = true;
 	}
+	if(new_item)
+		UI_Object::theme.playSound(SWISHIN_SOUND, (getAbsolutePosition() + getSize()/2).x);
+	if(deleted_item)
+		UI_Object::theme.playSound(SWISHOUT_SOUND, (getAbsolutePosition() + getSize()/2).x);
+		
 }
 
 
-void BoWindow::setSelected(const unsigned int selected)
+void BoWindow::setSelected(const std::list<unsigned int>& selected)
 {
 	std::list<BoEntry*>::iterator entry = boList.begin();
 	while(entry != boList.end())
 	{
-		if((*entry)->getNumber() == selected)
-		{
-			(*entry)->resetGradient();
-			return;
-		}
+		for(std::list<unsigned int>::const_iterator j = selected.begin(); j != selected.end(); ++j)
+			if((*entry)->getNumber() == *j)
+			{
+				(*entry)->resetGradient();
+//				return;
+			}
 		++entry;
 	}
 
@@ -448,13 +466,13 @@ void BoWindow::setSelected(const unsigned int selected)
 
 void BoWindow::checkForInfoWindow()
 {
-	selectedItem = -1;
+	selectedItems.clear();
 	std::list<BoEntry*>::iterator entry = boList.begin();
 	while(entry != boList.end())
 	{
 		if((*entry)->isCurrentlyHighlighted())
 		{
-			selectedItem = (*entry)->getNumber();
+			selectedItems.push_back((*entry)->getNumber());
 			return;
 		}
 		++entry;
@@ -828,7 +846,12 @@ void BoWindow::process()
 			if(saveBox->getString().length()>0)
 			{
 				UI_Object::focus = NULL;
-				BUILD_ORDER my_bo_list(anarace->getRace(), *anarace->getGoal(), saveBox->getString(), anarace->getRealTimer(), anarace->getProgramList());
+
+				BO_HEADER bo_header;
+				bo_header.setRace(anarace->getRace());
+				bo_header.setName(saveBox->getString());
+				bo_header.setTime(anarace->getRealTimer());
+				BUILD_ORDER my_bo_list(bo_header, *anarace->getGoal(),  anarace->getProgramList());
 				
 				database.saveBuildOrder(saveBox->getString(), my_bo_list);
 				boMenu->resetData();

@@ -3,7 +3,8 @@
 
 # --- Races ---
 
-@STARTCONDITIONS "Protoss"
+@STARTCONDITIONS
+	"Race" = "Protoss"
 	"Name" = "Default Protoss start"
 	"Minerals" = "50"
 	"Gas" = "0"

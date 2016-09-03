@@ -170,7 +170,7 @@ void UI_Object::reloadOriginalSize()
 void UI_Object::adjustPositionAndSize(const eAdjustMode adjust_mode, const Size& size)
 {
 //	UI_Object::addToProcessArray(this);
-	sizeHasChanged = false;
+//	sizeHasChanged = false; ?
 	signed int left = originalRect.GetLeft();
 	signed int top = originalRect.GetTop();
 	unsigned int full_width;
@@ -271,6 +271,7 @@ void UI_Object::adjustPositionAndSize(const eAdjustMode adjust_mode, const Size&
 			}
 		}break;
 		case ARRANGE_TOP_RIGHT:
+		// TODO: Wird irgendwie beim Erstaufruf falsch (getmintoprightx mit falschem Wert initialisiert?)
 		{
 			if(getParent())
 			{
@@ -433,18 +434,26 @@ void UI_Object::process()
 //	if (!isShown()) //~~
 //		return;
 
-	if(uiConfiguration.isSmoothMovements())
+	if(startRect != targetRect)
 	{
-		if(relativeRect.moveSmooth(startRect, targetRect))
-			setNeedRedrawMoved();
+		if(uiConfiguration.isSmoothMovements())
+		{
+
+			if(relativeRect.moveSmooth(startRect, targetRect))
+			{
+				setNeedRedrawMoved();
+			}
+		}
+		else 
+		{
+			if(relativeRect.move(startRect, targetRect))
+			{
+				setNeedRedrawMoved();
+			}
+		}
+		if(oldSize != relativeRect.GetSize())
+			sizeHasChanged=true;
 	}
-	else 
-	{
-		if(relativeRect.move(startRect, targetRect))
-			setNeedRedrawMoved();
-	}
-	if(oldSize != relativeRect.GetSize())
-		sizeHasChanged=true;
 
 	if(sizeHasChanged==true)
 	{
@@ -554,22 +563,14 @@ void UI_Object::draw(DC* dc) const
 	}
 }
 
-void UI_Object::wave(SDL_snd& sound)
-{
-	if(!isShown())
-		return;
-	UI_Object* tmp = children;
-	if (tmp) {
-		do {
-			tmp->wave(sound);
-			tmp = tmp->nextBrother;
-		} while (tmp != children);
-	}
-}
-
 void UI_Object::setOriginalRect(const Rect& rect) {
 	originalRect = rect;
 	setRect(rect);
+}
+
+const bool UI_Object::isMoving() const
+{
+	return((isShown())&&(relativeRect.GetLeft() != targetRect.GetLeft()));
 }
 
 void UI_Object::setRect(const Rect& rect) 
@@ -591,7 +592,7 @@ void UI_Object::setPosition(const Point& position)
 #ifdef _SCC_DEBUG
 	if((position.y > 900000)||(position.x > 900000))
 	{
-		toLog("DEBUG: (UI_Object::setPosition): Value position out of range.");return;
+		toLog("DEBUG (UI_Object::setPosition()): Value position out of range.");return;
 	}
 #endif
 	startRect.SetTopLeft(position);
@@ -634,6 +635,7 @@ void UI_Object::setSize(const Size size)
 	relativeRect.SetSize(size);
 	startRect.SetSize(size);
 	targetRect.SetSize(size);
+	
 	setNeedRedrawNotMoved(); // TODO Wenns kleiner wird!
 }
 
@@ -720,6 +722,15 @@ void UI_Object::setNeedRedrawNotMoved(const bool need_redraw)
                         tmp = tmp->nextBrother;
                 } while (tmp != children);
         }
+}
+
+void UI_Object::makeFirstChild()
+{
+	if((!getParent())||((getParent()->children == this)&&(getParent()->children->getNextBrother() == this)))
+		return;
+	UI_Object* old_parent = getParent();
+	removeFromFamily();
+	setParent(old_parent);
 }
 
 void UI_Object::setNeedRedrawNotMovedFirstChild(const bool need_redraw)
@@ -905,7 +916,7 @@ UI_EditField* UI_Object::getEditField()
 //std::list<UI_EditField*>::iterator UI_Object::editField;
 //UI_Object* hotkey[300];
 
-UI_Object* UI_Object::focus;
+UI_Object* UI_Object::focus(NULL);
 
 //unsigned int UI_Object::key;
 

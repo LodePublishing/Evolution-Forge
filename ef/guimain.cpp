@@ -3,8 +3,9 @@
 #include "../ui/tooltip.hpp"
 #include "configuration.hpp"
 
-Main::Main(DC* dc, SDL_snd& sound):
+Main::Main():
 	mainWindow(NULL),
+	introWindow(NULL),
 	helpWindow(NULL),
 	settingsWindow(NULL),
 	dataBaseWindow(NULL),
@@ -13,47 +14,61 @@ Main::Main(DC* dc, SDL_snd& sound):
 	gameCount(0),
 	currentTab(0)
 {
-// ----- INITIALIZE DATABASE -----	
+	for(unsigned int i = MAX_TABS;i--;)
+	{
+		tabToGameList[i] = -1;
+		tabToSplitGameList[i] = -1;
+	}
+	
+	for(unsigned int i = MAX_GAME;i--;)
+		game[i]=NULL;
+}
+
+const bool Main::initGUI(DC* dc)
+{
 	toLog(UI_Object::theme.lookUpString(START_LOAD_UI_BITMAPS_FONTS_STRING));
 #ifdef __linux__
-	UI_Object::theme.loadData("settings/ui/default.ui", "data/bitmaps/", "data/sounds/", "data/fonts/", dc, sound);
-	UI_Object::theme.loadWindowData("settings/ui/windows.ui", 0, 1);
-	UI_Object::theme.loadWindowData("settings/ui/split_windows.ui", 0, 2);
-	UI_Object::theme.loadWindowData("settings/ui/split_windows.ui", 1, 2);
+	UI_Object::theme.loadData("settings/ui/default.ui", "data/bitmaps/", "data/sounds/", "data/fonts/", dc);
+	UI_Object::theme.loadWindowDataFile("settings/ui/windows.ui", 0, 1);
+	UI_Object::theme.loadWindowDataFile("settings/ui/split_windows.ui", 0, 2);
+	UI_Object::theme.loadWindowDataFile("settings/ui/split_windows.ui", 1, 2);
 #elif __WIN32__
-	UI_Object::theme.loadData("settings\\ui\\default.ui", "data\\bitmaps\\", "data\\sounds\\", "data\\fonts\\", dc, sound);
-	UI_Object::theme.loadWindowData("settings\\ui\\windows.ui", 0, 1);
-	UI_Object::theme.loadWindowData("settings\\ui\\split_windows.ui", 0, 2);
-	UI_Object::theme.loadWindowData("settings\\ui\\split_windows.ui", 1, 2);
+	UI_Object::theme.loadData("settings\\ui\\default.ui", "data\\bitmaps\\", "data\\sounds\\", "data\\fonts\\", dc);
+	UI_Object::theme.loadWindowDataFile("settings\\ui\\windows.ui", 0, 1);
+	UI_Object::theme.loadWindowDataFile("settings\\ui\\split_windows.ui", 0, 2);
+	UI_Object::theme.loadWindowDataFile("settings\\ui\\split_windows.ui", 1, 2);
 #endif
-	toLog(UI_Object::theme.lookUpString(START_UI_BITMAPS_FONTS_LOADED_STRING));
-	
-	loadHarvestData();
-	loadMaps();
-	
-	loadStartConditions();
-	loadGoals();
-	loadBuildOrders();
 
-// goal beschreibt Rasse, Ziele und Modus
-	
-// Map in "map.txt" is now map[0]
-// choose the first map we loaded (map[0])
-// ----- END OF INITIALIZING DATABASE -----
+// ----- INITIALIZING WINDOWS -----
+	toLog(UI_Object::theme.lookUpString(START_INIT_GUI_STRING)); // ? TODO
 
-	toLog(UI_Object::theme.lookUpString(START_INIT_GUI_STRING));
-	
+	toLog("* " + UI_Object::theme.lookUpString(START_INIT_MAIN_WINDOW_STRING));
 	mainWindow = new MainWindow();
-	introWindow = new IntroWindow(mainWindow);
-	helpWindow = new HelpWindow(mainWindow);
-	settingsWindow = new SettingsWindow(mainWindow);
-	dataBaseWindow = new DataBaseWindow(mainWindow);
-	mapWindow = new MapWindow(mainWindow);
-	Main::msgWindow = new MessageWindow(mainWindow);
-	ForceWindow::techTreeWindow = new TechTreeWindow(mainWindow);
-	ForceWindow::techTreeWindow->Hide();
 	
-	mainWindow->Show();
+	toLog("* " + UI_Object::theme.lookUpString(START_INIT_HELP_WINDOW_STRING));
+	helpWindow = new HelpWindow(mainWindow);
+	
+	toLog("* " + UI_Object::theme.lookUpString(START_INIT_SETTINGS_WINDOW_STRING));
+	settingsWindow = new SettingsWindow(mainWindow);
+	
+	toLog("* " + UI_Object::theme.lookUpString(START_INIT_DATABASE_WINDOW_STRING));
+	dataBaseWindow = new DataBaseWindow(mainWindow);
+	
+	toLog("* " + UI_Object::theme.lookUpString(START_INIT_MAP_WINDOW_STRING));
+	mapWindow = new MapWindow(mainWindow);
+	
+	toLog("* " + UI_Object::theme.lookUpString(START_INIT_MSG_WINDOW_STRING));
+	Main::msgWindow = new MessageWindow(mainWindow);
+	
+	toLog("* " + UI_Object::theme.lookUpString(START_INIT_TECHTREE_WINDOW_STRING));
+	ForceWindow::techTreeWindow = new TechTreeWindow(mainWindow);
+	
+	toLog("* " + UI_Object::theme.lookUpString(START_INIT_INTRO_WINDOW_STRING));
+	introWindow = new IntroWindow(NULL);
+	
+	toLog("* " + UI_Object::theme.lookUpString(START_HIDING_WINDOWS_STRING));
+	ForceWindow::techTreeWindow->Hide();
+	mainWindow->Hide();
 	introWindow->Show();
 	helpWindow->Hide();
 	settingsWindow->Hide();
@@ -63,21 +78,56 @@ Main::Main(DC* dc, SDL_snd& sound):
 	msgWindow->addMessage(UI_Object::theme.lookUpString(WELCOME_MSG1_STRING));
 	msgWindow->addMessage(UI_Object::theme.lookUpString(WELCOME_MSG2_STRING));
 	msgWindow->addMessage("Visit www.clawsoftware.de - - - ");
+// ----- END INITIALIZING WINDOWS -----
 
-	for(unsigned int i = MAX_TABS;i--;)
+	return(true); // TODO
+}
+
+
+const bool Main::initCore()
+{
+// ----- INITIALIZE DATABASE -----	
+	toLog(UI_Object::theme.lookUpString(START_INIT_CORE_STRING));
+
+	if(!loadHarvestData())
 	{
-		tabToGameList[i] = -1;
-		tabToSplitGameList[i] = -1;
+		toLog("ERROR (Main::init()): Harvest data was not successfully initialized.");
+		return(false);
+	}
+
+	if(!loadMaps())
+	{
+		toLog("ERROR (Main::init()): Map data was not successfully initialized.");
+		return(false);
 	}
 	
-	for(unsigned int i = MAX_GAME;i--;)
-		game[i]=NULL;
-	initializeGame(0);
+	if(!loadStartConditions())
+	{
+		toLog("ERROR (Main::init()): Start conditions were not successfully initialized.");
+		return(false);
+	}
+	
+	if(!loadGoals())
+	{
+		toLog("ERROR (Main::init()): Goals were not successfully initialized.");
+		return(false);
+	}
+	
+	if(!loadBuildOrders())
+	{
+		toLog("ERROR (Main::init()): Build orders were not successfully initialized.");
+		return(false);
+	}
+
+// ----- END OF INITIALIZING DATABASE -----
+
+	return(true);
 }
 
 void Main::reloadOriginalSize()
 {
 	mainWindow->reloadOriginalSize();
+	introWindow->reloadOriginalSize();
 	ForceWindow::techTreeWindow->reloadOriginalSize();
 }
 
@@ -99,7 +149,8 @@ void Main::initializeGame(const unsigned int tab_number)
 			break;
 	if(game_number == MAX_GAME)
 		return;
-	
+
+	toLog("* Choosing game tab...");
 
 	if(tabToGameList[tab_number]>=0)
 	{
@@ -111,9 +162,19 @@ void Main::initializeGame(const unsigned int tab_number)
 			// => schon besetzt! Fehler!
 		} else
 		{
-			game_nr = 1;
+//			if(is_compare_mode)
+//			{
+//				compareWindow initialisieren (links)
+//				...
+//				oder doch eigenes? ueber tabs compare? 
+//				naja... vergleicht ja nicht mit aktuellem game
+//				sondern schmeisst das game raus und guggt sich gespeicherte spiele an...
+//				ok -> auf comparetab!
+//			}
+			
+			game_nr = 0;
 			game_max = 2;
-			game[tabToGameList[tab_number]]->setMode(0, game_max);
+			game[tabToGameList[tab_number]]->setMode(1, game_max);
 			tabToSplitGameList[tab_number] = game_number;
 			// => als split window hernehmen!
 		}
@@ -126,25 +187,40 @@ void Main::initializeGame(const unsigned int tab_number)
 		mainWindow->addNewGameTab();
 		mainWindow->forcePressTab(tab_number);
 	}
+	toLog("* Creating game...");
 	game[game_number] = new Game(mainWindow, game_nr, game_max); // TODO
+	toLog("* Assigning map...");
 	game[game_number]->assignMap(database.getMap(0));
+	toLog("* Assigning start condition...");
 	game[game_number]->assignStartCondition(1, database.getStartCondition(TERRA, 0)); // <- evtl auswaehlen... jo, aber erst spaeter einbauen TODO
+	toLog("* Setting race...");
 	game[game_number]->setStartRace(1, TERRA); // <- ok
+	toLog("* Assigning goal...");
 	game[game_number]->assignGoal(1, database.getGoal(TERRA, 0)); // <- immer auf 0 setzen
+	toLog("* Creating start units...");
 	game[game_number]->fillGroups();
+	toLog("* Assigning harvest speed...");
 	game[game_number]->setHarvestSpeed(1, TERRA, database.getHarvestSpeed(TERRA, 0));
 	game[game_number]->setHarvestSpeed(1, PROTOSS, database.getHarvestSpeed(PROTOSS, 0));
 	game[game_number]->setHarvestSpeed(1, ZERG, database.getHarvestSpeed(ZERG, 0));
 
+	toLog("* Setting start position...");
 	game[game_number]->setStartPosition(1, 1); // <- TODO
+
+	toLog("* Creating initial set of build orders...");
 	game[game_number]->initSoup();
+
+	toLog("* Measuring fitness of first generation...");
 	game[game_number]->newGeneration();
+
+	toLog("* Showing game information...");
 	game[game_number]->Show();
 }
 
 
 Main::~Main()
 {
+	toLog("* Freeing windows...");
 	delete mainWindow;
 	delete introWindow;
 	delete ForceWindow::techTreeWindow;
@@ -153,6 +229,7 @@ Main::~Main()
 	delete settingsWindow;
 	delete dataBaseWindow;
 	delete mapWindow;
+	toLog("* Freeing games...");
 	for(unsigned int i=MAX_GAME;i--;)
 		delete game[i];
 }
@@ -177,8 +254,6 @@ void Main::resetDataChange()
 
 void Main::process()
 {
-	if(!introWindow->isShown())
-		mainWindow->Show();
 	UI_Window::gotoHelpChapter = -1;
 	mainWindow->resetMinXY();
 //	ForceWindow::techTreeWindow->Hide();
@@ -194,11 +269,13 @@ void Main::process()
 		i = UI_Object::msgList.erase(i);
 	}
 
-	if(!introWindow->isShown())
-	{
-		mainWindow->process();
-	} else
+	if(introWindow->isShown())
 		introWindow->process();
+	else
+	{
+		mainWindow->Show();
+		mainWindow->process();
+	}
 
 	if((UI_Object::tooltip)&&(UI_Object::toolTipParent->checkForNeedRedraw()))
 		UI_Object::tooltip->setNeedRedrawNotMoved();
@@ -241,10 +318,6 @@ void Main::process()
 		helpWindow->gotoChapter(UI_Window::gotoHelpChapter);
 	}
 
-	if(introWindow->isShown())
-	{
-	}
-	else
 	if(mainWindow->getCurrentTab()>=0)
 	{
 		currentTab = mainWindow->getCurrentTab();
@@ -302,11 +375,13 @@ void Main::process()
 					initializeGame(currentTab);
 			break;
 		} // end switch getCurrentTabs
+		msgWindow->makeFirstChild();
 	}
 	
 	if((tabToGameList[currentTab]>=0)&&(game[tabToGameList[currentTab]]->isSplitGame())&&(tabToSplitGameList[currentTab]==-1))
 	{
 		initializeGame(currentTab);
+		msgWindow->makeFirstChild();
 	}
 
 	if((tabToGameList[currentTab]>=0)&&(game[tabToGameList[currentTab]]->isRemoveGame()))
@@ -395,44 +470,39 @@ void Main::needRedraw()
 		UI_Object::tooltip->setNeedRedrawNotMoved();
 }
 
-
-void Main::wave(SDL_snd& sound)
-{
-	mainWindow->wave(sound);
-}
-
 void Main::draw(DC* dc) const
 {
-	if(mainWindow->isShown())
+	UI_Object::redrawnObjects = 0;
+	bool redraw = mainWindow->checkForNeedRedraw();
+	for(unsigned int i=MAX_GAME;i--;)
+		if((game[i])&&(game[i]->checkForNeedRedraw()))
+			redraw=true;
+	if((UI_Object::tooltip!=NULL)&&(UI_Object::tooltip->checkForNeedRedraw()))
+		redraw=true;
+	if(UI_Object::toolTipWasDeleted)
 	{
-		bool redraw = mainWindow->checkForNeedRedraw();
-		for(unsigned int i=MAX_GAME;i--;)
-			if((game[i])&&(game[i]->checkForNeedRedraw()))
-				redraw=true;
-		if((UI_Object::tooltip!=NULL)&&(UI_Object::tooltip->checkForNeedRedraw()))
-			redraw=true;
-		if(UI_Object::toolTipWasDeleted)
-		{
-			UI_Object::toolTipWasDeleted = false;
-			redraw=true;
-		}
-
-		if(redraw)
-		{
-			SDL_Rect rc;
-			rc.x = 0;rc.y = 0; rc.w = UI_Object::max_x; rc.h = UI_Object::max_y;
-			if(efConfiguration.isBackgroundBitmap())
-				dc->Blit(UI_Object::theme.lookUpBitmap(BACKGROUND_BITMAP), rc);
-			else
-				dc->clearScreen();
-			msgWindow->setNeedRedrawNotMoved();
-			mainWindow->setNeedRedrawNotMoved();
-		}
-		UI_Object::theme.setColorTheme(UI_Object::theme.getMainColorTheme());
+		UI_Object::toolTipWasDeleted = false;
+		redraw=true;
 	}
-	mainWindow->draw(dc);
+
+	if(redraw)
+	{
+		SDL_Rect rc;
+		rc.x = 0;rc.y = 0; rc.w = UI_Object::max_x; rc.h = UI_Object::max_y;
+		if(efConfiguration.isBackgroundBitmap())
+			dc->Blit(UI_Object::theme.lookUpBitmap(BACKGROUND_SC_BITMAP), rc);
+		else
+			dc->clearScreen();
+		msgWindow->setNeedRedrawNotMoved();
+		mainWindow->setNeedRedrawNotMoved();
+	}
+	UI_Object::theme.setColorTheme(UI_Object::theme.getMainColorTheme());
+	
+	if(introWindow->isShown())
+		introWindow->draw(dc);
+	else
+		mainWindow->draw(dc);
 	ForceWindow::techTreeWindow->draw(dc);
-//	introWindow->draw(dc);
 }
 
 										
@@ -509,64 +579,61 @@ const bool Main::newRun()
 	return(false);
 }	
 
-void Main::loadHarvestData()
+const bool Main::loadHarvestData()
 {
-	toLog(UI_Object::theme.lookUpString(START_LOAD_HARVEST_STRING));
-	for(unsigned int i = 0; i < MAX_RACES; ++i)
-	{
-		std::list<std::string> harvestFiles = database.findFiles("settings", "harvest", raceString[i]);
-		for(std::list<std::string>::iterator j = harvestFiles.begin(); j!=harvestFiles.end(); ++j)
-			database.loadHarvestFile(*j);
-	}
-//TODO flag setzen ob was geladen wurde
+	toLog("* " + UI_Object::theme.lookUpString(START_LOAD_HARVEST_STRING));
+	std::list<std::string> harvestFiles = findFiles("settings", "harvest", "");
+	for(std::list<std::string>::iterator j = harvestFiles.begin(); j!=harvestFiles.end(); ++j)
+		database.loadHarvestFile(*j);
+	return(database.isHarvestDataInitialized());
 }
 
-
-void Main::loadStartConditions()
+const bool Main::loadStartConditions()
 {
-	toLog(UI_Object::theme.lookUpString(START_LOAD_STARTCONDITIONS_STRING));
+	toLog("* " + UI_Object::theme.lookUpString(START_LOAD_STARTCONDITIONS_STRING));
 	for(unsigned int i = 0; i < MAX_RACES; ++i)
 	{
-		std::list<std::string> startFiles = database.findFiles("settings", "start", raceString[i]);
+		std::list<std::string> startFiles = findFiles("settings", "start", raceString[i]);
 		for(std::list<std::string>::iterator j = startFiles.begin(); j!=startFiles.end(); ++j)
 			database.loadStartConditionFile(*j);
 	}
-//TODO flag setzen ob was geladen wurde
+	return(database.isStartConditionDataInitialized());
 }
 
-void Main::loadMaps()
+const bool Main::loadMaps()
 {
-	toLog(UI_Object::theme.lookUpString(START_LOAD_MAPS_STRING));
-	std::list<std::string> mapFiles = database.findFiles("settings", "maps");
+	toLog("* " + UI_Object::theme.lookUpString(START_LOAD_MAPS_STRING));
+	std::list<std::string> mapFiles = findFiles("settings", "maps", "");
 	for(std::list<std::string>::iterator j = mapFiles.begin(); j!=mapFiles.end(); ++j)
 		database.loadMapFile(*j);
-//TODO flag setzen ob was geladen wurde
+	return(database.isMapDataInitialized());
 }
 
-void Main::loadGoals()
+const bool Main::loadGoals()
 {
-	toLog(UI_Object::theme.lookUpString(START_LOAD_GOALS_STRING));
+	toLog("* " + UI_Object::theme.lookUpString(START_LOAD_GOALS_STRING));
 	for(unsigned int i = 0; i < MAX_RACES; ++i)
 	{
 		database.addDefaultGoal((eRace)i);
-		std::list<std::string> goalFiles = database.findFiles("settings", "goals", raceString[i]);
+		std::list<std::string> goalFiles = findFiles("settings", "goals", raceString[i]);
 		for(std::list<std::string>::iterator j = goalFiles.begin(); j!=goalFiles.end(); ++j)
-			database.loadGoalFile(*j);
+			if(!database.loadGoalFile(*j))
+				toLog("WARNING (Main::loadGoals()): Goal file " + *j + " could not be loaded => file is ignored.");
 	}
-//TODO flag setzen ob was geladen wurde
+	return(database.isGoalDataInitialized());
 }
 
-void Main::loadBuildOrders()
+const bool Main::loadBuildOrders()
 {
-	toLog(UI_Object::theme.lookUpString(START_LOAD_GOALS_STRING));
+	toLog("* " + UI_Object::theme.lookUpString(START_LOAD_BUILD_ORDERS_STRING));
 	for(unsigned int i = 0; i < MAX_RACES; ++i)
 	{
 //		database.addDefaultBuildOrder((eRace)i); :/ TODO
-		std::list<std::string> boFiles = database.findFiles("output", "bos", raceString[i]);
+		std::list<std::string> boFiles = findFiles("output", "bos", raceString[i]);
 		for(std::list<std::string>::iterator j = boFiles.begin(); j!=boFiles.end(); ++j)
 			database.loadBuildOrderFile(*j);
 	}
-//TODO flag setzen ob was geladen wurde
+	return(database.isBuildOrderDataInitialized());
 }
 
 void Main::leftDown()

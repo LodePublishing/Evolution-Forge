@@ -162,7 +162,7 @@
 		Intro window, 600, 400, 400, dock center inside of, Main window
 		Message window, 200, 75, 75, dock bottom center inside of, Main window
 		Help window, 600, 400, 400, dock center inside of, Main window
-		Settings window, 425, 368, 368, dock center inside of, Main window
+		Settings window, 550, 368, 368, dock center inside of, Main window
 		Map window, 600, 450, 450, dock center inside of, Main window
 		Database window, 600, 450, 450, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
@@ -174,7 +174,7 @@
 		Intro window, 750, 500, 500, dock center inside of, Main window
 		Message window, 250, 100, 100, dock bottom center inside of, Main window
 		Help window, 750, 500, 500, dock center inside of, Main window
-		Settings window, 500, 400, 400, dock center inside of, Main window
+		Settings window, 600, 400, 400, dock center inside of, Main window
 		Database window, 750, 550, 550, dock center inside of, Main window
 		Map window, 750, 550, 550, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
@@ -187,7 +187,7 @@
 		Intro window, 900, 600, 600, dock center inside of, Main window
 		Message window, 300, 125, 125, dock bottom center inside of, Main window
 		Help window, 900, 600, 600, dock center inside of, Main window
-		Settings window, 600, 450, 450, dock center inside of, Main window
+		Settings window, 700, 450, 450, dock center inside of, Main window
 		Database window, 950, 700, 700, dock center inside of, Main window
 		Map window, 950, 700, 700, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
@@ -199,7 +199,7 @@
 		Intro window, 1100, 900, 700, dock center inside of, Main window
 		Message window, 400, 150, 150, dock top center inside of, Main window
 		Help window, 1100, 900, 700, dock center inside of, Main window
-		Settings window, 700, 500, 500, dock center inside of, Main window
+		Settings window, 800, 500, 500, dock center inside of, Main window
 		Database window, 1200, 900, 900, dock center inside of, Main window
 		Map window, 1200, 900, 900, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
@@ -1348,864 +1348,175 @@
 
 @END
 
+
+# TODO: keine einfache Liste sondern Namen fuer die Bilder vergeben, wie bei STRINGS auch... alle nicht aufgefuehrten Namen in zwei Ebenen (Theme und Resolution) aufgeteilten generellen Bitmaps legen.
+
+# bitmaps independant from theme and resolution
+@GENERAL_BITMAPS
+	"NULL_BITMAP" = "null"
+	"INCREASE_BITMAP" = "increase"
+	"SUB_BITMAP" = "sub"
+	"CANCEL_BITMAP" = "cancel"
+	"SMALL_ARROW_LEFT_BITMAP" = "arrow_left"
+	"SMALL_ARROW_RIGHT_BITMAP" = "arrow_right"
+	"SMALL_ARROW_UP_BITMAP" = "arrow_up"
+	"SMALL_ARROW_DOWN_BITMAP" = "arrow_down"
+	"LOCATION_BUTTON_BITMAP" = "location_button"
+	"TIME_BUTTON_BITMAP" = "time_button"
+	"MOUSE_NONE" = "mouse"
+	"MOUSE_LEFT" = "mouse1"
+	"MOUSE_RIGHT" = "mouse2"
+	"MOUSE_BOTH" = "mouse3"
+	"BAR_BITMAP" = "bar.jpg"
+	"KEY_BITMAP" = "key.bmp"
+	"CLAWSOFTWARE_BITMAP" = "clawsoftware.jpg", (SOLID)
+	"CLAWSOFTWARE_MONO_BITMAP" = "clawsoftware.png", (SOLID)
+	"HELP_BITMAP" = "help"
+	"MAP_BITMAP" = "map"
+	"SETTING_BITMAP" = "settings"
+	"SCORE_ACTIVE_BITMAP" = "score_active.jpg"
+	"SCORE_EMPTY_BITMAP" = "score_empty.jpg"
+	"FORCE_WINDOW_BITMAP" = "force_window.jpg"
+	"BODIAGRAM_WINDOW_BITMAP" = "bodiagram_window.jpg"
+	"BOGRAPH_WINDOW_BITMAP" = "bograph_window.jpg"
+	"BO_WINDOW_BITMAP" = "bo_window.jpg"
+	"CLEMENS_BITMAP" = "clemens.jpg"
+
+@END
+
+# bitmaps independant from themes
+@GENERAL_RESOLUTION_BITMAPS
+	@640x480
+		"BACKGROUND_SC_BITMAP" = "back_sc_640.jpg", (SOLID)
+		"BACKGROUND_WH40K_BITMAP" = "back_wh40k_640.jpg", (SOLID)
+		"NEW_BITMAP" = "new_640"
+		"LOAD_BITMAP" = "open_640"
+		"SAVE_BITMAP" = "save_640"
+		"REFRESH_BITMAP" = "refresh_640"
+		"BACK_BITMAP" = "back_640"
+		"FORWARD_BITMAP" = "forward_640"
+		"ADD_BITMAP" = "add_640"
+		"DELETE_BITMAP" = "delete_640"	
+	@END
+	@800x600
+		"BACKGROUND_SC_BITMAP" = "back_sc_800.jpg", (SOLID)
+		"BACKGROUND_WH40K_BITMAP" = "back_wh40k_800.jpg", (SOLID)
+		"NEW_BITMAP" = "new_800"
+		"LOAD_BITMAP" = "open_800"
+		"SAVE_BITMAP" = "save_800"
+		"REFRESH_BITMAP" = "refresh_800"
+		"BACK_BITMAP" = "back_800"
+		"FORWARD_BITMAP" = "forward_800"
+		"ADD_BITMAP" = "add_800"
+		"DELETE_BITMAP" = "delete_800"	
+	@END
+	@1024x768
+		"BACKGROUND_SC_BITMAP" = "back_sc_1024.jpg", (SOLID)
+		"BACKGROUND_WH40K_BITMAP" = "back_wh40k_1024.jpg", (SOLID)
+		"NEW_BITMAP" = "new_1024"
+		"LOAD_BITMAP" = "open_1024"
+		"SAVE_BITMAP" = "save_1024"
+		"REFRESH_BITMAP" = "refresh_1024"
+		"BACK_BITMAP" = "back_1024"
+		"FORWARD_BITMAP" = "forward_1024"
+		"ADD_BITMAP" = "add_1024"
+		"DELETE_BITMAP" = "delete_1024"	
+	@END
+	@1280x1024
+		"BACKGROUND_SC_BITMAP" = "back_sc_1280.jpg", (SOLID)
+		"BACKGROUND_WH40K_BITMAP" = "back_wh40k_1280.jpg", (SOLID)
+		"NEW_BITMAP" = "new_1280"
+		"LOAD_BITMAP" = "open_1280"
+		"SAVE_BITMAP" = "save_1280"
+		"REFRESH_BITMAP" = "refresh_1280"
+		"BACK_BITMAP" = "back_1280"
+		"FORWARD_BITMAP" = "forward_1280"
+		"ADD_BITMAP" = "add_1280"
+		"DELETE_BITMAP" = "delete_1280"	
+	@END
+@END
+
+# bitmaps independant from resolution
+@GENERAL_THEME_BITMAPS
+	@DARK_RED_THEME
+		"RADIO_OFF" = "red_radio_off"
+		"RADIO_ON" = "red_radio_on"
+		"BULLET_BITMAP" = "red_bullet"
+	@END
+
+	@DARK_BLUE_THEME
+		"RADIO_OFF" = "blue_radio_off"
+		"RADIO_ON" = "blue_radio_on"
+		"BULLET_BITMAP" = "blue_bullet"
+	@END
+
+	@YELLOW_THEME
+		"RADIO_OFF" = "yellow_radio_off"
+		"RADIO_ON" = "yellow_radio_on"
+		"BULLET_BITMAP" = "yellow_bullet"
+	@END
+
+	@GREEN_THEME
+		"RADIO_OFF" = "yellow_radio_off"
+		"RADIO_ON" = "yellow_radio_on"
+		"BULLET_BITMAP" = "yellow_bullet"
+	@END
+	
+	@GREY_THEME
+		"RADIO_OFF" = "yellow_radio_off"
+		"RADIO_ON" = "yellow_radio_on"
+		"BULLET_BITMAP" = "yellow_bullet"
+	@END
+@END
+
 @BITMAPS
 	@640x480
 		@DARK_RED_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			red_radio_off
-			red_radio_on
-			back_wh40k_640.jpg, (SOLID)
-			bar.jpg
-			key.bmp
-			clawsoftware.jpg, (SOLID)
-			new_640
-			open_640
-			save_640
-			refresh_640
-			back_640
-			forward_640
-			add_640
-			delete_640
-			help
-			map
-			settings
-			background_640.jpg, (SOLID)
-			red_bullet.bmp
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
-
 		@DARK_BLUE_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			blue_radio_off
-			blue_radio_on
-			back_wh40k_640.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new_640
-			open_640
-			save_640
-			refresh_640
-			back_640
-			forward_640
-			add_640
-			delete_640
-			help
-			map
-			settings
-			background_640.jpg, (SOLID)
-			blue_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
 		@YELLOW_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			yellow_radio_off
-			yellow_radio_on
-			back_wh40k_640.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new_640
-			open_640
-			save_640
-			refresh_640
-			back_640
-			forward_640
-			add_640
-			delete_640
-			help
-			map
-			settings
-			background_640.jpg, (SOLID)
-			yellow_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
-	
 		@GREEN_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			yellow_radio_off
-			yellow_radio_on
-			back_wh40k_640.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new_640
-			open_640
-			save_640
-			refresh_640
-			back_640
-			forward_640
-			add_640
-			delete_640
-			help
-			map
-			settings
-			background_640.jpg, (SOLID)
-			yellow_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
 		@GREY_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			yellow_radio_off
-			yellow_radio_on
-			back_wh40k_640.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new_640
-			open_640
-			save_640
-			refresh_640
-			back_640
-			forward_640
-			add_640
-			delete_640
-			help
-			map
-			settings
-			background_640.jpg, (SOLID)
-			yellow_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
-
 	@END
 	@800x600
 		@DARK_RED_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			red_radio_off
-			red_radio_on
-			background_800.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new_800
-			open_800
-			save_800
-			refresh_800
-			back_800
-			forward_800
-			add_800
-			delete_800
-			help
-			map
-			settings
-			back_wh40k_800.jpg, (SOLID)
-			red_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
-
 		@DARK_BLUE_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			blue_radio_off
-			blue_radio_on
-			background_800.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new_800
-			open_800
-			save_800
-			refresh_800
-			back_800
-			forward_800
-			add_800
-			delete_800
-			help
-			map
-			settings
-			back_wh40k_800.jpg, (SOLID)
-			blue_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
 		@YELLOW_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			yellow_radio_off
-			yellow_radio_on
-			background_800.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new_800
-			open_800
-			save_800
-			refresh_800
-			back_800
-			forward_800
-			add_800
-			delete_800
-			help
-			map
-			settings
-			back_wh40k_800.jpg, (SOLID)
-			yellow_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
 		@GREEN_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			yellow_radio_off
-			yellow_radio_on
-			background_800.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new_800
-			open_800
-			save_800
-			refresh_800
-			back_800
-			forward_800
-			add_800
-			delete_800
-			help
-			map
-			settings
-			back_wh40k_800.jpg, (SOLID)
-			yellow_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
-
 		@GREY_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			yellow_radio_off
-			yellow_radio_on
-			background_800.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new_800
-			open_800
-			save_800
-			refresh_800
-			back_800
-			forward_800
-			add_800
-			delete_800
-			help
-			map
-			settings
-			back_wh40k_800.jpg, (SOLID)
-			yellow_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
-
 	@END
 
 	@1024x768
 		@DARK_RED_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			red_radio_off
-			red_radio_on
-			background_1024.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new_1024
-			open_1024
-			save_1024
-			refresh_1024
-			back_1024
-			forward_1024
-			add_1024
-			delete_1024
-			help
-			map
-			settings
-			back_wh40k_1024.jpg, (SOLID)
-			red_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
-
 		@DARK_BLUE_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			blue_radio_off
-			blue_radio_on
-			background_1024.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new_1024
-			open_1024
-			save_1024
-			refresh_1024
-			back_1024
-			forward_1024
-			add_1024
-			delete_1024
-			help
-			map
-			settings
-			back_wh40k_1024.jpg, (SOLID)
-			blue_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
 		@YELLOW_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			yellow_radio_off
-			yellow_radio_on
-			background_1024.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new_1024
-			open_1024
-			save_1024
-			refresh_1024
-			back_1024
-			forward_1024
-			add_1024
-			delete_1024
-			help
-			map
-			settings
-			back_wh40k_1024.jpg, (SOLID)
-			yellow_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
 		@GREEN_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			yellow_radio_off
-			yellow_radio_on
-			background_1024.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new_1024
-			open_1024
-			save_1024
-			refresh_1024
-			back_1024
-			forward_1024
-			add_1024
-			delete_1024
-			help
-			map
-			settings
-			back_wh40k_1024.jpg, (SOLID)
-			yellow_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
 		@GREY_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			yellow_radio_off
-			yellow_radio_on
-			background_1024.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new_1024
-			open_1024
-			save_1024
-			refresh_1024
-			back_1024
-			forward_1024
-			add_1024
-			delete_1024
-			help
-			map
-			settings
-			back_wh40k_1024.jpg, (SOLID)
-			yellow_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
-
 	@END
 	@1280x1024
 		@DARK_RED_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			red_radio_off
-			red_radio_on
-			background_1280.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new
-			open
-			save
-			refresh
-			back
-			forward
-			add
-			delete
-			help
-			map
-			settings
-			back_wh40k_1280.jpg, (SOLID)
-			red_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
-
 		@DARK_BLUE_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			blue_radio_off
-			blue_radio_on
-			background_1280.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new
-			open
-			save
-			refresh
-			back
-			forward
-			add
-			delete
-			help
-			map
-			settings
-			back_wh40k_1280.jpg, (SOLID)
-			blue_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
 		@YELLOW_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			yellow_radio_off
-			yellow_radio_on
-			background_1280.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new
-			open
-			save
-			refresh
-			back
-			forward
-			add
-			delete
-			help
-			map
-			settings
-			back_wh40k_1280.jpg, (SOLID)
-			yellow_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
 		@GREEN_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			yellow_radio_off
-			yellow_radio_on
-			background_1280.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new
-			open
-			save
-			refresh
-			back
-			forward
-			add
-			delete
-			help
-			map
-			settings
-			back_wh40k_1280.jpg, (SOLID)
-			yellow_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
-
 		@GREY_THEME
-			null
-			increase
-			sub
-			cancel
-			arrow_left
-			arrow_right
-			arrow_up
-			arrow_down
-			location_button
-			time_button
-			mouse
-			mouse1
-			mouse2
-			mouse3
-			yellow_radio_off
-			yellow_radio_on
-			background_1280.jpg, (SOLID)
-			bar.jpg
-			key
-			clawsoftware.jpg, (SOLID)
-			new
-			open
-			save
-			refresh
-			back
-			forward
-			add
-			delete
-			help
-			map
-			settings
-			back_wh40k_1280.jpg, (SOLID)
-			yellow_bullet
-			score_active.jpg
-			score_empty.jpg
-			force_window.jpg
-			bodiagram_window.jpg
-			bograph_window.jpg
-			bo_window.jpg
-			clemens.jpg
 		@END
 	@END
 
@@ -2301,31 +1612,31 @@
 	40, 2,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    2,  2,  2,  2,  2,    2,  2,  2, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,    0,  0,  0,  0,  0
 
 # new button
-	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   20, 20, 20, 20, 20
-# load button
 	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   21, 21, 21, 21, 21
-# save button
+# load button
 	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   22, 22, 22, 22, 22
-# refresh button
+# save button
 	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   23, 23, 23, 23, 23
-# back button
+# refresh button
 	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   24, 24, 24, 24, 24
-# forward button
+# back button
 	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   25, 25, 25, 25, 25
-# add button
+# forward button
 	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   26, 26, 26, 26, 26
-# delete button
+# add button
 	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   27, 27, 27, 27, 27
+# delete button
+	20, 1,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   14, 14, 14, 14, 14,   17, 17, 17, 17, 17,   28, 28, 28, 28, 28
 # help button
-	20, 2,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   28, 28, 28, 28, 28
+	20, 2,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   29, 29, 29, 29, 29
 # help tab
-	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   28, 28, 28, 28, 28
+	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   29, 29, 29, 29, 29
 # database tab
-	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   29, 29, 29, 29, 29
-# map tab
-	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   29, 29, 29, 29, 29
-# settings tab
 	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   30, 30, 30, 30, 30
+# map tab
+	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   30, 30, 30, 30, 30
+# settings tab
+	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,   31, 31, 31, 31, 31
 
 	
 @END
@@ -2354,12 +1665,18 @@
 
 
 @SOUNDS
-	t.wav
-	audiodump.wav
+	click.wav
+	geneti_9.mp3, LOOP
 	mouseover.wav
 	swishin.wav
+	swishout.wav
+	swishlock.wav
+	scorefillend.wav
+	click.wav
 	trescue.wav
 	buzz.wav
+	tmedcure.wav
+	intro.mp3
 @END
 
 

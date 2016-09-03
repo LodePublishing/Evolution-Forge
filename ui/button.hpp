@@ -83,7 +83,6 @@ class UI_Button:public UI_Object
 		void updateText(const std::string& utext);
 		void updateText(const eString utext);
 
-		void wave(SDL_snd& sound);
 		void process(); // process messages, continue animation etc.
 		UI_Object* checkToolTip();
 		UI_Object* checkHighlight();
@@ -131,6 +130,8 @@ class UI_Button:public UI_Object
 		
 		UI_StaticText* getText() const;
 	private:
+		static bool doClickedSound;
+		static bool doClickSound;
 		void setPressDepth(const unsigned int press);
 		bool allowMoveByMouse;
 		static Point mouseMovePoint;
@@ -139,6 +140,8 @@ class UI_Button:public UI_Object
 		static bool currentButtonPressed;
 		static bool currentButtonHasAlreadyLeft;
 		static UI_Button* currentButton;
+
+		static bool doMouseEnterSound;
 	
 		
 		bool moved; // did this item move one pixel down (pressed)

@@ -26,10 +26,14 @@ const float GUI_VERSION=0.51;
 class Main
 {
 	public:
-		Main(DC* dc, SDL_snd& sound);
+		Main();
 		~Main();
+
+		const bool initGUI(DC* dc);
+		const bool initCore();
+		
+		
 		void draw(DC* dc) const;
-		void wave(SDL_snd& sound);
 		
 		void process();
 		void resetData();
@@ -65,8 +69,8 @@ class Main
 
 		void needRedraw();
 	
-	private:
 		void initializeGame(const unsigned int game_number);
+	private:
 		MainWindow* mainWindow;
 		IntroWindow* introWindow;
 		HelpWindow* helpWindow;
@@ -79,11 +83,11 @@ class Main
 //		static InfoWindow* infoWindow;
 		static MessageWindow* msgWindow;
 //		StatisticsWindow* statisticsWindow;
-		void loadGoals();
-		void loadBuildOrders();
-		void loadStartConditions();
-		void loadHarvestData();
-		void loadMaps();
+		const bool loadGoals();
+		const bool loadBuildOrders();
+		const bool loadStartConditions();
+		const bool loadHarvestData();
+		const bool loadMaps();
 
 		signed int tabToGameList[MAX_TABS];
 		signed int tabToSplitGameList[MAX_TABS];

@@ -24,6 +24,7 @@ class BoEntry : public UI_Button
 		PROGRAM program;
 		void setNumber(const unsigned int my_number);
 		const unsigned int getNumber() const;
+		static bool doLockSound;		
 	private:
 		unsigned int number;
 //		bool fixed;

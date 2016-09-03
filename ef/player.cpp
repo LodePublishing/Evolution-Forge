@@ -80,8 +80,8 @@ void Player::drawGene(DC* dc, unsigned int k, const Point* points, const Point p
 
 void Player::drawGeneString(DC* dc) const
 {
-	Rect position = Rect(boWindow->getAbsolutePosition() + Point(boWindow->getWidth() / 2+5, 30), Size(boWindow->getWidth()/2 -15, 2*(FONT_SIZE+10)));
-		//Rect(getAbsolutePosition()+Point(210, 200+anarace->getPlayerNumber()*300), Size(600, 120));
+	Rect position = //Rect(boWindow->getAbsolutePosition() + Point(boWindow->getWidth() / 2+5, 30), Size(boWindow->getWidth()/2 -15, 2*(FONT_SIZE+10)));
+		Rect(getAbsolutePosition()+Point(210, 200), Size(256, 128));
 	dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
 	dc->SetPen(*theme.lookUpPen(BRIGHT_UNIT_TYPE_1_PEN));
 	dc->DrawRectangle(Rect(position.GetTopLeft() - Size(1,2), position.GetSize() + Size(2,4)));
@@ -239,10 +239,16 @@ void Player::process()
 // ------ PROCESS MEMBER VARIABLES ------	
 // ------ END PROCESSING MEMBER VARIABLES ------
 
-	if(boGraphWindow->getSelectedItem() >=0)
-		boWindow->setSelected(boGraphWindow->getSelectedItem());
-	else if(boWindow->getSelectedItem() >= 0)
-		boGraphWindow->setSelected(boWindow->getSelectedItem());
+	if(boGraphWindow->getSelectedItems().size() > 0)
+		boWindow->setSelected(boGraphWindow->getSelectedItems());
+	else if(boWindow->getSelectedItems().size() > 0)
+		boGraphWindow->setSelected(boWindow->getSelectedItems());
+	else if(boDiagramWindow->getSelectedItems().size() > 0)
+	{
+		boWindow->setSelected(boDiagramWindow->getSelectedItems());
+		boGraphWindow->setSelected(boDiagramWindow->getSelectedItems());
+	}
+		
 
 
 }
@@ -255,6 +261,11 @@ void Player::setMode(const unsigned int game_number, const unsigned int game_max
 	gameMax = game_max;
 	playerNumber = player_number;
 	playerMax = player_max;
+	forceWindow->setMode(game_number, game_max, player_number, player_max);
+	boWindow->setMode(game_number, game_max, player_number, player_max);
+	boGraphWindow->setMode(game_number, game_max, player_number, player_max);
+	boDiagramWindow->setMode(game_number, game_max, player_number, player_max);
+	
 	reloadOriginalSize();
 }
 
@@ -263,17 +274,6 @@ void Player::reloadOriginalSize()
 	setOriginalRect(UI_Object::theme.lookUpPlayerRect(PLAYER_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
 //	setMaxHeight(UI_Object::theme.lookUpPlayerMaxHeight(PLAYER_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
 
-	forceWindow->setOriginalRect(UI_Object::theme.lookUpPlayerRect(FORCE_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
-	forceWindow->setMaxHeight(UI_Object::theme.lookUpPlayerMaxHeight(FORCE_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
-
-	boWindow->setOriginalRect(UI_Object::theme.lookUpPlayerRect(BUILD_ORDER_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
-	boWindow->setMaxHeight(UI_Object::theme.lookUpPlayerMaxHeight(BUILD_ORDER_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
-	
-	boGraphWindow->setOriginalRect(UI_Object::theme.lookUpPlayerRect(BUILD_ORDER_GRAPH_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
-	boGraphWindow->setMaxHeight(UI_Object::theme.lookUpPlayerMaxHeight(BUILD_ORDER_GRAPH_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
-
-	boDiagramWindow->setOriginalRect(UI_Object::theme.lookUpPlayerRect(BUILD_ORDER_DIAGRAM_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
-	boDiagramWindow->setMaxHeight(UI_Object::theme.lookUpPlayerMaxHeight(BUILD_ORDER_DIAGRAM_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
 
 	UI_Object::reloadOriginalSize();
 }

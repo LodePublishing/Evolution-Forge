@@ -44,6 +44,7 @@ class SettingsWindow:public UI_Window
 
 		UI_Group* coreSettings;
 		UI_Group* guiSettings;
+		UI_Group* soundSettings;
 		UI_Radio* uiSettingsRadio;
 //		UI_Group* defaultSettings;
 		UI_Group* loadSaveSettings;
@@ -57,8 +58,15 @@ class SettingsWindow:public UI_Window
 		UI_NumberField* maxTimeOut;
 		UI_NumberField* breedFactor;
 //		UI_NumberField* crossingOver;
-
 		UI_CheckButton* autoSaveRuns;
+
+		UI_CheckButton* useMusic;
+		UI_CheckButton* useSound;
+
+		UI_NumberField* musicVolume;
+		UI_NumberField* soundVolume;
+		UI_NumberField* channels;
+		
 		UI_CheckButton* restrictSC;
 		UI_CheckButton* facilityMode;
 //		UI_CheckButton* preprocessBuildorder;

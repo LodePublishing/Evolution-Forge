@@ -3,6 +3,8 @@
 
 #include "button.hpp"
 
+// TODO: aus 'text' einen TEXT_BUTTON machen!
+
 class UI_CheckButton : public UI_Object
 {
 	public:

@@ -105,6 +105,7 @@ void UI_Radio::forcePress(const unsigned int button_id)
 #endif
 	forceUnpressAll();
 	buttonId[button_id]->forcePress();
+	markedItem = button_id;
 }
 
 const signed int UI_Radio::getMarked() const

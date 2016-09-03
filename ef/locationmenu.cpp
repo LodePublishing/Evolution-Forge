@@ -65,7 +65,7 @@ void LocationMenu::reloadOriginalSize()
 {
 	updateItemSizes(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH));
 	UI_Object::reloadOriginalSize();
-	updateItemPositions(TWO_COLOUMN_MENU);
+	updateItemPositions(TWO_COLOUMNS_MENU);
 }
 
 void LocationMenu::assignMap(const std::list<std::string>& location_list)

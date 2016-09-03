@@ -5,7 +5,8 @@
 #include "SDL_image.h"
 #include "../core/starcraft.hpp"
 #include "configuration.hpp"
-#include "../sdl/sound.hpp"
+
+#include <fmod.hpp>
 
 extern unsigned int FONT_SIZE;
 //#define FONT_SIZE 6
@@ -17,7 +18,14 @@ extern unsigned int FONT_SIZE;
 #define MAX_COMPARE_GAMES 2 // two per page at maximum
 
 
-
+enum eCursor
+{
+	ARROW_CURSOR,
+	CLOCK_CURSOR,
+	HAND_CURSOR,
+	
+	MAX_CURSORS
+};
 
 // ------ DATA TYPES ------
 enum eDataType
@@ -28,6 +36,9 @@ enum eDataType
 	FONT_DATA_TYPE,
 	WINDOW_DATA_TYPE,
 	COLOR_DATA_TYPE,
+	GENERAL_BITMAP_DATA_TYPE,
+	GENERAL_RESOLUTION_BITMAP_DATA_TYPE,
+	GENERAL_THEME_BITMAP_DATA_TYPE,
 	BITMAP_DATA_TYPE,
 	SOUND_DATA_TYPE,
 	PEN_DATA_TYPE,
@@ -350,7 +361,6 @@ enum eString
 {
 	NULL_STRING,
 
-	UNIT_NULL_STRING=1,
 	LAST_UNIT_STRING=315,
 	
 	START_LOAD_CONFIGURATION_STRING=316,
@@ -363,22 +373,37 @@ enum eString
 	START_INIT_SDL_STRING,	
 	START_UNABLE_TO_INIT_SDL_STRING,
 	START_ERROR_SETTING_VIDEO_MODE_STRING,
+	START_CREATED_SURFACE_STRING,
 	START_SET_WINDOW_MODE_STRING,	
 	START_SET_FULLSCREEN_MODE_STRING,	
 	START_INIT_SDL_TRUETYPE_FONTS_STRING,
 	START_INIT_FRAMERATE_STRING,
+	START_INIT_SOUND_STRING,
 	START_INIT_GRAPHIC_ENGINE_CORE_STRING,	
 	START_LOAD_UI_BITMAPS_FONTS_STRING,
-	START_UI_BITMAPS_FONTS_LOADED_STRING,
 	START_ASSIGNING_DEFAULT_VARIABLES_STRING,	
 	START_READING_PARSING_STRING,	
 	START_LOAD_HARVEST_STRING,	
 	START_LOAD_MAPS_STRING,	
 	START_LOAD_STARTCONDITIONS_STRING,	
 	START_LOAD_GOALS_STRING,	
+	START_LOAD_BUILD_ORDERS_STRING,
 	START_ASSIGN_AND_ANALYZE_STRING,	
 	START_PREPARE_FIRST_RUN_STRING,	
-	START_INIT_GUI_STRING,	
+	START_INIT_GUI_STRING,
+
+	START_INIT_MAIN_WINDOW_STRING,
+	START_INIT_HELP_WINDOW_STRING,
+	START_INIT_SETTINGS_WINDOW_STRING,
+	START_INIT_DATABASE_WINDOW_STRING,
+	START_INIT_MAP_WINDOW_STRING,
+	START_INIT_MSG_WINDOW_STRING,
+	START_INIT_TECHTREE_WINDOW_STRING,
+	START_INIT_INTRO_WINDOW_STRING,
+	START_HIDING_WINDOWS_STRING,
+
+	
+	START_INIT_CORE_STRING,
 	START_MAIN_INIT_COMPLETE_STRING,	
 	START_SYSTEM_READY_STRING,
 	START_INITIALIZATION_TIME_STRING,
@@ -585,6 +610,12 @@ enum eString
 	SETTING_SOFTWARE_MOUSE_STRING,
 	SETTING_UNLOAD_GRAPHICS_STRING,
 
+	SETTING_USE_MUSIC_STRING,
+	SETTING_USE_SOUND_STRING,
+	SETTING_MUSIC_VOLUME_STRING,
+	SETTING_SOUND_VOLUME_STRING,
+	SETTING_CHANNELS_STRING,
+
 	SETTING_MAX_TIME_TOOLTIP_STRING,
 	SETTING_RESTRICT_SC_TOOLTIP_STRING,
 	SETTING_FACILITY_MODE_TOOLTIP_STRING,
@@ -615,6 +646,12 @@ enum eString
 	SETTING_TOOLTIPS_TOOLTIP_STRING,
 	SETTING_SOFTWARE_MOUSE_TOOLTIP_STRING,
 	SETTING_UNLOAD_GRAPHICS_TOOLTIP_STRING,
+
+	SETTING_USE_MUSIC_TOOLTIP_STRING,
+	SETTING_USE_SOUND_TOOLTIP_STRING,
+	SETTING_MUSIC_VOLUME_TOOLTIP_STRING,
+	SETTING_SOUND_VOLUME_TOOLTIP_STRING,
+	SETTING_CHANNELS_TOOLTIP_STRING,
 
 	SETTINGS_SAVED_STRING,
 
@@ -663,6 +700,7 @@ enum eString
 
 	SETWINDOW_CORE_SETTINGS_STRING,
 	SETWINDOW_GUI_SETTINGS_STRING,
+	SETWINDOW_SOUND_SETTINGS_STRING,
 	SETWINDOW_UI_SETTINGS_STRING,
 	SETWINDOW_LOADSAVE_SETTINGS_STRING,
 
@@ -755,12 +793,13 @@ enum eBitmap
 	RADIO_OFF,
 	RADIO_ON,
 
-	BACKGROUND_BITMAP,
+	BACKGROUND_SC_BITMAP,
 
 	BAR_BITMAP,
 	KEY_BITMAP,
 
 	CLAWSOFTWARE_BITMAP,
+	CLAWSOFTWARE_MONO_BITMAP,
 
 	NEW_BITMAP, //20
 	LOAD_BITMAP, // 21
@@ -812,8 +851,14 @@ enum eSound
 	LALA_SOUND,
 	MOUSEOVER_SOUND,
 	SWISHIN_SOUND,
+	SWISHOUT_SOUND,
+	SWISHLOCK_SOUND,
+	CLICKED_SOUND,
+	CLICK_SOUND,
 	COMPLETE_SOUND,
 	ERROR_SOUND,
+	RING_SOUND,
+	INTRO_SOUND,
 	MAX_SOUNDS
 };
 
@@ -991,6 +1036,10 @@ enum eButtonColorsType
 	MAP_TAB_BUTTON,
 	SETTINGS_TAB_BUTTON,
 
+//	COMPARE_GAME_BUTTON TODO
+//	REMOVE_GAME_BUTTON,
+	
+
 	MAX_BUTTON_COLORS_TYPES
 };
 
@@ -1039,12 +1088,19 @@ struct ButtonColorsType
 	unsigned int speed; // 100 = 100 steps for full animation
 	eButtonAnimationType type;
 };
+/*
+1. Eintraege in den Datendateien mit Nummern versehen
+2. In eine map einlesen
+3. Nicht zeilenweise sondern direkt nach Nummer zuweisen
+
+Alternativ: Globale Namen fuer jedes item (Konstantennamen?) der in den Konfigurationsdateien auftaucht -> besser, jedoch mehr Arbeit :o
+*/
 
 struct BitmapEntry
 {
 	std::string name;
-	eResolution resolution;
-	eTheme theme;
+//	eResolution resolution;
+//	eTheme theme;
 	unsigned int line;
 	SDL_Surface* bitmap;
 	bool used;
@@ -1055,7 +1111,7 @@ struct SoundEntry
 {
 	unsigned int line;
 	std::string name;
-	const SndInfo* sound;
+	const FMOD::Sound* sound;
 	bool used;
 };
 
@@ -1066,7 +1122,7 @@ class UI_Theme
 		~UI_Theme();
 		
 		const eLanguage getLanguage() const;
-		void setLanguage(const eLanguage language);
+		const bool setLanguage(const eLanguage language);
 
 		const eTheme getColorTheme() const;
 		const eTheme getMainColorTheme() const;
@@ -1076,16 +1132,18 @@ class UI_Theme
 		const eResolution getResolution() const;
 		void setResolution(const eResolution theme_resolution);
 
+		const Size getResolutionSize() const;
+
 		const eBitDepth getBitDepth() const;
 		void setBitDepth(const eBitDepth theme_bitdepth);
 		
 		void unloadGraphicsAndSounds();
 
-		void loadHelpChapterStringFile(const std::string& data_file);
-		void loadStringFile(const std::string& data_file);
-		void loadData(const std::string& data_file, const std::string& bitmap_dir, const std::string& sound_dir, const std::string& font_dir, DC* dc, SDL_snd& sound); //currently all data hard coded, move it to file later! TODO
-		void loadSoundData(const std::string& sound_file);
-		void loadWindowData(const std::string& data_file, const unsigned int game_number, const unsigned int max_games);
+		const bool loadHelpChapterStringFile(const std::string& help_file);
+		const bool loadStringFile(const std::string& string_file);
+		void loadData(const std::string& data_file, const std::string& bitmap_dir, const std::string& sound_dir, const std::string& font_dir, DC* dc); //currently all data hard coded, move it to file later! TODO
+		const bool loadSoundDataFile(const std::string& sound_data_file); // TODO
+		const bool loadWindowDataFile(const std::string& window_data_file, const unsigned int game_number, const unsigned int max_games);
 
 		const std::string& lookUpString(const eString id) const;
 		const std::string& lookUpHelpChapterString(const eHelpChapter id) const;
@@ -1095,11 +1153,13 @@ class UI_Theme
 		const std::string lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j, const unsigned int k) const;
 		Color* lookUpColor(const eColor id) const;
 		/*const */SDL_Surface* lookUpBitmap(const eBitmap id);
-		const SndInfo* lookUpSound(const eSound id);
+		SDL_Cursor* lookUpCursor(const eCursor id, const unsigned int animation_phase = 0) const;
+		FMOD::Sound* lookUpSound(const eSound id);
 		Pen* lookUpPen(const ePen id) const;
 		Brush* lookUpBrush(const eBrush id) const;
 		Font* lookUpFont(const eFont id) const;
-		
+
+		void printSoundInformation() const;
 		
 		const Rect lookUpGlobalRect(const eGlobalWindow id) const;
 		const Rect lookUpGameRect(const eGameWindow id, const unsigned int gameNumber, const unsigned int maxGames) const;
@@ -1113,8 +1173,11 @@ class UI_Theme
 		const unsigned int lookUpButtonWidth(const eButtonWidthType id) const;
 
 		void updateColors(SDL_Surface* surface);
+		void playSound(const eSound id, const unsigned int x);
+		std::list<std::pair<FMOD::Sound*, float> > soundsToPlay;
 
-
+		static bool ERRCHECK(FMOD_RESULT result);
+		FMOD::System* sound;
 	private:
 		void setMaxGlobalHeight(unsigned int current_resolution, unsigned int id, unsigned int max_height);
 		void setMaxGameHeight(unsigned int current_resolution, unsigned int gameNumber, unsigned int maxGames, unsigned int id, unsigned int max_height);
@@ -1126,22 +1189,30 @@ class UI_Theme
 		eTheme colorTheme;
 		eTheme mainColorTheme;
 
+		void initBitmapIdentifier();
+		std::string bitmapIdentifier[MAX_BITMAPS];
 		std::list<BitmapEntry> loadedBitmaps;
 		BitmapEntry* bitmapAccessTable[MAX_RESOLUTIONS][MAX_COLOR_THEMES][MAX_BITMAPS];
 	
 		std::list<SoundEntry> loadedSounds;
 		SoundEntry* soundAccessTable[MAX_SOUNDS];
 		
+		void initStringIdentifier();
+		std::string stringIdentifier[MAX_STRINGS];
 		std::string stringList[MAX_LANGUAGES][MAX_STRINGS];
+		bool languageInitialized[MAX_LANGUAGES];
 		std::map<eHelpChapter, const std::string> helpChapterStringMap[MAX_LANGUAGES];
 		
 		Color* colorList[MAX_COLOR_THEMES][MAX_COLORS];
 		
 		SDL_Surface* bitmapList[MAX_RESOLUTIONS][MAX_COLOR_THEMES][MAX_BITMAPS];
-		const SndInfo* soundList[MAX_SOUNDS];
+		FMOD::Sound* soundList[MAX_SOUNDS];
 		
 		Pen* penList[MAX_COLOR_THEMES][MAX_PENS];
 		Brush* brushList[MAX_COLOR_THEMES][MAX_BRUSHES];
+
+		SDL_Cursor* cursorList[MAX_CURSORS][2];
+		SDL_Cursor* defaultCursor;
 
 		Rect* globalRectList[MAX_RESOLUTIONS][MAX_GLOBAL_WINDOWS];
 		Rect* gameRectList[MAX_RESOLUTIONS][MAX_COMPARE_GAMES][MAX_COMPARE_GAMES][MAX_GAME_WINDOWS];
@@ -1176,9 +1247,7 @@ inline const eLanguage UI_Theme::getLanguage() const {
 	return(language);
 }
 
-inline void UI_Theme::setLanguage(const eLanguage theme_language) {
-	language = theme_language;
-}
+
 
 inline const eResolution UI_Theme::getResolution() const {
 	return(resolution);
@@ -1188,12 +1257,22 @@ inline const eBitDepth UI_Theme::getBitDepth() const {
 	return(bitdepth);
 }
 
-
-
 inline void UI_Theme::setBitDepth(const eBitDepth theme_bitdepth) {
 	bitdepth = theme_bitdepth;
 	// TODO update dc
 }
+
+inline SDL_Cursor* UI_Theme::lookUpCursor(const eCursor id, const unsigned int animation_phase) const
+{
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_CURSORS)||(animation_phase>1)||(cursorList[id][animation_phase]==NULL)) {
+		toLog("ERROR: (UI_Theme::lookUpCursor) id/phase out of range.");return(cursorList[0][0]);
+	}
+#endif
+	return(cursorList[id][animation_phase]);
+}
+
+	
 
 inline const ButtonColorsType* UI_Theme::lookUpButtonColors(const eButtonColorsType id) const
 {

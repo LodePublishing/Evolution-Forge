@@ -42,7 +42,7 @@ class PREBUILDORDER
 	
 		void createSpecial();
 		void resetSpecial();
-		void resetPrerace();
+		virtual void resetData();
 
 		const unsigned int harvestMinerals() const;
 		const unsigned int harvestGas() const; 

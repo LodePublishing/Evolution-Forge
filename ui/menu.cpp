@@ -89,17 +89,24 @@ void UI_Menu::updateItemPositions(const eMenuType menu_type)
 	{
 		case CUSTOM_MENU:break;
 		case ONE_COLOUMN_MENU:
-		for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+		for(std::list<UI_MenuEntry*>::iterator m = menuEntries.begin(); m != menuEntries.end(); ++m)
 		{
 			(*m)->setOriginalPosition(Point(0, i*((*m)->getTextHeight()+(*m)->getDistanceBottomRight().GetHeight())));
 			i++;
 		}break;			 
-		case TWO_COLOUMN_MENU:
-		for(std::list<UI_MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+		case TWO_COLOUMNS_MENU:
+		for(std::list<UI_MenuEntry*>::iterator m = menuEntries.begin(); m != menuEntries.end(); ++m)
 		{
 			(*m)->setOriginalPosition(Point((i%2) * ((*m)->getWidth() + (*m)->getDistanceBottomRight().GetWidth()), (i/2)*((*m)->getTextHeight()+(*m)->getDistanceBottomRight().GetHeight())));
 			i++;
 		}break;
+		case HORIZONTAL_MENU:
+		for(std::list<UI_MenuEntry*>::iterator m = menuEntries.begin(); m != menuEntries.end(); ++m)
+		{
+			(*m)->setOriginalPosition(Point(i * ((*m)->getWidth() + (*m)->getDistanceBottomRight().GetWidth()), 0));
+			i++;
+		}break;	
+		break;
 		default:break;
 	}
 }

@@ -3,7 +3,8 @@
 # @LOCATION_MAIN, @LOCATION_FRONT, @LOCATION_EXPANSION1, @LOCATION_EXPANSION2, @LOCATION_ISLAND_EXPANSION, @LOCATION_CENTER
 
 # --- Races ---
-@STARTCONDITIONS "Terra"
+@STARTCONDITIONS
+	"Race" = "Terra"
 	"Name" = "Default Terra start"
 	"Minerals" = "50"
 	"Gas" = "0"

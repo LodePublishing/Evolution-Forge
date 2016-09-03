@@ -3,8 +3,8 @@
 # --- Map ---
 @MAP
 	"Name" = "2 Player Lost Temple"
-	"Max Locations" = "7"
-	"Max Player" = "2"
+	"Max locations" = "7"
+	"Max player" = "2"
 @END
 
 # --- Locations ---
@@ -13,14 +13,14 @@
 	"Name" = "The wayne location"
 	"Minerals" = "0"
 	"Geysirs" = "0"
-	"Mineral Distance" = "2"
+	"Mineral distance" = "2"
 @END
 
 @LOCATION "2"
 	"Name" = "Main"
 	"Minerals" = "8"
 	"Geysirs" = "1"
-	"Mineral Distance" = "2"
+	"Mineral distance" = "2"
 	"Distance to" 3 = 15
 @END
 
@@ -28,7 +28,7 @@
 	"Name" = "Choke"
 	"Minerals" = "0"
 	"Geysirs" = "0"
-	"Mineral Distance" = "2"
+	"Mineral distance" = "2"
 	"Distance to" 4 = 10
 @END
 
@@ -36,14 +36,14 @@
 	"Name" = "Expansion"
 	"Minerals" = "8"
 	"Geysirs" = "1"
-	"Mineral Distance" = "2"
+	"Mineral distance" = "2"
 @END
 
 @LOCATION "5"
 	"Name" = "Main"
 	"Minerals" = "8"
 	"Geysirs" = "1"
-	"Mineral Distance" = "2"
+	"Mineral distance" = "2"
 	"Distance to" 3 = 15
 @END
 
@@ -51,7 +51,7 @@
 	"Name" = "Choke"
 	"Minerals" = "0"
 	"Geysirs" = "0"
-	"Mineral Distance" = "2"
+	"Mineral distance" = "2"
 	"Distance to" 4 = 10
 @END
 
@@ -59,6 +59,6 @@
 	"Name" = "Expansion"
 	"Minerals" = "8"
 	"Geysirs" = "1"
-	"Mineral Distance" = "2"
+	"Mineral distance" = "2"
 @END
 

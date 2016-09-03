@@ -192,7 +192,7 @@ void TechTreeWindow::draw(DC* dc) const
 			dc->SetBrush(*theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][i].unitType)));
 			dc->SetPen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN+stats[anarace->getRace()][i].unitType)));
 			dc->DrawEdgedRoundedRectangle(node[i]->getAbsoluteRect(), 4);
-			std::string text = UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i+UNIT_NULL_STRING));
+			std::string text = UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i));
 			Size text_size = dc->GetTextExtent(text);
 			dc->DrawText(text, node[i]->getAbsolutePosition() + Point(2 + (s.GetWidth())/2, 5) - Size(text_size.GetWidth()/2, 0));
 		}
@@ -211,7 +211,7 @@ void TechTreeWindow::draw(DC* dc) const
 				dc->SetPen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN+stats[anarace->getRace()][*i].unitType)));
 				
 				dc->DrawEdgedRoundedRectangle(Rect(getAbsolutePosition() + Point(px - (s.GetWidth())/2, k*s2.GetHeight()), s), 4);
-				std::string text = UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+(*i)+UNIT_NULL_STRING));
+				std::string text = UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+(*i)));
 				Size text_size = dc->GetTextExtent(text);
 				dc->DrawText(text, getAbsolutePosition() + Point(px+4- (text_size.GetWidth())/2, k*s2.GetHeight()+4));
 				++x;

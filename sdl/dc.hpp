@@ -18,16 +18,6 @@ enum eChooseDriverError
 	SDL_DRIVER_NOT_SUPPORTED
 };
 
-enum eResolution
-{
-	ZERO_RESOLUTION,
-	RESOLUTION_640x480,
-	RESOLUTION_800x600,
-	RESOLUTION_1024x768,
-	RESOLUTION_1280x1024,
-	MAX_RESOLUTIONS
-};
-
 enum eBitDepth
 {
 	DEPTH_8BIT,
@@ -40,7 +30,7 @@ class DC
 {
 	public:
 		DC();
-		DC(const eResolution current_resolution, const eBitDepth bit_depth, const Uint32 nflags, const Uint32 initflags);
+		DC(const Size current_resolution, const eBitDepth bit_depth, const Uint32 nflags, const Uint32 initflags);
 		~DC();
 		
 		DC(const DC& other);
@@ -50,14 +40,13 @@ class DC
 		SDL_Surface* operator->() const;
 		SDL_Surface* GetSurface() const;
 
-		const bool valid() const;
-		Uint32 flags() const;
 		const unsigned int w() const;
 		const unsigned int h() const;
-		const Size getResolutionSize() const;
-		void setResolution(const eResolution current_resolution);
+		const bool valid() const;
+		Uint32 flags() const;
+		void setResolution(const Size current_resolution);
 		void setBitDepth(const eBitDepth bit_depth);
-		void setScreen(const eResolution current_resolution, const eBitDepth bit_depth, const Uint32 nflags);
+		void setScreen(const Size current_resolution, const eBitDepth bit_depth, const Uint32 nflags);
 		const eBitDepth getBitDepth() const;
 	
 		Uint16 pitch() const;
@@ -136,6 +125,7 @@ class DC
 		static std::string printHardwareInformation();
 		static std::string printSurfaceInformation(DC* surface);
 		static std::list<std::string> getAvailibleDrivers();
+		static SDL_Cursor* createCursor(char* xpm_image[]);
 		static const eChooseDriverError chooseDriver(std::string& driver_name);
 
 		void setPressedRectangle(const bool pressed = true);
@@ -164,7 +154,7 @@ class DC
 		const Font* font;
 		
 		eBitDepth bitDepth;
-		eResolution resolution;
+		Size resolution;
 
 		void (DC::*Draw_HLine)(const signed int x0, const signed int y0, const signed int x1) const;
 		void Draw_HLine_8bit(const signed int x0, const signed int y0, const signed int x1) const;

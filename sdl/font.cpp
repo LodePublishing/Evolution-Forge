@@ -1,11 +1,22 @@
 #include "font.hpp"
 
+
+#ifdef _SCC_DEBUG
+        #include "../stl/misc.hpp"
+#endif
+
+
 Font::Font(const std::string& fname, const unsigned int font_size, const bool is_under_lined, const bool is_shadow):
 	font(TTF_OpenFont(fname.c_str(), font_size)),
 	size(font_size),
 	underlined(is_under_lined),
 	shadow(is_shadow)
-{ }
+{ 
+#ifdef _SCC_DEBUG
+	if(font == NULL)
+		toLog("ERROR (Font::Font()): Could not initialize font " + fname + " [TTF ERROR: \"" + TTF_GetError() + "\"].");
+#endif
+}
 
 Font::Font():
 	font(NULL),
@@ -43,7 +54,8 @@ Font::~Font()
 
 const Size Font::GetTextExtent(const std::string& font_text) const
 {
-	int width, height;
+	int width;// = 0;
+	int height;// = 0;
 	TTF_SizeUTF8(font, font_text.c_str(), &width, &height);
 	return(Size(width, height-2));
 }

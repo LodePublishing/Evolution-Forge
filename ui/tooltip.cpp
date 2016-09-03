@@ -61,7 +61,7 @@ void UI_ToolTip::draw(DC* dc) const
 		return;
 	dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
 	dc->SetBrush(*theme.lookUpBrush(TOOLTIP_BRUSH));
-	dc->DrawRectangle(Rect(getAbsolutePosition()-Size(5,3), Size(10 + getWidth(), 6 + getTextHeight())));
+	dc->DrawRectangle(Rect(getAbsolutePosition()-Size(1,1), Size(5 + getTextWidth(), 5 + getTextHeight())));
 //	UI_StaticText::draw(dc);
 	UI_LongText::draw(dc);	
 }

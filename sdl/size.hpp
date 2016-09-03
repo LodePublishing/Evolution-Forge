@@ -1,6 +1,10 @@
 #ifndef _SDL_SIZE_HPP
 #define _SDL_SIZE_HPP
 
+#ifdef _SCC_DEBUG
+        #include "../stl/misc.hpp"
+#endif
+
 class Size
 {
 	public:
@@ -38,6 +42,10 @@ inline Size::Size(const unsigned int w, const unsigned int h) :
 	width(w),
 	height(h)
 {
+#ifdef _SCC_DEBUG
+        if((w > 10000) || (h > 10000))
+                toLog("WARNING (Size::Size()): Coordinates out of boundary.");
+#endif
 }
 
 inline const Size Size::operator-(const Size& size) const {

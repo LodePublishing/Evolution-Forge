@@ -105,7 +105,7 @@ void UnitMenu::processMenu()
 								unit_type = SCV;
 							else if(i==2)
 								unit_type = GAS_SCV;
-							(*m)->updateText(theme.lookUpString((eString)(unit_type+UNIT_NULL_STRING+UNIT_TYPE_COUNT*anarace->getRace())));
+							(*m)->updateText(theme.lookUpString((eString)(unit_type+UNIT_TYPE_COUNT*anarace->getRace())));
 							std::ostringstream os;
 							os << "$" << stats[anarace->getRace()][unit_type].name << "$#" <<
 								"  build time $" << stats[anarace->getRace()][unit_type].BT << "$ sec.#";
@@ -157,7 +157,7 @@ void UnitMenu::processMenu()
 					{
 						(*m)->Show();
 						(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[anarace->getRace()][facility[i]].unitType));
-						(*m)->updateText(UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+facility[i]+UNIT_NULL_STRING)) + "...");
+						(*m)->updateText(UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+facility[i])) + "...");
 						std::ostringstream os;
 						os << "$" << stats[anarace->getRace()][facility[i]].name << "$#";
 
@@ -192,7 +192,7 @@ void UnitMenu::processMenu()
 					{
 						(*m)->Show();
 						(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+menuLevel));
-						(*m)->updateText(UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i+UNIT_NULL_STRING)));
+						(*m)->updateText(UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i)));
 						std::ostringstream os;
 						os << "$" << stats[anarace->getRace()][i].name << "$#" <<
 							"  build time $" << stats[anarace->getRace()][i].BT << "$ sec.#";
@@ -232,7 +232,7 @@ void UnitMenu::processMenu()
 						(*m)->Show();
 						(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[anarace->getRace()][i].unitType));
 						(*m)->updateText(
-						UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i+UNIT_NULL_STRING)));
+						UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i)));
 	
 						std::ostringstream os;
 						os << "$" << stats[anarace->getRace()][i].name << "$#" <<

@@ -3,6 +3,7 @@
 
 #include "size.hpp"
 
+
 class Point
 {
 	public:
@@ -24,7 +25,7 @@ class Point
 		const bool operator<(const Point& point) const;
 		void move(const Point& startPoint, const Point& targetPoint);
 	
-		static void mv(signed int& x, const signed int sx, const signed int tx);
+		static const bool mv(signed int& x, const signed int sx, const signed int tx);
 		static void mv2(signed int& x, const signed int sx, const signed int tx);
 		
 		signed int x;
@@ -38,7 +39,12 @@ inline Point::Point():	x(0), y(0)
 inline Point::Point(const signed int xx, const signed int yy) : 
 	x(xx), 
 	y(yy)
-{ }
+{ 
+#ifdef _SCC_DEBUG
+	if((x < -10000) || (x > 10000) || (y < -10000) || (y > 10000))
+		toLog("WARNING (Point::Point()): Coordinates out of boundary.");
+#endif
+}
 
 inline Point& Point::operator=(const Point& point)
 {

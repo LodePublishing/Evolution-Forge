@@ -9,19 +9,15 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
-#include <dirent.h>
-#include <sys/types.h>
-
-#ifdef __linux__
-#else 
-#include <windows.h>
-#endif
 
 DATABASE::DATABASE():
-	loadedMap()
-{
-	srand(time(NULL));
-}
+	loadedMap(),
+	goalDataInitialized(false),
+	buildOrderDataInitialized(true), // we don't need bos...
+	startConditionDataInitialized(false),
+	mapDataInitialized(false),
+	harvestDataInitialized(false)
+{}
 
 DATABASE::~DATABASE()
 {
@@ -43,46 +39,6 @@ DATABASE::~DATABASE()
 	}
 }
 
-// TODO evtl in misc.cpp rein
-std::list<std::string> DATABASE::findFiles(const std::string& directory1, const std::string& directory2, const std::string& directory3)
-{
-	std::list<std::string> fileList;
-	std::ostringstream os;
-	os.str("");
-#ifdef __linux__
-	DIR *dir;
-	struct dirent *entry;
-	if(directory3!="")
-		os << directory1 << "/" << directory2 << "/" << directory3;
-	else if(directory2!="")
-		os << directory1 << "/" << directory2;
-	else if(directory1!="")
-		os << directory1;
-
-	if ((dir = opendir(os.str().c_str())) == NULL)
-		toLog("ERROR: (DATABASE::findFiles) Cannot open directory " + os.str());
-	else 
-	{
-		while ((entry = readdir(dir)) != NULL)
-			fileList.push_back(os.str() + "/" + entry->d_name);
-		closedir(dir);
-	}
-#elif __WIN32__
-	WIN32_FIND_DATA dir;
-	HANDLE fhandle;
-	os << directory1 << "\\" << directory2 << "\\" << directory3 << "\\" << "*.*";
-	if ((fhandle=FindFirstFile(os.str().c_str(), &dir)) !=INVALID_HANDLE_VALUE)
-	{
-		do
-			fileList.push_back(directory1 + "\\" + directory2 + "\\" + directory3 + "\\" + dir.cFileName);
-		while(FindNextFile(fhandle, &dir));
-	} else
-		toLog("ERROR: (DATABASE::findFiles) Cannot load " + directory1 + "\\" + directory2 + "\\" + directory3 + ".");
-	FindClose(fhandle);
-#endif
-	return fileList;
-}
-
 
 
 
@@ -92,402 +48,742 @@ void DATABASE::addDefaultGoal(const eRace race)
 	goal->setName("Clear List");
 	goal->setRace(race);
 	loadedGoal[goal->getRace()].push_back(goal);
+	goalDataInitialized = true;
 }
 
 // ---------------------------
 // ------- FILE LOADING ------
 // ---------------------------
 
-GOAL_ENTRY* parseGoalBlock(std::list< std::list<std::string> >::iterator& i, std::list< std::list<std::string> >& block)
+GOAL_ENTRY* parseGoalBlock(std::map<std::string, std::list<std::string> > block)
 {
 	GOAL_ENTRY* goal = new GOAL_ENTRY;
-	bool race_initialized = false;
-
-	for(; i!=block.end(); ++i)
+	std::map<std::string, std::list<std::string> >::iterator i;
+	
+	if((i=block.find("Name"))!=block.end())
 	{
-		if(*(i->begin()) == "Name")
-		{
-			i->pop_front();
-			goal->setName(*(i->begin()));
-		} else if(*(i->begin()) == "Race")
-		{
-			i->pop_front();
-			std::string estr = i->front();
-			eRace goal_race = TERRA;
-			if(estr == raceString[TERRA]) goal_race=TERRA;
-			else if(estr == raceString[PROTOSS]) goal_race=PROTOSS;
-			else if(estr == raceString[ZERG]) goal_race=ZERG;
-#ifdef _SCC_DEBUG
-			else {
-				toLog("ERROR: parseGoalBlock(): Wrong race entry (" + estr + " [" + raceString[TERRA] + "|" + raceString[PROTOSS] + "|" + raceString[ZERG] + "]).");delete goal;return(NULL);
-			}
-			race_initialized = true;
-#endif
-			goal->setRace(goal_race);
-		} else if(*(i->begin()) == "@END")
-		{
-			return(goal);
-		} else if(race_initialized)
-		{
-			for(unsigned int unit=UNIT_TYPE_COUNT;unit--;)
+		i->second.pop_front();
+	  	goal->setName(i->second.front());
+		block.erase(i);		
+	} else
+	{
+		toLog("ERROR (parseGoalBlock()): Field name 'Name' not found.");
+		delete goal;
+		return(NULL);
+	}
+
+	if((i=block.find("Race"))!=block.end()){
+		i->second.pop_front();
+	
+		std::string estr = i->second.front();
+		eRace goal_race = TERRA;
+		if(estr == raceString[TERRA]) goal_race=TERRA;
+		else if(estr == raceString[PROTOSS]) goal_race=PROTOSS;
+		else if(estr == raceString[ZERG]) goal_race=ZERG;
+		else {
+			toLog("ERROR (parseGoalBlock()): Invalid race entry (" + estr + " [" + raceString[TERRA] + "|" + raceString[PROTOSS] + "|" + raceString[ZERG] + "]).");
+			delete goal;
+			return(NULL);
+		}
+		goal->setRace(goal_race);
+		block.erase(i);
+	} else
+	{
+		toLog("ERROR (parseGoalBlock()): Field name 'Race' not found.");
+		delete goal;
+		return(NULL);
+	}
+
+	bool found_at_least_one = false;
+	i = block.begin();
+	while(i!=block.end())
+	{
+		bool found = false;
+		for(unsigned int unit=UNIT_TYPE_COUNT;(unit--)&&(i!=block.end());)
+			if(*(i->second.begin()) == stats[goal->getRace()][unit].name)
 			{
-				if(*(i->begin()) == stats[goal->getRace()][unit].name)
+				std::list<std::string>::iterator l=i->second.begin();
+				if(l->size()>=3)
 				{
-					std::list<std::string>::iterator l=i->begin();
-					if(l->size()>=3)
-					{
-						++l;int count=atoi(l->c_str());
-						++l;int location=atoi(l->c_str());
-						++l;int time=atoi(l->c_str());
-						goal->addNewGoalToList(unit, time, location, count);
-					}
+					++l;int count=atoi(l->c_str());
+					++l;int location=atoi(l->c_str());
+					++l;int time=atoi(l->c_str());
+					goal->addNewGoalToList(unit, time, location, count);
+					found_at_least_one = true;
+//					rueckgabewert TODO
+					block.erase(i);
+					i = block.begin();
+					found = true;
+				} else
+				{
+					toLog("WARNING (parseGoalBlock()): Incorrect number of parameters for entry in goal list (\'" + *(i->second.begin()) + "\'): 3 parameters expected => line will be ignored.");
+					block.erase(i);
+					i = block.begin();
+					found = true;
 				}
 			}
+		if(!found)
+		{
+			toLog("WARNING (parseGoalBlock()): Unknown entry in goal list (\'" + *(i->second.begin()) + "\') => line will be ignored.");
+			i++;
 		}
 	}
-	toLog("ERROR: parseGoalBlock(): No @END for goal block found");
-	return(NULL);
+	if(!found_at_least_one)
+	{
+		toLog("ERROR (parseGoalBlock()): Empty goal list => file will be ignored.");
+		delete goal;
+		return(NULL);
+	} else
+		return(goal);
 }
 
-void DATABASE::loadGoalFile(const std::string& goal_file)
+BO_HEADER* parseBoHeaderBlock(std::map<std::string, std::list<std::string> > block)
 {
-	if((goal_file.compare(goal_file.size()-4, goal_file.size(), ".gol")==1))
-		return;
-
-	std::ifstream pFile(goal_file.c_str());
-	if(!pFile.is_open())
+	BO_HEADER* bo_header = new BO_HEADER;
+	std::map<std::string, std::list<std::string> >::iterator i;
+	
+	if((i=block.find("Name"))!=block.end())
 	{
-		toLog("ERROR: (DATABASE::loadGoalFile): File " + goal_file + " not found.");
-		return;
+		i->second.pop_front();
+	  	bo_header->setName(i->second.front());
+		block.erase(i);		
+	} else
+	{
+		toLog("ERROR (parseBoHeaderBlock()): Field name 'Name' not found.");
+		delete bo_header;
+		return(NULL);
 	}
-//	toLog(goal_file + " loaded.");
-	std::list<std::list<std::string> > block;
-	parse_block(pFile, block);
 
+	if((i=block.find("Race"))!=block.end()){
+		i->second.pop_front();
+	
+		std::string estr = i->second.front();
+		eRace bo_race = TERRA;
+		if(estr == raceString[TERRA]) bo_race=TERRA;
+		else if(estr == raceString[PROTOSS]) bo_race=PROTOSS;
+		else if(estr == raceString[ZERG]) bo_race=ZERG;
+		else {
+			toLog("ERROR (parseBoHeaderBlock()): Invalid race entry (" + estr + " [" + raceString[TERRA] + "|" + raceString[PROTOSS] + "|" + raceString[ZERG] + "]).");
+			delete bo_header;
+			return(NULL);
+		}
+		bo_header->setRace(bo_race);
+		block.erase(i);
+	} else
+	{
+		toLog("ERROR (parseBoHeaderBlock()): Field name 'Race' not found.");
+		delete bo_header;
+		return(NULL);
+	}
+	
+	if((i=block.find("Time"))!=block.end())
+	{
+		i->second.pop_front();
+	  	bo_header->setTime(atoi(i->second.front().c_str()));
+		block.erase(i);
+	} else
+	{
+		toLog("ERROR (parseBoHeaderBlock()): Field name 'Time' not found.");
+		delete bo_header;
+		return(NULL);
+	}
+	return(bo_header);
+}
+
+std::list<PROGRAM>* parseBuildOrderBlock(const eRace bo_race, std::list<std::list<std::string> > block)
+{
+	bool found_at_least_one = false;
+	std::list<PROGRAM>* program_list = new std::list<PROGRAM>;
 	for(std::list<std::list<std::string> >::iterator i = block.begin(); i!=block.end(); ++i)
 	{
+		bool found = false;
+		for(unsigned int unit=UNIT_TYPE_COUNT;unit--;)
+			if(*(i->begin())==stats[bo_race][unit].name)
+			{
+				PROGRAM p;
+				p.setUnit(unit);
+				program_list->push_back(p);
+				found = true;
+				found_at_least_one = true;
+				break;
+			}
+		if(!found)
+			toLog("WARNING (parseBuildOrderBlock()): Unkown entry in build order list (\'" + *(i->begin()) + "\') => ignoring entry.");
+	}
+	
+	if(!found_at_least_one)
+	{
+		toLog("ERROR (parseBuildOrderBlock()): Empty build order list => file will be ignored.");
+		delete program_list;
+		return(NULL);
+	} else
+		return(program_list);
+}
 
-		if(*(i->begin())=="@GOAL")
+
+const bool DATABASE::loadGoalFile(const std::string& goal_file)
+{
+	if((goal_file.compare(goal_file.size()-4, goal_file.size(), ".gol")==1))
+		return(true);
+
+	std::ifstream pFile(goal_file.c_str());
+	if(!checkStreamIsOpen(pFile, "DATABASE::loadGoalFile", goal_file))
+		return(false);
+	
+	char line[1024];
+	while(pFile.getline(line, sizeof line))
+	{
+		if(!checkStreamForFailure(pFile, "DATABASE::loadGoalFile", goal_file))
+			return(false);
+
+		std::string text = line;
+		size_t start = text.find_first_not_of("\t ");
+		if((start == std::string::npos) || (text[0] == '#') || (text[0] == '\0'))
+			continue; // ignore line
+		size_t stop = text.find_first_of("\t ", start);
+		if(stop == std::string::npos) 
+			stop = text.size();
+		std::string index = text.substr(start, stop);
+		if(index=="@GOAL")
 		{
-			parse_block(pFile, block);
-			GOAL_ENTRY* my_goal = parseGoalBlock(i, block);
+			std::map<std::string, std::list<std::string> > block;
+			if(!parse_block_map(pFile, block))
+			{
+				toLog("WARNING (DATABASE::loadGoalFile()): No concluding @END for @GOAL block was found in file " + goal_file + " => trying to parse what we have so far.");
+			}
+			GOAL_ENTRY* my_goal = parseGoalBlock(block);
 			if(my_goal == NULL)
 			{
-				toLog("ERROR: DATABASE::loadGoalFile(): Error parsing " + goal_file + ".");
-				return;
+				toLog("ERROR (DATABASE::loadGoalFile()): Error parsing " + goal_file + ".");
+				return(false);
 			}
 			else 
 			{
 				loadedGoal[my_goal->getRace()].push_back(my_goal);
-				return;
+				goalDataInitialized = true;
+				return(true);
 			}
 		} // end index == GOAL
-	}
+	} // end while
+	toLog("ERROR (DATABASE::loadGoalFile()): No @GOAL block was found in file " + goal_file + ".");
+	return(false);	
 } // schoen :) naja :o
 
-void DATABASE::loadBuildOrderFile(const std::string& build_order_file)
+const bool DATABASE::loadBuildOrderFile(const std::string& build_order_file)
 {
+// just ignore the file if it's no .txt file... 
 	if((build_order_file.compare(build_order_file.size()-4, build_order_file.size(), ".txt")==1))
-		return;
+		return(true);
 
 	std::ifstream pFile(build_order_file.c_str());
-	if(!pFile.is_open())
-	{
-		toLog("ERROR: (DATABASE::loadBuildOrderFile): File " + build_order_file + " not found.");
-		return;
-	}
-//	toLog(build_order_file + " loaded.");
+	if(!checkStreamIsOpen(pFile, "DATABASE::loadBuildOrderFile", build_order_file))
+		return(false);
 	
+	bool found_goal_block = false;
+	bool found_bo_block = false;
+	bool found_bo_header_block = false;
 	
-	std::list<std::list<std::string> > block;
-	std::list<PROGRAM> program_list;
-	parse_block(pFile, block);
-	bool bo_mode = false;
-	eRace bo_race = TERRA;
-	std::string bo_name;
-	GOAL_ENTRY* bo_goal;
-	unsigned int bo_time = 0;
-	for(std::list<std::list<std::string> >::iterator i = block.begin(); i!=block.end(); ++i)
-	{
-		if(*(i->begin())=="@GOAL")
-		{
-			parse_block(pFile, block);
-			bo_goal = parseGoalBlock(i, block);
-			if(bo_goal==NULL) {
-				toLog("ERROR: DATABASE::loadBuildOrderFile(): Error parsing " +  build_order_file + ".");return;
-			}
-		} else	
-		if(*(i->begin()) == "@BUILDORDER")
-			bo_mode = true;
-		else if(*(i->begin()) == "@END")
-			bo_mode = false;
-		else if(bo_mode==true)
-		{
-			if(*(i->begin()) == "Name")
-			{
-				i->pop_front();
-				bo_name = i->front();
-			} else 
-			if(*(i->begin()) == "Race")
-			{
-				i->pop_front();
-				std::string estr = i->front();
-				if(estr == raceString[TERRA]) bo_race=TERRA;
-				else if(estr == raceString[PROTOSS]) bo_race=PROTOSS;
-				else if(estr == raceString[ZERG]) bo_race=ZERG;
-#ifdef _SCC_DEBUG
-				else {
-					toLog("ERROR: (DATABASE::loadBuildOrderFile [" + build_order_file + "]): Wrong race entry (" + estr + " [" + raceString[TERRA] + "|" + raceString[PROTOSS] + "|" + raceString[ZERG] + "]).");return;
-				}
-#endif
-			} else 
-			if(*(i->begin()) == "Time")
-			{
-				i->pop_front();
-				bo_time = atoi(i->begin()->c_str());
-			} else
-			{
-				
-				for(unsigned int unit=UNIT_TYPE_COUNT;unit--;)
-				{
-					if(*(i->begin())==stats[bo_race][unit].name)
-					{
-						PROGRAM p;
-						p.setUnit(unit);
-						program_list.push_back(p);
-						break;
-					}
-				}
-			}
-		} // end index == BUILDORDER
-	}
-	BUILD_ORDER* build_order = new BUILD_ORDER(bo_race, *bo_goal, bo_name, bo_time, program_list);
-	delete bo_goal;
-	loadedBuildOrder[build_order->getRace()].push_back(build_order);
-
-} // schoen :)
-
-void DATABASE::loadHarvestFile(const std::string& harvestFile)
-{
-	if((harvestFile.compare(harvestFile.size()-4, harvestFile.size(), ".hvt")==1))
-		return;
-
-	std::ifstream pFile(harvestFile.c_str());
-	if(!pFile.is_open())
-	{
-		toLog("ERROR: (DATABASE::loadHarvestFile): File " + harvestFile + "not found.");
-		return;
-	}
+	BO_HEADER* bo_header = NULL;
+	GOAL_ENTRY* bo_goal = NULL;
+	std::list<PROGRAM>* program_list = NULL;
+	
 	char line[1024];
-	std::string text;
 	while(pFile.getline(line, sizeof line))
 	{
-		if(pFile.fail())
-			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
-		text = line;
+		if(!checkStreamForFailure(pFile, "DATABASE::loadBuildOrderFile", build_order_file))
+			return(false);
+	
+		std::string text = line;
 		size_t start_position = text.find_first_not_of("\t ");
 		if((start_position == std::string::npos)||(text[0]=='#')||(text[0]=='\0'))
-				continue; // ignore line
+			continue; // ignore line
+		size_t stop_position = text.find_first_of("\t ", start_position);
+		if(stop_position == std::string::npos) 
+			stop_position = text.size();
+		std::string index = text.substr(start_position, stop_position);
+
+		if(index=="@BO_HEADER")
+		{
+			std::map<std::string, std::list<std::string> > block;
+			if(!parse_block_map(pFile, block))
+			{
+				toLog("WARNING (DATABASE::loadBuildOrderFile()): No concluding @END for @BO_HEADER block was found in file " + build_order_file + " => trying to parse what we have.");
+			}
+			if(found_bo_header_block)
+			{
+				toLog("WARNING (DATABASE::loadBuildOrderFile()): Too many @BO_HEADER blocks defined in file " + build_order_file + " => ignoring new block.");
+			}
+			else
+			{
+				bo_header = parseBoHeaderBlock(block);
+				if(bo_header == NULL)
+				{
+					toLog("ERROR (DATABASE::loadBuildOrderFile()): Error parsing build order header in file " + build_order_file + ".");
+					return(false);
+				}
+				found_bo_header_block = true;		
+			}
+		} else
+		if(index=="@GOAL")
+		{
+			std::map<std::string, std::list<std::string> > block;
+			if(!parse_block_map(pFile, block))
+			{
+				toLog("WARNING: (DATABASE::loadBuildOrderFile) No concluding @END for @GOAL block was found in file " + build_order_file + " => trying to parse what we have.");
+			}
+			if(found_goal_block)
+			{
+				toLog("WARNING (DATABASE::loadBuildOrderFile()): Too many @GOAL blocks defined in file " + build_order_file + " => ignoring new block.");
+			}
+			else
+			{
+				if(!found_bo_header_block)
+				{
+					toLog("ERROR (DATABASE::loadBuildOrderFile()): [Until I fixed it] the order in build order file " +  build_order_file + " has to be @BO_HEADER, @GOAL, @BUILDORDER.");
+					return(false);
+				}
+				bo_goal = parseGoalBlock(block);
+				if(bo_goal == NULL)
+				{
+					toLog("ERROR: DATABASE::loadBuildOrderFile(): Error parsing goal in file " + build_order_file + ".");
+					delete bo_header;
+					return(false);
+				}
+				found_goal_block = true;
+			}
+		} // end index == GOAL
+		else if(index=="@BUILDORDER")
+		{
+			std::list<std::list<std::string> > block;
+			if(!parse_block_list(pFile, block))
+			{
+				toLog("WARNING (DATABASE::loadBuildOrderFile()): No concluding @END for @BUILDORDER block was found in file " + build_order_file + " => trying to parse what we have.");
+			}
+			if(found_bo_block)
+			{
+				toLog("WARNING (DATABASE::loadBuildOrderFile()): Too many @BUILDORDER blocks defined in file " + build_order_file + " => ignoring new block.");
+			}
+			else
+			{
+				if(!found_goal_block)
+				{
+					toLog("ERROR (DATABASE::loadBuildOrderFile()): [Until I fixed it] the order in build order file " +  build_order_file + " has to be @BO_HEADER, @GOAL, @BUILDORDER.");
+					if(found_bo_header_block)
+						delete bo_header;
+					return(false);
+				}
+				program_list = parseBuildOrderBlock(bo_header->getRace(), block);
+				if(program_list == NULL)
+				{
+					toLog("ERROR (DATABASE::loadBuildOrderFile()): Error parsing build order in file " + build_order_file + ".");
+					delete bo_header;
+					delete bo_goal;
+					return(false);
+				}
+				found_bo_block = true;
+			}		
+		} // end index == BUILDORDER
+	} // end while
+	
+	if(found_bo_header_block && found_goal_block && found_bo_block)
+	{	
+		BUILD_ORDER* build_order = new BUILD_ORDER(*bo_header, *bo_goal, *program_list);
+		delete bo_header;
+		delete bo_goal;
+		delete program_list;
+		loadedBuildOrder[build_order->getRace()].push_back(build_order);
+		buildOrderDataInitialized = true;
+		return(true);
+	}
+	else
+	{
+		toLog("ERROR (DATABASE::loadBuildOrderFile()): End of file in file " + build_order_file + " before all blocks (@BO_HEADER, @GOAL and @BUILDORDER) were defined.");
+		delete bo_header;
+		delete bo_goal;
+		delete program_list;
+		return(false);
+	}
+} // schoen :)
+
+
+
+
+
+
+const bool DATABASE::loadHarvestFile(const std::string& harvest_file)
+{
+	if((harvest_file.compare(harvest_file.size()-4, harvest_file.size(), ".hvt")==1))
+		return(true);
+
+	std::ifstream pFile(harvest_file.c_str());
+	
+	if(!checkStreamIsOpen(pFile, "DATABASE::loadHarvestFile", harvest_file))
+		return(false);
+	
+	bool harvest_mode = false;
+	unsigned int current_race = MAX_RACES;
+	const std::string race_names[MAX_RACES] = {"@TERRA", "@PROTOSS", "@ZERG"};
+	HARVEST_SPEED* harvest[MAX_RACES] = {NULL, NULL, NULL};
+	
+	std::fstream::pos_type old_pos = pFile.tellg();
+	char line[1024];
+	while(pFile.getline(line, sizeof line))
+	{
+		if(!checkStreamForFailure(pFile, "DATABASE::loadHarvestFile", harvest_file))
+			return(false);
+		
+		std::string text = line;
+		size_t start_position = text.find_first_not_of("\t ");
+		if((start_position == std::string::npos)||(text[0]=='#')||(text[0]=='\0'))
+			continue; // ignore line
+		
 		size_t stop_position = text.find_first_of("\t ", start_position);
 		if(stop_position == std::string::npos) stop_position = text.size();
 		std::string index = text.substr(start_position, stop_position);
-		std::map<std::string, std::map<std::string, std::list<std::string> > >::iterator value;
-		std::map<std::string, std::list<std::string> >::iterator item;
-		if(index == "@HARVESTDATA")
+		
+		if(!harvest_mode)
 		{
-				std::map<std::string, std::map<std::string, std::list<std::string> > > block;
-				parse_2nd_block(pFile, block);
-				std::map<std::string, std::list<std::string> > player;
-				if((value = block.find("@TERRA")) != block.end())
+			if(index == "@HARVESTDATA")
+				harvest_mode = true;
+			else
+				toLog("WARNING (DATABASE::loadHarvestFile()): Line '" + index + "' is outside of @HARVESTDATA block in file " + harvest_file + " => line will be ignored.");
+		} else
+		{
+			if(current_race == MAX_RACES)
+			{
+				if(index == "@END")
+					harvest_mode = false;
+				else 
 				{
-					HARVEST_SPEED* harvest = new HARVEST_SPEED();
-					// erstes Element falsch? TODO
-					if((item = value->second.find("Mineral Harvest"))!=value->second.end())
-					{
-						unsigned int j = 0;
-						item->second.pop_front(); // the expression 'mineral harvest' itself
-						for(std::list<std::string>::const_iterator i = item->second.begin();i != item->second.end(); ++i)
-							harvest->setHarvestMineralSpeed(j++, atoi(i->c_str()));
-					}
-					if((item = value->second.find("Gas Harvest"))!=value->second.end())
-					{
-						unsigned int j = 0;
-						item->second.pop_front(); // the expression 'gas harvest' itself
-						for(std::list<std::string>::const_iterator i = item->second.begin();i != item->second.end(); ++i)
-							harvest->setHarvestGasSpeed(j++, atoi(i->c_str()));
-					}
-					loadedHarvestSpeed[TERRA].push_back(harvest);
+					bool race_found = false;
+					for(unsigned int i = MAX_RACES; (i--)&&(!race_found);)
+						if(index == race_names[i])
+						{
+							current_race = i;
+							race_found = true;
+						}
+					if(!race_found)
+						toLog("WARNING (DATABASE::loadHarvestFile()): Line '" + index + "' is outside of any race block (@TERRA, @PROTOSS or @ZERG) in file " + harvest_file + " => line will be ignored.");
 				}
-				if((value=block.find("@PROTOSS"))!=block.end())
+			} else
+			{
+				std::map<std::string, std::list<std::string> > block;
+				pFile.seekg(old_pos);
+				if(!parse_block_map(pFile, block))
 				{
-					HARVEST_SPEED* harvest = new HARVEST_SPEED();
-					if((item=value->second.find("Mineral Harvest"))!=value->second.end())
-					{
-						unsigned int j = 0;
-						item->second.pop_front();
-						for(std::list<std::string>::const_iterator i = item->second.begin();i != item->second.end(); ++i)
-							harvest->setHarvestMineralSpeed(j++, atoi(i->c_str()));
-					}
-					if((item=value->second.find("Gas Harvest"))!=value->second.end())
-					{
-						unsigned int j = 0;
-						item->second.pop_front(); 
-						for(std::list<std::string>::const_iterator i = item->second.begin();i != item->second.end(); ++i)
-							harvest->setHarvestGasSpeed(j++,atoi(i->c_str()));
-					}
-					loadedHarvestSpeed[PROTOSS].push_back(harvest);
+					toLog("WARNING (DATABASE::loadHarvestFile()): No concluding @END for " + race_names[current_race] + " block was found in file " + harvest_file + " => trying to parse what we have so far.");
 				}
-				if((value=block.find("@ZERG"))!=block.end())
+			
+				if(harvest[current_race])
 				{
-					HARVEST_SPEED* harvest = new HARVEST_SPEED();
-					if((item = value->second.find("Mineral Harvest")) != value->second.end())
-					{
-						unsigned int j = 0;
-						item->second.pop_front(); 
-						for(std::list<std::string>::const_iterator i=item->second.begin();i != item->second.end(); ++i)
-							harvest->setHarvestMineralSpeed(j++, atoi(i->c_str()));
-					}
-					if((item=value->second.find("Gas Harvest")) != value->second.end())
-					{
-						unsigned int j = 0;
-						item->second.pop_front(); 
-						for(std::list<std::string>::const_iterator i = item->second.begin();i != item->second.end();++i)
-							harvest->setHarvestGasSpeed(j++, atoi(i->c_str()));
-					}
-					loadedHarvestSpeed[ZERG].push_back(harvest);
+					toLog("WARNING (DATABASE::loadHarvestFile()): " + race_names[current_race] + " block was already defined in current file " + harvest_file + " => ignoring new block.");
 				}
-		}
-	}// END while
-} // schoen :)
+				else
+				{
+					std::map<std::string, std::list<std::string> >::iterator item;
+					for(unsigned int i = MAX_RACES; i--;)
+						if((item = block.find(race_names[i])) != block.end())
+						{
+							toLog("WARNING (DATABASE::loadHarvestFile()): Block " + race_names[i] + " was found in file " + race_names[current_race] + " block in file " + harvest_file + " => ignoring entry and trying to continue.");
+							block.erase(item);
+						}
 
-void DATABASE::loadMapFile(const std::string& mapFile)
+					harvest[current_race] = new HARVEST_SPEED;
+					if((item = block.find("Mineral harvest")) != block.end())
+					{
+						unsigned int j = 0;
+						for(std::list<std::string>::const_iterator i = item->second.begin(); i != item->second.end(); ++i)
+						{
+							if(i!= item->second.begin()) // TODO, warum ist item->second.begin() == 'Mineral harvest'?
+								harvest[current_race]->setHarvestMineralSpeed(j++, atoi(i->c_str()));
+						}
+						block.erase(item);
+					} else 
+					{
+						toLog("ERROR (DATABASE::loadHarvestFile()): Field name 'Mineral harvest' not found in file " + race_names[current_race] + " block in file " + harvest_file + ".");
+						for(unsigned int i = MAX_RACES; i--;)
+							delete harvest[i];
+						return(false);
+					}
+	
+					if((item = block.find("Gas harvest")) != block.end())
+					{
+						unsigned int j = 0;
+						for(std::list<std::string>::const_iterator i = item->second.begin(); i != item->second.end(); ++i)
+						{
+							if(i!= item->second.begin()) // TODO, warum ist item->second.begin() == 'Gas harvest'?
+								harvest[current_race]->setHarvestGasSpeed(j++, atoi(i->c_str()));
+						}
+						block.erase(item);
+					} else 
+					{
+						toLog("ERROR (DATABASE::loadHarvestFile()): Field name 'Gas harvest' not found in file " + race_names[current_race] + " block in file " + harvest_file + ".");
+						for(unsigned int i = MAX_RACES; i--;)
+							delete harvest[i];
+						return(false);
+					}
+					if(block.size() > 0)
+						toLog("WARNING (DATABASE::loadHarvestFile()): Other unknown entries were found in file " + race_names[current_race] + " block in file " + harvest_file + " => ignoring entries.");
+				}
+				current_race = MAX_RACES;
+			} // end current_race != MAX_RACES
+		} // end harvest_mode
+		old_pos = pFile.tellg();
+	} // end while
+	
+	for(unsigned int i = MAX_RACES; i--;)
+		if(!harvest[i])
+		{
+			toLog("ERROR (loadHarvestFile()): Race block " + race_names[i] + " is missing in file " + harvest_file + ".");
+			for(unsigned int j = MAX_RACES; j--;)
+				delete harvest[j];
+			return(false);
+		}
+	for(unsigned int i = MAX_RACES; i--;)
+		loadedHarvestSpeed[i].push_back(harvest[i]);
+	harvestDataInitialized = true;
+	return(true);
+}
+// TODO Vor (zuvielen) uebriggebliebenen Eintraege warnen
+
+const bool DATABASE::loadMapFile(const std::string& map_file)
 {
-	if((mapFile.size()<20)||(mapFile.compare(mapFile.size()-4, mapFile.size(), ".map")==1))
-		return;
-	std::ifstream pFile(mapFile.c_str());
-	if(!pFile.is_open())
-	{
-		toLog("ERROR: (DATABASE::loadMapFile): File " + mapFile + " not found.");
-		return;
-	}
+	if((map_file.size()<20)||(map_file.compare(map_file.size()-4, map_file.size(), ".map")==1))
+		return(true);
+	
+	std::ifstream pFile(map_file.c_str());
+	if(!checkStreamIsOpen(pFile, "DATABASE::loadMapFile", map_file))
+		return(false);
+
+	bool found_map_block = false;
+	bool found_location_block[MAX_LOCATIONS];
+	for(unsigned int i = MAX_LOCATIONS; i--;)
+		found_location_block[i] = false;
+	
+	BASIC_MAP* basic_map = new BASIC_MAP; // TODO mehrere maps verhindern?
+	
 	char line[1024];
-	std::string text;
-	BASIC_MAP* basicmap = new BASIC_MAP; // TODO mehrere maps verhindern?
 	while(pFile.getline(line, sizeof line))
 	{
-		if(pFile.fail())
-			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
-		text=line;
+		if(!checkStreamForFailure(pFile, "DATABASE::loadMapFile", map_file))
+		{
+			delete basic_map;
+			return(false);
+		}
+		
+		std::string text = line;
 		size_t start_position = text.find_first_not_of("\t ");
 		if((start_position == std::string::npos)||(text[0]=='#')||(text[0]=='\0'))
 			continue; // ignore line
 		std::list<std::string> words;
 		parse_line(text, words);
-		if(words.empty()) continue;
+		if(words.empty())  // ? TODO
+			continue; 
 		std::list<std::string>::iterator j=words.begin();
 		std::string index=*j;++j;
 		std::map<std::string, std::list<std::string> >::iterator i;
+		
 		if(index=="@MAP")
 		{
 			std::map<std::string, std::list<std::string> > block;
-			parse_block(pFile, block);
-			if((i=block.find("Name"))!=block.end()){
-				i->second.pop_front();
-			  	basicmap->setName(i->second.front());
+			if(!parse_block_map(pFile, block))
+			{
+				toLog("WARNING (DATABASE::loadMapFile()): No concluding @END for @MAP block was found in file " + map_file + " => trying to parse what we have so far.");
 			}
-			if((i=block.find("Max Locations"))!=block.end()){
-				i->second.pop_front();
-			   	basicmap->setMaxLocations(atoi(i->second.front().c_str()));
-			}
-			if((i=block.find("Max Player"))!=block.end()){
-				i->second.pop_front();
-			   	basicmap->setMaxPlayer(atoi(i->second.front().c_str()));
+			if(found_map_block)
+			{
+				toLog("WARNING (DATABASE::loadMapFile()): Too many @MAP blocks defined in file " + map_file + " => ignoring new block.");
+				
+			} else
+			{
+				if((i=block.find("Name"))!=block.end()){
+					i->second.pop_front();
+				  	basic_map->setName(i->second.front());
+				} else
+				{
+					toLog("ERROR (loadMapFile()): Field name 'Name' not found within @MAP block in file " + map_file + ".");
+					delete basic_map;
+					return(false);				
+				}
+			
+				if((i=block.find("Max locations"))!=block.end()){
+					i->second.pop_front();
+				   	basic_map->setMaxLocations(atoi(i->second.front().c_str()));
+				} else
+				{
+					toLog("ERROR (loadMapFile()): Field name 'Max locations' not found within @MAP block in file " + map_file + ".");
+					delete basic_map;
+					return(false);
+				}
+			
+				if((i=block.find("Max player"))!=block.end()){
+					i->second.pop_front();
+				   	basic_map->setMaxPlayer(atoi(i->second.front().c_str()));
+				} else
+				{
+					toLog("ERROR (loadMapFile()): Field name 'Max player' not found within @MAP block in file " + map_file + ".");
+					delete basic_map;
+					return(false);				
+				}
+				found_map_block = true;
 			}
 		}
 		else if(index=="@LOCATION")
 		{
 			if(j==words.end())
 			{
-				toLog("ERROR: (DATABASE::loadMapFile [" + mapFile + "]): Every @LOCATION entry needs a number.");
-				return;
+				toLog("ERROR (DATABASE::loadMapFile()): @LOCATION entry needs a following number (e.g. '@LOCATION \"2\"') in file " + map_file + ".");
+				delete basic_map;
+				return(false);
 			}
-			int location = atoi(j->c_str());
+			int location = atoi(j->c_str())-1;
 			std::map<std::string, std::list<std::string> > block;
-			parse_block(pFile, block);
-			if((i=block.find("Name"))!=block.end()) 
+			if(!parse_block_map(pFile, block))
 			{
-				i->second.pop_front();
-				basicmap->setLocationName(location-1, i->second.front().c_str());
+				toLog("WARNING (DATABASE::loadMapFile()): No concluding @END for @LOCATION block " + *j + " block was found in file " + map_file + " => trying to parse what we have so far.");
 			}
-			if((i=block.find("Mineral Distance"))!=block.end()) 
+			if(location<0)
 			{
-				i->second.pop_front();
-				basicmap->setLocationMineralDistance(location-1, atoi(i->second.front().c_str()));
-			}
-			if((i=block.find("Distance to"))!=block.end()) 
+				toLog("WARNING (DATABASE::loadMapFile()): Number for @LOCATION block " + *j + " is invalid in file " + map_file + " => ignoring block.");
+			} else if(!found_map_block)
 			{
-				i->second.pop_front();
-				int target = atoi(i->second.front().c_str());
-				i->second.pop_front();
-				basicmap->setLocationDistance(location-1, target-1, atoi(i->second.front().c_str()));
-//				cout << location-1 << "->" << target-1 << " : " << atoi(i->second.front().c_str()) << std::endl;
-			}
-			if((i=block.find("Minerals"))!=block.end())
+				toLog("WARNING (DATABASE::loadMapFile()): @MAP block was not yet defined prior to @LOCATION block " + *j + " block in file " + map_file + " => ignoring block.");
+			} else if(location > basic_map->getMaxLocations())
 			{
-				i->second.pop_front();
-				basicmap->setLocationMineralPatches(location-1, atoi(i->second.front().c_str()));
-			}
-			if((i=block.find("Geysirs"))!=block.end())
+				toLog("WARNING (DATABASE::loadMapFile()): Number for @LOCATION block " + *j + " is bigger than what was defined in 'Max locations'  in the @MAP block in file " + map_file + " => ignoring block.");
+			} else
+			if(found_location_block[location])
 			{
-				i->second.pop_front();
-				basicmap->setLocationVespeneGeysirs(location-1, atoi(i->second.front().c_str()));
+				toLog("WARNING (DATABASE::loadMapFile()): @LOCATION block " + *j + " block was already defined in file " + map_file + " => ignoring new block.");
+			} else
+			{
+				if((i=block.find("Name"))!=block.end()) 
+				{
+					i->second.pop_front();
+					basic_map->setLocationName(location, i->second.front().c_str());
+				} else
+				{
+					toLog("ERROR (loadMapFile()): Field name 'Name' not found within @LOCATION block " + *j + " block in file " + map_file + ".");
+					delete basic_map;
+					return(false);				
+				}
+			
+				if((i=block.find("Mineral distance"))!=block.end()) 
+				{
+					i->second.pop_front();
+					basic_map->setLocationMineralDistance(location, atoi(i->second.front().c_str()));
+				} else
+				{
+					toLog("ERROR (loadMapFile()): Field name 'Mineral distance' not found within @LOCATION block " + *j + " block in file " + map_file + ".");
+					delete basic_map;
+					return(false);				
+				}
+				
+				if((i=block.find("Distance to"))!=block.end()) 
+				{
+					i->second.pop_front();
+					int target = atoi(i->second.front().c_str())-1;
+					i->second.pop_front();
+					basic_map->setLocationDistance(location, target, atoi(i->second.front().c_str()));
+//					cout << location << "->" << target-1 << " : " << atoi(i->second.front().c_str()) << std::endl;
+				} else
+				{
+/*					toLog("ERROR (loadMapFile()): Field name 'Distance to' not found within @LOCATION block " + *j + " block in file " + map_file + ".");
+					delete basic_map;
+					return(false);*/
+					// don't care, distance to is not essential (although it's important...)
+				}
+				
+				if((i=block.find("Minerals"))!=block.end())
+				{
+					i->second.pop_front();
+					basic_map->setLocationMineralPatches(location, atoi(i->second.front().c_str()));
+				} else
+				{
+					toLog("ERROR (loadMapFile()): Field name 'Minerals' not found within @LOCATION block " + *j + " block in file " + map_file + ".");
+					delete basic_map;
+					return(false);				
+				}
+				
+				if((i=block.find("Geysirs"))!=block.end())
+				{
+					i->second.pop_front();
+					basic_map->setLocationVespeneGeysirs(location, atoi(i->second.front().c_str()));
+				} else
+				{
+					toLog("ERROR (loadMapFile()): Field name 'Geysirs' not found within @LOCATION block " + *j + " block in file " + map_file + ".");
+					delete basic_map;
+					return(false);				
+				}
+				
+				found_location_block[location] = true;
 			}
 			
 		}
 	}// END while
 	
-/*DEBUG	for(unsigned int i = 1; i < basicmap->getMaxLocations(); ++i)
+	if(!found_map_block)
+	{
+		toLog("ERROR (DATABASE::loadMapFile()): @MAP block was not defined in file " + map_file + ".");
+		delete basic_map;
+		return(false);
+	}
+		
+	for(unsigned int i = 0; i < basic_map->getMaxLocations(); ++i)
+		if(!found_location_block[i])
+		{
+			std::ostringstream os;
+			os << (i+1);
+			toLog("ERROR (DATABASE::loadMapFile()): @LOCATION block " + os.str() + " was not defined in file " + map_file + ".");
+			delete basic_map;
+			return(false);
+		}
+/*DEBUG	for(unsigned int i = 1; i < basic_map->getMaxLocations(); ++i)
 	{	
 		std::cout << "Location " << i << " ";
-		for(unsigned int j = 1; j < basicmap->getMaxLocations(); ++j)
-			std::cout << basicmap->getLocation(i)->getDistance(j) << " ";
+		for(unsigned int j = 1; j < basic_map->getMaxLocations(); ++j)
+			std::cout << basic_map->getLocation(i)->getDistance(j) << " ";
 		std::cout << std::endl;
 	}
 
-	basicmap->calculateLocationsDistances();
+	basic_map->calculateLocationsDistances();
 
-	for(unsigned int i = 1; i < basicmap->getMaxLocations(); ++i)
+	for(unsigned int i = 1; i < basic_map->getMaxLocations(); ++i)
 	{	
 		std::cout << "Location " << i << " ";
-		for(unsigned int j = 1; j < basicmap->getMaxLocations(); ++j)
-			std::cout << basicmap->getLocation(i)->getDistance(j) << " ";
+		for(unsigned int j = 1; j < basic_map->getMaxLocations(); ++j)
+			std::cout << basic_map->getLocation(i)->getDistance(j) << " ";
 		std::cout << std::endl;
 	}*/
 	
-	loadedMap.push_back(basicmap);
+	loadedMap.push_back(basic_map);
+	mapDataInitialized = true;
+	return(true);
+	// TODO
 } // schoen :)
 
-void DATABASE::loadStartConditionFile(const std::string& startconditionFile)
+const bool DATABASE::loadStartConditionFile(const std::string& start_condition_file)
 {
-	if((startconditionFile.compare(startconditionFile.size()-6, startconditionFile.size(), ".start")==1))
-		return;
+	if((start_condition_file.compare(start_condition_file.size()-6, start_condition_file.size(), ".start")==1))
+		return(true);
 
-	std::ifstream pFile(startconditionFile.c_str());
-	if(!pFile.is_open())
-	{
-		toLog("ERROR: (DATABASE::loadStartConditionFile): File " + startconditionFile + " not found.");
-		return;
-	}
+	std::ifstream pFile(start_condition_file.c_str());
+	if(!checkStreamIsOpen(pFile, "DATABASE::loadStartConditionFile", start_condition_file))
+		return(false);
+	
 	START_CONDITION* startcondition = new START_CONDITION;
+	
+	bool found_start_conditions_block = false;
+	bool found_location_block[MAX_LOCATIONS];
+	for(unsigned int i = MAX_LOCATIONS; i--;)
+		found_location_block[i] = false;
 
 	char line[1024];
-	std::string text;
-	eRace race=TERRA; 
 	while(pFile.getline(line, sizeof line))
 	{
-		if(pFile.fail())
-			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
-		text=line;
+		if(!checkStreamForFailure(pFile, "DATABASE::loadStartConditionFile", start_condition_file))
+			return(false);
+		std::string text = line;
 		size_t start_position = text.find_first_not_of("\t ");
 		if((start_position == std::string::npos)||(text[0]=='#')||(text[0]=='\0'))
 			continue; // ignore line
@@ -496,88 +792,184 @@ void DATABASE::loadStartConditionFile(const std::string& startconditionFile)
 
 		std::list<std::string>::iterator j=words.begin();
 		std::string index=*j;++j;
-		std::map<std::string, std::list<std::string> >::iterator i;
 		if(index=="@STARTCONDITIONS")
 		{
-			if(j==words.end())
-			{
-				toLog("ERROR: (DATABASE::loadMapFile [" + startconditionFile + "]): Every @LOCATION entry needs a number.");
-				return;
-			}
-
-			if(*j == raceString[TERRA]) race=TERRA;
-			else if(*j == raceString[PROTOSS]) race=PROTOSS;
-			else if(*j == raceString[ZERG]) race=ZERG;
-
 			std::map<std::string, std::list<std::string> > block;
-			parse_block(pFile, block);
+			if(!parse_block_map(pFile, block))
+			{
+				toLog("WARNING (DATABASE::loadStartConditionFile()): No concluding @END for @STARTCONDITIONS block was found in file " + start_condition_file + " => trying to parse what we have so far.");
+			}
 
-			if((i=block.find("Name"))!=block.end()) 
+			if(found_start_conditions_block)
 			{
-				i->second.pop_front();
-				startcondition->setName(i->second.front());
-			}
-			if((i=block.find("Minerals"))!=block.end()) 
+				toLog("WARNING (DATABASE::loadStartConditionFile()): @STARTCONDITIONS block was already defined in file " + start_condition_file + " => ignoring new block.");
+			} else
 			{
-				i->second.pop_front();
-				startcondition->setMinerals(100*atoi(i->second.front().c_str()));
-			}
-			if((i=block.find("Gas"))!=block.end()) 
-			{
-				i->second.pop_front();
-				startcondition->setGas(100*atoi(i->second.front().c_str()));
-			}
-			if((i=block.find("Time"))!=block.end()) 
-			{
-				i->second.pop_front();
-				startcondition->setStartTime(atoi(i->second.front().c_str()));
+				std::map<std::string, std::list<std::string> >::iterator i;
+	
+				if((i=block.find("Race"))!=block.end())
+				{
+					i->second.pop_front();
+					std::string estr = i->second.front();
+					if(estr == raceString[TERRA]) startcondition->assignRace(TERRA);
+					else if(estr == raceString[PROTOSS]) startcondition->assignRace(PROTOSS);
+					else if(estr == raceString[ZERG]) startcondition->assignRace(ZERG);
+					else {
+						toLog("ERROR (DATABASE::loadStartConditionFile()): Invalid race entry (" + estr + " [" + raceString[TERRA] + "|" + raceString[PROTOSS] + "|" + raceString[ZERG] + "]) in file " + start_condition_file + ".");
+						delete startcondition;
+						return(false);
+					}
+					block.erase(i);
+				} else
+				{
+					toLog("ERROR (DATABASE::loadStartConditionFile()): Field name 'Race' not found in file " + start_condition_file + ".");
+					delete startcondition;
+					return(false);
+				}
+// TODO evtl ueberpruefen ob gueltige Werte...
+				if((i=block.find("Name"))!=block.end()) 
+				{
+					i->second.pop_front();
+					startcondition->setName(i->second.front());
+					block.erase(i);
+				} else
+				{
+					toLog("ERROR (loadStartConditionFile()): Field name 'Name' not found in file " + start_condition_file + ".");
+					delete startcondition;
+					return(false);
+				}
+			
+				if((i=block.find("Minerals"))!=block.end()) 
+				{
+					i->second.pop_front();
+					startcondition->setMinerals(100*atoi(i->second.front().c_str()));
+					block.erase(i);
+				} else
+				{
+					toLog("ERROR (loadStartConditionFile()): Field name 'Minerals' not found in file " + start_condition_file + ".");
+					delete startcondition;
+					return(false);
+				}
+			
+				if((i=block.find("Gas"))!=block.end()) 
+				{
+					i->second.pop_front();
+					startcondition->setGas(100*atoi(i->second.front().c_str()));
+					block.erase(i);
+				} else
+				{
+					toLog("ERROR (loadStartConditionFile()): Field name 'Gas' not found in file " + start_condition_file + ".");
+					delete startcondition;
+					return(false);
+				}
+			
+				if((i=block.find("Time"))!=block.end()) 
+				{
+					i->second.pop_front();
+					startcondition->setStartTime(atoi(i->second.front().c_str()));
+					block.erase(i);
+				} else
+				{
+					toLog("ERROR (loadStartConditionFile()): Field name 'Time' not found in file " + start_condition_file + ".");
+					delete startcondition;
+					return(false);
+				}
+				found_start_conditions_block = true;
 			}
 		}
 		else if(index=="@LOCATION")
 		{
 			if(j==words.end())
 			{
-				toLog("ERROR: (DATABASE::loadMapFile [" + startconditionFile + "]): Every @LOCATION entry needs a number.");
-				return;
+				toLog("ERROR (DATABASE::loadStartConditionFile()): @LOCATION entry needs a following number (e.g. '@LOCATION \"2\"') in file " + start_condition_file + ".");
+				delete startcondition;
+				return(false);
 			}
-			
-			unsigned int location = atoi(j->c_str());
-// TODO pruefen
-			std::map<std::string, std::list<std::string> > block;
-			parse_block(pFile, block);
-			for(unsigned int k=UNIT_TYPE_COUNT;k--;)
+
+			signed int location = atoi(j->c_str()) - 1;
+			std::list<std::list<std::string> > block;
+			if(!parse_block_list(pFile, block))
 			{
-				std::string unit=stats[race][k].name;
-				if((i=block.find(unit))!=block.end())
+				toLog("WARNING (DATABASE::loadStartConditionFile()): No concluding @END for @LOCATION " + *j + " block was found in file " + start_condition_file + " => trying to parse what we have so far.");
+			}
+
+			if(location < 0)
+			{
+				toLog("WARNING (DATABASE::loadStartConditionFile()): Number for @LOCATION block " + *j + " is invalid in file " + start_condition_file + " => ignoring block.");
+			} else if(found_location_block[location])
+			{
+				toLog("WARNING (DATABASE::loadStartConditionFile()): @LOCATION block " + *j + " block was already defined in file " + start_condition_file + " => ignoring new block.");
+			} else if(!found_start_conditions_block)
+			{
+				toLog("WARNING (DATABASE::loadStartConditionFile()): @STARTCONDITIONS block was not yet defined prior to @LOCATION block " + *j + " block in file " + start_condition_file + " => ignoring block.");
+				
+			} else
+			{
+				bool found_at_least_one = false;
+				std::list<std::list<std::string> >::iterator i = block.begin();
+				while(i!=block.end())
 				{
-					i->second.pop_front();
-					unsigned int count=atoi(i->second.front().c_str());
-//TODO: values checken!
-					if(count > 0)
+					bool found = false;
+					for(unsigned int unit=UNIT_TYPE_COUNT;(unit--)&&(i!=block.end());)
+						if(*(i->begin()) == stats[startcondition->getRace()][unit].name)
+						{
+							i->pop_front();
+
+							if(i->size() != 1)
+							{
+								toLog("WARNING (DATABASE::loadStartConditionFile()): Incorrect number of parameters for entry \'" + *(i->begin()) + "\' in file " + start_condition_file + ": 1 parameter expected => line will be ignored.");
+							} else
+							{
+								unsigned int count = atoi(i->front().c_str());
+								if(count > 0) {
+									startcondition->setLocationTotal(location, unit, count);
+									startcondition->setLocationAvailible(location, unit, count);
+									found_at_least_one = true;
+								} else
+								{
+									toLog("WARNING (DATABASE::loadStartConditionFile()): Invalid parameter for entry \'" + *(i->begin()) + "\' in file " + start_condition_file + " => line will be ignored.");
+								}
+							}
+							block.erase(i);
+							i = block.begin();
+							found = true;
+						}
+					if(!found)
 					{
-						startcondition->setLocationTotal(location-1, k, count);
-						startcondition->setLocationAvailible(location-1, k, count);
-			//			std::ostringstream os;
-			//			os << unit << " : " << count;
-			//			toLog(os.str());
+						toLog("WARNING (DATABASE::loadStartConditionFile()): Unknown entry \'" + *(i->begin()) + "\' in file " + start_condition_file + " => line will be ignored.");
+						i++;
 					}
-				}
-			}
-		} // end if == LOCATION
-	}// END while
-	startcondition->assignRace(race);
-	startcondition->adjustResearches();
-	startcondition->adjustSupply();
-	loadedStartCondition[race].push_back(startcondition); // beendet nicht richtig :/
+				} // end while
 		
-/*	for(unsigned int i = MAX_LOCATIONS;i--;)
-		for(unsigned int j=UNIT_TYPE_COUNT;j--;)
-			if(startcondition->getLocationTotal(i, j))
+				if(!found_at_least_one)
+				{
+					toLog("ERROR (DATABASE::loadStartConditionFile()): Empty @LOCATION " + *j + " block in file " + start_condition_file + " => location will be ignored.");
+				} else
+					found_location_block[location] = true;
+			}
+		} // end index == @LOCATION
+	} // end while
+
+	if(!found_start_conditions_block)
+	{
+		toLog("WTF?");
+		delete startcondition;
+		return(false);
+	}
+	else 
+	{
+		startcondition->adjustResearches();
+		startcondition->adjustSupply();
+		loadedStartCondition[startcondition->getRace()].push_back(startcondition);
+		startConditionDataInitialized = true;
+		for(unsigned int i = MAX_RACES; i--;)
+			if(loadedStartCondition[i].size() == 0)
 			{
-				std::ostringstream os;
-				os << stats[startcondition->getRace()][j].name << " : " << startcondition->getLocationTotal(i, j);
-				toLog(os.str());
-			}*/
+				startConditionDataInitialized = false;
+				break;
+			}		
+	}
+	return(true);
 } // schoen :)
 
 // ---------------------------------
@@ -586,71 +978,81 @@ void DATABASE::loadStartConditionFile(const std::string& startconditionFile)
 
 // FILE SAVING
 
-void DATABASE::saveGoal(const std::string& name, GOAL_ENTRY* goalentry)
+const bool DATABASE::saveGoal(const std::string& goal_name, GOAL_ENTRY* goalentry)
 {
-	std::ostringstream os;
-	os.str("");
+	std::ostringstream goal_file;
+	goal_file.str("");
 #ifdef __linux__
-	os << "settings/goals/";
-	os << raceString[goalentry->getRace()] << "/" << name << ".gol";// TODO!
+	goal_file << "settings/goals/";
+	goal_file << raceString[goalentry->getRace()] << "/" << goal_file << ".gol";// TODO!
 #elif __WIN32__
-	os << "settings\\goals\\";
-	os << raceString[goalentry->getRace()] << "\\" << name << ".gol";// TODO!
+	goal_file << "settings\\goals\\";
+	goal_file << raceString[goalentry->getRace()] << "\\" << goal_file << ".gol";// TODO!
 #endif 
-	std::ofstream pFile(os.str().c_str(), std::ios_base::out | std::ios_base::trunc);
-	if(!pFile.is_open())
-	{
-		toLog("ERROR: (DATABASE::saveGoal) Could not create file " + os.str() + " (write protection? disk space?)");
-		return;
-	}
+	std::ofstream pFile(goal_file.str().c_str(), std::ios_base::out | std::ios_base::trunc);
+	if(!checkStreamIsOpen(pFile, "DATABASE::saveGoal", goal_file.str()))
+		return(false);
 
-	goalentry->setName(name);
+	goalentry->setName(goal_name);
 
 	pFile << "@GOAL" << std::endl;
-	pFile << "		\"Name\" \"" << name << "\"" << std::endl; // TODO
+	pFile << "		\"Name\" \"" << goal_name << "\"" << std::endl; // TODO
 	pFile << "		\"Race\" \"" << raceString[goalentry->getRace()] << "\"" << std::endl;
 
 	for(std::list<GOAL>::const_iterator i = goalentry->goal.begin(); i!=goalentry->goal.end(); ++i)
 		pFile << "		\"" << stats[goalentry->getRace()][i->getUnit()].name << "\" \"" << i->getCount() << "\" \"" << i->getLocation() << "\" \"" << i->getTime() << "\"" << std::endl;		
 	pFile << "@END" << std::endl;
-	loadGoalFile(os.str().c_str());
+
+	if(!loadGoalFile(goal_file.str()))
+	{
+		toLog("ERROR (DATABASE::saveGoal()): Could not reload file " + goal_file.str() + ". Goal is probably lost. This is either a BUG or the OS messed something up.");
+		return(false);
+	}
+	return(true);
 }
 
-void DATABASE::saveBuildOrder(const std::string& name, BUILD_ORDER& build_order)
+const bool DATABASE::saveBuildOrder(const std::string& build_order_name, BUILD_ORDER& build_order)
 {
-	std::ostringstream os;
-	os.str("");
+	std::ostringstream build_order_file;
+	build_order_file.str("");
 #ifdef __linux__
-	os << "output/bos/";
-	os << raceString[build_order.getRace()] << "/" << name << ".txt";
+	build_order_file << "output/bos/";
+	build_order_file << raceString[build_order.getRace()] << "/" << build_order_name << ".txt";
 #elif __WIN32__
-	os << "output\\bos\\";
-	os << raceString[build_order.getRace()] << "\\" << name << ".txt";
+	build_order_file << "output\\bos\\";
+	build_order_file << raceString[build_order.getRace()] << "\\" << build_order_name << ".txt";
 #endif 
-	std::ofstream pFile(os.str().c_str(), std::ios_base::out | std::ios_base::trunc);
-	if(!pFile.is_open())
-	{
-		toLog("ERROR: (DATABASE::saveBuildOrder) Could not create file " + os.str() + " (write protection? disk space?)");
-		return;
-	}
+	std::ofstream pFile(build_order_file.str().c_str(), std::ios_base::out | std::ios_base::trunc);
+	if(!checkStreamIsOpen(pFile, "DATABASE::saveBuildOrder", build_order_file.str()))
+		return(false);
 
+	pFile << "@BO_HEADER" << std::endl;
+	pFile << "		\"Name\" \"" << build_order_name << "\"" << std::endl; // TODO
+	pFile << "		\"Race\" \"" << raceString[build_order.getRace()] << "\"" << std::endl;
+	pFile << "		\"Time\" \"" << build_order.getTime() << "\"" << std::endl;
+	pFile << "@END" << std::endl;
+	
+	
 	pFile << "@GOAL" << std::endl;
-	pFile << "		\"Name\" \"" << name << "\"" << std::endl; // TODO
+	pFile << "		\"Name\" \"" << build_order_name << "\"" << std::endl; // TODO! Name muesste eigentlich der echte Goal Name sein!
 	pFile << "		\"Race\" \"" << raceString[build_order.getGoal().getRace()] << "\"" << std::endl;
 
 	for(std::list<GOAL>::const_iterator i = build_order.getGoal().goal.begin(); i!= build_order.getGoal().goal.end(); ++i)
 		pFile << "		\"" << stats[build_order.getGoal().getRace()][i->getUnit()].name << "\" \"" << i->getCount() << "\" \"" << i->getLocation() << "\" \"" << i->getTime() << "\"" << std::endl;		
 	pFile << "@END" << std::endl;
 
-	pFile << "@BUILDORDER" << std::endl;
-	pFile << "		\"Name\" \"" << name << "\"" << std::endl; // TODO
-	pFile << "		\"Race\" \"" << raceString[build_order.getRace()] << "\"" << std::endl;
-	pFile << "		\"Time\" \"" << build_order.getTime() << "\"" << std::endl;
 
+	pFile << "@BUILDORDER" << std::endl;
 	for(std::list<PROGRAM>::iterator i = build_order.getProgramList().begin(); i!=build_order.getProgramList().end(); ++i)
 		pFile << "		\"" << stats[build_order.getRace()][i->getUnit()].name << "\""/* \"" << i->getCount() << "\" \"" << i->getLocation() << "\" \"" << i->getTime() << "\""*/ << std::endl;
 	pFile << "@END" << std::endl;
-	loadBuildOrderFile(os.str().c_str());
+	
+	if(!loadBuildOrderFile(build_order_file.str()))
+	{
+		toLog("ERROR (DATABASE::saveBuildOrder()): Could not reload file " + build_order_file.str() + ". Build order is probably lost. This is either a BUG or the OS messed something up.");
+		return(false);
+	}
+	return(true);
 
 /*	std::ostringstream os;
 	os.str("");
@@ -744,8 +1146,8 @@ const unsigned int DATABASE::getBuildOrderCount(const eRace race, const GOAL_ENT
 BUILD_ORDER* DATABASE::getBuildOrder(const eRace race, const GOAL_ENTRY* goal, const unsigned int build_order) const
 {
 #ifdef _SCC_DEBUG
-	if(build_order>=getBuildOrderCount(race, goal)) {
-		toLog("WARNING: (DATABASE::getBuildOrder): Value out of range.");return(NULL);
+	if(build_order >= getBuildOrderCount(race, goal)) {
+		toLog("DEBUG WARNING (DATABASE::getBuildOrder()): Value 'build_order' out of range.");return(NULL);
 	}
 #endif
 	unsigned int count = 0;

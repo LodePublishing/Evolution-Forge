@@ -79,26 +79,40 @@ void CoreConfiguration::loadConfigurationFile()
 		saveToFile();		
 		return;
 	}
+	
+	toLog("* Loading " + configurationFile);
+	
+	std::fstream::pos_type old_pos = pFile.tellg();
 	char line[1024];
-	std::string text;
 	while(pFile.getline(line, sizeof line))
 	{
 		if(pFile.fail())
+		{
 			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
-		text=line;
-		size_t start=text.find_first_not_of("\t ");
-		if((start==std::string::npos)||(text[0]=='#')||(text[0]=='\0'))
+#ifdef _SCC_DEBUG
+			toLog("WARNING: (CoreConfiguration::loadConfigurationFile) Long line!");
+#endif
+		}
+		
+		std::string text = line;
+		size_t start = text.find_first_not_of("\t ");
+		if((start == std::string::npos) || (text[0] == '#') || (text[0] == '\0'))
 			continue; // ignore line
-		size_t stop=text.find_first_of("\t ", start);
-		if(stop==std::string::npos) stop=text.size();
-		std::string index=text.substr(start, stop);
-		std::string value;
-		std::map<std::string, std::list<std::string> >::iterator i;
+		size_t stop = text.find_first_of("\t ", start);
+		if(stop == std::string::npos) 
+			stop = text.size();
+		std::string index = text.substr(start, stop);
 		if(index=="@SETTINGS")
 		{
 			std::map<std::string, std::list<std::string> > block;
-			parse_block(pFile, block);
-
+			pFile.seekg(old_pos);
+			if(!parse_block_map(pFile, block))
+			{
+#ifdef _SCC_DEBUG
+				toLog("WARNING: (CoreConfiguration::loadConfigurationFile) No concluding @END was found!");
+#endif
+			}
+			std::map<std::string, std::list<std::string> >::iterator i;
 			if((i=block.find("Allow goal adaption"))!=block.end()){
 				i->second.pop_front();
 			   	setAllowGoalAdaption(atoi(i->second.front().c_str()));
@@ -136,6 +150,7 @@ void CoreConfiguration::loadConfigurationFile()
 			   	setMaxGenerations(atoi(i->second.front().c_str()));
 			}
 		}
+		old_pos = pFile.tellg();
 	}// END while
 } // schoen :)
 

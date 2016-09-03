@@ -80,13 +80,25 @@ void DC::Draw_VLine_16bit(const signed int x0, const signed int y0, const signed
 	register Uint8 *p = (Uint8*)surface->pixels + y0 * surface->pitch + (x0 << 1);
 	register signed int i = y1-y0+1;
 	Lock();
-	switch( i % 4 ) {								 
-		do{											
-			case 0: *(Uint16*)p = pen_col; p+=surface->pitch;
-			case 3: *(Uint16*)p = pen_col; p+=surface->pitch;
-			case 2: *(Uint16*)p = pen_col; p+=surface->pitch;
-			case 1: *(Uint16*)p = pen_col; p+=surface->pitch;
-		}while( (i-=4) > 0 );
+
+	if(pen.GetStyle() == SHORT_DASH_PEN_STYLE)
+	{
+		for(;i--;)
+		{
+			if(((i%5) != 2)&&((i%5) != 3))
+				*(Uint16*)p = pen_col;
+			p+=surface->pitch;
+		}
+	} else
+	{
+		switch( i % 4 ) {
+			do{
+				case 0: *(Uint16*)p = pen_col; p+=surface->pitch;
+				case 3: *(Uint16*)p = pen_col; p+=surface->pitch;
+				case 2: *(Uint16*)p = pen_col; p+=surface->pitch;
+				case 1: *(Uint16*)p = pen_col; p+=surface->pitch;
+			}while( (i-=4) > 0 );
+		}
 	}
 	Unlock();
 }
@@ -102,9 +114,20 @@ void DC::Draw_VLine_24bit(const signed int x0, const signed int y0, const signed
 	register signed int k = y1-y0+1;
 
 	Lock();
-	
-	SDL_DO_DRAWING_Y
-
+	if(pen.GetStyle() == SHORT_DASH_PEN_STYLE)
+	{
+		for(;k--;)
+		{
+			if(((k%5) != 2) && ((k%5) != 3))
+			{
+				SDL_DRAW_PUTPIXEL_BPP_3_AUX
+			}
+			p+=surface->pitch;
+		}
+	} else
+	{
+		SDL_DO_DRAWING_Y
+	}
 	Unlock();
 }
 
@@ -116,9 +139,20 @@ void DC::Draw_VLine_32bit(const signed int x0, const signed int y0, const signed
 	register signed int i = y1-y0+1;
 	
 	Lock();
-
-	for(;i--; p+=surface->pitch)
-		*(Uint32*)p = pen_col;
+	
+	if(pen.GetStyle() == SHORT_DASH_PEN_STYLE)
+	{
+		for(;i--;)
+		{
+			if(((i%5) != 2)&&((i%5) != 3))
+				*(Uint32*)p = pen_col;
+			p+=surface->pitch;
+		}
+	} else
+	{
+		for(;i--; p+=surface->pitch)
+			*(Uint32*)p = pen_col;
+	}
 	
 	Unlock();
 }

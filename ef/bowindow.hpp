@@ -18,21 +18,22 @@ class BoWindow : public UI_Window
 	public:
 		BoWindow(const BoWindow& object);
 		BoWindow& operator=(const BoWindow& object);
-		BoWindow(UI_Object* bo_parent, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_players);
+		BoWindow(UI_Object* bo_parent, const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max);
 		~BoWindow();
 		void resetData();
 		void draw(DC* dc) const;
 		void reloadStrings();
 		void processList();
 		void process();
-		void wave(SDL_snd& sound);
+
 		void assignAnarace(ANABUILDORDER* bo_anarace);
+		void setMode(const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max);
 		void reloadOriginalSize();
 
 		const bool wasResetted() const;
 
-		const signed int getSelectedItem() const;
-		void setSelected(const unsigned int selected);
+		const std::list<unsigned int>& getSelectedItems() const;
+		void setSelected(const std::list<unsigned int>& selected);
 
 		void recheckSomeDataAfterChange();
 		
@@ -55,9 +56,8 @@ class BoWindow : public UI_Window
 		unsigned int boGoalListOpened;
 		unsigned int lastBogoal;
 		unsigned int startLine;
-		signed int selectedItem;
+		std::list<unsigned int> selectedItems;
 
-		bool newItem;
 
 		UI_StaticText* timeSlot[60];
 
@@ -77,10 +77,16 @@ class BoWindow : public UI_Window
 
 		BoMenu* boMenu;
 		SaveBox* saveBox;
+	
+		unsigned int gameNumber;
+		unsigned int gameMax;
+		unsigned int playerNumber;
+		unsigned int playerMax;
+	
 };
 
-inline const signed int BoWindow::getSelectedItem() const {
-	return(selectedItem);
+inline const std::list<unsigned int>& BoWindow::getSelectedItems() const {
+	return(selectedItems);
 }
 
 

@@ -9,7 +9,7 @@
 		@PLAYER_ONE
 			Player window, 315, 440, 440, absolute coordinates, 0, 15
 			Force window, 160, 100, 170, dock top left inside of, Player window
-			Build order window, 140, 100, 280, dock right inside of, Player window, absolute y coordinate, 120
+			Build order window, 140, 100, 260, dock right inside of, Player window, absolute y coordinate, 120 
 			Build order diagram window, 175, 80, 80, dock left inside of, Player window, absolute y coordinate, 200
 			Build order graph window, 175, 75, 120, dock left inside of, Player window, dock with lower border of, Build order diagram window
 		@END
@@ -96,7 +96,7 @@
 		@PLAYER_ONE
 			Player window, 390, 545, 545, absolute coordinates, 0, 15
 			Force window, 200, 100, 400, dock top left inside of, Player window
-			Build order window, 170, 100, 400, dock right inside of, Player window, absolute y coordinate, 150
+			Build order window, 170, 100, 320, dock right inside of, Player window, absolute y coordinate, 90
 			Build order diagram window, 220, 100, 100, dock left inside of, Player window, absolute y coordinate, 290
 			Build order graph window, 220, 75, 170, dock left inside of, Player window, dock with lower border of, Build order diagram window
 		@END

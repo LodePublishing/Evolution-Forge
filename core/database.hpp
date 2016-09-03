@@ -20,33 +20,44 @@ class DATABASE
 		std::vector<START_CONDITION*> loadedStartCondition[MAX_RACES];
 		std::vector<BASIC_MAP*> loadedMap; //modes: 0: ignore map settings and make up a default force, 1: use map settings
 		std::vector<HARVEST_SPEED*> loadedHarvestSpeed[MAX_RACES];
+
+		bool goalDataInitialized;
+		bool buildOrderDataInitialized;
+		bool startConditionDataInitialized;
+		bool mapDataInitialized;
+		bool harvestDataInitialized;
 	public:
-		static std::list<std::string> findFiles(const std::string& directory1, const std::string& directory2, const std::string& directory3="");
 // ----- MAPS -----
-		void loadMapFile(const std::string& mapFile);
+		const bool loadMapFile(const std::string& mapFile);
 		const unsigned int getMapCount() const;
 		const BASIC_MAP* getMap(const unsigned int map_number) const;
+		const bool isMapDataInitialized() const;
 
 // ----- GOALS ------
-		void loadGoalFile(const std::string& goalFile);
-		void saveGoal(const std::string& name, GOAL_ENTRY* goalentry);
+		const bool loadGoalFile(const std::string& goal_file);
+		const bool saveGoal(const std::string& goal_name, GOAL_ENTRY* goalentry);
 		const unsigned int getGoalCount(const eRace race) const;
 		const GOAL_ENTRY* getGoal(const eRace race, const unsigned int goal_number) const;
 		void addDefaultGoal(const eRace race);
+		const bool isGoalDataInitialized() const;
+		
 // ----- BUILD ORDERS ------
-		void loadBuildOrderFile(const std::string& boFile);
-		void saveBuildOrder(const std::string& name, BUILD_ORDER& build_order);
+		const bool loadBuildOrderFile(const std::string& build_order_file);
+		const bool saveBuildOrder(const std::string& build_order_name, BUILD_ORDER& build_order);
 		const unsigned int getBuildOrderCount(const eRace race, const GOAL_ENTRY* goal) const;
 		BUILD_ORDER* getBuildOrder(const eRace race, const GOAL_ENTRY* goal, const unsigned int bo_number) const;
+		const bool isBuildOrderDataInitialized() const;
 
 // ----- STARTCONDITION -----
-		void loadStartConditionFile(const std::string& startConditionFile);
+		const bool loadStartConditionFile(const std::string& start_condition_file);
 		const unsigned int getStartConditionCount(const eRace race) const;
 		const START_CONDITION* getStartCondition(const eRace race, const unsigned int start_condition_number) const;
+		const bool isStartConditionDataInitialized() const;
 
 // ----- HARVEST DATA -----
-		void loadHarvestFile(const std::string& harvestFile);
+		const bool loadHarvestFile(const std::string& harvest_file);
 		const HARVEST_SPEED* getHarvestSpeed(const eRace race, const unsigned int harvest_number) const;
+		const bool isHarvestDataInitialized() const;
 
 		DATABASE();
 		~DATABASE();
@@ -107,6 +118,22 @@ inline const HARVEST_SPEED* DATABASE::getHarvestSpeed(const eRace race, const un
 	}
 #endif
 	return(loadedHarvestSpeed[race][harvest_number]);
+}
+
+inline const bool DATABASE::isHarvestDataInitialized() const {
+	return(harvestDataInitialized);
+}
+inline const bool DATABASE::isGoalDataInitialized() const {
+	return(goalDataInitialized);
+}
+inline const bool DATABASE::isMapDataInitialized() const {
+	return(mapDataInitialized);
+}
+inline const bool DATABASE::isBuildOrderDataInitialized() const {
+	return(buildOrderDataInitialized);
+}
+inline const bool DATABASE::isStartConditionDataInitialized() const {
+	return(startConditionDataInitialized);
 }
 
 // one global database

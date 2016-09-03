@@ -47,7 +47,10 @@ void BoEntry::process()
 {
 //	if(!isShown())
 //		return;
+	bool different = isMoving();
 	UI_Button::process();
+	if(different && (!isMoving()))
+		UI_Object::theme.playSound(SWISHLOCK_SOUND, (getAbsolutePosition() + getSize()/2).x);
 //	if(isRightClicked())
 //		lock(!fixed);
 }

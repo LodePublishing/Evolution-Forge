@@ -49,21 +49,21 @@ PREBUILDORDER::PREBUILDORDER():
 	resetSpecial();
 }
 
-void PREBUILDORDER::resetPrerace()
+void PREBUILDORDER::resetData()
 {
 //	location = NULL;
 	conditionsChanged = true;
 //	pStartCondition = NULL;
 	while(!buildingQueue.empty())
 		buildingQueue.pop();
-	unit = NULL;
-	pStats = NULL;
+//	unit = NULL;
+//	pStats = NULL;
 	neededMinerals = 0;
 	neededGas = 0;
-	pStart = NULL;
+//	pStart = NULL;
 	ready = false;
-	pGoal = NULL;
-	playerNum = 0;
+//	pGoal = NULL;
+//	playerNum = 0;
 	minerals = 0;
 	gas = 0;
 	timer = 0; //? max_time-1?
@@ -363,6 +363,8 @@ void PREBUILDORDER::adjustLocationUnitsAfterCompletion(const unsigned int locati
 		case NEEDED_UNTIL_COMPLETE:
 			if(facility)
 				addOneLocationAvailible(location_number, facility);
+			if(facility2)
+				addOneLocationAvailible(location_number, facility2); //?
 			break; // fuer spaeter mal: Wenn in 2 Fabriken produziert wuerde wirds probmelatisch, da
 //in Buiding nur eine facility gespeichert wird...
 		case NEEDED_ONCE_IS_LOST:
@@ -1223,6 +1225,8 @@ void PREBUILDORDER::copyCode(unsigned int* dst) const
 void PREBUILDORDER::setConditionsChanged(const bool conditions_changed) 
 {
 	conditionsChanged = conditions_changed;
+	if(conditionsChanged)
+		resetData();
 }
 
 

@@ -8,6 +8,11 @@ UI_Configuration::UI_Configuration():
 	resolution(RESOLUTION_640x480),
 	bitdepth(DEPTH_32BIT),
 	theme(DARK_BLUE_THEME),
+	musicVolume(75),
+	soundVolume(75),
+	channels(16),
+	useMusic(true),
+	useSound(true),
 	glowingButtons(true),
 	transparency(false),
 	smoothMovements(true),
@@ -24,6 +29,11 @@ void UI_Configuration::initDefaults()
 	setResolution(RESOLUTION_640x480);
 	setBitDepth(DEPTH_32BIT);
 	setTheme(DARK_BLUE_THEME);
+	setMusicVolume(75);
+	setSoundVolume(75);
+	setChannels(16);
+	setMusic(true);
+	setSound(true);
 	setGlowingButtons(true);
 	setTransparency(false);
 	setSmoothMovements(true);
@@ -53,6 +63,20 @@ void UI_Configuration::saveToFile() const
 	pFile << "    \"Bit depth\" = \"" << (int)getBitDepth() << "\"" << std::endl;
 	pFile << "# 1 = dark red theme, 2 = dark blue theme, 4 = yellow theme" << std::endl;
 	pFile << "    \"Theme\" = \"" << (int)getTheme() << "\"" << std::endl;
+	
+	pFile << "# use music (1: on, 0: off)" << std::endl;
+	pFile << "    \"Music\" = \"" << (int)isMusic() << "\"" << std::endl;
+	pFile << "# use sound (1: on, 0: off)" << std::endl;
+	pFile << "    \"Sound effects\" = \"" << (int)isSound() << "\"" << std::endl;
+
+	pFile << "# music volume (0% - 100%)" << std::endl;
+	pFile << "    \"Music volume\" = \"" << (int)getMusicVolume() << "\"" << std::endl;
+	pFile << "# sound volume (0% - 100%)" << std::endl;
+	pFile << "    \"Sound volume\" = \"" << (int)getSoundVolume() << "\"" << std::endl;
+
+	pFile << "# max number of simultaneously played sounds" << std::endl;
+	pFile << "    \"Channels\" = \"" << (int)getChannels() << "\"" << std::endl;
+
 	pFile << "# glowing effects" << std::endl;
 	pFile << "    \"Glowing buttons\" = \"" << (int)isGlowingButtons() << "\"" << std::endl;
 	pFile << "# moving rectangles, 2 = all objects move smoothly, 1 = some objects move smoothly, 0 = all objects jump directly to their destination" << std::endl;
@@ -76,13 +100,22 @@ void UI_Configuration::loadConfigurationFile()
 		saveToFile();		
 		return;
 	}
+
+	toLog("* Loading " + configurationFile);
+	
+	std::fstream::pos_type old_pos = pFile.tellg();
 	char line[1024];
-	std::string text;
 	while(pFile.getline(line, sizeof line))
 	{
 		if(pFile.fail())
+		{
 			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
-		text=line;
+#ifdef _SCC_DEBUG
+			toLog("WARNING: (UI_Configuration::loadConfigurationFile) Long line!");
+#endif
+		}
+		
+		std::string text = line;
 		size_t start=text.find_first_not_of("\t ");
 		if((start==std::string::npos)||(text[0]=='#')||(text[0]=='\0'))
 			continue; // ignore line
@@ -94,7 +127,8 @@ void UI_Configuration::loadConfigurationFile()
 		if(index=="@SETTINGS")
 		{
 			std::map<std::string, std::list<std::string> > block;
-			parse_block(pFile, block);
+			pFile.seekg(old_pos);
+			parse_block_map(pFile, block);
 
 			if((i=block.find("Language"))!=block.end()){
 				i->second.pop_front();
@@ -111,6 +145,27 @@ void UI_Configuration::loadConfigurationFile()
 			if((i=block.find("Theme"))!=block.end()){
 				i->second.pop_front();
 			   	setTheme((eTheme)(atoi(i->second.front().c_str())));
+			}	
+
+			if((i=block.find("Music"))!=block.end()){
+				i->second.pop_front();
+			   	setMusic(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Sound effects"))!=block.end()){
+				i->second.pop_front();
+			   	setSound(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Music volume"))!=block.end()){
+				i->second.pop_front();
+			   	setMusicVolume(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Sound volume"))!=block.end()){
+				i->second.pop_front();
+			   	setSoundVolume(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Channels"))!=block.end()){
+				i->second.pop_front();
+			   	setChannels(atoi(i->second.front().c_str()));
 			}		
 			if((i=block.find("Glowing buttons"))!=block.end()){
 				i->second.pop_front();
@@ -128,8 +183,8 @@ void UI_Configuration::loadConfigurationFile()
 				i->second.pop_front();
 			   	setUnloadGraphics(atoi(i->second.front().c_str()));
 			}
-
 		}
+		old_pos = pFile.tellg();
 	}// END while
 } // schoen :)
 
@@ -162,6 +217,46 @@ const bool UI_Configuration::setTheme(const eTheme current_theme)
 	if(theme == current_theme)
 		return(false);
 	theme = current_theme;
+	return(true);
+}
+
+const bool UI_Configuration::setMusic(const bool use_music) 
+{
+	if(useMusic == use_music)
+		return(false);
+	useMusic = use_music;
+	return(true);
+}
+
+const bool UI_Configuration::setSound(const bool use_sound) 
+{
+	if(useSound == use_sound)
+		return(false);
+	useSound = use_sound;
+	return(true);
+}
+
+const bool UI_Configuration::setMusicVolume(const unsigned int music_volume)
+{
+	if(musicVolume == music_volume)
+		return(false);
+	musicVolume = music_volume;
+	return(true);
+}
+
+const bool UI_Configuration::setSoundVolume(const unsigned int sound_volume) 
+{
+	if(soundVolume == sound_volume)
+		return(false);
+	soundVolume = sound_volume;
+	return(true);
+}
+
+const bool UI_Configuration::setChannels(const unsigned int channel_num)
+{
+	if(channels == channel_num)
+		return(false);
+	channels = channel_num;
 	return(true);
 }
 

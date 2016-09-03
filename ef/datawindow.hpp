@@ -8,6 +8,8 @@
 #include "../ui/checkbutton.hpp"
 #include "../ui/numberfield.hpp"
 
+#include "game.hpp"
+
 #include "../core/database.hpp"
 #include "bitdepthmenu.hpp"
 #include "languagemenu.hpp"
@@ -37,12 +39,14 @@ class DataBaseWindow:public UI_Window
 
 //		void forceLanguageChange();
 		void reloadOriginalSize();
+
+		// goal liste (loeschbar)
+		// liste (aehnlich bowindow) von build-order-namen und Zeit (geordnet nach Zeit) (auch loeschbar)
+		// wenn da eins angeklickt wird dann erscheint die build order in einem weiteren Fenster (split-screen)
 		
-//		const bool hasLanguageChanged() const;
-//		const bool hasResolutionChanged() const;
-//		const bool hasBitDepthChanged() const;
 //		const bool hasFullScreenChanged() const;
 	private:
+		Game* game;
 /*		BASIC_MAP* map;
 
 		UI_Group* mapSettings;

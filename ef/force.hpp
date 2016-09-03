@@ -31,17 +31,18 @@ enum eMenu
 class ForceWindow : public UI_Window
 {
 	public:
-		ForceWindow(UI_Object* force_parent, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_players);
+		ForceWindow(UI_Object* force_parent, const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max);
 		~ForceWindow();
 		
 		void processList();
 		void process();
-		void wave(SDL_snd& sound);
+
 		void draw(DC* dc) const;
 		const unsigned int getMarkedUnit() const;
 		void setMarkedUnit(const unsigned int marked_unit);
 		void assignAnarace(ANABUILDORDER* force_anarace);
 		void reloadStrings();
+		void setMode(const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max);
 		void reloadOriginalSize();
 		static TechTreeWindow* techTreeWindow;
 
@@ -63,8 +64,6 @@ class ForceWindow : public UI_Window
 		std::list<ForceEntry*> goalForceList;
 		std::list<ForceEntry*> nongoalForceList;
 
-		bool doErrorSound;
-		
 		unsigned int markedUnit, oldMarkedUnit;
 		ANABUILDORDER* anarace;
 
@@ -73,6 +72,10 @@ class ForceWindow : public UI_Window
 		SaveBox* saveBox;
 //		RaceMenu* raceMenu;
 //		LocationMenu* locationMenu;
+		unsigned int gameNumber;
+		unsigned int gameMax;
+		unsigned int playerNumber;
+		unsigned int playerMax;
 
 };
 

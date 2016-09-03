@@ -94,13 +94,21 @@ void EF_Configuration::loadConfigurationFile()
 		saveToFile();		
 		return;
 	}
+
+	toLog("* Loading " + configurationFile);
+	
+	std::fstream::pos_type old_pos = pFile.tellg();
 	char line[1024];
-	std::string text;
 	while(pFile.getline(line, sizeof line))
 	{
 		if(pFile.fail())
+		{
 			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
-		text=line;
+#ifdef _SCC_DEBUG
+			toLog("WARNING: (EF_Configuration::loadConfigurationFile) Long line!");
+#endif
+		}
+		std::string text = line;
 		size_t start=text.find_first_not_of("\t ");
 		if((start==std::string::npos)||(text[0]=='#')||(text[0]=='\0'))
 			continue; // ignore line
@@ -112,7 +120,14 @@ void EF_Configuration::loadConfigurationFile()
 		if(index=="@SETTINGS")
 		{
 			std::map<std::string, std::list<std::string> > block;
-			parse_block(pFile, block);
+			pFile.seekg(old_pos);
+			if(!parse_block_map(pFile, block))
+			{
+#ifdef _SCC_DEBUG
+				toLog("WARNING: (EF_Configuration::loadConfigurationFile) No concluding @END was found!");
+#endif
+			}			
+				
 
 			if((i=block.find("Autosave runs"))!=block.end()) {
 				i->second.pop_front();
@@ -163,6 +178,7 @@ void EF_Configuration::loadConfigurationFile()
 			   	setDnaSpiral(atoi(i->second.front().c_str()));
 			}
 		}
+		old_pos = pFile.tellg();
 	}// END while
 } // schoen :)
 

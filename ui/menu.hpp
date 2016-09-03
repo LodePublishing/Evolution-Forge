@@ -8,7 +8,8 @@ enum eMenuType
 {
 	CUSTOM_MENU,
 	ONE_COLOUMN_MENU,
-	TWO_COLOUMN_MENU
+	TWO_COLOUMNS_MENU,
+	HORIZONTAL_MENU
 };
 
 class UI_Menu : public UI_Object

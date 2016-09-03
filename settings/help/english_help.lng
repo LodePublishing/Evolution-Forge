@@ -3,27 +3,27 @@
 # INDEX_CHAPTER = 0
 		@0	
 			$Help Index$###
-			~32~@Chapter 1: Introduction@100@##
-			~32~@Chapter 2: Detailed description@200@##
-			~32~@Chapter 3: How to use the results@300@##
-			~32~@Chapter 4: Configuration@400@##
-			~32~@Chapter 4: Program Mechanics@500@##
-			~32~@Chapter 5: Interactive Mode@600@##
-			~32~@Chapter 6: The core of the program@700@##
-			~32~@Chapter 7: Communication@800@##
-			~32~@Chapter 8: Development of EF@900@##
-			~32~@Chapter 9: Philosophy and EF@1000@#
+			~33~@Chapter 1: Introduction@100@##
+			~33~@Chapter 2: Detailed description@200@##
+			~33~@Chapter 3: How to use the results@300@##
+			~33~@Chapter 4: Configuration@400@##
+			~33~@Chapter 4: Program Mechanics@500@##
+			~33~@Chapter 5: Interactive Mode@600@##
+			~33~@Chapter 6: The core of the program@700@##
+			~33~@Chapter 7: Communication@800@##
+			~33~@Chapter 8: Development of EF@900@##
+			~33~@Chapter 9: Philosophy and EF@1000@#
 		@END
 		
 # INTRODUCTION_MAIN_CHAPTER = 100
 		@100
-			@Chapter 1: Introduction@0@###
-			~32~@1.1: What does this program?@110@##
-			~32~@1.2: Quickstart@120@##
-			~32~@1.3: Overview of the elements@130@##
-			~32~@1.4: Is it useful?@140@##
-			~32~@1.5: Limits of the Program@150@##
-			~32~@1.6: Problems of the Program@160@##
+			@~4~Chapter 1: Introduction@0@###
+			~33~@1.1: What does this program?@110@##
+			~33~@1.2: Quickstart@120@##
+			~33~@1.3: Overview of the elements@130@##
+			~33~@1.4: Is it useful?@140@##
+			~33~@1.5: Limits of the Program@150@##
+			~33~@1.6: Problems of the Program@160@##
 		@END
 
 # INTRODUCTION_CHAPTER = 110
@@ -40,15 +40,15 @@
 			It's easy:#
 			- In the @score window@210@ click on $'Add player'$#
 			- Choose a race by clicking on the $'race'$ button#
-			- In the @unit list window@230@ click on ~26~, choose a category and pick your goals#
+			- In the @unit list window@230@ click on ~27~, choose a category and pick your goals#
 			- Finally click on $'(paused)'$ button in the @score window@210@ and sit back to watch the progress#
 			- You will see items moving around in window named @build order@260@. The program now will optimize the build order by adding, removing and rearranging the items#
 			- In the @score window@210@ you will see the current status of the calculation. $'searching'$ means that it still looks for a valid solution (i.e. a solution that fulfills your goals), $'optimizing'$ means that it will try to reduce the time the build order needs#
 			- The @overview@240@ window shows how supply, minerals and gas develop over the time span of the build order#
 			- The @graphical build order@250@ window shows graphically where and when units and buildings are constructed#
 			- After a while you will notice that there are no more changes on the screen. Probably the fastest build order is found. 
-			- Now you might want to save the build order by clicking on ~22~ in the @build order window@260@. You can also save your goal list by doing the same with the @unit list window@230@#
-			- Saved build orders and goal lists can be loaded again by clicking on ~21~#
+			- Now you might want to save the build order by clicking on ~23~ in the @build order window@260@. You can also save your goal list by doing the same with the @unit list window@230@#
+			- Saved build orders and goal lists can be loaded again by clicking on ~22~#
 		@END
 
 # INTRODUCTION_OVERVIEW_CHAPTER = 130
@@ -85,17 +85,17 @@
 # DESCRIPTION_MAIN_CHAPTER = 200
 		@200
 			@Chapter 2. Detailed Description@0@###
-			~32~@2.1: The score window@210@##
-			~32~@2.2: The unit list window@220@##
-			~32~@2.3: The build order diagram window@230@##
-			~32~@2.4: The build order graph window@240@##
-			~32~@2.5: The build order window@250@#
+			~33~@2.1: The score window@210@##
+			~33~@2.2: The unit list window@220@##
+			~33~@2.3: The build order diagram window@230@##
+			~33~@2.4: The build order graph window@240@##
+			~33~@2.5: The build order window@250@#
 		@END
 
 # DESCRIPTION_SCORE_WINDOW_CHAPTER = 210
 		@210
 			@2.1: The score window@200@##
-			~34~   
+			~35~   
 			(1) $Choose a map$#   
 			A map contains a unit list for each player (normally workers and a main building), start conditions (minerals, gas, ...) and a list of locations and their distances.#   
 			(2) $Add a player$#   
@@ -116,7 +116,7 @@
 # DESCRIPTION_UNIT_LIST_WINDOW_CHAPTER = 220
 		@220
 			@2.2: The unit list window@200@##
-			~35~
+			~36~
 			(1) $Add a goal$#
 			Here you can add units/buildings/researches to your goal list below. These goals will be used to calculate the build order. If you like a different structure (based on buildings vs based on unit types) of the unit menu then change the 'facility mode' in the settings window.#
 			(2) $Load a goal list$#
@@ -138,7 +138,7 @@
 # DESCRIPTION_BODIAGRAM_WINDOW_CHAPTER = 230
 		@230
 			@2.3: The build order diagram window@200@##
-			~36~
+			~37~
 			(1) $Minerals and Gas$#
 			The blue and green graph represents the amount of minerals and gas that you have at that time. While the program tries to maximize the amount of gathered ressources a fast build order should never save large amounts of minerals and gas.#
 			(2) $Supply$#
@@ -150,14 +150,14 @@
 # DESCRIPTION_BOGRAPH_WINDOW_CHAPTER = 240
 		@240
 			@2.4: The build order graph window@200@##
-			~37~
+			~38~
 			In this window all orders are presented graphically. On the top you see a rough time raster, below there is a list of used facilities. When building for example a factory the SCV 'facility' is used, when building a marine the barracks facility is used. When there are several build orders and several availible facilities the build orders are often executed in parallel because that speeds up the build order.#			
 		@END
 
 # DESCRIPTION_BUILD_ORDER_WINDOW_CHAPTER = 250
 		@250
 			@2.5: The build order window@200@##
-			~38~
+			~39~
 
 			TODO
 			You can edit the build order, too. To do that you have to click on the $edit mode button$ TODO which pauses the calculation (else the program will immediately 'optimize' your build order), change the entries and finally press edit button again TODO. For the editing part look in the @Editing the build order@610@ chapter.
@@ -174,10 +174,10 @@
 # RESULTS_MAIN_CHAPTER = 300
 		@300
 			@Chapter 3. How to use the results@0@###
-			~32~@3.1: About time and numbers@310@##
-			~32~@3.2: HTML output@320@##
-			~32~@3.3: Using the database@330@##
-			~32~@3.4: Results during the run@340@#
+			~33~@3.1: About time and numbers@310@##
+			~33~@3.2: HTML output@320@##
+			~33~@3.3: Using the database@330@##
+			~33~@3.4: Results during the run@340@#
 		@END
 
 # RESULTS_TIME_AND_NUMBERS_CHAPTER = 310
@@ -210,11 +210,11 @@
 # CONFIGURATION_MAIN_CHAPTER = 400
 		@400
 			@Chapter 4. Configuration of the program@0@###
-			~32~@4.1: Loading/Saving Settings@410@##
-			~32~@4.2: Resolution, Color Depth and Language@420@##
-			~32~@4.3: Core Settings@430@##
-			~32~@4.4: GUI Settings@440@##
-			~32~@4.5: Rules Settings@450@##
+			~33~@4.1: Loading/Saving Settings@410@##
+			~33~@4.2: Resolution, Color Depth and Language@420@##
+			~33~@4.3: Core Settings@430@##
+			~33~@4.4: GUI Settings@440@##
+			~33~@4.5: Rules Settings@450@##
 		@END
 
 
@@ -266,10 +266,10 @@
 # MECHANICS_MAIN_CHAPTER = 500
 		@500
 			@Chapter 5. Mechanics of the program@0@###
-			~32~@5.1: How the build order is processed@510@##
-			~32~@5.2: How multiplayer works@520@##
-			~32~@5.3: How the algorithm works@540@##
-			~32~@5.4: How to finetune the build order@530@##
+			~33~@5.1: How the build order is processed@510@##
+			~33~@5.2: How multiplayer works@520@##
+			~33~@5.3: How the algorithm works@540@##
+			~33~@5.4: How to finetune the build order@530@##
 		@END
 
 
@@ -300,10 +300,10 @@
 # INTERACTIVE_MAIN_CHAPTER = 600
 		@600
 			@Chapter 6. Interactive mode@0@###
-			~32~@6.1: Editing the build order@610@##
-			~32~@6.2: Playing against the computer@620@##
-			~32~@6.3: Letting it play against itself@630@##
-			~32~@6.4: What to learn from the program@640@#
+			~33~@6.1: Editing the build order@610@##
+			~33~@6.2: Playing against the computer@620@##
+			~33~@6.3: Letting it play against itself@630@##
+			~33~@6.4: What to learn from the program@640@#
 		@END
 	
 # INTERACTIVE_EDITING_CHAPTER = 610
@@ -338,11 +338,11 @@
 # CORE_MAIN_CHAPTER = 700
 		@700
 			@Chapter 7. The core of the program@0@###
-			~32~@7.1: The algorithm of the core@710@##
-			~32~@7.2: Buildorder TODO@720@##
-			~32~@7.3: Scalability@730@##
-			~32~@7.4: Comparison?@740@##
-			~32~@7.5: Problems with the algorithm@750@#
+			~33~@7.1: The algorithm of the core@710@##
+			~33~@7.2: Buildorder TODO@720@##
+			~33~@7.3: Scalability@730@##
+			~33~@7.4: Comparison?@740@##
+			~33~@7.5: Problems with the algorithm@750@#
 		@END
 
 
@@ -396,8 +396,8 @@
 # COMMUNICATION_MAIN_CHAPTER = 800
 		@800
 			@Chapter 8. Communication@0@###
-			~32~@8.1: ClawSoftware.de@810@##
-			~32~@8.3: About myself@830@#
+			~33~@8.1: ClawSoftware.de@810@##
+			~33~@8.3: About myself@830@#
 		@END
 
 # COMMUNICATION_CLAWSOFTWARE_CHAPTER = 810
@@ -410,17 +410,17 @@
 # COMMUNICATION_ABOUT_CHAPTER = 830
 		@830
 			@8.3: About myself@800@##
-			~39~ My name is Clemens and I am living in germany and currently studying Computer Science in Karlsruhe. I am programming since about 12 years doing small projects until 2000. Then I started my work on Evolution Forge (called Starcraft Calculator back then).#
+			~40~ My name is Clemens and I am living in germany and currently studying Computer Science in Karlsruhe. I am programming since about 12 years doing small projects until 2000. Then I started my work on Evolution Forge (called Starcraft Calculator back then).#
 		@END
 
 # DEVELOPMENT_MAIN_CHAPTER = 900
 		@900
 			@Chapter 9. Development@0@###
-			~32~@9.1: History@910@##
-			~32~@9.2: Things that will come later@920@##
-			~32~@9.3: Current developments@930@##
-			~32~@9.4: Future plans with Evolution Forge@940@#
-			~32~@9.5: Things will never be implemented@950@##
+			~33~@9.1: History@910@##
+			~33~@9.2: Things that will come later@920@##
+			~33~@9.3: Current developments@930@##
+			~33~@9.4: Future plans with Evolution Forge@940@#
+			~33~@9.5: Things will never be implemented@950@##
 		@END
 
 # DEVELOPMENT_HISTORY_CHAPTER = 910
@@ -460,9 +460,9 @@
 # PHILOSOHPY_MAIN_CHAPTER = 1000
 		@1000
 			@Chapter 10. Philosophy@0@###
-			~32~@10.1: Evolution@1010@##
-			~32~@10.2: TODO@1020@##
-			~32~@10.3: Reality check@1030@#
+			~33~@10.1: Evolution@1010@##
+			~33~@10.2: TODO@1020@##
+			~33~@10.3: Reality check@1030@#
 		@END
 
 # PHILOSOPHY_EVOLUTION_CHAPTER = 1010

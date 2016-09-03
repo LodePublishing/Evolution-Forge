@@ -141,7 +141,6 @@ class UI_Object
 		void makeFirstChild();
 		
 		virtual void draw(DC* dc) const;
-		virtual void wave(SDL_snd& sound);	
 		virtual void process();
 		virtual void resetData();
 
@@ -214,13 +213,13 @@ class UI_Object
 		static UI_Object* focus;
 
 		static bool toolTipWasDeleted;
+		const bool isMoving() const;
 	protected:
 		UI_Object* children; // pointer to the head of the linked list of children
 	private:
 //		bei wechsel alle rekursiv (-> virtual) durchlaufen und Liste bilden, das aktuelle heraussuchen und aktivieren
 //		Ansonsten bei klick Focus legen, Esc/anderer Klick entfernt den Focus (NULL bzw. anderer Fokus)
 		
-				
 		Rect relativeRect; // every object needs a current position and size, position is >> RELATIVE << to parent!
 		Rect startRect; // TODO private machen
 		Rect targetRect;

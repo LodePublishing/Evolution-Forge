@@ -1,0 +1,112 @@
+	// TODO Surface to Surface issue... :-/
+/*	SDL_Surface* picture = IMG_Load("data/bitmaps/clawsoftware.png");
+	unsigned char* data1 = new unsigned char[64000];
+	unsigned char* data2 = new unsigned char[64000];
+	unsigned char* temp = NULL;
+	{
+	Uint32 pen_col_black = (Uint32)(Color(picture,0,0,0));
+	register Uint8* p = (Uint8*)picture->pixels;
+	for(unsigned int x = 0; x < 64000; x++)
+		{
+			if(   *(  (Uint32*) p ) == pen_col_black)
+				data1[x] = 0;
+			else data1[x] = 1;
+			p++;
+		}
+	}*/
+	
+//	SDL_Surface* picture2 = IMG_Load("data/bitmaps/clawsoftware.png");
+/*	{
+		SDL_Surface* surface = UI_Object::theme.lookUpBitmap(CLAWSOFTWARE_MONO_BITMAP);
+		//picture = SDL_CreateRGBSurface(surface->flags, surface->w, surface->h, surface->format->BitsPerPixel, surface->format->Rmask, surface->format->Gmask, surface->format->Bmask, surface->format->Amask);
+		picture1 = UI_Object::theme.lookUpBitmap(CLAWSOFTWARE_MONO_BITMAP);//SDL_CreateRGBSurfaceFrom(surface->pixels, surface->w, surface->h, surface->format->BitsPerPixel, surface->pitch, surface->format->Rmask, surface->format->Gmask, surface->format->Bmask, surface->format->Amask);
+
+		SDL_Rect drect;
+		drect.x = 0;
+		drect.y = 0;
+		drect.w = surface->w;
+		drect.h = surface->h;
+//		SDL_BlitSurface(surface, NULL, picture, NULL);
+	}*/
+
+/*
+		Uint32 pen_col_white = (Uint32)(Color(picture,255,255,255));
+		Uint32 pen_col_black = (Uint32)(Color(picture,0,0,0));
+		register Uint8* p = (Uint8*)picture->pixels;
+		for(unsigned int x = 0; x < 64000; x++)
+		{
+			if(data2[x]==1)
+				*(Uint32*)p = pen_col_white;
+			else if(data2[x]==0)
+				*(Uint32*)p = pen_col_black;
+			p++;
+		}
+		screen->DrawBitmap(picture, (UI_Object::max_x - picture->w)/2, (UI_Object::max_y - picture->h)/2);
+		DC::addRectangle(Rect(Point((UI_Object::max_x - picture->w)/2, (UI_Object::max_y - picture->h)/2), Size(picture->w, picture->h)));
+	}
+*/
+			
+/*	for(unsigned int y0 = 1; y0 < picture1->h-1; y0++)
+	{
+		p+=4;o+=4;
+		for(unsigned int x0 = 1; x0 < picture1->w-1; x0++)
+		{
+			int t = ((*((Uint32*) (p+4) ))==pen_col_white) + 
+				((*((Uint32*) (p-4) ))==pen_col_white) +
+//				((*((Uint32*)p))==pen_col_white) + 
+				((*((Uint32*) (p+4-picture1->pitch)))==pen_col_white) + 
+				((*((Uint32*) (p-picture1->pitch)))==pen_col_white) + 
+				((*((Uint32*) (p-4-picture1->pitch)))==pen_col_white) +
+				((*((Uint32*) (p+4+picture1->pitch)))==pen_col_white) + 
+				((*((Uint32*) (p+picture1->pitch)))==pen_col_white) +
+				((*((Uint32*) (p-4+picture1->pitch)))==pen_col_white);
+				
+			if((*(Uint32*)(p))==pen_col_white)
+			{
+				if((t>=5)||(t<2))
+					*(Uint32*)o = pen_col_black;
+			} else
+				if(t==3)
+					*(Uint32*)o = pen_col_white;
+			p+=4;o+=4;
+		}
+		p+=4;o+=4;
+	}
+		}*/
+
+
+/*	{
+		temp = data1;
+		data1 = data2;
+		data2 = temp;
+
+		for(unsigned int x = 1; x < 319; x++)
+			for(unsigned int y = 1; y < 199; y++)
+			{
+				int t = 
+					data2[(x-1) + (y-1) * 320] +
+					data2[x     + (y-1) * 320] +
+					data2[(x+1) + (y-1) * 320] +
+					data2[(x-1) + y     * 320] +
+					data2[x + y     * 320] +
+					data2[(x+1) + y     * 320] +
+					data2[(x-1) + (y+1) * 320] +
+					data2[x     + (y+1) * 320] +
+					data2[(x+1) + (y+1) * 320];
+				if(data2[x+y*320] == 1)
+				{
+					if((t<=1)||(t>=5))
+						data1[x+y*320] = 0;
+					else if((t==3)||(t==4))
+						data1[x+y*320] = 1;
+					// merken bei 2?
+				} else
+				{
+					if(t==3)
+						data1[x+y*320] = 1;
+					else data1[x+y*320] = 0;
+				}
+			}
+		
+		// ...*/
+

@@ -27,11 +27,15 @@ BoGraphWindow& BoGraphWindow::operator=(const BoGraphWindow& object)
 	return(*this);
 }*/
 
-BoGraphWindow::BoGraphWindow(UI_Object* bograph_parent, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_players) :
-	UI_Window(bograph_parent, BOGRAPH_WINDOW_TITLE_STRING, theme.lookUpPlayerRect(BUILD_ORDER_GRAPH_WINDOW, game_number, max_games, player_number, max_players), theme.lookUpPlayerMaxHeight(BUILD_ORDER_GRAPH_WINDOW, game_number, max_games, player_number, max_players), SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0, 15, 1000, 1000)),
+BoGraphWindow::BoGraphWindow(UI_Object* bograph_parent, const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max) :
+	UI_Window(bograph_parent, BOGRAPH_WINDOW_TITLE_STRING, theme.lookUpPlayerRect(BUILD_ORDER_GRAPH_WINDOW, game_number, game_max, player_number, player_max), theme.lookUpPlayerMaxHeight(BUILD_ORDER_GRAPH_WINDOW, game_number, game_max, player_number, player_max), SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0, 15, 1000, 1000)),
 	markAni(0),
 	anarace(NULL),
-	selectedItem(-1)
+	selectedItems(),
+	gameNumber(game_number),
+	gameMax(game_max),
+	playerNumber(player_number),
+	playerMax(player_max)
 {
 	addHelpButton(DESCRIPTION_BOGRAPH_WINDOW_CHAPTER);
 }
@@ -52,17 +56,32 @@ void BoGraphWindow::resetData()
 	processList();
 }
 
+void BoGraphWindow::setMode(const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max)
+{
+	if((game_number == gameNumber) && (game_max == gameMax) && (player_number == playerNumber) && (player_max == playerMax))
+		return;
+	gameNumber = game_number;
+	gameMax = game_max;
+	playerNumber = player_number;
+	playerMax = player_max;
+}
+
+
 void BoGraphWindow::reloadOriginalSize()
 {
+	setOriginalRect(UI_Object::theme.lookUpPlayerRect(BUILD_ORDER_GRAPH_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
+	setMaxHeight(UI_Object::theme.lookUpPlayerMaxHeight(BUILD_ORDER_GRAPH_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
+
 	UI_Window::reloadOriginalSize();
 	processList();
 }
 
 
-void BoGraphWindow::setSelected(const unsigned int selected)
+void BoGraphWindow::setSelected(const std::list<unsigned int>& selected)
 {
-	for(std::list<BoGraphLine*>::iterator i = boGraphLine.begin(); i != boGraphLine.end(); ++i)
-		(*i)->checkSelected(selected);
+	for(std::list<unsigned int>::const_iterator j = selected.begin(); j != selected.end(); ++j)
+		for(std::list<BoGraphLine*>::iterator i = boGraphLine.begin(); i != boGraphLine.end(); ++i)
+			(*i)->checkSelected(*j);
 }
 
 void BoGraphWindow::processList()
@@ -161,7 +180,7 @@ void BoGraphWindow::processList()
 	std::list<BoGraphLine*>::iterator j = boGraphLine.begin();
 	for(std::list<unsigned int>::iterator i = fac.begin(); i!=fac.end(); ++i, ++j)
 	{
-		edge = Rect(Point(5, 10+position * (FONT_SIZE+10)), Size(getClientRectWidth()-10, lines[*i] * (FONT_SIZE+10)));
+		edge = Rect(Point(5, 10+position * (FONT_SIZE+11)), Size(getClientRectWidth()-10, lines[*i] * (FONT_SIZE+11)));
 		
 		if(j == boGraphLine.end())
 		{
@@ -183,7 +202,7 @@ void BoGraphWindow::processList()
 	// let the window adjust to the last line
 
 	if(boGraphLine.size())
-		fitItemToRelativeClientRect(Rect(Point(5, position * (FONT_SIZE+10)), Size(getClientRectWidth()-10, (FONT_SIZE+10))),1);
+		fitItemToRelativeClientRect(Rect(Point(5, position * (FONT_SIZE+11)), Size(getClientRectWidth()-10, (FONT_SIZE+11))),1);
 	else
 		fitItemToRelativeClientRect(Rect(), 1);
 	}
@@ -220,7 +239,7 @@ void BoGraphWindow::processList()
 					// k hat mit MAX_TIME im Grunde nichts zu tun, MAX_TIME waere nur das oberste Limit an simultanen Befehlen!
 					edge = Rect(Point(
 						1+( order->getRealTime()*(getClientRectWidth()-10)) / (anarace->getRealTimer()), 
-							1+(k/MIN_HEIGHT)*(FONT_SIZE+10)+(k%MIN_HEIGHT)*(FONT_SIZE+10)/((*i)->getLineHeight())), 
+							1+(k/MIN_HEIGHT)*(FONT_SIZE+11)+(k%MIN_HEIGHT)*(FONT_SIZE+11)/((*i)->getLineHeight())), 
 						Size((order->getBT()*(getClientRectWidth()-10))/(anarace->getRealTimer()),
 							(FONT_SIZE+10)/((*i)->getLineHeight())));
 					break;
@@ -301,14 +320,14 @@ void BoGraphWindow::processList()
 
 void BoGraphWindow::checkForInfoWindow()
 {
-	selectedItem = -1;
+	selectedItems.clear();
 	for(std::list<BoGraphLine*>::iterator i = boGraphLine.begin(); i!=boGraphLine.end(); ++i)
 		if((*i)->getFacility()>0)
 		{
 			for(std::list<BoGraphEntry*>::iterator entry = (*i)->boGraphList.begin(); entry!=(*i)->boGraphList.end(); ++entry)
 				if((*entry)->isCurrentlyHighlighted())
 				{
-					selectedItem = (*entry)->getNumber();
+					selectedItems.push_back( (*entry)->getNumber() );
 					return;
 				}
 		}

@@ -96,6 +96,8 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Siz
 			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.GetWidth()+0,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, HORIZONTALLY_CENTERED); // TODO
 	} else if(hasBitmap)
 		setOriginalSize(bitmap_size);
+
+//	process();
 }
 
 UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Size distance_bottom_right, const eButtonColorsType button_colors_type, const bool has_bitmap, const eButtonMode button_mode, const std::string& button_text, const ePositionMode button_position_mode, const eFont button_font, const eAutoSize button_auto_size) :
@@ -156,42 +158,9 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Siz
 //			text[i]=new UI_StaticText(this, normalText, Rect(0,0,0,0), HORIZONTALLY_CENTERED_TEXT_MODE, font, theme.lookUpButtonColors(button_colors_type)->startTextColor[i]);
 	} else if(hasBitmap)
 		setOriginalSize(bitmap_size);
-}
 
-// -> bitmap button!
-/*UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Size distance_bottom_right, const eButtonColorsType button_colors_type, const eButtonMode button_mode, const ePositionMode button_position_mode):
-	UI_Object(button_parent, button_rect, distance_bottom_right, button_position_mode, NO_AUTO_SIZE),
-	radio(NULL), //?
-	forcedPress(false),
-	
-	allowMoveByMouse(false),
-	moved(false),
-	isOriginalPosition(false),
-	hasBitmap(true),
-	wasPressed(false),
-	gradient(0),
-	pressdepth(0),
-	font(NULL_FONT),
-	buttonColorsType(button_colors_type),
-	statusFlags(0),
-	frameNumber(0),
-	text(NULL)
-{
-	// TODO size aus Bitmap bestimmen!
-	switch(button_mode)
-	{
-		case NO_BUTTON_MODE:statusFlags |= BF_NOT_CLICKABLE;break;
-		case STATIC_BUTTON_MODE:statusFlags |= BF_STATIC;break;
-		case PRESS_BUTTON_MODE:break;
-		case PUSH_BUTTON_MODE:statusFlags |= BF_REPEATS;break;
-		case TAB_BUTTON_MODE:statusFlags |= BF_IS_TAB; statusFlags |= BF_STATIC;break;
-		case BOGRAPH_BUTTON_MODE:statusFlags |= BF_IS_RECTANGLE;break;
-		default:break;
-	} 
-//	startRect = getRelativeRect();
-//	targetRect = getRelativeRect();
-//	filledHeight = getHeight();
-}*/
+//	process();
+}
 
 UI_Button::~UI_Button()
 {
@@ -227,7 +196,6 @@ void UI_Button::setPressDepth(const unsigned int depth)
 // Render button.  How it draws exactly depends on it's current state.
 void UI_Button::draw(DC* dc) const
 {
-
 	if(!isShown())
 		return;
 
@@ -292,7 +260,8 @@ void UI_Button::draw(DC* dc) const
 			else
 				dc->setPressedRectangle(false);
 			if(statusFlags & BF_IS_RECTANGLE)
-				dc->DrawRectangle(getAbsolutePosition()+Size(pressdepth, pressdepth), getSize()/*+Size(1,1)*/);
+//				dc->DrawRectangle(getAbsolutePosition()+Size(pressdepth, pressdepth), getSize()/*+Size(1,1)*/);
+				dc->DrawEdgedRoundedRectangle(getAbsolutePosition()+Size(pressdepth, pressdepth), getSize()/*+Size(1,1)*/, 2);
 			else
 				dc->DrawEdgedRoundedRectangle(getAbsolutePosition()+Size(pressdepth, pressdepth), getSize()/*+Size(1,1)*/, 4);
 			dc->setPressedRectangle(false);
@@ -341,7 +310,10 @@ void UI_Button::mouseHasEnteredArea()
 //	UI_Object::addToProcessArray(this);
 	resetGradient();
 	if(!(statusFlags & BF_HIGHLIGHTED))
+	{
 		statusFlags |= BF_JUST_HIGHLIGHTED;
+		UI_Object::theme.playSound(MOUSEOVER_SOUND, /*(getAbsolutePosition() + getSize()/2)*/mouse.x);
+	}
 	statusFlags |= BF_HIGHLIGHTED;
 	if(statusFlags & BF_WAS_PRESSED)
 	{
@@ -400,6 +372,7 @@ void UI_Button::mouseLeftButtonReleased()
 		statusFlags |= BF_LEFT_CLICKED;
 		if(statusFlags & BF_STATIC)
 		{
+			UI_Object::theme.playSound(CLICKED_SOUND, mouse.x);
 			if((isOriginalPosition)&&(!(statusFlags & BF_IS_TAB)))
 				isOriginalPosition=false;
 			else if(!isOriginalPosition)
@@ -408,7 +381,10 @@ void UI_Button::mouseLeftButtonReleased()
 			UI_Object::focus = this;
 		}
 		else
+		{
+			UI_Object::theme.playSound(CLICK_SOUND, mouse.x);
 			setPressDepth(0);
+		}
 		if(radio)
 		{
 			if(isOriginalPosition)
@@ -427,11 +403,12 @@ void UI_Button::mouseLeftButtonReleased()
 
 void UI_Button::mouseRightButtonPressed()
 {
-	if((statusFlags & BF_NOT_CLICKABLE)||((statusFlags & BF_IS_TAB)&&(isOriginalPosition==true)))
+	if((statusFlags & BF_NOT_CLICKABLE)||(statusFlags & BF_STATIC)||((statusFlags & BF_IS_TAB)&&(isOriginalPosition==true)))
 		return;
 //	UI_Object::addToProcessArray(this);
 	statusFlags |= BF_WAS_PRESSED;
 	statusFlags |= BF_DOWN;
+	
 	if(isOriginalPosition)
 		setPressDepth(0);
 	else
@@ -441,7 +418,7 @@ void UI_Button::mouseRightButtonPressed()
 
 void UI_Button::mouseRightButtonReleased()
 {
-	if((statusFlags & BF_NOT_CLICKABLE))
+	if((statusFlags & BF_NOT_CLICKABLE)||(statusFlags & BF_STATIC))
 		return;
 //	UI_Object::addToProcessArray(this);
 //	if(forcedPress)
@@ -451,16 +428,21 @@ void UI_Button::mouseRightButtonReleased()
 	{
 		statusFlags &= ~BF_DOWN;
 		statusFlags |= BF_RIGHT_CLICKED;
+	
 		if(statusFlags & BF_STATIC)
 		{
+	/*		UI_Object::theme.playSound(CLICKED_SOUND, (getAbsolutePosition() + getSize()/2).x);
 			if((isOriginalPosition)&&(!(statusFlags & BF_IS_TAB)))
 				isOriginalPosition=false;
 			else if(!isOriginalPosition)
 				isOriginalPosition=true;
-			setNeedRedrawMoved();
+			setNeedRedrawMoved();*/
 		}
 		else
+		{
+			UI_Object::theme.playSound(CLICK_SOUND, mouse.x);
 			setPressDepth(0);
+		}
 	/*	if(radio)
 		{
 			if(isOriginalPosition)
@@ -488,15 +470,6 @@ UI_Object* UI_Button::checkHighlight()
 	return((UI_Object*)this);
 }
 
-void UI_Button::wave(SDL_snd& sound) {
-	if(statusFlags & BF_JUST_HIGHLIGHTED)
-	{
-		sound.play(UI_Object::theme.lookUpSound(MOUSEOVER_SOUND));
-		statusFlags &= ~BF_JUST_HIGHLIGHTED;
-	}
-	UI_Object::wave(sound);
-}
-
 void UI_Button::process()
 {
 /*	if(!isShown())
@@ -520,9 +493,11 @@ void UI_Button::process()
 		if(!(statusFlags & BF_HIGHLIGHTED))
 			gradient = 100;
 		else 
-			if(frameNumber<theme.lookUpButtonColors(buttonColorsType)->speed/2) gradient=20;
+		if(frameNumber<theme.lookUpButtonColors(buttonColorsType)->speed/2) 
+			gradient=20;
 		else 
 			gradient = 100;
+		setNeedRedrawNotMovedFirstChild();
 	} else
 	if((!(statusFlags & BF_HIGHLIGHTED))&&(theme.lookUpButtonColors(buttonColorsType)->type!=NO_ANIMATION))
 		gradient += (100 - gradient) / 5 + 1;
@@ -530,12 +505,12 @@ void UI_Button::process()
 //		UI_Object::addToNextProcessArray(this);
 		switch(theme.lookUpButtonColors(buttonColorsType)->type)
 		{	
-		case NO_ANIMATION:/*if(gradient < 100) ++gradient;else gradient = 100;*/break;
-		case JUMPY_COLORS_ANIMATION:gradient=(frameNumber%theme.lookUpButtonColors(buttonColorsType)->speed)*100/theme.lookUpButtonColors(buttonColorsType)->speed;break;
-		case GLOWING_ANIMATION:gradient=(unsigned int)(50*(sin(3.141*frameNumber/theme.lookUpButtonColors(buttonColorsType)->speed)+1));break;
-		case BLINKING_ANIMATION:if(frameNumber<theme.lookUpButtonColors(buttonColorsType)->speed/2) gradient=0;else gradient=100;break;
-		default:break;
-	}
+			case NO_ANIMATION:/*if(gradient < 100) ++gradient;else gradient = 100;*/break;
+			case JUMPY_COLORS_ANIMATION:gradient=(frameNumber%theme.lookUpButtonColors(buttonColorsType)->speed)*100/theme.lookUpButtonColors(buttonColorsType)->speed;break;
+			case GLOWING_ANIMATION:gradient=(unsigned int)(50*(sin(3.141*frameNumber/theme.lookUpButtonColors(buttonColorsType)->speed)+1));break;
+			case BLINKING_ANIMATION:if(frameNumber<theme.lookUpButtonColors(buttonColorsType)->speed/2) gradient=0;else gradient=100;break;
+			default:break;
+		}
 	}
 
 	if(gradient > 100)
@@ -661,6 +636,7 @@ void UI_Button::forcePress()
 		} else if((!(statusFlags & BF_STATIC)) && (!(statusFlags & BF_DOWN)))
 		{
 			statusFlags |= BF_LEFT_CLICKED | BF_DOWN;			 //~?
+			UI_Object::theme.playSound(CLICK_SOUND, (getAbsolutePosition() + getSize()/2).x);
 			setPressDepth(1); //?
 		}
 	} 
@@ -697,4 +673,4 @@ bool UI_Button::currentButtonHasAlreadyLeft = false;
 UI_Button* UI_Button::currentButton = NULL;
 bool UI_Button::moveByMouse = false;
 Point UI_Button::mouseMovePoint = Point();
-
+bool UI_Button::doClickedSound = false;

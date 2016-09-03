@@ -37,6 +37,7 @@ Game::Game(UI_Object* game_parent, const unsigned int game_number, const unsigne
 	for(unsigned int i=MAX_PLAYER;i--;)
 		for(unsigned int j = MAX_LENGTH;j--;)
 			oldCode[i][j]=999;
+	scoreWindow->makeFirstChild();
 }
 
 Game::~Game()

@@ -44,7 +44,7 @@ ANABUILDORDER::ANABUILDORDER():
 
 void ANABUILDORDER::resetData()
 {
-	PREBUILDORDER::resetPrerace();
+	PREBUILDORDER::resetData();
 	unitsTotal = 4;
 	unitsTotalMax = 4;
 	nonGoalsUnitsTotalMax = 4;
@@ -732,7 +732,7 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 		}
 // ---- END SPECIAL RULES -----
 	
-		if(!is_larva)
+		if(!is_larva) //?
 		{
 			program.after.setNeedSupply(getNeedSupply());
 			program.after.setHaveSupply(getHaveSupply());

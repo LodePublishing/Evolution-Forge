@@ -11,10 +11,11 @@
 class BoGraphWindow:public UI_Window
 {
 	public:
-		BoGraphWindow(UI_Object* bograph_parent, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_players);
+		BoGraphWindow(UI_Object* bograph_parent, const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max);
 		BoGraphWindow(UI_Object* bograph_parent, const unsigned int bograph_window_number);
 		~BoGraphWindow();
 
+		void setMode(const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max);
 		void reloadOriginalSize();
 		void resetData();
 		void process();
@@ -23,8 +24,8 @@ class BoGraphWindow:public UI_Window
 	    	void mouseHasMoved();
 		void assignAnarace(ANABUILDORDER* bograph_anarace);
 		
-		const signed int getSelectedItem() const;
-		void setSelected(const unsigned int selected);
+		const std::list<unsigned int>& getSelectedItems() const;
+		void setSelected(const std::list<unsigned int>& selected);
 	private:
 //		BoGraphWindow(const BoGraphWindow& object); // don't allow copying... wouldn't make sense... :-/
 //		BoGraphWindow& operator=(const BoGraphWindow& object);
@@ -34,12 +35,17 @@ class BoGraphWindow:public UI_Window
 		void checkForInfoWindow();
 		unsigned int markAni;
 		ANABUILDORDER* anarace;
-		signed int selectedItem;
+		std::list<unsigned int> selectedItems;
 //		std::list<UI_StaticText*> legend;
+		unsigned int gameNumber;
+		unsigned int gameMax;
+		unsigned int playerNumber;
+		unsigned int playerMax;
+
 };
 
-inline const signed int BoGraphWindow::getSelectedItem() const {
-	return(selectedItem);
+inline const std::list<unsigned int>& BoGraphWindow::getSelectedItems() const {
+	return(selectedItems);
 }
 
 #endif

@@ -1,32 +1,32 @@
 #include "boentry.hpp"
 
-BUILD_ORDER::BUILD_ORDER(const eRace bo_race, const GOAL_ENTRY& bo_goal, const std::string& bo_name, const unsigned int bo_time, std::list<PROGRAM>& bo_program):
-	name(bo_name),
-	race(bo_race),
-	programList(bo_program),
+BUILD_ORDER::BUILD_ORDER(const BO_HEADER& bo_header, const GOAL_ENTRY& bo_goal, std::list<PROGRAM>& bo_program):
+	boHeader(bo_header),
 	goal(bo_goal),
-	time(bo_time)
+	programList(bo_program)
 {}
 
 BUILD_ORDER::BUILD_ORDER(const BUILD_ORDER& object) :
-	name(object.name),
-	race(object.race),
-	programList(object.programList),
+	boHeader(object.boHeader),
 	goal(object.goal),
-	time(object.time)
+	programList(object.programList)
 {}
 
 BUILD_ORDER& BUILD_ORDER::operator=(const BUILD_ORDER& object)
 {
-	name = object.name;
-	race = object.race;
-	programList = object.programList;
+	boHeader = object.boHeader;
 	goal = object.goal;
-	time = object.time;
+	programList = object.programList;
 	return(*this);
 }
 
 BUILD_ORDER::~BUILD_ORDER()
+{}
+
+BO_HEADER::BO_HEADER() 
+{}
+
+BO_HEADER::~BO_HEADER() 
 {}
 
 

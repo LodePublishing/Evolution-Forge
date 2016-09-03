@@ -15,6 +15,7 @@ SOUP::SOUP() :
 
 SOUP::~SOUP()
 {
+	toLog("* Freeing build orders...");
 	for(unsigned int i=MAX_PROGRAMS;i--;)
 		delete buildOrder[i];
 	for(unsigned int i=MAX_PLAYER;i--;)
@@ -177,6 +178,7 @@ void SOUP::setMapPlayerNum(const unsigned int map_player_num)
 
 void SOUP::checkForChange() const
 {
+//	TODO
 //	unsigned int changed=0;
 /*	for(unsigned int k=mapPlayerNum-1;k--;)
 		if(analyzedBuildOrder[k]->getPlayer()->isChanged())
@@ -459,6 +461,7 @@ const bool SOUP::recalculateGeneration(ANABUILDORDER* previous_analyzed_buildord
 	{
 		if(previous_analyzed_buildorder[k]!=NULL)
 		{
+			// TODO: bei goal change werden Code und programList ungueltig
 			if(previous_analyzed_buildorder[k]->haveConditionsChanged())
 			{
 				previous_analyzed_buildorder[k]->setConditionsChanged(false);

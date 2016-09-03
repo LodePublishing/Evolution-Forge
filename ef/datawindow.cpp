@@ -173,6 +173,71 @@ DataBaseWindow::DataBaseWindow(UI_Object* mapwindow_parent):
 	menuRadio->addButton(menuButton[MAPWINDOW_SAVE_BUTTON], 3);
 	menuRadio->calculateBoxSize(true);
 	addHelpButton(DESCRIPTION_MAP_WINDOW_CHAPTER);*/
+
+
+/*	game = new Game(getParent(), 0, 2)
+
+			
+	unsigned int game_max = 0;
+	for(game_number = 0;game_number < MAX_GAME; ++game_number)
+		if(game[game_number]==NULL)
+			break;
+	if(game_number == MAX_GAME)
+		return;
+	
+	if(tabToGameList[tab_number]>=0)
+	{
+		if(tabToSplitGameList[tab_number]>=0)
+		{
+#ifdef _SCC_DEBUG
+			toLog("ERROR: WTF!.");return;
+#endif    
+			// => schon besetzt! Fehler!
+		} else
+		{
+//			if(is_compare_mode)
+//			{
+//				compareWindow initialisieren (links)
+//				...
+//				oder doch eigenes? ueber tabs compare? 
+//				naja... vergleicht ja nicht mit aktuellem game
+//				sondern schmeisst das game raus und guggt sich gespeicherte spiele an...
+				ok -> auf comparetab!
+//			}
+			
+			game_nr = 0;
+			game_max = 2;
+			game[tabToGameList[tab_number]]->setMode(1, game_max);
+			tabToSplitGameList[tab_number] = game_number;
+			// => als split window hernehmen!
+		}
+	} else
+	{
+	// => new tab
+		game_nr = 0;
+		game_max = 1;
+		tabToGameList[tab_number] = game_number;
+		mainWindow->addNewGameTab();
+		mainWindow->forcePressTab(tab_number);
+	}
+	game[game_number] = new Game(mainWindow, game_nr, game_max); // TODO
+	game[game_number]->assignMap(database.getMap(0));
+	game[game_number]->assignStartCondition(1, database.getStartCondition(TERRA, 0)); // <- evtl auswaehlen... jo, aber erst spaeter einbauen TODO
+	game[game_number]->setStartRace(1, TERRA); // <- ok
+	game[game_number]->assignGoal(1, database.getGoal(TERRA, 0)); // <- immer auf 0 setzen
+	game[game_number]->fillGroups();
+	game[game_number]->setHarvestSpeed(1, TERRA, database.getHarvestSpeed(TERRA, 0));
+	game[game_number]->setHarvestSpeed(1, PROTOSS, database.getHarvestSpeed(PROTOSS, 0));
+	game[game_number]->setHarvestSpeed(1, ZERG, database.getHarvestSpeed(ZERG, 0));
+
+	game[game_number]->setStartPosition(1, 1); // <- TODO
+	game[game_number]->initSoup();
+	game[game_number]->newGeneration();
+	game[game_number]->Show();
+}*/
+
+
+
 }
 
 void DataBaseWindow::reloadOriginalSize()

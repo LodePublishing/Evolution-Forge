@@ -73,10 +73,6 @@ class EF_Configuration
 
 extern EF_Configuration efConfiguration;
 
-//extern void parse_2nd_block(std::ifstream& stream, std::map<std::string, std::map<std::string, std::list<std::string> > >& block);
-//extern void parse_block(std::ifstream& stream, std::map<std::string, std::list<std::string> >& block);
-//extern void parse_line(std::string& text, std::list<std::string>& words);
-
 
 inline const unsigned int EF_Configuration::getDesiredFramerate() const
 {

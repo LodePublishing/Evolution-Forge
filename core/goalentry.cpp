@@ -1,7 +1,6 @@
 #include "goalentry.hpp"
 
 GOAL_ENTRY::GOAL_ENTRY():
-	number(0),
 	name("ERROR"),
 	race(TERRA),
 	maxBuildTypes(0),
@@ -14,7 +13,6 @@ GOAL_ENTRY::GOAL_ENTRY():
 }
 
 GOAL_ENTRY::GOAL_ENTRY(const GOAL_ENTRY& object) :
-	number(object.number),
 	name(object.name),
 	race(object.race),
 	maxBuildTypes(object.maxBuildTypes),
@@ -35,7 +33,6 @@ GOAL_ENTRY::GOAL_ENTRY(const GOAL_ENTRY& object) :
 
 GOAL_ENTRY& GOAL_ENTRY::operator=(const GOAL_ENTRY& object)
 {
-	number = object.number;
 	name = object.name;
 	race = object.race;
 	maxBuildTypes = object.maxBuildTypes;
@@ -139,18 +136,6 @@ const bool GOAL_ENTRY::operator==(const GOAL_ENTRY& other) const
 	return(true);
 }
 
-
-/*const GOAL& GOAL_ENTRY::getGoal(const int goal_number) const
-{
-	int j = 0;
-	for(std::list<GOAL>::const_iterator i=goal.begin(); i!=goal.end(); ++i)
-	{
-		if(j == goal_number)
-			return(*i);
-		++j;
-	}
-	
-}*/
 
 /*const bool GOAL_ENTRY::getNextGoal(std::list<GOAL>::const_iterator& current, const bool first) const
 {

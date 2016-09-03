@@ -113,14 +113,9 @@ void MainWindow::process()
 {
 //	UI_Object::rectnumber=0;
 	clearRedrawFlag();
-	if(!isShown())
-		UI_Object::process();
-	else
-	{
-		UI_Window::process();
-		if(tabRow->checkForNeedRedraw())
-			setNeedRedrawNotMoved();
-	}
+	UI_Window::process();
+	if(tabRow->checkForNeedRedraw())
+		setNeedRedrawNotMoved();
 }
 
 void MainWindow::continueOptimizationAnimation(const bool running)

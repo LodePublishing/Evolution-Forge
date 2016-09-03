@@ -5,6 +5,15 @@
 #include "statictext.hpp"
 #include <string>
 
+enum eGroupType
+{
+	CUSTOM_GROUP,
+	ONE_COLOUMN_GROUP,
+	TWO_COLOUMNS_GROUP,
+	HORIZONTAL_GROUP
+};
+
+
 // TODO eString erlauben!
 
 // simplified window class, maybe inheritate UI_Window from UI_Group...
@@ -20,12 +29,13 @@ class UI_Group : public UI_Object
 		void process();
 		UI_Object* checkToolTip();
 		UI_Object* checkHighlight();
-		void calculateBoxSize(const bool horizontal = false);
+		void calculateBoxSize(const eGroupType group_type = ONE_COLOUMN_GROUP);
 
 		void reloadStrings();
 	private:
 		UI_StaticText* title;
 		unsigned int number;
+		bool highlighted;
 };
 
 #endif

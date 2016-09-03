@@ -19,7 +19,7 @@ void ThemeMenu::reloadOriginalSize()
 {
 	updateItemSizes(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH));
 	UI_Object::reloadOriginalSize();
-	updateItemPositions(TWO_COLOUMN_MENU);
+	updateItemPositions(TWO_COLOUMNS_MENU);
 }
 
 void ThemeMenu::process()

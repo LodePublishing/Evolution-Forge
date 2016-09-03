@@ -2,7 +2,8 @@
 # no locations -> all are relative to the start location specified in the map
 
 # --- Races ---
-@STARTCONDITIONS "Zerg"
+@STARTCONDITIONS
+	"Race" = "Zerg"
 	"Name" = "Default Zerg start"
 	"Minerals" = "50"
 	"Gas" = "0"

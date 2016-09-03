@@ -94,7 +94,7 @@ UI_Window::~UI_Window()
 
 void UI_Window::addHelpButton(eHelpChapter help_chapter)
 {
-	helpButton = new UI_Button(this, Rect(Point(0,10), Size(13, 14)), Size(5,10), HELP_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, ARRANGE_TOP_RIGHT);
+	helpButton = new UI_Button(this, Rect(Point(0,10), Size(13, 14)), Size(5 + (isScrollable==SCROLLED?8:0),10), HELP_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, ARRANGE_TOP_RIGHT);
 	helpChapter = help_chapter;	
 }
 
@@ -287,16 +287,28 @@ void UI_Window::process()
 		}	
 	}
 
-	if((!UI_Object::windowSelected)&&(((isMouseInside())||( (scrollBar!=NULL) && (Rect(getAbsolutePosition() + Point(getWidth(), 0), Size(12, getHeight())).Inside(mouse))))&&(!isTopItem()))) // => main window!
+	if(/*(!UI_Object::windowSelected)&&*/(((isMouseInside())||( (scrollBar!=NULL) && (Rect(getAbsolutePosition() + Point(getWidth(), 0), Size(12, getHeight())).Inside(mouse))))))//&&(!isTopItem()))) // => main window! WHY? TODO
 	{
+		bool new_window = false;
 		if(UI_Object::currentWindow != this)
 		{
-			setNeedRedrawNotMoved();
-			if(UI_Object::currentWindow)
-				UI_Object::currentWindow->setNeedRedrawNotMoved();
+			// current window is inside this window
+			if( (UI_Object::currentWindow==NULL)||
+				(!UI_Object::currentWindow->isMouseInside())||
+   			    (UI_Object::currentWindow->getAbsolutePosition() < getAbsolutePosition())||
+			    (UI_Object::currentWindow->getAbsoluteRect().GetBottomRight() > getAbsoluteRect().GetBottomRight()) ) 
+			{
+				setNeedRedrawNotMoved();
+				if(UI_Object::currentWindow)
+					UI_Object::currentWindow->setNeedRedrawNotMoved();
+				new_window = true;
+			}
+		} else new_window = true;
+		if(new_window)
+		{
+			UI_Object::currentWindow = this;
+			UI_Object::windowSelected = true;
 		}
-		UI_Object::currentWindow = this;
-		UI_Object::windowSelected = true;
 	}
 
 

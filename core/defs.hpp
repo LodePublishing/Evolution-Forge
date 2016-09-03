@@ -7,7 +7,7 @@
 #include <list>
 
 #define MAX_RACES 3
-#define UNIT_TYPE_COUNT 101
+#define UNIT_TYPE_COUNT 105
 #define MAX_LOCATIONS 9
 #define MAX_PLAYER 3
 
@@ -230,6 +230,12 @@ enum eTerraUnits
 	R_VEHICLE_WEAPONS,
 	R_SHIP_PLATING,
 	R_SHIP_WEAPONS,
+
+	F_FACTORY_ADDON,
+	F_STARPORT_ADDON,
+	F_COMMAND_CENTER_ADDON,
+	F_SCIENCE_FACILITY_ADDON,
+	
 	INTRON, //100
 //} // end eTerranUnits
 //

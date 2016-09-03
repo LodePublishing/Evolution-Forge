@@ -1,7 +1,7 @@
 @GOAL 
 	"Name" "Vulture drop"
 	"Race" "Terra"
-	"Dropship" "1" "0" "0"
-	"Vulture" "4" "0" "0"
+	"Dropship" "1" "1" "0"
+	"Vulture" "4" "1" "0"
 	"Spider mines" "1" "0" "0"
 @END

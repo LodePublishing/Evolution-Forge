@@ -324,7 +324,7 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge 1.61 BETA Test :)$# #
 								configuration.setAllowStaticFramerate(false);
 								configuration.setDynamicFramerate(0);
 							} else
-							UI_Object::editTextField->addChar('_');
+							UI_Object::editTextField->addChar(' ');
 							break;
 						case SDLK_EXCLAIM:break;
 						case SDLK_QUOTEDBL:break;

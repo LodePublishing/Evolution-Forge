@@ -19,6 +19,11 @@ GoalMenu::GoalMenu(UI_Object* goal_parent, ANARACE* goal_anarace, Rect goal_rect
 	resetData();
 }
 
+void GoalMenu::assignAnarace(ANARACE* goal_anarace)
+{
+	anarace = goal_anarace;
+}
+
 void GoalMenu::resetData()
 {
 	unsigned int i=0;

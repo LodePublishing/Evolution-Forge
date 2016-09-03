@@ -14,6 +14,7 @@ class GoalMenu : public Menu
 		void process();
 		void draw(DC* dc) const;
 		void resetData();
+		void assignAnarace(ANARACE* goal_anarace);
 	private:
 		ANARACE* anarace;
 };

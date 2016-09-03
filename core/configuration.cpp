@@ -490,71 +490,71 @@ void Configuration::setConfigurationFile(const string& configuration_file)
 
 void Configuration::saveToFile() const
 {
-    ofstream pFile(configurationFile.c_str(), ios_base::out | ios_base::trunc);
-    if(!pFile.is_open())
-    {
-        toLog("ERROR: (loadConfigurationFile): File could not be opened.");
-        return;
-    }
-pFile << "@SETTINGS" << endl;
-pFile << "# 1 = english, 2 = german" << endl;
-pFile << "    \"Language\" = \"" << getLanguage() << "\"" << endl;
-pFile << "# max time in seconds" << endl;
-pFile << "    \"Max Time\" = \"" << getMaxTime() << "\"" << endl;
-pFile << "# Do autosave at the end of a run or ask for it?" << endl;
-pFile << "    \"Autosave runs\" = \"" << (int)isAutoSaveRuns() << "\"" << endl;
-pFile << "# Preprocessing not implemented yet" << endl;
-pFile << "    \"Preprocess Buildorder\" = \"" << (int)isPreprocessBuildOrder() << "\"" << endl;
-pFile << "    \"Max unchanged Generations\" = \"" << getMaxGenerations() << "\"" << endl;
-pFile << "    \"Max Length\" = \"" << getMaxLength() << "\"" << endl;
-pFile << "    \"Max Runs\" = \"" << getMaxRuns() << "\"" << endl;
-pFile << "# max timeout for each order in seconds" << endl;
-pFile << "    \"Max Timeout\" = \"" << getMaxTimeOut() << "\"" << endl;
-pFile << "# Allow to ignore unnecessary goals (mainly for using for example only \"lair\" instead of both \"lair\" and \"hatchery\")" << endl;
-pFile << "    \"Allow goal adaption\" = \"" << (int)isAllowGoalAdaption() << "\"" << endl;
-pFile << "# Breed Factor:" << endl;
-pFile << "# This parameter determines how many % of the players will multiply by 1:1 copy" << endl;
-pFile << "    \"Breed Factor\" = \"" << getBreedFactor() << "\"" << endl;
-pFile << "# Crossing Over:" << endl;
-pFile << "# This parameter determines how many % of the players will multiply by crossover# CURRENTLY NOT IMPLEMENTED!" << endl;
-pFile << "    \"Crossing Over\" = \"" << getCrossingOver() << "\"" << endl;
-pFile << "# 10 means that programs will be sorted into 10-program groups, the best 2 are" << endl;
-pFile << "# taken for reproduction and the worst two are replaced by their children" << endl;
-pFile << "" << endl;                                                       
-pFile << "# GUI SETTINGS:" << endl;
-pFile << "" << endl;            
-pFile << "# set this to 1 to set all details to zero, fastest output" << endl;
-pFile << "# Real minimalists should take a look at the command line options where SDL can be deactivated completely! 8-DD" << endl;
-pFile << "# CURRENTLY NOT IMPLEMENTED" << endl;
-pFile << "    \"Minimalist\" = \"0\"" << endl; // TODO
-pFile << "" << endl;
-pFile << "# how a frame update is weighted compared to a core update (e.g. 4 means that a new generation is calculated every 4 frames)" << endl;
-pFile << "    \"Allow static framerate\" = \"" << (int)isAllowStaticFramerate() << "\"" << endl;
-pFile << "# allow the program to dynamicly reduce the speed of the core to reach this frame rate. 0 = offline." << endl;
-pFile << "    \"Static framerate\" = \"" << getStaticFramerate() << "\"" << endl;
-pFile << "# Draw X frames per new generation" << endl;
-pFile << "    \"Dynamic framerate\" = \"" << getDynamicFramerate() << "\"" << endl;
-pFile << "" << endl;                                                                                
-pFile << "# Order entries in the unitmenu by area or by facility?" << endl;
-pFile << "    \"Facility mode\" = \"" << (int)isFacilityMode() << "\"" << endl;
-pFile << "# glowing effects" << endl;
-pFile << "    \"Glowing buttons\" = \"" << (int)isGlowingButtons() << "\"" << endl;
-pFile << "# Show nice DNA spiral?" << endl;
-pFile << "    \"DNA Spiral\" = \"" << (int)isDnaSpiral() << "\"" << endl;
-pFile << "# moving rectangles, 2 = all objects move smoothly, 1 = some objects move smoothly, 0 = all objects jump directly to their destination" << endl;
-pFile << "    \"Smooth movements\" = \"" << (int)isSmoothMovements() << "\"" << endl;
-pFile << "# Rounded rectangles, saves a little cpu power if deactivated (the computer loves simple object :-D" << endl;
-pFile << "# CURRENTLY NOT IMPLEMENTED" << endl;
-pFile << "    \"Rounded rectangles\" = \"1\"" << endl; // TODO
-pFile << "# use background bitmap, saves some cpu power if deactivated" << endl;
-pFile << "    \"Background bitmap\" = \"" << (int)isBackgroundBitmap() << "\"" << endl;
-pFile << "# Transparency, let's burn some cpu power" << endl;
-pFile << "    \"Transparency\" = \"" << (int)isTransparency() << "\"" << endl;
-pFile << endl;                                                                                
-pFile << "    \"Tooltips\" = \"" << (int)isTooltips() << "\"" << endl;
-pFile << "    \"Fullscreen\" = \"" << (int)isFullScreen() << "\"" << endl;
-pFile << "    \"Software mouse\" = \"" << (int)isSoftwareMouse() << "\"" << endl;
-pFile << "@END" << endl;
+	ofstream pFile(configurationFile.c_str(), ios_base::out | ios_base::trunc);
+	if(!pFile.is_open())
+	{
+		toLog("ERROR: (loadConfigurationFile): File could not be opened.");
+		return;
+	}
+	pFile << "@SETTINGS" << endl;
+	pFile << "# 1 = english, 2 = german" << endl;
+	pFile << "    \"Language\" = \"" << (int)getLanguage() << "\"" << endl;
+	pFile << "# max time in seconds" << endl;
+	pFile << "    \"Max Time\" = \"" << getMaxTime() << "\"" << endl;
+	pFile << "# Do autosave at the end of a run or ask for it?" << endl;
+	pFile << "    \"Autosave runs\" = \"" << (int)isAutoSaveRuns() << "\"" << endl;
+	pFile << "# Preprocessing not implemented yet" << endl;
+	pFile << "    \"Preprocess Buildorder\" = \"" << (int)isPreprocessBuildOrder() << "\"" << endl;
+	pFile << "    \"Max unchanged Generations\" = \"" << getMaxGenerations() << "\"" << endl;
+	pFile << "    \"Max Length\" = \"" << getMaxLength() << "\"" << endl;
+	pFile << "    \"Max Runs\" = \"" << getMaxRuns() << "\"" << endl;
+	pFile << "# max timeout for each order in seconds" << endl;
+	pFile << "    \"Max Timeout\" = \"" << getMaxTimeOut() << "\"" << endl;
+	pFile << "# Allow to ignore unnecessary goals (mainly for using for example only \"lair\" instead of both \"lair\" and \"hatchery\")" << endl;
+	pFile << "    \"Allow goal adaption\" = \"" << (int)isAllowGoalAdaption() << "\"" << endl;
+	pFile << "# Breed Factor:" << endl;
+	pFile << "# This parameter determines how many % of the players will multiply by 1:1 copy" << endl;
+	pFile << "    \"Breed Factor\" = \"" << getBreedFactor() << "\"" << endl;
+	pFile << "# Crossing Over:" << endl;
+	pFile << "# This parameter determines how many % of the players will multiply by crossover# CURRENTLY NOT IMPLEMENTED!" << endl;
+	pFile << "    \"Crossing Over\" = \"" << getCrossingOver() << "\"" << endl;
+	pFile << "# 10 means that programs will be sorted into 10-program groups, the best 2 are" << endl;
+	pFile << "# taken for reproduction and the worst two are replaced by their children" << endl;
+	pFile << "" << endl;                                                       
+	pFile << "# GUI SETTINGS:" << endl;
+	pFile << "" << endl;            
+	pFile << "# set this to 1 to set all details to zero, fastest output" << endl;
+	pFile << "# Real minimalists should take a look at the command line options where SDL can be deactivated completely! 8-DD" << endl;
+	pFile << "# CURRENTLY NOT IMPLEMENTED" << endl;
+	pFile << "    \"Minimalist\" = \"0\"" << endl; // TODO
+	pFile << "" << endl;
+	pFile << "# how a frame update is weighted compared to a core update (e.g. 4 means that a new generation is calculated every 4 frames)" << endl;
+	pFile << "    \"Allow static framerate\" = \"" << (int)isAllowStaticFramerate() << "\"" << endl;
+	pFile << "# allow the program to dynamicly reduce the speed of the core to reach this frame rate. 0 = offline." << endl;
+	pFile << "    \"Static framerate\" = \"" << getStaticFramerate() << "\"" << endl;
+	pFile << "# Draw X frames per new generation" << endl;
+	pFile << "    \"Dynamic framerate\" = \"" << getDynamicFramerate() << "\"" << endl;
+	pFile << "" << endl;                                                                                
+	pFile << "# Order entries in the unitmenu by area or by facility?" << endl;
+	pFile << "    \"Facility mode\" = \"" << (int)isFacilityMode() << "\"" << endl;
+	pFile << "# glowing effects" << endl;
+	pFile << "    \"Glowing buttons\" = \"" << (int)isGlowingButtons() << "\"" << endl;
+	pFile << "# Show nice DNA spiral?" << endl;
+	pFile << "    \"DNA Spiral\" = \"" << (int)isDnaSpiral() << "\"" << endl;
+	pFile << "# moving rectangles, 2 = all objects move smoothly, 1 = some objects move smoothly, 0 = all objects jump directly to their destination" << endl;
+	pFile << "    \"Smooth movements\" = \"" << (int)isSmoothMovements() << "\"" << endl;
+	pFile << "# Rounded rectangles, saves a little cpu power if deactivated (the computer loves simple object :-D" << endl;
+	pFile << "# CURRENTLY NOT IMPLEMENTED" << endl;
+	pFile << "    \"Rounded rectangles\" = \"1\"" << endl; // TODO
+	pFile << "# use background bitmap, saves some cpu power if deactivated" << endl;
+	pFile << "    \"Background bitmap\" = \"" << (int)isBackgroundBitmap() << "\"" << endl;
+	pFile << "# Transparency, let's burn some cpu power" << endl;
+	pFile << "    \"Transparency\" = \"" << (int)isTransparency() << "\"" << endl;
+	pFile << endl;                                                                                
+	pFile << "    \"Tooltips\" = \"" << (int)isTooltips() << "\"" << endl;
+	pFile << "    \"Fullscreen\" = \"" << (int)isFullScreen() << "\"" << endl;
+	pFile << "    \"Software mouse\" = \"" << (int)isSoftwareMouse() << "\"" << endl;
+	pFile << "@END" << endl;
 }
 
 void Configuration::loadConfigurationFile()

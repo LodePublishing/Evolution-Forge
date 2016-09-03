@@ -5,7 +5,7 @@ CORE=core
 
 CORE_OBJ=$(CORE)/defs.o $(CORE)/prerace.o $(CORE)/anarace.o $(CORE)/configuration.o $(CORE)/goal.o  $(CORE)/goalentry.o $(CORE)/harvest.o  $(CORE)/location.o  $(CORE)/basicmap.o  $(CORE)/race.o  $(CORE)/settings.o  $(CORE)/soup.o $(CORE)/building.o $(CORE)/start.o $(CORE)/unit.o $(CORE)/startcondition.o
 
-EF_OBJ=$(EF)/bodiagram.o $(EF)/bograph.o $(EF)/bowindow.o $(EF)/forceentry.o $(EF)/force.o $(EF)/info.o $(EF)/message.o $(EF)/statistics.o $(EF)/timer.o $(EF)/mainwindow.o $(EF)/tutorial.o $(EF)/corewindow.o $(EF)/player.o  $(EF)/order.o $(EF)/main.o  $(EF)/racemenu.o $(EF)/menuentry.o $(EF)/menu.o $(EF)/setwindow.o $(EF)/progressbar.o $(EF)/unitmenu.o $(EF)/goalmenu.o $(EF)/forcemenu.o $(EF)/languagemenu.o $(EF)/resolutionmenu.o $(EF)/thememenu.o $(EF)/guimain.o
+EF_OBJ=$(EF)/bodiagram.o $(EF)/bograph.o $(EF)/bowindow.o $(EF)/forceentry.o $(EF)/force.o $(EF)/info.o $(EF)/message.o $(EF)/statistics.o $(EF)/timer.o $(EF)/mainwindow.o $(EF)/tutorial.o $(EF)/player.o  $(EF)/order.o $(EF)/main.o  $(EF)/racemenu.o $(EF)/menuentry.o $(EF)/menu.o $(EF)/setwindow.o $(EF)/progressbar.o $(EF)/unitmenu.o $(EF)/goalmenu.o $(EF)/forcemenu.o $(EF)/languagemenu.o $(EF)/resolutionmenu.o $(EF)/thememenu.o $(EF)/locmenu.o $(EF)/guimain.o
 
 UI_OBJ=$(UI)/object.o $(UI)/window.o $(UI)/button.o $(UI)/radio.o $(UI)/statictext.o $(UI)/theme.o $(UI)/group.o $(UI)/editfield.o $(UI)/checkbutton.o $(UI)/endrundialog.o $(UI)/tooltip.o $(UI)/numberfield.o 
 
@@ -15,8 +15,8 @@ SDL_OBJ=$(SDL)/color.o $(SDL)/font.o $(SDL)/pen.o $(SDL)/surface.o $(SDL)/brush.
 
 
 CPPFLAGS =
-#FLAGS = -g -D_SCC_DEBUG -ansi -pedantic-errors -Wall -W -Wabi #-Wmissing-braces -Wredundant-decls -Wundef -Wunused -Wconversion -Woverloaded-virtual -Wmissing-noreturn -Winline -Wdisabled-optimization -Wsign-promo -Wwrite-strings -Wlong-long -Woverloaded-virtual -Wfloat-equal -Wreturn-type -Wparentheses -Wchar-subscripts -Wimplicit  -Wtrigraphs  -Wendif-labels -Wpointer-arith #-Wcast-qual -Wcast-align -Wwrite-strings -Wshadow -Weffc++
-FLAGS = -O2 #-fmerge-all-constants --param max-crossjump-edges=2000 --param max-gcse-memory=209715200 --param max-gcse-passes=40 --param max-pending-list-length=1000 --param max-delay-slot-insn-search=2000 --param max-delay-slot-live-search=4000 -ffast-math -march=pentium4 -fomit-frame-pointer -msse -msse2 -mmmx
+FLAGS = -g -D_SCC_DEBUG -ansi -pedantic-errors -Wall -W -Wabi -Wmissing-braces -Wredundant-decls -Wundef -Wunused -Wconversion -Woverloaded-virtual -Wmissing-noreturn -Winline -Wdisabled-optimization -Wsign-promo -Wwrite-strings -Wlong-long -Woverloaded-virtual -Wfloat-equal -Wreturn-type -Wparentheses -Wchar-subscripts -Wimplicit  -Wtrigraphs  -Wendif-labels -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wshadow #-Weffc++
+#FLAGS = -O3 -fmerge-all-constants --param max-crossjump-edges=2000 --param max-gcse-memory=209715200 --param max-gcse-passes=40 --param max-pending-list-length=1000 --param max-delay-slot-insn-search=2000 --param max-delay-slot-live-search=4000 -ffast-math -march=pentium4 -fomit-frame-pointer
 #-g -D_SCC_DEBUG -ansi -pedantic-errors -Wall -W -Wabi -Wmissing-braces -Wredundant-decls -Wundef -Wunused -Wconversion -Woverloaded-virtual -Wmissing-noreturn -Winline -Wdisabled-optimization -Wsign-promo -Wwrite-strings -Wlong-long -Woverloaded-virtual -Wfloat-equal -Wreturn-type -Wparentheses -Wchar-subscripts -Wimplicit  -Wtrigraphs  -Wendif-labels -Wpointer-arith #-Wcast-qual -Wcast-align -Wwrite-strings -Wshadow -Weffc++ 
 #-Wold-style-cast
 #-Wswitch-enum -Wpadded -Waggregate-return -Wunreachable-code -Wswitch -Wswitch-default 

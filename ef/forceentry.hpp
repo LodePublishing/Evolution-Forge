@@ -22,6 +22,11 @@ class ForceEntry : public UI_Button
 		void setType(const eUnitType unit_type); // ~~
 		const eUnitType getType() const;
 		const unsigned int getUnit() const;
+
+		const unsigned int getHeight() const;
+
+		//const bool showLocationMenu() const;
+		const bool isLocationGoalClicked() const;
 		
 		void HideIt();
 
@@ -29,10 +34,9 @@ class ForceEntry : public UI_Button
 		UI_Object* checkHighlight();
 	
 		UI_NumberField* timeEntryBox;
-//		UI_Button* makeLocationGoal;
+		UI_Button* makeLocationGoal;
 		UI_Button* makeTimeGoal;
 		static bool changed;
-	
 	private:
         
 		unsigned int startForce;
@@ -43,7 +47,7 @@ class ForceEntry : public UI_Button
 		unsigned int unit;
 		eUnitType type;
 		GOAL* goal;
-//		static LocationMenu* locationMenu;
+		bool showLocMenu;
 };
 
 #endif // _FORCEENTRY_HPP

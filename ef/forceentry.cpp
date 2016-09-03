@@ -4,37 +4,39 @@
 #include <sstream>
 
 ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const Rect entry_max_rect, const string& entry_unit):
-    UI_Button(entry_parent, Rect(entry_rect.GetTopLeft(), Size(entry_rect.GetWidth(), entry_rect.GetHeight())), entry_max_rect, entry_unit, FORCE_ENTRY_BUTTON, NO_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE),
+	UI_Button(entry_parent, Rect(entry_rect.GetTopLeft(), Size(entry_rect.GetWidth(), entry_rect.GetHeight())), entry_max_rect, entry_unit, FORCE_ENTRY_BUTTON, NO_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE),
 	timeEntryBox(new UI_NumberField(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 210, -14), Size(10,10)), 0, configuration.getMaxTime(), 6, 0, NULL_STRING, NULL_STRING, TIME_NUMBER_TYPE)),
-//	makeLocationGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 30, -11), Size(10,10)), entry_max_rect, GOAL_LOCATION_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
+	makeLocationGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 60, -11), Size(10,10)), entry_max_rect, GOAL_LOCATION_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
 	makeTimeGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 29, -11), Size(16,10)), entry_max_rect, GOAL_TIME_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
 
-    startForce(20),
-    targetForce(20),
-    currentForce(20),
-    totalNumber(1),
+	startForce(20),
+	targetForce(20),
+	currentForce(20),
+	totalNumber(1),
 	unit(0),
 	type(REMAINING_UNIT_TYPE),
-	goal(NULL)
+	goal(NULL),
+	showLocMenu(false)
 {
-//	makeLocationGoal->Hide();
+	makeLocationGoal->Hide();
 	makeTimeGoal->Hide();
 	makeTimeGoal->updateToolTip(FORCEENTRY_TIME_TOOLTIP_STRING);
 	timeEntryBox->Hide();
 }	
 
 ForceEntry::ForceEntry(const ForceEntry& object) :
-    UI_Button((UI_Button)object),
+	UI_Button((UI_Button)object),
 	timeEntryBox(new UI_NumberField(*object.timeEntryBox)),
-//	makeLocationGoal(new UI_Button(*object.makeLocationGoal)),
+	makeLocationGoal(new UI_Button(*object.makeLocationGoal)),
 	makeTimeGoal(new UI_Button(*object.makeTimeGoal)),
-    startForce(object.startForce),
-    targetForce(object.targetForce),
-    currentForce(object.currentForce),
-    totalNumber(object.totalNumber),
+	startForce(object.startForce),
+	targetForce(object.targetForce),
+	currentForce(object.currentForce),
+	totalNumber(object.totalNumber),
 	unit(object.unit),
 	type(object.type),
-	goal(object.goal)
+	goal(object.goal),
+	showLocMenu(object.showLocMenu)
 { }
 
 
@@ -42,16 +44,18 @@ ForceEntry& ForceEntry::operator=(const ForceEntry& object)
 {
 	((UI_Button)(*this)) = ((UI_Button)object);
 	timeEntryBox = new UI_NumberField(*object.timeEntryBox);
-//	makeLocationGoal = new UI_Button(*object.makeLocationGoal);
+	makeLocationGoal = new UI_Button(*object.makeLocationGoal);
 	makeTimeGoal = new UI_Button(*object.makeTimeGoal);
 
-    startForce = object.startForce;
-    targetForce = object.targetForce;
-    currentForce = object.currentForce;
-    totalNumber = object.totalNumber;
+	startForce = object.startForce;
+	targetForce = object.targetForce;
+	currentForce = object.currentForce;
+	totalNumber = object.totalNumber;
 	unit = object.unit;
 	type = object.type;
 	goal = object.goal;
+
+	showLocMenu = object.showLocMenu;
 
 	return(*this);
 }
@@ -59,7 +63,7 @@ ForceEntry& ForceEntry::operator=(const ForceEntry& object)
 ForceEntry::~ForceEntry()
 {
 	delete makeTimeGoal;
-//	delete makeLocationGoal;
+	delete makeLocationGoal;
 	delete timeEntryBox;
 }
 
@@ -68,7 +72,7 @@ UI_Object* ForceEntry::checkTooltip()
 	UI_Object* t = makeTimeGoal->checkTooltip();
 	if(t == NULL)
 	{
-//		t = makeLocationGoal->checkTooltip();
+		t = makeLocationGoal->checkTooltip();
 		if(t == NULL)
 		{
 			t = timeEntryBox->checkTooltip();
@@ -83,43 +87,54 @@ UI_Object* ForceEntry::checkTooltip()
 
 UI_Object* ForceEntry::checkHighlight()
 {
-	UI_Object* t = makeTimeGoal->checkHighlight();
+	UI_Object* t = UI_Object::checkHighlight();
 	if(t == NULL)
 	{
-//		t = makeLocationGoal->checkHighlight();
+		t = makeTimeGoal->checkHighlight();
 		if(t == NULL)
 		{
-			t = timeEntryBox->checkHighlight();
+			t = makeLocationGoal->checkHighlight();
 			if(t == NULL)
-			    return(UI_Button::checkHighlight());
+			{
+				t = timeEntryBox->checkHighlight();
+				if(t == NULL)
+				    return(UI_Button::checkHighlight());
+				else return(t);
+			}
 			else return(t);
 		}
 		else return(t);
-	}
-	else return(t);
+	} else return(t);
 }
-                                                                                                                                                            
+
+const bool ForceEntry::isLocationGoalClicked() const
+{
+	return(showLocMenu);
+//	makeLocationGoal->isLeftClicked());
+}
+
 void ForceEntry::process()
 {
-    if(!isShown())
-        return;
-    Size::mv(currentForce, startForce, targetForce);
-    UI_Button::process();
+	if(!isShown())
+		return;
+	Size::mv(currentForce, startForce, targetForce);
+	UI_Button::process();
+	showLocMenu=false;
 	if(makeTimeGoal->isLeftClicked())
 	{
 		timeEntryBox->Show(!timeEntryBox->isShown());
-//		makeLocationGoal->forceUnpress();
-		// locationMenu->Hide();
-	} 
-/*	if(makeLocationGoal->isLeftClicked())
+		makeLocationGoal->forceUnpress();
+//		showLocMenu=false;
+	} else
+	if(makeLocationGoal->isLeftClicked())
 	{
 		timeEntryBox->Hide();
 		makeTimeGoal->forceUnpress();
-		// locationMenu->Show();
-	} else */
+		showLocMenu=true;
+	} else
 	if(!goal)
 	{
-//		makeLocationGoal->Hide();
+		makeLocationGoal->Hide();
 		makeTimeGoal->Hide();
 		buttonPlacementArea.SetWidth(((UI_Window*)getParent())->getClientRectWidth());
 	}
@@ -140,28 +155,28 @@ void ForceEntry::process()
 			if(timeEntryBox->isShown())
 				r.SetWidth(((UI_Window*)getParent())->getClientRectWidth()-86);
 			else
-				r.SetWidth(((UI_Window*)getParent())->getClientRectWidth()-26);
-//			makeLocationGoal->Show();
+				r.SetWidth(((UI_Window*)getParent())->getClientRectWidth()-66);
+			makeLocationGoal->Show();
 			makeTimeGoal->Show();
 			buttonPlacementArea.SetWidth(r.GetWidth());
 		}
 		else
 		if(!((UI_Window*)getParent())->getAbsoluteRect().Inside(mouse))
 		{
-//			makeLocationGoal->forceUnpress();
+			makeLocationGoal->forceUnpress();
 			makeTimeGoal->forceUnpress();
-//			makeLocationGoal->Hide();
+			makeLocationGoal->Hide();
 			makeTimeGoal->Hide();
 			timeEntryBox->Hide();
 			buttonPlacementArea.SetWidth(r.GetWidth());
 		} else if(!makeTimeGoal->isCurrentlyPressed())
 		{
-//          makeLocationGoal->forceUnpress();
-            makeTimeGoal->forceUnpress();
-//          makeLocationGoal->Hide();
-            makeTimeGoal->Hide();
-            timeEntryBox->Hide();
-            buttonPlacementArea.SetWidth(r.GetWidth());
+			makeLocationGoal->forceUnpress();
+			makeTimeGoal->forceUnpress();
+			makeLocationGoal->Hide();
+			makeTimeGoal->Hide();
+			timeEntryBox->Hide();
+			buttonPlacementArea.SetWidth(r.GetWidth());
 		}
 	}
 }
@@ -271,4 +286,3 @@ void ForceEntry::setTotalNumber(const unsigned int total_number)
 }
 
 bool ForceEntry::changed = false;
-

@@ -50,6 +50,11 @@ BoDiagramWindow::BoDiagramWindow(UI_Object* bod_parent, ANARACE* bod_anarace, In
 BoDiagramWindow::~BoDiagramWindow()
 { }
 
+void BoDiagramWindow::assignAnarace(ANARACE* bod_anarace)
+{
+	anarace = bod_anarace;
+}
+
 void BoDiagramWindow::resetData()
 { }
 
@@ -431,6 +436,8 @@ void BoDiagramWindow::draw(DC* dc) const
 				if((time%60)<10)
 					os << "0";
 				os << (time%60);
+				 dc->SetTextForeground(*theme.lookUpColor(BRIGHT_FITNESS_TEXT_COLOR));
+				 
 				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(50,48));
 				
 				dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));

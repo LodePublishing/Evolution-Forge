@@ -27,6 +27,7 @@ class InfoWindow : public UI_Window
 		const unsigned int getIP() const; 
 		const unsigned int isSet() const;
 		void setupOk(const unsigned int ok); // already setuped by bowindow
+		void assignAnarace(ANARACE* info_anarace);
 		
 	private:
 		signed int bx;

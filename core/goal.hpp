@@ -10,6 +10,7 @@ class GOAL
 		~GOAL();
 		GOAL(const GOAL& goal);
 		GOAL& operator=(const GOAL& goal);
+		bool operator<(const GOAL& goal);
 
 		void setUnit(const unsigned int goal_unit);
 		void setTime(const unsigned int goal_time);
@@ -22,7 +23,7 @@ class GOAL
 		const unsigned int getCount() const;
 		const unsigned int getLocation() const;
 		const unsigned int getFinalTime() const;
-		
+
 	private:
 	    unsigned int unit;//!
     	unsigned int time;

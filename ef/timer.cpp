@@ -27,6 +27,11 @@ TimerWindow::~TimerWindow()
 	delete(timeText);
 	delete(continueButton);
 }
+
+void TimerWindow::assignAnarace(ANARACE* timer_anarace)
+{
+	anarace = timer_anarace;
+}
 																				
 void TimerWindow::resetData()
 {
@@ -57,12 +62,14 @@ void TimerWindow::process()
 		if(continueButton->isCurrentlyActivated())
 		{
 			anarace->setOptimizing(true);
-			continueButton->updateText(CLICK_TO_PAUSE_STRING);	
+			continueButton->updateText(CLICK_TO_PAUSE_STRING);
+			continueButton->updateToolTip(PAUSE_OPTIMIZATION_TOOLTIP_STRING);
 		}
 		else
 		{
 			anarace->setOptimizing(false);
-			continueButton->updateText(CLICK_TO_CONTINUE_STRING);	
+			continueButton->updateText(CLICK_TO_CONTINUE_STRING);
+			continueButton->updateToolTip(CONTINUE_OPTIMIZATION_TOOLTIP_STRING);
 		}
 	}
 	

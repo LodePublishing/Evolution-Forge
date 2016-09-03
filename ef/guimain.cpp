@@ -139,6 +139,7 @@ Main::Main(DC* dc):
 	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG1_STRING)));
 	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG2_STRING)));
 	msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(PLAYERS_LOADED_STRING, settings.getMap(0)->getMaxPlayer()));
+	msgWindow->addMessage(" - - - www.clawsoftware.de - - - ");
 	bar->draw(dc, 8, START_MAIN_INIT_COMPLETE_STRING);
 //	cursor=init_system_cursor(arrow);
 //	SDL_ShowCursor(SDL_DISABLE);
@@ -155,12 +156,12 @@ Main::Main(DC* dc):
 
 Main::~Main()
 {
-    delete mainWindow;
-    delete msgWindow;
-    delete tutorialWindow;
-    delete settingsWindow;
-    for(int i=0;i<MAX_PLAYER;i++)
-        delete player[i];
+	delete mainWindow;
+	delete msgWindow;
+	delete tutorialWindow;
+	delete settingsWindow;
+	for(int i=0;i<MAX_PLAYER;i++)
+		delete player[i];
 }
 
 void Main::resetData()
@@ -449,27 +450,27 @@ void Main::draw(DC* dc) const
 	{
 		mainWindow->draw(dc);
 // ------ MOUSE DRAWING ------
-/*		if(configuration.isSoftwareMouse())
+		if(configuration.isSoftwareMouse())
 		{
-			SDL_ShowCursor(SDL_DISABLE);
+//			SDL_ShowCursor(SDL_DISABLE);
 			Point p = UI_Object::mouse - Size(20,10);//Point(90, 140);
 			dc->SetFont(UI_Object::theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
 			switch(UI_Object::mouseType)
 			{
-				case 0:dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_NONE), p);
+				case 0://dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_NONE), p);
 					break;
 				case 1:
-					dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_LEFT), p);
+//					dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_LEFT), p);
 					dc->SetTextForeground(toSDL_Color(179,0,0));
 					dc->DrawText("Add a unit", p.x-50, p.y+2);
 				break;
 				case 2:
-					dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_RIGHT), p);
+//					dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_RIGHT), p);
 					dc->SetTextForeground(toSDL_Color(0,177,188));
 					dc->DrawText("Remove a unit", p.x+38, p.y+1);
 				break;
 				case 3:
-					dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_BOTH), p);
+//					dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_BOTH), p);
 					dc->SetTextForeground(toSDL_Color(179,0,0));
 					dc->DrawText("Add a unit", p.x-50, p.y+2);
 					dc->SetTextForeground(toSDL_Color(0,177,188));
@@ -477,8 +478,8 @@ void Main::draw(DC* dc) const
 				break;
 			}
 		}
-		else
-			SDL_ShowCursor(SDL_ENABLE);*/
+//		else
+//			SDL_ShowCursor(SDL_ENABLE);
 // ------ END MOUSE DRAWING ------
 	
 		if(UI_Object::tooltip)

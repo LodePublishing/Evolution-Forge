@@ -31,6 +31,11 @@ GOAL& GOAL::operator=(const GOAL& object)
 	return(*this);
 }
 
+bool GOAL::operator<(const GOAL& goal)
+{
+	return(getLocation() < goal.getLocation());
+}
+
 void GOAL::setUnit(const unsigned int goal_unit)
 {
 #ifdef _SCC_DEBUG

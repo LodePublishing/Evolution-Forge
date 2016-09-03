@@ -9,15 +9,15 @@ const unsigned int Menu::getHeight() const
 }
 
 Menu::Menu(const Menu& object) :
-    UI_Object((UI_Object)object),
+	UI_Object((UI_Object)object),
 	menuEntries(object.menuEntries),
-    menuLevel(object.menuLevel),
-    pressedItem(object.pressedItem),
+	menuLevel(object.menuLevel),
+	pressedItem(object.pressedItem),
 	markedItem(object.markedItem),
-    height(object.height),
+	height(object.height),
 	chooseMenu(object.chooseMenu),
-    p1(object.p1),
-    p2(object.p2)
+	p1(object.p1),
+	p2(object.p2)
 { }
 
 Menu& Menu::operator=(const Menu& object)
@@ -47,28 +47,28 @@ Menu::Menu(UI_Object* menu_parent, Rect menu_rect, const bool choose_menu):
 { }
 
 Menu::Menu(UI_Object* menu_parent, Rect rect, const int entryNumber, const int coloumns, const Size& s, const eString firstString, const eButton button, const bool choose_menu):
-    UI_Object(menu_parent, rect),
+	UI_Object(menu_parent, rect),
 	menuEntries(),
-    menuLevel(0),
-    pressedItem(-1),
-    markedItem(-1),
-    height(0),
-    chooseMenu(choose_menu),
-    p1(),
-    p2()
+	menuLevel(0),
+	pressedItem(-1),
+	markedItem(-1),
+	height(0),
+	chooseMenu(choose_menu),
+	p1(),
+	p2()
 {
-    for(int i=0;i<entryNumber;i++)
-    {
-        Rect edge = Rect(Point(10 + (i%coloumns) * (s.GetWidth()+10), (i/coloumns)*(s.GetHeight()+12)), s);
-        MenuEntry* entry = new MenuEntry(this, edge, (eString)(firstString+i));
-        entry->setButton(button);
-        menuEntries.push_back(entry);
-    }
+	for(int i=0;i<entryNumber;i++)
+	{
+		Rect edge = Rect(Point(10 + (i%coloumns) * (s.GetWidth()+10), (i/coloumns)*(s.GetHeight()+12)), s);
+		MenuEntry* entry = new MenuEntry(this, edge, (eString)(firstString+i));
+		entry->setButton(button);
+		menuEntries.push_back(entry);
+	}
 }
 
 Menu::~Menu()
 {
-    for(list<MenuEntry*>::const_iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+	for(list<MenuEntry*>::const_iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 		delete (*m);	
 }
 

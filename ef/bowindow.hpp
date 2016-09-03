@@ -9,22 +9,22 @@
 
 class BoEntry : public UI_Button
 {
-    public:
+	public:
 		BoEntry(const BoEntry& object);
 		BoEntry& operator=(const BoEntry& object);
-        BoEntry(UI_Object* bo_parent, Rect bo_rect, Rect bo_max_rect, const string& bo_unit);
-        ~BoEntry();
-        const unsigned int changed();
+		BoEntry(UI_Object* bo_parent, Rect bo_rect, Rect bo_max_rect, const string& bo_unit);
+		~BoEntry();
+		const unsigned int changed();
 		void process();
 		void draw(DC* dc) const;
-    private:
+	private:
 //        UI_Button* addUnit;
 //      UI_Button* subUnit;
 //    UI_Button* cancelUnit; TODO
 };
 
 
-class BoWindow:public UI_Window
+class BoWindow : public UI_Window
 {
 	public:
 		BoWindow(const BoWindow& object);
@@ -40,9 +40,10 @@ class BoWindow:public UI_Window
 		
 		void setMarkedUnit(const unsigned int marked_unit);
 		const unsigned int getMarkedUnit() const;
+		void assignAnarace(ANARACE* bo_anarace);
 	private:
 		void drawSelectionStuff(DC* dc) const;
-        BoEntry* boEntry[MAX_LENGTH];
+		BoEntry* boEntry[MAX_LENGTH];
 	
 //		void resetButtons();
 		unsigned int markedUnit;

@@ -101,6 +101,10 @@
 		R_VEHICLE_WEAPONS
 		R_SHIP_PLATING
 		R_SHIP_WEAPONS
+		F_FACTORY_ADDON
+		F_STARPORT_ADDON
+		F_COMMAND_CENTER_ADDON
+		F_SCIENCE_FACILITY_ADDON
 		INTRON
 		NULL
 		Sonde
@@ -202,6 +206,10 @@
 		R_GROUND_WEAPONS
 		R_AIR_WEAPONS
 		R_PLASMA_SHIELDS
+		NULL
+		NULL
+		NULL
+		NULL
 		INTRON
 		
 		NULL
@@ -304,6 +312,10 @@
 		NULL
 		NULL
 		NULL
+		NULL
+		NULL
+		NULL
+		NULL
 		INTRON
 				
 		Starte ...
@@ -379,7 +391,8 @@
 		+Überschuss / Einheiten / Ziele:
 		[Zeit/Zielzeit]  +Überschuss / Einheiten / Ziele:
 		Hier klicken um Ziel hinzuzufügen
-		Schliessen
+		zurück
+		schliessen
 		Ziel hinzu
 		Ziel laden
 		Starteinheiten
@@ -473,6 +486,8 @@
 		Speichere Baureihenfolge als HTML
 
 		Fahre mit der Optimierung fort
+		Halte die Optimierung an
+		
 		Anteil aller Ziele / zeitlicher Anteil am Optimum (Mineralien/Gas ignoriert)
 				
 		Einfache Oberfläche und grundlegende Möglichkeiten

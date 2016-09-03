@@ -19,6 +19,7 @@ class TimerWindow : public UI_Window
 		void setMode(const unsigned int current_mode);
 
 		void forcePause(const bool pause=true);
+		void assignAnarace(ANARACE* timer_anarace);
 	private:
 		unsigned int oldTimeCounter[20], oldTime[20];
 		unsigned int currentTime;

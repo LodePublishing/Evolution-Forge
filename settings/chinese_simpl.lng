@@ -1,0 +1,1226 @@
+@STRINGS
+
+
+	
+@ENGLISH
+		NULL
+		
+		零位! 无
+
+		SCV
+
+		空间海军陆战队员
+
+		鬼魂
+
+		雕
+
+		巨人
+
+		围困坦克
+
+		Firebat
+
+		军医
+
+		幽灵
+
+		科学船
+
+		Dropship
+
+		战舰
+
+		Valkyrie
+
+		核弹头
+
+		供应集中处
+
+		营房
+
+		学院
+
+		工厂
+
+		指挥中心
+
+		Starport
+
+		科学设施
+
+		工程学海湾
+
+		军械库
+
+		导弹塔楼
+
+		地堡
+
+		Comsat 驻地
+
+		核筒仓
+
+		塔台
+
+		隐蔽Ops
+
+		物理实验室
+
+		金工车间
+
+		指挥中心[ CS ]
+
+		指挥中心[ NS ]
+
+		Starport [ CT ]
+
+		科学设施[ CO ]
+
+		科学设施[ PL ]
+
+		工厂[ 女士]
+
+		Stim 叠板
+
+		Lockdown
+
+		EMP 冲击波
+
+		蜘蛛矿
+
+		坦克围困方式
+
+		照耀
+
+		Yamato 枪
+
+		掩饰领域
+
+		人员掩饰
+
+		恢复
+
+		光学火光
+
+		U238 壳
+
+		离子起飞加速器
+
+		Tital 反应器
+
+		视觉植入管
+
+		Moebius 反应器
+
+		阿波罗反应器
+
+		巨人反应器
+
+		众神使者的手杖反应器
+
+		Charon 助推器
+
+		步兵装甲
+
+		步兵武器
+
+		车镀层
+
+		车武器
+
+		船镀层
+
+		船武器
+
+		精炼厂 
+
+		气体SCV
+
+		MOVE_ONE_3_FORWARD
+
+		MOVE_ONE_1_FORWARD
+
+		MOVE_ONE_1_BACKWARD
+
+		转动
+
+		随后而来
+
+		重新设置
+
+		Vespene Geysir
+
+		矿物补丁
+
+		R_STIM_PACKS
+
+		R_LOCKDOWN
+
+		R_EMP_SHOCKWAVE
+
+		R_SPIDER_MINES
+
+		R_TANK_SIEGE_MODE
+
+		R_IRRADIATE
+
+		R_YAMATO_GUN
+
+		R_CLOAKING_FIELD
+
+		R_PERSONNEL_CLOAKING
+
+		R_RESTORATION
+
+		R_OPTICAL_FLARE
+
+		R_U238_SHELLS
+
+		R_ION_THRUSTERS
+
+		R_TITAN_REACTOR
+
+		R_OCULAR_IMPLANTS
+
+		R_MOEBIUS_REACTOR
+
+		R_APOLLO_REACTOR
+
+		R_COLOSSUS_REACTOR
+
+		R_CADUCEUS_REACTOR
+
+		R_CHARON_BOOSTER
+
+		R_INFANTRY_ARMOR
+	
+		R_INFANTRY_WEAPONS
+
+		R_VEHICLE_PLATING
+
+		R_VEHICLE_WEAPONS
+
+		R_SHIP_PLATING
+
+		R_SHIP_WEAPONS
+
+		F_FACTORY_ADDON
+
+		F_STARPORT_ADDON
+
+		F_COMMAND_CENTER_ADDON
+
+		F_SCIENCE_FACILITY_ADDON
+
+		INTRON
+
+		零位
+
+		探针
+
+		黑暗的Templar
+
+		黑暗的Archon
+
+		狂热者
+
+		暴徒
+
+		高的Templar
+
+		Archon
+
+		Reaver
+
+		半金龟子
+
+		充分的金龟子
+
+		海盗
+
+		梭
+
+		侦察员
+
+		裁决者
+
+		载体
+
+		半拦截机
+
+		充分的拦截机
+
+		观察员
+
+		连结
+
+		机器人学设施
+
+		定向塔
+
+		观测所
+
+		门户
+
+		光子大炮
+
+		控制论核心
+
+		Adun 城堡
+
+		Templar 档案
+
+		伪造
+
+		Stargate
+
+		舰队烽火台
+
+		裁决者法庭
+
+		机器人学支持海湾
+
+		盾电池
+
+		Psionic 风暴
+
+		幻觉
+
+		回忆
+
+		Stasis 领域
+
+		中断网
+
+		头脑控制
+
+		大漩涡
+
+		稀有充电
+
+		腿改进
+
+		金龟子损伤
+
+		Reaver 容量
+
+		Gravitic 驱动
+
+		传感器列阵
+
+		Gravitic 助推器
+
+		Khaydarin 护身符
+
+		Apial 传感器
+
+		Gravitic 起飞加速器
+
+		载体容量
+
+		Khaydarin 核心
+
+		阿格斯珠宝
+
+		阿格斯护符
+
+		装甲
+
+		镀层
+
+		地面武器
+
+		空中武器
+
+		血浆盾
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		Assimilator
+
+		气体探针
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		Vespene Geysir
+
+		矿物
+
+		R_PSIONIC_STORM
+
+		R_HALLUCINATION
+
+		R_RECALL
+
+		R_STASIS_FIELD
+
+		R_DISRUPTION_WEB
+
+		R_MIND_CONTROL
+
+		R_MAELSTROM
+
+		R_SINGULARITY_CHARGE
+
+		R_LEG_ENHANCEMENTS
+
+		R_SCARAB_DAMAGE
+
+		R_REAVER_CAPACITY
+
+		R_GRAVITIC_DRIVE
+
+		R_SENSOR_ARRAY
+
+		R_GRAVITIC_BOOSTERS
+
+		R_KHAYDARIN_AMULET
+
+		R_APIAL_SENSORS
+
+		R_GRAVITIC_THRUSTERS
+
+		R_CARRIER_CAPACITY
+
+		R_KHAYDARIN_CORE
+
+		R_ARGUS_JEWEL
+
+		R_ARGUS_TALISMAN
+
+		R_ARMOR
+
+		R_PLATING
+
+		R_GROUND_WEAPONS
+
+		R_AIR_WEAPONS
+
+		R_PLASMA_SHIELDS
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		INTRON
+
+		零位
+
+		寄生虫
+
+		幼虫
+
+		Zergling
+
+		Hydralisk
+
+		Ultralisk
+
+		Defiler
+
+		诱鱼灯船
+
+		霸主
+
+		Mutalisk
+
+		Guardien
+
+		女王/王后
+
+		鞭
+
+		Devourer
+
+		穴
+
+		蜂房
+
+		Nydus 运河
+
+		Hydralisk 小室 
+
+		Defiler 土墩
+
+		孵卵站 
+
+		更加伟大的Spire
+
+		女王巢
+
+		演变分庭
+
+		Ultralisk 洞穴
+
+		Spire
+
+		产生水池
+
+		蠕动殖民地
+
+		孢子殖民地 
+
+		水槽殖民地
+
+		腹大袋
+
+		天线
+
+		Pneumatized Carapace
+
+		新陈代谢的助力
+
+		肾上腺封垫
+
+		肌肉增添
+
+		Grooved 脊椎
+
+		Gamete 成熟分裂
+
+		Metasynaptic 结
+
+		几丁质的镀层
+
+		促合成综合
+
+		挖洞
+
+		产生物Broodling
+
+		瘟疫
+
+		消耗
+
+		诱捕
+
+		诱鱼灯船方面
+
+		Carapace
+
+		飞行物Carapace
+
+		混战攻击
+
+		导弹攻击
+
+		飞行物攻击
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		提取器
+
+		气体寄生虫
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		Vespene Geysir
+
+		矿物
+
+		打破修造
+
+		R_VENTRAL_SACKS
+
+		R_ANTENNAE
+
+		R_PNEUMATIZED_CARAPACE
+
+		R_METABOLIC_BOOST
+
+		R_ADRENAL_GLANDS
+
+		R_MUSCULAR_AUGMENTS
+
+		R_GROOVED_SPINES
+
+		R_GAMETE_MEIOSIS
+
+		R_METASYNAPTIC_NODE
+
+		R_CHITINOUS_PLATING
+
+		R_ANABOLIC_SYNTHESIS
+
+		R_BURROWING
+
+		R_SPAWN_BROODLING
+
+		R_PLAGUE
+
+		R_CONSUME
+
+		R_ENSNARE
+
+		R_LURKER_ASPECT
+
+		R_CARAPACE
+
+		R_FLYER_CARAPACE
+
+		R_MELEE_ATTACKS
+
+		R_MISSILE_ATTACKS
+
+		R_FLYER_ATTACKS
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		零位
+
+		INTRON
+
+		开始...
+
+		装货核心设置...
+
+		初始化的SDL...
+
+		无法对init SDL:
+
+		初始化的视频模式...
+
+		错误设置视频模式。
+
+		设置窗口方式...
+
+		设置fullscreen 方式...
+
+		初始化的SDL 配齐字体...
+
+		初始化的图形引擎和核心...
+
+		装货ui 设置和位图和字体...
+
+		UI 设置和位图和字体装载了。
+
+		赋予缺省值...
+
+		读和解析数据文件...
+
+		装货收获数据文件...
+
+		装货地图...
+
+		装载的开始适应...
+
+		装货目标...
+
+		分配和分析数据...
+
+		汤为头次运行做准备...
+
+		初始化的GUI...
+
+		主要初始化完全。
+
+		系统准备好。
+
+		时刻为初始化: 
+
+
+
+# 窗口标题
+
+
+
+		演变伪造v%s
+
+		消息
+
+		演变伪造核心
+
+		演变伪造讲解
+
+		命令描述球员%s
+
+		图解修造次序%s
+
+		概要%s
+
+		统计%s
+
+		最好%s
+
+		单位名单%s
+
+		修造次序%s
+
+
+
+# 消息
+
+		欢迎到演变伪造!
+
+		点击上面增加新目标。
+
+		%i 球员被装载...
+
+		增加的%s 作为目标。
+
+		设置%s 当目标名单。
+
+		设置%s 作为种族。
+
+		增加一%s 来目标名单。
+
+		从目标名单去除一%s 。
+
+		被移动的非目标%s 对目标名单。
+
+		被保存的%s 。
+
+
+# 编辑领域窗口
+
+		好
+
+		取消
+
+
+# 力量窗口
+
+		休息
+
+		SCV
+
+		气体SCV
+
+		作战部队...
+
+		支援部队...
+
+		Supply/Refinery...
+
+		生产大厦...
+
+		研究大厦...
+
+		大厦addons...
+
+		研究...
+
+		特别...
+
+		开始力量:
+
+		非目标:
+
+		目标:
+
+		+surplus/力量/目标
+
+		[ time/goal 时间] +surplus/力量/目标
+
+		增加这作为目标
+
+		后面
+
+		关闭
+
+		目标...
+
+		目标名单...
+
+		开始力量...
+
+		赛跑...
+
+
+		之外目标...
+
+		之外目标
+
+		给目标您能以后认可的一个名字:
+
+
+
+		之外修造次序
+
+		给修造次序您能以后认可的一个名字:
+
+
+
+		土地
+
+		Protoss
+
+		Zerg
+
+# bowindow
+
+		(点击这里插入命令)
+
+# (点击这里关闭)
+
+# (点击这里回去)
+
+		优选一切
+
+		优选选择
+
+		再开始
+
+		之外修造次序...
+
+		框架每世代
+
+# 定时器窗口
+
+		%i % 目标履行了
+
+		%i % 临近时间最宜
+
+		(停留)
+
+		搜寻...
+
+		%i % 理论最宜
+
+		优选...
+
+		%i/%i/%i res./units/struc 。
+
+		共计: %i
+
+		点击继续
+
+		点击停留
+
+# 统计窗口
+
+		共计收获了矿物: %i
+
+		共计收获了气体: %i
+
+		时间: %i:%2.i
+
+		力量: %i
+
+		修造次序长度: %i
+
+		健身平均: %i [ %i 好]
+
+		健身变化: %i
+
+		%i+ 世代离开[ %i 共计]
+
+# 窗口标题参量串
+
+		无形
+
+		球员
+
+		先进的球员
+
+		专家(球员)
+
+		第1 计算机敌人
+
+		GOSU (球员)
+
+		第1 计算机敌人
+
+		第2 计算机敌人
+
+		错误- 检查playermodes
+
+# 制表符
+
+		零的制表符
+
+		初学者
+
+		先进
+
+		专家
+
+		Gosu
+
+		帮助
+
+		设置
+
+		地图& 目标
+
+		比较目标
+
+				
+
+# tooltips:
+
+		增加一个单位
+
+		去除单位
+
+		去除目标
+
+		选择Terra/Protoss/Zerg
+
+		增加目标来名单
+
+		选择被预定义的目标名单
+
+		选择预定义开始力量
+
+
+
+		共计被收获的矿物
+
+		共计被收获的气体
+
+		最佳的修造秩序的时期
+
+		总额单位在末端
+
+		修造秩序的长度在项目
+
+		所有节目的平均健身
+
+		所有节目的健身变化
+
+		世代的最小数字离开
+
+		每秒传输帧数[ 修造次序每秒]
+
+
+
+		重新设置和重新开始从抓痕
+
+		之外修造次序作为HTML
+
+
+
+		继续优化
+
+		停留优化
+
+		
+
+		理论(没有minerals/gas) 最宜的所有目标/百分之的百分之
+
+
+
+		简单的接口和基本的选择
+
+		所有信息被提出
+
+		修造次序将被测试反对仓促
+
+		演奏在实时反对计算机或让它演奏自己
+
+		
+
+		不同的窗口和讲解的解释
+
+		显示和全球性ef 设置
+
+		创造和配置力量和目标和地图
+
+		比较当前和被保存的修造次序
+		点击设置最新的时刻这些单位应该是完全的
+		设置
+		被预定义的设置
+		最大时间
+		设施方式
+		自动存储奔跑
+		预先处理修造次序
+		最大长度
+		奔跑的数字
+		世代的数字
+		最大暂停
+		允许目标适应
+		助长因素
+		横穿在因素
+
+# Radiobutton
+
+		最小的图表
+
+		充分的图表
+
+		风俗
+
+# Radiobutton + Eingabefeld
+
+		允许静态框架率
+
+		FPS 上限
+
+		渴望的FPS
+
+		光滑的运动
+
+		发光的按钮
+
+		DNA 螺旋
+
+		被环绕的长方形
+
+		背景位图
+
+		透明度
+
+		全荧光屏
+
+		工具套子
+
+		软件老鼠
+
+
+
+		计时修造次序可以使用在最大值(有影响在节目需要发现第一解答) 的时间
+
+		项目在' 将增加目标' 菜单由设施下令由题材或吗?
+
+		修造次序将应该automaticly 被保存在奔跑的结尾或我问什么做?
+
+		将任意地被创造的或预先处理的修造定货使用在开始?
+
+		修造次序的最大长度
+
+		多频繁节目再开始将得到优选的修造定货?
+
+		在多少个未改变的世代以后节目再开始以最近被创造的修造将定货?
+
+		多少秒钟可以是在二等级之间?
+
+		节目被允许做一些小调整在目标名单吗?
+
+		什么下一代的百分比将被创造出于最佳的修造次序这一个?
+
+		什么下一代的百分比将由横渡创造在这个世代几个节目的基因信息?
+
+# Radiobutton
+
+		图表极小值(所有CPU 力量被分配为演算) (为速度没有图表: 检查命令行选择)
+
+		设置图表对好:)
+
+		点击自己
+
+# Radiobutton + Eingabefeld
+
+		将节目举行(尽可能的) 一恒定的framerate () 或应该它单一地取决于计算机速度()?
+
+		每秒传输帧数的最大数字
+
+		渴望的每秒传输帧数(减少演算速度和总100% CPU 用法)
+
+# aus
+
+		将对象慢慢地行动或将他们直接地跳跃对他们的目的地吗?
+
+		将按钮并且项目发光当老鼠是在项目?
+
+		dna 螺旋代表修造次序将被画吗?
+
+		长方形将有被环绕的边缘和疆界吗? (需要小的CPU)
+
+		那里将是一个好的背景图象吗? (需要一些CPU 在这个版本)
+
+		透明对象(需要一些CPU:) )
+
+		交换在窗口之间和fullscreen (需要节目再开始在一些系统)
+
+		8[ ya 不喜欢这些文本吗?
+
+		使用软件老鼠或使用操作系统的鼠标?
+
+
+
+		设置将被保存对settings/default.cfg 何时放弃节目
+
+		GUI 被更换了到英语。
+
+		语言
+
+		错误
+
+		英语
+
+		德语
+
+		意大利语
+
+		Portugese
+
+		荷兰语
+
+		芬兰语
+
+		希腊语
+
+		法语
+
+		西班牙语
+
+		Polski
+
+		韩国语- _ -
+
+		汉语
+
+		俄语
+
+
+
+		决议
+
+		错误
+
+		800x600
+
+		1024x768
+
+		1280x1024
+
+
+
+		题材
+
+		错误
+
+		深蓝
+
+		绿色
+
+		红色
+
+		黄色
+
+		灰色
+
+		单色
+
+
+
+		再装从文件
+
+		故障自动保险的设置
+
+		之外
+
+
+
+		核心的设置
+
+		gui 的设置
+
+		Load/Save 设置
+
+
+
+		单位名字
+
+		供应
+
+		矿物
+
+		气体
+
+		地点
+
+		时间
+
+		
+
+		．跑完成(最后的时间
+
+		被保存的修造次序...
+
+		奔跑的结尾
+
+		修造次序将被保存吗?
+
+		之外
+
+		投掷
+
+# 成功类型
+
+		可能
+		足够的矿物
+		足够的气体
+		供应是满意
+		前提
+		设施
+		地狱结冰
+		未知
+		修造
+		当
+		变得availible
+		在
+		当
+		有
+		矿物
+		气体
+		供应
+		时间
+	@END 
+@END

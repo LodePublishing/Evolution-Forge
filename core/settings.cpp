@@ -578,6 +578,7 @@ void SETTINGS::saveGoal(const string& name, GOAL_ENTRY* goalentry)
 	}
 	
 	pFile << "@END" << std::endl;
+	loadGoalFile(os.str().c_str());
 }
 
 // -------------------------------

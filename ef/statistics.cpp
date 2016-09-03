@@ -25,6 +25,11 @@ StatisticsWindow::~StatisticsWindow()
 	for(int i=0;i<MAX_STAT_ENTRY;i++)
 		delete statEntry[i];
 }
+
+void StatisticsWindow::assignAnarace(ANARACE* stat_anarace)
+{
+	anarace = stat_anarace;
+}
 																				
 void StatisticsWindow::showGraph(DC* dc, const unsigned int* graph_data, const unsigned int min, const unsigned int max, const Color col, const bool bold) const
 {

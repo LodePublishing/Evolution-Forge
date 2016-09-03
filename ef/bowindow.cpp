@@ -130,6 +130,11 @@ BoWindow::~BoWindow()
 	delete saveBuildOrderButton;
 }
 
+void BoWindow::assignAnarace(ANARACE* bo_anarace)
+{
+	anarace = bo_anarace;
+}
+
 void BoWindow::resetData()
 {
 //	int i;

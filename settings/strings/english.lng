@@ -102,6 +102,10 @@
 		R_VEHICLE_WEAPONS
 		R_SHIP_PLATING
 		R_SHIP_WEAPONS
+		F_FACTORY_ADDON
+		F_STARPORT_ADDON
+		F_COMMAND_CENTER_ADDON
+		F_SCIENCE_FACILITY_ADDON
 		INTRON
 		NULL
 		Probe
@@ -203,6 +207,10 @@
 		R_GROUND_WEAPONS
 		R_AIR_WEAPONS
 		R_PLASMA_SHIELDS
+		NULL
+		NULL
+		NULL
+		NULL
 		INTRON
 		NULL
 		Drone
@@ -304,6 +312,10 @@
 		NULL
 		NULL
 		NULL
+		NULL
+		NULL
+		NULL
+		NULL
 		INTRON
 
 		Starting ...
@@ -380,6 +392,7 @@
 		+surplus / forces / goals
 		[time/goal time]  +surplus / forces / goals
 		add this as goal
+		back
 		close
 		goal...
 		goal list...
@@ -469,6 +482,8 @@
 		Save build order as html
 
 		Continue the optimization
+		Pause the optimization
+		
 		Percent of all goals / Percent of theoretical (without minerals/gas) optimum
 
 		Simple interface and basic options

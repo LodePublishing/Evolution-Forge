@@ -35,7 +35,7 @@ const unsigned int MAX_GAS = 5000000;
 
 //const unsigned int MAX_PROGRAMS = 128; //must be multiplier of (16*player)
 const unsigned int LARVA_MAX = 200;
-//const unsigned int UNIT_TYPE_COUNT = 101;
+//const unsigned int UNIT_TYPE_COUNT = 105;
 //const unsigned int MAX_GOALS = 100; // count of possible different goals
 //const unsigned int MAX_HARVEST_SPEEDS = 100;
 const unsigned int MAX_SUPPLY = 200;
@@ -109,32 +109,32 @@ void fillInfluenceList()
 		}
 	}
 }
-
+// BUILD FREE ADDON PLACE FOR FACTORY, STARPORT ETC. WIE BEI RESEARCHES
 const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {
 {//n                          t     m     g  ns hs uc up      prere       fac     fac2    facility_type         create speed  unit type
 {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 100, REMAINING_UNIT_TYPE},
-{"SCV"	,					 20, 5000,    0,  1, 0, 0, {0, 0}, {0 ,0, 0}, {COMMAND_CENTER, COMMAND_CENTER_CS, COMMAND_CENTER_NS}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, WORKER_UNIT_TYPE},
-{"Marine", 			 		 24, 5000,    0,  1, 0, 0, {0, 0}, {0 ,0, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"SCV"	,					 20, 5000,    0,  1, 0, 0, {0, 0}, {0 ,0, 0}, {COMMAND_CENTER, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, WORKER_UNIT_TYPE},
+{"Space Marine", 		 		 24, 5000,    0,  1, 0, 0, {0, 0}, {0 ,0, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
 {"Ghost",					 50, 2500, 7500,  1, 0, 0, {0, 0}, {ACADEMY ,SCIENCE_FACILITY_CO, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
-{"Vulture",					 30, 7500,    0,  2, 0, 0, {0, 0}, {0, 0, 0}, {FACTORY, FACTORY_MS, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
-{"Goliath",					 40,10000, 5000,  2, 0, 0, {0, 0}, {ARMORY, 0, 0}, {FACTORY, FACTORY_MS, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
-{"Siege Tank", 				 50,15000,10000,  2, 0, 0, {0, 0}, {0 ,0, 0}, {FACTORY_MS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Vulture",					 30, 7500,    0,  2, 0, 0, {0, 0}, {0, 0, 0}, {FACTORY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Goliath",					 40,10000, 5000,  2, 0, 0, {0, 0}, {ARMORY, 0, 0}, {FACTORY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Siege Tank", 				 50,15000,10000,  2, 0, 0, {0, 0}, {0 ,0, 0}, {FACTORY_MS, 0, 0}, FACTORY, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
 {"Firebat",					 24, 5000, 2500,  1, 0, 0, {0, 0}, {ACADEMY ,0, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
 {"Medic", 					 30, 5000, 2500,  1, 0, 0, {0, 0}, {ACADEMY ,0, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
-{"Wraith", 					 60,15000,10000,  2, 0, 0, {0, 0}, {0 ,0, 0}, {STARPORT, STARPORT_CT, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
-{"Science Vessel", 			 80,10000,22500,  2, 0, 0, {0, 0}, {SCIENCE_FACILITY, 0, 0}, {STARPORT_CT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
-{"Dropship", 				 50,10000,10000,  2, 0, 0, {0, 0}, {0, 0, 0}, {STARPORT_CT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
-{"Battle Cruiser",			133,40000,30000,  6, 0, 0, {0, 0}, {SCIENCE_FACILITY_PL, 0, 0}, {STARPORT_CT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
-{"Valkyrie", 				 50,25000,12500,  3, 0, 0, {0, 0}, {ARMORY, 0, 0}, {STARPORT_CT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Wraith", 					 60,15000,10000,  2, 0, 0, {0, 0}, {0 ,0, 0}, {STARPORT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Science Vessel", 			 80,10000,22500,  2, 0, 0, {0, 0}, {SCIENCE_FACILITY, 0, 0}, {STARPORT_CT, 0, 0}, STARPORT, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
+{"Dropship", 				 50,10000,10000,  2, 0, 0, {0, 0}, {0, 0, 0}, {STARPORT_CT, 0, 0}, STARPORT, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
+{"Battle Cruiser",			133,40000,30000,  6, 0, 0, {0, 0}, {SCIENCE_FACILITY_PL, 0, 0}, {STARPORT_CT, 0, 0}, STARPORT, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+{"Valkyrie", 				 50,25000,12500,  3, 0, 0, {0, 0}, {ARMORY, 0, 0}, {STARPORT_CT, 0, 0}, STARPORT, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
 {"Nuclear Warhead",			100,20000,20000,  8, 0, 0, {0, 0}, {0, 0, 0}, {NUCLEAR_SILO, 0, 0}, 0, NEEDED_ALWAYS, 0, 0, SUPPORT_UNIT_TYPE}, // TODO !!! ADDONS !!!!!!
 {"Supply Depot", 			 40,10000,    0,  0, 8, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0, SUPPLY_UNIT_TYPE},
 {"Barracks", 				 80,15000,    0,  0, 0, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, PRODUCE_UNIT_TYPE},
 {"Academy", 				 80,15000,    0,  0, 0, 0, {0, 0}, {BARRACKS ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
-{"Factory", 				 80,20000,10000,  0, 0, 0, {0, 0}, {BARRACKS ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, PRODUCE_UNIT_TYPE},
-{"Command Center",			120,40000,    0,  0,10, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, SUPPLY_UNIT_TYPE},
-{"Starport", 				 70,15000,10000,  0, 0, 0, {0, 0}, {FACTORY ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, PRODUCE_UNIT_TYPE},
-{"Science Facility", 		 60,10000,15000,  0, 0, 0, {0, 0}, {STARPORT ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, RESEARCH_FACILITY_UNIT_TYPE},
+{"Factory", 				 80,20000,10000,  0, 0, 0, {0, 0}, {BARRACKS ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, F_FACTORY_ADDON, 10, PRODUCE_UNIT_TYPE},
+{"Command Center",			120,40000,    0,  0,10, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, F_COMMAND_CENTER_ADDON, 10, SUPPLY_UNIT_TYPE},
+{"Starport", 				 70,15000,10000,  0, 0, 0, {0, 0}, {FACTORY ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, F_STARPORT_ADDON, 10, PRODUCE_UNIT_TYPE},
+{"Science Facility", 		 60,10000,15000,  0, 0, 0, {0, 0}, {STARPORT ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, F_SCIENCE_FACILITY_ADDON, 10, RESEARCH_FACILITY_UNIT_TYPE},
 {"Engineering Bay", 		 60,12500,    0,  0, 0, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, RESEARCH_FACILITY_UNIT_TYPE},
 {"Armory", 					 80,10000, 5000,  0, 0, 0, {0, 0}, {FACTORY, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
 {"Missile Turret", 			 30, 7500,    0,  0, 0, 0, {0, 0}, {ENGINEERING_BAY, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 0, SUPPORT_UNIT_TYPE},
@@ -145,18 +145,18 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"Covert Ops",  			  0,    0,    0,  0, 0, 0, {0, 0}, {COVERT_OPS, SCIENCE_FACILITY_CO, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
 {"Physics Lab",  			  0,    0,    0,  0, 0, 0, {0, 0}, {PHYSICS_LAB, SCIENCE_FACILITY_PL, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
 {"Machine Shop",  			  0,    0,    0,  0, 0, 0, {0, 0}, {MACHINE_SHOP, FACTORY_MS, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
-{"Command Center[CS]", 		 40, 5000, 5000,  0,10, 0, {0, 0}, {ACADEMY, 0, 0}, {COMMAND_CENTER, 0, 0}, 0, IS_LOST, COMSAT_STATION, 0, ADD_ON_UNIT_TYPE}, //TODO: Beim Abheben zerstoeren...
-{"Command Center[NS]", 		 40,10000,10000,  0,10, 0, {0, 0}, {SCIENCE_FACILITY_CO, 0, 0}, {COMMAND_CENTER, 0, 0}, 0, IS_LOST, NUCLEAR_SILO, 0, ADD_ON_UNIT_TYPE},
-{"Starport[CT]", 			 80, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {STARPORT, 0, 0}, 0, IS_LOST, CONTROL_TOWER, 0, ADD_ON_UNIT_TYPE},
-{"Science Facility[CO]", 	 40, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, 0, IS_LOST, COVERT_OPS, 0, ADD_ON_UNIT_TYPE},
-{"Science Facility[PL]", 	 40, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, 0, IS_LOST, PHYSICS_LAB, 0, ADD_ON_UNIT_TYPE},
-{"Factory[MS]", 			 40, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {FACTORY, 0, 0}, 0, IS_LOST, MACHINE_SHOP, 0, ADD_ON_UNIT_TYPE},
+{"Command Center[CS]", 		 40, 5000, 5000,  0,10, 0, {0, 0}, {ACADEMY, 0, 0}, {COMMAND_CENTER, 0, 0}, F_COMMAND_CENTER_ADDON, NEEDED_UNTIL_COMPLETE, COMSAT_STATION, 0, ADD_ON_UNIT_TYPE}, //TODO: Beim Abheben zerstoeren...
+{"Command Center[NS]", 		 40,10000,10000,  0,10, 0, {0, 0}, {SCIENCE_FACILITY_CO, 0, 0}, {COMMAND_CENTER, 0, 0}, F_COMMAND_CENTER_ADDON, NEEDED_UNTIL_COMPLETE, NUCLEAR_SILO, 0, ADD_ON_UNIT_TYPE},
+{"Starport[CT]", 			 80, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {STARPORT, 0, 0}, F_STARPORT_ADDON, NEEDED_UNTIL_COMPLETE, CONTROL_TOWER, 0, ADD_ON_UNIT_TYPE},
+{"Science Facility[CO]", 	 40, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, F_SCIENCE_FACILITY_ADDON, NEEDED_UNTIL_COMPLETE, COVERT_OPS, 0, ADD_ON_UNIT_TYPE},
+{"Science Facility[PL]", 	 40, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, F_SCIENCE_FACILITY_ADDON, NEEDED_UNTIL_COMPLETE, PHYSICS_LAB, 0, ADD_ON_UNIT_TYPE},
+{"Factory[MS]", 			 40, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {FACTORY, 0, 0}, F_FACTORY_ADDON, NEEDED_UNTIL_COMPLETE, MACHINE_SHOP, 0, ADD_ON_UNIT_TYPE},
 {"Stim Packs", 				 80,10000,10000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_STIM_PACKS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
 {"Lockdown",				100,20000,20000,  0, 0, 0, {0, 0}, {SCIENCE_FACILITY_CO, 0, 0}, {COVERT_OPS, 0, 0}, R_LOCKDOWN, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
-{"EMP Shockwave",			120,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, SCIENCE_FACILITY_CO, SCIENCE_FACILITY_PL}, R_EMP_SHOCKWAVE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"EMP Shockwave",			120,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, R_EMP_SHOCKWAVE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
 {"Spider Mines", 			 80,10000,10000,  0, 0, 0, {0, 0}, {FACTORY_MS ,0, 0}, {MACHINE_SHOP, 0, 0}, R_SPIDER_MINES, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
 {"Siege Mode", 				 80,15000,15000,  0, 0, 0, {0, 0}, {FACTORY_MS ,0, 0}, {MACHINE_SHOP, 0, 0}, R_TANK_SIEGE_MODE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
-{"Irradiate", 				 80,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, SCIENCE_FACILITY_CO, SCIENCE_FACILITY_PL}, R_IRRADIATE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Irradiate", 				 80,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, R_IRRADIATE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
 {"Yamato Gun",				120,10000,10000,  0, 0, 0, {0, 0}, {SCIENCE_FACILITY_PL ,0, 0}, {PHYSICS_LAB, 0, 0}, R_YAMATO_GUN, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
 {"Cloaking Field",			100,15000,15000,  0, 0, 0, {0, 0}, {STARPORT_CT ,0, 0}, {CONTROL_TOWER, 0, 0}, R_CLOAKING_FIELD, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
 {"Personnel Cloaking", 		 80,10000,10000,  0, 0, 0, {0, 0}, {SCIENCE_FACILITY_CO ,0, 0}, {COVERT_OPS, 0, 0}, R_PERSONNEL_CLOAKING, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
@@ -164,7 +164,7 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"Optical Flare",			120,10000,10000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_OPTICAL_FLARE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
 {"U-238 Shells",			100,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {ACADEMY, 0, 0}, R_U238_SHELLS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
 {"Ion Thrusters",			100,10000,10000,  0, 0, 0, {0, 0}, {FACTORY_MS ,0, 0}, {MACHINE_SHOP, 0, 0}, R_ION_THRUSTERS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
-{"Titan Reactor",			166,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, SCIENCE_FACILITY_CO, SCIENCE_FACILITY_PL}, R_TITAN_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+{"Titan Reactor",			166,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, R_TITAN_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
 {"Ocular Implants",			166,10000,10000,  0, 0, 0, {0, 0}, {SCIENCE_FACILITY_CO ,0, 0}, {COVERT_OPS, 0, 0}, R_OCULAR_IMPLANTS, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
 {"Moebius Reactor",			166,20000,20000,  0, 0, 0, {0, 0}, {SCIENCE_FACILITY_CO ,0, 0}, {COVERT_OPS, 0, 0}, R_MOEBIUS_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
 {"Apollo Reactor",			166,20000,20000,  0, 0, 0, {0, 0}, {STARPORT_CT ,0, 0}, {CONTROL_TOWER, 0, 0}, R_APOLLO_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
@@ -214,6 +214,11 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"R_Vehicle Weapons",		  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
 {"R_Ship Plating",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
 {"R_Ship Weapons",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+
+{"F_Factory Addon",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"F_Starport Addon",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"F_Command Center Addon",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+{"F_Science Facility Addon",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
 {"INTRON",					  0,    0,    0,  0, 0, 0, {0, 0}, {0, 0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE}
 },
 
@@ -322,6 +327,10 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"R_Ground Weapons",		  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
 {"R_Air Weapons",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
 {"R_Plasma Shields",		  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
 {"INTRON",					  0,    0,    0,  0, 0, 0, {0, 0}, {0, 0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE}
 },
  //for colors... 0= rest, 1= scv, 2= gas scv, 3= combat units, 4=support, 5=supply/refinery, 6=produce buildings, 7=research buildigns, 8= addons, 9=researchs, 10= special
@@ -329,7 +338,7 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0, 0, 0}, {0 ,0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
 {"Drone",					 23, 5000,    0,  1, 0, 0, {0, 0}, {0 ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, WORKER_UNIT_TYPE},
 {"Larva",					 20,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NEEDED_ONCE, 0, 0, SPECIAL_UNIT_TYPE},
-{"Zergling",				 28, 5000,    0,  1, 0, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
+{"Zergling",				 28, 5000,    0,  1, 0, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, ZERGLING, 100, COMBAT_UNIT_TYPE},
 {"Hydralisk",				 28, 7500, 2500,  1, 0, 0, {0, 0}, {HYDRALISK_DEN ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE}, //Hier stand ein Zergling als facility2!?
 {"Ultralisk",				 60,20000,20000,  6, 0, 0, {0, 0}, {ULTRALISK_CAVERN ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
 {"Defiler",					 50, 5000,15000,  2, 0, 0, {0, 0}, {DEFILER_MOUND ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, SUPPORT_UNIT_TYPE},
@@ -340,8 +349,8 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"Queen",					 50,10000,10000,  2, 0, 0, {0, 0}, {QUEENS_NEST ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, SUPPORT_UNIT_TYPE},
 {"Scourge",					 30, 2500, 7500,  1, 0, 0, {0, 0}, {SPIRE ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, SCOURGE, 100, COMBAT_UNIT_TYPE},
 {"Devourer",				 40,10000, 5000,  2, 0, 0, {0, 0}, {GREATER_SPIRE ,0, 0}, {MUTALISK, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE}, 
-{"Lair",					100,15000,10000,  0, 1, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {HATCHERY, 0, 0}, 0, IS_LOST, 0, 0, ADD_ON_UNIT_TYPE},
-{"Hive",					120,20000,15000,  0, 1, 0, {0, 0}, {QUEENS_NEST ,0, 0}, {LAIR, 0, 0}, 0, IS_LOST, 0, 0, ADD_ON_UNIT_TYPE},
+{"Lair",					100,15000,10000,  0, 1, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {HATCHERY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, ADD_ON_UNIT_TYPE},
+{"Hive",					120,20000,15000,  0, 1, 0, {0, 0}, {QUEENS_NEST ,0, 0}, {LAIR, 0, 0}, 0, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, ADD_ON_UNIT_TYPE},
 {"Nydus Canal",				 40,15000,    0,  0, 0, 0, {0, 0}, {HIVE ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, SUPPORT_UNIT_TYPE},
 {"Hydralisk den",			 40,10000, 5000,  0, 0, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
 {"Defiler mound",			 60,10000,10000,  0, 0, 0, {0, 0}, {HIVE ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
@@ -424,6 +433,10 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"R_Melee Attacks",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
 {"R_Missile Attacks",		  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
 {"R_Flyer Attacks",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+{"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
 {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
 {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
 {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},

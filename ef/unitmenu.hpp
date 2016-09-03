@@ -17,6 +17,8 @@ class UnitMenu : public Menu
 		void draw(DC* dc) const;
 		void setFacilityModus(const bool facility_mode=true);
 		void resetData();
+		void assignAnarace(ANARACE* unit_anarace);
+		const bool secondLevel() const;
 	private:
 		ANARACE* anarace;
 // sort units in the addgoal menu rather by facility than by unitType		

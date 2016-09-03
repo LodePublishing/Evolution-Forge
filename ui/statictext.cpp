@@ -91,9 +91,9 @@ UI_Object* UI_StaticText::checkHighlight() {
 }
 
 UI_Object* UI_StaticText::checkTooltip() {
-    if( (!isShown()) || (isDisabled()) || (!textBox.Inside(mouse)) )
-        return(0);
-    return((UI_Object*)this);
+	if( (!isShown()) || (isDisabled()) || (!textBox.Inside(mouse)) )
+		return(0);
+	return((UI_Object*)this);
 }
 
 const bool UI_StaticText::doneWriting() const {
@@ -358,17 +358,17 @@ void UI_StaticText::removeCharBackspace(const unsigned int pos)
 
 void UI_StaticText::removeCharDelete(const unsigned int pos)
 {
-    if((text.size()==0)||(pos>=text.size()))
-        return;
-    std::ostringstream os;
+	if((text.size()==0)||(pos>=text.size()))
+		return;
+	std::ostringstream os;
 	if(pos==0)
 		os << text.substr(1);
 	else
-    if(pos==text.size()-1)
-        os << text.substr(0, text.size()-1);
-    else
-        os << text.substr(0, pos) << text.substr(pos+1);
-    updateText(os.str());
+	if(pos==text.size()-1)
+		os << text.substr(0, text.size()-1);
+	else
+		os << text.substr(0, pos) << text.substr(pos+1);
+	updateText(os.str());
 }
 
 const std::string& UI_StaticText::getString() const
@@ -379,31 +379,39 @@ const std::string& UI_StaticText::getString() const
 void UI_StaticText::process()
 {
 	textBox.SetTopLeft(getAbsolutePosition());
-    switch(mode)
-    {
-        case NO_TEXT_MODE:
+	switch(mode)
+	{
+		case NO_TEXT_MODE:
 			textBox.SetSize(UI_Object::theme.lookUpFont(font)->GetTextExtent(text));break;
-        case VERTICALLY_CENTERED_TEXT_MODE:
-            textBox.SetTop(textBox.GetTop() + (getHeight() - textBox.GetHeight())/2 );
+		case VERTICALLY_CENTERED_TEXT_MODE:
+			textBox.SetTop(textBox.GetTop() + (getHeight() - textBox.GetHeight())/2 );
 			textBox.SetSize(UI_Object::theme.lookUpFont(font)->GetTextExtent(text));break;
-        case RIGHT_BOUNDED_TEXT_MODE:
-            textBox.SetLeft(textBox.GetLeft() + getWidth() - textBox.GetWidth());
+		case RIGHT_BOUNDED_TEXT_MODE:
+			textBox.SetLeft(textBox.GetLeft() + getWidth() - textBox.GetWidth());
 			textBox.SetSize(UI_Object::theme.lookUpFont(font)->GetTextExtent(text));break;
-        case HORIZONTALLY_CENTERED_TEXT_MODE:
+		case HORIZONTALLY_CENTERED_TEXT_MODE:
 			textBox.SetSize(UI_Object::theme.lookUpFont(font)->GetTextExtent(text));
-            textBox.SetLeft(textBox.GetLeft() + (getWidth() - textBox.GetWidth())/2);break;
-        case TOTAL_CENTERED_TEXT_MODE:
+			textBox.SetLeft(textBox.GetLeft() + (getWidth() - textBox.GetWidth())/2);break;
+		case TOTAL_CENTERED_TEXT_MODE:
 			textBox.SetSize(UI_Object::theme.lookUpFont(font)->GetTextExtent(text));
-            textBox.SetLeft(textBox.GetLeft() + (getWidth() - textBox.GetWidth())/2);
-            textBox.SetTop(textBox.GetTop() + (getHeight() - textBox.GetHeight())/2 );break;
-        case LOWER_CENTERED_TEXT_MODE:
+			textBox.SetLeft(textBox.GetLeft() + (getWidth() - textBox.GetWidth())/2);
+			textBox.SetTop(textBox.GetTop() + (getHeight() - textBox.GetHeight())/2 );break;
+		case LOWER_CENTERED_TEXT_MODE:
 			textBox.SetSize(UI_Object::theme.lookUpFont(font)->GetTextExtent(text));
-            textBox.SetLeft(textBox.GetLeft() + (getWidth() - textBox.GetWidth())/2);
-            textBox.SetTop(textBox.GetTop() + (getHeight() - textBox.GetHeight())*2/3 );break;
-        case UPPER_CENTERED_TEXT_MODE:
+			textBox.SetLeft(textBox.GetLeft() + (getWidth() - textBox.GetWidth())/2);
+			textBox.SetTop(textBox.GetTop() + (getHeight() - textBox.GetHeight())*2/3 );break;
+		case UPPER_CENTERED_TEXT_MODE:
 			textBox.SetSize(UI_Object::theme.lookUpFont(font)->GetTextExtent(text));
-            textBox.SetLeft(textBox.GetLeft() + (getWidth() - textBox.GetWidth())/2);
-            textBox.SetTop(textBox.GetTop() + (getHeight() - textBox.GetHeight())/4 );break;
+			textBox.SetLeft(textBox.GetLeft() + (getWidth() - textBox.GetWidth())/2);
+			textBox.SetTop(textBox.GetTop() + (getHeight() - textBox.GetHeight())/4 );break;
+		case BOTTOM_TEXT_MODE:
+			textBox.SetSize(UI_Object::theme.lookUpFont(font)->GetTextExtent(text));
+			textBox.SetLeft(textBox.GetLeft() + (getWidth() - textBox.GetWidth())/2);
+			textBox.SetTop(100);break;//textBox.GetBottom() - 2*textBox.GetHeight());break;
+		case TOP_TEXT_MODE:
+			textBox.SetSize(UI_Object::theme.lookUpFont(font)->GetTextExtent(text));
+			textBox.SetLeft(textBox.GetLeft() + (getWidth() - textBox.GetWidth())/2);
+			textBox.SetTop(textBox.GetTop() + textBox.GetHeight() );break;	
 		case FORMATTED_TEXT_MODE:
 			textBox.SetSize(UI_Object::theme.lookUpFont(font)->GetTextExtent(text)); //wenn das auskommentiert ist sind die Buchstaben wild.
 			break;
@@ -524,13 +532,13 @@ void UI_StaticText::process()
 		default:break;
 	}
 	
-    if((mode!=FORMATTED_TEXT_MODE)&&(mode!=FORMATTED_NON_BLOCK_TEXT_MODE))
-    {
-        if(pressed)
-            textBox.SetTopLeft(textBox.GetTopLeft() + Size(1, 4));
-        else
-            textBox.SetTopLeft(textBox.GetTopLeft() + Size(0, 3));
-    }
+	if((mode!=FORMATTED_TEXT_MODE)&&(mode!=FORMATTED_NON_BLOCK_TEXT_MODE))
+	{
+		if(pressed)
+			textBox.SetTopLeft(textBox.GetTopLeft() + Size(1, 4));
+		else
+			textBox.SetTopLeft(textBox.GetTopLeft() + Size(0, 3));
+	}
 
 
 	UI_Object::process();

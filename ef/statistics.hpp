@@ -30,6 +30,7 @@ class StatisticsWindow : public UI_Window
 		void draw(DC* dc) const;
 		
 		void resetData();
+		void assignAnarace(ANARACE* stat_anarace);
 		
 	private:
 		void showGraph(DC* dc, const unsigned int* data, const unsigned int min, const unsigned int max, const Color col, const bool bold=false) const;

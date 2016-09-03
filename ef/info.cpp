@@ -46,6 +46,11 @@ InfoWindow::~InfoWindow()
 	delete text;
 }
 
+void InfoWindow::assignAnarace(ANARACE* info_anarace)
+{
+	anarace = info_anarace;
+}
+
 const signed int InfoWindow::getBx() const {
 	return bx;
 }

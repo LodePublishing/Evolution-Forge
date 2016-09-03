@@ -7,12 +7,12 @@
 
 struct GOAL_TREE
 {
-    bool checked[GAS_SCV+1];
+	bool checked[GAS_SCV+1];
 	unsigned int level[GAS_SCV+1];
 	unsigned int coloumn[GAS_SCV+1];
-	unsigned int width[10];
-    std::list<unsigned int> con[GAS_SCV+1];
-	std::list<unsigned int> unit[10];
+	unsigned int width[12];
+	std::list<unsigned int> con[GAS_SCV+1];
+	std::list<unsigned int> unit[12];
 };
 
 class GOAL_ENTRY
@@ -44,6 +44,7 @@ class GOAL_ENTRY
 		~GOAL_ENTRY();
 		GOAL_ENTRY& operator=(const GOAL_ENTRY& object);
 
+ 
 //		const unsigned int getMode() const; // 0: normal, 1: based on success of enemy
 //		void setMode(int mode);
 
@@ -60,7 +61,7 @@ class GOAL_ENTRY
 #ifdef _SCC_DEBUG
 	if(unit>GAS_SCV) {
 		toLog("DEBUG: (GOAL_ENTRY::getIsBuildable): Value unit out of range.");return(false);
-    }
+	}
 #endif
 	return(isBuildable[unit]);		
 }

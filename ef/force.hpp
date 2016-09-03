@@ -5,21 +5,21 @@
 
 #include "unitmenu.hpp"
 #include "goalmenu.hpp"
-//#include "forcemenu.hpp"
 #include "racemenu.hpp"
 #include "message.hpp"
 #include "forceentry.hpp"
+#include "locmenu.hpp"
 
 #include "../core/anarace.hpp"
 #include "../core/settings.hpp"
 #include "../ui/radio.hpp"
+
 
 enum eMenu
 {
 	RACE_MENU,
 	UNIT_MENU,
 	GOAL_MENU,
-//	FORCE_MENU,
 	MAX_MENUS
 };
 
@@ -34,10 +34,12 @@ class ForceWindow : public UI_Window
 		void draw(DC* dc) const;
 		const unsigned int getMarkedUnit() const;
 		void setMarkedUnit(const unsigned int marked_unit);
-
-	private:
+		void assignAnarace(ANARACE* force_anarace);
 		void drawTechTree(DC* dc) const;
-
+	private:
+		unsigned int addUnit, addTime, addLocation;
+		signed int addCount;
+		
 		unsigned int currentGoalUnit; // which goal is currently highlighted?
 	
 		void closeMenus();
@@ -50,18 +52,19 @@ class ForceWindow : public UI_Window
 
 		UI_StaticText* nongoals;
 		UI_StaticText* goals;
+		UI_StaticText* locationName[2][MAX_LOCATIONS];
 		UI_StaticText* legend;
 
 		list<ForceEntry*> forceList;
+		ForceEntry* movedForceEntry;
 
-		
 		unsigned int markedUnit, oldMarkedUnit;
 		ANARACE* anarace;
 
 		UnitMenu* unitMenu;
 		GoalMenu* goalMenu;
-//		ForceMenu* forceMenu; TODO -> in Map-tab reinschieben
 		RaceMenu* raceMenu;
+		LocationMenu* locationMenu;
 };
 
 #endif

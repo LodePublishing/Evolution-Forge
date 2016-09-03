@@ -1,15 +1,14 @@
 #include "mainwindow.hpp"
 
 MainWindow::MainWindow() : 
-	UI_Window( NULL, MAIN_WINDOW_TITLE_STRING, MAIN_WINDOW, 0, NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, TABBED ),
-	url(new UI_StaticText(this, "www.clawsoftware.de", getRelativeRect(), FORCE_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT, LOWER_CENTERED_TEXT_MODE))
+	UI_Window( NULL, MAIN_WINDOW_TITLE_STRING, MAIN_WINDOW, 0, NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, TABBED )
 {
 // TODO: nach resolutions ordnen! *theme.lookUpRect etc. in data.txt eintragen
 // left:
-    tab[BASIC_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), BASIC_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
-    tab[ADVANCED_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), ADVANCED_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
-    tab[EXPERT_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), EXPERT_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
-    tab[GOSU_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), GOSU_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+	tab[BASIC_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), BASIC_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+	tab[ADVANCED_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), ADVANCED_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+	tab[EXPERT_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), EXPERT_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+	tab[GOSU_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), GOSU_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
 
 // right:
 	tab[COMPARE_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), COMPARE_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
@@ -37,7 +36,6 @@ MainWindow::~MainWindow()
 {
 	for(int i=BASIC_TAB;i<MAX_TABS;i++)
 		delete tab[i];
-delete url;
 }
 
 void MainWindow::process()

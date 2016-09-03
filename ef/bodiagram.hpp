@@ -16,6 +16,8 @@ class BoDiagramWindow:public UI_Window {
 		void process();
 		void draw(DC * dc) const;
 
+		void assignAnarace(ANARACE* bod_anarace);
+
 	private:
 		ANARACE* anarace;
 		InfoWindow* infoWindow;

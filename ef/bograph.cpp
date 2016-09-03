@@ -90,6 +90,11 @@ BoGraphWindow::BoGraphWindow(UI_Object* bograph_parent, ANARACE* bograph_anarace
 BoGraphWindow::~BoGraphWindow()
 { }
 
+void BoGraphWindow::assignAnarace(ANARACE* bograph_anarace)
+{
+	anarace = bograph_anarace;
+}
+
 const unsigned int BoGraphWindow::getMarkedIP() const 
 {
 #ifdef _SCC_DEBUG

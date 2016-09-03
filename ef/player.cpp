@@ -13,7 +13,7 @@ Player::Player(UI_Object* player_parent, ANARACE** player_anarace, MessageWindow
 	orderList(),
 	mode(0)
 {
-    for(int i=0;i<MAX_WINDOWS;i++)
+	for(int i=0;i<MAX_WINDOWS;i++)
 		window[i]=NULL;
 	window[FORCE_WINDOW] = new ForceWindow(this, *anarace, msgWindow, playerNumber);
 	window[TIMER_WINDOW] = new TimerWindow(this, *anarace, playerNumber);
@@ -31,157 +31,165 @@ Player::Player(UI_Object* player_parent, ANARACE** player_anarace, MessageWindow
 //	return;
 	Hide();
 	setOptimizing(false);
+	
 }
 
 void Player::assignAnarace(ANARACE** player_anarace)
 {
 	anarace = player_anarace;
+	((ForceWindow*)window[FORCE_WINDOW])->assignAnarace(*anarace);
+	((TimerWindow*)window[TIMER_WINDOW])->assignAnarace(*anarace);
+	((StatisticsWindow*)window[STATISTICS_WINDOW])->assignAnarace(*anarace);
+	((InfoWindow*)window[INFO_WINDOW])->assignAnarace(*anarace);
+	((BoWindow*)window[BUILD_ORDER_WINDOW])->assignAnarace(*anarace);
+	((BoGraphWindow*)window[BO_GRAPH_WINDOW])->assignAnarace(*anarace);
+	((BoDiagramWindow*)window[BO_DIAGRAM_WINDOW])->assignAnarace(*anarace);
 }
 
 void Player::processBoGraph()
 {
 	if((!window[BO_GRAPH_WINDOW]->isShown())||(!isShown()))
 		return;
-    unsigned int fac[20];
-    unsigned int unitCounter[UNIT_TYPE_COUNT][MAX_LENGTH];
-    unsigned int height[UNIT_TYPE_COUNT];
-    unsigned int lines[UNIT_TYPE_COUNT];
-    unsigned int faccount=0;
+	unsigned int fac[20];
+	unsigned int unitCounter[UNIT_TYPE_COUNT][MAX_LENGTH];
+	unsigned int height[UNIT_TYPE_COUNT];
+	unsigned int lines[UNIT_TYPE_COUNT];
+	unsigned int faccount=0;
 	int lastbographY=0;
 
 	for(int i=UNIT_TYPE_COUNT;i--;)
-    {
-        for(int j=0;j<MAX_LENGTH;j++)
-            unitCounter[i][j]=0;
-        height[i]=0;
-        lines[i]=0;
-    }
+	{
+		for(int j=0;j<MAX_LENGTH;j++)
+			unitCounter[i][j]=0;
+		height[i]=0;
+		lines[i]=0;
+	}
 
 	BOGRAPH bograph[20];
 	for(int i=20;i--;)
-        fac[i]=0; // TODO in BOGRAPH?
+		fac[i]=0; // TODO in BOGRAPH?
 
 //calculate maximum height per facility => height is after that the maximum of force - availible for each facility
-    for(map<long, Order>::const_iterator order=orderList.begin(); order!=orderList.end(); ++order)
-    {
-        unsigned int IP=order->second.getIP();
-// falls facility benoetigt wird und Zahl der zu dem Zeitpunkt vorhandenen Einheiten minus der verfuegbaren Einheiten > hoehe => setze hoehe auf diesen Wert        
+	for(map<long, Order>::const_iterator order=orderList.begin(); order!=orderList.end(); ++order)
+	{
+		unsigned int IP=order->second.getIP();
+// falls facility benoetigt wird und Zahl der zu dem Zeitpunkt vorhandenen Einheiten minus der verfuegbaren Einheiten > hoehe => setze hoehe auf diesen Wert		
 		if((*anarace)->getProgramFacility(IP)&&
-          ((*anarace)->getProgramTotalCount(IP, (*anarace)->getProgramFacility(IP))-(*anarace)->getProgramAvailibleCount(IP,(*anarace)->getProgramFacility(IP))>height[(*anarace)->getProgramFacility(IP)]))
-             height[(*anarace)->getProgramFacility(IP)]=(*anarace)->getProgramTotalCount(IP,(*anarace)->getProgramFacility(IP))-(*anarace)->getProgramAvailibleCount(IP,(*anarace)->getProgramFacility(IP));
-        // total - availible at that time equals used facilities
-    }
-    //=>  height[i] = max used i-facilities
-                                                                                                                                                            
+		  ((*anarace)->getProgramTotalCount(IP, (*anarace)->getProgramFacility(IP))-(*anarace)->getProgramAvailibleCount(IP,(*anarace)->getProgramFacility(IP))>height[(*anarace)->getProgramFacility(IP)]))
+			 height[(*anarace)->getProgramFacility(IP)]=(*anarace)->getProgramTotalCount(IP,(*anarace)->getProgramFacility(IP))-(*anarace)->getProgramAvailibleCount(IP,(*anarace)->getProgramFacility(IP));
+		// total - availible at that time equals used facilities
+	}
+	//=>  height[i] = max used i-facilities
+																																							
 //calculate number of lines per facility and adjust the height
-    for(int i=UNIT_TYPE_COUNT;i--;)
-    {
+	for(int i=UNIT_TYPE_COUNT;i--;)
+	{
 // at maximum MIN_HEIGHT items in one row
-        while(height[i]>MIN_HEIGHT) {
-            height[i]-=MIN_HEIGHT;
-            lines[i]++;
-        }
-        if(height[i]>0)
-            lines[i]++;
-        if(lines[i]>1)
-            height[i]=MIN_HEIGHT;
+		while(height[i]>MIN_HEIGHT) {
+			height[i]-=MIN_HEIGHT;
+			lines[i]++;
+		}
+		if(height[i]>0)
+			lines[i]++;
+		if(lines[i]>1)
+			height[i]=MIN_HEIGHT;
 		if(height[i]==0) // TODO!
 			height[i]=1;
-    }
+	}
 
 //make a list of facilities that are needed...
 // TODO WARUM = 1 und nicht = 0?
-    faccount=1;
-    for(map<long, Order>::const_iterator order=orderList.begin(); order!=orderList.end(); ++order)
-    {
-        if((*anarace)->getProgramFacility(order->second.getIP()))
-        {
-            unsigned int i;
-            // search for 'untaken' facilities
-            for(i=1;(i<faccount)&&(fac[i]!=(*anarace)->getProgramFacility(order->second.getIP()));i++);
-                                                                                                                                                            
-            if(i==faccount)
-            {
-                fac[i]=(*anarace)->getProgramFacility(order->second.getIP());
-                faccount++;
-            }
-        }
-    }
+	faccount=1;
+	for(map<long, Order>::const_iterator order=orderList.begin(); order!=orderList.end(); ++order)
+	{
+		if((*anarace)->getProgramFacility(order->second.getIP()))
+		{
+			unsigned int i;
+			// search for 'untaken' facilities
+			for(i=1;(i<faccount)&&(fac[i]!=(*anarace)->getProgramFacility(order->second.getIP()));i++);
+																																							
+			if(i==faccount)
+			{
+				fac[i]=(*anarace)->getProgramFacility(order->second.getIP());
+				faccount++;
+			}
+		}
+	}
 
 // ...and sort them (just an optical issue, scvs last)
 	std::sort(fac, fac+20); // Warnung?!
 // now put all together
-    int position=0;
-    for(int i=0;i<20;i++)
-    {
-        bograph[position].type=fac[i];
-        bograph[position].lines=lines[fac[i]];
-        bograph[position].height=height[fac[i]];
-        position+=lines[fac[i]];
-    }
+	int position=0;
+	for(int i=0;i<20;i++)
+	{
+		bograph[position].type=fac[i];
+		bograph[position].lines=lines[fac[i]];
+		bograph[position].height=height[fac[i]];
+		position+=lines[fac[i]];
+	}
 
 // create a sorted by IP - list
-    int orderCount=0;
+	int orderCount=0;
 	Order* sortedList[MAX_LENGTH];
-    for(map<long, Order>::iterator order=orderList.begin(); order!=orderList.end(); ++order) {
-        sortedList[orderCount]=&(order->second);
-        orderCount++;
-    }
+	for(map<long, Order>::iterator order=orderList.begin(); order!=orderList.end(); ++order) {
+		sortedList[orderCount]=&(order->second);
+		orderCount++;
+	}
 
 	std::sort(sortedList, sortedList+orderCount, Order::OrderDescendingIPSort());
 
 	int hoehe=0;
 //  for(map<long, Order>::iterator order=orderList->begin(); order!=orderList->end(); ++order)
-    for(int k=0;k<orderCount;k++)
-    {
-        if((*anarace)->getProgramFacility(sortedList[k]->getIP()))
-            for(int i=0;i<20;i++)
-                if(bograph[i].type==(*anarace)->getProgramFacility(sortedList[k]->getIP()))
-                {
+	for(int k=0;k<orderCount;k++)
+	{
+		if((*anarace)->getProgramFacility(sortedList[k]->getIP()))
+			for(int i=0;i<20;i++)
+				if(bograph[i].type==(*anarace)->getProgramFacility(sortedList[k]->getIP()))
+				{
 //order->time muesste vorsortiert sein
 // hoehen! Positionen anordnen damits keine ueberschneidungen gibt
-                                                                                                                                                            
-        // calculate the y-position of this specific order, THIS HAS TO BEGIN WITH 0 -> MAX_LENGTH, DO NOT USE -- OPTIMIZATION!
-                    for(int j=0;j<MAX_LENGTH;j++)
-                        if(unitCounter[bograph[i].type][j]<=(*anarace)->getRealProgramTime(sortedList[k]->getIP()))
-                        {
+																																							
+		// calculate the y-position of this specific order, THIS HAS TO BEGIN WITH 0 -> MAX_LENGTH, DO NOT USE -- OPTIMIZATION!
+					for(int j=0;j<MAX_LENGTH;j++)
+						if(unitCounter[bograph[i].type][j]<=(*anarace)->getRealProgramTime(sortedList[k]->getIP()))
+						{
 // if we have found a unitCounter which has a lower time (all unitCounter start with 0) we set the unit time to starttime + buildtime
 // at the end all unitCounter have the time at which programTime ... TODO
 // the items are in REAL TIME, i.e. time 0 is the beginning, ga->maxTime is the end
-                                                                                                                                                            
-                            unitCounter[bograph[i].type][j]=(*anarace)->getRealProgramTime(sortedList[k]->getIP())+stats[(*anarace)->getRace()][sortedList[k]->getUnit()/*(*anarace)->getPhaenoCode(sortedList[k]->getIP())*/].BT;
-                            hoehe=j;
-                            j=MAX_LENGTH;
-                        }
-                                                                                                                                                            
-                    Rect t=Rect(
+																																							
+							unitCounter[bograph[i].type][j]=(*anarace)->getRealProgramTime(sortedList[k]->getIP())+stats[(*anarace)->getRace()][sortedList[k]->getUnit()/*(*anarace)->getPhaenoCode(sortedList[k]->getIP())*/].BT;
+							hoehe=j;
+							j=MAX_LENGTH;
+						}
+																																							
+					Rect t=Rect(
 Point( ( (*anarace)->getRealProgramTime(sortedList[k]->getIP())*window[BO_GRAPH_WINDOW]->getClientRectWidth()) / ((*anarace)->getRealTimer()),
-       (1+i+hoehe/MIN_HEIGHT)*(FONT_SIZE+10)+(hoehe%MIN_HEIGHT)*(FONT_SIZE+10)/bograph[i].height),
-                                                                                                                                                            
+	   (1+i+hoehe/MIN_HEIGHT)*(FONT_SIZE+10)+(hoehe%MIN_HEIGHT)*(FONT_SIZE+10)/bograph[i].height),
+																																							
 Size(  (stats[(*anarace)->getRace()][sortedList[k]->getUnit()/*(*anarace)->getPhaenoCode(sortedList[k]->getIP())*/].BT/*(*anarace)->getProgramBT(s)*/*window[BO_GRAPH_WINDOW]->getClientRectWidth())/((*anarace)->getRealTimer()),
-     (FONT_SIZE+9)/(bograph[i].height)));
-                    if(t!=sortedList[k]->btarget)
-                        sortedList[k]->bstart=sortedList[k]->brect;
-                    sortedList[k]->btarget=t;
-                    if(sortedList[k]->bonew)
-                    {
-//                      sortedList[k]->brect=sortedList[k]->btarget;
-                        sortedList[k]->bstart=sortedList[k]->btarget;
-                    }
-                }
-    }
+	 (FONT_SIZE+9)/(bograph[i].height)));
+					if(t!=sortedList[k]->btarget)
+						sortedList[k]->bstart=sortedList[k]->brect;
+					sortedList[k]->btarget=t;
+					if(sortedList[k]->bonew)
+					{
+//					  sortedList[k]->brect=sortedList[k]->btarget;
+						sortedList[k]->bstart=sortedList[k]->btarget;
+					}
+				}
+	}
 
 // assign the coordinates for the lines where the orders are printed on
-    int j=0;
-    for(int i=0;i<20;i++)
-        if(bograph[i].type>0)
-        {
-            bograph[i].edge=Rect(window[BO_GRAPH_WINDOW]->getAbsoluteClientRectPosition(), Size(window[BO_GRAPH_WINDOW]->getClientRectWidth(), bograph[i].lines*(FONT_SIZE+10)));
-            bograph[i].edge.SetTop(window[BO_GRAPH_WINDOW]->getAbsoluteClientRectUpperBound()+(j+1)*(FONT_SIZE+10));
-            j+=bograph[i].lines;
-            if(window[BO_GRAPH_WINDOW]->fitItemToAbsoluteClientRect(bograph[i].edge,1))
-                lastbographY=bograph[i].edge.GetBottom();
-        }
+	int j=0;
+	for(int i=0;i<20;i++)
+		if(bograph[i].type>0)
+		{
+			bograph[i].edge=Rect(window[BO_GRAPH_WINDOW]->getAbsoluteClientRectPosition(), Size(window[BO_GRAPH_WINDOW]->getClientRectWidth(), bograph[i].lines*(FONT_SIZE+10)));
+			bograph[i].edge.SetTop(window[BO_GRAPH_WINDOW]->getAbsoluteClientRectUpperBound()+(j+1)*(FONT_SIZE+10));
+			j+=bograph[i].lines;
+			if(window[BO_GRAPH_WINDOW]->fitItemToAbsoluteClientRect(bograph[i].edge,1))
+				lastbographY=bograph[i].edge.GetBottom();
+		}
 		
 	((BoGraphWindow*)window[BO_GRAPH_WINDOW])->copyBoGraph(bograph);
 	((BoGraphWindow*)window[BO_GRAPH_WINDOW])->setBoGraphY(lastbographY);
@@ -221,18 +229,18 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 
 	const Order* sortedList[MAX_LENGTH];
 	int orderCount=0;
-    for(map<long, Order>::const_iterator order=orderList.begin(); order!=orderList.end(); ++order) {
-        sortedList[orderCount]=&(order->second);
-        orderCount++;
-    }
+	for(map<long, Order>::const_iterator order=orderList.begin(); order!=orderList.end(); ++order) {
+		sortedList[orderCount]=&(order->second);
+		orderCount++;
+	}
 	if(orderCount<2)
 		return;
-    std::sort(sortedList, sortedList+orderCount, Order::OrderDescendingIPSort());
+	std::sort(sortedList, sortedList+orderCount, Order::OrderDescendingIPSort());
 
-    for(int k=0;k<orderCount;k++)
-        colors[k]=sortedList[k]->getUnit();
+	for(int k=0;k<orderCount;k++)
+		colors[k]=sortedList[k]->getUnit();
 	
-//    for(map<long, Order>::const_iterator order=orderList.begin(); order!=orderList.end(); ++order)
+//	for(map<long, Order>::const_iterator order=orderList.begin(); order!=orderList.end(); ++order)
 //		colors[order->second.getIP()]=order->second.getUnit();
 
 //	if((*anarace)->isOptimizing())
@@ -283,28 +291,28 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 					int k=2;
 					if(points1[0].y>points1[1].y) // faellt -> hinten
 					{
-                        if(points1[0].y>points2[0].y)
-                        {
-                            drawGene(dc, k, points1, position.GetTopLeft(), bla1, bla2);
-                            drawGene(dc, k, points2, position.GetTopLeft(), bla1, bla2);
-                        }
-                        else
-                        {
-                            drawGene(dc, k, points2, position.GetTopLeft(), bla1, bla2);
-                            drawGene(dc, k, points1, position.GetTopLeft(), bla1, bla2);
-                        }
-                        if(points3[0].y>points4[0].y)
-                        {
-                            drawGene(dc, k, points3, position.GetTopLeft(), bla1, bla2);
-                            drawGene(dc, k, points4, position.GetTopLeft(), bla1, bla2);
-                        } else
-                        {
-                            drawGene(dc, k, points4, position.GetTopLeft(), bla1, bla2);
-                            drawGene(dc, k, points3, position.GetTopLeft(), bla1, bla2);
-                        }
+						if(points1[0].y>points2[0].y)
+						{
+							drawGene(dc, k, points1, position.GetTopLeft(), bla1, bla2);
+							drawGene(dc, k, points2, position.GetTopLeft(), bla1, bla2);
+						}
+						else
+						{
+							drawGene(dc, k, points2, position.GetTopLeft(), bla1, bla2);
+							drawGene(dc, k, points1, position.GetTopLeft(), bla1, bla2);
+						}
+						if(points3[0].y>points4[0].y)
+						{
+							drawGene(dc, k, points3, position.GetTopLeft(), bla1, bla2);
+							drawGene(dc, k, points4, position.GetTopLeft(), bla1, bla2);
+						} else
+						{
+							drawGene(dc, k, points4, position.GetTopLeft(), bla1, bla2);
+							drawGene(dc, k, points3, position.GetTopLeft(), bla1, bla2);
+						}
 					} else
 					{
-        	            if(points3[0].y>points4[0].y)
+						if(points3[0].y>points4[0].y)
 						{
 							drawGene(dc, k, points3, position.GetTopLeft(), bla1, bla2);
 							drawGene(dc, k, points4, position.GetTopLeft(), bla1, bla2);
@@ -320,8 +328,8 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 						}
 						else
 						{
-                    	    drawGene(dc, k, points2, position.GetTopLeft(), bla1, bla2);
-	            	        drawGene(dc, k, points1, position.GetTopLeft(), bla1, bla2);
+							drawGene(dc, k, points2, position.GetTopLeft(), bla1, bla2);
+							drawGene(dc, k, points1, position.GetTopLeft(), bla1, bla2);
 						}
 					
 					}
@@ -345,7 +353,8 @@ void Player::draw(DC* dc) const
 		dc->SetPen(*theme.lookUpPen(BRIGHT_UNIT_TYPE_1_PEN));
 		dc->DrawRectangle(r);
 		drawGeneString(dc, r);
-	}
+	};
+	((ForceWindow*)window[FORCE_WINDOW])->drawTechTree(dc);
 }
 
 void Player::setMode(const eTab tab, const unsigned int playerNum)//, int player1, int player2)
@@ -368,9 +377,9 @@ void Player::setMode(const eTab tab, const unsigned int playerNum)//, int player
 		case 2:
 			this->Show();
 			(*anarace)->setActive(1);
-            window[BO_DIAGRAM_WINDOW]->Show();
-            window[STATISTICS_WINDOW]->Show();
-            window[BO_GRAPH_WINDOW]->Show();
+			window[BO_DIAGRAM_WINDOW]->Show();
+			window[STATISTICS_WINDOW]->Show();
+			window[BO_GRAPH_WINDOW]->Show();
 		break; // first player advanced mode
 		case 3:this->Hide();(*anarace)->setActive(0);break; // second player advanced mode
 		case 4:this->Show();(*anarace)->setActive(1);break; // first player
@@ -577,4 +586,5 @@ void Player::MoveOrders()
 		Size::mv(order->second.blend, order->second.blendStart, order->second.blendTarget);
 	}
 }
+
 

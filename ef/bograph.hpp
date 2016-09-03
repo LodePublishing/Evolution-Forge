@@ -46,7 +46,8 @@ class BoGraphWindow:public UI_Window
 		const unsigned int getMarkedUnit() const;
 		void copyBoGraph(const BOGRAPH* bo_graph);
 		void setBoGraphY(const unsigned int last_bograph_y);
-		void mouseHasMoved();
+	    	void mouseHasMoved();
+		void assignAnarace(ANARACE* bograph_anarace);
 	private:
 		void checkForInfoWindow();
 

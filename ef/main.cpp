@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 		toLog("No video drivers are availible for your platform!");
 		return(EXIT_FAILURE);
 	}
-
+//TODO: Aufloesung und Farbtiefe uebergeben einbauen
 	if(!arguments.empty())
 	{
 		for(std::list<std::string>::const_iterator i = arguments.begin();i!=arguments.end();i++)

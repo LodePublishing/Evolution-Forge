@@ -165,13 +165,13 @@ void DC::Draw_HLine_32bit(const signed int x0, const signed int y0, const signed
 	Lock();
 	if (sizeof(wchar_t) == sizeof(Uint32)) { 
 #ifdef __linux__
-		wmemset((wchar_t*)( (Uint8*)surface->pixels +  y0 * surface->pitch + (x0<<2)), pen_col, x1-x0);
+		wmemset((wchar_t*)( (Uint8*)surface->pixels +  y0 * surface->pitch + (x0*4)), pen_col, x1-x0);
 #elif __WIN32__
-		memset((wchar_t*)( (Uint8*)surface->pixels +  y0 * surface->pitch + (x0<<2)), pen_col, x1-x0);
+		memset((wchar_t*)( (Uint8*)surface->pixels +  y0 * surface->pitch + (x0*4)), pen_col, x1-x0);
 #endif
 	} else 
 	{
-		register Uint8* p = (Uint8*)surface->pixels + y0 * surface->pitch + (x0<<2);
+		register Uint8* p = (Uint8*)surface->pixels + y0 * surface->pitch + (x0*4);
 		register Sint16 i = x1-x0;
 		for(;i--;p+=4)
 			*(Uint32*)p = pen_col;
@@ -353,12 +353,12 @@ void DC::DrawFilledRound_8bit(const signed int x, const signed int y, const unsi
 	int rightInc = 6;
 	int d = width<height ? width : height;
 
-	d = 3 - (radius<<1);
-	int diagonalInc = 10 - (radius<<2);
+	d = 3 - (radius*2);
+	int diagonalInc = 10 - (radius*4);
  	int Xcenter = x+radius;
 	int Ycenter = y+radius;
-	int dx = width - (radius<<1);
-	int dy = height - (radius<<1);
+	int dx = width - (radius*2);
+	int dy = height - (radius*2);
 	int X2center=Xcenter + dx;
 	int Y2center=Ycenter + dy;
 
@@ -383,13 +383,13 @@ void DC::DrawFilledRound_8bit(const signed int x, const signed int y, const unsi
 		r.w = dx; r.h = radius;
 		SDL_FillRect(surface, &r, col);
 	}
-	Lock();
 	unsigned int i = 0;
+	Lock();
 	while (i <= radius) 
 	{
 // TODO optimieren evtl 4 bytes zusammenfassen
 // Nur Ecken:
-		for(int k=i;k--;)
+		for(unsigned int k=i;k--;)
 		{
 			*((Uint8*)((Uint8*)surface->pixels + k+ (Ycenter-radius)*surface->pitch + (Xcenter - i))) = col;
 			*((Uint8*)((Uint8*)surface->pixels + k+(Ycenter-radius)*surface->pitch + X2center)) = col;
@@ -397,7 +397,7 @@ void DC::DrawFilledRound_8bit(const signed int x, const signed int y, const unsi
 			*((Uint8*)((Uint8*)surface->pixels + k+(Y2center+radius-1)*surface->pitch + (Xcenter-i))) = col;
 
 		}
-		for(int k=radius;k--;)
+		for(unsigned int k=radius;k--;)
 		{
 			*((Uint8*)((Uint8*)surface->pixels + k+(Ycenter-i)*surface->pitch + (Xcenter - radius))) = col;
 			*((Uint8*)((Uint8*)surface->pixels + k+(Ycenter-i)*surface->pitch + X2center)) = col;
@@ -427,12 +427,12 @@ void DC::DrawFilledRound_16bit(const signed int x, const signed int y, const uns
 	int rightInc = 6;
 	int d = width<height ? width : height;
 
-	d = 3 - (radius<<1);
-	int diagonalInc = 10 - (radius<<2);
+	d = 3 - (radius*2);
+	int diagonalInc = 10 - (radius*4);
  	int Xcenter = x+radius;
 	int Ycenter = y+radius;
-	int dx = width - (radius<<1);
-	int dy = height - (radius<<1);
+	int dx = width - (radius*2);
+	int dy = height - (radius*2);
 	int X2center=Xcenter + dx;
 	int Y2center=Ycenter + dy;
 
@@ -457,26 +457,27 @@ void DC::DrawFilledRound_16bit(const signed int x, const signed int y, const uns
 		r.w = dx; r.h = radius;
 		SDL_FillRect(surface, &r, col);
 	}
-	Lock();
 	unsigned int i = 0;
+	
+	Lock();
 	while (i <= radius) 
 	{
 
 // Nur Ecken:
-		for(int k=i;k--;)
+		for(unsigned int k=i;k--;)
 		{
-			*((Uint16*)((Uint8*)surface->pixels + k+ (Ycenter-radius)*surface->pitch + (Xcenter - i)*2)) = col;
-			*((Uint16*)((Uint8*)surface->pixels + k+(Ycenter-radius)*surface->pitch + X2center*2)) = col;
-			*((Uint16*)((Uint8*)surface->pixels + k+(Y2center+radius-1)*surface->pitch + X2center*2)) = col;
-			*((Uint16*)((Uint8*)surface->pixels + k+(Y2center+radius-1)*surface->pitch + (Xcenter-i)*2)) = col;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (k + Xcenter - i)*2)) = col;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (k + X2center)*2)) = col;
+			*((Uint16*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + (k + X2center)*2)) = col;
+			*((Uint16*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + (k + Xcenter - i)*2)) = col;
 
 		}
-		for(int k=radius;k--;)
+		for(unsigned int k=radius;k--;)
 		{
-			*((Uint16*)((Uint8*)surface->pixels + k+(Ycenter-i)*surface->pitch + (Xcenter - radius)*2)) = col;
-			*((Uint16*)((Uint8*)surface->pixels + k+(Ycenter-i)*surface->pitch + X2center*2)) = col;
-			*((Uint16*)((Uint8*)surface->pixels + k+(Y2center+i-1)*surface->pitch + X2center*2)) = col;
-			*((Uint16*)((Uint8*)surface->pixels + k+(Y2center+i-1)*surface->pitch + (Xcenter-radius)*2)) = col;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (k+Xcenter - radius)*2)) = col;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (k+X2center)*2)) = col;
+			*((Uint16*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + (k+X2center)*2)) = col;
+			*((Uint16*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + (k+Xcenter-radius)*2)) = col;
 		}
 		if (d >= 0) 
 		{
@@ -503,12 +504,12 @@ void DC::DrawFilledRound_24bit(const signed int x, const signed int y, const uns
 	int rightInc = 6;
 	int d = width<height ? width : height;
 
-	d = 3 - (radius<<1);
-	int diagonalInc = 10 - (radius<<2);
+	d = 3 - (radius*2);
+	int diagonalInc = 10 - (radius*4);
  	int Xcenter = x+radius;
 	int Ycenter = y+radius;
-	int dx = width - (radius<<1);
-	int dy = height - (radius<<1);
+	int dx = width - (radius*2);
+	int dy = height - (radius*2);
 	int X2center=Xcenter + dx;
 	int Y2center=Ycenter + dy;
 
@@ -545,15 +546,16 @@ void DC::DrawFilledRound_24bit(const signed int x, const signed int y, const uns
 	{
 		register Uint8 *p;
 		register Sint16 k;
+
+		
 		p = (Uint8*)surface->pixels + (Ycenter-radius) * surface->pitch + (Xcenter-i) * 3;k = i;SDL_DO_DRAWING_X
 		p = (Uint8*)surface->pixels + (Ycenter-radius) * surface->pitch + X2center * 3;k = i;SDL_DO_DRAWING_X
-		p = (Uint8*)surface->pixels + (Ycenter+radius-1) * surface->pitch + X2center * 3;k = i;SDL_DO_DRAWING_X
-		p = (Uint8*)surface->pixels + (Ycenter+radius-1) * surface->pitch + (Xcenter-i) * 3;k = i;SDL_DO_DRAWING_X
-		
+		p = (Uint8*)surface->pixels + (Y2center+radius-1) * surface->pitch + X2center * 3;k = i;SDL_DO_DRAWING_X
+		p = (Uint8*)surface->pixels + (Y2center+radius-1) * surface->pitch + (Xcenter-i) * 3;k = i;SDL_DO_DRAWING_X
 		p = (Uint8*)surface->pixels + (Ycenter-i) * surface->pitch + (Xcenter-radius) * 3;k = radius;SDL_DO_DRAWING_X
 		p = (Uint8*)surface->pixels + (Ycenter-i) * surface->pitch + X2center * 3;k = radius;SDL_DO_DRAWING_X
-		p = (Uint8*)surface->pixels + (Ycenter+i-1) * surface->pitch + X2center * 3;k = radius;SDL_DO_DRAWING_X
-		p = (Uint8*)surface->pixels + (Ycenter+i-1) * surface->pitch + (Xcenter-radius) * 3;k = radius;SDL_DO_DRAWING_X
+		p = (Uint8*)surface->pixels + (Y2center+i-1) * surface->pitch + X2center * 3;k = radius;SDL_DO_DRAWING_X
+		p = (Uint8*)surface->pixels + (Y2center+i-1) * surface->pitch + (Xcenter-radius) * 3;k = radius;SDL_DO_DRAWING_X
 		
 		if (d >= 0) 
 		{
@@ -578,12 +580,12 @@ void DC::DrawFilledRound_32bit(const signed int x, const signed int y, const uns
 	int rightInc = 6;
 	int d = width<height ? width : height;
 
-	d = 3 - (radius<<1);
-	int diagonalInc = 10 - (radius<<2);
+	d = 3 - (radius*2);
+	int diagonalInc = 10 - (radius*4);
  	int Xcenter = x+radius;
 	int Ycenter = y+radius;
-	int dx = width - (radius<<1);
-	int dy = height - (radius<<1);
+	int dx = width - (radius*2);
+	int dy = height - (radius*2);
 	int X2center=Xcenter + dx;
 	int Y2center=Ycenter + dy;
 
@@ -608,8 +610,9 @@ void DC::DrawFilledRound_32bit(const signed int x, const signed int y, const uns
 		r.w = dx; r.h = radius;
 		SDL_FillRect(surface, &r, col);
 	}
-	Lock();
+	
 	unsigned int i = 0;
+	Lock();
 	while (i <= radius) 
 	{
 
@@ -628,7 +631,7 @@ void DC::DrawFilledRound_32bit(const signed int x, const signed int y, const uns
 		wmemset((wchar_t*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + X2center*4), col, i);
 		wmemset((wchar_t*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + X2center*4), col, radius);
 #elif __WIN32__
-		for(int k=i;k--;)
+		for(unsigned int k=i;k--;)
 		{
 			*((Uint32*)((Uint8*)surface->pixels + k+ (Ycenter-radius)*surface->pitch + (Xcenter - i)*4)) = col;
 			*((Uint32*)((Uint8*)surface->pixels + k+(Ycenter-radius)*surface->pitch + X2center*4)) = col;
@@ -636,7 +639,7 @@ void DC::DrawFilledRound_32bit(const signed int x, const signed int y, const uns
 			*((Uint32*)((Uint8*)surface->pixels + k+(Y2center+radius-1)*surface->pitch + (Xcenter-i)*4)) = col;
 
 		}
-		for(int k=radius;k--;)
+		for(unsigned int k=radius;k--;)
 		{
 			*((Uint32*)((Uint8*)surface->pixels + k+(Ycenter-i)*surface->pitch + (Xcenter - radius)*4)) = col;
 			*((Uint32*)((Uint8*)surface->pixels + k+(Ycenter-i)*surface->pitch + X2center*4)) = col;
@@ -670,12 +673,12 @@ void DC::DrawFilledEdgedRound_8bit(const signed int x, const signed int y, const
 
 	/*TODO: We can do better :-)*/
 	d = width<height ? width : height;
-	d = 3 - (radius<<1);
-	diagonalInc = 10 - (radius<<2);
+	d = 3 - (radius*2);
+	diagonalInc = 10 - (radius*4);
 
 	// Kantenlaengen
-	int dx = width - (radius<<1);
-	int dy = height - (radius<<1);
+	int dx = width - (radius*2);
+	int dy = height - (radius*2);
 
 	// Ecke links oben
 	int Xcenter = x + radius;
@@ -705,18 +708,18 @@ void DC::DrawFilledEdgedRound_8bit(const signed int x, const signed int y, const
 		SDL_FillRect(surface, &r, col);
 	}
 
+	unsigned int i = 0;
 	Lock();
 // Halbkreis
-	int i = 0;
-	while (i <= (signed int)radius) 
+	while (i <= radius) 
 	{
-		for(int k=i;k--;)
+		for(unsigned int k=i;k--;)
 		{
 			*((Uint8*)((Uint8*)surface->pixels + k + (Ycenter-radius)*surface->pitch + (Xcenter - i))) = col;
 			*((Uint8*)((Uint8*)surface->pixels + k + (Ycenter-radius)*surface->pitch + X2center)) = col;
 			*((Uint8*)((Uint8*)surface->pixels + k + (Y2center+radius-1)*surface->pitch + X2center)) = col;
 		}
-		for(int k=radius;k--;)
+		for(unsigned int k=radius;k--;)
 		{
 			*((Uint8*)((Uint8*)surface->pixels + k + (Ycenter-i)*surface->pitch + (Xcenter - radius))) = col;
 			*((Uint8*)((Uint8*)surface->pixels + k + (Ycenter-i)*surface->pitch + X2center)) = col;
@@ -749,12 +752,12 @@ void DC::DrawFilledEdgedRound_16bit(const signed int x, const signed int y, cons
 
 	/*TODO: We can do better :-)*/
 	d = width<height ? width : height;
-	d = 3 - (radius<<1);
-	diagonalInc = 10 - (radius<<2);
+	d = 3 - (radius*2);
+	diagonalInc = 10 - (radius*4);
 
 	// Kantenlaengen
-	int dx = width - (radius<<1);
-	int dy = height - (radius<<1);
+	int dx = width - (radius*2);
+	int dy = height - (radius*2);
 
 	// Ecke links oben
 	int Xcenter = x + radius;
@@ -784,22 +787,22 @@ void DC::DrawFilledEdgedRound_16bit(const signed int x, const signed int y, cons
 		SDL_FillRect(surface, &r, col);
 	}
 
+	unsigned int i = 0;
 	Lock();
 // Halbkreis
-	int i = 0;
-	while (i <= (signed int)radius) 
+	while (i <= radius) 
 	{
-		for(int k=i;k--;)
+		for(unsigned int k=i;k--;)
 		{
-			*((Uint16*)((Uint8*)surface->pixels + k*2 + (Ycenter-radius)*surface->pitch + (Xcenter - i)*2)) = col;
-			*((Uint16*)((Uint8*)surface->pixels + k*2 + (Ycenter-radius)*surface->pitch + X2center*2)) = col;
-			*((Uint16*)((Uint8*)surface->pixels + k*2 + (Y2center+radius-1)*surface->pitch + X2center*2)) = col;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (k + Xcenter - i)*2)) = col;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (k + X2center)*2)) = col;
+			*((Uint16*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + (k + X2center*2))) = col;
 		}
-		for(int k=radius;k--;)
+		for(unsigned int k=radius;k--;)
 		{
-			*((Uint16*)((Uint8*)surface->pixels + k*2 + (Ycenter-i)*surface->pitch + (Xcenter - radius)*2)) = col;
-			*((Uint16*)((Uint8*)surface->pixels + k*2 + (Ycenter-i)*surface->pitch + X2center*2)) = col;
-			*((Uint16*)((Uint8*)surface->pixels + k*2 + (Y2center+i-1)*surface->pitch + X2center*2)) = col;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (k + Xcenter - radius)*2)) = col;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (k + X2center)*2)) = col;
+			*((Uint16*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + (k + X2center)*2)) = col;
 		}
 
 		if (d >= 0) 
@@ -829,12 +832,12 @@ void DC::DrawFilledEdgedRound_24bit(const signed int x, const signed int y, cons
 
 	/*TODO: We can do better :-)*/
 	d = width<height ? width : height;
-	d = 3 - (radius<<1);
-	diagonalInc = 10 - (radius<<2);
+	d = 3 - (radius*2);
+	diagonalInc = 10 - (radius*4);
 
 	// Kantenlaengen
-	int dx = width - (radius<<1);
-	int dy = height - (radius<<1);
+	int dx = width - (radius*2);
+	int dy = height - (radius*2);
 
 	// Ecke links oben
 	int Xcenter = x + radius;
@@ -880,9 +883,9 @@ void DC::DrawFilledEdgedRound_24bit(const signed int x, const signed int y, cons
 		p = (Uint8*)surface->pixels + (Ycenter-radius) * surface->pitch + X2center * 3;k = i;SDL_DO_DRAWING_X
 		p = (Uint8*)surface->pixels + (Ycenter+radius-1) * surface->pitch + X2center * 3;k = i;SDL_DO_DRAWING_X
 		
-		p = (Uint8*)surface->pixels + (Ycenter-i) * surface->pitch + (Xcenter-radius) * 3;k = radius;SDL_DO_DRAWING_X
-		p = (Uint8*)surface->pixels + (Ycenter-i) * surface->pitch + X2center * 3;k = radius;SDL_DO_DRAWING_X
-		p = (Uint8*)surface->pixels + (Ycenter+i-1) * surface->pitch + X2center * 3;k = radius;SDL_DO_DRAWING_X
+		p = (Uint8*)surface->pixels + (Y2center-i) * surface->pitch + (Xcenter-radius) * 3;k = radius;SDL_DO_DRAWING_X
+		p = (Uint8*)surface->pixels + (Y2center-i) * surface->pitch + X2center * 3;k = radius;SDL_DO_DRAWING_X
+		p = (Uint8*)surface->pixels + (Y2center+i-1) * surface->pitch + X2center * 3;k = radius;SDL_DO_DRAWING_X
 
 		if (d >= 0) 
 		{
@@ -912,12 +915,12 @@ void DC::DrawFilledEdgedRound_32bit(const signed int x, const signed int y, cons
 
 	/*TODO: We can do better :-)*/
 	d = width<height ? width : height;
-	d = 3 - (radius<<1);
-	diagonalInc = 10 - (radius<<2);
+	d = 3 - (radius*2);
+	diagonalInc = 10 - (radius*4);
 
 	// Kantenlaengen
-	int dx = width - (radius<<1);
-	int dy = height - (radius<<1);
+	int dx = width - (radius*2);
+	int dy = height - (radius*2);
 
 	// Ecke links oben
 	int Xcenter = x + radius;
@@ -946,24 +949,24 @@ void DC::DrawFilledEdgedRound_32bit(const signed int x, const signed int y, cons
 		r.w = width-radius; r.h = radius;
 		SDL_FillRect(surface, &r, col);
 	}
-
+	
+	unsigned int i = 0;
 	Lock();
 // Halbkreis
-	int i = 0;
-	while (i <= (signed int)radius) 
+	while (i <= radius) 
 	{
 // Nur Ecken:
-		for(int k=i;k--;)
+		for(unsigned int k=i;k--;)
 		{
-			*((Uint32*)((Uint8*)surface->pixels + k*4 + (Ycenter-radius)*surface->pitch + (Xcenter - i)*4)) = col;
-			*((Uint32*)((Uint8*)surface->pixels + k*4 + (Ycenter-radius)*surface->pitch + X2center*4)) = col;
-			*((Uint32*)((Uint8*)surface->pixels + k*4 + (Y2center+radius-1)*surface->pitch + X2center*4)) = col;
+			*((Uint32*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (k + Xcenter - i)*4)) = col;
+			*((Uint32*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (k + X2center)*4)) = col;
+			*((Uint32*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + (k + X2center)*4)) = col;
 		}
-		for(int k=radius;k--;)
+		for(unsigned int k=radius;k--;)
 		{
-			*((Uint32*)((Uint8*)surface->pixels + k*4 + (Ycenter-i)*surface->pitch + (Xcenter - radius)*4)) = col;
-			*((Uint32*)((Uint8*)surface->pixels + k*4 + (Ycenter-i)*surface->pitch + X2center*4)) = col;
-			*((Uint32*)((Uint8*)surface->pixels + k*4 + (Y2center+i-1)*surface->pitch + X2center*4)) = col;
+			*((Uint32*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (k + Xcenter - radius)*4)) = col;
+			*((Uint32*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (k + X2center)*4)) = col;
+			*((Uint32*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + (k + X2center)*4)) = col;
 		}
 
 		if (d >= 0) 
@@ -985,8 +988,8 @@ void DC::DrawFilledEdgedRound_32bit(const signed int x, const signed int y, cons
 
 void DC::DrawEmptyEdgedRound_8bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const
 {
-	int dx = width - (corner<<1);
-	int dy = height - (corner<<1);
+	int dx = width - (corner*2);
+	int dy = height - (corner*2);
 	
 	int Xcenter = x + corner;
 	int Ycenter = y + corner;
@@ -1030,13 +1033,13 @@ void DC::DrawEmptyEdgedRound_8bit(const signed int x, const signed int y, const 
 	}
 // ------ END OF LEFT AND RIGHT VERTICAL LINE ------
 
-	int i = 0;	
 	int rightInc = 6;
-	int d = 3 - (corner<<1);
-	int diagonalInc = 10 - (corner<<2);
+	int d = 3 - (corner*2);
+	int diagonalInc = 10 - (corner*4);
 	unsigned int radius = corner;
 	
-	while (i <= ((signed int)(radius))) 
+	unsigned int i = 0;	
+	while (i <= radius) 
 	{
 		*((Uint8*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + Xcenter - i)) = pen_col;
 		*((Uint8*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + Xcenter - radius)) = pen_col;
@@ -1070,8 +1073,8 @@ void DC::DrawEmptyEdgedRound_8bit(const signed int x, const signed int y, const 
 
 void DC::DrawEmptyEdgedRound_16bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const
 {
-	int dx = width - (corner<<1);
-	int dy = height - (corner<<1);
+	int dx = width - (corner*2);
+	int dy = height - (corner*2);
 	
 	int Xcenter = x + corner;
 	int Ycenter = y + corner;
@@ -1083,17 +1086,17 @@ void DC::DrawEmptyEdgedRound_16bit(const signed int x, const signed int y, const
 	Uint32 pen_col = (Uint32)(*pen.GetColor());
 	Lock();
 	{
-	register Uint8* p0 = (Uint8*)surface->pixels + y * surface->pitch + (Xcenter<<1);
-	register Uint8* p1 = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + (x<<1);
-	register Sint16 i = corner;
-	for(;i--;p1+=2)
-		*(Uint16*)p1 = pen_col;
-	i = dx;
-	for(;i--;p0+=2,p1+=2)
-	{
-		*(Uint16*)p0 = pen_col;
-		*(Uint16*)p1 = pen_col;
-	}
+		register Uint8* p0 = (Uint8*)surface->pixels + y * surface->pitch + (Xcenter*2);
+		register Uint8* p1 = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + (x*2);
+		register Sint16 i = corner;
+		for(;i--;p1+=2)
+			*(Uint16*)p1 = pen_col;
+		i = dx;
+		for(;i--;p0+=2,p1+=2)
+		{
+			*(Uint16*)p0 = pen_col;
+			*(Uint16*)p1 = pen_col;
+		}
 	}
 // ------ END OF TOP AND LOWER HORIZONTAL LINE ------
 
@@ -1101,8 +1104,8 @@ void DC::DrawEmptyEdgedRound_16bit(const signed int x, const signed int y, const
 	{
 		if (height<3)	
 			return;
-		register Uint8* p0 = (Uint8*)surface->pixels + Ycenter*surface->pitch + (x<<1);
-		register Uint8* p1 = (Uint8*)surface->pixels + Ycenter*surface->pitch + ((x+width)<<1);
+		register Uint8* p0 = (Uint8*)surface->pixels + Ycenter*surface->pitch + (x*2);
+		register Uint8* p1 = (Uint8*)surface->pixels + Ycenter*surface->pitch + ((x+width)*2);
 		register Sint16 i = dy;
 		for(;i--;p0+=surface->pitch, p1+=surface->pitch)
 		{
@@ -1114,50 +1117,50 @@ void DC::DrawEmptyEdgedRound_16bit(const signed int x, const signed int y, const
 			*(Uint16*)p0 = pen_col;	
 	}
 // ------ END OF LEFT AND RIGHT VERTICAL LINE ------
-{
-	int i = 0;	
-	int rightInc = 6;
-	int d = 3 - (corner<<1);
-	int diagonalInc = 10 - (corner<<2);
-	unsigned int radius = corner;
-	
-	while (i <= ((signed int)(radius))) 
 	{
-		*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((Xcenter - i)<<1))) = pen_col;
-		*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((Xcenter - radius)<<1))) = pen_col;
+		int rightInc = 6;
+		int d = 3 - (corner*2);
+		int diagonalInc = 10 - (corner*4);
+		unsigned int radius = corner;
+	
+		unsigned int i = 0;	
+		while (i <= radius) 
+		{
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((Xcenter - i)*2))) = pen_col;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((Xcenter - radius)*2))) = pen_col;
 
-		*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((X2center + i)<<1))) = pen_col;
-		*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((X2center + radius)<<1))) = pen_col;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((X2center + i)*2))) = pen_col;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((X2center + radius)*2))) = pen_col;
 
-		*((Uint16*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + ((Xcenter - corner)<<1))) = pen_col;
-		*((Uint16*)((Uint8*)surface->pixels + (Y2center+i)*surface->pitch + ((Xcenter - corner)<<1))) = pen_col;
+			*((Uint16*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + ((Xcenter - corner)*2))) = pen_col;
+			*((Uint16*)((Uint8*)surface->pixels + (Y2center+i)*surface->pitch + ((Xcenter - corner)*2))) = pen_col;
 
-		*((Uint16*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + ((X2center + i)<<1))) = pen_col;
-		*((Uint16*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + ((X2center + radius)<<1))) = pen_col;
+			*((Uint16*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + ((X2center + i)*2))) = pen_col;
+			*((Uint16*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + ((X2center + radius)*2))) = pen_col;
 
-		*((Uint16*)((Uint8*)surface->pixels + (Y2center+corner-1)*surface->pitch + ((Xcenter - radius)<<1))) = pen_col; // new
-		*((Uint16*)((Uint8*)surface->pixels + (Y2center+corner-1)*surface->pitch + ((Xcenter - i)<<1))) = pen_col; // new
+			*((Uint16*)((Uint8*)surface->pixels + (Y2center+corner-1)*surface->pitch + ((Xcenter - radius)*2))) = pen_col; // new
+			*((Uint16*)((Uint8*)surface->pixels + (Y2center+corner-1)*surface->pitch + ((Xcenter - i)*2))) = pen_col; // new
 
-		if (d >= 0) {
-			d += diagonalInc;
-			diagonalInc += 8;
-			--radius;
-		} else {
-			d += rightInc;
-			diagonalInc += 4;
-		}
-		rightInc += 4;
-		++i;
-	}/*while*/
-}
+			if (d >= 0) {
+				d += diagonalInc;
+				diagonalInc += 8;
+				--radius;
+			} else {
+				d += rightInc;
+				diagonalInc += 4;
+			}
+			rightInc += 4;
+			++i;
+		}/*while*/
+	}
 	Unlock();
 
 }/*Draw_Round*/
 
 void DC::DrawEmptyEdgedRound_24bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const
 {
-	int dx = width - (corner<<1);
-	int dy = height - (corner<<1);
+	int dx = width - (corner*2);
+	int dy = height - (corner*2);
 	
 	int Xcenter = x + corner;
 	int Ycenter = y + corner;
@@ -1176,8 +1179,7 @@ void DC::DrawEmptyEdgedRound_24bit(const signed int x, const signed int y, const
 	{
 		register Uint8* p;
 		register int k;
-		p = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + x * 3;k = corner;SDL_DO_DRAWING_X
-		p = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + (x+corner) * 3;k = dx;SDL_DO_DRAWING_X
+		p = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + x * 3;k = dx+corner-1;SDL_DO_DRAWING_X
 		p = (Uint8*)surface->pixels + y * surface->pitch + Xcenter * 3;k = dx;SDL_DO_DRAWING_X
 	}
 // ------ END OF TOP AND LOWER HORIZONTAL LINE ------
@@ -1187,32 +1189,26 @@ void DC::DrawEmptyEdgedRound_24bit(const signed int x, const signed int y, const
 		register Uint8* p;
 		register int k;
 		
-		p = (Uint8*)surface->pixels + Ycenter * surface->pitch + x * 3;k = dy;SDL_DO_DRAWING_Y
+		p = (Uint8*)surface->pixels + Ycenter * surface->pitch + x * 3;k = corner+dy-1;SDL_DO_DRAWING_Y
 		p = (Uint8*)surface->pixels + Ycenter * surface->pitch + (x+width) * 3;k = dy;SDL_DO_DRAWING_Y
-		p = (Uint8*)surface->pixels + (Ycenter+dy) * surface->pitch + x * 3;k = corner-1;SDL_DO_DRAWING_Y
 	}
 // ------ END OF LEFT AND RIGHT VERTICAL LINE ------
 
-	int i = 0;	
 	int rightInc = 6;
-	int d = 3 - (corner<<1);
-	int diagonalInc = 10 - (corner<<2);
+	int d = 3 - (corner*2);
+	int diagonalInc = 10 - (corner*4);
 	unsigned int radius = corner;
 
 	register Uint8* p;
+	unsigned int i = 0;	
 	while (i <= radius) 
 	{
 		p = (Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (Xcenter - i)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
+		p = (Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + X2center*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
+		p = (Uint8*)surface->pixels + (Y2center + radius - 1)*surface->pitch + X2center*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
 		p = (Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (Xcenter - radius)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (X2center + i)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (X2center + radius)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+radius-1)*surface->pitch + (Xcenter - corner)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+i)*surface->pitch + (Xcenter - corner)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+radius-1)*surface->pitch + (X2center + i)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+i-1)*surface->pitch + (X2center + radius)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+corner-1)*surface->pitch + (Xcenter - radius)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+corner-1)*surface->pitch + (Xcenter - i)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		
+		p = (Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + X2center*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
+		p = (Uint8*)surface->pixels + (Y2center + i - 1)*surface->pitch + X2center*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
 		if (d >= 0) {
 			d += diagonalInc;
 			diagonalInc += 8;
@@ -1230,8 +1226,8 @@ void DC::DrawEmptyEdgedRound_24bit(const signed int x, const signed int y, const
 
 void DC::DrawEmptyEdgedRound_32bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const
 {
-	int dx = width - (corner<<1);
-	int dy = height - (corner<<1);
+	int dx = width - (corner*2);
+	int dy = height - (corner*2);
 	
 	int Xcenter = x + corner;
 	int Ycenter = y + corner;
@@ -1244,16 +1240,16 @@ void DC::DrawEmptyEdgedRound_32bit(const signed int x, const signed int y, const
 	Lock();
 	if (sizeof(wchar_t) == sizeof(Uint32)) { 
 #ifdef __linux__
-		wmemset((wchar_t*)( (Uint8*)surface->pixels +  y * surface->pitch + (Xcenter<<2)), pen_col, dx);
-		wmemset((wchar_t*)( (Uint8*)surface->pixels +  (y+height-1) * surface->pitch + (x<<2)), pen_col, width - corner);
+		wmemset((wchar_t*)( (Uint8*)surface->pixels +  y * surface->pitch + (Xcenter*4)), pen_col, dx);
+		wmemset((wchar_t*)( (Uint8*)surface->pixels +  (y+height-1) * surface->pitch + (x*4)), pen_col, width - corner);
 #elif __WIN32__
-		memset((wchar_t*)( (Uint8*)surface->pixels +  y * surface->pitch + (Xcenter<<2)), pen_col, dx);
-		memset((wchar_t*)( (Uint8*)surface->pixels +  (y+height-1) * surface->pitch + (x<<2)), pen_col, width - corner);
+		memset((wchar_t*)( (Uint8*)surface->pixels +  y * surface->pitch + (Xcenter*4)), pen_col, dx);
+		memset((wchar_t*)( (Uint8*)surface->pixels +  (y+height-1) * surface->pitch + (x*4)), pen_col, width - corner);
 #endif
 	} else 
 	{
-		register Uint8* p0 = (Uint8*)surface->pixels + y * surface->pitch + (Xcenter<<2);
-		register Uint8* p1 = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + (x<<2);
+		register Uint8* p0 = (Uint8*)surface->pixels + y * surface->pitch + (Xcenter*4);
+		register Uint8* p1 = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + (x*4);
 		register Sint16 i = corner;
 		for(;i--;p1+=4)
 			*(Uint32*)p1 = pen_col;
@@ -1270,8 +1266,8 @@ void DC::DrawEmptyEdgedRound_32bit(const signed int x, const signed int y, const
 	{
 		if (height<3)	
 			return;
-		register Uint8* p0 = (Uint8*)surface->pixels + Ycenter*surface->pitch + (x<<2);
-		register Uint8* p1 = (Uint8*)surface->pixels + Ycenter*surface->pitch + ((x+width)<<2);
+		register Uint8* p0 = (Uint8*)surface->pixels + Ycenter*surface->pitch + (x*4);
+		register Uint8* p1 = (Uint8*)surface->pixels + Ycenter*surface->pitch + ((x+width)*4);
 		register Sint16 i = dy;
 		for(;i--;p0+=surface->pitch, p1+=surface->pitch)
 		{
@@ -1284,28 +1280,22 @@ void DC::DrawEmptyEdgedRound_32bit(const signed int x, const signed int y, const
 	}
 // ------ END OF LEFT AND RIGHT VERTICAL LINE ------
 
-	int i = 0;	
 	int rightInc = 6;
-	int d = 3 - (corner<<1);
-	int diagonalInc = 10 - (corner<<2);
+	int d = 3 - (corner*2);
+	int diagonalInc = 10 - (corner*4);
 	unsigned int radius = corner;
 	
-	while (i <= ((signed int)(radius))) 
+	unsigned int i = 0;	
+	while (i <= radius) 
 	{
-		*((Uint32*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((Xcenter - i)<<2))) = pen_col;
-		*((Uint32*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((Xcenter - radius)<<2))) = pen_col;
+		*((Uint32*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((Xcenter - i)*4))) = pen_col;
+		*((Uint32*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((Xcenter - radius)*4))) = pen_col;
 
-		*((Uint32*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((X2center + i)<<2))) = pen_col;
-		*((Uint32*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((X2center + radius)<<2))) = pen_col;
+		*((Uint32*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((X2center + i)*4))) = pen_col;
+		*((Uint32*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((X2center + radius)*4))) = pen_col;
 
-		*((Uint32*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + ((Xcenter - corner)<<2))) = pen_col;
-		*((Uint32*)((Uint8*)surface->pixels + (Y2center+i)*surface->pitch + ((Xcenter - corner)<<2))) = pen_col;
-
-		*((Uint32*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + ((X2center + i)<<2))) = pen_col;
-		*((Uint32*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + ((X2center + radius)<<2))) = pen_col;
-
-		*((Uint32*)((Uint8*)surface->pixels + (Y2center+corner-1)*surface->pitch + ((Xcenter - radius)<<2))) = pen_col; // new
-		*((Uint32*)((Uint8*)surface->pixels + (Y2center+corner-1)*surface->pitch + ((Xcenter - i)<<2))) = pen_col; // new
+		*((Uint32*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + ((X2center + i)*4))) = pen_col;
+		*((Uint32*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + ((X2center + radius)*4))) = pen_col;
 
 		if (d >= 0) {
 			d += diagonalInc;
@@ -1325,8 +1315,8 @@ void DC::DrawEmptyEdgedRound_32bit(const signed int x, const signed int y, const
 void DC::DrawFilledEdgedBorderRound_8bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const
 {
 	// Kantenlaengen
-	int dx = width - (corner<<1);
-	int dy = height - (corner<<1);
+	int dx = width - (corner*2);
+	int dy = height - (corner*2);
 
 	// Ecke links oben
 	int Xcenter = x + corner;
@@ -1403,25 +1393,25 @@ void DC::DrawFilledEdgedBorderRound_8bit(const signed int x, const signed int y,
 // Halbkreis
 	//???
 	{
-		int d = 3 - (corner<<1);
-		int i = 0;
+		int d = 3 - (corner*2);
+		unsigned int i = 0;
 		int rightInc = 6;
-		int diagonalInc = 10 - (corner<<2);
+		int diagonalInc = 10 - (corner*4);
 		unsigned int radius = corner;
 	
-		while (i <= (signed int)radius) 
+		while (i <= radius) 
 		{
-			for(int k=i;k--;)
+			for(unsigned int k=i;k--;)
 			{
-				*((Uint8*)((Uint8*)surface->pixels + k + (Ycenter-radius)*surface->pitch + Xcenter - i)) = brush_col;
-				*((Uint8*)((Uint8*)surface->pixels + k + (Ycenter-radius)*surface->pitch + X2center)) = brush_col;
-				*((Uint8*)((Uint8*)surface->pixels + k + (Y2center+radius-1)*surface->pitch + X2center)) = brush_col;
+				*((Uint8*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + k + Xcenter - i)) = brush_col;
+				*((Uint8*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + k + X2center)) = brush_col;
+				*((Uint8*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + k + X2center)) = brush_col;
 			}
-			for(int k=radius;k--;)
+			for(unsigned int k=radius;k--;)
 			{
-				*((Uint8*)((Uint8*)surface->pixels + k + (Ycenter-i)*surface->pitch + Xcenter - radius)) = brush_col;
-				*((Uint8*)((Uint8*)surface->pixels + k + (Ycenter-i)*surface->pitch + X2center)) = brush_col;
-				*((Uint8*)((Uint8*)surface->pixels + k + (Y2center+i-1)*surface->pitch + X2center)) = brush_col;
+				*((Uint8*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + k + Xcenter - radius)) = brush_col;
+				*((Uint8*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + k + X2center)) = brush_col;
+				*((Uint8*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + k + X2center)) = brush_col;
 			}
 			if (d >= 0) 
 			{
@@ -1438,13 +1428,13 @@ void DC::DrawFilledEdgedBorderRound_8bit(const signed int x, const signed int y,
 		}
 	}
 	{
-		int d = 3 - (corner<<1);
-		int i = 0;
+		int d = 3 - (corner*2);
 		int rightInc = 6;
-		int diagonalInc = 10 - (corner<<2);
+		int diagonalInc = 10 - (corner*4);
 		unsigned int radius = corner;
 
-		while (i <= (signed int)radius) 
+		unsigned int i = 0;
+		while (i <= radius) 
 		{
 			*((Uint8*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + Xcenter - i)) = pen_col;
 			*((Uint8*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + Xcenter - radius)) = pen_col;
@@ -1452,14 +1442,8 @@ void DC::DrawFilledEdgedBorderRound_8bit(const signed int x, const signed int y,
 			*((Uint8*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + X2center + i)) = pen_col;
 			*((Uint8*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + X2center + radius)) = pen_col;
 
-//			*((Uint8*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + Xcenter - corner)) = pen_col;
-//			*((Uint8*)((Uint8*)surface->pixels + (Y2center+i)*surface->pitch + Xcenter - corner)) = pen_col;
-
 			*((Uint8*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + X2center + i)) = pen_col;
 			*((Uint8*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + X2center + radius)) = pen_col;
-
-//			*((Uint8*)((Uint8*)surface->pixels + (Y2center+corner-1)*surface->pitch + Xcenter - radius)) = pen_col; // new
-//			*((Uint8*)((Uint8*)surface->pixels + (Y2center+corner-1)*surface->pitch + Xcenter - i)) = pen_col; // new
 
 			if (d >= 0) 
 			{
@@ -1483,8 +1467,8 @@ void DC::DrawFilledEdgedBorderRound_8bit(const signed int x, const signed int y,
 void DC::DrawFilledEdgedBorderRound_16bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const
 {
 	// Kantenlaengen
-	int dx = width - (corner<<1);
-	int dy = height - (corner<<1);
+	int dx = width - (corner*2);
+	int dy = height - (corner*2);
 
 	// Ecke links oben
 	int Xcenter = x + corner;
@@ -1525,8 +1509,8 @@ void DC::DrawFilledEdgedBorderRound_16bit(const signed int x, const signed int y
 	Uint32 pen_col = (Uint32)(*pen.GetColor());
 	Lock();
 {
-	register Uint8* p0 = (Uint8*)surface->pixels + y * surface->pitch + (Xcenter<<1);
-	register Uint8* p1 = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + (x<<1);
+	register Uint8* p0 = (Uint8*)surface->pixels + y * surface->pitch + (Xcenter*2);
+	register Uint8* p1 = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + (x*2);
 	register Sint16 i = corner;
 	for(;i--;p1+=2)
 		*(Uint16*)p1 = pen_col;
@@ -1544,8 +1528,8 @@ void DC::DrawFilledEdgedBorderRound_16bit(const signed int x, const signed int y
 	{
 		if (height<3)	
 			return;
-		register Uint8* p0 = (Uint8*)surface->pixels + Ycenter*surface->pitch + (x<<1);	 
-		register Uint8* p1 = (Uint8*)surface->pixels + Ycenter*surface->pitch + ((x+width)<<1);
+		register Uint8* p0 = (Uint8*)surface->pixels + Ycenter*surface->pitch + (x*2);	 
+		register Uint8* p1 = (Uint8*)surface->pixels + Ycenter*surface->pitch + ((x+width)*2);
 		register Sint16 i = dy;
 		for(;i--;p0+=surface->pitch, p1+=surface->pitch)
 		{
@@ -1561,77 +1545,70 @@ void DC::DrawFilledEdgedBorderRound_16bit(const signed int x, const signed int y
 // Halbkreis
 	//???
 	{
-	int d = 3 - (corner<<1);
-	int i = 0;
-	int rightInc = 6;
-	int diagonalInc = 10 - (corner<<2);
-	unsigned int radius = corner;
+		int d = 3 - (corner*2);
+		int rightInc = 6;
+		int diagonalInc = 10 - (corner*4);
+		unsigned int radius = corner;
 	
-	while (i <= (signed int)radius) 
-	{
-		for(int k=i;k--;)
+		unsigned int i = 0;
+		while (i <= radius) 
 		{
-			*((Uint16*)((Uint8*)surface->pixels + (k<<1) + (Ycenter-radius)*surface->pitch + ((Xcenter - i)<<1))) = brush_col;
-			*((Uint16*)((Uint8*)surface->pixels + (k<<1) + (Ycenter-radius)*surface->pitch + ((X2center)<<1))) = brush_col;
-			*((Uint16*)((Uint8*)surface->pixels + (k<<1) + (Y2center+radius-1)*surface->pitch + (X2center<<1))) = brush_col;
+			for(unsigned int k=i;k--;)
+			{
+				*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (k + Xcenter - i)*2)) = brush_col;
+				*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (k + X2center)*2)) = brush_col;
+				*((Uint16*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + (k + X2center)*2)) = brush_col;
+			}
+			for(unsigned int k=radius;k--;)
+			{
+				*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (k + Xcenter - radius)*2)) = brush_col;
+				*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (k + X2center) *2)) = brush_col;
+				*((Uint16*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + (k + X2center)*2)) = brush_col;
+			}
+			if (d >= 0) 
+			{
+				d += diagonalInc;
+				diagonalInc += 8;
+				--radius;
+			} else 
+			{
+				d += rightInc;
+				diagonalInc += 4;
+			}
+			rightInc += 4;
+			++i;
 		}
-		for(int k=radius;k--;)
-		{
-			*((Uint16*)((Uint8*)surface->pixels + (k<<1) + (Ycenter-i)*surface->pitch + ((Xcenter - radius)<<1))) = brush_col;
-			*((Uint16*)((Uint8*)surface->pixels + (k<<1) + (Ycenter-i)*surface->pitch + (X2center<<1))) = brush_col;
-			*((Uint16*)((Uint8*)surface->pixels + (k<<1) + (Y2center+i-1)*surface->pitch + (X2center<<1))) = brush_col;
-		}
-		if (d >= 0) 
-		{
-			d += diagonalInc;
-			diagonalInc += 8;
-			--radius;
-		} else 
-		{
-			d += rightInc;
-			diagonalInc += 4;
-		}
-		rightInc += 4;
-		++i;
 	}
-	}
 	{
-	int d = 3 - (corner<<1);
-	int i = 0;
-	int rightInc = 6;
-	int diagonalInc = 10 - (corner<<2);
-	unsigned int radius = corner;
-
-	while (i <= (signed int)radius) 
-	{
-				*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((Xcenter - i)<<1))) = pen_col;
-				*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((Xcenter - radius)<<1))) = pen_col;
-
-				*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((X2center + i)<<1))) = pen_col;
-				*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((X2center + radius)<<1))) = pen_col;
-
-//				*((Uint16*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + (Xcenter - corner)*2)) = pen_col;
-//				*((Uint16*)((Uint8*)surface->pixels + (Y2center+i)*surface->pitch + (Xcenter - corner)*2)) = pen_col;
-
-				*((Uint16*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + ((X2center + i)<<1))) = pen_col;
-				*((Uint16*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + ((X2center + radius)<<1))) = pen_col;
-
-//				*((Uint16*)((Uint8*)surface->pixels + (Y2center+corner-1)*surface->pitch + (Xcenter - radius)*2)) = pen_col; // new
-//				*((Uint16*)((Uint8*)surface->pixels + (Y2center+corner-1)*surface->pitch + (Xcenter - i)*2)) = pen_col; // new
-
-		if (d >= 0) 
+		int d = 3 - (corner*2);
+		int rightInc = 6;
+		int diagonalInc = 10 - (corner*4);
+		unsigned int radius = corner;
+		
+		unsigned int i = 0;
+		while (i <= radius) 
 		{
-			d += diagonalInc;
-			diagonalInc += 8;
-			--radius;
-		} else 
-		{
-			d += rightInc;
-			diagonalInc += 4;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((Xcenter - i)*2))) = pen_col;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((Xcenter - radius)*2))) = pen_col;
+
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((X2center + i)*2))) = pen_col;
+			*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((X2center + radius)*2))) = pen_col;
+
+			*((Uint16*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + ((X2center + i)*2))) = pen_col;
+			*((Uint16*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + ((X2center + radius)*2))) = pen_col;
+			if (d >= 0) 
+			{
+				d += diagonalInc;
+				diagonalInc += 8;
+				--radius;
+			} else 
+			{
+				d += rightInc;
+				diagonalInc += 4;
+			}
+			rightInc += 4;
+			++i;
 		}
-		rightInc += 4;
-		++i;
-	}
 	}
 	Unlock();
 
@@ -1641,8 +1618,8 @@ void DC::DrawFilledEdgedBorderRound_16bit(const signed int x, const signed int y
 void DC::DrawFilledEdgedBorderRound_24bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const
 {
 	// Kantenlaengen
-	int dx = width - (corner<<1);
-	int dy = height - (corner<<1);
+	int dx = width - (corner*2);
+	int dy = height - (corner*2);
 
 	// Ecke links oben
 	int Xcenter = x + corner;
@@ -1688,8 +1665,7 @@ void DC::DrawFilledEdgedBorderRound_24bit(const signed int x, const signed int y
 	{
 		register Uint8* p;
 		register int k;
-		p = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + x * 3;k = corner;SDL_DO_DRAWING_X
-		p = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + (x+corner) * 3;k = dx;SDL_DO_DRAWING_X
+		p = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + x * 3;k = dx+corner;SDL_DO_DRAWING_X
 		p = (Uint8*)surface->pixels + y * surface->pitch + Xcenter * 3;k = dx;SDL_DO_DRAWING_X
 	}
 // ------ END OF TOP AND LOWER HORIZONTAL LINE ------
@@ -1700,89 +1676,82 @@ void DC::DrawFilledEdgedBorderRound_24bit(const signed int x, const signed int y
 		register Uint8* p;
 		register int k;
 		
-		p = (Uint8*)surface->pixels + Ycenter * surface->pitch + x * 3;k = dy;SDL_DO_DRAWING_Y
+		p = (Uint8*)surface->pixels + Ycenter * surface->pitch + x * 3;k = height-corner-1;SDL_DO_DRAWING_Y
 		p = (Uint8*)surface->pixels + Ycenter * surface->pitch + (x+width) * 3;k = dy;SDL_DO_DRAWING_Y
-		p = (Uint8*)surface->pixels + (Ycenter+dy) * surface->pitch + x * 3;k = corner-1;SDL_DO_DRAWING_Y
 	}
 // ------ END OF LEFT AND RIGHT VERTICAL LINE ------
 
 // Halbkreis
 	//???
 	{
+		int d = 3 - (corner-1)*2;
+		int rightInc = 6;
+		int diagonalInc = 10 - (corner-1)*4;
+		unsigned int radius = corner-1;
 	
-	int d = 3 - (corner<<1);
-	int rightInc = 6;
-	int diagonalInc = 10 - (corner<<2);
-	unsigned int radius = corner;
-	
-	colorbyte0 = (Uint8) (brush_col & 0xff);
-	colorbyte1 = (Uint8) ((brush_col >> 8) & 0xff);
-	colorbyte2 = (Uint8) ((brush_col >> 16) & 0xff);
+		colorbyte0 = (Uint8) (brush_col & 0xff);
+		colorbyte1 = (Uint8) ((brush_col >> 8) & 0xff);
+		colorbyte2 = (Uint8) ((brush_col >> 16) & 0xff);
 
-	unsigned int i = 0;
-	while (i <= radius) 
-	{
-		register Uint8 *p;
-		register Sint16 k;
-		p = (Uint8*)surface->pixels + (Ycenter-radius) * surface->pitch + (Xcenter-i) * 3;k = i;SDL_DO_DRAWING_X
-		p = (Uint8*)surface->pixels + (Ycenter-radius) * surface->pitch + X2center * 3;k = i;SDL_DO_DRAWING_X
-		p = (Uint8*)surface->pixels + (Ycenter+radius-1) * surface->pitch + X2center * 3;k = i;SDL_DO_DRAWING_X
+		unsigned int i = 0;
+		while (i < radius)
+		{
+			register Uint8 *p;
+			register Sint16 k;
+			p = (Uint8*)surface->pixels + (Ycenter-radius) * surface->pitch + (Xcenter-i) * 3;k = i;SDL_DO_DRAWING_X
+			p = (Uint8*)surface->pixels + (Ycenter-radius) * surface->pitch + (X2center) * 3;k = i;SDL_DO_DRAWING_X
+			p = (Uint8*)surface->pixels + (Y2center+radius-1) * surface->pitch + (X2center) * 3;k = i;SDL_DO_DRAWING_X
 		
-		p = (Uint8*)surface->pixels + (Ycenter-i) * surface->pitch + (Xcenter-radius) * 3;k = radius;SDL_DO_DRAWING_X
-		p = (Uint8*)surface->pixels + (Ycenter-i) * surface->pitch + X2center * 3;k = radius;SDL_DO_DRAWING_X
-		p = (Uint8*)surface->pixels + (Ycenter+i-1) * surface->pitch + X2center * 3;k = radius;SDL_DO_DRAWING_X
+			p = (Uint8*)surface->pixels + (Ycenter-i) * surface->pitch + (Xcenter-radius) * 3;k = radius;SDL_DO_DRAWING_X
+			p = (Uint8*)surface->pixels + (Ycenter-i) * surface->pitch + (X2center) * 3;k = radius;SDL_DO_DRAWING_X
+			p = (Uint8*)surface->pixels + (Y2center+i-1) * surface->pitch + (X2center) * 3;k = radius;SDL_DO_DRAWING_X
 
-		if (d >= 0) 
-		{
-			d += diagonalInc;
-			diagonalInc += 8;
-			--radius;
-		} else 
-		{
-			d += rightInc;
-			diagonalInc += 4;
+			if (d >= 0) 
+			{
+				d += diagonalInc;
+				diagonalInc += 8;
+				--radius;
+			} else 
+			{
+				d += rightInc;
+				diagonalInc += 4;
+			}
+			rightInc += 4;
+			++i;
 		}
-		rightInc += 4;
-		++i;
-	}
 	}
 	{
-	int d = 3 - (corner<<1);
-	int i = 0;
-	int rightInc = 6;
-	int diagonalInc = 10 - (corner<<2);
-	unsigned int radius = corner;
-	colorbyte0 = (Uint8) (pen_col & 0xff);
-	colorbyte1 = (Uint8) ((pen_col >> 8) & 0xff);
-	colorbyte2 = (Uint8) ((pen_col >> 16) & 0xff);
-	register Uint8 *p;
-
-	while (i <= (signed int)radius) 
-	{
-		p = (Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (Xcenter - i)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (Xcenter - radius)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (X2center + i)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (X2center + radius)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+radius-1)*surface->pitch + (Xcenter - corner)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+i)*surface->pitch + (Xcenter - corner)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+radius-1)*surface->pitch + (X2center + i)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+i-1)*surface->pitch + (X2center + radius)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+corner-1)*surface->pitch + (Xcenter - radius)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+corner-1)*surface->pitch + (Xcenter - i)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-
-		if (d >= 0) 
+		int d = 3 - (corner*2);
+		int rightInc = 6;
+		int diagonalInc = 10 - (corner*4);
+		unsigned int radius = corner;
+		colorbyte0 = (Uint8) (pen_col & 0xff);
+		colorbyte1 = (Uint8) ((pen_col >> 8) & 0xff);
+		colorbyte2 = (Uint8) ((pen_col >> 16) & 0xff);
+		register Uint8 *p;
+	
+		unsigned int i = 0;
+		while (i <= radius) 
 		{
-			d += diagonalInc;
-			diagonalInc += 8;
-			--radius;
-		} else 
-		{
-			d += rightInc;
-			diagonalInc += 4;
+			p = (Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (Xcenter - i)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
+			p = (Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (Xcenter - radius)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
+			p = (Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (X2center + i)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
+			p = (Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (X2center + radius)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
+			p = (Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + (X2center + i)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
+				p = (Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + (X2center + radius)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
+			if (d >= 0) 
+			{
+				d += diagonalInc;
+				diagonalInc += 8;
+				--radius;
+			} else 
+			{
+				d += rightInc;
+				diagonalInc += 4;
+			}
+			rightInc += 4;
+			++i;
 		}
-		rightInc += 4;
-		++i;
-	}
 	}
 	Unlock();
 
@@ -1792,8 +1761,8 @@ void DC::DrawFilledEdgedBorderRound_24bit(const signed int x, const signed int y
 void DC::DrawFilledEdgedBorderRound_32bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const
 {
 	// Kantenlaengen
-	int dx = width - (corner<<1);
-	int dy = height - (corner<<1);
+	int dx = width - (corner*2);
+	int dy = height - (corner*2);
 
 	// Ecke links oben
 	int Xcenter = x + corner;
@@ -1835,16 +1804,16 @@ void DC::DrawFilledEdgedBorderRound_32bit(const signed int x, const signed int y
 	Lock();
 	if (sizeof(wchar_t) == sizeof(Uint32)) { 
 #ifdef __linux__
-		wmemset((wchar_t*)( (Uint8*)surface->pixels +  y * surface->pitch + (Xcenter<<2)), pen_col, dx);
-		wmemset((wchar_t*)( (Uint8*)surface->pixels +  (y+height-1) * surface->pitch + (x<<2)), pen_col, width - corner);
+		wmemset((wchar_t*)( (Uint8*)surface->pixels +  y * surface->pitch + (Xcenter*4)), pen_col, dx);
+		wmemset((wchar_t*)( (Uint8*)surface->pixels +  (y+height-1) * surface->pitch + (x*4)), pen_col, width - corner);
 #elif __WIN32__
-		memset((wchar_t*)( (Uint8*)surface->pixels +  y * surface->pitch + (Xcenter<<2)), pen_col, dx);
-		memset((wchar_t*)( (Uint8*)surface->pixels +  (y+height-1) * surface->pitch + (x<<2)), pen_col, width - corner);
+		memset((wchar_t*)( (Uint8*)surface->pixels +  y * surface->pitch + (Xcenter*4)), pen_col, dx);
+		memset((wchar_t*)( (Uint8*)surface->pixels +  (y+height-1) * surface->pitch + (x*4)), pen_col, width - corner);
 #endif
 	} else 
 	{
-		register Uint8* p0 = (Uint8*)surface->pixels + y * surface->pitch + (Xcenter<<2);
-		register Uint8* p1 = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + (x<<2);
+		register Uint8* p0 = (Uint8*)surface->pixels + y * surface->pitch + (Xcenter*4);
+		register Uint8* p1 = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + (x*4);
 		register Sint16 i = corner;
 		for(;i--;p1+=4)
 			*(Uint32*)p1 = pen_col;
@@ -1862,8 +1831,8 @@ void DC::DrawFilledEdgedBorderRound_32bit(const signed int x, const signed int y
 	{
 		if (height<3)	
 			return;
-		register Uint8* p0 = (Uint8*)surface->pixels + Ycenter*surface->pitch + (x<<2);	 
-		register Uint8* p1 = (Uint8*)surface->pixels + Ycenter*surface->pitch + ((x+width)<<2);
+		register Uint8* p0 = (Uint8*)surface->pixels + Ycenter*surface->pitch + (x*4);	 
+		register Uint8* p1 = (Uint8*)surface->pixels + Ycenter*surface->pitch + ((x+width)*4);
 		register Sint16 i = dy;
 		for(;i--;p0+=surface->pitch, p1+=surface->pitch)
 		{
@@ -1879,77 +1848,71 @@ void DC::DrawFilledEdgedBorderRound_32bit(const signed int x, const signed int y
 // Halbkreis
 	//???
 	{
-	int d = 3 - (corner<<1);
-	int i = 0;
-	int rightInc = 6;
-	int diagonalInc = 10 - (corner<<2);
-	unsigned int radius = corner;
+		int d = 3 - (corner*2);
+		int rightInc = 6;
+		int diagonalInc = 10 - (corner*4);
+		unsigned int radius = corner;
 	
-	while (i <= (signed int)radius) 
-	{
-		for(int k=i;k--;)
+		unsigned int i = 0;
+		while (i <= radius) 
 		{
-			*((Uint32*)((Uint8*)surface->pixels + (k<<2) + (Ycenter-radius)*surface->pitch + ((Xcenter - i)<<2))) = brush_col;
-			*((Uint32*)((Uint8*)surface->pixels + (k<<2) + (Ycenter-radius)*surface->pitch + ((X2center)<<2))) = brush_col;
-			*((Uint32*)((Uint8*)surface->pixels + (k<<2) + (Y2center+radius-1)*surface->pitch + (X2center<<2))) = brush_col;
+			for(unsigned int k=i;k--;)
+			{
+				*((Uint32*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (k + Xcenter - i)*4)) = brush_col;
+				*((Uint32*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (k + X2center)*4)) = brush_col;
+				*((Uint32*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + (k + X2center)*4)) = brush_col;
+			}
+			for(unsigned int k=radius;k--;)
+			{
+				*((Uint32*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (k + Xcenter - radius)*4)) = brush_col;
+				*((Uint32*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (k + X2center)*4)) = brush_col;
+				*((Uint32*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + (k + X2center)*4)) = brush_col;
+			}
+			if (d >= 0) 
+			{
+				d += diagonalInc;
+				diagonalInc += 8;
+				--radius;
+			} else 
+			{
+				d += rightInc;
+				diagonalInc += 4;
+			}
+			rightInc += 4;
+			++i;
 		}
-		for(int k=radius;k--;)
-		{
-			*((Uint32*)((Uint8*)surface->pixels + (k<<2) + (Ycenter-i)*surface->pitch + ((Xcenter - radius)<<2))) = brush_col;
-			*((Uint32*)((Uint8*)surface->pixels + (k<<2) + (Ycenter-i)*surface->pitch + (X2center<<2))) = brush_col;
-			*((Uint32*)((Uint8*)surface->pixels + (k<<2) + (Y2center+i-1)*surface->pitch + (X2center<<2))) = brush_col;
-		}
-		if (d >= 0) 
-		{
-			d += diagonalInc;
-			diagonalInc += 8;
-			--radius;
-		} else 
-		{
-			d += rightInc;
-			diagonalInc += 4;
-		}
-		rightInc += 4;
-		++i;
 	}
-	}
 	{
-	int d = 3 - (corner<<1);
-	int i = 0;
-	int rightInc = 6;
-	int diagonalInc = 10 - (corner<<2);
-	unsigned int radius = corner;
+		int d = 3 - (corner*2);
+		int rightInc = 6;
+		int diagonalInc = 10 - (corner*4);
+		unsigned int radius = corner;
 
-	while (i <= (signed int)radius) 
-	{
-				*((Uint32*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((Xcenter - i)<<2))) = pen_col;
-				*((Uint32*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((Xcenter - radius)<<2))) = pen_col;
+		unsigned int i = 0;
+		while (i <= radius) 
+		{	
+			*((Uint32*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((Xcenter - i)*4))) = pen_col;
+			*((Uint32*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((Xcenter - radius)*4))) = pen_col;
 
-				*((Uint32*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((X2center + i)<<2))) = pen_col;
-				*((Uint32*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((X2center + radius)<<2))) = pen_col;
+			*((Uint32*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + ((X2center + i)*4))) = pen_col;
+			*((Uint32*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + ((X2center + radius)*4))) = pen_col;
 
-//				*((Uint32*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + (Xcenter - corner)*4)) = pen_col;
-  //			  *((Uint32*)((Uint8*)surface->pixels + (Y2center+i)*surface->pitch + (Xcenter - corner)*4)) = pen_col;
+			*((Uint32*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + ((X2center + i)*4))) = pen_col;
+			*((Uint32*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + ((X2center + radius)*4))) = pen_col;
 
-				*((Uint32*)((Uint8*)surface->pixels + (Y2center+radius-1)*surface->pitch + ((X2center + i)<<2))) = pen_col;
-				*((Uint32*)((Uint8*)surface->pixels + (Y2center+i-1)*surface->pitch + ((X2center + radius)<<2))) = pen_col;
-
-//				*((Uint32*)((Uint8*)surface->pixels + (Y2center+corner-1)*surface->pitch + (Xcenter - radius)*4)) = pen_col; // new
-  //			  *((Uint32*)((Uint8*)surface->pixels + (Y2center+corner-1)*surface->pitch + (Xcenter - i)*4)) = pen_col; // new
-
-		if (d >= 0) 
-		{
-			d += diagonalInc;
-			diagonalInc += 8;
-			--radius;
-		} else 
-		{
-			d += rightInc;
-			diagonalInc += 4;
+			if (d >= 0) 
+			{
+				d += diagonalInc;
+				diagonalInc += 8;
+				--radius;
+			} else 
+			{
+				d += rightInc;
+				diagonalInc += 4;
+			}
+			rightInc += 4;
+			++i;
 		}
-		rightInc += 4;
-		++i;
-	}
 	}
 	Unlock();
 
@@ -1966,13 +1929,13 @@ void DC::DrawEmptyRound_8bit(const signed int x, const signed int y, const unsig
 	
 	/*TODO: We can do better :-)*/
 	Sint16 d = width<height ? width : height;
-//	d = 3 - (radius<<1); WTF?
-	Sint16 diagonalInc = 10 - (radius<<2);
+//	d = 3 - (radius*2); WTF?
+	Sint16 diagonalInc = 10 - (radius*4);
 
 	/*Rectangles*/
-	Sint16 dx = width - (radius<<1);
+	Sint16 dx = width - (radius*2);
 	Sint16 Xcenter = x+radius;
-	Sint16 dy = height - (radius<<1);
+	Sint16 dy = height - (radius*2);
 	Sint16 Ycenter = y+radius;
 
 	/*Centers*/
@@ -2022,9 +1985,9 @@ void DC::DrawEmptyRound_8bit(const signed int x, const signed int y, const unsig
 		}while( (i-=4) > 0 );					 
 	}
 	
-/*	unsigned int */i = 0; //TODO
+	i = 0;
 
-	while (i < ((signed int)(radius))) 
+	while (i < radius) 
 	{
 		*((Uint8*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (Xcenter - radius))) = col;
 		*((Uint8*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (Xcenter - i))) = col;
@@ -2072,13 +2035,13 @@ void DC::DrawEmptyRound_16bit(const signed int x, const signed int y, const unsi
 
 	/*TODO: We can do better :-)*/
 	d = width<height ? width : height;
-//	d = 3 - (radius<<1); WTF?
-	diagonalInc = 10 - (radius<<2);
+//	d = 3 - (radius*2); WTF?
+	diagonalInc = 10 - (radius*4);
 
 	/*Rectangles*/
-	dx = width - (radius<<1);
+	dx = width - (radius*2);
 	Xcenter = x+radius;
-	dy = height - (radius<<1);
+	dy = height - (radius*2);
 	Ycenter = y+radius;
 
 	/*Centers*/
@@ -2128,23 +2091,19 @@ void DC::DrawEmptyRound_16bit(const signed int x, const signed int y, const unsi
 				*(Uint16*)p1 = col; p1+=surface->pitch;
 		}while( (i-=4) > 0 );					 
 	}
-	
-/*	unsigned int */i = 0; //TODO
 
-	while (i < ((signed int)(radius))) 
+
+	i = 0;
+	while (i < (signed int)radius)
 	{
 		*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (Xcenter - radius)*2)) = col;
 		*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (Xcenter - i)*2)) = col;
-
 		*((Uint16*)((Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (X2center + i)*2)) = col;
 		*((Uint16*)((Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (X2center + radius)*2)) = col;
-
 		*((Uint16*)((Uint8*)surface->pixels + (Y2center+radius)*surface->pitch + (X2center + i)*2)) = col;
 		*((Uint16*)((Uint8*)surface->pixels + (Y2center+i)*surface->pitch + (X2center + radius)*2)) = col;
-
 		*((Uint16*)((Uint8*)surface->pixels + (Y2center+radius)*surface->pitch + (Xcenter - i)*2)) = col;
 		*((Uint16*)((Uint8*)surface->pixels + (Y2center+i)*surface->pitch + (Xcenter - radius)*2)) = col;
-
 		if (d >= 0) {
 			d += diagonalInc;
 			diagonalInc += 8;
@@ -2155,10 +2114,10 @@ void DC::DrawEmptyRound_16bit(const signed int x, const signed int y, const unsi
 		}
 		rightInc += 4;
 		++i;
-	}/*while*/
+	}
 	Unlock();
 
-}/*Draw_Round*/
+}
 
 void DC::DrawEmptyRound_24bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const
 {
@@ -2178,13 +2137,13 @@ void DC::DrawEmptyRound_24bit(const signed int x, const signed int y, const unsi
 
 /*TODO: We can do better :-)*/
 	d = width<height ? width : height;
-//	d = 3 - (radius<<1); WTF?
-	diagonalInc = 10 - (radius<<2);
+//	d = 3 - (radius*2); WTF?
+	diagonalInc = 10 - (radius*4);
 
 	/*Rectangles*/
-	dx = width - (radius<<1);
+	dx = width - (radius*2);
 	Xcenter = x+radius;
-	dy = height - (radius<<1);
+	dy = height - (radius*2);
 	Ycenter = y+radius;
 
 	/*Centers*/
@@ -2196,8 +2155,7 @@ void DC::DrawEmptyRound_24bit(const signed int x, const signed int y, const unsi
 	{
 		register Uint8* p;
 		register int k;
-		p = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + x * 3;k = corner;SDL_DO_DRAWING_X
-		p = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + (x+corner) * 3;k = dx;SDL_DO_DRAWING_X
+		p = (Uint8*)surface->pixels + (y+height-1) * surface->pitch + x * 3;k = dx+corner-1;SDL_DO_DRAWING_X
 		p = (Uint8*)surface->pixels + y * surface->pitch + Xcenter * 3;k = dx;SDL_DO_DRAWING_X
 	}
 // ------ END OF TOP AND LOWER HORIZONTAL LINE ------
@@ -2208,9 +2166,8 @@ void DC::DrawEmptyRound_24bit(const signed int x, const signed int y, const unsi
 		register Uint8* p;
 		register int k;
 		
-		p = (Uint8*)surface->pixels + Ycenter * surface->pitch + x * 3;k = dy;SDL_DO_DRAWING_Y
+		p = (Uint8*)surface->pixels + Ycenter * surface->pitch + x * 3;k = corner+dy-1;SDL_DO_DRAWING_Y
 		p = (Uint8*)surface->pixels + Ycenter * surface->pitch + (x+width) * 3;k = dy;SDL_DO_DRAWING_Y
-		p = (Uint8*)surface->pixels + (Ycenter+dy) * surface->pitch + x * 3;k = corner-1;SDL_DO_DRAWING_Y
 	}
 // ------ END OF LEFT AND RIGHT VERTICAL LINE ------
 
@@ -2224,12 +2181,10 @@ void DC::DrawEmptyRound_24bit(const signed int x, const signed int y, const unsi
 		p = (Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (Xcenter - radius)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
 		p = (Uint8*)surface->pixels + (Ycenter-radius)*surface->pitch + (X2center + i)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
 		p = (Uint8*)surface->pixels + (Ycenter-i)*surface->pitch + (X2center + radius)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+radius-1)*surface->pitch + (Xcenter - corner)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+i)*surface->pitch + (Xcenter - corner)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+radius-1)*surface->pitch + (X2center + i)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+i-1)*surface->pitch + (X2center + radius)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+corner-1)*surface->pitch + (Xcenter - radius)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
-		p = (Uint8*)surface->pixels + (Ycenter+corner-1)*surface->pitch + (Xcenter - i)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
+		p = (Uint8*)surface->pixels + (Y2center+radius)*surface->pitch + (Xcenter + i)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
+		p = (Uint8*)surface->pixels + (Y2center+i)*surface->pitch + (Xcenter + radius)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
+		p = (Uint8*)surface->pixels + (Y2center+radius)*surface->pitch + (X2center - i)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
+		p = (Uint8*)surface->pixels + (Y2center+i)*surface->pitch + (X2center - radius)*3; SDL_DRAW_PUTPIXEL_BPP_3_AUX
 
 		if (d >= 0) {
 			d += diagonalInc;
@@ -2264,13 +2219,13 @@ void DC::DrawEmptyRound_32bit(const signed int x, const signed int y, const unsi
 
 	/*TODO: We can do better :-)*/
 	d = width<height ? width : height;
-//	d = 3 - (radius<<1); WTF?
-	diagonalInc = 10 - (radius<<2);
+//	d = 3 - (radius*2); WTF?
+	diagonalInc = 10 - (radius*4);
 
 	/*Rectangles*/
-	dx = width - (radius<<1);
+	dx = width - (radius*2);
 	Xcenter = x+radius;
-	dy = height - (radius<<1);
+	dy = height - (radius*2);
 	Ycenter = y+radius;
 
 	/*Centers*/

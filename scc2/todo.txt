@@ -1,0 +1,2 @@
+todo: html output nur von Zeit die eine build order braucht ausgebenssss
+bei jeder generation zusaetzliche Sammel und Baugeschwindigkeit leicht veraendern, anarace neu kalkulieren und vergleichen

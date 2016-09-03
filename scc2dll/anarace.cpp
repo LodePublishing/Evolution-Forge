@@ -604,14 +604,17 @@ int EXPORT ANARACE::getProgramFitness(int IP)
 
 int EXPORT ANARACE::calculateFitness() // Fuer den Uebersichtsgraphen unten rechts
 {
-	int i,tpF;
+	int i,j,tpF;
 //	int bonus[MAX_LOCATIONS][UNIT_TYPE_COUNT]; // temporary data to check whether a bonus is already given (only applies if force > goal)
 //TODO: Nicht alle Einheiten am Ort? => Ort egal sein lassen aber zur Zeit hinzuzaehlen
 	// Nicht alle Einheiten ueberhaupt gebaut UND nicht alle am Ort => nur viertel Bonus fuer Einheiten die nicht am Ort sind
 	tpF=0;
+	int otpF=0;
+	
 	for(i=MAX_GOALS;i--;)
 		if(getPlayer()->goal->goal[i].count>0)
 		{
+			otpF=tpF;
 			if( /*((getPlayer()->goal->goal[i].location==0)&&(getPlayer()->goal->goal[i].count>getLocationForce(0,getPlayer()->goal->goal[i].unit))) || ( (getPlayer()->goal->goal[i].location>0)&&*/(getPlayer()->goal->goal[i].count>getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit)))
 			{
 					//total points: (Am Ort befindliche Einheiten + (Summe aller Locations(100-distance)/100)) / Goalcount
@@ -623,7 +626,7 @@ int EXPORT ANARACE::calculateFitness() // Fuer den Uebersichtsgraphen unten rech
 				else
 				{
 					bon=getPlayer()->goal->goal[i].count;
-					int j=1;
+					j=1;
 					while((j<MAX_LOCATIONS)&&(bon>getLocationForce(pMap->locationList[getPlayer()->goal->goal[i].location][j],getPlayer()->goal->goal[i].unit)))						 
 					{
 						sumup+=getLocationForce(pMap->locationList[getPlayer()->goal->goal[i].location][j],getPlayer()->goal->goal[i].unit)*(100-pMap->location[pMap->locationList[getPlayer()->goal->goal[i].location][j]].getDistance(getPlayer()->goal->goal[i].location));							 
@@ -656,29 +659,30 @@ int EXPORT ANARACE::calculateFitness() // Fuer den Uebersichtsgraphen unten rech
 				else tpF+=100;
 // does not work yet, if this is uncommented, sFitness occasionally jumps to -1222000 or something like that... :/
 // include the final location maybe...
-//			      if(getPlayer()->goal->goal[i].count<location[getPlayer()->goal->goal[i].location].force[getPlayer()->goal->goal[i].unit])
-//				      setsFitness(getsFitness()-location[getPlayer()->goal->goal[i].location].force[getPlayer()->goal->goal[i].unit])*(pStats[i].mins+pStats[i].gas));
+
 			}
+			fitnessCode[i]=tpF-otpF;
 		}
 // TODO: Check for very small 'goal.time' values, probably in scc.cpp!!
 																			    
 //Bonus: Sind noch Plaetze offen?
-																			    /* Absturz 8[
-		for(i=MAX_LOCATIONS;i--;)
+// TODO: Problem: wenn ich das reintu gibts so tolle Zacken auf der fitnesskurve...
+/*		for(i=MAX_LOCATIONS;i--;)
 		       for(j=UNIT_TYPE_COUNT;j--;)
 			       bonus[i][j]=0;
 																			    
 		for(i=MAX_GOALS;i--;)
-			if(location[getPlayer()->goal->goal[i].location].force[getPlayer()->goal->goal[i].unit]<getPlayer()->goal->goal[i].count)
-				bonus[getPlayer()->goal->goal[i].location][getPlayer()->goal->goal[i].unit]+=getPlayer()->goal->goal[i].count-location[getPlayer()->goal->goal[i].location].force[getPlayer()->goal->goal[i].unit];		 for(i=MAX_BUILDINGS;i--;)
-			if((building[i].RB>0)&&(bonus[building[i].type][building[i].location]>0))
+			if(getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit)<getPlayer()->goal->goal[i].count)
+				bonus[getPlayer()->goal->goal[i].location][getPlayer()->goal->goal[i].unit]+=getPlayer()->goal->goal[i].count-getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit);		 
+		for(i=MAX_BUILDINGS;i--;)
+			if((getBuildingRemainingBuildTime(i)>0)&&(bonus[getBuildingType(i)][getBuildingLocation(i)]>0))
 			{			 //erstmal ohne Zeit...
-				tpF+=((building[i].RB*100)/((location[building[i].location].force[building[i].type]+bonus[building[i].type][building[i].location])*pStats[building[i].type].BT));
+				tpF+=((getBuildingRemainingBuildTime(i)*100)/((getLocationForce(getBuildingLocation(i),getBuildingType(i))+bonus[getBuildingType(i)][getBuildingLocation(i)])*pStats[getBuildingType(i)].BT));
 																			    
-				if((getPlayer()->goal->goal[building[i].type].time>0)&&(location[building[i].location].force[building[i].type]==0))
-					tpF+=(building[i].RB*100*getPlayer()->goal->goal[building[i].type].time*location[0].force[i])/(getPlayer()->goal->goal[building[i].type].count*pStats[building[i].type].BT*ga->maxTime);
-				else					 tpF+=((building[i].RB*100)/(getPlayer()->goal->goal[building[i].type].count*pStats[building[i].type].BT));
-				bonus[building[i].location][building[i].type]--;
+				if((getPlayer()->goal->goal[getBuildingType(i)].time>0)&&(getLocationForce(getBuildingLocation(i),getBuildingType(i))==0))
+					tpF+=(getBuildingRemainingBuildTime(i)*100*getPlayer()->goal->goal[getBuildingType(i)].time*getLocationForce(0,i))/(getPlayer()->goal->goal[getBuildingType(i)].count*pStats[getBuildingType(i)].BT*ga->maxTime);
+				else					 tpF+=((getBuildingRemainingBuildTime(i)*100)/(getPlayer()->goal->goal[getBuildingType(i)].count*pStats[getBuildingType(i)].BT));
+				bonus[getBuildingLocation(i)][getBuildingType(i)]--;
 			}*/
 	return(tpF);
 }
@@ -686,11 +690,11 @@ int EXPORT ANARACE::calculateFitness() // Fuer den Uebersichtsgraphen unten rech
 
 int EXPORT ANARACE::calculateStep()
 {
-//ZERG: Larvenproduktion!  CREEP!
+//ZERG: CREEP!
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
 	int tm,tg;
 	int i,j;
-	if((!time)||(ready)||(!getIP())||(4*time<3*bestTime))
+	if((!time)||(ready)||(!getIP())||((bestTime*4<3*ga->maxTime)&&(4*time<3*bestTime)))
 	{
 		setLength(ga->maxLength-getIP());
 		if(ready)
@@ -698,6 +702,7 @@ int EXPORT ANARACE::calculateStep()
 		else setTimer(0);
 		for(i=0;i<MAX_LENGTH;i++)
 			phaenoCode[i]=getPlayer()->goal->toPhaeno(Code[getProgramDominant(i)][i]);
+		calculateFitness();
 		return(1);
 	}
 
@@ -803,7 +808,8 @@ int EXPORT ANARACE::calculateStep()
 							setProgramFacility(getBuildingIP(j),getBuildingFacility(j));
 						}
 						if(stat->facility2)
-							addLocationForce(getBuildingLocation(j),stat->facility2,-1);
+							addLocationForce(0/*getBuildingLocation(j)*/,stat->facility2,-1);
+//r_researches need location 0~~ TODO
 						break;
 					case NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE:
 						{
@@ -812,10 +818,10 @@ int EXPORT ANARACE::calculateStep()
 								addLocationAvailible(getBuildingLocation(j),getBuildingFacility(j),1);
 								if(getBuildingFacility(j)) setProgramFacility(getBuildingIP(j),getBuildingFacility(j));
 							}
-							if(stat->facility2) // special rule for upgrades!
+							if(stat->facility2) // special rule for upgrades! need 0 location
 							{
-								addLocationForce(getBuildingLocation(j),stat->facility2,-1);
-								addLocationAvailible(getBuildingLocation(j),stat->facility2,1);
+								addLocationForce(0/*getBuildingLocation(j)*/,stat->facility2,-1);
+								addLocationAvailible(0/*getBuildingLocation(j)*/,stat->facility2,1);
 							};
 						}
 						break;
@@ -872,14 +878,14 @@ int EXPORT ANARACE::calculateStep()
 					// ~~~~ Ja... geht schon... aber kann ja auch mal was anderes sein...
 				}
 					//evtl noch location==0 als 'egal wo' einfuehren
+                                lastcounter++;
+
 				//ANA~
 				setProgramIsBuilt(getBuildingIP(j),1);
 				setProgramLocation(getBuildingIP(j),getBuildingLocation(j));
 				setProgramBT(getIP(),getBuildingTotalBuildTime(j)); //~~~
-				lastcounter++;
 //			IP zeugs checken... length is immer 2 :/	 ??
 
-                //                ready=1;
                                 for(i=MAX_GOALS;i--;)
 // ist dieses goal belegt?
                                 if((getPlayer()->goal->goal[i].unit>0)&&
@@ -890,29 +896,16 @@ int EXPORT ANARACE::calculateStep()
                     //                    {
                                                 setFinalTime(i,ga->maxTime-time);
 // Did we reach the right number at the right time?
-                                                ready&=(((getPlayer()->goal->goal[i].time==0)||(getFinalTime(i)<=getPlayer()->goal->goal[i].time))&&(getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit)>=getPlayer()->goal->goal[i].count));
 //              i=MAX_GOALS;  TODO? koennen wir mehrere goals gleichzeitig erfuell0rn?
                   //                      }
 				ready=1;
-	                        for(i=MAX_GOALS;i--;)
+	                        for(i=MAX_GOALS;(i--)&&(ready);)
 				if(getPlayer()->goal->goal[i].count)
 					
         	                        ready&=(
 		(getPlayer()->goal->goal[i].count<=getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit))&&
 		( (getPlayer()->goal->goal[i].time>=getFinalTime(i)) || (getPlayer()->goal->goal[i].time==0)) 
 						);
-
-	
-/*				for(i=MAX_GOALS;i--;)
-					if((getPlayer()->goal->goal[i].unit>0)&&((getPlayer()->goal->goal[i].location==0)||(getBuildingLocation(j)==getPlayer()->goal->goal[i].location))&&(getBuildingType(j)==getPlayer()->goal->goal[i].unit)&&((getPlayer()->goal->goal[i].time==0)||(time<=getPlayer()->goal->goal[i].time)))
-						setFinalTime(getBuildingType(j),time);
-					
-				ready=1;
-				for(i=MAX_GOALS;i--;)
-					ready&=( ( ((getPlayer()->goal->goal[i].location==0)&&
-(getPlayer()->goal->goal[i].count<=getLocationForce(0,getPlayer()->goal->goal[i].unit)))||((getPlayer()->goal->goal[i].location>0)&&
-(getPlayer()->goal->goal[i].count<=getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit))) )&&
-((getPlayer()->goal->goal[i].time>=getFinalTime(i))||(getPlayer()->goal->goal[i].time==0)));*/
 			}
 		}
 	}
@@ -1022,6 +1015,8 @@ int ANARACE::buildGene(int unit)
 //Wenn nicht => +/- absteigen bis alle locations durch sind
 			int fac=0;
 			int tloc=1;
+			int ttloc=0;
+			int j=0;
 	    
 			if(lastcounter>0)
 			{
@@ -1029,25 +1024,33 @@ int ANARACE::buildGene(int unit)
 				tloc=last[lastcounter].location;
 			}
 
-			if((stat->facility2==0)||(getLocationAvailible(tloc,stat->facility2)>0))
+//			if((stat->facility2==0)||(getLocationAvailible(tloc,stat->facility2)>0))
 				for(fac=3;fac--;)
 					if( ((stat->facility[fac]>0)&&(getLocationAvailible(tloc,stat->facility[fac])>0)) || ((stat->facility[fac]==0)&&(fac==0))) 
 					{
 						ok=1;
 						break;
 					}
-/*			if(!ok)
-				for(tloc=1;tloc<MAX_LOCATIONS;tloc++)
-					if((stat->facility2==0)||(getLocationAvailible(tloc,stat->facility2)>0))
+		
+
+			j=1;
+			if(!ok)
+				while(j<MAX_LOCATIONS)
+				{
+					ttloc=pMap->locationList[tloc][j];
+//	                                if((stat->facility2==0)||(getLocationAvailible(ttloc,stat->facility2)>0))
 					{
 						for(fac=3;fac--;)
-							if( ((stat->facility[fac]>0)&&(getLocationAvailible(tloc,stat->facility[fac])>0)) || ((stat->facility[fac]==0)&&(fac==0)))
+							if( ((stat->facility[fac]>0)&&(getLocationAvailible(ttloc,stat->facility[fac])>0)) || ((stat->facility[fac]==0)&&(fac==0)))
 							{
+								tloc=ttloc;
 								ok=1;
 								break;
 							}
 						break;
-					}	*/
+					}
+					j++;
+				}	
 //				bewegliche Sachen ueberdenken...
 //					evtl zusaetzliche Eigenschaft 'speed' einbauen (muss sowieso noch...)... bei speed>0 ... mmmh... trifft aber auch nur auf scvs zu ... weil bringt ja wenig erst mit der hydra rumzulaufen und dann zum lurker... mmmh... aber waere trotzdem zu ueberlegen...
 //					auch noch ueberlegen, wenn z.B. mit scv ohne kommandozentrale woanders gesammelt wird...
@@ -1070,6 +1073,7 @@ int ANARACE::buildGene(int unit)
 				//	nr=MAX_BUILDINGS;
 				}
 				//TODO kommt hier nicht hin und wird trotzdem gebaut!??
+				setBuildingOnTheRun(nr,0);
 				setBuildingFacility(nr,stat->facility[fac]);
 				setBuildingLocation(nr,tloc);
 				setBuildingUnitCount(nr,1); //~~
@@ -1121,15 +1125,15 @@ int ANARACE::buildGene(int unit)
 					case NEEDED_UNTIL_COMPLETE_IS_LOST:
 						if(stat->facility2>0)
 						{
-							addLocationAvailible(tloc,stat->facility2,-1);
-							setSupply(getSupply()+pStats[stat->facility2].supply); // <- nicht noetig :/
+							addLocationAvailible(0/*tloc*/,stat->facility2,-1); //r_researches have to be at location 0
+					//		setSupply(getSupply()+pStats[stat->facility2].supply); // <- nicht noetig :/
 						}
 						if(stat->facility[fac]>0)
 							addLocationAvailible(tloc,stat->facility[fac],-1);
 						break;
 					case NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE:
 						if(stat->facility2>0)
-							addLocationAvailible(tloc,stat->facility2,-1);
+							addLocationAvailible(/*tloc*/0,stat->facility2,-1);// need loc 0
 							// no supply gain as the item is recovered... well or not? mmmh... ~~~~
 						if(stat->facility[fac]>0)
 							addLocationAvailible(tloc,stat->facility[fac],-1);
@@ -1150,7 +1154,7 @@ int ANARACE::buildGene(int unit)
 	}
 	else // unit > EXTRACTOR+1
 	{
-/*		int count=0;
+		int count=0;
 		switch(unit)
 		{
 		       case MOVE_ONE_1_FORWARD:count=1;break;
@@ -1171,25 +1175,36 @@ int ANARACE::buildGene(int unit)
 						setBuildingUnitCount(nr,last[lastcounter].count);
 					else setBuildingUnitCount(nr,getLocationAvailible(last[lastcounter].location,last[lastcounter].unit));
 					setBuildingFacility(nr,0);
-					setBuildingLocation(nr,last[lastcounter].location);
+        	                        if(last[lastcounter].location+count<1)
+	                                        count=MAX_LOCATIONS+count;
+                	                else if(last[lastcounter].location+count>=MAX_LOCATIONS)
+                        	                count=1+last[lastcounter].location+count-MAX_LOCATIONS;
+                                	else count=last[lastcounter].location+count;
+
+					setBuildingLocation(nr,count);
 					setBuildingType(nr,last[lastcounter].unit);
-					setBuildingRemainingBuildTime(nr,pMap->location[last[lastcounter].location].getDistance(last[lastcounter].location+count)*100/pStats[last[lastcounter].unit].speed);
+					setBuildingRemainingBuildTime(nr,pMap->location[last[lastcounter].location].getDistance(count)*100/pStats[last[lastcounter].unit].speed);
 					setBuildingOnTheRun(nr,1);
 					setBuildingIP(nr,getIP()); // ~ANA
 						// 2x Unit => send 8/All instead of just one unit there
-					if((getIP()>1)&&((Code[0][getIP()-1]==unit)||(Code[1][getIP()-1]==unit)))
+			
+/*					if((getIP()>1)&&((Code[0][getIP()-1]==unit)||(Code[1][getIP()-1]==unit)))
 					{
 		    							if(getLocationAvailible(last[lastcounter].location,last[lastcounter].unit)>=6)
 									setBuildingUnitCount(nr,6);
 								else setBuildingUnitCount(nr,getLocationAvailible(last[lastcounter].location,last[lastcounter].unit));
+        				                        setProgramIsBuilt(getIP(),1);
+	
 								setIP(getIP()-1);
 								//TODO dominance... und 8 checken... evtl weniger
-				       }
+				       }*/
+	                                setProgramIsBuilt(getIP(),1);
+
 					addLocationAvailible(last[lastcounter].location,getBuildingType(nr),-getBuildingUnitCount(nr));
 					addLocationForce(last[lastcounter].location,getBuildingType(nr),-getBuildingUnitCount(nr));
 						ok=1;
 				}
-		}*/
+		}
 	}
 					
 /*      else

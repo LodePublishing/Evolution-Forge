@@ -116,7 +116,7 @@ int SOUP::initSoup()
 		debug.toLog(0,"ERROR: (SOUP::initSoup) SOUP is already initialzed.");
 		return(0);
 	}
-	PRERACE::resetMapInitialized(); //todo: map wieder static machen
+	PRERACE::resetMapInitialized();
 	if(!(PRERACE::setMap(pMap)))
 	{
 		debug.toLog(0,"ERROR: (SOUP::initSoup) Map not initialized.");
@@ -124,7 +124,8 @@ int SOUP::initSoup()
 	}
 	t=MAX_PROGRAMS/(pMap->getMaxPlayer()-1);
 	
-//differenzieren, damit auch restarts/updates moeglich sind waehrend dem run!
+//differenzieren, damit auch restarts/updates moeglich sind waehrend dem run! TODO
+	PRERACE::markerCounter=1;
 	for(k=0;k<pMap->getMaxPlayer()-1;k++)
 	{
 		for(i=0;i<t;i++)
@@ -138,24 +139,20 @@ int SOUP::initSoup()
 	};
 	RACE::bestTime=0;
 	for(;k<MAX_PLAYER;k++)
-	{
 		anaplayer[k]=0;
-//		new ANARACE();
-//		anaplayer[k]->loadPlayer(1);
-	};
 	playerInitialized=1;
 	return(1);
 };
 
 
-/*int compare(const void* a,const void* b)
+int compare(const void* a,const void* b)
 {
-	if(( (*(RACE*)a).pFitness<(*(RACE*)b).pFitness)||(((*(RACE*)a).pFitness==(*(RACE*)b).pFitness)&&((*(RACE*)a).sFitness<(*(RACE*)b).sFitness)) || ( ((*(RACE*)a).pFitness==(*(RACE*)b).pFitness)&&((*(RACE*)a).sFitness==(*(RACE*)b).sFitness)&& ((*(RACE*)a).tFitness>=(*(RACE*)b).tFitness)) )
+	if(( (*(RACE*)a).getpFitness()<(*(RACE*)b).getpFitness())||(((*(RACE*)a).getpFitness()==(*(RACE*)b).getpFitness())&&((*(RACE*)a).getsFitness()<(*(RACE*)b).getsFitness())) || ( ((*(RACE*)a).getpFitness()==(*(RACE*)b).getpFitness())&&((*(RACE*)a).getsFitness()==(*(RACE*)b).getsFitness())&& ((*(RACE*)a).gettFitness()>=(*(RACE*)b).gettFitness())) )
 		return (1);
-	else if(( (*(RACE*)a).pFitness>(*(RACE*)b).pFitness)|| ((*(RACE*)a).sFitness>(*(RACE*)b).sFitness))
+	else if(( (*(RACE*)a).getpFitness()>(*(RACE*)b).getpFitness())|| ((*(RACE*)a).getsFitness()>(*(RACE*)b).getsFitness()))
 		return (-1);
 	else return(0);
-};*/
+};
 
 //TODO: Ueber Optionen einstellen, welche Fitness ueberhaupt bzw. wie stark gewertet wird (oder ob z.B. die Fitnesswerte zusammengeschmissen werden sollen etc.)
 
@@ -179,19 +176,64 @@ ANARACE* SOUP::newGeneration()
 	}
 	if(anaplayer[0]->getRun()>=ga->maxRuns) //~~
 		return(0);
-//sauber	
-	t=MAX_PROGRAMS/(pMap->getMaxPlayer()-1);
-
-	for(i=0;i<t;i++)
-	{
-		for(k=0;k<pMap->getMaxPlayer();k++)
-			for(l=0;l<pMap->getMaxLocations();l++) // War -1 ??
-				for(m=0;m<UNIT_TYPE_COUNT;m++)
+	
+// Map initialisieren und fitness errechnen
+        t=MAX_PROGRAMS/(pMap->getMaxPlayer()-1);
+        for(i=0;i<t;i++)
+        { 
+		for(k=0;k<pMap->getMaxPlayer();k++) //warum -1? nochmal pruefen... TODO
+		{
+			for(l=0;l<pMap->getMaxLocations();l++)
+				for(m=0;m<UNIT_TYPE_COUNT;m++) //TODO: Grenzen runter ... brauchts nur gasscv oder so
 				{
-					player[0]->setMapLocationForce(k,l,m,pMap->location[l].force[k][m]);
+					player[0]->setMapLocationForce(k,l,m,pMap->location[l].force[k][m]); //in player[k]->setLocation aendern?
 					player[0]->setMapLocationAvailible(k,l,m,pMap->location[l].force[k][m]);
 				}
+	                switch(player[k]->getPlayer()->goal->getRace())
+        	        {
+                	        case TERRA:
+					for(j=74;j<94;j++) 
+					{
+						player[k]->setLocationForce(0,j,1);
+						player[k]->setLocationAvailible(0,j,1);
+					}
+					for(j=95;j<100;j++)
+					{
+						player[k]->setLocationForce(0,j,3);
+						player[k]->setLocationAvailible(0,j,1);
+						//temporary researches and upgrades
+					};break;
+	                        case PROTOSS:
+                                        for(j=74;j<95;j++)
+                                        {
+						player[k]->setLocationForce(0,j,1);
+	                                        player[k]->setLocationAvailible(0,j,1);
+                                        }
+                                        for(j=96;j<100;j++)                                         
+					{
+                                                player[k]->setLocationForce(0,j,3);
+                                                player[k]->setLocationAvailible(0,j,1);
+                                                //temporary researches and upgrades
+                                        };break;
+        	                case ZERG:
+					for(j=75;j<92;j++)
+                                        {
+                                                 player[k]->setLocationForce(0,j,1);
+                                                 player[k]->setLocationAvailible(0,j,1);
+                                        }                                         
+					for(j=93;j<97;j++)
+                                        {
+                                                player[k]->setLocationForce(0,j,3);
+                                                player[k]->setLocationAvailible(0,j,1);
+                                               //temporary researches and upgrades
+                                        };break;
+                	        default:break;//error ?
+	                }
+		}
 
+//        t=MAX_PROGRAMS/(pMap->getMaxPlayer()-1);
+//        for(i=0;i<t;i++)
+//        { BUG in GDB wenn das hier so is?
 		for(k=0;k<pMap->getMaxPlayer()-1;k++)
 		{
 			player[k*t+i]->resetData();
@@ -208,10 +250,8 @@ ANARACE* SOUP::newGeneration()
 				complete&=player[k*t+i]->calculateStep();
 		}
 	}
-//ende sauber
+
 //NOW: all pFtiness of the players are calculated
-
-
 	for(k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
 	{
 		
@@ -226,11 +266,8 @@ ANARACE* SOUP::newGeneration()
 					player[i]=player[j];
 					player[j]=temp;
 				}
-																			    
+
 //NOW: all players are sorted
-
-														    
-
 //	      qsort(player[0],MAX_PROGRAMS/2,sizeof(RACE),compare);
 //	      qsort(player[MAX_PROGRAMS/2],MAX_PROGRAMS/2,sizeof(RACE),compare);
 
@@ -240,7 +277,11 @@ ANARACE* SOUP::newGeneration()
 			for(j=0;j<MAX_LENGTH;j++)
 			{
 				player[k*t+l]->Code[0][j]=player[k*t]->Code[0][j];
+                                player[k*t+l]->Marker[0][j]=player[k*t]->Marker[0][j];
+
 				player[k*t+l]->Code[1][j]=player[k*t]->Code[1][j];
+                                player[k*t+l]->Marker[1][j]=player[k*t]->Marker[1][j];
+
 //			      memcpy(player[t]->Code[0],player[0]->Code[0],MAX_LENGTH); 
 //			      memcpy(player[t]->Code[1],player[0]->Code[1],MAX_LENGTH);
 			}
@@ -250,12 +291,13 @@ ANARACE* SOUP::newGeneration()
 
 
 	newcalc=0;
-	
 	for(k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
 	{
 		if((player[k*t]->getpFitness()>anaplayer[k]->getMaxpFitness())||
+
 		  ((player[k*t]->getpFitness()>=anaplayer[k]->getMaxpFitness())
 		 &&(player[k*t]->getsFitness()>anaplayer[k]->getMaxsFitness()))||
+
 		  ((player[k*t]->getpFitness()>=anaplayer[k]->getMaxpFitness())
 		 &&(player[k*t]->getsFitness()>=anaplayer[k]->getMaxsFitness())
 		 &&(player[k*t]->gettFitness()>anaplayer[k]->getMaxtFitness())))
@@ -278,8 +320,13 @@ ANARACE* SOUP::newGeneration()
 			newcalc=1;
 			for(i=0;i<MAX_LENGTH;i++)
 			{
+// assign the 'best of breed' to anaplayer
 				anaplayer[k]->Code[0][i]=player[t*k]->Code[0][i];
+                                anaplayer[k]->Marker[0][i]=player[t*k]->Marker[0][i];
+
 				anaplayer[k]->Code[1][i]=player[t*k]->Code[1][i];
+                                anaplayer[k]->Marker[1][i]=player[t*k]->Marker[1][i];
+
 				//memcpy(anaplayer[j]->Code[0],player[j*MAX_PROGRAMS/2]->Code[0],MAX_LENGTH*4);
 				//memcpy(anaplayer[j]->Code[1],player[j*MAX_PROGRAMS/2]->Code[1],MAX_LENGTH*4);
 			}
@@ -335,6 +382,49 @@ ANARACE* SOUP::newGeneration()
 					anaplayer[0]->setMapLocationForce(k,l,m,pMap->location[l].force[k][m]);
 					anaplayer[0]->setMapLocationAvailible(k,l,m,pMap->location[l].force[k][m]);
 				}
+
+		for(k=0;k<pMap->getMaxPlayer()-1;k++) //TODO -1??
+			switch(anaplayer[k]->getPlayer()->goal->getRace())
+                        {
+                                case TERRA:
+                                        for(j=74;j<94;j++)
+                                        {
+                                                anaplayer[k]->setLocationForce(0,j,1);
+                                                anaplayer[k]->setLocationAvailible(0,j,1);
+                                        }
+                                        for(j=95;j<100;j++)
+                                        {
+                                                anaplayer[k]->setLocationForce(0,j,3);
+                                                anaplayer[k]->setLocationAvailible(0,j,1);
+                                                //temporary researches and upgrades
+                                        };break;
+                                case PROTOSS:
+                                        for(j=74;j<95;j++)
+                                        {
+                                                anaplayer[k]->setLocationForce(0,j,1);
+                                                anaplayer[k]->setLocationAvailible(0,j,1);
+                                        }
+                                        for(j=96;j<100;j++)
+                                        {
+                                                anaplayer[k]->setLocationForce(0,j,3);
+                                                anaplayer[k]->setLocationAvailible(0,j,1);
+                                                //temporary researches and upgrades
+                                        };break;
+                                case ZERG:
+                                        for(j=75;j<92;j++)
+                                        {
+                                                 anaplayer[k]->setLocationForce(0,j,1);
+                                                 anaplayer[k]->setLocationAvailible(0,j,1);
+                                        }
+                                        for(j=93;j<97;j++)
+                                        {
+                                                anaplayer[k]->setLocationForce(0,j,3);
+                                                anaplayer[k]->setLocationAvailible(0,j,1);
+                                               //temporary researches and upgrades
+                                        };break;
+                                default:break;//error ?
+                        }
+
 
 		for(k=0;k<pMap->getMaxPlayer()-1;k++)
 		{

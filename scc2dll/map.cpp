@@ -32,7 +32,10 @@ int MAP::getMaxPlayer()
 int MAP::setName(const char* line)
 {
 	if(!line)
+	{
+		debug.toLog(0,"DEBUG: (MAP::setName): Variable line not initialized [%i].",line);
 		return(0);
+	}
 	strcpy(name,line);
 	return(1);
 };
@@ -132,7 +135,6 @@ MAP::MAP()
 
 MAP::~MAP()
 {
-	//21 mal!?
 	delete[] name;
 };
 

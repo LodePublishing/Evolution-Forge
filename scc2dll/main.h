@@ -15,7 +15,7 @@
 #define MAX_RACE 2
 #define MIN_RACE 0
 
-#define MAX_LOCATIONS 10
+#define MAX_LOCATIONS 9
 #define MIN_LOCATIONS 0 //this does not mean that maps with 0 locations can exist....
 
 #define MAX_PLAYER 3
@@ -176,6 +176,7 @@ struct GOAL
 
 #define VESPENE_GEYSIR 			72 
 #define MINERALS			73
+
 #define R_STIM_PACKS 			74
 #define R_LOCKDOWN 			75
 #define R_EMP_SHOCKWAVE 		76
@@ -369,7 +370,7 @@ struct GOAL
 //#define NULL                          60
 //#define NULL                          61
 //#define NULL                          62
-//#define NULL				63
+//#define CREEP				63
 #define EXTRACTOR 			64 // <- must be set constant to 64
 #define GAS_DRONE			65
 
@@ -384,6 +385,7 @@ struct GOAL
 //#define VESPENE_GEYSIR 		72 <- already defined in terra unit list
 //#define MINERALS			73 <- already defined in terra unit list
 #define BREAK_UP_BUILDING		74
+
 #define R_VENTRAL_SACKS                 75
 #define R_ANTENNAE                      76
 #define R_PNEUMATIZED_CARAPACE          77
@@ -508,10 +510,11 @@ const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 {"Ship Plating",266,15000,15000,  0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_SHIP_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0},
 {"Ship Weapons",266,10000,10000,  0, 5000, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_SHIP_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0},
 {"Refinery", 40,10000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {SCV, 0, 0}, 0/*VESPENE_GEYSIR*/, NEEDED_UNTIL_COMPLETE/*_IS_LOST*/, 0, 0}, //~~~ueberlegen...
-{"Gas SCV",  3,    0,    0,  1, 0, {0, 0}, {0 ,0, 0}, {REFINERY, 0, 0}, SCV, NEEDED_ONCE_IS_LOST, 0, 0},	//~~~~
-{"      Window move+++",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
-{"        Window move+",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
-{"        Window move-",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
+{"Gas SCV",  3,    0,    0,  1, 0, {0, 0}, {0 ,0, 0}, {SCV/*REFINERY*/, 0, 0}, /*SCV*/0, /*NEEDED_ONCE_*/IS_LOST, 0, 0},	//~~~~
+//TODO: Move Befehle an den Anfang der Befehlskette (wegen code[0]>code[1]...) TODO
+{"Move 3 Forward",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
+{"Move 1 Forward",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
+{"Move 1 Backward",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"    Window move prev",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"      Move from here",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"        Move to here",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
@@ -613,7 +616,7 @@ const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 {"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"         Assimilator", 40,10000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {PROBE, 0, 0}, /*VESPENE_GEYSIR*/0, NEEDED_ONCE/*_IS_LOST*/, 0, 0},
-{"           Gas Probe",  3,    0,    0,  1, 0, {0, 0}, {0 ,0, 0}, {ASSIMILATOR, 0, 0}, PROBE, NEEDED_ONCE_IS_LOST, 0, 0},	//Needed once? ~~~
+{"           Gas Probe",  3,    0,    0,  1, 0, {0, 0}, {0 ,0, 0}, {PROBE/*ASSIMILATOR*/, 0, 0}, 0/*PROBE*/, /*NEEDED_ONCE_*/IS_LOST, 0, 0},	//Needed once? ~~~ wenn hier ne Aenderung, Facility2 in race und anarace wieder auf location availible checken !TODO
 {"      Window move+++",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"        Window move+",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"        Window move-",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
@@ -668,7 +671,7 @@ const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 {"               Queen", 50,10000,10000,  2, 0, {0, 0}, {QUEENS_NEST ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100},
 {"             Scourge", 30, 2500, 7500,  1, 0, {0, 0}, {SPIRE ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, SCOURGE, 100},
 {"            Devourer", 40,10000, 5000,  2, 0, {0, 0}, {GREATER_SPIRE ,0, 0}, {MUTALISK, 0, 0}, 0, IS_LOST, 0, 100}, 
-{"            Hatchery",120,30000,    0, -1, 0, {0, 0}, {0 ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, LARVA, 0}, //create 1 Larva when done :-)
+{"            Hatchery",120,30000,    0, -1, 0, {0, 0}, {0 ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, LARVA, 0}, //create 1 Larva when done :-) TODO: add another "create" field for "CREEP"
 {"                Lair",100,15000,10000, -1, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {HATCHERY, 0, 0}, 0, IS_LOST, 0, 0},
 {"                Hive",120,20000,15000, -1, 0, {0, 0}, {QUEENS_NEST ,0, 0}, {LAIR, 0, 0}, 0, IS_LOST, 0, 0},
 {"         Nydus Canal", 40,15000,    0,  0, 0, {0, 0}, {HIVE ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0},
@@ -718,8 +721,8 @@ const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 {"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
-{"           Extractor", 40, 5000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {/*VESPENE_GEYSIR*/DRONE, 0, 0}, 0/*DRONE*/, IS_LOST, 0, 0}, //~~
-{"           Gas Drone",  3,    0,    0,  1, 0, {0, 0}, {0 ,0, 0}, {EXTRACTOR, 0, 0}, DRONE, NEEDED_ONCE_IS_LOST, 0, 0}, //~~~~
+{"           Extractor", 40, 5000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {/*VESPENE_GEYSIR*/DRONE, 0, 0}, 0/*DRONE*/, IS_LOST, 0, 0}, //~~ //TODO HAE?
+{"           Gas Drone",  3,    0,    0,  1, 0, {0, 0}, {0 ,0, 0}, {/*EXTRACTOR*/DRONE, 0, 0}, /*DRONE*/0, /*NEEDED_ONCE_*/IS_LOST, 0, 0}, //~~~~
 
 {"      Window move+++",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"        Window move+",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},

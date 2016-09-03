@@ -300,7 +300,8 @@ int EXPORT PRERACE::addLocationAvailible(int loc, int type, int num)
 	}
 	
 	location[loc].availible[type]+=num;
-	location[0].availible[type]+=num;
+	if(loc>0) //sonst waers ja doppelt...
+		location[0].availible[type]+=num;
 	return(1);
 };
 																			    
@@ -328,7 +329,8 @@ int EXPORT PRERACE::addLocationForce(int loc, int type, int num)
 	}
 
 	location[0].force[type]+=num;
-	location[loc].force[type]+=num;
+	if(loc>0)
+		location[loc].force[type]+=num;
 	return(1);
 };
 
@@ -769,19 +771,20 @@ int EXPORT PRERACE::adjustMineralHarvest(int location)
 		return(0);
 	}
 	int i,j;
+	//TODO Zerg hatchery,lair etc.
 	if((location==0)||((!getLocationForce(location,COMMAND_CENTER))&&(!getMapLocationForce(0,location,MINERALS))))
 	{
 		for(j=45;j--;)
 			setMineralHarvestPerSecond(location,j,0);
 	}
-	/*else if((!pMap->location[num].force[playerNum][COMMAND_CENTER])&&(pMap->location[num].force[0][MINERALS]))
-	{
+//	else if((!pMap->location[num].force[playerNum][COMMAND_CENTER])&&(pMap->location[num].force[0][MINERALS]))
+//	{
 	//nach naehestem command_center suchen
-	}
-	else if((pMap->location[num].force[playerNum][COMMAND_CENTER])&&(!pMap->location[num].force[0][MINERALS]))
-	{
+//	}
+//	else if((pMap->location[num].force[playerNum][COMMAND_CENTER])&&(!pMap->location[num].force[0][MINERALS]))
+//	{
 	//nach naehesten Mineralien suchen
-	}*/
+//	}
 
 	//TODO: Wenn 2 SPieler an einem sammeln, beide einberechnen!
 	else if(player->getBasicMineralHarvestPerSecond(1)>0) //???
@@ -1283,6 +1286,7 @@ PRERACE::~PRERACE()
 //void PRERACE::resetMapInitialized();
 //int PRERACE::setMap(MAP* map);
 //MAP* PRERACE::getMap();
+int PRERACE::markerCounter;
 MAP* PRERACE::pMap;
 GA* PRERACE::ga;
 int PRERACE::mapInitialized;

@@ -5,7 +5,10 @@
 int MAP_LOCATION_BASIC::setName(const char* line)
 {
 	if(!line)
+	{
+                debug.toLog(0,"DEBUG: (MAP_LOCATION::setMineralDistance): Value line not initialized [%i].",line);
 		return(0);
+	}
 	strcpy(name,line);
 	return(1);
 };
@@ -23,11 +26,16 @@ int MAP_LOCATION_BASIC::setMineralDistance(int num)
 
 int MAP_LOCATION_BASIC::setDistance(int num,int dist)
 {
-	if((num<0)||(num>=MAX_LOCATIONS)||(dist<0)||(dist>500))
-	{
-		debug.toLog(0,"DEBUG: (MAP_LOCATION::setDistance): Value [%i/%i] out of range.",num,dist);
-		return(0);
-	}
+        if((num<0)||(num>=MAX_LOCATIONS))
+        {
+                debug.toLog(0,"DEBUG: (MAP_LOCATION::setDistance): Value [%i] out of range.",num);
+                return(0);
+        }
+        if((distance[num]<0)||(distance[num]>500))
+        {
+                debug.toLog(0,"DEBUG: (MAP_LOCATION::setDistance): Value distance[%i] out of range [%i].",num,distance[num]);
+                return(0);
+        }
 	distance[num]=dist;
 	return(1);
 };
@@ -56,7 +64,7 @@ int MAP_LOCATION_BASIC::getDistance(int num)
 	}
 	if((distance[num]<0)||(distance[num]>500))
 	{
-		debug.toLog(0,"DEBUG: (MAP_LOCATION::getDistance): Variable not initialized [%i].",distance[num]);
+		debug.toLog(0,"DEBUG: (MAP_LOCATION::getDistance): Value distance[%i] out of range [%i].",num,distance[num]);
 		return(0);
 	}
 	return(distance[num]);

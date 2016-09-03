@@ -81,6 +81,8 @@ private:
 	int ftime[MAX_GOALS]; //when the goal is reached / when the last item is produced (ALL locations...*/
 	int length;
 public:
+        static int markerCounter;
+
 	static int bestTime; // cancel calculation if this calculation is worse than 25%
 																		    
 	int getMapLocationAvailible(int player, int loc, int type);
@@ -106,6 +108,7 @@ public:
 	int calculated;
 
 	int Code[2][MAX_LENGTH];
+	int Marker[2][MAX_LENGTH];
 	int setpStats(const UNIT_STATISTICS* pStats);
 
 	static MAP* getMap();

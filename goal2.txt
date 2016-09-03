@@ -1,7 +1,0 @@
-"@GOAL"
-"Name" "4 Wraith rush"
-"@RACE" "Terra"
-"Wraith" "4" "0" "0"
-"Cloaking Field" "1" "0" "0"
-"@END"
-"@END"

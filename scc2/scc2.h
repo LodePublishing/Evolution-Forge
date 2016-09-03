@@ -1,5 +1,5 @@
-#ifndef __SCC2_H
-#define __SCC2_H
+#ifndef __EC2_H
+#define __EC2_H
 
 #include "wx/wxprec.h"
 #ifndef WX_PRECOMP
@@ -8,7 +8,7 @@
                                                                                                                                                             
 // the application icon (under Windows and OS/2 it is in resources)
 #if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
-    #include "/home/clawg/work/sc1036/sc/mondrian.xpm"
+    #include "/home/clawg/work/sc1037/sc/icon.xpm"
 //    #include "scc.png"
 #endif
 
@@ -16,34 +16,34 @@
 #include <wx/button.h>
 enum
 {
-        SCC_Version=1006,
+        EC_Version=107,
     // menu items
-        SCC_Open=1,
-        SCC_Start=2,
-        SCC_Stop=3,
-        SCC_Quit = 4,
-        SCC_GeneralSettings = 5,
-        SCC_SettingsDialog=101,
+        EC_Open=1,
+        EC_Start=2,
+        EC_Stop=3,
+        EC_Quit = 4,
+        EC_GeneralSettings = 5,
+        EC_SettingsDialog=101,
                                                                                 
-        SCC_SpinMaxTime=301,
-        SCC_SpinMaxTimeOut=302,
-        SCC_SpinMaxLength=303,
-        SCC_SpinMaxRuns=304,
-        SCC_SpinMaxGenerations=305,
-        SCC_SpinBreedFactor=306,
-        SCC_SpinCrossOver=307,
-        SCC_CheckPreprocess=308,
+        EC_SpinMaxTime=301,
+        EC_SpinMaxTimeOut=302,
+        EC_SpinMaxLength=303,
+        EC_SpinMaxRuns=304,
+        EC_SpinMaxGenerations=305,
+        EC_SpinBreedFactor=306,
+        EC_SpinCrossOver=307,
+        EC_CheckPreprocess=308,
                                                                                 
-        SCC_GoalCreate=401,
-        SCC_GoalImport=402,
+        EC_GoalCreate=401,
+        EC_GoalImport=402,
                                                                                 
-        SCC_MapCreate=501,
-        SCC_MapImport=502,
+        EC_MapCreate=501,
+        EC_MapImport=502,
                                                                                 
     // it is important for the id corresponding to the "About" command to have
     // this standard value as otherwise it won't be handled properly under Mac
     // (where it is special and put into the "Apple" menu)
-    SCC_About = wxID_ABOUT
+    EC_About = wxID_ABOUT
 };
 
 #ifdef __WIN32__                                                                                
@@ -52,14 +52,38 @@ const int FONT_SIZE=8;
 const int FONT_SIZE=9;
 #endif
 
+
+// this is mainly for for io to display some of the output
+const char error_message[ERROR_MESSAGES][25]=
+{
+        "possible.", //= OK
+        "enough minerals.", 
+        "enough gas.",
+        "supply is satisfied.",
+        "prerequisite",
+        "facility",
+        "hell freezes.", //timeout
+        "SC2 comes out." //unknown
+};
+/*char error_small_message[ERROR_MESSAGES]=
+{
+        'O','M','G','S','P','F','T','U'
+};*/
+                                                                                    
+
+
 const int SECOND_COLOUMN=290;
 const int SECOND_COLOUMN_WIDTH=250;
 const int THIRD_COLOUMN=570;
-const int BUILD_ORDER_NUMBER=40;
-const int FORCE_LIST_NUMBER=25;
-const int FORCE_LIST_LENGTH=FORCE_LIST_NUMBER*(FONT_SIZE+5)+3;
-const int BUILD_ORDER_GRAPH_NUMBER=10; const int BUILD_ORDER_GRAPH_LENGTH=BUILD_ORDER_GRAPH_NUMBER*(FONT_SIZE+5)+3+FORCE_LIST_LENGTH;
-const int MIN_HEIGHT=3;
+const int BUILD_ORDER_NUMBER=37;
+const int FORCE_LIST_NUMBER=23;
+
+const int BUILD_ORDER_GRAPH_LENGTH=FORCE_LIST_NUMBER*(FONT_SIZE+5)+3;//BUILD_ORDER_GRAPH_NUMBER*(FONT_SIZE+5)+3+FORCE_LIST_LENGTH;
+
+const int FORCE_LIST_LENGTH=60+3+BUILD_ORDER_GRAPH_LENGTH;//FORCE_LIST_NUMBER*(FONT_SIZE+5)+3;
+const int BUILD_ORDER_GRAPH_NUMBER=10; 
+//const int BUILD_ORDER_GRAPH_LENGTH=BUILD_ORDER_GRAPH_NUMBER*(FONT_SIZE+5)+3+FORCE_LIST_LENGTH;
+const int MIN_HEIGHT=2;
 
 // Define a new application type, each program should derive a class from wxApp
 class MyApp : public wxApp
@@ -82,6 +106,29 @@ struct BOLOG
 
 
 
+struct OLDORDER
+{
+	
+	int blend;
+	int blendTarget;
+
+//build order list
+	int x,y; //current x,y
+	int targetx,targety;
+	int dx,dy;
+
+//build order graph
+	int bx,by;
+	int targetbx,targetby;
+
+	int height,width;
+	int targetheight,targetwidth;
+	
+	int unit,mins,gas,time,location,needSupply,haveSupply,forceFacilityCount,availibleFacilityCount,successType,successUnit,facility,code,forceCount;
+	int marker,bonew;
+//	int mins, color  etc.
+};
+
 class MyDCWindow : 
 //public wxWindow
 public wxScrolledWindow
@@ -91,6 +138,7 @@ public:
         void OnEraseBackground(wxEraseEvent& event);
         void OnPaint(wxPaintEvent& event);
         void OnIdle(wxIdleEvent& WXUNUSED(event));
+	void OnMouseMove(wxMouseEvent& event);
         SETTINGS settings;
 	int run;
 private:
@@ -98,10 +146,15 @@ private:
         BOLOG bolog[MAX_LENGTH];
         BOLOG globalForcelog[UNIT_TYPE_COUNT];
         wxBitmap bmpGraph,bmpTimer,bmpBack,bmpBack2;
-        void showGraph(wxDC* dec,int* data,int max,wxColour col);
-        wxMemoryDC* dc;
+        void showGraph(int* data,int max,wxColour col);
+        void showForceListBack();
+	void showTimer();
+	void showProgramGraph();
+	wxMemoryDC* dc;
         ANARACE* anarace;
-        int update;
+        
+	int infoWindow,infoWindowX,infoWindowY;
+	int update;
         int sFitness[200];
         int pFitness[200];
         int tFitness[200];
@@ -110,8 +163,11 @@ private:
 	int length[200];
         int time[200];
         int force[200];
+
         int oldTimeCounter[20],oldTime[20];
 	
+	OLDORDER* oldOrder[MAX_LENGTH*50];
+//	int oldMarker[MAX_LENGTH];
 
 //	int oldBuildOrders[BUILD_ORDER_NUMBER];
 	int oldForceList[FORCE_LIST_NUMBER];
@@ -144,6 +200,7 @@ public:
 	void OnStart(wxCommandEvent& event);
 	void OnStop(wxCommandEvent& event);
 	void OnGeneralSettings(wxCommandEvent& event);
+
 	
         void OnSettingsDialogApply();
 

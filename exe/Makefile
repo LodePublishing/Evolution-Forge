@@ -23,7 +23,7 @@ RESFLAGS=--include-dir $(WXPATH)/include --define __WIN32__ --define __WIN95__ -
 
 CPPFLAGS = -I$(WXPATH)/lib/wx/include/msw-2.4-i386-mingw32msvc -I$(WXPATH)/include -I$(WXPATH)/src/regex -I$(WXPATH)/src/zlib -I$(WXPATH)/src/png -I$(WXPATH)/src/jpeg -I$(WXPATH)/src/tiff -D_WIN32_IE=0x400 $(EXTRADEFS)  -D__WXMSW__ -mthreads -DWXUSINGDLL=1 -I$(DLLPATH)
 
-CXXFLAGS = $(CPPFLAGS) -fno-pcc-struct-return -MMD -mthreads -Wall
+CXXFLAGS = $(CPPFLAGS) -fno-pcc-struct-return -MMD -mthreads -Wall -O3
 RESCOMP=i386-mingw32msvc-windres
 PICFLAGS = -UWXUSINGDLL -DWXMAKINGDLL=1 -D_DLL=1 -D_WINDLL=1
 

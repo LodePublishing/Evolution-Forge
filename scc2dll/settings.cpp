@@ -941,20 +941,18 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 			}
 			else if(mode==4) // PLAYER Block in LOCATION Block
 			{
-				//TODO: MAPDaten in seperate Mapfiles!
 				if(!strcmp(item,"@END"))
 					mode=2;
 				else
 				{
-					for(i=0;i<UNIT_TYPE_COUNT;i++) 
+					for(i=0;i<=UNIT_TYPE_COUNT;i++)  // TODO reicht eigentlich nur bis GAS SCV... aber dann auch unten die abbruchbedingung anguggn
 						if(strstr(stats[map[getMapCount()].player[modePlayer].getRace()][i].name,item)!=NULL)
 						{
                                                         map[getMapCount()].location[0].force[modePlayer][i]=value1;
 							map[getMapCount()].location[modeLocation-1].force[modePlayer][i]=value1;
-			//TODO: Begrenzungen bei researches und upgrades und nichtbaubaren Sachen!
 							i=UNIT_TYPE_COUNT+1;
 							break;
-						}	
+						}
 				};
 				if(i!=UNIT_TYPE_COUNT+1) debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: No matching unit name.",mapFile,ln,item);
 			}

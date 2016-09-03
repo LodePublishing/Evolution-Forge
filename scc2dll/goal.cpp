@@ -9,9 +9,9 @@ const char* EXPORT GOAL_ENTRY::getName()
 
 int EXPORT GOAL_ENTRY::getRace()
 {
-	if((race<0)||(race>2))
+	if((race<MIN_RACE)||(race>MAX_RACE))
 	{
-		debug.toLog(0,"DEBUG: (EXPORT GOAL_ENTRY::getRace): Variable not initialized [%i].",race);
+		debug.toLog(0,"DEBUG: (GOAL_ENTRY::getRace): Variable not initialized [%i].",race);
 		return(0);
 	}
 	return race;
@@ -35,7 +35,7 @@ int EXPORT GOAL_ENTRY::setRace(int num)
 {
 	if((num<0)||(num>2))
 	{
-		debug.toLog(0,"DEBUG: (EXPORT GOAL_ENTRY::setRace): Value [%i] out of range.",num);
+		debug.toLog(0,"DEBUG: (GOAL_ENTRY::setRace): Value [%i] out of range.",num);
 		return(0);
 	}
 	pStats=&(stats[race=num][0]);
@@ -56,11 +56,11 @@ int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption)
 	for(i=0;i<UNIT_TYPE_COUNT;i++)
 		oldGoal[i]=allGoal[i];
 	
-        isBuildable[MOVE_ONE_1_FORWARD]=1;isVariable[MOVE_ONE_1_FORWARD]=1;
-        isBuildable[MOVE_ONE_3_FORWARD]=1;isVariable[MOVE_ONE_3_FORWARD]=1;
-        isBuildable[MOVE_ONE_1_BACKWARD]=1;isVariable[MOVE_ONE_1_BACKWARD]=1;
+//        isBuildable[MOVE_ONE_1_FORWARD]=1;isVariable[MOVE_ONE_1_FORWARD]=1;
+  //      isBuildable[MOVE_ONE_3_FORWARD]=1;isVariable[MOVE_ONE_3_FORWARD]=1;
+    //    isBuildable[MOVE_ONE_1_BACKWARD]=1;isVariable[MOVE_ONE_1_BACKWARD]=1;
                                                                                                                                                             
-        isBuildable[INTRON]=1; // :-)
+//        isBuildable[INTRON]=1; // :-)
                                                                                                                                                             
                 switch(getRace())
                 {
@@ -127,7 +127,12 @@ int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption)
                 isBuildable[GAS_SCV]=1; //ONE_MINERAL_SCV... = ONE_MINERAL_PROBE... = ONE_MINERAL_DRONE...
                 isVariable[GAS_SCV]=1;
         }; 
-
+//special rules for zerg
+	if(getRace())
+	{
+		isBuildable[LARVA]=0;
+		isVariable[LARVA]=0;
+	}
 	maxBuildTypes=0;
 	for(i=UNIT_TYPE_COUNT;i--;)
 		if(isBuildable[i]==1)
@@ -143,15 +148,47 @@ int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption)
 
 int EXPORT GOAL_ENTRY::isGoal(int unit)
 {
-	if(allGoal[unit]>0)
-		return(1);
-	else return(0);
+        if((unit<0)||(unit>=UNIT_TYPE_COUNT))
+        {
+                debug.toLog(0,"DEBUG: (GOAL_ENTRY::isGoal): Value unit [%i] out of range.",unit);
+                return(0);
+        }
+
+        if((allGoal[unit]<0)||(allGoal[unit]>=UNIT_TYPE_COUNT))
+        {
+                debug.toLog(0,"DEBUG: (GOAL_ENTRY::isGoal): Variable allGoal[%i] not initialized [%i].",unit,allGoal[unit]);
+                return(0);
+        }
+	return(allGoal[unit]>0);
 };
 
 int EXPORT GOAL_ENTRY::addGoal(int unit, int count, int time, int location)
 {
-	if(unit==0) 
-		return(0);
+        if((unit<=0)||(unit>=UNIT_TYPE_COUNT))
+        {
+                debug.toLog(0,"DEBUG: (GOAL_ENTRY::addGoal): Value unit [%i] out of range.",unit);
+                return(0);
+        }
+
+        if((count<=0)||(count>MAX_SUPPLY))
+        {
+                debug.toLog(0,"DEBUG: (GOAL_ENTRY::addGoal): Value count [%i] out of range.",count);
+                return(0);
+        }
+
+        if((time<0)||(time>=MAX_TIME))
+        {
+                debug.toLog(0,"DEBUG: (GOAL_ENTRY::addGoal): Value time [%i] out of range.",time);
+                return(0);
+        }
+
+        if((location<0)||(location>=MAX_LOCATIONS))
+        {
+                debug.toLog(0,"DEBUG: (GOAL_ENTRY::addGoal): Value location [%i] out of range.",location);
+                return(0);
+        }
+
+
 	allGoal[unit]+=count;
 
 	globalGoal[location][unit]+=count;
@@ -178,7 +215,7 @@ int EXPORT GOAL_ENTRY::getMaxBuildTypes()
 {
 	if((maxBuildTypes<0)||(maxBuildTypes>UNIT_TYPE_COUNT))
 	{
-		debug.toLog(0,"DEBUG: (EXPORT GOAL_ENTRY::getMaxBuildTypes): Variable not initialized [%i].",maxBuildTypes);
+		debug.toLog(0,"DEBUG: (GOAL_ENTRY::getMaxBuildTypes): Variable not initialized [%i].",maxBuildTypes);
 		return(0);
 	}
 	return(maxBuildTypes);
@@ -194,12 +231,12 @@ int EXPORT GOAL_ENTRY::toGeno(int num)
 {
 	if((num<0)||(num>=UNIT_TYPE_COUNT))
 	{
-		debug.toLog(0,"DEBUG: (EXPORT GOAL_ENTRY::toGeno): Value [%i] out of range.",num);
+		debug.toLog(0,"DEBUG: (GOAL_ENTRY::toGeno): Value [%i] out of range.",num);
 		return(0);
 	}
 	if((phaenoToGenotype[num]<0)||(phaenoToGenotype[num]>=UNIT_TYPE_COUNT))
 	{
-		debug.toLog(0,"DEBUG: (EXPORT GOAL_ENTRY::toGeno): Variable not initialized [%i].",phaenoToGenotype[num]);
+		debug.toLog(0,"DEBUG: (GOAL_ENTRY::toGeno): Variable not initialized [%i].",phaenoToGenotype[num]);
 		return(0);
 	}
 	return(phaenoToGenotype[num]);
@@ -209,12 +246,12 @@ int EXPORT GOAL_ENTRY::toPhaeno(int num)
 {
 	if((num<0)||(num>=UNIT_TYPE_COUNT))
 	{
-		debug.toLog(0,"DEBUG: (EXPORT GOAL_ENTRY::toPhaeno): Value [%i] out of range.",num);
+		debug.toLog(0,"DEBUG: (GOAL_ENTRY::toPhaeno): Value [%i] out of range.",num);
 		return(0);
 	}
 	if((genoToPhaenotype[num]<0)||(genoToPhaenotype[num]>=UNIT_TYPE_COUNT))
 	{
-		debug.toLog(0,"DEBUG: (EXPORT GOAL_ENTRY::toPhaeno): Variable not initialized [%i].",genoToPhaenotype[num]);
+		debug.toLog(0,"DEBUG: (GOAL_ENTRY::toPhaeno): Variable not initialized [%i].",genoToPhaenotype[num]);
 		return(0);
 	}
 	return(genoToPhaenotype[num]);

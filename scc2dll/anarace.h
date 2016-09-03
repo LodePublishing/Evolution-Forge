@@ -40,7 +40,8 @@ EXPORT class ANARACE: public PRERACE
 		static MAP_LOCATION backupLoc[MAX_PLAYER][MAX_LOCATIONS];
 
 	public:
-	
+		int fitnessCode[MAX_GOALS];
+
 		int backupMap();
 		int restoreMap();		
 

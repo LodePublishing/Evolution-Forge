@@ -21,7 +21,7 @@ RESFLAGS=--include-dir $(WXPATH)/include --define __WXGTK__ --define __UNIX__
 
 CPPFLAGS = -I$(WXPATH)/lib/wx/include/gtk-2.4 -I$(WXPATH)/include -I/user/include/gtk-1.2 -I/usr/include/glib-1.2 -I/usr/lib/glib/include -D_REENTRANT -I/usr/X11R6/include -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -D__WXGTK__ -DGTK_NO_CHECK_CASTS
 
-CXXFLAGS = $(CPPFLAGS) -O3 -MMD -Wall -g
+CXXFLAGS = $(CPPFLAGS) -O3 -MMD -Wall
 
 .SUFFIXES: .o .cpp .rc _resources.o
 .rc_resources.o:
@@ -43,10 +43,13 @@ clean:
 allclean:
 	@rm -vf ./*.o
 	@rm -vf ./*.d
+	@rm -vf ./exe/*.d
+	@rm -vf ./exe/*.a
 	@rm -vf $(DLLPATH)/*.d
 	@rm -vf $(DLLPATH)/*.o
 	@rm -vf $(PROGRAM)/*.d
 	@rm -vf $(PROGRAM)/*.o
+	@rm -vf $(PROGRAM)/*.d
 	@rm -vf $(PROGRAM).dll
 	@rm -vf $(PROGRAM).a
 	@rm -vf $(PROGRAM).bin

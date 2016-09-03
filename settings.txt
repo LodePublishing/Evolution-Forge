@@ -2,7 +2,7 @@
 "Max Time" = "1800"
 # Preprocessing not implemented yet
 "Preprocess Buildorder" = "0"
-"Max unchanged Generations" = "150"
+"Max unchanged Generations" = "250"
 "Max Length" = "96"
 "Max Runs" = "1"
 "Max Timeout" = "133"
@@ -16,10 +16,10 @@
 "Mode" = "0"
 # Breed Factor:
 # This parameter determines how many % of the players will multiply by 1:1 copy
-"Breed Factor" = "5"
+"Breed Factor" = "2"
 # Crossing Over:
 # This parameter determines how many % of the players will multiply by crossover
-"Crossing Over" = "10"
+"Crossing Over" = "0"
 # 10 means that programs will be sorted into 10-program groups, the best 2 are
 # taken for reproduction and the worst two are replaced by their children
 

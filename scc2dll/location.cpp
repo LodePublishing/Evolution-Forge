@@ -172,21 +172,31 @@ int MAP_LOCATION_BASIC::getDistance(int num)
 	}
 #endif
 	return(distance[num]);
-}
+};
 
-
-MAP_LOCATION_BASIC::MAP_LOCATION_BASIC()
+void MAP_LOCATION_BASIC::resetForce()
 {
-	strcpy(name,"Error!");
-	mineralDistance=0;
-	for(int i=0;i<MAX_LOCATIONS;i++)
-		setDistance(i,0);
 	for(int i=0;i<MAX_PLAYER;i++)
 		for(int j=0;j<UNIT_TYPE_COUNT;j++)
 		{
 			force[i][j]=0;
 			availible[i][j]=0;
 		}
+};
+
+void MAP_LOCATION_BASIC::resetData()
+{
+	strcpy(name,"Error!");
+	mineralDistance=0;
+	for(int i=0;i<MAX_LOCATIONS;i++)
+		setDistance(i,0);
+	resetForce();
+};
+
+
+MAP_LOCATION_BASIC::MAP_LOCATION_BASIC()
+{
+	resetData();
 };
 
 MAP_LOCATION_BASIC::~MAP_LOCATION_BASIC()

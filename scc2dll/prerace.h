@@ -39,8 +39,11 @@ protected:
 
 	int calculateReady();
 	void adjustAvailibility(int loc,int fac,const UNIT_STATISTICS* stat);
+	int calculatePrimaryFitness(int ready);
 
 private:
+//	static int doTransform; // -> a new goal was added so the genetic information is probably wrong... bad thing to do but better than keeping track which goals are already changed
+//	static int transformList[UNIT_TYPE_COUNT]; // old geno type -> new geno type
 	static MAP_LOCATION loc[MAX_PLAYER][MAX_LOCATIONS];
 	MAP_LOCATION* location;
 	PLAYER* player;
@@ -54,31 +57,29 @@ private:
 	int maxSupply; // total supply
 	int ftime[MAX_GOALS]; //when the goal is reached / when the last item is produced (ALL locations...*/
 	int length,timeout;
-        int calculated;
+	int calculated;
+	BuildingList buildingList;
+	static int noise[MAX_TIME];
+	static int markerCounter;
 public:
-        BuildingList buildingList;
-	//wxList buildingList;
 
-        static int noise[MAX_TIME];
-
-        static int markerCounter;
-																		    
+	static void copyMap(int mode); //copies the startforce from map to loc
+																				
 	int getMapLocationAvailible(int player, int loc, int type);
 	int getMapLocationForce(int player, int loc, int type);
-																			    
-	int setMapLocationAvailible(int player, int loc, int type, int num);
-	int setMapLocationForce(int player, int loc, int type, int num);
-																			    
-	int addMapLocationAvailible(int player, int loc, int type, int num);
-	int addMapLocationForce(int player, int loc, int type, int num);
-																			    
-
+																				
+	static int setMapLocationAvailible(int player, int loc, int type, int num);
+	static int setMapLocationForce(int player, int loc, int type, int num);
+																				
+	static int addMapLocationAvailible(int player, int loc, int type, int num);
+	static int addMapLocationForce(int player, int loc, int type, int num);
+																				
 	int getLocationAvailible(int loc, int type);
 	int getLocationForce(int loc, int type);
-																			    
+																				
 	int setLocationAvailible(int loc, int type, int num);
 	int setLocationForce(int loc, int type, int num);
-																			    
+																				
 	int addLocationAvailible(int loc, int type, int num);
 	int addLocationForce(int loc, int type, int num);
 
@@ -110,17 +111,17 @@ public:
 	int setMaxSupply(int supply);
 	int setMins(int mins);
 	int setGas(int gas);
-        int getSupply();
-        int getMaxSupply();
-        int getMins();
-        int getGas();
+	int getSupply();
+	int getMaxSupply();
+	int getMins();
+	int getGas();
 
 
 	int setTimer(int time);
-        int getTimer();
+	int getTimer();
 
 	int setTimeOut(int time);
-        int getTimeOut();
+	int getTimeOut();
 
 	int resetSupply();
 	static int setMap(MAP* map);

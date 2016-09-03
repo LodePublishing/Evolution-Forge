@@ -184,18 +184,58 @@ int compare(const void* a,const void* b)
 
 void SOUP::checkForChange()
 {
+	int changed=0;
 	for(int k=0;k<pMap->getMaxPlayer()-1;k++)
-	if(anaplayer[k]->getPlayer()->isChanged())
-	{
-		anaplayer[k]->getPlayer()->changeAccepted();
-		anaplayer[k]->setGeneration(0); //?
-		anaplayer[k]->setMaxpFitness(0);
-		anaplayer[k]->setMaxsFitness(0);
-		anaplayer[k]->setMaxtFitness(0);
-		anaplayer[k]->setUnchangedGenerations(0);
-	}
+		if(anaplayer[k]->getPlayer()->isChanged())
+		{
+			changed=1;
+			anaplayer[k]->getPlayer()->changeAccepted();
+			anaplayer[k]->setGeneration(0); //?
+			anaplayer[k]->setMaxpFitness(0);
+			anaplayer[k]->setMaxsFitness(0);
+			anaplayer[k]->setMaxtFitness(0);
+			anaplayer[k]->setUnchangedGenerations(0);
+		}
+	if(changed)
+		calculateAnaplayer();
 }
 
+
+void EXPORT SOUP::calculateAnaplayer()
+{
+	for(int k=0;k<pMap->getMaxPlayer()-1;k++) //warum net -1?
+//		if(anaplayer[k]->isActive())
+		{
+// map reset
+			for(int l=0;l<pMap->getMaxLocations();l++) // warum -1 !??!
+				for(int m=0;m<UNIT_TYPE_COUNT;m++)
+				{
+					anaplayer[0]->setMapLocationForce(k,l,m,pMap->getLocationForce(l,k,m));
+					anaplayer[0]->setMapLocationAvailible(k,l,m,pMap->getLocationForce(l,k,m));
+				}
+		}
+
+//! NEED TO BE 2 DIFFERENT loops!
+	for(int k=0;k<pMap->getMaxPlayer()-1;k++)
+//		if(anaplayer[k]->isActive())
+		{
+			anaplayer[k]->resetData();
+			anaplayer[k]->resetSupply();
+			anaplayer[k]->adjustHarvest();
+		}
+// supply is nicht resettet... bzw. falsch... in resetSupply
+	int complete=0;
+	while(!complete)
+	{
+		complete=1;
+		for(int k=0;k<pMap->getMaxPlayer()-1;k++)
+//			if(anaplayer[k]->isActive())
+				complete&=anaplayer[k]->calculateStep();
+	}
+//		anaplayer[0]->backupMap();
+//	} else
+//		anaplayer[0]->restoreMap();
+}
 
 
 ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the goals/settings been changed?
@@ -237,10 +277,13 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 	for(int j=0;j<pMap->getMaxPlayer()-1;j++)
 		if(oldAnarace[j]) //TODO
 		{
-//			for(i=MAX_LENGTH;i--;)
-//				for(k=0;k<2;k++)
-//					player[j*t]->Code[k][i]=oldAnarace[j]->Code[k][i];
-			anaplayer[j]->setActive(oldAnarace[j]->isActive());
+			for(int i=MAX_LENGTH;i--;)
+				for(int k=0;k<2;k++)
+				{
+					player[j*t]->Code[k][i]=oldAnarace[j]->Code[k][i];
+					player[j*t]->Marker[k][i]=oldAnarace[j]->Marker[k][i];
+				}
+//			anaplayer[j]->setActive(oldAnarace[j]->isActive());
 			anaplayer[j]->setOptimizing(oldAnarace[j]->isOptimizing());
 		}
 
@@ -251,27 +294,40 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 	for(int i=0;i<t;i++)
 	{
 // Map mit Startwerten initialisieren, muss JEDEN Durchlauf passieren!! sonst sammeln sich in der statischen loc variable Haufenweise Commando Centers an 8-)
-	for(int k=0;k<pMap->getMaxPlayer();k++) //warum -1? nochmal pruefen... TODO
-//		if((k>=pMap->getMaxPlayer()-1)||(anaplayer[k]->isActive()))
-			for(int l=0;l<pMap->getMaxLocations();l++)
-				for(int m=0;m<UNIT_TYPE_COUNT;m++) //TODO: Grenzen runter ... brauchts nur gasscv oder so
-				{
-					player[0]->setMapLocationForce(k,l,m,pMap->getLocationForce(l,k,m)); //in player[k]->setLocation aendern?
-					player[0]->setMapLocationAvailible(k,l,m,pMap->getLocationForce(l,k,m));
-				}
+	if(pMap->useMapSettings())
+		PRERACE::copyMap(3);
+	else PRERACE::copyMap(pMap->getPlayer()->goal->getRace());
+
+	
+	{
+		for(int k=0;k<pMap->getMaxPlayer();k++) //warum -1? nochmal pruefen... TODO
+//			if((k>=pMap->getMaxPlayer()-1)||(anaplayer[k]->isActive()))
+				for(int l=0;l<pMap->getMaxLocations();l++)
+					for(int m=0;m<UNIT_TYPE_COUNT;m++) //TODO: Grenzen runter ... brauchts nur gasscv oder so
+					{
+						PRERACE::setMapLocationForce(k,l,m,pMap->getLocationForce(l,k,m)); //in player[k]->setLocation aendern?
+						PRERACE::setMapLocationAvailible(k,l,m,pMap->getLocationForce(l,k,m));
+					}
+	} else
+	{
+		switch(pMap->getPlayer()->goal->getRace())
+		{
+				
+		}
+	}
 
 	//reset code && calculate 
 		for(int k=0;k<pMap->getMaxPlayer()-1;k++)
-			if(anaplayer[k]->isActive())
+//			if(anaplayer[k]->isActive())
 			{
 				player[k*t+i]->resetData();
 				player[k*t+i]->resetSupply();
 				player[k*t+i]->adjustHarvest();
-				if(anaplayer[k]->isOptimizing())
+//				if(anaplayer[k]->isOptimizing())
 				{
 					if(i!=0)
 						player[k*t+i]->mutateGeneCode();
-//					player[k*t+i]->eraseIllegalCode();  TODO
+					player[k*t+i]->eraseIllegalCode();
 				}
 			}
 		int complete=0;
@@ -279,7 +335,7 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 		{
 			complete=1;
 			for(int k=0;k<pMap->getMaxPlayer()-1;k++)
-				if(anaplayer[k]->isActive())
+				//if(anaplayer[k]->isActive())
 					complete&=player[k*t+i]->calculateStep();
 		//TODO Sleep Funktion einbauen
 		}
@@ -288,7 +344,7 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 
 //NOW: all pFtiness of the players are calculated
 	for(int k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
-		if(anaplayer[k]->isActive())
+//		if(anaplayer[k]->isActive())
 		{
 			for(int i=k*t;i<(k+1)*t;i++)
 				for(int j=k*t;j<i;j++)
@@ -329,7 +385,7 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 
 		newcalc=0;
 		for(int k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
-			if(anaplayer[k]->isActive())
+//			if(anaplayer[k]->isActive())
 			{
 				if((player[k*t]->getpFitness()>anaplayer[k]->getMaxpFitness())||
 
@@ -412,37 +468,15 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 
 //	if(newcalc)
 //	{
-	for(int k=0;k<pMap->getMaxPlayer()-1;k++) //warum net -1?
-		if(anaplayer[k]->isActive())
-		{
-// map reset
-			for(int l=0;l<pMap->getMaxLocations();l++) // warum -1 !??!
-				for(int m=0;m<UNIT_TYPE_COUNT;m++)
-				{
-					anaplayer[0]->setMapLocationForce(k,l,m,pMap->getLocationForce(l,k,m));
-					anaplayer[0]->setMapLocationAvailible(k,l,m,pMap->getLocationForce(l,k,m));
-				}
-			anaplayer[k]->resetData();
-			anaplayer[k]->resetSupply();
-			anaplayer[k]->adjustHarvest();
-		}
-	int complete=0;
-	while(!complete)
-	{
-		complete=1;
-		for(int k=0;k<pMap->getMaxPlayer()-1;k++)
-			if(anaplayer[k]->isActive())
-				complete&=anaplayer[k]->calculateStep();
-	}
-//		anaplayer[0]->backupMap();
-//	} else
-//		anaplayer[0]->restoreMap();
+	
+	calculateAnaplayer();
+	
 
 
 // SOME POST PROCESSING
 // CALCULATE FITNESS AVERAGE & VARIANCE
 	for(int k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
-	if(anaplayer[k]->isActive()) //~~ TODO evtl isOptimizing stattdessen...
+//	if(anaplayer[k]->isActive()) //~~ TODO evtl isOptimizing stattdessen...
 	{
 		anaplayer[k]->fitnessAverage=0;
 		for(int i=k*t;i<(k+1)*t;i++)
@@ -457,7 +491,7 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 		}
 		anaplayer[k]->fitnessVariance/=MAX_PROGRAMS;
 		anaplayer[k]->analyzeBuildOrder();
-		anaplayer[k]->getPlayer()->goal->bestTime=anaplayer[k]->getTimer();
+		anaplayer[k]->getPlayer()->getGoal()->bestTime=anaplayer[k]->getTimer();
 		anaplayer[k]->setUnchangedGenerations(anaplayer[k]->getUnchangedGenerations()+1);
 		anaplayer[k]->setGeneration(anaplayer[k]->getGeneration()+1);
 		if(anaplayer[k]->getUnchangedGenerations()>ga->maxGenerations)
@@ -495,7 +529,7 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 					s[k]->setProgramForceCount(p,q,anaplayer[k]->getProgramForceCount(p,q));
 					s[k]->setProgramAvailibleCount(p,q,anaplayer[k]->getProgramAvailibleCount(p,q));
 				}
-				s[k]->phaenoCode[p]=anaplayer[k]->phaenoCode[p];
+				s[k]->setPhaenoCode(p,anaplayer[k]->getPhaenoCode(p));
 			}
  			s[k]->setUnchangedGenerations(anaplayer[k]->getUnchangedGenerations()-1);
 			s[k]->setRun(anaplayer[k]->getRun()+1);
@@ -538,7 +572,7 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 			anaplayer[k]->setMaxtFitness(0);
 			anaplayer[k]->setUnchangedGenerations(0);
 
-			debug.toLog(0,"FITNESS: %s: [%.2i:%.2i]",s[k]->getPlayer()->goal->getName(),(ga->maxTime-s[k]->getTimer())/60,(ga->maxTime-s[k]->getTimer())%60);
+			debug.toLog(0,"FITNESS: %s: [%.2i:%.2i]",s[k]->getPlayer()->getGoal()->getName(),(ga->maxTime-s[k]->getTimer())/60,(ga->maxTime-s[k]->getTimer())%60);
 			return(Save[anaplayer[k]->getRun()]); //~~~~
 		}
 	}

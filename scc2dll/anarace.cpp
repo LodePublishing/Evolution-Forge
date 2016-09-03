@@ -43,15 +43,34 @@ int EXPORT ANARACE::getMarker(int IP)
         return(Marker[getProgramDominant(IP)][IP]); 
 };
 
+void EXPORT ANARACE::removeOrder(int IP)
+{
+        for(int j=IP;j--;)
+        {
+                Code[0][j+1]=Code[0][j];
+                Code[1][j+1]=Code[1][j];
+                Marker[0][j+1]=Marker[0][j];
+                Marker[1][j+1]=Marker[1][j];
+                program[j+1].dominant=program[j].dominant;
+                program[j+1].built=program[j].built;
+        }
+	for(int j=0;j<MAX_LENGTH;j++)
+                phaenoCode[j]=getPlayer()->getGoal()->toPhaeno(Code[getProgramDominant(j)][j]);
+        getPlayer()->wasChanged(); // to allow update of time etc. of anarace
+};
+
 
 void EXPORT ANARACE::insertOrder(int unit, int position)
 {
 	int l=0;
 	int i;
-	for(i=MAX_LENGTH;(l<position)&&(i--);)
+
+	for(i=MAX_LENGTH;(l<=position)&&(i--);)
 		if(getProgramIsBuilt(i))
 			l++;
 	i++;
+	if(i==0)
+		i=MAX_LENGTH-1;
 	for(int j=0;j<i;j++)
 	{
 		Code[0][j]=Code[0][j+1];
@@ -62,13 +81,13 @@ void EXPORT ANARACE::insertOrder(int unit, int position)
 		program[j].built=program[j+1].built;
 	}
 	
-	if(getPlayer()->goal->allGoal[unit]==0)
+	if(getPlayer()->getGoal()->allGoal[unit]==0)
 	{
-		getPlayer()->goal->addGoal(unit,1,0,0);
+		getPlayer()->getGoal()->addGoal(unit,1,0,0);
 		getPlayer()->changeAccepted();
 	}
 
-	Code[0][i]=getPlayer()->goal->toGeno(unit);
+	Code[0][i]=getPlayer()->getGoal()->toGeno(unit); // ?
 	Code[1][i]=Code[0][i];
         program[i].dominant=0;
         program[i].built=1;
@@ -76,7 +95,8 @@ void EXPORT ANARACE::insertOrder(int unit, int position)
         markerCounter++;Marker[1][i]=markerCounter;
 
 	for(int j=0;j<MAX_LENGTH;j++)
-        	phaenoCode[j]=getPlayer()->goal->toPhaeno(Code[getProgramDominant(j)][j]); 
+        	phaenoCode[j]=getPlayer()->getGoal()->toPhaeno(Code[getProgramDominant(j)][j]); 
+	getPlayer()->wasChanged(); // to allow update of time etc. of anarace
 }
 
 int EXPORT ANARACE::backupMap()
@@ -791,39 +811,39 @@ int ANARACE::maximum(int unit)
 {
 /*	int max=0;
 	int t=0;
-	if((stats[getPlayer()->goal->getRace()][unit].facility[0])&&(!getMap()->location[0].force[1][stats[getPlayer()->goal->getRace()][unit].facility[0]])&&(stats[getPlayer()->goal->getRace()][unit].facility[0]!=unit))
+	if((stats[getPlayer()->getGoal()->getRace()][unit].facility[0])&&(!getMap()->location[0].force[1][stats[getPlayer()->getGoal()->getRace()][unit].facility[0]])&&(stats[getPlayer()->getGoal()->getRace()][unit].facility[0]!=unit))
 	{
-		t=needTime(stats[getPlayer()->goal->getRace()][unit].facility[0]);
+		t=needTime(stats[getPlayer()->getGoal()->getRace()][unit].facility[0]);
 		if(t>max) max=t;
 		t=0;
 	}
-        if((stats[getPlayer()->goal->getRace()][unit].facility[1])&&(!getMap()->location[0].force[1][stats[getPlayer()->goal->getRace()][unit].facility[1]]))
+        if((stats[getPlayer()->getGoal()->getRace()][unit].facility[1])&&(!getMap()->location[0].force[1][stats[getPlayer()->getGoal()->getRace()][unit].facility[1]]))
         {
-                t=needTime(stats[getPlayer()->goal->getRace()][unit].facility[1]);
+                t=needTime(stats[getPlayer()->getGoal()->getRace()][unit].facility[1]);
                 if(t>max) max=t;
                 t=0;
         }
-        if((stats[getPlayer()->goal->getRace()][unit].facility[2])&&(!getMap()->location[0].force[1][stats[getPlayer()->goal->getRace()][unit].facility[2]]))
+        if((stats[getPlayer()->getGoal()->getRace()][unit].facility[2])&&(!getMap()->location[0].force[1][stats[getPlayer()->getGoal()->getRace()][unit].facility[2]]))
         {
-                t=needTime(stats[getPlayer()->goal->getRace()][unit].facility[2]);
+                t=needTime(stats[getPlayer()->getGoal()->getRace()][unit].facility[2]);
                 if(t>max) max=t;
                 t=0;
         }
-        if((stats[getPlayer()->goal->getRace()][unit].prerequisite[0])&&(!getMap()->location[0].force[1][stats[getPlayer()->goal->getRace()][unit].prerequisite[0]]))
+        if((stats[getPlayer()->getGoal()->getRace()][unit].prerequisite[0])&&(!getMap()->location[0].force[1][stats[getPlayer()->getGoal()->getRace()][unit].prerequisite[0]]))
         {
-                t=needTime(stats[getPlayer()->goal->getRace()][unit].prerequisite[0]);
+                t=needTime(stats[getPlayer()->getGoal()->getRace()][unit].prerequisite[0]);
                 if(t>max) max=t;
                 t=0;
         }
-        if((stats[getPlayer()->goal->getRace()][unit].prerequisite[1])&&(!getMap()->location[0].force[1][stats[getPlayer()->goal->getRace()][unit].prerequisite[1]]))
+        if((stats[getPlayer()->getGoal()->getRace()][unit].prerequisite[1])&&(!getMap()->location[0].force[1][stats[getPlayer()->getGoal()->getRace()][unit].prerequisite[1]]))
         {
-                t=needTime(stats[getPlayer()->goal->getRace()][unit].prerequisite[1]);
+                t=needTime(stats[getPlayer()->getGoal()->getRace()][unit].prerequisite[1]);
                 if(t>max) max=t;
                 t=0;
         }
-        if((stats[getPlayer()->goal->getRace()][unit].prerequisite[2])&&(!getMap()->location[0].force[1][stats[getPlayer()->goal->getRace()][unit].prerequisite[2]]))
+        if((stats[getPlayer()->getGoal()->getRace()][unit].prerequisite[2])&&(!getMap()->location[0].force[1][stats[getPlayer()->getGoal()->getRace()][unit].prerequisite[2]]))
         {
-                t=needTime(stats[getPlayer()->goal->getRace()][unit].prerequisite[2]);
+                t=needTime(stats[getPlayer()->getGoal()->getRace()][unit].prerequisite[2]);
                 if(t>max) max=t;
                 t=0;
         }
@@ -834,11 +854,12 @@ int ANARACE::maximum(int unit)
 int ANARACE::needTime(int unit)
 {
 //	if(!getMap()->location[0].force[1][unit])
-//		return(stats[getPlayer()->goal->getRace()][unit].BT+maximum(unit)); //eigene Bauzeit + Bauzeit der Prerequisites/Facilities
+//		return(stats[getPlayer()->getGoal()->getRace()][unit].BT+maximum(unit)); //eigene Bauzeit + Bauzeit der Prerequisites/Facilities
 //	else return(0);
 	return(0);
 };
 
+#if 0
 int EXPORT ANARACE::calculateFitness() // Fuer den Uebersichtsgraphen unten rechts
 {
 
@@ -849,57 +870,57 @@ int EXPORT ANARACE::calculateFitness() // Fuer den Uebersichtsgraphen unten rech
 	// Nicht alle Einheiten ueberhaupt gebaut UND nicht alle am Ort => nur viertel Bonus fuer Einheiten die nicht am Ort sind
 	int otpF=0;
 	for(int i=MAX_GOALS;i--;)
-		if(getPlayer()->goal->goal[i].count>0)
+		if(getPlayer()->getGoal()->goal[i].count>0)
 		{
 			otpF=tpF;
-			if( /*((getPlayer()->goal->goal[i].location==0)&&(getPlayer()->goal->goal[i].count>getLocationForce(0,getPlayer()->goal->goal[i].unit))) || ( (getPlayer()->goal->goal[i].location>0)&&*/(getPlayer()->goal->goal[i].count>getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit)))
+			if( /*((getPlayer()->getGoal()->goal[i].location==0)&&(getPlayer()->getGoal()->goal[i].count>getLocationForce(0,getPlayer()->getGoal()->goal[i].unit))) || ( (getPlayer()->getGoal()->goal[i].location>0)&&*/(getPlayer()->getGoal()->goal[i].count>getLocationForce(getPlayer()->getGoal()->goal[i].location,getPlayer()->getGoal()->goal[i].unit)))
 			{
 					//total points: (Am Ort befindliche Einheiten + (Summe aller Locations(100-distance)/100)) / Goalcount
 					//TODO: Absteigen und markieren der benutzten wbfs! Also zuerst die eigentliche location abchecken, dann nach links und rechts die naehesten hinzuziehen					 //evtl direkt von den locations die wbfs erstmal abziehen und am Schluss nochmal alle goals durchlaufen und den Rest verteilen!					 
 				int sumup=0;
 				int bon=0;
-				if(getPlayer()->goal->goal[i].location==0)
-					sumup=getLocationForce(0,getPlayer()->goal->goal[i].unit)*100;
+				if(getPlayer()->getGoal()->goal[i].location==0)
+					sumup=getLocationForce(0,getPlayer()->getGoal()->goal[i].unit)*100;
 				else
 				{
-					bon=getPlayer()->goal->goal[i].count;
+					bon=getPlayer()->getGoal()->goal[i].count;
 					int j=1;
 					int loc;
-					while((j<MAX_LOCATIONS)&&(bon>getLocationForce(loc=pMap->getNearestLocation(getPlayer()->goal->goal[i].location,j),getPlayer()->goal->goal[i].unit)))						 
+					while((j<MAX_LOCATIONS)&&(bon>getLocationForce(loc=pMap->getNearestLocation(getPlayer()->getGoal()->goal[i].location,j),getPlayer()->getGoal()->goal[i].unit)))						 
 					{
-						sumup+=getLocationForce(loc,getPlayer()->goal->goal[i].unit)*(100-pMap->getDistance(loc,getPlayer()->goal->goal[i].location));							 
-						bon-=getLocationForce(loc,getPlayer()->goal->goal[i].unit);						  
+						sumup+=getLocationForce(loc,getPlayer()->getGoal()->goal[i].unit)*(100-pMap->getDistance(loc,getPlayer()->getGoal()->goal[i].location));							 
+						bon-=getLocationForce(loc,getPlayer()->getGoal()->goal[i].unit);						  
 						j++;
 					}
 						//rest
 					if(j<MAX_LOCATIONS)
-						sumup+=bon*(100-pMap->getDistance(loc,getPlayer()->goal->goal[i].location));					 
+						sumup+=bon*(100-pMap->getDistance(loc,getPlayer()->getGoal()->goal[i].location));					 
 				}
 					//TODO: Hier gibts Probleme wenn mehrere goals gleicher Units an unterschiedlichen Orten existieren...
 					// evtl funktionsglobales bonus System wie bei den '@' in scc.cpp einfuegen
 					// bissl komplex da mans ja den einzelnen goals verteilen muss...
-				if((getPlayer()->goal->goal[i].time>0)&&(getFinalTime(i)>getPlayer()->goal->goal[i].time))
+				if((getPlayer()->getGoal()->goal[i].time>0)&&(getFinalTime(i)>getPlayer()->getGoal()->goal[i].time))
 //				{
 //					if(getFinalTime(i)>0)
-						tpF+=(getPlayer()->goal->goal[i].time*sumup)/(getPlayer()->goal->goal[i].count*getFinalTime(i));
+						tpF+=(getPlayer()->getGoal()->goal[i].time*sumup)/(getPlayer()->getGoal()->goal[i].count*getFinalTime(i));
 //					else
-//						tpF+=(getPlayer()->goal->goal[i].time*sumup)/(getPlayer()->goal->goal[i].count*ga->maxTime);
+//						tpF+=(getPlayer()->getGoal()->goal[i].time*sumup)/(getPlayer()->getGoal()->goal[i].count*ga->maxTime);
 //				}
 				else
-					tpF+=sumup/getPlayer()->goal->goal[i].count;
+					tpF+=sumup/getPlayer()->getGoal()->goal[i].count;
 			} //END force < goal
 			else 
-//if( ((getPlayer()->goal->goal[i].location==0)&&(getPlayer()->goal->goal[i].count<=getLocationForce(0,getPlayer()->goal->goal[i].unit))) || ( (getPlayer()->goal->goal[i].location>0)&&(getPlayer()->goal->goal[i].count<=getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit))) )
+//if( ((getPlayer()->getGoal()->goal[i].location==0)&&(getPlayer()->getGoal()->goal[i].count<=getLocationForce(0,getPlayer()->getGoal()->goal[i].unit))) || ( (getPlayer()->getGoal()->goal[i].location>0)&&(getPlayer()->getGoal()->goal[i].count<=getLocationForce(getPlayer()->getGoal()->goal[i].location,getPlayer()->getGoal()->goal[i].unit))) )
 		//force >= goal
 			{
-				if((getPlayer()->goal->goal[i].time>0)&&(getFinalTime(i)>getPlayer()->goal->goal[i].time))
-					tpF+=(getPlayer()->goal->goal[i].time*100/getFinalTime(i));
+				if((getPlayer()->getGoal()->goal[i].time>0)&&(getFinalTime(i)>getPlayer()->getGoal()->goal[i].time))
+					tpF+=(getPlayer()->getGoal()->goal[i].time*100/getFinalTime(i));
 				else tpF+=100;
 // does not work yet, if this is uncommented, sFitness occasionally jumps to -1222000 or something like that... :/
 // include the final location maybe...
 
 			}
-			fitnessCode[i]=tpF-otpF;
+//			fitnessCode[i]=tpF-otpF;
 		}
 // TODO: Check for very small 'goal.time' values, probably in scc.cpp!!
 																			    
@@ -910,16 +931,16 @@ int EXPORT ANARACE::calculateFitness() // Fuer den Uebersichtsgraphen unten rech
 			       bonus[i][j]=0;
 																			    
 		for(i=MAX_GOALS;i--;)
-			if(getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit)<getPlayer()->goal->goal[i].count)
-				bonus[getPlayer()->goal->goal[i].location][getPlayer()->goal->goal[i].unit]+=getPlayer()->goal->goal[i].count-getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit);		 
+			if(getLocationForce(getPlayer()->getGoal()->goal[i].location,getPlayer()->getGoal()->goal[i].unit)<getPlayer()->getGoal()->goal[i].count)
+				bonus[getPlayer()->getGoal()->goal[i].location][getPlayer()->getGoal()->goal[i].unit]+=getPlayer()->getGoal()->goal[i].count-getLocationForce(getPlayer()->getGoal()->goal[i].location,getPlayer()->getGoal()->goal[i].unit);		 
 		for(i=MAX_BUILDINGS;i--;)
 			if((getRemainingBuildTime(i)>0)&&(bonus[getType(i)][getLocation(i)]>0))
 			{			 //erstmal ohne Zeit...
 				tpF+=((getRemainingBuildTime(i)*100)/((getLocationForce(getLocation(i),getType(i))+bonus[getType(i)][getLocation(i)])*pStats[getType(i)].BT));
 																			    
-				if((getPlayer()->goal->goal[getType(i)].time>0)&&(getLocationForce(getLocation(i),getType(i))==0))
-					tpF+=(getRemainingBuildTime(i)*100*getPlayer()->goal->goal[getType(i)].time*getLocationForce(0,i))/(getPlayer()->goal->goal[getType(i)].count*pStats[getType(i)].BT*ga->maxTime);
-				else					 tpF+=((getRemainingBuildTime(i)*100)/(getPlayer()->goal->goal[getType(i)].count*pStats[getType(i)].BT));
+				if((getPlayer()->getGoal()->goal[getType(i)].time>0)&&(getLocationForce(getLocation(i),getType(i))==0))
+					tpF+=(getRemainingBuildTime(i)*100*getPlayer()->getGoal()->goal[getType(i)].time*getLocationForce(0,i))/(getPlayer()->getGoal()->goal[getType(i)].count*pStats[getType(i)].BT*ga->maxTime);
+				else					 tpF+=((getRemainingBuildTime(i)*100)/(getPlayer()->getGoal()->goal[getType(i)].count*pStats[getType(i)].BT));
 				bonus[getLocation(i)][getType(i)]--;
 			}*/
 /*	if(ready)
@@ -927,7 +948,7 @@ int EXPORT ANARACE::calculateFitness() // Fuer den Uebersichtsgraphen unten rech
 		int totalBT=0;
 		j=0;
 		for(i=0;i<UNIT_TYPE_COUNT;i++)
-		if(getPlayer()->goal->allGoal[i])
+		if(getPlayer()->getGoal()->allGoal[i])
 		{
 			j=needTime(i);
 			if(j>totalBT)
@@ -941,7 +962,7 @@ int EXPORT ANARACE::calculateFitness() // Fuer den Uebersichtsgraphen unten rech
 	else*/ percentage=0;
 	return(tpF);
 }
-
+#endif
 int EXPORT ANARACE::getPercentage()
 {
 	return(percentage);
@@ -956,16 +977,15 @@ int EXPORT ANARACE::calculateStep()
 	setStatisticsHaveSupply(getTimer(),getMaxSupply());
 	setStatisticsHaveMinerals(getTimer(),getMins());
 	setStatisticsHaveGas(getTimer(),getGas());
-	setStatisticsFitness(getTimer(),calculateFitness());
+	setStatisticsFitness(getTimer(),calculatePrimaryFitness(ready));
 
-	if((!getTimer())||(ready=calculateReady())||(!getIP()))//||((getPlayer()->goal->bestTime*4<3*ga->maxTime)&&(4*getTimer()<3*getPlayer()->goal->bestTime))) //TODO calculateReady optimieren
+	if((!getTimer())||(ready=calculateReady())||(!getIP())||((getPlayer()->getGoal()->bestTime*4<3*ga->maxTime)&&(4*getTimer()<3*getPlayer()->getGoal()->bestTime))) //TODO calculateReady optimieren
 	{
 		setLength(ga->maxLength-getIP());
 		if(!ready) setTimer(0);
-			
 		for(int i=0;i<MAX_LENGTH;i++)
-			phaenoCode[i]=getPlayer()->goal->toPhaeno(Code[getProgramDominant(i)][i]);
-		calculateFitness();
+			phaenoCode[i]=getPlayer()->getGoal()->toPhaeno(Code[getProgramDominant(i)][i]);
+		setCurrentpFitness(calculatePrimaryFitness(ready));
 		buildingList.Clear();
 		return(1);
 	}
@@ -978,13 +998,13 @@ int EXPORT ANARACE::calculateStep()
 		neededGas=99999;
 		if(Code[0][getIP()]>Code[1][getIP()]) //dominance
 		{
-			if(!(ok=buildGene(getPlayer()->goal->toPhaeno(Code[dominant=0][getIP()]))))
-				ok=buildGene(getPlayer()->goal->toPhaeno(Code[dominant=1][getIP()]));
+			if(!(ok=buildGene(getPlayer()->getGoal()->toPhaeno(Code[dominant=0][getIP()]))))
+				ok=buildGene(getPlayer()->getGoal()->toPhaeno(Code[dominant=1][getIP()]));
 		}
 		else
 		{
-			if(!(ok=buildGene(getPlayer()->goal->toPhaeno(Code[dominant=1][getIP()]))))
-				ok=buildGene(getPlayer()->goal->toPhaeno(Code[dominant=0][getIP()]));
+			if(!(ok=buildGene(getPlayer()->getGoal()->toPhaeno(Code[dominant=1][getIP()]))))
+				ok=buildGene(getPlayer()->getGoal()->toPhaeno(Code[dominant=0][getIP()]));
 		}
 		if(successType>0)
 		{
@@ -1172,7 +1192,7 @@ int EXPORT ANARACE::calculateStep()
 				addLocationForce(build->getLocation(),stat->create,1);
 				addLocationAvailible(build->getLocation(),stat->create,1);
 				if(last[lastcounter].unit==stat->create) last[lastcounter].count++; //TODO ???
-				if((getPlayer()->goal->getRace()==ZERG)&&(stat->create==LARVA))
+				if((getPlayer()->getGoal()->getRace()==ZERG)&&(stat->create==LARVA))
 				{
 					larva[larvacounternumber].location=build->getLocation();
 					larva[larvacounternumber].larvacount=1;
@@ -1192,11 +1212,11 @@ int EXPORT ANARACE::calculateStep()
 
 		        for(int i=MAX_GOALS;i--;)
 // ist dieses goal belegt?
-		                if((getPlayer()->goal->goal[i].unit>0)&&
+		                if((getPlayer()->getGoal()->goal[i].unit>0)&&
 // befinden wir uns am richtigen Ort?
-		                ((getPlayer()->goal->goal[i].location==0)||(build->getLocation()==getPlayer()->goal->goal[i].location))&&
+		                ((getPlayer()->getGoal()->goal[i].location==0)||(build->getLocation()==getPlayer()->getGoal()->goal[i].location))&&
 // und untersuchen wir das zum Unittype gehoerende Goal?
-		                (build->getType()==getPlayer()->goal->goal[i].unit))
+		                (build->getType()==getPlayer()->getGoal()->goal[i].unit))
 		                        setFinalTime(i,ga->maxTime-getTimer());
 // Did we reach the right number at the right time?
 //              i=MAX_GOALS;  TODO? koennen wir mehrere goals gleichzeitig erfuell0rn?
@@ -1254,7 +1274,7 @@ int ANARACE::buildGene(int unit)
 		}
 		else
 		if //ANA~
-
+//TODO, < ((stat->facility_type==IS_LOST)&&(stat->facility[fac]==stat->facility2)) einfuegen....
 			( ((stat->facility[0]==0)||(getLocationAvailible(0,stat->facility[0])==0))&&
 			  ((stat->facility[1]==0)||(getLocationAvailible(0,stat->facility[1])==0))&&
 			  ((stat->facility[2]==0)||(getLocationAvailible(0,stat->facility[2])==0))&&
@@ -1323,7 +1343,7 @@ int ANARACE::buildGene(int unit)
 
 //			if((stat->facility2==0)||(getLocationAvailible(tloc,stat->facility2)>0))
 			for(fac=3;fac--;)
-				if( ((stat->facility[fac]>0)&&(getLocationAvailible(tloc,stat->facility[fac])>0)) || ((stat->facility[fac]==0)&&(fac==0))) 
+				if( ((stat->facility[fac]>0)&&(getLocationAvailible(tloc,stat->facility[fac])>((stat->facility_type==IS_LOST)&&(stat->facility[fac]==stat->facility2)))) || ((stat->facility[fac]==0)&&(fac==0))) 
 				{
 					ok=1;
 					break;
@@ -1337,7 +1357,7 @@ int ANARACE::buildGene(int unit)
 //					if((stat->facility2==0)||(getLocationAvailible(ttloc,stat->facility2)>0))
 //					{
 					for(fac=3;fac--;)
-						if( ((stat->facility[fac]>0)&&(getLocationAvailible(ttloc,stat->facility[fac])>0)) || ((stat->facility[fac]==0)&&(fac==0)))
+						if( ((stat->facility[fac]>0)&&(getLocationAvailible(ttloc,stat->facility[fac])>((stat->facility_type==IS_LOST)&&(stat->facility[fac]==stat->facility2)))) || ((stat->facility[fac]==0)&&(fac==0)))
 						{
 							tloc=ttloc;
 							ok=1;
@@ -1387,6 +1407,7 @@ int ANARACE::buildGene(int unit)
 			} //kk!=1?
 		} // if resources prere etc ok
 	}
+//TODO: error wenn facilities net gefunden...
 	else // unit > EXTRACTOR+1
 	{
 	/*	int count=0;
@@ -1484,9 +1505,57 @@ int ANARACE::buildGene(int unit)
 }
 
 
+void EXPORT ANARACE::setPhaenoCode(int IP, int num)
+{
+#ifdef _SCC_DEBUG
+        if((IP<0)||(IP>=MAX_LENGTH))
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::setPhaenoCode): Value IP [%i] out of range.",IP);
+                return;
+        }
+        if((num<0)||(num>=UNIT_TYPE_COUNT))
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::setPhaenoCode): Value num [%i] out of range.",num);
+                return;
+        }
+#endif
+	phaenoCode[IP]=num;
+};
+
+int EXPORT ANARACE::getPhaenoCode(int IP)
+{
+#ifdef _SCC_DEBUG
+        if((IP<0)||(IP>=MAX_LENGTH))
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::getPhaenoCode): Value IP [%i] out of range.",IP);
+                return(0);
+        }
+                                                                                                                                                            
+        if((program[IP].isGoal<0)||(program[IP].isGoal>1))
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::getPhaenoCode): Variable not initialized [%i].",phaenoCode[IP]);
+                return(0);
+        }
+#endif
+	return(phaenoCode[IP]);
+};
+
+
+int EXPORT ANARACE::getCurrentpFitness()
+{
+	return(currentpFitness);
+};
+
+void ANARACE::setCurrentpFitness(int num)
+{
+	currentpFitness=num;
+};
+
 // Reset all ongoing data (between two runs)
 void EXPORT ANARACE::resetData() // resets all data to standard starting values
 {
+
+	setCurrentpFitness(0);
 	for(int i=MAX_GOALS;i--;)
 		setFinalTime(i,0);
 	resetSpecial();
@@ -1506,8 +1575,7 @@ void EXPORT ANARACE::resetData() // resets all data to standard starting values
 		setProgramSuccessUnit(i,0);
 //		program[i].successLocation=0;
 		setProgramIsBuilt(i,0);
-		program[i].time=MAX_TIME;
-	//	setProgramTime(i,MAX_TIME);
+		setProgramTime(i,MAX_TIME);
 		for(int j=0;j<UNIT_TYPE_COUNT;j++)
 		{
 			setProgramAvailibleCount(i,j,0);
@@ -1612,7 +1680,7 @@ int EXPORT ANARACE::getMaxsFitness()
 int EXPORT EXPORT ANARACE::getMaxtFitness()
 {
 #ifdef _SCC_DEBUG	
-	if((maxtFitness<0)||(maxtFitness>50000))
+	if((maxtFitness<0)||(maxtFitness>MAX_TFITNESS))
 	{
 		debug.toLog(0,"DEBUG: (ANARACE::getMaxtFitness): Variable maxtFitness not initialized [%i].",maxtFitness);
 		return(0);
@@ -1691,7 +1759,7 @@ int EXPORT ANARACE::setMaxsFitness(int num)
 int EXPORT ANARACE::setMaxtFitness(int num)
 {
 #ifdef _SCC_DEBUG
-	if((num<0)||(num>50000))
+	if((num<0)||(num>MAX_TFITNESS))
 	{
 		debug.toLog(0,"DEBUG: (ANARACE::setMaxtFitness): Value [%i] out of range.",num);
 		return(0);
@@ -1712,7 +1780,7 @@ void EXPORT ANARACE::analyzeBuildOrder()
 	{
 		tGoal[i]=0;
 		for(int j=1;j<MAX_LOCATIONS;j++)
-			tGoal[i]+=getPlayer()->goal->globalGoal[j][i]-getMap()->getLocationForce(j,getPlayerNum(),i);
+			tGoal[i]+=getPlayer()->getGoal()->globalGoal[j][i]-getMap()->getLocationForce(j,getPlayerNum(),i);
 	}
 
 	for(int i=0;i<MAX_LENGTH;i++)
@@ -1721,7 +1789,7 @@ void EXPORT ANARACE::analyzeBuildOrder()
 			tGoal[phaenoCode[i]]--;
 			setProgramIsGoal(i,1);
 		}
-		else setProgramIsGoal(i,0);
+	else setProgramIsGoal(i,0);
 };
 
 
@@ -1731,11 +1799,11 @@ ANARACE::ANARACE()
 	setGeneration(0);
 	setMaxpFitness(0);
 	setMaxsFitness(0);
-	setMaxtFitness(0);
+	setMaxtFitness(MAX_TFITNESS);
 	setUnchangedGenerations(0);
 	setRun(0);
 	optimizing=0;
-	active=0;
+	active=1;
 };
 
 ANARACE::~ANARACE()

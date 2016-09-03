@@ -20,6 +20,7 @@ private:
 	ANARACE* anaplayer[MAX_PLAYER];
 	ANARACE* Save[MAX_RUNS][MAX_PLAYER];
 public:
+	void calculateAnaplayer();
 	int setGoal(GOAL_ENTRY* goal, int player);
 	int setMap(MAP* map);
 	void checkForChange(); // manually update changes (when the engine is not optimizing for example)

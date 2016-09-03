@@ -1,5 +1,5 @@
 "@SETTINGS"
-"Max Time" = "3600"
+"Max Time" = "1800"
 # Preprocessing not implemented yet
 "Preprocess Buildorder" = "0"
 "Max unchanged Generations" = "500"

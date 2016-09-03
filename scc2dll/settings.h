@@ -8,19 +8,23 @@
 #include "map.h"
 #include "ga.h"
 
+#define TOP_VS_BOTTOM 0
+#define USE_MAP_SETTINGS 1 
+
 // generally all function return 0 if there was an error and 1 if there was no error
 
 class EXPORT SETTINGS
 {
 private:
 	GOAL_ENTRY goalEntry[MAX_GOAL_ENTRIES];
-	MAP map[MAX_MAPS];
+	MAP map[MAX_MAPS]; //modes: 0: ignore map settings and make up a default force, 1: use map settings
 	HARVEST_SPEED harvestSpeed[3];
 	GA ga;
 	SOUP soup;
 	int setMapCount(int num);
 	int setGoalCount(int num);
 public:
+	void calculateAnaplayer();
 	MAP* getMap(int num);
 
 	void checkForChange();
@@ -83,7 +87,7 @@ public:
 	void loadDefaults();
 	int loadGoalFile(const char* goalFile);
 	int loadSettingsFile(const char* settingsFile);
-	int loadMapFile(const char* mapFile);
+	int loadMapFile(const char* mapFile, int UMS);
 	int loadHarvestFile(const char* harvestFile);
 	ANARACE** newGeneration(ANARACE* oldAnarace[MAX_PLAYER]);
 

@@ -1,4 +1,3 @@
-#include "../scc2dll/settings.h"
 #include "../scc2dll/location.h"
 #include "scc2.h"
 #include "../scc2dll/race.h"
@@ -27,7 +26,11 @@ BEGIN_EVENT_TABLE(MyDCWindow, wxWindow)
 	EVT_MOTION(MyDCWindow::OnMouseMove)
 	EVT_LEFT_UP(MyDCWindow::OnMouseLeftUp)
 	EVT_LEFT_DOWN(MyDCWindow::OnMouseLeftDown)
+	EVT_RIGHT_UP(MyDCWindow::OnMouseRightUp)
+	EVT_RIGHT_DOWN(MyDCWindow::OnMouseRightDown)
 	EVT_MOUSEWHEEL(MyDCWindow::OnMouseScroll)
+	EVT_KEY_DOWN(MyDCWindow::OnKeyDown)
+	EVT_KEY_UP(MyDCWindow::OnKeyUp)
 	EVT_TIMER(-1,MyDCWindow::OnTimer)
 END_EVENT_TABLE()
 
@@ -43,7 +46,9 @@ const int ADVANCED=1;
 const int EXPERT=2;
 const int GOSU=3;
 const int TRANSCENDEND=4;
-const int TUTORIAL=5;
+const int MAP=5;
+const int SETTINGS=6;
+const int TUTORIAL=7;
 
 int grey; //0-100%
 
@@ -51,6 +56,7 @@ int animationNumbers;
 
 void MyDCWindow::resetData()
 {
+	refresh=0;
 	endrun=0;
 	gizmor=rand()%GIZMO_NUMBER;
 	for(int i=0;i<MAX_PLAYER;i++)
@@ -65,7 +71,6 @@ void MyDCWindow::resetData()
 MyDCWindow::MyDCWindow(wxFrame *parent)
 	:wxWindow(parent, -1)
 {
-//	dt1=wxDateTime::UNow();
 #ifdef __WIN32__
 	GraphixScrollWindow::font=wxFont(FONT_SIZE,wxDEFAULT,wxNORMAL,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);
 	GraphixScrollWindow::font2=wxFont(FONT_SIZE,wxDEFAULT,wxFONTSTYLE_ITALIC,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);
@@ -78,44 +83,56 @@ MyDCWindow::MyDCWindow(wxFrame *parent)
 
 	GraphixScrollWindow::font5=wxFont(24,wxDECORATIVE,wxNORMAL,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);
 	GraphixScrollWindow::font6=wxFont(12,wxDECORATIVE,wxNORMAL,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);
-
+	GraphixScrollWindow::font7=wxFont(16,wxDECORATIVE,wxNORMAL,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);
+		
 // Always do loadHarvestFile (mining speeds) before loadMapFile, because at the moment the mapfile also sets the gathering speed
-	settings.loadHarvestFile("mining.txt");
-	settings.loadSettingsFile("settings.txt");
+	GraphixScrollWindow::settings.loadHarvestFile("mining.txt");
+	GraphixScrollWindow::settings.loadSettingsFile("settings.txt");
 // Map in "map.txt" is now map[0]
-	settings.loadMapFile("map.txt");
+
+	GraphixScrollWindow::settings.loadMapFile("LostTemple",USE_MAP_SETTINGS);
+	GraphixScrollWindow::settings.loadMapFile("LostTemple",TOP_VS_BOTTOM);
 // choose the first map we loaded (map[0])
-	settings.setCurrentMap(0);
+	GraphixScrollWindow::settings.setCurrentMap(0);
+
+// MAPS: Startforce
+// Goals: 
+	
 // Goal in "goal.txt" is now goal[0]
-	settings.loadGoalFile("goalp0.txt");
-	settings.loadGoalFile("goalp1.txt");
+	GraphixScrollWindow::settings.loadGoalFile("goalp1.txt");
+	GraphixScrollWindow::settings.loadGoalFile("goalp0.txt");
+	GraphixScrollWindow::settings.loadGoalFile("goalp0.txt");
+	GraphixScrollWindow::settings.loadGoalFile("goalp0.txt");
+	GraphixScrollWindow::settings.loadGoalFile("goalp0.txt");
+	GraphixScrollWindow::settings.loadGoalFile("goalp0.txt");
 // assign goal 0 to all players
-	for(int i=1;i<settings.getMap(0)->getMaxPlayer();i++)
-		settings.setGoal(0,i);
+	for(int i=1;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer();i++)
+		GraphixScrollWindow::settings.setGoal(0,i);
 	update=0;
 // initialize the soup, set the parameters, load the players etc.
-	settings.initSoup();
-	ga=settings.getGa();
+	GraphixScrollWindow::settings.initSoup();
+	ga=GraphixScrollWindow::settings.getGa();
 	oldrun=0;
 	grey=0;
 	resetData();
-//	dt2=wxDateTime::UNow();
-	if(ANARACE** temp=settings.newGeneration(anarace))
+	if(ANARACE** temp=GraphixScrollWindow::settings.newGeneration(anarace))
 	{
-		for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
+		for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
 			anarace[i]=temp[i];
 		update=2;
 //		if(anarace[0]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=1;} TODO?
 	};
 
-	mainWindow=new GraphixScrollWindow(1,wxRect(0,0,SCREEN_X,SCREEN_Y),wxRect(0,0,SCREEN_X,SCREEN_Y),NOT_SCROLLED,TABBED);
+	mainWindow=new GraphixScrollWindow(1,wxRect(0,0,SCREEN_X,SCREEN_Y),wxRect(0,0,SCREEN_X,SCREEN_Y),NOT_SCROLLED,0,TABBED);
 	mainWindow->setTitle(SCREEN_X/2,_T(wxString::Format(wxT("Evolution Forge v.%i "),EF_Version)));
 	mainWindow->addTab(10,_T("Basic"));
-	mainWindow->addTab(152,_T("Advanced"));
-	mainWindow->addTab(294,_T("Expert"));
-	mainWindow->addTab(436,_T("Gosu -_-"));
-	mainWindow->addTab(578,_T("Transcend"));
-	mainWindow->addTab(SCREEN_X-160,_T("Tutorial"));
+	mainWindow->addTab(130,_T("Advanced"));
+	mainWindow->addTab(250,_T("Expert"));
+	mainWindow->addTab(370,_T("Gosu >_<"));
+	mainWindow->addTab(490,_T("Transcend"));
+    mainWindow->addTab(610,_T("Map&Goals"));
+	mainWindow->addTab(730,_T("Settings"));
+	mainWindow->addTab(890,_T("Tutorial"));
 
 	msgWindow=new MessageWindow(wxRect(mainWindow->getInnerPosition()+wxPoint(0,mainWindow->getInnerHeight()-125),wxSize(FIRST_COLOUMN,120)),wxRect(mainWindow->getInnerLeftBound(),mainWindow->getInnerLeftBound()+mainWindow->getInnerHeight()-125,FIRST_COLOUMN,120));
 msgWindow->setTitle(0,"Messages");
@@ -123,14 +140,14 @@ msgWindow->setTitle(0,"Messages");
 	theCore=new GraphixScrollWindow(0,wxRect(FIRST_COLOUMN+5,mainWindow->getInnerUpperBound()+SECOND_ROW,SECOND_COLOUMN,220),wxRect(FIRST_COLOUMN+5,mainWindow->getInnerUpperBound()+SECOND_ROW,SECOND_COLOUMN,220),NOT_SCROLLED);
 	theCore->setTitle(0,"The Core of Evolution Forge");
 
-	tutorialWindow=new GraphixScrollWindow(0,wxRect(mainWindow->getInnerWidth()-theCore->getWidth(),SECOND_ROW,theCore->getWidth(),500),wxRect(mainWindow->getInnerLeftBound(),mainWindow->getInnerUpperBound(),mainWindow->getInnerWidth(),500),NOT_SCROLLED,TABBED);
+	tutorialWindow=new GraphixScrollWindow(0,wxRect(mainWindow->getInnerWidth()-theCore->getWidth(),SECOND_ROW,theCore->getWidth(),500),wxRect(mainWindow->getInnerLeftBound(),mainWindow->getInnerUpperBound(),mainWindow->getInnerWidth(),500),NOT_SCROLLED,0,TABBED);
 	tutorialWindow->setTitle(0,"Evolution Forge Tutorial");
 
 	Player::InitPositions(mainWindow);
 
 //TODO: scc2 player und scc2dll player Zusammenhang nachschaun! loadPlayer wird net aufgerufen... goals ueberschneiden etc...
 
-	for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
+	for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
 		player[i]=new Player(&(anarace[i]),i);
 
 //	haxor=new GraphixScrollWindow(wxColour(255,0,0), wxColour(5,25,0), wxColour(40,150,20), wxRect(0,0,550,100),0,boGraphWindow->getLeftBound(),boGraphWindow->getLowerBound()+10,0);
@@ -149,7 +166,7 @@ msgWindow->setTitle(0,"Messages");
 
 	msgWindow->addMessage(_T("Welcome to Evolution Forge!"));
 	msgWindow->addMessage(_T("Click above to add new goals."));
-	msgWindow->addMessage(_T(wxString::Format(wxT("%i players loaded..."),settings.getMap(0)->getMaxPlayer()-1))),
+	msgWindow->addMessage(_T(wxString::Format(wxT("%i players loaded..."),GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1))),
 
 	GraphixScrollWindow::bmpClawsoftware.LoadFile("clawsoftware.bmp", wxBITMAP_TYPE_BMP);
 	GraphixScrollWindow::bmpClemens.LoadFile("clemens.bmp", wxBITMAP_TYPE_BMP);
@@ -173,6 +190,7 @@ msgWindow->setTitle(0,"Messages");
 
 //	wxtimer.SetOwner(this);
 //	wxtimer.Start(200);
+	dc=0;
 };
 
 MyDCWindow::~MyDCWindow()
@@ -284,8 +302,8 @@ void MyDCWindow::processButtons()
 					msgWindow->Show(0);
 					theCore->Show(0);
 					tutorialWindow->Show(0);
-					settings.setGoal(1,1); // share same goal with advanced
-					settings.setGoal(0,2); //zero goal!
+					GraphixScrollWindow::settings.setGoal(1,1); // share same goal with advanced
+					GraphixScrollWindow::settings.setGoal(0,2); //zero goal!
 				break;
 				case ADVANCED: //1 player
 					player[0]->Show(2);
@@ -293,8 +311,8 @@ void MyDCWindow::processButtons()
 					msgWindow->Show(0);
 					theCore->Show(1);
 					tutorialWindow->Show(0);
-                                        settings.setGoal(1,1); //share same goal with basic
-                                        settings.setGoal(0,2); //zero goal!
+                                        GraphixScrollWindow::settings.setGoal(1,1); //share same goal with basic
+                                        GraphixScrollWindow::settings.setGoal(0,2); //zero goal!
 				break;
 				case EXPERT: //2 player rushversuche
 					player[0]->Show(3);
@@ -302,8 +320,8 @@ void MyDCWindow::processButtons()
 					msgWindow->Show(0);
 					theCore->Show(0);
 					tutorialWindow->Show(0);
-                                        settings.setGoal(1,1); // share same goal as advanced
-                                        settings.setGoal(0,2); // zero goal!  -> computer!
+                                        GraphixScrollWindow::settings.setGoal(1,1); // share same goal as advanced
+                                        GraphixScrollWindow::settings.setGoal(0,2); // zero goal!  -> computer!
 				break;
 				case GOSU: // 2 player - Spieler spielt
 					player[0]->Show(5);
@@ -312,8 +330,8 @@ void MyDCWindow::processButtons()
 					theCore->Show(0);
 					tutorialWindow->Show(0);
 // TODO wenn zero goal -> absturz beim aendern
-                                        settings.setGoal(0,1); // zero goal! -> human
-                                        settings.setGoal(0,2); // zero goal!  -> computer!
+                                        GraphixScrollWindow::settings.setGoal(0,1); // zero goal! -> human
+                                        GraphixScrollWindow::settings.setGoal(0,2); // zero goal!  -> computer!
 				break;
 				case TRANSCENDEND: // 2 player - 2 Computer
 					player[0]->Show(7); //~~
@@ -321,8 +339,8 @@ void MyDCWindow::processButtons()
 					msgWindow->Show(0);
 					theCore->Show(0);
 					tutorialWindow->Show(0);
-                                        settings.setGoal(0,1); // zero goal!  -> computer!
-                                        settings.setGoal(0,2); // zero goal!  -> computer!
+                                        GraphixScrollWindow::settings.setGoal(0,1); // zero goal!  -> computer!
+                                        GraphixScrollWindow::settings.setGoal(0,2); // zero goal!  -> computer!
 				break;
 				case TUTORIAL:
 					player[0]->Show(1);
@@ -334,34 +352,35 @@ void MyDCWindow::processButtons()
 					msgWindow->Show(0);
 					theCore->Show(0);			
 					tutorialWindow->Show(1);
-                                        settings.setGoal(1,1); // same goal as basic
-                                        settings.setGoal(0,2); // zero goal!  -> computer!
+                                        GraphixScrollWindow::settings.setGoal(1,1); // same goal as basic
+                                        GraphixScrollWindow::settings.setGoal(0,2); // zero goal!  -> computer!
 				break;
 				default:break;		
-			}
+			} // end switch
 
 			player[0]->update();
 			player[1]->update();
 
-/*			settings.initSoup();
+/*			GraphixScrollWindow::settings.initSoup();
 		        resetData();
-		        if(ANARACE** temp=settings.newGeneration(anarace))
-		        {                 for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
+		        if(ANARACE** temp=GraphixScrollWindow::settings.newGeneration(anarace))
+		        {                 for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
                 			        anarace[i]=temp[i];
 		                update=2;
 //              if(anarace[0]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=1;} TODO?
 		        };
-		        for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
+		        for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
                 		player[i]->assignAnarace(&(anarace[i]));*/
 	
-			settings.checkForChange();
-		}
+//			GraphixScrollWindow::settings.checkForChange();
+		} // end mainwindow is activated
 
-	for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
+	GraphixScrollWindow::settings.checkForChange();
+	for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
 		if(player[i]->isShown())
 		{
 			player[i]->processButtons();
-			if(player[i]->hasChanged())
+//			if(player[i]->hasChanged())
 			{
 				if(!isOptimizing())
 					update=2;
@@ -541,14 +560,14 @@ void MyDCWindow::processButtons()
 
 void MyDCWindow::stopOptimizing()
 {
-	for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
+	for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
 	       if(player[i]->isShown())
 			player[i]->setOptimizing(0);
 };
 
 int MyDCWindow::isOptimizing()
 {
-	for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
+	for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
  	       if(player[i]->isOptimizing())
 			return(1);
 	return(0);
@@ -640,19 +659,12 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 	{
 		dc->SetBrush(*wxBLACK_BRUSH);
 		dc->SetPen(*wxTRANSPARENT_PEN);
-		dc->SetFont(GraphixScrollWindow::font);
-		wxString bla=_T("Click");
-		int dx,dy;
-		dc->GetTextExtent(bla,&dx,&dy);
-		wxRect edget=wxRect(mainWindow->getLeftBound()+mainWindow->getWidth()-dx-190-3,mainWindow->getUpperBound()-dy-3,dx+26,dy+6);
-		dc->DrawRectangle(edget);
-		dc->DrawText(bla,mainWindow->getLeftBound()+mainWindow->getWidth()-dx-190,mainWindow->getUpperBound()-dy);
-		dc->DrawBitmap(GraphixScrollWindow::bmpArrowRight,mainWindow->getLeftBound()+mainWindow->getWidth()-180-animationNumbers%4,mainWindow->getUpperBound()-dy);
+		dc->DrawBitmap(GraphixScrollWindow::bmpArrowRight,mainWindow->getLeftBound()+mainWindow->getWidth()-130-animationNumbers%4,mainWindow->getUpperBound()-5);
 	}
 
 //	if(update==2)
 //	{
-		for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
+		for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
 			if(player[i]->isShown())
 				player[i]->update();
 //	}
@@ -1141,13 +1153,7 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 	}*/
 
 
-/*	if(infoWindow->isShown())
-	{
-		if(infoWindowNumber) //infoWindow needs to be AFTER theCore
-			showInfoWindow();
-	}*/
-
-	for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
+	for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
 		if(player[i]->isShown())
 			player[i]->DrawMe(dc);
 
@@ -1167,20 +1173,20 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 /*
 void MyFrame::OnSettingsDialogApply()
 {
-	child->settings.setMaxTime(spin1->GetValue());
-	child->settings.setMaxTimeOut(spin2->GetValue());
-	child->settings.setMaxLength(spin3->GetValue());
-	child->settings.setMaxRuns(spin4->GetValue());
-	child->settings.setMaxGenerations(spin5->GetValue());
-	child->settings.setBreedFactor(spin6->GetValue());
-	child->settings.setCrossOver(spin7->GetValue());
+	child->GraphixScrollWindow::settings.setMaxTime(spin1->GetValue());
+	child->GraphixScrollWindow::settings.setMaxTimeOut(spin2->GetValue());
+	child->GraphixScrollWindow::settings.setMaxLength(spin3->GetValue());
+	child->GraphixScrollWindow::settings.setMaxRuns(spin4->GetValue());
+	child->GraphixScrollWindow::settings.setMaxGenerations(spin5->GetValue());
+	child->GraphixScrollWindow::settings.setBreedFactor(spin6->GetValue());
+	child->GraphixScrollWindow::settings.setCrossOver(spin7->GetValue());
 	if(check1->GetValue())
-		child->settings.setPreprocessBuildOrder(1);
-	else child->settings.setPreprocessBuildOrder(0);
+		child->GraphixScrollWindow::settings.setPreprocessBuildOrder(1);
+	else child->GraphixScrollWindow::settings.setPreprocessBuildOrder(0);
 
-	child->settings.setCurrentMap(lb1->GetSelection());
-	child->settings.setGoal(lb2->GetSelection(),1);
-	child->settings.setGoal(lb2->GetSelection(),2);
+	child->GraphixScrollWindow::settings.setCurrentMap(lb1->GetSelection());
+	child->GraphixScrollWindow::settings.setGoal(lb2->GetSelection(),1);
+	child->GraphixScrollWindow::settings.setGoal(lb2->GetSelection(),2);
 }
 */
 
@@ -1191,9 +1197,9 @@ void MyDCWindow::OnIdle(wxIdleEvent& WXUNUSED(event))
 		update=2;
 		ANARACE** temp;
 //TODO: nach Ende eines Durchlaufs ist anarace 0, aber viele anderen Teile des Codes greifen noch drauf zu!!
-		if(temp=settings.newGeneration(anarace))
+		if(temp=GraphixScrollWindow::settings.newGeneration(anarace))
 		{
-			for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
+			for(int i=0;i<GraphixScrollWindow::settings.getMap(0)->getMaxPlayer()-1;i++)
 			{
 				anarace[i]=temp[i];
 //				if(anarace[i]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=1;} TODO
@@ -1208,7 +1214,7 @@ void MyDCWindow::OnIdle(wxIdleEvent& WXUNUSED(event))
 //	}
 
 	refresh++;
-	if(refresh>5)
+	if(refresh>2)
 		refresh=0;		
 	Refresh(false);
 }
@@ -1217,6 +1223,20 @@ void MyDCWindow::OnTimer(wxTimerEvent& WXUNUSED(event))
 {
 //	Refresh(false);
 }
+
+void MyDCWindow::OnKeyDown(wxKeyEvent& event)
+{
+//	if(event.ShiftDown())
+		mainWindow->controls.setShiftPressed(1);
+};
+
+void MyDCWindow::OnKeyUp(wxKeyEvent& event)
+{
+//	if(!event.ShiftDown())
+		mainWindow->controls.setShiftPressed(0);
+// TODO, wenn event verloren geht... :/
+};
+
 
 void MyDCWindow::OnMouseScroll(wxMouseEvent& event)
 {
@@ -1233,10 +1253,17 @@ void MyDCWindow::OnMouseMove(wxMouseEvent& event)
 	event.GetPosition(&position.x,&position.y);
 	mainWindow->controls.setMouse(position);
 	//TODO irgendwie ein player -> update oder so
-//	infoWindowNumber=0;
-//	if(infoWindow->isShown())
-//		infoWindowNumber=CheckForInfoWindow();
 }
+
+void MyDCWindow::OnMouseRightDown(wxMouseEvent& event)
+{
+	mainWindow->controls.rightDown();
+};
+
+void MyDCWindow::OnMouseRightUp(wxMouseEvent& event)
+{
+	mainWindow->controls.rightUp();
+};
 
 void MyDCWindow::OnMouseLeftDown(wxMouseEvent& event)
 {
@@ -1280,7 +1307,7 @@ void MyFrame::OnMapImport(wxCommandEvent& event)
 			case wxID_OK:
 				{
 					wxString path=fileDialog.GetPath();
-					if(!(error=(child->settings.loadMapFile(path))))
+					if(!(error=(child->GraphixScrollWindow::settings.loadMapFile(path))))
 					{
 						wxMessageDialog bla(this,path/*_T(wxString::Format(wxT("Error importing goal file!\n %s : Error Code %i."),path,error))*/,_T("Message"),wxOK,wxDefaultPosition);
 						while(bla.ShowModal()!=wxID_OK);
@@ -1320,7 +1347,7 @@ void MyFrame::OnGoalImport(wxCommandEvent& event)
 			case wxID_OK:
 				{
 					wxString path=fileDialog.GetPath();
-					if(!(error=(child->settings.loadGoalFile(path))))
+					if(!(error=(child->GraphixScrollWindow::settings.loadGoalFile(path))))
 					{
 						wxMessageDialog bla(this,path/*_T(wxString::Format(wxT("Error importing goal file!\n %s : Error Code %i."),path,error))*/,_T("Message"),wxOK,wxDefaultPosition);
 						while(bla.ShowModal()!=wxID_OK);
@@ -1355,16 +1382,16 @@ void MyFrame::OnGeneralSettings(wxCommandEvent& WXUNUSED(event))
 	text7=new wxStaticText(dia,-1,_T("BreedFactor"),wxPoint(10,110),wxDefaultSize,0,_T("BreedFactor percentage"));
 	text8=new wxStaticText(dia,-1,_T("CrossOver"),wxPoint(10,130),wxDefaultSize,0,_T("CrossOver percentage"));
 
-	spin1=new wxSpinCtrl(dia,EF_SpinMaxTime,wxEmptyString,wxPoint(100,10),wxSize(60,18),wxSP_ARROW_KEYS,child->settings.getMINMaxTime(),child->settings.getMAXMaxTime(),child->settings.getMaxTime(),_T("MaxTimeSpin"));
-	spin2=new wxSpinCtrl(dia,EF_SpinMaxTimeOut,wxEmptyString,wxPoint(100,30),wxSize(60,18),wxSP_ARROW_KEYS,child->settings.getMINMaxTimeOut(),child->settings.getMAXMaxTimeOut(),child->settings.getMaxTimeOut(),_T("MaxTimeOutSpin"));
-	spin3=new wxSpinCtrl(dia,EF_SpinMaxLength,wxEmptyString,wxPoint(100,50),wxSize(60,18),wxSP_ARROW_KEYS,child->settings.getMINMaxLength(),child->settings.getMAXMaxLength(),child->settings.getMaxLength(),_T("MaxLengthSpin"));
-	spin4=new wxSpinCtrl(dia,EF_SpinMaxRuns,wxEmptyString,wxPoint(100,70),wxSize(60,18),wxSP_ARROW_KEYS,child->settings.getMINMaxRuns(),child->settings.getMAXMaxRuns(),child->settings.getMaxRuns(),_T("MaxRunsSpin"));
-	spin5=new wxSpinCtrl(dia,EF_SpinMaxGenerations,wxEmptyString,wxPoint(100,90),wxSize(60,18),wxSP_ARROW_KEYS,child->settings.getMINMaxGenerations(),child->settings.getMAXMaxGenerations(),child->settings.getMaxGenerations(),_T("MaxGenerationsSpin"));
-	spin6=new wxSpinCtrl(dia,EF_SpinBreedFactor,wxEmptyString,wxPoint(100,110),wxSize(60,18),wxSP_ARROW_KEYS,child->settings.getMINBreedFactor(),child->settings.getMAXBreedFactor(),child->settings.getBreedFactor(),_T("BreedFactorSpin"));
-	spin7=new wxSpinCtrl(dia,EF_SpinCrossOver,wxEmptyString,wxPoint(100,130),wxSize(60,18),wxSP_ARROW_KEYS,child->settings.getMINCrossOver(),child->settings.getMAXCrossOver(),child->settings.getCrossOver(),_T("CrossOverSpin"));
+	spin1=new wxSpinCtrl(dia,EF_SpinMaxTime,wxEmptyString,wxPoint(100,10),wxSize(60,18),wxSP_ARROW_KEYS,child->GraphixScrollWindow::settings.getMINMaxTime(),child->settings.getMAXMaxTime(),child->settings.getMaxTime(),_T("MaxTimeSpin"));
+	spin2=new wxSpinCtrl(dia,EF_SpinMaxTimeOut,wxEmptyString,wxPoint(100,30),wxSize(60,18),wxSP_ARROW_KEYS,child->GraphixScrollWindow::settings.getMINMaxTimeOut(),child->settings.getMAXMaxTimeOut(),child->settings.getMaxTimeOut(),_T("MaxTimeOutSpin"));
+	spin3=new wxSpinCtrl(dia,EF_SpinMaxLength,wxEmptyString,wxPoint(100,50),wxSize(60,18),wxSP_ARROW_KEYS,child->GraphixScrollWindow::settings.getMINMaxLength(),child->settings.getMAXMaxLength(),child->settings.getMaxLength(),_T("MaxLengthSpin"));
+	spin4=new wxSpinCtrl(dia,EF_SpinMaxRuns,wxEmptyString,wxPoint(100,70),wxSize(60,18),wxSP_ARROW_KEYS,child->GraphixScrollWindow::settings.getMINMaxRuns(),child->settings.getMAXMaxRuns(),child->settings.getMaxRuns(),_T("MaxRunsSpin"));
+	spin5=new wxSpinCtrl(dia,EF_SpinMaxGenerations,wxEmptyString,wxPoint(100,90),wxSize(60,18),wxSP_ARROW_KEYS,child->GraphixScrollWindow::settings.getMINMaxGenerations(),child->settings.getMAXMaxGenerations(),child->settings.getMaxGenerations(),_T("MaxGenerationsSpin"));
+	spin6=new wxSpinCtrl(dia,EF_SpinBreedFactor,wxEmptyString,wxPoint(100,110),wxSize(60,18),wxSP_ARROW_KEYS,child->GraphixScrollWindow::settings.getMINBreedFactor(),child->settings.getMAXBreedFactor(),child->settings.getBreedFactor(),_T("BreedFactorSpin"));
+	spin7=new wxSpinCtrl(dia,EF_SpinCrossOver,wxEmptyString,wxPoint(100,130),wxSize(60,18),wxSP_ARROW_KEYS,child->GraphixScrollWindow::settings.getMINCrossOver(),child->settings.getMAXCrossOver(),child->settings.getCrossOver(),_T("CrossOverSpin"));
 
 	check1=new wxCheckBox(dia,EF_CheckPreprocess,_T("Preprocess Buildorder"),wxPoint(10,150),wxDefaultSize,-1,wxDefaultValidator,_T("preprocess"));
-	if(child->settings.getPreprocessBuildOrder())
+	if(child->GraphixScrollWindow::settings.getPreprocessBuildOrder())
 		check1->SetValue(TRUE);
 	else check1->SetValue(FALSE);
 
@@ -1374,18 +1401,18 @@ void MyFrame::OnGeneralSettings(wxCommandEvent& WXUNUSED(event))
 	but4=new wxButton(dia,wxID_CANCEL,_T("Cancel"),wxPoint(230,200),wxSize(65,20));
 
 	wxString bla[MAX_MAPS];
-	for(int i=0;i<child->settings.getMapCount();i++)
-		bla[i]=_T(wxString::Format(wxT("%s"),child->settings.getMap(i)->getName()));
+	for(int i=0;i<child->GraphixScrollWindow::settings.getMapCount();i++)
+		bla[i]=_T(wxString::Format(wxT("%s"),child->GraphixScrollWindow::settings.getMap(i)->getName()));
 	text9=new wxStaticText(dia,-1,_T("SelectMap"),wxPoint(200,10),wxDefaultSize,0,_T("Select Map"));
-	lb1=new wxListBox(dia,-1,wxPoint(200,30),wxSize(80,150),child->settings.getMapCount(),bla,0,wxDefaultValidator,_T("listBox"));
-	lb1->SetSelection(child->settings.getCurrentMap());
+	lb1=new wxListBox(dia,-1,wxPoint(200,30),wxSize(80,150),child->GraphixScrollWindow::settings.getMapCount(),bla,0,wxDefaultValidator,_T("listBox"));
+	lb1->SetSelection(child->GraphixScrollWindow::settings.getCurrentMap());
 
 	wxString bla2[MAX_MAPS];
-	for(int i=0;i<child->settings.getGoalCount();i++)
-		bla2[i]=_T(wxString::Format(wxT("%s"),child->settings.getGoal(i)->getName()));
+	for(int i=0;i<child->GraphixScrollWindow::settings.getGoalCount();i++)
+		bla2[i]=_T(wxString::Format(wxT("%s"),child->GraphixScrollWindow::settings.getGoal(i)->getName()));
 	text10=new wxStaticText(dia,-1,_T("SelectGoal"),wxPoint(300,10),wxDefaultSize,0,_T("Select Goal"));
-	lb2=new wxListBox(dia,-1,wxPoint(300,30),wxSize(80,150),child->settings.getGoalCount(),bla2,0,wxDefaultValidator,_T("listBox"));
-	//lb2->SetSelection(settings.getCurrentGoal()); ~~~ multiple players...
+	lb2=new wxListBox(dia,-1,wxPoint(300,30),wxSize(80,150),child->GraphixScrollWindow::settings.getGoalCount(),bla2,0,wxDefaultValidator,_T("listBox"));
+	//lb2->SetSelection(GraphixScrollWindow::settings.getCurrentGoal()); ~~~ multiple players...
 
 	int temp;
 	while(true)
@@ -1396,7 +1423,7 @@ void MyFrame::OnGeneralSettings(wxCommandEvent& WXUNUSED(event))
 			case wxID_CANCEL:break;
 			case wxID_APPLY:
 			case wxID_OK:OnSettingsDialogApply();break;
-			case wxID_RESET:child->settings.loadDefaults();break;
+			case wxID_RESET:child->GraphixScrollWindow::settings.loadDefaults();break;
 		}
 		if((temp==wxID_CANCEL)||(temp==wxID_OK)) break;
 	}

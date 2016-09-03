@@ -3,6 +3,17 @@
 #include "debug.h"
 #include "location.h"
 
+int MAP::getUMS()
+{
+	return(UMS);
+};
+
+void MAP::setUMS(int UMS)
+{
+	if(UMS)
+		this->UMS=UMS;
+};
+
 int MAP::getStartPlayerRace(int player)
 {
 #ifdef _SCC_DEBUG
@@ -32,15 +43,15 @@ int MAP::setStartPlayerGoal(int player, GOAL_ENTRY* goal)
 #ifdef _SCC_DEBUG
 	if((player<0)||(player>=MAX_PLAYER))
 	{
-	       debug.toLog(0,"DEBUG: (MAP::setStartPlayerGoal): Value player [%i] out of range.",player);
+		   debug.toLog(0,"DEBUG: (MAP::setStartPlayerGoal): Value player [%i] out of range.",player);
 		return(0);
-						                                
-	};       
+														
+	};	   
 	if(!goal)
 	{
-	       debug.toLog(0,"DEBUG: (MAP::setStartPlayerGoal): Variable goal not initialized [%i].",goal);
-	       return(0);
-						                                
+		   debug.toLog(0,"DEBUG: (MAP::setStartPlayerGoal): Variable goal not initialized [%i].",goal);
+		   return(0);
+														
 	};
 #endif
 	return(startPlayer[player].setGoal(goal));
@@ -51,9 +62,9 @@ int MAP::setStartPlayerRace(int player, int race)
 #ifdef _SCC_DEBUG
 	if((player<0)||(player>=MAX_PLAYER))
 	{
-	       debug.toLog(0,"DEBUG: (MAP::setStartPlayerRace): Value player [%i] out of range.",player);
+		   debug.toLog(0,"DEBUG: (MAP::setStartPlayerRace): Value player [%i] out of range.",player);
 		return(0);
-						                                
+														
 	};
 #endif
 	return(startPlayer[player].setRace(race));
@@ -64,22 +75,35 @@ int MAP::setStartPlayerHarvestSpeed(int player, const int* mining, const int* ga
 #ifdef _SCC_DEBUG
 	if((player<0)||(player>=MAX_PLAYER))
 	{
-	       debug.toLog(0,"DEBUG: (MAP::setStartPlayerHarvestSpeed): Value player [%i] out of range.", player);
+		   debug.toLog(0,"DEBUG: (MAP::setStartPlayerHarvestSpeed): Value player [%i] out of range.", player);
 		return(0);
-						                                
+														
 	};
 #endif
 	return(startPlayer[player].setHarvest(mining,gasing));
 };
+
+int MAP::getStartPlayerPosition(int player)
+{
+#ifdef _SCC_DEBUG
+	if((player<0)||(player>=MAX_PLAYER))
+	{
+		   debug.toLog(0,"DEBUG: (MAP::getStartPlayerPosition): Value player [%i] out of range.", player);
+		   return(0);
+	};
+#endif
+	return(startPlayer[player].getPosition());
+};
+
 
 int MAP::setStartPlayerPosition(int player, int position)
 {
 #ifdef _SCC_DEBUG
 	if((player<0)||(player>=MAX_PLAYER))
 	{
-	       debug.toLog(0,"DEBUG: (MAP::setStartPlayerPosition): Value player [%i] out of range.", player);
-	       return(0);
-						                                                                                                            
+		   debug.toLog(0,"DEBUG: (MAP::setStartPlayerPosition): Value player [%i] out of range.", player);
+		   return(0);
+																					                                                
 	};
 #endif
 	return(startPlayer[player].setPosition(position));
@@ -90,9 +114,9 @@ int MAP::setStartPlayerMins(int player, int mins)
 #ifdef _SCC_DEBUG
 	if((player<0)||(player>=MAX_PLAYER))
 	{
-	       debug.toLog(0,"DEBUG: (MAP::setStartPlayerMins): Value player [%i] out of range.", player);
-	       return(0);
-						                                                                                                            
+		   debug.toLog(0,"DEBUG: (MAP::setStartPlayerMins): Value player [%i] out of range.", player);
+		   return(0);
+																					                                                
 	};
 #endif
 	return(startPlayer[player].setMins(mins));
@@ -103,9 +127,9 @@ int MAP::setStartPlayerGas(int player, int gas)
 #ifdef _SCC_DEBUG
 	if((player<0)||(player>=MAX_PLAYER))
 	{
-	       debug.toLog(0,"DEBUG: (MAP::setStartPlayerGas): Value player [%i] out of range.", player);
+		   debug.toLog(0,"DEBUG: (MAP::setStartPlayerGas): Value player [%i] out of range.", player);
 		return(0);
-						                                                                                                            
+																					                                                
 	};
 #endif
 	return(startPlayer[player].setGas(gas));
@@ -116,9 +140,9 @@ int MAP::setStartPlayerTime(int player, int time)
 #ifdef _SCC_DEBUG
 	if((player<0)||(player>=MAX_PLAYER))
 	{
-	       debug.toLog(0,"DEBUG: (MAP::setStartPlayerTime): Value player [%i] out of range.", player);
-	       return(0);
-						                                                                                                            
+		   debug.toLog(0,"DEBUG: (MAP::setStartPlayerTime): Value player [%i] out of range.", player);
+		   return(0);
+																					                                                
 	};
 #endif
 	return(startPlayer[player].setTime(time));
@@ -131,7 +155,7 @@ int MAP::getLocationForce(int loc, int player, int unit)
 #ifdef _SCC_DEBUG
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 	{
-	       debug.toLog(0,"DEBUG: (MAP::getLocationForce): Value loc [%i] out of range.",loc);
+		   debug.toLog(0,"DEBUG: (MAP::getLocationForce): Value loc [%i] out of range.",loc);
 		return(0);
 
 	};
@@ -224,6 +248,22 @@ int MAP::setDistance(int loc1, int loc2, int num)
 	return(1);
 };
 
+const char* MAP::getLocationName(int loc)
+{
+#ifdef _SCC_DEBUG
+		if((loc<0)||(loc>=MAX_LOCATIONS))
+		{
+				debug.toLog(0,"DEBUG: (MAP::getLocationName): Value loc [%i] out of range.",loc);
+				return(0);
+		}
+		if(location[loc].getName()==NULL)
+		{
+				debug.toLog(0,"DEBUG: (MAP::getLocationName): Value location[%i] not initialized. [%i]",loc,location[loc].getName());
+				return(0);
+		}
+#endif
+	return(location[loc].getName());
+};
 
 int MAP::setLocationName(int loc, const char* name)
 {
@@ -359,8 +399,8 @@ int MAP::adjustDistanceList()
 					{
 						min=location[i].getDistance(j);
 						locationList[i][counter]=j;
-		       			}
-			       	}
+			   			}
+				   	}
 		}
 	}
 	return(1);
@@ -405,20 +445,71 @@ int MAP::adjustResearches()
 				{
 					setLocationForce(0,k,j,3-getLocationForce(0,k,j+VENTRAL_SACKS-R_VENTRAL_SACKS));
 					setLocationAvailible(0,k,j,1-getLocationForce(0,k,j+VENTRAL_SACKS-R_VENTRAL_SACKS));
-					       //temporary researches and upgrades
+						   //temporary researches and upgrades
 				};break;
 			default:break;//error ?
 		}
 	return(0);
 };
 
-
-MAP::MAP()
+void MAP::resetForce()
 {
-	name=new char[64];
+	for(int i=0;i<MAX_LOCATIONS;i++)
+		location[i].resetData();
+};
+
+void MAP::resetData()
+{
+	for(int i=0;i<MAX_LOCATIONS;i++)
+		for(int j=0;j<MAX_LOCATIONS;j++)
+			locationList[i][j]=0;
+	for(int i=0;i<MAX_PLAYER;i++)
+		startPlayer[i].resetData();
+	//todo mit zeigern? brauch ja nicht immer maxplayer..
 	strcpy(name,"Error!");
 	maxLocations=0;
 	maxPlayer=0;
+	UMS=0;
+	resetForce();
+};
+
+
+/*void MAP::switchTVBRace(int player, int race)
+{
+	//TODO evtl in ne externe Datei schreiben
+	setLocationForce(0,player,SCV,4);			
+	setLocationForce(getStartPlayerPosition(player),i,SCV,4);
+	setStartPlayerRace(player, race);
+	switch(race)
+	{
+		case TERRA:
+			{
+				setLocationForce(0,player,COMMAND_CENTER,1);
+				setLocationForce(getStartPlayerPosition(player),player,COMMAND_CENTER,1);
+			};break;
+		case PROTOSS:
+			{
+				setLocationForce(0,player,NEXUS,1);
+				setLocationForce(getStartPlayerPosition(player),player,NEXUS,1);
+			};break;						
+		case ZERG:
+			{
+			   setLocationForce(0,player,HATCHERY,1);
+			   setLocationForce(getStartPlayerPosition(player),player,HATCHERY,1);
+			   setLocationForce(0,player,OVERLORD,1);
+			   setLocationForce(getStartPlayerPosition(player),player,OVERLORD,1);
+			   setLocationForce(0,player,LARVA,3);
+			   setLocationForce(getStartPlayerPosition(player),player,LARVA,3);
+			};break;					
+		}
+	}
+}*/
+
+	
+MAP::MAP()
+{
+	name=new char[64];
+	resetData();
 };
 
 MAP::~MAP()

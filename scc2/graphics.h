@@ -5,11 +5,13 @@
 #include "wx/wx.h"
 #include "util.h"
 
-#ifdef __WIN32__                                                                                
+#ifdef __WIN32__		                                                                        
 const int FONT_SIZE=6;
 #else
 const int FONT_SIZE=7;
 #endif
+
+#include "../scc2dll/settings.h"
 
 const wxColour BOcolor[11]={wxColour(0,0,0),wxColour(25,25,25),wxColour(0,50,0),wxColour(50,0,0),wxColour(50,0,50),wxColour(0,0,50),wxColour(0,50,50),wxColour(50,50,0),wxColour(0,0,25),wxColour(25,0,0),wxColour(0,25,0)};
 
@@ -23,6 +25,9 @@ const int NOT_SCROLLED=0;
 const int TABBED=1;
 const int NOT_TABBED=0;
 const int PERM_BUTTON=1;
+
+const int AUTO_ADJUST=1;
+const int NO_AUTO_ADJUST=0;
 
 const int COLOR1R=100;
 const int COLOR1G=100;
@@ -74,13 +79,14 @@ struct Button
 class GraphixScrollWindow
 {
 public:
+	static SETTINGS settings;
 	void checkButtons();
 	
 	void wasChanged();
 	int hasChanged();
 	void changeAccepted();
 
-        int getScrollY();
+		int getScrollY();
 	int getUpperBound();
 	int getLowerBound();
 	int getLeftBound();
@@ -94,6 +100,8 @@ public:
 	int getWidth();
 	int getTargetHeight();
 	int getTargetWidth();
+
+	wxRect getTarget();
 
 	void setWindow(wxRect rect);
 	void setMaxWindow(wxRect max);
@@ -114,9 +122,9 @@ public:
 	bool insideClientArea(wxPoint position);
 	bool fitToClientArea(wxRect& rectangle, int adjust=0);
 	void moveToClientArea(wxRect& rectangle);
-        wxRect getScrollBalken();
+		wxRect getScrollBalken();
 	void adjustWindow(wxRect edge);
-//        void moveScrollBalken(int dy);
+//		void moveScrollBalken(int dy);
 	void moveScrollBalkenTo(int y);
 
 	int lastEntry;
@@ -125,16 +133,16 @@ public:
 	void setFreeMove(int move);
 	
 
-        void setMaxScrollY(int y);
-        void setTitleColour(wxColour titleColour);
-        void setBackground(wxBrush backgroundColour);
-        void setRahmenPen(wxColour rahmenPenColour);
-        void setRahmen(wxRect rahmen);
-        void setTitle(int x, const char* Title);
+		void setMaxScrollY(int y);
+		void setTitleColour(wxColour titleColour);
+		void setBackground(wxBrush backgroundColour);
+		void setRahmenPen(wxColour rahmenPenColour);
+		void setRahmen(wxRect rahmen);
+		void setTitle(int x, const char* Title);
 	void addDescription(int x, const char* Description);
 	void setDescription(int nr, int x, const char* Description);
 	void addTab(int x,const char* tab);
-        void Draw(wxDC* dc);
+		void Draw(wxDC* dc);
 	void DrawTabs(wxDC* dc);
 	void DrawTitle(wxDC* dc);
 
@@ -143,7 +151,7 @@ public:
 	void updateWindow();
 	void OnScrollMouse(int msy);
 	wxBrush getBackground();
-//        void adjustClientWindow(int width, int height);
+//		void adjustClientWindow(int width, int height);
 	void transformClientWidth(int width); //handle with care O_O
 	void transformClientHeight(int height); //handle with care O_O
 
@@ -156,6 +164,7 @@ public:
 
 
 	int isActivated(int num);
+	int getPressCondition(int num);
 	int addButton(wxRect edge, int permButton=0);
 	int addBitmapButton(wxRect edge, wxBitmap& bitmap, int permButton=0);
 	void clearButtons();
@@ -165,14 +174,15 @@ public:
 //	void removeButton(int num);
 
 	int currentTab;
-        void setScrollY(int y);
-        GraphixScrollWindow(int level, wxRect rahmen, wxRect maxSize, int scrolled=1, int tabbed=0, wxRect clientArea=wxRect(0,0,9999,9999));
+	void setScrollY(int y);
+	GraphixScrollWindow(int level, wxRect rahmen, wxRect maxSize, int scrolled=1, int autoAdjust=0, int tabbed=0, wxRect clientArea=wxRect(0,0,9999,9999));
 	static wxFont font;
 	static wxFont font2;
 	static wxFont font3;
 	static wxFont font4;
 	static wxFont font5;
 	static wxFont font6;
+	static wxFont font7;
 	int isShown();
 	void Show(int show);
 
@@ -212,10 +222,10 @@ private:
 	int shown;
 	int freeMove;
 	int numButtons;
-        int maxScrollY;
-        int scrollY;
+		int maxScrollY;
+		int scrollY;
 	wxRect titlePosition;
-        wxString Title;
+		wxString Title;
 	wxString Description[10];
 	int descriptionPosition[10];
 	int descriptionNumber;
@@ -225,26 +235,26 @@ private:
 	int tabButton[10];
 	int tabPosition[10];
 
-        wxColour TitleColour;
+		wxColour TitleColour;
 	wxColour disabledItemColour;
 	wxColour clickedItemColour;
-        wxColour RahmenColour;
+		wxColour RahmenColour;
 	wxColour BrightRahmenColour;
-        wxPen disabledItemPen;
-        wxPen RahmenPen;
+		wxPen disabledItemPen;
+		wxPen RahmenPen;
 	wxPen BrightRahmenPen;
 	wxPen clickedItemPen;
 
 	wxBrush RahmenBrush;
-        wxBrush clickedItemBrush;
-        wxBrush Background;
+		wxBrush clickedItemBrush;
+		wxBrush Background;
 
 	
+	int autoAdjust;
 
-
-        wxRect Rahmen;
+	wxRect Rahmen;
 	wxRect OuterRahmen;
-        wxRect ScrollBalken;
+	wxRect ScrollBalken;
 	wxRect ScrollArea;
 	wxRect PfeilUp;
 	wxRect PfeilDown;

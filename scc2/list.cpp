@@ -186,7 +186,7 @@ void OrderList::Sort()
 		NODE* temp2=head;
 		while(temp2&&temp2!=temp)
 		{
-			if(temp->GetData()->row<temp2->GetData()->row)
+			if(temp->GetData()->IP>temp2->GetData()->IP)
 			{
 				ORDER* temp3=temp->GetData();
 				temp->SetData(temp2->GetData());

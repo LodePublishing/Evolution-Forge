@@ -95,11 +95,11 @@ void TimerWindow::drawTimer(wxDC* dc)
 	{
 		int count=0;
 		for(int i=0;i<MAX_GOALS;i++)
-			if(anarace->getPlayer()->goal->goal[i].count>0)
+			if(anarace->getPlayer()->getGoal()->goal[i].count>0)
 				count++;
 		int percentage=0;
 		if(count>0)
-			percentage=anarace->getMaxpFitness()/count;
+			percentage=anarace->getCurrentpFitness()/count;
 		else percentage=100;
 
                 dc->SetFont(GraphixScrollWindow::font6);
@@ -158,7 +158,7 @@ void TimerWindow::drawTimer(wxDC* dc)
 
 	{
 		wxRect edge=wxRect(getInnerLeftBound()+getInnerWidth()-180,getInnerUpperBound()+getInnerHeight()-20,160,FONT_SIZE+10);
-		dc->SetPen(wxPen(wxColour(100,100,255),2,wxSOLID));
+		dc->SetPen(wxPen(wxColour(100,100,255),1,wxSOLID));
 		if(!anarace->isOptimizing())
 		{
 			animation++;if(animation>50) animation=0;

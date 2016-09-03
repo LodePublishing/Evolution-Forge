@@ -2,6 +2,49 @@
 #include "debug.h"
 #include "location.h"
 
+void EXPORT PLAYER::setUseMapSettings(int use)
+{
+#ifdef _SCC_DEBUG
+	if((use!=0)&&(use!=1))
+	{
+		debug.toLog(0,"DEBUG: (PLAYER::setUseMapSettings): Variable use out of range [%i].",use);
+		return;
+	}
+#endif
+	useMapSettings=use;
+	wasChanged();
+};
+
+int EXPORT PLAYER::getUseMapSettings()
+{
+#ifdef _SCC_DEBUG
+    if((useMapSettings!=0)&&(useMapSettings!=1))
+    {
+		debug.toLog(0,"DEBUG: (PLAYER::getUseMapSettings): Variable useMapSettings not initialized [%i].",useMapSettings);
+        return(0);
+    }
+#endif
+	wasChanged();
+	return(useMapSettings);
+};
+
+GOAL_ENTRY* EXPORT PLAYER::getGoal()
+{
+#ifdef _SCC_DEBUG
+        if(!goal)
+        {
+                debug.toLog(0,"DEBUG: (PLAYER::getGoal): Variable not initialized [%i].",goal);
+                return(0);
+        }
+#endif
+	return(goal);
+};
+
+void EXPORT PLAYER::wasChanged()
+{
+	changed=1;
+};
+
 int EXPORT PLAYER::isChanged()
 {
 	if((changed)||(goal->isChanged()))
@@ -12,10 +55,7 @@ int EXPORT PLAYER::isChanged()
 void EXPORT PLAYER::changeAccepted()
 {
 	if(goal->isChanged())
-	{
 		goal->changeAccepted();
-		goal->adjustGoals(1);
-	}
 	changed=0;
 };
 
@@ -150,9 +190,9 @@ int EXPORT PLAYER::setTime(int time)
                 return(0);
         }
 #endif
-        changed=1; //TODO
+    wasChanged(); //TODO
 	timer=time;
-        return(1);
+    return(1);
 };
 
 
@@ -165,7 +205,7 @@ int EXPORT PLAYER::setMins(int num)
 		return(0);
 	}
 #endif
-	changed=1;
+	wasChanged();
 	mins=num;
 	return(1);
 };
@@ -179,7 +219,7 @@ int EXPORT PLAYER::setGas(int num)
 		return(0);
 	}
 #endif
-	changed=1;
+	wasChanged();
 	gas=num;
 	return(1);
 };
@@ -193,7 +233,7 @@ int EXPORT PLAYER::setTimer(int num)
 		return(0);
 	}
 #endif
-	changed=1;
+	wasChanged();
 	timer=num;
 	return(1);
 };
@@ -207,7 +247,7 @@ int EXPORT PLAYER::setPosition(int num)
 		return(0);
 	}
 #endif
-	changed=1;
+	wasChanged();
 	position=num;
 	return(1);
 };
@@ -221,7 +261,7 @@ int EXPORT PLAYER::setRace(int num)
 		return(0);
 	}
 #endif
-	changed=1;
+	wasChanged();
 	race=num;
 	return(1);
 };
@@ -235,7 +275,7 @@ int EXPORT PLAYER::setHarvest(const int* mining, const int* gasing)
 		return(0); //evtl auf initialized pruefen
 	}
 #endif
-	changed=1;
+	wasChanged();
 	basicMineralHarvestPerSecond=mining;
 	basicGasHarvestPerSecond=gasing;
 	return(1);
@@ -250,7 +290,7 @@ int EXPORT PLAYER::setGoal(GOAL_ENTRY* goal)
 		return(0);
 	};
 #endif
-	changed=1;
+	wasChanged();
 	this->goal=goal;
 	return(1);
 };
@@ -265,7 +305,7 @@ int EXPORT PLAYER::setSupply(int num)
 		return(0);
 	}
 #endif
-	changed=1;
+	wasChanged();
 	supply=num;
 	return(1);
 };
@@ -279,7 +319,7 @@ int EXPORT PLAYER::setMaxSupply(int num)
 		return(0);
 	}
 #endif
-	changed=1;
+	wasChanged();
 	maxSupply=num;
 	return(1);
 };
@@ -290,17 +330,25 @@ int EXPORT PLAYER::getInitialized()
 	return(initialized);
 };
 
+void EXPORT PLAYER::resetData()
+{
+    setMins(0);
+    setGas(0);
+    setSupply(0);
+    setMaxSupply(0);
+    setTimer(0);
+    setPosition(0);
+    setRace(0);
+    setUseMapSettings(0);
+	basicMineralHarvestPerSecond=0;
+	basicGasHarvestPerSecond=0;
+	goal=0;
+	initialized=1; //?
+};
 
 PLAYER::PLAYER()
 {
-	setMins(0);
-	setGas(0);
-	setSupply(0);
-	setMaxSupply(0);
-	setTimer(0);
-	setPosition(0);
-	setRace(0);
-	initialized=1;
+	resetData();
 };
 
 PLAYER::~PLAYER()

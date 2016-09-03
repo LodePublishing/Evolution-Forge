@@ -17,7 +17,7 @@ class StatisticsWindow:public GraphixScrollWindow
 		int currentForce;
         private:
 		ANARACE* anarace;
-        	void showGraph(wxDC* dc, int* data,int max,wxColour col);
+        	void showGraph(wxDC* dc, int* data, int min, int max, wxColour col);
         	int harvestedMins[200];
 	        int harvestedGas[200];
         	int pFitness[200];
@@ -34,7 +34,12 @@ class StatisticsWindow:public GraphixScrollWindow
 	        int maxpFitness;
 	        int maxtFitness;
 		int mintFitness;
+		int maxaFitness;
+		int maxvFitness;
+		int maxHarvestedRessources;
 		int average[100];int averagecounter;
+                wxDateTime dt1;
+                wxDateTime dt2;
 };
 #endif
 

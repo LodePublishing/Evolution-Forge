@@ -16,6 +16,7 @@ int EXPORT GOAL_ENTRY::isChanged()
 
 void EXPORT GOAL_ENTRY::changeAccepted()
 {
+	adjustGoals(1);
 	bestTime=0;
 	changed=0;
 };
@@ -103,17 +104,19 @@ const UNIT_STATISTICS* EXPORT GOAL_ENTRY::getpStats()
 
 int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption)
 {
+// if free-mode  set all isbuildable to 1
+// else ...
 	int oldGoal[UNIT_TYPE_COUNT]; //goals we got from the user which we MAY NOT ignore
 	for(int i=0;i<UNIT_TYPE_COUNT;i++)
 		oldGoal[i]=allGoal[i];
-
+//	fill(oldGoal)
 //TODO: Reset hier rein!
 	
 //        isBuildable[MOVE_ONE_1_FORWARD]=1;isVariable[MOVE_ONE_1_FORWARD]=1;
   //      isBuildable[MOVE_ONE_3_FORWARD]=1;isVariable[MOVE_ONE_3_FORWARD]=1;
     //    isBuildable[MOVE_ONE_1_BACKWARD]=1;isVariable[MOVE_ONE_1_BACKWARD]=1;
                                                                                                                                                             
-//        isBuildable[INTRON]=1; // :-)
+          //isBuildable[INTRON]=1; // :-)
                                                                                                                                                             
                 switch(getRace())
                 {
@@ -184,9 +187,10 @@ int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption)
                 isBuildable[GAS_SCV]=1; //ONE_MINERAL_SCV... = ONE_MINERAL_PROBE... = ONE_MINERAL_DRONE...
                 isVariable[GAS_SCV]=1;
         }; 
-	maxBuildTypes=0;
+
+
 	for(int i=UNIT_TYPE_COUNT;i--;)
-		if(isBuildable[i]==1)
+		if((isBuildable[i]==1)&&(phaenoToGenotype[i]==-1)) // a goal && not set yet
 		{
 			genoToPhaenotype[maxBuildTypes]=i;
 			phaenoToGenotype[i]=maxBuildTypes;
@@ -331,32 +335,35 @@ int EXPORT GOAL_ENTRY::toPhaeno(int num)
 	return(genoToPhaenotype[num]);
 }
 
-
+void GOAL_ENTRY::resetData()
+{
+	raceInitialized=0;
+        goalCount=0;
+        maxBuildTypes=0;
+        for(int i=0;i<MAX_GOALS;i++)
+        {
+                goal[i].count=0;
+                goal[i].time=0;
+                goal[i].unit=0;
+                goal[i].location=0;
+        }
+        for(int i=UNIT_TYPE_COUNT;i--;)
+        {
+                genoToPhaenotype[i]=-1;
+                phaenoToGenotype[i]=-1;
+                allGoal[i]=0;
+                isVariable[i]=0;
+                isBuildable[i]=0;
+                for(int j=0;j<MAX_LOCATIONS;j++)
+                        globalGoal[j][i]=0;
+        }
+        initialized=1;
+        bestTime=0;
+};
 
 GOAL_ENTRY::GOAL_ENTRY()
 {
-	raceInitialized=0;
-	strcpy(name,"Error!");
-	goalCount=0;
-	for(int i=0;i<MAX_GOALS;i++)
-	{
-		goal[i].count=0;
-		goal[i].time=0;
-		goal[i].unit=0;
-		goal[i].location=0;
-	}
-	for(int i=UNIT_TYPE_COUNT;i--;)
-	{
-		allGoal[i]=0;
-		isVariable[i]=0;
-		isBuildable[i]=0;
-		genoToPhaenotype[i]=0;
-		phaenoToGenotype[i]=0;
-		for(int j=0;j<MAX_LOCATIONS;j++)
-			globalGoal[j][i]=0;
-	}
-	initialized=1;
-	bestTime=0;
+	resetData();
 };
 
 GOAL_ENTRY::~GOAL_ENTRY()

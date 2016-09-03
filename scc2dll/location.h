@@ -14,6 +14,8 @@ class EXPORT MAP_LOCATION_BASIC
 		int force[MAX_PLAYER][UNIT_TYPE_COUNT];
 		int availible[MAX_PLAYER][UNIT_TYPE_COUNT];
 	public:
+		void resetData();
+		void resetForce();
 		int setName(const char* line);
 		int setMineralDistance(int num);
 		int setDistance(int num,int dist);

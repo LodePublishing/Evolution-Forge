@@ -1,7 +1,6 @@
 # Mineral Distances: 0: Very fast map (3x gathering speed), 1: fast map (2x gathering speed) 2: standard map, 3: slow map (0.75x gathering speed)
 
 # --- Map ---
-
 "@MAP"
 "Name" = "Lost Temple"
 "Max Locations" = "9"
@@ -29,7 +28,7 @@
 
 "@PLAYER" "0"
 # temporary player, do not use!
-"Race" = "Terra"
+"Race" = "Protoss"
 "@END"
 
 # --- Locations ---
@@ -51,8 +50,8 @@
 "@END"
 
 "@PLAYER" "1"
-"Nexus" = "1"
-"Probe" = "4"
+#"Command Center" = "1"
+#"SCV" = "4"
 #"Nexus" = "1"
 #"Probe" = "4"
 #"Marine" = "12"
@@ -60,6 +59,8 @@
 #"Hatchery" = "1"
 #"Overlord" = "1"
 #"Larva" = "3"
+"Probe" = "4"
+"Nexus" = "1"
 "@END"
 
 "@END"
@@ -117,6 +118,12 @@
 "@END"
 
 "@PLAYER" "2"
+#"SCV" = "4"
+#"Command Center" = "1"
+#"Drone" = "4"
+#"Hatchery" = "1"
+#"Overlord" = "1"
+#"Larva" = "3"
 "Probe" = "4"
 "Nexus" = "1"
 "@END"

@@ -4,21 +4,25 @@
 #include "graphics.h"
 #include "../scc2dll/anarace.h"
 #include "list.h"
+#include "info.h"
 
 class BoGraphWindow:public GraphixScrollWindow
 {
-        public:
-                BoGraphWindow(wxRect rahmen, wxRect maxSize);
-                ~BoGraphWindow();
-                void resetData();
-                void CheckOrders();
-                void MoveOrders();
-                void showBoGraph(wxDC* dc);
-                int CheckForInfoWindow();
+	public:
+		BoGraphWindow(wxRect rahmen, wxRect maxSize);
+		~BoGraphWindow();
+		void resetData();
+		void showBoGraph(wxDC* dc, OrderList* orderList);
 		void setAnarace(ANARACE* anarace);
-                OrderList orderList;
-        private:
-                ANARACE* anarace;
+		void setOrderList(OrderList* orderList);
+		void assignInfoWindow(InfoWindow* infoWindow);
+		bool mouseOnOrder(ORDER* order);
+		void setMarkedUnit(int unit);
+	private:
+		int markedUnit;
+		int markAni;
+		InfoWindow* infoWindow;
+		ANARACE* anarace;
 };
 
 #endif

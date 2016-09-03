@@ -14,20 +14,26 @@ class Controls
         public:
                 Controls();
                 ~Controls();
+		int isShiftPressed();
 		int getX();
 		int getY();
 		void setMouse(wxPoint position);
 		int getScroll();
 		void scrollMouse(int scroll);
+		void rightDown();
+		void rightUp();
 		void leftDown();
 		void leftUp();
 		void captured();
+		void setShiftPressed(int p);
 		int getPressCondition(wxRect rect);
 		wxPoint getCurrentPosition();
 		wxPoint getCurrentPosition(wxPoint pos);
 	private:
                 wxPoint current,start,end;
+		int shiftPressed;
 		int scroll;
+		bool left;
 };
 
 #endif

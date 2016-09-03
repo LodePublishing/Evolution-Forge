@@ -1,9 +1,148 @@
 #include "prerace.h"
 #include "debug.h"
 
+void PRERACE::copyMap(int mode)
+{
+	if(mode==4)
+		for(int k=0;k<pMap->getMaxPlayer();k++) //warum -1? nochmal pruefen... TODO
+	//		  if((k>=pMap->getMaxPlayer()-1)||(anaplayer[k]->isActive()))
+			for(int l=0;l<pMap->getMaxLocations();l++)
+				for(int m=0;m<UNIT_TYPE_COUNT;m++) //TODO: Grenzen runter ... brauchts nur gasscv oder so
+				{
+					PRERACE::setMapLocationForce(k,l,m,pMap->getLocationForce(l,k,m)); //in player[k]->setLocation aendern?
+					PRERACE::setMapLocationAvailible(k,l,m,pMap->getLocationForce(l,k,m));
+				}
+	else assignStandardForce(pMap->getPlayer()->goal->getRace());
+};
+
+void PRERACE::assignStandardForce(int race)
+{
+	switch(race)
+	{
+		
+	};
+};
+
+
+int PRERACE::calculatePrimaryFitness(int ready)
+{
+	int tpF=0;
+//TODO evtl noch uebrige availible miteinbeziehen
+//	int bonus[MAX_LOCATIONS][UNIT_TYPE_COUNT]; // temporary data to check whether a bonus is already given (only applies if force > goal)
+//TODO: Nicht alle Einheiten am Ort? => Ort egal sein lassen aber zur Zeit hinzuzaehlen
+	// Nicht alle Einheiten ueberhaupt gebaut UND nicht alle am Ort => nur viertel Bonus fuer Einheiten die nicht am Ort sind
+	if(!ready)
+	{
+		//calculate number of fulfilled goals & their time & their distance to goal position
+		for(int i=MAX_GOALS;i--;)
+			if(getPlayer()->getGoal()->goal[i].count>0)
+			{
+// Haben wir zuwenig Einheiten gebaut?  force < goal
+if( /*((getPlayer()->getGoal()->goal[i].location==0)&&(getPlayer()->getGoal()->goal[i].count>getLocationForce(0,getPlayer()->getGoal()->goal[i].unit))) || unnuetz*/
+  (  /*(getPlayer()->getGoal()->goal[i].location>0)&&*/(getPlayer()->getGoal()->goal[i].count>getLocationForce(getPlayer()->getGoal()->goal[i].location,getPlayer()->getGoal()->goal[i].unit))) )
+				{
+					//total points: (Am Ort befindliche Einheiten + (Summe aller Locations(100-distance)/100)) / Goalcount
+					//TODO: Absteigen und markieren der benutzten wbfs! Also zuerst die eigentliche location abchecken, dann nach links und rechts die naehesten hinzuziehen
+					//evtl direkt von den locations die wbfs erstmal abziehen und am Schluss nochmal alle goals durchlaufen und den Rest verteilen!
+					int sumup=0;
+					int bon=0;
+// location 0? Dann ist es trivial
+					if(getPlayer()->getGoal()->goal[i].location==0)
+						sumup=getLocationForce(0,getPlayer()->getGoal()->goal[i].unit)*100;
+					else
+					{
+				// location != 0 ? Dann schaun wir mal, ob wir auf der Karte noch wo Units verstreut haben
+				// mehr als goalcount koennen wir keinen Bonus vergeben
+						bon=getPlayer()->getGoal()->goal[i].count;
+						int j=1;
+						int loc=pMap->getNearestLocation(getPlayer()->getGoal()->goal[i].location,j);
+						while((j<MAX_LOCATIONS)&&(bon>getLocationForce(loc,getPlayer()->getGoal()->goal[i].unit)))
+						{
+							sumup+=getLocationForce(loc,getPlayer()->getGoal()->goal[i].unit)*(100-pMap->getDistance(loc,getPlayer()->getGoal()->goal[i].location)); //was pMap->location[j]...
+							bon-=getLocationForce(loc,getPlayer()->getGoal()->goal[i].unit);
+							j++;
+						}
+						// Falls j<MAX_LOCATIONS => unser "Bon" wurde schon vorher aufgebraucht => An dieser Stelle j den Rest draufgeben... 
+						if(j<MAX_LOCATIONS)
+							sumup+=bon*(100-pMap->getDistance(loc,getPlayer()->getGoal()->goal[i].location));
+					}
+
+//jetzt steht in sumup die gesammelten forces gewichtet mit den Entfernungen zum Ziel
+										//TODO: Hier gibts Probleme wenn mehrere goals gleicher Units an unterschiedlichen Orten existieren...
+										// evtl funktionsglobales bonus System wie bei den '@' in scc.cpp einfuegen
+										// bissl komplex da mans ja den einzelnen goals verteilen muss...
+										if((getPlayer()->getGoal()->goal[i].time>0)&&(getFinalTime(i)>getPlayer()->getGoal()->goal[i].time))
+//									  {
+//											  if(getFinalTime(i)>0) //??? TODO
+//											  if(getFinalTime(i)>getPlayer()->getGoal()->goal[i].time)
+												        tpF+=(getPlayer()->getGoal()->goal[i].time*sumup)/(getPlayer()->getGoal()->goal[i].count*getFinalTime(i));
+//											  else setpFitness(getpFitness()+sumup/getPlayer()->getGoal()->goal[i].count);
+//TODO...~~~
+//											  else while(true); // <- kann eigentlich nicht auftreten!
+//												      setpFitness(getpFitness()+(getPlayer()->getGoal()->goal[i].time*sumup)/(getPlayer()->getGoal()->goal[i].count*ga->maxTime));
+//									  }
+										else
+												tpF+=sumup/getPlayer()->getGoal()->goal[i].count;
+								} // END force < goal
+								else
+//if( /*((getPlayer()->getGoal()->goal[i].location==0)&&(getPlayer()->getGoal()->goal[i].count<=getLocationForce(0,getPlayer()->getGoal()->goal[i].unit))) || ( (getPlayer()->getGoal()->goal[i].location>0)&&*/(getPlayer()->getGoal()->goal[i].count<=getLocationForce(getPlayer()->getGoal()->goal[i].location,getPlayer()->getGoal()->goal[i].unit)))
+								//force >= goal ?
+								{
+// Checken wann wir das Ziel erreicht haetten
+										if((getPlayer()->getGoal()->goal[i].time>0)&&(getFinalTime(i)>getPlayer()->getGoal()->goal[i].time))
+// aha, wir haben die Zeit ueberschritten => trotzdem anteilig Bonus geben
+												tpF+=(getPlayer()->getGoal()->goal[i].time*100/getFinalTime(i));
+// keine Zeitbeschraenkung + wir haben genuegend Einheiten am Zielort => gg
+										else tpF+=100;
+// does not work yet, if this is uncommented, sFitness occasionally jumps to -1222000 or something like that... :/
+// include the final location maybe...
+								}
+						} //end of goal checking
+// TODO: Check for very small 'goal.time' values, probably in scc.cpp!!
+												                                                                                                            
+//Bonus: Hier werden Einheiten verarbeitet die noch in Produktion sind, aber Teil der goals sind
+												                                                                                                            
+//Erstmal Maximalbonus errechnen (nicht, dass die engine dann 50 Battlecruiser kurz vor Schluss noch anfaengt oder so :P )
+/*			  for(i=MAX_LOCATIONS;i--;)
+					   for(j=UNIT_TYPE_COUNT;j--;)
+							   bonus[i][j]=0;
+				for(i=MAX_GOALS;i--;)
+						if(getLocationForce(getPlayer()->getGoal()->goal[i].location,getPlayer()->getGoal()->goal[i].unit)<getPlayer()->getGoal()->goal[i].count)
+								bonus[getPlayer()->getGoal()->goal[i].location][getPlayer()->getGoal()->goal[i].unit]+=getPlayer()->getGoal()->goal[i].count-getLocationForce(getPlayer()->getGoal()->goal[i].location,getPlayer()->getGoal()->goal[i].unit);
+//bonus ist jetzt mit den uebrigen Einheiten bis zur Zielerfuellung belegt
+				for(i=MAX_BUILDINGS;i--;)
+						if((build->getRemainingBuildTime(i)>0)&&(bonus[build->getLocation(i)][build->getType(i)]>0))
+						{
+						//erstmal ohne Zeit...
+								pFitness+=((build->getRemainingBuildTime(i)*100)/((getLocationForce(build->getLocation(i),build->getType(i))+bonus[build->getLocation(i)][build->getType(i)])*pStats[build->getType(i)].BT)); //TODO in ProgramBT aendern
+												                                                                                                            
+								if((getPlayer()->getGoal()->goal[build->getType(i)].time>0)&&(getLocationForce(build->getLocation(i),build->getType(i))==0))
+										pFitness+=(build->getRemainingBuildTime(i)*100*getPlayer()->getGoal()->goal[build->getType(i)].time*getLocationForce(0,i))/(getPlayer()->getGoal()->goal[build->getType(i)].count*pStats[build->getType(i)].BT*ga->maxTime);//hier auch ProgramBT
+								else
+										pFitness+=((build->getRemainingBuildTime(i)*100)/(getPlayer()->getGoal()->goal[build->getType(i)].count*pStats[build->getType(i)].BT));
+								bonus[build->getLocation(i)][build->getType(i)]--;
+						}*/
+												                                                                                                            
+		} // end of ready=false
+		else   // all goals fulfilled, fitness <- timer
+	{
+		tpF+=getTimer();
+				for(int i=MAX_GOALS;i--;)
+				{
+						if(getPlayer()->getGoal()->goal[i].count>0)
+								tpF+=100;
+/*					  if((getPlayer()->getGoal()->goal[i].unit!=GAS_SCV)&&(getPlayer()->getGoal()->goal[i].unit!=SCV)) //do not punish 'too much' workers!
+								if(getPlayer()->getGoal()->goal[i].count<getLocationForce(getPlayer()->getGoal()->goal[i].location,getPlayer()->getGoal()->goal[i].unit))
+										setsFitness(getsFitness()+(-getLocationForce(getPlayer()->getGoal()->goal[i].location,getPlayer()->getGoal()->goal[i].unit)+getPlayer()->getGoal()->goal[i].count)*(stats[getPlayer()->getGoal()->getRace()][getPlayer()->getGoal()->goal[i].unit].mins+stats[getPlayer()->getGoal()->getRace()][getPlayer()->getGoal()->goal[i].unit].gas));*/
+				}
+	}
+	return(tpF);
+}
+// end of calculatePrimaryFitness
+
 void EXPORT PRERACE::createSpecial()
 {
-	if(getPlayer()->goal->getRace()==ZERG)
+	if(getPlayer()->getGoal()->getRace()==ZERG)
 		for(int i=0;i<larvacounternumber;i++)
 			if(!--larva[i].counter)
 			{
@@ -54,7 +193,7 @@ int EXPORT PRERACE::getMapLocationForce(int player, int loc, int type)
 		debug.toLog(0,"DEBUG: (PRERACE::getMapLocationForce): Value player [%i] out of range.",player);
 		return(0);
 	}
-																			    
+																				
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getMapLocationForce): Value loc [%i] out of range.",loc);
@@ -83,7 +222,7 @@ int EXPORT PRERACE::setMapLocationAvailible(int player, int loc, int type, int n
 		debug.toLog(0,"DEBUG: (PRERACE::setMapLocationAvailible): Value player [%i] out of range.",player);
 		return(0);
 	}
-																			    
+																				
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setMapLocationAvailible): Value loc [%i] out of range.",loc);
@@ -98,7 +237,7 @@ int EXPORT PRERACE::setMapLocationAvailible(int player, int loc, int type, int n
 	this->loc[player][loc].availible[type]=num;
 	return(1);
 };
-																			    
+																				
 int EXPORT PRERACE::setMapLocationForce(int player, int loc, int type, int num)
 {
 #ifdef _SCC_DEBUG
@@ -135,7 +274,7 @@ int EXPORT PRERACE::addMapLocationAvailible(int player, int loc, int type, int n
 		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationAvailible): Value player [%i] out of range.",player);
 		return(0);
 	}
-																			    
+																				
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationAvailible): Value loc [%i] out of range.",loc);
@@ -171,7 +310,7 @@ int EXPORT PRERACE::addMapLocationForce(int player, int loc, int type, int num)
 		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationForce): Value player [%i] out of range.",player);
 		return(0);
 	}
-																			    
+																				
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationForce): Value loc [%i] out of range.",loc);
@@ -197,7 +336,7 @@ int EXPORT PRERACE::addMapLocationForce(int player, int loc, int type, int num)
 	this->loc[player][loc].force[type]+=num;
 	return(1);
 };
-																			    
+																				
 
 //----
 
@@ -322,7 +461,7 @@ int EXPORT PRERACE::addLocationAvailible(int loc, int type, int num)
 		location[0].availible[type]+=num;
 	return(1);
 };
-																			    
+																				
 int EXPORT PRERACE::addLocationForce(int loc, int type, int num)
 {
 #ifdef _SCC_DEBUG
@@ -659,7 +798,7 @@ int EXPORT PRERACE::loadPlayer(int num)
 {
 	setPlayerNum(num);
 	setPlayer(pMap->getStartPlayer(num));
-	setpStats(player->goal->getpStats());
+	setpStats(player->getGoal()->getpStats());
 	setMins(player->getMins());
 	setGas(player->getGas());
 	setTimer(player->getTimer());
@@ -687,7 +826,7 @@ int EXPORT PRERACE::adjustHarvest()
 int EXPORT PRERACE::harvestMinerals()
 {
 	int sum=0;
-//      int t=(rand()%10)-5;
+//	  int t=(rand()%10)-5;
 	for(int i=1;i<MAX_LOCATIONS;i++)//~~
 	{
 		int s=location[i].availible[SCV];
@@ -997,11 +1136,11 @@ int EXPORT PRERACE::setFinalTime(int goal, int time)
 		debug.toLog(0,"DEBUG: (PRERACE::setFinalTime): Value time [%i] out of range.",time);
 		return(0);
 	}
-        if((goal<0)||(goal>=MAX_GOALS))
-        {
-                debug.toLog(0,"DEBUG: (PRERACE::setFinalTime): Value goal [%i] out of range.",goal);
-                return(0);
-        }
+		if((goal<0)||(goal>=MAX_GOALS))
+		{
+				debug.toLog(0,"DEBUG: (PRERACE::setFinalTime): Value goal [%i] out of range.",goal);
+				return(0);
+		}
 
 #endif
 	ftime[goal]=time;
@@ -1061,7 +1200,7 @@ void EXPORT PRERACE::resetSpecial()
 		larva[i].larvacount=0;
 	}
 	larvacounternumber=0;
-	if(getPlayer()->goal->getRace()==ZERG)
+	if(getPlayer()->getGoal()->getRace()==ZERG)
 	{
 		for(int i=1;i<MAX_LOCATIONS;i++)
 		{
@@ -1091,7 +1230,7 @@ void PRERACE::adjustAvailibility(int loc,int fac,const UNIT_STATISTICS* stat)
 			{
 				addLocationAvailible(loc,stat->facility[fac],-1);
 				setSupply(getSupply()+pStats[stat->facility[fac]].supply);
-				if((getPlayer()->goal->getRace()==ZERG)&&(stat->facility[fac]==LARVA))
+				if((getPlayer()->getGoal()->getRace()==ZERG)&&(stat->facility[fac]==LARVA))
 				{
 					int bestPlace=0;//unschoen hier :/
 					int bestCounter=0;
@@ -1155,8 +1294,8 @@ int PRERACE::calculateReady()
 {
 	int ready=1;
 	for(int i=MAX_GOALS;(i--)&&(ready);)
-		if(getPlayer()->goal->goal[i].count)
-			ready&=((getPlayer()->goal->goal[i].count<=getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit))&&((getPlayer()->goal->goal[i].time>=getFinalTime(i))||(getPlayer()->goal->goal[i].time==0)));
+		if(getPlayer()->getGoal()->goal[i].count)
+			ready&=((getPlayer()->getGoal()->goal[i].count<=getLocationForce(getPlayer()->getGoal()->goal[i].location,getPlayer()->getGoal()->goal[i].unit))&&((getPlayer()->getGoal()->goal[i].time>=getFinalTime(i))||(getPlayer()->getGoal()->goal[i].time==0)));
 	return(ready);
 }
 

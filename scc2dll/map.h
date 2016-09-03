@@ -6,16 +6,38 @@
 
 // this needs still some work to make everything private
 
+class EXPORT START
+{
+	MAP* map;
+	PLAYER* startPlayer;
+	MAP_LOCATION_BASIC location[MAX_LOCATIONS]; // initialized map
+};
+
+
+
 class EXPORT MAP
 {
 	private:
-		char* name;
-		int maxLocations;//¬¬
-		int maxPlayer;
-		int locationList[MAX_LOCATIONS][MAX_LOCATIONS];	 
-		MAP_LOCATION_BASIC location[MAX_LOCATIONS];
+		char* name; // constant
+		int maxLocations; // constant
+		int maxPlayer; // constant ?
+		int locationList[MAX_LOCATIONS][MAX_LOCATIONS];	// constant
+		
+		MAP_LOCATION_BASIC location[MAX_LOCATIONS]; // initialized map
+
+		
+		
 		PLAYER startPlayer[MAX_PLAYER];
+		
+		int UMS;
 	public:
+		static int defaultForce[MAX_RACES][UNIT_TYPE_COUNT];
+		int mapSettingsForce[UNIT_TYPE_COUNT];
+		
+		void resetData();
+		void resetForce();
+		void setUMS(int UMS);
+		int getUMS();
 		int setStartPlayerRace(int player, int race);
 		int setStartPlayerHarvestSpeed(int player, const int* mining, const int* gasing);
 		int setStartPlayerPosition(int player, int position);
@@ -23,6 +45,8 @@ class EXPORT MAP
 		int setStartPlayerGas(int player, int gas);
 		int setStartPlayerTime(int player, int time);
 
+		int getStartPlayerPosition(int player);
+		
 		int getStartPlayerRace(int player);
 		int setStartPlayerGoal(int player, GOAL_ENTRY* goal);
 
@@ -40,6 +64,7 @@ class EXPORT MAP
 		int getMaxPlayer();
 		
 		int setLocationName(int loc, const char* line);
+		const char* getLocationName(int loc);
 
 		int setName(const char* line);  // every map needs a name :)
 		int setMaxLocations(int num);  // sets the number of locations of this map

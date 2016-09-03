@@ -8,6 +8,11 @@
 #include <stdlib.h>
 #include <time.h>
 
+void EXPORT SETTINGS::calculateAnaplayer()
+{
+	soup.calculateAnaplayer();
+};
+
 MAP* EXPORT SETTINGS::getMap(int num)
 {
         if((num>getMapCount())||(num<0))
@@ -772,7 +777,7 @@ int EXPORT SETTINGS::loadHarvestFile(const char* harvestFile)
 
 
 
-int EXPORT SETTINGS::loadMapFile(const char* mapFile)
+int EXPORT SETTINGS::loadMapFile(const char* mapFile, int UMS)
 {
 	char line[1024],old[1024];
 	FILE* pFile;
@@ -782,12 +787,16 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 	int value1=0,value2=0,value3=0;
 	int mode=0,modeLocation=0,modePlayer=-1;
 	int playerCount=0;
-	if((pFile = fopen (mapFile,"r"))==NULL)
+//	sprintf(buffer,"maps/%s.map",mapFile);
+	if((pFile = fopen ("maps/LostTemple.map","r"))==NULL)
 	{
 		debug.toLog(0,"ERROR: (SETTINGS::loadMapFile) %s: Could not open file!",mapFile);
 		return(0); 
 	}
-
+	map[getMapCount()].setUMS(UMS);
+//todo: maps in ne linked list oder so...
+//allgemeine linked list schreiben ... etc. etc.
+	map[getMapCount()].resetForce();
 	item[0]='\0';param1[0]='\0';param2[0]='\0';param3[0]='\0';
 
 	int distanceCount=0;
@@ -942,7 +951,7 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 				}
 				else if(!strcmp(item,"Starting Point"))
 				{
-					if(!map[getMapCount()].setStartPlayerPosition(modePlayer,value1))
+					if(!map[getMapCount()].setStartPlayerPosition(modePlayer,value1-1))
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Starting Point out of range.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"Starting Minerals"))
@@ -973,17 +982,20 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 				int i=0;
 				if(!strcmp(item,"@END"))
 					mode=2;
-				else
+				else 
 				{
-					for(i=0;i<=UNIT_TYPE_COUNT;i++)  // TODO reicht eigentlich nur bis GAS SCV... aber dann auch unten die abbruchbedingung anguggn
+					for(i=0;i<UNIT_TYPE_COUNT;i++)  // TODO reicht eigentlich nur bis GAS SCV... aber dann auch unten die abbruchbedingung anguggn
 						if(strstr(stats[map[getMapCount()].getStartPlayerRace(modePlayer)][i].name,item)!=NULL)
 						{
-                                                        map[getMapCount()].setLocationForce(0,modePlayer,i,value1);
-							map[getMapCount()].setLocationForce(modeLocation-1,modePlayer,i,value1);
-							i=UNIT_TYPE_COUNT+1;
+							if((UMS==1)||(modePlayer==0))
+							{
+	                            map[getMapCount()].setLocationForce(0,modePlayer,i,value1); //warum location 0?
+								map[getMapCount()].setLocationForce(modeLocation-1,modePlayer,i,value1);
+							};
+							i=UNIT_TYPE_COUNT;
 							break;
 						}
-					if(i!=UNIT_TYPE_COUNT+1) debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: No matching unit name.",mapFile,ln,item);
+					if(i!=UNIT_TYPE_COUNT) debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: No matching unit name.",mapFile,ln,item);
 				}
 			}
 			else
@@ -996,6 +1008,12 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 		debug.toLog(0,"ERROR: (SETTINGS::loadMapFile) %s: 'Max players' declared as %i but only %i (incl. neutral player) players found.",mapFile,map[getMapCount()].getMaxPlayer(),playerCount+1);
 		return(0);
 	}
+	if(UMS==0)
+	{
+		for(int i=1;i<map[getMapCount()].getMaxPlayer();i++)
+		map[getMapCount()].resetForTVBRace(i,map[getPlayerCount()].getRace(i));
+	}
+	
 	map[getMapCount()].adjustSupply();
 	map[getMapCount()].adjustResearches(); // temporary units, 3 for upgrades, 1 for researchs etc.
 	map[getMapCount()].adjustDistanceList();

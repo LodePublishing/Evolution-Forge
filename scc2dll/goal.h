@@ -16,6 +16,7 @@ private:
 	int genoToPhaenotype[UNIT_TYPE_COUNT];
 	int changed;
 public:
+	void resetData();
 	int isChanged();
 	void changeAccepted();
 	int goalCount;

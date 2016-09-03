@@ -3,6 +3,7 @@
 
 #include "graphics.h"
 #include "../scc2dll/anarace.h"
+#include "info.h"
 
 class BoDiagramWindow:public GraphixScrollWindow
 {
@@ -12,7 +13,9 @@ class BoDiagramWindow:public GraphixScrollWindow
                 void resetData();
                 void showProgramGraph(wxDC* dc);
 		void setAnarace(ANARACE* anarace);
+		void assignInfoWindow(InfoWindow* infoWindow);
         private:
+		InfoWindow* infoWindow;
                 ANARACE* anarace;
 };
 

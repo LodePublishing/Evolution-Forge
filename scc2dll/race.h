@@ -21,7 +21,7 @@ class RACE: public PRERACE
 		int setsFitness(int num);
 		int settFitness(int num);
 
-		void calculateFitness(int ready);
+		int calculateSecondaryFitness();
 
 		int getpFitness();
 		int getsFitness();

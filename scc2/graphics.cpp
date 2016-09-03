@@ -1,6 +1,11 @@
 #include "graphics.h"
 #include "util.h"
 
+wxRect GraphixScrollWindow::getTarget()
+{
+	return(target);
+};
+
 int GraphixScrollWindow::addBitmapButton(wxRect edge, wxBitmap& bitmap, int permButton)
 {
 	for(int i=0;i<1000;i++)
@@ -195,6 +200,12 @@ int GraphixScrollWindow::addButton(wxRect edge, int permButton)
 	return(0);
 };
 
+int GraphixScrollWindow::getPressCondition(int num)
+{
+	if((num>=1000)||(!button[num].used)) return(0);
+	return(button[num].pressed);
+};
+
 int GraphixScrollWindow::isActivated(int num)
 {
 	if((num>=1000)||(!button[num].used)) return(0);
@@ -253,7 +264,7 @@ void GraphixScrollWindow::addTab(int x, const char* tab)
 	this->tab[tabNumber].Printf("%s",tab);
 	tabNumber++;
 };
-																			    
+																				
 int GraphixScrollWindow::getScrollY()
 {
 	return(0);
@@ -325,12 +336,12 @@ int GraphixScrollWindow::getInnerWidth()
 
 wxPoint GraphixScrollWindow::getPosition()
 {
-        return(rect.GetPosition());
+		return(rect.GetPosition());
 };
-                                                                                                                                                            
+													                                                                                                        
 wxSize GraphixScrollWindow::getSize()
 {
-        return(rect.GetSize());
+		return(rect.GetSize());
 };
 
 wxPoint GraphixScrollWindow::getInnerPosition()
@@ -354,7 +365,7 @@ void GraphixScrollWindow::setScrollY(int y)
 		scrollY=y;
 	ScrollBalken.y=ScrollArea.y+17+scrollY*(ScrollArea.height-34)/maxScrollY;
 };
-																      
+																	  
 void GraphixScrollWindow::setMaxScrollY(int y)
 {
 	if(y>0) maxScrollY=y;
@@ -369,12 +380,12 @@ void GraphixScrollWindow::setMaxScrollY(int y)
 		ScrollBalken.y=ScrollArea.y+17+scrollY*(ScrollArea.height-34)/maxScrollY;
 	}
 };
-																      
+																	  
 void GraphixScrollWindow::setTitleColour(wxColour titleColour)
 {
 	TitleColour=titleColour;
 };
-																      
+																	  
 void GraphixScrollWindow::setBackground(wxBrush backgroundColour)
 {
 	Background=backgroundColour;
@@ -430,7 +441,7 @@ void GraphixScrollWindow::drawArrow(wxDC* dc, wxPoint position, int dir, int len
 	dc->DrawLine(t+getInnerPosition(),t1+getInnerPosition());
 	dc->DrawLine(t+getInnerPosition(),t2+getInnerPosition());
 };
-														      
+															  
 
 void GraphixScrollWindow::wasChanged()
 {
@@ -439,12 +450,12 @@ void GraphixScrollWindow::wasChanged()
 
 int GraphixScrollWindow::hasChanged()
 {
-        return(changed);
+		return(changed);
 };
 
 void GraphixScrollWindow::changeAccepted()
 {
-        changed=0;
+		changed=0;
 };
 
 
@@ -479,7 +490,7 @@ void GraphixScrollWindow::DrawTabs(wxDC* dc)
 	{
 		dc->SetPen(RahmenPen);
 		dc->SetBrush(*wxBLACK_BRUSH);
-		wxRect edge=wxRect(tabPosition[i],0,150,30);
+		wxRect edge=wxRect(tabPosition[i],0,120,30);
 		dc->DrawRectangle(edge);
 
 		if(i==currentTab)
@@ -491,9 +502,9 @@ void GraphixScrollWindow::DrawTabs(wxDC* dc)
 		dc->DrawRectangle(wxRect(edge.GetPosition()+wxPoint(3,3),edge.GetSize()+wxSize(-6,-6)));
 	
 
-		dc->SetFont(font4);
+		dc->SetFont(font6);
 		if(i==currentTab)
-			dc->SetTextForeground(wxColour(150,150,200));
+			dc->SetTextForeground(wxColour(200,200,255));
 		else
 			dc->SetTextForeground(TitleColour);
 		int dx,dy;
@@ -547,10 +558,10 @@ void GraphixScrollWindow::Draw(wxDC* dc)
 	}*/
 
 	setMaxScrollY(lastEntry);
-	if(doAdjustments)
+	if((doAdjustments))//||(autoAdjust))
 		adjustWindow(wxRect(wxPoint(target.GetPosition()),wxSize(target.GetWidth(),lastEntry+80)));
 	doAdjustments=0;
-	lastEntry=0;																		    
+	lastEntry=0;																			
 	if(ScrollBalkenMove)
 		moveScrollBalkenTo(controls.getCurrentPosition().y-ScrollBalkenMoveY-ScrollBalken.y);
 	else moveScrollBalkenTo(0);
@@ -624,12 +635,12 @@ void GraphixScrollWindow::Draw(wxDC* dc)
 		case PRESSING_BUTTON:
 		{
 			dc->SetBrush(clickedItemBrush);
-	                dc->SetPen(RahmenPen);
+					dc->SetPen(RahmenPen);
 		};break;
 		default:
 		{
-                        dc->SetBrush(getBackground());
-                        dc->SetPen(RahmenPen);
+						dc->SetBrush(getBackground());
+						dc->SetPen(RahmenPen);
 		};break;
 
 	}
@@ -644,29 +655,29 @@ void GraphixScrollWindow::Draw(wxDC* dc)
 	dc->DrawRoundedRectangle(PfeilDown.x+rect.GetX(),PfeilDown.y+rect.GetY(),PfeilDown.width,PfeilDown.height,4);
 
 	if(scrollY>=maxScrollY-(innerRect.height))
-        {
-                dc->SetBrush(getBackground());
-                dc->SetPen(disabledItemPen);
-        } else
-        switch(PfeilDownPressed)
-        {
-                case POINTER_OVER_BUTTON:
-                {
-                        dc->SetBrush(RahmenBrush);
-                        dc->SetPen(clickedItemPen);
-                };break;
-                case PRESSING_BUTTON:
-                {
-                        dc->SetBrush(clickedItemBrush);
-                        dc->SetPen(RahmenPen);
-                };break;
-                default:
-                {
-                        dc->SetBrush(getBackground());
-                        dc->SetPen(RahmenPen);
-                };break;
-                                                                                                                                                            
-        }
+		{
+				dc->SetBrush(getBackground());
+				dc->SetPen(disabledItemPen);
+		} else
+		switch(PfeilDownPressed)
+		{
+				case POINTER_OVER_BUTTON:
+				{
+						dc->SetBrush(RahmenBrush);
+						dc->SetPen(clickedItemPen);
+				};break;
+				case PRESSING_BUTTON:
+				{
+						dc->SetBrush(clickedItemBrush);
+						dc->SetPen(RahmenPen);
+				};break;
+				default:
+				{
+						dc->SetBrush(getBackground());
+						dc->SetPen(RahmenPen);
+				};break;
+													                                                                                                        
+		}
 
 	points[0].x=PfeilDown.width/2;points[0].y=PfeilDown.height-3;
 	points[1].x=2;points[1].y=2;
@@ -692,11 +703,14 @@ bool GraphixScrollWindow::fitToClientArea(wxRect& rectangle, int adjust)
 	if(rectangle.width+rectangle.x>getInnerLeftBound()+getInnerWidth()) 
 		rectangle.width=getInnerLeftBound()+getInnerWidth()-rectangle.x;
 //	if(rectangle.y<clientArea.y) rectangle.y=clientArea.y;
-  //      if(rectangle.y+rectangle.height>clientArea.y+clientArea.height) rectangle.height=clientArea.y+clientArea.height-rectangle.y;
+  //	  if(rectangle.y+rectangle.height>clientArea.y+clientArea.height) rectangle.height=clientArea.y+clientArea.height-rectangle.y;
 	if(adjust)
+	{
 		doAdjustments=1;
-	if(rectangle.y+rectangle.height-getInnerUpperBound()>lastEntry)
-		lastEntry=rectangle.y+rectangle.height-getInnerUpperBound();
+		if(rectangle.y+rectangle.height-getInnerUpperBound()>lastEntry)
+			lastEntry=rectangle.y+rectangle.height-getInnerUpperBound();
+	}
+	
 	if((rectangle.width<=0)||(rectangle.y<getInnerUpperBound())||(rectangle.y+rectangle.height>getInnerUpperBound()+getInnerHeight())) return false;
 	else return true;
 }
@@ -718,8 +732,9 @@ void GraphixScrollWindow::adjustElements()
 	
 }*/
 
-GraphixScrollWindow::GraphixScrollWindow(int level, wxRect rahmen, wxRect maxSize, int scrolled, int tabbed, wxRect clientArea)
+GraphixScrollWindow::GraphixScrollWindow(int level, wxRect rahmen, wxRect maxSize, int scrolled, int autoAdjust, int tabbed, wxRect clientArea)
 {
+	this->autoAdjust=autoAdjust;
 	for(int i=0;i<1000;i++)
 	{
 		button[i].used=0;
@@ -729,13 +744,13 @@ GraphixScrollWindow::GraphixScrollWindow(int level, wxRect rahmen, wxRect maxSiz
 	setTitleColour(wxColour(100,100,200));
 	switch(level)
 	{
-		case 0:setBackground(wxBrush(wxColour(5,25,0),wxCROSS_HATCH));break;
-		case 1:setBackground(wxBrush(wxColour(5,25,80),wxCROSS_HATCH));break; //!! TODO Warum loescht mir gtk meinen hintergrund auch noch?!
+		case 0:setBackground(wxBrush(wxColour(5,10,20),wxSOLID));break;
+		case 1:setBackground(wxBrush(wxColour(5,15,30),wxSOLID));break; //!! TODO Warum loescht mir gtk meinen hintergrund auch noch?!
 		case 2:setBackground(wxBrush(wxColour(5,25,40),wxSOLID));break; //infowindow
 		default:break;
 	}
 
-	RahmenColour=wxColour(40,120,30);
+	RahmenColour=wxColour(40,30,120);//,30);
 	RahmenPen=wxPen(RahmenColour,1,wxSOLID);
 	RahmenBrush=wxBrush(RahmenColour,wxSOLID);
 
@@ -780,7 +795,7 @@ GraphixScrollWindow::GraphixScrollWindow(int level, wxRect rahmen, wxRect maxSiz
 	}
 	else
 	{
-	       if(clientArea.x+clientArea.width>Rahmen.x+Rahmen.width-3) clientArea.width=Rahmen.x+Rahmen.width-3-clientArea.x;
+		   if(clientArea.x+clientArea.width>Rahmen.x+Rahmen.width-3) clientArea.width=Rahmen.x+Rahmen.width-3-clientArea.x;
 	}
 
 //	if(tabbed)
@@ -800,10 +815,10 @@ GraphixScrollWindow::GraphixScrollWindow(int level, wxRect rahmen, wxRect maxSiz
 //	maxcheight=maxheight-Rahmen.height+clientArea.height-2*clientArea.y;
 //	descriptionNumber=0;
 	setFreeMove(0);
-	Show(0);
+	Show(1);
 	clearButtons();
 	lastEntry=clientArea.height;
-	doAdjustments=0;
+	doAdjustments=1;
 };
 
 
@@ -852,7 +867,14 @@ void GraphixScrollWindow::checkButtons()
 	{
 		for(int i=0;i<1000;i++)
 			if(button[i].used)
+			{
 				button[i].pressed=controls.getPressCondition(button[i].edge);
+				if(button[i].pressed)
+				{
+					int x=button[i].edge.x;
+					break;
+				}
+			}
 	}
 };
 
@@ -923,19 +945,19 @@ void GraphixScrollWindow::transformClientHeight(int height) //handle with care O
 void GraphixScrollWindow::adjustClientWindow(int width, int height)
 {
 //	if(edge.x!=targetcx)
-  //	    startcx=clientArea.x;
+  //		startcx=clientArea.x;
 //	if(edge.y!=targetcy)
-  //	    startcy=clientArea.y;
-       if(height!=targetcheight)
+  //		startcy=clientArea.y;
+	   if(height!=targetcheight)
 //||((targetcheight>maxcheight)&&(edge.height!=maxcheight))) already checked in adjustWindow
-	      startcheight=clientArea.height;
+		  startcheight=clientArea.height;
 	if(width!=targetcwidth)
 		startcwidth=clientArea.width;
-//      targetcx=edge.x;
-  //     targetcy=edge.y;
+//	  targetcx=edge.x;
+  //	 targetcy=edge.y;
 	targetcwidth=width;
 //	if(edge.height<=maxcheight)
-	      targetcheight=height;
+		  targetcheight=height;
   //  else targetcheight=maxcheight;
 }*/
 
@@ -1013,21 +1035,21 @@ void GraphixScrollWindow::updateWindow()
 	wxRect oldRahmen=Rahmen;
 	setRahmen(rect);
 	ScrollArea=wxRect(Rahmen.x+Rahmen.width-18,Rahmen.y+2,16,Rahmen.height-4); //relative Koordinate!
-//      ScrollBalken=wxRect(ScrollArea.x+1,ScrollArea.y+17,ScrollArea.width-2,ScrollArea.height-34);
+//	  ScrollBalken=wxRect(ScrollArea.x+1,ScrollArea.y+17,ScrollArea.width-2,ScrollArea.height-34);
 	PfeilUp=wxRect(ScrollArea.x,ScrollArea.y,ScrollArea.width,ScrollArea.width); //relative Koordinate!
 	PfeilDown=wxRect(ScrollArea.x,ScrollArea.y+ScrollArea.height-ScrollArea.width,ScrollArea.width,ScrollArea.width); //relative Koordinate!
 //	clientArea.x=Rahmen.x+5;
-  //      if(scrolled)
-    //	    clientArea.width=ScrollArea.x-3-clientArea.x;
+  //	  if(scrolled)
+	//		clientArea.width=ScrollArea.x-3-clientArea.x;
 //	else
-  //	      clientArea.width=Rahmen.x+Rahmen.width-3-clientArea.x;
+  //		  clientArea.width=Rahmen.x+Rahmen.width-3-clientArea.x;
 
 /*	if(tabNumber)
 	{
 		
 	}*/ //~~
 
-    /*    if(descriptionNumber)
+	/*	if(descriptionNumber)
 	{ 
 		clientArea.height-=Rahmen.y+16-clientArea.y;
 		clientArea.y=Rahmen.y+16;
@@ -1062,6 +1084,7 @@ wxFont GraphixScrollWindow::font3;
 wxFont GraphixScrollWindow::font4;
 wxFont GraphixScrollWindow::font5;
 wxFont GraphixScrollWindow::font6;
+wxFont GraphixScrollWindow::font7;
 Controls GraphixScrollWindow::controls;
 wxBitmap GraphixScrollWindow::bmpCancel;
 wxBitmap GraphixScrollWindow::bmpAdd;
@@ -1072,4 +1095,4 @@ wxBitmap GraphixScrollWindow::bmpArrowRight;
 wxBitmap GraphixScrollWindow::bmpArrowDown;
 wxBitmap GraphixScrollWindow::bmpClemens;
 wxBitmap GraphixScrollWindow::bmpClawsoftware;
-
+SETTINGS GraphixScrollWindow::settings;

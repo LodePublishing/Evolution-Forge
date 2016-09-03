@@ -11,15 +11,21 @@ class PLAYER
 		int timer;
 		int position;
 		int race;
-	        const int* basicMineralHarvestPerSecond;
-	        const int* basicGasHarvestPerSecond;
+	    const int* basicMineralHarvestPerSecond;
+	    const int* basicGasHarvestPerSecond;
 		int initialized;
 		int supply,maxSupply;
 		int changed; //did the settings change?
+		GOAL_ENTRY* goal;
+		int useMapSettings;
 	public:
+		void resetData();
+		void setUseMapSettings(int use);
+		int getUseMapSettings();
+		void wasChanged();
 		int isChanged();
 		void changeAccepted();
-		GOAL_ENTRY* goal;
+		GOAL_ENTRY* getGoal();
 		int getInitialized();
 		int getMins();
 		int getGas();

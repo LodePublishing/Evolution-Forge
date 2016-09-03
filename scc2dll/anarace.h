@@ -51,8 +51,15 @@ EXPORT class ANARACE: public PRERACE
 		int needTime(int unit);
 		int maximum(int unit);
 		int percentage;
+		void setCurrentpFitness(int num);
+		int currentpFitness;
+		int phaenoCode[MAX_LENGTH];		// the final build order: an array of unit numbers (as defined in main.h)
 	public:
-		
+		int getPhaenoCode(int IP);
+		void setPhaenoCode(int IP, int num);		
+
+		int getCurrentpFitness();		
+
 		int isOptimizing();
 		void setOptimizing(int opt);
 
@@ -70,7 +77,6 @@ EXPORT class ANARACE: public PRERACE
 		int wayneCrossover;
 		int negativeCrossover;
 // external data output
-		int phaenoCode[MAX_LENGTH];		// the final build order: an array of unit numbers (as defined in main.h)
 
 		int getMarker(int IP);
 
@@ -110,6 +116,7 @@ EXPORT class ANARACE: public PRERACE
 		int getMaxtFitness();			// gets tertiary fitness (build order appearance, some heuristics)
 
 		void insertOrder(int unit, int position);
+		void removeOrder(int IP);
 
 
 // internal control structures, do not touch ;-)
@@ -140,8 +147,9 @@ EXPORT class ANARACE: public PRERACE
 		int setProgramForceCount(int IP, int unit, int count);	
                 int setProgramAvailibleCount(int IP, int unit, int count);
 
+
 		int calculateStep();			// calculates another time step of current generation
-		int calculateFitness();
+//		int calculateFitness();
 		void resetData();				// resets all data to standard values
 		void analyzeBuildOrder();		// sets the isGoal of program
 

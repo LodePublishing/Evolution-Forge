@@ -11,8 +11,12 @@ struct ORDER
                                                                                
 //build order list
 	wxRect rect;
+	wxRect brect;
 	wxRect target;
+	wxRect btarget;
 	wxRect start;
+	wxRect bstart;
+		
                                                                                
 //build order graph
             

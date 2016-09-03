@@ -1,6 +1,6 @@
 "@GOAL"
 "Name" "Test2 O_O"
-"@RACE" "Terra"
+"@RACE" "Protoss"
 #"Command Center" "3" "0" "4"
 #"SCV" "5" "0" "0"
 #"Siege Tank" "1" "0" "0"

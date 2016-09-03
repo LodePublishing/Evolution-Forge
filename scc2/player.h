@@ -8,6 +8,7 @@
 #include "info.h"
 #include "bodiagram.h"
 #include "bowindow.h"
+#include "list.h"
 
 class Player
 {
@@ -49,10 +50,14 @@ class Player
 		static wxRect forceWindowMax[25];
 		static wxRect infoWindowRect[25];
 		static wxRect infoWindowMax[25];
+		void CheckForInfoWindow();
+		void CheckOrders();
+		void MoveOrders();
         private:
                 ANARACE** anarace; //pointer auf pointer, weil sich der pointer ja veraendert!
 		int shown;
 		int geneAnimation;
+		OrderList orderList;		
 };
 
 #endif

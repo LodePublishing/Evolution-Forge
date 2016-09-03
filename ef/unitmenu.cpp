@@ -4,10 +4,10 @@ UnitMenu::UnitMenu(UI_Object* unit_parent, ANARACE* unit_anarace, Rect unit_rect
 	Menu(unit_parent, unit_rect),
 	markedUnit(0),
 	anarace(unit_anarace),
-	facilityMode(true),
+	facilityMode(false),
 	facilityNumber(1)
 {
-    for(int i=0;i<3*UNIT_TYPE_COUNT;i++) //TODO
+    for(int i=0;i<UNIT_TYPE_COUNT;i++) //TODO
     {
         MenuEntry* entry = new MenuEntry(this,
                         Rect(0, 0,110, FONT_SIZE+4),
@@ -83,7 +83,6 @@ void UnitMenu::process()
 	
 	markedUnit = 0;
 	// check for Pressed Units
-	pressedItem = -1;
 	eButton color;
     switch((*anarace->getStartCondition())->getRace())
     {
@@ -108,24 +107,20 @@ void UnitMenu::process()
 						(*m)->Hide();
 						continue;
 					}
-					Rect edge = Rect(Point(10+130*(height%2), ((height+1)/2+1) * (FONT_SIZE + 9) /*- getScrollY()*/), Size(0,0));
+					Rect edge = Rect(Point(10/*+130*(height%2)*/, ((height+1)/*/2*/+1-2) * (FONT_SIZE + 9) /*- getScrollY()*/), Size(0,0));
 	//				if (fitItemToClientRect(edge, 1))
 					{
 						(*m)->Show();
-						if ((*m)->isCurrentlyHighlighted()) // TODO
-							markedUnit = i;
+//						if ((i<=2)&&((*m)->isCurrentlyHighlighted())) // TODO
+//							markedUnit = i;
 						(*m)->setButton(eButton(UNIT_TYPE_0_BUTTON+i));
 						(*m)->updateText(*theme.lookUpString((eString)(UNIT_TYPE_0_STRING+i)));
 						(*m)->adjustRelativeRect(edge);
 					}
-    		        if ((*m)->isLeftClicked())
-	        	    {
-            		    pressedItem = i;
-	        	        open();
-    		            break;
-	    	        }
 					height++;
 				}
+				height-=2;
+				height*=2;
 			} else 
 			{
                 for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
@@ -140,8 +135,8 @@ void UnitMenu::process()
     //              if (fitItemToClientRect(edge, 1))
                     {
                         (*m)->Show();
-                        if ((*m)->isCurrentlyHighlighted()) // TODO
-                            markedUnit = facility[i]; //?
+//                        if ((i<=2)&&((*m)->isCurrentlyHighlighted())) // TODO
+  //                          markedUnit = facility[i]; //?
                         (*m)->setButton(color); // TODO
                         (*m)->updateText(stats[(*anarace->getStartCondition())->getRace()][facility[i]].name);
                         (*m)->adjustRelativeRect(edge);
@@ -152,28 +147,28 @@ void UnitMenu::process()
 		} // end 'if menuLevel == 1'
 		else if(menuLevel>1)
 		{
-			int i =0;
+			unsigned int i =0;
 			if(!facilityMode)
 			{
                 for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
                 {
                     i++;
-                    if((i >= facilityNumber ) || (stats[(*anarace->getStartCondition())->getRace()][i].unitType == (signed int)(menuLevel)))
+                    if(/*(i >= facilityNumber ) ||*/ (stats[(*anarace->getStartCondition())->getRace()][i].unitType != (signed int)(menuLevel)))
                     {
                         (*m)->Hide();
                         continue;
                     }
-						Rect edge = Rect(Point(10+130*(height%2), ((height+1)/2+1)*(FONT_SIZE+9)), Size(0,0));
-			//			if (parent->fitItemToRelativeRect(edge, 1)) 
-						{
-							(*m)->Show();
-							if ((*m)->isCurrentlyHighlighted())
-								markedUnit = i;
-							(*m)->setButton(eButton(UNIT_TYPE_0_BUTTON+menuLevel));
-							(*m)->updateText(stats[(*anarace->getStartCondition())->getRace()][i].name);
-							(*m)->adjustRelativeRect(edge);
-						}
-						height++;
+					Rect edge = Rect(Point(10+130*(height%2), ((height+1)/2+1)*(FONT_SIZE+9)), Size(0,0));
+		//			if (parent->fitItemToRelativeRect(edge, 1)) 
+					{
+						(*m)->Show();
+//						if ((*m)->isCurrentlyHighlighted())
+//							markedUnit = i;
+						(*m)->setButton(eButton(UNIT_TYPE_0_BUTTON+menuLevel));
+						(*m)->updateText(stats[(*anarace->getStartCondition())->getRace()][i].name);
+						(*m)->adjustRelativeRect(edge);
+					}
+					height++;
 				}
 			} else
 			{
@@ -192,8 +187,8 @@ void UnitMenu::process()
 			//		if (parent->fitItemToRelativeRect(edge, 1)) 
 					{
 						(*m)->Show();
-						if ((*m)->isCurrentlyHighlighted())
-							markedUnit = i;
+//						if ((*m)->isCurrentlyHighlighted())
+//							markedUnit = i;
     							
 						(*m)->setButton(color); 
 						(*m)->updateText(stats[(*anarace->getStartCondition())->getRace()][i].name);
@@ -231,6 +226,23 @@ void UnitMenu::process()
 				else if(menuLevel > 1) 
 					pressedItem=i;
 			}
+		}
+		if ((*m)->isCurrentlyHighlighted())
+		{
+            if(!facilityMode)
+            {
+                if ((menuLevel == 1) && (i == 1))  //scv
+                    markedUnit = SCV;
+        // TODO: pruefen ob das Goal schon vorhanden ist, wenn ja => hasChanged nicht aufrufen
+                else if ((menuLevel == 1) && (i == 2))   //gasscv
+                    markedUnit = GAS_SCV;
+                else if (menuLevel > 1)
+                    markedUnit = i;
+            } else
+            {
+                if(menuLevel > 1)
+                    markedUnit=i;
+            }
 		}
 	}
 	height+=4;

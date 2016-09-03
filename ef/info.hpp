@@ -17,7 +17,7 @@ const char error_message[ERROR_MESSAGES][25]=
 	"SC2 comes out." //unknown
 };
 
-class InfoWindow:public UI_Window
+class InfoWindow : public UI_Window
 {
 	public:
 		InfoWindow& operator=(const InfoWindow& object);

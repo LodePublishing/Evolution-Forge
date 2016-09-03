@@ -96,6 +96,12 @@ const Color DC::brightenColor(const Color* id, const unsigned int brightness) co
 			id->b() +brightness));
 }
 
+const Color DC::darkenColor(const Color* id, const unsigned int brightness) const
+{
+	return(Color(surface, id->r() * brightness / 100,
+			id->g() * brightness / 100,
+			id->b() * brightness / 100));
+}
 void DC::DrawSpline(const unsigned int c, const Point* p) const
 {
 	if((pen.GetStyle() == TRANSPARENT_PEN_STYLE)||(c<2))
@@ -202,7 +208,7 @@ void DC::DrawRectangle(const signed int x, const signed int y, const unsigned in
 		return;
 	SDL_Rect rc;
 	rc.x=x+1;rc.y=y+1;rc.w=width-2;rc.h=height-2;
-	if(brush.GetStyle()!=TRANSPARENT_BRUSH_STYLE)
+//	if(brush.GetStyle()!=TRANSPARENT_BRUSH_STYLE)
 		SDL_FillRect(surface, &rc, (Uint32)(*brush.GetColor()) );
 	DrawEmptyRectangle(x, y, width, height);	
 }

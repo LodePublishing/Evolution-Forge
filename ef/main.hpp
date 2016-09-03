@@ -62,7 +62,7 @@ class Main
 		ANARACE* anarace[MAX_PLAYER];
 		unsigned int update; // TODO anderer Name
 		unsigned int refresh; // "" 
-		unsigned int ani;
+		unsigned int ani, ani2;
 };
 																				
 #endif

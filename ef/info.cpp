@@ -114,16 +114,17 @@ void InfoWindow::process()
 	UI_Window::process();
 	std::ostringstream os;
 	os << "Build $" << stats[anarace->getRace()][unit].name << 
-		  "$ as soon as $" << error_message[anarace->getProgramSuccessType(IP)] <<
-		  "$ at $" << (*anarace->getMap())->getLocation(anarace->getProgramLocation(IP))->getName() << "$ when";
+		  "$ as soon as $&" << error_message[anarace->getProgramSuccessType(IP)] << "&$ ";
 	if(anarace->getProgramSuccessUnit(IP))
-		os << "$" << stats[anarace->getRace()][anarace->getProgramSuccessUnit(IP)].name << "$ becomes availible and";
-	os << " having $" << (int)(anarace->getStatisticsHaveMinerals(IP)/100) << 
-	      "$ minerals, $" << (int)(anarace->getStatisticsHaveGas(IP)/100) << 
-		  "$ gas,$" << anarace->getStatisticsNeedSupply(IP) << 
+		os << "&$" << stats[anarace->getRace()][anarace->getProgramSuccessUnit(IP)].name << "$& becomes availible ";
+	// TODO
+		os << "at $" << (*anarace->getMap())->getLocation(anarace->getProgramLocation(IP))->getName() << "$ when " << 
+		  "having &$" << (int)(anarace->getStatisticsHaveMinerals(IP)/100) << 
+	      "$ minerals,& &$" << (int)(anarace->getStatisticsHaveGas(IP)/100) << 
+		  "$ gas,& &$" << anarace->getStatisticsNeedSupply(IP) << 
 		  "$/$" << anarace->getStatisticsHaveSupply(IP) <<
-		  "$ supply [time: $" << anarace->getProgramTime(IP)/60 << 
-		  "$:$" << anarace->getProgramTime(IP)%60 << "$]#";
+		  "$ supply& &[time: $" << anarace->getRealProgramTime(IP)/60 << 
+		  "$:$" << anarace->getRealProgramTime(IP)%60 << "$]& #";
 	text->updateText(os.str());
 }
 

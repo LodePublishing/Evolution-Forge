@@ -383,7 +383,7 @@ void UI_Window::draw(DC* dc) const
 		dc->DrawEdgedRoundedRectangle(outerBorder.GetTopLeft()+getAbsolutePosition(),outerBorder.GetSize(),6);
 
 	// draw inner border:
-		if(highlighted)
+		if(isMouseInside())
 			dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 		else
 			dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));

@@ -72,7 +72,6 @@ extern void toLog(const std::string& msg);
 
 enum eErrorMessages
 {
-	NO_ERROR,
 	OK,
 	ENOUGH_MINERALS_WERE_GATHERED,
 	ENOUGH_GAS_WAS_GATHERED,
@@ -417,16 +416,6 @@ struct LAST
 	unsigned int count;
 };
 
-struct GOAL
-{
-	unsigned int unit;//!
-	unsigned int time;
-	unsigned int count;
-	unsigned int location;
-
-	unsigned int finalTime; // temporary!
-};
-
 struct UNIT_STATISTICS
 {
 	std::string name;
@@ -447,8 +436,9 @@ struct UNIT_STATISTICS
 	eUnitType unitType;		
 };
 
-extern const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT];
 
+extern const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT];
+extern const std::string raceString[MAX_RACES];
 // TODO: automatic building units/buildings for spells and larvaes
 
 #endif // _CORE_DEFS_HPP

@@ -42,6 +42,7 @@ class DC
 		const Color mixColor(const Color* id1, const Color* id2) const;
 		const Color mixColor(const Color* id1, const Color* id2, const unsigned int gradient) const;
 		const Color brightenColor(const Color* id, const unsigned int brightness) const;
+		const Color darkenColor(const Color* id, const unsigned int brightness) const;
 
 		const bool valid() const {
 			return (surface!=0);
@@ -134,7 +135,7 @@ class DC
 		void DrawRectangle(const Point& p, const Size& s) const { 
 			DrawRectangle(p.x, p.y, s.GetWidth(), s.GetHeight());
 		}
-		
+	
 		void DrawSpline(const unsigned int c, const Point* p) const;
 		void DrawSpline(const unsigned int c, const Point* p, const Point s) const;
 

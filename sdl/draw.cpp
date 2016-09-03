@@ -182,6 +182,14 @@ e = dy2 - dx;
 
  for (i = 0; i < dx; ++i) {
 	*((Uint32*)((Uint8*)surface->pixels + y0*surface->pitch + x0*4))=col;
+/*	Uint32* col2 = ((Uint32*)((Uint8*)surface->pixels + y0*surface->pitch + x0*4));
+	Uint32 col3 = (((*col2>>24)+(col>>24))<<23) + 
+				  (( ((*col2<<8)>>24) + ((col<<8)>>24) )<<15) + 
+				  (( ((*col2<<16)>>24) + ((col<<16)>>24) )<<7) + 
+				  (( ((*col2<<24)>>24) + ((col<<24)>>24) )>>1);
+
+	//Uint32 col3 = (((*col2>>24)+(col>>24))>>1) + ((col<<8)>>8);
+	*col2 = col3;*/
 
  while (e >= 0) {
 y0 += sy;
@@ -216,7 +224,14 @@ sy = temp;
  e = dy2 - dx;
 
  for (i = 0; i < dx; ++i) {
-*((Uint32*)((Uint8*)surface->pixels + x0*surface->pitch + y0*4))=col;
+	*((Uint32*)((Uint8*)surface->pixels + x0*surface->pitch + y0*4))=col;
+    /*Uint32* col2 = ((Uint32*)((Uint8*)surface->pixels + x0*surface->pitch + y0*4));
+	Uint32 col3 = (((*col2>>24)+(col>>24))<<23) + 
+				  (( ((*col2<<8)>>24) + ((col<<8)>>24) )<<15) + 
+				  (( ((*col2<<16)>>24) + ((col<<16)>>24) )<<7) + 
+				  (( ((*col2<<24)>>24) + ((col<<24)>>24) )>>1);
+    *col2 = col3;*/
+			
 
  while (e >= 0) {
 y0 += sy;
@@ -612,7 +627,7 @@ SDL_DRAW_WMEMSET_END
   if (height<3)  return;                         
   p0 = (Uint8*)surface->pixels + Ycenter*surface->pitch + x*4;     
   p1 = (Uint8*)surface->pixels + Ycenter*surface->pitch + (x+width)*4;
-  i=dy-1;                                        
+  i=dy; 
   switch( i % 4 ) {                           
     do{                                      
       case 0:                               

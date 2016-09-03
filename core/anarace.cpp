@@ -36,8 +36,7 @@ ANARACE::ANARACE():
 }
 
 ANARACE::~ANARACE()
-{
-}
+{ }
 
 void ANARACE::resetData()
 {
@@ -52,6 +51,7 @@ void ANARACE::resetData()
 	timePercentage=0;
 	goalPercentage=0;
 	averageLength=0;
+	setTimer(0);
 }
 
 
@@ -101,11 +101,6 @@ const bool ANARACE::calculateStep()
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
 	//TODO: Fehler hier, getHaveSupply - getNeedSupply kann -1 werden!
 	// needSupply war 11, maxneedSupply war 10 :/
-	setStatisticsNeedSupply(getIP(), getNeedSupply());
-	setStatisticsHaveSupply(getIP(), getHaveSupply());
-	setStatisticsHaveMinerals(getIP(), getMinerals());
-	setStatisticsHaveGas(getIP(), getGas());
-	setStatisticsFitness(getIP(), calculatePrimaryFitness(ready));
 
 	if((!getTimer())||(ready=calculateReady())||(!getIP()))
 	{
@@ -137,12 +132,18 @@ const bool ANARACE::calculateStep()
 // set needed_ to maximum to determine the minimum of minerals/gas our jobs need (needed_ is set in buildGene)
 		neededMinerals=MAX_MINERALS;
 		neededGas=MAX_GAS;
+		setStatisticsNeedSupply(getIP(), getNeedSupply());
+		setStatisticsHaveSupply(getIP(), getHaveSupply());
+		setStatisticsHaveMinerals(getIP(), getMinerals());
+		setStatisticsHaveGas(getIP(), getGas());
+		setStatisticsFitness(getIP(), calculatePrimaryFitness(ready));
+	
 		ok=buildGene(getpGoal()->toPhaeno(getCurrentCode()));
 		
 		if(successType>0)
 		{
-			setProgramSuccessType(getIP(),successType);
-			setProgramSuccessUnit(getIP(),successUnit);
+			setProgramSuccessType(getIP(), successType);
+			setProgramSuccessUnit(getIP(), successUnit);
 		}
 		
 //TODO PROBLEM: wenn Einheit gebaut wurde (also in die build list incl. IP eingefuegt wurde) aber gleichzeitig ein timeout war, wird die Einheit als TIMEOUT markiert aber trotzdem gebaut
@@ -150,18 +151,18 @@ const bool ANARACE::calculateStep()
 
 		if((ok)||(!getTimeOut())) {
 			if(ok) {
-				setProgramTime(getIP(), getRealTimer());
+				setProgramTime(getIP(), getTimer());
 			} else {
 				setProgramTime(getIP(),ga->maxTime);
-				setProgramSuccessType(getIP(),TIMEOUT_ERROR);
-				setProgramSuccessUnit(getIP(),0);
+				setProgramSuccessType(getIP(), TIMEOUT_ERROR);
+				setProgramSuccessUnit(getIP(), 0);
 //				setProgramSuccessLocation(0);
 			}
 			for(int i=UNIT_TYPE_COUNT;i--;)	{
 				setProgramTotalCount(getIP(), i, getLocationTotal(GLOBAL, i));
 				setProgramAvailibleCount(getIP(),i,getLocationAvailible(GLOBAL, i));
 			}
-			
+	
 			setTimeOut(ga->maxTimeOut);
 			setIP(getIP()-1);
 		}
@@ -210,6 +211,7 @@ const bool ANARACE::calculateStep()
 				adjustMineralHarvest(build.getLocation());
 				adjustGasHarvest(build.getLocation());
 			} else 
+// RACE SPECIFIC!
 			if((build.getType()==LARVA)&&(getpGoal()->getRace()==ZERG)&&(!buildGene(LARVA))) {
 				removeLarvaFromQueue(build.getLocation());
 			}
@@ -217,7 +219,7 @@ const bool ANARACE::calculateStep()
 
 			
 // ------ CHECK WHETHER WE ARE READY ------
-			getpGoal()->calculateFinalTimes(build.getLocation(), build.getType(), getRealTimer());
+			getpGoal()->calculateFinalTimes(build.getLocation(), build.getType(), getLocationTotal(build.getLocation(), build.getType()), getRealTimer());
 			ready=calculateReady();
 // ------ END CHECK ------
 
@@ -266,7 +268,7 @@ const bool ANARACE::buildGene(const unsigned int build_unit)
 	const UNIT_STATISTICS* stat=&((*pStats)[build_unit]);
 	bool ok=false;
 
-	successType=0;
+	successType=OK;
 	successUnit=0;
 
 	if(build_unit<=REFINERY+1)
@@ -336,6 +338,18 @@ const bool ANARACE::buildGene(const unsigned int build_unit)
 				neededGas=stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)-getGas();
 		}
 		else
+		if((stat->upgrade[0]>0)&&(getLocationTotal(GLOBAL, build_unit)>=2) && (!getLocationTotal(GLOBAL, stat->upgrade[0])))
+		{
+            successUnit=stat->upgrade[0];
+			successType=PREREQUISITE_WAS_FULFILLED;
+		}
+		else
+		if((stat->upgrade[1]>0)&&(getLocationTotal(GLOBAL, build_unit)>=3) && (!getLocationTotal(GLOBAL, stat->upgrade[1])))
+		{
+            successUnit=stat->upgrade[1];
+            successType=PREREQUISITE_WAS_FULFILLED;
+		}
+		else	
 		{
 //Zuerst: availible pruefen ob am Ort gebaut werden kann
 //Wenn nicht => +/- absteigen bis alle locations durch sind
@@ -349,10 +363,13 @@ const bool ANARACE::buildGene(const unsigned int build_unit)
 				lastcounter--;
 				tloc=last[lastcounter].location;
 			}
-
+// TODO!
 //			if((stat->facility2==0)||(getLocationAvailible(tloc,stat->facility2)>0))
-			for(fac=3;fac--;)
-				if( ((stat->facility[fac]>0)&&(getLocationAvailible(tloc,stat->facility[fac])>((stat->facilityType==IS_LOST)&&(stat->facility[fac]==stat->facility2)))) || ((stat->facility[fac]==0)&&(fac==0))) 
+//			for(fac=3;fac--;)
+			for(fac=0;fac<3; fac++)
+				if( ((stat->facility[fac]>0)&&(getLocationAvailible(tloc, stat->facility[fac]))&&
+				((getLocationAvailible(ttloc, stat->facility[fac])>1)||(stat->facilityType!=IS_LOST)||(stat->facility[fac]==stat->facility2)))  )
+	//		||	((stat->facility[fac]==0)&&(fac==0))) 
 				{
 					ok=true;
 					break;
@@ -365,8 +382,12 @@ const bool ANARACE::buildGene(const unsigned int build_unit)
 					ttloc=(*pMap)->getLocation(tloc)->getNearest(j);
 //					if((stat->facility2==0)||(getLocationAvailible(ttloc,stat->facility2)>0))
 //					{
-					for(fac=3;fac--;)
-						if( ((stat->facility[fac]>0)&&(getLocationAvailible(ttloc,stat->facility[fac])>((stat->facilityType==IS_LOST)&&(stat->facility[fac]==stat->facility2)))) || ((stat->facility[fac]==0)&&(fac==0)))
+//					for(fac=3;fac--;)
+					for(fac=0;fac<3; fac++)
+						if(((stat->facility[fac]>0)&&(getLocationAvailible(ttloc, stat->facility[fac]))&&
+						// special rules for morphing units
+						((getLocationAvailible(ttloc, stat->facility[fac])>1)||(stat->facilityType!=IS_LOST)||(stat->facility[fac]!=stat->facility2)) ))
+	//					|| ((stat->facility[fac]==0)&&(fac==0))) //~~
 						{
 							tloc=ttloc;
 							ok=true;
@@ -615,60 +636,6 @@ void ANARACE::insertOrder(int unit, int position)
 // ------ MISC FUNCTIONS ------
 // ----------------------------
 
-#if 0
-const unsigned int ANARACE::maximum(const unsigned int unit) const
-{
-/*	int max=0;
-	int t=0;
-	if((stats[getpGoal()->getRace()][unit].facility[0])&&(!getMap()->location[0].force[1][stats[getpGoal()->getRace()][unit].facility[0]])&&(stats[getpGoal()->getRace()][unit].facility[0]!=unit))
-	{
-		t=needTime(stats[getpGoal()->getRace()][unit].facility[0]);
-		if(t>max) max=t;
-		t=0;
-	}
-		if((stats[getpGoal()->getRace()][unit].facility[1])&&(!getMap()->location[0].force[1][stats[getpGoal()->getRace()][unit].facility[1]]))
-		{
-				t=needTime(stats[getpGoal()->getRace()][unit].facility[1]);
-				if(t>max) max=t;
-				t=0;
-		}
-		if((stats[getpGoal()->getRace()][unit].facility[2])&&(!getMap()->location[0].force[1][stats[getpGoal()->getRace()][unit].facility[2]]))
-		{
-				t=needTime(stats[getpGoal()->getRace()][unit].facility[2]);
-				if(t>max) max=t;
-				t=0;
-		}
-		if((stats[getpGoal()->getRace()][unit].prerequisite[0])&&(!getMap()->location[0].force[1][stats[getpGoal()->getRace()][unit].prerequisite[0]]))
-		{
-				t=needTime(stats[getpGoal()->getRace()][unit].prerequisite[0]);
-				if(t>max) max=t;
-				t=0;
-		}
-		if((stats[getpGoal()->getRace()][unit].prerequisite[1])&&(!getMap()->location[0].force[1][stats[getpGoal()->getRace()][unit].prerequisite[1]]))
-		{
-				t=needTime(stats[getpGoal()->getRace()][unit].prerequisite[1]);
-				if(t>max) max=t;
-				t=0;
-		}
-		if((stats[getpGoal()->getRace()][unit].prerequisite[2])&&(!getMap()->location[0].force[1][stats[getpGoal()->getRace()][unit].prerequisite[2]]))
-		{
-				t=needTime(stats[getpGoal()->getRace()][unit].prerequisite[2]);
-				if(t>max) max=t;
-				t=0;
-		}
-	return(max);*/
-	return(0);
-}
-
-
-const unsigned int ANARACE::needTime(const unsigned int unit) const
-{
-//	if(!getMap()->location[0].force[1][unit])
-//		return(stats[getpGoal()->getRace()][unit].BT+maximum(unit)); //eigene Bauzeit + Bauzeit der Prerequisites/Facilities
-//	else return(0);
-	return(0);
-}
-#endif
 void ANARACE::countUnitsTotal()
 {
 	unitsTotal = 0;
@@ -747,6 +714,9 @@ const unsigned int ANARACE::getProgramFacility(const unsigned int IP) const
 		toLog("DEBUG: (ANARACE::getProgramFacility): Variable not initialized.");return(0);
 	}
 #endif
+//	if((getRace()==PROTOSS)&&(program[IP].facility==PROBE))
+//		while(true);
+
 	return(program[IP].facility);
 }
 
@@ -1135,7 +1105,21 @@ const unsigned int ANARACE::getTimePercentage() const
 
 const unsigned int ANARACE::getGoalPercentage() const
 {
-	return(goalPercentage);
+	if(getTimer()==0)
+		return(goalPercentage);
+	else 
+	{
+		unsigned int optimalTime = getpGoal()->calculateFastestBO((*pStartCondition)->getUnit(GLOBAL));
+		if(optimalTime==0)
+			return(100);
+		else
+			return(100*optimalTime/getRealTimer());
+	}
+}
+
+const GOAL_TREE ANARACE::getGoalTree(const unsigned int currentGoalUnit) const
+{
+	return(getpGoal()->getGoalTree((*pStartCondition)->getUnit(GLOBAL), currentGoalUnit));
 }
 
 void ANARACE::setPhaenoCode(const unsigned int IP, const unsigned int num)

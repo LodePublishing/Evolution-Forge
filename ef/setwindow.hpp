@@ -5,58 +5,8 @@
 
 #include "../core/settings.hpp"
 #include "numberfield.hpp"
-#include "menu.hpp"
+#include "languagemenu.hpp"
 
-
-class LanguageMenu : public Menu
-{
-    public:
-        LanguageMenu(UI_Object* language_parent, Rect language_rect):
-			Menu(language_parent, language_rect/*, 120, MAX_LANGUAGES-1*/)
-		{
-			int i = 1;
-			for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
-			{
-				(*m)->updateText(*theme.lookUpString((eString)(SETTING_LANGUAGE_STRING+i)));
-				(*m)->setButton(eButton(UNIT_TYPE_5_BUTTON));
-				i++;
-			}
-		}
-		~LanguageMenu() {};
-        void process()
-		{
-			if(!isShown())
-				return;
-			Menu::process();
-			if(menuLevel)
-			{
-				int i=0;
-				for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
-				{
-					Rect edge = Rect(Point(10 + i * 90, height * (FONT_SIZE+9)), Size(75, FONT_SIZE+3));
-		//          if (parent->fitItemToRelativeRect(edge, 1))
-        		    {
-		                (*m)->adjustRelativeRect(edge);
-        		    }
-		            if ((*m)->isLeftClicked())
-        		    {
-                		pressedItem = i;
-		                open();
-        		        break;
-		            }
-					i++;
-				}
-				height++;
-			}
-		}
-	
-        void draw(DC* dc) const
-		{
-		    if(!isShown())
-		        return;
-		    Menu::draw(dc);
-		}	
-};
 
 /*class ResolutionMenu : public Menu
 {
@@ -150,7 +100,8 @@ class SettingsWindow:public UI_Window
 		ForceMenu* forceMenu;
 		RaceMenu* raceMenu;*/
 
-		LanguageMenu* langMenu;
+		LanguageMenu* languageMenu;
+		UI_Button* languageMenuButton;
 };
 
 #endif

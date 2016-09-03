@@ -2,7 +2,7 @@
 #define _CORE_SETTINGS_HPP
 
 #include "soup.hpp"
-#include "goal.hpp"	
+#include "goalentry.hpp"	
 #include "harvest.hpp"
 #include "basicmap.hpp"
 #include "ga.hpp"
@@ -75,10 +75,13 @@ public:
 	const unsigned int getMapCount() const;
 	const unsigned int getStartconditionCount(const unsigned int player) const;
 	
+	void saveBuildOrder(const ANARACE* anarace) const;
 	const GOAL_ENTRY* getGoal(const unsigned int player, const unsigned int goalNumber) const;
 	const START_CONDITION* getStartcondition(const unsigned int player, const unsigned int startconditionNumber) const;
 
 	void initDefaults(); 
+
+	void saveGoal(const GOAL_ENTRY* goalentry);
 
 	void loadStartconditionFile(const string& startconditionFile);
 	void loadGoalFile(const string& goalFile);

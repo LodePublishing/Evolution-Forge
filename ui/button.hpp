@@ -196,6 +196,9 @@ class UI_Button:public UI_Object
 
 		bool forcedPress;
 		void adjustButtonPlacementArea(); // jump to relativeRect
+		Rect buttonPlacementArea;
+
+		const unsigned int getTextWidth() const;
 
 	private:
 		bool moved; // did this item move one pixel down (pressed)
@@ -203,9 +206,11 @@ class UI_Button:public UI_Object
 		bool hasBitmap;
 
 
-		Rect buttonPlacementArea;
+//		Rect buttonPlacementArea;
 		unsigned int gradient;
 		long unsigned int timeStamp;
+
+//		long unsigned int forcedHighlightTimeout;
 		
 		void adjustButtonSize(const Size& size);
 

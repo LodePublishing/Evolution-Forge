@@ -5,6 +5,7 @@
 #include "../core/anarace.hpp"
 
 #include "math.h"
+#include "numberfield.hpp"
 
 class StatisticsWindow:public UI_Window
 {
@@ -20,11 +21,9 @@ class StatisticsWindow:public UI_Window
 	private:
 		void showGraph(DC* dc, const unsigned int* data, const unsigned int min, const unsigned int max, const Color col) const;
 		
-		UI_StaticText* mspf;
-		UI_StaticText* fps;
-		UI_StaticText* bps;
+		int ani;
 		
-		UI_Button* statEntry[8];
+		UI_Button* statEntry[9];
 		long unsigned int start_time;
 		const ANARACE* anarace;
 		unsigned int harvestedMinerals[200];
@@ -37,9 +36,15 @@ class StatisticsWindow:public UI_Window
 		unsigned int time[200];
 		unsigned int force[200];
 		unsigned int generation[200];
-		unsigned int oldForceCounter[20],oldForce[20];
-		unsigned int oldGasCounter[20],oldGas[20];
-		unsigned int oldMineralsCounter[20],oldMinerals[20];
+		unsigned int fps[200];
+		unsigned int oldForceCounter[20];
+		signed int oldForce[20];
+		unsigned int oldGasCounter[20];
+		signed int oldGas[20];
+		unsigned int oldMineralsCounter[20];
+		signed int oldMinerals[20];
+		unsigned int oldBoLengthCounter[20];
+		signed int oldBoLength[20];
 		unsigned int maxpFitness;
 		unsigned int maxsFitness;
 		unsigned int maxtFitness;
@@ -48,8 +53,10 @@ class StatisticsWindow:public UI_Window
 		unsigned int maxvFitness;
 		unsigned int maxForce;
 		unsigned int maxHarvestedRessources;
+		unsigned int maxfps;
 		unsigned int average[100];
 		unsigned int averagecounter;
+		NumberField* speed;
 };
 #endif
 

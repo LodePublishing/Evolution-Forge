@@ -73,7 +73,8 @@ BoWindow::BoWindow(const BoWindow& object) :
     boGoalListOpened(object.boGoalListOpened),
     lastBogoal(object.lastBogoal),
     resetButton(new UI_Button(*(object.resetButton))),
-    speed(new NumberField(*(object.speed)))
+    saveBuildOrderButton(new UI_Button(*(object.saveBuildOrderButton)))
+//    speed(new NumberField(*(object.speed)))
 { }
 
 BoWindow& BoWindow::operator=(const BoWindow& object)
@@ -93,8 +94,10 @@ BoWindow& BoWindow::operator=(const BoWindow& object)
 	lastBogoal = object.lastBogoal;
 	delete resetButton;
 	resetButton = new UI_Button(*(object.resetButton));
-	delete speed;
-	speed = new NumberField(*(object.speed));
+	delete saveBuildOrderButton;
+	saveBuildOrderButton = new UI_Button(*(object.saveBuildOrderButton));
+//	delete speed;
+//	speed = new NumberField(*(object.speed));
 	return(*this);
 }
 
@@ -113,13 +116,9 @@ BoWindow::BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_inf
     boGoalListOpened(0),
 	lastBogoal(0),
 	resetButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), Rect(Point(0,0),getSize()), RESET_BUILD_ORDER_STRING, RESET_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	speed(new NumberField(this, Rect(getRelativeClientRectPosition(), getClientRectSize() - Size(100,0)), SPEED_STRING, SETTING_FRAMERATE_TOOLTIP_STRING, 25, true))
-/*	speedText(new UI_StaticText(this, SPEED_STRING, Rect(getRelativeClientRectPosition() + Point(30,0), getClientRectSize()), NO_TEXT_MODE, FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT)),
-    addSpeed(new UI_Button(this, Rect(Point(getWidth()-117,42),Size(8,8)), Rect(Point(0,0), getSize()), ADD_BUTTON, PRESS_BUTTON_MODE)),
-    subSpeed(new UI_Button(this, Rect(Point(getWidth()-107,42),Size(8,8)), Rect(Point(0,0), getSize()), SUB_BUTTON, PRESS_BUTTON_MODE))*/
+	saveBuildOrderButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), Rect(Point(0,0),getSize()), SAVE_BUILD_ORDER_STRING, SAVE_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE))
+	//speed(new NumberField(this, Rect(getRelativeClientRectPosition(), Size(getClientRectWidth() - 100, 0)), SPEED_STRING, SETTING_FRAMERATE_TOOLTIP_STRING, 25, PERCENT_NUMBER_TYPE))
 {
-//	addButton(Rect(getClientRectLeftBound()+getWidth()-48,getClientRectUpperBound()-30,12,12), 0, PERM_BUTTON);
-//	addButton(Rect(getClientRectLeftBound()+getWidth()-48,getClientRectUpperBound()-15,12,12), 0, PERM_BUTTON);
 	resetData();
 	for(int i=MAX_LENGTH;i--;)
 	{
@@ -129,6 +128,7 @@ BoWindow::BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_inf
 		boEntry[i]->Hide();
 	}
 	resetButton->updateToolTip("Reset and restart from the scratch");
+	saveBuildOrderButton->updateToolTip("Save build order as bitmap or html");
 }
 
 BoWindow::~BoWindow()
@@ -136,10 +136,8 @@ BoWindow::~BoWindow()
 	for(int i=MAX_LENGTH;i--;)
 		delete boEntry[i]; 
 	delete resetButton;
-//	delete speedText;
-//	delete addSpeed;
-//	delete subSpeed;
-	delete speed;
+	delete saveBuildOrderButton;
+//	delete speed;
 }
 
 void BoWindow::resetData()
@@ -161,10 +159,7 @@ void BoWindow::process()
 		return;
 	UI_Window::process();
 
-	speed->updateNumber((int)(100/(settings.getSpeed()+1)));
-//	std::ostringstream os;
-//	os << *theme.lookUpString(SPEED_STRING) << " " << (int)(100/(settings.getSpeed()+1)) << "%";
-//	speedText->updateText(os.str());
+//	speed->updateNumber((int)(100/(settings.getSpeed()+1)));
 
 #if 0
 	if(isActivated(makeSpaceButton))
@@ -301,7 +296,7 @@ void BoWindow::process()
 
 	unsigned int line=0;
 	boEndPoint=0;
-	unsigned int oldTime=0;
+	unsigned int oldTime=MAX_TIME+1;
 	ownMarkedUnit=0;
 	ownMarkedIP=0;
 	unsigned int tempForceCount[UNIT_TYPE_COUNT];
@@ -393,7 +388,11 @@ void BoWindow::process()
 	(fitItemToRelativeClientRect(edge,1));
 	} // end for ...
 	for(;line<MAX_LENGTH;line++)
-    	boEntry[line]->adjustRelativeRect(Rect(getRelativeClientRectPosition()+Point(200,200), Size(getClientRectWidth(), FONT_SIZE+5)));
+	{
+    	boEntry[line]->adjustRelativeRect(Rect(Point(max_x+10,getRelativeClientRectPosition().y+200), Size(getClientRectWidth(), FONT_SIZE+5)));
+//		if(boEntry[line]->getAbsoluteRect().GetTopLeft() == getRelativeClientRectPosition()+Point(200,200))
+//			boEntry[line]->Hide(); TODO
+	}
 	
 		
 //		boEntry[line]->Hide();
@@ -404,12 +403,20 @@ void BoWindow::process()
 			boEntry[i]->Hide();
 	
 	if(resetButton->isLeftClicked())
+	{
 		settings.assignRunParametersToSoup();
+		setChangedFlag();
+	}
 
-	if(speed->addClicked() && (settings.getSpeed()>0))
-		settings.setSpeed(settings.getSpeed()-1);
-	if(speed->subClicked() && (settings.getSpeed()<100))
-		settings.setSpeed(settings.getSpeed()+1);
+	if(saveBuildOrderButton->isLeftClicked())
+	{
+		settings.saveBuildOrder(anarace);
+	}
+
+//	if(speed->addClicked() && (settings.getSpeed()>0))
+//		settings.setSpeed(settings.getSpeed()-1);
+//	if(speed->subClicked() && (settings.getSpeed()<100))
+//		settings.setSpeed(settings.getSpeed()+1);
 
 //	setMarkedUnit(ownMarkedUnit);
 //	setMarkedIP(ownMarkedIP);

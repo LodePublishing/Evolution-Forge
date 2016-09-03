@@ -1,6 +1,6 @@
 #include "race.hpp"
 
-/* RACE.CPP - last changed: 6/23/04                              *
+/* RACE.CPP - last changed: 9/24/04                              *
  * Author: Clemens Lode                                             *
  * Copyright: Clemens Lode                                          *
  *                                                                  *
@@ -13,12 +13,10 @@ RACE::RACE():
 	pFitness(0),
 	sFitness(0),
 	tFitness(99999)
-{
-}
+{ }
 
 RACE::~RACE()
-{
-}
+{ }
 
 
 const unsigned int RACE::calculateSecondaryFitness() const
@@ -134,7 +132,7 @@ const bool RACE::calculateStep()
 
 			
 // ------ CHECK WHETHER WE ARE READY ------
-			getpGoal()->calculateFinalTimes(build.getLocation(), build.getType(), getRealTimer());
+			getpGoal()->calculateFinalTimes(build.getLocation(), build.getType(), getLocationTotal(build.getLocation(), build.getType()), getRealTimer());
 			ready=calculateReady();
 // ------ END CHECK -------
 			
@@ -199,7 +197,11 @@ const bool RACE::buildGene(const unsigned int build_unit)
 			&&
 			(((getHaveSupply()>=stat->needSupply+getNeedSupply()-stat->haveSupply)&&(stat->needSupply+getNeedSupply()<=MAX_SUPPLY)) ||(stat->needSupply==0)) // TODO: IS_LOST einfuegen!
 			&&
-			((stat->facility2==0)||(getLocationAvailible(GLOBAL, stat->facility2)>0)))
+			((stat->facility2==0)||(getLocationAvailible(GLOBAL, stat->facility2)>0)) 
+			&&
+			((stat->upgrade[0]==0)||(getLocationTotal(GLOBAL, build_unit)<2) || (getLocationTotal(GLOBAL, stat->upgrade[0]))) 
+			&&
+			((stat->upgrade[1]==0)||(getLocationTotal(GLOBAL, build_unit)<3) || (getLocationTotal(GLOBAL, stat->upgrade[1])))) 
 		{
 		
 			if
@@ -229,11 +231,15 @@ const bool RACE::buildGene(const unsigned int build_unit)
 					tloc=last[lastcounter].location;
 				}
 
+
+// TODO! ?!?!?
 //				if((stat->facility2==0)||(getLocationAvailible(/*tloc*/0,stat->facility2)>0))
-				for(fac=3;fac--;)
-					if( ((stat->facility[fac]>0)&&
-				 		(getLocationAvailible(tloc,stat->facility[fac])>((stat->facilityType==IS_LOST)&&(stat->facility[fac]==stat->facility2)))) ||  //sonderregel wegen doppel morphunits von protoss
-						((stat->facility[fac]==0)&&(fac==0))) 
+//				for(fac=3;fac--;)
+				for(fac=0;fac<3;fac++)
+					if( ((stat->facility[fac]>0)&&(getLocationAvailible(tloc, stat->facility[fac]))&&
+					// special rules for morphing units of protoss
+						((getLocationAvailible(ttloc, stat->facility[fac])>1)||(stat->facilityType!=IS_LOST)&&(stat->facility[fac]!=stat->facility2))) )
+//						||((stat->facility[fac]==0)&&(fac==0))) 
 					{
 						ok=true;
 						break;
@@ -246,8 +252,15 @@ const bool RACE::buildGene(const unsigned int build_unit)
 						ttloc=(*pMap)->getLocation(tloc)->getNearest(j);
 //						if((stat->facility2==0)||(getLocationAvailible(ttloc,stat->facility2)>0)) TODO
 //						{
-						for(fac=3;fac--;)
-							if( ((stat->facility[fac]>0)&&(getLocationAvailible(ttloc,stat->facility[fac])>((stat->facilityType==IS_LOST)&&(stat->facility[fac]==stat->facility2)))) || ((stat->facility[fac]==0)&&(fac==0)))
+//            	        for(fac=3;fac--;)
+						for(fac=0;fac<3; fac++)
+                        if(((stat->facility[fac]>0)&&(getLocationAvailible(ttloc, stat->facility[fac]))&&
+                        // special rules for morphing units of protoss
+                        ((getLocationAvailible(ttloc, stat->facility[fac])>1)||(stat->facilityType!=IS_LOST)||(stat->facility[fac]!=stat->facility2)) ))
+//                        || ((stat->facility[fac]==0)&&(fac==0))) //~~
+
+//						for(fac=3;fac--;)
+//							if( ((stat->facility[fac]>0)&&(getLocationAvailible(ttloc,stat->facility[fac])>((stat->facilityType==IS_LOST)&&(stat->facility[fac]==stat->facility2)))) || ((stat->facility[fac]==0)&&(fac==0)))
 							{
 								tloc=ttloc;
 								ok=true;

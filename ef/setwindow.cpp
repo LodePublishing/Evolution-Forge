@@ -51,9 +51,10 @@ SettingsWindow::SettingsWindow(UI_Object* parent):
 	//dynamicFramerateText = new UI_StaticText(this, SETTING_DYNAMIC_FRAMERATE_STRING, Rect(getRelativeClientRectPosition()+Point(250,80), Size(200, 15)), RIGHT_BOUNDED_TEXT_MODE, FORCE_TEXT_COLOR);
 //    dynamicFramerateText->updateToolTip(*theme.lookUpString(SETTING_DYNAMIC_FRAMERATE_TOOLTIP_STRING));
 
-	
-	languageMenu = new languageMenu(this);
-	resolutionMenu = new resolutionMenu(this);
+	*/
+	languageMenuButton = new UI_Button(this, Rect(getRelativeClientRectPosition()+Point(250,215), Size(200, 15)), Rect(getRelativeClientRectPosition()+Point(250,215), Size(200, 15)), SETTING_LANGUAGE_STRING, SETTING_LANGUAGE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE);
+	languageMenu = new LanguageMenu(this, Rect(100,100,100,100));
+/*	resolutionMenu = new resolutionMenu(this);
 
 	englishButton = new UI_Button(this, Rect(getRelativeClientRectPosition()+Point(250,215), Size(200, 15)), Rect(getRelativeClientRectPosition()+Point(250,215), Size(200, 15)), SETTING_ENGLISH_STRING, SETTING_ENGLISH_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE);
 
@@ -125,6 +126,9 @@ SettingsWindow::~SettingsWindow()
 	delete englishButton; 
 	delete germanButton;
 	delete languageRadio;*/
+
+	delete languageMenu;
+	delete languageMenuButton;
 }
 
 void SettingsWindow::process()
@@ -132,6 +136,15 @@ void SettingsWindow::process()
 //	if(!shown)
 //		return;
 	UI_Window::process();
+
+	if(languageMenuButton->isLeftClicked())
+	{
+		languageMenu->open();
+		if(!languageMenu->isOpen())
+			languageMenu->Hide();
+		else languageMenu->Show();
+	}
+		
 #if 0
 	totalUnits=0;
 	for(int i = UNIT_TYPE_TYPES;i--;)

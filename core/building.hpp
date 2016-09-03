@@ -26,7 +26,6 @@ public:
 	Building(const Building& object);
 	Building& operator=(const Building& object);
 	
-
 	const unsigned int getTotalBuildTime() const;
 	const unsigned int getBuildFinishedTime() const;
 

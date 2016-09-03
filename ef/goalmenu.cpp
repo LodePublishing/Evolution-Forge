@@ -36,7 +36,7 @@ void GoalMenu::process()
 		
 	if(menuLevel)
 	{
-		int i = 0;
+		unsigned int i = 0;
         for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 		{
 			Rect edge = Rect(Point(10, height * (FONT_SIZE + 9)), Size(getParent()->getWidth()+20, FONT_SIZE));

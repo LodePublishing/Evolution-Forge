@@ -48,12 +48,10 @@ BoDiagramWindow::BoDiagramWindow(UI_Object* bod_parent, ANARACE* bod_anarace, In
 }
 
 BoDiagramWindow::~BoDiagramWindow()
-{
-}
+{ }
 
 void BoDiagramWindow::resetData()
-{
-}
+{ }
 
 void BoDiagramWindow::process()
 {
@@ -61,8 +59,7 @@ void BoDiagramWindow::process()
 		return;
 
 	UI_Window::process();
-
-	count=0;
+//return;
 	if(anarace->getRealTimer()<2) return;
 	
 //	if(anarace->getTimer()==settings.getGa()->maxTime) time=0;
@@ -70,10 +67,10 @@ void BoDiagramWindow::process()
 //time=anarace->getTimer()+1;
 	float time = (getClientRectWidth()-6) / (float)(anarace->getRealTimer());
 
-	unsigned int haveSupply=0;
-	unsigned int maxMins=0;
-	unsigned int maxGas=0;
-	for(int i = settings.getGa()->maxLength - anarace->getLength(); i<settings.getGa()->maxLength; i++)
+	unsigned int haveSupply=10; // TODO
+	unsigned int maxMins=(*anarace->getStartCondition())->getMinerals();
+	unsigned int maxGas=(*anarace->getStartCondition())->getGas();
+	for(unsigned int i = settings.getGa()->maxLength - anarace->getLength(); i<settings.getGa()->maxLength; i++)
 	{
 		if(anarace->getStatisticsHaveMinerals(i)>maxMins) 
 			maxMins=anarace->getStatisticsHaveMinerals(i);
@@ -84,17 +81,93 @@ void BoDiagramWindow::process()
 		if(anarace->getStatisticsHaveSupply(i)>haveSupply) 
 			haveSupply=anarace->getStatisticsHaveSupply(i);
 	}
-	unsigned int s=MAX_LENGTH/*settings.getGa()->maxLength*/ - anarace->getLength();
-	while(s < MAX_LENGTH)//settings.getGa()->maxLength)
+	if(anarace->getMinerals()>maxMins)
+		maxMins=anarace->getMinerals();
+	if(anarace->getGas()>maxGas)
+		maxGas=anarace->getGas();
+	if(anarace->getNeedSupply()>haveSupply)
+		haveSupply=anarace->getNeedSupply();
+	if(anarace->getHaveSupply()>haveSupply)
+		haveSupply=anarace->getHaveSupply();
+
+	count=0;
+
+	{
+        int y1;
+        if(maxMins) y1=(*anarace->getStartCondition())->getMinerals()*75/maxMins; else y1=0;
+        Point p=Point( 3, -y1-2);
+        if(targetMinerals[count]==Point(0,0))
+        {
+            targetMinerals[count]=p;
+            startMinerals[count]=p;
+            minerals[count]=p;
+        } else
+        if(p!=targetMinerals[count]) {
+            targetMinerals[count]=p;
+            startMinerals[count]=minerals[count];
+        }
+
+        if(maxGas) y1=(*anarace->getStartCondition())->getGas()*75/maxGas; else y1=0;
+        p=Point( 3, -y1-2);
+        // first round
+        if(targetGas[count]==Point(0,0))
+        {
+            targetGas[count]=p;
+            startGas[count]=p;
+            gas[count]=p;
+        } else
+        if(p!=targetGas[count]) {
+            targetGas[count]=p;
+            startGas[count]=gas[count];
+        }
+                                                                                                                                                            
+//TODO anarace->getMaxpFitness-getTimer kann auch 0 sein !! kann es??
+                                                                                                                                                            
+/*      if(anarace->getMaxpFitness()) y1=anarace->getStatisticsFitness(s)*75/(anarace->getMaxpFitness()-anarace->getTimer()); else y1=0;
+        p=Point( 3+((count*(getClientRectWidth()-6))/(anarace->getRealTimer())), -y1);
+        if(p!=targetFitness[count]) {
+            targetFitness[count]=p;
+            startFitness[count]=fitness[count];
+        }       */
+                                                                                                                                                            
+        if(haveSupply) y1=(*anarace->getStartCondition())->getHaveSupply()*75/haveSupply; else y1=0;
+        p=Point(3, -y1-2);
+        if(targetHneedSupply[count]==Point(0,0))
+        {
+            targetHneedSupply[count]=p;
+            startHneedSupply[count]=p;
+            hneedSupply[count]=p;
+        } else
+        if(p!=targetHneedSupply[count]) {
+            targetHneedSupply[count]=p;
+            startHneedSupply[count]=hneedSupply[count];
+		}
+
+        if(haveSupply) y1=(*anarace->getStartCondition())->getNeedSupply()*75/haveSupply; else y1=0;
+        p=Point(3, -y1-2);
+        if(targetNneedSupply[count]==Point(0,0))
+        {
+            targetNneedSupply[count]=p;
+            startNneedSupply[count]=p;
+            nneedSupply[count]=p;
+        } else
+        if(p!=targetNneedSupply[count]) {
+            targetNneedSupply[count]=p;
+            startNneedSupply[count]=nneedSupply[count];
+        }
+	}
+	count++;
+	unsigned int s=settings.getGa()->maxLength-1;// - anarace->getLength();
+	while(s > settings.getGa()->maxLength - anarace->getLength())
 	{
 		if(!anarace->getProgramIsBuilt(s))
 		{
-			s++;
+			s--;
 			continue;
 		}
 		int y1;
 		if(maxMins) y1=anarace->getStatisticsHaveMinerals(s)*75/maxMins; else y1=0;
-		Point p=Point( 3+anarace->getProgramTime(s)*time, -y1-2);
+		Point p=Point( 3+anarace->getRealProgramTime(s)*time, -y1-2);
         if(targetMinerals[count]==Point(0,0))
         {
             targetMinerals[count]=p;
@@ -107,7 +180,7 @@ void BoDiagramWindow::process()
 		}
 																																						
 		if(maxGas) y1=anarace->getStatisticsHaveGas(s)*75/maxGas; else y1=0;
-		p=Point( 3+anarace->getProgramTime(s)*time, -y1-2);
+		p=Point( 3+anarace->getRealProgramTime(s)*time, -y1-2);
 		// first round
 		if(targetGas[count]==Point(0,0))
 		{
@@ -156,12 +229,92 @@ void BoDiagramWindow::process()
 		}
 	
 		count++;
-//		s--;
-		s++;
+		s--;
+	}
+
+	{
+        int y1;
+        if(maxMins) y1=anarace->getMinerals()*75/maxMins; else y1=0;
+        Point p=Point( getClientRectWidth()-3, -y1-2);
+        if(targetMinerals[count]==Point(0,0))
+        {
+            targetMinerals[count]=p;
+            startMinerals[count]=p;
+            minerals[count]=p;
+        } else
+        if(p!=targetMinerals[count]) {
+            targetMinerals[count]=p;
+            startMinerals[count]=minerals[count];
+        }
+
+        if(maxGas) y1=anarace->getGas()*75/maxGas; else y1=0;
+        p=Point(  getClientRectWidth()-3, -y1-2);
+        // first round
+        if(targetGas[count]==Point(0,0))
+        {
+            targetGas[count]=p;
+            startGas[count]=p;
+            gas[count]=p;
+        } else
+        if(p!=targetGas[count]) {
+            targetGas[count]=p;
+            startGas[count]=gas[count];
+        }
+                                                                                                                                                            
+//TODO anarace->getMaxpFitness-getTimer kann auch 0 sein !! kann es??
+                                                                                                                                                            
+/*      if(anarace->getMaxpFitness()) y1=anarace->getStatisticsFitness(s)*75/(anarace->getMaxpFitness()-anarace->getTimer()); else y1=0;
+        p=Point( 3+((count*(getClientRectWidth()-6))/(anarace->getRealTimer())), -y1);
+        if(p!=targetFitness[count]) {
+            targetFitness[count]=p;
+            startFitness[count]=fitness[count];
+        }       */
+                                                                                                                                                            
+        if(haveSupply) y1=anarace->getHaveSupply()*75/haveSupply; else y1=0;
+        p=Point( getClientRectWidth()-3, -y1-2);
+        if(targetHneedSupply[count]==Point(0,0))
+        {
+            targetHneedSupply[count]=p;
+            startHneedSupply[count]=p;
+            hneedSupply[count]=p;
+        } else
+        if(p!=targetHneedSupply[count]) {
+            targetHneedSupply[count]=p;
+            startHneedSupply[count]=hneedSupply[count];
+		}
+
+        if(haveSupply) y1=anarace->getNeedSupply()*75/haveSupply; else y1=0;
+        p=Point( getClientRectWidth()-3, -y1-2);
+        if(targetNneedSupply[count]==Point(0,0))
+        {
+            targetNneedSupply[count]=p;
+            startNneedSupply[count]=p;
+            nneedSupply[count]=p;
+        } else
+        if(p!=targetNneedSupply[count]) {
+            targetNneedSupply[count]=p;
+            startNneedSupply[count]=nneedSupply[count];
+        }
 	}
 
 //TODO letztes item
-//	count++;
+	count++;
+/*	for(int i = 0; i < count; i++)
+		for(int j = 0; j < i; j++)
+		{
+			if(minerals[i].x < minerals[j].x)
+			{
+				Point temp = minerals[i];
+				minerals[i]=minerals[j];
+				minerals[j]=temp;
+				temp = startMinerals[i];
+				startMinerals[i]=startMinerals[j];
+				startMinerals[j]=temp;
+				temp = targetMinerals[i];
+				targetMinerals[i]=targetMinerals[j];
+				targetMinerals[j]=temp;			
+			}
+		}*/
 
 	for(int i=count;i--;)
 	{
@@ -185,10 +338,10 @@ void BoDiagramWindow::draw(DC* dc) const
 	if(!isShown()) 
 		return;
 	UI_Window::draw(dc);
-	if(infoWindow->isShown())
+//	if(infoWindow->isShown())
 		dc->SetBrush(*theme.lookUpBrush(BODIAGRAM_BACK1));
-	else
-		dc->SetBrush(*theme.lookUpBrush(BODIAGRAM_BACK2));
+//	else
+//		dc->SetBrush(*theme.lookUpBrush(BODIAGRAM_BACK2));
 	dc->DrawRectangle(getAbsoluteClientRectPosition()+Point(0,10), getClientRectSize() - Size(0,10));
 
 	if(count>0)
@@ -217,33 +370,14 @@ void BoDiagramWindow::draw(DC* dc) const
 		
 			dc->SetBrush(*theme.lookUpBrush(BODIAGRAM_SUPPLY_BRUSH));
 			dc->SetPen(*theme.lookUpPen(BODIAGRAM_SUPPLY_PEN));
-			for(unsigned int i=0;i<getClientRectWidth();i++)
+			for(int i = 0;i<(count-1);i++)
 			{
-				int yy1 = getAbsoluteClientRectPosition().y + getClientRectHeight() + hneedSupply[count*i/getClientRectWidth()].y;
-				int yy2 = getAbsoluteClientRectPosition().y + getClientRectHeight() + nneedSupply[count*i/getClientRectWidth()].y;
-/*				if(yy1 < yy2)
-				{
-            		dc->SetPen(*theme.lookUpPen(BODIAGRAM_SUPPLY_PEN));
-					dc->DrawVerticalLine(getAbsoluteClientRectPosition().x+i, yy1, yy2);
-				} else
-				if(yy1 > yy2)
-				{
-                    dc->SetPen(*theme.lookUpPen(MARKED_BITMAP_RED_PEN));
-                    dc->DrawVerticalLine(getAbsoluteClientRectPosition().x+i, yy2, yy1);
-				} else
-                {
-                    dc->SetPen(*theme.lookUpPen(MARKED_BITMAP_RED_PEN));
-                    dc->DrawVerticalLine(getAbsoluteClientRectPosition().x+i, yy1, yy1+1);
-                }*/
-                {
-                    dc->SetPen(*theme.lookUpPen(MARKED_BITMAP_RED_PEN));
-                    dc->DrawVerticalLine(getAbsoluteClientRectPosition().x+i, yy1, getAbsoluteClientRectPosition().y + getClientRectHeight());
-            		dc->SetPen(*theme.lookUpPen(BODIAGRAM_SUPPLY_PEN));
-					dc->DrawVerticalLine(getAbsoluteClientRectPosition().x+i, yy2, getAbsoluteClientRectPosition().y + getClientRectHeight());
-                } 				
-				
+				if(hneedSupply[i].y > nneedSupply[i].y)
+					dc->DrawRectangle(getAbsoluteClientRectPosition() + Point(0, getClientRectHeight()) + hneedSupply[i], Size(hneedSupply[i+1].x - hneedSupply[i].x, hneedSupply[i].y - nneedSupply[i].y));
+				else if(hneedSupply[i].y < nneedSupply[i].y)
+					dc->DrawRectangle(getAbsoluteClientRectPosition() + Point(0, getClientRectHeight()) + hneedSupply[i], Size(hneedSupply[i+1].x - hneedSupply[i].x, nneedSupply[i].y - hneedSupply[i].y));
 			}
-			
+				
 			dc->SetPen(*theme.lookUpPen(BODIAGRAM_MINERALS_PEN));
 			dc->DrawSpline(count, &(minerals[0]), getAbsoluteClientRectPosition()+Point(0,getClientRectHeight()));
 			dc->SetPen(*theme.lookUpPen(BODIAGRAM_GAS_PEN));
@@ -260,30 +394,63 @@ void BoDiagramWindow::draw(DC* dc) const
 			dc->SetTextForeground(*theme.lookUpColor(FITNESS_TEXT_COLOR));
 			dc->DrawText("Fitness",getAbsoluteClientRectPosition()+Point(1,43));
 					
-			if(count>5)
+			#if 0
+			if(count>2)
 			if(isMouseInside())
 			{
 				// TODO this anarace values are one iteration too old compared to mouse position...
-/*				ostringstream os;
+				ostringstream os;
 				dc->SetTextForeground(*theme.lookUpColor(BRIGHT_MINERALS_TEXT_COLOR));
-				os << anarace->getStatisticsHaveMinerals(settings.getGa()->maxTime-(controls.getX()-getAbsoluteClientRectLeftBound())*(anarace->getRealTimer())/getClientRectWidth())/100;
+				unsigned int t = anarace->getRealTimer() * (mouse.x - getAbsoluteClientRectLeftBound()) / getClientRectWidth();
+				unsigned int s = settings.getGa()->maxLength;
+
+
+				
+				while(s > settings.getGa()->maxLength - anarace->getLength())
+				if(anarace->getProgramIsBuilt(s))
+				{
+					if(anarace->getRealProgramTime(s) > t)
+						break;
+					s--;
+				} else s--;
+				// => s, s+1, TODO: Mittelwerte ausrechnen
+	  
+				double anteil = ((double)((double)t - (double)anarace->getRealProgramTime(s))) / ((double)((double)anarace->getRealProgramTime(s+1) - (double)anarace->getRealProgramTime(s)));
+			
+				os << ((signed)anarace->getStatisticsHaveMinerals(s) + anteil * ((signed)anarace->getStatisticsHaveMinerals(s) - (signed)anarace->getStatisticsHaveMinerals(s+1)))/100 << " " << t << " " << anteil;
 				dc->DrawText(os.str(),getAbsoluteClientRectPosition()+Point(50,10));os.str("");
 				
 				dc->SetTextForeground(*theme.lookUpColor(BRIGHT_GAS_TEXT_COLOR));
-				
-				os << anarace->getStatisticsHaveGas(settings.getGa()->maxTime-(controls.getX()-getAbsoluteClientRectLeftBound())*(anarace->getRealTimer())/getClientRectWidth())/100;
+				os << anarace->getStatisticsHaveGas(s)/100;
 				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(50,21));os.str("");
 				
 				dc->SetTextForeground(*theme.lookUpColor(BRIGHT_SUPPLY_TEXT_COLOR));
-
-				int ns=anarace->getStatisticsNeedSupply(settings.getGa()->maxTime-(controls.getX()-getAbsoluteClientRectLeftBound())*(anarace->getRealTimer())/getClientRectWidth());
-				int hs=anarace->getStatisticsHaveSupply(settings.getGa()->maxTime-(controls.getX()-getAbsoluteClientRectLeftBound())*(anarace->getRealTimer())/getClientRectWidth());
+				int ns=anarace->getStatisticsNeedSupply(s);
+				int hs=anarace->getStatisticsHaveSupply(s);
 				
 				os << ns << ":" << hs;
-				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(50,32));*/
+				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(50,32));
+				
+				dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+				dc->SetPen(*theme.lookUpPen(SELECT_PEN));
+				dc->DrawEmptyRectangle( getAbsoluteClientRectLeftBound() + (anarace->getRealProgramTime(s) * getClientRectWidth()) / anarace->getRealTimer() ,getAbsoluteClientRectUpperBound()+10, 4, getClientRectHeight()-10);
+
+				
+	// ------ (soon transparent) BAR WHICH SHOWS WHICH TIME INTERVALL IS LOOKED UPON -----
+/*	if(insideClientRect(controls.getCurrentPosition()))
+	{				
+		int x=controls.getX()-2;
+		if(x<getAbsoluteClientRectLeftBound())
+			x=getAbsoluteClientRectLeftBound();
+		if(x+4>=getAbsoluteClientRectRightBound())
+			x=getAbsoluteClientRectRightBound()-5;
+	}*/
+// ----- END BAR -----			
 			}
+			#endif
 			dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
 		}
+		#if 0 
 		if(infoWindow->isShown())
 		{
 			if(stats[(*anarace->getStartCondition())->getRace()][infoWindow->getUnit()].needSupply)
@@ -320,19 +487,8 @@ void BoDiagramWindow::draw(DC* dc) const
 						 getAbsoluteClientRectUpperBound()+10,
 						 getAbsoluteClientRectLowerBound());
 		}
+		#endif
 
-// ------ (soon transparent) BAR WHICH SHOWS WHICH TIME INTERVALL IS LOOKED UPON -----
-/*	if(insideClientRect(controls.getCurrentPosition()))
-	{				
-		int x=controls.getX()-2;
-		if(x<getAbsoluteClientRectLeftBound())
-			x=getAbsoluteClientRectLeftBound();
-		if(x+4>=getAbsoluteClientRectRightBound())
-			x=getAbsoluteClientRectRightBound()-5;
-//		dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
-		dc->SetPen(*theme.lookUpPen(SELECT_PEN));
-		dc->DrawEmptyRectangle(x,getAbsoluteClientRectUpperBound()+10,4,getClientRectHeight()-10);
-	}*/
-// ----- END BAR -----
+
 }
 

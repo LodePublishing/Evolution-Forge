@@ -1,4 +1,7 @@
 #include "settings.hpp"
+#include "../ui/object.hpp"
+
+// TODO in theme rein oder so
 
 SETTINGS::SETTINGS():
 	loadedMap(),
@@ -13,8 +16,7 @@ SETTINGS::SETTINGS():
 }
 
 SETTINGS::~SETTINGS()
-{
-}
+{ }
 
 SETTINGS settings;
 
@@ -228,7 +230,7 @@ void SETTINGS::loadGoalFile(const string& goalFile)
 						l++;int count=atoi(l->c_str());
 						l++;int location=atoi(l->c_str());
 						l++;int time=atoi(l->c_str());
-						goal.addGoal(unit, count, 60*time, location);
+						goal.addGoal(unit, count, time, location);
 					}
 				}
 			}
@@ -572,6 +574,115 @@ void SETTINGS::loadStartconditionFile(const string& startconditionFile)
 // ------ END OF FILE LOADING ------
 // ---------------------------------
 
+// FILE SAVING
+
+
+void SETTINGS::saveBuildOrder(const ANARACE* anarace) const
+{
+    ostringstream os;
+    os << "output/bos/";
+    os << raceString[anarace->getRace()] << "/bo" << rand()%100 << ".html";// TODO!
+    ofstream pFile(os.str().c_str(), ios_base::out | ios_base::trunc);
+    if(!pFile.is_open())
+    {
+        toLog("ERROR: Could not create file (write protection? disk space?)");
+        return;
+    }
+pFile << "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">" << std::endl;
+pFile << "<html>" << std::endl;
+pFile << "<head>" << std::endl;
+pFile << "  <meta content=\"text/html; charset=ISO-8859-1\"" << std::endl;
+pFile << " http-equiv=\"content-type\">" << std::endl;
+pFile << "  <title>Build order list</title>" << std::endl;
+pFile << "</head>" << std::endl;
+pFile << "<body alink=\"#000099\" vlink=\"#990099\" link=\"#000099\" style=\"color: rgb("<< (int)UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR)->r() << ", " << (int)UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR)->g() << ", " << (int)UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR)->b() << "); background-color: rgb(" << (int)UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColor()->r() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColor()->g() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColor()->b() << ");\">" << std::endl;
+pFile << "<div style=\"text-align: center;\"><big style=\"font-weight: bold;\"><big>Evolution Forge BETA Demo 1.59</big></big><br><br>" << std::endl;
+pFile << "<big>Buildorder list</big><br>" << std::endl;
+pFile << "</div>" << std::endl;
+pFile << "<br>" << std::endl;
+pFile << "<table style=\"background-color: rgb(" << (int)UI_Object::theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH)->GetColor()->r() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH)->GetColor()->g() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH)->GetColor()->b() << "); text-align: center; vertical-align: middle; width: 600px; margin-left: auto; margin-right: auto;\""<< std::endl;
+pFile << " border=\"1\" cellspacing=\"0\" cellpadding=\"1\">" << std::endl;
+pFile << "  <tbody>" << std::endl;
+pFile << "    <tr>" << std::endl;
+pFile << "      <td style=\"text-align: center; vertical-align: middle; width: 200px;\">Unitname<br>" << std::endl;
+pFile << "      </td>" << std::endl;
+pFile << "      <td style=\"text-align: center; vertical-align: middle; width: 75px;\">Supply</td>" << std::endl;
+pFile << "      <td style=\"text-align: center; vertical-align: middle; width: 75px;\">Minerals<br>" << std::endl;
+pFile << "      </td>" << std::endl;
+pFile << "      <td style=\"text-align: center; vertical-align: middle; width: 75px;\">Gas<br>" << std::endl;
+pFile << "      </td>" << std::endl;
+pFile << "      <td style=\"text-align: center; vertical-align: middle; width: 100px;\">Location<br>" << std::endl;
+pFile << "      </td>" << std::endl;
+pFile << "      <td style=\"text-align: center; vertical-align: middle; width: 75px;\">Time<br>" << std::endl;
+pFile << "      </td>" << std::endl;
+pFile << "    </tr>" << std::endl;
+
+for(int i = MAX_LENGTH;i--;)
+	if(anarace->getProgramIsBuilt(i))
+	{
+pFile << "    <tr style=\"text-align: center; vertical-align: middle; background-color: rgb(" << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][anarace->getPhaenoCode(i)].unitType))->GetColor()->r() << ", " << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][anarace->getPhaenoCode(i)].unitType))->GetColor()->g() << ", " << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][anarace->getPhaenoCode(i)].unitType))->GetColor()->b() << ");\">" << std::endl;
+
+pFile << "      <td style=\"\">" << stats[anarace->getRace()][anarace->getPhaenoCode(i)].name << "<br>" << std::endl;
+pFile << "      </td>" << std::endl;
+
+pFile << "      <td style=\"\">" << anarace->getStatisticsNeedSupply(i) << "/" << anarace->getStatisticsHaveSupply(i) << "<br>" << std::endl;
+pFile << "      </td>" << std::endl;
+
+pFile << "      <td style=\"\">" << anarace->getStatisticsHaveMinerals(i)/100 << "<br>" << std::endl;
+pFile << "      </td>" << std::endl;
+
+pFile << "      <td style=\"\">" << anarace->getStatisticsHaveGas(i)/100 << "<br>" << std::endl;
+pFile << "      </td>" << std::endl;
+
+pFile << "      <td style=\"\">" << (*anarace->getMap())->getLocation(anarace->getProgramLocation(i))->getName() << "<br>" << std::endl;
+pFile << "      </td>" << std::endl;
+
+if(anarace->getRealProgramTime(i)%60>9)
+{
+pFile << "      <td style=\"\">" << anarace->getRealProgramTime(i)/60 << ":" << anarace->getRealProgramTime(i)%60 << "<br>" << std::endl;
+pFile << "      </td>" << std::endl;
+} else
+{
+pFile << "      <td style=\"\">" << anarace->getRealProgramTime(i)/60 << ":0" << anarace->getRealProgramTime(i)%60 << "<br>" << std::endl;
+pFile << "      </td>" << std::endl;
+}
+                                                                                                   
+pFile << "    </tr>" << std::endl;
+}
+
+pFile << "  </tbody>" << std::endl;
+pFile << "</table>" << std::endl;
+pFile << "<br>" << std::endl;
+pFile << "</body>" << std::endl;
+pFile << "</html>" << std::endl;
+}
+
+void SETTINGS::saveGoal(const GOAL_ENTRY* goalentry)
+{
+	ostringstream os;
+	os << "settings/goals/";
+	os << raceString[goalentry->getRace()] << "/goal" << rand()%100 << ".gol";// TODO!
+    ofstream pFile(os.str().c_str(), ios_base::out | ios_base::trunc);
+    if(!pFile.is_open())
+    {
+        toLog("ERROR: Could not create file (write protection? disk space?)");
+        return;
+	}
+
+	pFile << "@GOAL" << std::endl;
+	pFile << "        \"Name\" \"" << os.str() << "\"" << std::endl; // TODO
+	pFile << "        \"Race\" \"" << raceString[goalentry->getRace()] << "\"" << std::endl;
+
+    for(std::list<GOAL>::const_iterator i = goalentry->goal.begin(); i!=goalentry->goal.end(); i++)
+//    bool first=true;
+  //  while(goalentry->getNextGoal(i, first))
+    {
+//        first=false;
+		pFile << "        \"" << stats[goalentry->getRace()][i->getUnit()].name << "\" \"" << i->getCount() << "\" \"" << i->getLocation() << "\" \"" << i->getTime() << "\"" << std::endl;		
+	}
+	
+	pFile << "@END" << std::endl;
+}
 
 // -------------------------------
 // ------ GET/SET FUNCTIONS ------

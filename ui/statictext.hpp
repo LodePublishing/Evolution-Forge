@@ -34,6 +34,12 @@ class UI_StaticText:public UI_Object
 		void setColor(const eColor st_color);
 		void setFont(const eFont st_font);
 		void updateText(const string& st_text);
+		void addChar(const char key);
+		void removeChar();
+
+// for formatted Text:
+		const bool doneWriting() const; 
+		
 		UI_Object* checkHighlight();
 		void updateText(const eString st_text);
 		
@@ -41,12 +47,19 @@ class UI_StaticText:public UI_Object
         void process();
 
 		const Size getTextSize() const;
+
+//		const bool isEditable() const; // mouse change, clickable etc.
+//		void setEditable(const bool editable=true); 
 	protected:
         eTextMode  mode; 
     private:
+//		bool editable;
+		
 		string text;
         eFont font;
         Color color;
+		unsigned int position;
+		
 };
 
 #endif // _UI_STATICTEXT_HPP

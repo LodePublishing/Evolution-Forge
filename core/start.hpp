@@ -2,7 +2,7 @@
 #define _CORE_START_HPP
 
 #include "basicmap.hpp"
-#include "goal.hpp"
+#include "goalentry.hpp"
 #include "startcondition.hpp"
 #include "harvest.hpp"
 

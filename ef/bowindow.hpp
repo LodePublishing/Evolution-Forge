@@ -63,8 +63,9 @@ class BoWindow:public UI_Window
 		unsigned int lastBogoal;
 
 		UI_Button* resetButton;
+		UI_Button* saveBuildOrderButton;
 
-		NumberField* speed;
+//		NumberField* speed;
 };
 
 #endif // _GUI_BOWINDOW_HPP

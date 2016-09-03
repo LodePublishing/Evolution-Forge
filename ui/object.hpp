@@ -3,6 +3,7 @@
 
 #include "theme.hpp"
 
+class UI_StaticText;
 
 class UI_Object
 {
@@ -202,9 +203,9 @@ class UI_Object
 		signed int getMinBottomRightX() const { return min_bottom_right_x;};
 
 	
-	
-
+		static unsigned int mouseType;
 		static Point mouse;
+		static UI_StaticText* editTextFeld; //~~
 
 //		const bool setFocus(); TODO
 	protected:

@@ -68,6 +68,11 @@ void Menu::close()
 	menuLevel=0;
 }
 
+const signed int Menu::getMarkedItem() const
+{
+	return(markedItem);
+}
+
 void Menu::process()
 {
 	UI_Object::process();

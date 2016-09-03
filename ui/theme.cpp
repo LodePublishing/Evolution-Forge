@@ -148,8 +148,8 @@ UI_Theme::~UI_Theme()
 			delete colorList[i][j];
 		for(int j = MAX_RESOLUTIONS;j--;)
 		{
-			for(int k = MAX_BITMAPS;k--;)
-				delete bitmapList[i][j][k];
+//			for(int k = MAX_BITMAPS-2;k--;) // !!! TODO
+//				delete bitmapList[i][j][k];
 	 		for(int k = MAX_PENS;k--;)
 				delete penList[i][j][k];
 		}
@@ -523,7 +523,8 @@ const eTab getTabSubDataEntry(const string& item)
 	if(item=="@ADVANCED_TAB") return(ADVANCED_TAB);else
 	if(item=="@EXPERT_TAB") return(EXPERT_TAB);else
 	if(item=="@GOSU_TAB") return(GOSU_TAB);else
-	if(item=="@TRANSCENDEND_TAB") return(TRANSCENDEND_TAB);else
+	
+	if(item=="@COMPARE_TAB") return(COMPARE_TAB);else
 	if(item=="@MAP_TAB") return(MAP_TAB);else
 	if(item=="@SETTINGS_TAB") return(SETTINGS_TAB);else
 	if(item=="@TUTORIAL_TAB") return(TUTORIAL_TAB);else
@@ -952,7 +953,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 #endif
 							bitmapList[current_resolution][current_theme][current_line]=new Bitmap(t);
 							
-							SDL_SetColorKey(dc->GetSurface(), SDL_SRCCOLORKEY , SDL_MapRGB(bitmapList[current_resolution][current_theme][current_line]->getFormat(), 255, 255, 255));
+							SDL_SetColorKey(bitmapList[current_resolution][current_theme][current_line]->getSurface(), SDL_SRCCOLORKEY , SDL_MapRGB(bitmapList[current_resolution][current_theme][current_line]->getFormat(), 0,0,0));
 		
 						}break;
 					case PEN_DATA_TYPE:penList[current_resolution][current_theme][current_line]=new Pen(dc->GetSurface(),v[1],v[2],v[3],v[0],get_pen_style(p[4]));break;

@@ -205,7 +205,8 @@ void PRERACE::adjustLocationUnitsAfterCompletion(const unsigned int location, co
 			if(facility2) // special rule for upgrades!
 			{
 				removeOneLocationTotal(GLOBAL, facility2);
-				addOneLocationAvailible(GLOBAL, facility2);
+				if(getLocationTotal(GLOBAL, facility2) > 0)
+					addOneLocationAvailible(GLOBAL, facility2);
 			}
 			break;
 		case NEEDED_ALWAYS:break;
@@ -312,66 +313,67 @@ const unsigned int PRERACE::calculatePrimaryFitness(const bool ready)
 			for(int j=UNIT_TYPE_COUNT;j--;)
 				bonus[i][j]=0;
 // ------ END BONUSSYSTEM INIT ------
-		std::list<GOAL>::const_iterator i;
-		bool first=true;
-		while((*pGoal)->getNextGoal(i, first))
+
+//				bool first=true;
+		for(std::list<GOAL>::const_iterator i = (*pGoal)->goal.begin(); i!= (*pGoal)->goal.end(); i++)
+//		while((*pGoal)->getNextGoal(i, first))
 		{
-			first=false;
+//			first=false;
 // ------ NOT ENOUGH UNITS BUILD OF THIS TYPE? -------
-				if(i->count>getLocationTotal(i->location,i->unit))
+				if(i->getCount() > getLocationTotal(i->getLocation(), i->getUnit()))
 				{
 // ------ ADD TO MAX BONUS -----
-					bonus[i->location][i->unit]+=i->count-getLocationTotal(i->location, i->unit);
+					bonus[i->getLocation()][i->getUnit()]+=i->getCount()-getLocationTotal(i->getLocation(), i->getUnit());
 					//total points: (Am Ort befindliche Einheiten + (Summe aller Locations(100-distance)/100)) / Goalcount
 					//TODO: Absteigen und markieren der benutzten wbfs! Also zuerst die eigentliche location abchecken, dann nach links und rechts die naehesten hinzuziehen
 					//evtl direkt von den locations die wbfs erstmal abziehen und am Schluss nochmal alle goals durchlaufen und den Rest verteilen!
 					int sumup=0;
 // location 0? Dann ist es trivial
-					if(i->location==0)
-						sumup=getLocationTotal(0, i->unit)*100;
+					if(i->getLocation()==0)
+						sumup=getLocationTotal(0, i->getUnit())*100;
 					else
 					{
 				// location != 0 ? Dann schaun wir mal, ob wir auf der Karte noch wo Units verstreut haben
 				// mehr als goalcount koennen wir keinen Bonus vergeben
 						int j=1;
-						unsigned int bon=i->count;
-						unsigned int loc=(*pMap)->getLocation(i->location)->getNearest(j);
-						while((j<MAX_LOCATIONS) && (bon>getLocationTotal(loc, i->unit)))
+						unsigned int bon = i->getCount();
+						unsigned int loc=(*pMap)->getLocation(i->getLocation())->getNearest(j);
+						while((j<MAX_LOCATIONS) && (bon>getLocationTotal(loc, i->getUnit())))
 						{
-							sumup+=getLocationTotal(loc, i->unit)*(100-(*pMap)->getLocation(loc)->getDistance(i->location)); //was pMap->location[j]...
-							bon-=getLocationTotal(loc, i->unit);
+							sumup+=getLocationTotal(loc, i->getUnit())*(100-(*pMap)->getLocation(loc)->getDistance(i->getLocation())); //was pMap->location[j]...
+							bon-=getLocationTotal(loc, i->getUnit());
 							j++;
 						}
 						// Falls j<MAX_LOCATIONS => unser "Bon" wurde schon vorher aufgebraucht => An dieser Stelle j den Rest draufgeben... 
 						if(j<MAX_LOCATIONS)
-							sumup+=bon*(100-(*pMap)->getLocation(loc)->getDistance(i->location));
+							sumup+=bon*(100-(*pMap)->getLocation(loc)->getDistance(i->getLocation()));
 					}
 
 //jetzt steht in sumup die gesammelten totals gewichtet mit den Entfernungen zum Ziel
 										//TODO: Hier gibts Probleme wenn mehrere goals gleicher Units an unterschiedlichen Orten existieren...
 										// evtl funktionsglobales bonus System wie bei den '@' in scc.cpp einfuegen
 										// bissl komplex da mans ja den einzelnen goals verteilen muss...
-					if((i->time>0)&&(i->finalTime>i->time))
+					if((i->getTime()>0)&&(i->getFinalTime()>i->getTime()))
 //					{
 //						if(getFinalTime(i)>0) //??? TODO
-//						if(getFinalTime(i)>i->time)
-						tpF+=(i->time*sumup)/(i->count*i->finalTime);
-//						else setpFitness(getpFitness()+sumup/i->count);
+//						if(getFinalTime(i)>i->getTime())
+						tpF+=(i->getTime()*sumup)/(i->getCount()*i->getFinalTime());
+//						else setpFitness(getpFitness()+sumup/i->getCount());
 //TODO...~~~
 //						else while(true); // <- kann eigentlich nicht auftreten!
-//						  setpFitness(getpFitness()+(i->time*sumup)/(i->count*ga->maxTime));
+//						  setpFitness(getpFitness()+(i->getTime()*sumup)/(i->getCount()*ga->maxTime));
 //					  }
 					else
-						tpF+=sumup/i->count;
+						tpF+=sumup/i->getCount();
 				} // END total < goal
 				else
-//if( /*((i->location==0)&&(i->count<=getLocationTotal(0,i->unit))) || ( (i->location>0)&&*/(i->count<=getLocationTotal(i->location,i->unit)))
+//if( /*((i->getLocation()==0)&&(i->getCount()<=getLocationTotal(0,i->getUnit()))) || ( (i->getLocation()>0)&&*/(i->getCount()<=getLocationTotal(i->getLocation(),i->getUnit())))
 								//total >= goal ?
 				{
 // Checken wann wir das Ziel erreicht haetten
-					if((i->time>0)&&(i->finalTime>i->time))
+					if((i->getTime()>0)&&(i->getFinalTime()>i->getTime()))
 // aha, wir haben die Zeit ueberschritten => trotzdem anteilig Bonus geben
-						tpF+=(i->time*100/i->finalTime);
+						tpF+=(i->getTime()*100/i->getFinalTime());
 // keine Zeitbeschraenkung + wir haben genuegend Einheiten am Zielort => gg
 					else tpF+=100;
 // does not work yet, if this is uncommented, sFitness occasionally jumps to -1222000 or something like that... :/
@@ -413,11 +415,11 @@ const unsigned int PRERACE::calculatePrimaryFitness(const bool ready)
 		tpF+=(*pGoal)->countGoals()*100;
 //		for(list<GOAL>::const_iterator i = (*pGoal)->goal.begin();i!=(*pGoal)->goal.end();++i)
 //				{
-//						if(i->count>0)
+//						if(i->getCount()>0)
 //								tpF+=100;
-/*					  if((i->unit!=GAS_SCV)&&(i->unit!=SCV)) //do not punish 'too much' workers!
-								if(i->count<getLocationTotal(i->location,i->unit))
-										setsFitness(getsFitness()+(-getLocationTotal(i->location,i->unit)+i->count)*(stats[(*pGoal)->getRace()][i->unit].minerals+stats[(*pGoal)->getRace()][i->unit].gas));*/
+/*					  if((i->getUnit()!=GAS_SCV)&&(i->getUnit()!=SCV)) //do not punish 'too much' workers!
+								if(i->getCount()<getLocationTotal(i->getLocation(),i->getUnit()))
+										setsFitness(getsFitness()+(-getLocationTotal(i->getLocation(),i->getUnit())+i->getCount())*(stats[(*pGoal)->getRace()][i->getUnit()].minerals+stats[(*pGoal)->getRace()][i->getUnit()].gas));*/
 //				}
 	}
 	return(tpF);

@@ -1,475 +1,135 @@
 #include "goal.hpp"
 
-GOAL_ENTRY::GOAL_ENTRY():
-	number(0),
-	name("ERROR"),
-	race(TERRA),
-	maxBuildTypes(0),
-	pStats(NULL),
-	changed(false),
-	raceInitialized(false),
-	goal()	
-{
-	resetData();
-}
+#include "defs.hpp"
 
-GOAL_ENTRY::GOAL_ENTRY(const GOAL_ENTRY& object) :
-    number(object.number),
-    name(object.name),
-    race(object.race),
-    maxBuildTypes(object.maxBuildTypes),
-    pStats(object.pStats),
-    changed(object.changed),
-    raceInitialized(object.raceInitialized),
-    goal(object.goal) // optimize?
-{
-    for(int i=UNIT_TYPE_COUNT;i--;)
-    {
-        genoToPhaenotype[i]=object.genoToPhaenotype[i];
-        phaenoToGenotype[i]=object.phaenoToGenotype[i];
-        allGoal[i]=object.allGoal[i];
-        isVariable[i]=object.isVariable[i];
-        isBuildable[i]=object.isBuildable[i];
-        for(int j=MAX_LOCATIONS;j--;)
-            globalGoal[j][i]=object.globalGoal[j][i];
-    }
-}
+GOAL::GOAL() :
+	unit(0),
+	time(0),
+	count(0),
+	location(0),
+	finalTime(0)
+{ }
 
-GOAL_ENTRY& GOAL_ENTRY::operator=(const GOAL_ENTRY& object)
+GOAL::~GOAL()
+{ }
+
+GOAL::GOAL(const GOAL& object) :
+	unit(object.unit),
+	time(object.time),
+	count(object.count),
+	location(object.location),
+	finalTime(object.finalTime)
+{ }
+
+
+GOAL& GOAL::operator=(const GOAL& object)
 {
-    number = object.number;
-    name = object.name;
-    race = object.race;
-    maxBuildTypes = object.maxBuildTypes;
-    pStats = object.pStats;
-    changed = object.changed;
-    raceInitialized = object.raceInitialized;
-	this->goal.clear();
-    for(std::list<GOAL>::const_iterator i = object.goal.begin();i!=object.goal.end();++i)
-        this->goal.push_back(*i); // optimize?
-    //goal = object.goal; // optimize?
-    for(int i=UNIT_TYPE_COUNT;i--;)
-    {
-        genoToPhaenotype[i]=object.genoToPhaenotype[i];
-        phaenoToGenotype[i]=object.phaenoToGenotype[i];
-        allGoal[i]=object.allGoal[i];
-        isVariable[i]=object.isVariable[i];
-        isBuildable[i]=object.isBuildable[i];
-        for(int j=MAX_LOCATIONS;j--;)
-            globalGoal[j][i]=object.globalGoal[j][i];
-    }
+	unit = object.unit;
+	time = object.time;
+	count = object.count;
+	location = object.location;
+	finalTime = object.finalTime;
 	return(*this);
 }
 
-GOAL_ENTRY::~GOAL_ENTRY()
-{
-}
-
-void GOAL_ENTRY::resetData()
-{
-//	mode=0;
-	raceInitialized=false;
-	maxBuildTypes=0;
-	for(int i=UNIT_TYPE_COUNT;i--;)
-	{
-		genoToPhaenotype[i]=999;
-		phaenoToGenotype[i]=999;
-		allGoal[i]=0;
-		isVariable[i]=0;
-		isBuildable[i]=0;
-		for(int j=MAX_LOCATIONS;j--;)
-			globalGoal[j][i]=0;
-	}
-//	initialized=true;
-}
-
-const unsigned int GOAL_ENTRY::countGoals() const
-{
-	int goalNum=0;
-	for(std::list<GOAL>::const_iterator i = goal.begin(); i!=goal.end();++i)
-		if(i->count>0)
-			goalNum++;
-	return(goalNum);
-	// TODO evtl bei addGoal mitprotokollieren
-}
-
-const bool GOAL_ENTRY::calculateReady(const UNIT* units) const
-{
-    bool ready=true;
-    for(std::list<GOAL>::const_iterator i = goal.begin(); (i!=goal.end())&&(ready); ++i)
-        if(i->count)
-            ready&=( (i->count <= units[i->location].getTotal(i->unit)) && ((i->time==0) || (i->time>=i->finalTime)) );
-    return(ready);
-}
-
-const bool GOAL_ENTRY::getNextGoal(std::list<GOAL>::const_iterator& current, const bool first) const
-{
-	if(first)
-		current=goal.begin();
-	else 
-	{
-		++current;
-		while((current!=goal.end())&&(current->count==0))
-			++current;
-	}
-	if(current==goal.end()) return(false);
-	else return(true);
-}	
-
-void GOAL_ENTRY::calculateFinalTimes(const unsigned int location, const unsigned int unit, const unsigned int time)
-{
-    for(std::list<GOAL>::iterator i=goal.begin();i!=goal.end();++i)
-    {
-// ist dieses goal belegt?
-        if(( i->unit>0 )&&
-// befinden wir uns am richtigen Ort?
-          (( i->location==0 )||( i->location == location))&&
-// und untersuchen wir das zum Unittype gehoerende Goal?
-            ( i->unit == unit ) )
-              i->finalTime = time;
-    }
-}
-
-const unsigned int GOAL_ENTRY::getAllGoal(const unsigned int unit) const
+void GOAL::setUnit(const unsigned int goal_unit)
 {
 #ifdef _SCC_DEBUG
-	if(unit>GAS_SCV) {
-		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value unit out of range.");return(0);
-    }
-	if(allGoal[unit]>200) {
-		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Variable allGoal out of range.");return(0);
-    }	
-#endif
-	return(allGoal[unit]);		
-}
-
-const unsigned int GOAL_ENTRY::getGlobalGoal(const unsigned int location, const unsigned int unit) const
-{
-#ifdef _SCC_DEBUG
-	if(location>=MAX_LOCATIONS) {
-		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value location out of range.");return(0);
-    }
-	if(unit>GAS_SCV) {
-		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value unit out of range.");return(0);
-    }
-	if(globalGoal[location][unit]>200) {
-		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Variable globalGoal out of range.");return(0);
-    }	
-#endif
-	return(globalGoal[location][unit]);		
-}
-const bool GOAL_ENTRY::getIsBuildable(const unsigned int unit) const
-{
-#ifdef _SCC_DEBUG
-	if(unit>GAS_SCV) {
-		toLog("DEBUG: (GOAL_ENTRY::getIsBuildable): Value unit out of range.");return(false);
+    if((goal_unit >= UNIT_TYPE_COUNT)) {
+         toLog("DEBUG: (GOAL::setUnit): Value goal_unit out of range.");return;
     }
 #endif
-	return(isBuildable[unit]);		
+	unit = goal_unit;
 }
 
-// TODO 
-
-void GOAL_ENTRY::copy(const GOAL_ENTRY* goal_entry)
-{
-	*this = *goal_entry;
-}
-
-
-
-void GOAL_ENTRY::setRace(const eRace race)
-{
-	resetData();	
-	pStats=&(stats[this->race=race][0]);
-	raceInitialized=true;
-	changed=true;
-}
-
-void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
-{
-    for(int i=UNIT_TYPE_COUNT;i--;)
-	{
-		genoToPhaenotype[i]=999;
-		phaenoToGenotype[i]=999;
-		isVariable[i]=0; //?
-		isBuildable[i]=0;
-	}
-	maxBuildTypes=0;
-
-	// if free-mode  set all isbuildable to 1
-// else ...
-	int oldGoal[UNIT_TYPE_COUNT]; //goals we got from the user which we MAY NOT ignore
-	for(int i=UNIT_TYPE_COUNT;i--;) {
-		oldGoal[i]=allGoal[i];
-	}
-//	fill(oldGoal)
-//TODO: Reset hier rein!
-	
-//		isBuildable[MOVE_ONE_1_FORWARD]=1;isVariable[MOVE_ONE_1_FORWARD]=1;
-  //	  isBuildable[MOVE_ONE_3_FORWARD]=1;isVariable[MOVE_ONE_3_FORWARD]=1;
-	//	isBuildable[MOVE_ONE_1_BACKWARD]=1;isVariable[MOVE_ONE_1_BACKWARD]=1;
-		  //isBuildable[INTRON]=1; // :-)
-	if(unit);
-/*		for(int i=GAS_SCV+1;i--;) TODO
-			if(unit->getTotal(i))
-			{
-				if(allGoal[i]<unit->getTotal(i))
-					addGoal(i, unit->getTotal(i)-allGoal[i], 0, 0);
-			}*/
-	//TODO addgoal evtl machen hier!
-
-	for(int j=6;j--;) // Nuclear Warhead needs 6 steps (?) ~~~~
-		for(int i=UNIT_TYPE_COUNT;i--;)
-			if((allGoal[i])||(isBuildable[i]))
-			{
-				if((i==GAS_SCV)&&(allGoal[REFINERY]==0))
-					addGoal(REFINERY,1,0,0); //~~
-				isBuildable[i]=1;
-				//gather all prerequisites and mark them as goals
-				for(int k=0;k<3;k++)
-					if((pStats[i].prerequisite[k]>0)&&(allGoal[pStats[i].prerequisite[k]]==0))
-						addGoal(pStats[i].prerequisite[k],1,0,0);
-				if((pStats[i].facility2>0)&&(allGoal[pStats[i].facility2]==0)&&(pStats[i].facilityType!=NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE)&&(pStats[i].facilityType!=NEEDED_UNTIL_COMPLETE_IS_LOST))
-				{
-					isVariable[pStats[i].facility2]=1;
-					if(pStats[i].facilityType!=IS_LOST) //do not set those morph-facilities as goals...
-						addGoal(pStats[i].facility2,1,0,0);
-					else isBuildable[pStats[i].facility2]=1;// ... but make them buildable :)
-				}
-				if((pStats[i].facility[0]>0)&&(allGoal[pStats[i].facility[0]]==0)&&((pStats[i].facility[1]==0)||(allGoal[pStats[i].facility[1]]==0))&&((pStats[i].facility[2]==0)||(allGoal[pStats[i].facility[2]]==0)))
-// only facility[0] is important
-				{
-					isVariable[pStats[i].facility[0]]=1;
-					if((pStats[i].facilityType==NEEDED_ONCE)||(pStats[i].facilityType==NEEDED_UNTIL_COMPLETE)||(pStats[i].facilityType==NEEDED_ALWAYS))
-						addGoal(pStats[i].facility[0],1,0,0);
-					else isBuildable[pStats[i].facility[0]]=1; // ... same as above...
-				}
-			}
-
-//	now recheck whether we got too many goals
-//	>_<
-//	alle durchlaufen
-//	jeweils alle facilities von rechts nach links anguggn
-//	sobald eins gefunden das Teil der goals ist, alle weiter links streichen (aber buildable lassen)
-	for(int i=UNIT_TYPE_COUNT;i--;)
-		if((allGoal[i]>0)||(isBuildable[i]>0))
-		{
-			for(int j=3;j--;)
-				if(allGoal[pStats[i].facility[j]]>0)
-				{
-					for(int k=0;k<j;k++)
-					{
-						if(allowGoalAdaption) allGoal[pStats[i].facility[k]]=0;//~~
-						else allGoal[pStats[i].facility[k]]=oldGoal[pStats[i].facility[k]];
-					}
-					j=0;
-				}
-			isBuildable[pStats[i].create]=0; //~~
-			isVariable[pStats[i].create]=0;
-		}
-	
-		long Need_Gas=0;
-		for(int i=UNIT_TYPE_COUNT;i--;)
-			Need_Gas+=(allGoal[i]*pStats[i].gas);
-		if(Need_Gas>0)
-		{
-				isBuildable[REFINERY]=1;
-				if(allGoal[REFINERY]==0)
-					   addGoal(REFINERY,1,0,0); //ASSIMILATOR == EXTRACTOR == REFINERY
-				isBuildable[GAS_SCV]=1; //ONE_MINERAL_SCV... = ONE_MINERAL_PROBE... = ONE_MINERAL_DRONE...
-				isVariable[GAS_SCV]=1;
-		} 
-
-	switch(getRace())
-	{
-		case TERRA:isBuildable[SUPPLY_DEPOT]=1;isVariable[SUPPLY_DEPOT]=1;break;
-		case PROTOSS:isBuildable[PYLON]=1;isVariable[PYLON]=1;break;
-		case ZERG:isBuildable[OVERLORD]=1;isVariable[OVERLORD]=1;isBuildable[LARVA]=0;isVariable[LARVA]=0;break;
-		default:break;
-	}
-
-	for(int i=UNIT_TYPE_COUNT;i--;)
-		if((isBuildable[i]==1)&&(phaenoToGenotype[i]==999)) // a goal && not set yet
-		{
-			genoToPhaenotype[maxBuildTypes]=i;
-			phaenoToGenotype[i]=maxBuildTypes;
-			maxBuildTypes++;
-		}
-
-	// hack for unit who cannot be built but needs to be translated by phaenoToGenotype! (for the forcewindow)
-	if(getRace()==ZERG)
-	{
-		genoToPhaenotype[maxBuildTypes]=LARVA;
-		phaenoToGenotype[LARVA]=maxBuildTypes;
-		// further unit need to temporarily increment maxBuildTypes
-	}
-
-	//TODO: ueberlegen ob nicht einfach Move+ und Move- reichen...
-}
-
-// -------------------------------
-// ------ SET/GET FUNCTIONS ------
-// -------------------------------
-
-const UNIT_STATISTICS* GOAL_ENTRY::getpStats() const
+void GOAL::setTime(const unsigned int goal_time)
 {
 #ifdef _SCC_DEBUG
-	if(pStats==NULL) {
-		toLog("DEBUG: (GOAL_ENTRY::getpStats): Variable pStats not initialized.");return(0);
-	}
-#endif
-	return(pStats);
-}
-
-void GOAL_ENTRY::addGoal(const unsigned int unit, const signed int count, const unsigned int time, const unsigned int location)
-{
-#ifdef _SCC_DEBUG
-	if(unit>=UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value unit out of range.");return;
-	}
-	if(globalGoal[location][unit] + count>MAX_TOTAL_UNITS) {
-		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value count out of range.");return;
-	}
-	if(time>=MAX_TIME) {
-		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value time out of range.");return;
-	}
-	if(location>=MAX_LOCATIONS) {
-		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value location out of range.");return;
-	}
-#endif
-//TODO goal loeschen einbauen
-	if((race==ZERG)&&(unit==LARVA))
-		return;
-	allGoal[unit]+=count;
-	if(allGoal[unit]==0)
-	{
-		isBuildable[unit]=0;
-		isVariable[unit]=0;
-	}
-
-	globalGoal[location][unit]+=count;
-
-	bool found=false;
-	// TODO wenn Einheiten an mehreren verschiedenen Positionen und location 0 geloescht wird aufsammeln!!
-	for(std::list<GOAL>::iterator i=goal.begin(); (i!=goal.end())&&(!found); ++i)
-	{
-		if((i->unit==unit)&&(i->time==time)&&(i->location==location)) {
-			i->count += count;
-			found=true;
-			if(i->count == 0)
-				i = goal.erase(i);
-			break;
-		}
-	}
-	// neue goal erstellen
-	if(!found)
-	{
-		GOAL new_goal;
-		new_goal.unit=unit;
-		new_goal.time=time;
-		new_goal.location=location;
-		new_goal.count=count;
-		new_goal.finalTime=0;
-		goal.push_back(new_goal);
-	}
-	changed=true;
-}
-
-const bool GOAL_ENTRY::isGoal(const unsigned int unit) const
-{
-#ifdef _SCC_DEBUG
-	if(unit>=UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (GOAL_ENTRY::isGoal): Value unit out of range.");return(0);
-	}
-	// TODO UNIT_TYPE_COUNT ist nicht obere Grenze fuer Zahl der Units...
-	if(allGoal[unit]>=MAX_TOTAL_UNITS) {
-		toLog("DEBUG: (GOAL_ENTRY::isGoal): Variable allGoal not initialized.");return(0);
-	}
-#endif
-	return(allGoal[unit]>0);
-}
-const unsigned int GOAL_ENTRY::getMaxBuildTypes() const
-{
-#ifdef _SCC_DEBUG
-	if(maxBuildTypes > UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (GOAL_ENTRY::getMaxBuildTypes): Variable not initialized.");return(0);
-	}
-#endif
-	return(maxBuildTypes);
-}
-
-/*const bool GOAL_ENTRY::getInitialized() const
-{
-	return(initialized);
-}*/
-
-const unsigned int GOAL_ENTRY::toGeno(const unsigned int phaeno) const
-{
-#ifdef _SCC_DEBUG
-	if(phaeno>=UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (GOAL_ENTRY::toGeno): Value out of range.");return(0);
-	}
-	if(phaenoToGenotype[phaeno]>=UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (GOAL_ENTRY::toGeno): Variable not initialized.");return(0);
-	}
-#endif
-	return(phaenoToGenotype[phaeno]);
-}
-
-const unsigned int GOAL_ENTRY::toPhaeno(const unsigned int geno) const
-{
-#ifdef _SCC_DEBUG
-// TODO irgendwie maxbuildtypes statt UNIT_TYPE_COUNT?
-	if(geno>=UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (GOAL_ENTRY::toPhaeno): Value out of range.");return(0);
-	}
-	if(genoToPhaenotype[geno]>=UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (GOAL_ENTRY::toPhaeno): Variable not initialized.");return(0);
-	}
-#endif
-	return(genoToPhaenotype[geno]);
-}
-
-const bool GOAL_ENTRY::isChanged() const
-{
-	return(changed);
-}
-
-void GOAL_ENTRY::changeAccepted()
-{
-//	adjustGoals(true); //PROBLEM: unitforce wird nicht mit einbezogen!
-	changed=false;
-}
-
-const std::string& GOAL_ENTRY::getName() const
-{
-	return name;
-}
-
-const eRace GOAL_ENTRY::getRace() const
-{
-#ifdef _SCC_DEBUG
-// TODO irgendwie maxbuildtypes statt UNIT_TYPE_COUNT?
-    if(!raceInitialized) {
-        toLog("DEBUG: (GOAL_ENTRY::getRace): race not initialized.");return(TERRA);
+    if((goal_time >= MAX_TIME)) {
+         toLog("DEBUG: (GOAL::setTime): Value goal_time out of range.");return;
     }
 #endif
-	return race;
+	time = goal_time;
 }
 
-void GOAL_ENTRY::setName(const std::string& name)
+void GOAL::setCount(const unsigned int goal_count)
 {
-	this->name=name;
+#ifdef _SCC_DEBUG
+    if((goal_count >= MAX_SUPPLY)) {
+         toLog("DEBUG: (GOAL::setCount): Value goal_count out of range.");return;
+    }
+#endif
+	count = goal_count;
 }
 
-/*const unsigned int GOAL_ENTRY::getMode() const // TODO
+void GOAL::setLocation(const unsigned int goal_location)
 {
-	return(mode);
+#ifdef _SCC_DEBUG
+    if((goal_location >= MAX_LOCATIONS)) {
+         toLog("DEBUG: (GOAL::setLocation): Value goal_location out of range.");return;
+    }
+#endif
+	location = goal_location;
 }
 
-void GOAL_ENTRY::setMode(const unsigned int mode)
+void GOAL::setFinalTime(const unsigned int goal_final_time)
 {
-	this->mode=mode;
-}*/
+#ifdef _SCC_DEBUG
+    if((goal_final_time >= MAX_TIME)) {
+         toLog("DEBUG: (GOAL::setTime): Value goal_final_time out of range.");return;
+    }
+#endif
+	finalTime = goal_final_time;
+}
 
+
+const unsigned int GOAL::getUnit() const
+{
+#ifdef _SCC_DEBUG
+    if((unit >= UNIT_TYPE_COUNT)) {
+         toLog("DEBUG: (GOAL::getUnit): Variable not initialized.");return(0);
+    }
+#endif
+    return(unit);
+}
+
+const unsigned int GOAL::getTime() const
+{
+#ifdef _SCC_DEBUG
+    if((time >= MAX_TIME)) {
+         toLog("DEBUG: (GOAL::getTime): Variable not initialized.");return(0);
+    }
+#endif
+    return(time);
+}
+
+const unsigned int GOAL::getCount() const
+{
+#ifdef _SCC_DEBUG
+    if((count >= MAX_SUPPLY)) {
+         toLog("DEBUG: (GOAL::getCount): Variable not initialized.");return(0);
+    }
+#endif
+    return(count);
+}
+
+const unsigned int GOAL::getLocation() const
+{
+#ifdef _SCC_DEBUG
+    if((location >= MAX_LOCATIONS)) {
+         toLog("DEBUG: (GOAL::getLocation): Variable not initialized.");return(0);
+    }
+#endif
+    return(location);
+}
+
+const unsigned int GOAL::getFinalTime() const
+{
+#ifdef _SCC_DEBUG
+    if((finalTime >= MAX_TIME)) {
+         toLog("DEBUG: (GOAL::getFinalTime): Variable not initialized.");return(0);
+    }
+#endif
+    return(finalTime);
+}
 

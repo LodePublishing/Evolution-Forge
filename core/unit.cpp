@@ -6,8 +6,7 @@ UNIT::UNIT()
 }
 
 UNIT::~UNIT()
-{
-}
+{ }
 
 void UNIT::resetData()
 {

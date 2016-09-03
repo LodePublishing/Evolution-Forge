@@ -220,6 +220,12 @@ void UI_Button::adjustButtonPlacementArea()
 	buttonPlacementArea.SetTopLeft(getRelativePosition());
 }
 
+const unsigned int UI_Button::getTextWidth() const
+{
+	return(normalText->getTextSize().GetWidth());
+}
+
+
 void UI_Button::setButton(const eButton button_type)
 {
 #ifdef _SCC_DEBUG
@@ -718,6 +724,7 @@ void UI_Button::process()
 			frameNumber=0;
 
 	} // end shown*/
+
 	forcedPress=false;
 
 //	if(statusFlags & BF_DOWN)

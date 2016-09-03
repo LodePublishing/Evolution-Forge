@@ -1,5 +1,7 @@
 @GOAL 
 	"Name" "Marine drop"
 	"Race" "Terra"
-	"Marine" "1" "0" "0"
+	"Marine" "1" "0" "3"
+	"Siege Tank" "1" "0" "0"
+	
 @END

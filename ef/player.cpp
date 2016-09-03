@@ -141,19 +141,19 @@ void Player::processBoGraph()
                                                                                                                                                             
         // calculate the y-position of this specific order, THIS HAS TO BEGIN WITH 0 -> MAX_LENGTH, DO NOT USE -- OPTIMIZATION!
                     for(int j=0;j<MAX_LENGTH;j++)
-                        if(unitCounter[bograph[i].type][j]<=(*anarace)->getProgramTime(sortedList[k]->getIP()))
+                        if(unitCounter[bograph[i].type][j]<=(*anarace)->getRealProgramTime(sortedList[k]->getIP()))
                         {
 // if we have found a unitCounter which has a lower time (all unitCounter start with 0) we set the unit time to starttime + buildtime
 // at the end all unitCounter have the time at which programTime ... TODO
 // the items are in REAL TIME, i.e. time 0 is the beginning, ga->maxTime is the end
                                                                                                                                                             
-                            unitCounter[bograph[i].type][j]=(*anarace)->getProgramTime(sortedList[k]->getIP())+stats[(*anarace)->getRace()][sortedList[k]->getUnit()/*(*anarace)->getPhaenoCode(sortedList[k]->getIP())*/].BT;
+                            unitCounter[bograph[i].type][j]=(*anarace)->getRealProgramTime(sortedList[k]->getIP())+stats[(*anarace)->getRace()][sortedList[k]->getUnit()/*(*anarace)->getPhaenoCode(sortedList[k]->getIP())*/].BT;
                             hoehe=j;
                             j=MAX_LENGTH;
                         }
                                                                                                                                                             
                     Rect t=Rect(
-Point( ( (*anarace)->getProgramTime(sortedList[k]->getIP())*window[BO_GRAPH_WINDOW]->getClientRectWidth()) / ((*anarace)->getRealTimer()),
+Point( ( (*anarace)->getRealProgramTime(sortedList[k]->getIP())*window[BO_GRAPH_WINDOW]->getClientRectWidth()) / ((*anarace)->getRealTimer()),
        (1+i+hoehe/MIN_HEIGHT)*(FONT_SIZE+10)+(hoehe%MIN_HEIGHT)*(FONT_SIZE+10)/bograph[i].height),
                                                                                                                                                             
 Size(  (stats[(*anarace)->getRace()][sortedList[k]->getUnit()/*(*anarace)->getPhaenoCode(sortedList[k]->getIP())*/].BT/*(*anarace)->getProgramBT(s)*/*window[BO_GRAPH_WINDOW]->getClientRectWidth())/((*anarace)->getRealTimer()),
@@ -306,10 +306,24 @@ void Player::setMode(const eTab tab, const unsigned int playerNum)//, int player
 		window[(eWindow)i]->setTitleParameter(*theme.lookUpString((eString)(tab+HIDE_MODE_STRING)));
 	switch(mode)
 	{
-		case 0:this->Show();(*anarace)->setActive(1);break; // first player
-		case 1:this->Hide();(*anarace)->setActive(0);break; // second player
-		case 2:this->Show();(*anarace)->setActive(1);break; // first player
-		case 3:this->Hide();(*anarace)->setActive(0);break; // second player
+		case 0:
+			this->Show();
+			(*anarace)->setActive(1);
+			window[BO_DIAGRAM_WINDOW]->Hide();
+			window[STATISTICS_WINDOW]->Hide();
+			window[BO_GRAPH_WINDOW]->Hide();
+		break; // first player basic mode
+		
+		case 1:
+			this->Hide();(*anarace)->setActive(0);break; // second player basic mode
+		case 2:
+			this->Show();
+			(*anarace)->setActive(1);
+            window[BO_DIAGRAM_WINDOW]->Show();
+            window[STATISTICS_WINDOW]->Show();
+            window[BO_GRAPH_WINDOW]->Show();
+		break; // first player advanced mode
+		case 3:this->Hide();(*anarace)->setActive(0);break; // second player advanced mode
 		case 4:this->Show();(*anarace)->setActive(1);break; // first player
 		case 5:this->Show();(*anarace)->setActive(1);break; // second player
 		case 6:this->Show();(*anarace)->setActive(1);break; // first player
@@ -324,6 +338,7 @@ void Player::setMode(const eTab tab, const unsigned int playerNum)//, int player
 		case 15:this->Hide();(*anarace)->setActive(0);break; // second player
 		default:break;
 	}
+	resetData();
 	// TODO modes der einzelnen Windows (z.B> timer oder force)
 }
 
@@ -411,12 +426,13 @@ void Player::resetData()
 
 void Player::checkForChange()
 {
-	if(window[FORCE_WINDOW]->getChangedFlag())
+	if((window[FORCE_WINDOW]->getChangedFlag())||(window[BUILD_ORDER_WINDOW]->getChangedFlag()))
 	{
 		resetData();
 		(*anarace)->resetData();
-		(*(*anarace)->getCurrentGoal())->adjustGoals(true, (*   (*anarace)->getStartCondition()   )->getUnit(0) );
+//		(*(*anarace)->getCurrentGoal())->adjustGoals(true, (*   (*anarace)->getStartCondition()   )->getUnit(0) );
 		window[FORCE_WINDOW]->changeAccepted();
+		window[BUILD_ORDER_WINDOW]->changeAccepted();
 	}
 }
 
@@ -425,7 +441,7 @@ void Player::CheckOrders()
 {
 	unsigned int k=1;
 	for(int s=MAX_LENGTH;s--;)
-		if((*anarace)->getProgramIsBuilt(s)&&((*anarace)->getProgramTime(s)<=(*anarace)->getRealTimer()))
+		if((*anarace)->getProgramIsBuilt(s)&&((*anarace)->getRealProgramTime(s)<=(*anarace)->getRealTimer()))
 		{
 			map<long, Order>::iterator order=orderList.find((*anarace)->getMarker(s)) ;// => found old one -> update the data!
 			if(order!=orderList.end())
@@ -484,7 +500,7 @@ void Player::CheckOrders()
 						order=temp;
 					}
 				}
-				if(!found) // neues erstellen!
+				if((!found)&&(k+1<MAX_LENGTH)) // neues erstellen!
 				{
 					Order neuorder;
 					neuorder.setRow(k+1);//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace()));

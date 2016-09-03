@@ -30,6 +30,7 @@ bei komplexeren Goals spielt sFitness Graph verrueckt und unten im bo graph auch
 addons werden von race richtig, von anarace falsch verarbeitet 8[...done [lol]
 
 - todo: fuer goal files: Prioritaet setzen "as fast as possible" und "as many as possible" => Bonus mit Gewicht 
+- max out modus - build as many as possible
 
 evtl wieder fitnessCode einsetzen und als Balken im goal Diagramm anzeigen, wieviel % erreicht wurde mmmh...done
 fitness geht bei (!ready) auf 100% obwohl location noch nicht erreicht wurde 8[...done?
@@ -45,18 +46,18 @@ am Ende eines runs is die Darstellung kaputt...done
 fuer mehrstufige upgrades availible auf 1 aber force auf 3...done
 facility2 packt er irgendwie net :-/ alles availible0 8[...done
 
-- goal mit Startforce verbinden, damit man net mapfile dauernd bearbeiten muss
+goal mit Startforce verbinden, damit man net mapfile dauernd bearbeiten muss... DONE
 
 linked lists v.a. fuer buildings und counters...done
 wenn maus ueber Eintrag is, Hilfefenster anzeigen (und wieder verschwinden lassen, sobald Maus bewegt)...done
 
 fitness, mins und gas unten rechts nicht pro Befehl sondern pro Minute antragen... done
 
-- timer fuer animationen
+timer fuer animationen... DONE
 
-- thread fuer calculate
+thread fuer calculate... CANCELED
 
-- bei success sowohl dominant als auch rezessiv protokollieren
+bei success sowohl dominant als auch rezessiv protokollieren... CANCELED
 
 - am anfang kosten fuer StartForce auf sfitness addieren
 
@@ -69,7 +70,7 @@ mmmh... naja... ma guggn... auf jeden Fall belohnen, wenn man nicht den Ort wech
 
 - irgendwie timeout Befehle loeschen und neu berechnen bzw. zurueckspringen
 
-- anarace auf sekundenweise wieder zurueckstellen und program komplett mitdokumentieren (v.a. supply,mins,gas,fitness)
+anarace auf sekundenweise wieder zurueckstellen und program komplett mitdokumentieren (v.a. supply,mins,gas,fitness)... CANCELED
 
 - ueberlegen obs crossover wirklich bringt...
 
@@ -102,7 +103,6 @@ bug wenn ich goal entferne wird von sfitness ja mehr oder weniger abgezogen...
 
 evtl verlaufsdiagram speichern und dazwischen immer mal wieder die bos... waere halt ein grosses Bild/html datei
 
-max out modus - build as many as possible
 
 u238 shells und colossus reactor haengen irgendwie zusammen :o
 
@@ -119,7 +119,8 @@ Stoerer: Nur Antizeit
 human vs comp / comp vs comp: beide Parteien zaehlen ihre Punkte (gebaut + 2 * vernichtet)
 
 
-- goals in linked list schreiben!
+goals in linked list schreiben!... DONE
+
 map/goal/startforce neu ordnen
 
 Use Map settings / tvb
@@ -135,24 +136,23 @@ ifs, loops, gotos und stops rein
 if abfrage ist das heikelste, evtl Rasse, primaerer Einheitentyp, Armeegroesse, Expansionen, Mobilitaet
 evtl das ganze auf den Speicher abwaelzen und bei jedem Ast auf jeden Fall absteigen oder Aeste so plazieren/belegen, dass es STOP Zeichen gibt und die benachbarten Aeste dann je nach dem genommen werden... so ne Art kleines ANN
 
-- build as many as possible
- 
 - Regler fuer Wichtigkeit
 
-mit goals stimmt was net... da wird irgendwie die Anfangsforce draufgeschlagen bzw. nicht draufgeschlagen (auf die goal->goal[].count)
+mit goals stimmt was net... da wird irgendwie die Anfangsforce draufgeschlagen bzw. nicht draufgeschlagen (auf die goal->goal[].count)... DONE
 
-durch bauen von gas scv gewinnt man 1 supply!!
+durch bauen von gas scv gewinnt man 1 supply!! ... DONE?
 
 
 - ueberlegen wie man beide Player synchronisieren koennte... jo, evtl das speed dingens wieder rausnehmen... evtl auch buildingList fuer beide Player zusammenwerfen...
 
--evtl wieder Zusammenfassung der Buildorder (4 zealots anstatt zeal zeal zeal zeal)
+- evtl wieder Zusammenfassung der Buildorder (4 zealots anstatt zeal zeal zeal zeal)
 - Memo an GNU GCC - optionale Warnung falls Rueckgabewert einer Funktion nicht ausgewertet wird
 
 Groesseres Problem sind nach wie vor die goals, vor allem die Ortsangaben fuer die Einheiten, ist ja je nach Map verschieden!
 
 
-maxpfitness wird nicht resettet
+DONE: maxpfitness wird nicht resettet
+
 - eine Art screenshot knopf fuer bowindow, also ein neues Fenster damit der Benutzer das mit dem alten Zustand vergleichen kann
 evtl auch ein geladenes oder so :o
 
@@ -162,3 +162,32 @@ sicher schoen zu maechen :-) Leertaste oder so zum weitermachen
 quiz funktion (which bo is faster? two step to optimal bo etc. fast schon schachprobleme :) )
 
 Techtree darstellen, mit so Linien wie bei bebop 20
+
+- TODO blinken oben links weniger
+
+total harvested gas/mins direkt bei statistics hinschreiben, nicht ueber tooltip	... DONE
+
+- TODO Dauer der Kalkulation
+
+- Kennzeichnen im Unitmenu ob noch ein weiteres Menu aufklappt (facilities / units)
+
+- Kennzeichnen welche Units hinzugefuegt/abgezogen werden koennen bzw. warum etwas schiefging (aufblinken der benoetigten units oder so )
+
+- im force window ein "save current goal" item machen
+
+- Fenster mit Textzeile! (z.B. um goals abzuspeichern)
+
+- Reihenfolge der Tabs
+
+- Addons sind falsch!
+
+- MAX_TIME <> ga.maxTime checken
+
+- Techtree does not work if startforce scvs is 0
+
+- getProgramFacility does only sometimes give a probe as facility... or no at all... strange... because of that the protoss bograph is screwed up
+
+- addons bug: factory wird als prerequisite von z.B. armory benoetigt, wenn aber factory-MS da ist, passt was nicht... mmmh... allGoal springt immer wieder zurueck auf 0 8[
+
+- menues ueberarbeiten!
+

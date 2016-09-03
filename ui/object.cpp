@@ -656,4 +656,7 @@ bool UI_Object::needToolTipRedraw(true);
 unsigned int UI_Object::max_x(0);
 unsigned int UI_Object::max_y(0);
 Point UI_Object::mouse(Point(0,0));
+UI_StaticText* UI_Object::editTextFeld(NULL);
+unsigned int UI_Object::mouseType(0);
+
 

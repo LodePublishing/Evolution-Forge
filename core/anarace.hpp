@@ -87,6 +87,8 @@ class ANARACE: public PRERACE
 // external data output
 
 
+		const GOAL_TREE getGoalTree(const unsigned currentGoalUnit=0) const;
+		
 //		const bool getProgramIsConstant(const unsigned int IP) const;
 
 		const unsigned int getTimePercentage() const;

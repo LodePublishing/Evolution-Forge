@@ -16,6 +16,7 @@ class Menu : public UI_Object
 		void draw(DC* dc) const;
 		const unsigned int getHeight() const;
 		const signed int getPressedItem() const;
+		const signed int getMarkedItem() const;
 		void close();
 		void open();		
 		const bool isOpen() const;
@@ -23,6 +24,7 @@ class Menu : public UI_Object
 		list<MenuEntry*> menuEntries;
 		unsigned int menuLevel;
 		signed int pressedItem;
+		signed int markedItem;
 		unsigned int height;
 	private:
 		Point p1, p2;

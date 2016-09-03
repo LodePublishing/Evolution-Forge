@@ -46,6 +46,8 @@
 		startforce
 		choose race
 
+		save goal
+
 		Terra
 		Protoss
 		Zerg
@@ -56,9 +58,11 @@
 		Optimize everything
 		Optimize selected
 		Restart calculation
-		Speed
+		Save build order...
+		Frames per generation
 # timer window
 		%i % of goals fulfilled
+		%i % near time optimum
 		(paused)
 		Searching...
 		%i % of theoretical optimum
@@ -70,8 +74,8 @@
 # statistics window
 		Force : %i
 		Time : %i:%2i
-		Minerals : %i
-		Gas : %i
+		total harvested Minerals : %i
+		total harvested Gas : %i
 		Fitness average : %i [%i best]
 		Fitness variance : %i
 		Build order length : %i
@@ -92,7 +96,7 @@
 		Advanced
 		Expert
 		Gosu
-		Transcendend
+		Compare Goals
 		Map & Goals
 		Settings
 		Help
@@ -114,14 +118,16 @@
 		length of build order in items
 		minimum number of generations left
 
-		 Simple interface and basic options
-		 All options are availible
-		 The build order will be tested against rushes
-		 Play in realtime against the computer
-    	Let two computers play against each other
-		 Create and configure forces, goals and maps
+		Simple interface and basic options
+		All options are availible
+		The build order will be tested against rushes
+		Play in realtime against the computer or let it play itself
+    	
+		Compare current and saved build orders
+		Explanation of the different windows and a tutorial
 		Display and global ef settings
-		Well...
+		Create and configure forces and goals and maps
+		
 		Settings
 		Max time
 		Preprocess
@@ -154,7 +160,7 @@
 # an, aus
 		Tooltips
 
-		Time a build order may use at maximum, has influence on the time the program needs to find a first solution
+		Time a build order may use at maximum (has influence on the time the program needs to find a first solution)
 		Shall a randomly created or a preprocessed build order used at the beginning?
 		Maximum length of a build order
 		How often shall the program restart to get an optimal build order?
@@ -163,7 +169,7 @@
 		What percentage of the next generation shall be created out of the best build order of this one?
 		What percentage of the next generation shall be created by crossing over the genetic information of several programs of this generation?
 # Radiobutton
-		Minimum of graphics, all CPU power is allocated for the calculation (for extreme minimalists: check the command line options)
+		Minimum of graphics (all CPU power is allocated for the calculation) (for extreme minimalists: check the command line options)
 		Set the graphics to nice :)
 		Click yourself around
 # Radiobutton + Eingabefeld
@@ -172,7 +178,7 @@
 		How often shall the screen be updated between two generations?
 # an, aus
 		Shall the objects move around slowly or shall they directly jump to their destinations?
-		Transparent objects, needs some CPU :)
+		Transparent objects (needs some CPU :) )
 		8[ Don't ya like these texts?
 
 		Language
@@ -246,6 +252,9 @@
 		Ziele laden
 		Starteinheiten
 		Waehle Rasse
+
+		Speichere Ziele
+		
 		Terraner
 		Protoss
 		Zerg
@@ -256,9 +265,11 @@
 		Alles optimieren
 		Optimiere nur Auswahl
 		Neustart
+		Speichere Baufolge...
 		Geschwindigkeit
 # timer window
 		%i % der Ziele erfuellt
+		%i % nahe am Zeitoptimum
 		(unterbrochen)
 		Suche...
 		%i%% des theoretischen Optimums
@@ -270,8 +281,8 @@
 # statistics window
 		Einheitenzahl : %i
 		Zeit : %i:%2i
-		Mineralien : %i
-		Vespine Gas : %i
+		Gesamte gesammelte Mineralien : %i
+		Gesamtes gesammeltes Vespine Gas : %i
 		durchschnittliche Fitness : %i [beste %i]
 		Varianz der Fitness : %i
 		Laenge der Befehlsliste : %i
@@ -292,7 +303,7 @@
 		Erfahren
 		Experte
 		Gosu
-		Transzendent
+		Vergleiche Ziele
 		Karte & Ziele
 		Einstellungen
 		Hilfe
@@ -318,10 +329,10 @@
 		All options are availible
 		The build order will be tested against rushes
 		Play in realtime against the computer
-    	Let two computers play against each other
-		Create and configure forces, goals and maps
+    	Compare current and saved build orders
+		Explanation of the different windows and a tutorial
 		Display and global ef settings
-		Well...
+		Create and configure forces and goals and maps
 
 		Einstellungen
 		maximale Zeit
@@ -355,7 +366,7 @@
 # an, aus
 		Tooltips
 
-		Zeit die eine Baureihenfolge maximal benoetigen darf, beeinflusst Zeit bis zum Finden der ersten Loesung
+		Zeit die eine Baureihenfolge maximal benoetigen darf (beeinflusst Zeit bis zum Finden der ersten Loesung)
 		Soll eine zufaellige oder eine vorberechnete Baureihenfolge zu Beginn genommen werden?
 		Maximale Laenge einer Baureihenfolge
 		Wie oft soll das Programm neustarten um eine optimale Baureihenfolge zu erhalten?
@@ -364,7 +375,7 @@
 		Wieviel Prozent des besten Programms einer Generation soll in die naechste uebernommen werden?
 		Wieviel Prozent der Programme sollen sich per Crossing-Over (Austausch von Geninformationen) fortpflanzen?
 # Radiobutton
-		Minimale Grafik, alle CPU Power der Berechnung zuweisen (Fuer extreme Minimalisten: siehe Kommandozeilenoptionen)
+		Minimale Grafik (alle CPU Power der Berechnung zuweisen) (Fuer extreme Minimalisten: siehe Kommandozeilenoptionen)
 		Grafik auf schoen stellen :)
 		Selber rumklicken
 # Radiobutton + Eingabefeld
@@ -373,7 +384,7 @@
 		Wie oft soll der Schirm zwischen zwei Generationen geupdatet werden?
 # an, aus
 		Sollen sich Objekte langsam hin und herbewegen oder auf ihren Zielpunkt springen?
-		Durchsichtige Objekte, zieht etwas CPU :)
+		Durchsichtige Objekte (zieht etwas CPU :) )
 		8[ Gefallen Dir die Texte etwa nicht?
 	
 		Sprache
@@ -538,6 +549,8 @@
 		100, 150, 200
 #	generations left text color
 		200,   0,   0
+#  fps text color
+		255, 255, 255
 #  fitness diagram text color
 		155,  40,  40
 # disabled text color
@@ -587,13 +600,13 @@
 # basic bitmap pen
 			1, 255,  255,  255, SOLID
 # bodiagram supply, mins, gas pen
-			1,  60,   60,   60, SOLID
+			1, 120,  120,  120, SOLID
 			2,  80,   80,  255, SOLID
 			2,  40,  255,   40, SOLID
 # unit list colors:
 			1,   0,   0,   0, SOLID
 			1,  75,  75,  75, SOLID
-				1,  50, 100,  50, SOLID
+			1,  50, 100,  50, SOLID
 			1, 100,  50,  50, SOLID
 			1, 100,  50, 100, SOLID
 			1,  50,  50, 100, SOLID
@@ -668,7 +681,7 @@
 # unit list colors:
 			1,   0,   0,   0, SOLID
 			1,  75,  75,  75, SOLID
-				1,  50, 100,  50, SOLID
+			1,  50, 100,  50, SOLID
 			1, 100,  50,  50, SOLID
 			1, 100,  50, 100, SOLID
 			1,  50,  50, 100, SOLID
@@ -870,19 +883,12 @@
 			arrow_down_clicked
 			arrow_big_up_clicked
 			arrow_big_down_clicked
-			clemens
-			clawsoftware
-			roids
-			claws
-			i1
-			i2
-			i3
-			i4
-			i5
-			i6
-			claws
-			maus
-
+			location_button
+			time_button
+			mouse1
+			mouse2
+			mouse3
+			mouse
 		@END
 
 	@END
@@ -910,19 +916,12 @@
 			arrow_down_clicked
 			arrow_big_up_clicked
 			arrow_big_down_clicked
-			clemens
-			clawsoftware
-			roids
-			backstar
-			i1
-			i2
-			i3
-			i4
-			i5
-			i6
-			claws
-			maus
-
+			location_button
+			time_button
+			mouse1
+			mouse2
+			mouse3
+			mouse
 		@END
 
 	@END
@@ -950,20 +949,12 @@
 			arrow_down_clicked
 			arrow_big_up_clicked
 			arrow_big_down_clicked
-
-			clemens
-			clawsoftware
-			roids
-			boxer
-			i1
-			i2
-			i3
-			i4
-			i5
-			i6
-			claws
-			maus
-
+			location_button
+			time_button
+			mouse1
+			mouse2
+			mouse3
+			mouse
 		@END
 
 	@END
@@ -1040,7 +1031,7 @@
 			Settings window, dock left inside of, Main window, dock top inside of, Main window, 600, 400
 		@END
 
-		@TRANSCENDEND_TAB
+		@COMPARE_TAB
 			NULL window, absolute coordinates, 0, 0, 0, 0
 			Main window, absolute coordinates, 0, 0, 800, 600
 			Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
@@ -1116,10 +1107,13 @@
 			Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
 			The core window, dock center inside of, Main window, 500, 220
 			Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
-			Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
-			Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
+#			Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
+			Build order window, absolute coordinates, 500, 150, 200, 100
+# TODO
+#			Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
+			Force window, absolute coordinates, 100, 150, 300, 100
 			Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
-			Statistics window, dock with right border of, Force window, dock top inside of, Main window, 420, 120
+			Statistics window, dock with right border of, Force window, dock top inside of, Main window, 420, 140
 			Build order diagram window, dock with right border of, Force window, dock with lower border of, Statistics window, 500, 110
 #			Build order graph window, dock with lower border of, Build order diagram window, dock with left border of, Build order window, 500, 50
 			Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
@@ -1136,7 +1130,7 @@
 			Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
 			Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
 			Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
-			Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 120
+			Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 140
 			Build order diagram window, dock with right border of, Force window, dock with lower border of, Statistics window, 500, 110
 #			Build order graph window, dock with lower border of, Build order diagram window, dock with left border of, Build order window, 500, 50
 			Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
@@ -1178,7 +1172,7 @@
 			Settings window, dock left inside of, Main window, dock top inside of, Main window, 600, 400
 		@END
 
-		@TRANSCENDEND_TAB
+		@COMPARE_TAB
 			NULL window, absolute coordinates, 0, 0, 0, 0
 			Main window, absolute coordinates, 0, 0, 1024, 768
 			Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
@@ -1316,7 +1310,7 @@
 			Settings window, dock left inside of, Main window, dock top inside of, Main window, 600, 400
 		@END
 
-		@TRANSCENDEND_TAB
+		@COMPARE_TAB
 			NULL window, absolute coordinates, 0, 0, 0, 0
 			Main window, absolute coordinates, 0, 0, 1280, 1024
 			Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
@@ -1456,7 +1450,7 @@
 			Settings window, same as above
 		@END
 
-		@TRANSCENDEND_TAB
+		@COMPARE_TAB
 			NULL window, same as above
 			Main window, same as above
 			Message window, same as above
@@ -1590,7 +1584,7 @@
 			Settings window, same as above
 		@END
 
-		@TRANSCENDEND_TAB
+		@COMPARE_TAB
 			NULL window, same as above
 			Main window, same as above
 			Message window, same as above
@@ -1724,7 +1718,7 @@
 			Settings window, same as above
 		@END
 
-		@TRANSCENDEND_TAB
+		@COMPARE_TAB
 			NULL window, same as above
 			Main window, same as above
 			Message window, same as above
@@ -1836,6 +1830,8 @@
 	30, 2,  2,  2,  3,  2,  3,   2,  3,  2,  3,  2,   21, 21, 21, 21, 21,   10, 10, 10, 10, 10,  3,  3,  3,  3,  3,   3,  3,  3,  7,  7,   0,  0,  0,  0,  0
 	30, 2,  2,  2,  3,  2,  3,   2,  3,  2,  3,  2,   22, 22, 22, 22, 22,   10, 10, 10, 10, 10,  3,  3,  3,  3,  3,   3,  3,  3,  7,  7,   0,  0,  0,  0,  0
 	30, 2,  2,  2,  3,  2,  3,   2,  3,  2,  3,  2,   23, 23, 23, 23, 23,   10, 10, 10, 10, 10,  3,  3,  3,  3,  3,   3,  3,  3,  7,  7,   0,  0,  0,  0,  0
+# fps
+	30, 2,  2,  2,  3,  2,  3,   2,  3,  2,  3,  2,   24, 24, 24, 24, 24,   10, 10, 10, 10, 10,  3,  3,  3,  3,  3,   3,  3,  3,  7,  7,   0,  0,  0,  0,  0
 
 # arrow buttons
 
@@ -1847,6 +1843,11 @@
 	20, 2,  6,  6,  6,  5,  6,   6,  6,  6,  5,  6,   1,  1,  1,  1,  1,   1,  1,  1,  1,  1,   0,  0,  0, 17, 17,   0,  0,  0, 14,  14,   9,  9, 17,  9, 17
 	20, 2,  6,  6,  6,  5,  6,   6,  6,  6,  5,  6,   1,  1,  1,  1,  1,   1,  1,  1,  1,  1,   0,  0,  0, 17, 17,   0,  0,  0, 14,  14,  10, 10, 18, 10, 18
 	20, 2,  6,  6,  6,  5,  6,   6,  6,  6,  5,  6,   1,  1,  1,  1,  1,   1,  1,  1,  1,  1,   0,  0,  0, 17, 17,   0,  0,  0, 14,  14,  11, 11, 19, 11, 19
+
+# location button
+	20, 2,  6,  6,  6,  5,  6,   6,  6,  6,  5,  6,   1,  1,  1,  1,  1,   1,  1,  1,  1,  1,   0,  0,  0,  3,  3,   0,  0,  0, 14,  14,  20, 20, 20, 20, 20
+# time button
+	20, 2,  6,  6,  6,  5,  6,   6,  6,  6,  5,  6,   1,  1,  1,  1,  1,   1,  1,  1,  1,  1,   0,  0,  0,  3,  3,   0,  0,  0, 14,  14,  21, 21, 21, 21, 21
 
 @END
 

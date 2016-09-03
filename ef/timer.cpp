@@ -104,7 +104,7 @@ void TimerWindow::process()
 	}
 	else
 	{
-		goalsFulFilledText->updateText(theme.lookUpFormattedString(OF_GOALS_FULFILLED_STRING, anarace->getGoalPercentage()));
+		goalsFulFilledText->updateText(theme.lookUpFormattedString(OF_TIME_FULFILLED_STRING, anarace->getGoalPercentage()));
 		if(!anarace->isOptimizing())
 			currentActionText->updateText(PAUSED_STRING);
 		else
@@ -118,7 +118,12 @@ void TimerWindow::process()
 	}
 	std::ostringstream os;
 //	os << "[" << (anarace->getRealTimer())/60 << ":" << std::setfill('0') << setw(2) << (anarace->getRealTimer())%60 << "]";
-	os << "[" << currentTime/60 << ":" << std::setfill('0') << std::setw(2) << currentTime%60 << "]";
+	if(currentTime >= 3600) // TODO ga->...
+	{
+		os << "[--:--]";
+	}
+	else
+		os << "[" << currentTime/60 << ":" << std::setfill('0') << std::setw(2) << currentTime%60 << "]";
 	timeText->updateText(os.str());
 
 	}

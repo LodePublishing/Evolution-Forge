@@ -5,13 +5,15 @@
 
 #include <string>
 
+// TODO Konstanten teilweise in CoreConfiguration verschieben
+
 //extern const unsigned int MAX_RACES;
 //extern const unsigned int UNIT_TYPE_COUNT;
 //extern const unsigned int MAX_LOCATIONS;
 
 #define MAX_RACES 3
 #define UNIT_TYPE_COUNT 105
-#define MAX_LOCATIONS 20
+#define MAX_LOCATIONS 2
 
 // max simultaneous games/maps in the TAB LIST!
 //extern const unsigned int MAX_GAME_TABS;
@@ -27,12 +29,13 @@
 //extern const unsigned int MAX_PLAYER;
 //extern const unsigned int MAX_INTERNAL_PLAYER;
 
-#define MAX_PLAYER 4 // TODO FEHLER BEI 1
-#define MAX_INTERNAL_PLAYER 5 // inclusive neutral player!
+#define MAX_PLAYER 1
+#define MAX_INTERNAL_PLAYER 2 // inclusive neutral player!
 
 //extern const unsigned int GLOBAL;
 
 #define GLOBAL 0
+#define NEUTRAL_PLAYER 0
 
 extern const std::string CORE_VERSION;
 
@@ -45,7 +48,7 @@ extern const unsigned int MIN_PLAYER;
 extern const unsigned int MAX_MINERALS;
 extern const unsigned int MAX_GAS;
 
-#define MAX_PROGRAMS 128
+#define MAX_PROGRAMS 64
 //extern const unsigned int MAX_PROGRAMS; //must be multiplier of (16*player)
 extern const unsigned int LARVA_MAX;
 //extern const unsigned int UNIT_TYPE_COUNT;
@@ -56,7 +59,7 @@ extern const unsigned int MAX_SUPPLY;
 
 extern const unsigned int MAX_TOTAL_UNITS;
 
-#define MAX_TIME 3601
+#define MAX_TIME 54001
 //extern const unsigned int MAX_TIME;
 extern const unsigned int MIN_TIME;
 
@@ -72,8 +75,6 @@ extern const unsigned int MIN_RUNS;
 
 extern const unsigned int MAX_TFITNESS;
 extern const unsigned int MAX_PFITNESS;
-
-//extern const unsigned int MAX_RACES;
 
 //extern void fillInfluenceList();
 
@@ -158,6 +159,17 @@ enum eErrorMessages
 	TIMEOUT_ERROR,
 	UNKNOWN_ERROR,
 	ERROR_MESSAGES
+};
+
+enum eGameSpeedFrames
+{
+	GAME_SPEED_SLOWEST = 6,
+	GAME_SPEED_SLOWER = 9,
+	GAME_SPEED_SLOW = 12,
+	GAME_SPEED_NORMAL = 15,
+	GAME_SPEED_FAST = 18,
+	GAME_SPEED_FASTER = 21,
+	GAME_SPEED_FASTEST = 24 
 };
 
 enum eRace
@@ -504,7 +516,7 @@ struct LAST
 struct UNIT_STATISTICS
 {
 	std::string name;
-	unsigned int BT;
+	unsigned int BT; // in frames (slowest: 6 fps, fastest: 24fps)
 	unsigned int minerals,gas;
 	unsigned int needSupply;
 	unsigned int haveSupply;

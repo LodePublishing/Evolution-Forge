@@ -22,6 +22,7 @@
 #include "setwindow.hpp"
 
 #include "../core/configuration.hpp"
+#include "../core/database.hpp"
 #include "../ui/configuration.hpp"
 #include "configuration.hpp"
 
@@ -40,7 +41,9 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
 
 	uberSettings(new UI_Group(this, Rect(Point(15, 20), Size(100,0)), Size(0,10), ONE_COLOUMN_GROUP, TOP_LEFT, NULL_STRING)),
 	coreSettings(new UI_Group(uberSettings, Rect(Point(15, 40), Size(100,0)), Size(0, 15), ONE_COLOUMN_GROUP, DO_NOT_ADJUST, SETWINDOW_CORE_SETTINGS_STRING)),
+#ifndef _NO_FMOD_SOUND
 	soundSettings(new UI_Group(uberSettings, Rect(Point(15, 40), Size(100,0)), Size(0, 15), ONE_COLOUMN_GROUP, DO_NOT_ADJUST, SETWINDOW_SOUND_SETTINGS_STRING)),
+#endif
 	guiSettings(new UI_Group(uberSettings, Rect(Point(15, 40), Size(100,0)), Size(0, 15), ONE_COLOUMN_GROUP, DO_NOT_ADJUST, SETWINDOW_GUI_SETTINGS_STRING)),
 	graphicSettings(new UI_Group(uberSettings, Rect(Point(15, 40), Size(100,0)), Size(0, 15), ONE_COLOUMN_GROUP, DO_NOT_ADJUST, SETWINDOW_GRAPHIC_SETTINGS_STRING)),
 	
@@ -51,22 +54,25 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
 	expansionSet(new UI_Button(coreSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, true, CHECK_BUTTON_MODE, SETTING_EXPANSION_SET_STRING, SETTING_EXPANSION_SET_TOOLTIP_STRING, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 //	alwaysBuildWorkers(new UI_Button(coreSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, true, CHECK_BUTTON_MODE, SETTING_ALWAYS_BUILD_WORKERS_STRING, SETTING_ALWAYS_BUILD_WORKERS_STRING)), TODO ... :-/
 	allowWaitOrders(new UI_Button(coreSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, true, CHECK_BUTTON_MODE, SETTING_ALLOW_WAIT_ORDERS_STRING, SETTING_ALLOW_WAIT_ORDERS_TOOLTIP_STRING, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
-	waitAccuracy(new UI_NumberField(coreSettings, Rect(Point(10, 0), Size(3*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)/2, 15)), Size(2,2), DO_NOT_ADJUST,  1, 120, SETTING_WAIT_ACCURACY_STRING, SETTING_WAIT_ACCURACY_TOOLTIP_STRING, 1, coreConfiguration.getWaitAccuracy(), true)),
+	waitAccuracy(new UI_NumberField(coreSettings, Rect(Point(10, 0), Size(3*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)/2, 15)), Size(2,2), DO_NOT_ADJUST,  1, 1200, SETTING_WAIT_ACCURACY_STRING, SETTING_WAIT_ACCURACY_TOOLTIP_STRING, 100, coreConfiguration.getWaitAccuracy(), true)),
+	gameSpeed(new UI_NumberField(coreSettings, Rect(Point(10, 0), Size(3*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)/2, 15)), Size(2,2), DO_NOT_ADJUST,  (int)GAME_SPEED_SLOWEST_STRING, (int)GAME_SPEED_FASTEST_STRING, SETTING_GAME_SPEED_STRING, SETTING_GAME_SPEED_TOOLTIP_STRING, 1, efConfiguration.getGameSpeed() + (int)GAME_SPEED_SLOWEST_STRING, false, STRING_NUMBER_TYPE)),
 
 	autoRuns(new UI_Button(coreSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, true, CHECK_BUTTON_MODE, SETTING_AUTO_RUNS_STRING, SETTING_AUTO_RUNS_TOOLTIP_STRING, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	maxGenerations(new UI_NumberField(coreSettings, Rect(Point(10, 0), Size(3*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)/2, 15)), Size(2,2), DO_NOT_ADJUST,  MIN_GENERATIONS, MAX_GENERATIONS, SETTING_MAX_GENERATIONS_STRING, SETTING_MAX_GENERATIONS_TOOLTIP_STRING, 10, efConfiguration.getMaxGenerations(), true)),
 		
+#ifndef _NO_FMOD_SOUND
 	useMusic(new UI_Button(soundSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, true, CHECK_BUTTON_MODE, SETTING_USE_MUSIC_STRING, SETTING_USE_MUSIC_TOOLTIP_STRING, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	musicVolume(new UI_NumberField(soundSettings, Rect(Point(10, 0), Size(3*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)/2, 15)), Size(2,2), DO_NOT_ADJUST,  0, 100, SETTING_MUSIC_VOLUME_STRING, SETTING_MUSIC_VOLUME_TOOLTIP_STRING, 1, uiConfiguration.getMusicVolume(), true, PERCENT_NUMBER_TYPE)),
 	useSound(new UI_Button(soundSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, true, CHECK_BUTTON_MODE, SETTING_USE_SOUND_STRING, SETTING_USE_SOUND_TOOLTIP_STRING, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	soundVolume(new UI_NumberField(soundSettings, Rect(Point(10, 0), Size(3*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)/2, 15)), Size(2,2), DO_NOT_ADJUST,  0, 100, SETTING_SOUND_VOLUME_STRING, SETTING_SOUND_VOLUME_TOOLTIP_STRING, 1, uiConfiguration.getSoundVolume(), true, PERCENT_NUMBER_TYPE)),
 	channels(new UI_NumberField(soundSettings, Rect(Point(10, 0), Size(3*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)/2, 15)), Size(2,2), DO_NOT_ADJUST,  2, 255, SETTING_CHANNELS_STRING, SETTING_CHANNELS_TOOLTIP_STRING, 1, uiConfiguration.getChannels(), true)),
-
+#endif
  	backgroundBitmap(new UI_Button(guiSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, true, CHECK_BUTTON_MODE, SETTING_BACKGROUND_BITMAP_STRING, SETTING_BACKGROUND_BITMAP_TOOLTIP_STRING, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	smoothMovement(new UI_Button(guiSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, true, CHECK_BUTTON_MODE, SETTING_SMOOTH_MOVEMENT_STRING, SETTING_SMOOTH_MOVEMENT_TOOLTIP_STRING, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	waitAfterChange(new UI_Button(guiSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, true, CHECK_BUTTON_MODE, SETTING_WAIT_AFTER_CHANGE_STRING, SETTING_WAIT_AFTER_CHANGE_TOOLTIP_STRING, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
  	tooltips(new UI_Button(guiSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, true, CHECK_BUTTON_MODE, SETTING_TOOLTIPS_STRING, SETTING_TOOLTIPS_TOOLTIP_STRING, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
  	dnaSpiral(new UI_Button(guiSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, true, CHECK_BUTTON_MODE, SETTING_DNA_SPIRAL_STRING, SETTING_DNA_SPIRAL_TOOLTIP_STRING, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+ 	raceSpecificTheme(new UI_Button(guiSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, true, CHECK_BUTTON_MODE, SETTING_RACE_SPECIFIC_THEME_STRING, SETTING_RACE_SPECIFIC_THEME_TOOLTIP_STRING, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
  	glowingButtons(new UI_Button(guiSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, true, CHECK_BUTTON_MODE, SETTING_GLOWING_BUTTONS_STRING, SETTING_GLOWING_BUTTONS_TOOLTIP_STRING, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
  	compactDisplayMode(new UI_Button(guiSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, true, CHECK_BUTTON_MODE, SETTING_COMPACT_DISPLAY_MODE_STRING, SETTING_COMPACT_DISPLAY_MODE_TOOLTIP_STRING, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
  	facilityMode(new UI_Button(guiSettings, Rect(Point(10, 0), Size(200, 12)), Size(2, 2), CHECK_BUTTON, true, CHECK_BUTTON_MODE, SETTING_FACILITY_MODE_STRING, SETTING_FACILITY_MODE_TOOLTIP_STRING, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
@@ -96,13 +102,16 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
 	bitDepthHasChanged(false),
 	themeHasChanged(false),
 	fullScreenHasChanged(false),
-	compactDisplayModeHasChanged(false)
+	compactDisplayModeHasChanged(false),
+	allowWaitOrdersHasChanged(false),
+	gameSpeedHasChanged(false)
 {
 	updateItems();
 	if(!efConfiguration.isAutoRuns())
 		maxGenerations->Hide();
 	if(!coreConfiguration.isAllowWaitOrders())
 		waitAccuracy->Hide();
+#ifndef _NO_FMOD_SOUND
 	if(!uiConfiguration.isMusic())
 		musicVolume->Hide();
 	if(!uiConfiguration.isSound())
@@ -110,6 +119,7 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
 		soundVolume->Hide();
 		channels->Hide();
 	}
+#endif
 
 	uiSettingsRadio->addButton(languageMenuButton, 0);
 	uiSettingsRadio->addButton(resolutionMenuButton, 1);
@@ -117,7 +127,9 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
 	uiSettingsRadio->addButton(themeMenuButton, 3);
 
 	coreSettings->alignWidth(UI_Object::theme.lookUpButtonWidth(LARGE_BUTTON_WIDTH));
+#ifndef _NO_FMOD_SOUND
 	soundSettings->alignWidth(UI_Object::theme.lookUpButtonWidth(LARGE_BUTTON_WIDTH));
+#endif
 	guiSettings->alignWidth(UI_Object::theme.lookUpButtonWidth(LARGE_BUTTON_WIDTH));
 	graphicSettings->alignWidth(UI_Object::theme.lookUpButtonWidth(LARGE_BUTTON_WIDTH));
 
@@ -132,33 +144,12 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
 	themeMenu->close();
 }
 
-void SettingsWindow::reloadOriginalSize()
-{
-	setOriginalRect(theme.lookUpGlobalRect(SETTINGS_WINDOW));
-	setMaxHeight(theme.lookUpGlobalMaxHeight(SETTINGS_WINDOW));
-
-	languageMenuButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
-	resolutionMenuButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
-	bitDepthMenuButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
-	themeMenuButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
-	
-	reloadFromFileButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
-	saveToFileButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
-	loadDefaultsButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
-
-	UI_Window::reloadOriginalSize();
-
-	coreSettings->alignWidth(UI_Object::theme.lookUpButtonWidth(LARGE_BUTTON_WIDTH));
-	soundSettings->alignWidth(UI_Object::theme.lookUpButtonWidth(LARGE_BUTTON_WIDTH));
-	guiSettings->alignWidth(UI_Object::theme.lookUpButtonWidth(LARGE_BUTTON_WIDTH));
-	graphicSettings->alignWidth(UI_Object::theme.lookUpButtonWidth(LARGE_BUTTON_WIDTH));
-}
-
-
 SettingsWindow::~SettingsWindow()
 {
 	delete coreSettings;
+#ifndef _NO_FMOD_SOUND
 	delete soundSettings;
+#endif
 	delete guiSettings;
 	delete graphicSettings;
 	delete uberSettings;
@@ -171,20 +162,24 @@ SettingsWindow::~SettingsWindow()
 //	delete alwaysBuildWorkers;
 	delete allowWaitOrders;
 	delete waitAccuracy;
+	delete gameSpeed;
 	delete autoRuns;
 	delete maxGenerations;
 	
+#ifndef _NO_FMOD_SOUND
 	delete useMusic;
 	delete useSound;
 	delete musicVolume;
 	delete soundVolume;
 	delete channels;
+#endif
 
 	delete backgroundBitmap;
 	delete smoothMovement;
 	delete waitAfterChange;
 	delete tooltips;
 	delete dnaSpiral;
+	delete raceSpecificTheme;
 	delete glowingButtons;
 	delete compactDisplayMode;
 	delete facilityMode;
@@ -212,17 +207,41 @@ SettingsWindow::~SettingsWindow()
 	
 }
 
-void SettingsWindow::resetData()
-{ }
+void SettingsWindow::reloadOriginalSize()
+{
+	setOriginalRect(theme.lookUpGlobalRect(SETTINGS_WINDOW));
+	setMaxHeight(theme.lookUpGlobalMaxHeight(SETTINGS_WINDOW));
+
+	languageMenuButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
+	resolutionMenuButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
+	bitDepthMenuButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
+	themeMenuButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
+	
+	reloadFromFileButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
+	saveToFileButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
+	loadDefaultsButton->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
+
+	UI_Window::reloadOriginalSize();
+
+	coreSettings->alignWidth(UI_Object::theme.lookUpButtonWidth(LARGE_BUTTON_WIDTH));
+#ifndef _NO_FMOD_SOUND
+	soundSettings->alignWidth(UI_Object::theme.lookUpButtonWidth(LARGE_BUTTON_WIDTH));
+#endif
+	guiSettings->alignWidth(UI_Object::theme.lookUpButtonWidth(LARGE_BUTTON_WIDTH));
+	graphicSettings->alignWidth(UI_Object::theme.lookUpButtonWidth(LARGE_BUTTON_WIDTH));
+}
+
 
 void SettingsWindow::resetDataChange()
 {
-	languageHasChanged=false;
-	bitDepthHasChanged=false;
-	resolutionHasChanged=false;
-	themeHasChanged=false;
-	fullScreenHasChanged=false;
-	compactDisplayModeHasChanged=false;
+	languageHasChanged = false;
+	bitDepthHasChanged = false;
+	resolutionHasChanged = false;
+	themeHasChanged = false;
+	fullScreenHasChanged = false;
+	compactDisplayModeHasChanged = false;
+	allowWaitOrdersHasChanged = false;
+	gameSpeedHasChanged = false;
 }
 
 void SettingsWindow::closeMenus()
@@ -248,7 +267,7 @@ void SettingsWindow::process()
 	if((uberSettings->checkForNeedRedraw())/*(coreSettings->checkForNeedRedraw())||(guiSettings->checkForNeedRedraw())||(graphicSettings->checkForNeedRedraw())||(soundSettings->checkForNeedRedraw())*/||(uiSettingsRadio->checkForNeedRedraw())||(loadSaveSettings->checkForNeedRedraw()))
 	{
 		setNeedRedrawMoved();
-		fitItemToRelativeClientRect(uberSettings->getRelativeRect(), 1);
+		fitItemToRelativeClientRect(uberSettings->getRelativeRect(), true);
 	}
 
 	switch(uiSettingsRadio->getMarked())
@@ -372,10 +391,16 @@ void SettingsWindow::process()
 	
 	if(coreConfiguration.setAllowWaitOrders ( allowWaitOrders->isCurrentlyActivated() ) )
 	{
+		allowWaitOrdersHasChanged = true;
 		if(coreConfiguration.isAllowWaitOrders())
 			waitAccuracy->Show();
 		else waitAccuracy->Hide();
 	}
+	if(coreConfiguration.setWaitAccuracy( waitAccuracy->getNumber() ))
+		allowWaitOrdersHasChanged = true;
+
+	if(efConfiguration.setGameSpeed( gameSpeed->getNumber() - (int)GAME_SPEED_SLOWEST_STRING ))
+		gameSpeedHasChanged = true;
 
 	if(efConfiguration.setAutoRuns ( autoRuns->isCurrentlyActivated() ) )
 	{
@@ -386,6 +411,7 @@ void SettingsWindow::process()
 		
 	efConfiguration.setMaxGenerations ( maxGenerations->getNumber() );
 
+#ifndef _NO_FMOD_SOUND
 	uiConfiguration.setMusicVolume( musicVolume->getNumber() );
 	uiConfiguration.setSoundVolume( soundVolume->getNumber() );
 	if(uiConfiguration.setMusic( useMusic->isCurrentlyActivated() ))
@@ -404,13 +430,15 @@ void SettingsWindow::process()
 		}
 	}
 	uiConfiguration.setChannels( channels->getNumber() );
-
+#endif
+	
 	if( efConfiguration.setBackgroundBitmap ( backgroundBitmap->isCurrentlyActivated()))
 		setNeedRedrawMoved();
 	uiConfiguration.setSmoothMovements ( smoothMovement->isCurrentlyActivated() );
 	efConfiguration.setWaitAfterChange ( waitAfterChange->isCurrentlyActivated() );
 	efConfiguration.setToolTips ( tooltips->isCurrentlyActivated() );
 	efConfiguration.setDnaSpiral ( dnaSpiral->isCurrentlyActivated());
+	efConfiguration.setRaceSpecificTheme ( raceSpecificTheme->isCurrentlyActivated());
 	uiConfiguration.setGlowingButtons ( glowingButtons->isCurrentlyActivated());
 	if( efConfiguration.setCompactDisplayMode( compactDisplayMode->isCurrentlyActivated() ) )
 		compactDisplayModeHasChanged = true;
@@ -439,9 +467,15 @@ void SettingsWindow::process()
 // reload from file
 void SettingsWindow::reloadFromFile()
 {
-	efConfiguration.loadConfigurationFile();
+	toInitLog(UI_Object::theme.lookUpString(START_LOAD_UI_CONFIGURATION_STRING));
 	uiConfiguration.loadConfigurationFile();
+
+	toInitLog(UI_Object::theme.lookUpString(START_LOAD_CORE_CONFIGURATION_STRING));
 	coreConfiguration.loadConfigurationFile();
+
+	toInitLog(UI_Object::theme.lookUpString(START_LOAD_EF_CONFIGURATION_STRING));
+	efConfiguration.loadConfigurationFile();
+
 	updateItems();
 }
 
@@ -463,18 +497,22 @@ void SettingsWindow::updateItems()
 	waitAccuracy->updateNumber( coreConfiguration.getWaitAccuracy() );
 	autoRuns->check( efConfiguration.isAutoRuns() );
 	maxGenerations->updateNumber( efConfiguration.getMaxGenerations() );
+	gameSpeed->updateNumber( efConfiguration.getGameSpeed() + (int)GAME_SPEED_SLOWEST_STRING);
 	
+#ifndef _NO_FMOD_SOUND
 	useMusic->check( uiConfiguration.isMusic() );
 	useSound->check( uiConfiguration.isSound() );
 	musicVolume->updateNumber( uiConfiguration.getMusicVolume() );
 	soundVolume->updateNumber( uiConfiguration.getSoundVolume() );
 	channels->updateNumber( uiConfiguration.getChannels() );
+#endif
 
 	backgroundBitmap->check ( efConfiguration.isBackgroundBitmap() );
 	smoothMovement->check ( uiConfiguration.isSmoothMovements() );
 	waitAfterChange->check ( efConfiguration.isWaitAfterChange() );
 	tooltips->check ( efConfiguration.isToolTips() );
 	dnaSpiral->check ( efConfiguration.isDnaSpiral() );
+	raceSpecificTheme->check( efConfiguration.isRaceSpecificTheme() );
 	glowingButtons->check ( uiConfiguration.isGlowingButtons() );
 	if(compactDisplayMode->isCurrentlyActivated() != efConfiguration.isCompactDisplayMode())
 		compactDisplayModeHasChanged=true;
@@ -523,13 +561,6 @@ void SettingsWindow::updateItems()
 	}
 }
 
-void SettingsWindow::draw(DC* dc) const
-{
-	if(!isShown())
-		return;
-	UI_Window::draw(dc);
-}
-
 void SettingsWindow::forceFullScreenChange()
 {
 	fullScreenHasChanged = true;
@@ -539,18 +570,5 @@ void SettingsWindow::forceFullScreenChange()
 	fullscreen->setNeedRedrawMoved();
 }
 
-void SettingsWindow::forceResolutionChange()
-{
-	resolutionHasChanged = true;
-}
 
-void SettingsWindow::forceBitDepthChange()
-{
-	bitDepthHasChanged = true;
-}
-
-void SettingsWindow::forceLanguageChange()
-{
-	languageHasChanged=true;
-}
 

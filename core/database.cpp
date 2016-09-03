@@ -39,9 +39,6 @@ DATABASE::~DATABASE()
 	}
 }
 
-
-
-
 void DATABASE::addDefaultGoal(const eRace race)
 {
 	GOAL_ENTRY* goal = new GOAL_ENTRY;
@@ -495,7 +492,7 @@ const bool DATABASE::loadHarvestFile(const std::string& harvest_file)
 						for(std::list<std::string>::const_iterator i = item->second.begin(); i != item->second.end(); ++i)
 						{
 							if(i!= item->second.begin()) // TODO, warum ist item->second.begin() == 'Mineral harvest'?
-								harvest[current_race]->setHarvestMineralSpeed(j++, atoi(i->c_str()));
+								harvest[current_race]->setHarvestMineralSpeed(j++, atoi(i->c_str())/15);
 						}
 						block.erase(item);
 					} else 
@@ -512,7 +509,7 @@ const bool DATABASE::loadHarvestFile(const std::string& harvest_file)
 						for(std::list<std::string>::const_iterator i = item->second.begin(); i != item->second.end(); ++i)
 						{
 							if(i!= item->second.begin()) // TODO, warum ist item->second.begin() == 'Gas harvest'?
-								harvest[current_race]->setHarvestGasSpeed(j++, atoi(i->c_str()));
+								harvest[current_race]->setHarvestGasSpeed(j++, atoi(i->c_str())/15);
 						}
 						block.erase(item);
 					} else 
@@ -618,7 +615,12 @@ const bool DATABASE::loadMapFile(const std::string& map_file)
 			
 				if((i=block.find("Max player"))!=block.end()){
 					i->second.pop_front();
-				   	basic_map->setMaxPlayer(atoi(i->second.front().c_str()));
+				   	if(!basic_map->setMaxPlayer(atoi(i->second.front().c_str())))
+					{
+						delete basic_map;
+						toErrorLog("ERROR (loadMapFile()): Field name 'Max player' out of range in file " + map_file + " => ignoring file.");
+						return(false);
+					}
 				} else
 				{
 					toErrorLog("ERROR (loadMapFile()): Field name 'Max player' not found within @MAP block in file " + map_file + ".");
@@ -999,7 +1001,7 @@ const bool DATABASE::saveGoal(const std::string& goal_name, GOAL_ENTRY* goalentr
 	pFile << "		\"Name\" \"" << goal_name << "\"" << std::endl; // TODO
 	pFile << "		\"Race\" \"" << raceString[goalentry->getRace()] << "\"" << std::endl;
 
-	for(std::list<GOAL>::const_iterator i = goalentry->goal.begin(); i!=goalentry->goal.end(); ++i)
+	for(std::list<GOAL>::const_iterator i = goalentry->goalList.begin(); i!=goalentry->goalList.end(); ++i)
 		pFile << "		\"" << stats[goalentry->getRace()][i->getUnit()].name << "\" \"" << i->getCount() << "\" \"" << i->getLocation() << "\" \"" << i->getTime() << "\"" << std::endl;		
 	pFile << "@END" << std::endl;
 
@@ -1011,7 +1013,7 @@ const bool DATABASE::saveGoal(const std::string& goal_name, GOAL_ENTRY* goalentr
 	return(true);
 }
 
-const bool DATABASE::saveBuildOrder(const std::string& build_order_name, BUILD_ORDER& build_order)
+const bool DATABASE::saveBuildOrder(const std::string& build_order_name, const BUILD_ORDER& build_order)
 {
 	std::ostringstream build_order_file;
 	build_order_file.str("");
@@ -1037,13 +1039,13 @@ const bool DATABASE::saveBuildOrder(const std::string& build_order_name, BUILD_O
 	pFile << "		\"Name\" \"" << build_order_name << "\"" << std::endl; // TODO! Name muesste eigentlich der echte Goal Name sein!
 	pFile << "		\"Race\" \"" << raceString[build_order.getGoal().getRace()] << "\"" << std::endl;
 
-	for(std::list<GOAL>::const_iterator i = build_order.getGoal().goal.begin(); i!= build_order.getGoal().goal.end(); ++i)
+	for(std::list<GOAL>::const_iterator i = build_order.getGoal().goalList.begin(); i!= build_order.getGoal().goalList.end(); ++i)
 		pFile << "		\"" << stats[build_order.getGoal().getRace()][i->getUnit()].name << "\" \"" << i->getCount() << "\" \"" << i->getLocation() << "\" \"" << i->getTime() << "\"" << std::endl;		
 	pFile << "@END" << std::endl;
 
 
 	pFile << "@BUILDORDER" << std::endl;
-	for(std::list<PROGRAM>::iterator i = build_order.getProgramList().begin(); i!=build_order.getProgramList().end(); ++i)
+	for(std::list<PROGRAM>::const_iterator i = build_order.getProgramList().begin(); i!=build_order.getProgramList().end(); ++i)
 		pFile << "		\"" << stats[build_order.getRace()][i->getUnit()].name << "\""/* \"" << i->getCount() << "\" \"" << i->getLocation() << "\" \"" << i->getTime() << "\""*/ << std::endl;
 	pFile << "@END" << std::endl;
 	

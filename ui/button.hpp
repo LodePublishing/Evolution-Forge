@@ -3,16 +3,6 @@
 
 #include "statictext.hpp"
 
-
-// Button terminology:
-//   Up = button is in up state (also called pressed)
-//   Down = button is in down state (also called released)
-//   Just pressed = button has just gone from up to down state
-//   Just released = button has just gone from down to up state
-//   Clicked = a trigger type effect caused by 'just pressed' event or repeat while 'down'
-//   Double clicked = 2 'just pressed' events occuring within a short amount of time
-
-
 enum eButtonMode
 {
 	NO_BUTTON_MODE,
@@ -20,6 +10,7 @@ enum eButtonMode
 	PRESS_BUTTON_MODE,  // returns to unpressed
 	PUSH_BUTTON_MODE,   // calls several messages when being pressed
 	TAB_BUTTON_MODE,
+	TOP_TAB_BUTTON_MODE,
 	CHECK_BUTTON_MODE, // no '3d effect', allows button to be set with 'check'
 //	MENU_TAB_BUTTON_MODE,
 	BOGRAPH_BUTTON_MODE, // just a rectangle, not rounded
@@ -29,7 +20,7 @@ enum eButtonMode
 
 class UI_Radio;
 
-class UI_Button:public UI_Object
+class UI_Button : public UI_Object
 {
 	public:
 // TODO Beschreibung der Konstruktoren
@@ -110,6 +101,7 @@ class UI_Button:public UI_Object
 		
 		void draw(DC* dc) const;
 		void setButtonColorsType(const eButtonColorsType button_colors_type);
+		const eButtonColorsType getButtonColorsType() const;
 		void resetGradient();
 		UI_Radio* radio;
 
@@ -185,7 +177,8 @@ class UI_Button:public UI_Object
 		static const unsigned int BF_WAS_PRESSED = 8192; // button will be DOWN again, wenn mouse gets over button, without pressing the button again
 		static const unsigned int BF_IS_RECTANGLE = 16384;
 		static const unsigned int BF_IS_CHECKBUTTON = 32768; // no '3d effect', allows to be 'checked'
-		//static const unsigned int BF_WAS_FORCED = 65536; // TODO irgendwie mit Zeit machen, dass z.B. nach 100ms die Taste automatisch losgelassen wird
+		static const unsigned int BF_IS_TOP_TAB = 65536; 
+		// TODO irgendwie mit Zeit machen, dass z.B. nach 100ms die Taste automatisch losgelassen wird
 	protected:
 		UI_StaticText* text;
 	private:
@@ -207,6 +200,10 @@ inline void UI_Button::setAllowMoveByMouse(const bool allow_move_by_mouse) {
 
 inline const unsigned int UI_Button::getGradient() const {
 	return(gradient);
+}
+
+inline const eButtonColorsType UI_Button::getButtonColorsType() const {
+	return(buttonColorsType);
 }
 
 inline void UI_Button::setButtonColorsType(const eButtonColorsType button_colors_type)

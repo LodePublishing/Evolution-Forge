@@ -4,9 +4,6 @@
 #include "../ui/window.hpp"
 #include "message.hpp"
 
-#include <list>
-
-using std::list;
 class MessageWindow:public UI_Window
 {
 	public:
@@ -18,7 +15,7 @@ class MessageWindow:public UI_Window
 		void draw(DC* dc) const;
 		void reloadOriginalSize();
 	private:
-		list<Message*> message;
+		std::list<Message*> message;
 };
 
 #endif

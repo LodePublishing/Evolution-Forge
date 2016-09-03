@@ -75,21 +75,6 @@ void UI_Radio::forceUnpressAll()
 			buttonId[i]->forceUnpress();
 }
 
-const signed int UI_Radio::getMarked() const
-{
-	return(markedItem);
-}
-
-void UI_Radio::leftButtonPressed(UI_Button* button) // Unpress all except one
-{
-	buttonWasPressed = button;
-}
-
-void UI_Radio::leftButtonReleased(UI_Button* button) // allow release?
-{
-	buttonWasPressed = button;
-}
-
 
 void UI_Radio::process()
 {

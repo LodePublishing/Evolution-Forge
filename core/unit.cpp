@@ -52,7 +52,7 @@ void UNIT::adjustSupply(const eRace race, unsigned int& needSupply, unsigned int
 		}
 #ifdef _SCC_DEBUG
 	if(needSupply>haveSupply)
-		toErrorLog("DEBUG: (UNIT::adjustSupply): Too many units :/");
+		toErrorLog("DEBUG ((UNIT::adjustSupply()): Too many units :/");
 #endif
 }
 

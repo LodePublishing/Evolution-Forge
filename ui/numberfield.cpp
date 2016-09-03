@@ -1,7 +1,9 @@
 #include "numberfield.hpp"
+#include "../ef/configuration.hpp" // TODO GameSpeed in UI
 #include <sstream>
 
 // TODO: ui_objects arrangen! es nur in button zu benutzen bringt wenig...
+// eString
 UI_NumberField::UI_NumberField(UI_Object* numberfield_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const unsigned int number_min, const unsigned int number_max, const eString txt, const eString tool_tip, const unsigned int number_steps, const unsigned int num, const bool shift_right, const eFieldType field_type) :
 	UI_Object(numberfield_parent, rect, distance_bottom_right, position_mode, AUTO_HEIGHT_CONST_WIDTH),
 	fieldType(field_type),
@@ -21,6 +23,7 @@ UI_NumberField::UI_NumberField(UI_Object* numberfield_parent, const Rect& rect, 
 	updateNumber(num);
 }
 
+// std::string&
 UI_NumberField::UI_NumberField(UI_Object* numberfield_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const unsigned int number_min, const unsigned int number_max, const std::string& txt, const eString tool_tip, const unsigned int number_steps, const unsigned int num, const bool shift_right, const eFieldType field_type) :
 	UI_Object(numberfield_parent, rect, distance_bottom_right, position_mode, AUTO_HEIGHT_CONST_WIDTH),
 	fieldType(field_type),
@@ -97,9 +100,8 @@ void UI_NumberField::process()
 		{
 			case NORMAL_NUMBER_TYPE:os << number; break;
 			case PERCENT_NUMBER_TYPE:os << number << "%"; break;
-			case TIME_NUMBER_TYPE:
-				os << formatTime(number);
-				break;
+			case TIME_NUMBER_TYPE:os << formatTime(number, efConfiguration.getGameSpeed());break;
+			case STRING_NUMBER_TYPE: os << theme.lookUpString((eString)(number));
 			default:break;
 		}
 		numberText->updateText(os.str());

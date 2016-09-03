@@ -1,7 +1,6 @@
 #include "score.hpp"
-#include "configuration.hpp"
 #include <sstream>
-#include <iomanip>
+#include "configuration.hpp"
 
 ScoreWindow::ScoreWindow(UI_Object* score_parent, const unsigned int game_number, const unsigned int game_max) :
 	UI_Window(score_parent, TIMER_WINDOW_TITLE_STRING, theme.lookUpGameRect(SCORE_WINDOW, game_number, game_max), theme.lookUpGameMaxHeight(SCORE_WINDOW, game_number, game_max), NOT_SCROLLED),
@@ -16,10 +15,8 @@ ScoreWindow::ScoreWindow(UI_Object* score_parent, const unsigned int game_number
 	gameMax(0)
 {
 /*TODO
-
 - Map initialisieren ?
 - Harvest speed initialisieren
-
 */
 	for(unsigned int i = MAX_PLAYER;i--;)
 	{
@@ -64,8 +61,8 @@ void ScoreWindow::setUnchangedGenerations(const unsigned int unchanged_generatio
 {
 	if(unchangedGenerations == unchanged_generations)
 		return;
-	setNeedRedrawNotMoved();
 	unchangedGenerations = unchanged_generations;
+	setNeedRedrawNotMoved();
 }
 
 void ScoreWindow::resetPlayerTime(unsigned int player_number)
@@ -143,7 +140,8 @@ void ScoreWindow::process()
 	//	mapMenuButton->forceUnpress();
 		closeMenus();
 		for(unsigned int i=MAX_PLAYER;i--;)
-			player[i]->mouseHasLeft();
+			if(player[i]->isShown())
+				player[i]->mouseHasLeft();
 	}
 							
         unsigned int line = 1;
@@ -164,15 +162,15 @@ void ScoreWindow::process()
 	}
 	
 // Alle Player durchlaufen, evtl Hoehe anpassen: 
-
-	fitItemToRelativeClientRect(Rect(0,16*(line-1),10,12)/*playerText[i]->getAbsoluteRect()*/,2); // TODO
+// TODO
+	fitItemToRelativeClientRect(Rect(Point(0, 16*(line-1)), Size(100,12)), true);
 }
 
 
 void ScoreWindow::draw(DC* dc) const
 {
-//	if(!isShown()) 
-//		return;
+	if(!isShown()) 
+		return;
 	UI_Window::draw(dc);
 	if(!checkForNeedRedraw())
 		return;
@@ -197,7 +195,7 @@ const bool ScoreWindow::openMenu(const ePlayerOrder order)
 	do
 	{
 		i++;
-		if(i > MAX_PLAYER)
+		if(i >= MAX_PLAYER)
 			i = 0;
 		if( (player[i]) && (player[i]->isShown()) && ( ((order == OPEN_RACE_MENU)&&(player[i]->openRaceMenu()))/* || ((order == ADD_PLAYER)&&(player[i]->addPlayer()))*/ ) )
 		{

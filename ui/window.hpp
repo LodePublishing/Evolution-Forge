@@ -1,7 +1,6 @@
 #ifndef _UI_WINDOW_HPP
 #define _UI_WINDOW_HPP
 
-#include "radio.hpp"
 #include "scrollbar.hpp"
 
 enum eIsAutoAdjust
@@ -71,8 +70,8 @@ class UI_Window : public UI_Object
 
 
 		static unsigned int rectnumber;
-		const bool fitItemToRelativeClientRect(const Rect& rectangle, const unsigned int adjust = 0);
-		const bool fitItemToAbsoluteClientRect(const Rect& rectangle, const unsigned int adjust = 0);
+		const bool fitItemToRelativeClientRect(const Rect& rectangle, const bool adjust = false);
+		const bool fitItemToAbsoluteClientRect(const Rect& rectangle, const bool adjust = false);
 
 		UI_ScrollBar* getScrollBar() const;
 		const unsigned int getMaxHeight() const;
@@ -224,6 +223,10 @@ inline const bool UI_Window::getChangedFlag() {
 
 inline void UI_Window::changeAccepted() {
 	changedFlag=false;
+}
+
+inline void UI_Window::setMaxHeight(const unsigned int max_height) {
+	maxHeight = max_height;
 }
 
 

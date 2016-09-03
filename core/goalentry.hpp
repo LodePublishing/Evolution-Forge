@@ -38,43 +38,18 @@ struct NEED
 
 class GOAL_ENTRY
 {
-	private:
-		std::string name;
-		eRace race;
-		
-		unsigned int maxBuildTypes;
-		const UNIT_STATISTICS* pStats;
-//		bool initialized;
-		unsigned int phaenoToGenotype[LAST_UNIT];
-		unsigned int genoToPhaenotype[LAST_UNIT];
-//		int mode;
-
-		const bool isError(const unsigned int j, const unsigned int unit) const;
-
-		bool changed;
-		bool raceInitialized;
-		bool isBuildable[LAST_UNIT];
-		bool isStatic[LAST_UNIT];	
-		bool isHaveable[LAST_UNIT]; // all units that are goals, can be build or are build by the bo (larva etc.)
-		bool isGoal[LAST_UNIT];
-
-		void setIsBuildable(const unsigned int unit, const bool is_buildable = true);
-		void setIsStatic(const unsigned int unit, const bool is_static = true);
-		void setIsHaveable(const unsigned int unit, const bool is_haveable = true);
-		void setIsGoal(const unsigned int unit, const bool is_goal = true);
-
 	public:
-//		GOAL_ENTRY(const GOAL_ENTRY& object);
+		GOAL_ENTRY();
+		~GOAL_ENTRY();
+
+		GOAL_ENTRY(const GOAL_ENTRY& object);
 		GOAL_ENTRY& operator=(const GOAL_ENTRY& object);
+		const bool operator==(const GOAL_ENTRY& other) const;
 	
-		std::list<GOAL> goal; // private?
+		std::list<GOAL> goalList; // private?
 		NEED need[LAST_UNIT];
 		ALLOW allow[LAST_UNIT];
 		
-		GOAL_ENTRY();
-		~GOAL_ENTRY();
-		const bool operator==(const GOAL_ENTRY& other) const;
-
  
 //		const unsigned int getMode() const; // 0: normal, 1: based on success of enemy
 //		void setMode(int mode);
@@ -118,7 +93,30 @@ class GOAL_ENTRY
 		void setName(const std::string& goal_name);
 		void setRace(const eRace goal_race);
 		const bool getInitialized() const;
+	private:
+		std::string name;
+		eRace race;
+		
+		unsigned int maxBuildTypes;
+		const UNIT_STATISTICS* pStats;
+//		bool initialized;
+		unsigned int phaenoToGenotype[LAST_UNIT];
+		unsigned int genoToPhaenotype[LAST_UNIT];
+//		int mode;
 
+		const bool isError(const unsigned int j, const unsigned int unit) const;
+
+		bool changed;
+		bool raceInitialized;
+		bool isBuildable[LAST_UNIT];
+		bool isStatic[LAST_UNIT];	
+		bool isHaveable[LAST_UNIT]; // all units that are goals, can be build or are build by the bo (larva etc.)
+		bool isGoal[LAST_UNIT];
+
+		void setIsBuildable(const unsigned int unit, const bool is_buildable = true);
+		void setIsStatic(const unsigned int unit, const bool is_static = true);
+		void setIsHaveable(const unsigned int unit, const bool is_haveable = true);
+		void setIsGoal(const unsigned int unit, const bool is_goal = true);
 };
 
 

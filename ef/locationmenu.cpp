@@ -15,6 +15,10 @@ LocationMenu::LocationMenu(UI_Object* location_parent, const std::list<std::stri
 	resetData();
 }
 
+LocationMenu::~LocationMenu()
+{ }
+
+
 void LocationMenu::resetData()
 {
 	std::list<std::string>::iterator i = locationList.begin();
@@ -39,10 +43,6 @@ void LocationMenu::resetData()
 	}
 	reloadOriginalSize();
 }
-
-
-LocationMenu::~LocationMenu()
-{ }
 
 void LocationMenu::reloadOriginalSize()
 {

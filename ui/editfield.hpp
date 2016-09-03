@@ -3,7 +3,6 @@
 
 #include "button.hpp"
 
-
 // TODO: Editfield aus Button und Text bestehen lassen... wegen UI_Group (die Box) und wegen besserer Uebersicht (damits net immer ein extra STaticText braucht)
 // 
 class UI_EditField : public UI_Object
@@ -67,6 +66,14 @@ inline const bool UI_EditField::done() const {
 
 inline const bool UI_EditField::canceled() const {
 	return(pressedEscape);
+}
+
+inline UI_Object* UI_EditField::checkToolTip() {
+	return(UI_Object::checkToolTip());
+}
+
+inline UI_Object* UI_EditField::checkHighlight() {
+	return(UI_Object::checkHighlight());
 }
 
 

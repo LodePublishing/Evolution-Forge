@@ -1,6 +1,5 @@
 #include "force.hpp"
 #include "savebox.hpp"
-#include "../core/configuration.hpp"
 
 ForceWindow::ForceWindow(UI_Object* force_parent, const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max) :
 	UI_Window(force_parent, FORCE_WINDOW_TITLE_STRING, theme.lookUpPlayerRect(FORCE_WINDOW, game_number, game_max, player_number, player_max), theme.lookUpPlayerMaxHeight(FORCE_WINDOW, game_number, game_max, player_number, player_max), NOT_SCROLLED),
@@ -25,7 +24,8 @@ ForceWindow::ForceWindow(UI_Object* force_parent, const unsigned int game_number
 	playerMax(player_max),
 	saveBox(false),
 	goalMenuOpenedExternally(false),
-	unitMenuOpenedExternally(false)
+	unitMenuOpenedExternally(false),
+	assignGoal(-1)
 {	
 	menuButton[UNIT_MENU] = new UI_Button(menuRadio, Rect(Point(5, 5), Size(21,20)), Size(5,5), ADD_BUTTON, true, STATIC_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST);
 	menuButton[GOAL_MENU] = new UI_Button(menuRadio, Rect(Point(5, 5), Size(21,20)), Size(5,5), LOAD_BUTTON, true, STATIC_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST);
@@ -162,9 +162,6 @@ void ForceWindow::process()
 	oldMarkedUnit = markedUnit;
 	markedUnit = 0;
 
-	int assignGoal = -1;
-
-
 	if(ForceEntry::changed)
 	{
 		if(ForceEntry::forceEntryIsGoal)
@@ -173,9 +170,6 @@ void ForceWindow::process()
 			{
 				const std::list<GOAL> error_list = anarace->getGoal()->tryToAddGoal(ForceEntry::forceEntryUnit, ForceEntry::forceEntryTime, ForceEntry::forceEntryLocation, ForceEntry::forceEntryCount);
 
-				// TODO in addGoal rein
-//				addCount = -1  - ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); 
-				
 				if(error_list.size()>0)
 				{
 					if(ForceEntry::changed == GOAL_TIME_HAS_CHANGED)
@@ -186,7 +180,9 @@ void ForceWindow::process()
 					} else
 					for(std::list<GOAL>::const_iterator blink = error_list.begin(); blink != error_list.end(); ++blink)
 					{
-						UI_Object::theme.playSound(ERROR_SOUND, (getAbsolutePosition() + getSize()/2).x);
+#ifndef _NO_FMOD_SOUND
+						UI_Object::sound.playSound(ERROR_SOUND, (getAbsolutePosition() + getSize()/2).x);
+#endif
 						for(std::list<ForceEntry*>::iterator f = goalForceList.begin(); f != goalForceList.end(); ++f)
 							if(((*f)->getUnit() == blink->getUnit())&&((*f)->getTime() == blink->getTime()))//&&((*f)->getLocation() == blink->getLocation()))
 							{
@@ -224,7 +220,9 @@ void ForceWindow::process()
 	if(ForceEntry::doCompleteSound)
 	{
 		ForceEntry::doCompleteSound = false;
-		UI_Object::theme.playSound(COMPLETE_SOUND, (getAbsolutePosition() + getSize()/2).x);
+#ifndef _NO_FMOD_SOUND
+		UI_Object::sound.playSound(COMPLETE_SOUND, (getAbsolutePosition() + getSize()/2).x);
+#endif
 	}
 
 // TODO rechtsklick -> entfernen, auch im unitmenu!
@@ -244,7 +242,9 @@ void ForceWindow::process()
 		{
 			for(std::list<GOAL>::const_iterator blink = error_list.begin(); blink != error_list.end(); ++blink)
 			{
-				UI_Object::theme.playSound(ERROR_SOUND, (getAbsolutePosition() + getSize()/2).x);
+#ifndef _NO_FMOD_SOUND
+				UI_Object::sound.playSound(ERROR_SOUND, (getAbsolutePosition() + getSize()/2).x);
+#endif
 				for(std::list<ForceEntry*>::iterator f = goalForceList.begin(); f!=goalForceList.end(); ++f)
 					if(((*f)->getUnit() == blink->getUnit())&&((*f)->getTime() == blink->getTime()))//&&((*f)->getLocation() == blink->getLocation()))
 					{
@@ -265,9 +265,9 @@ void ForceWindow::process()
 		}
 	}
 
-	if((pressed = goalMenu->getPressedItem())>=0)
+	assignGoal = -1;
+	if((assignGoal = goalMenu->getPressedItem())>=0)
 	{
-		assignGoal = pressed;
 		menuRadio->forceUnpressAll();
 		menuButton[GOAL_MENU]->forceUnpress();
 	}
@@ -339,9 +339,9 @@ void ForceWindow::process()
 	if(!isMouseInside()) 
 		mouseHasLeft();
 
-	if(assignGoal>=0)
+/*	if(assignGoal>=0)
 	{
-		anarace->assignGoal(database.getGoal(anarace->getRace(), assignGoal));
+		anarace->assignStartGoal(database.getGoal(anarace->getRace(), assignGoal));
 		UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(SET_NEW_GOAL_LIST_STRING, anarace->getGoal()->getName()));
 		std::list<ForceEntry*>::iterator a = goalForceList.begin();
 		while(a!=goalForceList.end())
@@ -356,7 +356,7 @@ void ForceWindow::process()
 			a = nongoalForceList.erase(a);
 		}
 		setChangedFlag(); // TODO, evtl resetten irgendwie...
-	}
+	}*/
 
 	startLine = 0;
 	if(unitMenu->getHeight()/2 > startLine)
@@ -485,7 +485,7 @@ void ForceWindow::processList()
 		return;
 	std::list<ForceEntry*>::iterator goal_entry = goalForceList.begin();
 
-	for(std::list<GOAL>::iterator i = anarace->getGoal()->goal.begin(); i!= anarace->getGoal()->goal.end(); ++i)
+	for(std::list<GOAL>::iterator i = anarace->getGoal()->goalList.begin(); i!= anarace->getGoal()->goalList.end(); ++i)
 	{
 		if(goal_entry == goalForceList.end())
 		{
@@ -669,7 +669,7 @@ void ForceWindow::processList()
 	}*/
 		
 //	int z = forceList.size();
-//	int zz = anarace->getGoal()->goal.size(); 
+//	int zz = anarace->getGoal()->goalList.size(); 
 // ------------------- GOALS ----------------------------
 // ------ START WHERE THE MENUES END
 	startLine = 0;
@@ -694,7 +694,7 @@ void ForceWindow::processList()
 
 		
 //	bool menuIsOpen=false;
-	for(std::list<GOAL>::const_iterator i = anarace->getGoal()->goal.begin(); i!= anarace->getGoal()->goal.end(); ++i)
+	for(std::list<GOAL>::const_iterator i = anarace->getGoal()->goalList.begin(); i!= anarace->getGoal()->goalList.end(); ++i)
 	{
 /*		if(i->getLocation()!=current_location)
 		{
@@ -805,7 +805,7 @@ void ForceWindow::processList()
 					addLocation = 0;
 					msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(MOVED_NON_GOAL_STRING, UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i))));
 				}
-				fitItemToRelativeClientRect(edge, 1);
+				fitItemToRelativeClientRect(edge, true);
 				++line;
 				++forceEntry;
 			} // goal > 0
@@ -813,7 +813,7 @@ void ForceWindow::processList()
 
 	--line;
 	Rect edge=Rect(getRelativeClientRectPosition() + Point(0, 45 + line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)), Size(getClientRectWidth(), FONT_SIZE+6));
-	fitItemToRelativeClientRect(edge, 1);
+	fitItemToRelativeClientRect(edge, true);
 	
 
 	markedUnit = 0;

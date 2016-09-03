@@ -1,0 +1,17 @@
+ ----------
+ Languages
+----------
+
+Currently there is only german and english supported. If you stumble over a spelling or grammar error (highly possible :o ) or if you just do not understand a line please let me know so that I can correct and/or improve the text. I am by no means a so called technical writer and what makes it even worse I am the programmer of this program so when writing the texts I have a whole understanding of the program of how each option, each button and each item works while you have to learn it within minutes.
+My first language is german, not english, so this increases the possibility for mistakes even more. 
+
+
+I do not have the will (or the money) to hire professional translators for other languages, so if you want to volunteer to translate for your own (preferably first) language, please do so :) You can lurk through the 'settings/strings/' files to see how much items are needed to be translated (currently around 600). For some items you need an understanding how the program works so we probably will have to communicate a little :)
+In the help texts ('settings/help/') there is even more to translate (>1000 lines), they are only of secondary importance - who reads them anyway :D?
+
+~ TODO
+
+
+Best regards,
+Clemens
+

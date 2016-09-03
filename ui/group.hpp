@@ -1,9 +1,7 @@
 #ifndef _UI_TITLE_GROUP_HPP
 #define _UI_TITLE_GROUP_HPP
 
-#include "object.hpp"
 #include "statictext.hpp"
-#include <string>
 
 enum eGroupType
 {
@@ -25,10 +23,6 @@ class UI_Group : public UI_Object
 
 		void draw(DC* dc) const;
 		void process();
-		UI_Object* checkToolTip();
-		UI_Object* checkHighlight();
-
-		void reloadStrings();
 		void reloadOriginalSize();
 
 		void alignWidth(const unsigned int width);

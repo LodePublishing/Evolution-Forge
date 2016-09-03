@@ -1,7 +1,4 @@
 #include "editfield.hpp"
-#include "button.hpp"
-#include <sstream>
-
 
 // TODO: Tatsaechliches Eingabefeld seperat machen
 // ISO-LEVEL 2 
@@ -16,6 +13,11 @@ UI_EditField::UI_EditField(UI_Object* edit_parent, const Rect& edit_rect, const 
 	UI_Object::addEditField(this);
 }
 
+UI_EditField::~UI_EditField()
+{
+	UI_Object::removeEditField(this);
+}
+
 void UI_EditField::resetData()
 {
 	updateText(" ");
@@ -23,11 +25,7 @@ void UI_EditField::resetData()
 	pressedEscape = false;
 }
 
-UI_EditField::~UI_EditField()
-{
-	UI_Object::removeEditField(this);
-}
-
+/*
 UI_EditField::UI_EditField(const UI_EditField& object) :
 	UI_StaticText((UI_StaticText)object),
 	position(object.position),
@@ -42,7 +40,7 @@ UI_EditField& UI_EditField::operator=(const UI_EditField& object)
 	ani = object.ani;
 	pressedEnter = object.pressedEnter;
 	return(*this);
-}
+}*/
 
 void UI_EditField::addChar(char a)
 {
@@ -81,7 +79,6 @@ void UI_EditField::removeCharDelete()
 	ani=5;
 }
 
-#include <math.h>					  
 void UI_EditField::draw(DC* dc) const
 {
 	if(!checkForNeedRedraw())
@@ -108,14 +105,6 @@ void UI_EditField::process()
 	++ani;
 }
 
-UI_Object* UI_EditField::checkToolTip()
-{
-	return(UI_StaticText::checkToolTip());
-}
 
-UI_Object* UI_EditField::checkHighlight()
-{
-	return(UI_StaticText::checkHighlight());
-}
 
 

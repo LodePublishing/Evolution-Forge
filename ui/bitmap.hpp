@@ -6,7 +6,6 @@
 class UI_Bitmap : public UI_Object
 {
 	public:
-// TODO Beschreibung der Konstruktoren
 		UI_Bitmap(UI_Object* bitmap_parent, 
 				const Rect& bitmap_rect, 
 				const Size distance_bottom_right, 

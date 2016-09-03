@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include "../core/configuration.hpp"
 void toErrorLog(const std::string& msg) {
 	std::cout << msg << "\n";
 }
@@ -220,24 +221,15 @@ void parse_2nd_block(std::ifstream& stream, std::map<std::string, std::map<std::
 	}
 }*/
 
-const std::string formatTime(const int time)
+const std::string formatTime(const int time, const unsigned int speed)
 {
 	std::ostringstream os;
 	os.str("");
 	if(time < 0) os << "- ";
-	os << time/60 << ":" << std::setfill('0') << std::setw(2) << time%60;
+	int my_time = time / (6+speed*3);
+	os << my_time/60 << ":" << std::setfill('0') << std::setw(2) << my_time%60;
 	return(os.str());
 }
-
-const std::string formatTime2(const int time)
-{
-	std::ostringstream os;
-	os.str("");
-	if(time < 0) os << "- ";
-	os << time/60 << "_" << std::setfill('0') << std::setw(2) << time%60;
-	return(os.str());
-}
-
 
 // -----------------------------------------------
 // ------  END PARSING TOOLS AND ERROR LOGS ------

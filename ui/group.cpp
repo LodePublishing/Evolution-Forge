@@ -1,5 +1,4 @@
 #include "group.hpp"
-#include "button.hpp"
 
 UI_Group::UI_Group(UI_Object* group_parent, const Rect& initial_rect, const Size bottom_right_distance, const eGroupType group_type, const ePositionMode position_mode, const eString txt ) :
 	UI_Object(group_parent, initial_rect, bottom_right_distance, position_mode, NOTHING),
@@ -8,12 +7,9 @@ UI_Group::UI_Group(UI_Object* group_parent, const Rect& initial_rect, const Size
 	groupType(group_type)
 { }
 
-UI_Group::~UI_Group() {
+UI_Group::~UI_Group() 
+{
 	delete title;
-}
-
-void UI_Group::reloadStrings() {
-	UI_Object::reloadStrings();
 }
 
 void UI_Group::calculateBoxSize()
@@ -67,7 +63,7 @@ void UI_Group::calculateBoxSize()
 		}
 		tmp = tmp->getNextBrother();
 	} while(tmp!=getChildren());
-	Size s = Size(maxWidth , maxHeight+7);
+	Size s = Size(maxWidth+7, maxHeight+7);
 
 //	setOriginalSize(s);
 	adjustRelativeRect(Rect(getTargetPosition(), s));
@@ -94,14 +90,14 @@ void UI_Group::draw(DC* dc) const
 {
 	if(checkForNeedRedraw())
 	{
-		if(highlighted)
+/*		if(highlighted)
 			dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 		else	
-			dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));
+			dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));*/
 		if(title!=NULL)
 		{
-			dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-			dc->DrawRoundedRectangle(getAbsolutePosition() - Size(4, 5), getSize(), 4);
+//			dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
+//			dc->DrawRoundedRectangle(getAbsolutePosition() - Size(4, 5), getSize(), 4);
 		
 			Size s = title->getTextSize();
 		  	Rect titleRect = Rect(getAbsolutePosition() - Size(5, 15), s + Size(5,2));
@@ -111,8 +107,8 @@ void UI_Group::draw(DC* dc) const
 		}
 		else
 		{
-			dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-			dc->DrawEdgedRoundedRectangle(getAbsolutePosition()-Size(3,0), getSize()+Size(6,0), 4);
+//			dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
+//			dc->DrawEdgedRoundedRectangle(getAbsolutePosition()-Size(3,0), getSize()+Size(6,0), 4);
 		}
 	}
 	UI_Object::draw(dc);
@@ -149,15 +145,5 @@ void UI_Group::process()
 		setNeedRedrawMoved();
 }
 
-
-UI_Object* UI_Group::checkToolTip()
-{
-	return(UI_Object::checkToolTip());
-}
-
-UI_Object* UI_Group::checkHighlight()
-{
-	return(UI_Object::checkHighlight());
-}
 
 

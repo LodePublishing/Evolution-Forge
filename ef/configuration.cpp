@@ -18,10 +18,12 @@ EF_Configuration::EF_Configuration():
 	fullScreen(false),
 	softwareMouse(false),
 	backgroundBitmap(false),
+	raceSpecificTheme(true),
 	dnaSpiral(true),
 	toolTips(true),
 	showDebug(false),
 	maxGenerations(MAX_GENERATIONS-1),
+	gameSpeed(3),
 	configurationFile("settings/main.cfg")
 { }
 
@@ -40,10 +42,12 @@ void EF_Configuration::initDefaults()
 	setFacilityMode(true);
 	setFullScreen(false);
 	setBackgroundBitmap(false);
+	setRaceSpecificTheme(true);
 	setDnaSpiral(true);
 	setToolTips(true);
 	setShowDebug(false);
 	setMaxGenerations(MAX_GENERATIONS-1);
+	setGameSpeed(3);
 	configurationFile = "settings/main.cfg";
 }
 
@@ -55,11 +59,8 @@ void EF_Configuration::setConfigurationFile(const std::string& configuration_fil
 void EF_Configuration::saveToFile() const
 {
 	std::ofstream pFile(configurationFile.c_str(), std::ios_base::out | std::ios_base::trunc);
-	if(!pFile.is_open())
-	{
-		toErrorLog("ERROR: (EF_Configuration::saveToFile): File could not be opened.");
+	if(!checkStreamIsOpen(pFile, "EF_Configuration::saveToFile", configurationFile))
 		return;
-	}
 	pFile << "@SETTINGS" << std::endl;
 	pFile << "# Do autosave at the end of a run or ask for it?" << std::endl;
 	pFile << "    \"Auto runs\" = \"" << (int)isAutoRuns() << "\"" << std::endl;
@@ -79,22 +80,25 @@ void EF_Configuration::saveToFile() const
 	pFile << "    \"DNA Spiral\" = \"" << (int)isDnaSpiral() << "\"" << std::endl;
 	pFile << "# use background bitmap, saves some cpu power if deactivated" << std::endl;
 	pFile << "    \"Background bitmap\" = \"" << (int)isBackgroundBitmap() << "\"" << std::endl;
+	pFile << "# use global theme (0) or race specific themes + the global theme (1)?" << std::endl;
+	pFile << "    \"Race specific theme\" = \"" << (int)isRaceSpecificTheme() << "\"" << std::endl;
 	pFile << "    \"Fullscreen\" = \"" << (int)isFullScreen() << "\"" << std::endl;
 	pFile << "    \"Tooltips\" = \"" << (int)isToolTips() << "\"" << std::endl;
 	pFile << "# show which part of the program needs how much CPU resources" << std::endl;
 	pFile << "    \"Show debug\" = \"" << (int)isShowDebug() << "\"" << std::endl;
+        pFile << "# Game speed (0 = slowest, 6 = fastest)" << std::endl;
+        pFile << "\"Game speed\" = \"" << getGameSpeed() << "\"" << std::endl;
 	pFile << "@END" << std::endl;
 }
 	
 void EF_Configuration::loadConfigurationFile()
 {
 	std::ifstream pFile(configurationFile.c_str());
-	if(!pFile.is_open())
+	if(!checkStreamIsOpen(pFile, "EF_Configuration::loadConfigurationFile()", configurationFile))
 	{
-		toErrorLog("WARNING: (EF_Configuration::loadConfigurationFile): File not found.");
 		toErrorLog("-> Creating new file with default values...");
 		initDefaults();
-		saveToFile();		
+		saveToFile();
 		return;
 	}
 
@@ -104,13 +108,8 @@ void EF_Configuration::loadConfigurationFile()
 	char line[1024];
 	while(pFile.getline(line, sizeof line))
 	{
-		if(pFile.fail())
-		{
-			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
-#ifdef _SCC_DEBUG
-			toErrorLog("WARNING: (EF_Configuration::loadConfigurationFile) Long line!");
-#endif
-		}
+		if(!checkStreamForFailure(pFile, "EF_Configuration::loadConfigurationFile()", configurationFile))
+			return;
 		std::string text = line;
 		size_t start=text.find_first_not_of("\t ");
 		if((start==std::string::npos)||(text[0]=='#')||(text[0]=='\0'))
@@ -172,6 +171,10 @@ void EF_Configuration::loadConfigurationFile()
 				i->second.pop_front();
 			   	setBackgroundBitmap(atoi(i->second.front().c_str()));
 			}
+			if((i=block.find("Race specific theme"))!=block.end()){
+				i->second.pop_front();
+			   	setRaceSpecificTheme(atoi(i->second.front().c_str()));
+			}
 			if((i=block.find("Desired framerate"))!=block.end()){
 				i->second.pop_front();
 			   	setDesiredFramerate(atoi(i->second.front().c_str()));
@@ -186,6 +189,10 @@ void EF_Configuration::loadConfigurationFile()
 			   	setDnaSpiral(atoi(i->second.front().c_str()));
 			}
 
+                        if((i=block.find("Game speed"))!=block.end()){
+				i->second.pop_front();
+				setGameSpeed(atoi(i->second.front().c_str()));
+			}
 		}
 		old_pos = pFile.tellg();
 	}// END while
@@ -239,6 +246,13 @@ const bool EF_Configuration::setBackgroundBitmap(const bool background_bitmap)
 	return(true);
 }
 
+const bool EF_Configuration::setRaceSpecificTheme(const bool race_specific_theme) 
+{
+	if(raceSpecificTheme == race_specific_theme)
+		return(false);
+	raceSpecificTheme = race_specific_theme;
+	return(true);
+}
 const bool EF_Configuration::setDnaSpiral(const bool dna_spiral) 
 {
 	if(dnaSpiral == dna_spiral)
@@ -312,5 +326,20 @@ const bool EF_Configuration::setDesiredFramerate(const unsigned int desired_fram
 	desiredFramerate = desired_frame_rate;
 	return(true);
 }
+
+const bool EF_Configuration::setGameSpeed(const unsigned int game_speed)
+{
+	if(gameSpeed == game_speed)
+		return(false);
+#ifdef _SCC_DEBUG
+	if(game_speed>6) {
+		toErrorLog("WARNING (CoreConfiguration::setGameSpeed()): Value out of range.");
+		return(false);
+	}
+#endif
+	gameSpeed = game_speed;
+	return(true);
+}
+
 EF_Configuration efConfiguration;
 

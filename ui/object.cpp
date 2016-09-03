@@ -1,5 +1,4 @@
 #include "object.hpp"
-#include "configuration.hpp"
 
 UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const Size distance_bottom_right, const ePositionMode position_mode, const eAutoSize auto_size) :
 	isClipped(false),
@@ -146,7 +145,6 @@ void UI_Object::adjustSize(const eAdjustMode adjust_mode, const Size& size)
 //	UI_Object::addToProcessArray(this);
 	Size old_size = getSize();
 	signed int left = originalRect.getLeft();
-	signed int top = originalRect.getTop();
 	unsigned int full_width;
 	if(getParent() != NULL)
 	{
@@ -325,8 +323,6 @@ void UI_Object::addChild(UI_Object* child)
 
 		eldest_sibling->prevBrother = child;
 		youngest_sibling->nextBrother = child;
-
-//		children = child; ?
 	}
 }
 
@@ -383,11 +379,6 @@ void UI_Object::process()
 		} while (tmp != children);
 	}
 	oldSize = relativeRect.getSize();
-}
-
-const bool UI_Object::hasSizeChanged() const
-{
-	return(sizeHasChanged);
 }
 
 void UI_Object::setSizeHasChanged(const bool size_has_changed)
@@ -751,9 +742,11 @@ void UI_Object::resetWindow()
 
 UI_Object* UI_Object::focus(NULL);
 
-//unsigned int UI_Object::key;
-
 UI_Theme UI_Object::theme;
+#ifndef _NO_FMOD_SOUND
+UI_Sound UI_Object::sound;
+#endif
+
 UI_ToolTip* UI_Object::tooltip(NULL);
 UI_Object* UI_Object::toolTipParent(NULL);
 unsigned int UI_Object::max_x(0);
@@ -771,7 +764,4 @@ std::list<std::string> UI_Object::msgList;
 //std::list<UI_Object*> UI_Object::nextProcessArray;
 
 bool UI_Object::toolTipWasDeleted = false;
-
-//unsigned int UI_Object::key;
-//unsigned int UI_Object::mod;
 

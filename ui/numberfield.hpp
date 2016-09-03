@@ -8,7 +8,8 @@ enum eFieldType
 {
 	NORMAL_NUMBER_TYPE,
 	PERCENT_NUMBER_TYPE,
-	TIME_NUMBER_TYPE
+	TIME_NUMBER_TYPE,
+	STRING_NUMBER_TYPE
 };
 
 class UI_NumberField : public UI_Object

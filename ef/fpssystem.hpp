@@ -42,6 +42,7 @@ class FPS_SYSTEM
 		unsigned int tickIntervall;
 		unsigned int framesPerGeneration;
 		unsigned int refresh;
+		void updateDesiredValues();
 };
 
 #endif

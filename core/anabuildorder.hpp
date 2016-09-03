@@ -10,8 +10,6 @@ class ANABUILDORDER: public PREBUILDORDER
 	public:
 		ANABUILDORDER();
 		~ANABUILDORDER();
-		ANABUILDORDER& operator=(const ANABUILDORDER& anarace);
-		ANABUILDORDER(const ANABUILDORDER& anarace);
 	
 		unsigned int fitnessAverage;
 		unsigned int fitnessVariance;
@@ -30,8 +28,8 @@ class ANABUILDORDER: public PREBUILDORDER
 		const bool isActive() const;
 		void setActive(const bool active=true);
 
-		std::list<PROGRAM>& getProgramList();
-		STATISTICS* getTimeStatistics();
+		const std::list<PROGRAM>& getProgramList() const;
+		const std::list<STATISTICS>& getTimeStatisticsList() const;
 
 		const unsigned int getAverageLength() const;
 //		void setFixed(const bool* fixed_list);
@@ -69,12 +67,13 @@ class ANABUILDORDER: public PREBUILDORDER
 		static void resetStaticData();
 		void prepareForNewGeneration();				// resets all data to standard values
 	
-		const bool writeProgramBackToCode(std::list<PROGRAM>& program_list);
-		void copyProgramList(std::list<PROGRAM>& program_list);
+		const bool writeProgramBackToCode(const std::list<PROGRAM>& program_list);
+		void copyProgramList(const std::list<PROGRAM>& program_list);
 
 		std::list<PROGRAM> programList; // TODO private machen
-
-		
+//	protected:
+	//	ANABUILDORDER& operator=(const ANABUILDORDER& anarace);
+	//	ANABUILDORDER(const ANABUILDORDER& anarace);
 	private:
 		unsigned int unitsTotal; // total number of all unit types at the end
 		unsigned int unitsTotalMax; // maximum number of one unit type at the end
@@ -90,9 +89,7 @@ class ANABUILDORDER: public PREBUILDORDER
 		unsigned int averageLength;
 
 		
-//		unsigned int phaenoCode[MAX_LENGTH];		// the final build order: an array of unit numbers (as defined in main.h)
-
-		STATISTICS timeStatistics[MAX_TIME];
+		std::list<STATISTICS> timeStatisticsList;
 
 //		const bool* fixed;
 		
@@ -120,12 +117,12 @@ const bool* ANABUILDORDER::getFixed() const
 	return(fixed);
 }*/
 
-inline std::list<PROGRAM>& ANABUILDORDER::getProgramList() {
+inline const std::list<PROGRAM>& ANABUILDORDER::getProgramList() const {
 	return(programList);
 }
 
-inline STATISTICS* ANABUILDORDER::getTimeStatistics() {
-	return(timeStatistics);
+inline const std::list<STATISTICS>& ANABUILDORDER::getTimeStatisticsList() const {
+	return(timeStatisticsList);
 }
 
 inline const unsigned int ANABUILDORDER::getAverageLength() const {
@@ -176,11 +173,11 @@ inline const unsigned int ANABUILDORDER::getTimePercentage() const {
 }
 
 inline const unsigned int ANABUILDORDER::getFastestGoalTime() const {
-	return(getGoal()->calculateFastestBO((*(pStart->getStartCondition()))->getUnit(GLOBAL)));
+	return(getGoal()->calculateFastestBO((*(getStartCondition()))->getUnit(GLOBAL)));
 }
 
 inline const GOAL_TREE ANABUILDORDER::getGoalTree(const unsigned int currentGoalUnit) const {
-	return(getGoal()->getGoalTree((*(pStart->getStartCondition()))->getUnit(GLOBAL), currentGoalUnit));
+	return(getGoal()->getGoalTree((*(getStartCondition()))->getUnit(GLOBAL), currentGoalUnit));
 }
 
 inline const unsigned int ANABUILDORDER::getCurrentpFitness() const

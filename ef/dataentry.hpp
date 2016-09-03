@@ -7,8 +7,9 @@
 class DataBaseEntry : public UI_Object
 {
 	public:
-		DataBaseEntry(UI_Object* entry_parent, Rect entry_rect, Size distance_bottom_right, ePositionMode position_mode, std::string text, const bool is_goal);
+		DataBaseEntry(UI_Object* entry_parent, const Rect& entry_rect, const Size distance_bottom_right, const ePositionMode position_mode, const std::string& text, const bool is_goal = false, const unsigned int bo_count = 0);
 		~DataBaseEntry();
+		
 		const bool isClicked() const;
 		const bool isMarked() const;
 		const bool isGoal() const;
@@ -18,7 +19,7 @@ class DataBaseEntry : public UI_Object
 		void draw(DC* dc) const;
 		void process();
 		void reloadOriginalSize();
-		const GOAL_ENTRY* myGoal;
+		unsigned int myGoal;
 		unsigned int myBO;
 	private:
 		UI_Button* entry;
@@ -26,28 +27,23 @@ class DataBaseEntry : public UI_Object
 		bool goal;
 };
 
-inline void DataBaseEntry::forceUnpress()
-{
+inline void DataBaseEntry::forceUnpress() {
 	entry->forceUnpress();
 }
 
-inline const bool DataBaseEntry::isClicked() const
-{
+inline const bool DataBaseEntry::isClicked() const {
 	return(entry->isLeftClicked());
 }
 
-inline const bool DataBaseEntry::isMarked() const
-{
+inline const bool DataBaseEntry::isMarked() const {
 	return(entry->isCurrentlyActivated());
 }
 
-inline const bool DataBaseEntry::isCurrentlyHighlighted() const
-{
+inline const bool DataBaseEntry::isCurrentlyHighlighted() const {
 	return(entry->isCurrentlyHighlighted());
 }
 
-inline const bool DataBaseEntry::isGoal() const
-{
+inline const bool DataBaseEntry::isGoal() const {
 	return(goal);
 }
 

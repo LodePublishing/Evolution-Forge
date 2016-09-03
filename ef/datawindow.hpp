@@ -18,6 +18,8 @@ class DataBaseWindow : public UI_Window
 
 		void reloadOriginalSize();
 
+		void newGeneration();
+
 		// goal liste (loeschbar)
 		// liste (aehnlich bowindow) von build-order-namen und Zeit (geordnet nach Zeit) (auch loeschbar)
 		// wenn da eins angeklickt wird dann erscheint die build order in einem weiteren Fenster (split-screen)
@@ -39,7 +41,7 @@ class DataBaseWindow : public UI_Window
  		Game* game;
 		bool raceMenuOpenedExternally;
 		unsigned int lastBoLoaded;
-		const GOAL_ENTRY* lastGoalLoaded;
+		unsigned int lastGoalLoaded;
 //		UI_Button* executeButton; // apply changes to the disk
 //		UI_Button* exportDataBase; // write everything in one file
 //		UI_Button* importDataBase; // import such a file and add it to the database without overwriting things ~~

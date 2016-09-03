@@ -1,6 +1,5 @@
 #include "radio.hpp"
 #include "configuration.hpp"
-#include <math.h>
 
 UI_Button::UI_Button(UI_Object* button_parent, 
 		const Rect button_rect, 
@@ -19,7 +18,7 @@ UI_Button::UI_Button(UI_Object* button_parent,
 			distance_bottom_right, 
 			button_position_mode == SPECIAL_BUTTON_LEFT ? DO_NOT_ADJUST : button_position_mode, 
 			button_auto_size),
-	radio(0), //?
+	radio(NULL), //?
 
 	allowMoveByMouse(false),
 	moved(false),
@@ -41,6 +40,7 @@ UI_Button::UI_Button(UI_Object* button_parent,
 		case PRESS_BUTTON_MODE:break;
 		case PUSH_BUTTON_MODE:statusFlags |= BF_REPEATS;break;
 		case TAB_BUTTON_MODE:statusFlags |= BF_IS_TAB; statusFlags |= BF_STATIC;break;
+		case TOP_TAB_BUTTON_MODE:statusFlags |= BF_IS_TOP_TAB; statusFlags |= BF_IS_TAB; statusFlags |= BF_STATIC;break;
 		case BOGRAPH_BUTTON_MODE:statusFlags |= BF_IS_RECTANGLE;break;
 		case CHECK_BUTTON_MODE:statusFlags |= BF_STATIC; statusFlags |= BF_IS_CHECKBUTTON;break;
 		default:break;
@@ -53,11 +53,11 @@ UI_Button::UI_Button(UI_Object* button_parent,
 	if(button_text!=NULL_STRING)
 	{
 		if((button_position_mode == SPECIAL_BUTTON_LEFT)/*||(button_position_mode == SPECIAL_BUTTON_ARRANGE_TOP_LEFT)||(button_position_mode == SPECIAL_BUTTON_ARRANGE_TOP_RIGHT) || (button_position_mode == SPECIAL_BUTTON_ARRANGE_LEFT) || (button_position_mode == SPECIAL_BUTTON_ARRANGE_RIGHT)*/)
-			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.getWidth()+2,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, CENTER_LEFT); // TODO
+			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.getWidth()+4,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, CENTER_LEFT); // TODO
 		else if(button_auto_size == AUTO_SIZE)
-			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.getWidth()+2,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, DO_NOT_ADJUST); // TODO
+			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.getWidth()+4,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, DO_NOT_ADJUST); // TODO
 		else
-			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.getWidth()+0,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, HORIZONTALLY_CENTERED); // TODO
+			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.getWidth(), 1), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, HORIZONTALLY_CENTERED); // TODO
 	} else if(hasBitmap)
 		setOriginalSize(bitmap_size);
 
@@ -66,7 +66,7 @@ UI_Button::UI_Button(UI_Object* button_parent,
 UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Size distance_bottom_right, const eButtonColorsType button_colors_type, const bool has_bitmap, const eButtonMode button_mode, const eString button_text, const eString button_tooltip, const ePositionMode button_position_mode, const eFont button_font, const eAutoSize button_auto_size) :
 	UI_Object(button_parent, button_rect, distance_bottom_right, 
 			button_position_mode == SPECIAL_BUTTON_LEFT ? DO_NOT_ADJUST : button_position_mode, button_auto_size),
-	radio(0), //?
+	radio(NULL), //?
 
 	allowMoveByMouse(false),
 	moved(false),
@@ -89,6 +89,7 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Siz
 		case PRESS_BUTTON_MODE:break;
 		case PUSH_BUTTON_MODE:statusFlags |= BF_REPEATS;break;
 		case TAB_BUTTON_MODE:statusFlags |= BF_IS_TAB; statusFlags |= BF_STATIC;break;
+		case TOP_TAB_BUTTON_MODE:statusFlags |= BF_IS_TOP_TAB; statusFlags |= BF_IS_TAB; statusFlags |= BF_STATIC;break;
 		case BOGRAPH_BUTTON_MODE:statusFlags |= BF_IS_RECTANGLE;break;
 		case CHECK_BUTTON_MODE:statusFlags |= BF_STATIC; statusFlags |= BF_IS_CHECKBUTTON;break;
 		default:break;
@@ -101,11 +102,11 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Siz
 	if(button_text!=NULL_STRING)
 	{
 		if(button_position_mode == SPECIAL_BUTTON_LEFT)
-			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.getWidth()+4,1), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, CENTER_LEFT); // TODO
+			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.getWidth()+4,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, CENTER_LEFT); // TODO
 		else if(button_auto_size == AUTO_SIZE)
-			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.getWidth()+4,1), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, DO_NOT_ADJUST); // TODO
+			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.getWidth()+4,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, DO_NOT_ADJUST); // TODO
 		else
-			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.getWidth()+4,1), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, HORIZONTALLY_CENTERED); // TODO
+			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.getWidth(), 1), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, HORIZONTALLY_CENTERED); // TODO
 	} else if(hasBitmap)
 		setOriginalSize(bitmap_size);
 
@@ -116,7 +117,7 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Siz
 					button_position_mode == SPECIAL_BUTTON_LEFT ? DO_NOT_ADJUST : 
 					button_position_mode, 
 					button_auto_size),
-	radio(0), //?
+	radio(NULL), //?
 
 	allowMoveByMouse(false),
 	moved(false),
@@ -138,6 +139,7 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Siz
 		case PRESS_BUTTON_MODE:break;
 		case PUSH_BUTTON_MODE:statusFlags |= BF_REPEATS;break;
 		case TAB_BUTTON_MODE:statusFlags |= BF_IS_TAB; statusFlags |= BF_STATIC;break;
+		case TOP_TAB_BUTTON_MODE:statusFlags |= BF_IS_TOP_TAB; statusFlags |= BF_IS_TAB; statusFlags |= BF_STATIC;break;
 		case BOGRAPH_BUTTON_MODE:statusFlags |= BF_IS_RECTANGLE;break;
 		case CHECK_BUTTON_MODE:statusFlags |= BF_STATIC; statusFlags |= BF_IS_CHECKBUTTON;break;
 		default:break;
@@ -158,7 +160,7 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Siz
 			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.getWidth()+4,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, DO_NOT_ADJUST); // TODO
 
 		else
-			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.getWidth()+4,0), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, TOTAL_CENTERED); // TODO
+			text = new UI_StaticText(this, button_text, Rect(Point(bitmap_size.getWidth(), 1), getSize()), Size(0,0), theme.lookUpButtonColors(button_colors_type)->startTextColor[PRESSED_BUTTON_PHASE], button_font, TOTAL_CENTERED); // TODO
 	} else if(hasBitmap)
 		setOriginalSize(bitmap_size);
 
@@ -263,6 +265,8 @@ void UI_Button::draw(DC* dc) const
 			if(statusFlags & BF_IS_RECTANGLE)
 //				dc->DrawRectangle(getAbsolutePosition()+Size(pressdepth, pressdepth), getSize()/*+Size(1,1)*/);
 				dc->DrawEdgedRoundedRectangle(getAbsolutePosition()+Size(pressdepth, pressdepth), getSize()/*+Size(1,1)*/, 2);
+			else if(statusFlags & BF_IS_TOP_TAB)
+				dc->DrawTabRectangle(getAbsolutePosition()+Size(pressdepth, pressdepth), getSize()/*+Size(1,1)*/);
 			else
 				dc->DrawEdgedRoundedRectangle(getAbsolutePosition()+Size(pressdepth, pressdepth), getSize()/*+Size(1,1)*/, 4);
 			dc->setPressedRectangle(false);
@@ -313,7 +317,9 @@ void UI_Button::mouseHasEnteredArea()
 	if(!(statusFlags & BF_HIGHLIGHTED))
 	{
 		statusFlags |= BF_JUST_HIGHLIGHTED;
-		UI_Object::theme.playSound(MOUSEOVER_SOUND, /*(getAbsolutePosition() + getSize()/2)*/mouse.x);
+#ifndef _NO_FMOD_SOUND
+		UI_Object::sound.playSound(MOUSEOVER_SOUND, /*(getAbsolutePosition() + getSize()/2)*/mouse.x);
+#endif
 	}
 	statusFlags |= BF_HIGHLIGHTED;
 	if(statusFlags & BF_WAS_PRESSED)
@@ -324,7 +330,7 @@ void UI_Button::mouseHasEnteredArea()
 			setPressDepth(1);
 		statusFlags |= BF_DOWN;
 	}
-	if(buttonColorsType == TEXT_BUTTON)
+	if((buttonColorsType == TEXT_BUTTON) || (buttonColorsType == VISITED_TEXT_BUTTON))
 		SDL_SetCursor(UI_Object::theme.lookUpCursor(HAND_CURSOR, 0));
 }
 
@@ -374,7 +380,9 @@ void UI_Button::mouseLeftButtonReleased()
 		statusFlags |= BF_LEFT_CLICKED;
 		if(statusFlags & BF_STATIC)
 		{
-			UI_Object::theme.playSound(CLICKED_SOUND, mouse.x);
+#ifndef _NO_FMOD_SOUND
+			UI_Object::sound.playSound(CLICKED_SOUND, mouse.x);
+#endif
 			if((isOriginalPosition)&&(!(statusFlags & BF_IS_TAB)))
 				isOriginalPosition=false;
 			else if(!isOriginalPosition)
@@ -384,7 +392,9 @@ void UI_Button::mouseLeftButtonReleased()
 		}
 		else
 		{
-			UI_Object::theme.playSound(CLICK_SOUND, mouse.x);
+#ifndef _NO_FMOD_SOUND
+			UI_Object::sound.playSound(CLICK_SOUND, mouse.x);
+#endif
 			setPressDepth(0);
 		}
 		if(radio)
@@ -431,8 +441,10 @@ void UI_Button::mouseRightButtonReleased()
 	
 		if(statusFlags & BF_STATIC)
 		{
-	/*		UI_Object::theme.playSound(CLICKED_SOUND, (getAbsolutePosition() + getSize()/2).x);
-			if((isOriginalPosition)&&(!(statusFlags & BF_IS_TAB)))
+#ifndef _NO_FMOD_SOUND
+	//		UI_Object::sound.playSound(CLICKED_SOUND, (getAbsolutePosition() + getSize()/2).x);
+#endif
+	/*		if((isOriginalPosition)&&(!(statusFlags & BF_IS_TAB)))
 				isOriginalPosition=false;
 			else if(!isOriginalPosition)
 				isOriginalPosition=true;
@@ -440,7 +452,9 @@ void UI_Button::mouseRightButtonReleased()
 		}
 		else
 		{
-			UI_Object::theme.playSound(CLICK_SOUND, mouse.x);
+#ifndef _NO_FMOD_SOUND
+			UI_Object::sound.playSound(CLICK_SOUND, mouse.x);
+#endif
 			setPressDepth(0);
 		}
 	/*	if(radio)
@@ -683,7 +697,9 @@ void UI_Button::forcePress()
                 } else if((!(statusFlags & BF_STATIC)) && (!(statusFlags & BF_DOWN)))
                 {
                         statusFlags |= BF_LEFT_CLICKED | BF_DOWN;                        //~?
-                        UI_Object::theme.playSound(CLICK_SOUND, (getAbsolutePosition() + getSize()/2).x);
+#ifndef _NO_FMOD_SOUND
+                        UI_Object::sound.playSound(CLICK_SOUND, (getAbsolutePosition() + getSize()/2).x);
+#endif
                         setPressDepth(1); //?
                 }
         }

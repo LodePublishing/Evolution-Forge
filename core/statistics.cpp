@@ -5,7 +5,8 @@ STATISTICS::STATISTICS():
 	haveSupply(0),
 	minerals(0),
 	gas(0),
-	fitness(0)
+	fitness(0),
+	time(0)
 { }
 
 STATISTICS::~STATISTICS() {}
@@ -17,6 +18,7 @@ void STATISTICS::resetData()
 	minerals = 0;
 	gas = 0;
 	fitness = 0;
+	time = 0;
 }
 
 STATISTICS& STATISTICS::operator=(const STATISTICS& object)
@@ -26,6 +28,7 @@ STATISTICS& STATISTICS::operator=(const STATISTICS& object)
 	minerals = object.minerals;
 	gas = object.gas;
 	fitness = object.fitness;
+	time = object.time;
 	return(*this);
 }
 
@@ -35,7 +38,8 @@ STATISTICS::STATISTICS(const STATISTICS& object) :
 	haveSupply(object.haveSupply),
 	minerals(object.minerals),
 	gas(object.gas),
-	fitness(object.fitness)
+	fitness(object.fitness),
+	time(object.time)
 { }
 
 

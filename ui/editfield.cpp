@@ -1,5 +1,4 @@
 #include "editfield.hpp"
-#include <sstream>
 
 // ISO-LEVEL 2 
 
@@ -144,7 +143,6 @@ void UI_EditField::removeCharDelete()
 	ani=5;
 }
 
-#include <math.h>					  
 void UI_EditField::draw(DC* dc) const
 {
 //	if(!checkForNeedRedraw())
@@ -183,14 +181,6 @@ void UI_EditField::process()
 	editField->setNeedRedrawNotMoved();
 	editField->doHighlight(isMouseInside());
 	descriptionText->doHighlight(isMouseInside());
-}
-
-UI_Object* UI_EditField::checkToolTip() {
-	return(UI_Object::checkToolTip());
-}
-
-UI_Object* UI_EditField::checkHighlight() {
-	return(UI_Object::checkHighlight());
 }
 
 

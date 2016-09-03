@@ -3,7 +3,6 @@
 
 #include "../ui/window.hpp"
 #include "../core/anabuildorder.hpp"
-#include "math.h"
 
 enum eStatEntry
 {

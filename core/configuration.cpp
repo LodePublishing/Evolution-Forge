@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 
-CoreConfiguration::CoreConfiguration(): 
+CoreConfiguration::CoreConfiguration() : 
 	crossingOver(MIN_CROSSING_OVER),
 	breedFactor(20),
 	mutationFactor(200),
@@ -13,10 +13,10 @@ CoreConfiguration::CoreConfiguration():
 	noise(0),
 	preprocessBuildOrder(false),
 	allowGoalAdaption(true),
-	allowWaitOrders(true),
-	waitAccuracy(5),
 	fastCalculation(false),
 	expansionSet(true),
+	allowWaitOrders(true),
+	waitAccuracy(100),
 	configurationFile("settings/core.cfg")
 { }
 
@@ -30,12 +30,12 @@ void CoreConfiguration::initDefaults()
 	setMutationFactor(200);
 	setMaxTime(MAX_TIME-1);
 	setMaxTimeOut(MAX_TIMEOUT-1);
-	setMaxLength(MAX_LENGTH-1);
+	setMaxLength(MAX_LENGTH);
 	setNoise(0);
 	setPreprocessBuildOrder(false);
 	setAllowGoalAdaption(true);
 	setAllowWaitOrders(true);
-	setWaitAccuracy(5);
+	setWaitAccuracy(100);
 	setFastCalculation(false);
 	setExpansionSet(true);
 	configurationFile = "settings/core.cfg";
@@ -44,11 +44,8 @@ void CoreConfiguration::initDefaults()
 void CoreConfiguration::saveToFile() const
 {
 	std::ofstream pFile(configurationFile.c_str(), std::ios_base::out | std::ios_base::trunc);
-	if(!pFile.is_open())
-	{
-		toErrorLog("ERROR (CoreConfiguration::saveToFile()): File could not be opened.");
+	if(!checkStreamIsOpen(pFile, "CoreConfiguration::saveToFile", configurationFile))
 		return;
-	}
 	pFile << "@SETTINGS" << std::endl;
 	pFile << "# fast calculation?" << std::endl;
 	pFile << "\"Fast calculation\" = \"" << (int)isFastCalculation() << "\"" << std::endl;
@@ -57,7 +54,7 @@ void CoreConfiguration::saveToFile() const
 	pFile << "# allow orders to let the build order wait a certain time instead of building units and buildings as soon as possible?" << std::endl;
 	pFile << "\"Allow wait orders\" = \"" << (int)isAllowWaitOrders() << "\"" << std::endl;
 	pFile << "# time in seconds to wait (less = the more accurate but needs also much more time to calculate)" << std::endl;
-	pFile << "\"Wait accuracy\" = \"" << (int)getWaitAccuracy() << "\"" << std::endl;	
+	pFile << "\"Wait accuracy\" = \"" << getWaitAccuracy() << "\"" << std::endl;	
 
 //	pFile << "# max time in seconds" << std::endl;
 //	pFile << "    \"Max Time\" = \"" << getMaxTime() << "\"" << std::endl;
@@ -82,29 +79,22 @@ void CoreConfiguration::saveToFile() const
 void CoreConfiguration::loadConfigurationFile()
 {
 	std::ifstream pFile(configurationFile.c_str());
-	if(!pFile.is_open())
+	if(!checkStreamIsOpen(pFile, "CoreConfiguration::loadConfigurationFile()", configurationFile))
 	{
-		toErrorLog("WARNING: (CoreConfiguration::loadConfigurationFile): File not found.");
 		toErrorLog("-> Creating new file with default values...");
 		initDefaults();
 		saveToFile();		
 		return;
 	}
-	
 	toInitLog("* Loading " + configurationFile);
 	
 	std::fstream::pos_type old_pos = pFile.tellg();
+	
 	char line[1024];
 	while(pFile.getline(line, sizeof line))
 	{
-		if(pFile.fail())
-		{
-			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
-#ifdef _SCC_DEBUG
-			toErrorLog("WARNING: (CoreConfiguration::loadConfigurationFile) Long line!");
-#endif
-		}
-		
+		if(!checkStreamForFailure(pFile, "CoreConfiguration::loadConfigurationFile()", configurationFile))
+			return;
 		std::string text = line;
 		size_t start = text.find_first_not_of("\t ");
 		if((start == std::string::npos) || (text[0] == '#') || (text[0] == '\0'))
@@ -120,7 +110,7 @@ void CoreConfiguration::loadConfigurationFile()
 			if(!parse_block_map(pFile, block))
 			{
 #ifdef _SCC_DEBUG
-				toErrorLog("WARNING: (CoreConfiguration::loadConfigurationFile) No concluding @END was found!");
+				toErrorLog("WARNING (CoreConfiguration::loadConfigurationFile) No concluding @END was found!");
 #endif
 			}
 			std::map<std::string, std::list<std::string> >::iterator i;
@@ -207,8 +197,8 @@ const bool CoreConfiguration::setWaitAccuracy(const unsigned int wait_accuracy)
 	if(waitAccuracy == wait_accuracy)
 		return(false);
 #ifdef _SCC_DEBUG
-	if((wait_accuracy<1) || (wait_accuracy>120)) {
-		toErrorLog("WARNING (CoreConfiguration::setWaitAccuracy()): Value out of range.");return(false);
+	if((wait_accuracy<1) || (wait_accuracy>1200)) {
+		toErrorLog("WARNING (CoreConfiguration::setWaitAccuracy()()): Value out of range.");return(false);
 	}
 #endif
 	waitAccuracy = wait_accuracy;
@@ -221,7 +211,7 @@ const bool CoreConfiguration::setCrossingOver(const unsigned int crossing_over)
 		return(false);
 #ifdef _SCC_DEBUG
 	if((crossing_over<MIN_CROSSING_OVER)||(crossing_over>MAX_CROSSING_OVER)) {
-		toErrorLog("WARNING: (CoreConfiguration::setCrossingOver): Value out of range.");return(false);
+		toErrorLog("WARNING (CoreConfiguration::setCrossingOver()): Value out of range.");return(false);
 	}
 #endif
 	crossingOver = crossing_over;
@@ -234,7 +224,7 @@ const bool CoreConfiguration::setBreedFactor(const unsigned int breed_factor)
 		return(false);
 #ifdef _SCC_DEBUG
 	if((breed_factor<MIN_BREED_FACTOR)||(breed_factor>MAX_BREED_FACTOR)) {
-		toErrorLog("WARNING: (CoreConfiguration::setBreedFactor): Value out of range.");return(false);
+		toErrorLog("WARNING (CoreConfiguration::setBreedFactor()): Value out of range.");return(false);
 	}
 #endif
 	breedFactor = breed_factor;
@@ -246,7 +236,7 @@ const bool CoreConfiguration::setMutationFactor(const unsigned int mutation_fact
 		return(false);
 #ifdef _SCC_DEBUG
 	if((mutation_factor<MIN_MUTATION_FACTOR)||(mutation_factor>MAX_MUTATION_FACTOR)) {
-		toErrorLog("WARNING: (CoreConfiguration::setMutationFactor): Value out of range.");return(false);
+		toErrorLog("WARNING (CoreConfiguration::setMutationFactor()): Value out of range.");return(false);
 	}
 #endif
 	mutationFactor = mutation_factor;
@@ -259,7 +249,7 @@ const bool CoreConfiguration::setMaxTime(const unsigned int max_time)
 		return(false);
 #ifdef _SCC_DEBUG
 	if((max_time<MIN_TIME)||(max_time>MAX_TIME)) {
-		toErrorLog("WARNING: (CoreConfiguration::setMaxTime): Value out of range.");return(false);
+		toErrorLog("WARNING (CoreConfiguration::setMaxTime()): Value out of range.");return(false);
 	}
 #endif
 	maxTime = max_time;
@@ -272,7 +262,7 @@ const bool CoreConfiguration::setMaxTimeOut(const unsigned int time_out)
 		return(false);
 #ifdef _SCC_DEBUG
 	if((time_out<MIN_TIMEOUT)||(time_out>MAX_TIMEOUT)) {
-		toErrorLog("WARNING: (CoreConfiguration::setMaxTimeOut): Value out of range.");return(false);
+		toErrorLog("WARNING (CoreConfiguration::setMaxTimeOut()): Value out of range.");return(false);
 	}
 #endif
 	maxTimeOut = time_out;
@@ -285,7 +275,7 @@ const bool CoreConfiguration::setMaxLength(const unsigned int max_length)
 		return(false);
 #ifdef _SCC_DEBUG
 	if((max_length<MIN_LENGTH)||(max_length>MAX_LENGTH)) {
-		toErrorLog("WARNING: (CoreConfiguration::setMaxLength): Value out of range.");return(false);
+		toErrorLog("WARNING (CoreConfiguration::setMaxLength()): Value out of range.");return(false);
 	}
 #endif
 	maxLength = max_length;
@@ -298,7 +288,7 @@ const bool CoreConfiguration::setNoise(const unsigned int desired_noise)
 		return(false);
 #ifdef _SCC_DEBUG
 	if((desired_noise < MIN_NOISE)||(desired_noise > MAX_NOISE)) {
-		toErrorLog("WARNING: (CoreConfiguration::setNoise): Value out of range.");return(false);
+		toErrorLog("WARNING (CoreConfiguration::setNoise()): Value out of range.");return(false);
 	}
 #endif
 	noise = desired_noise;

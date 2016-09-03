@@ -22,3 +22,7 @@ bei bowindow und bodiagram:
 Kurzdarstellung (5x mutalisk) ermoeglichen OK
 
 CheckButton!... ~
+
+
+
+Beim parallelen Bauen ergibt sich das PRoblem, dass 'programList' ja sich nach ausgefuehrten Befehlen richtet... ( 'buildIt' )

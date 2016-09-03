@@ -1,21 +1,17 @@
 #ifndef _GUI_FORCE_HPP
 #define _GUI_FORCE_HPP
 
-#include "../ui/window.hpp"
-
 #include "unitmenu.hpp"
 #include "goalmenu.hpp"
 //#include "racemenu.hpp"
 #include "forceentry.hpp"
 //#include "locationmenu.hpp"
-
 #include "techtree.hpp"
+
+#include "../ui/radio.hpp"
 
 #include "../core/anabuildorder.hpp"
 #include "../core/database.hpp"
-#include "../ui/radio.hpp"
-#include "savebox.hpp"
-
 
 enum eMenu
 {
@@ -54,6 +50,7 @@ class ForceWindow : public UI_Window
 		const bool saveGoal();
 		const bool openGoalMenu();
 		const bool openUnitMenu();
+		const signed int getAssignedGoal() const;
 	private:
 		unsigned int currentGoalUnit; // which goal is currently highlighted?
 		unsigned int startLine;
@@ -85,11 +82,17 @@ class ForceWindow : public UI_Window
 		unsigned int playerMax;
 		bool saveBox;
 
+		signed int assignGoal;
+
 		void mouseHasLeft();
 		
 		bool goalMenuOpenedExternally;
 		bool unitMenuOpenedExternally;
 };
+
+inline const signed int ForceWindow::getAssignedGoal() const {
+	return(assignGoal);
+}
 
 inline void ForceWindow::setMarkedUnit(const unsigned int marked_unit)
 {

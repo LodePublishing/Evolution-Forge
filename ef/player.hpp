@@ -1,13 +1,11 @@
 #ifndef _GUI_PLAYER_HPP
 #define _GUI_PLAYER_HPP
 
-#include "score.hpp"
 #include "bgwindow.hpp"
 #include "force.hpp"
 #include "bodiagram.hpp"
 #include "bowindow.hpp"
-
-
+#include "score.hpp"
 
 class Player : public UI_Object
 {
@@ -37,11 +35,10 @@ class Player : public UI_Object
 		void compactDisplayModeHasChanged();
 
 		const bool openMenu(const ePlayerOrder order);
-		void loadBuildOrder(const unsigned int number);
+
+		const signed int getLoadedBuildOrder() const;
+		const signed int getAssignedGoal() const;
 	private:
-		float geneAnimation;
-		void drawGeneString(DC* dc) const;
-		void drawGene(DC* dc, unsigned int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const;
 		
 		ANABUILDORDER* anarace; //pointer auf pointer, weil sich der pointer ja veraendert!
 //		unsigned int mode;

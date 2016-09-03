@@ -1,10 +1,8 @@
 #ifndef _UI_TOOLTIP_HPP
 #define _UI_TOOLTIP_HPP
 
-//#include "statictext.hpp"
 #include "longtext.hpp"
 
-//class UI_ToolTip : public UI_StaticText
 class UI_ToolTip : public UI_LongText
 {
 	public:

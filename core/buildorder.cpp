@@ -19,14 +19,6 @@ BUILDORDER::BUILDORDER():
 BUILDORDER::~BUILDORDER()
 { }
 
-BUILDORDER::BUILDORDER(const BUILDORDER& object) :
-	PREBUILDORDER((PREBUILDORDER)(object)),
-	mutationRate( object.mutationRate ),
-	pFitness( object.pFitness ),
-	sFitness( object.sFitness ),
-	tFitness( object.tFitness )
-{ }
-
 void BUILDORDER::resetData()
 {
 	PREBUILDORDER::resetData();
@@ -34,6 +26,14 @@ void BUILDORDER::resetData()
 	pFitness = 0;
 	tFitness = 99999;
 }
+
+/*BUILDORDER::BUILDORDER(const BUILDORDER& object) :
+	PREBUILDORDER((PREBUILDORDER)(object)),
+	mutationRate( object.mutationRate ),
+	pFitness( object.pFitness ),
+	sFitness( object.sFitness ),
+	tFitness( object.tFitness )
+{ }
 
 BUILDORDER& BUILDORDER::operator=(const BUILDORDER& object)
 {
@@ -43,7 +43,8 @@ BUILDORDER& BUILDORDER::operator=(const BUILDORDER& object)
 	sFitness = object.sFitness;
 	tFitness = object.tFitness;
 	return(*this);
-}
+}*/
+
 #include <sstream>
 const unsigned int BUILDORDER::calculateSecondaryFitness() const
 {
@@ -52,7 +53,7 @@ const unsigned int BUILDORDER::calculateSecondaryFitness() const
 	
 	//TODO: evtl gas und minerals (wie urspruenglich eigentlich) in Verhaeltnis setyen wieviel es jeweils Geysire/Mineralien gibt...	
 	unsigned int penalty = 0;
-	for(std::list<GOAL>::const_iterator i = getGoal()->goal.begin(); i!=getGoal()->goal.end(); ++i)
+	for(std::list<GOAL>::const_iterator i = getGoal()->goalList.begin(); i!=getGoal()->goalList.end(); ++i)
 		if((i->getTime() == 0)&&(i->getUnit() != SCV)&&(i->getUnit() != GAS_SCV))
 			bonus[i->getLocation()][i->getUnit()] += i->getCount();
 
@@ -61,8 +62,8 @@ const unsigned int BUILDORDER::calculateSecondaryFitness() const
 			if(bonus[j][i]>0)
 			{
 				unsigned int total = bonus[j][i];
-				if((*(pStart->getStartCondition()))->getLocationTotal(j, i) > total)
-					total = (*(pStart->getStartCondition()))->getLocationTotal(j, i);
+				if((*(getStartCondition()))->getLocationTotal(j, i) > total)
+					total = (*(getStartCondition()))->getLocationTotal(j, i);
 				if(getLocationTotal(j, i) > total)
 					penalty += (getLocationTotal(GLOBAL,i) - total) * (stats[getGoal()->getRace()][i].gas + stats[getGoal()->getRace()][i].minerals);
 			}
@@ -82,12 +83,17 @@ const bool BUILDORDER::calculateStep()
 //ZERG:  CREEP!
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
 // TODO evtl bestTime wieder rein, Probleme gibts aber mit allen statistischen Sachen (sFitness, tFitness, ...)
-	
-	if((!getTimer()) || (ready = calculateReady()) || (!getIP())) 
+
+// calculateReady koennte eigentlich rausgenommen werden, jedoch sind 'null-ziele' moeglich, bei denen sofort abgebrochen werden muss (z.B. Ziel: 1scv 1cc)
+	if((ready) || (!getTimer()) || (!getIP())) 
 	{
 		setLength(coreConfiguration.getMaxLength()-getIP());
 		if(!ready) 
-			setTimer(0);
+		{
+			ready = calculateReady();
+			if(!ready)
+				setTimer(0);
+		}
 //		if(getGoal()->getMode()==0)
 			setpFitness(calculatePrimaryFitness(ready));
 		while(!buildingQueue.empty()) 
@@ -205,7 +211,7 @@ const bool BUILDORDER::calculateStep()
 				continue;
 			}
 			
-			const UNIT_STATISTICS* stat=&(*pStats)[build.getType()];
+			const UNIT_STATISTICS* stat=&(*getpStats())[build.getType()];
 				
 // ------ ACTUAL BUILDING ------
 			adjustLocationUnitsAfterCompletion(build.getLocation(), stat->facilityType, build.getFacility(), stat->facility2, build.getUnitCount());
@@ -218,10 +224,10 @@ const bool BUILDORDER::calculateStep()
 			
 // ------ SPECIAL RULES ------
 			if(build.getType() == REFINERY) {
-				removeOneMapLocationTotal(GLOBAL, build.getLocation(), VESPENE_GEYSIR);
+				getUnit(NEUTRAL_PLAYER, build.getLocation()).removeOneTotal(VESPENE_GEYSIR);
 				adjustGasHarvest(build.getLocation());
 			} else
-			if((build.getType() == COMMAND_CENTER)&&(!getLocationTotal(build.getLocation(),COMMAND_CENTER))) {
+			if((build.getType() == COMMAND_CENTER)&&(!getLocationTotal(build.getLocation(), COMMAND_CENTER))) {
 				adjustMineralHarvest(build.getLocation());
 				adjustGasHarvest(build.getLocation());
 			} else 
@@ -238,7 +244,6 @@ const bool BUILDORDER::calculateStep()
 			
 // ------ CHECK WHETHER WE ARE READY ------
 			getGoal()->calculateFinalTimes(build.getLocation(), build.getType(), getLocationTotal(build.getLocation(), build.getType()), getRealTimer());
-			ready = calculateReady();
 // ------ END CHECK -------
 			
 
@@ -261,6 +266,7 @@ const bool BUILDORDER::calculateStep()
 		} // END of if(build.getBuildFinishedTime()==getTimer())
 		else foundAnother=false;
 	} // END of while
+	ready = calculateReady();
 	return(false);
 	//TODO: Auch voruebergehende Ziele miteinberechnen (Bewegungen!)
 	//Also quasi eine zweite Goalreihe rein um scvs/Einheiten zu belohnen die bestimmte Orte besetzen... erstmal nur scvs... also z.B. int tempGoal...
@@ -276,7 +282,7 @@ const bool BUILDORDER::calculateStep()
 
 const bool BUILDORDER::buildGene(const unsigned int build_unit)
 {
-	const UNIT_STATISTICS* stat = &(*pStats)[build_unit];
+	const UNIT_STATISTICS* stat = &(*getpStats())[build_unit];
 	bool ok = false;
 	if(build_unit <= LAST_UNIT)
 	{
@@ -343,7 +349,7 @@ const bool BUILDORDER::buildGene(const unsigned int build_unit)
 		}
 		if(count>0)
 		{
-			if((lastcounter>0)&&(getLocationAvailible(last[lastcounter-1].location,last[lastcounter-1].unit)>0)&&((*pStats)[last[lastcounter-1].unit].speed>0))
+			if((lastcounter>0)&&(getLocationAvailible(last[lastcounter-1].location,last[lastcounter-1].unit)>0)&&((*getpStats())[last[lastcounter-1].unit].speed>0))
 			{
 				--lastcounter;
 				int nr=0;
@@ -362,7 +368,7 @@ const bool BUILDORDER::buildGene(const unsigned int build_unit)
 
 				setLocation(nr,count);
 				setType(nr,last[lastcounter].unit);
-				setRemainingBuildTime(nr,(*pMap)->location[last[lastcounter].location].getDistance(count)*100/(*pStats)[last[lastcounter].unit].speed);
+				setRemainingBuildTime(nr,(*pMap)->location[last[lastcounter].location].getDistance(count)*100/(*getpStats())[last[lastcounter].unit].speed);
 				setOnTheRun(nr,1);
 //						building[nr].IP=IP; TODO?
 						// 2x Unit => send 8/All instead of just one unit there
@@ -426,7 +432,7 @@ const bool BUILDORDER::buildIt(const unsigned int build_unit)
 	//Zuerst: availible pruefen ob am Ort gebaut werden kann
 	//Wenn nicht => +/- absteigen bis alle locations durch sind
 	
-	const UNIT_STATISTICS* stat = &((*pStats)[build_unit]);
+	const UNIT_STATISTICS* stat = &((*getpStats())[build_unit]);
 	bool ok = false;
 	unsigned int picked_facility = 0;
 	unsigned int current_location_window = 1; // TODO
@@ -501,10 +507,10 @@ const bool BUILDORDER::buildIt(const unsigned int build_unit)
         {
                 if(build_unit==REFINERY)
                 {
-                        if(getMapLocationAvailible(0, current_location_window, VESPENE_GEYSIR) <=0) // TODO!
+                        if(getUnit(NEUTRAL_PLAYER, current_location_window).getAvailible(VESPENE_GEYSIR) <=0) // TODO!
                                 ok=false;
                         else
-                                removeOneMapLocationAvailible(0, current_location_window, VESPENE_GEYSIR);
+				getUnit(NEUTRAL_PLAYER, current_location_window).removeOneAvailible(VESPENE_GEYSIR);
                 } else
                 if(build_unit==GAS_SCV)
                 {
@@ -528,14 +534,21 @@ const bool BUILDORDER::buildIt(const unsigned int build_unit)
 			build.setUnitCount(getLocationAvailible(current_location_window, GAS_SCV));
 		else
 			build.setUnitCount(1+(stat->create == build_unit));
-		build.setBuildFinishedTime(getTimer()-stat->BT);
-		build.setTotalBuildTime(stat->BT);
+		if(build_unit == INTRON)
+		{
+			build.setBuildFinishedTime(getTimer() - coreConfiguration.getWaitAccuracy());
+			build.setTotalBuildTime(coreConfiguration.getWaitAccuracy());
+		} else
+		{	
+			build.setBuildFinishedTime(getTimer()-stat->BT);
+			build.setTotalBuildTime(stat->BT);
+		}
 		build.setType(build_unit);
 // upgrade_cost is 0 if it's no upgrade
 		setMinerals(getMinerals()-(stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)));
 		setGas(getGas()-(stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)));
 		setNeedSupply(getNeedSupply()+stat->needSupply);
-//		if((stat->needSupply>0)||(((*pStats)[stat->facility[0]].needSupply<0)&&(stat->facilityType==IS_LOST)))  TODO!!!!
+//		if((stat->needSupply>0)||(((*getpStats())[stat->facility[0]].needSupply<0)&&(stat->facilityType==IS_LOST)))  TODO!!!!
 //		setNeedSupply(getNeedSupply()-stat->needSupply); //? Beschreibung!
 		adjustAvailibility(current_location_window, picked_facility, stat);
 		buildingQueue.push(build);
@@ -546,7 +559,7 @@ const bool BUILDORDER::buildIt(const unsigned int build_unit)
 			if(build_unit==LARVA)
 				addLarvaToQueue(current_location_window);
 			else
-			if(((*pStats)[build_unit].facility[0]==LARVA)&&(checkForLarva(current_location_window)))
+			if(((*getpStats())[build_unit].facility[0]==LARVA)&&(checkForLarva(current_location_window)))
 				buildIt(LARVA);
 		}
 // ----- END SPECIAL RULES -----

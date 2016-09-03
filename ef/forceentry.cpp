@@ -2,10 +2,11 @@
 
 #include "../ui/window.hpp"
 #include "../core/configuration.hpp"
+#include "configuration.hpp"
 #include <sstream>
 
 ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std::string& entry_unit):
-	UI_Button(entry_parent, entry_rect, Size(0,0), FORCE_ENTRY_BUTTON, false, PRESS_BUTTON_MODE, entry_unit, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH),
+	UI_Button(entry_parent, entry_rect, Size(0,0), FORCE_ENTRY_BUTTON, false, PRESS_BUTTON_MODE, entry_unit, SPECIAL_BUTTON_LEFT, SMALL_SHADOW_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH),
 	oldGoalCount(0),
 	oldGoalTime(0),
 	oldGoalFinalTime(0),
@@ -78,9 +79,6 @@ void ForceEntry::process()
 		{
 			if((ForceEntry::currentForceEntry == NULL) && (r.Inside(mouse)) && (!ForceEntry::makeTimeGoalButton))
 			{
-				std::ostringstream os;
-				os << mouse.x << "/" << mouse.y << " " << r.getLeft() << "/" << r.getTop();
-				toErrorLog(os.str());
 				setOriginalSize(Size(getParent()->getWidth()-30, getHeight()));
 				ForceEntry::makeTimeGoalButton = new UI_Button(getParent(), Rect(Point(getRelativePosition() + Size(getParent()->getWidth()-26, 0)), Size(16,10)), Size(0,0), GOAL_TIME_BUTTON, true, STATIC_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST);
 				ForceEntry::makeTimeGoalButton->updateToolTip(FORCEENTRY_TIME_TOOLTIP_STRING);
@@ -250,7 +248,7 @@ void ForceEntry::draw(DC* dc) const
 		dc->setTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(FULFILLED_TEXT_COLOR)));
 
 	if(goal)
-		os << totalNumber << "/" << goal->getCount();
+		os << totalNumber << " / " << goal->getCount();
 	else
 		os << totalNumber;
 		
@@ -265,16 +263,16 @@ void ForceEntry::draw(DC* dc) const
 		if ((goal->getFinalTime() > goal->getTime()) && (totalNumber >= goal->getCount()))
 		{
 			dc->setTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(NOT_FULFILLED_TEXT_COLOR)));
-			os << formatTime(goal->getFinalTime()) << " / " << formatTime(goal->getTime());
+			os << formatTime(goal->getFinalTime(), efConfiguration.getGameSpeed()) << " / " << formatTime(goal->getTime(), efConfiguration.getGameSpeed());
 		}
 		else if(totalNumber >= goal->getCount())
 		{
 			dc->setTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(FULFILLED_TEXT_COLOR)));
-			os << "+" << formatTime(goal->getTime() - goal->getFinalTime()) << " / " << formatTime(goal->getTime());
+			os << "+" << formatTime(goal->getTime() - goal->getFinalTime(), efConfiguration.getGameSpeed()) << " / " << formatTime(goal->getTime(), efConfiguration.getGameSpeed());
 		} else
 		{
 			dc->setTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(NOT_FULFILLED_TEXT_COLOR)));
-			os << "[" << formatTime(goal->getTime()) << "]";
+			os << "[" << formatTime(goal->getTime(), efConfiguration.getGameSpeed()) << "]";
 		}
 		s = dc->getTextExtent(os.str());
 		dc->DrawText(os.str(), getAbsolutePosition() + Point(getWidth() - s.getWidth() - getParent()->getWidth()/3, 1+(FONT_SIZE+12-s.getHeight())/2 ));

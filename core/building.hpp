@@ -6,21 +6,11 @@
 
 class Building
 {
-	private:
-		unsigned int totalBuildTime;
-		signed int buildFinishedTime; // timestamp when item is finnished (3600 = beginning)
-		unsigned int type;			  // Type of Building
-		unsigned int unitCount;  // number of units which are moving... currently ONLY for movements...
-		unsigned int facility;   // in what facility it was produced
-//		unsigned int IP;		  // for back-tracking certain buildings (especially for the 'cancel building' option of zerg)
-		unsigned int location;   // where the building was finished
-		unsigned int goal;			  // For movement, where the units will move to, not yet fully implemented
-		bool onTheRun;   // is this building/unit moving around or is it under construction at some place?
 	public:
-
 		Building();
-		Building(const Building& object);
+		~Building();
 		Building& operator=(const Building& object);
+		Building(const Building& object);
 		friend bool operator<(const Building& x, const Building& y)
 		{
 			if(x.getBuildFinishedTime() < y.getBuildFinishedTime())
@@ -52,25 +42,32 @@ class Building
 		void setLocation(const unsigned int building_location);
 		void setGoal(const unsigned int building_goal);
 		void setOnTheRun(const bool building_on_the_run);
+	private:
+		unsigned int totalBuildTime;
+		signed int buildFinishedTime; // timestamp when item is finnished (3600 = beginning)
+		unsigned int type;			  // Type of Building
+		unsigned int unitCount;  // number of units which are moving... currently ONLY for movements...
+		unsigned int facility;   // in what facility it was produced
+//		unsigned int IP;		  // for back-tracking certain buildings (especially for the 'cancel building' option of zerg)
+		unsigned int location;   // where the building was finished
+		unsigned int goal;			  // For movement, where the units will move to, not yet fully implemented
+		bool onTheRun;   // is this building/unit moving around or is it under construction at some place?
 };
 
 inline const unsigned int Building::getTotalBuildTime() const
 {
 #ifdef _SCC_DEBUG
 	if(totalBuildTime > MAX_TIME) {
-		toErrorLog("DEBUG: Building::getTotalBuildTime): Variable totalBuildTime not initialized.");return(0);
+		toErrorLog("DEBUG (Building::getTotalBuildTime()): Variable totalBuildTime not initialized.");return(0);
 	}
 #endif
 	return(totalBuildTime);
 }
-																				
-
-																				
 inline const unsigned int Building::getType() const
 {
 #ifdef _SCC_DEBUG
 	if(type >= LAST_UNIT) {
-		toErrorLog("DEBUG: Building::getType): Variable not initialized.");return(0);
+		toErrorLog("DEBUG (Building::getType()()): Variable not initialized.");return(0);
 	}
 #endif
 	return(type);
@@ -80,7 +77,7 @@ inline const unsigned int Building::getUnitCount() const
 {
 #ifdef _SCC_DEBUG
 	if(unitCount > MAX_TOTAL_UNITS) {
-		toErrorLog("DEBUG: Building::getUnitCount): Variable not initialized.");return(0);
+		toErrorLog("DEBUG (Building::getUnitCount()): Variable not initialized.");return(0);
 	}
 #endif
 	return(unitCount);
@@ -90,17 +87,17 @@ inline const unsigned int Building::getFacility() const
 {
 #ifdef _SCC_DEBUG
 	if(facility >= LAST_UNIT) {
-		toErrorLog("DEBUG: Building::getFacility): Variable not initialized.");return(0);
+		toErrorLog("DEBUG (Building::getFacility()): Variable not initialized.");return(0);
 	}
 #endif
 	return(facility);
 }
-																				
+
 /*inline const unsigned int Building::getIP() const
 {
 #ifdef _SCC_DEBUG
 	if(IP > MAX_LENGTH) {
-		toErrorLog("DEBUG: Building::getIP): Variable not initialized.");return(0);
+		toErrorLog("DEBUG (Building::getIP()): Variable not initialized.");return(0);
 	}
 #endif
 	return(IP);
@@ -110,7 +107,7 @@ inline const unsigned int Building::getLocation() const
 {
 #ifdef _SCC_DEBUG
 	if(location >= MAX_LOCATIONS) { // TODO
-		toErrorLog("DEBUG: Building::getLocation): Variable not initialized.");return(0);
+		toErrorLog("DEBUG (Building::getLocation()): Variable not initialized.");return(0);
 	}
 #endif
 	return(location);
@@ -120,7 +117,7 @@ inline const unsigned int Building::getGoal() const
 {
 #ifdef _SCC_DEBUG
 	if(goal >= LAST_UNIT) {
-		toErrorLog("DEBUG: Building::getGoal): Variable not initialized.");return(0);
+		toErrorLog("DEBUG (Building::getGoal()): Variable not initialized.");return(0);
 	}
 #endif
 	return(goal);
@@ -140,7 +137,7 @@ inline void Building::setTotalBuildTime(const unsigned int total_build_time)
 {
 #ifdef _SCC_DEBUG
 	if(total_build_time>=MAX_TIME) {
-		toErrorLog("DEBUG: Building::setTotalBuildTime): Value out of range.");return;
+		toErrorLog("DEBUG (Building::setTotalBuildTime()): Value out of range.");return;
 	}
 #endif
 	totalBuildTime = total_build_time;
@@ -150,7 +147,7 @@ inline void Building::setBuildFinishedTime(const signed int build_finished_time)
 {
 #ifdef _SCC_DEBUG
 	if((build_finished_time < -MAX_TIME)||(build_finished_time > MAX_TIME)) {
-		toErrorLog("DEBUG: Building::setBuildFinishedTime): Value out of range.");return;
+		toErrorLog("DEBUG (Building::setBuildFinishedTime()): Value out of range.");return;
 	}
 #endif
 	buildFinishedTime = build_finished_time;
@@ -160,7 +157,7 @@ inline void Building::setType(const unsigned int building_type)
 {
 #ifdef _SCC_DEBUG
 	if(building_type >= LAST_UNIT) {
-		toErrorLog("DEBUG: Building::setType): Value out of range.");return;
+		toErrorLog("DEBUG (Building::setType()): Value out of range.");return;
 	}
 #endif
 	type = building_type;
@@ -170,7 +167,7 @@ inline void Building::setUnitCount(const unsigned int building_count)
 {
 #ifdef _SCC_DEBUG
 	if(building_count >= 10) {
-		toErrorLog("DEBUG: Building::setUnitCount): Value out of range.");return;
+		toErrorLog("DEBUG (Building::setUnitCount()): Value out of range.");return;
 	}
 #endif
 	unitCount = building_count;
@@ -180,7 +177,7 @@ inline void Building::setFacility(const unsigned int building_facility)
 {
 #ifdef _SCC_DEBUG
 	if(building_facility >= LAST_UNIT) {
-		toErrorLog("DEBUG: Building::setFacility): Value out of range.");return;
+		toErrorLog("DEBUG (Building::setFacility()): Value out of range.");return;
 	}
 #endif
 	facility = building_facility;
@@ -190,7 +187,7 @@ inline void Building::setFacility(const unsigned int building_facility)
 {
 #ifdef _SCC_DEBUG
 	if(building_IP >= MAX_LENGTH) {
-		toErrorLog("DEBUG: Building::setIP): Value out of range.");return;
+		toErrorLog("DEBUG (Building::setIP()): Value out of range.");return;
 	}
 #endif
 	IP = building_IP;
@@ -200,7 +197,7 @@ inline void Building::setLocation(const unsigned int building_location)
 {
 #ifdef _SCC_DEBUG
 	if(building_location >= MAX_LOCATIONS) {
-		toErrorLog("DEBUG: Building::setLocation): Value out of range.");return;
+		toErrorLog("DEBUG (Building::setLocation()): Value out of range.");return;
 	}
 #endif
 	location = building_location;
@@ -210,7 +207,7 @@ inline void Building::setGoal(const unsigned int building_goal)
 {
 #ifdef _SCC_DEBUG
 	if(building_goal >= LAST_UNIT) {
-		toErrorLog("DEBUG: Building::setGoal): Value out of range.");return;
+		toErrorLog("DEBUG (Building::setGoal()): Value out of range.");return;
 	}
 #endif
 	goal = building_goal;

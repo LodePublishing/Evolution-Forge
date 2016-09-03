@@ -7,8 +7,10 @@ MapMenu::MapMenu(UI_Object* map_parent, const Rect map_rect, const Size distance
 	reloadOriginalSize();
 }
 
-void MapMenu::reloadOriginalSize()
-{
+MapMenu::~MapMenu()
+{ }
+
+void MapMenu::reloadOriginalSize() {
 	UI_Menu::reloadOriginalSize();
 }
 
@@ -37,9 +39,6 @@ void MapMenu::resetData()
 	reloadOriginalSize();
 }
 
-
-MapMenu::~MapMenu()
-{ }
 
 void MapMenu::process()
 {

@@ -1,5 +1,6 @@
 #include "playerentry.hpp"
-#include "../ui/window.hpp"
+#include "configuration.hpp"
+#include <sstream>
 
 PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size distance_bottom_right) :
 	UI_Object(player_parent, rect, distance_bottom_right),
@@ -11,11 +12,12 @@ PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size d
 // TODO UI_Object:: arrange top left :(
 // 
 	playerText(new UI_StaticText(this, "Player 1:", Rect(Point(/*UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*/12, 0), Size(0,0)), Size(0, 0), IMPORTANT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
-	currentActionButton(new UI_Button(this, Rect(Point(playerText->getRelativeRect().getLeft()+playerText->getTextSize().getWidth()+5, 0), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*9/10, 0)), Size(0,0), MY_BUTTON, false, STATIC_BUTTON_MODE, PAUSED_STRING, DO_NOT_ADJUST, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
-	raceMenuButton(new UI_Button(this, Rect(Point(0, FONT_SIZE+8), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2, 0)), Size(0, 0), TAB_BUTTON, false, STATIC_BUTTON_MODE, CHOOSE_RACE_STRING, DO_NOT_ADJUST, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+	currentActionButton(new UI_Button(this, Rect(Point(playerText->getRelativeRect().getLeft()+playerText->getTextSize().getWidth()+5, 0), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*9/10, 0)), Size(0,0), MY_BUTTON, false, STATIC_BUTTON_MODE, PAUSED_STRING, DO_NOT_ADJUST, SMALL_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+	raceMenuButton(new UI_Button(this, Rect(Point(0, FONT_SIZE+8), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2, 0)), Size(0, 0), TAB_BUTTON, false, STATIC_BUTTON_MODE, CHOOSE_RACE_STRING, DO_NOT_ADJUST, SMALL_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	raceMenu(new RaceMenu(this, Rect(10, 15, 0, 0), Size(0,0), DO_NOT_ADJUST )),
 //	removePlayerButton(new UI_Button(this, Rect(Point(0, 1), Size(8, 8)), Size(5, 0), CANCEL_BUTTON, true, PRESS_BUTTON_MODE, NULL_STRING, DO_NOT_ADJUST)), // Evtl bitmap
 	scoreText(new UI_StaticText(this, Rect(Point(currentActionButton->getRelativeRightBound()+5, -2), Size(0, 0)), Size(5, 0), IMPORTANT_COLOR, LARGE_BOLD_FONT, DO_NOT_ADJUST)),
+	speedText(new UI_StaticText(this, Rect(Point(currentActionButton->getRelativeRightBound()-5, -10), Size(0, 0)), Size(5, 0), IMPORTANT_COLOR, SMALL_FONT, DO_NOT_ADJUST)),
 	goalsFulfilledText(new UI_StaticText(this, Rect(Point(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2 + 5, FONT_SIZE+8), Size(0, 0)), Size(5, 0), IMPORTANT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
 //	addPlayerButton(new UI_Button(this, Rect(Point(5, 0), Size(60, 0)), Size(5, 0), MY_BUTTON, false, PRESS_BUTTON_MODE, ADD_PLAYER_STRING, TOP_CENTER, LARGE_BOLD_FONT, AUTO_SIZE)),
 	optimizing(false),
@@ -26,6 +28,7 @@ PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size d
 - Startposition
 - Startbedingungen
  * */
+	speedText->Hide();
 	raceMenu->setPositionParent(raceMenuButton);
 	addPlayer();
 /*	currentActionButton->Hide();
@@ -102,7 +105,6 @@ const bool PlayerEntry::openRaceMenu()
 	}
 }
 
-#include <sstream>
 
 void PlayerEntry::setNumber(const unsigned int player_number)
 {
@@ -117,17 +119,13 @@ PlayerEntry::~PlayerEntry()
 {
 	delete currentActionButton;
 	delete scoreText;
+	delete speedText;
 	delete goalsFulfilledText;
 	delete playerText;
 //	delete addPlayerButton;
 //	delete removePlayerButton;
 	delete raceMenuButton;
 	delete raceMenu;
-}
-
-void PlayerEntry::closeMenus()
-{
-	raceMenu->close();
 }
 
 void PlayerEntry::mouseHasLeft()
@@ -165,7 +163,7 @@ void PlayerEntry::setScore(const unsigned int score)
 {
 	if(score==programScore)
 		return;
-	programScore = score;	
+	programScore = score;
 	setNeedRedrawMoved();
 }
 
@@ -186,7 +184,7 @@ void PlayerEntry::setOptimizing(const bool opt)
 
 void PlayerEntry::setInitMode(const eInitMode init_mode)
 {
-	if(init_mode == initMode)
+	if(initMode == init_mode)
 		return;
 	initMode = init_mode;
 	if(initMode == INITIALIZED)
@@ -205,17 +203,6 @@ void PlayerEntry::setScoreMode(const eScoreMode score_mode)
 	scoreMode = score_mode;
 	setNeedRedrawMoved();
 }
-
-const eScoreMode PlayerEntry::getScoreMode() const
-{
-	return(scoreMode);
-}
-
-const eInitMode PlayerEntry::getInitMode() const
-{
-	return(initMode);
-}
-
 
 const bool PlayerEntry::isOptimizing() const
 {
@@ -252,6 +239,7 @@ void PlayerEntry::process()
 				currentActionButton->updateText(PAUSED_STRING);
 			else
 				currentActionButton->updateText(SEARCHING_STRING);
+			speedText->Hide();
 		}
 		else if(scoreMode==SCORE_TIME_MODE)
 		{
@@ -261,8 +249,10 @@ void PlayerEntry::process()
 				currentActionButton->updateText(PAUSED_STRING);
 			else
 				currentActionButton->updateText(OPTIMIZING_STRING);
+			speedText->Show();
+			speedText->updateText((eString)(efConfiguration.getGameSpeed() + GAME_SPEED_SLOWEST_STRING));
 		} 
-		// else see below
+// else see below
 /*	else if(surrentMode==SCORE_MODE
 	{
 		goalsFulfilledText->updateText(theme.lookUpFormattedString(RES_UNITS_STRUCT_STRING, 0,0,0));
@@ -284,7 +274,7 @@ void PlayerEntry::process()
 			if(scoreMode==SCORE_FULFILL_MODE)
 				os << "[--:--]";
 			else
-				os << "[" << formatTime(currentScore) << "]";
+				os << "[" << formatTime(currentScore, efConfiguration.getGameSpeed()) << "]";
 			scoreText->updateText(os.str());
 		}
 	}
@@ -292,10 +282,12 @@ void PlayerEntry::process()
 	{
 		playerText->Hide();
 		scoreText->Hide();
+		speedText->Hide();
 		currentActionButton->Hide();
 		raceMenuButton->Hide();
 		goalsFulfilledText->Hide();
 	}
+	
 /*	if(addPlayerButton->isLeftClicked())
 		addPlayer();
 	if(removePlayerButton->isLeftClicked())
@@ -325,27 +317,13 @@ void PlayerEntry::process()
 		if(!raceMenu->isOpen())
 		{
 			raceMenuButton->forceUnpress();		
-			closeMenus();
+			raceMenu->close();
 			raceMenuOpenedExternally = false;
 		} else
 		{
-			closeMenus();
+			raceMenu->close();
 			raceMenu->open();
 		}
 	}
 }
-
-void PlayerEntry::draw(DC* dc) const
-{
-	if(!isShown())
-		return;
-	UI_Object::draw(dc);
-}
-
-
-const signed int PlayerEntry::getAssignedRace() const
-{
-	return(assignRace);
-}
-
 

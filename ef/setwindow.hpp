@@ -6,7 +6,7 @@
 #include "../ui/radio.hpp"
 #include "../ui/numberfield.hpp"
 
-#include "../core/database.hpp"
+
 #include "bitdepthmenu.hpp"
 #include "languagemenu.hpp"
 #include "resolutionmenu.hpp"
@@ -18,10 +18,8 @@ class SettingsWindow:public UI_Window
 		SettingsWindow(UI_Object* setwindow_parent);
 		~SettingsWindow();
 		
-		void resetData();
 		void resetDataChange();
 		void process();
-		void draw(DC* dc) const;
 		void updateItems();
 
 		void forceLanguageChange();
@@ -36,6 +34,8 @@ class SettingsWindow:public UI_Window
 		const bool hasThemeChanged() const;
 		const bool hasFullScreenChanged() const;
 		const bool hasCompactDisplayModeChanged() const;
+		const bool hasAllowWaitOrdersChanged() const;
+		const bool hasGameSpeedChanged() const;
 	private:
 
 		void reloadFromFile();
@@ -62,7 +62,9 @@ class SettingsWindow:public UI_Window
 		UI_Group* uberSettings;
 
 		UI_Group* coreSettings;
+#ifndef _NO_FMOD_SOUND
 		UI_Group* soundSettings;
+#endif
 		UI_Group* guiSettings;
 		UI_Group* graphicSettings;
 
@@ -74,20 +76,23 @@ class SettingsWindow:public UI_Window
 		UI_Button* alwaysBuildWorkers;
 		UI_Button* allowWaitOrders;
 		UI_NumberField* waitAccuracy;
+		UI_NumberField* gameSpeed;
 		UI_Button* autoRuns;
 		UI_NumberField* maxGenerations;
-	
+		
+#ifndef _NO_FMOD_SOUND
 		UI_Button* useMusic;
 		UI_NumberField* musicVolume;
 		UI_Button* useSound;
 		UI_NumberField* soundVolume;
 		UI_NumberField* channels; // TODO evtl raus
-		
+#endif
 		UI_Button* backgroundBitmap;
 		UI_Button* smoothMovement;
 		UI_Button* waitAfterChange;
 		UI_Button* tooltips;
 		UI_Button* dnaSpiral;
+		UI_Button* raceSpecificTheme;
 		UI_Button* glowingButtons;
 		UI_Button* compactDisplayMode;
 		UI_Button* facilityMode;
@@ -119,6 +124,8 @@ class SettingsWindow:public UI_Window
 		bool themeHasChanged;
 		bool fullScreenHasChanged;
 		bool compactDisplayModeHasChanged;
+		bool allowWaitOrdersHasChanged;
+		bool gameSpeedHasChanged;
 };
 
 inline const bool SettingsWindow::hasLanguageChanged() const {
@@ -143,6 +150,26 @@ inline const bool SettingsWindow::hasFullScreenChanged() const {
 
 inline const bool SettingsWindow::hasCompactDisplayModeChanged() const {
 	return(compactDisplayModeHasChanged);
+}
+
+inline const bool SettingsWindow::hasAllowWaitOrdersChanged() const {
+	return(allowWaitOrdersHasChanged);
+}
+
+inline const bool SettingsWindow::hasGameSpeedChanged() const {
+	return(gameSpeedHasChanged);
+}
+
+inline void SettingsWindow::forceResolutionChange() {
+	resolutionHasChanged = true;
+}
+
+inline void SettingsWindow::forceBitDepthChange() {
+	bitDepthHasChanged = true;
+}
+
+inline void SettingsWindow::forceLanguageChange() {
+	languageHasChanged=true;
 }
 
 #endif

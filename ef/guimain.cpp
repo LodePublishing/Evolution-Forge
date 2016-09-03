@@ -1,7 +1,8 @@
 #include "guimain.hpp"
-#include "../ui/editfield.hpp"
+//#include "../ui/editfield.hpp"
 #include "../ui/tooltip.hpp"
 #include "configuration.hpp"
+#include <iomanip>
 
 Main::Main():
 	mainWindow(NULL),
@@ -31,12 +32,18 @@ const bool Main::initGUI(DC* dc)
 {
 	toInitLog(UI_Object::theme.lookUpString(START_LOAD_UI_BITMAPS_FONTS_STRING));
 #ifdef __linux__
-	UI_Object::theme.loadData("settings/ui/default.ui", "data/bitmaps/", "data/sounds/", "data/fonts/", dc);
+	UI_Object::theme.loadData("settings/ui/default.ui", "data/bitmaps/", "data/fonts/", dc);
+#ifndef _NO_FMOD_SOUND
+	UI_Object::sound.loadSoundDataFile("data/sounds/");
+#endif
 	UI_Object::theme.loadWindowDataFile("settings/ui/windows.ui", 0, 1);
 	UI_Object::theme.loadWindowDataFile("settings/ui/split_windows.ui", 0, 2);
 	UI_Object::theme.loadWindowDataFile("settings/ui/split_windows.ui", 1, 2);
 #elif __WIN32__
-	UI_Object::theme.loadData("settings\\ui\\default.ui", "data\\bitmaps\\", "data\\sounds\\", "data\\fonts\\", dc);
+	UI_Object::theme.loadData("settings\\ui\\default.ui", "data\\bitmaps\\", "data\\fonts\\", dc);
+#ifndef _NO_FMOD_SOUND
+	UI_Object::sound.loadSoundDataFile("data\\sounds\\");
+#endif
 	UI_Object::theme.loadWindowDataFile("settings\\ui\\windows.ui", 0, 1);
 	UI_Object::theme.loadWindowDataFile("settings\\ui\\split_windows.ui", 0, 2);
 	UI_Object::theme.loadWindowDataFile("settings\\ui\\split_windows.ui", 1, 2);
@@ -152,7 +159,7 @@ void Main::reloadStrings()
 
 const bool Main::isIntro() const
 {
-	return((introWindow->isShown())||(languageMenu->isShown()));
+	return((introWindow->isShown()) || (languageMenu->isShown()) || (helpWindow->isShown()));
 }
 
 void Main::initializeGame(const unsigned int tab_number)
@@ -168,7 +175,7 @@ void Main::initializeGame(const unsigned int tab_number)
 	if(game_number == MAX_GAME)
 		return;
 
-	toInitLog("* Choosing game tab...");
+	toInitLog("* " + UI_Object::theme.lookUpString(START_CHOOSING_GAME_TAB_STRING));
 
 	if(tabToGameList[tab_number]>=0)
 	{
@@ -180,16 +187,6 @@ void Main::initializeGame(const unsigned int tab_number)
 			// => schon besetzt! Fehler!
 		} else
 		{
-//			if(is_compare_mode)
-//			{
-//				compareWindow initialisieren (links)
-//				...
-//				oder doch eigenes? ueber tabs compare? 
-//				naja... vergleicht ja nicht mit aktuellem game
-//				sondern schmeisst das game raus und guggt sich gespeicherte spiele an...
-//				ok -> auf comparetab!
-//			}
-			
 			game_nr = 0;
 			game_max = 2;
 			game[tabToGameList[tab_number]]->setMode(1, game_max);
@@ -207,40 +204,26 @@ void Main::initializeGame(const unsigned int tab_number)
 		currentGame = 0;
 //		mainWindow->forcePressTab(tab_number);
 	}
-	toInitLog("* Creating game...");
-	game[game_number] = new Game(mainWindow, game_nr, game_max); // TODO
-	toInitLog("* Assigning map...");
-	game[game_number]->assignMap(database.getMap(0));
-	toInitLog("* Assigning start condition...");
-	game[game_number]->assignStartCondition(1, database.getStartCondition(TERRA, 0)); // <- evtl auswaehlen... jo, aber erst spaeter einbauen TODO
-	toInitLog("* Setting race...");
-	game[game_number]->setStartRace(1, TERRA); // <- ok
-	toInitLog("* Assigning goal...");
-	game[game_number]->assignGoal(1, database.getGoal(TERRA, 0)); // <- immer auf 0 setzen
-	toInitLog("* Creating start units...");
-	game[game_number]->fillGroups();
-	toInitLog("* Assigning harvest speed...");
+	toInitLog("* " + UI_Object::theme.lookUpString(START_CREATING_GAME_STRING));
+	game[game_number] = new Game(mainWindow, database.getMap(0), game_nr, game_max); // TODO
+//	game[game_number]->assignStartCondition(1, database.getStartCondition(TERRA, 0)); // <- evtl auswaehlen... jo, aber erst spaeter einbauen TODO
+//	game[game_number]->setStartRace(1, TERRA); // <- ok
+	game[game_number]->setStartPosition(1, 1); // <- TODO
+//	game[game_number]->fillGroups();
+//	game[game_number]->assignGoal(1, database.getGoal(TERRA, 0)); // <- default goal
+	toInitLog("* " + UI_Object::theme.lookUpString(START_ASSIGNING_HARVEST_SPEED_STRING));
 	game[game_number]->setHarvestSpeed(1, TERRA, database.getHarvestSpeed(TERRA, 0));
 	game[game_number]->setHarvestSpeed(1, PROTOSS, database.getHarvestSpeed(PROTOSS, 0));
 	game[game_number]->setHarvestSpeed(1, ZERG, database.getHarvestSpeed(ZERG, 0));
 
-	toInitLog("* Setting start position...");
-	game[game_number]->setStartPosition(1, 1); // <- TODO
-
-	toInitLog("* Creating initial set of build orders...");
-	game[game_number]->initSoup();
-
-	toInitLog("* Measuring fitness of first generation...");
-	game[game_number]->newGeneration();
-
-	toInitLog("* Showing game information...");
+	toInitLog("* " + UI_Object::theme.lookUpString(START_SHOWING_GAME_STRING));
 	game[game_number]->Show();
 }
 
 
 Main::~Main()
 {
-	toInitLog("* Freeing windows...");
+	toInitLog("* " + UI_Object::theme.lookUpString(END_FREEING_WINDOWS_STRING));
 	delete mainWindow;
 	delete introWindow;
 	delete languageMenu;
@@ -251,7 +234,7 @@ Main::~Main()
 	delete dataBaseWindow;
 //	delete mapWindow;
 	delete saveBox;
-	toInitLog("* Freeing games...");
+	toInitLog("* " + UI_Object::theme.lookUpString(END_FREEING_GAMES_STRING));
 	for(unsigned int i=MAX_GAME;i--;)
 		delete game[i];
 }
@@ -282,60 +265,35 @@ void Main::resetDataChange()
 
 void Main::process()
 {
+	setMouse(maus);
 	UI_Window::gotoHelpChapter = -1;
-//	mainWindow->resetMinXY(); // ?
-//	ForceWindow::techTreeWindow->Hide();
-	
 	UI_Object::windowSelected = false;
-	
+
+// ------ PROCESSING ------
 	if((efConfiguration.isToolTips())&&(UI_Object::tooltip))
 		UI_Object::tooltip->process();
 	
-	for(std::list<std::string>::iterator i = UI_Object::msgList.begin(); i!= UI_Object::msgList.end(); ++i)
-	{
-		msgWindow->addMessage(*i);
-		i = UI_Object::msgList.erase(i);
-	}
-
 	if(languageMenu->isShown())
 		languageMenu->process();
 	else if(introWindow->isShown())
 		introWindow->process();
 	else if(saveBox)
 		saveBox->process();
-	else
+	if((!introWindow->isShown())&&(!languageMenu->isShown())&&(!saveBox))
 	{
 		mainWindow->Show();
 		mainWindow->process();
 	}
+	ForceWindow::techTreeWindow->process();
+// ------ PROCESSING ------
 
-	{
-		int pressed = -1;
-		if(((pressed = languageMenu->getPressedItem())>=0))
-		{
-			UI_Object::theme.setLanguage((eLanguage)(pressed+1));
-			uiConfiguration.setFirstStart(false);
-		}
-	}
+	checkTab();
 
 	if((UI_Object::tooltip)&&(UI_Object::toolTipParent->checkForNeedRedraw()))
 		UI_Object::tooltip->setNeedRedrawNotMoved();
 
-	ForceWindow::techTreeWindow->process();
-//	if(UI_Button::getCurrentButton()==NULL) // TODO verschaerfen, boolvariable setzen wenn currentButton von !NULL auf NULL gesetzt wurde
-		setMouse(maus);
-
 	if(!UI_Object::windowSelected)
-	{
-//		if(UI_Object::currentWindow)
-//			UI_Object::currentWindow->setNeedRedrawNotMoved();
 		UI_Object::currentWindow=NULL;
-	}
-
-	if(settingsWindow->hasCompactDisplayModeChanged())
-		for(unsigned int i = MAX_GAME; i--;)
-			if(game[i])
-				game[i]->compactDisplayModeHasChanged();
 
 	if(saveBox == NULL)
 	{
@@ -362,26 +320,43 @@ void Main::process()
 		}
 	}
 	
+
+
+	if(settingsWindow->hasCompactDisplayModeChanged())
+		for(unsigned int i = MAX_GAME; i--;)
+			if(game[i])
+				game[i]->compactDisplayModeHasChanged();
+	
+	{
+		int pressed = -1;
+		if(((pressed = languageMenu->getPressedItem())>=0))
+		{
+			UI_Object::theme.setLanguage((eLanguage)(pressed+1));
+			uiConfiguration.setFirstStart(false);
+		}
+	}
+
 	if(settingsWindow->hasLanguageChanged())
 	{
-//		for(unsigned int i = MAX_GAME;i--;)
-//			if(game[i])
-//				game[i]->reloadStrings();
 		mainWindow->reloadStrings();
 		ForceWindow::techTreeWindow->reloadStrings();
-//		settingsWindow->reloadStrings();
 		msgWindow->addMessage(UI_Object::theme.lookUpString(LANGUAGE_HAS_CHANGED_STRING));
-	} else
+	}
 
-/*	if(settingsWindow->hasResolutionChanged())
+	if(settingsWindow->hasAllowWaitOrdersChanged())
 	{
-                for(unsigned int i = MAX_GAME;i--;)
-                        if(game[i])
-                                game[i]->reloadStrings();
-                mainWindow->reloadStrings();
-                settingsWindow->reloadStrings();
-// TODO msgWindow add Message
-	}*/
+		for(unsigned int i = MAX_GAME; i--;)
+			if(game[i])
+				game[i]->setResetFlag();
+		UI_Window::setChangedFlag();
+	}
+
+	if(settingsWindow->hasGameSpeedChanged())
+	{
+		for(unsigned int i = MAX_GAME; i--;)
+			if(game[i])
+				game[i]->resetPlayerTime();
+	}
 
 	if(UI_Window::gotoHelpChapter>=0)
 	{
@@ -389,6 +364,15 @@ void Main::process()
 		helpWindow->gotoChapter(UI_Window::gotoHelpChapter);
 	}
 
+	for(std::list<std::string>::iterator i = UI_Object::msgList.begin(); i!= UI_Object::msgList.end(); ++i)
+	{
+		msgWindow->addMessage(*i);
+		i = UI_Object::msgList.erase(i);
+	}
+}
+
+void Main::checkTab()
+{
 	if(currentTab != mainWindow->getCurrentTab())
 	{
 		currentTab = mainWindow->getCurrentTab();
@@ -496,18 +480,6 @@ void Main::process()
 		UI_Object::windowSelected = false;
 		currentGame = 0;
 	}
-
-/*	for(unsigned int i = MAX_GAME;i--;) // TODO
-	if((game[i])&&(game[i]->checkForNeedRedraw()))
-		{
-			mainWindow->setNeedRedrawNotMoved();
-			msgWindow->setNeedRedrawNotMoved();
-			settingsWindow->setNeedRedrawNotMoved();
-			helpWindow->setNeedRedrawNotMoved();
-//			mapWindow->setNeedRedrawNotMoved();
-			mainWindow->setNeedRedrawMoved();
-			break;
-		}*/
 }
 
 void Main::stopAllOptimizing()
@@ -611,6 +583,8 @@ void Main::newGeneration()
 		for(unsigned int i=MAX_GAME;i--;)
 			if((game[i])&&(game[i]->isShown()))
 				game[i]->newGeneration();
+		if(dataBaseWindow->isShown())
+			dataBaseWindow->newGeneration();
 	}
 }
 
@@ -732,95 +706,7 @@ const bool Main::loadBuildOrders()
 	return(database.isBuildOrderDataInitialized());
 }
 
-void Main::leftDown()
-{
-	if(UI_Button::getCurrentButton()!=NULL)
-	{
-		UI_Button::getCurrentButton()->mouseLeftButtonPressed();
-		UI_Button::setCurrentButtonPressed();
-	} else
-	if(UI_Object::focus!=NULL)
-		UI_Object::focus=NULL;
-}
-
-void Main::leftUp(const Point p)
-{
-	if((UI_Button::getCurrentButton()!=NULL)&&(UI_Button::isCurrentButtonPressed()))
-		UI_Button::getCurrentButton()->mouseLeftButtonReleased();
-	UI_Button::setCurrentButtonPressed(false);
-	UI_Button::setCurrentButtonHasAlreadyLeft(false);
-	setMouse(p);
-
-	if(UI_Button::isMoveByMouse()==true)
-	{
-		UI_Button::setMoveByMouse(false);
-		UI_Button::setMouseMovePoint(Point(0, 0));
-	}
-	if((UI_Button::getCurrentButton()==NULL)&&(UI_Object::focus!=NULL))
-		UI_Object::focus=NULL;
-
-}
-
-void Main::rightDown()
-{
-	if(UI_Button::getCurrentButton()!=NULL)
-	{
-		UI_Button::getCurrentButton()->mouseRightButtonPressed();
-		UI_Button::setCurrentButtonPressed();
-	}
-}
-
-void Main::rightUp(const Point p)
-{
-	if((UI_Button::getCurrentButton()!=NULL)&&(UI_Button::isCurrentButtonPressed()))
-		UI_Button::getCurrentButton()->mouseRightButtonReleased();
-	UI_Button::setCurrentButtonPressed(false);
-	UI_Button::setCurrentButtonHasAlreadyLeft(false);
-	setMouse(p);
-}
-
-void Main::wheelToTop()
-{
-	if(UI_Object::currentWindow)
-		UI_Object::currentWindow->moveScrollBarToTop();
-}
-
-void Main::wheelToBottom()
-{
-	if(UI_Object::currentWindow)
-		UI_Object::currentWindow->moveScrollBarToBottom();
-}
-
-void Main::wheelUp()
-{
-	if(UI_Object::currentWindow)
-		UI_Object::currentWindow->wheelUp();
-}
-
-void Main::wheelDown()
-{
-	if(UI_Object::currentWindow)
-		UI_Object::currentWindow->wheelDown();
-}
-
-void Main::openMenu(const ePlayerOrder order)
-{
-	if(currentGame==0)
-	{
-		if(!game[tabToGameList[currentTab]]->openMenu(order))
-		{
-			if((tabToSplitGameList[currentTab]>=0)&&(game[tabToSplitGameList[currentTab]]->openMenu(order)))
-				currentGame = 1;
-		}
-	} else if(currentGame==1)
-	{
-		if((tabToSplitGameList[currentTab]==-1)||(!game[tabToSplitGameList[currentTab]]->openMenu(order)))
-		{
-			if(game[tabToGameList[currentTab]]->openMenu(order))
-				currentGame = 0;			
-		}
-	}
-}
+// ------ EVENTS ------
 
 void Main::setMouse(const Point p)
 {
@@ -828,9 +714,6 @@ void Main::setMouse(const Point p)
 		return;
 	maus = p;
 	UI_Object::mouse = p;
-//	((BoGraphWindow*)(game[0]->window[BO_GRAPH_WINDOW]))->mouseHasMoved(); // TODO
-//	else if(game[1]->window[BO_GRAPH_WINDOW]->Inside(p))
-//		(BoGraphWindow*)(game[1]->window[BO_GRAPH_WINDOW])->mouseHasMoved();
 	
 	if(UI_Button::isCurrentButtonHasAlreadyLeft())
 	{
@@ -956,6 +839,110 @@ void Main::setMouse(const Point p)
 	}
 }
 
+
+void Main::leftDown()
+{
+	if(UI_Button::getCurrentButton()!=NULL)
+	{
+		UI_Button::getCurrentButton()->mouseLeftButtonPressed();
+		UI_Button::setCurrentButtonPressed();
+	} else
+	if(UI_Object::focus!=NULL)
+		UI_Object::focus=NULL;
+}
+
+void Main::leftUp(const Point p)
+{
+	if((UI_Button::getCurrentButton()!=NULL)&&(UI_Button::isCurrentButtonPressed()))
+		UI_Button::getCurrentButton()->mouseLeftButtonReleased();
+	UI_Button::setCurrentButtonPressed(false);
+	UI_Button::setCurrentButtonHasAlreadyLeft(false);
+	setMouse(p);
+
+	if(UI_Button::isMoveByMouse()==true)
+	{
+		UI_Button::setMoveByMouse(false);
+		UI_Button::setMouseMovePoint(Point(0, 0));
+	}
+	if((UI_Button::getCurrentButton()==NULL)&&(UI_Object::focus!=NULL))
+		UI_Object::focus=NULL;
+
+}
+
+void Main::rightDown()
+{
+	if(UI_Button::getCurrentButton()!=NULL)
+	{
+		UI_Button::getCurrentButton()->mouseRightButtonPressed();
+		UI_Button::setCurrentButtonPressed();
+	}
+}
+
+void Main::rightUp(const Point p)
+{
+	if((UI_Button::getCurrentButton()!=NULL)&&(UI_Button::isCurrentButtonPressed()))
+		UI_Button::getCurrentButton()->mouseRightButtonReleased();
+	UI_Button::setCurrentButtonPressed(false);
+	UI_Button::setCurrentButtonHasAlreadyLeft(false);
+	setMouse(p);
+}
+
+void Main::wheelToTop()
+{
+	if(UI_Object::currentWindow)
+		UI_Object::currentWindow->moveScrollBarToTop();
+}
+
+void Main::wheelToBottom()
+{
+	if(UI_Object::currentWindow)
+		UI_Object::currentWindow->moveScrollBarToBottom();
+}
+
+void Main::wheelUp()
+{
+	if(UI_Object::currentWindow)
+		UI_Object::currentWindow->wheelUp();
+}
+
+void Main::wheelDown()
+{
+	if(UI_Object::currentWindow)
+		UI_Object::currentWindow->wheelDown();
+}
+
+const bool Main::openMenu(const ePlayerOrder order)
+{
+	// links?
+	if(currentGame==0)
+	{
+		if(tabToGameList[currentTab]<0)
+			return(false);
+		if(!game[tabToGameList[currentTab]]->openMenu(order))
+		{
+			if((tabToSplitGameList[currentTab]>=0)&&(game[tabToSplitGameList[currentTab]]->openMenu(order)))
+			{				
+				currentGame = 1;
+				return(true);
+			}
+			else return(false);
+		} else return(true);
+	} // oder rechts?
+	else if(currentGame==1)
+	{
+		if((tabToSplitGameList[currentTab]==-1)||(!game[tabToSplitGameList[currentTab]]->openMenu(order)))
+		{
+			if((tabToGameList[currentTab]) && (game[tabToGameList[currentTab]]->openMenu(order)))
+			{
+				currentGame = 0;
+				return(true);
+			} else return(false);
+		} 
+		return(false);
+	}
+	return(false);
+}
+// ------ END EVENTS ------
 
 //InfoWindow* Main::infoWindow = NULL;
 MessageWindow* Main::msgWindow = NULL;

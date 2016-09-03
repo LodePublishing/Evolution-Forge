@@ -1,9 +1,7 @@
 #ifndef _GUI_PLAYERENTRY_HPP
 #define _GUI_PLAYERENTRY_HPP
 
-#include "../ui/object.hpp"
 #include "../ui/radio.hpp"
-
 #include "racemenu.hpp"
 
 enum eScoreMode
@@ -47,7 +45,6 @@ class PlayerEntry : public UI_Object
 		const bool isOptimizing() const;
 
 		void process();
-		void draw(DC* dc) const;
 
 		void reloadOriginalSize();
 		
@@ -59,7 +56,6 @@ class PlayerEntry : public UI_Object
 		const bool addPlayer();
 		const bool openRaceMenu();
 	private:
-		void closeMenus();
 		unsigned int oldScoreCounter[20], oldScore[20];
 		unsigned int currentScore, programScore;
 		unsigned int goalComplete;
@@ -73,6 +69,7 @@ class PlayerEntry : public UI_Object
 		RaceMenu* raceMenu;
 //		UI_Button* removePlayerButton;
 		UI_StaticText* scoreText;
+		UI_StaticText* speedText;
 		UI_StaticText* goalsFulfilledText;
 //		UI_Button* addPlayerButton;
 		bool optimizing;
@@ -81,6 +78,19 @@ class PlayerEntry : public UI_Object
 		signed int assignRace;
 		bool raceMenuOpenedExternally;
 };
+
+inline const signed int PlayerEntry::getAssignedRace() const {
+	return(assignRace);
+}
+
+inline const eScoreMode PlayerEntry::getScoreMode() const {
+	return(scoreMode);
+}
+
+inline const eInitMode PlayerEntry::getInitMode() const {
+	return(initMode);
+}
+
 
 
 

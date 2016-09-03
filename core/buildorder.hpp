@@ -5,19 +5,9 @@
 
 class BUILDORDER : public PREBUILDORDER
 {
-	private:
-	       	unsigned int mutationRate;
-       		const bool buildGene(const unsigned int build_unit);
-		unsigned int pFitness;
-		unsigned int sFitness;
-		unsigned int tFitness;
-		
-		const bool buildIt(const unsigned int build_unit);
 	public:
 		BUILDORDER();
 		~BUILDORDER();
-		BUILDORDER& operator=(const BUILDORDER& object);
-		BUILDORDER(const BUILDORDER& object);
 		void resetData();
 //Output:
 		void setpFitness(const unsigned int p_fitness);
@@ -31,9 +21,19 @@ class BUILDORDER : public PREBUILDORDER
 		const unsigned int gettFitness() const;
 //Controls:
 		const bool calculateStep(); 
-//		void resetGeneCode();//resets either to a pre-processed buildorder or a completely random one*/
 		void prepareForNewGeneration(); //resets all data to standard values
 //		void crossOver(BUILDORDER* parent2, BUILDORDER* child1, BUILDORDER* child2);
+	private:
+	       	unsigned int mutationRate;
+       		const bool buildGene(const unsigned int build_unit);
+		unsigned int pFitness;
+		unsigned int sFitness;
+		unsigned int tFitness;
+		
+		const bool buildIt(const unsigned int build_unit);
+
+		BUILDORDER& operator=(const BUILDORDER& object);
+		BUILDORDER(const BUILDORDER& object);
 };
 
 // ----------------------------------------------------

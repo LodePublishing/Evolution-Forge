@@ -21,8 +21,6 @@ class UI_ScrollBar : public UI_Object
 
 		void setClientHeight(const unsigned int height);
 		void setClientTargetHeight(const unsigned int height);
-
-		void reloadStrings();
 		
 		void setFirstItemY(const signed int first_item_y);
 		void setLastItemY(const signed int last_item_y);

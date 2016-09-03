@@ -215,7 +215,7 @@ void UI_LongText::updateText(const std::string& lt_text)
 			if(textbutton==0)
 				text_cursor_x += UI_Object::theme.lookUpFont(current_font)->getTextExtent(os.str()).getWidth();
 			else
-				text_cursor_x += UI_Object::theme.lookUpFont((eFont)(font+3))->getTextExtent(os.str()).getWidth();
+				text_cursor_x += UI_Object::theme.lookUpFont((eFont)(font+4))->getTextExtent(os.str()).getWidth();
 		}
 		// TODO zeilenuebergreifende BOLDs und TEXTBUTTONs
 // reached end of line? Calculate line and draw it
@@ -268,12 +268,12 @@ void UI_LongText::updateText(const std::string& lt_text)
 					textbutton=0;
 				} else if((textbutton==2)||(textbutton==4))
 				{
-					unsigned int height = UI_Object::theme.lookUpFont((eFont)(font+3))->getTextExtent(realstring.str()).getHeight();
+					unsigned int height = UI_Object::theme.lookUpFont((eFont)(font+4))->getTextExtent(realstring.str()).getHeight();
 					unsigned int ty;
 					if(current_row+maxdy/2 < height/2)
 						ty = 0;
 					else ty = current_row+maxdy/2-height/2+2;
-					UI_Button* t = new UI_Button(scrollBar==NULL?this:scrollBar, Rect(p+Point(first_text_cursor_x-1, ty), Size(0, 0)), Size(0, 0), button, false, PRESS_BUTTON_MODE, realstring.str(), DO_NOT_ADJUST, (eFont)(font+3), AUTO_SIZE);
+					UI_Button* t = new UI_Button(scrollBar==NULL?this:scrollBar, Rect(p+Point(first_text_cursor_x-1, ty), Size(0, 0)), Size(0, 0), button, false, PRESS_BUTTON_MODE, realstring.str(), DO_NOT_ADJUST, (eFont)(font+4), AUTO_SIZE);
 					longButton.push_back(t);
 					text_cursor_x = first_text_cursor_x + t->getTextWidth();
 				} else if((textbutton==1)&&(!end_of_order))
@@ -281,12 +281,12 @@ void UI_LongText::updateText(const std::string& lt_text)
 					// abgebrochener button
 					if(text_cursor_x>getWidth()-10)
 					{
-						unsigned int height = UI_Object::theme.lookUpFont((eFont)(font+3))->getTextExtent(realstring.str()).getHeight();
+						unsigned int height = UI_Object::theme.lookUpFont((eFont)(font+4))->getTextExtent(realstring.str()).getHeight();
 						unsigned int ty;
 						if(current_row+maxdy/2 < height/2)
 							ty = 0;
 						else ty = current_row+maxdy/2-height/2+2;
-						UI_Button* t = new UI_Button(scrollBar==NULL?this:scrollBar, Rect(p+Point(first_text_cursor_x-1, ty), Size(0, 0)), Size(0, 0), button, false, PRESS_BUTTON_MODE, realstring.str(), DO_NOT_ADJUST, (eFont)(font+3), AUTO_SIZE);
+						UI_Button* t = new UI_Button(scrollBar==NULL?this:scrollBar, Rect(p+Point(first_text_cursor_x-1, ty), Size(0, 0)), Size(0, 0), button, false, PRESS_BUTTON_MODE, realstring.str(), DO_NOT_ADJUST, (eFont)(font+4), AUTO_SIZE);
 						longButton.push_back(t);
 						textbutton=3;
 					} else continue;

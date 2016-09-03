@@ -4,9 +4,6 @@
 #include "../ui/menu.hpp"
 #include "../core/basicmap.hpp"
 
-#include <string>
-#include <list>
-
 class LocationMenu : public UI_Menu
 {
 	public:

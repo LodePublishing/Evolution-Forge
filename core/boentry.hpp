@@ -22,26 +22,24 @@ class BO_HEADER
 		void setTime(const unsigned int bo_time);
 };
 
-
-
 class BUILD_ORDER
 {
-	private:
-		BO_HEADER boHeader;
-		GOAL_ENTRY goal;
-		std::list<PROGRAM> programList;
-		BUILD_ORDER& operator=(const BUILD_ORDER& object);
-		BUILD_ORDER(const BUILD_ORDER& object);
 	public:
-		BUILD_ORDER(const BO_HEADER& bo_header, const GOAL_ENTRY& bo_goal, std::list<PROGRAM>& bo_program);
+		BUILD_ORDER(const BO_HEADER& bo_header, const GOAL_ENTRY& bo_goal, const std::list<PROGRAM>& bo_program);
 		~BUILD_ORDER();
 
 		const std::string& getName() const;
 		const eRace getRace() const;
 		const unsigned int getTime() const;
 		const GOAL_ENTRY& getGoal() const;
-		std::list<PROGRAM>& getProgramList();
+		const std::list<PROGRAM>& getProgramList() const;
 		const unsigned int countBuildOrders() const;
+	private:
+		BO_HEADER boHeader;
+		GOAL_ENTRY goal;
+		const std::list<PROGRAM> programList;
+		BUILD_ORDER& operator=(const BUILD_ORDER& object);
+		BUILD_ORDER(const BUILD_ORDER& object);
 };
 
 inline const std::string& BO_HEADER::getName() const {
@@ -89,7 +87,7 @@ inline const unsigned int BUILD_ORDER::countBuildOrders() const {
 	return(programList.size());
 }
 
-inline std::list<PROGRAM>& BUILD_ORDER::getProgramList() {
+inline const std::list<PROGRAM>& BUILD_ORDER::getProgramList() const {
 	return(programList);
 }
 

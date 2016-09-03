@@ -1,10 +1,29 @@
 #include "goalmenu.hpp"
+#include "configuration.hpp"
+#include <sstream>
 
-GoalMenu::GoalMenu(UI_Object* goal_parent, const Rect goal_rect, const Size distance_bottom_right, const ePositionMode position_mode):
+GoalMenu::GoalMenu(UI_Object* goal_parent, const Rect& goal_rect, const Size distance_bottom_right, const ePositionMode position_mode):
 	UI_Menu(goal_parent, goal_rect, distance_bottom_right, position_mode, true, TWO_COLOUMNS_MENU, STANDARD_BUTTON_WIDTH),
 	anarace(NULL),
 	lastRace(TERRA)
 { }
+
+GoalMenu::~GoalMenu()
+{ }
+
+void GoalMenu::process()
+{
+	UI_Menu::process();
+	if(!isShown())
+		return;
+}
+
+void GoalMenu::draw(DC* dc) const
+{
+	if(!isShown())
+		return;
+	UI_Menu::draw(dc);
+}
 
 void GoalMenu::assignAnarace(ANABUILDORDER* goal_anarace)
 {
@@ -33,7 +52,6 @@ const bool GoalMenu::addKey(unsigned int key, unsigned int mod)
 	return(true);
 }
 
-#include <sstream>
 void GoalMenu::resetData()
 {
 	if(!anarace)
@@ -59,11 +77,11 @@ void GoalMenu::resetData()
 			entry->setButtonColorsType(eButtonColorsType(UNIT_TYPE_1_BUTTON));
 
 		os.str("");
-		for(std::list<GOAL>::const_iterator j = my_goal->goal.begin();j!=my_goal->goal.end();++j)
+		for(std::list<GOAL>::const_iterator j = my_goal->goalList.begin();j!=my_goal->goalList.end();++j)
 		{
 			os << j->getCount() << "x $" << stats[lastRace][j->getUnit()].name << "$";
 			if(j->getTime()>0)
-				os << " [" << formatTime(j->getTime()) << "]"; 
+				os << " [" << formatTime(j->getTime(), efConfiguration.getGameSpeed()) << "]"; 
 			os << "#";
 		}
 		entry->updateToolTip(os.str());
@@ -74,20 +92,4 @@ void GoalMenu::resetData()
 }
 
 
-GoalMenu::~GoalMenu()
-{ }
-
-void GoalMenu::process()
-{
-	UI_Menu::process();
-	if(!isShown())
-		return;
-}
-
-void GoalMenu::draw(DC* dc) const
-{
-	if(!isShown())
-		return;
-	UI_Menu::draw(dc);
-}
 

@@ -14,9 +14,6 @@ class UI_InputObject : public UI_Object
 		void draw(DC* dc) const;
 		void process();
 		
-		UI_Object* checkToolTip();
-		UI_Object* checkHighlight();
-		
 		void addChar(char a);
 		void removeCharBackspace();
 		void removeCharDelete();

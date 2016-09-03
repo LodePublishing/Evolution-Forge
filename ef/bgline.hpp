@@ -5,6 +5,12 @@
 
 #include <list>
 
+/*struct Not_Availible
+{
+	unsigned int begin;
+	unsigned int end;
+};*/
+
 class BoGraphLine : public UI_Object
 {
 	public:
@@ -16,6 +22,7 @@ class BoGraphLine : public UI_Object
 
 		void process();
 		void draw(DC* dc) const;
+		void reloadStrings();
 
 		void setRace(const eRace race);
 		void setFacility(const unsigned int bg_facility);
@@ -27,6 +34,8 @@ class BoGraphLine : public UI_Object
 		const unsigned int getLineHeight() const;
 		const unsigned int getLines() const;
 		std::list<BoGraphEntry*> boGraphList;
+//		std::list<Not_Availible> notAvailibleList;
+		unsigned int firstAvailible;
 	private:
 		eRace race;
 		unsigned int facility;

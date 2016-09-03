@@ -68,14 +68,14 @@ void UI_ScrollBar::checkBoundsOfChildren(const signed int upper_bound, const sig
 		do {
 			if((tmp!=add)&&(tmp!=sub))
 			{
-				if(((tmp->getAbsoluteUpperBound() < upper_bound) || (tmp->getAbsoluteLowerBound() > lower_bound)))
+				if(((tmp->getAbsoluteUpperBound() < upper_bound + 10) || (tmp->getAbsoluteLowerBound() > lower_bound - 10)))
 				{
 					if(tmp->isClipped)
 					{
-						if((tmp->getAbsoluteLowerBound() > upper_bound + 5) && (tmp->getAbsoluteUpperBound() + 5< lower_bound))
+						if((tmp->getAbsoluteLowerBound() > upper_bound + 10) && (tmp->getAbsoluteUpperBound() +5 < lower_bound - 10))
 						{
 							tmp->Show();
-							tmp->clipRect = Rect(tmp->getAbsoluteLeftBound(), upper_bound+5, tmp->getWidth(), lower_bound - upper_bound-10);
+							tmp->clipRect = Rect(tmp->getAbsoluteLeftBound(), upper_bound + 10, tmp->getWidth(), lower_bound - upper_bound - 20);
 						} else 
 						{
 							tmp->Hide();
@@ -90,11 +90,6 @@ void UI_ScrollBar::checkBoundsOfChildren(const signed int upper_bound, const sig
 			tmp = tmp->getNextBrother();
 		} while (tmp != getChildren());
 	}
-}
-
-void UI_ScrollBar::reloadStrings()
-{
-	UI_Object::reloadStrings();
 }
 
 // TODO: Klarer gliedern zwischen virtueller Hoehe und realer Hoehe!
@@ -158,6 +153,7 @@ void UI_ScrollBar::process() // process messages, continue animation etc.
 	if(sub->isLeftClicked())
 		moveUp();
 
+	// TODO: nicht zeichnen falls Hoehe zu klein
 }
 
 

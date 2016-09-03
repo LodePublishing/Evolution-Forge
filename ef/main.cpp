@@ -1,10 +1,11 @@
 #include "guimain.hpp"
 #include "fpssystem.hpp"
-#include "savebox.hpp"
+
 #include "configuration.hpp"
 #include "../ui/configuration.hpp"
 #include "../core/configuration.hpp"
 
+#include <sstream>
 
 class ExitInfo
 {
@@ -24,32 +25,36 @@ ExitInfo::~ExitInfo()
 	{
 		toInitLog("If you need help with the error message please post it on www.clawsoftware.de in the forums or contact me at ghoul@clawsoftware.de");
 	} else
-		toInitLog("Exiting ...");
+	{
+		toInitLog("Exiting...");
+	}
 }
 
+#ifndef _NO_FMOD_SOUND
 const bool init_sound()
 {
 	// TODO start a 'watchdog' thread (FMOD waits indefinitely if the sound is currently used!)
 	unsigned int version;
 	
-        if(!UI_Theme::ERRCHECK(FMOD::System_Create(&UI_Object::theme.sound))) 
+        if(!UI_Sound::ERRCHECK(FMOD::System_Create(&UI_Object::sound.sound))) 
 		return(false);
-	if(!UI_Theme::ERRCHECK(UI_Object::theme.sound->getVersion(&version))) 
+	if(!UI_Sound::ERRCHECK(UI_Object::sound.sound->getVersion(&version))) 
 		return(false);
 
 	if (version < FMOD_VERSION)
         {
 		std::ostringstream os;
-		os << "Error!  You are using an old version of FMOD " << version << ". This program requires " << FMOD_VERSION << ".";
+		os << UI_Object::theme.lookUpString(START_INIT_FMOD_VERSION_ERROR_STRING) << "[" << version << " < " << FMOD_VERSION << "]";
 		toErrorLog(os.str());
 	       	return(false);
 	}
-	if(!UI_Theme::ERRCHECK(UI_Object::theme.sound->init(32, FMOD_INIT_NONREALTIME, 0)))
+	if(!UI_Sound::ERRCHECK(UI_Object::sound.sound->init(32, FMOD_INIT_NONREALTIME, 0)))
 		return(false);
 
-	UI_Object::theme.printSoundInformation();
+	UI_Object::sound.printSoundInformation();
 	return(true);
 }
+#endif
 
 
 int main(int argc, char *argv[])
@@ -64,13 +69,18 @@ int main(int argc, char *argv[])
 		current_driver = getenv("SDL_VIDEODRIVER");
 
 // ------ LOAD CONFIGURATION FILES ------
-	toInitLog("Initializing language files...");
+//	toInitLog(UI_Object::theme.lookUpString(START_LOAD_LANGUAGE_FILES_STRING));
+//	dum, weil sind ja noch gar keine Sprachen geladen
+	
+	toInitLog("Loading language files...");
 	std::list<std::string> stringFiles = findFiles("settings", "strings", "");
 	for(std::list<std::string>::iterator j = stringFiles.begin(); j!=stringFiles.end(); ++j)
 		UI_Object::theme.loadStringFile(*j);
 	
-	toInitLog(UI_Object::theme.lookUpString(START_LOAD_CONFIGURATION_STRING));
+	toInitLog(UI_Object::theme.lookUpString(START_LOAD_UI_CONFIGURATION_STRING));
 	uiConfiguration.loadConfigurationFile();
+	
+	toInitLog(UI_Object::theme.lookUpString(START_SET_LANGUAGE_STRING) + UI_Object::theme.lookUpString((eString)(SETTING_ZERO_LANGUAGE_STRING + uiConfiguration.getLanguage())));
 	if(!UI_Object::theme.setLanguage(uiConfiguration.getLanguage()))
 	{
 		toErrorLog("Could not load language, trying default language english... ");
@@ -84,17 +94,20 @@ int main(int argc, char *argv[])
 	for(std::list<std::string>::iterator j = stringFiles.begin(); j!=stringFiles.end(); ++j)
 		UI_Object::theme.loadHelpChapterStringFile(*j);
 	
+	toInitLog(UI_Object::theme.lookUpString(START_LOAD_CORE_CONFIGURATION_STRING));
 	coreConfiguration.loadConfigurationFile();
+	
+	toInitLog(UI_Object::theme.lookUpString(START_LOAD_EF_CONFIGURATION_STRING));
 	efConfiguration.loadConfigurationFile();
 // ------ END LOAD CONFIGURATION FILES -------
 
 // ------ PARSING COMMAND LINE ------
-	toInitLog("You can set some parameters of the sound and graphic engine with the command line:");
-	toInitLog("-vo <driver> sets the video driver, see below for a list of availible video drivers");
-	toInitLog("-nosound deactivates sound and music");
-	toInitLog("-640, -800, -1024, -1280 sets the video resolution");
-	toInitLog("-8bit, -16bit, -24bit, -32bit sets the bit depth");
-	toInitLog("-fs, -window sets the program to fullscreen or to window mode");
+	toInitLog(UI_Object::theme.lookUpString(START_COMMANDO_LINE_1_STRING));
+	toInitLog(UI_Object::theme.lookUpString(START_COMMANDO_LINE_2_STRING));
+	toInitLog(UI_Object::theme.lookUpString(START_COMMANDO_LINE_3_STRING));
+	toInitLog(UI_Object::theme.lookUpString(START_COMMANDO_LINE_4_STRING));
+	toInitLog(UI_Object::theme.lookUpString(START_COMMANDO_LINE_5_STRING));
+	toInitLog(UI_Object::theme.lookUpString(START_COMMANDO_LINE_6_STRING));
 	toInitLog(UI_Object::theme.lookUpString(START_PARSE_COMMAND_LINE_STRING));
 	if(!arguments.empty())
 		for(std::list<std::string>::const_iterator i = arguments.begin();i!=arguments.end(); ++i)
@@ -105,13 +118,16 @@ int main(int argc, char *argv[])
 				if(i==arguments.end())
 					toErrorLog(UI_Object::theme.lookUpString(START_WARNING_VO_ARGUMENT_STRING));
 				else current_driver = *i;
-			} else 
-			if((*i) == "-nosound")
+			} 
+#ifndef _NO_FMOD_SOUND
+			else if((*i) == "-nosound")
 			{
 				uiConfiguration.setSound(false);
 				uiConfiguration.setMusic(false);
-				toInitLog("Parameter -nosound causes the sound engine to be deactivated, To activate sound in the program go to the 'settings'.");
-			} else if((*i) == "-640")
+				toInitLog(UI_Object::theme.lookUpString(START_INIT_NOSOUND_STRING));
+			} 
+#endif
+			else if((*i) == "-640")
 			{
 				uiConfiguration.setResolution(RESOLUTION_640x480);
 			} else if((*i) == "-800")
@@ -144,8 +160,10 @@ int main(int argc, char *argv[])
 			}
 		}
 // ------ END PARSING COMMAND LINE ------
-	bool sound_not_initialized = true;
+
+#ifndef _NO_FMOD_SOUND
 // ------ INIT SOUND ENGINE -------
+	bool sound_not_initialized = true;
 	std::list<FMOD::Channel*> sound_channel;
 	FMOD::Channel* music_channel;
 	eSound current_music = MAX_SOUNDS;
@@ -160,6 +178,7 @@ int main(int argc, char *argv[])
 			sound_not_initialized = false;
 	}
 // ------ END INIT SOUND ENGINE -------
+#endif
 
 	
 // ------ INIT SDL AND WINDOW ------
@@ -168,10 +187,11 @@ int main(int argc, char *argv[])
 	{
 		std::ostringstream os;
 		os.str("");
+		os << "* " << UI_Object::theme.lookUpString(START_AVAILIBLE_GRAPHIC_DRIVERS_STRING);
 		std::list<std::string> s = DC::getAvailibleDrivers();
 		for(std::list<std::string>::const_iterator i = s.begin(); i!=s.end(); i++)
 			os << *i << " ";
-		toInitLog("* Availible graphic drivers: " + os.str());
+		toInitLog(os.str());
 	}
 
 	
@@ -212,14 +232,14 @@ int main(int argc, char *argv[])
 	}
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 	SDL_ShowCursor(SDL_DISABLE);
-	toInitLog(DC::printHardwareInformation());
-	toInitLog("* " + UI_Object::theme.lookUpString(START_CREATED_SURFACE_STRING) + " " + DC::printSurfaceInformation(screen));
+	toInitLog(UI_Object::theme.printHardwareInformation());
+	toInitLog("* " + UI_Object::theme.lookUpString(START_CREATED_SURFACE_STRING) + " " + UI_Object::theme.printSurfaceInformation(screen));
 // ------ END INIT SDL AND WINDOW ------
 
 // ------ INIT SDL_TTF ------
 	toInitLog("* " + UI_Object::theme.lookUpString(START_INIT_SDL_TRUETYPE_FONTS_STRING));
 	if(TTF_Init()==-1) {
-		toErrorLog(std::string("TTF_Init: ") + " [TTF ERROR: \"" + TTF_GetError() + "\"]");
+		toErrorLog(UI_Object::theme.lookUpString(START_INIT_SDL_TTF_ERROR_STRING) + " [\"" + TTF_GetError() + "\"]");
 		delete screen;
 		return(EXIT_FAILURE);
 	}
@@ -280,7 +300,8 @@ int main(int argc, char *argv[])
 //		}
 	
 //		UI_Object::copyToNextProcessArray();
-	
+
+
 		bool ignore_rest = false;
 		while (SDL_PollEvent(&event))
 		{
@@ -443,9 +464,10 @@ int main(int argc, char *argv[])
 		}
 		fps->poll(MESSAGE_TICKS);
 		
-		
 		if(picture_num==INTRO_ANIMATION_FRAMES)
+		{
 			m.process();
+		}
 
 		if(m.hasBitDepthChanged())
 		{
@@ -480,6 +502,7 @@ int main(int argc, char *argv[])
 
 		fps->poll(PROCESS_TICKS);
 
+#ifndef _NO_FMOD_SOUND
 // ------ SOUND ENGINE -------
 		if(((uiConfiguration.isSound())||(uiConfiguration.isMusic()))&&(sound_not_initialized))
 		{
@@ -500,7 +523,7 @@ int main(int argc, char *argv[])
 		} else 
 		if((!uiConfiguration.isSound())&&(!uiConfiguration.isMusic())&&(!sound_not_initialized))
 		{
-			UI_Object::theme.releaseSoundEngine();
+			UI_Object::sound.releaseSoundEngine();
 			sound_not_initialized = true;
 		} else
 			
@@ -518,7 +541,7 @@ int main(int argc, char *argv[])
 				bool is_playing = false;
 				music_channel->isPlaying(&is_playing);
 				if((!is_playing)&&(current_music!=MAX_SOUNDS))
-					UI_Object::theme.sound->playSound(FMOD_CHANNEL_FREE, UI_Object::theme.lookUpSound(current_music), 0, &music_channel);
+					UI_Object::sound.sound->playSound(FMOD_CHANNEL_FREE, UI_Object::sound.lookUpSound(current_music), 0, &music_channel);
 			} else
 				music_channel->stop();
 
@@ -532,24 +555,24 @@ int main(int argc, char *argv[])
 						i = sound_channel.erase(i);
 				}
 
-				for(std::list<std::pair<FMOD::Sound*,float> >::iterator i = UI_Object::theme.soundsToPlay.begin(); i != UI_Object::theme.soundsToPlay.end(); ++i)
+				for(std::list<std::pair<FMOD::Sound*,float> >::iterator i = UI_Object::sound.soundsToPlay.begin(); i != UI_Object::sound.soundsToPlay.end(); ++i)
 					if((sound_channel.size() < uiConfiguration.getChannels()))
 					{
 						FMOD::Channel* mychannel = NULL;
-						UI_Object::theme.sound->playSound(FMOD_CHANNEL_FREE, i->first, 0, &mychannel);
+						UI_Object::sound.sound->playSound(FMOD_CHANNEL_FREE, i->first, 0, &mychannel);
 						mychannel->setPan(i->second);
 						mychannel->setVolume((float)(uiConfiguration.getSoundVolume())/100.0);
 						sound_channel.push_back(mychannel);
 					}
 			} else
 				sound_channel.clear();
-			UI_Object::theme.sound->update();
+			UI_Object::sound.sound->update();
 		}
-		UI_Object::theme.soundsToPlay.clear();
+		UI_Object::sound.soundsToPlay.clear();
 		fps->poll(SOUND_TICKS);
+#endif
 
 // ------ END SOUND ENGINE -------
-
 
 // ------ DRAWING AND PROCESSING ------
 	
@@ -570,7 +593,9 @@ int main(int argc, char *argv[])
 			Size s = Size(picture->w, picture->h);
 			if(picture_num==1010)
 			{
-				UI_Object::theme.playSound(INTRO_SOUND, UI_Object::max_x/2);
+#ifndef _NO_FMOD_SOUND
+				UI_Object::sound.playSound(INTRO_SOUND, UI_Object::max_x/2);
+#endif
 				screen->setTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
 				screen->setFont(UI_Object::theme.lookUpFont(SMALL_SHADOW_BOLD_FONT));
 				screen->DrawText("Brought to you by...", UI_Object::max_x/2 - picture->w/3, p.y - 15);
@@ -594,9 +619,10 @@ int main(int argc, char *argv[])
 			SDL_Surface* picture = IMG_Load(os.str().c_str());
 			Point p = Point(picture->w-5, (UI_Object::max_y - 2*picture->h));
 			Size s = Size(picture->w, picture->h);
-		
+#ifndef _NO_FMOD_SOUND
 			if(picture_num==1)
-				UI_Object::theme.playSound(RING_SOUND, p.x + picture->w/2);
+				UI_Object::sound.playSound(RING_SOUND, p.x + picture->w/2);
+#endif
 			
 			screen->setBrush(*UI_Object::theme.lookUpBrush(TRANSPARENT_BRUSH));
 			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_PEN));
@@ -624,9 +650,11 @@ int main(int argc, char *argv[])
 			Point p = Point((UI_Object::max_x+5 - 2*picture->w), (UI_Object::max_y - 2*picture->h));
 			Size s = Size(picture->w, picture->h);
 		
+#ifndef _NO_FMOD_SOUND
 			if(picture_num==17)
-				UI_Object::theme.playSound(RING_SOUND, p.x + picture->w/2);
-
+				UI_Object::sound.playSound(RING_SOUND, p.x + picture->w/2);
+#endif
+			
 			screen->setBrush(*UI_Object::theme.lookUpBrush(TRANSPARENT_BRUSH));
 			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_PEN));
 			screen->DrawEdgedRoundedRectangle(Rect(p - Size(5,5), s + Size(10,10)), 4);
@@ -646,8 +674,10 @@ int main(int argc, char *argv[])
 			picture_num++;
 
 			SDL_FreeSurface(picture);
-		} else if(picture_num<=48)
+		} 
+		else if(picture_num<=48)
 		{
+#ifndef _NO_FMOD_SOUND
 			std::ostringstream os; os.str("");
 			os << "intro_ani/fmod" << picture_num-32 << ".png";
 			SDL_Surface* picture = IMG_Load(os.str().c_str());
@@ -656,7 +686,7 @@ int main(int argc, char *argv[])
 			Size s = Size(picture->w, picture->h);
 			
 			if(picture_num==33)
-				UI_Object::theme.playSound(RING_SOUND, p.x + picture->w/2);
+				UI_Object::sound.playSound(RING_SOUND, p.x + picture->w/2);
 			screen->setBrush(*UI_Object::theme.lookUpBrush(TRANSPARENT_BRUSH));
 			screen->setPen(*UI_Object::theme.lookUpPen(INNER_BORDER_PEN));
 			screen->DrawEdgedRoundedRectangle(Rect(p - Size(5,5), s + Size(10,10)), 4);
@@ -667,13 +697,14 @@ int main(int argc, char *argv[])
 			{
 				screen->setTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
 				screen->setFont(UI_Object::theme.lookUpFont(SMALL_FONT));
-				screen->DrawText("FMOD Sound System http://www.fmod.org", p.x, p.y+10+picture->h);
-				screen->DrawText("(C) Firelight Technologies Pty, Ltd., 1994-2005", p.x, p.y+20+picture->h);
+				screen->DrawText("FMOD Sound System http://www.fmod.org", p.x-20, p.y+10+picture->h);
+				screen->DrawText("(C) Firelight Technologies Pty, Ltd., 1994-2005", p.x-20, p.y+20+picture->h);
 			}
 			DC::addRectangle(Rect(p - Size(10,5), s + Size(80,40)));
+			SDL_FreeSurface(picture);				
+#endif
 			picture_num++;
 
-			SDL_FreeSurface(picture);				
 		}
 		else if(picture_num<(INTRO_ANIMATION_FRAMES-1))
 		{
@@ -685,15 +716,11 @@ int main(int argc, char *argv[])
 		if(picture_num == 9999)
 		{
 			picture_num = INTRO_ANIMATION_FRAMES;
+#ifndef _NO_FMOD_SOUND
 			current_music = LALA_SOUND;
+#endif
 			efConfiguration.setDesiredCPU(original_desired_cpu);
 			efConfiguration.setDesiredFramerate(original_desired_framerate);
-			std::ostringstream os;
-			os << efConfiguration.getDesiredFramerate();
-			toInitLog("* setting desired framerate to " + os.str());
-			os.str("");	
-			os << efConfiguration.getDesiredCPU();
-			toInitLog("* setting desired CPU usage to " + os.str() + "%");
 			SDL_ShowCursor(SDL_ENABLE);
 		}
 
@@ -721,26 +748,22 @@ int main(int argc, char *argv[])
 // ------ END SCREENCAPTURE -----
 		screen->updateScreen();
 		fps->poll(DRAW_TICKS);
-		
-		
-		
 // ------ FRAMERATE AND CALCULATION ------	
-		fps->delay(m.isAnyOptimizing());
+		fps->delay(m.isAnyOptimizing()); 
 		fps->poll(IDLE_TICKS);
 		while(fps->allowCalculation())
-			m.newGeneration();
-		
-// ------ END FRAMERATE AND CALCULATION 
+		{
+			if((picture_num==INTRO_ANIMATION_FRAMES)&&(!m.isIntro()))
+				m.newGeneration();
+		}
 		fps->poll(GENERATION_TICKS);
+// ------ END FRAMERATE AND CALCULATION 
 
 		fps->process();
-
 		fps->updateConfiguration();
-	
-		
 	}
 	delete fps;
-	toInitLog("* Closing SDL...");
+	toInitLog("* " + UI_Object::theme.lookUpString(END_CLOSING_SDL_STRING));
 	delete screen;
 	exitInfo.smoothExit = true;
 	return(EXIT_SUCCESS);

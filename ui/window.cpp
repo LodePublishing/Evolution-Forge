@@ -41,11 +41,6 @@ void UI_Window::addHelpButton(eHelpChapter help_chapter)
 	helpChapter = help_chapter;	
 }
 
-void UI_Window::setMaxHeight(const unsigned int max_height)
-{
-	maxHeight = max_height;
-}
-
 void UI_Window::calculateClientRect()
 {
 	Rect oldClientRect = clientRect;
@@ -231,7 +226,7 @@ void UI_Window::process()
 
 
 
-const bool UI_Window::fitItemToRelativeClientRect(const Rect& rect, const unsigned int adjust)
+const bool UI_Window::fitItemToRelativeClientRect(const Rect& rect, const bool adjust)
 {
 	if(scrollBar)
 	{
@@ -257,8 +252,7 @@ const bool UI_Window::fitItemToRelativeClientRect(const Rect& rect, const unsign
 	{
 		doAdjustments = true;
 		if((rect.getBottom()>0) &&((unsigned int)(rect.getBottom())/*-getRelativeClientRectUpperBound()*/>filledHeight))
-		filledHeight = rect.getBottom()/*-getRelativeClientRectUpperBound()*/;
-	
+			filledHeight = rect.getBottom()/*-getRelativeClientRectUpperBound()*/;
 		if(filledHeight>getMaxHeight()) 
 			filledHeight=getMaxHeight();
 	}
@@ -268,7 +262,7 @@ const bool UI_Window::fitItemToRelativeClientRect(const Rect& rect, const unsign
 	else return true;
 }
 
-const bool UI_Window::fitItemToAbsoluteClientRect(const Rect& rect, const unsigned int adjust)
+const bool UI_Window::fitItemToAbsoluteClientRect(const Rect& rect, const bool adjust)
 {
 	if(scrollBar)
 	{

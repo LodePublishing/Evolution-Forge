@@ -8,7 +8,7 @@
 #define BOGRAPH_MAX_LINES 30
 
 
-class BoGraphWindow:public UI_Window
+class BoGraphWindow : public UI_Window
 {
 	public:
 		BoGraphWindow(UI_Object* bograph_parent, const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max);
@@ -42,6 +42,7 @@ class BoGraphWindow:public UI_Window
 		unsigned int playerNumber;
 		unsigned int playerMax;
 		eRace lastRace;
+		unsigned int totalTime;
 };
 
 inline const std::list<unsigned int>& BoGraphWindow::getSelectedItems() const {

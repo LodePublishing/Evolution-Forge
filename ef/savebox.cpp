@@ -45,7 +45,6 @@ void SaveBox::reloadOriginalSize()
 	UI_Window::reloadOriginalSize();
 }
 
-#include <math.h>					  
 void SaveBox::draw(DC* dc) const
 {
 	if(checkForNeedRedraw())

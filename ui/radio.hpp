@@ -33,6 +33,19 @@ class UI_Radio : public UI_Group
 		UI_Radio& operator=(const UI_Radio& object);
 		UI_Radio(const UI_Radio& object);
 };
+
+inline const signed int UI_Radio::getMarked() const {
+	return(markedItem);
+}
+
+inline void UI_Radio::leftButtonPressed(UI_Button* button) { // Unpress all except one
+	buttonWasPressed = button;
+}
+
+inline void UI_Radio::leftButtonReleased(UI_Button* button) { // allow release?
+	buttonWasPressed = button;
+}
+
 /*
 inline void UI_Radio::rightButtonPressed(UI_Button* button) {
 //	leftButtonPressed(button);

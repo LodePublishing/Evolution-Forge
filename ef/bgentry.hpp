@@ -1,9 +1,7 @@
 #ifndef _GUI_BOGRAPH_ENTRY_HPP
 #define _GUI_BOGRAPH_ENTRY_HPP
 
-#include "../sdl/dc.hpp"
 #include "../ui/button.hpp"
-
 #include "../core/program.hpp"
 
 class BoGraphEntry : public UI_Button

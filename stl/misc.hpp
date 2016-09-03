@@ -22,8 +22,7 @@ extern const bool parse_block_map(std::ifstream& stream, std::map<std::string, s
 extern const bool parse_block_list(std::ifstream& stream, std::list<std::list<std::string> >& block);
 //extern void parse_2nd_block(std::ifstream& stream, std::map<std::string, std::map<std::string, std::list<std::string> > >& block);
 
-const std::string formatTime(const int time);
-const std::string formatTime2(const int time);
+const std::string formatTime(const int time, const unsigned int speed);
 
 // -----------------------------------------------
 // ------  END PARSING TOOLS AND ERROR LOGS ------

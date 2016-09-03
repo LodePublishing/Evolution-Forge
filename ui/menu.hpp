@@ -2,7 +2,6 @@
 #define _UI_MENU_HPP
 
 #include "menuentry.hpp"
-#include <list>
 
 enum eMenuType
 {

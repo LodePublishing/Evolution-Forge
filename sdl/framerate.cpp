@@ -21,23 +21,35 @@ FPS::FPS():
 FPS::~FPS()
 { }
 
-void FPS::setDesiredFramerate(const unsigned int desired_frame_rate)
+#include "../stl/misc.hpp"
+void FPS::setTotalTicks(const long unsigned int total_ticks) 
+{
+	if(total_ticks > 10000)
+	{
+		toErrorLog("WARNING (FPS::setTotalTicks()): total_ticks out of range.");
+	}
+	totalTicks = total_ticks;
+}
+
+
+const bool FPS::setDesiredFramerate(const unsigned int desired_frame_rate)
 {
 	if(desiredFramerate == desired_frame_rate)
-		return;
+		return(false);
 	framecount = 0;
 	desiredFramerate = desired_frame_rate;
 	rateTicks = (1000.0 / (float) desiredFramerate);
+	return(true);
 }
 
-void FPS::setDesiredCPU(const unsigned int desired_cpu_usage)
+const bool FPS::setDesiredCPU(const unsigned int desired_cpu_usage)
 {
 	if(desiredCPU == desired_cpu_usage)
-		return;
+		return(false);
 	desiredCPU = desired_cpu_usage;
+	return(true);
 }
-	
-#include <stdio.h>
+
 void FPS::delay()
 {
 // Increase/Reduce the frames per generation
@@ -62,7 +74,7 @@ void FPS::delay()
 		if((currentFramerate > desiredFramerate) && (framesPerGeneration>1))
 			--framesPerGeneration;
 		else 
-		if((currentFramerate < desiredFramerate) && (framesPerGeneration<100)) //100?
+		if((currentFramerate < desiredFramerate) && (framesPerGeneration<1000)) //100?
 			++framesPerGeneration;
 	} else if(currentFramerate > desiredFramerate)
 	{
@@ -87,6 +99,5 @@ void FPS::delay()
 	else if((delayTicks > cpu_delay))
 		delayTicks-=(delayTicks - cpu_delay)/5 + 1;
 	SDL_Delay(delayTicks);
-
 }
 

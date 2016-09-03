@@ -22,8 +22,6 @@ class UI_LongText : public UI_Object
 		const unsigned int getTextHeight() const;
 		const unsigned int getTextWidth() const;
 		
-//	protected:
-//		eTextMode  mode; 
 	private:
 		UI_Object* scrollBar;
 		std::list<UI_StaticText*> longText; // parsed text

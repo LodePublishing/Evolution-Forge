@@ -48,6 +48,7 @@ PROGRAM& PROGRAM::operator=(const PROGRAM& object)
 	usedFacilityCount = object.usedFacilityCount;
 	unit = object.unit;
 	BT = object.BT;
+	buildingQueue = object.buildingQueue;
 	return(*this);
 }
 
@@ -55,6 +56,7 @@ PROGRAM::PROGRAM(const PROGRAM& object) :
 //	built(object.built),
 	before(object.before),
 	after(object.after),
+	buildingQueue(object.buildingQueue),
 	time(object.time),
 	location(object.location),
 	successType(object.successType),

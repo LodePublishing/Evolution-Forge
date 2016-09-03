@@ -4,7 +4,6 @@
 #include "../ui/window.hpp"
 #include "../ui/editfield.hpp"
 
-
 // simplified window class, maybe inheritate UI_Window from SaveBox...
 class SaveBox : public UI_Window
 {

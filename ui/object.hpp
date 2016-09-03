@@ -2,8 +2,7 @@
 #define _UI_OBJECT_HPP
 
 #include "theme.hpp"
-#include <list>
-#include <string>
+#include "sound.hpp"
 
 #include <math.h>
 #ifndef M_PI
@@ -126,6 +125,9 @@ class UI_Object
 		static unsigned int redrawnObjects;
 		static void setResolution(const Size resolution);
 		static UI_Theme theme;
+#ifndef _NO_FMOD_SOUND
+		static UI_Sound sound;
+#endif
 		static UI_Window* currentWindow;
 		static bool windowSelected;
 		
@@ -411,6 +413,11 @@ inline const eString UI_Object::getToolTipEString() const {
 inline const std::string& UI_Object::getToolTipString() const {
 	return(toolTipString);
 }
+
+inline const bool UI_Object::hasSizeChanged() const {
+	return(sizeHasChanged);
+}
+
 
 #endif
 

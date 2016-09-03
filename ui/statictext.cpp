@@ -1,5 +1,4 @@
 #include "statictext.hpp"
-
 #include <sstream>
 
 UI_StaticText::UI_StaticText(UI_Object* st_parent, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode) :
@@ -26,12 +25,7 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const eString st_text, const 
 	eText(st_text),
 	pressed(false),
 	highlight(false)
-{
-//	adjustSize(CHILD_WAS_CHANGED, getTextSize());
-	updateText(eText);
-//	if(getParent()) 
-//		adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, getTextSize()); TODO
-}
+{}
 
 UI_StaticText::UI_StaticText(UI_Object* st_parent, const std::string& st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode) :
 	UI_Object(st_parent, st_pos, distance_bottom_right, position_mode, NO_AUTO_SIZE),
@@ -44,12 +38,7 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const std::string& st_text, c
 	eText(NULL_STRING),
 	pressed(false),
 	highlight(false)
-{
-//	adjustSize(CHILD_WAS_CHANGED, getTextSize());
-	updateText(text);
-//	if(getParent()) 
-//		adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, getTextSize()); TODO, fuer UI_Group groessen bei Buttons... AUTO_HEIGHT muss irgendwo berechnet werden...
-}
+{}
 
 UI_StaticText::~UI_StaticText()
 {}
@@ -172,11 +161,7 @@ void UI_StaticText::updateText(const std::string& st_text)
 	textWasChanged=true;
 	Size old_size = getTextSize();
 	text = st_text;
-	std::ostringstream os;
-//	adjustSize(CHILD_WAS_CHANGED, getTextSize());
 	setSize(getTextSize());	
-//	os << "Gewuenschte Groesse: " << getTextSize().getWidth() << "x" << getTextSize().getHeight() << ", erzielte Groesse: " << getSize().getWidth() << "x" << getSize().getHeight() << " - " << text;
-//	toLog(os.str());
 }
 
 void UI_StaticText::updateText(const eString st_text)
@@ -193,10 +178,8 @@ void UI_StaticText::reloadText(const std::string& st_text)
 {
 	setNeedRedrawMoved();
 	textWasChanged=true;
-//	Size old_size = getTextSize();
 	text = st_text;
 	setSize(getTextSize());
-//	adjustSize(CHILD_WAS_CHANGED, getTextSize());
 }
 
 void UI_StaticText::reloadText(const eString st_text)

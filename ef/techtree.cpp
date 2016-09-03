@@ -1,4 +1,5 @@
 #include "techtree.hpp"
+#include "../core/database.hpp"
 
 TechTreeWindow::TechTreeWindow(UI_Object* techtree_parent) :
 	UI_Window(techtree_parent, TECHTREE_WINDOW_TITLE_STRING, theme.lookUpGlobalRect(TECHTREE_WINDOW), theme.lookUpGlobalMaxHeight(TECHTREE_WINDOW), NOT_SCROLLED),

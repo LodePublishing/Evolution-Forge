@@ -1,16 +1,14 @@
 #ifndef _GUI_BOWINDOW_HPP
 #define _GUI_BOWINDOW_HPP
 
-#include "unitmenu.hpp"
 #include "../ui/window.hpp"
+#include "../ui/group.hpp"
+
 #include "../core/anabuildorder.hpp"
-#include <list>
 
 #include "boentry.hpp"
-#include "../ui/scrollbar.hpp"
-
-#include "savebox.hpp"
 #include "bomenu.hpp"
+#include "unitmenu.hpp"
 
 class BoWindow : public UI_Window
 {
@@ -43,8 +41,12 @@ class BoWindow : public UI_Window
 		const bool saveBuildOrder();
 		const bool openBoMenu();
 		void mouseHasLeft();
-		void loadBuildOrder(const unsigned int number);
+		const signed int getLoadedBuildOrder() const;
 	private:
+		float geneAnimation;
+		void drawGeneString(DC* dc) const;
+		void drawGene(DC* dc, unsigned int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const;
+
 		void closeMenus();
 		void drawSelectionStuff(DC* dc) const;
 		void checkForInfoWindow();
@@ -66,17 +68,15 @@ class BoWindow : public UI_Window
 		std::list<unsigned int> selectedItems;
 
 
-		UI_StaticText* timeSlot[60];
+//		UI_StaticText* timeSlot[60];
 
 		UI_Group* menuGroup;
 		UI_Button* restartBuildOrderButton;
 		UI_Button* saveBuildOrderButton;
 		UI_Button* loadBuildOrderButton;
 		
-
-		bool* fixed;
 		UI_ScrollBar* scrollBar;
-		UI_Button* alwaysBuildWorker;
+//		UI_Button* alwaysBuildWorker;
 //		UI_Button* onlySwapOrders;
 		
 //		UI_Button* unitMenuButton;
@@ -92,7 +92,13 @@ class BoWindow : public UI_Window
 		bool saveBox;
 
 		bool boMenuOpenedExternally;
+
+		signed int loadedBuildOrder;
 };
+
+inline const signed int BoWindow::getLoadedBuildOrder() const {
+	return(loadedBuildOrder);
+}
 
 inline const std::list<unsigned int>& BoWindow::getSelectedItems() const {
 	return(selectedItems);

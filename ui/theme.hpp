@@ -6,8 +6,6 @@
 #include "../core/starcraft.hpp"
 #include "configuration.hpp"
 
-#include <fmod.hpp>
-
 extern unsigned int FONT_SIZE;
 //#define FONT_SIZE 6
 // TODO!!!
@@ -40,7 +38,6 @@ enum eDataType
 	GENERAL_RESOLUTION_BITMAP_DATA_TYPE,
 	GENERAL_THEME_BITMAP_DATA_TYPE,
 	BITMAP_DATA_TYPE,
-	SOUND_DATA_TYPE,
 	PEN_DATA_TYPE,
 	BRUSH_DATA_TYPE,
 	BUTTON_COLOR_DATA_TYPE,
@@ -197,6 +194,7 @@ enum eColor
 	BRIGHT_FITNESS_TEXT_COLOR,
 
 	DISABLED_TEXT_COLOR,
+	DARK_IMPORTANT_COLOR,
 
 	MAX_COLORS
 };
@@ -355,7 +353,6 @@ enum eBrush
 	MAX_BRUSHES
 };
 // ------ END BRUSHES ------
-
 // ------ STRINGS ------
 enum eString
 {
@@ -363,22 +360,38 @@ enum eString
 
 	LAST_UNIT_STRING=315,
 	
-	START_LOAD_CONFIGURATION_STRING=316,
+	START_LOAD_LANGUAGE_FILES_STRING=316,
+	START_LOAD_UI_CONFIGURATION_STRING,
+	START_LOAD_CORE_CONFIGURATION_STRING,
+	START_LOAD_EF_CONFIGURATION_STRING,
+	START_SET_LANGUAGE_STRING,
+
+	START_COMMANDO_LINE_1_STRING,
+	START_COMMANDO_LINE_2_STRING,
+	START_COMMANDO_LINE_3_STRING,
+	START_COMMANDO_LINE_4_STRING,
+	START_COMMANDO_LINE_5_STRING,
+	START_COMMANDO_LINE_6_STRING,
+	
 	START_PARSE_COMMAND_LINE_STRING,
+	START_INIT_NOSOUND_STRING,
 	START_WARNING_VO_ARGUMENT_STRING,
 	START_SDL_USING_DRIVER_STRING,
 	START_ERROR_NO_DRIVER_AVAILIBLE_STRING,
 	START_ERROR_DRIVER_NOT_SUPPORTED_STRING,
 	
 	START_INIT_SDL_STRING,	
+	START_AVAILIBLE_GRAPHIC_DRIVERS_STRING,
 	START_UNABLE_TO_INIT_SDL_STRING,
 	START_ERROR_SETTING_VIDEO_MODE_STRING,
 	START_CREATED_SURFACE_STRING,
 	START_SET_WINDOW_MODE_STRING,	
 	START_SET_FULLSCREEN_MODE_STRING,	
 	START_INIT_SDL_TRUETYPE_FONTS_STRING,
+	START_INIT_SDL_TTF_ERROR_STRING,
 	START_INIT_FRAMERATE_STRING,
 	START_INIT_SOUND_STRING,
+	START_INIT_FMOD_VERSION_ERROR_STRING,
 	START_INIT_GRAPHIC_ENGINE_CORE_STRING,	
 	START_LOAD_UI_BITMAPS_FONTS_STRING,
 	START_ASSIGNING_DEFAULT_VARIABLES_STRING,	
@@ -388,6 +401,25 @@ enum eString
 	START_LOAD_STARTCONDITIONS_STRING,	
 	START_LOAD_GOALS_STRING,	
 	START_LOAD_BUILD_ORDERS_STRING,
+	START_LOADING_STRING, // just 'loading'
+
+	START_LOAD_COORDINATES_SINGLE_VIEW_STRING,
+	START_LOAD_COORDINATES_LEFT_SPLIT_VIEW_STRING,
+	START_LOAD_COORDINATES_RIGHT_SPLIT_VIEW_STRING,
+
+	START_LOAD_DATA_FILE_STRING,
+	START_LOAD_COLORS_STRING,
+	START_LOAD_PENS_STRING,
+	START_LOAD_BRUSHES_STRING,
+	START_LOAD_FONTS_STRING,
+	START_LOAD_MAIN_COORDINATES_STRING,
+	START_LOAD_BITMAPS_STRING,
+	START_LOAD_BUTTONS_STRING,
+	START_LOAD_SOUNDS_STRING,
+
+	START_SET_DESIRED_FRAMERATE_STRING,
+	START_SET_DESIRED_CPU_STRING,
+		
 	START_ASSIGN_AND_ANALYZE_STRING,	
 	START_PREPARE_FIRST_RUN_STRING,	
 	START_INIT_GUI_STRING,
@@ -401,12 +433,71 @@ enum eString
 	START_INIT_TECHTREE_WINDOW_STRING,
 	START_INIT_INTRO_WINDOW_STRING,
 	START_HIDING_WINDOWS_STRING,
-
 	
 	START_INIT_CORE_STRING,
 	START_MAIN_INIT_COMPLETE_STRING,	
 	START_SYSTEM_READY_STRING,
 	START_INITIALIZATION_TIME_STRING,
+
+	START_CHOOSING_GAME_TAB_STRING,
+	START_CREATING_GAME_STRING,
+	START_ASSIGNING_MAP_STRING,
+	START_ASSIGNING_START_CONDITION_STRING,
+	START_SETTING_RACE_STRING,
+	START_ASSIGNING_GOAL_STRING,
+	START_CREATING_START_UNITS_STRING,
+	START_ASSIGNING_HARVEST_SPEED_STRING,
+	START_SETTING_START_POSITION_STRING,
+	START_CREATING_BUILD_ORDERS_STRING,
+	START_MEASURING_FITNESS_STRING,
+	START_SHOWING_GAME_STRING,
+
+
+        START_SDL_NO_MODES_AVAILIBLE_STRING,
+        START_SDL_ALL_RESOLUTIONS_AVAILIBLE_STRING,
+        START_SDL_AVAILIBLE_MODES_STRING,
+        START_SDL_MAX_COLOR_DEPTH_STRING,
+        START_SDL_HARDWARE_SURFACES_POSSIBLE_STRING,
+        START_SDL_WINDOW_MANAGER_AVAILIBLE_STRING,
+        START_SDL_HARDWARE_TO_HARDWARE_BLITS_ACCELERATED_STRING,
+        START_SDL_HARDWARE_TO_HARDWARE_COLORKEY_BLITS_ACCELERATED_STRING,
+        START_SDL_HARDWARE_TO_HARDWARE_ALPHA_BLITS_ACCELERATED_STRING,
+        START_SDL_SOFTWARE_TO_HARDWARE_BLITS_ACCELERATED_STRING,
+        START_SDL_SOFTWARE_TO_HARDWARE_COLORKEY_BLITS_ACCELERATED_STRING,
+        START_SDL_SOFTWARE_TO_HARDWARE_ALPHA_BLITS_ACCELERATED_STRING,
+        START_SDL_COLOR_FILLS_ACCELERATED_STRING,
+        START_SDL_TOTAL_VIDEO_MEMORY_STRING,
+        START_SDL_SURFACE_STORED_IN_SYSTEM_MEMORY_STRING,
+        START_SDL_SURFACE_STORED_IN_VIDEO_MEMORY_STRING,
+        START_SDL_SURFACE_USES_ASYNCHRONOUS_BLITS_STRING,
+        START_SDL_SURFACE_ALLOWS_ANY_PIXEL_FORMAT_STRING,
+        START_SDL_SURFACE_HAS_EXCLUSIVE_PALETTE_STRING,
+        START_SDL_SURFACE_IS_DOUBLE_BUFFERED_STRING,
+        START_SDL_SURFACE_HAS_OPENGL_CONTEXT_STRING,
+        START_SDL_SURFACE_SUPPORTS_OPENGL_BLITTING_STRING,
+        START_SDL_SURFACE_IS_RESIZABLE_STRING,
+        START_SDL_SURFACE_BLIT_USES_HARDWARE_ACCELERATION_STRING,
+        START_SDL_SURFACE_USES_COLORKEY_BLITTING_STRING,
+        START_SDL_COLORKEY_BLITTING_RLE_ACCELERATED_STRING,
+        START_SDL_BLIT_USES_ALPHA_BLENDING_STRING,
+	START_SDL_SURFACE_USES_PREALLOCATED_MEMORY_STRING,
+	START_SDL_SURFACE_NEEDS_LOCKING_STRING,
+
+
+//	END_FREEING_BUILD_ORDERS_STRING,
+//	END_FREEING_ANALYZED_DATA_STRING, // TODO :/
+	END_RESET_MOUSE_CURSOR_STRING,
+	END_FREEING_WINDOWS_STRING,
+	END_FREEING_GAMES_STRING,
+	END_FREEING_COLORS_BRUSHES_PENS_STRING,
+	END_FREEING_BITMAPS_STRING,
+	END_FREEING_COORDINATES_STRING,
+	END_FREEING_BUTTONS_STRING,
+	END_FREEING_FONTS_STRING,
+	END_FREEING_SOUNDS_STRING,
+	END_CLOSING_SOUND_ENGINE_STRING,
+	END_RELEASING_SOUND_ENGINE_STRING,
+	END_CLOSING_SDL_STRING,
 
 	CHANGED_BIT_DEPTH_STRING,
 	CHANGED_RESOLUTION_STRING,
@@ -444,6 +535,7 @@ enum eString
 	REMOVED_ONE_GOAL_STRING,
 	MOVED_NON_GOAL_STRING,
 	SAVED_GOAL_STRING,
+	SAVED_BUILD_ORDER_STRING,
 
 // game window:
 	COMPARE_GAME_STRING,
@@ -512,6 +604,12 @@ enum eString
 	RESET_BUILD_ORDER_STRING,
 	SAVE_BUILD_ORDER_STRING,
 	LOAD_BUILD_ORDER_STRING,
+
+	BOWINDOW_BUILD_TIME_STRING,
+	BOWINDOW_MINERALS_STRING,
+	BOWINDOW_GAS_STRING,
+	BOWINDOW_EACH_TOTAL_STRING,
+
 	SPEED_STRING,
 	
 // timer window
@@ -586,6 +684,7 @@ enum eString
 	SETTING_ALWAYS_BUILD_WORKERS_STRING,
 	SETTING_ALLOW_WAIT_ORDERS_STRING,
 	SETTING_WAIT_ACCURACY_STRING,
+	SETTING_GAME_SPEED_STRING,
 	SETTING_AUTO_RUNS_STRING,
 	SETTING_MAX_GENERATIONS_STRING,
 
@@ -600,6 +699,7 @@ enum eString
 	SETTING_WAIT_AFTER_CHANGE_STRING,
 	SETTING_TOOLTIPS_STRING,
 	SETTING_DNA_SPIRAL_STRING,
+	SETTING_RACE_SPECIFIC_THEME_STRING,
 	SETTING_GLOWING_BUTTONS_STRING,
 	SETTING_COMPACT_DISPLAY_MODE_STRING,
 	SETTING_FACILITY_MODE_STRING,
@@ -620,6 +720,7 @@ enum eString
 	SETTING_ALWAYS_BUILD_WORKERS_TOOLTIP_STRING,
 	SETTING_ALLOW_WAIT_ORDERS_TOOLTIP_STRING,
 	SETTING_WAIT_ACCURACY_TOOLTIP_STRING,
+	SETTING_GAME_SPEED_TOOLTIP_STRING,
 	SETTING_AUTO_RUNS_TOOLTIP_STRING,
 	SETTING_MAX_GENERATIONS_TOOLTIP_STRING,
 
@@ -634,6 +735,7 @@ enum eString
 	SETTING_WAIT_AFTER_CHANGE_TOOLTIP_STRING,
 	SETTING_TOOLTIPS_TOOLTIP_STRING,
 	SETTING_DNA_SPIRAL_TOOLTIP_STRING,
+	SETTING_RACE_SPECIFIC_THEME_TOOLTIP_STRING,
 	SETTING_GLOWING_BUTTONS_TOOLTIP_STRING,
 	SETTING_COMPACT_DISPLAY_MODE_TOOLTIP_STRING,
 	SETTING_FACILITY_MODE_TOOLTIP_STRING,
@@ -645,6 +747,14 @@ enum eString
 	SETTING_DESIRED_CPU_USAGE_TOOLTIP_STRING,
 
 	SETTINGS_SAVED_STRING,
+
+	GAME_SPEED_SLOWEST_STRING, // 6
+	GAME_SPEED_SLOWER_STRING, // 9
+	GAME_SPEED_SLOW_STRING, // 12
+	GAME_SPEED_NORMAL_STRING, // 15
+	GAME_SPEED_FAST_STRING, // 18
+	GAME_SPEED_FASTER_STRING, // 21
+	GAME_SPEED_FASTEST_STRING, // 24
 
 	LANGUAGE_HAS_CHANGED_STRING,
 	
@@ -701,6 +811,7 @@ enum eString
 	MAX_STRINGS //207
 };
 // ------ END STRINGS ------
+
 
 // ------ BITMAPS ------
 enum eBitmap
@@ -774,27 +885,11 @@ enum eBitmap
 	CLICKED_ARROW_UP_BITMAP,
 	CLICKED_ARROW_DOWN_BITMAP,*/
 	
+	HELP_MAIN_BITMAP,
+	
 	MAX_BITMAPS
 };
 // ------ END BITMAPS ------
-
-enum eSound
-{
-	NULL_SOUND,
-	LALA_SOUND,
-	MOUSEOVER_SOUND,
-	SWISHIN_SOUND,
-	SWISHOUT_SOUND,
-	SWISHLOCK_SOUND,
-	CLICKED_SOUND,
-	CLICK_SOUND,
-	COMPLETE_SOUND,
-	ERROR_SOUND,
-	RING_SOUND,
-	INTRO_SOUND,
-	MAX_SOUNDS
-};
-
 
 // ------ GENERAL RECTANGLES ------
 enum eGlobalWindow
@@ -1045,15 +1140,6 @@ struct BitmapEntry
 	bool solid;
 };
 
-struct SoundEntry
-{
-	unsigned int line;
-	std::string name;
-	FMOD::Sound* sound;
-	bool used;
-	bool loop;
-};
-
 class UI_Theme
 {
 	public:
@@ -1080,8 +1166,7 @@ class UI_Theme
 
 		const bool loadHelpChapterStringFile(const std::string& help_file);
 		const bool loadStringFile(const std::string& string_file);
-		void loadData(const std::string& data_file, const std::string& bitmap_dir, const std::string& sound_dir, const std::string& font_dir, DC* dc); //currently all data hard coded, move it to file later! TODO
-		const bool loadSoundDataFile(const std::string& sound_data_file); // TODO
+		void loadData(const std::string& data_file, const std::string& bitmap_dir, const std::string& font_dir, DC* dc); //currently all data hard coded, move it to file later! TODO
 		const bool loadWindowDataFile(const std::string& window_data_file, const unsigned int game_number, const unsigned int max_games);
 
 		const std::string& lookUpString(const eString id) const;
@@ -1093,20 +1178,17 @@ class UI_Theme
 		Color* lookUpColor(const eColor id) const;
 		/*const */SDL_Surface* lookUpBitmap(const eBitmap id);
 		SDL_Cursor* lookUpCursor(const eCursor id, const unsigned int animation_phase = 0) const;
-		FMOD::Sound* lookUpSound(const eSound id);
 		Pen* lookUpPen(const ePen id) const;
 		Brush* lookUpBrush(const eBrush id) const;
 		Font* lookUpFont(const eFont id) const;
 
-		void printSoundInformation() const;
-		
 		const Rect lookUpGlobalRect(const eGlobalWindow id) const;
-		const Rect lookUpGameRect(const eGameWindow id, const unsigned int gameNumber, const unsigned int maxGames) const;
-		const Rect lookUpPlayerRect(const ePlayerWindow id, const unsigned int gameNumber, const unsigned int maxGames, const unsigned int playerNumber, const unsigned int maxPlayer) const;
+		const Rect lookUpGameRect(const eGameWindow id, const unsigned int game_number, const unsigned int max_games) const;
+		const Rect lookUpPlayerRect(const ePlayerWindow id, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_player) const;
 		
 		const unsigned int lookUpGlobalMaxHeight(const eGlobalWindow id) const;
-		const unsigned int lookUpGameMaxHeight(const eGameWindow id, const unsigned int gameNumber, const unsigned int maxGames) const;
-		const unsigned int lookUpPlayerMaxHeight(const ePlayerWindow id, const unsigned int gameNumber, const unsigned int maxGames, const unsigned int playerNumber, const unsigned int maxPlayer) const;
+		const unsigned int lookUpGameMaxHeight(const eGameWindow id, const unsigned int game_number, const unsigned int max_games) const;
+		const unsigned int lookUpPlayerMaxHeight(const ePlayerWindow id, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_player) const;
 
 		const ButtonColorsType* lookUpButtonColors(const eButtonColorsType id) const;
 		const unsigned int lookUpButtonWidth(const eButtonWidthType id) const;
@@ -1115,17 +1197,13 @@ class UI_Theme
 		
 		const eBitmap getBitmapFromIdentifier(const std::string& identifier) const;
 
-		void playSound(const eSound id, const unsigned int x);
-		std::list<std::pair<FMOD::Sound*, float> > soundsToPlay;
-		static bool ERRCHECK(FMOD_RESULT result);
-		FMOD::System* sound;
-		void releaseSoundEngine();
-
 		const bool isLanguageInitialized(const eLanguage language) const;
+		std::string printHardwareInformation();
+		std::string printSurfaceInformation(DC* surface);
 	private:
 		void setMaxGlobalHeight(unsigned int current_resolution, unsigned int id, unsigned int max_height);
-		void setMaxGameHeight(unsigned int current_resolution, unsigned int gameNumber, unsigned int maxGames, unsigned int id, unsigned int max_height);
-		void setMaxPlayerHeight(unsigned int current_resolution, unsigned int gameNumber, unsigned int maxGames, unsigned int player_max, unsigned int playerNumber, unsigned int id, unsigned int max_height);
+		void setMaxGameHeight(unsigned int current_resolution, unsigned int game_number, unsigned int max_games, unsigned int id, unsigned int max_height);
+		void setMaxPlayerHeight(unsigned int current_resolution, unsigned int game_number, unsigned int max_games, unsigned int player_max, unsigned int player_number, unsigned int id, unsigned int max_height);
  		eResolution currentResolution;
 		eBitDepth currentBitDepth;
 		eLanguage currentLanguage;
@@ -1138,12 +1216,6 @@ class UI_Theme
 		std::list<BitmapEntry> loadedBitmaps;
 		BitmapEntry* bitmapAccessTable[MAX_RESOLUTIONS][MAX_COLOR_THEMES][MAX_BITMAPS];
 	
-		void initSoundIdentifier();
-		std::string soundIdentifier[MAX_SOUNDS];
-		FMOD::Sound* soundList[MAX_SOUNDS];
-		std::list<SoundEntry> loadedSounds;
-		SoundEntry* soundAccessTable[MAX_SOUNDS];
-		
 		void initStringIdentifier();
 		std::string stringIdentifier[MAX_STRINGS];
 		std::string stringList[MAX_LANGUAGES][MAX_STRINGS];

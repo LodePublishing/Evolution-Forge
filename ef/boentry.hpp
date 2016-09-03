@@ -1,9 +1,7 @@
 #ifndef _BOENTRY_HPP
 #define _BOENTRY_HPP
 
-#include "../sdl/dc.hpp"
 #include "../ui/button.hpp"
-
 #include "../core/program.hpp"
 
 class BoEntry : public UI_Button
@@ -26,37 +24,34 @@ class BoEntry : public UI_Button
 
 		void setCount(const unsigned int unit_count);
 		const unsigned int getCount() const;
-		
+
 		static bool doLockSound;		
 	private:
 		unsigned int id;
 		unsigned int count;
 //		bool fixed;
-//        UI_Button* addUnit;
-//      UI_Button* subUnit;
-//    UI_Button* cancelUnit; TODO
+//		UI_Button* addUnit;
+//		UI_Button* subUnit;
+//		UI_Button* cancelUnit; TODO
 		BoEntry(const BoEntry& object);
 		BoEntry& operator=(const BoEntry& object);
 };
 
-inline void BoEntry::setId(const unsigned int my_id)
-{
+inline void BoEntry::setId(const unsigned int my_id) {
 	id = my_id;
 }
 
-inline const unsigned int BoEntry::getId() const
-{
+inline const unsigned int BoEntry::getId() const {
 	return(id);
 }
 
-inline void BoEntry::setCount(const unsigned int unit_count)
-{
+inline void BoEntry::setCount(const unsigned int unit_count) {
 	count = unit_count;
 }
 
-inline const unsigned int BoEntry::getCount() const
-{
+inline const unsigned int BoEntry::getCount() const {
 	return(count);
 }
+
 #endif
 

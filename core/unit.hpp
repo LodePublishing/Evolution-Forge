@@ -12,15 +12,13 @@ eine startforce (auch player 0) zusammenstellen, vorgegebene startforces jeweils
 
 class UNIT
 {
-	private:
-		unsigned int availible[UNIT_TYPE_COUNT];
-		unsigned int total[UNIT_TYPE_COUNT];
 	public:
 		UNIT();
 		~UNIT();
+
 		UNIT(const UNIT& object);
 		UNIT& operator=(const UNIT& object);
-
+	
 		//TODO evtl noch nen paar get/set Funktionen rein... 
 		const unsigned int getAvailible(const unsigned int unit_type) const;
 		const unsigned int getTotal(const unsigned int unit_type) const;
@@ -38,6 +36,9 @@ class UNIT
 		void adjustResearches(const eRace race);
 		void adjustSupply(const eRace race, unsigned int& needSupply, unsigned int& haveSupply);
 		void resetData();
+	private:
+		unsigned int availible[UNIT_TYPE_COUNT];
+		unsigned int total[UNIT_TYPE_COUNT];
 };
 
 inline const unsigned int UNIT::getAvailible(const unsigned int unitType) const

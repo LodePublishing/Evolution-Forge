@@ -1,11 +1,11 @@
 #include "fpssystem.hpp"
-#include "configuration.hpp"
-#include "../stl/misc.hpp"
 #include <sstream>
+#include "configuration.hpp"
+
 
 FPS_SYSTEM::FPS_SYSTEM():
 	fps(new FPS()),
-	currentTicks(500),
+	currentTicks(0), //lol, muss 0 sein
 	framesPerSecond(10),
 	totalTicks(500),
 	tickIntervall(0),
@@ -14,24 +14,14 @@ FPS_SYSTEM::FPS_SYSTEM():
 {
 	for(unsigned int i = MAX_TICK_TYPES;i--;)
 		for(unsigned int j = TICK_INTERVALL;j--;)
-			ticks[i][j] = 10;
+			ticks[i][j] = 0;
 	for(unsigned int j = TICK_INTERVALL;j--;)
-		frames_count[j]=5;
+		frames_count[j]=0;
 	for(unsigned int i = MAX_TICK_TYPES; i--;)
-		percent[i] = 10;
+		percent[i] = 0;
+
+	updateDesiredValues();
 		
-	{
-		std::ostringstream os;
-		os << efConfiguration.getDesiredFramerate();
-		toInitLog("* setting desired framerate to " + os.str());
-	}
-	fps->setDesiredFramerate(efConfiguration.getDesiredFramerate());
-	{
-	//	std::ostringstream os;
-	//	os << efConfiguration.getDesiredCPU();
-	//	toInitLog("* setting desired CPU usage to " + os.str() + "%");
-	}
-	fps->setDesiredCPU(efConfiguration.getDesiredCPU());
 	refresh = fps->getFramesPerGeneration();
 }
 
@@ -40,6 +30,22 @@ FPS_SYSTEM::~FPS_SYSTEM()
 	delete fps;
 }
 
+void FPS_SYSTEM::updateDesiredValues()
+{
+	if( fps->setDesiredFramerate(efConfiguration.getDesiredFramerate()) )
+	{
+		std::ostringstream os;
+		os << efConfiguration.getDesiredFramerate();
+		toInitLog("* " + UI_Object::theme.lookUpString(START_SET_DESIRED_FRAMERATE_STRING) + " " + os.str());
+	}
+	
+	if( fps->setDesiredCPU(efConfiguration.getDesiredCPU()) )
+	{
+		std::ostringstream os;
+		os << efConfiguration.getDesiredCPU();
+		toInitLog("* " + UI_Object::theme.lookUpString(START_SET_DESIRED_CPU_STRING) + " " + os.str() + "%");
+	}
+}
 
 void FPS_SYSTEM::poll(const eTicks etick)
 {
@@ -64,8 +70,8 @@ void FPS_SYSTEM::process()
 		totalTicks+=total_this_ticks[i];
 		
 	}
-	totalTicks+=1;
-
+	if(totalTicks == 0)
+		totalTicks = 1;
 	unsigned int total_frames = 0;
 	for(unsigned int j = TICK_INTERVALL;j--;)
 		total_frames += frames_count[j];
@@ -141,8 +147,7 @@ void FPS_SYSTEM::delay(const bool optimizing)
 	framesPerGeneration = fps->getFramesPerGeneration();
 	frames_count[tickIntervall] = fps->getCurrentFramerate();
 	fps->setAdaptFramesPerGeneration(optimizing);
-	fps->setDesiredFramerate(efConfiguration.getDesiredFramerate());
-	fps->setDesiredCPU(efConfiguration.getDesiredCPU());
+	updateDesiredValues();
 	fps->setTotalTicks(1+totalTicks/TICK_INTERVALL);
 	fps->delay();
 	refresh += 100;

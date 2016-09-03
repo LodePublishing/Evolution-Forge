@@ -1,66 +1,8 @@
 #include "mainwindow.hpp"
 #include "configuration.hpp"
 
-/*enum eIsTabbed
-{
-	NOT_TABBED,
-	TABBED
-};*/
-
-/*		UI_Radio* tabRow;
-		UI_Button* tab[MAX_TABS];
-		void addTab(UI_Button* tab_button, const unsigned int button_id);
-		void removeTab(const unsigned int button_id);
-		const signed int getCurrentTab() const;
-		void forcePressTab(const unsigned int press_tab);
-// has this window tab buttons at the top?
-		eIsTabbed isTabbed;
-		void drawTabs(DC* dc) const;
-	
-
-void UI_Window::addTab(UI_Button* tab_button, const unsigned int button_id)
-{
-#ifdef _SCC_DEBUG
-	if(isTabbed==NOT_TABBED) {
-                toErrorLog("DEBUG: (UI_Window::addTab): Tried to add a tab while window is marked as not tabbed.");return;
-        }
-#endif
-	tabRow->addButton(tab_button, button_id);
-}
-
-void UI_Window::removeTab(const unsigned int button_id)
-{
-#ifdef _SCC_DEBUG
-	if(isTabbed==NOT_TABBED) {
-                toErrorLog("DEBUG: (UI_Window::removeTab): Tried to remove a tab while window is marked as not tabbed.");return;
-        }
-#endif
-	tabRow->removeButton(button_id);
-	tabRow->updateIds(); // fill the space
-}
-
-void UI_Window::forcePressTab(const unsigned int press_tab)
-{
-	if(isTabbed==NOT_TABBED) 
-		return;
-	tabRow->forcePress(press_tab);
-}
-
-const signed int UI_Window::getCurrentTab() const
-{
-	if(isTabbed==NOT_TABBED) 
-		return -1;
-	return(tabRow->getMarked());
-}*/
-
-
-
-
 MainWindow::MainWindow() : 
 	UI_Window( NULL, NULL_STRING, theme.lookUpGlobalRect(MAIN_WINDOW), theme.lookUpGlobalMaxHeight(MAIN_WINDOW), NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, Rect(0, 0, 1280, 1024), TRANSPARENT ),
-	ani(1),
-	ani2(0),
-	gizmo(true),
 	gameTabCount(0),
 	gameNumber(1),
 	leftTabs(new UI_Group(this, Rect(Point(10, 0), Size(100,0)), Size(0, 0), HORIZONTAL_GROUP, TOP_LEFT, NULL_STRING)),
@@ -75,12 +17,12 @@ MainWindow::MainWindow() :
 		gameNumbers[i]=0;
 		tab[i]=NULL;
 	}
- 	tab[0] = new UI_Button(leftTabs, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), TAB_BUTTON, false, TAB_BUTTON_MODE, NEW_GAME_STRING, DO_NOT_ADJUST, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+ 	tab[0] = new UI_Button(leftTabs, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), TAB_BUTTON, false, TOP_TAB_BUTTON_MODE, NEW_GAME_STRING, DO_NOT_ADJUST, MIDDLE_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 // right:
-	tab[DATABASE_TAB] = new UI_Button(rightTabs, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), DATABASE_TAB_BUTTON, true, TAB_BUTTON_MODE, DATABASE_TAB_STRING, DO_NOT_ADJUST, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
-//	tab[MAP_TAB] = new UI_Button(NULL, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), MAP_TAB_BUTTON, true, TAB_BUTTON_MODE, MAP_TAB_STRING, DO_NOT_ADJUST, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
-	tab[SETTINGS_TAB] = new UI_Button(rightTabs, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), SETTINGS_TAB_BUTTON, true, TAB_BUTTON_MODE, SETTINGS_TAB_STRING, DO_NOT_ADJUST, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
-	tab[HELP_TAB] = new UI_Button(rightTabs, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), HELP_TAB_BUTTON, true, TAB_BUTTON_MODE, HELP_TAB_STRING, DO_NOT_ADJUST, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	tab[DATABASE_TAB] = new UI_Button(rightTabs, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), DATABASE_TAB_BUTTON, true, TOP_TAB_BUTTON_MODE, DATABASE_TAB_STRING, DO_NOT_ADJUST, MIDDLE_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+//	tab[MAP_TAB] = new UI_Button(NULL, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), MAP_TAB_BUTTON, true, TOP_TAB_BUTTON_MODE, MAP_TAB_STRING, DO_NOT_ADJUST, MIDDLE_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	tab[SETTINGS_TAB] = new UI_Button(rightTabs, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), SETTINGS_TAB_BUTTON, true, TOP_TAB_BUTTON_MODE, SETTINGS_TAB_STRING, DO_NOT_ADJUST, MIDDLE_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	tab[HELP_TAB] = new UI_Button(rightTabs, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), HELP_TAB_BUTTON, true, TOP_TAB_BUTTON_MODE, HELP_TAB_STRING, DO_NOT_ADJUST, MIDDLE_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 
 	tab[DATABASE_TAB]->updateToolTip(DATABASE_TAB_TOOLTIP_STRING);
 //	tab[MAP_TAB]->updateToolTip(MAP_TAB_TOOLTIP_STRING);
@@ -155,7 +97,7 @@ void MainWindow::addNewGameTab()
 	delete(tab[gameTabCount]); // 'new game' loeschen
 //	removeTab(gameTabCount);
 	
-	tab[gameTabCount] = new UI_Button(leftTabs, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), TAB_BUTTON, false, TAB_BUTTON_MODE, UI_Object::theme.lookUpFormattedString(GAME_NUMBER_STRING, gameNumber), DO_NOT_ADJUST, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	tab[gameTabCount] = new UI_Button(leftTabs, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), TAB_BUTTON, false, TOP_TAB_BUTTON_MODE, UI_Object::theme.lookUpFormattedString(GAME_NUMBER_STRING, gameNumber), DO_NOT_ADJUST, MIDDLE_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 	activateTab((eTabs)gameTabCount);
 
 	gameNumbers[gameTabCount] = gameNumber;
@@ -164,7 +106,7 @@ void MainWindow::addNewGameTab()
 	
 	if(gameTabCount<MAX_GAME_TABS)
 	{
-	 	tab[gameTabCount] = new UI_Button(leftTabs, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), TAB_BUTTON, false, TAB_BUTTON_MODE, NEW_GAME_STRING, DO_NOT_ADJUST, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	 	tab[gameTabCount] = new UI_Button(leftTabs, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), TAB_BUTTON, false, TOP_TAB_BUTTON_MODE, NEW_GAME_STRING, DO_NOT_ADJUST, MIDDLE_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 	}
 }
 
@@ -188,7 +130,7 @@ void MainWindow::removeGameTab(const unsigned int game_number)
 	--gameTabCount;
 	if(gameTabCount==MAX_GAME_TABS-1) // alles voll => letztes durch new game ersetzen
 	{
-	 	tab[gameTabCount] = new UI_Button(leftTabs, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), TAB_BUTTON, false, TAB_BUTTON_MODE, NEW_GAME_STRING, DO_NOT_ADJUST, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	 	tab[gameTabCount] = new UI_Button(leftTabs, Rect(0, 0, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(2, 0), TAB_BUTTON, false, TOP_TAB_BUTTON_MODE, NEW_GAME_STRING, DO_NOT_ADJUST, MIDDLE_SHADOW_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 //		addTab(tab[gameTabCount], gameTabCount);
 	} else 
 	{
@@ -214,30 +156,6 @@ void MainWindow::process()
 	oldTab = getCurrentTab();
 }
 
-void MainWindow::continueOptimizationAnimation(const bool running)
-{
-	if(running)
-	{
-		if(ani2>1)
-		{
-			++ani;
-			ani2 = 0;
-		} else ++ani2;
-	}
-	else ani = 1;
-	if(ani>30) ani = 1;
-}
-
-const Size MainWindow::helper(DC* dc, Point point, const unsigned int dx, const int i, const std::string& str) const
-{
-	dc->setTextForeground(DC::toSDL_Color(
-				(Uint8)((0==ani%(20+i))*35+((0==ani%(19+i))+(0==ani%(21+i)))*15+20),
-				(Uint8)((0==ani%(20+i))*35+((0==ani%(19+i))+(0==ani%(21+i)))*15+20),
-				(Uint8)((0==ani%(20+i))*35+((0==ani%(19+i))+(0==ani%(21+i)))*30+60)));
-	dc->DrawText(str.substr(str.size()-1, str.size()), point + Size(dx, 0));
-	return(dc->getTextExtent(str.c_str()));
-}
-
 void MainWindow::draw(DC* dc) const
 {
 /*	if(checkForNeedRedraw())
@@ -256,6 +174,30 @@ void MainWindow::draw(DC* dc) const
 		dc->DrawEdgedRoundedRectangle(Point(3, 8) + getAbsolutePosition(), getSize() - Size(6, 11), 6);
 	}*/
 	UI_Object::draw(dc);
+	if(checkForNeedRedraw())
+	{
+	// draw outer border:
+/*		dc->setPen(*theme.lookUpPen(OUTER_BORDER_PEN));
+		dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+		dc->DrawEdgedRoundedRectangle(Point(1, 20) + getAbsolutePosition(), getSize() - Size(2, 2), 6);
+		
+	// draw inner border:
+		if(UI_Object::currentWindow == this)
+			dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+		else
+			dc->setPen(*theme.lookUpPen(INNER_BORDER_PEN));
+		dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+		
+		dc->DrawEdgedRoundedRectangle(
+				tab[getCurrentTab()]->getAbsoluteLowerBound()
+				
+				Point(3, 22) + getAbsolutePosition(), getSize() - Size(6, 6), 6);*/
+
+		dc->setPen(Pen(dc->changeRelativeBrightness(*UI_Object::theme.lookUpPen(UI_Object::theme.lookUpButtonColors(TAB_BUTTON)->startBorderPen[NORMAL_BUTTON_PHASE])->getColor(), 70), 1, SOLID_PEN_STYLE));
+		dc->DrawHorizontalLine(0, tab[getCurrentTab()]->getAbsoluteLowerBound(), tab[getCurrentTab()]->getAbsoluteLeftBound());
+		dc->DrawHorizontalLine(tab[getCurrentTab()]->getAbsoluteRightBound(), tab[getCurrentTab()]->getAbsoluteLowerBound(), UI_Object::max_x);
+	
+	}
 //	
 #if 0
 // ------ MOUSE DRAWING ------
@@ -295,3 +237,54 @@ void MainWindow::draw(DC* dc) const
 }
 
 
+/*enum eIsTabbed
+{
+	NOT_TABBED,
+	TABBED
+};*/
+
+/*		UI_Radio* tabRow;
+		UI_Button* tab[MAX_TABS];
+		void addTab(UI_Button* tab_button, const unsigned int button_id);
+		void removeTab(const unsigned int button_id);
+		const signed int getCurrentTab() const;
+		void forcePressTab(const unsigned int press_tab);
+// has this window tab buttons at the top?
+		eIsTabbed isTabbed;
+		void drawTabs(DC* dc) const;
+	
+
+void UI_Window::addTab(UI_Button* tab_button, const unsigned int button_id)
+{
+#ifdef _SCC_DEBUG
+	if(isTabbed==NOT_TABBED) {
+                toErrorLog("DEBUG: (UI_Window::addTab): Tried to add a tab while window is marked as not tabbed.");return;
+        }
+#endif
+	tabRow->addButton(tab_button, button_id);
+}
+
+void UI_Window::removeTab(const unsigned int button_id)
+{
+#ifdef _SCC_DEBUG
+	if(isTabbed==NOT_TABBED) {
+                toErrorLog("DEBUG: (UI_Window::removeTab): Tried to remove a tab while window is marked as not tabbed.");return;
+        }
+#endif
+	tabRow->removeButton(button_id);
+	tabRow->updateIds(); // fill the space
+}
+
+void UI_Window::forcePressTab(const unsigned int press_tab)
+{
+	if(isTabbed==NOT_TABBED) 
+		return;
+	tabRow->forcePress(press_tab);
+}
+
+const signed int UI_Window::getCurrentTab() const
+{
+	if(isTabbed==NOT_TABBED) 
+		return -1;
+	return(tabRow->getMarked());
+}*/

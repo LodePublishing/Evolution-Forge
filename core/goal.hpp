@@ -8,9 +8,9 @@ class GOAL
 	public:
 		GOAL();
 		~GOAL();
+		bool operator<(const GOAL& goal);
 		GOAL(const GOAL& goal);
 		GOAL& operator=(const GOAL& goal);
-		bool operator<(const GOAL& goal);
 
 		void setUnit(const unsigned int goal_unit);
 		void setTime(const unsigned int goal_time);
@@ -31,6 +31,7 @@ class GOAL
 		unsigned int location;
 
 		unsigned int finalTime; // temporary! ?
+
 };
 
 inline void GOAL::setUnit(const unsigned int goal_unit)
@@ -72,8 +73,6 @@ inline void GOAL::setLocation(const unsigned int goal_location)
 #endif
 	location = goal_location;
 }
-
-
 
 
 inline const unsigned int GOAL::getUnit() const

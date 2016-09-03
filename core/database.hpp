@@ -14,19 +14,10 @@
 
 class DATABASE
 {
-	private:
-		std::vector<GOAL_ENTRY*> loadedGoal[MAX_RACES];
-		std::vector<BUILD_ORDER*> loadedBuildOrder[MAX_RACES];
-		std::vector<START_CONDITION*> loadedStartCondition[MAX_RACES];
-		std::vector<BASIC_MAP*> loadedMap; //modes: 0: ignore map settings and make up a default force, 1: use map settings
-		std::vector<HARVEST_SPEED*> loadedHarvestSpeed[MAX_RACES];
-
-		bool goalDataInitialized;
-		bool buildOrderDataInitialized;
-		bool startConditionDataInitialized;
-		bool mapDataInitialized;
-		bool harvestDataInitialized;
 	public:
+		DATABASE();
+		~DATABASE();
+
 // ----- MAPS -----
 		const bool loadMapFile(const std::string& mapFile);
 		const unsigned int getMapCount() const;
@@ -43,7 +34,7 @@ class DATABASE
 		
 // ----- BUILD ORDERS ------
 		const bool loadBuildOrderFile(const std::string& build_order_file);
-		const bool saveBuildOrder(const std::string& build_order_name, BUILD_ORDER& build_order);
+		const bool saveBuildOrder(const std::string& build_order_name, const BUILD_ORDER& build_order);
 		const unsigned int getBuildOrderCount(const eRace race, const GOAL_ENTRY* goal) const;
 		BUILD_ORDER* getBuildOrder(const eRace race, const GOAL_ENTRY* goal, const unsigned int bo_number) const;
 		const bool isBuildOrderDataInitialized() const;
@@ -59,8 +50,18 @@ class DATABASE
 		const HARVEST_SPEED* getHarvestSpeed(const eRace race, const unsigned int harvest_number) const;
 		const bool isHarvestDataInitialized() const;
 
-		DATABASE();
-		~DATABASE();
+	private:
+		std::vector<GOAL_ENTRY*> loadedGoal[MAX_RACES];
+		std::vector<BUILD_ORDER*> loadedBuildOrder[MAX_RACES];
+		std::vector<START_CONDITION*> loadedStartCondition[MAX_RACES];
+		std::vector<BASIC_MAP*> loadedMap; //modes: 0: ignore map settings and make up a default force, 1: use map settings
+		std::vector<HARVEST_SPEED*> loadedHarvestSpeed[MAX_RACES];
+
+		bool goalDataInitialized;
+		bool buildOrderDataInitialized;
+		bool startConditionDataInitialized;
+		bool mapDataInitialized;
+		bool harvestDataInitialized;	
 };
 
 // -------------------------------

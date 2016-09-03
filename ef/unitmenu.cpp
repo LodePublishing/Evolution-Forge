@@ -1,11 +1,6 @@
 #include "unitmenu.hpp"
 #include "configuration.hpp"
 
-const Rect calculateRect(const unsigned int width, const unsigned int height)
-{
-	return(Rect(Point((width/2-10)*(height%2), (1+height/2)*(FONT_SIZE+8)), Size(width/2-15, FONT_SIZE+7)));
-}
-
 UnitMenu::UnitMenu(UI_Object* unit_parent, const Rect unit_rect, const Size distance_bottom_right, const ePositionMode position_mode) :
 	UI_Menu(unit_parent, unit_rect, distance_bottom_right, position_mode, false),
 	anarace(NULL),
@@ -21,6 +16,11 @@ UnitMenu::UnitMenu(UI_Object* unit_parent, const Rect unit_rect, const Size dist
 
 UnitMenu::~UnitMenu()
 { }
+
+const Rect calculateRect(const unsigned int width, const unsigned int height)
+{
+	return(Rect(Point((width/2-10)*(height%2), (1+height/2)*(FONT_SIZE+8)), Size(width/2-15, FONT_SIZE+7)));
+}
 
 const bool UnitMenu::addKey(unsigned int key, unsigned int mod)
 {
@@ -96,7 +96,7 @@ void UnitMenu::processMenu()
 						continue;
 					}
 					Rect edge = calculateRect(getParent()->getWidth(), height);
-	//				if (fitItemToClientRect(edge, 1))
+	//				if (fitItemToClientRect(edge, true))
 					{
 						(*m)->Show();
 						(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+i));
@@ -108,25 +108,19 @@ void UnitMenu::processMenu()
 							else if(i==2)
 								unit_type = GAS_SCV;
 							std::ostringstream os;
+							
 							os << theme.lookUpString((eString)(unit_type+UNIT_TYPE_COUNT*lastRace));
 							if(UI_Object::focus == this)
 								os << " [" << i << "]";
 							(*m)->updateText(os.str());
 							os.str("");
-							os << "$" << stats[lastRace][unit_type].name << "$#" <<
-								"  build time $" << stats[lastRace][unit_type].BT << "$ sec.#";
-								if(stats[lastRace][unit_type].minerals>0)
-									os << "  $" << stats[lastRace][unit_type].minerals/100 << "$ minerals#";
-								if(stats[lastRace][unit_type].gas>0)
-									os << "  $" << stats[lastRace][unit_type].gas/100 << "$ gas#";
-/*								<< stats[lastRace][unit_type].prerequisite[]
-								<< stats[lastRace][unit_type].facility[]
-								<< stats[lastRace][unit_type].needSupply
-								<< stats[lastRace][unit_type].haveSupply
-								<< stats[lastRace][unit_type].facilityType
-								<< stats[lastRace][unit_type].create
-								<< stats[lastRace][unit_type].bwunit*/
-								
+							os << UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*lastRace+unit_type)) << "#" << "  " << UI_Object::theme.lookUpFormattedString(BOWINDOW_BUILD_TIME_STRING, stats[lastRace][unit_type].BT/(efConfiguration.getGameSpeed()*3+6)) << "#";
+							
+							if(stats[lastRace][unit_type].minerals>0)
+								os << "  $" << stats[lastRace][unit_type].minerals/100 << "$ " << UI_Object::theme.lookUpString(BOWINDOW_MINERALS_STRING) << "#";
+							if(stats[lastRace][unit_type].gas>0)
+								os << "  $" << stats[lastRace][unit_type].gas/100 << "$ " << UI_Object::theme.lookUpString(BOWINDOW_GAS_STRING) << "#";
+							
 							(*m)->updateToolTip(os.str());
 						}
 						else
@@ -160,7 +154,7 @@ void UnitMenu::processMenu()
 						continue;
 					}
 					Rect edge = calculateRect(getParent()->getWidth(), height);
-	//			  if (fitItemToClientRect(edge, 1))
+	//			  if (fitItemToClientRect(edge, true))
 					{
 						(*m)->Show();
 						(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[lastRace][facility[i]].unitType));
@@ -243,7 +237,7 @@ void UnitMenu::processMenu()
 							continue;
 						}
 					Rect edge = calculateRect(getParent()->getWidth(), height);
-			//		if (parent->fitItemToRelativeRect(edge, 1)) 
+			//		if (parent->fitItemToRelativeRect(edge, true)) 
 					{
 						(*m)->Show();
 						(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[lastRace][i].unitType));

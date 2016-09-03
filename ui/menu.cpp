@@ -1,13 +1,5 @@
 #include "menu.hpp"
 
-const unsigned int UI_Menu::getHeight() const
-{
-	if(!isOpen())
-		return(0);
-	else
-		return(height);
-}
-
 UI_Menu::UI_Menu(UI_Object* menu_parent, const Rect& rect, const Size distance_bottom_right, const ePositionMode position_mode, const bool choose_menu, const eMenuType menu_type, const eButtonWidthType button_width_type, const unsigned int entryNumber, const eString firstString, const eButtonColorsType button_colors_type):
 	UI_Object(menu_parent, rect, distance_bottom_right, position_mode),
 	menuEntries(),
@@ -106,6 +98,15 @@ const signed int UI_Menu::getPressedItem()
 	pressedItem = -1;
 	return(p);
 }
+
+const unsigned int UI_Menu::getHeight() const
+{
+	if(!isOpen())
+		return(0);
+	else
+		return(height);
+}
+
 
 void UI_Menu::open()
 {

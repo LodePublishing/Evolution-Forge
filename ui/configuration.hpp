@@ -1,12 +1,9 @@
 #ifndef _UI_CONFIGURATION_HPP
 #define _UI_CONFIGURATION_HPP
 
-#include <list>
-#include <map>
 #include "../stl/misc.hpp"
-#include <string>
-#include <set>
 #include "../sdl/dc.hpp"
+#include <set>
 
 enum eResolution
 {
@@ -60,81 +57,93 @@ enum eLanguage
 
 class UI_Configuration
 {
-public:
-	UI_Configuration();
-	~UI_Configuration();
+	public:
+		UI_Configuration();
+		~UI_Configuration();
 
-	void initDefaults();
+		void initDefaults();
+		void loadConfigurationFile();
+		void saveToFile() const;
+		void visitHelpChapter(const unsigned int chapter);
 
-	const eLanguage getLanguage() const;
-	const eResolution getResolution() const;
-	const eBitDepth getBitDepth() const;
-	const eTheme getTheme() const;
+// get/set commands:
+		const eLanguage getLanguage() const;
+		const eResolution getResolution() const;
+		const eBitDepth getBitDepth() const;
+		const eTheme getTheme() const;
 
-	const unsigned int getMusicVolume() const;
-	const unsigned int getSoundVolume() const;
+#ifndef _NO_FMOD_SOUND
+		const unsigned int getMusicVolume() const;
+		const unsigned int getSoundVolume() const;
 
-	const unsigned int getChannels() const;
+		const unsigned int getChannels() const;
 
-	const bool isMusic() const;
-	const bool isSound() const;
-	const bool isGlowingButtons() const;
-	const bool isTransparency() const;
-	const bool isSmoothMovements() const;
-	const bool isUnloadGraphics() const;
+		const bool isMusic() const;
+		const bool isSound() const;
+#endif
+		
+		const bool isGlowingButtons() const;
+		const bool isTransparency() const;
+		const bool isSmoothMovements() const;
+		const bool isUnloadGraphics() const;
+		
+		const bool isFirstStart() const;
+		
+		const bool setResolution(const eResolution current_resolution);
+		const bool setBitDepth(const eBitDepth current_bitdepth);
+		const bool setLanguage(const eLanguage current_language);
+		const bool setTheme(const eTheme current_theme);
+
+#ifndef _NO_FMOD_SOUND
+		const bool setMusicVolume(const unsigned int music_volume);
+		const bool setSoundVolume(const unsigned int sound_volume);
+		const bool setChannels(const unsigned int channel_num);
+		
+		const bool setMusic(const bool use_music);
+		const bool setSound(const bool use_sound);
+#endif
+		const bool setGlowingButtons(const bool glowing_buttons);
+		const bool setTransparency(const bool trans_parency);
+		const bool setSmoothMovements(const bool smooth_movements);
+		const bool setUnloadGraphics(const bool unload_graphics);
+		
+		const bool setFirstStart(const bool first_start);
+		void setConfigurationFile(const std::string& configuration_file);
+		
+		const bool isVisitedHelpChapter(const unsigned int chapter) const;
+		
+	private:
+		eLanguage language;
+		eResolution resolution;
+		eBitDepth bitdepth;
+		eTheme theme;
+
+#ifndef _NO_FMOD_SOUND
+		unsigned int musicVolume;
+		unsigned int soundVolume;
+
+		unsigned int channels;
 	
-	const bool isFirstStart() const;
-	
-	const bool setResolution(const eResolution current_resolution);
-	const bool setBitDepth(const eBitDepth current_bitdepth);
-	const bool setLanguage(const eLanguage current_language);
-	const bool setTheme(const eTheme current_theme);
+		bool useMusic;
+		bool useSound;
+#endif
+		bool glowingButtons;
+		bool transparency;
+		bool smoothMovements;
+		bool unloadGraphics;
 
-	const bool setMusicVolume(const unsigned int music_volume);
-	const bool setSoundVolume(const unsigned int sound_volume);
-	const bool setChannels(const unsigned int channel_num);
-	
-	const bool setMusic(const bool use_music);
-	const bool setSound(const bool use_sound);
-	const bool setGlowingButtons(const bool glowing_buttons);
-	const bool setTransparency(const bool trans_parency);
-	const bool setSmoothMovements(const bool smooth_movements);
-	const bool setUnloadGraphics(const bool unload_graphics);
-	
-	const bool setFirstStart(const bool first_start);
+		bool firstStart;
+		
+		std::string configurationFile;
 
-	void setConfigurationFile(const std::string& configuration_file);
-	void loadConfigurationFile();
-	void saveToFile() const;
-
-	const bool isVisitedHelpChapter(const unsigned int chapter) const;
-	void visitHelpChapter(const unsigned int chapter);
-private:
-	eLanguage language;
-	eResolution resolution;
-	eBitDepth bitdepth;
-	eTheme theme;
-
-	unsigned int musicVolume;
-	unsigned int soundVolume;
-
-	unsigned int channels;
-	
-	bool useMusic;
-	bool useSound;
-	bool glowingButtons;
-	bool transparency;
-	bool smoothMovements;
-	bool unloadGraphics;
-
-	bool firstStart;
-	
-	std::string configurationFile;
-
-	std::set<unsigned int> visitedHelpChapters;
+		std::set<unsigned int> visitedHelpChapters;
 };
 
 extern UI_Configuration uiConfiguration;
+
+inline void UI_Configuration::setConfigurationFile(const std::string& configuration_file) {
+	configurationFile = configuration_file;
+}
 
 inline const bool UI_Configuration::isFirstStart() const {
 	return(firstStart);
@@ -156,6 +165,7 @@ inline const eTheme UI_Configuration::getTheme() const {
 	return(theme);
 }
 
+#ifndef _NO_FMOD_SOUND
 inline const unsigned int UI_Configuration::getChannels() const {
 	return(channels);
 }
@@ -175,6 +185,7 @@ inline const bool UI_Configuration::isMusic() const {
 inline const bool UI_Configuration::isSound() const {
 	return(useSound);
 }
+#endif
 
 inline const bool UI_Configuration::isGlowingButtons() const {
 	return(glowingButtons);

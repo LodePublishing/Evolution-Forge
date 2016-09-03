@@ -1,8 +1,6 @@
 #ifndef _GUI_MAIN_HPP
 #define _GUI_MAIN_HPP
 
-const float GUI_VERSION=0.51;
-
 #include "game.hpp"
 #include "msgwindow.hpp"
 //#include "info.hpp"
@@ -13,12 +11,6 @@ const float GUI_VERSION=0.51;
 #include "setwindow.hpp"
 
 //#include "progressbar.hpp"
-
-#include <math.h>
-#include <iostream>
-#include <sstream>
-#include <iomanip>
-#include <string>
 
 #include "intro.hpp"
 #include "savebox.hpp"
@@ -75,13 +67,17 @@ class Main
 		void initializeGame(const unsigned int game_number);
 
 		const bool isIntro() const;
+		const bool isHelp() const;
 
-		void openMenu(const ePlayerOrder order);
+		const bool openMenu(const ePlayerOrder order);
 		
 		MainWindow* mainWindow;
 
 		void goBack();
 	private:
+
+		void checkTab();
+
 		IntroWindow* introWindow;
 		HelpWindow* helpWindow;
 		SettingsWindow* settingsWindow;

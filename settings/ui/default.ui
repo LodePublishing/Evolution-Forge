@@ -270,6 +270,8 @@
 		255,  80,  80
 # disabled text color
 		100,   80,   80
+# dark important text for bright backgrounds
+		100,   0,   0
 	@END
 
 	@DARK_BLUE_THEME
@@ -328,7 +330,8 @@
 		255,  80,  80
 # disabled text color
 		 80,   80,  100
-
+# dark important text for bright backgrounds
+		100,   0,   0
 	@END
 	@YELLOW_THEME
 		0,   0,   0
@@ -386,7 +389,8 @@
 		255,  80,  80
 # disabled text color
 		 90,  90,  80
-
+# dark important text for bright backgrounds
+		100,   0,   0	
 	@END
 	@GREEN_THEME
 		0,   0,   0
@@ -399,7 +403,7 @@
 # title color
 		100, 100, 200
 # important text (time etc. red in the original)
-		200,   0,   0
+		  0, 200,   0
 # fulfilled & not fulfilled
 		0, 100,   0
 		100,   0,   0
@@ -444,7 +448,8 @@
 		255,  80,  80
 # disabled text color
 		 90,  90,  80
-
+# dark important text for bright backgrounds
+		  0, 100,   0	  
 	@END
 
 	@GREY_THEME
@@ -454,14 +459,14 @@
 # window text color
 		170, 170, 170
 # bright window text color
-		220, 220, 220
+		255, 255, 255
 # title color
 		140, 140, 140
 # important text (time etc. red in the original)
 		200, 200, 200
 # fulfilled & not fulfilled
-		60, 60, 60
-		50, 50, 50
+	       200,  200, 200
+	       150,  150, 150
 # force add goal button color
 		100, 100, 100
 # force text color
@@ -503,7 +508,8 @@
 		200, 200, 200
 # disabled text color
 		 90,  90,  90
-
+# dark important text for bright backgrounds
+		100, 100, 100
 	@END
 @END
 
@@ -1126,9 +1132,9 @@
 		50,  50, 200, SOLID
 		50, 200, 200, SOLID
 		200, 200,  50, SOLID
-		50,  50, 200, SOLID
-		200,  50,  50, SOLID
-		50, 200,  50, SOLID
+		35,  35, 130, SOLID
+		130,  35,  35, SOLID
+		35, 130,  35, SOLID
 		255, 255, 255, SOLID
 		
 # continue button brush
@@ -1276,8 +1282,7 @@
 # supply brush
 		120, 120, 120, SOLID
 # statistics window (generations left brush)
-#		40,  40, 100, SOLID
-		100,  40, 40, SOLID
+		 40, 100, 40, SOLID
 # tooltip
 		200, 200,  20, SOLID
 # disabled item
@@ -1386,7 +1391,7 @@
 	"BO_WINDOW_BITMAP" = "bo_window.jpg"
 	"CLEMENS_BITMAP" = "clemens.jpg"
 	"LIST_BITMAP" = "list"
-
+	"HELP_MAIN_BITMAP" = "hegel.png"
 @END
 
 # bitmaps independant from themes
@@ -1614,7 +1619,7 @@
 # checkButton
 	25, 2,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    3,  3,  3,  3,  3,    3,  3,  3, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,   14, 14, 15, 14, 15
 # open tree
-	40, 2,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    3,  3,  3,  3,  3,    3,  3,  3, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,    1,  1,  2,  1,  2
+	40, 2,    0,  0,  0,  0,  0,    0,  0,  0,  0,  0,    3,  3,  3,  3,  3,    3,  3,  3, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,    2,  2,  1,  2,  1
 # non-goal bo-entry dataentry (with setting bitmap)
 	40, 2,    0,  0,  4,  0,  4,    0,  0,  6,  4,  6,    3,  3,  3,  3,  3,    3,  3,  3, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,   41, 41, 41, 41, 41
 
@@ -1679,23 +1684,4 @@
 		220
 	@END
 @END
-
-
-@SOUNDS
-	"NULL_SOUND" = "click.wav"
-	"LALA_SOUND" = "scherzo.mid", (LOOP)
-	"MOUSEOVER_SOUND" = "mouseover.wav"
-	"SWISHIN_SOUND" = "swishin.wav"
-	"SWISHOUT_SOUND" = "swishout.wav"
-	"SWISHLOCK_SOUND" = "swishlock.wav"
-	"CLICKED_SOUND" = "scorefillend.wav"
-	"CLICK_SOUND" = "click.wav"
-	"COMPLETE_SOUND" = "trescue.wav"
-	"ERROR_SOUND" = "buzz.wav"
-	"RING_SOUND" = "tmedcure.wav"
-	"INTRO_SOUND" = "intro.mp3"
-@END
-
-
-
 

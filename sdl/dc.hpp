@@ -102,7 +102,12 @@ class DC
 		void DrawRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height) const;
 		void DrawRectangle(const Rect& rect) const; 
 		void DrawRectangle(const Point& p, const Size& s) const;
-		
+
+		void DrawTabRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height) const;
+		void DrawTabRectangle(const Rect& rect) const; 
+		void DrawTabRectangle(const Point& p, const Size& s) const;
+
+
 		void DrawSpline(const unsigned int c, const Point* p) const;
 		void DrawSpline(const unsigned int c, const Point* p, const Point s) const;
 
@@ -122,8 +127,6 @@ class DC
 		
 		static SDL_Color toSDL_Color(const Uint8 r, const Uint8 g, const Uint8 b);
 		
-		static std::string printHardwareInformation();
-		static std::string printSurfaceInformation(DC* surface);
 		static std::list<std::string> getAvailibleDrivers();
 		static SDL_Cursor* createCursor(char* xpm_image[]);
 		static const eChooseDriverError chooseDriver(std::string& driver_name);
@@ -181,6 +184,13 @@ class DC
 		void DrawFilledRound_16bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
 		void DrawFilledRound_24bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
 		void DrawFilledRound_32bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
+	
+		
+		void (DC::*DrawTab)(const signed int x, const signed int y, const unsigned int width, const unsigned int height) const;
+		void DrawTab_8bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height) const;
+		void DrawTab_16bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height) const;
+		void DrawTab_24bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height) const;
+		void DrawTab_32bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height) const;
 		
 		void (DC::*DrawFilledEdgedRound)(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
 		void DrawFilledEdgedRound_8bit(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int corner) const;
@@ -290,22 +300,6 @@ inline void DC::DrawEdgedRoundedRectangle(const Rect& rect, const unsigned int r
 	DrawEdgedRoundedRectangle(rect.getLeft(), rect.getTop(), rect.getWidth(), rect.getHeight(), radius);
 }
 
-inline void DC::setBrush(const Brush& dc_brush) {
-	brush = dc_brush;
-}
-
-inline void DC::setPen(const Pen& dc_pen) {
-	pen = dc_pen;
-}
-
-inline void DC::setColor(const Color* dc_color) {
-	color = dc_color;
-}
-
-inline void DC::setFont(const Font* dc_font) {
-	font = dc_font;
-}
-
 inline void DC::setTextForeground(const SDL_Color& dc_text_color) {
 	textColor = dc_text_color;
 }
@@ -342,6 +336,14 @@ inline void DC::DrawRectangle(const Point& p, const Size& s) const {
 	DrawRectangle(p.x, p.y, s.getWidth(), s.getHeight());
 }
 
+inline void DC::DrawTabRectangle(const Rect& rect) const { 
+	DrawTabRectangle(rect.getLeft(), rect.getTop(), rect.getWidth(), rect.getHeight());
+}
+		
+inline void DC::DrawTabRectangle(const Point& p, const Size& s) const { 
+	DrawTabRectangle(p.x, p.y, s.getWidth(), s.getHeight());
+}
+
 inline const bool DC::setColorKey(const Uint32 flag, const Color key) const {
 	return SDL_SetColorKey(surface, flag, key) == 0;
 }
@@ -350,6 +352,13 @@ inline const bool DC::setAlpha(const Uint32 flag, const Uint8 alpha) const {
 	return SDL_SetAlpha(surface, flag, alpha) == 0;
 }
 
+inline void DC::setBrush(const Brush& dc_brush) {
+	brush = dc_brush;
+}
+
+inline void DC::setPen(const Pen& dc_pen) {
+	pen = dc_pen;
+}
 inline const Color DC::doColor(const Uint8 r, const Uint8 g, const Uint8 b) const {
 	return(Color(surface, r, g, b));
 }

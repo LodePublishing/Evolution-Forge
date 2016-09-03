@@ -3,6 +3,10 @@
 
 #include "statistics.hpp"
 #include "configuration.hpp"
+#include "building.hpp"
+
+#include <vector>
+#include <queue>
 
 class PROGRAM
 {
@@ -11,7 +15,7 @@ class PROGRAM
 		~PROGRAM();
 		PROGRAM(const PROGRAM& object);
 		PROGRAM& operator=(const PROGRAM& object);
-
+	
 		void resetData();
 		const unsigned int getSuccessType() const;	// determines the type of the last error before the item was built at that IP
 		const unsigned int getSuccessUnit() const;	// what unit was missing? (connected to successtype)
@@ -49,6 +53,8 @@ class PROGRAM
 		STATISTICS after;
 //		const bool wasBuilt();
 //		void setBuild(const bool was_built = true);
+
+		std::priority_queue<Building, std::vector<Building> > buildingQueue;
 	private:
 //		bool built;
 		unsigned int time;			// at which time this order was started

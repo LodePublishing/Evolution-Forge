@@ -10,24 +10,25 @@
 
 
 PREBUILDORDER::PREBUILDORDER():
-	pMap(NULL),
 //	location(0),
 //	pStartCondition(NULL),
 	buildingQueue(), // TODO
 	parallelCommandQueues(),
 //	lastcounter(0),
 //	lastunit(0),
-	unit(NULL),
-	pStats(NULL),
 	neededMinerals(0),
 	neededGas(0),
-	pStart(NULL),
 	ready(false),
-	pGoal(NULL),
 	alwaysBuildWorkers(false),
 	onlySwapOrders(false),
-	conditionsChanged(true),
 
+	unit(NULL),
+//	pMap(NULL),
+//	pStats(NULL),
+	pStart(NULL),
+//	pGoal(NULL),
+	conditionsChanged(true),
+	
 	playerNum(0),
 	minerals(0),
 	gas(0),
@@ -40,13 +41,34 @@ PREBUILDORDER::PREBUILDORDER():
 	needSupply(0),
 	haveSupply(0),
 	length(0),
-	timeout(0)
+	timeout(0),
+
+	playerNumInitialized(false),
+//	goalInitialized(false),
+//	mapInitialized(false),
+//	pStatsInitialized(false),
+	unitsInitialized(false),
+	pStartInitialized(false)
 {
 	memset(mineralHarvestPerSecond, 0, 45 * MAX_LOCATIONS*sizeof(int));
 	memset(gasHarvestPerSecond, 0, 5 * MAX_LOCATIONS*sizeof(int));
-	memset(Code, 0, MAX_LENGTH*sizeof(int));
+	resetGeneCode();
 	resetSpecial();
 }
+
+PREBUILDORDER::~PREBUILDORDER()
+{
+	std::list<PARALLEL_COMMAND*>::iterator i = parallelCommandQueues.begin();
+	while(i!=parallelCommandQueues.end())
+	{
+		delete *i;
+		i = parallelCommandQueues.erase(i);
+	}
+
+	while(!buildingQueue.empty())
+		buildingQueue.pop();
+}
+
 
 void PREBUILDORDER::resetData()
 {
@@ -78,111 +100,18 @@ void PREBUILDORDER::resetData()
 	// pMap == NULL?
 	memset(mineralHarvestPerSecond, 0, 45 * MAX_LOCATIONS*sizeof(int));
 	memset(gasHarvestPerSecond, 0, 5 * MAX_LOCATIONS*sizeof(int));
-	memset(Code, 0, MAX_LENGTH*sizeof(int));
+	resetGeneCode();
 	resetSpecial();
 }
 
-PREBUILDORDER::PREBUILDORDER(const PREBUILDORDER& object) :
-//	location(object.location),
-//	pStartCondition(object.pStartCondition),
-	buildingQueue(object.buildingQueue),
-//	lastcounter(object.lastcounter),
-//	lastunit(object.lastunit),
-	unit(object.unit),
-	pStats(object.pStats),
-	neededMinerals(object.neededMinerals),
-	neededGas(object.neededGas),
-	pStart(object.pStart),
-	ready(object.ready),
-	pGoal(object.pGoal),
-	alwaysBuildWorkers(object.alwaysBuildWorkers),
-	onlySwapOrders(object.onlySwapOrders),
-	conditionsChanged(true),
-	playerNum(object.playerNum),
-	minerals(object.minerals),
-	gas(object.gas),
-	timer(object.timer),
-	IP(object.IP),
-	harvestedMinerals(object.harvestedMinerals),
-	harvestedGas(object.harvestedGas),
-	wastedMinerals(object.wastedMinerals),
-	wastedGas(object.wastedGas),
-	needSupply(object.needSupply),
-	haveSupply(object.haveSupply),
-	length(object.length),
-	timeout(object.timeout)
-{
-	memcpy(Code, object.Code, MAX_LENGTH * sizeof(int));
-	//memcpy(last, object.last, MAX_LENGTH * sizeof(int));
-	
-	memcpy(larvaInProduction, object.larvaInProduction, MAX_LOCATIONS * sizeof(int));
-	memcpy(mineralHarvestPerSecond, object.mineralHarvestPerSecond, MAX_LOCATIONS * 45 * sizeof(int));
-	memcpy(gasHarvestPerSecond, object.gasHarvestPerSecond, MAX_LOCATIONS * 5 * sizeof(int));
-}
-
-PREBUILDORDER& PREBUILDORDER::operator=(const PREBUILDORDER& object)
-{
-//	location = object.location;
-//	pStartCondition = object.pStartCondition;
-	buildingQueue = object.buildingQueue;
-//	lastcounter = object.lastcounter;
-  //  lastunit = object.lastunit;
-	unit = object.unit;
-	pStats = object.pStats;
-	neededMinerals = object.neededMinerals;
-	neededGas = object.neededGas;
-	pStart = object.pStart;
-	ready = object.ready;
-	pGoal = object.pGoal;
-	
-	alwaysBuildWorkers = object.alwaysBuildWorkers;
-	onlySwapOrders = object.onlySwapOrders;
-	conditionsChanged = true;
-
-	playerNum = object.playerNum;
-	minerals = object.minerals;
-	gas = object.gas;
-	timer = object.timer;
-	IP = object.IP;
-	harvestedMinerals = object.harvestedMinerals;
-	harvestedGas = object.harvestedGas;
-	wastedMinerals = object.wastedMinerals;
-	wastedGas = object.wastedGas;
-	needSupply = object.needSupply;
-	haveSupply = object.haveSupply;
-	length = object.length;
-	timeout = object.timeout;
-	memcpy(Code, object.Code, MAX_LENGTH * sizeof(int));
-	//memcpy(last, object.last, MAX_LENGTH * sizeof(int));
-
-	memcpy(larvaInProduction, object.larvaInProduction, MAX_LOCATIONS * sizeof(int));	
-	memcpy(mineralHarvestPerSecond, object.mineralHarvestPerSecond, MAX_LOCATIONS * 45 * sizeof(int));
-	memcpy(mineralHarvestPerSecond, object.mineralHarvestPerSecond, MAX_LOCATIONS * 5 * sizeof(int));
-
-	return(*this);
-}
-
-const bool PREBUILDORDER::setAlwaysBuildWorkers(const bool always_build_workers)
-{
-	if(alwaysBuildWorkers == always_build_workers)
-		return(false);
-	conditionsChanged = true;
-	alwaysBuildWorkers = always_build_workers;
-	return(true);
-}
-
-const bool PREBUILDORDER::setOnlySwapOrders(const bool only_swap_orders)
-{
-	if(onlySwapOrders == only_swap_orders)
-		return(false);
-	conditionsChanged = true;
-	onlySwapOrders = only_swap_orders;
-	return(true);
-}
 
 void PREBUILDORDER::prepareForNewGeneration()
 {
-	assignStart(pStart);
+#ifdef _SCC_DEBUG
+	if(!pStartInitialized) {
+		toErrorLog("DEBUG (PREBUILDORDER::prepareForNewGeneration()): pStart not initialized.");
+	}
+#endif
 	std::list<PARALLEL_COMMAND*>::iterator i = parallelCommandQueues.begin();
 	while(i!=parallelCommandQueues.end())
 	{
@@ -200,7 +129,6 @@ void PREBUILDORDER::prepareForNewGeneration()
 								
 	setHarvestedGas(0);setHarvestedMinerals(0);
 	setWastedGas(0);setWastedMinerals(0);
-
 	setMinerals((*(getStartCondition()))->getMinerals());
 	setGas((*(getStartCondition()))->getGas());
 	setTimer(coreConfiguration.getMaxTime()-(*(getStartCondition()))->getStartTime());
@@ -241,22 +169,6 @@ void PREBUILDORDER::prepareForNewGeneration()
 	if(getRace() == ZERG)
 		resetSpecial();
 }																																							
-
-PREBUILDORDER::~PREBUILDORDER()
-{
-	std::list<PARALLEL_COMMAND*>::iterator i = parallelCommandQueues.begin();
-	while(i!=parallelCommandQueues.end())
-	{
-		delete *i;
-		i = parallelCommandQueues.erase(i);
-	}
-}
-
-const eRace PREBUILDORDER::getRace() const
-{
-	return(pStart->getPlayerRace());
-}
-
 // -----------------------------------
 // ------ CONTROLS FROM OUTSIDE ------
 // -----------------------------------
@@ -404,14 +316,14 @@ void PREBUILDORDER::adjustAvailibility(const unsigned int loc, const unsigned in
 			if(stat->facility[fac]>0)
 			{
 				removeOneLocationAvailible(loc, stat->facility[fac]);
-				setNeedSupply(getNeedSupply()-(*pStats)[stat->facility[fac]].needSupply);
-				setHaveSupply(getHaveSupply()-(*pStats)[stat->facility[fac]].haveSupply);
+				setNeedSupply(getNeedSupply()-(*getpStats())[stat->facility[fac]].needSupply);
+				setHaveSupply(getHaveSupply()-(*getpStats())[stat->facility[fac]].haveSupply);
 			}
 			if(stat->facility2>0)
 			{
 				removeOneLocationAvailible(loc, stat->facility2);
-				setNeedSupply(getNeedSupply()-(*pStats)[stat->facility2].needSupply);
-				setHaveSupply(getHaveSupply()-(*pStats)[stat->facility2].haveSupply);
+				setNeedSupply(getNeedSupply()-(*getpStats())[stat->facility2].needSupply);
+				setHaveSupply(getHaveSupply()-(*getpStats())[stat->facility2].haveSupply);
 			}
 			break;
 		case IS_MORPHING:
@@ -433,8 +345,8 @@ void PREBUILDORDER::adjustAvailibility(const unsigned int loc, const unsigned in
 			if(stat->facility2>0)
 			{
 				removeOneLocationAvailible(loc, stat->facility2);
-				setNeedSupply(getNeedSupply()-(*pStats)[stat->facility2].needSupply);
-				setHaveSupply(getHaveSupply()-(*pStats)[stat->facility2].haveSupply);	
+				setNeedSupply(getNeedSupply()-(*getpStats())[stat->facility2].needSupply);
+				setHaveSupply(getHaveSupply()-(*getpStats())[stat->facility2].haveSupply);	
 				// <- nicht noetig :/ eigentlich schon... bei gas scv z.B. :/
 			}
 			break;
@@ -442,7 +354,7 @@ void PREBUILDORDER::adjustAvailibility(const unsigned int loc, const unsigned in
 			if(stat->facility2>0)
 			{
 				removeOneLocationAvailible(GLOBAL/*location*/ ,stat->facility2); // primarily for temporary R_researches, have to be location 0
-// TODO				 setNeedSupply(getNeedSupply()+(*pStats)[stat->facility2].needSupply); // <- nicht noetig :/
+// TODO				 setNeedSupply(getNeedSupply()+(*getpStats())[stat->facility2].needSupply); // <- nicht noetig :/
 			}
 			if(stat->facility[fac]>0)
 				removeOneLocationAvailible(loc, stat->facility[fac]);
@@ -513,138 +425,9 @@ const unsigned int PREBUILDORDER::calculatePrimaryFitness(const bool is_ready)
 }
 // end of calculatePrimaryFitness
 
-#if 0
-const bool PREBUILDORDER::buildIt(const unsigned int build_unit)
-{
-	//Zuerst: availible pruefen ob am Ort gebaut werden kann
-	//Wenn nicht => +/- absteigen bis alle locations durch sind
-
-	const UNIT_STATISTICS* stat = &((*pStats)[build_unit]);
-	bool ok = false;
-	unsigned int picked_facility = 0;
-	unsigned int current_location_window = 1; // TODO
-//	unsigned int ttloc=0;
-//	unsigned int j=0;
-
-/*	if(lastcounter>0)
-	{	
-		--lastcounter;
-		tloc=last[lastcounter].location;
-	}*/
-
-	if(stat->facility[0]==0)
-		ok=true;
-	else
-	// special rule for morphing units of protoss
-	if((stat->facility2>0) && ((stat->facilityType == IS_LOST) || (stat->facilityType == IS_MORPHING)) && (stat->facility[0] == stat->facility2))
-	{
-		if(getLocationAvailible(current_location_window, stat->facility2) >=2)
-		{
-			ok = true;
-			picked_facility = 0;
-		}
-	} else
-	{
-		// research/upgrade:
-		if((stat->facility2==0) || (getLocationAvailible(current_location_window, stat->facility2)>=1))
-		{
-		// pick one availible facility: 
-			for(picked_facility = 0; picked_facility<3; ++picked_facility)
-				if((stat->facility[picked_facility]>0)&&(getLocationAvailible(current_location_window, stat->facility[picked_facility])>0))
-				{
-					ok=true;
-					break;
-				}
-		}						
-	}
-				
-//				j=1;
-				// none found? search other parts of the map... TODO
-/*				if(!ok)
-					while(j<MAX_LOCATIONS)
-					{
-						ttloc=(*pMap)->getLocation(tloc)->getNearest(j);
-//						if((stat->facility2==0)||(getLocationAvailible(ttloc,stat->facility2)>0)) TODO
-//						{
-//						for(fac=3;fac--;)
-						for(fac=0;fac<3; ++fac)
-						if(
-						// special rules for morphing units of protoss
-						((stat->facilityType != IS_LOST) || (stat->facility[fac] != stat->facility2) || (getLocationAvailible(ttloc, stat->facility[fac]) >= 2)) &&
-						((stat->facility[fac] > 0) && (getLocationAvailible(ttloc, stat->facility[fac])))
-						|| ((stat->facility[fac]==0)&&(fac==0))) //~~
-																													   
-//					  for(fac=3;fac--;)
-//						  if( ((stat->facility[fac]>0)&&(getLocationAvailible(ttloc,stat->facility[fac])>((stat->facilityType==IS_LOST)&&(stat->facility[fac]==stat->facility2)))) || ((stat->facility[fac]==0)&&(fac==0)))
-							{
-								tloc=ttloc;
-								ok=true;
-								break;
-							}
-//						  break;
-//					  }
-						++j;
-					}*/
-																													   
-	if((ok)&&(build_unit==REFINERY)) {
-		if(getMapLocationAvailible(GLOBAL, current_location_window, VESPENE_GEYSIR) <=0)
-			ok=false;
-		else
-			removeOneMapLocationAvailible(GLOBAL, current_location_window, VESPENE_GEYSIR);
-	}
-//TODO: Wenn verschiedene facilities moeglich sind, dann das letzte nehmen
-//			  bewegliche Sachen ueberdenken...
-//				  evtl zusaetzliche Eigenschaft 'speed' einbauen (muss sowieso noch...)... bei speed>0 ... mmmh... trifft aber auch nur auf scvs zu ... weil bringt ja wenig erst mit der hydra rumzulaufen und dann zum lurker... mmmh... aber waere trotzdem zu ueberlegen...
-//				  auch noch ueberlegen, wenn z.B. mit scv ohne kommandozentrale woanders gesammelt wird...
-//	  Phagen ueber Phagen...
-	if(ok)
-	{ 
- 		if((getGoal()->getRace()==ZERG) &&
-//		  ((*pStats)[build_unit].facility[0]==LARVA)&&
-			(build_unit!=LARVA) &&
-		// Larva wird benoetigt zum Bau? Fein, dann bauen wir eine neue Larva falls nicht schon alle hatcheries etc. belegt sidn
-				// Gesamtzahl der Larven < 3 * HATCHERY?
-		   ((getLocationTotal(current_location_window, HATCHERY)+
-			 getLocationTotal(current_location_window, LAIR)+
-			 getLocationTotal(current_location_window, HIVE)) *3 > 
-			 (larvaInProduction[current_location_window]+getLocationTotal(current_location_window, LARVA)))  &&
-// max 1 larva pro Gebaeude produzieren
- 		   ((getLocationTotal(current_location_window, HATCHERY)+
-			 getLocationTotal(current_location_window, LAIR)+
-			 getLocationTotal(current_location_window, HIVE) > 
-			  larvaInProduction[current_location_window]))) // => zuwenig Larven da!
-			{
-				addLarvaToQueue(current_location_window);
-				if(!buildIt(LARVA));
-//					removeLarvaFromQueue(current_location_window);
-			}
-																													  
-		Building build;
-		build.setOnTheRun(false);
-		build.setFacility(stat->facility[picked_facility]);
-		build.setLocation(current_location_window);
-		build.setUnitCount(1+(stat->create == build_unit));
-		build.setBuildFinishedTime(getTimer()-stat->BT);
-		build.setTotalBuildTime(stat->BT);
-		build.setType(build_unit);
-		build.setIP(getIP()); //needed only for Anarace!
-
-		TODO program!
-// upgrade_cost is 0 if it's no upgrade
-		setMinerals(getMinerals()-(stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)));
-		setGas(getGas()-(stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)));
-		setNeedSupply(getNeedSupply()+stat->needSupply);
-//		if((stat->needSupply>0)||(((*pStats)[stat->facility[0]].needSupply<0)&&(stat->facilityType==IS_LOST)))  TODO!!!!
-//		setNeedSupply(getNeedSupply()-stat->needSupply); //? Beschreibung!
-		adjustAvailibility(current_location_window, picked_facility, stat);
-		buildingQueue.push(build);
-	} //end if(ok)
-	return(ok);
-}
-#endif
 const bool PREBUILDORDER::isDifferent(const unsigned int* code) const
 {
-	for(unsigned int i = MAX_LENGTH;i--;)
+	for(unsigned int i = coreConfiguration.getMaxLength() - getLength(); i < coreConfiguration.getMaxLength(); ++i)
 		if(getCode(i)!=code[i])
 			return(true);
 	return(false);	
@@ -659,7 +442,7 @@ void PREBUILDORDER::adjustMineralHarvest(const unsigned int location_number)
 	//TODO Zerg hatchery,lair etc.
 	
 // WAYNE Location,	  kein Command Center 							und keine Mineralien
-	if((location_number == 0) || ((!getLocationTotal(location_number, COMMAND_CENTER)) && (!getMapLocationTotal(0, location_number, MINERAL_PATCH))))
+	if((location_number == 0) || ((!getLocationTotal(location_number, COMMAND_CENTER)) && (getUnit(GLOBAL, location_number).getTotal(MINERAL_PATCH) == 0)))
 	{
 		for(unsigned int i=45;i--;)
 			setMineralHarvestPerSecond(location_number, i, 0);
@@ -800,21 +583,24 @@ const unsigned int PREBUILDORDER::harvestGas() const
 void PREBUILDORDER::assignStart(START* start)
 {
 #ifdef _SCC_DEBUG
-	if(!start) {
+	if(start == NULL) {
 		toErrorLog("DEBUG: (PREBUILDORDER::assignStart): Variable pStart not initialized.");return;
 	}
 #endif
 	pStart = start;
+	pStartInitialized = true;
 
 //	Optimierungen...
 	
-	pMap = pStart->getMap();
+//	setpMap(pStart->getMap());
+//	setGoal(pStart->getCurrentGoal());
+//	setpStats(pStart->getpStats());
+//
 //	pStartCondition = getStartCondition();
-	setGoal(pStart->getCurrentGoal());
-	setpStats(pStart->getpStats());
-
 //	memset(noise, 0, MAX_TIME * sizeof(int));
 //	setPlayerNumber(playerNum);
+	
+	
 }
 
 /*void PREBUILDORDER::initNoise()
@@ -834,18 +620,23 @@ void PREBUILDORDER::resetSpecial()
 void PREBUILDORDER::setPlayerNumber(const unsigned int player_number)
 {
 #ifdef _SCC_DEBUG
-	if((player_number < 1) || (player_number > MAX_PLAYER)) {
+	if((player_number < 1) || (player_number > (*getMap())->getMaxPlayer())) {
 		toErrorLog("DEBUG: (PREBUILDORDER::setPlayerNumber): Value out of range.");return;
 	}
 #endif
 	playerNum = player_number;
-//	location = &((*unit)[playerNum]);
+	playerNumInitialized = true;
 }
-
 
 void PREBUILDORDER::assignUnits(UNIT (*units)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS])
 {
+#ifdef _SCC_DEBUG
+	if(units == NULL) {
+		toErrorLog("DEBUG: (PREBUILDORDER::assignUnits()): Variable units not initialized.");return;
+	}
+#endif
 	unit = units;
+	unitsInitialized = true;
 }
 
 void PREBUILDORDER::initializePlayer()
@@ -910,7 +701,7 @@ void PREBUILDORDER::mutateGeneCode()
 	if(coreConfiguration.getMutationFactor()==0)
 		return;
 	if(getLength()==0) 
-		setLength(MAX_LENGTH);//coreConfiguration.getMaxLength()); // TODO
+		setLength(coreConfiguration.getMaxLength());
 
 	bool t_checked[LAST_UNIT];
 	bool t_buildable[LAST_UNIT];
@@ -921,9 +712,12 @@ void PREBUILDORDER::mutateGeneCode()
 	for(unsigned int i = LAST_UNIT; i--;)
 	{
 		t_need[i] = getGoal()->need[i];
+
 		t_checked[i] = false;
-		t_buildable[i] = false;
 	}
+	
+	memset(t_checked
+	t_buildable[i] = getGoal()->getStartIsBuildable(i)
 	
 	memset(t_geno, 0, LAST_UNIT*sizeof(int));
  
@@ -963,31 +757,33 @@ void PREBUILDORDER::mutateGeneCode()
 	}
 #endif
 		
-	for(unsigned int x=MAX_LENGTH-1;x>MAX_LENGTH-getLength(); --x) //length
+	for(unsigned int x = coreConfiguration.getMaxLength()-1; x > coreConfiguration.getMaxLength() - getLength(); --x)
 	{
 // IS_LOST ETC!!!
-		if(rand() % (MAX_LENGTH*100/coreConfiguration.getMutationFactor())==0)
+		if(rand() % (coreConfiguration.getMaxLength()*100/coreConfiguration.getMutationFactor())==0)
 		{
 			int new_item;
 			if(isAlwaysBuildWorkers())
 				new_item = t_geno[(rand()%(t_max_build_types-1))+1];
 			else 
 				new_item = t_geno[rand()%t_max_build_types];
-			int random=3;
-			if(!isOnlySwapOrders())
-				random = rand()%6;
+			int random=4;
+			if(isOnlySwapOrders())
+				random = (rand()%3) +3;
+			else if(x == coreConfiguration.getMaxLength()-1)
+		// <- we need at least one entry to switch with after the current one => no h
+				random = rand()%3;
+			else random = rand()%6;
 			switch(random)
 			{
 				case 0://remove
 				{
-					memmove(Code+x, Code+x+1, (MAX_LENGTH-x-1) * sizeof(int));
-//					for(unsigned int i=x;i<MAX_LENGTH-1; ++i)
-//						Code[i] = Code[i+1];
-					Code[MAX_LENGTH-1] = new_item;
+					memmove(Code+x, Code+x+1, (coreConfiguration.getMaxLength()-x-1) * sizeof(int));
+					Code[coreConfiguration.getMaxLength()-1] = new_item;
 				}break;
 				case 1://add
 				{
-					memmove(Code+x+1, Code+x, (MAX_LENGTH-x-1) * sizeof(int));
+					memmove(Code+x+1, Code+x, (coreConfiguration.getMaxLength()-x-1) * sizeof(int));
 					Code[x] = new_item;
 				}break;
 				case 2://change one entry
@@ -996,9 +792,10 @@ void PREBUILDORDER::mutateGeneCode()
 				}break;
 				case 3://move one entry (no new_item) here
 				{
-					if(x < MAX_LENGTH-1) // <- we need at least one entry to switch with after the current one
 					{
-						unsigned int y=rand()%(MAX_LENGTH-x-1) + x + 1;
+
+
+						unsigned int y = rand()%(coreConfiguration.getMaxLength()-x-1) + x + 1;
 						if(t_buildable[getGoal()->toPhaeno(Code[y])])
 						{
 							unsigned int l = Code[y];
@@ -1009,9 +806,8 @@ void PREBUILDORDER::mutateGeneCode()
 				}break;
 				case 4://exchange two entries
 				{
-					if(x < MAX_LENGTH-1) // <- we need at least one entry to switch with after the current one
 					{
-						unsigned int y = rand()%(MAX_LENGTH-x-1) + x + 1;
+						unsigned int y = rand()%(coreConfiguration.getMaxLength()-x) + x;
 						if(t_buildable[getGoal()->toPhaeno(Code[y])])
 						{
 							unsigned int l;
@@ -1022,10 +818,10 @@ void PREBUILDORDER::mutateGeneCode()
 				case 5://move a block of orders  [a..b..ta..tb..c..d] -> [a..ta..tb..b..c..d]
 					//~~~TODO bug, code wird nicht richtig verschoben ?
 				{
-					if(x < MAX_LENGTH-1)
+					if(x < coreConfiguration.getMaxLength()-1)
 					{
-						unsigned int source_position = rand()%(MAX_LENGTH-x-1) + x + 1;
-						unsigned int block_length = rand()%(MAX_LENGTH-source_position)+1;
+						unsigned int source_position = rand()%(coreConfiguration.getMaxLength() - x - 1) + x + 1;
+						unsigned int block_length = rand()%(coreConfiguration.getMaxLength() - source_position)+1;
 // TODO beschleunigbar indem erstmal alle verschiebbaren Elemente aufgesammelt werden
 						for(unsigned int i = source_position; i < source_position+block_length; i++)
 						{
@@ -1077,9 +873,9 @@ void PREBUILDORDER::mutateGeneCode()
 						++t_max_build_types;
 					}
 				}
-				if(((*pStats)[i].create>0)&&((*pStats)[i].create<LAST_UNIT))
+				if(((*getpStats())[i].create>0)&&((*getpStats())[i].create<LAST_UNIT))
 				{
-					i = (*pStats)[i].create;
+					i = (*getpStats())[i].create;
 					if(!t_checked[i])
 					{
 						std::list<unsigned int> new_buildable;
@@ -1139,10 +935,6 @@ void PREBUILDORDER::resetGeneCode()
 /*	if((coreConfiguration.preprocessBuildOrder)&&(basicLength>0))
 	{
 		memcpy(Code,basicBuildOrder,MAX_LENGTH*4);
-		for(int i=MAX_LENGTH;i--;)
-		{
-			++markerCounter;Marker[i]=markerCounter;
-		}
 	}
 	else*/
 //	{
@@ -1166,7 +958,6 @@ void PREBUILDORDER::resetGeneCode()
 //				Code[0][i]=/*rand()%*/getGoal()->toGeno(SCV);//getMaxBuildTypes();
 //				Code[1][i]=/*rand()%*/getGoal()->toGeno(SCV);//getMaxBuildTypes();
 //			}
-//			++markerCounter;setMarker(i, markerCounter);
 //		}
 //	}
 }
@@ -1181,16 +972,12 @@ void PREBUILDORDER::crossOver(PREBUILDORDER* parent2, PREBUILDORDER* child1, PRE
 		{
 			int num=MAX_LENGTH-counter;
 			memcpy(&child1->Code[0][i-num],&Code[0][i-num],num*4);
-			memcpy(&child1->Marker[0][i-num],&Marker[0][i-num],num*4);
 
 			memcpy(&child1->Code[1][i-num],&parent2->Code[1][i-num],num*4);
-			memcpy(&child1->Marker[1][i-num],&parent2->Marker[1][i-num],num*4);
 
 			memcpy(&child2->Code[1][i-num],&Code[1][i-num],num*4);
-			memcpy(&child2->Marker[1][i-num],&Marker[1][i-num],num*4);
 
 			memcpy(&child2->Code[0][i-num],&parent2->Code[0][i-num],num*4);
-			memcpy(&child2->Marker[0][i-num],&parent2->Marker[0][i-num],num*4);
 
 			counter=MAX_LENGTH; //~~ TODO
 			RACE* c=child1;
@@ -1201,16 +988,12 @@ void PREBUILDORDER::crossOver(PREBUILDORDER* parent2, PREBUILDORDER* child1, PRE
 	}
 	int num=MAX_LENGTH-counter;
 	memcpy(&child1->Code[0][counter],&Code[0][counter],num*4);
-	memcpy(&child1->Marker[0][counter],&Marker[0][counter],num*4);
 
 	memcpy(&child1->Code[1][counter],&parent2->Code[1][counter],num*4);
-	memcpy(&child1->Marker[1][counter],&parent2->Marker[1][counter],num*4);
 
 	memcpy(&child2->Code[1][counter],&Code[1][counter],num*4);
-	memcpy(&child2->Marker[1][counter],&Marker[1][counter],num*4);
 
 	memcpy(&child2->Code[0][counter],&parent2->Code[0][counter],num*4);
-	memcpy(&child2->Marker[0][counter],&parent2->Marker[0][counter],num*4);
 
 	child1->mutationRate=(2*mutationRate+parent2->mutationRate)/3;
 	child2->mutationRate=(2*parent2->mutationRate+mutationRate)/3;*/
@@ -1224,12 +1007,12 @@ void PREBUILDORDER::crossOver(PREBUILDORDER* parent2, PREBUILDORDER* child1, PRE
 
 void PREBUILDORDER::copyCode(PREBUILDORDER& player)
 {
-	memcpy(Code, player.Code, sizeof(int) * MAX_LENGTH);
+	memcpy(Code, player.Code, sizeof(int) * player.getLength());
 }
 
 void PREBUILDORDER::copyCode(unsigned int* dst) const
 {
-	memcpy(dst, Code, MAX_LENGTH * sizeof(int));
+	memcpy(dst, Code, getLength() * sizeof(int));
 }
 
 void PREBUILDORDER::setConditionsChanged(const bool conditions_changed) 
@@ -1239,17 +1022,107 @@ void PREBUILDORDER::setConditionsChanged(const bool conditions_changed)
 		resetData();
 }
 
+const bool PREBUILDORDER::setAlwaysBuildWorkers(const bool always_build_workers)
+{
+	if(alwaysBuildWorkers == always_build_workers)
+		return(false);
+	conditionsChanged = true;
+	alwaysBuildWorkers = always_build_workers;
+	return(true);
+}
+
+const bool PREBUILDORDER::setOnlySwapOrders(const bool only_swap_orders)
+{
+	if(onlySwapOrders == only_swap_orders)
+		return(false);
+	conditionsChanged = true;
+	onlySwapOrders = only_swap_orders;
+	return(true);
+}
+
+
 
 // --------------------------------------
 // ------ END OF GET/SET FUNCTIONS ------
 // --------------------------------------
 
-//START* PREBUILDORDER::pStart;
-//const BASIC_MAP* const* PREBUILDORDER::pMap;
 
-//signed int PREBUILDORDER::noise[MAX_TIME];
-//unsigned int PREBUILDORDER::markerCounter;
+/*PREBUILDORDER::PREBUILDORDER(const PREBUILDORDER& object) :
+//	location(object.location),
+//	pStartCondition(object.pStartCondition),
+	buildingQueue(object.buildingQueue),
+//	lastcounter(object.lastcounter),
+//	lastunit(object.lastunit),
+	unit(object.unit),
+	pStats(object.pStats),
+	neededMinerals(object.neededMinerals),
+	neededGas(object.neededGas),
+	pStart(object.pStart),
+	ready(object.ready),
+	pGoal(object.pGoal),
+	alwaysBuildWorkers(object.alwaysBuildWorkers),
+	onlySwapOrders(object.onlySwapOrders),
+	conditionsChanged(true),
+	playerNum(object.playerNum),
+	minerals(object.minerals),
+	gas(object.gas),
+	timer(object.timer),
+	IP(object.IP),
+	harvestedMinerals(object.harvestedMinerals),
+	harvestedGas(object.harvestedGas),
+	wastedMinerals(object.wastedMinerals),
+	wastedGas(object.wastedGas),
+	needSupply(object.needSupply),
+	haveSupply(object.haveSupply),
+	length(object.length),
+	timeout(object.timeout)
+{
+	memcpy(Code, object.Code, MAX_LENGTH * sizeof(int));
+	//memcpy(last, object.last, MAX_LENGTH * sizeof(int));
+	
+	memcpy(larvaInProduction, object.larvaInProduction, MAX_LOCATIONS * sizeof(int));
+	memcpy(mineralHarvestPerSecond, object.mineralHarvestPerSecond, MAX_LOCATIONS * 45 * sizeof(int));
+	memcpy(gasHarvestPerSecond, object.gasHarvestPerSecond, MAX_LOCATIONS * 5 * sizeof(int));
+}
 
-//map<CODE, SITUATION*> PREBUILDORDER::situationHashMap;
+PREBUILDORDER& PREBUILDORDER::operator=(const PREBUILDORDER& object)
+{
+//	location = object.location;
+//	pStartCondition = object.pStartCondition;
+	buildingQueue = object.buildingQueue;
+//	lastcounter = object.lastcounter;
+  //  lastunit = object.lastunit;
+	unit = object.unit;
+	pStats = object.pStats;
+	neededMinerals = object.neededMinerals;
+	neededGas = object.neededGas;
+	pStart = object.pStart;
+	ready = object.ready;
+	pGoal = object.pGoal;
+	
+	alwaysBuildWorkers = object.alwaysBuildWorkers;
+	onlySwapOrders = object.onlySwapOrders;
+	conditionsChanged = true;
 
+	playerNum = object.playerNum;
+	minerals = object.minerals;
+	gas = object.gas;
+	timer = object.timer;
+	IP = object.IP;
+	harvestedMinerals = object.harvestedMinerals;
+	harvestedGas = object.harvestedGas;
+	wastedMinerals = object.wastedMinerals;
+	wastedGas = object.wastedGas;
+	needSupply = object.needSupply;
+	haveSupply = object.haveSupply;
+	length = object.length;
+	timeout = object.timeout;
+	memcpy(Code, object.Code, MAX_LENGTH * sizeof(int));
+	//memcpy(last, object.last, MAX_LENGTH * sizeof(int));
 
+	memcpy(larvaInProduction, object.larvaInProduction, MAX_LOCATIONS * sizeof(int));	
+	memcpy(mineralHarvestPerSecond, object.mineralHarvestPerSecond, MAX_LOCATIONS * 45 * sizeof(int));
+	memcpy(mineralHarvestPerSecond, object.mineralHarvestPerSecond, MAX_LOCATIONS * 5 * sizeof(int));
+
+	return(*this);
+}*/

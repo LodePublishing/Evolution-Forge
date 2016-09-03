@@ -2,7 +2,6 @@
 #define _GUI_TECHTREE_HPP
 
 #include "../ui/window.hpp"
-#include "../core/database.hpp"
 #include "../core/anabuildorder.hpp"
 
 

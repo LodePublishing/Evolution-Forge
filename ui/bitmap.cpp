@@ -11,8 +11,6 @@ UI_Bitmap::UI_Bitmap(UI_Object* bitmap_parent,
 	isClipped = true;
 }
 
-
-
 UI_Bitmap::~UI_Bitmap()
 {}
 

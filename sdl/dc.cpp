@@ -71,64 +71,7 @@ SDL_Cursor* DC::createCursor(char* xpm_image[])
 }
 
 
-#include <sstream>
-std::string DC::printHardwareInformation()
-{
-	// TODO: uebersetzen bzw. dem Aufrufer nur Daten uebergeben
-	SDL_Rect **modes;
-	std::ostringstream os;
-	os.str("");
-	modes = SDL_ListModes(NULL, SDL_SWSURFACE);
-	if(modes == (SDL_Rect **)0)
-		os << "* No modes available!" << std::endl;
-	else
-	{
-		if(modes == (SDL_Rect **)-1)
-			os << "* All resolutions available." << std::endl;
-		else
-		{
-			os << "* Available Modes:";
-			for(unsigned int i=0;modes[i];++i)
-				os << "  " << modes[i]->w << " x " << modes[i]->h;
-			os << std::endl;
-		}
-	}
-	const SDL_VideoInfo* hardware = SDL_GetVideoInfo();
-	os << " - Max color depth : " << (unsigned int)hardware->vfmt->BitsPerPixel;
-//	if(hardware->hw_availible) os << "- It is possible to create hardware surfaces" << std::endl;
-	if(hardware->wm_available) os << "\n - There is a window manager available";
-	if(hardware->blit_hw) os << "\n - Hardware to hardware blits are accelerated";
-	if(hardware->blit_hw_CC) os << "\n - Hardware to hardware colorkey blits are accelerated";
-	if(hardware->blit_hw_A) os << "\n - Hardware to hardware alpha blits are accelerated";
-	if(hardware->blit_sw) os << "\n - Software to hardware blits are accelerated";
-	if(hardware->blit_sw_CC) os << "\n - Software to hardware colorkey blits are accelerated";
-	if(hardware->blit_sw_A)	os << "\n - Software to hardware alpha blits are accelerated";
-	if(hardware->blit_fill)	os << "\n - Color fills are accelerated";
-	if(hardware->video_mem>0) os << "\n - Total amount of video memory: " << hardware->video_mem << "kb";
-	return(os.str());
-}
 
-std::string DC::printSurfaceInformation(DC* surface)
-{
-	std::ostringstream os; os.str("");
-	os << surface->getSurface()->w << " x " << surface->getSurface()->h << " @ " << (unsigned int)(surface->getSurface()->format->BitsPerPixel);
-	if (surface->flags() & SDL_SWSURFACE) os << "\n- Surface is stored in system memory";
-	else if(surface->flags() & SDL_HWSURFACE) os << "\n- Surface is stored in video memory";
-	if(surface->flags() & SDL_ASYNCBLIT) os << "\n- Surface uses asynchronous blits if possible";
-	if(surface->flags() & SDL_ANYFORMAT) os << "\n- Allows any pixel-format";
-	if(surface->flags() & SDL_HWPALETTE) os << "\n- Surface has exclusive palette";
-	if(surface->flags() & SDL_DOUBLEBUF) os << "\n- Surface is double buffered";
-	if(surface->flags() & SDL_OPENGL) os << "\n- Surface has an OpenGL context";
-	if(surface->flags() & SDL_OPENGLBLIT) os << "\n- Surface supports OpenGL blitting";
-	if(surface->flags() & SDL_RESIZABLE) os << "\n- Surface is resizable";
-	if(surface->flags() & SDL_HWACCEL) os << "\n- Surface blit uses hardware acceleration";
-	if(surface->flags() & SDL_SRCCOLORKEY) os << "\n- Surface use colorkey blitting";
-	if(surface->flags() & SDL_RLEACCEL) os << "\n- Colorkey blitting is accelerated with RLE";
-	if(surface->flags() & SDL_SRCALPHA) os << "\n- Surface blit uses alpha blending";
-	if(surface->flags() & SDL_PREALLOC) os << "\n- Surface uses preallocated memory";
-	if(SDL_MUSTLOCK(surface->getSurface())) os << "\n- Surface needs locking";
-	return(os.str());
-}
 
 std::list<std::string> DC::getAvailibleDrivers()
 {
@@ -164,42 +107,31 @@ void DC::setFullscreen(const bool full_screen)
 #endif
 	}										
 }
-#include "../stl/misc.hpp"
-#include <sstream>
 
 void DC::addRectangle(const Rect& rect)
 {
-	if(changedRectangles>199)
+	if((changedRectangles>199) || (rect.getLeft() >= max_x) || (rect.getTop() >= max_y) || (rect.getRight() < 0) || (rect.getBottom() < 0))
 		return;
 	SDL_Rect r;
 	if(rect.getLeft() < 0)
 		r.x = 0;
-	else if(rect.getLeft() >= max_x)
-		return;
 	else
 		r.x = rect.getLeft();
 
 	if(rect.getTop() < 0)
 		r.y = 0;
-	else if(rect.getTop() >= max_y)
-		return;
 	else 
 		r.y = rect.getTop();
 	
-	if(rect.getRight() < 0)
-		return;
-	else if(rect.getRight() > max_x)
+	if(rect.getRight() > max_x)
 		r.w = max_x - r.x;
 	else 
 		r.w = rect.getRight() - r.x;
 
-	if(rect.getBottom() < 0)
-		return;
-	else if(rect.getBottom() > max_y)
+	if(rect.getBottom() > max_y)
 		r.h = max_y - r.y;
 	else 
 		r.h = rect.getBottom() - r.y;
-	std::ostringstream os;
 
 	for(unsigned int i = 0; i < changedRectangles; i ++)
 	{
@@ -258,34 +190,31 @@ void DC::DrawBitmap(SDL_Surface* bitmap, const signed int x, const signed int y,
 	SDL_Rect drect;
 	drect.x = x;
 	drect.y = y;
+	srect.x = 0;
+	srect.y = 0;
+	srect.w = bitmap->w;
+	srect.h = bitmap->h;
 
-	if((clip_rect.getLeft() > x + bitmap->w) || (clip_rect.getTop() > y + bitmap->h) || (clip_rect.getBottom() < y) || (clip_rect.getRight() < x))
+	if((clip_rect.getLeft() > x + srect.w) || (clip_rect.getTop() > y + srect.h) || (clip_rect.getBottom() < y) || (clip_rect.getRight() < x))
 		return;
 	if(clip_rect.getLeft() > x)
 	{
 		srect.x = clip_rect.getLeft() - x;
-		srect.w = bitmap->w - srect.x;
+		srect.w -= srect.x;
 		drect.x = clip_rect.getLeft();
 	}
-	else
-		srect.x = 0;
 	if(clip_rect.getTop() > y)
 	{
 		srect.y = clip_rect.getTop() - y;
-		srect.h = bitmap->h - srect.y;
+		srect.h -= srect.y;
 		drect.y = clip_rect.getTop();
 	}
-	else srect.y = 0;
-
-	if(clip_rect.getRight() < srect.x + bitmap->w)
-		srect.w = srect.x + bitmap->w - clip_rect.getRight();
-	else
-		srect.w = bitmap->w;
+	if(clip_rect.getRight() < x + srect.w)
+		srect.w = clip_rect.getRight() - x;
 	
-	if(clip_rect.getBottom() < srect.y + bitmap->h)
-		srect.h = srect.y + bitmap->h - clip_rect.getBottom();
-	else
-		srect.h = bitmap->h;
+	if(clip_rect.getBottom() < y + srect.h)
+		srect.h = clip_rect.getBottom() - y;
+	
 	SDL_BlitSurface(bitmap , &srect, surface, &drect);
 }
 
@@ -473,6 +402,7 @@ void DC::setScreen(const Size current_resolution, const eBitDepth bit_depth, con
 			DrawEmptyEdgedRound = &DC::DrawEmptyEdgedRound_8bit;
 			DrawEmptyRound = &DC::DrawEmptyRound_8bit;
 			DrawFilledEdgedBorderRound = &DC::DrawFilledEdgedBorderRound_8bit;
+			DrawTab = &DC::DrawTab_8bit;
 			break;
 		case 16:bitDepth = DEPTH_16BIT;
 			Draw_HLine = &DC::Draw_HLine_16bit;
@@ -483,6 +413,7 @@ void DC::setScreen(const Size current_resolution, const eBitDepth bit_depth, con
 		        DrawEmptyEdgedRound = &DC::DrawEmptyEdgedRound_16bit;
 		        DrawEmptyRound = &DC::DrawEmptyRound_16bit;
 		        DrawFilledEdgedBorderRound = &DC::DrawFilledEdgedBorderRound_16bit;
+			DrawTab = &DC::DrawTab_16bit;
 			break;
 		case 24:bitDepth = DEPTH_24BIT;
 			Draw_HLine = &DC::Draw_HLine_24bit;
@@ -493,6 +424,7 @@ void DC::setScreen(const Size current_resolution, const eBitDepth bit_depth, con
 		        DrawEmptyEdgedRound = &DC::DrawEmptyEdgedRound_24bit;
 		        DrawEmptyRound = &DC::DrawEmptyRound_24bit;
 		        DrawFilledEdgedBorderRound = &DC::DrawFilledEdgedBorderRound_24bit;
+			DrawTab = &DC::DrawTab_24bit;
 			break;
 		case 32:bitDepth = DEPTH_32BIT;
 			Draw_HLine = &DC::Draw_HLine_32bit;
@@ -503,6 +435,7 @@ void DC::setScreen(const Size current_resolution, const eBitDepth bit_depth, con
 		        DrawEmptyEdgedRound = &DC::DrawEmptyEdgedRound_32bit;
 		        DrawEmptyRound = &DC::DrawEmptyRound_32bit;
 		        DrawFilledEdgedBorderRound = &DC::DrawFilledEdgedBorderRound_32bit;
+			DrawTab = &DC::DrawTab_32bit;
 			break;
 		default:break;
 	}
@@ -519,6 +452,31 @@ void DC::setResolution(const Size current_resolution)
 {
 	setScreen(current_resolution, bitDepth, surface->flags);
 }
+
+void DC::setColor(const Color* dc_color) 
+{
+#ifdef _SCC_DEBUG
+	if(dc_color==NULL)
+	{
+		toErrorLog("ERROR (DC::setColor()): Color not initialized.");
+		return;
+	}
+#endif
+	color = dc_color;
+}
+
+void DC::setFont(const Font* dc_font) 
+{
+#ifdef _SCC_DEBUG
+	if(dc_font==NULL)
+	{
+		toErrorLog("ERROR (DC::setFont()): Font not initialized.");
+		return;
+	}
+#endif
+	font = dc_font;
+}
+
 
 #if 0
 void DC::DrawGridEdgedRoundedRectangle(const signed int x, const signed y, const unsigned width, const unsigned int height, const unsigned int radius, std::list<Rect> notDrawRectList) const 
@@ -621,6 +579,14 @@ void DC::DrawRoundedRectangle(const signed int x, const signed int y, const unsi
 }
 
 
+void DC::DrawTabRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height) const
+{
+	if((width<2)||(height<2)||(x+width>=max_x)||(y+height>=max_y)||(x<0)||(y<0)) return;
+	
+	(*this.*DrawTab)(x, y, width, height);
+}
+
+
 void DC::DrawRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height) const
 {
 	if((width<2)||(height<2)||(width>max_x)||(height>max_y)||(x<0)||(y<0)) return;
@@ -720,6 +686,7 @@ void DC::Unlock() const {
 	}
 }
 
+#include <sstream>
 const eChooseDriverError DC::chooseDriver(std::string& driver_name)
 {
 	std::list<std::string> availible_drivers = DC::getAvailibleDrivers();

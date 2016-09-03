@@ -9,8 +9,6 @@ class BoMenu : public UI_Menu
 	public:
 		BoMenu(UI_Object* bo_parent, const Rect bo_rect, const Size distance_bottom_right, const ePositionMode position_mode);
 		~BoMenu();
-		void process();
-		void draw(DC* dc) const;
 		void resetData();
 		void assignAnarace(ANABUILDORDER* bo_anarace);
 		void reloadOriginalSize();

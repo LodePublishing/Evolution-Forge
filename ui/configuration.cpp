@@ -1,18 +1,19 @@
 #include "configuration.hpp"
-#include <fstream>
-#include <iostream>
 #include <sstream>
+#include <fstream>
 
 UI_Configuration::UI_Configuration(): 
 	language(ZERO_LANGUAGE),
 	resolution(RESOLUTION_640x480),
 	bitdepth(DEPTH_32BIT),
 	theme(DARK_BLUE_THEME),
+#ifndef _NO_FMOD_SOUND
 	musicVolume(75),
 	soundVolume(75),
 	channels(16),
 	useMusic(true),
 	useSound(true),
+#endif
 	glowingButtons(true),
 	transparency(false),
 	smoothMovements(true),
@@ -31,11 +32,13 @@ void UI_Configuration::initDefaults()
 	setResolution(RESOLUTION_640x480);
 	setBitDepth(DEPTH_32BIT);
 	setTheme(DARK_BLUE_THEME);
+#ifndef _NO_FMOD_SOUND
 	setMusicVolume(75);
 	setSoundVolume(75);
 	setChannels(16);
 	setMusic(true);
 	setSound(true);
+#endif
 	setGlowingButtons(true);
 	setTransparency(false);
 	setSmoothMovements(true);
@@ -44,9 +47,9 @@ void UI_Configuration::initDefaults()
 	configurationFile = "settings/ui.cfg";
 }
 
-void UI_Configuration::setConfigurationFile(const std::string& configuration_file)
+void UI_Configuration::visitHelpChapter(const unsigned int chapter)
 {
-	configurationFile = configuration_file;
+	visitedHelpChapters.insert(chapter);
 }
 
 void UI_Configuration::saveToFile() const
@@ -68,7 +71,8 @@ void UI_Configuration::saveToFile() const
 	pFile << "    \"Bit depth\" = \"" << (int)getBitDepth() << "\"" << std::endl;
 	pFile << "# 1 = dark red theme, 2 = dark blue theme, 4 = yellow theme" << std::endl;
 	pFile << "    \"Theme\" = \"" << (int)getTheme() << "\"" << std::endl;
-	
+		
+#ifndef _NO_FMOD_SOUND
 	pFile << "# use music (1: on, 0: off)" << std::endl;
 	pFile << "    \"Music\" = \"" << (int)isMusic() << "\"" << std::endl;
 	pFile << "# use sound (1: on, 0: off)" << std::endl;
@@ -78,10 +82,10 @@ void UI_Configuration::saveToFile() const
 	pFile << "    \"Music volume\" = \"" << (int)getMusicVolume() << "\"" << std::endl;
 	pFile << "# sound volume (0% - 100%)" << std::endl;
 	pFile << "    \"Sound volume\" = \"" << (int)getSoundVolume() << "\"" << std::endl;
-
 	pFile << "# max number of simultaneously played sounds" << std::endl;
 	pFile << "    \"Channels\" = \"" << (int)getChannels() << "\"" << std::endl;
-
+#endif
+	
 	pFile << "# glowing effects" << std::endl;
 	pFile << "    \"Glowing buttons\" = \"" << (int)isGlowingButtons() << "\"" << std::endl;
 	pFile << "# moving rectangles, 2 = all objects move smoothly, 1 = some objects move smoothly, 0 = all objects jump directly to their destination" << std::endl;
@@ -101,28 +105,22 @@ void UI_Configuration::saveToFile() const
 void UI_Configuration::loadConfigurationFile()
 {
 	std::ifstream pFile(configurationFile.c_str());
-	if(!pFile.is_open())
-	{
-		toErrorLog("WARNING: (UI_Configuration::loadConfigurationFile): File not found.");
-		toErrorLog("-> Creating new file with default values...");
-		initDefaults();
-		saveToFile();		
-		return;
-	}
+	if(!checkStreamIsOpen(pFile, "UI_Configuration::loadConfigurationFile()", configurationFile))
+        {
+//                toErrorLog(lookUpString(START_CREATE_NEW_DEFAULT_FILE_STRING));
+//                problem: kein Zugriff auf theme!
+                initDefaults();
+                saveToFile();
+                return;
+        }
 
-	toInitLog("* Loading " + configurationFile);
 	
 	std::fstream::pos_type old_pos = pFile.tellg();
 	char line[1024];
 	while(pFile.getline(line, sizeof line))
 	{
-		if(pFile.fail())
-		{
-			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
-#ifdef _SCC_DEBUG
-			toErrorLog("WARNING: (UI_Configuration::loadConfigurationFile) Long line!");
-#endif
-		}
+                if(!checkStreamForFailure(pFile, "UI_Configuration::loadConfigurationFile()", configurationFile))
+                        return;
 		
 		std::string text = line;
 		size_t start=text.find_first_not_of("\t ");
@@ -160,7 +158,7 @@ void UI_Configuration::loadConfigurationFile()
 				i->second.pop_front();
 			   	setTheme((eTheme)(atoi(i->second.front().c_str())));
 			}	
-
+#ifndef _NO_FMOD_SOUND
 			if((i=block.find("Music"))!=block.end()){
 				i->second.pop_front();
 			   	setMusic(atoi(i->second.front().c_str()));
@@ -180,7 +178,8 @@ void UI_Configuration::loadConfigurationFile()
 			if((i=block.find("Channels"))!=block.end()){
 				i->second.pop_front();
 			   	setChannels(atoi(i->second.front().c_str()));
-			}		
+			}
+#endif
 			if((i=block.find("Glowing buttons"))!=block.end()){
 				i->second.pop_front();
 			   	setGlowingButtons(atoi(i->second.front().c_str()));
@@ -214,11 +213,6 @@ const bool UI_Configuration::isVisitedHelpChapter(const unsigned int chapter) co
 	if(visitedHelpChapters.find(chapter) == visitedHelpChapters.end())
 		return(false);
 	else return(true);
-}
-
-void UI_Configuration::visitHelpChapter(const unsigned int chapter)
-{
-	visitedHelpChapters.insert(chapter);
 }
 
 const bool UI_Configuration::setFirstStart(const bool first_start) 
@@ -263,6 +257,7 @@ const bool UI_Configuration::setTheme(const eTheme current_theme)
 	return(true);
 }
 
+#ifndef _NO_FMOD_SOUND
 const bool UI_Configuration::setMusic(const bool use_music) 
 {
 	if(useMusic == use_music)
@@ -302,6 +297,7 @@ const bool UI_Configuration::setChannels(const unsigned int channel_num)
 	channels = channel_num;
 	return(true);
 }
+#endif
 
 const bool UI_Configuration::setGlowingButtons(const bool glowing_buttons) 
 {

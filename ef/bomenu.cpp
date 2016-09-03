@@ -1,4 +1,5 @@
 #include "bomenu.hpp"
+#include "configuration.hpp"
 
 BoMenu::BoMenu(UI_Object* bo_parent, const Rect bo_rect, const Size distance_bottom_right, const ePositionMode position_mode):
 	UI_Menu(bo_parent, bo_rect, distance_bottom_right, position_mode, true, ONE_COLOUMN_MENU),
@@ -6,6 +7,9 @@ BoMenu::BoMenu(UI_Object* bo_parent, const Rect bo_rect, const Size distance_bot
 	anarace(NULL),
 	lastRace(TERRA),
 	lastGoal(NULL)
+{ }
+
+BoMenu::~BoMenu()
 { }
 
 void BoMenu::assignAnarace(ANABUILDORDER* bo_anarace)
@@ -63,14 +67,14 @@ void BoMenu::resetData()
 			os << " [" << i << "]";
 		(*m)->updateText(os.str());
 		os.str("");
-		os << "$" << my_bo->getName() << " ["<< formatTime(my_bo->getTime()) << "]$#";
+		os << "$" << my_bo->getName() << " ["<< formatTime(my_bo->getTime(), efConfiguration.getGameSpeed()) << "]$#";
 		unsigned int entries = 0;
-		for(std::list<PROGRAM>::iterator j = my_bo->getProgramList().begin();(entries < 20) && (j!=my_bo->getProgramList().end());++j)
+		for(std::list<PROGRAM>::const_iterator j = my_bo->getProgramList().begin();(entries < 20) && (j!=my_bo->getProgramList().end());++j)
 		{
 			entries++;
 			os << stats[lastRace][j->getUnit()].name;
 			if(j->getTime()>0)
-				os << " [" << formatTime(j->getTime()) << "]"; 
+				os << " [" << formatTime(j->getTime(), efConfiguration.getGameSpeed()) << "]"; 
 			os << "#";
 		}
 		if(entries==20)
@@ -99,20 +103,4 @@ void BoMenu::resetData()
 }
 
 
-BoMenu::~BoMenu()
-{ }
-
-void BoMenu::process()
-{
-	UI_Menu::process();
-	if(!isShown())
-		return;
-}
-
-void BoMenu::draw(DC* dc) const
-{
-	if(!isShown())
-		return;
-	UI_Menu::draw(dc);
-}
 

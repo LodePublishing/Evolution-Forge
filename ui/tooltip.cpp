@@ -1,14 +1,14 @@
 #include "tooltip.hpp"
 
 UI_ToolTip::UI_ToolTip(UI_Object* parent_object, const std::string& tooltip_text) :
-	UI_LongText::UI_LongText(parent_object, Rect(2, 2, 2*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) , 0), Size(0, 0), tooltip_text, TEXT_COLOR, IMPORTANT_COLOR, SMALL_FONT, TEXT_BUTTON),
+	UI_LongText::UI_LongText(parent_object, Rect(2, 2, 2*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) , 0), Size(0, 0), tooltip_text, TEXT_COLOR, DARK_IMPORTANT_COLOR, SMALL_FONT, TEXT_BUTTON),
 	boxSize()
 { 
 	process();
 }
 
 UI_ToolTip::UI_ToolTip(UI_Object* parent_object, const eString tooltip_text) :
-	UI_LongText::UI_LongText(parent_object, Rect(2, 2, 2*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 0), Size(0, 0), UI_Object::theme.lookUpString(tooltip_text), TEXT_COLOR, IMPORTANT_COLOR, SMALL_FONT, TEXT_BUTTON),
+	UI_LongText::UI_LongText(parent_object, Rect(2, 2, 2*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 0), Size(0, 0), UI_Object::theme.lookUpString(tooltip_text), TEXT_COLOR, DARK_IMPORTANT_COLOR, SMALL_FONT, TEXT_BUTTON),
 	boxSize()
 { 
 	process();

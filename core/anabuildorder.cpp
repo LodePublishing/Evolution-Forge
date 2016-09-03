@@ -36,11 +36,9 @@ ANABUILDORDER::ANABUILDORDER():
 	timePercentage(0),
 	goalPercentage(0),
 	currentpFitness(0),
-	averageLength(0)
-{
-	for(unsigned int i = MAX_TIME;i--;)
-		timeStatistics[i].resetData();
-}
+	averageLength(0),
+	timeStatisticsList()
+{}
 
 void ANABUILDORDER::resetData()
 {
@@ -62,15 +60,14 @@ void ANABUILDORDER::resetData()
 	positiveCrossover = 0;
 	wayneCrossover = 0;
 	negativeCrossover = 0;
-	for(unsigned int i = MAX_TIME;i--;)
-		timeStatistics[i].resetData();
+	timeStatisticsList.clear();
 	programList.clear();	
 }
 
 ANABUILDORDER::~ANABUILDORDER()
 { }
 
-ANABUILDORDER::ANABUILDORDER(const ANABUILDORDER& object) :
+/*ANABUILDORDER::ANABUILDORDER(const ANABUILDORDER& object) :
 	PREBUILDORDER((PREBUILDORDER)object),
 	fitnessAverage( object.fitnessAverage ),
 	fitnessVariance( object.fitnessVariance ),
@@ -116,7 +113,7 @@ ANABUILDORDER& ANABUILDORDER::operator=(const ANABUILDORDER& object)
         memcpy(timeStatistics, object.timeStatistics, MAX_TIME * sizeof(STATISTICS));
 
 	return(*this);
-}
+}*/
 
 
 
@@ -141,11 +138,8 @@ void ANABUILDORDER::prepareForNewGeneration() // resets all data to standard sta
 	PREBUILDORDER::prepareForNewGeneration();
 	setCurrentpFitness(0);
 
-	memset(timeStatistics, 0, MAX_TIME * sizeof(STATISTICS));
-
-	std::list<PROGRAM>::iterator i = programList.begin();
-	while(i!=programList.end())
-		i = programList.erase(i);	
+	timeStatisticsList.clear();
+	programList.clear();
 }
 
 // ----------------------------------------
@@ -168,11 +162,15 @@ const bool ANABUILDORDER::calculateStep()
 	//TODO: Fehler hier, getHaveSupply - getNeedSupply kann -1 werden!
 	// needSupply war 11, maxneedSupply war 10 :/
 
-	if((!getTimer()) || (ready = calculateReady()) || (!getIP()))
+	if((ready) || (!getTimer()) || (!getIP()))
 	{
 		setLength(coreConfiguration.getMaxLength()-getIP());
 		if(!ready) 
-			setTimer(0);
+		{
+			ready = calculateReady();
+			if(!ready)
+				setTimer(0);
+		}
 //		if(getGoal()->getMode()==0)
 			setCurrentpFitness(calculatePrimaryFitness(ready));
 		while(!buildingQueue.empty())
@@ -289,13 +287,16 @@ const bool ANABUILDORDER::calculateStep()
 //		setProgramSuccessLocation(0);
 //	}
 
-	for(unsigned int i = t; i--;)
+	ready = calculateReady();
 	{
- 		timeStatistics[getTimer()-i].setNeedSupply(getNeedSupply());
-		timeStatistics[getTimer()-i].setHaveSupply(getHaveSupply());
-		timeStatistics[getTimer()-i].setHaveMinerals(getMinerals()+harvestMinerals()*i);
-		timeStatistics[getTimer()-i].setHaveGas(getGas()+harvestGas()*i);
-		timeStatistics[getTimer()-i].setFitness(calculatePrimaryFitness(ready)); // ~~
+		STATISTICS stat;
+		stat.setTime(getTimer());
+		stat.setNeedSupply(getNeedSupply());
+		stat.setHaveSupply(getHaveSupply());
+		stat.setHaveMinerals(getMinerals());
+		stat.setHaveGas(getGas());
+		stat.setFitness(calculatePrimaryFitness(ready)); // ~~
+		timeStatisticsList.push_back(stat);
 	}
 
 	setMinerals(getMinerals()+harvestMinerals()*t);
@@ -325,7 +326,7 @@ const bool ANABUILDORDER::calculateStep()
 				continue;
 			}
 
-			const UNIT_STATISTICS* stat = &((*pStats)[build.getType()]);
+			const UNIT_STATISTICS* stat = &((*getpStats())[build.getType()]);
 
 // ------ ACTUAL BUILDING ------
 			adjustLocationUnitsAfterCompletion(build.getLocation(), stat->facilityType, build.getFacility(), stat->facility2, build.getUnitCount());
@@ -337,7 +338,7 @@ const bool ANABUILDORDER::calculateStep()
 			
 // ------ SPECIAL RULES ------
 			if(build.getType() == REFINERY) {
-				removeOneMapLocationTotal(GLOBAL, build.getLocation(), VESPENE_GEYSIR);
+				getUnit(GLOBAL, build.getLocation()).removeOneTotal(VESPENE_GEYSIR);
 				adjustGasHarvest(build.getLocation());
 			} else
 			if((build.getType() == COMMAND_CENTER)&&(!getLocationTotal(build.getLocation(), COMMAND_CENTER))) {
@@ -356,7 +357,6 @@ const bool ANABUILDORDER::calculateStep()
 			
 // ------ CHECK WHETHER WE ARE READY ------
 			getGoal()->calculateFinalTimes(build.getLocation(), build.getType(), getLocationTotal(build.getLocation(), build.getType()), getRealTimer());
-			ready = calculateReady();
 // ------ END CHECK ------
 
 			
@@ -390,6 +390,18 @@ const bool ANABUILDORDER::calculateStep()
 	} //end while
 //TODO: Alles rausschmeissen, was schon von race berechnet wurde!
 	
+	ready = calculateReady();
+	{
+		STATISTICS stat;
+		stat.setTime(getTimer());
+		stat.setNeedSupply(getNeedSupply());
+		stat.setHaveSupply(getHaveSupply());
+		stat.setHaveMinerals(getMinerals());
+		stat.setHaveGas(getGas());
+		stat.setFitness(calculatePrimaryFitness(ready)); // ~~
+		timeStatisticsList.push_back(stat);
+	}
+
 	return(false);
 
 	//TODO: Auch voruebergehende Ziele miteinberechnen (Bewegungen!)
@@ -401,7 +413,7 @@ const bool ANABUILDORDER::calculateStep()
 
 const bool ANABUILDORDER::buildGene(const unsigned int build_unit)
 {
-	const UNIT_STATISTICS* stat = &((*pStats)[build_unit]);
+	const UNIT_STATISTICS* stat = &((*getpStats())[build_unit]);
 	bool ok = false;
 	successType = OK;
 	successUnit = 0;
@@ -502,7 +514,7 @@ const bool ANABUILDORDER::buildGene(const unsigned int build_unit)
 		}
 		   if(count>0)
 		{
-			if((lastcounter>0)&&(getLocationAvailible(last[lastcounter-1].location,last[lastcounter-1].unit)>0)&&((*pStats)[last[lastcounter-1].unit].speed>0))
+			if((lastcounter>0)&&(getLocationAvailible(last[lastcounter-1].location,last[lastcounter-1].unit)>0)&&((*getpStats())[last[lastcounter-1].unit].speed>0))
 				{
 					lastcounter--;
 					int nr=0;
@@ -521,7 +533,7 @@ const bool ANABUILDORDER::buildGene(const unsigned int build_unit)
 
 					setLocation(nr,count);
 					setType(nr,last[lastcounter].unit);
-					setRemainingBuildTime(nr,pMap->getDistance(last[lastcounter].location,count)*100/(*pStats)[last[lastcounter].unit].speed);
+					setRemainingBuildTime(nr,pMap->getDistance(last[lastcounter].location,count)*100/(*getpStats())[last[lastcounter].unit].speed);
 					setOnTheRun(nr,1);
 					setIP(nr,getIP()); // ~ANA
 						// 2x Unit => send 8/All instead of just one unit there
@@ -593,7 +605,7 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 	//Zuerst: availible pruefen ob am Ort gebaut werden kann
 	//Wenn nicht => +/- absteigen bis alle locations durch sind
 
-	const UNIT_STATISTICS* stat = &((*pStats)[build_unit]);
+	const UNIT_STATISTICS* stat = &((*getpStats())[build_unit]);
 	bool ok = false;
 	unsigned int picked_facility = 0;
 	unsigned int current_location_window = 1; // TODO
@@ -667,10 +679,10 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 	{
 		if(build_unit==REFINERY)
 		{
-			if(getMapLocationAvailible(0, current_location_window, VESPENE_GEYSIR) <=0) // TODO!
+			if(getUnit(NEUTRAL_PLAYER, current_location_window).getAvailible(VESPENE_GEYSIR) <=0) // TODO!
 				ok=false;
 			else
-				removeOneMapLocationAvailible(0, current_location_window, VESPENE_GEYSIR);
+				getUnit(NEUTRAL_PLAYER, current_location_window).removeOneAvailible(VESPENE_GEYSIR);
 		} else 
 		if(build_unit==GAS_SCV)
 		{
@@ -694,14 +706,24 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 			build.setUnitCount(getLocationAvailible(current_location_window, GAS_SCV));
 		else
 			build.setUnitCount(1+(stat->create == build_unit));
-		build.setBuildFinishedTime(getTimer()-stat->BT);
-		build.setTotalBuildTime(stat->BT);
+		if(build_unit == INTRON)
+		{
+			build.setBuildFinishedTime(getTimer() - coreConfiguration.getWaitAccuracy());
+			build.setTotalBuildTime(coreConfiguration.getWaitAccuracy());
+		} else
+		{
+			build.setBuildFinishedTime(getTimer()-stat->BT);
+			build.setTotalBuildTime(stat->BT);
+		}
 		build.setType(build_unit);
+
+		PROGRAM program;
+		program.buildingQueue = buildingQueue;
+		
 		buildingQueue.push(build);
 
 		bool is_larva = (getGoal()->getRace()==ZERG) && (build_unit==LARVA);									
 
-		PROGRAM program;
 		if(!is_larva)
 		{
 //		for(unsigned int i = UNIT_TYPE_COUNT; i--;)
@@ -730,7 +752,7 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 		setMinerals(getMinerals()-(stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)));
 		setGas(getGas()-(stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)));
 		setNeedSupply(getNeedSupply()+stat->needSupply);
-//		if((stat->needSupply>0)||(((*pStats)[stat->facility[0]].needSupply<0)&&(stat->facilityType==IS_LOST)))  TODO!!!!
+//		if((stat->needSupply>0)||(((*getpStats())[stat->facility[0]].needSupply<0)&&(stat->facilityType==IS_LOST)))  TODO!!!!
 //		setNeedSupply(getNeedSupply()-stat->needSupply); //? Beschreibung!
 		adjustAvailibility(current_location_window, picked_facility, stat);
 
@@ -741,7 +763,7 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 			if(build_unit==LARVA)
 				addLarvaToQueue(current_location_window);
 			else
-			if(((*pStats)[build_unit].facility[0]==LARVA)&&(checkForLarva(current_location_window)))
+			if(((*getpStats())[build_unit].facility[0]==LARVA)&&(checkForLarva(current_location_window)))
 				buildIt(LARVA);
 		}
 // ---- END SPECIAL RULES -----
@@ -756,7 +778,7 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 			program.setUsedFacilityCount(getLocationTotal(GLOBAL, stat->facility[picked_facility]) - getLocationAvailible(GLOBAL, stat->facility[picked_facility])); // TODO evtl nach Ort
 			programList.push_back(program);
 		}
-
+// TODO Wait
 		if(build.getType() == INTRON)
 		{
 			std::list<Building> b_list;
@@ -781,10 +803,10 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 	return(ok);
 }
 
-const bool ANABUILDORDER::writeProgramBackToCode(std::list<PROGRAM>& program_list)
+const bool ANABUILDORDER::writeProgramBackToCode(const std::list<PROGRAM>& program_list)
 {
 	bool changed_bo=false;
-	int ip=coreConfiguration.getMaxLength()-1;
+	int ip = coreConfiguration.getMaxLength()-1;
 	for(std::list<PROGRAM>::const_iterator i = program_list.begin(); i!=program_list.end();++i)
 	{
 		// TODO etwas problematisch... am besten intern pruefen... oder keine SCVs generell bauen? mmmh...
@@ -834,10 +856,10 @@ const bool ANABUILDORDER::writeProgramBackToCode(std::list<PROGRAM>& program_lis
 
 
 
-void ANABUILDORDER::copyProgramList(std::list<PROGRAM>& program_list)
+void ANABUILDORDER::copyProgramList(const std::list<PROGRAM>& program_list)
 {
 	programList.clear();
-	for(std::list<PROGRAM>::iterator i = program_list.begin();i!=program_list.end();++i)
+	for(std::list<PROGRAM>::const_iterator i = program_list.begin();i!=program_list.end();++i)
 	{
 		PROGRAM p;
 		p.setUnit(i->getUnit());
@@ -879,7 +901,7 @@ const unsigned int ANABUILDORDER::getGoalPercentage() const
 		return(goalPercentage);
 	else 
 	{
-		unsigned int optimalTime = getGoal()->calculateFastestBO((*(pStart->getStartCondition()))->getUnit(GLOBAL));
+		unsigned int optimalTime = getGoal()->calculateFastestBO((*(getStartCondition()))->getUnit(GLOBAL));
 //		return(optimalTime);
 		if(/*(optimalTime==0)||*/(getRealTimer()==0))
 			return(100);

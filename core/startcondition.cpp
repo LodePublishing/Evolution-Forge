@@ -2,7 +2,7 @@
 
 START_CONDITION::START_CONDITION():
 	race(TERRA),
-//am Namen liegts... seltsam... checken... ! o_O
+//am Namen liegts... seltsam... checken... ! o_O ?
 	name("ERROR"),
 	haveSupply(0),
 	needSupply(0),

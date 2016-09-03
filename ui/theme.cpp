@@ -3,9 +3,6 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
-#include <string>
-
-#include <fmod_errors.h>
 
 #include "clock1.xpm"
 #include "clock2.xpm"
@@ -15,7 +12,6 @@
 unsigned int FONT_SIZE=6;
 
 UI_Theme::UI_Theme():
-	sound(NULL),
 	currentResolution(RESOLUTION_640x480),
 	currentBitDepth(DEPTH_32BIT),
 	currentLanguage(ENGLISH_LANGUAGE),
@@ -76,20 +72,17 @@ UI_Theme::UI_Theme():
 	}
 	for(unsigned int i = MAX_BUTTON_COLORS_TYPES;i--;)
 		buttonColorsList[i] = NULL;
-	for(unsigned int i = MAX_SOUNDS;i--;)
-		soundList[i] = NULL;
 
 	for(unsigned int i = MAX_CURSORS; i--;)
 		for(unsigned int j = 2; j--;)
 			cursorList[i][j] = NULL;
 	initStringIdentifier();
 	initBitmapIdentifier();
-	initSoundIdentifier();
 }
 
 UI_Theme::~UI_Theme()
 {
-	toInitLog("* Resetting mouse cursor...");
+	toInitLog("* " + lookUpString(END_RESET_MOUSE_CURSOR_STRING));
 	SDL_SetCursor(defaultCursor);
 // TODO: Jeder Mauszeiger der benutzt wurde verursacht bei SDL_FreeCursor einen segfault :/ (bzw. 'wurde schon geloescht' Fehler der glibc
 //	for(unsigned int i = MAX_CURSORS; i--;)
@@ -99,7 +92,7 @@ UI_Theme::~UI_Theme()
 //	SDL_FreeCursor(cursorList[CLOCK_CURSOR][0]);
 //	SDL_FreeCursor(cursorList[CLOCK_CURSOR][1]);
 
-	toInitLog("* Freeing colors, brushes and pens...");
+	toInitLog("* " + lookUpString(END_FREEING_COLORS_BRUSHES_PENS_STRING));
 	for(unsigned int i = MAX_COLOR_THEMES;i--;)
 	{
 		for(unsigned int j = MAX_COLORS;j--;)
@@ -110,11 +103,11 @@ UI_Theme::~UI_Theme()
 			delete penList[i][j];
 	}
 
-	toInitLog("* Freeing bitmaps..."); 
+	toInitLog("* " + lookUpString(END_FREEING_BITMAPS_STRING));
 	for(std::list<BitmapEntry>::iterator l = loadedBitmaps.begin(); l!=loadedBitmaps.end();++l)
 		SDL_FreeSurface(l->bitmap);
 
-	toInitLog("* Freeing coordinates...");
+	toInitLog("* " + lookUpString(END_FREEING_COORDINATES_STRING));
         for(unsigned int i = MAX_RESOLUTIONS;i--;)
         {
                 for(unsigned int j = MAX_GLOBAL_WINDOWS;j--;)
@@ -131,33 +124,15 @@ UI_Theme::~UI_Theme()
 			}
         }
 
-	toInitLog("* Freeing buttons...");
+	toInitLog("* " + lookUpString(END_FREEING_BUTTONS_STRING));
 	for(unsigned int i=MAX_BUTTON_COLORS_TYPES;i--;)
 		delete buttonColorsList[i];
 
-	toInitLog("* Freeing fonts...");
+	toInitLog("* " + lookUpString(END_FREEING_FONTS_STRING));
 	for(unsigned int i = MAX_RESOLUTIONS;i--;)
 //		for(unsigned int j = MAX_LANGUAGES;j--;)
 			for(unsigned int k = MAX_FONTS;k--;)
 				delete fontList[i][k];
-
-	toInitLog("* Freeing sounds...");
-	for(unsigned int i=MAX_SOUNDS;i--;)
-		soundList[i]->release();
-
-	releaseSoundEngine();
-}
-
-bool UI_Theme::ERRCHECK(FMOD_RESULT result)
-{
-	if (result != FMOD_OK)
-	{
-		std::ostringstream os;
-		os << "FMOD error! ( "<< result << ") " << FMOD_ErrorString(result);
-		toErrorLog(os.str());
-		return(false);
-	}
-	return(true);
 }
 
 void UI_Theme::unloadGraphics()
@@ -175,17 +150,6 @@ void UI_Theme::unloadGraphics()
 			i->used = true;
 		} else if(i->bitmap!=NULL)
 			i->used = false;
-/*	for(std::list<SoundEntry>::iterator i = loadedSounds.begin(); i!=loadedSounds.end(); ++i)
-		if(!i->used)
-		{
-			for(unsigned int j = MAX_SOUNDS;j--;)
-				if(i->sound == soundList[j])
-					soundList[j] = NULL;
-			i->sound->release();
-			i->sound = NULL;
-			i->used = true;
-		} else if(i->sound!=NULL)
-			i->used = false;*/
 }
 
 const Size UI_Theme::getResolutionSize() const
@@ -335,68 +299,68 @@ const unsigned int UI_Theme::lookUpGlobalMaxHeight(const eGlobalWindow id) const
 	return(maxGlobalHeightList[currentResolution][id]);
 }
 
-const Rect UI_Theme::lookUpGameRect(const eGameWindow id, const unsigned int gameNumber, const unsigned int maxGames) const
+const Rect UI_Theme::lookUpGameRect(const eGameWindow id, const unsigned int game_number, const unsigned int max_games) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_GAME_WINDOWS)) {
 		toErrorLog("ERROR: (UI_Theme::lookUpGameRect) id out of range.");return(Rect(0,0,0,0));
 	}
-	if(maxGames==0) {
-		toErrorLog("ERROR: (UI_Theme::lookUpGameRect) maxGames out of range.");return(Rect(0,0,0,0));
+	if(max_games==0) {
+		toErrorLog("ERROR: (UI_Theme::lookUpGameRect) max_games out of range.");return(Rect(0,0,0,0));
 	}
-	if((gameNumber>=maxGames)||(maxGames>MAX_COMPARE_GAMES)) {
+	if((game_number>=max_games)||(max_games>MAX_COMPARE_GAMES)) {
 		toErrorLog("ERROR: (UI_Theme::lookUpGameRect) game out of range.");return(Rect(0,0,0,0));
 	}
 #endif
-	return(*gameRectList[currentResolution][gameNumber][maxGames-1][id]);
+	return(*gameRectList[currentResolution][game_number][max_games-1][id]);
 }
 
-const unsigned int UI_Theme::lookUpGameMaxHeight(const eGameWindow id, const unsigned int gameNumber, const unsigned int maxGames) const 
+const unsigned int UI_Theme::lookUpGameMaxHeight(const eGameWindow id, const unsigned int game_number, const unsigned int max_games) const 
 {
 #ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_GAME_WINDOWS)) {
+	if((id < 0) || (id >= MAX_GAME_WINDOWS)) {
 		toErrorLog("ERROR: (UI_Theme::lookUpGameMaxHeight) id out of range.");return(0);
 	}
-	if(maxGames==0) {
-		toErrorLog("ERROR: (UI_Theme::lookUpGameMaxHeight) maxGames out of range.");return(0);
+	if(max_games==0) {
+		toErrorLog("ERROR: (UI_Theme::lookUpGameMaxHeight) max_games out of range.");return(0);
 	}
-	if((gameNumber>=maxGames)||(maxGames>MAX_COMPARE_GAMES)) {
+	if((game_number >= max_games) || (max_games > MAX_COMPARE_GAMES)) {
 		toErrorLog("ERROR: (UI_Theme::lookUpGameMaxHeight) game out of range.");return(0);
 	}
 #endif
-	return(maxGameHeightList[currentResolution][gameNumber][maxGames-1][id]);
+	return(maxGameHeightList[currentResolution][game_number][max_games-1][id]);
 }
 
-const Rect UI_Theme::lookUpPlayerRect(const ePlayerWindow id, const unsigned int gameNumber, const unsigned int maxGames, const unsigned int playerNumber, const unsigned int maxPlayer) const
+const Rect UI_Theme::lookUpPlayerRect(const ePlayerWindow id, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_player) const
 {
 #ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_PLAYER_WINDOWS)) {
+	if((id < 0) || (id >= MAX_PLAYER_WINDOWS)) {
 		toErrorLog("ERROR: (UI_Theme::lookUpPlayerRect) id out of range.");return(Rect(0,0,0,0));
 	}
-	if(maxPlayer==0) {
-		toErrorLog("ERROR: (UI_Theme::lookUpPlayerRect) maxPlayer out of range.");return(Rect(0,0,0,0));
+	if((max_player==0) || (max_player > MAX_PLAYER)) {
+		toErrorLog("ERROR: (UI_Theme::lookUpPlayerRect) max_player out of range.");return(Rect(0,0,0,0));
 	}
-	if((playerNumber>=maxPlayer)||(maxPlayer>MAX_PLAYER)) {
-		toErrorLog("ERROR: (UI_Theme::lookUpPlayerRect) player out of range.");return(Rect(0,0,0,0));
+	if(player_number >= max_player) {
+		toErrorLog("ERROR: (UI_Theme::lookUpPlayerRect) player_number out of range.");return(Rect(0,0,0,0));
 	}	
 #endif
-	return(*playerRectList[currentResolution][gameNumber][maxGames-1][maxPlayer-1][playerNumber][id]);
+	return(*playerRectList[currentResolution][game_number][max_games-1][max_player-1][player_number][id]);
 }
 
-const unsigned int UI_Theme::lookUpPlayerMaxHeight(const ePlayerWindow id, const unsigned int gameNumber, const unsigned int maxGames, const unsigned int playerNumber, const unsigned int maxPlayer) const 
+const unsigned int UI_Theme::lookUpPlayerMaxHeight(const ePlayerWindow id, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_player) const 
 {
 #ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_PLAYER_WINDOWS)) {
+	if((id < 0) || (id >= MAX_PLAYER_WINDOWS)) {
 		toErrorLog("ERROR: (UI_Theme::lookUpMaxHeight) id out of range.");return(0);
 	}
-	if(maxPlayer==0) {
-		toErrorLog("ERROR: (UI_Theme::lookUpPlayerMaxHeight) maxPlayer out of range.");return(0);
+	if((max_player==0) || (max_player > MAX_PLAYER)) {
+		toErrorLog("ERROR: (UI_Theme::lookUpPlayerMaxHeight) max_player out of range.");return(0);
 	}
-	if((playerNumber>=maxPlayer)||(maxPlayer>MAX_PLAYER)) {
-		toErrorLog("ERROR: (UI_Theme::lookUpPlayerRect) player out of range.");return(0);
+	if(player_number >= max_player) {
+		toErrorLog("ERROR: (UI_Theme::lookUpPlayerMaxHeight) player_number out of range.");return(0);
 	}
 #endif
-	return(maxPlayerHeightList[currentResolution][gameNumber][maxGames-1][maxPlayer-1][playerNumber][id]);
+	return(maxPlayerHeightList[currentResolution][game_number][max_games-1][max_player-1][player_number][id]);
 }
 
 const ePlayerType getPlayerType(const std::string& item)
@@ -432,7 +396,6 @@ const eDataType getDataType(const std::string& item)
 	if(item=="@GENERAL_THEME_BITMAPS") return(GENERAL_THEME_BITMAP_DATA_TYPE);else
 	if(item=="@BITMAPS") return(BITMAP_DATA_TYPE);else
 	if(item=="@BUTTON_COLORS") return(BUTTON_COLOR_DATA_TYPE);else
-	if(item=="@SOUNDS") return(SOUND_DATA_TYPE);else
 	if(item=="@BUTTON_WIDTH") return(BUTTON_WIDTH_DATA_TYPE);else
 	return(ZERO_DATA_TYPE);
 }
@@ -912,8 +875,9 @@ const bool UI_Theme::loadStringFile(const std::string& string_file)
 	if(!checkStreamIsOpen(pFile, "UI_Theme::loadStringFile", string_file))
 		return(false);
 
+//	toInitLog("* " + lookUpString(START_LOADING_STRING) + " " + string_file);
+//problem: Stringfile ist ja noch nicht geladen :>
 	toInitLog("* Loading " + string_file);
-
 	bool found_any_language_block = false;
 	bool found_language_block[MAX_LANGUAGES];
 	for(unsigned int i = MAX_LANGUAGES; i--;)
@@ -1033,13 +997,13 @@ const bool UI_Theme::loadWindowDataFile(const std::string& window_data_file, con
 		return(false);
 	
 	if((game_number==0) && (max_games==1))
-		toInitLog("* Loading window coordinates for single view...");
+		toInitLog("* " + lookUpString(START_LOAD_COORDINATES_SINGLE_VIEW_STRING));
 	else 
 	if((game_number==0) && (max_games==2))
-		toInitLog("* Loading left side window coordinates for split view...");
+		toInitLog("* " + lookUpString(START_LOAD_COORDINATES_LEFT_SPLIT_VIEW_STRING));
 	else 
 	if((game_number==1) && (max_games==2))
-		toInitLog("* Loading right side window coordinates for split view...");
+		toInitLog("* " + lookUpString(START_LOAD_COORDINATES_RIGHT_SPLIT_VIEW_STRING));
 
 	char line[1024];
 	while(pFile.getline(line, sizeof line))
@@ -1118,7 +1082,7 @@ const bool UI_Theme::loadWindowDataFile(const std::string& window_data_file, con
 				gameRectList[current_resolution][game_number][max_games-1][current_line+1] = parse_window(parameter, gameRectList[current_resolution][game_number][max_games-1], max_height, 1, (game_number==1));
 				if((game_number==1)&&(current_line==0))
 					gameRectList[current_resolution][game_number][max_games-1][current_line+1]->setTopLeft(gameRectList[current_resolution][game_number][max_games-1][current_line+1]->getTopLeft() + Size(globalRectList[current_resolution][MAIN_WINDOW]->getWidth()/2,0));
-				setMaxGameHeight(current_resolution, game_number, max_games-1, current_line+1, max_height);
+				setMaxGameHeight(current_resolution, game_number, max_games, current_line+1, max_height);
 				++current_line;
 			}
 			else if(player_type==ZERO_PLAYER_TYPE)
@@ -1129,7 +1093,7 @@ const bool UI_Theme::loadWindowDataFile(const std::string& window_data_file, con
 			{
 				unsigned int max_height=0;
 				playerRectList[current_resolution][game_number][max_games-1][game_type-2][player_type-1][current_line+1] = parse_window(parameter, playerRectList[current_resolution][game_number][max_games-1][game_type-2][player_type-1], max_height, 2, (game_number==1));
-				setMaxPlayerHeight(current_resolution, game_number, max_games-1, game_type-2, player_type-1, current_line+1, max_height);
+				setMaxPlayerHeight(current_resolution, game_number, max_games, game_type-1, player_type-1, current_line+1, max_height);
 				++current_line;
 			}
 		} 
@@ -1154,8 +1118,7 @@ void UI_Theme::updateColors(SDL_Surface* surface)
 	}
 }
 
-// TODO: Sounds (wie Bitmaps) dynamisch zur Laufzeit laden
-void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_dir, const std::string& sound_dir, const std::string& font_dir, DC* dc)
+void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_dir, const std::string& font_dir, DC* dc)
 {
 	const unsigned int MAX_PARAMETERS = 50;
 	char* buffer;
@@ -1177,7 +1140,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 		value[i]=0;
 	}
 
-	toInitLog("* Loading data file");
+	toInitLog("* " + lookUpString(START_LOAD_DATA_FILE_STRING));
 
 	bool loading_fonts = false;
 	bool loading_main_coordinates = false;
@@ -1186,7 +1149,6 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 	bool loading_brushes = false;
 	bool loading_bitmaps = false;
 	bool loading_buttons = false;
-	bool loading_sounds = false;
 	
 	std::ifstream pFile(data_file.c_str());
 	
@@ -1250,7 +1212,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 			mode=getDataType(parameter[0]);
 #ifdef _SCC_DEBUG
 //			if(mode!=ZERO_DATA_TYPE)
-//				toLog("Loading "+parameter[0]+"...");
+//				toInitLog("lookUpString(START_LOADING_STRING) + " " + parameter[0]);
 			if(mode==ZERO_DATA_TYPE)
 			{
 				if(parameter[0]=="@END")
@@ -1329,7 +1291,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 						if(!loading_colors)
 						{
 							loading_colors = true;
-							toInitLog("  - Loading colors...");
+							toInitLog("  - " + lookUpString(START_LOAD_COLORS_STRING));
 						}
 						colorList[current_theme][current_line]=new Color(dc->getSurface(),(Uint8)value[0],(Uint8)value[1],(Uint8)value[2]);
 					break;
@@ -1337,7 +1299,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 						if(!loading_pens)
 						{
 							loading_pens = true;
-							toInitLog("  - Loading pens...");
+							toInitLog("  - " + lookUpString(START_LOAD_PENS_STRING));
 						}
 						penList[current_theme][current_line]=new Pen(dc->getSurface(),value[1],value[2],value[3],value[0],get_pen_style(parameter[4]));
 						break;
@@ -1345,7 +1307,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 						if(!loading_brushes)
 						{
 							loading_brushes = true;
-							toInitLog("  - Loading brushes...");
+							toInitLog("  - " + lookUpString(START_LOAD_BRUSHES_STRING));
 						}
 						brushList[current_theme][current_line]=new Brush(dc->getSurface(),(Uint8)value[0],(Uint8)value[1],(Uint8)value[2],get_brush_style(parameter[3]));
 						break;
@@ -1353,7 +1315,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 						if(!loading_fonts)
 						{
 							loading_fonts = true;
-							toInitLog("  - Loading fonts...");
+							toInitLog("  - " + lookUpString(START_LOAD_FONTS_STRING));
 						}
 						{
 							std::string font_name=font_dir+parameter[0]+".ttf";
@@ -1370,7 +1332,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 						if(!loading_main_coordinates)
 						{
 							loading_main_coordinates = true;
-							toInitLog("  - Loading main coordinates...");
+							toInitLog("  - " + lookUpString(START_LOAD_MAIN_COORDINATES_STRING));
 						}
 
 						{
@@ -1384,7 +1346,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 						if(!loading_bitmaps)
 						{
 							loading_bitmaps = true;
-							toInitLog("  - Loading bitmaps...");
+							toInitLog("  - " + lookUpString(START_LOAD_BITMAPS_STRING));
 						}
 			                        std::map<std::string, std::list<std::string> > block;
 			                        pFile.seekg(old_pos);
@@ -1437,7 +1399,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 						if(!loading_bitmaps)
 						{
 							loading_bitmaps = true;
-							toInitLog("  - Loading bitmaps...");
+							toInitLog("  - " + lookUpString(START_LOAD_BITMAPS_STRING));
 						}					
 			                        std::map<std::string, std::list<std::string> > block;
 			                        pFile.seekg(old_pos);
@@ -1498,7 +1460,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 					if(!loading_buttons)
 					{
 						loading_buttons = true;
-						toInitLog("  - Loading buttons...");
+						toInitLog("  - " + lookUpString(START_LOAD_BUTTONS_STRING));
 					}
 					buttonColorsList[current_line] = new ButtonColorsType;
 					buttonColorsList[current_line]->speed=value[0];
@@ -1515,62 +1477,12 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 	//					buttonColorsList[current_line]->text[i]=(eString)(value[7*MAX_BUTTON_ANIMATION_PHASES+2+i]);
 					}
 					++current_line;
-				} else if(mode == SOUND_DATA_TYPE)
-				{
-					if(!loading_sounds)
-					{
-						loading_sounds = true;
-						toInitLog("  - Loading sounds...");
-					}
-			                std::map<std::string, std::list<std::string> > block;
-			                pFile.seekg(old_pos);
-			                if(!parse_block_map(pFile, block))
-			                {
-			                	toErrorLog("WARNING (UI_Theme::loadDataFile()): No concluding @END for @SOUND_DATA_TYPE block was found in file " + data_file + " => trying to parse what we have so far.");
-			                }
-			                for(unsigned int j = 0; j < MAX_SOUNDS; j++)
-			                {
-						std::map<std::string, std::list<std::string> >::iterator i;
-						if((i = block.find(soundIdentifier[j])) != block.end())
-						{
-							i->second.pop_front(); // Identifier loeschen
-							std::string name = i->second.front();
-							if((name.size()<4)||(name[name.size()-4]!='.'))
-								name = sound_dir + name + ".mp3";
-							else name = sound_dir + name;
-							bool found_sound = false;
-							for(std::list<SoundEntry>::iterator l = loadedSounds.begin(); l!=loadedSounds.end(); ++l)
-							// already loaded?
-								if(l->name == name)
-								{
-									found_sound = true;
-									soundAccessTable[j] = &(*l);
-									break;
-								}
-							if(!found_sound)
-							{
-								SoundEntry entry;
-								entry.line = current_line;
-								entry.name = name;
-								entry.sound = NULL;
-								entry.used = false;
-								i->second.pop_front(); // Parameter
-								entry.loop = ((i->second.size()>0)&&(i->second.front() == "(LOOP)"));
-								loadedSounds.push_back(entry);
-								soundAccessTable[j] = &(loadedSounds.back());
-							}
-							block.erase(i);
-						}
-					}
-					mode = ZERO_DATA_TYPE;
-				// TODO nicht gefundene Eintraege bemaengeln
-				}
-				else if(mode == GENERAL_BITMAP_DATA_TYPE)
+				} else if(mode == GENERAL_BITMAP_DATA_TYPE)
 				{
 					if(!loading_bitmaps)
 					{
 						loading_bitmaps = true;
-						toInitLog("  - Loading bitmaps...");
+						toInitLog("  - " + lookUpString(START_LOAD_BITMAPS_STRING));
 					}					
 		                        std::map<std::string, std::list<std::string> > block;
 		                        pFile.seekg(old_pos);
@@ -1642,7 +1554,7 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 						if(!loading_bitmaps)
 						{
 							loading_bitmaps = true;
-							toInitLog("  - Loading bitmaps...");
+							toInitLog("  - " + lookUpString(START_LOAD_BITMAPS_STRING));
 						}					
 			                        std::map<std::string, std::list<std::string> > block;
 			                        pFile.seekg(old_pos);
@@ -1706,58 +1618,58 @@ void UI_Theme::loadData(const std::string& data_file, const std::string& bitmap_
 void UI_Theme::setMaxGlobalHeight(unsigned int current_resolution, unsigned int id, unsigned int max_height)
 {
 #ifdef _SCC_DEBUG
-        if(current_resolution>MAX_RESOLUTIONS) {
+        if(current_resolution > MAX_RESOLUTIONS) {
                 toErrorLog("ERROR: (UI_Theme::setMaxGlobalHeightList) resolution out of range.");return;
         }
-        if(id>=MAX_GLOBAL_WINDOWS) {
+        if(id >= MAX_GLOBAL_WINDOWS) {
                 toErrorLog("ERROR: (UI_Theme::setMaxGlobalHeightList) window out of range.");return;
         }
 #endif	
 	maxGlobalHeightList[current_resolution][id] = max_height;
 }
 
-void UI_Theme::setMaxGameHeight(unsigned int current_resolution, unsigned int gameNumber, unsigned int maxGames, unsigned int id, unsigned int max_height)
+void UI_Theme::setMaxGameHeight(unsigned int current_resolution, unsigned int game_number, unsigned int max_games, unsigned int id, unsigned int max_height)
 {
 #ifdef _SCC_DEBUG
         if(current_resolution>MAX_RESOLUTIONS) {
                 toErrorLog("ERROR: (UI_Theme::setMaxGameHeight) resolution out of range.");return;
         }
-        if(gameNumber>=MAX_COMPARE_GAMES) {
-                toErrorLog("ERROR: (UI_Theme::setMaxGameHeight) gameNumber out of range.");return;
+        if(max_games > MAX_COMPARE_GAMES) {
+                toErrorLog("ERROR: (UI_Theme::setMaxGameHeight) max_games out of range.");return;
         }
-        if(maxGames>=MAX_COMPARE_GAMES) {
-                toErrorLog("ERROR: (UI_Theme::setMaxGameHeight) maxGames out of range.");return;
+        if(game_number > max_games) {
+                toErrorLog("ERROR: (UI_Theme::setMaxGameHeight) game_number out of range.");return;
         }
         if(id>=MAX_GAME_WINDOWS) {
                 toErrorLog("ERROR: (UI_Theme::setMaxGameHeight) id out of range.");return;
         }
 #endif	
-	maxGameHeightList[current_resolution][gameNumber][maxGames][id]=max_height;
+	maxGameHeightList[current_resolution][game_number][max_games-1][id] = max_height;
 }
 
-void UI_Theme::setMaxPlayerHeight(unsigned int current_resolution, unsigned int gameNumber, unsigned int maxGames, unsigned int player_max, unsigned int playerNumber, unsigned int id, unsigned int max_height)
+void UI_Theme::setMaxPlayerHeight(unsigned int current_resolution, unsigned int game_number, unsigned int max_games, unsigned int player_max, unsigned int player_number, unsigned int id, unsigned int max_height)
 {
 #ifdef _SCC_DEBUG
         if(current_resolution>MAX_RESOLUTIONS) {
                 toErrorLog("ERROR: (UI_Theme::setMaxPlayerHeight) resolution out of range.");return;
         }
-        if(gameNumber>MAX_COMPARE_GAMES) {
-                toErrorLog("ERROR: (UI_Theme::setMaxPlayerHeight) gameNumber out of range.");return;
+        if(max_games > MAX_COMPARE_GAMES) {
+		toErrorLog("ERROR: (UI_Theme::setMaxPlayerHeight) max_games out of range.");return;
         }
-        if(maxGames>MAX_COMPARE_GAMES) {
-		toErrorLog("ERROR: (UI_Theme::setMaxPlayerHeight) maxGames out of range.");return;
+        if(game_number >= max_games) {
+                toErrorLog("ERROR: (UI_Theme::setMaxPlayerHeight) game_number out of range.");return;
         }
-	if(player_max>MAX_PLAYER) {
+	if(player_max > MAX_PLAYER) {
 		toErrorLog("ERROR: (UI_Theme::setMaxPlayerHeight) player_max out of range.");return;
         }
-	if(playerNumber>MAX_PLAYER) {
-		toErrorLog("ERROR: (UI_Theme::setMaxPlayerHeight) playerNumber out of range.");return;
+	if(player_number >= player_max) {
+		toErrorLog("ERROR: (UI_Theme::setMaxPlayerHeight) player_number out of range.");return;
         }
-        if(id>=MAX_PLAYER_WINDOWS) {
+        if(id >= MAX_PLAYER_WINDOWS) {
                 toErrorLog("ERROR: (UI_Theme::setMaxPlayerHeight) window out of range.");return;
         }
 #endif	
-	maxPlayerHeightList[current_resolution][gameNumber][maxGames][player_max][playerNumber][id] = max_height;
+	maxPlayerHeightList[current_resolution][game_number][max_games-1][player_max-1][player_number][id] = max_height;
 }
 
 #include <sstream>
@@ -1768,10 +1680,6 @@ Font* UI_Theme::lookUpFont(const eFont id) const
 		toErrorLog("ERROR: (UI_Theme::lookUpFont) id out of range.");return(fontList[currentResolution]/*[language]*/[id]);
 	}
 #endif
-//	std::ostringstream os;
-//	os.str("");
-//	os << "getting id " << id << " (with resolution " << resolution << ")";
-//	toLog(os.str());
 	return(fontList[currentResolution]/*[language]*/[id]);
 }
 
@@ -1808,46 +1716,6 @@ SDL_Surface* UI_Theme::lookUpBitmap(const eBitmap id)
 	return(bitmapList[currentResolution][currentColorTheme][id]);
 }
 
-FMOD::Sound* UI_Theme::lookUpSound(const eSound id)
-{
-	if(!sound)
-		return(NULL);
-#ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_SOUNDS)) {
-		toErrorLog("ERROR: (UI_Theme::lookUpSound) id out of range.");return(NULL); // TODO
-	}
-#endif
-	if(soundList[id] == NULL)
-// reload
-	{
-		FMOD::Sound* temp = NULL;
-		if(soundAccessTable[id]==NULL)
-		{
-			toErrorLog("ERROR (UI_Theme::lookUpSound()): Sound was not initialized. Check 'settings/ui/default.ui' and 'data/sounds'."); // TODO sound identifier...
-			return(NULL);
-		} else		
-		{
-			FMOD_RESULT result;
-			result = sound->createSound(soundAccessTable[id]->name.c_str(), (soundAccessTable[id]->loop?FMOD_LOOP_NORMAL:0) | FMOD_SOFTWARE, 0, &temp);
-			if(!ERRCHECK(result))
-			{
-				toErrorLog("ERROR (UI_Theme::lookUpSound()): Could not load " + soundAccessTable[id]->name);
-				return(NULL);
-			}
-			soundAccessTable[id]->sound = temp;
-			soundList[id] = temp;
-		}
-	}
-	soundAccessTable[id]->used = true;
-	return(soundList[id]);
-}
-
-void UI_Theme::playSound(const eSound id, const unsigned int x)
-{
-	if(!sound)
-		return;
-	soundsToPlay.push_back(std::pair<FMOD::Sound*, float>(lookUpSound(id), 2*((float)(2*x) - (float)getResolutionSize().getWidth())/(float)(3*getResolutionSize().getWidth())));
-}
 
 const bool UI_Theme::setLanguage(const eLanguage theme_language) {
 	if(languageInitialized[theme_language])
@@ -1862,55 +1730,6 @@ const bool UI_Theme::setLanguage(const eLanguage theme_language) {
 	}
 }
 
-void UI_Theme::printSoundInformation() const
-{
-	int driver_num;
-	sound->getNumDrivers(&driver_num);
-	std::ostringstream os; os << "* Availible sound drivers: ";
-	for(unsigned int i = driver_num; i--;)
-	{
-		char driver_name[128];
-		sound->getDriverName(i, driver_name, 128);
-		os << driver_name << " ";
-	}
-	toInitLog(os.str());
-	os.str("");
-	int current_driver;
-	sound->getDriver(&current_driver);
-
-	os << "* Driver used: ";
-	if(current_driver == -1)
-	{
-		os << "Primary or main sound device as selected by the operating system settings";
-		if(driver_num == 1)
-		{
-			char driver_name[128];
-			sound->getDriverName(current_driver, driver_name, 128);
-			os << "(probably '" << driver_name << "')";
-		}
-		toInitLog(os.str());
-	}
-	else
-	{
-		char driver_name[128];
-		sound->getDriverName(current_driver, driver_name, 128);
-		os << driver_name;
-		toInitLog(os.str());
-	}
-}
-
-void UI_Theme::releaseSoundEngine()
-{
-	if(!sound)
-		return;
-	toInitLog("* Closing sound engine...");
-	sound->close();
-
-	toInitLog("* Releasing sound engine...");
-	sound->release();
-	sound = NULL;
-}
-
 const eBitmap UI_Theme::getBitmapFromIdentifier(const std::string& identifier) const
 {
 	for(unsigned int j = MAX_BITMAPS; j--;)
@@ -1919,24 +1738,71 @@ const eBitmap UI_Theme::getBitmapFromIdentifier(const std::string& identifier) c
 	return(NULL_BITMAP);
 }
 
-void UI_Theme::initSoundIdentifier()
+std::string UI_Theme::printHardwareInformation()
 {
-	for(unsigned int i = MAX_SOUNDS; i--;)
-		soundIdentifier[i] = "null";
-	soundIdentifier[NULL_SOUND] = "NULL_SOUND";
-	soundIdentifier[LALA_SOUND] = "LALA_SOUND";
-	soundIdentifier[MOUSEOVER_SOUND] = "MOUSEOVER_SOUND";
-	soundIdentifier[SWISHIN_SOUND] = "SWISHIN_SOUND";
-	soundIdentifier[SWISHOUT_SOUND] = "SWISHOUT_SOUND";
-	soundIdentifier[SWISHLOCK_SOUND] = "SWISHLOCK_SOUND";
-	soundIdentifier[CLICKED_SOUND] = "CLICKED_SOUND";
-	soundIdentifier[CLICK_SOUND] = "CLICK_SOUND";
-	soundIdentifier[COMPLETE_SOUND] = "COMPLETE_SOUND";
-	soundIdentifier[ERROR_SOUND] = "ERROR_SOUND";
-	soundIdentifier[RING_SOUND] = "RING_SOUND";
-	soundIdentifier[INTRO_SOUND] = "INTRO_SOUND";
+	// TODO: uebersetzen bzw. dem Aufrufer nur Daten uebergeben
+	SDL_Rect **modes;
+	std::ostringstream os;
+	os.str("");
+	modes = SDL_ListModes(NULL, SDL_SWSURFACE);
+	if(modes == (SDL_Rect **)0)
+		os << "* " << lookUpString(START_SDL_NO_MODES_AVAILIBLE_STRING) << std::endl;
+	else
+	{
+		if(modes == (SDL_Rect **)-1)
+			os << "* " << lookUpString(START_SDL_ALL_RESOLUTIONS_AVAILIBLE_STRING) << std::endl;
+		else
+		{
+			os << "* " << lookUpString(START_SDL_AVAILIBLE_MODES_STRING);
+			for(unsigned int i=0;modes[i];++i)
+				os << "  " << modes[i]->w << " x " << modes[i]->h;
+			os << std::endl;
+		}
+	}
+	const SDL_VideoInfo* hardware = SDL_GetVideoInfo();
+	os << " - " << lookUpString(START_SDL_MAX_COLOR_DEPTH_STRING) << (unsigned int)hardware->vfmt->BitsPerPixel;
+//	if(hardware->hw_availible) os << "\n- " << lookUpString(START_SDL_HARDWARE_SURFACES_POSSIBLE_STRING);
+	if(hardware->wm_available) os << "\n - " << lookUpString(START_SDL_WINDOW_MANAGER_AVAILIBLE_STRING);
+	if(hardware->blit_hw) os << "\n - " << lookUpString(START_SDL_HARDWARE_TO_HARDWARE_BLITS_ACCELERATED_STRING);
+	if(hardware->blit_hw_CC) os << "\n - " << lookUpString(START_SDL_HARDWARE_TO_HARDWARE_COLORKEY_BLITS_ACCELERATED_STRING);
+	if(hardware->blit_hw_A) os << "\n - " << lookUpString(START_SDL_HARDWARE_TO_HARDWARE_ALPHA_BLITS_ACCELERATED_STRING);
+	if(hardware->blit_sw) os << "\n - " << lookUpString(START_SDL_SOFTWARE_TO_HARDWARE_BLITS_ACCELERATED_STRING);
+	if(hardware->blit_sw_CC) os << "\n - " << lookUpString(START_SDL_SOFTWARE_TO_HARDWARE_COLORKEY_BLITS_ACCELERATED_STRING);
+	if(hardware->blit_sw_A)	os << "\n - " << lookUpString(START_SDL_SOFTWARE_TO_HARDWARE_ALPHA_BLITS_ACCELERATED_STRING);
+	if(hardware->blit_fill)	os << "\n - " << lookUpString(START_SDL_COLOR_FILLS_ACCELERATED_STRING);
+	if(hardware->video_mem>0) os << "\n - " << lookUpFormattedString(START_SDL_TOTAL_VIDEO_MEMORY_STRING, hardware->video_mem);
+//	Total amount of video memory: " << hardware->video_mem << "kb";
+	return(os.str());
 }
 
+std::string UI_Theme::printSurfaceInformation(DC* surface)
+{
+	std::ostringstream os; os.str("");
+	os << surface->getSurface()->w << " x " << surface->getSurface()->h << " @ " << (unsigned int)(surface->getSurface()->format->BitsPerPixel);
+	if (surface->flags() & SDL_SWSURFACE) os << "\n- " << lookUpString(START_SDL_SURFACE_STORED_IN_SYSTEM_MEMORY_STRING);
+	//Surface is stored in system memory";
+	else if(surface->flags() & SDL_HWSURFACE) os << "\n- " << lookUpString(START_SDL_SURFACE_STORED_IN_VIDEO_MEMORY_STRING);
+//			Surface is stored in video memory";
+	if(surface->flags() & SDL_ASYNCBLIT) os << "\n- " << lookUpString(START_SDL_SURFACE_USES_ASYNCHRONOUS_BLITS_STRING);
+	//urface uses asynchronous blits if possible";
+	if(surface->flags() & SDL_ANYFORMAT) os << "\n- " << lookUpString(START_SDL_SURFACE_ALLOWS_ANY_PIXEL_FORMAT_STRING);
+	if(surface->flags() & SDL_HWPALETTE) os << "\n- " << lookUpString(START_SDL_SURFACE_HAS_EXCLUSIVE_PALETTE_STRING);
+	if(surface->flags() & SDL_DOUBLEBUF) os << "\n- " << lookUpString(START_SDL_SURFACE_IS_DOUBLE_BUFFERED_STRING);
+	if(surface->flags() & SDL_OPENGL) os << "\n- " << lookUpString(START_SDL_SURFACE_HAS_OPENGL_CONTEXT_STRING);
+	if(surface->flags() & SDL_OPENGLBLIT) os << "\n- " << lookUpString(START_SDL_SURFACE_SUPPORTS_OPENGL_BLITTING_STRING);
+	if(surface->flags() & SDL_RESIZABLE) os << "\n- " << lookUpString(START_SDL_SURFACE_IS_RESIZABLE_STRING);
+	if(surface->flags() & SDL_HWACCEL) os << "\n- " << lookUpString(START_SDL_SURFACE_BLIT_USES_HARDWARE_ACCELERATION_STRING);
+	//Surface blit uses hardware acceleration";
+	if(surface->flags() & SDL_SRCCOLORKEY) os << "\n- " << lookUpString(START_SDL_SURFACE_USES_COLORKEY_BLITTING_STRING);
+	//Surface use colorkey blitting";
+	if(surface->flags() & SDL_RLEACCEL) os << "\n- " << lookUpString(START_SDL_COLORKEY_BLITTING_RLE_ACCELERATED_STRING);
+	//Colorkey blitting is accelerated with RLE";
+	if(surface->flags() & SDL_SRCALPHA) os << "\n- " << lookUpString(START_SDL_BLIT_USES_ALPHA_BLENDING_STRING);
+//	Surface blit uses alpha blending";
+	if(surface->flags() & SDL_PREALLOC) os << "\n- " << lookUpString(START_SDL_SURFACE_USES_PREALLOCATED_MEMORY_STRING);
+	if(SDL_MUSTLOCK(surface->getSurface())) os << "\n- " << lookUpString(START_SDL_SURFACE_NEEDS_LOCKING_STRING);
+	return(os.str());
+}
 
 void UI_Theme::initBitmapIdentifier()
 {
@@ -1985,6 +1851,7 @@ void UI_Theme::initBitmapIdentifier()
 	bitmapIdentifier[CLEMENS_BITMAP] = "CLEMENS_BITMAP";
 	bitmapIdentifier[LIST_BITMAP] = "LIST_BITMAP";
 //	bitmapIdentifier[OPEN_TREE_BITMAP] = "OPEN_TREE_BITMAP";
+	bitmapIdentifier[HELP_MAIN_BITMAP] = "HELP_MAIN_BITMAP";
 }
 
 void UI_Theme::initStringIdentifier()
@@ -2261,21 +2128,37 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_MISSILE_ATTACKS] = "R_MISSILE_ATTACKS";
 	stringIdentifier[UNIT_TYPE_COUNT*ZERG+R_FLYER_ATTACKS] = "R_FLYER_ATTACKS";
 
-	stringIdentifier[START_LOAD_CONFIGURATION_STRING] = "START_LOAD_CONFIGURATION_STRING";
+	stringIdentifier[START_LOAD_LANGUAGE_FILES_STRING] = "START_LOAD_LANGUAGE_FILES_STRING";
+	stringIdentifier[START_LOAD_UI_CONFIGURATION_STRING] = "START_LOAD_UI_CONFIGURATION_STRING";
+	stringIdentifier[START_LOAD_CORE_CONFIGURATION_STRING] = "START_LOAD_CORE_CONFIGURATION_STRING";
+	stringIdentifier[START_LOAD_EF_CONFIGURATION_STRING] = "START_LOAD_EF_CONFIGURATION_STRING";
+	stringIdentifier[START_SET_LANGUAGE_STRING] = "START_SET_LANGUAGE_STRING";
+
+	stringIdentifier[START_COMMANDO_LINE_1_STRING] = "START_COMMANDO_LINE_1_STRING";
+	stringIdentifier[START_COMMANDO_LINE_2_STRING] = "START_COMMANDO_LINE_2_STRING";
+	stringIdentifier[START_COMMANDO_LINE_3_STRING] = "START_COMMANDO_LINE_3_STRING";
+	stringIdentifier[START_COMMANDO_LINE_4_STRING] = "START_COMMANDO_LINE_4_STRING";
+	stringIdentifier[START_COMMANDO_LINE_5_STRING] = "START_COMMANDO_LINE_5_STRING";
+	stringIdentifier[START_COMMANDO_LINE_6_STRING] = "START_COMMANDO_LINE_6_STRING";
+	
 	stringIdentifier[START_PARSE_COMMAND_LINE_STRING] = "START_PARSE_COMMAND_LINE_STRING";
+	stringIdentifier[START_INIT_NOSOUND_STRING] = "START_INIT_NOSOUND_STRING";
 	stringIdentifier[START_WARNING_VO_ARGUMENT_STRING] = "START_WARNING_VO_ARGUMENT_STRING";
 	stringIdentifier[START_SDL_USING_DRIVER_STRING] = "START_SDL_USING_DRIVER_STRING";
 	stringIdentifier[START_ERROR_NO_DRIVER_AVAILIBLE_STRING] = "START_ERROR_NO_DRIVER_AVAILIBLE_STRING";
 	stringIdentifier[START_ERROR_DRIVER_NOT_SUPPORTED_STRING] = "START_ERROR_DRIVER_NOT_SUPPORTED_STRING";
 	stringIdentifier[START_INIT_SDL_STRING] = "START_INIT_SDL_STRING";
+	stringIdentifier[START_AVAILIBLE_GRAPHIC_DRIVERS_STRING] = "START_AVAILIBLE_GRAPHIC_DRIVERS_STRING";
 	stringIdentifier[START_UNABLE_TO_INIT_SDL_STRING] = "START_UNABLE_TO_INIT_SDL_STRING";
 	stringIdentifier[START_CREATED_SURFACE_STRING] = "START_CREATED_SURFACE_STRING";
 	stringIdentifier[START_ERROR_SETTING_VIDEO_MODE_STRING] = "START_ERROR_SETTING_VIDEO_MODE_STRING";
 	stringIdentifier[START_SET_WINDOW_MODE_STRING] = "START_SET_WINDOW_MODE_STRING";
 	stringIdentifier[START_SET_FULLSCREEN_MODE_STRING] = "START_SET_FULLSCREEN_MODE_STRING";
 	stringIdentifier[START_INIT_SDL_TRUETYPE_FONTS_STRING] = "START_INIT_SDL_TRUETYPE_FONTS_STRING";
+	stringIdentifier[START_INIT_SDL_TTF_ERROR_STRING] = "START_INIT_SDL_TTF_ERROR_STRING";
 	stringIdentifier[START_INIT_FRAMERATE_STRING] = "START_INIT_FRAMERATE_STRING";
 	stringIdentifier[START_INIT_SOUND_STRING] = "START_INIT_SOUND_STRING";
+	stringIdentifier[START_INIT_FMOD_VERSION_ERROR_STRING] = "START_INIT_FMOD_VERSION_ERROR_STRING";
 	stringIdentifier[START_INIT_GRAPHIC_ENGINE_CORE_STRING] = "START_INIT_GRAPHIC_ENGINE_CORE_STRING";
 	stringIdentifier[START_LOAD_UI_BITMAPS_FONTS_STRING] = "START_LOAD_UI_BITMAPS_FONTS_STRING";
 	stringIdentifier[START_ASSIGNING_DEFAULT_VARIABLES_STRING] = "START_ASSIGNING_DEFAULT_VARIABLES_STRING";
@@ -2285,7 +2168,26 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[START_LOAD_STARTCONDITIONS_STRING] = "START_LOAD_STARTCONDITIONS_STRING";
 	stringIdentifier[START_LOAD_GOALS_STRING] = "START_LOAD_GOALS_STRING";
 	stringIdentifier[START_LOAD_BUILD_ORDERS_STRING] = "START_LOAD_BUILD_ORDERS_STRING";
+	stringIdentifier[START_LOADING_STRING] = "START_LOADING_STRING";
+
+        stringIdentifier[START_LOAD_COORDINATES_SINGLE_VIEW_STRING] = "START_LOAD_COORDINATES_SINGLE_VIEW_STRING";
+        stringIdentifier[START_LOAD_COORDINATES_LEFT_SPLIT_VIEW_STRING] = "START_LOAD_COORDINATES_LEFT_SPLIT_VIEW_STRING";
+        stringIdentifier[START_LOAD_COORDINATES_RIGHT_SPLIT_VIEW_STRING] = "START_LOAD_COORDINATES_RIGHT_SPLIT_VIEW_STRING";
+        stringIdentifier[START_LOAD_DATA_FILE_STRING] = "START_LOAD_DATA_FILE_STRING";
+        stringIdentifier[START_LOAD_COLORS_STRING] = "START_LOAD_COLORS_STRING";
+        stringIdentifier[START_LOAD_PENS_STRING] = "START_LOAD_PENS_STRING";
+        stringIdentifier[START_LOAD_BRUSHES_STRING] = "START_LOAD_BRUSHES_STRING";
+        stringIdentifier[START_LOAD_FONTS_STRING] = "START_LOAD_FONTS_STRING";
+        stringIdentifier[START_LOAD_MAIN_COORDINATES_STRING] ="START_LOAD_MAIN_COORDINATES_STRING";
+        stringIdentifier[START_LOAD_BITMAPS_STRING] = "START_LOAD_BITMAPS_STRING";
+        stringIdentifier[START_LOAD_BUTTONS_STRING] = "START_LOAD_BUTTONS_STRING";
+        stringIdentifier[START_LOAD_SOUNDS_STRING] = "START_LOAD_SOUNDS_STRING";
+	
+	stringIdentifier[START_SET_DESIRED_FRAMERATE_STRING] = "START_SET_DESIRED_FRAMERATE_STRING";
+	stringIdentifier[START_SET_DESIRED_CPU_STRING] = "START_SET_DESIRED_CPU_STRING";
+
 	stringIdentifier[START_ASSIGN_AND_ANALYZE_STRING] = "START_ASSIGN_AND_ANALYZE_STRING";
+
 	stringIdentifier[START_PREPARE_FIRST_RUN_STRING] = "START_PREPARE_FIRST_RUN_STRING";
 	stringIdentifier[START_INIT_GUI_STRING] = "START_INIT_GUI_STRING";
 	stringIdentifier[START_INIT_MAIN_WINDOW_STRING] = "START_INIT_MAIN_WINDOW_STRING";
@@ -2302,6 +2204,68 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[START_MAIN_INIT_COMPLETE_STRING] = "START_MAIN_INIT_COMPLETE_STRING";
 	stringIdentifier[START_SYSTEM_READY_STRING] = "START_SYSTEM_READY_STRING";
 	stringIdentifier[START_INITIALIZATION_TIME_STRING] = "START_INITIALIZATION_TIME_STRING";
+
+
+	stringIdentifier[START_CHOOSING_GAME_TAB_STRING] = "START_CHOOSING_GAME_TAB_STRING";
+	stringIdentifier[START_CREATING_GAME_STRING] = "START_CREATING_GAME_STRING";
+	stringIdentifier[START_ASSIGNING_MAP_STRING] = "START_ASSIGNING_MAP_STRING";
+	stringIdentifier[START_ASSIGNING_START_CONDITION_STRING] = "START_ASSIGNING_START_CONDITION_STRING";
+	stringIdentifier[START_SETTING_RACE_STRING] = "START_SETTING_RACE_STRING";
+	stringIdentifier[START_ASSIGNING_GOAL_STRING] = "START_ASSIGNING_GOAL_STRING";
+	stringIdentifier[START_CREATING_START_UNITS_STRING] = "START_CREATING_START_UNITS_STRING";
+	stringIdentifier[START_ASSIGNING_HARVEST_SPEED_STRING] = "START_ASSIGNING_HARVEST_SPEED_STRING";
+	stringIdentifier[START_SETTING_START_POSITION_STRING] = "START_SETTING_START_POSITION_STRING";
+	stringIdentifier[START_CREATING_BUILD_ORDERS_STRING] = "START_CREATING_BUILD_ORDERS_STRING";
+	stringIdentifier[START_MEASURING_FITNESS_STRING] = "START_MEASURING_FITNESS_STRING";
+	stringIdentifier[START_SHOWING_GAME_STRING] = "START_SHOWING_GAME_STRING";
+
+
+        stringIdentifier[START_SDL_NO_MODES_AVAILIBLE_STRING] = "START_SDL_NO_MODES_AVAILIBLE_STRING";
+        stringIdentifier[START_SDL_ALL_RESOLUTIONS_AVAILIBLE_STRING] = "START_SDL_ALL_RESOLUTIONS_AVAILIBLE_STRING";
+        stringIdentifier[START_SDL_AVAILIBLE_MODES_STRING] = "START_SDL_AVAILIBLE_MODES_STRING";
+        stringIdentifier[START_SDL_MAX_COLOR_DEPTH_STRING] = "START_SDL_MAX_COLOR_DEPTH_STRING";
+        stringIdentifier[START_SDL_HARDWARE_SURFACES_POSSIBLE_STRING] = "START_SDL_HARDWARE_SURFACES_POSSIBLE_STRING";
+        stringIdentifier[START_SDL_WINDOW_MANAGER_AVAILIBLE_STRING] = "START_SDL_WINDOW_MANAGER_AVAILIBLE_STRING";
+        stringIdentifier[START_SDL_HARDWARE_TO_HARDWARE_BLITS_ACCELERATED_STRING] = "START_SDL_HARDWARE_TO_HARDWARE_BLITS_ACCELERATED_STRING";
+        stringIdentifier[START_SDL_HARDWARE_TO_HARDWARE_COLORKEY_BLITS_ACCELERATED_STRING] = "START_SDL_HARDWARE_TO_HARDWARE_COLORKEY_BLITS_ACCELERATED_STRING";
+        stringIdentifier[START_SDL_HARDWARE_TO_HARDWARE_ALPHA_BLITS_ACCELERATED_STRING] = "START_SDL_HARDWARE_TO_HARDWARE_ALPHA_BLITS_ACCELERATED_STRING";
+        stringIdentifier[START_SDL_SOFTWARE_TO_HARDWARE_BLITS_ACCELERATED_STRING] = "START_SDL_SOFTWARE_TO_HARDWARE_BLITS_ACCELERATED_STRING";
+        stringIdentifier[START_SDL_SOFTWARE_TO_HARDWARE_COLORKEY_BLITS_ACCELERATED_STRING] = "START_SDL_SOFTWARE_TO_HARDWARE_COLORKEY_BLITS_ACCELERATED_STRING";
+        stringIdentifier[START_SDL_SOFTWARE_TO_HARDWARE_ALPHA_BLITS_ACCELERATED_STRING] = "START_SDL_SOFTWARE_TO_HARDWARE_ALPHA_BLITS_ACCELERATED_STRING";
+        stringIdentifier[START_SDL_COLOR_FILLS_ACCELERATED_STRING] = "START_SDL_COLOR_FILLS_ACCELERATED_STRING";
+        stringIdentifier[START_SDL_TOTAL_VIDEO_MEMORY_STRING] = "START_SDL_TOTAL_VIDEO_MEMORY_STRING";
+        stringIdentifier[START_SDL_SURFACE_STORED_IN_SYSTEM_MEMORY_STRING] = "START_SDL_SURFACE_STORED_IN_SYSTEM_MEMORY_STRING";
+        stringIdentifier[START_SDL_SURFACE_STORED_IN_VIDEO_MEMORY_STRING] = "START_SDL_SURFACE_STORED_IN_VIDEO_MEMORY_STRING";
+        stringIdentifier[START_SDL_SURFACE_USES_ASYNCHRONOUS_BLITS_STRING] = "START_SDL_SURFACE_USES_ASYNCHRONOUS_BLITS_STRING";
+        stringIdentifier[START_SDL_SURFACE_ALLOWS_ANY_PIXEL_FORMAT_STRING] = "START_SDL_SURFACE_ALLOWS_ANY_PIXEL_FORMAT_STRING";
+        stringIdentifier[START_SDL_SURFACE_HAS_EXCLUSIVE_PALETTE_STRING] = "START_SDL_SURFACE_HAS_EXCLUSIVE_PALETTE_STRING";
+        stringIdentifier[START_SDL_SURFACE_IS_DOUBLE_BUFFERED_STRING] = "START_SDL_SURFACE_IS_DOUBLE_BUFFERED_STRING";
+        stringIdentifier[START_SDL_SURFACE_HAS_OPENGL_CONTEXT_STRING] = "START_SDL_SURFACE_HAS_OPENGL_CONTEXT_STRING";
+        stringIdentifier[START_SDL_SURFACE_SUPPORTS_OPENGL_BLITTING_STRING] = "START_SDL_SURFACE_SUPPORTS_OPENGL_BLITTING_STRING";
+        stringIdentifier[START_SDL_SURFACE_IS_RESIZABLE_STRING] = "START_SDL_SURFACE_IS_RESIZABLE_STRING";
+        stringIdentifier[START_SDL_SURFACE_BLIT_USES_HARDWARE_ACCELERATION_STRING] = "START_SDL_SURFACE_BLIT_USES_HARDWARE_ACCELERATION_STRING";
+        stringIdentifier[START_SDL_SURFACE_USES_COLORKEY_BLITTING_STRING] = "START_SDL_SURFACE_USES_COLORKEY_BLITTING_STRING";
+        stringIdentifier[START_SDL_COLORKEY_BLITTING_RLE_ACCELERATED_STRING] = "START_SDL_COLORKEY_BLITTING_RLE_ACCELERATED_STRING";
+        stringIdentifier[START_SDL_BLIT_USES_ALPHA_BLENDING_STRING] = "START_SDL_BLIT_USES_ALPHA_BLENDING_STRING";
+	stringIdentifier[START_SDL_SURFACE_USES_PREALLOCATED_MEMORY_STRING] = "START_SDL_SURFACE_USES_PREALLOCATED_MEMORY_STRING";
+	stringIdentifier[START_SDL_SURFACE_NEEDS_LOCKING_STRING] = "START_SDL_SURFACE_NEEDS_LOCKING_STRING";
+
+
+
+	stringIdentifier[END_RESET_MOUSE_CURSOR_STRING] = "END_RESET_MOUSE_CURSOR_STRING";
+	stringIdentifier[END_FREEING_WINDOWS_STRING] = "END_FREEING_WINDOWS_STRING";
+	stringIdentifier[END_FREEING_GAMES_STRING] = "END_FREEING_GAMES_STRING";
+	stringIdentifier[END_FREEING_COLORS_BRUSHES_PENS_STRING] = "END_FREEING_COLORS_BRUSHES_PENS_STRING";
+	stringIdentifier[END_FREEING_BITMAPS_STRING] = "END_FREEING_BITMAPS_STRING";
+	stringIdentifier[END_FREEING_COORDINATES_STRING] = "END_FREEING_COORDINATES_STRING";
+	stringIdentifier[END_FREEING_BUTTONS_STRING] = "END_FREEING_BUTTONS_STRING";
+	stringIdentifier[END_FREEING_FONTS_STRING] = "END_FREEING_FONTS_STRING";
+	stringIdentifier[END_FREEING_SOUNDS_STRING] = "END_FREEING_SOUNDS_STRING";
+	stringIdentifier[END_CLOSING_SOUND_ENGINE_STRING] = "END_CLOSING_SOUND_ENGINE_STRING";
+	stringIdentifier[END_RELEASING_SOUND_ENGINE_STRING] = "END_RELEASING_SOUND_ENGINE_STRING";
+	stringIdentifier[END_CLOSING_SDL_STRING] = "END_CLOSING_SDL_STRING";
+
+	
 	stringIdentifier[CHANGED_BIT_DEPTH_STRING] = "CHANGED_BIT_DEPTH_STRING";
 	stringIdentifier[CHANGED_RESOLUTION_STRING] = "CHANGED_RESOLUTION_STRING";
 	stringIdentifier[INTRO_WINDOW_TITLE_STRING] = "INTRO_WINDOW_TITLE_STRING";
@@ -2333,6 +2297,7 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[REMOVED_ONE_GOAL_STRING] = "REMOVED_ONE_GOAL_STRING";
 	stringIdentifier[MOVED_NON_GOAL_STRING] = "MOVED_NON_GOAL_STRING";
 	stringIdentifier[SAVED_GOAL_STRING] = "SAVED_GOAL_STRING";
+	stringIdentifier[SAVED_BUILD_ORDER_STRING] = "SAVED_BUILD_ORDER_STRING";
 	stringIdentifier[COMPARE_GAME_STRING] = "COMPARE_GAME_STRING";
 	stringIdentifier[REMOVE_GAME_STRING] = "REMOVE_GAME_STRING";
 	stringIdentifier[HELP_WINDOW_INDEX_STRING] = "HELP_WINDOW_INDEX_STRING";
@@ -2381,6 +2346,12 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[RESET_BUILD_ORDER_STRING] = "RESET_BUILD_ORDER_STRING";
 	stringIdentifier[SAVE_BUILD_ORDER_STRING] = "SAVE_BUILD_ORDER_STRING";
 	stringIdentifier[LOAD_BUILD_ORDER_STRING] = "LOAD_BUILD_ORDER_STRING";
+
+	stringIdentifier[BOWINDOW_BUILD_TIME_STRING] = "BOWINDOW_BUILD_TIME_STRING";
+	stringIdentifier[BOWINDOW_MINERALS_STRING] = "BOWINDOW_MINERALS_STRING";
+	stringIdentifier[BOWINDOW_GAS_STRING] = "BOWINDOW_GAS_STRING";
+	stringIdentifier[BOWINDOW_EACH_TOTAL_STRING] = "BOWINDOW_EACH_TOTAL_STRING";
+		
 	stringIdentifier[SPEED_STRING] = "SPEED_STRING";
 	stringIdentifier[OF_GOALS_FULFILLED_STRING] = "OF_GOALS_FULFILLED_STRING";
 	stringIdentifier[OF_TIME_FULFILLED_STRING] = "OF_TIME_FULFILLED_STRING";
@@ -2438,6 +2409,7 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[SETTING_ALWAYS_BUILD_WORKERS_STRING] = "SETTING_ALWAYS_BUILD_WORKERS_STRING";
 	stringIdentifier[SETTING_ALLOW_WAIT_ORDERS_STRING] = "SETTING_ALLOW_WAIT_ORDERS_STRING";
 	stringIdentifier[SETTING_WAIT_ACCURACY_STRING] = "SETTING_WAIT_ACCURACY_STRING";
+	stringIdentifier[SETTING_GAME_SPEED_STRING] = "SETTING_GAME_SPEED_STRING";
 	stringIdentifier[SETTING_AUTO_RUNS_STRING] = "SETTING_AUTO_RUNS_STRING";
 	stringIdentifier[SETTING_MAX_GENERATIONS_STRING] = "SETTING_MAX_GENERATIONS_STRING";
 	stringIdentifier[SETTING_USE_MUSIC_STRING] = "SETTING_USE_MUSIC_STRING";
@@ -2450,6 +2422,7 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[SETTING_WAIT_AFTER_CHANGE_STRING] = "SETTING_WAIT_AFTER_CHANGE_STRING";
 	stringIdentifier[SETTING_TOOLTIPS_STRING] = "SETTING_TOOLTIPS_STRING";
 	stringIdentifier[SETTING_DNA_SPIRAL_STRING] = "SETTING_DNA_SPIRAL_STRING";
+	stringIdentifier[SETTING_RACE_SPECIFIC_THEME_STRING] = "SETTING_RACE_SPECIFIC_THEME_STRING";
 	stringIdentifier[SETTING_GLOWING_BUTTONS_STRING] = "SETTING_GLOWING_BUTTONS_STRING";
 	stringIdentifier[SETTING_COMPACT_DISPLAY_MODE_STRING] = "SETTING_COMPACT_DISPLAY_MODE_STRING";
 	stringIdentifier[SETTING_FACILITY_MODE_STRING] = "SETTING_FACILITY_MODE_STRING";
@@ -2468,6 +2441,7 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[SETTING_ALWAYS_BUILD_WORKERS_TOOLTIP_STRING] = "SETTING_ALWAYS_BUILD_WORKERS_TOOLTIP_STRING";
 	stringIdentifier[SETTING_ALLOW_WAIT_ORDERS_TOOLTIP_STRING] = "SETTING_ALLOW_WAIT_ORDERS_TOOLTIP_STRING";
 	stringIdentifier[SETTING_WAIT_ACCURACY_TOOLTIP_STRING] = "SETTING_WAIT_ACCURACY_TOOLTIP_STRING";
+	stringIdentifier[SETTING_GAME_SPEED_TOOLTIP_STRING] = "SETTING_GAME_SPEED_TOOLTIP_STRING";
 	stringIdentifier[SETTING_AUTO_RUNS_TOOLTIP_STRING] = "SETTING_AUTO_RUNS_TOOLTIP_STRING";
 	stringIdentifier[SETTING_MAX_GENERATIONS_TOOLTIP_STRING] = "SETTING_MAX_GENERATIONS_TOOLTIP_STRING";
 	stringIdentifier[SETTING_USE_MUSIC_TOOLTIP_STRING] = "SETTING_USE_MUSIC_TOOLTIP_STRING";
@@ -2480,6 +2454,7 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[SETTING_WAIT_AFTER_CHANGE_TOOLTIP_STRING] = "SETTING_WAIT_AFTER_CHANGE_TOOLTIP_STRING";
 	stringIdentifier[SETTING_TOOLTIPS_TOOLTIP_STRING] = "SETTING_TOOLTIPS_TOOLTIP_STRING";
 	stringIdentifier[SETTING_DNA_SPIRAL_TOOLTIP_STRING] = "SETTING_DNA_SPIRAL_TOOLTIP_STRING";
+	stringIdentifier[SETTING_RACE_SPECIFIC_THEME_TOOLTIP_STRING] = "SETTING_RACE_SPECIFIC_THEME_TOOLTIP_STRING";
 	stringIdentifier[SETTING_GLOWING_BUTTONS_TOOLTIP_STRING] = "SETTING_GLOWING_BUTTONS_TOOLTIP_STRING";
 	stringIdentifier[SETTING_COMPACT_DISPLAY_MODE_TOOLTIP_STRING] = "SETTING_COMPACT_DISPLAY_MODE_TOOLTIP_STRING";
 	stringIdentifier[SETTING_FACILITY_MODE_TOOLTIP_STRING] = "SETTING_FACILITY_MODE_TOOLTIP_STRING";
@@ -2490,6 +2465,15 @@ void UI_Theme::initStringIdentifier()
 	stringIdentifier[SETTING_DESIRED_CPU_USAGE_TOOLTIP_STRING] = "SETTING_DESIRED_CPU_USAGE_TOOLTIP_STRING";
 	
 	stringIdentifier[SETTINGS_SAVED_STRING] = "SETTINGS_SAVED_STRING";
+	
+	stringIdentifier[GAME_SPEED_SLOWEST_STRING] = "GAME_SPEED_SLOWEST_STRING";
+	stringIdentifier[GAME_SPEED_SLOWER_STRING] = "GAME_SPEED_SLOWER_STRING";
+	stringIdentifier[GAME_SPEED_SLOW_STRING] = "GAME_SPEED_SLOW_STRING";
+	stringIdentifier[GAME_SPEED_NORMAL_STRING] = "GAME_SPEED_NORMAL_STRING";
+	stringIdentifier[GAME_SPEED_FAST_STRING] = "GAME_SPEED_FAST_STRING";
+	stringIdentifier[GAME_SPEED_FASTER_STRING] = "GAME_SPEED_FASTER_STRING";
+	stringIdentifier[GAME_SPEED_FASTEST_STRING] = "GAME_SPEED_FASTEST_STRING";
+	
 	stringIdentifier[LANGUAGE_HAS_CHANGED_STRING] = "LANGUAGE_HAS_CHANGED_STRING";
 	stringIdentifier[SETTING_LANGUAGE_STRING] = "SETTING_LANGUAGE_STRING";
 	stringIdentifier[SETTING_ZERO_LANGUAGE_STRING] = "SETTING_ZERO_LANGUAGE_STRING";

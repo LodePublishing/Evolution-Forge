@@ -7,8 +7,9 @@
 class GoalMenu : public UI_Menu
 {
 	public:
-		GoalMenu(UI_Object* goal_parent, const Rect goal_rect, const Size distance_bottom_right, const ePositionMode position_mode);
+		GoalMenu(UI_Object* goal_parent, const Rect& goal_rect, const Size distance_bottom_right, const ePositionMode position_mode);
 		~GoalMenu();
+		
 		void process();
 		void draw(DC* dc) const;
 		void resetData();

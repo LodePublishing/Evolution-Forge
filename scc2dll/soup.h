@@ -4,7 +4,7 @@
 #include "anarace.h"
 #include "race.h"
 #include "goal.h"
-#include "map.h"
+#include "basicmap.h"
 #include "ga.h"
 #include "start.h"
 
@@ -15,20 +15,29 @@ class EXPORT SOUP
 private:
 	RACE* player[MAX_PROGRAMS];
 	START* start;
-	MAP* pMap;
-	int run_number,goalsInitialized,playerInitialized,mapInitialized,goalCount,gaInitialized,newcalc;
+
+	// --- cache ----
+	const BASIC_MAP** pMap; //-> start->currentMap(), simplifies changes in start
+
+	
+	int run_number, goalCount;
+	bool goalsInitialized; //?
+	bool playerInitialized; //?
+	bool newcalc;
+	bool gaInitialized;
 	GOAL_ENTRY* goal[MAX_PLAYER];
 	GA* ga;
 	ANARACE* anaplayer[MAX_PLAYER];
 	ANARACE* Save[MAX_RUNS][MAX_PLAYER];
 public:
-	void initializeMap(MAP* map);
-	void calculateAnaplayer();
-	void setGoal(GOAL_ENTRY* goal, int player);
+//	void initializeMap(const BASIC_MAP* map); //~~~
+	void calculateAnaplayer() const;
+	void setGoal(GOAL_ENTRY* goal, const int player);
 	//int setMap(MAP* map);
-	void checkForChange(); // manually update changes (when the engine is not optimizing for example)
+	void checkForChange() const; // manually update changes (when the engine is not optimizing for example)
+	// TODO evtl ueber Rueckgabewert
 // initializes the soup (primarily it does some error checking whether all is initialized and allocates the memory for the players
-	int initSoup();
+	void initSoup();
 //one generation, copies stats and results of best individual and average values of the soup in 'best'
 	ANARACE** newGeneration(ANARACE* oldAnarace[MAX_PLAYER]); 
 
@@ -36,7 +45,7 @@ public:
 	~SOUP();
 
 // internal function (called by settings)
-	int setParameters(GA* ga, START* start);
+	void setParameters(GA* ga, START* start);
 };
 
 #endif

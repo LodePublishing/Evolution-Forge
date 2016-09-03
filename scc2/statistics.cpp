@@ -289,7 +289,7 @@ void StatisticsWindow::draw(DC* dc)
 //      showGraph(dc,tFitness,mintFitness,maxtFitness,Color(255,40,255));
 	showGraph(dc,harvestedMins,0,maxHarvestedRessources,*theme.lookUpColor(MINERALS_TEXT_COLOUR));
 	showGraph(dc,harvestedGas,0,maxHarvestedRessources,*theme.lookUpColor(GAS_TEXT_COLOUR));
-	showGraph(dc,force,0,maxForce/*anarace->getTotalUnitForce()*/,*theme.lookUpColor(STATISTICS_FORCE_TEXT_COLOUR));
+	showGraph(dc,force,0,maxForce/*anarace->getUnitsTotal()*/,*theme.lookUpColor(STATISTICS_FORCE_TEXT_COLOUR));
 	showGraph(dc,length,0,MAX_LENGTH,*theme.lookUpColor(BOLENGTH_TEXT_COLOUR));
 	showGraph(dc,time,0,anarace->ga->maxTime,*theme.lookUpColor(TIME_TEXT_COLOUR));
 	showGraph(dc,aFitness,0,maxaFitness,*theme.lookUpColor(FITNESS_AVERAGE_TEXT_COLOUR));
@@ -323,7 +323,7 @@ void StatisticsWindow::process()
 	vFitness[199]=(int)sqrt((double)anarace->fitnessVariance);
 	length[199]=anarace->getLength();
 	time[199]=(anarace->ga->maxTime-15);//anarace->getTimer());
-	force[199]=anarace->getTotalUnitForce();
+	force[199]=anarace->getUnitsTotal();
 
 	maxpFitness=0;
 	maxsFitness=0;

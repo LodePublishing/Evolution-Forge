@@ -172,8 +172,8 @@ void BoGraphWindow::draw(DC* dc)
 	{
 		int IP=order->second.IP;
 // falls facility benoetigt wird und Zahl der zu dem Zeitpunkt vorhandenen Einheiten minus der verfuegbaren Einheiten > hoehe => setze hoehe auf diesen Wert
-		if(anarace->getProgramFacility(IP)&&(anarace->getProgramForceCount(IP,anarace->getProgramFacility(IP))-anarace->getProgramAvailibleCount(IP,anarace->getProgramFacility(IP))>height[anarace->getProgramFacility(IP)]))
-			 height[anarace->getProgramFacility(IP)]=anarace->getProgramForceCount(IP,anarace->getProgramFacility(IP))-anarace->getProgramAvailibleCount(IP,anarace->getProgramFacility(IP));
+		if(anarace->getProgramFacility(IP)&&(anarace->getProgramTotalCount(IP,anarace->getProgramFacility(IP))-anarace->getProgramAvailibleCount(IP,anarace->getProgramFacility(IP))>height[anarace->getProgramFacility(IP)]))
+			 height[anarace->getProgramFacility(IP)]=anarace->getProgramTotalCount(IP,anarace->getProgramFacility(IP))-anarace->getProgramAvailibleCount(IP,anarace->getProgramFacility(IP));
 	}
 																			    
 //calculate number of lines per facility and adjust the height

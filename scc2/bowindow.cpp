@@ -222,7 +222,7 @@ void BoWindow::draw(DC* dc)
 					if(edge.width>=110)
 					{
 						ostringstream os;
-						os << tempForceCount[anarace->getPhaenoCode(order->second.IP)]+anarace->getProgramForceCount(order->second.IP, anarace->getPhaenoCode(order->second.IP))+1 << ".";
+						os << tempForceCount[anarace->getPhaenoCode(order->second.IP)]+anarace->getProgramTotalCount(order->second.IP, anarace->getPhaenoCode(order->second.IP))+1 << ".";
 						os <<  stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->second.IP)].name;
 //						dc->DrawText(os.str(),edge.GetPosition()+Point(5,0));os.str("");
 //						dc->DrawText(stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->second.IP)].name,edge.GetPosition()+Point(20,0));

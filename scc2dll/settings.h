@@ -5,9 +5,8 @@
 #include "main.h"
 #include "goal.h"	
 #include "harvest.h"
-#include "map.h"
+#include "basicmap.h"
 #include "ga.h"
-#include "default.h"
 
 #define MELEE 0
 #define USE_MAP_SETTINGS 1 
@@ -18,96 +17,98 @@ class EXPORT SETTINGS
 {
 private:
 	GOAL_ENTRY loadedGoal[MAX_GOAL_ENTRIES];
-	MAP loadedMap[MAX_MAPS]; //modes: 0: ignore map settings and make up a default force, 1: use map settings
-	HARVEST_SPEED harvestSpeed[3];
+	START_CONDITION loadedStartcondition[MAX_START_CONDITIONS];
+	BASIC_MAP loadedMap[MAX_MAPS]; //modes: 0: ignore map settings and make up a default force, 1: use map settings
+	HARVEST_SPEED harvestSpeed[MAX_RACES];
 	GA ga;
 	SOUP soup;
-	DEFAULT defaults;
+//	DEFAULT defaults; //?
 	START start;
-	void setMapCount(int num);
-	void setGoalCount(int num);
+	
+	void setMapCount(const int mapCount);
+	void setStartconditionCount(const int startconditionCount);
+	void setGoalCount(const int goalCount);
 	int currentMap;
-	int UMS;
 public:
 	void calculateAnaplayer();
-	void initializeMap();
-	MAP* getMap(int num);
+//	void initializeMap();
+	const BASIC_MAP* getMap(const int mapNumber) const;
 
-	void setMap(int UMS, int num=-1/*, int playerMode=0*/); // evtl noch player dazu
+	void setMap(const int mapNumber);
 	// 0 = 1vs1, 1 = ... ma guggn...
 
-	int getUMS();
-	void adjustGoals(int player);
+//	void adjustGoals(const int player);
 
-	void checkForChange();
-	void setStartRace(int player, int race);
+	void checkForChange() const;
+//	void setStartRace(const int player, const eRace race);
 //all those nasty range checking stuff :-)
-	int getMAXBreedFactor();
-	int getMAXMode();
-	int getMAXCrossOver();
-	int getMAXMaxTime();
-	int getMAXMaxTimeOut();
-	int getMAXMaxLength();
-	int getMAXMaxRuns();
-	int getMAXMaxGenerations();
-	int getMAXPreprocessBuildOrder();
-	int getMAXCurrentMap();
+	const int getMAXBreedFactor() const;
+	const int getMAXMode() const;
+	const int getMAXCrossOver() const;
+	const int getMAXMaxTime() const;
+	const int getMAXMaxTimeOut() const;
+	const int getMAXMaxLength() const;
+	const int getMAXMaxRuns() const;
+	const int getMAXMaxGenerations() const;
+	const int getMAXCurrentMap() const;
 
-	int getMINBreedFactor();
-	int getMINMode();
-	int getMINCrossOver();
-	int getMINMaxTime();
-	int getMINMaxTimeOut();
-	int getMINMaxLength();
-	int getMINMaxRuns();
-	int getMINMaxGenerations();
-	int getMINPreprocessBuildOrder();
-	int getMINCurrentMap();
+	const int getMINBreedFactor() const;
+	const int getMINMode() const;
+	const int getMINCrossOver() const;
+	const int getMINMaxTime() const;
+	const int getMINMaxTimeOut() const;
+	const int getMINMaxLength() const;
+	const int getMINMaxRuns() const;
+	const int getMINMaxGenerations() const;
+	const int getMINCurrentMap() const;
 
-	void setMaxTime(int num); //sets max Time in minutes
-	void setMaxTimeOut(int num); //
-	void setAllowGoalAdaption(int num);
-	void setMaxLength(int num);
-	void setMaxRuns(int num);
-	void setMaxGenerations(int num);
-	void setPreprocessBuildOrder(int num);
+	void setMaxTime(const int maxTime); //sets max Time in minutes
+	void setMaxTimeOut(const int maxTimeOut); //
+	void setAllowGoalAdaption(const bool allowGoalAdaption=true);
+	void setMaxLength(const int maxLength);
+	void setMaxRuns(const int maxRuns);
+	void setMaxGenerations(const int maxGenerations);
+	void setPreprocessBuildOrder(const bool preprocess);
 //	void setCurrentMap(int num);
-	void setGoal(int goal, int player);
-	void setBreedFactor(int num);
-	void setMode(int num);
-	void setCrossOver(int num);
+	void setGoal(const int goal, const int player);
+	void setBreedFactor(const int breedFactor);
+	void setMode(const int mode);
+	void setCrossOver(const int crossOver);
 
-	int getBreedFactor();
-	int getMode();
-	int getCrossOver();
-	int getMaxTime();
-	int getMaxTimeOut();
-	int getMaxLength();
-	int getMaxRuns();
-	int getMaxGenerations();
-	int getPreprocessBuildOrder();
+	const int getBreedFactor() const;
+	const int getMode() const;
+	const int getCrossOver() const;
+	const int getMaxTime() const;
+	const int getMaxTimeOut() const;
+	const int getMaxLength() const;
+	const int getMaxRuns() const;
+	const int getMaxGenerations() const;
+	const bool getPreprocessBuildOrder() const;
 //	int getCurrentMap();
-	int getCurrentGoal();
-	int getHarvestMineralsSpeed(int race, int workers); // get basic mineral harvest speed of <race> with <workers> workers
-	int getHarvestGasSpeed(int race, int workers); // get basic mineral harvest speed of <race> with <workers> workers
+	const int getCurrentGoal() const;
+	const int getHarvestMineralsSpeed(const eRace race, const int workers) const; // get basic mineral harvest speed of <race> with <workers> workers
+	const int getHarvestGasSpeed(const eRace race, const int workers) const; // get basic mineral harvest speed of <race> with <workers> workers
 //	int getDistance(int l1,int l2); // get distance between location 1 and 2
-	GA* getGa();
-	int getGoalCount();
-	int getMapCount();
-	GOAL_ENTRY* getGoal(int num);
+	const GA* getGa() const;
+	const int getGoalCount() const;
+	const int getMapCount() const;
+	const int getForceCount() const;
+	const int getStartconditionCount() const;
+	
+	const GOAL_ENTRY* getGoal(const int goalNumber) const;
 
-	void initDefaults();
+	void initDefaults(); 
 
-	void loadDefaultsFile(string& defaultFile);
-	void loadGoalFile(string& goalFile);
-	void loadSettingsFile(string& settingsFile);
-	void loadMapFile(string& mapFile);
-	void loadHarvestFile(string& harvestFile);
+	void loadStartconditionFile(const string& startconditionFile);
+	void loadGoalFile(const string& goalFile);
+	void loadSettingsFile(const string& settingsFile);
+	void loadMapFile(const string& mapFile);
+	void loadHarvestFile(const string& harvestFile);
 // todo evtl error codes...
 	
 	ANARACE** newGeneration(ANARACE* oldAnarace[MAX_PLAYER]);
 
-	int initSoup();
+	void initSoup(); //?
 
 	SETTINGS();
 	~SETTINGS();

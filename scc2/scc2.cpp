@@ -2,7 +2,6 @@
 #include "scc2.h"
 #include "../scc2dll/race.h"
 #include "../scc2dll/anarace.h"
-#include "../scc2dll/default.h"
 #include <math.h>
 #include "UI_Object.h"
 #include "SDL/SDL.h"
@@ -342,7 +341,7 @@ void Main::startOptimizing()
 				player[i]->setOptimizing(true);
 };
 
-int Main::isOptimizing()
+const int Main::isOptimizing()
 {
 	for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
  		   if(player[i]->isOptimizing())
@@ -350,12 +349,9 @@ int Main::isOptimizing()
 	return(0);
 };
 
-void Main::drawGizmo(DC* dc)
+void Main::drawGizmo(DC* dc) const
 {
 	dc->SetFont(UI_Object::theme.lookUpFont(HUGE_DEFAULT_BOLD_FONT));
-	if(isOptimizing()) ani++;
-	else ani=1;
-	if(ani>30) ani=1;
 	int dx=0;int dy=0;
 	dc->SetTextForeground(toSDL_Color((0==ani%20)*200+((0==ani%19)+(0==ani%21))*50,(0==ani%20)*200+((0==ani%19)+(0==ani%21))*50,(0==ani%20)*200+((0==ani%19)+(0==ani%21))*100+50));
 	dc->DrawText("E",mainWindow->getAbsoluteClientRectPosition()+Point(10,5));
@@ -419,6 +415,10 @@ void Main::OnPaint(DC* dc)
 //	animationNumbers++;
 //	if(animationNumbers>150)
 //		animationNumbers=1;
+
+	if(isOptimizing()) ani++;
+	else ani=1;
+	if(ani>30) ani=1;
 
 	process();
 
@@ -518,27 +518,22 @@ void Main::OnIdle()
 
 void Main::Init(DC* dc)
 {
-	UI_Object::theme.loadDataFiles(dc);
-		
+	UI_Object::theme.loadDataFiles("settings/ui/default.ui","data/bitmaps","data/fonts",dc);
 // Always do loadHarvestFile (mining speeds) before loadMapFile, because at the moment the mapfile also sets the gathering speed
-	settings.loadHarvestFile("mining.txt");
-	settings.loadSettingsFile("settings.txt");
-	settings.loadMapFile("LostTemple");
-	settings.loadDefaultsFile("default.map");
-
-	settings.loadGoalFile("goal.txt");
-	settings.loadGoalFile("goal2.txt");
-	settings.loadGoalFile("goal3.txt");
+	settings.loadHarvestFile("settings/harvest/default.hvt");
+	settings.loadSettingsFile("settings/default.cfg");
+	settings.loadMapFile("settings/maps/lt42");
+	settings.loadStartconditionFile("settings/start/default_terra.start");
+	settings.loadStartconditionFile("settings/start/default_protoss.start");
+	settings.loadStartconditionFile("settings/start/default_zerg.start");
+	settings.loadGoalFile("settings/goals/protoss.gol");
 // goal beschreibt Rasse, Ziele und Modus
-
 	
 // Map in "map.txt" is now map[0]
-//	settings.loadMapFile("LostTemple",USE_MAP_SETTINGS);
-//	settings.loadMapFile("LostTemple",TOP_VS_BOTTOM);
 // choose the first map we loaded (map[0])
+	settings.setMap(0); // first map (lt) and ums = false
 	settings.initSoup(); // assign START of settings
 	// initializes players, initializes Map
-	settings.setMap(0, 0); // first map (lt) and ums = false
 	
 //	for(int i=1;i<settings.getMap(0)->getMaxPlayer();i++)
 //		settings.setGoal(0, i);

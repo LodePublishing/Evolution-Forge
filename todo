@@ -149,4 +149,6 @@ durch bauen von gas scv gewinnt man 1 supply!!
 -evtl wieder Zusammenfassung der Buildorder (4 zealots anstatt zeal zeal zeal zeal)
 - Memo an GNU GCC - optionale Warnung falls Rueckgabewert einer Funktion nicht ausgewertet wird
 
+Groesseres Problem sind nach wie vor die goals, vor allem die Ortsangaben fuer die Einheiten, ist ja je nach Map verschieden!
+
 

@@ -21,7 +21,7 @@ struct PROGRAM
 	int location;		// at which location was this unit built
 	int successType;	// type of error
 	int successUnit;	// unit number
-	int isGoal;			// is this unit part of the goal list? DOES NOT WORK YET :)
+//	int isGoal;			// is this unit part of the goal list? DOES NOT WORK YET :)
 	int forceCount[UNIT_TYPE_COUNT];
 	int availibleCount[UNIT_TYPE_COUNT];
 	int facility; 	// where it was produced
@@ -33,15 +33,15 @@ struct PROGRAM
 EXPORT class ANARACE: public PRERACE
 {
 	private:
-		int totalUnitForce; // total number of all unit types at the end
-		int maxUnitForce; // maximum number of one unit type at the end
-		void countForce(); // to set maxUnitForce and totalUnitForce
+		int unitsTotal; // total number of all unit types at the end
+		int unitsTotalMax; // maximum number of one unit type at the end
+		void countUnitsTotal(); // to set maxUnitForce and totalUnitForce
 		
-		int buildGene(int unit);
+		const int buildGene(const int unit);
 		int unchangedGenerations;
 		int currentRun;
-		int optimizing;
-		int active;
+		bool optimizing;
+		bool active;
 		int generation;
 		int maxpFitness;
 		int maxsFitness;
@@ -51,32 +51,32 @@ EXPORT class ANARACE: public PRERACE
 		static int successType; //type of error
 		static int successUnit; //unit number
 		static MAP_LOCATION backupLoc[MAX_PLAYER][MAX_LOCATIONS];
-		int needTime(int unit);
-		int maximum(int unit);
+		const int needTime(const int unit) const;
+		const int maximum(const int unit) const;
 		int timePercentage;
 		int goalPercentage;
 		void setCurrentpFitness(int num);
 		int currentpFitness;
 		int phaenoCode[MAX_LENGTH];		// the final build order: an array of unit numbers (as defined in main.h)
 	public:
-		int getMaxUnitForce();
-		int getTotalUnitForce();
+		const int getUnitsTotalMax() const;
+		const int getUnitsTotal() const;
 		
-		int getPhaenoCode(int IP);
-		void setPhaenoCode(int IP, int num);		
+		const int getPhaenoCode(const int IP) const;
+		void setPhaenoCode(const int IP, const int num);		
 
-		int getCurrentpFitness();		
+		const int getCurrentpFitness() const;		
 
-		bool isOptimizing();
-		void setOptimizing(bool optimizing=true);
+		const bool isOptimizing() const;
+		void setOptimizing(const bool optimizing=true);
 
-		bool isActive();
-		void setActive(bool active=true);
+		const bool isActive() const;
+		void setActive(const bool active=true);
 
 		int fitnessCode[MAX_GOALS];
 
-		int backupMap();
-		int restoreMap();		
+//		int backupMap();
+//		int restoreMap();		
 
 		int fitnessAverage;
        		int fitnessVariance;
@@ -85,80 +85,79 @@ EXPORT class ANARACE: public PRERACE
 		int negativeCrossover;
 // external data output
 
-		int getMarker(int IP);
+		const int getMarker(const int IP) const;
 
 
 //		int getProgramIsConstant(int IP);
 
-		int getTimePercentage();
-		int getGoalPercentage();
-		int getProgramCode(int IP);
-		int getProgramSuccessType(int IP);	// determines the type of the last error before the item was built at that IP
-		int getProgramSuccessUnit(int IP);	// what unit was missing? (connected to successtype)
+		const int getTimePercentage() const;
+		const int getGoalPercentage() const;
+		const int getProgramCode(const int IP) const;
+		const int getProgramSuccessType(const int IP) const;	// determines the type of the last error before the item was built at that IP
+		const int getProgramSuccessUnit(const int IP) const;	// what unit was missing? (connected to successtype)
 		
-		int getStatisticsNeedSupply(int time);	// supply that is used up by all units
-		int getStatisticsHaveSupply(int time);	// total supply of supply buildings (overlord, supply depot, command center, ...)
-		int getStatisticsFitness(int time);
-		int getStatisticsHaveMinerals(int time); // minerals at that time
-		int getStatisticsHaveGas(int time);		// gas at that time
+		const int getStatisticsNeedSupply(const int time) const;	// supply that is used up by all units
+		const int getStatisticsHaveSupply(const int time) const;	// total supply of supply buildings (overlord, supply depot, command center, ...)
+		const int getStatisticsFitness(const int time) const;
+		const int getStatisticsHaveMinerals(const int time) const; // minerals at that time
+		const int getStatisticsHaveGas(const int time) const;		// gas at that time
 
-		int getProgramIsBuilt(int IP);		// was this order successfully built?
-		int getProgramIsBuilt2(int IP); //hack wegen exe o_O TODO
+		const bool getProgramIsBuilt(const int IP) const;		// was this order successfully built?
+		const bool getProgramIsBuilt2(const int IP) const; //hack wegen exe o_O TODO
 
-		int getProgramTime(int IP);			// at which time this order was started
-		int getProgramLocation(int IP);		// at which location was this unit built
-		int getProgramTemp(int IP);			// unused
-		int getProgramIsGoal(int IP);		// is this unit part of the goal list? NOT YET WORKING!
-		int getProgramForceCount(int IP, int unit);	// how many units of the type at phaenoCode[s] do exist at that time?
-                int getProgramAvailibleCount(int IP, int unit);     // how many units of the type at phaenoCode[s] do exist at that time?
+		const int getProgramTime(const int IP) const;			// at which time this order was started
+		const int getProgramLocation(const int IP) const;		// at which location was this unit built
+		const int getProgramTemp(const int IP) const;			// unused
+//		const bool getProgramIsGoal(const int IP) const;		// is this unit part of the goal list? NOT YET WORKING!
+		const int getProgramTotalCount(const int IP, const int unit) const;	// how many units of the type at phaenoCode[s] do exist at that time?
+		const int getProgramAvailibleCount(const int IP, const int unit) const;     // how many units of the type at phaenoCode[s] do exist at that time?
 
-		int getProgramFacility(int IP);
-		int getProgramBT(int IP);
+		const int getProgramFacility(const int IP) const;
+		const int getProgramBT(const int IP) const;
 
-		int getUnchangedGenerations();	// gets number of generations where no change in fitness took place
-		int getRun();					// gets number of runs (one run is complete when no <unchangedGenerations> > <maxGenerations>)
-		int getGeneration();			// gets number of total generations of this run
-		int getMaxpFitness();			// gets primary fitness (goal and time)
-		int getMaxsFitness();			// gets secondary fitness (ressources)
-		int getMaxtFitness();			// gets tertiary fitness (build order appearance, some heuristics)
+		const int getUnchangedGenerations() const;	// gets number of generations where no change in fitness took place
+		const int getRun() const;					// gets number of runs (one run is complete when no <unchangedGenerations> > <maxGenerations>)
+		const int getGeneration() const;			// gets number of total generations of this run
+		const int getMaxpFitness() const;			// gets primary fitness (goal and time)
+		const int getMaxsFitness() const;			// gets secondary fitness (ressources)
+		const int getMaxtFitness() const;			// gets tertiary fitness (build order appearance, some heuristics)
 
-		void insertOrder(int unit, int position);
-		void removeOrder(int IP);
+//		void insertOrder(int unit, int position);
+//		void removeOrder(int IP);
 
 
 // internal control structures, do not touch ;-)
-		int setUnchangedGenerations(int num); 
-		int setRun(int run);
-		int setGeneration(int num);
-		int setMaxpFitness(int num);
-		int setMaxsFitness(int num);
-		int setMaxtFitness(int num);
+		void setUnchangedGenerations(const int num); 
+		void setRun(const int run);
+		void setGeneration(const int num);
+		void setMaxpFitness(const int num);
+		void setMaxsFitness(const int num);
+		void setMaxtFitness(const int num);
 
-		int setStatisticsNeedSupply(int time, int supply);
-		int setStatisticsHaveSupply(int time, int supply);
-		int setStatisticsFitness(int time,int fitness);
-		int setStatisticsHaveMinerals(int time, int mins);
-		int setStatisticsHaveGas(int time, int gas);
+		void setStatisticsNeedSupply(const int time, const int supply);
+		void setStatisticsHaveSupply(const int time, const int supply);
+		void setStatisticsFitness(const int time, const int fitness);
+		void setStatisticsHaveMinerals(const int time, const int mins);
+		void setStatisticsHaveGas(const int time, const int gas);
 	
 
-//		int setProgramIsConstant(int IP, int num);
-		int setProgramFacility(int IP, int num);
-		int setProgramBT(int IP, int num);
-		int setProgramSuccessType(int IP, int num);
-		int setProgramSuccessUnit(int IP, int num);
-		int setProgramIsBuilt(int IP, int num);
-		int setProgramLocation(int IP, int location);
-		int setProgramTime(int IP, int time);
-		int setProgramIsGoal(int IP, int num);	
-		int setProgramForceCount(int IP, int unit, int count);	
-                int setProgramAvailibleCount(int IP, int unit, int count);
+//		void setProgramIsConstant(const int IP, const int num);
+		void setProgramFacility(const int IP, const int num);
+		void setProgramBT(const int IP, const int num);
+		void setProgramSuccessType(const int IP, const int num);
+		void setProgramSuccessUnit(const int IP, const int num);
+		void setProgramIsBuilt(const int IP, const bool isBuilt);
+		void setProgramLocation(const int IP, const int location);
+		void setProgramTime(const int IP, const int time);
+//		void setProgramIsGoal(const int IP, const bool isGoal);	
+		void setProgramTotalCount(const int IP, const int unit, const int count);	
+		void setProgramAvailibleCount(const int IP, const int unit, const int count);
 
 
-		int calculateStep();			// calculates another time step of current generation
+		const int calculateStep();			// calculates another time step of current generation
 //		int calculateFitness();
 		void resetData();				// resets all data to standard values
-		void analyzeBuildOrder();		// sets the isGoal of program
-
+//		void analyzeBuildOrder();		// sets the isGoal of program
 // Constructor
 		ANARACE();
 		~ANARACE();

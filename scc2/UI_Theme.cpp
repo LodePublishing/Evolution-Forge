@@ -518,7 +518,7 @@ eArrangeDirection parse_complete_command(const string* p, eCommand* e, Rect& rec
 	return(direction);
 };
 
-void UI_Theme::loadDataFiles(DC* dc)
+void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, const string& fontDir, DC* dc)
 {
 	const int MAX_PARAMETERS = 50;
 	char line[1024], old[1024];
@@ -550,8 +550,6 @@ void UI_Theme::loadDataFiles(DC* dc)
 
 	int current_line = 0;
 	
-	string dataFile("data.txt"); //TODO
-
  	for(int i=MAX_PARAMETERS;i--;)
 	{
 		p[i]="";
@@ -562,7 +560,7 @@ void UI_Theme::loadDataFiles(DC* dc)
 	
 	if(!pFile.is_open())
     {
-        debug.toLog(0,"ERROR: (UI_Theme::loadDataFiles) %s: Could not open file!",dataFile.c_str());
+        toLog("ERROR: (UI_Theme::loadDataFiles) Could not open file!");
         return;
     }
 	
@@ -570,7 +568,7 @@ void UI_Theme::loadDataFiles(DC* dc)
     {
 		if(pFile.fail())
 		{
-	        debug.toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Long line!",dataFile.c_str());
+	        toLog("WARNING: (UI_Theme::loadDataFiles) Long line!");
 			pFile.clear(pFile.rdstate() & ~ios::failbit);
 		};
 			
@@ -603,7 +601,7 @@ void UI_Theme::loadDataFiles(DC* dc)
 		};
         if((buffer=strtok(NULL,",\0"))!=NULL)
         {
-            debug.toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Line %d [%s]: Too many parameters.",dataFile.c_str(),ln,old);
+            toLog("WARNING: (UI_Theme::loadDataFiles) Too many parameters.");
             continue;
         }
 		for(int j=0;j<MAX_PARAMETERS;j++)
@@ -622,9 +620,9 @@ void UI_Theme::loadDataFiles(DC* dc)
 			if(mode==ZERO_DATA_TYPE)
             {
                 if(p[0]=="@END")
-                    debug.toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Line %d [%s]: Lonely @END.",dataFile.c_str(),ln,old);
+                    toLog("WARNING: (UI_Theme::loadDataFiles) Lonely @END.");
                 else
-                    debug.toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Line %d [%s]: Line is outside a block but is not marked as comment.",dataFile.c_str(),ln,old);
+                    toLog("WARNING: (UI_Theme::loadDataFiles) Line is outside a block but is not marked as comment.");
             }
 			sub_mode=getSubDataType(mode);
 			sub_sub_mode=getSubSubDataType(mode);
@@ -730,12 +728,12 @@ void UI_Theme::loadDataFiles(DC* dc)
 				{
 			        case FONT_DATA_TYPE:
 						{
-                            string t="fonts/"+p[1]+".ttf";
+                            string t=fontDir+"/"+p[1]+".ttf";
 							fontList[current_resolution][current_language][current_line]=new Font(t, v[2]/*, get_font_style1(p[2]), get_font_style2(p[3]), get_font_style3(p[4]), false, _T(""), FONTENCODING_DEFAULT*/);
 						};break;
 			        case BITMAP_DATA_TYPE:
 						{
-							string t="bitmaps/"+p[1]+".bmp";
+							string t=bitmapDir+"/"+p[1]+".bmp";
 							bitmapList[current_resolution][current_theme][current_line]=new Bitmap(t);
 						};break;
 			        case PEN_DATA_TYPE:penList[current_resolution][current_theme][current_line]=new Pen(dc->GetSurface(),v[2],v[3],v[4],v[1],get_pen_style(p[5]));break;
@@ -791,7 +789,7 @@ while(change)
 								rectList[i][j][k]->SetTop(10+rectList[i][j][trectList[i][j][k][l+1]]->GetTop());l++;break;
 				            case DOCK_BOTTOM_INSIDE_OF_COMMAND:
 								rectList[i][j][k]->SetTop(-30+rectList[i][j][trectList[i][j][k][l+1]]->GetTop()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight()-rectList[i][j][k]->GetHeight());l++;break;
-							default:debug.toLog(0,"error... same as above oder so");break; // TODO ERROR
+							default:toLog("error... same as above oder so");break; // TODO ERROR
 						}
 					if((rectList[i][j][k]->GetLeft()!=oldx)||(rectList[i][j][k]->GetTop()!=oldy))
 					{
@@ -845,7 +843,7 @@ while(change)
 									maxRectList[i][j][k]->SetPosition(rectList[i][j][k]->GetPosition());
 									maxRectList[i][j][k]->SetSize(rectList[i][j][k]->GetSize());
 								};break;
-                            default:debug.toLog(0,"max error... same as above oder so");break; // TODO ERROR
+                            default:toLog("max error... same as above oder so");break; // TODO ERROR
                         }
                     if((maxRectList[i][j][k]->GetLeft()!=oldx)||(maxRectList[i][j][k]->GetTop()!=oldy))
                         change=1;

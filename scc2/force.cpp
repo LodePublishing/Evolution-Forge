@@ -79,7 +79,7 @@ int ForceWindow::getMarkedUnit()
 void ForceWindow::process()
 {
 	UI_Window::process();
-	if(radio->hasChanged())
+/*	if(radio->hasChanged())
 	{
             switch (radio->getMarked())
             {
@@ -102,7 +102,7 @@ void ForceWindow::process()
                   settings.setMap(MELEE);
               };break;
             }
-	}
+	}*/ // race darf nur indirekt geaendert werden!
 
 	if(getChangedFlag())
         resetData();
@@ -121,30 +121,30 @@ void ForceWindow::process()
 		{
 			Rect edge = Rect(getRelativeClientRectPosition() + Point(0, line*(FONT_SIZE+6)), Size(getClientRectWidth(), FONT_SIZE+5));
 
-	//		if (oldForceList[i] < anarace->getLocationForce(0, i) * 100 / anarace->getMaxUnitForce())
-	//			oldForceList[i] += (anarace->getLocationForce(0, i) * 100 / anarace->getMaxUnitForce() - oldForceList[i]) / 5 + 1;
-	//		else if (oldForceList[i] > anarace->getLocationForce(0, i) * 100 / anarace->getMaxUnitForce())
-	//			oldForceList[i] -= (oldForceList[i] - anarace->getLocationForce(0, i) * 100 / anarace->getMaxUnitForce()) / 5 + 1;
+	//		if (oldForceList[i] < anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax())
+	//			oldForceList[i] += (anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax() - oldForceList[i]) / 5 + 1;
+	//		else if (oldForceList[i] > anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax())
+	//			oldForceList[i] -= (oldForceList[i] - anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax()) / 5 + 1;
 			if (fitItemToRelativeClientRect(edge, 1)) //clientRect veraendert sich net ;/
 			{
 				forceEntry[i]->Show();
 				if (forceEntry[i]->isCurrentlyHighlighted())
 					markedUnit = i;
 				ostringstream os;
-				os << anarace->getLocationForce(0, i) << " " << stats[anarace->getPlayer()->getRace()][i].name;
-				if (anarace->getLocationForce(0, i) == 1);
+				os << anarace->getLocationTotal(0, i) << " " << stats[anarace->getPlayer()->getRace()][i].name;
+				if (anarace->getLocationTotal(0, i) == 1);
 				else os << "s";
 				forceEntry[i]->updateText(os.str());
 				forceEntry[i]->adjustRelativeRect(edge);
-				switch(forceEntry[i]->changed())
-				{
-					case 0:break;
-					case 1:anarace->getPlayer()->getGoal()->addGoal(i, 1, 0, 0);break;  //<- Bei (+) kann sich nichts an den goals veraendern!
-					case 2:anarace->getPlayer()->getGoal()->addGoal(i, -1, 0, 0);
-							setChangedFlag();break;           // <- Bei (-) sehr wohl
-					case 3:anarace->getPlayer()->getGoal()->addGoal(i,-anarace->getPlayer()->getGoal()->globalGoal[0][i], 0, 0);
-					        setChangedFlag();break;           // <- und auch bei X natuerlich
-				};
+//				switch(forceEntry[i]->changed())
+//				{
+//					case 0:break;
+//					case 1:anarace->getPlayer()->getGoal()->addGoal(i, 1, 0, 0);break;  //<- Bei (+) kann sich nichts an den goals veraendern!
+//					case 2:anarace->getPlayer()->getGoal()->addGoal(i, -1, 0, 0);
+//							setChangedFlag();break;           // <- Bei (-) sehr wohl
+//					case 3:anarace->getPlayer()->getGoal()->addGoal(i,-anarace->getPlayer()->getGoal()->globalGoal[0][i], 0, 0);
+//					        setChangedFlag();break;           // <- und auch bei X natuerlich
+//				};
 			}
 		   	else 
 			{
@@ -269,7 +269,6 @@ void ForceWindow::processButtons()
 								anarace->getPlayer()->getGoal()->addGoal(j, 1, 0, 0);
 								setChangedFlag();
 				//                                                      msgWindow->addMessage(_T(string::Format(T("Added %s to the goal list."),stats[anarace->getPlayer()->getRace()][j].name)));
-				//                                                        anarace->getPlayer()->getGoal()->adjustGoals(0); //~~
 								j = UNIT_TYPE_COUNT;
 							}
 							l++;
@@ -288,7 +287,7 @@ void ForceWindow::resetData()
 		if ((!anarace) || (anarace->getPlayer()->getGoal()->allGoal[i] == 0))
 			oldForceList[i] = 0;
 		else if ((anarace) && (anarace->getPlayer()->getGoal()->allGoal[i]))
-			oldForceList[i] = anarace->getLocationForce(0, i) * 100 / anarace->getMaxUnitForce();
+			oldForceList[i] = anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax();
 	}
 	markedUnit = 0;
 };
@@ -489,13 +488,13 @@ void ForceWindow::draw(DC* dc)
 					dc->DrawRoundedRectangle(Rect
 											 (edge.GetPosition() + Point(edge.GetWidth() - oldForceList[i], 0),
 											  Size(oldForceList[i] + 1, FONT_SIZE + 4)), 4);
-					if (anarace->getLocationForce(0, i) < anarace->getPlayer()->getGoal()->allGoal[i])
+					if (anarace->getLocationTotal(0, i) < anarace->getPlayer()->getGoal()->allGoal[i])
 						dc->SetTextForeground(theme.lookUpMixedColor(TEXT_COLOUR, FULFILLED_TEXT_COLOUR));
 					else
 						dc->SetTextForeground(theme.lookUpMixedColor(TEXT_COLOUR, NOT_FULFILLED_TEXT_COLOUR));
 					
 					string bla = _T(string::Format(T("%i/%i"),
-													   anarace->getLocationForce(0,
+													   anarace->getLocationTotal(0,
 																				 i),
 													   anarace->getPlayer()->getGoal()->allGoal[i]));
 					int dx, dy;
@@ -508,30 +507,30 @@ void ForceWindow::draw(DC* dc)
 				if (isShown() == 1)
 					dc->DrawRoundedRectangle(edge.GetPosition() +
 											 Point(edge.GetWidth() -
-													 anarace->getPlayer()->getGoal()->allGoal[i] * 100 / anarace->getMaxUnitForce(), 0),
-											 Size(anarace->getPlayer()->getGoal()->allGoal[i] * 100 / anarace->getMaxUnitForce() + 1,
+													 anarace->getPlayer()->getGoal()->allGoal[i] * 100 / anarace->getUnitsTotalMax(), 0),
+											 Size(anarace->getPlayer()->getGoal()->allGoal[i] * 100 / anarace->getUnitsTotalMax() + 1,
 													FONT_SIZE + 4), 4);
 				else if (isShown() == 2)
 					dc->DrawRoundedRectangle(edge.GetPosition() +
 											 Point(edge.GetWidth() -
-													 anarace->getPlayer()->getGoal()->allGoal[i] * 100 / anarace->getMaxUnitForce(), 0),
-											 Size(anarace->getPlayer()->getGoal()->allGoal[i] * 100 / anarace->getMaxUnitForce() + 1,
+													 anarace->getPlayer()->getGoal()->allGoal[i] * 100 / anarace->getUnitsTotalMax(), 0),
+											 Size(anarace->getPlayer()->getGoal()->allGoal[i] * 100 / anarace->getUnitsTotalMax() + 1,
 													FONT_SIZE + 4), 4); TODO ... mode oder so */
 
 /*
  * if((percent[i]/counter[i]<100)&&(percent[i]/counter[i]>0))
  * * {
- * * //             dc->DrawText(_T(string::Format(T("[%i]"),anarace->getLocationForce(0,i))),edge.GetPosition()+Point(edge.GetWidth()-80-oldForceList[i],0));
+ * * //             dc->DrawText(_T(string::Format(T("[%i]"),anarace->getLocationTotal(0,i))),edge.GetPosition()+Point(edge.GetWidth()-80-oldForceList[i],0));
  * * dc->DrawText(_T(string::Format(T("%i%%"),percent[i]/counter[i])),edge.GetPosition()+Point(edge.GetWidth()-120-oldForceList[i],0));
  * * int dx,dy;
- * * string bla=_T(string::Format(T("%2i/%2i"),anarace->getLocationForce(0,i),anarace->getPlayer()->getGoal()->allGoal[i]));
+ * * string bla=_T(string::Format(T("%2i/%2i"),anarace->getLocationTotal(0,i),anarace->getPlayer()->getGoal()->allGoal[i]));
  * * dc->GetTextExtent(bla,&dx,&dy);
  * * dc->DrawText(bla,edge.GetPosition()+Point(edge.GetWidth()-45-dx,0));
  * * 
  * * } else
  * * {
  * * int dx,dy;
- * * string bla=_T(string::Format(T("%2i"),anarace->getLocationForce(0,i)));
+ * * string bla=_T(string::Format(T("%2i"),anarace->getLocationTotal(0,i)));
  * * dc->GetTextExtent(bla,&dx,&dy);
  * * dc->DrawText(bla,edge.GetPosition()+Point(edge.GetWidth()-45-dx,0));
  * * } 
@@ -611,15 +610,15 @@ void ForceWindow::draw(DC* dc)
 //  ---------- NON GOALS
 	line++;
 	for (int i = 0; i <= GAS_SCV; i++)
-		if ((anarace->getPlayer()->getGoal()->allGoal[i] == 0) && (anarace->getLocationForce(0, i)))
+		if ((anarace->getPlayer()->getGoal()->allGoal[i] == 0) && (anarace->getLocationTotal(0, i)))
 		{
 			Rect edge = Rect(getClientRectPosition() + Point(0,
 															  line * (FONT_SIZE + 5) + 3 - getScrollY()),
 								 Size(270, FONT_SIZE + 5));
-			if (oldForceList[i] < anarace->getLocationForce(0, i) * 100 / anarace->getMaxUnitForce())
-				oldForceList[i] += (anarace->getLocationForce(0, i) * 100 / anarace->getMaxUnitForce() - oldForceList[i]) / 5 + 1;
-			else if (oldForceList[i] > anarace->getLocationForce(0, i) * 100 / anarace->getMaxUnitForce())
-				oldForceList[i] -= (oldForceList[i] - anarace->getLocationForce(0, i) * 100 / anarace->getMaxUnitForce()) / 5 + 1;
+			if (oldForceList[i] < anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax())
+				oldForceList[i] += (anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax() - oldForceList[i]) / 5 + 1;
+			else if (oldForceList[i] > anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax())
+				oldForceList[i] -= (oldForceList[i] - anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax()) / 5 + 1;
 			if (fitItemToClientRect(edge, 1))
 			{
 				if (line % 2 == 0)
@@ -628,15 +627,15 @@ void ForceWindow::draw(DC* dc)
 					dc->SetBrush(*theme.lookUpBrush(BO_BRIGHT_BRUSH));
 
 				dc->DrawRoundedRectangle(edge, 4);
-				if (anarace->getLocationForce(0, i) == 1)
+				if (anarace->getLocationTotal(0, i) == 1)
 					dc->DrawText(_T
 								 (string::
-								  Format(T("%2i %s"), anarace->getLocationForce(0, i),
+								  Format(T("%2i %s"), anarace->getLocationTotal(0, i),
 										 stats[anarace->getPlayer()->getRace()][i].name)), edge.GetPosition());
 				else
 					dc->DrawText(_T
 								 (string::
-								  Format(T("%2i %ss"), anarace->getLocationForce(0, i),
+								  Format(T("%2i %ss"), anarace->getLocationTotal(0, i),
 										 stats[anarace->getPlayer()->getRace()][i].name)), edge.GetPosition());
 //                              dc->SetBrush(Brush(Color(   ( (anarace->getProgramCode(order->IP)+1)*155/(1+anarace->getPlayer()->getGoal()->getMaxBuildTypes()/2))%156,
 //                                              ((anarace->getProgramCode(order->IP)+1)*155/(1+anarace->getPlayer()->getGoal()->getMaxBuildTypes()/4))%156,

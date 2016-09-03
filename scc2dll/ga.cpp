@@ -1,29 +1,28 @@
 #include "ga.h"
 
 
-EXPORT void GA::setMutationFactor(int num)
+EXPORT void GA::setMutationFactor(const int num)
 {
 	mutationFactor=num; //~~
 };
-EXPORT void GA::setCrossOver(int num)
+EXPORT void GA::setCrossOver(const int num)
 {
 	crossOver=num;
 };
-EXPORT void GA::setBreedFactor(int num)
+EXPORT void GA::setBreedFactor(const int num)
 {
 	breedFactor=num;
 };
 
-
-EXPORT int GA::getMutationFactor()
+EXPORT const int GA::getMutationFactor() const
 {
         return(mutationFactor); //~~
 };
-EXPORT int GA::getCrossOver()
+EXPORT const int GA::getCrossOver() const
 {
         return(crossOver);
 };
-EXPORT int GA::getBreedFactor()
+const int EXPORT GA::getBreedFactor() const
 {
         return(breedFactor);
 };
@@ -33,6 +32,7 @@ GA::GA()
 {
 	goalCount=0;
 	mapCount=0;
+	startconditionCount=0;
 	maxTime=0;
 	maxTimeOut=0;
 	maxLength=0;

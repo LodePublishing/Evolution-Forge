@@ -13,6 +13,7 @@ private:
 	int mutationFactor;
 public:
 	int goalCount;			// number of total goals currently loaded
+	int startconditionCount;
 	int mapCount;			// number of total maps currently loaded
 	int maxTime;			// border of global searchspace in seconds (the lower the faster but needs longer to get a valid solution at the first place)
 	int maxTimeOut;			// border of local searchspace in seconds (how long the program should be allowed to wait until prerequisites of an item are fulfilled)
@@ -25,14 +26,13 @@ public:
 	int noise; //in %
 	int allowGoalAdaption;
 
+	const int getMutationFactor() const;
+	const int getCrossOver() const;
+	const int getBreedFactor() const;
 
-	int getMutationFactor();
-	int getCrossOver();
-	int getBreedFactor();
-
-	void setMutationFactor(int num);
-	void setCrossOver(int num);
-	void setBreedFactor(int num);
+	void setMutationFactor(const int num);
+	void setCrossOver(const int num);
+	void setBreedFactor(const int num);
 //constructor
 	GA();
 	~GA();

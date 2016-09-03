@@ -8,36 +8,50 @@ START::~START()
 {
 };
 
-MAP* START::getMap()
+const BASIC_MAP** START::getMap() const
 {
-	return(&map);
+	return(&tmpmap);
 };
 
-void EXPORT START::adjustGoals(int player)
+const HARVEST** START::getHarvest(const int player) const
 {
-	map.adjustGoals(player);
+	return(&(harvest[player]));
 };
 
-void EXPORT START::setPlayerRace(int player, int race)
+const PLAYER* START::getStartPlayer(const int player) const
 {
-	map.setStartPlayerRace(player, race);
+	return(&startPlayer[player]);
 };
 
-void EXPORT START::assignMap(MAP* map, DEFAULT* defaults)
+void START::copyStartForce(void* target)
 {
-	//TODO wenn map settings so sind, dass auch Einheiten ausserhalb der Startposition liegen, gehts hier net...
-	if(defaults)
-	{
-		this->map.copyBasic(map); // just copy the basics, not the units! (except player 0 and resetting all locations)
-		// goals are copied together with player in map
-		this->map.copy(defaults);
-		// CALL adjustGoals afterwards! (after race is set)
-	}
-	else
-	{
-		this->map.copy(map); //copy everything...
-		for(int i=1;i<map->getMaxPlayer();i++)
-			adjustGoals(i); // and adjust the goals (only here because the players' races are fixed
-	}
+	memcpy(target, &(startForce[0][0]), sizeof(startForce));
+};
+
+const START_CONDITION* START::getStartcondition(const int player) const
+{
+	return(startcondition[player]);
+};
+
+void EXPORT START::setPlayerRace(const int player, const eRace race)
+{
+	startPlayer[player].setRace(race); // TODO
+};
+
+void EXPORT START::assignGoal(const GOAL_ENTRY* goal, const int player)
+{
+	tmpgoal[player]=goal;
+};
+
+void EXPORT START::assignStartcondition(const int player, const START_CONDITION* startcondition)
+{
+	this->startcondition[player]=startcondition;
+};
+
+void EXPORT START::assignMap(const BASIC_MAP* map)
+{
+	this->tmpmap=map;
+	// initialize Map???
+	// player 0 ?
 };
 

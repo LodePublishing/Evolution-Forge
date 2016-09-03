@@ -563,7 +563,7 @@ class UI_Theme
 		const eTab getTab() const;
 		void setTab(const eTab tab);	
 
-		void loadDataFiles(DC* dc); //currently all data hard coded, move it to file later! TODO
+		void loadDataFiles(const string& dataFile, const string& bitmapDir, const string& fontDir, DC* dc); //currently all data hard coded, move it to file later! TODO
 
         const string* lookUpString(const eString id) const;
 		const string lookUpFormattedString(const eString id, const string& text) const;

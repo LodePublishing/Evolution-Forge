@@ -2,276 +2,259 @@
 #include "debug.h"
 #include "location.h"
 
-void EXPORT PLAYER::adjustGoals(int adjust, UNITS* units)
-{
-	goal.adjustGoals(adjust, units);
-};
+//void EXPORT PLAYER::adjustGoals(const int adjust, const UNIT* unit)
+//{
+//	goal.adjustGoals(adjust, unit);
+//};
 
-void EXPORT PLAYER::setGoal(GOAL_ENTRY* goal)
+void EXPORT PLAYER::setGoal(const GOAL_ENTRY* goal)
 {
 	this->goal.copy(goal);
 };
 
-void EXPORT PLAYER::copy(PLAYER* player)
+void EXPORT PLAYER::copy(const PLAYER* player)
 {
-	setMins(player->getMins());
+	setMinerals(player->getMinerals());
 	setGas(player->getGas());
 	setTimer(player->getTimer());
 	setRace(player->getRace()); //problem: uebergebene Player ist der von der geladenen MAP, also die Mapsettings... deshalb muss auch in /scc2/force.cpp zuerst die map, dann die Rasse gewechselt werden
-	setHarvest(player->getHarvestMining(),player->getHarvestGasing());
-	setSupply(player->getSupply());
-	setMaxSupply(player->getMaxSupply());
-	setGoal(player->getGoal());	
+	setHarvest(player->getHarvestMining(), player->getHarvestGasing());
+	setNeedSupply(player->getNeedSupply());
+	setHaveSupply(player->getHaveSupply());
+//	setGoal(player->getGoal());	
 };
 
-const int* PLAYER::getHarvestMining()
+const int* PLAYER::getHarvestMining() const
 {
 #ifdef _SCC_DEBUG
     if(!basicMineralHarvestPerSecond)
     {
-        debug.toLog(0,"DEBUG: (PLAYER::getHarvestMining): Variable not initialized [%i].",basicMineralHarvestPerSecond);
+        toLog("DEBUG: (PLAYER::getHarvestMining): Variable not initialized.");
         return(0);
     }
 #endif
 	return basicMineralHarvestPerSecond;
 };
 
-const int* PLAYER::getHarvestGasing()
+const int* PLAYER::getHarvestGasing() const
 {
 #ifdef _SCC_DEBUG
     if(!basicGasHarvestPerSecond)
     {
-        debug.toLog(0,"DEBUG: (PLAYER::getHarvestGasing): Variable not initialized [%i].",basicGasHarvestPerSecond);
+        toLog("DEBUG: (PLAYER::getHarvestGasing): Variable not initialized.");
         return(0);
     }
 #endif
 	return basicGasHarvestPerSecond;
 };
 
-GOAL_ENTRY* EXPORT PLAYER::getGoal()
+const GOAL_ENTRY* EXPORT PLAYER::getGoal() const
 {
 	return(&goal);
 };
 
 void EXPORT PLAYER::wasChanged()
 {
-	changed=1;
+	changed=true;
 };
 
-int EXPORT PLAYER::isChanged()
+const bool EXPORT PLAYER::isChanged() const
 {
-	if((changed)||(goal.isChanged()))
-		return(1);
-	else return(0);
+	return((changed)||(goal.isChanged()));
 };
-
+/*
 void EXPORT PLAYER::changeAccepted()
 {
 	if(goal.isChanged())
 		goal.changeAccepted();
 	changed=0;
-};
+};*/
 
 
 
-int EXPORT PLAYER::getSupply()
+const int EXPORT PLAYER::getNeedSupply() const
 {
 #ifdef _SCC_DEBUG
-	if((supply<0)||(supply>MAX_SUPPLY))
+	if((needSupply<0)||(needSupply>MAX_SUPPLY))
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::getSupply): Variable not initialized [%i].",supply);
+		toLog("DEBUG: (PLAYER::getNeedSupply): Variable not initialized.");
 		return(0);
 	}
 #endif
-	return(supply);
+	return(needSupply);
 };
 
-int EXPORT PLAYER::getMaxSupply()
+const int EXPORT PLAYER::getHaveSupply() const
 {
 #ifdef _SCC_DEBUG
-	if((maxSupply<0)||(maxSupply>MAX_SUPPLY))
+	if((haveSupply<0)||(haveSupply>MAX_SUPPLY))
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::getMaxSupply): Variable not initialized [%i].",maxSupply);
+		toLog("DEBUG: (PLAYER::getHaveSupply): Variable not initialized.");
 		return(0);
 	}
 #endif
-	return(maxSupply);
+	return(haveSupply);
 };
 
-int EXPORT PLAYER::getMins()
+const int EXPORT PLAYER::getMinerals() const
 {
 #ifdef _SCC_DEBUG
-	if((mins<0)||(mins>MAX_MINS))
+	if((minerals<0)||(minerals>MAX_MINS))
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::getMins): Variable not initialized [%i].",mins);
+		toLog("DEBUG: (PLAYER::getMinerals): Variable not initialized.");
 		return(0);
 	}
 #endif
-	return(mins);
+	return(minerals);
 };
 
-int EXPORT PLAYER::getGas()
+const int EXPORT PLAYER::getGas() const
 {
 #ifdef _SCC_DEBUG
 	if((gas<0)||(gas>MAX_GAS))
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::getGas): Variable not initialized [%i].",gas);
+		toLog("DEBUG: (PLAYER::getGas): Variable not initialized.");
 		return(0);
 	}
 #endif
 	return(gas);
 };
 
-int EXPORT PLAYER::getTimer()
+const int EXPORT PLAYER::getTimer() const
 {
 #ifdef _SCC_DEBUG
 	if((timer<0)||(timer>MAX_TIME))
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::getTimer): Variable not initialized [%i].",timer);
+		toLog("DEBUG: (PLAYER::getTimer): Variable not initialized.");
 		return(0);
 	}
 #endif
 	return(timer);
 };
 
-int EXPORT PLAYER::getPosition()
+/*const int EXPORT PLAYER::getStartPosition() const
 {
 #ifdef _SCC_DEBUG
-	if((position<0)||(position>MAX_LOCATIONS))
+	if((startPosition<0)||(startPosition>=MAX_LOCATIONS))
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::getPosition): Variable not initialized [%i].",position);
+		toLog("DEBUG: (PLAYER::getPosition): Variable not initialized.");
 		return(0);
 	}
 #endif
-	return(position);
-};
+	return(startPosition);
+};*/
 
-int EXPORT PLAYER::getRace()
+const eRace EXPORT PLAYER::getRace() const
 {
-#ifdef _SCC_DEBUG
-	if((race<0)||(race>2))
-	{
-		debug.toLog(0,"DEBUG: (PLAYER::getRace): Variable not initialized [%i].",race);
-		return(0);
-	}
-#endif
 	return(race);
 };
 
-int EXPORT PLAYER::getBasicMineralHarvestPerSecond(int num)
+const int EXPORT PLAYER::getBasicMineralHarvestPerSecond(const int workerCount) const
 {
+	int tmp=workerCount;
+	if(tmp>44) tmp=44;
 #ifdef _SCC_DEBUG
-	if(num<0)
+	if(tmp<0)
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::getBasicMineralHarvestPerSecond): Variable [%i] out of range.",num);
+		toLog("DEBUG: (PLAYER::getBasicMineralHarvestPerSecond): Variable out of range.");
 		return(0);
 	}
-	if(num>44) num=44;
-	if((basicMineralHarvestPerSecond[num]<0)||(basicMineralHarvestPerSecond[num]>5000))
+	if((basicMineralHarvestPerSecond[tmp]<0)||(basicMineralHarvestPerSecond[tmp]>5000))
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::getBasicMineralHarvestPerSecond): Variable not initialized [%i].",basicMineralHarvestPerSecond[num]);
+		toLog("DEBUG: (PLAYER::getBasicMineralHarvestPerSecond): Variable not initialized.");
 		return(0);
 	}
 #endif
-	return(basicMineralHarvestPerSecond[num]);
+	return(basicMineralHarvestPerSecond[tmp]);
 };
 
-int EXPORT PLAYER::getBasicGasHarvestPerSecond(int num)
+const int EXPORT PLAYER::getBasicGasHarvestPerSecond(const int workerCount) const
 {
+	int tmp=workerCount;
+	if(tmp>4) tmp=4;
 #ifdef _SCC_DEBUG
-	if(num<0)
+	if(tmp<0)
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::getBasicGasHarvestPerSecond): Variable [%i] out of range.",num);
+		toLog("DEBUG: (PLAYER::getBasicGasHarvestPerSecond): Variable out of range.");
 		return(0);
 	}
-	if(num>4) num=4;
-	if((basicGasHarvestPerSecond[num]<0)||(basicGasHarvestPerSecond[num]>5000))
+	if((basicGasHarvestPerSecond[tmp]<0)||(basicGasHarvestPerSecond[tmp]>5000))
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::getBasicGasHarvestPerSecond): Variable not initialized [%i].",basicGasHarvestPerSecond[num]);
+		toLog("DEBUG: (PLAYER::getBasicGasHarvestPerSecond): Variable not initialized.");
 		return(0);
 	}
 #endif
-	return(basicGasHarvestPerSecond[num]);
+	return(basicGasHarvestPerSecond[tmp]);
 };
 
-int EXPORT PLAYER::setMins(int num)
+void EXPORT PLAYER::setMinerals(const int minerals)
 {
 #ifdef _SCC_DEBUG
-	if((num<0)||(num>MAX_MINS))
+	if((minerals<0)||(minerals>MAX_MINS))
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::setMins): Value [%i] out of range.",num);
-		return(0);
+		toLog("DEBUG: (PLAYER::setMinerals): Value out of range.");
+		return;
 	}
 #endif
+	this->minerals=minerals;
 	wasChanged();
-	mins=num;
-	return(1);
 };
 
-int EXPORT PLAYER::setGas(int num)
+void EXPORT PLAYER::setGas(const int gas)
 {
 #ifdef _SCC_DEBUG
-	if((num<0)||(num>MAX_GAS))
+	if((gas<0)||(gas>MAX_GAS))
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::setGas): Value [%i] out of range.",num);
-		return(0);
+		toLog("DEBUG: (PLAYER::setGas): Value out of range.");
+		return;
 	}
 #endif
+	this->gas=gas;
 	wasChanged();
-	gas=num;
-	return(1);
 };
 
-int EXPORT PLAYER::setTimer(int num)
+void EXPORT PLAYER::setTimer(const int timer)
 {
 #ifdef _SCC_DEBUG
-	if((num<0)||(num>MAX_TIME))
+	if((timer<0)||(timer>MAX_TIME))
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::setTimer): Value [%i] out of range.",num);
-		return(0);
+		toLog("DEBUG: (PLAYER::setTimer): Value out of range.");
+		return;
 	}
 #endif
+	this->timer=timer;
 	wasChanged();
-	timer=num;
-	return(1);
 };
 
-int EXPORT PLAYER::setPosition(int num)
+/*void EXPORT PLAYER::setStartPosition(const int startPosition)
 {
 #ifdef _SCC_DEBUG
-	if((num<0)||(num>MAX_LOCATIONS))
+	if((startPosition<0)||(startPosition>=MAX_LOCATIONS))
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::setPosition): Value [%i] out of range.",num);
-		return(0);
+		toLog("DEBUG: (PLAYER::setPosition): Value out of range.");
+		return;
 	}
 #endif
+	this->startPosition=startPosition;
 	wasChanged();
-	position=num;
-	return(1);
-};
+};*/
 
-int EXPORT PLAYER::setRace(int num)
+void EXPORT PLAYER::setRace(const eRace race)
 {
-#ifdef _SCC_DEBUG
-	if((num<0)||(num>2))
+	if(goal.getRace()!=race)
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::setRace): Value [%i] out of range.",num);
-		return(0);
-	}
-#endif
-	wasChanged();
-	pStats=&(stats[race=num][0]);
-	if(goal.getRace()!=num)
-		goal.setRace(num);
-	return(1);
+		pStats=&(stats[this->race=race][0]);
+		goal.setRace(race);
+		wasChanged();
+	}; // TODO
 };
 
-const UNIT_STATISTICS* EXPORT PLAYER::getpStats()
+const UNIT_STATISTICS* EXPORT PLAYER::getpStats() const
 {
 #ifdef _SCC_DEBUG
 	if(!pStats)
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::getpStats): Variable pstats is not initialized.");
+		toLog("DEBUG: (PLAYER::getpStats): Variable pstats is not initialized.");
 		return(0); //evtl auf initialized pruefen
 	}
 #endif
@@ -279,74 +262,65 @@ const UNIT_STATISTICS* EXPORT PLAYER::getpStats()
 };
 		
 
-int EXPORT PLAYER::setHarvest(const int* mining, const int* gasing)
+void EXPORT PLAYER::setHarvest(const int* mining, const int* gasing)
 {
 #ifdef _SCC_DEBUG
 	if((!mining)||(!gasing))
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::setHarvest): Variable mining/gasing is not initialized.");
-		return(0); //evtl auf initialized pruefen
+		toLog("DEBUG: (PLAYER::setHarvest): Variable mining/gasing is not initialized.");
+		return;
 	}
 #endif
-	wasChanged();
 	basicMineralHarvestPerSecond=mining;
 	basicGasHarvestPerSecond=gasing;
-	return(1);
+	wasChanged();
 };
 
-int EXPORT PLAYER::setSupply(int num)
+void EXPORT PLAYER::setNeedSupply(const int supply)
 {
 #ifdef _SCC_DEBUG
-	if((num<0)||(num>MAX_SUPPLY))
+	if((supply<0)||(supply>MAX_SUPPLY))
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::setSupply): Value [%i] out of range.",num);
-		return(0);
+		toLog("DEBUG: (PLAYER::setNeedSupply): Value out of range.");
+		return;
 	}
 #endif
+	this->supply=supply;
 	wasChanged();
-	supply=num;
-	return(1);
 };
 
-int EXPORT PLAYER::setMaxSupply(int num)
+void EXPORT PLAYER::setHaveSupply(const int maxSupply)
 {
 #ifdef _SCC_DEBUG
-	if((num<0)||(num>MAX_SUPPLY))
+	if((maxSupply<0)||(maxSupply>MAX_SUPPLY))
 	{
-		debug.toLog(0,"DEBUG: (PLAYER::setMaxSupply): Value [%i] out of range.",num);
-		return(0);
+		toLog("DEBUG: (PLAYER::setHaveSupply): Value out of range.");
+		return;
 	}
 #endif
+	this->maxSupply=maxSupply;
 	wasChanged();
-	maxSupply=num;
-	return(1);
 };
 
 
-int EXPORT PLAYER::getInitialized()
+const bool EXPORT PLAYER::getInitialized() const
 {
-#ifdef _SCC_DEBUG
-    if((initialized<0)||(initialized>1))
-    {
-        debug.toLog(0,"DEBUG: (PLAYER::getInitialized): Variable initialized not initialized [%i].",initialized);
-        return(0);
-    }
-#endif
 	return(initialized);
 };
 
 void EXPORT PLAYER::resetData()
 {
-	setMins(0);
+	setMinerals(0);
 	setGas(0);
-	setSupply(0);
-	setMaxSupply(0);
+	setNeedSupply(0);
+	setHaveSupply(0);
 	setTimer(0);
 	setPosition(0);
-	setRace(0);
+	setRace(TERRA);
 	basicMineralHarvestPerSecond=0;
 	basicGasHarvestPerSecond=0;
-	initialized=1; //?
+	initialized=true; //?
+	changed=false;
 	pStats=0;
 };
 

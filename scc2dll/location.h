@@ -2,44 +2,32 @@
 #define __LOCATION_H
 
 #include "main.h"
-#include "units.h"
 
 #define GLOBAL 0
 
 class EXPORT MAP_LOCATION
 {
 	private:
-		char name[32];
+		string name;
 		int mineralDistance;
 		int distance[MAX_LOCATIONS];
+		int nearest[MAX_LOCATIONS];
 	//	int isCliff; //only reachable per dropship
 	//	int canShootbetweenwhichconnection... // maybe for cliff drop later
-
-//		int force[MAX_PLAYER][UNIT_TYPE_COUNT];
-//		int availible[MAX_PLAYER][UNIT_TYPE_COUNT];
-		UNITS units[MAX_PLAYER];
-// later: a linked list for both force and availible for faster fighting calculation
 	public:
-		UNITS* getUnits(int player);
-		void copy(int player, UNITS* units);
-		void copy(MAP_LOCATION* location);
-		void copyBasic(MAP_LOCATION* location); // copy the location without units!
+		const string& getName() const;
+		const int getMineralDistance() const;
+		const int getDistance(const int distance) const;
+		const int getNearest(const int step) const;
+		
+		void setName(const string& name);
+		void setMineralDistance(const int distance);
+		void setDistance(const int target, const int distance);
+
 		void resetData();
-		void resetForce();
-		int setName(const char* line);
-		int setMineralDistance(int num);
-		void setDistance(int target, int distance);
-		const char* getName();
-		int getMineralDistance();
-		int getDistance(int num);
-		int getForce(int player, int unit);
-		int setForce(int player, int unit, int num);
+		void calculateDistances();
+		void adjustDistances();
 
-		void adjustResearches(int player, int race);
-		void adjustSupply(int player, int race, int& supply, int& maxSupply);
-
-		int getAvailible(int player, int unit);
-		int setAvailible(int player, int unit, int num);
 		MAP_LOCATION();
 		~MAP_LOCATION();
 };

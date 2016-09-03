@@ -2,7 +2,7 @@
 #define __PRERACE_H
 
 #include "main.h"
-#include "map.h"
+#include "basicmap.h"
 #include "player.h"
 #include "ga.h"
 #include "location.h"
@@ -16,12 +16,13 @@ class EXPORT PRERACE
 {
 protected:
 	static START* start;
-	static MAP* pMap; // MAP is all the same for all players using 'start'
 
 //------------------ optimizations:-----------------
-	UNITS* global; // non-static pointer to player's global total force (location 0.total)
-	UNITS* location; // non-static pointer to players total/availible units
-	PLAYER* startPlayer; //pointer to player in start
+	UNIT* global; // non-static pointer to player's global total force (location 0.total)
+	UNIT* location; // non-static pointer to players total/availible units
+	const PLAYER* startPlayer; //pointer to player in start
+
+	const static BASIC_MAP* pMap; // MAP is all the same for all players using 'start'
 //------------- end -------------------------------
 	
  	//multimap<int, Building> buildingList; // key is time
@@ -29,24 +30,24 @@ protected:
 	
 	static int noise[MAX_TIME];
 	static int markerCounter;
-	static UNITS units[MAX_PLAYER][MAX_LOCATIONS];
+	static UNIT unit[MAX_PLAYER][MAX_LOCATIONS];
 	LAST last[MAX_LENGTH]; // last* is to save the last position, for movements
 	int lastcounter;
 	int lastunit;
 	static int startInitialized;
-	int ready;
+	bool ready;
 	const UNIT_STATISTICS* pStats;
 	int neededMinerals,neededGas;
 	
 	void createSpecial();
 	void resetSpecial();
-	int harvestMinerals();
-	int harvestGas();
+	const int harvestMinerals() const;
+	const int harvestGas() const; 
 
-	int calculateReady();
-	void adjustAvailibility(int loc,int fac,const UNIT_STATISTICS* stat);
-	int calculatePrimaryFitness(int ready);
-	void replaceCode(int IP, int num);
+	const bool calculateReady() const;
+	void adjustAvailibility(const int loc, const int fac, const UNIT_STATISTICS* stat);
+	const int calculatePrimaryFitness(const bool ready) const;
+	void replaceCode(const int IP, const int num);
 
 	int larvaInProduction[MAX_LOCATIONS]; // well... one of that ugly race-specific variables saves a lot of trouble...
 private:
@@ -54,11 +55,11 @@ private:
 //	static int transformList[UNIT_TYPE_COUNT]; // old geno type -> new geno type
 	
 	int playerNum;
-	int mins,gas,timer;
+	int minerals,gas,timer;
 	int IP;
 	int mineralHarvestPerSecond[MAX_LOCATIONS][45];
 	int gasHarvestPerSecond[MAX_LOCATIONS][5];
-	int harvestedGas,harvestedMins;
+	int harvestedGas,harvestedMinerals;
 	int supply;		// free supply
 	int maxSupply; // total supply
 	int ftime[MAX_GOALS]; //when the goal is reached / when the last item is produced (ALL locations...*/
@@ -68,90 +69,90 @@ private:
 public:
 	static void setStartConditions(START* pStart);
 	static void initNoise();
-	static void initializeMap(); //copies the startforce from map to static 'units'
+	static void copyMap(); //copies the startforce from map to static 'units'
 	
-	static int getMapLocationAvailible(int player, int loc, int type);
-	static int getMapLocationForce(int player, int loc, int type);
+	const static int getMapLocationAvailible(const int player, const int loc, const int unittype);
+	const static int getMapLocationTotal(const int player, const int loc, const int unittype);
 																				
-	static int setMapLocationAvailible(int player, int loc, int type, int num);
-	static int setMapLocationForce(int player, int loc, int type, int num);
+	static void setMapLocationAvailible(const int player, const int loc, const int unittype, const int num);
+	static void setMapLocationTotal(const int player, const int loc, const int unittype, const int num);
 																				
-	static int addMapLocationAvailible(int player, int loc, int type, int num);
-	static int addMapLocationForce(int player, int loc, int type, int num);
+	static void addMapLocationAvailible(const int player, const int loc, const int unittype, const int num);
+	static void addMapLocationTotal(const int player, const int loc, int unittype, const int num);
 																				
-	int getLocationAvailible(int loc, int type);
-	int getLocationForce(int loc, int type);
+	const int getLocationAvailible(const int loc, const int unittype) const;
+	const int getLocationTotal(const int loc, const int unittype) const;
 																				
-	int setLocationAvailible(int loc, int type, int num);
-	int setLocationForce(int loc, int type, int num);
+	void setLocationAvailible(const int loc, int unittype, int num);
+	void setLocationTotal(int loc, const int unittype, int num);
 																				
-	int addLocationAvailible(int loc, int type, int num);
-	int addLocationForce(int loc, int type, int num);
-
+	void addLocationAvailible(const int loc, const int unittype, const int num);
+	void addLocationTotal(const int loc, const int unittype, const int num);
 
 	int Code[MAX_LENGTH];
 	int Marker[MAX_LENGTH];
 
-	int setpStats(const UNIT_STATISTICS* pStats);
-	const UNIT_STATISTICS* getpStats();
+	void setpStats(const UNIT_STATISTICS* pStats);
+	const UNIT_STATISTICS* getpStats() const;
 
-	static MAP* getMap();
+	const static BASIC_MAP** getMap();
 	static GA* ga;
 
-	int getPlayerNum();
-	void setPlayer(int num); // assigns player data from start (start mins, supply etc.) and sets the appropriate optimized pointers (global, location, pMap etc.) CALL IT AFTER EACH MAP CHANGE AND PLAYER CHANGE!!
+	const int getPlayerNum() const;
+	void setPlayer(const int num); // assigns player data from start (start minerals, supply etc.) and sets the appropriate optimized pointers (global, location, pMap etc.) CALL IT AFTER EACH MAP CHANGE AND PLAYER CHANGE!!
 
-	PLAYER* getPlayer();
+	const PLAYER* getPlayer() const;
 
-	int getCalculated();
-	int setCalculated(int num);
+	const int getCalculated() const; 
+	void setCalculated(const int num);
 
 	void initializePlayer();
-	int adjustMineralHarvest(int location);
-	int adjustGasHarvest(int location);
-	int adjustHarvest();
+	void adjustMineralHarvest(const int location);
+	void adjustGasHarvest(const int location);
+	void adjustHarvest();
 
-	int setSupply(int supply);
-	int setMaxSupply(int supply);
-	int setMins(int mins);
-	int setGas(int gas);
-	int getSupply();
-	int getMaxSupply();
-	int getMins();
-	int getGas();
+	void setNeedSupply(const int needSupply);
+	void setHaveSupply(const int haveSupply);
+	void setMinerals(const int minerals);
+	void setGas(const int gas);
+
+	const int getNeedSupply() const;
+	const int getHaveSupply() const;
+	const int getMinerals() const;
+	const int getGas() const;
 
 
-	int setTimer(int time);
-	int getTimer();
+	void setTimer(const int time);
+	const int getTimer() const;
 
-	int setTimeOut(int time);
-	int getTimeOut();
+	void setTimeOut(const int time);
+	const int getTimeOut() const;
 
 	static void resetGeneMarker();
 	//int resetSupply();
 //	static int setMap(MAP* map);
 //	static void resetMapInitialized();
 
-	int getIP();
-	int setIP(int IP);
+	const int getIP() const;
+	void setIP(const int IP);
 
-	int setMineralHarvestPerSecond(int tloc,int worker,int mins);
-	int getMineralHarvestPerSecond(int tloc,int worker);
+	void setMineralHarvestPerSecond(const int tloc, const int worker, const int minerals);
+	const int getMineralHarvestPerSecond(const int tloc, const int worker) const;
 
-	int setGasHarvestPerSecond(int tloc,int worker,int gas);
-	int getGasHarvestPerSecond(int tloc,int worker);
+	void setGasHarvestPerSecond(const int tloc, const int worker, const int gas);
+	const int getGasHarvestPerSecond(const int tloc, const int worker) const;
 
-	int getHarvestedMins();
-	int getHarvestedGas();
+	const int getHarvestedMinerals() const;
+	const int getHarvestedGas() const;
 
-	int setHarvestedMins(int mins);
-	int setHarvestedGas(int gas);
+	void setHarvestedMinerals(const int minerals);
+	void setHarvestedGas(const int gas);
 
-	int setFinalTime(int goal, int time);
-	int getFinalTime(int goal);
+	void setFinalTime(const int goal, const int time);
+	const int getFinalTime(const int goal) const;
 
-	int getLength();
-	int setLength(int length);
+	const int getLength() const;
+	void setLength(const int length);
 		
 	PRERACE();
 	~PRERACE();

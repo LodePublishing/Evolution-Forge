@@ -2,10 +2,9 @@ PROGRAM=scc2
 DEPENDFILE=.depend
 CXX=g++
 DLLPATH=$(PROGRAM)dll
-OBJDLL=$(DLLPATH)/anarace.o $(DLLPATH)/debug.o $(DLLPATH)/ga.o $(DLLPATH)/goal.o  $(DLLPATH)/harvest.o  $(DLLPATH)/location.o  $(DLLPATH)/map.o  $(DLLPATH)/player.o  $(DLLPATH)/prerace.o  $(DLLPATH)/race.o  $(DLLPATH)/settings.o  $(DLLPATH)/soup.o $(DLLPATH)/building.o $(DLLPATH)/default.o $(DLLPATH)/start.o $(DLLPATH)/units.o $(DLLPATH)/blist.o
+OBJDLL=$(DLLPATH)/anarace.o $(DLLPATH)/debug.o $(DLLPATH)/ga.o $(DLLPATH)/goal.o  $(DLLPATH)/harvest.o  $(DLLPATH)/location.o  $(DLLPATH)/basicmap.o  $(DLLPATH)/player.o  $(DLLPATH)/prerace.o  $(DLLPATH)/race.o  $(DLLPATH)/settings.o  $(DLLPATH)/soup.o $(DLLPATH)/building.o $(DLLPATH)/start.o $(DLLPATH)/unit.o $(DLLPATH)/blist.o $(DLLPATH)/startcondition.o
 
 SOURCEDLL=$(OBJDLL:%.o=%.cpp)
-#$(DLLPATH)/anarace.cpp $(DLLPATH)/debug.cpp $(DLLPATH)/ga.cpp $(DLLPATH)/goal.cpp  $(DLLPATH)/harvest.cpp  $(DLLPATH)/location.cpp  $(DLLPATH)/map.cpp  $(DLLPATH)/player.cpp  $(DLLPATH)/prerace.cpp  $(DLLPATH)/race.cpp  $(DLLPATH)/settings.cpp  $(DLLPATH)/soup.cpp $(DLLPATH)/building.cpp $(DLLPATH)/default.cpp $(DLLPATH)/start.cpp $(DLLPATH)/units.cpp $(DLLPATH)/blist.cpp
 
 OBJMAIN=$(PROGRAM)/scc2.o $(PROGRAM)/defs.o $(PROGRAM)/UI_Theme.o $(PROGRAM)/UI_Window.o $(PROGRAM)/UI_Button.o $(PROGRAM)/UI_Object.o $(PROGRAM)/controls.o $(PROGRAM)/bodiagram.o $(PROGRAM)/bograph.o $(PROGRAM)/bowindow.o $(PROGRAM)/force.o $(PROGRAM)/info.o $(PROGRAM)/message.o $(PROGRAM)/player.o $(PROGRAM)/statistics.o $(PROGRAM)/timer.o $(PROGRAM)/util.o $(PROGRAM)/UI_StaticText.o $(PROGRAM)/mainwindow.o $(PROGRAM)/tutorial.o $(PROGRAM)/corewindow.o
 

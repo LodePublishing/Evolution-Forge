@@ -1,5 +1,4 @@
 #include "blist.h"
-#include "debug.h"
 
 BNODE::BNODE(BNODE* prev)
 {
@@ -61,7 +60,6 @@ void BNODE::SetData(Building* data)
 {
 	if(((int)data>999)||((int)data==0))
 		this->data=data;
-	else debug.toLog(0,"o_O");
 };
 
 void BNODE::SetNext(BNODE* next)

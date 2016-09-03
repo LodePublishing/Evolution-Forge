@@ -15,25 +15,25 @@ private:
         int goal;              // For movement, where the units will move to, not yet fully implemented
         int onTheRun;   // is this building/unit moving around or is it under construction at some place?
 public:
-        int getTotalBuildTime();
-        int getRemainingBuildTime();
-        int getType();
-        int getUnitCount();
-        int getFacility();
-        int getIP();
-        int getLocation();
-        int getGoal();
-        int getOnTheRun();
+        const int getTotalBuildTime() const;
+        const int getRemainingBuildTime() const;
+        const int getType() const;
+        const int getUnitCount() const;
+        const int getFacility() const;
+        const int getIP() const;
+        const int getLocation() const;
+        const int getGoal() const;
+        const int getOnTheRun() const;
                                                                                                                                                             
-        int setTotalBuildTime( int time);
-        int setRemainingBuildTime(int time);
-        int setType(int type);
-        int setUnitCount(int count);
-        int setFacility(int facility);
-        int setIP(int IP);
-        int setLocation(int location);
-        int setGoal(int goal);
-        int setOnTheRun(int onTheRun);
+        void setTotalBuildTime(const int time);
+        void setRemainingBuildTime(const int time);
+        void setType(const int type);
+        void setUnitCount(const int count);
+        void setFacility(const int facility);
+        void setIP(const int IP);
+        void setLocation(const int location);
+        void setGoal(const int goal);
+        void setOnTheRun(const int onTheRun);
 	Building();
 };
 

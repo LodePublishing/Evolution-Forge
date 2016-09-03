@@ -1,5 +1,6 @@
-@GOAL "Protoss: 4 Zealots"
-	@RACE "Protoss"
+@GOAL 
+	"Name" "4 Zealots"
+	"Race" "Protoss"
 		"Zealot" "4" "0" "0"
 #"SCV" "4" "0" "0"
 #"Command Center" "1" "0" "0"

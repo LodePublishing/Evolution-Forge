@@ -47,7 +47,7 @@ public:
 	TutorialWindow* tutorialWindow;
 	Player* player[MAX_PLAYER];
 	CoreWindow* theCore;
-	int isOptimizing();
+	const int isOptimizing();
 	void stopOptimizing();
 	void startOptimizing();
 	void Init(DC* dc);
@@ -56,18 +56,15 @@ private:
 	
 	int mouseLeft;
 	int oldrun,endrun;
-	GA* ga;
+	const GA* ga;
 	void process();
-	void drawGizmo(DC* dc);
+	void drawGizmo(DC* dc) const;
 	void showCoreAnimation();
 	ANARACE* anarace[MAX_PLAYER];
-
 	int animationNumbers;
 	int update;
 	int refresh;
-
 	int tutorialChapter;
-
 	int ani;
 	int tutorialAnimation;
 };

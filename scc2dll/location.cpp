@@ -2,222 +2,117 @@
 #include "string.h"
 #include "debug.h"
 
-int MAP_LOCATION::setName(const char* line)
+void MAP_LOCATION::setName(const string& name)
 {
-#ifdef _SCC_DEBUG
-	if(!line)
-	{
-		debug.toLog(0,"DEBUG: (MAP_LOCATION::setMineralDistance): Value line not initialized [%i].",line);
-		return(0);
-	}
-#endif
-	strcpy(name,line);
-	return(1);
+	this->name=name;
 };
 
-int MAP_LOCATION::setMineralDistance(int num)
+void MAP_LOCATION::setMineralDistance(const int mineralDistance)
 {
 #ifdef _SCC_DEBUG
-	if((num<0)||(num>5))
+	if((mineralDistance<0)||(mineralDistance>5))
 	{
-		debug.toLog(0,"DEBUG: (MAP_LOCATION::setMineralDistance): Value [%i] out of range.",num);
-		return(0);
-	}
-#endif
-	mineralDistance=num;
-	return(1);
-};
-
-int MAP_LOCATION::setAvailible(int player, int unit, int num)
-{
-#ifdef _SCC_DEBUG
-	if((player<0)||(player>=MAX_PLAYER))
-	{
-		debug.toLog(0,"DEBUG: (MAP_LOCATION::setAvailible): Value player [%i] out of range.",player);
-		return(0);
-	}
-#endif
-	units[player].setAvailible(unit, num);
-	return(1);
-};
-
-int MAP_LOCATION::getAvailible(int player,int unit)
-{
-#ifdef _SCC_DEBUG
-	if((player<0)||(player>=MAX_PLAYER))
-	{
-		debug.toLog(0,"DEBUG: (MAP_LOCATION::getAvailible): Value player [%i] out of range.",player);
-		return(0);
-	}
-#endif
-	return(units[player].getAvailible(unit));
-};
-
-
-
-int MAP_LOCATION::setForce(int player, int unit, int num)
-{
-#ifdef _SCC_DEBUG
-	if((player<0)||(player>=MAX_PLAYER))
-	{
-		debug.toLog(0,"DEBUG: (MAP_LOCATION::setForce): Value player [%i] out of range.",player);
-		return(0);
-	}
-#endif
-	units[player].setTotal(unit, num);
-	return(1);
-};
-
-UNITS* MAP_LOCATION::getUnits(int player)
-{
-#ifdef _SCC_DEBUG
-	if((player<0)||(player>=MAX_PLAYER))
-	{
-		debug.toLog(0,"DEBUG: (MAP_LOCATION::getUnits): Value player [%i] out of range.",player);
-		return(0);
-	}
-#endif
-	return(&units[player]);
-};
-
-void MAP_LOCATION::copy(int player, UNITS* units)
-{
-#ifdef _SCC_DEBUG
-	if((player<0)||(player>=MAX_PLAYER))
-	{
-		debug.toLog(0,"DEBUG: (MAP_LOCATION::copy): Value player [%i] out of range.",player);
+		toLog("DEBUG: (MAP_LOCATION::setMineralDistance): Value out of range.");
 		return;
 	}
 #endif
-	this->units[player].copy(units);
+	this->mineralDistance=mineralDistance;
 };
 
-void MAP_LOCATION::copyBasic(MAP_LOCATION* location)
-{
-	setName(location->getName());
-	setMineralDistance(location->getMineralDistance());
-	for(int i=MAX_LOCATIONS;i--;)
-		setDistance(i,location->getDistance(i));
-};
-
-
-void MAP_LOCATION::copy(MAP_LOCATION* location)
-{
-	for(int i=MAX_PLAYER;i--;)
-		units[i].copy(location->getUnits(i));
-	setName(location->getName());
-	setMineralDistance(location->getMineralDistance());
-	for(int i=MAX_LOCATIONS;i--;)
-		setDistance(i,location->getDistance(i));
-};
-
-int MAP_LOCATION::getForce(int player,int unit)
+const int MAP_LOCATION::getNearest(const int step) const
 {
 #ifdef _SCC_DEBUG
-	if((player<0)||(player>=MAX_PLAYER))
-	{
-		debug.toLog(0,"DEBUG: (MAP_LOCATION::getForce): Value player [%i] out of range.",player);
-		return(0);
-	}
+    if((step<=0)||(step>=MAX_LOCATIONS))
+    {
+        toLog("DEBUG: (MAP_LOCATION::getNearest): Value out of range.");
+        return(0);
+    }
 #endif
-	return(units[player].getTotal(unit));
+	return(nearest[step]);
 };
 
-
-
-void MAP_LOCATION::setDistance(int target, int distance)
+void MAP_LOCATION::calculateDistances()
+{
+	for(int i=MAX_LOCATIONS;i--;)
+		nearest[i]=0;
+	for(int step=1;step<MAX_LOCATIONS;step++)
+	{
+		int min=200;
+		for(int loc=1;loc<MAX_LOCATIONS;loc++)
+			if(getDistance(loc)<min)
+			{
+				bool alreadyProcessed=false;
+				for(int k=1;k<step;k++)
+					if(nearest[k]==loc) alreadyProcessed=true;
+				if(!alreadyProcessed)
+				{
+					min=getDistance(loc);
+					nearest[step]=loc;
+				}
+			}
+	};
+};
+                                                                                
+void MAP_LOCATION::setDistance(const int target, const int distance)
 {
 #ifdef _SCC_DEBUG
 	if((target<0)||(target>=MAX_LOCATIONS))
 	{
-		debug.toLog(0,"DEBUG: (MAP_LOCATION::setDistance): Value target [%i] out of range.",target);
+		toLog("DEBUG: (MAP_LOCATION::setDistance): Value target out of range.");
 		return;
 	}
 	if((distance<0)||(distance>500))
 	{
-		debug.toLog(0,"DEBUG: (MAP_LOCATION::setDistance): Value distance [%i] out of range.",target, distance);
+		toLog("DEBUG: (MAP_LOCATION::setDistance): Value distance out of range.");
 		return;
 	}
 #endif
 	this->distance[target]=distance;
 };
 
-const char* MAP_LOCATION::getName()
+const string& MAP_LOCATION::getName() const
 {
 	return(name);
 };
 
-int MAP_LOCATION::getMineralDistance()
+const int MAP_LOCATION::getMineralDistance() const
 {
 #ifdef _SCC_DEBUG
 	if((mineralDistance<0)||(mineralDistance>5))
 	{
-		debug.toLog(0,"DEBUG: (MAP_LOCATION::getMineralDistance): Variable not initialized [%i].",mineralDistance);
+		toLog("DEBUG: (MAP_LOCATION::getMineralDistance): Variable not initialized.");
 		return(0);
 	}
 #endif
 	return(mineralDistance);
 };
 
-int MAP_LOCATION::getDistance(int num)
+const int MAP_LOCATION::getDistance(const int num) const
 {
 #ifdef _SCC_DEBUG
 	if((num<0)||(num>=MAX_LOCATIONS))
 	{
-		debug.toLog(0,"DEBUG: (MAP_LOCATION::getDistance): Value [%i] out of range.",num);
+		toLog("DEBUG: (MAP_LOCATION::getDistance): Value out of range.");
 		return(0);
 	}
 	if((distance[num]<0)||(distance[num]>500))
 	{
-		debug.toLog(0,"DEBUG: (MAP_LOCATION::getDistance): Value distance[%i] out of range [%i].",num,distance[num]);
+		toLog("DEBUG: (MAP_LOCATION::getDistance): Value distance out of range.");
 		return(0);
 	}
 #endif
 	return(distance[num]);
 };
 
-void MAP_LOCATION::adjustSupply(int player, int race, int& supply, int& maxSupply)
-{
-#ifdef _SCC_DEBUG
-	if((player<0)||(player>=MAX_PLAYER))
-	{
-		debug.toLog(0,"DEBUG: (MAP_LOCATION::adjustSupply): Value player [%i] out of range.",player);
-		return;
-	}
-#endif
-	units[player].adjustSupply(race, supply, maxSupply);
-};
-
-void MAP_LOCATION::adjustResearches(int player, int race)
-{
-#ifdef _SCC_DEBUG
-	if((player<0)||(player>=MAX_PLAYER))
-	{
-		debug.toLog(0,"DEBUG: (MAP_LOCATION::adjustResearches): Value player [%i] out of range.",player);
-		return;
-	}
-#endif
-	units[player].adjustResearches(race);
-};
-
-
-void MAP_LOCATION::resetForce()
-{
-	for(int i=0;i<MAX_PLAYER;i++)
-		for(int j=0;j<UNIT_TYPE_COUNT;j++)
-		{
-			units[i].setTotal(j, 0);
-			units[i].setAvailible(j, 0);
-		}
-};
-
 void MAP_LOCATION::resetData()
 {
-	strcpy(name,"Error!");
+	name="ERROR";
 	mineralDistance=0;
-	for(int i=0;i<MAX_LOCATIONS;i++)
+	for(int i=MAX_LOCATIONS;i--;)
+	{
 		setDistance(i,0);
-	resetForce();
+		nearest[i]=0;
+	};		
 };
 
 

@@ -1,5 +1,8 @@
 //TODO: Problem: auf goals muessen sowohl ueber jeweiligen Ort (also gGoal[MAX_LOCATIONS][MAX_GOALS]), als auch einzelne Goals, wenn z.B. nach 5 und 10 Minuten 3 und 5 Marines an einem Ort sein sollen...
 
+#include <string>
+using namespace std;
+
 #ifndef __MAIN_H
 #define __MAIN_H
 
@@ -63,6 +66,8 @@ const float CORE_VERSION=0.50;
 
 #define MAX_TFITNESS 99999
 
+#define MAX_START_CONDITIONS 99 // ~~
+
 struct LAST
 {
 	int unit;
@@ -94,13 +99,14 @@ enum eErrorMessages
 	ERROR_MESSAGES
 };
 
-enum eRaces
+enum eRace
 {
 	TERRA,
 	PROTOSS,
-	ZERG,
-	MAX_RACES
+	ZERG
 };
+
+#define MAX_RACES (ZERG+1)
 
 enum eTerraUnits
 {
@@ -207,11 +213,11 @@ enum eTerraUnits
 	R_VEHICLE_WEAPONS,
 	R_SHIP_PLATING,
 	R_SHIP_WEAPONS,
-	INTRON
-}; // end eTerranUnits
-
-enum eProtossUnits
-{
+	INTRON,
+//}; // end eTerranUnits
+//
+//enum eProtossUnits
+//{
 	PROBE = 1,
 	DARK_TEMPLAR,
 	DARK_ARCHON,
@@ -299,11 +305,11 @@ enum eProtossUnits
 	R_PLATING,
 	R_GROUND_WEAPONS,
 	R_AIR_WEAPONS,
-	R_PLASMA_SHIELDS
-};
-
-enum eZergUnits
-{
+	R_PLASMA_SHIELDS,
+//};
+//
+//enum eZergUnits
+//{
 	DRONE = 1,
 	LARVA,
 	ZERGLING,

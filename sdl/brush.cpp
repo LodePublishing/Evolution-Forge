@@ -15,20 +15,9 @@ Brush::Brush(SDL_Surface* surface, const Uint8 r, const Uint8 g, const Uint8 b, 
 Brush::Brush():
 	color(),
 	style()
-{
-}
+{}
 
 Brush::~Brush()
-{
-}
+{}
 
-const eBrushStyle Brush::GetStyle() const 
-{
-	return style;
-}
-
-const Color* Brush::GetColor() const 
-{
-	return &color;
-}
 

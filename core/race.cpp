@@ -158,15 +158,15 @@ const bool RACE::calculateStep()
 		if((buildingQueue.top().canBeCompleted())&&(buildingQueue.top().getBuildFinishedTime()==getTimer()))
 		{
 			foundAnother=true;
-		    const Building& build = buildingQueue.top();
+			const Building& build(buildingQueue.top());
 			const UNIT_STATISTICS* stat=&(*pStats)[build.getType()];
 
 // ------ ACTUAL BUILDING ------
 			adjustLocationUnitsAfterCompletion(build.getLocation(), stat->facilityType, build.getFacility(), stat->facility2);			
 // increase haveSupply AFTER the building is completed (needSupply is increased BEFORE it's started!)
 			setHaveSupply(getHaveSupply()+stat->haveSupply);
-			addLocationTotal(build.getLocation(),build.getType(),build.getUnitCount());
-			addLocationAvailible(build.getLocation(),build.getType(),build.getUnitCount());
+			addLocationTotal(build.getLocation(),build.getType(), build.getUnitCount());
+			addLocationAvailible(build.getLocation(),build.getType(), build.getUnitCount());
 // ------- END OF ACTUAL BUILDING ------
 
 			
@@ -197,7 +197,7 @@ const bool RACE::calculateStep()
 //			last[lastcounter].count=build.getUnitCount();
 //			last[lastcounter].location=build.getLocation();
 
-			if((stat->create)&&(!build.getOnTheRun())) //one additional unit (zerglings, scourge, comsat, etc.)
+			if((stat->create)&&(stat->create!=build.getType())&&(!build.getOnTheRun())) //one additional unit (zerglings, scourge, comsat, etc.)
 			{ //here no unitCount! ~~~
 				addOneLocationTotal(build.getLocation(), stat->create);
 				addOneLocationAvailible(build.getLocation(), stat->create);
@@ -385,67 +385,5 @@ void RACE::prepareForNewGeneration() // resets all data to standard starting val
 	settFitness(MAX_TFITNESS);
 }
 
-// ----------------------------------------------------
-// ------ PRETTY UNINTERESTING SET/GET FUNCTIONS ------
-// ----------------------------------------------------
 
-void RACE::setpFitness(const unsigned int p_fitness) 
-{
-#ifdef _SCC_DEBUG
-	if(p_fitness > MAX_PFITNESS) {
-		toLog("DEBUG: (RACE::setpFitness): Value p_fitness out of range.");return;
-	}
-#endif
-	pFitness = p_fitness;
-}
-
-void RACE::setsFitness(const unsigned int s_fitness)
-{
-#ifdef _SCC_DEBUG
-	if(s_fitness > MAX_MINERALS+MAX_GAS) {
-		toLog("DEBUG: (RACE::setsFitness): Value s_fitness out of range.");return;
-	}
-#endif
-	sFitness = s_fitness;
-}
-
-void RACE::settFitness(const unsigned int t_fitness)
-{
-#ifdef _SCC_DEBUG
-	if(t_fitness > MAX_TFITNESS) {
-		toLog("DEBUG: (RACE::settFitness): Value t_fitness out of range.");return;
-	}
-#endif
-	tFitness = t_fitness;
-}
-
-const unsigned int RACE::getpFitness() const
-{
-#ifdef _SCC_DEBUG
-	if(pFitness > MAX_PFITNESS) {
-		toLog("DEBUG: (RACE::getpFitness): Variable pFitness not initialized.");return(0);
-	}
-#endif
-	return(pFitness);
-}
-
-const unsigned int RACE::getsFitness() const
-{
-#ifdef _SCC_DEBUG
-	if(sFitness>MAX_MINERALS+MAX_GAS) {
-		toLog("DEBUG: (RACE::getsFitness): Variable sFitness not initialized.");return(0);
-	}
-#endif
-	return(sFitness);
-}
-
-const unsigned int RACE::gettFitness() const
-{
-#ifdef _SCC_DEBUG
-	if(tFitness>MAX_TFITNESS) {
-		toLog("DEBUG: (RACE::gettFitness): Variable tFitness not initialized.");return(0);
-	}
-#endif
-	return(tFitness);
-}
 

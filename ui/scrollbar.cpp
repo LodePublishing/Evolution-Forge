@@ -6,27 +6,27 @@ UI_Scrollbar& UI_Scrollbar::operator=(const UI_Scrollbar& object)
 {
 	((UI_Object)(*this)) = ((UI_Object)object);
 	delete add;
-    add = new UI_Button(*(object.add));
+	add = new UI_Button(*(object.add));
 	delete sub;
-    sub = new UI_Button(*(object.sub));
-    hideable = object.hideable;
-    internalScrollY = object.internalScrollY;
-    internalHeight = object.internalHeight;
-    currentScrollY = object.currentScrollY;
-    currentHeight = object.currentHeight;
+	sub = new UI_Button(*(object.sub));
+	hideable = object.hideable;
+	internalScrollY = object.internalScrollY;
+	internalHeight = object.internalHeight;
+	currentScrollY = object.currentScrollY;
+	currentHeight = object.currentHeight;
 	maxScrollY = object.maxScrollY;
 	return(*this);
 }
 
 UI_Scrollbar::UI_Scrollbar(const UI_Scrollbar& object) :
-    UI_Object((UI_Object)object),
-    add(new UI_Button(*(object.add))),
-    sub(new UI_Button(*(object.sub))),
-    hideable(object.hideable),
-    internalScrollY(object.internalScrollY),
-    internalHeight(object.internalHeight),
-    currentScrollY(object.currentScrollY),
-    currentHeight(object.currentHeight),
+	UI_Object((UI_Object)object),
+	add(new UI_Button(*(object.add))),
+	sub(new UI_Button(*(object.sub))),
+	hideable(object.hideable),
+	internalScrollY(object.internalScrollY),
+	internalHeight(object.internalHeight),
+	currentScrollY(object.currentScrollY),
+	currentHeight(object.currentHeight),
 	maxScrollY(object.maxScrollY)
 { }
 
@@ -116,7 +116,7 @@ void UI_Scrollbar::draw(DC* dc) const
 
 	std::ostringstream os;
 	os << maxScrollY << ":" << internalScrollY;
-	dc->SetTextForeground(toSDL_Color(255, 100, 100));
+	dc->SetTextForeground(DC::toSDL_Color(255, 100, 100));
 	dc->SetFont(UI_Object::theme.lookUpFont(LARGE_NORMAL_BOLD_FONT));
 	dc->DrawText(os.str(), 500, 500);
 

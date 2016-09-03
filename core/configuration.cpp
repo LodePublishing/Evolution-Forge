@@ -19,6 +19,7 @@ Configuration::Configuration():
 	language(ZERO_LANGUAGE),
 
 	autoSaveRuns(false),
+	restrictSC(true),
 	facilityMode(true),
 	preprocessBuildOrder(false),
 	allowGoalAdaption(true),
@@ -53,6 +54,7 @@ void Configuration::initDefaults()
 	setLanguage(ENGLISH_LANGUAGE);
 	
 	setAutoSaveRuns(false);
+	setRestrictSC(false);
 	setFacilityMode(true);
 	setPreprocessBuildOrder(false);
 	setAllowGoalAdaption(true);
@@ -66,340 +68,6 @@ void Configuration::initDefaults()
 	setTransparency(false);
 	setSmoothMovements(true);
 	configurationFile = "settings/default.cfg";
-}
-
-const unsigned int Configuration::getCrossingOver() const {
-#ifdef _SCC_DEBUG
-    if((crossingOver<MIN_CROSSING_OVER)||(crossingOver>MAX_CROSSING_OVER)) {
-        toLog("WARNING: (Configuration::getCrossingOver): Value out of range.");return(MIN_CROSSING_OVER);
-    }
-#endif
-	return(crossingOver);
-}
-
-const unsigned int Configuration::getBreedFactor() const {
-#ifdef _SCC_DEBUG
-    if((breedFactor<MIN_BREED_FACTOR)||(breedFactor>MAX_BREED_FACTOR)) {
-        toLog("WARNING: (Configuration::getBreedFactor): Value out of range.");return(MIN_BREED_FACTOR);
-    }
-#endif
-	return(breedFactor);
-}
-
-const unsigned int Configuration::getMutationFactor() const {
-#ifdef _SCC_DEBUG
-    if((mutationFactor<MIN_MUTATION_FACTOR)||(mutationFactor>MAX_MUTATION_FACTOR)) {
-        toLog("WARNING: (Configuration::getMutationFactor): Value out of range.");return(MIN_MUTATION_FACTOR);
-    }
-#endif
-	return(mutationFactor);
-}
-const unsigned int Configuration::getMaxTime() const {
-#ifdef _SCC_DEBUG
-    if((maxTime<MIN_TIME)||(maxTime>MAX_TIME)) {
-        toLog("WARNING: (Configuration::getMaxTime): Value out of range.");return(MIN_TIME);
-    }
-#endif
-	return(maxTime);
-}
-const unsigned int Configuration::getMaxTimeOut() const {
-#ifdef _SCC_DEBUG
-    if((maxTimeOut<MIN_TIMEOUT)||(maxTimeOut>MAX_TIMEOUT)) {
-        toLog("WARNING: (Configuration::getMaxTimeOut): Value out of range.");return(MIN_TIMEOUT);
-    }
-#endif
-	return(maxTimeOut);
-}
-
-const unsigned int Configuration::getMaxLength() const {
-#ifdef _SCC_DEBUG
-    if((maxLength<MIN_LENGTH)||(maxLength>MAX_LENGTH)) {
-        toLog("WARNING: (Configuration::getMaxLength): Value out of range.");return(MIN_LENGTH);
-    }
-#endif
-	return(maxLength);
-}
-const unsigned int Configuration::getMaxRuns() const 
-{
-#ifdef _SCC_DEBUG
-    if((maxRuns<MIN_RUNS)||(maxRuns>MAX_RUNS)) {
-        toLog("WARNING: (Configuration::getMaxRuns): Value out of range.");return(MIN_RUNS);
-    }
-#endif
-	return(maxRuns);
-}
-const unsigned int Configuration::getMaxGenerations() const 
-{
-#ifdef _SCC_DEBUG
-    if((maxGenerations<MIN_GENERATIONS)||(maxGenerations>MAX_GENERATIONS)) {
-        toLog("WARNING: (Configuration::getMaxGenerations): Value out of range.");return(MIN_NOISE);
-    }
-#endif
-	return(maxGenerations);
-}
-const unsigned int Configuration::getNoise() const {
-#ifdef _SCC_DEBUG
-    if((noise < MIN_NOISE) || (noise > MAX_NOISE)) {
-        toLog("WARNING: (Configuration::getNoise): Value out of range.");return(MIN_NOISE);
-    }
-#endif
-	return(noise);
-}
-
-const unsigned int Configuration::getStaticFramerate() const
-{
-#ifdef _SCC_DEBUG
-    if((staticFramerate<MIN_STATIC_FRAMERATE)||(staticFramerate>MAX_STATIC_FRAMERATE)) {
-        toLog("WARNING: (Configuration::getStaticFramerate): Value out of range.");return(MIN_STATIC_FRAMERATE);
-    }
-#endif
-    return(staticFramerate);
-}
-
-const unsigned int Configuration::getDynamicFramerate() const
-{
-#ifdef _SCC_DEBUG
-    if((dynamicFramerate<MIN_DYNAMIC_FRAMERATE)||(dynamicFramerate>MAX_DYNAMIC_FRAMERATE)) {
-        toLog("WARNING: (Configuration::getDynamicFramerate): Value out of range.");return(MIN_DYNAMIC_FRAMERATE);
-    }
-#endif
-    return(dynamicFramerate);
-}
-
-const eLanguage Configuration::getLanguage() const {
-	return(language);
-}
-
-const unsigned int Configuration::getCurrentFramerate() const {
-	return(currentFramerate);
-}
-
-void Configuration::setCurrentFramerate(const unsigned int frame_rate) {
-	currentFramerate = frame_rate;
-}
-
-void Configuration::setCurrentFramesPerGeneration(const unsigned int frames_per_generation) {
-	currentFramesPerGeneration = frames_per_generation;
-}
-
-const unsigned int Configuration::getCurrentFramesPerGeneration() const {
-	return(currentFramesPerGeneration);
-}
-
-const bool Configuration::isAutoSaveRuns() const {
-	return(autoSaveRuns);
-}
-
-const bool Configuration::isFacilityMode() const {
-	return(facilityMode);
-}
-
-const bool Configuration::isPreprocessBuildOrder() const {
-	return(preprocessBuildOrder);
-}
-
-const bool Configuration::isAllowGoalAdaption() const {
-	return(allowGoalAdaption);
-}
-
-const bool Configuration::isSoftwareMouse() const {
-    return(softwareMouse);
-}
-                                                                                                                                                            
-const bool Configuration::isFullScreen() const {
-    return(fullScreen);
-}
-                                                                                                                                                            
-const bool Configuration::isBackgroundBitmap() const {
-    return(backgroundBitmap);
-}
-                                                                                                                                                            
-const bool Configuration::isAllowStaticFramerate() const {
-    return(allowStaticFramerate);
-}
-                                                                                                                                                            
-const bool Configuration::isGlowingButtons() const {
-    return(glowingButtons);
-}
-
-const bool Configuration::isDnaSpiral() const {
-    return(dnaSpiral);
-}
-                                                                                                                                                         
-const bool Configuration::isTooltips() const {
-    return(tooltips);
-}
-                                                                                                                                                            
-const bool Configuration::isTransparency() const {
-    return(transparency);
-}
-                                                                                                                                                            
-const bool Configuration::isSmoothMovements() const {
-    return(smoothMovements);
-}
-
-void Configuration::setCrossingOver(const unsigned int crossing_over) 
-{
-#ifdef _SCC_DEBUG
-    if((crossing_over<MIN_CROSSING_OVER)||(crossing_over>MAX_CROSSING_OVER)) {
-        toLog("WARNING: (Configuration::setCrossingOver): Value out of range.");return;
-    }
-#endif
-	crossingOver = crossing_over;
-}
-
-void Configuration::setBreedFactor(const unsigned int breed_factor) 
-{
-#ifdef _SCC_DEBUG
-    if((breed_factor<MIN_BREED_FACTOR)||(breed_factor>MAX_BREED_FACTOR)) {
-        toLog("WARNING: (Configuration::setBreedFactor): Value out of range.");return;
-    }
-#endif
-	breedFactor = breed_factor;
-}
-void Configuration::setMutationFactor(const unsigned int mutation_factor) 
-{
-#ifdef _SCC_DEBUG
-    if((mutation_factor<MIN_MUTATION_FACTOR)||(mutation_factor>MAX_MUTATION_FACTOR)) {
-        toLog("WARNING: (Configuration::setMutationFactor): Value out of range.");return;
-    }
-#endif
-	mutationFactor = mutation_factor;
-}
-void Configuration::setMaxTime(const unsigned int max_time) 
-{
-#ifdef _SCC_DEBUG
-    if((max_time<MIN_TIME)||(max_time>MAX_TIME)) {
-        toLog("WARNING: (Configuration::setMaxTime): Value out of range.");return;
-    }
-#endif
-	maxTime = max_time;
-}
-
-void Configuration::setMaxTimeOut(const unsigned int time_out) 
-{
-#ifdef _SCC_DEBUG
-    if((time_out<MIN_TIMEOUT)||(time_out>MAX_TIMEOUT)) {
-        toLog("WARNING: (Configuration::setMaxTimeOut): Value out of range.");return;
-    }
-#endif
-	maxTimeOut = time_out;
-}
-
-void Configuration::setMaxLength(const unsigned int max_length) 
-{
-#ifdef _SCC_DEBUG
-    if((max_length<MIN_LENGTH)||(max_length>MAX_LENGTH)) {
-        toLog("WARNING: (Configuration::setMaxLength): Value out of range.");return;
-    }
-#endif
-	maxLength = max_length;
-}
-
-void Configuration::setMaxRuns(const unsigned int max_runs) 
-{
-#ifdef _SCC_DEBUG
-    if((max_runs<MIN_RUNS)||(max_runs>MAX_RUNS)) {
-        toLog("WARNING: (Configuration::setMaxRuns): Value out of range.");return;
-    }
-#endif
-	maxRuns = max_runs;
-}
-
-void Configuration::setMaxGenerations(const unsigned int max_generations) 
-{
-#ifdef _SCC_DEBUG
-    if((max_generations<MIN_GENERATIONS)||(max_generations>MAX_GENERATIONS)) {
-        toLog("WARNING: (Configuration::setMaxGenerations): Value out of range.");return;
-    }
-#endif
-	maxGenerations = max_generations;
-}
-
-void Configuration::setNoise(const unsigned int desired_noise)
-{
-#ifdef _SCC_DEBUG
-    if((desired_noise < MIN_NOISE)||(desired_noise > MAX_NOISE)) {
-        toLog("WARNING: (Configuration::setNoise): Value out of range.");return;
-    }
-#endif
-	noise = desired_noise;
-}
-
-
-void Configuration::setDynamicFramerate(const unsigned int dynamic_framerate)
-{
-#ifdef _SCC_DEBUG
-    if((dynamic_framerate<MIN_DYNAMIC_FRAMERATE)||(dynamic_framerate>MAX_DYNAMIC_FRAMERATE)) {
-        toLog("WARNING: (Configuration::setDynamicFramerate): Value out of range.");return;
-    }
-#endif
-	dynamicFramerate = dynamic_framerate;
-}
-
-void Configuration::setStaticFramerate(const unsigned int frame_rate)
-{
-#ifdef _SCC_DEBUG
-    if((frame_rate<MIN_STATIC_FRAMERATE)||(frame_rate>MAX_STATIC_FRAMERATE)) {
-        toLog("WARNING: (Configuration::setStaticFramerate): Value out of range.");return;
-    }
-#endif
-    staticFramerate = frame_rate;
-}
-
-void Configuration::setLanguage(const eLanguage current_language) {
-	language = current_language;
-}
-
-void Configuration::setAutoSaveRuns(const bool auto_save_runs) {
-	autoSaveRuns = auto_save_runs;
-}
-
-void Configuration::setFacilityMode(const bool facility_mode) {
-	facilityMode = facility_mode;
-}
-
-void Configuration::setPreprocessBuildOrder(const bool preprocess_build_order) {
-	preprocessBuildOrder = preprocess_build_order;
-}
-
-void Configuration::setAllowGoalAdaption(const bool allow_goal_adaption) {
-	allowGoalAdaption = allow_goal_adaption;
-}
-
-void Configuration::setSoftwareMouse(const bool software_mouse) {
-	softwareMouse = software_mouse;
-}
-
-void Configuration::setFullScreen(const bool full_screen) {
-	fullScreen = full_screen;
-}
-
-void Configuration::setBackgroundBitmap(const bool background_bitmap) {
-	backgroundBitmap = background_bitmap;
-}
-
-void Configuration::setAllowStaticFramerate(const bool allow_static_framerate) {
-	allowStaticFramerate = allow_static_framerate;
-}
-
-void Configuration::setGlowingButtons(const bool glowing_buttons) {
-	glowingButtons = glowing_buttons;
-}
-
-void Configuration::setDnaSpiral(const bool dna_spiral) {
-	dnaSpiral = dna_spiral;
-}
-void Configuration::setTooltips(const bool tool_tips) {
-	tooltips = tool_tips;
-}
-
-void Configuration::setTransparency(const bool trans_parency) {
-	transparency = trans_parency;
-}
-
-void Configuration::setSmoothMovements(const bool smooth_movements) {
-	smoothMovements = smooth_movements;
 }
 
 
@@ -535,6 +203,8 @@ void Configuration::saveToFile() const
 	pFile << "# Draw X frames per new generation" << endl;
 	pFile << "    \"Dynamic framerate\" = \"" << getDynamicFramerate() << "\"" << endl;
 	pFile << "" << endl;                                                                                
+	pFile << "# Restrict unit menus to StarCraft (TM) units?" << endl;
+	pFile << "    \"Restrict units\" = \"" << (int)isRestrictSC() << "\"" << endl;
 	pFile << "# Order entries in the unitmenu by area or by facility?" << endl;
 	pFile << "    \"Facility mode\" = \"" << (int)isFacilityMode() << "\"" << endl;
 	pFile << "# glowing effects" << endl;
@@ -594,6 +264,11 @@ void Configuration::loadConfigurationFile()
 				i->second.pop_front();
 			   	setAllowGoalAdaption(atoi(i->second.front().c_str()));
 			}
+			if((i=block.find("Restrict units"))!=block.end()){
+				i->second.pop_front();
+				setRestrictSC(atoi(i->second.front().c_str()));
+			}
+			
 			if((i=block.find("Facility mode"))!=block.end()){
 				i->second.pop_front();
 			   	setFacilityMode(atoi(i->second.front().c_str()));

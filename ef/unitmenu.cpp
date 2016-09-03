@@ -7,8 +7,7 @@ UnitMenu::UnitMenu(UI_Object* unit_parent, ANARACE* unit_anarace, Rect unit_rect
 {
 	for(int i=0;i<UNIT_TYPE_COUNT;i++) //TODO
 	{
-		MenuEntry* entry = new MenuEntry(this,
-						Rect(0, 0, 130, FONT_SIZE+5), "ERROR"); //TODO maybe already initialize with name string
+		MenuEntry* entry = new MenuEntry(this, Rect(0, 0, 130, FONT_SIZE+5), "ERROR"); //TODO maybe already initialize with name string
 		menuEntries.push_back(entry);
 	}
 	resetData();
@@ -45,6 +44,7 @@ void UnitMenu::resetData()
 //	if(stats[(*anarace->getStartCondition())->getRace()][i].unitType != ADD_ON_UNIT_TYPE)
 	{
 		for(int j=1;j<=GAS_SCV;j++)
+		if((!configuration.isRestrictSC())||(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==0))
 		if((stats[(*anarace->getStartCondition())->getRace()][j].facility[0] == i)||
 		   (stats[(*anarace->getStartCondition())->getRace()][j].facility[1] == i)||
 		   (stats[(*anarace->getStartCondition())->getRace()][j].facility[2] == i))
@@ -71,10 +71,10 @@ void UnitMenu::process()
 	eButton color;
 	switch((*anarace->getStartCondition())->getRace())
 	{
- 	   case TERRA:color=UNIT_TYPE_5_BUTTON;break;
-	   case PROTOSS:color=UNIT_TYPE_7_BUTTON;break;
-	   case ZERG:color=UNIT_TYPE_3_BUTTON;break;
-	   default:break;
+		case TERRA:color=UNIT_TYPE_5_BUTTON;break;
+		case PROTOSS:color=UNIT_TYPE_7_BUTTON;break;
+		case ZERG:color=UNIT_TYPE_3_BUTTON;break;
+		default:break;
 	}
 			
 	if(menuLevel)
@@ -87,7 +87,7 @@ void UnitMenu::process()
 				for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					i++;
-					if(i >=10 )
+					if((i >=10 ))// || ((configuration.isRestrictSC())&&(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==1)))					
 					{
 						(*m)->Hide();
 						continue;
@@ -115,7 +115,7 @@ void UnitMenu::process()
 				for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					i++;
-					if(i >= facilityNumber )
+					if((i >= facilityNumber)) //|| ((configuration.isRestrictSC())/*&&(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==1)*/))
 					{
 						(*m)->Hide();
 						continue;
@@ -140,7 +140,7 @@ void UnitMenu::process()
 				for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					i++;
-					if(/*(i >= facilityNumber ) ||*/ (stats[(*anarace->getStartCondition())->getRace()][i].unitType != (signed int)(menuLevel)))
+					if(/*(i >= facilityNumber ) ||*/ (stats[(*anarace->getStartCondition())->getRace()][i].unitType != (signed int)(menuLevel)) || ((configuration.isRestrictSC())&&(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==1)))
 					{
 						(*m)->Hide();
 						continue;

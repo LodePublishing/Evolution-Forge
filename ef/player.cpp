@@ -258,7 +258,7 @@ void Player::process()
 	UI_Object::process();
 // TODO!
 // ------ COMMUNICATION BETWEEN THE WINDOWS ------ TODO
-	if(window[FORCE_WINDOW]->isShown())
+/*	if(window[FORCE_WINDOW]->isShown())
 	{
 		int markedUnit=((ForceWindow*)window[FORCE_WINDOW])->getMarkedUnit();
 		int markedIP=((BoGraphWindow*)window[BO_GRAPH_WINDOW])->getMarkedIP();
@@ -278,7 +278,7 @@ void Player::process()
 		((ForceWindow*)window[FORCE_WINDOW])->setMarkedUnit(markedUnit);
 		if(!markedIP)
 			window[INFO_WINDOW]->Hide();
-	}
+	}*/
 // ------ END COMMUNICATION BETWEEN THE WINDOWS ------
 
 	if((*anarace)->isOptimizing())
@@ -316,7 +316,13 @@ void Player::resetData()
 	((InfoWindow*)window[INFO_WINDOW])->resetData();
 	geneAnimation=0;
 //	Hide();
-	orderList.clear();
+        list<Order*>::iterator order = orderList.begin();
+        while(order != orderList.end())
+        {
+                delete(*order);
+                order = orderList.erase(order);
+        }
+	//orderList.clear();
 }
 
 void Player::restartAnarace()
@@ -327,47 +333,54 @@ void Player::restartAnarace()
 void Player::CheckOrders()
 {
 	list<Order*>::iterator order = orderList.begin();
-	
+        while(order != orderList.end())
+        {
+                delete(*order);
+                order = orderList.erase(order);
+        }
+	order = orderList.begin();
+
 	for(int s=MAX_LENGTH;s--;)
-		if((*anarace)->getProgramIsBuilt(s)&&((*anarace)->getRealProgramTime(s)<=(*anarace)->getRealTimer()))
+		if((*anarace)->getProgramIsBuilt(s)&&((*anarace)->getRealProgramTime(s) + stats[(*anarace)->getRace()][(*anarace)->getPhaenoCode(s)].BT<=(*anarace)->getRealTimer()))
 		{
 			if(order == orderList.end()) // => insert at the back
 			{
-                                Order* new_order = new Order();
-                                new_order->setUnit((*anarace)->getPhaenoCode(s));
-                                new_order->setIP(s);
-                                new_order->setMarker((*anarace)->getMarker(s));
-                                orderList.push_back(new_order);				
-			} else if((*order)->getMarker() != (*anarace)->getMarker(s))
+				Order* new_order = new Order();
+				new_order->setUnit((*anarace)->getPhaenoCode(s));
+				new_order->setIP(s);
+				new_order->setMarker((*anarace)->getMarker(s));
+				orderList.push_back(new_order);
+			} else 
+			if((*order)->getMarker() != (*anarace)->getMarker(s))
 			{
 				std::list<Order*>::iterator i = order;
-	                        while(i != orderList.end())
-        	                {
-                	                if((*i)->getMarker() == (*anarace)->getMarker(s))
-                        	                break;
-                                	i++;
-	                        }
-				if(i!=orderList.end()) // Found, Move the entry
+				while(i != orderList.end())
+				{
+					if((*i)->getMarker() == (*anarace)->getMarker(s))
+						break;
+					i++;
+				}
+				if(i != orderList.end()) // Found, Move the entry
 				{
 					Order* old = *i;
-	                                orderList.insert(order, old);
-                                	orderList.erase(i);
-                        	        old->setUnit((*anarace)->getPhaenoCode(s));
-                                	old->setIP(s);
+					orderList.insert(order, old);
+					order = orderList.erase(i);
+					old->setUnit((*anarace)->getPhaenoCode(s));
+					old->setIP(s);
 				} else // => not found, insert a new one
 				{
-        	                        Order* new_order = new Order();
-                	                new_order->setUnit((*anarace)->getPhaenoCode(s));
-        	                        new_order->setIP(s);
+					Order* new_order = new Order();
+					new_order->setUnit((*anarace)->getPhaenoCode(s));
+					new_order->setIP(s);
 					new_order->setMarker((*anarace)->getMarker(s));
-	                                orderList.insert(order, new_order);
+					orderList.insert(order, new_order);
 				}
 			} else  // ok
 			{
-                                (*order)->setIP(s);
-                                order++;
+				(*order)->setIP(s);
+				order++;
 			}
-	}
+		}
 
 	while(order != orderList.end())
 	{
@@ -379,17 +392,17 @@ void Player::CheckOrders()
 			while((s) && (order != orderList.end()) && ((*order)->getMarker() == (*anarace)->getMarker(s)))
 			{
 			// update
-                                (*order)->setRow(k+1);
-                                Rect t = Rect(0, (k+1)*(FONT_SIZE+7), 500-8, FONT_SIZE+6);
-                                if((*order)->target!=t)
-                                {
-                                        (*order)->start = (*order)->rect;
-                                        (*order)->target = t;
-                                	(*order)->blendTarget = 50;
-	                                (*order)->blendStart = (*order)->blend;
-	                                (*order)->setUnit((*anarace)->getPhaenoCode(s));
+				(*order)->setRow(k+1);
+				Rect t = Rect(0, (k+1)*(FONT_SIZE+7), 500-8, FONT_SIZE+6);
+				if((*order)->target!=t)
+				{
+					(*order)->start = (*order)->rect;
+					(*order)->target = t;
+					(*order)->blendTarget = 50;
+					(*order)->blendStart = (*order)->blend;
+					(*order)->setUnit((*anarace)->getPhaenoCode(s));
 				}
-                                (*order)->setIP(s);
+				(*order)->setIP(s);
 				s--;
 				order++;
 				k++;
@@ -426,10 +439,10 @@ void Player::CheckOrders()
 				orderList.insert(order, old);
 
 				old->setRow(k+1);
-                                Rect t = Rect(0, (k+1)*(FONT_SIZE+7), 500-8, FONT_SIZE+6);
-                                if(old->target != t)
+				Rect t = Rect(0, (k+1)*(FONT_SIZE+7), 500-8, FONT_SIZE+6);
+				if(old->target != t)
 				{
-                                        old->start = old->rect;
+					old->start = old->rect;
 					old->target = t;
 				}
 				old->blendTarget = 50;

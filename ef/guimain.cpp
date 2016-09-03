@@ -1,6 +1,5 @@
 #include "guimain.hpp"
 #include "../ui/editfield.hpp"
-#include "../ui/endrundialog.hpp"
 #include "../ui/tooltip.hpp"
 
 
@@ -19,7 +18,6 @@ Main::Main(DC* dc):
 //	button(NULL),
 	drawing(true),
 	oldrun(0),
-	endrun(false),
 	gizmo(true),
 	update(0),
 	refresh(0),
@@ -334,73 +332,6 @@ void Main::process()
 		boHasChanged=true;
 	}
 	
-	if(endrun) // TODO!
-	{
-		if(configuration.isAutoSaveRuns())
-		{
-			ostringstream os, os2, time;
-			time << setw(2) << (anarace[0]->getRealTimer())/60 << ":";
-			if(anarace[0]->getRealTimer()<10)
-				time << "0";
-			time << setw(2) << (anarace[0]->getRealTimer())%60;
-			
-			os << anarace[0]->getRun() << *UI_Object::theme.lookUpString(ENDRUN_FINISHED_STRING) << "[" << time << "]";
-			msgWindow->addMessage(os.str());
-			os2 << "bo_" << (*anarace[0]->getCurrentGoal())->getName() << "_" << time << "_" << anarace[0]->getRun();
-			if(UI_EndRunDialog::getLastString()!="bo")
-				settings.saveBuildOrder(UI_EndRunDialog::getLastString(), anarace[0]); // TODO, evtl alle saven...
-			else
-				settings.saveBuildOrder(os2.str(), anarace[0]); // TODO, evtl alle saven...
-			// TODO Name muss mitangegeben werden...
-			// Dann ist auch die Frage wie die Ergebnisse gespeichert werden sollen, klar, nach Rasse sortiert 
-			// Voreinstellung fuer Editfeld ist letzter benutzter Name  (oder 'leer') + fortlaufende Zahl (Reset bei neuem Namen)
-			// Spaeter: ueberschreiben pruefen
-			// In DateiName evtl auch Zeit einbauen
-			msgWindow->addMessage(*UI_Object::theme.lookUpString(ENDRUN_SAVED_BUILDORDER_STRING));
-//			resetData();
-
-//TODO timer window updaten
-			endrun=false;
-		} else
-		{
-			if(UI_Object::editTextField==NULL)
-				UI_Object::editTextField = new UI_EndRunDialog(mainWindow, "");
-				// Dialog aufmachen: Weiterrechnen oder neubeginnen? (checkbox: nicht mehr fragen) Neuanfang kann u.U. einen neuen Weg ermoeglichen und u.U. ein besseres Ergebnis bringen... Abspeichern Checkbox, EXIT, CONTINUE, NEW ROUND...
-		// you may want to use 'comparison' (not availible yet) to show all results 
-			else
-			{
-				if((UI_Object::editTextField->isDone())&&(UI_Object::editTextField->getCaller()==NULL))
-				{
-					drawing=true;
-					if(UI_Object::editTextField->getString().length()>0)
-					{
-						ostringstream os;
-							os << anarace[0]->getRun() << *UI_Object::theme.lookUpString(ENDRUN_FINISHED_STRING) << " [" << setw(2) << (anarace[0]->getRealTimer())/60 << ":";
-						if(anarace[0]->getRealTimer()<10)
-							os << "0";
-						os << setw(2) << (anarace[0]->getRealTimer())%60 << "]";
-						msgWindow->addMessage(os.str());
-						settings.saveBuildOrder(UI_Object::editTextField->getString(), anarace[0]); // TODO, evtl alle saven...
-						msgWindow->addMessage(*UI_Object::theme.lookUpString(ENDRUN_SAVED_BUILDORDER_STRING));
-			//		  resetData();
-					}
-					endrun=false;
-					delete UI_Object::editTextField;
-					UI_Object::resetButton();
-					UI_Object::editTextField=NULL;
-				} else
-				if((UI_Object::editTextField->isCanceled())&&(UI_Object::editTextField->getCaller()==NULL))
-				{
-					drawing=true;
-					delete UI_Object::editTextField;
-					UI_Object::resetButton();
-					UI_Object::editTextField=NULL;
-					endrun=false;
-					//resetData();??
-				}
-			}
-		}
-	}
 }
 
 void Main::stopOptimizing()
@@ -427,7 +358,7 @@ const bool Main::isOptimizing() const
 
 const Size Main::helper(DC* dc, const unsigned int dx, const int i, const string& str) const
 {
-	dc->SetTextForeground(toSDL_Color(
+	dc->SetTextForeground(DC::toSDL_Color(
 				(Uint8)((0==ani%(20+i))*35+((0==ani%(19+i))+(0==ani%(21+i)))*15+20),
 				(Uint8)((0==ani%(20+i))*35+((0==ani%(19+i))+(0==ani%(21+i)))*15+20),
 				(Uint8)((0==ani%(20+i))*35+((0==ani%(19+i))+(0==ani%(21+i)))*30+60)));
@@ -443,13 +374,13 @@ void Main::drawGizmo(DC* dc) const
 	for(unsigned int i=0;i<str.size();i++)
 		s = helper(dc, s.GetWidth(), i, str.substr(0, i+1));
 
-	dc->SetTextForeground(toSDL_Color(25, 25, 85));
+	dc->SetTextForeground(DC::toSDL_Color(25, 25, 85));
 	dc->DrawText("Forge", mainWindow->getAbsoluteClientRectPosition() + Point(50, 58));
-	dc->SetTextForeground(toSDL_Color(0,0,85));
+	dc->SetTextForeground(DC::toSDL_Color(0,0,85));
 	ostringstream os;
-	os << "v1." << CORE_VERSION << " beta2";
+	os << CORE_VERSION;
 	dc->DrawText(os.str(), mainWindow->getAbsoluteClientRectPosition()+Point(78, 98));
-	dc->SetTextForeground(toSDL_Color(50, 50, 85));
+	dc->SetTextForeground(DC::toSDL_Color(50, 50, 85));
 	dc->DrawText(os.str(), mainWindow->getAbsoluteClientRectPosition()+Point(75, 95));
 }
 
@@ -470,19 +401,19 @@ void Main::draw(DC* dc) const
 					break;
 				case 1:
 //					dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_LEFT), p);
-					dc->SetTextForeground(toSDL_Color(179,0,0));
+					dc->SetTextForeground(DC::toSDL_Color(179,0,0));
 					dc->DrawText("Add a unit", p.x-50, p.y+2);
 				break;
 				case 2:
 //					dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_RIGHT), p);
-					dc->SetTextForeground(toSDL_Color(0,177,188));
+					dc->SetTextForeground(DC::toSDL_Color(0,177,188));
 					dc->DrawText("Remove a unit", p.x+38, p.y+1);
 				break;
 				case 3:
 //					dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_BOTH), p);
-					dc->SetTextForeground(toSDL_Color(179,0,0));
+					dc->SetTextForeground(DC::toSDL_Color(179,0,0));
 					dc->DrawText("Add a unit", p.x-50, p.y+2);
-					dc->SetTextForeground(toSDL_Color(0,177,188));
+					dc->SetTextForeground(DC::toSDL_Color(0,177,188));
 					dc->DrawText("Remove a unit", p.x+38, p.y+1);
 				break;
 			}
@@ -512,7 +443,7 @@ void Main::draw(DC* dc) const
 
 void Main::OnIdle()
 {
-	if((!UI_Object::editTextField/*endrun*/)&&(isOptimizing()))
+	if((!UI_Object::editTextField)&&(isOptimizing()))
 	{
 		update = 2;
 		ANARACE** temp;
@@ -535,20 +466,85 @@ void Main::OnIdle()
 					
 				anarace[i]=temp[i];
 			}
-			if(anarace[0]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=true;}
+	//		if(anarace[0]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=true;}
 		}
 	}
 	
-	if(settings.getIsNewRun())
-		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
-			player[i]->resetData();
-	
+
+
+
 //	if(update==1)
 //	{
 //		update=2;
 //	}
 
 }
+
+
+const bool Main::newRun()
+{
+	bool endrun=true;
+	if(configuration.isAutoSaveRuns())
+	{
+		ostringstream os, os2;
+		os << anarace[0]->getRun() << *UI_Object::theme.lookUpString(ENDRUN_FINISHED_STRING) << "[" << formatTime2(anarace[0]->getRealTimer()) << "]";
+		msgWindow->addMessage(os.str());
+		os2 << "bo_" << (*anarace[0]->getCurrentGoal())->getName() << "_" << formatTime2(anarace[0]->getRealTimer()) << "_" << anarace[0]->getRun();
+//		if(UI_EndRunDialog::getLastString()!="bo")
+//			settings.saveBuildOrder(UI_EndRunDialog::getLastString(), anarace[0]); // TODO, evtl alle saven...
+//		else
+			settings.saveBuildOrder(os2.str(), anarace[0]); // TODO, evtl alle saven...
+		// TODO Name muss mitangegeben werden...
+		// Dann ist auch die Frage wie die Ergebnisse gespeichert werden sollen, klar, nach Rasse sortiert 
+		// Voreinstellung fuer Editfeld ist letzter benutzter Name  (oder 'leer') + fortlaufende Zahl (Reset bei neuem Namen)
+		// Spaeter: ueberschreiben pruefen
+		// In DateiName evtl auch Zeit einbauen
+		msgWindow->addMessage(*UI_Object::theme.lookUpString(ENDRUN_SAVED_BUILDORDER_STRING));
+		endrun=false;
+	} else
+	{
+		ostringstream os;
+		os << "bo_" << (*anarace[0]->getCurrentGoal())->getName() << "_" << formatTime2(anarace[0]->getRealTimer()) << "_" << anarace[0]->getRun();
+
+		if(UI_Object::editTextField==NULL)
+			UI_Object::editTextField = new UI_EndRunDialog(mainWindow, os.str());
+		// Dialog aufmachen: Weiterrechnen oder neubeginnen? (checkbox: nicht mehr fragen) Neuanfang kann u.U. einen neuen Weg ermoeglichen und u.U. ein besseres Ergebnis bringen... Abspeichern Checkbox, EXIT, CONTINUE, NEW ROUND...
+		// you may want to use 'comparison' (not availible yet) to show all results 
+		else
+		{
+			if((UI_Object::editTextField->isDone())&&(UI_Object::editTextField->getCaller()==NULL))
+			{
+				drawing=true;
+				if(UI_Object::editTextField->getString().length()>0)
+				{
+					ostringstream os;
+					os << anarace[0]->getRun() << *UI_Object::theme.lookUpString(ENDRUN_FINISHED_STRING) << " [" << formatTime2(anarace[0]->getRealTimer()) << "]";
+					msgWindow->addMessage(os.str());
+					settings.saveBuildOrder(UI_Object::editTextField->getString(), anarace[0]); // TODO, evtl alle saven...
+					msgWindow->addMessage(*UI_Object::theme.lookUpString(ENDRUN_SAVED_BUILDORDER_STRING));
+				}
+				delete UI_Object::editTextField;
+				UI_Object::resetButton();
+				UI_Object::editTextField=NULL;
+				endrun = false;
+			} else
+			if((UI_Object::editTextField->isCanceled())&&(UI_Object::editTextField->getCaller()==NULL))
+			{
+				drawing=true;
+				delete UI_Object::editTextField;
+				UI_Object::resetButton();
+				UI_Object::editTextField=NULL;
+				endrun = false;
+			}
+		}
+	}
+	if(!endrun)
+		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
+			player[i]->resetData();
+	return(endrun);
+}	
+
+
 
 void Main::loadGoals()
 {

@@ -37,7 +37,8 @@ enum eLanguage
 
 
 #define GLOBAL 0
-extern const unsigned int CORE_VERSION;
+
+extern const std::string CORE_VERSION;
 
 //extern const unsigned int MAX_LOCATIONS;
 extern const unsigned int MIN_LOCATIONS; //this does not mean that maps with 0 locations can exist....
@@ -101,6 +102,8 @@ extern const unsigned int MAX_STATIC_FRAMERATE;
 //extern const unsigned int MAX_RACES;
 
 extern void toLog(const std::string& msg);
+extern const std::string formatTime(const unsigned int time);
+extern const std::string formatTime2(const unsigned int time);
 extern void fillInfluenceList();
 
 #define NEUTRAL_PLAYER 0
@@ -475,7 +478,8 @@ struct UNIT_STATISTICS
 						 
 	unsigned int create;			 // Additional building created when this item is completed (only for add-ons)
 	unsigned int speed;			 // speed of units, not yet implemented
-	eUnitType unitType;		
+	eUnitType unitType;
+	unsigned int bwunit;
 };
 
 

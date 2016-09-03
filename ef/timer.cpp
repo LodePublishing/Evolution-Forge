@@ -13,7 +13,7 @@ TimerWindow::TimerWindow(UI_Object* timer_parent, ANARACE* timer_anarace, const 
 	currentActionText(new UI_StaticText(this, getRelativeClientRect(), IMPORTANT_COLOR, LARGE_NORMAL_BOLD_FONT, UPPER_CENTERED_TEXT_MODE)),
 	timeText(new UI_StaticText(this, getRelativeClientRect(), IMPORTANT_COLOR, VERY_LARGE_NORMAL_BOLD_FONT, TOTAL_CENTERED_TEXT_MODE)),
 // TODO irgendwas stimmt hier mit der Hoehe nicht
-	continueButton(new UI_Button(this, getRelativeClientRect(), getRelativeClientRect(), CLICK_TO_CONTINUE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, BOTTOM_CENTER, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH))
+	continueButton(new UI_Button(this, getRelativeClientRect(), CLICK_TO_CONTINUE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, BOTTOM_CENTER, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH))
 {
 	continueButton->updateToolTip(CONTINUE_OPTIMIZATION_TOOLTIP_STRING);
 	goalsFulFilledText->updateToolTip(GOALS_FULFILLED_TOOLTIP_STRING);
@@ -92,7 +92,7 @@ void TimerWindow::process()
 			else
 				currentActionText->updateText(OPTIMIZING_STRING);
 		}
-		if(anarace->getRealTimer()<currentTime)
+		if(anarace->getRealTimer()!=currentTime)
 		{
 			currentTime -= (currentTime - (anarace->getRealTimer()))/2;
 		    	if(anarace->getRealTimer()<currentTime)
@@ -102,7 +102,7 @@ void TimerWindow::process()
 		if(currentTime >= 3600) // TODO ga->...
 			os << "[--:--]";
 		else
-			os << "[" << currentTime/60 << ":" << std::setfill('0') << std::setw(2) << currentTime%60 << "]";
+			os << "[" << formatTime(currentTime) << "]";
 		timeText->updateText(os.str());
 	}
 	else if(getCurrentMode()==2)

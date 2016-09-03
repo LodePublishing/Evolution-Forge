@@ -1,16 +1,5 @@
 #include "dc.hpp"
 
-SDL_Color toSDL_Color(const Uint8 r, const Uint8 g, const Uint8 b)
-{
-	SDL_Color c;
-	c.r=r;
-	c.g=g;
-	c.b=b;
-	c.unused=255;
-	return(c);	
-}
-
-
 DC::DC():
 	surface(),
 	max_x(0),
@@ -43,38 +32,37 @@ DC::DC(const unsigned int width, const unsigned int height, const unsigned int b
 	color(NULL),
 	textColor(),
 	font(NULL)
-{ }
+{
+/*	switch(surface->format->BitsPerPixel)
+	{
+		case 8:(DC::Draw_HLine) = (void (unsigned int, unsigned int, unsigned int)) Draw_HLine_8bit;break;
+//		case 15:
+//		case 16:Draw_HLine = &DC::Draw_HLine_16bit;break;
+//		case 24:Draw_HLine = &DC::Draw_HLine_24bit;break;
+//		case 32:Draw_HLine = &DC::Draw_HLine_32bit;break;
+		default:toLog("Bit Error");break;
+	}*/
+}
 
 void DC::setFullscreen(const bool full_screen)
 {
 	if(((surface->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN) != full_screen)
 	{
-	#ifdef __linux
+#ifdef __linux
 		SDL_WM_ToggleFullScreen(surface);
-	#elif __WIN32__
+#elif __WIN32__
 		Uint32 nflags = surface->flags;
 		nflags ^= SDL_FULLSCREEN;
 		surface = SDL_SetVideoMode(surface->w, surface->h, surface->format->BitsPerPixel, nflags);
-	#endif
+#endif
 	}										
 }
 
 void DC::updateScreen() const
 {
-    SDL_UpdateRect(surface, 0, 0, 0, 0);
+	SDL_Flip(surface);
+//	SDL_UpdateRect(surface, 0, 0, 0, 0);
 }
-
-void DC::SetBrush(const Brush& dc_brush) {brush=dc_brush;}
-// void DC::SetBrush(const eBrush dc_brush) {brush=dc_brush;}
-// TODO! SETBRUSH AUCH MIT eBrush etc. erlauben!!!!!!!!!!!! TODO
-
-void DC::SetPen(const Pen& dc_pen) {pen=dc_pen;}
-void DC::SetColor(Color* dc_color) {color=dc_color;}
-void DC::SetFont(Font* dc_font) {font=dc_font;}
-void DC::SetTextForeground(const SDL_Color& dc_text_color) {textColor=dc_text_color;}
-Font* DC::GetFont() const {return(font);}
-
-
 void DC::DrawBitmap(const Bitmap& bitmap, const signed int x, const signed int y) const
 {
 	SDL_Rect drect;
@@ -89,7 +77,7 @@ void DC::DrawBitmap(const Bitmap& bitmap, const signed int x, const signed int y
 
 const Color DC::mixColor(const Color* id1, const Color* id2)  const
 {
-   return(Color(surface, id1->r()  +id2->r(),
+	return(Color(surface, id1->r()  +id2->r(),
 			id1->g()+id2->g(),
 			id1->b() +id2->b()));
 }
@@ -118,7 +106,7 @@ const Color DC::darkenColor(const Color* id, const unsigned int brightness) cons
 void DC::DrawLine(const signed x1, const signed y1, const signed x2, const signed y2) const
 {
 	if(pen.GetStyle()==TRANSPARENT_PEN_STYLE)
-	        return;
+			return;
 	int xx1 = x1;
 	int xx2 = x2;
 	int yy1 = y1;
@@ -194,6 +182,7 @@ void DC::setResolution(const unsigned int dc_max_x, const unsigned int dc_max_y)
 
 void DC::DrawGridEdgedRoundedRectangle(const signed int x, const signed y, const unsigned width, const unsigned int height, const unsigned int radius, std::list<Rect> notDrawRectList) const 
 {
+	return;
 	if((width<2)||(height<2)) return;
 	if((x>=max_x)||(x<0)) return;
 	if((y>=max_y)||(y<0)) return;
@@ -260,10 +249,15 @@ void DC::DrawEdgedRoundedRectangle(const signed int x, const signed int y, const
 		return;
 	}
 
-	if (brush.GetStyle() != TRANSPARENT_BRUSH_STYLE)
+	if(brush.GetStyle() == TRANSPARENT_BRUSH_STYLE)
+	{
+		if(pen.GetStyle() != TRANSPARENT_PEN_STYLE)
+			DrawEmptyEdgedRound(x, y, ww, hh, radius);
+	} else
+	if(pen.GetStyle() == TRANSPARENT_PEN_STYLE)
 		DrawFilledEdgedRound(x, y, ww, hh, radius);
-	if (pen.GetStyle() != TRANSPARENT_PEN_STYLE)
-		DrawEmptyEdgedRound(x, y, ww, hh, radius);
+	else 
+		DrawFilledEdgedBorderRound(x, y, ww, hh, radius);
 }
 
 void DC::DrawRoundedRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int radius) const
@@ -303,7 +297,8 @@ void DC::DrawRectangle(const signed int x, const signed int y, const unsigned in
 
 void DC::DrawEmptyRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height) const
 {
-	if(pen.GetStyle()==TRANSPARENT_PEN_STYLE) return;
+	if(pen.GetStyle()==TRANSPARENT_PEN_STYLE) 
+		return;
 	SDL_Rect rc;
 	if((width<2)||(height<2)||(x<0)||(y<0)||(x+width>=max_x)||(y+height>=max_y)) // TODO clipping
 		return;
@@ -344,40 +339,23 @@ void DC::DrawVerticalLine(const signed int x0, const signed int y0, const signed
 
 void DC::DrawHorizontalLine(const signed int x0, const signed int y0, const signed int x1) const
 {
-    if((x1<0)||(x0>=max_x)||(y0<0)||(y0>=max_y)||(x1<x0))
-    {
-//      std::ostringstream os;
-//      os << "Line out of range: " << x0 << ", " << y0 << ", " << y1;
-        toLog("Line out of range");//os.str());
-        return;
-    }
-    signed int xx0;
-    signed int xx1;
-    if(x0 < 0)
-        xx0=0;
-    else xx0=x0;
-    if(x1>=max_x)
-        xx1=max_x-1;
-    else
-        xx1=x1;
-    Draw_HLine(xx0, y0, xx1);
-}
-
-void DC::DrawTextA(const std::string& text, const int x, const int y) const {
-	DrawText(text, x, y);
-}
-
-void DC::DrawTextA(const std::string& text, const Point& p) const {
-	DrawText(text, p.x, p.y);
-}
-
-void DC::DrawText(const std::string& text, const Point& p) const {
-	DrawText(text, p.x, p.y);
-}
-
-void DC::DrawText(const std::string& text, const signed int x, const signed int y) const
-{
-	font->DrawText(surface, textColor, text, x, y);
+	if((x1<0)||(x0>=max_x)||(y0<0)||(y0>=max_y)||(x1<x0))
+	{
+//	  std::ostringstream os;
+//	  os << "Line out of range: " << x0 << ", " << y0 << ", " << y1;
+		toLog("Line out of range");//os.str());
+		return;
+	}
+	signed int xx0;
+	signed int xx1;
+	if(x0 < 0)
+		xx0=0;
+	else xx0=x0;
+	if(x1>=max_x)
+		xx1=max_x-1;
+	else
+		xx1=x1;
+	Draw_HLine(xx0, y0, xx1);
 }
 
 const bool DC::Lock() const {
@@ -427,27 +405,5 @@ const bool DC::FillRect(SDL_Rect& dstrect, const Color color) const{
 }
 */
 // Set various things
-const bool DC::SetColorKey(const Uint32 flag, const Color key) const {
-	return SDL_SetColorKey(surface, flag, key) == 0;
-}
 
-const bool DC::SetAlpha(const Uint32 flag, const Uint8 alpha) const {
-	return SDL_SetAlpha(surface, flag, alpha) == 0;
-}
-
-void DC::SetClipRect(const SDL_Rect& rect) const {
-	SDL_SetClipRect(surface, const_cast<SDL_Rect*>(&rect));
-}
-
-void DC::ResetClipRect() const {
-	SDL_SetClipRect(surface, 0);
-}
-
-void DC::GetClipRect(SDL_Rect& rect) const {
-	SDL_GetClipRect(surface, &rect);
-}
-
-const Color DC::doColor(const Uint8 r, const Uint8 g, const Uint8 b) const {
-	return(Color(surface, r, g, b));
-}
 

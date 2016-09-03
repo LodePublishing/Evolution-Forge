@@ -52,7 +52,7 @@ UI_Window::UI_Window(const UI_Window& object) :
 
 // TODO Reihenfolge
 UI_Window::UI_Window(UI_Object* window_parent, const eString window_title_string, const eWindow window_type, const unsigned int  window_number, const eIsScrolled window_is_scrollable, const eIsAutoAdjust window_is_auto_adjust, const eIsTabbed window_is_tabbed, const Rect window_client_area):
-	UI_Object(window_parent, theme.lookUpRect(window_type, window_number, BASIC_TAB), theme.lookUpMaxRect(window_type, window_number)),
+	UI_Object(window_parent, theme.lookUpRect(window_type, window_number, BASIC_TAB)),
 	tabRow(window_is_tabbed==TABBED?new UI_Radio(this) : NULL),
 	window(window_type), // ?
 	currentTab(ZERO_TAB),
@@ -66,6 +66,7 @@ UI_Window::UI_Window(UI_Object* window_parent, const eString window_title_string
 	clientStartRect(),
 	clientTargetRect(),
 	originalClientRect(), // TODO 
+	maxHeight(theme.lookUpMaxHeight(window_type, window_number, BASIC_TAB)),
 	windowNumber(window_number), //?
 	isAutoAdjust(window_is_auto_adjust), //?
 	isScrollable(NOT_SCROLLED), // TODO
@@ -110,8 +111,7 @@ UI_Window::~UI_Window()
 void UI_Window::updateRectangles(const unsigned int maxPlayer)
 {
 // ------ PROCESSING
-	setMaxRect(theme.lookUpMaxRect(window, windowNumber, maxPlayer)); //~~
-	setFreeMove();
+//	setMaxRect(theme.lookUpMaxRect(window, windowNumber, maxPlayer)); //~~
 	adjustRelativeRect(theme.lookUpRect(window, windowNumber, maxPlayer));
 	adjustClientRect();
 //	originalRect=getRelativeRect(); ?
@@ -314,8 +314,8 @@ const bool UI_Window::fitItemToRelativeClientRect(Rect& rect, const unsigned int
 			filledHeight=rect.GetBottom()/*-getRelativeClientRectUpperBound()*/;
 /*		if(scrollBar)
 			scrollBar->setMaxScrollY(filledHeight);*/
-		if(filledHeight>getMaxRect().GetHeight()) 
-			filledHeight=getMaxRect().GetHeight();
+//		if(filledHeight>getMaxRect().GetHeight()) 
+//			filledHeight=getMaxRect().GetHeight();
 	}
 	if((rect.GetTop()<getRelativeClientRectUpperBound())||
 	  (rect.GetBottom()>getRelativeClientRectLowerBound())) 
@@ -344,8 +344,8 @@ const bool UI_Window::fitItemToAbsoluteClientRect(Rect& rect, const unsigned int
 			filledHeight=(unsigned int) (rect.GetBottom()-getAbsoluteClientRectUpperBound());
 /*		if(scrollBar)
 			scrollBar->setMaxScrollY(filledHeight);*/
-		if(filledHeight>getMaxRect().GetHeight()) 
-			filledHeight=getMaxRect().GetHeight();
+//		if(filledHeight>getMaxRect().GetHeight()) 
+//			filledHeight=getMaxRect().GetHeight();
 	}
 	if((rect.GetTop()<getAbsoluteClientRectUpperBound())||
 	 (rect.GetBottom()>getAbsoluteClientRectLowerBound())) 
@@ -392,9 +392,11 @@ void UI_Window::draw(DC* dc) const
 		if(isTopItem()) // => main window!
 			dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 		else
+//		{
 			dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
 //		if(notDrawRectList.empty())
 			dc->DrawEdgedRoundedRectangle(outerBorder.GetTopLeft()+getAbsolutePosition(),outerBorder.GetSize(), 6);
+//		}
 //		else 
 //			dc->DrawGridEdgedRoundedRectangle(outerBorder.GetLeft()+getAbsolutePosition().x, outerBorder.GetTop() + getAbsolutePosition().y, outerBorder.GetWidth(), outerBorder.GetHeight(), 6, notDrawRectList);
 
@@ -511,29 +513,7 @@ void UI_Window::draw(DC* dc) const
 
 }
 
-void UI_Window::setChangedFlag(const bool flag) {
-	changedFlag=flag;
-}
 
-const bool UI_Window::getChangedFlag() {
-	return(changedFlag);
-}
-
-void UI_Window::changeAccepted() {
-	changedFlag=false;
-}
-
-void UI_Window::setResetFlag(const bool flag) {
-	resetFlag=flag;
-}
-
-const bool UI_Window::getResetFlag() {
-	return(resetFlag);
-}
-
-void UI_Window::resetAccepted() {
-	resetFlag=false;
-}
 
 bool UI_Window::changedFlag=false;
 bool UI_Window::resetFlag=false;

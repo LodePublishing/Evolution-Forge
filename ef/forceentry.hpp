@@ -15,7 +15,7 @@ enum eForceEntryMessage
 class ForceEntry : public UI_Button
 {
 	public:
-		ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const Rect entry_max_size, const string& entry_unit);
+		ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const string& entry_unit);
 		~ForceEntry();
 		ForceEntry(const ForceEntry& object);
 		ForceEntry& operator=(const ForceEntry& object);
@@ -61,6 +61,22 @@ class ForceEntry : public UI_Button
 		GOAL* goal;
 		bool showLocMenu;
 };
+
+inline void ForceEntry::setUnit(const unsigned int unit_type) {
+	unit = unit_type; // TODO
+}
+
+inline const unsigned int ForceEntry::getUnit() const {
+	return(unit);
+}
+
+inline const eUnitType ForceEntry::getType() const {
+	return(type);
+}
+
+inline void ForceEntry::setType(const eUnitType unit_type) {
+	type = unit_type; // TODO
+}
 
 #endif // _FORCEENTRY_HPP
 

@@ -431,15 +431,9 @@ void BoDiagramWindow::draw(DC* dc) const
 				
 				os << ns << ":" << hs;
 				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(50,37));
-
-				os.str("");
-				os << (time/60) << ":";
-				if((time%60)<10)
-					os << "0";
-				os << (time%60);
-				 dc->SetTextForeground(*theme.lookUpColor(BRIGHT_FITNESS_TEXT_COLOR));
-				 
-				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(50,48));
+				
+				dc->SetTextForeground(*theme.lookUpColor(BRIGHT_FITNESS_TEXT_COLOR));
+				dc->DrawText(formatTime(time), getAbsoluteClientRectPosition()+Point(50,48));
 				
 				dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 				dc->SetPen(*theme.lookUpPen(SELECT_PEN));

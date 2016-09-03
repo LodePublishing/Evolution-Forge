@@ -33,5 +33,13 @@ class UI_Radio : public UI_Group
 		bool alwaysOn;
 };
 
+inline void UI_Radio::rightButtonPressed(UI_Button* button) {
+	leftButtonPressed(button);
+}
+
+inline void UI_Radio::rightButtonReleased(UI_Button* button) { // allow release?
+	leftButtonReleased(button);
+}
+
 #endif
 

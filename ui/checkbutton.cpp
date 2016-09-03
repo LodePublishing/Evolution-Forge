@@ -19,8 +19,8 @@ UI_CheckButton::UI_CheckButton(const UI_CheckButton& object) :
 { }
 
 UI_CheckButton::UI_CheckButton(UI_Object* checkbutton_parent, const Rect rect, const eString txt, const eString tooltip_string, const bool is_checked) :
-	UI_Object(checkbutton_parent, rect, rect),
-	checkButton(new UI_Button(this, Rect(Point(120, 3),Size(10,10)), Rect(Point(0,0), getSize()), CHECK_BUTTON, STATIC_BUTTON_MODE)),
+	UI_Object(checkbutton_parent, rect),
+	checkButton(new UI_Button(this, Rect(Point(120, 3),Size(10,10)), CHECK_BUTTON, STATIC_BUTTON_MODE)),
 	text(new UI_StaticText(this, txt, Rect(Point(0,0), Size(110, 0)), FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT, RIGHT_BOUNDED_TEXT_MODE))
 {
 	this->updateToolTip(tooltip_string); // TODO
@@ -31,14 +31,6 @@ UI_CheckButton::~UI_CheckButton()
 {
 	delete checkButton;
 	delete text;
-}
-
-const bool UI_CheckButton::isClicked() const {
-	return(checkButton->isLeftClicked());
-}
-
-const bool UI_CheckButton::isChecked() const {
-	return(checkButton->isCurrentlyActivated());
 }
 
 UI_Object* UI_CheckButton::checkTooltip() {

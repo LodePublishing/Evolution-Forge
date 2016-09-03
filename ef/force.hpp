@@ -69,5 +69,25 @@ class ForceWindow : public UI_Window
 		LocationMenu* locationMenu;
 };
 
+inline void ForceWindow::setMarkedUnit(const unsigned int marked_unit)
+{
+#ifdef _SCC_DEBUG
+	if(marked_unit >= UNIT_TYPE_COUNT) {
+		toLog("DEBUG: (ForceWindow::setMarkedUnit): Value marked_unit out of range.");return;
+	}
+#endif
+	markedUnit = marked_unit;
+}
+	
+inline const unsigned int ForceWindow::getMarkedUnit() const
+{
+#ifdef _SCC_DEBUG
+	if(markedUnit >= UNIT_TYPE_COUNT) {
+		toLog("DEBUG: (ForceWindow::getMarkedUnit): Value markedUnit out of range.");return(0);
+	}
+#endif
+	return (markedUnit);
+}
+
 #endif
 

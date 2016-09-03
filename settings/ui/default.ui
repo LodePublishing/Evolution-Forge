@@ -283,29 +283,29 @@
 			2,  50,  75,  50, SOLID
 		
 # bright unit list colors:
-			1,  40,  40,  40, SOLID
-			1, 100, 100, 100, SOLID
-			1,  50, 150,  50, SOLID
-			1, 150,  50,  50, SOLID
-			1, 150,  50, 150, SOLID
-			1,  50,  50, 150, SOLID
-			1,  50, 150, 150, SOLID
-			1, 150, 150,  50, SOLID
-			1,  50,  50, 100, SOLID
-			1, 100,  50,  50, SOLID
-			1,  50, 100,  50, SOLID
+			1,  60,  60,  60, SOLID
+			1, 150, 150, 150, SOLID
+			1,  75, 225,  75, SOLID
+			1, 225,  75,  75, SOLID
+			1, 225,  75, 225, SOLID
+			1,  75,  75, 225, SOLID
+			1,  75, 225, 225, SOLID
+			1, 225, 225,  75, SOLID
+			1,  75,  75, 150, SOLID
+			1, 150,  75,  75, SOLID
+			1,  75, 150,  75, SOLID
 
-			2,  40,  40,  40, SOLID
-			2, 100, 100, 100, SOLID
-			2,  50, 150,  50, SOLID
-			2, 150,  50,  50, SOLID
-			2, 150,  50, 150, SOLID
-			2,  50,  50, 150, SOLID
-			2,  50, 150, 150, SOLID
-			2, 150, 150,  50, SOLID
-			2,  50,  50, 100, SOLID
-			2, 100,  50,  50, SOLID
-			2,  50, 100,  50, SOLID		
+			2,  60,  60,  60, SOLID
+			2, 150, 150, 150, SOLID
+			2,  75, 225,  75, SOLID
+			2, 225,  75,  75, SOLID
+			2, 225,  75, 225, SOLID
+			2,  75,  75, 225, SOLID
+			2,  75, 225, 225, SOLID
+			2, 225, 225,  75, SOLID
+			2,  75,  75, 150, SOLID
+			2, 150,  75,  75, SOLID
+			2,  75, 150,  75, SOLID
 # green timesteps pen
 			1,  20, 100,  20, SOLID
 # fitness diagram pen
@@ -359,7 +359,7 @@
 			2,  80,   80,  255, SOLID
 			2,  40,  255,   40, SOLID
 # unit list colors:
-			1,   0,   0,   0, SOLID
+			1,  25,  25,  25, SOLID
 			1,  75,  75,  75, SOLID
 			1,  50, 100,  50, SOLID
 			1, 100,  50,  50, SOLID
@@ -384,30 +384,29 @@
 			2,  50,  75,  50, SOLID
 		
 # bright unit list colors:
-			1,   0,   0,   0, SOLID
-			1, 100, 100, 100, SOLID
-			1,  50, 150,  50, SOLID
-			1, 150,  50,  50, SOLID
-			1, 150,  50, 150, SOLID
-			1,  50,  50, 150, SOLID
-			1,  50, 150, 150, SOLID
-			1, 150, 150,  50, SOLID
-			1,  50,  50, 100, SOLID
-			1, 100,  50,  50, SOLID
-			1,  50, 100,  50, SOLID
+			1,  60,  60,  60, SOLID
+			1, 150, 150, 150, SOLID
+			1,  75, 225,  75, SOLID
+			1, 225,  75,  75, SOLID
+			1, 225,  75, 225, SOLID
+			1,  75,  75, 225, SOLID
+			1,  75, 225, 225, SOLID
+			1, 225, 225,  75, SOLID
+			1,  75,  75, 150, SOLID
+			1, 150,  75,  75, SOLID
+			1,  75, 150,  75, SOLID
 
-			2,   0,   0,   0, SOLID
-			2, 100, 100, 100, SOLID
-			2,  50, 150,  50, SOLID
-			2, 150,  50,  50, SOLID
-			2, 150,  50, 150, SOLID
-			2,  50,  50, 150, SOLID
-			2,  50, 150, 150, SOLID
-			2, 150, 150,  50, SOLID
-			2,  50,  50, 100, SOLID
-			2, 100,  50,  50, SOLID
-			2,  50, 100,  50, SOLID
-		
+			2,  60,  60,  60, SOLID
+			2, 150, 150, 150, SOLID
+			2,  75, 225,  75, SOLID
+			2, 225,  75,  75, SOLID
+			2, 225,  75, 225, SOLID
+			2,  75,  75, 225, SOLID
+			2,  75, 225, 225, SOLID
+			2, 225, 225,  75, SOLID
+			2,  75,  75, 150, SOLID
+			2, 150,  75,  75, SOLID
+			2,  75, 150,  75, SOLID
 # green timesteps pen
 			1,  20, 100,  20, SOLID
 # fitness diagram pen
@@ -462,7 +461,7 @@
 			2,  40,  255,   40, SOLID
 		
 # unit list colors:
-			1,   0,   0,   0, SOLID
+			1,  25,  25,  25, SOLID
 			1,  75,  75,  75, SOLID
 			1,  50, 100,  50, SOLID
 			1, 100,  50,  50, SOLID
@@ -474,7 +473,7 @@
 			1,  75,  50,  50, SOLID
 			1,  50,  75,  50, SOLID
 
-			2,   0,   0,   0, SOLID
+			2,  25,  25,  25, SOLID
 			2,  75,  75,  75, SOLID
 			2,  50, 100,  50, SOLID
 			2, 100,  50,  50, SOLID
@@ -487,29 +486,29 @@
 			2,  50,  75,  50, SOLID
 		
 # bright unit list colors:
-			1,   0,   0,   0, SOLID
-			1, 100, 100, 100, SOLID
-			1,  50, 150,  50, SOLID
-			1, 150,  50,  50, SOLID
-			1, 150,  50, 150, SOLID
-			1,  50,  50, 150, SOLID
-			1,  50, 150, 150, SOLID
-			1, 150, 150,  50, SOLID
-			1,  50,  50, 100, SOLID
-			1, 100,  50,  50, SOLID
-			1,  50, 100,  50, SOLID
+			1,  60,  60,  60, SOLID
+			1, 150, 150, 150, SOLID
+			1,  75, 225,  75, SOLID
+			1, 225,  75,  75, SOLID
+			1, 225,  75, 225, SOLID
+			1,  75,  75, 225, SOLID
+			1,  75, 225, 225, SOLID
+			1, 225, 225,  75, SOLID
+			1,  75,  75, 150, SOLID
+			1, 150,  75,  75, SOLID
+			1,  75, 150,  75, SOLID
 
-			2,   0,   0,   0, SOLID
-			2, 100, 100, 100, SOLID
-			2,  50, 150,  50, SOLID
-			2, 150,  50,  50, SOLID
-			2, 150,  50, 150, SOLID
-			2,  50,  50, 150, SOLID
-			2,  50, 150, 150, SOLID
-			2, 150, 150,  50, SOLID
-			2,  50,  50, 100, SOLID
-			2, 100,  50,  50, SOLID
-			2,  50, 100,  50, SOLID
+			2,  60,  60,  60, SOLID
+			2, 150, 150, 150, SOLID
+			2,  75, 225,  75, SOLID
+			2, 225,  75,  75, SOLID
+			2, 225,  75, 225, SOLID
+			2,  75,  75, 225, SOLID
+			2,  75, 225, 225, SOLID
+			2, 225, 225,  75, SOLID
+			2,  75,  75, 150, SOLID
+			2, 150,  75,  75, SOLID
+			2,  75, 150,  75, SOLID
 		
 # green timesteps pen
 			1,  20, 100,  20, SOLID
@@ -547,30 +546,30 @@
 		50,   50,  50, SOLID
 
 # unit list colors:
-		10,  10,  10, SOLID
-		25,  25,  25, SOLID
-		 0,  50,   0, SOLID
-		50,   0,   0, SOLID
-		50,   0,  50, SOLID
-		 0,   0,  50, SOLID
-		 0,  50,  50, SOLID
-		50,  50,   0, SOLID
-		 0,   0,  25, SOLID
-		25,   0,   0, SOLID
-		 0,  25,   0, SOLID
+		15,  15,  15, SOLID
+		35,  35,  35, SOLID
+		 0,  75,   0, SOLID
+		75,   0,   0, SOLID
+		75,   0,  75, SOLID
+		 0,   0,  75, SOLID
+		 0,  75,  75, SOLID
+		75,  75,   0, SOLID
+		 0,   0,  35, SOLID
+		35,   0,   0, SOLID
+		 0,  35,   0, SOLID
 
 # bright unit list colors:
-		20,  20,  20, SOLID
-		75,  75,  75, SOLID
-		25, 125,  25, SOLID
-		125,  25,  25, SOLID
-		125,  25, 125, SOLID
-		25,  25, 125, SOLID
-		25, 125, 125, SOLID
-		125, 125,  25, SOLID
-		25,  25,  75, SOLID
-		75,  25,  25, SOLID
-		25,  75,  25, SOLID
+		30,  30,  30, SOLID
+		110, 110, 110, SOLID
+		35, 180,  35, SOLID
+		180,  35,  35, SOLID
+		180,  35, 180, SOLID
+		35,  35, 180, SOLID
+		35, 180, 180, SOLID
+		180, 180,  35, SOLID
+		35,  35, 110, SOLID
+		110,  35,  35, SOLID
+		35, 110,  35, SOLID
 		255, 255, 255, SOLID
 
 # continue button brush
@@ -585,7 +584,7 @@
 # bodiagram bar 
 		40,  40,  40, SOLID
 # supply brush
-		120, 120, 120, SOLID 
+		120, 120, 120, SOLID
 # statistics window (generations left brush)
 #		40,  40, 100, SOLID
 		100,  40, 40, SOLID
@@ -593,7 +592,6 @@
 		200, 200,  20, SOLID
 # disabled item
 		60,   50,  50, SOLID
-		
 	@END
 
 	@DARK_BLUE_THEME
@@ -616,30 +614,30 @@
 		50,   50,  50, SOLID
 
 # unit list colors:
-		10,  10,  10, SOLID
-		25,  25,  25, SOLID
-		 0,  50,   0, SOLID
-		50,   0,   0, SOLID
-		50,   0,  50, SOLID
-		 0,   0,  50, SOLID
-		 0,  50,  50, SOLID
-		50,  50,   0, SOLID
-		 0,   0,  25, SOLID
-		25,   0,   0, SOLID
-		 0,  25,   0, SOLID
+		15,  15,  15, SOLID
+		35,  35,  35, SOLID
+		 0,  75,   0, SOLID
+		75,   0,   0, SOLID
+		75,   0,  75, SOLID
+		 0,   0,  75, SOLID
+		 0,  75,  75, SOLID
+		75,  75,   0, SOLID
+		 0,   0,  35, SOLID
+		35,   0,   0, SOLID
+		 0,  35,   0, SOLID
 
 # bright unit list colors:
-		20,  20,  20, SOLID
-		75,  75,  75, SOLID
-		25, 125,  25, SOLID
-		125,  25,  25, SOLID
-		125,  25, 125, SOLID
-		25,  25, 125, SOLID
-		25, 125, 125, SOLID
-		125, 125,  25, SOLID
-		25,  25,  75, SOLID
-		75,  25,  25, SOLID
-		25,  75,  25, SOLID
+		30,  30,  30, SOLID
+		110, 110, 110, SOLID
+		35, 180,  35, SOLID
+		180,  35,  35, SOLID
+		180,  35, 180, SOLID
+		35,  35, 180, SOLID
+		35, 180, 180, SOLID
+		180, 180,  35, SOLID
+		35,  35, 110, SOLID
+		110,  35,  35, SOLID
+		35, 110,  35, SOLID
 		255, 255, 255, SOLID
 # continue button brush
 		75,  75, 125, SOLID
@@ -652,15 +650,15 @@
 # bodiagram bar 
 		40,  40,  40, SOLID
 # supply brush
-		120, 120, 120, SOLID 
+		120, 120, 120, SOLID
 # statistics window (generations left brush)
 		40,  40, 100, SOLID
 # tooltip
 		200, 200,  20, SOLID
 # disabled item
 		50,   50,  60, SOLID
-		
 	@END
+	
 	@YELLOW_THEME
 		0,   0,   0, SOLID
 # main window is transparent
@@ -681,30 +679,30 @@
 		50,   50,  50, SOLID
 
 # unit list colors:
-		10,  10,  10, SOLID
-		25,  25,  25, SOLID
-		 0,  50,   0, SOLID
-		50,   0,   0, SOLID
-		50,   0,  50, SOLID
-		 0,   0,  50, SOLID
-		 0,  50,  50, SOLID
-		50,  50,   0, SOLID
-		 0,   0,  25, SOLID
-		25,   0,   0, SOLID
-		 0,  25,   0, SOLID
+		15,  15,  15, SOLID
+		35,  35,  35, SOLID
+		 0,  75,   0, SOLID
+		75,   0,   0, SOLID
+		75,   0,  75, SOLID
+		 0,   0,  75, SOLID
+		 0,  75,  75, SOLID
+		75,  75,   0, SOLID
+		 0,   0,  35, SOLID
+		35,   0,   0, SOLID
+		 0,  35,   0, SOLID
 
 # bright unit list colors:
-		20,  20,  20, SOLID
-		75,  75,  75, SOLID
-		25, 125,  25, SOLID
-		125,  25,  25, SOLID
-		125,  25, 125, SOLID
-		25,  25, 125, SOLID
-		25, 125, 125, SOLID
-		125, 125,  25, SOLID
-		25,  25,  75, SOLID
-		75,  25,  25, SOLID
-		25,  75,  25, SOLID
+		30,  30,  30, SOLID
+		110, 110, 110, SOLID
+		35, 180,  35, SOLID
+		180,  35,  35, SOLID
+		180,  35, 180, SOLID
+		35,  35, 180, SOLID
+		35, 180, 180, SOLID
+		180, 180,  35, SOLID
+		35,  35, 110, SOLID
+		110,  35,  35, SOLID
+		35, 110,  35, SOLID
 		255, 255, 255, SOLID
 # continue button brush
 		115,  115, 75, SOLID
@@ -717,14 +715,13 @@
 # bodiagram bar 
 		40,  40,  40, SOLID
 # supply brush
-		120, 120, 120, SOLID 
+		120, 120, 120, SOLID
 # statistics window (generations left brush)
 		90,  90, 40, SOLID
 # tooltip
 		200, 200,  20, SOLID
 # disabled item
 		55,   55,  50, SOLID
-		
 	@END
 
 @END
@@ -744,6 +741,7 @@
 			mouse3
 			radio_off
 			radio_on
+			back
 			bar
 			key
 		@END
@@ -761,6 +759,7 @@
 			mouse3
 			radio_off
 			radio_on
+			back
 			bar
 			key
 		@END
@@ -777,6 +776,7 @@
 			mouse3
 			radio_off
 			radio_on
+			back
 			bar
 			key
 		@END
@@ -794,7 +794,6 @@
 			The core window, dock center inside of, Main window, 500, 220
 			Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
 			Build order window, absolute coordinates, 500, 150, 200, 100
-# TODO
 			Force window, absolute coordinates, 100, 150, 300, 100
 			Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
 			Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 150
@@ -830,7 +829,6 @@
 			Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
 			Build order window, dock with lower border of, Timer window, dock right inside of, Main window, 200, 100
 			Force window, dock left inside of, Main window, dock with lower border of, NULL window, 300, 120
-#dock top inside of, Main window, 300, 100
 			Timer window, dock top inside of, Main window, dock right inside of, Main window, 200, 120
 			Statistics window, dock with right border of, Force window, dock top inside of, Main window, 420, 120
 			Build order diagram window, dock with right border of, Force window, dock with lower border of, Statistics window, 500, 110
@@ -847,7 +845,6 @@
 			The core window, dock center inside of, Main window, 500, 220
 			Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
 			Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
-#			Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
 			Force window, dock top inside of, Main window, dock left inside of, Main window, 300, 100
 			Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
 			Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 120
@@ -865,7 +862,6 @@
 			The core window, dock center inside of, Main window, 500, 220
 			Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
 			Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
-#			Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
 			Force window, dock left inside of, Main window, dock top inside of, Main window, 300, 100
 			Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
 			Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 120
@@ -883,7 +879,6 @@
 			The core window, dock center inside of, Main window, 500, 220
 			Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
 			Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
-#			Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
 			Force window, dock left inside of, Main window, dock top inside of, Main window, 300, 100
 			Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
 			Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 120
@@ -901,7 +896,6 @@
 			The core window, dock center inside of, Main window, 500, 220
 			Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
 			Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
-#			Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
 			Force window, dock left inside of, Main window, dock top inside of, Main window, 300, 100
 			Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
 			Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 120
@@ -932,22 +926,20 @@
 	@END
 @END
 
-@MAX_RECTANGLES
+@MAX_HEIGHTS
 	@1024x768
 		@BASIC_TAB
 			NULL window, same as above
 			Main window, same as above
 			Message window, same as above
 			The core window, same as above
-			Tutorial window, calculate maxsize
+			Tutorial window, calculate maxheight
 			Build order window, calculate maxheight
-#            Force window, same position as above, 300, 200
 			Force window, calculate maxheight
 			Timer window, same as above
 			Statistics window, same as above
 			Build order diagram window, same as above
 			Build order graph window, calculate maxheight
-#dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 380
 			Info window, same as above
 			Settings window, same as above
 			Edit field window, same as above
@@ -958,9 +950,8 @@
 			Main window, same as above
 			Message window, same as above
 			The core window, same as above
-			Tutorial window, calculate maxsize
+			Tutorial window, calculate maxheight
 			Build order window, calculate maxheight
-#           Force window, same position as above, 300, 200
 			Force window, calculate maxheight
 			Timer window, same as above
 			Statistics window, same as above
@@ -976,14 +967,13 @@
 			Main window, same as above
 			Message window, same as above
 			The core window, same as above
-			Tutorial window, calculate maxsize
+			Tutorial window, calculate maxheight
 			Build order window, calculate maxheight
-			Force window, same position as above, 300, 200
-#calculate maxheight
+			Force window, calculate maxheight
 			Timer window, same as above
 			Statistics window, same as above
 			Build order diagram window, same as above
-			Build order graph window, same position as above, 500, 300
+			Build order graph window, calculate maxheight
 			Info window, same as above
 			Settings window, same as above
 			Edit field window, same as above
@@ -994,7 +984,7 @@
 			Main window, same as above
 			Message window, same as above
 			The core window, same as above
-			Tutorial window, calculate maxsize
+			Tutorial window, calculate maxheight
 			Build order window, calculate maxheight
 			Force window, calculate maxheight
 			Timer window, same as above
@@ -1011,7 +1001,7 @@
 			Main window, same as above
 			Message window, same as above
 			The core window, same as above
-			Tutorial window, calculate maxsize
+			Tutorial window, calculate maxheight
 			Build order window, calculate maxheight
 			Force window, calculate maxheight
 			Timer window, same as above
@@ -1028,7 +1018,7 @@
 			Main window, same as above
 			Message window, same as above
 			The core window, same as above
-			Tutorial window, calculate maxsize
+			Tutorial window, calculate maxheight
 			Build order window, calculate maxheight
 			Force window, calculate maxheight
 			Timer window, same as above
@@ -1045,7 +1035,7 @@
 			Main window, same as above
 			Message window, same as above
 			The core window, same as above
-			Tutorial window, calculate maxsize
+			Tutorial window, calculate maxheight
 			Build order window, calculate maxheight
 			Force window, calculate maxheight
 			Timer window, same as above
@@ -1062,7 +1052,7 @@
 			Main window, same as above
 			Message window, same as above
 			The core window, same as above
-			Tutorial window, calculate maxsize
+			Tutorial window, calculate maxheight
 			Build order window, calculate maxheight
 			Force window, calculate maxheight
 			Timer window, same as above
@@ -1094,19 +1084,19 @@
 	20, 2,  6,  6,  6,  5,  6,   6,  6,  6,  5,  6,   1,  1,  1,  1,  1,   1,  1,  1,  1,  1,  16, 16, 16, 16, 16,  17, 17, 17, 17,  17,   3,  3,  3,  3,  3
 
 # bo list
-	20, 2,  8,  8,  8,  8,  8,   8,  8, 19, 19, 19,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 24, 24, 24, 24, 24,  24, 24, 35, 35, 35,   0,  0,  0,  0,  0
-	20, 2,  9,  9,  9,  9,  9,   9,  9, 20, 20, 20,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 25, 25, 25, 25, 25,  25, 25, 36, 36, 36,   0,  0,  0,  0,  0
-	20, 2, 10, 10, 10, 10, 10,  10, 10, 21, 21, 21,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 26, 26, 26, 26, 26,  26, 26, 37, 37, 37,   0,  0,  0,  0,  0
-	20, 2, 11, 11, 11, 11, 11,  11, 11, 22, 22, 22,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 27, 27, 27, 27, 27,  27, 27, 38, 38, 38,   0,  0,  0,  0,  0
-	20, 2, 12, 12, 12, 12, 12,  12, 12, 23, 23, 23,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 28, 28, 28, 28, 28,  28, 28, 39, 39, 39,   0,  0,  0,  0,  0
-	20, 2, 13, 13, 13, 13, 13,  13, 13, 24, 24, 24,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 29, 29, 29, 29, 29,  29, 29, 40, 40, 40,   0,  0,  0,  0,  0
-	20, 2, 14, 14, 14, 14, 14,  14, 14, 25, 25, 25,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 30, 30, 30, 30, 30,  30, 30, 41, 41, 41,   0,  0,  0,  0,  0
-	20, 2, 15, 15, 15, 15, 15,  15, 15, 26, 26, 26,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 31, 31, 31, 31, 31,  31, 31, 42, 42, 42,   0,  0,  0,  0,  0
-	20, 2, 16, 16, 16, 16, 16,  16, 16, 27, 27, 27,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 32, 32, 32, 32, 32,  32, 32, 43, 43, 43,   0,  0,  0,  0,  0
-	20, 2, 17, 17, 17, 17, 17,  17, 17, 28, 28, 28,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 33, 33, 33, 33, 33,  33, 33, 44, 44, 44,   0,  0,  0,  0,  0
-	20, 2, 18, 18, 18, 18, 18,  18, 18, 29, 29, 29,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 34, 34, 34, 34, 34,  34, 34, 45, 45, 45,   0,  0,  0,  0,  0
+	40, 2,  8,  8,  8,  8,  8,   8,  8, 19, 19, 19,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 24, 24, 24, 24, 24,  24, 24, 35, 35, 35,   0,  0,  0,  0,  0
+	40, 2,  9,  9,  9,  9,  9,   9,  9, 20, 20, 20,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 25, 25, 25, 25, 25,  25, 25, 36, 36, 36,   0,  0,  0,  0,  0
+	40, 2, 10, 10, 10, 10, 10,  10, 10, 21, 21, 21,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 26, 26, 26, 26, 26,  26, 26, 37, 37, 37,   0,  0,  0,  0,  0
+	40, 2, 11, 11, 11, 11, 11,  11, 11, 22, 22, 22,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 27, 27, 27, 27, 27,  27, 27, 38, 38, 38,   0,  0,  0,  0,  0
+	40, 2, 12, 12, 12, 12, 12,  12, 12, 23, 23, 23,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 28, 28, 28, 28, 28,  28, 28, 39, 39, 39,   0,  0,  0,  0,  0
+	40, 2, 13, 13, 13, 13, 13,  13, 13, 24, 24, 24,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 29, 29, 29, 29, 29,  29, 29, 40, 40, 40,   0,  0,  0,  0,  0
+	40, 2, 14, 14, 14, 14, 14,  14, 14, 25, 25, 25,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 30, 30, 30, 30, 30,  30, 30, 41, 41, 41,   0,  0,  0,  0,  0
+	40, 2, 15, 15, 15, 15, 15,  15, 15, 26, 26, 26,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 31, 31, 31, 31, 31,  31, 31, 42, 42, 42,   0,  0,  0,  0,  0
+	40, 2, 16, 16, 16, 16, 16,  16, 16, 27, 27, 27,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 32, 32, 32, 32, 32,  32, 32, 43, 43, 43,   0,  0,  0,  0,  0
+	40, 2, 17, 17, 17, 17, 17,  17, 17, 28, 28, 28,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 33, 33, 33, 33, 33,  33, 33, 44, 44, 44,   0,  0,  0,  0,  0
+	40, 2, 18, 18, 18, 18, 18,  18, 18, 29, 29, 29,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 34, 34, 34, 34, 34,  34, 34, 45, 45, 45,   0,  0,  0,  0,  0
 
-	20, 2, 30, 30, 30, 30, 30,  30, 30, 30, 30, 30,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 35, 35, 35, 35, 35,  35, 35, 46, 46, 46,   0,  0,  0,  0,  0
+	40, 2, 30, 30, 30, 30, 30,  30, 30, 30, 30, 30,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10, 35, 35, 35, 35, 35,  35, 35, 46, 46, 46,   0,  0,  0,  0,  0
 # main window tabs 
 	30, 2, 31, 31, 31, 31, 31,  31, 32, 33, 33, 33,   3,  3, 10,  3, 10,   3,  3, 10, 10, 10,  5,  5,  5,  5,  5,   5,  5,  5,  7,  7,   0,  0,  0,  0,  0
 # force window add goal

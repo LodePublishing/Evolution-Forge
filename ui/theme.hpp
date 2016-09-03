@@ -39,7 +39,7 @@ enum eDataType
 	PEN_DATA_TYPE,
 	BRUSH_DATA_TYPE,
 	RECT_DATA_TYPE,
-	MAX_RECT_DATA_TYPE,
+	MAX_HEIGHT_DATA_TYPE,
 	BUTTON_DATA_TYPE,
 
 	MAX_DATA_TYPES
@@ -523,6 +523,7 @@ enum eString
 	TITLE_PREDEFINED_SETTINGS_STRING,
 // core-settings:
 	SETTING_MAX_TIME_STRING,
+	SETTING_RESTRICT_SC_STRING,
 	SETTING_FACILITY_MODE_STRING,
 	SETTING_AUTO_SAVE_RUNS_STRING,
 	SETTING_PREPROCESS_BUILDORDER_STRING,
@@ -551,6 +552,7 @@ enum eString
 	SETTING_SOFTWARE_MOUSE_STRING,
 
 	SETTING_MAX_TIME_TOOLTIP_STRING,
+	SETTING_RESTRICT_SC_TOOLTIP_STRING,
 	SETTING_FACILITY_MODE_TOOLTIP_STRING,
 	SETTING_AUTO_SAVE_RUNS_TOOLTIP_STRING,
 	SETTING_PREPROCESS_BUILDORDER_TOOLTIP_STRING,
@@ -691,7 +693,7 @@ enum eBitmap
 	RADIO_OFF,
 	RADIO_ON,
 
-	//BACKGROUND_BITMAP,
+	BACKGROUND_BITMAP,
 
 	BAR_BITMAP,
 	KEY_BITMAP,
@@ -909,7 +911,7 @@ class UI_Theme
 		const Point lookUpMaxRealDistance(const eWindow id, const unsigned int windowNumber=0) const;
 		
 		const Rect lookUpRect(const eWindow id, const unsigned int windowNumber=0, const unsigned int maxPlayer=0) const;
-		const Rect lookUpMaxRect(const eWindow id, const unsigned int windowNumber=0, const unsigned int maxPlayer=0) const;
+		const unsigned int lookUpMaxHeight(const eWindow id, const unsigned int windowNumber=0, const unsigned int maxPlayer=0) const;
 
 		const ButtonAnimation* lookUpButtonAnimation(const eButton id) const;
 		
@@ -948,7 +950,7 @@ class UI_Theme
 		Brush* brushList[MAX_COLOR_THEMES][MAX_BRUSHES];
 
 		Rect* rectList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
-		Rect* maxRectList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
+		unsigned int maxHeightList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
 
 		eArrangeDirection arrangeDirection[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
 
@@ -957,6 +959,111 @@ class UI_Theme
 		eWindow ywindow[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
 		eWindow xwindow[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
 };
+
+inline void UI_Theme::setColorTheme(const eTheme color_theme) {
+	colorTheme=color_theme;
+}
+
+inline const eTheme UI_Theme::getColorTheme() const {
+	return(colorTheme);
+}
+
+inline const eLanguage UI_Theme::getLanguage() const {
+	return(language);
+}
+
+inline void UI_Theme::setLanguage(const eLanguage theme_language) {
+	language = theme_language;
+}
+
+inline const eResolution UI_Theme::getResolution() const {
+	return(resolution);
+}
+
+inline void UI_Theme::setResolution(const eResolution theme_resolution) {
+	resolution = theme_resolution;
+	// TODO update whole engine
+}
+
+inline void UI_Theme::setTab(const eTab theme_tab) {
+	tab = theme_tab;
+}
+
+inline const eTab UI_Theme::getTab() const { 
+	return(tab);
+}
+
+inline const ButtonAnimation* UI_Theme::lookUpButtonAnimation(const eButton id) const
+{
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_BUTTONS)) {
+		toLog("ERROR: (UI_Theme::lookUpButtonAnimation) id out of range.");return(buttonAnimationList[0]);
+	}
+#endif
+	return(buttonAnimationList[id]);
+}
+
+inline const string* UI_Theme::lookUpString(const eString id) const
+{
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_STRINGS)) {
+		toLog("ERROR: (UI_Theme::lookUpString) id out of range.");return(stringList[language][0]);
+	}
+#endif
+	return(stringList[language][id]);
+}
+
+inline Color* UI_Theme::lookUpColor(const eColor id) const
+{
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_COLORS)) {
+		toLog("ERROR: (UI_Theme::lookUpColor) id out of range.");return(colorList[colorTheme][id]);
+	}
+#endif
+	return(colorList[colorTheme][id]);
+}
+
+inline /*const */Bitmap* UI_Theme::lookUpBitmap(const eBitmap id) const 
+{
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_BITMAPS)) {
+		toLog("ERROR: (UI_Theme::lookUpBitmap) id out of range.");return(bitmapList[resolution][colorTheme][id]);
+	}
+#endif
+
+	return(bitmapList[resolution][colorTheme][id]);
+}
+
+inline Pen* UI_Theme::lookUpPen(const ePen id) const
+{
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_PENS)) {
+		toLog("ERROR: (UI_Theme::lookUpPen) id out of range.");return(penList[resolution][colorTheme][id]);
+	}
+#endif
+	return(penList[resolution][colorTheme][id]);
+}
+
+inline Brush* UI_Theme::lookUpBrush(const eBrush id) const
+{
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_BRUSHES)) {
+		toLog("ERROR: (UI_Theme::lookUpBrush) id out of range.");return(brushList[colorTheme][id]);
+	}
+#endif
+	return(brushList[colorTheme][id]);
+}
+
+inline Font* UI_Theme::lookUpFont(const eFont id) const
+{
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_FONTS)) {
+		toLog("ERROR: (UI_Theme::lookUpFont) id out of range.");return(fontList[resolution]/*[language]*/[id]);
+	}
+#endif
+	return(fontList[resolution]/*[language]*/[id]);
+}
+
 
 #endif // _UI_THEME_HPP
 

@@ -432,7 +432,7 @@
 # statistics window
 		total harvested Minerals : %i
 		total harvested Gas : %i
-		Time : %i:%2i
+		Time : %s
 		Force : %i
 		Build order length : %i
 		Fitness average : %i [%i best]
@@ -501,6 +501,7 @@
 		Settings
 		Predefined settings
 		Max time
+		Restrict units
 		Facility mode
 		Autosave runs
 		Preprocess build order
@@ -538,6 +539,7 @@
 		Software mouse
 
 		Time a build order may use at maximum (has influence on the time the program needs to find a first solution)
+		Shall only StarCraft (TM) units be allowed to be build?
 		Shall the items in the 'add goal' menu be ordered by theme or by facility?
 		Shall the build orders be automaticly saved at the end of a run or should I ask what to do?
 		Shall a randomly created or a preprocessed build order used at the beginning?

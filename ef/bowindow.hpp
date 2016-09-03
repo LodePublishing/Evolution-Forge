@@ -24,19 +24,11 @@ class BoWindow : public UI_Window
 		void processList();
 		void process();
 		
-		void setMarkedIP(const unsigned int marked_ip);
-		const unsigned int getMarkedIP() const;
-		
-		void setMarkedUnit(const unsigned int marked_unit);
-		const unsigned int getMarkedUnit() const;
 		void assignAnarace(ANARACE* bo_anarace);
 	private:
 		void drawSelectionStuff(DC* dc) const;
+		void checkForInfoWindow();
 //		void resetButtons();
-		unsigned int markedUnit;
-		unsigned int ownMarkedUnit;
-		unsigned int markedIP;
-		unsigned int ownMarkedIP;
 		InfoWindow* infoWindow;
 		ANARACE* anarace;
 		std::list<Order*>* orderList;

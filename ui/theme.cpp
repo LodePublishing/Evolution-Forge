@@ -40,7 +40,7 @@ UI_Theme& UI_Theme::operator=(const UI_Theme& object)
 			for(int k = MAX_WINDOWS;k--;)
 			{
 				rectList[i][j][k]=object.rectList[i][j][k];
-				maxRectList[i][j][k]=object.maxRectList[i][j][k];
+				maxHeightList[i][j][k] = object.maxHeightList[i][j][k];
 				xwindow[i][j][k]=object.xwindow[i][j][k];
 				ywindow[i][j][k]=object.ywindow[i][j][k];
 			}
@@ -81,7 +81,7 @@ UI_Theme::UI_Theme(const UI_Theme& object) :
 			for(int k = MAX_WINDOWS;k--;)
 			{
 				rectList[i][j][k]=object.rectList[i][j][k];
-				maxRectList[i][j][k]=object.maxRectList[i][j][k];
+				maxHeightList[i][j][k]=object.maxHeightList[i][j][k];
 				xwindow[i][j][k]=object.xwindow[i][j][k];
 				ywindow[i][j][k]=object.ywindow[i][j][k];
 			}
@@ -98,32 +98,32 @@ UI_Theme::UI_Theme():
 {
 	for(int i = MAX_LANGUAGES;i--;)
 		for(int j = MAX_STRINGS;j--;)
-			stringList[i][j]=0;
+			stringList[i][j] = NULL;
 	for(int i = MAX_RESOLUTIONS;i--;)
 //		for(int j = MAX_LANGUAGES;j--;)
 			for(int k = MAX_FONTS;k--;)
-				fontList[i][k]=0;
+				fontList[i][k] = NULL;
 	for(int i = MAX_COLOR_THEMES;i--;)
 	{
 		for(int j = MAX_COLORS;j--;)
-				colorList[i][j]=0;
+				colorList[i][j] = NULL;
   		for(int j = MAX_RESOLUTIONS;j--;)
 		{
 			for(int k = MAX_PENS;k--;)
-				penList[i][j][k]=0;
+				penList[i][j][k] = NULL;
 			 for(int k = MAX_BITMAPS;k--;)
-				bitmapList[i][j][k]=0;
+				bitmapList[i][j][k] = NULL;
 		}
 					
 		for(int j = MAX_BRUSHES;j--;)
-			brushList[i][j]=0;
+			brushList[i][j] = NULL;
 	}
 	for(int i = MAX_RESOLUTIONS;i--;)
 		for(int j = MAX_TABS;j--;)
 			for(int k = MAX_WINDOWS;k--;)
 			{
-  				rectList[i][j][k]=0;
-				maxRectList[i][j][k]=0;
+  				rectList[i][j][k] = NULL;
+				maxHeightList[i][j][k]=0;
 				xwindow[i][j][k]=NULL_WINDOW;
 				ywindow[i][j][k]=NULL_WINDOW;
 			}
@@ -158,76 +158,13 @@ UI_Theme::~UI_Theme()
  	for(int i = MAX_RESOLUTIONS;i--;)
 		for(int j = MAX_TABS;j--;)
 			for(int k = MAX_WINDOWS;k--;)
-			{
 				delete rectList[i][j][k];
-				delete maxRectList[i][j][k];
-			}	
+
 	for(int i=MAX_BUTTONS;i--;)
 		delete buttonAnimationList[i];
 }
 
-void UI_Theme::setColorTheme(const eTheme color_theme)
-{
-	colorTheme=color_theme;
-}
 
-const eTheme UI_Theme::getColorTheme() const
-{
-	return(colorTheme);
-}
-
-const eLanguage UI_Theme::getLanguage() const
-{
-	return(language);
-}
-
-void UI_Theme::setLanguage(const eLanguage theme_language)
-{
-	language = theme_language;
-}
-
-const eResolution UI_Theme::getResolution() const
-{
-	return(resolution);
-}
-
-void UI_Theme::setResolution(const eResolution theme_resolution)
-{
-	resolution=theme_resolution;
-	// TODO update whole engine
-}
-
-void UI_Theme::setTab(const eTab theme_tab)
-{
-	tab=theme_tab;
-}
-
-const eTab UI_Theme::getTab() const
-{ 
-	return(tab);
-}
-
-const ButtonAnimation* UI_Theme::lookUpButtonAnimation(const eButton id) const
-{
-#ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_BUTTONS)) {
-		toLog("ERROR: (UI_Theme::lookUpButtonAnimation) id out of range.");return(buttonAnimationList[0]);
-	}
-#endif
-	return(buttonAnimationList[id]);
-}
-
-
-const string* UI_Theme::lookUpString(const eString id) const
-{
-#ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_STRINGS)) {
-		toLog("ERROR: (UI_Theme::lookUpString) id out of range.");return(stringList[language][0]);
-	}
-#endif
-
-	return(stringList[language][id]);
-}
 
 void findandreplace( string& source, const string& find, const string& replace )
 {
@@ -308,57 +245,6 @@ const string UI_Theme::lookUpFormattedString(const eString id, const unsigned in
 }
 
 
-Color* UI_Theme::lookUpColor(const eColor id) const
-{
-#ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_COLORS)) {
-		toLog("ERROR: (UI_Theme::lookUpColor) id out of range.");return(colorList[colorTheme][id]);
-	}
-#endif
-	return(colorList[colorTheme][id]);
-}
-
-/*const */Bitmap* UI_Theme::lookUpBitmap(const eBitmap id) const 
-{
-#ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_BITMAPS)) {
-		toLog("ERROR: (UI_Theme::lookUpBitmap) id out of range.");return(bitmapList[resolution][colorTheme][id]);
-	}
-#endif
-
-	return(bitmapList[resolution][colorTheme][id]);
-}
-
-Pen* UI_Theme::lookUpPen(const ePen id) const
-{
-#ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_PENS)) {
-		toLog("ERROR: (UI_Theme::lookUpPen) id out of range.");return(penList[resolution][colorTheme][id]);
-	}
-#endif
-	return(penList[resolution][colorTheme][id]);
-}
-
-Brush* UI_Theme::lookUpBrush(const eBrush id) const
-{
-#ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_BRUSHES)) {
-		toLog("ERROR: (UI_Theme::lookUpBrush) id out of range.");return(brushList[colorTheme][id]);
-	}
-#endif
-	return(brushList[colorTheme][id]);
-}
-
-Font* UI_Theme::lookUpFont(const eFont id) const
-{
-#ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_FONTS)) {
-		toLog("ERROR: (UI_Theme::lookUpFont) id out of range.");return(fontList[resolution]/*[language]*/[id]);
-	}
-#endif
-	return(fontList[resolution]/*[language]*/[id]);
-}
-
 const Point UI_Theme::lookUpRealDistance(const eWindow id, const unsigned int windowNumber) const // ~~ Name
 {
 #ifdef _SCC_DEBUG
@@ -388,11 +274,11 @@ const Point UI_Theme::lookUpMaxRealDistance(const eWindow id, const unsigned int
 	if(id==MAIN_WINDOW) return(Point(0,0));
 	switch(arrangeDirection[resolution][tab][id])
 	{
-		case ARRANGE_LEFT_TO_RIGHT:return(Point(windowNumber*maxRectList[resolution][tab][id]->GetWidth(), 0));break;
-		case ARRANGE_RIGHT_TO_LEFT:return(Point(-windowNumber*maxRectList[resolution][tab][id]->GetWidth(), 0));break;
-		case ARRANGE_TOP_TO_DOWN:return(Point(0, windowNumber*maxRectList[resolution][tab][id]->GetHeight()));break;
-		case ARRANGE_DOWN_TO_TOP:return(Point(0, -windowNumber*maxRectList[resolution][tab][id]->GetHeight()));break;
-		default:return(Point(0,0));
+		case ARRANGE_LEFT_TO_RIGHT:return(Point(windowNumber*rectList[resolution][tab][id]->GetWidth(), 0));break;
+		case ARRANGE_RIGHT_TO_LEFT:return(Point(-windowNumber*rectList[resolution][tab][id]->GetWidth(), 0));break;
+		case ARRANGE_TOP_TO_DOWN:return(Point(0, windowNumber*maxHeightList[resolution][tab][id]));break;
+		case ARRANGE_DOWN_TO_TOP:return(Point(0, -windowNumber*maxHeightList[resolution][tab][id]));break;
+		default:return(Point(0,0));break;
 	}
 }
 
@@ -420,11 +306,11 @@ const Rect UI_Theme::lookUpRect(const eWindow id, const unsigned int windowNumbe
 	return(Rect(rectList[resolution][tab][id]->GetTopLeft()+p, rectList[resolution][tab][id]->GetSize()));
 }
 
-const Rect UI_Theme::lookUpMaxRect(const eWindow id, const unsigned int windowNumber, const unsigned int maxPlayer) const 
+const unsigned int UI_Theme::lookUpMaxHeight(const eWindow id, const unsigned int windowNumber, const unsigned int maxPlayer) const 
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_WINDOWS)) {
-		toLog("ERROR: (UI_Theme::lookUpMaxRect) id out of range.");return(Rect(0,0,0,0));
+		toLog("ERROR: (UI_Theme::lookUpMaxHeight) id out of range.");return(0);
 	}
 #endif
 	Point p;
@@ -436,7 +322,7 @@ const Rect UI_Theme::lookUpMaxRect(const eWindow id, const unsigned int windowNu
 		case ARRANGE_DOWN_TO_TOP:p=lookUpMaxRealDistance(id, windowNumber) + Point(0,lookUpMaxRealDistance(ywindow[resolution][tab][id], maxPlayer).y);break;
 		default:break;
 	}
-	return(Rect(maxRectList[resolution][tab][id]->GetTopLeft()+p, maxRectList[resolution][tab][id]->GetSize()));
+	return(p.y);
 }
 
 const eDataType getDataType(const string& item)
@@ -448,7 +334,7 @@ const eDataType getDataType(const string& item)
 	if(item=="@BRUSHES") return(BRUSH_DATA_TYPE);else
 	if(item=="@BITMAPS") return(BITMAP_DATA_TYPE);else
 	if(item=="@RECTANGLES") return(RECT_DATA_TYPE);else
-	if(item=="@MAX_RECTANGLES") return(MAX_RECT_DATA_TYPE);else
+	if(item=="@MAX_HEIGHTS") return(MAX_HEIGHT_DATA_TYPE);else
 	if(item=="@BUTTONS") return(BUTTON_DATA_TYPE);else
 	return(ZERO_DATA_TYPE);
 }
@@ -464,7 +350,7 @@ const eSubDataType getSubDataType(const eDataType mode)
 		case PEN_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
 		case BRUSH_DATA_TYPE:return(COLOR_THEME_SUB_DATA_TYPE);
 		case RECT_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
-		case MAX_RECT_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
+		case MAX_HEIGHT_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
 		default:return(ZERO_SUB_DATA_TYPE);
 	}
 }
@@ -477,7 +363,7 @@ const eSubSubDataType getSubSubDataType(const eDataType mode)
 		case BITMAP_DATA_TYPE:return(COLOR_THEME_SUB_SUB_DATA_TYPE);
 		case PEN_DATA_TYPE:return(COLOR_THEME_SUB_SUB_DATA_TYPE);
 		case RECT_DATA_TYPE:return(TAB_SUB_SUB_DATA_TYPE);
-		case MAX_RECT_DATA_TYPE:return(TAB_SUB_SUB_DATA_TYPE);
+		case MAX_HEIGHT_DATA_TYPE:return(TAB_SUB_SUB_DATA_TYPE);
 		default:return(ZERO_SUB_SUB_DATA_TYPE);
 	}
 }
@@ -627,6 +513,94 @@ eCommand parse_commands(const string& item)
 }
 
 // Rueckgabewert: Richtung
+
+eArrangeDirection parse_complete_command(const string* p, eCommand* e, unsigned int &height)
+{
+	signed int x=-1;signed int y=-1;
+	unsigned int dx=0;unsigned int dy=0;
+	bool xpart=false; bool ypart=false; bool xypart=false; bool dxpart=false; bool dypart=false;
+	bool xcomplete=false;bool ycomplete=false;
+	bool window=false;
+
+// additional windows: arrange left to right = 0, arrange right to left = 1, arrange top to down = 2, arrange down to top = 3 :)
+	eArrangeDirection direction=ARRANGE_LEFT_TO_RIGHT;
+	
+	for(int i = 1; i <50;i++)
+	{
+		if(xcomplete&&ycomplete)
+		{
+			dxpart=true;
+			xcomplete=false;
+			ycomplete=false;
+		}
+	
+		e[i]=NO_COMMAND;
+		if(window)
+		{
+			e[i]=(eCommand)parse_window(p[i]);
+			window=false;
+		}
+		else
+		if(xpart)
+		{
+			x=atoi(p[i].c_str());
+			xpart=false;
+			if(xypart)
+			{
+				ypart=true;
+				xypart=false;
+			}
+		} else
+		if(ypart)
+		{
+			y=atoi(p[i].c_str());
+			ypart=false;
+		} else
+		if(dxpart)
+		{
+			dx=atoi(p[i].c_str());
+			dxpart=false;dypart=true;
+		} else
+		if(dypart)
+		{
+			dy=atoi(p[i].c_str());
+			dypart=false;
+		} else
+		{
+			eCommand k=parse_commands(p[i]);
+			switch(k)
+			{
+				case ABSOLUTE_COORDINATES_COMMAND:xpart=true;xypart=true;xcomplete=true;ycomplete=true;break;
+				case ABSOLUTE_X_COORDINATE_COMMAND:xpart=true;xcomplete=true;direction=ARRANGE_LEFT_TO_RIGHT;break;
+				case ABSOLUTE_Y_COORDINATE_COMMAND:ypart=true;ycomplete=true;direction=ARRANGE_TOP_TO_DOWN;break;
+				case DOCK_WITH_LEFT_BORDER_OF_COMMAND:e[i]=k;window=true;xcomplete=true;direction=ARRANGE_RIGHT_TO_LEFT;break;
+				case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:e[i]=k;window=true;xcomplete=true;direction=ARRANGE_LEFT_TO_RIGHT;break;
+				case DOCK_WITH_LOWER_BORDER_OF_COMMAND:e[i]=k;window=true;ycomplete=true;direction=ARRANGE_TOP_TO_DOWN;break;
+				case DOCK_WITH_UPPER_BORDER_OF_COMMAND:e[i]=k;window=true;ycomplete=true;direction=ARRANGE_DOWN_TO_TOP;break;
+				case DOCK_CENTER_INSIDE_OF_COMMAND:e[i]=k;window=true;dxpart=true;break;
+				case DOCK_LEFT_INSIDE_OF_COMMAND:e[i]=k;window=true;xcomplete=true;direction=ARRANGE_LEFT_TO_RIGHT;break;
+				case DOCK_RIGHT_INSIDE_OF_COMMAND:e[i]=k;window=true;xcomplete=true;direction=ARRANGE_RIGHT_TO_LEFT;break;
+				case DOCK_TOP_INSIDE_OF_COMMAND:
+												  {
+													  e[i]=k;window=true;ycomplete=true;direction=ARRANGE_TOP_TO_DOWN;
+												  }break;
+				case DOCK_BOTTOM_INSIDE_OF_COMMAND:e[i]=k;window=true;ycomplete=true;direction=ARRANGE_DOWN_TO_TOP;break;
+//				case CALCULATE_MAXSIZE_COMMAND:break;
+//				case CALCULATE_MAXWIDTH_COMMAND:break;
+//				case CALCULATE_MAXHEIGHT_COMMAND:break;
+				case SAME_POSITION_AS_ABOVE_COMMAND:e[i]=k;dxpart=true;break;
+//				case SAME_SIZE_AS_ABOVE_COMMAND:break;
+//				case SAME_AS_ABOVE_COMMAND:break;//TODO!
+						
+				default:e[i]=k;break;			
+			}
+			
+		}
+	}
+	height = dy;
+	return(direction);
+}
+
 
 eArrangeDirection parse_complete_command(const string* p, eCommand* e, Rect& rect)
 {
@@ -921,7 +895,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 	eTab current_tab=ZERO_TAB;
 
 	eCommand trectList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS][MAX_PARAMETERS];
-	eCommand tmaxRectList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS][MAX_PARAMETERS];
+	eCommand tmaxHeightList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS][MAX_PARAMETERS];
 
 	for(int i = MAX_RESOLUTIONS;i--;)
 		for(int j = MAX_TABS;j--;)
@@ -929,7 +903,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 				for(int l = MAX_PARAMETERS;l--;)
 				{
 					trectList[i][j][k][l]=NO_COMMAND;
-					tmaxRectList[i][j][k][l]=NO_COMMAND;
+					tmaxHeightList[i][j][k][l]=NO_COMMAND;
 				}
 
 	int current_line = 0;
@@ -1143,7 +1117,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 #endif
 							bitmapList[current_resolution][current_theme][current_line]=new Bitmap(t);
 							
-							SDL_SetColorKey(bitmapList[current_resolution][current_theme][current_line]->getSurface(), SDL_SRCCOLORKEY , SDL_MapRGB(bitmapList[current_resolution][current_theme][current_line]->getFormat(), 0,0,0));
+//							SDL_SetColorKey(bitmapList[current_resolution][current_theme][current_line]->getSurface(), SDL_SRCCOLORKEY , SDL_MapRGB(bitmapList[current_resolution][current_theme][current_line]->getFormat(), 0,0,0));
 		
 						}break;
 					case PEN_DATA_TYPE:penList[current_resolution][current_theme][current_line]=new Pen(dc->GetSurface(),v[1],v[2],v[3],v[0],get_pen_style(p[4]));break;
@@ -1158,10 +1132,9 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 							   << rectList[current_resolution][current_tab][parse_window(p[0])]->GetHeight();
 							toLog(os.str());*/
 						}break;
-					case MAX_RECT_DATA_TYPE:
+					case MAX_HEIGHT_DATA_TYPE:
 						{
-							maxRectList[current_resolution][current_tab][parse_window(p[0])]=new Rect();
-							parse_complete_command(p, &(tmaxRectList[current_resolution][current_tab][parse_window(p[0])][0]), *(maxRectList[current_resolution][current_tab][parse_window(p[0])]));
+							parse_complete_command(p, &(tmaxHeightList[current_resolution][current_tab][parse_window(p[0])][0]), maxHeightList[current_resolution][current_tab][parse_window(p[0])]);
 						}break;					
 					default:break;
 				}
@@ -1205,7 +1178,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 							}break;
 							case DOCK_WITH_UPPER_BORDER_OF_COMMAND:
 							{
-								rectList[i][j][k]->SetTop(-5+rectList[i][j][trectList[i][j][k][l+1]]->GetLeft()-rectList[i][j][k]->GetHeight());
+								rectList[i][j][k]->SetTop(-5+rectList[i][j][trectList[i][j][k][l+1]]->GetTop()-rectList[i][j][k]->GetHeight());
 								ywindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
 								l++;
 							}break;
@@ -1237,7 +1210,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 							}break;
 							case DOCK_BOTTOM_INSIDE_OF_COMMAND:
 							{
-								rectList[i][j][k]->SetTop(100+rectList[i][j][trectList[i][j][k][l+1]]->GetTop()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight()-rectList[i][j][k]->GetHeight()); // TODO
+								rectList[i][j][k]->SetTop(rectList[i][j][trectList[i][j][k][l+1]]->GetTop()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight()-rectList[i][j][k]->GetHeight()-10); // TODO
 								ywindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
 								l++;
 							}break;
@@ -1260,48 +1233,31 @@ while(change)
 	for(int i=0;i<MAX_RESOLUTIONS;i++)
 		for(int j=0;j<MAX_TABS;j++)
 			for(int k=0;k<MAX_WINDOWS;k++)
-				if(maxRectList[i][j][k])
+				if(maxHeightList[i][j][k]>0)
 				{
-					int oldx=maxRectList[i][j][k]->GetLeft();
-					int oldy=maxRectList[i][j][k]->GetTop();
+					int oldy = maxHeightList[i][j][k];
 					for(unsigned int l=0;l<MAX_PARAMETERS;l++)
-						switch(tmaxRectList[i][j][k][l])
+						switch(tmaxHeightList[i][j][k][l])
 						{
 							case NO_COMMAND:break;
-							case DOCK_WITH_LEFT_BORDER_OF_COMMAND:
-								maxRectList[i][j][k]->SetLeft(5+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetLeft()-maxRectList[i][j][k]->GetWidth());l++;break;
-							case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:
-								maxRectList[i][j][k]->SetLeft(-5+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetLeft()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetWidth());l++;break;
-							case DOCK_WITH_LOWER_BORDER_OF_COMMAND:
-								maxRectList[i][j][k]->SetTop(5+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetTop()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetHeight());l++;break;
-							case DOCK_WITH_UPPER_BORDER_OF_COMMAND:
-								maxRectList[i][j][k]->SetTop(-5+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetLeft()-maxRectList[i][j][k]->GetHeight());l++;break;
-							case DOCK_CENTER_INSIDE_OF_COMMAND:								 
-								maxRectList[i][j][k]->SetLeft(maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetLeft()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetWidth()-maxRectList[i][j][k]->GetWidth());
-								maxRectList[i][j][k]->SetTop(maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetTop()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetHeight()-maxRectList[i][j][k]->GetHeight());l++;break;
-							case DOCK_LEFT_INSIDE_OF_COMMAND:
-								maxRectList[i][j][k]->SetLeft(10+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetLeft());l++;break;
-							case DOCK_RIGHT_INSIDE_OF_COMMAND:
-								maxRectList[i][j][k]->SetLeft(-10+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetLeft()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetWidth()-maxRectList[i][j][k]->GetWidth());l++;break;
-							case DOCK_TOP_INSIDE_OF_COMMAND:;
-								maxRectList[i][j][k]->SetTop(10+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetTop());l++;break;
-							case DOCK_BOTTOM_INSIDE_OF_COMMAND:
-								maxRectList[i][j][k]->SetTop(-10+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetTop()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetHeight()-maxRectList[i][j][k]->GetHeight());l++;break;
-							case CALCULATE_MAXHEIGHT_COMMAND:maxRectList[i][j][k]->SetTopLeft(rectList[i][j][k]->GetTopLeft());
-															 maxRectList[i][j][k]->SetSize(Size(rectList[i][j][k]->GetWidth(), rectList[i][j][MAIN_WINDOW]->GetHeight() + rectList[i][j][MAIN_WINDOW]->GetTop() - rectList[i][j][k]->GetTop() - 30));break;
-															 // main window mal hernehmen... TODO andere Fenster miteinberechnen!!
-							
-							case CALCULATE_MAXSIZE_COMMAND:
-							case CALCULATE_MAXWIDTH_COMMAND: //TODO
-							case SAME_POSITION_AS_ABOVE_COMMAND:
-								maxRectList[i][j][k]->SetTopLeft(rectList[i][j][k]->GetTopLeft());break;
+							case DOCK_WITH_LEFT_BORDER_OF_COMMAND:break;
+							case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:break;
+							case DOCK_WITH_LOWER_BORDER_OF_COMMAND:break;
+							case DOCK_WITH_UPPER_BORDER_OF_COMMAND:break;
+							case DOCK_CENTER_INSIDE_OF_COMMAND:break;
+							case DOCK_LEFT_INSIDE_OF_COMMAND:break;
+							case DOCK_RIGHT_INSIDE_OF_COMMAND:break;
+							case DOCK_TOP_INSIDE_OF_COMMAND:break;
+							case DOCK_BOTTOM_INSIDE_OF_COMMAND:break;
+							case CALCULATE_MAXHEIGHT_COMMAND:
+								maxHeightList[i][j][k] = rectList[i][j][MAIN_WINDOW]->GetHeight() + rectList[i][j][MAIN_WINDOW]->GetTop() - rectList[i][j][k]->GetTop() - 30;break;
+										 // main window mal hernehmen... TODO andere Fenster miteinberechnen!!
+							case CALCULATE_MAXSIZE_COMMAND:break;
+							case CALCULATE_MAXWIDTH_COMMAND:break;
+							case SAME_POSITION_AS_ABOVE_COMMAND:break;
 							case SAME_SIZE_AS_ABOVE_COMMAND:
-								maxRectList[i][j][k]->SetSize(rectList[i][j][k]->GetSize());break;
 							case SAME_AS_ABOVE_COMMAND:
-							{
-								maxRectList[i][j][k]->SetTopLeft(rectList[i][j][k]->GetTopLeft());
-								maxRectList[i][j][k]->SetSize(rectList[i][j][k]->GetSize());
-							}
+								maxHeightList[i][j][k] = rectList[i][j][k]->GetHeight();
 							break;
 							default:
 #ifdef _SCC_DEBUG								
@@ -1309,7 +1265,7 @@ while(change)
 #endif
 								break;
 						}
-					if((maxRectList[i][j][k]->GetLeft()!=oldx)||(maxRectList[i][j][k]->GetTop()!=oldy))
+					if(maxHeightList[i][j][k]!=oldy)
 						change=1;
 				}
 	}

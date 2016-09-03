@@ -27,30 +27,21 @@ const Size Font::GetTextExtent(const std::string& font_text) const
 
 Font::~Font()
 {
-    if(font) 
+	if(font) 
 	{	
 		TTF_CloseFont(font);
-	    font=NULL;
+		font=NULL;
 	}
 }
-#include <sstream>
 
 void Font::DrawText(SDL_Surface* surface, const SDL_Color& color, const std::string& font_text, const signed int x, const signed int y) const
 {
-    SDL_Surface *sText = TTF_RenderUTF8_Blended( font, font_text.c_str(), color );
+	SDL_Surface *sText = TTF_RenderUTF8_Blended( font, font_text.c_str(), color );
 	if(sText==NULL)
 		return;
-    SDL_Rect rcDest = {x,y-4,0,0};
-    SDL_BlitSurface( sText, NULL, surface, &rcDest );
-    SDL_FreeSurface( sText );
-}
-
-Font::operator TTF_Font*() 
-{
-	return(font);
+	SDL_Rect rcDest = {x,y-4,0,0};
+	SDL_BlitSurface( sText, NULL, surface, &rcDest );
+	SDL_FreeSurface( sText );
 }
 
 
-TTF_Font* Font::getTTF_Font() const {
-	return(font);
-}

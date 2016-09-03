@@ -6,11 +6,11 @@ class MAP_LOCATION
 {
 	private:
 		std::string name;
-		int mineralPatches;
-		int vespeneGeysirs;
-		int mineralDistance;
-		int distance[MAX_LOCATIONS];
-		int nearest[MAX_LOCATIONS];
+		unsigned int mineralPatches;
+		unsigned int vespeneGeysirs;
+		unsigned int mineralDistance;
+		unsigned int distance[MAX_LOCATIONS];
+		unsigned int nearest[MAX_LOCATIONS];
 	public:
 		MAP_LOCATION();
 		~MAP_LOCATION();
@@ -18,24 +18,122 @@ class MAP_LOCATION
 		MAP_LOCATION(const MAP_LOCATION& object);
 		
 		const std::string& getName() const;
-		const int getMineralDistance() const;
-		const int getDistance(const int location) const;
-		const int getNearest(const int step) const;
-		const int getMineralPatches() const;
-		const int getVespeneGeysirs() const;
+		const unsigned int getMineralDistance() const;
+		const unsigned int getDistance(const unsigned int location) const;
+		const unsigned int getNearest(const unsigned int step) const;
+		const unsigned int getMineralPatches() const;
+		const unsigned int getVespeneGeysirs() const;
 	
 		void setName(const std::string& location_name);
-		void setMineralDistance(const int mineral_distance);
-		void setDistance(const int target, const int location_distance);
-		void setMineralPatches(const int mineral_patches);
-		void setVespeneGeysirs(const int vespene_geysirs);
+		void setMineralDistance(const unsigned int mineral_distance);
+		void setDistance(const unsigned int target, const unsigned int location_distance);
+		void setMineralPatches(const unsigned int mineral_patches);
+		void setVespeneGeysirs(const unsigned int vespene_geysirs);
 
 		void resetData();
 		void calculateDistances();
 		void adjustDistances();
 };
 
-	  	
+inline void MAP_LOCATION::setName(const std::string& location_name)
+{
+	name.assign(location_name);
+}
+
+inline const unsigned int MAP_LOCATION::getMineralPatches() const
+{
+	return(mineralPatches);
+}
+
+inline const unsigned int MAP_LOCATION::getVespeneGeysirs() const
+{
+	return(vespeneGeysirs);
+}
+
+inline void MAP_LOCATION::setMineralPatches(const unsigned int mineral_patches)
+{
+#ifdef _SCC_DEBUG
+// TODO constant
+	if(mineral_patches > 100) {
+		toLog("DEBUG: (MAP_LOCATION::setMineralPatches): Value out of range.");return;
+	}
+#endif
+	mineralPatches = mineral_patches;
+}
+
+inline void MAP_LOCATION::setVespeneGeysirs(const unsigned int vespene_geysirs)
+{
+#ifdef _SCC_DEBUG
+// TODO constantv
+	if(vespene_geysirs > 100) {
+		toLog("DEBUG: (MAP_LOCATION::setVespeneGeysirs): Value out of range.");return;
+	}
+#endif
+	vespeneGeysirs = vespene_geysirs;
+}
+
+inline void MAP_LOCATION::setMineralDistance(const unsigned int mineral_distance)
+{
+#ifdef _SCC_DEBUG
+	if(mineral_distance > 5) {
+		toLog("DEBUG: (MAP_LOCATION::setMineralDistance): Value out of range.");return;
+	}
+#endif
+	mineralDistance = mineral_distance;
+}
+
+inline const unsigned int MAP_LOCATION::getNearest(const unsigned int step) const
+{
+#ifdef _SCC_DEBUG
+	if((step<=0)||(step>=MAX_LOCATIONS)) {
+		toLog("DEBUG: (MAP_LOCATION::getNearest): Value out of range.");return(0);
+	}
+#endif
+	return(nearest[step]);
+}
+
+
+inline void MAP_LOCATION::setDistance(const unsigned int target, const unsigned int location_distance)
+{
+#ifdef _SCC_DEBUG
+	if(target>=MAX_LOCATIONS) {
+		toLog("DEBUG: (MAP_LOCATION::setDistance): Value target out of range.");return;
+	}
+	if(location_distance>500) {
+		toLog("DEBUG: (MAP_LOCATION::setDistance): Value distance out of range.");return;
+	}
+#endif
+	distance[target] = location_distance;
+}
+
+inline const std::string& MAP_LOCATION::getName() const
+{
+	return(name);
+}
+
+inline const unsigned int MAP_LOCATION::getMineralDistance() const
+{
+#ifdef _SCC_DEBUG
+	if(mineralDistance>5) {
+		toLog("DEBUG: (MAP_LOCATION::getMineralDistance): Variable not initialized.");return(0);
+	}
+#endif
+	return(mineralDistance);
+}
+
+inline const unsigned int MAP_LOCATION::getDistance(const unsigned int location) const
+{
+#ifdef _SCC_DEBUG
+	if(location>=MAX_LOCATIONS) {
+		toLog("DEBUG: (MAP_LOCATION::getDistance): Value out of range.");return(0);
+	}
+	if(distance[location]>500) {
+		toLog("DEBUG: (MAP_LOCATION::getDistance): Value distance out of range.");return(0);
+	}
+#endif
+	return(distance[location]);
+}
+
 
 #endif // _CORE_LOCATION_HPP
 

@@ -38,69 +38,25 @@ class UI_Window : public UI_Object
 		const unsigned int getScrollY() const;
 
 // returns position and size of the client area
-		const Rect& getRelativeClientRect() const {
-			return(clientRect);
-		}
-
-		const Rect getAbsoluteClientRect() const {
-			return(Rect(getAbsoluteClientRectPosition(), getClientRectSize()));
-		}
-
-		const Point getRelativeClientRectPosition() const {
-			return(clientRect.GetTopLeft());
-		}
-
-		const Point getAbsoluteClientRectPosition() const {
-    		return(clientRect.GetTopLeft()+getAbsolutePosition());
-		}
-                                                                            
-		const unsigned int getClientRectHeight() const {
-		    return(clientRect.GetHeight());
-		}
-                                                                            
-		const unsigned int getClientRectWidth() const {
-		    return(clientRect.GetWidth());
-		}
-                                                                            
-		const Size& getClientRectSize() const {
-		    return(clientRect.GetSize());
-		}
-                                                                            
-		const signed int getRelativeClientRectUpperBound() const {
-		    return(clientRect.GetTop());
-		}
-                                                                            
-		const signed int getRelativeClientRectLeftBound() const {
-		    return(clientRect.GetLeft());
-        }
-                                                                            
-		const signed int getRelativeClientRectLowerBound() const {
-		    return(clientRect.GetBottom());
-		}
-                                                                            
-		const signed int getRelativeClientRectRightBound() const {
-		    return(clientRect.GetRight());
-		}
-                                                                            
-		const signed int getAbsoluteClientRectUpperBound() const {
-		    return(getAbsoluteClientRectPosition().y);
-		}
-
-		const signed int getAbsoluteClientRectLeftBound() const {
-	    return(getAbsoluteClientRectPosition().x);
-		}
-                                                                            
-		const signed int getAbsoluteClientRectLowerBound() const {
-		    return(getAbsoluteClientRectPosition().y + getClientRectHeight() -1 ); // TODO?
-		}
-
-		const signed int getAbsoluteClientRectRightBound() const {
-		    return(getAbsoluteClientRectPosition().x + getClientRectWidth() -1 );
-		}
+		const Rect& getRelativeClientRect() const;
+		const Rect getAbsoluteClientRect() const;
+		const Point getRelativeClientRectPosition() const;
+		const Point getAbsoluteClientRectPosition() const;
+		const unsigned int getClientRectHeight() const;
+		const unsigned int getClientRectWidth() const;
+		const Size& getClientRectSize() const;
+		const signed int getRelativeClientRectUpperBound() const;
+		const signed int getRelativeClientRectLeftBound() const;
+		const signed int getRelativeClientRectLowerBound() const;
+		const signed int getRelativeClientRectRightBound() const;
+		const signed int getAbsoluteClientRectUpperBound() const;
+		const signed int getAbsoluteClientRectLeftBound() const;
+		const signed int getAbsoluteClientRectLowerBound() const;
+		const signed int getAbsoluteClientRectRightBound() const;
 
 /*		const bool insideClientRect(const Point pos) const
 		{
-		    return(clientRect.Inside(pos - getAbsolutePosition())); //?
+			return(clientRect.Inside(pos - getAbsolutePosition())); //?
 		//  return(clientArea.Inside(rectangle.x,rectangle.y)||clientArea.Inside(rectangle.x+rectangle.width,rectangle.y+rectangle.height)||clientArea.Inside(rectangle.x+rectangle.width,rectangle.y)||clientArea.Inside(rectangle.x,rectangle.y+rectangle.height));
 		//  TODO: wenns auf beiden Seiten ueberlappt?
 		}*/ // TODO
@@ -108,12 +64,12 @@ class UI_Window : public UI_Object
 // do windows size changes smoothly		
 		void adjustClientRect();
 
-//	    void setRahmen(Rect rahmen);
-	    void addTab(UI_Button* tab_button);
+//		void setRahmen(Rect rahmen);
+		void addTab(UI_Button* tab_button);
 		const bool tabWasChanged() const;
 
 		void process();
-	    void draw(DC* dc) const;
+		void draw(DC* dc) const;
 
 		UI_Object* checkTooltip();
 		UI_Object* checkHighlight();
@@ -175,9 +131,11 @@ class UI_Window : public UI_Object
 
 		Rect originalClientRect;
 
-	    void drawTabs(DC* dc) const;
-    	void drawTitle(DC* dc) const;
-	    void drawToolTip(DC* dc, const Point p, const string* tip) const;
+		unsigned int maxHeight;
+
+		void drawTabs(DC* dc) const;
+		void drawTitle(DC* dc) const;
+		void drawToolTip(DC* dc, const Point p, const string* tip) const;
 
 		unsigned int windowNumber;
 		eIsAutoAdjust isAutoAdjust;
@@ -191,6 +149,91 @@ class UI_Window : public UI_Object
 		static bool changedFlag; 
 		static bool resetFlag;
 };
+
+inline const Rect& UI_Window::getRelativeClientRect() const {
+	return(clientRect);
+}
+
+inline const Rect UI_Window::getAbsoluteClientRect() const {
+	return(Rect(getAbsoluteClientRectPosition(), getClientRectSize()));
+}
+
+inline const Point UI_Window::getRelativeClientRectPosition() const {
+	return(clientRect.GetTopLeft());
+}
+
+inline const Point UI_Window::getAbsoluteClientRectPosition() const {
+	return(clientRect.GetTopLeft()+getAbsolutePosition());
+}
+
+inline const unsigned int UI_Window::getClientRectHeight() const {
+	return(clientRect.GetHeight());
+}
+
+inline const unsigned int UI_Window::getClientRectWidth() const {
+	return(clientRect.GetWidth());
+}
+
+inline const Size& UI_Window::getClientRectSize() const {
+	return(clientRect.GetSize());
+}
+
+inline const signed int UI_Window::getRelativeClientRectUpperBound() const {
+	return(clientRect.GetTop());
+}
+
+inline const signed int UI_Window::getRelativeClientRectLeftBound() const {
+	return(clientRect.GetLeft());
+}
+
+inline const signed int UI_Window::getRelativeClientRectLowerBound() const {
+	return(clientRect.GetBottom());
+}
+
+inline const signed int UI_Window::getRelativeClientRectRightBound() const {
+	return(clientRect.GetRight());
+}
+
+inline const signed int UI_Window::getAbsoluteClientRectUpperBound() const {
+	return(getAbsoluteClientRectPosition().y);
+}
+
+inline const signed int UI_Window::getAbsoluteClientRectLeftBound() const {
+	return(getAbsoluteClientRectPosition().x);
+}
+
+inline const signed int UI_Window::getAbsoluteClientRectLowerBound() const {
+	return(getAbsoluteClientRectPosition().y + getClientRectHeight() -1 ); // TODO?
+}
+
+inline const signed int UI_Window::getAbsoluteClientRectRightBound() const {
+	return(getAbsoluteClientRectPosition().x + getClientRectWidth() -1 );
+}
+
+inline void UI_Window::setChangedFlag(const bool flag) {
+	changedFlag=flag;
+}
+
+inline const bool UI_Window::getChangedFlag() {
+	return(changedFlag);
+}
+
+inline void UI_Window::changeAccepted() {
+	changedFlag=false;
+}
+
+inline void UI_Window::setResetFlag(const bool flag) {
+	resetFlag=flag;
+}
+
+inline const bool UI_Window::getResetFlag() {
+	return(resetFlag);
+}
+
+inline void UI_Window::resetAccepted() {
+	resetFlag=false;
+}
+
 
 #endif
 

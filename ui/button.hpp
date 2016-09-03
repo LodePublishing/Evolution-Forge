@@ -40,6 +40,7 @@ enum eAutoSize
 	NOTHING,
 	NO_AUTO_SIZE,
 	AUTO_SIZE_ONCE,
+	AUTO_SIZE_TWICE,
 	AUTO_SIZE,
 	AUTO_HEIGHT_FULL_WIDTH, // fehlerhaft! TODO
 	FULL_WIDTH,
@@ -66,13 +67,13 @@ class UI_Button:public UI_Object
 		UI_Button(const UI_Button& object);
 
 // TODO Beschreibung der Konstruktoren
-		UI_Button(UI_Object* button_parent, const Rect button_rect, const Rect button_max_rect, 
+		UI_Button(UI_Object* button_parent, const Rect button_rect, 
 		const eString button_text, 
 		const eButton button_type, const eTextMode button_text_mode = HORIZONTALLY_CENTERED_TEXT_MODE, const eButtonMode button_mode = STATIC_BUTTON_MODE, const ePositionMode button_position_mode = DO_NOT_ADJUST, const eFont button_font = SMALL_NORMAL_BOLD_FONT, const eAutoSize button_auto_size = NO_AUTO_SIZE);
 
-		UI_Button(UI_Object* button_parent, const Rect button_rect, const Rect button_max_rect, const string& button_text, const eButton button_type, const eTextMode button_text_mode = HORIZONTALLY_CENTERED_TEXT_MODE, const eButtonMode button_mode = STATIC_BUTTON_MODE, ePositionMode button_position_mode = DO_NOT_ADJUST, const eFont button_font = SMALL_NORMAL_BOLD_FONT, const eAutoSize button_auto_size = NO_AUTO_SIZE);
+		UI_Button(UI_Object* button_parent, const Rect button_rect, const string& button_text, const eButton button_type, const eTextMode button_text_mode = HORIZONTALLY_CENTERED_TEXT_MODE, const eButtonMode button_mode = STATIC_BUTTON_MODE, ePositionMode button_position_mode = DO_NOT_ADJUST, const eFont button_font = SMALL_NORMAL_BOLD_FONT, const eAutoSize button_auto_size = NO_AUTO_SIZE);
 // Bitmap button
-		UI_Button(UI_Object* button_parent, const Rect button_rect, const Rect button_max_rect, const eButton button_type, const eButtonMode button_mode = STATIC_BUTTON_MODE, const ePositionMode button_position_mode = DO_NOT_ADJUST);
+		UI_Button(UI_Object* button_parent, const Rect button_rect, const eButton button_type, const eButtonMode button_mode = STATIC_BUTTON_MODE, const ePositionMode button_position_mode = DO_NOT_ADJUST);
 		~UI_Button();
 		
 //	  void set_hotkey_if_focus(int key); TODO
@@ -138,6 +139,7 @@ class UI_Button:public UI_Object
 		bool moved; // did this item move one pixel down (pressed)
 		bool originalPosition; // always false (not pressed) for non-static buttons
 		bool hasBitmap;
+		bool doNotSetSize;
 
 
 //		Rect buttonPlacementArea;
@@ -170,14 +172,89 @@ class UI_Button:public UI_Object
 
 		void resetData();
 //		SDL_Surface* tempSurface; 	
+
+// Button flags
+
+		static const unsigned int BF_DOWN = 1;
+		static const unsigned int BF_JUST_PRESSED = 2;
+		static const unsigned int BF_JUST_RELEASED = 4;
+		static const unsigned int BF_LEFT_CLICKED = 8;
+		static const unsigned int BF_RIGHT_CLICKED = 16;
+		static const unsigned int BF_DOUBLE_CLICKED = 32;
+		static const unsigned int BF_HIGHLIGHTED = 64;  // button is not highlighted (ie mouse is not over)
+		static const unsigned int BF_JUST_HIGHLIGHTED = 128;  // button has just been highlighted, true for 1 frame
+		static const unsigned int BF_REPEATS = 256;
+		static const unsigned int BF_STATIC = 512;
+		static const unsigned int BF_STATIC_PRESSED = 1024;
+		static const unsigned int BF_NOT_CLICKABLE = 2048;
+		static const unsigned int BF_IS_TAB = 4096;
+		static const unsigned int BF_WAS_PRESSED = 8192; // button will be DOWN again, wenn mouse gets over button, without pressing the button again
+//const int BF_IGNORE_FOCUS			= 4096  // button should not use focus to accept space/enter keypresses
+//const int BF_HOTKEY_JUST_PRESSED = 8192  // button hotkey was just pressed
+//const int BF_REPEATS				 = 16384 // if held down, generates repeating presses
+//const int BF_SKIP_FIRST_HIGHLIGHT_CALLBACK 32768	// skip first callback for mouse over event
+
+
+
+
 protected:
 		UI_StaticText* text;
 	
 		long unsigned int nextRepeat;	 // timestamp for next repeat if held down
 
 		bool moveByMouse;
+		void doNotAdaptSize();
 
 };
+
+inline const unsigned int UI_Button::getGradient() const {
+	return(gradient);
+}
+
+inline void UI_Button::adjustButtonPlacementPosition() {
+	buttonPlacementArea.SetTopLeft(getRelativePosition());
+}
+
+inline void UI_Button::adjustButtonPlacementSize() {
+	buttonPlacementArea.SetSize(getSize());
+}
+
+inline const unsigned int UI_Button::getTextWidth() const {
+	return(text->getTextSize().GetWidth());
+}
+
+inline void UI_Button::setButton(const eButton button_type)
+{
+#ifdef _SCC_DEBUG
+	if((button_type<0)&&(button_type>=MAX_BUTTONS)) {
+		toLog("WARNING: (UI_Button::setButton): Value button out of range.");return;
+	}
+#endif
+	button=button_type;
+}
+
+inline void UI_Button::mouseHasMoved() {
+//	mouse = p;
+	moveByMouse = true;
+}
+
+inline void UI_Button::updateText(const string& utext) {
+	text->updateText(utext);
+}
+
+inline void UI_Button::updateText(const eString utext) {
+	text->updateText(utext);
+}
+
+// Is the mouse over this button?
+inline void UI_Button::forceHighlighted() {
+	statusFlags |= BF_HIGHLIGHTED;
+}
+
+inline void UI_Button::forceDelighted() {
+	statusFlags &= ~BF_HIGHLIGHTED;
+}				   
+
 
 
 #endif // _UI_BUTTON_HPP

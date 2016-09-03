@@ -14,9 +14,10 @@ class UI_Object
 	public:
 		UI_Object& operator=(const UI_Object& object);
 		UI_Object(const UI_Object& object);
-		UI_Object(UI_Object* parent_object, const Rect relative_rect = Rect(0,0,0,0), const Rect max_rect = Rect(0,0,0,0));
+		UI_Object(UI_Object* parent_object, const Rect relative_rect = Rect(0,0,0,0));
 		virtual ~UI_Object();
 	
+		void setRelativeRect(const Rect& rect);
 		void Show(const bool show=true);
 		void Hide(const bool hide=true);
 
@@ -28,127 +29,34 @@ class UI_Object
 
 		const bool isTopItem() const;
 		
-		const Point& getRelativePosition() const {
-			return(relativeRect.GetTopLeft());
-		}
-			
-		void setWidth(const unsigned int width) {
-			relativeRect.SetWidth(width);
-		}
-				
-		void setHeight(const unsigned int height) {
-			relativeRect.SetHeight(height);
-		}
-				
-		void setSize(const Size size) {
-			relativeRect.SetSize(size);
-		}
-	
+		const Point& getRelativePosition() const;
+		void setWidth(const unsigned int width);
+		void setHeight(const unsigned int height);
+		void setSize(const Size size);
 		void setPosition(const Point& position);
 		void jumpToPosition(const Point& position);
 		
-		void setLeft(const signed int x) {
-			relativeRect.SetLeft(x);
-		}
-		
-		void setTop(const signed int y) {
-			relativeRect.SetTop(y);
-		}
-				
-		const Size& getSize() const {
-			return(relativeRect.GetSize());
-		}
-	
-		const signed int getRelativeUpperBound() const {
-			return(relativeRect.GetTop());
-		}
-				
-		const signed int getRelativeLowerBound() const {
-			return(relativeRect.GetBottom());
-		}
-	
-		const signed int getRelativeLeftBound() const {
-			return(relativeRect.GetLeft());
-		}
-	
-		const signed int getRelativeRightBound() const {
-			return(relativeRect.GetRight());
-		}
-	
-		const unsigned int getHeight() const {
-			return(relativeRect.GetHeight());
-		}
-	
-		const unsigned int getWidth() const {
-			return(relativeRect.GetWidth());
-		}
-		
-		const Rect& getRelativeRect() const {
-			return(relativeRect);
-		}
-		
-		const Point getParentAbsolutePosition() const	{
-			if(parent)
-				return(parent->getAbsolutePosition());
-			else return(Point(0,0));
-		}
-
+		void setLeft(const signed int x);
+		void setTop(const signed int y);
+		const Size& getSize() const;
+		const signed int getRelativeUpperBound() const;
+		const signed int getRelativeLowerBound() const;
+		const signed int getRelativeLeftBound() const;
+		const signed int getRelativeRightBound() const;
+		const unsigned int getHeight() const;
+		const unsigned int getWidth() const;
+		const Rect& getRelativeRect() const;
+		const Point getParentAbsolutePosition() const;
 		const Point getAbsolutePosition() const;
-		/*{
-			if(parent)
-				return(relativeRect.GetTopLeft() + parent->getAbsolutePosition());
-			else return(relativeRect.GetTopLeft());
-		}*/
-		
-		const Rect getAbsoluteRect() const {
-			if(parent)
-				return(Rect(relativeRect.GetTopLeft() + parent->getAbsolutePosition(), getSize()));
-			else 
-				return(relativeRect);
-		}
-		
-		const signed int getAbsoluteUpperBound() const {
-			if(parent)
-				return(relativeRect.GetTop() + parent->getAbsoluteUpperBound());
-			else
-				return(relativeRect.GetTop());
-		}
-				
-		const signed int getAbsoluteLowerBound() const {
-			if(parent)
-				return(relativeRect.GetBottom() + parent->getAbsoluteUpperBound());			
-			else
-				return(relativeRect.GetBottom());
-		}
-	
-		const signed int getAbsoluteLeftBound() const {
-			if(parent)
-				return(relativeRect.GetLeft() + parent->getAbsoluteLeftBound());			
-			else
-				return(relativeRect.GetLeft());
-		}
-	
-		const signed int getAbsoluteRightBound() const {
-			if(parent)
-				return(relativeRect.GetRight() + parent->getAbsoluteLeftBound());			
-			else
-				return(relativeRect.GetRight());
-		}
+		const Rect getAbsoluteRect() const;
+		const signed int getAbsoluteUpperBound() const;
+		const signed int getAbsoluteLowerBound() const;
+		const signed int getAbsoluteLeftBound() const;
+		const signed int getAbsoluteRightBound() const;
 
-		void setFreeMove(const bool is_free_move=true);
-		
 		const unsigned int getTargetWidth() const;
 		const unsigned int getTargetHeight() const;
 
-		void setMaxRect(const Rect& rect) {
-			this->maxRect = rect;
-		}
-		
-		void setRelativeRect(const Rect& rect) {
-			this->relativeRect=rect;
-		}
-
-		const Rect& getMaxRect() const;
 		const unsigned int getDoAdjustments() const;
 		void setDoAdjustments(const unsigned int doAdjustments=1);
 		void adjustRelativeRect(Rect rect);
@@ -258,9 +166,6 @@ class UI_Object
 // needs redraw?
 //		bool needRedraw;
 			
-// ignore maxRect for the next adjustWindow calls - important for tutorials
-		bool isFreeMove;
-
 		UI_Object* prevBrother;
 		UI_Object* nextBrother; 
 
@@ -272,7 +177,6 @@ class UI_Object
 	// to adjust object smoothly
 //		Rect startRect;
 //		Rect targetRect;
-		Rect maxRect;
 		unsigned int doAdjustments;
 		
 		eString toolTipString;
@@ -297,6 +201,183 @@ class UI_Object
 	
 //		int hotkey;
 };
+
+inline void UI_Object::setRelativeRect(const Rect& rect) {
+	this->relativeRect=rect;
+}
+
+inline void UI_Object::Hide(const bool hide) {
+	shown=!hide;
+}
+
+inline void UI_Object::Enable(const bool enable) {
+	disabledFlag = !enable;
+}
+
+inline void UI_Object::Disable(const bool disable) {
+	disabledFlag = disable;
+}
+
+inline const bool UI_Object::isShown() const {
+	return(shown);
+}
+
+inline const bool UI_Object::isDisabled() const {
+	return(disabledFlag);
+}
+
+inline void UI_Object::assignStartTime() {
+	startTime = SDL_GetTicks();
+}
+
+inline const Point& UI_Object::getRelativePosition() const {
+	return(relativeRect.GetTopLeft());
+}
+			
+inline void UI_Object::setWidth(const unsigned int width) {
+	relativeRect.SetWidth(width);
+}
+				
+inline void UI_Object::setHeight(const unsigned int height) {
+	relativeRect.SetHeight(height);
+}
+				
+inline void UI_Object::setSize(const Size size) {
+	relativeRect.SetSize(size);
+}
+	
+inline void UI_Object::setLeft(const signed int x) {
+	relativeRect.SetLeft(x);
+}
+		
+inline void UI_Object::setTop(const signed int y) {
+	relativeRect.SetTop(y);
+}
+				
+inline const Size& UI_Object::getSize() const {
+	return(relativeRect.GetSize());
+}
+	
+inline const signed int UI_Object::getRelativeUpperBound() const {
+	return(relativeRect.GetTop());
+}
+				
+inline const signed int UI_Object::getRelativeLowerBound() const {
+	return(relativeRect.GetBottom());
+}
+	
+inline const signed int UI_Object::getRelativeLeftBound() const {
+	return(relativeRect.GetLeft());
+}
+	
+inline const signed int UI_Object::getRelativeRightBound() const {
+	return(relativeRect.GetRight());
+}
+	
+inline const unsigned int UI_Object::getHeight() const {
+	return(relativeRect.GetHeight());
+}
+	
+inline const unsigned int UI_Object::getWidth() const {
+	return(relativeRect.GetWidth());
+}
+	
+inline const Rect& UI_Object::getRelativeRect() const {
+	return(relativeRect);
+}
+		
+inline const Point UI_Object::getParentAbsolutePosition() const	{
+	if(parent)
+		return(parent->getAbsolutePosition());
+	else return(Point(0,0));
+}
+
+inline const Point UI_Object::getAbsolutePosition() const
+{
+	if(parent)
+		return(relativeRect.GetTopLeft() + parent->getAbsolutePosition());
+	else return(relativeRect.GetTopLeft());
+}
+		
+inline const Rect UI_Object::getAbsoluteRect() const {
+	if(parent)
+		return(Rect(relativeRect.GetTopLeft() + parent->getAbsolutePosition(), getSize()));
+	else 
+		return(relativeRect);
+}
+		
+inline const signed int UI_Object::getAbsoluteUpperBound() const {
+	if(parent)
+		return(relativeRect.GetTop() + parent->getAbsoluteUpperBound());
+	else
+		return(relativeRect.GetTop());
+}
+				
+inline const signed int UI_Object::getAbsoluteLowerBound() const {
+	if(parent)
+		return(relativeRect.GetBottom() + parent->getAbsoluteUpperBound());			
+	else
+		return(relativeRect.GetBottom());
+}
+	
+inline const signed int UI_Object::getAbsoluteLeftBound() const {
+	if(parent)
+		return(relativeRect.GetLeft() + parent->getAbsoluteLeftBound());			
+	else
+		return(relativeRect.GetLeft());
+}
+	
+inline const signed int UI_Object::getAbsoluteRightBound() const {
+	if(parent)
+		return(relativeRect.GetRight() + parent->getAbsoluteLeftBound());			
+	else
+		return(relativeRect.GetRight());
+}
+
+inline UI_Object* UI_Object::getPrevBrother() const {
+	return(prevBrother);
+}
+
+inline UI_Object* UI_Object::getNextBrother() const {
+	return(nextBrother);
+}
+
+inline UI_Object* UI_Object::getParent() const {
+	return(parent);
+}
+
+inline UI_Object* UI_Object::getChildren() const {
+	return(children);
+}
+
+inline void UI_Object::updateToolTip(const eString tool_tip) {
+	toolTipString = tool_tip;
+}
+
+inline const eString UI_Object::getToolTipString() const {
+	return(toolTipString);
+}
+
+inline const unsigned int UI_Object::getDoAdjustments() const {
+	return(doAdjustments);
+}
+
+inline void UI_Object::setDoAdjustments(const unsigned int do_adjustments) {
+	doAdjustments=do_adjustments;
+}
+
+inline const unsigned int UI_Object::getTargetWidth() const {
+	return(targetRect.GetWidth());
+}
+
+inline const unsigned int UI_Object::getTargetHeight() const {
+	return(targetRect.GetHeight());
+}
+
+inline const bool UI_Object::isMouseInside() const {
+	return(getAbsoluteRect().Inside(mouse));
+}
+
 
 #endif
 

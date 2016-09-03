@@ -87,11 +87,11 @@ void GOAL_ENTRY::resetData()
 
 const unsigned int GOAL_ENTRY::countGoals() const
 {
-	int goalNum=0;
-	for(std::list<GOAL>::const_iterator i = goal.begin(); i!=goal.end();++i)
-		if(i->getCount()>0)
-			goalNum++;
-	return(goalNum);
+//	int goalNum=0;
+//	for(std::list<GOAL>::const_iterator i = goal.begin(); i!=goal.end();++i)
+//		if(i->getCount()>0)
+//			goalNum++;
+	return(goal.size());
 	// TODO evtl bei addGoal mitprotokollieren
 }
 
@@ -147,34 +147,7 @@ void GOAL_ENTRY::calculateFinalTimes(const unsigned int location, const unsigned
 	}
 }
 
-const unsigned int GOAL_ENTRY::getAllGoal(const unsigned int unit) const
-{
-#ifdef _SCC_DEBUG
-	if(unit>GAS_SCV) {
-		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value unit out of range.");return(0);
-	}
-	if(allGoal[unit]>200) {
-		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Variable allGoal out of range.");return(0);
-	}	
-#endif
-	return(allGoal[unit]);		
-}
 
-const unsigned int GOAL_ENTRY::getGlobalGoal(const unsigned int location, const unsigned int unit) const
-{
-#ifdef _SCC_DEBUG
-	if(location>=MAX_LOCATIONS) {
-		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value location out of range.");return(0);
-	}
-	if(unit>GAS_SCV) {
-		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value unit out of range.");return(0);
-	}
-	if(globalGoal[location][unit]>200) {
-		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Variable globalGoal out of range.");return(0);
-	}	
-#endif
-	return(globalGoal[location][unit]);		
-}
 // TODO 
 
 void GOAL_ENTRY::setRace(const eRace goal_race)
@@ -488,34 +461,6 @@ const GOAL_TREE GOAL_ENTRY::getGoalTree(const UNIT* startForce, const unsigned i
 	return(tree);
 }
 
-const bool GOAL_ENTRY::getIsStatic(const unsigned int unit) const
-{
-#ifdef _SCC_DEBUG
-	if(unit>GAS_SCV) {
-		toLog("DEBUG: (GOAL_ENTRY::getIsStatic): Value unit out of range.");return(false);
-	}
-#endif
-	return(isStatic[unit]);
-}
-const bool GOAL_ENTRY::getIsHaveable(const unsigned int unit) const
-{
-#ifdef _SCC_DEBUG
-	if(unit>GAS_SCV) {
-		toLog("DEBUG: (GOAL_ENTRY::getIsHaveable): Value unit out of range.");return(false);
-	}
-#endif
-	return(isHaveable[unit]);
-}
-
-const bool GOAL_ENTRY::getIsBuildable(const unsigned int unit) const
-{
-#ifdef _SCC_DEBUG
-	if(unit>GAS_SCV) {
-		toLog("DEBUG: (GOAL_ENTRY::getIsBuildable): Value unit out of range.");return(false);
-	}
-#endif
-	return(isBuildable[unit]);
-}
 
 void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 {
@@ -789,15 +734,6 @@ NEED& NEED::operator=(const NEED& object)
 // ------ SET/GET FUNCTIONS ------
 // -------------------------------
 
-const UNIT_STATISTICS* GOAL_ENTRY::getpStats() const
-{
-#ifdef _SCC_DEBUG
-	if(pStats==NULL) {
-		toLog("DEBUG: (GOAL_ENTRY::getpStats): Variable pStats not initialized.");return(0);
-	}
-#endif
-	return(pStats);
-}
 
 void GOAL_ENTRY::addGoal(const unsigned int unit, const signed int count, const unsigned int time, const unsigned int location)
 {
@@ -857,101 +793,5 @@ void GOAL_ENTRY::addGoal(const unsigned int unit, const signed int count, const 
 	changed=true;
 }
 
-const bool GOAL_ENTRY::isGoal(const unsigned int unit) const
-{
-#ifdef _SCC_DEBUG
-	if(unit>=UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (GOAL_ENTRY::isGoal): Value unit out of range.");return(0);
-	}
-	// TODO UNIT_TYPE_COUNT ist nicht obere Grenze fuer Zahl der Units...
-	if(allGoal[unit]>=MAX_TOTAL_UNITS) {
-		toLog("DEBUG: (GOAL_ENTRY::isGoal): Variable allGoal not initialized.");return(0);
-	}
-#endif
-	return(allGoal[unit]>0);
-}
-const unsigned int GOAL_ENTRY::getMaxBuildTypes() const
-{
-#ifdef _SCC_DEBUG
-	if(maxBuildTypes > UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (GOAL_ENTRY::getMaxBuildTypes): Variable not initialized.");return(0);
-	}
-#endif
-	return(maxBuildTypes);
-}
-
-/*const bool GOAL_ENTRY::getInitialized() const
-{
-	return(initialized);
-}*/
-
-const unsigned int GOAL_ENTRY::toGeno(const unsigned int phaeno) const
-{
-#ifdef _SCC_DEBUG
-	if(phaeno>=UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (GOAL_ENTRY::toGeno): Value out of range.");return(0);
-	}
-	if(phaenoToGenotype[phaeno]>=UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (GOAL_ENTRY::toGeno): Variable not initialized.");return(0);
-	}
-#endif
-	return(phaenoToGenotype[phaeno]);
-}
-
-const unsigned int GOAL_ENTRY::toPhaeno(const unsigned int geno) const
-{
-#ifdef _SCC_DEBUG
-// TODO irgendwie maxbuildtypes statt UNIT_TYPE_COUNT?
-	if(geno>=UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (GOAL_ENTRY::toPhaeno): Value out of range.");return(0);
-	}
-	if(genoToPhaenotype[geno]>=UNIT_TYPE_COUNT) {
-		toLog("DEBUG: (GOAL_ENTRY::toPhaeno): Variable not initialized.");return(0);
-	}
-#endif
-	return(genoToPhaenotype[geno]);
-}
-
-const bool GOAL_ENTRY::isChanged() const
-{
-	return(changed);
-}
-
-void GOAL_ENTRY::changeAccepted()
-{
-//	ajdjustGoals(true); //PROBLEM: unitforce wird nicht mit einbezogen!
-	changed=false;
-}
-
-const std::string& GOAL_ENTRY::getName() const
-{
-	return name;
-}
-
-const eRace GOAL_ENTRY::getRace() const
-{
-#ifdef _SCC_DEBUG
-// TODO irgendwie maxbuildtypes statt UNIT_TYPE_COUNT?
-	if(!raceInitialized) {
-		toLog("DEBUG: (GOAL_ENTRY::getRace): race not initialized.");return(TERRA);
-	}
-#endif
-	return race;
-}
-
-void GOAL_ENTRY::setName(const std::string& goal_name)
-{
-	name.assign(goal_name);
-}
-
-/*const unsigned int GOAL_ENTRY::getMode() const // TODO
-{
-	return(mode);
-}
-
-void GOAL_ENTRY::setMode(const unsigned int mode)
-{
-	this->mode=mode;
-}*/
 
 

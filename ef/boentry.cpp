@@ -12,8 +12,8 @@ BoEntry& BoEntry::operator=(const BoEntry& object)
 	return(*this);
 }
 
-BoEntry::BoEntry(UI_Object* bo_parent, Rect bo_rect, Rect bo_max_rect, const string& bo_unit) :
-	UI_Button(bo_parent, bo_rect, bo_max_rect, bo_unit, FORCE_ENTRY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NOTHING)
+BoEntry::BoEntry(UI_Object* bo_parent, Rect bo_rect, const string& bo_unit) :
+	UI_Button(bo_parent, bo_rect, bo_unit, FORCE_ENTRY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NOTHING)
 //	fixed(false)
 	// TODO!
 {
@@ -27,26 +27,6 @@ BoEntry::~BoEntry()
 /*	delete(addUnit);
 	delete(subUnit);
 	delete(cancelUnit);*/
-}
-
-void BoEntry::setUnit(const unsigned int bo_unit)
-{
-	unit = bo_unit;
-}
-
-const unsigned int BoEntry::getUnit() const
-{
-	return(unit);
-}
-
-void BoEntry::setIP(const unsigned int bo_ip)
-{
-	ip = bo_ip;
-}
-
-const unsigned int BoEntry::getIP() const
-{
-	return(ip);
 }
 
 

@@ -33,7 +33,7 @@ UI_StaticText::UI_StaticText(const UI_StaticText& object) :
 }
 
 UI_StaticText::UI_StaticText(UI_Object* st_parent, const Rect st_pos, const eColor st_color, const eFont st_font, const eTextMode st_mode) :
-	UI_Object(st_parent, st_pos, st_pos),
+	UI_Object(st_parent, st_pos),
 	mode(st_mode),
 	text(),
 	font(st_font),
@@ -46,7 +46,7 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const Rect st_pos, const eCol
 { }
 
 UI_StaticText::UI_StaticText(UI_Object* st_parent, const eString st_text, const Rect st_pos, const eColor st_color, const eFont st_font, const eTextMode st_mode) :
-	UI_Object(st_parent, st_pos, st_pos),
+	UI_Object(st_parent, st_pos),
 	mode(st_mode),
 	text(),
 	font(st_font),
@@ -61,7 +61,7 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const eString st_text, const 
 }
 
 UI_StaticText::UI_StaticText(UI_Object* st_parent, const string& st_text, const Rect st_pos, const eColor st_color, const eFont st_font, const eTextMode st_mode) :
-	UI_Object(st_parent, st_pos, st_pos),
+	UI_Object(st_parent, st_pos),
 	mode(st_mode),
 	text(),
 	font(st_font),
@@ -78,40 +78,10 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const string& st_text, const 
 UI_StaticText::~UI_StaticText()
 { }
 
-const Size& UI_StaticText::getBoxSize() const {
-	return(textBox.GetSize());
-}
-
-void UI_StaticText::setPressed(const bool press) {
-	pressed = press;
-}
-
-UI_Object* UI_StaticText::checkHighlight() {
-	return(UI_Object::checkHighlight());
-}
-
 UI_Object* UI_StaticText::checkTooltip() {
 	if( (!isShown()) || (isDisabled()) || (!Rect(textBox.GetTopLeft() + getAbsolutePosition(), textBox.GetSize()).Inside(mouse )) )
 		return(0);
 	return((UI_Object*)this);
-}
-
-const bool UI_StaticText::doneWriting() const {
-	return(position >= text.size());
-}
-
-const Rect& UI_StaticText::getTextBox() const {
-	return(textBox);
-}
-
-const Size UI_StaticText::getTextSize() const
-{
-	//return(textBox.GetSize());
-	return(theme.lookUpFont(font)->GetTextExtent(text));
-}
-
-const Size UI_StaticText::getTextPosSize(const unsigned pos) const {
-	return(theme.lookUpFont(font)->GetTextExtent(text.substr(0, pos)));
 }
 
 void UI_StaticText::draw(DC* dc) const
@@ -591,23 +561,4 @@ void UI_StaticText::reloadStrings()
 	updateText(*theme.lookUpString(eText));
 }
 
-void UI_StaticText::setColor(const eColor st_color)
-{
-	color=*theme.lookUpColor(st_color);
-}
-
-void UI_StaticText::setColor(const Color st_color)
-{
-	color=st_color;
-}
-
-void UI_StaticText::setMode(const eTextMode st_mode)
-{
-	mode=st_mode;
-}
-
-void UI_StaticText::setFont(const eFont st_font)
-{
-	font=st_font;
-}
 

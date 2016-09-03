@@ -8,11 +8,11 @@
 
 class Bitmap:public Surface
 {
-    public:
-        Bitmap(const std::string& name);
-        Bitmap(const Bitmap& bmp);
-        Bitmap();
-        ~Bitmap();
+	public:
+		Bitmap(const std::string& name);
+		Bitmap(const Bitmap& bmp);
+		Bitmap();
+		~Bitmap();
 };
 
 #endif // _SDL_BITMAP_HPP

@@ -42,5 +42,25 @@ class UI_NumberField : public UI_Object
 		unsigned int steps;
 };
 
+inline const unsigned int UI_NumberField::getNumber() const {
+	return(number);
+}
+
+inline const bool UI_NumberField::addClicked() const {
+	return(addbutton->isLeftClicked());
+}
+
+inline const bool UI_NumberField::subClicked() const {
+	return(subbutton->isLeftClicked());
+}
+
+inline const bool UI_NumberField::addRightClicked() const {
+	return(addbutton->isRightClicked());
+}
+
+inline const bool UI_NumberField::subRightClicked() const {
+	return(subbutton->isRightClicked());
+}
+
 #endif
 

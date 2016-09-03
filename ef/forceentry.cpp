@@ -3,11 +3,11 @@
 #include "../ui/window.hpp"
 #include <sstream>
 
-ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const Rect entry_max_rect, const string& entry_unit):
-	UI_Button(entry_parent, entry_rect, entry_max_rect, entry_unit, FORCE_ENTRY_BUTTON, NO_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE),
+ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const string& entry_unit):
+	UI_Button(entry_parent, entry_rect, entry_unit, FORCE_ENTRY_BUTTON, NO_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE),
 	timeEntryBox(new UI_NumberField(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 210, -14), Size(10,10)), 0, configuration.getMaxTime(), 6, 0, NULL_STRING, NULL_STRING, TIME_NUMBER_TYPE)),
 //	makeLocationGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 60, -11), Size(10,10)), entry_max_rect, GOAL_LOCATION_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
-	makeTimeGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 29, -11), Size(16,10)), entry_max_rect, GOAL_TIME_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
+	makeTimeGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 29, -11), Size(16,10)), GOAL_TIME_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
 
 	startForce(0),
 	targetForce(0),
@@ -117,8 +117,8 @@ void ForceEntry::process()
 {
 	if(!isShown())
 		return;
+	doNotAdaptSize();
 	Size::mv(currentForce, startForce, targetForce);
-	UI_Button::process();
 	showLocMenu=false;
 	if(makeTimeGoal->isLeftClicked())
 	{
@@ -167,6 +167,7 @@ void ForceEntry::process()
 		else
 		if(!((UI_Window*)getParent())->getAbsoluteRect().Inside(mouse))
 		{
+			doNotAdaptSize();
 //			makeLocationGoal->forceUnpress();
 			makeTimeGoal->forceUnpress();
 //			makeLocationGoal->Hide();
@@ -175,6 +176,7 @@ void ForceEntry::process()
 			buttonPlacementArea.SetWidth(r.GetWidth());
 		} else if(!makeTimeGoal->isCurrentlyPressed())
 		{
+			doNotAdaptSize();
 //			makeLocationGoal->forceUnpress();
 			makeTimeGoal->forceUnpress();
 //			makeLocationGoal->Hide();
@@ -183,6 +185,7 @@ void ForceEntry::process()
 			buttonPlacementArea.SetWidth(r.GetWidth());
 		}
 	}
+	UI_Button::process();
 	if(isLeftClicked())
 	{
 		changed = LEFT_CLICKED;
@@ -217,26 +220,7 @@ void ForceEntry::process()
 		}	
 	}
 }
-
-void ForceEntry::setUnit(const unsigned int unit_type)
-{
-	unit = unit_type; // TODO
-}
-
-const unsigned int ForceEntry::getUnit() const
-{
-	return(unit);
-}
-
-const eUnitType ForceEntry::getType() const
-{
-	return(type);
-}
-
-void ForceEntry::setType(const eUnitType unit_type)
-{
-	type = unit_type; // TODO
-}	
+	
 																																							
 void ForceEntry::setTargetForce(const unsigned int force)
 {
@@ -290,34 +274,16 @@ void ForceEntry::draw(DC* dc) const
 		if ((goal->getFinalTime() > goal->getTime()) && (totalNumber >= goal->getCount()))
 		{
 			dc->SetTextForeground(dc->mixColor(theme.lookUpColor(BRIGHT_TEXT_COLOR), theme.lookUpColor(NOT_FULFILLED_TEXT_COLOR)));
-			if(goal->getFinalTime()%60>9)
-				os << goal->getFinalTime()/60 << ":" << goal->getFinalTime()%60;
-			else
-				os << goal->getFinalTime()/60 << ":0" << goal->getFinalTime()%60;
-			if(goal->getTime()%60>9)
-				os << " / " << goal->getTime()/60 << ":" << goal->getTime()%60;
-			else
-				os << " / " << goal->getTime()/60 << ":0" << goal->getTime()%60;			
+			os << formatTime(goal->getFinalTime()) << " / " << formatTime(goal->getTime());
 		}
 		else if(totalNumber >= goal->getCount())
 		{
 			dc->SetTextForeground(dc->mixColor(theme.lookUpColor(BRIGHT_TEXT_COLOR), theme.lookUpColor(FULFILLED_TEXT_COLOR)));
-			if((goal->getTime() - goal->getFinalTime())%60>9)
-				os << "-" << (goal->getTime() - goal->getFinalTime())/60 << ":" << (goal->getTime() - goal->getFinalTime())%60;
-			else
-				os << "-" << (goal->getTime() - goal->getFinalTime())/60 << ":0" << (goal->getTime() - goal->getFinalTime())%60;
-			if(goal->getTime()%60>9)
-				os << " / " << goal->getTime()/60 << ":" << goal->getTime()%60;
-			else
-				os << " / " << goal->getTime()/60 << ":0" << goal->getTime()%60;
+			os << "+" << formatTime(goal->getTime() - goal->getFinalTime()) << " / " << formatTime(goal->getTime());
 		} else
 		{
 			dc->SetTextForeground(dc->mixColor(theme.lookUpColor(BRIGHT_TEXT_COLOR), theme.lookUpColor(NOT_FULFILLED_TEXT_COLOR)));
-			if(goal->getTime()%60>9)
-				os << "[" << goal->getTime()/60 << ":" << goal->getTime()%60 << "]";
-			else
-				os << "[" << goal->getTime()/60 << ":0" << goal->getTime()%60 << "]";
-														   
+			os << "[" << formatTime(goal->getTime()) << "]";
 		}
 		s = dc->GetTextExtent(os.str());
 		dc->DrawText(os.str(), getAbsolutePosition() + Point(getWidth() - s.GetWidth() - 100, 2));

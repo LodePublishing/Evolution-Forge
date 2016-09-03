@@ -6,10 +6,10 @@
 
 UI_EditField::UI_EditField(UI_Object* edit_parent, UI_Object* edit_caller, const eString edit_text, const eString description_text, const eString ok_string, const eString cancel_string, const string& name_proposal) :
 	UI_Window(edit_parent, edit_text, EDIT_FIELD_WINDOW, 0),
-	OK_Button(new UI_Button(this, getRelativeClientRect(), getRelativeClientRect(), ok_string, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	Cancel_Button(new UI_Button(this, getRelativeClientRect(), getRelativeClientRect(), cancel_string, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	editText(new UI_StaticText(this, description_text, Rect(getRelativeClientRectPosition()+Point(10, 15), getClientRectSize()), FORCE_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),
-	userText(new UI_StaticText(this, name_proposal, Rect(getRelativeClientRectPosition()+Point(17, 37), getClientRectSize()), BRIGHT_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),
+	OK_Button(new UI_Button(this, getRelativeClientRect(), ok_string, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	Cancel_Button(new UI_Button(this, getRelativeClientRect(), cancel_string, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	editText(new UI_StaticText(this, description_text, Rect(getRelativeClientRectPosition() + Point(10, 15), getClientRectSize()), FORCE_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),
+	userText(new UI_StaticText(this, name_proposal, Rect(getRelativeClientRectPosition() + Point(17, 37), getClientRectSize()), BRIGHT_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),
 	position(name_proposal.size()),
 	caller(edit_caller),
 	ani(5)
@@ -88,29 +88,6 @@ void UI_EditField::removeCharDelete()
 	ani=5;
 }
 
-const string& UI_EditField::getString() const {
-	return(userText->getString());
-}
-
-const bool UI_EditField::isCanceled() const {
-	return(Cancel_Button->isLeftClicked());
-}
-
-const bool UI_EditField::isDone() const {
-	return(OK_Button->isLeftClicked());
-}
-
-void UI_EditField::forceCancel() {
-	Cancel_Button->forcePress();
-}
-
-void UI_EditField::forceDone() {
-	OK_Button->forcePress();
-}
-
-const UI_Object* UI_EditField::getCaller() const {
-	return(caller);
-}
 #include <math.h>					  
 void UI_EditField::draw(DC* dc) const
 {
@@ -120,7 +97,7 @@ void UI_EditField::draw(DC* dc) const
 
 	UI_Window::draw(dc);
 	Rect entry_rect = Rect(getAbsolutePosition() + Size(25, 50), Size(getWidth()-50, 14));
-    if(entry_rect.Inside(mouse))
+	if(entry_rect.Inside(mouse))
 		dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 	else
 		dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
@@ -133,24 +110,24 @@ void UI_EditField::draw(DC* dc) const
 
 void UI_EditField::process()
 {
-    if(!isShown())
-        return;
-    UI_Window::process();
+	if(!isShown())
+		return;
+	UI_Window::process();
 	ani++;
 }
 
 UI_Object* UI_EditField::checkTooltip()
 {
-    if(!getAbsoluteRect().Inside(mouse))
-        return(NULL);
-    return(UI_Window::checkTooltip());
+	if(!getAbsoluteRect().Inside(mouse))
+		return(NULL);
+	return(UI_Window::checkTooltip());
 }
 
 UI_Object* UI_EditField::checkHighlight()
 {
-    if(!getAbsoluteRect().Inside(mouse))
-        return(NULL);
-    return(UI_Window::checkHighlight());
+	if(!getAbsoluteRect().Inside(mouse))
+		return(NULL);
+	return(UI_Window::checkHighlight());
 }
 
 

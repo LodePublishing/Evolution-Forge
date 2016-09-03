@@ -431,7 +431,7 @@
 # statistics window
 		Gesamt Mineralien : %i
 		Gesamt Vespine Gas : %i
-		Zeit : %i:%2i
+		Zeit : %s
 		Einheitenzahl : %i
 		Länge Befehlsliste : %i
 	
@@ -504,6 +504,7 @@
 		Einstellungen
 		Vordefinierte Einstellungen
 		maximale Zeit
+		Begrenze Einheiten
 		Produktionsstättenmodus
 		Speicherung am Ende
 		Vorberechnung Baufolge
@@ -535,8 +536,9 @@
 		Software Maus
 
 		Zeit die eine Baureihenfolge maximal benötigen darf (beeinflusst Zeit bis zum Finden der ersten Lösung)
+		Sollen nur StarCraft (TM) Einheiten verwendet werden?
 		Sollen die Einträge im 'Füge Ziel hinzu' Menü nach Einsatzgebiet oder nach Baustätte geordnet werden?
-		Sollen die Baureihenfolgen am Ende eines Durchgans automatisch gespeichert werden oder soll gefragt werden?
+		Sollen die Baureihenfolgen am Ende eines Durchgangs automatisch gespeichert werden oder soll gefragt werden?
 		Soll eine zufällige oder eine vorberechnete Baureihenfolge zu Beginn genommen werden?
 		Maximale Länge einer Baureihenfolge
 		Wie oft soll das Programm neustarten um eine optimale Baureihenfolge zu erhalten?

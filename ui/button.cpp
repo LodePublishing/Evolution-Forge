@@ -2,27 +2,6 @@
 #include "../core/configuration.hpp"
 #include "math.h"
 
-// Button flags
-
-const unsigned int BF_DOWN=1;
-const unsigned int BF_JUST_PRESSED			= 2;
-const unsigned int BF_JUST_RELEASED		   = 4;
-const unsigned int BF_LEFT_CLICKED				 = 8;
-const unsigned int BF_RIGHT_CLICKED				 = 16;
-const unsigned int BF_DOUBLE_CLICKED		  = 32;
-const unsigned int BF_HIGHLIGHTED			 = 64;  // button is not highlighted (ie mouse is not over)
-const unsigned int BF_JUST_HIGHLIGHTED	= 128;  // button has just been highlighted, true for 1 frame
-const unsigned int BF_REPEATS = 256;
-const unsigned int BF_STATIC	= 512;
-const unsigned int BF_STATIC_PRESSED = 1024;
-const unsigned int BF_NOT_CLICKABLE = 2048;
-const unsigned int BF_IS_TAB = 4096;
-const unsigned int BF_WAS_PRESSED = 8192; // button will be DOWN again, wenn mouse gets over button, without pressing the button again
-
-//const int BF_IGNORE_FOCUS			= 4096  // button should not use focus to accept space/enter keypresses
-//const int BF_HOTKEY_JUST_PRESSED = 8192  // button hotkey was just pressed
-//const int BF_REPEATS				 = 16384 // if held down, generates repeating presses
-//const int BF_SKIP_FIRST_HIGHLIGHT_CALLBACK 32768	// skip first callback for mouse over event
 
 UI_Button::UI_Button(const UI_Button& object) :
 	UI_Object((UI_Object)object),
@@ -32,6 +11,7 @@ UI_Button::UI_Button(const UI_Button& object) :
 	moved(object.moved),
 	originalPosition(object.originalPosition),
 	hasBitmap(object.hasBitmap),
+	doNotSetSize(object.doNotSetSize),
 	gradient(object.gradient),
 	timeStamp(object.timeStamp),
 	pressdepth(object.pressdepth),
@@ -57,6 +37,7 @@ UI_Button& UI_Button::operator=(const UI_Button& object)
 	moved = object.moved;
 	originalPosition = object.originalPosition;
 	hasBitmap = object.hasBitmap;
+	doNotSetSize = object.doNotSetSize;
 	gradient = object.gradient;
 	timeStamp = object.timeStamp;
 	pressdepth = object.pressdepth;
@@ -81,8 +62,8 @@ void UI_Button::setFrameNumber(const unsigned int frame_number)
 	frameNumber=frame_number;
 }
 
-UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Rect button_max_rect, const eString button_text, const eButton button_type, const eTextMode button_text_mode, const eButtonMode button_mode, const ePositionMode button_position_mode, const eFont button_font, const eAutoSize button_auto_size):
-	UI_Object(button_parent, button_rect, button_max_rect),
+UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const eString button_text, const eButton button_type, const eTextMode button_text_mode, const eButtonMode button_mode, const ePositionMode button_position_mode, const eFont button_font, const eAutoSize button_auto_size):
+	UI_Object(button_parent, button_rect),
 	radio(0), //?
 
 	forcedPress(false),
@@ -90,6 +71,7 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Rec
 	moved(false),
 	originalPosition(false),
 	hasBitmap(false),
+	doNotSetSize(false),
 	gradient(0),
 	timeStamp(0),
 	pressdepth(0),
@@ -123,14 +105,15 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Rec
 //		text[i]=new UI_StaticText(this, normalText, Rect(0,0,0,0), HORIZONTALLY_CENTERED_TEXT_MODE, theme.lookUpButtonAnimation(button)->startTextColor[i], font
 }
 
-UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Rect button_max_rect, const string& button_text, const eButton button_type, const eTextMode button_text_mode, const eButtonMode button_mode, const ePositionMode button_position_mode, const eFont button_font, const eAutoSize button_auto_size):
-	UI_Object(button_parent, button_rect, button_max_rect),
+UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const string& button_text, const eButton button_type, const eTextMode button_text_mode, const eButtonMode button_mode, const ePositionMode button_position_mode, const eFont button_font, const eAutoSize button_auto_size):
+	UI_Object(button_parent, button_rect),
 	radio(0), //?
 	forcedPress(false),
 	buttonPlacementArea(button_rect),
 	moved(false),
 	originalPosition(false),
 	hasBitmap(false),
+	doNotSetSize(false),
 	gradient(0),
 	timeStamp(0),
 	pressdepth(0),
@@ -166,14 +149,15 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Rec
 }
 
 // -> bitmap button!
-UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Rect button_max_rect, const eButton button_type, const eButtonMode button_mode, const ePositionMode button_position_mode):
-	UI_Object(button_parent, button_rect, button_max_rect),
+UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const eButton button_type, const eButtonMode button_mode, const ePositionMode button_position_mode):
+	UI_Object(button_parent, button_rect),
 	radio(NULL), //?
 	forcedPress(false),
 	buttonPlacementArea(button_rect),
 	moved(false),
 	originalPosition(false),
 	hasBitmap(true),
+	doNotSetSize(false),
 	
 	gradient(0),
 	timeStamp(0),
@@ -209,26 +193,6 @@ UI_Button::~UI_Button()
 	delete text;
 }
 
-const unsigned int UI_Button::getGradient() const
-{
-	return(gradient);
-}
-
-void UI_Button::adjustButtonPlacementPosition()
-{
-	buttonPlacementArea.SetTopLeft(getRelativePosition());
-}
-
-void UI_Button::adjustButtonPlacementSize()
-{
-	buttonPlacementArea.SetSize(getSize());
-}
-
-const unsigned int UI_Button::getTextWidth() const
-{
-	return(text->getTextSize().GetWidth());
-}
-
 void UI_Button::setPressDepth(const unsigned int depth)
 {
 	pressdepth=depth;
@@ -240,17 +204,6 @@ void UI_Button::setPressDepth(const unsigned int depth)
 	}
 }
 
-
-void UI_Button::setButton(const eButton button_type)
-{
-#ifdef _SCC_DEBUG
-	if((button_type<0)&&(button_type>=MAX_BUTTONS)) {
-		toLog("WARNING: (UI_Button::setButton): Value button out of range.");return;
-	}
-#endif
-	button=button_type;
-}
-
 void UI_Button::adjustButtonSize(const Size& size)
 {
 	switch(autoSize)
@@ -259,7 +212,10 @@ void UI_Button::adjustButtonSize(const Size& size)
 //		case AUTO_SIZE_ONCE:
 		case NO_AUTO_SIZE:setSize(buttonPlacementArea.GetSize());break;
 		case AUTO_SIZE_ONCE:setSize(size+Size(6, 0));
-							autoSize = NO_AUTO_SIZE;break;
+						autoSize = AUTO_SIZE_TWICE;break;
+		case AUTO_SIZE_TWICE:setSize(size+Size(6, 0));
+						autoSize = NO_AUTO_SIZE;break;
+					
 		case AUTO_SIZE:setSize(size+Size(6, 0));break;
 		case AUTO_HEIGHT_FULL_WIDTH:setSize(Size(buttonPlacementArea.GetWidth(),size.GetHeight()));break;
 		case FULL_WIDTH:setSize(Size(buttonPlacementArea.GetWidth(), getHeight()));break;
@@ -320,22 +276,6 @@ void UI_Button::adjustButtonSize(const Size& size)
 		}break;
 		default:break;//TODO error
 	}
-}
-
-void UI_Button::mouseHasMoved()
-{
-//	mouse = p;
-	moveByMouse = true;
-}
-
-void UI_Button::updateText(const string& utext)
-{
-	text->updateText(utext);
-}
-
-void UI_Button::updateText(const eString utext)
-{
-	text->updateText(utext);
 }
 
 // Render button.  How it draws exactly depends on it's current state.
@@ -645,6 +585,7 @@ void UI_Button::process()
 //	oldPressDepth = pressdepth;
 	
 	Point absoluteCoord = getRelativePosition();
+	Size absoluteSize = getSize();
 	if(moveByMouse)
 	{
 		setPosition(mouse);
@@ -655,6 +596,12 @@ void UI_Button::process()
 	
 	buttonPlacementArea.SetLeft( buttonPlacementArea.GetLeft() + getRelativePosition().x - absoluteCoord.x);
 	buttonPlacementArea.SetTop( buttonPlacementArea.GetTop() + getRelativePosition().y - absoluteCoord.y);
+	if(!doNotSetSize)
+	{
+		buttonPlacementArea.SetWidth( buttonPlacementArea.GetWidth() + getWidth() - absoluteSize.GetWidth());
+		buttonPlacementArea.SetHeight( buttonPlacementArea.GetHeight() + getHeight() - absoluteSize.GetHeight());
+	} else doNotSetSize=false;
+
 
 	if(!hasBitmap)
 	{
@@ -740,12 +687,12 @@ void UI_Button::process()
 		if(!(statusFlags & BF_HIGHLIGHTED))
 			gradient=100;
 		else 
-		if(frameNumber<theme.lookUpButtonAnimation(button)->speed/2) gradient=100;
+			if(frameNumber<theme.lookUpButtonAnimation(button)->speed/2) gradient=100;
 		else 
-		gradient=0;
+			gradient=0;
 	} else			
-	if(!(statusFlags & BF_HIGHLIGHTED))
-		gradient += (100 - gradient) / 5 + 1;
+		if(!(statusFlags & BF_HIGHLIGHTED))
+			gradient += (100 - gradient) / 5 + 1;
 	else
 	switch(theme.lookUpButtonAnimation(button)->type)
 	{
@@ -770,6 +717,11 @@ void UI_Button::process()
 		
 //	if(!doesNeedRedraw())
 //		getParent()->addRect(getAbsoluteRect()); // Dieses rect NICHT neuzeichnen
+}
+
+void UI_Button::doNotAdaptSize()
+{
+	doNotSetSize=true;
 }
 
 const bool UI_Button::isLeftClicked()
@@ -862,16 +814,6 @@ const bool UI_Button::isCurrentlyHighlighted() const
 		return false;
 	return (statusFlags & BF_HIGHLIGHTED);
 }
-// Is the mouse over this button?
-void UI_Button::forceHighlighted()
-{
-	statusFlags |= BF_HIGHLIGHTED;
-}
-
-void UI_Button::forceDelighted()
-{
-	statusFlags &= ~BF_HIGHLIGHTED;
-}				   
 
 // Force button to get pressed
 void UI_Button::forcePress()

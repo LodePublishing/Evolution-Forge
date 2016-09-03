@@ -17,6 +17,8 @@ const float GUI_VERSION=0.51;
 #include <iomanip>
 #include <string>
 
+#include "../ui/endrundialog.hpp"
+
 class Main
 {
 	public:
@@ -48,6 +50,8 @@ class Main
 		void rightUp(const Point p);
 	
 		void setMouse(const Point p);
+
+		const bool newRun();
 	
 		Point maus;
 		bool drawing;

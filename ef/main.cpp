@@ -42,11 +42,11 @@ int main(int argc, char *argv[])
 //	putenv("SDL_VIDEODRIVER=dga"); windows
 	if (configuration.isFullScreen()) {
 		toLog(*UI_Object::theme.lookUpString(START_SET_FULLSCREEN_MODE_STRING));
-		screen=new DC(clientWindow.w, clientWindow.h, 16, SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_ANYFORMAT|SDL_FULLSCREEN|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC);
+		screen=new DC(clientWindow.w, clientWindow.h, SDL_DRAW_BPP*8, SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_ANYFORMAT|SDL_FULLSCREEN/*|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC*/);
 	}
 	else {
 		toLog(*UI_Object::theme.lookUpString(START_SET_WINDOW_MODE_STRING));
-		screen=new DC(clientWindow.w, clientWindow.h, 16, SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_ANYFORMAT|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC);
+		screen=new DC(clientWindow.w, clientWindow.h, SDL_DRAW_BPP*8, SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_ANYFORMAT/*|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC*/);
 	}
 	
 	if ( screen == NULL )
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
 	Rect t((clientWindow.w-650)/2 + 10, (clientWindow.h - 750)/2 + 10, 650 - 20, 650 - 20);
 	Rect t2((clientWindow.w-600)/2 + 10, (clientWindow.h - 700)/2 + 10, 600 - 20, 600 - 20);
 	
-UI_StaticText introText(NULL, "$Welcome to Evolution Forge 1.61 BETA Test :)$# # $ABOUT THE BETA TEST:$# #- $How can I help?$# Post your ideas, discuss or report bugs at the forums at $clawsoftware.de$!#- $It's a beta test... so what do I have to do?$#Test the program on different pcs, different configurations, color settings, drivers etc and report back any crashes, bugs etc#Try out many different, especially unusual goal lists to test the core, let the program run some hours, change the settings, ...# Please do not mess with the data files, the loading routines do not take notice of every error. In the worst case the programm will crash.# # $ABOUT THE PROGRAM ITSELF:$# # - $What does this program?$#The program simulates an abstract StarCraft : Broodwar environment, calculates the time a certain build order needs and optimizes randomly created build orders to a given goal list using evolutionary algorithms.# # $USER INTERFACE:$# # $Keyboard$# - $SPACE$: deactivate drawing (less CPU usage / faster calculation)# - $ALT + ENTER$: switch between fullscreen and window mode# - $ESC$: quits the program without saving# - $PAUSE$: stop/continue calculation# # $Mouse$# - $LEFT BUTTON$: activates buttons and adds items# - $RIGHT BUTTON$: removes items (units) or adds very many items (+/- buttons) # # - $Saving/Loading$: Saved build orders are placed in output/bos/<the race>/, goals are placed in settings/goals/<the race>/ # # NOW HAVE FUN! 8-D # # Best regards, # Clemens Lode", t2, BRIGHT_TEXT_COLOR, SMALL_MIDDLE_NORMAL_FONT, FORMATTED_TEXT_MODE);
+UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " :)$# # $ABOUT THE BETA TEST:$# #- $How can I help?$# Post your ideas, discuss or report bugs at the forums at $clawsoftware.de$!#- $It's a beta test... so what do I have to do?$#Test the program on different pcs, different configurations, color settings, drivers etc and report back any crashes, bugs etc#Try out many different, especially unusual goal lists to test the core, let the program run some hours, change the settings, ...# Please do not mess with the data files, the loading routines do not take notice of every error. In the worst case the programm will crash.# # $ABOUT THE PROGRAM ITSELF:$# # - $What does this program?$#The program simulates an abstract StarCraft : Broodwar environment, calculates the time a certain build order needs and optimizes randomly created build orders to a given goal list using evolutionary algorithms.# # $USER INTERFACE:$# # $Keyboard$# - $SPACE$: deactivate drawing (less CPU usage / faster calculation)# - $ALT + ENTER$: switch between fullscreen and window mode# - $ESC$: quits the program without saving# - $PAUSE$: stop/continue calculation# # $Mouse$# - $LEFT BUTTON$: activates buttons and adds items# - $RIGHT BUTTON$: removes items (units) or adds very many items (+/- buttons) # # - $Saving/Loading$: Saved build orders are placed in output/bos/<the race>/, goals are placed in settings/goals/<the race>/ # # NOW HAVE FUN! 8-D # # Best regards, # Clemens Lode", t2, BRIGHT_TEXT_COLOR, SMALL_MIDDLE_NORMAL_FONT, FORMATTED_TEXT_MODE);
 	bool done = false;
 	while(!done)
 	{
@@ -182,6 +182,8 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge 1.61 BETA Test :)$# #
 	screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
 	screen->DrawRectangle(Rect(clientWindow.x, clientWindow.y, clientWindow.w-1, clientWindow.h-1));
 
+	bool firstRun = true;
+		bool endrun = false;
 	while(true)
 	{
 		unsigned int frames_per_generation = fps->getFramesPerGeneration();
@@ -199,15 +201,21 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge 1.61 BETA Test :)$# #
 			configuration.setCurrentFramesPerGeneration(frames_per_generation);
 
 			refresh+=100;
-			while(refresh > frames_per_generation)
+			while((refresh > frames_per_generation) && (!(endrun = settings.getIsNewRun())))
 			{
 				m.OnIdle();
+				firstRun=false;
 				if(frames_per_generation > refresh)
 					refresh = 0;
 				else
 					refresh -= frames_per_generation;
 			}
 		}
+		
+//		if((settings.getIsNewRun())&&(!firstRun))
+//			endrun = true;
+		if(endrun)
+			endrun = m.newRun();
 
 //		if(m.drawing) // Problem: wenn run zuende ist....???
 //		else			
@@ -219,33 +227,29 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge 1.61 BETA Test :)$# #
 		{
 			m.process();
 			warning=false;
-		/*	if(configuration.isBackgroundBitmap())
+			if(configuration.isBackgroundBitmap())
 			{
-//				SDL_Surface* source = *UI_Object::theme.lookUpBitmap(BACKGROUND_BITMAP);
-//				SDL_imageFilterSobelX((unsigned char*)source, (unsigned char*)dest, rand()%10+2, rand()%10+2);
+				SDL_Surface* source = *UI_Object::theme.lookUpBitmap(BACKGROUND_BITMAP);
 				SDL_BlitSurface(*UI_Object::theme.lookUpBitmap(BACKGROUND_BITMAP) , 0, screen->GetSurface(), &clientWindow );
-//				SDL_BlitSurface(rotozoomSurface(source, 5.0, 0.1, 1) , 0, screen->GetSurface(), &clientWindow );
-//				SDL_FreeSurface(source);
 			}
-			else*/
+			else
 			{
-				screen->SetPen(Pen(Color(screen->GetSurface(), 0, 0, 0), 1, SOLID_PEN_STYLE));
-				screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
-				screen->DrawRectangle(Rect(clientWindow.x, clientWindow.y, clientWindow.w-1, clientWindow.h-1));
+				SDL_Rect rc;
+				rc.x=clientWindow.x;rc.y=clientWindow.y;rc.w=clientWindow.w;rc.h=clientWindow.h;
+				SDL_FillRect(screen->GetSurface(), &rc, 0);
 			}
-//			screen->DrawBitmap(claw, clientWindow.w - claw->w, clientWindow.h - claw->h);
 			m.draw(screen);
 		}
 // ------ END DRAWING ------
 		else if(!warning)
 		{
-			screen->SetTextForeground(toSDL_Color(255, 20, 20));
+			screen->SetTextForeground(DC::toSDL_Color(255, 20, 20));
 			screen->SetFont(UI_Object::theme.lookUpFont(LARGE_NORMAL_BOLD_FONT));
 			screen->DrawText("DRAWING SUSPENDED FOR MAXIMUM SPEED, PRESS A BUTTON OR KEY TO STOP.", 100, 350);	
 			warning = true;
 			m.player[0]->window[STATISTICS_WINDOW]->draw(screen);
 		}
-		
+
 // ------ SCREENCAPTURE ------		
 		/*if(screenCapturing) {
 			ostringstream os;os << "shot" << screenshot << ".bmp";
@@ -275,6 +279,27 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge 1.61 BETA Test :)$# #
 					delete screen;
 					return(0);
 					break;
+				case SDL_MOUSEBUTTONDOWN:
+					if(!m.drawing)
+					{
+						configuration.setAllowStaticFramerate(oldAllowStaticFramerate);
+						configuration.setDynamicFramerate(oldDynamicFramerate);
+						m.drawing=true;
+					}
+					if(event.button.button == SDL_BUTTON_LEFT)
+						m.leftDown();
+					else if(event.button.button == SDL_BUTTON_RIGHT)
+						m.rightDown();
+					break;
+				case SDL_MOUSEBUTTONUP:
+					if(event.button.button == SDL_BUTTON_LEFT)
+						m.leftUp(Point(event.motion.x, event.motion.y));
+					else if(event.button.button == SDL_BUTTON_RIGHT)
+						m.rightUp(Point(event.motion.x, event.motion.y));
+					break;
+				case SDL_MOUSEMOTION:
+					m.setMouse(Point(event.motion.x, event.motion.y));break;
+				
 				case SDL_KEYDOWN:
 					if(!m.drawing)
 					{
@@ -347,10 +372,10 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge 1.61 BETA Test :)$# #
 						case SDLK_KP_MINUS:break;
 						case SDLK_MINUS:
 							if((event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))&&(UI_Object::editTextField!=NULL))
-                            {
-                                UI_Object::editTextField->addChar('_');
-                                break;
-                            }break;
+							{
+								UI_Object::editTextField->addChar('_');
+								break;
+							}break;
 						case SDLK_KP_PERIOD:
 						case SDLK_PERIOD:break;//TODO
 						case SDLK_KP_DIVIDE:break;
@@ -369,14 +394,14 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge 1.61 BETA Test :)$# #
 						case SDLK_RIGHTBRACKET:break;
 						case SDLK_CARET:break;
 						case SDLK_UNDERSCORE:
-                            if(UI_Object::editTextField!=NULL)
-                                UI_Object::editTextField->addChar('_');
-                            break;
+							if(UI_Object::editTextField!=NULL)
+								UI_Object::editTextField->addChar('_');
+							break;
 						case SDLK_BACKQUOTE:break;
 						case SDLK_DELETE:
-                            if(UI_Object::editTextField!=NULL)
-	                            UI_Object::editTextField->removeCharDelete();
-	                        break;
+							if(UI_Object::editTextField!=NULL)
+								UI_Object::editTextField->removeCharDelete();
+							break;
 						case SDLK_KP0:
 						case SDLK_KP1:
 						case SDLK_KP2:
@@ -387,9 +412,9 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge 1.61 BETA Test :)$# #
 						case SDLK_KP7:
 						case SDLK_KP8:
 						case SDLK_KP9:
-                            if(UI_Object::editTextField!=NULL)
-                                UI_Object::editTextField->addChar('0'+event.key.keysym.sym-SDLK_0);
-                            break;
+							if(UI_Object::editTextField!=NULL)
+								UI_Object::editTextField->addChar('0'+event.key.keysym.sym-SDLK_0);
+							break;
 
 
 //						case SDLK_PRINT:
@@ -457,43 +482,23 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge 1.61 BETA Test :)$# #
 						case SDLK_7:
 						case SDLK_8:
 						case SDLK_9:
-                            if(UI_Object::editTextField!=NULL)
+							if(UI_Object::editTextField!=NULL)
 								UI_Object::editTextField->addChar('0'+event.key.keysym.sym-SDLK_0);
-                            break;
+							break;
 
 						case SDLK_LEFT:
-                            if(UI_Object::editTextField!=NULL)
-                                UI_Object::editTextField->moveLeft();
-                            break;
+							if(UI_Object::editTextField!=NULL)
+								UI_Object::editTextField->moveLeft();
+							break;
 
 						case SDLK_RIGHT:
-                            if(UI_Object::editTextField!=NULL)
-                                UI_Object::editTextField->moveRight();
-                            break;
+							if(UI_Object::editTextField!=NULL)
+								UI_Object::editTextField->moveRight();
+							break;
 
 						default:break;
 					}
 					break;
-				case SDL_MOUSEBUTTONDOWN:
-                    if(!m.drawing)
-                    {
-                        configuration.setAllowStaticFramerate(oldAllowStaticFramerate);
-                        configuration.setDynamicFramerate(oldDynamicFramerate);
-                        m.drawing=true;
-                    }
-					if(event.button.button == SDL_BUTTON_LEFT)
-						m.leftDown();
-					else if(event.button.button == SDL_BUTTON_RIGHT)
-						m.rightDown();
-					break;
-				case SDL_MOUSEBUTTONUP:
-					if(event.button.button == SDL_BUTTON_LEFT)
-						m.leftUp(Point(event.motion.x, event.motion.y));
-					else if(event.button.button == SDL_BUTTON_RIGHT)
-						m.rightUp(Point(event.motion.x, event.motion.y));
-					break;
-				case SDL_MOUSEMOTION:
-					m.setMouse(Point(event.motion.x, event.motion.y));break;
 				default:break;
 			}
 		}

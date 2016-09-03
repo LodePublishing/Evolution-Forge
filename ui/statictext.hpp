@@ -79,5 +79,50 @@ class UI_StaticText:public UI_Object
 		Rect textBox;
 };
 
+inline const Size& UI_StaticText::getBoxSize() const {
+	return(textBox.GetSize());
+}
+
+inline void UI_StaticText::setPressed(const bool press) {
+	pressed = press;
+}
+
+inline UI_Object* UI_StaticText::checkHighlight() {
+	return(UI_Object::checkHighlight());
+}
+
+inline const bool UI_StaticText::doneWriting() const {
+	return(position >= text.size());
+}
+
+inline const Rect& UI_StaticText::getTextBox() const {
+	return(textBox);
+}
+
+inline const Size UI_StaticText::getTextSize() const {
+	//return(textBox.GetSize());
+	return(theme.lookUpFont(font)->GetTextExtent(text));
+}
+
+inline const Size UI_StaticText::getTextPosSize(const unsigned pos) const {
+	return(theme.lookUpFont(font)->GetTextExtent(text.substr(0, pos)));
+}
+
+inline void UI_StaticText::setColor(const eColor st_color) {
+	color=*theme.lookUpColor(st_color);
+}
+
+inline void UI_StaticText::setColor(const Color st_color) {
+	color=st_color;
+}
+
+inline void UI_StaticText::setMode(const eTextMode st_mode) {
+	mode=st_mode;
+}
+
+inline void UI_StaticText::setFont(const eFont st_font) {
+	font=st_font;
+}
+
 #endif // _UI_STATICTEXT_HPP
 

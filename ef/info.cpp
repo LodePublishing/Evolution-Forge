@@ -9,6 +9,7 @@ InfoWindow& InfoWindow::operator=(const InfoWindow& object)
 	delete text;
 	text = new UI_StaticText(*object.text);
 	IP = object.IP;
+	newIP = object.newIP;
 	anarace = object.anarace;
 	bo = object.bo;
 	bg = object.bg;
@@ -20,6 +21,7 @@ InfoWindow::InfoWindow(const InfoWindow& object) :
 	unit(object.unit),
 	text(new UI_StaticText(*object.text)),
 	IP(object.IP),
+	newIP(object.newIP),
 	anarace(object.anarace),
 	bo(object.bo),
 	bg(object.bg)
@@ -29,7 +31,8 @@ InfoWindow::InfoWindow(UI_Object* info_parent, ANARACE* info_anarace, const unsi
 	UI_Window(info_parent, INFO_WINDOW_TITLE_STRING, INFO_WINDOW, info_window_number, NOT_SCROLLED),
 	unit(0),
 	text(new UI_StaticText(this, "nothing", getRelativeClientRect(), BRIGHT_TEXT_COLOR, SMALL_MIDDLE_NORMAL_FONT, FORMATTED_NON_BLOCK_TEXT_MODE)),
-	IP(0),
+	IP(999),
+	newIP(999),
 	anarace(info_anarace),
 	bo(NULL),
 	bg(NULL)
@@ -65,7 +68,8 @@ void InfoWindow::setUnit(const unsigned int unit_type) {
 void InfoWindow::resetData()
 {
 	unit = 0;
-	IP = 0;
+	IP = 999;
+	newIP = 999;
 	bo = NULL;
 	bg = NULL;
 }
@@ -82,8 +86,14 @@ void InfoWindow::assignBo(const BoEntry* info_bo)
 void InfoWindow::process()
 {
 	if(!isShown()) 
+	{
+		IP=999;
 		return;
+	}
 	UI_Window::process();
+//	IP = newIP;
+	if(IP>MAX_LENGTH)
+		return;
 	std::ostringstream os;
 //	os << "$aaaaa$#";
 	os << *UI_Object::theme.lookUpString(INFO_BUILD_STRING) << " $" 
@@ -106,9 +116,7 @@ void InfoWindow::process()
 		<< anarace->getIPStatisticsHaveSupply(IP*2+1) << "$ "
 		<< *UI_Object::theme.lookUpString(INFO_SUPPLY_STRING) << "& &["
 		<< *UI_Object::theme.lookUpString(INFO_TIME_STRING) << ": $" 
-		<< anarace->getRealProgramTime(IP)/60 << "$:$";
-	  if((anarace->getRealProgramTime(IP)%60)<9) os << "0";
-	  	os << anarace->getRealProgramTime(IP)%60 << "$]& #";
+		<< formatTime(anarace->getRealProgramTime(IP)) << "$]& #";
 	text->updateText(os.str());
 }
 
@@ -124,6 +132,18 @@ void InfoWindow::draw(DC* dc) const
 		dc->DrawLine(getAbsolutePosition() + Size(getWidth() / 2+2, 0) - Size(0, 3), bo->getAbsolutePosition() + Size(0, bo->getHeight() / 2+2) - Size(2, 0));
 		dc->DrawLine(getAbsolutePosition() + Size(getWidth() / 2-1, 0) - Size(0, 3), bo->getAbsolutePosition() + Size(0, bo->getHeight() / 2) - Size(2, 1));
 	}
+	if(bg)
+	{
+		dc->SetPen(Pen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN)->GetColor(), 2, SOLID_PEN_STYLE));
+		dc->DrawLine(getAbsolutePosition() + Size(getWidth() / 2, 0) - Size(0, 3), bg->getAbsolutePosition() + Size(bg->getWidth()/2, bg->getHeight()) - Size(2, 0));
+		dc->SetPen(Pen(*theme.lookUpPen(BIG_BUTTONS_PEN)->GetColor(), 1, SOLID_PEN_STYLE));
+		dc->DrawLine(getAbsolutePosition() + Size(getWidth() / 2+2, 0) - Size(0, 3), bg->getAbsolutePosition() + Size(bg->getWidth()/2+2, bg->getHeight()) - Size(2, 0));
+		dc->DrawLine(getAbsolutePosition() + Size(getWidth() / 2+1, 0) - Size(0, 3), bg->getAbsolutePosition() + Size(bg->getWidth()/2, bg->getHeight()) - Size(2, 1));
+		
+//		dc->DrawLine(getAbsolutePosition() + Size(getWidth() / 2+2, 0) - Size(0, 3), bo->getAbsolutePosition() + Size(0, bo->getHeight() / 2+2) - Size(2, 0));
+//		dc->DrawLine(getAbsolutePosition() + Size(getWidth() / 2-1, 0) - Size(0, 3), bo->getAbsolutePosition() + Size(0, bo->getHeight() / 2) - Size(2, 1));
+	}
+
 	UI_Window::draw(dc);
 }
 

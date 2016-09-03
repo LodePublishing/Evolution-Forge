@@ -25,7 +25,7 @@ SETTINGS::~SETTINGS()
 	for(std::vector<BASIC_MAP*>::iterator i = loadedMap.begin(); i!=loadedMap.end(); i++)
 		delete *i;
 	loadedMap.clear();
-	for(int j=0;j<MAX_RACES;j++)
+	for(unsigned int j=0;j<MAX_RACES;j++)
 	{
 		for(std::vector<START_CONDITION*>::iterator i = loadedStartcondition[j].begin(); i!=loadedStartcondition[j].end(); i++)
 			delete *i;
@@ -62,7 +62,6 @@ list<string> SETTINGS::findFiles(const string directory1, const string directory
 		closedir(dir);
 	}
 #elif __WIN32__
-	toLog("winnn");
 	WIN32_FIND_DATA dir;
 	HANDLE fhandle;
 	ostringstream os;
@@ -185,7 +184,7 @@ void SETTINGS::loadGoalFile(const string& goalFile)
 				goal->setRace(race);
 			}
 			map<string, list<string> >::iterator k;
-			for(int unit=UNIT_TYPE_COUNT;unit--;)
+			for(unsigned int unit=UNIT_TYPE_COUNT;unit--;)
 			{
 				if((k=block.find(stats[goal->getRace()][unit].name))!=block.end())
 				{
@@ -240,14 +239,14 @@ void SETTINGS::loadHarvestFile(const string& harvestFile)
 					// erstes Element falsch? TODO
 					if((item = value->second.find("Mineral Harvest"))!=value->second.end())
 					{
-						int j = 0;
+						unsigned int j = 0;
 						item->second.pop_front(); // the expression 'mineral harvest' itself
 						for(list<string>::const_iterator i = item->second.begin();i != item->second.end(); ++i)
 							loadedHarvestSpeed[TERRA].setHarvestMineralSpeed(j++, atoi(i->c_str()));
 					}
 					if((item = value->second.find("Gas Harvest"))!=value->second.end())
 					{
-						int j = 0;
+						unsigned int j = 0;
 						item->second.pop_front(); // the expression 'gas harvest' itself
 						for(list<string>::const_iterator i = item->second.begin();i != item->second.end(); ++i)
 							loadedHarvestSpeed[TERRA].setHarvestGasSpeed(j++, atoi(i->c_str()));
@@ -257,14 +256,14 @@ void SETTINGS::loadHarvestFile(const string& harvestFile)
 				{
 					if((item=value->second.find("Mineral Harvest"))!=value->second.end())
 					{
-						int j = 0;
+						unsigned int j = 0;
 						item->second.pop_front();
 						for(list<string>::const_iterator i = item->second.begin();i != item->second.end(); ++i)
 							loadedHarvestSpeed[PROTOSS].setHarvestMineralSpeed(j++, atoi(i->c_str()));
 					}
 					if((item=value->second.find("Gas Harvest"))!=value->second.end())
 					{
-						int j = 0;
+						unsigned int j = 0;
 						item->second.pop_front(); 
 						for(list<string>::const_iterator i = item->second.begin();i != item->second.end(); ++i)
 							loadedHarvestSpeed[PROTOSS].setHarvestGasSpeed(j++,atoi(i->c_str()));
@@ -274,14 +273,14 @@ void SETTINGS::loadHarvestFile(const string& harvestFile)
 				{
 					if((item = value->second.find("Mineral Harvest")) != value->second.end())
 					{
-						int j = 0;
+						unsigned int j = 0;
 						item->second.pop_front(); 
 						for(list<string>::const_iterator i=item->second.begin();i != item->second.end(); ++i)
 							loadedHarvestSpeed[ZERG].setHarvestMineralSpeed(j++, atoi(i->c_str()));
 					}
 					if((item=value->second.find("Gas Harvest")) != value->second.end())
 					{
-						int j = 0;
+						unsigned int j = 0;
 						item->second.pop_front(); 
 						for(list<string>::const_iterator i = item->second.begin();i != item->second.end();++i)
 							loadedHarvestSpeed[ZERG].setHarvestGasSpeed(j++, atoi(i->c_str()));
@@ -450,7 +449,7 @@ void SETTINGS::loadStartconditionFile(const string& startconditionFile)
 // TODO pruefen
 			map<string, list<string> > block;
 			parse_block(pFile, block);
-			for(int k=UNIT_TYPE_COUNT;k--;)
+			for(unsigned int k=UNIT_TYPE_COUNT;k--;)
 			{
 					string unit=stats[race][k].name;
 					if((i=block.find(unit))!=block.end())
@@ -495,7 +494,7 @@ pFile << " http-equiv=\"content-type\">" << std::endl;
 pFile << "  <title>Build order list</title>" << std::endl;
 pFile << "</head>" << std::endl;
 pFile << "<body alink=\"#000099\" vlink=\"#990099\" link=\"#000099\" style=\"color: rgb("<< (int)UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR)->r() << ", " << (int)UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR)->g() << ", " << (int)UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR)->b() << "); background-color: rgb(" << (int)UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColor()->r() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColor()->g() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColor()->b() << ");\">" << std::endl;
-pFile << "<div style=\"text-align: center;\"><big style=\"font-weight: bold;\"><big>Evolution Forge BETA Demo 1." << CORE_VERSION << "</big></big><br><br>" << std::endl;
+pFile << "<div style=\"text-align: center;\"><big style=\"font-weight: bold;\"><big>Evolution Forge " << CORE_VERSION << "</big></big><br><br>" << std::endl;
 pFile << "<big>Buildorder list " << name << "</big><br>" << std::endl;
 pFile << "</div>" << std::endl;
 pFile << "<br>" << std::endl;
@@ -536,15 +535,8 @@ pFile << "      </td>" << std::endl;
 pFile << "      <td style=\"\">" << (*anarace->getMap())->getLocation(anarace->getProgramLocation(i))->getName() << "<br>" << std::endl;
 pFile << "      </td>" << std::endl;
 
-if(anarace->getRealProgramTime(i)%60>9)
-{
-pFile << "      <td style=\"\">" << anarace->getRealProgramTime(i)/60 << ":" << anarace->getRealProgramTime(i)%60 << "<br>" << std::endl;
+pFile << "      <td style=\"\">" << formatTime(anarace->getRealProgramTime(i)) << "<br>" << std::endl;
 pFile << "      </td>" << std::endl;
-} else
-{
-pFile << "      <td style=\"\">" << anarace->getRealProgramTime(i)/60 << ":0" << anarace->getRealProgramTime(i)%60 << "<br>" << std::endl;
-pFile << "      </td>" << std::endl;
-}
                                                                                                    
 pFile << "    </tr>" << std::endl;
 }

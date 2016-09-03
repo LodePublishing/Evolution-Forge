@@ -44,5 +44,29 @@ class UI_EditField : public UI_Window
 		int ani;
 };
 
+inline const string& UI_EditField::getString() const {
+	return(userText->getString());
+}
+
+inline const bool UI_EditField::isCanceled() const {
+	return(Cancel_Button->isLeftClicked());
+}
+
+inline const bool UI_EditField::isDone() const {
+	return(OK_Button->isLeftClicked());
+}
+
+inline void UI_EditField::forceCancel() {
+	Cancel_Button->forcePress();
+}
+
+inline void UI_EditField::forceDone() {
+	OK_Button->forcePress();
+}
+
+inline const UI_Object* UI_EditField::getCaller() const {
+	return(caller);
+}
+
 #endif
 

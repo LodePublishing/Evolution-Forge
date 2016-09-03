@@ -22,5 +22,14 @@ class UI_CheckButton : public UI_Object
 		UI_StaticText* text;
 };
 
+inline const bool UI_CheckButton::isClicked() const {
+	return(checkButton->isLeftClicked());
+}
+
+inline const bool UI_CheckButton::isChecked() const {
+	return(checkButton->isCurrentlyActivated());
+}
+
+
 #endif
 

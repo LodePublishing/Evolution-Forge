@@ -10,7 +10,7 @@ class BoEntry : public UI_Button
 	public:
 		BoEntry(const BoEntry& object);
 		BoEntry& operator=(const BoEntry& object);
-		BoEntry(UI_Object* bo_parent, Rect bo_rect, Rect bo_max_rect, const string& bo_unit);
+		BoEntry(UI_Object* bo_parent, Rect bo_rect, const string& bo_unit);
 		~BoEntry();
 		const unsigned int changed();
 		void process();
@@ -32,6 +32,23 @@ class BoEntry : public UI_Button
 //      UI_Button* subUnit;
 //    UI_Button* cancelUnit; TODO
 };
+
+inline void BoEntry::setUnit(const unsigned int bo_unit) {
+	unit = bo_unit;
+}
+
+inline const unsigned int BoEntry::getUnit() const {
+	return(unit);
+}
+
+inline void BoEntry::setIP(const unsigned int bo_ip) {
+	ip = bo_ip;
+}
+
+inline const unsigned int BoEntry::getIP() const {
+	return(ip);
+}
+
 
 #endif
 

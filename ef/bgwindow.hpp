@@ -22,10 +22,6 @@ class BoGraphWindow:public UI_Window
 		void process();
 		void processList();
 		void draw(DC* dc) const;
-		void setMarkedIP(const unsigned int marked_ip);
-		const unsigned int getMarkedIP() const;
-		void setMarkedUnit(const unsigned int marked_unit);
-		const unsigned int getMarkedUnit() const;
 	    	void mouseHasMoved();
 		void assignAnarace(ANARACE* bograph_anarace);
 	private:
@@ -43,17 +39,15 @@ class BoGraphWindow:public UI_Window
 		
 //		list<BoGraphEntry*> boGraphList;
 
-		unsigned int markedUnit;
-		unsigned int markedIP;
-	
-		unsigned int ownMarkedUnit;
-		unsigned int ownMarkedIP;
-	
 		unsigned int markAni;
  		std::list<Order*>* orderList;
 		InfoWindow* infoWindow;
 		ANARACE* anarace;
 };
+
+inline void BoGraphWindow::assignAnarace(ANARACE* bograph_anarace) {
+	anarace = bograph_anarace;
+}
 
 #endif
 

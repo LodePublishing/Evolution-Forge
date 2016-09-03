@@ -2,14 +2,8 @@
 #include "../core/settings.hpp"
 #include "../ui/editfield.hpp"
 
-
-
 BoWindow::BoWindow(const BoWindow& object) : 
 	UI_Window((UI_Window)object),
-	markedUnit(object.markedUnit),
-	ownMarkedUnit(object.ownMarkedUnit),
-	markedIP(object.markedIP),
-	ownMarkedIP(object.ownMarkedIP),
 	infoWindow(object.infoWindow),
 	anarace(object.anarace),
 	orderList(object.orderList),
@@ -27,10 +21,6 @@ BoWindow::BoWindow(const BoWindow& object) :
 BoWindow& BoWindow::operator=(const BoWindow& object)
 {
 	((UI_Window)(*this)) = ((UI_Window)object);
-	markedUnit = object.markedUnit;
-	ownMarkedUnit = object.ownMarkedUnit;
-	markedIP = object.markedIP;
-	ownMarkedIP = object.ownMarkedIP;
 	infoWindow = object.infoWindow;
 	anarace = object.anarace;
 	orderList = object.orderList;
@@ -50,10 +40,6 @@ BoWindow& BoWindow::operator=(const BoWindow& object)
 
 BoWindow::BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_info_window, MessageWindow* message_window, std::list<Order*>* bo_order_list/*, bool* fixed_list*/, const unsigned int bo_window_number) :
 	UI_Window(bo_parent, BOWINDOW_TITLE_STRING, BUILD_ORDER_WINDOW, bo_window_number, SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0, 25, 1000, 1000)),
-	markedUnit(0),
-	ownMarkedUnit(0),
-	markedIP(0),
-	ownMarkedIP(0),
 	infoWindow(bo_info_window),
 	anarace(bo_anarace),
 	orderList(bo_order_list),
@@ -62,8 +48,8 @@ BoWindow::BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_inf
 	boEndPoint(-1),
 	boGoalListOpened(0),
 	lastBogoal(0),
-	resetButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), Rect(Point(0, 0), getSize()), RESET_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	saveBuildOrderButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), Rect(Point(0, 0), getSize()), SAVE_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	resetButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), RESET_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	saveBuildOrderButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), SAVE_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
 	msgWindow(message_window)
 //	fixed(fixed_list)
 {
@@ -96,8 +82,15 @@ void BoWindow::resetData()
 	boEndPoint=-1;
 	boGoalListOpened=0;
 	optimizeMode=0;
-	markedUnit=0;markedIP=0;
-	ownMarkedUnit=0;ownMarkedIP=0;
+	
+        std::list<BoEntry*>::iterator entry = boList.begin();
+        while(entry != boList.end())
+	{
+		if(UI_Object::currentButton == *entry) UI_Object::currentButton = NULL;
+		delete(*entry);
+		entry = boList.erase(entry);
+	}
+									
 //	for(i=0;i<MAX_LENGTH;i++)
 //		selection[i]=1;
 }
@@ -122,10 +115,9 @@ void BoWindow::processList()
 		if(entry == boList.end())
 		{
 			BoEntry* t = new BoEntry(this, Rect(Point(max_x, getRelativeClientRectPosition().y+200), Size(getClientRectWidth(), FONT_SIZE+5)),
-				Rect(getRelativeClientRectPosition(), getMaxRect().GetSize()/*getClientRectSize()*/),  // max size -y? TODO
+			// max size -y? TODO
 				*UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+(*order)->getUnit()+UNIT_NULL_STRING))); // (*anarace->getStartCondition())->getRace()?
 			t->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][(*order)->getUnit()].unitType));
-//			t->setFreeMove();
 			t->adjustRelativeRect(edge);
 			t->setUnit((*order)->getUnit());
 			t->setIP((*order)->getIP());
@@ -151,9 +143,8 @@ void BoWindow::processList()
 				old->setIP((*order)->getIP());
 			} else // => not found, insert a new one
 			{
-				BoEntry* t = new BoEntry(this, Rect(Point(max_x,getRelativeClientRectPosition().y+200), Size(getClientRectWidth(), FONT_SIZE+5)), Rect(getRelativeClientRectPosition(), getMaxRect().GetSize()/*getClientRectSize()*/), *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+(*order)->getUnit()+UNIT_NULL_STRING))); // (*anarace->getStartCondition())->getRace()?
+				BoEntry* t = new BoEntry(this, Rect(Point(max_x,getRelativeClientRectPosition().y+200), Size(getClientRectWidth(), FONT_SIZE+5)), *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+(*order)->getUnit()+UNIT_NULL_STRING))); // (*anarace->getStartCondition())->getRace()?
 	                        t->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][(*order)->getUnit()].unitType));
-//				t->setFreeMove();
 				t->adjustRelativeRect(edge);
 				t->setUnit((*order)->getUnit());
 				t->setIP((*order)->getIP());
@@ -178,16 +169,49 @@ void BoWindow::processList()
 }
 
 
-//TODO: BoEntry's Targetheight ueberpruefen!
-//Wenn != 12 => stopp!
+void BoWindow::checkForInfoWindow()
+{
+	for(std::list<BoEntry*>::iterator bo = boList.begin(); bo != boList.end(); ++bo)
+	{
+//		if(boEntry[line]->locked())
+//			fixed[line]=true;
+//		else fixed[line]=false;
+		if((*bo)->isCurrentlyHighlighted())
+		{
+			(*bo)->forceHighlighted();
+			infoWindow->assignBo(*bo);
+			infoWindow->setUnit((*bo)->getUnit());
+			if((*bo)->getIP()!=infoWindow->getIP())
+				infoWindow->setIP((*bo)->getIP());
+			infoWindow->Show(1);
+			infoWindow->adjustRelativeRect(Rect(getRelativeLeftBound() - 205, (*bo)->getAbsolutePosition().y + getRelativeClientRectUpperBound() - 5, 200, 110));
+			return;
+		}
+	} // end for ...
+	
+/*	for(std::list<BoEntry*>::iterator bo = boList.begin(); bo != boList.end(); ++bo)
+	{
+		if((*bo)->getIP() == infoWindow->getIP())
+		{
+			(*bo)->forceHighlighted();
+			infoWindow->assignBo(*bo);
+			infoWindow->setUnit((*bo)->getUnit());
+			if((*bo)->getIP()!=infoWindow->getIP())
+				infoWindow->setIP((*bo)->getIP());
+			infoWindow->Show(1);
+			infoWindow->adjustRelativeRect(Rect(getRelativeLeftBound() - 205, (*bo)->getAbsolutePosition().y + getRelativeClientRectUpperBound() - 5, 200, 110));
+			return;
+		}
+	} // end for ...*/
+	infoWindow->bo=NULL;
+}
 
 void BoWindow::process()
 {
 	if(!isShown()) 
 		return;
 	UI_Window::process();
-
-/*	std::list<BoEntry*>::iterator entry = boList.begin();
+       /*	std::list<BoEntry*>::iterator entry = boList.begin();
 	if((*entry)->getHeight()==FONT_SIZE+5)
 	{
 		BoEntry* j = *entry;
@@ -333,48 +357,14 @@ void BoWindow::process()
 	unsigned int line=0;
 	boEndPoint=0;
 	unsigned int oldTime=MAX_TIME+1;
-	ownMarkedUnit=0;
-	ownMarkedIP=0;
 	unsigned int tempForceCount[UNIT_TYPE_COUNT];
-	for(int i=UNIT_TYPE_COUNT;i--;)
-		tempForceCount[i]=0;
+	memset(tempForceCount, 0, UNIT_TYPE_COUNT * sizeof(int));
 
 // hack for minimum size ~~
 //  Rect edge=Rect(getRelativeClientRectPosition()+Point(0,100),Size(100,20));
 //fitItemToRelativeClientRect(edge,1);
 
-
-
-
-	for(std::list<BoEntry*>::iterator bo = boList.begin(); bo != boList.end(); ++bo)
-	{
-//		if(boEntry[line]->locked())
-//			fixed[line]=true;
-//		else fixed[line]=false;
-		if((*bo)->isCurrentlyHighlighted())
-		{
-			ownMarkedUnit = (*bo)->getUnit();
-			ownMarkedIP = (*bo)->getIP();
-			infoWindow->assignBo(*bo);
-			infoWindow->assignBg(NULL);
-			infoWindow->setUnit(ownMarkedUnit);
-			infoWindow->setIP(ownMarkedIP);
-//			infoWindow->setBx(order->second.brect.GetLeft());
-//			infoWindow->setBWidth(order->second.brect.GetWidth());
-			infoWindow->Show(1);
-			// TODO 
-			infoWindow->setFreeMove();
-			infoWindow->adjustRelativeRect(Rect(getRelativeLeftBound() - 205, (*bo)->getAbsolutePosition().y + getRelativeClientRectUpperBound() - 5, 200, 110));
-		}
-//		if(temp.GetLeft()!=boEntry[line]->startRect.GetLeft())
-//			boEntry[line]->resetGradient();
-//			if((infoWindow->isShown())&&((*order)->getIP()==infoWindow->getIP()) // TODO evtl
-		if(((markedUnit>0)&&(markedUnit==(*bo)->getUnit()))||
-		   ((markedIP>0)&&(markedIP==(*bo)->getIP())))
-			(*bo)->forceHighlighted();
-//		else
-//	   		boEntry[line]->forceDelighted();
-	} // end for ...
+	checkForInfoWindow();
 	
 	if(resetButton->isLeftClicked())
 	{
@@ -407,8 +397,6 @@ void BoWindow::process()
 			UI_Object::editTextField=NULL;
 		}
 	}
-//	setMarkedUnit(ownMarkedUnit);
-//	setMarkedIP(ownMarkedIP);
 }
 
 void BoWindow::draw(DC* dc) const
@@ -416,6 +404,20 @@ void BoWindow::draw(DC* dc) const
 	if(!isShown()) 
 		return;
 	UI_Window::draw(dc);
+
+/*	int k = 0;
+	for(std::list<Order*>::const_iterator order = orderList->begin(); order != orderList->end(); ++order)
+	{
+		dc->DrawText(stats[(*anarace->getStartCondition())->getRace()][(*order)->getUnit()].name, getAbsolutePosition() + Size(0, k*10));
+		k++;
+	}
+	k = 0;
+	for(int s=MAX_LENGTH;s--;)
+		if(anarace->getProgramIsBuilt(s)&&(anarace->getRealProgramTime(s) + stats[anarace->getRace()][anarace->getPhaenoCode(s)].BT<=anarace->getRealTimer()))
+		{
+			dc->DrawText(stats[(*anarace->getStartCondition())->getRace()][anarace->getPhaenoCode(s)].name, getAbsolutePosition() + Size(100, k*10));
+			k++;
+		}	 */
 
 //	ostringstream os;
 //	os << new_one << "/" << add_end << "/" << moved << "/" << same << "/" << deleted << " [" << size1 << "/" << size2 << "]";
@@ -628,44 +630,6 @@ void BoWindow::drawSelectionStuff(DC* dc) const
 */
 }
 #endif
-const unsigned int BoWindow::getMarkedIP() const
-{
-#ifdef _SCC_DEBUG
-    if(ownMarkedIP > MAX_LENGTH) {
-	toLog("DEBUG: (BoWindow::getMarkedIP): Value ownMarkedIP out of range.");return(0);
-    }
-#endif
-	return(ownMarkedIP);
-}
 
-void BoWindow::setMarkedIP(const unsigned int marked_ip)
-{
-#ifdef _SCC_DEBUG
-    if(marked_ip > MAX_LENGTH) {
-	toLog("DEBUG: (BoGraphWindow::setMarkedIP): Value marked_ip out of range.");return;
-    }
-#endif
-    markedIP = marked_ip;
-}
-
-const unsigned int BoWindow::getMarkedUnit() const
-{
-#ifdef _SCC_DEBUG
-    if(ownMarkedUnit >= UNIT_TYPE_COUNT) {
-	toLog("DEBUG: (BoWindow::getMarkedUnit): Value ownMarkedUnit out of range.");return(0);
-    }
-#endif
-	return(ownMarkedUnit);
-}
-
-void BoWindow::setMarkedUnit(const unsigned int marked_unit)
-{
-#ifdef _SCC_DEBUG
-    if(marked_unit >= UNIT_TYPE_COUNT) {
-	toLog("DEBUG: (BoWindow::setMarkedUnit): Value marked_unit out of range.");return;
-    }
-#endif
-    markedUnit = marked_unit;
-}
 
 

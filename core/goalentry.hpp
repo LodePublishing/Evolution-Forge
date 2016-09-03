@@ -108,5 +108,172 @@ class GOAL_ENTRY
 
 };
 
+inline const UNIT_STATISTICS* GOAL_ENTRY::getpStats() const
+{
+#ifdef _SCC_DEBUG
+	if(pStats==NULL) {
+		toLog("DEBUG: (GOAL_ENTRY::getpStats): Variable pStats not initialized.");return(0);
+	}
+#endif
+	return(pStats);
+}
+
+inline const bool GOAL_ENTRY::isGoal(const unsigned int unit) const
+{
+#ifdef _SCC_DEBUG
+	if(unit>=UNIT_TYPE_COUNT) {
+		toLog("DEBUG: (GOAL_ENTRY::isGoal): Value unit out of range.");return(0);
+	}
+	// TODO UNIT_TYPE_COUNT ist nicht obere Grenze fuer Zahl der Units...
+	if(allGoal[unit]>=MAX_TOTAL_UNITS) {
+		toLog("DEBUG: (GOAL_ENTRY::isGoal): Variable allGoal not initialized.");return(0);
+	}
+#endif
+	return(allGoal[unit]>0);
+}
+
+inline const unsigned int GOAL_ENTRY::getMaxBuildTypes() const
+{
+#ifdef _SCC_DEBUG
+	if(maxBuildTypes > UNIT_TYPE_COUNT) {
+		toLog("DEBUG: (GOAL_ENTRY::getMaxBuildTypes): Variable not initialized.");return(0);
+	}
+#endif
+	return(maxBuildTypes);
+}
+
+/*const bool GOAL_ENTRY::getInitialized() const
+{
+	return(initialized);
+}*/
+
+inline const unsigned int GOAL_ENTRY::toGeno(const unsigned int phaeno) const
+{
+#ifdef _SCC_DEBUG
+	if(phaeno>=UNIT_TYPE_COUNT) {
+		toLog("DEBUG: (GOAL_ENTRY::toGeno): Value out of range.");return(0);
+	}
+	if(phaenoToGenotype[phaeno]>=UNIT_TYPE_COUNT) {
+		toLog("DEBUG: (GOAL_ENTRY::toGeno): Variable not initialized.");return(0);
+	}
+#endif
+	return(phaenoToGenotype[phaeno]);
+}
+
+inline const unsigned int GOAL_ENTRY::toPhaeno(const unsigned int geno) const
+{
+#ifdef _SCC_DEBUG
+// TODO irgendwie maxbuildtypes statt UNIT_TYPE_COUNT?
+	if(geno>=UNIT_TYPE_COUNT) {
+		toLog("DEBUG: (GOAL_ENTRY::toPhaeno): Value out of range.");return(0);
+	}
+	if(genoToPhaenotype[geno]>=UNIT_TYPE_COUNT) {
+		toLog("DEBUG: (GOAL_ENTRY::toPhaeno): Variable not initialized.");return(0);
+	}
+#endif
+	return(genoToPhaenotype[geno]);
+}
+
+inline const bool GOAL_ENTRY::isChanged() const
+{
+	return(changed);
+}
+
+inline void GOAL_ENTRY::changeAccepted()
+{
+//	ajdjustGoals(true); //PROBLEM: unitforce wird nicht mit einbezogen!
+	changed=false;
+}
+
+inline const std::string& GOAL_ENTRY::getName() const
+{
+	return name;
+}
+
+inline const eRace GOAL_ENTRY::getRace() const
+{
+#ifdef _SCC_DEBUG
+// TODO irgendwie maxbuildtypes statt UNIT_TYPE_COUNT?
+	if(!raceInitialized) {
+		toLog("DEBUG: (GOAL_ENTRY::getRace): race not initialized.");return(TERRA);
+	}
+#endif
+	return race;
+}
+
+inline void GOAL_ENTRY::setName(const std::string& goal_name)
+{
+	name.assign(goal_name);
+}
+
+inline const unsigned int GOAL_ENTRY::getAllGoal(const unsigned int unit) const
+{
+#ifdef _SCC_DEBUG
+	if(unit>GAS_SCV) {
+		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value unit out of range.");return(0);
+	}
+	if(allGoal[unit]>200) {
+		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Variable allGoal out of range.");return(0);
+	}	
+#endif
+	return(allGoal[unit]);		
+}
+
+inline const unsigned int GOAL_ENTRY::getGlobalGoal(const unsigned int location, const unsigned int unit) const
+{
+#ifdef _SCC_DEBUG
+	if(location>=MAX_LOCATIONS) {
+		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value location out of range.");return(0);
+	}
+	if(unit>GAS_SCV) {
+		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value unit out of range.");return(0);
+	}
+	if(globalGoal[location][unit]>200) {
+		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Variable globalGoal out of range.");return(0);
+	}	
+#endif
+	return(globalGoal[location][unit]);		
+}
+
+
+inline const bool GOAL_ENTRY::getIsStatic(const unsigned int unit) const
+{
+#ifdef _SCC_DEBUG
+	if(unit>GAS_SCV) {
+		toLog("DEBUG: (GOAL_ENTRY::getIsStatic): Value unit out of range.");return(false);
+	}
+#endif
+	return(isStatic[unit]);
+}
+inline const bool GOAL_ENTRY::getIsHaveable(const unsigned int unit) const
+{
+#ifdef _SCC_DEBUG
+	if(unit>GAS_SCV) {
+		toLog("DEBUG: (GOAL_ENTRY::getIsHaveable): Value unit out of range.");return(false);
+	}
+#endif
+	return(isHaveable[unit]);
+}
+
+inline const bool GOAL_ENTRY::getIsBuildable(const unsigned int unit) const
+{
+#ifdef _SCC_DEBUG
+	if(unit>GAS_SCV) {
+		toLog("DEBUG: (GOAL_ENTRY::getIsBuildable): Value unit out of range.");return(false);
+	}
+#endif
+	return(isBuildable[unit]);
+}
+
+
+/*const unsigned int GOAL_ENTRY::getMode() const // TODO
+{
+	return(mode);
+}
+
+void GOAL_ENTRY::setMode(const unsigned int mode)
+{
+	this->mode=mode;
+}*/
 #endif // _CORE_GOALENTRY_HPP
 

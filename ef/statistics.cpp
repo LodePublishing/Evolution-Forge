@@ -15,7 +15,7 @@ StatisticsWindow::StatisticsWindow(UI_Object* stat_parent, const ANARACE* stat_a
 	Size l2 = Size(190, FONT_SIZE+7);
 	for(int i = 0; i < MAX_STAT_ENTRY; i++)
 	{
-		statEntry[i] = new UI_Button(this, Rect(l1+Point(0,i*14), l2), Rect(l1+Point(0,i*14), l2), (eString)(MINERALS_STAT_STRING+i), (eButton)(MINERALS_STAT_BUTTON+i), NO_TEXT_MODE, STATIC_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE);
+		statEntry[i] = new UI_Button(this, Rect(l1+Point(0,i*14), l2), (eString)(MINERALS_STAT_STRING+i), (eButton)(MINERALS_STAT_BUTTON+i), NO_TEXT_MODE, STATIC_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE);
 		statEntry[i]->updateToolTip((eString)(MINERALS_STAT_TOOLTIP_STRING+i));
 		statEntry[i]->forcePress();
 	}
@@ -31,7 +31,7 @@ void StatisticsWindow::assignAnarace(ANARACE* stat_anarace)
 {
 	anarace = stat_anarace;
 }
-																				
+
 void StatisticsWindow::showGraph(DC* dc, const unsigned int* graph_data, const unsigned int min, const unsigned int max, const Color col, const bool bold) const
 {
 	int j,k;
@@ -63,26 +63,18 @@ void StatisticsWindow::showGraph(DC* dc, const unsigned int* graph_data, const u
 void StatisticsWindow::resetData()
 {
 	averagecounter = 1;
-	for(int i = 100; i--; )
-		average[i] = 0;
-																				
-	for(int i = 0; i < MAX_STAT_ENTRY; i++)
-	{
-		for(int j = 200; j--;)
-			data[i][j] = 0;
-		maxdata[i]=0;
-		for(int j = 20; j--;)
-		{
-			oldData[i][j] = 0;
-			oldDataCounter[i][j] = 0;
-		}
-	}
+	memset(average, 0, 100 * sizeof(int));
 
-	for(int j = 200; j--;)
-	{
-		data[FORCE_STAT_ENTRY][j] = 5; //5 units at the beginning!
-		data[GENERATIONS_LEFT_STAT_ENTRY][j] = configuration.getMaxGenerations();
-	}
+	memset(data, 0, 200 * MAX_STAT_ENTRY * sizeof(int));
+	memset(oldData, 0, 20 * MAX_STAT_ENTRY * sizeof(int));
+	memset(oldDataCounter, 0, 20 * MAX_STAT_ENTRY * sizeof(int));
+	
+	for(int i = 0; i < MAX_STAT_ENTRY; i++)
+		maxdata[i]=0;
+
+	memset(data[FORCE_STAT_ENTRY], 5, 200 * sizeof(int)); // 5 units at the beginning ~~
+	memset(data[GENERATIONS_LEFT_STAT_ENTRY], configuration.getMaxGenerations(), 200 * sizeof(int));
+
 	wasResetted=true;
 }
 
@@ -112,8 +104,15 @@ void StatisticsWindow::draw(DC* dc) const
 				ostringstream os;
 				if(oldData[i][k]>0) 
 					os << "+";
-				os << oldData[i][k];
-				dc->DrawText(os.str(), statEntry[i]->getAbsolutePosition() + Size(statEntry[i]->getTextWidth() + oldDataCounter[i][k]-5, 4));
+				else if(oldData[i]<0)
+					os << "-";
+				if(i == TIME_STAT_ENTRY)
+				{
+					if(oldData[i][k]<0)
+						os << formatTime(-oldData[i][k]);
+					else os << formatTime(oldData[i][k]);
+					dc->DrawText(os.str(), statEntry[i]->getAbsolutePosition() + Size(statEntry[i]->getTextWidth() + oldDataCounter[i][k]-5, 4));
+				}
 			}
 }
 
@@ -124,7 +123,7 @@ void StatisticsWindow::process()
 		return;
 	
 	UI_Window::process();
-
+	
 	for(int i=0;i<=AVERAGE_BO_LENGTH_STAT_ENTRY;i++)
 		for(int k=0;k<20;k++)
 			if(oldDataCounter[i][k]>0)
@@ -224,7 +223,7 @@ void StatisticsWindow::process()
 	
 	statEntry[MINERALS_STAT_ENTRY]->updateText(theme.lookUpFormattedString(MINERALS_STAT_STRING, data[MINERALS_STAT_ENTRY][199]));
 	statEntry[GAS_STAT_ENTRY]->updateText(theme.lookUpFormattedString(GAS_STAT_STRING, data[GAS_STAT_ENTRY][199]));
-	statEntry[TIME_STAT_ENTRY]->updateText(theme.lookUpFormattedString(TIME_STAT_STRING, data[TIME_STAT_ENTRY][199]%60, data[TIME_STAT_ENTRY][199]/60));
+	statEntry[TIME_STAT_ENTRY]->updateText(theme.lookUpFormattedString(TIME_STAT_STRING, formatTime(data[TIME_STAT_ENTRY][199])));
 	statEntry[FORCE_STAT_ENTRY]->updateText(theme.lookUpFormattedString(FORCE_STAT_STRING, data[FORCE_STAT_ENTRY][199]));
 	statEntry[AVERAGE_BO_LENGTH_STAT_ENTRY]->updateText(theme.lookUpFormattedString(AVERAGE_BO_LENGTH_STAT_STRING, data[AVERAGE_BO_LENGTH_STAT_ENTRY][199]));
 	statEntry[FITNESS_AVERAGE_STAT_ENTRY]->updateText(theme.lookUpFormattedString(FITNESS_AVERAGE_STAT_STRING, data[FITNESS_AVERAGE_STAT_ENTRY][199], anarace->getMaxpFitness()));

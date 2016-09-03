@@ -24,14 +24,15 @@ class InfoWindow : public UI_Window
 		void assignAnarace(ANARACE* info_anarace);
 		void assignBo(const BoEntry* info_bo);
 		void assignBg(const BoGraphEntry* info_bg);
-		
+		const BoEntry* bo;
+		const BoGraphEntry* bg;
+
 	private:
 		unsigned int unit;
 		UI_StaticText* text;
 		unsigned int IP;
+		unsigned int newIP;
 		ANARACE* anarace;
-		const BoEntry* bo;
-		const BoGraphEntry* bg;
 };
 
 #endif // _GUI_INFO_HPP

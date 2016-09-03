@@ -38,7 +38,7 @@ void GoalMenu::resetData()
 		(*m)->Show();
 		(*m)->setButton(eButton(UNIT_TYPE_1_BUTTON));
 		(*m)->updateText(settings.getGoal(anarace->getPlayerNumber(), i)->getName());
-		Rect edge = Rect(Point(10, height * (FONT_SIZE + 9)), Size(0,0));
+		Rect edge = Rect(Point(10, height * (FONT_SIZE + 9)), Size(160,0));
 		(*m)->adjustRelativeRect(edge);
 		height++;
 		i++;

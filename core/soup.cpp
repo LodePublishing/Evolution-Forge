@@ -27,12 +27,12 @@ SOUP::~SOUP()
 
 SOUP::SOUP(const SOUP& object):
 	start(object.start),
-    mapPlayerNum(object.mapPlayerNum),
-    runNumber(object.runNumber),
-    newcalc(object.newcalc),
-    isNewRun(object.isNewRun)
+	mapPlayerNum(object.mapPlayerNum),
+	runNumber(object.runNumber),
+	newcalc(object.newcalc),
+	isNewRun(object.isNewRun)
 {
-    for(int i=MAX_PROGRAMS;i--;)
+	for(int i=MAX_PROGRAMS;i--;)
 		if(player[i]!=NULL)
 			player[i] = new RACE(*(object.player[i]));
 	for(int i=MAX_PLAYER;i--;)
@@ -42,17 +42,17 @@ SOUP::SOUP(const SOUP& object):
 
 SOUP& SOUP::operator=(const SOUP& object)
 {
-    start = object.start;
-    mapPlayerNum = object.mapPlayerNum;
-    runNumber = object.runNumber;
-    newcalc = object.newcalc;
-    isNewRun = object.isNewRun;
-    for(int i=MAX_PROGRAMS;i--;)
-        if(player[i]!=NULL)
-            player[i] = new RACE(*(object.player[i]));
-    for(int i=MAX_PLAYER;i--;)
-        if(anaplayer[i]!=NULL)
-            anaplayer[i] = new ANARACE(*(object.anaplayer[i]));
+	start = object.start;
+	mapPlayerNum = object.mapPlayerNum;
+	runNumber = object.runNumber;
+	newcalc = object.newcalc;
+	isNewRun = object.isNewRun;
+	for(int i=MAX_PROGRAMS;i--;)
+		if(player[i]!=NULL)
+			player[i] = new RACE(*(object.player[i]));
+	for(int i=MAX_PLAYER;i--;)
+		if(anaplayer[i]!=NULL)
+			anaplayer[i] = new ANARACE(*(object.anaplayer[i]));
 	return(*this);
 }
 
@@ -151,8 +151,8 @@ void SOUP::checkForChange() const
 struct SoupPlayerDescendingFitnessSort {
 	bool operator()(RACE* const& playerStart, RACE* const& playerEnd) {
 		return ((playerStart->getpFitness()>playerEnd->getpFitness())||
-               ((playerStart->getpFitness()==playerEnd->getpFitness())&&(playerStart->getsFitness() > playerEnd->getsFitness()))||
-               ((playerStart->getpFitness()==playerEnd->getpFitness())&&(playerStart->getsFitness() == playerEnd->getsFitness())&&(playerStart->gettFitness()>playerEnd->gettFitness())) );
+			   ((playerStart->getpFitness()==playerEnd->getpFitness())&&(playerStart->getsFitness() > playerEnd->getsFitness()))||
+			   ((playerStart->getpFitness()==playerEnd->getpFitness())&&(playerStart->getsFitness() == playerEnd->getsFitness())&&(playerStart->gettFitness()>playerEnd->gettFitness())) );
 	}
 };
 
@@ -242,7 +242,7 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 				if(anaplayer[k]->isOptimizing())
 				{
 					player[k*groupSize+i]->eraseIllegalCode();
-					player[k*groupSize+i]->eraseUselessCode(); //TODO Problem beim switchen, falls schon goals gesetzt waren
+//					player[k*groupSize+i]->eraseUselessCode(); //TODO Problem beim switchen, falls schon goals gesetzt waren
 // preserve player[0]s genes					
 					if((i!=0)&&(rand()%2))
 						player[k*groupSize+i]->mutateGeneCode(/*anaplayer[k]->getFixed()*/);

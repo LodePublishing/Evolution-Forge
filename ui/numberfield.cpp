@@ -35,10 +35,10 @@ UI_NumberField::UI_NumberField(const UI_NumberField& object) :
 { }
 
 UI_NumberField::UI_NumberField(UI_Object* numberfield_parent, const Rect rect, const unsigned int number_min, const unsigned int number_max, const unsigned int number_steps, const unsigned int num, const eString txt, const eString tool_tip, const eFieldType field_type) :
-	UI_Object(numberfield_parent, rect, rect),
+	UI_Object(numberfield_parent, rect),
 	fieldType(field_type),
-	addbutton(new UI_Button(this, Rect(Point(150, 3),Size(8,8)), Rect(Point(0,0), getSize()), ADD_BUTTON, PRESS_BUTTON_MODE)),
-	subbutton(new UI_Button(this, Rect(Point(160, 3),Size(8,8)), Rect(Point(0,0), getSize()), SUB_BUTTON, PRESS_BUTTON_MODE)),
+	addbutton(new UI_Button(this, Rect(Point(150, 3),Size(8,8)), ADD_BUTTON, PRESS_BUTTON_MODE)),
+	subbutton(new UI_Button(this, Rect(Point(160, 3),Size(8,8)), SUB_BUTTON, PRESS_BUTTON_MODE)),
 	text(txt==NULL_STRING?NULL:new UI_StaticText(this, txt, Rect(Point(0,0), Size(110,0)), FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT, RIGHT_BOUNDED_TEXT_MODE)),
 	number_text(new UI_StaticText(this, Rect(Point(125, 1), Size(20,20)), FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT)),
 	number(num),
@@ -65,21 +65,7 @@ UI_Object* UI_NumberField::checkTooltip() {
 	return((UI_Object*)this);
 }
 
-const unsigned int UI_NumberField::getNumber() const {
-	return(number);
-}
-const bool UI_NumberField::addClicked() const {
-	return(addbutton->isLeftClicked());
-}
-const bool UI_NumberField::subClicked() const {
-	return(subbutton->isLeftClicked());
-}
-const bool UI_NumberField::addRightClicked() const {
-	return(addbutton->isRightClicked());
-}
-const bool UI_NumberField::subRightClicked() const {
-	return(subbutton->isRightClicked());
-}
+
 void UI_NumberField::updateNumber(const unsigned int num)
 {
 	number = num;
@@ -89,10 +75,7 @@ void UI_NumberField::updateNumber(const unsigned int num)
 		case NORMAL_NUMBER_TYPE:os << number;break;
 		case PERCENT_NUMBER_TYPE:os << number << "%";break;
 		case TIME_NUMBER_TYPE:
-			if(number%60>9)
-				os << number/60 << ":" << number%60;
-			else
-				os << number/60 << ":0" << number%60;
+			os << formatTime(number);
 			break;
 		default:break;
 	}

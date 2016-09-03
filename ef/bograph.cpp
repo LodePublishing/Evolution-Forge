@@ -12,8 +12,8 @@ BoGraphEntry& BoGraphEntry::operator=(const BoGraphEntry& object)
 	return(*this);
 }
 
-BoGraphEntry::BoGraphEntry(UI_Object* entry_parent, const Rect entry_rect, const Rect entry_max_rect, const int entry_unit) : // TODO
-	UI_Button(entry_parent, entry_rect, entry_max_rect, "", (eButton)(UNIT_TYPE_0_BUTTON), NO_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NOTHING),
+BoGraphEntry::BoGraphEntry(UI_Object* entry_parent, const Rect entry_rect, const int entry_unit) : // TODO
+	UI_Button(entry_parent, entry_rect, "", (eButton)(UNIT_TYPE_0_BUTTON), NO_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NOTHING),
 	unit(entry_unit)
 { }
 

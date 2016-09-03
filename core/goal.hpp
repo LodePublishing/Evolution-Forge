@@ -46,7 +46,7 @@ inline void GOAL::setUnit(const unsigned int goal_unit)
 inline void GOAL::setTime(const unsigned int goal_time)
 {
 #ifdef _SCC_DEBUG
-	if((goal_time > configuration.getMaxTime())) {
+	if((goal_time > coreConfiguration.getMaxTime())) {
 		 toLog("DEBUG: (GOAL::setTime): Value goal_time out of range.");return;
 	}
 #endif
@@ -76,7 +76,7 @@ inline void GOAL::setLocation(const unsigned int goal_location)
 inline void GOAL::setFinalTime(const unsigned int goal_final_time)
 {
 #ifdef _SCC_DEBUG
-	if((goal_final_time > configuration.getMaxTime())) {
+	if((goal_final_time > coreConfiguration.getMaxTime())) {
 		 toLog("DEBUG: (GOAL::setTime): Value goal_final_time out of range.");return;
 	}
 #endif
@@ -97,7 +97,7 @@ inline const unsigned int GOAL::getUnit() const
 inline const unsigned int GOAL::getTime() const
 {
 #ifdef _SCC_DEBUG
-	if((time > configuration.getMaxTime())) {
+	if((time > coreConfiguration.getMaxTime())) {
 		 toLog("DEBUG: (GOAL::getTime): Variable not initialized.");return(0);
 	}
 #endif
@@ -127,7 +127,7 @@ inline const unsigned int GOAL::getLocation() const
 inline const unsigned int GOAL::getFinalTime() const
 {
 #ifdef _SCC_DEBUG
-	if((finalTime > configuration.getMaxTime())) {
+	if((finalTime > coreConfiguration.getMaxTime())) {
 		 toLog("DEBUG: (GOAL::getFinalTime): Variable not initialized.");return(0);
 	}
 #endif

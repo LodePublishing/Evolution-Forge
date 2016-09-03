@@ -1,7 +1,6 @@
 #ifndef _BOENTRY_HPP
 #define _BOENTRY_HPP
 
-#include <string>
 #include "../sdl/dc.hpp"
 #include "../ui/button.hpp"
 
@@ -12,7 +11,7 @@ class BoEntry : public UI_Button
 	public:
 		BoEntry(const BoEntry& object);
 		BoEntry& operator=(const BoEntry& object);
-		BoEntry(UI_Object* bo_parent, Rect bo_rect, const string& bo_unit, const PROGRAM& bo_program);
+		BoEntry(UI_Object* bo_parent, Rect bo_rect, const std::string& bo_unit, const PROGRAM& bo_program);
 		~BoEntry();
 
 		const unsigned int changed();

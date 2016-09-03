@@ -2,21 +2,21 @@
 #define _GUI_GOALMENU_HPP
 
 #include "menu.hpp"
-#include "../core/settings.hpp"
+#include "../core/database.hpp"
 
 class GoalMenu : public Menu
 {
 	public:
-		GoalMenu(UI_Object* goal_parent, ANARACE* goal_anarace, Rect goal_rect);
+		GoalMenu(UI_Object* goal_parent, Rect goal_rect);
 		GoalMenu(const GoalMenu& object);
 		GoalMenu& operator=(const GoalMenu& object);
 		~GoalMenu();
 		void process();
 		void draw(DC* dc) const;
 		void resetData();
-		void assignAnarace(ANARACE* goal_anarace);
+		void assignAnarace(ANABUILDORDER* goal_anarace);
 	private:
-		ANARACE* anarace;
+		ANABUILDORDER* anarace;
 };
 
 #endif // _GUI_GOALMENU_HPP

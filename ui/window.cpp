@@ -1,5 +1,5 @@
 #include "window.hpp"
-#include "../core/configuration.hpp"
+#include "configuration.hpp"
 const unsigned int  MIN_HEIGHT = 2;
 
 UI_Window& UI_Window::operator=(const UI_Window& object)
@@ -154,15 +154,15 @@ const eTab UI_Window::getCurrentTab() const
 	else return((eTab)(tmp+1));
 }
 
-void UI_Window::setTitleParameter(const string& p) {
+void UI_Window::setTitleParameter(const std::string& p) {
 	titleParameter=p;
 }
 
-UI_Object* UI_Window::checkTooltip()
+UI_Object* UI_Window::checkToolTip()
 {
 	if(!(isMouseInside()))
 		return(NULL);
-	return(UI_Object::checkTooltip());
+	return(UI_Object::checkToolTip());
 }
 
 UI_Object* UI_Window::checkHighlight()
@@ -249,16 +249,16 @@ void UI_Window::wheelDown()
 	}
 }
 
-void UI_Window::resetScrollbar()
+void UI_Window::moveScrollbarToTop()
 {
 	if(scrollBar)
-		scrollBar->reset();
+		scrollBar->moveToTop();
 }
 
-void UI_Window::resetScrollbarToEnd()
+void UI_Window::moveScrollbarToBottom()
 {
 	if(scrollBar)
-		scrollBar->resetToEnd();
+		scrollBar->moveToBottom();
 }
 
 void UI_Window::process()
@@ -310,7 +310,7 @@ void UI_Window::process()
 	
 	if(clientRect.GetHeight() != clientTargetRect.GetHeight())
 	{
-		if(configuration.isSmoothMovements())
+		if(uiConfiguration.isSmoothMovements())
 		{
 			if(clientRect.moveSmooth(clientStartRect, clientTargetRect))
 				setNeedRedrawMoved();
@@ -433,7 +433,7 @@ void UI_Window::drawTitle(DC* dc) const
 	dc->SetFont(theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
 	dc->SetTextForeground(*theme.lookUpColor(TITLE_COLOR));
 
-	string text;
+	std::string text;
 	
 	if(titleParameter.size())
 		text=theme.lookUpFormattedString(titleString, titleParameter);
@@ -449,8 +449,8 @@ void UI_Window::drawTitle(DC* dc) const
 
 void UI_Window::draw(DC* dc) const
 {
-	if(!isShown()) 
-		return;
+//	if(!isShown()) 
+//		return;
 
 	if(checkForNeedRedraw())
 	{
@@ -466,7 +466,7 @@ void UI_Window::draw(DC* dc) const
 			dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 /*			SDL_Rect rc;
 			rc.x = getRelativeLeftBound();rc.y = getRelativeUpperBound(); rc.w = getWidth(); rc.h = getHeight();
-			if(configuration.isBackgroundBitmap())
+			if(uiConfiguration.isBackgroundBitmap())
 				SDL_BlitSurface(*UI_Object::theme.lookUpBitmap(BACKGROUND_BITMAP) , 0, dc->GetSurface(), &rc);
 			else
 				SDL_FillRect(dc->GetSurface(), &rc, 0);*/

@@ -1,144 +1,103 @@
 #include "guimain.hpp"
 #include "../ui/editfield.hpp"
 #include "../ui/tooltip.hpp"
+#include "configuration.hpp"
 
 Main::Main(DC* dc):
 	mainWindow(NULL),
-	msgWindow(NULL),
-	infoWindow(NULL),
 	tutorialWindow(NULL),
 	settingsWindow(NULL),
 	maus(),
-	oldrun(0),
-	gizmo(true),
-	ani(1),
-	ani2(0),
-	boHasChanged(true)
+	gameCount(0)
 {
+// ----- INITIALIZE DATABASE -----	
 	UI_Object::theme.setTab(BASIC_TAB);
-	resetData(); // TODO 
-	for(int i=0;i<MAX_GAME;i++)
-		game[i]=NULL;
 	toLog(*UI_Object::theme.lookUpString(START_LOAD_UI_BITMAPS_FONTS_STRING));
 #ifdef __linux__
-	UI_Object::theme.loadDataFiles("settings/ui/default.ui","data/bitmaps/","data/fonts/",dc);
-	bar->draw(dc, 20, START_UI_BITMAPS_FONTS_LOADED_STRING);
+	UI_Object::theme.loadGraphicData("settings/ui/default.ui","data/bitmaps/","data/fonts/",dc);
+	UI_Object::theme.loadWindowData("settings/ui/windows.ui");
+//	bar->draw(dc, 20, START_UI_BITMAPS_FONTS_LOADED_STRING);
 // Always do loadHarvestFile (mining speeds) before loadMapFile, because at the moment the mapfile also sets the gathering speed
-	bar->draw(dc, 2, START_LOAD_HARVEST_STRING);
-	settings.loadHarvestFile("settings/harvest/default.hvt");
+//	bar->draw(dc, 2, START_LOAD_HARVEST_STRING);
+	database.loadHarvestFile("settings/harvest/default.hvt");
 	
-	bar->draw(dc, 2, START_LOAD_MAPS_STRING);
-	settings.loadMapFile("settings/maps/lt41.map");
-	bar->draw(dc, 4, START_LOAD_STARTCONDITIONS_STRING);
-	settings.assignMap(0); // first map (lt) and ums = false
-	settings.loadStartconditionFile("settings/start/default_terra.start");
-	settings.loadStartconditionFile("settings/start/default_protoss.start");
-	settings.loadStartconditionFile("settings/start/default_zerg.start");
+//	bar->draw(dc, 2, START_LOAD_MAPS_STRING);
+	database.loadMapFile("settings/maps/lt41.map");
+//	bar->draw(dc, 4, START_LOAD_STARTCONDITIONS_STRING);
+	database.loadStartConditionFile("settings/start/default_terra.start");
+	database.loadStartConditionFile("settings/start/default_protoss.start");
+	database.loadStartConditionFile("settings/start/default_zerg.start");
 #elif __WIN32__
-	UI_Object::theme.loadDataFiles("settings\\ui\\default.ui","data\\bitmaps\\","data\\fonts\\",dc);
-	bar->draw(dc, 20, START_UI_BITMAPS_FONTS_LOADED_STRING);
+	UI_Object::theme.loadGraphicData("settings\\ui\\default.ui","data\\bitmaps\\","data\\fonts\\",dc);
+	UI_Object::theme.loadWindowData("settings\\ui\\windows.ui");
+//	bar->draw(dc, 20, START_UI_BITMAPS_FONTS_LOADED_STRING);
 // Always do loadHarvestFile (mining speeds) before loadMapFile, because at the moment the mapfile also sets the gathering speed
-	bar->draw(dc, 2, START_LOAD_HARVEST_STRING);
-	settings.loadHarvestFile("settings\\harvest\\default.hvt");
+//	bar->draw(dc, 2, START_LOAD_HARVEST_STRING);
+	database.loadHarvestFile("settings\\harvest\\default.hvt");
 	
-	bar->draw(dc, 2, START_LOAD_MAPS_STRING);
-	settings.loadMapFile("settings\\maps\\lt41.map");
-	bar->draw(dc, 4, START_LOAD_STARTCONDITIONS_STRING);
-	settings.assignMap(0); // first map (lt) and ums = false
-	settings.loadStartconditionFile("settings\\start\\default_terra.start");
-	settings.loadStartconditionFile("settings\\start\\default_protoss.start");
-	settings.loadStartconditionFile("settings\\start\\default_zerg.start");
+//	bar->draw(dc, 2, START_LOAD_MAPS_STRING);
+	database.loadMapFile("settings\\maps\\lt41.map");
+//	bar->draw(dc, 4, START_LOAD_STARTCONDITIONS_STRING);
+	database.loadStartConditionFile("settings\\start\\default_terra.start");
+	database.loadStartConditionFile("settings\\start\\default_protoss.start");
+	database.loadStartConditionFile("settings\\start\\default_zerg.start");
 #endif
-	
-
-	bar->draw(dc, 12, START_LOAD_GOALS_STRING);
+//	bar->draw(dc, 12, START_LOAD_GOALS_STRING);
 	loadGoals();
 
 // goal beschreibt Rasse, Ziele und Modus
 	
-	bar->draw(dc, 8, START_ASSIGN_AND_ANALYZE_STRING);
+//	bar->draw(dc, 8, START_ASSIGN_AND_ANALYZE_STRING);
 // Map in "map.txt" is now map[0]
 // choose the first map we loaded (map[0])
-//	settings.setMode(0); // TODO
-	settings.setHarvestSpeed(TERRA, 0);
-	settings.setHarvestSpeed(PROTOSS, 1);
-	settings.setHarvestSpeed(ZERG, 2);
-
-	settings.assignStartRace(1, TERRA);
-//	settings.assignStartRace(2, TERRA);
-
-	settings.assignStartcondition(1, 0);
-//	settings.assignStartcondition(2, 0);
-
-	settings.setStartPosition(1, 1); // TODO
-//	settings.setStartPosition(2, 7);
-	settings.fillGroups();
-
-	settings.assignGoal(1, 0);
-//	settings.assignGoal(2, 0); //~~ !! TODO
-	// TODO FEHLERMELDUNG FALLS FALSCHES GOAL ZU FALSCHER RASSE
-//	settings.assignStartconditionHarvestSpeed();
-	bar->draw(dc, 2, START_PREPARE_FIRST_RUN_STRING);
-	settings.assignRunParametersToSoup(); // assign START and GA of settings to soup
-	// initializes players, initializes Map
-// initialize the soup, set the parameters, load the players etc.
-	if(ANARACE** temp=settings.newGeneration(anarace))
-	{
-		for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-			anarace[i]=temp[i];
-	}
-
-	anarace[0]->setMaxpFitness(0);
-
+// ----- END OF INITIALIZING DATABASE -----
 	UI_Object::assignStartTime();
-	
-	bar->draw(dc, 2, START_INIT_GUI_STRING);
+//	bar->draw(dc, 2, START_INIT_GUI_STRING);
 	mainWindow = new MainWindow();
-
 	tutorialWindow = new TutorialWindow(mainWindow);
 	settingsWindow = new SettingsWindow(mainWindow);
 	msgWindow = new MessageWindow(mainWindow);
-
-//TODO: scc2 player und scc2dll player Zusammenhang nachschaun! loadPlayer wird net aufgerufen... goals ueberschneiden etc...
-
-//	for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-//	{
-//		player[i] = new Player(mainWindow, &(anarace[i]), msgWindow, i);
-//	}
-//	for(unsigned int i = settings.getMap(0)->getMaxPlayer();i<MAX_GAME;i++)
-//		player[i]=0;
-
-	for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-		game[i] = new Game(mainWindow, &(anarace[i]), msgWindow, 0);
-		
-//	player[1] = new Player(mainWindow, &(anarace[1]), msgWindow, 1);
-//	player[2] = 0; TODO restliche 0
-
-//	msgWindow->setParent(mainWindow); // process AFTER player
-	
 	mainWindow->Show();
-	msgWindow->Show();
 	tutorialWindow->Hide();
 	settingsWindow->Hide();
-
-	game[0]->Show();
-//	game[0]->Hide(); //~~
-
 	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG1_STRING)));
 	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG2_STRING)));
-//	msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(GAMES_LOADED_STRING, settings.getMap(0)->getMaxPlayer()));
-	bar->draw(dc, 8, START_MAIN_INIT_COMPLETE_STRING);
-//	cursor=init_system_cursor(arrow);
-//	SDL_ShowCursor(SDL_DISABLE);
-//	cursor = (UI_Object::theme.lookUpBitmap(MAUS_BITMAP))->getSurface();
-
-//  SDL_SetColorKey(cursor, SDL_SRCCOLORKEY|SDL_RLEACCEL, SDL_MapRGB(cursor->format, 255, 255, 255));
-			
-//	cursor_save = *UI_Object::theme.lookUpBitmap(MAUS_BITMAP);
-	
-//	get_bg(dc, cursor_save, 0, 0);
-//	SDL_SetAlpha(cursor, SDL_SRCALPHA, 127);
+//	msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(GAMES_LOADED_STRING, database.getMap(0)->getMaxPlayer()));
+//	bar->draw(dc, 8, START_MAIN_INIT_COMPLETE_STRING);
 	mainWindow->forcePressTab(BASIC_TAB); // !!
+
+	initializeGame();
+}
+
+void Main::initializeGame()
+{
+	game[0] = new Game(mainWindow, 0);gameCount++;
+	for(unsigned int i = gameCount; i<MAX_GAME;i++)
+		game[i]=NULL;
+		
+//	setMode(0); // TODO
+	game[0]->assignMap(database.getMap(0));
+	game[0]->setHarvestSpeed(1, TERRA, database.getHarvestSpeed(TERRA, 0));
+	game[0]->setHarvestSpeed(1, PROTOSS, database.getHarvestSpeed(PROTOSS, 0));
+	game[0]->setHarvestSpeed(1, ZERG, database.getHarvestSpeed(ZERG, 0));
+	game[0]->setStartRace(1, TERRA);
+	game[0]->assignStartCondition(1, database.getStartCondition(TERRA, 0));
+	game[0]->setStartPosition(1, 1);
+	game[0]->assignGoal(1, database.getGoal(TERRA, 0));
+	game[0]->initSoup();
+	game[0]->fillGroups();
+
+// TODO FEHLERMELDUNG FALLS FALSCHES GOAL ZU FALSCHER RASSE
+//	database.assignStartConditionHarvestSpeed();
+//	bar->draw(dc, 2, START_PREPARE_FIRST_RUN_STRING);
+
+	// initializes players, initializes Map
+// initialize the soup, set the parameters, load the players etc.
+	game[0]->newGeneration();
+//	anarace[0]->setMaxpFitness(0);
+
+	game[0]->Show();
+
 
 }
 
@@ -148,16 +107,17 @@ Main::~Main()
 	delete msgWindow;
 	delete tutorialWindow;
 	delete settingsWindow;
-	for(int i=0;i<MAX_GAME;i++)
+	for(unsigned int i=MAX_GAME;i--;)
 		delete game[i];
 }
 
 void Main::resetData()
 {
 	endrun = false;
-	for(unsigned int i=MAX_GAME;i--;)
-		anarace[i] = NULL;
-	boHasChanged = true;
+	for(unsigned int i=gameCount;i--;)
+		if(game[i])
+			game[i]->resetData();
+	
 }
 
 void Main::noticeFullscreen()
@@ -168,29 +128,23 @@ void Main::noticeFullscreen()
 void Main::process()
 {
 	UI_Object::windowSelected = false;
-	if(isOptimizing()) 
-	{
-		if(ani2>1)
-		{
-			ani++;
-			ani2 = 0;
-		} else ani2++;
-	}
-	else ani = 1;
-	if(ani>30) ani = 1;
-
-	if(boHasChanged)
-	{
-		boHasChanged = false;
-		for(unsigned int i = settings.getMap(0)->getMaxPlayer();i--;)
-			if(game[i]->isShown())
-				game[i]->CheckOrders();
-	}
-	if((configuration.isTooltips())&&(UI_Object::tooltip))
+	
+//	mainWindow->continueOptimizingAnimation(isOptimizing());
+	
+	if((efConfiguration.isToolTips())&&(UI_Object::tooltip))
 		UI_Object::tooltip->process();
-	mainWindow->process();
 
 	
+	for(std::list<std::string>::iterator i = UI_Object::msgList.begin(); i!= UI_Object::msgList.end(); i++)
+	{
+		msgWindow->addMessage(*i);
+		i = UI_Object::msgList.erase(i);
+	}
+
+
+	mainWindow->process();
+
+
 	if(!UI_Object::windowSelected)
 	{
 		if(UI_Object::currentWindow)
@@ -199,7 +153,7 @@ void Main::process()
 	}
 	if(settingsWindow->hasLanguageChanged())
 	{
-		for(unsigned int i = settings.getMap(0)->getMaxPlayer();i--;)
+		for(unsigned int i = gameCount;i--;)
 			game[i]->reloadStrings();
 		mainWindow->reloadStrings();
 		settingsWindow->reloadStrings();
@@ -208,8 +162,8 @@ void Main::process()
 
 	if(mainWindow->tabWasChanged())
 	{
-		boHasChanged = true;
-		gizmo = false;
+//		boHasChanged = true; an entsprechende (?) Games weiterleiten
+//		mainWindow->setGizmo(false);
 		eTab ctab = mainWindow->getCurrentTab();
 		switch(ctab)
 		{
@@ -217,13 +171,13 @@ void Main::process()
 				msgWindow->Show();
 				settingsWindow->Hide();
 				tutorialWindow->Hide();
-				gizmo = true;
+//				mainWindow->setGizmo();
 			break;
 			case ADVANCED_TAB: //1 player
 				msgWindow->Show();
 				settingsWindow->Hide();
 				tutorialWindow->Hide();
-				gizmo = true;
+//				mainWindow->setGizmo();
 			break;
 			case EXPERT_TAB: //2 player rushversuche
 				msgWindow->Show();
@@ -259,8 +213,8 @@ void Main::process()
 			break;
 			default:break;		
 		} // end switch getCurrentTabs
-		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
-			game[i]->setMode(ctab, i);
+		for(unsigned int i=gameCount;i--;)
+			game[i]->setMode(ctab, i); // TODO
 
 		UI_Object::theme.setTab(ctab);
 		
@@ -268,112 +222,51 @@ void Main::process()
 		msgWindow->updateRectangles(0);
 		settingsWindow->updateRectangles(0);
 		tutorialWindow->updateRectangles(0);
-		unsigned int maxPlayer=0;
-		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
-			if(game[i]->isShown()) 
-				maxPlayer++;
-		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
-			if(game[i]->isShown())
-				game[i]->updateRectangles(maxPlayer-1);
+//		unsigned int maxPlayer=0;
+//		for(unsigned int i=database.getMap(0)->getMaxPlayer();i--;)
+//			if(game[i]->isShown()) 
+//				maxPlayer++;
+//		for(unsigned int i=gameCount;i--;)
+//			if(game[i]->isShown())
+//				game[i]->updateRectangles(maxPlayer-1);
 	} // end tabwasChanged
 	
-//	settings.checkForChange();
-	// TODO nicht gesamt Reset machen sondern je nach dem welcher Player resettet wurde!!
-	if(UI_Window::getChangedFlag())
-	{
-		bool was_optimizing = isOptimizing();
-		for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
+	for(unsigned int i = gameCount;i--;) // TODO
+		if(game[i]->checkForNeedRedraw())
 		{
-			game[i]->resetData();
-			game[i]->restartAnarace(); //?
+			mainWindow->setNeedRedrawNotMoved();
+			msgWindow->setNeedRedrawNotMoved();
+			settingsWindow->setNeedRedrawNotMoved();
+			mainWindow->setNeedRedrawMoved();
+			break;
 		}
-		if(was_optimizing)
-			startOptimizing();
-		else stopOptimizing();
-		UI_Window::changeAccepted();
-		boHasChanged=true;	
-	} else
-	if(UI_Window::getResetFlag())
-	{
-		bool was_optimizing = isOptimizing();
-		for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-		{
-			game[i]->resetData();
-			game[i]->restartAnarace(); //?
-		}
-		settings.assignRunParametersToSoup();
-		if(ANARACE** temp=settings.newGeneration(anarace))
-		{
-			for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-				anarace[i] = temp[i];
-		}
-		for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-			game[i]->assignAnarace(&(anarace[i]));
-		if(was_optimizing)
-			startOptimizing();
-		else stopOptimizing();
 
-		UI_Window::resetAccepted();
-		UI_Window::changeAccepted();
-		boHasChanged=true;
-	}
-	if(game[0]->checkForNeedRedraw())
-	{
-		mainWindow->setNeedRedrawNotMoved();
-		msgWindow->setNeedRedrawNotMoved();
-		settingsWindow->setNeedRedrawNotMoved();
-		mainWindow->setNeedRedrawMoved();
-	}
 	
 }
 
-void Main::stopOptimizing()
+void Main::stopAllOptimizing()
 {
-	for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
+	for(unsigned int i=gameCount;i--;)
 		if(game[i]->isShown())
 			game[i]->setOptimizing(false);
 }
 
-void Main::startOptimizing()
+void Main::startAllOptimizing()
 {
-	for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
+	for(unsigned int i=gameCount;i--;)
 		if(game[i]->isShown())
 			game[i]->setOptimizing(true);
 }
 
-const bool Main::isOptimizing() const
+const bool Main::isAnyOptimizing() const
 {
-	for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
+	for(unsigned int i=gameCount;i--;)
 		if((game[i]->isShown())&&(game[i]->isOptimizing()))
 			return(true);
 	return(false);
 }
 
-const Size Main::helper(DC* dc, const unsigned int dx, const int i, const string& str) const
-{
-	dc->SetTextForeground(DC::toSDL_Color(
-				(Uint8)((0==ani%(20+i))*35+((0==ani%(19+i))+(0==ani%(21+i)))*15+20),
-				(Uint8)((0==ani%(20+i))*35+((0==ani%(19+i))+(0==ani%(21+i)))*15+20),
-				(Uint8)((0==ani%(20+i))*35+((0==ani%(19+i))+(0==ani%(21+i)))*30+60)));
-	dc->DrawText(str.substr(str.size()-1, str.size()), mainWindow->getAbsoluteClientRectPosition()+Point(20+dx,20));
-	return(dc->GetTextExtent(str.c_str()));
-}
 
-void Main::drawGizmo(DC* dc) const
-{
-	dc->SetFont(UI_Object::theme.lookUpFont(HUGE_DEFAULT_BOLD_FONT));
-	string str="Evolution";
-	Size s;
-	for(unsigned int i=0;i<str.size();i++)
-		s = helper(dc, s.GetWidth(), i, str.substr(0, i+1));
-
-	dc->SetTextForeground(DC::toSDL_Color(25, 25, 85));
-	dc->DrawText("Forge", mainWindow->getAbsoluteClientRectPosition() + Point(50, 58));
-	dc->SetTextForeground(DC::toSDL_Color(0,0,85));
-	dc->DrawText(CORE_VERSION, mainWindow->getAbsoluteClientRectPosition()+Point(78, 98));
-	dc->SetTextForeground(DC::toSDL_Color(50, 50, 85));
-	dc->DrawText(CORE_VERSION, mainWindow->getAbsoluteClientRectPosition()+Point(75, 95));
-}
 
 void Main::draw(DC* dc) const
 {
@@ -383,53 +276,12 @@ void Main::draw(DC* dc) const
 		{
 			SDL_Rect rc;
 			rc.x = 0;rc.y = 0; rc.w = UI_Object::max_x; rc.h = UI_Object::max_y;
-			if(configuration.isBackgroundBitmap())
+			if(efConfiguration.isBackgroundBitmap())
 				SDL_BlitSurface(UI_Object::theme.lookUpBitmap(BACKGROUND_BITMAP) , 0, dc->GetSurface(), &rc);
 			else
 				SDL_FillRect(dc->GetSurface(), &rc, 0);
 		}
 		mainWindow->draw(dc);
-		if(gizmo)
-			drawGizmo(dc);
-		if(UI_Object::tooltip)
-		{
-			UI_Object::tooltip->draw(dc);
-		//	(UI_Object::tooltip)->clearRedrawFlag();
-		}
-		mainWindow->clearRedrawFlag();
-	// ------ MOUSE DRAWING ------
-		if(configuration.isSoftwareMouse())
-		{
-//			SDL_ShowCursor(SDL_DISABLE);
-			Point p = UI_Object::mouse - Size(20,10);//Point(90, 140);
-			dc->SetFont(UI_Object::theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
-			switch(UI_Object::mouseType)
-			{
-				case 0://dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_NONE), p);
-					break;
-				case 1:
-//					dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_LEFT), p);
-					dc->SetTextForeground(DC::toSDL_Color(179,0,0));
-					dc->DrawText("Add a unit", p.x-50, p.y+2);
-				break;
-				case 2:
-//					dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_RIGHT), p);
-					dc->SetTextForeground(DC::toSDL_Color(0,177,188));
-					dc->DrawText("Remove a unit", p.x+38, p.y+1);
-				break;
-				case 3:
-//					dc->DrawBitmap(*UI_Object::theme.lookUpBitmap(MOUSE_BOTH), p);
-					dc->SetTextForeground(DC::toSDL_Color(179,0,0));
-					dc->DrawText("Add a unit", p.x-50, p.y+2);
-					dc->SetTextForeground(DC::toSDL_Color(0,177,188));
-					dc->DrawText("Remove a unit", p.x+38, p.y+1);
-				break;
-			}
-		}
-//		else
-//			SDL_ShowCursor(SDL_ENABLE);
-// ------ END MOUSE DRAWING ------
-		
 	}
 /*	SDL_Rect c;
 	c.x=maus.x;
@@ -447,41 +299,27 @@ void Main::draw(DC* dc) const
 
 void Main::OnIdle()
 {
-	if((!UI_Object::editTextField)&&(isOptimizing()))
+	if((!UI_Object::editTextField))
 	{
-		ANARACE** temp;
-		unsigned int oldCode[MAX_GAME][MAX_LENGTH];
-		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
-			anarace[i]->copyCode(oldCode[i]);
-			
-//TODO: nach Ende eines Durchlaufs ist anarace 0, aber viele anderen Teile des Codes greifen noch drauf zu!!
-		if((temp=settings.newGeneration(anarace)))
-		{
-			for(int i=settings.getMap(0)->getMaxPlayer();i--;)
-			{
-				if(anarace[i]->isDifferent(oldCode[i]))//, oldMarker[i]))
-					boHasChanged=true;
-					
-				anarace[i]=temp[i];
-			}
-		}
+		for(unsigned int i=gameCount;i--;)
+			game[i]->newGeneration();
 	}
 }
 
 
 const bool Main::newRun()
 {
-	bool endrun=true;
-	if(configuration.isAutoSaveRuns())
+//	endrun=true; TODO
+/*	if(efConfiguration.isAutoSaveRuns()) TODO
 	{
 		ostringstream os, os2;
 		os << anarace[0]->getRun() << *UI_Object::theme.lookUpString(ENDRUN_FINISHED_STRING) << "[" << formatTime2(anarace[0]->getRealTimer()) << "]";
 		msgWindow->addMessage(os.str());
 		os2 << "bo_" << (*anarace[0]->getCurrentGoal())->getName() << "_" << formatTime2(anarace[0]->getRealTimer()) << "_" << anarace[0]->getRun();
 //		if(UI_EndRunDialog::getLastString()!="bo")
-//			settings.saveBuildOrder(UI_EndRunDialog::getLastString(), anarace[0]); // TODO, evtl alle saven...
+//			database.saveBuildOrder(UI_EndRunDialog::getLastString(), anarace[0]); // TODO, evtl alle saven...
 //		else
-			settings.saveBuildOrder(os2.str(), anarace[0]); // TODO, evtl alle saven...
+			database.saveBuildOrder(os2.str(), anarace[0]); // TODO, evtl alle saven...
 		// TODO Name muss mitangegeben werden...
 		// Dann ist auch die Frage wie die Ergebnisse gespeichert werden sollen, klar, nach Rasse sortiert 
 		// Voreinstellung fuer Editfeld ist letzter benutzter Name  (oder 'leer') + fortlaufende Zahl (Reset bei neuem Namen)
@@ -507,7 +345,7 @@ const bool Main::newRun()
 					ostringstream os;
 					os << anarace[0]->getRun() << *UI_Object::theme.lookUpString(ENDRUN_FINISHED_STRING) << " [" << formatTime2(anarace[0]->getRealTimer()) << "]";
 					msgWindow->addMessage(os.str());
-					settings.saveBuildOrder(UI_Object::editTextField->getString(), anarace[0]); // TODO, evtl alle saven...
+					database.saveBuildOrder(UI_Object::editTextField->getString(), anarace[0]); // TODO, evtl alle saven...
 					msgWindow->addMessage(*UI_Object::theme.lookUpString(ENDRUN_SAVED_BUILDORDER_STRING));
 				}
 				delete UI_Object::editTextField;
@@ -525,9 +363,10 @@ const bool Main::newRun()
 		}
 	}
 	if(!endrun)
-		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
+		for(unsigned int i=database.getMap(0)->getMaxPlayer();i--;)
 			game[i]->resetData();
-	return(endrun);
+	return(endrun);*/
+	return(false);
 }	
 
 
@@ -536,9 +375,9 @@ void Main::loadGoals()
 {
 	for(unsigned int i = 0; i < MAX_RACES; i++)
 	{
-		list<string> goalFiles = settings.findFiles("settings", "goals", raceString[i]);
-		for(list<string>::iterator j = goalFiles.begin(); j!=goalFiles.end(); j++)
-			settings.loadGoalFile(*j);
+		std::list<std::string> goalFiles = database.findFiles("settings", "goals", raceString[i]);
+		for(std::list<std::string>::iterator j = goalFiles.begin(); j!=goalFiles.end(); j++)
+			database.loadGoalFile(*j);
 	}
 //TODO flag setzen ob was geladen wurde
 }
@@ -596,9 +435,9 @@ void Main::setMouse(const Point p)
 {
 //	if(p == UI_Object::mouse)
 //		return;
-	maus=p;
-	UI_Object::mouse=p;
-	((BoGraphWindow*)(game[0]->window[BO_GRAPH_WINDOW]))->mouseHasMoved(); // TODO
+	maus = p;
+	UI_Object::mouse = p;
+//	((BoGraphWindow*)(game[0]->window[BO_GRAPH_WINDOW]))->mouseHasMoved(); // TODO
 //	else if(game[1]->window[BO_GRAPH_WINDOW]->Inside(p))
 //		(BoGraphWindow*)(game[1]->window[BO_GRAPH_WINDOW])->mouseHasMoved();
 	
@@ -632,7 +471,7 @@ void Main::setMouse(const Point p)
 	UI_Object::currentButton=NULL;
 	if(UI_Object::editTextField==NULL)
 	{
-		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
+		for(unsigned int i=gameCount;i--;)
 			if(!UI_Object::currentButton)
 				UI_Object::currentButton = (UI_Button*) (game[i]->checkHighlight());
 				
@@ -648,28 +487,28 @@ void Main::setMouse(const Point p)
 		UI_Object::currentButton->mouseHasEnteredArea();
 		UI_Object::currentButtonHasAlreadyLeft=false;
 	}
-	if(configuration.isTooltips())
+	if(efConfiguration.isToolTips())
 	{
 //		UI_Object* temp=UI_Object::toolTipParent;
 		UI_Object* temp2 = NULL;
 		UI_Object::toolTipParent = NULL;
 
-		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
+		for(unsigned int i=gameCount;i--;)
 		{
 			if(UI_Object::toolTipParent==NULL)
-				temp2 = game[i]->checkTooltip();
+				temp2 = game[i]->checkToolTip();
 			if((temp2!=NULL) && (temp2->getToolTipString()!=NULL_STRING))
 				UI_Object::toolTipParent = temp2;
 			temp2=NULL;
 		}
 		
 		if(UI_Object::toolTipParent==NULL)
-			temp2 = mainWindow->checkTooltip();
+			temp2 = mainWindow->checkToolTip();
 		if((temp2!=NULL) && (temp2->getToolTipString()!=NULL_STRING))
 			UI_Object::toolTipParent = temp2;
 		temp2=NULL;
 		if(UI_Object::toolTipParent==NULL)
-			temp2 = settingsWindow->checkTooltip();
+			temp2 = settingsWindow->checkToolTip();
 		if((temp2!=NULL) && (temp2->getToolTipString()!=NULL_STRING))
 			UI_Object::toolTipParent = temp2;
 //		if((UI_Object::toolTipParent!=temp)//||(UI_Object::tooltip==NULL))
@@ -679,7 +518,7 @@ void Main::setMouse(const Point p)
 			if(/*(temp!=NULL)&&*/(UI_Object::toolTipParent==NULL))
 				UI_Object::tooltip=NULL;
 			else
-				UI_Object::tooltip=new UI_Tooltip(mainWindow, (UI_Object::toolTipParent)->getToolTipString());
+				UI_Object::tooltip=new UI_ToolTip(mainWindow, (UI_Object::toolTipParent)->getToolTipString());
 			mainWindow->setNeedRedrawNotMoved();
 		}
 	} else if(UI_Object::tooltip)
@@ -691,5 +530,7 @@ void Main::setMouse(const Point p)
 }
 
 
-ProgressBar* Main::bar;
+//ProgressBar* Main::bar;
+InfoWindow* Main::infoWindow = NULL;
+MessageWindow* Main::msgWindow = NULL;
 

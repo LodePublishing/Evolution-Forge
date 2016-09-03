@@ -36,8 +36,8 @@ void UI_Radio::addButton(UI_Button* button)
 
 void UI_Radio::draw(DC* dc) const
 {
-	if(!isShown())
-		return;
+//	if(!isShown())
+//		return;
 	UI_Group::draw(dc);
 }
 

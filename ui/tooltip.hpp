@@ -3,13 +3,13 @@
 
 #include "statictext.hpp"
 
-class UI_Tooltip : UI_StaticText
+class UI_ToolTip : UI_StaticText
 {
 	public:
-		UI_Tooltip& operator=(const UI_Tooltip& object);
-		UI_Tooltip(const UI_Tooltip& object);
-		UI_Tooltip(UI_Object* parent_object, const eString text);
-		~UI_Tooltip();
+		UI_ToolTip& operator=(const UI_ToolTip& object);
+		UI_ToolTip(const UI_ToolTip& object);
+		UI_ToolTip(UI_Object* parent_object, const eString text);
+		~UI_ToolTip();
 	
 		void draw(DC* dc) const;
 		void process();

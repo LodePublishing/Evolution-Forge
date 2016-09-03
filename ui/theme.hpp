@@ -3,6 +3,7 @@
 
 #include "../sdl/dc.hpp"
 #include "../core/defs.hpp"
+#include "configuration.hpp"
 /*const char gizmo[GIZMO_NUMBER][40]=
 {
 	"Perfection is the key",
@@ -25,8 +26,6 @@ const unsigned int FONT_SIZE = 7;
 // TODO!!!
 
 const unsigned int MIN_DISTANCE = 3;
-
-using std::string;
 
 // ------ DATA TYPES ------
 enum eDataType
@@ -707,26 +706,30 @@ enum eBitmap
 // ------ END BITMAPS ------
 
 // ------ GENERAL RECTANGLES ------
-enum eWindow
+enum eGlobalWindow
 {
 	NULL_WINDOW,
 	MAIN_WINDOW,
 	MESSAGE_WINDOW,
-	THE_CORE_WINDOW,
 	TUTORIAL_WINDOW,
-	BUILD_ORDER_WINDOW,
-	FORCE_WINDOW,
-	TIMER_WINDOW,
-	STATISTICS_WINDOW,
-	BO_DIAGRAM_WINDOW,
-	BO_GRAPH_WINDOW,
+//	STATISTICS_WINDOW, ?
 	INFO_WINDOW,
-
 	SETTINGS_WINDOW,
 	EDIT_FIELD_WINDOW,
-
-	MAX_WINDOWS
+	MAX_GLOBAL_WINDOWS
 };
+
+
+enum eGameWindow
+{
+};
+
+enum ePlayerWindow
+{
+	
+};
+
+
 // ------ END GENERAL RECTANGLES ------
 
 enum eTab
@@ -896,14 +899,15 @@ class UI_Theme
 		const eTab getTab() const;
 		void setTab(const eTab tab);	
 
-		void loadStringFile(const string& dataFile);	
-		void loadDataFiles(const string& dataFile, const string& bitmapDir, const string& fontDir, DC* dc); //currently all data hard coded, move it to file later! TODO
+		void loadStringFile(const std::string& dataFile);
+		void loadGraphicData(const std::string& dataFile, const std::string& bitmapDir, const std::string& fontDir, DC* dc); //currently all data hard coded, move it to file later! TODO
+		void loadWindowData(const std::string& dataFile);
 
-		const string* lookUpString(const eString id) const;
-		const string lookUpFormattedString(const eString id, const string& text) const;
-		const string lookUpFormattedString(const eString id, const unsigned int i) const;
-		const string lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j) const;
-		const string lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j, const unsigned int k) const;
+		const std::string* lookUpString(const eString id) const;
+		const std::string lookUpFormattedString(const eString id, const std::string& text) const;
+		const std::string lookUpFormattedString(const eString id, const unsigned int i) const;
+		const std::string lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j) const;
+		const std::string lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j, const unsigned int k) const;
 		Color* lookUpColor(const eColor id) const;
 		/*const */SDL_Surface* lookUpBitmap(const eBitmap id) const;
 		Pen* lookUpPen(const ePen id) const;
@@ -914,7 +918,11 @@ class UI_Theme
 		const Point lookUpRealDistance(const eWindow id, const unsigned int windowNumber=0) const;
 		const Point lookUpMaxRealDistance(const eWindow id, const unsigned int windowNumber=0) const;
 		
-		const Rect lookUpRect(const eWindow id, const unsigned int windowNumber=0, const unsigned int maxPlayer=0) const;
+		const Rect lookUpGlobalRect(const eGlobalWindow id, const unsigned int windowNumber=0, const unsigned int maxPlayer=0) const;
+		const Rect lookUpGameRect(const eGameWindow id, const unsigned int gameNumber=0, const unsigned int maxGames=0) const;
+		const Rect lookUpPlayerRect(const ePlayerWindow id, const unsigned int playerNumber=0, const unsigned int maxPlayer=0) const;
+
+		
 		const unsigned int lookUpMaxHeight(const eWindow id, const unsigned int windowNumber=0, const unsigned int maxPlayer=0) const;
 
 		const ButtonAnimation* lookUpButtonAnimation(const eButton id) const;
@@ -947,13 +955,17 @@ class UI_Theme
 		eLanguage language;
 		eTheme colorTheme;
 		
-		string* stringList[MAX_LANGUAGES][MAX_STRINGS];
+		std::string* stringList[MAX_LANGUAGES][MAX_STRINGS];
 		Color* colorList[MAX_COLOR_THEMES][MAX_COLORS];
 		SDL_Surface* bitmapList[MAX_COLOR_THEMES][MAX_RESOLUTIONS][MAX_BITMAPS];
 		Pen* penList[MAX_RESOLUTIONS][MAX_COLOR_THEMES][MAX_PENS];
 		Brush* brushList[MAX_COLOR_THEMES][MAX_BRUSHES];
 
-		Rect* rectList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
+		Rect* globalRectList[MAX_RESOLUTIONS][MAX_TABS][MAX_GLOBAL_WINDOWS];
+		Rect* gameRectList[MAX_RESOLUTIONS][MAX_TABS][MAX_GAME_WINDOWS];
+		Rect* playerRectList[MAX_RESOLUTIONS][MAX_TABS][MAX_PLAYER_WINDOWS];
+
+		
 		unsigned int maxHeightList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
 
 		eArrangeDirection arrangeDirection[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
@@ -1007,7 +1019,7 @@ inline const ButtonAnimation* UI_Theme::lookUpButtonAnimation(const eButton id) 
 	return(buttonAnimationList[id]);
 }
 
-inline const string* UI_Theme::lookUpString(const eString id) const
+inline const std::string* UI_Theme::lookUpString(const eString id) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_STRINGS)) {

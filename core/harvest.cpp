@@ -2,9 +2,9 @@
 
 HARVEST_SPEED::HARVEST_SPEED()
 {
-	for(int i=45;i--;)
+	for(unsigned int i=45;i--;)
 		setHarvestMineralSpeed(i,0);
-	for(int i=5;i--;)
+	for(unsigned int i=5;i--;)
 		setHarvestGasSpeed(i,0);
 }
 

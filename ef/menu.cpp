@@ -46,7 +46,7 @@ Menu::Menu(UI_Object* menu_parent, Rect menu_rect, const bool choose_menu):
 	p2()
 { }
 
-Menu::Menu(UI_Object* menu_parent, Rect rect, const int entryNumber, const int coloumns, const Size& s, const eString firstString, const eButton button, const bool choose_menu):
+Menu::Menu(UI_Object* menu_parent, Rect rect, const unsigned int entryNumber, const unsigned int coloumns, const Size& s, const eString firstString, const eButton button, const bool choose_menu):
 	UI_Object(menu_parent, rect),
 	menuEntries(),
 	menuLevel(0),
@@ -57,7 +57,7 @@ Menu::Menu(UI_Object* menu_parent, Rect rect, const int entryNumber, const int c
 	p1(),
 	p2()
 {
-	for(int i=0;i<entryNumber;i++)
+	for(unsigned int i=0;i<entryNumber;i++)
 	{
 		Rect edge = Rect(Point(10 + (i%coloumns) * (s.GetWidth()+10), (i/coloumns)*(s.GetHeight()+12)), s);
 		MenuEntry* entry = new MenuEntry(this, edge, (eString)(firstString+i));
@@ -68,7 +68,7 @@ Menu::Menu(UI_Object* menu_parent, Rect rect, const int entryNumber, const int c
 
 Menu::~Menu()
 {
-	for(list<MenuEntry*>::const_iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+	for(std::list<MenuEntry*>::const_iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 		delete (*m);	
 }
 
@@ -120,9 +120,9 @@ void Menu::process()
 	p1 = Point(9999, 9999);
 	p2 = Point(0, 0);
 
-	int i = 0;
+	unsigned int i = 0;
 
-	for(list<MenuEntry*>::const_iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+	for(std::list<MenuEntry*>::const_iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 	{
 		if(!(*m)->isShown())
 		{

@@ -1,6 +1,6 @@
-#include "race.hpp"
+#include "buildorder.hpp"
 
-/* RACE.CPP - last changed: 9/24/04			      *
+/* BUILDORDER.CPP - last changed: 9/24/04			      *
  * Author: Clemens Lode					     *
  * Copyright: Clemens Lode					  *
  *								  *
@@ -8,36 +8,36 @@
  *      This is the core of the core, where the main calculations   *
  *      are made. */
 
-RACE::RACE():
-	PRERACE(),
+BUILDORDER::BUILDORDER():
+	PREBUILDORDER(),
 	mutationRate(20),
 	pFitness(0),
 	sFitness(0),
 	tFitness(99999)
 { }
 
-RACE::~RACE()
+BUILDORDER::~BUILDORDER()
 { }
 
-RACE::RACE(const RACE& object) :
-	PRERACE((PRERACE)(object)),
+BUILDORDER::BUILDORDER(const BUILDORDER& object) :
+	PREBUILDORDER((PREBUILDORDER)(object)),
 	mutationRate( object.mutationRate ),
 	pFitness( object.pFitness ),
 	sFitness( object.sFitness ),
 	tFitness( object.tFitness )
 { }
 
-void RACE::resetData()
+void BUILDORDER::resetData()
 {
-	PRERACE::resetPrerace();
+	PREBUILDORDER::resetPrerace();
 	mutationRate = 20;
 	pFitness = 0;
 	tFitness = 99999;
 }
 
-RACE& RACE::operator=(const RACE& object)
+BUILDORDER& BUILDORDER::operator=(const BUILDORDER& object)
 {
-	(PRERACE)(*this) = (PRERACE)(object);
+	(PREBUILDORDER)(*this) = (PREBUILDORDER)(object);
 	mutationRate = object.mutationRate;
 	pFitness = object.pFitness;
 	sFitness = object.sFitness;
@@ -45,19 +45,19 @@ RACE& RACE::operator=(const RACE& object)
 	return(*this);
 }
 
-const unsigned int RACE::calculateSecondaryFitness() const
+const unsigned int BUILDORDER::calculateSecondaryFitness() const
 {
 	// total gathered resources minus minerals that were not used
 	int tsF = getHarvestedMinerals() + getHarvestedGas();// - (getWastedMinerals() + getWastedGas()) / getRealTimer();
 	//TODO: evtl gas und minerals (wie urspruenglich eigentlich) in Verhaeltnis setyen wieviel es jeweils Geysire/Mineralien gibt...	
 	for(int i=GAS_SCV+1; i--;)
-		if((getpGoal()->getAllGoal(i)>0)&&(getpGoal()->getAllGoal(i)+(*pStartCondition)->getLocationTotal(GLOBAL, i)<getLocationTotal(GLOBAL, i)))
-			tsF-=((*pStartCondition)->getLocationTotal(GLOBAL, i)-(*pStartCondition)->getLocationTotal(GLOBAL,i)-getpGoal()->getAllGoal(i))*(stats[getpGoal()->getRace()][i].gas+stats[getpGoal()->getRace()][i].minerals);
+		if((getGoal()->getAllGoal(i)>0)&&(getGoal()->getAllGoal(i)+(*pStartCondition)->getLocationTotal(GLOBAL, i)<getLocationTotal(GLOBAL, i)))
+			tsF-=((*pStartCondition)->getLocationTotal(GLOBAL, i)-(*pStartCondition)->getLocationTotal(GLOBAL,i)-getGoal()->getAllGoal(i))*(stats[getGoal()->getRace()][i].gas+stats[getGoal()->getRace()][i].minerals);
 	return(tsF);
 }
 
 // TODO: reimplement/recheck the speed of the units
-const bool RACE::calculateStep()
+const bool BUILDORDER::calculateStep()
 {
 //ZERG:  CREEP!
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
@@ -65,23 +65,23 @@ const bool RACE::calculateStep()
 	
 	if((!getTimer()) || (ready = calculateReady()) || (!getIP())) 
 	{
-		setLength(configuration.getMaxLength()-getIP());
+		setLength(coreConfiguration.getMaxLength()-getIP());
 		if(!ready) 
 			setTimer(0);
-//		if(getpGoal()->getMode()==0)
+//		if(getGoal()->getMode()==0)
 			setpFitness(calculatePrimaryFitness(ready));
 		while(!buildingQueue.empty()) 
 			buildingQueue.pop();
 
-// ----- RACE SPECIFIC -----
+// ----- BUILDORDER SPECIFIC -----
 		settFitness(gettFitness()-getLength());
 		setsFitness(calculateSecondaryFitness());
-// ----- END RACE SPECIFIC ------
+// ----- END BUILDORDER SPECIFIC ------
 
 	
 		return(true);
 	}
-/*		if(getpGoal()->getRace()==ZERG)
+/*		if(getGoal()->getRace()==ZERG)
 		{
 //		  ((*pStats)[build_unit].facility[0]==LARVA)&&
 		// Larva wird benoetigt zum Bau? Fein, dann bauen wir eine neue Larva falls nicht schon alle hatcheries etc. belegt sidn
@@ -112,11 +112,11 @@ const bool RACE::calculateStep()
 // set needed_ to maximum to determine the minimum of minerals/gas our jobs need (needed_ is set in buildGene)
 		neededMinerals = MAX_MINERALS;
 		neededGas = MAX_GAS;
-		int code = getpGoal()->toPhaeno(getCurrentCode());
+		int code = getGoal()->toPhaeno(getCurrentCode());
 		if((code >= BUILD_PARALLEL_2) && (code <= BUILD_PARALLEL_16))
 		{
 			setIP(getIP()-1);
-			while((getpGoal()->toPhaeno(getCurrentCode()) > GAS_SCV)&&(getIP()))
+			while((getGoal()->toPhaeno(getCurrentCode()) > GAS_SCV)&&(getIP()))
 				setIP(getIP()-1);
 			PARALLEL_COMMAND* pcommand = new PARALLEL_COMMAND;
 			switch(code)
@@ -127,14 +127,14 @@ const bool RACE::calculateStep()
 				case BUILD_PARALLEL_16:pcommand->count = 16;break;
 				default:break; // ~~
 			}
-			pcommand->unit = getpGoal()->toPhaeno(getCurrentCode());
+			pcommand->unit = getGoal()->toPhaeno(getCurrentCode());
 			if(getIP()) 
 				setIP(getIP()-1);
 			parallelCommandQueues.push_back(pcommand);
 			ok = true;
 		} else
 		{
-			ok = buildGene(getpGoal()->toPhaeno(getCurrentCode()));
+			ok = buildGene(getGoal()->toPhaeno(getCurrentCode()));
 		// ~~
 			if((ok)||(!getTimeOut()))
 			{
@@ -143,15 +143,15 @@ const bool RACE::calculateStep()
 				first = false;
 				if(!getTimeOut())
 					settFitness(gettFitness()-5);
-				setTimeOut(configuration.getMaxTimeOut());
+				setTimeOut(coreConfiguration.getMaxTimeOut());
 				setIP(getIP()-1);
 			}
 // Try parallel commands
 			std::list<PARALLEL_COMMAND*>::iterator command = parallelCommandQueues.begin(); 
 			while(command != parallelCommandQueues.end())
 			{
-				unsigned int unit = (*command)->unit;
-				ok = buildGene(unit);
+				unsigned int build_unit = (*command)->unit;
+				ok = buildGene(build_unit);
 				if(ok)
 				{
 					(*command)->count--;
@@ -164,7 +164,7 @@ const bool RACE::calculateStep()
 				{
 					do
 						command++;
-					while((command!=parallelCommandQueues.end())&&((*command)->unit == unit));
+					while((command!=parallelCommandQueues.end())&&((*command)->unit == build_unit));
 				}
 			}
 		}
@@ -222,7 +222,7 @@ const bool RACE::calculateStep()
 
 			
 // ------ CHECK WHETHER WE ARE READY ------
-			getpGoal()->calculateFinalTimes(build.getLocation(), build.getType(), getLocationTotal(build.getLocation(), build.getType()), getRealTimer());
+			getGoal()->calculateFinalTimes(build.getLocation(), build.getType(), getLocationTotal(build.getLocation(), build.getType()), getRealTimer());
 			ready = calculateReady();
 // ------ END CHECK -------
 			
@@ -259,7 +259,7 @@ const bool RACE::calculateStep()
 
 //TODO: pFitness wird total falsch berechnet fuer races die nicht alle Ziele erfuellt haben!1 [location problem halt...]
 
-const bool RACE::buildGene(const unsigned int build_unit)
+const bool BUILDORDER::buildGene(const unsigned int build_unit)
 {
 	const UNIT_STATISTICS* stat = &(*pStats)[build_unit];
 	bool ok = false;
@@ -303,7 +303,7 @@ const bool RACE::buildGene(const unsigned int build_unit)
 				if(buildIt(build_unit)==true)
 				{
 					ok=true;
-// ------ RACE SPECIFIC, tFITNESS ------
+// ------ BUILDORDER SPECIFIC, tFITNESS ------
 					if(getMinerals()*3<4*stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)) settFitness(gettFitness()-2);
 					if(getGas()*3<4*stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)) settFitness(gettFitness()-2);
 //				      if((stat->needSupply>0)&&(getNeedSupply()*4<5*stat->needSupply)) settFitness(gettFitness()-2);  TODO
@@ -406,7 +406,7 @@ const bool RACE::buildGene(const unsigned int build_unit)
 	return(ok);
 }
 
-const bool RACE::buildIt(const unsigned int build_unit)
+const bool BUILDORDER::buildIt(const unsigned int build_unit)
 {
 	//Zuerst: availible pruefen ob am Ort gebaut werden kann
 	//Wenn nicht => +/- absteigen bis alle locations durch sind
@@ -500,7 +500,7 @@ const bool RACE::buildIt(const unsigned int build_unit)
 //	  Phagen ueber Phagen...
 	if(ok)
 	{ 
- 		if((getpGoal()->getRace()==ZERG) &&
+ 		if((getGoal()->getRace()==ZERG) &&
 //		  ((*pStats)[build_unit].facility[0]==LARVA)&&
 			(build_unit!=LARVA) &&
 		// Larva wird benoetigt zum Bau? Fein, dann bauen wir eine neue Larva falls nicht schon alle hatcheries etc. belegt sidn
@@ -543,9 +543,9 @@ const bool RACE::buildIt(const unsigned int build_unit)
 	return(ok);
 }
 // Reset all ongoing data (between two generations)
-void RACE::prepareForNewGeneration() // resets all data to standard starting values
+void BUILDORDER::prepareForNewGeneration() // resets all data to standard starting values
 {
-	PRERACE::prepareForNewGeneration();
+	PREBUILDORDER::prepareForNewGeneration();
 	setpFitness(0);
 	setsFitness(0);
 	settFitness(MAX_TFITNESS);

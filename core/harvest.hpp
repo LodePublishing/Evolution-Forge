@@ -2,58 +2,59 @@
 #define _CORE_HARVEST_HPP
 
 #include "defs.hpp"
+#include "../stl/misc.hpp"
 
 class HARVEST_SPEED
 {
 	private:
-		int minerals[45];
-		int gas[5];
+		unsigned int minerals[45];
+		unsigned int gas[5];
 	public:
 		HARVEST_SPEED();
 		~HARVEST_SPEED();
 	
-		const int getHarvestMineralSpeed(const int num) const;
-		const int getHarvestGasSpeed(const int num) const;
-		void setHarvestMineralSpeed(const int num, const int speed);
-		void setHarvestGasSpeed(const int num, const int speed);
+		const unsigned int getHarvestMineralSpeed(const unsigned int num) const;
+		const unsigned int getHarvestGasSpeed(const unsigned int num) const;
+		void setHarvestMineralSpeed(const unsigned int num, const unsigned int speed);
+		void setHarvestGasSpeed(const unsigned int num, const unsigned int speed);
 
 };
 
-inline const int HARVEST_SPEED::getHarvestMineralSpeed(const int num) const
+inline const unsigned int HARVEST_SPEED::getHarvestMineralSpeed(const unsigned int num) const
 {
 #ifdef _SCC_DEBUG
 	//todo range checking von minerals[num]!
-	if((num<0)||(num>=45)) {
+	if(num>=45) {
 		toLog("DEBUG: (HARVEST_SPEED::getHarvestMineralSpeed): Value out of range.");return(0);
 	}
 #endif
 	return(minerals[num]);
 }
 
-inline const int HARVEST_SPEED::getHarvestGasSpeed(const int num) const
+inline const unsigned int HARVEST_SPEED::getHarvestGasSpeed(const unsigned int num) const
 {
 #ifdef _SCC_DEBUG
-	if((num<0)||(num>=5)) {
+	if(num>=5) {
 		toLog("DEBUG: (HARVEST_SPEED::getHarvestGasSpeed): Value out of range.");return(0);
 	}
 #endif
 	return(gas[num]);
 }
 
-inline void HARVEST_SPEED::setHarvestMineralSpeed(const int num, const int speed)
+inline void HARVEST_SPEED::setHarvestMineralSpeed(const unsigned int num, const unsigned int speed)
 {
 #ifdef _SCC_DEBUG
-	if((num<0)||(num>=45)||(speed<0)) {
+	if(num>=45) {
 		toLog("DEBUG: (HARVEST_SPEED::setHarvestMineralSpeed): Value out of range.");return;
 	}
 #endif
 	minerals[num]=speed;
 }
 
-inline void HARVEST_SPEED::setHarvestGasSpeed(const int num, const int speed)
+inline void HARVEST_SPEED::setHarvestGasSpeed(const unsigned int num, const unsigned int speed)
 {
 #ifdef _SCC_DEBUG
-	if((num<0)||(num>=5)||(speed<0)) {
+	if(num>=5) {
 		toLog("DEBUG: (HARVEST_SPEED::getHarvestGasSpeed): Value out of range.");return;
 	}
 #endif

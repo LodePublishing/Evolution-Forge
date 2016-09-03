@@ -64,7 +64,7 @@ class UI_Window : public UI_Object
 		void process();
 		void draw(DC* dc) const;
 
-		UI_Object* checkTooltip();
+		UI_Object* checkToolTip();
 		UI_Object* checkHighlight();
 
 // 		reconfigure rectangles depending on current theme settings
@@ -78,7 +78,7 @@ class UI_Window : public UI_Object
 		static void setResetFlag(const bool flag=true);
 		static void resetAccepted();
 
-		void setTitleParameter(const string& p);
+		void setTitleParameter(const std::string& p);
 
 		void updateBorders();
 
@@ -95,13 +95,13 @@ class UI_Window : public UI_Object
 
 		void wheelUp();
 		void wheelDown();
-		void resetScrollbar();
-		void resetScrollbarToEnd();
+		void moveScrollbarToTop();
+		void moveScrollbarToBottom();
 
 	protected:
 //		bool isMouseInsideClientArea();
-	private:
 		UI_Radio* tabRow;
+	private:
 		UI_Button* tab[MAX_TABS];
 		
 		eWindow window;
@@ -110,7 +110,7 @@ class UI_Window : public UI_Object
 
 // no set/get for title as this is unique and does not change
 		eString titleString;
-		string titleParameter;
+		std::string titleParameter;
 		
 		Rect originalRect;
 
@@ -130,7 +130,7 @@ class UI_Window : public UI_Object
 
 		void drawTabs(DC* dc) const;
 		void drawTitle(DC* dc) const;
-		void drawToolTip(DC* dc, const Point p, const string* tip) const;
+		void drawToolTip(DC* dc, const Point p, const std::string* tip) const;
 
 		unsigned int windowNumber;
 		eIsAutoAdjust isAutoAdjust;

@@ -4,12 +4,10 @@
 
 BoGraphWindow::BoGraphWindow(const BoGraphWindow& object) :
 	UI_Window((UI_Window)object),
-//	boGraphList(),
 	markAni(object.markAni),
-	infoWindow(object.infoWindow),
 	anarace(object.anarace)
 {
-	for(int i = BOGRAPH_MAX_LINES;i--;)
+	for(unsigned int i = BOGRAPH_MAX_LINES;i--;)
 	{
 		bograph[i].facility = object.bograph[i].facility;
 		bograph[i].height = object.bograph[i].height;
@@ -22,9 +20,8 @@ BoGraphWindow& BoGraphWindow::operator=(const BoGraphWindow& object)
 {
 	((UI_Window)(*this)) = ((UI_Window)object);
 	markAni = object.markAni;
-	infoWindow = object.infoWindow;
 	anarace = object.anarace;
-	for(int i = BOGRAPH_MAX_LINES;i--;)
+	for(unsigned int i = BOGRAPH_MAX_LINES;i--;)
 	{
 		bograph[i].facility = object.bograph[i].facility;
 		bograph[i].height = object.bograph[i].height;
@@ -34,19 +31,17 @@ BoGraphWindow& BoGraphWindow::operator=(const BoGraphWindow& object)
 	return(*this);
 }
 
-BoGraphWindow::BoGraphWindow(UI_Object* bograph_parent, ANARACE* bograph_anarace, InfoWindow* bograph_info_window, const unsigned int bograph_window_number) :
+BoGraphWindow::BoGraphWindow(UI_Object* bograph_parent, const unsigned int bograph_window_number) :
 	UI_Window(bograph_parent, BOGRAPH_WINDOW_TITLE_STRING, BO_GRAPH_WINDOW, bograph_window_number, NOT_SCROLLED),
-//	boGraphList(),
 	markAni(0),
-	infoWindow(bograph_info_window),
-	anarace(bograph_anarace)
+	anarace(NULL)
 {
 //	resetData(); // TODO
 }
 
 BoGraphWindow::~BoGraphWindow()
 {
-	for(int j = 0; j < BOGRAPH_MAX_LINES; j++)
+	for(unsigned int j = 0; j < BOGRAPH_MAX_LINES; j++)
 	{
 		std::list<BoGraphEntry*>::iterator i = bograph[j].boGraphList.begin();
 		while(i != bograph[j].boGraphList.end())
@@ -62,7 +57,7 @@ BoGraphWindow::~BoGraphWindow()
 void BoGraphWindow::checkForInfoWindow()
 {
 #if 0
-	for(int j = 0; j < BOGRAPH_MAX_LINES; j++)
+	for(unsigned int j = 0; j < BOGRAPH_MAX_LINES; j++)
 	{
 		std::list<BoGraphEntry*>::iterator i = bograph[j].boGraphList.begin();
 		while(i != bograph[j].boGraphList.end())
@@ -86,7 +81,7 @@ void BoGraphWindow::checkForInfoWindow()
 	}
 	#endif
 	
-/*	for(int j = 0; j < BOGRAPH_MAX_LINES; j++)
+/*	for(unsigned int j = 0; j < BOGRAPH_MAX_LINES; j++)
 	{
 		std::list<BoGraphEntry*>::iterator i = bograph[j].boGraphList.begin();
 		while(i != bograph[j].boGraphList.end())
@@ -110,12 +105,12 @@ void BoGraphWindow::checkForInfoWindow()
 			i++;
 		}
 	}*/
-	infoWindow->assignBg(NULL);
+//	infoWindow->assignBg(NULL);
 }
 	
 void BoGraphWindow::resetData()
 {
-	for(int i=BOGRAPH_MAX_LINES;i--;)
+	for(unsigned int i=BOGRAPH_MAX_LINES;i--;)
 	{
 		bograph[i].facility = 0;
 		bograph[i].height = 0;
@@ -145,14 +140,14 @@ void BoGraphWindow::processList()
 	unsigned int fac[BOGRAPH_MAX_LINES];
 	unsigned int faccount = 0;
 	
-	priority_queue<unsigned int, vector<unsigned int> > endOfBuild;
+	std::priority_queue<unsigned int, std::vector<unsigned int> > endOfBuild;
 	
 
 	memset(unitCounter, 0, MAX_TIME * UNIT_TYPE_COUNT * sizeof(int));
 	memset(height, 0, UNIT_TYPE_COUNT * sizeof(int));
 	memset(lines, 0, UNIT_TYPE_COUNT * sizeof(int));
 
-	for(int i=BOGRAPH_MAX_LINES;i--;)
+	for(unsigned int i=BOGRAPH_MAX_LINES;i--;)
 		fac[i] = 0;
 // ------ CALCULATE NUMBER OF ENTRIES FOR EACH FACILITY ------ 
 // = maximum of force - availible for each facility
@@ -182,7 +177,7 @@ void BoGraphWindow::processList()
 
 
 //calculate number of lines per facility and adjust the height
-	for(int i=UNIT_TYPE_COUNT;i--;)
+	for(unsigned int i=UNIT_TYPE_COUNT;i--;)
 	{
 // at maximum MIN_HEIGHT items in one row
 		while(height[i]>MIN_HEIGHT) {
@@ -220,8 +215,8 @@ void BoGraphWindow::processList()
 // ...and sort them (just an optical issue, scvs last)
 	std::sort(fac, fac+BOGRAPH_MAX_LINES); // Warnung?!
 // now put all together
-	int position = 0;
-	for(int i = 0;i < BOGRAPH_MAX_LINES; i++)
+	unsigned int position = 0;
+	for(unsigned int i = 0;i < BOGRAPH_MAX_LINES; i++)
 	{
 		bograph[position].facility = fac[i];
 		bograph[position].lines = lines[fac[i]];
@@ -231,7 +226,7 @@ void BoGraphWindow::processList()
 
 // ... and finally the orders
 	std::list<BoGraphEntry*>::iterator entry[BOGRAPH_MAX_LINES];
-	for(int i = BOGRAPH_MAX_LINES; i--;)
+	for(unsigned int i = BOGRAPH_MAX_LINES; i--;)
 		entry[i] = bograph[i].boGraphList.begin();
         for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
 	if(anarace->getTimer() + order->getBT() < order->getTime())
@@ -239,11 +234,11 @@ void BoGraphWindow::processList()
 		if(!order->getFacility())
 			continue;
 		Rect edge;
-		int i;
+		unsigned int i;
 		for(i = 0; i < BOGRAPH_MAX_LINES; i++)
 			if(bograph[i].facility == order->getFacility())
 			{
-				int k;
+				unsigned int k;
 				for(k = 0; k < MAX_TIME; k++) // TODO!
 					if(unitCounter[bograph[i].facility][k] <= order->getRealTime())
 					{
@@ -303,13 +298,13 @@ void BoGraphWindow::processList()
 		}
 	}
 
-	for(int i = 0; i < BOGRAPH_MAX_LINES; i++)
-	while(entry[i] != bograph[i].boGraphList.end())
-	{
-		if(UI_Object::currentButton == *entry[i]) UI_Object::currentButton = NULL;
-		delete(*entry[i]);
-		entry[i] = bograph[i].boGraphList.erase(entry[i]);
-	}
+	for(unsigned int i = 0; i < BOGRAPH_MAX_LINES; i++)
+		while(entry[i] != bograph[i].boGraphList.end())
+		{
+			if(UI_Object::currentButton == *entry[i]) UI_Object::currentButton = NULL;
+			delete(*entry[i]);
+			entry[i] = bograph[i].boGraphList.erase(entry[i]);
+		}
 
 
 
@@ -322,10 +317,10 @@ void BoGraphWindow::processList()
 			continue;
 		Rect edge;
 
-		for(int i = 0; i < BOGRAPH_MAX_LINES; i++)
+		for(unsigned int i = 0; i < BOGRAPH_MAX_LINES; i++)
 			if(bograph[i].facility == anarace->getProgramFacility((*order)->getIP()))
 			{
-				int k;
+				unsigned int k;
 				for(k = 0; k < MAX_LENGTH; k++)
 					if(unitCounter[bograph[i].facility][k] <= anarace->getRealProgramTime((*order)->getIP()))
 					{
@@ -424,8 +419,8 @@ void BoGraphWindow::processList()
 		}
 	}*/
 // assign the coordinates for the lines where the orders are printed on
-	int j=0;
-	for(int i=0;i<BOGRAPH_MAX_LINES;i++)
+	unsigned int j=0;
+	for(unsigned int i=0;i<BOGRAPH_MAX_LINES;i++)
 		if(bograph[i].facility>0)
 		{
 			bograph[i].edge = Rect(Point(0, j*(FONT_SIZE+9)), Size(10, FONT_SIZE+10+(bograph[i].lines-1) * (FONT_SIZE+9)));
@@ -481,9 +476,9 @@ void BoGraphWindow::draw(DC* dc) const
 		return;
 	
 	dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
-	for(int i = 0; i<BOGRAPH_MAX_LINES; i++)
+	for(unsigned int i = 0; i<BOGRAPH_MAX_LINES; i++)
 		if(bograph[i].facility>0)
-	//		for(int j=0;j<bograph[i].lines;j++)
+	//		for(unsigned int j=0;j<bograph[i].lines;j++)
 			{
 				Rect rec=Rect(bograph[i].edge.GetTopLeft() + getAbsoluteClientRectPosition() + Size(0,(FONT_SIZE+10)), Size(getClientRectWidth(), bograph[i].edge.GetHeight()));
 //				if(insideAbsoluteClientRect(rec)) // TODO
@@ -547,7 +542,7 @@ void BoGraphWindow::draw(DC* dc) const
 	
 	dc->SetFont(UI_Object::theme.lookUpFont(SMALL_MIDDLE_NORMAL_FONT));
 	dc->SetTextForeground(*theme.lookUpColor(WINDOW_TEXT_COLOR));
-	for(int i=0; i<BOGRAPH_MAX_LINES; i++)
+	for(unsigned int i=0; i<BOGRAPH_MAX_LINES; i++)
 		if(bograph[i].facility>0)
 			dc->DrawText(" "+*UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+bograph[i].facility+UNIT_NULL_STRING)), getAbsoluteClientRectPosition()+Point(0, 4+(i+1)*(FONT_SIZE+10)));
 }

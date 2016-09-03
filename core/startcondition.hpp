@@ -232,7 +232,7 @@ inline void START_CONDITION::setLocationTotal(const unsigned int location, const
 
 inline void START_CONDITION::resetUnits()
 {
-	for(int i=MAX_LOCATIONS;i--;)
+	for(unsigned int i=MAX_LOCATIONS;i--;)
 		unit[i].resetData();
 }
 

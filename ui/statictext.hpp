@@ -28,7 +28,7 @@ class UI_StaticText:public UI_Object
 
 		UI_StaticText(UI_Object* st_parent, const eString st_text, const Rect st_pos, const eColor st_color, const eFont st_font, const eTextMode st_mode = NO_TEXT_MODE);
 		
-		UI_StaticText(UI_Object* st_parent, const string& st_text, const Rect st_pos, const eColor st_color, const eFont st_font, const eTextMode st_mode = NO_TEXT_MODE);
+		UI_StaticText(UI_Object* st_parent, const std::string& st_text, const Rect st_pos, const eColor st_color, const eFont st_font, const eTextMode st_mode = NO_TEXT_MODE);
 
 		~UI_StaticText();
 
@@ -38,7 +38,7 @@ class UI_StaticText:public UI_Object
 		void setColor(const eColor st_color);
 		void setFont(const eFont st_font);
 		const std::string& getString() const;
-		void updateText(const string& st_text);
+		void updateText(const std::string& st_text);
 
 		void addChar(const unsigned int position, const char key);
 		void removeCharBackspace(const unsigned int position);
@@ -68,7 +68,7 @@ class UI_StaticText:public UI_Object
 		eTextMode  mode; 
 	private:
 
-		string text;
+		std::string text;
 		
 		eFont font;
 		unsigned int position;

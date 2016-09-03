@@ -2,8 +2,6 @@
 #define _GUI_RACEMENU_HPP
 
 #include "menu.hpp"
-#include "../core/anarace.hpp"
-#include "../core/settings.hpp"
 
 class RaceMenu : public Menu
 {

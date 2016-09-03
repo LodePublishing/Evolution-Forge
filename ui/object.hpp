@@ -3,10 +3,11 @@
 
 #include "theme.hpp"
 #include <list>
+#include <string>
 
 class UI_Object;
 class UI_EditField;
-class UI_Tooltip;
+class UI_ToolTip;
 class UI_Button;
 class UI_Window;
 
@@ -71,7 +72,7 @@ class UI_Object
 //		void resetToOriginalValues(); // ~~
 
 		virtual UI_Object* checkHighlight();
-		virtual UI_Object* checkTooltip();
+		virtual UI_Object* checkToolTip();
 		virtual void reloadStrings();
 		virtual void adjustButtonPlacementSize();
 		const bool isMouseInside() const;
@@ -81,9 +82,8 @@ class UI_Object
 		void makeFirstChild();
 		
 		virtual void draw(DC* dc) const;
-
-		
 		virtual void process();
+		virtual void resetData();
 
 		UI_Object* getNextBrother() const;
 		UI_Object* getPrevBrother() const;
@@ -147,10 +147,12 @@ class UI_Object
 		static UI_EditField* editTextField; //~~
 //		static UI_EndRunDialog* endRunDialog;
 
-		static UI_Tooltip* tooltip;
+		static UI_ToolTip* tooltip;
 		static UI_Object* toolTipParent;
 
 		void clearRedrawFlag();
+
+		static std::list<std::string> msgList;
 
 //		void addRect(const Rect& rect);
 

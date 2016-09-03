@@ -1,7 +1,5 @@
 #include "location.hpp"
 
-//const int GLOBAL = 0;
-
 MAP_LOCATION::MAP_LOCATION():
 	name("ERROR"),
 	mineralPatches(0),
@@ -48,7 +46,7 @@ MAP_LOCATION& MAP_LOCATION::operator=(const MAP_LOCATION& object)
 	mineralPatches = object.mineralPatches;
 	vespeneGeysirs = object.vespeneGeysirs;
 	mineralDistance = object.mineralDistance;
-	for(int i = MAX_LOCATIONS;i--;)
+	for(unsigned int i = MAX_LOCATIONS;i--;)
 	{
 		distance[i] = object.distance[i];
 		nearest[i] = object.nearest[i];

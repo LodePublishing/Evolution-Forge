@@ -1,16 +1,16 @@
 #include "unitmenu.hpp"
+#include "configuration.hpp"
 
-UnitMenu::UnitMenu(UI_Object* unit_parent, ANARACE* unit_anarace, Rect unit_rect) : 
+UnitMenu::UnitMenu(UI_Object* unit_parent, Rect unit_rect) : 
 	Menu(unit_parent, unit_rect, false),
-	anarace(unit_anarace),
+	anarace(NULL),
 	facilityNumber(1)
 {
-	for(int i=0;i<UNIT_TYPE_COUNT;i++) //TODO
+	for(unsigned int i=0;i<UNIT_TYPE_COUNT;i++) //TODO
 	{
 		MenuEntry* entry = new MenuEntry(this, Rect(0, 0, 130, FONT_SIZE+5), "ERROR"); //TODO maybe already initialize with name string
 		menuEntries.push_back(entry);
 	}
-	resetData();
 }
 
 /*UnitMenu::UnitMenu(const UnitMenu& object) :
@@ -18,7 +18,7 @@ UnitMenu::UnitMenu(UI_Object* unit_parent, ANARACE* unit_anarace, Rect unit_rect
 	anarace(object.anarace),
 	facilityNumber(object.facilityNumber);
 {
-	for(int i = GAS_SCV+1; i--;)
+	for(unsigned int i = GAS_SCV+1; i--;)
 		facility[i] = object.facility[i];
 }
 
@@ -27,7 +27,7 @@ UnitMenu& UnitMenu::operator=(const UnitMenu& object)
 	((UnitMenu)(*this)) = ((UnitMenu)object);
 	anarace = object.anarace;
 	facilityNumber = object.facilityNumber;
-	for(int i = GAS_SCV+1; i--;)
+	for(unsigned int i = GAS_SCV+1; i--;)
 		facility[i] = object.facility[i];
 	return(*this);
 }*/
@@ -43,8 +43,8 @@ void UnitMenu::resetData()
 		// cut out those [CS], [NS] temporary facilities
 //	if(stats[(*anarace->getStartCondition())->getRace()][i].unitType != ADD_ON_UNIT_TYPE)
 	{
-		for(int j=1;j<=GAS_SCV;j++)
-		if((!configuration.isRestrictSC())||(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==0))
+		for(unsigned int j=1;j<=GAS_SCV;j++)
+		if((!efConfiguration.isRestrictSC())||(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==0))
 		if((stats[(*anarace->getStartCondition())->getRace()][j].facility[0] == i)||
 		   (stats[(*anarace->getStartCondition())->getRace()][j].facility[1] == i)||
 		   (stats[(*anarace->getStartCondition())->getRace()][j].facility[2] == i))
@@ -56,9 +56,10 @@ void UnitMenu::resetData()
 	}
 }
 		
-void UnitMenu::assignAnarace(ANARACE* goal_anarace)
+void UnitMenu::assignAnarace(ANABUILDORDER* goal_anarace)
 {
 	anarace = goal_anarace;
+	resetData();
 }
 
 void UnitMenu::process()
@@ -82,12 +83,12 @@ void UnitMenu::process()
 		if(menuLevel==1)
 		{
 			unsigned int i=0;
-			if(!configuration.isFacilityMode())
+			if(!efConfiguration.isFacilityMode())
 			{
-				for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+				for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					i++;
-					if((i >=10 ))// || ((configuration.isRestrictSC())&&(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==1)))					
+					if((i >=10 ))// || ((efConfiguration.isRestrictSC())&&(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==1)))					
 					{
 						(*m)->Hide();
 						continue;
@@ -112,10 +113,10 @@ void UnitMenu::process()
 				height*=2;
 			} else 
 			{
-				for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+				for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					i++;
-					if((i >= facilityNumber)) //|| ((configuration.isRestrictSC())/*&&(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==1)*/))
+					if((i >= facilityNumber)) //|| ((efConfiguration.isRestrictSC())/*&&(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==1)*/))
 					{
 						(*m)->Hide();
 						continue;
@@ -135,12 +136,12 @@ void UnitMenu::process()
 		else if(menuLevel>1)
 		{
 			unsigned int i =0;
-			if(!configuration.isFacilityMode())
+			if(!efConfiguration.isFacilityMode())
 			{
-				for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+				for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					i++;
-					if(/*(i >= facilityNumber ) ||*/ (stats[(*anarace->getStartCondition())->getRace()][i].unitType != (signed int)(menuLevel)) || ((configuration.isRestrictSC())&&(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==1)))
+					if(/*(i >= facilityNumber ) ||*/ (stats[(*anarace->getStartCondition())->getRace()][i].unitType != (signed int)(menuLevel)) || ((efConfiguration.isRestrictSC())&&(stats[(*anarace->getStartCondition())->getRace()][i].bwunit==1)))
 					{
 						(*m)->Hide();
 						continue;
@@ -157,7 +158,7 @@ void UnitMenu::process()
 				}
 			} else
 			{
-				for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+				for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 				{
 					i++;
 					if((i > GAS_SCV ) || 
@@ -183,7 +184,7 @@ void UnitMenu::process()
 		} // end 'if menuLevel > 1'
 	} // end 'if menuLevel'
 	else
-		for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+		for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 		{
 		//	Rect edge = Rect(0, 0, 10,10);
 		//	(*m)->adjustRelativeRect(edge);
@@ -193,9 +194,9 @@ void UnitMenu::process()
 // special rules for sub menu...
 	if(pressedItem>-1)
 	{
-		int i = pressedItem+1;
+		unsigned int i = pressedItem+1;
 		pressedItem = -1;
-		if(!configuration.isFacilityMode())
+		if(!efConfiguration.isFacilityMode())
 		{
 			if ((menuLevel == 1) && (i == 1))  //scv
 					pressedItem = SCV;
@@ -216,9 +217,9 @@ void UnitMenu::process()
 	}
 	if(markedItem>-1)
 	{
-		int i = markedItem;
+		unsigned int i = markedItem;
 		markedItem = -1;
-		if(!configuration.isFacilityMode())
+		if(!efConfiguration.isFacilityMode())
 		{
 			if ((menuLevel == 1) && (i == 1))  //scv
 				markedItem = SCV;

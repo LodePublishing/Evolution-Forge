@@ -7,7 +7,7 @@
 #include "../ui/checkbutton.hpp"
 #include "../ui/numberfield.hpp"
 
-#include "../core/settings.hpp"
+#include "../core/database.hpp"
 #include "languagemenu.hpp"
 #include "resolutionmenu.hpp"
 #include "thememenu.hpp"

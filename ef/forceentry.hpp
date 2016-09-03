@@ -15,7 +15,7 @@ enum eForceEntryMessage
 class ForceEntry : public UI_Button
 {
 	public:
-		ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const string& entry_unit);
+		ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std::string& entry_unit);
 		~ForceEntry();
 		ForceEntry(const ForceEntry& object);
 		ForceEntry& operator=(const ForceEntry& object);

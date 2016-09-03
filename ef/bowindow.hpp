@@ -2,9 +2,7 @@
 #define _GUI_BOWINDOW_HPP
 
 #include "../ui/window.hpp"
-#include "message.hpp"
-
-#include "info.hpp"
+#include "../core/anabuildorder.hpp"
 #include <list>
 
 #include "boentry.hpp"
@@ -15,7 +13,7 @@ class BoWindow : public UI_Window
 	public:
 		BoWindow(const BoWindow& object);
 		BoWindow& operator=(const BoWindow& object);
-		BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_info_window, MessageWindow* message_window, /* bool* fixed,*/ const unsigned int bo_window_number);
+		BoWindow(UI_Object* bo_parent, /* bool* fixed,*/ const unsigned int bo_window_number);
 		~BoWindow();
 		void resetData();
 		void draw(DC* dc) const;
@@ -23,13 +21,12 @@ class BoWindow : public UI_Window
 		void processList();
 		void process();
 		
-		void assignAnarace(ANARACE* bo_anarace);
+		void assignAnarace(ANABUILDORDER* bo_anarace);
 	private:
 		void drawSelectionStuff(DC* dc) const;
 		void checkForInfoWindow();
 //		void resetButtons();
-		InfoWindow* infoWindow;
-		ANARACE* anarace;
+		ANABUILDORDER* anarace;
 		std::list<BoEntry*> boList;
 		unsigned int optimizeMode;
 //		int new_one;
@@ -50,7 +47,6 @@ class BoWindow : public UI_Window
 		UI_Button* saveBuildOrderButton;
 		UI_Button* loadBuildOrderButton;
 
-		MessageWindow* msgWindow;
 		bool* fixed;
 		UI_Scrollbar* scrollBar;
 };

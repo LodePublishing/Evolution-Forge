@@ -157,7 +157,7 @@ void GOAL_ENTRY::setRace(const eRace goal_race)
 	changed = true;
 }
 
-const std::list<unsigned int> GOAL_ENTRY::allowDeletion(const unsigned int unitType)
+const std::list<unsigned int> GOAL_ENTRY::allowDeletion(const unsigned int unitType) const
 {
 	std::list<unsigned int> prefList;
 #ifdef _SCC_DEBUG
@@ -233,7 +233,7 @@ const std::list<unsigned int> GOAL_ENTRY::allowDeletion(const unsigned int unitT
 	return(prefList);
 }
 
-const std::list<unsigned int> GOAL_ENTRY::allowAddition(const unsigned int unitType)
+const std::list<unsigned int> GOAL_ENTRY::allowAddition(const unsigned int unitType) const
 {
 	std::list<unsigned int> prefList;
 #ifdef _SCC_DEBUG
@@ -287,7 +287,7 @@ const unsigned int GOAL_ENTRY::calculateFastestBO(const UNIT* startForce) const
 				}
 
 				unsigned int fac = 2*MAX_TIME;
-				for(int k = 0;k < 3; k++)
+				for(unsigned int k = 0;k < 3; k++)
 					if(pStats[i].facility[k]>0)
 					{
 						if(fac > min_time[pStats[i].facility[k]])// + pStats[pStats[i].facility[k]].BT)
@@ -305,7 +305,7 @@ const unsigned int GOAL_ENTRY::calculateFastestBO(const UNIT* startForce) const
 				}
 			}
 	unsigned int min = 0;
-	for(int i = UNIT_TYPE_COUNT;i--;)
+	for(unsigned int i = UNIT_TYPE_COUNT;i--;)
 		if(allGoal[i])
 			if(min < min_time[i])
 				min = min_time[i];
@@ -316,7 +316,7 @@ const unsigned int GOAL_ENTRY::calculateFastestBO(const UNIT* startForce) const
 const GOAL_TREE GOAL_ENTRY::getGoalTree(const UNIT* startForce, const unsigned int currentGoalUnit) const
 {
 	bool buildable[GAS_SCV+1];
-	for(int i = 1;i<=GAS_SCV;i++)
+	for(unsigned int i = 1;i<=GAS_SCV;i++)
 	{
 		if(isBuildable[i])
 			buildable[i]=true;
@@ -326,11 +326,11 @@ const GOAL_TREE GOAL_ENTRY::getGoalTree(const UNIT* startForce, const unsigned i
 	if(currentGoalUnit>0)
 	{
 		buildable[currentGoalUnit]=true;
-		for(int j = 0;j<10;j++)
-			for(int i=1;i<=GAS_SCV;i++)
+		for(unsigned int j = 0;j<10;j++)
+			for(unsigned int i=1;i<=GAS_SCV;i++)
 			if(buildable[i])
 			{
-				for(int k=0;k<3;k++)
+				for(unsigned int k=0;k<3;k++)
 				{
 					if(pStats[i].prerequisite[k]>0)
 						buildable[pStats[i].prerequisite[k]]=true;
@@ -346,7 +346,7 @@ const GOAL_TREE GOAL_ENTRY::getGoalTree(const UNIT* startForce, const unsigned i
 				}
 				if( (pStats[i].facility[0]>0) && (pStats[pStats[i].facility[0]].unitType == REMAINING_UNIT_TYPE ))
 				{
-					int l = 0;
+					unsigned int l = 0;
 					for(l = GAS_SCV;l--;)
 						if(pStats[l].create == pStats[i].facility[0])
 							break;
@@ -361,11 +361,11 @@ const GOAL_TREE GOAL_ENTRY::getGoalTree(const UNIT* startForce, const unsigned i
 	memset(tree.level, 0, (GAS_SCV+1) * sizeof(int));
 	memset(tree.coloumn, 0, (GAS_SCV+1) * sizeof(int));
 
-	for(int i=10;i--;)
+	for(unsigned int i=10;i--;)
 		tree.width[i]=0;
 
-	int c=0;
-	for(int i = GAS_SCV+1;i--;)
+	unsigned int c=0;
+	for(unsigned int i = GAS_SCV+1;i--;)
 		if(startForce->getTotal(i))
 		{
 			tree.unit[0].push_back(i);
@@ -376,7 +376,7 @@ const GOAL_TREE GOAL_ENTRY::getGoalTree(const UNIT* startForce, const unsigned i
 		else
 			tree.checked[i]=false;
 	tree.width[0]=c;
-	for(int k = 1; k<10;k++)
+	for(unsigned int k = 1; k<10;k++)
 	{
 		c=0;
 		for(unsigned int i = 1; i <= GAS_SCV; i++)
@@ -400,7 +400,7 @@ const GOAL_TREE GOAL_ENTRY::getGoalTree(const UNIT* startForce, const unsigned i
 					tree.con[i].push_back(pStats[i].prerequisite[2]);
                                 if( (pStats[i].facility[0]>0) && (pStats[pStats[i].facility[0]].unitType == REMAINING_UNIT_TYPE ))
                                 {
-                                        int j = 0;
+                                        unsigned int j = 0;
                                         for(j = GAS_SCV;j--;)
                                                 if(pStats[j].create == pStats[i].facility[0])
                                                         break;
@@ -434,7 +434,7 @@ const GOAL_TREE GOAL_ENTRY::getGoalTree(const UNIT* startForce, const unsigned i
 				
 		                if( (pStats[i].facility[0]>0) && (pStats[pStats[i].facility[0]].unitType == REMAINING_UNIT_TYPE ))
                                 {
-                                        int j = 0;
+                                        unsigned int j = 0;
                                         for(j = GAS_SCV;j--;)
                                                 if(pStats[j].create == pStats[i].facility[0])
                                                         break;
@@ -473,7 +473,7 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 
 	// if free-mode  set all isbuildable to 1
 // else ...
-	int oldGoal[UNIT_TYPE_COUNT]; //goals we got from the user which we MAY NOT ignore
+	unsigned int oldGoal[UNIT_TYPE_COUNT]; //goals we got from the user which we MAY NOT ignore
 	memcpy(oldGoal, allGoal, UNIT_TYPE_COUNT * sizeof(int));
 
 //	fill(oldGoal)
@@ -484,7 +484,7 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 	//	isBuildable[MOVE_ONE_1_BACKWARD]=true;isVariable[MOVE_ONE_1_BACKWARD]=true;
 		  //isBuildable[INTRON]=true; // :-)
 	if(unit)
-		for(int i=LAST_UNIT; i--;)
+		for(unsigned int i=LAST_UNIT; i--;)
 			if(unit->getTotal(i))
 			{
 				isBuildable[i]=true;
@@ -493,8 +493,8 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 			}
 	//TODO addgoal evtl machen hier!
 // TODO Locations fehlen hier, man muesste durch alle goals laufen und die jeweiligen Bedingungen u.U. AM ORT durchfuehren... mmmh... da ist natuerlich die Frage an welchem Ort... ok, ueberzeugt, Ort ist egal
-	for(int j=6;j--;) // Nuclear Warhead needs 6 steps (?) ~~~~
-		for(int i=LAST_UNIT;i--;)
+	for(unsigned int j=6;j--;) // Nuclear Warhead needs 6 steps (?) ~~~~
+		for(unsigned int i=LAST_UNIT;i--;)
 			if((allGoal[i])||(isBuildable[i]))
 			{
 			
@@ -502,7 +502,7 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 					addGoal(REFINERY,1,0,0); //~~
 				isBuildable[i]=true;
 				//gather all prerequisites and mark them as goals
-				for(int k=0;k<3;k++)
+				for(unsigned int k=3;k--;)
 					if((pStats[i].prerequisite[k]>0)&&(allGoal[pStats[i].prerequisite[k]]==0))
 						addGoal(pStats[i].prerequisite[k], 1, 0, 0);
 						
@@ -514,7 +514,7 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 						addGoal(pStats[i].facility2, 1, 0, 0);
 					else isBuildable[pStats[i].facility2]=true;// ... but make them buildable :)
 				}
-				int fac = 0;
+				unsigned int fac = 0;
 				if(((pStats[i].facility[0]>0)&&(allGoal[pStats[i].facility[0]]==0))&&
 				   ((pStats[i].facility[1]==0)||(allGoal[pStats[i].facility[1]]==0))&&
 				   ((pStats[i].facility[2]==0)||(allGoal[pStats[i].facility[2]]==0)))
@@ -561,13 +561,13 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 //	jeweils alle facilities von rechts nach links anguggn
 //	sobald eins gefunden das Teil der goals ist, alle weiter links streichen (aber buildable lassen)
 // Beispiel: Wenn wir schon 'Starport[CT]' haben brauchen wir u.U. kein 'Starport' mehr
-	for(int i=UNIT_TYPE_COUNT;i--;)
+	for(unsigned int i=UNIT_TYPE_COUNT;i--;)
 		if((allGoal[i]>0)||(isBuildable[i]))
 		{
-			for(int j=3;j--;)
+			for(unsigned int j=3;j--;)
 				if((pStats[i].facility[j]>0)&&(allGoal[pStats[i].facility[j]]>0))
 				{
-					for(int k=0;k<j;k++)
+					for(unsigned int k=0;k<j;k++)
 					{
 						if((allowGoalAdaption)&&(allGoal[pStats[i].facility[k]]>0))
 						{
@@ -590,7 +590,7 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 		}
 	
 	long Need_Gas = 0;
-	for(int i = UNIT_TYPE_COUNT; i--;)
+	for(unsigned int i = UNIT_TYPE_COUNT; i--;)
 		Need_Gas+=(allGoal[i]*pStats[i].gas);
 	if(Need_Gas > 0)
 	{
@@ -615,7 +615,7 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 //	isBuildable[BUILD_PARALLEL_16] = true;
 //	isBuildable[FROM_GAS_TO_MINERALS] = true;
 
-	for(int i=UNIT_TYPE_COUNT;i--;)
+	for(unsigned int i=UNIT_TYPE_COUNT;i--;)
 		if((isBuildable[i])&&(phaenoToGenotype[i]==999)) // a goal && not set yet
 		{
 			genoToPhaenotype[maxBuildTypes]=i;
@@ -633,11 +633,11 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 
 
 	
-	for(int i=1;i<UNIT_TYPE_COUNT;i++)
+	for(unsigned int i=1;i<UNIT_TYPE_COUNT;i++)
 		if(((isBuildable[i])||(allGoal[i]))&&(pStats[i].create>0))
 			isHaveable[pStats[i].create]=true;
 
-	for(int i=1;i<UNIT_TYPE_COUNT;i++)
+	for(unsigned int i=1;i<UNIT_TYPE_COUNT;i++)
 	{
 		if(allGoal[i])
 			isHaveable[i]=false;
@@ -651,7 +651,7 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 //	goal.sort();
 
 
-	for(int i = LAST_UNIT;i--;)
+	for(unsigned int i = LAST_UNIT;i--;)
 		if(allGoal[i])
 		{
 			isStatic[pStats[i].facility[0]]=false;
@@ -660,7 +660,7 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 			isStatic[pStats[i].facility2]=false;
 		}
 
-	for(int i = UNIT_TYPE_COUNT;i--;)
+	for(unsigned int i = UNIT_TYPE_COUNT;i--;)
 	{
 		allow[i].facility.clear();
 		allow[i].facility2.clear();
@@ -670,10 +670,10 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 		need[i].prerequisite = 0;;
 	}
 
-	for(int i = UNIT_TYPE_COUNT;i--;)
+	for(unsigned int i = UNIT_TYPE_COUNT;i--;)
 		if(isBuildable[i])
 		{
-			for(int j = 3;j--;)
+			for(unsigned int j = 3;j--;)
 			{
 				if(pStats[i].facility[j]>0)
 					allow[pStats[i].facility[j]].facility.push_back(i);
@@ -684,7 +684,7 @@ void GOAL_ENTRY::adjustGoals(const bool allowGoalAdaption, const UNIT* unit)
 				allow[pStats[i].facility2].facility2.push_back(i);
                 	if((pStats[i].facility[0]>0)||(pStats[i].facility[1]>0)||(pStats[i].facility[2]>0))
                         	need[i].facility = true;
-	                for(int j=3;j--;)
+	                for(unsigned int j=3;j--;)
         	                if(pStats[i].prerequisite[j])
                 	                need[i].prerequisite++;
 			if(pStats[i].facility2>0)
@@ -748,7 +748,7 @@ void GOAL_ENTRY::addGoal(const unsigned int unit, const signed int count, const 
 	if(globalGoal[location][unit] + count > MAX_TOTAL_UNITS) {
 		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value count out of range.");return;
 	}
-	if(time > configuration.getMaxTime()) {
+	if(time > coreConfiguration.getMaxTime()) {
 		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value time out of range.");return;
 	}
 	if(location >= MAX_LOCATIONS) { // TODO
@@ -791,7 +791,7 @@ void GOAL_ENTRY::addGoal(const unsigned int unit, const signed int count, const 
 		new_goal.setTime(time);
 		new_goal.setLocation(location);
 		new_goal.setCount(unit_count);
-		new_goal.setFinalTime(configuration.getMaxTime());
+		new_goal.setFinalTime(coreConfiguration.getMaxTime());
 		goal.push_back(new_goal);
 	}
 	changed=true;

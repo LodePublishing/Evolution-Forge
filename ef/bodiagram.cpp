@@ -1,9 +1,10 @@
 #include "bodiagram.hpp"
+#include "../core/configuration.hpp"
+#include <sstream>
 
 BoDiagramWindow::BoDiagramWindow(const BoDiagramWindow& object) :
 	UI_Window((UI_Window)object),
 	anarace(object.anarace),
-	infoWindow(object.infoWindow),
 	count(object.count),
 	bold(object.bold)
 {
@@ -14,20 +15,17 @@ BoDiagramWindow& BoDiagramWindow::operator=(const BoDiagramWindow& object)
 {
 	((UI_Window)(*this)) = ((UI_Window)object);
 	anarace = object.anarace;
-	infoWindow = object.infoWindow;
 	count = object.count;
 	bold = object.bold;
 	return(*this);
 }
 
-BoDiagramWindow::BoDiagramWindow(UI_Object* bod_parent, ANARACE* bod_anarace, InfoWindow* bod_info_window, const unsigned int bod_window_number):
+BoDiagramWindow::BoDiagramWindow(UI_Object* bod_parent, const unsigned int bod_window_number):
 	UI_Window(bod_parent, BODIAGRAM_WINDOW_TITLE_STRING, BO_DIAGRAM_WINDOW, bod_window_number, NOT_SCROLLED),
-	anarace(bod_anarace),
-	infoWindow(bod_info_window),	
+	anarace(NULL),
 	count(0),
 	bold(false)
 {
-	resetData();
 	for(unsigned int i=MAX_TIME;i--;)
 	{
 		minerals[i]=Point(0,0);
@@ -53,7 +51,7 @@ BoDiagramWindow::BoDiagramWindow(UI_Object* bod_parent, ANARACE* bod_anarace, In
 BoDiagramWindow::~BoDiagramWindow()
 { }
 
-void BoDiagramWindow::assignAnarace(ANARACE* bod_anarace)
+void BoDiagramWindow::assignAnarace(ANABUILDORDER* bod_anarace)
 {
 	anarace = bod_anarace;
 }
@@ -97,7 +95,7 @@ void BoDiagramWindow::processList()
 	
 // TODO nur machen wenns optimiert!
 
-//	if(anarace->getTimer()==configuration.getMaxTime()) time=0;
+//	if(anarace->getTimer()==coreConfiguration.getMaxTime()) time=0;
 //		else 
 //time=anarace->getTimer()+1;
 	float time = (getClientRectWidth()-6) / (float)(anarace->getRealTimer());
@@ -414,21 +412,21 @@ void BoDiagramWindow::draw(DC* dc) const
 			if(bold)
 			{
 				// TODO this anarace values are one iteration too old compared to mouse position...
-				ostringstream os;
+				std::ostringstream os;
 				dc->SetTextForeground(*theme.lookUpColor(BRIGHT_MINERALS_TEXT_COLOR));
 				unsigned int time = anarace->getRealTimer() * (mouse.x - getAbsoluteClientRectLeftBound()) / getClientRectWidth();
 				if(mouse.x < getAbsoluteClientRectLeftBound())
 					while(true);
-				os << anarace->getTimeStatistics()[configuration.getMaxTime()-time].getHaveMinerals()/100;
+				os << anarace->getTimeStatistics()[coreConfiguration.getMaxTime()-time].getHaveMinerals()/100;
 				dc->DrawText(os.str(),getAbsoluteClientRectPosition()+Point(50,15));os.str("");
 				
 				dc->SetTextForeground(*theme.lookUpColor(BRIGHT_GAS_TEXT_COLOR));
-				os << anarace->getTimeStatistics()[configuration.getMaxTime()-time].getHaveGas()/100;
+				os << anarace->getTimeStatistics()[coreConfiguration.getMaxTime()-time].getHaveGas()/100;
 				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(50,26));os.str("");
 				
 				dc->SetTextForeground(*theme.lookUpColor(BRIGHT_SUPPLY_TEXT_COLOR));
-				int ns = anarace->getTimeStatistics()[configuration.getMaxTime()-time].getNeedSupply();
-				int hs = anarace->getTimeStatistics()[configuration.getMaxTime()-time].getHaveSupply();
+				int ns = anarace->getTimeStatistics()[coreConfiguration.getMaxTime()-time].getNeedSupply();
+				int hs = anarace->getTimeStatistics()[coreConfiguration.getMaxTime()-time].getHaveSupply();
 				
 				os << ns << ":" << hs;
 				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(50,37));

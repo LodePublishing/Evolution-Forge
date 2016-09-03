@@ -71,7 +71,7 @@ class UI_Button:public UI_Object
 		const eString button_text, 
 		const eButton button_type, const eTextMode button_text_mode = HORIZONTALLY_CENTERED_TEXT_MODE, const eButtonMode button_mode = STATIC_BUTTON_MODE, const ePositionMode button_position_mode = DO_NOT_ADJUST, const eFont button_font = SMALL_NORMAL_BOLD_FONT, const eAutoSize button_auto_size = NO_AUTO_SIZE);
 
-		UI_Button(UI_Object* button_parent, const Rect button_rect, const string& button_text, const eButton button_type, const eTextMode button_text_mode = HORIZONTALLY_CENTERED_TEXT_MODE, const eButtonMode button_mode = STATIC_BUTTON_MODE, ePositionMode button_position_mode = DO_NOT_ADJUST, const eFont button_font = SMALL_NORMAL_BOLD_FONT, const eAutoSize button_auto_size = NO_AUTO_SIZE);
+		UI_Button(UI_Object* button_parent, const Rect button_rect, const std::string& button_text, const eButton button_type, const eTextMode button_text_mode = HORIZONTALLY_CENTERED_TEXT_MODE, const eButtonMode button_mode = STATIC_BUTTON_MODE, ePositionMode button_position_mode = DO_NOT_ADJUST, const eFont button_font = SMALL_NORMAL_BOLD_FONT, const eAutoSize button_auto_size = NO_AUTO_SIZE);
 // Bitmap button
 		UI_Button(UI_Object* button_parent, const Rect button_rect, const eButton button_type, const eButtonMode button_mode = STATIC_BUTTON_MODE, const ePositionMode button_position_mode = DO_NOT_ADJUST);
 		~UI_Button();
@@ -96,7 +96,7 @@ class UI_Button:public UI_Object
 
 		void setPressDepth(const unsigned int press);
 
-		void updateText(const string& utext);
+		void updateText(const std::string& utext);
 		void updateText(const eString utext);
 
 		//void setHighlightAction( void (*user_function)(void) );
@@ -140,6 +140,7 @@ class UI_Button:public UI_Object
 		bool originalPosition; // always false (not pressed) for non-static buttons
 		bool hasBitmap;
 		bool doNotSetSize;
+		bool wasPressed;
 
 
 //		Rect buttonPlacementArea;
@@ -170,7 +171,7 @@ class UI_Button:public UI_Object
 //		void maybeShowCustomCursor();   // show different cursor when onmouseOverCursor is set => process()
   //	  void restorePreviousCursor();   // reset to original state => frame_reset()
 
-		void resetData();
+// 		void resetData(); TODO
 //		SDL_Surface* tempSurface; 	
 
 // Button flags
@@ -238,7 +239,7 @@ inline void UI_Button::mouseHasMoved() {
 	moveByMouse = true;
 }
 
-inline void UI_Button::updateText(const string& utext) {
+inline void UI_Button::updateText(const std::string& utext) {
 	text->updateText(utext);
 }
 

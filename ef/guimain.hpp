@@ -5,6 +5,7 @@ const float GUI_VERSION=0.51;
 
 #include "game.hpp"
 #include "message.hpp"
+#include "info.hpp"
 #include "tutorial.hpp"
 #include "mainwindow.hpp"
 #include "setwindow.hpp"
@@ -17,7 +18,7 @@ const float GUI_VERSION=0.51;
 #include <iomanip>
 #include <string>
 
-#include "../ui/endrundialog.hpp"
+#include "endrundialog.hpp"
 
 class Main
 {
@@ -30,17 +31,10 @@ class Main
 		void resetData();
 		void loadGoals();
 		
-		UI_Window* mainWindow;
-		MessageWindow* msgWindow;
-		UI_Window* infoWindow;
-		TutorialWindow* tutorialWindow;
-		Game* game[MAX_PLAYER];
-		SettingsWindow* settingsWindow;
-		static ProgressBar* bar;
 		
-		const bool isOptimizing() const;
-		void stopOptimizing();
-		void startOptimizing();
+		const bool isAnyOptimizing() const;
+		void stopAllOptimizing();
+		void startAllOptimizing();
 
 		void noticeFullscreen();
 
@@ -56,20 +50,23 @@ class Main
 
 		const bool newRun();
 	
-		Point maus;
 	private:
 //		SDL_Surface* cursor_save;
 //		SDL_Surface* cursor;
+		void initializeGame();
+		UI_Window* mainWindow;
+		TutorialWindow* tutorialWindow;
+		SettingsWindow* settingsWindow;
+		Point maus;
+//		static ProgressBar* bar;
 
-		unsigned int oldrun;
 		bool endrun;
-		bool gizmo;
-		void drawGizmo(DC* dc) const;
-		const Size helper(DC* dc, const unsigned int dx, const int i, const string& str) const;
-		ANARACE* anarace[MAX_PLAYER];
-		unsigned int ani, ani2;
 
-		bool boHasChanged;	
+		unsigned int gameCount; 
+		Game* game[MAX_GAME];
+		
+		static InfoWindow* infoWindow;
+		static MessageWindow* msgWindow;
 };
 																				
 #endif

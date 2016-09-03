@@ -1,6 +1,15 @@
-#include "settings.hpp"
+// -----------------------------------------------------------------------------------------
+// DATABASE holds all map, harvest, goal and start-condition date for other classes to read
+// In addition it saves and loads these data from/to files.
+// -----------------------------------------------------------------------------------------
+
+#include "database.hpp"
 #include "../ui/object.hpp"
 
+#include <map>
+#include <sstream>
+#include <fstream>
+#include <iostream>
 #include <dirent.h>
 #include <sys/types.h>
 
@@ -9,41 +18,36 @@
 #include <windows.h>
 #endif
 
-// TODO in theme rein oder so
-
-SETTINGS::SETTINGS():
-	loadedMap(),
-	soup(),
-	start()
+DATABASE::DATABASE():
+	loadedMap()
 {
 	srand(time(NULL));
-//	initDefaults();
 }
 
-SETTINGS::~SETTINGS()
+DATABASE::~DATABASE()
 {
 	for(std::vector<BASIC_MAP*>::iterator i = loadedMap.begin(); i!=loadedMap.end(); i++)
 		delete *i;
 	loadedMap.clear();
 	for(unsigned int j=0;j<MAX_RACES;j++)
 	{
-		for(std::vector<START_CONDITION*>::iterator i = loadedStartcondition[j].begin(); i!=loadedStartcondition[j].end(); i++)
+		for(std::vector<START_CONDITION*>::iterator i = loadedStartCondition[j].begin(); i!=loadedStartCondition[j].end(); i++)
 			delete *i;
 		for(std::vector<GOAL_ENTRY*>::iterator i = loadedGoal[j].begin(); i!=loadedGoal[j].end(); i++)
 			delete *i;
-		loadedStartcondition[j].clear();
+		loadedStartCondition[j].clear();
 		loadedGoal[j].clear();
 	}
 }
 
-
-list<string> SETTINGS::findFiles(const string& directory1, const string& directory2, const string& directory3) const
+// TODO evtl in misc.cpp rein
+std::list<std::string> DATABASE::findFiles(const std::string& directory1, const std::string& directory2, const std::string& directory3)
 {
-	list<string> fileList;
+	std::list<std::string> fileList;
+	std::ostringstream os;
 #ifdef __linux__
 	DIR *dir;
 	struct dirent *entry;
-	ostringstream os;
 	os << directory1 << "/" << directory2 << "/" << directory3;
 	if ((dir = opendir(os.str().c_str())) == NULL)
 		toLog("ERROR opening directory " + os.str());
@@ -56,7 +60,6 @@ list<string> SETTINGS::findFiles(const string& directory1, const string& directo
 #elif __WIN32__
 	WIN32_FIND_DATA dir;
 	HANDLE fhandle;
-	ostringstream os;
 	os << directory1 << "\\" << directory2 << "\\" << directory3 << "\\" << "*.*";
 	if ((fhandle=FindFirstFile(os.str().c_str(), &dir)) !=INVALID_HANDLE_VALUE)
 	{
@@ -72,76 +75,44 @@ list<string> SETTINGS::findFiles(const string& directory1, const string& directo
 
 
 
-SETTINGS settings;
-
-// -------------------------------
-// ------ CONTROL FUNCTIONS ------
-// -------------------------------
-
-void SETTINGS::assignRunParametersToSoup()
-{
-//	soup.initializeMap(start.getMap()); //???? TODO
-	// set GA and START on prerace and soup
-	soup.setParameters(&start);
-	// allocate memory for players ~~
-}
-
-ANARACE** SETTINGS::newGeneration(ANARACE* oldAnarace[MAX_PLAYER])
-{
-	return(soup.newGeneration(oldAnarace));
-}
-
-void SETTINGS::calculateAnaplayer()
-{
-	soup.calculateAnaplayer();
-}
-
-void SETTINGS::fillGroups()
-{
-	start.fillGroups();
-}
-
-void SETTINGS::checkForChange() const
-{
-	soup.checkForChange();	
-}
+DATABASE database;
 
 // ---------------------------
 // ------- FILE LOADING ------
 // ---------------------------
 
-void SETTINGS::loadGoalFile(const string& goalFile)
+void DATABASE::loadGoalFile(const std::string& goalFile)
 {
 	if((goalFile.compare(goalFile.size()-4, goalFile.size(), ".gol")==1))
 		return;
 
-	ifstream pFile(goalFile.c_str());
+	std::ifstream pFile(goalFile.c_str());
 	if(!pFile.is_open())
 	{
 		toLog("ERROR: (loadGoalFile): File " + goalFile + " not found.");
 		return;
 	}
-	toLog(goalFile + " loaded.");
+//	toLog(goalFile + " loaded.");
 	
 	char line[1024];
-	string text;
-	GOAL_ENTRY* goal = new GOAL_ENTRY;
+	std::string text;
 	while(pFile.getline(line, sizeof line))
 	{
 		if(pFile.fail())
-			pFile.clear(pFile.rdstate() & ~ios::failbit);
+			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
 		text=line;
 		size_t start_position = text.find_first_not_of("\t ");
-		if((start_position == string::npos)||(text[0]=='#')||(text[0]=='\0'))
+		if((start_position == std::string::npos)||(text[0]=='#')||(text[0]=='\0'))
 			continue; // ignore line
 		size_t stop_position = text.find_first_of("\t ",start_position);
-		if(stop_position == string::npos) stop_position = text.size();
-		string index=text.substr(start_position, stop_position);
-		map<string, list<string> >::iterator i;
+		if(stop_position == std::string::npos) stop_position = text.size();
+		std::string index=text.substr(start_position, stop_position);
+		std::map<std::string, std::list<std::string> >::iterator i;
 
 		if(index=="@GOAL")
 		{
-			map<string, list<string> > block;
+			GOAL_ENTRY* goal = new GOAL_ENTRY;
+			std::map<std::string, std::list<std::string> > block;
 			parse_block(pFile, block);
 			if((i=block.find("Name"))!=block.end()){
 				i->second.pop_front();
@@ -151,7 +122,7 @@ void SETTINGS::loadGoalFile(const string& goalFile)
 			{
 				eRace race=TERRA;
 				i->second.pop_front();
-				string estr=i->second.front();
+				std::string estr=i->second.front();
 				if(i->second.front()=="Terra") race=TERRA;
 				else if(i->second.front()=="Protoss") race=PROTOSS;
 				else if(i->second.front()=="Zerg") race=ZERG;
@@ -162,12 +133,12 @@ void SETTINGS::loadGoalFile(const string& goalFile)
 #endif
 				goal->setRace(race);
 			}
-			map<string, list<string> >::iterator k;
+			std::map<std::string, std::list<std::string> >::iterator k;
 			for(unsigned int unit=UNIT_TYPE_COUNT;unit--;)
 			{
 				if((k=block.find(stats[goal->getRace()][unit].name))!=block.end())
 				{
-					list<string>::iterator l=k->second.begin();
+					std::list<std::string>::iterator l=k->second.begin();
 					if(l->size()>=3)
 					{
 						l++;int count=atoi(l->c_str());
@@ -177,139 +148,143 @@ void SETTINGS::loadGoalFile(const string& goalFile)
 					}
 				}
 			}
+			loadedGoal[goal->getRace()].push_back(goal);
 		} // end index == GOAL
 	}
 
-	loadedGoal[goal->getRace()].push_back(goal);
-	
-//  loadedGoal[getGoalCount()].adjustGoals(configuration.allowGoalAdaption);
 } // schoen :)
 
-void SETTINGS::loadHarvestFile(const string& harvestFile)
+void DATABASE::loadHarvestFile(const std::string& harvestFile)
 {
-	ifstream pFile(harvestFile.c_str());
+	std::ifstream pFile(harvestFile.c_str());
 	if(!pFile.is_open())
 	{
 		toLog("ERROR: (loadHarvestFile): File not found.");
 		return;
 	}
 	char line[1024];
-	string text;
+	std::string text;
 	while(pFile.getline(line, sizeof line))
 	{
 		if(pFile.fail())
-			pFile.clear(pFile.rdstate() & ~ios::failbit);
+			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
 		text = line;
 		size_t start_position = text.find_first_not_of("\t ");
-		if((start_position == string::npos)||(text[0]=='#')||(text[0]=='\0'))
+		if((start_position == std::string::npos)||(text[0]=='#')||(text[0]=='\0'))
 				continue; // ignore line
 		size_t stop_position = text.find_first_of("\t ", start_position);
-		if(stop_position == string::npos) stop_position = text.size();
-		string index = text.substr(start_position, stop_position);
-		map<string, map<string, list<string> > >::iterator value;
-		map<string, list<string> >::iterator item;
+		if(stop_position == std::string::npos) stop_position = text.size();
+		std::string index = text.substr(start_position, stop_position);
+		std::map<std::string, std::map<std::string, std::list<std::string> > >::iterator value;
+		std::map<std::string, std::list<std::string> >::iterator item;
 		if(index == "@HARVESTDATA")
 		{
-				map<string, map<string, list<string> > > block;
+				std::map<std::string, std::map<std::string, std::list<std::string> > > block;
 				parse_2nd_block(pFile, block);
-				map<string, list<string> > player;
+				std::map<std::string, std::list<std::string> > player;
 				if((value = block.find("@TERRA")) != block.end())
 				{
+					HARVEST_SPEED* harvest = new HARVEST_SPEED();
 					// erstes Element falsch? TODO
 					if((item = value->second.find("Mineral Harvest"))!=value->second.end())
 					{
 						unsigned int j = 0;
 						item->second.pop_front(); // the expression 'mineral harvest' itself
-						for(list<string>::const_iterator i = item->second.begin();i != item->second.end(); ++i)
-							loadedHarvestSpeed[TERRA].setHarvestMineralSpeed(j++, atoi(i->c_str()));
+						for(std::list<std::string>::const_iterator i = item->second.begin();i != item->second.end(); ++i)
+							harvest->setHarvestMineralSpeed(j++, atoi(i->c_str()));
 					}
 					if((item = value->second.find("Gas Harvest"))!=value->second.end())
 					{
 						unsigned int j = 0;
 						item->second.pop_front(); // the expression 'gas harvest' itself
-						for(list<string>::const_iterator i = item->second.begin();i != item->second.end(); ++i)
-							loadedHarvestSpeed[TERRA].setHarvestGasSpeed(j++, atoi(i->c_str()));
+						for(std::list<std::string>::const_iterator i = item->second.begin();i != item->second.end(); ++i)
+							harvest->setHarvestGasSpeed(j++, atoi(i->c_str()));
 					}
+					loadedHarvestSpeed[TERRA].push_back(harvest);
 				}
 				if((value=block.find("@PROTOSS"))!=block.end())
 				{
+					HARVEST_SPEED* harvest = new HARVEST_SPEED();
 					if((item=value->second.find("Mineral Harvest"))!=value->second.end())
 					{
 						unsigned int j = 0;
 						item->second.pop_front();
-						for(list<string>::const_iterator i = item->second.begin();i != item->second.end(); ++i)
-							loadedHarvestSpeed[PROTOSS].setHarvestMineralSpeed(j++, atoi(i->c_str()));
+						for(std::list<std::string>::const_iterator i = item->second.begin();i != item->second.end(); ++i)
+							harvest->setHarvestMineralSpeed(j++, atoi(i->c_str()));
 					}
 					if((item=value->second.find("Gas Harvest"))!=value->second.end())
 					{
 						unsigned int j = 0;
 						item->second.pop_front(); 
-						for(list<string>::const_iterator i = item->second.begin();i != item->second.end(); ++i)
-							loadedHarvestSpeed[PROTOSS].setHarvestGasSpeed(j++,atoi(i->c_str()));
+						for(std::list<std::string>::const_iterator i = item->second.begin();i != item->second.end(); ++i)
+							harvest->setHarvestGasSpeed(j++,atoi(i->c_str()));
 					}
+					loadedHarvestSpeed[PROTOSS].push_back(harvest);
 				}
 				if((value=block.find("@ZERG"))!=block.end())
 				{
+					HARVEST_SPEED* harvest = new HARVEST_SPEED();
 					if((item = value->second.find("Mineral Harvest")) != value->second.end())
 					{
 						unsigned int j = 0;
 						item->second.pop_front(); 
-						for(list<string>::const_iterator i=item->second.begin();i != item->second.end(); ++i)
-							loadedHarvestSpeed[ZERG].setHarvestMineralSpeed(j++, atoi(i->c_str()));
+						for(std::list<std::string>::const_iterator i=item->second.begin();i != item->second.end(); ++i)
+							harvest->setHarvestMineralSpeed(j++, atoi(i->c_str()));
 					}
 					if((item=value->second.find("Gas Harvest")) != value->second.end())
 					{
 						unsigned int j = 0;
 						item->second.pop_front(); 
-						for(list<string>::const_iterator i = item->second.begin();i != item->second.end();++i)
-							loadedHarvestSpeed[ZERG].setHarvestGasSpeed(j++, atoi(i->c_str()));
+						for(std::list<std::string>::const_iterator i = item->second.begin();i != item->second.end();++i)
+							harvest->setHarvestGasSpeed(j++, atoi(i->c_str()));
 					}
+					loadedHarvestSpeed[ZERG].push_back(harvest);
 				}
 		}
 	}// END while
 } // schoen :)
 
-void SETTINGS::loadMapFile(const string& mapFile)
+void DATABASE::loadMapFile(const std::string& mapFile)
 {
-	ifstream pFile(mapFile.c_str());
+	std::ifstream pFile(mapFile.c_str());
 	if(!pFile.is_open())
 	{
 		toLog("ERROR: (loadMapFile): File not found.");
 		return;
 	}
 	char line[1024];
-	string text;
-	BASIC_MAP* basicmap = new BASIC_MAP;
+	std::string text;
+	BASIC_MAP* basicmap = new BASIC_MAP; // TODO mehrere maps verhindern?
 	while(pFile.getline(line, sizeof line))
 	{
 		if(pFile.fail())
-			pFile.clear(pFile.rdstate() & ~ios::failbit);
+			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
 		text=line;
 		size_t start_position = text.find_first_not_of("\t ");
-		if((start_position == string::npos)||(text[0]=='#')||(text[0]=='\0'))
+		if((start_position == std::string::npos)||(text[0]=='#')||(text[0]=='\0'))
 			continue; // ignore line
-		list<string> words;
+		std::list<std::string> words;
 		parse_line(text, words);
 		if(words.empty()) continue;
-		list<string>::iterator j=words.begin();
-		string index=*j;j++;
-		map<string, list<string> >::iterator i;
+		std::list<std::string>::iterator j=words.begin();
+		std::string index=*j;j++;
+		std::map<std::string, std::list<std::string> >::iterator i;
 		if(index=="@MAP")
 		{
-				map<string, list<string> > block;
-				parse_block(pFile, block);
-				if((i=block.find("Name"))!=block.end()){
-					i->second.pop_front();
-				   	basicmap->setName(i->second.front());
-				}
-				if((i=block.find("Max Locations"))!=block.end()){
-					i->second.pop_front();
-				   	basicmap->setMaxLocations(atoi(i->second.front().c_str()));
-				}
-				if((i=block.find("Max Player"))!=block.end()){
-					i->second.pop_front();
-				   	basicmap->setMaxPlayer(atoi(i->second.front().c_str()));
-				}
+			std::map<std::string, std::list<std::string> > block;
+			parse_block(pFile, block);
+			if((i=block.find("Name"))!=block.end()){
+				i->second.pop_front();
+			  	basicmap->setName(i->second.front());
+			}
+			if((i=block.find("Max Locations"))!=block.end()){
+				i->second.pop_front();
+			   	basicmap->setMaxLocations(atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Max Player"))!=block.end()){
+				i->second.pop_front();
+			   	basicmap->setMaxPlayer(atoi(i->second.front().c_str()));
+			}
 		}
 		else if(index=="@LOCATION")
 		{
@@ -319,7 +294,7 @@ void SETTINGS::loadMapFile(const string& mapFile)
 				return;
 			}
 			int location = atoi(j->c_str());
-			map<string, list<string> > block;
+			std::map<std::string, std::list<std::string> > block;
 			parse_block(pFile, block);
 			if((i=block.find("Name"))!=block.end()) 
 			{
@@ -374,33 +349,33 @@ void SETTINGS::loadMapFile(const string& mapFile)
 	loadedMap.push_back(basicmap);
 } // schoen :)
 
-void SETTINGS::loadStartconditionFile(const string& startconditionFile)
+void DATABASE::loadStartConditionFile(const std::string& startconditionFile)
 {
-	ifstream pFile(startconditionFile.c_str());
+	std::ifstream pFile(startconditionFile.c_str());
 	if(!pFile.is_open())
 	{
-		toLog("ERROR: (loadStartconditionFile): File not found.");
+		toLog("ERROR: (loadStartConditionFile): File not found.");
 		return;
 	}
 	START_CONDITION* startcondition = new START_CONDITION;
 
 	char line[1024];
-	string text;
+	std::string text;
 	eRace race=TERRA; 
 	while(pFile.getline(line, sizeof line))
 	{
 		if(pFile.fail())
-			pFile.clear(pFile.rdstate() & ~ios::failbit);
+			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
 		text=line;
 		size_t start_position = text.find_first_not_of("\t ");
-		if((start_position == string::npos)||(text[0]=='#')||(text[0]=='\0'))
+		if((start_position == std::string::npos)||(text[0]=='#')||(text[0]=='\0'))
 			continue; // ignore line
-		list<string> words;
+		std::list<std::string> words;
 		parse_line(text, words);
 
-		list<string>::iterator j=words.begin();
-		string index=*j;j++;
-		map<string, list<string> >::iterator i;
+		std::list<std::string>::iterator j=words.begin();
+		std::string index=*j;j++;
+		std::map<std::string, std::list<std::string> >::iterator i;
 		if(index=="@STARTCONDITIONS")
 		{
 			if(j==words.end())
@@ -413,7 +388,7 @@ void SETTINGS::loadStartconditionFile(const string& startconditionFile)
 			else if(*j=="Protoss") race=PROTOSS;
 			else if(*j=="Zerg") race=ZERG;
 
-			map<string, list<string> > block;
+			std::map<std::string, std::list<std::string> > block;
 			parse_block(pFile, block);
 
 			if((i=block.find("Name"))!=block.end()) 
@@ -447,11 +422,11 @@ void SETTINGS::loadStartconditionFile(const string& startconditionFile)
 			
 			int location = atoi(j->c_str());
 // TODO pruefen
-			map<string, list<string> > block;
+			std::map<std::string, std::list<std::string> > block;
 			parse_block(pFile, block);
 			for(unsigned int k=UNIT_TYPE_COUNT;k--;)
 			{
-				string unit=stats[race][k].name;
+				std::string unit=stats[race][k].name;
 				if((i=block.find(unit))!=block.end())
 				{
 					i->second.pop_front();int count=atoi(i->second.front().c_str());
@@ -465,7 +440,7 @@ void SETTINGS::loadStartconditionFile(const string& startconditionFile)
 	startcondition->assignRace(race);
 	startcondition->adjustResearches();
 	startcondition->adjustSupply();
-	loadedStartcondition[race].push_back(startcondition); // beendet nicht richtig :/
+	loadedStartCondition[race].push_back(startcondition); // beendet nicht richtig :/
 } // schoen :)
 
 // ---------------------------------
@@ -475,9 +450,9 @@ void SETTINGS::loadStartconditionFile(const string& startconditionFile)
 // FILE SAVING
 
 
-void SETTINGS::saveBuildOrder(const string& name, const ANARACE* anarace) const
+void DATABASE::saveBuildOrder(const std::string& name, const ANABUILDORDER* anarace) const
 {
-	ostringstream os;
+	std::ostringstream os;
 #ifdef __linux__
 	os << "output/bos/";
 	os << raceString[anarace->getRace()] << "/" << name << ".html";
@@ -485,7 +460,7 @@ void SETTINGS::saveBuildOrder(const string& name, const ANARACE* anarace) const
 	os << "output\\bos\\";
 	os << raceString[anarace->getRace()] << "\\" << name << ".html";
 #endif
-	ofstream pFile(os.str().c_str(), ios_base::out | ios_base::trunc);
+	std::ofstream pFile(os.str().c_str(), std::ios_base::out | std::ios_base::trunc);
 	
 	if(!pFile.is_open())
 	{
@@ -553,9 +528,9 @@ void SETTINGS::saveBuildOrder(const string& name, const ANARACE* anarace) const
 	pFile << "</html>" << std::endl;
 }
 
-void SETTINGS::saveGoal(const string& name, GOAL_ENTRY* goalentry)
+void DATABASE::saveGoal(const std::string& name, GOAL_ENTRY* goalentry)
 {
-	ostringstream os;
+	std::ostringstream os;
 #ifdef __linux__
 	os << "settings/goals/";
 	os << raceString[goalentry->getRace()] << "/" << name << ".gol";// TODO!
@@ -563,11 +538,11 @@ void SETTINGS::saveGoal(const string& name, GOAL_ENTRY* goalentry)
 	os << "settings\\goals\\";
 	os << raceString[goalentry->getRace()] << "\\" << name << ".gol";// TODO!
 #endif 
-	ofstream pFile(os.str().c_str(), ios_base::out | ios_base::trunc);
+	std::ofstream pFile(os.str().c_str(), std::ios_base::out | std::ios_base::trunc);
 	if(!pFile.is_open())
 	{
-			toLog("ERROR: Could not create file (write protection? disk space?)");
-			return;
+		toLog("ERROR: Could not create file (write protection? disk space?)");
+		return;
 	}
 
 	goalentry->setName(name);
@@ -578,7 +553,6 @@ void SETTINGS::saveGoal(const string& name, GOAL_ENTRY* goalentry)
 
 	for(std::list<GOAL>::const_iterator i = goalentry->goal.begin(); i!=goalentry->goal.end(); i++)
 		pFile << "		\"" << stats[goalentry->getRace()][i->getUnit()].name << "\" \"" << i->getCount() << "\" \"" << i->getLocation() << "\" \"" << i->getTime() << "\"" << std::endl;		
-	
 	pFile << "@END" << std::endl;
 	loadGoalFile(os.str().c_str());
 }

@@ -47,14 +47,9 @@ class Rect
 
 		void SetBottom(const signed int bottom);
 				
-/*		const Rect operator+(const Rect& rect) const {
-			return(Rect(p + rect.p, s + rect.s));
-		} TODO
-		
-		Rect& operator+=(const Rect& rect)
-		{
-			return ( *this = (*this + rect) );
-		}*/
+		const Rect operator+(const Point p) const {
+			return(Rect(topLeftCorner + p, rectSize));
+		}
 	
 		Rect& operator=(const Rect& rect);
 		const bool operator==(const Rect& rect) const ;

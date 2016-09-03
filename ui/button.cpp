@@ -1,6 +1,6 @@
 #include "radio.hpp"
-#include "../core/configuration.hpp"
-#include "math.h"
+#include "configuration.hpp"
+#include <math.h>
 
 
 UI_Button::UI_Button(const UI_Button& object) :
@@ -12,6 +12,7 @@ UI_Button::UI_Button(const UI_Button& object) :
 	originalPosition(object.originalPosition),
 	hasBitmap(object.hasBitmap),
 	doNotSetSize(object.doNotSetSize),
+	wasPressed(object.wasPressed),
 	gradient(object.gradient),
 	timeStamp(object.timeStamp),
 	pressdepth(object.pressdepth),
@@ -38,6 +39,7 @@ UI_Button& UI_Button::operator=(const UI_Button& object)
 	originalPosition = object.originalPosition;
 	hasBitmap = object.hasBitmap;
 	doNotSetSize = object.doNotSetSize;
+	wasPressed = object.wasPressed;
 	gradient = object.gradient;
 	timeStamp = object.timeStamp;
 	pressdepth = object.pressdepth;
@@ -72,6 +74,7 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const eSt
 	originalPosition(false),
 	hasBitmap(false),
 	doNotSetSize(false),
+	wasPressed(false),
 	gradient(0),
 	timeStamp(0),
 	pressdepth(0),
@@ -105,7 +108,7 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const eSt
 //		text[i]=new UI_StaticText(this, normalText, Rect(0,0,0,0), HORIZONTALLY_CENTERED_TEXT_MODE, theme.lookUpButtonAnimation(button)->startTextColor[i], font
 }
 
-UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const string& button_text, const eButton button_type, const eTextMode button_text_mode, const eButtonMode button_mode, const ePositionMode button_position_mode, const eFont button_font, const eAutoSize button_auto_size):
+UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const std::string& button_text, const eButton button_type, const eTextMode button_text_mode, const eButtonMode button_mode, const ePositionMode button_position_mode, const eFont button_font, const eAutoSize button_auto_size):
 	UI_Object(button_parent, button_rect),
 	radio(0), //?
 	forcedPress(false),
@@ -114,6 +117,7 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const str
 	originalPosition(false),
 	hasBitmap(false),
 	doNotSetSize(false),
+	wasPressed(false),
 	gradient(0),
 	timeStamp(0),
 	pressdepth(0),
@@ -158,7 +162,7 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const eBu
 	originalPosition(false),
 	hasBitmap(true),
 	doNotSetSize(false),
-	
+	wasPressed(false),
 	gradient(0),
 	timeStamp(0),
 	pressdepth(0),
@@ -196,7 +200,7 @@ UI_Button::~UI_Button()
 void UI_Button::setPressDepth(const unsigned int depth)
 {
 	pressdepth = depth;
-	setNeedRedrawMoved();
+	wasPressed = true;
 	if(text)
 	{
 		if(pressdepth==0)
@@ -506,6 +510,7 @@ void UI_Button::mouseLeftButtonReleased()
 				originalPosition=false;
 			else if(!originalPosition)
 				originalPosition=true;
+			setNeedRedrawMoved();
 		}
 		else
 			setPressDepth(0);
@@ -550,6 +555,7 @@ void UI_Button::mouseRightButtonReleased()
 				originalPosition=false;
 			else if(!originalPosition)
 				originalPosition=true;
+			setNeedRedrawMoved();
 		}
 		else
 			setPressDepth(0);
@@ -591,7 +597,12 @@ void UI_Button::process()
 	// dann waere sowas moeglich, dass ich maus reinfahr und das langsam verblasst
 	// evtl auch einfach brightencolor ueberlegen...
 	unsigned int oldgradient = gradient;
-	if(!configuration.isGlowingButtons())
+	if(wasPressed)
+	{
+		wasPressed=false;
+		setNeedRedrawMoved();
+	}
+	if(!uiConfiguration.isGlowingButtons())
 	{
 		if(!(statusFlags & BF_HIGHLIGHTED))
 			gradient = 100;
@@ -777,7 +788,7 @@ const bool UI_Button::isJustPressed() const
 const bool UI_Button::isJustReleased() const
 {
 	if(!isShown())
-			return false;
+		return false;
 	if ( statusFlags & BF_JUST_RELEASED )
 		return true;
 	else

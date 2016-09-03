@@ -25,7 +25,7 @@ InfoWindow::InfoWindow(const InfoWindow& object) :
 	anarace(object.anarace)
 { }
 
-InfoWindow::InfoWindow(UI_Object* info_parent, ANARACE* info_anarace, const unsigned int info_window_number):
+InfoWindow::InfoWindow(UI_Object* info_parent, ANABUILDORDER* info_anarace, const unsigned int info_window_number):
 	UI_Window(info_parent, INFO_WINDOW_TITLE_STRING, INFO_WINDOW, info_window_number, NOT_SCROLLED),
 	bo(NULL),
 	bg(NULL),
@@ -39,7 +39,7 @@ InfoWindow::~InfoWindow() {
 	delete text;
 }
 
-void InfoWindow::assignAnarace(ANARACE* info_anarace) {
+void InfoWindow::assignAnarace(ANABUILDORDER* info_anarace) {
 	anarace = info_anarace;
 }
 

@@ -4,6 +4,7 @@
 #include "location.hpp"
 #include "unit.hpp"
 #include "goal.hpp"
+#include <list>
 
 struct GOAL_TREE
 {
@@ -17,9 +18,9 @@ struct GOAL_TREE
 
 struct ALLOW
 {
-        list<unsigned int> facility;
-        list<unsigned int> facility2;
-        list<unsigned int> prerequisite;
+	std::list<unsigned int> facility;
+	std::list<unsigned int> facility2;
+	std::list<unsigned int> prerequisite;
 };
 
 struct NEED
@@ -30,9 +31,9 @@ struct NEED
 		const bool prerequisiteIsDone();
 		NEED& operator=(const NEED& object);
 	
-        	bool facility;
-	        bool facility2;
-        	unsigned int prerequisite; // we need all... no double?
+		bool facility;
+		bool facility2;
+		unsigned int prerequisite; // we need all... no double?
 };
 
 
@@ -71,8 +72,8 @@ class GOAL_ENTRY
 //		const unsigned int getMode() const; // 0: normal, 1: based on success of enemy
 //		void setMode(int mode);
 
-		const std::list<unsigned int> allowDeletion(const unsigned int unitType);
-		const std::list<unsigned int> allowAddition(const unsigned int unitType);
+		const std::list<unsigned int> allowDeletion(const unsigned int unitType) const;
+		const std::list<unsigned int> allowAddition(const unsigned int unitType) const;
 
 		const unsigned int countGoals() const;
 		void calculateFinalTimes(const unsigned int location, const unsigned int unit, const unsigned int count, const unsigned int time);

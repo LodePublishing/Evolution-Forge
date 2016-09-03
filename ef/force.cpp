@@ -1,7 +1,8 @@
 #include "force.hpp"
 #include "../ui/editfield.hpp"
+#include "../core/configuration.hpp"
 
-ForceWindow::ForceWindow(UI_Object* force_parent, ANARACE* force_anarace, MessageWindow* force_msg_window, const unsigned int force_window_number) :
+ForceWindow::ForceWindow(UI_Object* force_parent, const unsigned int force_window_number) :
 	UI_Window(force_parent, FORCE_WINDOW_TITLE_STRING, FORCE_WINDOW, force_window_number, NOT_SCROLLED),
 	addUnit(0),
 	addTime(0),
@@ -9,7 +10,6 @@ ForceWindow::ForceWindow(UI_Object* force_parent, ANARACE* force_anarace, Messag
 	addCount(0),
 	currentGoalUnit(0),
 	startLine(0),
-	msgWindow(force_msg_window),
 	menuRadio(new UI_Radio(this, getRelativeClientRectPosition() + Point(0,10) )),
 	saveGoalButton(new UI_Button(this, Rect(getRelativeClientRectPosition() + Size(0, 10), getClientRectSize()), SAVE_GOAL_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
 	nongoalsText(new UI_StaticText(this, NON_GOALS_STRING, Rect(Point(0,20), getClientRectSize()), FORCE_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),
@@ -19,12 +19,12 @@ ForceWindow::ForceWindow(UI_Object* force_parent, ANARACE* force_anarace, Messag
 	nongoalForceList(),
 	markedUnit(0),
 	oldMarkedUnit(0),
-	anarace(force_anarace),
-	unitMenu(new UnitMenu(this, anarace, Rect(10, 10, getWidth()-10, 0))),
-	goalMenu(new GoalMenu(this, anarace, Rect(10, 10, getWidth()-100, 0))),
+	anarace(NULL),
+	unitMenu(new UnitMenu(this, Rect(10, 10, getWidth()-10, 0))),
+	goalMenu(new GoalMenu(this, Rect(10, 10, getWidth()-100, 0))),
 	raceMenu(new RaceMenu(this, Rect(10, 10, getWidth()-200, 0))), // TODO
 //	locationMenu(new LocationMenu(this, anarace, getRelativeClientRect())),
-	alwaysBuildWorker(new UI_CheckButton(this, Rect(Point(getWidth()-140, 50), Size(200, 15)), SETTING_ALWAYS_BUILD_WORKER_STRING, SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING, configuration.isAlwaysBuildWorker()))
+	alwaysBuildWorker(new UI_CheckButton(this, Rect(Point(getWidth()-140, 50), Size(200, 15)), SETTING_ALWAYS_BUILD_WORKER_STRING, SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING, coreConfiguration.isAlwaysBuildWorker()))
 	
 {	
 	menuButton[RACE_MENU] = new UI_Button(this, Rect(Point(0, 0), getClientRectSize()), CHOOSE_RACE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE_ONCE);
@@ -77,12 +77,13 @@ ForceWindow::~ForceWindow()
 	delete alwaysBuildWorker;
 }
 
-void ForceWindow::assignAnarace(ANARACE* force_anarace)
+void ForceWindow::assignAnarace(ANABUILDORDER* force_anarace)
 {
 	anarace = force_anarace;
 	unitMenu->assignAnarace(anarace);
 	goalMenu->assignAnarace(anarace);
 //	locationMenu->assignAnarace(anarace);
+// resetData?
 }
 
 void ForceWindow::closeMenus()
@@ -127,7 +128,7 @@ void ForceWindow::process()
 			if(ForceEntry::changed == LEFT_CLICKED)
 			{
 				bool allow = true;
-				const std::list<unsigned int> errorList = (*anarace->getCurrentGoal())->allowAddition(ForceEntry::forceEntryUnit);
+				const std::list<unsigned int> errorList = anarace->getGoal()->allowAddition(ForceEntry::forceEntryUnit);
 				if(errorList.size()>0)
 				{
 					for(std::list<unsigned int>::const_iterator blink = errorList.begin(); blink != errorList.end(); ++blink)
@@ -150,7 +151,7 @@ void ForceWindow::process()
 				if(allow)
 				{
 					addUnit = ForceEntry::forceEntryUnit;	addCount = 1  + ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); addTime = ForceEntry::forceEntryTime;	addLocation = ForceEntry::forceEntryLocation;
-					msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(ADDED_ONE_GOAL_STRING, *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+ForceEntry::forceEntryUnit+UNIT_NULL_STRING))));
+					UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(ADDED_ONE_GOAL_STRING, *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+ForceEntry::forceEntryUnit+UNIT_NULL_STRING))));
 					setChangedFlag();
 				}
 			} else
@@ -158,9 +159,9 @@ void ForceWindow::process()
 			if(ForceEntry::changed == RIGHT_CLICKED)
 			{
 				bool allow=true;
-				if((*anarace->getCurrentGoal())->getAllGoal(ForceEntry::forceEntryUnit)==1)
+				if(anarace->getGoal()->getAllGoal(ForceEntry::forceEntryUnit)==1)
 				{
-					const std::list<unsigned int> errorList = (*anarace->getCurrentGoal())->allowDeletion(ForceEntry::forceEntryUnit);
+					const std::list<unsigned int> errorList = anarace->getGoal()->allowDeletion(ForceEntry::forceEntryUnit);
 					if(errorList.size()>0)
 					{
 						for(std::list<unsigned int>::const_iterator blink = errorList.begin(); blink != errorList.end(); ++blink)
@@ -184,7 +185,7 @@ void ForceWindow::process()
 				if(allow)
 				{
 					addUnit = ForceEntry::forceEntryUnit;	addCount = -1  - ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); addTime = ForceEntry::forceEntryTime;	addLocation = ForceEntry::forceEntryLocation;
-					msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(REMOVED_ONE_GOAL_STRING, *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+ForceEntry::forceEntryUnit+UNIT_NULL_STRING))));
+					UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(REMOVED_ONE_GOAL_STRING, *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+ForceEntry::forceEntryUnit+UNIT_NULL_STRING))));
 					setChangedFlag();
 				}
 			} else 
@@ -196,7 +197,7 @@ void ForceWindow::process()
 			if(ForceEntry::changed == LEFT_CLICKED)
 			{
 				addUnit = ForceEntry::forceEntryUnit;	addCount = 1 + ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); addTime = 0;	addLocation = 0;
-				msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(MOVED_NON_GOAL_STRING, *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+ForceEntry::forceEntryUnit+UNIT_NULL_STRING))));
+				UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(MOVED_NON_GOAL_STRING, *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+ForceEntry::forceEntryUnit+UNIT_NULL_STRING))));
 				setChangedFlag();
 //				movedForceEntry=*forceEntry;
 			} else 
@@ -230,9 +231,9 @@ void ForceWindow::process()
 		{
 			if(UI_Object::editTextField->getString().length()>0)
 			{
-				settings.saveGoal(editTextField->getString(), *anarace->getCurrentGoal());
+				database.saveGoal(editTextField->getString(), anarace->getGoal());
 				goalMenu->resetData();
-				msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(SAVED_GOAL_STRING, (*anarace->getCurrentGoal())->getName()));
+				UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(SAVED_GOAL_STRING, anarace->getGoal()->getName()));
 			}
 			delete UI_Object::editTextField;
 			UI_Object::resetButton();
@@ -244,7 +245,7 @@ void ForceWindow::process()
 	if(unitMenu->getPressedItem()>=0)
 	{
 		bool allow = true;
-		const std::list<unsigned int> errorList = (*anarace->getCurrentGoal())->allowAddition(unitMenu->getPressedItem());
+		const std::list<unsigned int> errorList = anarace->getGoal()->allowAddition(unitMenu->getPressedItem());
 		if(errorList.size()>0)
 		{
 			for(std::list<unsigned int>::const_iterator blink = errorList.begin(); blink != errorList.end(); ++blink)
@@ -267,7 +268,7 @@ void ForceWindow::process()
 		if(allow)
 		{
 			addUnit = unitMenu->getPressedItem(); addCount = 1 + ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); addTime = 0; addLocation = 0;
-			msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(ADDED_GOAL_STRING, *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+unitMenu->getPressedItem()+UNIT_NULL_STRING))));
+			UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(ADDED_GOAL_STRING, *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+unitMenu->getPressedItem()+UNIT_NULL_STRING))));
 		}
 	}
 
@@ -275,14 +276,14 @@ void ForceWindow::process()
 	{
 		assignGoal = goalMenu->getPressedItem();
 		menuRadio->forceUnpressAll();
-		msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(SET_NEW_GOAL_LIST_STRING, (*anarace->getCurrentGoal())->getName()));
+		UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(SET_NEW_GOAL_LIST_STRING, anarace->getGoal()->getName()));
 		menuButton[GOAL_MENU]->forceUnpress();
 	}
 	
 	if(raceMenu->getPressedItem()>=0)
 	{
 		assignRace = raceMenu->getPressedItem();
-		msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(SET_RACE_STRING, *theme.lookUpString((eString)(TERRA_STRING + assignRace)))); 
+		UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(SET_RACE_STRING, *theme.lookUpString((eString)(TERRA_STRING + assignRace)))); 
 		menuButton[RACE_MENU]->forceUnpress();
 	}
 
@@ -353,14 +354,14 @@ void ForceWindow::process()
 	
 	if(addCount!=0)
 	{
-//		bool new_unit = ((*anarace->getCurrentGoal())->getAllGoal(addUnit)==0);
-		(*anarace->getCurrentGoal())->addGoal(addUnit, addCount, addTime, addLocation);
-//		if(((*anarace->getCurrentGoal())->getAllGoal(addUnit)==0)||new_unit) TODO: 3. Status fuer ChangedFlag machen, damit zwar BO resetted aber die Goals nicht neuberechnet werden muessen
+//		bool new_unit = (anarace->getGoal()->getAllGoal(addUnit)==0);
+		anarace->getGoal()->addGoal(addUnit, addCount, addTime, addLocation);
+//		if((anarace->getGoal()->getAllGoal(addUnit)==0)||new_unit) TODO: 3. Status fuer ChangedFlag machen, damit zwar BO resetted aber die Goals nicht neuberechnet werden muessen
 		setChangedFlag();
 	}
 	if(assignGoal>=0)
 	{
-		settings.assignGoal(anarace->getPlayerNumber(), goalMenu->getPressedItem());
+		anarace->assignGoal(database.getGoal(anarace->getRace(), goalMenu->getPressedItem()));
                 std::list<ForceEntry*>::iterator a = goalForceList.begin();
                 while(a!=goalForceList.end())
                 {
@@ -381,10 +382,11 @@ void ForceWindow::process()
 	}
 	if(assignRace>=0)
 	{
-		settings.assignStartRace(anarace->getPlayerNumber(), (eRace)assignRace);
-		settings.assignStartcondition(anarace->getPlayerNumber(), 0);
-		settings.fillGroups();
-		settings.assignGoal(anarace->getPlayerNumber(), 0);
+	// TODO evtl in game verschieben... bzw. game aufrufen... :[
+		anarace->setRace((eRace)assignRace);
+		anarace->assignGoal(database.getGoal(anarace->getRace(), 0)); // assign default goal
+		anarace->assignStartCondition(database.getStartCondition(anarace->getRace(), 0)); // assign default startcondition
+	
 		unitMenu->resetData();
 		goalMenu->resetData();
 		switch(assignRace)
@@ -429,13 +431,13 @@ void ForceWindow::process()
 	else	
 		menuButton[UNIT_MENU]->updateText(ADD_GOAL_STRING);
 
-	if(configuration.isAlwaysBuildWorker() != alwaysBuildWorker->isChecked() )
+	if(coreConfiguration.isAlwaysBuildWorker() != alwaysBuildWorker->isChecked() )
 		setChangedFlag();
-	configuration.setAlwaysBuildWorker( alwaysBuildWorker->isChecked() );
+	coreConfiguration.setAlwaysBuildWorker( alwaysBuildWorker->isChecked() );
 	
 	if((startLine!=oldStartLine)||(getChangedFlag()))
 	{
-		(*anarace->getCurrentGoal())->adjustGoals(true, (*anarace->getStartCondition())->getUnit(0) );
+		anarace->getGoal()->adjustGoals(true, (*anarace->getStartCondition())->getUnit(0) );
 		processList();
 	}
 
@@ -458,7 +460,7 @@ void ForceWindow::processList()
 	
 	std::list<ForceEntry*>::iterator goal_entry = goalForceList.begin();
 
-	for(std::list<GOAL>::iterator i = (*anarace->getCurrentGoal())->goal.begin(); i!= (*anarace->getCurrentGoal())->goal.end(); ++i)
+	for(std::list<GOAL>::iterator i = anarace->getGoal()->goal.begin(); i!= anarace->getGoal()->goal.end(); ++i)
         {
                 if(goal_entry == goalForceList.end())
                 {
@@ -522,7 +524,7 @@ void ForceWindow::processList()
 	while(goal_entry != goalForceList.end())
 	{
 	// Suche gleichen Nongoal Eintrag
-		if((*anarace->getCurrentGoal())->getIsBuildable((*goal_entry)->getUnit()))
+		if(anarace->getGoal()->getIsBuildable((*goal_entry)->getUnit()))
 		{
 		// => is a non-goal! move it down!
 			(*goal_entry)->assignGoal(NULL);
@@ -547,7 +549,7 @@ void ForceWindow::processList()
 
 	while(nongoal_entry != nongoalForceList.end())
 	{
-		if((*anarace->getCurrentGoal())->getIsHaveable((*nongoal_entry)->getUnit()))
+		if(anarace->getGoal()->getIsHaveable((*nongoal_entry)->getUnit()))
 		{
 			checkedUnits[(*nongoal_entry)->getUnit()] = true;
 			(*nongoal_entry)->updateText("   " + *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+(*nongoal_entry)->getUnit()+UNIT_NULL_STRING)));
@@ -563,9 +565,9 @@ void ForceWindow::processList()
 
 
 		for (unsigned int i = GAS_SCV+1; i--;)
-//		if ( ((*anarace->getCurrentGoal())->getAllGoal(i) == 0) && (((*anarace->getCurrentGoal())->getIsBuildable(i))||(anarace->getLocationTotal(0,i))))
-//	if ((*anarace->getCurrentGoal())->getIsHaveable(i)) 
-			if (((*anarace->getCurrentGoal())->getIsHaveable(i))&&(!checkedUnits[i])) //&&(anarace->getLocationTotal(loc, i)))
+//		if ( (anarace->getGoal()->getAllGoal(i) == 0) && ((anarace->getGoal()->getIsBuildable(i))||(anarace->getLocationTotal(0,i))))
+//	if (anarace->getGoal()->getIsHaveable(i)) 
+			if ((anarace->getGoal()->getIsHaveable(i))&&(!checkedUnits[i])) //&&(anarace->getLocationTotal(loc, i)))
 
 //			nonGoalList[i]=true;
 			{
@@ -598,7 +600,7 @@ void ForceWindow::processList()
 	{
 		bool unitsthere = false;
 		for (unsigned int i = GAS_SCV+1; i--;)
-			if (((*anarace->getCurrentGoal())->getIsHaveable(i))&&(anarace->getLocationTotal(loc, i)))
+			if ((anarace->getGoal()->getIsHaveable(i))&&(anarace->getLocationTotal(loc, i)))
 				unitsthere=true;
 		if(!unitsthere)
 		{
@@ -607,9 +609,9 @@ void ForceWindow::processList()
 		}	   
 
 		for (unsigned int i = GAS_SCV+1; i--;)
-//		if ( ((*anarace->getCurrentGoal())->getAllGoal(i) == 0) && (((*anarace->getCurrentGoal())->getIsBuildable(i))||(anarace->getLocationTotal(0,i))))
-//	if ((*anarace->getCurrentGoal())->getIsHaveable(i)) 
-			if (((*anarace->getCurrentGoal())->getIsHaveable(i))&&(anarace->getLocationTotal(loc, i))&&(!checkedUnits[i]))
+//		if ( (anarace->getGoal()->getAllGoal(i) == 0) && ((anarace->getGoal()->getIsBuildable(i))||(anarace->getLocationTotal(0,i))))
+//	if (anarace->getGoal()->getIsHaveable(i)) 
+			if ((anarace->getGoal()->getIsHaveable(i))&&(anarace->getLocationTotal(loc, i))&&(!checkedUnits[i]))
 //			nonGoalList[i]=true;
 			{
 				ForceEntry* forceEntry;
@@ -648,10 +650,10 @@ void ForceWindow::processList()
 	}*/
 		
 //	int z = forceList.size();
-//	int zz = (*anarace->getCurrentGoal())->goal.size(); 
+//	int zz = anarace->getGoal()->goal.size(); 
 // ------------------- GOALS ----------------------------
 // ------ START WHERE THE MENUES END
-	unsigned int startLine = 3;
+	startLine = 3;
 	if(raceMenu->getHeight() > startLine)
 		startLine = raceMenu->getHeight();
 	if(unitMenu->getHeight()/2 > startLine)
@@ -674,7 +676,7 @@ void ForceWindow::processList()
 
 		
 //	bool menuIsOpen=false;
-	for(std::list<GOAL>::const_iterator i = (*anarace->getCurrentGoal())->goal.begin(); i!= (*anarace->getCurrentGoal())->goal.end(); ++i)
+	for(std::list<GOAL>::const_iterator i = anarace->getGoal()->goal.begin(); i!= anarace->getGoal()->goal.end(); ++i)
 	{
 /*		if(i->getLocation()!=current_location)
 		{
@@ -721,7 +723,7 @@ void ForceWindow::processList()
 	{
 		bool unitsthere = false;
 		for (unsigned int i = GAS_SCV+1; i--;)
-			if (((*anarace->getCurrentGoal())->getIsHaveable(i))&&(anarace->getLocationTotal(loc, i)))
+			if ((anarace->getGoal()->getIsHaveable(i))&&(anarace->getLocationTotal(loc, i)))
 				unitsthere=true;
 		if(!unitsthere)
 		{
@@ -735,7 +737,7 @@ void ForceWindow::processList()
 		forceEntry = nongoalForceList.begin();
 		while(forceEntry!=nongoalForceList.end())
 		{
-//			if (((*anarace->getCurrentGoal())->getIsHaveable(i)))//&&(anarace->getLocationTotal(loc, i)))
+//			if ((anarace->getGoal()->getIsHaveable(i)))//&&(anarace->getLocationTotal(loc, i)))
 			{
 //				checkedUnits[i]=true;
 				(*forceEntry)->setTargetForce(anarace->getLocationTotal(loc, (*forceEntry)->getUnit()) * getClientRectWidth() / (3*anarace->getNonGoalsUnitsTotalMax()));
@@ -751,8 +753,8 @@ void ForceWindow::processList()
 		}
 	
 /*		for (unsigned int i = GAS_SCV+1; i--;)
-//			if (((*anarace->getCurrentGoal())->getAllGoal(i) == 0) && (((*anarace->getCurrentGoal())->getIsBuildable(i))|| ( anarace->getLocationTotal(0,i))))
-			if (((*anarace->getCurrentGoal())->getIsHaveable(i)))//&&(anarace->getLocationTotal(loc, i)))
+//			if ((anarace->getGoal()->getAllGoal(i) == 0) && ((anarace->getGoal()->getIsBuildable(i))|| ( anarace->getLocationTotal(0,i))))
+			if ((anarace->getGoal()->getIsHaveable(i)))//&&(anarace->getLocationTotal(loc, i)))
 			{
 				checkedUnits[i]=true;
 				(*forceEntry)->setTargetForce(anarace->getLocationTotal(loc, i) * getClientRectWidth() / (3*anarace->getNonGoalsUnitsTotalMax()));
@@ -776,7 +778,7 @@ void ForceWindow::processList()
 	{
 		bool unitsthere = false;
 		for (unsigned int i = GAS_SCV+1; i--;)
-			if (((*anarace->getCurrentGoal())->getIsHaveable(i))&&(anarace->getLocationTotal(loc, i)))
+			if ((anarace->getGoal()->getIsHaveable(i))&&(anarace->getLocationTotal(loc, i)))
 				unitsthere=true;
 		if(!unitsthere)
 		{
@@ -789,8 +791,8 @@ void ForceWindow::processList()
 		line++;
 
 		for (unsigned int i = GAS_SCV+1; i--;)
-//			if (((*anarace->getCurrentGoal())->getAllGoal(i) == 0) && (((*anarace->getCurrentGoal())->getIsBuildable(i))|| ( anarace->getLocationTotal(0,i))))
-			if (((*anarace->getCurrentGoal())->getIsHaveable(i))&&(anarace->getLocationTotal(loc, i))&&(!checkedUnits[i]))
+//			if ((anarace->getGoal()->getAllGoal(i) == 0) && ((anarace->getGoal()->getIsBuildable(i))|| ( anarace->getLocationTotal(0,i))))
+			if ((anarace->getGoal()->getIsHaveable(i))&&(anarace->getLocationTotal(loc, i))&&(!checkedUnits[i]))
 			{
 				checkedUnits[i]=true;
 				(*forceEntry)->setTargetForce(anarace->getLocationTotal(loc, i) * getClientRectWidth() / (3*anarace->getNonGoalsUnitsTotalMax()));
@@ -829,8 +831,8 @@ void ForceWindow::draw(DC* dc) const
 	for(std::list<ForceEntry*>::const_iterator j = forceList.begin(); (!mouseType)&&(j!= forceList.end()); ++j)
 		if((*j)->isCurrentlyHighlighted())
 		{
-			const std::list<unsigned int> subErrorList = (*anarace->getCurrentGoal())->allowDeletion((*j)->getUnit());
-			const std::list<unsigned int> addErrorList = (*anarace->getCurrentGoal())->allowAddition((*j)->getUnit());
+			const std::list<unsigned int> subErrorList = anarace->getGoal()->allowDeletion((*j)->getUnit());
+			const std::list<unsigned int> addErrorList = anarace->getGoal()->allowAddition((*j)->getUnit());
 			if((subErrorList.size()>0)&&(!addErrorList.size()))
 				mouseType = 1;
 			else if((!subErrorList.size())&&(!addErrorList.size()))
@@ -842,8 +844,8 @@ void ForceWindow::draw(DC* dc) const
 	for(std::list<ForceEntry*>::const_iterator j = forceList.begin(); (!mouseType)&&(j!= forceList.end()); ++j)
 		if((*j)->isCurrentlyHighlighted())
 		{
-			const std::list<unsigned int> subErrorList = (*anarace->getCurrentGoal())->allowDeletion((*j)->getUnit());
-			const std::list<unsigned int> addErrorList = (*anarace->getCurrentGoal())->allowAddition((*j)->getUnit());
+			const std::list<unsigned int> subErrorList = anarace->getGoal()->allowDeletion((*j)->getUnit());
+			const std::list<unsigned int> addErrorList = anarace->getGoal()->allowAddition((*j)->getUnit());
 			if((subErrorList.size()>0)&&(!addErrorList.size()))
 				mouseType = 1;
 			else if((!subErrorList.size())&&(!addErrorList.size()))
@@ -939,7 +941,7 @@ void ForceWindow::drawTechTree(DC* dc) const
 					dc->SetBrush(*theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][*i].unitType)));
 					dc->SetPen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN+stats[anarace->getRace()][*i].unitType)));
 					dc->DrawEdgedRoundedRectangle(Rect(Point(px - (s.GetWidth())/2, p.y + k*s2.GetHeight()), s), 4);
-					string text = *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+(*i)+UNIT_NULL_STRING));
+					std::string text = *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+(*i)+UNIT_NULL_STRING));
 					Size text_size = dc->GetTextExtent(text);
 					dc->DrawText(text, Point(px+4- (text_size.GetWidth())/2, p.y + k*s2.GetHeight()+4));
 					x++;

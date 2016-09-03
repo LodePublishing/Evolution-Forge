@@ -1,87 +1,93 @@
-#include "game.hpp"
+#include "player.hpp"
+#include "configuration.hpp"
 
-Game::~Game()
+Player::~Player()
 { 
-	for(int i=0;i<MAX_WINDOWS;i++)
-		delete window[i];
+	delete forceWindow;
+//	delete statisticsWindow;
+	delete boWindow;
+	delete boGraphWindow;
+	delete boDiagramWindow;
 }
 
-Game::Game(UI_Object* game_parent, ANARACE** game_anarace, MessageWindow* msgWindow, const unsigned int gameNumber):
-	UI_Object(game_parent),
+Player::Player(UI_Object* player_parent, const unsigned int playerNumber) :
+	UI_Object(player_parent),
 	geneAnimation(0),
-	anarace(game_anarace),
-	mode(0)
+	anarace(NULL),
+	mode(0),
+	forceWindow(new ForceWindow(this, playerNumber)),
+//	statisticsWindow(new StatisticsWindow(this, playerNumber)),
+	boWindow(new BoWindow(this, /* fixed,*/ playerNumber)),
+	boGraphWindow(new BoGraphWindow(this, playerNumber)),
+	boDiagramWindow(new BoDiagramWindow(this, playerNumber))
 {
-	for(int i=0;i<MAX_WINDOWS;i++)
-		window[i]=NULL;
-	window[FORCE_WINDOW] = new ForceWindow(this, *anarace, msgWindow, gameNumber);
-	window[TIMER_WINDOW] = new TimerWindow(this, *anarace, msgWindow, gameNumber);
-	window[STATISTICS_WINDOW]=new StatisticsWindow(this, *anarace, gameNumber);
-	window[INFO_WINDOW] = new InfoWindow(this, *anarace, gameNumber);
-	window[BUILD_ORDER_WINDOW] = new BoWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], msgWindow, /* fixed,*/ gameNumber);
-	window[BO_GRAPH_WINDOW] = new BoGraphWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], gameNumber);
-	window[BO_DIAGRAM_WINDOW]=new BoDiagramWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], gameNumber);
 	
-	// to set infoWindow above all others
-	window[INFO_WINDOW]->removeFromFamily(); window[INFO_WINDOW]->setParent(this);
-	setOptimizing();
-//	process();
 	Hide();
-	setOptimizing(false);
+	
 //	for(int i=MAX_LENGTH;i--;)
 //		fixed[i]=false;	
-//	(*anarace)->setFixed(fixed);
+//	anarace->setFixed(fixed);
 }
 
-void Game::assignAnarace(ANARACE** game_anarace)
+void Player::assignAnarace(ANABUILDORDER* player_anarace)
 {
-	anarace = game_anarace;
-	((ForceWindow*)window[FORCE_WINDOW])->assignAnarace(*anarace);
-	((TimerWindow*)window[TIMER_WINDOW])->assignAnarace(*anarace);
-	((StatisticsWindow*)window[STATISTICS_WINDOW])->assignAnarace(*anarace);
-	((InfoWindow*)window[INFO_WINDOW])->assignAnarace(*anarace);
-	((BoWindow*)window[BUILD_ORDER_WINDOW])->assignAnarace(*anarace);
-	((BoGraphWindow*)window[BO_GRAPH_WINDOW])->assignAnarace(*anarace);
-	((BoDiagramWindow*)window[BO_DIAGRAM_WINDOW])->assignAnarace(*anarace);
-//	(*anarace)->setFixed(fixed);
+	anarace = player_anarace;
+	forceWindow->assignAnarace(anarace);
+//	statisticsWindow->assignAnarace(anarace);
+	boWindow->assignAnarace(anarace);
+	boGraphWindow->assignAnarace(anarace);
+	boDiagramWindow->assignAnarace(anarace);
+	
+//	anarace->setFixed(fixed);
 }
 
-void Game::drawGene(DC* dc, int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const
+void Player::reloadStrings() //TODO
+{
+	if(!isShown())
+		return;
+	UI_Object::reloadStrings(); 
+}
+
+void Player::drawGene(DC* dc, int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const
 {
 	if(points[0].y<points[1].y) dc->SetPen(bla1);else dc->SetPen(bla2);
 	dc->DrawSpline(k, points, position);
-	//dc->SetPen(bla2);
 	dc->DrawSpline(k, points, position - Size(0,1));
 	dc->DrawSpline(k, points, position + Size(0,1));
 }
 
-void Game::drawGeneString(DC* dc, const Rect position) const
+void Player::drawGeneString(DC* dc) const
 {
-	int stringheight=0;
+	Rect position = Rect(getAbsolutePosition()+Point(210, 200+anarace->getPlayerNumber()*300), Size(600, 120));
+	dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
+	dc->SetPen(*theme.lookUpPen(BRIGHT_UNIT_TYPE_1_PEN));
+	dc->DrawRectangle(position);
+
+	unsigned int stringheight=0;
 	Point points1[2];
 	Point points2[2];
 	Point points3[2];
 	Point points4[2];
-	vector<int> colors;
-	int orderCount = (*anarace)->getProgramList().size();
+	std::vector<unsigned int> colors;
+	unsigned int orderCount = anarace->getProgramList().size();
 	if(orderCount<2)
 		return;
-	for(std::list<PROGRAM>::const_iterator i = (*anarace)->getProgramList().begin();i!=(*anarace)->getProgramList().end();i++)
+	for(std::list<PROGRAM>::const_iterator i = anarace->getProgramList().begin();i!=anarace->getProgramList().end();i++)
 		colors.push_back(i->getUnit());
 
-//	if((*anarace)->isOptimizing())
+//	if(anarace->isOptimizing())
 	{
-		int current_type = stats[(*anarace)->getRace()][colors[0]].facilityType;
-		for(int i=0;i<2*orderCount;i++)
+		unsigned int current_type = stats[anarace->getRace()][colors[0]].facilityType;
+		for(unsigned int i=0;i<2*orderCount;i++)
 		{
 //			int k=2;
-/*			while((i<orderCount)&&(stats[(*anarace)->getRace()][colors[i]].facilityType==current_type))
+/*			while((i<orderCount)&&(stats[anarace->getRace()][colors[i]].facilityType==current_type))
 			{
 				i++;
 				k++;
 			}*/
-			current_type = stats[(*anarace)->getRace()][colors[i/2]].facilityType;
-				for(int j=0;j<2;j++)
+			current_type = stats[anarace->getRace()][colors[i/2]].facilityType;
+				for(unsigned int j=0;j<2;j++)
 				{
 					points1[j] = Point(5+(stringheight+j)*(position.GetWidth()-8)/(orderCount*2)-1, (int)((cos((float)(4*(stringheight+j)+geneAnimation)*5.0*M_PI/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
 					
@@ -96,9 +102,9 @@ void Game::drawGeneString(DC* dc, const Rect position) const
 //				if(k>=1)
 				{
 						
-					Pen bla1=Pen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN+stats[(*anarace)->getRace()][colors[i/2]].unitType)));
-					Pen bla2=Pen(*theme.lookUpPen((ePen)(UNIT_TYPE_0_PEN+stats[(*anarace)->getRace()][colors[i/2]].unitType)));
-					int k=2;
+					Pen bla1=Pen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN+stats[anarace->getRace()][colors[i/2]].unitType)));
+					Pen bla2=Pen(*theme.lookUpPen((ePen)(UNIT_TYPE_0_PEN+stats[anarace->getRace()][colors[i/2]].unitType)));
+					unsigned int k=2;
 					if(points1[0].y>points1[1].y) // faellt -> hinten
 					{
 						if(points1[0].y>points2[0].y)
@@ -150,77 +156,76 @@ void Game::drawGeneString(DC* dc, const Rect position) const
 }
 																			
 
-void Game::draw(DC* dc) const
+void Player::draw(DC* dc) const
 {
 	if(!isShown())
 		return;
 	// TODO
 	UI_Object::draw(dc);
-	if(configuration.isDnaSpiral())
-	{
-		Rect r = Rect(getAbsolutePosition()+Point(210, 200+(*anarace)->getPlayerNumber()*300), Size(600, 120));
-		dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
-		dc->SetPen(*theme.lookUpPen(BRIGHT_UNIT_TYPE_1_PEN));
-		dc->DrawRectangle(r);
-		drawGeneString(dc, r);
-	};
-	((ForceWindow*)window[FORCE_WINDOW])->drawTechTree(dc);
+	if(efConfiguration.isDnaSpiral())
+		drawGeneString(dc);
+	forceWindow->drawTechTree(dc);
 }
 
-void Game::setMode(const eTab tab, const unsigned int gameNum)//, int game1, int game2)
+void Player::setMode(const eTab tab, const unsigned int playerNum)//, int player1, int player2)
 {
-	this->mode=tab*2+gameNum-2;
-	for(int i=BUILD_ORDER_WINDOW;i<=INFO_WINDOW;i++)
-		window[(eWindow)i]->setTitleParameter(*theme.lookUpString((eString)(tab+HIDE_MODE_STRING)));
-	switch(mode)
+// TODO evtl eine Zwischenklasse fuer alle Playerwindows machen
+//	mode=tab*2+playerNum-2;
+	std::string title_parameter = *theme.lookUpString((eString)(tab+HIDE_MODE_STRING));
+
+	forceWindow->setTitleParameter(title_parameter);
+//	statisticsWindow->setTitleParameter(title_parameter);
+	boWindow->setTitleParameter(title_parameter);
+	boGraphWindow->setTitleParameter(title_parameter);
+	boDiagramWindow->setTitleParameter(title_parameter);
+
+	switch(tab)
 	{
-		case 0:
+		case ZERO_TAB:break;
+		case BASIC_TAB:
 			this->Show();
-			(*anarace)->setActive(1);
-			window[BO_DIAGRAM_WINDOW]->Hide();
-			window[STATISTICS_WINDOW]->Hide();
-			window[BO_GRAPH_WINDOW]->Hide();
-		break; // first game basic mode
-		
-		case 1:
-			this->Hide();(*anarace)->setActive(0);break; // second game basic mode
-		case 2:
+			anarace->setActive(1);
+			boDiagramWindow->Hide();
+//			statisticsWindow->Hide();
+			boGraphWindow->Hide();
+		break; 
+		case ADVANCED_TAB:
 			this->Show();
-			(*anarace)->setActive(1);
-			window[BO_DIAGRAM_WINDOW]->Show();
-			window[STATISTICS_WINDOW]->Show();
-			window[BO_GRAPH_WINDOW]->Show();
-		break; // first game advanced mode
-		case 3:this->Hide();(*anarace)->setActive(0);break; // second game advanced mode
-		case 4:this->Show();(*anarace)->setActive(1);break; // first game
-		case 5:this->Show();(*anarace)->setActive(1);break; // second game
-		case 6:this->Show();(*anarace)->setActive(1);break; // first game
-		case 7:this->Show();(*anarace)->setActive(1);break; // second game
-		case 8:this->Show();(*anarace)->setActive(1);
-				break; // first game // compare?
-		case 9:this->Hide();(*anarace)->setActive(0);break; // second game
-		case 10:this->Hide();(*anarace)->setActive(0);break; // first game
-		case 11:this->Hide();(*anarace)->setActive(0);break; // second game
-		case 12:this->Hide();(*anarace)->setActive(0);break; // first game
-		case 13:this->Hide();(*anarace)->setActive(0);break; // second game
-		case 14:this->Show();(*anarace)->setActive(1);
-			window[BO_DIAGRAM_WINDOW]->Show();
-			window[STATISTICS_WINDOW]->Hide();
-			window[BO_GRAPH_WINDOW]->Show();
-		break; // first game compare
-		case 15:this->Hide();(*anarace)->setActive(0);break; // second game compare
-		default:break;
+			anarace->setActive(1);
+			boDiagramWindow->Show();
+//			statisticsWindow->Show();
+			boGraphWindow->Show();
+		break;
+
+                case EXPERT_TAB:
+                case GOSU_TAB:
+			this->Show();
+			anarace->setActive(1);
+			boDiagramWindow->Show();
+//			statisticsWindow->Hide();
+			boGraphWindow->Show();
+                        break;
+                case TUTORIAL_TAB:
+                case SETTINGS_TAB:
+                case MAP_TAB:
+                case COMPARE_TAB: // TODO
+	                        this->Hide();
+				anarace->setActive(0);
+				boDiagramWindow->Hide();
+//				statisticsWindow->Hide();
+				boGraphWindow->Hide();
+			break;
+                default:break;
 	}
 	resetData();
 	setNeedRedrawMoved(); //?
 	// TODO modes der einzelnen Windows (z.B> timer oder force)
 }
 
-void Game::process()
+void Player::process()
 {
 	if(!isShown())
 		return;
-	window[INFO_WINDOW]->Hide();
 	UI_Object::process();
 // TODO!
 // ------ COMMUNICATION BETWEEN THE WINDOWS ------ TODO
@@ -247,54 +252,32 @@ void Game::process()
 	}*/
 // ------ END COMMUNICATION BETWEEN THE WINDOWS ------
 
-	if((*anarace)->isOptimizing())
-		geneAnimation+=0.43;
+//	if(anarace->isOptimizing())
+//		geneAnimation+=0.43;
 // ------ PROCESS MEMBER VARIABLES ------	
-//	MoveOrders();
 // ------ END PROCESSING MEMBER VARIABLES ------
 }
 
-void Game::updateRectangles(const unsigned int maxGame)
+void Player::updateRectangles(const unsigned int maxPlayer)
 {
-	for(int i=BUILD_ORDER_WINDOW; i <= INFO_WINDOW; i++)
-		window[(eWindow)i]->updateRectangles(maxGame);
+	forceWindow->updateRectangles(maxPlayer);
+//	statisticsWindow->updateRectangles(maxPlayer);
+	boWindow->updateRectangles(maxPlayer);
+	boGraphWindow->updateRectangles(maxPlayer);
+	boDiagramWindow->updateRectangles(maxPlayer);
 }
 
-const bool Game::isOptimizing() const
+void Player::resetData()
 {
-	return((*anarace)->isOptimizing());
-}
-
-void Game::setOptimizing(const bool opt)
-{
-	(*anarace)->setOptimizing(opt);
-	((TimerWindow*)window[TIMER_WINDOW])->forcePause(opt);
-}
-
-void Game::resetData()
-{
-	((BoWindow*)window[BUILD_ORDER_WINDOW])->resetData();
-//	((ForceWindow*)window[FORCE_WINDOW])->resetData(); ?
-	((BoGraphWindow*)window[BO_GRAPH_WINDOW])->resetData();
-	((StatisticsWindow*)window[STATISTICS_WINDOW])->resetData();
-	((BoDiagramWindow*)window[BO_DIAGRAM_WINDOW])->resetData();
-	((TimerWindow*)window[TIMER_WINDOW])->resetData();
-	((InfoWindow*)window[INFO_WINDOW])->resetData();
 	geneAnimation=0;
-//	Hide();
 }
 
-void Game::restartAnarace()
+void Player::CheckOrders()
 {
-	(*anarace)->restartData();
-}
-
-void Game::CheckOrders()
-{
-	((BoDiagramWindow*)(window[BO_DIAGRAM_WINDOW]))->processList();
-	((BoWindow*)(window[BUILD_ORDER_WINDOW]))->processList();
-	((BoGraphWindow*)(window[BO_GRAPH_WINDOW]))->processList();
-	((ForceWindow*)(window[FORCE_WINDOW]))->processList();
+	boDiagramWindow->processList();
+	boWindow->processList();
+	boGraphWindow->processList();
+	forceWindow->processList();
 }
 
 //virtual machen

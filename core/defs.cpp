@@ -1,39 +1,7 @@
 //TODO: Problem: auf goals muessen sowohl ueber jeweiligen Ort (also gGoal[MAX_LOCATIONS][MAX_GOALS]), als auch einzelne Goals, wenn z.B. nach 5 und 10 Minuten 3 und 5 Marines an einem Ort sein sollen...
 
 #include "defs.hpp"
-#include <iostream>
-#include <sstream>
-#include <iomanip>
 #include <string>
-/*#ifdef _SCC_DEBUG
-	#define toLog((x)) std::cout << x << std::endl
-#else
-	#define toLog((x))
-#endif*/
-std::string lastMsg;
-void toLog(const std::string& msg)
-{
-	if(msg == lastMsg)
-		return;
-	lastMsg=msg;
-	std::cout << msg << std::endl;
-//	ofstream pFile("error.log", ios_base::app);
-//	pFile << msg.c_str() << endl;
-}
-
-const std::string formatTime(const unsigned int time)
-{
-	std::ostringstream os;
-	os << time/60 << ":" << std::setfill('0') << std::setw(2) << time%60;
-	return(os.str());
-}
-const std::string formatTime2(const unsigned int time)
-{
-	std::ostringstream os;
-	os << time/60 << "_" << std::setfill('0') << std::setw(2) << time%60;
-	return(os.str());
-}
-
 
 const std::string CORE_VERSION="Beta 1.63a";
 
@@ -79,9 +47,6 @@ const unsigned int MIN_TIMEOUT = 40;
 const unsigned int MAX_MUTATION_FACTOR = 400;
 const unsigned int MIN_MUTATION_FACTOR = 1;
 
-const unsigned int MIN_DYNAMIC_FRAMERATE = 0;
-const unsigned int MAX_DYNAMIC_FRAMERATE = 100;
-
 const unsigned int MIN_NOISE = 0;
 const unsigned int MAX_NOISE = 100;
 
@@ -98,15 +63,12 @@ const unsigned int MAX_PFITNESS = 99999;
 
 //const unsigned int MAX_RACES = (ZERG+1);
 
-const unsigned int MIN_STATIC_FRAMERATE = 1;
-const unsigned int MAX_STATIC_FRAMERATE = 100;
-
 const std::string raceString[MAX_RACES] = 
 { "Terra", "Protoss", "Zerg" };
 
-std::list<unsigned int> influenceList[MAX_RACES][UNIT_TYPE_COUNT];
+//std::list<unsigned int> influenceList[MAX_RACES][UNIT_TYPE_COUNT];
 
-void fillInfluenceList()
+/*void fillInfluenceList()
 {
 	for(int i=0;i<MAX_RACES;i++)
 	{
@@ -124,7 +86,7 @@ void fillInfluenceList()
 					influenceList[i][stats[i][j].upgrade[k]].push_front(j);
 		}
 	}
-}
+}*/
 // BUILD FREE ADDON PLACE FOR FACTORY, STARPORT ETC. WIE BEI RESEARCHES
 const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {

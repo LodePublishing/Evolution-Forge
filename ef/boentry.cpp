@@ -14,7 +14,7 @@ BoEntry& BoEntry::operator=(const BoEntry& object)
 	return(*this);
 }
 
-BoEntry::BoEntry(UI_Object* bo_parent, Rect bo_rect, const string& bo_unit, const PROGRAM& bo_program) :
+BoEntry::BoEntry(UI_Object* bo_parent, Rect bo_rect, const std::string& bo_unit, const PROGRAM& bo_program) :
 	UI_Button(bo_parent, bo_rect, bo_unit, FORCE_ENTRY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NOTHING),
 	program(bo_program)
 //	fixed(false)

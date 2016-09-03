@@ -189,7 +189,7 @@ inline void PROGRAM::setTotalCount(const unsigned int unit_type, const unsigned 
 inline void PROGRAM::setTime(const unsigned int program_time)
 {
 #ifdef _SCC_DEBUG
-	if(program_time > configuration.getMaxTime()) {
+	if(program_time > coreConfiguration.getMaxTime()) {
 		toLog("DEBUG: (PROGRAM::setTime): Value program_time out of range.");return;
 	}
 #endif
@@ -287,7 +287,7 @@ inline void PROGRAM::setSuccessUnit(const unsigned int unit_type)
 inline const unsigned int PROGRAM::getTime() const
 {
 #ifdef _SCC_DEBUG
-	if(time > configuration.getMaxTime()) {
+	if(time > coreConfiguration.getMaxTime()) {
 		toLog("DEBUG: (PROGRAM::getTime): Variable not initialized.");return(0);
 	}
 #endif
@@ -295,7 +295,7 @@ inline const unsigned int PROGRAM::getTime() const
 }
 
 inline const unsigned int PROGRAM::getRealTime() const {
-	return(configuration.getMaxTime() - getTime());
+	return(coreConfiguration.getMaxTime() - getTime());
 }
 
 inline const unsigned int PROGRAM::getLocation() const

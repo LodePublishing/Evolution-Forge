@@ -12,7 +12,7 @@ LocationMenu& LocationMenu::operator=(const LocationMenu& object)
 	return(*this);
 }
 
-LocationMenu::LocationMenu(UI_Object* location_parent, ANARACE* location_anarace, Rect location_rect):
+LocationMenu::LocationMenu(UI_Object* location_parent, ANABUILDORDER* location_anarace, Rect location_rect):
 	Menu(location_parent, location_rect, true),
 	anarace(location_anarace)
 {
@@ -23,7 +23,7 @@ void LocationMenu::resetData()
 {
 	unsigned int i=0;
 	height=1;
-	for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+	for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 	{
 		if(i >= (*anarace->getMap())->getMaxLocations())
 		{
@@ -53,7 +53,7 @@ void LocationMenu::resetData()
 LocationMenu::~LocationMenu()
 { }
 
-void LocationMenu::assignAnarace(ANARACE* location_anarace)
+void LocationMenu::assignAnarace(ANABUILDORDER* location_anarace)
 {
 	anarace = location_anarace;
 }

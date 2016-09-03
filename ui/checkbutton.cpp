@@ -15,11 +15,12 @@ UI_CheckButton::UI_CheckButton(const UI_CheckButton& object) :
 	UI_Object((UI_Object)object),
 	checked(object.checked),
 	checkButton(new UI_Button(*(object.checkButton))),
-	text(object.text?new UI_StaticText(*(object.text)):NULL)
+	text(object.text?new UI_StaticText(*(object.text)) : NULL)
 { }
 
 UI_CheckButton::UI_CheckButton(UI_Object* checkbutton_parent, const Rect rect, const eString txt, const eString tooltip_string, const bool is_checked) :
 	UI_Object(checkbutton_parent, rect),
+	checked(false),
 	checkButton(new UI_Button(this, Rect(Point(120, 3),Size(10,10)), CHECK_BUTTON, STATIC_BUTTON_MODE)),
 	text(new UI_StaticText(this, txt, Rect(Point(0,0), Size(110, 0)), FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT, RIGHT_BOUNDED_TEXT_MODE))
 {
@@ -56,6 +57,8 @@ void UI_CheckButton::process()
 	if(!isShown())
 		return;
 	UI_Object::process();
+	if(checkButton->checkForNeedRedraw())
+		setNeedRedrawMoved();
 }
 
 void UI_CheckButton::draw(DC* dc) const

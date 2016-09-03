@@ -18,7 +18,7 @@ class UI_Group : public UI_Object
 
 		void draw(DC* dc) const;
 		void process();
-		UI_Object* checkTooltip();
+		UI_Object* checkToolTip();
 		UI_Object* checkHighlight();
 
 		void reloadStrings();

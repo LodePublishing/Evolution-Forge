@@ -4,37 +4,23 @@
 #define _CORE_DEFS_HPP
 
 #include <string>
-#include <list>
+//#include <list>
 
 #define MAX_RACES 3
 #define UNIT_TYPE_COUNT 105
 #define MAX_LOCATIONS 5
-#define MAX_GAME 5
 
+// max simultaneous games/maps
+#define MAX_GAME 4
 
-// ------ LANGUAGES ------
-enum eLanguage
-{
-	ZERO_LANGUAGE,
-	ENGLISH_LANGUAGE,
-	GERMAN_LANGUAGE,
-	ITALIAN_LANGUAGE,
-	PORTUGESE_LANGUAGE,
-	DUTCH_LANGUAGE,
-	FINNISH_LANGUAGE,
-	GREEK_LANGUAGE,
-	FRENCH_LANGUAGE,
-	SPANISH_LANGUAGE,
-	POLSKI_LANGUAGE,
-	KOREAN_LANGUAGE,
-	CHINESE_LANGUAGE,
-	RUSSIAN_LANGUAGE,
+// max simultaneous players
+#define MAX_PLAYER 8
 
-	MAX_LANGUAGES
-};
-// ------ END LANGUAGES ------
-
-
+#include <math.h>
+#ifndef M_PI
+	#define M_PI 3.14159265358979323846
+#endif
+// Windows kotz
 
 #define GLOBAL 0
 
@@ -90,21 +76,14 @@ extern const unsigned int MAX_PFITNESS;
 extern const unsigned int MIN_NOISE;
 extern const unsigned int MAX_NOISE;
 
-extern const unsigned int MIN_DYNAMIC_FRAMERATE;
-extern const unsigned int MAX_DYNAMIC_FRAMERATE;
 
 extern const unsigned int MIN_MUTATION_FACTOR;
 extern const unsigned int MAX_MUTATION_FACTOR;
 
-extern const unsigned int MIN_STATIC_FRAMERATE;
-extern const unsigned int MAX_STATIC_FRAMERATE;
 
 //extern const unsigned int MAX_RACES;
 
-extern void toLog(const std::string& msg);
-extern const std::string formatTime(const unsigned int time);
-extern const std::string formatTime2(const unsigned int time);
-extern void fillInfluenceList();
+//extern void fillInfluenceList();
 
 #define NEUTRAL_PLAYER 0
 
@@ -484,10 +463,9 @@ struct UNIT_STATISTICS
 };
 
 
-extern std::list<unsigned int> influenceList[MAX_RACES][UNIT_TYPE_COUNT];
+//extern std::list<unsigned int> influenceList[MAX_RACES][UNIT_TYPE_COUNT];
 extern const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT];
 extern const std::string raceString[MAX_RACES];
-// TODO: automatic building units/buildings for spells and larvaes
 
 #endif // _CORE_DEFS_HPP
 

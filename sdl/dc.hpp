@@ -125,7 +125,7 @@ class DC
 		void FillRect( SDL_Surface& dest, SDL_Rect *rc, SDL_Color &clr ) const;
 		void setResolution(const unsigned int max_x, const unsigned int max_y);
 		static SDL_Color toSDL_Color(const Uint8 r, const Uint8 g, const Uint8 b);
-		void printInformation() const;
+//		void printInformation() const;
 		
 	protected:
 		SDL_Surface* surface;

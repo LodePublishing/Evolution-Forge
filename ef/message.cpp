@@ -1,9 +1,9 @@
 #include "message.hpp"
 
-Message::Message(UI_Object* msg_parent, Rect rect, const unsigned int msg_type, const string& msg_string, const unsigned int color) :
+Message::Message(UI_Object* msg_parent, Rect rect, const unsigned int msg_type, const std::string& msg_string, const unsigned int msg_color) :
 	UI_StaticText(msg_parent, msg_string, rect, FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT), 
 	type(msg_type),
-	col(color)
+	col(msg_color)
 { }
 
 Message::~Message()
@@ -36,13 +36,17 @@ MessageWindow::MessageWindow( UI_Window* parentWindow ):
 //		resetData();?
 
 
+
 MessageWindow::~MessageWindow()
 { }
 
-void MessageWindow::addMessage( const string& bla )
+void MessageWindow::resetData()
+{}
+
+void MessageWindow::addMessage( const std::string& bla )
 {
 	setNeedRedrawNotMoved();
-	resetScrollbarToEnd();
+	moveScrollbarToBottom();
 	Message msg(getScrollbar(), Rect(Point(5, 10 + message.size() * (FONT_SIZE+5)), Size(getClientRectWidth(), FONT_SIZE+5)), 1, bla, 155);
 	message.push_back(msg);
 //	if(message.size() > 20)

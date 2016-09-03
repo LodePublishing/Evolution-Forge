@@ -2,13 +2,13 @@
 #define _GUI_FORCEMENU_HPP
 
 #include "menu.hpp"
-#include "../core/anarace.hpp"
-#include "../core/settings.hpp"
+#include "../core/anabuildorder.hpp"
+#include "../core/database.hpp"
 
 class ForceMenu : public Menu
 {
 	public:
-		ForceMenu(UI_Object* force_parent, ANARACE* force_anarace, Rect force_rect);
+		ForceMenu(UI_Object* force_parent, ANABUILDORDER* force_anarace, Rect force_rect);
 		ForceMenu(const ForceMenu& object);
 		ForceMenu& operator=(const ForceMenu& object);
 		~ForceMenu();

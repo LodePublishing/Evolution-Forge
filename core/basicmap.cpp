@@ -1,5 +1,4 @@
 #include "basicmap.hpp"
-#include <iostream>
 
 BASIC_MAP::BASIC_MAP():
 	name("ERROR"),
@@ -14,9 +13,9 @@ BASIC_MAP::~BASIC_MAP()
 
 void BASIC_MAP::resetData()
 {
-	for(int i=MAX_LOCATIONS;i--;)
+	for(unsigned int i=MAX_LOCATIONS;i--;)
 		location[i].resetData();
-	for(int i=MAX_PLAYER;i--;)
+	for(unsigned int i=MAX_PLAYER;i--;)
 		startPosition[i] = 0;
 	name = "ERROR";
 	maxLocations = 0;
@@ -48,7 +47,7 @@ void BASIC_MAP::calculateLocationsDistances()
 			if(location[i].getDistance(j) < 9999)
 				location[j].setDistance(i, location[i].getDistance(j));
 
-	for(unsigned int i = 1; i < getMaxLocations(); i++)
+/*	for(unsigned int i = 1; i < getMaxLocations(); i++)
 	{
 		std::cout << "Location " << i << " ";
 		for(unsigned int j = 1; j < getMaxLocations(); j++)
@@ -66,7 +65,7 @@ void BASIC_MAP::calculateLocationsDistances()
 		for(unsigned int j = 1; j < getMaxLocations(); j++)
 			std::cout << getLocation(i)->getDistance(j) << " ";
 		std::cout << std::endl;
-	}
+	}*/
 
 	for(unsigned int i=1;i<getMaxLocations();i++)
 		location[i].calculateDistances();

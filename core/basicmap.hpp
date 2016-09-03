@@ -3,7 +3,6 @@
 
 #include "location.hpp"
 
-#include <list>
 
 class BASIC_MAP
 {

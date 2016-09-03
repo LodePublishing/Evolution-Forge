@@ -109,11 +109,11 @@ void UI_Group::process()
 }
 
 
-UI_Object* UI_Group::checkTooltip()
+UI_Object* UI_Group::checkToolTip()
 {
 //	if(!(Rect(getAbsolutePosition(), boxSize).Inside(mouse)))
 //		return(0);
-	return(UI_Object::checkTooltip());
+	return(UI_Object::checkToolTip());
 }
 
 UI_Object* UI_Group::checkHighlight()

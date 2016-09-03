@@ -74,17 +74,22 @@ void UI_Scrollbar::moveDown()
 	currentScrollY+=clientHeight/20;
 }
 
-void UI_Scrollbar::reset()
+void UI_Scrollbar::moveToTop()
 {
 	currentScrollY = 0;
 	setNeedRedrawMoved();
 }
 
-void UI_Scrollbar::resetToEnd()
+void UI_Scrollbar::moveToBottom()
 {
 	currentScrollY = 99999;
 	setNeedRedrawMoved();
 	process();
+}
+
+void UI_Scrollbar::reloadStrings()
+{
+	UI_Object::reloadStrings();
 }
 
 

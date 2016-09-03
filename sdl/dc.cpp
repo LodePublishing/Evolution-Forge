@@ -1,40 +1,41 @@
 #include "dc.hpp"
 
+
 DC::DC():
 	surface(),
+	initOK(true),
 	max_x(0),
 	max_y(0),
 	brush(),
 	pen(),
 	color(NULL),
 	textColor(),
-	font(NULL),
-	initOK(false)
+	font(NULL)
 { }
 
 DC::DC(const DC& other):
 	surface(other.surface),
+	initOK(other.initOK),
 	max_x(other.max_x),
 	max_y(other.max_y),
 	brush(other.brush),
 	pen(other.pen),
 	color(other.color),
 	textColor(other.textColor),
-	font(other.font),
-	initOK(other.initOK)
+	font(other.font)
 { }
 // TODO?
 
 DC::DC(const unsigned int width, const unsigned int height, const unsigned int bitdepth, Uint32 nflags, Uint32 initflags) :
 	surface(NULL),
+	initOK(true),
 	max_x(0),
 	max_y(0),
 	brush(),
 	pen(),
 	color(NULL),
 	textColor(),
-	font(NULL),
-	initOK(true)
+	font(NULL)
 {
 	if ( SDL_Init(initflags) < 0 )
 	{
@@ -59,51 +60,6 @@ DC::DC(const unsigned int width, const unsigned int height, const unsigned int b
 const bool DC::initializationOK() const
 {
 	return(initOK);
-}
-
-void DC::printInformation() const
-{
-#if 0
-	SDL_Rect **modes;
-	modes=SDL_ListModes(NULL, SDL_FULLSCREEN|SDL_HWSURFACE);
-	if(modes == (SDL_Rect **)0)
-	{
-		toLog("No modes available!");
-	} else
-	{
-		if(modes == (SDL_Rect **)-1)
-			toLog("All resolutions available.");
-		else
-		{
-			toLog("Available Modes:");
-			for(int i=0;modes[i];++i)
-			{
-				std::ostringstream os;
-				os << "  " << modes[i]->w << " x " << modes[i]->h;
-				toLog(os.str());
-			}
-		}
-	}
-
-
-	if (flags() & SDL_SWSURFACE)
-		toLog("Surface is stored in system memory");
-	else if(flags() & SDL_HWSURFACE)
-		toLog("Surface is stored in video memory");
-	if(flags() & SDL_ASYNCBLIT) toLog("Surface uses asynchronous blits if possible");
-	if(flags() & SDL_ANYFORMAT) toLog("Allows any pixel-format");
-	if(flags() & SDL_HWPALETTE) toLog("Surface has exclusive palette");
-	if(flags() & SDL_DOUBLEBUF) toLog("Surface is double buffered");
-	if(flags() & SDL_OPENGL) toLog("Surface has an OpenGL context");
-	if(flags() & SDL_OPENGLBLIT) toLog("Surface supports OpenGL blitting");
-	if(flags() & SDL_RESIZABLE) toLog("Surface is resizable");
-	if(flags() & SDL_HWACCEL) toLog("Surface blit uses hardware acceleration");
-	if(flags() & SDL_SRCCOLORKEY) toLog("Surface use colorkey blitting");
-	if(flags() & SDL_RLEACCEL) toLog("Colorkey blitting is accelerated with RLE");
-	if(flags() & SDL_SRCALPHA) toLog("Surface blit uses alpha blending");
-	if(flags() & SDL_PREALLOC) toLog("Surface uses preallocated memory");
-	if(SDL_MUSTLOCK(surface)) toLog("Surface needs locking");
-#endif
 }
 
 void DC::setFullscreen(const bool full_screen)
@@ -238,8 +194,9 @@ void DC::DrawSpline(const unsigned int c, const Point* p, const Point s) const
 
 void DC::setResolution(const unsigned int dc_max_x, const unsigned int dc_max_y)
 {
-	max_x=dc_max_x;
-	max_y=dc_max_y;
+	max_x = dc_max_x;
+	max_y = dc_max_y;
+//	printInformation();
 }
 
 #if 0

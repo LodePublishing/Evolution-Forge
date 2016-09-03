@@ -2,6 +2,8 @@
 
 PROGRAM::PROGRAM():
 //	built(false),
+	before(),
+	after(),
 	time(0),
 	location(0),
 	successType(0),
@@ -9,9 +11,7 @@ PROGRAM::PROGRAM():
 	facility(0),
 	usedFacilityCount(0),
 	unit(0),
-	BT(0),
-	before(),
-	after()
+	BT(0)
 {
 //	memset(forceCount, 0, UNIT_TYPE_COUNT * sizeof(int));
 //	memset(availibleCount, 0, UNIT_TYPE_COUNT * sizeof(int));
@@ -38,6 +38,8 @@ void PROGRAM::resetData()
 PROGRAM& PROGRAM::operator=(const PROGRAM& object)
 {
 //	built = object.built;
+	before = object.before;
+	after = object.after;
 	time = object.time;
 	location = object.location;
 	successType = object.successType;
@@ -46,13 +48,13 @@ PROGRAM& PROGRAM::operator=(const PROGRAM& object)
 	usedFacilityCount = object.usedFacilityCount;
 	unit = object.unit;
 	BT = object.BT;
-	before = object.before;
-	after = object.after;
 	return(*this);
 }
 
 PROGRAM::PROGRAM(const PROGRAM& object) :
 //	built(object.built),
+	before(object.before),
+	after(object.after),
 	time(object.time),
 	location(object.location),
 	successType(object.successType),
@@ -60,7 +62,5 @@ PROGRAM::PROGRAM(const PROGRAM& object) :
 	facility(object.facility),
 	usedFacilityCount(object.usedFacilityCount),
 	unit(object.unit),
-	BT(object.BT),
-	before(object.before),
-	after(object.after)
+	BT(object.BT)
 { }

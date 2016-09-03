@@ -2,6 +2,7 @@
 #define _CORE_UNIT_HPP
 
 #include "defs.hpp"
+#include "../stl/misc.hpp"
 
 /*1. researches + erforschungen werden nur fuer location 0 gezaehlt, wie bisher
 2. globales array, also locations x unit x spieler

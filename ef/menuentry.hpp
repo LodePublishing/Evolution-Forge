@@ -8,7 +8,7 @@ class MenuEntry : public UI_Button
 	public:
 		MenuEntry(const MenuEntry& object);
 		MenuEntry(UI_Object* menuentry_parent, Rect rect, const eString unit);
-		MenuEntry(UI_Object* menuentry_parent, Rect rect, const string& unit);
+		MenuEntry(UI_Object* menuentry_parent, Rect rect, const std::string& unit);
 		~MenuEntry();
 		MenuEntry& operator=(const MenuEntry& object);
 		void process();

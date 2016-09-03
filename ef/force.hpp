@@ -6,12 +6,11 @@
 #include "unitmenu.hpp"
 #include "goalmenu.hpp"
 #include "racemenu.hpp"
-#include "message.hpp"
 #include "forceentry.hpp"
 #include "locmenu.hpp"
 
-#include "../core/anarace.hpp"
-#include "../core/settings.hpp"
+#include "../core/anabuildorder.hpp"
+#include "../core/database.hpp"
 #include "../ui/radio.hpp"
 #include "../ui/checkbutton.hpp"
 
@@ -27,7 +26,7 @@ enum eMenu
 class ForceWindow : public UI_Window
 {
 	public:
-		ForceWindow(UI_Object* force_parent, ANARACE* force_anarace, MessageWindow* force_msg_window, const unsigned int force_window_number);
+		ForceWindow(UI_Object* force_parent, const unsigned int force_window_number);
 		~ForceWindow();
 		
 		void processList();
@@ -35,7 +34,7 @@ class ForceWindow : public UI_Window
 		void draw(DC* dc) const;
 		const unsigned int getMarkedUnit() const;
 		void setMarkedUnit(const unsigned int marked_unit);
-		void assignAnarace(ANARACE* force_anarace);
+		void assignAnarace(ANABUILDORDER* force_anarace);
 		void drawTechTree(DC* dc) const;
 		void reloadStrings();
 	private:
@@ -47,8 +46,6 @@ class ForceWindow : public UI_Window
 	
 		void closeMenus();
 
-		MessageWindow* msgWindow;
-
 		UI_Radio* menuRadio;
 		UI_Button* menuButton[MAX_MENUS];
 		UI_Button* saveGoalButton;
@@ -58,11 +55,11 @@ class ForceWindow : public UI_Window
 //		UI_StaticText* locationName[2][MAX_LOCATIONS];
 		UI_StaticText* legend;
 
-		list<ForceEntry*> goalForceList;
-		list<ForceEntry*> nongoalForceList;
+		std::list<ForceEntry*> goalForceList;
+		std::list<ForceEntry*> nongoalForceList;
 		
 		unsigned int markedUnit, oldMarkedUnit;
-		ANARACE* anarace;
+		ANABUILDORDER* anarace;
 
 		UnitMenu* unitMenu;
 		GoalMenu* goalMenu;

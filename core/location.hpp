@@ -1,6 +1,7 @@
 #ifndef _CORE_LOCATION_HPP
 #define _CORE_LOCATION_HPP
 #include "defs.hpp"
+#include "../stl/misc.hpp"
 
 class MAP_LOCATION
 {

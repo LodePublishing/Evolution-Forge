@@ -60,7 +60,7 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const eString st_text, const 
 	updateText(st_text);
 }
 
-UI_StaticText::UI_StaticText(UI_Object* st_parent, const string& st_text, const Rect st_pos, const eColor st_color, const eFont st_font, const eTextMode st_mode) :
+UI_StaticText::UI_StaticText(UI_Object* st_parent, const std::string& st_text, const Rect st_pos, const eColor st_color, const eFont st_font, const eTextMode st_mode) :
 	UI_Object(st_parent, st_pos),
 	mode(st_mode),
 	text(),
@@ -86,9 +86,8 @@ UI_Object* UI_StaticText::checkTooltip() {
 
 void UI_StaticText::draw(DC* dc) const
 {
-//	if(!isShown())
-//		return;
-	
+	if(!isShown())
+		return;
 	if(!checkForNeedRedraw())
 		return;
 //	if(font!=NULL_FONT)
@@ -404,7 +403,7 @@ void UI_StaticText::calculatePosition()
 			unsigned int currentRow=0;
 			unsigned int maxdx=0;
 			unsigned int maxdy=0;
-			string t_text=text+"#";
+			std::string t_text=text+"#";
 			s = UI_Object::theme.lookUpFont(font)->GetTextExtent(t_text);
 			maxdy = s.GetHeight();
 			for(unsigned int i=0;i<t_text.length();i++)
@@ -533,7 +532,7 @@ void UI_StaticText::process()
 //	updateText(eText);
 }
 
-void UI_StaticText::updateText(const string& st_text)
+void UI_StaticText::updateText(const std::string& st_text)
 {
 	if(text == st_text)
 		return;

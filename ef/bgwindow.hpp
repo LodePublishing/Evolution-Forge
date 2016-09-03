@@ -3,8 +3,7 @@
 
 #include "../ui/window.hpp"
 #include "bograph.hpp"
-//#include "order.hpp"
-#include "info.hpp"
+#include "../core/anabuildorder.hpp"
 
 #include <list>
 
@@ -13,7 +12,7 @@
 class BoGraphWindow:public UI_Window
 {
 	public:
-		BoGraphWindow(UI_Object* bograph_parent, ANARACE* bograph_anarace, InfoWindow* bograph_info_window, const unsigned int bograph_window_number);
+		BoGraphWindow(UI_Object* bograph_parent, const unsigned int bograph_window_number);
 		BoGraphWindow(const BoGraphWindow& object);
 		BoGraphWindow& operator=(const BoGraphWindow& object);
 		~BoGraphWindow();
@@ -23,7 +22,7 @@ class BoGraphWindow:public UI_Window
 		void processList();
 		void draw(DC* dc) const;
 	    	void mouseHasMoved();
-		void assignAnarace(ANARACE* bograph_anarace);
+		void assignAnarace(ANABUILDORDER* bograph_anarace);
 	private:
 
 		struct BOGRAPH
@@ -32,20 +31,15 @@ class BoGraphWindow:public UI_Window
 			unsigned int height; // number of entries per line
 			unsigned int lines; // number of lines
 			Rect edge;
-			list<BoGraphEntry*> boGraphList;
+			std::list<BoGraphEntry*> boGraphList;
 		} bograph[BOGRAPH_MAX_LINES];
 	
 		void checkForInfoWindow();
-		
-//		list<BoGraphEntry*> boGraphList;
-
 		unsigned int markAni;
-// 		std::list<Order*>* orderList;
-		InfoWindow* infoWindow;
-		ANARACE* anarace;
+		ANABUILDORDER* anarace;
 };
 
-inline void BoGraphWindow::assignAnarace(ANARACE* bograph_anarace) {
+inline void BoGraphWindow::assignAnarace(ANABUILDORDER* bograph_anarace) {
 	anarace = bograph_anarace;
 }
 

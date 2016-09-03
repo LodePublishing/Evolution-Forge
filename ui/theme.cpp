@@ -4,7 +4,6 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
-using namespace std;
 
 UI_Theme& UI_Theme::operator=(const UI_Theme& object)
 {
@@ -13,38 +12,37 @@ UI_Theme& UI_Theme::operator=(const UI_Theme& object)
 	language = object.language;
 	colorTheme = object.colorTheme;
 
-	for(int i = MAX_LANGUAGES;i--;)
-		for(int j = MAX_STRINGS;j--;)
+	for(unsigned int i = MAX_LANGUAGES;i--;)
+		for(unsigned int j = MAX_STRINGS;j--;)
 			stringList[i][j]=object.stringList[i][j];
-	for(int i = MAX_RESOLUTIONS;i--;)
-//		for(int j = MAX_LANGUAGES;j--;)
-			for(int k = MAX_FONTS;k--;)
+	for(unsigned int i = MAX_RESOLUTIONS;i--;)
+//		for(unsigned int j = MAX_LANGUAGES;j--;)
+			for(unsigned int k = MAX_FONTS;k--;)
 				fontList[i][k]=object.fontList[i][k];
-	for(int i = MAX_COLOR_THEMES;i--;)
+	for(unsigned int i = MAX_COLOR_THEMES;i--;)
 	{
-		for(int j = MAX_COLORS;j--;)
+		for(unsigned int j = MAX_COLORS;j--;)
 			colorList[i][j]=object.colorList[i][j];
-		for(int j = MAX_RESOLUTIONS;j--;)
+		for(unsigned int j = MAX_RESOLUTIONS;j--;)
 		{
-			for(int k = MAX_PENS;k--;)
+			for(unsigned int k = MAX_PENS;k--;)
 				penList[j][i][k]=object.penList[j][i][k]; // :D
-			 for(int k = MAX_BITMAPS;k--;)
+			 for(unsigned int k = MAX_BITMAPS;k--;)
 				bitmapList[i][j][k]=object.bitmapList[i][j][k];
 		}
-																																							
-		for(int j = MAX_BRUSHES;j--;)
+		for(unsigned int j = MAX_BRUSHES;j--;)
 			brushList[i][j]=object.brushList[i][j];
 	}
-	for(int i = MAX_RESOLUTIONS;i--;)
-		for(int j = MAX_TABS;j--;)
-			for(int k = MAX_WINDOWS;k--;)
+	for(unsigned int i = MAX_RESOLUTIONS;i--;)
+		for(unsigned int j = MAX_TABS;j--;)
+			for(unsigned int k = MAX_WINDOWS;k--;)
 			{
 				rectList[i][j][k]=object.rectList[i][j][k];
 				maxHeightList[i][j][k] = object.maxHeightList[i][j][k];
 				xwindow[i][j][k]=object.xwindow[i][j][k];
 				ywindow[i][j][k]=object.ywindow[i][j][k];
 			}
-	for(int i=MAX_BUTTONS;i--;)
+	for(unsigned int i=MAX_BUTTONS;i--;)
 		buttonAnimationList[i]=object.buttonAnimationList[i];
 	return(*this);
 }
@@ -55,37 +53,37 @@ UI_Theme::UI_Theme(const UI_Theme& object) :
 	language( object.language ),
 	colorTheme( object.colorTheme)
 {
-	for(int i = MAX_LANGUAGES;i--;)
-		for(int j = MAX_STRINGS;j--;)
+	for(unsigned int i = MAX_LANGUAGES;i--;)
+		for(unsigned int j = MAX_STRINGS;j--;)
 			stringList[i][j]=object.stringList[i][j];
-	for(int i = MAX_RESOLUTIONS;i--;)
-//		for(int j = MAX_LANGUAGES;j--;)
-			for(int k = MAX_FONTS;k--;)
+	for(unsigned int i = MAX_RESOLUTIONS;i--;)
+//		for(unsigned int j = MAX_LANGUAGES;j--;)
+			for(unsigned int k = MAX_FONTS;k--;)
 				fontList[i][k]=object.fontList[i][k];
-	for(int i = MAX_COLOR_THEMES;i--;)
+	for(unsigned int i = MAX_COLOR_THEMES;i--;)
 	{
-		for(int j = MAX_COLORS;j--;)
+		for(unsigned int j = MAX_COLORS;j--;)
 			colorList[i][j]=object.colorList[i][j];
-		for(int j = MAX_RESOLUTIONS;j--;)
+		for(unsigned int j = MAX_RESOLUTIONS;j--;)
 		{
-			for(int k = MAX_PENS;k--;)
+			for(unsigned int k = MAX_PENS;k--;)
 				penList[i][j][k]=object.penList[i][j][k];
-			 for(int k = MAX_BITMAPS;k--;)
+			 for(unsigned int k = MAX_BITMAPS;k--;)
 				bitmapList[i][j][k]=object.bitmapList[i][j][k];
 		}
-		for(int j = MAX_BRUSHES;j--;)
+		for(unsigned int j = MAX_BRUSHES;j--;)
 			brushList[i][j]=object.brushList[i][j];
 	}
-	for(int i = MAX_RESOLUTIONS;i--;)
-		for(int j = MAX_TABS;j--;)
-			for(int k = MAX_WINDOWS;k--;)
+	for(unsigned int i = MAX_RESOLUTIONS;i--;)
+		for(unsigned int j = MAX_TABS;j--;)
+			for(unsigned int k = MAX_WINDOWS;k--;)
 			{
 				rectList[i][j][k]=object.rectList[i][j][k];
 				maxHeightList[i][j][k]=object.maxHeightList[i][j][k];
 				xwindow[i][j][k]=object.xwindow[i][j][k];
 				ywindow[i][j][k]=object.ywindow[i][j][k];
 			}
-	for(int i=MAX_BUTTONS;i--;)
+	for(unsigned int i=MAX_BUTTONS;i--;)
 		buttonAnimationList[i]=object.buttonAnimationList[i];
 }
 
@@ -96,132 +94,132 @@ UI_Theme::UI_Theme():
 	language(GERMAN_LANGUAGE),
 	colorTheme(DARK_BLUE_THEME)
 {
-	for(int i = MAX_LANGUAGES;i--;)
-		for(int j = MAX_STRINGS;j--;)
+	for(unsigned int i = MAX_LANGUAGES;i--;)
+		for(unsigned int j = MAX_STRINGS;j--;)
 			stringList[i][j] = NULL;
-	for(int i = MAX_RESOLUTIONS;i--;)
-//		for(int j = MAX_LANGUAGES;j--;)
-			for(int k = MAX_FONTS;k--;)
+	for(unsigned int i = MAX_RESOLUTIONS;i--;)
+//		for(unsigned int j = MAX_LANGUAGES;j--;)
+			for(unsigned int k = MAX_FONTS;k--;)
 				fontList[i][k] = NULL;
-	for(int i = MAX_COLOR_THEMES;i--;)
+	for(unsigned int i = MAX_COLOR_THEMES;i--;)
 	{
-		for(int j = MAX_COLORS;j--;)
+		for(unsigned int j = MAX_COLORS;j--;)
 				colorList[i][j] = NULL;
-  		for(int j = MAX_RESOLUTIONS;j--;)
+  		for(unsigned int j = MAX_RESOLUTIONS;j--;)
 		{
-			for(int k = MAX_PENS;k--;)
+			for(unsigned int k = MAX_PENS;k--;)
 				penList[i][j][k] = NULL;
-			 for(int k = MAX_BITMAPS;k--;)
+			 for(unsigned int k = MAX_BITMAPS;k--;)
 				bitmapList[i][j][k] = NULL;
 		}
 					
-		for(int j = MAX_BRUSHES;j--;)
+		for(unsigned int j = MAX_BRUSHES;j--;)
 			brushList[i][j] = NULL;
 	}
-	for(int i = MAX_RESOLUTIONS;i--;)
-		for(int j = MAX_TABS;j--;)
-			for(int k = MAX_WINDOWS;k--;)
+	for(unsigned int i = MAX_RESOLUTIONS;i--;)
+		for(unsigned int j = MAX_TABS;j--;)
+			for(unsigned int k = MAX_WINDOWS;k--;)
 			{
   				rectList[i][j][k] = NULL;
 				maxHeightList[i][j][k]=0;
 				xwindow[i][j][k]=NULL_WINDOW;
 				ywindow[i][j][k]=NULL_WINDOW;
 			}
-	for(int i=MAX_BUTTONS;i--;)
+	for(unsigned int i=MAX_BUTTONS;i--;)
 		buttonAnimationList[i]=0;
 
 }
 
 UI_Theme::~UI_Theme()
 {
- 	for(int i = MAX_LANGUAGES;i--;)
- 		for(int j = MAX_STRINGS;j--;)
+ 	for(unsigned int i = MAX_LANGUAGES;i--;)
+ 		for(unsigned int j = MAX_STRINGS;j--;)
 			delete stringList[i][j];
-	for(int i = MAX_RESOLUTIONS;i--;)
-//		for(int j = MAX_LANGUAGES;j--;)
-			for(int k = MAX_FONTS;k--;)
+	for(unsigned int i = MAX_RESOLUTIONS;i--;)
+//		for(unsigned int j = MAX_LANGUAGES;j--;)
+			for(unsigned int k = MAX_FONTS;k--;)
 				delete fontList[i][k];
-	for(int i = MAX_COLOR_THEMES;i--;)
+	for(unsigned int i = MAX_COLOR_THEMES;i--;)
 	{
-		for(int j = MAX_COLORS;j--;)
+		for(unsigned int j = MAX_COLORS;j--;)
 			delete colorList[i][j];
-		for(int j = MAX_BRUSHES;j--;)
+		for(unsigned int j = MAX_BRUSHES;j--;)
 			delete brushList[i][j];
-		for(int j = MAX_RESOLUTIONS;j--;)
+		for(unsigned int j = MAX_RESOLUTIONS;j--;)
 		{
-			for(int k = MAX_BITMAPS;k--;)
+			for(unsigned int k = MAX_BITMAPS;k--;)
 				SDL_FreeSurface(bitmapList[i][j][k]);
-//	 		for(int k = MAX_PENS;k--;)
+//	 		for(unsigned int k = MAX_PENS;k--;)
 //				delete penList[i][j][k];
 		}
 	}
- 	for(int i = MAX_RESOLUTIONS;i--;)
-		for(int j = MAX_TABS;j--;)
-			for(int k = MAX_WINDOWS;k--;)
+ 	for(unsigned int i = MAX_RESOLUTIONS;i--;)
+		for(unsigned int j = MAX_TABS;j--;)
+			for(unsigned int k = MAX_WINDOWS;k--;)
 				delete rectList[i][j][k];
 
-	for(int i=MAX_BUTTONS;i--;)
+	for(unsigned int i=MAX_BUTTONS;i--;)
 		delete buttonAnimationList[i];
 }
 
 
 
-void findandreplace( string& source, const string& find, const string& replace )
+void findandreplace( std::string& source, const std::string& find, const std::string& replace )
 {
 	size_t j = source.find(find);source.replace(j,find.length(),replace);
 	// TODO wenn nix gefunden wird...
 }
 
-const string UI_Theme::lookUpFormattedString(const eString id, const string& text) const
+const std::string UI_Theme::lookUpFormattedString(const eString id, const std::string& text) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_STRINGS)) {
 		toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
 	}
 #endif
-	string bla=*(stringList[language][id]);
+	std::string bla=*(stringList[language][id]);
 	findandreplace(bla, "%s", text);
 	return(bla);
 }
 
-const string UI_Theme::lookUpFormattedString(const eString id, const unsigned int i) const
+const std::string UI_Theme::lookUpFormattedString(const eString id, const unsigned int i) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_STRINGS)) {
 		toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
 	}
 #endif
-	string bla=*(stringList[language][id]);
-	ostringstream os;
+	std::string bla=*(stringList[language][id]);
+	std::ostringstream os;
 	os << i; 
 	findandreplace(bla, "%i", os.str());
 	return(bla);
 }
-const string UI_Theme::lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j, const unsigned int k) const
+const std::string UI_Theme::lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j, const unsigned int k) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_STRINGS)) {
 		toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
 	}
 #endif
-	string bla=*(stringList[language][id]);
-	ostringstream os;
+	std::string bla=*(stringList[language][id]);
+	std::ostringstream os;
 	os << i;findandreplace(bla, "%i", os.str());os.str("");
 	os << j;findandreplace(bla, "%i", os.str());os.str("");
 	os << k;findandreplace(bla, "%i", os.str());
 	return(bla);
 }
 
-const string UI_Theme::lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j) const
+const std::string UI_Theme::lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_STRINGS)) {
 		toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
 	}
 #endif
-	string bla=*(stringList[language][id]);
+	std::string bla=*(stringList[language][id]);
 	std::ostringstream os;
-	if(bla.find("%2i")!=string::npos)
+	if(bla.find("%2i")!=std::string::npos)
 	{
 		os << std::setfill('0') << std::setw(2) << i;
 		findandreplace(bla, "%2i", os.str());os.str("");
@@ -231,7 +229,7 @@ const string UI_Theme::lookUpFormattedString(const eString id, const unsigned in
 		os << i;
 		findandreplace(bla, "%i", os.str());os.str("");
 	}
-	if(bla.find("%2i")!=string::npos)
+	if(bla.find("%2i")!=std::string::npos)
 	{
 		os << std::setfill('0') << std::setw(2) << j;
 		findandreplace(bla, "%2i", os.str());os.str("");
@@ -333,7 +331,7 @@ const unsigned int UI_Theme::lookUpMaxHeight(const eWindow id, const unsigned in
 	return(p.y);
 }
 
-const eDataType getDataType(const string& item)
+const eDataType getDataType(const std::string& item)
 {
 	if(item=="@STRINGS") return(STRING_DATA_TYPE);else
 	if(item=="@FONTS") return(FONT_DATA_TYPE);else
@@ -376,7 +374,7 @@ const eSubSubDataType getSubSubDataType(const eDataType mode)
 	}
 }
 
-const eLanguage getLanguageSubDataEntry(const string& item)
+const eLanguage getLanguageSubDataEntry(const std::string& item)
 {
 	if(item=="@ENGLISH") return(ENGLISH_LANGUAGE);else
 	if(item=="@GERMAN") return(GERMAN_LANGUAGE);else
@@ -394,7 +392,7 @@ const eLanguage getLanguageSubDataEntry(const string& item)
 	return(ZERO_LANGUAGE);
 }
 
-const eResolution getResolutionSubDataEntry(const string& item)
+const eResolution getResolutionSubDataEntry(const std::string& item)
 {
 	if(item=="@800x600") return(RESOLUTION_800x600);else
 	if(item=="@1024x768") return(RESOLUTION_1024x768);else
@@ -403,7 +401,7 @@ const eResolution getResolutionSubDataEntry(const string& item)
 	return(ZERO_RESOLUTION);
 }
 
-const eTheme getThemeSubDataEntry(const string& item)
+const eTheme getThemeSubDataEntry(const std::string& item)
 {
 	if(item=="@DARK_RED_THEME") return(DARK_RED_THEME);else
 	if(item=="@DARK_BLUE_THEME") return(DARK_BLUE_THEME);else
@@ -414,7 +412,7 @@ const eTheme getThemeSubDataEntry(const string& item)
 	return(ZERO_THEME);
 }
 
-const eTab getTabSubDataEntry(const string& item)
+const eTab getTabSubDataEntry(const std::string& item)
 {
 	if(item=="@BASIC_TAB") return(BASIC_TAB);else
 	if(item=="@ADVANCED_TAB") return(ADVANCED_TAB);else
@@ -428,7 +426,7 @@ const eTab getTabSubDataEntry(const string& item)
 	return(ZERO_TAB);
 }
 
-const eBrushStyle get_brush_style(const string& item)
+const eBrushStyle get_brush_style(const std::string& item)
 {
 	if(item=="SOLID") return(SOLID_BRUSH_STYLE);else
 	if(item=="BDIAGONAL_HATCH") return(BDIAGONAL_HATCH_BRUSH_STYLE);else
@@ -443,7 +441,7 @@ const eBrushStyle get_brush_style(const string& item)
 }
 
 
-const ePenStyle get_pen_style(const string& item)
+const ePenStyle get_pen_style(const std::string& item)
 {
 	if(item=="SOLID") return(SOLID_PEN_STYLE);else
 	if(item=="DOT") return(DOT_PEN_STYLE);else
@@ -453,21 +451,21 @@ const ePenStyle get_pen_style(const string& item)
 	return(TRANSPARENT_PEN_STYLE);
 }
 /*
-int get_font_style1(const string& item)
+int get_font_style1(const std::string& item)
 {
 			if(item=="decorative") return(DECORATIVE);else
 			if(item=="normal") return(DEFAULT);else
 			return(DEFAULT);
 // TODO!
 }
-int get_font_style2(const string& item)
+int get_font_style2(const std::string& item)
 {
 			if(item=="italics") return(FONTSTYLE_ITALIC);else
 			if(item=="normal") return(DEFAULT);else
 			return(DEFAULT);
 // TODO!
 }
-int get_font_style3(const string& item)
+int get_font_style3(const std::string& item)
 {
 			if(item=="bold") return(BOLD);else
 			if(item=="normal") return(DEFAULT);else
@@ -475,7 +473,7 @@ int get_font_style3(const string& item)
 // TODO!
 }*/
 
-eWindow parse_window(const string& item)
+eWindow parse_window(const std::string& item)
 {
 	if(item=="NULL window") return(NULL_WINDOW);else
 	if(item=="Main window") return(MAIN_WINDOW);else
@@ -494,10 +492,7 @@ eWindow parse_window(const string& item)
 	return(NULL_WINDOW);
 }
 
-
-
-
-eCommand parse_commands(const string& item)
+eCommand parse_commands(const std::string& item)
 {
 	if(item=="absolute coordinates") return(ABSOLUTE_COORDINATES_COMMAND);else
 	if(item=="absolute x coordinate") return(ABSOLUTE_X_COORDINATE_COMMAND);else
@@ -521,7 +516,7 @@ eCommand parse_commands(const string& item)
 }
 
 // Rueckgabewert: Richtung
-eArrangeDirection parse_complete_command(const string* p, eCommand* e, Rect& rect)
+eArrangeDirection parse_complete_command(const std::string* parameter, eCommand* e, Rect& rect)
 {
 	signed int x=-1;signed int y=-1;
 	unsigned int dx=0;unsigned int dy=0;
@@ -532,7 +527,7 @@ eArrangeDirection parse_complete_command(const string* p, eCommand* e, Rect& rec
 // additional windows: arrange left to right = 0, arrange right to left = 1, arrange top to down = 2, arrange down to top = 3 :)
 	eArrangeDirection direction=ARRANGE_LEFT_TO_RIGHT;
 	
-	for(int i = 1; i <50;i++)
+	for(unsigned int i = 1; i <50;i++)
 	{
 		if(xcomplete&&ycomplete)
 		{
@@ -544,13 +539,13 @@ eArrangeDirection parse_complete_command(const string* p, eCommand* e, Rect& rec
 		e[i]=NO_COMMAND;
 		if(window)
 		{
-			e[i]=(eCommand)parse_window(p[i]);
+			e[i]=(eCommand)parse_window(parameter[i]);
 			window=false;
 		}
 		else
 		if(xpart)
 		{
-			x=atoi(p[i].c_str());
+			x=atoi(parameter[i].c_str());
 			xpart=false;
 			if(xypart)
 			{
@@ -560,21 +555,21 @@ eArrangeDirection parse_complete_command(const string* p, eCommand* e, Rect& rec
 		} else
 		if(ypart)
 		{
-			y=atoi(p[i].c_str());
+			y=atoi(parameter[i].c_str());
 			ypart=false;
 		} else
 		if(dxpart)
 		{
-			dx=atoi(p[i].c_str());
+			dx=atoi(parameter[i].c_str());
 			dxpart=false;dypart=true;
 		} else
 		if(dypart)
 		{
-			dy=atoi(p[i].c_str());
+			dy=atoi(parameter[i].c_str());
 			dypart=false;
 		} else
 		{
-			eCommand k=parse_commands(p[i]);
+			eCommand k=parse_commands(parameter[i]);
 			switch(k)
 			{
 				case ABSOLUTE_COORDINATES_COMMAND:xpart=true;xypart=true;xcomplete=true;ycomplete=true;break;
@@ -608,16 +603,15 @@ eArrangeDirection parse_complete_command(const string* p, eCommand* e, Rect& rec
 	return(direction);
 }
 
-void UI_Theme::loadStringFile(const string& dataFile)
+void UI_Theme::loadStringFile(const std::string& dataFile)
 {
 	if((dataFile.substr(dataFile.size()-2,2) == "..") ||(dataFile.substr(dataFile.size()-1,1) == "."))
 		return;
 	const unsigned int MAX_PARAMETERS = 50;
 	char line[1024], old[1024];
 	char* buffer;
-	string p[MAX_PARAMETERS];
-	int v[MAX_PARAMETERS];
-	int ln=0;
+	std::string parameter[MAX_PARAMETERS];
+	unsigned int value[MAX_PARAMETERS];
 	eDataType mode=ZERO_DATA_TYPE;
 	eSubDataType sub_mode=ZERO_SUB_DATA_TYPE;
 	eSubSubDataType sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
@@ -627,15 +621,15 @@ void UI_Theme::loadStringFile(const string& dataFile)
 	eResolution current_resolution=ZERO_RESOLUTION;
 	eTab current_tab=ZERO_TAB;
 
-	int current_line = 0;
+	unsigned int current_line = 0;
 	
- 	for(int i=MAX_PARAMETERS;i--;)
+ 	for(unsigned int i=MAX_PARAMETERS;i--;)
 	{
-		p[i]="";
-		v[i]=0;
+		parameter[i]="";
+		value[i]=0;
 	}
 
-	ifstream pFile(dataFile.c_str());
+	std::ifstream pFile(dataFile.c_str());
 	
 	if(!pFile.is_open())
 	{
@@ -650,18 +644,17 @@ void UI_Theme::loadStringFile(const string& dataFile)
 		if(pFile.fail())
 		{
 #ifdef _SCC_DEBUG
-			toLog("WARNING: (UI_Theme::loadDataFiles) Long line!");
+			toLog("WARNING: (UI_Theme::loadStringFile) Long line!");
 #endif
-			pFile.clear(pFile.rdstate() & ~ios::failbit);
+			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
 		}
 			
-		++ln;
 		//line[strlen(line)-1]='\0';
 		if((line[0]=='#')||(line[0]=='\0')||(line=="")) continue;
-		for(int i=MAX_PARAMETERS;i--;)
+		for(unsigned int i=MAX_PARAMETERS;i--;)
 		{
-			p[i]="";
-			v[i]=0;
+			parameter[i]="";
+			value[i]=0;
 		}
 		char* line2=line;		
 		while(((*line2)==32)||((*line2)==9))
@@ -672,44 +665,38 @@ void UI_Theme::loadStringFile(const string& dataFile)
 		strcpy(old,line2);
 		
 		if((buffer=strtok(line2,",\0"))!=NULL)
-			p[0]=buffer;
+			parameter[0]=buffer;
 		unsigned int k=1;
 		
 		while(((buffer=strtok(NULL,",\0"))!=NULL)&&(k<MAX_PARAMETERS))
 		{
 			while(((*buffer)==32)||((*buffer)==9))
 				buffer++;
-			p[k]=buffer;
+			parameter[k]=buffer;
 			k++;
 		}
 		if((buffer=strtok(NULL,",\0"))!=NULL)
 		{
 #ifdef _SCC_DEBUG
-			toLog("WARNING: (UI_Theme::loadDataFiles) Too many parameters.");
+			toLog("WARNING: (UI_Theme::loadStringFile) Too many parameters.");
 #endif
 			continue;
 		}
-		for(unsigned int j=0;j<MAX_PARAMETERS;j++)
-			v[j]=atoi(p[j].c_str());
-/*		if((value1<0)||(value2<0)||(value3<0)||(value4<0)||(value5<0))
-		{
-			toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Line %d [%s]: Value below zero.",dataFile.c_str(),ln,old);
-			continue;
-		}*/
-
+		for(unsigned int j=MAX_PARAMETERS;j--;)
+			value[j]=atoi(parameter[j].c_str());
 		// mode	
 		if(mode==ZERO_DATA_TYPE)
 		{
-			mode=getDataType(p[0]);
+			mode=getDataType(parameter[0]);
 #ifdef _SCC_DEBUG
 //			if(mode!=ZERO_DATA_TYPE)
-//				toLog("Loading "+p[0]+"...");
+//				toLog("Loading "+parameter[0]+"...");
 			if(mode==ZERO_DATA_TYPE)
 			{
-				if(p[0]=="@END")
-					toLog("WARNING: (UI_Theme::loadDataFiles) Lonely @END.");
+				if(parameter[0]=="@END")
+					toLog("WARNING: (UI_Theme::loadStringFile) Lonely @END.");
 				else
-					toLog("WARNING: (UI_Theme::loadDataFiles) Line is outside a block but is not marked as comment.");
+					toLog("WARNING: (UI_Theme::loadStringFile) Line is outside a block but is not marked as comment.");
 			}
 #endif				
 			sub_mode=getSubDataType(mode);
@@ -717,7 +704,7 @@ void UI_Theme::loadStringFile(const string& dataFile)
 		}
 		else if(mode!=ZERO_DATA_TYPE)
 		{
-			if(p[0]=="@END")
+			if(parameter[0]=="@END")
 			{
 			// TODO! 
 				// @END of 1st sub area => return to begin of data type
@@ -777,7 +764,7 @@ void UI_Theme::loadStringFile(const string& dataFile)
 			{
 				switch(mode)
 				{
-					case STRING_DATA_TYPE:stringList[current_language][current_line]=new string(p[0]);
+					case STRING_DATA_TYPE:stringList[current_language][current_line]=new std::string(parameter[0]);
 					default:break;
 				}
 				current_line++;
@@ -786,22 +773,20 @@ void UI_Theme::loadStringFile(const string& dataFile)
 		} // end if mode != ZERO_DATA_TYPE
 	} // end while
 
-	for(int i = 0; i < MAX_LANGUAGES; i++)
-		for(int j = 0; j < MAX_STRINGS; j++)
+	for(unsigned int i = MAX_LANGUAGES; i--;)
+		for(unsigned int j = MAX_STRINGS; j--;)
 			if(stringList[i][j]==NULL)
-				stringList[i][j] = new string("ERROR");
+				stringList[i][j] = new std::string("ERROR");
 
 }
 
-
-void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, const string& fontDir, DC* dc)
+void UI_Theme::loadWindowData(const std::string& dataFile)
 {
 	const unsigned int MAX_PARAMETERS = 50;
 	char line[1024], old[1024];
 	char* buffer;
-	string p[MAX_PARAMETERS];
-	int v[MAX_PARAMETERS];
-	int ln=0;
+	std::string parameter[MAX_PARAMETERS];
+	unsigned int value[MAX_PARAMETERS];
 	eDataType mode=ZERO_DATA_TYPE;
 	eSubDataType sub_mode=ZERO_SUB_DATA_TYPE;
 	eSubSubDataType sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
@@ -814,29 +799,29 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 	eCommand trectList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS][MAX_PARAMETERS];
 	eCommand tmaxHeightList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS][MAX_PARAMETERS];
 
-	for(int i = MAX_RESOLUTIONS;i--;)
-		for(int j = MAX_TABS;j--;)
-			for(int k = MAX_WINDOWS;k--;) //?
-				for(int l = MAX_PARAMETERS;l--;)
+	for(unsigned int i = MAX_RESOLUTIONS;i--;)
+		for(unsigned int j = MAX_TABS;j--;)
+			for(unsigned int k = MAX_WINDOWS;k--;) //?
+				for(unsigned int l = MAX_PARAMETERS;l--;)
 				{
 					trectList[i][j][k][l]=NO_COMMAND;
 					tmaxHeightList[i][j][k][l]=NO_COMMAND;
 				}
 
-	int current_line = 0;
+	unsigned int current_line = 0;
 	
- 	for(int i=MAX_PARAMETERS;i--;)
+ 	for(unsigned int i=MAX_PARAMETERS;i--;)
 	{
-		p[i]="";
-		v[i]=0;
+		parameter[i]="";
+		value[i]=0;
 	}
 
-	ifstream pFile(dataFile.c_str());
+	std::ifstream pFile(dataFile.c_str());
 	
 	if(!pFile.is_open())
 	{
 #ifdef _SCC_DEBUG
-		toLog("ERROR: (UI_Theme::loadDataFiles) Could not open data file!");
+		toLog("ERROR: (UI_Theme::loadWindowData) Could not open data file!");
 #endif
 		return;
 	}
@@ -846,18 +831,17 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 		if(pFile.fail())
 		{
 #ifdef _SCC_DEBUG
-			toLog("WARNING: (UI_Theme::loadDataFiles) Long line!");
+			toLog("WARNING: (UI_Theme::loadWindowData) Long line!");
 #endif
-			pFile.clear(pFile.rdstate() & ~ios::failbit);
+			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
 		}
 			
-		++ln;
 		//line[strlen(line)-1]='\0';
 		if((line[0]=='#')||(line[0]=='\0')||(line=="")) continue;
-		for(int i=MAX_PARAMETERS;i--;)
+		for(unsigned int i=MAX_PARAMETERS;i--;)
 		{
-			p[i]="";
-			v[i]=0;
+			parameter[i]="";
+			value[i]=0;
 		}
 		char* line2=line;		
 		while(((*line2)==32)||((*line2)==9))
@@ -868,44 +852,38 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 		strcpy(old,line2);
 		
 		if((buffer=strtok(line2,",\0"))!=NULL)
-			p[0]=buffer;
+			parameter[0]=buffer;
 		unsigned int k=1;
 		
 		while(((buffer=strtok(NULL,",\0"))!=NULL)&&(k<MAX_PARAMETERS))
 		{
 			while(((*buffer)==32)||((*buffer)==9))
 				buffer++;
-			p[k]=buffer;
+			parameter[k]=buffer;
 			k++;
 		}
 		if((buffer=strtok(NULL,",\0"))!=NULL)
 		{
 #ifdef _SCC_DEBUG
-			toLog("WARNING: (UI_Theme::loadDataFiles) Too many parameters.");
+			toLog("WARNING: (UI_Theme::loadWindowData) Too many parameters.");
 #endif
 			continue;
 		}
-		for(unsigned int j=0;j<MAX_PARAMETERS;j++)
-			v[j]=atoi(p[j].c_str());
-/*		if((value1<0)||(value2<0)||(value3<0)||(value4<0)||(value5<0))
-		{
-			toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Line %d [%s]: Value below zero.",dataFile.c_str(),ln,old);
-			continue;
-		}*/
-
+		for(unsigned int j=MAX_PARAMETERS;j--;)
+			value[j]=atoi(parameter[j].c_str());
 		// mode	
 		if(mode==ZERO_DATA_TYPE)
 		{
-			mode=getDataType(p[0]);
+			mode=getDataType(parameter[0]);
 #ifdef _SCC_DEBUG
 //			if(mode!=ZERO_DATA_TYPE)
-//				toLog("Loading "+p[0]+"...");
+//				toLog("Loading "+parameter[0]+"...");
 			if(mode==ZERO_DATA_TYPE)
 			{
-				if(p[0]=="@END")
-					toLog("WARNING: (UI_Theme::loadDataFiles) Lonely @END.");
+				if(parameter[0]=="@END")
+					toLog("WARNING: (UI_Theme::loadWindowData) Lonely @END.");
 				else
-					toLog("WARNING: (UI_Theme::loadDataFiles) Line is outside a block but is not marked as comment.");
+					toLog("WARNING: (UI_Theme::loadWindowData) Line is outside a block but is not marked as comment.");
 			}
 #endif				
 			sub_mode=getSubDataType(mode);
@@ -913,7 +891,7 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 		}
 		else if(mode!=ZERO_DATA_TYPE)
 		{
-			if(p[0]=="@END")
+			if(parameter[0]=="@END")
 			{
 
 			
@@ -973,40 +951,11 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 			// => hat nur 1 Ebene => Position festgestellt!
 			else if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE))
 			{
-				switch(mode)
-				{
-					case STRING_DATA_TYPE:stringList[current_language][current_line]=new string(p[0]);
-					//toLog(p[0]);
-					break;
-					case COLOR_DATA_TYPE:
-										  colorList[current_theme][current_line]=new Color(dc->GetSurface(),(Uint8)v[0],(Uint8)v[1],(Uint8)v[2]);break;
-					case BRUSH_DATA_TYPE:brushList[current_theme][current_line]=new Brush(dc->GetSurface(),(Uint8)v[0],(Uint8)v[1],(Uint8)v[2],get_brush_style(p[3]));break;
-					case FONT_DATA_TYPE:
-					{
-						string t=fontDir+p[0]+".ttf";
-						fontList[current_resolution]/*[current_language]*/[current_line]=new Font(t, v[1]/*, get_font_style1(p[2]), get_font_style2(p[3]), get_font_style3(p[4]), false, _T(""), FONTENCODING_DEFAULT*/);
-					}break;				
-					default:break;
-				}
 				current_line++;
 			}
 			// 0 ebenen -> buttons :) BUTTON_DATA_TYPE?? TODO
 			else if((sub_mode==ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE))
 			{
-				buttonAnimationList[current_line] = new ButtonAnimation;
-				buttonAnimationList[current_line]->speed=v[0];
-				buttonAnimationList[current_line]->type=(eButtonAnimationType)v[1];
-				for(int i=0;i<MAX_BUTTON_ANIMATION_PHASES;i++)
-				{
-					buttonAnimationList[current_line]->startBrush[i]=(eBrush)(v[0*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonAnimationList[current_line]->endBrush[i]=(eBrush)(v[1*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonAnimationList[current_line]->startTextColor[i]=(eColor)(v[2*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonAnimationList[current_line]->endTextColor[i]=(eColor)(v[3*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonAnimationList[current_line]->startBorderPen[i]=(ePen)(v[4*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonAnimationList[current_line]->endBorderPen[i]=(ePen)(v[5*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonAnimationList[current_line]->bitmap[i]=(eBitmap)(v[6*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-//					buttonAnimationList[current_line]->text[i]=(eString)(v[7*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-				}
 				current_line++;				
 			}
 			// => es gibt noch eine 2. Ebene
@@ -1026,36 +975,19 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 			{
 				switch(mode)
 				{
-					case BITMAP_DATA_TYPE:
-						{
-							string name = bitmapDir+p[0]+".bmp";
-							SDL_Surface* temp = SDL_LoadBMP(name.c_str());
-							if(temp == NULL)
-							{
-								toLog("Could not load Bitmap " + name);
-								SDL_FreeSurface(temp);
-								bitmapList[current_resolution][current_theme][current_line] = NULL;
-							}
-							else 
-								bitmapList[current_resolution][current_theme][current_line] = temp;
-							
-//							SDL_SetColorKey(bitmapList[current_resolution][current_theme][current_line]->getSurface(), SDL_SRCCOLORKEY , SDL_MapRGB(bitmapList[current_resolution][current_theme][current_line]->getFormat(), 0,0,0));
-		
-						}break;
-					case PEN_DATA_TYPE:penList[current_resolution][current_theme][current_line]=new Pen(dc->GetSurface(),v[1],v[2],v[3],v[0],get_pen_style(p[4]));break;
 					case RECT_DATA_TYPE:
 						{
-							rectList[current_resolution][current_tab][parse_window(p[0])]=new Rect();
-							arrangeDirection[current_resolution][current_tab][parse_window(p[0])]=parse_complete_command(p, &(trectList[current_resolution][current_tab][parse_window(p[0])][0]), *(rectList[current_resolution][current_tab][parse_window(p[0])]));
-							/*ostringstream os;
-							os << rectList[current_resolution][current_tab][parse_window(p[0])]->GetLeft() << ":"
-							 << rectList[current_resolution][current_tab][parse_window(p[0])]->GetTop() << ":"
-							  << rectList[current_resolution][current_tab][parse_window(p[0])]->GetWidth() << ":"
-							   << rectList[current_resolution][current_tab][parse_window(p[0])]->GetHeight();
+							rectList[current_resolution][current_tab][parse_window(parameter[0])]=new Rect();
+							arrangeDirection[current_resolution][current_tab][parse_window(parameter[0])]=parse_complete_command(parameter, &(trectList[current_resolution][current_tab][parse_window(parameter[0])][0]), *(rectList[current_resolution][current_tab][parse_window(parameter[0])]));
+							/*std::ostringstream os;
+							os << rectList[current_resolution][current_tab][parse_window(parameter[0])]->GetLeft() << ":"
+							 << rectList[current_resolution][current_tab][parse_window(parameter[0])]->GetTop() << ":"
+							  << rectList[current_resolution][current_tab][parse_window(parameter[0])]->GetWidth() << ":"
+							   << rectList[current_resolution][current_tab][parse_window(parameter[0])]->GetHeight();
 							toLog(os.str());*/
 						}break;
 					case MAX_HEIGHT_DATA_TYPE:
-							tmaxHeightList[current_resolution][current_tab][parse_window(p[0])][0] = parse_commands(p[1]);
+							tmaxHeightList[current_resolution][current_tab][parse_window(parameter[0])][0] = parse_commands(parameter[1]);
 						break;					
 					default:break;
 				}
@@ -1068,9 +1000,9 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 	while(change)
 	{	
 		change=0;
-		for(int i=0;i<MAX_RESOLUTIONS;i++)
-			for(int j=0;j<MAX_TABS;j++)
-				for(int k=0;k<MAX_WINDOWS;k++)
+		for(unsigned int i=MAX_RESOLUTIONS;i--;)
+			for(unsigned int j=MAX_TABS;j--;)
+				for(unsigned int k=0;k<MAX_WINDOWS;k++)
 					if(rectList[i][j][k])
 					{
 					int oldx=rectList[i][j][k]->GetLeft();
@@ -1148,9 +1080,9 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 				}
 }
 
-	for(int i=0;i<MAX_RESOLUTIONS;i++)
-		for(int j=0;j<MAX_TABS;j++)
-			for(int k=0;k<MAX_WINDOWS;k++)
+	for(unsigned int i=MAX_RESOLUTIONS;i--;)
+		for(unsigned int j=MAX_TABS;j--;)
+			for(unsigned int k=0;k<MAX_WINDOWS;k++)
 			{
 				for(unsigned int l = 0; l < MAX_PARAMETERS; l++)
 					switch(tmaxHeightList[i][j][k][l])
@@ -1182,11 +1114,258 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 						break;
 					}
 			}
+}
 
-	for(int i = 0; i < MAX_LANGUAGES; i++)
-		for(int j = 0; j < MAX_STRINGS; j++)
-			if(stringList[i][j]==NULL)
-				stringList[i][j] = new string("ERROR");
+
+
+
+void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& bitmapDir, const std::string& fontDir, DC* dc)
+{
+	const unsigned int MAX_PARAMETERS = 50;
+	char line[1024], old[1024];
+	char* buffer;
+	std::string parameter[MAX_PARAMETERS];
+	unsigned int value[MAX_PARAMETERS];
+	eDataType mode=ZERO_DATA_TYPE;
+	eSubDataType sub_mode=ZERO_SUB_DATA_TYPE;
+	eSubSubDataType sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
+
+	eLanguage current_language=ZERO_LANGUAGE;
+	eTheme current_theme=ZERO_THEME;
+	eResolution current_resolution=ZERO_RESOLUTION;
+	eTab current_tab=ZERO_TAB;
+
+	eCommand trectList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS][MAX_PARAMETERS];
+	eCommand tmaxHeightList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS][MAX_PARAMETERS];
+
+	for(unsigned int i = MAX_RESOLUTIONS;i--;)
+		for(unsigned int j = MAX_TABS;j--;)
+			for(unsigned int k = MAX_WINDOWS;k--;) //?
+				for(unsigned int l = MAX_PARAMETERS;l--;)
+				{
+					trectList[i][j][k][l]=NO_COMMAND;
+					tmaxHeightList[i][j][k][l]=NO_COMMAND;
+				}
+
+	unsigned int current_line = 0;
+	
+ 	for(unsigned int i=MAX_PARAMETERS;i--;)
+	{
+		parameter[i]="";
+		value[i]=0;
+	}
+
+	std::ifstream pFile(dataFile.c_str());
+	
+	if(!pFile.is_open())
+	{
+#ifdef _SCC_DEBUG
+		toLog("ERROR: (UI_Theme::loadGraphicData) Could not open data file!");
+#endif
+		return;
+	}
+	
+	while(pFile.getline(line,1024))
+	{
+		if(pFile.fail())
+		{
+#ifdef _SCC_DEBUG
+			toLog("WARNING: (UI_Theme::loadGraphicData) Long line!");
+#endif
+			pFile.clear(pFile.rdstate() & ~std::ios::failbit);
+		}
+			
+		//line[strlen(line)-1]='\0';
+		if((line[0]=='#')||(line[0]=='\0')||(line=="")) continue;
+		for(unsigned int i=MAX_PARAMETERS;i--;)
+		{
+			parameter[i]="";
+			value[i]=0;
+		}
+		char* line2=line;		
+		while(((*line2)==32)||((*line2)==9))
+			line2++;
+		if((*line2)=='\0')
+			continue;
+		
+		strcpy(old,line2);
+		
+		if((buffer=strtok(line2,",\0"))!=NULL)
+			parameter[0]=buffer;
+		unsigned int k=1;
+		
+		while(((buffer=strtok(NULL,",\0"))!=NULL)&&(k<MAX_PARAMETERS))
+		{
+			while(((*buffer)==32)||((*buffer)==9))
+				buffer++;
+			parameter[k]=buffer;
+			k++;
+		}
+		if((buffer=strtok(NULL,",\0"))!=NULL)
+		{
+#ifdef _SCC_DEBUG
+			toLog("WARNING: (UI_Theme::loadGraphicData) Too many parameters.");
+#endif
+			continue;
+		}
+		for(unsigned int j=MAX_PARAMETERS;j--;)
+			value[j]=atoi(parameter[j].c_str());
+		// mode	
+		if(mode==ZERO_DATA_TYPE)
+		{
+			mode=getDataType(parameter[0]);
+#ifdef _SCC_DEBUG
+//			if(mode!=ZERO_DATA_TYPE)
+//				toLog("Loading "+parameter[0]+"...");
+			if(mode==ZERO_DATA_TYPE)
+			{
+				if(parameter[0]=="@END")
+					toLog("WARNING: (UI_Theme::loadGraphicData) Lonely @END.");
+				else
+					toLog("WARNING: (UI_Theme::loadGraphicData) Line is outside a block but is not marked as comment.");
+			}
+#endif				
+			sub_mode=getSubDataType(mode);
+			sub_sub_mode=getSubSubDataType(mode);
+		}
+		else if(mode!=ZERO_DATA_TYPE)
+		{
+			if(parameter[0]=="@END")
+			{
+
+			
+			// TODO! 
+				// @END of 1st sub area => return to begin of data type
+
+// - deepness |1|: end of SUB-MODE
+				if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE)&&
+				  ((current_language!=ZERO_LANGUAGE)||(current_resolution!=ZERO_RESOLUTION)||(current_theme!=ZERO_THEME)))
+				{
+					current_language=ZERO_LANGUAGE;
+					current_resolution=ZERO_RESOLUTION;
+					current_theme=ZERO_THEME;
+					current_line=0;
+				}
+				// @END of 2nd sub area => return to begin of sub data type
+				else 
+				if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
+// - deepness |2|: end of SUB-SUB-MODE
+				((current_tab!=ZERO_TAB)||(current_language!=ZERO_LANGUAGE)||(current_theme!=ZERO_THEME)))
+				{
+					current_tab=ZERO_TAB;
+					current_language=ZERO_LANGUAGE;
+					current_theme=ZERO_THEME;
+					current_line=0;
+				}
+				// @END  of 1st sub area (with an existing sub sub area...)
+// - deepness |2|: end of SUB-MODE
+				else if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
+// sub-sub-items already closed -> close sub-item
+						(current_resolution!=ZERO_RESOLUTION)&&(current_tab==ZERO_TAB)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
+				{
+					current_resolution=ZERO_RESOLUTION;
+					current_line=0;
+				}
+				// @END of 0 area => reset mode
+				else
+				{
+					mode=ZERO_DATA_TYPE;
+					sub_mode=ZERO_SUB_DATA_TYPE;
+					sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
+					current_line=0;
+				}
+			}
+			else
+			if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(current_language==ZERO_LANGUAGE)&&(current_resolution==ZERO_RESOLUTION)&&(current_theme==ZERO_THEME))
+			{
+				switch(sub_mode)
+				{
+					case LANGUAGE_SUB_DATA_TYPE:current_language=getLanguageSubDataEntry(line2);break;
+					case RESOLUTION_SUB_DATA_TYPE:current_resolution=getResolutionSubDataEntry(line2);break;
+					case COLOR_THEME_SUB_DATA_TYPE:current_theme=getThemeSubDataEntry(line2);break;
+					default:break;
+				}
+				current_line=0;
+			}
+			// => hat nur 1 Ebene => Position festgestellt!
+			else if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE))
+			{
+				switch(mode)
+				{
+					case STRING_DATA_TYPE:stringList[current_language][current_line]=new std::string(parameter[0]);
+					//toLog(parameter[0]);
+					break;
+					case COLOR_DATA_TYPE:
+										  colorList[current_theme][current_line]=new Color(dc->GetSurface(),(Uint8)value[0],(Uint8)value[1],(Uint8)value[2]);break;
+					case BRUSH_DATA_TYPE:brushList[current_theme][current_line]=new Brush(dc->GetSurface(),(Uint8)value[0],(Uint8)value[1],(Uint8)value[2],get_brush_style(parameter[3]));break;
+					case FONT_DATA_TYPE:
+					{
+						std::string t=fontDir+parameter[0]+".ttf";
+						fontList[current_resolution]/*[current_language]*/[current_line]=new Font(t, value[1]/*, get_font_style1(parameter[2]), get_font_style2(parameter[3]), get_font_style3(parameter[4]), false, _T(""), FONTENCODING_DEFAULT*/);
+					}break;				
+					default:break;
+				}
+				current_line++;
+			}
+			// 0 ebenen -> buttons :) BUTTON_DATA_TYPE?? TODO
+			else if((sub_mode==ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE))
+			{
+				buttonAnimationList[current_line] = new ButtonAnimation;
+				buttonAnimationList[current_line]->speed=value[0];
+				buttonAnimationList[current_line]->type=(eButtonAnimationType)value[1];
+				for(unsigned int i=MAX_BUTTON_ANIMATION_PHASES;i--;)
+				{
+					buttonAnimationList[current_line]->startBrush[i]=(eBrush)(value[0*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonAnimationList[current_line]->endBrush[i]=(eBrush)(value[1*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonAnimationList[current_line]->startTextColor[i]=(eColor)(value[2*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonAnimationList[current_line]->endTextColor[i]=(eColor)(value[3*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonAnimationList[current_line]->startBorderPen[i]=(ePen)(value[4*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonAnimationList[current_line]->endBorderPen[i]=(ePen)(value[5*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonAnimationList[current_line]->bitmap[i]=(eBitmap)(value[6*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+//					buttonAnimationList[current_line]->text[i]=(eString)(value[7*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+				}
+				current_line++;				
+			}
+			// => es gibt noch eine 2. Ebene
+			else if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&(current_language==ZERO_LANGUAGE)&&(current_tab==ZERO_TAB)&&(current_theme==ZERO_THEME))
+			{
+				switch(sub_sub_mode)
+				{
+					case LANGUAGE_SUB_SUB_DATA_TYPE:current_language=getLanguageSubDataEntry(line2);break;
+					case COLOR_THEME_SUB_SUB_DATA_TYPE:current_theme=getThemeSubDataEntry(line2);break;
+					case TAB_SUB_SUB_DATA_TYPE:current_tab=getTabSubDataEntry(line2);break;
+					default:break;
+				}			
+ 				current_line=0;				
+			}
+			// => hat 2 Ebenen => Position festgestellt!
+			else
+			{
+				switch(mode)
+				{
+					case BITMAP_DATA_TYPE:
+						{
+							std::string name = bitmapDir+parameter[0]+".bmp";
+							SDL_Surface* temp = SDL_LoadBMP(name.c_str());
+							if(temp == NULL)
+							{
+								toLog("Could not load Bitmap " + name);
+								SDL_FreeSurface(temp);
+								bitmapList[current_resolution][current_theme][current_line] = NULL;
+							}
+							else 
+								bitmapList[current_resolution][current_theme][current_line] = temp;
+							
+//							SDL_SetColorKey(bitmapList[current_resolution][current_theme][current_line]->getSurface(), SDL_SRCCOLORKEY , SDL_MapRGB(bitmapList[current_resolution][current_theme][current_line]->getFormat(), 0,0,0));
+		
+						}break;
+					case PEN_DATA_TYPE:penList[current_resolution][current_theme][current_line]=new Pen(dc->GetSurface(),value[1],value[2],value[3],value[0],get_pen_style(parameter[4]));break;
+					default:break;
+				}
+				current_line++;
+			}
+		} // end if mode != ZERO_DATA_TYPE
+	} // end while
 
 }
 

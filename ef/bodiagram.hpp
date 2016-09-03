@@ -2,13 +2,13 @@
 #define _GUI_BODIAGRAM_HPP
 
 #include "../ui/window.hpp"
-#include "../core/settings.hpp"
-#include "info.hpp"
+#include "../core/database.hpp"
+#include "../core/anabuildorder.hpp"
 
 class BoDiagramWindow : public UI_Window 
 {
 	public:
-		BoDiagramWindow(UI_Object * bod_parent, ANARACE * bod_anarace, InfoWindow * bod_info_window, const unsigned int bod_window_number);
+		BoDiagramWindow(UI_Object* bod_parent, const unsigned int bod_window_number);
 		BoDiagramWindow(const BoDiagramWindow& object);
 		BoDiagramWindow& operator=(const BoDiagramWindow& object);
 		~BoDiagramWindow();
@@ -18,11 +18,10 @@ class BoDiagramWindow : public UI_Window
 		void processList();
 		void draw(DC * dc) const;
 
-		void assignAnarace(ANARACE* bod_anarace);
+		void assignAnarace(ANABUILDORDER* bod_anarace);
 
 	private:
-		ANARACE* anarace;
-		InfoWindow* infoWindow;
+		ANABUILDORDER* anarace;
 
 		unsigned int count;
 		bool bold;

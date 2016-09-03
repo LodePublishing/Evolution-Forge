@@ -1,6 +1,6 @@
-#include "anarace.hpp"
+#include "anabuildorder.hpp"
 
-/* ANARACE.CPP - last changed: 6/23/04							  *
+/* ANABUILDORDER.CPP - last changed: 6/23/04							  *
  * Author: Clemens Lode											 *
  * Copyright: Clemens Lode										  *
  *																  *
@@ -11,15 +11,15 @@
 		preformatted/precalculated -> statistics.					*/
 
 
-void ANARACE::resetStaticData()
+void ANABUILDORDER::resetStaticData()
 {
 	successType = 0;
 	successUnit = 0;
 }
 
 // TODO: reimplement/recheck the speed of the units
-ANARACE::ANARACE():
-	PRERACE(),
+ANABUILDORDER::ANABUILDORDER():
+	PREBUILDORDER(),
 	fitnessAverage(0),
 	fitnessVariance(0),
 	positiveCrossover(0),
@@ -28,11 +28,7 @@ ANARACE::ANARACE():
 	unitsTotal(4),
 	unitsTotalMax(4),
 	nonGoalsUnitsTotalMax(4),
-	unchangedGenerations(0),
-	currentRun(0),
-	optimizing(false),
 	active(true),
-	totalGeneration(0),
 	maxpFitness(0),
 	maxsFitness(0),
 	maxtFitness(MAX_TFITNESS),
@@ -41,21 +37,17 @@ ANARACE::ANARACE():
 	currentpFitness(0),
 	averageLength(0)
 {
-	for(int i = MAX_TIME;i--;)
+	for(unsigned int i = MAX_TIME;i--;)
 		timeStatistics[i].resetData();
 }
 
-void ANARACE::resetData()
+void ANABUILDORDER::resetData()
 {
-	PRERACE::resetPrerace();
+	PREBUILDORDER::resetPrerace();
 	unitsTotal = 4;
 	unitsTotalMax = 4;
 	nonGoalsUnitsTotalMax = 4;
-	unchangedGenerations = 0;
-	currentRun = 0;
-	optimizing = false;
 	active = true;
-	totalGeneration = 0;
 	maxpFitness = 0;
 	maxsFitness = 0;
 	maxtFitness = MAX_TFITNESS;
@@ -68,15 +60,15 @@ void ANARACE::resetData()
 	positiveCrossover = 0;
 	wayneCrossover = 0;
 	negativeCrossover = 0;
-	for(int i = MAX_TIME;i--;)
+	for(unsigned int i = MAX_TIME;i--;)
 		timeStatistics[i].resetData();
 }
 
-ANARACE::~ANARACE()
+ANABUILDORDER::~ANABUILDORDER()
 { }
 
-ANARACE::ANARACE(const ANARACE& object) :
-	PRERACE((PRERACE)object),
+ANABUILDORDER::ANABUILDORDER(const ANABUILDORDER& object) :
+	PREBUILDORDER((PREBUILDORDER)object),
 	fitnessAverage( object.fitnessAverage ),
 	fitnessVariance( object.fitnessVariance ),
 	positiveCrossover( object.positiveCrossover ),
@@ -85,11 +77,7 @@ ANARACE::ANARACE(const ANARACE& object) :
 	unitsTotal( object.unitsTotal ),
 	unitsTotalMax( object.unitsTotalMax ),
 	nonGoalsUnitsTotalMax( object.nonGoalsUnitsTotalMax ),
-	unchangedGenerations( object.unchangedGenerations ),
-	currentRun( object.currentRun ),
-	optimizing( object.optimizing ),
 	active( object.active ),
-	totalGeneration( object.totalGeneration ),
 	maxpFitness( object.maxpFitness ),
 	maxsFitness( object.maxsFitness ),
 	maxtFitness( object.maxtFitness ),
@@ -101,9 +89,9 @@ ANARACE::ANARACE(const ANARACE& object) :
 	memcpy(timeStatistics, object.timeStatistics, MAX_TIME * sizeof(STATISTICS));
 }
 
-ANARACE& ANARACE::operator=(const ANARACE& object)
+ANABUILDORDER& ANABUILDORDER::operator=(const ANABUILDORDER& object)
 {
-	(PRERACE)(*this) = (PRERACE)object;
+	(PREBUILDORDER)(*this) = (PREBUILDORDER)object;
 	fitnessAverage = object.fitnessAverage;
 	fitnessVariance = object.fitnessVariance;
 	positiveCrossover = object.positiveCrossover;
@@ -112,11 +100,7 @@ ANARACE& ANARACE::operator=(const ANARACE& object)
 	unitsTotal = object.unitsTotal;
 	unitsTotalMax = object.unitsTotalMax;
 	nonGoalsUnitsTotalMax = object.nonGoalsUnitsTotalMax;
-	unchangedGenerations = object.unchangedGenerations;
-	currentRun = object.currentRun;
-	optimizing = object.optimizing;
 	active = object.active;
-	totalGeneration = object.totalGeneration;
 	maxpFitness = object.maxpFitness;
 	maxsFitness = object.maxsFitness;
 	maxtFitness = object.maxtFitness;
@@ -131,13 +115,11 @@ ANARACE& ANARACE::operator=(const ANARACE& object)
 
 
 
-void ANARACE::restartData()
+void ANABUILDORDER::restartData()
 {
 	resetSpecial();
-	setTotalGeneration(0);
 	setMaxpFitness(0);
 	setMaxsFitness(0);
-	setUnchangedGenerations(0);
 	unitsTotal = 1; // ~4 ?
 	unitsTotalMax = 1;
 	nonGoalsUnitsTotalMax = 1;
@@ -149,9 +131,9 @@ void ANARACE::restartData()
 
 
 // Reset all ongoing data (between two runs)
-void ANARACE::prepareForNewGeneration() // resets all data to standard starting values
+void ANABUILDORDER::prepareForNewGeneration() // resets all data to standard starting values
 {
-	PRERACE::prepareForNewGeneration();
+	PREBUILDORDER::prepareForNewGeneration();
 	setCurrentpFitness(0);
 
 	memset(timeStatistics, 0, MAX_TIME * sizeof(STATISTICS));
@@ -165,7 +147,7 @@ void ANARACE::prepareForNewGeneration() // resets all data to standard starting 
 // ------ CORE OF THE CORE FUNCTIONS ------
 // ----------------------------------------
 
-const bool ANARACE::calculateStep()
+const bool ANABUILDORDER::calculateStep()
 {
 //ZERG: CREEP!
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
@@ -174,18 +156,18 @@ const bool ANARACE::calculateStep()
 
 	if((!getTimer())||(ready=calculateReady())||(!getIP()))
 	{
-		setLength(configuration.getMaxLength()-getIP());
+		setLength(coreConfiguration.getMaxLength()-getIP());
 		if(!ready) 
 			setTimer(0);
 		while(!buildingQueue.empty())
 			buildingQueue.pop();
 
-	//	if(getpGoal()->getMode()==0)
+	//	if(getGoal()->getMode()==0)
 			setCurrentpFitness(calculatePrimaryFitness(ready));
 		
-// ------ ANARACE SPECIFIC ------
+// ------ ANABUILDORDER SPECIFIC ------
 		countUnitsTotal();
-		unsigned int maxPoints=getpGoal()->countGoals();
+		unsigned int maxPoints=getGoal()->countGoals();
 		if(maxPoints>0)
 			goalPercentage = 100 * currentpFitness / maxPoints;
 		else goalPercentage = 0;
@@ -196,7 +178,7 @@ const bool ANARACE::calculateStep()
 //		setTimeStatisticsHaveGas(getTimer(), getGas());
 //		setTimeStatisticsFitness(getTimer(), calculatePrimaryFitness(ready)); // ~~
 
-// ------ END ANARACE SPECIFIC ------
+// ------ END ANABUILDORDER SPECIFIC ------
 
 		return(true);
 	}
@@ -204,11 +186,11 @@ const bool ANARACE::calculateStep()
 	bool ok=true;
 	while((ok)&&(getIP()))
 	{
-		unsigned int code = getpGoal()->toPhaeno(getCurrentCode());
+		unsigned int code = getGoal()->toPhaeno(getCurrentCode());
 		if((code >= BUILD_PARALLEL_2) && (code <= BUILD_PARALLEL_16))
                 {
                         setIP(getIP()-1);
-                        while((getpGoal()->toPhaeno(getCurrentCode()) > GAS_SCV)&&(getIP()))
+                        while((getGoal()->toPhaeno(getCurrentCode()) > GAS_SCV)&&(getIP()))
                                 setIP(getIP()-1);
                         PARALLEL_COMMAND* pcommand = new PARALLEL_COMMAND;
                         switch(code)
@@ -219,7 +201,7 @@ const bool ANARACE::calculateStep()
                                 case BUILD_PARALLEL_16:pcommand->count = 16;break;
                                 default:break; // ~~
                         }
-                        pcommand->unit = getpGoal()->toPhaeno(getCurrentCode());
+                        pcommand->unit = getGoal()->toPhaeno(getCurrentCode());
 			
                         if(getIP()) 
 				setIP(getIP()-1);
@@ -231,14 +213,14 @@ const bool ANARACE::calculateStep()
 			neededMinerals = MAX_MINERALS;
 			neededGas = MAX_GAS;
 			
-			ok = buildGene(getpGoal()->toPhaeno(getCurrentCode()));
+			ok = buildGene(getGoal()->toPhaeno(getCurrentCode()));
 
 //TODO PROBLEM: wenn Einheit gebaut wurde (also in die build list incl. IP eingefuegt wurde) aber gleichzeitig ein timeout war, wird die Einheit als TIMEOUT markiert aber trotzdem gebaut
 // Problemloesung: Ueberpruefen, dass utnen auch wirklich das Mininimum gewaehlt fuer t gewaehlt wird! 
 
 			if((ok) || (!getTimeOut())) 
 			{
-				setTimeOut(configuration.getMaxTimeOut());
+				setTimeOut(coreConfiguration.getMaxTimeOut());
 				setIP(getIP()-1);
 			}
 // Try parallel commands
@@ -246,7 +228,7 @@ const bool ANARACE::calculateStep()
        	                std::list<PARALLEL_COMMAND*>::iterator command = parallelCommandQueues.begin(); 
                	        while(command != parallelCommandQueues.end())
                        	{
-				unsigned int unit = (*command)->unit;
+				unsigned int build_unit = (*command)->unit;
                                	ok = buildGene((*command)->unit);
                                 if(ok)  
       	                        {
@@ -260,7 +242,7 @@ const bool ANARACE::calculateStep()
 				{
 					do
 						command++;
-					while((command!=parallelCommandQueues.end())&&((*command)->unit == unit));
+					while((command!=parallelCommandQueues.end())&&((*command)->unit == build_unit));
 				}
                 	}
 		}
@@ -326,15 +308,15 @@ const bool ANARACE::calculateStep()
 				adjustMineralHarvest(build.getLocation());
 				adjustGasHarvest(build.getLocation());
 			} else 
-// RACE SPECIFIC!
-			if((build.getType() == LARVA) && (getpGoal()->getRace() == ZERG)) {
+// BUILDORDER SPECIFIC!
+			if((build.getType() == LARVA) && (getGoal()->getRace() == ZERG)) {
 				removeLarvaFromQueue(build.getLocation());
 			}
 // ------ END SPECIAL RULES ------
 
 			
 // ------ CHECK WHETHER WE ARE READY ------
-			getpGoal()->calculateFinalTimes(build.getLocation(), build.getType(), getLocationTotal(build.getLocation(), build.getType()), getRealTimer());
+			getGoal()->calculateFinalTimes(build.getLocation(), build.getType(), getLocationTotal(build.getLocation(), build.getType()), getRealTimer());
 			ready = calculateReady();
 // ------ END CHECK ------
 
@@ -380,7 +362,7 @@ const bool ANARACE::calculateStep()
 
 // falschen Standort ueber distances abrechnen! (100-distance oder so... je nach dem wieviele am falschen Ort sind!)
 
-const bool ANARACE::buildGene(const unsigned int build_unit)
+const bool ANABUILDORDER::buildGene(const unsigned int build_unit)
 {
 	const UNIT_STATISTICS* stat = &((*pStats)[build_unit]);
 	bool ok = false;
@@ -569,7 +551,7 @@ const bool ANARACE::buildGene(const unsigned int build_unit)
 	return(ok);
 }
 
-const bool ANARACE::buildIt(const unsigned int build_unit)
+const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 {
 	//Zuerst: availible pruefen ob am Ort gebaut werden kann
 	//Wenn nicht => +/- absteigen bis alle locations durch sind
@@ -664,7 +646,7 @@ const bool ANARACE::buildIt(const unsigned int build_unit)
 //	  Phagen ueber Phagen...
 	if(ok)
 	{ 
- 		if((getpGoal()->getRace()==ZERG) &&
+ 		if((getGoal()->getRace()==ZERG) &&
 //		  ((*pStats)[build_unit].facility[0]==LARVA)&&
 			(build_unit!=LARVA) &&
 		// Larva wird benoetigt zum Bau? Fein, dann bauen wir eine neue Larva falls nicht schon alle hatcheries etc. belegt sidn
@@ -751,7 +733,7 @@ const bool ANARACE::buildIt(const unsigned int build_unit)
 // -------------------------------
 
 /*
-void ANARACE::removeOrder(const unsigned int ip)
+void ANABUILDORDER::removeOrder(const unsigned int ip)
 {
 		for(int j=IP;j--;)
 		{
@@ -763,7 +745,7 @@ void ANARACE::removeOrder(const unsigned int ip)
 };
 
 
-void ANARACE::insertOrder(int unit, int position)
+void ANABUILDORDER::insertOrder(int unit, int position)
 {
 	int l=0;
 	int i;
@@ -781,21 +763,21 @@ void ANARACE::insertOrder(int unit, int position)
 		program[j].built=program[j+1].built;
 	}
 	
-	if(getpGoal()->allGoal[unit]==0)
+	if(getGoal()->allGoal[unit]==0)
 	{
-		getpGoal()->addGoal(unit,1,0,0);
+		getGoal()->addGoal(unit,1,0,0);
 		(*pStartCondition)->changeAccepted();
 	}
-	replaceCode(i,getpGoal()->toGeno(unit));
+	replaceCode(i,getGoal()->toGeno(unit));
 	
 	program[i].built=1;
 
 	for(int j=0;j<MAX_LENGTH;j++)
-		phaenoCode[j]=getpGoal()->toPhaeno(Code[j]); 
+		phaenoCode[j]=getGoal()->toPhaeno(Code[j]); 
 	(*pStartCondition)->wasChanged(); // to allow update of time etc. of anarace
 }
 */
-//void ANARACE::backupMap()
+//void ANABUILDORDER::backupMap()
 //{
 /*	for(int i=0;i<pMap->getMaxPlayer()-1;i++)
 		for(int j=0;j<MAX_LOCATIONS;j++)
@@ -807,7 +789,7 @@ void ANARACE::insertOrder(int unit, int position)
 //	return(1);
 //}
 
-//void ANARACE::restoreMap()
+//void ANABUILDORDER::restoreMap()
 //{
 /*	for(int i=0;i<pMap->getMaxPlayer()-1;i++)
 		for(int j=0;j<MAX_LOCATIONS;j++)
@@ -826,7 +808,7 @@ void ANARACE::insertOrder(int unit, int position)
 // ------ MISC FUNCTIONS ------
 // ----------------------------
 
-void ANARACE::countUnitsTotal()
+void ANABUILDORDER::countUnitsTotal()
 {
 	unitsTotal = 0;
 	unitsTotalMax = 1;
@@ -835,10 +817,10 @@ void ANARACE::countUnitsTotal()
 	{
 		if (getLocationTotal(GLOBAL, i) > unitsTotalMax)
 			unitsTotalMax = getLocationTotal(GLOBAL, i);
-		if (getpGoal()->getAllGoal(i) > unitsTotalMax)
-			unitsTotalMax = getpGoal()->getAllGoal(i);
+		if (getGoal()->getAllGoal(i) > unitsTotalMax)
+			unitsTotalMax = getGoal()->getAllGoal(i);
 		unitsTotal += getLocationTotal(GLOBAL, i);
-		if ((getpGoal()->getAllGoal(i) == 0) && (getLocationTotal(GLOBAL, i) > nonGoalsUnitsTotalMax))
+		if ((getGoal()->getAllGoal(i) == 0) && (getLocationTotal(GLOBAL, i) > nonGoalsUnitsTotalMax))
 			nonGoalsUnitsTotalMax = getLocationTotal(GLOBAL, i);
 	}
 }
@@ -847,13 +829,13 @@ void ANARACE::countUnitsTotal()
 // ------ END OF MISC FUNCTIONS ------
 // -----------------------------------
 
-const unsigned int ANARACE::getGoalPercentage() const
+const unsigned int ANABUILDORDER::getGoalPercentage() const
 {
 	if(getTimer()==0)
 		return(goalPercentage);
 	else 
 	{
-		unsigned int optimalTime = getpGoal()->calculateFastestBO((*pStartCondition)->getUnit(GLOBAL));
+		unsigned int optimalTime = getGoal()->calculateFastestBO((*pStartCondition)->getUnit(GLOBAL));
 //		return(optimalTime);
 		if(/*(optimalTime==0)||*/(getRealTimer()==0))
 			return(100);
@@ -864,7 +846,7 @@ const unsigned int ANARACE::getGoalPercentage() const
 
 
 
-/*void ANARACE::analyzeBuildOrder()
+/*void ANABUILDORDER::analyzeBuildOrder()
 {
 //keeps track of the '@' symbol on the left of each build order entry
 //if the goal is set to 10 marines, the eleventh won't be marked as a 'fulfilled goal' with a '@'
@@ -875,7 +857,7 @@ const unsigned int ANARACE::getGoalPercentage() const
 	{
 		tGoal[i]=0;
 		for(int j=1;j<MAX_LOCATIONS;j++)
-			tGoal[i]+=getpGoal()->globalGoal[j][i]-pStartcondition->getLocationTotal(j,i);
+			tGoal[i]+=getGoal()->globalGoal[j][i]-pStartcondition->getLocationTotal(j,i);
 	}
 
 	for(int i=0;i<MAX_LENGTH;i++)
@@ -888,6 +870,6 @@ const unsigned int ANARACE::getGoalPercentage() const
 };*/
 
 
-unsigned int ANARACE::successType;
-unsigned int ANARACE::successUnit;
+unsigned int ANABUILDORDER::successType;
+unsigned int ANABUILDORDER::successUnit;
 

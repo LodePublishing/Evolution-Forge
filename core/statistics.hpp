@@ -2,6 +2,7 @@
 #define _CORE_STATISTICS_HPP
 
 #include "defs.hpp"
+#include "../stl/misc.hpp"
 
 class STATISTICS
 {

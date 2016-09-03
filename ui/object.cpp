@@ -1,5 +1,5 @@
 #include "object.hpp"
-#include "../core/configuration.hpp"
+#include "configuration.hpp"
 
 
 UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect) :
@@ -320,7 +320,7 @@ void UI_Object::process()
 		doAdjustments=2;
 	}
 
-	if(configuration.isSmoothMovements())
+	if(uiConfiguration.isSmoothMovements())
 	{
 		if(relativeRect.moveSmooth(startRect, targetRect))
 			setNeedRedrawMoved();
@@ -360,11 +360,23 @@ void UI_Object::process()
 		} while (tmp != children);
 	}
 	
-	if((toolTipString!=NULL_STRING)&&(configuration.isTooltips())&&(isMouseInside()))
+	if((toolTipString!=NULL_STRING)/*&&(uiConfiguration.isToolTips())*/&&(isMouseInside()))
 		toolTipParent = this;
 }
 
-UI_Object* UI_Object::checkTooltip()
+void UI_Object::resetData()
+{ 
+	UI_Object* tmp = children;  // process all children of gadget
+	if (tmp) {
+		do {
+			tmp->resetData();
+			tmp = tmp->nextBrother;
+																				
+		} while (tmp != children);
+	}
+}
+
+UI_Object* UI_Object::checkToolTip()
 {
 	if(!isShown())
 		return(NULL);
@@ -377,7 +389,7 @@ UI_Object* UI_Object::checkTooltip()
 	UI_Object* result=NULL;
 	do 
 	{
-		result = tmp->checkTooltip();
+		result = tmp->checkToolTip();
 		tmp = tmp->nextBrother;
 	}
 	while((tmp!=children)&&(result==NULL));
@@ -424,8 +436,8 @@ UI_Object* UI_Object::checkHighlight()
 void UI_Object::draw(DC* dc) const
 {
 	// if hidden, hide children as well
-	if (!isShown())
-		return;
+//	if (!isShown())
+//		return;
 /*	
 		SDL_Rect temp;
 		if(background!=NULL)
@@ -551,9 +563,9 @@ void UI_Object::Show(const bool show)
 {
 	if((show)&&(!shown))
 	{
+		shown = true;
 		setNeedRedrawMoved(true);
 		process();
-		shown = true;
 	} 
 	else if((!show)&&(shown))
 	{
@@ -701,7 +713,7 @@ UI_Theme UI_Object::theme;
 long unsigned int UI_Object::startTime(0);
 //SDL_Rect UI_Object::rectlist[3000];
 //unsigned int UI_Object::rectnumber(0);
-UI_Tooltip* UI_Object::tooltip(NULL);
+UI_ToolTip* UI_Object::tooltip(NULL);
 UI_Object* UI_Object::toolTipParent(NULL);
 unsigned int UI_Object::max_x(0);
 unsigned int UI_Object::max_y(0);
@@ -717,3 +729,4 @@ UI_Button* UI_Object::currentButton = NULL;
 UI_Window* UI_Object::currentWindow = NULL;
 bool UI_Object::windowSelected = false;
 unsigned int UI_Object::redrawnObjects(0);
+std::list<std::string> UI_Object::msgList;

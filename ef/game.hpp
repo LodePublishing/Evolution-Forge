@@ -1,80 +1,133 @@
 #ifndef _GUI_GAME_HPP
 #define _GUI_GAME_HPP
 
-#include "statistics.hpp"
-#include "timer.hpp"
-#include "bgwindow.hpp"
-#include "force.hpp"
-#include "bodiagram.hpp"
-#include "bowindow.hpp"
-#include "message.hpp"
-
-#include <math.h>
-#ifndef M_PI
-	#define M_PI 3.14159265358979323846
-#endif
-// Windows kotz
+#include "player.hpp"
+#include "../ui/object.hpp"
+#include "../core/anabuildorder.hpp"
+#include "../core/soup.hpp"
+#include "score.hpp"
+#include "../core/configuration.hpp"
 
 enum eGameMode
 {
 	HIDE_MODE,
-	BASIC_GAME_MODE,
-	ADVANCED_GAME_MODE,
-	EXPERT_GAME_MODE,
+	BASIC_Game_MODE,
+	ADVANCED_Game_MODE,
+	EXPERT_Game_MODE,
 	EXPERT_COMPUTER_MODE,
-	GOSU_GAME_MODE,
+	GOSU_Game_MODE,
 	GOSU_COMPUTER_MODE,
 	TRANSCENDEND_COMPUTER_MODE,
 	
 	MAX_MODES
 };
 	
-    // hide: 0
-    // basic mode [GAME]: 1     // 1 - 2 player trying to reach the goal
-    // advanced mode [GAME]: 2  // 1 - 2 player trying to reach the goal
-    // expert mode [GAME]: 3    // 2 - 4 player, 1-2 'human', 1-3 computers trying to stop him
-    // expert mode [COMPUTER]: 4
-    // gosu mode [GAME]: 5      // freeplay for 1-2 human vs 1-2 computers
-    // gosu mode [COMPUTER]: 6
-    // transcendend mode [COMPUTER]: 7 // freeplay for 1-2 computers vs 1-2 computers
-
-
 class Game : public UI_Object
 {
 	public:
-		Game(UI_Object* parent, ANARACE** anarace, MessageWindow* msgWindow, const unsigned int gameNumber);
+		Game(UI_Object* parent, const unsigned int gameNumber);
 		~Game();
 		
 		void update();
 
 		void resetData();
-		void restartAnarace();
 		
-		void setMode(const eTab tab, const unsigned int gameNum); 
 
 		void draw(DC* dc) const;
 		void process();
 
 		const bool isOptimizing() const;
-		void setOptimizing(bool opt=true);
-
-		void CheckOrders();
+		void setOptimizing(const bool opt=true);
 
 		void updateRectangles(const unsigned int maxGame);
-		UI_Window* window[MAX_WINDOWS]; 
-		
-		float geneAnimation;
-		void assignAnarace(ANARACE** anarace);
+
+		void newGeneration();
+	
+		const unsigned int getUnchangedGenerations() const;	// gets number of generations where no change in fitness took place
+		const unsigned int getRun() const;					// gets number of runs (one run is complete when no <unchangedGenerations> > <maxGenerations>)
+		const unsigned int getTotalGeneration() const;			// gets number of total generations of this run
+	
+		void setUnchangedGenerations(const unsigned int unchanged_generations); 
+		void setRun(const unsigned int current_run);
+		void setTotalGeneration(const unsigned int total_generations);
+
+		void assignMap(const BASIC_MAP* game_map);
+		void setHarvestSpeed(const unsigned int player_num, const eRace harvest_race, const HARVEST_SPEED* harvest_speed);
+		void setStartRace(const unsigned int player_num, const eRace player_race);
+		void initSoup();
+		void assignStartCondition(const unsigned int player_num, const START_CONDITION* start_condition);
+		void setStartPosition(const unsigned int player_num, const unsigned int player_position);
+		void assignGoal(const unsigned int player_num, const GOAL_ENTRY* player_goal);
+		void fillGroups(); // TODO
+		void setMode(const eTab tab, const unsigned int gameNum);
 	private:
-		void drawGeneString(DC* dc, const Rect position) const;
-		void drawGene(DC* dc, int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const;
+		SOUP* soup;
+		START* start[MAX_PLAYER];
+		Player* player[MAX_PLAYER];
+		ANABUILDORDER* anarace[MAX_PLAYER];
+		UNIT unit[MAX_PLAYER][MAX_LOCATIONS];
 		
-		ANARACE** anarace; //pointer auf pointer, weil sich der pointer ja veraendert!
-//		list<Order*> orderList; // sorted by IP
+		const BASIC_MAP* map;
 		unsigned int mode;
-//		void MoveOrders();
-//		bool fixed[MAX_LENGTH];
+		bool optimizing;
+		bool boHasChanged;
+		ScoreWindow* scoreWindow;
+
+		unsigned int unchangedGenerations;
+ 		unsigned int currentRun;
+		unsigned int totalGeneration;		
 };
+
+inline const unsigned int Game::getUnchangedGenerations() const
+{
+#ifdef _SCC_DEBUG	
+	if(unchangedGenerations > coreConfiguration.getMaxGenerations()) {
+		toLog("DEBUG: (Game::getUnchangedGenerations): Variable unchangedGenerations not initialized.");return(0);
+	}
+#endif
+	return(unchangedGenerations);
+}
+
+inline const unsigned int Game::getRun() const
+{
+#ifdef _SCC_DEBUG	
+	if(currentRun > coreConfiguration.getMaxRuns()) {
+		toLog("DEBUG: (Game::getRun): Variable currentRun not initialized.");return(0);
+	}
+#endif
+	return(currentRun);
+}
+
+inline const unsigned int Game::getTotalGeneration() const
+{
+	return(totalGeneration);
+}
+
+inline void Game::setUnchangedGenerations(const unsigned int unchanged_generations)
+{
+#ifdef _SCC_DEBUG	
+	if(unchanged_generations > coreConfiguration.getMaxGenerations()) {
+		toLog("DEBUG: (Game::setUnchangedGenerations): Value out of range.");return;
+	}
+#endif
+	unchangedGenerations = unchanged_generations;
+}
+
+inline void Game::setRun(const unsigned int current_run)
+{
+#ifdef _SCC_DEBUG
+	if(current_run > coreConfiguration.getMaxRuns()) {
+		toLog("DEBUG: (Game::setRun): Value out of range.");return;
+	}
+#endif
+	currentRun = current_run;
+}
+
+inline void Game::setTotalGeneration(const unsigned int total_generation) {
+	totalGeneration = total_generation;
+}
+
+
 
 #endif
 

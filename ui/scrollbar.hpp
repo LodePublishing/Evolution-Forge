@@ -18,11 +18,13 @@ class UI_Scrollbar : public UI_Object
 
 		void moveUp();
 		void moveDown();
-		void reset();
-		void resetToEnd();
+		void moveToTop();
+		void moveToBottom();
 
 		void setClientHeight(const unsigned int height);
 		void setClientTargetHeight(const unsigned int height);
+
+		void reloadStrings();
 
 	protected:
 	private:

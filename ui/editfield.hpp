@@ -2,13 +2,12 @@
 #define _UI_EDITFIELD_HPP
 
 #include "window.hpp"
-#include <string>
 
 // simplified window class, maybe inheritate UI_Window from UI_EditField...
 class UI_EditField : public UI_Window
 {
 	public:
-		UI_EditField(UI_Object* edit_parent, UI_Object* edit_caller, const eString edit_text=NULL_STRING, const eString description_text=NULL_STRING, const eString ok_string=EDIT_FIELD_OK_STRING, const eString cancel_string=EDIT_FIELD_CANCEL_STRING, const string& name_proposal="");
+		UI_EditField(UI_Object* edit_parent, UI_Object* edit_caller, const eString edit_text=NULL_STRING, const eString description_text=NULL_STRING, const eString ok_string=EDIT_FIELD_OK_STRING, const eString cancel_string=EDIT_FIELD_CANCEL_STRING, const std::string& name_proposal="");
 		~UI_EditField();
 		UI_EditField(const UI_EditField& object);
 		UI_EditField& operator=(const UI_EditField& object);
@@ -16,7 +15,7 @@ class UI_EditField : public UI_Window
 		void draw(DC* dc) const;
 		void process();
 		
-		UI_Object* checkTooltip();
+		UI_Object* checkToolTip();
 		UI_Object* checkHighlight();
 		
 		void addChar(char a);
@@ -26,7 +25,7 @@ class UI_EditField : public UI_Window
 		void moveLeft();
 		void moveRight();
 
-		const string& getString() const;
+		const std::string& getString() const;
 		const UI_Object* getCaller() const;
 		
 		const bool isCanceled() const;
@@ -44,7 +43,7 @@ class UI_EditField : public UI_Window
 		int ani;
 };
 
-inline const string& UI_EditField::getString() const {
+inline const std::string& UI_EditField::getString() const {
 	return(userText->getString());
 }
 

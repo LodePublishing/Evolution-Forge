@@ -1,10 +1,9 @@
 #include "bowindow.hpp"
-#include "../core/settings.hpp"
+#include "../core/database.hpp"
 #include "../ui/editfield.hpp"
 
 BoWindow::BoWindow(const BoWindow& object) : 
 	UI_Window((UI_Window)object),
-	infoWindow(object.infoWindow),
 	anarace(object.anarace),
 	optimizeMode(object.optimizeMode),
 	boInsertPoint(object.boInsertPoint),
@@ -12,15 +11,13 @@ BoWindow::BoWindow(const BoWindow& object) :
 	boGoalListOpened(object.boGoalListOpened),
 	lastBogoal(object.lastBogoal),
 	saveBuildOrderButton(new UI_Button(*(object.saveBuildOrderButton))),
-	loadBuildOrderButton(new UI_Button(*(object.loadBuildOrderButton))),
-	msgWindow(object.msgWindow)
+	loadBuildOrderButton(new UI_Button(*(object.loadBuildOrderButton)))
 //	fixed(object.fixed),
 { }
 
 BoWindow& BoWindow::operator=(const BoWindow& object)
 {
 	((UI_Window)(*this)) = ((UI_Window)object);
-	infoWindow = object.infoWindow;
 	anarace = object.anarace;
 	optimizeMode = object.optimizeMode;
 	boInsertPoint = object.boInsertPoint;
@@ -31,23 +28,20 @@ BoWindow& BoWindow::operator=(const BoWindow& object)
 	saveBuildOrderButton = new UI_Button(*(object.saveBuildOrderButton));
 	delete loadBuildOrderButton;
 	loadBuildOrderButton = new UI_Button(*(object.loadBuildOrderButton));
-	msgWindow = object.msgWindow;
 //	fixed = object.fixed;
 	return(*this);
 }
 
-BoWindow::BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_info_window, MessageWindow* message_window, /*, bool* fixed_list*/ const unsigned int bo_window_number) :
+BoWindow::BoWindow(UI_Object* bo_parent, /*, bool* fixed_list*/ const unsigned int bo_window_number) :
 	UI_Window(bo_parent, BOWINDOW_TITLE_STRING, BUILD_ORDER_WINDOW, bo_window_number, SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0, 25, 1000, 1000)),
-	infoWindow(bo_info_window),
-	anarace(bo_anarace),
+	anarace(NULL),
 	optimizeMode(0),
 	boInsertPoint(-1),
 	boEndPoint(-1),
 	boGoalListOpened(0),
 	lastBogoal(0),
 	saveBuildOrderButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), SAVE_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	loadBuildOrderButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), LOAD_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	msgWindow(message_window)
+	loadBuildOrderButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), LOAD_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE))
 //	fixed(fixed_list)
 {
 	resetData();
@@ -67,7 +61,7 @@ BoWindow::~BoWindow()
 	delete loadBuildOrderButton;
 }
 
-void BoWindow::assignAnarace(ANARACE* bo_anarace)
+void BoWindow::assignAnarace(ANABUILDORDER* bo_anarace)
 {
 	anarace = bo_anarace;
 }
@@ -94,8 +88,8 @@ void BoWindow::resetData()
 
 void BoWindow::reloadStrings()
 {
-	processList();
 	UI_Object::reloadStrings();
+//	processList();
 }
 
 void BoWindow::processList()
@@ -221,6 +215,9 @@ void BoWindow::process()
 	if(!isShown()) 
 		return;
 	UI_Window::process();
+	if(getScrollbar()->checkForNeedRedraw())
+		setNeedRedrawNotMoved();
+		
 	// TODO evtl auf move befehl warten
 
 	std::list<BoEntry*>::iterator entry = boList.begin();
@@ -410,8 +407,8 @@ void BoWindow::process()
 		{
 			if(UI_Object::editTextField->getString().length()>0)
 			{
-				settings.saveBuildOrder(UI_Object::editTextField->getString(), anarace);
-				msgWindow->addMessage("Saved build order.");
+				database.saveBuildOrder(UI_Object::editTextField->getString(), anarace);
+				UI_Object::msgList.push_back("Saved build order.");
 			}
 			delete UI_Object::editTextField;
 			UI_Object::resetButton();

@@ -1,11 +1,12 @@
 #include "forceentry.hpp"
 
 #include "../ui/window.hpp"
+#include "../core/configuration.hpp"
 #include <sstream>
 
-ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const string& entry_unit):
+ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std::string& entry_unit):
 	UI_Button(entry_parent, entry_rect, entry_unit, FORCE_ENTRY_BUTTON, NO_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NOTHING),//NO_AUTO_SIZE),
-	timeEntryBox(new UI_NumberField(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 210, -14), Size(10,10)), 0, configuration.getMaxTime(), 6, 0, NULL_STRING, NULL_STRING, TIME_NUMBER_TYPE)),
+	timeEntryBox(new UI_NumberField(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 210, -14), Size(10,10)), 0, coreConfiguration.getMaxTime(), 6, 0, NULL_STRING, NULL_STRING, TIME_NUMBER_TYPE)),
 //	makeLocationGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 60, -11), Size(10,10)), entry_max_rect, GOAL_LOCATION_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
 	makeTimeGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 29, -11), Size(16,10)), GOAL_TIME_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
 

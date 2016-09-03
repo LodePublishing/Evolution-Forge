@@ -11,7 +11,7 @@ FPS::FPS():
 	lastTicks(SDL_GetTicks()),
 	averagecounter(0)
 {
-	for(int i=100;i--;)
+	for(unsigned int i=100;i--;)
 		average[i]=0;
 }
 

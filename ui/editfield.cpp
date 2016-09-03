@@ -4,7 +4,7 @@
 
 // ISO-LEVEL 2 
 
-UI_EditField::UI_EditField(UI_Object* edit_parent, UI_Object* edit_caller, const eString edit_text, const eString description_text, const eString ok_string, const eString cancel_string, const string& name_proposal) :
+UI_EditField::UI_EditField(UI_Object* edit_parent, UI_Object* edit_caller, const eString edit_text, const eString description_text, const eString ok_string, const eString cancel_string, const std::string& name_proposal) :
 	UI_Window(edit_parent, edit_text, EDIT_FIELD_WINDOW, 0),
 	OK_Button(new UI_Button(this, getRelativeClientRect(), ok_string, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
 	Cancel_Button(new UI_Button(this, getRelativeClientRect(), cancel_string, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
@@ -118,11 +118,11 @@ void UI_EditField::process()
 	ani++;
 }
 
-UI_Object* UI_EditField::checkTooltip()
+UI_Object* UI_EditField::checkToolTip()
 {
 	if(!getAbsoluteRect().Inside(mouse))
 		return(NULL);
-	return(UI_Window::checkTooltip());
+	return(UI_Window::checkToolTip());
 }
 
 UI_Object* UI_EditField::checkHighlight()

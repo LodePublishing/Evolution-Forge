@@ -86,10 +86,11 @@ UI_Object* UI_StaticText::checkTooltip() {
 
 void UI_StaticText::draw(DC* dc) const
 {
-	if(!isShown())
+//	if(!isShown())
+//		return;
+	
+	if(!checkForNeedRedraw())
 		return;
-	UI_Object::draw(dc);
-
 //	if(font!=NULL_FONT)
 		dc->SetFont(theme.lookUpFont(font));
 	if(color!=NULL_COLOR) 
@@ -304,6 +305,7 @@ void UI_StaticText::draw(DC* dc) const
 			dc->DrawText(t_text, getAbsolutePosition() + textBox.GetTopLeft() + Size(0, 3));
 		break;
 	}
+	UI_Object::draw(dc);
 }
 
 void UI_StaticText::addChar(const unsigned int pos, const char key)
@@ -535,7 +537,7 @@ void UI_StaticText::updateText(const string& st_text)
 {
 	if(text == st_text)
 		return;
-//	setNeedRedraw();
+	setNeedRedrawMoved();
 	text = st_text;
 	if(mode == NO_TEXT_MODE)
 		setSize(getTextSize()); // TODO size ist falsch
@@ -546,9 +548,9 @@ void UI_StaticText::updateText(const string& st_text)
 
 void UI_StaticText::updateText(const eString st_text)
 {
-	calculatePosition();
 	if(st_text==eText)
-		return;
+		return; //?
+	calculatePosition();
 	eText = st_text;
 	updateText(*theme.lookUpString(st_text));
 	textMode = false;

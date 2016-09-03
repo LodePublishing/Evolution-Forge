@@ -195,6 +195,9 @@ void SETTINGS::loadGoalFile(const string& goalFile)
 						l++;int location=atoi(l->c_str());
 						l++;int time=atoi(l->c_str());
 						goal->addGoal(unit, count, time, location);
+						ostringstream sdf;
+						sdf << unit << " " << count << " " << time << " " << location;
+						toLog(sdf.str());
 					}
 				}
 			}
@@ -352,10 +355,13 @@ void SETTINGS::loadMapFile(const string& mapFile)
 				i->second.pop_front();
 				basicmap->setLocationMineralDistance(location-1, atoi(i->second.front().c_str()));
 			}
-			if((i=block.find("Distances"))!=block.end()) 
+			if((i=block.find("Distance to"))!=block.end()) 
 			{
 				i->second.pop_front();
-				basicmap->setLocationDistance(location-1, i->second);
+				int target = atoi(i->second.front().c_str());
+				i->second.pop_front();
+				basicmap->setLocationDistance(location-1, target-1, atoi(i->second.front().c_str()));
+				cout << location-1 << "->" << target-1 << " : " << atoi(i->second.front().c_str()) << std::endl;
 			}
 			if((i=block.find("Minerals"))!=block.end())
 			{
@@ -370,7 +376,25 @@ void SETTINGS::loadMapFile(const string& mapFile)
 			
 		}
 	}// END while
+	
+	for(unsigned int i = 1; i < basicmap->getMaxLocations(); i++)
+	{	
+		std::cout << "Location " << i << " ";
+		for(unsigned int j = 1; j < basicmap->getMaxLocations(); j++)
+			std::cout << basicmap->getLocation(i)->getDistance(j) << " ";
+		std::cout << std::endl;
+	}
+
 	basicmap->calculateLocationsDistances();
+
+	for(unsigned int i = 1; i < basicmap->getMaxLocations(); i++)
+	{	
+		std::cout << "Location " << i << " ";
+		for(unsigned int j = 1; j < basicmap->getMaxLocations(); j++)
+			std::cout << basicmap->getLocation(i)->getDistance(j) << " ";
+		std::cout << std::endl;
+	}
+	
 	loadedMap.push_back(basicmap);
 } // schoen :)
 
@@ -394,7 +418,7 @@ void SETTINGS::loadStartconditionFile(const string& startconditionFile)
 		text=line;
 		size_t start_position = text.find_first_not_of("\t ");
 		if((start_position == string::npos)||(text[0]=='#')||(text[0]=='\0'))
-				continue; // ignore line
+			continue; // ignore line
 		list<string> words;
 		parse_line(text, words);
 
@@ -413,29 +437,29 @@ void SETTINGS::loadStartconditionFile(const string& startconditionFile)
 			else if(*j=="Protoss") race=PROTOSS;
 			else if(*j=="Zerg") race=ZERG;
 
-				map<string, list<string> > block;
-				parse_block(pFile, block);
+			map<string, list<string> > block;
+			parse_block(pFile, block);
 
-				if((i=block.find("Name"))!=block.end()) 
-				{
-					i->second.pop_front();
-					startcondition->setName(i->second.front());
-				}
-				if((i=block.find("Minerals"))!=block.end()) 
-				{
-					i->second.pop_front();
-					startcondition->setMinerals(100*atoi(i->second.front().c_str()));
-				}
-				if((i=block.find("Gas"))!=block.end()) 
-				{
-					i->second.pop_front();
-					startcondition->setGas(100*atoi(i->second.front().c_str()));
-				}
-				if((i=block.find("Time"))!=block.end()) 
-				{
-					i->second.pop_front();
-					startcondition->setStartTime(atoi(i->second.front().c_str()));
-				}
+			if((i=block.find("Name"))!=block.end()) 
+			{
+				i->second.pop_front();
+				startcondition->setName(i->second.front());
+			}
+			if((i=block.find("Minerals"))!=block.end()) 
+			{
+				i->second.pop_front();
+				startcondition->setMinerals(100*atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Gas"))!=block.end()) 
+			{
+				i->second.pop_front();
+				startcondition->setGas(100*atoi(i->second.front().c_str()));
+			}
+			if((i=block.find("Time"))!=block.end()) 
+			{
+				i->second.pop_front();
+				startcondition->setStartTime(atoi(i->second.front().c_str()));
+			}
 		}
 		else if(index=="@LOCATION")
 		{
@@ -451,14 +475,14 @@ void SETTINGS::loadStartconditionFile(const string& startconditionFile)
 			parse_block(pFile, block);
 			for(unsigned int k=UNIT_TYPE_COUNT;k--;)
 			{
-					string unit=stats[race][k].name;
-					if((i=block.find(unit))!=block.end())
-					{
-						i->second.pop_front();int count=atoi(i->second.front().c_str());
-							//TODO: values checken!
-						startcondition->setLocationTotal(location-1, k, count);
-						startcondition->setLocationAvailible(location-1, k, count);
-					}
+				string unit=stats[race][k].name;
+				if((i=block.find(unit))!=block.end())
+				{
+					i->second.pop_front();int count=atoi(i->second.front().c_str());
+						//TODO: values checken!
+					startcondition->setLocationTotal(location-1, k, count);
+					startcondition->setLocationAvailible(location-1, k, count);
+				}
 			}
 		} // end if == LOCATION
 	}// END while
@@ -477,76 +501,74 @@ void SETTINGS::loadStartconditionFile(const string& startconditionFile)
 
 void SETTINGS::saveBuildOrder(const string& name, const ANARACE* anarace) const
 {
-    ostringstream os;
-    os << "output/bos/";
-    os << raceString[anarace->getRace()] << "/" << name << ".html";
-    ofstream pFile(os.str().c_str(), ios_base::out | ios_base::trunc);
-    if(!pFile.is_open())
-    {
-        toLog("ERROR: Could not create file (write protection? disk space?)");
-        return;
-    }
-pFile << "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">" << std::endl;
-pFile << "<html>" << std::endl;
-pFile << "<head>" << std::endl;
-pFile << "  <meta content=\"text/html; charset=ISO-8859-1\"" << std::endl;
-pFile << " http-equiv=\"content-type\">" << std::endl;
-pFile << "  <title>Build order list</title>" << std::endl;
-pFile << "</head>" << std::endl;
-pFile << "<body alink=\"#000099\" vlink=\"#990099\" link=\"#000099\" style=\"color: rgb("<< (int)UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR)->r() << ", " << (int)UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR)->g() << ", " << (int)UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR)->b() << "); background-color: rgb(" << (int)UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColor()->r() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColor()->g() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColor()->b() << ");\">" << std::endl;
-pFile << "<div style=\"text-align: center;\"><big style=\"font-weight: bold;\"><big>Evolution Forge " << CORE_VERSION << "</big></big><br><br>" << std::endl;
-pFile << "<big>Buildorder list " << name << "</big><br>" << std::endl;
-pFile << "</div>" << std::endl;
-pFile << "<br>" << std::endl;
-pFile << "<table style=\"background-color: rgb(" << (int)UI_Object::theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH)->GetColor()->r() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH)->GetColor()->g() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH)->GetColor()->b() << "); text-align: center; vertical-align: middle; width: 600px; margin-left: auto; margin-right: auto;\""<< std::endl;
-pFile << " border=\"1\" cellspacing=\"0\" cellpadding=\"1\">" << std::endl;
-pFile << "  <tbody>" << std::endl;
-pFile << "    <tr>" << std::endl;
-pFile << "      <td style=\"text-align: center; vertical-align: middle; width: 200px;\">" << *UI_Object::theme.lookUpString(OUTPUT_UNITNAME_STRING) << "<br>" << std::endl;
-pFile << "      </td>" << std::endl;
-pFile << "      <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << *UI_Object::theme.lookUpString(OUTPUT_SUPPLY_STRING) << "</td>" << std::endl;
-pFile << "      <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << *UI_Object::theme.lookUpString(OUTPUT_MINERALS_STRING) << "<br>" << std::endl;
-pFile << "      </td>" << std::endl;
-pFile << "      <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << *UI_Object::theme.lookUpString(OUTPUT_GAS_STRING) << "<br>" << std::endl;
-pFile << "      </td>" << std::endl;
-pFile << "      <td style=\"text-align: center; vertical-align: middle; width: 100px;\">" << *UI_Object::theme.lookUpString(OUTPUT_LOCATION_STRING) << "<br>" << std::endl;
-pFile << "      </td>" << std::endl;
-pFile << "      <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << *UI_Object::theme.lookUpString(OUTPUT_TIME_STRING) << "<br>" << std::endl;
-pFile << "      </td>" << std::endl;
-pFile << "    </tr>" << std::endl;
-
-for(int i = MAX_LENGTH;i--;)
-	if(anarace->getProgramIsBuilt(i))
+	ostringstream os;
+	os << "output/bos/";
+	os << raceString[anarace->getRace()] << "/" << name << ".html";
+	ofstream pFile(os.str().c_str(), ios_base::out | ios_base::trunc);
+	if(!pFile.is_open())
 	{
-pFile << "    <tr style=\"text-align: center; vertical-align: middle; background-color: rgb(" << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][anarace->getPhaenoCode(i)].unitType))->GetColor()->r() << ", " << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][anarace->getPhaenoCode(i)].unitType))->GetColor()->g() << ", " << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][anarace->getPhaenoCode(i)].unitType))->GetColor()->b() << ");\">" << std::endl;
+		toLog("ERROR: Could not create file (write protection? disk space?)");
+		return;
+	}
+	
+	pFile << "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">" << std::endl;
+	pFile << "<html>" << std::endl;
+	pFile << "<head>" << std::endl;
+	pFile << "  <meta content=\"text/html; charset=ISO-8859-1\"" << std::endl;
+	pFile << " http-equiv=\"content-type\">" << std::endl;
+	pFile << "  <title>Build order list</title>" << std::endl;
+	pFile << "</head>" << std::endl;
+	pFile << "<body alink=\"#000099\" vlink=\"#990099\" link=\"#000099\" style=\"color: rgb("<< (int)UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR)->r() << ", " << (int)UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR)->g() << ", " << (int)UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR)->b() << "); background-color: rgb(" << (int)UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColor()->r() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColor()->g() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColor()->b() << ");\">" << std::endl;
+	pFile << "<div style=\"text-align: center;\"><big style=\"font-weight: bold;\"><big>Evolution Forge " << CORE_VERSION << "</big></big><br><br>" << std::endl;
+	pFile << "<big>Buildorder list " << name << "</big><br>" << std::endl;
+	pFile << "</div>" << std::endl;
+	pFile << "<br>" << std::endl;
+	pFile << "<table style=\"background-color: rgb(" << (int)UI_Object::theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH)->GetColor()->r() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH)->GetColor()->g() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH)->GetColor()->b() << "); text-align: center; vertical-align: middle; width: 600px; margin-left: auto; margin-right: auto;\""<< std::endl;
+	pFile << " border=\"1\" cellspacing=\"0\" cellpadding=\"1\">" << std::endl;
+	pFile << "  <tbody>" << std::endl;
+	pFile << "	<tr>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 200px;\">" << *UI_Object::theme.lookUpString(OUTPUT_UNITNAME_STRING) << "<br>" << std::endl;
+	pFile << "	  </td>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << *UI_Object::theme.lookUpString(OUTPUT_SUPPLY_STRING) << "</td>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << *UI_Object::theme.lookUpString(OUTPUT_MINERALS_STRING) << "<br>" << std::endl;
+	pFile << "	  </td>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << *UI_Object::theme.lookUpString(OUTPUT_GAS_STRING) << "<br>" << std::endl;
+	pFile << "	  </td>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 100px;\">" << *UI_Object::theme.lookUpString(OUTPUT_LOCATION_STRING) << "<br>" << std::endl;
+	pFile << "	  </td>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << *UI_Object::theme.lookUpString(OUTPUT_TIME_STRING) << "<br>" << std::endl;
+	pFile << "	  </td>" << std::endl;
+	pFile << "	</tr>" << std::endl;
 
-pFile << "      <td style=\"\">" << *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+anarace->getPhaenoCode(i)+UNIT_NULL_STRING)) << "<br>" << std::endl;
-pFile << "      </td>" << std::endl;
+	for(std::list<PROGRAM>::const_iterator order = anarace->programList.begin(); order != anarace->programList.end(); ++order)
+	{
+		pFile << "	<tr style=\"text-align: center; vertical-align: middle; background-color: rgb(" << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][order->getUnit()].unitType))->GetColor()->r() << ", " << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][order->getUnit()].unitType))->GetColor()->g() << ", " << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][order->getUnit()].unitType))->GetColor()->b() << ");\">" << std::endl;
+		pFile << "	  <td style=\"\">" << *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace() + order->getUnit() + UNIT_NULL_STRING)) << "<br>" << std::endl;
+		pFile << "	  </td>" << std::endl;
+		pFile << "	  <td style=\"\">" << order->getStatisticsBefore().getNeedSupply() << "/" << order->getStatisticsBefore().getHaveSupply() << "<br>" << std::endl;
+		pFile << "	  </td>" << std::endl;
 
-pFile << "      <td style=\"\">" << anarace->getIPStatisticsNeedSupply(2*i) << "/" << anarace->getIPStatisticsHaveSupply(2*i) << "<br>" << std::endl;
-pFile << "      </td>" << std::endl;
+		pFile << "	  <td style=\"\">" << order->getStatisticsBefore().getHaveMinerals()/100 << "<br>" << std::endl;
+		pFile << "	  </td>" << std::endl;
 
-pFile << "      <td style=\"\">" << anarace->getIPStatisticsHaveMinerals(2*i)/100 << "<br>" << std::endl;
-pFile << "      </td>" << std::endl;
+		pFile << "	  <td style=\"\">" << order->getStatisticsBefore().getHaveGas()/100 << "<br>" << std::endl;
+		pFile << "	  </td>" << std::endl;
 
-pFile << "      <td style=\"\">" << anarace->getIPStatisticsHaveGas(2*i)/100 << "<br>" << std::endl;
-pFile << "      </td>" << std::endl;
+		pFile << "	  <td style=\"\">" << (*anarace->getMap())->getLocation(order->getLocation())->getName() << "<br>" << std::endl;
+		pFile << "	  </td>" << std::endl;
 
-pFile << "      <td style=\"\">" << (*anarace->getMap())->getLocation(anarace->getProgramLocation(i))->getName() << "<br>" << std::endl;
-pFile << "      </td>" << std::endl;
+		pFile << "	  <td style=\"\">" << formatTime(order->getRealTime()) << "<br>" << std::endl;
+		pFile << "	  </td>" << std::endl;
+																								   
+		pFile << "	</tr>" << std::endl;
+	}
 
-pFile << "      <td style=\"\">" << formatTime(anarace->getRealProgramTime(i)) << "<br>" << std::endl;
-pFile << "      </td>" << std::endl;
-                                                                                                   
-pFile << "    </tr>" << std::endl;
-}
-
-pFile << "  </tbody>" << std::endl;
-pFile << "</table>" << std::endl;
-pFile << "<br>" << std::endl;
-pFile << "<b><a href=\"http://www.clawsoftware.de\">www.clawsoftware.de</a></b>"<< std::endl;
-pFile << "</body>" << std::endl;
-pFile << "</html>" << std::endl;
+	pFile << "  </tbody>" << std::endl;
+	pFile << "</table>" << std::endl;
+	pFile << "<br>" << std::endl;
+	pFile << "<b><a href=\"http://www.clawsoftware.de\">www.clawsoftware.de</a></b>\n";
+	pFile << "</body>\n";
+	pFile << "</html>" << std::endl;
 }
 
 void SETTINGS::saveGoal(const string& name, GOAL_ENTRY* goalentry)
@@ -562,134 +584,23 @@ void SETTINGS::saveGoal(const string& name, GOAL_ENTRY* goalentry)
 	ofstream pFile(os.str().c_str(), ios_base::out | ios_base::trunc);
 	if(!pFile.is_open())
 	{
-	        toLog("ERROR: Could not create file (write protection? disk space?)");
-        	return;
+			toLog("ERROR: Could not create file (write protection? disk space?)");
+			return;
 	}
 
 	goalentry->setName(name);
 
 	pFile << "@GOAL" << std::endl;
-	pFile << "        \"Name\" \"" << name << "\"" << std::endl; // TODO
-	pFile << "        \"Race\" \"" << raceString[goalentry->getRace()] << "\"" << std::endl;
+	pFile << "		\"Name\" \"" << name << "\"" << std::endl; // TODO
+	pFile << "		\"Race\" \"" << raceString[goalentry->getRace()] << "\"" << std::endl;
 
 	for(std::list<GOAL>::const_iterator i = goalentry->goal.begin(); i!=goalentry->goal.end(); i++)
-		pFile << "        \"" << stats[goalentry->getRace()][i->getUnit()].name << "\" \"" << i->getCount() << "\" \"" << i->getLocation() << "\" \"" << i->getTime() << "\"" << std::endl;		
+		pFile << "		\"" << stats[goalentry->getRace()][i->getUnit()].name << "\" \"" << i->getCount() << "\" \"" << i->getLocation() << "\" \"" << i->getTime() << "\"" << std::endl;		
 	
 	pFile << "@END" << std::endl;
 	loadGoalFile(os.str().c_str());
 }
 
-// -------------------------------
-// ------ GET/SET FUNCTIONS ------
-// -------------------------------
-
-const bool SETTINGS::getIsNewRun()
-{
-	return(soup.getIsNewRun());
-}
-
-const BASIC_MAP* SETTINGS::getMap(const unsigned int mapNumber) const
-{
-#ifdef _SCC_DEBUG
-	if(mapNumber>loadedMap.size()) {
-		toLog("WARNING: (SETTINGS::getMap): Value out of range.");return(0);
-	}
-#endif
-	return(loadedMap[mapNumber]);
-}
-
-GOAL_ENTRY* SETTINGS::getCurrentGoal(const unsigned int player)
-{
-	return(*(start.getCurrentGoal(player)));
-}
-
-//void SETTINGS::setPreprocessBuildOrder(const bool preprocess)
-//{
-//	configuration.setPreprocessBuildOrder(preprocess);
-//}
-
-void SETTINGS::assignMap(const unsigned int mapNumber)
-{
-#ifdef _SCC_DEBUG
-	if(mapNumber>=loadedMap.size()) {
-		toLog("WARNING: (SETTINGS::assignMap): Value out of range.");return;
-	}
-#endif
-	start.assignMap(loadedMap[mapNumber]);
-//	soup.initializeMap(&(loadedMap[mapNumber])); //?
-}
-
-void SETTINGS::assignStartRace(const unsigned int player, const eRace race)
-{
-	start.setPlayerRace(player, race);
-}
-
-void SETTINGS::assignStartcondition(const unsigned int player, const unsigned int startcondition)
-{
-#ifdef _SCC_DEBUG
-    if(startcondition>=loadedStartcondition[start.getPlayerRace(player)].size()) {
-        toLog("WARNING: (SETTINGS::setStartcondition): Value out of range.");return;
-    }
-#endif
-	start.assignStartcondition(player, loadedStartcondition[start.getPlayerRace(player)][startcondition]);
-}
-
-void SETTINGS::setHarvestSpeed(const eRace race, const unsigned int harvest)
-{
-	// todo: checken ob harvest dazupasst
-	start.setHarvestSpeed(race, &(loadedHarvestSpeed[harvest]));
-}
-
-void SETTINGS::setStartPosition(const unsigned int player, const unsigned int startPosition)
-{
-	start.setStartPosition(player, startPosition);
-}
-
-void SETTINGS::assignGoal(const unsigned int player, const unsigned int goal)
-{
-#ifdef _SCC_DEBUG
-	if(goal>=loadedGoal[start.getPlayerRace(player)].size()) {
-		toLog("WARNING: (SETTINGS::assignGoal): Value out of range.");return;
-	}
-#endif
-	start.assignGoal(player, loadedGoal[start.getPlayerRace(player)][goal]);
-}
-
-const unsigned int SETTINGS::getStartconditionCount(const unsigned int player) const
-{
-	return(loadedStartcondition[start.getPlayerRace(player)].size());
-}
-
-const unsigned int SETTINGS::getGoalCount(const unsigned int player) const
-{
-	return(loadedGoal[start.getPlayerRace(player)].size());
-}
-
-const unsigned int SETTINGS::getMapCount() const
-{
-	return(loadedMap.size());
-}
-
-const GOAL_ENTRY* SETTINGS::getGoal(const unsigned int player, const unsigned int goal) const
-
-{
-#ifdef _SCC_DEBUG
-	if(goal>=loadedGoal[start.getPlayerRace(player)].size()) {
-		toLog("WARNING: (SETTINGS::getGoal): Value out of range.");return(NULL);
-	}
-#endif
-	return(loadedGoal[start.getPlayerRace(player)][goal]);
-}
-
-const START_CONDITION* SETTINGS::getStartcondition(const unsigned int player, const unsigned int startconditionNumber) const
-{
-#ifdef _SCC_DEBUG
-	if(startconditionNumber>=loadedStartcondition[start.getPlayerRace(player)].size()) {
-		toLog("WARNING: (SETTINGS::getStartcondition): Value out of range.");return(NULL);
-	}
-#endif
-	return(loadedStartcondition[start.getPlayerRace(player)][startconditionNumber]);
-}
 
 // --------------------------------------
 // ------ END OF GET/SET FUNCTIONS ------

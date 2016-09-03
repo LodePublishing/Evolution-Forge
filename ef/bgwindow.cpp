@@ -6,7 +6,6 @@ BoGraphWindow::BoGraphWindow(const BoGraphWindow& object) :
 	UI_Window((UI_Window)object),
 //	boGraphList(),
 	markAni(object.markAni),
-	orderList(object.orderList),
 	infoWindow(object.infoWindow),
 	anarace(object.anarace)
 {
@@ -23,7 +22,6 @@ BoGraphWindow& BoGraphWindow::operator=(const BoGraphWindow& object)
 {
 	((UI_Window)(*this)) = ((UI_Window)object);
 	markAni = object.markAni;
-	orderList = object.orderList;
 	infoWindow = object.infoWindow;
 	anarace = object.anarace;
 	for(int i = BOGRAPH_MAX_LINES;i--;)
@@ -36,11 +34,10 @@ BoGraphWindow& BoGraphWindow::operator=(const BoGraphWindow& object)
 	return(*this);
 }
 
-BoGraphWindow::BoGraphWindow(UI_Object* bograph_parent, ANARACE* bograph_anarace, InfoWindow* bograph_info_window, std::list<Order*>* bograph_order_list, const unsigned int bograph_window_number) :
-	UI_Window(bograph_parent, BOGRAPH_WINDOW_TITLE_STRING, BO_GRAPH_WINDOW, bograph_window_number, SCROLLED),
+BoGraphWindow::BoGraphWindow(UI_Object* bograph_parent, ANARACE* bograph_anarace, InfoWindow* bograph_info_window, const unsigned int bograph_window_number) :
+	UI_Window(bograph_parent, BOGRAPH_WINDOW_TITLE_STRING, BO_GRAPH_WINDOW, bograph_window_number, NOT_SCROLLED),
 //	boGraphList(),
 	markAni(0),
-	orderList(bograph_order_list),
 	infoWindow(bograph_info_window),
 	anarace(bograph_anarace)
 {
@@ -64,6 +61,7 @@ BoGraphWindow::~BoGraphWindow()
 
 void BoGraphWindow::checkForInfoWindow()
 {
+#if 0
 	for(int j = 0; j < BOGRAPH_MAX_LINES; j++)
 	{
 		std::list<BoGraphEntry*>::iterator i = bograph[j].boGraphList.begin();
@@ -77,15 +75,16 @@ void BoGraphWindow::checkForInfoWindow()
 					infoWindow->setIP((*i)->getIP());
 				infoWindow->Show(1);
 				infoWindow->assignBg(*i);
-				if((*i)->getAbsolutePosition().x + 200 > getAbsolutePosition().x + getWidth())
+				if((*i)->getAbsoluteLeftBound() + 200 > getAbsoluteRightBound())
 					infoWindow->adjustRelativeRect(Rect(getRelativeRightBound() - 200, getRelativeLowerBound() + 5, 200, 110));
 				else
-					infoWindow->adjustRelativeRect(Rect((*i)->getAbsolutePosition().x, getRelativeLowerBound() + 5, 200, 110));
+					infoWindow->adjustRelativeRect(Rect((*i)->getAbsoluteLeftBound(), getRelativeLowerBound() + 5, 200, 110));
 				return;
 			}
 			i++;
 		}
 	}
+	#endif
 	
 /*	for(int j = 0; j < BOGRAPH_MAX_LINES; j++)
 	{
@@ -102,10 +101,10 @@ void BoGraphWindow::checkForInfoWindow()
 					infoWindow->setIP((*i)->getIP());
 				infoWindow->Show(1);
 				infoWindow->assignBg(*i);
-				if((*i)->getAbsolutePosition().x + 200 > getAbsolutePosition().x + getWidth())
+				if((*i)->getAbsoluteLeftBound() + 200 > getAbsoluteRightBound() + getWidth())
 					infoWindow->adjustRelativeRect(Rect(getRelativeRightBound() - 200, getRelativeLowerBound() + 5, 200, 110));
 				else
-					infoWindow->adjustRelativeRect(Rect((*i)->getAbsolutePosition().x, getRelativeLowerBound() + 5, 200, 110));
+					infoWindow->adjustRelativeRect(Rect((*i)->getAbsoluteLeftBound(), getRelativeLowerBound() + 5, 200, 110));
 				return;
 			}
 			i++;
@@ -135,18 +134,21 @@ void BoGraphWindow::resetData()
 
 void BoGraphWindow::processList()
 {
+	if(!isShown())
+		return;
 	resetData();
+	filledHeight = 0;
 	
-	unsigned int unitCounter[UNIT_TYPE_COUNT][MAX_LENGTH];
+	unsigned int unitCounter[UNIT_TYPE_COUNT][MAX_TIME];
 	unsigned int height[UNIT_TYPE_COUNT];
 	unsigned int lines[UNIT_TYPE_COUNT];
 	unsigned int fac[BOGRAPH_MAX_LINES];
 	unsigned int faccount = 0;
 	
-	priority_queue<int, deque<int> > endOfBuild;
+	priority_queue<unsigned int, vector<unsigned int> > endOfBuild;
 	
 
-	memset(unitCounter, 0, MAX_LENGTH * UNIT_TYPE_COUNT * sizeof(int));
+	memset(unitCounter, 0, MAX_TIME * UNIT_TYPE_COUNT * sizeof(int));
 	memset(height, 0, UNIT_TYPE_COUNT * sizeof(int));
 	memset(lines, 0, UNIT_TYPE_COUNT * sizeof(int));
 
@@ -154,25 +156,25 @@ void BoGraphWindow::processList()
 		fac[i] = 0;
 // ------ CALCULATE NUMBER OF ENTRIES FOR EACH FACILITY ------ 
 // = maximum of force - availible for each facility
-	for(list<Order*>::const_iterator order=orderList->begin(); order!=orderList->end(); ++order)
+	for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
+	if(anarace->getTimer() + order->getBT() < order->getTime())
 	{
-		unsigned int IP = (*order)->getIP();
 // falls facility benoetigt wird und Zahl der zu dem Zeitpunkt vorhandenen Einheiten minus der verfuegbaren Einheiten > hoehe => setze hoehe auf diesen Wert		
 
 // TODO allgemein fuer
-		while((!endOfBuild.empty())&&(endOfBuild.top() > anarace->getProgramTime(IP)))
+		while((!endOfBuild.empty())&&(endOfBuild.top() > order->getTime()))
 			endOfBuild.pop();
-		if(anarace->getProgramFacility(IP))
+		if(order->getFacility())
 		{
-			if((anarace->getRace() == PROTOSS)&&(stats[anarace->getRace()][(*order)->getUnit()].facility[0] == PROBE))
+			if((anarace->getRace() == PROTOSS)&&(stats[anarace->getRace()][order->getUnit()].facility[0] == PROBE))
 			{
-				endOfBuild.push(anarace->getProgramTime(IP) - stats[anarace->getRace()][(*order)->getUnit()].BT);
+				endOfBuild.push(order->getTime() - order->getBT());
 				if(endOfBuild.size() > height[PROBE])
 					height[PROBE] = endOfBuild.size();
 			}
 			else
-		  		if((anarace->getProgramTotalCount(IP, anarace->getProgramFacility(IP))-anarace->getProgramAvailibleCount(IP,anarace->getProgramFacility(IP))>height[anarace->getProgramFacility(IP)]))
-			 height[anarace->getProgramFacility(IP)]=anarace->getProgramTotalCount(IP,anarace->getProgramFacility(IP))-anarace->getProgramAvailibleCount(IP,anarace->getProgramFacility(IP));
+			if(order->getUsedFacilityCount() > height[order->getFacility()])
+				height[order->getFacility()] = order->getUsedFacilityCount();
 		}
 		// total - availible at that time equals used facilities
 	}
@@ -198,17 +200,18 @@ void BoGraphWindow::processList()
 // ------ CREATE A LIST OF NEEDED FACILITIES
 // TODO WARUM = 1 und nicht = 0?
 	faccount = 1;
-	for(list<Order*>::const_iterator order=orderList->begin(); order!=orderList->end(); ++order)
+	for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
+	if(anarace->getTimer() + order->getBT() < order->getTime())
 	{
-		if(anarace->getProgramFacility((*order)->getIP()))
+		if(order->getFacility())
 		{
 			unsigned int i;
 			// search for 'untaken' facilities
-			for(i = 1;(i < faccount)&&(fac[i] != anarace->getProgramFacility((*order)->getIP())); i++);
+			for(i = 1;(i < faccount)&&(fac[i] != order->getFacility()); i++);
 
-			if(i==faccount)
+			if(i == faccount)
 			{
-				fac[i]=anarace->getProgramFacility((*order)->getIP());
+				fac[i] = order->getFacility();
 				faccount++;
 			}
 		}
@@ -230,24 +233,24 @@ void BoGraphWindow::processList()
 	std::list<BoGraphEntry*>::iterator entry[BOGRAPH_MAX_LINES];
 	for(int i = BOGRAPH_MAX_LINES; i--;)
 		entry[i] = bograph[i].boGraphList.begin();
-		
-	for(std::list<Order*>::const_iterator order = orderList->begin(); order != orderList->end(); ++order)
+        for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
+	if(anarace->getTimer() + order->getBT() < order->getTime())
 	{
-		if(!anarace->getProgramFacility((*order)->getIP()))
+		if(!order->getFacility())
 			continue;
 		Rect edge;
 		int i;
 		for(i = 0; i < BOGRAPH_MAX_LINES; i++)
-			if(bograph[i].facility == anarace->getProgramFacility((*order)->getIP()))
+			if(bograph[i].facility == order->getFacility())
 			{
 				int k;
-				for(k = 0; k < MAX_LENGTH; k++)
-					if(unitCounter[bograph[i].facility][k] <= anarace->getRealProgramTime((*order)->getIP()))
+				for(k = 0; k < MAX_TIME; k++) // TODO!
+					if(unitCounter[bograph[i].facility][k] <= order->getRealTime())
 					{
-						unitCounter[bograph[i].facility][k] = anarace->getRealProgramTime((*order)->getIP())+stats[anarace->getRace()][(*order)->getUnit()].BT;
+						unitCounter[bograph[i].facility][k] = order->getRealTime() + order->getBT();
 						break;
 					}
-				   edge = Rect(getRelativeClientRectPosition() + Point( ( anarace->getRealProgramTime((*order)->getIP())*getClientRectWidth()) / (anarace->getRealTimer()), FONT_SIZE+11+(i+k/MIN_HEIGHT)*(FONT_SIZE+9)+(k%MIN_HEIGHT)*(FONT_SIZE+9)/bograph[i].height), Size(  (stats[anarace->getRace()][(*order)->getUnit()].BT/*anarace->getProgramBT(s)*/*getClientRectWidth())/(anarace->getRealTimer()), (FONT_SIZE+8)/(bograph[i].height)));
+				   edge = Rect(getRelativeClientRectPosition() + Point( ( order->getRealTime()*getClientRectWidth()) / (anarace->getRealTimer()), FONT_SIZE+11+(i+k/MIN_HEIGHT)*(FONT_SIZE+9)+(k%MIN_HEIGHT)*(FONT_SIZE+9)/bograph[i].height), Size(  (order->getBT()*getClientRectWidth())/(anarace->getRealTimer()), (FONT_SIZE+8)/(bograph[i].height)));
 				break;
 			}
 		if(i == BOGRAPH_MAX_LINES)
@@ -255,17 +258,16 @@ void BoGraphWindow::processList()
  		
 		if(entry[i] == bograph[i].boGraphList.end())
 		{
-			BoGraphEntry* t = new BoGraphEntry(this, edge, (*order)->getUnit());
-			t->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][(*order)->getUnit()].unitType));
-			t->setIP((*order)->getIP());
+			BoGraphEntry* t = new BoGraphEntry(this, edge, *order);
+			t->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
 			bograph[i].boGraphList.push_back(t);
 		} else
-		if((*entry[i])->getUnit() != (*order)->getUnit())
+		if((*entry[i])->program.getUnit() != order->getUnit())
 		{
 			std::list<BoGraphEntry*>::iterator k = entry[i];
 			while(k != bograph[i].boGraphList.end())
 			{
-				if((*k)->getUnit() == (*order)->getUnit())
+				if((*k)->program.getUnit() == order->getUnit())
 					break;
 				k++;
 			}
@@ -275,29 +277,28 @@ void BoGraphWindow::processList()
 				entry[i] = bograph[i].boGraphList.insert(entry[i], old);
 				entry[i]++;
 				bograph[i].boGraphList.erase(k);
-				if(edge!=(*entry[i])->targetRect)
+				if(edge != old->targetRect)
 				{
 					old->adjustRelativeRect(edge);
 					old->resetGradient();
 				}
-				old->setIP((*order)->getIP());
+				old->program = *order;
 			} else // => not found, insert a new one
 			{
-				BoGraphEntry* t = new BoGraphEntry(this, edge, (*order)->getUnit());
-				t->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][(*order)->getUnit()].unitType));
-				t->setIP((*order)->getIP());
+				BoGraphEntry* t = new BoGraphEntry(this, edge, *order);
+				t->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
 				entry[i] = bograph[i].boGraphList.insert(entry[i], t);
 				entry[i]++;
 			}
 		} else // ok
 //		  if((*entry)->getUnit() == (*order)->getUnit())
 		{
+			(*entry[i])->program = *order;
 			if(edge!=(*entry[i])->targetRect)
 			{
 				(*entry[i])->adjustRelativeRect(edge);
 				(*entry[i])->resetGradient();
 			}
-			(*entry[i])->setIP((*order)->getIP());
 			entry[i]++;
 		}
 	}
@@ -443,9 +444,6 @@ void BoGraphWindow::process()
 	if(!isShown()) 
 		return;
 		
-	if(!orderList) 
-		return;
-
 	UI_Window::process();
 	
 	checkForInfoWindow();
@@ -476,10 +474,12 @@ void BoGraphWindow::draw(DC* dc) const
 	if(!isShown()) 
 		return;
 
-	if(!orderList) 
-		return;
 	// now print the lines...
 	UI_Window::draw(dc);
+
+	if(!checkForNeedRedraw())
+		return;
+	
 	dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
 	for(int i = 0; i<BOGRAPH_MAX_LINES; i++)
 		if(bograph[i].facility>0)

@@ -62,7 +62,7 @@ void UI_Radio::forcePress(const unsigned int button)
 	UI_Button* tmp=(UI_Button*)getChildren();
 	if(!tmp) 
 		return;
-	changed=true;
+	changed = true;
 	forceUnpressAll();
 	
 	unsigned int i=1;
@@ -87,7 +87,7 @@ void UI_Radio::forcePress(const unsigned int button)
 
 const unsigned int UI_Radio::getMarked()
 {
-	changed=false;
+	changed = false;
 	unsigned int i=markedItem;
 	markedItem=0;
 	return(i);

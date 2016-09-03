@@ -13,6 +13,7 @@
 #include "../core/anarace.hpp"
 #include "../core/settings.hpp"
 #include "../ui/radio.hpp"
+#include "../ui/checkbutton.hpp"
 
 
 enum eMenu
@@ -54,7 +55,7 @@ class ForceWindow : public UI_Window
 
 		UI_StaticText* nongoalsText;
 		UI_StaticText* goalsText;
-		UI_StaticText* locationName[2][MAX_LOCATIONS];
+//		UI_StaticText* locationName[2][MAX_LOCATIONS];
 		UI_StaticText* legend;
 
 		list<ForceEntry*> goalForceList;
@@ -66,7 +67,8 @@ class ForceWindow : public UI_Window
 		UnitMenu* unitMenu;
 		GoalMenu* goalMenu;
 		RaceMenu* raceMenu;
-		LocationMenu* locationMenu;
+//		LocationMenu* locationMenu;
+		UI_CheckButton* alwaysBuildWorker;
 };
 
 inline void ForceWindow::setMarkedUnit(const unsigned int marked_unit)

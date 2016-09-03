@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 	//fillInfluenceList();
 	toLog(*UI_Object::theme.lookUpString(START_START_STRING));
 	
-	long unsigned int startTime = SDL_GetTicks();
+//	long unsigned int startTime = SDL_GetTicks();
 	toLog(*UI_Object::theme.lookUpString(START_LOAD_CORE_SETTINGS_STRING));
 	configuration.loadConfigurationFile();
 	UI_Object::theme.setLanguage(configuration.getLanguage());
@@ -119,8 +119,8 @@ int main(int argc, char *argv[])
 	FPS* fps=new FPS();
 	fps->setDesiredFramerate(configuration.getStaticFramerate());
 	fps->setAllowStaticFramerate(configuration.isAllowStaticFramerate());
-	unsigned int screenshot=100;
-	bool screenCapturing=false;
+//	unsigned int screenshot=100;
+//	bool screenCapturing=false;
 	bool warning = false;
 // ------ END CAP FRAMERATE
 	Main::bar->draw(screen, 100, START_SYSTEM_READY_STRING);
@@ -183,11 +183,13 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 	screen->DrawRectangle(Rect(clientWindow.x, clientWindow.y, clientWindow.w-1, clientWindow.h-1));
 
 	bool firstRun = true;
-		bool endrun = false;
+	bool endrun = false;
+//	SDL_BlitSurface(*UI_Object::theme.lookUpBitmap(BACKGROUND_BITMAP) , 0, screen->GetSurface(), &clientWindow );
 	while(true)
 	{
 		unsigned int frames_per_generation = fps->getFramesPerGeneration();
 		unsigned int frames_per_second = fps->getCurrentFramerate();
+		if(!endrun)
 		if(((UI_Object::editTextField==NULL)&&(m.isOptimizing()))||(configuration.isAllowStaticFramerate()))
 		{
 			if(configuration.isAllowStaticFramerate())
@@ -225,20 +227,17 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 // ------ DRAWING ------
 		if(m.drawing)
 		{
+			UI_Object::redrawnObjects = 0;
 			m.process();
 			warning=false;
-			if(configuration.isBackgroundBitmap())
-			{
-				SDL_Surface* source = *UI_Object::theme.lookUpBitmap(BACKGROUND_BITMAP);
-				SDL_BlitSurface(*UI_Object::theme.lookUpBitmap(BACKGROUND_BITMAP) , 0, screen->GetSurface(), &clientWindow );
-			}
-			else
-			{
-				SDL_Rect rc;
-				rc.x=clientWindow.x;rc.y=clientWindow.y;rc.w=clientWindow.w;rc.h=clientWindow.h;
-				SDL_FillRect(screen->GetSurface(), &rc, 0);
-			}
 			m.draw(screen);
+			screen->SetTextForeground(DC::toSDL_Color(255, 20, 20));
+			screen->SetFont(UI_Object::theme.lookUpFont(LARGE_NORMAL_BOLD_FONT));
+			ostringstream os;
+			screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
+			screen->DrawRectangle(110,350,200,20);
+			os << "Objects: " << UI_Object::redrawnObjects << "   FPS: " << configuration.getCurrentFramerate();
+			screen->DrawText(os.str(), 100, 350);	
 		}
 // ------ END DRAWING ------
 		else if(!warning)
@@ -290,16 +289,23 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 						m.leftDown();
 					else if(event.button.button == SDL_BUTTON_RIGHT)
 						m.rightDown();
+					else if(event.button.button == SDL_BUTTON_WHEELUP)
+						m.wheelUp();
+					else if(event.button.button == SDL_BUTTON_WHEELDOWN)
+						m.wheelDown();
 					break;
 				case SDL_MOUSEBUTTONUP:
 					if(event.button.button == SDL_BUTTON_LEFT)
 						m.leftUp(Point(event.motion.x, event.motion.y));
 					else if(event.button.button == SDL_BUTTON_RIGHT)
 						m.rightUp(Point(event.motion.x, event.motion.y));
+                                        else if(event.button.button == SDL_BUTTON_WHEELUP)
+                                                m.wheelUp();
+                                        else if(event.button.button == SDL_BUTTON_WHEELDOWN)
+                                                m.wheelDown();
 					break;
 				case SDL_MOUSEMOTION:
 					m.setMouse(Point(event.motion.x, event.motion.y));break;
-				
 				case SDL_KEYDOWN:
 					if(!m.drawing)
 					{

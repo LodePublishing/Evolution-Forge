@@ -7,7 +7,6 @@
 #include <sstream>
 #include <list>
 #include <map>
-#include <deque>
 
 using namespace std;
 
@@ -46,6 +45,7 @@ private:
 	bool tooltips;
 	bool transparency;
 	bool smoothMovements;
+	bool alwaysBuildWorker;
 	
 
 	string configurationFile;
@@ -88,6 +88,7 @@ public:
 	const bool isTooltips() const;
 	const bool isTransparency() const;
 	const bool isSmoothMovements() const;
+	const bool isAlwaysBuildWorker() const;
 	
 	void setCrossingOver(const unsigned int crossing_over);
 	void setBreedFactor(const unsigned int breed_factor);
@@ -117,6 +118,7 @@ public:
 	void setTooltips(const bool tool_tips);
 	void setTransparency(const bool trans_parency);
 	void setSmoothMovements(const bool smooth_movements);
+	void setAlwaysBuildWorker(const bool always_build_scv);
 
 	void setCurrentFramerate(const unsigned int frame_rate);
 	void setCurrentFramesPerGeneration(const unsigned int frames_per_generation);
@@ -311,6 +313,10 @@ inline const bool Configuration::isSmoothMovements() const {
 	return(smoothMovements);
 }
 
+inline const bool Configuration::isAlwaysBuildWorker() const {
+	return(alwaysBuildWorker);
+}
+
 inline void Configuration::setCrossingOver(const unsigned int crossing_over) 
 {
 #ifdef _SCC_DEBUG
@@ -482,7 +488,9 @@ inline void Configuration::setSmoothMovements(const bool smooth_movements) {
 	smoothMovements = smooth_movements;
 }
 
-
+inline void Configuration::setAlwaysBuildWorker(const bool always_build_worker) {
+	alwaysBuildWorker = always_build_worker;
+}
 
 #endif // _CORE_CONFIGURATION_HPP
 

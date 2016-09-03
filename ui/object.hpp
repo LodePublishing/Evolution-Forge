@@ -8,6 +8,7 @@ class UI_Object;
 class UI_EditField;
 class UI_Tooltip;
 class UI_Button;
+class UI_Window;
 
 class UI_Object
 {
@@ -34,7 +35,7 @@ class UI_Object
 		void setHeight(const unsigned int height);
 		void setSize(const Size size);
 		void setPosition(const Point& position);
-		void jumpToPosition(const Point& position);
+//		void jumpToPosition(const Point& position);
 		
 		void setLeft(const signed int x);
 		void setTop(const signed int y);
@@ -54,8 +55,14 @@ class UI_Object
 		const signed int getAbsoluteLeftBound() const;
 		const signed int getAbsoluteRightBound() const;
 
+		void checkForChildrenOverlap(const Rect& rect);
+		const bool checkForNeedRedraw() const;
+		void setNeedRedrawMoved(const bool need_redraw=true);
+		void setNeedRedrawNotMoved(const bool need_redraw=true);
+
 		const unsigned int getTargetWidth() const;
 		const unsigned int getTargetHeight() const;
+		const Point getTargetPosition() const;
 
 		const unsigned int getDoAdjustments() const;
 		void setDoAdjustments(const unsigned int doAdjustments=1);
@@ -97,10 +104,13 @@ class UI_Object
 		Rect startRect; // TODO private machen
 		Rect targetRect;
 		unsigned int filledHeight;
+		
+		signed int firstItemY;
+		signed int lastItemY;
 
 
-//		const bool doesNeedRedraw() const;
-//		void setNeedRedraw(const bool need_redraw=true);
+
+		static unsigned int redrawnObjects;
 
 //		static SDL_Rect rectlist[3000];
 //		static unsigned int rectnumber;
@@ -111,6 +121,8 @@ class UI_Object
 		static bool currentButtonPressed;
 		static bool currentButtonHasAlreadyLeft;
 		static UI_Button* currentButton;
+		static UI_Window* currentWindow;
+		static bool windowSelected;
 		static void resetButton();
 
 //		static void maybeShowToolTip(DC* dc);
@@ -129,7 +141,6 @@ class UI_Object
 		signed int getMinBottomLeftX() const { return min_bottom_left_x;};
 		signed int getMinTopRightX() const { return min_top_right_x;};
 		signed int getMinBottomRightX() const { return min_bottom_right_x;};
-
 	
 		static unsigned int mouseType;
 		static Point mouse;
@@ -138,6 +149,8 @@ class UI_Object
 
 		static UI_Tooltip* tooltip;
 		static UI_Object* toolTipParent;
+
+		void clearRedrawFlag();
 
 //		void addRect(const Rect& rect);
 
@@ -150,6 +163,9 @@ class UI_Object
 
 		UI_Object* children; // pointer to the head of the linked list of children
 //		std::list<Rect> notDrawRectList;
+		SDL_Surface* background;
+		Rect oldRect;
+
 	private:
 		
 		bool shown;
@@ -164,7 +180,7 @@ class UI_Object
 		// returns false if it (and none of its children) cannot get focus
 
 // needs redraw?
-//		bool needRedraw;
+		bool needRedraw;
 			
 		UI_Object* prevBrother;
 		UI_Object* nextBrother; 
@@ -185,12 +201,6 @@ class UI_Object
 
 //		list<Rect> changedRects;
 
-//		static bool toolTipIsShown;
-//		static string toolTipString;
-//		static Point toolTipPosition;
-//		static Rect lastToolTipRect;
-//		static bool needToolTipRedraw;
-
 //		static void addRectToBeDrawn(Rect& lastRect, const Rect currentRect);
 //		int linkedToHotSpot; // is this item linked constantly to a hotspot? Or is his position determined by hardcoded functions?
 
@@ -200,6 +210,7 @@ class UI_Object
 	
 	
 //		int hotkey;
+
 };
 
 inline void UI_Object::setRelativeRect(const Rect& rect) {
@@ -207,7 +218,7 @@ inline void UI_Object::setRelativeRect(const Rect& rect) {
 }
 
 inline void UI_Object::Hide(const bool hide) {
-	shown=!hide;
+	Show(!hide);
 }
 
 inline void UI_Object::Enable(const bool enable) {
@@ -234,26 +245,7 @@ inline const Point& UI_Object::getRelativePosition() const {
 	return(relativeRect.GetTopLeft());
 }
 			
-inline void UI_Object::setWidth(const unsigned int width) {
-	relativeRect.SetWidth(width);
-}
-				
-inline void UI_Object::setHeight(const unsigned int height) {
-	relativeRect.SetHeight(height);
-}
-				
-inline void UI_Object::setSize(const Size size) {
-	relativeRect.SetSize(size);
-}
-	
-inline void UI_Object::setLeft(const signed int x) {
-	relativeRect.SetLeft(x);
-}
-		
-inline void UI_Object::setTop(const signed int y) {
-	relativeRect.SetTop(y);
-}
-				
+			
 inline const Size& UI_Object::getSize() const {
 	return(relativeRect.GetSize());
 }
@@ -374,9 +366,14 @@ inline const unsigned int UI_Object::getTargetHeight() const {
 	return(targetRect.GetHeight());
 }
 
+inline const Point UI_Object::getTargetPosition() const {
+	return(targetRect.GetTopLeft());
+}
+
 inline const bool UI_Object::isMouseInside() const {
 	return(getAbsoluteRect().Inside(mouse));
 }
+
 
 
 #endif

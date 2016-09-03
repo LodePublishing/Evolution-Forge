@@ -3,7 +3,7 @@
 
 #include "../ui/window.hpp"
 #include "bograph.hpp"
-#include "order.hpp"
+//#include "order.hpp"
 #include "info.hpp"
 
 #include <list>
@@ -13,7 +13,7 @@
 class BoGraphWindow:public UI_Window
 {
 	public:
-		BoGraphWindow(UI_Object* bograph_parent, ANARACE* bograph_anarace, InfoWindow* bograph_info_window, std::list<Order*>* bograph_order_list, const unsigned int bograph_window_number);
+		BoGraphWindow(UI_Object* bograph_parent, ANARACE* bograph_anarace, InfoWindow* bograph_info_window, const unsigned int bograph_window_number);
 		BoGraphWindow(const BoGraphWindow& object);
 		BoGraphWindow& operator=(const BoGraphWindow& object);
 		~BoGraphWindow();
@@ -40,7 +40,7 @@ class BoGraphWindow:public UI_Window
 //		list<BoGraphEntry*> boGraphList;
 
 		unsigned int markAni;
- 		std::list<Order*>* orderList;
+// 		std::list<Order*>* orderList;
 		InfoWindow* infoWindow;
 		ANARACE* anarace;
 };

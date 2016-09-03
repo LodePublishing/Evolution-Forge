@@ -18,9 +18,7 @@ class InfoWindow : public UI_Window
 		void draw(DC* dc) const;
 
 		const unsigned int getUnit() const;
-		void setUnit(const unsigned int unit_type);
-		void setIP(const unsigned int ip);
-		const unsigned int getIP() const; 
+		void setProgram(const PROGRAM& info_program);
 		void assignAnarace(ANARACE* info_anarace);
 		void assignBo(const BoEntry* info_bo);
 		void assignBg(const BoGraphEntry* info_bg);
@@ -30,8 +28,7 @@ class InfoWindow : public UI_Window
 	private:
 		unsigned int unit;
 		UI_StaticText* text;
-		unsigned int IP;
-		unsigned int newIP;
+		PROGRAM program;
 		ANARACE* anarace;
 };
 

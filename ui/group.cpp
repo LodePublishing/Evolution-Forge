@@ -74,26 +74,29 @@ void UI_Group::calculateSameWidthOfButtons(const bool horizontal)
 
 void UI_Group::draw(DC* dc) const
 {
-	if((Rect(getAbsolutePosition(), boxSize).Inside(mouse)))
-		dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-	else
-		dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
-	if(title!=NULL)
+	if(checkForNeedRedraw())
 	{
-		title->setColor(BRIGHT_TEXT_COLOR);
-		dc->SetBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-		dc->DrawEdgedRoundedRectangle(getAbsolutePosition() - Size(5, 13), boxSize + Size(12, 0) - Size(0, 10), 4);
+		if((Rect(getAbsolutePosition(), boxSize).Inside(mouse)))
+			dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+		else	
+			dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
+		if(title!=NULL)
+		{
+			title->setColor(BRIGHT_TEXT_COLOR);
+			dc->SetBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
+			dc->DrawEdgedRoundedRectangle(getAbsolutePosition() - Size(5, 13), boxSize + Size(12, 0) - Size(0, 10), 4);
 		
-		Size s = title->getBoxSize();
-	  	Rect titleRect = Rect(getAbsolutePosition() - Size(5, 20), s + Size(5,2));
-		dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-		dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
-		dc->DrawEdgedRoundedRectangle(titleRect, 2);
-	}
-	else
-	{
-		dc->SetBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-		dc->DrawEdgedRoundedRectangle(getAbsolutePosition() - Size(3, 3), boxSize + Size(12, 6), 4);
+			Size s = title->getBoxSize();
+		  	Rect titleRect = Rect(getAbsolutePosition() - Size(5, 20), s + Size(5,2));
+			dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+			dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
+			dc->DrawEdgedRoundedRectangle(titleRect, 2);
+		}
+		else
+		{
+			dc->SetBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
+			dc->DrawEdgedRoundedRectangle(getAbsolutePosition() - Size(3, 3), boxSize + Size(12, 6), 4);
+		}
 	}
 	UI_Object::draw(dc);
 }

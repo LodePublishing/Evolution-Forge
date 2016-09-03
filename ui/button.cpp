@@ -195,12 +195,13 @@ UI_Button::~UI_Button()
 
 void UI_Button::setPressDepth(const unsigned int depth)
 {
-	pressdepth=depth;
+	pressdepth = depth;
+	setNeedRedrawMoved();
 	if(text)
 	{
 		if(pressdepth==0)
 			text->setPressed(false);
-		else text->setPressed(true);		
+		else text->setPressed(true);
 	}
 }
 
@@ -209,10 +210,11 @@ void UI_Button::adjustButtonSize(const Size& size)
 	switch(autoSize)
 	{
 		case NOTHING:break;
-//		case AUTO_SIZE_ONCE:
 		case NO_AUTO_SIZE:setSize(buttonPlacementArea.GetSize());break;
-		case AUTO_SIZE_ONCE:setSize(size+Size(6, 0));
-						autoSize = AUTO_SIZE_TWICE;break;
+		case AUTO_SIZE_ONCE:
+			setSize(size+Size(6, 0));
+			autoSize = NO_AUTO_SIZE;//AUTO_SIZE_TWICE;
+			break;
 		case AUTO_SIZE_TWICE:setSize(size+Size(6, 0));
 						autoSize = NO_AUTO_SIZE;break;
 					
@@ -281,12 +283,11 @@ void UI_Button::adjustButtonSize(const Size& size)
 // Render button.  How it draws exactly depends on it's current state.
 void UI_Button::draw(DC* dc) const
 {
-	if(!isShown())
-		return;
-
-//	if(!doesNeedRedraw())
+//	if(!isShown())
 //		return;
-	
+	if(checkForNeedRedraw())
+	{
+
 	eButtonAnimationPhase animation_phase;
 	if(isDisabled())
 		animation_phase=DISABLED_BUTTON_PHASE;
@@ -352,7 +353,7 @@ void UI_Button::draw(DC* dc) const
 	}
 	else 
 	{
-		dc->DrawRectangle(Rect(getAbsolutePosition()-Size(1,1)+Size(pressdepth, pressdepth), getSize()+Size(2,2))); // kasterl ums bitmap
+//		dc->DrawRectangle(Rect(getAbsolutePosition()-Size(1,1)+Size(pressdepth, pressdepth), getSize()+Size(2,2))); // kasterl ums bitmap
 		dc->DrawBitmap(*theme.lookUpBitmap(theme.lookUpButtonAnimation(button)->bitmap[animation_phase]), getAbsolutePosition()+Size(pressdepth, pressdepth));
 	}
 	
@@ -364,7 +365,7 @@ void UI_Button::draw(DC* dc) const
 	} ??? */
 
 //	dc->DrawRectangle(Rect(buttonPlacementArea.GetTopLeft() + getAbsolutePosition(), buttonPlacementArea.GetSize()));
-		
+	}
 	UI_Object::draw(dc);	
 /*	int offset, frame_num = -1;
 
@@ -453,10 +454,8 @@ void UI_Button::mouseHasEnteredArea()
 	{
 		if(originalPosition)
 			setPressDepth(0);
-//			buttonPlacementArea.SetTopLeft(buttonPlacementArea.GetTopLeft()-Size(1,1));
 		else
 			setPressDepth(1);
-//			buttonPlacementArea.SetTopLeft(buttonPlacementArea.GetTopLeft()+Size(1,1));
 		statusFlags |= BF_DOWN;
 	}
 }
@@ -491,6 +490,7 @@ void UI_Button::mouseLeftButtonReleased()
 {
 	if((statusFlags & BF_NOT_CLICKABLE))
 		return;
+	setNeedRedrawMoved();
 //	if(forcedPress)
 //		return;
 	statusFlags &= ~BF_WAS_PRESSED;
@@ -504,6 +504,7 @@ void UI_Button::mouseLeftButtonReleased()
 				originalPosition=false;
 			else if(!originalPosition)
 				originalPosition=true;
+			setNeedRedrawMoved();
 		}
 		else
 			setPressDepth(0);
@@ -548,6 +549,7 @@ void UI_Button::mouseRightButtonReleased()
 				originalPosition=false;
 			else if(!originalPosition)
 				originalPosition=true;
+			setNeedRedrawMoved();
 		}
 		else
 			setPressDepth(0);
@@ -574,16 +576,46 @@ UI_Object* UI_Button::checkHighlight()
 		return(NULL);
 	return((UI_Object*)this);
 }
+
 void UI_Button::process()
 {
-	if(!isShown())
+/*	if(!isShown())
 	{
 		resetGradient();
 		return;
-	}
+	}*/
 //	oldRect = getAbsoluteRect();
-//	oldPressDepth = pressdepth;
-	
+
+	// TODO evtl Animation fuer jede Phase in die config datei
+	// dann waere sowas moeglich, dass ich maus reinfahr und das langsam verblasst
+	// evtl auch einfach brightencolor ueberlegen...
+	if(!configuration.isGlowingButtons())
+	{
+		if(!(statusFlags & BF_HIGHLIGHTED))
+			gradient = 100;
+		else 
+			if(frameNumber<theme.lookUpButtonAnimation(button)->speed/2) gradient=100;
+		else 
+			gradient = 0;
+	} else
+		if(!(statusFlags & BF_HIGHLIGHTED))
+			gradient += (100 - gradient) / 5 + 1;
+	else
+	switch(theme.lookUpButtonAnimation(button)->type)
+	{
+		case NO_ANIMATION:if(gradient < 100) gradient++;else gradient = 100;break;
+		case JUMPY_COLORS_ANIMATION:gradient=(frameNumber%theme.lookUpButtonAnimation(button)->speed)*100/theme.lookUpButtonAnimation(button)->speed;break;
+		case GLOWING_ANIMATION:gradient=(unsigned int)(50*(sin(3.141*frameNumber/theme.lookUpButtonAnimation(button)->speed)+1));break;
+		case BLINKING_ANIMATION:if(frameNumber<theme.lookUpButtonAnimation(button)->speed/2) gradient=0;else gradient=100;break;
+		default:break;
+	}
+
+	if(gradient > 100)
+		gradient = 100;
+
+	if(gradient != 100)
+		setNeedRedrawNotMoved();
+
 	Point absoluteCoord = getRelativePosition();
 	Size absoluteSize = getSize();
 	if(moveByMouse)
@@ -594,7 +626,7 @@ void UI_Button::process()
 	else
 		UI_Object::process();
 	
-	buttonPlacementArea.SetLeft( buttonPlacementArea.GetLeft() + getRelativePosition().x - absoluteCoord.x);
+/*	buttonPlacementArea.SetLeft( buttonPlacementArea.GetLeft() + getRelativePosition().x - absoluteCoord.x);
 	buttonPlacementArea.SetTop( buttonPlacementArea.GetTop() + getRelativePosition().y - absoluteCoord.y);
 	if(!doNotSetSize)
 	{
@@ -602,13 +634,13 @@ void UI_Button::process()
 		buttonPlacementArea.SetHeight( buttonPlacementArea.GetHeight() + getHeight() - absoluteSize.GetHeight());
 	} else doNotSetSize=false;
 
-
 	if(!hasBitmap)
 	{
 		adjustButtonSize(text->getTextSize());
 		text->setSize(getSize());
 	}
 
+*/
 	if(statusFlags & BF_WAS_PRESSED)
 		statusFlags |= BF_HIGHLIGHTED;
 	if(frameNumber<theme.lookUpButtonAnimation(button)->speed)
@@ -679,41 +711,10 @@ void UI_Button::process()
 
 	forcedPress = false;
 
-	// TODO evtl Animation fuer jede Phase in die config datei
-	// dann waere sowas moeglich, dass ich maus reinfahr und das langsam verblasst
-	// evtl auch einfach brightencolor ueberlegen...
-	if(!configuration.isGlowingButtons())
-	{
-		if(!(statusFlags & BF_HIGHLIGHTED))
-			gradient=100;
-		else 
-			if(frameNumber<theme.lookUpButtonAnimation(button)->speed/2) gradient=100;
-		else 
-			gradient=0;
-	} else			
-		if(!(statusFlags & BF_HIGHLIGHTED))
-			gradient += (100 - gradient) / 5 + 1;
-	else
-	switch(theme.lookUpButtonAnimation(button)->type)
-	{
-		case NO_ANIMATION:if(gradient<100) gradient++;else gradient=100;break;
-		case JUMPY_COLORS_ANIMATION:gradient=(frameNumber%theme.lookUpButtonAnimation(button)->speed)*100/theme.lookUpButtonAnimation(button)->speed;break;
-		case GLOWING_ANIMATION:gradient=(unsigned int)(50*(sin(3.141*frameNumber/theme.lookUpButtonAnimation(button)->speed)+1));break;
-		case BLINKING_ANIMATION:if(frameNumber<theme.lookUpButtonAnimation(button)->speed/2) gradient=0;else gradient=100;break;
-		default:break;
-	}
-
-	if(gradient > 100)
-		gradient = 100;
-
-//	if(gradient!=100)
-//		setNeedRedraw();
 	
 // TODO evtl ueberlegen, dass markierte buttons langsam verblassen wenn sie nicht mehr gehighlighted sind
 	// Problem: die mixColor arbeitet mit animation_phase, wenn ausserhalb der phase wird gradient ignoriert auf 
 
-//	if((oldRect != getAbsoluteRect()) || (oldPressDepth != pressdepth))
-//		setNeedRedraw();
 		
 //	if(!doesNeedRedraw())
 //		getParent()->addRect(getAbsoluteRect()); // Dieses rect NICHT neuzeichnen
@@ -800,7 +801,7 @@ const bool UI_Button::isCurrentlyActivated() const
 const bool UI_Button::isCurrentlyPressed() const
 {
 	if(!isShown())
-			return false;
+		return false;
 	if ( (statusFlags & BF_DOWN) || !isTimeSpanElapsed(timeStamp) )
 		return true;
 	else
@@ -831,7 +832,8 @@ void UI_Button::forcePress()
 //			{
    			statusFlags &= ~BF_DOWN;
 			setPressDepth(1);
-		} else if((!(statusFlags & BF_STATIC)) && (!(statusFlags & BF_DOWN)))
+		} 
+		else if((!(statusFlags & BF_STATIC)) && (!(statusFlags & BF_DOWN)))
 		{
 			statusFlags |= BF_LEFT_CLICKED | BF_DOWN;			 //~
 			setPressDepth(1); //?

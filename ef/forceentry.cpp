@@ -162,7 +162,11 @@ void ForceEntry::process()
 				r.SetWidth(((UI_Window*)getParent())->getClientRectWidth()-30);
 //			makeLocationGoal->Show();
 			makeTimeGoal->Show();
-			buttonPlacementArea.SetWidth(r.GetWidth());
+			if(r.GetWidth() < getWidth())
+			{
+				setWidth(r.GetWidth());
+				setNeedRedrawMoved();
+			}
 		}
 		else
 		if(!((UI_Window*)getParent())->getAbsoluteRect().Inside(mouse))
@@ -173,7 +177,8 @@ void ForceEntry::process()
 //			makeLocationGoal->Hide();
 			makeTimeGoal->Hide();
 			timeEntryBox->Hide();
-			buttonPlacementArea.SetWidth(r.GetWidth());
+//			buttonPlacementArea.SetWidth(r.GetWidth());
+			setWidth(r.GetWidth());
 		} else if(!makeTimeGoal->isCurrentlyPressed())
 		{
 			doNotAdaptSize();
@@ -182,7 +187,8 @@ void ForceEntry::process()
 //			makeLocationGoal->Hide();
 			makeTimeGoal->Hide();
 			timeEntryBox->Hide();
-			buttonPlacementArea.SetWidth(r.GetWidth());
+//			buttonPlacementArea.SetWidth(r.GetWidth());
+			setWidth(r.GetWidth());
 		}
 	}
 	UI_Button::process();
@@ -224,21 +230,22 @@ void ForceEntry::process()
 																																							
 void ForceEntry::setTargetForce(const unsigned int force)
 {
-	if(targetForce!=force)
+	if(targetForce != force)
 	{
-		startForce=currentForce;
-		targetForce=force;
-//		setNeedRedraw();
+		startForce = currentForce;
+		targetForce = force;
+		setNeedRedrawNotMoved();
 	}
 }
 
 void ForceEntry::draw(DC* dc) const
 {
-	if(!isShown()) return;
+	if(!isShown()) 
+		return;
 	UI_Button::draw(dc);
+	if(!checkForNeedRedraw())
+		return;
 
-//	if(doesNeedRedraw())
-	{
 	dc->SetBrush(*theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+getType())));
 	dc->SetPen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN+getType())));
 	dc->DrawEdgedRoundedRectangle(Rect(getAbsolutePosition()+Point(getWidth()-currentForce-1, 1), Size(currentForce+1, FONT_SIZE+4)), 3);
@@ -287,7 +294,6 @@ void ForceEntry::draw(DC* dc) const
 		}
 		s = dc->GetTextExtent(os.str());
 		dc->DrawText(os.str(), getAbsolutePosition() + Point(getWidth() - s.GetWidth() - 100, 2));
-	}
 	}
 }
 																																							

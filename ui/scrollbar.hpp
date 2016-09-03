@@ -3,19 +3,25 @@
 
 #include "button.hpp"
 
-class UI_Scrollbar:public UI_Object
+class UI_Window;
+
+class UI_Scrollbar : public UI_Object
 {
 	public:
 		UI_Scrollbar& operator=(const UI_Scrollbar& object);
 		UI_Scrollbar(const UI_Scrollbar& object);
-		UI_Scrollbar(UI_Object* scroll_parent, const Point topRightCorner, const unsigned int max_height, const bool scroll_hideable = false);
+		UI_Scrollbar(UI_Object* scroll_parent, /*const Rect& clientrect?*/ const unsigned int start_y, const unsigned int max_height, const bool scroll_hideable = false);
 		~UI_Scrollbar();
 
 		void process(); // process messages, continue animation etc.
 		void draw(DC* dc) const;
-        const signed int getScrollY() const;
+		const signed int getScrollY() const;
 
 		void setMaxScrollY(const unsigned int max_scrolly);
+
+		void moveUp();
+		void moveDown();
+
 	protected:
 	private:
 		UI_Button* add;
@@ -24,11 +30,10 @@ class UI_Scrollbar:public UI_Object
 		bool hideable; // hides if total height is smaller maxheight
 		signed int internalScrollY;
 		unsigned int internalHeight;
-		
 		signed int currentScrollY;
-		unsigned int currentHeight;
-
+		unsigned int barHeight;
 		unsigned int maxScrollY;
+		unsigned int startY;
 };
 
 #endif // _UI_SCROLLBAR_HPP

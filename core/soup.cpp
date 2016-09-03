@@ -7,13 +7,10 @@ SOUP::SOUP() :
 	newcalc(true),
 	isNewRun(false)
 {
-	for(int i=MAX_PROGRAMS;i--;)
-		player[i]=NULL;
-	for(int i=MAX_PLAYER;i--;)
-		anaplayer[i]=NULL;
+	memset(player, 0, MAX_PROGRAMS * sizeof(RACE*));
+	memset(anaplayer, 0, MAX_PLAYER * sizeof(ANARACE*));
 //	playerInitialized=0;
 //	goalCount=0;
-//	gaInitialized=0;
 //	goalsInitialized=0;
 }
 
@@ -56,9 +53,6 @@ SOUP& SOUP::operator=(const SOUP& object)
 	return(*this);
 }
 
-
-
-	
 void SOUP::initSoup()
 {
 /* benoetigt folgende initialisierte Daten:
@@ -75,11 +69,7 @@ void SOUP::initSoup()
 		toLog("ERROR: (SOUP::initSoup) Goals not initialized.");
 		return(0);
 	}
-	if(!gaInitialized)
-	{
-		toLog("ERROR: (SOUP::initSoup) GA not initialized.");
-		return(0);
-	}*/
+	*/
 #endif
 //	if(playerInitialized)
 //	{
@@ -92,14 +82,14 @@ void SOUP::initSoup()
 		toLog("ERROR: (SOUP::initSoup) Map not initialized.");
 		return(0);
 	}*/
-	int groupSize=MAX_PROGRAMS/mapPlayerNum;
+	int groupSize = MAX_PROGRAMS / mapPlayerNum;
 	
 //differenzieren, damit auch restarts/updates moeglich sind waehrend dem run! TODO
 	
 	int k;
-	for(k=mapPlayerNum;k--;)
+	for(k = mapPlayerNum; k--;)
 	{
-		for(int i=groupSize;i--;)
+		for(int i = groupSize; i--;)
 		{
 			if(player[i+k*groupSize])
 				player[i+k*groupSize]->resetData();
@@ -116,14 +106,14 @@ void SOUP::initSoup()
 		else
 		{
 			delete anaplayer[k];
-			anaplayer[k]=new ANARACE();
+			anaplayer[k] = new ANARACE();
 		}
 		anaplayer[k]->setPlayerNumber(k+1);
 	}
-	for(k=mapPlayerNum;k<MAX_PLAYER;k++)
+	for(k = mapPlayerNum; k < MAX_PLAYER; k++)
 	{
 		delete anaplayer[k];
-		anaplayer[k]=NULL;
+		anaplayer[k] = NULL;
 	}
 		//what about 'player'?
 }
@@ -141,26 +131,25 @@ void SOUP::checkForChange() const
 			anaplayer[k]->setTotalGeneration(0); //?
 			anaplayer[k]->setMaxpFitness(0);
 			anaplayer[k]->setMaxsFitness(0);
-			anaplayer[k]->setMaxtFitness(0);
 			anaplayer[k]->setUnchangedGenerations(0);
 		}
 	if(changed)
 		calculateAnaplayer(); // TODO */
 }
 
+
 struct SoupPlayerDescendingFitnessSort {
-	bool operator()(RACE* const& playerStart, RACE* const& playerEnd) {
-		return ((playerStart->getpFitness()>playerEnd->getpFitness())||
-			   ((playerStart->getpFitness()==playerEnd->getpFitness())&&(playerStart->getsFitness() > playerEnd->getsFitness()))||
-			   ((playerStart->getpFitness()==playerEnd->getpFitness())&&(playerStart->getsFitness() == playerEnd->getsFitness())&&(playerStart->gettFitness()>playerEnd->gettFitness())) );
-	}
+        bool operator()(RACE* const& playerStart, RACE* const& playerEnd) {
+                return ((playerStart->getpFitness()>playerEnd->getpFitness())||((playerStart->getpFitness()==playerEnd->getpFitness())&&(playerStart->getsFitness() > playerEnd->getsFitness()))||
+                           ((playerStart->getpFitness()==playerEnd->getpFitness())&&(playerStart->getsFitness() == playerEnd->getsFitness())&&(playerStart->gettFitness()>playerEnd->gettFitness())) );
+        }
 };
 
 void SOUP::calculateAnaplayer() const
 {
 	PRERACE::copyMap(); // copy all units from start map to 'work sheet' ;)
 
-	for(int k=mapPlayerNum;k--;)
+	for(unsigned int k = mapPlayerNum; k--;)
 		if(anaplayer[k]->isActive())
 		{
 			anaplayer[k]->prepareForNewGeneration();
@@ -171,8 +160,8 @@ void SOUP::calculateAnaplayer() const
 	bool complete=false;
 	while(!complete)
 	{
-		complete=true;
-		for(int k=mapPlayerNum;k--;)
+		complete = true;
+		for(unsigned int k = mapPlayerNum; k--;)
 			if(anaplayer[k]->isActive())
 				complete&=anaplayer[k]->calculateStep();
 	}
@@ -194,11 +183,7 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 		toLog("ERROR: (SOUP::newGeneration) Goals not initialized.");
 		return(0);
 	}
-	if(!gaInitialized)
-	{
-		toLog("ERROR: (SOUP::newGeneration) GA not initialized.");
-		return(0);
-	}*/
+	*/
 #endif
 //	if(anaplayer[0]->getRun()>=ga->getMaxRuns()) //~~
 //		return(0);
@@ -227,13 +212,13 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 // check whether goals etc. have changed
 //		checkForChange();
 
-	for(int i=groupSize;i--;)
+	for(unsigned int i=groupSize;i--;)
 	{
 // Map mit Startwerten initialisieren, muss JEDEN Durchlauf passieren!! sonst sammeln sich in der statischen loc variable Haufenweise Commando Centers an 8-)
 		PRERACE::copyMap();
 
 		//reset code && calculate 
-		for(int k=mapPlayerNum;k--;)
+		for(unsigned int k = mapPlayerNum; k--;)
 			if(anaplayer[k]->isActive())
 			{
 				player[k*groupSize+i]->prepareForNewGeneration();
@@ -269,11 +254,11 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 			for(int i=configuration.getBreedFactor()*groupSize/100;i--;) // % are replaced by the uber-program :-o
 			{
 				int l=rand() % (groupSize*configuration.getBreedFactor()/100) + groupSize*(100-configuration.getBreedFactor())/100;
-				if((player[k*groupSize+l]->getpFitness()*1.1<player[k*groupSize]->getpFitness())||
-					  ((player[k*groupSize+l]->getpFitness()==player[k*groupSize]->getpFitness())&&(player[k*groupSize+l]->getsFitness()*1.1<player[k*groupSize]->getsFitness()))||
-					  ((player[k*groupSize+l]->getpFitness()==player[k*groupSize]->getpFitness())&&(player[k*groupSize+l]->getsFitness()==player[k*groupSize]->getsFitness())&&(player[k*groupSize+l]->gettFitness()*1.1<player[k*groupSize]->gettFitness())) )
+                                if((player[k*groupSize+l]->getpFitness()*1.1<player[k*groupSize]->getpFitness())||
+                                          ((player[k*groupSize+l]->getpFitness()==player[k*groupSize]->getpFitness())&&(player[k*groupSize+l]->getsFitness()*1.1<player[k*groupSize]->getsFitness()))||
+                                          ((player[k*groupSize+l]->getpFitness()==player[k*groupSize]->getpFitness())&&(player[k*groupSize+l]->getsFitness()==player[k*groupSize]->getsFitness())&&(player[k*groupSize+l]->gettFitness()*1.1<player[k*groupSize]->gettFitness())) )
+					player[k*groupSize+l]->copyCode(*player[k*groupSize]);
 
-				player[k*groupSize+l]->copyCode(*player[k*groupSize]);
 /*				for(int j=MAX_LENGTH;j--;)
 				{
 					player[k*groupSize+l]->Code[j]=player[k*groupSize]->Code[j];
@@ -286,46 +271,46 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 		}
 
 // Do we have a new best player?
-		newcalc=0;
-		for(int k=mapPlayerNum;k--;)
-			if(anaplayer[k]->isActive())
-			{
-				if((player[k*groupSize]->getpFitness()>anaplayer[k]->getMaxpFitness())||
+		newcalc = false;
+                for(int k=mapPlayerNum;k--;)
+                        if(anaplayer[k]->isActive())
+                        {
+                                if((player[k*groupSize]->getpFitness()>anaplayer[k]->getMaxpFitness())||
 
-				  ((player[k*groupSize]->getpFitness()>=anaplayer[k]->getMaxpFitness())
-				 &&(player[k*groupSize]->getsFitness()>anaplayer[k]->getMaxsFitness()))||
+                                  ((player[k*groupSize]->getpFitness()>=anaplayer[k]->getMaxpFitness())
+                                 &&(player[k*groupSize]->getsFitness()>anaplayer[k]->getMaxsFitness()))||
 
-				  ((player[k*groupSize]->getpFitness()>=anaplayer[k]->getMaxpFitness())
-				 &&(player[k*groupSize]->getsFitness()>=anaplayer[k]->getMaxsFitness())
-				 &&(player[k*groupSize]->gettFitness()>anaplayer[k]->getMaxtFitness())))
-				{
+                                  ((player[k*groupSize]->getpFitness()>=anaplayer[k]->getMaxpFitness())
+                                 &&(player[k*groupSize]->getsFitness()>=anaplayer[k]->getMaxsFitness())
+                                 &&(player[k*groupSize]->gettFitness()>anaplayer[k]->getMaxtFitness())))
+                                {
 
-					if(player[k*groupSize]->gettFitness()>anaplayer[k]->getMaxtFitness())
-						anaplayer[k]->setMaxtFitness(player[k*groupSize]->gettFitness());
-					if(player[k*groupSize]->getsFitness()>anaplayer[k]->getMaxsFitness())
-					{
-						anaplayer[k]->setMaxsFitness(player[k*groupSize]->getsFitness());
-						anaplayer[k]->setMaxtFitness(player[k*groupSize]->gettFitness());
-					}
-					if(player[k*groupSize]->getpFitness()>anaplayer[k]->getMaxpFitness())
-					{
-						anaplayer[k]->setMaxpFitness(player[k*groupSize]->getpFitness());
-						anaplayer[k]->setMaxsFitness(player[k*groupSize]->getsFitness());
-						anaplayer[k]->setMaxtFitness(player[k*groupSize]->gettFitness());
-					}
-					anaplayer[k]->setUnchangedGenerations(0);
-					newcalc=1;
-					anaplayer[k]->copyCode(*player[k*groupSize]);
-/*					for(int i=MAX_LENGTH;i--;)
-					{
-	// assign the 'best of breed' to anaplayer
-						anaplayer[k]->Code[i]=player[k*groupSize]->Code[i];
-						anaplayer[k]->Marker[i]=player[k*groupSize]->Marker[i];
-					//memcpy(anaplayer[j]->Code[0],player[j*MAX_PROGRAMS/2]->Code[0],MAX_LENGTH*4);
-					//memcpy(anaplayer[j]->Code[1],player[j*MAX_PROGRAMS/2]->Code[1],MAX_LENGTH*4);
-					}*/
-				}
-			}
+                                        if(player[k*groupSize]->gettFitness()>anaplayer[k]->getMaxtFitness())
+                                                anaplayer[k]->setMaxtFitness(player[k*groupSize]->gettFitness());
+                                        if(player[k*groupSize]->getsFitness()>anaplayer[k]->getMaxsFitness())
+                                        {
+                                                anaplayer[k]->setMaxsFitness(player[k*groupSize]->getsFitness());
+                                                anaplayer[k]->setMaxtFitness(player[k*groupSize]->gettFitness());
+                                        }
+                                        if(player[k*groupSize]->getpFitness()>anaplayer[k]->getMaxpFitness())
+                                        {
+                                                anaplayer[k]->setMaxpFitness(player[k*groupSize]->getpFitness());
+                                                anaplayer[k]->setMaxsFitness(player[k*groupSize]->getsFitness());
+                                                anaplayer[k]->setMaxtFitness(player[k*groupSize]->gettFitness());
+                                        }
+                                        anaplayer[k]->setUnchangedGenerations(0);
+                                        newcalc = true;
+                                        anaplayer[k]->copyCode(*player[k*groupSize]);
+/*                                      for(int i=MAX_LENGTH;i--;)
+                                        {
+        // assign the 'best of breed' to anaplayer
+                                                anaplayer[k]->Code[i]=player[k*groupSize]->Code[i];
+                                                anaplayer[k]->Marker[i]=player[k*groupSize]->Marker[i];
+                                        //memcpy(anaplayer[j]->Code[0],player[j*MAX_PROGRAMS/2]->Code[0],MAX_LENGTH*4);
+                                        //memcpy(anaplayer[j]->Code[1],player[j*MAX_PROGRAMS/2]->Code[1],MAX_LENGTH*4);
+                                        }*/
+                                }
+                        }
 
 //TODO: Kinder sofort neuberechnen
 // Anzahl Tournaments pro Spieler: (MAX_PROGRAMS/mapPlayerNum)/(100/configuration.getCrossOver())
@@ -341,8 +326,7 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 				{
 					for(int l=(k*groupSize)+i*(100/ga->getCrossOver());l<j;l++)
 						if((player[j]->getpFitness()>player[l]->getpFitness())||
-						  ((player[j]->getpFitness()==player[l]->getpFitness())&&(player[j]->getsFitness()>player[l]->getsFitness()))||
-						  ((player[j]->getpFitness()==player[l]->getpFitness())&&(player[j]->getsFitness()==player[l]->getsFitness())&&(player[j]->gettFitness()>player[l]->gettFitness())) )
+						  ((player[j]->getpFitness()==player[l]->getpFitness())&&(player[j]->getsFitness()>player[l]->getsFitness()))))
 							  std::swap(player[l], player[j]);
 				}
 			}
@@ -381,8 +365,8 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 			
 			for(unsigned int i=k*groupSize;i<(k+1)*groupSize;i++)
 			{
-				int z=anaplayer[k]->fitnessAverage-player[i]->getpFitness();
-				anaplayer[k]->fitnessVariance+=(z*z);
+				unsigned int z = anaplayer[k]->fitnessAverage-player[i]->getpFitness();
+				anaplayer[k]->fitnessVariance += (z*z);
 			}
 			anaplayer[k]->fitnessVariance/=MAX_PROGRAMS;
 //			anaplayer[k]->analyzeBuildOrder(); TODO?
@@ -431,7 +415,6 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 			s[k]->setTotalGeneration(anaplayer[k]->getTotalGeneration());
 			s[k]->setMaxpFitness(anaplayer[k]->getMaxpFitness());
 			s[k]->setMaxsFitness(anaplayer[k]->getMaxsFitness());
-			s[k]->setMaxtFitness(anaplayer[k]->getMaxtFitness());
 
 			s[k]->setPlayerNumber(anaplayer[k]->getPlayer());
 			s[k]->setPlayerNumber(anaplayer[k]->getPlayerNumber());
@@ -481,21 +464,9 @@ const bool SOUP::getIsNewRun()
 {
 	if(isNewRun)
 	{
-		isNewRun=false;
+		isNewRun = false;
 		return(true);
 	} else return(false);
-}
-			
-
-
-void SOUP::setMapPlayerNum(const unsigned int map_player_num)
-{
-#ifdef _SCC_DEBUG
-	if((map_player_num<1)||(map_player_num>=MAX_PLAYER)) {
-		toLog("DEBUG: (SOUP::setMapPlayerNum): map_player_num not initialized.");return;
-	}
-#endif
-	mapPlayerNum = map_player_num;
 }
 
 void SOUP::setParameters(START* start_parameters)
@@ -505,11 +476,10 @@ void SOUP::setParameters(START* start_parameters)
 		toLog("DEBUG: (SOUP::setParameters): Value start not initialized.");return;
 	}
 #endif
-//	gaInitialized=1;
-	ANARACE::resetStaticData();
 	start = start_parameters;
 	setMapPlayerNum((*start->getMap())->getMaxPlayer()); // ~~~
 	PRERACE::assignStart(start);
+	ANARACE::resetStaticData();
 	initSoup();
 }
 

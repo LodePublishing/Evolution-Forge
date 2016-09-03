@@ -5,7 +5,7 @@ extern const unsigned int MIN_HEIGHT; // TODO in bograph?
 
 #include "object.hpp"
 #include "radio.hpp"
-//#include "scrollbar.hpp"
+#include "scrollbar.hpp"
 
 enum eIsScrolled
 {
@@ -76,7 +76,6 @@ class UI_Window : public UI_Object
 
 // 		reconfigure rectangles depending on current theme settings
 		void updateRectangles(const unsigned int maxPlayer);
-
 		
 		static const bool getChangedFlag();
 		static void setChangedFlag(const bool flag=true);
@@ -95,8 +94,14 @@ class UI_Window : public UI_Object
 		void forcePressTab(const eTab press_tab);
 
 		static unsigned int rectnumber;
-		const bool fitItemToRelativeClientRect(Rect& rectangle, const unsigned int adjust=0);
-		const bool fitItemToAbsoluteClientRect(Rect& rectangle, const unsigned int adjust=0);
+		const bool fitItemToRelativeClientRect(const Rect& rectangle, const unsigned int adjust = 0);
+		const bool fitItemToAbsoluteClientRect(const Rect& rectangle, const unsigned int adjust = 0);
+
+		UI_Object* getScrollbar() const; 
+		const unsigned int getMaxHeight() const;
+
+		void wheelUp();
+		void wheelDown();
 
 	protected:
 //		bool isMouseInsideClientArea();
@@ -104,18 +109,13 @@ class UI_Window : public UI_Object
 		UI_Radio* tabRow;
 		UI_Button* tab[MAX_TABS];
 		
-	
 		eWindow window;
 		
 		eTab currentTab; // maybe move to 'theme'
-		
 
 // no set/get for title as this is unique and does not change
 		eString titleString;
 		string titleParameter;
-		
-// this windows may have a scroll bar		
-//		UI_Scrollbar* scrollBar;
 		
 		Rect originalRect;
 
@@ -148,7 +148,18 @@ class UI_Window : public UI_Object
 
 		static bool changedFlag; 
 		static bool resetFlag;
+		
+// this windows may have a scroll bar		
+		UI_Scrollbar* scrollBar;
 };
+
+inline const unsigned int UI_Window::getMaxHeight() const {
+	return(maxHeight);
+}
+
+inline UI_Object* UI_Window::getScrollbar() const {
+	return(scrollBar);
+}
 
 inline const Rect& UI_Window::getRelativeClientRect() const {
 	return(clientRect);

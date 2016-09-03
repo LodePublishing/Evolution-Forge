@@ -68,12 +68,12 @@
 		Ship Weapons
 		Refinery 
 		Gas SCV
-		MOVE_ONE_3_FORWARD
-		MOVE_ONE_1_FORWARD
-		MOVE_ONE_1_BACKWARD
-		Rotate
-		Follow
-		Reset
+                Build parallel two
+                Build parallel four
+                Build parallel eight
+                Build parallel sixteen
+		All from Gas to Minerals
+		NULL
 		Vespene Geysir
 		Mineral Patch
 		R_STIM_PACKS
@@ -173,11 +173,11 @@
 		NULL
 		Assimilator
 		Gas Probe
-		NULL
-		NULL
-		NULL
-		NULL
-		NULL
+		Build parallel two
+		Build parallel four
+		Build parallel eight
+		Build parallel sixteen
+		All from Gas to Minerals
 		NULL
 		Vespene Geysir
 		Minerals
@@ -278,11 +278,11 @@
 		NULL
 		Extractor
 		Gas Drone
-		NULL
-		NULL
-		NULL
-		NULL
-		NULL
+		Build parallel two
+		Build parallel four
+		Build parallel eight
+		Build parallel sixteen
+		All from Gas to Minerals
 		NULL
 		Vespene Geysir
 		Minerals
@@ -504,6 +504,7 @@
 		Restrict units
 		Facility mode
 		Autosave runs
+		Always build workers
 		Preprocess build order
 		Max length
 		Number of runs
@@ -542,6 +543,7 @@
 		Shall only StarCraft (TM) units be allowed to be build?
 		Shall the items in the 'add goal' menu be ordered by theme or by facility?
 		Shall the build orders be automaticly saved at the end of a run or should I ask what to do?
+		Shall the program try to always build workers?~
 		Shall a randomly created or a preprocessed build order used at the beginning?
 		Maximum length of a build order
 		How often shall the program restart to get an optimal build order?

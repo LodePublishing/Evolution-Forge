@@ -11,6 +11,8 @@ class MAP_LOCATION
 		unsigned int mineralDistance;
 		unsigned int distance[MAX_LOCATIONS];
 		unsigned int nearest[MAX_LOCATIONS];
+		static unsigned int maxLocations;
+		static const unsigned int getMaxLocations();
 	public:
 		MAP_LOCATION();
 		~MAP_LOCATION();
@@ -33,7 +35,31 @@ class MAP_LOCATION
 		void resetData();
 		void calculateDistances();
 		void adjustDistances();
+		
+		static void setMaxLocations(const unsigned int max_locations);
 };
+
+inline void MAP_LOCATION::setMaxLocations(const unsigned int max_locations)
+{
+#ifdef _SCC_DEBUG
+// TODO constant
+        if(max_locations > MAX_LOCATIONS) {
+                toLog("DEBUG: (MAP_LOCATION::setMaxLocations): Value out of range.");return;
+        }
+#endif
+	maxLocations=max_locations;
+}
+
+inline const unsigned int MAP_LOCATION::getMaxLocations()
+{
+#ifdef _SCC_DEBUG
+// TODO constant
+        if(maxLocations > MAX_LOCATIONS) {
+                toLog("DEBUG: (MAP_LOCATION::getMaxLocations): Variable maxLocations out of range.");return(0);
+        }
+#endif
+	return(maxLocations);
+}
 
 inline void MAP_LOCATION::setName(const std::string& location_name)
 {
@@ -42,11 +68,23 @@ inline void MAP_LOCATION::setName(const std::string& location_name)
 
 inline const unsigned int MAP_LOCATION::getMineralPatches() const
 {
+#ifdef _SCC_DEBUG
+// TODO constant
+	if(mineralPatches > 100) {
+		toLog("DEBUG: (MAP_LOCATION::getMineralPatches): Variable mineralPatches out of range.");return(0);
+	}
+#endif			
 	return(mineralPatches);
 }
 
 inline const unsigned int MAP_LOCATION::getVespeneGeysirs() const
 {
+#ifdef _SCC_DEBUG
+// TODO constantv
+        if(vespeneGeysirs > 100) {
+                toLog("DEBUG: (MAP_LOCATION::getVespeneGeysirs): Value vespeneGeysirs out of range.");return(0);
+        }
+#endif
 	return(vespeneGeysirs);
 }
 
@@ -85,7 +123,7 @@ inline void MAP_LOCATION::setMineralDistance(const unsigned int mineral_distance
 inline const unsigned int MAP_LOCATION::getNearest(const unsigned int step) const
 {
 #ifdef _SCC_DEBUG
-	if((step<=0)||(step>=MAX_LOCATIONS)) {
+	if((step<=0)||(step>=maxLocations)) {
 		toLog("DEBUG: (MAP_LOCATION::getNearest): Value out of range.");return(0);
 	}
 #endif
@@ -96,12 +134,12 @@ inline const unsigned int MAP_LOCATION::getNearest(const unsigned int step) cons
 inline void MAP_LOCATION::setDistance(const unsigned int target, const unsigned int location_distance)
 {
 #ifdef _SCC_DEBUG
-	if(target>=MAX_LOCATIONS) {
+	if(target>=maxLocations) {
 		toLog("DEBUG: (MAP_LOCATION::setDistance): Value target out of range.");return;
 	}
-	if(location_distance>500) {
-		toLog("DEBUG: (MAP_LOCATION::setDistance): Value distance out of range.");return;
-	}
+//	if(location_distance>) {
+//		toLog("DEBUG: (MAP_LOCATION::setDistance): Value distance out of range.");return;
+//	}
 #endif
 	distance[target] = location_distance;
 }
@@ -124,12 +162,12 @@ inline const unsigned int MAP_LOCATION::getMineralDistance() const
 inline const unsigned int MAP_LOCATION::getDistance(const unsigned int location) const
 {
 #ifdef _SCC_DEBUG
-	if(location>=MAX_LOCATIONS) {
+	if(location>=maxLocations) {
 		toLog("DEBUG: (MAP_LOCATION::getDistance): Value out of range.");return(0);
 	}
-	if(distance[location]>500) {
-		toLog("DEBUG: (MAP_LOCATION::getDistance): Value distance out of range.");return(0);
-	}
+//	if(distance[location]>500) {
+//		toLog("DEBUG: (MAP_LOCATION::getDistance): Value distance out of range.");return(0);
+//	}
 #endif
 	return(distance[location]);
 }

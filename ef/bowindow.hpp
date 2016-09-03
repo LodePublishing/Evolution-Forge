@@ -2,21 +2,20 @@
 #define _GUI_BOWINDOW_HPP
 
 #include "../ui/window.hpp"
-#include "order.hpp"
 #include "message.hpp"
 
 #include "info.hpp"
 #include <list>
 
 #include "boentry.hpp"
-
+#include "../ui/scrollbar.hpp"
 
 class BoWindow : public UI_Window
 {
 	public:
 		BoWindow(const BoWindow& object);
 		BoWindow& operator=(const BoWindow& object);
-		BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_info_window, MessageWindow* message_window, std::list<Order*>* bo_order_list,/* bool* fixed,*/ const unsigned int bo_window_number);
+		BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_info_window, MessageWindow* message_window, /* bool* fixed,*/ const unsigned int bo_window_number);
 		~BoWindow();
 		void resetData();
 		void draw(DC* dc) const;
@@ -31,7 +30,6 @@ class BoWindow : public UI_Window
 //		void resetButtons();
 		InfoWindow* infoWindow;
 		ANARACE* anarace;
-		std::list<Order*>* orderList;
 		std::list<BoEntry*> boList;
 		unsigned int optimizeMode;
 //		int new_one;
@@ -54,7 +52,7 @@ class BoWindow : public UI_Window
 
 		MessageWindow* msgWindow;
 		bool* fixed;
-
+		UI_Scrollbar* scrollBar;
 };
 
 #endif // _GUI_BOWINDOW_HPP

@@ -135,7 +135,7 @@ inline void START::setStartPosition(const unsigned int playerNum, const unsigned
 	if((playerNum < 1) || (playerNum >= MAX_PLAYER)) {
 		toLog("DEBUG: (START::setStartPosition): Value playerNum out of range.");return;
 	}
-	if((start_position < 1) || (start_position >= MAX_LOCATIONS)) {
+	if((start_position < 1) || (start_position >= tmpmap->getMaxLocations())) {
 		toLog("DEBUG: (START::setStartPosition): Value start_position out of range.");return;
 	}
 #endif

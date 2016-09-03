@@ -132,14 +132,14 @@ void Menu::process()
 		}
 		else
 		{
-			if((*m)->getAbsolutePosition().x < p1.x)
-				p1.x = (*m)->getAbsolutePosition().x;
-			if((*m)->getAbsolutePosition().y < p1.y)
-				p1.y = (*m)->getAbsolutePosition().y;
-			if((*m)->getAbsolutePosition().x + ((signed int)((*m)->getWidth())) > p2.x)
-				p2.x = (*m)->getAbsolutePosition().x + ((signed int)((*m)->getWidth()));
-			if((*m)->getAbsolutePosition().y + ((signed int)((*m)->getHeight())) > p2.y)
-				p2.y = (*m)->getAbsolutePosition().y + ((signed int)((*m)->getHeight()));
+			if((*m)->getAbsoluteLeftBound() < p1.x)
+				p1.x = (*m)->getAbsoluteLeftBound();
+			if((*m)->getAbsoluteUpperBound() < p1.y)
+				p1.y = (*m)->getAbsoluteUpperBound();
+			if((*m)->getAbsoluteRightBound() > p2.x)
+				p2.x = (*m)->getAbsoluteRightBound();
+			if((*m)->getAbsoluteLowerBound() > p2.y)
+				p2.y = (*m)->getAbsoluteLowerBound();
 
 			if ((*m)->isLeftClicked())
 				pressedItem = i;
@@ -158,6 +158,8 @@ void Menu::draw(DC* dc) const
 	if((!isShown())||(p1 > p2))
 		return;
 	UI_Object::draw(dc);
+	if(!checkForNeedRedraw())
+		return;
 	Rect edge = Rect(p1 - Size(3,3), Size(p2.x-p1.x+6, p2.y-p1.y+6) );
 	dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 	dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));

@@ -66,7 +66,7 @@ inline void GOAL::setCount(const unsigned int goal_count)
 inline void GOAL::setLocation(const unsigned int goal_location)
 {
 #ifdef _SCC_DEBUG
-	if((goal_location >= MAX_LOCATIONS)) {
+	if((goal_location >= MAX_LOCATIONS)) { // TODO
 		 toLog("DEBUG: (GOAL::setLocation): Value goal_location out of range.");return;
 	}
 #endif
@@ -117,7 +117,7 @@ inline const unsigned int GOAL::getCount() const
 inline const unsigned int GOAL::getLocation() const
 {
 #ifdef _SCC_DEBUG
-	if((location >= MAX_LOCATIONS)) {
+	if((location >= MAX_LOCATIONS)) { // TODO
 		 toLog("DEBUG: (GOAL::getLocation): Variable not initialized.");return(0);
 	}
 #endif

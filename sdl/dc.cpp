@@ -61,7 +61,7 @@ void DC::setFullscreen(const bool full_screen)
 void DC::updateScreen() const
 {
 	SDL_Flip(surface);
-//	SDL_UpdateRect(surface, 0, 0, 0, 0);
+//	SDL_UpdateRect(surface, 0, 0, 1000, 200);
 }
 void DC::DrawBitmap(const Bitmap& bitmap, const signed int x, const signed int y) const
 {

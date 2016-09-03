@@ -53,7 +53,14 @@ void MessageWindow::process()
 void MessageWindow::draw( DC* dc ) const
 {
 	if(!isShown()) return;
+	if(!checkForNeedRedraw())
+	{
+		UI_Window::draw(dc);
+		return;
+	}
 	UI_Window::draw(dc);
+	
+	
 	dc->SetFont(theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
 	dc->SetTextForeground(*theme.lookUpColor(FORCE_TEXT_COLOR));
 	for(list<Message>::const_iterator m=message.begin(); m!=message.end(); ++m)

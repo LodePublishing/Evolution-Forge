@@ -7,8 +7,13 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect) :
 	targetRect(relative_rect),
 
 	filledHeight(relative_rect.GetHeight()),
-	children(NULL),
 //	notDrawRectList(),
+	firstItemY(0),
+	lastItemY(0),
+	children(NULL),
+	background(NULL),
+	oldRect(),
+
 	shown(true),
 	disabledFlag(false),
 
@@ -19,12 +24,11 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect) :
 	min_top_right_x(0),
 	min_bottom_right_x(0),	
 
-
-//	needRedraw(true),
+	needRedraw(true),
 //	tempSurface(NULL),
 	prevBrother(this),
 	nextBrother(this),
-	parent(0),
+	parent(NULL),
 	relativeRect(relative_rect),
 //	lastRect(),
 	doAdjustments(1),
@@ -37,14 +41,19 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect) :
 UI_Object::~UI_Object()
 {
 	removeFromFamily(); // !!!!!
+	SDL_FreeSurface(background);
 }
 
 UI_Object& UI_Object::operator=(const UI_Object& object)
 {
 	startRect = object.startRect;
 	targetRect = object.targetRect;
+	firstItemY = object.firstItemY;
+	lastItemY = object.lastItemY;
 	filledHeight = object.filledHeight;
 	children = object.children;
+	background = object.background;
+	oldRect = object.oldRect;
 //	notDrawRectList = object.notDrawRectList,
 	shown = object.shown;
 	disabledFlag = object.disabledFlag;
@@ -55,7 +64,7 @@ UI_Object& UI_Object::operator=(const UI_Object& object)
 	min_bottom_left_x = object.min_bottom_left_x;
 	min_top_right_x = object.min_top_right_x;
 	min_bottom_right_x = object.min_bottom_right_x;
-//	needRedraw = object.needRedraw;
+	needRedraw = object.needRedraw;
 //	SDL_FreeSurface(tempSurface);
 //DL_Crate
 //	tempSurface = object.tempSurface;
@@ -76,8 +85,13 @@ UI_Object::UI_Object(const UI_Object& object) :
 	startRect( object.startRect ),
 	targetRect( object.targetRect ),
 	filledHeight( object.filledHeight ),
-	children( object.children ),
 //	notDrawRectList( object.notDrawRectList ),
+	firstItemY( object.firstItemY ), 
+	lastItemY( object.lastItemY ), 
+	children( object.children ),
+	background( object.background ),
+	oldRect( object.oldRect),
+
 	shown( object.shown ), 
 	disabledFlag( object.disabledFlag ),
 
@@ -88,7 +102,7 @@ UI_Object::UI_Object(const UI_Object& object) :
 	min_top_right_x( object.min_top_right_x ),
 	min_bottom_right_x( object.min_bottom_right_x ),
 
-//	needRedraw( object.needRedraw ),
+	needRedraw( object.needRedraw ),
 //	tempSurface( object.tempSurface ),
 	prevBrother( this ), // !!
 	nextBrother( this ), // !!
@@ -159,7 +173,6 @@ void UI_Object::adjustRelativeRect(Rect edge)
 	if(edge != targetRect)
 	{
 // neues Ziel?
-
 		if((edge.GetLeft()!=targetRect.GetLeft())||(edge.GetRight()!=targetRect.GetRight()))
 		{
 			startRect.SetLeft(getRelativeLeftBound());
@@ -294,9 +307,8 @@ void UI_Object::addRectToBeDrawn(Rect& lastRect, const Rect currentRect)
 #endif
 void UI_Object::process()
 {
-	if (/*(disabledFlag)||*/(!shown)) //~~
-		return;
-//	needRedraw=false;
+//	if (/*(disabledFlag)||*/(!isShown())) //~~
+//		return;
 
 //	while(!notDrawRectList.empty())
 //		notDrawRectList.pop_front();
@@ -306,9 +318,11 @@ void UI_Object::process()
 		adjustRelativeRect(Rect(Point(targetRect.GetTopLeft()), Size(targetRect.GetWidth(), filledHeight+25))); // TODO!
 //		ARGH
 		doAdjustments=2;
-	}	
-
-	relativeRect.move(startRect, targetRect);
+	}
+	oldRect = getRelativeRect();
+	if(relativeRect.move(startRect, targetRect));
+	if(oldRect != getRelativeRect())
+		setNeedRedrawMoved();
 #if 0
 	if((lastRect!=getAbsoluteRect())||(needRedraw))
 	{
@@ -399,21 +413,32 @@ UI_Object* UI_Object::checkHighlight()
 	return(result);
 }
 
-/*const bool UI_Object::doesNeedRedraw() const
-{
-	return(needRedraw);
-}
-
-void UI_Object::setNeedRedraw(const bool need_redraw)
-{
-	this->needRedraw=need_redraw;
-}*/
-
 void UI_Object::draw(DC* dc) const
 {
 	// if hidden, hide children as well
-	if (!shown)
+	if (!isShown())
 		return;
+/*	
+		SDL_Rect temp;
+		if(background!=NULL)
+		{
+			temp.x = oldRect.GetLeft();
+			temp.y = oldRect.GetTop();
+			temp.w = oldRect.GetWidth();
+			temp.h = oldRect.GetHeight();
+			SDL_BlitSurface(background, NULL, dc->GetSurface(), &temp); // erase old
+			SDL_FreeSurface(background);
+			const_cast< UI_Object* > (this)->background = NULL;
+		}
+		const_cast< UI_Object* > (this)->background = SDL_CreateRGBSurface(SDL_SWSURFACE, getWidth(), getHeight(), 24, 0, 0, 0, 0);
+		temp.x = getAbsoluteLeftBound();
+		temp.y = getAbsoluteUpperBound();
+		temp.w = getWidth();
+		temp.h = getHeight();	
+		SDL_BlitSurface(dc->GetSurface(), &temp, background, NULL); // save new background
+	}*/
+	
+//	dc->DrawEmptyRectangle(getAbsoluteRect());
 
 	UI_Object* tmp = children;
 	
@@ -425,19 +450,78 @@ void UI_Object::draw(DC* dc) const
 	}
 }
 
-void UI_Object::setPosition(const Point& position)
+/*void UI_Object::setPosition(const Point& position)
 {
+	if(position == relativeRect.GetTopLeft())
+		return;
 	startRect.SetTopLeft(startRect.GetTopLeft() + (position - relativeRect.GetTopLeft()));
 	targetRect.SetTopLeft(targetRect.GetTopLeft() + (position - relativeRect.GetTopLeft()));
 	relativeRect.SetTopLeft(position);
-}
+	setNeedRedraw();
+}*/
 
-void UI_Object::jumpToPosition(const Point& position)
+void UI_Object::setPosition(const Point& position)
+//void UI_Object::jumpToPosition(const Point& position)
 {
+	if(position == relativeRect.GetTopLeft())
+		return;
 	startRect.SetTopLeft(position);
 	targetRect.SetTopLeft(position);
 	relativeRect.SetTopLeft(position);
+	setNeedRedrawMoved();
 }
+
+void UI_Object::setHeight(const unsigned int height) 
+{
+	if(relativeRect.GetHeight() == height)
+		return;
+	relativeRect.SetHeight(height);
+	startRect.SetHeight(height);
+	targetRect.SetHeight(height);
+	setNeedRedrawNotMoved(); // TODO wenns kleiner wird
+}
+
+void UI_Object::setWidth(const unsigned int width) 
+{
+	if(relativeRect.GetWidth() == width)
+		return;
+	relativeRect.SetWidth(width);
+	startRect.SetWidth(width);
+	targetRect.SetWidth(width);
+	setNeedRedrawNotMoved(); // TODO Wenns kleiner wird!
+}
+
+void UI_Object::setSize(const Size size)
+{
+	if(relativeRect.GetSize() == size)
+		return;
+	relativeRect.SetSize(size);
+	startRect.SetSize(size);
+	targetRect.SetSize(size);
+	setNeedRedrawNotMoved(); // TODO Wenns kleiner wird!
+}
+
+void UI_Object::setLeft(const signed int x) 
+{
+	if(relativeRect.GetLeft() == x)
+		return;
+	relativeRect.SetLeft(x);
+	startRect.SetLeft(x);
+	targetRect.SetLeft(x);
+	setNeedRedrawMoved();
+}
+		
+void UI_Object::setTop(const signed int y) 
+{
+	if(relativeRect.GetTop() == y)
+		return;
+	relativeRect.SetTop(y);
+	startRect.SetTop(y);
+	targetRect.SetTop(y);
+	setNeedRedrawMoved();
+}
+	
+
 
 /*const Point UI_Object::getAbsolutePosition() const	
 {
@@ -456,9 +540,88 @@ const bool UI_Object::isTopItem() const
 
 void UI_Object::Show(const bool show)
 {
-	shown = show;
-	if(show)
+	if((show)&&(!shown))
+	{
 		process();
+		setNeedRedrawNotMoved(true);
+		shown = true;
+	} 
+	else if((!show)&&(shown))
+	{
+		setNeedRedrawMoved(true);
+		
+		setNeedRedrawMoved(false); // ~~
+		shown = false;
+	}
+}
+
+void UI_Object::setNeedRedrawMoved(const bool need_redraw)  // moved item
+{
+	if(!isShown())
+		return;
+	setNeedRedrawNotMoved(need_redraw);
+	if((need_redraw)&&(getParent()))
+	{
+		getParent()->checkForChildrenOverlap(oldRect);
+		getParent()->setNeedRedrawNotMoved(true);
+	}
+}
+
+void UI_Object::checkForChildrenOverlap(const Rect& rect)
+{
+        UI_Object* tmp = children;
+
+        if (tmp) {
+                do {
+			if(rect.overlaps(tmp->getRelativeRect()))
+	                        tmp->setNeedRedrawNotMoved(true);
+                        tmp = tmp->nextBrother;
+                } while (tmp != children);
+        }
+}
+
+void UI_Object::setNeedRedrawNotMoved(const bool need_redraw)
+{
+	if(!isShown())
+		return;
+
+	needRedraw = need_redraw;
+
+        UI_Object* tmp = children;
+
+        if (tmp) {
+                do {
+                        tmp->setNeedRedrawNotMoved(needRedraw);
+                        tmp = tmp->nextBrother;
+                } while (tmp != children);
+        }
+}
+
+
+void UI_Object::clearRedrawFlag()
+{
+//	if(!isShown())
+//		return;
+	if(needRedraw)
+	{
+		needRedraw = false;
+	}
+	UI_Object* tmp = children;
+	if (tmp) {
+		do {
+			tmp->clearRedrawFlag();
+			tmp = tmp->nextBrother;
+		} while (tmp != children);
+	}
+}
+
+const bool UI_Object::checkForNeedRedraw() const
+{
+	if(needRedraw)
+	{
+		redrawnObjects++;
+		return(true);
+	} else return(false);
 }
 
 const unsigned long int UI_Object::getTimeStampMs(const unsigned long int timeSpan)
@@ -539,5 +702,6 @@ unsigned int UI_Object::mouseType(0);
 bool UI_Object::currentButtonPressed = false;
 bool UI_Object::currentButtonHasAlreadyLeft = false;
 UI_Button* UI_Object::currentButton = NULL;
-
-
+UI_Window* UI_Object::currentWindow = NULL;
+bool UI_Object::windowSelected = false;
+unsigned int UI_Object::redrawnObjects(0);

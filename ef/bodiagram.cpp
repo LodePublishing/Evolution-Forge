@@ -1,10 +1,10 @@
 #include "bodiagram.hpp"
 
 BoDiagramWindow::BoDiagramWindow(const BoDiagramWindow& object) :
-    UI_Window((UI_Window)object),
-    anarace(object.anarace),
-    infoWindow(object.infoWindow),
-    count(object.count)
+	UI_Window((UI_Window)object),
+	anarace(object.anarace),
+	infoWindow(object.infoWindow),
+	count(object.count)
 {
 // TODO arrays?
 }
@@ -64,128 +64,70 @@ void BoDiagramWindow::process()
 		return;
 
 	UI_Window::process();
-//return;
+
+	for(int i=count;i--;)
+	{
+	// TODO in unsigned umwandeln...
+		Point::mv(minerals[i].y, startMinerals[i].y, targetMinerals[i].y);
+		Point::mv(gas[i].y, startGas[i].y, targetGas[i].y);
+		Point::mv(hneedSupply[i].y, startHneedSupply[i].y, targetHneedSupply[i].y);
+		Point::mv(nneedSupply[i].y, startNneedSupply[i].y, targetNneedSupply[i].y);
+//		Point::mv(fitness[i].y, startFitness[i].y, targetFitness[i].y);
+		
+		minerals[i].x=targetMinerals[i].x;
+		gas[i].x=targetGas[i].x;
+		hneedSupply[i].x=targetHneedSupply[i].x;
+		nneedSupply[i].x=targetNneedSupply[i].x;
+//		fitness[i].x=targetFitness[i].x;
+	}
+}
+
+void BoDiagramWindow::processList()
+{
 	if(anarace->getRealTimer()<2) return;
 	
+// TODO nur machen wenns optimiert!
+
 //	if(anarace->getTimer()==configuration.getMaxTime()) time=0;
 //		else 
 //time=anarace->getTimer()+1;
 	float time = (getClientRectWidth()-6) / (float)(anarace->getRealTimer());
 
-	unsigned int haveSupply=10; // TODO
-	unsigned int maxMins=(*anarace->getStartCondition())->getMinerals();
-	unsigned int maxGas=(*anarace->getStartCondition())->getGas();
-	for(unsigned int i = 2*(configuration.getMaxLength() - anarace->getLength()); i<2*configuration.getMaxLength(); i++)
+	unsigned int haveSupply = 10; // TODO
+	unsigned int maxMins = (*anarace->getStartCondition())->getMinerals();
+	unsigned int maxGas = (*anarace->getStartCondition())->getGas();
+	
+	for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
 	{
-		if(anarace->getIPStatisticsHaveMinerals(i)>maxMins) 
-			maxMins=anarace->getIPStatisticsHaveMinerals(i);
-		if(anarace->getIPStatisticsHaveGas(i)>maxGas) 
-			maxGas=anarace->getIPStatisticsHaveGas(i);
-		if(anarace->getIPStatisticsNeedSupply(i)>haveSupply) 
-			haveSupply=anarace->getIPStatisticsNeedSupply(i);
-		if(anarace->getIPStatisticsHaveSupply(i)>haveSupply) 
-			haveSupply=anarace->getIPStatisticsHaveSupply(i);
+		if(order->getStatisticsBefore().getHaveMinerals() > maxMins) maxMins = order->getStatisticsBefore().getHaveMinerals();
+		if(order->getStatisticsBefore().getHaveGas() > maxGas) maxGas = order->getStatisticsBefore().getHaveGas();
+		if(order->getStatisticsBefore().getNeedSupply() > haveSupply) haveSupply = order->getStatisticsBefore().getNeedSupply();
+		if(order->getStatisticsBefore().getHaveSupply() > haveSupply) haveSupply = order->getStatisticsBefore().getHaveSupply();
 	}
-	if(anarace->getMinerals()>maxMins)
-		maxMins=anarace->getMinerals();
-	if(anarace->getGas()>maxGas)
-		maxGas=anarace->getGas();
-	if(anarace->getNeedSupply()>haveSupply)
-		haveSupply=anarace->getNeedSupply();
-	if(anarace->getHaveSupply()>haveSupply)
-		haveSupply=anarace->getHaveSupply();
+	if(anarace->getMinerals()>maxMins) maxMins=anarace->getMinerals();
+	if(anarace->getGas()>maxGas) maxGas=anarace->getGas();
+	if(anarace->getNeedSupply()>haveSupply)	haveSupply=anarace->getNeedSupply();
+	if(anarace->getHaveSupply()>haveSupply) haveSupply=anarace->getHaveSupply();
 
 	count=0;
 
 	{
-        int y1;
-        if(maxMins) y1=(*anarace->getStartCondition())->getMinerals()*75/maxMins; else y1=0;
-        Point p=Point( 3, -y1-2);
-        if(targetMinerals[count]==Point(0,0))
-        {
-            targetMinerals[count]=p;
-            startMinerals[count]=p;
-            minerals[count]=p;
-        } else
-        if(p!=targetMinerals[count]) {
-            targetMinerals[count]=p;
-            startMinerals[count]=minerals[count];
-        }
-
-        if(maxGas) y1=(*anarace->getStartCondition())->getGas()*75/maxGas; else y1=0;
-        p=Point( 3, -y1-2);
-        // first round
-        if(targetGas[count]==Point(0,0))
-        {
-            targetGas[count]=p;
-            startGas[count]=p;
-            gas[count]=p;
-        } else
-        if(p!=targetGas[count]) {
-            targetGas[count]=p;
-            startGas[count]=gas[count];
-        }
-                                                                                                                                                            
-//TODO anarace->getMaxpFitness-getTimer kann auch 0 sein !! kann es??
-                                                                                                                                                            
-/*      if(anarace->getMaxpFitness()) y1=anarace->getIPStatisticsFitness(2*s)*75/(anarace->getMaxpFitness()-anarace->getTimer()); else y1=0;
-        p=Point( 3+((count*(getClientRectWidth()-6))/(anarace->getRealTimer())), -y1);
-        if(p!=targetFitness[count]) {
-            targetFitness[count]=p;
-            startFitness[count]=fitness[count];
-        }       */
-                                                                                                                                                            
-        if(haveSupply) y1=(*anarace->getStartCondition())->getHaveSupply()*75/haveSupply; else y1=0;
-        p=Point(3, -y1-2);
-        if(targetHneedSupply[count]==Point(0,0))
-        {
-            targetHneedSupply[count]=p;
-            startHneedSupply[count]=p;
-            hneedSupply[count]=p;
-        } else
-        if(p!=targetHneedSupply[count]) {
-            targetHneedSupply[count]=p;
-            startHneedSupply[count]=hneedSupply[count];
-		}
-
-        if(haveSupply) y1=(*anarace->getStartCondition())->getNeedSupply()*75/haveSupply; else y1=0;
-        p=Point(3, -y1-2);
-        if(targetNneedSupply[count]==Point(0,0))
-        {
-            targetNneedSupply[count]=p;
-            startNneedSupply[count]=p;
-            nneedSupply[count]=p;
-        } else
-        if(p!=targetNneedSupply[count]) {
-            targetNneedSupply[count]=p;
-            startNneedSupply[count]=nneedSupply[count];
-        }
-	}
-	count++;
-	unsigned int s=2*configuration.getMaxLength()-1;// - anarace->getLength();
-	while(s > 2*(configuration.getMaxLength() - anarace->getLength()))
-	{
-		if(!anarace->getProgramIsBuilt(s/2))
-		{
-			s--;
-			continue;
-		}
 		int y1;
-		if(maxMins) y1=anarace->getIPStatisticsHaveMinerals(s)*75/maxMins; else y1=0;
-		Point p=Point( 3+(int)(anarace->getRealProgramTime(s/2)*time), -y1-2);
-        if(targetMinerals[count]==Point(0,0))
-        {
-            targetMinerals[count]=p;
-            startMinerals[count]=p;
-            minerals[count]=p;
-        } else
+		if(maxMins) y1=(*anarace->getStartCondition())->getMinerals()*75/maxMins; else y1=0;
+		Point p=Point( 3, -y1-2);
+		if(targetMinerals[count]==Point(0,0))
+		{
+			targetMinerals[count]=p;
+			startMinerals[count]=p;
+			minerals[count]=p;
+		} else
 		if(p!=targetMinerals[count]) {
 			targetMinerals[count]=p;
 			startMinerals[count]=minerals[count];
 		}
-																																						
-		if(maxGas) y1=anarace->getIPStatisticsHaveGas(s)*75/maxGas; else y1=0;
-		p=Point( 3+(int)(anarace->getRealProgramTime(s/2)*time), -y1-2);
+
+		if(maxGas) y1=(*anarace->getStartCondition())->getGas()*75/maxGas; else y1=0;
+		p=Point( 3, -y1-2);
 		// first round
 		if(targetGas[count]==Point(0,0))
 		{
@@ -197,109 +139,175 @@ void BoDiagramWindow::process()
 			targetGas[count]=p;
 			startGas[count]=gas[count];
 		}
-	
+																																							
 //TODO anarace->getMaxpFitness-getTimer kann auch 0 sein !! kann es??
-																																						
-/*		if(anarace->getMaxpFitness()) y1=anarace->getIPStatisticsFitness(2*s)*75/(anarace->getMaxpFitness()-anarace->getTimer()); else y1=0;
+																																							
+/*	  if(anarace->getMaxpFitness()) y1=anarace->getIPStatisticsFitness(2*s)*75/(anarace->getMaxpFitness()-anarace->getTimer()); else y1=0;
 		p=Point( 3+((count*(getClientRectWidth()-6))/(anarace->getRealTimer())), -y1);
 		if(p!=targetFitness[count]) {
 			targetFitness[count]=p;
 			startFitness[count]=fitness[count];
-		}		*/
-		
-		if(haveSupply) y1=anarace->getIPStatisticsHaveSupply(s)*75/haveSupply; else y1=0;
-		p=Point(3+(int)(anarace->getRealProgramTime(s/2)*time), -y1-2);
-        if(targetHneedSupply[count]==Point(0,0))
-        {
-            targetHneedSupply[count]=p;
-            startHneedSupply[count]=p;
-            hneedSupply[count]=p;
-        } else
+		}	   */
+																																							
+		if(haveSupply) y1=(*anarace->getStartCondition())->getHaveSupply()*75/haveSupply; else y1=0;
+		p=Point(3, -y1-2);
+		if(targetHneedSupply[count]==Point(0,0))
+		{
+			targetHneedSupply[count]=p;
+			startHneedSupply[count]=p;
+			hneedSupply[count]=p;
+		} else
 		if(p!=targetHneedSupply[count]) {
 			targetHneedSupply[count]=p;
 			startHneedSupply[count]=hneedSupply[count];
 		}
-		
-		if(haveSupply) y1=anarace->getIPStatisticsNeedSupply(s)*75/haveSupply; else y1=0;
-		p=Point(3+(int)(anarace->getRealProgramTime(s/2)*time), -y1-2);
-        if(targetNneedSupply[count]==Point(0,0))
-        {
-            targetNneedSupply[count]=p;
-            startNneedSupply[count]=p;
-            nneedSupply[count]=p;
-        } else
+
+		if(haveSupply) y1=(*anarace->getStartCondition())->getNeedSupply()*75/haveSupply; else y1=0;
+		p=Point(3, -y1-2);
+		if(targetNneedSupply[count]==Point(0,0))
+		{
+			targetNneedSupply[count]=p;
+			startNneedSupply[count]=p;
+			nneedSupply[count]=p;
+		} else
 		if(p!=targetNneedSupply[count]) {
 			targetNneedSupply[count]=p;
 			startNneedSupply[count]=nneedSupply[count];
 		}
+	}
+	count++;
+
+	for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
+	{
+		int y1;
+		if(maxMins) y1 = order->getStatisticsBefore().getHaveMinerals()*75/maxMins; else y1 = 0;
+		Point p = Point( 3+(int)(order->getRealTime()*time), -y1-2);
+		if(targetMinerals[count]==Point(0,0))
+			targetMinerals[count] = startMinerals[count] = minerals[count] = p;
+		else
+		if(p != targetMinerals[count]) {
+			targetMinerals[count] = p;
+			startMinerals[count] = minerals[count];
+		}
+		
+
+		if(maxGas) y1 = order->getStatisticsBefore().getHaveGas()*75/maxGas; else y1 = 0;
+		p = Point( 3+(int)(order->getRealTime()*time), -y1-2);
+		if(targetGas[count] == Point(0, 0))
+			targetGas[count] = startGas[count] = gas[count] = p;
+		else
+		if(p != targetGas[count]) {
+			targetGas[count] = p;
+			startGas[count] = gas[count];
+		}
 	
+		if(haveSupply) y1 = order->getStatisticsBefore().getHaveSupply()*75/haveSupply; else y1=0;
+		p=Point(3+(int)(order->getRealTime()*time), -y1-2);
+		if(targetHneedSupply[count] == Point(0, 0))
+			targetHneedSupply[count] = startHneedSupply[count] = hneedSupply[count] = p;
+		else
+		if(p != targetHneedSupply[count]) {
+			targetHneedSupply[count] = p;
+			startHneedSupply[count] = hneedSupply[count];
+		}
+		
+		if(haveSupply) y1 = order->getStatisticsBefore().getNeedSupply()*75/haveSupply; else y1=0;
+		p = Point(3+(int)(order->getRealTime()*time), -y1-2);
+		if(targetNneedSupply[count] == Point(0, 0))
+			targetNneedSupply[count] = startNneedSupply[count] = nneedSupply[count] = p;
+		else
+		if(p != targetNneedSupply[count]) {
+			targetNneedSupply[count] = p;
+			startNneedSupply[count] = nneedSupply[count];
+		}
 		count++;
-		s--;
+
+		if(maxMins) y1 = order->getStatisticsAfter().getHaveMinerals()*75/maxMins; else y1 = 0;
+		p = Point( 3+(int)(order->getRealTime()*time), -y1-2);
+		if(targetMinerals[count]==Point(0,0))
+			targetMinerals[count] = startMinerals[count] = minerals[count] = p;
+		else
+		if(p != targetMinerals[count]) {
+			targetMinerals[count] = p;
+			startMinerals[count] = minerals[count];
+		}
+		
+
+		if(maxGas) y1 = order->getStatisticsAfter().getHaveGas()*75/maxGas; else y1 = 0;
+		p = Point( 3+(int)(order->getRealTime()*time), -y1-2);
+		if(targetGas[count] == Point(0, 0))
+			targetGas[count] = startGas[count] = gas[count] = p;
+		else
+		if(p != targetGas[count]) {
+			targetGas[count] = p;
+			startGas[count] = gas[count];
+		}
+	
+		if(haveSupply) y1 = order->getStatisticsAfter().getHaveSupply()*75/haveSupply; else y1=0;
+		p=Point(3+(int)(order->getRealTime()*time), -y1-2);
+		if(targetHneedSupply[count] == Point(0, 0))
+			targetHneedSupply[count] = startHneedSupply[count] = hneedSupply[count] = p;
+		else
+		if(p != targetHneedSupply[count]) {
+			targetHneedSupply[count] = p;
+			startHneedSupply[count] = hneedSupply[count];
+		}
+		
+		if(haveSupply) y1 = order->getStatisticsAfter().getNeedSupply()*75/haveSupply; else y1=0;
+		p = Point(3+(int)(order->getRealTime()*time), -y1-2);
+		if(targetNneedSupply[count] == Point(0, 0))
+			targetNneedSupply[count] = startNneedSupply[count] = nneedSupply[count] = p;
+		else
+		if(p != targetNneedSupply[count]) {
+			targetNneedSupply[count] = p;
+			startNneedSupply[count] = nneedSupply[count];
+		}
+		count++;
+	
 	}
 
 	{
-        int y1;
-        if(maxMins) y1=anarace->getMinerals()*75/maxMins; else y1=0;
-        Point p=Point( getClientRectWidth()-3, -y1-2);
-        if(targetMinerals[count]==Point(0,0))
-        {
-            targetMinerals[count]=p;
-            startMinerals[count]=p;
-            minerals[count]=p;
-        } else
-        if(p!=targetMinerals[count]) {
-            targetMinerals[count]=p;
-            startMinerals[count]=minerals[count];
-        }
-
-        if(maxGas) y1=anarace->getGas()*75/maxGas; else y1=0;
-        p=Point(  getClientRectWidth()-3, -y1-2);
-        // first round
-        if(targetGas[count]==Point(0,0))
-        {
-            targetGas[count]=p;
-            startGas[count]=p;
-            gas[count]=p;
-        } else
-        if(p!=targetGas[count]) {
-            targetGas[count]=p;
-            startGas[count]=gas[count];
-        }
-                                                                                                                                                            
-//TODO anarace->getMaxpFitness-getTimer kann auch 0 sein !! kann es??
-                                                                                                                                                            
-/*      if(anarace->getMaxpFitness()) y1=anarace->getIPStatisticsFitness(2*s)*75/(anarace->getMaxpFitness()-anarace->getTimer()); else y1=0;
-        p=Point( 3+((count*(getClientRectWidth()-6))/(anarace->getRealTimer())), -y1);
-        if(p!=targetFitness[count]) {
-            targetFitness[count]=p;
-            startFitness[count]=fitness[count];
-        }       */
-                                                                                                                                                            
-        if(haveSupply) y1=anarace->getHaveSupply()*75/haveSupply; else y1=0;
-        p=Point( getClientRectWidth()-3, -y1-2);
-        if(targetHneedSupply[count]==Point(0,0))
-        {
-            targetHneedSupply[count]=p;
-            startHneedSupply[count]=p;
-            hneedSupply[count]=p;
-        } else
-        if(p!=targetHneedSupply[count]) {
-            targetHneedSupply[count]=p;
-            startHneedSupply[count]=hneedSupply[count];
+		int y1;
+		if(maxMins) y1=anarace->getMinerals()*75/maxMins; else y1=0;
+		Point p=Point( getClientRectWidth()-3, -y1-2);
+		if(targetMinerals[count]==Point(0,0))
+			targetMinerals[count] = startMinerals[count] = minerals[count] = p;
+		else
+		if(p!=targetMinerals[count]) {
+			targetMinerals[count]=p;
+			startMinerals[count]=minerals[count];
 		}
 
-        if(haveSupply) y1=anarace->getNeedSupply()*75/haveSupply; else y1=0;
-        p=Point( getClientRectWidth()-3, -y1-2);
-        if(targetNneedSupply[count]==Point(0,0))
-        {
-            targetNneedSupply[count]=p;
-            startNneedSupply[count]=p;
-            nneedSupply[count]=p;
-        } else
-        if(p!=targetNneedSupply[count]) {
-            targetNneedSupply[count]=p;
-            startNneedSupply[count]=nneedSupply[count];
-        }
+		if(maxGas) y1=anarace->getGas()*75/maxGas; else y1=0;
+		p=Point(  getClientRectWidth()-3, -y1-2);
+		// first round
+		if(targetGas[count]==Point(0,0))
+			targetGas[count] = startGas[count] = gas[count] = p;
+		else
+		if(p!=targetGas[count]) {
+			targetGas[count] = p;
+			startGas[count] = gas[count];
+		}
+		
+		if(haveSupply) y1 = anarace->getHaveSupply()*75/haveSupply; else y1=0;
+		p=Point( getClientRectWidth()-3, -y1-2);
+		if(targetHneedSupply[count] == Point(0,0))
+			targetHneedSupply[count] = startHneedSupply[count] = hneedSupply[count] = p;
+		else
+		if(p!=targetHneedSupply[count]) {
+			targetHneedSupply[count] = p;
+			startHneedSupply[count] = hneedSupply[count];
+		}
+
+		if(haveSupply) y1=anarace->getNeedSupply()*75/haveSupply; else y1=0;
+		p=Point( getClientRectWidth()-3, -y1-2);
+		if(targetNneedSupply[count]==Point(0,0))
+			targetNneedSupply[count] = startNneedSupply[count] = nneedSupply[count] = p;
+		else
+		if(p!=targetNneedSupply[count]) {
+			targetNneedSupply[count] = p;
+			startNneedSupply[count] = nneedSupply[count];
+		}
 	}
 
 //TODO letztes item
@@ -321,21 +329,6 @@ void BoDiagramWindow::process()
 			}
 		}*/
 
-	for(int i=count;i--;)
-	{
-	// TODO in unsigned umwandeln...
-		Point::mv(minerals[i].y, startMinerals[i].y, targetMinerals[i].y);
-		Point::mv(gas[i].y, startGas[i].y, targetGas[i].y);
-		Point::mv(hneedSupply[i].y, startHneedSupply[i].y, targetHneedSupply[i].y);
-		Point::mv(nneedSupply[i].y, startNneedSupply[i].y, targetNneedSupply[i].y);
-//		Point::mv(fitness[i].y, startFitness[i].y, targetFitness[i].y);
-		
-		minerals[i].x=targetMinerals[i].x;
-		gas[i].x=targetGas[i].x;
-		hneedSupply[i].x=targetHneedSupply[i].x;
-		nneedSupply[i].x=targetNneedSupply[i].x;
-//		fitness[i].x=targetFitness[i].x;
-	}
 }
 
 void BoDiagramWindow::draw(DC* dc) const
@@ -343,6 +336,8 @@ void BoDiagramWindow::draw(DC* dc) const
 	if(!isShown()) 
 		return;
 	UI_Window::draw(dc);
+	if(!checkForNeedRedraw())
+		return;
 //	if(infoWindow->isShown())
 		dc->SetBrush(*theme.lookUpBrush(BODIAGRAM_BACK1));
 //	else
@@ -418,16 +413,16 @@ void BoDiagramWindow::draw(DC* dc) const
 				unsigned int time = anarace->getRealTimer() * (mouse.x - getAbsoluteClientRectLeftBound()) / getClientRectWidth();
 				if(mouse.x < getAbsoluteClientRectLeftBound())
 					while(true);
-				os << anarace->getTimeStatisticsHaveMinerals(configuration.getMaxTime()-time)/100;
+				os << anarace->getTimeStatistics()[configuration.getMaxTime()-time].getHaveMinerals()/100;
 				dc->DrawText(os.str(),getAbsoluteClientRectPosition()+Point(50,15));os.str("");
 				
 				dc->SetTextForeground(*theme.lookUpColor(BRIGHT_GAS_TEXT_COLOR));
-				os << anarace->getTimeStatisticsHaveGas(configuration.getMaxTime()-time)/100;
+				os << anarace->getTimeStatistics()[configuration.getMaxTime()-time].getHaveGas()/100;
 				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(50,26));os.str("");
 				
 				dc->SetTextForeground(*theme.lookUpColor(BRIGHT_SUPPLY_TEXT_COLOR));
-				int ns=anarace->getTimeStatisticsNeedSupply(configuration.getMaxTime()-time);
-				int hs=anarace->getTimeStatisticsHaveSupply(configuration.getMaxTime()-time);
+				int ns = anarace->getTimeStatistics()[configuration.getMaxTime()-time].getNeedSupply();
+				int hs = anarace->getTimeStatistics()[configuration.getMaxTime()-time].getHaveSupply();
 				
 				os << ns << ":" << hs;
 				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(50,37));
@@ -492,7 +487,6 @@ void BoDiagramWindow::draw(DC* dc) const
 						 getAbsoluteClientRectLowerBound());
 		}
 		#endif
-
 
 }
 

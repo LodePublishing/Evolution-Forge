@@ -128,11 +128,14 @@ const unsigned int TimerWindow::getCurrentMode() const
 
 void TimerWindow::draw(DC* dc) const
 {
-	if(!isShown()) 
-		return;
+//	if(!isShown()) 
+//		return;
 	UI_Window::draw(dc);
+	if(!checkForNeedRedraw())
+		return;
+		
 	dc->SetPen(*UI_Object::theme.lookUpPen(BODIAGRAM_FITNESS_PEN));
-	dc->DrawHorizontalLine(getAbsolutePosition().x + 10, getAbsolutePosition().y + getHeight() - 30, getAbsolutePosition().x + 10 + ((getWidth()-35)*anarace->getUnchangedGenerations())  / configuration.getMaxGenerations() );
+	dc->DrawHorizontalLine(getAbsoluteLeftBound() + 10, getAbsoluteLowerBound() - 30, getAbsoluteLeftBound() + 10 + ((getWidth()-35)*anarace->getUnchangedGenerations())  / configuration.getMaxGenerations() );
 	ostringstream os;
 	os << 100*anarace->getUnchangedGenerations()  / configuration.getMaxGenerations() << "%";
 	dc->DrawText(os.str(), getAbsolutePosition() + Size(getWidth() - 25, getHeight() - 30));

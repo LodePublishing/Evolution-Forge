@@ -48,6 +48,9 @@ class Main
 		void leftUp(const Point p);
 		void rightDown();
 		void rightUp(const Point p);
+
+		void wheelUp();
+		void wheelDown();
 	
 		void setMouse(const Point p);
 

@@ -5,51 +5,51 @@
 
 class Building
 {
-private:
-	unsigned int totalBuildTime;
-	signed int buildFinishedTime; // timestamp when item is finnished (3600 = beginning)
-	unsigned int type;			  // Type of Building
-	unsigned int unitCount;  // number of units which are moving... currently ONLY for movements...
-	unsigned int facility;   // in what facility it was produced
-	unsigned int IP;		  // for back-tracking certain buildings (especially for the 'cancel building' option of zerg)
-	unsigned int location;   // where the building was finished
-	unsigned int goal;			  // For movement, where the units will move to, not yet fully implemented
-	bool onTheRun;   // is this building/unit moving around or is it under construction at some place?
-public:
-	friend bool operator<(const Building& x, const Building& y)
-	{
-		if(x.getBuildFinishedTime() < y.getBuildFinishedTime())
-			return(true);
-		return(false);
-	}
-	Building();
-	Building(const Building& object);
-	Building& operator=(const Building& object);
-	
-	const unsigned int getTotalBuildTime() const;
-	const unsigned int getBuildFinishedTime() const;
+	private:
+		unsigned int totalBuildTime;
+		signed int buildFinishedTime; // timestamp when item is finnished (3600 = beginning)
+		unsigned int type;			  // Type of Building
+		unsigned int unitCount;  // number of units which are moving... currently ONLY for movements...
+		unsigned int facility;   // in what facility it was produced
+//		unsigned int IP;		  // for back-tracking certain buildings (especially for the 'cancel building' option of zerg)
+		unsigned int location;   // where the building was finished
+		unsigned int goal;			  // For movement, where the units will move to, not yet fully implemented
+		bool onTheRun;   // is this building/unit moving around or is it under construction at some place?
+	public:
+
+		Building();
+		Building(const Building& object);
+		Building& operator=(const Building& object);
+		friend bool operator<(const Building& x, const Building& y)
+		{
+			if(x.getBuildFinishedTime() < y.getBuildFinishedTime())
+				return(true);
+			return(false);
+		};
+		const unsigned int getTotalBuildTime() const;
+		const unsigned int getBuildFinishedTime() const;
 
 // is the finnishing time >= 0, i.e. can this building be finnished within max_time?
-	const bool canBeCompleted() const;
+		const bool canBeCompleted() const;
 	
-	const unsigned int getType() const;
-	const unsigned int getUnitCount() const;
-	const unsigned int getFacility() const;
-	const unsigned int getIP() const;
-	const unsigned int getLocation() const;
-	const unsigned int getGoal() const;
-	const bool getOnTheRun() const;
+		const unsigned int getType() const;
+		const unsigned int getUnitCount() const;
+		const unsigned int getFacility() const;
+//		const unsigned int getIP() const;
+		const unsigned int getLocation() const;
+		const unsigned int getGoal() const;
+		const bool getOnTheRun() const;
 		
-	void setTotalBuildTime(const unsigned int total_build_time);
-	void setBuildFinishedTime(const signed int build_finished_time);
+		void setTotalBuildTime(const unsigned int total_build_time);
+		void setBuildFinishedTime(const signed int build_finished_time);
 	
-	void setType(const unsigned int building_type);
-	void setUnitCount(const unsigned int building_count);
-	void setFacility(const unsigned int building_facility);
-	void setIP(const unsigned int building_IP);
-	void setLocation(const unsigned int building_location);
-	void setGoal(const unsigned int building_goal);
-	void setOnTheRun(const bool building_on_the_run);
+		void setType(const unsigned int building_type);
+		void setUnitCount(const unsigned int building_count);
+		void setFacility(const unsigned int building_facility);
+//		void setIP(const unsigned int building_IP);
+		void setLocation(const unsigned int building_location);
+		void setGoal(const unsigned int building_goal);
+		void setOnTheRun(const bool building_on_the_run);
 };
 
 inline const unsigned int Building::getTotalBuildTime() const
@@ -104,7 +104,7 @@ inline const unsigned int Building::getFacility() const
 	return(facility);
 }
 																				
-inline const unsigned int Building::getIP() const
+/*inline const unsigned int Building::getIP() const
 {
 #ifdef _SCC_DEBUG
 	if(IP > MAX_LENGTH) {
@@ -112,12 +112,12 @@ inline const unsigned int Building::getIP() const
 	}
 #endif
 	return(IP);
-}
+}*/
 																				
 inline const unsigned int Building::getLocation() const
 {
 #ifdef _SCC_DEBUG
-	if(location > MAX_LOCATIONS) {
+	if(location >= MAX_LOCATIONS) { // TODO
 		toLog("DEBUG: Building::getLocation): Variable not initialized.");return(0);
 	}
 #endif
@@ -194,7 +194,7 @@ inline void Building::setFacility(const unsigned int building_facility)
 	facility = building_facility;
 }
 																				
-inline void Building::setIP(const unsigned int building_IP)
+/*inline void Building::setIP(const unsigned int building_IP)
 {
 #ifdef _SCC_DEBUG
 	if(building_IP >= MAX_LENGTH) {
@@ -202,7 +202,7 @@ inline void Building::setIP(const unsigned int building_IP)
 	}
 #endif
 	IP = building_IP;
-}
+}*/
 																				
 inline void Building::setLocation(const unsigned int building_location)
 {

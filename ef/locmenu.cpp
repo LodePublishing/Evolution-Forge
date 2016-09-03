@@ -25,7 +25,7 @@ void LocationMenu::resetData()
 	height=1;
 	for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 	{
-		if(i >= MAX_LOCATIONS)
+		if(i >= (*anarace->getMap())->getMaxLocations())
 		{
 			(*m)->Hide();
 			continue;
@@ -39,7 +39,7 @@ void LocationMenu::resetData()
 		height++;
 		i++;
     	}
-	for(;i<MAX_LOCATIONS;i++)
+	for(;i<(*anarace->getMap())->getMaxLocations();i++)
 	{
 		MenuEntry* entry = new MenuEntry(this, Rect(Point(10, height * (FONT_SIZE + 9)), Size(160, FONT_SIZE)), (*anarace->getMap())->getLocation(i)->getName());
 		entry->setButton(eButton(UNIT_TYPE_6_BUTTON));

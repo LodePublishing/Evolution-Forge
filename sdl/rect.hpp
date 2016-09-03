@@ -16,6 +16,7 @@ class Rect
 		const Point GetBottomLeft() const;
 		void SetTopLeft( const Point& point );
 		const Point& GetBottomRight() const;
+		const Point GetTopRight() const;
 
 /*		void SetBottomRight( const Point& point) {
 			rectSize.width += point.x  
@@ -61,7 +62,9 @@ class Rect
 		const bool Inside(const signed int x, const signed int y) const;
 		const bool Inside(const Point& point) const;
 
-		void move(const Rect startRect, const Rect targetRect);
+		const bool overlaps(const Rect& rect) const;
+
+		const bool move(const Rect startRect, const Rect targetRect);
 	private:
 		Point topLeftCorner;
 		Point bottomRightCorner;
@@ -96,6 +99,10 @@ inline Rect::Rect(const Rect& rect) :
 	
 inline const Point& Rect::GetTopLeft() const { 
 	return topLeftCorner; 
+}
+
+inline const Point Rect::GetTopRight() const {
+	return(Point(bottomRightCorner.x, topLeftCorner.y));
 }
 
 inline const Point Rect::GetBottomLeft() const {

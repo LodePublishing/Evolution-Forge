@@ -72,8 +72,11 @@ void StatisticsWindow::resetData()
 	for(int i = 0; i < MAX_STAT_ENTRY; i++)
 		maxdata[i]=0;
 
-	memset(data[FORCE_STAT_ENTRY], 5, 200 * sizeof(int)); // 5 units at the beginning ~~
-	memset(data[GENERATIONS_LEFT_STAT_ENTRY], configuration.getMaxGenerations(), 200 * sizeof(int));
+	for(int i = 200; i--;)
+	{
+		data[FORCE_STAT_ENTRY][i] = 0;
+		data[GENERATIONS_LEFT_STAT_ENTRY][i] = configuration.getMaxGenerations();
+	}
 
 	wasResetted=true;
 }
@@ -83,6 +86,9 @@ void StatisticsWindow::draw(DC* dc) const
 	if(!isShown())
 		return;
 	UI_Window::draw(dc);
+
+	if(!checkForNeedRedraw())
+		return;
 
 	dc->SetBrush(*theme.lookUpBrush( WINDOW_BACKGROUND_BRUSH ));
 	dc->SetPen(*theme.lookUpPen( INNER_BORDER_PEN ));
@@ -135,10 +141,18 @@ void StatisticsWindow::process()
 					oldData[i][k]=0;
 				}
 			}
-
+	for(int i = 0; i < MAX_STAT_ENTRY; i++)
+		if((statEntry[i]->isCurrentlyHighlighted())&&(statEntry[i]->isCurrentlyActivated()))
+		{
+			setNeedRedrawNotMoved();
+			break;
+		}
 
 	if((!wasResetted)&&(!anarace->isOptimizing()))
 		return;
+
+	setNeedRedrawNotMoved();
+	
 	wasResetted = false;
 
 	long int difference = SDL_GetTicks() - start_time;
@@ -210,7 +224,7 @@ void StatisticsWindow::process()
 				data[i][j] = data[i][j+1];
 		if(av==0)
 			av=1;
-		data[FPS_STAT_ENTRY][199]=1000/av;
+		data[FPS_STAT_ENTRY][199]=configuration.getCurrentFramerate();//1000/av; // ???? TODO
 	}
 	
 

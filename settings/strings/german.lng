@@ -67,11 +67,11 @@
 		Schiff-Waffen
 		Raffinerie
 		Gas WBF
-		MOVE_ONE_3_FORWARD
-		MOVE_ONE_1_FORWARD
-		MOVE_ONE_1_BACKWARD
-		ROTATE
-		FOLLOW
+		Baue parallel zwei
+		Baue parallel vier
+		Baue parallel acht
+		Baue parallel sechzehn
+		Alle vom Gas zu Mineralien
 		RESET
 		Vespin-Geysir
 		Mineralienfeld
@@ -172,11 +172,11 @@
 		NULL
 		Assimilator
 		Gas Sonde
-		NULL
-		NULL
-		NULL
-		NULL
-		NULL
+		Baue parallel zwei
+		Baue parallel vier
+		Baue parallel acht
+		Baue parallel sechzehn
+		Alle vom Gas zu Mineralien
 		NULL
 		Vespene Geysir
 		Mineralienfeld
@@ -278,11 +278,11 @@
 		NULL
 		Extraktor
 		Gas Drone
-		NULL
-		NULL
-		NULL
-		NULL
-		NULL
+		Baue parallel zwei
+		Baue parallel vier
+		Baue parallel acht
+		Baue parallel sechzehn
+		Alle vom Gas zu Mineralien
 		NULL
 		Vespene Geysir
 		Mineralienfeld
@@ -507,6 +507,7 @@
 		Begrenze Einheiten
 		Produktionsstättenmodus
 		Speicherung am Ende
+		Baue immer Arbeiter
 		Vorberechnung Baufolge
 		Maximale Länge
 		Zahl der Versuche
@@ -539,6 +540,7 @@
 		Sollen nur StarCraft (TM) Einheiten verwendet werden?
 		Sollen die Einträge im 'Füge Ziel hinzu' Menü nach Einsatzgebiet oder nach Baustätte geordnet werden?
 		Sollen die Baureihenfolgen am Ende eines Durchgangs automatisch gespeichert werden oder soll gefragt werden?
+		Soll versucht werden, dass ununterbrochen Arbeiter produziert werden?
 		Soll eine zufällige oder eine vorberechnete Baureihenfolge zu Beginn genommen werden?
 		Maximale Länge einer Baureihenfolge
 		Wie oft soll das Programm neustarten um eine optimale Baureihenfolge zu erhalten?

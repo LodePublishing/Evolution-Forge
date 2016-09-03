@@ -209,7 +209,7 @@ inline void GOAL_ENTRY::setName(const std::string& goal_name)
 inline const unsigned int GOAL_ENTRY::getAllGoal(const unsigned int unit) const
 {
 #ifdef _SCC_DEBUG
-	if(unit>GAS_SCV) {
+	if(unit >= LAST_UNIT) {
 		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value unit out of range.");return(0);
 	}
 	if(allGoal[unit]>200) {
@@ -225,7 +225,7 @@ inline const unsigned int GOAL_ENTRY::getGlobalGoal(const unsigned int location,
 	if(location>=MAX_LOCATIONS) {
 		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value location out of range.");return(0);
 	}
-	if(unit>GAS_SCV) {
+	if(unit >= LAST_UNIT) {
 		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value unit out of range.");return(0);
 	}
 	if(globalGoal[location][unit]>200) {
@@ -239,7 +239,7 @@ inline const unsigned int GOAL_ENTRY::getGlobalGoal(const unsigned int location,
 inline const bool GOAL_ENTRY::getIsStatic(const unsigned int unit) const
 {
 #ifdef _SCC_DEBUG
-	if(unit>GAS_SCV) {
+	if(unit >= LAST_UNIT) {
 		toLog("DEBUG: (GOAL_ENTRY::getIsStatic): Value unit out of range.");return(false);
 	}
 #endif
@@ -248,7 +248,7 @@ inline const bool GOAL_ENTRY::getIsStatic(const unsigned int unit) const
 inline const bool GOAL_ENTRY::getIsHaveable(const unsigned int unit) const
 {
 #ifdef _SCC_DEBUG
-	if(unit>GAS_SCV) {
+	if(unit > LAST_UNIT) {
 		toLog("DEBUG: (GOAL_ENTRY::getIsHaveable): Value unit out of range.");return(false);
 	}
 #endif
@@ -258,7 +258,7 @@ inline const bool GOAL_ENTRY::getIsHaveable(const unsigned int unit) const
 inline const bool GOAL_ENTRY::getIsBuildable(const unsigned int unit) const
 {
 #ifdef _SCC_DEBUG
-	if(unit>GAS_SCV) {
+	if(unit >= LAST_UNIT) {
 		toLog("DEBUG: (GOAL_ENTRY::getIsBuildable): Value unit out of range.");return(false);
 	}
 #endif

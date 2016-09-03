@@ -5,92 +5,68 @@
 InfoWindow& InfoWindow::operator=(const InfoWindow& object)
 {
 	((UI_Window)(*this)) = ((UI_Window)object);
+	bo = object.bo;
+	bg = object.bg;
 	unit = object.unit;
 	delete text;
 	text = new UI_StaticText(*object.text);
-	IP = object.IP;
-	newIP = object.newIP;
+	program = object.program;
 	anarace = object.anarace;
-	bo = object.bo;
-	bg = object.bg;
 	return(*this);
 }
 
 InfoWindow::InfoWindow(const InfoWindow& object) :
 	UI_Window((UI_Window)object),
+	bo(object.bo),
+	bg(object.bg),
 	unit(object.unit),
 	text(new UI_StaticText(*object.text)),
-	IP(object.IP),
-	newIP(object.newIP),
-	anarace(object.anarace),
-	bo(object.bo),
-	bg(object.bg)
+	program(object.program),
+	anarace(object.anarace)
 { }
 
 InfoWindow::InfoWindow(UI_Object* info_parent, ANARACE* info_anarace, const unsigned int info_window_number):
 	UI_Window(info_parent, INFO_WINDOW_TITLE_STRING, INFO_WINDOW, info_window_number, NOT_SCROLLED),
+	bo(NULL),
+	bg(NULL),
 	unit(0),
 	text(new UI_StaticText(this, "nothing", getRelativeClientRect(), BRIGHT_TEXT_COLOR, SMALL_MIDDLE_NORMAL_FONT, FORMATTED_NON_BLOCK_TEXT_MODE)),
-	IP(999),
-	newIP(999),
-	anarace(info_anarace),
-	bo(NULL),
-	bg(NULL)
+	program(),
+	anarace(info_anarace)
 { }
 
-InfoWindow::~InfoWindow()
-{
+InfoWindow::~InfoWindow() {
 	delete text;
 }
 
-void InfoWindow::assignAnarace(ANARACE* info_anarace)
-{
+void InfoWindow::assignAnarace(ANARACE* info_anarace) {
 	anarace = info_anarace;
 }
 
-void InfoWindow::assignBg(const BoGraphEntry* info_bg)
-{
+void InfoWindow::assignBg(const BoGraphEntry* info_bg) {
 	bg = info_bg;
 }
 
-const unsigned int InfoWindow::getUnit() const {
-	return unit;
-}
-
-void InfoWindow::setIP(const unsigned int ip) {
-	IP = ip;
-}
-
-void InfoWindow::setUnit(const unsigned int unit_type) {
-	unit = unit_type;
+void InfoWindow::setProgram(const PROGRAM& info_program) {
+	program = info_program;
 }
 
 void InfoWindow::resetData()
 {
-	unit = 0;
-	IP = 999;
-	newIP = 999;
 	bo = NULL;
 	bg = NULL;
 }
 
-const unsigned int InfoWindow::getIP() const {
-	return(IP);
-}
-
-void InfoWindow::assignBo(const BoEntry* info_bo)
-{
+void InfoWindow::assignBo(const BoEntry* info_bo) {
 	bo = info_bo;
 }
 
 void InfoWindow::process()
 {
 	if(!isShown()) 
-	{
-		IP=999;
 		return;
-	}
 	UI_Window::process();
+#if 0
 //	IP = newIP;
 	if(IP>MAX_LENGTH)
 		return;
@@ -118,6 +94,7 @@ void InfoWindow::process()
 		<< *UI_Object::theme.lookUpString(INFO_TIME_STRING) << ": $" 
 		<< formatTime(anarace->getRealProgramTime(IP)) << "$]& #";
 	text->updateText(os.str());
+#endif
 }
 
 void InfoWindow::draw(DC* dc) const

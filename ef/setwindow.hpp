@@ -44,12 +44,13 @@ class SettingsWindow:public UI_Window
 //		UI_NumberField* crossingOver;
 
 		UI_CheckButton* autoSaveRuns;
+		UI_CheckButton* alwaysBuildWorker;
 		UI_CheckButton* restrictSC;
 		UI_CheckButton* facilityMode;
 //		UI_CheckButton* preprocessBuildorder;
 //		UI_CheckButton* allowGoalAdaption;
 		UI_CheckButton* glowingButtons;
-//		UI_CheckButton* dnaSpiral;
+		UI_CheckButton* dnaSpiral;
 		UI_CheckButton* backgroundBitmap;
 		UI_CheckButton* fullscreen;
 		UI_CheckButton* tooltips;

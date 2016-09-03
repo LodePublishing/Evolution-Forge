@@ -248,37 +248,43 @@ const string UI_Theme::lookUpFormattedString(const eString id, const unsigned in
 const Point UI_Theme::lookUpRealDistance(const eWindow id, const unsigned int windowNumber) const // ~~ Name
 {
 #ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_WINDOWS)) {
+	if((id < 0) || (id >= MAX_WINDOWS)) {
 		toLog("ERROR: (UI_Theme::lookUpRealDistance) id out of range.");return(Point(0,0));
 	}
 #endif
-	if(id==MAIN_WINDOW) 
-		return(Point(0,0));
+	if(id == MAIN_WINDOW) 
+		return(Point(0, 0));
 	switch(arrangeDirection[resolution][tab][id])
 	{
-		case ARRANGE_LEFT_TO_RIGHT:return(Point(windowNumber*rectList[resolution][tab][id]->GetWidth(), 0));break;
-		case ARRANGE_RIGHT_TO_LEFT:return(Point(-windowNumber*rectList[resolution][tab][id]->GetWidth(), 0));break;
-		case ARRANGE_TOP_TO_DOWN:return(Point(0, windowNumber*rectList[resolution][tab][id]->GetHeight()));break;
-		case ARRANGE_DOWN_TO_TOP:return(Point(0, -windowNumber*rectList[resolution][tab][id]->GetHeight()));break;
-		default:return(Point(0,0));
+		case ARRANGE_LEFT_TO_RIGHT:
+			return(Point(windowNumber * rectList[resolution][tab][id]->GetWidth(), 0));break;
+		case ARRANGE_RIGHT_TO_LEFT:
+			return(Point(-windowNumber * rectList[resolution][tab][id]->GetWidth(), 0));break;
+		case ARRANGE_TOP_TO_DOWN:
+			return(Point(0, windowNumber * rectList[resolution][tab][id]->GetHeight()));break;
+		case ARRANGE_DOWN_TO_TOP:
+			return(Point(0, -windowNumber * rectList[resolution][tab][id]->GetHeight()));break;
+		default:
+			return(Point(0,0));
 	}
 }
 
 const Point UI_Theme::lookUpMaxRealDistance(const eWindow id, const unsigned int windowNumber) const // ~~ Name
 {
 #ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_WINDOWS)) {		
+	if((id < 0) || (id >= MAX_WINDOWS)) {
 		toLog("ERROR: (UI_Theme::lookUpMaxRealDistance) id out of range.");return(Point(0,0));
 	}
 #endif
-	if(id==MAIN_WINDOW) return(Point(0,0));
+	if(id == MAIN_WINDOW) 
+		return(Point(0, 0));
 	switch(arrangeDirection[resolution][tab][id])
 	{
-		case ARRANGE_LEFT_TO_RIGHT:return(Point(windowNumber*rectList[resolution][tab][id]->GetWidth(), 0));break;
-		case ARRANGE_RIGHT_TO_LEFT:return(Point(-windowNumber*rectList[resolution][tab][id]->GetWidth(), 0));break;
-		case ARRANGE_TOP_TO_DOWN:return(Point(0, windowNumber*maxHeightList[resolution][tab][id]));break;
-		case ARRANGE_DOWN_TO_TOP:return(Point(0, -windowNumber*maxHeightList[resolution][tab][id]));break;
-		default:return(Point(0,0));break;
+		case ARRANGE_LEFT_TO_RIGHT:return(Point(windowNumber * rectList[resolution][tab][id]->GetWidth(), 0));break;
+		case ARRANGE_RIGHT_TO_LEFT:return(Point(-windowNumber * rectList[resolution][tab][id]->GetWidth(), 0));break;
+		case ARRANGE_TOP_TO_DOWN:return(Point(0, windowNumber * maxHeightList[resolution][tab][id]));break;
+		case ARRANGE_DOWN_TO_TOP:return(Point(0, -windowNumber * maxHeightList[resolution][tab][id]));break;
+		default:return(Point(0, 0));break;
 	}
 }
 
@@ -313,13 +319,15 @@ const unsigned int UI_Theme::lookUpMaxHeight(const eWindow id, const unsigned in
 		toLog("ERROR: (UI_Theme::lookUpMaxHeight) id out of range.");return(0);
 	}
 #endif
+	return(maxHeightList[resolution][tab][id]);
+	
 	Point p;
 	switch(arrangeDirection[resolution][tab][id])
 	{
 		case ARRANGE_LEFT_TO_RIGHT:
-		case ARRANGE_RIGHT_TO_LEFT:p=lookUpMaxRealDistance(id, windowNumber) + Point(lookUpMaxRealDistance(xwindow[resolution][tab][id], maxPlayer).x, 0);break;
+		case ARRANGE_RIGHT_TO_LEFT:p = lookUpMaxRealDistance(id, windowNumber) + Point(lookUpMaxRealDistance(xwindow[resolution][tab][id], maxPlayer).x, 0);break;
 		case ARRANGE_TOP_TO_DOWN:
-		case ARRANGE_DOWN_TO_TOP:p=lookUpMaxRealDistance(id, windowNumber) + Point(0,lookUpMaxRealDistance(ywindow[resolution][tab][id], maxPlayer).y);break;
+		case ARRANGE_DOWN_TO_TOP:p = lookUpMaxRealDistance(id, windowNumber) + Point(0, lookUpMaxRealDistance(ywindow[resolution][tab][id], maxPlayer).y);break;
 		default:break;
 	}
 	return(p.y);
@@ -513,95 +521,6 @@ eCommand parse_commands(const string& item)
 }
 
 // Rueckgabewert: Richtung
-
-eArrangeDirection parse_complete_command(const string* p, eCommand* e, unsigned int &height)
-{
-	signed int x=-1;signed int y=-1;
-	unsigned int dx=0;unsigned int dy=0;
-	bool xpart=false; bool ypart=false; bool xypart=false; bool dxpart=false; bool dypart=false;
-	bool xcomplete=false;bool ycomplete=false;
-	bool window=false;
-
-// additional windows: arrange left to right = 0, arrange right to left = 1, arrange top to down = 2, arrange down to top = 3 :)
-	eArrangeDirection direction=ARRANGE_LEFT_TO_RIGHT;
-	
-	for(int i = 1; i <50;i++)
-	{
-		if(xcomplete&&ycomplete)
-		{
-			dxpart=true;
-			xcomplete=false;
-			ycomplete=false;
-		}
-	
-		e[i]=NO_COMMAND;
-		if(window)
-		{
-			e[i]=(eCommand)parse_window(p[i]);
-			window=false;
-		}
-		else
-		if(xpart)
-		{
-			x=atoi(p[i].c_str());
-			xpart=false;
-			if(xypart)
-			{
-				ypart=true;
-				xypart=false;
-			}
-		} else
-		if(ypart)
-		{
-			y=atoi(p[i].c_str());
-			ypart=false;
-		} else
-		if(dxpart)
-		{
-			dx=atoi(p[i].c_str());
-			dxpart=false;dypart=true;
-		} else
-		if(dypart)
-		{
-			dy=atoi(p[i].c_str());
-			dypart=false;
-		} else
-		{
-			eCommand k=parse_commands(p[i]);
-			switch(k)
-			{
-				case ABSOLUTE_COORDINATES_COMMAND:xpart=true;xypart=true;xcomplete=true;ycomplete=true;break;
-				case ABSOLUTE_X_COORDINATE_COMMAND:xpart=true;xcomplete=true;direction=ARRANGE_LEFT_TO_RIGHT;break;
-				case ABSOLUTE_Y_COORDINATE_COMMAND:ypart=true;ycomplete=true;direction=ARRANGE_TOP_TO_DOWN;break;
-				case DOCK_WITH_LEFT_BORDER_OF_COMMAND:e[i]=k;window=true;xcomplete=true;direction=ARRANGE_RIGHT_TO_LEFT;break;
-				case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:e[i]=k;window=true;xcomplete=true;direction=ARRANGE_LEFT_TO_RIGHT;break;
-				case DOCK_WITH_LOWER_BORDER_OF_COMMAND:e[i]=k;window=true;ycomplete=true;direction=ARRANGE_TOP_TO_DOWN;break;
-				case DOCK_WITH_UPPER_BORDER_OF_COMMAND:e[i]=k;window=true;ycomplete=true;direction=ARRANGE_DOWN_TO_TOP;break;
-				case DOCK_CENTER_INSIDE_OF_COMMAND:e[i]=k;window=true;dxpart=true;break;
-				case DOCK_LEFT_INSIDE_OF_COMMAND:e[i]=k;window=true;xcomplete=true;direction=ARRANGE_LEFT_TO_RIGHT;break;
-				case DOCK_RIGHT_INSIDE_OF_COMMAND:e[i]=k;window=true;xcomplete=true;direction=ARRANGE_RIGHT_TO_LEFT;break;
-				case DOCK_TOP_INSIDE_OF_COMMAND:
-												  {
-													  e[i]=k;window=true;ycomplete=true;direction=ARRANGE_TOP_TO_DOWN;
-												  }break;
-				case DOCK_BOTTOM_INSIDE_OF_COMMAND:e[i]=k;window=true;ycomplete=true;direction=ARRANGE_DOWN_TO_TOP;break;
-//				case CALCULATE_MAXSIZE_COMMAND:break;
-//				case CALCULATE_MAXWIDTH_COMMAND:break;
-//				case CALCULATE_MAXHEIGHT_COMMAND:break;
-				case SAME_POSITION_AS_ABOVE_COMMAND:e[i]=k;dxpart=true;break;
-//				case SAME_SIZE_AS_ABOVE_COMMAND:break;
-//				case SAME_AS_ABOVE_COMMAND:break;//TODO!
-						
-				default:e[i]=k;break;			
-			}
-			
-		}
-	}
-	height = dy;
-	return(direction);
-}
-
-
 eArrangeDirection parse_complete_command(const string* p, eCommand* e, Rect& rect)
 {
 	signed int x=-1;signed int y=-1;
@@ -1133,9 +1052,8 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 							toLog(os.str());*/
 						}break;
 					case MAX_HEIGHT_DATA_TYPE:
-						{
-							parse_complete_command(p, &(tmaxHeightList[current_resolution][current_tab][parse_window(p[0])][0]), maxHeightList[current_resolution][current_tab][parse_window(p[0])]);
-						}break;					
+							tmaxHeightList[current_resolution][current_tab][parse_window(p[0])][0] = parse_commands(p[1]);
+						break;					
 					default:break;
 				}
 				current_line++;
@@ -1226,49 +1144,41 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 					}
 				}
 }
-change=1;
-while(change)
-{
-	change=0;
+
 	for(int i=0;i<MAX_RESOLUTIONS;i++)
 		for(int j=0;j<MAX_TABS;j++)
 			for(int k=0;k<MAX_WINDOWS;k++)
-				if(maxHeightList[i][j][k]>0)
-				{
-					int oldy = maxHeightList[i][j][k];
-					for(unsigned int l=0;l<MAX_PARAMETERS;l++)
-						switch(tmaxHeightList[i][j][k][l])
-						{
-							case NO_COMMAND:break;
-							case DOCK_WITH_LEFT_BORDER_OF_COMMAND:break;
-							case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:break;
-							case DOCK_WITH_LOWER_BORDER_OF_COMMAND:break;
-							case DOCK_WITH_UPPER_BORDER_OF_COMMAND:break;
-							case DOCK_CENTER_INSIDE_OF_COMMAND:break;
-							case DOCK_LEFT_INSIDE_OF_COMMAND:break;
-							case DOCK_RIGHT_INSIDE_OF_COMMAND:break;
-							case DOCK_TOP_INSIDE_OF_COMMAND:break;
-							case DOCK_BOTTOM_INSIDE_OF_COMMAND:break;
-							case CALCULATE_MAXHEIGHT_COMMAND:
-								maxHeightList[i][j][k] = rectList[i][j][MAIN_WINDOW]->GetHeight() + rectList[i][j][MAIN_WINDOW]->GetTop() - rectList[i][j][k]->GetTop() - 30;break;
+			{
+				for(unsigned int l = 0; l < MAX_PARAMETERS; l++)
+					switch(tmaxHeightList[i][j][k][l])
+					{
+						case NO_COMMAND:break;
+						case DOCK_WITH_LEFT_BORDER_OF_COMMAND:break;
+						case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:break;
+						case DOCK_WITH_LOWER_BORDER_OF_COMMAND:break;
+						case DOCK_WITH_UPPER_BORDER_OF_COMMAND:break;
+						case DOCK_CENTER_INSIDE_OF_COMMAND:break;
+						case DOCK_LEFT_INSIDE_OF_COMMAND:break;
+						case DOCK_RIGHT_INSIDE_OF_COMMAND:break;
+						case DOCK_TOP_INSIDE_OF_COMMAND:break;
+						case DOCK_BOTTOM_INSIDE_OF_COMMAND:break;
+						case CALCULATE_MAXHEIGHT_COMMAND:
+							maxHeightList[i][j][k] = rectList[i][j][MAIN_WINDOW]->GetHeight() + rectList[i][j][MAIN_WINDOW]->GetTop() - rectList[i][j][k]->GetTop() - 30;break;
 										 // main window mal hernehmen... TODO andere Fenster miteinberechnen!!
-							case CALCULATE_MAXSIZE_COMMAND:break;
-							case CALCULATE_MAXWIDTH_COMMAND:break;
-							case SAME_POSITION_AS_ABOVE_COMMAND:break;
-							case SAME_SIZE_AS_ABOVE_COMMAND:
-							case SAME_AS_ABOVE_COMMAND:
-								maxHeightList[i][j][k] = rectList[i][j][k]->GetHeight();
-							break;
-							default:
+						case CALCULATE_MAXSIZE_COMMAND:break;
+						case CALCULATE_MAXWIDTH_COMMAND:break;
+						case SAME_POSITION_AS_ABOVE_COMMAND:break;
+						case SAME_SIZE_AS_ABOVE_COMMAND:
+						case SAME_AS_ABOVE_COMMAND:
+							maxHeightList[i][j][k] = rectList[i][j][k]->GetHeight();
+						break;
+						default:
 #ifdef _SCC_DEBUG								
 								toLog("max error... same as above oder so");
 #endif
-								break;
-						}
-					if(maxHeightList[i][j][k]!=oldy)
-						change=1;
-				}
-	}
+						break;
+					}
+			}
 
 	for(int i = 0; i < MAX_LANGUAGES; i++)
 		for(int j = 0; j < MAX_STRINGS; j++)

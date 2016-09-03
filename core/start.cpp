@@ -5,14 +5,14 @@ START::START():
 	startConditionsInitialized(false),
 	mapInitialized(false)
 {
-	for(int i=MAX_PLAYER;i--;)
+	for(int i = MAX_PLAYER; i--;)
 	{
-		pCurrentGoal[i]=&(currentGoal[i]);
-		startcondition[i]=NULL;
-		tmpgoal[i]=NULL;
-		startPosition[i]=0;
-		playerRace[i]=TERRA;
-		pStats[i]=NULL;
+		pCurrentGoal[i] = &(currentGoal[i]);
+		startcondition[i] = NULL;
+		tmpgoal[i] = NULL;
+		startPosition[i] = 0;
+		playerRace[i] = TERRA;
+		pStats[i] = NULL;
 	}		
 }
 
@@ -32,9 +32,9 @@ void START::fillGroups()
 #endif
 	for(int i=MAX_PLAYER;i--;)
 		totalForce[i].resetData();
-	int maxp=tmpmap->getMaxPlayer();
+	unsigned int maxp = tmpmap->getMaxPlayer();
 
-	for(int j=MAX_LOCATIONS;j--;)
+	for(int j = tmpmap->getMaxLocations();j--;)
 	{
 		startForce[0][j].setTotal(MINERAL_PATCH, tmpmap->getLocationMineralPatches(j));
 		startForce[0][j].setTotal(VESPENE_GEYSIR, tmpmap->getLocationVespeneGeysirs(j));
@@ -45,7 +45,8 @@ void START::fillGroups()
 	{
 		startForce[i+1][0] = *startcondition[i+1]->getUnit(0);
 		startForce[i+1][startPosition[i+1]] = *startcondition[i+1]->getUnit(0);
-		for(int j=1;j<MAX_LOCATIONS;j++)
+		// TODO bei mehreren Spielern!
+		for(unsigned int j=1;j<tmpmap->getMaxLocations();j++)
 		{
 			for(int k=UNIT_TYPE_COUNT;k--;)
 				if(startForce[i+1][j].getTotal(k))

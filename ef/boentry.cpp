@@ -1,19 +1,22 @@
 #include "boentry.hpp"
 
 BoEntry::BoEntry(const BoEntry& object) :
-	UI_Button((UI_Button)object)
+	UI_Button((UI_Button)object),
+	program()
 //	fixed(object.fixed)
 { }
 	
 BoEntry& BoEntry::operator=(const BoEntry& object)
 {
 	((UI_Button)(*this)) = ((UI_Button)object);
+	program = object.program;
 //	fixed = object.fixed;
 	return(*this);
 }
 
-BoEntry::BoEntry(UI_Object* bo_parent, Rect bo_rect, const string& bo_unit) :
-	UI_Button(bo_parent, bo_rect, bo_unit, FORCE_ENTRY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NOTHING)
+BoEntry::BoEntry(UI_Object* bo_parent, Rect bo_rect, const string& bo_unit, const PROGRAM& bo_program) :
+	UI_Button(bo_parent, bo_rect, bo_unit, FORCE_ENTRY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NOTHING),
+	program(bo_program)
 //	fixed(false)
 	// TODO!
 {
@@ -29,8 +32,6 @@ BoEntry::~BoEntry()
 	delete(cancelUnit);*/
 }
 
-
-
 void BoEntry::draw(DC* dc) const
 {
 	if(!isShown())
@@ -42,10 +43,8 @@ void BoEntry::draw(DC* dc) const
 
 void BoEntry::process()
 {
-	if(!isShown())
-		return;
-	if(getTargetHeight()!=12)
-		toLog("entry to high");
+//	if(!isShown())
+//		return;
 	UI_Button::process();
 //	if(isRightClicked())
 //		lock(!fixed);

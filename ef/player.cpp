@@ -10,7 +10,6 @@ Player::Player(UI_Object* player_parent, ANARACE** player_anarace, MessageWindow
 	UI_Object(player_parent),
 	geneAnimation(0),
 	anarace(player_anarace),
-	orderList(),
 	mode(0)
 {
 	for(int i=0;i<MAX_WINDOWS;i++)
@@ -19,15 +18,14 @@ Player::Player(UI_Object* player_parent, ANARACE** player_anarace, MessageWindow
 	window[TIMER_WINDOW] = new TimerWindow(this, *anarace, playerNumber);
 	window[STATISTICS_WINDOW]=new StatisticsWindow(this, *anarace, playerNumber);
 	window[INFO_WINDOW] = new InfoWindow(this, *anarace, playerNumber);
-	window[BUILD_ORDER_WINDOW] = new BoWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], msgWindow, &orderList,/* fixed,*/ playerNumber);
-	window[BO_GRAPH_WINDOW] = new BoGraphWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], &orderList, playerNumber);
+	window[BUILD_ORDER_WINDOW] = new BoWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], msgWindow, /* fixed,*/ playerNumber);
+	window[BO_GRAPH_WINDOW] = new BoGraphWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], playerNumber);
 	window[BO_DIAGRAM_WINDOW]=new BoDiagramWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], playerNumber);
 	
 	// to set infoWindow above all others
 	window[INFO_WINDOW]->removeFromFamily(); window[INFO_WINDOW]->setParent(this);
 	setOptimizing();
 //	process();
-//	return;
 	Hide();
 	setOptimizing(false);
 //	for(int i=MAX_LENGTH;i--;)
@@ -59,42 +57,21 @@ void Player::drawGene(DC* dc, int k, const Point* points, const Point position, 
 
 void Player::drawGeneString(DC* dc, const Rect position) const
 {
-#if 0
 	int stringheight=0;
-	Point points1[200];
-	Point points2[200];
-	Point points3[200];
-	Point points4[200];
-	for(int i=0;i<200;i++)
-	{
-		points1[i].x=0;points1[i].y=0;
-		points2[i].x=0;points2[i].y=0;
-		points3[i].x=0;points3[i].y=0;
-		points4[i].x=0;points4[i].y=0;
-	}
-	int colors[MAX_LENGTH];													
-	for(int i=0;i<MAX_LENGTH;i++)
-		colors[i]=0;
-
-	const Order* sortedList[MAX_LENGTH];
-	int orderCount=0;
-	for(map<long, Order>::const_iterator order=orderList.begin(); order!=orderList.end(); ++order) {
-		sortedList[orderCount]=&((*order)->second);
-		orderCount++;
-	}
+	Point points1[2];
+	Point points2[2];
+	Point points3[2];
+	Point points4[2];
+	vector<int> colors;
+	int orderCount = (*anarace)->getProgramList().size();
 	if(orderCount<2)
 		return;
-	std::sort(sortedList, sortedList+orderCount, Order::OrderDescendingIPSort());
-
-	for(int k=0;k<orderCount;k++)
-		colors[k]=sortedList[k]->getUnit();
-	
-//	for(map<long, Order>::const_iterator order=orderList.begin(); order!=orderList.end(); ++order)
-//		colors[(*order)->second.getIP()]=(*order)->second.getUnit();
+	for(std::list<PROGRAM>::const_iterator i = (*anarace)->getProgramList().begin();i!=(*anarace)->getProgramList().end();i++)
+		colors.push_back(i->getUnit());
 
 //	if((*anarace)->isOptimizing())
 	{
-		int current_type=stats[(*anarace)->getRace()][colors[0]].facilityType;
+		int current_type = stats[(*anarace)->getRace()][colors[0]].facilityType;
 		for(int i=0;i<2*orderCount;i++)
 		{
 //			int k=2;
@@ -103,32 +80,16 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 				i++;
 				k++;
 			}*/
-			current_type=stats[(*anarace)->getRace()][colors[i/2]].facilityType;
-			
-			
-/*		for(int i=0;i<MAX_LENGTH;i++)
-			if(colors[i])
-			{
-				int k=1; // TODO
-				while((i<MAX_LENGTH)&&((!colors[i])||((stats[(*anarace)->getRace()][colors[i]].facilityType)&&((current_type==-1)||(stats[(*anarace)->getRace()][colors[i]].facilityType==current_type)))))
-				{
-					i++;
-					if(!colors[i]) continue;
-					if(current_type==-1)
-						current_type=stats[(*anarace)->getRace()][colors[i]].facilityType;
-					k++;
-				}
-				current_type=stats[(*anarace)->getRace()][colors[i]].facilityType;*/
-																				
+			current_type = stats[(*anarace)->getRace()][colors[i/2]].facilityType;
 				for(int j=0;j<2;j++)
 				{
-					points1[j] = Point(5+(stringheight+j)*(position.GetWidth()-8)/(orderCount*2)-1, (int)((cos((float)(4*(stringheight+j)+geneAnimation/2)*5.0*M_PI/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
+					points1[j] = Point(5+(stringheight+j)*(position.GetWidth()-8)/(orderCount*2)-1, (int)((cos((float)(4*(stringheight+j)+geneAnimation)*5.0*M_PI/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
 					
-					points2[j] = Point(5+(stringheight+j)*(position.GetWidth()-8)/(orderCount*2)-1, (int)((sin(((float)(4*(stringheight+j)+geneAnimation/2)+13.0)*5.0*M_PI/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
+					points2[j] = Point(5+(stringheight+j)*(position.GetWidth()-8)/(orderCount*2)-1, (int)((sin(((float)(4*(stringheight+j)+geneAnimation)+13.0)*5.0*M_PI/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
 					
-					points3[j] = Point(5+(stringheight+j)*(position.GetWidth()-8)/(orderCount*2)-1, (int)((cos(((float)(4*(stringheight+j)+geneAnimation/2)+26.0)*5.0*M_PI/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
+					points3[j] = Point(5+(stringheight+j)*(position.GetWidth()-8)/(orderCount*2)-1, (int)((cos(((float)(4*(stringheight+j)+geneAnimation)+26.0)*5.0*M_PI/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
 					
-					points4[j] = Point(5+(stringheight+j)*(position.GetWidth()-8)/(orderCount*2)-1, (int)((sin(((float)(4*(stringheight+j)+geneAnimation/2)+39.0)*5.0*M_PI/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
+					points4[j] = Point(5+(stringheight+j)*(position.GetWidth()-8)/(orderCount*2)-1, (int)((sin(((float)(4*(stringheight+j)+geneAnimation)+39.0)*5.0*M_PI/200.0)*0.9*position.GetHeight()/2)+position.GetHeight()/2.1));
 				} //end for(j=0;j<k;j++)
 				stringheight+=1;
 //				k++;
@@ -186,7 +147,6 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 				}
 			} //end blend
 	} //end if(isOptimizing)
-#endif
 }
 																			
 
@@ -282,7 +242,7 @@ void Player::process()
 // ------ END COMMUNICATION BETWEEN THE WINDOWS ------
 
 	if((*anarace)->isOptimizing())
-		geneAnimation++;
+		geneAnimation+=0.43;
 // ------ PROCESS MEMBER VARIABLES ------	
 //	MoveOrders();
 // ------ END PROCESSING MEMBER VARIABLES ------
@@ -290,7 +250,7 @@ void Player::process()
 
 void Player::updateRectangles(const unsigned int maxPlayer)
 {
-	for(int i=BUILD_ORDER_WINDOW;i<=INFO_WINDOW;i++)
+	for(int i=BUILD_ORDER_WINDOW; i <= INFO_WINDOW; i++)
 		window[(eWindow)i]->updateRectangles(maxPlayer);
 }
 
@@ -316,13 +276,6 @@ void Player::resetData()
 	((InfoWindow*)window[INFO_WINDOW])->resetData();
 	geneAnimation=0;
 //	Hide();
-        list<Order*>::iterator order = orderList.begin();
-        while(order != orderList.end())
-        {
-                delete(*order);
-                order = orderList.erase(order);
-        }
-	//orderList.clear();
 }
 
 void Player::restartAnarace()
@@ -332,230 +285,12 @@ void Player::restartAnarace()
 
 void Player::CheckOrders()
 {
-	list<Order*>::iterator order = orderList.begin();
-        while(order != orderList.end())
-        {
-                delete(*order);
-                order = orderList.erase(order);
-        }
-	order = orderList.begin();
-
-	for(int s=MAX_LENGTH;s--;)
-		if((*anarace)->getProgramIsBuilt(s)&&((*anarace)->getRealProgramTime(s) + stats[(*anarace)->getRace()][(*anarace)->getPhaenoCode(s)].BT<=(*anarace)->getRealTimer()))
-		{
-			if(order == orderList.end()) // => insert at the back
-			{
-				Order* new_order = new Order();
-				new_order->setUnit((*anarace)->getPhaenoCode(s));
-				new_order->setIP(s);
-				new_order->setMarker((*anarace)->getMarker(s));
-				orderList.push_back(new_order);
-			} else 
-			if((*order)->getMarker() != (*anarace)->getMarker(s))
-			{
-				std::list<Order*>::iterator i = order;
-				while(i != orderList.end())
-				{
-					if((*i)->getMarker() == (*anarace)->getMarker(s))
-						break;
-					i++;
-				}
-				if(i != orderList.end()) // Found, Move the entry
-				{
-					Order* old = *i;
-					orderList.insert(order, old);
-					order = orderList.erase(i);
-					old->setUnit((*anarace)->getPhaenoCode(s));
-					old->setIP(s);
-				} else // => not found, insert a new one
-				{
-					Order* new_order = new Order();
-					new_order->setUnit((*anarace)->getPhaenoCode(s));
-					new_order->setIP(s);
-					new_order->setMarker((*anarace)->getMarker(s));
-					orderList.insert(order, new_order);
-				}
-			} else  // ok
-			{
-				(*order)->setIP(s);
-				order++;
-			}
-		}
-
-	while(order != orderList.end())
-	{
-		delete(*order);
-		order = orderList.erase(order);
-	}
-
-		#if 0	
-			while((s) && (order != orderList.end()) && ((*order)->getMarker() == (*anarace)->getMarker(s)))
-			{
-			// update
-				(*order)->setRow(k+1);
-				Rect t = Rect(0, (k+1)*(FONT_SIZE+7), 500-8, FONT_SIZE+6);
-				if((*order)->target!=t)
-				{
-					(*order)->start = (*order)->rect;
-					(*order)->target = t;
-					(*order)->blendTarget = 50;
-					(*order)->blendStart = (*order)->blend;
-					(*order)->setUnit((*anarace)->getPhaenoCode(s));
-				}
-				(*order)->setIP(s);
-				s--;
-				order++;
-				k++;
-			}
-
-			list<Order*>::iterator i = order;
-			while(i != orderList.end())
-			{
-				if((*i)->getMarker() == (*anarace)->getMarker(s))
-					break;
-				i++;
-			}
-			if(i == orderList.end()) // => not found, insert new
-			{ 
-				Order* new_order = new Order();
-				new_order->setRow(k+1);
-				new_order->rect = Rect(170, new_order->getRow()*(FONT_SIZE+7), 0, FONT_SIZE+6);
-				Rect t = Rect(0, new_order->getRow()*(FONT_SIZE+7), 500-8, FONT_SIZE+6);
-				new_order->start = new_order->rect;
-				new_order->target = t;
-				new_order->blend = 1;
-				new_order->blendTarget = 50;
-				new_order->blendStart = new_order->blend;
-				new_order->setUnit((*anarace)->getPhaenoCode(s));
-				new_order->setIP(s);
-				new_order->setMarker((*anarace)->getMarker(s));
-				orderList.insert(order, new_order);
-				k++;
-			} else
-// update and swap
-			{
-				Order* old = *i;
-				orderList.erase(i);
-				orderList.insert(order, old);
-
-				old->setRow(k+1);
-				Rect t = Rect(0, (k+1)*(FONT_SIZE+7), 500-8, FONT_SIZE+6);
-				if(old->target != t)
-				{
-					old->start = old->rect;
-					old->target = t;
-				}
-				old->blendTarget = 50;
-				old->blendStart = (*i)->blend;
-				old->setUnit((*anarace)->getPhaenoCode(s));
-				old->setIP(s);
-				k++;
-			}
-		}
-#endif
-/*
-
-			
-			map<long, Order>::iterator order = orderList.find((*anarace)->getMarker(s)) ;// => found old one -> update the data!
-			if(order!=orderList.end())
-			{
-				(*order)->second.setRow(k+1);//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace())); TODO
-				//Rect t=Rect(((*order)->second.getRow()%2)*(window[BUILD_ORDER_WINDOW]->getWidth()/2), ((*order)->second.getRow()/2)*(FONT_SIZE+6),(window[BUILD_ORDER_WINDOW]->getWidth()-8)/2,FONT_SIZE+4);
-				Rect t=Rect(0,(*order)->second.getRow()*(FONT_SIZE+7),500-8,FONT_SIZE+6);
-				if((*order)->second.target!=t)
-					(*order)->second.start=(*order)->second.rect;
-				(*order)->second.target=t;
-				(*order)->second.blendTarget=50;
-				(*order)->second.blendStart=(*order)->second.blend;
-				(*order)->second.setUnit((*anarace)->getPhaenoCode(s));
-				(*order)->second.setIP(s);
-				(*order)->second.checked=true;
-				(*order)->second.bonew=false;
-			} // => aktualisieren
-			else
-			// => neues erstellen
-			{
-				//TODO: testen ob anderes item da ist, das aber die gleiche Unit besitzt + an die gleiche Position kommt
-				bool found=false;
-				map<long, Order>::iterator current_order = orderList.begin();
-				while((!found) && (current_order != orderList.end()))
-				{
-					if((current_(*order)->second.getUnit()!=(*anarace)->getPhaenoCode(s))||(current_(*order)->second.getRow()!=k+1)||(current_(*order)->second.target.GetLeft()>0)||(s!=current_(*order)->second.getIP()))
-						current_order++;
-					else //=> ueberschreiben
-					{
-						found=true;
-						Order neuorder;
-						neuorder.setRow(k+1);//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace())); TODO
-//						Rect t=Rect(((*order)->second.getRow()%2)*(window[BUILD_ORDER_WINDOW]->getWidth()/2), ((*order)->second.getRow()/2)*(FONT_SIZE+6),(window[BUILD_ORDER_WINDOW]->getWidth()-8)/2,FONT_SIZE+4);
-						Rect t=Rect(0, current_(*order)->second.getRow()*(FONT_SIZE+7), 500-8, FONT_SIZE+6);
-						if(current_(*order)->second.target != t)
-							neuorder.start = current_(*order)->second.rect;
-						else neuorder.start = current_(*order)->second.start;
-						neuorder.target = t;
-
-						neuorder.brect = current_(*order)->second.brect;
-						neuorder.bstart = current_(*order)->second.bstart;
-						neuorder.btarget = current_(*order)->second.btarget;
-						
-						neuorder.blendTarget = 50;
-						neuorder.blendStart = current_(*order)->second.blend;
-						neuorder.setUnit((*anarace)->getPhaenoCode(s));
-						neuorder.marker = current_(*order)->second.marker;
-						neuorder.checked=true;
-						neuorder.bonew=true;
-						orderList.insert(pair<long, Order>((*anarace)->getMarker(s), neuorder));
-						
-						map<long, Order>::iterator temp = current_order;
-						temp++;
-						orderList.erase(current_order);
-						current_order = temp;
-					}
-				}
-				if((!found)&&(k+1<MAX_LENGTH)) // neues erstellen!
-				{
-					Order neuorder;
-					neuorder.setRow(k+1);//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace()));
-					neuorder.rect=Rect(170, neuorder.getRow()*(FONT_SIZE+7), 0, FONT_SIZE+6);
-					//Rect t=Rect(((*order)->second.getRow()%2)*(window[BUILD_ORDER_WINDOW]->getWidth()/2), ((*order)->second.getRow()/2)*(FONT_SIZE+6),(window[BUILD_ORDER_WINDOW]->getWidth()-8)/2,FONT_SIZE+4);
-					Rect t=Rect(0, neuorder.getRow()*(FONT_SIZE+7), 500-8, FONT_SIZE+6);
-					neuorder.start = neuorder.rect;
-					neuorder.target = t;
-					neuorder.blend = 1;neuorder.blendTarget = 50;
-					neuorder.blendStart = neuorder.blend;
-					neuorder.bonew = true;
-					neuorder.setUnit((*anarace)->getPhaenoCode(s));
-					neuorder.setIP(s);
-					neuorder.checked=true;
-					orderList.insert(pair<long, Order>((*anarace)->getMarker(s), neuorder));
-				}
-			}
-			k++;
-		}*/
-
-		((BoWindow*)(window[BUILD_ORDER_WINDOW]))->processList();
-		((BoGraphWindow*)(window[BO_GRAPH_WINDOW]))->processList();
-		((ForceWindow*)(window[FORCE_WINDOW]))->processList();
-
+	((BoDiagramWindow*)(window[BO_DIAGRAM_WINDOW]))->processList();
+	((BoWindow*)(window[BUILD_ORDER_WINDOW]))->processList();
+	((BoGraphWindow*)(window[BO_GRAPH_WINDOW]))->processList();
+	((ForceWindow*)(window[FORCE_WINDOW]))->processList();
 }
 
-
-#if 0
-// ----- MOVE ORDERS IN BOWINDOW AND BOGRAPH -----
-void Player::MoveOrders() 
-{
-/*	for(map<long, Order>::iterator order=orderList.begin(); order!=orderList.end(); ++order)
-	{
-		(*order)->second.rect.move((*order)->second.start, (*order)->second.target);
-		(*order)->second.brect.move((*order)->second.bstart, (*order)->second.btarget);
-		Size::mv((*order)->second.blend, (*order)->second.blendStart, (*order)->second.blendTarget);
-	}*/
-	for(list<Order*>::iterator order=orderList.begin(); order!=orderList.end(); ++order)
-	{
-//		(*order)->rect.move((*order)->start, (*order)->target);
-//		(*order)->brect.move((*order)->bstart, (*order)->btarget);
-//		Size::mv((*order)->blend, (*order)->blendStart, (*order)->blendTarget);
-	}
-}
-#endif
+//virtual machen
+//resetData, updateItems, assignAnarace, checkOrders
 

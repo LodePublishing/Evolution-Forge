@@ -12,13 +12,13 @@ class RACE : public PRERACE
 		unsigned int sFitness;
 		unsigned int tFitness;
 		
+		const bool buildIt(const unsigned int build_unit);
 	public:
 		RACE();
 		~RACE();
 		RACE& operator=(const RACE& object);
 		RACE(const RACE& object);
 		void resetData();
-		static void resetStaticData();
 //Output:
 		void setpFitness(const unsigned int p_fitness);
 		void setsFitness(const unsigned int s_fitness);
@@ -63,12 +63,13 @@ inline void RACE::setsFitness(const unsigned int s_fitness)
 inline void RACE::settFitness(const unsigned int t_fitness)
 {
 #ifdef _SCC_DEBUG
-	if(t_fitness > MAX_TFITNESS) {
-		toLog("DEBUG: (RACE::settFitness): Value t_fitness out of range.");return;
-	}
+        if(t_fitness > MAX_TFITNESS) {
+                toLog("DEBUG: (RACE::settFitness): Value t_fitness out of range.");return;
+        }
 #endif
-	tFitness = t_fitness;
+        tFitness = t_fitness;
 }
+
 
 inline const unsigned int RACE::getpFitness() const
 {
@@ -93,11 +94,12 @@ inline const unsigned int RACE::getsFitness() const
 inline const unsigned int RACE::gettFitness() const
 {
 #ifdef _SCC_DEBUG
-	if(tFitness>MAX_TFITNESS) {
-		toLog("DEBUG: (RACE::gettFitness): Variable tFitness not initialized.");return(0);
-	}
+        if(tFitness>MAX_TFITNESS) {
+                toLog("DEBUG: (RACE::gettFitness): Variable tFitness not initialized.");return(0);
+        }
 #endif
-	return(tFitness);
+        return(tFitness);
 }
+
 
 #endif //_CORE_RACE_HPP

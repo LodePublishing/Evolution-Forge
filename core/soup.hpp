@@ -39,5 +39,15 @@ class SOUP
 		void setParameters(START* start);
 };
 
+inline void SOUP::setMapPlayerNum(const unsigned int map_player_num)
+{
+#ifdef _SCC_DEBUG
+	if((map_player_num < 1) || (map_player_num >= MAX_PLAYER)) {
+		toLog("DEBUG: (SOUP::setMapPlayerNum): map_player_num not initialized.");return;
+	}
+#endif
+	mapPlayerNum = map_player_num;
+}
+
 #endif // _CORE_SOUP_HPP
 

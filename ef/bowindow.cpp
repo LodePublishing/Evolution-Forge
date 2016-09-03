@@ -6,7 +6,6 @@ BoWindow::BoWindow(const BoWindow& object) :
 	UI_Window((UI_Window)object),
 	infoWindow(object.infoWindow),
 	anarace(object.anarace),
-	orderList(object.orderList),
 	optimizeMode(object.optimizeMode),
 	boInsertPoint(object.boInsertPoint),
 	boEndPoint(object.boEndPoint),
@@ -15,7 +14,7 @@ BoWindow::BoWindow(const BoWindow& object) :
 	resetButton(new UI_Button(*(object.resetButton))),
 	saveBuildOrderButton(new UI_Button(*(object.saveBuildOrderButton))),
 	msgWindow(object.msgWindow)
-//	fixed(object.fixed)
+//	fixed(object.fixed),
 { }
 
 BoWindow& BoWindow::operator=(const BoWindow& object)
@@ -23,7 +22,6 @@ BoWindow& BoWindow::operator=(const BoWindow& object)
 	((UI_Window)(*this)) = ((UI_Window)object);
 	infoWindow = object.infoWindow;
 	anarace = object.anarace;
-	orderList = object.orderList;
 	optimizeMode = object.optimizeMode;
 	boInsertPoint = object.boInsertPoint;
 	boEndPoint = object.boEndPoint;
@@ -33,16 +31,15 @@ BoWindow& BoWindow::operator=(const BoWindow& object)
 	resetButton = new UI_Button(*(object.resetButton));
 	delete saveBuildOrderButton;
 	saveBuildOrderButton = new UI_Button(*(object.saveBuildOrderButton));
-	return(*this);
 	msgWindow = object.msgWindow;
 //	fixed = object.fixed;
+	return(*this);
 }
 
-BoWindow::BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_info_window, MessageWindow* message_window, std::list<Order*>* bo_order_list/*, bool* fixed_list*/, const unsigned int bo_window_number) :
+BoWindow::BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_info_window, MessageWindow* message_window, /*, bool* fixed_list*/ const unsigned int bo_window_number) :
 	UI_Window(bo_parent, BOWINDOW_TITLE_STRING, BUILD_ORDER_WINDOW, bo_window_number, SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0, 25, 1000, 1000)),
 	infoWindow(bo_info_window),
 	anarace(bo_anarace),
-	orderList(bo_order_list),
 	optimizeMode(0),
 	boInsertPoint(-1),
 	boEndPoint(-1),
@@ -83,8 +80,8 @@ void BoWindow::resetData()
 	boGoalListOpened=0;
 	optimizeMode=0;
 	
-        std::list<BoEntry*>::iterator entry = boList.begin();
-        while(entry != boList.end())
+	std::list<BoEntry*>::iterator entry = boList.begin();
+	while(entry != boList.end())
 	{
 		if(UI_Object::currentButton == *entry) UI_Object::currentButton = NULL;
 		delete(*entry);
@@ -103,74 +100,85 @@ void BoWindow::reloadStrings()
 
 void BoWindow::processList()
 {
-        std::list<BoEntry*>::iterator entry = boList.begin();
-        int row = 2;
-        for(std::list<Order*>::const_iterator order = orderList->begin(); order != orderList->end(); ++order)
-        {
-		
-		Rect edge=Rect(getRelativeClientRectPosition()+Point(0, row*(FONT_SIZE+6)), Size(200, FONT_SIZE+5));//(*order)->rect.GetSize());// TODO
-		(fitItemToRelativeClientRect(edge, 1));
+	if(!isShown())
+		return;
+	firstItemY = 0;
+	lastItemY = 0;
+	
+	std::list<BoEntry*>::iterator entry = boList.begin();
+	int row = 2;
+	for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
+	{
+		Rect edge=Rect(getRelativeClientRectPosition()+Point(0, row*(FONT_SIZE+6)), Size(180, FONT_SIZE+5));//(*order)->rect.GetSize());// TODO
+		fitItemToRelativeClientRect(edge, 1);
 //		edge.SetTopLeft(edge.GetTopLeft() - Size(0, getScrollY()));
 		row++;
 		if(entry == boList.end())
 		{
-			BoEntry* t = new BoEntry(this, Rect(Point(max_x, getRelativeClientRectPosition().y+200), Size(getClientRectWidth(), FONT_SIZE+5)),
+			BoEntry* t = new BoEntry(getScrollbar(), Rect(Point(max_x, getRelativeClientRectPosition().y+200), Size(180, FONT_SIZE+5)),
 			// max size -y? TODO
-				*UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+(*order)->getUnit()+UNIT_NULL_STRING))); // (*anarace->getStartCondition())->getRace()?
-			t->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][(*order)->getUnit()].unitType));
+				*UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()+UNIT_NULL_STRING)), *order); // (*anarace->getStartCondition())->getRace()?
+			t->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
 			t->adjustRelativeRect(edge);
-			t->setUnit((*order)->getUnit());
-			t->setIP((*order)->getIP());
 			boList.push_back(t);
 		} else 
-		if((*entry)->getUnit() != (*order)->getUnit())
+		if((*entry)->program.getUnit() != order->getUnit())
 		{
 			std::list<BoEntry*>::iterator k = entry;
-                        while(k!=boList.end())
-                        {
-                                if((*k)->getUnit() == (*order)->getUnit())
-                                        break;
-                                k++;
-                        }
-                        if(k!=boList.end()) // => Found, move the entry
+			while(k != boList.end())
 			{
-                                BoEntry* old = *k;
-                                entry = boList.insert(entry, old);
+				if((*k)->program.getUnit() == order->getUnit())  //oder direkt adressen vergleichen? mmmh...
+					break;
+				k++;
+			}
+			if(k != boList.end()) // => Found, move the entry
+			{
+				BoEntry* old = *k;
+				entry = boList.insert(entry, old);
 				entry++;
-                                boList.erase(k);
-                                old->adjustRelativeRect(edge);
-				old->resetGradient();
-				old->setIP((*order)->getIP());
+				boList.erase(k);
+				if(edge != old->targetRect)
+				{
+					old->adjustRelativeRect(edge);
+					old->resetGradient();
+				}
+				old->program = *order;
 			} else // => not found, insert a new one
 			{
-				BoEntry* t = new BoEntry(this, Rect(Point(max_x,getRelativeClientRectPosition().y+200), Size(getClientRectWidth(), FONT_SIZE+5)), *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+(*order)->getUnit()+UNIT_NULL_STRING))); // (*anarace->getStartCondition())->getRace()?
-	                        t->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][(*order)->getUnit()].unitType));
+				BoEntry* t = new BoEntry(getScrollbar(), Rect(Point(max_x,getRelativeClientRectPosition().y+200), Size(180, FONT_SIZE+5)), *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()+UNIT_NULL_STRING)), *order); // (*anarace->getStartCondition())->getRace()?
+				t->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
 				t->adjustRelativeRect(edge);
-				t->setUnit((*order)->getUnit());
-				t->setIP((*order)->getIP());
-        	                entry = boList.insert(entry, t);
+				entry = boList.insert(entry, t);
 				entry++;
 			}
 		} else // ok
-//              if((*entry)->getUnit() == (*order)->getUnit())
-               	{
-			(*entry)->setIP((*order)->getIP());
-     	                (*entry)->adjustRelativeRect(edge);
-                        entry++;
-       	        }
+//		if((*entry)->getUnit() == order->getUnit())
+	       	{
+			(*entry)->program = *order;
+			if(edge != (*entry)->targetRect)
+			{
+				(*entry)->Show();
+	     			(*entry)->adjustRelativeRect(edge);
+				(*entry)->resetGradient();
+			}
+						
+			entry++;
+       		}
 	}
 	
 	while(entry != boList.end())
-        {
-                if(UI_Object::currentButton == *entry) UI_Object::currentButton = NULL;
-                delete(*entry);
-                entry = boList.erase(entry);
-        }
+	{
+		if(UI_Object::currentButton == *entry) 
+			UI_Object::currentButton = NULL;
+		delete(*entry);
+		entry = boList.erase(entry);
+	}
 }
 
 
 void BoWindow::checkForInfoWindow()
 {
+#if 0
 	for(std::list<BoEntry*>::iterator bo = boList.begin(); bo != boList.end(); ++bo)
 	{
 //		if(boEntry[line]->locked())
@@ -204,6 +212,7 @@ void BoWindow::checkForInfoWindow()
 		}
 	} // end for ...*/
 	infoWindow->bo=NULL;
+	#endif
 }
 
 void BoWindow::process()
@@ -211,6 +220,21 @@ void BoWindow::process()
 	if(!isShown()) 
 		return;
 	UI_Window::process();
+	// TODO evtl auf move befehl warten
+
+	std::list<BoEntry*>::iterator entry = boList.begin();
+	while(entry != boList.end())
+	{
+		if((((*entry)->getAbsoluteUpperBound() < getAbsoluteClientRectUpperBound()+30)||((*entry)->getAbsoluteLowerBound() > getAbsoluteClientRectLowerBound())))//&&((*entry)->getRelativeRect()==(*entry)->targetRect))
+		{
+			(*entry)->Hide();
+//			(*entry)->jumpToPosition((*entry)->getTargetPosition());
+		}
+		else (*entry)->Show();
+		entry++;
+	}
+
+	
        /*	std::list<BoEntry*>::iterator entry = boList.begin();
 	if((*entry)->getHeight()==FONT_SIZE+5)
 	{
@@ -220,7 +244,6 @@ void BoWindow::process()
 
 
 //	speed->updateNumber((int)(100/(settings.getSpeed()+1)));
-
 #if 0
 	if(isActivated(makeSpaceButton))
 	{
@@ -347,16 +370,16 @@ void BoWindow::process()
 				orderList->setMakeSpace(temp);
 		} else*/ // TODO
 		{
-				orderList->setMakeSpace(-1);
+//				orderList->setMakeSpace(-1);
 				boGoalListOpened=0;
 				boInsertPoint=-1;
 				boEndPoint=-1;
 		}
 #endif
 
-	unsigned int line=0;
+//	unsigned int line=0;
 	boEndPoint=0;
-	unsigned int oldTime=MAX_TIME+1;
+//	unsigned int oldTime=MAX_TIME+1;
 	unsigned int tempForceCount[UNIT_TYPE_COUNT];
 	memset(tempForceCount, 0, UNIT_TYPE_COUNT * sizeof(int));
 
@@ -405,13 +428,13 @@ void BoWindow::draw(DC* dc) const
 		return;
 	UI_Window::draw(dc);
 
-/*	int k = 0;
-	for(std::list<Order*>::const_iterator order = orderList->begin(); order != orderList->end(); ++order)
-	{
-		dc->DrawText(stats[(*anarace->getStartCondition())->getRace()][(*order)->getUnit()].name, getAbsolutePosition() + Size(0, k*10));
-		k++;
-	}
-	k = 0;
+//	int k = 0;
+  //      for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
+//	{
+//		dc->DrawText(stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].name, getAbsolutePosition() + Size(0, k*10));
+//		k++;
+//	}
+/*	k = 0;
 	for(int s=MAX_LENGTH;s--;)
 		if(anarace->getProgramIsBuilt(s)&&(anarace->getRealProgramTime(s) + stats[anarace->getRace()][anarace->getPhaenoCode(s)].BT<=anarace->getRealTimer()))
 		{

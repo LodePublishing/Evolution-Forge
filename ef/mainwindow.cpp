@@ -47,6 +47,7 @@ void MainWindow::process()
 
 void MainWindow::draw(DC* dc) const
 {
+//jedem player ein mainwindow zuweisen!
 	UI_Window::draw(dc);
 }
 

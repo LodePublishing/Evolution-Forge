@@ -63,14 +63,14 @@ class Player : public UI_Object
 		void updateRectangles(const unsigned int maxPlayer);
 		UI_Window* window[MAX_WINDOWS]; 
 		
-		unsigned int geneAnimation;
+		float geneAnimation;
 		void assignAnarace(ANARACE** anarace);
 	private:
 		void drawGeneString(DC* dc, const Rect position) const;
 		void drawGene(DC* dc, int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const;
 		
 		ANARACE** anarace; //pointer auf pointer, weil sich der pointer ja veraendert!
-		list<Order*> orderList; // sorted by IP
+//		list<Order*> orderList; // sorted by IP
 		unsigned int mode;
 //		void MoveOrders();
 //		bool fixed[MAX_LENGTH];

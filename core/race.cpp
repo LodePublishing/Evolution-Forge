@@ -1,10 +1,10 @@
 #include "race.hpp"
 
-/* RACE.CPP - last changed: 9/24/04                              *
- * Author: Clemens Lode                                             *
- * Copyright: Clemens Lode                                          *
- *                                                                  *
- *  PURPPOSE OF THIS FILE:                                          *
+/* RACE.CPP - last changed: 9/24/04			      *
+ * Author: Clemens Lode					     *
+ * Copyright: Clemens Lode					  *
+ *								  *
+ *  PURPPOSE OF THIS FILE:					  *
  *      This is the core of the core, where the main calculations   *
  *      are made. */
 
@@ -30,14 +30,9 @@ RACE::RACE(const RACE& object) :
 void RACE::resetData()
 {
 	PRERACE::resetPrerace();
-	mutationRate=20;
-	pFitness=0;
-	tFitness=99999;
-}
-
-void RACE::resetStaticData()
-{
-	PRERACE::resetStaticPrerace();
+	mutationRate = 20;
+	pFitness = 0;
+	tFitness = 99999;
 }
 
 RACE& RACE::operator=(const RACE& object)
@@ -53,9 +48,9 @@ RACE& RACE::operator=(const RACE& object)
 const unsigned int RACE::calculateSecondaryFitness() const
 {
 	// total gathered resources minus minerals that were not used
-	int tsF=getHarvestedMinerals() + getHarvestedGas();// - (getWastedMinerals() + getWastedGas()) / getRealTimer();
+	int tsF = getHarvestedMinerals() + getHarvestedGas();// - (getWastedMinerals() + getWastedGas()) / getRealTimer();
 	//TODO: evtl gas und minerals (wie urspruenglich eigentlich) in Verhaeltnis setyen wieviel es jeweils Geysire/Mineralien gibt...	
-	for(int i=GAS_SCV+1;i--;)
+	for(int i=GAS_SCV+1; i--;)
 		if((getpGoal()->getAllGoal(i)>0)&&(getpGoal()->getAllGoal(i)+(*pStartCondition)->getLocationTotal(GLOBAL, i)<getLocationTotal(GLOBAL, i)))
 			tsF-=((*pStartCondition)->getLocationTotal(GLOBAL, i)-(*pStartCondition)->getLocationTotal(GLOBAL,i)-getpGoal()->getAllGoal(i))*(stats[getpGoal()->getRace()][i].gas+stats[getpGoal()->getRace()][i].minerals);
 	return(tsF);
@@ -68,7 +63,7 @@ const bool RACE::calculateStep()
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
 // TODO evtl bestTime wieder rein, Probleme gibts aber mit allen statistischen Sachen (sFitness, tFitness, ...)
 	
-	if((!getTimer())||(ready=calculateReady())||(!getIP())) 
+	if((!getTimer()) || (ready = calculateReady()) || (!getIP())) 
 	{
 		setLength(configuration.getMaxLength()-getIP());
 		if(!ready) 
@@ -107,36 +102,76 @@ const bool RACE::calculateStep()
 			}
 		}*/
 	
-	bool ok=true;
-	bool first=true;
+	bool ok = true;
+	bool first = true;
 
 	while((ok)&&(getIP()))
 	{
 //TODO: Variable einfuegen, damit Benutzer z.B. max Befehle pro Zeiteinheit (oder pro Location!?) einstellen kann
 
 // set needed_ to maximum to determine the minimum of minerals/gas our jobs need (needed_ is set in buildGene)
-		neededMinerals=MAX_MINERALS;
-		neededGas=MAX_GAS;
-		ok=buildGene(getpGoal()->toPhaeno(getCurrentCode()));
-		
-		if((ok)||(!getTimeOut()))
+		neededMinerals = MAX_MINERALS;
+		neededGas = MAX_GAS;
+		int code = getpGoal()->toPhaeno(getCurrentCode());
+		if((code >= BUILD_PARALLEL_2) && (code <= BUILD_PARALLEL_16))
 		{
-			if(!first)
-				settFitness(gettFitness()-1);
-			first=false;
-			if(!getTimeOut())
-				settFitness(gettFitness()-5);
-			
-			setTimeOut(configuration.getMaxTimeOut());
-
-
 			setIP(getIP()-1);
+			while((getpGoal()->toPhaeno(getCurrentCode()) > GAS_SCV)&&(getIP()))
+				setIP(getIP()-1);
+			PARALLEL_COMMAND* pcommand = new PARALLEL_COMMAND;
+			switch(code)
+			{
+				case BUILD_PARALLEL_2:pcommand->count = 2;break;
+				case BUILD_PARALLEL_4:pcommand->count = 4;break;
+				case BUILD_PARALLEL_8:pcommand->count = 8;break;
+				case BUILD_PARALLEL_16:pcommand->count = 16;break;
+				default:break; // ~~
+			}
+			pcommand->unit = getpGoal()->toPhaeno(getCurrentCode());
+			if(getIP()) 
+				setIP(getIP()-1);
+			parallelCommandQueues.push_back(pcommand);
+			ok = true;
+		} else
+		{
+			ok = buildGene(getpGoal()->toPhaeno(getCurrentCode()));
+		// ~~
+			if((ok)||(!getTimeOut()))
+			{
+				if(!first)
+					settFitness(gettFitness()-1);
+				first = false;
+				if(!getTimeOut())
+					settFitness(gettFitness()-5);
+				setTimeOut(configuration.getMaxTimeOut());
+				setIP(getIP()-1);
+			}
+// Try parallel commands
+			std::list<PARALLEL_COMMAND*>::iterator command = parallelCommandQueues.begin(); 
+			while(command != parallelCommandQueues.end())
+			{
+				unsigned int unit = (*command)->unit;
+				ok = buildGene(unit);
+				if(ok)
+				{
+					(*command)->count--;
+					if(!(*command)->count)
+					{
+						delete *command;
+						command = parallelCommandQueues.erase(command);
+					}
+				} else 
+				{
+					do
+						command++;
+					while((command!=parallelCommandQueues.end())&&((*command)->unit == unit));
+				}
+			}
 		}
 	}
 
-
 //  ------ LEAP FORWARD IN TIME ------
-	int t=calculateIdleTime();
+	int t = calculateIdleTime();
 //	int oldMinerals = getMinerals();
 //	int oldGas = getGas();
 
@@ -162,7 +197,7 @@ const bool RACE::calculateStep()
 			const UNIT_STATISTICS* stat=&(*pStats)[build.getType()];
 
 // ------ ACTUAL BUILDING ------
-			adjustLocationUnitsAfterCompletion(build.getLocation(), stat->facilityType, build.getFacility(), stat->facility2);			
+			adjustLocationUnitsAfterCompletion(build.getLocation(), stat->facilityType, build.getFacility(), stat->facility2, build.getUnitCount());
 // increase haveSupply AFTER the building is completed (needSupply is increased BEFORE it's started!)
 			setHaveSupply(getHaveSupply()+stat->haveSupply);
 			addLocationTotal(build.getLocation(),build.getType(), build.getUnitCount());
@@ -171,11 +206,11 @@ const bool RACE::calculateStep()
 
 			
 // ------ SPECIAL RULES ------
-			if(build.getType()==REFINERY) {
+			if(build.getType() == REFINERY) {
 				removeOneMapLocationTotal(GLOBAL, build.getLocation(), VESPENE_GEYSIR);
 				adjustGasHarvest(build.getLocation());
 			} else
-			if((build.getType()==COMMAND_CENTER)&&(!getLocationTotal(build.getLocation(),COMMAND_CENTER))) {
+			if((build.getType() == COMMAND_CENTER)&&(!getLocationTotal(build.getLocation(),COMMAND_CENTER))) {
 				adjustMineralHarvest(build.getLocation());
 				adjustGasHarvest(build.getLocation());
 			} else 
@@ -188,7 +223,7 @@ const bool RACE::calculateStep()
 			
 // ------ CHECK WHETHER WE ARE READY ------
 			getpGoal()->calculateFinalTimes(build.getLocation(), build.getType(), getLocationTotal(build.getLocation(), build.getType()), getRealTimer());
-			ready=calculateReady();
+			ready = calculateReady();
 // ------ END CHECK -------
 			
 
@@ -197,7 +232,7 @@ const bool RACE::calculateStep()
 //			last[lastcounter].count=build.getUnitCount();
 //			last[lastcounter].location=build.getLocation();
 
-			if((stat->create)&&(stat->create!=build.getType())&&(!build.getOnTheRun())) //one additional unit (zerglings, scourge, comsat, etc.)
+			if((stat->create) && (stat->create != build.getType()) && (!build.getOnTheRun())) //one additional unit (zerglings, scourge, comsat, etc.)
 			{ //here no unitCount! ~~~
 				addOneLocationTotal(build.getLocation(), stat->create);
 				addOneLocationAvailible(build.getLocation(), stat->create);
@@ -226,9 +261,9 @@ const bool RACE::calculateStep()
 
 const bool RACE::buildGene(const unsigned int build_unit)
 {
-	const UNIT_STATISTICS* stat=&(*pStats)[build_unit];
-	bool ok=false;
-	if(build_unit<=REFINERY+1)
+	const UNIT_STATISTICS* stat = &(*pStats)[build_unit];
+	bool ok = false;
+	if(build_unit <= LAST_UNIT)
 	{
 		//TODO: Array und testen wo der comp am meisten haengenbleibt und abbricht... moeglichst dann nach oben bringen!
 		if(
@@ -265,20 +300,16 @@ const bool RACE::buildGene(const unsigned int build_unit)
 					neededGas=stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)-getGas();
 			}
 			else
-			{
 				if(buildIt(build_unit)==true)
 				{
 					ok=true;
 // ------ RACE SPECIFIC, tFITNESS ------
 					if(getMinerals()*3<4*stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)) settFitness(gettFitness()-2);
 					if(getGas()*3<4*stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)) settFitness(gettFitness()-2);
-//					if((stat->needSupply>0)&&(getNeedSupply()*4<5*stat->needSupply)) settFitness(gettFitness()-2);  TODO
-					if((getMinerals()*5/4<stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit))||
-					   (getGas()*5/4<stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)))
+//				      if((stat->needSupply>0)&&(getNeedSupply()*4<5*stat->needSupply)) settFitness(gettFitness()-2);  TODO
+					if((getMinerals()*5/4<stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit))||(getGas()*5/4<stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)))
 						settFitness(gettFitness()-1);
-				}
-// ------ END RACE SPECIFIC, tFITNESS ------
-			} //end minerals/gas else
+				} else ok = false;
 		} //end prere/fac else
 	} //end build_unit < REFINERY
 	else // build_unit > REFINERY+1
@@ -375,11 +406,146 @@ const bool RACE::buildGene(const unsigned int build_unit)
 	return(ok);
 }
 
+const bool RACE::buildIt(const unsigned int build_unit)
+{
+	//Zuerst: availible pruefen ob am Ort gebaut werden kann
+	//Wenn nicht => +/- absteigen bis alle locations durch sind
+
+	const UNIT_STATISTICS* stat = &((*pStats)[build_unit]);
+	bool ok = false;
+	unsigned int picked_facility = 0;
+	unsigned int current_location_window = 1; // TODO
+//	unsigned int ttloc=0;
+//	unsigned int j=0;
+
+/*	if(lastcounter>0)
+	{	
+		lastcounter--;
+		tloc=last[lastcounter].location;
+	}*/
+
+	if(stat->facility[0]==0)
+		ok=true;
+	else
+	// special rule for morphing units of protoss
+	if((stat->facility2>0) && ((stat->facilityType == IS_LOST) || (stat->facilityType == IS_MORPHING)) && (stat->facility[0] == stat->facility2))
+	{
+		if(getLocationAvailible(current_location_window, stat->facility2) >=2)
+		{
+			ok = true;
+			picked_facility = 0;
+		}
+	} else
+	{
+		// research/upgrade:
+		if((stat->facility2==0) || (getLocationAvailible(current_location_window, stat->facility2)>=1))
+		{
+		// pick one availible facility: 
+			for(picked_facility = 0; picked_facility<3; picked_facility++)
+				if((stat->facility[picked_facility]>0)&&(getLocationAvailible(current_location_window, stat->facility[picked_facility])>0))
+				{
+					ok=true;
+					break;
+				}
+		}						
+	}
+				
+//				j=1;
+				// none found? search other parts of the map... TODO
+/*				if(!ok)
+					while(j<MAX_LOCATIONS)
+					{
+						ttloc=(*pMap)->getLocation(tloc)->getNearest(j);
+//						if((stat->facility2==0)||(getLocationAvailible(ttloc,stat->facility2)>0)) TODO
+//						{
+//						for(fac=3;fac--;)
+						for(fac=0;fac<3; fac++)
+						if(
+						// special rules for morphing units of protoss
+						((stat->facilityType != IS_LOST) || (stat->facility[fac] != stat->facility2) || (getLocationAvailible(ttloc, stat->facility[fac]) >= 2)) &&
+						((stat->facility[fac] > 0) && (getLocationAvailible(ttloc, stat->facility[fac])))
+						|| ((stat->facility[fac]==0)&&(fac==0))) //~~
+																													   
+//					  for(fac=3;fac--;)
+//						  if( ((stat->facility[fac]>0)&&(getLocationAvailible(ttloc,stat->facility[fac])>((stat->facilityType==IS_LOST)&&(stat->facility[fac]==stat->facility2)))) || ((stat->facility[fac]==0)&&(fac==0)))
+							{
+								tloc=ttloc;
+								ok=true;
+								break;
+							}
+//						  break;
+//					  }
+						j++;
+					}*/
+        if(ok)
+        {
+                if(build_unit==REFINERY)
+                {
+                        if(getMapLocationAvailible(0, current_location_window, VESPENE_GEYSIR) <=0) // TODO!
+                                ok=false;
+                        else
+                                removeOneMapLocationAvailible(0, current_location_window, VESPENE_GEYSIR);
+                } else
+                if(build_unit==GAS_SCV)
+                {
+                        if(getLocationTotal(current_location_window, REFINERY)*4 <= getLocationTotal(current_location_window, GAS_SCV))
+                                ok=false;
+
+                }
+        }
+//TODO: Wenn verschiedene facilities moeglich sind, dann das letzte nehmen
+//			  bewegliche Sachen ueberdenken...
+//				  evtl zusaetzliche Eigenschaft 'speed' einbauen (muss sowieso noch...)... bei speed>0 ... mmmh... trifft aber auch nur auf scvs zu ... weil bringt ja wenig erst mit der hydra rumzulaufen und dann zum lurker... mmmh... aber waere trotzdem zu ueberlegen...
+//				  auch noch ueberlegen, wenn z.B. mit scv ohne kommandozentrale woanders gesammelt wird...
+//	  Phagen ueber Phagen...
+	if(ok)
+	{ 
+ 		if((getpGoal()->getRace()==ZERG) &&
+//		  ((*pStats)[build_unit].facility[0]==LARVA)&&
+			(build_unit!=LARVA) &&
+		// Larva wird benoetigt zum Bau? Fein, dann bauen wir eine neue Larva falls nicht schon alle hatcheries etc. belegt sidn
+				// Gesamtzahl der Larven < 3 * HATCHERY?
+		   ((getLocationTotal(current_location_window, HATCHERY)+
+			 getLocationTotal(current_location_window, LAIR)+
+			 getLocationTotal(current_location_window, HIVE)) *3 > 
+			 (larvaInProduction[current_location_window]+getLocationTotal(current_location_window, LARVA)))  &&
+// max 1 larva pro Gebaeude produzieren
+ 		   ((getLocationTotal(current_location_window, HATCHERY)+
+			 getLocationTotal(current_location_window, LAIR)+
+			 getLocationTotal(current_location_window, HIVE) > 
+			  larvaInProduction[current_location_window]))) // => zuwenig Larven da!
+			{
+				addLarvaToQueue(current_location_window);
+				if(!buildIt(LARVA));
+//					removeLarvaFromQueue(current_location_window);
+			}
+																													  
+		Building build;
+		build.setOnTheRun(false);
+		build.setFacility(stat->facility[picked_facility]);
+		build.setLocation(current_location_window);
+		if(build_unit == FROM_GAS_TO_MINERALS)
+			build.setUnitCount(getLocationAvailible(current_location_window, GAS_SCV));
+		else
+			build.setUnitCount(1+(stat->create == build_unit));
+		build.setBuildFinishedTime(getTimer()-stat->BT);
+		build.setTotalBuildTime(stat->BT);
+		build.setType(build_unit);
+// upgrade_cost is 0 if it's no upgrade
+		setMinerals(getMinerals()-(stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)));
+		setGas(getGas()-(stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, build_unit)));
+		setNeedSupply(getNeedSupply()+stat->needSupply);
+//		if((stat->needSupply>0)||(((*pStats)[stat->facility[0]].needSupply<0)&&(stat->facilityType==IS_LOST)))  TODO!!!!
+//		setNeedSupply(getNeedSupply()-stat->needSupply); //? Beschreibung!
+		adjustAvailibility(current_location_window, picked_facility, stat);
+		buildingQueue.push(build);
+	} //end if(ok)
+	return(ok);
+}
 // Reset all ongoing data (between two generations)
 void RACE::prepareForNewGeneration() // resets all data to standard starting values
 {
 	PRERACE::prepareForNewGeneration();
-
 	setpFitness(0);
 	setsFitness(0);
 	settFitness(MAX_TFITNESS);

@@ -5,7 +5,8 @@
 #include "../core/settings.hpp"
 #include "info.hpp"
 
-class BoDiagramWindow:public UI_Window {
+class BoDiagramWindow : public UI_Window 
+{
 	public:
 		BoDiagramWindow(UI_Object * bod_parent, ANARACE * bod_anarace, InfoWindow * bod_info_window, const unsigned int bod_window_number);
 		BoDiagramWindow(const BoDiagramWindow& object);
@@ -14,6 +15,7 @@ class BoDiagramWindow:public UI_Window {
 
 		void resetData();
 		void process();
+		void processList();
 		void draw(DC * dc) const;
 
 		void assignAnarace(ANARACE* bod_anarace);

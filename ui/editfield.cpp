@@ -91,6 +91,8 @@ void UI_EditField::removeCharDelete()
 #include <math.h>					  
 void UI_EditField::draw(DC* dc) const
 {
+	if(!checkForNeedRedraw())
+		return; // TODO
 	dc->SetBrush(*theme.lookUpBrush(BRIGHT_UNIT_TYPE_3_BRUSH));
 	dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
 	dc->DrawRectangle(Rect(getAbsolutePosition()-Size(10,10), getSize() + Size(20,20)));

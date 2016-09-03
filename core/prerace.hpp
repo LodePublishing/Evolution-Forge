@@ -52,208 +52,213 @@ class SITUATION
 		unsigned int ttGeno[UNIT_TYPE_COUNT];
 };*/
 
+struct PARALLEL_COMMAND
+{
+	unsigned int unit;
+	unsigned int count;
+};
+
 class PRERACE
 {
-protected:
+	protected:
 
 //------------------ optimizations:-----------------
-//	UNIT* global; // non-static pointer to player's global total force (location 0.total)
-	UNIT* location; // non-static pointer to players total/availible units
+//		UNIT* global; // non-static pointer to player's global total force (location 0.total)
+		UNIT* location; // non-static pointer to players total/availible units
 
-	const START_CONDITION* const* pStartCondition; //pointer to player in start
+		const START_CONDITION* const* pStartCondition; //pointer to player in start
 
-	static const BASIC_MAP* const* pMap; // MAP is all the same for all players using 'start
+		static const BASIC_MAP* const* pMap; // MAP is all the same for all players using 'start
 //------------- end -------------------------------
 
-	priority_queue<Building, deque<Building> > buildingQueue;
+		priority_queue<Building, vector<Building> > buildingQueue;
+		list<PARALLEL_COMMAND*> parallelCommandQueues;
 
 // global best time so far
-	static signed int noise[MAX_TIME];
-	static unsigned int markerCounter;
-	static UNIT unit[MAX_PLAYER][MAX_LOCATIONS]; // player 0 is neutral player!
-//	LAST last[MAX_LENGTH]; // last* is to save the last position, for movements
-//	unsigned int lastcounter;
-//	unsigned int lastunit;
-	const UNIT_STATISTICS* const* pStats;
-	unsigned int neededMinerals, neededGas;
+		static signed int noise[MAX_TIME];
+//		static unsigned int markerCounter;
+		static UNIT unit[MAX_PLAYER][MAX_LOCATIONS]; // player 0 is neutral player!
+//		LAST last[MAX_LENGTH]; // last* is to save the last position, for movements
+//		unsigned int lastcounter;
+//		unsigned int lastunit;
+		const UNIT_STATISTICS* const* pStats;
+		unsigned int neededMinerals, neededGas;
 	
-	static START* pStart;
+		static START* pStart;
 	
-	void createSpecial();
-	void resetSpecial();
-	void resetPrerace();
-	static void resetStaticPrerace();
+		void createSpecial();
+		void resetSpecial();
+		void resetPrerace();
 
-	const unsigned int harvestMinerals() const;
-	const unsigned int harvestGas() const; 
+		const unsigned int harvestMinerals() const;
+		const unsigned int harvestGas() const; 
 
-	const bool calculateReady() const;
-	void adjustAvailibility(const unsigned int location_number, const unsigned int fac, const UNIT_STATISTICS* stat);
-	void adjustLocationUnitsAfterCompletion(const unsigned int location_number, const eFacilityType facilityType, const unsigned int facility, const unsigned int facility2);
-	const unsigned int calculatePrimaryFitness(const bool ready);
-	void replaceCode(const unsigned int ip, const unsigned int code);
+		const bool calculateReady() const;
+		void adjustAvailibility(const unsigned int location_number, const unsigned int fac, const UNIT_STATISTICS* stat);
+		void adjustLocationUnitsAfterCompletion(const unsigned int location_number, const eFacilityType facilityType, const unsigned int facility, const unsigned int facility2, const unsigned int count);
+		const unsigned int calculatePrimaryFitness(const bool ready);
+		void replaceCode(const unsigned int ip, const unsigned int code);
 
-	unsigned int larvaInProduction[MAX_LOCATIONS]; // well... one of that ugly race-specific variables saves a lot of trouble...
+		unsigned int larvaInProduction[MAX_LOCATIONS]; // well... one of that ugly race-specific variables saves a lot of trouble...
 
 //TODO: PlayerNum von anarace ist irgendwie 2 statt 1 oder so ... auch ist die Frage wie was upgedatet wird...
 //		 Deutlich durchsichtiger machen...
-	const unsigned int calculateIdleTime() const; // calculate the next time something significant will happen
-	GOAL_ENTRY* getpGoal() const {
-		return(*pGoal);
-	}
-
-	bool ready;
+		const unsigned int calculateIdleTime() const; // calculate the next time something significant will happen
+		GOAL_ENTRY* getpGoal() const;
 	
-	GOAL_ENTRY** pGoal; // pStart->getGoal()
-private:
-	unsigned int Code[MAX_LENGTH];
-	unsigned int Marker[MAX_LENGTH];
+		bool ready;
+	
+		GOAL_ENTRY** pGoal; // pStart->getGoal()
+	private:
+		unsigned int Code[MAX_LENGTH];
+//		unsigned int Marker[MAX_LENGTH];
 
-	unsigned int playerNum;
-	unsigned int minerals, gas, timer;
-	unsigned int IP;
-	unsigned int mineralHarvestPerSecond[MAX_LOCATIONS][45];
-	unsigned int gasHarvestPerSecond[MAX_LOCATIONS][5];
-	unsigned int harvestedMinerals, harvestedGas;
-	unsigned int wastedMinerals, wastedGas;
-	unsigned int needSupply;		// free supply
-	unsigned int haveSupply; // total supply
-	unsigned int length;
-	unsigned int timeout;
+		unsigned int playerNum;
+		unsigned int minerals, gas, timer;
+		unsigned int IP;
+		unsigned int mineralHarvestPerSecond[MAX_LOCATIONS][45];
+		unsigned int gasHarvestPerSecond[MAX_LOCATIONS][5];
+		unsigned int harvestedMinerals, harvestedGas;
+		unsigned int wastedMinerals, wastedGas;
+		unsigned int needSupply;		// free supply
+		unsigned int haveSupply; // total supply
+		unsigned int length;
+		unsigned int timeout;
 
+	public:
+		static void assignStart(START* start);
+//		static map<CODE, SITUATION*> situationHashMap;
 
+//		static void assignConfiguration(Configuration* pconfiguration);
+		static void initNoise();
+		static void copyMap(); //copies the startforce from map to static 'units'
+		static const BASIC_MAP* const* getMap(); 	
 
-public:
-	static void assignStart(START* start);
-//	static map<CODE, SITUATION*> situationHashMap;
+		PRERACE();
+		virtual ~PRERACE();
 
-//	static void assignConfiguration(Configuration* pconfiguration);
-	static void initNoise();
-	static void copyMap(); //copies the startforce from map to static 'units'
-	static const BASIC_MAP* const* getMap(); 	
+		PRERACE& operator=(const PRERACE& object);
+		PRERACE(const PRERACE& object);
 
-	PRERACE();
-	virtual ~PRERACE();
-
-	PRERACE& operator=(const PRERACE& object);
-	PRERACE(const PRERACE& object);
-
-	const bool isDifferent(const unsigned int* code, const unsigned int* marker) const;
+		const bool isDifferent(const unsigned int* code) const; //, const unsigned int* marker) const;
 
 // ------ HARVEST ROUTINES ------
-	void adjustMineralHarvest(const unsigned int location_number);
-	void adjustGasHarvest(const unsigned int location_number);
-	void adjustHarvestAllLocations();
-	void setMineralHarvestPerSecond(const unsigned int location_number, const unsigned int worker, const unsigned int harvest_minerals);
-	const unsigned int getMineralHarvestPerSecond(const unsigned int location_number, const unsigned int worker) const;
-	void setGasHarvestPerSecond(const unsigned int location_number, const unsigned int worker, const unsigned int harvest_gas);
-	const unsigned int getGasHarvestPerSecond(const unsigned int location_nubmer, const unsigned int worker) const;
-	const unsigned int getHarvestedMinerals() const;
-	const unsigned int getHarvestedGas() const;
-	void setHarvestedMinerals(const unsigned int harvested_minerals);
-	void setHarvestedGas(const unsigned int harvested_gas);
+		void adjustMineralHarvest(const unsigned int location_number);
+		void adjustGasHarvest(const unsigned int location_number);
+		void adjustHarvestAllLocations();
+		void setMineralHarvestPerSecond(const unsigned int location_number, const unsigned int worker, const unsigned int harvest_minerals);
+		const unsigned int getMineralHarvestPerSecond(const unsigned int location_number, const unsigned int worker) const;
+		void setGasHarvestPerSecond(const unsigned int location_number, const unsigned int worker, const unsigned int harvest_gas);
+		const unsigned int getGasHarvestPerSecond(const unsigned int location_nubmer, const unsigned int worker) const;
+		const unsigned int getHarvestedMinerals() const;
+		const unsigned int getHarvestedGas() const;
+		void setHarvestedMinerals(const unsigned int harvested_minerals);
+		void setHarvestedGas(const unsigned int harvested_gas);
 	
-	const unsigned int getWastedMinerals() const;
-	const unsigned int getWastedGas() const;
-	void setWastedMinerals(const unsigned int wasted_minerals);
-	void setWastedGas(const unsigned int wasted_gas);
+		const unsigned int getWastedMinerals() const;
+		const unsigned int getWastedGas() const;
+		void setWastedMinerals(const unsigned int wasted_minerals);
+		void setWastedGas(const unsigned int wasted_gas);
 
 // ------ INITIALIZATION ROUTINES ------
-	void setPlayerNumber(const unsigned int player_number); // assigns player data from start (start minerals, supply etc.) and sets the appropriate optimized pointers (global, location, pMap etc.) CALL IT AFTER EACH MAP CHANGE AND PLAYER CHANGE!!
-	void initializePlayer();
-	void prepareForNewGeneration();
+		void setPlayerNumber(const unsigned int player_number); // assigns player data from start (start minerals, supply etc.) and sets the appropriate optimized pointers (global, location, pMap etc.) CALL IT AFTER EACH MAP CHANGE AND PLAYER CHANGE!!
+		void initializePlayer();
+		void prepareForNewGeneration();
 
-	void eraseIllegalCode();
-	void eraseUselessCode();
-	void mutateGeneCode(/*const bool* fixed_list*/);
-	void resetGeneCode();//resets either to a pre-processed buildorder or a completely random one*/
-//	void crossOver(PRERACE* parent2, PRERACE* child1, PRERACE* child2); TODO
+		void eraseIllegalCode();
+		void eraseUselessCode();
+		void mutateGeneCode(/*const bool* fixed_list*/);
+		void resetGeneCode();//resets either to a pre-processed buildorder or a completely random one*/
+//		void crossOver(PRERACE* parent2, PRERACE* child1, PRERACE* child2); TODO
 
 
-	const bool buildIt(const unsigned int build_unit);
 	
 // ------ GET/SET ROUTINES ------
-	void setMarker(const unsigned int ip, const unsigned int value);
-	 void setCode(const unsigned int ip, const unsigned int value);
-	 const unsigned int getCode(const unsigned int ip) const;
-	 const unsigned int getCurrentCode() const;
-	 const unsigned int getMarker(const unsigned int ip) const;
-	void copyCode(PRERACE& player);
+//		void setMarker(const unsigned int ip, const unsigned int value);
+		void setCode(const unsigned int ip, const unsigned int value);
+		const unsigned int getCode(const unsigned int ip) const;
+		const unsigned int getCurrentCode() const;
+//		const unsigned int getMarker(const unsigned int ip) const;
+		void copyCode(PRERACE& player);
 
-	void addLarvaToQueue(const unsigned int location_number);
-	void removeLarvaFromQueue(const unsigned int location_number);
+		void addLarvaToQueue(const unsigned int location_number);
+		void removeLarvaFromQueue(const unsigned int location_number);
 
-	 const eRace getRace() const;
-	GOAL_ENTRY** getCurrentGoal() const;
-	void setCurrentGoal(GOAL_ENTRY** current_goal);
+		const eRace getRace() const;
+		GOAL_ENTRY** getCurrentGoal() const;
+		void setCurrentGoal(GOAL_ENTRY** current_goal);
 	
-	const START_CONDITION* const* getStartCondition(); //pointer to player in start
+		const START_CONDITION* const* getStartCondition(); //pointer to player in start
 	
-	 static const unsigned int getMapLocationAvailible(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
-	 static const unsigned int getMapLocationTotal(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
+		static const unsigned int getMapLocationAvailible(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
+		static const unsigned int getMapLocationTotal(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
 																				
-	static void setMapLocationAvailible(const unsigned int player, const unsigned int location_number, const unsigned int unit_type, const unsigned int availible);
-	static void setMapLocationTotal(const unsigned int player, const unsigned int location_number, const unsigned int unit_type, const unsigned int total);
+		static void setMapLocationAvailible(const unsigned int player, const unsigned int location_number, const unsigned int unit_type, const unsigned int availible);
+		static void setMapLocationTotal(const unsigned int player, const unsigned int location_number, const unsigned int unit_type, const unsigned int total);
 																				
-	static void addOneMapLocationAvailible(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
-	static void addOneMapLocationTotal(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
-	static void removeOneMapLocationAvailible(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
-	static void removeOneMapLocationTotal(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
+		static void addOneMapLocationAvailible(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
+		static void addOneMapLocationTotal(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
+		static void removeOneMapLocationAvailible(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
+		static void removeOneMapLocationTotal(const unsigned int player, const unsigned int location_number, const unsigned int unit_type);
 																			
-	 const unsigned int getLocationAvailible(const unsigned int location_number, const unsigned int unit_type) const;
-	 const unsigned int getLocationTotal(const unsigned int location_number, const unsigned int unit_type) const;
+		const unsigned int getLocationAvailible(const unsigned int location_number, const unsigned int unit_type) const;
+		const unsigned int getLocationTotal(const unsigned int location_number, const unsigned int unit_type) const;
 																				
-	void setLocationAvailible(const unsigned int location_number, const unsigned int unit_type, const unsigned int availible);
-	void setLocationTotal(const unsigned int location_number, const unsigned int unit_type, const unsigned int total);
+		void setLocationAvailible(const unsigned int location_number, const unsigned int unit_type, const unsigned int availible);
+		void setLocationTotal(const unsigned int location_number, const unsigned int unit_type, const unsigned int total);
 																				
-	void addLocationAvailible(const unsigned int location_number, const unsigned int unit_type, const unsigned int availible);
-	void addLocationTotal(const unsigned int location_number, const unsigned int unit_type, const unsigned int total);
+		void addLocationAvailible(const unsigned int location_number, const unsigned int unit_type, const unsigned int availible);
+		void addLocationTotal(const unsigned int location_number, const unsigned int unit_type, const unsigned int total);
 
-	void addOneLocationAvailible(const unsigned int location_number, const unsigned int unit_type);
-	void addOneLocationTotal(const unsigned int location_number, const unsigned int unit_type);
-	void removeOneLocationAvailible(const unsigned int location_number, const unsigned int unit_type);
-	void removeOneLocationTotal(const unsigned int location_number, const unsigned int unit_type);
+		void addOneLocationAvailible(const unsigned int location_number, const unsigned int unit_type);
+		void addOneLocationTotal(const unsigned int location_number, const unsigned int unit_type);
+		void removeOneLocationAvailible(const unsigned int location_number, const unsigned int unit_type);
+		void removeOneLocationTotal(const unsigned int location_number, const unsigned int unit_type);
 
-	void setNeedSupply(const unsigned int need_supply);
-	void setHaveSupply(const unsigned int have_supply);
-	void setMinerals(const unsigned int have_minerals);
-	void setGas(const unsigned int have_gas);
+		void setNeedSupply(const unsigned int need_supply);
+		void setHaveSupply(const unsigned int have_supply);
+		void setMinerals(const unsigned int have_minerals);
+		void setGas(const unsigned int have_gas);
 
-	void setpStats(const UNIT_STATISTICS* const* player_stats);
-	const UNIT_STATISTICS* const* getpStats() const;
+		void setpStats(const UNIT_STATISTICS* const* player_stats);
+		const UNIT_STATISTICS* const* getpStats() const;
 
-	const unsigned int getPlayerNumber() const;
-	const unsigned int getNeedSupply() const;
-	const unsigned int getHaveSupply() const;
-	const unsigned int getMinerals() const;
-	const unsigned int getGas() const;
+		const unsigned int getPlayerNumber() const;
+		const unsigned int getNeedSupply() const;
+		const unsigned int getHaveSupply() const;
+		const unsigned int getMinerals() const;
+		const unsigned int getGas() const;
 
-	void setTimer(const unsigned int time);
-	const unsigned int getTimer() const;
-	const unsigned int getRealTimer() const;
+		void setTimer(const unsigned int time);
+		const unsigned int getTimer() const;
+		const unsigned int getRealTimer() const;
 
-	void setTimeOut(const unsigned int time);
-	const unsigned int getTimeOut() const;
+		void setTimeOut(const unsigned int time);
+		const unsigned int getTimeOut() const;
 
-	const unsigned int getIP() const;
-	void setIP(const unsigned int ip);
+		const unsigned int getIP() const;
+		void setIP(const unsigned int ip);
 
-	const unsigned int getLength() const;
-	void setLength(const unsigned int bo_length);
-
+		const unsigned int getLength() const;
+		void setLength(const unsigned int bo_length);
 };
+
+inline GOAL_ENTRY* PRERACE::getpGoal() const {
+	return(*pGoal);
+}
+
 
 inline const unsigned int PRERACE::getLocationTotal(const unsigned int location_number, const unsigned int unit_type) const
 {
 #ifdef _SCC_DEBUG
-	if((location_number >= MAX_LOCATIONS)) {
+	if((location_number >= (*getMap())->getMaxLocations())) {
 		toLog("DEBUG: (PRERACE::getLocationTotal): Value location_number out of range.");return(0);
 	}
 #endif
 	return(location[location_number].getTotal(unit_type));
 }
 
-inline void PRERACE::setMarker(const unsigned int ip, const unsigned int value)
+/*inline void PRERACE::setMarker(const unsigned int ip, const unsigned int value)
 {
 #ifdef _SCC_DEBUG
 	if(ip >= MAX_LENGTH) {
@@ -261,7 +266,7 @@ inline void PRERACE::setMarker(const unsigned int ip, const unsigned int value)
 	}	
 #endif
 	Marker[ip]=value;
-}
+}*/
 
 
 inline void PRERACE::setCode(const unsigned int ip, const unsigned int value)
@@ -300,7 +305,7 @@ inline const unsigned int PRERACE::getCurrentCode() const
 	return(Code[getIP()]);
 }
 
-inline const unsigned int PRERACE::getMarker(const unsigned int ip) const
+/*inline const unsigned int PRERACE::getMarker(const unsigned int ip) const
 {
 #ifdef _SCC_DEBUG
 	if(ip > MAX_LENGTH) {
@@ -308,7 +313,7 @@ inline const unsigned int PRERACE::getMarker(const unsigned int ip) const
 	}
 #endif
 	return(Marker[ip]); 
-}
+}*/
 
 
 
@@ -319,7 +324,7 @@ inline const unsigned int PRERACE::getMapLocationAvailible(const unsigned int pl
 	if(player >= (*pMap)->getMaxPlayer()) {
 		toLog("DEBUG: (PRERACE::getMapLocationAvailible): Value player out of range.");return(0);
 	}
-	if((location_number >= MAX_LOCATIONS))	{
+	if((location_number >= (*getMap())->getMaxLocations()))	{
 		toLog("DEBUG: (PRERACE::getMapLocationAvailible): Value location_number out of range.");return(0);
 	}
 #endif
@@ -332,7 +337,7 @@ inline const unsigned int PRERACE::getMapLocationTotal(const unsigned int player
 	if(player >= (*pMap)->getMaxPlayer()) {
 		toLog("DEBUG: (PRERACE::getMapLocationTotal): Value player out of range.");return(0);
 	}
-	if((location_number >= MAX_LOCATIONS))	{
+	if((location_number >= (*getMap())->getMaxLocations()))	{
 		toLog("DEBUG: (PRERACE::getMapLocationTotal): Value location_number out of range.");return(0);
 	}
 #endif
@@ -345,7 +350,7 @@ inline void PRERACE::setMapLocationAvailible(const unsigned int player, const un
 	if(player >= (*pMap)->getMaxPlayer()) {
 		toLog("DEBUG: (PRERACE::setMapLocationAvailible): Value player out of range.");return;
 	}
-	if((location_number >= MAX_LOCATIONS))	{
+	if((location_number >= (*getMap())->getMaxLocations()))	{
 		toLog("DEBUG: (PRERACE::setMapLocationAvailible): Value location_number out of range.");return;
 	}
 #endif
@@ -358,7 +363,7 @@ inline void PRERACE::setMapLocationTotal(const unsigned int player, const unsign
 	if(player >= (*pMap)->getMaxPlayer()) {
 		toLog("DEBUG: (PRERACE::setMapLocationTotal): Value player out of range.");return;
 	}
-	if((location_number >= MAX_LOCATIONS))	{
+	if((location_number >= (*getMap())->getMaxLocations()))	{
 		toLog("DEBUG: (PRERACE::setMapLocationTotal): Value location_number out of range.");return;
 	}
 #endif
@@ -371,7 +376,7 @@ inline void PRERACE::addOneMapLocationAvailible(const unsigned int player, const
 	if(player >= (*pMap)->getMaxPlayer()) {
 		toLog("DEBUG: (PRERACE::addOneMapLocationAvailible): Value player out of range.");return;
 	}
-	if((location_number >= MAX_LOCATIONS)) {
+	if((location_number >= (*getMap())->getMaxLocations())) {
 		toLog("DEBUG: (PRERACE::addOneMapLocationAvailible): Value location_number out of range.");return;
 	}
 #endif
@@ -384,7 +389,7 @@ inline void PRERACE::addOneMapLocationTotal(const unsigned int player, const uns
 	if(player >= (*pMap)->getMaxPlayer()) {
 		toLog("DEBUG: (PRERACE::addOneMapLocationTotal): Value player out of range.");return;
 	}
-	if((location_number >= MAX_LOCATIONS)) {
+	if((location_number >= (*getMap())->getMaxLocations())) {
 		toLog("DEBUG: (PRERACE::addOneMapLocationTotal): Value location_number out of range.");return;
 	}
 #endif
@@ -397,7 +402,7 @@ inline void PRERACE::removeOneMapLocationAvailible(const unsigned int player, co
 	if(player >=(*pMap)->getMaxPlayer()) {
 		toLog("DEBUG: (PRERACE::addOneMapLocationAvailible): Value player out of range.");return;
 	}
-	if((location_number >= MAX_LOCATIONS)) {
+	if((location_number >= (*getMap())->getMaxLocations())) {
 		toLog("DEBUG: (PRERACE::addOneMapLocationAvailible): Value location_number out of range.");return;
 	}
 #endif
@@ -411,7 +416,7 @@ inline void PRERACE::removeOneMapLocationTotal(const unsigned int player, const 
 	if(player >=(*pMap)->getMaxPlayer()) {
 		toLog("DEBUG: (PRERACE::addOneMapLocationTotal): Value player out of range.");return;
 	}
-	if((location_number >= MAX_LOCATIONS)) {
+	if((location_number >= (*getMap())->getMaxLocations())) {
 		toLog("DEBUG: (PRERACE::addOneMapLocationTotal): Value location_number out of range.");return;
 	}
 #endif
@@ -421,7 +426,7 @@ inline void PRERACE::removeOneMapLocationTotal(const unsigned int player, const 
 inline const unsigned int PRERACE::getLocationAvailible(const unsigned int location_number, const unsigned int unit_type) const
 {
 #ifdef _SCC_DEBUG
-	if((location_number >= MAX_LOCATIONS))	{
+	if((location_number >= (*getMap())->getMaxLocations()))	{
 		toLog("DEBUG: (PRERACE::getLocationAvailible): Value location_number out of range.");return(0);
 	}
 #endif
@@ -431,7 +436,7 @@ inline const unsigned int PRERACE::getLocationAvailible(const unsigned int locat
 inline void PRERACE::setLocationAvailible(const unsigned int location_number, const unsigned int unit_type, const unsigned int availible)
 {
 #ifdef _SCC_DEBUG
-	if((location_number >= MAX_LOCATIONS)) {
+	if((location_number >= (*getMap())->getMaxLocations())) {
 		toLog("DEBUG: (PRERACE::setLocationAvailible): Value location_number out of range.");return;
 	}
 #endif
@@ -441,7 +446,7 @@ inline void PRERACE::setLocationAvailible(const unsigned int location_number, co
 inline void PRERACE::setLocationTotal(const unsigned int location_number, const unsigned int unit_type, const unsigned int total)
 {
 #ifdef _SCC_DEBUG
-	if(location_number >= MAX_LOCATIONS)	{
+	if(location_number >= (*getMap())->getMaxLocations())	{
 		toLog("DEBUG: (PRERACE::setLocationTotal): Value location_number out of range.");return;
 	}
 #endif
@@ -451,7 +456,7 @@ inline void PRERACE::setLocationTotal(const unsigned int location_number, const 
 inline void PRERACE::addLocationAvailible(const unsigned int location_number, const unsigned int unit_type, const unsigned int availible)
 {
 #ifdef _SCC_DEBUG
-	if(location_number >= MAX_LOCATIONS) {
+	if(location_number >= (*getMap())->getMaxLocations()) {
 		toLog("DEBUG: (PRERACE::addLocationAvailible): Value location_number out of range.");return;
 	}
 #endif	
@@ -463,7 +468,7 @@ inline void PRERACE::addLocationAvailible(const unsigned int location_number, co
 inline void PRERACE::addLocationTotal(const unsigned int location_number, const unsigned int unit_type, const unsigned int total)
 {
 #ifdef _SCC_DEBUG
-	if(location_number >= MAX_LOCATIONS)	{
+	if(location_number >= (*getMap())->getMaxLocations())	{
 		toLog("DEBUG: (PRERACE::addLocationTotal): Value location_number out of range.");return;
 	}
 #endif
@@ -475,7 +480,7 @@ inline void PRERACE::addLocationTotal(const unsigned int location_number, const 
 inline void PRERACE::addOneLocationAvailible(const unsigned int location_number, const unsigned int unit_type)
 {
 #ifdef _SCC_DEBUG
-	if(location_number >= MAX_LOCATIONS) {
+	if(location_number >= (*getMap())->getMaxLocations()) {
 		toLog("DEBUG: (PRERACE::addLocationAvailible): Value location_number out of range.");return;
 	}
 #endif
@@ -488,7 +493,7 @@ inline void PRERACE::addOneLocationAvailible(const unsigned int location_number,
 inline void PRERACE::addOneLocationTotal(const unsigned int location_number, const unsigned int unit_type)
 {
 #ifdef _SCC_DEBUG
-	if(location_number >= MAX_LOCATIONS) {
+	if(location_number >= (*getMap())->getMaxLocations()) {
 		toLog("DEBUG: (PRERACE::addLocationTotal): Value location_number out of range.");return;
 	}
 #endif
@@ -500,7 +505,7 @@ inline void PRERACE::addOneLocationTotal(const unsigned int location_number, con
 inline void PRERACE::removeOneLocationAvailible(const unsigned int location_number, const unsigned int unit_type)
 {
 #ifdef _SCC_DEBUG
-	if((location_number >= MAX_LOCATIONS)) {
+	if((location_number >= (*getMap())->getMaxLocations())) {
 		toLog("DEBUG: (PRERACE::removeOneLocationAvailible): Value location_number out of range.");return;
 	}
 #endif
@@ -513,7 +518,7 @@ inline void PRERACE::removeOneLocationAvailible(const unsigned int location_numb
 inline void PRERACE::removeOneLocationTotal(const unsigned int location_number, const unsigned int unit_type)
 {
 #ifdef _SCC_DEBUG
-	if((location_number >= MAX_LOCATIONS)) {
+	if((location_number >= (*getMap())->getMaxLocations())) {
 		toLog("DEBUG: (PRERACE::removeOneLocationTotal): Value location_number out of range.");return;
 	}
 #endif
@@ -614,7 +619,7 @@ inline void PRERACE::setMineralHarvestPerSecond( const unsigned int location_num
 	if(mineral_harvest_per_second >= MAX_MINERALS) {
 		toLog("DEBUG: (PRERACE::setMineralHarvestPerSecond): Value mineral_harvest_per_second out of range.");return;
 	}
-	if((location_number >= MAX_LOCATIONS)) {
+	if((location_number >= (*getMap())->getMaxLocations())) {
 		toLog("DEBUG: (PRERACE::setMineralHarvestPerSecond): Value location_number out of range.");return;
 	}
 	if(worker>=45) {
@@ -627,7 +632,7 @@ inline void PRERACE::setMineralHarvestPerSecond( const unsigned int location_num
 inline const unsigned int PRERACE::getMineralHarvestPerSecond( const unsigned int location_number, const unsigned int worker ) const
 {
 #ifdef _SCC_DEBUG
-	if((location_number >= MAX_LOCATIONS))	{
+	if((location_number >= (*getMap())->getMaxLocations()))	{
 		toLog("DEBUG: (PRERACE::getMineralHarvestPerSecond): Value location_number out of range.");return(0);
 	}
 	if(worker>=45) {
@@ -646,7 +651,7 @@ inline void PRERACE::setGasHarvestPerSecond( const unsigned int location_number,
 	if(gas_harvest_per_second >= MAX_GAS) {
 		toLog("DEBUG: (PRERACE::setGasHarvestPerSecond): Value gas_harvest_per_second out of range.");return;
 	}
-	if((location_number >= MAX_LOCATIONS)) {
+	if((location_number >= (*getMap())->getMaxLocations())) {
 		toLog("DEBUG: (PRERACE::setGasHarvestPerSecond): Value location_number out of range.");return;
 	}
 	if(worker >= 5) {
@@ -659,7 +664,7 @@ inline void PRERACE::setGasHarvestPerSecond( const unsigned int location_number,
 inline const unsigned int PRERACE::getGasHarvestPerSecond( const unsigned int location_number, const unsigned int worker ) const
 {
 #ifdef _SCC_DEBUG
-	if((location_number >= MAX_LOCATIONS))	{
+	if((location_number >= (*getMap())->getMaxLocations()))	{
 		toLog("DEBUG: (PRERACE::getGasHarvestPerSecond): Value location_number out of range.");return(0);
 	}
 	if(worker>=5)	{
@@ -934,8 +939,31 @@ inline const BASIC_MAP* const* PRERACE::getMap()
 // ------ END OF GET/SET FUNCTIONS ------
 // --------------------------------------
 
+inline void PRERACE::removeLarvaFromQueue(const unsigned int location_number)
+{
+#ifdef _SCC_DEBUG
+	if((location_number<1) || (location_number >= (*getMap())->getMaxLocations())) {
+		toLog("DEBUG: (PRERACE::removeLarvaFromQueue): Value location_number out of range.");return;
+	}
+	if((larvaInProduction[location_number]<1)||(larvaInProduction[location_number]>=MAX_SUPPLY)) {
+		toLog("DEBUG: (PRERACE::removeLarvaFromQueue): Variable larvaInProduction not initialized or out of range.");return;
+	}
+#endif
+	larvaInProduction[location_number]--;
+}
 
-
+inline void PRERACE::addLarvaToQueue(const unsigned int location_number)
+{
+#ifdef _SCC_DEBUG
+	if((location_number<1) || (location_number >= (*getMap())->getMaxLocations())) {
+		toLog("DEBUG: (PRERACE::addLarvaFromQueue): Value location_number out of range.");return;
+	}
+	if(larvaInProduction[location_number]>=MAX_SUPPLY) {
+		toLog("DEBUG: (PRERACE::addLarvaFromQueue): Variable larvaInProduction not initialized or out of range.");return;
+	}
+#endif
+	larvaInProduction[location_number]++;
+}
 
 #endif // __PRERACE_H
 

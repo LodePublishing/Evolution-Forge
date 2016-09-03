@@ -112,12 +112,12 @@ Main::Main(DC* dc):
 
 //TODO: scc2 player und scc2dll player Zusammenhang nachschaun! loadPlayer wird net aufgerufen... goals ueberschneiden etc...
 
-/*	for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-	{
-		player[i] = new Player(mainWindow, &(anarace[i]), msgWindow, i);
-	}
-	for(unsigned int i = settings.getMap(0)->getMaxPlayer();i<MAX_PLAYER;i++)
-		player[i]=0;*/
+//	for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
+//	{
+//		player[i] = new Player(mainWindow, &(anarace[i]), msgWindow, i);
+//	}
+//	for(unsigned int i = settings.getMap(0)->getMaxPlayer();i<MAX_PLAYER;i++)
+//		player[i]=0;
 
 	for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
 		player[i] = new Player(mainWindow, &(anarace[i]), msgWindow, 0);
@@ -125,7 +125,7 @@ Main::Main(DC* dc):
 //	player[1] = new Player(mainWindow, &(anarace[1]), msgWindow, 1);
 //	player[2] = 0; TODO restliche 0
 
-	msgWindow->setParent(mainWindow); // process AFTER player
+//	msgWindow->setParent(mainWindow); // process AFTER player
 	
 //TODO grey wieder rein... evtl bei draw
 
@@ -135,7 +135,7 @@ Main::Main(DC* dc):
 	settingsWindow->Hide();
 
 	player[0]->Show();
-//	player[1]->Hide(); //~~
+//	player[0]->Hide(); //~~
 
 	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG1_STRING)));
 	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG2_STRING)));
@@ -152,6 +152,7 @@ Main::Main(DC* dc):
 //	get_bg(dc, cursor_save, 0, 0);
 //	SDL_SetAlpha(cursor, SDL_SRCALPHA, 127);
 	mainWindow->forcePressTab(BASIC_TAB); // !!
+
 }
 
 Main::~Main()
@@ -183,32 +184,38 @@ void Main::noticeFullscreen()
 
 void Main::process()
 {
+	UI_Object::windowSelected = false;
 	if(isOptimizing()) 
 	{
 		if(ani2>1)
 		{
 			ani++;
-			ani2=0;
+			ani2 = 0;
 		} else ani2++;
 	}
-	else ani=1;
-	if(ani>30) ani=1;
-
+	else ani = 1;
+	if(ani>30) ani = 1;
 
 	if(boHasChanged)
 	{
-		boHasChanged=false;
-		for(int i=settings.getMap(0)->getMaxPlayer();i--;)
+		boHasChanged = false;
+		for(unsigned int i = settings.getMap(0)->getMaxPlayer();i--;)
 			if(player[i]->isShown())
 				player[i]->CheckOrders();
 	}
-	update=1;
+	update = 1;
 	if((configuration.isTooltips())&&(UI_Object::tooltip))
 		UI_Object::tooltip->process();
 	mainWindow->process();
+	if(!UI_Object::windowSelected)
+	{
+		if(UI_Object::currentWindow)
+			UI_Object::currentWindow->setNeedRedrawNotMoved();
+		UI_Object::currentWindow=NULL;
+	}
 	if(settingsWindow->hasLanguageChanged())
 	{
-		for(int i=settings.getMap(0)->getMaxPlayer();i--;)
+		for(unsigned int i = settings.getMap(0)->getMaxPlayer();i--;)
 			player[i]->reloadStrings();
 		mainWindow->reloadStrings();
 		settingsWindow->reloadStrings();
@@ -217,8 +224,8 @@ void Main::process()
 
 	if(mainWindow->tabWasChanged())
 	{
-		boHasChanged=true;
-		gizmo=false;
+		boHasChanged = true;
+		gizmo = false;
 		eTab ctab = mainWindow->getCurrentTab();
 		switch(ctab)
 		{
@@ -226,13 +233,13 @@ void Main::process()
 				msgWindow->Show();
 				settingsWindow->Hide();
 				tutorialWindow->Hide();
-				gizmo=true;
+				gizmo = true;
 			break;
 			case ADVANCED_TAB: //1 player
 				msgWindow->Show();
 				settingsWindow->Hide();
 				tutorialWindow->Hide();
-				gizmo=true;
+				gizmo = true;
 			break;
 			case EXPERT_TAB: //2 player rushversuche
 				msgWindow->Show();
@@ -389,7 +396,15 @@ void Main::draw(DC* dc) const
 	if(mainWindow->isShown())
 	{
 		mainWindow->draw(dc);
-// ------ MOUSE DRAWING ------
+		if(gizmo)
+			drawGizmo(dc);
+		if(UI_Object::tooltip)
+		{
+			UI_Object::tooltip->draw(dc);
+		//	(UI_Object::tooltip)->clearRedrawFlag();
+		}
+		mainWindow->clearRedrawFlag();
+	// ------ MOUSE DRAWING ------
 		if(configuration.isSoftwareMouse())
 		{
 //			SDL_ShowCursor(SDL_DISABLE);
@@ -421,11 +436,7 @@ void Main::draw(DC* dc) const
 //		else
 //			SDL_ShowCursor(SDL_ENABLE);
 // ------ END MOUSE DRAWING ------
-	
-		if(UI_Object::tooltip)
-			UI_Object::tooltip->draw(dc);
-		if(gizmo)
-			drawGizmo(dc);
+		
 	}
 	SDL_Rect c;
 	c.x=maus.x;
@@ -448,12 +459,12 @@ void Main::OnIdle()
 		update = 2;
 		ANARACE** temp;
 		unsigned int oldCode[MAX_PLAYER][MAX_LENGTH];
-		unsigned int oldMarker[MAX_PLAYER][MAX_LENGTH];
+//		unsigned int oldMarker[MAX_PLAYER][MAX_LENGTH];
 		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
 			for(unsigned int j = MAX_LENGTH;j--;)
 			{
 				oldCode[i][j] = anarace[i]->getCode(j);
-				oldMarker[i][j] = anarace[i]->getMarker(j);
+//				oldMarker[i][j] = anarace[i]->getMarker(j);
 			}
 			
 //TODO: nach Ende eines Durchlaufs ist anarace 0, aber viele anderen Teile des Codes greifen noch drauf zu!!
@@ -461,7 +472,7 @@ void Main::OnIdle()
 		{
 			for(int i=settings.getMap(0)->getMaxPlayer();i--;)
 			{
-				if(anarace[i]->isDifferent(oldCode[i], oldMarker[i]))
+				if(anarace[i]->isDifferent(oldCode[i]))//, oldMarker[i]))
 					boHasChanged=true;
 					
 				anarace[i]=temp[i];
@@ -557,6 +568,7 @@ void Main::loadGoals()
 //TODO flag setzen ob was geladen wurde
 }
 
+
 void Main::leftDown()
 {
 	if(UI_Object::currentButton)
@@ -591,6 +603,18 @@ void Main::rightUp(const Point p)
 	UI_Object::currentButtonPressed=false;
 	UI_Object::currentButtonHasAlreadyLeft=false;
 	setMouse(p);
+}
+
+void Main::wheelUp()
+{
+	if(UI_Object::currentWindow)
+		UI_Object::currentWindow->wheelUp();
+}
+
+void Main::wheelDown()
+{
+	if(UI_Object::currentWindow)
+		UI_Object::currentWindow->wheelDown();
 }
 
 void Main::setMouse(const Point p)

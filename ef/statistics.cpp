@@ -14,7 +14,7 @@ StatisticsWindow::StatisticsWindow(UI_Object* stat_parent, const unsigned int st
 	resetData();
 	Point l1 = Point(getRelativeClientRectPosition()+Point(210,0));
 	Size l2 = Size(190, FONT_SIZE+7);
-	for(unsigned int i = 0; i < MAX_STAT_ENTRY; i++)
+	for(unsigned int i = 0; i < MAX_STAT_ENTRY; ++i)
 	{
 		statEntry[i] = new UI_Button(this, Rect(l1+Point(0,i*14), l2), (eString)(MINERALS_STAT_STRING+i), (eButton)(MINERALS_STAT_BUTTON+i), NO_TEXT_MODE, STATIC_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE);
 		statEntry[i]->updateToolTip((eString)(MINERALS_STAT_TOOLTIP_STRING+i));
@@ -24,7 +24,7 @@ StatisticsWindow::StatisticsWindow(UI_Object* stat_parent, const unsigned int st
 
 StatisticsWindow::~StatisticsWindow()
 {
-	for(unsigned int i = 0; i < MAX_STAT_ENTRY; i++)
+	for(unsigned int i = MAX_STAT_ENTRY; i--;)
 		delete statEntry[i];
 }
 
@@ -46,15 +46,15 @@ void StatisticsWindow::showGraph(DC* dc, const unsigned int* graph_data, const u
 	Point blub[200];
 	j=1;
 	k=0;
-	for(unsigned int i = 1; i < 199; i++)
+	for(unsigned int i = 1; i < 199; ++i)
 	{
 		if((graph_data[i] != graph_data[i+1])||(k>9))
 		{
 			k=0;
 		//TODO Hoehe 100 in clientarea.height aendern
 			blub[j]=Point(i+getAbsoluteClientRectLeftBound(), getAbsoluteClientRectLowerBound() - 2 - (getClientRectHeight()-4)*(graph_data[i]-min)/(max+1));
-			j++;
-		} else k++;
+			++j;
+		} else ++k;
 	}
 	blub[0]=Point(getAbsoluteClientRectPosition() + Point(2, getClientRectHeight() - 3 - (getClientRectHeight()-4)*(graph_data[0]-min)/(max+1)));
 	blub[j]=Point(getAbsoluteClientRectPosition() + Point(201, getClientRectHeight() - 3 - (getClientRectHeight()-4)*(graph_data[199]-min)/(max+1)));
@@ -90,20 +90,21 @@ void StatisticsWindow::draw(DC* dc) const
 	dc->SetPen(*theme.lookUpPen( INNER_BORDER_PEN ));
 	dc->DrawRectangle(getAbsoluteClientRectPosition(), Size(202, getClientRectHeight()));
 
-	for(unsigned int i = 0; i < MAX_STAT_ENTRY; i++)
+	for(unsigned int i = 0; i < MAX_STAT_ENTRY; ++i)
 		if((!statEntry[i]->isCurrentlyHighlighted())&&(statEntry[i]->isCurrentlyActivated()))
 			showGraph(dc, data[i], 0, maxdata[i], dc->mixColor(theme.lookUpColor((eColor)(MINERALS_TEXT_COLOR+i)), theme.lookUpColor(BRIGHT_TEXT_COLOR), statEntry[i]->getGradient()));
-	for(unsigned int i = 0; i < MAX_STAT_ENTRY; i++)
+	for(unsigned int i = 0; i < MAX_STAT_ENTRY; ++i)
 		if((statEntry[i]->isCurrentlyHighlighted())&&(statEntry[i]->isCurrentlyActivated()))
 			showGraph(dc, data[i], 0, maxdata[i], dc->mixColor(theme.lookUpColor((eColor)(MINERALS_TEXT_COLOR+i)), theme.lookUpColor(BRIGHT_TEXT_COLOR), statEntry[i]->getGradient()), true);
 
-	for(unsigned int i = 0; i<=AVERAGE_BO_LENGTH_STAT_ENTRY;i++)
+	for(unsigned int i = 0; i<=AVERAGE_BO_LENGTH_STAT_ENTRY;++i)
 		if(statEntry[i]->isCurrentlyActivated())
-			for(unsigned int k = 0; k < 20; k++)
+			for(unsigned int k = 0; k < 20; ++k)
 				if(oldDataCounter[i][k]>0)
 				{
 					dc->SetTextForeground(dc->darkenColor( theme.lookUpColor((eColor)(MINERALS_TEXT_COLOR+i)), 80-oldDataCounter[i][k]*4));
 					std::ostringstream os;
+					os.str("");
 					if(oldData[i][k]>0) 
 						os << "+";
 					else if(oldData[i]<0)
@@ -127,8 +128,8 @@ void StatisticsWindow::process()
 	
 	UI_Window::process();
 	
-	for(unsigned int i=0;i<=AVERAGE_BO_LENGTH_STAT_ENTRY;i++)
-		for(unsigned int k=0;k<20;k++)
+	for(unsigned int i=0;i<=AVERAGE_BO_LENGTH_STAT_ENTRY;++i)
+		for(unsigned int k=20;k--;)
 			if(oldDataCounter[i][k]>0)
 			{
 				oldDataCounter[i][k]+=2;
@@ -138,7 +139,7 @@ void StatisticsWindow::process()
 					oldData[i][k]=0;
 				}
 			}
-	for(unsigned int i = 0; i < MAX_STAT_ENTRY; i++)
+	for(unsigned int i = MAX_STAT_ENTRY; i--;)
 		if((statEntry[i]->isCurrentlyHighlighted())&&(statEntry[i]->isCurrentlyActivated()))
 		{
 			setNeedRedrawNotMoved();
@@ -156,9 +157,9 @@ void StatisticsWindow::process()
 	start_time += difference;
 
 	int av=0;
-	for(unsigned int i=0;i<=AVERAGE_BO_LENGTH_STAT_ENTRY;i++)
-		for(unsigned int j=0;j<20;j++)
-			for(unsigned int k=0;k<j;k++)
+	for(unsigned int i=0;i<=AVERAGE_BO_LENGTH_STAT_ENTRY;++i)
+		for(unsigned int j=0;j<20;++j)
+			for(unsigned int k=0;k<j;++k)
 			{
 				if(oldDataCounter[i][j]>oldDataCounter[i][k])
 				{
@@ -176,10 +177,10 @@ void StatisticsWindow::process()
 	data[FITNESS_VARIANCE_STAT_ENTRY][199] = (unsigned int)sqrt((double)anarace->fitnessVariance);
 //	data[GENERATIONS_LEFT_STAT_ENTRY][199] = coreConfiguration.getMaxGenerations() - anarace->getUnchangedGenerations();
 
-	for(unsigned int i=0;i<AVERAGE_BO_LENGTH_STAT_ENTRY;i++)
+	for(unsigned int i=0;i<AVERAGE_BO_LENGTH_STAT_ENTRY;++i)
 		if(data[i][199]!=data[i][198])
 		{
-			for(unsigned int l=0;l<20;l++)
+			for(unsigned int l=0;l<20;++l)
 				if(oldDataCounter[i][l]==0)
 				{
 					oldDataCounter[i][l]=1;
@@ -190,24 +191,24 @@ void StatisticsWindow::process()
 		}
 
 
-	ani++;
+	++ani;
 	if(ani>5)
 	{
 		if(averagecounter<100)
-			averagecounter++;
+			++averagecounter;
 		for(unsigned int i=averagecounter-1;i--;)
 			average[i+1]=average[i];
 		average[0]=difference;
 	
-		for(unsigned int i=0;i<averagecounter;i++)
+		for(unsigned int i=averagecounter;i--;)
 			av+=average[i];
 		av/=averagecounter;
 		ani=0;
 	
-		for(unsigned int i=0;i<=AVERAGE_BO_LENGTH_STAT_ENTRY;i++)
+		for(unsigned int i=AVERAGE_BO_LENGTH_STAT_ENTRY+1;i--;)
 			if(data[i][199]!=data[i][198])
 			{
-				for(unsigned int l=0;l<20;l++)
+				for(unsigned int l=20;l--;)
 					if(oldDataCounter[i][l]==0)
 					{
 						oldDataCounter[i][l]=1;
@@ -216,8 +217,8 @@ void StatisticsWindow::process()
 					}
 			}
 		
-		for(unsigned int i=0;i<MAX_STAT_ENTRY;i++)
-			for(unsigned int j=0;j<199;j++)
+		for(unsigned int i=MAX_STAT_ENTRY;i--;)
+			for(unsigned int j=0;j<199;++j)
 				data[i][j] = data[i][j+1];
 		if(av==0)
 			av=1;
@@ -225,8 +226,8 @@ void StatisticsWindow::process()
 	}
 	
 
-	for(unsigned int i=0;i<MAX_STAT_ENTRY;i++)
-		for(unsigned int j=0;j<200;j++)
+	for(unsigned int i = MAX_STAT_ENTRY;i--;)
+		for(unsigned int j=200;j--;)
 		{
 			if(data[i][j]>maxdata[i])
 				maxdata[i]=data[i][j];
@@ -242,6 +243,7 @@ void StatisticsWindow::process()
 //	statEntry[GENERATIONS_LEFT_STAT_ENTRY]->updateText(theme.lookUpFormattedString(GENERATIONS_LEFT_STAT_STRING, data[GENERATIONS_LEFT_STAT_ENTRY][199], anarace->getTotalGeneration()));
 
 	std::ostringstream os;
+	os.str("");
 	os << data[FPS_STAT_ENTRY][199] << " fps ";/* [" << UI_Object::rectnumber << " updates]";*/
 //	if(anarace->isOptimizing())
 		os << "[" << (int) 

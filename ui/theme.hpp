@@ -4,25 +4,8 @@
 #include "../sdl/dc.hpp"
 #include "../core/defs.hpp"
 #include "configuration.hpp"
-/*const char gizmo[GIZMO_NUMBER][40]=
-{
-	"Perfection is the key",
-	"Look at la Luna",
-	"It is a good day to optimize",
-	"The early ling catches the worm",
-	"Build orders are best served optimized",
-	"Pool Pool Pool Pool Dead - A newbie",
-	"Good... Bad... I'm the guy with the gum",
-	"LOOOOOOOOOOOOOOOOOOOOOOOOOL",
-	"ALT+F4 - Zergling has left the game :/",
-	"WHY ARE YOUR ZEALOTS INVISIBLE!?",
-	"!!!!! 3VS3 BGH NO NOOBS !!!!",
-	"<ý¦<¬ ;) ýJ<¼ýD Ìýt<Üý >_<",
-	"60 Minutes no Rush!"
-}*/
 
-
-#define FONT_SIZE 7
+#define FONT_SIZE 6
 // TODO!!!
 
 #define MIN_DISTANCE 3
@@ -41,7 +24,7 @@ enum eDataType
 	BITMAP_DATA_TYPE,
 	PEN_DATA_TYPE,
 	BRUSH_DATA_TYPE,
-	BUTTON_ANIMATION_DATA_TYPE,
+	BUTTON_COLOR_DATA_TYPE,
 	BUTTON_WIDTH_DATA_TYPE,
 
 	MAX_DATA_TYPES
@@ -92,29 +75,21 @@ enum eTheme
 };
 // ------ END GENERAL THEMES ------
 
-// ------ RESOLUTIONS ------
-enum eResolution
-{
-	ZERO_RESOLUTION,
-	RESOLUTION_640x480,
-	RESOLUTION_800x600,
-	RESOLUTION_1024x768,
-	RESOLUTION_1280x1024,
-	MAX_RESOLUTIONS
-};
-// ------ END RESOLUTIONS ------
 
 // ------ FONTS ------
 enum eFont
 {
 	NULL_FONT,
-	SMALL_NORMAL_BOLD_FONT,
-	SMALL_ITALICS_BOLD_FONT,
-	SMALL_MIDDLE_NORMAL_FONT,
-	MIDDLE_NORMAL_BOLD_FONT,
-	LARGE_NORMAL_BOLD_FONT,
-	VERY_LARGE_NORMAL_BOLD_FONT,
-	HUGE_DEFAULT_BOLD_FONT, //TODO
+	SMALL_FONT,
+	SMALL_BOLD_FONT,
+	MIDDLE_FONT,
+	MIDDLE_BOLD_FONT,
+	LARGE_FONT,
+	LARGE_BOLD_FONT,
+	VERY_LARGE_FONT,
+	VERY_LARGE_BOLD_FONT,
+	HUGE_FONT, //TODO
+	HUGE_BOLD_FONT, //TODO
 
 	MAX_FONTS
 };
@@ -361,8 +336,13 @@ enum eString
 	UNIT_NULL_STRING=1,
 	LAST_UNIT_STRING=315,
 	
-	START_START_STRING=316,	
-	START_LOAD_CORE_SETTINGS_STRING,	
+	START_LOAD_CONFIGURATION_STRING=316,
+	START_PARSE_COMMAND_LINE_STRING,
+	START_WARNING_VO_ARGUMENT_STRING,
+	START_SDL_USING_DRIVER_STRING,
+	START_ERROR_NO_DRIVER_AVAILIBLE_STRING,
+	START_ERROR_DRIVER_NOT_SUPPORTED_STRING,
+	
 	START_INIT_SDL_STRING,	
 	START_UNABLE_TO_INIT_SDL_STRING,
 	START_ERROR_SETTING_VIDEO_MODE_STRING,
@@ -384,11 +364,16 @@ enum eString
 	START_MAIN_INIT_COMPLETE_STRING,	
 	START_SYSTEM_READY_STRING,
 	START_INITIALIZATION_TIME_STRING,
+
+	CHANGED_BIT_DEPTH_STRING,
+	CHANGED_RESOLUTION_STRING,
 	
 	MAIN_WINDOW_TITLE_STRING,
 	MESSAGE_WINDOW_TITLE_STRING,
-	CORE_WINDOW_TITLE_STRING,
-	TUTORIAL_WINDOW_TITLE_STRING,
+	HELP_WINDOW_TITLE_STRING,
+	SETTINGS_WINDOW_TITLE_STRING, 
+	MAP_WINDOW_TITLE_STRING,
+	
 	INFO_WINDOW_TITLE_STRING,
 	TECHTREE_WINDOW_TITLE_STRING,
 	BOGRAPH_WINDOW_TITLE_STRING,
@@ -400,6 +385,9 @@ enum eString
 	GAME_WINDOW_TITLE_STRING,
 	PLAYER_WINDOW_TITLE_STRING,
 
+	GAME_NUMBER_STRING,
+	NEW_GAME_STRING,
+	
 // message window:
 	WELCOME_MSG1_STRING,
 	WELCOME_MSG2_STRING,
@@ -413,6 +401,14 @@ enum eString
 	MOVED_NON_GOAL_STRING,
 	SAVED_GOAL_STRING,
 
+// game window:
+	COMPARE_GAME_STRING,
+	REMOVE_GAME_STRING,
+
+// help window:
+	HELP_WINDOW_INDEX_STRING,
+	HELP_WINDOW_BACK_STRING,
+	
 // edit field window:
 	EDIT_FIELD_OK_STRING,
 	EDIT_FIELD_CANCEL_STRING,
@@ -492,29 +488,11 @@ enum eString
 	FITNESS_AVERAGE_STAT_STRING, 
 	FITNESS_VARIANCE_STAT_STRING,
 	GENERATIONS_LEFT_STAT_STRING,
-	
 
-// window title parameters
-	HIDE_MODE_STRING,
-	BASIC_PLAYER_MODE_STRING,
-	ADVANCED_PLAYER_MODE_STRING, //70
-	EXPERT_PLAYER_MODE_STRING,
-	EXPERT_COMPUTER_MODE_STRING,
-	GOSU_PLAYER_MODE_STRING,
-	GOSU_COMPUTER_MODE_STRING, 
-	COMPARE_PLAYERMODE_STRING,
-	ERROR_MODE_STRING,
 // Tabs
-	ZERO_TAB_STRING,
-	BASIC_TAB_STRING,
-	ADVANCED_TAB_STRING,
-	EXPERT_TAB_STRING, // 80
-	GOSU_TAB_STRING,
-	
-	TUTORIAL_TAB_STRING,
+	HELP_TAB_STRING,
 	SETTINGS_TAB_STRING,
 	MAP_TAB_STRING, 
-	COMPARE_TAB_STRING,
 
 // tooltips
 	ADD_UNIT_TOOLTIP_STRING,
@@ -544,20 +522,13 @@ enum eString
 	PAUSE_OPTIMIZATION_TOOLTIP_STRING, 
 	GOALS_FULFILLED_TOOLTIP_STRING,
 
-	BASIC_TAB_TOOLTIP_STRING,
-	ADVANCED_TAB_TOOLTIP_STRING,
-	EXPERT_TAB_TOOLTIP_STRING,
-	GOSU_TAB_TOOLTIP_STRING,
-
-	TUTORIAL_TAB_TOOLTIP_STRING,	
+	HELP_TAB_TOOLTIP_STRING,	
 	SETTINGS_TAB_TOOLTIP_STRING, //110
 	MAP_TAB_TOOLTIP_STRING,
-	COMPARE_TAB_TOOLTIP_STRING,
 
 	FORCEENTRY_TIME_TOOLTIP_STRING,
 
 // settings:
-	SETTINGS_WINDOW_TITLE_STRING, 
 	TITLE_PREDEFINED_SETTINGS_STRING,
 // core-settings:
 	SETTING_MAX_TIME_STRING,
@@ -645,6 +616,12 @@ enum eString
 	SETTING_RESOLUTION_800x600_STRING,
 	SETTING_RESOLUTION_1024x768_STRING,
 	SETTING_RESOLUTION_1280x1024_STRING,
+
+	SETTING_BITDEPTH_STRING,
+	SETTING_DEPTH_8BIT_STRING,
+	SETTING_DEPTH_16BIT_STRING,
+	SETTING_DEPTH_24BIT_STRING,
+	SETTING_DEPTH_32BIT_STRING,
 				
 	SETTING_THEME_STRING,
 	SETTING_ZERO_THEME_STRING,
@@ -661,6 +638,7 @@ enum eString
 
 	SETWINDOW_CORE_SETTINGS_STRING,
 	SETWINDOW_GUI_SETTINGS_STRING,
+	SETWINDOW_UI_SETTINGS_STRING,
 	SETWINDOW_LOADSAVE_SETTINGS_STRING,
 
 	OUTPUT_UNITNAME_STRING, // 190
@@ -751,9 +729,11 @@ enum eGlobalWindow
 	
 	MAIN_WINDOW,
 	MESSAGE_WINDOW,
-	TUTORIAL_WINDOW,
+	HELP_WINDOW,
 //	STATISTICS_WINDOW, ?
 	SETTINGS_WINDOW,
+	MAP_WINDOW,
+	
 	INFO_WINDOW,
 	TECHTREE_WINDOW,
 	EDIT_FIELD_WINDOW,
@@ -808,7 +788,8 @@ enum eCommand
 	MAX_COMMANDS
 };
 
-enum eButton
+
+enum eButtonColorsType
 {
 // timer window
 	MY_BUTTON,
@@ -863,7 +844,18 @@ enum eButton
 
 	CHECK_BUTTON,
 	
-	MAX_BUTTONS
+
+	TEXT_BUTTON,
+	
+	MAX_BUTTON_COLORS_TYPES
+};
+
+enum eButtonWidthType
+{
+	STANDARD_BUTTON_WIDTH,
+	SMALL_BUTTON_WIDTH,
+	
+	MAX_BUTTON_WIDTH_TYPES
 };
 
 enum eButtonAnimationPhase
@@ -888,7 +880,7 @@ enum eButtonAnimationType
 
 
 
-struct ButtonAnimation
+struct ButtonColorsType
 {
 	eBrush startBrush[MAX_BUTTON_ANIMATION_PHASES];
 	eBrush endBrush[MAX_BUTTON_ANIMATION_PHASES];
@@ -899,7 +891,6 @@ struct ButtonAnimation
 	ePen endBorderPen[MAX_BUTTON_ANIMATION_PHASES];
 	
 	eBitmap bitmap[MAX_BUTTON_ANIMATION_PHASES];// bitmap animation is fixed... for now
-//	eString text[MAX_BUTTON_ANIMATION_PHASES];
 
 	unsigned int speed; // 100 = 100 steps for full animation
 	eButtonAnimationType type;
@@ -918,16 +909,18 @@ class UI_Theme
 		void setColorTheme(const eTheme colorTheme);
 		
 		const eResolution getResolution() const;
-		void setResolution(const eResolution resolution);
+		void setResolution(const eResolution theme_resolution);
 
-//		const eTab getTab() const;
-//		void setTab(const eTab tab);	
+		const eBitDepth getBitDepth() const;
+		void setBitDepth(const eBitDepth theme_bitdepth);
+		
+
 
 		void loadStringFile(const std::string& dataFile);
 		void loadGraphicData(const std::string& dataFile, const std::string& bitmapDir, const std::string& fontDir, DC* dc); //currently all data hard coded, move it to file later! TODO
 		void loadWindowData(const std::string& dataFile, const unsigned int gameNumber, const unsigned int maxGames);
 
-		const std::string* lookUpString(const eString id) const;
+		const std::string& lookUpString(const eString id) const;
 		const std::string lookUpFormattedString(const eString id, const std::string& text) const;
 		const std::string lookUpFormattedString(const eString id, const unsigned int i) const;
 		const std::string lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j) const;
@@ -947,29 +940,10 @@ class UI_Theme
 		const unsigned int lookUpGameMaxHeight(const eGameWindow id, const unsigned int gameNumber, const unsigned int maxGames) const;
 		const unsigned int lookUpPlayerMaxHeight(const ePlayerWindow id, const unsigned int gameNumber, const unsigned int maxGames, const unsigned int playerNumber, const unsigned int maxPlayer) const;
 
-		const ButtonAnimation* lookUpButtonAnimation(const eButton id) const;
-		const unsigned int lookUpButtonWidth(const eButton id) const;
+		const ButtonColorsType* lookUpButtonColors(const eButtonColorsType id) const;
+		const unsigned int lookUpButtonWidth(const eButtonWidthType id) const;
 
-// tools:
-//		const Color mixColor(const Color* id1, const Color* id2);
-//		const Color mixColor(const Color* id1, const Color* id2, const unsigned int gradient);
-//		const Color brightenColor(const Color* id, const unsigned int brightness);
-
-//		const Color lookUpMixedColor(const eColor id1, const eColor id2);
-//		const Color lookUpMixedColor(const eColor id1, const eColor id2, const unsigned int gradient);
-//		Color lookUpBrightenedColor(const eColor id, const unsigned int brightness);
-
-//		const Brush lookUpMixedBrush(const eBrush id1, const eColor id2);
-//		const Brush lookUpMixedBrush(const eBrush id1, const eColor id2, const unsigned int gradient);
-//		const Brush lookUpMixedBrush(const eBrush id1, const eBrush id2);
-//		const Brush lookUpMixedBrush(const eBrush id1, const eBrush id2, const unsigned int gradient);
-//		Brush lookUpBrightenedBrush(eBrush id, int brightness);
-
-//		const Pen lookUpMixedPen(const ePen id1, const eColor id2);
-//		const Pen lookUpMixedPen(const ePen id1, const eColor id2, const unsigned int gradient);
-//		const Pen lookUpMixedPen(const ePen id1, const ePen id2);
-//		const Pen lookUpMixedPen(const ePen id1, ePen id2, const unsigned int gradient);
-//		const Pen lookUpBrightenedPen(const ePen id, const unsigned int brightness);
+		void updateColors(SDL_Surface* surface);
 
 	private:
 		void setMaxGlobalHeight(unsigned int current_resolution, unsigned int id, unsigned int max_height);
@@ -977,9 +951,11 @@ class UI_Theme
 		void setMaxPlayerHeight(unsigned int current_resolution, unsigned int gameNumber, unsigned int maxGames, unsigned int player_max, unsigned int playerNumber, unsigned int id, unsigned int max_height);
 //memory issue: load maybe all data after a change! TODO
  		eResolution resolution;
-//		eTab tab;
+		eBitDepth bitdepth;
 		eLanguage language;
 		eTheme colorTheme;
+
+		
 		
 		std::string* stringList[MAX_LANGUAGES][MAX_STRINGS];
 		Color* colorList[MAX_COLOR_THEMES][MAX_COLORS];
@@ -988,18 +964,15 @@ class UI_Theme
 		Brush* brushList[MAX_COLOR_THEMES][MAX_BRUSHES];
 
 		Rect* globalRectList[MAX_RESOLUTIONS][MAX_GLOBAL_WINDOWS];
-		int test;
-	
 		Rect* gameRectList[MAX_RESOLUTIONS][MAX_COMPARE_GAMES][MAX_COMPARE_GAMES][MAX_GAME_WINDOWS];
-	
 		Rect* playerRectList[MAX_RESOLUTIONS][MAX_COMPARE_GAMES][MAX_COMPARE_GAMES][MAX_PLAYER][MAX_PLAYER][MAX_PLAYER_WINDOWS];
 		unsigned int maxGlobalHeightList[MAX_RESOLUTIONS][MAX_GLOBAL_WINDOWS];
 		unsigned int maxGameHeightList[MAX_RESOLUTIONS][MAX_COMPARE_GAMES][MAX_COMPARE_GAMES][MAX_GAME_WINDOWS];
 		unsigned int maxPlayerHeightList[MAX_RESOLUTIONS][MAX_COMPARE_GAMES][MAX_COMPARE_GAMES][MAX_PLAYER][MAX_PLAYER][MAX_PLAYER_WINDOWS];
 
 		Font* fontList[MAX_RESOLUTIONS][MAX_FONTS];
-		ButtonAnimation* buttonAnimationList[MAX_BUTTONS];
-		unsigned int buttonWidth[MAX_RESOLUTIONS][MAX_BUTTONS];
+		ButtonColorsType* buttonColorsList[MAX_BUTTON_COLORS_TYPES];
+		unsigned int buttonWidthList[MAX_RESOLUTIONS][MAX_BUTTON_WIDTH_TYPES];
 };
 
 inline void UI_Theme::setColorTheme(const eTheme color_theme) {
@@ -1022,47 +995,48 @@ inline const eResolution UI_Theme::getResolution() const {
 	return(resolution);
 }
 
+inline const eBitDepth UI_Theme::getBitDepth() const {
+	return(bitdepth);
+}
+
 inline void UI_Theme::setResolution(const eResolution theme_resolution) {
 	resolution = theme_resolution;
 	// TODO update whole engine
 }
 
-//inline void UI_Theme::setTab(const eTab theme_tab) {
-//	tab = theme_tab;
-//}
-
-//inline const eTab UI_Theme::getTab() const { 
-//	return(tab);
-//}
-
-inline const ButtonAnimation* UI_Theme::lookUpButtonAnimation(const eButton id) const
-{
-#ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_BUTTONS)) {
-		toLog("ERROR: (UI_Theme::lookUpButtonAnimation) id out of range.");return(buttonAnimationList[0]);
-	}
-#endif
-	return(buttonAnimationList[id]);
+inline void UI_Theme::setBitDepth(const eBitDepth theme_bitdepth) {
+	bitdepth = theme_bitdepth;
+	// TODO update dc
 }
 
-inline const unsigned int UI_Theme::lookUpButtonWidth(const eButton id) const
+inline const ButtonColorsType* UI_Theme::lookUpButtonColors(const eButtonColorsType id) const
 {
 #ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_BUTTONS)) {
-		toLog("ERROR: (UI_Theme::lookUpButtonWidth) id out of range.");return(buttonWidth[0][0]);
+	if((id<0)||(id>=MAX_BUTTON_COLORS_TYPES)) {
+		toLog("ERROR: (UI_Theme::lookUpButtonColors) id out of range.");return(buttonColorsList[0]);
 	}
 #endif
-	return(buttonWidth[resolution][id]);
+	return(buttonColorsList[id]);
 }
 
-inline const std::string* UI_Theme::lookUpString(const eString id) const
+inline const unsigned int UI_Theme::lookUpButtonWidth(const eButtonWidthType id) const
+{
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_BUTTON_WIDTH_TYPES)) {
+		toLog("ERROR: (UI_Theme::lookUpButtonWidth) id out of range.");return(buttonWidthList[0][0]);
+	}
+#endif
+	return(buttonWidthList[resolution][id]);
+}
+
+inline const std::string& UI_Theme::lookUpString(const eString id) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_STRINGS)) {
-		toLog("ERROR: (UI_Theme::lookUpString) id out of range.");return(stringList[language][0]);
+		toLog("ERROR: (UI_Theme::lookUpString) id out of range.");return(*stringList[language][0]);
 	}
 #endif
-	return(stringList[language][id]);
+	return(*stringList[language][id]);
 }
 
 inline Color* UI_Theme::lookUpColor(const eColor id) const

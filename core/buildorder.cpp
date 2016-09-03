@@ -50,7 +50,7 @@ const unsigned int BUILDORDER::calculateSecondaryFitness() const
 	// total gathered resources minus minerals that were not used
 	int tsF = getHarvestedMinerals() + getHarvestedGas();// - (getWastedMinerals() + getWastedGas()) / getRealTimer();
 	//TODO: evtl gas und minerals (wie urspruenglich eigentlich) in Verhaeltnis setyen wieviel es jeweils Geysire/Mineralien gibt...	
-	for(int i=GAS_SCV+1; i--;)
+	for(unsigned int i=GAS_SCV+1; i--;)
 		if((getGoal()->getAllGoal(i)>0)&&(getGoal()->getAllGoal(i)+(*pStartCondition)->getLocationTotal(GLOBAL, i)<getLocationTotal(GLOBAL, i)))
 			tsF-=((*pStartCondition)->getLocationTotal(GLOBAL, i)-(*pStartCondition)->getLocationTotal(GLOBAL,i)-getGoal()->getAllGoal(i))*(stats[getGoal()->getRace()][i].gas+stats[getGoal()->getRace()][i].minerals);
 	return(tsF);
@@ -112,7 +112,7 @@ const bool BUILDORDER::calculateStep()
 // set needed_ to maximum to determine the minimum of minerals/gas our jobs need (needed_ is set in buildGene)
 		neededMinerals = MAX_MINERALS;
 		neededGas = MAX_GAS;
-		int code = getGoal()->toPhaeno(getCurrentCode());
+		unsigned int code = getGoal()->toPhaeno(getCurrentCode());
 		if((code >= BUILD_PARALLEL_2) && (code <= BUILD_PARALLEL_16))
 		{
 			setIP(getIP()-1);
@@ -154,7 +154,7 @@ const bool BUILDORDER::calculateStep()
 				ok = buildGene(build_unit);
 				if(ok)
 				{
-					(*command)->count--;
+					--(*command)->count;
 					if(!(*command)->count)
 					{
 						delete *command;
@@ -163,7 +163,7 @@ const bool BUILDORDER::calculateStep()
 				} else 
 				{
 					do
-						command++;
+						++command;
 					while((command!=parallelCommandQueues.end())&&((*command)->unit == build_unit));
 				}
 			}
@@ -254,10 +254,10 @@ const bool BUILDORDER::calculateStep()
 			{ //here no unitCount! ~~~
 				addOneLocationTotal(build.getLocation(), stat->create);
 				addOneLocationAvailible(build.getLocation(), stat->create);
-//				if(last[lastcounter].unit==stat->create) last[lastcounter].count++; //TODO ???
+//				if(last[lastcounter].unit==stat->create) ++last[lastcounter].count; //TODO ???
 				// ~~~~ Ja... geht schon... aber kann ja auch mal was anderes sein...
 			}
-//			lastcounter++;
+//			++lastcounter;
 // ------ END OF LAST ITEM
 			buildingQueue.pop();
 // oder: irgendeine location... TODO: Problem: die Einheiten koennen irgendwo sein, also nicht gesammelt an einem Fleck...
@@ -348,10 +348,10 @@ const bool BUILDORDER::buildGene(const unsigned int build_unit)
 		{
 			if((lastcounter>0)&&(getLocationAvailible(last[lastcounter-1].location,last[lastcounter-1].unit)>0)&&((*pStats)[last[lastcounter-1].unit].speed>0))
 			{
-				lastcounter--;
+				--lastcounter;
 				int nr=0;
 				while((nr<MAX_BUILDINGS-1)&&(build->getRemainingBuildTime(nr)))
-						nr++;
+						++nr;
 				//TODO: Fehler wenn nicht genug buildings
 				if(getLocationAvailible(last[lastcounter].location,last[lastcounter].unit)>last[lastcounter].count)
 					setUnitCount(nr,last[lastcounter].count);
@@ -390,7 +390,7 @@ const bool BUILDORDER::buildGene(const unsigned int build_unit)
 			{
 				int min=5000;
 				int n=0;
-				for(i=0;i<MAX_BUILDINGS;i++)
+				for(i=0;i<MAX_BUILDINGS;++i)
 					if(building[i].RB>0)
 					{
 						if((stats[2][building[i].type].type==2) && (stats[2][building[i].type].BT-building[i].RB<min))
@@ -405,15 +405,15 @@ const bool BUILDORDER::buildGene(const unsigned int build_unit)
 
 					if(min<5000)
 					{
-						peonminerals++;
+						++peonminerals;
 						minerals+=stats[2][building[n].type].minerals*0.75;
 						gas+=stats[2][building[n].type].gas*0.75;
-						Supply--;
-						force[DRONE]++;
+						--Supply;
+						++force[DRONE];
 						if(building[n].type==REFINERY)
 						{
-							Vespene_Extractors--;
-							Vespene_Av++;
+							--Vespene_Extractors;
+							++Vespene_Av;
 						}
 						building[n].type=255;
 						building[n].RB=0;
@@ -438,7 +438,7 @@ const bool BUILDORDER::buildIt(const unsigned int build_unit)
 
 /*	if(lastcounter>0)
 	{	
-		lastcounter--;
+		--lastcounter;
 		tloc=last[lastcounter].location;
 	}*/
 
@@ -459,7 +459,7 @@ const bool BUILDORDER::buildIt(const unsigned int build_unit)
 		if((stat->facility2==0) || (getLocationAvailible(current_location_window, stat->facility2)>=1))
 		{
 		// pick one availible facility: 
-			for(picked_facility = 0; picked_facility<3; picked_facility++)
+			for(picked_facility = 0; picked_facility<3; ++picked_facility)
 				if((stat->facility[picked_facility]>0)&&(getLocationAvailible(current_location_window, stat->facility[picked_facility])>0))
 				{
 					ok=true;
@@ -477,7 +477,7 @@ const bool BUILDORDER::buildIt(const unsigned int build_unit)
 //						if((stat->facility2==0)||(getLocationAvailible(ttloc,stat->facility2)>0)) TODO
 //						{
 //						for(fac=3;fac--;)
-						for(fac=0;fac<3; fac++)
+						for(fac=0;fac<3; ++fac)
 						if(
 						// special rules for morphing units of protoss
 						((stat->facilityType != IS_LOST) || (stat->facility[fac] != stat->facility2) || (getLocationAvailible(ttloc, stat->facility[fac]) >= 2)) &&
@@ -493,7 +493,7 @@ const bool BUILDORDER::buildIt(const unsigned int build_unit)
 							}
 //						  break;
 //					  }
-						j++;
+						++j;
 					}*/
         if(ok)
         {

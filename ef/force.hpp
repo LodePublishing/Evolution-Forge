@@ -39,7 +39,10 @@ class ForceWindow : public UI_Window
 		void setMarkedUnit(const unsigned int marked_unit);
 		void assignAnarace(ANABUILDORDER* force_anarace);
 		void reloadStrings();
+		void reloadOriginalSize();
 		static TechTreeWindow* techTreeWindow;
+
+		void resetData();
 	private:
 		unsigned int addUnit, addTime, addLocation;
 		signed int addCount;

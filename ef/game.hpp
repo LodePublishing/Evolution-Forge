@@ -11,7 +11,7 @@
 class Game : public UI_Window
 {
 	public:
-		Game(UI_Object* game_parent, const unsigned int gameNumber, const unsigned int gameMax);
+		Game(UI_Object* game_parent, const unsigned int game_number, const unsigned int game_max);
 		~Game();
 //		void refreshGameNumbers(const unsigned int gameNumber, const unsigned int totalGames);
 		
@@ -44,8 +44,12 @@ class Game : public UI_Window
 		void assignGoal(const unsigned int player_num, const GOAL_ENTRY* player_goal);
 		void fillGroups(); // TODO
 		
-		void setMode(const unsigned int gameNumber, const unsigned int maxGames);
+		void reloadOriginalSize();
+		void setMode(const unsigned int game_number, const unsigned int max_games);
 		const unsigned int getMapPlayerCount() const;
+
+		const unsigned int getGameNumber();
+		const unsigned int getGameMax();
 
 		const bool isSplitGame() const;
 		const bool isRemoveGame() const;
@@ -55,6 +59,8 @@ class Game : public UI_Window
 		Player* player[MAX_PLAYER];
 		ANABUILDORDER* anarace[MAX_PLAYER];
 		UNIT startForce[MAX_INTERNAL_PLAYER][MAX_LOCATIONS];
+
+		void setBoHasChanged(const bool bo_has_changed = true);
 		
 		const BASIC_MAP* map;
 		bool optimizing;

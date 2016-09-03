@@ -22,12 +22,12 @@ void ProgressBar::draw(DC* dc, const unsigned int dp, const eString text)
 //    dc->DrawRectangle(Rect(bar.GetLeft(), bar.GetTop()+bar.GetHeight()+40+h*20, 350, 50));
     dc->SetFont(UI_Object::theme.lookUpFont(MIDDLE_NORMAL_BOLD_FONT));
 	dc->SetTextForeground(*UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR));
-	dc->DrawText(*UI_Object::theme.lookUpString(text), Point(bar.GetLeft(), bar.GetTop()+bar.GetHeight()+50+h*20));
+	dc->DrawText(UI_Object::theme.lookUpString(text), Point(bar.GetLeft(), bar.GetTop()+bar.GetHeight()+50+h*20));
 	dc->SetTextForeground(*UI_Object::theme.lookUpColor(FORCE_TEXT_COLOR));
 //	dc->DrawEmptyRectangle(bar.GetLeft()-2, bar.GetTop()+bar.GetHeight()+46+h*20, 425, 18);
 	dc->DrawText("OK", Point(bar.GetLeft()+400, bar.GetTop()+bar.GetHeight()+50+h*20));
 	draw(dc, dp);
-	toLog(*UI_Object::theme.lookUpString(text));
-	h++;
+	toLog(UI_Object::theme.lookUpString(text));
+	++h;
 }
 

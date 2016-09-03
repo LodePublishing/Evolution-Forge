@@ -16,12 +16,15 @@ class MainWindow : public UI_Window
 		void continueOptimizationAnimation(const bool running);
 		
 		const unsigned int getGameTabCount() const;
+
+		void reloadOriginalSize();
 	private:
 		const Size helper(DC* dc, Point point, const unsigned int dx, const int i, const std::string& str) const;
 		UI_Button* tab[MAX_TABS];
 		unsigned int ani, ani2;
 		bool gizmo;
 		unsigned int gameTabCount;
+		unsigned int gameNumber;
 };
 
 inline void MainWindow::setGizmo(const bool do_gizmo)

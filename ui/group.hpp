@@ -11,7 +11,7 @@
 class UI_Group : public UI_Object
 {
 	public:
-		UI_Group(UI_Object* group_parent, Rect initial_rect, Size bottom_right_distance, const eString txt=NULL_STRING, const ePositionMode position_mode = DO_NOT_ADJUST);
+		UI_Group(UI_Object* group_parent, const Rect initial_rect, const Size bottom_right_distance, const ePositionMode position_mode = DO_NOT_ADJUST, const eString txt=NULL_STRING);
 		~UI_Group();
 		UI_Group(const UI_Group& object);
 		UI_Group& operator=(const UI_Group& object);
@@ -24,9 +24,9 @@ class UI_Group : public UI_Object
 		void reloadStrings();
 
 		void calculateBoxSize(const bool horizontal=false);
-		void calculateSameWidthOfButtons(const bool horizontal=false);
 	private:
 		UI_StaticText* title;
+		unsigned int number;
 };
 
 #endif

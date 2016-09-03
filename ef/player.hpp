@@ -12,7 +12,7 @@
 class Player : public UI_Window
 {
 	public:
-		Player(UI_Object* player_parent, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_players);
+		Player(UI_Object* player_parent, const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max);
 		~Player();
 
 //		void refreshPlayerNumbers(const unsigned int playerNumber, const unsigned int totalPlayerNumber);
@@ -26,8 +26,10 @@ class Player : public UI_Window
 		void process();
 
 		void CheckOrders();
-		void setMode(const unsigned int game_number, const unsigned int max_game, const unsigned int player_number, const unsigned int max_player);
+		void setMode(const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int player_max);
 		void reloadStrings();
+
+		void reloadOriginalSize();
 	
 	private:
 		float geneAnimation;
@@ -41,6 +43,11 @@ class Player : public UI_Window
 		BoWindow* boWindow;
 		BoGraphWindow* boGraphWindow;
 		BoDiagramWindow* boDiagramWindow;
+
+		unsigned int gameNumber;
+		unsigned int gameMax;
+		unsigned int playerNumber;
+		unsigned int playerMax;
 };
 
 #endif

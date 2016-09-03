@@ -7,7 +7,7 @@
 class GoalMenu : public Menu
 {
 	public:
-		GoalMenu(UI_Object* goal_parent, Rect goal_rect);
+		GoalMenu(UI_Object* goal_parent, const Rect goal_rect, const Size distance_bottom_right, const ePositionMode position_mode);
 		GoalMenu(const GoalMenu& object);
 		GoalMenu& operator=(const GoalMenu& object);
 		~GoalMenu();

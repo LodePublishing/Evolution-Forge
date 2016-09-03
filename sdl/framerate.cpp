@@ -51,23 +51,23 @@ void FPS::delay()
    	startTicks += difference;
 
 	if(averagecounter<2)
-   		averagecounter++;
+   		++averagecounter;
 	for(unsigned int i=averagecounter;i--;)
    		average[i+1]=average[i];
 	average[0]=difference;
 																				
    	long int av=0;
-	for(unsigned int i=0;i<averagecounter;i++)
+	for(unsigned int i=averagecounter;i--;)
    		av += average[i];
 	currentFramerate = 1000*averagecounter / av;
 
 	if(!allowStaticFramerate)
 	{
 		if((currentFramerate > desiredFramerate) && (framesPerGeneration>1))
-			framesPerGeneration--;
+			--framesPerGeneration;
 		else 
 		if((currentFramerate < desiredFramerate) && (framesPerGeneration<10000))
-			framesPerGeneration++;
+			++framesPerGeneration;
 	} else
 	{
 		framesPerGeneration=100;

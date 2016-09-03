@@ -38,5 +38,16 @@ Building& Building::operator=(const Building& object)
 	return(*this);
 }
 
-
+const unsigned int Building::getBuildFinishedTime() const
+{
+#ifdef _SCC_DEBUG
+	if((buildFinishedTime<-MAX_TIME)||(buildFinishedTime>MAX_TIME)) {
+		toLog("DEBUG: Building::getBuildFinishedTime): Variable not initialized.");return(0);
+	}
+#endif
+	if(buildFinishedTime < 0)
+		return(0);
+	else 
+	return(buildFinishedTime);
+}
 

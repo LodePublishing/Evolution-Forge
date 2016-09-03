@@ -20,6 +20,7 @@ enum eButtonMode
 	PRESS_BUTTON_MODE,  // returns to unpressed
 	PUSH_BUTTON_MODE,   // calls several messages when being pressed
 	TAB_BUTTON_MODE,
+//	MENU_TAB_BUTTON_MODE,
 
 	MAX_BUTTON_MODES
 };
@@ -37,26 +38,26 @@ class UI_Button:public UI_Object
 				const Rect button_rect, 
 				const Size distance_bottom_right,
 				const eString button_text, 
-				const eButton button_type, 
+				const eButtonColorsType button_colors_type, 
 				const eButtonMode button_mode = STATIC_BUTTON_MODE,
 				const ePositionMode button_position_mode = DO_NOT_ADJUST, 
-				const eFont button_font = SMALL_NORMAL_BOLD_FONT, 
+				const eFont button_font = SMALL_BOLD_FONT, 
 				const eAutoSize button_auto_size = NO_AUTO_SIZE);
 		
 		UI_Button(UI_Object* button_parent, 
 				const Rect button_rect, 
 				const Size distance_bottom_right, 
 				const std::string& button_text, 
-				const eButton button_type, 
+				const eButtonColorsType button_colors_type, 
 				const eButtonMode button_mode = STATIC_BUTTON_MODE, 
 				const ePositionMode button_position_mode = DO_NOT_ADJUST, 
-				const eFont button_font = SMALL_NORMAL_BOLD_FONT, 
+				const eFont button_font = SMALL_BOLD_FONT, 
 				const eAutoSize button_auto_size = NO_AUTO_SIZE);
 // Bitmap button
 		UI_Button(UI_Object* button_parent, 
 				const Rect button_rect, 
 				const Size distance_bottom_right, 
-				const eButton button_type, 
+				const eButtonColorsType button_colors_type, 
 				const eButtonMode button_mode = STATIC_BUTTON_MODE, 
 				const ePositionMode button_position_mode = DO_NOT_ADJUST);
 		~UI_Button();
@@ -68,7 +69,8 @@ class UI_Button:public UI_Object
 		const bool isCurrentlyActivated() const;
 
 		const unsigned int getGradient() const;
-																																							
+
+		void reloadOriginalSize();																																							
 		void forceHighlighted();	// force button to be highlighted
 		void forceDelighted();	// force button to be de-highlighted
 		void forcePress();	  // force button to get pressed
@@ -84,6 +86,7 @@ class UI_Button:public UI_Object
 		UI_Object* checkHighlight();
 
 		void mouseHasMoved();
+		void frameReset();
 		
 		void mouseHasEnteredArea();
 		void mouseHasLeftArea();
@@ -94,18 +97,45 @@ class UI_Button:public UI_Object
 
 		
 		void draw(DC* dc) const;
-		void setButton(const eButton button);
-		void setFrameNumber(const unsigned int frame_number);
-	
-		void frameReset();
+		void setButtonColorsType(const eButtonColorsType button_colors_type);
 		void resetGradient();
 		UI_Radio* radio;
 
 		bool forcedPress;
 // relative 'button placement area'
 		const unsigned int getTextWidth() const;
+		const unsigned int getTextHeight() const;
+		void setAllowMoveByMouse(const bool allow_move_by_mouse = true);
 
+		static void resetButton();
+		static UI_Button* getCurrentButton();
+
+		static const bool isCurrentButtonPressed();
+		static const bool isCurrentButtonHasAlreadyLeft();
+		static const Point& getMouseMovePoint();
+
+		static const bool isMoveByMouse();
+		static void setMoveByMouse(const bool move_by_mouse = true);
+
+
+		static void setCurrentButtonPressed(const bool current_button_pressed = true);
+		static void setCurrentButtonHasAlreadyLeft(const bool button_has_already_left = true);
+		static void setMouseMovePoint(const Point& mouse_move_point);
+
+		static void setCurrentButton(UI_Button* current_button);
+
+		
+		
 	private:
+		bool allowMoveByMouse;
+		static Point mouseMovePoint;
+		static bool moveByMouse;
+	
+		static bool currentButtonPressed;
+		static bool currentButtonHasAlreadyLeft;
+		static UI_Button* currentButton;
+	
+		
 		bool moved; // did this item move one pixel down (pressed)
 		bool isOriginalPosition; // always false (not pressed) for non-static buttons
 		bool hasBitmap;
@@ -116,10 +146,10 @@ class UI_Button:public UI_Object
 		unsigned int pressdepth;
 		
 		eFont font;
-		eButton button;	
+		eButtonColorsType buttonColorsType;	
 		
-		unsigned int frameNumber;
 		unsigned int statusFlags;
+		unsigned int frameNumber;
 // Button flags
 
 		static const unsigned int BF_DOWN = 1;
@@ -136,9 +166,17 @@ class UI_Button:public UI_Object
 		static const unsigned int BF_NOT_CLICKABLE = 2048;
 		static const unsigned int BF_IS_TAB = 4096;
 		static const unsigned int BF_WAS_PRESSED = 8192; // button will be DOWN again, wenn mouse gets over button, without pressing the button again
-protected:
+	protected:
 		UI_StaticText* text;
 };
+
+inline UI_Button* UI_Button::getCurrentButton() {
+	return(currentButton);
+}
+
+inline void UI_Button::setAllowMoveByMouse(const bool allow_move_by_mouse) {
+	allowMoveByMouse = allow_move_by_mouse;
+}
 
 inline const unsigned int UI_Button::getGradient() const {
 	return(gradient);
@@ -148,14 +186,18 @@ inline const unsigned int UI_Button::getTextWidth() const {
 	return(text->getTextSize().GetWidth());
 }
 
-inline void UI_Button::setButton(const eButton button_type)
+inline const unsigned int UI_Button::getTextHeight() const {
+	return(text->getTextSize().GetHeight());
+}
+
+inline void UI_Button::setButtonColorsType(const eButtonColorsType button_colors_type)
 {
 #ifdef _SCC_DEBUG
-	if((button_type<0)&&(button_type>=MAX_BUTTONS)) {
-		toLog("WARNING: (UI_Button::setButton): Value button out of range.");return;
+	if((button_colors_type<0)&&(button_colors_type>=MAX_BUTTON_COLORS_TYPES)) {
+		toLog("WARNING: (UI_Button::setButtonColorsType): Value button_colors_type out of range.");return;
 	}
 #endif
-	button=button_type;
+	buttonColorsType = button_colors_type;
 }
 
 inline void UI_Button::updateText(const std::string& utext) {
@@ -175,7 +217,41 @@ inline void UI_Button::forceDelighted() {
 	statusFlags &= ~BF_HIGHLIGHTED;
 }				   
 
+inline const bool UI_Button::isCurrentButtonPressed() {
+	return(currentButtonPressed);
+}
 
+inline const bool UI_Button::isCurrentButtonHasAlreadyLeft() {
+	return(currentButtonHasAlreadyLeft);
+}
 
+inline void UI_Button::setCurrentButtonPressed(const bool current_button_pressed) {
+	currentButtonPressed = current_button_pressed;
+}
+
+inline void UI_Button::setCurrentButtonHasAlreadyLeft(const bool button_has_already_left) {
+	currentButtonHasAlreadyLeft = button_has_already_left;
+}
+
+inline const Point& UI_Button::getMouseMovePoint() {
+	return(mouseMovePoint);
+}
+
+inline void UI_Button::setMouseMovePoint(const Point& mouse_move_point) {
+	mouseMovePoint = mouse_move_point;
+}
+
+inline const bool UI_Button::isMoveByMouse() {
+	return(moveByMouse);
+}
+
+inline void UI_Button::setMoveByMouse(const bool move_by_mouse) {
+	moveByMouse = move_by_mouse;
+}
+
+inline void UI_Button::setCurrentButton(UI_Button* current_button) {
+	currentButton = current_button;
+}
+	
 #endif // _UI_BUTTON_HPP
 

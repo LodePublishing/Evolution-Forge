@@ -24,9 +24,10 @@ class Building
 		friend bool operator<(const Building& x, const Building& y)
 		{
 			if(x.getBuildFinishedTime() < y.getBuildFinishedTime())
-				return(true);
+				return(true); else
 			return(false);
 		};
+	
 		const unsigned int getTotalBuildTime() const;
 		const unsigned int getBuildFinishedTime() const;
 
@@ -63,17 +64,7 @@ inline const unsigned int Building::getTotalBuildTime() const
 	return(totalBuildTime);
 }
 																				
-inline const unsigned int Building::getBuildFinishedTime() const
-{
-#ifdef _SCC_DEBUG
-	if((buildFinishedTime<-MAX_TIME)||(buildFinishedTime>MAX_TIME)) {
-		toLog("DEBUG: Building::getBuildFinishedTime): Variable not initialized.");return(0);
-	}
-#endif
-	if(buildFinishedTime < 0)
-		return(0);
-	return(buildFinishedTime);
-}
+
 																				
 inline const unsigned int Building::getType() const
 {

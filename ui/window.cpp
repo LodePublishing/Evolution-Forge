@@ -13,7 +13,6 @@ UI_Window& UI_Window::operator=(const UI_Window& object)
 	isTransparent = object.isTransparent;
 	titleString = object.titleString;
 	titleParameter = object.titleParameter;
-	originalRect = object.originalRect;
 	clientRect = object.clientRect;
 	clientStartRect = object.clientStartRect;
 	clientTargetRect = object.clientTargetRect;
@@ -35,7 +34,6 @@ UI_Window::UI_Window(const UI_Window& object) :
 	isTransparent( object.isTransparent ),
 	titleString( object.titleString ),
 	titleParameter( object.titleParameter ),
-	originalRect( object.originalRect ),
 	clientRect( object.clientRect ),
 	clientStartRect( object.clientStartRect ),
 	clientTargetRect( object.clientTargetRect ),
@@ -55,7 +53,6 @@ UI_Window::UI_Window(UI_Object* window_parent, const eString window_title_string
 	isTransparent(transparent),
 	titleString(window_title_string), // ??
 	titleParameter(""),
-	originalRect(getRelativeRect()),
 	clientRect(window_client_area),
 	clientStartRect(),
 	clientTargetRect(),
@@ -76,7 +73,7 @@ UI_Window::UI_Window(UI_Object* window_parent, const eString window_title_string
 // ------ Buttons, ScrollBars etc.
 
 	if(isTabbed==TABBED)
-		tabRow->calculateSameWidthOfButtons();
+		tabRow->calculateBoxSize();
 }
 
 UI_Window::~UI_Window()
@@ -85,10 +82,17 @@ UI_Window::~UI_Window()
 	delete tabRow;
 }
 
+void UI_Window::setMaxHeight(const unsigned int max_height)
+{
+	maxHeight = max_height;
+}
+
 void UI_Window::calculateClientRect()
 {
-	if(clientRect.GetLeft() < 3) clientRect.SetLeft(3);
-   	if(clientRect.GetTop() < 3) clientRect.SetTop(3);
+	Rect oldClientRect = clientRect;
+	clientRect.SetSize(getTargetRect().GetSize());
+	if(clientRect.GetLeft() < 5) clientRect.SetLeft(5);
+   	if(clientRect.GetTop() < 5) clientRect.SetTop(5);
 	if(clientRect.GetBottom() > getHeight() - 5) clientRect.SetBottom(getHeight() - 5);
 //	{
 		
@@ -102,11 +106,26 @@ void UI_Window::calculateClientRect()
 //	}
 
 	originalClientRect = clientRect;
-	clientStartRect = clientRect;
+	clientStartRect = oldClientRect;
 	clientTargetRect = clientRect;
 }
 
-void UI_Window::updateRectangles(const Rect rect, const unsigned int max_height)
+#include <sstream>
+void UI_Window::reloadOriginalSize()
+{
+	setRect(getOriginalRect());
+	
+	if(tabRow!=NULL)
+		tabRow->setOriginalRect(getRelativeRect());
+	//adjustRelativeRect(getOriginalRect());
+	clientRect.SetSize(getOriginalRect().GetSize());
+	calculateClientRect();
+	adjustClientRect();
+	setNeedRedrawMoved(); //?
+	UI_Object::reloadOriginalSize();
+}
+
+/*void UI_Window::updateRectangles(const Rect rect, const unsigned int max_height)
 {
 	maxHeight = max_height;
 	adjustRelativeRect(isScrollable==SCROLLED?Rect(rect.GetTopLeft(), rect.GetSize() - Size(0, 0)):rect);
@@ -114,7 +133,7 @@ void UI_Window::updateRectangles(const Rect rect, const unsigned int max_height)
 //	originalRect=getRelativeRect();
 // TODO Buttons benachrichtigen ueber geaenderte buttonPlacementArea!
 	setNeedRedrawMoved();
-}
+}*/
 
 
 void UI_Window::addTab(UI_Button* tab_button, const unsigned int button_id)
@@ -186,8 +205,8 @@ UI_Object* UI_Window::checkHighlight()
 void UI_Window::adjustClientRect()
 {
 //CLIENT WINDOW
-	unsigned int height = getTargetHeight() - originalRect.GetHeight() + originalClientRect.GetHeight();
-	unsigned int width = getTargetWidth() - originalRect.GetWidth() + originalClientRect.GetWidth();
+	unsigned int height = getTargetHeight() - getOriginalRect().GetHeight() + originalClientRect.GetHeight();
+	unsigned int width = getTargetWidth() - getOriginalRect().GetWidth() + originalClientRect.GetWidth();
 	if(height!=clientTargetRect.GetHeight())
 		clientStartRect.SetHeight(clientRect.GetHeight());
 	if(width!=clientTargetRect.GetWidth())
@@ -231,6 +250,7 @@ void UI_Window::process()
 	if(!isShown()) 
 		return;
 
+		adjustClientRect();
 	if(doAdjustments==true)
 	{
 		adjustRelativeRect(Rect(Point(getTargetRect().GetTopLeft()), Size(getTargetRect().GetWidth(), filledHeight+25))); // TODO!
@@ -238,7 +258,7 @@ void UI_Window::process()
 		doAdjustments=false;
 	}
 
-//	calculateClientRect();
+	calculateClientRect();
 	
 	if(scrollBar)
 	{
@@ -280,7 +300,7 @@ void UI_Window::process()
 	}
 
 
-//	filledHeight=0;
+	filledHeight=0;
 //	if((ScrollBalkenPressed==2)||(ScrollBalkenPressed==3)||(ScrollBalkenPressed==4))
   //  {
 //		moveScrollBalkenTo(controls.getCurrentPosition().y-controls.getDragStartPosition().y-ScrollBalken.y);
@@ -371,14 +391,16 @@ void UI_Window::drawTitle(DC* dc) const
 		return;
 	dc->SetBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
 	dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-	dc->SetFont(theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
+	dc->SetFont(theme.lookUpFont(SMALL_BOLD_FONT));
 	dc->SetTextForeground(*theme.lookUpColor(TITLE_COLOR));
 
 	std::string text;
-	
+
+
+	// TODO UI_StaticText einfuegen!
 	if(titleParameter.size())
 		text=theme.lookUpFormattedString(titleString, titleParameter);
-	else text=*theme.lookUpString(titleString);
+	else text = theme.lookUpString(titleString);
 	
 	Size s = dc->GetTextExtent(text);
 	Rect titleRect = Rect(getAbsolutePosition() - Size(0,2), s - Size(0, 0) + Size(5,0));
@@ -390,6 +412,7 @@ void UI_Window::drawTitle(DC* dc) const
 
 void UI_Window::draw(DC* dc) const
 {
+	
 	if(checkForNeedRedraw())
 	{
 	// draw outer border:

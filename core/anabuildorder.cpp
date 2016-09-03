@@ -163,12 +163,13 @@ const bool ANABUILDORDER::calculateStep()
 		setLength(coreConfiguration.getMaxLength()-getIP());
 		if(!ready) 
 			setTimer(0);
-		while(!buildingQueue.empty())
-			buildingQueue.pop();
 
 	//	if(getGoal()->getMode()==0)
 			setCurrentpFitness(calculatePrimaryFitness(ready));
-		
+	
+		while(!buildingQueue.empty())
+			buildingQueue.pop();
+	
 // ------ ANABUILDORDER SPECIFIC ------
 		countUnitsTotal();
 		unsigned int maxPoints=getGoal()->countGoals();
@@ -236,7 +237,7 @@ const bool ANABUILDORDER::calculateStep()
                                	ok = buildGene((*command)->unit);
                                 if(ok)  
       	                        {
-               	                        (*command)->count--;
+               	                        --(*command)->count;
                        	                if(!(*command)->count)
 					{
 						delete *command;
@@ -245,7 +246,7 @@ const bool ANABUILDORDER::calculateStep()
                	                } else 
 				{
 					do
-						command++;
+						++command;
 					while((command!=parallelCommandQueues.end())&&((*command)->unit == build_unit));
 				}
                 	}
@@ -353,11 +354,11 @@ const bool ANABUILDORDER::calculateStep()
 //				if(stat->create==LARVA)
 //					while(true);	
 //				if( last[lastcounter].unit == stat->create ) 
-//					last[lastcounter].count++; //TODO ??? 
+//					++last[lastcounter].count; //TODO ??? 
 				// ~~~~ Ja... geht schon... aber kann ja auch mal was anderes sein...
 			}
 					//evtl noch location==0 als 'egal wo' einfuehren
-//			lastcounter++;
+//			++lastcounter;
 // ------ END OF LAST ITEM ------
 			
 // ------ RECORD THE BUILDING ------
@@ -490,7 +491,7 @@ const bool ANABUILDORDER::buildGene(const unsigned int build_unit)
 					lastcounter--;
 					int nr=0;
 					while((nr<MAX_BUILDINGS-1)&&(getRemainingBuildTime(nr)))
-							nr++;
+							++nr;
 					//TODO: Fehler wenn nicht genug buildings
 					if(getLocationAvailible(last[lastcounter].location,last[lastcounter].unit)>last[lastcounter].count)
 						setUnitCount(nr,last[lastcounter].count);
@@ -533,7 +534,7 @@ const bool ANABUILDORDER::buildGene(const unsigned int build_unit)
 			{
 				int min=5000;
 				int n=0;
-				for(i=0;i<MAX_BUILDINGS;i++)
+				for(i=0;i<MAX_BUILDINGS;++i)
 					if(building[i].RB>0)
 					{
 						if((stats[2][building[i].type].type==2) && (stats[2][building[i].type].BT-building[i].RB<min))
@@ -548,15 +549,15 @@ const bool ANABUILDORDER::buildGene(const unsigned int build_unit)
 
 					if(min<5000)
 					{
-						peonminerals++;
+						++peonminerals;
 						minerals+=stats[2][building[n].type].minerals*0.75;
 						gas+=stats[2][building[n].type].gas*0.75;
-						Supply--;
-						force[DRONE]++;
+						--Supply;
+						++force[DRONE];
 						if(building[n].type==REFINERY)
 						{
-							Vespene_Extractors--;
-							Vespene_Av++;
+							--Vespene_Extractors;
+							++Vespene_Av;
 						}
 						building[n].type=255;
 						building[n].RB=0;
@@ -585,7 +586,7 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 
 /*	if(lastcounter>0)
 	{	
-		lastcounter--;
+		--lastcounter;
 		tloc=last[lastcounter].location;
 	}*/
 
@@ -606,7 +607,7 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 		if((stat->facility2==0) || (getLocationAvailible(current_location_window, stat->facility2)>=1))
 		{
 		// pick one availible facility: 
-			for(picked_facility = 0; picked_facility<3; picked_facility++)
+			for(picked_facility = 0; picked_facility<3; ++picked_facility)
 				if((stat->facility[picked_facility]>0)&&(getLocationAvailible(current_location_window, stat->facility[picked_facility])>0))
 				{
 					ok=true;
@@ -623,8 +624,8 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 						ttloc=(*pMap)->getLocation(tloc)->getNearest(j);
 //						if((stat->facility2==0)||(getLocationAvailible(ttloc,stat->facility2)>0)) TODO
 //						{
-//						for(fac=3;fac--;)
-						for(fac=0;fac<3; fac++)
+//						for(fac=3; fac--;)
+						for(fac=0; fac<3; ++fac)
 						if(
 						// special rules for morphing units of protoss
 						((stat->facilityType != IS_LOST) || (stat->facility[fac] != stat->facility2) || (getLocationAvailible(ttloc, stat->facility[fac]) >= 2)) &&
@@ -640,7 +641,7 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 							}
 //						  break;
 //					  }
-						j++;
+						++j;
 					}*/
 																													   
 	if(ok)
@@ -743,6 +744,17 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 	return(ok);
 }
 
+void ANABUILDORDER::writeProgramBackToCode(std::list<PROGRAM>& program_list)
+{
+	int ip=coreConfiguration.getMaxLength()-1;
+	for(std::list<PROGRAM>::const_iterator i = program_list.begin(); i!=program_list.end();++i)
+	{
+		replaceCode(ip, getGoal()->toGeno(i->getUnit()));
+		--ip;
+	}
+}
+
+
 // -------------------------------------------
 // ------ END CORE OF THE CORE FUNCTIONS -----
 // -------------------------------------------
@@ -772,11 +784,11 @@ void ANABUILDORDER::insertOrder(int unit, int position)
 
 	for(i=MAX_LENGTH;(l<=position)&&(i--);)
 		if(getProgramIsBuilt(i))
-			l++;
-	i++;
+			++l;
+	++i;
 	if(i==0)
 		i=MAX_LENGTH-1;
-	for(int j=0;j<i;j++)
+	for(int j=0; j<i; ++j)
 	{
 		Code[j]=Code[j+1];
 		Marker[j]=Marker[j+1];
@@ -792,16 +804,16 @@ void ANABUILDORDER::insertOrder(int unit, int position)
 	
 	program[i].built=1;
 
-	for(int j=0;j<MAX_LENGTH;j++)
+	for(int j=0;j<MAX_LENGTH; ++j)
 		phaenoCode[j]=getGoal()->toPhaeno(Code[j]); 
 	(*pStartCondition)->wasChanged(); // to allow update of time etc. of anarace
 }
 */
 //void ANABUILDORDER::backupMap()
 //{
-/*	for(int i=0;i<pMap->getMaxPlayer()-1;i++)
-		for(int j=0;j<MAX_LOCATIONS;j++)
-			for(int k=0;k<UNIT_TYPE_COUNT;k++)
+/*	for(int i=0;i<pMap->getMaxPlayer()-1; ++i)
+		for(int j=0;j<MAX_LOCATIONS; ++j)
+			for(int k=0;k<UNIT_TYPE_COUNT; ++k)
 			{
 				backupLoc[i][j].availible[k]=getMapLocationAvailible(i,j,k);
 				backupLoc[i][j].force[k]=getMapLocationTotal(i,j,k);
@@ -811,9 +823,9 @@ void ANABUILDORDER::insertOrder(int unit, int position)
 
 //void ANABUILDORDER::restoreMap()
 //{
-/*	for(int i=0;i<pMap->getMaxPlayer()-1;i++)
-		for(int j=0;j<MAX_LOCATIONS;j++)
-			for(int k=0;k<UNIT_TYPE_COUNT;k++)
+/*	for(int i=0;i<pMap->getMaxPlayer()-1; ++i)
+		for(int j=0;j<MAX_LOCATIONS; ++j)
+			for(int k=0;k<UNIT_TYPE_COUNT; ++k)
 			{
 				setMapLocationAvailible(i,j,k,backupLoc[i][j].availible[k]);
 				setMapLocationTotal(i,j,k,backupLoc[i][j].force[k]);
@@ -833,7 +845,7 @@ void ANABUILDORDER::countUnitsTotal()
 	unitsTotal = 0;
 	unitsTotalMax = 1;
 	nonGoalsUnitsTotalMax = 1;
-	for (int i = GAS_SCV+1; i--;)
+	for (unsigned int i = GAS_SCV+1; i--;)
 	{
 		if (getLocationTotal(GLOBAL, i) > unitsTotalMax)
 			unitsTotalMax = getLocationTotal(GLOBAL, i);
@@ -873,17 +885,17 @@ const unsigned int ANABUILDORDER::getGoalPercentage() const
 	int tGoal[UNIT_TYPE_COUNT];
 // reset the tgGoals (to sign with '@' the units which are part of the goal list)
 // and subtract the units that are already on the map
-	for(int i=0;i<UNIT_TYPE_COUNT;i++)
+	for(int i=0;i<UNIT_TYPE_COUNT; ++i)
 	{
 		tGoal[i]=0;
-		for(int j=1;j<MAX_LOCATIONS;j++)
+		for(int j=1;j<MAX_LOCATIONS; ++j)
 			tGoal[i]+=getGoal()->globalGoal[j][i]-pStartcondition->getLocationTotal(j,i);
 	}
 
-	for(int i=0;i<MAX_LENGTH;i++)
+	for(int i=0;i<MAX_LENGTH; ++i)
 		if(tGoal[phaenoCode[i]]>0) //~~~~~~ location=0?
 		{
-			tGoal[phaenoCode[i]]--;
+			--tGoal[phaenoCode[i]];
 			setProgramIsGoal(i,true);
 		}
 	else setProgramIsGoal(i,false);

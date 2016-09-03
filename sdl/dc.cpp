@@ -10,7 +10,9 @@ DC::DC():
 	pen(),
 	color(NULL),
 	textColor(),
-	font(NULL)
+	font(NULL),
+	bitDepth(DEPTH_8BIT),
+	resolution(RESOLUTION_640x480)
 { }
 
 DC::DC(const DC& other):
@@ -22,10 +24,14 @@ DC::DC(const DC& other):
 	pen(other.pen),
 	color(other.color),
 	textColor(other.textColor),
-	font(other.font)
+	font(other.font),
+	bitDepth(other.bitDepth),
+	resolution(other.resolution)
+
 { }
 
-DC::DC(const unsigned int width, const unsigned int height, const unsigned int bitdepth, Uint32 nflags, Uint32 initflags) :
+
+DC::DC(const eResolution current_resolution, const eBitDepth bit_depth, const Uint32 nflags, const Uint32 initflags) :
 	surface(NULL),
 	initOK(true),
 	max_x(0),
@@ -34,7 +40,10 @@ DC::DC(const unsigned int width, const unsigned int height, const unsigned int b
 	pen(),
 	color(NULL),
 	textColor(),
-	font(NULL)
+	font(NULL),
+// evtl gar nicht initialisieren...
+	bitDepth(bit_depth),
+	resolution(current_resolution)
 {
 	if ( SDL_Init(initflags) < 0 )
 	{
@@ -42,48 +51,12 @@ DC::DC(const unsigned int width, const unsigned int height, const unsigned int b
 		return;
 	}
 	atexit(SDL_Quit);
-	surface = SDL_SetVideoMode(width, height, bitdepth, nflags);
+	setScreen(resolution, bit_depth, nflags);
+}
 
-	switch(surface->format->BitsPerPixel)
-	{
-		case 8:Draw_HLine = &DC::Draw_HLine_8bit;
-		       Draw_VLine = &DC::Draw_VLine_8bit;
-		       Draw_Line = &DC::Draw_Line_8bit;
-		       DrawFilledRound = &DC::DrawFilledRound_8bit;
-		       DrawFilledEdgedRound = &DC::DrawFilledEdgedRound_8bit;
-		       DrawEmptyEdgedRound = &DC::DrawEmptyEdgedRound_8bit;
-		       DrawEmptyRound = &DC::DrawEmptyRound_8bit;
-		       DrawFilledEdgedBorderRound = &DC::DrawFilledEdgedBorderRound_8bit;
-		       break;
-		case 16:Draw_HLine = &DC::Draw_HLine_16bit;
-		        Draw_VLine = &DC::Draw_VLine_16bit;
-		        Draw_Line = &DC::Draw_Line_16bit;
-		        DrawFilledRound = &DC::DrawFilledRound_16bit;
-		        DrawFilledEdgedRound = &DC::DrawFilledEdgedRound_16bit;
-		        DrawEmptyEdgedRound = &DC::DrawEmptyEdgedRound_16bit;
-		        DrawEmptyRound = &DC::DrawEmptyRound_16bit;
-		        DrawFilledEdgedBorderRound = &DC::DrawFilledEdgedBorderRound_16bit;
-			break;
-		case 24:Draw_HLine = &DC::Draw_HLine_24bit;
-		        Draw_VLine = &DC::Draw_VLine_24bit;
-		        Draw_Line = &DC::Draw_Line_24bit;
-		        DrawFilledRound = &DC::DrawFilledRound_24bit;
-		        DrawFilledEdgedRound = &DC::DrawFilledEdgedRound_24bit;
-		        DrawEmptyEdgedRound = &DC::DrawEmptyEdgedRound_24bit;
-		        DrawEmptyRound = &DC::DrawEmptyRound_24bit;
-		        DrawFilledEdgedBorderRound = &DC::DrawFilledEdgedBorderRound_24bit;
-			break;
-		case 32:Draw_HLine = &DC::Draw_HLine_32bit;
-		        Draw_VLine = &DC::Draw_VLine_32bit;
-		        Draw_Line = &DC::Draw_Line_32bit;
-		        DrawFilledRound = &DC::DrawFilledRound_32bit;
-		        DrawFilledEdgedRound = &DC::DrawFilledEdgedRound_32bit;
-		        DrawEmptyEdgedRound = &DC::DrawEmptyEdgedRound_32bit;
-		        DrawEmptyRound = &DC::DrawEmptyRound_32bit;
-		        DrawFilledEdgedBorderRound = &DC::DrawFilledEdgedBorderRound_32bit;
-			break;
-		default:break;
-	}
+DC::~DC()
+{
+	SDL_FreeSurface(surface);
 }
 
 #include <sstream>
@@ -91,6 +64,7 @@ std::string DC::printHardwareInformation()
 {
 	SDL_Rect **modes;
 	std::ostringstream os;
+	os.str("");
 	modes = SDL_ListModes(NULL, SDL_SWSURFACE);
 	if(modes == (SDL_Rect **)0)
 		os << "No modes available!" << std::endl;
@@ -101,12 +75,12 @@ std::string DC::printHardwareInformation()
 		else
 		{
 			os << "Available Modes:" << std::endl;
-			for(int i=0;modes[i];++i)
+			for(unsigned int i=0;modes[i];++i)
 				os << "  " << modes[i]->w << " x " << modes[i]->h << std::endl;
 		}
 	}
 	const SDL_VideoInfo* hardware = SDL_GetVideoInfo();
-	os << "Max color depth:" << hardware->vfmt->BitsPerPixel << std::endl;
+	os << "Max color depth : " << (unsigned int)hardware->vfmt->BitsPerPixel << std::endl;
 //	if(hardware->hw_availible) os << "- It is possible to create hardware surfaces" << std::endl;
 	if(hardware->wm_available) os << "- There is a window manager available" << std::endl;
 	if(hardware->blit_hw) os << "- Hardware to hardware blits are accelerated" << std::endl;
@@ -123,7 +97,8 @@ std::string DC::printHardwareInformation()
 std::string DC::printSurfaceInformation(DC* surface)
 {
 	std::ostringstream os;
-	os << "Created Surface :  " << surface->GetSurface()->w << " x " << surface->GetSurface()->h << " @ " << (int)(surface->GetSurface()->format->BitsPerPixel) << std::endl;
+	os.str("");
+	os << "Created Surface :  " << surface->GetSurface()->w << " x " << surface->GetSurface()->h << " @ " << (unsigned int)(surface->GetSurface()->format->BitsPerPixel) << std::endl;
 	if (surface->flags() & SDL_SWSURFACE) os << "- Surface is stored in system memory" << std::endl;
 	else if(surface->flags() & SDL_HWSURFACE) os << "- Surface is stored in video memory" << std::endl;
 	if(surface->flags() & SDL_ASYNCBLIT) os << "- Surface uses asynchronous blits if possible" << std::endl;
@@ -197,55 +172,81 @@ void DC::DrawBitmap(SDL_Surface* bitmap, const signed int x, const signed int y)
 	SDL_BlitSurface(bitmap , 0, surface, &drect );
 }
 
-const Color DC::mixColor(const Color* id1, const Color* id2)  const
+const Color DC::mixColor(const Color& id1, const Color& id2)  const
 {
-	return(Color(surface, id1->r()  +id2->r(),
-			id1->g()+id2->g(),
-			id1->b() +id2->b()));
+	return(Color(surface, id1.r()  +id2.r(),
+			id1.g()+id2.g(),
+			id1.b() +id2.b()));
 }
 
-const Color DC::mixColor(const Color* id1, const Color* id2, const unsigned int gradient) const
+const Color DC::mixColor(const Color& id1, const Color& id2, const unsigned int gradient) const
 {
-	return(Color(surface, (id1->r()*gradient  +id2->r()*(100-gradient))/100,
-		(id1->g()*gradient+id2->g()*(100-gradient))/100,
-		(id1->b()*gradient +id2->b()*(100-gradient))/100));
+	return(Color(surface, (id1.r()*gradient  +id2.r()*(100-gradient))/100,
+		(id1.g()*gradient+id2.g()*(100-gradient))/100,
+		(id1.b()*gradient +id2.b()*(100-gradient))/100));
 }
 
-const Color DC::brightenColor(const Color* id, const unsigned int brightness) const
+const Color DC::brightenColor(const Color& id, const unsigned int brightness) const
 {
-	return(Color(surface, id->r()  +brightness,
-			id->g()+brightness,
-			id->b() +brightness));
+	return(Color(surface, id.r()  +brightness,
+			id.g()+brightness,
+			id.b() +brightness));
 }
 
-const Color DC::darkenColor(const Color* id, const unsigned int brightness) const
+const Color DC::darkenColor(const Color& id, const unsigned int brightness) const
 {
-	return(Color(surface, id->r() * brightness / 100,
-			id->g() * brightness / 100,
-			id->b() * brightness / 100));
+	return(Color(surface, id.r() * brightness / 100,
+			id.g() * brightness / 100,
+			id.b() * brightness / 100));
 }
 
 void DC::DrawLine(const signed x1, const signed y1, const signed x2, const signed y2) const
 {
 	if(pen.GetStyle()==TRANSPARENT_PEN_STYLE)
 		return;
-	int xx1 = x1;
-	int xx2 = x2;
-	int yy1 = y1;
-	int yy2 = y2;
+	signed int xx1, xx2, yy1, yy2;
+	if(x1>x2)
+		{xx1=x2;xx2=x1;yy1=y2;yy2=y1;}
+	else {xx1=x1;xx2=x2;yy1=y1;yy2=y2;}
 
-	if((xx1<pen.GetWidth())||(yy1<pen.GetWidth())||(xx1>=max_x-pen.GetWidth())||(yy1>=max_y-pen.GetWidth())||(xx2<pen.GetWidth())||(yy2<pen.GetWidth())||(xx2>=max_x-pen.GetWidth())||(yy2>=max_y-pen.GetWidth()))
+	if((xx1<pen.GetWidth()/2)||(yy1+1<pen.GetWidth()/2)||(yy2<pen.GetWidth()/2)||(xx2>=max_x-pen.GetWidth()/2)||(yy1>=max_y-pen.GetWidth()/2)||(yy2>=max_y-pen.GetWidth()/2))
 		return;
-
-	(*this.*Draw_Line)(x1, y1, x2, y2);
-	if(pen.GetWidth()>1)
+		
+	if(yy1==yy2)
 	{
-//		Color c = *pen.GetColor();
-//		const_cast<DC*>(this)->pen.SetColor(Color(surface, (Uint8)(pen.GetColor()->r()*0.5),  (Uint8)(pen.GetColor()->g()*0.5), (Uint8)(pen.GetColor()->b()*0.5)));
-		(*this.*Draw_Line)(x1, y1+1, x2, y2+1);
-		(*this.*Draw_Line)(x1+1, y1, x2+1, y2);
-		(*this.*Draw_Line)(x1+1, y1+1, x2+1, y2+1);
-//		const_cast<DC*>(this)->pen.SetColor(c);
+		if(xx1==xx2)
+			return;
+		if(pen.GetWidth()>1)
+		{
+			SDL_Rect rc;
+			rc.x=xx1-pen.GetWidth()/2;rc.y=yy1-pen.GetWidth()/2;rc.w=xx2-xx1+pen.GetWidth();rc.h=pen.GetWidth();
+			SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()) );
+		} else
+			(*this.*Draw_HLine)(xx1, yy1, xx2);
+	} else
+	if(xx1==xx2)
+	{
+		if(yy1>yy2)
+			{signed int swp=yy1;yy1=yy2;yy2=swp;}
+		if(pen.GetWidth()>1)
+		{
+			SDL_Rect rc;
+			rc.x=xx1-pen.GetWidth()/2;rc.y=yy1-pen.GetWidth()/2;rc.w=pen.GetWidth();rc.h=yy2-yy1+pen.GetWidth();
+			SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()) );
+		} else
+			(*this.*Draw_VLine)(xx1, yy1, yy2);
+	} else
+	{
+		(*this.*Draw_Line)(xx1, yy1, xx2, yy2);
+		if(pen.GetWidth()==2)
+		{
+//			Color c = *pen.GetColor();
+//			const_cast<DC*>(this)->pen.SetColor(Color(surface, (Uint8)(pen.GetColor()->r()*0.5),  (Uint8)(pen.GetColor()->g()*0.5), (Uint8)(pen.GetColor()->b()*0.5)));
+			(*this.*Draw_Line)(xx1, yy1+1, xx2, yy2+1);
+			(*this.*Draw_Line)(xx1+1, yy1, xx2+1, yy2);
+			(*this.*Draw_Line)(xx1+1, yy1+1, xx2+1, yy2+1);
+//			const_cast<DC*>(this)->pen.SetColor(c);
+		}
 	}
 }
 
@@ -254,7 +255,7 @@ void DC::DrawSpline(const unsigned int c, const Point* p) const
 {
 	if((pen.GetStyle() == TRANSPARENT_PEN_STYLE)||(c<2))
 		return;
-	for(unsigned int i=0;i<c-1;i++)
+	for(unsigned int i=c-1;i--;)
 //	{
 //		aalineColor(surface, p[i].x, p[i].y, p[i+1].x, p[i+1].y, (Uint32)(*pen.GetColor()));
 //		aalineColor(surface, p[i].x, p[i].y+1, p[i+1].x, p[i+1].y+1, (Uint32)(*pen.GetColor()));
@@ -278,7 +279,7 @@ void DC::DrawSpline(const unsigned int c, const Point* p, const Point s) const
 {
 	if((pen.GetStyle() == TRANSPARENT_PEN_STYLE)||(c<2))
 		return;
-	for(unsigned int i=0;i<c-1;i++)
+	for(unsigned int i=c-1;i--;)
 //	{
 //		aalineColor(surface, p[i].x, p[i].y, p[i+1].x, p[i+1].y, (Uint32)(*pen.GetColor()));
 //		aalineColor(surface, p[i].x, p[i].y+1, p[i+1].x, p[i+1].y+1, (Uint32)(*pen.GetColor()));
@@ -299,11 +300,98 @@ void DC::DrawSpline(const unsigned int c, const Point* p, const Point s) const
 	
 }
 
-void DC::setResolution(const unsigned int dc_max_x, const unsigned int dc_max_y)
+void DC::setScreen(const eResolution current_resolution, const eBitDepth bit_depth, const Uint32 nflags)
 {
-	max_x = dc_max_x;
-	max_y = dc_max_y;
-//	printInformation();
+	if((current_resolution == resolution) && (bit_depth == bitDepth) && (surface!=NULL))
+		return;
+	resolution = current_resolution;
+	Size s = Size(getResolutionSize());
+	max_x = s.GetWidth();
+	max_y = s.GetHeight();
+	unsigned int bits;
+	switch(bit_depth)
+	{
+		case DEPTH_8BIT:bits=8;break;
+		case DEPTH_16BIT:bits=16;break;
+		case DEPTH_24BIT:bits=24;break;
+		case DEPTH_32BIT:bits=32;break;
+		default:bits=8;break;
+	}
+//	const SDL_VideoInfo* hardware = SDL_GetVideoInfo();
+//	if(bits > (unsigned int)hardware->vfmt->BitsPerPixel)
+//		bits = (unsigned int)hardware->vfmt->BitsPerPixel; :(
+
+	surface = SDL_SetVideoMode(max_x, max_y, bits, nflags);
+	if(surface==NULL)
+		return;
+
+	switch(surface->format->BitsPerPixel)
+	{
+		case 8:	bitDepth = DEPTH_8BIT;
+			Draw_HLine = &DC::Draw_HLine_8bit;
+			Draw_VLine = &DC::Draw_VLine_8bit;
+			Draw_Line = &DC::Draw_Line_8bit;
+			DrawFilledRound = &DC::DrawFilledRound_8bit;
+			DrawFilledEdgedRound = &DC::DrawFilledEdgedRound_8bit;
+			DrawEmptyEdgedRound = &DC::DrawEmptyEdgedRound_8bit;
+			DrawEmptyRound = &DC::DrawEmptyRound_8bit;
+			DrawFilledEdgedBorderRound = &DC::DrawFilledEdgedBorderRound_8bit;
+			break;
+		case 16:bitDepth = DEPTH_16BIT;
+			Draw_HLine = &DC::Draw_HLine_16bit;
+		        Draw_VLine = &DC::Draw_VLine_16bit;
+		        Draw_Line = &DC::Draw_Line_16bit;
+		        DrawFilledRound = &DC::DrawFilledRound_16bit;
+		        DrawFilledEdgedRound = &DC::DrawFilledEdgedRound_16bit;
+		        DrawEmptyEdgedRound = &DC::DrawEmptyEdgedRound_16bit;
+		        DrawEmptyRound = &DC::DrawEmptyRound_16bit;
+		        DrawFilledEdgedBorderRound = &DC::DrawFilledEdgedBorderRound_16bit;
+			break;
+		case 24:bitDepth = DEPTH_24BIT;
+			Draw_HLine = &DC::Draw_HLine_24bit;
+		        Draw_VLine = &DC::Draw_VLine_24bit;
+		        Draw_Line = &DC::Draw_Line_24bit;
+		        DrawFilledRound = &DC::DrawFilledRound_24bit;
+		        DrawFilledEdgedRound = &DC::DrawFilledEdgedRound_24bit;
+		        DrawEmptyEdgedRound = &DC::DrawEmptyEdgedRound_24bit;
+		        DrawEmptyRound = &DC::DrawEmptyRound_24bit;
+		        DrawFilledEdgedBorderRound = &DC::DrawFilledEdgedBorderRound_24bit;
+			break;
+		case 32:bitDepth = DEPTH_32BIT;
+			Draw_HLine = &DC::Draw_HLine_32bit;
+		        Draw_VLine = &DC::Draw_VLine_32bit;
+		        Draw_Line = &DC::Draw_Line_32bit;
+		        DrawFilledRound = &DC::DrawFilledRound_32bit;
+		        DrawFilledEdgedRound = &DC::DrawFilledEdgedRound_32bit;
+		        DrawEmptyEdgedRound = &DC::DrawEmptyEdgedRound_32bit;
+		        DrawEmptyRound = &DC::DrawEmptyRound_32bit;
+		        DrawFilledEdgedBorderRound = &DC::DrawFilledEdgedBorderRound_32bit;
+			break;
+		default:break;
+	}
+}
+
+const Size DC::getResolutionSize() const
+{
+	switch(resolution)
+	{
+		case RESOLUTION_640x480:return(Size(640, 480));break;
+		case RESOLUTION_800x600:return(Size(800, 600));break;
+		case RESOLUTION_1024x768:return(Size(1024, 768));break;
+		case RESOLUTION_1280x1024:return(Size(1280, 1024));break;
+//		case RESOLUTION_1600x1200:break;
+		default:return(Size(0,0));break;
+	}
+}
+
+void DC::setBitDepth(const eBitDepth bit_depth)
+{
+	setScreen(resolution, bit_depth, surface->flags);
+}
+
+void DC::setResolution(const eResolution current_resolution)
+{
+	setScreen(current_resolution, bitDepth, surface->flags);
 }
 
 #if 0
@@ -449,6 +537,7 @@ void DC::DrawVerticalLine(const signed int x0, const signed int y0, const signed
 	if((y1<0)||(y0>=max_y)||(x0<0)||(x0>=max_x)||(y1<y0))
 	{
 //		std::ostringstream os;
+//		os.str("");
 //		os << "Line out of range: " << x0 << ", " << y0 << ", " << y1;
 //		toLog("Line out of range");//os.str());
 		return;
@@ -470,6 +559,7 @@ void DC::DrawHorizontalLine(const signed int x0, const signed int y0, const sign
 	if((x1<0)||(x0>=max_x)||(y0<0)||(y0>=max_y)||(x1<x0))
 	{
 //	  std::ostringstream os;
+//	  os.str("");
 //	  os << "Line out of range: " << x0 << ", " << y0 << ", " << y1;
 //		toLog("Line out of range");//os.str());
 		return;
@@ -498,40 +588,25 @@ void DC::Unlock() const {
 		SDL_UnlockSurface(surface);
 	}
 }
-/*
-const int DC::Blit(const DC& src, const SDL_Rect& srcrect, SDL_Rect& dstrect) const {
-	return SDL_BlitSurface(src.surface, const_cast<SDL_Rect*>(&srcrect), surface, &dstrect);
-}
 
-const int DC::Blit(const DC& src, const SDL_Rect& srcrect, const Point& dstpoint) const {
-	SDL_Rect  rect;
-	rect.x = dstpoint.x; rect.y = dstpoint.y;
-	return Blit(src, srcrect, rect);
+const eChooseDriverError DC::chooseDriver(std::string& driver_name)
+{
+	std::list<std::string> availible_drivers = DC::getAvailibleDrivers();
+	if(availible_drivers.empty())
+		return(NO_VIDEO_DRIVERS_AVAILIBLE);
+	if(driver_name=="")
+		driver_name = *availible_drivers.begin();
+	for(std::list<std::string>::const_iterator j = availible_drivers.begin();j!=availible_drivers.end();++j)
+		if(driver_name == *j)
+		{
+			std::ostringstream video;
+			video.str("");
+			video << "SDL_VIDEODRIVER=" << driver_name;
+			char* video_cstr = new char[strlen(video.str().c_str())];
+			strcpy(video_cstr, video.str().c_str());
+			putenv(video_cstr);
+			return(NO_DRIVER_ERROR);
+		}
+	return(SDL_DRIVER_NOT_SUPPORTED);
 }
-
-const int DC::Blit(const DC& src, SDL_Rect& dstrect) const {
-	return SDL_BlitSurface(src.surface, 0, surface, &dstrect);
-}
-
-const int DC::Blit(const DC& src, const Point& dstpoint) const {
-	SDL_Rect  rect;
-	rect.x = dstpoint.x; rect.y = dstpoint.y;
-	return Blit(src, rect);
-}
-
-const int DC::Blit(const DC& src) const {
-	return SDL_BlitSurface(src.surface, 0, surface, 0);
-}
-
-const bool DC::Fill(const Color color) const {
-	return SDL_FillRect(surface, 0, color) == 0;
-}
-
-const bool DC::FillRect(SDL_Rect& dstrect, const Color color) const{
-//	return(boxColor(surface, dstrect.x, dstrect.y, dstrect.x+dstrect.w, dstrect.y+dstrect.h, (Uint32)color )==0);
-	return SDL_FillRect(surface, &dstrect, color) == 0;
-}
-*/
-// Set various things
-
 

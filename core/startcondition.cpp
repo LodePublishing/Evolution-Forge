@@ -46,7 +46,7 @@ void START_CONDITION::adjustSupply()
 	unsigned int need_supply = 0;
 	unsigned int have_supply = 0;
 
-	for(unsigned int i=1;i<MAX_LOCATIONS;i++)
+	for(unsigned int i=1; i<MAX_LOCATIONS; ++i)
 		unit[i].adjustSupply(race, need_supply, have_supply);
 	
 	setNeedSupply(need_supply);
@@ -55,7 +55,7 @@ void START_CONDITION::adjustSupply()
 
 void START_CONDITION::adjustResearches()
 {
-//	for(unsigned int i=1;i<MAX_LOCATIONS;i++)
+//	for(unsigned int i=1; i<MAX_LOCATIONS; ++i)
 		unit[0].adjustResearches(race);
 }
 

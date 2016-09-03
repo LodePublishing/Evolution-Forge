@@ -318,8 +318,12 @@
 		NULL
 		INTRON
 
-		Starting ...
-		Loading core settings ...
+		Loading configuration ...
+		Parse command line ...
+		WARNING: -vo argument given but no driver specified.
+		Using SDL driver %s.
+		ERROR: No video drivers are availible for your platform!
+		ERROR: SDL Driver %s is not supported!
 		Initializing SDL ...
 		Unable to init SDL:
 		Error setting video mode.
@@ -340,14 +344,18 @@
 		Initializing GUI ...
 		Main initialization complete.
 		System ready.
-		Time for initialization: 
+		Time for initialization:
 
+		Color depth changed to %ibit.
+		Resolution changed to %s.
 # window titles
 
 		Evolution Forge v%s
 		Messages
-		The core of Evolution Forge
-		Evolution forge tutorial
+		Evolution forge help
+		Settings
+		Map and Goals
+		
 		Order description player %s
 		Techtree
 		Graphical build order %s
@@ -358,6 +366,9 @@
 		Build order %s
 		Game
 		Player		
+
+		Game %i
+		New Game
 # messages
 		Welcome to Evolution Forge!
 		Click above to add new goals.
@@ -370,6 +381,12 @@
 		Removed one %s from the goal list.
 		Moved non-goal %s to the goal list.
 		Saved %s.
+# game window
+		Compare Game to..
+		Remove Game....
+# help window
+		Go to Index
+		Go back
 
 #edit field window
 		OK
@@ -443,26 +460,10 @@
 		Fitness average : %i [%i best]
 		Fitness variance : %i
 		%i+ generations left [%i total]
-		INVISIBLE
-# window title parameter strings
-		Player
-		Advanced Player
-		Expert (Player)
-		1st Computer enemy
-		GOSU (Player)
-		1st Computer enemy
-		2nd Computer enemy
-		ERROR - Check playermodes
 #tabs
-		Zero Tab
-		Beginner
-		Advanced
-		Expert
-		Gosu
 		Help
 		Settings
 		Map & Goals
-		Compare Goals
 				
 # tooltips:
 		add a unit
@@ -493,19 +494,12 @@
 		
 		Percent of all goals / Percent of theoretical (without minerals/gas) optimum
 
-		Simple interface and basic options
-		All informations are presented
-		The build order will be tested against rushes
-		Play in realtime against the computer or let it play itself
-		
 		Explanation of the different windows and a tutorial
 		Display and global ef settings
 		Create and configure forces and goals and maps
-		Compare current and saved build orders
 
 		Click to set latest time these units should be complete
 		
-		Settings
 		Predefined settings
 		Max time
 		Restrict units
@@ -605,6 +599,12 @@
 		1024x768
 		1280x1024
 
+		Color depth
+		8bit
+		16bit
+		24bit
+		32bit
+
 		Theme
 		ERROR
 		Dark blue
@@ -620,6 +620,7 @@
 
 		Settings of the core
 		Settings of the gui
+		General settings
 		Load/Save settings
 
 		Unit name

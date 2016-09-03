@@ -79,18 +79,18 @@ const std::string raceString[MAX_RACES] =
 
 /*void fillInfluenceList()
 {
-	for(int i=0;i<MAX_RACES;i++)
+	for(int i=0;i<MAX_RACES; ++i)
 	{
-		for(unsigned int j=0;j<UNIT_TYPE_COUNT;j++)
+		for(unsigned int j=0;j<UNIT_TYPE_COUNT; ++j)
 		{
-			for(int k=0;k<3;k++)
+			for(int k=0;k<3; ++k)
 			{
 				if(stats[i][j].prerequisite[k])
 					influenceList[i][stats[i][j].prerequisite[k]].push_front(j);
 				if(stats[i][j].facility[k])
 					influenceList[i][stats[i][j].facility[k]].push_front(j);
 			}
-			for(int k=0;k<2;k++)
+			for(int k=0;k<2; ++k)
 				if(stats[i][j].upgrade[k])
 					influenceList[i][stats[i][j].upgrade[k]].push_front(j);
 		}

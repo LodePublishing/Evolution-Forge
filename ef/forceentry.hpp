@@ -56,6 +56,7 @@ class ForceEntry : public UI_Button
 		unsigned int currentForce;
 		unsigned int totalNumber;
 
+		unsigned int highlight;
 		unsigned int unit;
 		eUnitType type;
 		GOAL* goal;

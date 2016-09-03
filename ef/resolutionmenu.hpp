@@ -1,15 +1,16 @@
-#ifndef _RESOLUTIONMENU_HPP
-#define _RESOLUTIONMENU_HPP
+#ifndef _RESOLUTION_MENU_HPP
+#define _RESOLUTION_MENU_HPP
 
 #include "menu.hpp"
 
 class ResolutionMenu : public Menu
 {
-    public:
-        ResolutionMenu(UI_Object* resmenu_parent, Rect rect);
+	public:
+		ResolutionMenu(UI_Object* resolution_menu_parent, const Rect rect, const Size distance_bottom_right, const ePositionMode position_mode);
 		~ResolutionMenu();
-        void process();
-        void draw(DC* dc) const;
+		void reloadOriginalSize();
+		void process();
+		void draw(DC* dc) const;
 };
 
 #endif

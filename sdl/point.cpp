@@ -3,9 +3,9 @@
 void Point::mv(signed int& x, const signed int sx, const signed int tx)
 {
 	if(x > tx)
-		x--;
+		--x;
 	else if(x < tx)
-		x++;
+		++x;
 	if(x == tx)
 		return;
 //	signed int z = (signed int)(((x>sx)?(2*(x-sx)<(tx-sx)?(double)(x-sx)/2:(double)(tx-x)/2):(2*(x-sx)>(tx-sx)?(double)(x-sx)/2:(double)(tx-x)/2)));

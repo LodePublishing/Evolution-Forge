@@ -30,7 +30,7 @@ void UNIT::resetData()
 void UNIT::adjustSupply(const eRace race, unsigned int& needSupply, unsigned int& haveSupply)
 {
 	// TODO wenn mehr Einheiten als Versorgung da is, wirds negativ... :/
-	for(int j=UNIT_TYPE_COUNT;j--;)
+	for(unsigned int j=UNIT_TYPE_COUNT;j--;)
 		if(total[j])
 		{
 			needSupply+=stats[race][j].needSupply*total[j];
@@ -92,12 +92,12 @@ void UNIT::adjustResearches(const eRace race) // only use this on location ZERO
 		default:break;
 	}
 
-	for(unsigned int j=firstResearch; j<=lastResearch; j++)
+	for(unsigned int j=firstResearch; j<=lastResearch; ++j)
 	{
 		setTotal(j, 1-total[j+basicResearch]);
 		setAvailible(j, 1-total[j+basicResearch]);
 	}
-	for(unsigned int j=firstUpgrade; j<=lastUpgrade; j++)
+	for(unsigned int j=firstUpgrade; j<=lastUpgrade; ++j)
 	{
 		setTotal(j, 3-total[j+basicResearch]);
 		setAvailible(j, 3-total[j+basicResearch]); // >0 !? wtf? TODO

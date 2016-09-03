@@ -49,6 +49,8 @@ class PlayerEntry : public UI_Object
 		void process();
 		void draw(DC* dc) const;
 
+		void reloadOriginalSize();
+		
 		const unsigned int getLineHeight() const;
 
 		const signed int getAssignedRace() const;
@@ -61,18 +63,18 @@ class PlayerEntry : public UI_Object
 
 		eInitMode initMode;
 		eScoreMode scoreMode;
-//		UI_StaticText* goalsFulfilledText;
 		UI_Button* currentActionButton;
-		UI_StaticText* scoreText;
 		UI_StaticText* playerText;
+		UI_Radio* menuRadio;
+		RaceMenu* raceMenu;
+//		UI_StaticText* goalsFulfilledText;
+		UI_StaticText* scoreText;
 		UI_Button* addPlayerButton;
 		UI_Button* removePlayerButton;
 		bool optimizing;
 		unsigned int number;
 
-		UI_Radio* menuRadio;
 		UI_Button* menuButton[MAX_PLAYER_ENTRY_MENUS];
-		RaceMenu* raceMenu;
 		signed int assignRace;
 
 };

@@ -3,14 +3,16 @@
 
 UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const Size distance_bottom_right, const ePositionMode position_mode, const eAutoSize auto_size) :
 	children(NULL),
+	relativeRect(relative_rect),
 	startRect(relative_rect),
 	targetRect(relative_rect),
 	originalRect(relative_rect),
 	distanceBottomRight(distance_bottom_right),
+	oldSize(relative_rect.GetSize()),
+	sizeHasChanged(true),
 
 	positionMode(position_mode),
 	autoSize(auto_size),
-	sizeHasChanged(true),
 	shown(true),
 
 	min_top_left_x(0),
@@ -21,10 +23,9 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const S
 	min_bottom_right_x(0),	
 
 	needRedraw(true),
+	parent(NULL),
 	prevBrother(this),
 	nextBrother(this),
-	parent(NULL),
-	relativeRect(relative_rect),
 	toolTipString(NULL_STRING)
 {
 	setParent(parent_object);
@@ -32,15 +33,17 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const S
 
 UI_Object& UI_Object::operator=(const UI_Object& object)
 {
+	relativeRect = object.relativeRect;
 	startRect = object.startRect;
 	targetRect = object.targetRect;
 	originalRect = object.originalRect;
 	distanceBottomRight = object.distanceBottomRight;
+	oldSize = object.oldSize;
 	children = object.children;
+	sizeHasChanged = true;	
 
 	positionMode = object.positionMode;
 	autoSize = object.autoSize;
-	sizeHasChanged = true;	
 	shown = object.shown;
 
 	min_top_left_x = object.min_top_left_x;
@@ -53,7 +56,6 @@ UI_Object& UI_Object::operator=(const UI_Object& object)
 	prevBrother = this; // !!
 	nextBrother = this; // !!
 	parent = NULL; // !!
-	relativeRect = object.relativeRect;
 	toolTipString = object.toolTipString;
 	
 	setParent(object.parent);
@@ -63,10 +65,12 @@ UI_Object& UI_Object::operator=(const UI_Object& object)
 
 UI_Object::UI_Object(const UI_Object& object) :
 	children( object.children ),
+	relativeRect( object.relativeRect ),
 	startRect( object.startRect ),
 	targetRect( object.targetRect ),
 	originalRect( object.originalRect ),
 	distanceBottomRight( object.distanceBottomRight ),
+	oldSize( object.oldSize ),
 	sizeHasChanged( true ),
 
 	positionMode( object.positionMode ),
@@ -82,10 +86,10 @@ UI_Object::UI_Object(const UI_Object& object) :
 	min_bottom_right_x( object.min_bottom_right_x ),
 
 	needRedraw( object.needRedraw ),
+
+	parent( NULL ), // !!
 	prevBrother( this ), // !!
 	nextBrother( this ), // !!
-	parent( NULL ), // !!
-	relativeRect( object.relativeRect ),
 	toolTipString( object.toolTipString )
 { 
 	setParent(object.parent);
@@ -96,28 +100,36 @@ UI_Object::~UI_Object()
 	removeFromFamily(); // !!!!!
 }
 
+void UI_Object::reloadOriginalSize()
+{
+	UI_Object* tmp=children;  // process all children of gadget
+	if (tmp) {
+		do {
+			tmp->reloadOriginalSize();
+			tmp = tmp->nextBrother;
+			} while (tmp != children);
+		}	
+}
+
 
 #include <sstream>
 void UI_Object::adjustPositionAndSize(const eAdjustMode adjust_mode, const Size& size)
 {
-	sizeHasChanged=false;
+	sizeHasChanged = false;
 	signed int left = originalRect.GetLeft();
 	signed int top = originalRect.GetTop();
-	
 	unsigned int full_width;
 	unsigned int full_height;
-	if(getParent()!=NULL)
+	if(getParent() != NULL)
 	{
 		full_width = getParent()->getWidth() - left - distanceBottomRight.GetWidth();
 		full_height = getParent()->getHeight() - top - distanceBottomRight.GetHeight();
-		// Parent nicht initialisiert :[
 	} 
 	else
 	{
 		full_width = getWidth();
 		full_height = getHeight();
 	}
-
 	if(adjust_mode == ADJUST_ONLY_POSITION)
 	{
 //		if(size!=Size(0,0))
@@ -166,21 +178,16 @@ void UI_Object::adjustPositionAndSize(const eAdjustMode adjust_mode, const Size&
 			case CONST_SIZE:setSize(Size(originalRect.GetWidth(), originalRect.GetHeight()));break;// ~~ nur fuer tabs naja
 			default:break; // TODO ERROR
 		}
+		
+		resetMinXY();	
 	}
 	
-	signed int hor_center = left + (full_width - getWidth())/2;
-	signed int right = full_width - left - getWidth();
+	signed int hor_center = left + ((signed int)full_width - (signed int)getWidth())/2;
+	signed int right = (signed int)full_width - left - (signed int)getWidth();
 
-	signed int ver_center = top + (full_height - getHeight())/2;
-	signed int bottom = full_height - top - getHeight();
-
-/*	if((positionMode==TOTAL_CENTERED)&&(getParent()))
-	{
-		std::ostringstream os;
-		os << "2. " << hor_center << ":" << ver_center << "[" << getWidth() << ":" << getHeight() << "]" << " " << getParent()->getWidth() << "-" << left << "-" << distanceBottomRight.GetWidth() << "/ " << getParent()->getHeight() << "-" << top << "-" << distanceBottomRight.GetHeight() << " [" << full_width << ":" << full_height << "]";
-						
-		toLog(os.str());
-	}*/
+	signed int ver_center = top + ((signed int)full_height - (signed int)getHeight())/2;
+	if(ver_center < top) ver_center = top;
+	signed int bottom = (signed int)full_height - top - (signed int)getHeight();
 
 //	setPosition(originalButtonRect.GetTopLeft());
 	
@@ -221,9 +228,10 @@ void UI_Object::adjustPositionAndSize(const eAdjustMode adjust_mode, const Size&
 			getParent()->addMinBottomRightX(getWidth() + MIN_DISTANCE);
 		}break;
 		case ARRANGE_LEFT:
+		if(adjust_mode!=ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED)
 		{
 			setPosition(left, top + getParent()->getMinLeftY());
-			getParent()->addMinLeftY(getHeight()+MIN_DISTANCE);
+			getParent()->addMinLeftY(getHeight() + MIN_DISTANCE);
 		}break;
 		case ARRANGE_RIGHT:
 		{
@@ -238,11 +246,12 @@ void UI_Object::adjustPositionAndSize(const eAdjustMode adjust_mode, const Size&
 }
 
 
-void UI_Object::adjustRelativeRect(Rect edge)
+void UI_Object::adjustRelativeRect(const Rect& edge)
 {
 	if(edge != targetRect)
 	{
 // neues Ziel?
+/*
 		if((edge.GetLeft()!=targetRect.GetLeft())||(edge.GetRight()!=targetRect.GetRight()))
 		{
 			startRect.SetLeft(getRelativeLeftBound());
@@ -255,7 +264,13 @@ void UI_Object::adjustRelativeRect(Rect edge)
 			startRect.SetTop(getRelativeUpperBound());
 //			if(edge.GetHeight()!=targetRect.GetHeight())
 			startRect.SetBottom(getRelativeLowerBound());
-		}
+		}*/
+
+		if(edge.GetTopLeft()!=targetRect.GetTopLeft())
+			startRect.SetTopLeft(getRelativePosition());
+		if(edge.GetSize()!=targetRect.GetSize())
+			startRect.SetSize(getSize());
+ 
 		targetRect=edge;
 	}
 //	targetRect.width=edge.width;
@@ -277,9 +292,9 @@ void UI_Object::removeFromFamily()
 	if((parent)&&(parent->children == this))
 	{
 		if (nextBrother == this)  // the only child?
-			parent->children = NULL;  // if so, parent now has no children
+			parent->children = NULL;  // if so, parent now has now no children
 		else
-			parent->children = nextBrother;  // next sibling is now the eldest
+			parent->children = nextBrother;  // next sibling is now the oldest
 	} 
 	parent = NULL;
 	if (nextBrother != this) {  // does this object have siblings?
@@ -321,12 +336,16 @@ void UI_Object::addChild(UI_Object* child)
 	}
 }
 
+void UI_Object::resetMinXY()
+{
+	min_top_right_x = 0; min_bottom_right_x = 0; min_bottom_left_x = 0; min_left_y = 0; min_top_left_x = 0; min_right_y = 0;
+}
+
 void UI_Object::process()
 {
 //	if (!isShown()) //~~
 //		return;
 
-	Size old_size  = relativeRect.GetSize();
 	if(uiConfiguration.isSmoothMovements())
 	{
 		if(relativeRect.moveSmooth(startRect, targetRect))
@@ -337,7 +356,7 @@ void UI_Object::process()
 		if(relativeRect.move(startRect, targetRect))
 			setNeedRedrawMoved();
 	}
-	if(old_size != relativeRect.GetSize())
+	if(oldSize != relativeRect.GetSize())
 		sizeHasChanged=true;
 
 	if(sizeHasChanged==true)
@@ -352,21 +371,20 @@ void UI_Object::process()
 		}
 		sizeHasChanged=false;
 	}
-//	if(adjust_mode == ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED)	
 	
-	min_top_right_x = min_bottom_right_x = min_bottom_left_x = min_left_y = min_top_left_x = min_right_y = 0;
+	resetMinXY();	
 
 	UI_Object* tmp=children;  // process all children of gadget
 	if (tmp) {
 		do {
 			tmp->process();
 			tmp = tmp->nextBrother;
-																				
 		} while (tmp != children);
 	}
 	
 	if((toolTipString!=NULL_STRING)/*&&(uiConfiguration.isToolTips())*/&&(isMouseInside()))
 		toolTipParent = this;
+	oldSize = relativeRect.GetSize();
 }
 
 void UI_Object::resetData()
@@ -449,6 +467,21 @@ void UI_Object::draw(DC* dc) const
 	}
 }
 
+void UI_Object::setOriginalRect(const Rect& rect) {
+	originalRect = rect;
+	setRect(rect);
+}
+
+void UI_Object::setRect(const Rect& rect) 
+{
+	if(rect == relativeRect)
+		return;
+	startRect = rect;
+	targetRect = rect;
+	relativeRect = rect;
+	setNeedRedrawMoved();
+}
+
 void UI_Object::setPosition(const Point& position)
 {
 	if(position == relativeRect.GetTopLeft())
@@ -512,19 +545,12 @@ void UI_Object::setTop(const signed int y)
 	setNeedRedrawMoved();
 }
 
-const bool UI_Object::isTopItem() const
-{
-	return(parent==NULL);
-}
-
-
 void UI_Object::Show(const bool show)
 {
 	if((show)&&(!shown))
 	{
 		shown = true;
 		setNeedRedrawMoved(true);
-		process(); //?
 	} 
 	else if((!show)&&(shown))
 	{
@@ -584,7 +610,7 @@ void UI_Object::clearRedrawFlag()
 //		return;
 	if(needRedraw)
 	{
-		needRedraw = false;
+//		needRedraw = false;
 	}
 	UI_Object* tmp = children;
 	if (tmp) {
@@ -599,7 +625,7 @@ const bool UI_Object::checkForNeedRedraw() const
 {
 	if(needRedraw)
 	{
-		redrawnObjects++;
+		++redrawnObjects;
 //		const_cast< UI_Object* > (this)->needRedraw=false;
 		return(true);
 	} else return(false);
@@ -608,35 +634,38 @@ const bool UI_Object::checkForNeedRedraw() const
 void UI_Object::addMinTopLeftX(signed int dx)
 {
 	if((dx + min_top_left_x > (signed int)max_x)||(dx + min_top_left_x < 0))
-		toLog("BUTTON MIN_TOP_LEFT_X out of range");
+		toLog("MIN_TOP_LEFT_X out of range");
 	min_top_left_x += dx;		
 }
 
 void UI_Object::addMinLeftY(signed int dy)
 {
 	if((dy + min_left_y > (signed int)max_y)||(dy + min_left_y < 0))
-		toLog("BUTTON MIN_LEFT_Y out of range");
+		toLog("MIN_LEFT_Y out of range");
 	min_left_y += dy;
 }
 
 void UI_Object::addMinRightY(signed int dy)
 {
 	if((dy + min_right_y > (signed int)max_y)||(dy + min_right_y < 0))
-		toLog("BUTTON MIN_RIGHT_Y out of range");
+		toLog("MIN_RIGHT_Y out of range");
 	min_right_y += dy;
 }
 
 void UI_Object::addMinBottomLeftX(signed int dx)
 {
 	if((dx + min_bottom_left_x > (signed int)max_x)||(dx + min_bottom_left_x < 0))
-		toLog("BUTTON MIN_BOTTOM_LEFT_X out of range");
+		toLog("MIN_BOTTOM_LEFT_X out of range");
 	min_bottom_left_x += dx;		
 }
 
 void UI_Object::addMinTopRightX(signed int dx)
 {
 	if((dx + min_top_right_x > (signed int)max_x)||(dx + min_top_right_x < 0))
+	{
 		toLog("BUTTON MIN_TOP_RIGHT_X out of range");
+		min_top_right_x = min_top_right_x;
+	}
 	min_top_right_x += dx;		
 }
 
@@ -647,13 +676,16 @@ void UI_Object::addMinBottomRightX(signed int dx)
 	min_bottom_right_x += dx;		
 }
 
-void UI_Object::resetButton()
+
+void UI_Object::setResolution(const Size resolution)
 {
-	currentButton=NULL;
-	currentButtonHasAlreadyLeft=false;	
-	currentButtonPressed=false;
+	max_x = resolution.GetWidth();
+	max_y = resolution.GetHeight();
 }
-	
+
+
+
+
 UI_Theme UI_Object::theme;
 UI_ToolTip* UI_Object::tooltip(NULL);
 UI_Object* UI_Object::toolTipParent(NULL);
@@ -664,9 +696,6 @@ Point UI_Object::mouse(Point(0,0));
 UI_EditField* UI_Object::editTextField(NULL);
 unsigned int UI_Object::mouseType(0);
 
-bool UI_Object::currentButtonPressed = false;
-bool UI_Object::currentButtonHasAlreadyLeft = false;
-UI_Button* UI_Object::currentButton = NULL;
 UI_Window* UI_Object::currentWindow = NULL;
 bool UI_Object::windowSelected = false;
 unsigned int UI_Object::redrawnObjects(0);

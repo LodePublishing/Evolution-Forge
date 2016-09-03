@@ -8,9 +8,9 @@
 #include "../ui/numberfield.hpp"
 
 #include "../core/database.hpp"
+#include "bitdepthmenu.hpp"
 #include "languagemenu.hpp"
 #include "resolutionmenu.hpp"
-#include "thememenu.hpp"
 
 class SettingsWindow:public UI_Window
 {
@@ -24,14 +24,21 @@ class SettingsWindow:public UI_Window
 		void updateItems();
 
 		void forceLanguageChange();
-		const bool hasLanguageChanged();
+		void reloadOriginalSize();
+		
+		const bool hasLanguageChanged() const;
+		const bool hasResolutionChanged() const;
+		const bool hasBitDepthChanged() const;
+		const bool hasFullScreenChanged() const;
 	private:
 
 		void reloadFromFile();
 		void loadFailsafeDefaults();
+		void closeMenus();
 
 		UI_Group* coreSettings;
 		UI_Group* guiSettings;
+		UI_Radio* uiSettingsRadio;
 //		UI_Group* defaultSettings;
 		UI_Group* loadSaveSettings;
 		
@@ -78,14 +85,34 @@ class SettingsWindow:public UI_Window
 	
 //		ThemeMenu* themeMenu;
 //		UI_Button* themeMenuButton;
-//		ResolutionMenu* resolutionMenu;
-//		UI_Button* resolutionMenuButton;
-		LanguageMenu* languageMenu;
 		UI_Button* languageMenuButton;
-//		UI_Radio* menuRadio;
+		UI_Button* resolutionMenuButton;
+		UI_Button* bitDepthMenuButton;
+		LanguageMenu* languageMenu;
+		ResolutionMenu* resolutionMenu;
+		BitDepthMenu* bitDepthMenu;
 
 		bool languageHasChanged;
+		bool resolutionHasChanged;
+		bool bitDepthHasChanged;
+		bool fullScreenHasChanged;
 };
+
+inline const bool SettingsWindow::hasLanguageChanged() const {
+	return(languageHasChanged);
+}
+
+inline const bool SettingsWindow::hasResolutionChanged() const {
+	return(resolutionHasChanged);
+}
+
+inline const bool SettingsWindow::hasBitDepthChanged() const {
+	return(bitDepthHasChanged);
+}
+
+inline const bool SettingsWindow::hasFullScreenChanged() const {
+	return(fullScreenHasChanged);
+}
 
 #endif
 

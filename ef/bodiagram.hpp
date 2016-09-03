@@ -19,6 +19,7 @@ class BoDiagramWindow : public UI_Window
 		void draw(DC * dc) const;
 
 		void assignAnarace(ANABUILDORDER* bod_anarace);
+		void reloadOriginalSize();
 
 	private:
 		ANABUILDORDER* anarace;

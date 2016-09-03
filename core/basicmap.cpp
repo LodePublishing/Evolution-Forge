@@ -29,7 +29,7 @@ unsigned int BASIC_MAP::calculateDistance(unsigned int i, unsigned int j)
 	if(location[i].getDistance(j) < 9999)
 		return(location[i].getDistance(j));
 	unsigned int min = 9999;
-	for(unsigned int k=1;k<getMaxLocations();k++)
+	for(unsigned int k=1;k<getMaxLocations();++k)
 		if(location[i].getDistance(k) < 9999)
 		{
 			unsigned int temp = location[i].getDistance(k) + calculateDistance(j, k);
@@ -42,32 +42,32 @@ unsigned int BASIC_MAP::calculateDistance(unsigned int i, unsigned int j)
 
 void BASIC_MAP::calculateLocationsDistances()
 {
-	for(unsigned int i=1;i<getMaxLocations();i++)
-		for(unsigned int j=1;j<getMaxLocations();j++)
+	for(unsigned int i=1;i<getMaxLocations();++i)
+		for(unsigned int j=1;j<getMaxLocations();++j)
 			if(location[i].getDistance(j) < 9999)
 				location[j].setDistance(i, location[i].getDistance(j));
 
-/*	for(unsigned int i = 1; i < getMaxLocations(); i++)
+/*	for(unsigned int i = 1; i < getMaxLocations(); ++i)
 	{
 		std::cout << "Location " << i << " ";
-		for(unsigned int j = 1; j < getMaxLocations(); j++)
+		for(unsigned int j = 1; j < getMaxLocations(); ++j)
 			std::cout << getLocation(i)->getDistance(j) << " ";
 		std::cout << std::endl;
 	}
 				
-	for(unsigned int i=1;i<getMaxLocations();i++)
-		for(unsigned int j=1;j<getMaxLocations();j++)
+	for(unsigned int i=1;i<getMaxLocations(); ++i)
+		for(unsigned int j=1;j<getMaxLocations(); ++j)
 			location[i].setDistance(j, calculateDistance(i, j));
 
-	for(unsigned int i = 1; i < getMaxLocations(); i++)
+	for(unsigned int i = 1; i < getMaxLocations(); ++i)
 	{
 		std::cout << "Location " << i << " ";
-		for(unsigned int j = 1; j < getMaxLocations(); j++)
+		for(unsigned int j = 1; j < getMaxLocations(); ++j)
 			std::cout << getLocation(i)->getDistance(j) << " ";
 		std::cout << std::endl;
 	}*/
 
-	for(unsigned int i=1;i<getMaxLocations();i++)
+	for(unsigned int i=1;i<getMaxLocations(); ++i)
 		location[i].calculateDistances();
 }
 

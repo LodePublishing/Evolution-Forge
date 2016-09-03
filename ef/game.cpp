@@ -13,8 +13,8 @@ Game::Game(UI_Object* game_parent, const unsigned int game_number, const unsigne
 	totalGeneration(0),
 	gameNumber(game_number),
 	gameMax(game_max),
-	splitGameButton(new UI_Button(this, Rect(0, 10, 0, 0), Size(10, 0), "Compare Game to...", MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	removeButton(new UI_Button(this, Rect(0, 10, 0, 0), Size(10, 0), "Remove Game...", MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE))
+	splitGameButton(new UI_Button(this, Rect(0, 12, 0, 0), Size(10, 0), COMPARE_GAME_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_BOLD_FONT, AUTO_SIZE)),
+	removeButton(new UI_Button(this, Rect(0, 12, 0, 0), Size(10, 0), REMOVE_GAME_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_BOLD_FONT, AUTO_SIZE))
 {
 	if(game_max>1)
 		splitGameButton->Hide();
@@ -41,17 +41,24 @@ Game::~Game()
 	delete removeButton;
 }
 
+void Game::reloadOriginalSize()
+{
+	setOriginalRect(UI_Object::theme.lookUpGameRect(GAME_WINDOW, gameNumber, gameMax));
+	setMaxHeight(UI_Object::theme.lookUpGameMaxHeight(GAME_WINDOW, gameNumber, gameMax));
+	UI_Window::reloadOriginalSize();
+	setBoHasChanged();
+}
+
 void Game::assignMap(const BASIC_MAP* game_map) 
 {
 	map = game_map;
 	mapPlayerCount = map->getMaxPlayer();
 
-
 //	TODO
-	for(unsigned int i = 0; i <= mapPlayerCount;i++)
+	for(unsigned int i = mapPlayerCount+1;i--;)
 		start[i]->assignMap(game_map);
 	
-	for(unsigned int i = 0; i < mapPlayerCount;i++)
+	for(unsigned int i = mapPlayerCount;i--;)
 	{
 		setHarvestSpeed(i+1, TERRA, database.getHarvestSpeed(TERRA, 0));
 		setHarvestSpeed(i+1, PROTOSS, database.getHarvestSpeed(PROTOSS, 0));
@@ -76,7 +83,7 @@ void Game::initSoup()
 void Game::fillGroups() 
 {
 	start[0]->fillAsNeutralPlayer(); // TODO
-	for(unsigned int i = 1; i <= mapPlayerCount;i++)
+	for(unsigned int i = 1; i <= mapPlayerCount;++i)
 		start[i]->fillAsActivePlayer();
 }
 
@@ -89,17 +96,16 @@ void Game::setMode(const unsigned int game_number, const unsigned int game_max)
 #endif
 	gameNumber = game_number;
 	gameMax = game_max;
-	scoreWindow->updateRectangles(UI_Object::theme.lookUpGameRect(SCORE_WINDOW, gameNumber, gameMax), UI_Object::theme.lookUpGameMaxHeight(SCORE_WINDOW, gameNumber, gameMax));
-	this->updateRectangles(UI_Object::theme.lookUpGameRect(GAME_WINDOW, gameNumber, gameMax), UI_Object::theme.lookUpGameMaxHeight(GAME_WINDOW, gameNumber, gameMax));
-	// databaseWindow->updateRectangles(UI_Object::theme.lookUpGameRect(DATABASE_WINDOW, gameNumber, gameMax), UI_Object::theme.lookUpGameMaxHeight(DATA_BASE_WINDOW, gameNumber, gameMax));
-
+	scoreWindow->setMode(game_number, game_max);
 	for(unsigned int i = mapPlayerCount;i--;)
 		player[i]->setMode(gameNumber, gameMax, i, mapPlayerCount);
+	
+	reloadOriginalSize();
 	resetData();
 	setNeedRedrawMoved();
 	if((game_max>1)||(game_number==1))
 	{
-		UI_Object::currentButton=NULL;
+		UI_Button::resetButton();
 		splitGameButton->Hide();
 	}
 	else splitGameButton->Show();
@@ -113,6 +119,10 @@ void Game::draw(DC* dc) const
 	UI_Window::draw(dc);
 }
 
+void Game::setBoHasChanged(const bool bo_has_changed)
+{
+	boHasChanged = bo_has_changed;
+}
 
 #include <sstream>
 void Game::process()
@@ -163,9 +173,7 @@ void Game::process()
 		}
 
 		
-//		anarace[i]->setOptimizing(scoreWindow->isOptimizing(i));
-//		std::ostringstream os; os << scoreWindow->isOptimizing(i);
-//		toLog(os.str());
+		anarace[i]->setOptimizing(scoreWindow->isOptimizing(i));
 	}		
 		
 	if(scoreWindow->getAssignedMap()>=0)
@@ -178,23 +186,26 @@ void Game::process()
 // ...
 
 //	soup->checkForChange(); ??
-	// TODO nicht gesamt Reset machen sondern je nach dem welcher Player resettet wurde!!
+// TODO nicht gesamt Reset machen sondern je nach dem welcher Player resettet wurde!!
+
 	if(UI_Window::getChangedFlag())
 	{
 		for(unsigned int i=mapPlayerCount;i--;)
-			if(scoreWindow->getInitMode(i) == INITIALIZED)
+			if(scoreWindow->isOptimizing(i))
 			{
-				player[i]->resetData();
+//				player[i]->resetData();
 				anarace[i]->restartData();
-				boHasChanged=true;
+				setBoHasChanged();
 			}
 		UI_Window::changeAccepted();
 	}
+	
 	if(UI_Window::getResetFlag())
 	{
 		for(unsigned int i=mapPlayerCount;i--;)
-			if(scoreWindow->getInitMode(i) == INITIALIZED)
-				player[i]->resetData();
+	//		if(scoreWindow->getInitMode(i) == INITIALIZED)
+			player[i]->resetData();
+		
 // soup->
 		initSoup();//&start);
 //		soup->setParameters(start); ??
@@ -250,16 +261,35 @@ void Game::newGeneration()
 //	unsigned int oldCode[MAX_PLAYER][MAX_LENGTH];
 //	for(unsigned int i=(*start->getMap())->getMaxPlayer();i--;)
 //		anarace[i]->copyCode(oldCode[i]);
-			
+	bool is_any_optimizing = false;
+		for(unsigned int i=mapPlayerCount;i--;)
+			if(scoreWindow->isOptimizing(i))
+			{
+				is_any_optimizing = true;
+				break;
+			}
+	
+	if(!is_any_optimizing)
+	{
+	if(soup->recalculateGeneration(anarace, &startForce)) // <- konstant
+		for(unsigned int i=mapPlayerCount;i--;)
+		{
+			setBoHasChanged();
+			player[i]->assignAnarace(anarace[i]);
+		}
+	} else
+	{
 //TODO: nach Ende eines Durchlaufs ist anarace 0, aber viele anderen Teile des Codes greifen noch drauf zu!!
 	if(soup->newGeneration(anarace, &startForce))
 		for(unsigned int i=mapPlayerCount;i--;)
-			if(scoreWindow->getInitMode(i) == INITIALIZED)
-		{
-//			if(anarace[i]->isDifferent(oldCode[i]))//, oldMarker[i]))
-				boHasChanged=true;
-			player[i]->assignAnarace(anarace[i]);
-		}
+			if(scoreWindow->isOptimizing(i))
+			{
+//				if(anarace[i]->isDifferent(oldCode[i]))//, oldMarker[i]))
+					setBoHasChanged();
+				player[i]->assignAnarace(anarace[i]);
+			}
+	}
+					
 }
 
 //virtual machen

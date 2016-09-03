@@ -31,9 +31,9 @@ enum eIsTransparent
 
 enum eTabs
 {
-	MAP_TAB = 27,
+	HELP_TAB=27,
 	SETTINGS_TAB,
-	TUTORIAL_TAB,
+	MAP_TAB,
 	MAX_TABS
 };
 
@@ -76,7 +76,7 @@ class UI_Window : public UI_Object
 		UI_Object* checkHighlight();
 
 // 		reconfigure rectangles depending on current theme settings
-		void updateRectangles(const Rect rect, const unsigned int max_height);
+//		void updateRectangles(const Rect rect, const unsigned int max_height);
 		
 		static const bool getChangedFlag();
 		static void setChangedFlag(const bool flag=true);
@@ -98,11 +98,14 @@ class UI_Window : public UI_Object
 		UI_Object* getScrollbar() const; 
 		const unsigned int getMaxHeight() const;
 
+		void setMaxHeight(const unsigned int max_height);
+
 		void wheelUp();
 		void wheelDown();
 		void moveScrollbarToTop();
 		void moveScrollbarToBottom();
 
+		void reloadOriginalSize();
 	protected:
 		UI_Radio* tabRow;
 	private:
@@ -119,7 +122,6 @@ class UI_Window : public UI_Object
 		eString titleString;
 		std::string titleParameter;
 		
-		Rect originalRect;
 // client area
 		Rect clientRect;
 		Rect clientStartRect;
@@ -162,10 +164,6 @@ inline const Rect& UI_Window::getRelativeClientRect() const {
 	return(clientRect);
 }
 
-inline const Rect UI_Window::getAbsoluteClientRect() const {
-	return(Rect(getAbsoluteClientRectPosition(), getClientRectSize()));
-}
-
 inline const Point UI_Window::getRelativeClientRectPosition() const {
 	return(clientRect.GetTopLeft());
 }
@@ -174,16 +172,20 @@ inline const Point UI_Window::getAbsoluteClientRectPosition() const {
 	return(clientRect.GetTopLeft()+getAbsolutePosition());
 }
 
+inline const Size& UI_Window::getClientRectSize() const {
+	return(clientRect.GetSize());
+}
+
+inline const Rect UI_Window::getAbsoluteClientRect() const {
+	return(Rect(getAbsoluteClientRectPosition(), getClientRectSize()));
+}
+
 inline const unsigned int UI_Window::getClientRectHeight() const {
 	return(clientRect.GetHeight());
 }
 
 inline const unsigned int UI_Window::getClientRectWidth() const {
 	return(clientRect.GetWidth());
-}
-
-inline const Size& UI_Window::getClientRectSize() const {
-	return(clientRect.GetSize());
 }
 
 inline const signed int UI_Window::getRelativeClientRectUpperBound() const {

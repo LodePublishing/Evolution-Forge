@@ -1,5 +1,4 @@
 #include "mainwindow.hpp"
-#include <sstream>
 #include "configuration.hpp"
 
 MainWindow::MainWindow() : 
@@ -7,27 +6,26 @@ MainWindow::MainWindow() :
 	ani(1),
 	ani2(0),
 	gizmo(true),
-	gameTabCount(0)
+	gameTabCount(0),
+	gameNumber(1)
 {
 // TODO: nach resolutions ordnen! *theme.lookUpRect etc. in data.txt eintragen
 // left:
 
 	for(unsigned int i = MAX_TABS;i--;)
 		tab[i]=NULL;
- 	tab[0] = new UI_Button(NULL, Rect(10, 1, theme.lookUpButtonWidth(TAB_BUTTON), 10), Size(20, 0), "New Game", TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+ 	tab[0] = new UI_Button(NULL, Rect(10, 1, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), NEW_GAME_STRING, TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 // right:
-	tab[TUTORIAL_TAB] = new UI_Button(NULL, Rect(10, 1, theme.lookUpButtonWidth(TAB_BUTTON), 10), Size(20, 0), TUTORIAL_TAB_STRING, TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
-	tab[SETTINGS_TAB] = new UI_Button(NULL, Rect(10, 1, theme.lookUpButtonWidth(TAB_BUTTON), 10), Size(20, 0), SETTINGS_TAB_STRING, TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
-	tab[MAP_TAB] = new UI_Button(NULL, Rect(10, 1, theme.lookUpButtonWidth(TAB_BUTTON), 10), Size(20, 0), MAP_TAB_STRING, TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	tab[MAP_TAB] = new UI_Button(NULL, Rect(0, 1, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), MAP_TAB_STRING, TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	tab[SETTINGS_TAB] = new UI_Button(NULL, Rect(0, 1, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), SETTINGS_TAB_STRING, TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	tab[HELP_TAB] = new UI_Button(NULL, Rect(0, 1, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), HELP_TAB_STRING, TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 
-//	int step=theme.lookUpButtonAnimation(TAB_BUTTON)->speed/(MAX_TABS-1);
 	for(unsigned int i=MAX_TABS;i--;)
-	if(tab[i]!=NULL)
-	{
-//		tab[i]->updateToolTip((eString)(BASIC_TAB_TOOLTIP_STRING+i-1));
-		addTab(tab[i], i);
-//		tab[i]->setFrameNumber((i-1)*step);
-	}
+		if(tab[i]!=NULL)
+		{
+//			tab[i]->updateToolTip((eString)(BASIC_TAB_TOOLTIP_STRING+i-1));
+			addTab(tab[i], i);
+		}
 }
 
 MainWindow::~MainWindow()
@@ -36,23 +34,34 @@ MainWindow::~MainWindow()
 		delete tab[i];
 }
 
+void MainWindow::reloadOriginalSize()
+{
+	for(unsigned int i = 0; i < MAX_TABS; i++)
+		if(tab[i])
+		{
+			tab[i]->setOriginalSize(Size(theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
+			tab[i]->reloadOriginalSize();
+		}
+	setOriginalRect(theme.lookUpGlobalRect(MAIN_WINDOW));
+	setMaxHeight(theme.lookUpGlobalMaxHeight(MAIN_WINDOW));
+	UI_Window::reloadOriginalSize();
+}
 void MainWindow::addNewGameTab()
 {
 	delete(tab[gameTabCount]); // 'new game' loeschen
 	removeTab(gameTabCount);
-	UI_Object::currentButton = NULL;
-	
-	std::ostringstream os;
-	os << "Game " << gameTabCount+1;
-	tab[gameTabCount] = new UI_Button(this, Rect(10, 1, theme.lookUpButtonWidth(TAB_BUTTON), 0), Size(20, 0), os.str(), TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
-	addTab(tab[gameTabCount], gameTabCount);
-	gameTabCount++;
+	UI_Button::resetButton();
 
+	tab[gameTabCount] = new UI_Button(this, Rect(10, 1, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), UI_Object::theme.lookUpFormattedString(GAME_NUMBER_STRING, gameNumber), TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	addTab(tab[gameTabCount], gameTabCount);
+	++gameTabCount;
+	++gameNumber;
+	
 	if(gameTabCount<MAX_GAME_TABS)
 	{
-	 	tab[gameTabCount] = new UI_Button(this, Rect(10, 1, theme.lookUpButtonWidth(TAB_BUTTON), 0), Size(20, 0), "New Game", TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	 	tab[gameTabCount] = new UI_Button(this, Rect(10, 1, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), NEW_GAME_STRING, TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 		addTab(tab[gameTabCount], gameTabCount);
-	}
+	}	
 }
 
 const unsigned int MainWindow::getGameTabCount() const
@@ -68,15 +77,15 @@ void MainWindow::removeGameTab(const unsigned int game_number)
 	}
 #endif
 	removeTab(game_number);
-//	UI_Object::currentButton = NULL;
+//	UI_Button::resetButton();
 	UI_Object::currentWindow = NULL;
 	delete(tab[game_number]);
-	for(unsigned int i = game_number; i < gameTabCount-1;i++)
+	for(unsigned int i = game_number; i < gameTabCount-1;++i)
 		tab[i] = tab[i+1];
-	gameTabCount--;	
+	--gameTabCount;
 	if(gameTabCount==MAX_GAME_TABS-1) // alles voll => letztes durch new game ersetzen
 	{
-	 	tab[gameTabCount] = new UI_Button(this, Rect(10, 1, theme.lookUpButtonWidth(TAB_BUTTON), 0), Size(20, 0), "New Game", TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	 	tab[gameTabCount] = new UI_Button(this, Rect(10, 1, theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(20, 0), NEW_GAME_STRING, TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 		addTab(tab[gameTabCount], gameTabCount);
 	} else 
 	{
@@ -100,9 +109,9 @@ void MainWindow::continueOptimizationAnimation(const bool running)
 	{
 		if(ani2>1)
 		{
-			ani++;
+			++ani;
 			ani2 = 0;
-		} else ani2++;
+		} else ++ani2;
 	}
 	else ani = 1;
 	if(ani>30) ani = 1;
@@ -121,19 +130,18 @@ const Size MainWindow::helper(DC* dc, Point point, const unsigned int dx, const 
 void MainWindow::draw(DC* dc) const
 {
 //jedem player ein mainwindow zuweisen!
-	UI_Window::draw(dc);
 
 	if(checkForNeedRedraw())
 	{
-		dc->SetFont(UI_Object::theme.lookUpFont(VERY_LARGE_NORMAL_BOLD_FONT));
+		dc->SetFont(UI_Object::theme.lookUpFont(VERY_LARGE_BOLD_FONT));
 //		std::string str="Evolution Forge";
 //		Size s;
-		Point point = Point(getAbsoluteClientRectPosition() + Size(getWidth()/2 - 120, 25));
-//		for(unsigned int i=0;i<str.size();i++)
+		Point point = Point(getAbsoluteClientRectPosition() + Size(getWidth()/2 - 120, 0));
+//		for(unsigned int i=0;i<str.size();++i)
 //			s = helper(dc, point, s.GetWidth(), i, str.substr(0, i+1));
-		dc->SetTextForeground(DC::toSDL_Color(0, 0, 85));
+		dc->SetTextForeground(DC::toSDL_Color(10, 10, 100));
 		dc->DrawText("Evolution Forge v1.64", point+Size(2,2));
-		dc->SetTextForeground(DC::toSDL_Color(50, 50, 85));
+		dc->SetTextForeground(DC::toSDL_Color(75, 75, 100));
 		dc->DrawText("Evolution Forge v1.64", point);
 //		dc->SetTextForeground(DC::toSDL_Color(0,0,85));
 //		dc->DrawText(CORE_VERSION, point + Size(20, 30) + Size(2,2));
@@ -142,6 +150,7 @@ void MainWindow::draw(DC* dc) const
 //		if(UI_Object::tooltip)
 //			UI_Object::tooltip->draw(dc);
 	}
+	UI_Window::draw(dc);
 //	
 #if 0
 // ------ MOUSE DRAWING ------

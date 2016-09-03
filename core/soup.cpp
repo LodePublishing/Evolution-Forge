@@ -121,7 +121,7 @@ void SOUP::initSoup(START* (*start)[MAX_INTERNAL_PLAYER])
 		analyzedBuildOrder[k]->assignStart((*start)[k+1]);
 		analyzedBuildOrder[k]->setPlayerNumber(k+1);
 	}
-	for(k = mapPlayerNum; k < MAX_PLAYER; k++)
+	for(k = mapPlayerNum; k < MAX_PLAYER; ++k)
 	{
 		delete analyzedBuildOrder[k];
 		analyzedBuildOrder[k] = NULL;
@@ -209,7 +209,7 @@ void SOUP::calculateBuildOrder(const unsigned int bo_num)
 			buildOrder[k*groupSize+bo_num]->eraseIllegalCode();
 //			buildOrder[k*groupSize+bo_num]->eraseUselessCode(); //TODO Problem beim switchen, falls schon goals gesetzt waren
 // preserve buildOrder[0]s genes					
-			if((bo_num!=0)&&(rand()%2))
+			if(bo_num!=0)
 				buildOrder[k*groupSize+bo_num]->mutateGeneCode(/*analyzedBuildOrder[k]->getFixed()*/);
 		}
 			
@@ -222,7 +222,6 @@ void SOUP::calculateBuildOrder(const unsigned int bo_num)
 				complete&=buildOrder[k*groupSize+bo_num]->calculateStep();
 	}
 }
-
 
 const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER], const UNIT (*startForce)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]) //reset: have the goals/settings been changed?
 {
@@ -346,13 +345,13 @@ const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_P
 	if(tournaments>0)
 	{
 //jetzt: sortieren
-		for(int k=0;k<mapPlayerNum-1;k++)
+		for(int k=0;k<mapPlayerNum-1; ++k)
 		if(analyzedBuildOrder[k]->isOptimizing())
-			for(int i=0;i<tournaments;i++)
+			for(int i=0;i<tournaments; ++i)
 			{
-				for(int j=(k*groupSize)+i*(100/ga->getCrossOver());j<(k*groupSize)+(i+1)*(100/ga->getCrossOver());j++) //diese (100/ga->crossOver) Programme untereinander sortieren
+				for(int j=(k*groupSize)+i*(100/ga->getCrossOver());j<(k*groupSize)+(i+1)*(100/ga->getCrossOver()); ++j) //diese (100/ga->crossOver) Programme untereinander sortieren
 				{
-					for(int l=(k*groupSize)+i*(100/ga->getCrossOver());l<j;l++)
+					for(int l=(k*groupSize)+i*(100/ga->getCrossOver());l<j; ++l)
 						if((buildOrder[j]->getpFitness()>buildOrder[l]->getpFitness())||
 						  ((buildOrder[j]->getpFitness()==buildOrder[l]->getpFitness())&&(buildOrder[j]->getsFitness()>buildOrder[l]->getsFitness()))))
 							  std::swap(buildOrder[l], buildOrder[j]);
@@ -361,9 +360,9 @@ const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_P
 //JETZT: Player in z.B. 20er (bei crossOver=5) Gruppen sortiert => besten 2 herausnehmen, schlechtesten 2 ersetzen
 																				
 																				
-//		for(int k=0;k<mapPlayerNum-1;k++)
+//		for(int k=0;k<mapPlayerNum-1; ++k)
 //		if(analyzedBuildOrder[k]->isOptimizing())
-//			for(int i=0;i<tournaments;i++)
+//			for(int i=0;i<tournaments; ++i)
 //			{
 //				int p1=i*(100/ga->getCrossOver())+(k*groupSize);
 //				int p2=i*(100/ga->getCrossOver())+(k*groupSize)+1; //evtl nur unterschiedlichen nehmen? => phaenocode zusammenzaehlen ~
@@ -386,12 +385,12 @@ const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_P
 		if(analyzedBuildOrder[k]->isOptimizing()) //~~ TODO evtl isOptimizing stattdessen...
 		{
 			analyzedBuildOrder[k]->fitnessAverage=0;
-			for(unsigned int i=k*groupSize;i<(k+1)*groupSize;i++)
+			for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
 				analyzedBuildOrder[k]->fitnessAverage+=buildOrder[i]->getpFitness();
 			analyzedBuildOrder[k]->fitnessAverage/=(MAX_PROGRAMS/mapPlayerNum);
 			analyzedBuildOrder[k]->fitnessVariance=0;
 			
-			for(unsigned int i=k*groupSize;i<(k+1)*groupSize;i++)
+			for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
 			{
 				unsigned int z = analyzedBuildOrder[k]->fitnessAverage-buildOrder[i]->getpFitness();
 				analyzedBuildOrder[k]->fitnessVariance += (z*z);
@@ -404,7 +403,7 @@ const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_P
 #if 0
 if(analyzedBuildOrder[k]->getUnchangedGenerations()>=coreConfiguration.getMaxGenerations())
 			{
-				for(unsigned int i=k*groupSize;i<(k+1)*groupSize;i++)
+				for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
 					buildOrder[i]->resetGeneCode();
 
 				analyzedBuildOrder[k]->setRun(analyzedBuildOrder[k]->getRun()+1);
@@ -422,6 +421,118 @@ if(analyzedBuildOrder[k]->getUnchangedGenerations()>=coreConfiguration.getMaxGen
 		}
 	#endif
 	}
+	for(unsigned int i=MAX_PLAYER;i--;)
+		previous_analyzed_buildorder[i]=analyzedBuildOrder[i];
+
+	//	~~
+	return(true);
+//	return(&(analyzedBuildOrder[0])); TODO
+}
+
+const bool SOUP::recalculateGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER], const UNIT (*startForce)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]) //reset: have the goals/settings been changed?
+{
+	for(unsigned int k = mapPlayerNum; k--;)
+	{
+		if(previous_analyzed_buildorder[k])
+			analyzedBuildOrder[k]->writeProgramBackToCode(previous_analyzed_buildorder[k]->getProgramList());
+	}
+
+	const unsigned int groupSize=MAX_PROGRAMS/mapPlayerNum;
+	for(unsigned int k=mapPlayerNum;k--;)
+		buildOrder[k*groupSize]->copyCode(*analyzedBuildOrder[k]);
+	memcpy(&temporaryForce, &((*startForce)[0][0]), sizeof(temporaryForce));
+	//reset code && calculate 
+	for(unsigned int k = mapPlayerNum; k--;)
+	{
+		buildOrder[k*groupSize]->assignUnits(&temporaryForce);
+		buildOrder[k*groupSize]->prepareForNewGeneration();
+		buildOrder[k*groupSize]->initializePlayer();
+		buildOrder[k*groupSize]->adjustHarvestAllLocations();
+		// evtl noch switch ohne mutation...
+//		buildOrder[k*groupSize]->eraseIllegalCode();
+	}
+	bool complete=false;
+	while(!complete)
+	{
+		complete=true;
+		for(unsigned int k=mapPlayerNum;k--;)
+			complete&=buildOrder[k*groupSize]->calculateStep();
+	}
+
+	for(unsigned int k = mapPlayerNum; k--;)
+	{
+		analyzedBuildOrder[k]->setMaxpFitness(buildOrder[k*groupSize]->getpFitness());
+		analyzedBuildOrder[k]->setMaxsFitness(buildOrder[k*groupSize]->getsFitness());
+		analyzedBuildOrder[k]->setMaxtFitness(buildOrder[k*groupSize]->gettFitness());
+	}
+
+	memcpy(&temporaryForce, &((*startForce)[0][0]), sizeof(temporaryForce));
+
+	for(unsigned int k = mapPlayerNum; k--;)
+	{
+	//	if(previous_analyzed_buildorder[k])
+	//		analyzedBuildOrder[k]->writeProgramBackToCode(previous_analyzed_buildorder[k]->getProgramList());
+		analyzedBuildOrder[k]->prepareForNewGeneration();
+		analyzedBuildOrder[k]->initializePlayer();
+		analyzedBuildOrder[k]->adjustHarvestAllLocations();
+	}
+// supply is nicht resettet... bzw. falsch... in resetSupply
+	complete=false;
+	while(!complete)
+	{
+		complete = true;
+		for(unsigned int k = mapPlayerNum; k--;)
+			complete&=analyzedBuildOrder[k]->calculateStep();
+	}
+//		analyzedBuildOrder[0]->backupMap();  backup&&restore map currently off-line!!!
+//	} else
+//		analyzedBuildOrder[0]->restoreMap();
+
+
+// SOME POST PROCESSING
+// CALCULATE FITNESS AVERAGE & VARIANCE
+	for(unsigned int k=mapPlayerNum;k--;)
+		{
+			analyzedBuildOrder[k]->fitnessAverage=0;
+			for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
+				analyzedBuildOrder[k]->fitnessAverage+=buildOrder[i]->getpFitness();
+			analyzedBuildOrder[k]->fitnessAverage/=(MAX_PROGRAMS/mapPlayerNum);
+			analyzedBuildOrder[k]->fitnessVariance=0;
+			
+			for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
+			{
+				unsigned int z = analyzedBuildOrder[k]->fitnessAverage-buildOrder[i]->getpFitness();
+				analyzedBuildOrder[k]->fitnessVariance += (z*z);
+			}
+			analyzedBuildOrder[k]->fitnessVariance/=MAX_PROGRAMS;
+//			analyzedBuildOrder[k]->analyzeBuildOrder(); TODO?
+//			analyzedBuildOrder[k]->getPlayer()->getGoal()->bestTime=analyzedBuildOrder[k]->getTimer(); TODO !!
+//			analyzedBuildOrder[k]->setUnchangedGenerations(analyzedBuildOrder[k]->getUnchangedGenerations()+1);
+//			analyzedBuildOrder[k]->setTotalGeneration(analyzedBuildOrder[k]->getTotalGeneration()+1); TODO
+#if 0
+if(analyzedBuildOrder[k]->getUnchangedGenerations()>=coreConfiguration.getMaxGenerations())
+			{
+				for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
+					buildOrder[i]->resetGeneCode();
+
+				analyzedBuildOrder[k]->setRun(analyzedBuildOrder[k]->getRun()+1);
+				analyzedBuildOrder[k]->setTotalGeneration(0);
+				analyzedBuildOrder[k]->setMaxpFitness(0);
+				analyzedBuildOrder[k]->setMaxsFitness(0);
+				analyzedBuildOrder[k]->setMaxtFitness(0);
+				analyzedBuildOrder[k]->setUnchangedGenerations(0);
+
+				isNewRun=true;
+
+				
+
+			return(&(analyzedBuildOrder[0])/*Save[analyzedBuildOrder[k]->getRun()]*/); //~~~~
+		}
+	#endif
+	}
+
+// SOME POST PROCESSING
+// CALCULATE FITNESS AVERAGE & VARIANCE
 	for(unsigned int i=MAX_PLAYER;i--;)
 		previous_analyzed_buildorder[i]=analyzedBuildOrder[i];
 

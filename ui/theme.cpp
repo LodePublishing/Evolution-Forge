@@ -7,6 +7,7 @@
 
 UI_Theme::UI_Theme():
 	resolution(RESOLUTION_640x480),
+	bitdepth(DEPTH_32BIT),
 	language(GERMAN_LANGUAGE),
 	colorTheme(DARK_BLUE_THEME)
 {
@@ -54,9 +55,11 @@ UI_Theme::UI_Theme():
 							maxPlayerHeightList[i][j][k][l][m][n] = 0;
 						}
 			}
+		for(unsigned int j=MAX_BUTTON_WIDTH_TYPES;j--;)
+			buttonWidthList[i][j] = 0;
 	}
-	for(unsigned int i=MAX_BUTTONS;i--;)
-		buttonAnimationList[i]=0;
+	for(unsigned int i=MAX_BUTTON_COLORS_TYPES;i--;)
+		buttonColorsList[i] = NULL;
 
 }
 
@@ -98,8 +101,8 @@ UI_Theme::~UI_Theme()
 			}
         }
 
-	for(unsigned int i=MAX_BUTTONS;i--;)
-		delete buttonAnimationList[i];
+	for(unsigned int i=MAX_BUTTON_COLORS_TYPES;i--;)
+		delete buttonColorsList[i];
 }
 
 
@@ -131,6 +134,7 @@ const std::string UI_Theme::lookUpFormattedString(const eString id, const unsign
 #endif
 	std::string bla = *(stringList[language][id]);
 	std::ostringstream os;
+	os.str("");
 	os << i; 
 	findandreplace(bla, "%i", os.str());
 	return(bla);
@@ -144,6 +148,7 @@ const std::string UI_Theme::lookUpFormattedString(const eString id, const unsign
 #endif
 	std::string bla = *(stringList[language][id]);
 	std::ostringstream os;
+	os.str("");
 	os << i;findandreplace(bla, "%i", os.str());os.str("");
 	os << j;findandreplace(bla, "%i", os.str());os.str("");
 	os << k;findandreplace(bla, "%i", os.str());
@@ -159,6 +164,7 @@ const std::string UI_Theme::lookUpFormattedString(const eString id, const unsign
 #endif
 	std::string bla=*(stringList[language][id]);
 	std::ostringstream os;
+	os.str("");
 	if(bla.find("%2i")!=std::string::npos)
 	{
 		os << std::setfill('0') << std::setw(2) << i;
@@ -294,7 +300,7 @@ const eDataType getDataType(const std::string& item)
 	if(item=="@PENS") return(PEN_DATA_TYPE);else
 	if(item=="@BRUSHES") return(BRUSH_DATA_TYPE);else
 	if(item=="@BITMAPS") return(BITMAP_DATA_TYPE);else
-	if(item=="@BUTTON_ANIMATION") return(BUTTON_ANIMATION_DATA_TYPE);else
+	if(item=="@BUTTON_COLORS") return(BUTTON_COLOR_DATA_TYPE);else
 	if(item=="@BUTTON_WIDTH") return(BUTTON_WIDTH_DATA_TYPE);else
 	return(ZERO_DATA_TYPE);
 }
@@ -417,8 +423,9 @@ eGlobalWindow parse_global_window(const std::string& item)
 {
 	if(item=="Main window") return(MAIN_WINDOW);else
 	if(item=="Message window") return(MESSAGE_WINDOW);else
-	if(item=="Tutorial window") return(TUTORIAL_WINDOW);else
+	if(item=="Help window") return(HELP_WINDOW);else
 	if(item=="Settings window") return(SETTINGS_WINDOW);else
+	if(item=="Map window") return(MAP_WINDOW);else
 	if(item=="Info window") return(INFO_WINDOW);else
 	if(item=="Tech tree window") return(TECHTREE_WINDOW);else
 	if(item=="Edit field window") return(EDIT_FIELD_WINDOW);else
@@ -487,7 +494,7 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 	Rect* rect = new Rect();
 	bool xpart=false; bool ypart=false; bool xypart=false; bool dxpart=true; bool dypart=false; bool hpart=false;
 
-	for(unsigned int i = 1; i <49;i++)
+	for(unsigned int i = 1; i < 49; ++i)
 	{
 		if(dxpart)
 		{
@@ -521,8 +528,8 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 		} else // Befehl
 		{
 			eCommand command = parse_commands(parameter[i], horizontal_mirror);
-			i++;
-			int win;
+			++i;
+			int win=0;
 			if(type==0) win = parse_global_window(parameter[i]);else
 			if(type==1) win = parse_game_window(parameter[i]);else
 			if(type==2) win = parse_player_window(parameter[i]);
@@ -532,11 +539,11 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 			}
 			switch(command)
 			{
-				case ABSOLUTE_COORDINATES_COMMAND:i--;xpart=true;xypart=true;break;
-				case ABSOLUTE_X_COORDINATE_COMMAND:i--;xpart=true;break;
-				case ABSOLUTE_Y_COORDINATE_COMMAND:i--;ypart=true;break;
+				case ABSOLUTE_COORDINATES_COMMAND:--i;xpart=true;xypart=true;break;
+				case ABSOLUTE_X_COORDINATE_COMMAND:--i;xpart=true;break;
+				case ABSOLUTE_Y_COORDINATE_COMMAND:--i;ypart=true;break;
 				case DOCK_WITH_LEFT_BORDER_OF_COMMAND:rect->SetLeft(-10 + windows[win]->GetLeft() - rect->GetWidth());break;
-				case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:rect->SetLeft(10 + windows[win]->GetRight());break;
+				case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:rect->SetLeft(0 + windows[win]->GetRight());break;
 				case DOCK_WITH_LOWER_BORDER_OF_COMMAND:rect->SetTop(25 + windows[win]->GetBottom());break;
 				case DOCK_WITH_UPPER_BORDER_OF_COMMAND:rect->SetTop(25 + windows[win]->GetTop() - rect->GetHeight());break;
 
@@ -554,7 +561,7 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 				case DOCK_RIGHT_INSIDE_OF_COMMAND:rect->SetLeft(-15+windows[win]->GetRight() - rect->GetWidth());break;
 				case DOCK_TOP_INSIDE_OF_COMMAND:rect->SetTop(windows[win]->GetTop());break;
 				case DOCK_BOTTOM_INSIDE_OF_COMMAND:rect->SetTop(-15+windows[win]->GetBottom() - rect->GetHeight());break;*/
-				default:i--;;break;
+				default:--i;;break;
 			}
 		}
 	}
@@ -615,7 +622,7 @@ void UI_Theme::loadStringFile(const std::string& dataFile)
 		}
 		char* line2=line;		
 		while(((*line2)==32)||((*line2)==9))
-			line2++;
+			++line2;
 		if((*line2)=='\0')
 			continue;
 		
@@ -628,9 +635,9 @@ void UI_Theme::loadStringFile(const std::string& dataFile)
 		while(((buffer=strtok(NULL,",\0"))!=NULL)&&(k<MAX_PARAMETERS))
 		{
 			while(((*buffer)==32)||((*buffer)==9))
-				buffer++;
+				++buffer;
 			parameter[k]=buffer;
-			k++;
+			++k;
 		}
 		if((buffer=strtok(NULL,",\0"))!=NULL)
 		{
@@ -708,30 +715,30 @@ void UI_Theme::loadStringFile(const std::string& dataFile)
 			{
 				switch(sub_mode)
 				{
-					case LANGUAGE_SUB_DATA_TYPE:current_language=getLanguageSubDataEntry(line2);break;
-					case RESOLUTION_SUB_DATA_TYPE:current_resolution=getResolutionSubDataEntry(line2);break;
-					case COLOR_THEME_SUB_DATA_TYPE:current_theme=getThemeSubDataEntry(line2);break;
+					case LANGUAGE_SUB_DATA_TYPE:current_language = getLanguageSubDataEntry(line2);break;
+					case RESOLUTION_SUB_DATA_TYPE:current_resolution = getResolutionSubDataEntry(line2);break;
+					case COLOR_THEME_SUB_DATA_TYPE:current_theme = getThemeSubDataEntry(line2);break;
 					default:break;
 				}
-				current_line=0;
+				current_line = 0;
 			}
 			// => hat nur 1 Ebene => Position festgestellt!
-			else if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE))
+			else if((sub_mode != ZERO_SUB_DATA_TYPE)&&(sub_sub_mode == ZERO_SUB_SUB_DATA_TYPE))
 			{
 				switch(mode)
 				{
-					case STRING_DATA_TYPE:stringList[current_language][current_line]=new std::string(parameter[0]);
+					case STRING_DATA_TYPE:stringList[current_language][current_line] = new std::string(parameter[0]);
 					default:break;
 				}
-				current_line++;
+				++current_line;
 			}
-			// 0 ebenen -> buttons :) BUTTON_DATA_TYPE?? TODO
+			// 0 ebenen -> buttons :) BUTTON_COLORS_DATA_TYPE?? TODO
 		} // end if mode != ZERO_DATA_TYPE
 	} // end while
 
 	for(unsigned int i = MAX_LANGUAGES; i--;)
 		for(unsigned int j = MAX_STRINGS; j--;)
-			if(stringList[i][j]==NULL)
+			if(stringList[i][j] == NULL)
 				stringList[i][j] = new std::string("ERROR");
 
 }
@@ -744,9 +751,9 @@ void UI_Theme::loadWindowData(const std::string& dataFile, const unsigned int ga
 	std::string parameter[MAX_PARAMETERS];
 	unsigned int value[MAX_PARAMETERS];
 	
-	eGameType game_type=ZERO_GAME_TYPE;
-	ePlayerType player_type=ZERO_PLAYER_TYPE;
-	eResolution current_resolution=ZERO_RESOLUTION;
+	eGameType game_type = ZERO_GAME_TYPE;
+	ePlayerType player_type = ZERO_PLAYER_TYPE;
+	eResolution current_resolution = ZERO_RESOLUTION;
 
 	unsigned int current_line = 0;
 	
@@ -784,7 +791,7 @@ void UI_Theme::loadWindowData(const std::string& dataFile, const unsigned int ga
 			value[i]=0;
 		}
 		char* line2=line;		
-		while(((*line2)==32)||((*line2)==9)) line2++;
+		while(((*line2)==32)||((*line2)==9)) ++line2;
 		if((*line2)=='\0') continue;
 		
 		strcpy(old,line2);
@@ -795,9 +802,9 @@ void UI_Theme::loadWindowData(const std::string& dataFile, const unsigned int ga
 		while(((buffer=strtok(NULL,",\0"))!=NULL)&&(k<MAX_PARAMETERS))
 		{
 			while(((*buffer)==32)||((*buffer)==9))
-				buffer++;
+				++buffer;
 			parameter[k]=buffer;
-			k++;
+			++k;
 		}
 		if((buffer=strtok(NULL,",\0"))!=NULL)
 		{
@@ -812,7 +819,7 @@ void UI_Theme::loadWindowData(const std::string& dataFile, const unsigned int ga
 	
 		if(current_resolution==ZERO_RESOLUTION)
 		{
-			current_resolution=getResolutionSubDataEntry(parameter[0]);
+			current_resolution = getResolutionSubDataEntry(parameter[0]);
 #ifdef _SCC_DEBUG
 //			if(mode!=ZERO_DATA_TYPE)
 //				toLog("Loading "+parameter[0]+"...");
@@ -837,7 +844,7 @@ void UI_Theme::loadWindowData(const std::string& dataFile, const unsigned int ga
 			}
 			else if(current_resolution==ZERO_RESOLUTION)
 			{
-				current_resolution=getResolutionSubDataEntry(line2);
+				current_resolution = getResolutionSubDataEntry(line2);
 				current_line=0;
 			} else if(game_type==ZERO_GAME_TYPE)
 			{
@@ -850,7 +857,7 @@ void UI_Theme::loadWindowData(const std::string& dataFile, const unsigned int ga
 				if((gameNumber==1)&&(current_line==0))
 					gameRectList[current_resolution][gameNumber][maxGames-1][current_line+1]->SetTopLeft(gameRectList[current_resolution][gameNumber][maxGames-1][current_line+1]->GetTopLeft() + Size(globalRectList[current_resolution][MAIN_WINDOW]->GetWidth()/2,0));
 				setMaxGameHeight(current_resolution, gameNumber, maxGames-1, current_line+1, max_height);
-				current_line++;
+				++current_line;
 			}
 			else if(player_type==ZERO_PLAYER_TYPE)
 			{
@@ -861,14 +868,28 @@ void UI_Theme::loadWindowData(const std::string& dataFile, const unsigned int ga
 				unsigned int max_height=0;
 				playerRectList[current_resolution][gameNumber][maxGames-1][game_type-2][player_type-1][current_line+1] = parse_window(parameter, playerRectList[current_resolution][gameNumber][maxGames-1][game_type-2][player_type-1], max_height, 2, (gameNumber==1));
 				setMaxPlayerHeight(current_resolution, gameNumber, maxGames-1, game_type-2, player_type-1, current_line+1, max_height);
-				current_line++;
+				++current_line;
 			}
 		} 
 	} 
 }
 
-
-
+// after a bit-depth change
+void UI_Theme::updateColors(SDL_Surface* surface)
+{
+	for(unsigned int i = MAX_COLOR_THEMES;i--;)
+	{
+		for(unsigned int j = MAX_COLORS;j--;)
+			if(colorList[i][j]!=NULL)
+				colorList[i][j]->updateColor(surface);
+		for(unsigned int j = MAX_BRUSHES;j--;)
+			if(brushList[i][j]!=NULL)
+				brushList[i][j]->updateColor(surface);
+		for(unsigned int j = MAX_PENS;j--;)
+			if(penList[i][j]!=NULL)
+				penList[i][j]->updateColor(surface);
+	}
+}
 
 void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& bitmapDir, const std::string& fontDir, DC* dc)
 {
@@ -903,7 +924,7 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 		return;
 	}
 	
-	while(pFile.getline(line,1024))
+	while(pFile.getline(line, 1024))
 	{
 		if(pFile.fail())
 		{
@@ -922,7 +943,7 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 		}
 		char* line2=line;		
 		while(((*line2)==32)||((*line2)==9))
-			line2++;
+			++line2;
 		if((*line2)=='\0')
 			continue;
 		
@@ -935,9 +956,9 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 		while(((buffer=strtok(NULL,",\0"))!=NULL)&&(k<MAX_PARAMETERS))
 		{
 			while(((*buffer)==32)||((*buffer)==9))
-				buffer++;
+				++buffer;
 			parameter[k]=buffer;
-			k++;
+			++k;
 		}
 		if((buffer=strtok(NULL,",\0"))!=NULL)
 		{
@@ -1041,12 +1062,13 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 						std::string t=fontDir+parameter[0]+".ttf";
 						fontList[current_resolution]/*[current_language]*/[current_line]=new Font(t, value[1]/*, get_font_style1(parameter[2]), get_font_style2(parameter[3]), get_font_style3(parameter[4]), false, _T(""), FONTENCODING_DEFAULT*/);
 //						std::ostringstream os;
+//						os.str("");
 //						os << "- " << current_resolution << " " << current_line << " " << t << " " << value[1];
 //						toLog(os.str());
 					}break;
 					case BUTTON_WIDTH_DATA_TYPE:
 					{
-						buttonWidth[current_resolution][current_line] = value[0];
+						buttonWidthList[current_resolution][current_line] = value[0];
 					}break;
 					case WINDOW_DATA_TYPE:
 					{
@@ -1056,26 +1078,26 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 					}break;
 					default:break;
 				}
-				current_line++;
+				++current_line;
 			}
-			// 0 ebenen -> buttons :) BUTTON_DATA_TYPE?? TODO
-			else if((sub_mode==ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE)&&(mode==BUTTON_ANIMATION_DATA_TYPE))
+			// 0 ebenen -> buttons :) BUTTON_COLORS_DATA_TYPE?? TODO
+			else if((sub_mode==ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE)&&(mode==BUTTON_COLOR_DATA_TYPE))
 			{
-				buttonAnimationList[current_line] = new ButtonAnimation;
-				buttonAnimationList[current_line]->speed=value[0];
-				buttonAnimationList[current_line]->type=(eButtonAnimationType)value[1];
+				buttonColorsList[current_line] = new ButtonColorsType;
+				buttonColorsList[current_line]->speed=value[0];
+				buttonColorsList[current_line]->type=(eButtonAnimationType)value[1];
 				for(unsigned int i=MAX_BUTTON_ANIMATION_PHASES;i--;)
 				{
-					buttonAnimationList[current_line]->startBrush[i]=(eBrush)(value[0*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonAnimationList[current_line]->endBrush[i]=(eBrush)(value[1*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonAnimationList[current_line]->startTextColor[i]=(eColor)(value[2*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonAnimationList[current_line]->endTextColor[i]=(eColor)(value[3*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonAnimationList[current_line]->startBorderPen[i]=(ePen)(value[4*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonAnimationList[current_line]->endBorderPen[i]=(ePen)(value[5*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-					buttonAnimationList[current_line]->bitmap[i]=(eBitmap)(value[6*MAX_BUTTON_ANIMATION_PHASES+2+i]);
-//					buttonAnimationList[current_line]->text[i]=(eString)(value[7*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonColorsList[current_line]->startBrush[i]=(eBrush)(value[0*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonColorsList[current_line]->endBrush[i]=(eBrush)(value[1*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonColorsList[current_line]->startTextColor[i]=(eColor)(value[2*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonColorsList[current_line]->endTextColor[i]=(eColor)(value[3*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonColorsList[current_line]->startBorderPen[i]=(ePen)(value[4*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonColorsList[current_line]->endBorderPen[i]=(ePen)(value[5*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+					buttonColorsList[current_line]->bitmap[i]=(eBitmap)(value[6*MAX_BUTTON_ANIMATION_PHASES+2+i]);
+//					buttonColorsList[current_line]->text[i]=(eString)(value[7*MAX_BUTTON_ANIMATION_PHASES+2+i]);
 				}
-				current_line++;				
+				++current_line;				
 			}
 			// => es gibt noch eine 2. Ebene
 			else if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
@@ -1111,7 +1133,7 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 						}break;
 					default:break;
 				}
-				current_line++;
+				++current_line;
 			}
 		} // end if mode != ZERO_DATA_TYPE
 	} // end while
@@ -1184,9 +1206,12 @@ Font* UI_Theme::lookUpFont(const eFont id) const
 	}
 #endif
 //	std::ostringstream os;
+//	os.str("");
 //	os << "getting id " << id << " (with resolution " << resolution << ")";
 //	toLog(os.str());
 	return(fontList[resolution]/*[language]*/[id]);
 }
+
+
 
 

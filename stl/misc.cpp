@@ -30,7 +30,7 @@ void parse_line(std::string& text, std::list<std::string>& words)
 		if(text[start]=='\"')
 		{
 			inParantheses=true;
-			start++;
+			++start;
 		}
 	
 		if(inParantheses)
@@ -91,6 +91,7 @@ void parse_2nd_block(std::ifstream& stream, std::map<std::string, std::map<std::
 const std::string formatTime(const int time)
 {
 	std::ostringstream os;
+	os.str("");
 	if(time < 0) os << "- ";
 	os << time/60 << ":" << std::setfill('0') << std::setw(2) << time%60;
 	return(os.str());
@@ -99,6 +100,7 @@ const std::string formatTime(const int time)
 const std::string formatTime2(const int time)
 {
 	std::ostringstream os;
+	os.str("");
 	if(time < 0) os << "- ";
 	os << time/60 << "_" << std::setfill('0') << std::setw(2) << time%60;
 	return(os.str());

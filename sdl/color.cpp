@@ -12,13 +12,11 @@ Color::Color(const Color& col):
 
 Color::Color(SDL_Surface* surface, const Uint8 red, const Uint8 green, const Uint8 blue):
 	ucol(SDL_MapRGB(surface->format, red, green, blue))
-//	scol( ((Uint32)red << 24) | ((Uint32)green << 16) | ((Uint32)blue << 8) | 255) 
 {
 	scol.r=red;
 	scol.g=green;
 	scol.b=blue;
 	scol.unused=255;
-//  ucol = (r << 24 ) + (g <<  16) + (b << 8) +200;
 }
 
 Color::Color():
@@ -27,4 +25,9 @@ Color::Color():
 { }
 
 Color::~Color() { }
+
+void Color::updateColor(SDL_Surface* surface)
+{
+	ucol = SDL_MapRGB(surface->format, scol.r, scol.g, scol.b);
+}
 

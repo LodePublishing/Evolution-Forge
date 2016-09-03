@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 
-EF_Configuration::EF_Configuration(): 
+EF_Configuration::EF_Configuration():
 	dynamicFramerate(25),
 	staticFramerate(25),
 	currentFramerate(1),

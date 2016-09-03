@@ -318,8 +318,12 @@
 		NULL
 		INTRON
 				
-		Starte ...
-		Lade Einstellungen des Kerns ...
+		Lade Konfiguration ...
+		Lese Kommandozeilenparameter ...
+		WARNUNG: -vo Argument ohne Treibernamen angegeben.
+		Benutze %s als SDL Treiber.
+		FEHLER: Kein Videotreiber fuer diese Plattform verfügbar!
+		FEHLER: SDL Treiber %s wird nicht unterstützt!
 		Initialisiere SDL ...
 		Initialisierung von SDL fehlgeschlagen:
 		Initialisierung des Videomodus fehlgeschlagen.
@@ -340,13 +344,19 @@
 		Initialisiere Graphische Benutzeroberfläche ...
 		Alle Initialisierungen abgeschlossen.
 		System bereit.
-		Dauer der Initialisierung: 
+		Dauer der Initialisierung:
+
+		Farbtiefe zu %ibit geändert.
+		Auflösung zu %s geändert.
+
 		
 # window titles
 		Evolution Forge v%s
 		Nachrichten
-		Kern von Evolution Forge
 		Evolution forge Einführung
+		Einstellungen
+		Karten und Ziele
+		
 		Befehlsbeschreibung Spieler %s
 		Techtree
 		Grafische Darstellung der Befehle %s
@@ -357,6 +367,9 @@
 		Befehlsreihenfolge %s
 		Spiel
 		Spieler
+
+		Spiel %i
+		Neues Spiel
 # messages
 		Willkommen zu Evolution Forge!
 		Klicke oben um weitere Ziele hinzuzufügen.
@@ -369,7 +382,12 @@
 		Ein %s wurde von der Zielliste entfernt.
 		%s wurde von in den Zielstatus erhoben.
 		%s wurde gespeichert.
-		
+# game window
+		Vergleiche Spiel mit...
+		Entferne Spiel...
+# help window
+		Zum Index
+		Zur letzten Seite
 #edit field window
 		OK
 		Abbruch
@@ -410,7 +428,7 @@
 		Speichere Baureihenfolge als
 		Gebe der Baureihenfolge einen Namen:
 		
-		Terraner
+		Terra
 		Protoss
 		Zerg
 # bowindow
@@ -433,7 +451,7 @@
 		Gesamt: %i
 		Klicken um fortzufahren
 		Klicken um zu unterbrechen
-		Füge ESpieler hinzu
+		Füge Spieler hinzu
 # statistics window
 		Gesamt Mineralien : %i
 		Gesamt Vespine Gas : %i
@@ -445,28 +463,10 @@
 		durchschn. Qualität : %i [beste %i]
 		Varianz der Qualität : %i
 		%i+ Generationen übrig [%i insg.]
-# window title parameter strings
-		INVISIBLE
-		Spieler
-		Erfahrener Spieler
-		Experte (Spieler)
-		1. Computerspieler
-		GOSU (Spieler)
-		1. Computerspieler
-		2. Computerspieler
-		ERROR - Check player modes
-#tabs
-		Zero Tab
-		Anfänger
-		Erfahren
-		Experte
-# 80
-		Gosu
 		
 		Hilfe
 		Einstellungen
 		Karte & Ziele
-		Vergleiche Ziele
 
 # tooltips:
 		füge Einheit hinzu
@@ -494,22 +494,14 @@
 
 		Fahre mit der Optimierung fort
 		Halte die Optimierung an
-
-		
 		Anteil aller Ziele / zeitlicher Anteil am Optimum (Mineralien/Gas ignoriert)
-				
-		Einfache Oberfläche und grundlegende Möglichkeiten
-		Alle Möglichkeiten sind verfügbar
-		Die Baureihenfolge wird auf frühe Angriffe getestet
-		Spiele in Realzeit gegen den Rechner
-		Erklärung der verschiedenen Fenster und eine Einführung
+
+		Erklränrungen und Hintergrundinformationen
 		Grafische und globale Einstellungen
 		Erstelle und verändere Starteinheiten und Ziele und Karten
-		Vergleiche momentane mit gespeicherten Baureihenfolgen
 
 		Klicken um spätesten Zeitpunkt der Produktion einzustellen
 
-		Einstellungen
 		Vordefinierte Einstellungen
 		maximale Zeit
 		Begrenze Einheiten
@@ -603,6 +595,12 @@
 		1024x768
 		1280x1024
 
+		Farbtiefe
+		8bit
+		16bit
+		24bit
+		32bit
+
 		Farbwahl
 		Fehler
 		Dunkelblau
@@ -618,6 +616,7 @@
 
 		Einstellungen des Kerns
 		Einstellungen der Oberfläche
+		Allgemeine Einstellungen
 		Lade/Speichere Einstellungen
 
 		Einheitenname

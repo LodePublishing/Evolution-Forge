@@ -6,6 +6,9 @@
 #include <map>
 #include "../stl/misc.hpp"
 #include <string>
+#include "../sdl/dc.hpp"
+
+
 
 // ------ LANGUAGES ------
 enum eLanguage
@@ -35,6 +38,8 @@ class UI_Configuration
 // This is still a public class though access _SHOULD_ be made through the corresponding functions of settings
 private:
 	eLanguage language;
+	eResolution resolution;
+	eBitDepth bitdepth;
 	bool glowingButtons;
 	bool transparency;
 	bool smoothMovements;
@@ -46,10 +51,14 @@ public:
 	void initDefaults();
 
 	const eLanguage getLanguage() const;
+	const eResolution getResolution() const;
+	const eBitDepth getBitDepth() const;
 	const bool isGlowingButtons() const;
 	const bool isTransparency() const;
 	const bool isSmoothMovements() const;
 	
+	void setResolution(const eResolution current_resolution);
+	void setBitDepth(const eBitDepth current_bitdepth);
 	void setLanguage(const eLanguage current_language);
 	void setGlowingButtons(const bool glowing_buttons);
 	void setTransparency(const bool trans_parency);
@@ -61,6 +70,14 @@ public:
 };
 
 extern UI_Configuration uiConfiguration;
+
+inline const eResolution UI_Configuration::getResolution() const {
+	return(resolution);
+}
+
+inline const eBitDepth UI_Configuration::getBitDepth() const {
+	return(bitdepth);
+}
 
 inline const eLanguage UI_Configuration::getLanguage() const {
 	return(language);
@@ -76,6 +93,14 @@ inline const bool UI_Configuration::isTransparency() const {
 
 inline const bool UI_Configuration::isSmoothMovements() const {
 	return(smoothMovements);
+}
+
+inline void UI_Configuration::setResolution(const eResolution current_resolution) {
+	resolution = current_resolution;
+}
+
+inline void UI_Configuration::setBitDepth(const eBitDepth current_bitdepth) {
+	bitdepth = current_bitdepth;
 }
 
 inline void UI_Configuration::setLanguage(const eLanguage current_language) {

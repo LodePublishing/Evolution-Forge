@@ -5,12 +5,6 @@
 #include "mapmenu.hpp"
 #include "playerentry.hpp"
 
-enum eScoreMenu
-{
-	MAP_MENU,
-	MAX_SCORE_MENUS
-};
-
 class ScoreWindow : public UI_Window
 {
 	public:
@@ -37,6 +31,9 @@ class ScoreWindow : public UI_Window
 		const bool isOptimizing(const unsigned int player_number) const;
 		const signed int getAssignedMap() const;
 
+		void reloadOriginalSize();
+		void setMode(const unsigned int game_number, const unsigned int game_max);
+
 		const signed int getAssignedRace(const unsigned int player_number) const;
 	private:
 		PlayerEntry* player[MAX_PLAYER];
@@ -45,10 +42,12 @@ class ScoreWindow : public UI_Window
 		unsigned int maxPlayer;
 
 		void closeMenus();
-		UI_Radio* menuRadio;
-		UI_Button* menuButton[MAX_SCORE_MENUS];
+		UI_Button* mapMenuButton;
 		MapMenu* mapMenu;		
 		signed int assignMap;
+
+		unsigned int gameNumber;
+		unsigned int gameMax;
 };
 
 //inline const bool ScoreWindow::isOptimizing() const {

@@ -32,19 +32,19 @@ void LocationMenu::resetData()
 		}
 
 		(*m)->Show();
-		(*m)->setButton(eButton(UNIT_TYPE_6_BUTTON));
+		(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_6_BUTTON));
 		(*m)->updateText((*anarace->getMap())->getLocation(i)->getName());
 		Rect edge = Rect(Point(10, height * (FONT_SIZE + 9)), Size(0,0));
 		(*m)->adjustRelativeRect(edge);
-		height++;
-		i++;
+		++height;
+		++i;
     	}
-	for(;i<(*anarace->getMap())->getMaxLocations();i++)
+	for(;i<(*anarace->getMap())->getMaxLocations();++i)
 	{
 		MenuEntry* entry = new MenuEntry(this, Rect(Point(10, height * (FONT_SIZE + 9)), Size(160, FONT_SIZE)), (*anarace->getMap())->getLocation(i)->getName());
-		entry->setButton(eButton(UNIT_TYPE_6_BUTTON));
+		entry->setButtonColorsType(eButtonColorsType(UNIT_TYPE_6_BUTTON));
 		menuEntries.push_back(entry);
-		height++;
+		++height;
 	}
 	height+=2;
 }

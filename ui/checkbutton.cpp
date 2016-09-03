@@ -22,8 +22,8 @@ UI_CheckButton::UI_CheckButton(const UI_CheckButton& object) :
 UI_CheckButton::UI_CheckButton(UI_Object* checkbutton_parent, const Rect checkbutton_rect, const Size distance_bottom_right, const ePositionMode position_mode, const eString txt, const eString tooltip_string, const bool is_checked) :
 	UI_Object(checkbutton_parent, checkbutton_rect, distance_bottom_right, position_mode, AUTO_HEIGHT_CONST_WIDTH), // TODO
 	checked(false),
-	checkButton(new UI_Button(this, Rect(0,0, 120, 10), Size(0,0), CHECK_BUTTON, STATIC_BUTTON_MODE)), // TODO
-	text(new UI_StaticText(this, txt, Rect(Point(0,0), Size(110, 0)), Size(0,0), FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT))
+	checkButton(new UI_Button(this, Rect(0, 0, 120, 10), Size(0, 0), CHECK_BUTTON, STATIC_BUTTON_MODE)), // TODO
+	text(new UI_StaticText(this, txt, Rect(Point(20, 1), Size(110, 0)), Size(0,0), FORCE_TEXT_COLOR, SMALL_BOLD_FONT, TOP_LEFT))
 {
 	this->updateToolTip(tooltip_string); // TODO
 	check(is_checked);
@@ -36,7 +36,7 @@ UI_CheckButton::~UI_CheckButton()
 }
 
 UI_Object* UI_CheckButton::checkTooltip() {
-	if( (!isShown()) || ((!checkButton->getAbsoluteRect().Inside(mouse)) && (!text->getTextBox().Inside(mouse))) )
+	if( (!isShown()) || ((!checkButton->getAbsoluteRect().Inside(mouse)) && (!text->getAbsoluteRect().Inside(mouse))) )
 		return(NULL);
 	return((UI_Object*)this);
 }
@@ -61,6 +61,7 @@ void UI_CheckButton::process()
 	UI_Object::process();
 	if(checkButton->checkForNeedRedraw())
 		setNeedRedrawMoved();
+	text->doHighlight(isMouseInside());
 }
 
 void UI_CheckButton::draw(DC* dc) const

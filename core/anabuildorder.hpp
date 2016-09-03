@@ -71,8 +71,9 @@ class ANABUILDORDER: public PREBUILDORDER
 		void prepareForNewGeneration();				// resets all data to standard values
 //		void analyzeBuildOrder();		// sets the isGoal of program
 	
-		std::list<PROGRAM> programList; // TODO private machen
+		void writeProgramBackToCode(std::list<PROGRAM>& program_list);
 
+		std::list<PROGRAM> programList; // TODO private machen
 	private:
 		unsigned int unitsTotal; // total number of all unit types at the end
 		unsigned int unitsTotalMax; // maximum number of one unit type at the end

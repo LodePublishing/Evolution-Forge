@@ -34,7 +34,7 @@ START::START(UNIT (*start_force)[MAX_LOCATIONS]):
         }
 
 maxplayer rausfinden
-	for(unsigned int i = 1; i < MAX_PLAYER; i++)
+	for(unsigned int i = 1; i < MAX_PLAYER; ++i)
 		
 	
         for(unsigned int i = MAX_RACES;i--;)
@@ -73,7 +73,7 @@ void START::fillAsNeutralPlayer()
 //	startForce[GLOBAL] = *startCondition->getUnit(GLOBAL);
 //	startForce[startPosition] = *startCondition->getUnit(0);
 	// TODO bei mehreren Spielern!
-	for(unsigned int j=1;j<tmpmap->getMaxLocations();j++)
+	for(unsigned int j=1;j<tmpmap->getMaxLocations(); ++j)
 		for(unsigned int k=UNIT_TYPE_COUNT;k--;)
 			if((*startForce)[j].getTotal(k))
 			{
@@ -103,7 +103,7 @@ void START::fillAsActivePlayer()
 	(*startForce)[GLOBAL] = *startCondition->getUnit(GLOBAL);
 	(*startForce)[startPosition] = *startCondition->getUnit(0);
 	// TODO bei mehreren Spielern!
-	for(unsigned int j=1;j<tmpmap->getMaxLocations();j++)
+	for(unsigned int j=1;j<tmpmap->getMaxLocations(); ++j)
 		for(unsigned int k=UNIT_TYPE_COUNT;k--;)
 			if((*startForce)[j].getTotal(k))
 			{

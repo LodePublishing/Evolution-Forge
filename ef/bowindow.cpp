@@ -31,17 +31,16 @@ BoWindow& BoWindow::operator=(const BoWindow& object)
 //	fixed = object.fixed;
 	return(*this);
 }
-
 BoWindow::BoWindow(UI_Object* bo_parent, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_players) :
-	UI_Window(bo_parent, BOWINDOW_TITLE_STRING, theme.lookUpPlayerRect(BUILD_ORDER_WINDOW, game_number, max_games, player_number, max_players), theme.lookUpPlayerMaxHeight(BUILD_ORDER_WINDOW, game_number, max_games, player_number, max_players), NOT_SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0, 25, 1000, 1000)),
+	UI_Window(bo_parent, BOWINDOW_TITLE_STRING, theme.lookUpPlayerRect(BUILD_ORDER_WINDOW, game_number, max_games, player_number, max_players), theme.lookUpPlayerMaxHeight(BUILD_ORDER_WINDOW, game_number, max_games, player_number, max_players), NOT_SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0, 20, 1000, 1000)),
 	anarace(NULL),
 	optimizeMode(0),
 	boInsertPoint(-1),
 	boEndPoint(-1),
 	boGoalListOpened(0),
 	lastBogoal(0),
-	saveBuildOrderButton(new UI_Button(this, getRelativeClientRect(), Size(5,5), SAVE_BUILD_ORDER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	loadBuildOrderButton(new UI_Button(this, getRelativeClientRect(), Size(5,5), LOAD_BUILD_ORDER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	saveBuildOrderButton(new UI_Button(this, getRelativeClientRect(), Size(5,5), SAVE_BUILD_ORDER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_BOLD_FONT, AUTO_SIZE)),
+	loadBuildOrderButton(new UI_Button(this, getRelativeClientRect(), Size(5,5), LOAD_BUILD_ORDER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_SIZE)),
 	alwaysBuildWorker(new UI_CheckButton(this, Rect(5, 40, 200, 15), Size(5, 5), DO_NOT_ADJUST, SETTING_ALWAYS_BUILD_WORKER_STRING, SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING, coreConfiguration.isAlwaysBuildWorker())) // TODO
 //	fixed(fixed_list)
 {
@@ -79,25 +78,28 @@ void BoWindow::resetData()
 	std::list<BoEntry*>::iterator entry = boList.begin();
 	while(entry != boList.end())
 	{
-		if(UI_Object::currentButton == *entry) UI_Object::currentButton = NULL;
+		if(UI_Button::getCurrentButton() == *entry) UI_Button::resetButton();
 		delete(*entry);
 		entry = boList.erase(entry);
 	}
 									
-//	for(i=0;i<MAX_LENGTH;i++)
+//	for(i=0;i<MAX_LENGTH;++i)
 //		selection[i]=1;
 }
 
 void BoWindow::reloadStrings()
 {
-	UI_Object::reloadStrings();
-//	processList();
+	processList();
+	UI_Window::reloadStrings();
 }
 
+
+// eigene processList machen falls anarace sich sicher nicht veraendert hat (optimieren = aus)
 void BoWindow::processList()
 {
-	if(!isShown())
-		return;
+//	if(!isShown())
+//		return;
+	if(anarace==NULL) return;
 	setNeedRedrawNotMoved();
 	
 	new_one=0;
@@ -106,60 +108,131 @@ void BoWindow::processList()
 	add_end=0;
 	deleted=0;
 
-	std::list<BoEntry*>::iterator entry = boList.begin();
-	int row = 2;
-	for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
+
+	// TODO irgendwie nur erlauben wenn programlist == bolist ist... also nicht waehrend dem optimieren
+
+	if((UI_Button::getCurrentButton()!=NULL)&&(UI_Button::isMoveByMouse()))
 	{
-		Rect edge=Rect(getRelativeClientRectPosition()+Point(0, row*(FONT_SIZE+6)), Size(getWidth()-20, FONT_SIZE+5));//(*order)->rect.GetSize());// TODO
+		Rect r = UI_Button::getCurrentButton()->getRelativeRect();
+		std::list<PROGRAM>::iterator order = anarace->getProgramList().begin();
+		std::list<BoEntry*>::iterator entry = boList.begin();
+		std::list<PROGRAM>::iterator order_point = anarace->getProgramList().begin();
+		std::list<BoEntry*>::iterator entry_point = boList.begin();
+		UI_Button::getCurrentButton()->resetGradient();
+	
+		unsigned int row = 2;
+		bool found_one = false;
+		while(entry != boList.end())
+		{
+			Rect edge = Rect(getRelativeClientRectPosition()+Point(4, row*(FONT_SIZE+6)), Size(getWidth()-20, FONT_SIZE+5));//(*order)->rect.GetSize());// TODO
+			if((r.GetBottom() >= edge.GetTop()) && (r.GetTop() <= edge.GetBottom() ))
+			{
+				order_point = order;
+				entry_point = entry;
+				found_one = true;
+				break;
+			}
+			++entry;
+			++order;
+			++row;
+		}
+		
+
+		order = anarace->getProgramList().begin();
+		entry = boList.begin();
+		while(entry != boList.end())
+		{
+			if((*entry) == UI_Button::getCurrentButton())
+			{
+				if(!found_one)
+				{
+					boList.push_back(*entry);
+					anarace->getProgramList().push_back(*order);
+				} else
+				{
+					boList.insert(entry_point, *entry);
+					anarace->getProgramList().insert(order_point, *order);
+				}
+				boList.erase(entry);
+				anarace->getProgramList().erase(order);
+				break;
+			}
+			++entry;
+			++order;
+		}			
+	}
+
+	
+	std::list<BoEntry*>::iterator entry = boList.begin();
+	unsigned int row = 3;
+	for(std::list<PROGRAM>::iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
+	{
+		Rect edge = Rect(getRelativeClientRectPosition()+Point(4, row*(FONT_SIZE+6)), Size(getWidth()-20, FONT_SIZE+5));//(*order)->rect.GetSize());// TODO
+
+		if((UI_Button::getCurrentButton()!=NULL)&&(UI_Button::isMoveByMouse()))
+		{
+			Rect r = UI_Button::getCurrentButton()->getRelativeRect();
+			if((r.GetBottom() >= edge.GetTop()) && (r.GetTop() <= edge.GetBottom()))
+				row++;
+		}
+
 		fitItemToRelativeClientRect(edge, 1);
-		row++;
+
 		if(entry == boList.end())
 		{
-			BoEntry* t = new BoEntry(getScrollbar()?getScrollbar():this, Point(max_x, getRelativeClientRectPosition().y+200), Size(5,5),
+			// wenn nicht optimieren -> anaraceliste loeschen TODO
+			BoEntry* t = new BoEntry(getScrollbar()?getScrollbar():this, Point(UI_Object::max_x, getRelativeClientRectPosition().y+200), Size(5,5),
 			// max size -y? TODO
-				*UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()+UNIT_NULL_STRING)), *order); // (*anarace->getStartCondition())->getRace()?
-			t->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
+				UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()+UNIT_NULL_STRING)), *order); // (*anarace->getStartCondition())->getRace()?
+			t->setAllowMoveByMouse();
+			t->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
 			t->adjustRelativeRect(edge);
 			boList.push_back(t);
 
-			add_end++;
-		} else 
+			++add_end;
+		} 
+		else 
 		if((*entry)->program.getUnit() != order->getUnit())
 		{
+		//	if(anarace->isOptimizing())
+			{
 			std::list<BoEntry*>::iterator k = entry;
 			while(k != boList.end())
 			{
 				if((*k)->program.getUnit() == order->getUnit())  //oder direkt adressen vergleichen? mmmh... TODO!!! was wenn zwei getauscht haben? mmmh...
 				{
-					same++;	
+					++same;	
 					break;
 				}
-				k++;
+				++k;
 			}
 			if(k != boList.end()) // => Found, move the entry
 			{
 				BoEntry* old = *k;
 				entry = boList.insert(entry, old);
-				entry++;
+				++entry;
 				boList.erase(k);
-				if(edge != old->getTargetRect())
+				if((edge != old->getTargetRect())&&((UI_Button::getCurrentButton()!=old)||(!UI_Button::isMoveByMouse())))
 				{
 					old->adjustRelativeRect(edge);
 					old->resetGradient();
 				}
 				old->program = *order;
 				
-				moved++;
+				++moved;
 			} else // => not found, insert a new one
 			{
-				BoEntry* t = new BoEntry(getScrollbar()?getScrollbar():this, Point(max_x,getRelativeClientRectPosition().y+200), Size(5,5), *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()+UNIT_NULL_STRING)), *order); // (*anarace->getStartCondition())->getRace()?
-				t->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
-				t->adjustRelativeRect(edge);
+				BoEntry* t = new BoEntry(getScrollbar()?getScrollbar():this, Point(UI_Object::max_x, getRelativeClientRectPosition().y+200), Size(5,5), UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+order->getUnit()+UNIT_NULL_STRING)), *order); // (*anarace->getStartCondition())->getRace()?
+				t->setAllowMoveByMouse();
+				t->setButtonColorsType(eButtonColorsType(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
+				if((edge != t->getTargetRect())&&((UI_Button::getCurrentButton()!=t)||(!UI_Button::isMoveByMouse())))
+					t->adjustRelativeRect(edge);
 				entry = boList.insert(entry, t);
-				entry++;
+				++entry;
 
-				new_one++;
+				++new_one;
 			}
+			} 
 		} else // ok
 //		if((*entry)->getUnit() == order->getUnit())
 	       	{
@@ -168,7 +241,7 @@ void BoWindow::processList()
 			{
 				if((((*entry)->getAbsoluteUpperBound() < getAbsoluteClientRectUpperBound()+25)||((*entry)->getAbsoluteLowerBound() > getAbsoluteClientRectLowerBound())))//&&((*entry)->getRelativeRect()==(*entry)->getTargetRect()))
 				{
-					(*entry)->Hide();
+//					(*entry)->Hide();
 //					(*entry)->jumpToPosition((*entry)->getTargetPosition());
 				}
 				else 
@@ -177,22 +250,26 @@ void BoWindow::processList()
 						setNeedRedrawMoved();
 					(*entry)->Show();
 				}
-	     			(*entry)->adjustRelativeRect(edge);
-				(*entry)->resetGradient();
+				if((edge != (*entry)->getTargetRect())&&((UI_Button::getCurrentButton()!=(*entry))||(!UI_Button::isMoveByMouse())))
+				{
+	     				(*entry)->adjustRelativeRect(edge);
+					(*entry)->resetGradient();
+				}
 			}
 						
-			entry++;
+			++entry;
        		}
+		++row;
 	}
 	
 	while(entry != boList.end())
 	{
-		if(UI_Object::currentButton == *entry) 
-			UI_Object::currentButton = NULL;
+		if(UI_Button::getCurrentButton() == *entry) 
+			UI_Button::resetButton();
 		delete(*entry);
 		entry = boList.erase(entry);
 		
-		deleted++;
+		++deleted;
 	}
 }
 
@@ -241,29 +318,55 @@ void BoWindow::process()
 	if(!isShown()) 
 		return;
 	UI_Window::process();
+	if(anarace==NULL) return;
 	if((getScrollbar())&&(getScrollbar()->checkForNeedRedraw()))
 		setNeedRedrawNotMoved();
-		
+
+	bool reloadList = false;
 	// TODO evtl auf move befehl warten
 
 	std::list<BoEntry*>::iterator entry = boList.begin();
+	std::list<PROGRAM>::iterator order = anarace->getProgramList().begin(); 
+	
 	while(entry != boList.end())
 	{
 		if((((*entry)->getAbsoluteUpperBound() < getAbsoluteClientRectUpperBound()+25)||((*entry)->getAbsoluteLowerBound() > getAbsoluteClientRectLowerBound())))//&&((*entry)->getRelativeRect()==(*entry)->getTargetRect()))
 		{
-			(*entry)->Hide();
+			if(isShown())
+				(*entry)->Hide();
+			
 //			(*entry)->jumpToPosition((*entry)->getTargetPosition());
 		}
 		else 
 		{
 			if((*entry)->getAbsoluteRightBound() > getAbsoluteClientRectRightBound())
 				setNeedRedrawMoved();
-			(*entry)->Show();
+			if(!isShown())
+				(*entry)->Show();
+			
+			if((*entry)->isRightClicked())
+			{
+				if(UI_Button::getCurrentButton() == *entry) UI_Button::resetButton();
+				delete(*entry);
+				entry = boList.erase(entry);
+				
+				order = anarace->getProgramList().erase(order);
+			} else
+			if((UI_Button::getCurrentButton() == (UI_Button*)*entry)&&(UI_Button::isMoveByMouse()))
+			{
+				
+				(*entry)->setPosition((*entry)->getRelativeLeftBound(), ((*entry)->getRelativePosition() + mouse + UI_Button::getMouseMovePoint() * (-1)).y);
+				UI_Button::setMouseMovePoint(mouse);
+				reloadList = true;
+			}
+		
 		}
-		entry++;
+		++entry;
+		++order;
 	}
 
-	
+//	if(reloadList)
+		processList();
        /*	std::list<BoEntry*>::iterator entry = boList.begin();
 	if((*entry)->getHeight()==FONT_SIZE+5)
 	{
@@ -280,7 +383,7 @@ void BoWindow::process()
 		anarace->setOptimizing(false);
 		boGoalListOpened=1;
 	} else
-	for(int i=0;i<MAX_LENGTH;i++)
+	for(int i=0;i<MAX_LENGTH;++i)
 	{
 		if(getPressCondition(orderButton[i])==7)
 		{
@@ -359,8 +462,8 @@ void BoWindow::process()
 					{
 						int l=0;
 						int j=0;
-						for(j=0;(j<UNIT_TYPE_COUNT)&&(l<i-boInsertPoint);j++)
-							if(stats[(*anarace->getStartCondition())->getRace()][j].facilityType==boGoalListOpened+1) l++;
+						for(j=0;(j<UNIT_TYPE_COUNT)&&(l<i-boInsertPoint);++j)
+							if(stats[(*anarace->getStartCondition())->getRace()][j].facilityType==boGoalListOpened+1) ++l;
 						anarace->insertOrder(j-1,boInsertPoint);
 //						msgWindow->addMessage(_T(string::Format(T("Item %i was chosen"),i-boInsertPoint-1)));
 //						update=2; TODO
@@ -426,7 +529,7 @@ void BoWindow::process()
 		if(UI_Object::editTextField->isCanceled())
 		{
 			delete UI_Object::editTextField;
-			UI_Object::resetButton();
+			UI_Button::resetButton();
 			UI_Object::editTextField=NULL;
 		} else
 		if(UI_Object::editTextField->isDone())
@@ -437,7 +540,7 @@ void BoWindow::process()
 				UI_Object::msgList.push_back("Saved build order.");
 			}
 			delete UI_Object::editTextField;
-			UI_Object::resetButton();
+			UI_Button::resetButton();
 			UI_Object::editTextField=NULL;
 		}
 	}
@@ -458,17 +561,18 @@ void BoWindow::draw(DC* dc) const
   //      for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
 //	{
 //		dc->DrawText(stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].name, getAbsolutePosition() + Size(0, k*10));
-//		k++;
+//		++k;
 //	}
 /*	k = 0;
 	for(int s=MAX_LENGTH;s--;)
 		if(anarace->getProgramIsBuilt(s)&&(anarace->getRealProgramTime(s) + stats[anarace->getRace()][anarace->getPhaenoCode(s)].BT<=anarace->getRealTimer()))
 		{
 			dc->DrawText(stats[(*anarace->getStartCondition())->getRace()][anarace->getPhaenoCode(s)].name, getAbsolutePosition() + Size(180, k*10));
-			k++;
+			++k;
 		}	 */
 
 //	std::ostringstream os;
+//	os.str("");
 //	os << "new: " << new_one << "/ add end: " << add_end << "/ moved: " << moved << "/ same: " << same << "/ deleted: " << deleted;   // << " [" << size1 << "/" << size2 << "]";
 //	os << PRERACE::situationHashMap.size();
 //	dc->DrawText(os.str(), getAbsoluteClientRectPosition() - Size(0, 8));
@@ -514,10 +618,10 @@ void BoWindow::draw(DC* dc) const
 			}
 //			unitButton[line]=addButton(edge); TODO
 		}
-		line++;
+		++line;
 		if(boGoalListOpened==1)
 		{
-			for(int i=1;i<11;i++)
+			for(int i=1;i<11;++i)
 			{
 				Rect edge=Rect(getAbsoluteClientRectPosition()+Point(10,line*(FONT_SIZE+5)),Size(270,FONT_SIZE+4));
 				int bright=0;
@@ -532,13 +636,13 @@ void BoWindow::draw(DC* dc) const
 					dc->DrawText(*theme.lookUpString((eString)(UNIT_TYPE_1_STRING+i)),edge.GetPosition()+Point(10,0));
 //					unitButton[line]=addButton(edge); TODO
 				}
-				line++;
+				++line;
 			}
 		}
 		else if(boGoalListOpened>1)
 		{
 			int type=boGoalListOpened+1;
-			for(int i=0;i<UNIT_TYPE_COUNT;i++)
+			for(int i=0;i<UNIT_TYPE_COUNT;++i)
 			{
 				if(stats[(*anarace->getStartCondition())->getRace()][i].facilityType==type)
 				{
@@ -556,7 +660,7 @@ void BoWindow::draw(DC* dc) const
 						dc->DrawText(stats[(*anarace->getStartCondition())->getRace()][i].name, edge.GetPosition()+Point(10,0));
 //						unitButton[line]=addButton(edge, "insert this unit"); TODO
 					}
-					line++;
+					++line;
 				}
 			}
 		}
@@ -586,7 +690,7 @@ void BoWindow::drawSelectionStuff(DC* dc) const
 {
 		dc->SetPen(*theme.lookUpPen(SELECT_PEN));
 		dc->SetTextForeground(*theme.lookUpColor(WINDOW_TEXT_COLOR));
-		dc->SetFont(theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
+		dc->SetFont(theme.lookUpFont(SMALL_BOLD_FONT));
 		dc->DrawText(*theme.lookUpString(OPTIMIZE_EVERYTHING_STRING), Point(0,-32)+getAbsoluteClientRectPosition());
 		dc->DrawText(*theme.lookUpString(OPTIMIZE_SELECTED_STRING), getAbsoluteClientRectPosition()+Point(0,-18));
 		dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
@@ -613,7 +717,7 @@ void BoWindow::drawSelectionStuff(DC* dc) const
 	int start=0;
 	int inrow=0;
 	int l=0;
-	for(i=0;i<orderList->getCount();i++)
+	for(i=0;i<orderList->getCount();++i)
 	{
 		if((!inrow)&&(selection[i])&&(i!=boInsertPoint))
 		{
@@ -670,7 +774,7 @@ void BoWindow::drawSelectionStuff(DC* dc) const
 				dc->DrawSpline(9,pointsKlammer);
 			}
 			}
-			l++;
+			++l;
 			if(i==boInsertPoint)
 				l=boEndPoint;
 		}

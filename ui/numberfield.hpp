@@ -2,6 +2,7 @@
 #define _UI_NUMBERFIELD_HPP
 
 #include "button.hpp"
+#include "group.hpp"
 
 enum eFieldType
 {
@@ -25,7 +26,9 @@ class UI_NumberField : public UI_Object
 		const bool subClicked() const;
 		const bool addRightClicked() const;
 		const bool subRightClicked() const;
-	
+
+		void reloadOriginalSize();
+		
 		const unsigned int getNumber() const;
 		void updateNumber(const unsigned int num);
 		void process();
@@ -40,6 +43,7 @@ class UI_NumberField : public UI_Object
 		unsigned int min;
 		unsigned int max;
 		unsigned int steps;
+		bool numberHasChanged;
 };
 
 inline const unsigned int UI_NumberField::getNumber() const {

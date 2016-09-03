@@ -26,6 +26,7 @@ class Pen
 		const int GetWidth() const {return width;};
 		const Color* GetColor() const {return &color;};
 		void SetColor(const Color pen_color);
+		void updateColor(SDL_Surface* surface);
 	private:
 		unsigned int width;
 		Color color;

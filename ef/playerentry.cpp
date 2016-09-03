@@ -8,14 +8,15 @@ PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size d
 	initMode(INACTIVE),
 	scoreMode(SCORE_FULFILL_MODE),
 
-	currentActionButton(new UI_Button(this, Rect(Point(0,0), Size(70, 12)), Size(5,0), CLICK_TO_CONTINUE_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE)),
-	scoreText(new UI_StaticText(this, Rect(Point(170, 0), rect.GetSize()), Size(5,0), IMPORTANT_COLOR, SMALL_NORMAL_BOLD_FONT)),
-	playerText(new UI_StaticText(this, "Player 1:", Rect(Point(5, 0), rect.GetSize()), Size(0, 0), IMPORTANT_COLOR, SMALL_NORMAL_BOLD_FONT, DO_NOT_ADJUST)),
-	addPlayerButton(new UI_Button(this, Rect(Point(0,0), Size(60, 12)), Size(5,0), ADD_PLAYER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, BOTTOM_CENTER, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
-	removePlayerButton(new UI_Button(this, Rect(Point(205,2), Size(8,8)), Size(5,0), CANCEL_BUTTON, PRESS_BUTTON_MODE)), // Evtl bitmap
+	currentActionButton(new UI_Button(this, Rect(Point(0, 0), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0)), Size(0,0), CLICK_TO_CONTINUE_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+	playerText(new UI_StaticText(this, "Player 1:", Rect(Point(0/*5+UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*/, 0), Size(0,0)), Size(0, 0), IMPORTANT_COLOR, SMALL_BOLD_FONT, ARRANGE_TOP_LEFT)),
+	menuRadio(new UI_Radio(this, Rect(Point(0, 0), Size(0, 0)), Size(0,0), DO_NOT_ADJUST/*ARRANGE_TOP_LEFT*/)), // TODO
+	raceMenu(new RaceMenu(menuRadio, Rect(0, 0, 0, 0), Size(0,0), TOP_LEFT )),
+
+	scoreText(new UI_StaticText(this, Rect(Point(10, 0), Size(0, 0)), Size(5,0), IMPORTANT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST/*ARRANGE_TOP_RIGHT*/)),
+	addPlayerButton(new UI_Button(this, Rect(Point(5, 0), Size(60, 0)), Size(5,0), ADD_PLAYER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, TOP_CENTER, SMALL_BOLD_FONT, AUTO_SIZE)),
+	removePlayerButton(new UI_Button(this, Rect(Point(0,1), Size(8,8)), Size(5,0), CANCEL_BUTTON, PRESS_BUTTON_MODE, DO_NOT_ADJUST/*ARRANGE_TOP_RIGHT*/)), // Evtl bitmap
 	optimizing(false),
-	menuRadio(new UI_Radio(this, Rect(Point(120, 0), Size(0,0)))),
-	raceMenu(new RaceMenu(this, Rect(120, 0, getWidth()-100, 0))),
 	assignRace(-1)
 {
 /* TODO:
@@ -23,14 +24,12 @@ PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size d
 - Startbedingungen
  * */
 	
-	//menuButton[RACE_MENU] = new UI_Button(this, Rect(Point(0, 0), Size(0,0)), Size(0,0), CHOOSE_RACE_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE);
-	menuButton[RACE_MENU] = new UI_Button(this, Rect(Point(0, 0), Size(0,0)), Size(0,0), CHOOSE_RACE_STRING, TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
-//	tab[TUTORIAL_TAB] = new UI_Button(NULL, Rect(10, 1, theme.lookUpButtonWidth(TAB_BUTTON), 10), Size(20, 0), TUTORIAL_TAB_STRING, TAB_BUTTON, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
+	menuButton[RACE_MENU] = new UI_Button(this, Rect(Point(0, 0), Size(35, 0)), Size(0, 0), CHOOSE_RACE_STRING, TAB_BUTTON, STATIC_BUTTON_MODE, TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 	raceMenu->Hide();
-	for(unsigned int i=0; i<MAX_PLAYER_ENTRY_MENUS; i++)
+	for(unsigned int i=0; i<MAX_PLAYER_ENTRY_MENUS; ++i)
 		menuRadio->addButton(menuButton[i], i);
-	menuRadio->calculateSameWidthOfButtons(true);
-			
+	menuRadio->calculateBoxSize(true);
+		
 	
 	currentActionButton->Hide();
 	scoreText->Hide();
@@ -46,6 +45,13 @@ PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size d
 	}
 }
 
+void PlayerEntry::reloadOriginalSize()
+{
+	playerText->setOriginalPosition(Point(5+UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
+	currentActionButton->setOriginalSize(Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
+	UI_Object::reloadOriginalSize();
+}
+
 const unsigned int PlayerEntry::getLineHeight() const
 {
 	return(1+raceMenu->getHeight());
@@ -57,6 +63,7 @@ void PlayerEntry::setNumber(const unsigned int player_number)
 {
 	number = player_number;
 	std::ostringstream os;
+	os.str("");
 	os << "Player " << number << ":";
 	playerText->updateText(os.str());
 }
@@ -68,7 +75,7 @@ PlayerEntry::~PlayerEntry()
 	delete playerText;
 	delete addPlayerButton;
 	delete removePlayerButton;
-        for(unsigned int i = 0; i < MAX_PLAYER_ENTRY_MENUS;i++)
+	for(unsigned int i = MAX_PLAYER_ENTRY_MENUS;i--;)
 		delete menuButton[i];
 	delete menuRadio;
 	delete raceMenu;
@@ -82,6 +89,7 @@ void PlayerEntry::closeMenus()
 void PlayerEntry::mouseHasLeft()
 {
 	menuRadio->forceUnpressAll();
+	menuButton[RACE_MENU]->forceUnpress();	
 	closeMenus();
 }
 
@@ -214,7 +222,7 @@ void PlayerEntry::process()
 		{
 			currentScore -= (currentScore - programScore)/2;
 		    	if(programScore<currentScore)
-				currentScore--;
+				--currentScore;
 		}
 		std::ostringstream os;
 		if(currentScore >= 3600) // TODO ga->...
@@ -268,24 +276,24 @@ void PlayerEntry::process()
 	}
 
 	if(menuRadio->buttonHasChanged())
-        {
-                switch(menuRadio->getMarked())
-                {
-                        case RACE_MENU:
-                                raceMenu->open();
-                                if(!raceMenu->isOpen())
-                                {
-                                        menuRadio->forceUnpressAll();
-                                        closeMenus();
-                                } else
-                                {
-                                        closeMenus();
-                                        raceMenu->open();
-                                }
-                        break;
-                        default:break;
-                }
-        }
+	{
+		switch(menuRadio->getMarked())
+		{
+			case RACE_MENU:
+				raceMenu->open();
+				if(!raceMenu->isOpen())
+				{
+					menuRadio->forceUnpressAll();
+					closeMenus();
+				} else
+				{
+					closeMenus();
+					raceMenu->open();
+				}
+			break;
+			default:break;
+		}
+	}
 }
 
 void PlayerEntry::draw(DC* dc) const

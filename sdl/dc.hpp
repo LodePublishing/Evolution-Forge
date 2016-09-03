@@ -10,13 +10,39 @@
 #include <string>
 #include <list>
 
+enum eChooseDriverError
+{
+	NO_DRIVER_ERROR,
+	NO_VIDEO_DRIVERS_AVAILIBLE,
+	SDL_DRIVER_NOT_SUPPORTED
+};
+
+// ------ RESOLUTIONS ------
+enum eResolution
+{
+	ZERO_RESOLUTION,
+	RESOLUTION_640x480,
+	RESOLUTION_800x600,
+	RESOLUTION_1024x768,
+	RESOLUTION_1280x1024,
+	MAX_RESOLUTIONS
+};
+// ------ END RESOLUTIONS ------
+
+enum eBitDepth
+{
+	DEPTH_8BIT,
+	DEPTH_16BIT,
+	DEPTH_24BIT,
+	DEPTH_32BIT
+};
+
 class DC
 {
 	public:
 		DC();
-		DC(const unsigned int width, const unsigned int height, const unsigned int bitdepth, Uint32 flags, Uint32 initflags);
-		~DC() 
-		{ }
+		DC(const eResolution current_resolution, const eBitDepth bit_depth, const Uint32 nflags, const Uint32 initflags);
+		~DC();
 		
 		DC(const DC& other);
 		DC &operator=(const DC& other);
@@ -24,16 +50,22 @@ class DC
 		operator SDL_Surface*() const;
 		SDL_Surface* operator->() const;
 		SDL_Surface* GetSurface() const;
-		
+
+		const Size getResolutionSize() const;
+		void setResolution(const eResolution current_resolution);
+		void setBitDepth(const eBitDepth bit_depth);
+		void setScreen(const eResolution current_resolution, const eBitDepth bit_depth, const Uint32 nflags);
+		const eBitDepth getBitDepth() const;
+	
 		const bool Lock() const;
 		void Unlock() const;
 
 		const Color doColor(const Uint8 r, const Uint8 g, const Uint8 b) const;
 		
-		const Color mixColor(const Color* id1, const Color* id2) const;
-		const Color mixColor(const Color* id1, const Color* id2, const unsigned int gradient) const;
-		const Color brightenColor(const Color* id, const unsigned int brightness) const;
-		const Color darkenColor(const Color* id, const unsigned int brightness) const;
+		const Color mixColor(const Color& id1, const Color& id2) const;
+		const Color mixColor(const Color& id1, const Color& id2, const unsigned int gradient) const;
+		const Color brightenColor(const Color& id, const unsigned int brightness) const;
+		const Color darkenColor(const Color& id, const unsigned int brightness) const;
 
 		const bool valid() const;
 		Uint32 flags() const;
@@ -120,13 +152,13 @@ class DC
 		void DrawEdgedRoundedRectangle(const Rect& rect, const unsigned int radius) const;
 		
 		void FillRect( SDL_Surface& dest, SDL_Rect *rc, SDL_Color &clr ) const;
-		void setResolution(const unsigned int max_x, const unsigned int max_y);
+		
 		static SDL_Color toSDL_Color(const Uint8 r, const Uint8 g, const Uint8 b);
 //		void printInformation() const;
 		static std::string printHardwareInformation();
 		static std::string printSurfaceInformation(DC* surface);
 		static std::list<std::string> getAvailibleDrivers();
-		
+		static const eChooseDriverError chooseDriver(std::string& driver_name);
 	protected:
 		SDL_Surface* surface;
 		void SetSurface(SDL_Surface *sdl_surface) {
@@ -143,6 +175,9 @@ class DC
 		Color* color;
 		SDL_Color textColor;
 		Font* font;
+		
+		eBitDepth bitDepth;
+		eResolution resolution;
 
 		void (DC::*Draw_Line)(signed int x1, signed int y1, signed int x2, signed int y2) const;
 		void Draw_Line_8bit(signed int x1, signed int y1, signed int x2, signed int y2) const;
@@ -257,12 +292,12 @@ inline void DC::DrawLine(const Point& p1, const Point& p2) const {
 	DrawLine(p1.x, p1.y, p2.x, p2.y);
 }
 
-inline void DC::DrawText(const std::string& text, const Point& p) const {
-	DrawText(text, p.x, p.y);
-}
-
 inline void DC::DrawText(const std::string& text, const signed int x, const signed int y) const {
 	font->DrawText(surface, textColor, text, x, y);
+}
+
+inline void DC::DrawText(const std::string& text, const Point& p) const {
+	DrawText(text, p.x, p.y);
 }
 
 inline void DC::DrawTextA(const std::string& text, const int x, const int y) const {
@@ -370,6 +405,10 @@ inline SDL_Color DC::toSDL_Color(const Uint8 r, const Uint8 g, const Uint8 b) {
 	c.r=r;c.g=g;c.b=b;
 	c.unused=255;
 	return(c);	
+}
+
+inline const eBitDepth DC::getBitDepth() const {
+	return(bitDepth);
 }
 
 

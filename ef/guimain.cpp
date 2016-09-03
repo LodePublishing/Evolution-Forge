@@ -5,13 +5,14 @@
 
 Main::Main(DC* dc):
 	mainWindow(NULL),
-	tutorialWindow(NULL),
+	helpWindow(NULL),
 	settingsWindow(NULL),
+//	mapWindow(NULL),
 	maus(),
 	currentTab(0)
 {
 // ----- INITIALIZE DATABASE -----	
-	toLog(*UI_Object::theme.lookUpString(START_LOAD_UI_BITMAPS_FONTS_STRING));
+	toLog(UI_Object::theme.lookUpString(START_LOAD_UI_BITMAPS_FONTS_STRING));
 #ifdef __linux__
 	UI_Object::theme.loadGraphicData("settings/ui/default.ui","data/bitmaps/","data/fonts/",dc);
 	UI_Object::theme.loadWindowData("settings/ui/windows.ui", 0, 1);
@@ -34,16 +35,20 @@ Main::Main(DC* dc):
 // choose the first map we loaded (map[0])
 // ----- END OF INITIALIZING DATABASE -----
 	mainWindow = new MainWindow();
-	tutorialWindow = new TutorialWindow(mainWindow);
+	
+	helpWindow = new HelpWindow(mainWindow);
 	settingsWindow = new SettingsWindow(mainWindow);
+//	mapWindow = new MapWindow(mainWindow);
+	
 	Main::msgWindow = new MessageWindow(mainWindow);
 	ForceWindow::techTreeWindow = new TechTreeWindow(mainWindow);
 	
 	mainWindow->Show();
-	tutorialWindow->Hide();
+	helpWindow->Hide();
+//	mapWindow->Hide();
 	settingsWindow->Hide();
-	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG1_STRING)));
-	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG2_STRING)));
+	msgWindow->addMessage(UI_Object::theme.lookUpString(WELCOME_MSG1_STRING));
+	msgWindow->addMessage(UI_Object::theme.lookUpString(WELCOME_MSG2_STRING));
 	msgWindow->addMessage("Visit www.clawsoftware.de - - - ");
 
 	for(unsigned int i = MAX_TABS;i--;)
@@ -57,13 +62,19 @@ Main::Main(DC* dc):
 	initializeGame(0);
 }
 
+void Main::reloadOriginalSize()
+{
+	mainWindow->reloadOriginalSize();
+//	mainWindow->reloadStrings();
+}
+
 void Main::initializeGame(const unsigned int tab_number)
 {
 	// erstes freies suchen:
 	signed int game_number;
 	int game_nr = 0;
 	int game_max = 0;
-	for(game_number = 0;game_number < MAX_GAME;game_number++)
+	for(game_number = 0;game_number < MAX_GAME; ++game_number)
 		if(game[game_number]==NULL)
 			break;
 	if(game_number == MAX_GAME)
@@ -93,6 +104,7 @@ void Main::initializeGame(const unsigned int tab_number)
 		game_max = 1;
 		tabToGameList[tab_number] = game_number;
 		mainWindow->addNewGameTab();
+		mainWindow->forcePressTab(tab_number);
 	}
 	game[game_number] = new Game(mainWindow, game_nr, game_max); // TODO
 	game[game_number]->assignMap(database.getMap(0));
@@ -115,7 +127,8 @@ Main::~Main()
 {
 	delete mainWindow;
 	delete msgWindow;
-	delete tutorialWindow;
+	delete helpWindow;
+//	delete mapWindow;
 	delete settingsWindow;
 	for(unsigned int i=MAX_GAME;i--;)
 		delete game[i];
@@ -142,14 +155,14 @@ void Main::process()
 	if((efConfiguration.isToolTips())&&(UI_Object::tooltip))
 		UI_Object::tooltip->process();
 	
-	for(std::list<std::string>::iterator i = UI_Object::msgList.begin(); i!= UI_Object::msgList.end(); i++)
+	for(std::list<std::string>::iterator i = UI_Object::msgList.begin(); i!= UI_Object::msgList.end(); ++i)
 	{
 		msgWindow->addMessage(*i);
 		i = UI_Object::msgList.erase(i);
 	}
 
 	mainWindow->process();
-//	if(UI_Object::currentButton==NULL) // TODO verschaerfen, boolvariable setzen wenn currentButton von !NULL auf NULL gesetzt wurde
+//	if(UI_Button::getCurrentButton()==NULL) // TODO verschaerfen, boolvariable setzen wenn currentButton von !NULL auf NULL gesetzt wurde
 		setMouse(maus);
 
 	if(!UI_Object::windowSelected)
@@ -161,13 +174,23 @@ void Main::process()
 	
 	if(settingsWindow->hasLanguageChanged())
 	{
-		for(unsigned int i = MAX_GAME;i--;)
-			if(game[i])
-				game[i]->reloadStrings();
+//		for(unsigned int i = MAX_GAME;i--;)
+//			if(game[i])
+//				game[i]->reloadStrings();
 		mainWindow->reloadStrings();
-		settingsWindow->reloadStrings();
-		msgWindow->addMessage(*UI_Object::theme.lookUpString(LANGUAGE_HAS_CHANGED_STRING));
-	}
+//		settingsWindow->reloadStrings();
+		msgWindow->addMessage(UI_Object::theme.lookUpString(LANGUAGE_HAS_CHANGED_STRING));
+	} else
+
+/*	if(settingsWindow->hasResolutionChanged())
+	{
+                for(unsigned int i = MAX_GAME;i--;)
+                        if(game[i])
+                                game[i]->reloadStrings();
+                mainWindow->reloadStrings();
+                settingsWindow->reloadStrings();
+// TODO msgWindow add Message
+	}*/
 
 	if(mainWindow->tabWasChanged())
 	{
@@ -181,24 +204,24 @@ void Main::process()
 			case MAP_TAB:
 				msgWindow->Show();
 				settingsWindow->Hide();
-				tutorialWindow->Hide();
+				helpWindow->Hide();
 			break;
 			case SETTINGS_TAB:
 				msgWindow->Hide();
 				settingsWindow->Show();
 				settingsWindow->updateItems();
-				tutorialWindow->Hide();
+				helpWindow->Hide();
 			break;
-			case TUTORIAL_TAB:
+			case HELP_TAB:
 				msgWindow->Hide();
 				settingsWindow->Hide();
-				tutorialWindow->Hide();
+				helpWindow->Show();
 			break;
 			default:
 			// => game[currentTab] wechseln, TODO mehrere auf eine Seite
 				msgWindow->Show();
 				settingsWindow->Hide();
-				tutorialWindow->Hide();
+				helpWindow->Hide();
 				if(tabToGameList[currentTab]>=0)
 				{
 					game[tabToGameList[currentTab]]->Show(); //...
@@ -216,20 +239,6 @@ void Main::process()
 		} // end switch getCurrentTabs
 //		for(unsigned int i=MAX_GAME;i--;)
 //			game[i]->setMode(currentTab, i); // TODO
-
-//		UI_Object::theme.setTab(currentTab);
-		
-//		mainWindow->updateRectangles(0);
-//		msgWindow->updateRectangles(0);
-//		settingsWindow->updateRectangles(0);
-//		tutorialWindow->updateRectangles(0);
-//		unsigned int maxPlayer=0;
-//		for(unsigned int i=database.getMap(0)->getMaxPlayer();i--;)
-//			if(game[i]->isShown()) 
-//				maxPlayer++;
-//		for(unsigned int i=MAX_GAME;i--;)
-//			if(game[i]->isShown())
-//				game[i]->updateRectangles(maxPlayer-1);
 	} // end tabwasChanged*/
 
 	if((tabToGameList[currentTab]>=0)&&(game[tabToGameList[currentTab]]->isSplitGame())&&(tabToSplitGameList[currentTab]==-1))
@@ -249,12 +258,13 @@ void Main::process()
 		{
 			delete game[tabToGameList[currentTab]];
 			game[tabToGameList[currentTab]]=NULL;
-			for(unsigned int i = currentTab;i < mainWindow->getGameTabCount()-1;i++)
+			for(unsigned int i = currentTab;i < mainWindow->getGameTabCount()-1;++i)
 				tabToGameList[i] = tabToGameList[i+1];
 			tabToGameList[mainWindow->getGameTabCount()-1]=-1;
 			mainWindow->removeGameTab(currentTab);
 			if(currentTab == mainWindow->getGameTabCount())
 				currentTab--;
+			mainWindow->forcePressTab(currentTab);
 			game[tabToGameList[currentTab]]->Show(); //...
 			if(tabToSplitGameList[currentTab]>=0)
 				game[tabToSplitGameList[currentTab]]->Show();
@@ -274,6 +284,8 @@ void Main::process()
 			mainWindow->setNeedRedrawNotMoved();
 			msgWindow->setNeedRedrawNotMoved();
 			settingsWindow->setNeedRedrawNotMoved();
+			helpWindow->setNeedRedrawNotMoved();
+//			mapWindow->setNeedRedrawNotMoved();
 			mainWindow->setNeedRedrawMoved();
 			break;
 		}
@@ -345,7 +357,7 @@ const bool Main::newRun()
 /*	if(efConfiguration.isAutoSaveRuns()) TODO
 	{
 		ostringstream os, os2;
-		os << anarace[0]->getRun() << *UI_Object::theme.lookUpString(ENDRUN_FINISHED_STRING) << "[" << formatTime2(anarace[0]->getRealTimer()) << "]";
+		os << anarace[0]->getRun() << UI_Object::theme.lookUpString(ENDRUN_FINISHED_STRING) << "[" << formatTime2(anarace[0]->getRealTimer()) << "]";
 		msgWindow->addMessage(os.str());
 		os2 << "bo_" << (*anarace[0]->getCurrentGoal())->getName() << "_" << formatTime2(anarace[0]->getRealTimer()) << "_" << anarace[0]->getRun();
 //		if(UI_EndRunDialog::getLastString()!="bo")
@@ -357,7 +369,7 @@ const bool Main::newRun()
 		// Voreinstellung fuer Editfeld ist letzter benutzter Name  (oder 'leer') + fortlaufende Zahl (Reset bei neuem Namen)
 		// Spaeter: ueberschreiben pruefen
 		// In DateiName evtl auch Zeit einbauen
-		msgWindow->addMessage(*UI_Object::theme.lookUpString(ENDRUN_SAVED_BUILDORDER_STRING));
+		msgWindow->addMessage(UI_Object::theme.lookUpString(ENDRUN_SAVED_BUILDORDER_STRING));
 		endrun=false;
 	} else
 	{
@@ -375,10 +387,10 @@ const bool Main::newRun()
 				if(UI_Object::editTextField->getString().length()>0)
 				{
 					ostringstream os;
-					os << anarace[0]->getRun() << *UI_Object::theme.lookUpString(ENDRUN_FINISHED_STRING) << " [" << formatTime2(anarace[0]->getRealTimer()) << "]";
+					os << anarace[0]->getRun() << UI_Object::theme.lookUpString(ENDRUN_FINISHED_STRING) << " [" << formatTime2(anarace[0]->getRealTimer()) << "]";
 					msgWindow->addMessage(os.str());
 					database.saveBuildOrder(UI_Object::editTextField->getString(), anarace[0]); // TODO, evtl alle saven...
-					msgWindow->addMessage(*UI_Object::theme.lookUpString(ENDRUN_SAVED_BUILDORDER_STRING));
+					msgWindow->addMessage(UI_Object::theme.lookUpString(ENDRUN_SAVED_BUILDORDER_STRING));
 				}
 				delete UI_Object::editTextField;
 				UI_Object::resetButton();
@@ -403,10 +415,10 @@ const bool Main::newRun()
 
 void Main::loadHarvestData()
 {
-	for(unsigned int i = 0; i < MAX_RACES; i++)
+	for(unsigned int i = 0; i < MAX_RACES; ++i)
 	{
 		std::list<std::string> harvestFiles = database.findFiles("settings", "harvest", raceString[i]);
-		for(std::list<std::string>::iterator j = harvestFiles.begin(); j!=harvestFiles.end(); j++)
+		for(std::list<std::string>::iterator j = harvestFiles.begin(); j!=harvestFiles.end(); ++j)
 			database.loadHarvestFile(*j);
 	}
 //TODO flag setzen ob was geladen wurde
@@ -415,10 +427,10 @@ void Main::loadHarvestData()
 
 void Main::loadStartConditions()
 {
-	for(unsigned int i = 0; i < MAX_RACES; i++)
+	for(unsigned int i = 0; i < MAX_RACES; ++i)
 	{
 		std::list<std::string> startFiles = database.findFiles("settings", "start", raceString[i]);
-		for(std::list<std::string>::iterator j = startFiles.begin(); j!=startFiles.end(); j++)
+		for(std::list<std::string>::iterator j = startFiles.begin(); j!=startFiles.end(); ++j)
 			database.loadStartConditionFile(*j);
 	}
 //TODO flag setzen ob was geladen wurde
@@ -427,17 +439,17 @@ void Main::loadStartConditions()
 void Main::loadMaps()
 {
 	std::list<std::string> mapFiles = database.findFiles("settings", "maps");
-	for(std::list<std::string>::iterator j = mapFiles.begin(); j!=mapFiles.end(); j++)
+	for(std::list<std::string>::iterator j = mapFiles.begin(); j!=mapFiles.end(); ++j)
 		database.loadMapFile(*j);
 //TODO flag setzen ob was geladen wurde
 }
 
 void Main::loadGoals()
 {
-	for(unsigned int i = 0; i < MAX_RACES; i++)
+	for(unsigned int i = 0; i < MAX_RACES; ++i)
 	{
 		std::list<std::string> goalFiles = database.findFiles("settings", "goals", raceString[i]);
-		for(std::list<std::string>::iterator j = goalFiles.begin(); j!=goalFiles.end(); j++)
+		for(std::list<std::string>::iterator j = goalFiles.begin(); j!=goalFiles.end(); ++j)
 			database.loadGoalFile(*j);
 	}
 //TODO flag setzen ob was geladen wurde
@@ -446,37 +458,44 @@ void Main::loadGoals()
 
 void Main::leftDown()
 {
-	if(UI_Object::currentButton)
+	if(UI_Button::getCurrentButton()!=NULL)
 	{
-		UI_Object::currentButton->mouseLeftButtonPressed();
-		UI_Object::currentButtonPressed=true;
+		UI_Button::getCurrentButton()->mouseLeftButtonPressed();
+		UI_Button::setCurrentButtonPressed();
 	}
 }
 
 void Main::leftUp(const Point p)
 {
-	if((UI_Object::currentButton)&&(UI_Object::currentButtonPressed))
-		UI_Object::currentButton->mouseLeftButtonReleased();
-	UI_Object::currentButtonPressed=false;
-	UI_Object::currentButtonHasAlreadyLeft=false;
+	if((UI_Button::getCurrentButton()!=NULL)&&(UI_Button::isCurrentButtonPressed()))
+		UI_Button::getCurrentButton()->mouseLeftButtonReleased();
+	UI_Button::setCurrentButtonPressed(false);
+	UI_Button::setCurrentButtonHasAlreadyLeft(false);
 	setMouse(p);
+
+	if(UI_Button::isMoveByMouse()==true)
+	{
+		UI_Button::setMoveByMouse(false);
+		UI_Button::setMouseMovePoint(Point(0, 0));
+	}
+
 }
 
 void Main::rightDown()
 {
-	if(UI_Object::currentButton)
+	if(UI_Button::getCurrentButton()!=NULL)
 	{
-		UI_Object::currentButton->mouseRightButtonPressed();
-		UI_Object::currentButtonPressed=true;
+		UI_Button::getCurrentButton()->mouseRightButtonPressed();
+		UI_Button::setCurrentButtonPressed();
 	}
 }
 
 void Main::rightUp(const Point p)
 {
-	if((UI_Object::currentButton)&&(UI_Object::currentButtonPressed))
-		UI_Object::currentButton->mouseRightButtonReleased();
-	UI_Object::currentButtonPressed=false;
-	UI_Object::currentButtonHasAlreadyLeft=false;
+	if((UI_Button::getCurrentButton()!=NULL)&&(UI_Button::isCurrentButtonPressed()))
+		UI_Button::getCurrentButton()->mouseRightButtonReleased();
+	UI_Button::setCurrentButtonPressed(false);
+	UI_Button::setCurrentButtonHasAlreadyLeft(false);
 	setMouse(p);
 }
 
@@ -502,51 +521,58 @@ void Main::setMouse(const Point p)
 //	else if(game[1]->window[BO_GRAPH_WINDOW]->Inside(p))
 //		(BoGraphWindow*)(game[1]->window[BO_GRAPH_WINDOW])->mouseHasMoved();
 	
-	if(UI_Object::currentButtonHasAlreadyLeft)
+	if(UI_Button::isCurrentButtonHasAlreadyLeft())
 	{
-		if((UI_Object::currentButton)&&(UI_Object::currentButton->getAbsoluteRect().Inside(p)))
+		if((UI_Button::getCurrentButton()!=NULL)&&(UI_Button::getCurrentButton()->getAbsoluteRect().Inside(p)))
 		{
-			UI_Object::currentButton->mouseHasEnteredArea();
-			UI_Object::currentButtonHasAlreadyLeft=false;
+			UI_Button::getCurrentButton()->mouseHasEnteredArea();
+			UI_Button::setCurrentButtonHasAlreadyLeft(false);
 		}
 		else return;
 	}
-	if((UI_Object::currentButton)&&(!UI_Object::currentButton->getAbsoluteRect().Inside(p)))
+	if((UI_Button::getCurrentButton())&&(!UI_Button::getCurrentButton()->getAbsoluteRect().Inside(p)))
 	{
-		UI_Object::currentButton->mouseHasLeftArea();
-		if(!UI_Object::currentButtonPressed)
-			UI_Object::currentButton=0;
+		UI_Button::getCurrentButton()->mouseHasLeftArea();
+		if(!UI_Button::isCurrentButtonPressed())
+			UI_Button::resetButton();
 		else
-			UI_Object::currentButtonHasAlreadyLeft=true;
+			UI_Button::setCurrentButtonHasAlreadyLeft();
 	}
 // ignore mousemove if button is still pressed		
-	if(UI_Object::currentButton)
+	if(UI_Button::getCurrentButton())
 	{
-		if(UI_Object::currentButtonPressed)
+		if(UI_Button::isCurrentButtonPressed())
 		{
-			UI_Object::currentButton->forceHighlighted();
-//			UI_Object::currentButton->mouseHasMoved();
+			UI_Button::getCurrentButton()->forceHighlighted();
+//			UI_Button::getCurrentButton()->mouseHasMoved();
 		}
 		return;
 	}
-	UI_Object::currentButton=NULL;
+	if(UI_Button::isMoveByMouse()==false)
+	{
+	UI_Button::resetButton();
 	if(UI_Object::editTextField==NULL)
 	{
 		for(unsigned int i=MAX_GAME;i--;)
-			if((game[i])&&(!UI_Object::currentButton))
-				UI_Object::currentButton = (UI_Button*) (game[i]->checkHighlight());
+			if((game[i])&&(!UI_Button::getCurrentButton()))
+				UI_Button::setCurrentButton( (UI_Button*) (game[i]->checkHighlight()) );
 				
-		if(!UI_Object::currentButton)
-			UI_Object::currentButton = (UI_Button*) (mainWindow->checkHighlight());
-		if(!UI_Object::currentButton)
-			UI_Object::currentButton = (UI_Button*) (settingsWindow->checkHighlight());
+		if(!UI_Button::getCurrentButton())
+			UI_Button::setCurrentButton ( (UI_Button*) (mainWindow->checkHighlight()) );
+		if(!UI_Button::getCurrentButton())
+			UI_Button::setCurrentButton ( (UI_Button*) (settingsWindow->checkHighlight()) );
+		if(!UI_Button::getCurrentButton())
+			UI_Button::setCurrentButton ( (UI_Button*) (helpWindow->checkHighlight()) );
+//		if(!UI_Button::getCurrentButton())
+//			UI_Button::setCurrentButton ( (UI_Button*) (mapWindow->checkHighlight()) );
 	} else
-	if((!UI_Object::currentButton)&&(UI_Object::editTextField!=NULL))
-		UI_Object::currentButton = (UI_Button*) (UI_Object::editTextField->checkHighlight());
-	if(UI_Object::currentButton)
+	if((!UI_Button::getCurrentButton())&&(UI_Object::editTextField!=NULL))
+		UI_Button::setCurrentButton ( (UI_Button*) (UI_Object::editTextField->checkHighlight()) );
+	if(UI_Button::getCurrentButton())
 	{
-		UI_Object::currentButton->mouseHasEnteredArea();
-		UI_Object::currentButtonHasAlreadyLeft=false;
+		UI_Button::getCurrentButton()->mouseHasEnteredArea();
+		UI_Button::setCurrentButtonHasAlreadyLeft(false);
+	}
 	}
 	if(efConfiguration.isToolTips())
 	{
@@ -571,6 +597,11 @@ void Main::setMouse(const Point p)
 		temp2=NULL;
 		if(UI_Object::toolTipParent==NULL)
 			temp2 = settingsWindow->checkToolTip();
+		if(temp2==NULL)
+			temp2 = helpWindow->checkToolTip();
+//		if(temp2==NULL)
+//			temp2 = mapWindow->checkToolTip();
+
 		if((temp2!=NULL) && (temp2->getToolTipString()!=NULL_STRING))
 			UI_Object::toolTipParent = temp2;
 //		if((UI_Object::toolTipParent!=temp)//||(UI_Object::tooltip==NULL))

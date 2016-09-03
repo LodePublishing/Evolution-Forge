@@ -5,7 +5,7 @@
 #include <sstream>
 
 ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std::string& entry_unit):
-	UI_Button(entry_parent, entry_rect, Size(0,0), entry_unit, FORCE_ENTRY_BUTTON, PRESS_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH),
+	UI_Button(entry_parent, entry_rect, Size(0,0), entry_unit, FORCE_ENTRY_BUTTON, PRESS_BUTTON_MODE, SPECIAL_BUTTON_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH),
 	timeEntryBox(new UI_NumberField(this, Rect(entry_rect.GetWidth() - 210, -14, 0, 0), Size(10,10), DO_NOT_ADJUST, 0, coreConfiguration.getMaxTime(), 6, 0, NULL_STRING, NULL_STRING, TIME_NUMBER_TYPE)),
 //	makeLocationGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 60, -11), Size(10,10)), entry_max_rect, GOAL_LOCATION_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
 	makeTimeGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 29, -11), Size(16,10)), Size(0,0), GOAL_TIME_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
@@ -17,7 +17,8 @@ ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std
 	unit(0),
 	type(REMAINING_UNIT_TYPE),
 	goal(NULL),
-	showLocMenu(false)
+	showLocMenu(false),
+	highlight(0)
 {
 //	makeLocationGoal->Hide();
 	makeTimeGoal->Hide();
@@ -37,7 +38,8 @@ ForceEntry::ForceEntry(const ForceEntry& object) :
 	unit(object.unit),
 	type(object.type),
 	goal(object.goal),
-	showLocMenu(object.showLocMenu)
+	showLocMenu(object.showLocMenu),
+	highlight(object.highlight)
 { }
 
 
@@ -58,6 +60,7 @@ ForceEntry& ForceEntry::operator=(const ForceEntry& object)
 
 	showLocMenu = object.showLocMenu;
 
+	highlight = object.highlight;
 	return(*this);
 }
 																																						   
@@ -118,6 +121,11 @@ void ForceEntry::process()
 {
 	if(!isShown())
 		return;
+	if(highlight>0)
+	{
+		highlight--;
+		highlight=highlight*5/6;
+	}
 	Size::mv(currentForce, startForce, targetForce);
 	showLocMenu=false;
 	if(makeTimeGoal->isLeftClicked())
@@ -233,6 +241,7 @@ void ForceEntry::setTargetForce(const unsigned int force)
 		startForce = currentForce;
 		targetForce = force;
 		setNeedRedrawNotMoved();
+		highlight = 50;
 	}
 }
 
@@ -243,32 +252,41 @@ void ForceEntry::draw(DC* dc) const
 	UI_Button::draw(dc);
 	if(!checkForNeedRedraw())
 		return;
+	Brush b = *theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+getType()));
+	if(highlight>0)
+		dc->SetBrush(Brush(dc->brightenColor(*b.GetColor(), highlight), b.GetStyle()));
+	else
+		dc->SetBrush(b);
+	Pen p = *theme.lookUpPen((ePen)(UNIT_TYPE_0_PEN+getType()));
+	if(highlight>0)
+		dc->SetPen(Pen(dc->brightenColor(*p.GetColor(), highlight), p.GetWidth(), p.GetStyle()));
+	else
+		dc->SetPen(p);
 
-	dc->SetBrush(*theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+getType())));
-	dc->SetPen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN+getType())));
 	dc->DrawEdgedRoundedRectangle(Rect(getAbsolutePosition()+Point(getWidth()-currentForce-1, 1), Size(currentForce+1, FONT_SIZE+4)), 3);
 
 	std::ostringstream os;
+	os.str("");
 
 // ------ Numbers
 	
 	if((goal)&&(totalNumber >= goal->getCount()))
 	{
-		dc->SetTextForeground(dc->mixColor(theme.lookUpColor(BRIGHT_TEXT_COLOR), theme.lookUpColor(FULFILLED_TEXT_COLOR)));
+		dc->SetTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(FULFILLED_TEXT_COLOR)));
 		if(totalNumber > goal->getCount()) 
 			os << "+" << totalNumber - goal->getCount() << "    ";
 	}
 	else if(goal)
-		dc->SetTextForeground(dc->mixColor(theme.lookUpColor(BRIGHT_TEXT_COLOR), theme.lookUpColor(NOT_FULFILLED_TEXT_COLOR)));
+		dc->SetTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(NOT_FULFILLED_TEXT_COLOR)));
 	else 
-		dc->SetTextForeground(dc->mixColor(theme.lookUpColor(BRIGHT_TEXT_COLOR), theme.lookUpColor(FULFILLED_TEXT_COLOR)));
+		dc->SetTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(FULFILLED_TEXT_COLOR)));
 
 	if(goal)
 		os << totalNumber << "/" << goal->getCount();
 	else
 		os << totalNumber;
 		
-	//dc->SetFont(UI_Object::theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
+	//dc->SetFont(UI_Object::theme.lookUpFont(SMALL_BOLD_FONT));
 	Size s = dc->GetTextExtent(os.str());
 	dc->DrawText(os.str(), getAbsolutePosition() + Point(getWidth() - s.GetWidth() - 2, 4));
   
@@ -278,16 +296,16 @@ void ForceEntry::draw(DC* dc) const
 		os.str("");
 		if ((goal->getFinalTime() > goal->getTime()) && (totalNumber >= goal->getCount()))
 		{
-			dc->SetTextForeground(dc->mixColor(theme.lookUpColor(BRIGHT_TEXT_COLOR), theme.lookUpColor(NOT_FULFILLED_TEXT_COLOR)));
+			dc->SetTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(NOT_FULFILLED_TEXT_COLOR)));
 			os << formatTime(goal->getFinalTime()) << " / " << formatTime(goal->getTime());
 		}
 		else if(totalNumber >= goal->getCount())
 		{
-			dc->SetTextForeground(dc->mixColor(theme.lookUpColor(BRIGHT_TEXT_COLOR), theme.lookUpColor(FULFILLED_TEXT_COLOR)));
+			dc->SetTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(FULFILLED_TEXT_COLOR)));
 			os << "+" << formatTime(goal->getTime() - goal->getFinalTime()) << " / " << formatTime(goal->getTime());
 		} else
 		{
-			dc->SetTextForeground(dc->mixColor(theme.lookUpColor(BRIGHT_TEXT_COLOR), theme.lookUpColor(NOT_FULFILLED_TEXT_COLOR)));
+			dc->SetTextForeground(dc->mixColor(*theme.lookUpColor(BRIGHT_TEXT_COLOR), *theme.lookUpColor(NOT_FULFILLED_TEXT_COLOR)));
 			os << "[" << formatTime(goal->getTime()) << "]";
 		}
 		s = dc->GetTextExtent(os.str());
@@ -314,6 +332,7 @@ void ForceEntry::setTotalNumber(const unsigned int total_number)
 	{
 		totalNumber = total_number;
 //		setNeedRedraw();
+		highlight = 50;
 	}
 }
 

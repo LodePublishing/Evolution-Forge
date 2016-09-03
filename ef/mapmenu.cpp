@@ -10,8 +10,8 @@ MapMenu& MapMenu::operator=(const MapMenu& object)
 	return(*this);
 }
 
-MapMenu::MapMenu(UI_Object* map_parent, Rect map_rect):
-	Menu(map_parent, map_rect, true)
+MapMenu::MapMenu(UI_Object* map_parent, const Rect map_rect, const Size distance_bottom_right, const ePositionMode position_mode):
+	Menu(map_parent, map_rect, distance_bottom_right, position_mode, true)
 { 
 	resetData();
 }
@@ -19,7 +19,9 @@ MapMenu::MapMenu(UI_Object* map_parent, Rect map_rect):
 void MapMenu::resetData()
 {
 	unsigned int i=0;
-	height=2;
+	height=1;
+	
+	
 	for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 	{
 		if(i >= database.getMapCount())
@@ -28,21 +30,22 @@ void MapMenu::resetData()
 			continue;
 		}
 		(*m)->Show();
-		(*m)->setButton(eButton(UNIT_TYPE_4_BUTTON));
+		(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_4_BUTTON));
 		(*m)->updateText(database.getMap(i)->getName());
-		Rect edge = Rect(Point(10, height * (FONT_SIZE + 9)), Size(0,0));
+		Rect edge = Rect(Point(0, i*(FONT_SIZE+6) + 25), Size(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), FONT_SIZE+3));
 		(*m)->adjustRelativeRect(edge);
-		height++;
-		i++;
+		++height;
+		++i;
 	}
-	for(;i<database.getMapCount();i++)
+	for(;i<database.getMapCount();++i)
 	{
-		MenuEntry* entry = new MenuEntry(this, Rect(Point(10, height * (FONT_SIZE + 9)), Size(0, FONT_SIZE)), database.getMap(i)->getName());
-		entry->setButton(eButton(UNIT_TYPE_4_BUTTON));
+		Rect edge = Rect(Point(0, i*(FONT_SIZE+6) + 25), Size(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), FONT_SIZE+3));
+		MenuEntry* entry = new MenuEntry(this, edge, database.getMap(i)->getName());
+		entry->setButtonColorsType(eButtonColorsType(UNIT_TYPE_4_BUTTON));
 		menuEntries.push_back(entry);
-		height++;
+		++height;
 	}
-	height++; // TODO
+	++height; // TODO
 }
 
 

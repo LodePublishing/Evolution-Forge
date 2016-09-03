@@ -1,45 +1,57 @@
 @FONTS
 	@640x480
+			FreeSans, 1
 			FreeSans, 8
 			FreeSansBold, 8
-			FreeSansBold, 8
-			FreeSansBold, 8
-			FreeSansBold, 8
-			FreeSansBold, 8
-			FreeSansBold, 8
-			FreeSansBold, 8
+			FreeSans, 9
+			FreeSansBold, 9
+			FreeSans, 12
+			FreeSansBold, 12
+			FreeSans, 14
+			FreeSansBold, 14
+			FreeSans, 18
+			FreeSansBold, 18
 	@END
 
 	@800x600
+			FreeSans, 1
+			FreeSans, 9
+			FreeSansBold, 9
 			FreeSans, 12
-			FreeSansBold, 10
-			FreeSansBold, 10
 			FreeSansBold, 12
+			FreeSans, 14
 			FreeSansBold, 14
+			FreeSans, 18
 			FreeSansBold, 18
+			FreeSans, 24
 			FreeSansBold, 24
-			FreeSansBold, 32
 	@END
 
 	@1024x768
+			FreeSans, 1
+			FreeSans, 9
+			FreeSansBold, 9
 			FreeSans, 12
-			FreeSansBold, 10
-			FreeSansBold, 10
 			FreeSansBold, 12
+			FreeSans, 14
 			FreeSansBold, 14
-			FreeSansBold, 18
-			FreeSansBold, 24
-			FreeSansBold, 32
+			FreeSans, 20
+			FreeSansBold, 20
+			FreeSans, 26
+			FreeSansBold, 26
 	@END
 
 	@1280x1024
+			FreeSans, 1
+			FreeSans, 10
+			FreeSansBold, 10
 			FreeSans, 12
-			FreeSansBold, 10
-			FreeSansBold, 10
 			FreeSansBold, 12
-			FreeSansBold, 14
+			FreeSans, 18
 			FreeSansBold, 18
+			FreeSans, 24
 			FreeSansBold, 24
+			FreeSans, 32
 			FreeSansBold, 32
 	@END
 @END
@@ -48,17 +60,19 @@
 	@640x480
 		Main window, 640, 480, 480, absolute coordinates, 0, 0
 		Message window, 400, 75, 75, dock bottom center inside of, Main window
-		Tutorial window, 500, 300, 300, dock center inside of, Main window
+		Help window, 500, 300, 300, dock center inside of, Main window
 		Settings window, 425, 368, 368, dock center inside of, Main window
+		Map window, 425, 368, 368, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
-		Tech tree window, 300, 300, 300, dock center inside of, Main window
+		Tech tree window, 300, 300, 300, dock bottom right inside of, Main window
 		Edit field window, 300, 150, 150, dock center inside of, Main window
 	@END
 	@800x600
 		Main window, 800, 600, 600, absolute coordinates, 0, 0
-		Message window, 400, 75, 75, dock bottom center inside of, Main window
-		Tutorial window, 500, 500, 500, dock center inside of, Main window
-		Settings window, 425, 368, 368, dock center inside of, Main window
+		Message window, 400, 100, 100, dock bottom center inside of, Main window
+		Help window, 500, 500, 500, dock center inside of, Main window
+		Settings window, 500, 400, 400, dock center inside of, Main window
+		Map window, 500, 400, 400, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 500, 500, 500, dock center inside of, Main window
 		Edit field window, 300, 150, 150, dock center inside of, Main window
@@ -66,18 +80,20 @@
 	
 	@1024x768
 		Main window, 1024, 768, 768, Main window, absolute coordinates, 0, 0
-		Message window, 400, 75, 75, dock bottom center inside of, Main window
-		Tutorial window, 500, 500, 500, dock center inside of, Main window
-		Settings window, 425, 368, 368, dock center inside of, Main window
+		Message window, 400, 125, 125, dock bottom center inside of, Main window
+		Help window, 500, 500, 500, dock center inside of, Main window
+		Settings window, 600, 450, 450, dock center inside of, Main window
+		Map window, 600, 450, 450, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 500, 500, 500, dock center inside of, Main window
 		Edit field window, 300, 150, 150, dock center inside of, Main window
 	@END
 	@1280x1024
-		Main window, 1280, 1000, 1000, Main window, absolute coordinates, 0, 0
-		Message window, 400, 75, 75, absolute coordinates, 440, 60
-		Tutorial window, 500, 500, 500, dock center inside of, Main window
-		Settings window, 425, 368, 368, dock center inside of, Main window
+		Main window, 1280, 1024, 1024, Main window, absolute coordinates, 0, 0
+		Message window, 400, 150, 150, dock bottom center inside of, Main window
+		Help window, 500, 500, 500, dock center inside of, Main window
+		Settings window, 700, 500, 500, dock center inside of, Main window
+		Map window, 700, 500, 500, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 500, 500, 500, dock bottom center inside of, Main window
 		Edit field window, 300, 150, 150, dock center inside of, Main window
@@ -676,18 +692,19 @@
 		 0,  35,   0, SOLID
 
 # bright unit list colors:
-		30,  30,  30, SOLID
-		110, 110, 110, SOLID
-		35, 180,  35, SOLID
-		180,  35,  35, SOLID
-		180,  35, 180, SOLID
-		35,  35, 180, SOLID
-		35, 180, 180, SOLID
-		180, 180,  35, SOLID
-		35,  35, 110, SOLID
-		110,  35,  35, SOLID
-		35, 110,  35, SOLID
+		50,  50,  50, SOLID
+		150, 150, 150, SOLID
+		50, 200,  50, SOLID
+		200,  50,  50, SOLID
+		200,  50, 200, SOLID
+		50,  50, 200, SOLID
+		50, 200, 200, SOLID
+		200, 200,  50, SOLID
+		50,  50, 200, SOLID
+		200,  50,  50, SOLID
+		50, 200,  50, SOLID
 		255, 255, 255, SOLID
+		
 # continue button brush
 		75,  75, 125, SOLID
 		25,  25,  50, SOLID
@@ -1048,9 +1065,10 @@
 
 @END
 
-@BUTTON_ANIMATION
+@BUTTON_COLORS
 # speed, type, startbrush, endbrush, starttextcolor, endtextcolor, startborderpen, endborderpen, bitmap
-#	DISABLED_BUTTON_PHASE,  NORMAL_BUTTON_PHASE,  PRESSED_BUTTON_PHASE,  HIGHLIGHT_BUTTON_PHASE, PRESSED_HIGHLIGHTED_BUTTON_PHASE
+#	types: no animation, jumpy (0,1,...,99,100,0,1,...), glowing (1,0,1,2,...,99,100,99,...), blinking (100,0,100,0,...)
+#	5 phases: DISABLED_BUTTON_PHASE,  NORMAL_BUTTON_PHASE,  PRESSED_BUTTON_PHASE,  HIGHLIGHT_BUTTON_PHASE, PRESSED_HIGHLIGHTED_BUTTON_PHASE
 # continue button brush
 	30, 2,   31, 31, 31, 31, 31,   31, 32, 33, 33, 33,    3,  3, 10,  3, 10,    3,  3, 10, 10, 10,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,    0,  0,  0,  0,  0
 # non-button force entry
@@ -1109,235 +1127,28 @@
 	20, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    0,  0,  0,  3,  3,    0,  0,  0, 14,  14,    9,  9,  9,  9,  9
 # checkButton
 	40, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   16, 16, 16, 16, 16,    0,  0,  0, 17,  17,   14, 14, 15, 14, 15
-
+# text button
+	40, 2,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    3,  3,  3,  3, 10,    3,  3,  3, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,    0,  0,  0,  0,  0
 @END
 
 @BUTTON_WIDTH
 	@640x480
-# continue button brush
-		50
-# non-button force entry
-		100
-# add button
-		100
-# sub button
-		100
-# cancel button
-		100
-# bo list
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-# main window tabs 
-		50
-# force window add goal
-		100
-# statistics 
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-# fps
-		100
-# arrow buttons
-		100
-		100
-		100
-		100
-
-		100
-		100
-		100
-		100
-# location button
-		100
-# time button
-		100
-# checkButton
-		100
+# standard button width
+		90
+# small
+		65
 	@END
 
 	@800x600
-		# continue button brush
-		100
-# non-button force entry
-		100
-# add button
-		100
-# sub button
-		100
-# cancel button
-		100
-# bo list
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-# main window tabs 
-		100
-# force window add goal
-		100
-# statistics 
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-# fps
-		100
-# arrow buttons
-		100
-		100
-		100
-		100
-
-		100
-		100
-		100
-		100
-# location button
-		100
-# time button
-		100
-# checkButton
-		100
+		110
+		80
 	@END
-
 	@1024x768
-# continue button brush
-		100
-# non-button force entry
-		100
-# add button
-		100
-# sub button
-		100
-# cancel button
-		100
-# bo list
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-# main window tabs 
-		100
-# force window add goal
-		100
-# statistics 
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-# fps
-		100
-# arrow buttons
-		100
-		100
-		100
-		100
-
-		100
-		100
-		100
-		100
-# location button
-		100
-# time button
-		100
-# checkButton
-		100
+		120
+		90
 	@END
-
 	@1280x1024
-# continue button brush
-		100
-# non-button force entry
-		100
-# add button
-		100
-# sub button
-		100
-# cancel button
-		100
-# bo list
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-# main window tabs 
-		100
-# force window add goal
-		100
-# statistics 
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-		100
-# fps
-		100
-# arrow buttons
-		100
-		100
-		100
-		100
-
-		100
-		100
-		100
-		100
-# location button
-		100
-# time button
-		100
-# checkButton
+		140
 		100
 	@END
 @END

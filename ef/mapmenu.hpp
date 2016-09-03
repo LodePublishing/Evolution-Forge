@@ -7,7 +7,7 @@
 class MapMenu : public Menu
 {
 	public:
-		MapMenu(UI_Object* map_parent, Rect map_rect);
+		MapMenu(UI_Object* map_parent, const Rect map_rect, const Size distance_bottom_right, const ePositionMode position_mode);
 		MapMenu(const MapMenu& object);
 		MapMenu& operator=(const MapMenu& object);
 		~MapMenu();

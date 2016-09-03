@@ -16,6 +16,9 @@ class Color
 		const Uint8 r() const;
 		const Uint8 g() const;
 		const Uint8 b() const;
+
+		void updateColor(SDL_Surface* surface);
+		
 		~Color();
 		Uint32 ucol;
 		SDL_Color scol;

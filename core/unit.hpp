@@ -129,7 +129,7 @@ inline void UNIT::addOneAvailible(const unsigned int unit_type)
 		toLog("DEBUG: (UNIT::addOneAvailible): Value num out of range.");return;
 	}
 #endif
-	availible[unit_type]++;
+	++availible[unit_type];
 }
 
 inline void UNIT::addOneTotal(const unsigned int unit_type)
@@ -142,7 +142,7 @@ inline void UNIT::addOneTotal(const unsigned int unit_type)
 		toLog("DEBUG: (UNIT::addOneTotal): Value num out of range.");return;
 	}
 #endif
-	total[unit_type]++;
+	++total[unit_type];
 }
 
 inline void UNIT::removeOneAvailible(const unsigned int unit_type)
@@ -155,7 +155,7 @@ inline void UNIT::removeOneAvailible(const unsigned int unit_type)
 		toLog("DEBUG: (UNIT::removeOneAvailible): Value num out of range.");return;
 	}
 #endif
-   availible[unit_type]--;
+	--availible[unit_type];
 }
 
 inline void UNIT::removeOneTotal(const unsigned int unit_type)
@@ -168,7 +168,7 @@ inline void UNIT::removeOneTotal(const unsigned int unit_type)
 		toLog("DEBUG: (UNIT::removeOneTotal): Value num out of range.");return;
 	}
 #endif
-	total[unit_type]--;
+	--total[unit_type];
 }
 
 

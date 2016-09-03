@@ -27,6 +27,7 @@ class Brush
 		~Brush();
 		const eBrushStyle GetStyle() const;
 		const Color* GetColor() const;
+		void updateColor(SDL_Surface* surface);
 	private:
 		Color color;
 		eBrushStyle style;

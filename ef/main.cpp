@@ -9,103 +9,85 @@
 
 int main(int argc, char *argv[])
 {
-	std::string current_driver;
-	if(getenv("SDL_VIDEODRIVER")==NULL)
-		current_driver="";
-	else
-		current_driver = getenv("SDL_VIDEODRIVER");		
 	std::list<std::string> arguments;
-	for(int i = 1;i<argc;i++)
+	for(signed int i = 1;i<argc;++i)
 		arguments.push_back(argv[i]);
-	std::list<std::string> availible_drivers = DC::getAvailibleDrivers();
-	if(availible_drivers.empty())
-	{
-		toLog("No video drivers are availible for your platform!");
-		return(EXIT_FAILURE);
-	}
-//TODO: Aufloesung und Farbtiefe uebergeben einbauen
+
+	std::string current_driver;
+	if(getenv("SDL_VIDEODRIVER")!=NULL)
+		current_driver = getenv("SDL_VIDEODRIVER");
+
+// ------ LOAD CONFIGURATION FILES ------
+	uiConfiguration.loadConfigurationFile();
+	UI_Object::theme.setLanguage(uiConfiguration.getLanguage());
+	std::list<std::string> stringFiles = database.findFiles("settings", "strings", "");
+	for(std::list<std::string>::iterator j = stringFiles.begin(); j!=stringFiles.end(); ++j)
+		UI_Object::theme.loadStringFile(*j);
+	toLog(UI_Object::theme.lookUpString(START_LOAD_CONFIGURATION_STRING));
+	coreConfiguration.loadConfigurationFile();
+	efConfiguration.loadConfigurationFile();
+// ------ END LOAD CONFIGURATION FILES -------
+
+// ------ PARSING COMMAND LINE ------
+	toLog(UI_Object::theme.lookUpString(START_PARSE_COMMAND_LINE_STRING));
 	if(!arguments.empty())
-	{
-		for(std::list<std::string>::const_iterator i = arguments.begin();i!=arguments.end();i++)
+		for(std::list<std::string>::const_iterator i = arguments.begin();i!=arguments.end(); ++i)
 		{
 			if((*i) == "-vo")
 			{
-				i++;
+				++i;
 				if(i==arguments.end())
-					toLog("-vo argument given but no driver specified.");
-				else
-				{
-					for(std::list<std::string>::const_iterator j = availible_drivers.begin();j!=availible_drivers.end();j++)
-						if(*i == *j)
-						{
-							current_driver = *i;
-							break;
-						}
-					if(current_driver=="")
-						toLog("SDL Driver " + *i + " is not supported.");
-				}
+					toLog(UI_Object::theme.lookUpString(START_WARNING_VO_ARGUMENT_STRING));
+				else current_driver = *i;
+				break;
 			}
 		}
-	}
-	if(current_driver=="")
-		current_driver = *availible_drivers.begin();
-
-// ------ LOAD CONFIGURATION FILES ------
-	toLog("Loading messages / Lade Nachrichten ...");
-	std::list<std::string> stringFiles = database.findFiles("settings", "strings", "");
-	for(std::list<std::string>::iterator j = stringFiles.begin(); j!=stringFiles.end(); j++)
-		UI_Object::theme.loadStringFile(*j);
-	toLog(*UI_Object::theme.lookUpString(START_START_STRING));
-	toLog(*UI_Object::theme.lookUpString(START_LOAD_CORE_SETTINGS_STRING));
-	coreConfiguration.loadConfigurationFile();
-	efConfiguration.loadConfigurationFile();
-	uiConfiguration.loadConfigurationFile();
-	UI_Object::theme.setLanguage(uiConfiguration.getLanguage());
-// ------ END LOAD CONFIGURATION FILES -------
-
+// ------ END PARSING COMMAND LINE ------
 
 
 // ------ INIT SDL AND WINDOW ------
-	std::ostringstream video;
-	video << "SDL_VIDEODRIVER=" << current_driver;
-	char* video_cstr = new char[strlen(video.str().c_str())];
-	strcpy(video_cstr, video.str().c_str());
-	putenv(video_cstr);
-	toLog("Using SDL Driver " + current_driver + " ...");
+	switch(DC::chooseDriver(current_driver))
+	{
+		case NO_DRIVER_ERROR:toLog(UI_Object::theme.lookUpFormattedString(START_SDL_USING_DRIVER_STRING, current_driver));break;
+		case NO_VIDEO_DRIVERS_AVAILIBLE:toLog(UI_Object::theme.lookUpString(START_ERROR_NO_DRIVER_AVAILIBLE_STRING));return(EXIT_FAILURE);break;
+		case SDL_DRIVER_NOT_SUPPORTED:toLog(UI_Object::theme.lookUpFormattedString(START_ERROR_DRIVER_NOT_SUPPORTED_STRING, current_driver));return(EXIT_FAILURE);break;
+	}
 
-	toLog(*UI_Object::theme.lookUpString(START_INIT_SDL_STRING));
- 	SDL_Rect clientWindow;
-	clientWindow.x=0;clientWindow.y=0;clientWindow.w=640;clientWindow.h=480;
-	UI_Object::theme.setResolution(RESOLUTION_640x480);
-	DC* screen;
-	if (efConfiguration.isFullScreen()) 
-	{
-		toLog(*UI_Object::theme.lookUpString(START_SET_FULLSCREEN_MODE_STRING));
-		screen = new DC(clientWindow.w, clientWindow.h, 24, SDL_HWSURFACE|SDL_FULLSCREEN|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC|SDL_DOUBLEBUF, SDL_INIT_NOPARACHUTE);
-	}
-	else 
-	{
-		toLog(*UI_Object::theme.lookUpString(START_SET_WINDOW_MODE_STRING));
-		screen = new DC(clientWindow.w, clientWindow.h, 24, SDL_HWSURFACE|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC|SDL_DOUBLEBUF, SDL_INIT_NOPARACHUTE);
-	}
-	toLog("Scanning Graphic-Hardware...");
-	toLog(DC::printHardwareInformation());
+	toLog(UI_Object::theme.lookUpString(START_INIT_SDL_STRING));
+
+	UI_Object::theme.setResolution(uiConfiguration.getResolution());
+	UI_Object::theme.setBitDepth(uiConfiguration.getBitDepth());
 	
+	toLog(UI_Object::theme.lookUpString(efConfiguration.isFullScreen()?START_SET_FULLSCREEN_MODE_STRING:START_SET_WINDOW_MODE_STRING));
+	
+	DC* screen = new DC(UI_Object::theme.getResolution(), UI_Object::theme.getBitDepth(), (efConfiguration.isFullScreen()?SDL_FULLSCREEN:0)|SDL_HWSURFACE|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC|SDL_DOUBLEBUF, SDL_INIT_NOPARACHUTE);
+
+	{
+		std::ostringstream os;
+		os.str("");
+		std::list<std::string> s = screen->getAvailibleDrivers();
+		for(std::list<std::string>::const_iterator i = s.begin(); i!=s.end(); i++)
+			os << *i << " ";
+		toLog("Availible drivers: " + os.str());		
+	}
+
+		
 	if(!screen->initializationOK())	{
-		toLog(*UI_Object::theme.lookUpString(START_UNABLE_TO_INIT_SDL_STRING) + SDL_GetError());return(EXIT_FAILURE);
+		toLog(UI_Object::theme.lookUpString(START_UNABLE_TO_INIT_SDL_STRING) + " [SDL ERROR: \"" + SDL_GetError() + "\"]");return(EXIT_FAILURE);		
 	}
 	
 	if ( screen->GetSurface() == NULL ) {
-		toLog(*UI_Object::theme.lookUpString(START_ERROR_SETTING_VIDEO_MODE_STRING) + SDL_GetError());return(EXIT_FAILURE);
+		toLog(UI_Object::theme.lookUpString(START_ERROR_SETTING_VIDEO_MODE_STRING) + " [SDL ERROR: \"" + SDL_GetError() + "\"]");return(EXIT_FAILURE);
 	}
 	
-	screen->setResolution(clientWindow.w, clientWindow.h);
+	toLog(DC::printHardwareInformation());
+
+	Size resolution = screen->getResolutionSize();
+	UI_Object::setResolution(resolution);
+
 	toLog(DC::printSurfaceInformation(screen));
 	
 	SDL_Event event;
-
-	UI_Object::max_x = clientWindow.w; UI_Object::max_y = clientWindow.h;
-
 	SDL_WM_SetCaption("EVOLUTION FORGE BETA - www.clawsoftware.de","");
 // ------ END INIT SDL AND WINDOW ------
 
@@ -113,17 +95,17 @@ int main(int argc, char *argv[])
 // ------ INTRO PICTURE ------
 //	SDL_Surface* progress = SDL_LoadBMP("data/bitmaps/bar.bmp");
 //	Bitmap claw("data/bitmaps/clawsoftware.bmp");
-//	screen->DrawBitmap(progress, (clientWindow.w - progress->w)/2, (clientWindow.h - progress->h)/2-60);
-//	screen->DrawBitmap(claw, clientWindow.w - claw->w, clientWindow.h - claw->h);
+//	screen->DrawBitmap(progress, (resoluton.GetWidth() - progress->w)/2, (resolution.GetHeight() - progress->h)/2-60);
+//	screen->DrawBitmap(claw, resolution.GetWidth() - claw->w, resolution.GetHeight() - claw->h);
 //	screen->SetPen(Pen(Color(screen->GetSurface(), 255, 255, 255), 1, SOLID_PEN_STYLE));
 //	screen->SetBrush(Brush(Color(screen->GetSurface(), 100, 150, 255), SOLID_BRUSH_STYLE));
 // ------ END INTRO PICTURE -------
 
 
 // ------ INIT SDL_TTF ------
-	toLog(*UI_Object::theme.lookUpString(START_INIT_SDL_TRUETYPE_FONTS_STRING));
+	toLog(UI_Object::theme.lookUpString(START_INIT_SDL_TRUETYPE_FONTS_STRING));
 	if(TTF_Init()==-1) {
-		toLog(std::string("TTF_Init: ") + TTF_GetError());return(EXIT_FAILURE);
+		toLog(std::string("TTF_Init: ") + " [TTF ERROR: \"" + TTF_GetError() + "\"]");return(EXIT_FAILURE);
 	}
 	atexit(TTF_Quit); 
 // ------- END INIT SDL_TTF -------
@@ -136,7 +118,7 @@ int main(int argc, char *argv[])
 
 
 // ------- INIT GRAPHIC ENGINE ------
-	toLog(*UI_Object::theme.lookUpString(START_INIT_GRAPHIC_ENGINE_CORE_STRING));
+	toLog(UI_Object::theme.lookUpString(START_INIT_GRAPHIC_ENGINE_CORE_STRING));
 	Main m(screen);
 
 	unsigned int screenshot = 100;
@@ -147,13 +129,13 @@ int main(int argc, char *argv[])
 //		m.stopAllOptimizing(); TODO
 
 	bool endrun = false;
-	int screenCapturing=0;
+	unsigned int screenCapturing=0;
 
 // ------ END INIT GRAPHIC ENGINE ------
 
 // ------ INTRO ------
-//	Rect t((clientWindow.w-650)/2 + 10, (clientWindow.h - 750)/2 + 10, 650 - 20, 650 - 20);
-//	Rect t2((clientWindow.w-600)/2 + 10, (clientWindow.h - 700)/2 + 10, 600 - 20, 600 - 20);
+//	Rect t((resolution.GetWidth()-650)/2 + 10, (resolution.GetHeight() - 750)/2 + 10, 650 - 20, 650 - 20);
+//	Rect t2((resolution.w-600)/2 + 10, (resolution.h - 700)/2 + 10, 600 - 20, 600 - 20);
 	
 //UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " :)$# # $ABOUT THE BETA TEST:$# #- $How can I help?$# Post your ideas, discuss or report bugs at the forums at $clawsoftware.de$!#- $It's a beta test... so what do I have to do?$#Test the program on different pcs, different configurations, color settings, drivers etc and report back any crashes, bugs etc#Try out many different, especially unusual goal lists to test the core, let the program run some hours, change the settings, ...# Please do not mess with the data files, the loading routines do not take notice of every error. In the worst case the programm will crash.# # $ABOUT THE PROGRAM ITSELF:$# # - $What does this program?$#The program simulates an abstract StarCraft : Broodwar environment, calculates the time a certain build order needs and optimizes randomly created build orders to a given goal list using evolutionary algorithms.# # $USER INTERFACE:$# # $Keyboard$# - $SPACE$: deactivate drawing (less CPU usage / faster calculation)# - $ALT + ENTER$: switch between fullscreen and window mode# - $ESC$: quits the program without saving# - $PAUSE$: stop/continue calculation# # $Mouse$# - $LEFT BUTTON$: activates buttons and adds items# - $RIGHT BUTTON$: removes items (units) or adds very many items (+/- buttons) # # - $Saving/Loading$: Saved build orders are placed in output/bos/<the race>/, goals are placed in settings/goals/<the race>/ # # NOW HAVE FUN! 8-D # # Best regards, # Clemens Lode", t2, Size(0,0), BRIGHT_TEXT_COLOR, SMALL_MIDDLE_NORMAL_FONT, FORMATTED_TEXT_MODE); // TODO
 /*	bool done = false;
@@ -162,11 +144,11 @@ int main(int argc, char *argv[])
 		introText.process();
 		screen->SetPen(Pen(Color(screen->GetSurface(), 0, 0, 0), 1, TRANSPARENT_PEN_STYLE));
 		screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
-		screen->DrawRectangle(Rect(clientWindow.x, clientWindow.y, clientWindow.w-1, clientWindow.h-1));
+		screen->DrawRectangle(Rect(resolution.x, resolution.y, resolution.w-1, resolution.h-1));
 		screen->SetPen(*UI_Object::theme.lookUpPen(OUTER_BORDER_PEN));
 		screen->SetBrush(*UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
 		screen->DrawEdgedRoundedRectangle(t,6);
-//		screen->DrawBitmap(claw, clientWindow.w - claw->w, clientWindow.h - claw->h);
+//		screen->DrawBitmap(claw, resolution.w - claw->w, resolution.h - claw->h);
 		introText.draw(screen);
 		screen->updateScreen();
 		fps->delay();
@@ -196,15 +178,15 @@ int main(int argc, char *argv[])
 		m.draw(screen);
 // ------ END DRAWING ------
 
-// ------ SCREENCAPTURE ------          
+// ------ SCREENCAPTURE ------ 
                 if(screenCapturing==100) {
-			std::ostringstream os;os << "shot" << screenshot << ".bmp";
+			std::ostringstream os;os.str("");os << "shot" << screenshot << ".bmp";
                         SDL_SaveBMP(screen->GetSurface() , os.str().c_str());
-			screenshot++;
+			++screenshot;
 		}
 		if(screenCapturing>0) {
-			screenCapturing--;
-			std::ostringstream os;os << "shot" << (screenshot-1) << ".bmp" << " saved (" << (clientWindow.w * clientWindow.h * (int)(screen->GetSurface()->format->BitsPerPixel))/1024 << "kb)";
+			--screenCapturing;
+			std::ostringstream os;os.str("");os << "shot" << (screenshot-1) << ".bmp" << " saved (" << (resolution.GetWidth() * resolution.GetHeight() * (int)(screen->GetSurface()->format->BitsPerPixel))/1024 << "kb)";
                         screen->DrawText(os.str(), 50, 300);
                 }
 // ------ END SCREENCAPTURE -----
@@ -242,17 +224,19 @@ int main(int argc, char *argv[])
 // ------ END FRAMERATE AND CALCULATION 
 
 
-
 // ------ FPS DEBUG
-/*		Point p = Point(20, clientWindow.h - 40);
-		screen->SetTextForeground(DC::toSDL_Color(255, 20, 20));
-		screen->SetFont(UI_Object::theme.lookUpFont(LARGE_NORMAL_BOLD_FONT));
-		screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
-		screen->DrawRectangle(Rect(p, Size(200,20)));
+/*		{
+			Point p = Point(20, resolution.GetHeight() - 40);
+			screen->SetTextForeground(DC::toSDL_Color(255, 20, 20));
+			screen->SetFont(UI_Object::theme.lookUpFont(LARGE_NORMAL_BOLD_FONT));
+			screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
+			screen->DrawRectangle(Rect(p, Size(200, 20)));
 
-		std::ostringstream os;
-		os << "Objects: " << UI_Object::redrawnObjects << "   FPS: " << efConfiguration.getCurrentFramerate();
-		screen->DrawText(os.str(), p);	*/
+			std::ostringstream os;
+			os.str("");
+			os << "Objects: " << UI_Object::redrawnObjects << "   FPS: " << efConfiguration.getCurrentFramerate();
+			screen->DrawText(os.str(), p + Size(20, 10));	
+		}*/
 // ------ END FPS DEBUG
 
 	
@@ -301,9 +285,10 @@ int main(int argc, char *argv[])
 							{
 								if(event.key.keysym.mod & (KMOD_LALT | KMOD_RALT | KMOD_ALT))
 								{
-									screen->setFullscreen(!efConfiguration.isFullScreen());
+//									screen->setFullscreen(!efConfiguration.isFullScreen());
 									efConfiguration.setFullScreen(!efConfiguration.isFullScreen());
 									m.noticeFullscreen();
+//									toLog(UI_Object::theme.lookUpString(efConfiguration.isFullScreen()?START_SET_FULLSCREEN_MODE_STRING:START_SET_WINDOW_MODE_STRING));
 								}
 							} else
 								UI_Object::editTextField->forceDone();
@@ -342,15 +327,15 @@ int main(int argc, char *argv[])
 						case SDLK_KP_MULTIPLY:
 						case SDLK_ASTERISK:break; // TODO
 						case SDLK_KP_PLUS:
-						case SDLK_PLUS:break;
+//						case SDLK_PLUS:break;
 						case SDLK_COMMA:break;
 						case SDLK_KP_MINUS:break;
-						case SDLK_MINUS:
-							if((event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))&&(UI_Object::editTextField!=NULL))
-							{
-								UI_Object::editTextField->addChar('_');
-								break;
-							}break;
+//						case SDLK_MINUS:
+//							if((event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))&&(UI_Object::editTextField!=NULL))
+//							{
+//								UI_Object::editTextField->addChar('_');
+//								break;
+//							}break;
 						case SDLK_KP_PERIOD:
 						case SDLK_PERIOD:break;//TODO
 						case SDLK_KP_DIVIDE:break;
@@ -360,13 +345,11 @@ int main(int argc, char *argv[])
 						case SDLK_SEMICOLON:break;
 						case SDLK_LESS:break;//TODO
 						case SDLK_KP_EQUALS:break;
-						case SDLK_EQUALS:break;
+//						case SDLK_EQUALS:break;
 						case SDLK_GREATER:break;//TODO
 						case SDLK_QUESTION:break;
 						case SDLK_AT:break;
-						case SDLK_LEFTBRACKET:break;
 						case SDLK_BACKSLASH:break;
-						case SDLK_RIGHTBRACKET:break;
 						case SDLK_CARET:break;
 						case SDLK_UNDERSCORE:
 							if(UI_Object::editTextField!=NULL)
@@ -393,22 +376,59 @@ int main(int argc, char *argv[])
 
 
 //						case SDLK_PRINT:break;
-//						case SDLK_PLUS:
-//								if(UI_Object::theme.getResolution()<RESOLUTION_1280x1024)
-//									UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() + 1));
-//								break;
-//						case SDLK_MINUS:
-//								if(UI_Object::theme.getResolution()>RESOLUTION_640x480)
-//									UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() - 1));
-//								break;
-//						case SDLK_F1:m.mainWindow->forcePressTab(BASIC_TAB);break;
-//						case SDLK_F2:m.mainWindow->forcePressTab(ADVANCED_TAB);break;
-//						case SDLK_F3:m.mainWindow->forcePressTab(EXPERT_TAB);break;
-//						case SDLK_F4:m.mainWindow->forcePressTab(GOSU_TAB);break;
-//						case SDLK_F5:m.mainWindow->forcePressTab(COMPARE_TAB);break;
+						case SDLK_EQUALS:
+								if(UI_Object::theme.getResolution()<RESOLUTION_1280x1024)
+								{
+									UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() + 1));
+									screen->setResolution(UI_Object::theme.getResolution());
+									uiConfiguration.setResolution(UI_Object::theme.getResolution());
+									resolution = screen->getResolutionSize();
+									UI_Object::setResolution(resolution);
+									std::ostringstream os;os.str("");
+ 									os << resolution.GetWidth() << "x" << resolution.GetHeight();
+									toLog(UI_Object::theme.lookUpFormattedString(CHANGED_RESOLUTION_STRING, os.str()));
+									m.reloadOriginalSize();
+								}
+								break;
+						case SDLK_MINUS:
+								if(UI_Object::theme.getResolution()>RESOLUTION_640x480)
+								{
+									UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() - 1));
+									screen->setResolution(UI_Object::theme.getResolution());
+									uiConfiguration.setResolution(UI_Object::theme.getResolution());
+									resolution = screen->getResolutionSize();
+									UI_Object::setResolution(resolution);
+									std::ostringstream os;os.str("");
+ 									os << resolution.GetWidth() << "x" << resolution.GetHeight();
+									toLog(UI_Object::theme.lookUpFormattedString(CHANGED_RESOLUTION_STRING, os.str()));
+									m.reloadOriginalSize();
+								}
+								break;
+						case SDLK_LEFTBRACKET:
+								if(screen->getBitDepth() > DEPTH_8BIT)
+								{
+									UI_Object::theme.setBitDepth((eBitDepth)(screen->getBitDepth()-1));
+									screen->setBitDepth(UI_Object::theme.getBitDepth());
+									uiConfiguration.setBitDepth(UI_Object::theme.getBitDepth());
+									UI_Object::theme.updateColors(screen->GetSurface());
+									// TODO bitDepth im theme aendern!
+									toLog(UI_Object::theme.lookUpFormattedString(CHANGED_BIT_DEPTH_STRING, (unsigned int)screen->GetSurface()->format->BitsPerPixel));
+								}
+								break;
+						case SDLK_RIGHTBRACKET:
+								if(screen->getBitDepth() < DEPTH_32BIT)
+								{
+									UI_Object::theme.setBitDepth((eBitDepth)(screen->getBitDepth()+1));
+									screen->setBitDepth(UI_Object::theme.getBitDepth());
+									uiConfiguration.setBitDepth(UI_Object::theme.getBitDepth());
+									UI_Object::theme.updateColors(screen->GetSurface());
+									toLog(UI_Object::theme.lookUpFormattedString(CHANGED_BIT_DEPTH_STRING, (unsigned int)screen->GetSurface()->format->BitsPerPixel));
+								}
+								break;
+							
 //						case SDLK_F6:m.mainWindow->forcePressTab(MAP_TAB);break;
 //						case SDLK_F7:m.mainWindow->forcePressTab(SETTINGS_TAB);break;
-//						case SDLK_F8:m.mainWindow->forcePressTab(TUTORIAL_TAB);break;
+//						case SDLK_F8:m.mainWindow->forcePressTab(HELP_TAB);break;
 						case SDLK_a:
 						case SDLK_b:
 						case SDLK_c:
@@ -473,6 +493,34 @@ int main(int argc, char *argv[])
 				default:break;
 			}
 		}
+
+		if(m.hasBitDepthChanged())
+		{
+			screen->setBitDepth(UI_Object::theme.getBitDepth());
+			UI_Object::theme.updateColors(screen->GetSurface());
+			toLog(UI_Object::theme.lookUpFormattedString(CHANGED_BIT_DEPTH_STRING, (unsigned int)screen->GetSurface()->format->BitsPerPixel));
+		} else
+	
+		if(m.hasResolutionChanged())
+		{
+			screen->setResolution(UI_Object::theme.getResolution());
+			resolution = screen->getResolutionSize();
+			UI_Object::setResolution(resolution);
+			std::ostringstream os;
+			os.str("");
+ 			os << resolution.GetWidth() << "x" << resolution.GetHeight();
+			toLog(UI_Object::theme.lookUpFormattedString(CHANGED_RESOLUTION_STRING, os.str()));
+			m.reloadOriginalSize();
+		} else 
+
+		if(m.hasFullScreenChanged())
+		{
+			screen->setFullscreen(efConfiguration.isFullScreen());
+			toLog(UI_Object::theme.lookUpString(efConfiguration.isFullScreen()?START_SET_FULLSCREEN_MODE_STRING:START_SET_WINDOW_MODE_STRING));
+		}
+
+
+		
 	}
 }
 					

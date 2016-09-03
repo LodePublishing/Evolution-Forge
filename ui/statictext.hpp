@@ -3,23 +3,7 @@
 
 #include "object.hpp"
 
-/*enum eTextMode
-{
-//	NO_TEXT_MODE = 0,
-	// => ueber ui object abhandeln! :)
-//	RIGHT_BOUNDED_TEXT_MODE,
-//	VERTICALLY_CENTERED_TEXT_MODE,
-//	HORIZONTALLY_CENTERED_TEXT_MODE,
-//	TOTAL_CENTERED_TEXT_MODE,
-//	LOWER_CENTERED_TEXT_MODE,
-//	UPPER_CENTERED_TEXT_MODE,
-//	BOTTOM_TEXT_MODE,
-//	TOP_TEXT_MODE,	
-//	FORMATTED_TEXT_MODE,
-//	FORMATTED_NON_BLOCK_TEXT_MODE
-};*/
-
-class UI_StaticText:public UI_Object
+class UI_StaticText : public UI_Object
 {
 	public:
 		UI_StaticText& operator=(const UI_StaticText& object);
@@ -30,21 +14,17 @@ class UI_StaticText:public UI_Object
 		UI_StaticText(UI_Object* st_parent, const std::string& st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode = HORIZONTALLY_CENTERED, const eAutoSize auto_size = NO_AUTO_SIZE);
 		~UI_StaticText();
 
-		
-//		void setMode(const eTextMode st_mode);
 		void setColor(const Color st_color);
 		void setColor(const eColor st_color);
 		void setFont(const eFont st_font);
 		const std::string& getString() const;
 		void updateText(const std::string& st_text);
+		void reloadOriginalSize();
 
 		void addChar(const unsigned int position, const char key);
 		void removeCharBackspace(const unsigned int position);
 		void removeCharDelete(const unsigned int position);
 
-// for formatted Text:
-		const bool doneWriting() const; 
-			
 		UI_Object* checkTooltip();
 		UI_Object* checkHighlight();
 	
@@ -57,27 +37,21 @@ class UI_StaticText:public UI_Object
 		const Size getTextSize() const;
 		const Rect& getTextBox() const;
 		const Size getTextPosSize(const unsigned int pos) const;
-		const Size& getBoxSize() const;
 
 		void setPressed(const bool press=false);
-
-//	protected:
-//		eTextMode  mode; 
+		void doHighlight(const bool high_light=true);
 	private:
-
 		std::string text;
-		
+		bool textWasChanged;
 		eFont font;
-		unsigned int position;
 		Color color;
 		eString eText;
-		bool textMode;
 		bool pressed; // for buttons only, draw the text +(1,1)	
-		Rect textBox;
+		bool highlight;
 };
 
-inline const Size& UI_StaticText::getBoxSize() const {
-	return(textBox.GetSize());
+inline void UI_StaticText::doHighlight(const bool high_light) {
+	highlight = high_light;
 }
 
 inline void UI_StaticText::setPressed(const bool press) {
@@ -88,16 +62,7 @@ inline UI_Object* UI_StaticText::checkHighlight() {
 	return(UI_Object::checkHighlight());
 }
 
-inline const bool UI_StaticText::doneWriting() const {
-	return(position >= text.size());
-}
-
-inline const Rect& UI_StaticText::getTextBox() const {
-	return(textBox);
-}
-
 inline const Size UI_StaticText::getTextSize() const {
-	//return(textBox.GetSize());
 	return(theme.lookUpFont(font)->GetTextExtent(text));
 }
 
@@ -106,19 +71,19 @@ inline const Size UI_StaticText::getTextPosSize(const unsigned pos) const {
 }
 
 inline void UI_StaticText::setColor(const eColor st_color) {
-	color=*theme.lookUpColor(st_color);
+	color = *theme.lookUpColor(st_color);
 }
 
 inline void UI_StaticText::setColor(const Color st_color) {
-	color=st_color;
+	color = st_color;
 }
 
-//inline void UI_StaticText::setMode(const eTextMode st_mode) {
-//	mode=st_mode;
-//}
+inline const std::string& UI_StaticText::getString() const {
+	return(text);
+}
 
 inline void UI_StaticText::setFont(const eFont st_font) {
-	font=st_font;
+	font = st_font;
 }
 
 #endif // _UI_STATICTEXT_HPP

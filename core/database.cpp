@@ -26,14 +26,14 @@ DATABASE::DATABASE():
 
 DATABASE::~DATABASE()
 {
-	for(std::vector<BASIC_MAP*>::iterator i = loadedMap.begin(); i!=loadedMap.end(); i++)
+	for(std::vector<BASIC_MAP*>::iterator i = loadedMap.begin(); i!=loadedMap.end(); ++i)
 		delete *i;
 	loadedMap.clear();
-	for(unsigned int j=0;j<MAX_RACES;j++)
+	for(unsigned int j = 0; j < MAX_RACES; ++j)
 	{
-		for(std::vector<START_CONDITION*>::iterator i = loadedStartCondition[j].begin(); i!=loadedStartCondition[j].end(); i++)
+		for(std::vector<START_CONDITION*>::iterator i = loadedStartCondition[j].begin(); i!=loadedStartCondition[j].end(); ++i)
 			delete *i;
-		for(std::vector<GOAL_ENTRY*>::iterator i = loadedGoal[j].begin(); i!=loadedGoal[j].end(); i++)
+		for(std::vector<GOAL_ENTRY*>::iterator i = loadedGoal[j].begin(); i!=loadedGoal[j].end(); ++i)
 			delete *i;
 		loadedStartCondition[j].clear();
 		loadedGoal[j].clear();
@@ -45,6 +45,7 @@ std::list<std::string> DATABASE::findFiles(const std::string& directory1, const 
 {
 	std::list<std::string> fileList;
 	std::ostringstream os;
+	os.str("");
 #ifdef __linux__
 	DIR *dir;
 	struct dirent *entry;
@@ -56,7 +57,7 @@ std::list<std::string> DATABASE::findFiles(const std::string& directory1, const 
 		os << directory1;
 	
 	if ((dir = opendir(os.str().c_str())) == NULL)
-		toLog("ERROR opening directory " + os.str());
+		toLog("ERROR: (DATABASE::findFiles) Cannot open directory " + os.str());
 	else 
 	{
 		while ((entry = readdir(dir)) != NULL)
@@ -73,7 +74,7 @@ std::list<std::string> DATABASE::findFiles(const std::string& directory1, const 
 			fileList.push_back(directory1 + "\\" + directory2 + "\\" + directory3 + "\\" + dir.cFileName);
 		while(FindNextFile(fhandle, &dir));
 	} else
-		toLog("ERROR Loading " + directory1 + "\\" + directory2 + "\\" + directory3 + ".");
+		toLog("ERROR: (DATABASE::findFiles) Cannot load " + directory1 + "\\" + directory2 + "\\" + directory3 + ".");
 	FindClose(fhandle);
 #endif
 	return fileList;
@@ -95,7 +96,7 @@ void DATABASE::loadGoalFile(const std::string& goalFile)
 	std::ifstream pFile(goalFile.c_str());
 	if(!pFile.is_open())
 	{
-		toLog("ERROR: (loadGoalFile): File " + goalFile + " not found.");
+		toLog("ERROR: (DATABASE::loadGoalFile): File " + goalFile + " not found.");
 		return;
 	}
 //	toLog(goalFile + " loaded.");
@@ -129,12 +130,12 @@ void DATABASE::loadGoalFile(const std::string& goalFile)
 				eRace race=TERRA;
 				i->second.pop_front();
 				std::string estr=i->second.front();
-				if(i->second.front()==*UI_Object::theme.lookUpString(TERRA_STRING)) race=TERRA;
-				else if(i->second.front()==*UI_Object::theme.lookUpString(PROTOSS_STRING)) race=PROTOSS;
-				else if(i->second.front()==*UI_Object::theme.lookUpString(ZERG_STRING)) race=ZERG;
+				if(i->second.front()==UI_Object::theme.lookUpString(TERRA_STRING)) race=TERRA;
+				else if(i->second.front()==UI_Object::theme.lookUpString(PROTOSS_STRING)) race=PROTOSS;
+				else if(i->second.front()==UI_Object::theme.lookUpString(ZERG_STRING)) race=ZERG;
 #ifdef _SCC_DEBUG
 				else {
-					toLog("ERROR: (loadSettingsFile): Wrong race entry.");return;
+					toLog("ERROR: (DATABASE::loadSettingsFile [" + goalFile + "]): Wrong race entry (" + i->second.front() + " [" + UI_Object::theme.lookUpString(TERRA_STRING)+"|" + UI_Object::theme.lookUpString(PROTOSS_STRING)+"|" + UI_Object::theme.lookUpString(ZERG_STRING)+"]).");return;
 				}
 #endif
 				goal->setRace(race);
@@ -147,9 +148,9 @@ void DATABASE::loadGoalFile(const std::string& goalFile)
 					std::list<std::string>::iterator l=k->second.begin();
 					if(l->size()>=3)
 					{
-						l++;int count=atoi(l->c_str());
-						l++;int location=atoi(l->c_str());
-						l++;int time=atoi(l->c_str());
+						++l;int count=atoi(l->c_str());
+						++l;int location=atoi(l->c_str());
+						++l;int time=atoi(l->c_str());
 						goal->addGoal(unit, count, time, location);
 					}
 				}
@@ -168,7 +169,7 @@ void DATABASE::loadHarvestFile(const std::string& harvestFile)
 	std::ifstream pFile(harvestFile.c_str());
 	if(!pFile.is_open())
 	{
-		toLog("ERROR: (loadHarvestFile): File not found.");
+		toLog("ERROR: (DATABASE::loadHarvestFile): File " + harvestFile + "not found.");
 		return;
 	}
 	char line[1024];
@@ -260,7 +261,7 @@ void DATABASE::loadMapFile(const std::string& mapFile)
 	std::ifstream pFile(mapFile.c_str());
 	if(!pFile.is_open())
 	{
-		toLog("ERROR: (loadMapFile): File not found.");
+		toLog("ERROR: (DATABASE::loadMapFile): File " + mapFile + " not found.");
 		return;
 	}
 	char line[1024];
@@ -278,7 +279,7 @@ void DATABASE::loadMapFile(const std::string& mapFile)
 		parse_line(text, words);
 		if(words.empty()) continue;
 		std::list<std::string>::iterator j=words.begin();
-		std::string index=*j;j++;
+		std::string index=*j;++j;
 		std::map<std::string, std::list<std::string> >::iterator i;
 		if(index=="@MAP")
 		{
@@ -301,7 +302,7 @@ void DATABASE::loadMapFile(const std::string& mapFile)
 		{
 			if(j==words.end())
 			{
-				toLog("ERROR: (loadMapFile): Every @LOCATION entry needs a number.");
+				toLog("ERROR: (DATABASE::loadMapFile [" + mapFile + "]): Every @LOCATION entry needs a number.");
 				return;
 			}
 			int location = atoi(j->c_str());
@@ -339,20 +340,20 @@ void DATABASE::loadMapFile(const std::string& mapFile)
 		}
 	}// END while
 	
-/*DEBUG	for(unsigned int i = 1; i < basicmap->getMaxLocations(); i++)
+/*DEBUG	for(unsigned int i = 1; i < basicmap->getMaxLocations(); ++i)
 	{	
 		std::cout << "Location " << i << " ";
-		for(unsigned int j = 1; j < basicmap->getMaxLocations(); j++)
+		for(unsigned int j = 1; j < basicmap->getMaxLocations(); ++j)
 			std::cout << basicmap->getLocation(i)->getDistance(j) << " ";
 		std::cout << std::endl;
 	}
 
 	basicmap->calculateLocationsDistances();
 
-	for(unsigned int i = 1; i < basicmap->getMaxLocations(); i++)
+	for(unsigned int i = 1; i < basicmap->getMaxLocations(); ++i)
 	{	
 		std::cout << "Location " << i << " ";
-		for(unsigned int j = 1; j < basicmap->getMaxLocations(); j++)
+		for(unsigned int j = 1; j < basicmap->getMaxLocations(); ++j)
 			std::cout << basicmap->getLocation(i)->getDistance(j) << " ";
 		std::cout << std::endl;
 	}*/
@@ -368,7 +369,7 @@ void DATABASE::loadStartConditionFile(const std::string& startconditionFile)
 	std::ifstream pFile(startconditionFile.c_str());
 	if(!pFile.is_open())
 	{
-		toLog("ERROR: (loadStartConditionFile): File not found.");
+		toLog("ERROR: (DATABASE::loadStartConditionFile): File " + startconditionFile + " not found.");
 		return;
 	}
 	START_CONDITION* startcondition = new START_CONDITION;
@@ -388,19 +389,19 @@ void DATABASE::loadStartConditionFile(const std::string& startconditionFile)
 		parse_line(text, words);
 
 		std::list<std::string>::iterator j=words.begin();
-		std::string index=*j;j++;
+		std::string index=*j;++j;
 		std::map<std::string, std::list<std::string> >::iterator i;
 		if(index=="@STARTCONDITIONS")
 		{
 			if(j==words.end())
 			{
-				toLog("ERROR: (loadMapFile): Every @LOCATION entry needs a number.");
+				toLog("ERROR: (DATABASE::loadMapFile [" + startconditionFile + "]): Every @LOCATION entry needs a number.");
 				return;
 			}
 
-			if(*j==*UI_Object::theme.lookUpString(TERRA_STRING)) race=TERRA;
-			else if(*j==*UI_Object::theme.lookUpString(PROTOSS_STRING)) race=PROTOSS;
-			else if(*j==*UI_Object::theme.lookUpString(ZERG_STRING)) race=ZERG;
+			if(*j==UI_Object::theme.lookUpString(TERRA_STRING)) race=TERRA;
+			else if(*j==UI_Object::theme.lookUpString(PROTOSS_STRING)) race=PROTOSS;
+			else if(*j==UI_Object::theme.lookUpString(ZERG_STRING)) race=ZERG;
 
 			std::map<std::string, std::list<std::string> > block;
 			parse_block(pFile, block);
@@ -430,7 +431,7 @@ void DATABASE::loadStartConditionFile(const std::string& startconditionFile)
 		{
 			if(j==words.end())
 			{
-				toLog("ERROR: (loadMapFile): Every @LOCATION entry needs a number.");
+				toLog("ERROR: (DATABASE::loadMapFile [" + startconditionFile + "]): Every @LOCATION entry needs a number.");
 				return;
 			}
 			
@@ -467,6 +468,7 @@ void DATABASE::loadStartConditionFile(const std::string& startconditionFile)
 void DATABASE::saveBuildOrder(const std::string& name, const ANABUILDORDER* anarace) const
 {
 	std::ostringstream os;
+	os.str("");
 #ifdef __linux__
 	os << "output/bos/";
 	os << raceString[anarace->getRace()] << "/" << name << ".html";
@@ -478,7 +480,7 @@ void DATABASE::saveBuildOrder(const std::string& name, const ANABUILDORDER* anar
 	
 	if(!pFile.is_open())
 	{
-		toLog("ERROR: Could not create file (write protection? disk space?)");
+		toLog("ERROR: (DATABASE::saveBuildOrder) Could not create file " + os.str() + " (write protection? disk space?)");
 		return;
 	}
 	
@@ -498,23 +500,23 @@ void DATABASE::saveBuildOrder(const std::string& name, const ANABUILDORDER* anar
 	pFile << " border=\"1\" cellspacing=\"0\" cellpadding=\"1\">" << std::endl;
 	pFile << "  <tbody>" << std::endl;
 	pFile << "	<tr>" << std::endl;
-	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 200px;\">" << *UI_Object::theme.lookUpString(OUTPUT_UNITNAME_STRING) << "<br>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 200px;\">" << UI_Object::theme.lookUpString(OUTPUT_UNITNAME_STRING) << "<br>" << std::endl;
 	pFile << "	  </td>" << std::endl;
-	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << *UI_Object::theme.lookUpString(OUTPUT_SUPPLY_STRING) << "</td>" << std::endl;
-	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << *UI_Object::theme.lookUpString(OUTPUT_MINERALS_STRING) << "<br>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << UI_Object::theme.lookUpString(OUTPUT_SUPPLY_STRING) << "</td>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << UI_Object::theme.lookUpString(OUTPUT_MINERALS_STRING) << "<br>" << std::endl;
 	pFile << "	  </td>" << std::endl;
-	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << *UI_Object::theme.lookUpString(OUTPUT_GAS_STRING) << "<br>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << UI_Object::theme.lookUpString(OUTPUT_GAS_STRING) << "<br>" << std::endl;
 	pFile << "	  </td>" << std::endl;
-	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 100px;\">" << *UI_Object::theme.lookUpString(OUTPUT_LOCATION_STRING) << "<br>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 100px;\">" << UI_Object::theme.lookUpString(OUTPUT_LOCATION_STRING) << "<br>" << std::endl;
 	pFile << "	  </td>" << std::endl;
-	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << *UI_Object::theme.lookUpString(OUTPUT_TIME_STRING) << "<br>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << UI_Object::theme.lookUpString(OUTPUT_TIME_STRING) << "<br>" << std::endl;
 	pFile << "	  </td>" << std::endl;
 	pFile << "	</tr>" << std::endl;
 
 	for(std::list<PROGRAM>::const_iterator order = anarace->programList.begin(); order != anarace->programList.end(); ++order)
 	{
 		pFile << "	<tr style=\"text-align: center; vertical-align: middle; background-color: rgb(" << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][order->getUnit()].unitType))->GetColor()->r() << ", " << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][order->getUnit()].unitType))->GetColor()->g() << ", " << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][order->getUnit()].unitType))->GetColor()->b() << ");\">" << std::endl;
-		pFile << "	  <td style=\"\">" << *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace() + order->getUnit() + UNIT_NULL_STRING)) << "<br>" << std::endl;
+		pFile << "	  <td style=\"\">" << UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace() + order->getUnit() + UNIT_NULL_STRING)) << "<br>" << std::endl;
 		pFile << "	  </td>" << std::endl;
 		pFile << "	  <td style=\"\">" << order->getStatisticsBefore().getNeedSupply() << "/" << order->getStatisticsBefore().getHaveSupply() << "<br>" << std::endl;
 		pFile << "	  </td>" << std::endl;
@@ -545,6 +547,7 @@ void DATABASE::saveBuildOrder(const std::string& name, const ANABUILDORDER* anar
 void DATABASE::saveGoal(const std::string& name, GOAL_ENTRY* goalentry)
 {
 	std::ostringstream os;
+	os.str("");
 #ifdef __linux__
 	os << "settings/goals/";
 	os << raceString[goalentry->getRace()] << "/" << name << ".gol";// TODO!
@@ -555,7 +558,7 @@ void DATABASE::saveGoal(const std::string& name, GOAL_ENTRY* goalentry)
 	std::ofstream pFile(os.str().c_str(), std::ios_base::out | std::ios_base::trunc);
 	if(!pFile.is_open())
 	{
-		toLog("ERROR: Could not create file (write protection? disk space?)");
+		toLog("ERROR: (DATABASE::saveGoal) Could not create file " + os.str() + " (write protection? disk space?)");
 		return;
 	}
 
@@ -565,7 +568,7 @@ void DATABASE::saveGoal(const std::string& name, GOAL_ENTRY* goalentry)
 	pFile << "		\"Name\" \"" << name << "\"" << std::endl; // TODO
 	pFile << "		\"Race\" \"" << raceString[goalentry->getRace()] << "\"" << std::endl;
 
-	for(std::list<GOAL>::const_iterator i = goalentry->goal.begin(); i!=goalentry->goal.end(); i++)
+	for(std::list<GOAL>::const_iterator i = goalentry->goal.begin(); i!=goalentry->goal.end(); ++i)
 		pFile << "		\"" << stats[goalentry->getRace()][i->getUnit()].name << "\" \"" << i->getCount() << "\" \"" << i->getLocation() << "\" \"" << i->getTime() << "\"" << std::endl;		
 	pFile << "@END" << std::endl;
 	loadGoalFile(os.str().c_str());

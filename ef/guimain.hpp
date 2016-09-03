@@ -4,9 +4,10 @@
 const float GUI_VERSION=0.51;
 
 #include "game.hpp"
-#include "message.hpp"
+#include "msgwindow.hpp"
 #include "info.hpp"
-#include "tutorial.hpp"
+#include "helpwindow.hpp"
+//#include "mapwindow.hpp"
 #include "mainwindow.hpp"
 #include "setwindow.hpp"
 
@@ -19,6 +20,7 @@ const float GUI_VERSION=0.51;
 #include <string>
 
 #include "endrundialog.hpp"
+//#include "mapwindow.hpp"
 
 class Main
 {
@@ -48,12 +50,18 @@ class Main
 		void setMouse(const Point p);
 
 		const bool newRun();
+		const bool hasBitDepthChanged() const;
+		const bool hasResolutionChanged() const;
+		const bool hasFullScreenChanged() const;
+
+		void reloadOriginalSize();
 	
 	private:
 		void initializeGame(const unsigned int game_number);
 		MainWindow* mainWindow;
-		TutorialWindow* tutorialWindow;
+		HelpWindow* helpWindow;
 		SettingsWindow* settingsWindow;
+//		MapWindow* mapWindow;
 		Point maus;
 		unsigned int gameCount; 
 		Game* game[MAX_GAME];
@@ -65,11 +73,23 @@ class Main
 		void loadHarvestData();
 		void loadMaps();
 
-		int tabToGameList[MAX_TABS];
-		int tabToSplitGameList[MAX_TABS];
+		signed int tabToGameList[MAX_TABS];
+		signed int tabToSplitGameList[MAX_TABS];
 
-		int currentTab;
+		unsigned int currentTab;
 };
-																				
+
+inline const bool Main::hasBitDepthChanged() const {
+	return(settingsWindow->hasBitDepthChanged());
+}
+
+inline const bool Main::hasResolutionChanged() const {
+	return(settingsWindow->hasResolutionChanged());
+}
+
+inline const bool Main::hasFullScreenChanged() const {
+	return(settingsWindow->hasFullScreenChanged());
+}
+																			
 #endif
 

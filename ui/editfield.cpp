@@ -6,10 +6,10 @@
 
 UI_EditField::UI_EditField(UI_Object* edit_parent, UI_Object* edit_caller, const eString edit_text, const eString description_text, const eString ok_string, const eString cancel_string, const std::string& name_proposal) :
 	UI_Window(edit_parent, edit_text, theme.lookUpGlobalRect(EDIT_FIELD_WINDOW), theme.lookUpGlobalMaxHeight(EDIT_FIELD_WINDOW)),
-	OK_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), ok_string, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	Cancel_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), cancel_string, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
-	editText(new UI_StaticText(this, description_text, Rect(getRelativeClientRectPosition() + Point(10, 15), getClientRectSize()), Size(0,0), FORCE_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),
-	userText(new UI_StaticText(this, name_proposal, Rect(getRelativeClientRectPosition() + Point(17, 37), getClientRectSize()), Size(0,0), BRIGHT_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),
+	OK_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), ok_string, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_BOLD_FONT, AUTO_SIZE)),
+	Cancel_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), cancel_string, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_BOLD_FONT, AUTO_SIZE)),
+	editText(new UI_StaticText(this, description_text, Rect(getRelativeClientRectPosition() + Point(10, 15), getClientRectSize()), Size(0,0), FORCE_TEXT_COLOR, SMALL_BOLD_FONT)),
+	userText(new UI_StaticText(this, name_proposal, Rect(getRelativeClientRectPosition() + Point(17, 37), getClientRectSize()), Size(0,0), BRIGHT_TEXT_COLOR, SMALL_BOLD_FONT)),
 	position(name_proposal.size()),
 	caller(edit_caller),
 	ani(5)
@@ -56,35 +56,35 @@ void UI_EditField::addChar(char a)
 	if(position>=28)
 		return;
 	userText->addChar(position, a);
-	position++;
+	++position;
 	ani=5;
 }
 
 void UI_EditField::moveLeft()
 {
 	if(position>0)
-		position--;
+		--position;
 	ani=5;
 }
 
 void UI_EditField::moveRight()
 {
 	if(position<28)
-		position++;
+		++position;
 	ani=5;
 }
 
 void UI_EditField::removeCharBackspace()
 {
 	userText->removeCharBackspace(position);
-	if(position>0) position--;
+	if(position>0) --position;
 	ani=5;
 }
 
 void UI_EditField::removeCharDelete()
 {
 	userText->removeCharDelete(position);
-	if(position>0) position--;
+	if(position>0) --position;
 	ani=5;
 }
 
@@ -106,7 +106,7 @@ void UI_EditField::draw(DC* dc) const
 	dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 	dc->DrawEdgedRoundedRectangle(entry_rect, 4);
 	
-	dc->SetPen(Pen(dc->mixColor(theme.lookUpColor(FORCE_TEXT_COLOR), theme.lookUpColor(BRIGHT_TEXT_COLOR), (unsigned int)(50*(sin(3.141*ani/10)+1))), 1, SOLID_PEN_STYLE));
+	dc->SetPen(Pen(dc->mixColor(*theme.lookUpColor(FORCE_TEXT_COLOR), *theme.lookUpColor(BRIGHT_TEXT_COLOR), (unsigned int)(50*(sin(3.141*ani/10)+1))), 1, SOLID_PEN_STYLE));
 	dc->DrawVerticalLine(entry_rect.GetLeft() + userText->getTextPosSize(position).GetWidth(),  entry_rect.GetTop() + 2, entry_rect.GetBottom() - 2);
 }
 
@@ -115,7 +115,7 @@ void UI_EditField::process()
 	if(!isShown())
 		return;
 	UI_Window::process();
-	ani++;
+	++ani;
 }
 
 UI_Object* UI_EditField::checkToolTip()

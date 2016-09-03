@@ -48,8 +48,18 @@ BoDiagramWindow::BoDiagramWindow(UI_Object* bod_parent, const unsigned int game_
 	}
 }
 
+
 BoDiagramWindow::~BoDiagramWindow()
 { }
+
+void BoDiagramWindow::reloadOriginalSize()
+{
+//	setOriginalRect(UI_Object::theme.lookUpGameRect(BUILD_ORDER_DIAGRAM_WINDOW, gameNumber, gameMax));
+//	setMaxHeight(UI_Object::theme.lookUpGameMaxHeight(BUILD_ORDER_DIAGRAM_WINDOW, gameNumber, gameMax));
+
+	
+	UI_Window::reloadOriginalSize();
+}
 
 void BoDiagramWindow::assignAnarace(ANABUILDORDER* bod_anarace)
 {
@@ -182,7 +192,7 @@ void BoDiagramWindow::processList()
 			startNneedSupply[count]=nneedSupply[count];
 		}
 	}
-	count++;
+	++count;
 
 	for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
 	{
@@ -227,7 +237,7 @@ void BoDiagramWindow::processList()
 			targetNneedSupply[count] = p;
 			startNneedSupply[count] = nneedSupply[count];
 		}
-		count++;
+		++count;
 
 		if(maxMins) y1 = order->getStatisticsAfter().getHaveMinerals()*(getClientRectHeight()-20)/maxMins; else y1 = 0;
 		p = Point(1+(int)(order->getRealTime()*time), -y1-2);
@@ -269,7 +279,7 @@ void BoDiagramWindow::processList()
 			targetNneedSupply[count] = p;
 			startNneedSupply[count] = nneedSupply[count];
 		}
-		count++;
+		++count;
 	
 	}
 
@@ -318,9 +328,9 @@ void BoDiagramWindow::processList()
 	}
 
 //TODO letztes item
-	count++;
-/*	for(int i = 0; i < count; i++) ???
-		for(int j = 0; j < i; j++)???
+	++count;
+/*	for(int i = 0; i < count; ++i) ???
+		for(int j = 0; j < i; ++j)???
 		{
 			if(minerals[i].x < minerals[j].x)
 			{
@@ -353,7 +363,7 @@ void BoDiagramWindow::draw(DC* dc) const
 
 	if(count>0)
 	{
-		dc->SetFont(theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
+		dc->SetFont(theme.lookUpFont(SMALL_BOLD_FONT));
 /*		if(infoWindowNumber)
 		{
 			dc->SetPen(Pen(dc->doColor(80,80,80),2,SOLID_PEN_STYLE));
@@ -377,7 +387,7 @@ void BoDiagramWindow::draw(DC* dc) const
 		
 			dc->SetBrush(*theme.lookUpBrush(BODIAGRAM_SUPPLY_BRUSH));
 			dc->SetPen(*theme.lookUpPen(BODIAGRAM_SUPPLY_PEN));
-			for(unsigned int i = 0;i<(count-1);i++)
+			for(unsigned int i = 0;i<(count-1);++i)
 			{
 				if((hneedSupply[i].y > nneedSupply[i].y)&&(hneedSupply[i].x < (unsigned int)(getClientTargetWidth()-2)))
 					dc->DrawRectangle(getAbsoluteClientRectPosition() + Point(0, getClientRectHeight()) + hneedSupply[i], Size(hneedSupply[i+1].x - hneedSupply[i].x, hneedSupply[i].y - nneedSupply[i].y));
@@ -413,6 +423,7 @@ void BoDiagramWindow::draw(DC* dc) const
 			{
 				// TODO this anarace values are one iteration too old compared to mouse position...
 				std::ostringstream os;
+				os.str("");
 				dc->SetTextForeground(*theme.lookUpColor(BRIGHT_MINERALS_TEXT_COLOR));
 				unsigned int time = anarace->getRealTimer() * (mouse.x - getAbsoluteClientRectLeftBound()) / getClientRectWidth();
 				if(mouse.x < getAbsoluteClientRectLeftBound())

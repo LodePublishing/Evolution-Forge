@@ -8,49 +8,6 @@
 #include <queue>
 #include <map>
 
-/*class CODE
-{
-	public:
-		CODE(const unsigned int* code, const unsigned int code_length);
-		~CODE();
-		const bool operator==(const CODE& object) const;
-		const bool operator<(const CODE& object) const;
-		CODE& operator=(const unsigned int* code);
-	private:
-		unsigned int Code[MAX_LENGTH];
-		unsigned int length;
-};
-
-class SITUATION
-{
-	public:
-		SITUATION();
-		SITUATION(const SITUATION& object);
-		~SITUATION();
-		
-		unsigned int getTMaxBuildTypes() const;
-		unsigned int getForce(const unsigned int unit) const;
-		unsigned int getBuildable(const unsigned int unit) const;
-		unsigned int getTGeno(const unsigned int unit) const;
-		unsigned int getTTGeno(const unsigned int unit) const;
-
-		void setTMaxBuildTypes(const unsigned int count);
-		void addTMaxBuildTypes();
-		void subTMaxBuildTypes();
-		void setForce(const unsigned int unit, const unsigned int count);
-		void setBuildable(const unsigned int unit, const unsigned int count);
-		void setTGeno(const unsigned int unit, const unsigned int count);
-		void setTTGeno(const unsigned int unit, const unsigned int count);
-
-
-	private:
-		unsigned int tMaxBuildTypes;
-		unsigned int  force[UNIT_TYPE_COUNT];
-		unsigned int buildable[UNIT_TYPE_COUNT];
-		unsigned int tGeno[UNIT_TYPE_COUNT]; // !! keine anderen units drueber nehmen!
-		unsigned int ttGeno[UNIT_TYPE_COUNT];
-};*/
-
 struct PARALLEL_COMMAND
 {
 	unsigned int unit;
@@ -107,7 +64,6 @@ class PREBUILDORDER
 		GOAL_ENTRY* pGoal; // pStart->getGoal()
 	private:
 		unsigned int Code[MAX_LENGTH];
-//		unsigned int Marker[MAX_LENGTH];
 
 		unsigned int playerNum;
 		unsigned int minerals, gas, timer;
@@ -246,6 +202,31 @@ class PREBUILDORDER
 		void setLength(const unsigned int bo_length);
 };
 
+inline const BASIC_MAP* const* PREBUILDORDER::getMap() const
+{
+	return(pMap);
+}
+
+inline void PREBUILDORDER::setIP(const unsigned int ip)
+{
+#ifdef _SCC_DEBUG
+	if(ip >= MAX_LENGTH) {
+		toLog("DEBUG: (PREBUILDORDER::setIP): Value out of range.");return;
+	}
+#endif
+	IP = ip;
+}
+
+inline const unsigned int PREBUILDORDER::getIP() const
+{
+#ifdef _SCC_DEBUG
+	if(IP>MAX_LENGTH) {
+		toLog("DEBUG: (PREBUILDORDER::getIP): Variable IP not initialized.");return(0);
+	}
+#endif
+	return(IP);
+}
+
 inline GOAL_ENTRY* PREBUILDORDER::getGoal() const {
 	return(pGoal);
 }
@@ -278,16 +259,6 @@ inline const unsigned int PREBUILDORDER::getLocationTotal(const unsigned int loc
 	return((*unit)[playerNum][location_number].getTotal(unit_type));
 //	return((*location)[location_number].getTotal(unit_type));
 }
-
-/*inline void PREBUILDORDER::setMarker(const unsigned int ip, const unsigned int value)
-{
-#ifdef _SCC_DEBUG
-	if(ip >= MAX_LENGTH) {
-		toLog("DEBUG: (PREBUILDORDER::setMarker): Value ip out of range.");return;
-	}	
-#endif
-	Marker[ip]=value;
-}*/
 
 
 inline void PREBUILDORDER::setCode(const unsigned int ip, const unsigned int value)
@@ -887,25 +858,6 @@ inline const UNIT_STATISTICS* const * PREBUILDORDER::getpStats() const
 	return(pStats);
 }
 
-inline void PREBUILDORDER::setIP(const unsigned int ip)
-{
-#ifdef _SCC_DEBUG
-	if(ip >= MAX_LENGTH) {
-		toLog("DEBUG: (PREBUILDORDER::setIP): Value out of range.");return;
-	}
-#endif
-	IP = ip;
-}
-
-inline const unsigned int PREBUILDORDER::getIP() const
-{
-#ifdef _SCC_DEBUG
-	if(IP>MAX_LENGTH) {
-		toLog("DEBUG: (PREBUILDORDER::getIP): Variable IP not initialized.");return(0);
-	}
-#endif
-	return(IP);
-}
 
 /*const unsigned int PREBUILDORDER::getFinalTime(const unsigned int goal) const
 {
@@ -975,10 +927,6 @@ inline const unsigned int PREBUILDORDER::getTimeOut() const
 	return(timeout);
 }
 
-inline const BASIC_MAP* const* PREBUILDORDER::getMap() const
-{
-	return(pMap);
-}
 
 // --------------------------------------
 // ------ END OF GET/SET FUNCTIONS ------
@@ -994,7 +942,7 @@ inline void PREBUILDORDER::removeLarvaFromQueue(const unsigned int location_numb
 		toLog("DEBUG: (PREBUILDORDER::removeLarvaFromQueue): Variable larvaInProduction not initialized or out of range.");return;
 	}
 #endif
-	larvaInProduction[location_number]--;
+	--larvaInProduction[location_number];
 }
 
 inline void PREBUILDORDER::addLarvaToQueue(const unsigned int location_number)
@@ -1007,7 +955,7 @@ inline void PREBUILDORDER::addLarvaToQueue(const unsigned int location_number)
 		toLog("DEBUG: (PREBUILDORDER::addLarvaFromQueue): Variable larvaInProduction not initialized or out of range.");return;
 	}
 #endif
-	larvaInProduction[location_number]++;
+	++larvaInProduction[location_number];
 }
 
 #endif // __PREBUILDORDER_H

@@ -12,6 +12,7 @@ class Point
 		const bool operator==(const Point& point) const;
 		const bool operator!=(const Point& point) const;
 		const Point operator+(const Point& point) const;
+		const Point operator*(const signed int scalar) const;
 		const Point operator+(const Size& size) const;
 		const Point operator-(const Size& size) const;
 		const Size operator-(const Point& point) const;
@@ -52,6 +53,10 @@ inline const bool Point::operator==(const Point& point) const {
 
 inline const bool Point::operator!=(const Point& point) const {
 	return !(*this == point);
+}
+
+inline const Point Point::operator*(const signed int scalar) const	{
+	return Point(x * scalar, y * scalar );
 }
 
 inline const Point Point::operator+(const Point& point) const	{

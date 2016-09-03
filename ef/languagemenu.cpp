@@ -1,18 +1,24 @@
 #include "languagemenu.hpp"
 
-LanguageMenu::LanguageMenu(UI_Object* language_parent, Rect language_rect) :
-	Menu(language_parent, language_rect, false)
+LanguageMenu::LanguageMenu(UI_Object* language_parent, const Rect language_rect, const Size distance_bottom_right, const ePositionMode position_mode) :
+	Menu(language_parent, language_rect, distance_bottom_right, position_mode, false)
 {
-    for(int i=0;i<2;i++)
-    {
-		Rect edge = Rect(Point(10 + (i%2) * 75, (i/2)*20 + height * (FONT_SIZE+9)), Size(75, FONT_SIZE+3));
-		MenuEntry* entry = new MenuEntry(this, edge, (eString)(SETTING_ENGLISH_LANGUAGE_STRING+i));
-		entry->setButton(eButton(UNIT_TYPE_5_BUTTON));
+	for(unsigned int i=0;i<2;++i)
+	{
+		MenuEntry* entry = new MenuEntry(this, Rect(), (eString)(SETTING_ENGLISH_LANGUAGE_STRING+i));
+		entry->setButtonColorsType(eButtonColorsType(UNIT_TYPE_5_BUTTON+i));
    		menuEntries.push_back(entry);
-    }
+	}
+	reloadOriginalSize();
 }
 
-// Anzahl, Position, coloumns, height / width, first string, Button
+void LanguageMenu::reloadOriginalSize()
+{
+	updateItemSizes(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH));
+	UI_Object::reloadOriginalSize();
+	updateItemPositions(TWO_COLOUMN_MENU);
+}
+
 
 LanguageMenu::~LanguageMenu() 
 { }

@@ -190,7 +190,7 @@ void PREBUILDORDER::prepareForNewGeneration()
 		last[k].unit=SCV;
 		last[k].count=1;
 	}
-	for(unsigned int int k=4;i<MAX_LENGTH;k++)
+	for(unsigned int int k=4;i<MAX_LENGTH; ++k)
 	{
 		last[k].location=0;
 		last[k].unit=0;
@@ -234,7 +234,7 @@ void PREBUILDORDER::replaceCode(const unsigned int ip, const unsigned int code)
 	}
 #endif
 	setCode(ip, code);
-//	markerCounter++;
+//	++markerCounter;
 //	setMarker(ip, markerCounter);
 }
 
@@ -452,7 +452,7 @@ const unsigned int PREBUILDORDER::calculatePrimaryFitness(const bool is_ready)
 // ------ END BONUSSYSTEM INIT ------
 
 //				bool first=true;
-		for(std::list<GOAL>::const_iterator i = getGoal()->goal.begin(); i!= getGoal()->goal.end(); i++)
+		for(std::list<GOAL>::const_iterator i = getGoal()->goal.begin(); i!= getGoal()->goal.end(); ++i)
 //		while(getGoal()->getNextGoal(i, first))
 		{
 //			first=false;
@@ -479,7 +479,7 @@ const unsigned int PREBUILDORDER::calculatePrimaryFitness(const bool is_ready)
 						{
 							sumup+=getLocationTotal(loc, i->getUnit())*(100-(*pMap)->getLocation(loc)->getDistance(i->getLocation())); //was pMap->location[j]...
 							bon-=getLocationTotal(loc, i->getUnit());
-							j++;
+							++j;
 							loc = (*pMap)->getLocation(i->getLocation())->getNearest(j);
 						}
 						// Falls j<MAX_LOCATIONS => unser "Bon" wurde schon vorher aufgebraucht => An dieser Stelle j den Rest draufgeben... 
@@ -541,7 +541,7 @@ const unsigned int PREBUILDORDER::calculatePrimaryFitness(const bool is_ready)
 				else
 					pFitness+=((build.getRemainingBuildTime(i)*100)/((getGoal()->goal[build.getType(i)].count*(*pStats)[build.getType(i)].BT));*/
 
-				bonus[build.getLocation()][build.getType()]--;
+				--bonus[build.getLocation()][build.getType()];
 			}
 			buildingQueue.pop();
 		}
@@ -579,7 +579,7 @@ const bool PREBUILDORDER::buildIt(const unsigned int build_unit)
 
 /*	if(lastcounter>0)
 	{	
-		lastcounter--;
+		--lastcounter;
 		tloc=last[lastcounter].location;
 	}*/
 
@@ -600,7 +600,7 @@ const bool PREBUILDORDER::buildIt(const unsigned int build_unit)
 		if((stat->facility2==0) || (getLocationAvailible(current_location_window, stat->facility2)>=1))
 		{
 		// pick one availible facility: 
-			for(picked_facility = 0; picked_facility<3; picked_facility++)
+			for(picked_facility = 0; picked_facility<3; ++picked_facility)
 				if((stat->facility[picked_facility]>0)&&(getLocationAvailible(current_location_window, stat->facility[picked_facility])>0))
 				{
 					ok=true;
@@ -618,7 +618,7 @@ const bool PREBUILDORDER::buildIt(const unsigned int build_unit)
 //						if((stat->facility2==0)||(getLocationAvailible(ttloc,stat->facility2)>0)) TODO
 //						{
 //						for(fac=3;fac--;)
-						for(fac=0;fac<3; fac++)
+						for(fac=0;fac<3; ++fac)
 						if(
 						// special rules for morphing units of protoss
 						((stat->facilityType != IS_LOST) || (stat->facility[fac] != stat->facility2) || (getLocationAvailible(ttloc, stat->facility[fac]) >= 2)) &&
@@ -634,7 +634,7 @@ const bool PREBUILDORDER::buildIt(const unsigned int build_unit)
 							}
 //						  break;
 //					  }
-						j++;
+						++j;
 					}*/
 																													   
 	if((ok)&&(build_unit==REFINERY)) {
@@ -695,7 +695,7 @@ const bool PREBUILDORDER::buildIt(const unsigned int build_unit)
 #endif
 const bool PREBUILDORDER::isDifferent(const unsigned int* code) const //, const unsigned int* marker) const
 {
-	for(int i = MAX_LENGTH;i--;)
+	for(unsigned int i = MAX_LENGTH;i--;)
 		if((getCode(i)!=code[i]))//||(getMarker(i)!=marker[i]))
 			return(true);
 	return(false);	
@@ -712,7 +712,7 @@ void PREBUILDORDER::adjustMineralHarvest(const unsigned int location_number)
 // WAYNE Location,	  kein Command Center 							und keine Mineralien
 	if((location_number == 0) || ((!getLocationTotal(location_number, COMMAND_CENTER)) && (!getMapLocationTotal(0, location_number, MINERAL_PATCH))))
 	{
-		for(int i=45;i--;)
+		for(unsigned int i=45;i--;)
 			setMineralHarvestPerSecond(location_number, i, 0);
 	}
 //	else if((!pMap->location[num].getTotal(playerNum][COMMAND_CENTER])&&(pMap->location[num].getTotal(0][MINERAL_PATCH]))
@@ -728,10 +728,10 @@ void PREBUILDORDER::adjustMineralHarvest(const unsigned int location_number)
 	else if(pStart->getBasicMineralHarvestSpeedPerSecond(1)) // SONST: Falls wir ne minimalSammelgeschwindigkeit haben eintragen
 	{
 //		int k;
-		for(int i=45;i--;)
+		for(unsigned int i=45;i--;)
 		{
 //			k=0;
-//			for(j=0;j<45;j++)
+//			for(j=0;j<45;++j)
 //				if(i*8<=j*pMap->location[num].getTotal(0][MINERAL_PATCH]) 
 //				{ k=j;j=45;}
 			setMineralHarvestPerSecond(location_number, i, pStart->getBasicMineralHarvestSpeedPerSecond(i/*k*/));//*pMap->location[num].getTotal(0][MINERAL_PATCH])/8;
@@ -744,7 +744,7 @@ void PREBUILDORDER::adjustGasHarvest(const unsigned int location_number)
 {
 	if((location_number == 0)||((!getLocationTotal(location_number, COMMAND_CENTER)) && (!getLocationTotal(location_number, REFINERY))))
 	{
-		for(int i=5;i--;)
+		for(unsigned int i=5;i--;)
 			setGasHarvestPerSecond(location_number, i, 0);
 	}
 /*	else if((!pMap->location[num].getTotal(playerNum][COMMAND_CENTER])&&(pMap->location[num].getTotal(playerNum][REFINERY]))
@@ -758,10 +758,10 @@ void PREBUILDORDER::adjustGasHarvest(const unsigned int location_number)
 	else if(pStart->getBasicMineralHarvestSpeedPerSecond(1))
 	{
 //		int k;
-		for(int i=5;i--;)
+		for(unsigned int i=5;i--;)
 		{
 //			k=0;
-//			for(j=0;j<5;j++)
+//			for(j=0;j<5;++j)
 //				if(i<=j*pMap->location[num].getTotal(playerNum][REFINERY]) { k=j;j=5;}
 					setGasHarvestPerSecond(location_number, i, pStart->getBasicGasHarvestSpeedPerSecond(i/*k*/)*getLocationTotal(location_number, REFINERY));
 
@@ -773,7 +773,7 @@ void PREBUILDORDER::adjustGasHarvest(const unsigned int location_number)
 
 void PREBUILDORDER::adjustHarvestAllLocations()
 {
-	for(int i = (*getMap())->getMaxLocations();i--;)
+	for(unsigned int i = (*getMap())->getMaxLocations();i--;)
 	{
 		adjustMineralHarvest(i);
 		adjustGasHarvest(i);
@@ -784,7 +784,7 @@ const unsigned int PREBUILDORDER::harvestMinerals() const
 {
 	unsigned int sum=0;
 //	  int t=(rand()%10)-5;
-	for(unsigned int i=1;i<(*getMap())->getMaxLocations();i++)//~~
+	for(unsigned int i=1;i<(*getMap())->getMaxLocations();++i)//~~
 	{
 		unsigned int s=getLocationAvailible(i, SCV);
 		if(s)
@@ -812,17 +812,17 @@ const unsigned int PREBUILDORDER::harvestMinerals() const
 
 const unsigned int PREBUILDORDER::harvestGas() const
 {
-	int sum=0;
+	unsigned int sum=0;
 //	int t=(rand()%10)-5;
-	for(unsigned int i=1;i<(*getMap())->getMaxLocations();i++)//~~
+	for(unsigned int i=1;i<(*getMap())->getMaxLocations();++i)//~~
 	{
 		unsigned int s = getLocationAvailible(i, GAS_SCV);
 		if(s)
 		{
 			if(s<4)
-				sum+=getGasHarvestPerSecond(i,s);
+				sum+=getGasHarvestPerSecond(i, s);
 			else
-				sum+=getGasHarvestPerSecond(i,4); //TODO
+				sum+=getGasHarvestPerSecond(i, 4); //TODO
 	/*
 				harvestedGas+=getGasHarvestPerSecond(i,s);
 			}
@@ -872,7 +872,7 @@ void PREBUILDORDER::assignStart(START* start)
 /*void PREBUILDORDER::initNoise()
 {
 //	if(coreCnfiguration.noise>0)
-//		for(int j=0;j<MAX_TIME;j++)
+//		for(int j=0;j<MAX_TIME;++j)
 //			noise[j]=rand()%coreConfiguration.noise-rand()%coreConfiguration.noise;
 //	else TODO
 	memset(noise, 0, MAX_TIME * sizeof(int));
@@ -926,10 +926,10 @@ void PREBUILDORDER::eraseUselessCode()
 	unsigned int allUnits[UNIT_TYPE_COUNT];
 	for(int i=UNIT_TYPE_COUNT;i--;)
 		allUnits[i]=getLocationTotal(GLOBAL,i);
-	for(int i=MAX_LENGTH;i--;)
+	for(unsigned int i=MAX_LENGTH;i--;)
 	{
 		bool ok=true;
-		for(int k=3;k--;)
+		for(unsigned int k=3;k--;)
 			ok&=((stats[getGoal()->getRace()][getGoal()->toPhaeno(getCode(i))].prerequisite[k]==0)||
 				 (allUnits[stats[getGoal()->getRace()][getGoal()->toPhaeno(getCode(i))].prerequisite[k]]));
 //WTF? allUnits mit prerequisite vergleichen!?
@@ -937,18 +937,18 @@ void PREBUILDORDER::eraseUselessCode()
 //TODO so ganz sauber is des net
 		if(!ok)
 		{
-			for(int k=i;k--;)
+			for(unsigned int k=i;k--;)
 				setCode(k+1, getCode(k));
 			setCode(0, 0);
 		}
 		else
-			allUnits[getGoal()->toPhaeno(getCode(i))]++;
+			++allUnits[getGoal()->toPhaeno(getCode(i))];
 	}
 }
 
 /*CODE::CODE(const unsigned int* code, const unsigned int code_length)
 {
-	for(int i = MAX_LENGTH-code_length;i<MAX_LENGTH;i++)
+	for(int i = MAX_LENGTH-code_length;i<MAX_LENGTH;++i)
 		Code[i]=code[i];
 	length = code_length;
 	
@@ -958,7 +958,7 @@ const bool CODE::operator==(const CODE& object) const
 {
 	if(length!=object.length)
 		return(false);
-	for(int i = MAX_LENGTH-length;i<MAX_LENGTH;i++)
+	for(int i = MAX_LENGTH-length;i<MAX_LENGTH;++i)
 		if(Code[i] != object.Code[i])
 			return(false);
 	return(true);
@@ -970,7 +970,7 @@ const bool CODE::operator<(const CODE& object) const
 			return(true);
 	else if(length>object.length)
 			return(false);
-	for(int i = MAX_LENGTH-length; i<MAX_LENGTH;i++)
+	for(int i = MAX_LENGTH-length; i<MAX_LENGTH;++i)
 		if(Code[i]>object.Code[i])
 			return(true);
 	return(false);
@@ -1103,7 +1103,7 @@ void SITUATION::addTMaxBuildTypes()
 		toLog("DEBUG: (SITUATION::addTMaxBuildTypes): Value out of range.");return;
 	}
 #endif
-	tMaxBuildTypes++;
+	++tMaxBuildTypes;
 }
 
 void SITUATION::subTMaxBuildTypes()
@@ -1114,7 +1114,7 @@ void SITUATION::subTMaxBuildTypes()
 		toLog("DEBUG: (SITUATION::subTMaxBuildTypes): Value out of range.");return;
 	}
 #endif
-	tMaxBuildTypes--;
+	--tMaxBuildTypes;
 }
 
 void SITUATION::setForce(const unsigned int unit, const unsigned int count)
@@ -1238,7 +1238,7 @@ void PREBUILDORDER::mutateGeneCode(const bool* fixed_list)
 //				for(int j=tMaxBuildTypes;j--;)
 //					if(tGeno[j] == getGoal()->toGeno(i))
 					{
-						for(int k = situation->getTTGeno(i); k < situation->getTMaxBuildTypes()-1; k++)
+						for(int k = situation->getTTGeno(i); k < situation->getTMaxBuildTypes()-1; ++k)
 							situation->setTGeno(k, situation->getTGeno(k+1));
 						situation->setTTGeno(i, 999);
 						situation->subTMaxBuildTypes();
@@ -1282,13 +1282,13 @@ void PREBUILDORDER::mutateGeneCode(const bool* fixed_list)
 						memmove(Code+x+1, Code+x, 4*(MAX_LENGTH-x-2));
 						memmove(Marker+x+1, Marker+x, 4*(MAX_LENGTH-x-2));
 					}*/
-					for(unsigned int i=x;i<MAX_LENGTH-1;i++)
+					for(unsigned int i=x;i<MAX_LENGTH-1;++i)
 					{
 						Code[i] = Code[i+1];
 						Marker[i] = Marker[i+1];
 					}
 					// TODO hier auch das buildable und tMaxBuildTypes rein... irgendwie den Code als "mutier mich" markieren und spaetereinfuegen
-//					markerCounter++;Marker[MAX_LENGTH-1] = markerCounter;
+//					++markerCounter;Marker[MAX_LENGTH-1] = markerCounter;
 					unsigned int y;
 //				if(coreConfiguration.preprocessBuildOrder) // TODO
 //				while(getGoal()->isVariable[y]==0) y=rand()%getGoal()->getMaxBuildTypes();
@@ -1306,12 +1306,12 @@ void PREBUILDORDER::mutateGeneCode(const bool* fixed_list)
 					memmove(Code+x+1, Code+x, MAX_LENGTH-x-1);
 					memmove(Marker+x+1, Marker+x, MAX_LENGTH-x-1);
 					
-/*					for(unsigned int i=MAX_LENGTH-1;i>x;i--)
+/*					for(unsigned int i=MAX_LENGTH-1;i>x; --i)
 					{
 						Code[i]=Code[i-1];
 						Marker[i]=Marker[i-1];
 					}*/
-//					markerCounter++;Marker[x]=markerCounter;
+//					++markerCounter;Marker[x]=markerCounter;
 					unsigned int y;
 //				if(coreConfiguration.preprocessBuildOrder) TODO
 //					while(getGoal()->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//getGoal()->getMaxBuildTypes();
@@ -1333,7 +1333,7 @@ void PREBUILDORDER::mutateGeneCode(const bool* fixed_list)
 //					else
 						y=situation->getTGeno(rand()%situation->getTMaxBuildTypes());//getGoal()->getMaxBuildTypes();
 						Code[x]=y;
-						markerCounter++;Marker[x]=markerCounter;
+						++markerCounter;Marker[x]=markerCounter;
 					}
 				}break;
 				case 3://exchange two entries
@@ -1361,19 +1361,19 @@ void PREBUILDORDER::mutateGeneCode(const bool* fixed_list)
 							unsigned int tmpCode[MAX_LENGTH];
 							unsigned int tmpMarker[MAX_LENGTH];
 							
-							for(unsigned int i = 0; i < block_length; i++)
+							for(unsigned int i = 0; i < block_length; ++i)
 							{
 								tmpCode[i] = Code[x + i];
 								tmpMarker[i] = Marker[x + i];
 							}
 								
-							for(unsigned int i = target_position; i < x; i++)
+							for(unsigned int i = target_position; i < x; ++i)
 							{
 								Code[i+block_length] = Code[i];
 								Marker[i+block_length] = Marker[i];
 							}
 
-							for(unsigned int i = 0; i<block_length; i++)
+							for(unsigned int i = 0; i<block_length; ++i)
 							{
 								Code[target_position + i] = tmpCode[i];
 								Marker[target_position + i] = tmpMarker[i];
@@ -1406,7 +1406,7 @@ void PREBUILDORDER::mutateGeneCode(const bool* fixed_list)
 			if(situation->getForce(i))
 			{
 				bool ok=true;
-				for(int j=GAS_SCV+1;j--;)
+				for(int j=GAS_SCV+1; j--;)
 					if((situation->getForce(j))&&((*pStats)[j].create>0)&&((*pStats)[j].create == i)) {
 						ok=false;break;
 					}
@@ -1436,10 +1436,10 @@ void PREBUILDORDER::mutateGeneCode(const bool* fixed_list)
 			
 			if((getGoal()->getIsStatic(i))&&getGoal()->getIsBuildable(i)&&getGoal()->getAllGoal(i)&&(situation->getForce(i)>=getGoal()->getAllGoal(i))&&(situation->getTTGeno(i)!=999))
 			{
-//				for(int j=tMaxBuildTypes;j--;)
+//				for(int j=tMaxBuildTypes; j--;)
 //					if(tGeno[j] == getGoal()->toGeno(i))
 					{
-						for(int k = situation->getTTGeno(i); k < situation->getTMaxBuildTypes()-1; k++)
+						for(int k = situation->getTTGeno(i); k < situation->getTMaxBuildTypes()-1; ++k)
 							situation->setTGeno(k, situation->getTGeno(k+1));
 						situation->setTTGeno(i, 999);
 						situation->subTMaxBuildTypes();
@@ -1478,7 +1478,7 @@ void PREBUILDORDER::mutateGeneCode(/*const bool* fixed_list*/)
 
 	NEED need[UNIT_TYPE_COUNT];
 
-	for(unsigned int i = UNIT_TYPE_COUNT;i--;)
+	for(unsigned int i = UNIT_TYPE_COUNT; i--;)
 	{
 		need[i] = getGoal()->need[i];
 		checked[i] = false;
@@ -1494,21 +1494,21 @@ void PREBUILDORDER::mutateGeneCode(/*const bool* fixed_list*/)
 		{
 			buildable[i]=true;
 			tGeno[tMaxBuildTypes]=getGoal()->toGeno(i);
-			tMaxBuildTypes++;
+			++tMaxBuildTypes;
 			if((*pStartCondition)->getLocationTotal(GLOBAL,i))
 			{
 				std::list<unsigned int> newBuildable;
-				for(std::list<unsigned int>::iterator j = allow[i].facility.begin();j!=allow[i].facility.end();j++) 
+				for(std::list<unsigned int>::iterator j = allow[i].facility.begin();j!=allow[i].facility.end(); ++j) 
 					if(need[*j].facilityIsDone())
 						newBuildable.push_back(*j);
-				for(std::list<unsigned int>::iterator j = allow[i].facility2.begin();j!=allow[i].facility2.end();j++) 
+				for(std::list<unsigned int>::iterator j = allow[i].facility2.begin();j!=allow[i].facility2.end(); ++j) 
 					if(need[*j].facility2IsDone())
 						newBuildable.push_back(*j);
-				for(std::list<unsigned int>::iterator j = allow[i].prerequisite.begin();j!=allow[i].prerequisite.end();j++) 
+				for(std::list<unsigned int>::iterator j = allow[i].prerequisite.begin();j!=allow[i].prerequisite.end(); ++j) 
 					if(need[*j].prerequisiteIsDone())
 						newBuildable.push_back(*j);
 				checked[i]=true;
-				for(std::list<unsigned int>::iterator j = newBuildable.begin();j!=newBuildable.end();j++)
+				for(std::list<unsigned int>::iterator j = newBuildable.begin();j!=newBuildable.end(); ++j)
 				{
 					buildable[*j]=true;
 					tGeno[tMaxBuildTypes]=getGoal()->toGeno(*j);
@@ -1517,7 +1517,7 @@ void PREBUILDORDER::mutateGeneCode(/*const bool* fixed_list*/)
 			}
 		}
 		
-	for(unsigned int x=MAX_LENGTH-1;x>MAX_LENGTH-getLength();x--) //length
+	for(unsigned int x=MAX_LENGTH-1;x>MAX_LENGTH-getLength(); --x) //length
 	{
 // IS_LOST ETC!!!
 		if(rand() % (MAX_LENGTH*100/coreConfiguration.getMutationFactor())==0)
@@ -1535,13 +1535,13 @@ void PREBUILDORDER::mutateGeneCode(/*const bool* fixed_list*/)
 						memmove(Code+x+1, Code+x, 4*(MAX_LENGTH-x-2));
 						memmove(Marker+x+1, Marker+x, 4*(MAX_LENGTH-x-2));
 					}*/
-					for(unsigned int i=x;i<MAX_LENGTH-1;i++)
+					for(unsigned int i=x;i<MAX_LENGTH-1; ++i)
 					{
 						Code[i] = Code[i+1];
 //						Marker[i] = Marker[i+1];
 					}
 					// TODO hier auch das buildable und tMaxBuildTypes rein... irgendwie den Code als "mutier mich" markieren und spaetereinfuegen
-//					markerCounter++;Marker[MAX_LENGTH-1] = markerCounter;
+//					++markerCounter;Marker[MAX_LENGTH-1] = markerCounter;
 					unsigned int y;
 //				if(coreConfiguration.preprocessBuildOrder) // TODO
 //				while(getGoal()->isVariable[y]==0) y=rand()%getGoal()->getMaxBuildTypes();
@@ -1559,12 +1559,12 @@ void PREBUILDORDER::mutateGeneCode(/*const bool* fixed_list*/)
 					memmove(Code+x+1, Code+x, (MAX_LENGTH-x-1) * sizeof(int));
 //					memmove(Marker+x+1, Marker+x, MAX_LENGTH-x-1);
 					
-/*					for(unsigned int i=MAX_LENGTH-1;i>x;i--)
+/*					for(unsigned int i=MAX_LENGTH-1; i>x; --i)
 					{
 						Code[i]=Code[i-1];
 						Marker[i]=Marker[i-1];
 					}*/
-//					markerCounter++;Marker[x]=markerCounter;
+//					++markerCounter;Marker[x]=markerCounter;
 					unsigned int y;
 //				if(coreConfiguration.preprocessBuildOrder) TODO
 //					while(getGoal()->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//getGoal()->getMaxBuildTypes();
@@ -1586,7 +1586,7 @@ void PREBUILDORDER::mutateGeneCode(/*const bool* fixed_list*/)
 //					else
 						y=tGeno[rand()%tMaxBuildTypes];//getGoal()->getMaxBuildTypes();
 						Code[x]=y;
-//						markerCounter++;Marker[x]=markerCounter;
+//						++markerCounter;Marker[x]=markerCounter;
 					}
 				}break;
 				case 3://exchange two entries
@@ -1614,19 +1614,19 @@ void PREBUILDORDER::mutateGeneCode(/*const bool* fixed_list*/)
 							unsigned int tmpCode[MAX_LENGTH];
 //							unsigned int tmpMarker[MAX_LENGTH];
 							
-							for(unsigned int i = 0; i < block_length; i++)
+							for(unsigned int i = 0; i < block_length; ++i)
 							{
 								tmpCode[i] = Code[x + i];
 //								tmpMarker[i] = Marker[x + i];
 							}
 								
-							for(unsigned int i = target_position; i < x; i++)
+							for(unsigned int i = target_position; i < x; ++i)
 							{
 								Code[i+block_length] = Code[i];
 //								Marker[i+block_length] = Marker[i];
 							}
 
-							for(unsigned int i = 0; i<block_length; i++)
+							for(unsigned int i = 0; i<block_length; ++i)
 							{
 								Code[target_position + i] = tmpCode[i];
 //								Marker[target_position + i] = tmpMarker[i];
@@ -1645,31 +1645,31 @@ void PREBUILDORDER::mutateGeneCode(/*const bool* fixed_list*/)
 			{
 				{
 					std::list<unsigned int> newBuildable;
-					for(std::list<unsigned int>::iterator j = allow[i].facility.begin();j!=allow[i].facility.end();j++)
+					for(std::list<unsigned int>::iterator j = allow[i].facility.begin();j!=allow[i].facility.end(); ++j)
 					if(need[*j].facilityIsDone())
 						newBuildable.push_back(*j);
-					for(std::list<unsigned int>::iterator j = allow[i].facility2.begin();j!=allow[i].facility2.end();j++)
+					for(std::list<unsigned int>::iterator j = allow[i].facility2.begin();j!=allow[i].facility2.end(); ++j)
 					if(need[*j].facility2IsDone())
 						newBuildable.push_back(*j);
-					for(std::list<unsigned int>::iterator j = allow[i].prerequisite.begin();j!=allow[i].prerequisite.end();j++)
+					for(std::list<unsigned int>::iterator j = allow[i].prerequisite.begin();j!=allow[i].prerequisite.end(); ++j)
 					if(need[*j].prerequisiteIsDone())
 						newBuildable.push_back(*j);
 					checked[i]=true;
 					if(getGoal()->getIsStatic(i))
 					// remove
-						for(int j = tMaxBuildTypes;j--;)
+						for(unsigned int j = tMaxBuildTypes;j--;)
 							if(tGeno[j] == getGoal()->toGeno(i))
 							{
-								tMaxBuildTypes--;
-								for(unsigned int k = j;k<tMaxBuildTypes;k++)
+								--tMaxBuildTypes;
+								for(unsigned int k = j;k<tMaxBuildTypes; ++k)
 									tGeno[k] = tGeno[k+1];
 							}
 			
-					for(std::list<unsigned int>::iterator j = newBuildable.begin();j!=newBuildable.end();j++) 
+					for(std::list<unsigned int>::iterator j = newBuildable.begin();j!=newBuildable.end(); ++j) 
 					{
 						buildable[*j]=true;
 						tGeno[tMaxBuildTypes]=getGoal()->toGeno(*j);
-						tMaxBuildTypes++;
+						++tMaxBuildTypes;
 					}
 				}
 				if((*pStats)[i].create>0)
@@ -1678,21 +1678,21 @@ void PREBUILDORDER::mutateGeneCode(/*const bool* fixed_list*/)
 					if(!checked[i])
 					{
 						std::list<unsigned int> newBuildable;
-			       			for(std::list<unsigned int>::iterator j = allow[i].facility.begin();j!=allow[i].facility.end();j++)
+			       			for(std::list<unsigned int>::iterator j = allow[i].facility.begin();j!=allow[i].facility.end(); ++j)
 							if(need[*j].facilityIsDone())
 								newBuildable.push_back(*j);
-						for(std::list<unsigned int>::iterator j = allow[i].facility2.begin();j!=allow[i].facility2.end();j++)
+						for(std::list<unsigned int>::iterator j = allow[i].facility2.begin();j!=allow[i].facility2.end(); ++j)
 							if(need[*j].facility2IsDone())
 								newBuildable.push_back(*j);
-						for(std::list<unsigned int>::iterator j = allow[i].prerequisite.begin();j!=allow[i].prerequisite.end();j++)
+						for(std::list<unsigned int>::iterator j = allow[i].prerequisite.begin();j!=allow[i].prerequisite.end(); ++j)
 							if(need[*j].prerequisiteIsDone())
 								newBuildable.push_back(*j);
 				       		checked[i]=true;
-						for(std::list<unsigned int>::iterator j = newBuildable.begin();j!=newBuildable.end();j++)
+						for(std::list<unsigned int>::iterator j = newBuildable.begin();j!=newBuildable.end(); ++j)
 						{
 							buildable[*j]=true;
 							tGeno[tMaxBuildTypes]=getGoal()->toGeno(*j);
-							tMaxBuildTypes++;
+							++tMaxBuildTypes;
 						}
 					}
 				}
@@ -1717,12 +1717,12 @@ void PREBUILDORDER::mutateGeneCode(/*const bool* fixed_list*/)
 					while(i < MAX_LENGTH-1)
 					{
 						while((i<MAX_LENGTH-1) && (fixed_list[i]))
-							i++;
+							++i;
 						if(i<MAX_LENGTH-1)
 						{
 							int j = i+1;
 							while((j<MAX_LENGTH)&&(fixed_list[j]))
-								j++;
+								++j;
 							if((j<MAX_LENGTH)&&(!fixed_list[j]))
 							{
 								setCode(i, getCode(j));
@@ -1730,10 +1730,10 @@ void PREBUILDORDER::mutateGeneCode(/*const bool* fixed_list*/)
 							}
 						}
 						if(!fixed_list[i])
-							i++;
+							++i;
 					}
 					// TODO hier auch das buildable und tMaxBuildTypes rein... irgendwie den Code als "mutier mich" markieren und spaetereinfuegen
-					markerCounter++;setMarker(MAX_LENGTH-1, markerCounter);
+					++markerCounter;setMarker(MAX_LENGTH-1, markerCounter);
 					unsigned int y;
 //				  if(coreConfiguration.preprocessBuildOrder) // TODO
 //				  while(getGoal()->isVariable[y]==0) y=rand()%getGoal()->getMaxBuildTypes();
@@ -1752,12 +1752,12 @@ void PREBUILDORDER::mutateGeneCode(/*const bool* fixed_list*/)
 					while(i>x)
 					{
 						while((i>x) && (fixed_list[i]))
-							i--;
+							--i;
 						if(i>x)
 						{
 							int j=i-1;
 							while((j) && (fixed_list[j]))
-								j--;
+								--j;
 							if(!fixed_list[j])
 							{
 								setCode(i, getCode(j));
@@ -1765,9 +1765,9 @@ void PREBUILDORDER::mutateGeneCode(/*const bool* fixed_list*/)
 							}
 						}
 						if(!fixed_list[i])
-							i--;
+							--i;
 					}
-					markerCounter++;setMarker(x, markerCounter);
+					++markerCounter;setMarker(x, markerCounter);
 					unsigned int y;
 //				  if(coreConfiguration.preprocessBuildOrder) TODO
 //					  while(getGoal()->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//getGoal()->getMaxBuildTypes();
@@ -1789,7 +1789,7 @@ void PREBUILDORDER::mutateGeneCode(/*const bool* fixed_list*/)
 //					  else
 						y=tGeno[rand()%tMaxBuildTypes];//getGoal()->getMaxBuildTypes();
 						setCode(x, y);
-						markerCounter++;setMarker(x, markerCounter);
+						++markerCounter;setMarker(x, markerCounter);
 					}
 				}break;
 				case 3://exchange two entries
@@ -1817,19 +1817,19 @@ void PREBUILDORDER::mutateGeneCode(/*const bool* fixed_list*/)
 							unsigned int tmpCode[MAX_LENGTH];
 							unsigned int tmpMarker[MAX_LENGTH];
 							
-							for(unsigned int i = 0; i < block_length; i++)
+							for(unsigned int i = 0; i < block_length; ++i)
 							{
 								tmpCode[i] = getCode(x + i);
 								tmpMarker[i] = getMarker(x + i);
 							}							
 								
-							for(unsigned int i = target_position; i < x; i++)
+							for(unsigned int i = target_position; i < x; ++i)
 							{
 								setCode(i+block_length, getCode(i));
 								setMarker(i+block_length, getMarker(i));
 							}
 
-							for(unsigned int i = 0; i<block_length; i++)
+							for(unsigned int i = 0; i<block_length; ++i)
 							{
 								setCode(target_position + i, tmpCode[i]);
 								setMarker(target_position + i, tmpMarker[i]);
@@ -1859,7 +1859,7 @@ void PREBUILDORDER::resetGeneCode()
 		memcpy(Code,basicBuildOrder,MAX_LENGTH*4);
 		for(int i=MAX_LENGTH;i--;)
 		{
-			markerCounter++;Marker[i]=markerCounter;
+			++markerCounter;Marker[i]=markerCounter;
 		}
 	}
 	else*/
@@ -1884,7 +1884,7 @@ void PREBUILDORDER::resetGeneCode()
 //				Code[0][i]=/*rand()%*/getGoal()->toGeno(SCV);//getMaxBuildTypes();
 //				Code[1][i]=/*rand()%*/getGoal()->toGeno(SCV);//getMaxBuildTypes();
 //			}
-//			markerCounter++;setMarker(i, markerCounter);
+//			++markerCounter;setMarker(i, markerCounter);
 //		}
 //	}
 }
@@ -1893,7 +1893,7 @@ void PREBUILDORDER::resetGeneCode()
 void PREBUILDORDER::crossOver(PREBUILDORDER* parent2, PREBUILDORDER* child1, PREBUILDORDER* child2)
 {
 /*	int counter=MAX_LENGTH;
-	for(int i=0;i<MAX_LENGTH;i++)
+	for(int i=0;i<MAX_LENGTH; ++i)
 	{
 		if(rand()%counter<5)
 		{
@@ -1915,7 +1915,7 @@ void PREBUILDORDER::crossOver(PREBUILDORDER* parent2, PREBUILDORDER* child1, PRE
 			child1=child2;
 			child2=c;
 		}
-		counter--;
+		--counter;
 	}
 	int num=MAX_LENGTH-counter;
 	memcpy(&child1->Code[0][counter],&Code[0][counter],num*4);

@@ -59,14 +59,14 @@ void MAP_LOCATION::calculateDistances()
 {
 	for(unsigned int i=MAX_LOCATIONS;i--;)
 		nearest[i] = 0;
-	for(unsigned int step = 1; step < getMaxLocations(); step++)
+	for(unsigned int step = 1; step < getMaxLocations(); ++step)
 	{
 		unsigned int min = 200;
-		for(unsigned int loc = 1;loc < getMaxLocations();loc++)
+		for(unsigned int loc = 1;loc < getMaxLocations(); ++loc)
 			if(getDistance(loc) < min)
 			{
 				bool alreadyProcessed = false;
-				for(unsigned int k=1;k<step;k++)
+				for(unsigned int k=1; k<step; ++k)
 					if(nearest[k] == loc) alreadyProcessed = true;
 				if(!alreadyProcessed)
 				{

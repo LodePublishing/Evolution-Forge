@@ -80,7 +80,7 @@ int SOUP::initSoup()
 		debug.toLog(0,"ERROR: (SOUP::initSoup) SOUP is already initialzed.");
 		return(0);
 	}
-	PRERACE::resetMapInitialized();
+	PRERACE::resetMapInitialized(); //todo: map wieder static machen
 	if(!(PRERACE::setMap(pMap)))
 	{
 		debug.toLog(0,"ERROR: (SOUP::initSoup) Map not initialized.");

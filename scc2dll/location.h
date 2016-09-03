@@ -3,7 +3,7 @@
 
 #include "main.h"
 
-class MAP_LOCATION_BASIC
+class EXPORT MAP_LOCATION_BASIC
 {
 	private:
 		char name[32];

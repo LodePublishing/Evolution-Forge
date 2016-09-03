@@ -747,7 +747,7 @@ void RACE::resetData() // resets all data to standard starting values
 		basicBuildOrder[1][i]=0;
 	}
 	basicLength=0;
-/*	while((supply<maxSupply)&&(basicLength<20))
+	while((supply<maxSupply)&&(basicLength<20))
 	{
 		if(supply<maxSupply)
 		{

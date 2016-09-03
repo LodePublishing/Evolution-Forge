@@ -1,29 +1,46 @@
-PROJECTNAME=scc2
+WXPATH=/home/clawg/temp/wxWindows-2.4.2/
+PROGRAM=scc2
 CXX=i386-mingw32msvc-g++
 DLLWRAP=i386-mingw32msvc-dllwrap
-DLLPATH=$(PROJECTNAME)dll
-MAINPATH=$(PROJECTNAME)
+DLLPATH=$(PROGRAM)dll
 OBJDLL=$(DLLPATH)/anarace.o $(DLLPATH)/debug.o $(DLLPATH)/ga.o $(DLLPATH)/goal.o  $(DLLPATH)/harvest.o  $(DLLPATH)/location.o  $(DLLPATH)/map.o  $(DLLPATH)/player.o  $(DLLPATH)/prerace.o  $(DLLPATH)/race.o  $(DLLPATH)/settings.o  $(DLLPATH)/soup.o
 SOURCEDLL=$(DLLPATH)/anarace.cpp $(DLLPATH)/debug.cpp $(DLLPATH)/ga.cpp $(DLLPATH)/goal.cpp  $(DLLPATH)/harvest.cpp  $(DLLPATH)/location.cpp  $(DLLPATH)/map.cpp  $(DLLPATH)/player.cpp  $(DLLPATH)/prerace.cpp  $(DLLPATH)/race.cpp  $(DLLPATH)/settings.cpp  $(DLLPATH)/soup.cpp
-OBJMAIN=$(MAINPATH)/io.o $(MAINPATH)/scc2.o
+OBJMAIN=$(PROGRAM)/scc2.o
 DLLFLAGS=-DBUILD_DLL
-CXXFLAGS= -O4 -Wall -march=pentium4 -mcpu=pentium4 -ffast-math -pipe -funroll-loops -fforce-mem -malign-double -fforce-addr -fomit-frame-pointer
-LIBS=-L./ -l$(PROJECTNAME)
-
+LIBS=-L./ -l$(PROGRAM)
+RES_PROGRAM_OBJ = $(PROGRAM)_resources.o
+EXTRALIBS =  -Wl,--subsystem,windows -mwindows -mthreads  -Wl,--version-script,$(WXPATH)/version-script -lrpcrt4 -loleaut32 -lole32 -luuid -lwinspool -lwinmm -lshell32 -lcomctl32 -lctl3d32 -ladvapi32 -lwsock32 -l$(PROGRAM)
+LDLIBS=${WXPATH}/lib/libwx_msw-2.4-i386-mingw32msvc.dll ${EXTRALIBS}
+WXLIB=libwx_msw-2.4-i386-mingw32msvc.a
+WXSHLIB=libwx_msw-2.4-i386-mingw32msvc.dll
+WXLIBBASE=wx_msw
+SHARED_LD=i386-mingw32msvc-c++ -shared -Wl,--out-implib,lib/libwx_msw-2.4-i386-mingw32msvc.dll.a -o
+RESFLAGS=--include-dir $(WXPATH)/include --define __WIN32__ --define __WIN95__ --define __GNUWIN32__ 
+RESCOMP=i386-mingw32msvc-windres
+CPPFLAGS = -I${WXPATH}/lib/wx/include/msw-2.4-i386-mingw32msvc -I${WXPATH}/include -I${WXPATH}/src/regex -I${WXPATH}/src/zlib -I${WXPATH}/src/png -I${WXPATH}/src/jpeg -I${WXPATH}/src/tiff -D_WIN32_IE=0x400 $(EXTRADEFS)  -D__WXMSW__ -mthreads -DWXUSINGDLL=1
+CXXFLAGS = ${CPPFLAGS} -fno-pcc-struct-return -MMD -mthreads -Wall
+PICFLAGS = -UWXUSINGDLL -DWXMAKINGDLL=1 -D_DLL=1 -D_WINDLL=1
+.SUFFIXES: .o .cpp .rc _resources.o
+.rc_resources.o:
+	$(RESCOMP) -i $< -o $@ $(RESFLAGS)
 dll:  $(SOURCEDLL)
 	$(CXX) $(CXXFLAGS) -c $(DLLFLAGS) $(SOURCEDLL)
 	@mv *.o $(DLLPATH)
-dllwrap: 
-	$(DLLWRAP) --output-lib=$(PROJECTNAME).a --dllname=$(PROJECTNAME).dll --driver-name=$(CXX) $(OBJDLL)
-main:  $(OBJMAIN)
-	$(CXX) -c $(OBJMAIN)
-exe:  $(OBJMAIN)
-	$(CXX) $(CXXFLAGS) -o $(PROJECTNAME).exe $(OBJMAIN) $(LIBS)
+	$(DLLWRAP) --output-lib=$(PROGRAM).a --dllname=$(PROGRAM).dll --driver-name=$(CXX) $(OBJDLL)
 
-clean: 
-	@rm -f $(DLLPATH)/*.o
-	@rm -f $(MAINPATH)/*.o
-	@rm -vf $(PROJECTNAME).dll
-	@rm -vf $(PROJECTNAME).a
-	@rm -vf $(PROJECTNAME).exe
+exe:  $(OBJMAIN) $(WXPATH)/lib/libwx_msw-2.4-i386-mingw32msvc.dll $(RES_PROGRAM_OBJ)
+	$(CXX) $(CXXFLAGS) -o $(PROGRAM).exe $(OBJMAIN) $(LIBS) $(LDLIBS) $(LIBRARIES) $(RES_PROGRAM_OBJ) -L./
+clean:
+	@rm -vf ./*.o
+	@rm -vf $(PROGRAM)/*.o
+	@rm -vf $(PROGRAM).exe
+	@echo "exe cleared."
+
+allclean:
+	@rm -vf ./*.o
+	@rm -vf $(DLLPATH)/*.o
+	@rm -vf $(PROGRAM)/*.o
+	@rm -vf $(PROGRAM).dll
+	@rm -vf $(PROGRAM).a
+	@rm -vf $(PROGRAM).exe
 	@echo "done."

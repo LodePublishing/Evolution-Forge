@@ -99,7 +99,7 @@ int GOAL_ENTRY::adjustGoals()
 		{
 			case TERRA:isBuildable[SUPPLY_DEPOT]=1;isVariable[SUPPLY_DEPOT]=1;break;
 			case PROTOSS:isBuildable[PYLON]=1;isVariable[PYLON]=1;break;
-			case ZERG:isBuildable[OVERLORD]=1;isVariable[OVERLORD];break;
+			case ZERG:isBuildable[OVERLORD]=1;isVariable[OVERLORD]=1;break;
 			default:break;
 		}
 

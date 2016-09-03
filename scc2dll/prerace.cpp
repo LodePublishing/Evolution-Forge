@@ -286,7 +286,7 @@ void EXPORT PRERACE::harvestResources()
 	int i,s;
 //	int t=(rand()%10)-5;
 	for(i=1;i<MAX_LOCATIONS;i++)//~~
-	if(s=location[i].availible[SCV])
+	if((s=(location[i].availible[SCV])))
 	{
 		//availible is 0, harvestSpeed ist ok!
 		if(s<56) //~~
@@ -599,9 +599,9 @@ PRERACE::~PRERACE()
 };
 
 
-// void PRERACE::resetMapInitialized();
-//int PRERACE::setMap(MAP* map);
-//MAP* PRERACE::getMap();
+ void PRERACE::resetMapInitialized();
+int PRERACE::setMap(MAP* map);
+MAP* PRERACE::getMap();
 MAP* PRERACE::pMap;
 GA* PRERACE::ga;
 int PRERACE::mapInitialized;

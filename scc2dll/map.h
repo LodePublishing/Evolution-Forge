@@ -6,7 +6,7 @@
 
 // this needs still some work to make everything private
 
-class MAP
+class EXPORT MAP
 {
 	private:
 		char* name;

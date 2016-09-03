@@ -24,7 +24,6 @@ class UI_LongText : public UI_Object
 		void updateText(const std::string& lt_text);
 
 		void reloadOriginalSize();
-		void reloadStrings();
 		
 		void draw() const;
 		void object_info();

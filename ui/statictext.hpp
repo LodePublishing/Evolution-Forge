@@ -7,20 +7,17 @@ class UI_StaticText : public UI_Object
 {
 	public:
 		UI_StaticText(UI_Object* st_parent, 
+				const unsigned int string_id, 
+				
 				const Rect st_pos, 
 				const Size distance_bottom_right, 
 				const eColor st_color, 
 				const eFont st_font, 
 				const ePositionMode position_mode = HORIZONTALLY_CENTERED);
-		UI_StaticText(UI_Object* st_parent, 
-				const eString st_text, 
-				const Rect st_pos, 
-				const Size distance_bottom_right, 
-				const eColor st_color, 
-				const eFont st_font, 
-				const ePositionMode position_mode = HORIZONTALLY_CENTERED);
+		
 		UI_StaticText(UI_Object* st_parent, 
 				const std::string& st_text, 
+				
 				const Rect st_pos, 
 				const Size distance_bottom_right, 
 				const eColor st_color, 
@@ -33,7 +30,6 @@ class UI_StaticText : public UI_Object
 		void setFont(const eFont st_font);
 		const std::string& getString() const;
 		void updateText(const std::string& st_text, const bool etext_change = false);
-		void reloadText(const std::string& st_text);
 		void reloadOriginalSize();
 
 		void addChar(const unsigned int position, const char key);
@@ -43,9 +39,7 @@ class UI_StaticText : public UI_Object
 		UI_Object* checkToolTip();
 		UI_Object* checkHighlight();
 	
-		void updateText(const eString st_text);
-		void reloadText(const eString st_text);
-		void reloadStrings();
+		void updateText(const unsigned int string_id);
 		void setTextWasChanged();
 		
 		void draw() const;
@@ -59,12 +53,13 @@ class UI_StaticText : public UI_Object
 		void doHighlight(const bool high_light=true);
 	private:
 		std::string text;
+		unsigned int stringID;
+		
 		bool textWasChanged;
 		eFont font;
 		eColor color;
 		Color tempColor;
 		bool tempColorIsSet;
-		eString eText;
 		bool highlight;
 	
 		UI_StaticText& operator=(const UI_StaticText& object);

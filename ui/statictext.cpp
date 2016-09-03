@@ -1,40 +1,28 @@
 #include "statictext.hpp"
 #include <sstream>
 
-UI_StaticText::UI_StaticText(UI_Object* st_parent, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode) :
-	UI_Object(st_parent, st_pos, distance_bottom_right, position_mode, AUTO_SIZE),
-	text(),
-	textWasChanged(true),
-	font(st_font),
-	color(st_color),
-	tempColor(),
-	tempColorIsSet(false),
-	eText(NULL_STRING),
-	highlight(false)
-{ 
-	setDrawType(TRANSPARENT_OBJECT);
-//	setDrawType(ANTI_ALIASED_OBJECT);
-}
-
-UI_StaticText::UI_StaticText(UI_Object* st_parent, const eString st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode) :
+UI_StaticText::UI_StaticText(UI_Object* st_parent, const unsigned int string_id, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode) :
 	UI_Object(st_parent, st_pos, distance_bottom_right, position_mode, NO_AUTO_SIZE),
 	text(),
+	stringID(string_id),
 	textWasChanged(true),
 	font(st_font),
 	color(st_color),
 	tempColor(),
 	tempColorIsSet(false),
-	eText(st_text),
 	highlight(false)
 {
+	aufruf updateStringID
+		
 	setDrawType(TRANSPARENT_OBJECT);
 //	setDrawType(ANTI_ALIASED_OBJECT);
-	updateText(theme.lookUpString(st_text)); //?
+//	updateText(theme.lookUpString(st_text)); //? => vom Hauptprogramm machen!
 }
 
 UI_StaticText::UI_StaticText(UI_Object* st_parent, const std::string& st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode) :
 	UI_Object(st_parent, st_pos, distance_bottom_right, position_mode, NO_AUTO_SIZE),
 	text(st_text),
+	stringID(0),
 	textWasChanged(true),
 	font(st_font),
 	color(st_color),
@@ -184,7 +172,7 @@ void UI_StaticText::setTextWasChanged()
 
 void UI_StaticText::reloadOriginalSize()
 {
-	reloadStrings();
+	setTextWasChanged();
 	UI_Object::reloadOriginalSize();
 }
 
@@ -193,36 +181,17 @@ void UI_StaticText::updateText(const std::string& st_text, const bool etext_chan
 	if((st_text==text) && (!etext_change))
 		return; //?
 	text = st_text;
-	eText = NULL_STRING;
+	stringID = 0;
 	setTextWasChanged();
 }
 
-void UI_StaticText::updateText(const eString st_text)
+void UI_StaticText::updateText(const unsigned int string_id)
 {
-	if(eText==st_text) // o_O
+	if(string_id == stringID) // o_O
 		return;
-	updateText(theme.lookUpString(st_text), true);
-	eText = st_text; //?
-}
-
-void UI_StaticText::reloadText(const std::string& st_text)
-{
-	text = st_text;
-	setTextWasChanged();
-}
-
-void UI_StaticText::reloadText(const eString st_text)
-{
-	eText = st_text;
-	reloadText(theme.lookUpString(st_text));
-}
-
-
-void UI_StaticText::reloadStrings()
-{
-	if(eText!=NULL_STRING)
-		reloadText(theme.lookUpString(eText));
-	else
-		reloadText(text);
+	stringID = string_id;	
+	UI::unregisterString(this, stringID);
+	UI::registerString(this, string_id);
+//	updateText(theme.lookUpString(st_text), true); ?
 }
 

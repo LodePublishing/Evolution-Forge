@@ -10,7 +10,7 @@
 
 
 PREBUILDORDER::PREBUILDORDER():
-	location(0),
+//	location(0),
 	pStartCondition(NULL),
 	buildingQueue(), // TODO
 //	lastcounter(0),
@@ -43,7 +43,7 @@ PREBUILDORDER::PREBUILDORDER():
 
 void PREBUILDORDER::resetPrerace()
 {
-	location = NULL;
+//	location = NULL;
 	pStartCondition = NULL;
 	while(!buildingQueue.empty())
 		buildingQueue.pop();
@@ -73,7 +73,7 @@ void PREBUILDORDER::resetPrerace()
 }
 
 PREBUILDORDER::PREBUILDORDER(const PREBUILDORDER& object) :
-	location(object.location),
+//	location(object.location),
 	pStartCondition(object.pStartCondition),
 	buildingQueue(object.buildingQueue),
 //	lastcounter(object.lastcounter),
@@ -108,7 +108,7 @@ PREBUILDORDER::PREBUILDORDER(const PREBUILDORDER& object) :
 
 PREBUILDORDER& PREBUILDORDER::operator=(const PREBUILDORDER& object)
 {
-	location = object.location;
+//	location = object.location;
 	pStartCondition = object.pStartCondition;
 	buildingQueue = object.buildingQueue;
 //	lastcounter = object.lastcounter;
@@ -145,6 +145,7 @@ PREBUILDORDER& PREBUILDORDER::operator=(const PREBUILDORDER& object)
 
 void PREBUILDORDER::prepareForNewGeneration()
 {
+	assignStart(pStart);
 	std::list<PARALLEL_COMMAND*>::iterator i = parallelCommandQueues.begin();
 	while(i!=parallelCommandQueues.end())
 	{
@@ -429,7 +430,7 @@ void PREBUILDORDER::adjustAvailibility(const unsigned int loc, const unsigned in
 /* compares the current force on the map and the finnishing times of the unit types with our predefined goals */
 const bool PREBUILDORDER::calculateReady() const
 {
-	return(getGoal()->calculateReady(*location));
+	return(getGoal()->calculateReady((*unit)[playerNum]));
 }
 
 // nicht const da buildingqueue verzehrt wird :/
@@ -785,7 +786,7 @@ const unsigned int PREBUILDORDER::harvestMinerals() const
 //	  int t=(rand()%10)-5;
 	for(unsigned int i=1;i<(*getMap())->getMaxLocations();i++)//~~
 	{
-		unsigned int s=(*location)[i].getAvailible(SCV);
+		unsigned int s=getLocationAvailible(i, SCV);
 		if(s)
 		{
 			//availible is 0, harvestSpeed ist ok!
@@ -815,7 +816,7 @@ const unsigned int PREBUILDORDER::harvestGas() const
 //	int t=(rand()%10)-5;
 	for(unsigned int i=1;i<(*getMap())->getMaxLocations();i++)//~~
 	{
-		unsigned int s = (*location)[i].getAvailible(GAS_SCV);
+		unsigned int s = getLocationAvailible(i, GAS_SCV);
 		if(s)
 		{
 			if(s<4)
@@ -855,6 +856,9 @@ void PREBUILDORDER::assignStart(START* start)
 	}
 #endif
 	pStart = start;
+
+//	Optimierungen...
+	
 	pMap = pStart->getMap();
 	pStartCondition = pStart->getStartCondition();
 	setGoal(pStart->getCurrentGoal());
@@ -882,18 +886,18 @@ void PREBUILDORDER::resetSpecial()
 void PREBUILDORDER::setPlayerNumber(const unsigned int player_number)
 {
 #ifdef _SCC_DEBUG
-	if((player_number < 1) || (player_number >= MAX_PLAYER)) {
+	if((player_number < 1) || (player_number > MAX_PLAYER)) {
 		toLog("DEBUG: (PREBUILDORDER::setPlayerNumber): Value out of range.");return;
 	}
 #endif
 	playerNum = player_number;
+//	location = &((*unit)[playerNum]);
 }
 
 
-void PREBUILDORDER::assignUnits(UNIT (*units)[MAX_PLAYER][MAX_LOCATIONS])
+void PREBUILDORDER::assignUnits(UNIT (*units)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS])
 {
 	unit = units;
-	location = &((*unit)[getPlayerNumber()]);
 }
 
 void PREBUILDORDER::initializePlayer()
@@ -907,7 +911,7 @@ void PREBUILDORDER::initializePlayer()
 
 void PREBUILDORDER::eraseIllegalCode()
 {
-	for(int i=MAX_LENGTH;i--;)
+	for(unsigned int i=MAX_LENGTH;i--;)
 		if(getCode(i) >= getGoal()->getMaxBuildTypes())
 			setCode(i, 0);
 /*		{

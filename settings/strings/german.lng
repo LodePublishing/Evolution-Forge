@@ -348,18 +348,22 @@
 		Kern von Evolution Forge
 		Evolution forge Einführung
 		Befehlsbeschreibung Spieler %s
+		Techtree
 		Grafische Darstellung der Befehle %s
 		Übersicht über den Verlauf %s
 		Statistiken %s
 		Punkte
 		Einheitenliste %s
 		Befehlsreihenfolge %s
+		Spiel
+		Spieler
 # messages
 		Willkommen zu Evolution Forge!
 		Klicke oben um weitere Ziele hinzuzufügen.
 		%i Spieler geladen ....
 		%s wurde der Zielliste hinzugefügt.
 		%s wurde als neue Zielliste ausgewählt.
+		%s wurde als Karte ausgewählt.
 		%s wurde als Rasse gesetzt.
 		Ein %s wurde der Zielliste hinzugefügt.
 		Ein %s wurde von der Zielliste entfernt.
@@ -397,6 +401,7 @@
 		Starteinheiten
 #				Wähle Rasse
 		Rasse
+		Karte
 
 		Speichere Ziele...
 		Speichere Ziele als
@@ -428,6 +433,7 @@
 		Gesamt: %i
 		Klicken um fortzufahren
 		Klicken um zu unterbrechen
+		Füge ESpieler hinzu
 # statistics window
 		Gesamt Mineralien : %i
 		Gesamt Vespine Gas : %i
@@ -488,6 +494,7 @@
 
 		Fahre mit der Optimierung fort
 		Halte die Optimierung an
+
 		
 		Anteil aller Ziele / zeitlicher Anteil am Optimum (Mineralien/Gas ignoriert)
 				

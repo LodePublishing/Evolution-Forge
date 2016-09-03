@@ -1,0 +1,17 @@
+# default settings for tvb
+# no locations -> all are relative to the start location specified in the map
+# @LOCATION_MAIN, @LOCATION_FRONT, @LOCATION_EXPANSION1, @LOCATION_EXPANSION2, @LOCATION_ISLAND_EXPANSION, @LOCATION_CENTER
+
+# --- Races ---
+@STARTCONDITIONS "Terra"
+	"Name" = "Default Terra start"
+	"Minerals" = "50"
+	"Gas" = "0"
+	"Time" = "0"
+@END
+
+# location forces... 2 = LOCATION MAIN
+@LOCATION "2"
+	"Command Center" = "1"
+	"SCV" = "4"
+@END

@@ -1,0 +1,64 @@
+# Mineral Distances: 0: Very fast map (3x gathering speed), 1: fast map (2x gathering speed) 2: standard map, 3: slow map (0.75x gathering speed)
+
+# --- Map ---
+@MAP
+	"Name" = "2 Player Lost Temple"
+	"Max Locations" = "7"
+	"Max Player" = "2"
+@END
+
+# --- Locations ---
+
+@LOCATION "1"
+	"Name" = "The wayne location"
+	"Minerals" = "0"
+	"Geysirs" = "0"
+	"Mineral Distance" = "2"
+@END
+
+@LOCATION "2"
+	"Name" = "Main"
+	"Minerals" = "8"
+	"Geysirs" = "1"
+	"Mineral Distance" = "2"
+	"Distance to" 3 = 15
+@END
+
+@LOCATION "3"
+	"Name" = "Choke"
+	"Minerals" = "0"
+	"Geysirs" = "0"
+	"Mineral DIstance" = "2"
+	"Distance to" 4 = 10
+@END
+
+@LOCATION "4"
+	"Name" = "Expansion"
+	"Minerals" = "8"
+	"Geysirs" = "1"
+	"Mineral Distance" = "2"
+@END
+
+@LOCATION "5"
+	"Name" = "Main"
+	"Minerals" = "8"
+	"Geysirs" = "1"
+	"Mineral Distance" = "2"
+	"Distance to" 3 = 15
+@END
+
+@LOCATION "6"
+	"Name" = "Choke"
+	"Minerals" = "0"
+	"Geysirs" = "0"
+	"Mineral DIstance" = "2"
+	"Distance to" 4 = 10
+@END
+
+@LOCATION "7"
+	"Name" = "Expansion"
+	"Minerals" = "8"
+	"Geysirs" = "1"
+	"Mineral Distance" = "2"
+@END
+

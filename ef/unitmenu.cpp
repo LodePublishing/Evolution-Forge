@@ -8,7 +8,7 @@ UnitMenu::UnitMenu(UI_Object* unit_parent, Rect unit_rect) :
 {
 	for(unsigned int i=0;i<UNIT_TYPE_COUNT;i++) //TODO
 	{
-		MenuEntry* entry = new MenuEntry(this, Rect(0, 0, 130, FONT_SIZE+5), "ERROR"); //TODO maybe already initialize with name string
+		MenuEntry* entry = new MenuEntry(this, Rect(0, 0, 110, FONT_SIZE+5), "ERROR"); //TODO maybe already initialize with name string
 		menuEntries.push_back(entry);
 	}
 }
@@ -62,22 +62,13 @@ void UnitMenu::assignAnarace(ANABUILDORDER* goal_anarace)
 	resetData();
 }
 
-void UnitMenu::process()
+#include <sstream>
+
+//vereinfachen, wie bei goalmenu in ein resetdata rein
+void UnitMenu::processMenu()
 {
-	Menu::process();
-	if(!isShown())
-		return;
-	height = 3;
-	// check for Pressed Units
-	eButton color;
-	switch((*anarace->getStartCondition())->getRace())
-	{
-		case TERRA:color=UNIT_TYPE_5_BUTTON;break;
-		case PROTOSS:color=UNIT_TYPE_7_BUTTON;break;
-		case ZERG:color=UNIT_TYPE_3_BUTTON;break;
-		default:break;
-	}
-			
+	return;
+	std::ostringstream os;os << "processMenu " << (rand()%10);toLog(os.str());
 	if(menuLevel)
 	{
 		if(menuLevel==1)
@@ -121,12 +112,12 @@ void UnitMenu::process()
 						(*m)->Hide();
 						continue;
 					}
-					Rect edge = Rect(Point(10+135*(height%2), ((height+1)/2+1) * (FONT_SIZE + 9)), Size(120, FONT_SIZE+6));
+					Rect edge = Rect(Point(5+115*(height%2), ((height+1)/2+1) * (FONT_SIZE + 9)), Size(120, FONT_SIZE+6));
 	//			  if (fitItemToClientRect(edge, 1))
 					{
 						(*m)->Show();
 						(*m)->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][facility[i]].unitType));
-						(*m)->updateText(*UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+facility[i]+UNIT_NULL_STRING)) + ". . .");
+						(*m)->updateText(*UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+facility[i]+UNIT_NULL_STRING)) + "...");
 						(*m)->adjustRelativeRect(edge);
 					}
 					height++;
@@ -146,7 +137,7 @@ void UnitMenu::process()
 						(*m)->Hide();
 						continue;
 					}
-					Rect edge = Rect(Point(10+135*(height%2), ((height+1)/2+1)*(FONT_SIZE+9)), Size(120, FONT_SIZE+6));
+					Rect edge = Rect(Point(5+115*(height%2), ((height+1)/2+1)*(FONT_SIZE+9)), Size(120, FONT_SIZE+6));
 		//			if (parent->fitItemToRelativeRect(edge, 1)) 
 					{
 						(*m)->Show();
@@ -169,7 +160,7 @@ void UnitMenu::process()
 							(*m)->Hide();
 							continue;
 						}
-					Rect edge = Rect(Point(10+135*(height%2), ((height+1)/2+1)*(FONT_SIZE+9)), Size(120, FONT_SIZE+6));
+					Rect edge = Rect(Point(5+115*(height%2), ((height+1)/2+1)*(FONT_SIZE+9)), Size(120, FONT_SIZE+6));
 			//		if (parent->fitItemToRelativeRect(edge, 1)) 
 					{
 						(*m)->Show();
@@ -191,6 +182,30 @@ void UnitMenu::process()
 			(*m)->Hide();
 		}
 
+}
+
+void UnitMenu::process()
+{
+	if(!isShown())
+		return;
+	Menu::process();
+	if(menuHasChanged());
+	{
+		std::ostringstream os;os << "menuHasChanged " << (rand()%10);toLog(os.str());
+		height=3;
+		processMenu();
+	}
+	// check for Pressed Units
+	eButton color;
+	switch((*anarace->getStartCondition())->getRace())
+	{
+		case TERRA:color=UNIT_TYPE_5_BUTTON;break;
+		case PROTOSS:color=UNIT_TYPE_7_BUTTON;break;
+		case ZERG:color=UNIT_TYPE_3_BUTTON;break;
+		default:break;
+	}
+			
+
 // special rules for sub menu...
 	if(pressedItem>-1)
 	{
@@ -204,17 +219,18 @@ void UnitMenu::process()
 				else if ((menuLevel == 1) && (i == 2))   //gasscv
 					pressedItem = GAS_SCV;
 				else if (menuLevel == 1)
-					menuLevel = i;
+					setMenuLevel(i);
 				else if (menuLevel > 1)
 					pressedItem = i;
 		} else
 		{
 			if(menuLevel == 1)
-				menuLevel = i+1;
+				setMenuLevel(i+1);
 			else if(menuLevel > 1) 
 				pressedItem=i;
 		}
 	}
+	
 	if(markedItem>-1)
 	{
 		unsigned int i = markedItem;
@@ -234,7 +250,8 @@ void UnitMenu::process()
 				markedItem=i;
 		}
 	}
-	height+=4;
+	height+=5;
+	height+=height%2;
 }
 
 

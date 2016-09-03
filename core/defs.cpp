@@ -3,7 +3,7 @@
 #include "defs.hpp"
 #include <string>
 
-const std::string CORE_VERSION="Beta 1.63a";
+const std::string CORE_VERSION="Beta 1.63b";
 
 //const unsigned int MAX_LOCATIONS = 9;
 const unsigned int MIN_LOCATIONS = 0; //this does not mean that maps with 0 locations can exist....

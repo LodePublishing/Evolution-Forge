@@ -16,7 +16,7 @@ class UI_Object
 	public:
 		UI_Object& operator=(const UI_Object& object);
 		UI_Object(const UI_Object& object);
-		UI_Object(UI_Object* parent_object, const Rect relative_rect = Rect(0,0,0,0));
+		UI_Object(UI_Object* parent_object, const Rect relative_rect = Rect(0,0,0,0), const Size distance_bottom_right = Size(0,0));
 		virtual ~UI_Object();
 	
 		void setRelativeRect(const Rect& rect);
@@ -90,8 +90,6 @@ class UI_Object
 		UI_Object* getParent() const; // TODO make const correctness!
 		UI_Object* getChildren() const;
 
-
-	
 		void updateToolTip(const eString tooltip);
 		const eString getToolTipString() const;
 
@@ -103,12 +101,13 @@ class UI_Object
 
 		Rect startRect; // TODO private machen
 		Rect targetRect;
+
+		Size distanceBottomRight;
+		
 		unsigned int filledHeight;
 		
 		signed int firstItemY;
 		signed int lastItemY;
-
-
 
 		static unsigned int redrawnObjects;
 
@@ -157,12 +156,14 @@ class UI_Object
 //		void addRect(const Rect& rect);
 
 //		const bool setFocus(); TODO
+		const bool isUpdateRelativePositions() const;
 	protected:
 
 		UI_Object* children; // pointer to the head of the linked list of children
 //		std::list<Rect> notDrawRectList;
 		SDL_Surface* background;
 		Rect oldRect;
+		bool updateRelativePositions;
 
 	private:
 		
@@ -189,8 +190,6 @@ class UI_Object
 //		Rect lastRect;
 		
 	// to adjust object smoothly
-//		Rect startRect;
-//		Rect targetRect;
 		unsigned int doAdjustments;
 		
 		eString toolTipString;
@@ -371,8 +370,6 @@ inline const Point UI_Object::getTargetPosition() const {
 inline const bool UI_Object::isMouseInside() const {
 	return(getAbsoluteRect().Inside(mouse));
 }
-
-
 
 #endif
 

@@ -23,6 +23,8 @@ class UnitMenu : public Menu
 		unsigned int facilityNumber;
 		unsigned int facility[GAS_SCV+1];
 		// facility number -> real facility 
+//		void setMenuLevel(const unsigned int menu_level);
+		void processMenu();
 };
 
 #endif // _GUI_UNITMENU_HPP

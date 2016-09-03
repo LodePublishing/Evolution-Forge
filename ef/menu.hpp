@@ -23,7 +23,10 @@ class Menu : public UI_Object
 		void close();
 		void open();		
 		const bool isOpen() const;
+		const bool menuHasChanged() const;
+		void setMenuHasChanged(const bool has_changed = true);
 	protected:
+		void setMenuLevel(const unsigned int menu_level);
 		std::list<MenuEntry*> menuEntries;
 		unsigned int menuLevel;
 		signed int pressedItem;
@@ -32,6 +35,7 @@ class Menu : public UI_Object
 		bool chooseMenu;
 	private:
 		Point p1, p2;
+		bool menuChanged;
 };
 
 #endif // _GUI_MENU_HPP

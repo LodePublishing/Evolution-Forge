@@ -19,3 +19,8 @@ Pen::Pen(SDL_Surface* surface, const Uint8 r, const Uint8 g, const Uint8 b, cons
 	style(pen_style)
 { }  // TODO: warning: will never be executed ??
 
+void Pen::SetColor(const Color pen_color)
+{
+	color = pen_color;
+}
+

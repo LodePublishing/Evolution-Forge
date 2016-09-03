@@ -31,8 +31,8 @@ BoGraphWindow& BoGraphWindow::operator=(const BoGraphWindow& object)
 	return(*this);
 }
 
-BoGraphWindow::BoGraphWindow(UI_Object* bograph_parent, const unsigned int bograph_window_number) :
-	UI_Window(bograph_parent, BOGRAPH_WINDOW_TITLE_STRING, BO_GRAPH_WINDOW, bograph_window_number, NOT_SCROLLED),
+BoGraphWindow::BoGraphWindow(UI_Object* bograph_parent, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_players) :
+	UI_Window(bograph_parent, BOGRAPH_WINDOW_TITLE_STRING, theme.lookUpPlayerRect(BUILD_ORDER_GRAPH_WINDOW, game_number, max_games, player_number, max_players), theme.lookUpPlayerMaxHeight(BUILD_ORDER_GRAPH_WINDOW, game_number, max_games, player_number, max_players), NOT_SCROLLED),
 	markAni(0),
 	anarace(NULL)
 {
@@ -152,7 +152,7 @@ void BoGraphWindow::processList()
 // ------ CALCULATE NUMBER OF ENTRIES FOR EACH FACILITY ------ 
 // = maximum of force - availible for each facility
 	for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
-	if(anarace->getTimer() + order->getBT() < order->getTime())
+	if(anarace->getTimer() + order->getBT() <= order->getTime())
 	{
 // falls facility benoetigt wird und Zahl der zu dem Zeitpunkt vorhandenen Einheiten minus der verfuegbaren Einheiten > hoehe => setze hoehe auf diesen Wert		
 
@@ -196,7 +196,7 @@ void BoGraphWindow::processList()
 // TODO WARUM = 1 und nicht = 0?
 	faccount = 1;
 	for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
-	if(anarace->getTimer() + order->getBT() < order->getTime())
+	if(anarace->getTimer() + order->getBT() <= order->getTime())
 	{
 		if(order->getFacility())
 		{
@@ -229,7 +229,7 @@ void BoGraphWindow::processList()
 	for(unsigned int i = BOGRAPH_MAX_LINES; i--;)
 		entry[i] = bograph[i].boGraphList.begin();
         for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
-	if(anarace->getTimer() + order->getBT() < order->getTime())
+	if(anarace->getTimer() + order->getBT() <= order->getTime())
 	{
 		if(!order->getFacility())
 			continue;
@@ -253,7 +253,8 @@ void BoGraphWindow::processList()
  		
 		if(entry[i] == bograph[i].boGraphList.end())
 		{
-			BoGraphEntry* t = new BoGraphEntry(this, edge, *order);
+			BoGraphEntry* t = new BoGraphEntry(this, edge.GetTopLeft(), Size(0,0), *order); // TODO
+			t->adjustRelativeRect(edge);
 			t->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
 			bograph[i].boGraphList.push_back(t);
 		} else
@@ -280,7 +281,8 @@ void BoGraphWindow::processList()
 				old->program = *order;
 			} else // => not found, insert a new one
 			{
-				BoGraphEntry* t = new BoGraphEntry(this, edge, *order);
+				BoGraphEntry* t = new BoGraphEntry(this, edge.GetTopLeft(), Size(0,0), *order); // TODO
+				t->adjustRelativeRect(edge);
 				t->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->getUnit()].unitType));
 				entry[i] = bograph[i].boGraphList.insert(entry[i], t);
 				entry[i]++;
@@ -538,13 +540,17 @@ void BoGraphWindow::draw(DC* dc) const
 		}
 	}
 	#endif
-	//finally print the legend
 	
+// finally print the legend
 	dc->SetFont(UI_Object::theme.lookUpFont(SMALL_MIDDLE_NORMAL_FONT));
 	dc->SetTextForeground(*theme.lookUpColor(WINDOW_TEXT_COLOR));
 	for(unsigned int i=0; i<BOGRAPH_MAX_LINES; i++)
 		if(bograph[i].facility>0)
 			dc->DrawText(" "+*UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+bograph[i].facility+UNIT_NULL_STRING)), getAbsoluteClientRectPosition()+Point(0, 4+(i+1)*(FONT_SIZE+10)));
+}
+
+void BoGraphWindow::assignAnarace(ANABUILDORDER* bograph_anarace) {
+	anarace = bograph_anarace;
 }
 
 

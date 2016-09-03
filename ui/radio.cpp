@@ -3,47 +3,85 @@
 UI_Radio& UI_Radio::operator=(const UI_Radio& object)
 {
 	((UI_Group)(*this)) = ((UI_Group)object);
-	markedItem = object.markedItem;
-	changed = object.changed;
+	setButtonHasChanged(object.changed);
 	alwaysOn = object.alwaysOn;
+	for(unsigned int i = 50;i--;) buttonId[i]=object.buttonId[i];
 	return(*this);
 }
 
 UI_Radio::UI_Radio(const UI_Radio& object):
 	UI_Group((UI_Group)object),
-	markedItem(object.markedItem),
 	changed(object.changed),
 	alwaysOn(object.alwaysOn)
-{ }
+{
+	for(unsigned int i = 50;i--;) buttonId[i]=object.buttonId[i];
+}
 
 UI_Radio::UI_Radio(UI_Object* radio_parent, Point position, const bool always_on, const eString radio_title) :
 	UI_Group(radio_parent, position, radio_title),
-	markedItem(0),
 	changed(false),
 	alwaysOn(always_on)
-{ }
+{ 
+	for(unsigned int i = 50;i--;) buttonId[i]=NULL;
+}
 
 UI_Radio::~UI_Radio()
 { }
 
-void UI_Radio::addButton(UI_Button* button)
+void UI_Radio::addButton(UI_Button* button, const unsigned int id)
 {
-	if(!button)
-		return;
+#ifdef _SCC_DEBUG
+	if((!button)||(buttonId[id]!=NULL)) {
+                toLog("DEBUG: (UI_Radio::addButton): Variable button not initialized.");return;
+        }
+#endif
 	button->setParent(this);
-	button->radio=this;
+	button->radio = this;
+	buttonId[id] = button;
+}
+
+void UI_Radio::removeButton(const unsigned int button_id)
+{
+#ifdef _SCC_DEBUG
+	if((button_id>=50)||(buttonId[button_id]==NULL)) {
+                toLog("DEBUG: (UI_Radio::removeButton): Value button_id out of range.");return;
+        }
+#endif
+	buttonId[button_id]->setParent(NULL);
+	buttonId[button_id]->radio = NULL;
+	buttonId[button_id] = NULL;
+}
+
+void UI_Radio::updateIds()
+{
+	for(unsigned int i = 0; i < 50;i++)
+	{
+		while((i<50)&&(buttonId[i]!=NULL)) i++;
+		if(i<50)
+		{
+			for(int j = i;j<9;j++)
+				buttonId[j] = buttonId[j+1];
+			buttonId[9] = NULL;
+			return;
+		}
+	}
 }
 
 void UI_Radio::draw(DC* dc) const
 {
-//	if(!isShown())
-//		return;
+	if(!isShown())
+		return;
 	UI_Group::draw(dc);
 }
 
-const bool UI_Radio::hasChanged() const
+const bool UI_Radio::buttonHasChanged() const
 {
 	return(changed);
+}
+
+void UI_Radio::setButtonHasChanged(const bool has_changed)
+{
+	changed = has_changed;
 }
 
 void UI_Radio::forceUnpressAll()
@@ -57,66 +95,40 @@ void UI_Radio::forceUnpressAll()
 	} while(tmp!=getChildren());
 }
 
-void UI_Radio::forcePress(const unsigned int button)
+void UI_Radio::forcePress(const unsigned int button_id)
 {
 	UI_Button* tmp=(UI_Button*)getChildren();
-	if(!tmp) 
-		return;
-	changed = true;
+#ifdef _SCC_DEBUG
+        if(!buttonId[button_id]) {
+                toLog("DEBUG: (UI_Radio::forcePress): Variable buttonId not initialized.");return;
+        }
+#endif
+	setButtonHasChanged();
 	forceUnpressAll();
-	
-	unsigned int i=1;
-	do
-	{
-		if(i==button)
-		{
-			tmp->forcePress();
-/*			UI_Button* tmp2=(UI_Button*)getChildren();
-			do
-			{
-				if(tmp2!=tmp)
-					tmp2->forceUnpress();
-				tmp2=(UI_Button*)tmp->getNextBrother();
-			} while(tmp2!=getChildren());*/
-			return;
-		}
-		i++;
-		tmp=(UI_Button*)tmp->getNextBrother();
-	} while(tmp!=getChildren());
+	buttonId[button_id]->forcePress();
 }
 
 const unsigned int UI_Radio::getMarked()
 {
-	changed = false;
-	unsigned int i=markedItem;
-	markedItem=0;
-	return(i);
-/*	UI_Button* tmp=(UI_Button*)getChildren();
-	changed=false;
-	if(!tmp) return(0);
-	int i=0;
-	do
-	{
-		if(tmp->isCurrentlyPressed())
+	setButtonHasChanged(false);
+	for(unsigned int i = 50;i--;)
+		if((buttonId[i])&&(buttonId[i]->isLeftClicked()))
 			return(i);
-		i++;
-		tmp=(UI_Button*)tmp->getNextBrother();
-	} while(tmp!=getChildren());
-	return(99);*/
+#ifdef _SCC_DEBUG
+	toLog("DEBUG: (UI_Radio::getMarked): was changed but no button is pressed!");
+#endif
+	return(0);
 }
 
-
-
-void UI_Radio::leftButtonPressed(UI_Button* button)
+void UI_Radio::leftButtonPressed(UI_Button* button) // Unpress all except one
 {
-	changed=true;
+	setButtonHasChanged();
 	unsigned int i=0;
 	UI_Button* tmp = (UI_Button*)getChildren();
 	do
 	{
 		if(tmp!=button)
 			tmp->forceUnpress();
-		else markedItem=i;
 		i++;
 		tmp=(UI_Button*)tmp->getNextBrother();
 	} while(tmp!=(UI_Button*)getChildren());
@@ -124,16 +136,12 @@ void UI_Radio::leftButtonPressed(UI_Button* button)
 
 void UI_Radio::leftButtonReleased(UI_Button* button) // allow release?
 {
-	changed=true;
-	unsigned int i=0;
-	UI_Button* tmp = (UI_Button*)getChildren();
-	do
-	{
-		if(tmp==button)
-			markedItem=i;
-		i++;
-		tmp=(UI_Button*)tmp->getNextBrother();
-	} while(tmp!=(UI_Button*)getChildren());
+	setButtonHasChanged();
+//	UI_Button* tmp = (UI_Button*)getChildren();
+//	do
+//	{
+//		tmp=(UI_Button*)tmp->getNextBrother();
+//	} while(tmp!=(UI_Button*)getChildren());
 	
 	// allow it. :|
 }
@@ -149,7 +157,7 @@ void UI_Radio::process()
 	UI_Button* tmp = (UI_Button*)getChildren();
 	do
 	{
-		if(tmp->isCurrentlyPressed())
+		if(tmp->isCurrentlyActivated())//Pressed())
 			lastPressed = tmp;
 		tmp=(UI_Button*)tmp->getNextBrother();
 	} while(tmp!=(UI_Button*)getChildren());
@@ -162,7 +170,7 @@ void UI_Radio::process()
 		tmp=(UI_Button*)getChildren();
 		do
 		{
-			if(tmp->isCurrentlyPressed())
+			if(tmp->isCurrentlyActivated())//Pressed())
 				allUnpressed=false;
 			tmp=(UI_Button*)tmp->getNextBrother();
 		} while(tmp!=(UI_Button*)getChildren());
@@ -170,7 +178,7 @@ void UI_Radio::process()
 		if(allUnpressed)
 		{
 			lastPressed->forcePress();
-			changed=true;
+			setButtonHasChanged();
 		}
 	}
 /*
@@ -196,7 +204,7 @@ void UI_Radio::process()
 	{
 		if(tmp->isCurrentlyActivated()&&(!old[i]))
 		{
-			changed=true;
+			setButtonHasChanged();
 			UI_Button* tmp2=(UI_Button*)getChildren();
 			int j=0;
 			do

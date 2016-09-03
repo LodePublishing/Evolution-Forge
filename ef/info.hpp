@@ -11,7 +11,7 @@ class InfoWindow : public UI_Window
 	public:
 		InfoWindow& operator=(const InfoWindow& object);
 		InfoWindow(const InfoWindow& object);
-		InfoWindow(UI_Object* parent, ANABUILDORDER* anarace, const unsigned int windowNumber);
+		InfoWindow(UI_Object* parent, ANABUILDORDER* anarace);
 		~InfoWindow();
 		void resetData();
 		void process();

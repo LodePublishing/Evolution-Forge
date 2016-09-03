@@ -123,9 +123,9 @@ void DATABASE::loadGoalFile(const std::string& goalFile)
 				eRace race=TERRA;
 				i->second.pop_front();
 				std::string estr=i->second.front();
-				if(i->second.front()=="Terra") race=TERRA;
-				else if(i->second.front()=="Protoss") race=PROTOSS;
-				else if(i->second.front()=="Zerg") race=ZERG;
+				if(i->second.front()==*UI_Object::theme.lookUpString(TERRA_STRING)) race=TERRA;
+				else if(i->second.front()==*UI_Object::theme.lookUpString(PROTOSS_STRING)) race=PROTOSS;
+				else if(i->second.front()==*UI_Object::theme.lookUpString(ZERG_STRING)) race=ZERG;
 #ifdef _SCC_DEBUG
 				else {
 					toLog("ERROR: (loadSettingsFile): Wrong race entry.");return;
@@ -156,6 +156,9 @@ void DATABASE::loadGoalFile(const std::string& goalFile)
 
 void DATABASE::loadHarvestFile(const std::string& harvestFile)
 {
+	if((harvestFile.compare(harvestFile.size()-4, harvestFile.size(), ".hvt")==1))
+		return;
+
 	std::ifstream pFile(harvestFile.c_str());
 	if(!pFile.is_open())
 	{
@@ -246,6 +249,9 @@ void DATABASE::loadHarvestFile(const std::string& harvestFile)
 
 void DATABASE::loadMapFile(const std::string& mapFile)
 {
+	if((mapFile.compare(mapFile.size()-4, mapFile.size(), ".map")==1))
+		return;
+
 	std::ifstream pFile(mapFile.c_str());
 	if(!pFile.is_open())
 	{
@@ -351,6 +357,9 @@ void DATABASE::loadMapFile(const std::string& mapFile)
 
 void DATABASE::loadStartConditionFile(const std::string& startconditionFile)
 {
+	if((startconditionFile.compare(startconditionFile.size()-6, startconditionFile.size(), ".start")==1))
+		return;
+
 	std::ifstream pFile(startconditionFile.c_str());
 	if(!pFile.is_open())
 	{
@@ -384,9 +393,9 @@ void DATABASE::loadStartConditionFile(const std::string& startconditionFile)
 				return;
 			}
 
-			if(*j=="Terra") race=TERRA;
-			else if(*j=="Protoss") race=PROTOSS;
-			else if(*j=="Zerg") race=ZERG;
+			if(*j==*UI_Object::theme.lookUpString(TERRA_STRING)) race=TERRA;
+			else if(*j==*UI_Object::theme.lookUpString(PROTOSS_STRING)) race=PROTOSS;
+			else if(*j==*UI_Object::theme.lookUpString(ZERG_STRING)) race=ZERG;
 
 			std::map<std::string, std::list<std::string> > block;
 			parse_block(pFile, block);

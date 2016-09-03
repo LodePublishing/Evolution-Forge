@@ -2,9 +2,10 @@
 #include "configuration.hpp"
 
 
-UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect) :
+UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const Size distance_bottom_right) :
 	startRect(relative_rect),
 	targetRect(relative_rect),
+	distanceBottomRight(distance_bottom_right),
 
 	filledHeight(relative_rect.GetHeight()),
 //	notDrawRectList(),
@@ -13,6 +14,7 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect) :
 	children(NULL),
 	background(NULL),
 	oldRect(),
+	updateRelativePositions(false),
 
 	shown(true),
 	disabledFlag(false),
@@ -48,12 +50,15 @@ UI_Object& UI_Object::operator=(const UI_Object& object)
 {
 	startRect = object.startRect;
 	targetRect = object.targetRect;
+	distanceBottomRight = object.distanceBottomRight;
+		
 	firstItemY = object.firstItemY;
 	lastItemY = object.lastItemY;
 	filledHeight = object.filledHeight;
 	children = object.children;
 	background = object.background;
 	oldRect = object.oldRect;
+	updateRelativePositions = false;
 //	notDrawRectList = object.notDrawRectList,
 	shown = object.shown;
 	disabledFlag = object.disabledFlag;
@@ -84,6 +89,8 @@ UI_Object& UI_Object::operator=(const UI_Object& object)
 UI_Object::UI_Object(const UI_Object& object) :
 	startRect( object.startRect ),
 	targetRect( object.targetRect ),
+	distanceBottomRight( object.distanceBottomRight ),
+	
 	filledHeight( object.filledHeight ),
 //	notDrawRectList( object.notDrawRectList ),
 	firstItemY( object.firstItemY ), 
@@ -91,6 +98,7 @@ UI_Object::UI_Object(const UI_Object& object) :
 	children( object.children ),
 	background( object.background ),
 	oldRect( object.oldRect),
+	updateRelativePositions( false ),
 
 	shown( object.shown ), 
 	disabledFlag( object.disabledFlag ),
@@ -320,6 +328,10 @@ void UI_Object::process()
 		doAdjustments=2;
 	}
 
+	if(relativeRect.getSize() != targetRect.getSize())
+		updateRelativePositions=true;
+	else updateRelativePositions=false;
+
 	if(uiConfiguration.isSmoothMovements())
 	{
 		if(relativeRect.moveSmooth(startRect, targetRect))
@@ -458,8 +470,12 @@ void UI_Object::draw(DC* dc) const
 		SDL_BlitSurface(dc->GetSurface(), &temp, background, NULL); // save new background
 	}*/
 
-//	if(checkForNeedRedraw())
-//		dc->DrawEmptyRectangle(getAbsoluteRect().GetTopLeft() + Size(rand()%3, rand()%3), getSize());
+//	if(getParent())
+//	{
+//	dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+//	dc->DrawEmptyRectangle(getParent()->getAbsolutePosition() + targetRect.GetTopLeft(), targetRect.GetSize());
+//	dc->DrawEmptyRectangle(getParent()->getAbsolutePosition() + startRect.GetTopLeft(), startRect.GetSize());
+//	}
 
 	UI_Object* tmp = children;
 	
@@ -543,7 +559,6 @@ void UI_Object::setTop(const signed int y)
 }
 	
 
-
 /*const Point UI_Object::getAbsolutePosition() const	
 {
 	if(parent)
@@ -565,7 +580,7 @@ void UI_Object::Show(const bool show)
 	{
 		shown = true;
 		setNeedRedrawMoved(true);
-		process();
+		process(); //?
 	} 
 	else if((!show)&&(shown))
 	{
@@ -621,6 +636,10 @@ void UI_Object::setNeedRedrawNotMoved(const bool need_redraw)
         }
 }
 
+const bool UI_Object::isUpdateRelativePositions() const
+{
+	return(updateRelativePositions());
+}
 
 void UI_Object::clearRedrawFlag()
 {
@@ -644,6 +663,7 @@ const bool UI_Object::checkForNeedRedraw() const
 	if(needRedraw)
 	{
 		redrawnObjects++;
+//		const_cast< UI_Object* > (this)->needRedraw=false;
 		return(true);
 	} else return(false);
 }

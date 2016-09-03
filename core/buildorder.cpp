@@ -217,6 +217,24 @@ const bool BUILDORDER::calculateStep()
 // if the larva was built reduce the number of larvas in the queue
 			if((build.getType()==LARVA)&&(getRace()==ZERG)) {
 				removeLarvaFromQueue(build.getLocation());
+
+                                if(// Gesamtzahl der Larven < 3 * HATCHERY?
+                   ((getLocationTotal(build.getLocation(), HATCHERY)+
+                         getLocationTotal(build.getLocation(), LAIR)+
+                         getLocationTotal(build.getLocation(), HIVE)) *3 >
+                         (larvaInProduction[build.getLocation()]+getLocationTotal(build.getLocation(), LARVA)))  &&
+// max 1 larva pro Gebaeude produzieren
+                   ((getLocationTotal(build.getLocation(), HATCHERY)+
+                         getLocationTotal(build.getLocation(), LAIR)+
+                         getLocationTotal(build.getLocation(), HIVE) >
+                          larvaInProduction[build.getLocation()]))) // => zuwenig Larven da!
+                        {
+                                addLarvaToQueue(build.getLocation());
+                                if(!buildIt(LARVA));
+//                                      removeLarvaFromQueue(build.getLocation());
+                        }
+
+				
 			}
 // ------ END SPECIAL RULES ------
 

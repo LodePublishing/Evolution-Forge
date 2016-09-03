@@ -8,6 +8,7 @@
 #include "brush.hpp"
 #include "font.hpp"
 #include <string>
+#include <list>
 
 #define SDL_DRAW_BPP 4
 
@@ -126,6 +127,9 @@ class DC
 		void setResolution(const unsigned int max_x, const unsigned int max_y);
 		static SDL_Color toSDL_Color(const Uint8 r, const Uint8 g, const Uint8 b);
 //		void printInformation() const;
+		static std::string printHardwareInformation();
+		static std::string printSurfaceInformation(DC* surface);
+		static std::list<std::string> getAvailibleDrivers();
 		
 	protected:
 		SDL_Surface* surface;

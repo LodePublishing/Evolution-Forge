@@ -33,33 +33,33 @@
 	@END
 @END
 
-@WINDOWS
+@MAIN
 	@800x600
-		NULL window, absolute coordinates, 0, 0, 0, 0
-		Main window, absolute coordinates, 0, 0, 800, 600
-		Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
-		Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
-		Settings window, dock center inside of, Main window, 425, 368
-		Info window, dock with left border of, Build order window, dock top inside of, Main window, 250, 150
-		Edit field window, dock center inside of, Main window, 300, 100
+		Main window, 800, 600, 600, absolute coordinates, 0, 0
+		Message window, 400, 75, 75, dock bottom center inside of, Main window
+		Tutorial window, 500, 500, 500, dock center inside of, Main window
+		Settings window, 425, 368, 368, dock center inside of, Main window
+		Info window, 250, 150, 150, dock center inside of, Main window
+		Tech tree window, 500, 500, 500, dock center inside of, Main window
+		Edit field window, 300, 150, 150, dock center inside of, Main window
 	@END
 	@1024x768
-		NULL window, absolute coordinates, 0, 0, 0, 0
-		Main window, absolute coordinates, 0, 0, 1024, 768
-		Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
-		Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
-		Settings window, dock center inside of, Main window, 425, 368
-		Info window, dock with left border of, Build order window, dock top inside of, Main window, 250, 150
-		Edit field window, dock center inside of, Main window, 300, 100
+		Main window, 1024, 768, 768, Main window, absolute coordinates, 0, 0
+		Message window, 400, 75, 75, dock bottom center inside of, Main window
+		Tutorial window, 500, 500, 500, dock center inside of, Main window
+		Settings window, 425, 368, 368, dock center inside of, Main window
+		Info window, 250, 150, 150, dock center inside of, Main window
+		Tech tree window, 500, 500, 500, dock center inside of, Main window
+		Edit field window, 300, 150, 150, dock center inside of, Main window
 	@END
 	@1280x1024
-		NULL window, absolute coordinates, 0, 0, 0, 0
-		Main window, absolute coordinates, 0, 0, 1280, 1024
-		Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
-		Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
-		Settings window, dock center inside of, Main window, 425, 368
-		Info window, dock with left border of, Build order window, dock top inside of, Main window, 250, 150
-		Edit field window, dock center inside of, Main window, 300, 100
+		Main window, 1280, 1000, 1000, Main window, absolute coordinates, 0, 0
+		Message window, 400, 75, 75, absolute coordinates, 440, 60
+		Tutorial window, 500, 500, 500, dock center inside of, Main window
+		Settings window, 425, 368, 368, dock center inside of, Main window
+		Info window, 250, 150, 150, dock center inside of, Main window
+		Tech tree window, 500, 500, 500, dock bottom center inside of, Main window
+		Edit field window, 300, 150, 150, dock center inside of, Main window
 	@END
 @END
 
@@ -243,7 +243,6 @@
 @END
 
 @PENS
-	@1024x768
 		@DARK_RED_THEME
 # null pen
 			1,   0,   0,   0, TRANSPARENT
@@ -548,8 +547,6 @@
 # disabled border pen
 			1, 105, 105, 100, SOLID
 		@END
-			
-	@END
 @END
 
 @BRUSHES
@@ -758,7 +755,142 @@
 @END
 
 @BITMAPS
+	@800x600
+		@DARK_RED_THEME
+			null
+			add
+			sub
+			cancel
+			arrow_left
+			arrow_right
+			arrow_up
+			arrow_down
+			location_button
+			time_button
+			mouse
+			mouse1
+			mouse2
+			mouse3
+			red_radio_off
+			red_radio_on
+			back
+			bar
+			key
+		@END
+
+		@DARK_BLUE_THEME
+			null
+			add
+			sub
+			cancel
+			arrow_left
+			arrow_right
+			arrow_up
+			arrow_down
+			location_button
+			time_button
+			mouse
+			mouse1
+			mouse2
+			mouse3
+			blue_radio_off
+			blue_radio_on
+			back
+			bar
+			key
+		@END
+		@YELLOW_THEME
+			null
+			add
+			sub
+			cancel
+			arrow_left
+			arrow_right
+			arrow_up
+			arrow_down
+			location_button
+			time_button
+			mouse
+			mouse1
+			mouse2
+			mouse3
+			yellow_radio_off
+			yellow_radio_on
+			back
+			bar
+			key
+		@END
+
+	@END
+
 	@1024x768
+		@DARK_RED_THEME
+			null
+			add
+			sub
+			cancel
+			arrow_left
+			arrow_right
+			arrow_up
+			arrow_down
+			location_button
+			time_button
+			mouse
+			mouse1
+			mouse2
+			mouse3
+			red_radio_off
+			red_radio_on
+			back
+			bar
+			key
+		@END
+
+		@DARK_BLUE_THEME
+			null
+			add
+			sub
+			cancel
+			arrow_left
+			arrow_right
+			arrow_up
+			arrow_down
+			location_button
+			time_button
+			mouse
+			mouse1
+			mouse2
+			mouse3
+			blue_radio_off
+			blue_radio_on
+			back
+			bar
+			key
+		@END
+		@YELLOW_THEME
+			null
+			add
+			sub
+			cancel
+			arrow_left
+			arrow_right
+			arrow_up
+			arrow_down
+			location_button
+			time_button
+			mouse
+			mouse1
+			mouse2
+			mouse3
+			yellow_radio_off
+			yellow_radio_on
+			back
+			bar
+			key
+		@END
+
+	@END
+	@1280x1024
 		@DARK_RED_THEME
 			null
 			add

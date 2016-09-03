@@ -28,7 +28,8 @@ ANABUILDORDER::ANABUILDORDER():
 	unitsTotal(4),
 	unitsTotalMax(4),
 	nonGoalsUnitsTotalMax(4),
-	active(true),
+	optimizing(false),
+	active(false),
 	maxpFitness(0),
 	maxsFitness(0),
 	maxtFitness(MAX_TFITNESS),
@@ -47,7 +48,8 @@ void ANABUILDORDER::resetData()
 	unitsTotal = 4;
 	unitsTotalMax = 4;
 	nonGoalsUnitsTotalMax = 4;
-	active = true;
+	optimizing = false;
+	active = false;
 	maxpFitness = 0;
 	maxsFitness = 0;
 	maxtFitness = MAX_TFITNESS;
@@ -77,7 +79,8 @@ ANABUILDORDER::ANABUILDORDER(const ANABUILDORDER& object) :
 	unitsTotal( object.unitsTotal ),
 	unitsTotalMax( object.unitsTotalMax ),
 	nonGoalsUnitsTotalMax( object.nonGoalsUnitsTotalMax ),
-	active( object.active ),
+	optimizing( object.optimizing ),
+	active( object.active ), 
 	maxpFitness( object.maxpFitness ),
 	maxsFitness( object.maxsFitness ),
 	maxtFitness( object.maxtFitness ),
@@ -100,6 +103,7 @@ ANABUILDORDER& ANABUILDORDER::operator=(const ANABUILDORDER& object)
 	unitsTotal = object.unitsTotal;
 	unitsTotalMax = object.unitsTotalMax;
 	nonGoalsUnitsTotalMax = object.nonGoalsUnitsTotalMax;
+	optimizing = object.optimizing;
 	active = object.active;
 	maxpFitness = object.maxpFitness;
 	maxsFitness = object.maxsFitness;
@@ -311,6 +315,22 @@ const bool ANABUILDORDER::calculateStep()
 // BUILDORDER SPECIFIC!
 			if((build.getType() == LARVA) && (getGoal()->getRace() == ZERG)) {
 				removeLarvaFromQueue(build.getLocation());
+                                if(// Gesamtzahl der Larven < 3 * HATCHERY?
+                   ((getLocationTotal(build.getLocation(), HATCHERY)+
+                         getLocationTotal(build.getLocation(), LAIR)+
+                         getLocationTotal(build.getLocation(), HIVE)) *3 >
+                         (larvaInProduction[build.getLocation()]+getLocationTotal(build.getLocation(), LARVA)))  &&
+// max 1 larva pro Gebaeude produzieren
+                   ((getLocationTotal(build.getLocation(), HATCHERY)+
+                         getLocationTotal(build.getLocation(), LAIR)+
+                         getLocationTotal(build.getLocation(), HIVE) >
+                          larvaInProduction[build.getLocation()]))) // => zuwenig Larven da!
+                        {
+                                addLarvaToQueue(build.getLocation());
+                                if(!buildIt(LARVA));
+//                                      removeLarvaFromQueue(build.getLocation());
+                        }
+				
 			}
 // ------ END SPECIAL RULES ------
 

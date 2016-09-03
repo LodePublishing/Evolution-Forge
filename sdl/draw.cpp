@@ -164,7 +164,7 @@ void DC::Draw_HLine(const signed int x0, const signed int y0, const signed int x
 
 void DC::Draw_Line(signed int x1, signed int y1, signed int x2, signed int y2) const
 {
-	if(y1 == y2)
+/*	if(y1 == y2)
 	{
 		Draw_HLine(x1, y1, x2);
 		return;
@@ -173,7 +173,7 @@ void DC::Draw_Line(signed int x1, signed int y1, signed int x2, signed int y2) c
 	{
 		Draw_VLine(x1, y1, y2);
 		return;
-	}
+	}*/
 		
 	Color col = (*pen.GetColor());
 	

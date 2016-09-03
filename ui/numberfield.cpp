@@ -33,7 +33,7 @@ UI_NumberField::UI_NumberField(const UI_NumberField& object) :
 	max(object.max),
 	steps(object.steps)
 { }
-
+// TODO: ui_objects arrangen! es nur in button zu benutzen bringt wenig...
 UI_NumberField::UI_NumberField(UI_Object* numberfield_parent, const Rect rect, const unsigned int number_min, const unsigned int number_max, const unsigned int number_steps, const unsigned int num, const eString txt, const eString tool_tip, const eFieldType field_type) :
 	UI_Object(numberfield_parent, rect),
 	fieldType(field_type),

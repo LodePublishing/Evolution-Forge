@@ -11,7 +11,7 @@ class BASIC_MAP
 		unsigned int maxLocations; // constant
 		unsigned int maxPlayer; // constant ?
 		void resetData();
-		unsigned int startPosition[MAX_PLAYER];
+//		unsigned int startPosition[MAX_PLAYER];
 		MAP_LOCATION location[MAX_LOCATIONS];
 		unsigned int calculateDistance(unsigned int i, unsigned int j);
 	public:		

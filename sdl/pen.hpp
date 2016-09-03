@@ -25,6 +25,7 @@ class Pen
 		const ePenStyle GetStyle() const {return style;};
 		const int GetWidth() const {return width;};
 		const Color* GetColor() const {return &color;};
+		void SetColor(const Color pen_color);
 	private:
 		unsigned int width;
 		Color color;

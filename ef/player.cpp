@@ -10,18 +10,17 @@ Player::~Player()
 	delete boDiagramWindow;
 }
 
-Player::Player(UI_Object* player_parent, const unsigned int playerNumber) :
-	UI_Object(player_parent),
+Player::Player(UI_Object* player_parent, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_players) :
+	UI_Window(player_parent, PLAYER_WINDOW_TITLE_STRING, theme.lookUpPlayerRect(PLAYER_WINDOW, game_number, max_games, player_number, max_players), theme.lookUpPlayerMaxHeight(PLAYER_WINDOW, game_number, max_games, player_number, max_players), NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0,0,1280,1024), TRANSPARENT),
 	geneAnimation(0),
 	anarace(NULL),
-	mode(0),
-	forceWindow(new ForceWindow(this, playerNumber)),
+//	mode(0),
+	forceWindow(new ForceWindow(this, game_number, max_games, player_number, max_players)),
 //	statisticsWindow(new StatisticsWindow(this, playerNumber)),
-	boWindow(new BoWindow(this, /* fixed,*/ playerNumber)),
-	boGraphWindow(new BoGraphWindow(this, playerNumber)),
-	boDiagramWindow(new BoDiagramWindow(this, playerNumber))
+	boWindow(new BoWindow(this, /* fixed,*/ game_number, max_games, player_number, max_players)),
+	boGraphWindow(new BoGraphWindow(this, game_number, max_games, player_number, max_players)),
+	boDiagramWindow(new BoDiagramWindow(this, game_number, max_games, player_number, max_players))
 {
-	
 	Hide();
 	
 //	for(int i=MAX_LENGTH;i--;)
@@ -37,7 +36,6 @@ void Player::assignAnarace(ANABUILDORDER* player_anarace)
 	boWindow->assignAnarace(anarace);
 	boGraphWindow->assignAnarace(anarace);
 	boDiagramWindow->assignAnarace(anarace);
-	
 //	anarace->setFixed(fixed);
 }
 
@@ -45,10 +43,10 @@ void Player::reloadStrings() //TODO
 {
 	if(!isShown())
 		return;
-	UI_Object::reloadStrings(); 
+	UI_Window::reloadStrings(); 
 }
 
-void Player::drawGene(DC* dc, int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const
+void Player::drawGene(DC* dc, unsigned int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const
 {
 	if(points[0].y<points[1].y) dc->SetPen(bla1);else dc->SetPen(bla2);
 	dc->DrawSpline(k, points, position);
@@ -161,13 +159,13 @@ void Player::draw(DC* dc) const
 	if(!isShown())
 		return;
 	// TODO
-	UI_Object::draw(dc);
+	UI_Window::draw(dc);
 	if(efConfiguration.isDnaSpiral())
 		drawGeneString(dc);
-	forceWindow->drawTechTree(dc);
+//	forceWindow->drawTechTree(dc);
 }
 
-void Player::setMode(const eTab tab, const unsigned int playerNum)//, int player1, int player2)
+/*void Player::setMode(const eTab tab, const unsigned int playerNum)//, int player1, int player2)
 {
 // TODO evtl eine Zwischenklasse fuer alle Playerwindows machen
 //	mode=tab*2+playerNum-2;
@@ -220,13 +218,13 @@ void Player::setMode(const eTab tab, const unsigned int playerNum)//, int player
 	resetData();
 	setNeedRedrawMoved(); //?
 	// TODO modes der einzelnen Windows (z.B> timer oder force)
-}
+}*/
 
 void Player::process()
 {
 	if(!isShown())
 		return;
-	UI_Object::process();
+	UI_Window::process();
 // TODO!
 // ------ COMMUNICATION BETWEEN THE WINDOWS ------ TODO
 /*	if(window[FORCE_WINDOW]->isShown())
@@ -258,18 +256,19 @@ void Player::process()
 // ------ END PROCESSING MEMBER VARIABLES ------
 }
 
-void Player::updateRectangles(const unsigned int maxPlayer)
+void Player::setMode(const unsigned int game_number, const unsigned int game_max, const unsigned int player_number, const unsigned int max_player)
 {
-	forceWindow->updateRectangles(maxPlayer);
-//	statisticsWindow->updateRectangles(maxPlayer);
-	boWindow->updateRectangles(maxPlayer);
-	boGraphWindow->updateRectangles(maxPlayer);
-	boDiagramWindow->updateRectangles(maxPlayer);
+	this->updateRectangles(UI_Object::theme.lookUpPlayerRect(PLAYER_WINDOW, game_number, game_max, player_number, max_player), UI_Object::theme.lookUpPlayerMaxHeight(PLAYER_WINDOW, game_number, game_max, player_number, max_player));
+	forceWindow->updateRectangles(UI_Object::theme.lookUpPlayerRect(FORCE_WINDOW, game_number, game_max, player_number, max_player), UI_Object::theme.lookUpPlayerMaxHeight(FORCE_WINDOW, game_number, game_max, player_number, max_player));
+	boWindow->updateRectangles(UI_Object::theme.lookUpPlayerRect(BUILD_ORDER_WINDOW, game_number, game_max, player_number, max_player), UI_Object::theme.lookUpPlayerMaxHeight(BUILD_ORDER_WINDOW, game_number, game_max, player_number, max_player));
+	boGraphWindow->updateRectangles(UI_Object::theme.lookUpPlayerRect(BUILD_ORDER_GRAPH_WINDOW, game_number, game_max, player_number, max_player), UI_Object::theme.lookUpPlayerMaxHeight(BUILD_ORDER_GRAPH_WINDOW, game_number, game_max, player_number, max_player));
+	boDiagramWindow->updateRectangles(UI_Object::theme.lookUpPlayerRect(BUILD_ORDER_DIAGRAM_WINDOW, game_number, game_max, player_number, max_player), UI_Object::theme.lookUpPlayerMaxHeight(BUILD_ORDER_DIAGRAM_WINDOW, game_number, game_max, player_number, max_player));
 }
 
 void Player::resetData()
 {
 	geneAnimation=0;
+	boWindow->resetData();
 }
 
 void Player::CheckOrders()

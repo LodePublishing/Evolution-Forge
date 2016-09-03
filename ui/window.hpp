@@ -25,6 +25,20 @@ enum eIsAutoAdjust
 	AUTO_SIZE_ADJUST
 };
 
+enum eIsTransparent
+{
+	TRANSPARENT,
+	NOT_TRANSPARENT
+};
+
+
+enum eTabs
+{
+	MAP_TAB = 27,
+	SETTINGS_TAB,
+	TUTORIAL_TAB,
+	MAX_TABS
+};
 
 class UI_Window : public UI_Object
 {
@@ -32,7 +46,7 @@ class UI_Window : public UI_Object
 		UI_Window& operator=(const UI_Window& object);
 		UI_Window(const UI_Window& object);
 
-		UI_Window(UI_Object* window_parent, const eString window_title_string, const eWindow window_type, const unsigned int window_number, const eIsScrolled window_is_scrolled=NOT_SCROLLED, const eIsAutoAdjust win_is_auto_adjust=NO_AUTO_SIZE_ADJUST, const eIsTabbed win_is_tabbed=NOT_TABBED, const Rect win_client_area=Rect(0,0,1280,1024));
+		UI_Window(UI_Object* window_parent, const eString window_title_string, const Rect rect, const unsigned int max_height, const eIsScrolled window_is_scrolled=NOT_SCROLLED, const eIsAutoAdjust win_is_auto_adjust=NO_AUTO_SIZE_ADJUST, const eIsTabbed win_is_tabbed=NOT_TABBED, const Rect win_client_area=Rect(0,0,1280,1024), eIsTransparent transparent = NOT_TRANSPARENT);
 		~UI_Window();
 
 // returns position and size of the client area
@@ -53,12 +67,14 @@ class UI_Window : public UI_Object
 		const signed int getAbsoluteClientRectRightBound() const;
 
 		const unsigned int getClientTargetHeight() const;
+		const unsigned int getClientTargetWidth() const;
 		
 // do windows size changes smoothly		
 		void adjustClientRect();
 
 //		void setRahmen(Rect rahmen);
-		void addTab(UI_Button* tab_button);
+		void addTab(UI_Button* tab_button, const unsigned int button_id);
+		void removeTab(const unsigned int button_id);
 		const bool tabWasChanged() const;
 
 		void process();
@@ -68,7 +84,7 @@ class UI_Window : public UI_Object
 		UI_Object* checkHighlight();
 
 // 		reconfigure rectangles depending on current theme settings
-		void updateRectangles(const unsigned int maxPlayer);
+		void updateRectangles(const Rect rect, const unsigned int max_height);
 		
 		static const bool getChangedFlag();
 		static void setChangedFlag(const bool flag=true);
@@ -82,9 +98,8 @@ class UI_Window : public UI_Object
 
 		void updateBorders();
 
-		const eTab getCurrentTab() const;
-
-		void forcePressTab(const eTab press_tab);
+		const unsigned int getCurrentTab() const;
+		void forcePressTab(const unsigned int press_tab);
 
 		static unsigned int rectnumber;
 		const bool fitItemToRelativeClientRect(const Rect& rectangle, const unsigned int adjust = 0);
@@ -103,10 +118,9 @@ class UI_Window : public UI_Object
 		UI_Radio* tabRow;
 	private:
 		UI_Button* tab[MAX_TABS];
-		
-		eWindow window;
-		
-		eTab currentTab; // maybe move to 'theme'
+
+		eIsTransparent isTransparent;
+		unsigned int currentTab; // maybe move to 'theme'
 
 // no set/get for title as this is unique and does not change
 		eString titleString;
@@ -128,11 +142,11 @@ class UI_Window : public UI_Object
 
 		unsigned int maxHeight;
 
+		void calculateClientRect();
 		void drawTabs(DC* dc) const;
 		void drawTitle(DC* dc) const;
 		void drawToolTip(DC* dc, const Point p, const std::string* tip) const;
 
-		unsigned int windowNumber;
 		eIsAutoAdjust isAutoAdjust;
 // has this window a ScrollBar?
 		eIsScrolled isScrollable;

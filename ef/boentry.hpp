@@ -11,7 +11,7 @@ class BoEntry : public UI_Button
 	public:
 		BoEntry(const BoEntry& object);
 		BoEntry& operator=(const BoEntry& object);
-		BoEntry(UI_Object* bo_parent, Rect bo_rect, const std::string& bo_unit, const PROGRAM& bo_program);
+		BoEntry(UI_Object* bo_parent, const Point top_left, const Size distance_bottom_right, const std::string& bo_unit, const PROGRAM& bo_program);
 		~BoEntry();
 
 		const unsigned int changed();

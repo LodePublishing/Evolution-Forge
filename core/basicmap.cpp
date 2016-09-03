@@ -15,8 +15,8 @@ void BASIC_MAP::resetData()
 {
 	for(unsigned int i=MAX_LOCATIONS;i--;)
 		location[i].resetData();
-	for(unsigned int i=MAX_PLAYER;i--;)
-		startPosition[i] = 0;
+//	for(unsigned int i=MAX_PLAYER;i--;)
+//		startPosition[i] = 0;
 	name = "ERROR";
 	maxLocations = 0;
 	maxPlayer = 0;

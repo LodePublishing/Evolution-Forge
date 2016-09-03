@@ -349,19 +349,22 @@
 		The core of Evolution Forge
 		Evolution forge tutorial
 		Order description player %s
+		Techtree
 		Graphical build order %s
 		Overview %s
 		Statistics %s
 		Scores
 		Unit list %s
 		Build order %s
-
+		Game
+		Player		
 # messages
 		Welcome to Evolution Forge!
 		Click above to add new goals.
 		%i players loaded...
 		Added %s as goal.
 		Set %s as goal list.
+		Set %s as map. 
 		Set %s as race.
 		Added one %s to the goal list.
 		Removed one %s from the goal list.
@@ -397,6 +400,7 @@
 		goal list...
 		start force...
 		race...
+		map...
 
 		save goal...
 		Save Goals as
@@ -429,6 +433,7 @@
 		Total: %i
 		Click to continue
 		Click to pause
+		Add player
 # statistics window
 		total harvested Minerals : %i
 		total harvested Gas : %i
@@ -484,6 +489,7 @@
 
 		Continue the optimization
 		Pause the optimization
+
 		
 		Percent of all goals / Percent of theoretical (without minerals/gas) optimum
 

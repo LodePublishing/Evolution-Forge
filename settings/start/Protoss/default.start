@@ -1,0 +1,19 @@
+# default settings for tvb
+# no locations -> all are relative to the start location specified in the map
+
+# --- Races ---
+
+@STARTCONDITIONS "Protoss"
+	"Name" = "Default Protoss start"
+	"Minerals" = "50"
+	"Gas" = "0"
+	"Time" = "0"
+	"Max Locations" = "4"
+@END
+
+# location forces... 2 = LOCATION MAIN
+@LOCATION "2"
+	"Nexus" = "1"
+	"Probe" = "4"
+@END
+

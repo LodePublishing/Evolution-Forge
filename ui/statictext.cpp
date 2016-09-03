@@ -549,9 +549,10 @@ void UI_StaticText::updateText(const eString st_text)
 {
 	if(st_text==eText)
 		return; //?
+	text = *theme.lookUpString(st_text);
 	calculatePosition();
-	eText = st_text;
 	updateText(*theme.lookUpString(st_text));
+	eText = st_text;
 	textMode = false;
 }
 

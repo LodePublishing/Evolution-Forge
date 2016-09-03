@@ -62,7 +62,7 @@ class PREBUILDORDER
 	protected:
 
 //------------------ optimizations:-----------------
-		UNIT (*location)[MAX_LOCATIONS]; // non-static pointer to players total/availible units (unit[playerNum])
+//		UNIT (*location)[MAX_LOCATIONS]; // non-static pointer to players total/availible units (unit[playerNum])
 
 		const START_CONDITION* const* pStartCondition; //pointer to player in start
 
@@ -74,7 +74,7 @@ class PREBUILDORDER
 
 // global best time so far
 //		static signed int noise[MAX_TIME];
-		UNIT (*unit)[MAX_PLAYER][MAX_LOCATIONS]; // player 0 is neutral player!
+		UNIT (*unit)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]; // player 0 is neutral player!
 //		LAST last[MAX_LENGTH]; // last* is to save the last position, for movements
 //		unsigned int lastcounter;
 //		unsigned int lastunit;
@@ -123,7 +123,7 @@ class PREBUILDORDER
 
 	public:
 		void assignStart(START* start);
-		void assignUnits(UNIT (*units)[MAX_PLAYER][MAX_LOCATIONS]);
+		void assignUnits(UNIT (*units)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]);
 
                 void setStartPosition(const unsigned int startPosition);
                 void setRace(const eRace race); // => gleichzeitig wird harvestspeed geaendert und condition und goal muessen u.U. neugewaehlt werden!
@@ -275,7 +275,8 @@ inline const unsigned int PREBUILDORDER::getLocationTotal(const unsigned int loc
 		toLog("DEBUG: (PREBUILDORDER::getLocationTotal): Value location_number out of range.");return(0);
 	}
 #endif
-	return((*location)[location_number].getTotal(unit_type));
+	return((*unit)[playerNum][location_number].getTotal(unit_type));
+//	return((*location)[location_number].getTotal(unit_type));
 }
 
 /*inline void PREBUILDORDER::setMarker(const unsigned int ip, const unsigned int value)
@@ -450,7 +451,8 @@ inline const unsigned int PREBUILDORDER::getLocationAvailible(const unsigned int
 		toLog("DEBUG: (PREBUILDORDER::getLocationAvailible): Value location_number out of range.");return(0);
 	}
 #endif
-	return((*location)[location_number].getAvailible(unit_type));
+//	return((*location)[location_number].getAvailible(unit_type));
+	return((*unit)[playerNum][location_number].getAvailible(unit_type));
 }
 
 inline void PREBUILDORDER::setLocationAvailible(const unsigned int location_number, const unsigned int unit_type, const unsigned int availible)
@@ -460,7 +462,8 @@ inline void PREBUILDORDER::setLocationAvailible(const unsigned int location_numb
 		toLog("DEBUG: (PREBUILDORDER::setLocationAvailible): Value location_number out of range.");return;
 	}
 #endif
-	(*location)[location_number].setAvailible(unit_type, availible);
+//	(*location)[location_number].setAvailible(unit_type, availible);
+	(*unit)[playerNum][location_number].setAvailible(unit_type, availible);
 }
 
 inline void PREBUILDORDER::setLocationTotal(const unsigned int location_number, const unsigned int unit_type, const unsigned int total)
@@ -470,7 +473,8 @@ inline void PREBUILDORDER::setLocationTotal(const unsigned int location_number, 
 		toLog("DEBUG: (PREBUILDORDER::setLocationTotal): Value location_number out of range.");return;
 	}
 #endif
-	(*location)[location_number].setTotal(unit_type, total);
+//	(*location)[location_number].setTotal(unit_type, total);
+	(*unit)[playerNum][location_number].setTotal(unit_type, total);
 }
 
 inline void PREBUILDORDER::addLocationAvailible(const unsigned int location_number, const unsigned int unit_type, const unsigned int availible)
@@ -480,9 +484,13 @@ inline void PREBUILDORDER::addLocationAvailible(const unsigned int location_numb
 		toLog("DEBUG: (PREBUILDORDER::addLocationAvailible): Value location_number out of range.");return;
 	}
 #endif	
-	(*location)[location_number].addAvailible(unit_type, availible);
+	(*unit)[playerNum][location_number].addAvailible(unit_type, availible);
 	if(location_number!=GLOBAL) //sonst waers ja doppelt...
-		(*location)[GLOBAL].addAvailible(unit_type, availible);
+		(*unit)[playerNum][GLOBAL].addAvailible(unit_type, availible);
+
+//	(*location)[location_number].addAvailible(unit_type, availible);
+//	if(location_number!=GLOBAL) //sonst waers ja doppelt...
+//		(*location)[GLOBAL].addAvailible(unit_type, availible);
 }
 
 inline void PREBUILDORDER::addLocationTotal(const unsigned int location_number, const unsigned int unit_type, const unsigned int total)
@@ -492,9 +500,13 @@ inline void PREBUILDORDER::addLocationTotal(const unsigned int location_number, 
 		toLog("DEBUG: (PREBUILDORDER::addLocationTotal): Value location_number out of range.");return;
 	}
 #endif
-	(*location)[location_number].addTotal( unit_type, total );
+	(*unit)[playerNum][location_number].addTotal( unit_type, total );
 	if(location_number!=GLOBAL) // sonst waers ja doppelt wenn location = 0
-		(*location)[GLOBAL].addTotal(unit_type, total);
+		(*unit)[playerNum][GLOBAL].addTotal(unit_type, total);
+
+//	(*location)[location_number].addTotal( unit_type, total );
+//	if(location_number!=GLOBAL) // sonst waers ja doppelt wenn location = 0
+//		(*location)[GLOBAL].addTotal(unit_type, total);
 }
 
 inline void PREBUILDORDER::addOneLocationAvailible(const unsigned int location_number, const unsigned int unit_type)
@@ -504,10 +516,15 @@ inline void PREBUILDORDER::addOneLocationAvailible(const unsigned int location_n
 		toLog("DEBUG: (PREBUILDORDER::addLocationAvailible): Value location_number out of range.");return;
 	}
 #endif
-	(*location)[location_number].addOneAvailible( unit_type );
+	(*unit)[playerNum][location_number].addOneAvailible( unit_type );
 // also add one unit to the global location if global location was not already specified
 	if(location_number!=GLOBAL) 
-		(*location)[GLOBAL].addOneAvailible( unit_type );
+		(*unit)[playerNum][GLOBAL].addOneAvailible( unit_type );
+
+//	(*location)[location_number].addOneAvailible( unit_type );
+// also add one unit to the global location if global location was not already specified
+//	if(location_number!=GLOBAL) 
+//		(*location)[GLOBAL].addOneAvailible( unit_type );
 }
 
 inline void PREBUILDORDER::addOneLocationTotal(const unsigned int location_number, const unsigned int unit_type)
@@ -517,9 +534,13 @@ inline void PREBUILDORDER::addOneLocationTotal(const unsigned int location_numbe
 		toLog("DEBUG: (PREBUILDORDER::addLocationTotal): Value location_number out of range.");return;
 	}
 #endif
-	(*location)[location_number].addOneTotal( unit_type );
+	(*unit)[playerNum][location_number].addOneTotal( unit_type );
 	if(location_number!=GLOBAL) // sonst waers ja doppelt wenn location = 0
-		(*location)[GLOBAL].addOneTotal( unit_type );
+		(*unit)[playerNum][GLOBAL].addOneTotal( unit_type );
+
+//	(*location)[location_number].addOneTotal( unit_type );
+//	if(location_number!=GLOBAL) // sonst waers ja doppelt wenn location = 0
+//		(*location)[GLOBAL].addOneTotal( unit_type );
 }
 
 inline void PREBUILDORDER::removeOneLocationAvailible(const unsigned int location_number, const unsigned int unit_type)
@@ -529,10 +550,15 @@ inline void PREBUILDORDER::removeOneLocationAvailible(const unsigned int locatio
 		toLog("DEBUG: (PREBUILDORDER::removeOneLocationAvailible): Value location_number out of range.");return;
 	}
 #endif
-	(*location)[location_number].removeOneAvailible( unit_type );
+	(*unit)[playerNum][location_number].removeOneAvailible( unit_type );
 // also add one unit to the global location if global location was not already specified
 	if(location_number!=GLOBAL)
-		(*location)[GLOBAL].removeOneAvailible( unit_type );
+		(*unit)[playerNum][GLOBAL].removeOneAvailible( unit_type );
+
+//	(*location)[location_number].removeOneAvailible( unit_type );
+// also add one unit to the global location if global location was not already specified
+//	if(location_number!=GLOBAL)
+//		(*location)[GLOBAL].removeOneAvailible( unit_type );
 }
 
 inline void PREBUILDORDER::removeOneLocationTotal(const unsigned int location_number, const unsigned int unit_type)
@@ -542,9 +568,13 @@ inline void PREBUILDORDER::removeOneLocationTotal(const unsigned int location_nu
 		toLog("DEBUG: (PREBUILDORDER::removeOneLocationTotal): Value location_number out of range.");return;
 	}
 #endif
-	(*location)[location_number].removeOneTotal( unit_type );
+	(*unit)[playerNum][location_number].removeOneTotal( unit_type );
 	if(location_number!=GLOBAL) 
-		(*location)[GLOBAL].removeOneTotal( unit_type );
+		(*unit)[playerNum][GLOBAL].removeOneTotal( unit_type );
+
+//	(*location)[location_number].removeOneTotal( unit_type );
+//	if(location_number!=GLOBAL) 
+//		(*location)[GLOBAL].removeOneTotal( unit_type );
 }
 // ------ END UNITS -----
 
@@ -792,7 +822,7 @@ inline void PREBUILDORDER::setGoal(GOAL_ENTRY* current_goal)
 inline const unsigned int PREBUILDORDER::getPlayerNumber() const
 {
 #ifdef _SCC_DEBUG
-	if(playerNum >= MAX_PLAYER) {
+	if(playerNum > MAX_PLAYER) {
 		toLog("DEBUG: (PREBUILDORDER::getPlayerNumber): Variable not initialized.");return(0);
 	}
 #endif
@@ -839,11 +869,11 @@ inline const unsigned int PREBUILDORDER::getRealTimer() const
 
 inline void PREBUILDORDER::setpStats(const UNIT_STATISTICS* const* player_stats)
 {
-#ifdef _SCC_DEBUG
+/*#ifdef _SCC_DEBUG
 	if((*player_stats)[0].minerals!=0) { // TODO
 		toLog("DEBUG: (PREBUILDORDER::setpStats): Variable not initialized.");return;
 	}
-#endif
+#endif*/
 	pStats = player_stats;
 }
 

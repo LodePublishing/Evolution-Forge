@@ -56,6 +56,82 @@ DC::DC(const unsigned int width, const unsigned int height, const unsigned int b
 	}*/
 }
 
+#include <sstream>
+std::string DC::printHardwareInformation()
+{
+	SDL_Rect **modes;
+	std::ostringstream os;
+	modes = SDL_ListModes(NULL, SDL_SWSURFACE);
+	if(modes == (SDL_Rect **)0)
+		os << "No modes available!" << std::endl;
+	else
+	{
+		if(modes == (SDL_Rect **)-1)
+			os << "All resolutions available." << std::endl;
+		else
+		{
+			os << "Available Modes:" << std::endl;
+			for(int i=0;modes[i];++i)
+				os << "  " << modes[i]->w << " x " << modes[i]->h << std::endl;
+		}
+	}
+	os << "Video Hardware:" << std::endl;
+	const SDL_VideoInfo* hardware = SDL_GetVideoInfo();
+//	if(hardware->hw_availible) os << "- It is possible to create hardware surfaces" << std::endl;
+	if(hardware->wm_available) os << "- There is a window manager available" << std::endl;
+	if(hardware->blit_hw) os << "- Hardware to hardware blits are accelerated" << std::endl;
+	if(hardware->blit_hw_CC) os << "- Hardware to hardware colorkey blits are accelerated" << std::endl;
+	if(hardware->blit_hw_A) os << "- Hardware to hardware alpha blits are accelerated" << std::endl;
+	if(hardware->blit_sw) os << "- Software to hardware blits are accelerated" << std::endl;
+	if(hardware->blit_sw_CC) os << "- Software to hardware colorkey blits are accelerated" << std::endl;
+	if(hardware->blit_sw_A)	os << "- Software to hardware alpha blits are accelerated" << std::endl;
+	if(hardware->blit_fill)	os << "- Color fills are accelerated" << std::endl;
+	if(hardware->video_mem>0) os << "- Total amount of video memory: " << hardware->video_mem << "kb";
+	return(os.str());
+}
+
+std::string DC::printSurfaceInformation(DC* surface)
+{
+	const SDL_VideoInfo* hardware = SDL_GetVideoInfo();
+	int bits = hardware->vfmt->BitsPerPixel;
+	std::ostringstream os;
+	os << "Created Surface :  " << surface->GetSurface()->w << " x " << surface->GetSurface()->h << " @ " << bits << std::endl;
+	if (surface->flags() & SDL_SWSURFACE) os << "- Surface is stored in system memory" << std::endl;
+	else if(surface->flags() & SDL_HWSURFACE) os << "- Surface is stored in video memory" << std::endl;
+	if(surface->flags() & SDL_ASYNCBLIT) os << "- Surface uses asynchronous blits if possible" << std::endl;
+	if(surface->flags() & SDL_ANYFORMAT) os << "- Allows any pixel-format" << std::endl;
+	if(surface->flags() & SDL_HWPALETTE) os << "- Surface has exclusive palette" << std::endl;
+	if(surface->flags() & SDL_DOUBLEBUF) os << "- Surface is double buffered" << std::endl;
+	if(surface->flags() & SDL_OPENGL) os << "- Surface has an OpenGL context" << std::endl;
+	if(surface->flags() & SDL_OPENGLBLIT) os << "- Surface supports OpenGL blitting" << std::endl;
+	if(surface->flags() & SDL_RESIZABLE) os << "- Surface is resizable" << std::endl;
+	if(surface->flags() & SDL_HWACCEL) os << "- Surface blit uses hardware acceleration" << std::endl;
+	if(surface->flags() & SDL_SRCCOLORKEY) os << "- Surface use colorkey blitting" << std::endl;
+	if(surface->flags() & SDL_RLEACCEL) os << "- Colorkey blitting is accelerated with RLE" << std::endl;
+	if(surface->flags() & SDL_SRCALPHA) os << "- Surface blit uses alpha blending" << std::endl;
+	if(surface->flags() & SDL_PREALLOC) os << "- Surface uses preallocated memory" << std::endl;
+	if(SDL_MUSTLOCK(surface->GetSurface())) os << "- Surface needs locking" << std::endl;
+	return(os.str());
+}
+
+std::list<std::string> DC::getAvailibleDrivers()
+{
+	std::list<std::string> availible_drivers;
+#ifdef __WIN32__
+	availible_drivers.push_back("directx");
+	availible_drivers.push_back("windib");
+#elif __linux__
+	availible_drivers.push_back("x11");
+	availible_drivers.push_back("dga");
+	availible_drivers.push_back("nano");
+	availible_drivers.push_back("fbcon");
+	availible_drivers.push_back("directfb");
+	availible_drivers.push_back("svgalib");	
+	availible_drivers.push_back("aalib");
+#endif
+	return(availible_drivers);
+}
+
 
 const bool DC::initializationOK() const
 {
@@ -124,7 +200,7 @@ const Color DC::darkenColor(const Color* id, const unsigned int brightness) cons
 void DC::DrawLine(const signed x1, const signed y1, const signed x2, const signed y2) const
 {
 	if(pen.GetStyle()==TRANSPARENT_PEN_STYLE)
-			return;
+		return;
 	int xx1 = x1;
 	int xx2 = x2;
 	int yy1 = y1;
@@ -136,9 +212,12 @@ void DC::DrawLine(const signed x1, const signed y1, const signed x2, const signe
 	Draw_Line(x1, y1, x2, y2);
 	if(pen.GetWidth()>1)
 	{
+//		Color c = *pen.GetColor();
+//		const_cast<DC*>(this)->pen.SetColor(Color(surface, (Uint8)(pen.GetColor()->r()*0.5),  (Uint8)(pen.GetColor()->g()*0.5), (Uint8)(pen.GetColor()->b()*0.5)));
 		Draw_Line(x1, y1+1, x2, y2+1);
 		Draw_Line(x1+1, y1, x2+1, y2);
 		Draw_Line(x1+1, y1+1, x2+1, y2+1);
+//		const_cast<DC*>(this)->pen.SetColor(c);
 	}
 }
 

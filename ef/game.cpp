@@ -1,58 +1,105 @@
 #include "game.hpp"
 
-Game::Game(UI_Object* game_parent, const unsigned int gameNumber):
-	UI_Object(game_parent),
+Game::Game(UI_Object* game_parent, const unsigned int game_number, const unsigned int game_max):
+	UI_Window(game_parent, GAME_WINDOW_TITLE_STRING, theme.lookUpGameRect(GAME_WINDOW, game_number, game_max), theme.lookUpGameMaxHeight(GAME_WINDOW, game_number, game_max), NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0,0,1280,1024), TRANSPARENT),
 	soup(new SOUP()),
-	mode(0),
+	map(NULL),
 	optimizing(false),
-	boHasChanged(true),
-	scoreWindow(new ScoreWindow(this))
+	boHasChanged(false),
+	scoreWindow(new ScoreWindow(this, game_number, game_max)),
+	mapPlayerCount(0),
+	unchangedGenerations(0),
+	currentRun(0),
+	totalGeneration(0),
+	gameNumber(game_number),
+	gameMax(game_max),
+	splitGameButton(new UI_Button(this, Point(0, 10), Size(10, 0), "Compare Game to...", MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
+	removeButton(new UI_Button(this, Point(0, 10), Size(10, 0), "Remove Game...", MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE))
 {
+	if(game_max>1)
+		splitGameButton->Hide();
 	for(unsigned int i=MAX_PLAYER;i--;) // TODO
 	{
 		anarace[i] = soup->getAnalyzedBuildOrder(i);
-		player[i] = new Player(this, i);
+		player[i] = new Player(this, gameNumber, gameMax, 0, 1);
 		player[i]->Hide();
-		start[i] = new START(&(unit[i]));
+		// TODO Player hinzufuegen/entfernen
 	}
+//	for(unsigned int i = mapPlayerCount;i<MAX_PLAYER;i++)
+//	{
+//		player[i]=NULL;
+//		anarace[i]=NULL;
+//	}
+	for(unsigned int i=MAX_INTERNAL_PLAYER;i--;)
+		start[i] = new START(&(startForce[i]));
 //	Hide();
 }
 
 Game::~Game()
 {
 	for(unsigned int i=MAX_PLAYER;i--;)
-	{
 		delete player[i];
+	for(unsigned int i=MAX_INTERNAL_PLAYER;i--;)
 		delete start[i];
-	}
 	delete soup;
 	delete scoreWindow;
+	delete splitGameButton;
+	delete removeButton;
 }
 
+/*void Game::addPlayer(...)
+{
+	map->getMaxPlayer()
+}*/
+
+/*void Game::removePlayer(...)
+{
+}*/
 
 void Game::draw(DC* dc) const
 {
 	if(!isShown())
 		return;
-	UI_Object::draw(dc);
+	UI_Window::draw(dc);
 }
 
-
-void Game::assignMap(const BASIC_MAP* game_map) {
+void Game::assignMap(const BASIC_MAP* game_map) 
+{
 	map = game_map;
-	for(unsigned int i = 0; i <= map->getMaxPlayer();i++)
+	mapPlayerCount = map->getMaxPlayer();
+
+
+//	TODO
+	for(unsigned int i = 0; i <= mapPlayerCount;i++)
 		start[i]->assignMap(game_map);
-	soup->setMapPlayerNum(map->getMaxPlayer());
-	scoreWindow->setPlayers(map->getMaxPlayer());
+	
+	for(unsigned int i = 0; i < mapPlayerCount;i++)
+	{
+		setHarvestSpeed(i+1, TERRA, database.getHarvestSpeed(TERRA, 0));
+		setHarvestSpeed(i+1, PROTOSS, database.getHarvestSpeed(PROTOSS, 0));
+		setHarvestSpeed(i+1, ZERG, database.getHarvestSpeed(ZERG, 0));
+		setStartPosition(i+1, 3*i+1); // <- TODO
+	}
+	
+//	TODO: start initialisieren!
+	setMode(gameNumber, gameMax);
+	soup->setMapPlayerNum(mapPlayerCount);
+	scoreWindow->setMaxPlayer(mapPlayerCount);
+	setResetFlag();
 }
 
 void Game::setHarvestSpeed(const unsigned int player_num, const eRace harvest_race, const HARVEST_SPEED* harvest_speed) {
+#ifdef _SCC_DEBUG
+        if((player_num < 1) || (player_num > mapPlayerCount)) {
+                toLog("DEBUG: (Game::setHarvestSpeed): Value player_num out of range.");return;
+        }
+#endif
 	start[player_num]->setHarvestSpeed(harvest_race, harvest_speed);
 }
 
 void Game::setStartRace(const unsigned int player_num, const eRace player_race) {
 #ifdef _SCC_DEBUG
-	if((player_num < 1) || (player_num > map->getMaxPlayer())) {
+	if((player_num < 1) || (player_num > mapPlayerCount)) {
 		toLog("DEBUG: (Game::setStartRace): Value player_num out of range.");return;
 	}
 #endif
@@ -61,7 +108,7 @@ void Game::setStartRace(const unsigned int player_num, const eRace player_race) 
 
 void Game::assignStartCondition(const unsigned int player_num, const START_CONDITION* start_condition) {
 #ifdef _SCC_DEBUG
-	if((player_num < 1) || (player_num > map->getMaxPlayer())) {
+	if((player_num < 1) || (player_num > mapPlayerCount)) {
 		toLog("DEBUG: (Game::assignStartCondition): Value player_num out of range.");return;
 	}                       
 #endif
@@ -76,63 +123,122 @@ void Game::initSoup()
 }
 
 void Game::setStartPosition(const unsigned int player_num, const unsigned int player_position) {
+#ifdef _SCC_DEBUG
+        if((player_num < 1) || (player_num > mapPlayerCount)) {
+                toLog("DEBUG: (Game::setStartPosition): Value player_num out of range.");return;
+        }
+#endif
 	start[player_num]->setStartPosition(player_position);
 }
 
 void Game::assignGoal(const unsigned int player_num, const GOAL_ENTRY* player_goal) {
+#ifdef _SCC_DEBUG
+        if((player_num < 1) || (player_num > mapPlayerCount)) {
+                toLog("DEBUG: (Game::assignGoal): Value player_num out of range.");return;
+        }       
+#endif
 	start[player_num]->assignGoal(player_goal);
 }
 
 void Game::fillGroups() 
 {
 	start[0]->fillAsNeutralPlayer(); // TODO
-	for(unsigned int i = 1; i <= map->getMaxPlayer();i++)
+	for(unsigned int i = 1; i <= mapPlayerCount;i++)
 		start[i]->fillAsActivePlayer();
 }
 
-void Game::setMode(const eTab tab, const unsigned int gameNum)//, int game1, int game2)
+void Game::setMode(const unsigned int game_number, const unsigned int game_max)
 {
-//	this->mode=tab*2+gameNum-2;
-//	for(int i=BUILD_ORDER_WINDOW;i<=INFO_WINDOW;i++)
-//		window[(eWindow)i]->setTitleParameter(*theme.lookUpString((eString)(tab+HIDE_MODE_STRING)));
-	switch(tab)
-	{
-		case ZERO_TAB:break;
-		case BASIC_TAB:
-		case ADVANCED_TAB:
-		case EXPERT_TAB:
-		case GOSU_TAB:
-				this->Show();
-				scoreWindow->Show();
-			break;
-		case TUTORIAL_TAB:
-		case SETTINGS_TAB:
-		case MAP_TAB:
-		case COMPARE_TAB: // TODO
-				this->Hide();
-				scoreWindow->Hide();
-		default:break;
-	}
-	player[0]->setMode(tab, 1);// mehrere players TODO
-	resetData();
-	setNeedRedrawMoved(); //?
-	// TODO modes der einzelnen Windows (z.B> timer oder force)
-	// TODO einzelne Player aktivieren
-	// TODO scoreWindow
-}
+#ifdef _SCC_DEBUG
+	if(game_number > game_max) {
+                toLog("DEBUG: (Game::setMode): Value game_number out of range.");return;
+        }
+#endif
+	gameNumber = game_number;
+	gameMax = game_max;
+	scoreWindow->updateRectangles(UI_Object::theme.lookUpGameRect(SCORE_WINDOW, gameNumber, gameMax), UI_Object::theme.lookUpGameMaxHeight(SCORE_WINDOW, gameNumber, gameMax));
+	this->updateRectangles(UI_Object::theme.lookUpGameRect(GAME_WINDOW, gameNumber, gameMax), UI_Object::theme.lookUpGameMaxHeight(GAME_WINDOW, gameNumber, gameMax));
+	// databaseWindow->updateRectangles(UI_Object::theme.lookUpGameRect(DATABASE_WINDOW, gameNumber, gameMax), UI_Object::theme.lookUpGameMaxHeight(DATA_BASE_WINDOW, gameNumber, gameMax));
 
+	for(unsigned int i = mapPlayerCount;i--;)
+		player[i]->setMode(gameNumber, gameMax, i, mapPlayerCount);
+	resetData();
+	setNeedRedrawMoved();
+	if((game_max>1)||(game_number==1))
+	{
+		UI_Object::currentButton=NULL;
+		splitGameButton->Hide();
+	}
+	else splitGameButton->Show();
+}
+const bool Game::isRemoveGame() const
+{
+	return removeButton->isLeftClicked();
+}
+const bool Game::isSplitGame() const
+{
+	return splitGameButton->isLeftClicked();
+}
+#include <sstream>
 void Game::process()
 {
 	if(!isShown())
 		return;
-	UI_Object::process();
-
-	if(boHasChanged)
+	UI_Window::process();
+	
+// ------ Did the user change optimization?
+	for(unsigned int i = mapPlayerCount;i--;)
 	{
-		boHasChanged = false;
-		for(unsigned int i = map->getMaxPlayer();i--;)
-			if(player[i]->isShown())
-				player[i]->CheckOrders();
+		if(scoreWindow->getAssignedRace(i)>=0)
+		{
+                	anarace[i]->setRace((eRace)scoreWindow->getAssignedRace(i));
+	                anarace[i]->assignGoal(database.getGoal(anarace[i]->getRace(), 0)); // assign default goal
+	                anarace[i]->assignStartCondition(database.getStartCondition(anarace[i]->getRace(), 0)); // assign default startcondition, make a menu later
+
+			scoreWindow->setInitMode(i, INITIALIZED); //?
+        
+//                unitMenu->resetData(); // TODO
+  //              goalMenu->resetData(); TODO
+ /*               switch(assignRace)
+                {
+                        case TERRA:UI_Object::theme.setColorTheme(DARK_BLUE_THEME);break;
+                        case PROTOSS:UI_Object::theme.setColorTheme(YELLOW_THEME);break;
+                        case ZERG:UI_Object::theme.setColorTheme(DARK_RED_THEME);break;
+                        default:break;
+                }*/
+/*                std::list<ForceEntry*>::iterator a = goalForceList.begin();
+                while(a!=goalForceList.end())
+                {
+                        if(UI_Object::currentButton==*a)
+                                UI_Object::currentButton=NULL;
+                        delete(*a);
+                        a = goalForceList.erase(a);
+                }
+                a = nongoalForceList.begin();
+                while(a!=nongoalForceList.end())
+                {
+                        if(UI_Object::currentButton==*a)
+                                UI_Object::currentButton=NULL;
+                        delete(*a);
+                        a = nongoalForceList.erase(a);
+                }               */ //TODO
+                
+	                setResetFlag(); //!
+			
+		}
+
+		
+		anarace[i]->setOptimizing(scoreWindow->isOptimizing(i));
+		std::ostringstream os; os << scoreWindow->isOptimizing(i);
+		toLog(os.str());
+	}		
+		
+	if(scoreWindow->getAssignedMap()>=0)
+		assignMap(database.getMap(scoreWindow->getAssignedMap()));
+
+	if(scoreWindow->getPlayers()>mapPlayerCount)
+	{
+		
 	}
 // ...
 
@@ -140,32 +246,68 @@ void Game::process()
 	// TODO nicht gesamt Reset machen sondern je nach dem welcher Player resettet wurde!!
 	if(UI_Window::getChangedFlag())
 	{
-		for(unsigned int i=map->getMaxPlayer();i--;)
-			player[i]->resetData();
+		for(unsigned int i=mapPlayerCount;i--;)
+			if(scoreWindow->getInitMode(i) == INITIALIZED)
+			{
+				player[i]->resetData();
+				anarace[i]->restartData();
+				boHasChanged=true;
+			}
 		UI_Window::changeAccepted();
-		boHasChanged=true;
-	} else
+	}
 	if(UI_Window::getResetFlag())
 	{
-		for(unsigned int i=map->getMaxPlayer();i--;)
-			player[i]->resetData();
-
-		soup->initSoup(&start);
+		for(unsigned int i=mapPlayerCount;i--;)
+			if(scoreWindow->getInitMode(i) == INITIALIZED)
+				player[i]->resetData();
+// soup->
+		initSoup();//&start);
 //		soup->setParameters(start); ??
 		
 		newGeneration();
 		// TODO players durchlaufen;
 		UI_Window::resetAccepted();
 		UI_Window::changeAccepted();
-		boHasChanged=true; // TODO
 	}
-	for(unsigned int i=map->getMaxPlayer();i--;)
+	for(unsigned int i = MAX_PLAYER;i--;)
+		player[i]->Hide();
+	for(unsigned int i = mapPlayerCount;i--;)
+		if(scoreWindow->getInitMode(i)==INITIALIZED)
+			player[i]->Show();
+
+	for(unsigned int i=mapPlayerCount;i--;)
 		if(player[i]->checkForNeedRedraw())
 		{
 			setNeedRedrawMoved();
 			scoreWindow->setNeedRedrawNotMoved();
 			break;
 		}
+	if(boHasChanged)
+	{
+		boHasChanged = false;
+		for(unsigned int i = mapPlayerCount;i--;)
+		{
+			if(player[i]->isShown())
+				player[i]->CheckOrders();
+	// update score window
+			if(scoreWindow->getInitMode(i) == INITIALIZED)
+			{
+				if(anarace[i]->getTimer()==0)
+				{
+					scoreWindow->setScoreMode(i, SCORE_FULFILL_MODE);
+					scoreWindow->setGoalComplete(i, anarace[i]->getGoalPercentage());
+				}
+				else
+				{
+					scoreWindow->setScoreMode(i, SCORE_TIME_MODE);
+					scoreWindow->setScore(i, anarace[i]->getRealTimer());
+					scoreWindow->setGoalComplete(i, anarace[i]->getGoalPercentage());
+				}
+			}		
+		}	
+	}
+
+
 }
 
 void Game::newGeneration()
@@ -175,47 +317,29 @@ void Game::newGeneration()
 //		anarace[i]->copyCode(oldCode[i]);
 			
 //TODO: nach Ende eines Durchlaufs ist anarace 0, aber viele anderen Teile des Codes greifen noch drauf zu!!
-	if(soup->newGeneration(anarace, &unit))
-		for(unsigned int i=map->getMaxPlayer();i--;)
+	if(soup->newGeneration(anarace, &startForce))
+		for(unsigned int i=mapPlayerCount;i--;)
+			if(scoreWindow->getInitMode(i) == INITIALIZED)
 		{
 //			if(anarace[i]->isDifferent(oldCode[i]))//, oldMarker[i]))
 				boHasChanged=true;
 			player[i]->assignAnarace(anarace[i]);
 		}
-// update score window
-	for(unsigned int i = map->getMaxPlayer();i--;)
-		{
-			if(anarace[i]->getTimer()==0)
-			{
-				scoreWindow->setMode(i, SCORE_FULFILL_MODE);
-				scoreWindow->setGoalComplete(i, anarace[i]->getGoalPercentage());
-			}
-			else
-			{
-				scoreWindow->setMode(i, SCORE_TIME_MODE);
-				scoreWindow->setScore(i, anarace[i]->getRealTimer());
-				scoreWindow->setGoalComplete(i, anarace[i]->getGoalPercentage());
-			}
-		}
-
-	
 }
 
-
-void Game::updateRectangles(const unsigned int maxGame)
+const unsigned int Game::getMapPlayerCount() const
 {
-//	for(unsigned int = MAX_PLAYER;i--;) TODO
-//		player[i]->updateRectangles(maxGame); // TODO
+	return(mapPlayerCount);
 }
 
-const bool Game::isOptimizing() const
+const bool Game::isOptimizing(const unsigned int player_number) const
 {
-	return(scoreWindow->isOptimizing());
+	return(scoreWindow->isOptimizing(player_number));
 }
 
 void Game::setOptimizing(const bool opt)
 {
-	scoreWindow->setOptimizing(opt);
+//	scoreWindow->setOptimizing(opt);
 }
 
 void Game::resetData()

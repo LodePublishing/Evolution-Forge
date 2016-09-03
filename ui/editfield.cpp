@@ -5,7 +5,7 @@
 // ISO-LEVEL 2 
 
 UI_EditField::UI_EditField(UI_Object* edit_parent, UI_Object* edit_caller, const eString edit_text, const eString description_text, const eString ok_string, const eString cancel_string, const std::string& name_proposal) :
-	UI_Window(edit_parent, edit_text, EDIT_FIELD_WINDOW, 0),
+	UI_Window(edit_parent, edit_text, theme.lookUpGlobalRect(EDIT_FIELD_WINDOW), theme.lookUpGlobalMaxHeight(EDIT_FIELD_WINDOW)),
 	OK_Button(new UI_Button(this, getRelativeClientRect(), ok_string, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
 	Cancel_Button(new UI_Button(this, getRelativeClientRect(), cancel_string, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE)),
 	editText(new UI_StaticText(this, description_text, Rect(getRelativeClientRectPosition() + Point(10, 15), getClientRectSize()), FORCE_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT)),

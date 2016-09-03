@@ -29,7 +29,6 @@ class Main
 		void process();
 		void OnIdle();
 		void resetData();
-		void loadGoals();
 		
 		
 		const bool isAnyOptimizing() const;
@@ -53,8 +52,8 @@ class Main
 	private:
 //		SDL_Surface* cursor_save;
 //		SDL_Surface* cursor;
-		void initializeGame();
-		UI_Window* mainWindow;
+		void initializeGame(const unsigned int game_number);
+		MainWindow* mainWindow;
 		TutorialWindow* tutorialWindow;
 		SettingsWindow* settingsWindow;
 		Point maus;
@@ -67,6 +66,16 @@ class Main
 		
 		static InfoWindow* infoWindow;
 		static MessageWindow* msgWindow;
+//		StatisticsWindow* statisticsWindow;
+		void loadGoals();
+		void loadStartConditions();
+		void loadHarvestData();
+		void loadMaps();
+
+		int tabToGameList[MAX_TABS];
+		int tabToSplitGameList[MAX_TABS];
+
+		int currentTab;
 };
 																				
 #endif

@@ -67,22 +67,22 @@ class UI_Button:public UI_Object
 		UI_Button(const UI_Button& object);
 
 // TODO Beschreibung der Konstruktoren
-		UI_Button(UI_Object* button_parent, const Rect button_rect, 
+		UI_Button(UI_Object* button_parent, const Point top_left, const Size distance_bottom_right,
 		const eString button_text, 
 		const eButton button_type, const eTextMode button_text_mode = HORIZONTALLY_CENTERED_TEXT_MODE, const eButtonMode button_mode = STATIC_BUTTON_MODE, const ePositionMode button_position_mode = DO_NOT_ADJUST, const eFont button_font = SMALL_NORMAL_BOLD_FONT, const eAutoSize button_auto_size = NO_AUTO_SIZE);
 
-		UI_Button(UI_Object* button_parent, const Rect button_rect, const std::string& button_text, const eButton button_type, const eTextMode button_text_mode = HORIZONTALLY_CENTERED_TEXT_MODE, const eButtonMode button_mode = STATIC_BUTTON_MODE, ePositionMode button_position_mode = DO_NOT_ADJUST, const eFont button_font = SMALL_NORMAL_BOLD_FONT, const eAutoSize button_auto_size = NO_AUTO_SIZE);
+		UI_Button(UI_Object* button_parent, const Point top_left, const Size distance_bottom_right, const std::string& button_text, const eButton button_type, const eTextMode button_text_mode = HORIZONTALLY_CENTERED_TEXT_MODE, const eButtonMode button_mode = STATIC_BUTTON_MODE, ePositionMode button_position_mode = DO_NOT_ADJUST, const eFont button_font = SMALL_NORMAL_BOLD_FONT, const eAutoSize button_auto_size = NO_AUTO_SIZE);
 // Bitmap button
-		UI_Button(UI_Object* button_parent, const Rect button_rect, const eButton button_type, const eButtonMode button_mode = STATIC_BUTTON_MODE, const ePositionMode button_position_mode = DO_NOT_ADJUST);
+		UI_Button(UI_Object* button_parent, const Point top_left, const Size distance_bottom_right, const eButton button_type, const eButtonMode button_mode = STATIC_BUTTON_MODE, const ePositionMode button_position_mode = DO_NOT_ADJUST);
 		~UI_Button();
 		
 //	  void set_hotkey_if_focus(int key); TODO
 		const bool isLeftClicked();			// has it been selected (ie clicked on)
 		const bool isRightClicked();
 //	  int double_clicked();   // button was double clicked on
-		const bool isJustPressed() const;	  // button has just been selected
-		const bool isJustReleased() const;
-		const bool isJustHighlighted() const; // button has just had mouse go over it
+//		const bool isJustPressed() const;	  // button has just been selected
+//		const bool isJustReleased() const;
+//		const bool isJustHighlighted() const; // button has just had mouse go over it
 		const bool isCurrentlyPressed() const; // is the button depressed?
 		const bool isCurrentlyHighlighted() const; // is the mouse over this button?
 		const bool isCurrentlyActivated() const;
@@ -129,10 +129,11 @@ class UI_Button:public UI_Object
 		UI_Radio* radio;
 
 		bool forcedPress;
-		void adjustButtonPlacementPosition(); // jump to relativeRect
-		void adjustButtonPlacementSize();
-		Rect buttonPlacementArea;
-
+//		void adjustButtonPlacementPosition(); // jump to relativeRect
+//		void adjustButtonPlacementSize();
+// relative 'button placement area'
+		Point originalTopLeft;
+		Size distanceBottomRight;
 		const unsigned int getTextWidth() const;
 
 	private:
@@ -212,13 +213,13 @@ inline const unsigned int UI_Button::getGradient() const {
 	return(gradient);
 }
 
-inline void UI_Button::adjustButtonPlacementPosition() {
+/*inline void UI_Button::adjustButtonPlacementPosition() {
 	buttonPlacementArea.SetTopLeft(getRelativePosition());
 }
 
 inline void UI_Button::adjustButtonPlacementSize() {
 	buttonPlacementArea.SetSize(getSize());
-}
+}*/
 
 inline const unsigned int UI_Button::getTextWidth() const {
 	return(text->getTextSize().GetWidth());

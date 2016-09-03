@@ -8,13 +8,16 @@
 
 #define MAX_RACES 3
 #define UNIT_TYPE_COUNT 105
-#define MAX_LOCATIONS 5
+#define MAX_LOCATIONS 20
 
-// max simultaneous games/maps
-#define MAX_GAME 4
+// max simultaneous games/maps in the TAB LIST!
+#define MAX_GAME_TABS 6
+#define MAX_SIMULTANEOUS_GAMES 2
+#define MAX_GAME (MAX_SIMULTANEOUS_GAMES*MAX_GAME_TABS)
 
 // max simultaneous players
-#define MAX_PLAYER 8
+#define MAX_PLAYER 4 // TODO FEHLER BEI 1
+#define MAX_INTERNAL_PLAYER 5 // inclusive neutral player!
 
 #include <math.h>
 #ifndef M_PI

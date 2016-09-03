@@ -9,7 +9,7 @@ UI_Configuration::UI_Configuration():
 	transparency(false),
 	smoothMovements(true),
 	configurationFile("settings/ui.cfg")
-{ }
+{}
 
 UI_Configuration::~UI_Configuration()
 { }

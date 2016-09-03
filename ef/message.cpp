@@ -31,7 +31,7 @@ void Message::draw(DC* dc) const
 }
 
 MessageWindow::MessageWindow( UI_Window* parentWindow ):
-	UI_Window( parentWindow, MESSAGE_WINDOW_TITLE_STRING, MESSAGE_WINDOW, 0, SCROLLED )
+	UI_Window( parentWindow, MESSAGE_WINDOW_TITLE_STRING, theme.lookUpGlobalRect(MESSAGE_WINDOW), theme.lookUpGlobalMaxHeight(MESSAGE_WINDOW), SCROLLED )
 { }
 //		resetData();?
 

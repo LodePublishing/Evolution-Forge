@@ -22,10 +22,13 @@
 }*/
 
 
-const unsigned int FONT_SIZE = 7;
+#define FONT_SIZE 7
 // TODO!!!
 
-const unsigned int MIN_DISTANCE = 3;
+#define MIN_DISTANCE 3
+
+//const unsigned int MAX_PLAYER = 4;
+#define MAX_COMPARE_GAMES 2 // two per page at maximum
 
 // ------ DATA TYPES ------
 enum eDataType
@@ -33,12 +36,11 @@ enum eDataType
 	ZERO_DATA_TYPE, 
 	STRING_DATA_TYPE,
 	FONT_DATA_TYPE,
+	WINDOW_DATA_TYPE,
 	COLOR_DATA_TYPE,
 	BITMAP_DATA_TYPE,
 	PEN_DATA_TYPE,
 	BRUSH_DATA_TYPE,
-	RECT_DATA_TYPE,
-	MAX_HEIGHT_DATA_TYPE,
 	BUTTON_DATA_TYPE,
 
 	MAX_DATA_TYPES
@@ -115,6 +117,32 @@ enum eFont
 	MAX_FONTS
 };
 // ------ END FONTS ------
+
+enum eGameType
+{
+	ZERO_GAME_TYPE,
+	GAME_MAIN_TYPE,
+	GAME_1PLAYER_TYPE,
+	GAME_2PLAYER_TYPE,
+	GAME_3PLAYER_TYPE,
+	GAME_4PLAYER_TYPE,
+
+	MAX_GAME_TYPE
+};
+
+enum ePlayerType
+{
+	ZERO_PLAYER_TYPE,
+	PLAYER_ONE_TYPE,
+	PLAYER_TWO_TYPE,
+	PLAYER_THREE_TYPE,
+	PLAYER_FOUR_TYPE,
+
+	MAX_PLAYER_TYPE
+};
+
+
+
 
 // ------ COLORS ------
 enum eColor
@@ -360,12 +388,15 @@ enum eString
 	CORE_WINDOW_TITLE_STRING,
 	TUTORIAL_WINDOW_TITLE_STRING,
 	INFO_WINDOW_TITLE_STRING,
+	TECHTREE_WINDOW_TITLE_STRING,
 	BOGRAPH_WINDOW_TITLE_STRING,
 	BODIAGRAM_WINDOW_TITLE_STRING,
 	STATISTICS_WINDOW_TITLE_STRING,
 	TIMER_WINDOW_TITLE_STRING,
 	FORCE_WINDOW_TITLE_STRING, // 10
 	BOWINDOW_TITLE_STRING,
+	GAME_WINDOW_TITLE_STRING,
+	PLAYER_WINDOW_TITLE_STRING,
 
 // message window:
 	WELCOME_MSG1_STRING,
@@ -373,6 +404,7 @@ enum eString
 	PLAYERS_LOADED_STRING,
 	ADDED_GOAL_STRING,
 	SET_NEW_GOAL_LIST_STRING,
+	SET_NEW_MAP_STRING,
 	SET_RACE_STRING,
 	ADDED_ONE_GOAL_STRING,
 	REMOVED_ONE_GOAL_STRING,
@@ -409,6 +441,8 @@ enum eString
 	GOAL_LIST_STRING,
 	STARTFORCE_STRING,
 	CHOOSE_RACE_STRING,
+	
+	CHOOSE_MAP_STRING,
 
 	SAVE_GOAL_STRING,
 
@@ -444,6 +478,8 @@ enum eString
 	TOTAL_STRING,
 	CLICK_TO_CONTINUE_STRING,
 	CLICK_TO_PAUSE_STRING,
+
+	ADD_PLAYER_STRING,
 
 // statistics window
 	MINERALS_STAT_STRING,
@@ -708,54 +744,45 @@ enum eBitmap
 // ------ GENERAL RECTANGLES ------
 enum eGlobalWindow
 {
-	NULL_WINDOW,
+	NULL_GLOBAL_WINDOW,
+	
 	MAIN_WINDOW,
 	MESSAGE_WINDOW,
 	TUTORIAL_WINDOW,
 //	STATISTICS_WINDOW, ?
-	INFO_WINDOW,
 	SETTINGS_WINDOW,
+	INFO_WINDOW,
+	TECHTREE_WINDOW,
 	EDIT_FIELD_WINDOW,
+	
 	MAX_GLOBAL_WINDOWS
 };
 
-
 enum eGameWindow
 {
+	NULL_GAME_WINDOW,
+
+	GAME_WINDOW,
+	SCORE_WINDOW,
+	DATABASE_WINDOW,
+
+	MAX_GAME_WINDOWS
 };
 
 enum ePlayerWindow
 {
+	NULL_PLAYER_WINDOW,
 	
-};
+	PLAYER_WINDOW,
+	FORCE_WINDOW,
+	BUILD_ORDER_WINDOW,
+	BUILD_ORDER_DIAGRAM_WINDOW,
+	BUILD_ORDER_GRAPH_WINDOW,
 
+	MAX_PLAYER_WINDOWS
+};
 
 // ------ END GENERAL RECTANGLES ------
-
-enum eTab
-{
-	ZERO_TAB,
-	BASIC_TAB,
-	ADVANCED_TAB,
-	EXPERT_TAB,
-	GOSU_TAB,
-
-	TUTORIAL_TAB,
-	SETTINGS_TAB,
-	MAP_TAB,
-	COMPARE_TAB,
-	
-	MAX_TABS
-};
-
-enum eArrangeDirection
-{
-	ARRANGE_LEFT_TO_RIGHT,
-	ARRANGE_RIGHT_TO_LEFT,
-	ARRANGE_TOP_TO_DOWN,
-	ARRANGE_DOWN_TO_TOP
-};
-
 
 enum eCommand
 {
@@ -768,16 +795,12 @@ enum eCommand
 	DOCK_WITH_LOWER_BORDER_OF_COMMAND,
 	DOCK_WITH_UPPER_BORDER_OF_COMMAND,
 	DOCK_CENTER_INSIDE_OF_COMMAND,
+	DOCK_BOTTOM_CENTER_INSIDE_OF_COMMAND,
+	DOCK_TOP_CENTER_INSIDE_OF_COMMAND,
 	DOCK_LEFT_INSIDE_OF_COMMAND,
 	DOCK_RIGHT_INSIDE_OF_COMMAND,
 	DOCK_TOP_INSIDE_OF_COMMAND,
 	DOCK_BOTTOM_INSIDE_OF_COMMAND,
-	CALCULATE_MAXSIZE_COMMAND,
-	CALCULATE_MAXWIDTH_COMMAND,
-	CALCULATE_MAXHEIGHT_COMMAND,
-	SAME_POSITION_AS_ABOVE_COMMAND,
-	SAME_SIZE_AS_ABOVE_COMMAND,
-	SAME_AS_ABOVE_COMMAND,
 
 	MAX_COMMANDS
 };
@@ -868,10 +891,10 @@ struct ButtonAnimation
 	eBrush endBrush[MAX_BUTTON_ANIMATION_PHASES];
 	eColor startTextColor[MAX_BUTTON_ANIMATION_PHASES];
 	eColor endTextColor[MAX_BUTTON_ANIMATION_PHASES];
-																																							
+	
 	ePen startBorderPen[MAX_BUTTON_ANIMATION_PHASES];
 	ePen endBorderPen[MAX_BUTTON_ANIMATION_PHASES];
-																																							
+	
 	eBitmap bitmap[MAX_BUTTON_ANIMATION_PHASES];// bitmap animation is fixed... for now
 //	eString text[MAX_BUTTON_ANIMATION_PHASES];
 
@@ -882,8 +905,6 @@ struct ButtonAnimation
 class UI_Theme
 {
 	public:
-		UI_Theme& operator=(const UI_Theme& object);
-		UI_Theme(const UI_Theme& object);
 		UI_Theme();
 		~UI_Theme();
 		
@@ -896,12 +917,12 @@ class UI_Theme
 		const eResolution getResolution() const;
 		void setResolution(const eResolution resolution);
 
-		const eTab getTab() const;
-		void setTab(const eTab tab);	
+//		const eTab getTab() const;
+//		void setTab(const eTab tab);	
 
 		void loadStringFile(const std::string& dataFile);
 		void loadGraphicData(const std::string& dataFile, const std::string& bitmapDir, const std::string& fontDir, DC* dc); //currently all data hard coded, move it to file later! TODO
-		void loadWindowData(const std::string& dataFile);
+		void loadWindowData(const std::string& dataFile, const unsigned int gameNumber, const unsigned int maxGames);
 
 		const std::string* lookUpString(const eString id) const;
 		const std::string lookUpFormattedString(const eString id, const std::string& text) const;
@@ -915,18 +936,16 @@ class UI_Theme
 		Font* lookUpFont(const eFont id) const;
 		
 		
-		const Point lookUpRealDistance(const eWindow id, const unsigned int windowNumber=0) const;
-		const Point lookUpMaxRealDistance(const eWindow id, const unsigned int windowNumber=0) const;
+		const Rect lookUpGlobalRect(const eGlobalWindow id) const;
+		const Rect lookUpGameRect(const eGameWindow id, const unsigned int gameNumber, const unsigned int maxGames) const;
+		const Rect lookUpPlayerRect(const ePlayerWindow id, const unsigned int gameNumber, const unsigned int maxGames, const unsigned int playerNumber, const unsigned int maxPlayer) const;
 		
-		const Rect lookUpGlobalRect(const eGlobalWindow id, const unsigned int windowNumber=0, const unsigned int maxPlayer=0) const;
-		const Rect lookUpGameRect(const eGameWindow id, const unsigned int gameNumber=0, const unsigned int maxGames=0) const;
-		const Rect lookUpPlayerRect(const ePlayerWindow id, const unsigned int playerNumber=0, const unsigned int maxPlayer=0) const;
-
-		
-		const unsigned int lookUpMaxHeight(const eWindow id, const unsigned int windowNumber=0, const unsigned int maxPlayer=0) const;
+		const unsigned int lookUpGlobalMaxHeight(const eGlobalWindow id) const;
+		const unsigned int lookUpGameMaxHeight(const eGameWindow id, const unsigned int gameNumber, const unsigned int maxGames) const;
+		const unsigned int lookUpPlayerMaxHeight(const ePlayerWindow id, const unsigned int gameNumber, const unsigned int maxGames, const unsigned int playerNumber, const unsigned int maxPlayer) const;
 
 		const ButtonAnimation* lookUpButtonAnimation(const eButton id) const;
-		
+
 // tools:
 //		const Color mixColor(const Color* id1, const Color* id2);
 //		const Color mixColor(const Color* id1, const Color* id2, const unsigned int gradient);
@@ -949,31 +968,33 @@ class UI_Theme
 //		const Pen lookUpBrightenedPen(const ePen id, const unsigned int brightness);
 
 	private:
+		void setMaxGlobalHeight(unsigned int current_resolution, unsigned int id, unsigned int max_height);
+		void setMaxGameHeight(unsigned int current_resolution, unsigned int gameNumber, unsigned int maxGames, unsigned int id, unsigned int max_height);
+		void setMaxPlayerHeight(unsigned int current_resolution, unsigned int gameNumber, unsigned int maxGames, unsigned int player_max, unsigned int playerNumber, unsigned int id, unsigned int max_height);
 //memory issue: load maybe all data after a change! TODO
  		eResolution resolution;
-		eTab tab;
+//		eTab tab;
 		eLanguage language;
 		eTheme colorTheme;
 		
 		std::string* stringList[MAX_LANGUAGES][MAX_STRINGS];
 		Color* colorList[MAX_COLOR_THEMES][MAX_COLORS];
 		SDL_Surface* bitmapList[MAX_COLOR_THEMES][MAX_RESOLUTIONS][MAX_BITMAPS];
-		Pen* penList[MAX_RESOLUTIONS][MAX_COLOR_THEMES][MAX_PENS];
+		Pen* penList[MAX_COLOR_THEMES][MAX_PENS];
 		Brush* brushList[MAX_COLOR_THEMES][MAX_BRUSHES];
 
-		Rect* globalRectList[MAX_RESOLUTIONS][MAX_TABS][MAX_GLOBAL_WINDOWS];
-		Rect* gameRectList[MAX_RESOLUTIONS][MAX_TABS][MAX_GAME_WINDOWS];
-		Rect* playerRectList[MAX_RESOLUTIONS][MAX_TABS][MAX_PLAYER_WINDOWS];
-
-		
-		unsigned int maxHeightList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
-
-		eArrangeDirection arrangeDirection[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
+		Rect* globalRectList[MAX_RESOLUTIONS][MAX_GLOBAL_WINDOWS];
+		int test;
+	
+		Rect* gameRectList[MAX_RESOLUTIONS][MAX_COMPARE_GAMES][MAX_COMPARE_GAMES][MAX_GAME_WINDOWS];
+	
+		Rect* playerRectList[MAX_RESOLUTIONS][MAX_COMPARE_GAMES][MAX_COMPARE_GAMES][MAX_PLAYER][MAX_PLAYER][MAX_PLAYER_WINDOWS];
+		unsigned int maxGlobalHeightList[MAX_RESOLUTIONS][MAX_GLOBAL_WINDOWS];
+		unsigned int maxGameHeightList[MAX_RESOLUTIONS][MAX_COMPARE_GAMES][MAX_COMPARE_GAMES][MAX_GAME_WINDOWS];
+		unsigned int maxPlayerHeightList[MAX_RESOLUTIONS][MAX_COMPARE_GAMES][MAX_COMPARE_GAMES][MAX_PLAYER][MAX_PLAYER][MAX_PLAYER_WINDOWS];
 
 		Font* fontList[MAX_RESOLUTIONS][MAX_FONTS];
 		ButtonAnimation* buttonAnimationList[MAX_BUTTONS];
-		eWindow ywindow[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
-		eWindow xwindow[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
 };
 
 inline void UI_Theme::setColorTheme(const eTheme color_theme) {
@@ -1001,13 +1022,13 @@ inline void UI_Theme::setResolution(const eResolution theme_resolution) {
 	// TODO update whole engine
 }
 
-inline void UI_Theme::setTab(const eTab theme_tab) {
-	tab = theme_tab;
-}
+//inline void UI_Theme::setTab(const eTab theme_tab) {
+//	tab = theme_tab;
+//}
 
-inline const eTab UI_Theme::getTab() const { 
-	return(tab);
-}
+//inline const eTab UI_Theme::getTab() const { 
+//	return(tab);
+//}
 
 inline const ButtonAnimation* UI_Theme::lookUpButtonAnimation(const eButton id) const
 {
@@ -1054,10 +1075,10 @@ inline Pen* UI_Theme::lookUpPen(const ePen id) const
 {
 #ifdef _SCC_DEBUG
 	if((id<0)||(id>=MAX_PENS)) {
-		toLog("ERROR: (UI_Theme::lookUpPen) id out of range.");return(penList[resolution][colorTheme][id]);
+		toLog("ERROR: (UI_Theme::lookUpPen) id out of range.");return(penList[colorTheme][id]);
 	}
 #endif
-	return(penList[resolution][colorTheme][id]);
+	return(penList[colorTheme][id]);
 }
 
 inline Brush* UI_Theme::lookUpBrush(const eBrush id) const
@@ -1069,17 +1090,6 @@ inline Brush* UI_Theme::lookUpBrush(const eBrush id) const
 #endif
 	return(brushList[colorTheme][id]);
 }
-
-inline Font* UI_Theme::lookUpFont(const eFont id) const
-{
-#ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_FONTS)) {
-		toLog("ERROR: (UI_Theme::lookUpFont) id out of range.");return(fontList[resolution]/*[language]*/[id]);
-	}
-#endif
-	return(fontList[resolution]/*[language]*/[id]);
-}
-
 
 #endif // _UI_THEME_HPP
 

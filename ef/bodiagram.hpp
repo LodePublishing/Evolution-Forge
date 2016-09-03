@@ -8,7 +8,7 @@
 class BoDiagramWindow : public UI_Window 
 {
 	public:
-		BoDiagramWindow(UI_Object* bod_parent, const unsigned int bod_window_number);
+		BoDiagramWindow(UI_Object* bod_parent, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_players);
 		BoDiagramWindow(const BoDiagramWindow& object);
 		BoDiagramWindow& operator=(const BoDiagramWindow& object);
 		~BoDiagramWindow();

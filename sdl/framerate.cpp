@@ -12,7 +12,7 @@ FPS::FPS():
 	averagecounter(0)
 {
 	for(unsigned int i=100;i--;)
-		average[i]=0;
+		average[i]=20;
 }
 
 FPS::~FPS()
@@ -45,20 +45,20 @@ void FPS::setAllowStaticFramerate(const bool allow_static_framerate)
 void FPS::delay()
 {
 // Increase/Reduce the frames per generation
-    long int difference = SDL_GetTicks() - startTicks;
+	long int difference = SDL_GetTicks() - startTicks;
 	if(difference==0)
 		difference=1;
    	startTicks += difference;
 
-    if(averagecounter<2)
-   	    averagecounter++;
-    for(unsigned int i=averagecounter;i--;)
-   	    average[i+1]=average[i];
-    average[0]=difference;
-                                                                                
+	if(averagecounter<2)
+   		averagecounter++;
+	for(unsigned int i=averagecounter;i--;)
+   		average[i+1]=average[i];
+	average[0]=difference;
+																				
    	long int av=0;
-    for(unsigned int i=0;i<averagecounter;i++)
-   	    av += average[i];
+	for(unsigned int i=0;i<averagecounter;i++)
+   		av += average[i];
 	currentFramerate = 1000*averagecounter / av;
 
 	if(!allowStaticFramerate)
@@ -71,21 +71,21 @@ void FPS::delay()
 	} else
 	{
 		framesPerGeneration=100;
-	    Uint32 current_ticks;
-	    Uint32 target_ticks;
-    	Uint32 the_delay;
+		Uint32 current_ticks;
+		Uint32 target_ticks;
+		Uint32 the_delay;
 
-    	framecount++;
-	    current_ticks = SDL_GetTicks();
-    	target_ticks = lastTicks + (Uint32) ((float) framecount * rateTicks);
+		framecount++;
+		current_ticks = SDL_GetTicks();
+		target_ticks = lastTicks + (Uint32) ((float) framecount * rateTicks);
 
-	    if (current_ticks <= target_ticks) {
+		if (current_ticks <= target_ticks) {
 			the_delay = target_ticks - current_ticks;
 			SDL_Delay(the_delay);
-	    } else {
+		} else {
 			framecount = 0;
 			lastTicks = SDL_GetTicks();
-	    }
+		}
 	}
 }
 

@@ -17,7 +17,8 @@ Menu::Menu(const Menu& object) :
 	height(object.height),
 	chooseMenu(object.chooseMenu),
 	p1(object.p1),
-	p2(object.p2)
+	p2(object.p2),
+	menuChanged(false)
 { }
 
 Menu& Menu::operator=(const Menu& object)
@@ -31,6 +32,7 @@ Menu& Menu::operator=(const Menu& object)
 	chooseMenu = object.chooseMenu;
 	p1 = object.p1;
 	p2 = object.p2;
+	setMenuHasChanged(false);//object.menuChanged);
 	return(*this);
 }
 
@@ -43,7 +45,8 @@ Menu::Menu(UI_Object* menu_parent, Rect menu_rect, const bool choose_menu):
 	height(0),
 	chooseMenu(choose_menu),
 	p1(),
-	p2()
+	p2(),
+	menuChanged(false)
 { }
 
 Menu::Menu(UI_Object* menu_parent, Rect rect, const unsigned int entryNumber, const unsigned int coloumns, const Size& s, const eString firstString, const eButton button, const bool choose_menu):
@@ -55,7 +58,8 @@ Menu::Menu(UI_Object* menu_parent, Rect rect, const unsigned int entryNumber, co
 	height(0),
 	chooseMenu(choose_menu),
 	p1(),
-	p2()
+	p2(),
+	menuChanged(false)
 {
 	for(unsigned int i=0;i<entryNumber;i++)
 	{
@@ -91,6 +95,7 @@ void Menu::open()
 	else if(menuLevel==1)
 		menuLevel=0;
 	else menuLevel=1;
+	setMenuHasChanged();
 
 //	setNeedRedrawNotMoved();
 
@@ -101,8 +106,34 @@ void Menu::open()
 
 void Menu::close()
 {
+	if(menuLevel!=0)
+		setMenuHasChanged();
 	menuLevel=0;
 	Hide();
+}
+
+void Menu::setMenuLevel(const unsigned int menu_level)
+{
+	if(menuLevel == menu_level)
+		return;
+	menuLevel = menu_level;
+	setMenuHasChanged();
+}
+
+void Menu::setMenuHasChanged(const bool has_changed)
+{
+	if(has_changed == menuChanged)
+		return;
+	if(has_changed)
+	{
+		menuChanged = true;
+		toLog("true");
+	}
+	else
+	{
+		menuChanged = false;
+		toLog("false");
+	}
 }
 
 const signed int Menu::getMarkedItem() const
@@ -112,12 +143,14 @@ const signed int Menu::getMarkedItem() const
 
 void Menu::process()
 {
+	if(!isShown())
+		return;
+	setMenuHasChanged(false);
+	
 	UI_Object::process();
 	pressedItem = -1;
 	markedItem = -1;
-	if(!isShown())
-		return;
-	p1 = Point(9999, 9999);
+		p1 = Point(9999, 9999);
 	p2 = Point(0, 0);
 
 	unsigned int i = 0;
@@ -168,3 +201,7 @@ void Menu::draw(DC* dc) const
 	dc->DrawRoundedRectangle(edge,4);
 }
 
+const bool Menu::menuHasChanged() const
+{
+	return(menuChanged);
+}

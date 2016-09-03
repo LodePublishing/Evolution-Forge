@@ -5,7 +5,7 @@
 #include "configuration.hpp"
 
 SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
-	UI_Window(setwindow_parent, SETTINGS_WINDOW_TITLE_STRING, SETTINGS_WINDOW, 0, SCROLLED),
+	UI_Window(setwindow_parent, SETTINGS_WINDOW_TITLE_STRING, theme.lookUpGlobalRect(SETTINGS_WINDOW), theme.lookUpGlobalMaxHeight(SETTINGS_WINDOW), SCROLLED),
 	coreSettings(new UI_Group(this, Point(20, 50), SETWINDOW_CORE_SETTINGS_STRING)),
 	guiSettings(new UI_Group(this, Point(20, 200), SETWINDOW_GUI_SETTINGS_STRING)),
 	loadSaveSettings(new UI_Group(this, Point(245, getHeight() - 81), SETWINDOW_GUI_SETTINGS_STRING/*SETWINDOW_LOADSAVE_SETTINGS_STRING*/)),
@@ -72,9 +72,9 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
 	menuRadio->addButton(languageMenuButton);*/
 //	reloadFromFile();
 
-	defaultSettingsRadio->addButton(minimalistButton);
-	defaultSettingsRadio->addButton(fullButton);
-	defaultSettingsRadio->addButton(customButton);
+	defaultSettingsRadio->addButton(minimalistButton, 0);
+	defaultSettingsRadio->addButton(fullButton, 1);
+	defaultSettingsRadio->addButton(customButton, 2);
 
 	defaultSettingsRadio->calculateSameWidthOfButtons();
 	coreSettings->calculateBoxSize();

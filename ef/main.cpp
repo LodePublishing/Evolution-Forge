@@ -7,84 +7,6 @@
 #include "../core/configuration.hpp"
 
 
-void printSurfaceInformation(DC* surface)
-{
-	const SDL_VideoInfo* hardware = SDL_GetVideoInfo();
-	int bits = hardware->vfmt->BitsPerPixel;
-	std::ostringstream os;
-	os << "Created Surface :  " << surface->GetSurface()->w << " x " << surface->GetSurface()->h << " @ " << bits;
-	toLog(os.str());
-
-	if (surface->flags() & SDL_SWSURFACE)
-		toLog("- Surface is stored in system memory");
-	else if(surface->flags() & SDL_HWSURFACE)
-		toLog("- Surface is stored in video memory");
-	if(surface->flags() & SDL_ASYNCBLIT) toLog("- Surface uses asynchronous blits if possible");
-	if(surface->flags() & SDL_ANYFORMAT) toLog("- Allows any pixel-format");
-	if(surface->flags() & SDL_HWPALETTE) toLog("- Surface has exclusive palette");
-	if(surface->flags() & SDL_DOUBLEBUF) toLog("- Surface is double buffered");
-	if(surface->flags() & SDL_OPENGL) toLog("- Surface has an OpenGL context");
-	if(surface->flags() & SDL_OPENGLBLIT) toLog("- Surface supports OpenGL blitting");
-	if(surface->flags() & SDL_RESIZABLE) toLog("- Surface is resizable");
-	if(surface->flags() & SDL_HWACCEL) toLog("- Surface blit uses hardware acceleration");
-	if(surface->flags() & SDL_SRCCOLORKEY) toLog("- Surface use colorkey blitting");
-	if(surface->flags() & SDL_RLEACCEL) toLog("- Colorkey blitting is accelerated with RLE");
-	if(surface->flags() & SDL_SRCALPHA) toLog("- Surface blit uses alpha blending");
-	if(surface->flags() & SDL_PREALLOC) toLog("- Surface uses preallocated memory");
-	if(SDL_MUSTLOCK(surface->GetSurface())) toLog("- Surface needs locking");
-}
-
-
-void printHardwareInformation()
-{
-	SDL_Rect **modes;
-	modes = SDL_ListModes(NULL, SDL_SWSURFACE);
-	if(modes == (SDL_Rect **)0)
-	{
-		toLog("No modes available!");
-	} else
-	{
-		if(modes == (SDL_Rect **)-1)
-			toLog("All resolutions available.");
-		else
-		{
-			toLog("Available Modes:");
-			for(int i=0;modes[i];++i)
-			{
-				std::ostringstream os;
-				os << "  " << modes[i]->w << " x " << modes[i]->h;
-				toLog(os.str());
-			}
-		}
-	}
-	toLog("Video Hardware:");
-	const SDL_VideoInfo* hardware = SDL_GetVideoInfo();
-//	if(hardware->hw_availible)
-//		toLog("- It is possible to create hardware surfaces");
-	if(hardware->wm_available)
-		toLog("- There is a window manager available");
-	if(hardware->blit_hw)
-		toLog("- Hardware to hardware blits are accelerated");
-	if(hardware->blit_hw_CC)
-		toLog("- Hardware to hardware colorkey blits are accelerated");
-	if(hardware->blit_hw_A)
-		toLog("- Hardware to hardware alpha blits are accelerated");
-	if(hardware->blit_sw)
-		toLog("- Software to hardware blits are accelerated");
-	if(hardware->blit_sw_CC)
-		toLog("- Software to hardware colorkey blits are accelerated");
-	if(hardware->blit_sw_A)
-		toLog("- Software to hardware alpha blits are accelerated");
-	if(hardware->blit_fill)
-		toLog("- Color fills are accelerated");
-	
-	if(hardware->video_mem>0)
-	{
-		std::ostringstream os;
-		os << "- Total amount of video memory: " << hardware->video_mem << "kb";toLog(os.str());
-	}
-}
-
 int main(int argc, char *argv[])
 {
 	std::string current_driver;
@@ -92,22 +14,10 @@ int main(int argc, char *argv[])
 		current_driver="";
 	else
 		current_driver = getenv("SDL_VIDEODRIVER");		
-	std::list<std::string> availible_drivers;
 	std::list<std::string> arguments;
 	for(int i = 1;i<argc;i++)
 		arguments.push_back(argv[i]);
-#ifdef __WIN32__
-	availible_drivers.push_back("directx");
-	availible_drivers.push_back("windib");
-#elif __linux__
-	availible_drivers.push_back("x11");
-	availible_drivers.push_back("dga");
-	availible_drivers.push_back("nano");
-	availible_drivers.push_back("fbcon");
-	availible_drivers.push_back("directfb");
-	availible_drivers.push_back("svgalib");	
-	availible_drivers.push_back("aalib");
-#endif
+	std::list<std::string> availible_drivers = DC::getAvailibleDrivers();
 	if(availible_drivers.empty())
 	{
 		toLog("No video drivers are availible for your platform!");
@@ -149,8 +59,8 @@ int main(int argc, char *argv[])
 	toLog(*UI_Object::theme.lookUpString(START_START_STRING));
 	toLog(*UI_Object::theme.lookUpString(START_LOAD_CORE_SETTINGS_STRING));
 	coreConfiguration.loadConfigurationFile();
-	uiConfiguration.loadConfigurationFile();
 	efConfiguration.loadConfigurationFile();
+	uiConfiguration.loadConfigurationFile();
 	UI_Object::theme.setLanguage(uiConfiguration.getLanguage());
 // ------ END LOAD CONFIGURATION FILES -------
 
@@ -166,7 +76,8 @@ int main(int argc, char *argv[])
 
 	toLog(*UI_Object::theme.lookUpString(START_INIT_SDL_STRING));
  	SDL_Rect clientWindow;
-	clientWindow.x=0;clientWindow.y=0;clientWindow.w=1024;clientWindow.h=768;
+	clientWindow.x=0;clientWindow.y=0;clientWindow.w=1280;clientWindow.h=1024;
+	UI_Object::theme.setResolution(RESOLUTION_1280x1024);
 	DC* screen;
 	if (efConfiguration.isFullScreen()) 
 	{
@@ -179,7 +90,7 @@ int main(int argc, char *argv[])
 		screen = new DC(clientWindow.w, clientWindow.h, SDL_DRAW_BPP*8, SDL_HWSURFACE|SDL_ANYFORMAT|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC|SDL_DOUBLEBUF, SDL_INIT_NOPARACHUTE);
 	}
 	toLog("Scanning Graphic-Hardware...");
-	printHardwareInformation();
+	toLog(DC::printHardwareInformation());
 	
 	if(!screen->initializationOK())	{
 		toLog(*UI_Object::theme.lookUpString(START_UNABLE_TO_INIT_SDL_STRING) + SDL_GetError());return(EXIT_FAILURE);
@@ -190,7 +101,7 @@ int main(int argc, char *argv[])
 	}
 	
 	screen->setResolution(clientWindow.w, clientWindow.h);
-	printSurfaceInformation(screen);
+	toLog(DC::printSurfaceInformation(screen));
 	
 	SDL_Event event;
 
@@ -200,7 +111,6 @@ int main(int argc, char *argv[])
 // ------ END INIT SDL AND WINDOW ------
 
 
-
 // ------ INTRO PICTURE ------
 	SDL_Surface* progress = SDL_LoadBMP("data/bitmaps/bar.bmp");
 //	Bitmap claw("data/bitmaps/clawsoftware.bmp");
@@ -208,11 +118,10 @@ int main(int argc, char *argv[])
 //	screen->DrawBitmap(claw, clientWindow.w - claw->w, clientWindow.h - claw->h);
 	screen->SetPen(Pen(Color(screen->GetSurface(), 255, 255, 255), 1, SOLID_PEN_STYLE));
 	screen->SetBrush(Brush(Color(screen->GetSurface(), 100, 150, 255), SOLID_BRUSH_STYLE));
+
 //	Main::bar = new ProgressBar(Rect((clientWindow.w-progress->w)/2 + 10, (clientWindow.h - progress->h)/2 - 50, progress->w - 20, progress->h - 20));
 //	Main::bar->draw(screen, 5);
 // ------ END INTRO PICTURE -------
-
-
 
 
 // ------ INIT SDL_TTF ------
@@ -235,6 +144,7 @@ int main(int argc, char *argv[])
 	toLog(*UI_Object::theme.lookUpString(START_INIT_GRAPHIC_ENGINE_CORE_STRING));
 	Main m(screen);
 
+	unsigned int screenshot = 100;
 	unsigned int refresh = fps->getFramesPerGeneration();
 //	if(efConfiguration.isAutoSaveRuns())
 //		m.startAllOptimizing();
@@ -242,6 +152,7 @@ int main(int argc, char *argv[])
 //		m.stopAllOptimizing(); TODO
 
 	bool endrun = false;
+	int screenCapturing=0;
 
 //	Main::bar->draw(screen, 100, START_SYSTEM_READY_STRING);
 //	delete Main::bar;
@@ -280,9 +191,33 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 	}
 
 // ------ END INTRO ------
-	
+
+
+
+// MAIN LOOP
 	while(true)
 	{
+// ------ DRAWING ------
+		UI_Object::redrawnObjects = 0;
+		m.process();
+		screen->updateScreen();
+		m.draw(screen);
+// ------ END DRAWING ------
+
+// ------ SCREENCAPTURE ------          
+                if(screenCapturing==100) {
+			std::ostringstream os;os << "shot" << screenshot << ".bmp";
+                        SDL_SaveBMP(screen->GetSurface() , os.str().c_str());
+			screenshot++;
+		}
+		if(screenCapturing>0) {
+			screenCapturing--;
+			std::ostringstream os;os << "shot" << (screenshot-1) << ".bmp" << " saved (" << (clientWindow.w * clientWindow.h * SDL_DRAW_BPP)/1024 << "kb)";
+                        screen->DrawText(os.str(), 50, 600);
+                }
+// ------ END SCREENCAPTURE -----
+
+	
 // ------ FRAMERATE AND CALCULATION ------	
 		unsigned int frames_per_generation = fps->getFramesPerGeneration();
 		unsigned int frames_per_second = fps->getCurrentFramerate();
@@ -314,26 +249,20 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 		endrun=false; // TODO
 // ------ END FRAMERATE AND CALCULATION 
 
-// ------ DRAWING ------
-		UI_Object::redrawnObjects = 0;
-		m.process();
-		m.draw(screen);
-		
-// ------ END DRAWING ------
 
 
 // ------ FPS DEBUG
+/*		Point p = Point(20, clientWindow.h - 40);
 		screen->SetTextForeground(DC::toSDL_Color(255, 20, 20));
 		screen->SetFont(UI_Object::theme.lookUpFont(LARGE_NORMAL_BOLD_FONT));
 		screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
-		screen->DrawRectangle(110,350,200,20);
+		screen->DrawRectangle(Rect(p, Size(200,20)));
 
 		std::ostringstream os;
 		os << "Objects: " << UI_Object::redrawnObjects << "   FPS: " << efConfiguration.getCurrentFramerate();
-		screen->DrawText(os.str(), 100, 350);	
+		screen->DrawText(os.str(), p);	*/
 // ------ END FPS DEBUG
 
-		screen->updateScreen();
 	
 
 		while (SDL_PollEvent(&event))
@@ -403,6 +332,7 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 						case SDLK_SPACE:
 							if(UI_Object::editTextField==NULL)
 							{
+								screenCapturing=100;
 //								if(m.isOptimizing())
 //									m.stopAllOptimizing();
 //								else m.startAllOptimizing();
@@ -471,14 +401,14 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge " + CORE_VERSION + " 
 
 
 //						case SDLK_PRINT:break;
-/*						case SDLK_PLUS:
-								if(UI_Object::theme.getResolution()<RESOLUTION_1280x1024)
-									UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() + 1));
-								break;
-						case SDLK_MINUS:
-								if(UI_Object::theme.getResolution()>RESOLUTION_800x600)
-									UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() - 1));
-								break;*/
+//						case SDLK_PLUS:
+//								if(UI_Object::theme.getResolution()<RESOLUTION_1280x1024)
+//									UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() + 1));
+//								break;
+//						case SDLK_MINUS:
+//								if(UI_Object::theme.getResolution()>RESOLUTION_800x600)
+//									UI_Object::theme.setResolution((eResolution)(UI_Object::theme.getResolution() - 1));
+//								break;
 //						case SDLK_F1:m.mainWindow->forcePressTab(BASIC_TAB);break;
 //						case SDLK_F2:m.mainWindow->forcePressTab(ADVANCED_TAB);break;
 //						case SDLK_F3:m.mainWindow->forcePressTab(EXPERT_TAB);break;

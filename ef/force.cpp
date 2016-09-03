@@ -2,8 +2,8 @@
 #include "../ui/editfield.hpp"
 #include "../core/configuration.hpp"
 
-ForceWindow::ForceWindow(UI_Object* force_parent, const unsigned int force_window_number) :
-	UI_Window(force_parent, FORCE_WINDOW_TITLE_STRING, FORCE_WINDOW, force_window_number, NOT_SCROLLED),
+ForceWindow::ForceWindow(UI_Object* force_parent, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_players) :
+	UI_Window(force_parent, FORCE_WINDOW_TITLE_STRING, theme.lookUpPlayerRect(FORCE_WINDOW, game_number, max_games, player_number, max_players), theme.lookUpPlayerMaxHeight(FORCE_WINDOW, game_number, max_games, player_number, max_players), NOT_SCROLLED),
 	addUnit(0),
 	addTime(0),
 	addLocation(0),
@@ -21,25 +21,24 @@ ForceWindow::ForceWindow(UI_Object* force_parent, const unsigned int force_windo
 	oldMarkedUnit(0),
 	anarace(NULL),
 	unitMenu(new UnitMenu(this, Rect(10, 10, getWidth()-10, 0))),
-	goalMenu(new GoalMenu(this, Rect(10, 10, getWidth()-100, 0))),
-	raceMenu(new RaceMenu(this, Rect(10, 10, getWidth()-200, 0))), // TODO
+	goalMenu(new GoalMenu(this, Rect(10, 10, getWidth()-100, 0)))
+//	raceMenu(new RaceMenu(this, Rect(10, 10, getWidth()-200, 0))), // TODO
 //	locationMenu(new LocationMenu(this, anarace, getRelativeClientRect())),
-	alwaysBuildWorker(new UI_CheckButton(this, Rect(Point(getWidth()-140, 50), Size(200, 15)), SETTING_ALWAYS_BUILD_WORKER_STRING, SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING, coreConfiguration.isAlwaysBuildWorker()))
 	
 {	
-	menuButton[RACE_MENU] = new UI_Button(this, Rect(Point(0, 0), getClientRectSize()), CHOOSE_RACE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE_ONCE);
+//	menuButton[RACE_MENU] = new UI_Button(this, Rect(Point(0, 0), getClientRectSize()), CHOOSE_RACE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE_ONCE);
 	menuButton[UNIT_MENU] = new UI_Button(this, Rect(Point(0, 0), getClientRectSize()), ADD_GOAL_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE_ONCE);
 	menuButton[GOAL_MENU] = new UI_Button(this, Rect(Point(0, 0), getClientRectSize()), GOAL_LIST_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE_ONCE);
-	menuButton[RACE_MENU]->updateToolTip(CHOOSE_RACE_TOOLTIP_STRING);
+//	menuButton[RACE_MENU]->updateToolTip(CHOOSE_RACE_TOOLTIP_STRING);
 	menuButton[UNIT_MENU]->updateToolTip(ADD_GOALS_TOOLTIP_STRING);
 	menuButton[GOAL_MENU]->updateToolTip(CHOOSE_GOALS_TOOLTIP_STRING);
-	
-	raceMenu->Hide();
+
+//	raceMenu->Hide();
 	unitMenu->Hide();
 	goalMenu->Hide();
 
-	for(int i = 0; i<MAX_MENUS; i++)	
-		menuRadio->addButton(menuButton[i]);
+	for(unsigned int i = 0; i<MAX_FORCE_MENUS; i++)	
+		menuRadio->addButton(menuButton[i], i);
 	menuRadio->calculateSameWidthOfButtons(true);
 
 /*	for (unsigned int j = 0; j < 2; j++)	
@@ -48,7 +47,6 @@ ForceWindow::ForceWindow(UI_Object* force_parent, const unsigned int force_windo
 			locationName[j][loc] = new UI_StaticText(this, (*anarace->getMap())->getLocation(loc)->getName(), Rect(getRelativeClientRectPosition()+Point(0,20), getClientRectSize()), FORCE_TEXT_COLOR, SMALL_NORMAL_BOLD_FONT);
 			locationName[j][loc]->Hide();
 		}*/
-//	processList();
 }
 
 ForceWindow::~ForceWindow()
@@ -62,7 +60,7 @@ ForceWindow::~ForceWindow()
 	delete goalsText;
 	delete legend;
 
-	for(int i=MAX_MENUS;i--;)
+	for(unsigned int i=MAX_FORCE_MENUS;i--;)
 		delete menuButton[i];
 //	for(int j = 0; j < 2; j++)
 //		for (unsigned int loc = 0; loc < (*anarace->getMap())->getMaxLocations(); loc++)
@@ -70,11 +68,10 @@ ForceWindow::~ForceWindow()
 	
 	delete unitMenu;
 	delete goalMenu;
-	delete raceMenu; 
+//	delete raceMenu; 
 	
 	delete menuRadio;
 //	delete locationMenu;
-	delete alwaysBuildWorker;
 }
 
 void ForceWindow::assignAnarace(ANABUILDORDER* force_anarace)
@@ -90,7 +87,7 @@ void ForceWindow::closeMenus()
 {
 	unitMenu->close();
 	goalMenu->close();
-	raceMenu->close();
+//	raceMenu->close();
 //	locationMenu->close();
 }
 
@@ -101,8 +98,8 @@ void ForceWindow::process()
 	ForceEntry::changed = NO_MESSAGE;
 	
 	unsigned int oldStartLine = 3;
-	if(raceMenu->getHeight() > oldStartLine)
-		oldStartLine = raceMenu->getHeight();
+//	if(raceMenu->getHeight() > oldStartLine)
+//		oldStartLine = raceMenu->getHeight();
 	if(unitMenu->getHeight()/2 > oldStartLine)
 		oldStartLine = unitMenu->getHeight()/2;
 	if(goalMenu->getHeight() > oldStartLine)
@@ -150,7 +147,10 @@ void ForceWindow::process()
 				}			
 				if(allow)
 				{
-					addUnit = ForceEntry::forceEntryUnit;	addCount = 1  + ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); addTime = ForceEntry::forceEntryTime;	addLocation = ForceEntry::forceEntryLocation;
+					addUnit = ForceEntry::forceEntryUnit;	
+					addCount = 1 + ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); 
+					addTime = ForceEntry::forceEntryTime;	
+					addLocation = ForceEntry::forceEntryLocation;
 					UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(ADDED_ONE_GOAL_STRING, *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+ForceEntry::forceEntryUnit+UNIT_NULL_STRING))));
 					setChangedFlag();
 				}
@@ -184,7 +184,10 @@ void ForceWindow::process()
 				}
 				if(allow)
 				{
-					addUnit = ForceEntry::forceEntryUnit;	addCount = -1  - ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); addTime = ForceEntry::forceEntryTime;	addLocation = ForceEntry::forceEntryLocation;
+					addUnit = ForceEntry::forceEntryUnit;	
+					addCount = -1  - ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); 
+					addTime = ForceEntry::forceEntryTime;	
+					addLocation = ForceEntry::forceEntryLocation;
 					UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(REMOVED_ONE_GOAL_STRING, *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+ForceEntry::forceEntryUnit+UNIT_NULL_STRING))));
 					setChangedFlag();
 				}
@@ -196,7 +199,10 @@ void ForceWindow::process()
 		{
 			if(ForceEntry::changed == LEFT_CLICKED)
 			{
-				addUnit = ForceEntry::forceEntryUnit;	addCount = 1 + ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); addTime = 0;	addLocation = 0;
+				addUnit = ForceEntry::forceEntryUnit;	
+				addCount = 1 + ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); 
+				addTime = 0;	
+				addLocation = 0;
 				UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(MOVED_NON_GOAL_STRING, *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+ForceEntry::forceEntryUnit+UNIT_NULL_STRING))));
 				setChangedFlag();
 //				movedForceEntry=*forceEntry;
@@ -267,7 +273,10 @@ void ForceWindow::process()
 		}
 		if(allow)
 		{
-			addUnit = unitMenu->getPressedItem(); addCount = 1 + ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); addTime = 0; addLocation = 0;
+			addUnit = unitMenu->getPressedItem(); 
+			addCount = 1 + ((stats[anarace->getRace()][addUnit].create>0)&&(stats[anarace->getRace()][addUnit].create==addUnit)); 
+			addTime = 0; 
+			addLocation = 0;
 			UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(ADDED_GOAL_STRING, *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+unitMenu->getPressedItem()+UNIT_NULL_STRING))));
 		}
 	}
@@ -276,24 +285,24 @@ void ForceWindow::process()
 	{
 		assignGoal = goalMenu->getPressedItem();
 		menuRadio->forceUnpressAll();
-		UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(SET_NEW_GOAL_LIST_STRING, anarace->getGoal()->getName()));
 		menuButton[GOAL_MENU]->forceUnpress();
 	}
 	
-	if(raceMenu->getPressedItem()>=0)
+/*	if(raceMenu->getPressedItem()>=0)
 	{
 		assignRace = raceMenu->getPressedItem();
 		UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(SET_RACE_STRING, *theme.lookUpString((eString)(TERRA_STRING + assignRace)))); 
+		menuRadio->forceUnpressAll(); // ?
 		menuButton[RACE_MENU]->forceUnpress();
-	}
+	}*/
 
 // ------ OPEN/CLOSE MENUES
-	if(menuRadio->hasChanged())
+	if(menuRadio->buttonHasChanged())
 	{
 		switch(menuRadio->getMarked())
 		{
 			// TODO in ne eigene Klasse oder so
-			case RACE_MENU:
+	/*		case RACE_MENU:
 			{
 				raceMenu->open();
 			   	if(!raceMenu->isOpen()) 
@@ -305,12 +314,12 @@ void ForceWindow::process()
 					closeMenus();
 					raceMenu->open();
 				}
-			}break;
+			}break;*/
 		
 			case UNIT_MENU:
 			{
 				unitMenu->open();
-				if(!unitMenu->isOpen()) 
+				if(!unitMenu->isOpen())
 				{
 					menuRadio->forceUnpressAll();
 					closeMenus();
@@ -320,7 +329,7 @@ void ForceWindow::process()
 					closeMenus();
 					unitMenu->open();
 				}
-				unitMenu->process();
+//				unitMenu->process();
 			}break;
 			
 			case GOAL_MENU:
@@ -340,9 +349,10 @@ void ForceWindow::process()
 			
 			default:break;
 		} // end of menuRadio has changed
-		processList();
 //		setChangedFlag();
+		processList();
 	}
+//		setChangedFlag(); WTF?
 		
 // ------ CLOSE MENUES IF MOUSE HAS LEFT FORCE WINDOW	
 	if(!isMouseInside()) 
@@ -362,27 +372,28 @@ void ForceWindow::process()
 	if(assignGoal>=0)
 	{
 		anarace->assignGoal(database.getGoal(anarace->getRace(), goalMenu->getPressedItem()));
-                std::list<ForceEntry*>::iterator a = goalForceList.begin();
-                while(a!=goalForceList.end())
-                {
+		UI_Object::msgList.push_back(UI_Object::theme.lookUpFormattedString(SET_NEW_GOAL_LIST_STRING, anarace->getGoal()->getName()));
+		std::list<ForceEntry*>::iterator a = goalForceList.begin();
+		while(a!=goalForceList.end())
+		{
 			if(UI_Object::currentButton==*a)
-                        	UI_Object::currentButton=NULL;
-                        delete(*a);
-                        a = goalForceList.erase(a);
-                }
-                a = nongoalForceList.begin();
-                while(a!=nongoalForceList.end())
-                {
+				UI_Object::currentButton=NULL;
+			delete(*a);
+			a = goalForceList.erase(a);
+		}
+		a = nongoalForceList.begin();
+		while(a!=nongoalForceList.end())
+		{
 			if(UI_Object::currentButton==*a)
-                        	UI_Object::currentButton=NULL;
-                        delete(*a);
-                        a = nongoalForceList.erase(a);
-                }
+				UI_Object::currentButton=NULL;
+			delete(*a);
+			a = nongoalForceList.erase(a);
+		}
 		setChangedFlag();		
 	}
-	if(assignRace>=0)
+/*	if(assignRace>=0)
 	{
-	// TODO evtl in game verschieben... bzw. game aufrufen... :[
+	// TODO evtl in game verschieben... bzw. game aufrufen... :[ DONE
 		anarace->setRace((eRace)assignRace);
 		anarace->assignGoal(database.getGoal(anarace->getRace(), 0)); // assign default goal
 		anarace->assignStartCondition(database.getStartCondition(anarace->getRace(), 0)); // assign default startcondition
@@ -399,26 +410,26 @@ void ForceWindow::process()
 		std::list<ForceEntry*>::iterator a = goalForceList.begin();
 		while(a!=goalForceList.end())
 		{
-                        if(UI_Object::currentButton==*a)
+			if(UI_Object::currentButton==*a)
 				UI_Object::currentButton=NULL;
 			delete(*a);
 			a = goalForceList.erase(a);
 		}
 		a = nongoalForceList.begin();
-                while(a!=nongoalForceList.end())
-                {
-                        if(UI_Object::currentButton==*a)
+		while(a!=nongoalForceList.end())
+		{
+			if(UI_Object::currentButton==*a)
 				UI_Object::currentButton=NULL;
-                        delete(*a);
-                        a = nongoalForceList.erase(a);
-                }		
+			delete(*a);
+			a = nongoalForceList.erase(a);
+		}		
 		
 		setResetFlag(); //!
-	}
+	}*/
 
 	startLine = 3;
-	if(raceMenu->getHeight() > startLine)
-		startLine = raceMenu->getHeight();
+//	if(raceMenu->getHeight() > startLine)
+//		startLine = raceMenu->getHeight();
 	if(unitMenu->getHeight()/2 > startLine)
 		startLine = unitMenu->getHeight()/2;
 	if(goalMenu->getHeight() > startLine)
@@ -431,9 +442,6 @@ void ForceWindow::process()
 	else	
 		menuButton[UNIT_MENU]->updateText(ADD_GOAL_STRING);
 
-	if(coreConfiguration.isAlwaysBuildWorker() != alwaysBuildWorker->isChecked() )
-		setChangedFlag();
-	coreConfiguration.setAlwaysBuildWorker( alwaysBuildWorker->isChecked() );
 	
 	if((startLine!=oldStartLine)||(getChangedFlag()))
 	{
@@ -441,6 +449,13 @@ void ForceWindow::process()
 		processList();
 	}
 
+	if(unitMenu->isOpen())
+	{
+		techTreeWindow->assignAnarace(anarace);
+		techTreeWindow->setCurrentGoalUnit(currentGoalUnit);
+		techTreeWindow->Show();
+	}
+	//else techTreeWindow->Hide();
 	
 }
 
@@ -461,25 +476,25 @@ void ForceWindow::processList()
 	std::list<ForceEntry*>::iterator goal_entry = goalForceList.begin();
 
 	for(std::list<GOAL>::iterator i = anarace->getGoal()->goal.begin(); i!= anarace->getGoal()->goal.end(); ++i)
-        {
-                if(goal_entry == goalForceList.end())
-                {
-                // Suche gleichen Nongoal Eintrag
-                        std::list<ForceEntry*>::iterator nongoal_entry = nongoalForceList.begin();
-                        while(nongoal_entry != nongoalForceList.end())
-                        {
-                                if((*nongoal_entry)->getUnit() == i->getUnit())
-                                        break;
-                                nongoal_entry++;
-                        }
-                        if(nongoal_entry == nongoalForceList.end()) // =>     Not found? => Insert new goal at the end
-                        {
-                                ForceEntry* forceEntry = new ForceEntry(this, Rect(getRelativeClientRectPosition()+Point(0,0), Size(getClientRectWidth(), FONT_SIZE+6)), "");
-                                forceEntry->setUnit(i->getUnit());
-                                forceEntry->setType(stats[anarace->getRace()][i->getUnit()].unitType);
-                                forceEntry->updateText("   " + *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i->getUnit()+UNIT_NULL_STRING)));
-                                forceEntry->assignGoal(&*i);
-                                goalForceList.push_back(forceEntry);
+	{
+		if(goal_entry == goalForceList.end())
+		{
+		// Suche gleichen Nongoal Eintrag
+			std::list<ForceEntry*>::iterator nongoal_entry = nongoalForceList.begin();
+			while(nongoal_entry != nongoalForceList.end())
+			{
+				if((*nongoal_entry)->getUnit() == i->getUnit())
+					break;
+				nongoal_entry++;
+			}
+			if(nongoal_entry == nongoalForceList.end()) // =>     Not found? => Insert new goal at the end
+			{
+				ForceEntry* forceEntry = new ForceEntry(this, Rect(getRelativeClientRectPosition()+Point(0,0), Size(getClientRectWidth(), FONT_SIZE+6)), "");
+				forceEntry->setUnit(i->getUnit());
+				forceEntry->setType(stats[anarace->getRace()][i->getUnit()].unitType);
+				forceEntry->updateText("   " + *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i->getUnit()+UNIT_NULL_STRING)));
+				forceEntry->assignGoal(&*i);
+				goalForceList.push_back(forceEntry);
 			} //=> Found? => move
 			else 
 			{
@@ -488,38 +503,39 @@ void ForceWindow::processList()
 				nongoalForceList.erase(nongoal_entry);
 			}
 		} else 
-                if((*goal_entry)->getUnit() != i->getUnit())
-                {
-                        std::list<ForceEntry*>::iterator k = goal_entry;
-                        while(k != goalForceList.end())
-                        {
-                                if((*k)->getUnit() == i->getUnit())
-                                        break;
-                                k++;
-                        }
-                        if(k != goalForceList.end()) // => Found, move the entry
-                        {
-                                ForceEntry* old = *k;
-                                goal_entry = goalForceList.insert(goal_entry, old);
-                                goal_entry++;
-                                goalForceList.erase(k);
-                        } else // => not found, insert a new one
-                        {
-                                ForceEntry* forceEntry = new ForceEntry(this, Rect(getRelativeClientRectPosition()+Point(0,0), Size(getClientRectWidth(), FONT_SIZE+6)), "");
-                                forceEntry->setUnit(i->getUnit());
-                                forceEntry->setType(stats[anarace->getRace()][i->getUnit()].unitType);
-                                forceEntry->updateText("   " + *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i->getUnit()+UNIT_NULL_STRING)));
-                                forceEntry->assignGoal(&*i);
-                                goal_entry = goalForceList.insert(goal_entry, forceEntry);
+		if((*goal_entry)->getUnit() != i->getUnit())
+		{
+			std::list<ForceEntry*>::iterator k = goal_entry;
+			while(k != goalForceList.end())
+			{
+				if((*k)->getUnit() == i->getUnit())
+					break;
+				k++;
+			}
+			if(k != goalForceList.end()) // => Found, move the entry
+			{
+				ForceEntry* old = *k;
+				goal_entry = goalForceList.insert(goal_entry, old);
 				goal_entry++;
-                        }
-                } else // ok
-//              if((*entry)->getUnit() == (*order)->getUnit())
-                {
+				goalForceList.erase(k);
+			} else // => not found, insert a new one
+			{
+				ForceEntry* forceEntry = new ForceEntry(this, Rect(getRelativeClientRectPosition()+Point(0,0), Size(getClientRectWidth(), FONT_SIZE+6)), "");
+				forceEntry->setUnit(i->getUnit());
+				forceEntry->setType(stats[anarace->getRace()][i->getUnit()].unitType);
+				forceEntry->updateText("   " + *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i->getUnit()+UNIT_NULL_STRING)));
+				forceEntry->assignGoal(&*i);
+				goal_entry = goalForceList.insert(goal_entry, forceEntry);
+				goal_entry++;
+			}
+		} else // ok
+//	      if((*entry)->getUnit() == (*order)->getUnit())
+		{
 			(*goal_entry)->updateText("   " + *UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+i->getUnit()+UNIT_NULL_STRING)));
-                        goal_entry++;
-                }
-        }
+
+			goal_entry++;
+		}
+	}
 
 	while(goal_entry != goalForceList.end())
 	{
@@ -654,13 +670,13 @@ void ForceWindow::processList()
 // ------------------- GOALS ----------------------------
 // ------ START WHERE THE MENUES END
 	startLine = 3;
-	if(raceMenu->getHeight() > startLine)
-		startLine = raceMenu->getHeight();
+//	if(raceMenu->getHeight() > startLine)
+//		startLine = raceMenu->getHeight();
 	if(unitMenu->getHeight()/2 > startLine)
 		startLine = unitMenu->getHeight()/2;
 	if(goalMenu->getHeight() > startLine)
 		startLine = goalMenu->getHeight();
-	unsigned int line = 2;
+	unsigned int line = 0;
 	
 	anarace->countUnitsTotal();
 	goalsText->adjustRelativeRect(Rect(Point(7, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)), Size(getClientRectWidth(), FONT_SIZE+5)));
@@ -688,12 +704,12 @@ void ForceWindow::processList()
 	
 	// TODO 2. Modus machen um Produktionsgebaeude ueber 'facility' zu bestimmen (fuer hotkeys geradezu praedestiniert)
 		if(anarace->getLocationTotal(i->getLocation(), i->getUnit()) >= i->getCount())
-			(*forceEntry)->setTargetForce(getClientRectWidth() / 3);
+			(*forceEntry)->setTargetForce(getClientRectWidth() /3);
 		else
 			(*forceEntry)->setTargetForce(anarace->getLocationTotal(i->getLocation(), i->getUnit()) * getClientRectWidth() / (3*i->getCount()));
 		(*forceEntry)->setTotalNumber(anarace->getLocationTotal(i->getLocation(), i->getUnit()));
 				
-		Rect edge = Rect(getRelativeClientRectPosition() + Point(0, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)), Size((*forceEntry)->getWidth(), FONT_SIZE+6));
+		Rect edge = Rect(getRelativeClientRectPosition() + Point(0, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)), Size(/*(*forceEntry)->getWidth()*/getClientRectWidth(), FONT_SIZE+6));
 		(*forceEntry)->adjustRelativeRect(edge);
 	
 /*		if((*forceEntry)->isLocationGoalClicked())
@@ -815,6 +831,7 @@ void ForceWindow::processList()
 			} // goal > 0
 	}*/
 
+	line--;
 	Rect edge=Rect(getRelativeClientRectPosition() + Point(0, line * (FONT_SIZE+7) + startLine*(FONT_SIZE+9)), Size(getClientRectWidth(), FONT_SIZE+6));
 	fitItemToRelativeClientRect(edge, 1);
 	
@@ -856,10 +873,9 @@ void ForceWindow::draw(DC* dc) const
 		}*/
 	
 }
-
+/*
 void ForceWindow::drawTechTree(DC* dc) const
 {
-	if(unitMenu->isOpen())
 	{
 		Point p(270, 550);
 		Size s(100, 15);
@@ -949,8 +965,7 @@ void ForceWindow::drawTechTree(DC* dc) const
 			}
 	}
 }
+*/
 
-
-
-
+TechTreeWindow* ForceWindow::techTreeWindow = NULL;
 

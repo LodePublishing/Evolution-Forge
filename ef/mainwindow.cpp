@@ -1,45 +1,87 @@
 #include "mainwindow.hpp"
+#include <sstream>
 #include "configuration.hpp"
 
 MainWindow::MainWindow() : 
-	UI_Window( NULL, MAIN_WINDOW_TITLE_STRING, MAIN_WINDOW, 0, NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, TABBED ),
+	UI_Window( NULL, MAIN_WINDOW_TITLE_STRING, theme.lookUpGlobalRect(MAIN_WINDOW), theme.lookUpGlobalMaxHeight(MAIN_WINDOW), NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, TABBED, Rect(0, 0, 1280, 1024), TRANSPARENT ),
 	ani(1),
 	ani2(0),
-	gizmo(true)
+	gizmo(true),
+	gameTabCount(0)
 {
 // TODO: nach resolutions ordnen! *theme.lookUpRect etc. in data.txt eintragen
 // left:
-	tab[BASIC_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), BASIC_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
-	tab[ADVANCED_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), ADVANCED_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
-	tab[EXPERT_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), EXPERT_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
-	tab[GOSU_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), GOSU_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
 
+	for(unsigned int i = MAX_TABS;i--;)
+		tab[i]=NULL;
+ 	tab[0] = new UI_Button(this, Point(10, 20), Size(20, 0), "New Game", TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
 // right:
-	tab[COMPARE_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), COMPARE_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
-	tab[TUTORIAL_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), TUTORIAL_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
-	tab[SETTINGS_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), SETTINGS_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
-	tab[MAP_TAB] = new UI_Button(this, Rect(getRelativePosition()+Size(10,0), Size(getWidth()-20, 20)), MAP_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+	tab[TUTORIAL_TAB] = new UI_Button(this, Point(10, 20), Size(20, 0), TUTORIAL_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+	tab[SETTINGS_TAB] = new UI_Button(this, Point(10, 20), Size(20, 0), SETTINGS_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+	tab[MAP_TAB] = new UI_Button(this, Point(10, 20), Size(20, 0), MAP_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
 
 	int step=theme.lookUpButtonAnimation(TAB_BUTTON)->speed/(MAX_TABS-1);
-	for(int i=BASIC_TAB;i<MAX_TABS;i++)
+	for(unsigned int i=MAX_TABS;i--;)
+	if(tab[i]!=NULL)
 	{
-		tab[i]->updateToolTip((eString)(BASIC_TAB_TOOLTIP_STRING+i-1));
-		addTab(tab[i]);
-		tab[i]->setFrameNumber((i-1)*step);
+//		tab[i]->updateToolTip((eString)(BASIC_TAB_TOOLTIP_STRING+i-1));
+		addTab(tab[i], i);
+//		tab[i]->setFrameNumber((i-1)*step);
 	}
-
-	tab[EXPERT_TAB]->Disable(); // TODO
-	tab[GOSU_TAB]->Disable();
-	tab[TUTORIAL_TAB]->Disable();
-	tab[MAP_TAB]->Disable();
-//	tab[COMPARE_TAB]->Disable();
 }
-
 
 MainWindow::~MainWindow()
 {
-	for(int i=BASIC_TAB;i<MAX_TABS;i++)
+	for(unsigned int i=MAX_TABS;i--;)
 		delete tab[i];
+}
+
+void MainWindow::addNewGameTab()
+{
+	delete(tab[gameTabCount]); // 'new game' loeschen
+	removeTab(gameTabCount);
+	UI_Object::currentButton = NULL;
+	
+	std::ostringstream os;
+	os << "Game " << gameTabCount+1;
+	tab[gameTabCount] = new UI_Button(this, Point(10, 20), Size(20, 0), os.str(), TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+	addTab(tab[gameTabCount], gameTabCount);
+	gameTabCount++;
+
+	if(gameTabCount<MAX_GAME_TABS)
+	{
+	 	tab[gameTabCount] = new UI_Button(this, Point(10, 20), Size(20, 0), "New Game", TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+		addTab(tab[gameTabCount], gameTabCount);
+	}
+}
+
+const unsigned int MainWindow::getGameTabCount() const
+{
+	return gameTabCount;
+}
+
+void MainWindow::removeGameTab(const unsigned int game_number)
+{
+#ifdef _SCC_DEBUG
+	if(game_number>=gameTabCount) {
+		toLog("DEBUG: (MainWindow::removeGameTab): Value game_number out of range.");return;
+	}
+#endif
+	removeTab(game_number);
+//	UI_Object::currentButton = NULL;
+	delete(tab[game_number]);
+	for(unsigned int i = game_number; i < gameTabCount-1;i++)
+		tab[i] = tab[i+1];
+	gameTabCount--;	
+	if(gameTabCount==MAX_GAME_TABS-1) // alles voll => letztes durch new game ersetzen
+	{
+	 	tab[gameTabCount] = new UI_Button(this, Point(10, 20), Size(20, 0), "New Game", TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP_LEFT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+		addTab(tab[gameTabCount], gameTabCount);
+	} else 
+	{
+		tab[gameTabCount]=tab[gameTabCount+1];
+		tab[gameTabCount+1]=NULL;
+	}
 }
 
 void MainWindow::process()
@@ -65,13 +107,13 @@ void MainWindow::continueOptimizationAnimation(const bool running)
 	if(ani>30) ani = 1;
 }
 
-const Size MainWindow::helper(DC* dc, const unsigned int dx, const int i, const std::string& str) const
+const Size MainWindow::helper(DC* dc, Point point, const unsigned int dx, const int i, const std::string& str) const
 {
 	dc->SetTextForeground(DC::toSDL_Color(
 				(Uint8)((0==ani%(20+i))*35+((0==ani%(19+i))+(0==ani%(21+i)))*15+20),
 				(Uint8)((0==ani%(20+i))*35+((0==ani%(19+i))+(0==ani%(21+i)))*15+20),
 				(Uint8)((0==ani%(20+i))*35+((0==ani%(19+i))+(0==ani%(21+i)))*30+60)));
-	dc->DrawText(str.substr(str.size()-1, str.size()), getAbsoluteClientRectPosition()+Point(20+dx,20));
+	dc->DrawText(str.substr(str.size()-1, str.size()), point + Size(dx, 0));
 	return(dc->GetTextExtent(str.c_str()));
 }
 
@@ -80,21 +122,27 @@ void MainWindow::draw(DC* dc) const
 //jedem player ein mainwindow zuweisen!
 	UI_Window::draw(dc);
 
-	dc->SetFont(UI_Object::theme.lookUpFont(HUGE_DEFAULT_BOLD_FONT));
-	std::string str="Evolution";
-	Size s;
-	for(unsigned int i=0;i<str.size();i++)
-		s = helper(dc, s.GetWidth(), i, str.substr(0, i+1));
-
-	dc->SetTextForeground(DC::toSDL_Color(25, 25, 85));
-	dc->DrawText("Forge", getAbsoluteClientRectPosition() + Point(50, 58));
-	dc->SetTextForeground(DC::toSDL_Color(0,0,85));
-	dc->DrawText(CORE_VERSION, getAbsoluteClientRectPosition()+Point(78, 98));
-	dc->SetTextForeground(DC::toSDL_Color(50, 50, 85));
-	dc->DrawText(CORE_VERSION, getAbsoluteClientRectPosition()+Point(75, 95));
-//	if(UI_Object::tooltip)
-//		UI_Object::tooltip->draw(dc);
-		// ------ MOUSE DRAWING ------
+	if(checkForNeedRedraw())
+	{
+		dc->SetFont(UI_Object::theme.lookUpFont(VERY_LARGE_NORMAL_BOLD_FONT));
+//		std::string str="Evolution Forge";
+//		Size s;
+		Point point = Point(getAbsoluteClientRectPosition() + Size(getWidth()/2 - 120, 25));
+//		for(unsigned int i=0;i<str.size();i++)
+//			s = helper(dc, point, s.GetWidth(), i, str.substr(0, i+1));
+		dc->SetTextForeground(DC::toSDL_Color(0, 0, 85));
+		dc->DrawText("Evolution Forge v1.64", point+Size(2,2));
+		dc->SetTextForeground(DC::toSDL_Color(50, 50, 85));
+		dc->DrawText("Evolution Forge v1.64", point);
+//		dc->SetTextForeground(DC::toSDL_Color(0,0,85));
+//		dc->DrawText(CORE_VERSION, point + Size(20, 30) + Size(2,2));
+//		dc->SetTextForeground(DC::toSDL_Color(50, 50, 85));
+//		dc->DrawText(CORE_VERSION, point + Size(20, 30)); TODO
+//		if(UI_Object::tooltip)
+//			UI_Object::tooltip->draw(dc);
+	}
+//	
+// ------ MOUSE DRAWING ------
 		if(efConfiguration.isSoftwareMouse())
 		{
 //			SDL_ShowCursor(SDL_DISABLE);

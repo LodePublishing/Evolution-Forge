@@ -55,21 +55,26 @@ ANABUILDORDER* SOUP::getAnalyzedBuildOrder(const unsigned int player_num)
 	return(analyzedBuildOrder[player_num]);
 }
 
-void SOUP::initSoup(START* (*start)[MAX_PLAYER]) // TODO start raus...
+void SOUP::initSoup(START* (*start)[MAX_INTERNAL_PLAYER])
 {
 /* benoetigt folgende initialisierte Daten:
    mapPlayerNum
 */
 #ifdef _SCC_DEBUG
+/*f(player_number >= mapPlayerNum)
+	{
+		toLog("ERROR: (SOUP::initSoup) player_number out of range.");
+		return;
+	}*/
 /*	if(!mapInitialized)
 	{
 		toLog("ERROR: (SOUP::initSoup) Map not initialized.");
-		return(0);
+		return;
 	}
 	if(!goalsInitialized)
 	{
 		toLog("ERROR: (SOUP::initSoup) Goals not initialized.");
-		return(0);
+		return;
 	}
 	*/
 #endif
@@ -102,8 +107,8 @@ void SOUP::initSoup(START* (*start)[MAX_PLAYER]) // TODO start raus...
 			}
 			buildOrder[i+k*groupSize]->assignStart((*start)[k+1]);
 			buildOrder[i+k*groupSize]->setPlayerNumber(k+1);
-			
 			buildOrder[i+k*groupSize]->resetGeneCode();
+			buildOrder[i+k*groupSize]->assignUnits(&temporaryForce);
 		}
 		if(analyzedBuildOrder[k])
 			analyzedBuildOrder[k]->resetData();
@@ -111,6 +116,7 @@ void SOUP::initSoup(START* (*start)[MAX_PLAYER]) // TODO start raus...
 		{
 			delete analyzedBuildOrder[k];
 			analyzedBuildOrder[k] = new ANABUILDORDER();
+			analyzedBuildOrder[k]->assignUnits(&temporaryForce);
 		}
 		analyzedBuildOrder[k]->assignStart((*start)[k+1]);
 		analyzedBuildOrder[k]->setPlayerNumber(k+1);
@@ -120,8 +126,19 @@ void SOUP::initSoup(START* (*start)[MAX_PLAYER]) // TODO start raus...
 		delete analyzedBuildOrder[k];
 		analyzedBuildOrder[k] = NULL;
 	}
-		//what about 'player'?
 }
+
+void SOUP::setMapPlayerNum(const unsigned int map_player_num)
+{
+#ifdef _SCC_DEBUG
+	if((map_player_num < 1) || (map_player_num > MAX_PLAYER)) {
+		toLog("DEBUG: (SOUP::setMapPlayerNum): map_player_num not initialized.");return;
+	}
+#endif
+	mapPlayerNum = map_player_num;
+	// TODO irgendwie von hier initSoup aufrufen
+}
+
 
 //TODO: Ueber Optionen einstellen, welche Fitness ueberhaupt bzw. wie stark gewertet wird (oder ob z.B. die Fitnesswerte zusammengeschmissen werden sollen etc.)
 
@@ -152,9 +169,8 @@ struct SoupPlayerDescendingFitnessSort {
 void SOUP::calculateAnalyzedBuildOrder()
 {
 	for(unsigned int k = mapPlayerNum; k--;)
-		if(analyzedBuildOrder[k]->isActive())
+		if(analyzedBuildOrder[k]->isOptimizing())
 		{
-			analyzedBuildOrder[k]->assignUnits(&unit);
 			analyzedBuildOrder[k]->prepareForNewGeneration();
 			analyzedBuildOrder[k]->initializePlayer();
 			analyzedBuildOrder[k]->adjustHarvestAllLocations();
@@ -165,7 +181,7 @@ void SOUP::calculateAnalyzedBuildOrder()
 	{
 		complete = true;
 		for(unsigned int k = mapPlayerNum; k--;)
-			if(analyzedBuildOrder[k]->isActive())
+			if(analyzedBuildOrder[k]->isOptimizing())
 				complete&=analyzedBuildOrder[k]->calculateStep();
 	}
 //		analyzedBuildOrder[0]->backupMap();  backup&&restore map currently off-line!!!
@@ -176,15 +192,15 @@ void SOUP::calculateAnalyzedBuildOrder()
 void SOUP::calculateBuildOrder(const unsigned int bo_num)
 {
 // Map mit Startwerten initialisieren, muss JEDEN Durchlauf passieren!! sonst sammeln sich in der statischen loc variable Haufenweise Commando Centers an 8-)
-/* copies the precalculated startforce from pStart into our map (unit[][])
+/* copies the precalculated startforce from pStart into our map (temporaryForce[][])
  * this is done 1:1, i.e. with memcpy */
 	const unsigned int groupSize=MAX_PROGRAMS/mapPlayerNum;
 
 	//reset code && calculate 
 	for(unsigned int k = mapPlayerNum; k--;)
-		if(analyzedBuildOrder[k]->isActive())
+		if(analyzedBuildOrder[k]->isOptimizing())
 		{
-			buildOrder[k*groupSize+bo_num]->assignUnits(&unit);
+			buildOrder[k*groupSize+bo_num]->assignUnits(&temporaryForce);
 			buildOrder[k*groupSize+bo_num]->prepareForNewGeneration();
 			buildOrder[k*groupSize+bo_num]->initializePlayer();
 			buildOrder[k*groupSize+bo_num]->adjustHarvestAllLocations();
@@ -201,14 +217,14 @@ void SOUP::calculateBuildOrder(const unsigned int bo_num)
 	while(!complete)
 	{
 		complete=true;
-		for(int k=mapPlayerNum;k--;)
-			if(analyzedBuildOrder[k]->isActive())
+		for(unsigned int k=mapPlayerNum;k--;)
+			if(analyzedBuildOrder[k]->isOptimizing())
 				complete&=buildOrder[k*groupSize+bo_num]->calculateStep();
 	}
 }
 
 
-const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER], UNIT (*units)[MAX_PLAYER][MAX_LOCATIONS]) //reset: have the goals/settings been changed?
+const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER], const UNIT (*startForce)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]) //reset: have the goals/settings been changed?
 {
 #ifdef _SCC_DEBUG
 	/*if(!mapInitialized)
@@ -237,13 +253,11 @@ const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_P
 				buildOrder[j*groupSize]->Code[i]=previous_analyzed_buildorder[j]->Code[i];
 				buildOrder[j*groupSize]->Marker[i]=previous_analyzed_buildorder[j]->Marker[i];
 			}
-//			analyzedBuildOrder[j]->setActive(previous_analyzed_buildorder[j]->isActive());
 //			analyzedBuildOrder[j]->setOptimizing(previous_analyzed_buildorder[j]->isOptimizing());
 		}
 	if(!previous_analyzed_buildorder[0])
 	{
-		analyzedBuildOrder[0]->setActive(true);
-		analyzedBuildOrder[0]->setOptimizing(false);
+		analyzedBuildOrder[0]->setOptimizing(true);
 	}*/
 	
 
@@ -253,14 +267,14 @@ const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_P
 
 	for(unsigned int i=groupSize;i--;)
 	{
-		memcpy(&unit, &((*units)[0][0]), sizeof(unit));
+		memcpy(&temporaryForce, &((*startForce)[0][0]), sizeof(temporaryForce));
 		calculateBuildOrder(i);
 	}
 //NOW: all pFitness of the players are calculated
 
 // SORT players	
 	for(unsigned int k=mapPlayerNum;k--;)
-		if(analyzedBuildOrder[k]->isActive())
+		if(analyzedBuildOrder[k]->isOptimizing())
 		{
 			std::sort(buildOrder+k*groupSize, buildOrder+(k+1)*groupSize, SoupPlayerDescendingFitnessSort());
 	//NOW: all players are sorted
@@ -286,8 +300,8 @@ const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_P
 
 // Do we have a new best player?
 		newcalc = false;
-                for(int k=mapPlayerNum;k--;)
-                        if(analyzedBuildOrder[k]->isActive())
+                for(unsigned int k=mapPlayerNum;k--;)
+                        if(analyzedBuildOrder[k]->isOptimizing())
                         {
                                 if((buildOrder[k*groupSize]->getpFitness()>analyzedBuildOrder[k]->getMaxpFitness())||
 
@@ -333,7 +347,7 @@ const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_P
 	{
 //jetzt: sortieren
 		for(int k=0;k<mapPlayerNum-1;k++)
-		if(analyzedBuildOrder[k]->isActive())
+		if(analyzedBuildOrder[k]->isOptimizing())
 			for(int i=0;i<tournaments;i++)
 			{
 				for(int j=(k*groupSize)+i*(100/ga->getCrossOver());j<(k*groupSize)+(i+1)*(100/ga->getCrossOver());j++) //diese (100/ga->crossOver) Programme untereinander sortieren
@@ -348,7 +362,7 @@ const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_P
 																				
 																				
 //		for(int k=0;k<mapPlayerNum-1;k++)
-//		if(analyzedBuildOrder[k]->isActive())
+//		if(analyzedBuildOrder[k]->isOptimizing())
 //			for(int i=0;i<tournaments;i++)
 //			{
 //				int p1=i*(100/ga->getCrossOver())+(k*groupSize);
@@ -363,13 +377,13 @@ const bool SOUP::newGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_P
 
 //	if(newcalc)
 //	{
-	memcpy(&unit, &((*units)[0][0]), sizeof(unit));
+	memcpy(&temporaryForce, &((*startForce)[0][0]), sizeof(temporaryForce));
 	calculateAnalyzedBuildOrder();
 
 // SOME POST PROCESSING
 // CALCULATE FITNESS AVERAGE & VARIANCE
 	for(unsigned int k=mapPlayerNum;k--;)
-		if(analyzedBuildOrder[k]->isActive()) //~~ TODO evtl isOptimizing stattdessen...
+		if(analyzedBuildOrder[k]->isOptimizing()) //~~ TODO evtl isOptimizing stattdessen...
 		{
 			analyzedBuildOrder[k]->fitnessAverage=0;
 			for(unsigned int i=k*groupSize;i<(k+1)*groupSize;i++)

@@ -19,7 +19,7 @@ class DATABASE
 		std::vector<BASIC_MAP*> loadedMap; //modes: 0: ignore map settings and make up a default force, 1: use map settings
 		std::vector<HARVEST_SPEED*> loadedHarvestSpeed[MAX_RACES];
 	public:
-		static std::list<std::string> findFiles(const std::string& directory1, const std::string& directory2, const std::string& directory3);
+		static std::list<std::string> findFiles(const std::string& directory1, const std::string& directory2, const std::string& directory3="");
 // ----- MAPS -----
 		void loadMapFile(const std::string& mapFile);
 		const unsigned int getMapCount() const;

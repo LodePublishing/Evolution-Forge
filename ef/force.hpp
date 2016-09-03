@@ -5,9 +5,11 @@
 
 #include "unitmenu.hpp"
 #include "goalmenu.hpp"
-#include "racemenu.hpp"
+//#include "racemenu.hpp"
 #include "forceentry.hpp"
 #include "locmenu.hpp"
+
+#include "techtree.hpp"
 
 #include "../core/anabuildorder.hpp"
 #include "../core/database.hpp"
@@ -17,16 +19,17 @@
 
 enum eMenu
 {
-	RACE_MENU,
+//	RACE_MENU,
 	UNIT_MENU,
 	GOAL_MENU,
-	MAX_MENUS
+	
+	MAX_FORCE_MENUS
 };
 
 class ForceWindow : public UI_Window
 {
 	public:
-		ForceWindow(UI_Object* force_parent, const unsigned int force_window_number);
+		ForceWindow(UI_Object* force_parent, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_players);
 		~ForceWindow();
 		
 		void processList();
@@ -35,8 +38,8 @@ class ForceWindow : public UI_Window
 		const unsigned int getMarkedUnit() const;
 		void setMarkedUnit(const unsigned int marked_unit);
 		void assignAnarace(ANABUILDORDER* force_anarace);
-		void drawTechTree(DC* dc) const;
 		void reloadStrings();
+		static TechTreeWindow* techTreeWindow;
 	private:
 		unsigned int addUnit, addTime, addLocation;
 		signed int addCount;
@@ -47,7 +50,7 @@ class ForceWindow : public UI_Window
 		void closeMenus();
 
 		UI_Radio* menuRadio;
-		UI_Button* menuButton[MAX_MENUS];
+		UI_Button* menuButton[MAX_FORCE_MENUS];
 		UI_Button* saveGoalButton;
 
 		UI_StaticText* nongoalsText;
@@ -63,9 +66,9 @@ class ForceWindow : public UI_Window
 
 		UnitMenu* unitMenu;
 		GoalMenu* goalMenu;
-		RaceMenu* raceMenu;
+//		RaceMenu* raceMenu;
 //		LocationMenu* locationMenu;
-		UI_CheckButton* alwaysBuildWorker;
+
 };
 
 inline void ForceWindow::setMarkedUnit(const unsigned int marked_unit)

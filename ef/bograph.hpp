@@ -9,7 +9,7 @@
 class BoGraphEntry : public UI_Button
 {
 	public:
-		BoGraphEntry(UI_Object* entry_parent, const Rect entry_rect, const PROGRAM& bg_program);
+		BoGraphEntry(UI_Object* entry_parent, const Point top_left, const Size distance_bottom_right, const PROGRAM& bg_program);
 		BoGraphEntry(const BoGraphEntry& object);
 		BoGraphEntry& operator=(const BoGraphEntry& object);
 		~BoGraphEntry();

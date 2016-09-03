@@ -12,6 +12,7 @@
 class BoGraphWindow:public UI_Window
 {
 	public:
+		BoGraphWindow(UI_Object* bograph_parent, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_players);
 		BoGraphWindow(UI_Object* bograph_parent, const unsigned int bograph_window_number);
 		BoGraphWindow(const BoGraphWindow& object);
 		BoGraphWindow& operator=(const BoGraphWindow& object);
@@ -38,10 +39,6 @@ class BoGraphWindow:public UI_Window
 		unsigned int markAni;
 		ANABUILDORDER* anarace;
 };
-
-inline void BoGraphWindow::assignAnarace(ANABUILDORDER* bograph_anarace) {
-	anarace = bograph_anarace;
-}
 
 #endif
 

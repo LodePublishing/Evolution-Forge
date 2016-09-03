@@ -67,7 +67,7 @@ void UI_Group::calculateSameWidthOfButtons(const bool horizontal)
 	do
 	{
 		tmp->setWidth(maxWidth);
-		tmp->adjustButtonPlacementSize();
+//		tmp->adjustButtonPlacementSize(); TODO
 		tmp=tmp->getNextBrother();
 	} while(tmp!=getChildren());
 }

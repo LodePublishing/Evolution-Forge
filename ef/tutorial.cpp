@@ -1,6 +1,7 @@
 #include "tutorial.hpp"
 
-TutorialWindow::TutorialWindow(UI_Window* parentWindow):UI_Window(parentWindow, TUTORIAL_WINDOW_TITLE_STRING, TUTORIAL_WINDOW, 0, NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, TABBED)
+TutorialWindow::TutorialWindow(UI_Window* parentWindow):
+	UI_Window(parentWindow, TUTORIAL_WINDOW_TITLE_STRING, theme.lookUpGlobalRect(TUTORIAL_WINDOW), theme.lookUpGlobalMaxHeight(TUTORIAL_WINDOW), NOT_SCROLLED, NO_AUTO_SIZE_ADJUST, TABBED)
 {
 	tutorialChapter=120; // TODO => in tabs einteilen
 }

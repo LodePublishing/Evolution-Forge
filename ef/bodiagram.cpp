@@ -20,8 +20,8 @@ BoDiagramWindow& BoDiagramWindow::operator=(const BoDiagramWindow& object)
 	return(*this);
 }
 
-BoDiagramWindow::BoDiagramWindow(UI_Object* bod_parent, const unsigned int bod_window_number):
-	UI_Window(bod_parent, BODIAGRAM_WINDOW_TITLE_STRING, BO_DIAGRAM_WINDOW, bod_window_number, NOT_SCROLLED),
+BoDiagramWindow::BoDiagramWindow(UI_Object* bod_parent, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_players) :
+	UI_Window(bod_parent, BODIAGRAM_WINDOW_TITLE_STRING, theme.lookUpPlayerRect(BUILD_ORDER_DIAGRAM_WINDOW, game_number, max_games, player_number, max_players), theme.lookUpPlayerMaxHeight(BUILD_ORDER_DIAGRAM_WINDOW, game_number, max_games, player_number, max_players), NOT_SCROLLED),
 	anarace(NULL),
 	count(0),
 	bold(false)
@@ -98,7 +98,7 @@ void BoDiagramWindow::processList()
 //	if(anarace->getTimer()==coreConfiguration.getMaxTime()) time=0;
 //		else 
 //time=anarace->getTimer()+1;
-	float time = (getClientRectWidth()-6) / (float)(anarace->getRealTimer());
+	float time = (getClientTargetWidth()-5) / (float)(anarace->getRealTimer());
 
 	unsigned int haveSupply = 10; // TODO
 	unsigned int maxMins = (*anarace->getStartCondition())->getMinerals();
@@ -120,8 +120,8 @@ void BoDiagramWindow::processList()
 
 	{
 		int y1;
-		if(maxMins) y1=(*anarace->getStartCondition())->getMinerals()*75/maxMins; else y1=0;
-		Point p=Point( 3, -y1-2);
+		if(maxMins) y1=(*anarace->getStartCondition())->getMinerals()*(getClientRectHeight()-20)/maxMins; else y1=0;
+		Point p = Point( 1, -y1-2);
 		if(targetMinerals[count]==Point(0,0))
 		{
 			targetMinerals[count]=p;
@@ -133,8 +133,8 @@ void BoDiagramWindow::processList()
 			startMinerals[count]=minerals[count];
 		}
 
-		if(maxGas) y1=(*anarace->getStartCondition())->getGas()*75/maxGas; else y1=0;
-		p=Point( 3, -y1-2);
+		if(maxGas) y1=(*anarace->getStartCondition())->getGas()*(getClientRectHeight()-20)/maxGas; else y1=0;
+		p = Point( 1, -y1-2);
 		// first round
 		if(targetGas[count]==Point(0,0))
 		{
@@ -149,15 +149,15 @@ void BoDiagramWindow::processList()
 																																							
 //TODO anarace->getMaxpFitness-getTimer kann auch 0 sein !! kann es??
 																																							
-/*	  if(anarace->getMaxpFitness()) y1=anarace->getIPStatisticsFitness(2*s)*75/(anarace->getMaxpFitness()-anarace->getTimer()); else y1=0;
-		p=Point( 3+((count*(getClientRectWidth()-6))/(anarace->getRealTimer())), -y1);
+/*	  if(anarace->getMaxpFitness()) y1=anarace->getIPStatisticsFitness(2*s)*(getClientRectHeight()-20)/(anarace->getMaxpFitness()-anarace->getTimer()); else y1=0;
+		p = Point(((count*getTargetClientRectWidth())/(anarace->getRealTimer())), -y1);
 		if(p!=targetFitness[count]) {
 			targetFitness[count]=p;
 			startFitness[count]=fitness[count];
 		}	   */
 																																							
-		if(haveSupply) y1=(*anarace->getStartCondition())->getHaveSupply()*75/haveSupply; else y1=0;
-		p=Point(3, -y1-2);
+		if(haveSupply) y1=(*anarace->getStartCondition())->getHaveSupply()*(getClientRectHeight()-20)/haveSupply; else y1=0;
+		p = Point(1, -y1-2);
 		if(targetHneedSupply[count]==Point(0,0))
 		{
 			targetHneedSupply[count]=p;
@@ -169,8 +169,8 @@ void BoDiagramWindow::processList()
 			startHneedSupply[count]=hneedSupply[count];
 		}
 
-		if(haveSupply) y1=(*anarace->getStartCondition())->getNeedSupply()*75/haveSupply; else y1=0;
-		p=Point(3, -y1-2);
+		if(haveSupply) y1=(*anarace->getStartCondition())->getNeedSupply()*(getClientRectHeight()-20)/haveSupply; else y1=0;
+		p = Point(1, -y1-2);
 		if(targetNneedSupply[count]==Point(0,0))
 		{
 			targetNneedSupply[count]=p;
@@ -187,8 +187,8 @@ void BoDiagramWindow::processList()
 	for(std::list<PROGRAM>::const_iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
 	{
 		int y1;
-		if(maxMins) y1 = order->getStatisticsBefore().getHaveMinerals()*75/maxMins; else y1 = 0;
-		Point p = Point( 3+(int)(order->getRealTime()*time), -y1-2);
+		if(maxMins) y1 = order->getStatisticsBefore().getHaveMinerals()*(getClientRectHeight()-20)/maxMins; else y1 = 0;
+		Point p = Point(1+(int)(order->getRealTime()*time), -y1-2);
 		if(targetMinerals[count]==Point(0,0))
 			targetMinerals[count] = startMinerals[count] = minerals[count] = p;
 		else
@@ -198,8 +198,8 @@ void BoDiagramWindow::processList()
 		}
 		
 
-		if(maxGas) y1 = order->getStatisticsBefore().getHaveGas()*75/maxGas; else y1 = 0;
-		p = Point( 3+(int)(order->getRealTime()*time), -y1-2);
+		if(maxGas) y1 = order->getStatisticsBefore().getHaveGas()*(getClientRectHeight()-20)/maxGas; else y1 = 0;
+		p = Point(1+(int)(order->getRealTime()*time), -y1-2);
 		if(targetGas[count] == Point(0, 0))
 			targetGas[count] = startGas[count] = gas[count] = p;
 		else
@@ -208,8 +208,8 @@ void BoDiagramWindow::processList()
 			startGas[count] = gas[count];
 		}
 	
-		if(haveSupply) y1 = order->getStatisticsBefore().getHaveSupply()*75/haveSupply; else y1=0;
-		p=Point(3+(int)(order->getRealTime()*time), -y1-2);
+		if(haveSupply) y1 = order->getStatisticsBefore().getHaveSupply()*(getClientRectHeight()-20)/haveSupply; else y1=0;
+		p = Point(1+(int)(order->getRealTime()*time), -y1-2);
 		if(targetHneedSupply[count] == Point(0, 0))
 			targetHneedSupply[count] = startHneedSupply[count] = hneedSupply[count] = p;
 		else
@@ -218,8 +218,8 @@ void BoDiagramWindow::processList()
 			startHneedSupply[count] = hneedSupply[count];
 		}
 		
-		if(haveSupply) y1 = order->getStatisticsBefore().getNeedSupply()*75/haveSupply; else y1=0;
-		p = Point(3+(int)(order->getRealTime()*time), -y1-2);
+		if(haveSupply) y1 = order->getStatisticsBefore().getNeedSupply()*(getClientRectHeight()-20)/haveSupply; else y1=0;
+		p = Point(1+(int)(order->getRealTime()*time), -y1-2);
 		if(targetNneedSupply[count] == Point(0, 0))
 			targetNneedSupply[count] = startNneedSupply[count] = nneedSupply[count] = p;
 		else
@@ -229,8 +229,8 @@ void BoDiagramWindow::processList()
 		}
 		count++;
 
-		if(maxMins) y1 = order->getStatisticsAfter().getHaveMinerals()*75/maxMins; else y1 = 0;
-		p = Point( 3+(int)(order->getRealTime()*time), -y1-2);
+		if(maxMins) y1 = order->getStatisticsAfter().getHaveMinerals()*(getClientRectHeight()-20)/maxMins; else y1 = 0;
+		p = Point(1+(int)(order->getRealTime()*time), -y1-2);
 		if(targetMinerals[count]==Point(0,0))
 			targetMinerals[count] = startMinerals[count] = minerals[count] = p;
 		else
@@ -240,8 +240,8 @@ void BoDiagramWindow::processList()
 		}
 		
 
-		if(maxGas) y1 = order->getStatisticsAfter().getHaveGas()*75/maxGas; else y1 = 0;
-		p = Point( 3+(int)(order->getRealTime()*time), -y1-2);
+		if(maxGas) y1 = order->getStatisticsAfter().getHaveGas()*(getClientRectHeight()-20)/maxGas; else y1 = 0;
+		p = Point(1+(int)(order->getRealTime()*time), -y1-2);
 		if(targetGas[count] == Point(0, 0))
 			targetGas[count] = startGas[count] = gas[count] = p;
 		else
@@ -250,8 +250,8 @@ void BoDiagramWindow::processList()
 			startGas[count] = gas[count];
 		}
 	
-		if(haveSupply) y1 = order->getStatisticsAfter().getHaveSupply()*75/haveSupply; else y1=0;
-		p=Point(3+(int)(order->getRealTime()*time), -y1-2);
+		if(haveSupply) y1 = order->getStatisticsAfter().getHaveSupply()*(getClientRectHeight()-20)/haveSupply; else y1=0;
+		p = Point(1+(int)(order->getRealTime()*time), -y1-2);
 		if(targetHneedSupply[count] == Point(0, 0))
 			targetHneedSupply[count] = startHneedSupply[count] = hneedSupply[count] = p;
 		else
@@ -260,8 +260,8 @@ void BoDiagramWindow::processList()
 			startHneedSupply[count] = hneedSupply[count];
 		}
 		
-		if(haveSupply) y1 = order->getStatisticsAfter().getNeedSupply()*75/haveSupply; else y1=0;
-		p = Point(3+(int)(order->getRealTime()*time), -y1-2);
+		if(haveSupply) y1 = order->getStatisticsAfter().getNeedSupply()*(getClientRectHeight()-20)/haveSupply; else y1=0;
+		p = Point(1+(int)(order->getRealTime()*time), -y1-2);
 		if(targetNneedSupply[count] == Point(0, 0))
 			targetNneedSupply[count] = startNneedSupply[count] = nneedSupply[count] = p;
 		else
@@ -275,8 +275,8 @@ void BoDiagramWindow::processList()
 
 	{
 		int y1;
-		if(maxMins) y1=anarace->getMinerals()*75/maxMins; else y1=0;
-		Point p=Point( getClientRectWidth()-3, -y1-2);
+		if(maxMins) y1=anarace->getMinerals()*(getClientRectHeight()-20)/maxMins; else y1=0;
+		Point p = Point( getClientTargetWidth()-2, -y1-2);
 		if(targetMinerals[count]==Point(0,0))
 			targetMinerals[count] = startMinerals[count] = minerals[count] = p;
 		else
@@ -285,8 +285,8 @@ void BoDiagramWindow::processList()
 			startMinerals[count]=minerals[count];
 		}
 
-		if(maxGas) y1=anarace->getGas()*75/maxGas; else y1=0;
-		p=Point(  getClientRectWidth()-3, -y1-2);
+		if(maxGas) y1=anarace->getGas()*(getClientRectHeight()-20)/maxGas; else y1=0;
+		p = Point(  getClientTargetWidth()-2, -y1-2);
 		// first round
 		if(targetGas[count]==Point(0,0))
 			targetGas[count] = startGas[count] = gas[count] = p;
@@ -296,8 +296,8 @@ void BoDiagramWindow::processList()
 			startGas[count] = gas[count];
 		}
 		
-		if(haveSupply) y1 = anarace->getHaveSupply()*75/haveSupply; else y1=0;
-		p=Point( getClientRectWidth()-3, -y1-2);
+		if(haveSupply) y1 = anarace->getHaveSupply()*(getClientRectHeight()-20)/haveSupply; else y1=0;
+		p = Point( getClientTargetWidth()-2, -y1-2);
 		if(targetHneedSupply[count] == Point(0,0))
 			targetHneedSupply[count] = startHneedSupply[count] = hneedSupply[count] = p;
 		else
@@ -306,8 +306,8 @@ void BoDiagramWindow::processList()
 			startHneedSupply[count] = hneedSupply[count];
 		}
 
-		if(haveSupply) y1=anarace->getNeedSupply()*75/haveSupply; else y1=0;
-		p=Point( getClientRectWidth()-3, -y1-2);
+		if(haveSupply) y1=anarace->getNeedSupply()*(getClientRectHeight()-20)/haveSupply; else y1=0;
+		p = Point( getClientTargetWidth()-2, -y1-2);
 		if(targetNneedSupply[count]==Point(0,0))
 			targetNneedSupply[count] = startNneedSupply[count] = nneedSupply[count] = p;
 		else
@@ -379,9 +379,9 @@ void BoDiagramWindow::draw(DC* dc) const
 			dc->SetPen(*theme.lookUpPen(BODIAGRAM_SUPPLY_PEN));
 			for(unsigned int i = 0;i<(count-1);i++)
 			{
-				if(hneedSupply[i].y > nneedSupply[i].y)
+				if((hneedSupply[i].y > nneedSupply[i].y)&&(hneedSupply[i].x < getClientTargetWidth()-2))
 					dc->DrawRectangle(getAbsoluteClientRectPosition() + Point(0, getClientRectHeight()) + hneedSupply[i], Size(hneedSupply[i+1].x - hneedSupply[i].x, hneedSupply[i].y - nneedSupply[i].y));
-				else if(hneedSupply[i].y < nneedSupply[i].y)
+				else if((hneedSupply[i].y < nneedSupply[i].y)&&(hneedSupply[i].x < getClientTargetWidth()-2))
 					dc->DrawRectangle(getAbsoluteClientRectPosition() + Point(0, getClientRectHeight()) + hneedSupply[i], Size(hneedSupply[i+1].x - hneedSupply[i].x, nneedSupply[i].y - hneedSupply[i].y));
 			}
 				

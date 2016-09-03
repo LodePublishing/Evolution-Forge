@@ -26,6 +26,8 @@ class ANABUILDORDER: public PREBUILDORDER
 		void countUnitsTotal(); // to set maxUnitForce and totalUnitForce
 		const unsigned int getCurrentpFitness() const;		
 
+		const bool isOptimizing() const;
+		void setOptimizing(const bool optimizing=true);
 		const bool isActive() const;
 		void setActive(const bool active=true);
 
@@ -75,7 +77,8 @@ class ANABUILDORDER: public PREBUILDORDER
 		unsigned int unitsTotal; // total number of all unit types at the end
 		unsigned int unitsTotalMax; // maximum number of one unit type at the end
 		unsigned int nonGoalsUnitsTotalMax; // maximum number of one NON GOAL unit type at the end
-		bool active;
+		bool optimizing; // mutate, sort, multiply etc.
+		bool active; // calculate
 		unsigned int maxpFitness;
 		unsigned int maxsFitness;
 		unsigned int maxtFitness;
@@ -154,6 +157,14 @@ inline const unsigned int ANABUILDORDER::getUnitsTotal() const
 	return(unitsTotal);
 }
 
+inline const bool ANABUILDORDER::isOptimizing() const {
+	return(optimizing);
+}
+
+inline void ANABUILDORDER::setOptimizing(const bool set_optimizing) {
+	optimizing = set_optimizing;
+}
+
 inline const bool ANABUILDORDER::isActive() const {
 	return(active);
 }
@@ -161,6 +172,7 @@ inline const bool ANABUILDORDER::isActive() const {
 inline void ANABUILDORDER::setActive(const bool set_active) {
 	active = set_active;
 }
+
 
 // ------ END OF STATISTICS GET FUNCTIONS ------
 

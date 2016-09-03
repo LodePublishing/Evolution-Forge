@@ -2,56 +2,58 @@
 #define _GUI_SCORE_HPP
 
 #include "../ui/window.hpp"
+#include "mapmenu.hpp"
+#include "playerentry.hpp"
 
-enum eScoreMode
+enum eScoreMenu
 {
-	SCORE_FULFILL_MODE,
-	SCORE_TIME_MODE,
-	SCORE_MODE	
+	MAP_MENU,
+	MAX_SCORE_MENUS
 };
 
 class ScoreWindow : public UI_Window
 {
 	public:
-		ScoreWindow(UI_Object* score_parent);
+		ScoreWindow(UI_Object* score_parent, const unsigned int game_number, const unsigned int game_max);
 		~ScoreWindow();
 
 		void resetData();
 		void process();
 		void draw(DC* dc) const;
 
-		const eScoreMode getCurrentMode(const unsigned int player) const;
-		void setMode(const unsigned int player, const eScoreMode current_mode);
+		const eScoreMode getScoreMode(const unsigned int player_number) const;
+		void setScoreMode(const unsigned int player_number, const eScoreMode score_mode);
 
-		void setOptimizing(const bool opt=true);
-		const bool isOptimizing() const;
+		const eInitMode getInitMode(const unsigned int player_number) const;
+		void setInitMode(const unsigned int player_number, const eInitMode init_mode);
+
+//		void setOptimizing(const bool opt=true);
 
 		void setScore(const unsigned int player, const unsigned int score);
 		void setGoalComplete(const unsigned int player, const unsigned int goal);
 		void setPlayers(const unsigned int player_count);
+		void setMaxPlayer(const unsigned int max_player);
+		const unsigned int getPlayers() const;
+		const bool isOptimizing(const unsigned int player_number) const;
+		const signed int getAssignedMap() const;
+
+		const signed int getAssignedRace(const unsigned int player_number) const;
 	private:
-		unsigned int oldScoreCounter[MAX_PLAYER][20], oldScore[MAX_PLAYER][20];
-		unsigned int currentScore[MAX_PLAYER], programScore[MAX_PLAYER];
-		unsigned int goalComplete[MAX_PLAYER];
-		
-		eScoreMode mode[MAX_PLAYER]; // 0: Fulfill goal, 1: Time goal, 1: Score Goal (TODO)
-		
-		UI_StaticText* goalsFulfilledText[MAX_PLAYER];
-		UI_StaticText* currentActionText[MAX_PLAYER];
-		UI_StaticText* scoreText[MAX_PLAYER];
-		UI_StaticText* playerText[MAX_PLAYER];
-
-		UI_Button* continueButton;
+		PlayerEntry* player[MAX_PLAYER];
 //		UI_Button* resetButton;
-
-		bool optimizing;
 		unsigned int players;
-		
+		unsigned int maxPlayer;
+
+		void closeMenus();
+		UI_Radio* menuRadio;
+		UI_Button* menuButton[MAX_SCORE_MENUS];
+		MapMenu* mapMenu;		
+		signed int assignMap;
 };
 
-inline const bool ScoreWindow::isOptimizing() const {
-	return optimizing;
-}
+//inline const bool ScoreWindow::isOptimizing() const {
+//	return optimizing;
+//}
 
 #endif
 

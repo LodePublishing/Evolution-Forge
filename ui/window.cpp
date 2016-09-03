@@ -7,7 +7,7 @@ UI_Window& UI_Window::operator=(const UI_Window& object)
 	((UI_Object)(*this)) = ((UI_Object)object);
 	delete tabRow;
 	tabRow = (object.tabRow != NULL? new UI_Radio(*object.tabRow) : NULL);
-	window = object.window;
+	isTransparent = object.isTransparent;
 	currentTab = object.currentTab;
 	titleString = object.titleString;
 	titleParameter = object.titleParameter;
@@ -18,7 +18,6 @@ UI_Window& UI_Window::operator=(const UI_Window& object)
 	clientStartRect = object.clientStartRect;
 	clientTargetRect = object.clientTargetRect;
 	originalClientRect = object.originalClientRect;
-	windowNumber = object.windowNumber;
 	isAutoAdjust = object.isAutoAdjust;
 	isScrollable = object.isScrollable;
 	isTabbed = object.isTabbed;
@@ -31,7 +30,7 @@ UI_Window& UI_Window::operator=(const UI_Window& object)
 UI_Window::UI_Window(const UI_Window& object) :
 	UI_Object((UI_Object)object),
 	tabRow((object.tabRow != NULL? new UI_Radio(*object.tabRow) : NULL)),
-	window( object.window ),
+	isTransparent( object.isTransparent),
 	currentTab( object.currentTab ),
 	titleString( object.titleString ),
 	titleParameter( object.titleParameter ),
@@ -42,7 +41,6 @@ UI_Window::UI_Window(const UI_Window& object) :
 	clientStartRect( object.clientStartRect ),
 	clientTargetRect( object.clientTargetRect ),
 	originalClientRect( object.originalClientRect ),
-	windowNumber( object.windowNumber ),
 	isAutoAdjust( object.isAutoAdjust ),
 	isScrollable( object.isScrollable ),
 	isTabbed( object.isTabbed ),
@@ -50,13 +48,11 @@ UI_Window::UI_Window(const UI_Window& object) :
 	scrollBar((object.scrollBar != NULL? new UI_Scrollbar(*object.scrollBar) : NULL))
 { }
 
-
-// TODO Reihenfolge
-UI_Window::UI_Window(UI_Object* window_parent, const eString window_title_string, const eWindow window_type, const unsigned int  window_number, const eIsScrolled window_is_scrollable, const eIsAutoAdjust window_is_auto_adjust, const eIsTabbed window_is_tabbed, const Rect window_client_area) :
-	UI_Object(window_parent, isScrollable==SCROLLED?Rect(theme.lookUpRect(window_type, window_number, 1).GetTopLeft(), theme.lookUpRect(window_type, window_number, 1).GetSize() - Size(0, 0)):theme.lookUpRect(window_type, window_number, 1)),
+UI_Window::UI_Window(UI_Object* window_parent, const eString window_title_string, const Rect rect, const unsigned int max_height, const eIsScrolled window_is_scrollable, const eIsAutoAdjust window_is_auto_adjust, const eIsTabbed window_is_tabbed, const Rect window_client_area, eIsTransparent transparent) :
+	UI_Object(window_parent, isScrollable==SCROLLED ? Rect(rect.GetTopLeft(), rect.GetSize() - Size(0, 0)): rect),
 	tabRow(window_is_tabbed==TABBED?new UI_Radio(this) : NULL),
-	window(window_type), // ?
-	currentTab(ZERO_TAB),
+	isTransparent(transparent),
+	currentTab(0),
 	titleString(window_title_string), // ??
 	titleParameter(""),
 	originalRect(getRelativeRect()),
@@ -66,8 +62,7 @@ UI_Window::UI_Window(UI_Object* window_parent, const eString window_title_string
 	clientStartRect(),
 	clientTargetRect(),
 	originalClientRect(), // TODO 
-	maxHeight(theme.lookUpMaxHeight(window_type, window_number, 1)),
-	windowNumber(window_number), //?
+	maxHeight(max_height),
 	isAutoAdjust(window_is_auto_adjust), //?
 	isScrollable(window_is_scrollable), // TODO
 	isTabbed(window_is_tabbed), //?
@@ -76,8 +71,25 @@ UI_Window::UI_Window(UI_Object* window_parent, const eString window_title_string
 {
 
 // ------ PROCESSING
-	updateBorders(); //~~
+	calculateClientRect();
 
+
+//	filledHeight=clientRect.GetHeight();
+// ------ Buttons, ScrollBars etc.
+
+	if(isTabbed==TABBED)
+		tabRow->calculateSameWidthOfButtons();
+}
+
+UI_Window::~UI_Window()
+{
+	delete scrollBar;
+	delete tabRow;
+}
+
+void UI_Window::calculateClientRect()
+{
+	updateBorders();
 	if(clientRect.GetLeft() < border.GetLeft()+5) clientRect.SetLeft(border.GetLeft()+5);
    	if(clientRect.GetTop() < border.GetTop()+5) clientRect.SetTop(border.GetTop()+5);
 	if(clientRect.GetBottom() > border.GetBottom()-5) clientRect.SetBottom(border.GetBottom()-5);
@@ -95,41 +107,41 @@ UI_Window::UI_Window(UI_Object* window_parent, const eString window_title_string
 	originalClientRect=clientRect;
 	clientStartRect=clientRect;
 	clientTargetRect=clientRect;
-
-//	filledHeight=clientRect.GetHeight();
-// ------ Buttons, ScrollBars etc.
-
-	if(isTabbed==TABBED)
-		tabRow->calculateSameWidthOfButtons();
 }
 
-UI_Window::~UI_Window()
+void UI_Window::updateRectangles(const Rect rect, const unsigned int max_height)
 {
-	delete scrollBar;
-	delete tabRow;
-}
-
-void UI_Window::updateRectangles(const unsigned int maxPlayer)
-{
-// ------ PROCESSING
-//	setMaxRect(theme.lookUpMaxRect(window, windowNumber, maxPlayer)); //~~
-	adjustRelativeRect(isScrollable==SCROLLED?Rect(theme.lookUpRect(window, windowNumber, maxPlayer).GetTopLeft(), theme.lookUpRect(window, windowNumber, maxPlayer).GetSize() - Size(0, 0)):theme.lookUpRect(window, windowNumber, maxPlayer));
-//	theme.lookUpRect(window, windowNumber, maxPlayer));
+	maxHeight = max_height;
+	adjustRelativeRect(isScrollable==SCROLLED?Rect(rect.GetTopLeft(), rect.GetSize() - Size(0, 0)):rect);
 	adjustClientRect();
 //	originalRect=getRelativeRect();
-	// TODO Buttons benachrichtigen ueber geaenderte buttonPlacementArea!
+// TODO Buttons benachrichtigen ueber geaenderte buttonPlacementArea!
 	setNeedRedrawMoved();
 }
 
 
-void UI_Window::addTab(UI_Button* tab_button)
+void UI_Window::addTab(UI_Button* tab_button, const unsigned int button_id)
 {
-	if(isTabbed==NOT_TABBED)
-		return;
-	tabRow->addButton(tab_button);
+#ifdef _SCC_DEBUG
+	if(isTabbed==NOT_TABBED) {
+                toLog("DEBUG: (UI_Window::addTab): Tried to add a tab while window is marked as not tabbed.");return;
+        }
+#endif
+	tabRow->addButton(tab_button, button_id);
 }
 
-void UI_Window::forcePressTab(const eTab press_tab)
+void UI_Window::removeTab(const unsigned int button_id)
+{
+#ifdef _SCC_DEBUG
+	if(isTabbed==NOT_TABBED) {
+                toLog("DEBUG: (UI_Window::removeTab): Tried to remove a tab while window is marked as not tabbed.");return;
+        }
+#endif
+	tabRow->removeButton(button_id);
+	tabRow->updateIds(); // fill the space
+}
+
+void UI_Window::forcePressTab(const unsigned int press_tab)
 {
 	if(isTabbed==NOT_TABBED) 
 		return;
@@ -141,17 +153,18 @@ const bool UI_Window::tabWasChanged() const
 {
 	if(isTabbed==NOT_TABBED) 
 		return false;
-	return(tabRow->hasChanged());
+	return(tabRow->buttonHasChanged());
 }
 
-const eTab UI_Window::getCurrentTab() const
+const unsigned int UI_Window::getCurrentTab() const
 {
 	if(isTabbed==NOT_TABBED) 
-		return (eTab)0;
+		return 0;
 	unsigned int tmp = tabRow->getMarked();
-	if(tmp == 99)
-		return (eTab)0;
-	else return((eTab)(tmp+1));
+//	if(tmp == 99)
+//		return 0;
+//	else return(tmp+1);
+	return(tmp);
 }
 
 void UI_Window::setTitleParameter(const std::string& p) {
@@ -170,6 +183,11 @@ UI_Object* UI_Window::checkHighlight()
 	if((!isMouseInside())&&( (scrollBar==NULL) || (!Rect(getAbsolutePosition() + Point(getWidth(), 0), Size(12, getHeight())).Inside(mouse))))
 		return(NULL);
 	return(UI_Object::checkHighlight());
+}
+
+const unsigned int UI_Window::getClientTargetWidth() const
+{
+	return(clientTargetRect.GetWidth());
 }
 
 const unsigned int UI_Window::getClientTargetHeight() const
@@ -265,6 +283,7 @@ void UI_Window::process()
 {
 	if(!isShown()) 
 		return;
+//	calculateClientRect();
 	
 	/*Rect r = getAbsoluteRect();
 	rectlist[rectnumber].x = r.x;rectlist[rectnumber].y = r.y;rectlist[rectnumber].w = r.width; rectlist[rectnumber].h = r.height;*/
@@ -461,7 +480,7 @@ void UI_Window::draw(DC* dc) const
 		
 	// draw outer border:
 		dc->SetPen(*theme.lookUpPen(OUTER_BORDER_PEN));
-		if(isTopItem()) // => main window!
+		if(isTransparent==TRANSPARENT) // => main window!
 		{
 			dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 /*			SDL_Rect rc;
@@ -592,6 +611,12 @@ void UI_Window::draw(DC* dc) const
 		UI_Object::draw(dc);
 //	}
 //	}
+
+//	dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+//	dc->DrawEmptyRectangle(Rect(getAbsolutePosition()+clientTargetRect.GetTopLeft(), clientTargetRect.GetSize()));
+//	dc->SetPen(*theme.lookUpPen(OUTER_BORDER_PEN));
+//	dc->DrawEmptyRectangle(getAbsoluteClientRect());
+
 }
 
 

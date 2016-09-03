@@ -18,10 +18,11 @@ UI_CheckButton::UI_CheckButton(const UI_CheckButton& object) :
 	text(object.text?new UI_StaticText(*(object.text)) : NULL)
 { }
 
-UI_CheckButton::UI_CheckButton(UI_Object* checkbutton_parent, const Rect rect, const eString txt, const eString tooltip_string, const bool is_checked) :
-	UI_Object(checkbutton_parent, rect),
+// TODO arrange ermoeglichen!
+UI_CheckButton::UI_CheckButton(UI_Object* checkbutton_parent, const Point top_left, const Size distance_bottom_right, const ePositionMode position_mode, const eString txt, const eString tooltip_string, const bool is_checked) :
+	UI_Object(checkbutton_parent, Rect(top_left, Size(0,0))), // TODO
 	checked(false),
-	checkButton(new UI_Button(this, Rect(Point(120, 3),Size(10,10)), CHECK_BUTTON, STATIC_BUTTON_MODE)),
+	checkButton(new UI_Button(this, Point(120, 3), distance_bottom_right, CHECK_BUTTON, STATIC_BUTTON_MODE, position_mode)),
 	text(new UI_StaticText(this, txt, Rect(Point(0,0), Size(110, 0)), FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT, RIGHT_BOUNDED_TEXT_MODE))
 {
 	this->updateToolTip(tooltip_string); // TODO

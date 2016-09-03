@@ -37,7 +37,7 @@ void GoalMenu::resetData()
 		(*m)->Show();
 		(*m)->setButton(eButton(UNIT_TYPE_1_BUTTON));
 		(*m)->updateText(database.getGoal(anarace->getRace(), i)->getName());
-		Rect edge = Rect(Point(10, height * (FONT_SIZE + 9)), Size(160,0));
+		Rect edge = Rect(Point(10, height * (FONT_SIZE + 9)), Size(140,0));
 		(*m)->adjustRelativeRect(edge);
 		height++;
 		i++;
@@ -49,6 +49,7 @@ void GoalMenu::resetData()
 		menuEntries.push_back(entry);
 		height++;
 	}
+	height++;
 }
 
 

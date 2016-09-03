@@ -5,92 +5,8 @@
 #include <iomanip>
 #include <string>
 
-UI_Theme& UI_Theme::operator=(const UI_Theme& object)
-{
-	resolution = object.resolution;
-	tab = object.tab;
-	language = object.language;
-	colorTheme = object.colorTheme;
-
-	for(unsigned int i = MAX_LANGUAGES;i--;)
-		for(unsigned int j = MAX_STRINGS;j--;)
-			stringList[i][j]=object.stringList[i][j];
-	for(unsigned int i = MAX_RESOLUTIONS;i--;)
-//		for(unsigned int j = MAX_LANGUAGES;j--;)
-			for(unsigned int k = MAX_FONTS;k--;)
-				fontList[i][k]=object.fontList[i][k];
-	for(unsigned int i = MAX_COLOR_THEMES;i--;)
-	{
-		for(unsigned int j = MAX_COLORS;j--;)
-			colorList[i][j]=object.colorList[i][j];
-		for(unsigned int j = MAX_RESOLUTIONS;j--;)
-		{
-			for(unsigned int k = MAX_PENS;k--;)
-				penList[j][i][k]=object.penList[j][i][k]; // :D
-			 for(unsigned int k = MAX_BITMAPS;k--;)
-				bitmapList[i][j][k]=object.bitmapList[i][j][k];
-		}
-		for(unsigned int j = MAX_BRUSHES;j--;)
-			brushList[i][j]=object.brushList[i][j];
-	}
-	for(unsigned int i = MAX_RESOLUTIONS;i--;)
-		for(unsigned int j = MAX_TABS;j--;)
-			for(unsigned int k = MAX_WINDOWS;k--;)
-			{
-				rectList[i][j][k]=object.rectList[i][j][k];
-				maxHeightList[i][j][k] = object.maxHeightList[i][j][k];
-				xwindow[i][j][k]=object.xwindow[i][j][k];
-				ywindow[i][j][k]=object.ywindow[i][j][k];
-			}
-	for(unsigned int i=MAX_BUTTONS;i--;)
-		buttonAnimationList[i]=object.buttonAnimationList[i];
-	return(*this);
-}
-
-UI_Theme::UI_Theme(const UI_Theme& object) :
-	resolution( object.resolution ),
-	tab( object.tab ),
-	language( object.language ),
-	colorTheme( object.colorTheme)
-{
-	for(unsigned int i = MAX_LANGUAGES;i--;)
-		for(unsigned int j = MAX_STRINGS;j--;)
-			stringList[i][j]=object.stringList[i][j];
-	for(unsigned int i = MAX_RESOLUTIONS;i--;)
-//		for(unsigned int j = MAX_LANGUAGES;j--;)
-			for(unsigned int k = MAX_FONTS;k--;)
-				fontList[i][k]=object.fontList[i][k];
-	for(unsigned int i = MAX_COLOR_THEMES;i--;)
-	{
-		for(unsigned int j = MAX_COLORS;j--;)
-			colorList[i][j]=object.colorList[i][j];
-		for(unsigned int j = MAX_RESOLUTIONS;j--;)
-		{
-			for(unsigned int k = MAX_PENS;k--;)
-				penList[i][j][k]=object.penList[i][j][k];
-			 for(unsigned int k = MAX_BITMAPS;k--;)
-				bitmapList[i][j][k]=object.bitmapList[i][j][k];
-		}
-		for(unsigned int j = MAX_BRUSHES;j--;)
-			brushList[i][j]=object.brushList[i][j];
-	}
-	for(unsigned int i = MAX_RESOLUTIONS;i--;)
-		for(unsigned int j = MAX_TABS;j--;)
-			for(unsigned int k = MAX_WINDOWS;k--;)
-			{
-				rectList[i][j][k]=object.rectList[i][j][k];
-				maxHeightList[i][j][k]=object.maxHeightList[i][j][k];
-				xwindow[i][j][k]=object.xwindow[i][j][k];
-				ywindow[i][j][k]=object.ywindow[i][j][k];
-			}
-	for(unsigned int i=MAX_BUTTONS;i--;)
-		buttonAnimationList[i]=object.buttonAnimationList[i];
-}
-
-
 UI_Theme::UI_Theme():
-	resolution(RESOLUTION_1024x768),
-	tab(ZERO_TAB),
+	resolution(RESOLUTION_1280x1024),
 	language(GERMAN_LANGUAGE),
 	colorTheme(DARK_BLUE_THEME)
 {
@@ -104,27 +20,41 @@ UI_Theme::UI_Theme():
 	for(unsigned int i = MAX_COLOR_THEMES;i--;)
 	{
 		for(unsigned int j = MAX_COLORS;j--;)
-				colorList[i][j] = NULL;
+			colorList[i][j] = NULL;
+		for(unsigned int j = MAX_PENS;j--;)
+			penList[i][j] = NULL; // !
+		
   		for(unsigned int j = MAX_RESOLUTIONS;j--;)
-		{
-			for(unsigned int k = MAX_PENS;k--;)
-				penList[i][j][k] = NULL;
 			 for(unsigned int k = MAX_BITMAPS;k--;)
 				bitmapList[i][j][k] = NULL;
-		}
 					
 		for(unsigned int j = MAX_BRUSHES;j--;)
 			brushList[i][j] = NULL;
 	}
 	for(unsigned int i = MAX_RESOLUTIONS;i--;)
-		for(unsigned int j = MAX_TABS;j--;)
-			for(unsigned int k = MAX_WINDOWS;k--;)
+	{
+		for(unsigned int j = MAX_GLOBAL_WINDOWS;j--;)
+		{
+			globalRectList[i][j] = NULL;
+			maxGlobalHeightList[i][j] = 0;
+		}
+		for(unsigned int j = MAX_COMPARE_GAMES;j--;)
+			for(unsigned int k = MAX_COMPARE_GAMES;k--;)
 			{
-  				rectList[i][j][k] = NULL;
-				maxHeightList[i][j][k]=0;
-				xwindow[i][j][k]=NULL_WINDOW;
-				ywindow[i][j][k]=NULL_WINDOW;
+				for(unsigned int l = MAX_GAME_WINDOWS;l--;)
+				{
+					gameRectList[i][j][k][l] = NULL;
+					maxGameHeightList[i][j][k][l] = 0;
+				}
+		                for(unsigned int l = MAX_PLAYER;l--;)
+                		        for(unsigned int m = MAX_PLAYER;m--;)
+                                		for(unsigned int n = MAX_PLAYER_WINDOWS;n--;)
+		                                {
+							playerRectList[i][j][k][l][m][n] = NULL;
+							maxPlayerHeightList[i][j][k][l][m][n] = 0;
+						}
 			}
+	}
 	for(unsigned int i=MAX_BUTTONS;i--;)
 		buttonAnimationList[i]=0;
 
@@ -145,18 +75,28 @@ UI_Theme::~UI_Theme()
 			delete colorList[i][j];
 		for(unsigned int j = MAX_BRUSHES;j--;)
 			delete brushList[i][j];
+		for(unsigned int j = MAX_PENS;j--;)
+			delete penList[i][j];
+		
 		for(unsigned int j = MAX_RESOLUTIONS;j--;)
-		{
 			for(unsigned int k = MAX_BITMAPS;k--;)
 				SDL_FreeSurface(bitmapList[i][j][k]);
-//	 		for(unsigned int k = MAX_PENS;k--;)
-//				delete penList[i][j][k];
-		}
 	}
- 	for(unsigned int i = MAX_RESOLUTIONS;i--;)
-		for(unsigned int j = MAX_TABS;j--;)
-			for(unsigned int k = MAX_WINDOWS;k--;)
-				delete rectList[i][j][k];
+        for(unsigned int i = MAX_RESOLUTIONS;i--;)
+        {
+                for(unsigned int j = MAX_GLOBAL_WINDOWS;j--;)
+			delete globalRectList[i][j];
+                for(unsigned int j = MAX_COMPARE_GAMES;j--;)
+                        for(unsigned int k = MAX_COMPARE_GAMES;k--;)
+			{
+                                for(unsigned int l = MAX_GAME_WINDOWS;l--;)
+                                        delete gameRectList[i][j][k][l];
+				for(unsigned int l = MAX_PLAYER;l--;)
+					for(unsigned int m = MAX_PLAYER;m--;)
+						for(unsigned int n = MAX_PLAYER_WINDOWS;n--;)
+							delete playerRectList[i][j][k][l][m][n];
+			}
+        }
 
 	for(unsigned int i=MAX_BUTTONS;i--;)
 		delete buttonAnimationList[i];
@@ -177,7 +117,7 @@ const std::string UI_Theme::lookUpFormattedString(const eString id, const std::s
 		toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
 	}
 #endif
-	std::string bla=*(stringList[language][id]);
+	std::string bla = *(stringList[language][id]);
 	findandreplace(bla, "%s", text);
 	return(bla);
 }
@@ -189,7 +129,7 @@ const std::string UI_Theme::lookUpFormattedString(const eString id, const unsign
 		toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
 	}
 #endif
-	std::string bla=*(stringList[language][id]);
+	std::string bla = *(stringList[language][id]);
 	std::ostringstream os;
 	os << i; 
 	findandreplace(bla, "%i", os.str());
@@ -202,7 +142,7 @@ const std::string UI_Theme::lookUpFormattedString(const eString id, const unsign
 		toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
 	}
 #endif
-	std::string bla=*(stringList[language][id]);
+	std::string bla = *(stringList[language][id]);
 	std::ostringstream os;
 	os << i;findandreplace(bla, "%i", os.str());os.str("");
 	os << j;findandreplace(bla, "%i", os.str());os.str("");
@@ -242,105 +182,118 @@ const std::string UI_Theme::lookUpFormattedString(const eString id, const unsign
 	return(bla);
 }
 
-
-const Point UI_Theme::lookUpRealDistance(const eWindow id, const unsigned int windowNumber) const // ~~ Name
+const Rect UI_Theme::lookUpGlobalRect(const eGlobalWindow id) const
 {
 #ifdef _SCC_DEBUG
-	if((id < 0) || (id >= MAX_WINDOWS)) {
-		toLog("ERROR: (UI_Theme::lookUpRealDistance) id out of range.");return(Point(0,0));
+	if((id<0)||(id>=MAX_GLOBAL_WINDOWS)) {
+		toLog("ERROR: (UI_Theme::lookUpGlobalRect) id out of range.");return(Rect(0,0,0,0));
 	}
 #endif
-	if(id == MAIN_WINDOW) 
-		return(Point(0, 0));
-	switch(arrangeDirection[resolution][tab][id])
-	{
-		case ARRANGE_LEFT_TO_RIGHT:
-			return(Point(windowNumber * rectList[resolution][tab][id]->GetWidth(), 0));break;
-		case ARRANGE_RIGHT_TO_LEFT:
-			return(Point(-windowNumber * rectList[resolution][tab][id]->GetWidth(), 0));break;
-		case ARRANGE_TOP_TO_DOWN:
-			return(Point(0, windowNumber * rectList[resolution][tab][id]->GetHeight()));break;
-		case ARRANGE_DOWN_TO_TOP:
-			return(Point(0, -windowNumber * rectList[resolution][tab][id]->GetHeight()));break;
-		default:
-			return(Point(0,0));
-	}
+	return(*globalRectList[resolution][id]);
 }
 
-const Point UI_Theme::lookUpMaxRealDistance(const eWindow id, const unsigned int windowNumber) const // ~~ Name
+const unsigned int UI_Theme::lookUpGlobalMaxHeight(const eGlobalWindow id) const 
 {
 #ifdef _SCC_DEBUG
-	if((id < 0) || (id >= MAX_WINDOWS)) {
-		toLog("ERROR: (UI_Theme::lookUpMaxRealDistance) id out of range.");return(Point(0,0));
+	if((id<0)||(id>=MAX_GLOBAL_WINDOWS)) {
+		toLog("ERROR: (UI_Theme::lookUpGlobalMaxHeight) id out of range.");return(0);
 	}
 #endif
-	if(id == MAIN_WINDOW) 
-		return(Point(0, 0));
-	switch(arrangeDirection[resolution][tab][id])
-	{
-		case ARRANGE_LEFT_TO_RIGHT:return(Point(windowNumber * rectList[resolution][tab][id]->GetWidth(), 0));break;
-		case ARRANGE_RIGHT_TO_LEFT:return(Point(-windowNumber * rectList[resolution][tab][id]->GetWidth(), 0));break;
-		case ARRANGE_TOP_TO_DOWN:return(Point(0, windowNumber * maxHeightList[resolution][tab][id]));break;
-		case ARRANGE_DOWN_TO_TOP:return(Point(0, -windowNumber * maxHeightList[resolution][tab][id]));break;
-		default:return(Point(0, 0));break;
-	}
+	return(maxGlobalHeightList[resolution][id]);
 }
 
-const Rect UI_Theme::lookUpRect(const eWindow id, const unsigned int windowNumber, const unsigned int maxPlayer) const
+const Rect UI_Theme::lookUpGameRect(const eGameWindow id, const unsigned int gameNumber, const unsigned int maxGames) const
 {
 #ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_WINDOWS)) {
-		toLog("ERROR: (UI_Theme::lookUpRect) id out of range.");return(Rect(0,0,0,0));
+	if((id<0)||(id>=MAX_GAME_WINDOWS)) {
+		toLog("ERROR: (UI_Theme::lookUpGameRect) id out of range.");return(Rect(0,0,0,0));
+	}
+	if(maxGames==0) {
+		toLog("ERROR: (UI_Theme::lookUpGameRect) maxGames out of range.");return(Rect(0,0,0,0));
+	}
+	if((gameNumber>=maxGames)||(maxGames>MAX_COMPARE_GAMES)) {
+		toLog("ERROR: (UI_Theme::lookUpGameRect) game out of range.");return(Rect(0,0,0,0));
 	}
 #endif
-	Point p;
-	switch(arrangeDirection[resolution][tab][id])
-	{
-		case ARRANGE_LEFT_TO_RIGHT:
-		case ARRANGE_RIGHT_TO_LEFT:p=lookUpMaxRealDistance(id, windowNumber) + Point(lookUpMaxRealDistance(xwindow[resolution][tab][id], maxPlayer).x, 0);break;
-		case ARRANGE_TOP_TO_DOWN:
-		case ARRANGE_DOWN_TO_TOP:p=lookUpMaxRealDistance(id, windowNumber) + Point(0,lookUpMaxRealDistance(ywindow[resolution][tab][id], maxPlayer).y);break;
-		default:
-#ifdef _SCC_DEBUG
-			toLog("ERROR: (UI_Theme::lookUpRect) arrangeDirection out of range.");return(Rect(0,0,0,0));
-#endif
-		break;
-
-	}
-	return(Rect(rectList[resolution][tab][id]->GetTopLeft()+p, rectList[resolution][tab][id]->GetSize()));
+	return(*gameRectList[resolution][gameNumber][maxGames-1][id]);
 }
 
-const unsigned int UI_Theme::lookUpMaxHeight(const eWindow id, const unsigned int windowNumber, const unsigned int maxPlayer) const 
+const unsigned int UI_Theme::lookUpGameMaxHeight(const eGameWindow id, const unsigned int gameNumber, const unsigned int maxGames) const 
 {
 #ifdef _SCC_DEBUG
-	if((id<0)||(id>=MAX_WINDOWS)) {
+	if((id<0)||(id>=MAX_GAME_WINDOWS)) {
+		toLog("ERROR: (UI_Theme::lookUpGameMaxHeight) id out of range.");return(0);
+	}
+	if(maxGames==0) {
+		toLog("ERROR: (UI_Theme::lookUpGameMaxHeight) maxGames out of range.");return(0);
+	}
+	if((gameNumber>=maxGames)||(maxGames>MAX_COMPARE_GAMES)) {
+		toLog("ERROR: (UI_Theme::lookUpGameMaxHeight) game out of range.");return(0);
+	}
+#endif
+	return(maxGameHeightList[resolution][gameNumber][maxGames-1][id]);
+}
+
+const Rect UI_Theme::lookUpPlayerRect(const ePlayerWindow id, const unsigned int gameNumber, const unsigned int maxGames, const unsigned int playerNumber, const unsigned int maxPlayer) const
+{
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_PLAYER_WINDOWS)) {
+		toLog("ERROR: (UI_Theme::lookUpPlayerRect) id out of range.");return(Rect(0,0,0,0));
+	}
+	if(maxPlayer==0) {
+		toLog("ERROR: (UI_Theme::lookUpPlayerRect) maxPlayer out of range.");return(Rect(0,0,0,0));
+	}
+	if((playerNumber>=maxPlayer)||(maxPlayer>MAX_PLAYER)) {
+		toLog("ERROR: (UI_Theme::lookUpPlayerRect) player out of range.");return(Rect(0,0,0,0));
+	}	
+#endif
+	return(*playerRectList[resolution][gameNumber][maxGames-1][maxPlayer-1][playerNumber][id]);
+}
+
+const unsigned int UI_Theme::lookUpPlayerMaxHeight(const ePlayerWindow id, const unsigned int gameNumber, const unsigned int maxGames, const unsigned int playerNumber, const unsigned int maxPlayer) const 
+{
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_PLAYER_WINDOWS)) {
 		toLog("ERROR: (UI_Theme::lookUpMaxHeight) id out of range.");return(0);
 	}
-#endif
-	return(maxHeightList[resolution][tab][id]);
-	
-	Point p;
-	switch(arrangeDirection[resolution][tab][id])
-	{
-		case ARRANGE_LEFT_TO_RIGHT:
-		case ARRANGE_RIGHT_TO_LEFT:p = lookUpMaxRealDistance(id, windowNumber) + Point(lookUpMaxRealDistance(xwindow[resolution][tab][id], maxPlayer).x, 0);break;
-		case ARRANGE_TOP_TO_DOWN:
-		case ARRANGE_DOWN_TO_TOP:p = lookUpMaxRealDistance(id, windowNumber) + Point(0, lookUpMaxRealDistance(ywindow[resolution][tab][id], maxPlayer).y);break;
-		default:break;
+	if(maxPlayer==0) {
+		toLog("ERROR: (UI_Theme::lookUpPlayerMaxHeight) maxPlayer out of range.");return(0);
 	}
-	return(p.y);
+	if((playerNumber>=maxPlayer)||(maxPlayer>MAX_PLAYER)) {
+		toLog("ERROR: (UI_Theme::lookUpPlayerRect) player out of range.");return(0);
+	}
+#endif
+	return(maxPlayerHeightList[resolution][gameNumber][maxGames-1][maxPlayer-1][playerNumber][id]);
+}
+
+const ePlayerType getPlayerType(const std::string& item)
+{
+	if(item=="@PLAYER_ONE") return(PLAYER_ONE_TYPE); else
+	if(item=="@PLAYER_TWO") return(PLAYER_TWO_TYPE); else
+	if(item=="@PLAYER_THREE") return(PLAYER_THREE_TYPE); else
+	if(item=="@PLAYER_FOUR") return(PLAYER_FOUR_TYPE); else
+	return(ZERO_PLAYER_TYPE);
+}
+
+const eGameType getGameType(const std::string& item)
+{
+	if(item=="@MAIN") return(GAME_MAIN_TYPE); else
+	if(item=="@1PLAYER") return(GAME_1PLAYER_TYPE); else
+	if(item=="@2PLAYER") return(GAME_2PLAYER_TYPE); else
+	if(item=="@3PLAYER") return(GAME_3PLAYER_TYPE); else
+	if(item=="@4PLAYER") return(GAME_4PLAYER_TYPE); else
+	return(ZERO_GAME_TYPE);
 }
 
 const eDataType getDataType(const std::string& item)
 {
 	if(item=="@STRINGS") return(STRING_DATA_TYPE);else
 	if(item=="@FONTS") return(FONT_DATA_TYPE);else
+	if(item=="@MAIN") return(WINDOW_DATA_TYPE);else
 	if(item=="@COLORS") return(COLOR_DATA_TYPE);else
 	if(item=="@PENS") return(PEN_DATA_TYPE);else
 	if(item=="@BRUSHES") return(BRUSH_DATA_TYPE);else
 	if(item=="@BITMAPS") return(BITMAP_DATA_TYPE);else
-	if(item=="@RECTANGLES") return(RECT_DATA_TYPE);else
-	if(item=="@MAX_HEIGHTS") return(MAX_HEIGHT_DATA_TYPE);else
 	if(item=="@BUTTONS") return(BUTTON_DATA_TYPE);else
 	return(ZERO_DATA_TYPE);
 }
@@ -351,12 +304,11 @@ const eSubDataType getSubDataType(const eDataType mode)
 	{	
 		case STRING_DATA_TYPE:return(LANGUAGE_SUB_DATA_TYPE);
 		case FONT_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
+		case WINDOW_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
 		case COLOR_DATA_TYPE:return(COLOR_THEME_SUB_DATA_TYPE);
 		case BITMAP_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
-		case PEN_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
+		case PEN_DATA_TYPE:return(COLOR_THEME_SUB_DATA_TYPE);
 		case BRUSH_DATA_TYPE:return(COLOR_THEME_SUB_DATA_TYPE);
-		case RECT_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
-		case MAX_HEIGHT_DATA_TYPE:return(RESOLUTION_SUB_DATA_TYPE);
 		default:return(ZERO_SUB_DATA_TYPE);
 	}
 }
@@ -367,9 +319,7 @@ const eSubSubDataType getSubSubDataType(const eDataType mode)
 	{
 //		case FONT_DATA_TYPE:return(LANGUAGE_SUB_SUB_DATA_TYPE);
 		case BITMAP_DATA_TYPE:return(COLOR_THEME_SUB_SUB_DATA_TYPE);
-		case PEN_DATA_TYPE:return(COLOR_THEME_SUB_SUB_DATA_TYPE);
-		case RECT_DATA_TYPE:return(TAB_SUB_SUB_DATA_TYPE);
-		case MAX_HEIGHT_DATA_TYPE:return(TAB_SUB_SUB_DATA_TYPE);
+//		case PEN_DATA_TYPE:return(COLOR_THEME_SUB_SUB_DATA_TYPE);
 		default:return(ZERO_SUB_SUB_DATA_TYPE);
 	}
 }
@@ -412,19 +362,6 @@ const eTheme getThemeSubDataEntry(const std::string& item)
 	return(ZERO_THEME);
 }
 
-const eTab getTabSubDataEntry(const std::string& item)
-{
-	if(item=="@BASIC_TAB") return(BASIC_TAB);else
-	if(item=="@ADVANCED_TAB") return(ADVANCED_TAB);else
-	if(item=="@EXPERT_TAB") return(EXPERT_TAB);else
-	if(item=="@GOSU_TAB") return(GOSU_TAB);else
-	
-	if(item=="@COMPARE_TAB") return(COMPARE_TAB);else
-	if(item=="@MAP_TAB") return(MAP_TAB);else
-	if(item=="@SETTINGS_TAB") return(SETTINGS_TAB);else
-	if(item=="@TUTORIAL_TAB") return(TUTORIAL_TAB);else
-	return(ZERO_TAB);
-}
 
 const eBrushStyle get_brush_style(const std::string& item)
 {
@@ -473,79 +410,100 @@ int get_font_style3(const std::string& item)
 // TODO!
 }*/
 
-eWindow parse_window(const std::string& item)
+eGlobalWindow parse_global_window(const std::string& item)
 {
-	if(item=="NULL window") return(NULL_WINDOW);else
 	if(item=="Main window") return(MAIN_WINDOW);else
 	if(item=="Message window") return(MESSAGE_WINDOW);else
-	if(item=="The core window") return(THE_CORE_WINDOW);else
 	if(item=="Tutorial window") return(TUTORIAL_WINDOW);else
-	if(item=="Build order window") return(BUILD_ORDER_WINDOW);else
-	if(item=="Force window") return(FORCE_WINDOW);else
-	if(item=="Timer window") return(TIMER_WINDOW);else
-	if(item=="Statistics window") return(STATISTICS_WINDOW);else
-	if(item=="Build order diagram window") return(BO_DIAGRAM_WINDOW);else
-	if(item=="Build order graph window") return(BO_GRAPH_WINDOW);else
-	if(item=="Info window") return(INFO_WINDOW);else
 	if(item=="Settings window") return(SETTINGS_WINDOW);else
+	if(item=="Info window") return(INFO_WINDOW);else
+	if(item=="Tech tree window") return(TECHTREE_WINDOW);else
 	if(item=="Edit field window") return(EDIT_FIELD_WINDOW);else
-	return(NULL_WINDOW);
+	return(NULL_GLOBAL_WINDOW);
 }
 
-eCommand parse_commands(const std::string& item)
+eGameWindow parse_game_window(const std::string& item)
 {
-	if(item=="absolute coordinates") return(ABSOLUTE_COORDINATES_COMMAND);else
-	if(item=="absolute x coordinate") return(ABSOLUTE_X_COORDINATE_COMMAND);else
-	if(item=="absolute y coordinate") return(ABSOLUTE_Y_COORDINATE_COMMAND);else
-	if(item=="dock with left border of") return(DOCK_WITH_LEFT_BORDER_OF_COMMAND);else
-	if(item=="dock with right border of") return(DOCK_WITH_RIGHT_BORDER_OF_COMMAND);else
-	if(item=="dock with lower border of") return(DOCK_WITH_LOWER_BORDER_OF_COMMAND);else
-	if(item=="dock with upper border of") return(DOCK_WITH_UPPER_BORDER_OF_COMMAND);else
-	if(item=="dock center inside of") return(DOCK_CENTER_INSIDE_OF_COMMAND);else
-	if(item=="dock left inside of") return(DOCK_LEFT_INSIDE_OF_COMMAND);else
-	if(item=="dock right inside of") return(DOCK_RIGHT_INSIDE_OF_COMMAND);else
-	if(item=="dock top inside of") return(DOCK_TOP_INSIDE_OF_COMMAND);else
-	if(item=="dock bottom inside of") return(DOCK_BOTTOM_INSIDE_OF_COMMAND);else
-	if(item=="calculate maxsize") return(CALCULATE_MAXSIZE_COMMAND);else
-	if(item=="calculate maxwidth") return(CALCULATE_MAXWIDTH_COMMAND);else
-	if(item=="calculate maxheight") return(CALCULATE_MAXHEIGHT_COMMAND);else
-	if(item=="same position as above") return(SAME_POSITION_AS_ABOVE_COMMAND);else
-	if(item=="same size as above") return(SAME_SIZE_AS_ABOVE_COMMAND);else
-	if(item=="same as above") return(SAME_AS_ABOVE_COMMAND);else
-	return(NO_COMMAND);
+	if(item=="Game window") return(GAME_WINDOW);else
+	if(item=="Score window") return(SCORE_WINDOW);else
+	if(item=="Database window") return(DATABASE_WINDOW);else
+	return(NULL_GAME_WINDOW);
 }
 
-// Rueckgabewert: Richtung
-eArrangeDirection parse_complete_command(const std::string* parameter, eCommand* e, Rect& rect)
+ePlayerWindow parse_player_window(const std::string& item)
 {
-	signed int x=-1;signed int y=-1;
-	unsigned int dx=0;unsigned int dy=0;
-	bool xpart=false; bool ypart=false; bool xypart=false; bool dxpart=false; bool dypart=false;
-	bool xcomplete=false;bool ycomplete=false;
-	bool window=false;
+	if(item=="Player window") return(PLAYER_WINDOW);else
+	if(item=="Force window") return(FORCE_WINDOW);else
+	if(item=="Build order window") return(BUILD_ORDER_WINDOW);else
+	if(item=="Build order diagram window") return(BUILD_ORDER_DIAGRAM_WINDOW);else
+	if(item=="Build order graph window") return(BUILD_ORDER_GRAPH_WINDOW);else
+	return(NULL_PLAYER_WINDOW);
+}
 
-// additional windows: arrange left to right = 0, arrange right to left = 1, arrange top to down = 2, arrange down to top = 3 :)
-	eArrangeDirection direction=ARRANGE_LEFT_TO_RIGHT;
-	
-	for(unsigned int i = 1; i <50;i++)
+eCommand parse_commands(const std::string& item, const bool horizontal_mirror)
+{
+	if(horizontal_mirror)
 	{
-		if(xcomplete&&ycomplete)
+		if(item=="absolute coordinates") return(ABSOLUTE_COORDINATES_COMMAND);else
+		if(item=="absolute x coordinate") return(ABSOLUTE_X_COORDINATE_COMMAND);else
+		if(item=="absolute y coordinate") return(ABSOLUTE_Y_COORDINATE_COMMAND);else
+		if(item=="dock with left border of") return(DOCK_WITH_RIGHT_BORDER_OF_COMMAND);else
+		if(item=="dock with right border of") return(DOCK_WITH_LEFT_BORDER_OF_COMMAND);else
+		if(item=="dock with lower border of") return(DOCK_WITH_LOWER_BORDER_OF_COMMAND);else
+		if(item=="dock with upper border of") return(DOCK_WITH_UPPER_BORDER_OF_COMMAND);else
+		if(item=="dock center inside of") return(DOCK_CENTER_INSIDE_OF_COMMAND);else
+		if(item=="dock bottom center inside of") return(DOCK_BOTTOM_CENTER_INSIDE_OF_COMMAND);else
+		if(item=="dock top center inside of") return(DOCK_TOP_CENTER_INSIDE_OF_COMMAND);else
+		if(item=="dock left inside of") return(DOCK_RIGHT_INSIDE_OF_COMMAND);else
+		if(item=="dock right inside of") return(DOCK_LEFT_INSIDE_OF_COMMAND);else
+		if(item=="dock top inside of") return(DOCK_TOP_INSIDE_OF_COMMAND);else
+		if(item=="dock bottom inside of") return(DOCK_BOTTOM_INSIDE_OF_COMMAND);else
+		return(NO_COMMAND);
+	} else
+	{
+		if(item=="absolute coordinates") return(ABSOLUTE_COORDINATES_COMMAND);else
+		if(item=="absolute x coordinate") return(ABSOLUTE_X_COORDINATE_COMMAND);else
+		if(item=="absolute y coordinate") return(ABSOLUTE_Y_COORDINATE_COMMAND);else
+		if(item=="dock with left border of") return(DOCK_WITH_LEFT_BORDER_OF_COMMAND);else
+		if(item=="dock with right border of") return(DOCK_WITH_RIGHT_BORDER_OF_COMMAND);else
+		if(item=="dock with lower border of") return(DOCK_WITH_LOWER_BORDER_OF_COMMAND);else
+		if(item=="dock with upper border of") return(DOCK_WITH_UPPER_BORDER_OF_COMMAND);else
+		if(item=="dock center inside of") return(DOCK_CENTER_INSIDE_OF_COMMAND);else
+		if(item=="dock bottom center inside of") return(DOCK_BOTTOM_CENTER_INSIDE_OF_COMMAND);else
+		if(item=="dock top center inside of") return(DOCK_TOP_CENTER_INSIDE_OF_COMMAND);else
+		if(item=="dock left inside of") return(DOCK_LEFT_INSIDE_OF_COMMAND);else
+		if(item=="dock right inside of") return(DOCK_RIGHT_INSIDE_OF_COMMAND);else
+		if(item=="dock top inside of") return(DOCK_TOP_INSIDE_OF_COMMAND);else
+		if(item=="dock bottom inside of") return(DOCK_BOTTOM_INSIDE_OF_COMMAND);else
+		return(NO_COMMAND);
+	}
+}
+
+Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& maxheight, int type, const bool horizontal_mirror)
+{
+	Rect* rect = new Rect();
+	bool xpart=false; bool ypart=false; bool xypart=false; bool dxpart=true; bool dypart=false; bool hpart=false;
+
+	for(unsigned int i = 1; i <49;i++)
+	{
+		if(dxpart)
 		{
-			dxpart=true;
-			xcomplete=false;
-			ycomplete=false;
-		}
-	
-		e[i]=NO_COMMAND;
-		if(window)
+			rect->SetWidth(atoi(parameter[i].c_str()));
+			dxpart=false;dypart=true;
+		} else
+		if(dypart)
 		{
-			e[i]=(eCommand)parse_window(parameter[i]);
-			window=false;
-		}
-		else
+			rect->SetHeight(atoi(parameter[i].c_str()));
+			dypart=false;hpart=true;
+		} else
+		if(hpart)
+		{
+			maxheight = atoi(parameter[i].c_str());
+			hpart=false;
+		} else
 		if(xpart)
 		{
-			x=atoi(parameter[i].c_str());
+			rect->SetLeft(atoi(parameter[i].c_str()));
 			xpart=false;
 			if(xypart)
 			{
@@ -555,52 +513,49 @@ eArrangeDirection parse_complete_command(const std::string* parameter, eCommand*
 		} else
 		if(ypart)
 		{
-			y=atoi(parameter[i].c_str());
+			rect->SetTop(atoi(parameter[i].c_str()));
 			ypart=false;
-		} else
-		if(dxpart)
+		} else // Befehl
 		{
-			dx=atoi(parameter[i].c_str());
-			dxpart=false;dypart=true;
-		} else
-		if(dypart)
-		{
-			dy=atoi(parameter[i].c_str());
-			dypart=false;
-		} else
-		{
-			eCommand k=parse_commands(parameter[i]);
-			switch(k)
+			eCommand command = parse_commands(parameter[i], horizontal_mirror);
+			i++;
+			int win;
+			if(type==0) win = parse_global_window(parameter[i]);else
+			if(type==1) win = parse_game_window(parameter[i]);else
+			if(type==2) win = parse_player_window(parameter[i]);
+			if((win==0)&&(command>=DOCK_WITH_LEFT_BORDER_OF_COMMAND))
 			{
-				case ABSOLUTE_COORDINATES_COMMAND:xpart=true;xypart=true;xcomplete=true;ycomplete=true;break;
-				case ABSOLUTE_X_COORDINATE_COMMAND:xpart=true;xcomplete=true;direction=ARRANGE_LEFT_TO_RIGHT;break;
-				case ABSOLUTE_Y_COORDINATE_COMMAND:ypart=true;ycomplete=true;direction=ARRANGE_TOP_TO_DOWN;break;
-				case DOCK_WITH_LEFT_BORDER_OF_COMMAND:e[i]=k;window=true;xcomplete=true;direction=ARRANGE_RIGHT_TO_LEFT;break;
-				case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:e[i]=k;window=true;xcomplete=true;direction=ARRANGE_LEFT_TO_RIGHT;break;
-				case DOCK_WITH_LOWER_BORDER_OF_COMMAND:e[i]=k;window=true;ycomplete=true;direction=ARRANGE_TOP_TO_DOWN;break;
-				case DOCK_WITH_UPPER_BORDER_OF_COMMAND:e[i]=k;window=true;ycomplete=true;direction=ARRANGE_DOWN_TO_TOP;break;
-				case DOCK_CENTER_INSIDE_OF_COMMAND:e[i]=k;window=true;dxpart=true;break;
-				case DOCK_LEFT_INSIDE_OF_COMMAND:e[i]=k;window=true;xcomplete=true;direction=ARRANGE_LEFT_TO_RIGHT;break;
-				case DOCK_RIGHT_INSIDE_OF_COMMAND:e[i]=k;window=true;xcomplete=true;direction=ARRANGE_RIGHT_TO_LEFT;break;
-				case DOCK_TOP_INSIDE_OF_COMMAND:
-												  {
-													  e[i]=k;window=true;ycomplete=true;direction=ARRANGE_TOP_TO_DOWN;
-												  }break;
-				case DOCK_BOTTOM_INSIDE_OF_COMMAND:e[i]=k;window=true;ycomplete=true;direction=ARRANGE_DOWN_TO_TOP;break;
-//				case CALCULATE_MAXSIZE_COMMAND:break;
-//				case CALCULATE_MAXWIDTH_COMMAND:break;
-//				case CALCULATE_MAXHEIGHT_COMMAND:break;
-				case SAME_POSITION_AS_ABOVE_COMMAND:e[i]=k;dxpart=true;break;
-//				case SAME_SIZE_AS_ABOVE_COMMAND:break;
-//				case SAME_AS_ABOVE_COMMAND:break;//TODO!
-						
-				default:e[i]=k;break;			
+				toLog(parameter[i]);
 			}
-			
+			switch(command)
+			{
+				case ABSOLUTE_COORDINATES_COMMAND:i--;xpart=true;xypart=true;break;
+				case ABSOLUTE_X_COORDINATE_COMMAND:i--;xpart=true;break;
+				case ABSOLUTE_Y_COORDINATE_COMMAND:i--;ypart=true;break;
+				case DOCK_WITH_LEFT_BORDER_OF_COMMAND:rect->SetLeft(-10 + windows[win]->GetLeft() - rect->GetWidth());break;
+				case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:rect->SetLeft(10 + windows[win]->GetRight());break;
+				case DOCK_WITH_LOWER_BORDER_OF_COMMAND:rect->SetTop(25 + windows[win]->GetBottom());break;
+				case DOCK_WITH_UPPER_BORDER_OF_COMMAND:rect->SetTop(25 + windows[win]->GetTop() - rect->GetHeight());break;
+
+				case DOCK_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(15 + windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, 15 + windows[win]->GetHeight() / 2 - rect->GetHeight() / 2));break;
+				case DOCK_BOTTOM_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, windows[win]->GetHeight() - rect->GetHeight() - 35));break;
+				case DOCK_TOP_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, 15));break;
+				case DOCK_LEFT_INSIDE_OF_COMMAND:rect->SetLeft(15);break;
+				case DOCK_RIGHT_INSIDE_OF_COMMAND:rect->SetLeft(-15+windows[win]->GetWidth() - rect->GetWidth());break;
+				case DOCK_TOP_INSIDE_OF_COMMAND:rect->SetTop(15);break;
+				case DOCK_BOTTOM_INSIDE_OF_COMMAND:rect->SetTop(-15+windows[win]->GetHeight() - rect->GetHeight());break;
+								   
+/*				case DOCK_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetLeft() + windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, windows[win]->GetTop() + windows[win]->GetHeight() / 2 - rect->GetHeight() / 2));break;
+				case DOCK_BOTTOM_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetLeft() + windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, windows[win]->GetBottom() - rect->GetHeight() - 35));break;
+				case DOCK_LEFT_INSIDE_OF_COMMAND:rect->SetLeft(10+windows[win]->GetLeft());break;
+				case DOCK_RIGHT_INSIDE_OF_COMMAND:rect->SetLeft(-15+windows[win]->GetRight() - rect->GetWidth());break;
+				case DOCK_TOP_INSIDE_OF_COMMAND:rect->SetTop(windows[win]->GetTop());break;
+				case DOCK_BOTTOM_INSIDE_OF_COMMAND:rect->SetTop(-15+windows[win]->GetBottom() - rect->GetHeight());break;*/
+				default:i--;;break;
+			}
 		}
 	}
-	rect=Rect(x, y, dx, dy);
-	return(direction);
+	return(rect);
 }
 
 void UI_Theme::loadStringFile(const std::string& dataFile)
@@ -619,7 +574,6 @@ void UI_Theme::loadStringFile(const std::string& dataFile)
 	eLanguage current_language=ZERO_LANGUAGE;
 	eTheme current_theme=ZERO_THEME;
 	eResolution current_resolution=ZERO_RESOLUTION;
-	eTab current_tab=ZERO_TAB;
 
 	unsigned int current_line = 0;
 	
@@ -639,7 +593,7 @@ void UI_Theme::loadStringFile(const std::string& dataFile)
 		return;
 	}
 	
-	while(pFile.getline(line,1024))
+	while(pFile.getline(line, 1024))
 	{
 		if(pFile.fail())
 		{
@@ -722,9 +676,8 @@ void UI_Theme::loadStringFile(const std::string& dataFile)
 				else 
 				if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
 // - deepness |2|: end of SUB-SUB-MODE
-				((current_tab!=ZERO_TAB)||(current_language!=ZERO_LANGUAGE)||(current_theme!=ZERO_THEME)))
+				((current_language!=ZERO_LANGUAGE)||(current_theme!=ZERO_THEME)))
 				{
-					current_tab=ZERO_TAB;
 					current_language=ZERO_LANGUAGE;
 					current_theme=ZERO_THEME;
 					current_line=0;
@@ -733,7 +686,7 @@ void UI_Theme::loadStringFile(const std::string& dataFile)
 // - deepness |2|: end of SUB-MODE
 				else if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
 // sub-sub-items already closed -> close sub-item
-						(current_resolution!=ZERO_RESOLUTION)&&(current_tab==ZERO_TAB)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
+						(current_resolution!=ZERO_RESOLUTION)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
 				{
 					current_resolution=ZERO_RESOLUTION;
 					current_line=0;
@@ -780,33 +733,17 @@ void UI_Theme::loadStringFile(const std::string& dataFile)
 
 }
 
-void UI_Theme::loadWindowData(const std::string& dataFile)
+void UI_Theme::loadWindowData(const std::string& dataFile, const unsigned int gameNumber, const unsigned int maxGames)
 {
 	const unsigned int MAX_PARAMETERS = 50;
 	char line[1024], old[1024];
 	char* buffer;
 	std::string parameter[MAX_PARAMETERS];
 	unsigned int value[MAX_PARAMETERS];
-	eDataType mode=ZERO_DATA_TYPE;
-	eSubDataType sub_mode=ZERO_SUB_DATA_TYPE;
-	eSubSubDataType sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
-
-	eLanguage current_language=ZERO_LANGUAGE;
-	eTheme current_theme=ZERO_THEME;
+	
+	eGameType game_type=ZERO_GAME_TYPE;
+	ePlayerType player_type=ZERO_PLAYER_TYPE;
 	eResolution current_resolution=ZERO_RESOLUTION;
-	eTab current_tab=ZERO_TAB;
-
-	eCommand trectList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS][MAX_PARAMETERS];
-	eCommand tmaxHeightList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS][MAX_PARAMETERS];
-
-	for(unsigned int i = MAX_RESOLUTIONS;i--;)
-		for(unsigned int j = MAX_TABS;j--;)
-			for(unsigned int k = MAX_WINDOWS;k--;) //?
-				for(unsigned int l = MAX_PARAMETERS;l--;)
-				{
-					trectList[i][j][k][l]=NO_COMMAND;
-					tmaxHeightList[i][j][k][l]=NO_COMMAND;
-				}
 
 	unsigned int current_line = 0;
 	
@@ -826,7 +763,7 @@ void UI_Theme::loadWindowData(const std::string& dataFile)
 		return;
 	}
 	
-	while(pFile.getline(line,1024))
+	while(pFile.getline(line, 1024))
 	{
 		if(pFile.fail())
 		{
@@ -844,17 +781,14 @@ void UI_Theme::loadWindowData(const std::string& dataFile)
 			value[i]=0;
 		}
 		char* line2=line;		
-		while(((*line2)==32)||((*line2)==9))
-			line2++;
-		if((*line2)=='\0')
-			continue;
+		while(((*line2)==32)||((*line2)==9)) line2++;
+		if((*line2)=='\0') continue;
 		
 		strcpy(old,line2);
 		
-		if((buffer=strtok(line2,",\0"))!=NULL)
-			parameter[0]=buffer;
-		unsigned int k=1;
+		if((buffer=strtok(line2,",\0"))!=NULL) parameter[0]=buffer;
 		
+		unsigned int k=1;
 		while(((buffer=strtok(NULL,",\0"))!=NULL)&&(k<MAX_PARAMETERS))
 		{
 			while(((*buffer)==32)||((*buffer)==9))
@@ -871,249 +805,63 @@ void UI_Theme::loadWindowData(const std::string& dataFile)
 		}
 		for(unsigned int j=MAX_PARAMETERS;j--;)
 			value[j]=atoi(parameter[j].c_str());
-		// mode	
-		if(mode==ZERO_DATA_TYPE)
+	
+	
+		if(current_resolution==ZERO_RESOLUTION)
 		{
-			mode=getDataType(parameter[0]);
+			current_resolution=getResolutionSubDataEntry(parameter[0]);
 #ifdef _SCC_DEBUG
 //			if(mode!=ZERO_DATA_TYPE)
 //				toLog("Loading "+parameter[0]+"...");
-			if(mode==ZERO_DATA_TYPE)
+			if(current_resolution==ZERO_RESOLUTION)
 			{
 				if(parameter[0]=="@END")
 					toLog("WARNING: (UI_Theme::loadWindowData) Lonely @END.");
 				else
 					toLog("WARNING: (UI_Theme::loadWindowData) Line is outside a block but is not marked as comment.");
 			}
-#endif				
-			sub_mode=getSubDataType(mode);
-			sub_sub_mode=getSubSubDataType(mode);
+#endif
 		}
-		else if(mode!=ZERO_DATA_TYPE)
+		else if(current_resolution!=ZERO_RESOLUTION)
 		{
 			if(parameter[0]=="@END")
 			{
-
-			
-			// TODO! 
-				// @END of 1st sub area => return to begin of data type
-
-// - deepness |1|: end of SUB-MODE
-				if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE)&&
-				  ((current_language!=ZERO_LANGUAGE)||(current_resolution!=ZERO_RESOLUTION)||(current_theme!=ZERO_THEME)))
-				{
-					current_language=ZERO_LANGUAGE;
-					current_resolution=ZERO_RESOLUTION;
-					current_theme=ZERO_THEME;
-					current_line=0;
-				}
-				// @END of 2nd sub area => return to begin of sub data type
-				else 
-				if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
-// - deepness |2|: end of SUB-SUB-MODE
-				((current_tab!=ZERO_TAB)||(current_language!=ZERO_LANGUAGE)||(current_theme!=ZERO_THEME)))
-				{
-					current_tab=ZERO_TAB;
-					current_language=ZERO_LANGUAGE;
-					current_theme=ZERO_THEME;
-					current_line=0;
-				}
-				// @END  of 1st sub area (with an existing sub sub area...)
-// - deepness |2|: end of SUB-MODE
-				else if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
-// sub-sub-items already closed -> close sub-item
-						(current_resolution!=ZERO_RESOLUTION)&&(current_tab==ZERO_TAB)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
-				{
-					current_resolution=ZERO_RESOLUTION;
-					current_line=0;
-				}
-				// @END of 0 area => reset mode
-				else
-				{
-					mode=ZERO_DATA_TYPE;
-					sub_mode=ZERO_SUB_DATA_TYPE;
-					sub_sub_mode=ZERO_SUB_SUB_DATA_TYPE;
-					current_line=0;
-				}
-			}
-			else
-			if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(current_language==ZERO_LANGUAGE)&&(current_resolution==ZERO_RESOLUTION)&&(current_theme==ZERO_THEME))
-			{
-				switch(sub_mode)
-				{
-					case LANGUAGE_SUB_DATA_TYPE:current_language=getLanguageSubDataEntry(line2);break;
-					case RESOLUTION_SUB_DATA_TYPE:current_resolution=getResolutionSubDataEntry(line2);break;
-					case COLOR_THEME_SUB_DATA_TYPE:current_theme=getThemeSubDataEntry(line2);break;
-					default:break;
-				}
 				current_line=0;
+				if(game_type==ZERO_GAME_TYPE) current_resolution=ZERO_RESOLUTION;
+				else if(game_type==GAME_MAIN_TYPE) game_type=ZERO_GAME_TYPE;
+				else if(player_type==ZERO_PLAYER_TYPE) game_type=ZERO_GAME_TYPE;
+				else player_type=ZERO_PLAYER_TYPE;
 			}
-			// => hat nur 1 Ebene => Position festgestellt!
-			else if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE))
+			else if(current_resolution==ZERO_RESOLUTION)
 			{
+				current_resolution=getResolutionSubDataEntry(line2);
+				current_line=0;
+			} else if(game_type==ZERO_GAME_TYPE)
+			{
+				game_type=getGameType(line2);
+				current_line=0;
+			} else if(game_type==GAME_MAIN_TYPE)
+			{
+				unsigned int max_height=0;
+				gameRectList[current_resolution][gameNumber][maxGames-1][current_line+1] = parse_window(parameter, gameRectList[current_resolution][gameNumber][maxGames-1], max_height, 1, (gameNumber==1));
+				if((gameNumber==1)&&(current_line==0))
+					gameRectList[current_resolution][gameNumber][maxGames-1][current_line+1]->SetTopLeft(gameRectList[current_resolution][gameNumber][maxGames-1][current_line+1]->GetTopLeft() + Size(globalRectList[current_resolution][MAIN_WINDOW]->GetWidth()/2,0));
+				setMaxGameHeight(current_resolution, gameNumber, maxGames-1, current_line+1, max_height);
 				current_line++;
 			}
-			// 0 ebenen -> buttons :) BUTTON_DATA_TYPE?? TODO
-			else if((sub_mode==ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE))
+			else if(player_type==ZERO_PLAYER_TYPE)
 			{
-				current_line++;				
-			}
-			// => es gibt noch eine 2. Ebene
-			else if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&(current_language==ZERO_LANGUAGE)&&(current_tab==ZERO_TAB)&&(current_theme==ZERO_THEME))
+				player_type=getPlayerType(line2);
+				current_line=0;
+			} else
 			{
-				switch(sub_sub_mode)
-				{
-					case LANGUAGE_SUB_SUB_DATA_TYPE:current_language=getLanguageSubDataEntry(line2);break;
-					case COLOR_THEME_SUB_SUB_DATA_TYPE:current_theme=getThemeSubDataEntry(line2);break;
-					case TAB_SUB_SUB_DATA_TYPE:current_tab=getTabSubDataEntry(line2);break;
-					default:break;
-				}			
- 				current_line=0;				
-			}
-			// => hat 2 Ebenen => Position festgestellt!
-			else
-			{
-				switch(mode)
-				{
-					case RECT_DATA_TYPE:
-						{
-							rectList[current_resolution][current_tab][parse_window(parameter[0])]=new Rect();
-							arrangeDirection[current_resolution][current_tab][parse_window(parameter[0])]=parse_complete_command(parameter, &(trectList[current_resolution][current_tab][parse_window(parameter[0])][0]), *(rectList[current_resolution][current_tab][parse_window(parameter[0])]));
-							/*std::ostringstream os;
-							os << rectList[current_resolution][current_tab][parse_window(parameter[0])]->GetLeft() << ":"
-							 << rectList[current_resolution][current_tab][parse_window(parameter[0])]->GetTop() << ":"
-							  << rectList[current_resolution][current_tab][parse_window(parameter[0])]->GetWidth() << ":"
-							   << rectList[current_resolution][current_tab][parse_window(parameter[0])]->GetHeight();
-							toLog(os.str());*/
-						}break;
-					case MAX_HEIGHT_DATA_TYPE:
-							tmaxHeightList[current_resolution][current_tab][parse_window(parameter[0])][0] = parse_commands(parameter[1]);
-						break;					
-					default:break;
-				}
+				unsigned int max_height=0;
+				playerRectList[current_resolution][gameNumber][maxGames-1][game_type-2][player_type-1][current_line+1] = parse_window(parameter, playerRectList[current_resolution][gameNumber][maxGames-1][game_type-2][player_type-1], max_height, 2, (gameNumber==1));
+				setMaxPlayerHeight(current_resolution, gameNumber, maxGames-1, game_type-2, player_type-1, current_line+1, max_height);
 				current_line++;
 			}
-		} // end if mode != ZERO_DATA_TYPE
-	} // end while
-
-	int change=1;
-	while(change)
-	{	
-		change=0;
-		for(unsigned int i=MAX_RESOLUTIONS;i--;)
-			for(unsigned int j=MAX_TABS;j--;)
-				for(unsigned int k=0;k<MAX_WINDOWS;k++)
-					if(rectList[i][j][k])
-					{
-					int oldx=rectList[i][j][k]->GetLeft();
-					int oldy=rectList[i][j][k]->GetTop();
-					for(unsigned int l=0;l<MAX_PARAMETERS;l++)
-						switch(trectList[i][j][k][l])
-						{
-							case NO_COMMAND:break;
-							case DOCK_WITH_LEFT_BORDER_OF_COMMAND:
-							{
-								rectList[i][j][k]->SetLeft(-5+rectList[i][j][trectList[i][j][k][l+1]]->GetLeft()-rectList[i][j][k]->GetWidth());
-								xwindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
-								l++;
-							}break;
-							case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:
-							{
-								rectList[i][j][k]->SetLeft(5+rectList[i][j][trectList[i][j][k][l+1]]->GetLeft()+rectList[i][j][trectList[i][j][k][l+1]]->GetWidth());
-								xwindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
-								l++;
-							}break;
-							case DOCK_WITH_LOWER_BORDER_OF_COMMAND:
-							{
-								rectList[i][j][k]->SetTop(5+rectList[i][j][trectList[i][j][k][l+1]]->GetTop()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight()); // TODO!
-								ywindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
-								l++;
-							}break;
-							case DOCK_WITH_UPPER_BORDER_OF_COMMAND:
-							{
-								rectList[i][j][k]->SetTop(-5+rectList[i][j][trectList[i][j][k][l+1]]->GetTop()-rectList[i][j][k]->GetHeight());
-								ywindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
-								l++;
-							}break;
-							case DOCK_CENTER_INSIDE_OF_COMMAND:
-							{
-								rectList[i][j][k]->SetLeft((rectList[i][j][trectList[i][j][k][l+1]]->GetLeft()+rectList[i][j][trectList[i][j][k][l+1]]->GetWidth()-rectList[i][j][k]->GetWidth())/2);
-								rectList[i][j][k]->SetTop((rectList[i][j][trectList[i][j][k][l+1]]->GetTop()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight()-rectList[i][j][k]->GetHeight())/2);
-								xwindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
-								l++;
-							}break;
-							case DOCK_LEFT_INSIDE_OF_COMMAND:
-							{
-								rectList[i][j][k]->SetLeft(10+rectList[i][j][trectList[i][j][k][l+1]]->GetLeft());
-								xwindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
-								l++;
-							}break;
-								
-							case DOCK_RIGHT_INSIDE_OF_COMMAND:
-							{
-								rectList[i][j][k]->SetLeft(-10+rectList[i][j][trectList[i][j][k][l+1]]->GetLeft()+rectList[i][j][trectList[i][j][k][l+1]]->GetWidth()-rectList[i][j][k]->GetWidth());
-								xwindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
-								l++;
-							}break;
-							case DOCK_TOP_INSIDE_OF_COMMAND:
-							{
-								rectList[i][j][k]->SetTop(25+rectList[i][j][trectList[i][j][k][l+1]]->GetTop());
-								ywindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
-								l++;
-							}break;
-							case DOCK_BOTTOM_INSIDE_OF_COMMAND:
-							{
-								rectList[i][j][k]->SetTop(rectList[i][j][trectList[i][j][k][l+1]]->GetTop()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight()-rectList[i][j][k]->GetHeight()-10); // TODO
-								ywindow[i][j][k]=(eWindow)trectList[i][j][k][l+1];
-								l++;
-							}break;
-							default:
-#ifdef _SCC_DEBUG								
-								toLog("error... same as above oder so");
-#endif				
-								break;
-						}
-					if((rectList[i][j][k]->GetLeft()!=oldx)||(rectList[i][j][k]->GetTop()!=oldy))
-					{
-						change=1;
-					}
-				}
-}
-
-	for(unsigned int i=MAX_RESOLUTIONS;i--;)
-		for(unsigned int j=MAX_TABS;j--;)
-			for(unsigned int k=0;k<MAX_WINDOWS;k++)
-			{
-				for(unsigned int l = 0; l < MAX_PARAMETERS; l++)
-					switch(tmaxHeightList[i][j][k][l])
-					{
-						case NO_COMMAND:break;
-						case DOCK_WITH_LEFT_BORDER_OF_COMMAND:break;
-						case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:break;
-						case DOCK_WITH_LOWER_BORDER_OF_COMMAND:break;
-						case DOCK_WITH_UPPER_BORDER_OF_COMMAND:break;
-						case DOCK_CENTER_INSIDE_OF_COMMAND:break;
-						case DOCK_LEFT_INSIDE_OF_COMMAND:break;
-						case DOCK_RIGHT_INSIDE_OF_COMMAND:break;
-						case DOCK_TOP_INSIDE_OF_COMMAND:break;
-						case DOCK_BOTTOM_INSIDE_OF_COMMAND:break;
-						case CALCULATE_MAXHEIGHT_COMMAND:
-							maxHeightList[i][j][k] = rectList[i][j][MAIN_WINDOW]->GetHeight() + rectList[i][j][MAIN_WINDOW]->GetTop() - rectList[i][j][k]->GetTop() - 30;break;
-										 // main window mal hernehmen... TODO andere Fenster miteinberechnen!!
-						case CALCULATE_MAXSIZE_COMMAND:break;
-						case CALCULATE_MAXWIDTH_COMMAND:break;
-						case SAME_POSITION_AS_ABOVE_COMMAND:break;
-						case SAME_SIZE_AS_ABOVE_COMMAND:
-						case SAME_AS_ABOVE_COMMAND:
-							maxHeightList[i][j][k] = rectList[i][j][k]->GetHeight();
-						break;
-						default:
-#ifdef _SCC_DEBUG								
-								toLog("max error... same as above oder so");
-#endif
-						break;
-					}
-			}
+		} 
+	} 
 }
 
 
@@ -1133,19 +881,6 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 	eLanguage current_language=ZERO_LANGUAGE;
 	eTheme current_theme=ZERO_THEME;
 	eResolution current_resolution=ZERO_RESOLUTION;
-	eTab current_tab=ZERO_TAB;
-
-	eCommand trectList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS][MAX_PARAMETERS];
-	eCommand tmaxHeightList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS][MAX_PARAMETERS];
-
-	for(unsigned int i = MAX_RESOLUTIONS;i--;)
-		for(unsigned int j = MAX_TABS;j--;)
-			for(unsigned int k = MAX_WINDOWS;k--;) //?
-				for(unsigned int l = MAX_PARAMETERS;l--;)
-				{
-					trectList[i][j][k][l]=NO_COMMAND;
-					tmaxHeightList[i][j][k][l]=NO_COMMAND;
-				}
 
 	unsigned int current_line = 0;
 	
@@ -1250,9 +985,8 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 				else 
 				if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
 // - deepness |2|: end of SUB-SUB-MODE
-				((current_tab!=ZERO_TAB)||(current_language!=ZERO_LANGUAGE)||(current_theme!=ZERO_THEME)))
+				((current_language!=ZERO_LANGUAGE)||(current_theme!=ZERO_THEME)))
 				{
-					current_tab=ZERO_TAB;
 					current_language=ZERO_LANGUAGE;
 					current_theme=ZERO_THEME;
 					current_line=0;
@@ -1261,7 +995,7 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 // - deepness |2|: end of SUB-MODE
 				else if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&
 // sub-sub-items already closed -> close sub-item
-						(current_resolution!=ZERO_RESOLUTION)&&(current_tab==ZERO_TAB)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
+						(current_resolution!=ZERO_RESOLUTION)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
 				{
 					current_resolution=ZERO_RESOLUTION;
 					current_line=0;
@@ -1296,13 +1030,23 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 					//toLog(parameter[0]);
 					break;
 					case COLOR_DATA_TYPE:
-										  colorList[current_theme][current_line]=new Color(dc->GetSurface(),(Uint8)value[0],(Uint8)value[1],(Uint8)value[2]);break;
+								  colorList[current_theme][current_line]=new Color(dc->GetSurface(),(Uint8)value[0],(Uint8)value[1],(Uint8)value[2]);break;
+					case PEN_DATA_TYPE:penList[current_theme][current_line]=new Pen(dc->GetSurface(),value[1],value[2],value[3],value[0],get_pen_style(parameter[4]));break;
 					case BRUSH_DATA_TYPE:brushList[current_theme][current_line]=new Brush(dc->GetSurface(),(Uint8)value[0],(Uint8)value[1],(Uint8)value[2],get_brush_style(parameter[3]));break;
 					case FONT_DATA_TYPE:
 					{
 						std::string t=fontDir+parameter[0]+".ttf";
 						fontList[current_resolution]/*[current_language]*/[current_line]=new Font(t, value[1]/*, get_font_style1(parameter[2]), get_font_style2(parameter[3]), get_font_style3(parameter[4]), false, _T(""), FONTENCODING_DEFAULT*/);
-					}break;				
+//						std::ostringstream os;
+//						os << "- " << current_resolution << " " << current_line << " " << t << " " << value[1];
+//						toLog(os.str());
+					}break;
+					case WINDOW_DATA_TYPE:
+					{
+						unsigned int max_height = 0;
+						globalRectList[current_resolution][current_line+1] = parse_window(parameter, globalRectList[current_resolution], max_height, 0, false);
+						setMaxGlobalHeight(current_resolution, current_line+1, max_height);
+					}break;
 					default:break;
 				}
 				current_line++;
@@ -1327,13 +1071,12 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 				current_line++;				
 			}
 			// => es gibt noch eine 2. Ebene
-			else if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&(current_language==ZERO_LANGUAGE)&&(current_tab==ZERO_TAB)&&(current_theme==ZERO_THEME))
+			else if((sub_sub_mode!=ZERO_SUB_SUB_DATA_TYPE)&&(current_language==ZERO_LANGUAGE)&&(current_theme==ZERO_THEME))
 			{
 				switch(sub_sub_mode)
 				{
 					case LANGUAGE_SUB_SUB_DATA_TYPE:current_language=getLanguageSubDataEntry(line2);break;
 					case COLOR_THEME_SUB_SUB_DATA_TYPE:current_theme=getThemeSubDataEntry(line2);break;
-					case TAB_SUB_SUB_DATA_TYPE:current_tab=getTabSubDataEntry(line2);break;
 					default:break;
 				}			
  				current_line=0;				
@@ -1359,7 +1102,6 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 //							SDL_SetColorKey(bitmapList[current_resolution][current_theme][current_line]->getSurface(), SDL_SRCCOLORKEY , SDL_MapRGB(bitmapList[current_resolution][current_theme][current_line]->getFormat(), 0,0,0));
 		
 						}break;
-					case PEN_DATA_TYPE:penList[current_resolution][current_theme][current_line]=new Pen(dc->GetSurface(),value[1],value[2],value[3],value[0],get_pen_style(parameter[4]));break;
 					default:break;
 				}
 				current_line++;
@@ -1367,6 +1109,77 @@ void UI_Theme::loadGraphicData(const std::string& dataFile, const std::string& b
 		} // end if mode != ZERO_DATA_TYPE
 	} // end while
 
+}
+
+void UI_Theme::setMaxGlobalHeight(unsigned int current_resolution, unsigned int id, unsigned int max_height)
+{
+#ifdef _SCC_DEBUG
+        if(current_resolution>MAX_RESOLUTIONS) {
+                toLog("ERROR: (UI_Theme::setMaxGlobalHeightList) resolution out of range.");return;
+        }
+        if(id>=MAX_GLOBAL_WINDOWS) {
+                toLog("ERROR: (UI_Theme::setMaxGlobalHeightList) window out of range.");return;
+        }
+#endif	
+	maxGlobalHeightList[current_resolution][id] = max_height;
+}
+
+void UI_Theme::setMaxGameHeight(unsigned int current_resolution, unsigned int gameNumber, unsigned int maxGames, unsigned int id, unsigned int max_height)
+{
+#ifdef _SCC_DEBUG
+        if(current_resolution>MAX_RESOLUTIONS) {
+                toLog("ERROR: (UI_Theme::setMaxGameHeight) resolution out of range.");return;
+        }
+        if(gameNumber>=MAX_COMPARE_GAMES) {
+                toLog("ERROR: (UI_Theme::setMaxGameHeight) gameNumber out of range.");return;
+        }
+        if(maxGames>=MAX_COMPARE_GAMES) {
+                toLog("ERROR: (UI_Theme::setMaxGameHeight) maxGames out of range.");return;
+        }
+        if(id>=MAX_GAME_WINDOWS) {
+                toLog("ERROR: (UI_Theme::setMaxGameHeight) id out of range.");return;
+        }
+#endif	
+	maxGameHeightList[current_resolution][gameNumber][maxGames][id]=max_height;
+}
+
+void UI_Theme::setMaxPlayerHeight(unsigned int current_resolution, unsigned int gameNumber, unsigned int maxGames, unsigned int player_max, unsigned int playerNumber, unsigned int id, unsigned int max_height)
+{
+#ifdef _SCC_DEBUG
+        if(current_resolution>MAX_RESOLUTIONS) {
+                toLog("ERROR: (UI_Theme::setMaxPlayerHeight) resolution out of range.");return;
+        }
+        if(gameNumber>MAX_COMPARE_GAMES) {
+                toLog("ERROR: (UI_Theme::setMaxPlayerHeight) gameNumber out of range.");return;
+        }
+        if(maxGames>MAX_COMPARE_GAMES) {
+		toLog("ERROR: (UI_Theme::setMaxPlayerHeight) maxGames out of range.");return;
+        }
+	if(player_max>MAX_PLAYER) {
+		toLog("ERROR: (UI_Theme::setMaxPlayerHeight) player_max out of range.");return;
+        }
+	if(playerNumber>MAX_PLAYER) {
+		toLog("ERROR: (UI_Theme::setMaxPlayerHeight) playerNumber out of range.");return;
+        }
+        if(id>=MAX_PLAYER_WINDOWS) {
+                toLog("ERROR: (UI_Theme::setMaxPlayerHeight) window out of range.");return;
+        }
+#endif	
+	maxPlayerHeightList[current_resolution][gameNumber][maxGames][player_max][playerNumber][id] = max_height;
+}
+
+#include <sstream>
+Font* UI_Theme::lookUpFont(const eFont id) const
+{
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_FONTS)) {
+		toLog("ERROR: (UI_Theme::lookUpFont) id out of range.");return(fontList[resolution]/*[language]*/[id]);
+	}
+#endif
+//	std::ostringstream os;
+//	os << "getting id " << id << " (with resolution " << resolution << ")";
+//	toLog(os.str());
+	return(fontList[resolution]/*[language]*/[id]);
 }
 
 

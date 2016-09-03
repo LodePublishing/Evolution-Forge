@@ -8,38 +8,22 @@
 #include "score.hpp"
 #include "../core/configuration.hpp"
 
-enum eGameMode
-{
-	HIDE_MODE,
-	BASIC_Game_MODE,
-	ADVANCED_Game_MODE,
-	EXPERT_Game_MODE,
-	EXPERT_COMPUTER_MODE,
-	GOSU_Game_MODE,
-	GOSU_COMPUTER_MODE,
-	TRANSCENDEND_COMPUTER_MODE,
-	
-	MAX_MODES
-};
-	
-class Game : public UI_Object
+class Game : public UI_Window
 {
 	public:
-		Game(UI_Object* parent, const unsigned int gameNumber);
+		Game(UI_Object* game_parent, const unsigned int gameNumber, const unsigned int gameMax);
 		~Game();
+//		void refreshGameNumbers(const unsigned int gameNumber, const unsigned int totalGames);
 		
 		void update();
-
 		void resetData();
-		
 
 		void draw(DC* dc) const;
 		void process();
 
-		const bool isOptimizing() const;
+		const bool isOptimizing(const unsigned int player_number) const;
 		void setOptimizing(const bool opt=true);
 
-		void updateRectangles(const unsigned int maxGame);
 
 		void newGeneration();
 	
@@ -59,23 +43,35 @@ class Game : public UI_Object
 		void setStartPosition(const unsigned int player_num, const unsigned int player_position);
 		void assignGoal(const unsigned int player_num, const GOAL_ENTRY* player_goal);
 		void fillGroups(); // TODO
-		void setMode(const eTab tab, const unsigned int gameNum);
+		
+		void setMode(const unsigned int gameNumber, const unsigned int maxGames);
+		const unsigned int getMapPlayerCount() const;
+
+		const bool isSplitGame() const;
+		const bool isRemoveGame() const;
 	private:
 		SOUP* soup;
-		START* start[MAX_PLAYER];
+		START* start[MAX_INTERNAL_PLAYER];
 		Player* player[MAX_PLAYER];
 		ANABUILDORDER* anarace[MAX_PLAYER];
-		UNIT unit[MAX_PLAYER][MAX_LOCATIONS];
+		UNIT startForce[MAX_INTERNAL_PLAYER][MAX_LOCATIONS];
 		
 		const BASIC_MAP* map;
-		unsigned int mode;
 		bool optimizing;
 		bool boHasChanged;
 		ScoreWindow* scoreWindow;
+		//DatabaseWindow* databaseWindow;
+
+		unsigned int mapPlayerCount;
 
 		unsigned int unchangedGenerations;
  		unsigned int currentRun;
 		unsigned int totalGeneration;		
+
+		unsigned int gameNumber;
+		unsigned int gameMax;
+		UI_Button* splitGameButton;
+		UI_Button* removeButton; // remove Game
 };
 
 inline const unsigned int Game::getUnchangedGenerations() const

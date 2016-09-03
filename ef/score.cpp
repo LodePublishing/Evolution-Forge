@@ -1,28 +1,38 @@
 #include "score.hpp"
-
 #include <sstream>
 #include <iomanip>
 
-ScoreWindow::ScoreWindow(UI_Object* score_parent) :
-	UI_Window(score_parent, TIMER_WINDOW_TITLE_STRING, TIMER_WINDOW, NOT_SCROLLED),
+ScoreWindow::ScoreWindow(UI_Object* score_parent, const unsigned int game_number, const unsigned int game_max) :
+	UI_Window(score_parent, TIMER_WINDOW_TITLE_STRING, theme.lookUpGameRect(SCORE_WINDOW, game_number, game_max), theme.lookUpGameMaxHeight(SCORE_WINDOW, game_number, game_max), NOT_SCROLLED),
 // TODO irgendwas stimmt hier mit der Hoehe nicht
-	continueButton(new UI_Button(this, getRelativeClientRect(), CLICK_TO_CONTINUE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, BOTTOM_CENTER, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH)),
 //	resetButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), RESET_BUILD_ORDER_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, CENTER_RIGHT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE))
-	optimizing(false),
-	players(0)
+	players(0),
+	maxPlayer(0),
+	menuRadio(new UI_Radio(this, getRelativeClientRectPosition() + Point(0, 10))),
+	mapMenu(new MapMenu(this, Rect(10, 10, getWidth()-100, 0))),
+	assignMap(-1)
 {
+
+/*TODO
+
+- Map initialisieren
+- Harvest speed initialisieren
+
+*/
+
+	menuButton[MAP_MENU] = new UI_Button(this, Rect(Point(0, 0), getClientRectSize()), CHOOSE_MAP_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE_ONCE);
+	mapMenu->Hide();
+	for(unsigned int i=0; i<MAX_SCORE_MENUS; i++)
+		menuRadio->addButton(menuButton[i], i);
+	menuRadio->calculateSameWidthOfButtons(true);
+		
 	for(unsigned int i = MAX_PLAYER;i--;)
 	{
-//		goalsFulfilledText[i] = new UI_StaticText(this, getRelativeClientRect() + Point(100, i * 20), IMPORTANT_COLOR, SMALL_NORMAL_BOLD_FONT, NO_TEXT_MODE); TODO => tooltip
-		currentActionText[i] = new UI_StaticText(this, getRelativeClientRect() + Point(50, i * 20), IMPORTANT_COLOR, SMALL_NORMAL_BOLD_FONT, NO_TEXT_MODE);
-		scoreText[i] = new UI_StaticText(this, getRelativeClientRect() + Point(120, i * 20), IMPORTANT_COLOR, SMALL_NORMAL_BOLD_FONT, NO_TEXT_MODE);
-		playerText[i] = new UI_StaticText(this, "Player 1:", getRelativeClientRect() + Point(0, i * 20), IMPORTANT_COLOR, SMALL_NORMAL_BOLD_FONT, NO_TEXT_MODE);
-		playerText[i]->Hide();
-		mode[i]=SCORE_FULFILL_MODE;
-		goalComplete[i]=0;
+		player[i] = new PlayerEntry(this, Rect(getRelativeClientRect().GetLeft(), 20+i*16, getRelativeClientRect().GetWidth(), 12));
+		player[i]->setNumber(i+1);
 	}
+//		goalsFulfilledText[i] = new UI_StaticText(this, getRelativeClientRect() + Point(100, i * 20), IMPORTANT_COLOR, SMALL_NORMAL_BOLD_FONT, NO_TEXT_MODE); TODO => tooltip
 //      resetButton->updateToolTip(RESET_BUILD_ORDER_TOOLTIP_STRING);
-	continueButton->updateToolTip(CONTINUE_OPTIMIZATION_TOOLTIP_STRING);
 //	goalsFulfilledText->updateToolTip(GOALS_FULFILLED_TOOLTIP_STRING);
 	resetData(); // TODO
 }
@@ -30,49 +40,121 @@ ScoreWindow::ScoreWindow(UI_Object* score_parent) :
 ScoreWindow::~ScoreWindow()
 {
 	for(unsigned int i = MAX_PLAYER;i--;)
-	{
-//		delete goalsFulfilledText[i];
-		delete currentActionText[i];
-		delete scoreText[i];
-	}
-	delete continueButton;
+		delete player[i];
+	for(unsigned int i = 0; i < MAX_SCORE_MENUS;i++)
+		delete menuButton[i];
+	delete menuRadio;
+	delete mapMenu;
 //	delete resetButton;
 }
 
-void ScoreWindow::setScore(const unsigned int player, const unsigned int score) {
-	programScore[player] = score;
+void ScoreWindow::setScore(const unsigned int player_number, const unsigned int score) 
+{
+#ifdef _SCC_DEBUG       
+	if(player_number >= maxPlayer) {
+		toLog("DEBUG: (ScoreWindow::setScore): Value player_number out of range.");return;
+	}
+#endif
+	player[player_number]->setScore(score);
 }
 
-void ScoreWindow::setGoalComplete(const unsigned int player, const unsigned int goal) {
-	goalComplete[player] = goal;
+void ScoreWindow::setGoalComplete(const unsigned int player_number, const unsigned int goal) {
+#ifdef _SCC_DEBUG       
+	if(player_number >= maxPlayer) {
+		toLog("DEBUG: (ScoreWindow::setGoalComplete): Value player_number out of range.");return;
+	}
+#endif
+	player[player_number]->setGoalComplete(goal);
 }
 
 void ScoreWindow::setPlayers(const unsigned int player_count) {
+#ifdef _SCC_DEBUG       
+	if(player_count >= maxPlayer) {
+		toLog("DEBUG: (ScoreWindow::setPlayers): Value player_count out of range.");return;
+	}
+#endif
 	players = player_count;
+}
+
+const unsigned int ScoreWindow::getPlayers() const
+{
+	return(players);
 }
 
 void ScoreWindow::resetData()
 {
-	for(unsigned int j = MAX_PLAYER;j--;)
-	{
-		for(unsigned int i=20;i--;)
-		{
-			oldScoreCounter[j][i] = 0;
-			oldScore[j][i] = MAX_TIME-1;
-		}
-		currentScore[j] = MAX_TIME;
-		programScore[j] = MAX_TIME;
-		goalComplete[j] = 0;
-		mode[j] = SCORE_FULFILL_MODE;
-	}
+// menuButton[MAP_MENU]->updateText(CHOOSE_MAP_STRING);
 }
 
-void ScoreWindow::setOptimizing(const bool opt)
+const signed int ScoreWindow::getAssignedMap() const
 {
-	if(!opt)
-		continueButton->forcePress();
-	else continueButton->forceUnpress();
-	optimizing = opt;
+	return(assignMap);
+}
+
+const bool ScoreWindow::isOptimizing(const unsigned int player_number) const
+{
+#ifdef _SCC_DEBUG       
+        if(player_number >= maxPlayer) {
+                toLog("DEBUG: (ScoreWindow::isOptimizing): Value player_number out of range.");return(false);
+        }
+#endif
+	return(player[player_number]->isOptimizing());
+}
+
+void ScoreWindow::setMaxPlayer(const unsigned int max_player)
+{
+#ifdef _SCC_DEBUG       
+	if(max_player > MAX_PLAYER) {
+		toLog("DEBUG: (ScoreWindow::setMaxPlayer): Value max_player out of range.");return;
+	}
+#endif
+	maxPlayer = max_player;
+}
+
+void ScoreWindow::setScoreMode(const unsigned int player_number, eScoreMode score_mode) // for different tabs different behaviour
+{
+#ifdef _SCC_DEBUG       
+	if(player_number >= maxPlayer) {
+		toLog("DEBUG: (ScoreWindow::setScoreMode): Value player_number out of range.");return;
+	}
+#endif
+	player[player_number]->setScoreMode(score_mode);
+}
+
+const eScoreMode ScoreWindow::getScoreMode(const unsigned int player_number) const
+{
+#ifdef _SCC_DEBUG       
+	if(player_number >= maxPlayer) {
+		toLog("DEBUG: (ScoreWindow::getScoreMode): Value player_number out of range.");return(SCORE_FULFILL_MODE);
+	}
+#endif
+	return(player[player_number]->getScoreMode());
+}
+
+
+void ScoreWindow::setInitMode(const unsigned int player_number, eInitMode init_mode) // for different tabs different behaviour
+{
+#ifdef _SCC_DEBUG
+	if(player_number >= maxPlayer) {
+		toLog("DEBUG: (ScoreWindow::setInitMode): Value player_number out of range.");return;
+	}
+#endif
+	player[player_number]->setInitMode(init_mode);
+}
+
+const eInitMode ScoreWindow::getInitMode(const unsigned int player_number) const
+{
+#ifdef _SCC_DEBUG       
+	if(player_number >= maxPlayer) {
+		toLog("DEBUG: (ScoreWindow::getInitMode): Value player_number out of range.");return(INACTIVE);
+	}
+#endif
+	return(player[player_number]->getInitMode());
+}
+
+void ScoreWindow::closeMenus()
+{
+	mapMenu->close();
 }
 
 void ScoreWindow::process()
@@ -81,96 +163,69 @@ void ScoreWindow::process()
 		return;
 
 	UI_Window::process();
-	if(continueButton->isLeftClicked())
+
+	assignMap=-1;
+	if(mapMenu->getPressedItem()>=0)
 	{
-		if(continueButton->isCurrentlyActivated())
+		assignMap = mapMenu->getPressedItem();
+		menuButton[MAP_MENU]->updateText(database.getMap(assignMap)->getName());
+		menuRadio->forceUnpressAll();
+		menuButton[MAP_MENU]->forceUnpress();
+	}
+	
+	if(menuRadio->buttonHasChanged())
+		switch(menuRadio->getMarked())
 		{
-			optimizing=true;
-			continueButton->updateText(CLICK_TO_PAUSE_STRING);
-			continueButton->updateToolTip(PAUSE_OPTIMIZATION_TOOLTIP_STRING);
+			case MAP_MENU:
+                                mapMenu->open();
+                                if(!mapMenu->isOpen())
+                                {
+                                        menuRadio->forceUnpressAll();
+                                        closeMenus();
+                                } else
+                                {
+                                        closeMenus();
+                                        mapMenu->open();
+                                }
+			break;
+			default:break;
 		}
-		else
+
+	
+        if(!isMouseInside())
+	{
+		menuRadio->forceUnpressAll(); 
+		closeMenus();
+		for(unsigned int i=MAX_PLAYER;i--;)
+			player[i]->mouseHasLeft();
+	}
+							
+        unsigned int line = 3;
+        if(mapMenu->getHeight() > line)
+                line = mapMenu->getHeight();
+	for(unsigned int i=MAX_PLAYER;i--;)
+	{
+		if(i>=maxPlayer)
+			player[i]->Hide();
+		else 
 		{
-			optimizing=false;
-			continueButton->updateText(CLICK_TO_CONTINUE_STRING);
-			continueButton->updateToolTip(CONTINUE_OPTIMIZATION_TOOLTIP_STRING);
+			player[i]->Show();
+			player[i]->adjustRelativeRect(Rect(getRelativeClientRect().GetLeft(), line*16, getRelativeClientRect().GetWidth(), 12));
+			line+=player[i]->getLineHeight(); // height of menu <-
 		}
 	}
-
+	
 // Alle Player durchlaufen, evtl Hoehe anpassen: 
 
-	for(unsigned int i = players;i--;)
-	{
-		playerText[i]->Show();
-		fitItemToRelativeClientRect(Rect(0,0,10,10)/*playerText[i]->getAbsoluteRect()*/,2);
-		scoreText[i]->Show();
-		currentActionText[i]->Show();
-//		goalsFulfilledText[i]->Show();
-		if(getCurrentMode(i)==SCORE_FULFILL_MODE)
-		{																	
-//			goalsFulfilledText[i]->updateText(theme.lookUpFormattedString(OF_GOALS_FULFILLED_STRING, goalComplete[i]/100));
-			if(!isOptimizing()) 
-				currentActionText[i]->updateText(PAUSED_STRING);
-			else
-				currentActionText[i]->updateText(SEARCHING_STRING);
-		}
-		else if(getCurrentMode(i)==SCORE_TIME_MODE)
-		{
-//			goalsFulfilledText[i]->updateText(theme.lookUpFormattedString(OF_TIME_FULFILLED_STRING, goalComplete[i]));
-			if(!isOptimizing())
-				currentActionText[i]->updateText(PAUSED_STRING);
-			else
-				currentActionText[i]->updateText(OPTIMIZING_STRING);
-		} 
-		// else see below
-/*	else if(getCurrentMode()==SCORE_MODE
-	{
-		goalsFulfilledText->updateText(theme.lookUpFormattedString(RES_UNITS_STRUCT_STRING, 0,0,0));
-		if(!anarace->isOptimizing())
-			currentActionText->updateText(PAUSED_STRING);
-		else
-			currentActionText->updateText(OPTIMIZING_STRING);
-		scoreText->updateText(theme.lookUpFormattedString(TOTAL_STRING, 123));
-	}*/
-	
-		if(programScore[i]!=currentScore[i])
-		{
-			currentScore[i] -= (currentScore[i] - programScore[i])/2;
-		    	if(programScore[i]<currentScore[i])
-				currentScore[i]--;
-		}
-		std::ostringstream os;
-		if(currentScore[i] >= 3600) // TODO ga->...
-			os << "[--:--]";
-		else
-			os << "[" << formatTime(currentScore[i]) << "]";
-		scoreText[i]->updateText(os.str());
-	}
-	for(unsigned int i = players;i<MAX_PLAYER;i++)
-	{
-		playerText[i]->Hide();
-		scoreText[i]->Hide();
-		currentActionText[i]->Hide();
-//		goalsFulfilledText[i]->Hide();
-	}
+	fitItemToRelativeClientRect(Rect(0,16*line,10,12)/*playerText[i]->getAbsoluteRect()*/,2); // TODO
 
-		
 //        if(resetButton->isLeftClicked())
-  //      {
-    //            setResetFlag();
+//      {
+//            setResetFlag();
 //		UI_Object::msgList.push_back("Resetted build order...");
-  //      }
+//      }
 }
 
-void ScoreWindow::setMode(const unsigned int player, eScoreMode current_mode) // for different tabs different behaviour
-{
-	mode[player] = current_mode;
-}
-
-const eScoreMode ScoreWindow::getCurrentMode(const unsigned int player) const
-{
-	return(mode[player]);
-}
 
 void ScoreWindow::draw(DC* dc) const
 {
@@ -185,5 +240,15 @@ void ScoreWindow::draw(DC* dc) const
 	ostringstream os;
 	os << 100*game->getUnchangedGenerations()  / configuration.getMaxGenerations() << "%";
 	dc->DrawText(os.str(), getAbsolutePosition() + Size(getWidth() - 25, getHeight() - 30));*/
+}
+
+const signed int ScoreWindow::getAssignedRace(const unsigned int player_number) const
+{
+#ifdef _SCC_DEBUG       
+        if(player_number >= maxPlayer) {
+                toLog("DEBUG: (ScoreWindow::getAssignedRace): Value player_number out of range.");return(-1);
+        }
+#endif
+	return(player[player_number]->getAssignedRace());
 }
 

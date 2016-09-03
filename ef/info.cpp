@@ -25,8 +25,8 @@ InfoWindow::InfoWindow(const InfoWindow& object) :
 	anarace(object.anarace)
 { }
 
-InfoWindow::InfoWindow(UI_Object* info_parent, ANABUILDORDER* info_anarace, const unsigned int info_window_number):
-	UI_Window(info_parent, INFO_WINDOW_TITLE_STRING, INFO_WINDOW, info_window_number, NOT_SCROLLED),
+InfoWindow::InfoWindow(UI_Object* info_parent, ANABUILDORDER* info_anarace):
+	UI_Window(info_parent, INFO_WINDOW_TITLE_STRING, theme.lookUpGlobalRect(INFO_WINDOW), theme.lookUpGlobalMaxHeight(INFO_WINDOW), NOT_SCROLLED),
 	bo(NULL),
 	bg(NULL),
 	unit(0),

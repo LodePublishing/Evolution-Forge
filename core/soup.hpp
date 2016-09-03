@@ -17,7 +17,7 @@ class SOUP
 		bool isNewRun;
 		void calculateAnalyzedBuildOrder();
 		void calculateBuildOrder(const unsigned int bo_num);
-		UNIT unit[MAX_PLAYER][MAX_LOCATIONS];
+		UNIT temporaryForce[MAX_INTERNAL_PLAYER][MAX_LOCATIONS];
 	public:
 		SOUP();
 		~SOUP();
@@ -28,25 +28,15 @@ class SOUP
 		void checkForChange() const; // manually update changes (when the engine is not optimizing for example)
 // 		TODO evtl ueber Rueckgabewert
 // 		initializes the soup (primarily it does some error checking whether all is initialized and allocates the memory for the players
-		void initSoup(START* (*start)[MAX_PLAYER]);
+		void initSoup(START* (*start)[MAX_INTERNAL_PLAYER]);
 //one generation, copies stats and results of best individual and average values of the soup in 'best'
-		const bool newGeneration(ANABUILDORDER* previous_build_order[MAX_PLAYER], UNIT (*target)[MAX_PLAYER][MAX_LOCATIONS]); 
+		const bool newGeneration(ANABUILDORDER* previous_build_order[MAX_PLAYER], const UNIT (*startForce)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]); 
 		const bool getIsNewRun();
 
 // internal function (called by settings)
 
 		ANABUILDORDER* getAnalyzedBuildOrder(const unsigned int player_num);
 };
-
-inline void SOUP::setMapPlayerNum(const unsigned int map_player_num)
-{
-#ifdef _SCC_DEBUG
-	if((map_player_num < 1) || (map_player_num >= MAX_PLAYER)) {
-		toLog("DEBUG: (SOUP::setMapPlayerNum): map_player_num not initialized.");return;
-	}
-#endif
-	mapPlayerNum = map_player_num;
-}
 
 #endif // _CORE_SOUP_HPP
 

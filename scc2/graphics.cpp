@@ -18,6 +18,131 @@ int GraphixScrollWindow::addBitmapButton(wxRect edge, wxBitmap& bitmap, int perm
 	return(0);
 };
 
+void GraphixScrollWindow::writeHeader(wxString bla, wxDC* dc, int mode)
+{
+        dc->SetFont(GraphixScrollWindow::font4);
+        dc->SetTextForeground(wxColour(100,100,200));
+        newTextPage();
+        dc->SetFont(GraphixScrollWindow::font5);
+        writeText(bla,dc);
+        writeText(_T(" "),dc);
+	dc->SetFont(GraphixScrollWindow::font4);
+	if(mode>0) textButton(_T("<- back"),dc);
+        if(mode==2)
+		dc->SetFont(GraphixScrollWindow::font2);
+};
+
+void GraphixScrollWindow::writeLine(wxString bla, wxDC* dc, wxColour color)
+{
+	dc->SetTextForeground(color);
+	int j,i,n,dx,dy,c,start,twidth,bold,next;
+	c=5;
+	start=0;
+	n=0;
+	twidth=0;
+	bold=0;
+	next=0;
+	for(i=0;i<bla.Length();i++)
+	{
+		if(bla.GetChar(i)==' ') 
+		{
+			n=i;
+			twidth=c;
+                }
+                else if(bla.GetChar(i)=='#')
+                {
+                        n=i;
+                        twidth=c+(getInnerWidth()-c)/2;
+                        next=1;
+                }
+		dc->GetTextExtent(_T(wxString::Format(wxT("%c"),bla.GetChar(i))),&dx,&dy);
+		c+=dx;
+		if((c>getInnerWidth()-5)||(next))
+		{
+			c=5;
+			int d=0;
+			for(j=start;j<n;j++)
+			{
+		                dc->GetTextExtent(_T(wxString::Format(wxT("%c"),bla.GetChar(j))),&dx,&dy);
+                                if(bla.GetChar(j)=='$')
+                                {
+                                        if(bold){bold=0;dc->SetTextForeground(color);} else
+                                                {bold=1;dc->SetTextForeground(wxColour(color.Red()+50,color.Green()+50,color.Blue()+30));}
+                                        continue;
+				}
+                                if(bla.GetChar(j)=='#') break;
+				dc->DrawText(_T(wxString::Format(wxT("%c"),bla.GetChar(j))),getInnerLeftBound()+c+d/(n-start-1),currentRow);
+				c+=dx;
+				d+=(getInnerWidth()-10-twidth);
+			}
+			currentRow+=dy+2;
+			twidth=0;
+			start=n+1;
+			i=n;
+			n=0;
+			c=5;
+			next=0;
+		}
+	}
+};
+
+void GraphixScrollWindow::writeLongText(wxString bla, wxDC* dc)
+{
+	dc->SetTextForeground(wxColour(100,100,200));
+	int j,i,n,dx,dy,c,start,twidth,next,bold;
+	c=5;
+	start=0;
+	n=0;
+	twidth=0;
+	next=0;
+	bold=0;
+	for(i=0;i<bla.Length();i++)
+	{
+		if(bla.GetChar(i)==' ') 
+		{
+			n=i;
+			twidth=c;
+		}
+		else if(bla.GetChar(i)=='#')
+		{
+			n=i;
+			twidth=c+(getInnerWidth()-c)/2;
+			next=1;
+                }
+		dc->GetTextExtent(_T(wxString::Format(wxT("%c"),bla.GetChar(i))),&dx,&dy);
+		c+=dx;
+		if((c>getInnerWidth()-5)||(next))
+		{
+			c=5;
+			int d=0;
+			for(j=start;j<n;j++)
+			{
+		                dc->GetTextExtent(_T(wxString::Format(wxT("%c"),bla.GetChar(j))),&dx,&dy);
+				if(bla.GetChar(j)=='$')
+				{
+		                        if(bold){bold=0;dc->SetTextForeground(wxColour(100,100,200));} else
+			                        {bold=1;dc->SetTextForeground(wxColour(150,150,210));}
+					continue;
+	                        }
+                                if(bla.GetChar(j)=='#') break;
+				dc->DrawText(_T(wxString::Format(wxT("%c"),bla.GetChar(j))),getInnerLeftBound()+c+d/(n-start-1),currentRow);
+				c+=dx;
+				if(!next)
+					d+=(getInnerWidth()-10-twidth);
+			}
+			currentRow+=dy+2;
+			twidth=0;
+			start=n+1;
+			i=n;
+			n=0;
+			c=5;
+			next=0;
+		}
+		
+	}
+
+};
+
 wxRect GraphixScrollWindow::getButtonRect(int num)
 {
 	if(!button[num].used) return(wxRect(0,0,0,0));
@@ -26,11 +151,16 @@ wxRect GraphixScrollWindow::getButtonRect(int num)
 
 void GraphixScrollWindow::textButton(wxString bla, wxDC* dc)
 {
-        dc->DrawText(bla,getInnerLeftBound()+5,currentRow);
         int dx,dy;
         dc->GetTextExtent(bla,&dx,&dy);
-        currentRow+=dy;
-	addButton(wxRect(getInnerLeftBound()+5,currentRow,dx,dy));
+	wxRect edge=wxRect(getInnerLeftBound()+5,currentRow,dx,dy);
+	if(edge.Inside(mouseX,mouseY))
+	        dc->SetTextForeground(wxColour(200,200,220));
+	else
+	        dc->SetTextForeground(wxColour(100,100,200));
+        dc->DrawText(bla,edge.x,edge.y);
+	addButton(edge);
+        currentRow+=dy+5;
 };
 
 
@@ -141,12 +271,17 @@ int GraphixScrollWindow::getLeftBound()
 int GraphixScrollWindow::getRightBound()
 {
         return(Border.x+Border.width+x);
-}
+};
 
 int GraphixScrollWindow::getHeight()
 {
 	return(Border.height);
-}
+};
+
+int GraphixScrollWindow::getTargetHeight()
+{
+	return(targetheight);
+};
 
 int GraphixScrollWindow::getWidth()
 {
@@ -250,11 +385,9 @@ void GraphixScrollWindow::DrawButtons(wxDC* dc)
         if(button[i].used)
         {
                 if(button[i].bitmapButton)
-//              else
-                {
-        //                dc->DrawRoundedRectangle(button[i].x-1,button[i].y-1,10,10,3);
                         dc->DrawBitmap(*button[i].bitmap,button[i].edge.x,button[i].edge.y,false);
-                }
+//		else                        
+//			dc->DrawRoundedRectangle(button[i].edge,3);
         }
 }
                 
@@ -456,7 +589,7 @@ if(!tabNumber)
 			        dc->SetTextForeground(wxColour(150,150,200));
 			else
 			        dc->SetTextForeground(TitleColour);
-			wxRect edge=wxRect(tabPosition[i],0,140,30);
+			wxRect edge=wxRect(tabPosition[i],0,150,30);
 		        dc->SetBrush(wxBrush(wxColour(0,0,0),wxSOLID));
 			dc->DrawRectangle(edge);
 			if(i==currentTab)
@@ -732,14 +865,14 @@ void GraphixScrollWindow::OnMouseLeftDown()
 		PfeilUpPressed=1;
 	else if(PfeilDown.Inside(mouseX-x,mouseY-y)&&(scrollY<maxScrollY))
 		PfeilDownPressed=1;
-	else
+/*	else
 	if(titlePosition.Inside(mouseX-x,mouseY-y))
 	{
 		WindowMove=1;
 //		startx=x;starty=y;startheight=Border.height;startwidth=Border.width;
 		WindowMoveX=mouseX-x;
 		WindowMoveY=mouseY-y;
-	}
+	}*/
 	else
 	{
 		int i;

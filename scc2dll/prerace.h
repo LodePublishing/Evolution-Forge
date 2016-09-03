@@ -92,6 +92,7 @@ public:
 	int addLocationAvailible(int loc, int type, int num);
 	int addLocationForce(int loc, int type, int num);
 
+
 	int Code[2][MAX_LENGTH];
 	int Marker[2][MAX_LENGTH];
 

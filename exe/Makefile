@@ -1,4 +1,4 @@
-WXPATH=/home/clawg/temp/wxWindows-2.4.2/
+WPATH=/home/clawg/temp/wxWindows-2.4.2/
 PROGRAM=scc2
 CXX=i386-mingw32msvc-g++
 DLLWRAP=i386-mingw32msvc-dllwrap

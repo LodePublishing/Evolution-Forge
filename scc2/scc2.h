@@ -5,10 +5,10 @@
 #ifndef WX_PREFOMP
     #include "wx/wx.h"
 #endif
-                                                                                                                                                            
+
 // the application icon (under Windows and OS/2 it is in resources)
 #if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
-    #include "/home/clawg/work/sc1039/sc/icon.xpm"
+    #include "/home/clawg/work/sc1040/sc/icon.xpm"
 //    #include "scc.png"
 #endif
 
@@ -54,6 +54,7 @@ const int FONT_SIZE=6;
 const int FONT_SIZE=7;
 #endif
 
+#include "list.h"
 
 // this is mainly for for io to display some of the output
 const char error_message[ERROR_MESSAGES][25]=
@@ -127,31 +128,7 @@ struct BOLOG
 
 
 
-struct OLDORDER
-{
-	
-	int blend;
-	int blendTarget;
-
-//build order list
-	int x,y; //current x,y
-	int targetx,targety;
-	int targetwidth,width;
-	int dx,dy;
-
-//build order graph
-	int bx,by;
-	int targetbx,targetby;
-
-	int bheight,bwidth;
-	int targetbheight,targetbwidth;
-	
-	int unit,mins,gas,time,location,needSupply,haveSupply,forceFacilityCount,availibleFacilityCount,successType,successUnit,facility,code,forceCount;
-	int marker,bonew;
-
-	int row;
-//	int mins, color  etc.
-};
+//WX_DECLARE_LIST(OLDORDER, OrderList);
 
 struct Message
 {
@@ -162,11 +139,11 @@ struct Message
 int msgCount;
 
 
-class MyDCWindow : 
-public wxScrolledWindow
+class MyDCWindow:public wxWindow
 {
 public:
         MyDCWindow(wxFrame *parent);
+	~MyDCWindow();
         void OnEraseBackground(wxEraseEvent& event);
         void OnPaint(wxPaintEvent& event);
         void OnIdle(wxIdleEvent& WXUNUSED(event));
@@ -174,11 +151,13 @@ public:
 	void OnMouseLeftUp(wxMouseEvent& event);
 	void OnMouseLeftDown(wxMouseEvent& event);
         void OnMouseScroll(wxMouseEvent& event);
+	void OnTimer(wxTimerEvent& event);
         SETTINGS settings;
 	int run;
 	void resetData();
 	void showToolTip();
 private:
+	wxTimer wxtimer;
 	void CheckOldOrders();
 	void MoveOldOrders();
 	int CheckForInfoWindow();
@@ -193,8 +172,11 @@ private:
         BOLOG globalForcelog[UNIT_TYPE_COUNT];
         wxBitmap bmpGraph,bmpTimer,bmpBack,bmpBack2,bmpCancel,bmpAdd,bmpSub;
 	wxBitmap bmpArrowLeft,bmpArrowUp,bmpArrowRight,bmpArrowDown;
+	int currentForce;
+	void analyzeData();
 	void showBoGraph();
 	void processButtons();
+	void drawBuildOrder();
 	void drawStatistics();
 	void drawGoalList();
 	void drawGizmo();
@@ -205,7 +187,6 @@ private:
         void showGraph(int* data,int max,wxColour col);
 	void showInfoWindow();
 	void showCoreAnimation();
-        void showForceListBack();
 	void showTimer();
 	void showProgramGraph();
 	wxMemoryDC* dc;
@@ -242,7 +223,8 @@ private:
 	int oldGasCounter[20],oldGas[20];
 	int oldMinsCounter[20],oldMins[20];
 	
-	OLDORDER* oldOrder[MAX_LENGTH*50];
+//	OLDORDER* oldOrder[MAX_LENGTH*50];
+	OrderList orderList;
 //	int oldMarker[MAX_LENGTH];
 
 //	int oldBuildOrders[BUILD_ORDER_NUMBER];
@@ -251,10 +233,11 @@ private:
 wxBitmap bitmap,bitmap2,bitmap3,hintBitmap,bmpNumbers,bmpRadiation,bmpAlpha,bmpTreppe,bmpCloning,bmpFitness;
 	wxBitmap bmpRad[5];
 	wxBitmap bmpHeart[5];
-	int ani,boanzahl;
+	int ani;
         int maxsFitness;
         int maxpFitness;
         int maxtFitness;
+	int tutorialAnimation;
 	int mintFitness;
         int maxForce; //all units
         int maxUnitForce; //single unit

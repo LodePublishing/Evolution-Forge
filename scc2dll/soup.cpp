@@ -528,6 +528,14 @@ if((player[k*t+l]->getpFitness()*1.1<player[k*t]->getpFitness())||
 			Save[anaplayer[k]->getRun()][k]=new ANARACE;
 			ANARACE* s=Save[anaplayer[k]->getRun()][k];
 			int p,q;
+			for(p=MAX_TIME;p--;)
+			{
+                                s->setStatisticsFitness(p,anaplayer[k]->getStatisticsFitness(p));
+                                s->setStatisticsHaveMinerals(p,anaplayer[k]->getStatisticsHaveMinerals(p));
+                                s->setStatisticsHaveGas(p,anaplayer[k]->getStatisticsHaveGas(p));
+                                s->setStatisticsNeedSupply(p,anaplayer[k]->getStatisticsNeedSupply(p));
+                                s->setStatisticsHaveSupply(p,anaplayer[k]->getStatisticsHaveSupply(p));
+			}
 			for(p=MAX_LENGTH;p--;)
 			{
 				s->setProgramFacility(p,anaplayer[k]->getProgramFacility(p));
@@ -536,14 +544,9 @@ if((player[k*t+l]->getpFitness()*1.1<player[k*t]->getpFitness())||
                                 s->setProgramSuccessUnit(p,anaplayer[k]->getProgramSuccessUnit(p));
                                 s->setProgramIsBuilt(p,anaplayer[k]->getProgramIsBuilt(p));
                                 s->setProgramLocation(p,anaplayer[k]->getProgramLocation(p));
-                                s->setProgramNeedSupply(p,anaplayer[k]->getProgramNeedSupply(p));
-                                s->setProgramHaveSupply(p,anaplayer[k]->getProgramHaveSupply(p));
                                 s->setProgramTime(p,anaplayer[k]->getProgramTime(p));
-                                s->setProgramHaveMinerals(p,anaplayer[k]->getProgramHaveMinerals(p));
-                                s->setProgramHaveGas(p,anaplayer[k]->getProgramHaveGas(p));
                                 s->setProgramIsGoal(p,anaplayer[k]->getProgramIsGoal(p));
                                 s->setProgramDominant(p,anaplayer[k]->getProgramDominant(p));
-                                s->setProgramFitness(p,anaplayer[k]->getProgramFitness(p));
 	
 				for(q=UNIT_TYPE_COUNT;q--;)
 				{

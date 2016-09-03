@@ -5,6 +5,7 @@
 																			    
 WX_DEFINE_LIST(BuildingList);
 
+
 void EXPORT PRERACE::createSpecial()
 {
 	int i;

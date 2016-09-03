@@ -1,24 +1,22 @@
-WXPATH=/home/clawg/temp2/wxGTK-2.4.2/
+WXPATH=/home/clawg/temp/wxX/
 PROGRAM=scc2
 CXX=g++
 DLLPATH=$(PROGRAM)dll
 OBJDLL=$(DLLPATH)/anarace.o $(DLLPATH)/debug.o $(DLLPATH)/ga.o $(DLLPATH)/goal.o  $(DLLPATH)/harvest.o  $(DLLPATH)/location.o  $(DLLPATH)/map.o  $(DLLPATH)/player.o  $(DLLPATH)/prerace.o  $(DLLPATH)/race.o  $(DLLPATH)/settings.o  $(DLLPATH)/soup.o $(DLLPATH)/building.o
 SOURCEDLL=$(DLLPATH)/anarace.cpp $(DLLPATH)/debug.cpp $(DLLPATH)/ga.cpp $(DLLPATH)/goal.cpp  $(DLLPATH)/harvest.cpp  $(DLLPATH)/location.cpp  $(DLLPATH)/map.cpp  $(DLLPATH)/player.cpp  $(DLLPATH)/prerace.cpp  $(DLLPATH)/race.cpp  $(DLLPATH)/settings.cpp  $(DLLPATH)/soup.cpp $(DLLPATH)/building.cpp
-OBJMAIN=$(PROGRAM)/scc2.o $(PROGRAM)/graphics.o
+OBJMAIN=$(PROGRAM)/scc2.o $(PROGRAM)/graphics.o $(PROGRAM)/list.o
 DLLFLAGS=-DBUILD_DLL
 LIBS=-L./ $(PROGRAM).so.1.0
 RES_PROGRAM_OBJ = $(PROGRAM)_resourcesl.o
 
-EXTRALIBS = -Wl -L/usr/lib -L/usr/X11R6/lib -lgtk 
+EXTRALIBS = -Wl -L/usr/lib -L/usr/X11R6/lib -lX11 
 #-lgdk -rdynamic -lgmodule -lglib -ldl -lXi -lXext -lX11 -lm -lpng -ljpeg -lz -ldl -lm
 
-DLIBS=$(WXPATH)/lib/libwx_gtk-2.4.so.0.1.1 $(EXTRALIBS)
+DLIBS=$(WXPATH)/lib/libwx_x11univ-2.4.so.0.1.1 $(EXTRALIBS)
+RESFLAGS=--include-dir $(WXPATH)/include --define __WXX11__ --define __UNIX__
 
-WXLIB=libwx_msw-2.4-i386-mingw32msvc.a
-RESFLAGS=--include-dir $(WXPATH)/include --define __WXGTK__ --define __UNIX__
-
-CPPFLAGS = -I$(WXPATH)/lib/wx/include/gtk-2.4 -I$(WXPATH)/include -I/user/include/gtk-1.2 -D__WXGTK__ -DGTK_NO_CHECK_CASTS -g
-#-I/usr/include/glib-1.2 -I/usr/lib/glib/include -D_REENTRANT -I/usr/X11R6/include -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES 
+CPPFLAGS = -I$(WXPATH)/lib/wx/include/x11univ-2.4 -I$(WXPATH)/include -I/usr/X11R6/include -D__WXUNIVERSAL__ -D__WXX11__ -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -g
+#-I/usr/include/glib-1.2 -I/usr/lib/glib/include -D_REENTRANT -I/usr/X11R6/include
 
 CXXFLAGS = $(CPPFLAGS) -MMD -Wall
 
@@ -27,7 +25,7 @@ CXXFLAGS = $(CPPFLAGS) -MMD -Wall
 	$(RESCOMP) -i $< -o $@ $(LRESFLAGS)
 
 bin:	$(OBJMAIN)
-	$(CXX) $(CXXFLAGS) -o $(PROGRAM).bin $(OBJMAIN) $(LIBS) $(LDLIBS) $(LIBRARIES) $(WXPATH)/lib/libwx_gtk-2.4.so.0.1.1
+	$(CXX) $(CXXFLAGS) -o $(PROGRAM).bin $(OBJMAIN) $(LIBS) $(LDLIBS) $(LIBRARIES) $(WXPATH)/lib/libwx_x11univ-2.4.so.0.1.1 
 
 lib:	$(SOURCEDLL)
 	$(CXX) $(CXXFLAGS) -fPIC -c $(SOURCEDLL)

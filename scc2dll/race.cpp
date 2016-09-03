@@ -451,9 +451,9 @@ int RACE::buildGene(int unit)
 				if(ok)
 				{
 					BuildingList::Node *node=NULL;
-					for (node = buildingList.GetFirst();node&&(((Building*)node->GetData())->getRemainingBuildTime()<stat->BT+3200*(stat->facility2==unit));node = node->GetNext());
+					for (node = buildingList.GetFirst();node&&(((Building*)node->GetData())->getRemainingBuildTime()<stat->BT/*+3200*(stat->facility2==unit)*/);node = node->GetNext());
 					Building* build=new Building();
-					if(node&&(((Building*)node->GetData())->getRemainingBuildTime()>=stat->BT+3200*(stat->facility2==unit)))
+					if(node&&(((Building*)node->GetData())->getRemainingBuildTime()>=stat->BT/*+3200*(stat->facility2==unit)*/))
 						buildingList.Insert(node,build);
 					else if(!node) buildingList.Append(build);	
 				
@@ -461,7 +461,7 @@ int RACE::buildGene(int unit)
 					build->setFacility(stat->facility[fac]);
 					build->setLocation(tloc);
 					build->setUnitCount(1);
-					build->setRemainingBuildTime(stat->BT+3200*(stat->facility2==unit)); //~~ hack :/ TODO
+					build->setRemainingBuildTime(stat->BT/*+3200*(stat->facility2==unit)*/); //~~ hack :/ TODO SINN???????
 	                                build->setTotalBuildTime(build->getRemainingBuildTime());
         	                        build->setType(unit);
 																			    

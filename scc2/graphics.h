@@ -35,6 +35,7 @@ public:
 	int getInnerWidth();
 	int getHeight();
 	int getWidth();
+	int getTargetHeight();
 
 //todo: angeben in welchem Fenster sich das Fenster befindet!
 	
@@ -78,9 +79,9 @@ public:
 	void textButton(wxString bla, wxDC* dc);
 	void newTextPage();
 	void writeText(wxString bla, wxDC* dc);
-
-
-
+	void writeHeader(wxString bla, wxDC* dc, int mode);
+	void writeLongText(wxString bla, wxDC* dc);
+	void writeLine(wxString bla, wxDC* dc, wxColour color);
 
 
 	int isPressed(int num);

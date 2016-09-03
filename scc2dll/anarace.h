@@ -3,15 +3,21 @@
 
 #include "prerace.h"
 
-struct PROGRAM
+struct STATISTICS
 {
 	int needSupply;		// supply that is used up by all units
 	int haveSupply;		// total supply of supply buildings (overlord, supply depot, command center, ...)
+	int mins;			// minerals at that time
+	int gas;			// gas at that time
+	int fitness;	//fitness at that time
+};
+
+
+struct PROGRAM
+{
 	int built;			// was this order successfully built?
 	int dominant;		// which one of the two 'Code' entries is dominant?
 	int time;			// at which time this order was started
-	int mins;			// minerals at that time
-	int gas;			// gas at that time
 	int temp;			// unused
 	int location;		// at which location was this unit built
 	int successType;	// type of error
@@ -21,7 +27,6 @@ struct PROGRAM
 	int availibleCount[UNIT_TYPE_COUNT];
 	int facility; 	// where it was produced
 	int BT;		//real buildtime, incl. moving scv etc.
-	int fitness;	//fitness at that time
 }; 
 
 EXPORT class ANARACE: public PRERACE
@@ -35,9 +40,12 @@ EXPORT class ANARACE: public PRERACE
 		int maxsFitness;
 		int maxtFitness;
 		PROGRAM program[MAX_LENGTH];
+		STATISTICS statistics[MAX_TIME];
 		static int successType; //type of error
 		static int successUnit; //unit number
 		static MAP_LOCATION backupLoc[MAX_PLAYER][MAX_LOCATIONS];
+		int needTime(int unit);
+		int maximum(int unit);
 		int percentage;
 	public:
 		int fitnessCode[MAX_GOALS];
@@ -53,16 +61,21 @@ EXPORT class ANARACE: public PRERACE
 // external data output
 		int phaenoCode[MAX_LENGTH];		// the final build order: an array of unit numbers (as defined in main.h)
 
+		int getMarker(int IP);
+
 		int getPercentage();
 		int getProgramCode(int IP);
 		int getProgramSuccessType(int IP);	// determines the type of the last error before the item was built at that IP
 		int getProgramSuccessUnit(int IP);	// what unit was missing? (connected to successtype)
-		int getProgramNeedSupply(int IP);	// supply that is used up by all units
-		int getProgramHaveSupply(int IP);	// total supply of supply buildings (overlord, supply depot, command center, ...)
+		
+		int getStatisticsNeedSupply(int time);	// supply that is used up by all units
+		int getStatisticsHaveSupply(int time);	// total supply of supply buildings (overlord, supply depot, command center, ...)
+		int getStatisticsFitness(int time);
+		int getStatisticsHaveMinerals(int time); // minerals at that time
+		int getStatisticsHaveGas(int time);		// gas at that time
+
 		int getProgramIsBuilt(int IP);		// was this order successfully built?
 		int getProgramTime(int IP);			// at which time this order was started
-		int getProgramHaveMinerals(int IP); // minerals at that time
-		int getProgramHaveGas(int IP);		// gas at that time
 		int getProgramLocation(int IP);		// at which location was this unit built
 		int getProgramTemp(int IP);			// unused
 		int getProgramIsGoal(int IP);		// is this unit part of the goal list? NOT YET WORKING!
@@ -71,7 +84,6 @@ EXPORT class ANARACE: public PRERACE
 
 		int getProgramFacility(int IP);
 		int getProgramBT(int IP);
-		int getProgramFitness(int IP);
 		int getProgramDominant(int IP);
 
 		int getUnchangedGenerations();	// gets number of generations where no change in fitness took place
@@ -92,22 +104,24 @@ EXPORT class ANARACE: public PRERACE
 		int setMaxsFitness(int num);
 		int setMaxtFitness(int num);
 
+		int setStatisticsNeedSupply(int time, int supply);
+		int setStatisticsHaveSupply(int time, int supply);
+		int setStatisticsFitness(int time,int fitness);
+		int setStatisticsHaveMinerals(int time, int mins);
+		int setStatisticsHaveGas(int time, int gas);
+	
 		int setProgramFacility(int IP, int num);
 		int setProgramBT(int IP, int num);
 		int setProgramSuccessType(int IP, int num);
 		int setProgramSuccessUnit(int IP, int num);
 		int setProgramIsBuilt(int IP, int num);
 		int setProgramLocation(int IP, int location);
-		int setProgramNeedSupply(int IP, int supply);
-		int setProgramHaveSupply(int IP, int supply);
 		int setProgramTime(int IP, int time);
-		int setProgramHaveMinerals(int IP, int mins);
-		int setProgramHaveGas(int IP, int gas);
 		int setProgramIsGoal(int IP, int num);	
 		int setProgramDominant(int IP, int num);
 		int setProgramForceCount(int IP, int unit, int count);	
                 int setProgramAvailibleCount(int IP, int unit, int count);
-		int setProgramFitness(int IP,int fitness);
+
 		int calculateStep();			// calculates another time step of current generation
 		int calculateFitness();
 		void resetData();				// resets all data to standard values

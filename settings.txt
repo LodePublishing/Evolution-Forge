@@ -1,10 +1,10 @@
 "@SETTINGS"
-"Max Time" = "1800"
+"Max Time" = "3600"
 # Preprocessing not implemented yet
 "Preprocess Buildorder" = "0"
-"Max unchanged Generations" = "250"
+"Max unchanged Generations" = "150"
 "Max Length" = "96"
-"Max Runs" = "1"
+"Max Runs" = "10"
 "Max Timeout" = "133"
 # Allow to ignore unnecessary goals (mainly for using for example only "lair" instead of both "lair" and "hatchery")
 "Allow goal adaption" = "1"
@@ -16,10 +16,10 @@
 "Mode" = "0"
 # Breed Factor:
 # This parameter determines how many % of the players will multiply by 1:1 copy
-"Breed Factor" = "2"
+"Breed Factor" = "5"
 # Crossing Over:
 # This parameter determines how many % of the players will multiply by crossover
-"Crossing Over" = "0"
+"Crossing Over" = "2"
 # 10 means that programs will be sorted into 10-program groups, the best 2 are
 # taken for reproduction and the worst two are replaced by their children
 

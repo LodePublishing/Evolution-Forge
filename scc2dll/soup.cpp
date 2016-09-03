@@ -5,6 +5,7 @@
 #include "race.h"
 #include "anarace.h"
 #include "debug.h"
+#include <stdio.h>
 
 //todo: debug.tolog einbaun
 #ifdef BUILD_DLL
@@ -156,7 +157,7 @@ int compare(const void* a,const void* b)
 
 //TODO: Ueber Optionen einstellen, welche Fitness ueberhaupt bzw. wie stark gewertet wird (oder ob z.B. die Fitnesswerte zusammengeschmissen werden sollen etc.)
 
-ANARACE* SOUP::newGeneration()
+ANARACE* SOUP::newGeneration(ANARACE* oldAnarace)
 {
 	int i,j,k,l,m,t,complete,tournaments;
 	if(!mapInitialized)
@@ -177,6 +178,25 @@ ANARACE* SOUP::newGeneration()
 	if(anaplayer[0]->getRun()>=ga->maxRuns) //~~
 		return(0);
 	
+        if(oldAnarace)
+//=> setze player 1 auf uebergebenen anarace code
+		for(i=MAX_LENGTH;i--;)
+			for(k=0;k<2;k++)
+				player[0]->Code[k][i]=oldAnarace->Code[k][i];
+
+//create noise for this whole generation:
+
+	if(ga->noise>0)
+	{
+		for(j=0;j<MAX_TIME;j++)
+			RACE::noise[j]=rand()%ga->noise-rand()%ga->noise;
+	}
+	else
+	{
+		for(j=0;j<MAX_TIME;j++)
+                	RACE::noise[j]=0;
+	}
+
 // Map initialisieren und fitness errechnen
         t=MAX_PROGRAMS/(pMap->getMaxPlayer()-1);
         for(i=0;i<t;i++)
@@ -234,6 +254,8 @@ ANARACE* SOUP::newGeneration()
 //        t=MAX_PROGRAMS/(pMap->getMaxPlayer()-1);
 //        for(i=0;i<t;i++)
 //        { BUG in GDB wenn das hier so is?
+
+
 		for(k=0;k<pMap->getMaxPlayer()-1;k++)
 		{
 			player[k*t+i]->resetData();
@@ -248,6 +270,7 @@ ANARACE* SOUP::newGeneration()
 			complete=1;
 			for(k=0;k<pMap->getMaxPlayer()-1;k++)
 				complete&=player[k*t+i]->calculateStep();
+		//TODO Sleep Funktion einbauen
 		}
 	}
 
@@ -274,6 +297,10 @@ ANARACE* SOUP::newGeneration()
 		for(i=0;i<ga->breedFactor*t/100;i++) // % are replaced by the uber-program :-o
 		{
 			l=rand()%(t*(ga->breedFactor)/100) + t*(100-ga->breedFactor)/100;
+if((player[k*t+l]->getpFitness()*1.1<player[k*t]->getpFitness())||
+                                  ((player[k*t+l]->getpFitness()==player[k*t]->getpFitness())&&(player[k*t+l]->getsFitness()*1.1<player[k*t]->getsFitness()))||
+                                  ((player[k*t+l]->getpFitness()==player[k*t]->getpFitness())&&(player[k*t+l]->getsFitness()==player[k*t]->getsFitness())&&(player[k*t+l]->gettFitness()*1.1<player[k*t]->gettFitness())) )
+
 			for(j=0;j<MAX_LENGTH;j++)
 			{
 				player[k*t+l]->Code[0][j]=player[k*t]->Code[0][j];
@@ -433,7 +460,6 @@ ANARACE* SOUP::newGeneration()
 			anaplayer[k]->adjustHarvest();
 		}
 		complete=0;
-
 		while(!complete)
 		{
 			complete=1;
@@ -444,6 +470,42 @@ ANARACE* SOUP::newGeneration()
 //	} else
 //		anaplayer[0]->restoreMap();
 
+        for(k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
+        {
+                anaplayer[k]->fitnessAverage=0;
+                for(i=k*t;i<(k+1)*t;i++)
+                        anaplayer[k]->fitnessAverage+=player[i]->getpFitness();
+                anaplayer[k]->fitnessAverage/=(MAX_PROGRAMS/(pMap->getMaxPlayer()-1));
+        }
+                                                                                                                                                            
+        for(k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
+        {
+                anaplayer[k]->fitnessVariance=0;
+                for(i=k*t;i<(k+1)*t;i++)
+                {
+                        int z=anaplayer[k]->fitnessAverage-player[i]->getpFitness();
+                        anaplayer[k]->fitnessVariance+=(z*z);
+                }
+                anaplayer[k]->fitnessVariance/=MAX_PROGRAMS;
+        }
+                                                                                                                                                            
+        for(k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
+        {
+                for(j=0;j<k;j++)
+                        if((anaplayer[k]->getMaxpFitness()>anaplayer[j]->getMaxpFitness())||
+                                ((anaplayer[k]->getMaxpFitness()==anaplayer[j]->getMaxpFitness())&&(anaplayer[k]->getMaxsFitness()>anaplayer[j]->getMaxsFitness()))||
+                                ((anaplayer[k]->getMaxpFitness()==anaplayer[j]->getMaxpFitness())&&(anaplayer[k]->getMaxsFitness()==anaplayer[j]->getMaxsFitness())&&(anaplayer[k]->getMaxtFitness()>anaplayer[j]->getMaxtFitness())) )
+                        {
+                                ANARACE* temp;
+                                temp=anaplayer[k];
+                                anaplayer[k]=anaplayer[j];
+                                anaplayer[j]=temp;
+                        }
+        }
+
+        anaplayer[0]->analyzeBuildOrder();
+        RACE::bestTime=anaplayer[0]->getTimer();
+
 	for(k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
 	{
 		anaplayer[k]->setUnchangedGenerations(anaplayer[k]->getUnchangedGenerations()+1);
@@ -453,54 +515,81 @@ ANARACE* SOUP::newGeneration()
 			for(i=k*t;i<(k+1)*t;i++)
 				player[i]->resetGeneCode();
 
+			Save[anaplayer[k]->getRun()][k]=new ANARACE;
+			ANARACE* s=Save[anaplayer[k]->getRun()][k];
+			int p,q;
+			for(p=MAX_LENGTH;p--;)
+			{
+				s->setProgramFacility(p,anaplayer[k]->getProgramFacility(p));
+                                s->setProgramBT(p,anaplayer[k]->getProgramBT(p));
+                                s->setProgramSuccessType(p,anaplayer[k]->getProgramSuccessType(p));
+                                s->setProgramSuccessUnit(p,anaplayer[k]->getProgramSuccessUnit(p));
+                                s->setProgramIsBuilt(p,anaplayer[k]->getProgramIsBuilt(p));
+                                s->setProgramLocation(p,anaplayer[k]->getProgramLocation(p));
+                                s->setProgramNeedSupply(p,anaplayer[k]->getProgramNeedSupply(p));
+                                s->setProgramHaveSupply(p,anaplayer[k]->getProgramHaveSupply(p));
+                                s->setProgramTime(p,anaplayer[k]->getProgramTime(p));
+                                s->setProgramHaveMinerals(p,anaplayer[k]->getProgramHaveMinerals(p));
+                                s->setProgramHaveGas(p,anaplayer[k]->getProgramHaveGas(p));
+                                s->setProgramIsGoal(p,anaplayer[k]->getProgramIsGoal(p));
+                                s->setProgramDominant(p,anaplayer[k]->getProgramDominant(p));
+                                s->setProgramFitness(p,anaplayer[k]->getProgramFitness(p));
+	
+				for(q=UNIT_TYPE_COUNT;q--;)
+				{
+	                                s->setProgramForceCount(p,q,anaplayer[k]->getProgramForceCount(p,q));
+        	                        s->setProgramAvailibleCount(p,q,anaplayer[k]->getProgramAvailibleCount(p,q));
+				}
+				s->phaenoCode[p]=anaplayer[k]->phaenoCode[p];
+			}
+ 	                s->setUnchangedGenerations(anaplayer[k]->getUnchangedGenerations()-1);
+	                s->setRun(anaplayer[k]->getRun()+1);
+        	        s->setGeneration(anaplayer[k]->getGeneration());
+                	s->setMaxpFitness(anaplayer[k]->getMaxpFitness());
+	                s->setMaxsFitness(anaplayer[k]->getMaxsFitness());
+        	        s->setMaxtFitness(anaplayer[k]->getMaxtFitness());
+
+			s->setPlayer(anaplayer[k]->getPlayer());
+			s->setPlayerNum(anaplayer[k]->getPlayerNum());
+			s->setpStats(anaplayer[k]->getpStats());
+			s->setCalculated(anaplayer[k]->getCalculated());
+			//loadplayer?
+			s->setSupply(anaplayer[k]->getSupply());
+			s->setMaxSupply(anaplayer[k]->getMaxSupply());
+			s->setMins(anaplayer[k]->getMins());
+			s->setGas(anaplayer[k]->getGas());
+
+			s->setTimer(anaplayer[k]->getTimer());
+			s->setTimeOut(anaplayer[k]->getTimeOut());
+			s->setIP(anaplayer[k]->getIP());
+			s->setHarvestedMins(anaplayer[k]->getHarvestedMins());
+			s->setHarvestedGas(anaplayer[k]->getHarvestedGas());
+			for(p=MAX_GOALS;p--;)
+				s->setFinalTime(p,anaplayer[k]->getFinalTime(p));
+			s->setLength(anaplayer[k]->getLength());
+
+			for(p=2;p--;)
+				for(q=MAX_LENGTH;q--;)
+				{
+					s->Code[p][q]=anaplayer[k]->Code[p][q];
+					s->Marker[p][q]=anaplayer[k]->Marker[p][q];
+				}
+		//TODO: statistical values ?!
+					
 			anaplayer[k]->setRun(anaplayer[k]->getRun()+1);
 			anaplayer[k]->setGeneration(0);
 			anaplayer[k]->setMaxpFitness(0);
 			anaplayer[k]->setMaxsFitness(0);
 			anaplayer[k]->setMaxtFitness(0);
-			anaplayer[k]->setUnchangedGenerations(0);		
-			//TODO: Saven!
+			anaplayer[k]->setUnchangedGenerations(0);
+
+			debug.toLog(0,"FITNESS: %s: [%.2i:%.2i]",s->getPlayer()->goal->getName(),(ga->maxTime-s->getTimer())/60,(ga->maxTime-s->getTimer())%60);
+			return(s);
 		}
 	}
 	//	~~
 
-	for(k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
-	{
-		anaplayer[k]->fitnessAverage=0;
-       		for(i=k*t;i<(k+1)*t;i++)
-			anaplayer[k]->fitnessAverage+=player[i]->getpFitness();
-		anaplayer[k]->fitnessAverage/=(MAX_PROGRAMS/(pMap->getMaxPlayer()-1));
-	}
-	
-	for(k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
-	{
-		anaplayer[k]->fitnessVariance=0;
-		for(i=k*t;i<(k+1)*t;i++)
-		{
-			int z=anaplayer[k]->fitnessAverage-player[i]->getpFitness();
-			anaplayer[k]->fitnessVariance+=(z*z);
-		}
-		anaplayer[k]->fitnessVariance/=MAX_PROGRAMS;
-	}
-																			    
-	for(k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
-	{
-		for(j=0;j<k;j++)
-			if((anaplayer[k]->getMaxpFitness()>anaplayer[j]->getMaxpFitness())||
-				((anaplayer[k]->getMaxpFitness()==anaplayer[j]->getMaxpFitness())&&(anaplayer[k]->getMaxsFitness()>anaplayer[j]->getMaxsFitness()))||
-				((anaplayer[k]->getMaxpFitness()==anaplayer[j]->getMaxpFitness())&&(anaplayer[k]->getMaxsFitness()==anaplayer[j]->getMaxsFitness())&&(anaplayer[k]->getMaxtFitness()>anaplayer[j]->getMaxtFitness())) )
-			{
-				ANARACE* temp;
-				temp=anaplayer[k];
-				anaplayer[k]=anaplayer[j];
-				anaplayer[j]=temp;
-			}
-	}
-
-	//return the best solution ~~ 
 	// TODO multiple parties
-	anaplayer[0]->analyzeBuildOrder();
-	RACE::bestTime=anaplayer[0]->getTimer();
 	return(anaplayer[0]);
 };
 

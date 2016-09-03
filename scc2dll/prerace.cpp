@@ -1,6 +1,11 @@
 #include "prerace.h"
 #include "debug.h"
 
+#include "wx/listimpl.cpp"
+																			    
+WX_DEFINE_LIST(BuildingList);
+
+
 void EXPORT PRERACE::createSpecial()
 {
 	int i;
@@ -334,305 +339,6 @@ int EXPORT PRERACE::addLocationForce(int loc, int type, int num)
 	return(1);
 };
 
-
-
-int PRERACE::getBuildingTotalBuildTime(int num)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingTotalBuildTime): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((building[num].TB<0)||(building[num].TB>MAX_TIME))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingTotalBuildTime): Variable building[%i].TB not initialized [%i].",num,building[num].TB);
-		return(0);
-	}
-	return(building[num].TB);
-};
-
-int PRERACE::getBuildingRemainingBuildTime(int num)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingRemainingBuildTime): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((building[num].RB<0)||(building[num].RB>MAX_TIME))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingRemainingBuildTime): Variable not initialized [%i].",building[num].RB);
-		return(0);
-	}
-	return(building[num].RB);
-};
-
-int PRERACE::getBuildingType(int num)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingType): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((building[num].type<0)||(building[num].type>UNIT_TYPE_COUNT))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingType): Variable not initialized [%i].",building[num].type);
-		return(0);
-	}
-	return(building[num].type);
-};
-
-int PRERACE::getBuildingUnitCount(int num)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingUnitCount): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((building[num].unitCount<0)||(building[num].unitCount>MAX_SUPPLY))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingUnitCount): Variable not initialized [%i].",building[num].unitCount);
-		return(0);
-	}
-	return(building[num].unitCount);
-};
-
-int PRERACE::getBuildingFacility(int num)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingFacility): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((building[num].facility<0)||(building[num].facility>UNIT_TYPE_COUNT))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingFacility): Variable not initialized [%i].",building[num].facility);
-		return(0);
-	}
-	return(building[num].facility);
-};
-
-int PRERACE::getBuildingIP(int num)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingIP): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((building[num].IP<0)||(building[num].IP>MAX_LENGTH))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingIP): Variable not initialized [%i].",building[num].IP);
-		return(0);
-	}
-	return(building[num].IP);
-};
-
-int PRERACE::getBuildingLocation(int num)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingLocation): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((building[num].location<0)||(building[num].location>MAX_LOCATIONS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingLocation): Variable not initialized [%i].",building[num].location);
-		return(0);
-	}
-	return(building[num].location);
-};
-
-int PRERACE::getBuildingGoal(int num)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingGoal): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((building[num].goal<0)||(building[num].goal>UNIT_TYPE_COUNT))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingGoal): Variable not initialized [%i].",building[num].goal);
-		return(0);
-	}
-	return(building[num].goal);
-};
-
-int PRERACE::getBuildingOnTheRun(int num)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingOnTheRun): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((building[num].onTheRun<0)||(building[num].onTheRun>2))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::getBuildingOnTheRun): Variable not initialized [%i].",building[num].onTheRun);
-		return(0);
-	}
-	return(building[num].onTheRun);
-};
-
-
-int PRERACE::setBuildingTotalBuildTime(int num, int time)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingTotalBuildTime): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((time<0)||(time>=MAX_TIME))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingTotalBuildTime): Value [%i] out of range.",time);
-		return(0);
-	}
-	building[num].TB=time;
-	return(1);
-};
-
-int PRERACE::setBuildingRemainingBuildTime(int num, int time)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingRemainingBuildTime): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((time<0)||(time>=MAX_TIME))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingRemainingBuildTime): Value [%i] out of range.",time);
-		return(0);
-	}
-	building[num].RB=time;
-	return(1);
-};
-
-int PRERACE::setBuildingType(int num, int type)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingType): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((type<0)||(type>=UNIT_TYPE_COUNT))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingType): Value [%i] out of range.",type);
-		return(0);
-	}
-	building[num].type=type;
-	return(1);
-};
-
-int PRERACE::setBuildingUnitCount(int num, int count)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingUnitCount): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((count<0)||(count>=10))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingUnitCount): Value [%i] out of range.",count);
-		return(0);
-	}
-	building[num].unitCount=count;
-	return(1);
-};
-
-int PRERACE::setBuildingFacility(int num, int facility)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingFacility): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((facility<0)||(facility>=UNIT_TYPE_COUNT))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingFacility): Value [%i] out of range.",facility);
-		return(0);
-	}
-	building[num].facility=facility;
-	return(1);
-};
-
-int PRERACE::setBuildingIP(int num, int IP)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingIP): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((IP<0)||(IP>=MAX_LENGTH))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingIP): Value [%i] out of range.",IP);
-		return(0);
-	}
-	building[num].IP=IP;
-	return(1);
-};
-
-int PRERACE::setBuildingLocation(int num, int location)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingLocation): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((location<0)||(location>=MAX_LOCATIONS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingLocation): Value [%i] out of range.",location);
-		return(0);
-	}
-	building[num].location=location;
-	return(1);
-};
-
-int PRERACE::setBuildingGoal(int num, int goal)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingGoal): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((goal<0)||(goal>=UNIT_TYPE_COUNT))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingGoal): Value [%i] out of range.",goal);
-		return(0);
-	}
-	building[num].goal=goal;
-	return(1);
-};
-
-int PRERACE::setBuildingOnTheRun(int num, int onTheRun)
-{
-	if((num<0)||(num>=MAX_BUILDINGS))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingOnTheRun): Value [%i] out of range.",num);
-		return(0);
-	}
-	if((onTheRun<0)||(onTheRun>=2))
-	{
-		debug.toLog(0,"DEBUG: (PRERACE::setBuildingOnTheRun): Value [%i] out of range.",onTheRun);
-		return(0);
-	}
-	building[num].onTheRun=onTheRun;
-	return(1);
-};
-
-void PRERACE::resetBuildings()
-{
-	int i;
-	for(i=0;i<MAX_BUILDINGS;i++)
-	{
-		setBuildingTotalBuildTime(i,0);
-		setBuildingRemainingBuildTime(i,0);
-		setBuildingType(i,0);
-		setBuildingUnitCount(i,0);
-		setBuildingFacility(i,0);
-		setBuildingIP(i,0);
-		setBuildingLocation(i,0);
-		setBuildingGoal(i,0);
-		setBuildingOnTheRun(i,0);
-	}
-}
-
 MAP* PRERACE::getMap()
 {
 	return(pMap);
@@ -887,6 +593,17 @@ int EXPORT PRERACE::setpStats(const UNIT_STATISTICS* pStats)
 };
 
 
+const UNIT_STATISTICS* EXPORT PRERACE::getpStats()
+{
+	if(!pStats)
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getpStats): Variable not initialized.");
+		return(0);
+	}
+	return(pStats);
+};
+
+
 int EXPORT PRERACE::loadPlayer(int num)
 {
 	setPlayerNum(num);
@@ -914,37 +631,57 @@ int EXPORT PRERACE::adjustHarvest()
 	return(1);
 }
 
-void EXPORT PRERACE::harvestResources()
+
+int EXPORT PRERACE::harvestMinerals()
 {
 	int i,s;
-//	int t=(rand()%10)-5;
+	int sum=0;
+//      int t=(rand()%10)-5;
 	for(i=1;i<MAX_LOCATIONS;i++)//~~
-	if((s=(location[i].availible[SCV])))
+	if((s=location[i].availible[SCV]))
 	{
 		//availible is 0, harvestSpeed ist ok!
 		if(s<44) //~~ war 56
-		{
+			sum+=getMineralHarvestPerSecond(i,s);
+		else
+			sum+=getMineralHarvestPerSecond(i,44);
+/*		{
 			setMins(getMins()+getMineralHarvestPerSecond(i,s));
-		       	//~~~ neu berechnen / Tabelle anlegen! sind ja nicht bei jeder Exe gleichviel Mineralien...
+			//~~~ neu berechnen / Tabelle anlegen! sind ja nicht bei jeder Exe gleichviel Mineralien... <- das sollte sich mit adjustHarvest erledigt haben
 			harvestedMins+=getMineralHarvestPerSecond(i,s); //~~~
 		}
 		else
 		{
 			setMins(getMins()+getMineralHarvestPerSecond(i,44)); //war 56
 			harvestedMins+=getMineralHarvestPerSecond(i,44);
-		}
-		s=location[i].availible[GAS_SCV];
+		}*/
+	}
+	return(sum);
+}
+
+
+int EXPORT PRERACE::harvestGas()
+{
+	int i,s;
+	int sum=0;
+//	int t=(rand()%10)-5;
+	for(i=1;i<MAX_LOCATIONS;i++)//~~
+	if((s=location[i].availible[GAS_SCV]))
+	{
 		if(s<4)
-		{
-			setGas(getGas()+getGasHarvestPerSecond(i,s));
+			sum+=getGasHarvestPerSecond(i,s);
+		else
+			sum+=getGasHarvestPerSecond(i,4); //TODO
+/*
 			harvestedGas+=getGasHarvestPerSecond(i,s);
 		}
 		else
 		{
 			setGas(getGas()+getGasHarvestPerSecond(i,4));
 			harvestedGas+=getGasHarvestPerSecond(i,4);
-		}
+		}*/
 	}
+	return(sum);
 };
 
 int EXPORT PRERACE::getCalculated()
@@ -1216,13 +953,13 @@ void EXPORT PRERACE::resetMapInitialized()
 void EXPORT PRERACE::resetSpecial()
 {
 	int i,j,k;
-        for(i=0;i<20;i++)
-        {
-                larva[i].counter=0;
-                larva[i].location=0;
-                larva[i].larvacount=0;
-        }
-        larvacounternumber=0;
+	for(i=0;i<20;i++)
+	{
+		larva[i].counter=0;
+		larva[i].location=0;
+		larva[i].larvacount=0;
+	}
+	larvacounternumber=0;
 	if(getPlayer()->goal->getRace()==ZERG)
 	{
 		for(i=1;i<MAX_LOCATIONS;i++)
@@ -1238,6 +975,87 @@ void EXPORT PRERACE::resetSpecial()
 				}
 	}
 }
+
+void PRERACE::adjustAvailibility(int loc,int fac,const UNIT_STATISTICS* stat)
+{
+	switch(stat->facility_type)
+	{
+		case IS_LOST:
+			if(stat->facility[fac]>0)
+			{
+				addLocationAvailible(loc,stat->facility[fac],-1);
+				setSupply(getSupply()+pStats[stat->facility[fac]].supply);
+				if((getPlayer()->goal->getRace()==ZERG)&&(stat->facility[fac]==LARVA))
+				{
+					int bestPlace=0;//unschoen hier :/
+					int bestCounter=0;
+					int i;
+					for(i=0;i<larvacounternumber;i++)
+						if((larva[i].location==loc)&&(larva[i].larvacount>bestCounter))
+							{bestCounter=larva[i].larvacount;bestPlace=i;}
+					larva[bestPlace].larvacount--;
+				}
+			}
+			if(stat->facility2>0)
+			{
+				addLocationAvailible(loc,stat->facility2,-1);
+				setSupply(getSupply()+pStats[stat->facility2].supply);
+			}
+			break;
+		case NEEDED_ONCE:
+			break;
+		case NEEDED_UNTIL_COMPLETE:
+			if(stat->facility[fac]>0)
+				addLocationAvailible(loc,stat->facility[fac],-1);
+			if(stat->facility2>0)
+				addLocationAvailible(loc,stat->facility2,-1);
+				//kommt glaub nicht vor...
+			break;
+		case NEEDED_ONCE_IS_LOST:
+			if(stat->facility2>0)
+			{
+				addLocationAvailible(loc,stat->facility2,-1);
+				setSupply(getSupply()+pStats[stat->facility2].supply); // <- nicht noetig :/ eigentlich schon... bei gas scv z.B. :/
+			}
+			break;
+		case NEEDED_UNTIL_COMPLETE_IS_LOST:
+			if(stat->facility2>0)
+			{
+				addLocationAvailible(0/*location*/ ,stat->facility2,-1); // primarily for temporary R_researches, have to be location 0
+// TODO				 setSupply(getSupply()+pStats[stat->facility2].supply); // <- nicht noetig :/
+			}
+			if(stat->facility[fac]>0)
+				addLocationAvailible(loc,stat->facility[fac],-1);
+			break;
+		case NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE:
+			if(stat->facility2>0)
+				addLocationAvailible(0/*loc*/,stat->facility2,-1);
+			// no supply gain as the item is recovered... well or not? mmmh... ~~~~
+			if(stat->facility[fac]>0)
+				addLocationAvailible(loc,stat->facility[fac],-1);
+			break;
+		case NEEDED_ALWAYS:
+			if(stat->facility[fac]>0)
+				addLocationAvailible(loc,stat->facility[fac],-1);
+				// supply?
+			if(stat->facility2>0)
+				addLocationAvailible(loc,stat->facility2,-1);
+			break;
+		default:debug.toLog(0,"DEBUG: (ANARACE::buildGene) default case reached!");break;
+	}
+}
+
+
+int PRERACE::calculateReady()
+{
+	int i;
+	int ready=1;
+	for(i=MAX_GOALS;(i--)&&(ready);)
+		if(getPlayer()->goal->goal[i].count)
+			ready&=((getPlayer()->goal->goal[i].count<=getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit))&&((getPlayer()->goal->goal[i].time>=getFinalTime(i))||(getPlayer()->goal->goal[i].time==0)));
+	return(ready);
+}
+
 
 PRERACE::PRERACE()
 {
@@ -1291,5 +1109,6 @@ MAP* PRERACE::pMap;
 GA* PRERACE::ga;
 int PRERACE::mapInitialized;
 int PRERACE::bestTime;
+int PRERACE::noise[MAX_TIME];
 MAP_LOCATION PRERACE::loc[MAX_PLAYER][MAX_LOCATIONS];
 

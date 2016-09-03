@@ -114,6 +114,8 @@ int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption)
 					}
 					j=0;
 				}
+			isBuildable[pStats[i].create]=0; //~~
+			isVariable[pStats[i].create]=0;
 		}
 	
         long Need_Gas=0;
@@ -127,12 +129,6 @@ int EXPORT GOAL_ENTRY::adjustGoals(int allowGoalAdaption)
                 isBuildable[GAS_SCV]=1; //ONE_MINERAL_SCV... = ONE_MINERAL_PROBE... = ONE_MINERAL_DRONE...
                 isVariable[GAS_SCV]=1;
         }; 
-//special rules for zerg
-	if(getRace())
-	{
-		isBuildable[LARVA]=0;
-		isVariable[LARVA]=0;
-	}
 	maxBuildTypes=0;
 	for(i=UNIT_TYPE_COUNT;i--;)
 		if(isBuildable[i]==1)

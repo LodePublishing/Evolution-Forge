@@ -13,6 +13,7 @@ GA::GA()
 	currentMap=0;
 	breedFactor=0; //~~
 	mode=0;
+	noise=0;
 }
 
 GA::~GA()

@@ -38,7 +38,6 @@ EXPORT class ANARACE: public PRERACE
 		static int successType; //type of error
 		static int successUnit; //unit number
 		static MAP_LOCATION backupLoc[MAX_PLAYER][MAX_LOCATIONS];
-
 	public:
 		int fitnessCode[MAX_GOALS];
 
@@ -103,6 +102,7 @@ EXPORT class ANARACE: public PRERACE
 		int setProgramDominant(int IP, int num);
 		int setProgramForceCount(int IP, int unit, int count);	
                 int setProgramAvailibleCount(int IP, int unit, int count);
+		int setProgramFitness(int IP,int fitness);
 		int calculateStep();			// calculates another time step of current generation
 		int calculateFitness();
 		void resetData();				// resets all data to standard values

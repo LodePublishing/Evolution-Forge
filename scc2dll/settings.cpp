@@ -578,6 +578,8 @@ int EXPORT SETTINGS::loadSettingsFile(const char* settingsFile)
 				{
 					if(!setMaxRuns(value))
 						debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: Max Runs too low.",settingsFile,ln,old);
+					//TODO: too low is falsch... Fehlermeldung wird ja eigentlich schon von setMaxRuns geschrieben...
+
 				}
 				
 				else if(!strcmp(item,"Preprocess Buildorder"))
@@ -986,9 +988,9 @@ int EXPORT SETTINGS::initSoup()
 }
 
 
-ANARACE* EXPORT SETTINGS::newGeneration()
+ANARACE* EXPORT SETTINGS::newGeneration(ANARACE* oldAnarace)
 {
-	return(soup.newGeneration());
+	return(soup.newGeneration(oldAnarace));
 };
 
 void EXPORT SETTINGS::loadDefaults()

@@ -6,18 +6,10 @@
 #include "player.h"
 #include "ga.h"
 #include "location.h"
+#include "building.h"
+#include "wx/list.h"
 
-struct BUILDING
-{
-	int TB,RB;		      // Remaining Buildtime
-	int type;	       // Type of Building
-	int unitCount;  // number of units which are moving... currently ONLY for movements...
-	int facility;   // in what facility it was produced
-	int IP;		 // for back-tracking certain buildings (especially for the 'cancel building' option of zerg)
-	int location;   // where the building was finished
-	int goal;	       // For movement, where the units will move to, not yet fully implemented
-	int onTheRun;   // is this building/unit moving around or is it under construction at some place?
-};
+WX_DECLARE_LIST(Building, BuildingList);
 
 struct LARVACOUNTER
 {
@@ -34,41 +26,25 @@ protected:
 	int lastcounter;
 	int lastunit;
 	static int mapInitialized;
-	void harvestResources();
+	int harvestMinerals();
+	int harvestGas();
 	const UNIT_STATISTICS* pStats;
-	int time,ready;
-	int timeout;
+	int ready;
 
-	void resetBuildings();
+	int neededMinerals,neededGas;
+
 	void createSpecial();
 	void resetSpecial();
 
 	int larvacounternumber;
 	LARVACOUNTER larva[30]; //koennen larvacounter (hatcheries etc.) auch wegfallen? mmmh... naja, wenn sie zerstoert werden... TODO
 
-	int getBuildingTotalBuildTime(int num);
-	int getBuildingRemainingBuildTime(int num);
-	int getBuildingType(int num);
-	int getBuildingUnitCount(int num);
-	int getBuildingFacility(int num);
-	int getBuildingIP(int num);
-	int getBuildingLocation(int num);
-	int getBuildingGoal(int num);
-	int getBuildingOnTheRun(int num);
-																			    
-	int setBuildingTotalBuildTime(int num, int time);
-	int setBuildingRemainingBuildTime(int num, int time);
-	int setBuildingType(int num, int type);
-	int setBuildingUnitCount(int num, int count);
-	int setBuildingFacility(int num, int facility);
-	int setBuildingIP(int num, int IP);
-	int setBuildingLocation(int num, int location);
-	int setBuildingGoal(int num, int goal);
-	int setBuildingOnTheRun(int num, int onTheRun);
+	int calculateReady();
+	void adjustAvailibility(int loc,int fac,const UNIT_STATISTICS* stat);
+
 private:
 	static MAP_LOCATION loc[MAX_PLAYER][MAX_LOCATIONS];
 	MAP_LOCATION* location;
-	BUILDING building[MAX_BUILDINGS];
 	PLAYER* player;
 	int playerNum;
 	int mins,gas,timer;
@@ -79,10 +55,15 @@ private:
 	int supply;		// free supply
 	int maxSupply; // total supply
 	int ftime[MAX_GOALS]; //when the goal is reached / when the last item is produced (ALL locations...*/
-	int length;
+	int length,timeout;
+        int calculated;
 public:
-        static int markerCounter;
+        BuildingList buildingList;
+	//wxList buildingList;
 
+        static int noise[MAX_TIME];
+
+        static int markerCounter;
 	static int bestTime; // cancel calculation if this calculation is worse than 25%
 																		    
 	int getMapLocationAvailible(int player, int loc, int type);
@@ -103,13 +84,12 @@ public:
 																			    
 	int addLocationAvailible(int loc, int type, int num);
 	int addLocationForce(int loc, int type, int num);
-																    
-
-	int calculated;
 
 	int Code[2][MAX_LENGTH];
 	int Marker[2][MAX_LENGTH];
+
 	int setpStats(const UNIT_STATISTICS* pStats);
+	const UNIT_STATISTICS* getpStats();
 
 	static MAP* getMap();
 	static GA* ga;
@@ -122,16 +102,28 @@ public:
 
 	int getCalculated();
 	int setCalculated(int num);
+
 	int loadPlayer(int num);
 	int adjustMineralHarvest(int location);
 	int adjustGasHarvest(int location);
 	int adjustHarvest();
+
 	int setSupply(int supply);
 	int setMaxSupply(int supply);
 	int setMins(int mins);
 	int setGas(int gas);
+        int getSupply();
+        int getMaxSupply();
+        int getMins();
+        int getGas();
+
+
 	int setTimer(int time);
+        int getTimer();
+
 	int setTimeOut(int time);
+        int getTimeOut();
+
 	int resetSupply();
 	static int setMap(MAP* map);
 	static void resetMapInitialized();
@@ -145,8 +137,6 @@ public:
 	int setGasHarvestPerSecond(int tloc,int worker,int gas);
 	int getGasHarvestPerSecond(int tloc,int worker);
 
-	int getTimeOut();
-		
 	int getHarvestedMins();
 	int getHarvestedGas();
 
@@ -159,12 +149,6 @@ public:
 	int getLength();
 	int setLength(int length);
 		
-	int getSupply();
-	int getMaxSupply();
-	int getMins();
-	int getGas();
-	int getTimer();
-
 	PRERACE();
 	~PRERACE();
 };

@@ -83,7 +83,7 @@ public:
 	int loadSettingsFile(const char* settingsFile);
 	int loadMapFile(const char* mapFile);
 	int loadHarvestFile(const char* harvestFile);
-	ANARACE* newGeneration();
+	ANARACE* newGeneration(ANARACE* oldAnarace);
 
 	int initSoup();
 

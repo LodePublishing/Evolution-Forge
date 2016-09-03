@@ -10,26 +10,33 @@ int RACE::calculateStep()
 //ZERG:  CREEP!
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
 //mins, gas hier rein...
-//TODO: evtl ueberlegen IP zu springen... also erstmal feststellen, warum nicht gebuildet werden kann und dann in einem Ruck resources und btimes hochsetzen...
-	if((!time)||(ready)||(!getIP())||((bestTime*4<ga->maxTime*3)&&(4*time<3*bestTime)))
+	if((!getTimer())||(ready)||(!getIP())||((bestTime*4<ga->maxTime*3)&&(4*getTimer()<3*bestTime)))
 	{
 		setLength(ga->maxLength-getIP());
 		settFitness(gettFitness()-getLength());
-		if(ready)
-			setTimer(time);
-		else
-			setTimer(0);
+		if(!ready) setTimer(0);
 		setpFitness(getTimer());
 		calculateFitness(ready);
+		BuildingList::Node *node=buildingList.GetFirst();
+		while(node)
+		{
+			Building* build=node->GetData();
+			node=node->GetNext();
+			buildingList.DeleteObject(build);
+			delete build;
+		}
 		return(1);
 	}
 	int dominant=0;
 	int ok=1;
 	int first=1;
-	int i,j;
+	int i;
+
 	while((ok)&&(getIP()))
 	{
 		//TODO: Variable einfuegen, damit Benutzer z.B. Befehle pro Zeiteinheit (oder pro Location!?) einstellen kann
+		neededMinerals=99999;
+		neededGas=99999;
 		if(Code[0][getIP()]>Code[1][getIP()]) //dominance
 		{
 			if(!(ok=buildGene(getPlayer()->goal->toPhaeno(Code[dominant=0][getIP()]))))
@@ -40,151 +47,187 @@ int RACE::calculateStep()
 			if(!(ok=buildGene(getPlayer()->goal->toPhaeno(Code[dominant=1][getIP()]))))
 				ok=buildGene(getPlayer()->goal->toPhaeno(Code[dominant=0][getIP()]));
 		};
-		//TODO: Eine Art Funktion "TimeAdvance" schreiben um Zeiten zu ueberspringen, in denen nix passiert (halt zum naechsten Zeitpunkt springen, zu dem ein Building fertig wird...
-		//TODO evtl buildings in eine linked Liste schreiben und dann immer das vorderste abarbeiten
-		if((ok)||(!timeout))
+		if((ok)||(!getTimeOut()))
 		{
 			if(!first)
 				settFitness(gettFitness()-1);
 			first=0;
 			setIP(getIP()-1);
-			if(!timeout)
+			if(!getTimeOut())
 				settFitness(gettFitness()-5);
-			timeout=ga->maxTimeOut;
+			setTimeOut(ga->maxTimeOut);
 		};
 	}
 
-//		BUILDING* build;//=&(building[MAX_BUILDINGS-1]);
-//!!!???		for(j=MAX_BUILDINGS;j--;build=&(building[j]))
-	for(j=MAX_BUILDINGS;j--;)
+	int t=getTimer();
+	BuildingList::Node *node=buildingList.GetFirst();
+
+	Building* build;
+	if(node)
 	{
-//		build=&building[j];
-		if(getBuildingRemainingBuildTime(j))
+		build=node->GetData();
+		int buildingRemaining=build->getRemainingBuildTime();
+		if(t>buildingRemaining) t=buildingRemaining;
+	}
+	if((harvestGas()>0)&&((harvestMinerals()==0)||(neededGas+(harvestGas()-neededGas%harvestGas()))/harvestGas() < (neededMinerals+(harvestMinerals()-neededMinerals%harvestMinerals()))/harvestMinerals()))
+	{
+		int gasRemaining=(neededGas+(harvestGas()-neededGas%harvestGas()))/harvestGas();
+		if(t>gasRemaining) t=gasRemaining;
+	}
+	else if(harvestMinerals()>0)
+	{
+		int mineralsRemaining=(neededMinerals+(harvestMinerals()-neededMinerals%harvestMinerals()))/harvestMinerals();
+		if(t>mineralsRemaining) t=mineralsRemaining;
+	}
+        if(t>getTimeOut()) t=getTimeOut();
+//	if((getTimeOut()>1)&&(t==getTimeOut()))
+//		t=getTimeOut()-1;
+
+	int mult=0;
+	for(i=getTimer()-t;i<getTimer();i++)
+	{
+		mult+=noise[i];
+	}
+	mult=mult/t;
+
+	setMins(getMins()+harvestMinerals()*(100+mult)*t/100);
+        setHarvestedMins(getHarvestedMins()+harvestMinerals()*(100+mult)*t/100);
+        setGas(getGas()+harvestGas()*(100+mult)*t/100);
+        setHarvestedGas(getHarvestedGas()+harvestGas()*(100+mult)*t/100);
+
+		
+
+	setTimeOut(getTimeOut()-t);
+	setTimer(getTimer()-t);
+
+
+	while(node)
+	{
+		node=node->GetNext();
+		build->setRemainingBuildTime(build->getRemainingBuildTime()-t);
+		if(!build->getRemainingBuildTime())
 		{
-			setBuildingRemainingBuildTime(j,getBuildingRemainingBuildTime(j)-1);
-			if(!getBuildingRemainingBuildTime(j))
+			const UNIT_STATISTICS* stat=&pStats[build->getType()];
+			switch(stat->facility_type)
 			{
-                                const UNIT_STATISTICS* stat=&pStats[getBuildingType(j)];
-
-				switch(stat->facility_type)
-				{
-					case IS_LOST:
-						if(getBuildingFacility(j))
-							addLocationForce(getBuildingLocation(j),getBuildingFacility(j),-1);
-							//availible was already taken account when starting the building
-						if(stat->facility2)
-							addLocationForce(getBuildingLocation(j),stat->facility2,-1);
-						break;
-					case NEEDED_ONCE:break;
-					case NEEDED_UNTIL_COMPLETE:
-						if(getBuildingFacility(j))
-							addLocationAvailible(getBuildingLocation(j),getBuildingFacility(j),1);
-						break; // fuer spaeter mal: Wenn in 2 Fabriken produziert wuerde wirds probmelatisch, da
+				case IS_LOST:
+					if(build->getFacility())
+						addLocationForce(build->getLocation(),build->getFacility(),-1);
+						//availible was already taken account when starting the building
+					if(stat->facility2)
+						addLocationForce(build->getLocation(),stat->facility2,-1);
+					break;
+				case NEEDED_ONCE:break;
+				case NEEDED_UNTIL_COMPLETE:
+					if(build->getFacility())
+						addLocationAvailible(build->getLocation(),build->getFacility(),1);
+					break; // fuer spaeter mal: Wenn in 2 Fabriken produziert wuerde wirds probmelatisch, da
 //in Buiding nur eine facility gespeichert wird...
-					case NEEDED_ONCE_IS_LOST:
-						if(stat->facility2)
-							addLocationForce(getBuildingLocation(j),stat->facility2,-1);
-						break;
-					case NEEDED_UNTIL_COMPLETE_IS_LOST:
-						if(getBuildingFacility(j))
-							addLocationAvailible(getBuildingLocation(j),getBuildingFacility(j),1);
-						if(stat->facility2)
-							addLocationForce(0/*getBuildingLocation(j)*/,stat->facility2,-1);
+				case NEEDED_ONCE_IS_LOST:
+					if(stat->facility2)
+						addLocationForce(build->getLocation(),stat->facility2,-1);
+					break;
+				case NEEDED_UNTIL_COMPLETE_IS_LOST:
+					if(build->getFacility())
+					{
+						addLocationAvailible(build->getLocation(),build->getFacility(),1);
+						setSupply(getSupply()+pStats[build->getFacility()].supply); //<- ?
+					}					
+					if(stat->facility2)
+						addLocationForce(0/*build->getLocation()*/,stat->facility2,-1);
 //r_researches need location 0
-						break;
-					case NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE:
+					break;
+				case NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE:
+					{
+						if(build->getFacility())
+							addLocationAvailible(build->getLocation(),build->getFacility(),1);
+						if(stat->facility2) // special rule for upgrades!
 						{
-							if(getBuildingFacility(j))
-								addLocationAvailible(getBuildingLocation(j),getBuildingFacility(j),1);
-							if(stat->facility2) // special rule for upgrades!
-							{
-								addLocationForce(0/*getBuildingLocation(j)*/,stat->facility2,-1);
-								addLocationAvailible(0/*getBuildingLocation(j)*/,stat->facility2,1);
-							};
-						}
-						break;
-					case NEEDED_ALWAYS:break;
-					default:break;
-				}
+							addLocationForce(0/*build->getLocation()*/,stat->facility2,-1);
+							addLocationAvailible(0/*build->getLocation()*/,stat->facility2,1);
+						};
+					}
+					break;
+				case NEEDED_ALWAYS:break;
+				default:break;
+			}
 
-				if(getBuildingType(j)==REFINERY)
-					addMapLocationForce(0,getBuildingLocation(j),VESPENE_GEYSIR,-1);
-				if(stat->supply<0)
-				{ //unitcount?
-					if(getMaxSupply()-stat->supply>MAX_SUPPLY)
-					{
-						if(getMaxSupply()<MAX_SUPPLY)
-						{
-							setSupply(getSupply()+(MAX_SUPPLY-getMaxSupply()));
-							setMaxSupply(MAX_SUPPLY);//problem beim abbrechen!
-						}
-					}
-					else
-					{
-						setSupply(getSupply()-stat->supply);
-						setMaxSupply(getMaxSupply()-stat->supply);
-					}
-				};
-				//else? mmmh ne!
-				//~~~~
-				addLocationForce(getBuildingLocation(j),getBuildingType(j),getBuildingUnitCount(j));
-				addLocationAvailible(getBuildingLocation(j),getBuildingType(j),getBuildingUnitCount(j));
-				if(getBuildingType(j)==REFINERY) 
-					adjustGasHarvest(getBuildingLocation(j));
-				if(getBuildingType(j)==COMMAND_CENTER) 
+			if(stat->supply<0)
+			{ //unitcount?
+				if(getMaxSupply()-stat->supply>MAX_SUPPLY)
 				{
-					adjustMineralHarvest(getBuildingLocation(j));
-					adjustGasHarvest(getBuildingLocation(j));
-				}
-				last[lastcounter].unit=getBuildingType(j);
-				last[lastcounter].count=getBuildingUnitCount(j);
-				last[lastcounter].location=getBuildingLocation(j);
-
-				if((stat->create)&&(!getBuildingOnTheRun(j))) //one additional unit (zerglings, scourge, comsat, etc.)
-				{ //here no unitCount! ~~~
-					addLocationForce(getBuildingLocation(j),stat->create,1);
-					addLocationAvailible(getBuildingLocation(j),stat->create,1);
-					if(last[lastcounter].unit==stat->create) last[lastcounter].count++; //TODO ???
-					if((getPlayer()->goal->getRace()==ZERG)&&(stat->create==LARVA))
+					if(getMaxSupply()<MAX_SUPPLY)
 					{
-						larva[larvacounternumber].location=getBuildingLocation(j);
-						larva[larvacounternumber].larvacount=1;
-						larva[larvacounternumber].counter=20;
-						larvacounternumber++; //~~mei... ne linked list...
+						setSupply(getSupply()+(MAX_SUPPLY-getMaxSupply()));
+						setMaxSupply(MAX_SUPPLY);//problem beim abbrechen!
 					}
-					// ~~~~ Ja... geht schon... aber kann ja auch mal was anderes sein...
 				}
-                                lastcounter++;
+				else
+				{
+					setSupply(getSupply()-stat->supply);
+					setMaxSupply(getMaxSupply()-stat->supply);
+				}
+			};
+			//~~~~
+			addLocationForce(build->getLocation(),build->getType(),build->getUnitCount());
+			addLocationAvailible(build->getLocation(),build->getType(),build->getUnitCount());
+
+			if(build->getType()==REFINERY) 
+			{
+                                addMapLocationForce(0,build->getLocation(),VESPENE_GEYSIR,-1);
+				adjustGasHarvest(build->getLocation());
+				//TODO: ein scv zum Gas schicken... ueber buildgene? oder manuell hier?
+			}
+			else
+			if(build->getType()==COMMAND_CENTER) 
+			{
+				adjustMineralHarvest(build->getLocation());
+				adjustGasHarvest(build->getLocation());
+			}
+			last[lastcounter].unit=build->getType();
+			last[lastcounter].count=build->getUnitCount();
+			last[lastcounter].location=build->getLocation();
+
+			if((stat->create)&&(!build->getOnTheRun())) //one additional unit (zerglings, scourge, comsat, etc.)
+			{ //here no unitCount! ~~~
+				addLocationForce(build->getLocation(),stat->create,1);
+				addLocationAvailible(build->getLocation(),stat->create,1);
+				if(last[lastcounter].unit==stat->create) last[lastcounter].count++; //TODO ???
+				if((getPlayer()->goal->getRace()==ZERG)&&(stat->create==LARVA))
+				{
+					larva[larvacounternumber].location=build->getLocation();
+					larva[larvacounternumber].larvacount=1;
+					larva[larvacounternumber].counter=20;
+					larvacounternumber++; //~~mei... ne linked list...
+				}
+				// ~~~~ Ja... geht schon... aber kann ja auch mal was anderes sein...
+			}
+
+			lastcounter++;
 
 // berechne 'FinalTime', die angibt, wann alle Einheiten (bzw. die letzte Einheit) unsereres Zieles fertiggestellt wurden
 // Quasi wie "ready" nur ohne Zeit
 //TODO CHECKEN!!
 
-				for(i=MAX_GOALS;i--;)
+		        for(i=MAX_GOALS;i--;)
 // ist dieses goal belegt?
-				if((getPlayer()->goal->goal[i].unit>0)&&
+		                if((getPlayer()->goal->goal[i].unit>0)&&
 // befinden wir uns am richtigen Ort?
-				  ((getPlayer()->goal->goal[i].location==0)||(getBuildingLocation(j)==getPlayer()->goal->goal[i].location))&&
+	        	        ((getPlayer()->goal->goal[i].location==0)||(build->getLocation()==getPlayer()->goal->goal[i].location))&&
 // und untersuchen wir das zum Unittype gehoerende Goal?
-				   (getBuildingType(j)==getPlayer()->goal->goal[i].unit))
-						setFinalTime(i,ga->maxTime-time);
+	                	(build->getType()==getPlayer()->goal->goal[i].unit))
+	                        	setFinalTime(i,ga->maxTime-getTimer());
 // Did we reach the right number at the right time?
-//		i=MAX_GOALS;  TODO? koennen wir mehrere goals gleichzeitig erfuell0rn?
-			ready=1;
-			for(i=MAX_GOALS;(i--)&&(ready);)
-                                if(getPlayer()->goal->goal[i].count)
-					ready&=((getPlayer()->goal->goal[i].count<=getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit))&&((getPlayer()->goal->goal[i].time>=getFinalTime(i))||(getPlayer()->goal->goal[i].time==0)));
+//              i=MAX_GOALS;  TODO? koennen wir mehrere goals gleichzeitig erfuell0rn?
+
+			ready=calculateReady();
 
 // oder: irgendeine location... TODO: Problem: die Einheiten koennen irgendwo sein, also nicht gesammelt an einem Fleck...
-			} // END of if(!getBuildingRemainingBuildTime(j))
-		} // END of if(getBuildingRemainingBuildTime(j))
-	} // END of for(j=MAX_BUILDINGS;j--;)
-//	resetLocations();
-//OK: Problem ist, dass pMap->location 0 ist... ?
-	harvestResources();
-	createSpecial(); //Larvae and later energy for wizards, lifepoints etc.
-	time--;
-	timeout--;
+			buildingList.DeleteObject(build);		
+			delete build;
+		} // END of if(!build->getRemainingBuildTime())
+		if(node) build=(Building*)node->GetData();
+	} // END of while
 	return(0);
 	//TODO: Auch voruebergehende Ziele miteinberechnen (Bewegungen!)
 	//Also quasi eine zweite Goalreihe rein um scvs/Einheiten zu belohnen die bestimmte Orte besetzen... erstmal nur scvs... also z.B. int tempGoal...
@@ -196,7 +239,7 @@ int RACE::calculateStep()
 
 //FEHLER MUSS HIER SEIN!! TODO
 
-//TODO: pFitness wird total falsch berechnet fuer races die nicht alle Ziele erfuellt haben!1
+//TODO: pFitness wird total falsch berechnet fuer races die nicht alle Ziele erfuellt haben!1 [location problem halt...]
 void RACE::calculateFitness(int ready)
 {
 //TODO evtl noch uebrige availible miteinbeziehen
@@ -286,33 +329,36 @@ if( /*((getPlayer()->goal->goal[i].location==0)&&(getPlayer()->goal->goal[i].cou
 		for(i=MAX_GOALS;i--;)
 			if(getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit)<getPlayer()->goal->goal[i].count)
 				bonus[getPlayer()->goal->goal[i].location][getPlayer()->goal->goal[i].unit]+=getPlayer()->goal->goal[i].count-getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit);
-
+//bonus ist jetzt mit den uebrigen Einheiten bis zur Zielerfuellung belegt
 		for(i=MAX_BUILDINGS;i--;)
-			if((getBuildingRemainingBuildTime(i)>0)&&(bonus[getBuildingLocation(i)][getBuildingType(i)]>0))
+			if((build->getRemainingBuildTime(i)>0)&&(bonus[build->getLocation(i)][build->getType(i)]>0))
 			{
 			//erstmal ohne Zeit...
-				pFitness+=((getBuildingRemainingBuildTime(i)*100)/((getLocationForce(getBuildingLocation(i),getBuildingType(i))+bonus[getBuildingLocation(i)][getBuildingType(i)])*pStats[getBuildingType(i)].BT)); //TODO in ProgramBT aendern
+				pFitness+=((build->getRemainingBuildTime(i)*100)/((getLocationForce(build->getLocation(i),build->getType(i))+bonus[build->getLocation(i)][build->getType(i)])*pStats[build->getType(i)].BT)); //TODO in ProgramBT aendern
 				
-				if((getPlayer()->goal->goal[getBuildingType(i)].time>0)&&(getLocationForce(getBuildingLocation(i),getBuildingType(i))==0))
-					pFitness+=(getBuildingRemainingBuildTime(i)*100*getPlayer()->goal->goal[getBuildingType(i)].time*getLocationForce(0,i))/(getPlayer()->goal->goal[getBuildingType(i)].count*pStats[getBuildingType(i)].BT*ga->maxTime);//hier auch ProgramBT
+				if((getPlayer()->goal->goal[build->getType(i)].time>0)&&(getLocationForce(build->getLocation(i),build->getType(i))==0))
+					pFitness+=(build->getRemainingBuildTime(i)*100*getPlayer()->goal->goal[build->getType(i)].time*getLocationForce(0,i))/(getPlayer()->goal->goal[build->getType(i)].count*pStats[build->getType(i)].BT*ga->maxTime);//hier auch ProgramBT
 				else 				   		
-					pFitness+=((getBuildingRemainingBuildTime(i)*100)/(getPlayer()->goal->goal[getBuildingType(i)].count*pStats[getBuildingType(i)].BT));
-				bonus[getBuildingLocation(i)][getBuildingType(i)]--;
+					pFitness+=((build->getRemainingBuildTime(i)*100)/(getPlayer()->goal->goal[build->getType(i)].count*pStats[build->getType(i)].BT));
+				bonus[build->getLocation(i)][build->getType(i)]--;
 			}*/
 
 	} // end of ready=false
 	else   // all goals fulfilled, fitness <- timer 
 		for(i=MAX_GOALS;i--;)
+		{
 			if(getPlayer()->goal->goal[i].count>0)
 				setpFitness(getpFitness()+100);
-
+			if((getPlayer()->goal->goal[i].unit!=GAS_SCV)&&(getPlayer()->goal->goal[i].unit!=SCV)) //do not punish 'too much' workers!
+				if(getPlayer()->goal->goal[i].count<getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit))
+					setsFitness(getsFitness()+(-getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit)+getPlayer()->goal->goal[i].count)*(stats[getPlayer()->goal->getRace()][getPlayer()->goal->goal[i].unit].mins+stats[getPlayer()->goal->getRace()][getPlayer()->goal->goal[i].unit].gas));
+		}
 }
 // end of calculateFitness
 
 
 int RACE::buildGene(int unit)
 {
-	int i;
 	const UNIT_STATISTICS* stat=&pStats[unit];
 	int ok=0;
 	if(unit<=EXTRACTOR+1)
@@ -330,25 +376,39 @@ int RACE::buildGene(int unit)
 			  ((stat->facility[0]==0)&&(stat->facility[1]==0)&&(stat->facility[2]==0))
 			)
 			&&
-			(getMins()>=stat->mins+stat->upgrade_cost*getLocationForce(0,unit))&&
-			(getGas()>=stat->gas+stat->upgrade_cost*getLocationForce(0,unit))
-			&&
 			((getSupply()>=stat->supply)||(stat->supply<=0))
 			&&
 			((stat->facility2==0)||(getLocationAvailible(0,stat->facility2)>0)))
 		{
-			//Zuerst: availible pruefen ob am Ort gebaut werden kann
-			//Wenn nicht => +/- absteigen bis alle locations durch sind
-			int fac=0;
-			int tloc=1;
-			int ttloc=0;
-			int j=0;
-			if(lastcounter>0)
-			{	
-				lastcounter--;
-				tloc=last[lastcounter].location;
+		
+			if
+			(getMins()<stat->mins+stat->upgrade_cost*getLocationForce(0,unit))
+			{
+				if(neededMinerals>stat->mins+stat->upgrade_cost*getLocationForce(0,unit)-getMins())
+					neededMinerals=stat->mins+stat->upgrade_cost*getLocationForce(0,unit)-getMins();
 			}
-//			if((stat->facility2==0)||(getLocationAvailible(/*tloc*/0,stat->facility2)>0))
+			else
+			if(getGas()<stat->gas+stat->upgrade_cost*getLocationForce(0,unit))
+			{
+				if(neededGas>stat->gas+stat->upgrade_cost*getLocationForce(0,unit)-getGas())
+					neededGas=stat->gas+stat->upgrade_cost*getLocationForce(0,unit)-getGas();
+			}
+			else
+			{
+				//Zuerst: availible pruefen ob am Ort gebaut werden kann
+				//Wenn nicht => +/- absteigen bis alle locations durch sind
+				int fac=0;
+				int tloc=1;
+				int ttloc=0;
+				int j=0;
+
+				if(lastcounter>0)
+				{	
+					lastcounter--;
+					tloc=last[lastcounter].location;
+				}
+
+//				if((stat->facility2==0)||(getLocationAvailible(/*tloc*/0,stat->facility2)>0))
 				for(fac=3;fac--;)
 					if( ((stat->facility[fac]>0)&&(getLocationAvailible(tloc,stat->facility[fac])>0)) || ((stat->facility[fac]==0)&&(fac==0))) 
 					{
@@ -356,146 +416,84 @@ int RACE::buildGene(int unit)
 						break;
 					}
 
-                        j=1;
-                        if(!ok)
-                                while(j<MAX_LOCATIONS)
-                                {
-                                        ttloc=pMap->locationList[tloc][j];
-//                                      if((stat->facility2==0)||(getLocationAvailible(ttloc,stat->facility2)>0))
-                                        {
-                                                for(fac=3;fac--;)
-                                                        if( ((stat->facility[fac]>0)&&(getLocationAvailible(ttloc,stat->facility[fac])>0)) || ((stat->facility[fac]==0)&&(fac==0)))
-                                                        {
+				j=1;
+				if(!ok)
+					while(j<MAX_LOCATIONS)
+					{
+						ttloc=pMap->locationList[tloc][j];
+//						if((stat->facility2==0)||(getLocationAvailible(ttloc,stat->facility2)>0))
+//						{
+						for(fac=3;fac--;)
+							if( ((stat->facility[fac]>0)&&(getLocationAvailible(ttloc,stat->facility[fac])>0)) || ((stat->facility[fac]==0)&&(fac==0)))
+							{
 								tloc=ttloc;
-                                                                ok=1;
-                                                                break;
-                                                        }
-                                                break;
-                                        }
-                                        j++;
-                                }
+								ok=1;
+								break;
+							}
+						break;
+//					}	
+						j++;
+					}
 
-			if((ok)&&(unit==EXTRACTOR))
-			{
-				if(!getMapLocationAvailible(0,tloc,VESPENE_GEYSIR))
-					ok=0;
-				else 
-					addMapLocationAvailible(0,tloc,VESPENE_GEYSIR,-1);
-			}
+				if((ok)&&(unit==EXTRACTOR))
+				{
+					if(!getMapLocationAvailible(0,tloc,VESPENE_GEYSIR))
+						ok=0;
+					else 
+						addMapLocationAvailible(0,tloc,VESPENE_GEYSIR,-1);
+				}
 //TODO: Wenn verschiedene facilities moeglich sind, dann das letzte nehmen						
 //				bewegliche Sachen ueberdenken...
 //					evtl zusaetzliche Eigenschaft 'speed' einbauen (muss sowieso noch...)... bei speed>0 ... mmmh... trifft aber auch nur auf scvs zu ... weil bringt ja wenig erst mit der hydra rumzulaufen und dann zum lurker... mmmh... aber waere trotzdem zu ueberlegen...
 //					auch noch ueberlegen, wenn z.B. mit scv ohne kommandozentrale woanders gesammelt wird...
 //		Phagen ueber Phagen...			
-			if(ok)
-			{
-				int nr=0;
-				while((nr<MAX_BUILDINGS-1)&&(getBuildingRemainingBuildTime(nr)))
+				if(ok)
 				{
-					nr++;
-					//nr=MAX_BUILDINGS;
-				}
-				setBuildingOnTheRun(nr,0);
-				setBuildingFacility(nr,stat->facility[fac]);
-				setBuildingLocation(nr,tloc);
-				setBuildingUnitCount(nr,1);
-				setBuildingRemainingBuildTime(nr,stat->BT+3200*(stat->facility2==unit)); //~~ hack :/ TODO
-                                                                                                                                                            
-	                        if(getMins()*3<4*stat->mins+stat->upgrade_cost*getLocationForce(0,unit)) settFitness(gettFitness()-2);
-        	                if(getGas()*3<4*stat->gas+stat->upgrade_cost*getLocationForce(0,unit)) settFitness(gettFitness()-2);
-                	        if((stat->supply>0)&&(getSupply()*4<5*stat->supply)) settFitness(gettFitness()-2);                                                                                                                                                         
-				if((getMins()*5/4<stat->mins+stat->upgrade_cost*getLocationForce(0,unit))||
-				   (getGas()*5/4<stat->gas+stat->upgrade_cost*getLocationForce(0,unit)))
-					settFitness(gettFitness()-1);
-				if(lastunit==0) lastunit=unit;
-				if(unit!=lastunit)//~~
-				{
-					settFitness(gettFitness()-1);
-					lastunit=unit;
-				}
-				setMins(getMins()-(stat->mins+stat->upgrade_cost*getLocationForce(0,unit)));
-				setGas(getGas()-(stat->gas+stat->upgrade_cost*getLocationForce(0,unit)));
-				setBuildingType(nr,unit);
+					BuildingList::Node *node=NULL;
+					for (node = buildingList.GetFirst();node&&(((Building*)node->GetData())->getRemainingBuildTime()<stat->BT+3200*(stat->facility2==unit));node = node->GetNext());
+					Building* build=new Building();
+					if(node&&(((Building*)node->GetData())->getRemainingBuildTime()>=stat->BT+3200*(stat->facility2==unit)))
+						buildingList.Insert(node,build);
+					else if(!node) buildingList.Append(build);	
+				
+					build->setOnTheRun(0);
+					build->setFacility(stat->facility[fac]);
+					build->setLocation(tloc);
+					build->setUnitCount(1);
+					build->setRemainingBuildTime(stat->BT+3200*(stat->facility2==unit)); //~~ hack :/ TODO
+	                                build->setTotalBuildTime(build->getRemainingBuildTime());
+        	                        build->setType(unit);
+																			    
+					if(getMins()*3<4*stat->mins+stat->upgrade_cost*getLocationForce(0,unit)) settFitness(gettFitness()-2);
+					if(getGas()*3<4*stat->gas+stat->upgrade_cost*getLocationForce(0,unit)) settFitness(gettFitness()-2);
+					if((stat->supply>0)&&(getSupply()*4<5*stat->supply)) settFitness(gettFitness()-2); 
+					if((getMins()*5/4<stat->mins+stat->upgrade_cost*getLocationForce(0,unit))||
+					   (getGas()*5/4<stat->gas+stat->upgrade_cost*getLocationForce(0,unit)))
+						settFitness(gettFitness()-1);
+					if(lastunit==0) lastunit=unit;
+					if(unit!=lastunit)//~~
+					{
+						settFitness(gettFitness()-1);
+						lastunit=unit;
+					}
 
-				if((stat->supply>0)||((pStats[stat->facility[0]].supply<0)&&(stat->facility_type==IS_LOST))) 
-					setSupply(getSupply()-stat->supply);
-				switch(stat->facility_type)
-				{
-					case IS_LOST:
-						if(stat->facility[fac]>0)
-						{
-							addLocationAvailible(tloc,stat->facility[fac],-1);
-							setSupply(getSupply()+pStats[stat->facility[fac]].supply); 
-							if((getPlayer()->goal->getRace()==ZERG)&&(stat->facility[fac]==LARVA))
-							{
-								int bestPlace=0;//unschoen hier :/
-								int bestCounter=0;
-								for(i=0;i<larvacounternumber;i++)
-									if((larva[i].location==tloc)&&(larva[i].larvacount>bestCounter))
-									{bestCounter=larva[i].larvacount;bestPlace=i;}
-								larva[bestPlace].larvacount--;
-							}
-						}
-						if(stat->facility2>0)
-						{
-							addLocationAvailible(tloc,stat->facility2,-1);
-							setSupply(getSupply()+pStats[stat->facility2].supply);
-						}
-						break;
-					case NEEDED_ONCE:
-						break;
-					case NEEDED_UNTIL_COMPLETE:
-						if(stat->facility[fac]>0)
-							addLocationAvailible(tloc,stat->facility[fac],-1);
-						if(stat->facility2>0)
-							addLocationAvailible(tloc,stat->facility2,-1);
-							//kommt glaub nicht vor...
-						break;
-					case NEEDED_ONCE_IS_LOST:
-						if(stat->facility2>0)
-						{
-							addLocationAvailible(tloc,stat->facility2,-1);
-							setSupply(getSupply()+pStats[stat->facility2].supply); // <- nicht noetig :/ eigentlich schon... bei gas scv z.B. :/
-						}
-						break;
-					case NEEDED_UNTIL_COMPLETE_IS_LOST:
-						if(stat->facility2>0)
-						{
-							addLocationAvailible(0/*location*/ ,stat->facility2,-1); // primarily for temporary R_researches, have to be location 0
-// TODO 						setSupply(getSupply()+pStats[stat->facility2].supply); // <- nicht noetig :/
-						}
-						if(stat->facility[fac]>0)
-							addLocationAvailible(tloc,stat->facility[fac],-1);
-						break;
-					case NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE:
-						if(stat->facility2>0)
-							addLocationAvailible(0/*tloc*/,stat->facility2,-1);
-							// no supply gain as the item is recovered... well or not? mmmh... ~~~~
-						if(stat->facility[fac]>0)
-							addLocationAvailible(tloc,stat->facility[fac],-1);
-						break;
-					case NEEDED_ALWAYS:
-						if(stat->facility[fac]>0)
-							addLocationAvailible(tloc,stat->facility[fac],-1);
-							// supply?
-						if(stat->facility2>0)
-							addLocationAvailible(tloc,stat->facility2,-1);
-						break;
-					default:break;
-				}
-	
-//					building[nr].on_the_run=0;
-				//	building[nr].IP=IP;
-			} 
-		}
-	}
+					setMins(getMins()-(stat->mins+stat->upgrade_cost*getLocationForce(0,unit)));
+					setGas(getGas()-(stat->gas+stat->upgrade_cost*getLocationForce(0,unit)));
+					if((stat->supply>0)||((pStats[stat->facility[0]].supply<0)&&(stat->facility_type==IS_LOST))) 
+						setSupply(getSupply()-stat->supply);
+					adjustAvailibility(tloc,fac,stat);
+					build->setIP(getIP());
+				} //end if(ok)
+			} //end mins/gas else
+		} //end prere/fac else
+	} //end unit < EXTRACTOR
 	else // unit > EXTRACTOR+1
 	{
 
 //hier checken!
 
 // TODO ueberlegen was mit scv passiert, das gerade ein Gebaeude fertiggestellt hat... steht das in irgendeinem "last" drin?
-		int count=0;
+/*		int count=0;
 		switch(unit)
 		{
 			case MOVE_ONE_1_FORWARD:count=1;break;
@@ -509,39 +507,39 @@ int RACE::buildGene(int unit)
 			{
 				lastcounter--;
 				int nr=0;
-				while((nr<MAX_BUILDINGS-1)&&(getBuildingRemainingBuildTime(nr)))
+				while((nr<MAX_BUILDINGS-1)&&(build->getRemainingBuildTime(nr)))
 						nr++;
 				//TODO: Fehler wenn nicht genug buildings
 				if(getLocationAvailible(last[lastcounter].location,last[lastcounter].unit)>last[lastcounter].count)
-					setBuildingUnitCount(nr,last[lastcounter].count);
-				else setBuildingUnitCount(nr,getLocationAvailible(last[lastcounter].location,last[lastcounter].unit));
-				setBuildingFacility(nr,0);
+					setUnitCount(nr,last[lastcounter].count);
+				else setUnitCount(nr,getLocationAvailible(last[lastcounter].location,last[lastcounter].unit));
+				setFacility(nr,0);
 				if(last[lastcounter].location+count<1)
 					count=MAX_LOCATIONS+count;
 				else if(last[lastcounter].location+count>=MAX_LOCATIONS)
 					count=1+last[lastcounter].location+count-MAX_LOCATIONS;
 				else count=last[lastcounter].location+count;
 
-				setBuildingLocation(nr,count);
-				setBuildingType(nr,last[lastcounter].unit);
-				setBuildingRemainingBuildTime(nr,pMap->location[last[lastcounter].location].getDistance(count)*100/pStats[last[lastcounter].unit].speed);
-				setBuildingOnTheRun(nr,1);
+				setLocation(nr,count);
+				setType(nr,last[lastcounter].unit);
+				setRemainingBuildTime(nr,pMap->location[last[lastcounter].location].getDistance(count)*100/pStats[last[lastcounter].unit].speed);
+				setOnTheRun(nr,1);
 //						building[nr].IP=IP; TODO?
 						// 2x Unit => send 8/All instead of just one unit there
-/*				if((getIP()>1)&&((Code[0][getIP()-1]==unit)||(Code[1][getIP()-1]==unit)))
+				if((getIP()>1)&&((Code[0][getIP()-1]==unit)||(Code[1][getIP()-1]==unit)))
 				{
 					if(getLocationAvailible(last[lastcounter].location,last[lastcounter].unit)>=6)
-						setBuildingUnitCount(nr,6);
-					else setBuildingUnitCount(nr,getLocationAvailible(last[lastcounter].location,last[lastcounter].unit));
-//	                                setProgramIsBuilt(getIP(),1);
+						setUnitCount(nr,6);
+					else setUnitCount(nr,getLocationAvailible(last[lastcounter].location,last[lastcounter].unit));
+//					setProgramIsBuilt(getIP(),1);
 					setIP(getIP()-1);
 				}*/
-				addLocationAvailible(last[lastcounter].location,getBuildingType(nr),-getBuildingUnitCount(nr));
-				addLocationForce(last[lastcounter].location,getBuildingType(nr),-getBuildingUnitCount(nr));
+//				addLocationAvailible(last[lastcounter].location,build->getType(nr),-build->getUnitCount(nr));
+//				addLocationForce(last[lastcounter].location,build->getType(nr),-build->getUnitCount(nr));
 //				setProgramIsBuilt(getIP(),1);
-				ok=1;
-			}
-		}
+//				ok=1;
+//			}
+//		}
 	}
 
 /*      else
@@ -580,7 +578,7 @@ int RACE::buildGene(int unit)
 //						program[building[n].IP].built=1;
 					}*/
 //TODO: Verwandtschaftsgrad fuer crossing over feststellen!	
-	return ok;
+	return(ok);
 }
 
 void RACE::mutateGeneCode()
@@ -588,7 +586,7 @@ void RACE::mutateGeneCode()
 //TODO: ne Art Mutationlogger ueber mehrere Generationen (weitervererbbar) machen um festzustellen, was passiert ist...
 //ODER: jedem Befehl eine Zahl zuweisen, ne Art radioaktiver Marker... Zu ueberlegen ist nur, was mit dem bei crossing over passiert...
 
-	int x,y,i,k,ta,tb,ttt;
+	int x;
 	if(getLength()==0) 
 		setLength(MAX_LENGTH);
 //		return;
@@ -599,12 +597,13 @@ void RACE::mutateGeneCode()
 		else mutationRate+=rand()%50;
 	}
 	for(x=MAX_LENGTH;x--;) //length
-		if(rand()%mutationRate==0)
+		if(rand()%100/*mutationRate*/==0)
 		{
 			switch(rand()%7)
 			{
 				//TODO: wenn generateBuildOrder==1 dann bleibts stehen!
 				case 0://delete one variabel entry and move - Mehrere Schmieden/Kasernen etc. zulassen!
+					int y;
 					if(((getPlayer()->goal->isVariable[Code[0][x]]==1)&&(getPlayer()->goal->isVariable[Code[1][x]]==1))||(!ga->preprocessBuildOrder))
 						//TODO: ueberlegen, ob Code evtl struct sein sollte... mmmh
 					for(y=x;y<MAX_LENGTH-1;y++)
@@ -615,22 +614,22 @@ void RACE::mutateGeneCode()
 						Marker[0][y]=Marker[0][y+1];
 						Marker[1][y]=Marker[1][y+1];
 					};
-                                                y=rand()%getPlayer()->goal->getMaxBuildTypes();
-                                                markerCounter++;Marker[0][MAX_LENGTH-1]=markerCounter;
-                                                markerCounter++;Marker[1][MAX_LENGTH-1]=markerCounter;
-                                                                                                                                                            
-                                                if(ga->preprocessBuildOrder)
-                                                        while(getPlayer()->goal->isVariable[y]==0) y=rand()%getPlayer()->goal->getMaxBuildTypes();
-                                                Code[0][MAX_LENGTH-1]=y;
-                                                y=rand()%getPlayer()->goal->getMaxBuildTypes();
-                                                if(ga->preprocessBuildOrder)
-                                                        while(getPlayer()->goal->isVariable[y]==0) y=rand()%getPlayer()->goal->getMaxBuildTypes();
-	                                         Code[1][MAX_LENGTH-1]=y;
+						y=rand()%getPlayer()->goal->getMaxBuildTypes();
+						markerCounter++;Marker[0][MAX_LENGTH-1]=markerCounter;
+						markerCounter++;Marker[1][MAX_LENGTH-1]=markerCounter;
+																			    
+						if(ga->preprocessBuildOrder)
+							while(getPlayer()->goal->isVariable[y]==0) y=rand()%getPlayer()->goal->getMaxBuildTypes();
+						Code[0][MAX_LENGTH-1]=y;
+						y=rand()%getPlayer()->goal->getMaxBuildTypes();
+						if(ga->preprocessBuildOrder)
+							while(getPlayer()->goal->isVariable[y]==0) y=rand()%getPlayer()->goal->getMaxBuildTypes();
+						 Code[1][MAX_LENGTH-1]=y;
 
 					break;
 				case 1://add one variable entry
 					{
-
+						int y;
 						for(y=MAX_LENGTH-1;y>x;y--)
 						{
 							Code[0][y]=Code[0][y-1];
@@ -654,43 +653,45 @@ void RACE::mutateGeneCode()
 					};break;
 				case 2://change one entry
 					{
-						k=rand()%2;
+						int k=rand()%2;
 						if(getPlayer()->goal->isVariable[Code[k][x]]==1)
 						{
-							y=rand()%getPlayer()->goal->getMaxBuildTypes();//Optimieren
+							int y=rand()%getPlayer()->goal->getMaxBuildTypes();//Optimieren
 							if(ga->preprocessBuildOrder)
 								while(getPlayer()->goal->isVariable[y]==0) y=rand()%getPlayer()->goal->getMaxBuildTypes();
 							Code[k][x]=y;
-	                                                markerCounter++;Marker[k][x]=markerCounter;
+							markerCounter++;Marker[k][x]=markerCounter;
 						};
 					};break;
 				case 3://exchange two entries
 					{
-						y=rand()%MAX_LENGTH/2+rand()%MAX_LENGTH/2-x;
+						int y=rand()%MAX_LENGTH/2+rand()%MAX_LENGTH/2-x;
 //						y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
 //						if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH; //TODO? Warum
 						if((y>0)&&(x!=y))
 						{
-							k=rand()%2;
-							ta=Code[k][x];Code[k][x]=Code[k][y];Code[k][y]=ta;
-							ta=Marker[k][x];Marker[k][x]=Marker[k][y];Marker[k][y]=ta;
+							int k=rand()%2;
+							int l=Code[k][x];Code[k][x]=Code[k][y];Code[k][y]=l;
+							l=Marker[k][x];Marker[k][x]=Marker[k][y];Marker[k][y]=l;
 						}
 					};break;
 				case 4://exchange two entries
 					{
-						y=rand()%MAX_LENGTH/2+rand()%MAX_LENGTH/2-x;
+						int y=rand()%MAX_LENGTH/2+rand()%MAX_LENGTH/2-x;
 //						y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
 //						if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH;
 						if((y>0)&&(x!=y))
 						{
-							ta=Code[0][x];Code[0][x]=Code[0][y];Code[0][y]=ta;
-							ta=Marker[1][x];Marker[1][x]=Marker[1][y];Marker[1][y]=ta;
+							int l;
+							l=Code[0][x];Code[0][x]=Code[0][y];Code[0][y]=l;
+							l=Marker[1][x];Marker[1][x]=Marker[1][y];Marker[1][y]=l;
 						}
 					};break;
 				case 5://move a block of orders  [a..b..ta..tb..c..d] -> [a..ta..tb..b..c..d]
 					//~~~TODO bug, marker und code wird nicht richtig verschoben
 /*					if(getLength()>2)
 					{
+						int i,ta,tb,ttt,y;
 						ta=rand()%(getLength()-2)+1; //>0    <getLength()-2
 						tb=rand()%(getLength()-1)+2; //>1   <getLength()-1 
 						while(ta==tb) tb=rand()%(getLength()-1)+2;
@@ -708,13 +709,13 @@ void RACE::mutateGeneCode()
 							for(i=ta;i<tb;i++) Code[1][i+y-tb]=Code[1][i];
 							for(i=0;i<y-tb;i++) Code[1][ta+i]=tmp[i];
 
-                                                        for(i=0;i<y-tb;i++) tmp[i]=Marker[0][i+tb];
-                                                        for(i=ta;i<tb;i++) Marker[0][i+y-tb]=Marker[0][i];
-                                                        for(i=0;i<y-tb;i++) Marker[0][ta+i]=tmp[i];
-                                                                                                                                                            
-                                                        for(i=0;i<y-tb;i++) tmp[i]=Marker[1][i+tb];
-                                                        for(i=ta;i<tb;i++) Marker[1][i+y-tb]=Marker[1][i];
-                                                        for(i=0;i<y-tb;i++) Marker[1][ta+i]=tmp[i];
+							for(i=0;i<y-tb;i++) tmp[i]=Marker[0][i+tb];
+							for(i=ta;i<tb;i++) Marker[0][i+y-tb]=Marker[0][i];
+							for(i=0;i<y-tb;i++) Marker[0][ta+i]=tmp[i];
+																			    
+							for(i=0;i<y-tb;i++) tmp[i]=Marker[1][i+tb];
+							for(i=ta;i<tb;i++) Marker[1][i+y-tb]=Marker[1][i];
+							for(i=0;i<y-tb;i++) Marker[1][ta+i]=tmp[i];
 
 						}
 						else
@@ -728,19 +729,20 @@ void RACE::mutateGeneCode()
 							for(i=ta;i<tb;i++) Code[1][y+i-ta]=Code[1][i];
 							for(i=0;i<ta-y;i++) Code[1][tb-y]=tmp[i];
 
-                                                        for(i=0;i<ta-y;i++) tmp[i]=Marker[0][i+y];
-                                                        for(i=ta;i<tb;i++) Marker[0][y+i-ta]=Marker[0][i];
-                                                        for(i=0;i<ta-y;i++) Marker[0][tb-y]=tmp[i];
-                                                                                                                                                            
-                                                        for(i=0;i<ta-y;i++) tmp[i]=Marker[1][i+y];
-                                                        for(i=ta;i<tb;i++) Marker[1][y+i-ta]=Marker[1][i];
-                                                        for(i=0;i<ta-y;i++) Marker[1][tb-y]=tmp[i];
+							for(i=0;i<ta-y;i++) tmp[i]=Marker[0][i+y];
+							for(i=ta;i<tb;i++) Marker[0][y+i-ta]=Marker[0][i];
+							for(i=0;i<ta-y;i++) Marker[0][tb-y]=tmp[i];
+																			    
+							for(i=0;i<ta-y;i++) tmp[i]=Marker[1][i+y];
+							for(i=ta;i<tb;i++) Marker[1][y+i-ta]=Marker[1][i];
+							for(i=0;i<ta-y;i++) Marker[1][tb-y]=tmp[i];
 						}
 					};*/break;
 				case 6://flip entries
 					{
-						ta=Code[0][x];Code[0][x]=Code[1][x];Code[1][x]=ta;
-						ta=Marker[0][x];Marker[0][x]=Marker[1][x];Marker[1][x]=ta;
+						int l;
+						l=Code[0][x];Code[0][x]=Code[1][x];Code[1][x]=l;
+						l=Marker[0][x];Marker[0][x]=Marker[1][x];Marker[1][x]=l;
 					};break;
 			}
 		}
@@ -753,7 +755,6 @@ void RACE::resetData() // resets all data to standard starting values
 	int i;
 	for(i=UNIT_TYPE_COUNT;i--;)
 		setFinalTime(i,0);
-	resetBuildings();
 	resetSpecial();
 	for(i=0;i<4;i++) //TODO ???
 	{
@@ -776,13 +777,12 @@ void RACE::resetData() // resets all data to standard starting values
 	//location 0 is for globalForce, so take location 1 for starting point instead
 	setMins(getPlayer()->getMins());
 	setGas(getPlayer()->getGas());
-	setTimer(getPlayer()->getTimer());
+	setTimer(ga->maxTime-getPlayer()->getTimer());
 	setSupply(0);
 	setMaxSupply(0);
 	setTimeOut(ga->maxTimeOut);
 	setIP(ga->maxLength-1);
 	setCalculated(0);
-	time=ga->maxTime;
 	ready=0;
 	setpFitness(0);
 	setsFitness(0);
@@ -948,7 +948,7 @@ void RACE::resetGeneCode()
 		for(i=0;i<MAX_LENGTH;i++)
 		{
 			markerCounter++;Marker[0][i]=markerCounter;
-		        markerCounter++;Marker[1][i]=markerCounter;
+			markerCounter++;Marker[1][i]=markerCounter;
 		}
 	}
 	else
@@ -971,16 +971,16 @@ void RACE::crossOver(RACE* parent2, RACE* child1, RACE* child2)
 		{
 			int num=MAX_LENGTH-counter;
 			memcpy(&child1->Code[0][i-num],&Code[0][i-num],num*4);
-                        memcpy(&child1->Marker[0][i-num],&Marker[0][i-num],num*4);
+			memcpy(&child1->Marker[0][i-num],&Marker[0][i-num],num*4);
 
 			memcpy(&child1->Code[1][i-num],&parent2->Code[1][i-num],num*4);
-                        memcpy(&child1->Marker[1][i-num],&parent2->Marker[1][i-num],num*4);
+			memcpy(&child1->Marker[1][i-num],&parent2->Marker[1][i-num],num*4);
 
 			memcpy(&child2->Code[1][i-num],&Code[1][i-num],num*4);
-                        memcpy(&child2->Marker[1][i-num],&Marker[1][i-num],num*4);
+			memcpy(&child2->Marker[1][i-num],&Marker[1][i-num],num*4);
 
 			memcpy(&child2->Code[0][i-num],&parent2->Code[0][i-num],num*4);
-                        memcpy(&child2->Marker[0][i-num],&parent2->Marker[0][i-num],num*4);
+			memcpy(&child2->Marker[0][i-num],&parent2->Marker[0][i-num],num*4);
 
 			counter=MAX_LENGTH; //~~ TODO
 			RACE* c=child1;
@@ -991,16 +991,16 @@ void RACE::crossOver(RACE* parent2, RACE* child1, RACE* child2)
 	}
 	int num=MAX_LENGTH-counter;
 	memcpy(&child1->Code[0][counter],&Code[0][counter],num*4);
-        memcpy(&child1->Marker[0][counter],&Marker[0][counter],num*4);
+	memcpy(&child1->Marker[0][counter],&Marker[0][counter],num*4);
 
 	memcpy(&child1->Code[1][counter],&parent2->Code[1][counter],num*4);
-        memcpy(&child1->Marker[1][counter],&parent2->Marker[1][counter],num*4);
+	memcpy(&child1->Marker[1][counter],&parent2->Marker[1][counter],num*4);
 
 	memcpy(&child2->Code[1][counter],&Code[1][counter],num*4);
-        memcpy(&child2->Marker[1][counter],&Marker[1][counter],num*4);
+	memcpy(&child2->Marker[1][counter],&Marker[1][counter],num*4);
 
 	memcpy(&child2->Code[0][counter],&parent2->Code[0][counter],num*4);
-        memcpy(&child2->Marker[0][counter],&parent2->Marker[0][counter],num*4);
+	memcpy(&child2->Marker[0][counter],&parent2->Marker[0][counter],num*4);
 
 	child1->mutationRate=(2*mutationRate+parent2->mutationRate)/3;
 	child2->mutationRate=(2*parent2->mutationRate+mutationRate)/3;

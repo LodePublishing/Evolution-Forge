@@ -1,55 +1,57 @@
-#ifndef __EC2_H
-#define __EC2_H
+#ifndef __EF2_H
+#define __EF2_H
 
 #include "wx/wxprec.h"
-#ifndef WX_PRECOMP
+#ifndef WX_PREFOMP
     #include "wx/wx.h"
 #endif
                                                                                                                                                             
 // the application icon (under Windows and OS/2 it is in resources)
 #if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
-    #include "/home/clawg/work/sc1037/sc/icon.xpm"
+    #include "/home/clawg/work/sc1038/sc/icon.xpm"
 //    #include "scc.png"
 #endif
 
 #include <wx/spinctrl.h>
 #include <wx/button.h>
+
+#include <wx/datetime.h>
 enum
 {
-        EC_Version=107,
+        EF_Version=108,
     // menu items
-        EC_Open=1,
-        EC_Start=2,
-        EC_Stop=3,
-        EC_Quit = 4,
-        EC_GeneralSettings = 5,
-        EC_SettingsDialog=101,
+        EF_Open=1,
+        EF_Start=2,
+        EF_Stop=3,
+        EF_Quit = 4,
+        EF_GeneralSettings = 5,
+        EF_SettingsDialog=101,
                                                                                 
-        EC_SpinMaxTime=301,
-        EC_SpinMaxTimeOut=302,
-        EC_SpinMaxLength=303,
-        EC_SpinMaxRuns=304,
-        EC_SpinMaxGenerations=305,
-        EC_SpinBreedFactor=306,
-        EC_SpinCrossOver=307,
-        EC_CheckPreprocess=308,
+        EF_SpinMaxTime=301,
+        EF_SpinMaxTimeOut=302,
+        EF_SpinMaxLength=303,
+        EF_SpinMaxRuns=304,
+        EF_SpinMaxGenerations=305,
+        EF_SpinBreedFactor=306,
+        EF_SpinCrossOver=307,
+        EF_CheckPreprocess=308,
                                                                                 
-        EC_GoalCreate=401,
-        EC_GoalImport=402,
+        EF_GoalCreate=401,
+        EF_GoalImport=402,
                                                                                 
-        EC_MapCreate=501,
-        EC_MapImport=502,
+        EF_MapCreate=501,
+        EF_MapImport=502,
                                                                                 
     // it is important for the id corresponding to the "About" command to have
     // this standard value as otherwise it won't be handled properly under Mac
     // (where it is special and put into the "Apple" menu)
-    EC_About = wxID_ABOUT
+    EF_About = wxID_ABOUT
 };
 
 #ifdef __WIN32__                                                                                
-const int FONT_SIZE=8;
+const int FONT_SIZE=6;
 #else
-const int FONT_SIZE=9;
+const int FONT_SIZE=7;
 #endif
 
 
@@ -69,13 +71,32 @@ const char error_message[ERROR_MESSAGES][25]=
 {
         'O','M','G','S','P','F','T','U'
 };*/
+
+const int GIZMO_NUMBER=13;
+
+const char gizmo[GIZMO_NUMBER][40]=
+{
+	"Perfection is the key",
+	"Look at la Luna",
+	"It is a good day to optimize",
+	"The early ling catches the worm",
+	"Build orders are best served optimized",
+	"Pool Pool Pool Pool Dead - A newbie",
+	"Good... Bad... I'm the guy with the gum",
+	"LOOOOOOOOOOOOOOOOOOOOOOOOOL",
+	"ALT+F4 - Zergling has left the game :/",
+	"WHY ARE YOUR ZEALOTS INVISIBLE!?",
+	"!!!!! 3VS3 BGH NO NOOBS !!!!",
+	"<ý¦<¬ ;) ýJ<¼ýD Ìýt<Üý >_<",
+	"60 Minutes no Rush!"
+};
                                                                                     
 
 
 const int SECOND_COLOUMN=290;
 const int SECOND_COLOUMN_WIDTH=250;
 const int THIRD_COLOUMN=570;
-const int BUILD_ORDER_NUMBER=37;
+const int BUILD_ORDER_NUMBER=36;
 const int FORCE_LIST_NUMBER=23;
 
 const int BUILD_ORDER_GRAPH_LENGTH=FORCE_LIST_NUMBER*(FONT_SIZE+5)+3;//BUILD_ORDER_GRAPH_NUMBER*(FONT_SIZE+5)+3+FORCE_LIST_LENGTH;
@@ -89,12 +110,6 @@ const int MIN_HEIGHT=2;
 class MyApp : public wxApp
 {
 public:
-    // override base class virtuals
-    // ----------------------------
-                                                                                                                                                            
-    // this one is called on application startup and is a good place for the app
-    // initialization (doing it here and not in the ctor allows to have an error
-    // return: if OnInit() returns false, the application terminates)
     virtual bool OnInit();
 };
                                                                                                                                                            
@@ -115,22 +130,23 @@ struct OLDORDER
 //build order list
 	int x,y; //current x,y
 	int targetx,targety;
+	int targetwidth,width;
 	int dx,dy;
 
 //build order graph
 	int bx,by;
 	int targetbx,targetby;
 
-	int height,width;
-	int targetheight,targetwidth;
+	int bheight,bwidth;
+	int targetbheight,targetbwidth;
 	
 	int unit,mins,gas,time,location,needSupply,haveSupply,forceFacilityCount,availibleFacilityCount,successType,successUnit,facility,code,forceCount;
 	int marker,bonew;
 //	int mins, color  etc.
 };
 
+
 class MyDCWindow : 
-//public wxWindow
 public wxScrolledWindow
 {
 public:
@@ -139,9 +155,15 @@ public:
         void OnPaint(wxPaintEvent& event);
         void OnIdle(wxIdleEvent& WXUNUSED(event));
 	void OnMouseMove(wxMouseEvent& event);
+	void OnMouseLeftUp(wxMouseEvent& event);
+	void OnMouseLeftDown(wxMouseEvent& event);
+        void OnMouseScroll(wxMouseEvent& event);
         SETTINGS settings;
 	int run;
+	void resetData();
 private:
+	int mouseX,mouseY,mouseLeft,orderLength;
+	int oldrun,endrun;
         const GA* ga;
         BOLOG bolog[MAX_LENGTH];
         BOLOG globalForcelog[UNIT_TYPE_COUNT];
@@ -164,7 +186,12 @@ private:
         int time[200];
         int force[200];
 
-        int oldTimeCounter[20],oldTime[20];
+	wxDateTime dt1;
+	wxDateTime dt2;
+
+	int average[100];int averagecounter;
+	
+	int oldTimeCounter[20],oldTime[20];
 	
 	OLDORDER* oldOrder[MAX_LENGTH*50];
 //	int oldMarker[MAX_LENGTH];
@@ -172,7 +199,8 @@ private:
 //	int oldBuildOrders[BUILD_ORDER_NUMBER];
 	int oldForceList[FORCE_LIST_NUMBER];
 	//int oldData[8];
-
+wxBitmap bitmap,bitmap2,bitmap3;
+	int ani,boanzahl;
         int maxsFitness;
         int maxpFitness;
         int maxtFitness;
@@ -210,7 +238,7 @@ public:
         void OnMapImport(wxCommandEvent& event);
 private:
 	MyDCWindow* child;
-	wxBitmap bitmap;
+//	wxBitmap bitmap;
 
         wxMenu* menuFile;
         wxMenu* menuHelp;

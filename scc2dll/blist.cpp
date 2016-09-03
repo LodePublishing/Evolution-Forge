@@ -163,7 +163,7 @@ int BuildingList::GetCount()
 	return count;
 };
 
-BNODE* BuildingList::GetFirst()
+BNODE* BuildingList::GetHead()
 {
 	return(head);
 };

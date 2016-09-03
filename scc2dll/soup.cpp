@@ -337,16 +337,16 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 
 		newcalc=0;
 		for(int k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
-//			if(anaplayer[k]->isActive())
+			if(anaplayer[k]->isActive())
 			{
-/*				if((player[k*t]->getpFitness()>anaplayer[k]->getMaxpFitness())||
+				if((player[k*t]->getpFitness()>anaplayer[k]->getMaxpFitness())||
 
 				  ((player[k*t]->getpFitness()>=anaplayer[k]->getMaxpFitness())
 				 &&(player[k*t]->getsFitness()>anaplayer[k]->getMaxsFitness()))||
 
 				  ((player[k*t]->getpFitness()>=anaplayer[k]->getMaxpFitness())
 				 &&(player[k*t]->getsFitness()>=anaplayer[k]->getMaxsFitness())
-				 &&(player[k*t]->gettFitness()>anaplayer[k]->getMaxtFitness())))*/
+				 &&(player[k*t]->gettFitness()>anaplayer[k]->getMaxtFitness())))
 				{
 
 					if(player[k*t]->gettFitness()>anaplayer[k]->getMaxtFitness())

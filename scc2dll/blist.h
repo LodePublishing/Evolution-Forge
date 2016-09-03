@@ -31,7 +31,7 @@ class BuildingList
 		void Clear();
 		void DeleteNode(BNODE* node);
 		int GetCount();
-		BNODE* GetFirst();
+		BNODE* GetHead();
 		BNODE* GetTail();
 	private:
 		BNODE* head;

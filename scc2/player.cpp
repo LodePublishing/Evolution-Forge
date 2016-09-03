@@ -6,48 +6,33 @@ Player::~Player()
 {
 };
 
-Player::Player(UI_Object* parent, ANARACE** anarace, ePlayerMode mode):UI_Object(parent)
+Player::Player(UI_Object* parent, ANARACE** anarace, ePlayerMode mode, const int playerNumber):UI_Object(parent)
 {
 	geneAnimation=0;
 	shown=0;
-	orderList.Clear();
-
 	this->anarace = anarace;
-
-// TODO ueberlegen wie ich die TAB Steuerung durchfuehre
-	
-	InfoWindow* infoWindow= new InfoWindow(this, *(UI_Object::theme.lookUpRect(INFO_WINDOW)), *(UI_Object::theme.lookUpMaxRect(INFO_WINDOW)), *anarace);
-	window[INFO_WINDOW] = infoWindow;
-
-	window[FORCE_WINDOW] = new ForceWindow(this, *theme.lookUpRect(FORCE_WINDOW), *theme.lookUpMaxRect(FORCE_WINDOW), *anarace);
-
-	window[TIMER_WINDOW] = new TimerWindow(this, *theme.lookUpRect(TIMER_WINDOW), *theme.lookUpMaxRect(TIMER_WINDOW), *anarace);
-	
-	window[STATISTICS_WINDOW]=new StatisticsWindow(this, *theme.lookUpRect(STATISTICS_WINDOW), *theme.lookUpMaxRect(STATISTICS_WINDOW), *anarace);
-	
-	window[BUILD_ORDER_WINDOW]=new BoWindow(this, *theme.lookUpRect(BUILD_ORDER_WINDOW), *theme.lookUpMaxRect(BUILD_ORDER_WINDOW), *anarace, infoWindow, &orderList);
-	
-	window[BO_GRAPH_WINDOW] = new BoGraphWindow(this, *theme.lookUpRect(BO_GRAPH_WINDOW), *theme.lookUpMaxRect(BO_GRAPH_WINDOW), *anarace, infoWindow, &orderList);
-	
-	window[BO_DIAGRAM_WINDOW]=new BoDiagramWindow(this, *theme.lookUpRect(BO_DIAGRAM_WINDOW), *theme.lookUpMaxRect(BO_DIAGRAM_WINDOW), *anarace, infoWindow);
-	
-
+	window[INFO_WINDOW] = new InfoWindow(this, *anarace, playerNumber);
+	window[FORCE_WINDOW] = new ForceWindow(this, *anarace, playerNumber);
+	window[TIMER_WINDOW] = new TimerWindow(this, *anarace, playerNumber);
+	window[STATISTICS_WINDOW]=new StatisticsWindow(this, *anarace, playerNumber);
+	window[BUILD_ORDER_WINDOW]=new BoWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], &orderList, playerNumber);
+	window[BO_GRAPH_WINDOW] = new BoGraphWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], &orderList, playerNumber);
+	window[BO_DIAGRAM_WINDOW]=new BoDiagramWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], playerNumber);
 	setMode(mode);
-
 	//Show(0);
 };
 
 
-void Player::drawGeneString(wxDC* dc, wxRect position)
+void Player::drawGeneString(DC* dc, Rect position)
 {
 	//TODO
 #if 0
 	int stringheight=0;
 	int currentType=-1;
-	wxPoint points1[200];
-	wxPoint points2[200];
-	wxPoint points3[200];
-	wxPoint points4[200];
+	Point points1[200];
+	Point points2[200];
+	Point points3[200];
+	Point points4[200];
 	for(int i=0;i<200;i++)
 	{
 		points1[i].x=0;points1[i].y=0;
@@ -106,14 +91,14 @@ void Player::drawGeneString(wxDC* dc, wxRect position)
 				k++;
 				if(k>=1)
 				{
-					wxPen bla1=wxPen(wxColour(
+					Pen bla1=Pen(Colour(
 3*(COLOR1R+2*BOcolor[stats[(*anarace)->getPlayer()->getRace()][colors[i-1]].facilityType].Red())/4,
 3*(COLOR1G+2*BOcolor[stats[(*anarace)->getPlayer()->getRace()][colors[i-1]].facilityType].Green())/4,
-3*(COLOR1B+2*BOcolor[stats[(*anarace)->getPlayer()->getRace()][colors[i-1]].facilityType].Blue())/4),3,wxSOLID);
-					wxPen bla2=wxPen(wxColour(
+3*(COLOR1B+2*BOcolor[stats[(*anarace)->getPlayer()->getRace()][colors[i-1]].facilityType].Blue())/4),3,SOLID);
+					Pen bla2=Pen(Colour(
 					3*(COLOR1R/2+BOcolor[stats[(*anarace)->getPlayer()->getRace()][colors[i-1]].facilityType].Red())/10,
 					3*(COLOR1G/2+BOcolor[stats[(*anarace)->getPlayer()->getRace()][colors[i-1]].facilityType].Green())/10,
-					3*(COLOR1B/2+BOcolor[stats[(*anarace)->getPlayer()->getRace()][colors[i-1]].facilityType].Blue())/10),1,wxSOLID);
+					3*(COLOR1B/2+BOcolor[stats[(*anarace)->getPlayer()->getRace()][colors[i-1]].facilityType].Blue())/10),1,SOLID);
 																			    
 					dc->SetPen(bla1);
 					dc->DrawSpline(k,points1);
@@ -161,159 +146,159 @@ void Player::InitPositions(UI_Window* parentWindow)
 
 	
 // 1 Player: 1st player [BASIC]
-	boWindowRect[0]=wxRect(wxPoint(mainWindow->getClientRectWidth()-THIRD_COLOUMN,SECOND_ROW),wxSize(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
-	boWindowMax[0]=wxRect(boWindowRect[0].GetPosition(),wxSize(boWindowRect[0].GetWidth(),mainWindow->getClientRectHeight()-30-120));
-	forceWindowRect[0]=wxRect(0,SECOND_ROW,FIRST_COLOUMN,14*(FONT_SIZE+5));
+	boWindowRect[0]=Rect(Point(mainWindow->getClientRectWidth()-THIRD_COLOUMN,SECOND_ROW),Size(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
+	boWindowMax[0]=Rect(boWindowRect[0].GetPosition(),Size(boWindowRect[0].GetWidth(),mainWindow->getClientRectHeight()-30-120));
+	forceWindowRect[0]=Rect(0,SECOND_ROW,FIRST_COLOUMN,14*(FONT_SIZE+5));
 //TODO ne Art * Operator reinbringen, damit die Hoehe genommen wird, die die entsprechende Drawroutine berechnet
-	forceWindowMax[0]=wxRect(0,SECOND_ROW,FIRST_COLOUMN,mainWindow->getClientRectHeight()-250);
-	timerWindowRect[0]=wxRect(wxPoint(mainWindow->getClientRectWidth()-THIRD_COLOUMN,0),wxSize(THIRD_COLOUMN,120));
+	forceWindowMax[0]=Rect(0,SECOND_ROW,FIRST_COLOUMN,mainWindow->getClientRectHeight()-250);
+	timerWindowRect[0]=Rect(Point(mainWindow->getClientRectWidth()-THIRD_COLOUMN,0),Size(THIRD_COLOUMN,120));
 	timerWindowMax[0]=timerWindowRect[0];
-	statisticsWindowRect[0]=wxRect(timerWindowRect[0].x-500,0,SECOND_COLOUMN,120);
-	statisticsWindowMax[0]=wxRect(timerWindowRect[0].x-500,0,SECOND_COLOUMN,120);
+	statisticsWindowRect[0]=Rect(timerWindowRect[0].x-500,0,SECOND_COLOUMN,120);
+	statisticsWindowMax[0]=Rect(timerWindowRect[0].x-500,0,SECOND_COLOUMN,120);
 
-	boDiagramWindowRect[0]=wxRect(wxPoint(FIRST_COLOUMN,400/*theCore->getLowerBound()+5*/),wxSize(SECOND_COLOUMN,110));
+	boDiagramWindowRect[0]=Rect(Point(FIRST_COLOUMN,400/*theCore->getLowerBound()+5*/),Size(SECOND_COLOUMN,110));
 	boDiagramWindowMax[0]=boDiagramWindowRect[0];
 
-	boGraphWindowRect[0]=wxRect(statisticsWindowRect[0].x,boDiagramWindowRect[0].y+boDiagramWindowRect[0].height+5,SECOND_COLOUMN,40);
-	boGraphWindowMax[0]=wxRect(statisticsWindowRect[0].x,boDiagramWindowRect[0].y+boDiagramWindowRect[0].height+5,SECOND_COLOUMN,380);
+	boGraphWindowRect[0]=Rect(statisticsWindowRect[0].x,boDiagramWindowRect[0].y+boDiagramWindowRect[0].height+5,SECOND_COLOUMN,40);
+	boGraphWindowMax[0]=Rect(statisticsWindowRect[0].x,boDiagramWindowRect[0].y+boDiagramWindowRect[0].height+5,SECOND_COLOUMN,380);
 
 // 1 Player: 1st player [ADVANCED]
-	boWindowRect[1]=wxRect(wxPoint(mainWindow->getClientRectWidth()-THIRD_COLOUMN,SECOND_ROW),wxSize(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
-	boWindowMax[1]=wxRect(boWindowRect[1].GetPosition(),wxSize(boWindowRect[1].GetWidth(),mainWindow->getClientRectHeight()-30-120));
-	forceWindowRect[1]=wxRect(0,SECOND_ROW,FIRST_COLOUMN,14*(FONT_SIZE+5));
-	forceWindowMax[1]=wxRect(0,SECOND_ROW,FIRST_COLOUMN,mainWindow->getClientRectHeight()-250);
-	timerWindowRect[1]=wxRect(wxPoint(mainWindow->getClientRectWidth()-THIRD_COLOUMN,0),wxSize(THIRD_COLOUMN,120));
+	boWindowRect[1]=Rect(Point(mainWindow->getClientRectWidth()-THIRD_COLOUMN,SECOND_ROW),Size(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
+	boWindowMax[1]=Rect(boWindowRect[1].GetPosition(),Size(boWindowRect[1].GetWidth(),mainWindow->getClientRectHeight()-30-120));
+	forceWindowRect[1]=Rect(0,SECOND_ROW,FIRST_COLOUMN,14*(FONT_SIZE+5));
+	forceWindowMax[1]=Rect(0,SECOND_ROW,FIRST_COLOUMN,mainWindow->getClientRectHeight()-250);
+	timerWindowRect[1]=Rect(Point(mainWindow->getClientRectWidth()-THIRD_COLOUMN,0),Size(THIRD_COLOUMN,120));
 	timerWindowMax[1]=timerWindowRect[1];
-	statisticsWindowRect[1]=wxRect(timerWindowRect[1].x-500,0,SECOND_COLOUMN,120);
+	statisticsWindowRect[1]=Rect(timerWindowRect[1].x-500,0,SECOND_COLOUMN,120);
 	statisticsWindowMax[1]=statisticsWindowRect[1];
 
-	boDiagramWindowRect[1]=wxRect(wxPoint(FIRST_COLOUMN,400),wxSize(SECOND_COLOUMN,110));
+	boDiagramWindowRect[1]=Rect(Point(FIRST_COLOUMN,400),Size(SECOND_COLOUMN,110));
 	boDiagramWindowMax[1]=boDiagramWindowRect[1];
 
-	boGraphWindowRect[1]=wxRect(FIRST_COLOUMN,515,SECOND_COLOUMN,40);
-	boGraphWindowMax[1]=wxRect(boGraphWindowRect[1].GetPosition(),wxSize(boGraphWindowRect[1].GetWidth(),380));
+	boGraphWindowRect[1]=Rect(FIRST_COLOUMN,515,SECOND_COLOUMN,40);
+	boGraphWindowMax[1]=Rect(boGraphWindowRect[1].GetPosition(),Size(boGraphWindowRect[1].GetWidth(),380));
 
 // 2 Player; 1st player [EXPERT], the human
-	boWindowRect[2]=wxRect(wxPoint(mainWindow->getClientRectWidth()-THIRD_COLOUMN,0),wxSize(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
-	boWindowMax[2]=wxRect(boWindowRect[2].GetPosition(),wxSize(boWindowRect[2].GetWidth(),mainWindow->getClientRectHeight()/2-5));
+	boWindowRect[2]=Rect(Point(mainWindow->getClientRectWidth()-THIRD_COLOUMN,0),Size(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
+	boWindowMax[2]=Rect(boWindowRect[2].GetPosition(),Size(boWindowRect[2].GetWidth(),mainWindow->getClientRectHeight()/2-5));
 
-	forceWindowRect[2]=wxRect(0,0,FIRST_COLOUMN,14*(FONT_SIZE+5));
-	forceWindowMax[2]=wxRect(forceWindowRect[2].GetPosition(),wxSize(FIRST_COLOUMN,mainWindow->getClientRectHeight()/2-5));
+	forceWindowRect[2]=Rect(0,0,FIRST_COLOUMN,14*(FONT_SIZE+5));
+	forceWindowMax[2]=Rect(forceWindowRect[2].GetPosition(),Size(FIRST_COLOUMN,mainWindow->getClientRectHeight()/2-5));
 
-	timerWindowRect[2]=wxRect(wxPoint(FIRST_COLOUMN+THIRD_COLOUMN,0),wxSize(THIRD_COLOUMN,120));
+	timerWindowRect[2]=Rect(Point(FIRST_COLOUMN+THIRD_COLOUMN,0),Size(THIRD_COLOUMN,120));
 	timerWindowMax[2]=timerWindowRect[2];
 
-	statisticsWindowRect[2]=wxRect(timerWindowRect[0].x-500,0,SECOND_COLOUMN,120);
+	statisticsWindowRect[2]=Rect(timerWindowRect[0].x-500,0,SECOND_COLOUMN,120);
 	statisticsWindowMax[2]=statisticsWindowRect[2];
 
-	boDiagramWindowRect[2]=wxRect(wxPoint(FIRST_COLOUMN,125),wxSize(SECOND_COLOUMN,110));
+	boDiagramWindowRect[2]=Rect(Point(FIRST_COLOUMN,125),Size(SECOND_COLOUMN,110));
 	boDiagramWindowMax[2]=boDiagramWindowRect[2];
 																			    
-	boGraphWindowRect[2]=wxRect(FIRST_COLOUMN,240,SECOND_COLOUMN,40);
-	boGraphWindowMax[2]=wxRect(boGraphWindowRect[2].GetPosition(),wxSize(boGraphWindowRect[2].GetWidth(),200));
+	boGraphWindowRect[2]=Rect(FIRST_COLOUMN,240,SECOND_COLOUMN,40);
+	boGraphWindowMax[2]=Rect(boGraphWindowRect[2].GetPosition(),Size(boGraphWindowRect[2].GetWidth(),200));
 
 
 // 2 Player: 2nd player [EXPERT], the computer
-	boWindowRect[3]=wxRect(wxPoint(mainWindow->getClientRectWidth()-/*2**/THIRD_COLOUMN,mainWindow->getClientRectHeight()/2+5),wxSize(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
-	boWindowMax[3]=wxRect(boWindowRect[3].GetPosition(),wxSize(boWindowRect[3].GetWidth(),mainWindow->getClientRectHeight()/2-5));
+	boWindowRect[3]=Rect(Point(mainWindow->getClientRectWidth()-/*2**/THIRD_COLOUMN,mainWindow->getClientRectHeight()/2+5),Size(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
+	boWindowMax[3]=Rect(boWindowRect[3].GetPosition(),Size(boWindowRect[3].GetWidth(),mainWindow->getClientRectHeight()/2-5));
 
-	forceWindowRect[3]=wxRect(0,mainWindow->getClientRectHeight()/2+5,FIRST_COLOUMN,14*(FONT_SIZE+5));
-	forceWindowMax[3]=wxRect(forceWindowRect[3].GetPosition(),wxSize(FIRST_COLOUMN,mainWindow->getClientRectHeight()/2-5));
+	forceWindowRect[3]=Rect(0,mainWindow->getClientRectHeight()/2+5,FIRST_COLOUMN,14*(FONT_SIZE+5));
+	forceWindowMax[3]=Rect(forceWindowRect[3].GetPosition(),Size(FIRST_COLOUMN,mainWindow->getClientRectHeight()/2-5));
 
-	timerWindowRect[3]=wxRect(wxPoint(FIRST_COLOUMN,0),wxSize(THIRD_COLOUMN,120));
+	timerWindowRect[3]=Rect(Point(FIRST_COLOUMN,0),Size(THIRD_COLOUMN,120));
 	timerWindowMax[3]=timerWindowRect[3];
 
-	boDiagramWindowRect[3]=wxRect(wxPoint(FIRST_COLOUMN,445),wxSize(SECOND_COLOUMN,110));
+	boDiagramWindowRect[3]=Rect(Point(FIRST_COLOUMN,445),Size(SECOND_COLOUMN,110));
 	boDiagramWindowMax[3]=boDiagramWindowRect[3];
 																			    
-	boGraphWindowRect[3]=wxRect(FIRST_COLOUMN,555,SECOND_COLOUMN,40);
-	boGraphWindowMax[3]=wxRect(boGraphWindowRect[3].GetPosition(),wxSize(boGraphWindowRect[3].GetWidth(),200));
+	boGraphWindowRect[3]=Rect(FIRST_COLOUMN,555,SECOND_COLOUMN,40);
+	boGraphWindowMax[3]=Rect(boGraphWindowRect[3].GetPosition(),Size(boGraphWindowRect[3].GetWidth(),200));
 
 
 
 // 2 Player: 1st player [GOSU], the human - freestyle
-	boWindowRect[4]=wxRect(wxPoint(mainWindow->getClientRectWidth()-THIRD_COLOUMN,0),wxSize(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
-	boWindowMax[4]=wxRect(boWindowRect[4].GetPosition(),wxSize(boWindowRect[4].GetWidth(),mainWindow->getClientRectHeight()*2/3));
+	boWindowRect[4]=Rect(Point(mainWindow->getClientRectWidth()-THIRD_COLOUMN,0),Size(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
+	boWindowMax[4]=Rect(boWindowRect[4].GetPosition(),Size(boWindowRect[4].GetWidth(),mainWindow->getClientRectHeight()*2/3));
 																			    
-	forceWindowRect[4]=wxRect(0,SECOND_ROW,FIRST_COLOUMN,14*(FONT_SIZE+5));
-	forceWindowMax[4]=wxRect(forceWindowRect[4].GetPosition(),wxSize(FIRST_COLOUMN,mainWindow->getClientRectHeight()/3-5));
+	forceWindowRect[4]=Rect(0,SECOND_ROW,FIRST_COLOUMN,14*(FONT_SIZE+5));
+	forceWindowMax[4]=Rect(forceWindowRect[4].GetPosition(),Size(FIRST_COLOUMN,mainWindow->getClientRectHeight()/3-5));
 																			    
-	timerWindowRect[4]=wxRect(wxPoint(mainWindow->getClientRectWidth()-3*THIRD_COLOUMN,0),wxSize(THIRD_COLOUMN,120));
+	timerWindowRect[4]=Rect(Point(mainWindow->getClientRectWidth()-3*THIRD_COLOUMN,0),Size(THIRD_COLOUMN,120));
 	timerWindowMax[4]=timerWindowRect[4];
 
-	statisticsWindowRect[4]=wxRect(timerWindowRect[0].x-500,0,SECOND_COLOUMN,120);
+	statisticsWindowRect[4]=Rect(timerWindowRect[0].x-500,0,SECOND_COLOUMN,120);
 	statisticsWindowMax[4]=statisticsWindowRect[4];
 
-	boDiagramWindowRect[4]=wxRect(wxPoint(0,2*mainWindow->getClientRectHeight()/3+5),wxSize(SECOND_COLOUMN,110));
+	boDiagramWindowRect[4]=Rect(Point(0,2*mainWindow->getClientRectHeight()/3+5),Size(SECOND_COLOUMN,110));
 	boDiagramWindowMax[4]=boDiagramWindowRect[4];
 																			    
-	boGraphWindowRect[4]=wxRect(0,2*mainWindow->getClientRectHeight()/3+115,SECOND_COLOUMN,40);
-	boGraphWindowMax[4]=wxRect(boGraphWindowRect[4].GetPosition(),wxSize(boGraphWindowRect[4].GetWidth(),200));
+	boGraphWindowRect[4]=Rect(0,2*mainWindow->getClientRectHeight()/3+115,SECOND_COLOUMN,40);
+	boGraphWindowMax[4]=Rect(boGraphWindowRect[4].GetPosition(),Size(boGraphWindowRect[4].GetWidth(),200));
 
 
 
 // 2 Player: 2nd player [GOSU/TRANSCEND], the computer - freestyle
-	boWindowRect[5]=wxRect(wxPoint(mainWindow->getClientRectWidth()-2*THIRD_COLOUMN,0),wxSize(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
-	boWindowMax[5]=wxRect(boWindowRect[5].GetPosition(),wxSize(boWindowRect[5].GetWidth(),mainWindow->getClientRectHeight()*2/3));
+	boWindowRect[5]=Rect(Point(mainWindow->getClientRectWidth()-2*THIRD_COLOUMN,0),Size(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
+	boWindowMax[5]=Rect(boWindowRect[5].GetPosition(),Size(boWindowRect[5].GetWidth(),mainWindow->getClientRectHeight()*2/3));
 																			    
-	forceWindowRect[5]=wxRect(FIRST_COLOUMN,SECOND_ROW,FIRST_COLOUMN,14*(FONT_SIZE+5));
-	forceWindowMax[5]=wxRect(forceWindowRect[5].GetPosition(),wxSize(FIRST_COLOUMN,mainWindow->getClientRectHeight()/3-5));
+	forceWindowRect[5]=Rect(FIRST_COLOUMN,SECOND_ROW,FIRST_COLOUMN,14*(FONT_SIZE+5));
+	forceWindowMax[5]=Rect(forceWindowRect[5].GetPosition(),Size(FIRST_COLOUMN,mainWindow->getClientRectHeight()/3-5));
 																			    
-	timerWindowRect[5]=wxRect(wxPoint(mainWindow->getClientRectWidth()-4*THIRD_COLOUMN,0),wxSize(THIRD_COLOUMN,120));
+	timerWindowRect[5]=Rect(Point(mainWindow->getClientRectWidth()-4*THIRD_COLOUMN,0),Size(THIRD_COLOUMN,120));
 	timerWindowMax[5]=timerWindowRect[5];
 
-	boDiagramWindowRect[5]=wxRect(wxPoint(SECOND_COLOUMN,2*mainWindow->getClientRectHeight()/3+5),wxSize(SECOND_COLOUMN,110));
+	boDiagramWindowRect[5]=Rect(Point(SECOND_COLOUMN,2*mainWindow->getClientRectHeight()/3+5),Size(SECOND_COLOUMN,110));
 	boDiagramWindowMax[5]=boDiagramWindowRect[5];
 																			    
-	boGraphWindowRect[5]=wxRect(SECOND_COLOUMN,2*mainWindow->getClientRectHeight()/3+115,SECOND_COLOUMN,40);
-	boGraphWindowMax[5]=wxRect(boGraphWindowRect[5].GetPosition(),wxSize(boGraphWindowRect[5].GetWidth(),200));
+	boGraphWindowRect[5]=Rect(SECOND_COLOUMN,2*mainWindow->getClientRectHeight()/3+115,SECOND_COLOUMN,40);
+	boGraphWindowMax[5]=Rect(boGraphWindowRect[5].GetPosition(),Size(boGraphWindowRect[5].GetWidth(),200));
 
 
 
 // 2 Player: 1st player [TRANSCEND], the computer - freestyle
-	boWindowRect[6]=wxRect(wxPoint(mainWindow->getClientRectWidth()-THIRD_COLOUMN,0),wxSize(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
-	boWindowMax[6]=wxRect(boWindowRect[6].GetPosition(),wxSize(boWindowRect[6].GetWidth(),mainWindow->getClientRectHeight()*2/3));
+	boWindowRect[6]=Rect(Point(mainWindow->getClientRectWidth()-THIRD_COLOUMN,0),Size(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
+	boWindowMax[6]=Rect(boWindowRect[6].GetPosition(),Size(boWindowRect[6].GetWidth(),mainWindow->getClientRectHeight()*2/3));
 																			    
-	forceWindowRect[6]=wxRect(0,SECOND_ROW,FIRST_COLOUMN,14*(FONT_SIZE+5));
-	forceWindowMax[6]=wxRect(forceWindowRect[6].GetPosition(),wxSize(FIRST_COLOUMN,mainWindow->getClientRectHeight()/3-5));
+	forceWindowRect[6]=Rect(0,SECOND_ROW,FIRST_COLOUMN,14*(FONT_SIZE+5));
+	forceWindowMax[6]=Rect(forceWindowRect[6].GetPosition(),Size(FIRST_COLOUMN,mainWindow->getClientRectHeight()/3-5));
 																			    
-	timerWindowRect[6]=wxRect(wxPoint(mainWindow->getClientRectWidth()-3*THIRD_COLOUMN,0),wxSize(THIRD_COLOUMN,120));
+	timerWindowRect[6]=Rect(Point(mainWindow->getClientRectWidth()-3*THIRD_COLOUMN,0),Size(THIRD_COLOUMN,120));
 	timerWindowMax[6]=timerWindowRect[6];
 
-	boDiagramWindowRect[6]=wxRect(wxPoint(0,2*mainWindow->getClientRectHeight()/3+5),wxSize(SECOND_COLOUMN,110));
+	boDiagramWindowRect[6]=Rect(Point(0,2*mainWindow->getClientRectHeight()/3+5),Size(SECOND_COLOUMN,110));
 	boDiagramWindowMax[6]=boDiagramWindowRect[6];
 																			    
-	boGraphWindowRect[6]=wxRect(0,2*mainWindow->getClientRectHeight()/3+115,SECOND_COLOUMN,40);
-	boGraphWindowMax[6]=wxRect(boGraphWindowRect[6].GetPosition(),wxSize(boGraphWindowRect[6].GetWidth(),200));
+	boGraphWindowRect[6]=Rect(0,2*mainWindow->getClientRectHeight()/3+115,SECOND_COLOUMN,40);
+	boGraphWindowMax[6]=Rect(boGraphWindowRect[6].GetPosition(),Size(boGraphWindowRect[6].GetWidth(),200));
 
-	infoWindowRect[0]=wxRect(wxPoint(boWindowRect[0].GetX()-200,0),wxSize(200,5+9*(FONT_SIZE+5)));
-	infoWindowMax[0]=infoWindowRect[0];//wxRect(wxPoint(boWindowRect[0].x-200/*theCore->getLeftBound()+theCore->getWidth()-200*/,0),infoWindowRect[0].GetSize());
+	infoWindowRect[0]=Rect(Point(boWindowRect[0].GetX()-200,0),Size(200,5+9*(FONT_SIZE+5)));
+	infoWindowMax[0]=infoWindowRect[0];//Rect(Point(boWindowRect[0].x-200/*theCore->getLeftBound()+theCore->getWidth()-200*/,0),infoWindowRect[0].GetSize());
 
 	for(int i=0;i<25;i++)
 	{
-		boWindowRect[i]=wxRect(boWindowRect[i].GetPosition()+mainWindow->getClientRectPosition(),boWindowRect[i].GetSize());
-		forceWindowRect[i]=wxRect(forceWindowRect[i].GetPosition()+mainWindow->getClientRectPosition(),forceWindowRect[i].GetSize());
-		timerWindowRect[i]=wxRect(timerWindowRect[i].GetPosition()+mainWindow->getClientRectPosition(),timerWindowRect[i].GetSize());
-		statisticsWindowRect[i]=wxRect(statisticsWindowRect[i].GetPosition()+mainWindow->getClientRectPosition(),statisticsWindowRect[i].GetSize());
-		boDiagramWindowRect[i]=wxRect(boDiagramWindowRect[i].GetPosition()+mainWindow->getClientRectPosition(),boDiagramWindowRect[i].GetSize());
-		boGraphWindowRect[i]=wxRect(boGraphWindowRect[i].GetPosition()+mainWindow->getClientRectPosition(),boGraphWindowRect[i].GetSize());
-		infoWindowRect[i]=wxRect(infoWindowRect[i].GetPosition()+mainWindow->getClientRectPosition(),infoWindowRect[i].GetSize());
+		boWindowRect[i]=Rect(boWindowRect[i].GetPosition()+mainWindow->getClientRectPosition(),boWindowRect[i].GetSize());
+		forceWindowRect[i]=Rect(forceWindowRect[i].GetPosition()+mainWindow->getClientRectPosition(),forceWindowRect[i].GetSize());
+		timerWindowRect[i]=Rect(timerWindowRect[i].GetPosition()+mainWindow->getClientRectPosition(),timerWindowRect[i].GetSize());
+		statisticsWindowRect[i]=Rect(statisticsWindowRect[i].GetPosition()+mainWindow->getClientRectPosition(),statisticsWindowRect[i].GetSize());
+		boDiagramWindowRect[i]=Rect(boDiagramWindowRect[i].GetPosition()+mainWindow->getClientRectPosition(),boDiagramWindowRect[i].GetSize());
+		boGraphWindowRect[i]=Rect(boGraphWindowRect[i].GetPosition()+mainWindow->getClientRectPosition(),boGraphWindowRect[i].GetSize());
+		infoWindowRect[i]=Rect(infoWindowRect[i].GetPosition()+mainWindow->getClientRectPosition(),infoWindowRect[i].GetSize());
 
-		boWindowMax[i]=wxRect(boWindowMax[i].GetPosition()+mainWindow->getClientRectPosition(),boWindowMax[i].GetSize());
-		forceWindowMax[i]=wxRect(forceWindowMax[i].GetPosition()+mainWindow->getClientRectPosition(),forceWindowMax[i].GetSize());
-		timerWindowMax[i]=wxRect(timerWindowMax[i].GetPosition()+mainWindow->getClientRectPosition(),timerWindowMax[i].GetSize());
-		statisticsWindowMax[i]=wxRect(statisticsWindowMax[i].GetPosition()+mainWindow->getClientRectPosition(),statisticsWindowMax[i].GetSize());
-		boDiagramWindowMax[i]=wxRect(boDiagramWindowMax[i].GetPosition()+mainWindow->getClientRectPosition(),boDiagramWindowMax[i].GetSize());
-		boGraphWindowMax[i]=wxRect(boGraphWindowMax[i].GetPosition()+mainWindow->getClientRectPosition(),boGraphWindowMax[i].GetSize());
-		infoWindowMax[i]=wxRect(infoWindowMax[i].GetPosition()+mainWindow->getClientRectPosition(),infoWindowMax[i].GetSize());
+		boWindowMax[i]=Rect(boWindowMax[i].GetPosition()+mainWindow->getClientRectPosition(),boWindowMax[i].GetSize());
+		forceWindowMax[i]=Rect(forceWindowMax[i].GetPosition()+mainWindow->getClientRectPosition(),forceWindowMax[i].GetSize());
+		timerWindowMax[i]=Rect(timerWindowMax[i].GetPosition()+mainWindow->getClientRectPosition(),timerWindowMax[i].GetSize());
+		statisticsWindowMax[i]=Rect(statisticsWindowMax[i].GetPosition()+mainWindow->getClientRectPosition(),statisticsWindowMax[i].GetSize());
+		boDiagramWindowMax[i]=Rect(boDiagramWindowMax[i].GetPosition()+mainWindow->getClientRectPosition(),boDiagramWindowMax[i].GetSize());
+		boGraphWindowMax[i]=Rect(boGraphWindowMax[i].GetPosition()+mainWindow->getClientRectPosition(),boGraphWindowMax[i].GetSize());
+		infoWindowMax[i]=Rect(infoWindowMax[i].GetPosition()+mainWindow->getClientRectPosition(),infoWindowMax[i].GetSize());
 	}
 };
 #endif 
 																			    
 
-void Player::draw(wxDC* dc)
+void Player::draw(DC* dc)
 {
-//	drawGeneString(dc,wxRect(mainWindow->getPosition()+wxPoint(0,20+i*(mainWindow->getClientRectHeight()/(UI_Object::settings.getMap(0)->getMaxPlayer()-1))),wxSize(mainWindow->getWidth(),mainWindow->getClientRectHeight()/(UI_Object::settings.getMap(0)->getMaxPlayer()-1)-40))); TODO
+//	drawGeneString(dc,Rect(mainWindow->getPosition()+Point(0,20+i*(mainWindow->getClientRectHeight()/(UI_Object::settings.getMap(0)->getMaxPlayer()-1))),Size(mainWindow->getWidth(),mainWindow->getClientRectHeight()/(UI_Object::settings.getMap(0)->getMaxPlayer()-1)-40))); TODO
 	
 	UI_Object::draw(dc);
 };
@@ -439,6 +424,12 @@ bool Player::getChangedFlag()
 	return(0);
 };
 
+void Player::updateRectangles()
+{
+    for(int i=BUILD_ORDER_WINDOW;i<MAX_WINDOWS;i++)
+        window[(eWindow)i]->updateRectangles();
+};
+
 bool Player::isOptimizing()
 {
 	return((*anarace)->isOptimizing());
@@ -480,103 +471,107 @@ void Player::CheckOrders()
 // /home/clawg/work/sc1041/sc/exe/../scc2/scc2.cpp:843: undefined reference to `ANARACE::getProgramIsBuilt(int)' <- WTF? nur bei exe...
 		if((*anarace)->getProgramIsBuilt2(s)/*&&(anarace->getProgramTime(s)<=ga->maxTime-anarace->getTimer())*/)
 		{
-			if(NODE* node=orderList.Find((*anarace)->getMarker(s))) // => found old one -> update the data!
+			map<long, Order>::iterator order=orderList.find((*anarace)->getMarker(s)) ;// => found old one -> update the data!
+			if(order!=orderList.end())
 			{
-				ORDER* order=node->GetData();
-				order->row=k+1+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace()));
-				// TODO!
-				wxRect t=wxRect(0,order->row*(FONT_SIZE+5),500-8,FONT_SIZE+4);
-				if(order->target!=t)
-					order->start=order->rect;
-				order->target=t;
-				order->blendTarget=50;
-				order->blendStart=order->blend;
-				order->unit=(*anarace)->getPhaenoCode(s);
-				order->IP=s;
-				order->checked=1;
+				order->second.row=k+1;//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace())); TODO
+				Rect t=Rect(0,order->second.row*(FONT_SIZE+5),500-8,FONT_SIZE+4);
+				if(order->second.target!=t)
+					order->second.start=order->second.rect;
+				order->second.target=t;
+				order->second.blendTarget=50;
+				order->second.blendStart=order->second.blend;
+				order->second.unit=(*anarace)->getPhaenoCode(s);
+				order->second.IP=s;
+				order->second.checked=1;
+				order->second.bonew=0;
 			} // => aktualisieren
-			else // => neues erstellen
+			else
+			// => neues erstellen
 			{
 				//TODO: testen ob anderes item da ist, das aber die gleiche Unit besitzt + an die gleiche Position kommt
-				int found=0;
-				NODE *node=orderList.GetFirst();
-				while(node&&(!found))
+				bool found=false;
+				map<long, Order>::iterator order=orderList.begin();
+				while((!found) && (order!=orderList.end()))
 				{
-					if((node->GetData()->unit!=(*anarace)->getPhaenoCode(s))||(node->GetData()->row!=k+1)||(node->GetData()->target.x>0))
-						node=node->GetNext();
+					if((order->second.unit!=(*anarace)->getPhaenoCode(s))||(order->second.row!=k+1)||(order->second.target.x>0))
+						order++;
 					else //=> ueberschreiben
 					{
-						ORDER* order=node->GetData();
-						order->blendTarget=50;
-						order->blendStart=order->blend;
-						//order->dx=0;order->dy=0;
-						//order->y=(k+1)*(FONT_SIZE+5);
-						order->row=k+1+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace())); //?
-						wxRect t=wxRect(0,order->row*(FONT_SIZE+5),500-8,FONT_SIZE+4);
-						if(order->target!=t)
-							order->start=order->rect;
-						order->target=t;
-						order->bonew=1;
-						order->IP=s;
-						order->unit=(*anarace)->getPhaenoCode(s);
-						order->checked=1;
-						found=1;
+						found=true;
+						Order neuorder;
+	                    neuorder.row=k+1;//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace())); TODO
+                    	Rect t=Rect(0,order->second.row*(FONT_SIZE+5),500-8,FONT_SIZE+4);
+                	    if(order->second.target!=t)
+            	            neuorder.start=order->second.rect;
+        	            else neuorder.start=order->second.start;
+    	                neuorder.target=t;
+	                    neuorder.blendTarget=50;
+                    	neuorder.blendStart=order->second.blend;
+                	    neuorder.unit=(*anarace)->getPhaenoCode(s);
+            	        neuorder.marker=order->second.marker;
+        	            neuorder.checked=1;
+    	                neuorder.bonew=1;
+						orderList.insert(pair<long, Order>((*anarace)->getMarker(s), neuorder));
+						map<long, Order>::iterator temp=order;
+						temp++;										
+						orderList.erase(order);
+						order=temp;
 					}
 				}
-				if(!found)
+				if(!found) // neues erstellen!
 				{
-					ORDER* order=new ORDER;
-					order->row=k+1+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace()));
-					order->rect=wxRect(170,order->row*(FONT_SIZE+5),0,FONT_SIZE+4);
-					wxRect t=wxRect(0,order->row*(FONT_SIZE+5),500-8,FONT_SIZE+4);
-					if(order->target!=t) // ?????
-						order->start=order->rect;
-					order->target=t;
-					order->blend=1;order->blendTarget=50;
-					order->blendStart=order->blend;
-					order->bonew=1;
-					order->unit=(*anarace)->getPhaenoCode(s);
-					order->IP=s;
-					order->checked=1;
-					orderList.Append((long)(*anarace)->getMarker(s),order);
+					Order neuorder;
+					neuorder.row=k+1;//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace()));
+					neuorder.rect=Rect(170,neuorder.row*(FONT_SIZE+5),0,FONT_SIZE+4);
+					Rect t=Rect(0,neuorder.row*(FONT_SIZE+5),500-8,FONT_SIZE+4);
+					neuorder.start=neuorder.rect;
+					neuorder.target=t;
+					neuorder.blend=1;neuorder.blendTarget=50;
+					neuorder.blendStart=neuorder.blend;
+					neuorder.bonew=1;
+					neuorder.unit=(*anarace)->getPhaenoCode(s);
+					neuorder.IP=s;
+					neuorder.checked=1;
+					orderList.insert(pair<long, Order>((*anarace)->getMarker(s), neuorder));
 				}
 			}
 			k++;
 		}
-																			    
-	NODE* node=orderList.GetFirst();
-																			    
-	while(node)
-	{
-		if(!node->GetData()->checked)
-			node=orderList.DeleteNode(node);
-		else
+
+		map<long, Order>::iterator order=orderList.begin();
+	    while(order!=orderList.end())
 		{
-			node->GetData()->checked=0;
-			node=node->GetNext();
-		}
-	}
-	orderList.Sort();	
+			if(!order->second.checked)
+			{
+				map<long, Order>::iterator temp=order;
+				temp++;
+				orderList.erase(order);
+				order=temp;
+			}
+			else
+			{
+				order->second.checked=0;
+				order++;
+			}
+		};
 };
 
 void Player::MoveOrders() 
 {
-	NODE *node=orderList.GetFirst();
-	while(node)
+    for(map<long, Order>::iterator order=orderList.begin(); order!=orderList.end(); ++order)
 	{
-		ORDER* order=node->GetData();		 
-		move(order->rect.x,order->start.x,order->target.x);
-		move(order->rect.y,order->start.y,order->target.y);
-		move(order->rect.width,order->start.width,order->target.width);
-		move(order->rect.height,order->start.height,order->target.height);
+		move(order->second.rect.x,order->second.start.x,order->second.target.x);
+		move(order->second.rect.y,order->second.start.y,order->second.target.y);
+		move(order->second.rect.width,order->second.start.width,order->second.target.width);
+		move(order->second.rect.height,order->second.start.height,order->second.target.height);
 
-		move(order->brect.x,order->bstart.x,order->btarget.x);
-		move(order->brect.y,order->bstart.y,order->btarget.y);
-		move(order->brect.width,order->bstart.width,order->btarget.width);
-		move(order->brect.height,order->bstart.height,order->btarget.height);
+		move(order->second.brect.x,order->second.bstart.x,order->second.btarget.x);
+		move(order->second.brect.y,order->second.bstart.y,order->second.btarget.y);
+		move(order->second.brect.width,order->second.bstart.width,order->second.btarget.width);
+		move(order->second.brect.height,order->second.bstart.height,order->second.btarget.height);
 
-		move(order->blend, order->blendStart, order->blendTarget);
-		node=node->GetNext();
+		move(order->second.blend, order->second.blendStart, order->second.blendTarget);
 	}
 };
 

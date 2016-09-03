@@ -345,7 +345,7 @@ void MAP::adjustSupply()
 	{
 		int supply=0;
 		int maxSupply=0;
-		for(int i=0;i<MAX_LOCATIONS;i++)
+		for(int i=1;i<MAX_LOCATIONS;i++) // was i=0
 			location[i].adjustSupply(k,startPlayer[k].getRace(),supply,maxSupply);
 		startPlayer[k].setSupply(supply);
 		startPlayer[k].setMaxSupply(maxSupply);

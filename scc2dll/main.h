@@ -23,14 +23,14 @@ const float CORE_VERSION=0.50;
 #define MIN_GOAL_ENTRIES 0
 
 #define MAX_MINS 5000000
-#define MAX_GAS 5000000
+#define MAX_GAS 5000001
 
 #define MAX_MAPS 25
 #define MIN_MAPS 0
 
 #define MAX_PROGRAMS 128 //must be multiplier of (16*player)
 #define LARVA_MAX 200
-#define UNIT_TYPE_COUNT 201
+#define UNIT_TYPE_COUNT 101
 #define MAX_GOALS 100 // count of possible different goals
 #define MAX_SUPPLY 200
 

@@ -1,47 +1,38 @@
-WXPATH=/home/clawg/temp/wxX/
 PROGRAM=scc2
+DEPENDFILE=.depend
 CXX=g++
 DLLPATH=$(PROGRAM)dll
-OBJDLL=$(DLLPATH)/anarace.o $(DLLPATH)/debug.o $(DLLPATH)/ga.o $(DLLPATH)/goal.o  $(DLLPATH)/harvest.o  $(DLLPATH)/location.o  $(DLLPATH)/map.o  $(DLLPATH)/player.o  $(DLLPATH)/prerace.o  $(DLLPATH)/race.o  $(DLLPATH)/settings.o  $(DLLPATH)/soup.o $(DLLPATH)/building.o $(DLLPATH)/blist.o $(DLLPATH)/default.o $(DLLPATH)/start.o $(DLLPATH)/units.o
+OBJDLL=$(DLLPATH)/anarace.o $(DLLPATH)/debug.o $(DLLPATH)/ga.o $(DLLPATH)/goal.o  $(DLLPATH)/harvest.o  $(DLLPATH)/location.o  $(DLLPATH)/map.o  $(DLLPATH)/player.o  $(DLLPATH)/prerace.o  $(DLLPATH)/race.o  $(DLLPATH)/settings.o  $(DLLPATH)/soup.o $(DLLPATH)/building.o $(DLLPATH)/default.o $(DLLPATH)/start.o $(DLLPATH)/units.o $(DLLPATH)/blist.o
 
-SOURCEDLL=$(DLLPATH)/anarace.cpp $(DLLPATH)/debug.cpp $(DLLPATH)/ga.cpp $(DLLPATH)/goal.cpp  $(DLLPATH)/harvest.cpp  $(DLLPATH)/location.cpp  $(DLLPATH)/map.cpp  $(DLLPATH)/player.cpp  $(DLLPATH)/prerace.cpp  $(DLLPATH)/race.cpp  $(DLLPATH)/settings.cpp  $(DLLPATH)/soup.cpp $(DLLPATH)/building.cpp $(DLLPATH)/blist.cpp $(DLLPATH)/default.cpp $(DLLPATH)/start.cpp $(DLLPATH)/units.cpp
+SOURCEDLL=$(OBJDLL:%.o=%.cpp)
+#$(DLLPATH)/anarace.cpp $(DLLPATH)/debug.cpp $(DLLPATH)/ga.cpp $(DLLPATH)/goal.cpp  $(DLLPATH)/harvest.cpp  $(DLLPATH)/location.cpp  $(DLLPATH)/map.cpp  $(DLLPATH)/player.cpp  $(DLLPATH)/prerace.cpp  $(DLLPATH)/race.cpp  $(DLLPATH)/settings.cpp  $(DLLPATH)/soup.cpp $(DLLPATH)/building.cpp $(DLLPATH)/default.cpp $(DLLPATH)/start.cpp $(DLLPATH)/units.cpp $(DLLPATH)/blist.cpp
 
-OBJMAIN=$(PROGRAM)/scc2.o $(PROGRAM)/UI_Theme.o $(PROGRAM)/UI_Window.o $(PROGRAM)/UI_Button.o $(PROGRAM)/UI_Object.o $(PROGRAM)/list.o $(PROGRAM)/controls.o $(PROGRAM)/bodiagram.o $(PROGRAM)/bograph.o $(PROGRAM)/bowindow.o $(PROGRAM)/force.o $(PROGRAM)/info.o $(PROGRAM)/message.o $(PROGRAM)/player.o $(PROGRAM)/statistics.o $(PROGRAM)/timer.o $(PROGRAM)/util.o $(PROGRAM)/UI_StaticText.o
+OBJMAIN=$(PROGRAM)/scc2.o $(PROGRAM)/defs.o $(PROGRAM)/UI_Theme.o $(PROGRAM)/UI_Window.o $(PROGRAM)/UI_Button.o $(PROGRAM)/UI_Object.o $(PROGRAM)/controls.o $(PROGRAM)/bodiagram.o $(PROGRAM)/bograph.o $(PROGRAM)/bowindow.o $(PROGRAM)/force.o $(PROGRAM)/info.o $(PROGRAM)/message.o $(PROGRAM)/player.o $(PROGRAM)/statistics.o $(PROGRAM)/timer.o $(PROGRAM)/util.o $(PROGRAM)/UI_StaticText.o $(PROGRAM)/mainwindow.o $(PROGRAM)/tutorial.o $(PROGRAM)/corewindow.o
+
+SOURCEMAIN=$(OBJMAIN:%.o=%.cpp)
+
 DLLFLAGS=-DBUILD_DLL
 LIBS=-L./ $(PROGRAM).so.1.0
-RES_PROGRAM_OBJ = $(PROGRAM)_resourcesl.o
 
-EXTRALIBS = -Wl -L/usr/lib -L/usr/X11R6/lib -lX11 
-#-lgdk -rdynamic -lgmodule -lglib -ldl -lXi -lXext -lX11 -lm -lpng -ljpeg -lz -ldl -lm
+CPPFLAGS =
+CXXFLAGS = -g -Wall -D_SCC_DEBUG
 
-DLIBS=$(WXPATH)/lib/libwx_x11univ-2.4.so.0.1.1 $(EXTRALIBS)
-RESFLAGS=--include-dir $(WXPATH)/include --define __WXX11__ --define __UNIX__
-
-CPPFLAGS = -I$(WXPATH)/lib/wx/include/x11univ-2.4 -I$(WXPATH)/include -I/usr/X11R6/include -D__WXUNIVERSAL__ -D__WXX11__ -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -g -D_SCC_DEBUG 
-#-I/usr/include/glib-1.2 -I/usr/lib/glib/include -D_REENTRANT -I/usr/X11R6/include
-
-CXXFLAGS = $(CPPFLAGS) -MMD -Wall
+-include $(DEPENDFILE)
 
 .SUFFIXES: .o .cpp .rc _resources.o
 .rc_resources.o:
 	$(RESCOMP) -i $< -o $@ $(LRESFLAGS)
 
-bin:	$(OBJMAIN)
-	$(CXX) $(CXXFLAGS) -o $(PROGRAM).bin $(OBJMAIN) $(LIBS) $(LDLIBS) $(LIBRARIES) $(WXPATH)/lib/libwx_x11univ-2.4.so.0.1.1
+bin:	$(OBJMAIN) $(OBJHEADER)
+	$(CXX) $(CXXFLAGS) -o $(PROGRAM).bin $(OBJMAIN) $(LIBS) $(LDLIBS) $(LIBRARIES) -lSDL -lSDL_ttf -lSDL_image
 		
-lib:	$(SOURCEDLL)
+lib:	$(SOURCEDLL) $(SOURCEHEADER)
 	$(CXX) $(CXXFLAGS) -fPIC -c $(SOURCEDLL)
 	@mv *.o $(DLLPATH)
 	$(CXX) $(CXXFLAGS) -shared -Wl,-soname,$(PROGRAM).so.1 -o $(PROGRAM).so.1.0 $(SOURCEDLL)
 
-dbin:   $(OBJMAIN)
-	$(CXX) $(CXXFLAGS) -o $(PROGRAM).bin $(OBJMAIN) $(LIBS) $(LDLIBS) $(LIBRARIES) $(WXPATH)/lib/libwx_x11univ-2.4.so.0.1.1
-
-dlib:   $(SOURCEDLL)
-	$(CXX) $(CXXFLAGS) -fPIC -c $(SOURCEDLL)
-	@mv *.o $(DLLPATH)
-	$(CXX) $(CXXFLAGS) -shared -Wl,-soname,$(PROGRAM).so.1 -o $(PROGRAM).so.1.0 $(SOURCEDLL)
-
+dep: $(SOURCEDLL) $(SOURCEMAIN)
+	$(CXX) -MM $(SOURCEDLL) $(SOURCEMAIN) > $(DEPENDFILE)
 	
 clean:
 	@rm -vf ./*.o

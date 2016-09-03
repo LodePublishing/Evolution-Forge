@@ -1,59 +1,56 @@
 #include "message.h"
 
-MessageWindow::MessageWindow(UI_Window* parentWindow):UI_Window(parentWindow, MESSAGE_WINDOW_TITLE_STRING, *theme.lookUpRect(MESSAGE_WINDOW), *theme.lookUpMaxRect(MESSAGE_WINDOW), SCROLLED)
+MessageWindow::MessageWindow(UI_Window* parentWindow):UI_Window(parentWindow, MESSAGE_WINDOW_TITLE_STRING, MESSAGE_WINDOW, SCROLLED)
 {
-        resetData();
+//        resetData();
 };
                                                                                                                                                             
 MessageWindow::~MessageWindow()
 {
 };
                                                                                                                                                             
-void MessageWindow::resetData()
+void MessageWindow::addMessage(string bla)
 {
-        msgCount=0;
-        for(int i=0;i<1000;i++)
-        {
-                message[i].type=0;
-                message[i].col=0;
-                message[i].string=_T("");
-        }
-};
-                                                                                                                                                            
-void MessageWindow::addMessage(wxString bla)
-{
+	if(!shown) return;
 //        setScrollY(0); TODO
-        message[msgCount].col=155;
-        message[msgCount].type=1;
-        message[msgCount].string=bla;
-        msgCount++;
+	Message msg;
+	msg.col=155;
+	msg.type=1;
+	msg.string=bla;
+	message.push_back(msg);
+	if(message.size()>5)
+		message.pop_front();
 };
 
 void MessageWindow::process()
 {
+	if(!shown) return;
 	UI_Window::process();
 };
                                                                                                                                                             
-void MessageWindow::draw(wxDC* dc)
+void MessageWindow::draw(DC* dc)
 {
+	if(!shown) return;
 	UI_Window::draw(dc);
         int t;
         t=0;
-        dc->SetFont(*theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
-        for(int i=msgCount;i--;)
-                if(message[i].type>0)
-                {
-                        dc->SetTextForeground(wxColour(100+message[i].col,100+message[i].col,255));
-                        if(message[i].col>5) message[i].col-=message[i].col/5+1;
-                        else message[i].col=0;
-                        wxRect edge=wxRect(getClientRectPosition()+wxPoint(5,8+t*(FONT_SIZE+5)-getScrollY()),wxSize(getClientRectWidth(),FONT_SIZE+5));
-                        if(fitItemToClientRect(edge))
+        dc->SetFont(theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
+		for(list<Message>::iterator m=message.begin(); m!=message.end(); ++m)
+			if(m->type>0)
+			{
+//                        dc->SetTextForeground(dc->doColor(100+m->col,100+m->col,255)); TODO
+                        if(m->col>5) m->col-=m->col/5+1;
+                        else m->col=0;
+                        Rect edge=Rect(getAbsoluteClientRectPosition()+Point(5,8+t*(FONT_SIZE+5)-getScrollY()),Size(getClientRectWidth(),FONT_SIZE+5));
+                        if(fitItemToAbsoluteClientRect(edge))
                         {
 //                              dc->DrawBitmap(hintBitmap,edge.x,edge.y);
-                                dc->SetPen(wxPen(wxColour(20,20,20),1,wxSOLID));
-                                dc->SetBrush(wxBrush(wxColour(30,30,30),wxSOLID));
-                                dc->DrawRoundedRectangle(edge,3);
-                                dc->DrawText(message[i].string,edge.x,edge.y);
+  //                              dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
+										//Pen(dc->doColor(20,20,20),1,SOLID_PEN_STYLE));
+//                                dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
+										//Brush(dc->doColor(30,30,30),SOLID_BRUSH_STYLE));
+//                                dc->DrawRoundedRectangle(edge,3);
+                                dc->DrawText(m->string, edge.GetPosition());
                         }
                         t++;
                 }

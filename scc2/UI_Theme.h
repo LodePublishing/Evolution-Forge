@@ -1,12 +1,15 @@
 #ifndef __UI_THEME_H
 #define __UI_THEME_H
 
-#include "wx/wx.h"
+#include "defs.h"
+//#include <string>
 
 #define FONT_SIZE 7 
 // TODO!!!
 
 #define MIN_DISTANCE 3
+
+using std::string;
 
 // ------ DATA TYPES ------
 enum eDataType
@@ -112,14 +115,14 @@ enum eFont
 	MIDDLE_NORMAL_BOLD_FONT,
 	LARGE_NORMAL_BOLD_FONT,
 	VERY_LARGE_NORMAL_BOLD_FONT,
-	HUGE_DEFAULT_BOLD_FONT,
+	HUGE_DEFAULT_BOLD_FONT, //TODO
 
 	MAX_FONTS
 };
 // ------ END FONTS ------
 
 // ------ COLOURS ------
-enum eColour
+enum eColor
 {
 	NULL_COLOUR,
 	TEXT_COLOUR,
@@ -149,6 +152,17 @@ enum eColour
 /*	MINERALS_COLOUR,
 	GAS_COLOUR,
 	SUPPLY_COLOUR,*/
+
+// bograph time steps font color
+	TIMESTEPS_TEXT_COLOUR,	
+
+// statistics window
+	STATISTICS_FORCE_TEXT_COLOUR,
+	TIME_TEXT_COLOUR,
+	FITNESS_AVERAGE_TEXT_COLOUR,
+	FITNESS_VARIANCE_TEXT_COLOUR,	
+	BOLENGTH_TEXT_COLOUR,
+	GENERATIONS_LEFT_TEXT_COLOUR,
 
 	MAX_COLOURS
 };
@@ -182,6 +196,34 @@ enum ePen
 	MARKED_BITMAP_YELLOW_PEN,
 	MARKED_BITMAP_RED_PEN,
 	MARKED_BITMAP_BASIC_PEN,
+// bodiagram
+	BODIAGRAM_SUPPLY_PEN,
+	BODIAGRAM_MINERALS_PEN,
+	BODIAGRAM_GAS_PEN,
+
+    UNIT_TYPE_0_PEN,
+    UNIT_TYPE_1_PEN,
+    UNIT_TYPE_2_PEN,
+    UNIT_TYPE_3_PEN,
+    UNIT_TYPE_4_PEN,
+    UNIT_TYPE_5_PEN,
+    UNIT_TYPE_6_PEN,
+    UNIT_TYPE_7_PEN,
+    UNIT_TYPE_8_PEN,
+    UNIT_TYPE_9_PEN,
+    UNIT_TYPE_10_PEN,
+                                                                                                                 
+    BRIGHT_UNIT_TYPE_0_PEN,
+    BRIGHT_UNIT_TYPE_1_PEN,
+    BRIGHT_UNIT_TYPE_2_PEN,
+    BRIGHT_UNIT_TYPE_3_PEN,
+    BRIGHT_UNIT_TYPE_4_PEN,
+    BRIGHT_UNIT_TYPE_5_PEN,
+    BRIGHT_UNIT_TYPE_6_PEN,
+    BRIGHT_UNIT_TYPE_7_PEN,
+    BRIGHT_UNIT_TYPE_8_PEN,
+    BRIGHT_UNIT_TYPE_9_PEN,
+    BRIGHT_UNIT_TYPE_10_PEN,
 	
 	MAX_PENS
 };
@@ -226,7 +268,14 @@ enum eBrush
 	BRIGHT_UNIT_TYPE_10_BRUSH,
 
 	CONTINUE_BUTTON_BRUSH,
+	BRIGHT_CONTINUE_BUTTON_BRUSH,
+
+	BODIAGRAM_BACK1,
+	BODIAGRAM_BACK2,
+	BODIAGRAM_BAR,
 	
+// statistics window
+	GENERATIONS_LEFT_BRUSH,	
 
 	MAX_BRUSHES
 };
@@ -318,6 +367,16 @@ enum eString
     GOSU_COMPUTER_MODE_STRING,
     TRANSCENDEND_COMPUTER_MODE_STRING,
 	ERROR_MODE_STRING,
+// Tabs
+    ZERO_TAB_STRING,
+    BASIC_TAB_STRING,
+    ADVANCED_TAB_STRING,
+    EXPERT_TAB_STRING,
+    GOSU_TAB_STRING,
+    TRANSCENDEND_TAB_STRING,
+    MAP_TAB_STRING,
+    SETTINGS_TAB_STRING,
+    TUTORIAL_TAB_STRING,
 	
 	MAX_STRINGS
 };
@@ -369,7 +428,6 @@ enum eWindow
 };
 // ------ END GENERAL RECTANGLES ------
 
-
 enum eTab
 {
 	ZERO_TAB,
@@ -383,6 +441,15 @@ enum eTab
     TUTORIAL_TAB,
     MAX_TABS
 };
+
+enum eArrangeDirection
+{
+	ARRANGE_LEFT_TO_RIGHT,
+	ARRANGE_RIGHT_TO_LEFT,
+	ARRANGE_TOP_TO_DOWN,
+	ARRANGE_DOWN_TO_TOP
+};
+
 
 enum eCommand
 {
@@ -420,6 +487,20 @@ enum eButton
 	TERRA_BUTTON,
 	PROTOSS_BUTTON,
 	ZERG_BUTTON,*/
+
+    UNIT_TYPE_0_BUTTON,
+    UNIT_TYPE_1_BUTTON,
+    UNIT_TYPE_2_BUTTON,
+    UNIT_TYPE_3_BUTTON,
+    UNIT_TYPE_4_BUTTON,
+    UNIT_TYPE_5_BUTTON,
+    UNIT_TYPE_6_BUTTON,
+    UNIT_TYPE_7_BUTTON,
+    UNIT_TYPE_8_BUTTON,
+    UNIT_TYPE_9_BUTTON,
+    UNIT_TYPE_10_BUTTON,
+
+	TAB_BUTTON,
 	
 	MAX_BUTTONS
 };
@@ -441,16 +522,18 @@ enum eButtonAnimationType
     NO_ANIMATION,
     JUMPY_COLOURS_ANIMATION, // gets bright and jumps back
     GLOWING_ANIMATION, // back and forth
-    BLINKING_ANIMATION // jumps between start and end colours
+    BLINKING_ANIMATION // jumps between start and end colors
 };
-                                                                                                                                                            
+
+
+
 struct ButtonAnimation
 {
     eBrush startBrush[MAX_BUTTON_ANIMATION_PHASES];
     eBrush endBrush[MAX_BUTTON_ANIMATION_PHASES];
                                                                                                                                                             
-    eColour startTextColour[MAX_BUTTON_ANIMATION_PHASES];
-    eColour endTextColour[MAX_BUTTON_ANIMATION_PHASES];
+    eColor startTextColor[MAX_BUTTON_ANIMATION_PHASES];
+    eColor endTextColor[MAX_BUTTON_ANIMATION_PHASES];
                                                                                                                                                             
     ePen startBorderPen[MAX_BUTTON_ANIMATION_PHASES];
     ePen endBorderPen[MAX_BUTTON_ANIMATION_PHASES];
@@ -468,73 +551,76 @@ class UI_Theme
         UI_Theme();
         ~UI_Theme();
         
-		eLanguage getLanguage();
-        void setLanguage(eLanguage language);
+		const eLanguage getLanguage() const;
+        void setLanguage(const eLanguage language);
 
-		eTheme getColourTheme();
-		void setColourTheme(eTheme colourTheme);
+		const eTheme getColorTheme() const;
+		void setColorTheme(const eTheme colorTheme);
 		
-		eResolution getResolution();
-		void setResolution(eResolution resolution);
+		const eResolution getResolution() const;
+		void setResolution(const eResolution resolution);
 
-		eTab getTab();
-		void setTab(eTab tab);	
+		const eTab getTab() const;
+		void setTab(const eTab tab);	
 
-		void loadDataFiles(); //currently all data hard coded, move it to file later! TODO
+		void loadDataFiles(DC* dc); //currently all data hard coded, move it to file later! TODO
 
-        wxString* lookUpString(eString id);
-		wxString lookUpFormattedString(eString id, ...);
-        wxColour* lookUpColour(eColour id);
-        wxBitmap* lookUpBitmap(eBitmap id);
-        wxPen* lookUpPen(ePen id);
-        wxBrush* lookUpBrush(eBrush id);
-        wxFont* lookUpFont(eFont id);
+        const string* lookUpString(const eString id) const;
+		const string lookUpFormattedString(const eString id, const string& text) const;
+		const string lookUpFormattedString(const eString id, const int i) const;
+		const string lookUpFormattedString(const eString id, const int i, const int j) const;
+		const string lookUpFormattedString(const eString id, const int i, const int j, const int k) const;
+        Color* lookUpColor(const eColor id) const;
+        const Bitmap* lookUpBitmap(const eBitmap id) const;
+        Pen* lookUpPen(const ePen id) const;
+        Brush* lookUpBrush(const eBrush id) const;
+        Font* lookUpFont(const eFont id) const;
 		
-		wxRect* lookUpRect(eWindow id);
-		wxRect* lookUpMaxRect(eWindow id);
+		const Rect lookUpRect(const eWindow id, int windowNumber=0) const;
+		const Rect lookUpMaxRect(const eWindow id, int windowNumber=0) const;
 
-		ButtonAnimation* lookUpButtonAnimation(eButton id);
+		const ButtonAnimation* lookUpButtonAnimation(const eButton id) const;
 		
 // tools:
-		wxColour mixColour(wxColour* id1, wxColour* id2);
-		wxColour mixColour(wxColour* id1, wxColour* id2, int gradient);
-		wxColour brightenColour(wxColour* id, int brightness);
+		const Color mixColor(const Color* id1, const Color* id2);
+		const Color mixColor(const Color* id1, const Color* id2, const int gradient);
+		const Color brightenColor(const Color* id, const int brightness);
 
+		const Color lookUpMixedColor(const eColor id1, const eColor id2);
+		const Color lookUpMixedColor(const eColor id1, const eColor id2, const int gradient);
+		Color lookUpBrightenedColor(const eColor id, const int brightness);
 
-		wxColour lookUpMixedColour(eColour id1, eColour id2);
-		wxColour lookUpMixedColour(eColour id1, eColour id2, int gradient);
-		wxColour lookUpBrightenedColour(eColour id, int brightness);
+		const Brush lookUpMixedBrush(const eBrush id1, const eColor id2);
+		const Brush lookUpMixedBrush(const eBrush id1, const eColor id2, const int gradient);
+		const Brush lookUpMixedBrush(const eBrush id1, const eBrush id2);
+		const Brush lookUpMixedBrush(const eBrush id1, const eBrush id2, const int gradient);
+		Brush lookUpBrightenedBrush(eBrush id, int brightness);
 
-
-		wxBrush lookUpMixedBrush(eBrush id1, eColour id2);
-		wxBrush lookUpMixedBrush(eBrush id1, eColour id2, int gradient);
-		wxBrush lookUpMixedBrush(eBrush id1, eBrush id2);
-		wxBrush lookUpMixedBrush(eBrush id1, eBrush id2, int gradient);
-		wxBrush lookUpBrightenedBrush(eBrush id, int brightness);
-
-		wxPen lookUpMixedPen(ePen id1, eColour id2);
-		wxPen lookUpMixedPen(ePen id1, eColour id2, int gradient);
-		wxPen lookUpMixedPen(ePen id1, ePen id2);
-		wxPen lookUpMixedPen(ePen id1, ePen id2, int gradient);
-		wxPen lookUpBrightenedPen(ePen id, int brightness);
-
-		
+		const Pen lookUpMixedPen(const ePen id1, const eColor id2);
+		const Pen lookUpMixedPen(const ePen id1, const eColor id2, const int gradient);
+		const Pen lookUpMixedPen(const ePen id1, const ePen id2);
+		const Pen lookUpMixedPen(const ePen id1, ePen id2, const int gradient);
+		const Pen lookUpBrightenedPen(const ePen id, const int brightness);
 
     private:
 //memory issue: load maybe all data after a change! TODO
  		eResolution resolution;
 		eTab tab;
         eLanguage language;
-		eTheme colourTheme;
+		eTheme colorTheme;
 		
-        wxString* stringList[MAX_LANGUAGES][MAX_STRINGS];
-        wxColour* colourList[MAX_COLOUR_THEMES][MAX_COLOURS];
-        wxBitmap* bitmapList[MAX_RESOLUTIONS][MAX_COLOUR_THEMES][MAX_BITMAPS];
-		wxPen* penList[MAX_RESOLUTIONS][MAX_COLOUR_THEMES][MAX_PENS];
-        wxBrush* brushList[MAX_COLOUR_THEMES][MAX_BRUSHES];
-		wxRect* rectList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
-		wxRect* maxRectList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
-		wxFont* fontList[MAX_RESOLUTIONS][MAX_LANGUAGES][MAX_FONTS];
+        string* stringList[MAX_LANGUAGES][MAX_STRINGS];
+        Color* colorList[MAX_COLOUR_THEMES][MAX_COLOURS];
+        Bitmap* bitmapList[MAX_RESOLUTIONS][MAX_COLOUR_THEMES][MAX_BITMAPS];
+		Pen* penList[MAX_RESOLUTIONS][MAX_COLOUR_THEMES][MAX_PENS];
+        Brush* brushList[MAX_COLOUR_THEMES][MAX_BRUSHES];
+
+		Rect* rectList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
+		Rect* maxRectList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
+
+		eArrangeDirection arrangeDirection[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
+
+		Font* fontList[MAX_RESOLUTIONS][MAX_LANGUAGES][MAX_FONTS];
 		ButtonAnimation* buttonAnimationList[MAX_BUTTONS];
 };
 

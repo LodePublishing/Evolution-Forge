@@ -1,7 +1,7 @@
 #include "timer.h"
 #include "UI_Theme.h"
 
-TimerWindow::TimerWindow(UI_Object* parent, wxRect rahmen, wxRect maxSize, ANARACE* anarace):UI_Window(parent, TIMER_WINDOW_TITLE_STRING, rahmen,maxSize,NOT_SCROLLED)
+TimerWindow::TimerWindow(UI_Object* parent, ANARACE* anarace, const int windowNumber):UI_Window(parent, TIMER_WINDOW_TITLE_STRING, TIMER_WINDOW, windowNumber, NOT_SCROLLED)
 {
 	this->anarace=anarace;
 
@@ -9,7 +9,7 @@ TimerWindow::TimerWindow(UI_Object* parent, wxRect rahmen, wxRect maxSize, ANARA
 	currentActionText = new UI_StaticText(this, getRelativeClientRect(), UPPER_CENTERED_TEXT_MODE, LARGE_NORMAL_BOLD_FONT, IMPORTANT_COLOUR);
 	timeText = new UI_StaticText(this, getRelativeClientRect(), LOWER_CENTERED_TEXT_MODE, VERY_LARGE_NORMAL_BOLD_FONT, IMPORTANT_COLOUR);
 
-	continueButton = new UI_Button(this, getRelativeClientRect(), getRelativeClientRect(), CLICK_TO_CONTINUE_STRING, CLICK_TO_PAUSE_STRING, MY_BUTTON, STATIC_BUTTON_MODE, BOTTOM_CENTER, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH);
+	continueButton = new UI_Button(this, getRelativeClientRect(), getRelativeClientRect(), CLICK_TO_CONTINUE_STRING, CLICK_TO_PAUSE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, BOTTOM_CENTER, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH);
 			
 	resetData();
 };
@@ -36,12 +36,11 @@ void TimerWindow::resetData()
 
 void TimerWindow::process()
 {
+	if(!shown) return;
 	UI_Window::process();
 
-	if(continueButton->isJustPressed() || continueButton->isJustReleased())
-		anarace->setOptimizing(continueButton->isCurrentlyPressed());
-//	else if(continueButton->isJustReleased())
-//		anarace->setOptimizing(false);
+//	if(continueButton->isJustPressed() || continueButton->isJustReleased()) //~~
+	anarace->setOptimizing(continueButton->isCurrentlyPressed());
 	
 	if(getCurrentMode()==1)
 	{																    
@@ -73,11 +72,11 @@ void TimerWindow::process()
 	for(int i=0;i<20;i++)
 		if(oldTimeCounter[i]>0)
 		{
-			dc->SetTextForeground(wxColour(160-oldTimeCounter[i]*8,0,0));
+			dc->SetTextForeground(Colour(160-oldTimeCounter[i]*8,0,0));
 			dc->SetFont(*theme.lookUpFont(VERY_LARGE_NORMAL_BOLD_FONT));
-//wxFont(30,wxDECORATIVE,wxNORMAL,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT));
+//Font(30,DECORATIVE,NORMAL,BOLD,false,_T(""),FONTENCODING_DEFAULT));
 																			    
-			wxString bla=_T(wxString::Format(wxT("[%.2i:%.2i]"),oldTime[i]/60,oldTime[i]%60));
+			String bla=_T(String::Format(T("[%.2i:%.2i]"),oldTime[i]/60,oldTime[i]%60));
 			int dx,dy;
 			dc->GetTextExtent(bla,&dx,&dy);
 																			    
@@ -106,7 +105,9 @@ void TimerWindow::process()
             currentActionText->updateText(PAUSED_STRING);
         else
             currentActionText->updateText(OPTIMIZING_STRING);
-		timeText->updateText(_T(wxString::Format(wxT("[%.2i:%.2i]"),(anarace->ga->maxTime-anarace->getTimer())/60,(anarace->ga->maxTime-anarace->getTimer())%60)));
+		ostringstream os;
+		os << "[" << (anarace->ga->maxTime-anarace->getTimer())/60 << ":" << (anarace->ga->maxTime-anarace->getTimer())%60 << "]";
+		timeText->updateText(os.str());
 	}
 
 	}
@@ -133,9 +134,8 @@ int TimerWindow::getCurrentMode()
 	return(mode);
 };
 
-void TimerWindow::draw(wxDC* dc)
+void TimerWindow::draw(DC* dc)
 {
+	if(!shown) return;
 	UI_Window::draw(dc);
-	if(!isShown())
-		return;
 }

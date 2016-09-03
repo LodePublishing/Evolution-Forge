@@ -2,24 +2,27 @@
 #define __MESSAGE_H
 
 #include "UI_Window.h"
+#include <list>
+using std::list;
+
+struct Message
+{
+	int type;
+	string string;
+	int col;
+};
 
 class MessageWindow:public UI_Window
 {
         public:
                 MessageWindow(UI_Window* parentWindow);
                 ~MessageWindow();
-                void addMessage(wxString bla);
+                void addMessage(string bla);
                 void resetData();
 				void process();
-                void draw(wxDC* dc);
-        private:
-                struct Message
-                {
-                        int type;
-                        wxString string;
-                        int col;
-                } message[1000];
-                int msgCount;
+		void draw(DC* dc);
+	private:
+		list <Message> message;
 };
 
 #endif

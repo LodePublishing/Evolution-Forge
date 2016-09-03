@@ -1045,30 +1045,27 @@ int EXPORT ANARACE::calculateStep()
 		}
 	}
 
-/*	int t=getTimer();*/
-	BNODE *node=buildingList.GetFirst();
+	int t=getTimer();
+	BNODE *node=buildingList.GetHead();
 	Building* build=0;
-	if(node)
-	{
-		build=(Building*)node->GetData();
-//		int buildingRemaining=build->getRemainingBuildTime();
-//		if(t>buildingRemaining) t=buildingRemaining;
-	};
-/*	if((harvestGas()>0)&&((harvestMinerals()==0)||(neededGas+(harvestGas()-neededGas%harvestGas()))/harvestGas() < (neededMinerals+(harvestMinerals()-neededMinerals%harvestMinerals()))/harvestMinerals()))
-	{
-		int gasRemaining=(neededGas+(harvestGas()-neededGas%harvestGas()))/harvestGas();
-		if(t>gasRemaining) t=gasRemaining;
-	}
-	else if(harvestMinerals()>0)
-	{
-		int mineralsRemaining=(neededMinerals+(harvestMinerals()-neededMinerals%harvestMinerals()))/harvestMinerals();
-		if(t>mineralsRemaining) t=mineralsRemaining;
-	}
-	if(t>getTimeOut()) t=getTimeOut();
-//		if((getTimeOut()>1)&&(t==getTimeOut()))
-  //			  t=getTimeOut()-1;
-	*/
-	int t=1;
+    if(node)
+    {
+		build=node->GetData();
+//        int buildingRemaining=min_element(buildingList.begin(),buildingList.end()).second.getRemainingBuildTime();
+        int buildingRemaining=build->getRemainingBuildTime();
+        if(t>buildingRemaining) t=buildingRemaining;
+    }
+    if((harvestGas()>0)&&((harvestMinerals()==0)||(neededGas+(harvestGas()-neededGas%harvestGas()))/harvestGas() < (neededMinerals+(harvestMinerals()-neededMinerals%harvestMinerals()))/harvestMinerals()))
+    {
+        int gasRemaining=(neededGas+(harvestGas()-neededGas%harvestGas()))/harvestGas();
+        if(t>gasRemaining) t=gasRemaining;
+    }
+    else if(harvestMinerals()>0)
+    {
+        int mineralsRemaining=(neededMinerals+(harvestMinerals()-neededMinerals%harvestMinerals()))/harvestMinerals();
+        if(t>mineralsRemaining) t=mineralsRemaining;
+    }
+    if(t>getTimeOut()) t=getTimeOut();
 		int mult=0;
 		for(int i=getTimer()-t;i<getTimer();i++)
 		{
@@ -1082,12 +1079,10 @@ int EXPORT ANARACE::calculateStep()
 	
 	setTimeOut(getTimeOut()-t);
 	setTimer(getTimer()-t);
-
-
 	while(node)
 	{
-		BNODE* oldnode=node;
-		node=node->GetNext();
+        BNODE* oldnode=node;
+        node=node->GetNext();
 		build->setRemainingBuildTime(build->getRemainingBuildTime()-t);
 		if(!build->getRemainingBuildTime())
 		{
@@ -1237,8 +1232,14 @@ int EXPORT ANARACE::calculateStep()
 
 			ready=calculateReady();
 			buildingList.DeleteNode(oldnode);
-		}
-		if(node) build=(Building*)node->GetData();
+/*            map<int, Building>::iterator temp=buildNode;
+            temp++;
+            buildingList.erase(buildNode);
+            buildNode=temp;*/
+		} // end while(getremainingbuildorder) ~|~
+		if(node)
+			build=(Building*)node->GetData();
+//		else buildNode++;
 	} //end while
 //TODO: Alles rausschmeissen, was schon von race berechnet wurde!
 	
@@ -1411,28 +1412,40 @@ int ANARACE::buildGene(int unit)
                                                                                                                                                             
                         };
                     };
-				BNODE *node=NULL;
-				for (node = buildingList.GetFirst();node&&((node->GetData())->getRemainingBuildTime()<stat->BT/*+3200*(stat->facility2==unit)*/);node = node->GetNext());
-				Building* build=new Building();
-				if(node&&((node->GetData())->getRemainingBuildTime()>=stat->BT/*+3200*(stat->facility2==unit)*/))
-					buildingList.Insert(node,build);
-				else if(!node) buildingList.Append(build);
-				else debug.toLog(0,"argh");
-																				
-				build->setOnTheRun(0);
-				build->setFacility(stat->facility[fac]);
-				build->setLocation(tloc);
-				build->setUnitCount(1);
-				build->setRemainingBuildTime(stat->BT/*+3200*(stat->facility2==unit)*/); //~~ hack :/ TODO ???????????? SINN?
-				build->setTotalBuildTime(build->getRemainingBuildTime());
-				build->setType(unit);
+					
+				/*Building build;
+				build.setOnTheRun(0);
+				build.setFacility(stat->facility[fac]);
+				build.setLocation(tloc);
+				build.setUnitCount(1);
+				build.setRemainingBuildTime(stat->BT/*+3200*(stat->facility2==unit)*///); //~~ hack :/ TODO ???????????? SINN?
+//				build.setTotalBuildTime(build.getRemainingBuildTime());
+//				build.setType(unit);
 
+					 BNODE *node=NULL;
+                    for (node = buildingList.GetTail();node&&(((Building*)node->GetData())->getRemainingBuildTime()<stat->BT/*+3200*(stat->facility2==unit)*/);node = node->GetPrev());
+                    Building* build=new Building();
+                    if(node&&(((Building*)node->GetData())->getRemainingBuildTime()>=stat->BT/*+3200*(stat->facility2==unit)*/))
+                        buildingList.Insert(node,build);
+                    else if(!node) buildingList.Append(build);
+
+                    build->setOnTheRun(0);
+                    build->setFacility(stat->facility[fac]);
+                    build->setLocation(tloc);
+                    build->setUnitCount(1);
+                    build->setRemainingBuildTime(stat->BT/*+3200*(stat->facility2==unit)*/); //~~ hack :/ TODO SINN???????
+                    build->setTotalBuildTime(build->getRemainingBuildTime());
+                    build->setType(unit);
+
+					
 				setMins(getMins()-(stat->mins+stat->upgrade_cost*getLocationForce(0,unit)));
 				setGas(getGas()-(stat->gas+stat->upgrade_cost*getLocationForce(0,unit)));
 				if((stat->supply>0)||((pStats[stat->facility[0]].supply<0)&&(stat->facilityType==IS_LOST))) 
 					setSupply(getSupply()-stat->supply);
 				adjustAvailibility(tloc,fac,stat);
-				build->setIP(getIP()); //?
+			    build->setIP(getIP());
+				
+//				buildingList.insert(pair<int, Building>(stat->BT/*+3200*(stat->facility2==unit)*/, build));
 			} //kk!=1?
 		} // if resources prere etc ok
 	}

@@ -2,18 +2,61 @@
 #include "util.h"
 #include "UI_Theme.h"
 
-BoWindow::BoWindow(UI_Object* parent, wxRect rahmen, wxRect maxSize, ANARACE* anarace, InfoWindow* infoWindow, OrderList* orderList):UI_Window(parent, BOWINDOW_TITLE_STRING, rahmen,maxSize, SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, wxRect(0,50,1000,1000))
+BoEntry::BoEntry(UI_Object* parent, Rect rect, Rect maxRect, string unit):UI_Button(parent, rect, maxRect, unit, unit, FORCE_ENTRY_BUTTON, NO_TEXT_MODE, NO_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE)
+    // TODO!
 {
-//	addButton(wxRect(getClientRectLeftBound()+getWidth()-48,getClientRectUpperBound()-30,12,12), 0, PERM_BUTTON);
-//	addButton(wxRect(getClientRectLeftBound()+getWidth()-48,getClientRectUpperBound()-15,12,12), 0, PERM_BUTTON);
+/*    addUnit = new UI_Button(this, Rect(Point(getWidth()-117,2),Size(8,8)), Rect(Point(0,0),getSize()), ADD_BUTTON, PRESS_BUTTON_MODE);
+    subUnit = new UI_Button(this, Rect(Point(getWidth()-107,2),Size(8,8)), Rect(Point(0,0),getSize()), SUB_BUTTON, PRESS_BUTTON_MODE);
+    cancelUnit = new UI_Button(this, Rect(Point(getWidth()-97,2),Size(8,8)), Rect(Point(0,0),getSize()), CANCEL_BUTTON, PRESS_BUTTON_MODE);*/
+};
+
+                                                                                                                                                           
+BoEntry::~BoEntry()
+{
+/*    if(addUnit)
+        delete(addUnit);
+    if(subUnit)
+        delete(subUnit);
+    if(cancelUnit)
+        delete(cancelUnit);*/
+};
+                                                                                                                                                            
+int BoEntry::changed()
+{
+//    if(addUnit->isPressed()) return(1);
+  //  if(subUnit->isPressed()) return(2);
+//    if(cancelUnit->isPressed()) return(3);
+    return(0);
+};
+                                                                                                                                                            
+void BoEntry::updateText(string utext)
+{
+    updateNormalText(utext);
+    updatePressedText(utext);
+};
+                                                                                                                                                            
+BoWindow::BoWindow(UI_Object* parent, ANARACE* anarace, InfoWindow* infoWindow, map <long, Order>* orderList, const int windowNumber):UI_Window(parent, BOWINDOW_TITLE_STRING, BUILD_ORDER_WINDOW, windowNumber, SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0,50,1000,1000))
+{
+//	addButton(Rect(getClientRectLeftBound()+getWidth()-48,getClientRectUpperBound()-30,12,12), 0, PERM_BUTTON);
+//	addButton(Rect(getClientRectLeftBound()+getWidth()-48,getClientRectUpperBound()-15,12,12), 0, PERM_BUTTON);
 	this->orderList=orderList;
 	this->infoWindow=infoWindow;
 	this->anarace=anarace;
 	resetData();
+    for(int i=MAX_LENGTH;i--;)
+    {
+        boEntry[i]=new BoEntry(this, Rect(getRelativeClientRectPosition()+Point(400,400), Size(getClientRectWidth(),FONT_SIZE+5)),
+                Rect(getRelativeClientRectPosition(), getClientRectSize()+Size(0, getMaxRect().height)),  // max size -y? TODO
+                        stats[anarace->getPlayer()->getGoal()->getRace()][i].name);
+        boEntry[i]->Hide();
+    };
 };
 
 BoWindow::~BoWindow()
 {
+    for(int i=MAX_LENGTH;i--;)
+        if(boEntry[i])
+            delete boEntry[i]; 
 };
 
 void BoWindow::resetData()
@@ -23,25 +66,14 @@ void BoWindow::resetData()
 	boEndPoint=-1;
 	boGoalListOpened=0;
 	optimizeMode=0;
-	resetButtons();
 	markedUnit=0;
 //	for(i=0;i<MAX_LENGTH;i++)
 //		selection[i]=1;
 };
 
-void BoWindow::resetButtons()
+void BoWindow::draw(DC* dc)
 {
-	for(int i=0;i<2*MAX_LENGTH;i++) //? TODO ???
-	{
-		optButton[i]=9999;
-		unitButton[i]=9999;
-		orderButton[i]=9999;	
-	}
-	makeSpaceButton=99999;
-};
-
-void BoWindow::draw(wxDC* dc)
-{
+	if(!shown) return;
 	UI_Window::draw(dc);
 
 	drawSelectionStuff(dc);
@@ -52,40 +84,39 @@ void BoWindow::draw(wxDC* dc)
 	for(int i=UNIT_TYPE_COUNT;i--;)
 		tempForceCount[i]=0;
 	boEndPoint=0;
-	resetButtons();
 
-	if((orderList->getMakeSpace()>-1)&&(boGoalListOpened==0))
+	/*if((orderList->getMakeSpace()>-1)&&(boGoalListOpened==0))
 	{
-		dc->SetTextForeground(wxColour(0,200,0));
-		dc->DrawText(*theme.lookUpString(CLICK_TO_INSERT_ORDER_STRING),getClientRectPosition()+wxPoint(0,orderList->getMakeSpace()*(FONT_SIZE+5)-getScrollY()));
-	}
+		dc->SetTextForeground(dc->doColor(0,200,0));
+		dc->DrawText(*theme.lookUpString(CLICK_TO_INSERT_ORDER_STRING),getClientRectPosition()+Point(0,orderList->getMakeSpace()*(FONT_SIZE+5)-getScrollY()));
+	}*/ // TODO
 
-	dc->SetPen(wxPen(wxColour(0,0,0),1,wxSOLID));
+	dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
 	if(boInsertPoint>-1)
 	{
 		int line=boInsertPoint;
-		wxRect edge=wxRect(getRelativeClientRectPosition()+wxPoint(0,line*(FONT_SIZE+5)-getScrollY()),wxSize(270,FONT_SIZE+4));
-		if(fitItemToClientRect(edge,1))
+		Rect edge=Rect(getAbsoluteClientRectPosition()+Point(0,line*(FONT_SIZE+5)-getScrollY()),Size(270,FONT_SIZE+4));
+		if(fitItemToAbsoluteClientRect(edge,1))
 		{
 			int bright=0;
 					if(edge.Inside(controls.getCurrentPosition()))
 				bright=50;
 			//if(t%2==0)
-				dc->SetBrush(theme.lookUpBrightenedBrush(FORCE_LIST_BUTTON_BRUSH, bright));
+				dc->SetBrush(Brush(dc->brightenColor(theme.lookUpBrush(FORCE_LIST_BUTTON_BRUSH)->GetColor(), bright), theme.lookUpBrush(FORCE_LIST_BUTTON_BRUSH)->GetStyle()));
 			//else
-				//dc->SetBrush(wxBrush(wxColour(COLOR2R,COLOR2G,COLOR2B),wxSOLID));
-																				
+			//dc->SetBrush(Brush(dc->doColor(COLOR2R,COLOR2G,COLOR2B),SOLID));
 			dc->DrawRoundedRectangle(edge,4);
-			dc->SetTextForeground(wxColour(0+bright,200+bright,0+bright)); //TODO
+//			brightenColor(FORCE_ADD_GOAL_TEXT_COLOUR,bright); TODO
+//			dc->SetTextForeground(dc->doColor(0+bright,200+bright,0+bright)); //TODO
 			if(boGoalListOpened==1)
 			{
-				dc->DrawBitmap(*theme.lookUpBitmap(ARROW_UP_BITMAP), edge.x+4,edge.y+2);
-				dc->DrawText(*theme.lookUpString(CLICK_TO_CLOSE_STRING),edge.x+14,edge.y);
+				dc->DrawBitmap(*theme.lookUpBitmap(ARROW_UP_BITMAP), edge.GetPosition()+Point(4,2));
+				dc->DrawText(*theme.lookUpString(CLICK_TO_CLOSE_STRING), edge.GetPosition()+Point(14,0));
 			}
 			else
 			{
-				dc->DrawBitmap(*theme.lookUpBitmap(ARROW_UP_BITMAP), edge.x+4,edge.y+2);
-				dc->DrawText(*theme.lookUpString(CLICK_TO_GO_BACK_STRING),edge.x+14,edge.y);
+				dc->DrawBitmap(*theme.lookUpBitmap(ARROW_UP_BITMAP), edge.GetPosition()+Point(4,2));
+				dc->DrawText(*theme.lookUpString(CLICK_TO_GO_BACK_STRING),edge.GetPosition()+Point(4,2));
 			}
 //			unitButton[line]=addButton(edge); TODO
 		}
@@ -94,17 +125,17 @@ void BoWindow::draw(wxDC* dc)
 		{
 			for(int i=1;i<11;i++)
 			{
-				wxRect edge=wxRect(getRelativeClientRectPosition()+wxPoint(10,line*(FONT_SIZE+5)-getScrollY()),wxSize(270,FONT_SIZE+4));
+				Rect edge=Rect(getAbsoluteClientRectPosition()+Point(10,line*(FONT_SIZE+5)-getScrollY()),Size(270,FONT_SIZE+4));
 				int bright=0;
-								if(edge.Inside(controls.getCurrentPosition()))
-										bright=50;
-				lastBogoal=edge.GetY();
-				if(fitItemToClientRect(edge,1))
+				if(edge.Inside(controls.getCurrentPosition()))
+						bright=50;
+				lastBogoal=edge.GetBottom();
+				if(fitItemToAbsoluteClientRect(edge,1))
 				{
-					dc->SetBrush(theme.lookUpBrightenedBrush((eBrush)(BRIGHT_UNIT_TYPE_1_BRUSH+i),100+bright));
+					dc->SetBrush(Brush(dc->brightenColor(theme.lookUpBrush((eBrush)(BRIGHT_UNIT_TYPE_1_BRUSH+i))->GetColor(), 100+bright), theme.lookUpBrush((eBrush)(BRIGHT_UNIT_TYPE_1_BRUSH+i))->GetStyle()));
 					dc->DrawRoundedRectangle(edge,4);
-					dc->SetTextForeground(theme.lookUpBrightenedColour(TEXT_COLOUR, bright));
-					dc->DrawText(*theme.lookUpString((eString)(UNIT_TYPE_1_STRING+i)),edge.x+10,edge.y);
+					dc->SetTextForeground(dc->brightenColor(theme.lookUpColor(TEXT_COLOUR),bright));
+					dc->DrawText(*theme.lookUpString((eString)(UNIT_TYPE_1_STRING+i)),edge.GetPosition()+Point(10,0));
 //					unitButton[line]=addButton(edge); TODO
 				}
 				line++;
@@ -117,18 +148,18 @@ void BoWindow::draw(wxDC* dc)
 			{
 				if(stats[anarace->getPlayer()->getRace()][i].facilityType==type)
 				{
-					wxRect edge=wxRect(getRelativeClientRectPosition()+wxPoint(20,line*(FONT_SIZE+5)-getScrollY()),wxSize(270,FONT_SIZE+4));
+					Rect edge=Rect(getAbsoluteClientRectPosition()+Point(20,line*(FONT_SIZE+5)-getScrollY()),Size(270,FONT_SIZE+4));
 					int bright=0;
 					if(edge.Inside(controls.getCurrentPosition()))
 						bright=50;
 
 					lastBogoal=edge.y;
-					if(fitItemToClientRect(edge,1))
+					if(fitItemToAbsoluteClientRect(edge, 1))
 					{
-						dc->SetBrush(theme.lookUpBrightenedBrush((eBrush)(BRIGHT_UNIT_TYPE_1_BRUSH+type),100+bright));
+	                    dc->SetBrush(Brush(dc->brightenColor(theme.lookUpBrush((eBrush)(BRIGHT_UNIT_TYPE_1_BRUSH+type))->GetColor(), 100+bright), theme.lookUpBrush((eBrush)(BRIGHT_UNIT_TYPE_1_BRUSH+type))->GetStyle()));
 		 				dc->DrawRoundedRectangle(edge,4);
-						dc->SetTextForeground(*theme.lookUpColour(TEXT_COLOUR));
-						dc->DrawText(_T(wxString::Format(wxT("%s"),stats[anarace->getPlayer()->getRace()][i].name)),edge.x+10,edge.y);
+						dc->SetTextForeground(*theme.lookUpColor(TEXT_COLOUR));
+						dc->DrawText(stats[anarace->getPlayer()->getRace()][i].name, edge.GetPosition()+Point(10,0));
 //						unitButton[line]=addButton(edge, "insert this unit"); TODO
 					}
 					line++;
@@ -141,111 +172,126 @@ void BoWindow::draw(wxDC* dc)
 		edge.height=2;
 		if(fitItemToClientRect(edge))
 		{
-			dc->SetPen(wxPen(wxColour(200,0,0),2,wxSOLID));
+			dc->SetPen(Pen(dc->doColor(200,0,0),2,SOLID));
 			dc->DrawLine(edge.x+getClientRectLeftBound(),edge.y+getClientRectUpperBound(),edge.x+edge.width+getClientRectLeftBound(),edge.y+getClientRectUpperBound());
-			dc->SetPen(wxPen(wxColour(0,0,0),1,wxSOLID));
+			dc->SetPen(Pen(dc->doColor(0,0,0),1,SOLID));
 		}*/
 		boEndPoint=line+1;
 		//end
 	}
 	
-	if(markedUnit==0)
-		markAni=0;
-	else
-	{		
-		if(markAni>1)
-			markAni-=4;
-		else markAni=50;
-	}
-
 	int line=0;
-	NODE* node=orderList->GetFirst();
-	while(node)
-	{
-		ORDER* order=node->GetData();
-		int row=((boInsertPoint>-1)&&(order->row>=boInsertPoint))*(boEndPoint-boInsertPoint);
-		wxRect edge=wxRect(getRelativeClientRectPosition()+order->rect.GetPosition()+wxPoint(0,row*(FONT_SIZE+5)-getScrollY()),order->rect.GetSize());
-		if(fitItemToClientRect(edge,1))
-		{
-			{
-				int bright=0;
-				if((infoWindow->isShown())&&(node->GetKey()==infoWindow->getKey())||(markedUnit==order->unit))
-					bright=50+markAni;
+	// hack for minimum size ~~
+//    Rect edge=Rect(getRelativeClientRectPosition()+Point(0,100),Size(100,20));
+  //   fitItemToRelativeClientRect(edge,1);
 
-                dc->SetBrush(theme.lookUpBrightenedBrush((eBrush)(UNIT_TYPE_1_BRUSH+stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->IP)].facilityType),(100+bright)*order->blend/50));
+	for(map<long, Order>::iterator order=orderList->begin(); order!=orderList->end(); ++order)
+	{
+		int row=((boInsertPoint>-1)&&(order->second.row>=boInsertPoint))*(boEndPoint-boInsertPoint);
+		Rect edge=Rect(getRelativeClientRectPosition()+order->second.rect.GetPosition()+Point(0,row*(FONT_SIZE+5)-getScrollY()),order->second.rect.GetSize());
+		if(fitItemToRelativeClientRect(edge,1))
+		{
+			boEntry[line]->Show();
+			if(boEntry[line]->isCurrentlyHighlighted()) markedUnit = line;
+            boEntry[line]->adjustRelativeRect(edge);
+			boEntry[line]->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[anarace->getPlayer()->getRace()][order->second.unit].unitType));
+
+//			int bright=0;
+//				if((infoWindow->isShown())&&(order->second.IP==infoWindow->getIP())||(markedUnit==order->second.unit)) // TODO
+//					bright=50+markAni;
+
+			/*	dc->SetBrush(
+							Brush(
+							dc->brightenColor(
+								theme.lookUpBrush((eBrush)(BRIGHT_UNIT_TYPE_1_BRUSH+stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->second.IP)].facilityType))->GetColor(), (100+bright)*order->second.blend/50
+								             ), 
+							    theme.lookUpBrush((eBrush)(BRIGHT_UNIT_TYPE_1_BRUSH+stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->second.IP)].facilityType))->GetStyle()));*/
 // optimizeMode...						
 
-//else dc->SetBrush(wxBrush(wxColour(
-//(COLOR2R+BOcolor[stats[anarace->getPlayer()->getRace()][order->unit].facilityType].Red())*order->blend/50,
-//(COLOR2G+BOcolor[stats[anarace->getPlayer()->getRace()][order->unit].facilityType].Green())*order->blend/50,
-//(COLOR2B+BOcolor[stats[anarace->getPlayer()->getRace()][order->unit].facilityType].Blue())*order->blend/50),wxSOLID));
+//else dc->SetBrush(Brush(dc->doColor(
+//(COLOR2R+BOcolor[stats[anarace->getPlayer()->getRace()][order->second.unit].facilityType].Red())*order->blend/50,
+//(COLOR2G+BOcolor[stats[anarace->getPlayer()->getRace()][order->second.unit].facilityType].Green())*order->blend/50,
+//(COLOR2B+BOcolor[stats[anarace->getPlayer()->getRace()][order->second.unit].facilityType].Blue())*order->blend/50),SOLID));
 
-					dc->DrawRoundedRectangle(edge,4);
-					dc->SetTextForeground(theme.lookUpBrush((eBrush)(UNIT_TYPE_1_BRUSH+stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->IP)].facilityType))->GetColour());
+//					dc->DrawRoundedRectangle(edge,4);
+//					dc->SetTextForeground(*theme.lookUpBrush((eBrush)(UNIT_TYPE_1_BRUSH+stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->second.IP)].facilityType))->GetColor());
 
-					if(anarace->getProgramTime(order->IP)!=oldTime)
+					if(anarace->getProgramTime(order->second.IP)!=oldTime)
 						for(int i=UNIT_TYPE_COUNT;i--;)
 								tempForceCount[i]=0;
 					if(edge.width>=110)
 					{
-						dc->DrawText(_T(wxString::Format(wxT("%i."),tempForceCount[anarace->getPhaenoCode(order->IP)]+anarace->getProgramForceCount(order->IP,anarace->getPhaenoCode(order->IP))+1)),edge.GetPosition()+wxPoint(5,0));
-						dc->DrawText(_T(wxString::Format(wxT("%s"),stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->IP)].name)),edge.GetPosition()+wxPoint(20,0));
-	//					if(row+order->row==boEndPoint) //~~
+						ostringstream os;
+						os << tempForceCount[anarace->getPhaenoCode(order->second.IP)]+anarace->getProgramForceCount(order->second.IP, anarace->getPhaenoCode(order->second.IP))+1 << ".";
+						os <<  stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->second.IP)].name;
+//						dc->DrawText(os.str(),edge.GetPosition()+Point(5,0));os.str("");
+//						dc->DrawText(stats[anarace->getPlayer()->getRace()][anarace->getPhaenoCode(order->second.IP)].name,edge.GetPosition()+Point(20,0));
+						boEntry[line]->updateText(os.str());
+	//					if(row+order->second.row==boEndPoint) //~~
 	//						dc->DrawBitmap(bmpArrowDown,edge.x+edge.width-12,edge.y+1);
 	//					else
 	//						dc->DrawBitmap(bmpArrowUp,edge.x+edge.width-12,edge.y+1);
 //						if(optimizeMode)
-//							optButton[row+t]=addButton(wxRect(getClientRectLeftBound()+edge.width,edge.y,getWidth()-edge.width,FONT_SIZE+5));
-//						orderButton[order->IP]=addButton(edge, "click right to remove order"); //~~~ TODO
-					}
-					
-					if(anarace->getProgramTime(order->IP)==oldTime)
-						tempForceCount[anarace->getPhaenoCode(order->IP)]++;
+//							optButton[row+t]=addButton(Rect(getClientRectLeftBound()+edge.width,edge.y,getWidth()-edge.width,FONT_SIZE+5));
+//						orderButton[order->second.IP]=addButton(edge, "click right to remove order"); //~~~ TODO
+					} else boEntry[line]->updateText("");
+				
+					if(anarace->getProgramTime(order->second.IP)==oldTime)
+						tempForceCount[anarace->getPhaenoCode(order->second.IP)]++;
 					else					
-						oldTime=anarace->getProgramTime(order->IP);
+						oldTime=anarace->getProgramTime(order->second.IP);
 /*					if(edge.width>=140)
-						dc->DrawText(_T(wxString::Format(wxT("%i"),order->mins)),110+edge.x,edge.y);
+						dc->DrawText(_T(string::Format(T("%i"),order->second.mins)),110+edge.x,edge.y);
 					if(edge.width>=180)
-						dc->DrawText(_T(wxString::Format(wxT("%i"),order->gas)),150+edge.x,edge.y);
+						dc->DrawText(_T(string::Format(T("%i"),order->second.gas)),150+edge.x,edge.y);
 					if(edge.width>=230)
-						dc->DrawText(_T(wxString::Format(wxT("%i/%i"),order->needSupply,order->haveSupply)),190+edge.x,edge.y);
+						dc->DrawText(_T(string::Format(T("%i/%i"),order->second.needSupply,order->haveSupply)),190+edge.x,edge.y);
 					if(edge.width>=260)
-						dc->DrawText(_T(wxString::Format(wxT("%.2i:%.2i"),order->time/60,order->time%60)),240+edge.x,edge.y);
-	//	  			dc->DrawText(_T(wxString::Format(wxT("%i"),order->successType)),190+order->x,order->y);*/
+						dc->DrawText(_T(string::Format(T("%.2i:%.2i"),order->second.time/60,order->time%60)),240+edge.x,edge.y);
+	//	  			dc->DrawText(_T(string::Format(T("%i"),order->second.successType)),190+order->x,order->y);*/
 //					}
-	//				unitButton[row+order->row]=addButton(wxRect(edge.x+edge.width-12,edge.y+1,8,8));
-			}
+		} // end fit item
+		else 
+		{
+            boEntry[line]->Hide();
+			boEntry[line]->adjustRelativeRect(Rect(getRelativeClientRectPosition()+Point(400,400), Size(getClientRectWidth(),FONT_SIZE+5)));			
 		}
 		line++;
-		node=node->GetNext();
-	} //order blend>0
+	} // end for ...
+
+	for(int i=line;i<MAX_LENGTH;i++)
+	{
+        boEntry[i]->Hide();
+        boEntry[i]->adjustRelativeRect(Rect(getRelativeClientRectPosition()+Point(400,400), Size(getClientRectWidth(),FONT_SIZE+5)));
+ 	}		
+	
 //	if(makeSpace!=99999) TODO
-//		makeSpaceButton=addButton(wxRect(getClientRectPosition()+wxPoint(0,makeSpace*(FONT_SIZE+5)-getScrollY()),wxSize(SECOND_COLOUMN-8,FONT_SIZE+4)));
+//		makeSpaceButton=addButton(Rect(getClientRectPosition()+Point(0,makeSpace*(FONT_SIZE+5)-getScrollY()),Size(SECOND_COLOUMN-8,FONT_SIZE+4)));
 //	else makeSpaceButton=99999;
 };
 
-void BoWindow::drawSelectionStuff(wxDC* dc)
+void BoWindow::drawSelectionStuff(DC* dc)
 {
 		dc->SetPen(*theme.lookUpPen(SELECT_PEN));
-		dc->SetTextForeground(*theme.lookUpColour(WINDOW_TEXT_COLOUR));
-		dc->SetFont(*theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
-		dc->DrawText(*theme.lookUpString(OPTIMIZE_EVERYTHING_STRING),getClientRectLeftBound(),getClientRectUpperBound()-32);
-		dc->DrawText(*theme.lookUpString(OPTIMIZE_SELECTED_STRING),getClientRectLeftBound(),getClientRectUpperBound()-18);
+		dc->SetTextForeground(*theme.lookUpColor(WINDOW_TEXT_COLOUR));
+		dc->SetFont(theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
+		dc->DrawText(*theme.lookUpString(OPTIMIZE_EVERYTHING_STRING), Point(0,-32)+getAbsoluteClientRectPosition());
+		dc->DrawText(*theme.lookUpString(OPTIMIZE_SELECTED_STRING), getAbsoluteClientRectPosition()+Point(0,-18));
 		dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
-		wxRect edge=wxRect(getClientRectLeftBound()+getWidth()-48,getClientRectUpperBound()-32,12,12);
-		wxRect edge2=wxRect(getClientRectLeftBound()+getWidth()-48,getClientRectUpperBound()-18,12,12);
+		Rect edge=Rect(getAbsoluteClientRectPosition()+Point(getClientRectWidth()-32,-32),Size(12,12));
+		Rect edge2=Rect(getAbsoluteClientRectPosition()+Point(getClientRectWidth()-32,-18),Size(12,12));
 																				
 		dc->DrawRoundedRectangle(edge,3);
 		dc->DrawRoundedRectangle(edge2,3);
 																				
-		dc->SetTextForeground(*theme.lookUpColour(FORCE_TEXT_COLOUR));
-		if(!optimizeMode) dc->DrawCheckMark(edge);
-		else
-		if(optimizeMode)
-		{
-			dc->DrawBitmap(*theme.lookUpBitmap(ARROW_DOWN_BITMAP), getClientRectLeftBound()+getWidth()-46,getClientRectUpperBound()-4);
-			dc->DrawCheckMark(edge2);
-		}
+		dc->SetTextForeground(*theme.lookUpColor(FORCE_TEXT_COLOUR));
+//		if(!optimizeMode) dc->DrawCheckMark(edge);
+//		else
+//		if(optimizeMode)
+//		{
+//			dc->DrawBitmap(*theme.lookUpBitmap(ARROW_DOWN_BITMAP), getClientRectLeftBound()+getWidth()-46,getClientRectUpperBound()-4);
+//			dc->DrawCheckMark(edge2);
+//		}
 																				
 /*	  int i;
 //	  boanzahl=orderList->GetCount();
@@ -264,7 +310,7 @@ void BoWindow::drawSelectionStuff(wxDC* dc)
 		} else if((inrow)&&((!selection[i])||(i==boInsertPoint)))
 		{
 			inrow=0;
-			wxPoint pointsKlammer[9];
+			Point pointsKlammer[9];
 			int h1=start*(FONT_SIZE+5)-getScrollY()+11+getClientRectUpperBound();
 			int h2=(l+1)*(FONT_SIZE+5)-getScrollY()-2+getClientRectUpperBound();
 																				
@@ -308,7 +354,7 @@ void BoWindow::drawSelectionStuff(wxDC* dc)
 																				
 				pointsKlammer[4].y=(h1+h2)/2;
 //TODO gruen/rot
-				dc->SetPen(wxPen(wxColour(50,200,50),1,wxSOLID));
+				dc->SetPen(Pen(dc->doColor(50,200,50),1,SOLID));
 				dc->DrawSpline(9,pointsKlammer);
 			}
 			}
@@ -322,6 +368,7 @@ void BoWindow::drawSelectionStuff(wxDC* dc)
 
 void BoWindow::process()
 {
+	if(!shown) return;
 	UI_Window::process();
 
 	
@@ -348,10 +395,10 @@ void BoWindow::process()
 		}
 		if(isActivated(unitButton[i]))
 		{
-//			msgWindow->addMessage(_T(wxString::Format(wxT("Button %i pressed"),i)));
+//			msgWindow->addMessage(_T(string::Format(T("Button %i pressed"),i)));
 //			if(boInsertPoint==-1) //all closed
 //			{
-//				msgWindow->addMessage(_T(wxString::Format(wxT("Opening menu at %i"),i)));
+//				msgWindow->addMessage(_T(string::Format(T("Opening menu at %i"),i)));
 //				boInsertPoint=i+1;
 //				anarace->setOptimizing(false);
 //				boGoalListOpened=1; //scheint zu funzen
@@ -359,14 +406,14 @@ void BoWindow::process()
 //			else 
 			if(i<boInsertPoint)
 			{
-//				msgWindow->addMessage(_T(wxString::Format(wxT("Closing menu at %i and opening menu at %i"),boInsertPoint,i)));
+//				msgWindow->addMessage(_T(string::Format(T("Closing menu at %i and opening menu at %i"),boInsertPoint,i)));
 				boInsertPoint=i+1;
 				anarace->setOptimizing(false);
 				boGoalListOpened=1;
 			} 
 			else if(i>=boEndPoint)
 			{
-//				msgWindow->addMessage(_T(wxString::Format(wxT("Closing menu at %i and opening menu at %i"),boInsertPoint,boInsertPoint-boEndPoint+i)));
+//				msgWindow->addMessage(_T(string::Format(T("Closing menu at %i and opening menu at %i"),boInsertPoint,boInsertPoint-boEndPoint+i)));
 				boInsertPoint=boInsertPoint-boEndPoint+i+1;
 				anarace->setOptimizing(false);
 				boGoalListOpened=1;
@@ -376,36 +423,36 @@ void BoWindow::process()
 				{
 					if(boGoalListOpened==1) //=> schliesse
 					{
-//						msgWindow->addMessage(_T(wxString::Format(wxT("Closing menu at %i"),boInsertPoint)));
+//						msgWindow->addMessage(_T(string::Format(T("Closing menu at %i"),boInsertPoint)));
 						boInsertPoint=-1;
 						boEndPoint=0;
 						boGoalListOpened=0;
 					} // => schliessen
 					else if(boGoalListOpened>1)
 					{
-//						msgWindow->addMessage(_T(wxString::Format(wxT("Returning to 1. menu at %i"),boInsertPoint)));
+//						msgWindow->addMessage(_T(string::Format(T("Returning to 1. menu at %i"),boInsertPoint)));
 						boGoalListOpened=1;
 					} // => schliessen
 				} else // aha ein menueeintrag
 				{
-//						msgWindow->addMessage(_T(wxString::Format(wxT("%i %i %i"),boInsertPoint,boEndPoint,i)));
+//						msgWindow->addMessage(_T(string::Format(T("%i %i %i"),boInsertPoint,boEndPoint,i)));
 					if(boGoalListOpened==1) // => 1. Untermenue
 					{
 						if(i==boInsertPoint+1)
 						{
 							anarace->insertOrder(SCV,boInsertPoint);
-//							msgWindow->addMessage(_T(wxString::Format(wxT("Item 1 was chosen")))); // => scv
+//							msgWindow->addMessage(_T(string::Format(T("Item 1 was chosen")))); // => scv
 //							update=2; TODO
 						}
 						else if(i==boInsertPoint+2)
 						{
 							anarace->insertOrder(GAS_SCV,boInsertPoint);
-//							msgWindow->addMessage(_T(wxString::Format(wxT("Item 2 was chosen")))); // => gas scv
+//							msgWindow->addMessage(_T(string::Format(T("Item 2 was chosen")))); // => gas scv
 //							update=2; TODO
 						}
 						else 
 						{
-//							msgWindow->addMessage(_T(wxString::Format(wxT("Opening 2. menu [%i] at %i"),i-boInsertPoint-1,boInsertPoint)));
+//							msgWindow->addMessage(_T(string::Format(T("Opening 2. menu [%i] at %i"),i-boInsertPoint-1,boInsertPoint)));
 							boGoalListOpened=i-boInsertPoint-1;
 						}
 					} else if(boGoalListOpened>1)
@@ -415,7 +462,7 @@ void BoWindow::process()
 						for(j=0;(j<UNIT_TYPE_COUNT)&&(l<i-boInsertPoint);j++)
 							if(stats[anarace->getPlayer()->getRace()][j].facilityType==boGoalListOpened+1) l++;
 						anarace->insertOrder(j-1,boInsertPoint);
-//						msgWindow->addMessage(_T(wxString::Format(wxT("Item %i was chosen"),i-boInsertPoint-1)));
+//						msgWindow->addMessage(_T(string::Format(T("Item %i was chosen"),i-boInsertPoint-1)));
 //						update=2; TODO
 						//actually add an entry to the build order
 					}
@@ -439,7 +486,7 @@ void BoWindow::process()
 	}
 
 	clearButtons();
-		if(controls.isShiftPressed()&&insideClientRect(controls.getCurrentPosition()-wxPoint(0,(FONT_SIZE+5))))
+		if(controls.isShiftPressed()&&insideClientRect(controls.getCurrentPosition()-Point(0,(FONT_SIZE+5))))
 		{
 				int temp=(controls.getCurrentPosition().y-getClientRectUpperBound()-getScrollY())/(FONT_SIZE+5);
 				if((boInsertPoint>-1)&&(temp>=boInsertPoint)&&(temp<=boEndPoint))
@@ -470,149 +517,22 @@ void BoWindow::setMarkedUnit(int unit)
 
 void BoWindow::checkForInfoWindow()
 {
-    NODE *node=orderList->GetFirst();
-    while(node)
+    for(map<long, Order>::iterator order=orderList->begin(); order!=orderList->end(); ++order)
     {
-        ORDER* order=node->GetData();
 //        int row=((boInsertPoint>-1)&&(order->row>=boInsertPoint))*(boEndPoint-boInsertPoint);
 //      mouse on order in player reinschieben, da is ja auch orderList zuhause
-		wxRect edge(order->rect.GetPosition()+getRelativeClientRectPosition()+wxPoint(0,-getScrollY()+((boInsertPoint>-1)&&(order->row>=boInsertPoint))*(boEndPoint-boInsertPoint)*(FONT_SIZE+5)-1),wxSize(order->rect.GetWidth(),FONT_SIZE+6));
+		Rect edge(order->second.rect.GetPosition()+getRelativeClientRectPosition()+Point(0,-getScrollY()+((boInsertPoint>-1)&&(order->second.row>=boInsertPoint))*(boEndPoint-boInsertPoint)*(FONT_SIZE+5)-1),Size(order->second.rect.GetWidth(),FONT_SIZE+6));
 
-		if((fitItemToClientRect(edge)&&edge.Inside(controls.getCurrentPosition())))
+		if((fitItemToRelativeClientRect(edge)&&edge.Inside(controls.getCurrentPosition())))
         {
-//window[INFO_WINDOW]->adjustWindow(wxRect(wxPoint(window[INFO_WINDOW]->getPosition().x,500)/*order->rect.GetY()+getClientRectUpperBound()-getScrollY()+((boInsertPoint>-1)&&(order->row>=boInsertPoint))*(boEndPoint-boInsertPoint)*(FONT_SIZE+5)-1)*/,window[INFO_WINDOW]->getSize()));
-            infoWindow->setUnit(order->unit);
-            infoWindow->setKey(node->GetKey());
-            infoWindow->setOrder(order);
-            infoWindow->setBx(order->brect.x);
-            infoWindow->setBWidth(order->brect.width);
+//window[INFO_WINDOW]->adjustWindow(Rect(Point(window[INFO_WINDOW]->getPosition().x,500)/*order->second.rect.GetBottom()+getClientRectUpperBound()-getScrollY()+((boInsertPoint>-1)&&(order->row>=boInsertPoint))*(boEndPoint-boInsertPoint)*(FONT_SIZE+5)-1)*/,window[INFO_WINDOW]->getSize()));
+            infoWindow->setUnit(order->second.unit);
+            infoWindow->setIP(order->second.IP);
+            infoWindow->setBx(order->second.brect.x);
+            infoWindow->setBWidth(order->second.brect.width);
             infoWindow->Show(1);
             return;
         }
-        node=node->GetNext();
     }
 };
 
-#if 0
-void BoWindow::CheckOrders()
-{
-	int k=0;
-	if(controls.isShiftPressed()&&insideClientRect(controls.getCurrentPosition()-wxPoint(0,(FONT_SIZE+5))))
-	{
-		int temp=(controls.getCurrentPosition().y-getClientRectUpperBound()-getScrollY())/(FONT_SIZE+5);
-				if((boInsertPoint>-1)&&(temp>=boInsertPoint)&&(temp<=boEndPoint))
-			temp=-1;
-		if((makeSpace!=temp)&&(temp>-1)&&(boGoalListOpened==1))
-		{
-			boGoalListOpened=0;
-			boInsertPoint=-1;
-			boEndPoint=-1;
-		}
-		makeSpace=temp;
-	} else 
-	{
-		makeSpace=-1;
-				boGoalListOpened=0;
-				boInsertPoint=-1;
-				boEndPoint=-1;
-	}
-	
-
-	for(int s=MAX_LENGTH;s--;)
-// /home/clawg/work/sc1041/sc/exe/../scc2/scc2.cpp:843: undefined reference to `ANARACE::getProgramIsBuilt(int)' <- WTF? nur bei exe...
-		if(anarace->getProgramIsBuilt2(s)/*&&(anarace->getProgramTime(s)<=ga->maxTime-anarace->getTimer())*/)
-		{
-			if(NODE* node=orderList->Find(anarace->getMarker(s))) // => found old one -> update the data!
-			{
-				ORDER* order=node->GetData();
-				order->row=k+1+((makeSpace>-1)*(k+1>=makeSpace));
-				wxRect t=wxRect(0,order->row*(FONT_SIZE+5),SECOND_COLOUMN-8,FONT_SIZE+4);
-				if(order->target!=t)
-					order->start=order->rect;
-				order->target=t;
-				order->blendTarget=50;
-				order->blendStart=order->blend;
-		   	 	order->unit=anarace->phaenoCode[s];
-				order->IP=s;
-				order->checked=1;
-			} // => aktualisieren
-			else // => neues erstellen
-			{
-				//TODO: testen ob anderes item da ist, das aber die gleiche Unit besitzt + an die gleiche Position kommt
-				int found=0;
-/*				NODE *node=orderList->GetFirst();
-				while(node&&(!found))
-				{
-					if((node->GetData()->unit!=anarace->phaenoCode[s])||(node->GetData()->row!=k+1)||(node->GetData()->target.x>0))
-						node=node->GetNext();
-					else //=> ueberschreiben
-					{
-						ORDER* order=node->GetData();
-						order->blendTarget=50;
-						order->blendStart=order->blend;
-						//order->dx=0;order->dy=0;
-						//order->y=(k+1)*(FONT_SIZE+5);
-						order->row=k+1+((makeSpace>-1)*(k+1>=makeSpace)); //?
-						wxRect t=wxRect(0,order->row*(FONT_SIZE+5),SECOND_COLOUMN-8,FONT_SIZE+4);
-						if(order->target!=t)
-							order->start=order->rect;
-						order->target=t; //?
-						order->bonew=1;
-						order->IP=s;
-						order->unit=anarace->phaenoCode[s];
-						order->checked=1;
-						found=1;
-					}
-				}*/
-				if(!found)
-				{
-					ORDER* order=new ORDER;
-					order->row=k+1+((makeSpace>-1)*(k+1>=makeSpace));
-					order->rect=wxRect(170,order->row*(FONT_SIZE+5),0,FONT_SIZE+4);
-					wxRect t=wxRect(0,order->row*(FONT_SIZE+5),SECOND_COLOUMN-8,FONT_SIZE+4);
-					if(order->target!=t)
-						order->start=order->rect;
-					order->target=t;
-					order->blend=1;order->blendTarget=50;
-					order->blendStart=order->blend;
-					order->bonew=1;
-					order->unit=anarace->phaenoCode[s];
-					order->IP=s;
-					order->checked=1;
-					orderList->Append((long)anarace->getMarker(s),order);
-				}
-			}
-			k++;
-		}
-																				
-		NODE* node=orderList->GetFirst();
-																				
-		while(node)
-		{
-			if(!node->GetData()->checked)
-				node=orderList->DeleteNode(node);
-			else
-			{
-				node->GetData()->checked=0;
-				node=node->GetNext();
-			}
-		}
-};
-#endif
-																				
-#if 0																			  
-void BoWindow::MoveOrders()
-{
-	NODE *node=orderList->GetFirst();
-	while(node)
-	{
-		ORDER* order=node->GetData();
-		move(order->rect.x,order->start.x,order->target.x);
-		move(order->rect.y,order->start.y,order->target.y);
-		move(order->rect.width,order->start.width,order->target.width);
-		move(order->rect.height,order->start.height,order->target.height);
-		move(order->blend, order->blendStart, order->blendTarget);
-		node=node->GetNext();
-	}
-};
-#endif

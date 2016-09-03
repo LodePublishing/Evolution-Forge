@@ -1,7 +1,7 @@
 #ifndef __INPUT_H
 #define __INPUT_H
 
-#include "wx/wx.h"
+#include "defs.h"
 
 const int LEFT_BUTTON = 1;
 const int MIDDLE_BUTTON = 2;
@@ -21,10 +21,10 @@ class Controls
 	public:
 		Controls();
 		~Controls();
-		wxPoint getDragStartPosition();
+		Point getDragStartPosition();
 		int getX();
 		int getY();
-		void setMouse(const wxPoint mouse_position);
+		void setMouse(const Point mouse_position);
 		void scrollMouseWheel(const int scroll_wheel);
 		void rightDown();
 		void rightUp();
@@ -35,15 +35,15 @@ class Controls
 	
 		int isShiftPressed();
 		void setShiftPressed(const int shift_pressed=1);
-		int getPressConditionOf(const wxRect rectangle);
-		wxPoint getCurrentPosition();
-		wxPoint getCurrentPosition(const wxPoint relative_position);
+		int getPressConditionOf(const Rect rectangle);
+		Point getCurrentPosition();
+		Point getCurrentPosition(const Point relative_position);
 		void mouseEventWasProcessed();
 	private:
 		
-		wxPoint currentPosition; // current position of the mouse
-		wxPoint dragStartPosition; // mouse position where dragging (pressed mouse button + mouse pointer moves) began, -1/-1 if it was not pressed
-		wxPoint dragEndPosition; // mouse position where the mouse button was released, -1/-1 if it was not pressed / is still pressed
+		Point currentPosition; // current position of the mouse
+		Point dragStartPosition; // mouse position where dragging (pressed mouse button + mouse pointer moves) began, -1/-1 if it was not pressed
+		Point dragEndPosition; // mouse position where the mouse button was released, -1/-1 if it was not pressed / is still pressed
 		int shiftPressed;
 		int mouseWheelY;
 		int button;

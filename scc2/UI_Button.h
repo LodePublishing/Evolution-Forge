@@ -4,6 +4,7 @@
 #include "UI_Object.h"
 #include "UI_StaticText.h"
 
+using std::string;
 
 // Button terminology:
 //   Up = button is in up state (also called pressed)
@@ -26,6 +27,7 @@
 #define BF_STATIC				(1<<8)
 #define BF_STATIC_PRESSED		(1<<9)
 #define BF_NOT_CLICKABLE			(1<<10)
+#define BF_IS_TAB				(1<<11)
 //#define BF_IGNORE_FOCUS             (1<<8)  // button should not use focus to accept space/enter keypresses
 //#define BF_HOTKEY_JUST_PRESSED  (1<<9)  // button hotkey was just pressed
 //#define BF_REPEATS                  (1<<10) // if held down, generates repeating presses
@@ -35,10 +37,10 @@
 /*class UI_LongText:public UI_StaticText
 {
 	public:
-		draw(wxDC* dc);
+		draw(DC* dc);
 		nexTextPage();
 	private:
-		wxRect textCursor;
+		Rect textCursor;
 };
 
 
@@ -65,7 +67,7 @@ class UI_TextButton:public UI_Button
 class UI_3dTextButton:public UI_TextButton
 {
 	public:
-		void draw(wxDC* dc);
+		void draw(DC* dc);
 	private:
 		int color;
 		
@@ -78,14 +80,6 @@ class UI_TabButton:public UI_TextButton
 };
 
 
-/*class EF_Button //: public EF_Gadget
-{
-    private:
-//      friend UI_SCROLLBAR;
-        // friend UI_SLIDER;
-//      friend UI_DOT_SLIDER;
-//      friend UI_DOT_SLIDER_NEW;
-                                                                                                                                                            
 // general things - move it later to EF_Gadget!
 // -------
                                                                                                                                                             
@@ -137,7 +131,8 @@ enum eAutoSize
 {
 	NO_AUTO_SIZE,
 	AUTO_SIZE,
-	AUTO_HEIGHT_FULL_WIDTH // 
+	AUTO_HEIGHT_FULL_WIDTH, // 
+	CONSTANT_SIZE //~~ constant width
 };
 
 enum eButtonMode
@@ -146,6 +141,7 @@ enum eButtonMode
 	STATIC_BUTTON_MODE, // stays in its position
 	PRESS_BUTTON_MODE,  // returns to unpressed
 	PUSH_BUTTON_MODE,   // calls several messages when being pressed
+	TAB_BUTTON_MODE,
 
 	MAX_BUTTON_MODES
 };
@@ -155,9 +151,9 @@ enum eButtonMode
 class UI_Button:public UI_Object
 {
 	public:
-		UI_Button(UI_Object* parent, wxRect rect, wxRect maxRect, eString normalText, eString pressedText, eButton button, eButtonMode buttonMode = STATIC_BUTTON_MODE, ePositionMode mode = DO_NOT_ADJUST, eFont font=SMALL_NORMAL_BOLD_FONT, eAutoSize autoSize=NO_AUTO_SIZE);
-		UI_Button(UI_Object* parent, wxRect rect, wxRect maxRect, wxString normalText, wxString pressedText, eButton button, eButtonMode buttonMode = STATIC_BUTTON_MODE, ePositionMode mode = DO_NOT_ADJUST, eFont font=SMALL_NORMAL_BOLD_FONT, eAutoSize autoSize=NO_AUTO_SIZE);
-		UI_Button(UI_Object* parent, wxRect rect, wxRect maxRect, eButton button, eButtonMode buttonMode = STATIC_BUTTON_MODE, ePositionMode mode = DO_NOT_ADJUST);
+		UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eString normalText, eString pressedText, eButton button, eTextMode textMode=HORIZONTALLY_CENTERED_TEXT_MODE, eButtonMode buttonMode = STATIC_BUTTON_MODE, ePositionMode mode = DO_NOT_ADJUST, eFont font=SMALL_NORMAL_BOLD_FONT, eAutoSize autoSize=NO_AUTO_SIZE);
+		UI_Button(UI_Object* parent, Rect rect, Rect maxRect, string normalText, string pressedText, eButton button, eTextMode textMode=HORIZONTALLY_CENTERED_TEXT_MODE, eButtonMode buttonMode = STATIC_BUTTON_MODE, ePositionMode mode = DO_NOT_ADJUST, eFont font=SMALL_NORMAL_BOLD_FONT, eAutoSize autoSize=NO_AUTO_SIZE);
+		UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eButton button, eButtonMode buttonMode = STATIC_BUTTON_MODE, ePositionMode mode = DO_NOT_ADJUST);
 		~UI_Button();
 		
 //      void set_hotkey_if_focus(int key); TODO
@@ -173,8 +169,8 @@ class UI_Button:public UI_Object
         void forcePressed();      // force button to get pressed
 		void forceUnpress();
 
-		void updateNormalText(wxString utext);
-		void updatePressedText(wxString utext);
+		void updateNormalText(string utext);
+		void updatePressedText(string utext);
 
         //void setHighlightAction( void (*user_function)(void) );
         //void setDisabledAction( void (*user_function)(void) );
@@ -184,7 +180,10 @@ class UI_Button:public UI_Object
 //        void set_custom_cursor_bmap(int bmap_id) { custom_cursor_bmap = bmap_id; };
 
 		void process(); // process messages, continue animation etc.
-		void draw(wxDC* dc);
+		void draw(DC* dc);
+		bool forcedPress;
+		void setButton(eButton button);
+		void setFrameNumber(int num);
 	protected:
 		UI_StaticText* normalText;
 		UI_StaticText* pressedText;
@@ -192,10 +191,11 @@ class UI_Button:public UI_Object
         long int nextRepeat;     // timestamp for next repeat if held down
 	private:
 
+
 		long int timeStamp;
 		
-		void adjustButtonSize(wxSize size);
-		wxRect currentSize;
+		void adjustButtonSize(Size size);
+		Rect currentSize;
 	
 		eFont font;
 		eButton button;	
@@ -206,7 +206,7 @@ class UI_Button:public UI_Object
 		void frameReset();
 		int frameNumber;
 		int statusFlags;
-		wxRect buttonRect;
+		Rect buttonRect;
         bool firstPressed; // first press-message after the button was not pressed
 		
 //	TODO    int onMouseOverCursor;                 // bmap handle of special cursor used on mouseovers
@@ -229,8 +229,9 @@ class UI_Radio:public UI_Object
 		~UI_Radio();
 		void addButton(UI_Button* button);
 		int getMarked();
+		void forceTabPressed(int tab);
 		void process();
-		void draw(wxDC* dc);
+		void draw(DC* dc);
 		bool hasChanged();
 	private:
 		bool changed;

@@ -44,24 +44,28 @@ void UNITS::adjustSupply(int race, int& supply, int& maxSupply)
 		return;
 	}
 #endif
+	// TODO wenn mehr Einheiten als Versorgung da is, wirds negativ... :/
 	for(int j=UNIT_TYPE_COUNT;j--;)
-		if(stats[race][j].supply<0)
+		if(total[j])
 		{
-			if(maxSupply-stats[race][j].supply*total[j]>MAX_SUPPLY)
+			if(stats[race][j].supply<0)
 			{
-				if(maxSupply<MAX_SUPPLY)
+				if(maxSupply-stats[race][j].supply*total[j]>MAX_SUPPLY)
 				{
-					supply+=MAX_SUPPLY-maxSupply;
-					maxSupply=MAX_SUPPLY;
+					if(maxSupply<MAX_SUPPLY)
+					{
+						supply+=MAX_SUPPLY-maxSupply;
+						maxSupply=MAX_SUPPLY;
+					}
 				}
-			}
-			else
-			{
+				else
+				{
+					supply-=stats[race][j].supply*total[j];
+					maxSupply-=stats[race][j].supply*total[j];
+				}
+			} else
 				supply-=stats[race][j].supply*total[j];
-				maxSupply-=stats[race][j].supply*total[j];
-			}
-		} else
-			supply-=stats[race][j].supply*total[j];
+		};
 };
 
 void UNITS::adjustResearches(int race) // only use this on location ZERO

@@ -8,7 +8,8 @@
 #include "info.h"
 #include "bodiagram.h"
 #include "bowindow.h"
-#include "list.h"
+#include  <list>
+#include "order.h"
 #include "UI_Object.h"
 
 enum ePlayerMode
@@ -38,7 +39,7 @@ enum ePlayerMode
 class Player : public UI_Object
 {
 	public:
-		Player(UI_Object* parent, ANARACE** anarace, ePlayerMode mode);
+		Player(UI_Object* parent, ANARACE** anarace, ePlayerMode mode, const int playerNumber);
 		~Player();
 		
 		void update();
@@ -47,7 +48,7 @@ class Player : public UI_Object
 		
 		void setMode(ePlayerMode mode); 
 
-		void draw(wxDC* dc);
+		void draw(DC* dc);
 		void process();
 
 		void changeAccepted();
@@ -57,17 +58,19 @@ class Player : public UI_Object
 		void setOptimizing(bool opt=true);
 
 		void CheckOrders();
+
+		void updateRectangles();
 		
 	private:
 		void setWindowTitles(ePlayerMode mode);
 		
-		void drawGeneString(wxDC* dc, wxRect position);
+		void drawGeneString(DC* dc, Rect position);
 
 		UI_Window* window[MAX_WINDOWS]; // TODO 
 		
 		ANARACE** anarace; //pointer auf pointer, weil sich der pointer ja veraendert!
 		int geneAnimation;
-		OrderList orderList;		
+		map <long, Order> orderList; // nach markern sortiert
 		ePlayerMode mode;
 		void MoveOrders();
 };

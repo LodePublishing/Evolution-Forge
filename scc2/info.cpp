@@ -1,6 +1,6 @@
 #include "info.h"
 
-InfoWindow::InfoWindow(UI_Object* parent, wxRect rahmen, wxRect maxSize, ANARACE* anarace):UI_Window(parent, INFO_WINDOW_TITLE_STRING,rahmen,maxSize,NOT_SCROLLED)
+InfoWindow::InfoWindow(UI_Object* parent, ANARACE* anarace, const int windowNumber):UI_Window(parent, INFO_WINDOW_TITLE_STRING, INFO_WINDOW, windowNumber, NOT_SCROLLED)
 {
 	this->anarace=anarace;
     resetData();
@@ -10,24 +10,19 @@ InfoWindow::~InfoWindow()
 {
 };
 
-int InfoWindow::getBx()
+const int InfoWindow::getBx() const
 {
 	return bx;
 };
 
-int InfoWindow::getBWidth()
+const int InfoWindow::getBWidth() const
 {
 	return bwidth;
 };
 
-int InfoWindow::getUnit()
+const int InfoWindow::getUnit() const
 {
 	return unit;
-};
-
-int InfoWindow::getKey()
-{
-	return key;
 };
 
 void InfoWindow::setBx(int bx)
@@ -40,19 +35,14 @@ void InfoWindow::setBWidth(int bwidth)
 	this->bwidth=bwidth;
 };
 
+void InfoWindow::setIP(int IP)
+{
+	this->IP=IP;
+};
+
 void InfoWindow::setUnit(int unit)
 {
 	this->unit=unit;
-};
-
-void InfoWindow::setKey(int key)
-{
-	this->key=key;
-};
-
-void InfoWindow::setOrder(ORDER* order)
-{
-	this->order=order;
 };
 
 void InfoWindow::resetData()
@@ -60,12 +50,11 @@ void InfoWindow::resetData()
 	bx=0;
 	bwidth=0;
 	unit=0;
-	key=0;
-	order=0;
+	IP=0;
 	setup=0;
 };
 
-int InfoWindow::isSet()
+const int InfoWindow::isSet() const
 {
 	return(setup);
 };
@@ -75,18 +64,20 @@ void InfoWindow::setupOk(int ok)
 	setup=ok;
 };
 
-ORDER* InfoWindow::getOrder()
+const int InfoWindow::getIP() const
 {
-	return(order);
+	return(IP);
 };
 
 void InfoWindow::process()
 {
+	if(!shown) return;
 	UI_Window::process();
 };
                                                                                                                                                             
-void InfoWindow::draw(wxDC* dc)
+void InfoWindow::draw(DC* dc)
 {
+	if(!shown) return;
 	UI_Window::draw(dc);
 #if 0
 	if(!order)
@@ -95,7 +86,7 @@ void InfoWindow::draw(wxDC* dc)
 		writeLongText(_T("#"), dc);
 		if(!anarace->getProgramSuccessUnit(order->IP))
 		{
-				writeLongText(_T(wxString::Format(wxT("Build $%i$. $%s$ as soon as $%s$ at $%s$ when having $%i$ minerals, $%i$ gas, $%i$/$%i$ supply [time: %.2i:%.2i]"),
+				writeLongText(_T(String::Format(T("Build $%i$. $%s$ as soon as $%s$ at $%s$ when having $%i$ minerals, $%i$ gas, $%i$/$%i$ supply [time: %.2i:%.2i]"),
 				anarace->getProgramForceCount(order->IP,order->unit)+1, 
 				stats[anarace->getPlayer()->getRace()][order->unit].name, 
 				error_message[anarace->getProgramSuccessType(order->IP)], 
@@ -109,7 +100,7 @@ void InfoWindow::draw(wxDC* dc)
 		}
 		else
 		{
-                writeLongText(_T(wxString::Format(wxT("Build $%i$. $%s$ as soon as $%s$ at $%s$ when $%s$ becomes availible and having $%i$ minerals, $%i$ gas, $%i$/$%i$ supply [time: %.2i:%.2i]"),
+                writeLongText(_T(String::Format(T("Build $%i$. $%s$ as soon as $%s$ at $%s$ when $%s$ becomes availible and having $%i$ minerals, $%i$ gas, $%i$/$%i$ supply [time: %.2i:%.2i]"),
                 anarace->getProgramForceCount(order->IP,order->unit)+1,
                 stats[anarace->getPlayer()->getRace()][order->unit].name,
                 error_message[anarace->getProgramSuccessType(order->IP)],

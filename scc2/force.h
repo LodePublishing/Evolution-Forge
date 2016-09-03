@@ -6,7 +6,6 @@
 #include "../scc2dll/anarace.h"
 #include "../scc2dll/settings.h"
 
-const int FORCE_LIST_NUMBER=23;
 /*
 class UnitMenu
 {
@@ -17,10 +16,10 @@ class UnitMenu
 class ForceEntry:public UI_Button
 {
 	public:
-		ForceEntry(UI_Object* parent, wxRect rect, wxRect maxRect, wxString unit);
+		ForceEntry(UI_Object* parent, Rect rahmen, Rect maxSize, string unit);
 		~ForceEntry();
 		int changed();
-		void updateText(wxString utext);
+		void updateText(string utext);
 	private:
 		UI_Button* addUnit;
    		UI_Button* subUnit;
@@ -32,12 +31,12 @@ class ForceEntry:public UI_Button
 class ForceWindow:public UI_Window
 {
 	public:
-		ForceWindow(UI_Object* parent, wxRect rahmen, wxRect maxSize, ANARACE* anarace);
+		ForceWindow(UI_Object* parent, ANARACE* anarace, const int windowNumber);
 		~ForceWindow();
 		
 		void resetData();
 		void process();
-		void draw(wxDC* dc);
+		void draw(DC* dc);
 		int getMarkedUnit();
 		
 	private:

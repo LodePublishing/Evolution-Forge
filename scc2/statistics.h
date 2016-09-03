@@ -7,17 +7,17 @@
 class StatisticsWindow:public UI_Window
 {
 	public:
-		StatisticsWindow(UI_Object* parent, wxRect rahmen, wxRect maxSize, ANARACE* anarace);
+		StatisticsWindow(UI_Object* parent, ANARACE* anarace, const int windowNumber);
 		~StatisticsWindow();
 		
 		void process();
-		void draw(wxDC* dc);
+		void draw(DC* dc);
 		
 		void resetData();
 		
 	private:
 		ANARACE* anarace;
-		void showGraph(wxDC* dc, int* data, int min, int max, wxColour col);
+		void showGraph(DC* dc, int* data, int min, int max, Color col);
 		int harvestedMins[200];
 		int harvestedGas[200];
 		int pFitness[200];
@@ -39,8 +39,8 @@ class StatisticsWindow:public UI_Window
 		int maxForce;
 		int maxHarvestedRessources;
 		int average[100];int averagecounter;
-//		wxDateTime dt1;
-//		wxDateTime dt2; taken out because DLL file was not compiled with wxDateTime
+//		DateTime dt1;
+//		DateTime dt2; taken out because DLL file was not compiled with DateTime
 };
 #endif
 

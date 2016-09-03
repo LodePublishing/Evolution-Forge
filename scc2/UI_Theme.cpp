@@ -1,5 +1,6 @@
 #include "UI_Theme.h"
 #include "../scc2dll/debug.h"
+#include <fstream>
 
 UI_Theme::UI_Theme()
 {
@@ -13,7 +14,7 @@ UI_Theme::UI_Theme()
     for(int i = MAX_COLOUR_THEMES;i--;)
     {
         for(int j = MAX_COLOURS;j--;)
-                colourList[i][j]=0;
+                colorList[i][j]=0;
   		for(int j = MAX_RESOLUTIONS;j--;)
 		{
 	        for(int k = MAX_PENS;k--;)
@@ -38,7 +39,7 @@ UI_Theme::UI_Theme()
 	tab=BASIC_TAB;
 	resolution=RESOLUTION_1280x1024;
 	language=GERMAN_LANGUAGE;
-	colourTheme=DARK_BLUE_THEME;
+	colorTheme=DARK_BLUE_THEME;
 };
 
 UI_Theme::~UI_Theme()
@@ -61,10 +62,10 @@ UI_Theme::~UI_Theme()
 	for(int i = MAX_COLOUR_THEMES;i--;)
 	{
 		for(int j = MAX_COLOURS;j--;)
-			if(colourList[i][j])
+			if(colorList[i][j])
 			{
-				delete colourList[i][j];
-				colourList[i][j]=0;
+				delete colorList[i][j];
+				colorList[i][j]=0;
 			}
 		for(int j = MAX_RESOLUTIONS;j--;)
 		{
@@ -77,7 +78,7 @@ UI_Theme::~UI_Theme()
 	 		for(int k = MAX_PENS;k--;)
 				if(penList[i][j][k])
 				{
-// TODO SPEICHERLECK: mmmh, anscheinend stuerzt der beim color-deleten von penlist ab... managt wxPen etwa die pen-colours zusammen mit den normalen colours 
+// TODO SPEICHERLECK: mmmh, anscheinend stuerzt der beim color-deleten von penlist ab... managt Pen etwa die pen-colors zusammen mit den normalen colors 
 					delete penList[i][j][k];
 					penList[i][j][k]=0;
 				}
@@ -113,103 +114,148 @@ UI_Theme::~UI_Theme()
 		};
 };
 
-void UI_Theme::setColourTheme(eTheme colourTheme)
+void UI_Theme::setColorTheme(const eTheme colorTheme)
 {
-	this->colourTheme=colourTheme;
+	this->colorTheme=colorTheme;
 };
 
-eTheme UI_Theme::getColourTheme()
+const eTheme UI_Theme::getColorTheme() const
 {
-	return(colourTheme);
+	return(colorTheme);
 };
 
-eLanguage UI_Theme::getLanguage()
+const eLanguage UI_Theme::getLanguage() const
 {
 	return(language);
 };
 
-void UI_Theme::setLanguage(eLanguage language)
+void UI_Theme::setLanguage(const eLanguage language)
 {
 	this->language=language;
 };
 
-eResolution UI_Theme::getResolution()
+const eResolution UI_Theme::getResolution() const
 {
 	return(resolution);
 };
 
-void UI_Theme::setResolution(eResolution resolution)
+void UI_Theme::setResolution(const eResolution resolution)
 {
 	this->resolution=resolution;
 };
 
-void UI_Theme::setTab(eTab tab)
+void UI_Theme::setTab(const eTab tab)
 {
 	this->tab=tab;
 };
 
-eTab UI_Theme::getTab()
-{
+const eTab UI_Theme::getTab() const
+{ 
 	return(tab);
 };
 
 
-ButtonAnimation* UI_Theme::lookUpButtonAnimation(eButton id)
+const ButtonAnimation* UI_Theme::lookUpButtonAnimation(const eButton id) const
 {
 	return(buttonAnimationList[id]);
 };
 
 
-wxString* UI_Theme::lookUpString(eString id)
+const string* UI_Theme::lookUpString(const eString id) const
 {
 	return(stringList[language][id]);
 };
 
-
-wxString UI_Theme::lookUpFormattedString(eString id, ...)
+void findandreplace( string& source, const string& find, const string& replace )
 {
-	va_list args;
-	wxString bla=*(stringList[language][id]);
-	va_start(args, id);
-	bla = wxString::FormatV(bla, args);
-	va_end(args);
+	size_t j = source.find(find);source.replace(j,find.length(),replace);
+	// TODO wenn nix gefunden wird...
+};
+
+const string UI_Theme::lookUpFormattedString(const eString id, const string& text) const
+{
+	string bla=*(stringList[language][id]);
+	findandreplace(bla, "%s", text);
+	return(bla);
+};
+
+const string UI_Theme::lookUpFormattedString(const eString id, const int i) const
+{
+	string bla=*(stringList[language][id]);
+	ostringstream os;
+    os << i; 
+    findandreplace(bla, "%i", os.str());
+    return(bla);
+};
+const string UI_Theme::lookUpFormattedString(const eString id, const int i, const int j, const int k) const
+{
+	string bla=*(stringList[language][id]);
+	ostringstream os;
+	os << i;findandreplace(bla, "%i", os.str());os.str("");
+	os << j;findandreplace(bla, "%i", os.str());os.str("");
+	os << k;findandreplace(bla, "%i", os.str());
+	return(bla);
+};
+
+const string UI_Theme::lookUpFormattedString(const eString id, const int i, const int j) const
+{
+	string bla=*(stringList[language][id]);
+	ostringstream os;
+	os << i;findandreplace(bla, "%i", os.str());os.str("");
+	os << j;findandreplace(bla, "%i", os.str());
 	return(bla);
 };
 
 
-wxColour* UI_Theme::lookUpColour(eColour id)
+Color* UI_Theme::lookUpColor(const eColor id) const
 {
-	return(colourList[colourTheme][id]);
+	return(colorList[colorTheme][id]);
 };
 
-wxBitmap* UI_Theme::lookUpBitmap(eBitmap id)
+const Bitmap* UI_Theme::lookUpBitmap(const eBitmap id) const 
 {
-	return(bitmapList[resolution][colourTheme][id]);
+	return(bitmapList[resolution][colorTheme][id]);
 };
 
-wxPen* UI_Theme::lookUpPen(ePen id)
+Pen* UI_Theme::lookUpPen(const ePen id) const
 {
-	return(penList[resolution][colourTheme][id]);
+	return(penList[resolution][colorTheme][id]);
 };
 
-wxBrush* UI_Theme::lookUpBrush(eBrush id)
+Brush* UI_Theme::lookUpBrush(const eBrush id) const
 {
-	return(brushList[colourTheme][id]);
+	return(brushList[colorTheme][id]);
 };
 
-wxFont* UI_Theme::lookUpFont(eFont id)
+Font* UI_Theme::lookUpFont(const eFont id) const
 {
 	return(fontList[resolution][language][id]);
 };
                                                                                
-wxRect* UI_Theme::lookUpRect(eWindow id)
+const Rect UI_Theme::lookUpRect(const eWindow id, const int windowNumber) const
 {
-	return(rectList[resolution][tab][id]);
+	Point p;
+	switch(arrangeDirection[resolution][tab][id])
+	{
+		case ARRANGE_LEFT_TO_RIGHT:p=Point(windowNumber*rectList[resolution][tab][id]->width,0);break;
+		case ARRANGE_RIGHT_TO_LEFT:p=Point(-windowNumber*rectList[resolution][tab][id]->width,0);break;
+		case ARRANGE_TOP_TO_DOWN:p=Point(0,windowNumber*rectList[resolution][tab][id]->height);break;
+		case ARRANGE_DOWN_TO_TOP:p=Point(0,-windowNumber*rectList[resolution][tab][id]->height);break;
+	};
+	return(Rect(rectList[resolution][tab][id]->GetPosition()+p,rectList[resolution][tab][id]->GetSize()));
 };
 
-wxRect* UI_Theme::lookUpMaxRect(eWindow id)
+const Rect UI_Theme::lookUpMaxRect(const eWindow id, const int windowNumber) const 
 {
-	return(maxRectList[resolution][tab][id]);
+    Point p;
+    switch(arrangeDirection[resolution][tab][id])
+    {
+        case ARRANGE_LEFT_TO_RIGHT:p=Point(windowNumber*maxRectList[resolution][tab][id]->width,0);break;
+        case ARRANGE_RIGHT_TO_LEFT:p=Point(-windowNumber*maxRectList[resolution][tab][id]->width,0);break;
+        case ARRANGE_TOP_TO_DOWN:p=Point(0,windowNumber*maxRectList[resolution][tab][id]->height);break;
+        case ARRANGE_DOWN_TO_TOP:p=Point(0,-windowNumber*maxRectList[resolution][tab][id]->height);break;
+    };
+    return(Rect(maxRectList[resolution][tab][id]->GetPosition()+p,maxRectList[resolution][tab][id]->GetSize()));
 };
 
 /*
@@ -221,21 +267,21 @@ und max tiefe 2
 pointer zurueckgeben
    */
 
-eDataType getDataType(const char* item)
+const eDataType getDataType(const string& item)
 {
-            if(!strcmp(item,"@STRINGS")) return(STRING_DATA_TYPE);else
-            if(!strcmp(item,"@FONTS")) return(FONT_DATA_TYPE);else
-            if(!strcmp(item,"@COLOURS")) return(COLOUR_DATA_TYPE);else
-            if(!strcmp(item,"@PENS")) return(PEN_DATA_TYPE);else
-            if(!strcmp(item,"@BRUSHES")) return(BRUSH_DATA_TYPE);else
-            if(!strcmp(item,"@BITMAPS")) return(BITMAP_DATA_TYPE);else
-            if(!strcmp(item,"@RECTANGLES")) return(RECT_DATA_TYPE);else
-            if(!strcmp(item,"@MAX_RECTANGLES")) return(MAX_RECT_DATA_TYPE);else
-            if(!strcmp(item,"@BUTTONS")) return(BUTTON_DATA_TYPE);else
+            if(item=="@STRINGS") return(STRING_DATA_TYPE);else
+            if(item=="@FONTS") return(FONT_DATA_TYPE);else
+            if(item=="@COLOURS") return(COLOUR_DATA_TYPE);else
+            if(item=="@PENS") return(PEN_DATA_TYPE);else
+            if(item=="@BRUSHES") return(BRUSH_DATA_TYPE);else
+            if(item=="@BITMAPS") return(BITMAP_DATA_TYPE);else
+            if(item=="@RECTANGLES") return(RECT_DATA_TYPE);else
+            if(item=="@MAX_RECTANGLES") return(MAX_RECT_DATA_TYPE);else
+            if(item=="@BUTTONS") return(BUTTON_DATA_TYPE);else
 			return(ZERO_DATA_TYPE);
 };
 
-eSubDataType getSubDataType(const eDataType mode)
+const eSubDataType getSubDataType(const eDataType mode)
 {
 	switch(mode)
 	{	
@@ -251,7 +297,7 @@ eSubDataType getSubDataType(const eDataType mode)
 	};
 };
 
-eSubSubDataType getSubSubDataType(const eDataType mode)
+const eSubSubDataType getSubSubDataType(const eDataType mode)
 {
 	switch(mode)
 	{
@@ -264,158 +310,153 @@ eSubSubDataType getSubSubDataType(const eDataType mode)
 	};
 };
 
-eLanguage getLanguageSubDataEntry(const char* item)
+const eLanguage getLanguageSubDataEntry(const string& item)
 {
-            if(!strcmp(item,"@ENGLISH")) return(ENGLISH_LANGUAGE);else
-            if(!strcmp(item,"@GERMAN")) return(GERMAN_LANGUAGE);else
-            if(!strcmp(item,"@FINNISH")) return(FINNISH_LANGUAGE);else
-            if(!strcmp(item,"@FRENCH")) return(FRENCH_LANGUAGE);else
-            if(!strcmp(item,"@SPANISH")) return(SPANISH_LANGUAGE);else
-            if(!strcmp(item,"@POLSKI")) return(POLSKI_LANGUAGE);else
-            if(!strcmp(item,"@KOREAN")) return(KOREAN_LANGUAGE);else
-            if(!strcmp(item,"@CHINESE")) return(CHINESE_LANGUAGE);else
-            if(!strcmp(item,"@RUSSKI")) return(RUSSKI_LANGUAGE);else
+            if(item=="@ENGLISH") return(ENGLISH_LANGUAGE);else
+            if(item=="@GERMAN") return(GERMAN_LANGUAGE);else
+            if(item=="@FINNISH") return(FINNISH_LANGUAGE);else
+            if(item=="@FRENCH") return(FRENCH_LANGUAGE);else
+            if(item=="@SPANISH") return(SPANISH_LANGUAGE);else
+            if(item=="@POLSKI") return(POLSKI_LANGUAGE);else
+            if(item=="@KOREAN") return(KOREAN_LANGUAGE);else
+            if(item=="@CHINESE") return(CHINESE_LANGUAGE);else
+            if(item=="@RUSSKI") return(RUSSKI_LANGUAGE);else
             return(ZERO_LANGUAGE);
 };
 
-eResolution getResolutionSubDataEntry(const char* item)
+const eResolution getResolutionSubDataEntry(const string& item)
 {
-            if(!strcmp(item,"@320x200")) return(RESOLUTION_320x200);else
-            if(!strcmp(item,"@640x480")) return(RESOLUTION_640x480);else
-            if(!strcmp(item,"@800x600")) return(RESOLUTION_800x600);else
-            if(!strcmp(item,"@1024x768")) return(RESOLUTION_1024x768);else
-            if(!strcmp(item,"@1280x1024")) return(RESOLUTION_1280x1024);else
-            if(!strcmp(item,"@1600x1200")) return(RESOLUTION_1600x1200);else
+            if(item=="@320x200") return(RESOLUTION_320x200);else
+            if(item=="@640x480") return(RESOLUTION_640x480);else
+            if(item=="@800x600") return(RESOLUTION_800x600);else
+            if(item=="@1024x768") return(RESOLUTION_1024x768);else
+            if(item=="@1280x1024") return(RESOLUTION_1280x1024);else
+            if(item=="@1600x1200") return(RESOLUTION_1600x1200);else
             return(ZERO_RESOLUTION);
 };
 
-eTheme getThemeSubDataEntry(const char* item)
+const eTheme getThemeSubDataEntry(const string& item)
 {
-            if(!strcmp(item,"@DARK_BLUE_THEME")) return(DARK_BLUE_THEME);else
-            if(!strcmp(item,"@GREEN_THEME")) return(GREEN_THEME);else
-            if(!strcmp(item,"@RED_THEME")) return(RED_THEME);else
-            if(!strcmp(item,"@YELLOW_THEME")) return(YELLOW_THEME);else
-            if(!strcmp(item,"@GREY_THEME")) return(GREY_THEME);else
-            if(!strcmp(item,"@MONOCHROME_THEME")) return(MONOCHROME_THEME);else
+            if(item=="@DARK_BLUE_THEME") return(DARK_BLUE_THEME);else
+            if(item=="@GREEN_THEME") return(GREEN_THEME);else
+            if(item=="@RED_THEME") return(RED_THEME);else
+            if(item=="@YELLOW_THEME") return(YELLOW_THEME);else
+            if(item=="@GREY_THEME") return(GREY_THEME);else
+            if(item=="@MONOCHROME_THEME") return(MONOCHROME_THEME);else
             return(ZERO_THEME);
 };
 
-eTab getTabSubDataEntry(const char* item)
+const eTab getTabSubDataEntry(const string& item)
 {
-            if(!strcmp(item,"@BASIC_TAB")) return(BASIC_TAB);else
-            if(!strcmp(item,"@ADVANCED_TAB")) return(ADVANCED_TAB);else
-            if(!strcmp(item,"@EXPERT_TAB")) return(EXPERT_TAB);else
-            if(!strcmp(item,"@GOSU_TAB")) return(GOSU_TAB);else
-            if(!strcmp(item,"@TRANSCENDEND_TAB")) return(TRANSCENDEND_TAB);else
-            if(!strcmp(item,"@MAP_TAB")) return(MAP_TAB);else
-            if(!strcmp(item,"@SETTINGS_TAB")) return(SETTINGS_TAB);else
-            if(!strcmp(item,"@TUTORIAL_TAB")) return(TUTORIAL_TAB);else
+            if(item=="@BASIC_TAB") return(BASIC_TAB);else
+            if(item=="@ADVANCED_TAB") return(ADVANCED_TAB);else
+            if(item=="@EXPERT_TAB") return(EXPERT_TAB);else
+            if(item=="@GOSU_TAB") return(GOSU_TAB);else
+            if(item=="@TRANSCENDEND_TAB") return(TRANSCENDEND_TAB);else
+            if(item=="@MAP_TAB") return(MAP_TAB);else
+            if(item=="@SETTINGS_TAB") return(SETTINGS_TAB);else
+            if(item=="@TUTORIAL_TAB") return(TUTORIAL_TAB);else
             return(ZERO_TAB);
 };
 
-int get_brush_style(const char* item)
+const eBrushStyle get_brush_style(const string& item)
 {
-            if(!strcmp(item,"TRANSPARENT")) return(wxTRANSPARENT);else
-            if(!strcmp(item,"SOLID")) return(wxSOLID);else
-            if(!strcmp(item,"BDIAGONAL_HATCH")) return(wxBDIAGONAL_HATCH);else
-            if(!strcmp(item,"CROSSDIAG_HATCH")) return(wxCROSSDIAG_HATCH);else
-            if(!strcmp(item,"FDIAGONAL_HATCH")) return(wxFDIAGONAL_HATCH);else
-            if(!strcmp(item,"CROSSH_ATCH")) return(wxCROSS_HATCH);else
-            if(!strcmp(item,"HORIZONTAL_HATCH")) return(wxHORIZONTAL_HATCH);else
-            if(!strcmp(item,"VERTICAL_HATCH")) return(wxVERTICAL_HATCH);else
-            if(!strcmp(item,"STIPPLE")) return(wxSTIPPLE);else
-            if(!strcmp(item,"STIPPLE_MASK_OPAQUE")) return(wxSTIPPLE_MASK_OPAQUE);else
-			return(wxTRANSPARENT);
+            if(item=="SOLID") return(SOLID_BRUSH_STYLE);else
+            if(item=="BDIAGONAL_HATCH") return(BDIAGONAL_HATCH_BRUSH_STYLE);else
+            if(item=="CROSSDIAG_HATCH") return(CROSSDIAG_HATCH_BRUSH_STYLE);else
+            if(item=="FDIAGONAL_HATCH") return(FDIAGONAL_HATCH_BRUSH_STYLE);else
+            if(item=="CROSSH_ATCH") return(CROSS_HATCH_BRUSH_STYLE);else
+            if(item=="HORIZONTAL_HATCH") return(HORIZONTAL_HATCH_BRUSH_STYLE);else
+            if(item=="VERTICAL_HATCH") return(VERTICAL_HATCH_BRUSH_STYLE);else
+            if(item=="STIPPLE") return(STIPPLE_BRUSH_STYLE);else
+            if(item=="STIPPLE_MASK_OPAQUE") return(STIPPLE_MASK_OPAQUE_BRUSH_STYLE);else
+			return(TRANSPARENT_BRUSH_STYLE);
 }
 
 
-int get_pen_style(const char* item)
+const ePenStyle get_pen_style(const string& item)
 {
-            if(!strcmp(item,"TRANSPARENT")) return(wxTRANSPARENT);else
-            if(!strcmp(item,"SOLID")) return(wxSOLID);else
-            if(!strcmp(item,"DOT")) return(wxDOT);else
-            if(!strcmp(item,"LONG_DASH")) return(wxLONG_DASH);else
-            if(!strcmp(item,"SHORT_DASH")) return(wxSHORT_DASH);else
-            if(!strcmp(item,"DOT_DASH")) return(wxDOT_DASH);else
-            if(!strcmp(item,"USER_DASH")) return(wxUSER_DASH);else
-            if(!strcmp(item,"BDIAGONAL_HATCH")) return(wxBDIAGONAL_HATCH);else
-            if(!strcmp(item,"CROSSDIAG_HATCH")) return(wxCROSSDIAG_HATCH);else
-            if(!strcmp(item,"FDIAGONAL_HATCH")) return(wxFDIAGONAL_HATCH);else
-            if(!strcmp(item,"CROSSH_ATCH")) return(wxCROSS_HATCH);else
-            if(!strcmp(item,"HORIZONTAL_HATCH")) return(wxHORIZONTAL_HATCH);else
-            if(!strcmp(item,"VERTICAL_HATCH")) return(wxVERTICAL_HATCH);else
-            if(!strcmp(item,"STIPPLE")) return(wxSTIPPLE);else
-			return(wxTRANSPARENT);
+	if(item=="SOLID") return(SOLID_PEN_STYLE);else
+	if(item=="DOT") return(DOT_PEN_STYLE);else
+	if(item=="LONG_DASH") return(LONG_DASH_PEN_STYLE);else
+	if(item=="SHORT_DASH") return(SHORT_DASH_PEN_STYLE);else
+	if(item=="DOT_DASH") return(DOT_DASH_PEN_STYLE);else
+	return(TRANSPARENT_PEN_STYLE);
 };
-
-int get_font_style1(const char* item)
+/*
+int get_font_style1(const string& item)
 {
-            if(!strcmp(item,"decorative")) return(wxDECORATIVE);else
-            if(!strcmp(item,"normal")) return(wxDEFAULT);else
-            return(wxDEFAULT);
+            if(item=="decorative") return(DECORATIVE);else
+            if(item=="normal") return(DEFAULT);else
+            return(DEFAULT);
 // TODO!
 };
-int get_font_style2(const char* item)
+int get_font_style2(const string& item)
 {
-            if(!strcmp(item,"italics")) return(wxFONTSTYLE_ITALIC);else
-            if(!strcmp(item,"normal")) return(wxDEFAULT);else
-            return(wxDEFAULT);
+            if(item=="italics") return(FONTSTYLE_ITALIC);else
+            if(item=="normal") return(DEFAULT);else
+            return(DEFAULT);
 // TODO!
 };
-int get_font_style3(const char* item)
+int get_font_style3(const string& item)
 {
-            if(!strcmp(item,"bold")) return(wxBOLD);else
-            if(!strcmp(item,"normal")) return(wxDEFAULT);else
-            return(wxDEFAULT);
+            if(item=="bold") return(BOLD);else
+            if(item=="normal") return(DEFAULT);else
+            return(DEFAULT);
 // TODO!
-};
+};*/
 
-eWindow parse_window(const char* item)
+eWindow parse_window(const string& item)
 {
-            if(!strcmp(item,"NULL window")) return(NULL_WINDOW);else
-            if(!strcmp(item,"Main window")) return(MAIN_WINDOW);else
-            if(!strcmp(item,"Message window")) return(MESSAGE_WINDOW);else
-            if(!strcmp(item,"The core window")) return(THE_CORE_WINDOW);else
-            if(!strcmp(item,"Tutorial window")) return(TUTORIAL_WINDOW);else
-            if(!strcmp(item,"Build order window")) return(BUILD_ORDER_WINDOW);else
-            if(!strcmp(item,"Force window")) return(FORCE_WINDOW);else
-            if(!strcmp(item,"Timer window")) return(TIMER_WINDOW);else
-            if(!strcmp(item,"Statistics window")) return(STATISTICS_WINDOW);else
-            if(!strcmp(item,"Build order diagram window")) return(BO_DIAGRAM_WINDOW);else
-            if(!strcmp(item,"Build order graph window")) return(BO_GRAPH_WINDOW);else
-            if(!strcmp(item,"Info window")) return(INFO_WINDOW);else
-            return(NULL_WINDOW);
+	if(item=="NULL window") return(NULL_WINDOW);else
+	if(item=="Main window") return(MAIN_WINDOW);else
+	if(item=="Message window") return(MESSAGE_WINDOW);else
+	if(item=="The core window") return(THE_CORE_WINDOW);else
+	if(item=="Tutorial window") return(TUTORIAL_WINDOW);else
+	if(item=="Build order window") return(BUILD_ORDER_WINDOW);else
+	if(item=="Force window") return(FORCE_WINDOW);else
+	if(item=="Timer window") return(TIMER_WINDOW);else
+	if(item=="Statistics window") return(STATISTICS_WINDOW);else
+	if(item=="Build order diagram window") return(BO_DIAGRAM_WINDOW);else
+	if(item=="Build order graph window") return(BO_GRAPH_WINDOW);else
+	if(item=="Info window") return(INFO_WINDOW);else
+	return(NULL_WINDOW);
 };
 
 
 
 
-eCommand parse_commands(const char* item)
+eCommand parse_commands(const string& item)
 {
-	if(!strcmp(item,"absolute coordinates")) return(ABSOLUTE_COORDINATES_COMMAND);else
-            if(!strcmp(item,"absolute x coordinate"))  return(ABSOLUTE_X_COORDINATE_COMMAND);else
-            if(!strcmp(item,"absolute y coordinate")) return(ABSOLUTE_Y_COORDINATE_COMMAND);else
-            if(!strcmp(item,"dock with left border of")) return(DOCK_WITH_LEFT_BORDER_OF_COMMAND);else
-            if(!strcmp(item,"dock with right border of")) return(DOCK_WITH_RIGHT_BORDER_OF_COMMAND);else
-            if(!strcmp(item,"dock with lower border of")) return(DOCK_WITH_LOWER_BORDER_OF_COMMAND);else
-            if(!strcmp(item,"dock with upper border of")) return(DOCK_WITH_UPPER_BORDER_OF_COMMAND);else
-            if(!strcmp(item,"dock center inside of")) return(DOCK_CENTER_INSIDE_OF_COMMAND);else
-            if(!strcmp(item,"dock left inside of")) return(DOCK_LEFT_INSIDE_OF_COMMAND);else
-            if(!strcmp(item,"dock right inside of")) return(DOCK_RIGHT_INSIDE_OF_COMMAND);else
-            if(!strcmp(item,"dock top inside of")) return(DOCK_TOP_INSIDE_OF_COMMAND);else
-            if(!strcmp(item,"dock bottom inside of")) return(DOCK_BOTTOM_INSIDE_OF_COMMAND);else
-            if(!strcmp(item,"calculate maxsize")) return(CALCULATE_MAXSIZE_COMMAND);else
-            if(!strcmp(item,"calculate maxwidth")) return(CALCULATE_MAXWIDTH_COMMAND);else
-            if(!strcmp(item,"calculate maxheight")) return(CALCULATE_MAXHEIGHT_COMMAND);else
-            if(!strcmp(item,"same as above")) return(SAME_AS_ABOVE_COMMAND);else
-            return(NO_COMMAND);
+	if(item=="absolute coordinates") return(ABSOLUTE_COORDINATES_COMMAND);else
+    if(item=="absolute x coordinate") return(ABSOLUTE_X_COORDINATE_COMMAND);else
+    if(item=="absolute y coordinate") return(ABSOLUTE_Y_COORDINATE_COMMAND);else
+    if(item=="dock with left border of") return(DOCK_WITH_LEFT_BORDER_OF_COMMAND);else
+    if(item=="dock with right border of") return(DOCK_WITH_RIGHT_BORDER_OF_COMMAND);else
+    if(item=="dock with lower border of") return(DOCK_WITH_LOWER_BORDER_OF_COMMAND);else
+	if(item=="dock with upper border of") return(DOCK_WITH_UPPER_BORDER_OF_COMMAND);else
+	if(item=="dock center inside of") return(DOCK_CENTER_INSIDE_OF_COMMAND);else
+	if(item=="dock left inside of") return(DOCK_LEFT_INSIDE_OF_COMMAND);else
+	if(item=="dock right inside of") return(DOCK_RIGHT_INSIDE_OF_COMMAND);else
+	if(item=="dock top inside of") return(DOCK_TOP_INSIDE_OF_COMMAND);else
+	if(item=="dock bottom inside of") return(DOCK_BOTTOM_INSIDE_OF_COMMAND);else
+	if(item=="calculate maxsize") return(CALCULATE_MAXSIZE_COMMAND);else
+	if(item=="calculate maxwidth") return(CALCULATE_MAXWIDTH_COMMAND);else
+	if(item=="calculate maxheight") return(CALCULATE_MAXHEIGHT_COMMAND);else
+	if(item=="same as above") return(SAME_AS_ABOVE_COMMAND);else
+	return(NO_COMMAND);
 };
 
-void parse_complete_command(const char p[50][1024], eCommand* e, wxRect& rect)
+// Rueckgabewert: Richtung
+
+eArrangeDirection parse_complete_command(const string* p, eCommand* e, Rect& rect)
 {
 	int x=-1;int y=-1;int dx=-1;int dy=-1;
 	bool xpart=false; bool ypart=false; bool xypart=false; bool dxpart=false; bool dypart=false;
 	bool window=false;
+
+// additional windows: arrange left to right = 0, arrange right to left = 1, arrange top to down = 2, arrange down to top = 3 :)
+	eArrangeDirection direction=ARRANGE_LEFT_TO_RIGHT;
 	
 	for(int i = 2; i <50;i++)
 	{
@@ -428,7 +469,7 @@ void parse_complete_command(const char p[50][1024], eCommand* e, wxRect& rect)
 		else
 		if(xpart)
 		{
-			x=atoi(p[i]);
+			x=atoi(p[i].c_str());
 			xpart=false;
 			if(xypart)
 			{
@@ -438,18 +479,18 @@ void parse_complete_command(const char p[50][1024], eCommand* e, wxRect& rect)
 		} else
 		if(ypart)
 		{
-			y=atoi(p[i]);
+			y=atoi(p[i].c_str());
 			ypart=false;
 			dxpart=true;
 		} else
 		if(dxpart)
 		{
-			dx=atoi(p[i]);
+			dx=atoi(p[i].c_str());
 			dxpart=false;dypart=true;
 		} else
 		if(dypart)
 		{
-			dy=atoi(p[i]);
+			dy=atoi(p[i].c_str());
 			dypart=false;
 		} else
 		{
@@ -459,30 +500,30 @@ void parse_complete_command(const char p[50][1024], eCommand* e, wxRect& rect)
 				case ABSOLUTE_COORDINATES_COMMAND:xpart=true;xypart=true;break;
             	case ABSOLUTE_X_COORDINATE_COMMAND:xpart=true;break;
 				case ABSOLUTE_Y_COORDINATE_COMMAND:ypart=true;break;
-				case DOCK_WITH_LEFT_BORDER_OF_COMMAND:e[i]=k;window=true;break;
-				case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:e[i]=k;window=true;break;
-				case DOCK_WITH_LOWER_BORDER_OF_COMMAND:e[i]=k;window=true;dxpart=true;break;
-				case DOCK_WITH_UPPER_BORDER_OF_COMMAND:e[i]=k;window=true;dxpart=true;break;
+				case DOCK_WITH_LEFT_BORDER_OF_COMMAND:e[i]=k;window=true;direction=ARRANGE_LEFT_TO_RIGHT;break;
+				case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:e[i]=k;window=true;direction=ARRANGE_RIGHT_TO_LEFT;break;
+				case DOCK_WITH_LOWER_BORDER_OF_COMMAND:e[i]=k;window=true;dxpart=true;direction=ARRANGE_TOP_TO_DOWN;break;
+				case DOCK_WITH_UPPER_BORDER_OF_COMMAND:e[i]=k;window=true;dxpart=true;direction=ARRANGE_DOWN_TO_TOP;break;
 				case DOCK_CENTER_INSIDE_OF_COMMAND:e[i]=k;window=true;dxpart=true;break;
-				case DOCK_LEFT_INSIDE_OF_COMMAND:e[i]=k;window=true;break;
-				case DOCK_RIGHT_INSIDE_OF_COMMAND:e[i]=k;window=true;break;
-				case DOCK_TOP_INSIDE_OF_COMMAND:e[i]=k;window=true;dxpart=true;break;
-				case DOCK_BOTTOM_INSIDE_OF_COMMAND:e[i]=k;window=true;dxpart=true;break;
+				case DOCK_LEFT_INSIDE_OF_COMMAND:e[i]=k;window=true;direction=ARRANGE_LEFT_TO_RIGHT;break;
+				case DOCK_RIGHT_INSIDE_OF_COMMAND:e[i]=k;window=true;direction=ARRANGE_RIGHT_TO_LEFT;break;
+				case DOCK_TOP_INSIDE_OF_COMMAND:e[i]=k;window=true;dxpart=true;direction=ARRANGE_TOP_TO_DOWN;break;
+				case DOCK_BOTTOM_INSIDE_OF_COMMAND:e[i]=k;window=true;dxpart=true;direction=ARRANGE_DOWN_TO_TOP;break;
 				default:e[i]=k;break;			
 			};
 			
 		}
 	};
-	rect=wxRect(x,y,dx,dy);
+	rect=Rect(x,y,dx,dy);
+	return(direction);
 };
 
-void UI_Theme::loadDataFiles()
+void UI_Theme::loadDataFiles(DC* dc)
 {
 	const int MAX_PARAMETERS = 50;
-	char line[1024],old[1024];
-    FILE* pFile;
+	char line[1024], old[1024];
     char* buffer;
-    char p[MAX_PARAMETERS][1024];
+    string p[MAX_PARAMETERS];
 	int v[MAX_PARAMETERS];
 	int ln=0;
 
@@ -509,30 +550,36 @@ void UI_Theme::loadDataFiles()
 
 	int current_line = 0;
 	
-	char dataFile[12];
-	
-	sprintf(dataFile, "data.txt"); //TODO
+	string dataFile("data.txt"); //TODO
 
  	for(int i=MAX_PARAMETERS;i--;)
 	{
-		strcpy(p[i],"");
+		p[i]="";
 		v[i]=0;
 	};
-                                                                                                                                                           
-    if((pFile = fopen (dataFile,"r"))==NULL)
+
+	ifstream pFile(dataFile.c_str());
+	
+	if(!pFile.is_open())
     {
-        debug.toLog(0,"ERROR: (UI_Theme::loadDataFiles) %s: Could not open file!",dataFile);
+        debug.toLog(0,"ERROR: (UI_Theme::loadDataFiles) %s: Could not open file!",dataFile.c_str());
         return;
     }
-                                                                                                                                                            
-    while(fgets(line,sizeof(line),pFile)!=NULL)
+	
+    while(pFile.getline(line,1024))
     {
+		if(pFile.fail())
+		{
+	        debug.toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Long line!",dataFile.c_str());
+			pFile.clear(pFile.rdstate() & ~ios::failbit);
+		};
+			
         ++ln;
-        line[strlen(line)-1]='\0';
+        //line[strlen(line)-1]='\0';
         if((line[0]=='#')||(line[0]=='\0')||(line=="")) continue;
 		for(int i=MAX_PARAMETERS;i--;)
 		{
-			strcpy(p[i],"");
+			p[i]="";
 			v[i]=0;
 		};
 		char* line2=line;		
@@ -543,28 +590,28 @@ void UI_Theme::loadDataFiles()
 		
         strcpy(old,line2);
 		
-        if((buffer=strtok(line2,",\0"))!=NULL) 
-			strcpy(p[0],buffer);
+        if((buffer=strtok(line2,",\0"))!=NULL)
+			p[0]=buffer;
 		int k=1;
 		
 		while(((buffer=strtok(NULL,",\0"))!=NULL)&&(k<MAX_PARAMETERS))
 		{
 	        while(((*buffer)==32)||((*buffer)==9))
     	        buffer++;
-			strcpy(p[k],buffer);
+			p[k]=buffer;
 			k++;
 		};
         if((buffer=strtok(NULL,",\0"))!=NULL)
         {
-            debug.toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Line %d [%s]: Too many parameters.",dataFile,ln,old);
+            debug.toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Line %d [%s]: Too many parameters.",dataFile.c_str(),ln,old);
             continue;
         }
 		for(int j=0;j<MAX_PARAMETERS;j++)
-			v[j]=atoi(p[j]);
+			v[j]=atoi(p[j].c_str());
                                                                                                                                                             
 /*        if((value1<0)||(value2<0)||(value3<0)||(value4<0)||(value5<0))
         {
-            debug.toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Line %d [%s]: Value below zero.",dataFile,ln,old);
+            debug.toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Line %d [%s]: Value below zero.",dataFile.c_str(),ln,old);
             continue;
         }*/
 
@@ -574,10 +621,10 @@ void UI_Theme::loadDataFiles()
 			mode=getDataType(p[0]);
 			if(mode==ZERO_DATA_TYPE)
             {
-                if(!strcmp(p[0],"@END"))
-                    debug.toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Line %d [%s]: Lonely @END.",dataFile,ln,old);
+                if(p[0]=="@END")
+                    debug.toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Line %d [%s]: Lonely @END.",dataFile.c_str(),ln,old);
                 else
-                    debug.toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Line %d [%s]: Line is outside a block but is not marked as comment.",dataFile,ln,old);
+                    debug.toLog(0,"WARNING: (UI_Theme::loadDataFiles) %s: Line %d [%s]: Line is outside a block but is not marked as comment.",dataFile.c_str(),ln,old);
             }
 			sub_mode=getSubDataType(mode);
 			sub_sub_mode=getSubSubDataType(mode);
@@ -585,7 +632,7 @@ void UI_Theme::loadDataFiles()
         }
         else if(mode!=ZERO_DATA_TYPE)
 		{
-            if(!strcmp(p[0],"@END"))
+            if(p[0]=="@END")
 			{
 				// @END of 1st sub area => return to begin of data type
 	            if((sub_mode!=ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE)&&((current_language!=ZERO_LANGUAGE)||(current_resolution!=ZERO_RESOLUTION)||(current_theme!=ZERO_THEME)))
@@ -638,14 +685,14 @@ void UI_Theme::loadDataFiles()
 			{
 				switch(mode)
 				{
-			        case STRING_DATA_TYPE:stringList[current_language][current_line]=new wxString(p[1]);break;
-		    	    case COLOUR_DATA_TYPE:colourList[current_theme][current_line]=new wxColour(v[1],v[2],v[3]);break;
-		        	case BRUSH_DATA_TYPE:brushList[current_theme][current_line]=new wxBrush(wxColour(v[1],v[2],v[3]),get_brush_style(p[4]));break;
+			        case STRING_DATA_TYPE:stringList[current_language][current_line]=new string(p[1]);break;
+		    	    case COLOUR_DATA_TYPE:colorList[current_theme][current_line]=new Color(dc->GetSurface(),v[1],v[2],v[3]);break;
+		        	case BRUSH_DATA_TYPE:brushList[current_theme][current_line]=new Brush(dc->GetSurface(),v[1],v[2],v[3],get_brush_style(p[4]));break;
 					default:break;
 				};
 				current_line++;
 			}
-			// 0 ebenen -> buttons :)
+			// 0 ebenen -> buttons :) BUTTON_DATA_TYPE?? TODO
 			else if((sub_mode==ZERO_SUB_DATA_TYPE)&&(sub_sub_mode==ZERO_SUB_SUB_DATA_TYPE))
 			{
 				buttonAnimationList[current_line] = new ButtonAnimation;
@@ -655,8 +702,8 @@ void UI_Theme::loadDataFiles()
 				{
 					buttonAnimationList[current_line]->startBrush[i]=(eBrush)(v[0*MAX_BUTTON_ANIMATION_PHASES+3+i]);
 					buttonAnimationList[current_line]->endBrush[i]=(eBrush)(v[1*MAX_BUTTON_ANIMATION_PHASES+3+i]);
-					buttonAnimationList[current_line]->startTextColour[i]=(eColour)(v[2*MAX_BUTTON_ANIMATION_PHASES+3+i]);
-					buttonAnimationList[current_line]->endTextColour[i]=(eColour)(v[3*MAX_BUTTON_ANIMATION_PHASES+3+i]);
+					buttonAnimationList[current_line]->startTextColor[i]=(eColor)(v[2*MAX_BUTTON_ANIMATION_PHASES+3+i]);
+					buttonAnimationList[current_line]->endTextColor[i]=(eColor)(v[3*MAX_BUTTON_ANIMATION_PHASES+3+i]);
 					buttonAnimationList[current_line]->startBorderPen[i]=(ePen)(v[4*MAX_BUTTON_ANIMATION_PHASES+3+i]);
 					buttonAnimationList[current_line]->endBorderPen[i]=(ePen)(v[5*MAX_BUTTON_ANIMATION_PHASES+3+i]);
 					buttonAnimationList[current_line]->bitmap[i]=(eBitmap)(v[6*MAX_BUTTON_ANIMATION_PHASES+3+i]);
@@ -683,25 +730,23 @@ void UI_Theme::loadDataFiles()
 				{
 			        case FONT_DATA_TYPE:
 						{
-							fontList[current_resolution][current_language][current_line]=new 
-								wxFont(v[1], get_font_style1(p[2]), get_font_style2(p[3]), get_font_style3(p[4]), false, _T(""), wxFONTENCODING_DEFAULT);
+                            string t="fonts/"+p[1]+".ttf";
+							fontList[current_resolution][current_language][current_line]=new Font(t, v[2]/*, get_font_style1(p[2]), get_font_style2(p[3]), get_font_style3(p[4]), false, _T(""), FONTENCODING_DEFAULT*/);
 						};break;
 			        case BITMAP_DATA_TYPE:
 						{
-							bitmapList[current_resolution][current_theme][current_line]=new wxBitmap();
-							char t[30];
-							sprintf(t,"bitmaps/%s.bmp",p[1]);
-							bitmapList[current_resolution][current_theme][current_line]->LoadFile(t,wxBITMAP_TYPE_BMP);
+							string t="bitmaps/"+p[1]+".bmp";
+							bitmapList[current_resolution][current_theme][current_line]=new Bitmap(t);
 						};break;
-			        case PEN_DATA_TYPE:penList[current_resolution][current_theme][current_line]=new wxPen(wxColour(v[2],v[3],v[4]),v[1],get_pen_style(p[5]));break;
+			        case PEN_DATA_TYPE:penList[current_resolution][current_theme][current_line]=new Pen(dc->GetSurface(),v[2],v[3],v[4],v[1],get_pen_style(p[5]));break;
 					case RECT_DATA_TYPE:
 						{
-							rectList[current_resolution][current_tab][parse_window(p[1])]=new wxRect();
-							parse_complete_command(p, &(trectList[current_resolution][current_tab][parse_window(p[1])][0]), *(rectList[current_resolution][current_tab][parse_window(p[1])]));
+							rectList[current_resolution][current_tab][parse_window(p[1])]=new Rect();
+							arrangeDirection[current_resolution][current_tab][parse_window(p[1])]=parse_complete_command(p, &(trectList[current_resolution][current_tab][parse_window(p[1])][0]), *(rectList[current_resolution][current_tab][parse_window(p[1])]));
 						};break;
 			        case MAX_RECT_DATA_TYPE:
 						{
-							maxRectList[current_resolution][current_tab][parse_window(p[1])]=new wxRect();
+							maxRectList[current_resolution][current_tab][parse_window(p[1])]=new Rect();
                             parse_complete_command(p, &(tmaxRectList[current_resolution][current_tab][parse_window(p[1])][0]), *(maxRectList[current_resolution][current_tab][parse_window(p[1])]));
 						};break;					
 					default:break;
@@ -720,35 +765,35 @@ while(change)
 			for(int k=0;k<MAX_WINDOWS;k++)
 				if(rectList[i][j][k])
 				{
-					int oldx=rectList[i][j][k]->GetX();
-					int oldy=rectList[i][j][k]->GetY();
+					int oldx=rectList[i][j][k]->GetLeft();
+					int oldy=rectList[i][j][k]->GetTop();
 					for(int l=1;l<MAX_PARAMETERS;l++)
 						switch(trectList[i][j][k][l])
 						{
 							case NO_COMMAND:break;
 				            case DOCK_WITH_LEFT_BORDER_OF_COMMAND:
-								rectList[i][j][k]->SetX(-5+rectList[i][j][trectList[i][j][k][l+1]]->GetX()-rectList[i][j][k]->GetWidth());l++;break;
+								rectList[i][j][k]->SetLeft(-5+rectList[i][j][trectList[i][j][k][l+1]]->GetLeft()-rectList[i][j][k]->GetWidth());l++;break;
 							case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:
-								rectList[i][j][k]->SetX(5+rectList[i][j][trectList[i][j][k][l+1]]->GetX()+rectList[i][j][trectList[i][j][k][l+1]]->GetWidth());l++;break;
+								rectList[i][j][k]->SetLeft(5+rectList[i][j][trectList[i][j][k][l+1]]->GetLeft()+rectList[i][j][trectList[i][j][k][l+1]]->GetWidth());l++;break;
 							case DOCK_WITH_LOWER_BORDER_OF_COMMAND:
-                                rectList[i][j][k]->SetY(5+rectList[i][j][trectList[i][j][k][l+1]]->GetY()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight());l++;break;
+                                rectList[i][j][k]->SetTop(5+rectList[i][j][trectList[i][j][k][l+1]]->GetTop()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight());l++;break;
 				            case DOCK_WITH_UPPER_BORDER_OF_COMMAND:
-								rectList[i][j][k]->SetY(-5+rectList[i][j][trectList[i][j][k][l+1]]->GetX()-rectList[i][j][k]->GetHeight());l++;break;
+								rectList[i][j][k]->SetTop(-5+rectList[i][j][trectList[i][j][k][l+1]]->GetLeft()-rectList[i][j][k]->GetHeight());l++;break;
 								
 				            case DOCK_CENTER_INSIDE_OF_COMMAND:
-								rectList[i][j][k]->SetX((rectList[i][j][trectList[i][j][k][l+1]]->GetX()+rectList[i][j][trectList[i][j][k][l+1]]->GetWidth()-rectList[i][j][k]->GetWidth())/2);
-								rectList[i][j][k]->SetY((rectList[i][j][trectList[i][j][k][l+1]]->GetY()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight()-rectList[i][j][k]->GetHeight())/2);l++;break;
+								rectList[i][j][k]->SetLeft((rectList[i][j][trectList[i][j][k][l+1]]->GetLeft()+rectList[i][j][trectList[i][j][k][l+1]]->GetWidth()-rectList[i][j][k]->GetWidth())/2);
+								rectList[i][j][k]->SetTop((rectList[i][j][trectList[i][j][k][l+1]]->GetTop()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight()-rectList[i][j][k]->GetHeight())/2);l++;break;
 				            case DOCK_LEFT_INSIDE_OF_COMMAND:
-								rectList[i][j][k]->SetX(10+rectList[i][j][trectList[i][j][k][l+1]]->GetX());l++;break;
+								rectList[i][j][k]->SetLeft(10+rectList[i][j][trectList[i][j][k][l+1]]->GetLeft());l++;break;
 				            case DOCK_RIGHT_INSIDE_OF_COMMAND:
-								rectList[i][j][k]->SetX(-10+rectList[i][j][trectList[i][j][k][l+1]]->GetX()+rectList[i][j][trectList[i][j][k][l+1]]->GetWidth()-rectList[i][j][k]->GetWidth());l++;break;
+								rectList[i][j][k]->SetLeft(-10+rectList[i][j][trectList[i][j][k][l+1]]->GetLeft()+rectList[i][j][trectList[i][j][k][l+1]]->GetWidth()-rectList[i][j][k]->GetWidth());l++;break;
 				            case DOCK_TOP_INSIDE_OF_COMMAND:;
-								rectList[i][j][k]->SetY(10+rectList[i][j][trectList[i][j][k][l+1]]->GetY());l++;break;
+								rectList[i][j][k]->SetTop(10+rectList[i][j][trectList[i][j][k][l+1]]->GetTop());l++;break;
 				            case DOCK_BOTTOM_INSIDE_OF_COMMAND:
-								rectList[i][j][k]->SetY(-10+rectList[i][j][trectList[i][j][k][l+1]]->GetY()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight()-rectList[i][j][k]->GetHeight());l++;break;
+								rectList[i][j][k]->SetTop(-30+rectList[i][j][trectList[i][j][k][l+1]]->GetTop()+rectList[i][j][trectList[i][j][k][l+1]]->GetHeight()-rectList[i][j][k]->GetHeight());l++;break;
 							default:debug.toLog(0,"error... same as above oder so");break; // TODO ERROR
 						}
-					if((rectList[i][j][k]->GetX()!=oldx)||(rectList[i][j][k]->GetY()!=oldy))
+					if((rectList[i][j][k]->GetLeft()!=oldx)||(rectList[i][j][k]->GetTop()!=oldy))
 					{
 						change=1;
 					}
@@ -763,34 +808,34 @@ while(change)
             for(int k=0;k<MAX_WINDOWS;k++)
                 if(maxRectList[i][j][k])
                 {
-                    int oldx=maxRectList[i][j][k]->GetX();
-                    int oldy=maxRectList[i][j][k]->GetY();
+                    int oldx=maxRectList[i][j][k]->GetLeft();
+                    int oldy=maxRectList[i][j][k]->GetTop();
                     for(int l=1;l<MAX_PARAMETERS;l++)
                         switch(tmaxRectList[i][j][k][l])
                         {
                             case NO_COMMAND:break;
                             case DOCK_WITH_LEFT_BORDER_OF_COMMAND:
-                                maxRectList[i][j][k]->SetX(5+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetX()-maxRectList[i][j][k]->GetWidth());l++;break;
+                                maxRectList[i][j][k]->SetLeft(5+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetLeft()-maxRectList[i][j][k]->GetWidth());l++;break;
                             case DOCK_WITH_RIGHT_BORDER_OF_COMMAND:
-                                maxRectList[i][j][k]->SetX(-5+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetX()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetWidth());l++;break;
+                                maxRectList[i][j][k]->SetLeft(-5+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetLeft()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetWidth());l++;break;
                             case DOCK_WITH_LOWER_BORDER_OF_COMMAND:
-                                maxRectList[i][j][k]->SetY(5+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetY()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetHeight());l++;break;
+                                maxRectList[i][j][k]->SetTop(5+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetTop()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetHeight());l++;break;
                             case DOCK_WITH_UPPER_BORDER_OF_COMMAND:
-                                maxRectList[i][j][k]->SetY(-5+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetX()-maxRectList[i][j][k]->GetHeight());l++;break;
+                                maxRectList[i][j][k]->SetTop(-5+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetLeft()-maxRectList[i][j][k]->GetHeight());l++;break;
                                                                                                                                                             
                             case DOCK_CENTER_INSIDE_OF_COMMAND:                                 
-								maxRectList[i][j][k]->SetX(maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetX()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetWidth()-maxRectList[i][j][k]->GetWidth());
-                                maxRectList[i][j][k]->SetY(maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetY()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetHeight()-maxRectList[i][j][k]->GetHeight());l++;break;
+								maxRectList[i][j][k]->SetLeft(maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetLeft()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetWidth()-maxRectList[i][j][k]->GetWidth());
+                                maxRectList[i][j][k]->SetTop(maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetTop()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetHeight()-maxRectList[i][j][k]->GetHeight());l++;break;
                             case DOCK_LEFT_INSIDE_OF_COMMAND:
-                                maxRectList[i][j][k]->SetX(10+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetX());l++;break;
+                                maxRectList[i][j][k]->SetLeft(10+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetLeft());l++;break;
                             case DOCK_RIGHT_INSIDE_OF_COMMAND:
-                                maxRectList[i][j][k]->SetX(-10+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetX()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetWidth()-maxRectList[i][j][k]->GetWidth());l++;break;
+                                maxRectList[i][j][k]->SetLeft(-10+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetLeft()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetWidth()-maxRectList[i][j][k]->GetWidth());l++;break;
                             case DOCK_TOP_INSIDE_OF_COMMAND:;
-                                maxRectList[i][j][k]->SetY(10+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetY());l++;break;
+                                maxRectList[i][j][k]->SetTop(10+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetTop());l++;break;
                             case DOCK_BOTTOM_INSIDE_OF_COMMAND:
-                                maxRectList[i][j][k]->SetY(-10+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetY()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetHeight()-maxRectList[i][j][k]->GetHeight());l++;break;
+                                maxRectList[i][j][k]->SetTop(-10+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetTop()+maxRectList[i][j][tmaxRectList[i][j][k][l+1]]->GetHeight()-maxRectList[i][j][k]->GetHeight());l++;break;
 							case CALCULATE_MAXHEIGHT_COMMAND:maxRectList[i][j][k]->SetPosition(rectList[i][j][k]->GetPosition());
-															 maxRectList[i][j][k]->SetSize(wxSize(rectList[i][j][k]->GetWidth(), rectList[i][j][MAIN_WINDOW]->GetHeight() + rectList[i][j][MAIN_WINDOW]->GetY() - rectList[i][j][k]->GetY()));break;
+															 maxRectList[i][j][k]->SetSize(Size(rectList[i][j][k]->GetWidth(), rectList[i][j][MAIN_WINDOW]->GetHeight() + rectList[i][j][MAIN_WINDOW]->GetTop() - rectList[i][j][k]->GetTop() - 30));break;
 															 // main window mal hernehmen... TODO andere Fenster miteinberechnen!!
 							
 							case CALCULATE_MAXSIZE_COMMAND:
@@ -802,7 +847,7 @@ while(change)
 								};break;
                             default:debug.toLog(0,"max error... same as above oder so");break; // TODO ERROR
                         }
-                    if((maxRectList[i][j][k]->GetX()!=oldx)||(maxRectList[i][j][k]->GetY()!=oldy))
+                    if((maxRectList[i][j][k]->GetLeft()!=oldx)||(maxRectList[i][j][k]->GetTop()!=oldy))
                         change=1;
                 }
 }
@@ -813,7 +858,7 @@ while(change)
             for(int k=0;k<MAX_WINDOWS;k++)
                 if(rectList[i][j][k])
                 {
-					debug.toLog(0,"[%i/%i/%i] x: %4i, y: %4i, dx: %4i, dy: %4i [max: x: %4i, y: %4i, dx: %4i, dy: %4i]", i, j, k, rectList[i][j][k]->GetX(), rectList[i][j][k]->GetY(), rectList[i][j][k]->GetWidth(), rectList[i][j][k]->GetHeight(), maxRectList[i][j][k]->GetX(), maxRectList[i][j][k]->GetY(), maxRectList[i][j][k]->GetWidth(), maxRectList[i][j][k]->GetHeight());
+					debug.toLog(0,"[%i/%i/%i] x: %4i, y: %4i, dx: %4i, dy: %4i [max: x: %4i, y: %4i, dx: %4i, dy: %4i]", i, j, k, rectList[i][j][k]->GetLeft(), rectList[i][j][k]->GetTop(), rectList[i][j][k]->GetWidth(), rectList[i][j][k]->GetHeight(), maxRectList[i][j][k]->GetLeft(), maxRectList[i][j][k]->GetTop(), maxRectList[i][j][k]->GetWidth(), maxRectList[i][j][k]->GetHeight());
 				}*/
 
 					
@@ -821,95 +866,6 @@ while(change)
 
 
 
-};
-
-
-wxColour UI_Theme::mixColour(wxColour* id1, wxColour* id2)
-{
-	return(wxColour(id1->Red()  +id2->Red(), 
-					id1->Green()+id2->Green(), 
-					id1->Blue() +id2->Blue()));
-					
-};
-
-wxColour UI_Theme::mixColour(wxColour* id1, wxColour* id2, int gradient)
-{
-	return(wxColour((id1->Red()*gradient  +id2->Red()*(100-gradient))/100, 
-					(id1->Green()*gradient+id2->Green()*(100-gradient))/100, 
-					(id1->Blue()*gradient +id2->Blue()*(100-gradient))/100));
-					
-};
-
-wxColour UI_Theme::brightenColour(wxColour* id, int brightness)
-{
-    return(wxColour(id->Red()  +brightness,
-					id->Green()+brightness,
-					id->Blue() +brightness));
-};
-
-wxColour UI_Theme::lookUpMixedColour(eColour id1, eColour id2)
-{
-	return(mixColour(lookUpColour(id1), lookUpColour(id2)));
-};
-
-wxColour UI_Theme::lookUpMixedColour(eColour id1, eColour id2, int gradient)
-{
-	return(mixColour(lookUpColour(id1), lookUpColour(id2), gradient));
-};
-
-wxColour UI_Theme::lookUpBrightenedColour(eColour id, int brightness)
-{
-	return(brightenColour(lookUpColour(id), brightness));
-};
-
-wxBrush UI_Theme::lookUpBrightenedBrush(eBrush id, int brightness)
-{
-    return(wxBrush(brightenColour(&(lookUpBrush(id)->GetColour()), brightness), lookUpBrush(id)->GetStyle()));
-};
-	
-wxBrush UI_Theme::lookUpMixedBrush(eBrush id1, eColour id2)
-{
-    return(wxBrush(mixColour(&(lookUpBrush(id1)->GetColour()), lookUpColour(id2)),lookUpBrush(id1)->GetStyle()));
-};
-
-wxBrush UI_Theme::lookUpMixedBrush(eBrush id1, eColour id2, int gradient)
-{
-    return(wxBrush(mixColour(&(lookUpBrush(id1)->GetColour()), lookUpColour(id2), gradient),lookUpBrush(id1)->GetStyle()));
-};
-
-wxBrush UI_Theme::lookUpMixedBrush(eBrush id1, eBrush id2)
-{
-    return(wxBrush(mixColour(&(lookUpBrush(id1)->GetColour()), &(lookUpBrush(id2)->GetColour())),lookUpBrush(id1)->GetStyle()));
-};
-
-wxBrush UI_Theme::lookUpMixedBrush(eBrush id1, eBrush id2, int gradient)
-{
-    return(wxBrush(mixColour(&(lookUpBrush(id1)->GetColour()), &(lookUpBrush(id2)->GetColour()), gradient),lookUpBrush(id1)->GetStyle()));
-};
-
-wxPen UI_Theme::lookUpBrightenedPen(ePen id, int brightness)
-{
-	    return(wxPen(brightenColour(&(lookUpPen(id)->GetColour()), brightness), lookUpPen(id)->GetWidth(), lookUpPen(id)->GetStyle()));
-};
-                                                                                                                  
-wxPen UI_Theme::lookUpMixedPen(ePen id1, ePen id2)
-{
-	    return(wxPen(mixColour(&(lookUpPen(id1)->GetColour()), &(lookUpPen(id2)->GetColour())), lookUpPen(id1)->GetWidth(), lookUpPen(id1)->GetStyle()));
-};
-                                                                                                                  
-wxPen UI_Theme::lookUpMixedPen(ePen id1, ePen id2, int gradient)
-{
-	    return(wxPen(mixColour(&(lookUpPen(id1)->GetColour()), &(lookUpPen(id2)->GetColour()), gradient), lookUpPen(id1)->GetWidth(), lookUpPen(id1)->GetStyle()));
-};
-
-wxPen UI_Theme::lookUpMixedPen(ePen id1, eColour id2)
-{
-	    return(wxPen(mixColour(&(lookUpPen(id1)->GetColour()), lookUpColour(id2)), lookUpPen(id1)->GetWidth(), lookUpPen(id1)->GetStyle()));
-};
-                                                                                                                  
-wxPen UI_Theme::lookUpMixedPen(ePen id1, eColour id2, int gradient)
-{
-	    return(wxPen(mixColour(&(lookUpPen(id1)->GetColour()), lookUpColour(id2), gradient), lookUpPen(id1)->GetWidth(), lookUpPen(id1)->GetStyle()));
 };
 
 

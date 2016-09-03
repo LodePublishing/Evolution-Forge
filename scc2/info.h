@@ -3,7 +3,7 @@
 
 #include "UI_Window.h"
 #include "../scc2dll/anarace.h"
-#include "list.h"
+#include "order.h"
 
 const char error_message[ERROR_MESSAGES][25]=
 {
@@ -20,32 +20,29 @@ const char error_message[ERROR_MESSAGES][25]=
 class InfoWindow:public UI_Window
 {
         public:
-                InfoWindow(UI_Object* parent, wxRect rahmen, wxRect maxSize, ANARACE* anarace);
+                InfoWindow(UI_Object* parent, ANARACE* anarace, const int windowNumber);
                 ~InfoWindow();
                 void resetData();
 				void process();
-                void draw(wxDC* dc);
+                void draw(DC* dc);
 
-		int getBx();
-		int getBWidth();
-		int getUnit();
-		int getKey();
+		const int getBx() const;
+		const int getBWidth() const;
+		const int getUnit() const;
 
-		void setBx(int bx);
-		void setBWidth(int bwidth);
-		void setUnit(int unit);
-		void setKey(int key);
+		void setBx(const int bx);
+		void setBWidth(const int bwidth);
+		void setUnit(const int unit);
+		void setIP(const int key);
+		const int getIP() const; 
 
-		void setOrder(ORDER* order);
-		ORDER* getOrder();
-
-		int isSet();
-		void setupOk(int ok); // already setuped by bowindow
-        private:
+		const int isSet() const;
+		void setupOk(const int ok); // already setuped by bowindow
+	private:
 		int bx,bwidth,unit,key;
 		int setup;
-		ORDER* order;
-                ANARACE* anarace;
+		int IP;
+		ANARACE* anarace;
 };
 
 #endif

@@ -1,16 +1,19 @@
 #include "UI_Object.h"
+#include<sys/timeb.h>
+#include<sys/types.h>
 
-UI_Object::UI_Object(UI_Object* parent, const wxRect relativeRect, const wxRect maxSize)
+UI_Object::UI_Object(UI_Object* parent, const Rect relativeRect, const Rect maxRect)
 {
 	this->parent=0;
 	this->relativeRect=relativeRect;
 	disabledFlag=false;
 	isFreeMove=true;
-	this->maxSize=maxSize;
+	this->maxRect=maxRect;
 	doAdjustments=0;
 	startRect=relativeRect;
 	targetRect=relativeRect;
-	absoluteCoord=wxPoint(0,0);
+	absoluteCoord=Point(0,0);
+	startTime=0;
 
 	shown=true;
 	nextBrother = prevBrother = this;
@@ -44,9 +47,7 @@ UI_Object* UI_Object::getChildren()
 };
 
 
-
-
-void UI_Object::setAbsoluteCoord(wxPoint p)
+void UI_Object::setAbsoluteCoord(Point p)
 {
 	absoluteCoord=p;
 };
@@ -61,7 +62,10 @@ void UI_Object::setDoAdjustments(const int doAdjustments)
 	this->doAdjustments=doAdjustments;
 };
 
-
+const Rect UI_Object::getMaxRect()
+{
+	return(maxRect);
+};
 
 int UI_Object::getTargetWidth()
 {
@@ -78,17 +82,25 @@ void UI_Object::setFreeMove(const bool isFreeMove)
 	this->isFreeMove=isFreeMove;
 };
 
-void UI_Object::adjustRelativeRect(wxRect edge)
+void UI_Object::forceSmallY(const int dy)
+{
+	relativeRect.y+=dy;relativeRect.height-=dy;
+	maxRect.y+=dy;maxRect.height-=dy;
+    startRect=relativeRect;
+    targetRect=relativeRect;
+};
+
+void UI_Object::adjustRelativeRect(Rect edge)
 {
 	//targetRect = edge;
 
 //	if((edge.x!=targetRect.x)&&(edge.width==targetRect.width))
 //	{
 // an Raender anpassen		
-		if((edge.x<maxSize.x) && (!isFreeMove))
-			edge.x=maxSize.x;
-		if((edge.x+edge.width>maxSize.x+maxSize.width)&&(!isFreeMove))
-			edge.width=maxSize.x+maxSize.width-edge.x;
+		if((edge.x<maxRect.x) && (!isFreeMove))
+			edge.x=maxRect.x;
+		if((edge.x+edge.width>maxRect.x+maxRect.width)&&(!isFreeMove))
+			edge.width=maxRect.x+maxRect.width-edge.x;
 // neues Ziel?		
 		if(edge.x!=targetRect.x)
 			startRect.x=getRelativeLeftBound();	
@@ -100,10 +112,10 @@ void UI_Object::adjustRelativeRect(wxRect edge)
 //	};
 
 // an Raender anpassen
-        if((edge.y<maxSize.y) && (!isFreeMove))
-            edge.y=maxSize.y;
-        if((edge.y+edge.height>maxSize.y+maxSize.height)&&(!isFreeMove))
-            edge.height=maxSize.y+maxSize.height-edge.y;
+        if((edge.y<maxRect.y) && (!isFreeMove))
+            edge.y=maxRect.y;
+        if((edge.y+edge.height>maxRect.y+maxRect.height)&&(!isFreeMove))
+            edge.height=maxRect.y+maxRect.height-edge.y;
 // neues Ziel?
         if(edge.y!=targetRect.y)
             startRect.y=getRelativeUpperBound();
@@ -119,64 +131,64 @@ void UI_Object::adjustRelativeRect(wxRect edge)
 //Only 1 change (X OR WIDTH, Y OR HEIGHT) is allowed!
     if(edge.width==targetRect.width) // nur x ist unterschiedlich
     {
-        if(((edge.x!=targetRect.x)&&(edge.x+edge.width<maxSize.x+maxSize.width)) // es ist ein neues Ziel
-        ||((edge.x+edge.width>maxSize.x+maxSize.width)&&(targetRect.x+targetRect.width!=maxSize.x+maxSize.width)) // oder einfach ausserhalb der Begrenzung aber unser Ziel war nicht die Begrenzung
-        ||((edge.x<maxSize.x)&&(targetRect.x!=maxSize.x)) // oder links ausserhalb der Begrenzung und altes Target hat nicht gepasst
+        if(((edge.x!=targetRect.x)&&(edge.x+edge.width<maxRect.x+maxRect.width)) // es ist ein neues Ziel
+        ||((edge.x+edge.width>maxRect.x+maxRect.width)&&(targetRect.x+targetRect.width!=maxRect.x+maxRect.width)) // oder einfach ausserhalb der Begrenzung aber unser Ziel war nicht die Begrenzung
+        ||((edge.x<maxRect.x)&&(targetRect.x!=maxRect.x)) // oder links ausserhalb der Begrenzung und altes Target hat nicht gepasst
         ||((edge.x!=targetRect.x)&&(isFreeMove))) // oder einfach freemove
             startRect.x=getLeftBound(); //Dann setze neuen Startpunkt
 		
-        if((edge.x+edge.width>maxSize.x+maxSize.width)&&(!isFreeMove))
-            edge.x=maxSize.x+maxSize.width-edge.width;
+        if((edge.x+edge.width>maxRect.x+maxRect.width)&&(!isFreeMove))
+            edge.x=maxRect.x+maxRect.width-edge.width;
     } else if(edge.x==targetRect.x)
     {
-        if(((edge.width!=targetRect.width)&&(edge.x+edge.width<maxSize.x+maxSize.width))
-        ||((edge.x+edge.width>maxSize.x+maxSize.width)&&(targetRect.x+targetRect.width!=maxSize.x+maxSize.width))
+        if(((edge.width!=targetRect.width)&&(edge.x+edge.width<maxRect.x+maxRect.width))
+        ||((edge.x+edge.width>maxRect.x+maxRect.width)&&(targetRect.x+targetRect.width!=maxRect.x+maxRect.width))
         ||((edge.width!=targetRect.width)&&(isFreeMove)))
             startRect.width=getWidth();
-        if((edge.x+edge.width>maxSize.x+maxSize.width)&&(!isFreeMove))
-            edge.width=maxSize.x+maxSize.width-edge.x;
+        if((edge.x+edge.width>maxRect.x+maxRect.width)&&(!isFreeMove))
+            edge.width=maxRect.x+maxRect.width-edge.x;
     } //else ?
                                                                                                                                                             
-/*    if(edge.height==targetRect.height)
+    if(edge.height==targetRect.height)
     {
-        if(((edge.y!=targetRect.y)&&(edge.y+edge.height<maxSize.y+maxSize.height))
-        ||((edge.y+edge.height>maxSize.y+maxSize.height)&&(targetRect.y+targetRect.height!=maxSize.y+maxSize.height))
-        ||((edge.y<maxSize.y)&&(targetRect.y!=maxSize.y)) )
+        if(((edge.y!=targetRect.y)&&(edge.y+edge.height<maxRect.y+maxRect.height))
+        ||((edge.y+edge.height>maxRect.y+maxRect.height)&&(targetRect.y+targetRect.height!=maxRect.y+maxRect.height))
+        ||((edge.y<maxRect.y)&&(targetRect.y!=maxRect.y)) )
 //        ||((edge.y!=targetRect.y)&&(isFreeMove)))
             startRect.y=getUpperBound();
-    //    if((edge.y+edge.height>maxSize.y+maxSize.height)&&(!isFreeMove))
-      //      edge.y=maxSize.y+maxSize.height-edge.height;
+    //    if((edge.y+edge.height>maxRect.y+maxRect.height)&&(!isFreeMove))
+      //      edge.y=maxRect.y+maxRect.height-edge.height;
     } else if(edge.y==targetRect.y)
     {
-        if(((edge.height!=targetRect.height)&&(edge.y+edge.height<maxSize.y+maxSize.height))
-        ||((edge.y+edge.height>maxSize.y+maxSize.height)&&(targetRect.y+targetRect.height!=maxSize.y+maxSize.height)) )
+        if(((edge.height!=targetRect.height)&&(edge.y+edge.height<maxRect.y+maxRect.height))
+        ||((edge.y+edge.height>maxRect.y+maxRect.height)&&(targetRect.y+targetRect.height!=maxRect.y+maxRect.height)) )
     //    ||((edge.height!=targetRect.height)&&(isFreeMove)))
             startRect.height=getHeight();
-//        if((edge.y+edge.height>maxSize.y+maxSize.height)&&(!isFreeMove))
-  //          edge.height=maxSize.y+maxSize.height-edge.y;
+//        if((edge.y+edge.height>maxRect.y+maxRect.height)&&(!isFreeMove))
+  //          edge.height=maxRect.y+maxRect.height-edge.y;
     } //else ... mmmh...
 
-/*     if((edge.x<maxSize.x)||(isFreeMove))
-        targetRect.x=maxSize.x;
+     if((edge.x<maxRect.x)||(isFreeMove))
+        targetRect.x=maxRect.x;
     else targetRect.x=edge.x;
 
-	if((edge.y<maxSize.y)||(isFreeMove))
-      targetRect.y=maxSize.y;
+	if((edge.y<maxRect.y)||(isFreeMove))
+      targetRect.y=maxRect.y;
     else targetRect.y=edge.y;*/
   
-/* 	if((edge.x>=maxSize.x)||(isFreeMove))
+/* 	if((edge.x>=maxRect.x)||(isFreeMove))
     	targetRect.x=edge.x;
-	else targetRect.x=maxSize.x;
+	else targetRect.x=maxRect.x;
 
-	if((edge.y>=maxSize.y)||(isFreeMove))
+	if((edge.y>=maxRect.y)||(isFreeMove))
     	targetRect.y=edge.y;
-	else targetRect.y=maxSize.y;*/
+	else targetRect.y=maxRect.y;*/
 	targetRect=edge;
 
 //	targetRect.width=edge.width;
   //  targetRect.height=edge.height;
 
-//    isFreeMove=0;
+    isFreeMove=0;
 };
 
 bool UI_Object::isTopItem()
@@ -187,7 +199,7 @@ bool UI_Object::isTopItem()
 };
 
 
-wxPoint UI_Object::getAbsolutePosition()
+Point UI_Object::getAbsolutePosition()
 {
 	if(parent)
 		return(absoluteCoord + relativeRect.GetPosition() + parent->getAbsolutePosition());
@@ -195,30 +207,30 @@ wxPoint UI_Object::getAbsolutePosition()
 };
 
 
-wxPoint UI_Object::getAbsolutePosition2()
+Point UI_Object::getAbsolutePosition2()
 {
     if(parent)
 	        return(parent->getAbsolutePosition());
-	    else return(wxPoint(0,0));
+	    else return(Point(0,0));
 };
 
 
-wxPoint UI_Object::getRelativePosition()
+Point UI_Object::getRelativePosition()
 {
     return(relativeRect.GetPosition());
 };
 
-wxRect UI_Object::getRelativeRect()
+Rect UI_Object::getRelativeRect()
 {
 	return(relativeRect);
 };
 
-void UI_Object::setSize(wxSize size)
+void UI_Object::setSize(Size size)
 {
 	relativeRect.SetSize(size);
 };
 
-wxSize UI_Object::getSize()
+Size UI_Object::getSize()
 {
     return(relativeRect.GetSize());
 };
@@ -334,12 +346,12 @@ void UI_Object::addChild(UI_Object* child)
 
 void UI_Object::process()
 {
-    if ((disabledFlag))
+    if ((disabledFlag)||(!shown)) //~~
       return;
 
 	if(doAdjustments==1)
 	{
-		adjustRelativeRect(wxRect(wxPoint(targetRect.GetPosition()),wxSize(targetRect.GetWidth(),lastItemY+25)));
+		adjustRelativeRect(Rect(Point(targetRect.GetPosition()),Size(targetRect.GetWidth(),lastItemY+25)));
 		doAdjustments=2;
 	}	
 	move(relativeRect.x,		startRect.x,		targetRect.x);
@@ -361,30 +373,30 @@ void UI_Object::process()
                                                                                 
 
 
-void UI_Object::draw(wxDC* dc)
+void UI_Object::draw(DC* dc)
 {
                                                                                 
     // if hidden, hide children as well
     if (!shown)
 		return;
 		
-	dc->SetBrush(*wxTRANSPARENT_BRUSH);
-	dc->SetPen(wxPen(wxColour(255,0,0),3,wxSOLID));
-    dc->DrawRectangle(wxRect(targetRect.GetPosition(),targetRect.GetSize()));
-	dc->SetPen(wxPen(wxColour(255,255,255),2,wxSHORT_DASH));
-    dc->DrawRectangle(wxRect(startRect.GetPosition(),startRect.GetSize()));
+/*	dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+	dc->SetPen(Pen(dc->doColor(255,0,0),3,SOLID_PEN_STYLE));
+    dc->DrawRectangle(Rect(targetRect.GetPosition(),targetRect.GetSize()));
+	dc->SetPen(Pen(dc->doColor(255,255,255),2,SHORT_DASH_PEN_STYLE));
+    dc->DrawRectangle(Rect(startRect.GetPosition(),startRect.GetSize()));*/
 
 	
-	/*dc->DrawRectangle(wxRect(maxSize.GetPosition()+getAbsolutePosition2(),maxSize.GetSize()));
+	/*dc->DrawRectangle(Rect(maxRect.GetPosition()+getAbsolutePosition2(),maxRect.GetSize()));
  	
-	dc->SetPen(wxPen(wxColour(255,255,255),1,wxSHORT_DASH));
-	dc->DrawRectangle(wxRect(relativeRect.GetPosition()+getAbsolutePosition()-relativeRect.GetPosition(),relativeRect.GetSize()));
+	dc->SetPen(Pen(Color(255,255,255),1,SHORT_DASH));
+	dc->DrawRectangle(Rect(relativeRect.GetPosition()+getAbsolutePosition()-relativeRect.GetPosition(),relativeRect.GetSize()));
 	
- 	dc->SetPen(wxPen(wxColour(0,255,0),1,wxSHORT_DASH));
-	dc->DrawRectangle(wxRect(targetRect.GetPosition()+getAbsolutePosition()-relativeRect.GetPosition(),targetRect.GetSize()));
+ 	dc->SetPen(Pen(Color(0,255,0),1,SHORT_DASH));
+	dc->DrawRectangle(Rect(targetRect.GetPosition()+getAbsolutePosition()-relativeRect.GetPosition(),targetRect.GetSize()));
  	
-	dc->SetPen(wxPen(wxColour(255,0,0),1,wxSHORT_DASH));
-	dc->DrawRectangle(wxRect(startRect.GetPosition()+getAbsolutePosition()-relativeRect.GetPosition(),startRect.GetSize()));*/
+	dc->SetPen(Pen(Color(255,0,0),1,SHORT_DASH));
+	dc->DrawRectangle(Rect(startRect.GetPosition()+getAbsolutePosition()-relativeRect.GetPosition(),startRect.GetSize()));*/
     UI_Object* cur;
 	
     if (children) {
@@ -398,26 +410,29 @@ void UI_Object::draw(wxDC* dc)
 
 void UI_Object::assignStartTime()
 {
-	startTime=wxDateTime::UNow();
+    struct timeb tms;time_t ts;
+    ftime(&tms);time(&ts);
+    startTime = tms.millitm + ts*1000;
 };
 
 long int UI_Object::getTimeStampMs(long int timeSpan)
 {
-	wxDateTime t=wxDateTime::UNow();
-	wxTimeSpan ts=t.Subtract(startTime);
-	return(timeSpan + ts.GetMilliseconds().ToLong());
+	struct timeb tms;time_t ts;
+    ftime(&tms);time(&ts);
+	long t = tms.millitm + ts*1000 - startTime;
+	return(timeSpan + t);
 };
 
-bool UI_Object::isTimeSpanElapsed(long int time)
+bool UI_Object::isTimeSpanElapsed(long int timeSpan)
 {
+	struct timeb tms;time_t ts;
 	if(time==0)
 		return(true);
-	wxDateTime t=wxDateTime::UNow();
-	wxTimeSpan ts=t.Subtract(startTime);
-	return(time < ts.GetMilliseconds().ToLong());
+    ftime(&tms);time(&ts);
+    long t = tms.millitm + ts*1000 - startTime;
+	return(timeSpan < t);
 };
 
-
 UI_Theme UI_Object::theme;
+long UI_Object::startTime;
 
-wxDateTime UI_Object::startTime;

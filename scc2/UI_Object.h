@@ -1,13 +1,6 @@
 #ifndef __UI_OBJECT_H
 #define __UI_OBJECT_H
 
-/*
-
-
-   22.05.04 : first version of UI_Object
-
- 
-*/
 #include "controls.h"
 #include "../scc2dll/settings.h"
 #include "UI_Theme.h"
@@ -20,11 +13,11 @@ class UI_Object
         void Hide(const bool show=false);
 		bool isShown();
 
-	    wxPoint getAbsolutePosition();
-	    wxPoint getAbsolutePosition2();
-	    wxPoint getRelativePosition();
-		void setSize(wxSize size);
-    	wxSize getSize();
+	    Point getAbsolutePosition();
+	    Point getAbsolutePosition2();
+	    Point getRelativePosition();
+		void setSize(Size size);
+    	Size getSize();
 		
 		int getRelativeUpperBound();
     	int getRelativeLowerBound();
@@ -34,7 +27,7 @@ class UI_Object
     	int getWidth();
 
 		bool isTopItem();
-		wxRect getRelativeRect();
+		Rect getRelativeRect();
 
 //		void setOriginalValues(const int originalValues); TODO
 //		void resetToOriginalValues();
@@ -46,26 +39,28 @@ class UI_Object
 		
 
 //		draw the object and all its children
-		virtual void draw(wxDC* dc);
+		virtual void draw(DC* dc);
 
-		UI_Object(UI_Object* parent, const wxRect rect = wxRect(0,0,0,0), const wxRect rect = wxRect(0,0,0,0));
+		UI_Object(UI_Object* parent, const Rect rect = Rect(0,0,0,0), const Rect rect = Rect(0,0,0,0));
 		virtual ~UI_Object();
 
-		static UI_Theme theme;
+		const Rect getMaxRect();
+
+
 		static void assignStartTime();
 		static long int getTimeStampMs(long int timeSpan);
 		static bool isTimeSpanElapsed(long int time);
 		
 		int min_top_x, min_left_y, min_right_y, min_bottom_x;
-		static wxDateTime startTime;
 
 		// we added an item at this y position
 		int lastItemY;
 
 		int getDoAdjustments();		
 		void setDoAdjustments(const int doAdjustments=1);
-		void adjustRelativeRect(wxRect rect);
-		
+		void adjustRelativeRect(Rect rect);
+		void forceSmallY(const int dy);
+
 		virtual void process();
 
 		//		virtual void message(int id);~~ TODO
@@ -80,7 +75,11 @@ class UI_Object
 		int getTargetWidth();
 		int getTargetHeight();
 
-		void setAbsoluteCoord(wxPoint p); // helper
+		static UI_Theme theme;
+		void setAbsoluteCoord(Point p); // helper
+
+		void setMaxRect(const Rect& rect) {this->relativeRect=rect;};
+		void setRelativeRect(const Rect& rect) {this->maxRect=rect;};
 	protected:
 		bool shown;
 		bool disabledFlag;
@@ -91,17 +90,19 @@ class UI_Object
 		UI_Object* parent; // = NULL means that this is the screen (x=0/y=0)
 		UI_Object* children; // pointer to the head of the linked list of children
 
-		wxRect relativeRect; // every object needs a current position and size, position is >> RELATIVE << to parent!
+		Rect relativeRect; // every object needs a current position and size, position is >> RELATIVE << to parent!
 	// to adjust object smoothly
-		wxRect startRect;
-		wxRect targetRect;
-		wxRect maxSize;
+		Rect startRect;
+		Rect targetRect;
+		Rect maxRect;
 
-		wxPoint absoluteCoord; // modificator if rect.GetPosition != real position
+		Point absoluteCoord; // modificator if rect.GetPosition != real position
 			
-// ignore maxSize for the next adjustWindow calls - important for tutorials
+// ignore maxRect for the next adjustWindow calls - important for tutorials
 		bool isFreeMove;
 		int doAdjustments;
+
+		static long startTime;
 		
 	
 //		int linkedToHotSpot; // is this item linked constantly to a hotspot? Or is his position determined by hardcoded functions?

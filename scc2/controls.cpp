@@ -2,7 +2,7 @@
 
 Controls::Controls()
 {
-	currentPosition = wxPoint(-1, -1);
+	currentPosition = Point(-1, -1);
 	mouseEventWasProcessed();
 	shiftPressed = 0;
 	button = 0;
@@ -32,17 +32,17 @@ int Controls::isShiftPressed()
 	return (shiftPressed);
 };
 
-wxPoint Controls::getCurrentPosition()
+Point Controls::getCurrentPosition()
 {
 	return (currentPosition);
 };
 
-wxPoint Controls::getCurrentPosition(const wxPoint relativePosition)
+Point Controls::getCurrentPosition(const Point relativePosition)
 {
 	return (currentPosition - relativePosition);
 };
 
-void Controls::setMouse(wxPoint position)
+void Controls::setMouse(Point position)
 {
 	currentPosition = position;
 };
@@ -58,7 +58,7 @@ void Controls::rightDown()
 {
 	button |= RIGHT_BUTTON;
 	dragStartPosition = currentPosition;
-	dragEndPosition = wxPoint(-1, -1);
+	dragEndPosition = Point(-1, -1);
 };
 
 void Controls::rightUp()
@@ -71,7 +71,7 @@ void Controls::leftDown()
 {
 	button |= LEFT_BUTTON;
 	dragStartPosition = currentPosition;
-	dragEndPosition = wxPoint(-1, -1);
+	dragEndPosition = Point(-1, -1);
 };
 
 void Controls::leftUp()
@@ -84,7 +84,7 @@ void Controls::middleDown()
 {
 	button |= LEFT_BUTTON;
 	dragStartPosition = currentPosition;
-	dragEndPosition = wxPoint(-1, -1);
+	dragEndPosition = Point(-1, -1);
 };
 
 void Controls::middleUp()
@@ -93,12 +93,12 @@ void Controls::middleUp()
 	dragEndPosition = currentPosition;
 };
 
-wxPoint Controls::getDragStartPosition()
+Point Controls::getDragStartPosition()
 {
 	return (dragStartPosition);
 };
 
-int Controls::getPressConditionOf(wxRect rect)
+int Controls::getPressConditionOf(Rect rect)
 {
 	int flags = NOT_PRESSED;
 
@@ -106,7 +106,7 @@ int Controls::getPressConditionOf(wxRect rect)
 		flags |= POINTER_OVER_BUTTON;
 	if (button & LEFT_BUTTON)
 	{
-		if(rect.Inside(dragStartPosition) && (dragEndPosition == wxPoint(-1, -1)))
+		if(rect.Inside(dragStartPosition) && (dragEndPosition == Point(-1, -1)))
 			flags |= PRESSING_LEFT_BUTTON;
 	} else 
 	if ((rect.Inside(dragStartPosition)) && (rect.Inside(dragEndPosition)))
@@ -118,7 +118,7 @@ int Controls::getPressConditionOf(wxRect rect)
 
 	if (button & MIDDLE_BUTTON)
 	{
-		if(rect.Inside(dragStartPosition) && (dragEndPosition == wxPoint(-1, -1)))
+		if(rect.Inside(dragStartPosition) && (dragEndPosition == Point(-1, -1)))
 			flags |= PRESSING_MIDDLE_BUTTON;
 		if ((rect.Inside(dragStartPosition)) && (rect.Inside(dragEndPosition)))
 		{						// pressed, waiting for acknowledgment
@@ -129,7 +129,7 @@ int Controls::getPressConditionOf(wxRect rect)
 	
 	if (button & RIGHT_BUTTON)
 	{
-		if(rect.Inside(dragStartPosition) && (dragEndPosition == wxPoint(-1, -1)))
+		if(rect.Inside(dragStartPosition) && (dragEndPosition == Point(-1, -1)))
 			flags |= PRESSING_RIGHT_BUTTON;
 		if ((rect.Inside(dragStartPosition)) && (rect.Inside(dragEndPosition)))
 		{						// pressed, waiting for acknowledgment
@@ -142,8 +142,8 @@ int Controls::getPressConditionOf(wxRect rect)
 
 void Controls::mouseEventWasProcessed()
 {
-	dragStartPosition = wxPoint(-1, -1);
-	dragEndPosition = wxPoint(-1, -1);
+	dragStartPosition = Point(-1, -1);
+	dragEndPosition = Point(-1, -1);
 };
 
 Controls controls;

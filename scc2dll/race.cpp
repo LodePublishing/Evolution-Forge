@@ -61,15 +61,17 @@ int RACE::calculateStep()
 	}
 
 	int t=getTimer();
-	BNODE *node=buildingList.GetFirst();
-
+	BNODE* node=buildingList.GetHead();
 	Building* build=0;
+//	if(!buildingList.empty())
 	if(node)
 	{
 		build=node->GetData();
+//		int buildingRemaining=min_element(buildingList.begin(),buildingList.end())->second.getRemainingBuildTime();
 		int buildingRemaining=build->getRemainingBuildTime();
 		if(t>buildingRemaining) t=buildingRemaining;
 	}
+	
 	if((harvestGas()>0)&&((harvestMinerals()==0)||(neededGas+(harvestGas()-neededGas%harvestGas()))/harvestGas() < (neededMinerals+(harvestMinerals()-neededMinerals%harvestMinerals()))/harvestMinerals()))
 	{
 		int gasRemaining=(neededGas+(harvestGas()-neededGas%harvestGas()))/harvestGas();
@@ -80,7 +82,7 @@ int RACE::calculateStep()
 		int mineralsRemaining=(neededMinerals+(harvestMinerals()-neededMinerals%harvestMinerals()))/harvestMinerals();
 		if(t>mineralsRemaining) t=mineralsRemaining;
 	}
-		if(t>getTimeOut()) t=getTimeOut();
+	if(t>getTimeOut()) t=getTimeOut();
 //	if((getTimeOut()>1)&&(t==getTimeOut()))
 //		t=getTimeOut()-1;
 
@@ -99,7 +101,6 @@ int RACE::calculateStep()
 
 	setTimeOut(getTimeOut()-t);
 	setTimer(getTimer()-t);
-
 
 	while(node)
 	{
@@ -155,7 +156,7 @@ int RACE::calculateStep()
 				default:
 						debug.toLog(0,"ERROR: UNDEFINED FACILITY BEHAVIOUR DETECTED!");
 						break;
-			}
+			} // end switch facilityType
 
 			if(stat->supply<0)
 			{ //unitcount?
@@ -234,11 +235,15 @@ int RACE::calculateStep()
 // Did we reach the right number at the right time?
 //			  i=MAX_GOALS;  TODO? koennen wir mehrere goals gleichzeitig erfuell0rn?
 			ready=calculateReady();
-// oder: irgendeine location... TODO: Problem: die Einheiten koennen irgendwo sein, also nicht gesammelt an einem Fleck...
-			if(!oldnode)
-				while(true);
 			buildingList.DeleteNode(oldnode);
+// oder: irgendeine location... TODO: Problem: die Einheiten koennen irgendwo sein, also nicht gesammelt an einem Fleck...
+/*           	map<int, Building>::iterator temp=buildNode;
+           	temp++;
+			buildingList.erase(buildNode);
+           	buildNode=temp;*/
+			
 		} // END of if(!build->getRemainingBuildTime())
+//		else buildNode++;
 		if(node) 
 			build=(Building*)node->GetData();
 	} // END of while
@@ -365,24 +370,23 @@ int RACE::buildGene(int unit)
 					
 						};
 					};
+                                                                                                                                                            
+                    BNODE *node=NULL;
+                    for (node = buildingList.GetTail();node&&(((Building*)node->GetData())->getRemainingBuildTime()<stat->BT/*+3200*(stat->facility2==unit)*/);node = node->GetPrev());
+                    Building* build=new Building();
+                    if(node&&(((Building*)node->GetData())->getRemainingBuildTime()>=stat->BT/*+3200*(stat->facility2==unit)*/))
+                        buildingList.Insert(node,build);
+                    else if(!node) buildingList.Append(build);
+
+                    build->setOnTheRun(0);
+                    build->setFacility(stat->facility[fac]);
+                    build->setLocation(tloc);
+                    build->setUnitCount(1);
+                    build->setRemainingBuildTime(stat->BT/*+3200*(stat->facility2==unit)*/); //~~ hack :/ TODO SINN???????
+                    build->setTotalBuildTime(build->getRemainingBuildTime());
+                    build->setType(unit);
 
 					
-					BNODE *node=NULL;
-					for (node = buildingList.GetFirst();node&&(((Building*)node->GetData())->getRemainingBuildTime()<stat->BT/*+3200*(stat->facility2==unit)*/);node = node->GetNext());
-					Building* build=new Building();
-					if(node&&(((Building*)node->GetData())->getRemainingBuildTime()>=stat->BT/*+3200*(stat->facility2==unit)*/))
-						buildingList.Insert(node,build);
-					else if(!node) buildingList.Append(build);
-
-				
-					build->setOnTheRun(0);
-					build->setFacility(stat->facility[fac]);
-					build->setLocation(tloc);
-					build->setUnitCount(1);
-					build->setRemainingBuildTime(stat->BT/*+3200*(stat->facility2==unit)*/); //~~ hack :/ TODO SINN???????
-					build->setTotalBuildTime(build->getRemainingBuildTime());
-					build->setType(unit);
-																				
 					if(getMins()*3<4*stat->mins+stat->upgrade_cost*getLocationForce(0,unit)) settFitness(gettFitness()-2);
 					if(getGas()*3<4*stat->gas+stat->upgrade_cost*getLocationForce(0,unit)) settFitness(gettFitness()-2);
 					if((stat->supply>0)&&(getSupply()*4<5*stat->supply)) settFitness(gettFitness()-2); 
@@ -398,11 +402,13 @@ int RACE::buildGene(int unit)
 // upgrade_cost is 0 if it's no upgrade
 					setMins(getMins()-(stat->mins+stat->upgrade_cost*getLocationForce(0,unit)));
 					setGas(getGas()-(stat->gas+stat->upgrade_cost*getLocationForce(0,unit)));
+	
 					
+//					build.setIP(getIP()); needed only for Anarace!
 					if((stat->supply>0)||((pStats[stat->facility[0]].supply<0)&&(stat->facilityType==IS_LOST))) 
 						setSupply(getSupply()-stat->supply); //? Beschreibung!
 					adjustAvailibility(tloc, fac, stat);
-//					build->setIP(getIP()); needed only for Anarace!
+                //	buildingList.insert(pair<int, Building>(stat->BT/*+3200*(stat->facility2==unit)*/, build));
 				} //end if(ok)
 			} //end mins/gas else
 		} //end prere/fac else

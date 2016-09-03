@@ -3,24 +3,26 @@
 
 #include "UI_Window.h"
 #include "../scc2dll/anarace.h"
-#include "list.h"
+#include "order.h"
 #include "info.h"
+
+#include <map>
 
 class BoGraphWindow:public UI_Window
 {
 	public:
-		BoGraphWindow(UI_Object* parent, wxRect rahmen, wxRect maxSize, ANARACE* anarace, InfoWindow* infoWindow, OrderList* orderList);
+		BoGraphWindow(UI_Object* parent, ANARACE* anarace, InfoWindow* infoWindow, map <long, Order>* orderList, const int windowNumber);
 		~BoGraphWindow();
 		
 		void resetData();
 		void process();
-		void draw(wxDC* dc);
+		void draw(DC* dc);
 		void setMarkedUnit(int unit);
 	private:
 		void checkForInfoWindow();
 		int markedUnit;
 		int markAni;
-		OrderList* orderList;
+ 		map <long, Order>* orderList;
 		InfoWindow* infoWindow;
 		ANARACE* anarace;
 };

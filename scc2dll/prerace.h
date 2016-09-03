@@ -7,8 +7,10 @@
 #include "ga.h"
 #include "location.h"
 #include "building.h"
-#include "blist.h"
 #include "start.h"
+#include "blist.h"
+
+using namespace std;
 
 class EXPORT PRERACE
 {
@@ -22,7 +24,9 @@ protected:
 	PLAYER* startPlayer; //pointer to player in start
 //------------- end -------------------------------
 	
- 	BuildingList buildingList;
+ 	//multimap<int, Building> buildingList; // key is time
+	BuildingList buildingList;
+	
 	static int noise[MAX_TIME];
 	static int markerCounter;
 	static UNITS units[MAX_PLAYER][MAX_LOCATIONS];

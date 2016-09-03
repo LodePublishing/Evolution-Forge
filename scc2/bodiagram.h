@@ -7,13 +7,13 @@
 
 class BoDiagramWindow:public UI_Window
 {
-        public:
-                BoDiagramWindow(UI_Object* parent, wxRect rahmen, wxRect maxSize, ANARACE* anarace, InfoWindow* infoWindow);
-                ~BoDiagramWindow();
+	public:
+		BoDiagramWindow(UI_Object* parent, ANARACE* anarace, InfoWindow* infoWindow, const int windowNumber);
+        ~BoDiagramWindow();
 
 		void resetData();
 		void process();		
-		void draw(wxDC* dc);
+		void draw(DC* dc);
 		
         private:
 		InfoWindow* infoWindow;

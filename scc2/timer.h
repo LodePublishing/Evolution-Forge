@@ -9,12 +9,12 @@
 class TimerWindow:public UI_Window
 {
 	public:
-		TimerWindow(UI_Object* parent, wxRect rahmen, wxRect maxSize, ANARACE* anarace);
+		TimerWindow(UI_Object* parent, ANARACE* anarace, const int windowNumber);
 		~TimerWindow();
 
 		void resetData();
 		void process();
-		void draw(wxDC* dc);
+		void draw(DC* dc);
 
 		int getCurrentMode();
 		void setMode(int mode);

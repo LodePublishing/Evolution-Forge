@@ -3,7 +3,7 @@
 
 UI_Radio::UI_Radio(UI_Object* parent):UI_Object(parent)
 {
-	changed=false;
+	changed=true;
 };
 
 UI_Radio::~UI_Radio()
@@ -12,6 +12,8 @@ UI_Radio::~UI_Radio()
 
 void UI_Radio::addButton(UI_Button* button)
 {
+	if(!button)
+		return;
 	button->setParent(this);
 };
 
@@ -20,9 +22,27 @@ bool UI_Radio::hasChanged()
 	return(changed);
 };
 
+void UI_Radio::forceTabPressed(int tab)
+{
+    UI_Button* tmp=(UI_Button*)getChildren();
+	if(!tmp) return;
+    int i=0;
+    do
+    {
+		if(i==tab)
+		{
+			tmp->forcePressed();
+			return;
+		};
+        i++;
+        tmp=(UI_Button*)tmp->getNextBrother();
+    } while(tmp!=getChildren());
+};
+
 int UI_Radio::getMarked()
 {
 	UI_Button* tmp=(UI_Button*)getChildren();
+	if(!tmp) return(0);
 	int i=0;
 	do
 	{
@@ -36,8 +56,10 @@ int UI_Radio::getMarked()
 	return(0);
 };
 
-void UI_Radio::draw(wxDC* dc)
+void UI_Radio::draw(DC* dc)
 {
+	if(!shown)
+		return;
 	UI_Object::draw(dc);
 };
 
@@ -53,7 +75,7 @@ void UI_Radio::process()
     int i=0;
     do
     {
-        if(tmp->isCurrentlyPressed())
+        if((tmp->isCurrentlyPressed())&&(!tmp->forcedPress))
 			old[i]=true;
 		else old[i]=false;
         i++;
@@ -89,14 +111,21 @@ void UI_Radio::process()
     } while(tmp!=(UI_Button*)getChildren());
 };
 
-UI_Button::UI_Button(UI_Object* parent, wxRect rect, wxRect maxRect, eString normalText, eString pressedText, eButton button, eButtonMode buttonMode, ePositionMode mode, eFont font, eAutoSize autoSize):UI_Object(parent, rect, maxRect)
+void UI_Button::setFrameNumber(int num)
 {
+	frameNumber=num;
+};
+
+UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eString normalText, eString pressedText, eButton button, eTextMode textMode, eButtonMode buttonMode, ePositionMode mode, eFont font, eAutoSize autoSize):UI_Object(parent, rect, maxRect)
+{
+	hasBitmap=false;
+	
 	statusFlags=0;
 	firstPressed=false;
 	hasToolTip=false;
-	hasBitmap=false;
 	frameNumber=0;
 	timeStamp=0;
+	forcedPress=false;
 
 	switch(buttonMode)
 	{
@@ -104,6 +133,7 @@ UI_Button::UI_Button(UI_Object* parent, wxRect rect, wxRect maxRect, eString nor
 		case STATIC_BUTTON_MODE:statusFlags |= BF_STATIC;break;
 		case PRESS_BUTTON_MODE:break;
 		case PUSH_BUTTON_MODE:statusFlags |= BF_REPEATS;break;
+		case TAB_BUTTON_MODE:statusFlags |= BF_IS_TAB;statusFlags |= BF_STATIC;break;
 		default:break;
 	}; 
 						   
@@ -112,29 +142,32 @@ UI_Button::UI_Button(UI_Object* parent, wxRect rect, wxRect maxRect, eString nor
 	this->mode=mode;
 	this->button=button;
 	this->font=font;
-	this->normalText=new UI_StaticText(this, normalText, wxRect(0,0,0,0), HORIZONTALLY_CENTERED_TEXT_MODE, font, theme.lookUpButtonAnimation(button)->startTextColour[PRESSED_BUTTON_PHASE]);
-	this->pressedText=new UI_StaticText(this, pressedText, wxRect(0,0,0,0), HORIZONTALLY_CENTERED_TEXT_MODE, font, theme.lookUpButtonAnimation(button)->startTextColour[PRESSED_BUTTON_PHASE]);
+	this->normalText=new UI_StaticText(this, normalText, Rect(0,0,0,0), textMode, font, theme.lookUpButtonAnimation(button)->startTextColor[PRESSED_BUTTON_PHASE]);
+	this->pressedText=new UI_StaticText(this, pressedText, Rect(0,0,0,0), textMode, font, theme.lookUpButtonAnimation(button)->startTextColor[PRESSED_BUTTON_PHASE]);
 
 //	for(int i=DISABLED_BUTTON_PHASE;i<MAX_BUTTON_ANIMATION_PHASES;i++)
-//		text[i]=new UI_StaticText(this, normalText, wxRect(0,0,0,0), HORIZONTALLY_CENTERED_TEXT_MODE, font, theme.lookUpButtonAnimation(button)->startTextColour[i]);
+//		text[i]=new UI_StaticText(this, normalText, Rect(0,0,0,0), HORIZONTALLY_CENTERED_TEXT_MODE, font, theme.lookUpButtonAnimation(button)->startTextColor[i]);
 	adjustButtonSize(this->normalText->getSize());
 };
 
-UI_Button::UI_Button(UI_Object* parent, wxRect rect, wxRect maxRect, wxString normalText, wxString pressedText, eButton button, eButtonMode buttonMode, ePositionMode mode, eFont font, eAutoSize autoSize):UI_Object(parent, rect, maxRect)
+UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, string normalText, string pressedText, eButton button, eTextMode textMode, eButtonMode buttonMode, ePositionMode mode, eFont font, eAutoSize autoSize):UI_Object(parent, rect, maxRect)
 {
+	hasBitmap=false;
+	
 	statusFlags=0;
 	firstPressed=false;
 	hasToolTip=false;
-	hasBitmap=false;
 	frameNumber=0;
 	timeStamp=0;
-
+    forcedPress=false;     
+	
 	switch(buttonMode)
 	{
 		case NO_BUTTON_MODE:statusFlags |= BF_NOT_CLICKABLE;break;
 		case STATIC_BUTTON_MODE:statusFlags |= BF_STATIC;break;
 		case PRESS_BUTTON_MODE:break;
 		case PUSH_BUTTON_MODE:statusFlags |= BF_REPEATS;break;
+        case TAB_BUTTON_MODE:statusFlags |= BF_IS_TAB; statusFlags |= BF_STATIC;break;
 		default:break;
 	}; 
 						   
@@ -143,29 +176,32 @@ UI_Button::UI_Button(UI_Object* parent, wxRect rect, wxRect maxRect, wxString no
 	this->mode=mode;
 	this->button=button;
 	this->font=font;
-	this->normalText=new UI_StaticText(this, normalText, wxRect(0,0,0,0), HORIZONTALLY_CENTERED_TEXT_MODE, font, theme.lookUpButtonAnimation(button)->startTextColour[PRESSED_BUTTON_PHASE]);
-	this->pressedText=new UI_StaticText(this, pressedText, wxRect(0,0,0,0), HORIZONTALLY_CENTERED_TEXT_MODE, font, theme.lookUpButtonAnimation(button)->startTextColour[PRESSED_BUTTON_PHASE]);
+	this->normalText=new UI_StaticText(this, normalText, Rect(0,0,0,0), textMode, font, theme.lookUpButtonAnimation(button)->startTextColor[PRESSED_BUTTON_PHASE]);
+	this->pressedText=new UI_StaticText(this, pressedText, Rect(0,0,0,0), textMode, font, theme.lookUpButtonAnimation(button)->startTextColor[PRESSED_BUTTON_PHASE]);
 
 //	for(int i=DISABLED_BUTTON_PHASE;i<MAX_BUTTON_ANIMATION_PHASES;i++)
-//		text[i]=new UI_StaticText(this, normalText, wxRect(0,0,0,0), HORIZONTALLY_CENTERED_TEXT_MODE, font, theme.lookUpButtonAnimation(button)->startTextColour[i]);
+//		text[i]=new UI_StaticText(this, normalText, Rect(0,0,0,0), HORIZONTALLY_CENTERED_TEXT_MODE, font, theme.lookUpButtonAnimation(button)->startTextColor[i]);
 	adjustButtonSize(this->normalText->getSize());
 };
 
 // -> bitmap button!
-UI_Button::UI_Button(UI_Object* parent, wxRect rect, wxRect maxRect, eButton button, eButtonMode buttonMode, ePositionMode mode):UI_Object(parent, rect, maxRect)
+UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eButton button, eButtonMode buttonMode, ePositionMode mode):UI_Object(parent, rect, maxRect)
 {
+	hasBitmap=true;
+	
 	statusFlags=0;
 	firstPressed=false;
 	hasToolTip=false;
-	hasBitmap=true;
 	frameNumber=0;
 	timeStamp=0;
-
+    forcedPress=false;     
 	switch(buttonMode)
 	{
+        case NO_BUTTON_MODE:statusFlags |= BF_NOT_CLICKABLE;break;
 		case STATIC_BUTTON_MODE:statusFlags |= BF_STATIC;break;
 		case PRESS_BUTTON_MODE:break;
 		case PUSH_BUTTON_MODE:statusFlags |= BF_REPEATS;break;
+        case TAB_BUTTON_MODE:statusFlags |= BF_IS_TAB; statusFlags |= BF_STATIC;break;
 		default:break;
 	}; 
 						   
@@ -186,15 +222,21 @@ UI_Button::~UI_Button()
 		delete pressedText;
 };
 
-void UI_Button::adjustButtonSize(wxSize size)
+void UI_Button::setButton(eButton button)
 {
-   	currentSize.SetSize(size+wxSize(5,0));
+	this->button=button;
+};
+
+void UI_Button::adjustButtonSize(Size size)
+{
+   	currentSize.SetSize(size+Size(5,0));
 
 	switch(autoSize)
 	{
 		case NO_AUTO_SIZE:currentSize.SetSize(getSize());break;
 		case AUTO_SIZE:break;
 		case AUTO_HEIGHT_FULL_WIDTH:currentSize.SetWidth(getWidth()-5);break;
+		case CONSTANT_SIZE:currentSize.SetWidth(120);break;// ~~ nur fuer tabs naja
 	};
 
 	currentSize.SetPosition(getRelativePosition());
@@ -202,41 +244,46 @@ void UI_Button::adjustButtonSize(wxSize size)
 	switch(mode)
 	{
 		case DO_NOT_ADJUST:break;
-		case TOTAL_CENTERED:currentSize.SetPosition(getRelativePosition()+wxPoint((getWidth() + currentSize.GetWidth())/2, (getHeight() + currentSize.GetHeight())/2));break;
-		case HORIZONTAL_CENTERED:currentSize.SetX(getRelativeUpperBound()+(getWidth() - currentSize.GetWidth())/2);break;
-		case VERTICALLY_CENTERED:currentSize.SetY(getRelativeUpperBound()+(getHeight() - currentSize.GetHeight())/2);break;
+		case TOTAL_CENTERED:currentSize.SetPosition(getRelativePosition()+Point((getWidth() + currentSize.GetWidth())/2, (getHeight() + currentSize.GetHeight())/2));break;
+		case HORIZONTAL_CENTERED:currentSize.SetLeft(getRelativeUpperBound()+(getWidth() - currentSize.GetWidth())/2);break;
+		case VERTICALLY_CENTERED:currentSize.SetTop(getRelativeUpperBound()+(getHeight() - currentSize.GetHeight())/2);break;
 		case TOP_LEFT:break;
-		case TOP_CENTER:currentSize.SetPosition(getRelativePosition()+wxPoint((getWidth() + currentSize.GetWidth())/2, 0));break;
-		case TOP_RIGHT:currentSize.SetPosition(getRelativePosition()+wxPoint(getWidth() - currentSize.GetWidth(), 0));break;
-		case CENTER_RIGHT:currentSize.SetPosition(getRelativePosition()+wxPoint(getWidth() - currentSize.GetWidth(), (getHeight() + currentSize.GetHeight())/2));break;
-		case BOTTOM_RIGHT:currentSize.SetPosition(getRelativePosition()+wxPoint(getWidth() - currentSize.GetWidth(), getHeight() - currentSize.GetHeight()));break;
-		case BOTTOM_CENTER:currentSize.SetPosition(getRelativePosition()+wxPoint((getWidth() - currentSize.GetWidth())/2, getHeight() - currentSize.GetHeight()));break;
-		case BOTTOM_LEFT:currentSize.SetPosition(getRelativePosition()+wxPoint(0, getHeight() - currentSize.GetHeight()));break;
-		case CENTER_LEFT:currentSize.SetPosition(getRelativePosition()+wxPoint(0, (getHeight() + currentSize.GetHeight())/2));break;
+		case TOP_CENTER:currentSize.SetPosition(getRelativePosition()+Point((getWidth() + currentSize.GetWidth())/2, 0));break;
+		case TOP_RIGHT:currentSize.SetPosition(getRelativePosition()+Point(getWidth() - currentSize.GetWidth(), 0));break;
+		case CENTER_RIGHT:currentSize.SetPosition(getRelativePosition()+Point(getWidth() - currentSize.GetWidth(), (getHeight() + currentSize.GetHeight())/2));break;
+		case BOTTOM_RIGHT:currentSize.SetPosition(getRelativePosition()+Point(getWidth() - currentSize.GetWidth(), getHeight() - currentSize.GetHeight()));break;
+		case BOTTOM_CENTER:currentSize.SetPosition(getRelativePosition()+Point((getWidth() - currentSize.GetWidth())/2, getHeight() - currentSize.GetHeight()));break;
+		case BOTTOM_LEFT:currentSize.SetPosition(getRelativePosition()+Point(0, getHeight() - currentSize.GetHeight()));break;
+		case CENTER_LEFT:currentSize.SetPosition(getRelativePosition()+Point(0, (getHeight() + currentSize.GetHeight())/2));break;
 
-		case ARRANGE_TOP:currentSize.SetPosition(getRelativePosition()+wxPoint(getParent()->min_top_x, 0));getParent()->min_top_x+=currentSize.GetWidth()+MIN_DISTANCE;break;
-		case ARRANGE_BOTTOM:currentSize.SetPosition(getRelativePosition()+wxPoint(getParent()->min_bottom_x, getHeight() - currentSize.GetHeight()));getParent()->min_bottom_x+=currentSize.GetWidth()+MIN_DISTANCE;break;
-		case ARRANGE_LEFT:currentSize.SetPosition(getRelativePosition()+wxPoint(0, getParent()->min_left_y));getParent()->min_left_y+=currentSize.GetHeight()+MIN_DISTANCE;break;
-		case ARRANGE_RIGHT:currentSize.SetPosition(getRelativePosition()+wxPoint(getWidth() - currentSize.GetWidth(), getParent()->min_right_y));getParent()->min_right_y+=currentSize.GetHeight()+MIN_DISTANCE;break;
+		case ARRANGE_TOP:currentSize.SetPosition(getRelativePosition()+Point(getParent()->min_top_x, 0));getParent()->min_top_x+=currentSize.GetWidth()+MIN_DISTANCE;break;
+		case ARRANGE_BOTTOM:currentSize.SetPosition(getRelativePosition()+Point(getParent()->min_bottom_x, getHeight() - currentSize.GetHeight()));getParent()->min_bottom_x+=currentSize.GetWidth()+MIN_DISTANCE;break;
+		case ARRANGE_LEFT:currentSize.SetPosition(getRelativePosition()+Point(0, getParent()->min_left_y));getParent()->min_left_y+=currentSize.GetHeight()+MIN_DISTANCE;break;
+		case ARRANGE_RIGHT:currentSize.SetPosition(getRelativePosition()+Point(getWidth() - currentSize.GetWidth(), getParent()->min_right_y));getParent()->min_right_y+=currentSize.GetHeight()+MIN_DISTANCE;break;
 	};
 
 };
 
-void UI_Button::updatePressedText(wxString utext)
+void UI_Button::updatePressedText(string utext)
 {
 	pressedText->updateText(utext);
 };
 
-void UI_Button::updateNormalText(wxString utext)
+void UI_Button::updateNormalText(string utext)
 {
 	normalText->updateText(utext);
 };
 
 // Render button.  How it draws exactly depends on it's current state.
-void UI_Button::draw(wxDC* dc)
+void UI_Button::draw(DC* dc)
 {
 	if(!shown)
 		return;
+
+	Point m=Point(0,0);
+	if(statusFlags & BF_DOWN)
+		m=Point(1,1);
+		
 	eButtonAnimationPhase animation_phase;
 	if(disabledFlag)
 		animation_phase=DISABLED_BUTTON_PHASE;
@@ -247,7 +294,7 @@ void UI_Button::draw(wxDC* dc)
 			animation_phase=PRESSED_HIGHLIGHTED_BUTTON_PHASE;
 		else
 		animation_phase=PRESSED_BUTTON_PHASE;
-		currentSize.SetPosition(currentSize.GetPosition()+wxPoint(1,1));
+		currentSize.SetPosition(currentSize.GetPosition()+m);
 	}
 	else
 	if(statusFlags & BF_HIGHLIGHTED)
@@ -256,52 +303,60 @@ void UI_Button::draw(wxDC* dc)
 
 	setAbsoluteCoord(currentSize.GetPosition() - getRelativePosition());
 
-	if(!(statusFlags & BF_NOT_CLICKABLE))
+	if(!(statusFlags & BF_NOT_CLICKABLE)) // ??
 	{
-		dc->SetBrush(*wxTRANSPARENT_BRUSH);
+		dc->SetBrush(*theme.lookUpBrush(NULL_BRUSH));
 		dc->SetPen(*theme.lookUpPen(DARK_BACKGROUND_PEN));
-		dc->DrawRectangle(wxRect(getAbsolutePosition()-wxPoint(1,1), currentSize.GetSize()+wxSize(2,2)));
+		dc->DrawRectangle(Rect(getAbsolutePosition()-Point(1,1)-m, currentSize.GetSize()+Size(2,2)));
 
-		dc->SetBrush(*wxBLACK_BRUSH);
-		dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
-		dc->DrawRectangle(wxRect(getAbsolutePosition(), currentSize.GetSize()));
+//		dc->SetBrush(*theme.lookUpBrush(NULL_BRUSH)); //?
+//		dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
+//		dc->DrawRoundedRectangle(Rect(getAbsolutePosition(), currentSize.GetSize()), 2);
 	}
+
 
 	int gradient=0;
 	switch(theme.lookUpButtonAnimation(button)->type)
 	{
     	case NO_ANIMATION:gradient=100;break;
 		case JUMPY_COLOURS_ANIMATION:gradient=(frameNumber%theme.lookUpButtonAnimation(button)->speed)*100/theme.lookUpButtonAnimation(button)->speed;break;
-		case GLOWING_ANIMATION:gradient=50*(sin(3.141*frameNumber/theme.lookUpButtonAnimation(button)->speed)+1);break;
+		case GLOWING_ANIMATION:gradient=(int)(50*(sin(3.141*frameNumber/theme.lookUpButtonAnimation(button)->speed)+1));break;
 		case BLINKING_ANIMATION:if(frameNumber<theme.lookUpButtonAnimation(button)->speed/2) gradient=100;else gradient=0;break;
 		default:break;
 	};
-	dc->SetPen(theme.lookUpMixedPen(theme.lookUpButtonAnimation(button)->startBorderPen[animation_phase], theme.lookUpButtonAnimation(button)->endBorderPen[animation_phase], gradient));
+
+	dc->SetPen(Pen(dc->mixColor(
+					theme.lookUpPen(theme.lookUpButtonAnimation(button)->startBorderPen[animation_phase])->GetColor(), 
+					theme.lookUpPen(theme.lookUpButtonAnimation(button)->endBorderPen[animation_phase])->GetColor(), gradient), 
+					theme.lookUpPen(theme.lookUpButtonAnimation(button)->startBorderPen[animation_phase])->GetWidth(), 
+					theme.lookUpPen(theme.lookUpButtonAnimation(button)->startBorderPen[animation_phase])->GetStyle()));
 
 	if(!hasBitmap)
 	{
-		dc->SetBrush(theme.lookUpMixedBrush(theme.lookUpButtonAnimation(button)->startBrush[animation_phase], theme.lookUpButtonAnimation(button)->endBrush[animation_phase], gradient));
-		//dc->SetPen(*wxTRANSPARENT_PEN);
+		dc->SetBrush(Brush(dc->mixColor(theme.lookUpBrush(theme.lookUpButtonAnimation(button)->startBrush[animation_phase])->GetColor(), theme.lookUpBrush(theme.lookUpButtonAnimation(button)->endBrush[animation_phase])->GetColor(), gradient),theme.lookUpBrush(theme.lookUpButtonAnimation(button)->startBrush[animation_phase])->GetStyle()));
+//TODO: eigene tab-button klasse
+		
+//		dc->SetPen(*theme.lookUpPen(NULL_PEN));
 		if(statusFlags & BF_DOWN)
-			pressedText->setColour(theme.lookUpMixedColour(theme.lookUpButtonAnimation(button)->startTextColour[animation_phase], theme.lookUpButtonAnimation(button)->endTextColour[animation_phase], gradient));
+			pressedText->setColor(dc->mixColor(theme.lookUpColor(theme.lookUpButtonAnimation(button)->startTextColor[animation_phase]), theme.lookUpColor( theme.lookUpButtonAnimation(button)->endTextColor[animation_phase]), gradient));
 		else 
-			normalText->setColour(theme.lookUpMixedColour(theme.lookUpButtonAnimation(button)->startTextColour[animation_phase], theme.lookUpButtonAnimation(button)->endTextColour[animation_phase], gradient));
+			normalText->setColor(dc->mixColor(theme.lookUpColor(theme.lookUpButtonAnimation(button)->startTextColor[animation_phase]), theme.lookUpColor( theme.lookUpButtonAnimation(button)->endTextColor[animation_phase]), gradient));
 	// TODO TAB-BUTTON MODE
-		dc->DrawRectangle(wxRect(getAbsolutePosition(), currentSize.GetSize()));
+		dc->DrawRoundedRectangle(Rect(getAbsolutePosition(), currentSize.GetSize()), 2);
 	}
 	else 
 	{
-		dc->SetBrush(*wxTRANSPARENT_BRUSH);
-		dc->DrawRectangle(wxRect(getAbsolutePosition()-wxPoint(1,1),currentSize.GetSize()+wxSize(2,2)));
+		dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+		dc->DrawRectangle(Rect(getAbsolutePosition()-Point(1,1),currentSize.GetSize()+Size(2,2))); // kasterl ums bitmap
 		dc->DrawBitmap(*theme.lookUpBitmap(theme.lookUpButtonAnimation(button)->bitmap[animation_phase]), getAbsolutePosition());
 	}
 	
-	if((animation_phase==PRESSED_BUTTON_PHASE)||(animation_phase==PRESSED_HIGHLIGHTED_BUTTON_PHASE))
+/*	if((animation_phase==PRESSED_BUTTON_PHASE)||(animation_phase==PRESSED_HIGHLIGHTED_BUTTON_PHASE))
 	{
-		dc->SetPen(wxPen(wxColour(theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColour()),1,wxSOLID));
-		dc->DrawLine(getAbsolutePosition() + wxPoint(0, currentSize.GetHeight()-1), getAbsolutePosition() + wxPoint(currentSize.GetWidth(), currentSize.GetHeight()-1));
-		dc->DrawLine(getAbsolutePosition() + wxPoint(currentSize.GetWidth()-1, 0), getAbsolutePosition() + wxPoint(currentSize.GetWidth()-1, currentSize.GetHeight()));
-	} 
+		dc->SetPen(Pen(*(theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColor()),1,SOLID_PEN_STYLE));
+		dc->DrawLine(getAbsolutePosition() + Point(0, currentSize.GetHeight()-1), getAbsolutePosition() + Point(currentSize.GetWidth(), currentSize.GetHeight()-1));
+		dc->DrawLine(getAbsolutePosition() + Point(currentSize.GetWidth()-1, 0), getAbsolutePosition() + Point(currentSize.GetWidth()-1, currentSize.GetHeight()));
+	} ??? */
 
 	UI_Object::draw(dc);	
 /*    int offset, frame_num = -1;
@@ -368,7 +423,7 @@ void UI_Button::draw(wxDC* dc)
 // maybeShowToolTip()
 
 	if(statusFlags & BF_DOWN)
-		currentSize.SetPosition(currentSize.GetPosition()-wxPoint(1,1));
+		currentSize.SetPosition(currentSize.GetPosition()-m);
 }
 
 
@@ -399,21 +454,22 @@ void UI_Button::frameReset()
 
 void UI_Button::process()
 {
+	if(!shown)
+		return;
 	// first check getChildren()
 	UI_Object::process();
 
-	wxRect r = wxRect(getParent()->getAbsolutePosition() + currentSize.GetPosition(), currentSize.GetSize());	
+	Rect r = Rect(getParent()->getAbsolutePosition() + currentSize.GetPosition(), currentSize.GetSize());	
 	int condition;
 	if(statusFlags & BF_DOWN)
-		r.SetPosition(r.GetPosition()+wxPoint(-2,-2));
-	else 
-		r.SetPosition(r.GetPosition()+wxPoint(-1,-1));
-	r.SetSize(r.GetSize()+wxSize(2,2));
+		r.SetPosition(r.GetPosition()+Point(-1,-1));
+//	else 
+//		r.SetPosition(r.GetPosition()+Point(-1,-1));
+	r.SetSize(r.GetSize());
 	condition = controls.getPressConditionOf(r);
 
 	int old_status_flags = statusFlags;
 	frameReset();
-
 	if(frameNumber<theme.lookUpButtonAnimation(button)->speed)
 		frameNumber++;
 	else frameNumber=0;
@@ -424,7 +480,6 @@ void UI_Button::process()
 		if (old_status_flags & BF_DOWN)
 			statusFlags |= BF_JUST_RELEASED;
 	}
-
 	if (shown)
 	{
 		// currently pressing the button?
@@ -452,6 +507,7 @@ void UI_Button::process()
 			if(( condition & PRESSING_LEFT_BUTTON ) && (!(old_status_flags & BF_DOWN)))
 				statusFlags |= BF_JUST_PRESSED;
 		}
+
 		
 		if( !(statusFlags & BF_DOWN))
 		{
@@ -461,7 +517,9 @@ void UI_Button::process()
 			if(!(statusFlags & BF_REPEATS))
 			{
 				if((statusFlags & BF_JUST_RELEASED) && (statusFlags & BF_HIGHLIGHTED))
+				{
 					statusFlags |= BF_CLICKED;
+				}
 			}
 			if(!hasBitmap)
 			{
@@ -508,10 +566,11 @@ void UI_Button::process()
 //    }
 		} // BF_DOWN?
 
-//		if(old_status_flags!=statusFlags)
-//			frameNumber=0;		 TODO
+		if((old_status_flags!=statusFlags) && (!(statusFlags & BF_IS_TAB))) // == lock animation evtl noch spaeter seperat machen
+			frameNumber=0;
 
 	} // end shown
+	forcedPress=false;
 }				
 
 bool UI_Button::isPressed()
@@ -573,8 +632,9 @@ void UI_Button::forcePressed()
 {
     if ( !disabledFlag ) 
 	{
-        statusFlags |= BF_DOWN | BF_CLICKED;
-        //statusFlags |= BF_JUST_PRESSED;
+		forcedPress=true;
+//        timeStamp = getTimeStampMs(100);
+	      statusFlags |= BF_DOWN | BF_CLICKED;// */| BF_JUST_PRESSED;
     }
 };
 
@@ -583,7 +643,9 @@ void UI_Button::forceUnpress()
 	if( !disabledFlag )
 	{
 		statusFlags &= ~BF_DOWN;
-		frameReset();
+//		statusFlags &= ~BF_JUST_RELEASED; // ~~
+	//	frameReset();
+	
 	};
 };
                                                                                

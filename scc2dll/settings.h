@@ -24,8 +24,8 @@ private:
 	SOUP soup;
 	DEFAULT defaults;
 	START start;
-	int setMapCount(int num);
-	int setGoalCount(int num);
+	void setMapCount(int num);
+	void setGoalCount(int num);
 	int currentMap;
 	int UMS;
 public:
@@ -64,18 +64,18 @@ public:
 	int getMINPreprocessBuildOrder();
 	int getMINCurrentMap();
 
-	int setMaxTime(int num); //sets max Time in minutes
-	int setMaxTimeOut(int num); //
-	int setAllowGoalAdaption(int num);
-	int setMaxLength(int num);
-	int setMaxRuns(int num);
-	int setMaxGenerations(int num);
-	int setPreprocessBuildOrder(int num);
-//	int setCurrentMap(int num);
+	void setMaxTime(int num); //sets max Time in minutes
+	void setMaxTimeOut(int num); //
+	void setAllowGoalAdaption(int num);
+	void setMaxLength(int num);
+	void setMaxRuns(int num);
+	void setMaxGenerations(int num);
+	void setPreprocessBuildOrder(int num);
+//	void setCurrentMap(int num);
 	void setGoal(int goal, int player);
-	int setBreedFactor(int num);
-	int setMode(int num);
-	int setCrossOver(int num);
+	void setBreedFactor(int num);
+	void setMode(int num);
+	void setCrossOver(int num);
 
 	int getBreedFactor();
 	int getMode();
@@ -98,11 +98,13 @@ public:
 
 	void initDefaults();
 
-	void loadDefaultsFile(const char* defaultFile);
-	int loadGoalFile(const char* goalFile);
-	int loadSettingsFile(const char* settingsFile);
-	int loadMapFile(const char* mapFile);
-	int loadHarvestFile(const char* harvestFile);
+	void loadDefaultsFile(string& defaultFile);
+	void loadGoalFile(string& goalFile);
+	void loadSettingsFile(string& settingsFile);
+	void loadMapFile(string& mapFile);
+	void loadHarvestFile(string& harvestFile);
+// todo evtl error codes...
+	
 	ANARACE** newGeneration(ANARACE* oldAnarace[MAX_PLAYER]);
 
 	int initSoup();

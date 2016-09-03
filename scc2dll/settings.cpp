@@ -6,6 +6,95 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <list>
+
+void parse_line(string& text, list<string>& words)
+{
+    int n = text.length();
+    int start, stop;
+    start = text.find_first_not_of(",\9\"\ =");
+    while ((start >= 0) && (start < n)) 
+	{
+       stop = text.find_first_of(",\9\0\n\"=", start);
+       if ((stop < 0) || (stop > n)) stop = n;
+       words.push_back(text.substr(start, stop - start));
+       start = text.find_first_not_of(",\9\n\"\ =", stop+1);
+    }
+}
+
+
+void parse_block(ifstream stream, map<string, list<string>>& block)
+{
+	char line[1024];
+	string text;
+    while(stream.getline(line, sizeof line))
+    {
+        if(pFile.fail())
+            stream.clear(pFile.rdstate() & ~ios::failbit);
+		text=line;
+		if(text.find("@END")!=npos) return;
+		int start=text.find_first_not_of("\9 ");
+		if ((start >= 0) && (start <= n))
+			if((text[0]=='#')||(text[0]=='\0')) continue; // ignore line
+		list<string> words;
+        parse_line(text, words);
+		block.Insert(text.substr(start), words);
+	};
+};
+
+void parse_2nd_block(ifstream stream, map<string, map<string, list<string>>>& block)
+{
+    char line[1024];
+    string text;
+    while(stream.getline(line, sizeof line))
+    {
+        if(pFile.fail())
+            stream.clear(pFile.rdstate() & ~ios::failbit);
+        text=line;
+		if(text.find("@END")!=npos) return;
+        int start=text.find_first_not_of("\9 ");
+        if ((start >= 0) && (start <= n))
+            if((text[0]=='#')||(text[0]=='\0')) continue; // ignore line
+        map<string, list<string>> words;
+        parse_block(stream, words);
+        block.Insert(text.substr(start), words);
+    };
+};
+
+
+void parse_file()
+{
+    char line[1024];
+    string text;
+    while(stream.getline(line, sizeof line))
+    {
+        if(pFile.fail())
+            stream.clear(pFile.rdstate() & ~ios::failbit);
+        text=line;
+        int start=text.find_first_not_of("\9 ");
+        if ((start >= 0) && (start <= n))
+            if((text[0]=='#')||(text[0]=='\0')) continue; // ignore line
+		string index=text.substr(start);
+		switch(index)
+		{
+			case "@STRINGS":
+				map<string, map<string, list<string>>> block;
+				parse_2nd_block(stream, block);
+				for(const_iterator ... begin ... end)
+					for(const iterator ... begin ... end)
+						for(const iterator ... begin ... end)
+							stringList[i][j][k]=block[][][].string;
+				break;
+			case ...
+
+		}
+    };
+};
+
+
 SETTINGS::SETTINGS()
 {
 	initDefaults();
@@ -149,13 +238,13 @@ int EXPORT SETTINGS::getMINCurrentMap()
 };
 
 										                                                                                                                    
-int EXPORT SETTINGS::setAllowGoalAdaption(int num) // allow the program to change goals (for example ignore command center when command center [NS] is already a goal
+void EXPORT SETTINGS::setAllowGoalAdaption(int num) // allow the program to change goals (for example ignore command center when command center [NS] is already a goal
 {
 #ifdef _SCC_DEBUG
 	if((num<0)||(num>1))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setAllowGoalAdaption): Value [%i] out of range.",num);
-		return(0);
+		return;
 	}
 #endif
 	ga.allowGoalAdaption=num;
@@ -163,65 +252,65 @@ int EXPORT SETTINGS::setAllowGoalAdaption(int num) // allow the program to chang
 };
 
 
-int EXPORT SETTINGS::setMaxTime(int num) //maximum time of build order in seconds
+void EXPORT SETTINGS::setMaxTime(int num) //maximum time of build order in seconds
 {
 #ifdef _SCC_DEBUG
 	if((num<MIN_TIME)||(num>MAX_TIME)) 
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setMaxTime): Value [%i] out of range.",num);
-		return(0);
+		return;
 	}
 #endif
 	ga.maxTime=num;
-	return(1);
+	return;
 };
 
-int EXPORT SETTINGS::setMaxTimeOut(int num) //timeout for building
+void EXPORT SETTINGS::setMaxTimeOut(int num) //timeout for building
 {
 #ifdef _SCC_DEBUG
 	if((num<MIN_TIMEOUT)||(num>MAX_TIMEOUT)) 
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setMaxTimeOut): Value [%i] out of range.",num);
-		return(0);
+		return;
 	}
 #endif
 	ga.maxTimeOut=num;
-	return(1);
+	return;
 };
 
-int EXPORT SETTINGS::setMaxLength(int num)
+void EXPORT SETTINGS::setMaxLength(int num)
 {
 #ifdef _SCC_DEBUG
 	if((num<MIN_LENGTH)||(num>MAX_LENGTH)) 
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setMaxLength): Value [%i] out of range.",num);
-		return(0);
+		return;
 	}
 #endif
 	ga.maxLength=num;
 	return(1);
 };
 
-int EXPORT SETTINGS::setMaxRuns(int num)
+void EXPORT SETTINGS::setMaxRuns(int num)
 {
 #ifdef _SCC_DEBUG
 	if((num<MIN_RUNS)||(num>MAX_RUNS))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setMaxRuns): Value [%i] out of range.",num);
-		return(0);
+		return;
 	}
 #endif
 	ga.maxRuns=num;
 	return(1);
 };
 
-int EXPORT SETTINGS::setMaxGenerations(int num)
+void EXPORT SETTINGS::setMaxGenerations(int num)
 {
 #ifdef _SCC_DEBUG
 	if((num<MIN_GENERATIONS)||(num>MAX_GENERATIONS))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setMaxGenerations): Value [%i] out of range.",num);
-		return(0);
+		return;
 	}
 #endif
 	ga.maxGenerations=num;
@@ -234,7 +323,7 @@ int SETTINGS::setMapCount(int num)
 	if((num<MIN_MAPS)||(num>=MAX_MAPS))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setMapCount): Value [%i] out of range.",num);
-		return(0);
+		return;
 	}
 #endif
 	ga.mapCount=num;
@@ -247,7 +336,7 @@ int SETTINGS::setGoalCount(int num)
 	if((num<MIN_GOAL_ENTRIES)||(num>=MAX_GOAL_ENTRIES))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setGoalCount): Value [%i] out of range.",num);
-		return(0);
+		return;
 	}
 #endif
 	ga.goalCount=num;
@@ -255,7 +344,7 @@ int SETTINGS::setGoalCount(int num)
 };
 
 
-int EXPORT SETTINGS::setPreprocessBuildOrder(int num)
+void EXPORT SETTINGS::setPreprocessBuildOrder(int num)
 {
 	if(num==1)
 		ga.preprocessBuildOrder=1;
@@ -266,19 +355,19 @@ int EXPORT SETTINGS::setPreprocessBuildOrder(int num)
 	else 
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setPreprocessBuildOrder): Value [%i] out of range.",num);
-		return(0);
+		return;
 	}
 #endif
 	return(1);
 };
 
-/*int EXPORT SETTINGS::setCurrentMap(int num)
+/*void EXPORT SETTINGS::setCurrentMap(int num)
 {
 #ifdef _SCC_DEBUG
 	if((num<MIN_MAPS)||(num>getMapCount()))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setCurrentMap): Value [%i] out of range.",num);
-		return(0);
+		return;
 	}
 #endif
 	ga.currentMap=num;
@@ -333,43 +422,43 @@ void EXPORT SETTINGS::checkForChange()
 	soup.checkForChange();	
 };
 
-int EXPORT SETTINGS::setBreedFactor(int num)
+void EXPORT SETTINGS::setBreedFactor(int num)
 {
 #ifdef _SCC_DEBUG
 	if((num<MIN_BREED_FACTOR)||(num>MAX_BREED_FACTOR))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setBreedFactor): Value [%i] out of range.",num);
-		return(0);
+		return;
 	}
 #endif
 	ga.setBreedFactor(num);
-	return(1);
+	return;
 };
 
-int EXPORT SETTINGS::setMode(int num)
+void EXPORT SETTINGS::setMode(int num)
 {
 #ifdef _SCC_DEBUG
 	if((num<MIN_MODE)||(num>MAX_MODE))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setMode): Value [%i] out of range.",num);
-		return(0);
+		return;
 	}
 #endif
 	ga.mode=num;
-	return(1);
+	return;
 };
 
-int EXPORT SETTINGS::setCrossOver(int num)
+void EXPORT SETTINGS::setCrossOver(int num)
 {
 #ifdef _SCC_DEBUG
 	if((num<MIN_CROSSOVER)||(num>MAX_CROSSOVER))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setCrossOver): Value [%i] out of range.",num);
-		return(0);
+		return;
 	}
 #endif
 	ga.setCrossOver(num);
-	return(1);
+	return;
 };
 
 int EXPORT SETTINGS::getBreedFactor()
@@ -476,82 +565,59 @@ GOAL_ENTRY* EXPORT SETTINGS::getGoal(int num)
 	return(&loadedGoal[num]);
 };
 
-void EXPORT SETTINGS::loadDefaultsFile(const char* defaultFile)
+void EXPORT SETTINGS::loadDefaultsFile(string& defaultFile)
 {
-	char* t=new char[257];
-	for(int i=32;i<256;i++)
-		t[i]=i;
-	t[256]=0;
-	debug.toLog(0,t);
-	delete t;
-
-	
 	defaults.loadFromFile(defaultFile, harvestSpeed);
 };
 
 
 //=> in race schreiben! :-) Bzw. in settings nur die Datei an sich laden, in ein array speichern und dann zur Auswahl geben
 // zu dem player[4] Problem... evtl pointer auf 4 Klassen machen...
-int EXPORT SETTINGS::loadGoalFile(const char* goalFile) //~~~
+void EXPORT SETTINGS::loadGoalFile(string& goalFile) //~~~
 {
-	char line[1024],old[1024];
-	FILE* pFile;
-	char* buffer;
-	char item[1024];
-	char param1[1024];
-	char param2[1024];
-	char param3[1024];
+	char line[1024];
+	string<list> parameter;
+	int<list>value;
 	int ln=0;
-	int value1=0,value2=0,value3=0;
 	int mode=0;
-
-	item[0]='\0';param1[0]='\0';param2[0]='\0';param3[0]='\0';
-
-	if((pFile = fopen (goalFile,"r"))==NULL)
-	{
-		debug.toLog(0,"ERROR: (SETTINGS::loadGoalFile) %s: Could not open file!",goalFile);
-		return(0); 
-	}
-	
+    ifstream pFile(goalFile.c_str());
+    if(!pFile.is_open())
+    {
+        debug.toLog(0,"ERROR: (UI_Theme::loadGoalFile) %s: Could not open file!",goalFile.c_str());
+        return;
+    }
 	//"unit name" "count" "time" "location"
-	while(fgets(line,sizeof(line),pFile)!=NULL)
-	{
+    while(pFile.getline(line, sizeof line))
+    {
+        if(pFile.fail())
+        {
+            debug.toLog(0,"WARNING: (UI_Theme::loadGoalFiles) %s: Long line!",goalFile.c_str());
+            pFile.clear(pFile.rdstate() & ~ios::failbit);
+        };
 		++ln;
-		line[strlen(line)-1]='\0';
 		if((line[0]=='#')||(line[0]=='\0')) continue;
-		strcpy(old,line);
-		strcpy(item,"");
-		strcpy(param1,"");
-		strcpy(param2,"");
 
-		if((buffer=strtok(line,"\""))!=NULL) strcpy(item,buffer);strtok(NULL,"\"");
-		if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param1,buffer);strtok(NULL,"\"");
-		if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param2,buffer);strtok(NULL,"\"");
-		if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param3,buffer);strtok(NULL,"\"");
-		if((buffer=strtok(NULL,"\""))!=NULL)
-		{
-			debug.toLog(0,"WARNING: (SETTINGS::loadGoalFile) %s: Line %d [%s]: Too many parameters.",goalFile,ln,old);
-			continue;
-		}
-		value1=atoi(param1);value2=atoi(param2);value3=atoi(param3);
-		
-		if((value1<0)||(value2<0)||(value3<0))
-		{
-			debug.toLog(0,"WARNING: (SETTINGS::loadGoalFile) %s: Line %d [%s]: Value below zero.",goalFile,ln,old);
-			continue;
-		}
+		parse(line, parameter, value); // evtl immer 2 zwischenraeume... naj aerstmal testen..
+
+//		if((value1<0)||(value2<0)||(value3<0))
+//		{
+//			debug.toLog(0,"WARNING: (SETTINGS::loadGoalFile) %s: Line %d [%s]: Value below zero.",goalFile,ln,old);
+//			continue;
+//		}
 		
 		if(mode==0)
 		{
-			if(!strcmp(item,"@GOAL"))
+			if(parameter[0]=="@GOAL")
 				mode=1;
 			//else ...
 		}
 		else if(mode==1)
 		{
-			if(!strcmp(item,"Name"))
-				loadedGoal[getGoalCount()].setName(param1);
-			else if(!strcmp(item,"@RACE"))
+			switch(parameter[0])
+			{
+			if(parameter[0]=="Name")
+				loadedGoal[getGoalCount()].setName(param);
+			else if(parameter[0]=="@RACE"))
 			{
 				mode=2;
 				if(!strcmp(param1,"Terra")) loadedGoal[getGoalCount()].setRace(TERRA);
@@ -560,11 +626,10 @@ int EXPORT SETTINGS::loadGoalFile(const char* goalFile) //~~~
 				else
 				{
 					debug.toLog(0,"ERROR: (SETTINGS::loadGoalFile) %s: Line %d [%s]: Invalid race.",goalFile,ln,old);
-					fclose(pFile);
-					return(0);
+					return;
 				}
 			}
-			else if(!strcmp(item,"@END"))
+			else if(parameter[0]=="@END"))
 				mode=0;
 			//else...
 			
@@ -574,12 +639,11 @@ int EXPORT SETTINGS::loadGoalFile(const char* goalFile) //~~~
 		/*	if(!loadedGoal[getGoalCount()].isRaceInitialized())
 			{
 				debug.toLog(0,"ERROR: (SETTINGS::loadGoalFile) %s: Line %d [%s]: @RACE must be the first line.",goalFile,ln,old);
-				fclose(pFile);
 				return(0);
 			}
 		else
 			{*/
-			if(!strcmp(item,"@END"))
+			if(parameter[0]=="@END"))
 				mode=1;
 			else
 			{
@@ -603,265 +667,115 @@ int EXPORT SETTINGS::loadGoalFile(const char* goalFile) //~~~
 //missing @END ??
 	loadedGoal[getGoalCount()].adjustGoals(ga.allowGoalAdaption);
 	setGoalCount(getGoalCount()+1);
-	fclose(pFile);
 	return(1);
 };
 
 
-int EXPORT SETTINGS::loadSettingsFile(const char* settingsFile)
+void SETTINGS::loadSettingsFile(string& settingsFile)
 {
-	char line[1024],old[1024];
-	FILE* pFile;
-	char* buffer;
-	char item[1024];
-	char param[1024];
-	int ln=0;
-	int value=0;
-	int mode=0;
-	
-	item[0]='\0';param[0]='\0';
-
-	if((pFile = fopen (settingsFile,"r"))==NULL)
-	{
-		debug.toLog(0,"ERROR: (SETTINGS::loadSettingsFile) %s: Could not open file!",settingsFile);
-		return(0);
-	}
-
-	while(fgets(line,sizeof(line),pFile)!=NULL)
-	{
-		++ln;
-		line[strlen(line)-1]='\0';
-		if((line[0]=='#')||(line[0]=='\0')) continue;
-		strcpy(old,line);
-		strcpy(item,"");
-		strcpy(param,"");
-		if((buffer=strtok(line,"\""))!=NULL) strcpy(item,buffer);strtok(NULL,"\"");
-		if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param,buffer);
-		if((buffer=strtok(NULL,"\""))!=NULL)
+    ifstream pFile(settingsFile.c_str());
+    char line[1024];
+    string text;
+    while(pFile.getline(line, sizeof line))
+    {
+        if(pFile.fail())
+            pFile.clear(pFile.rdstate() & ~ios::failbit);
+        text=line;
+        int start=text.find_first_not_of("\9 ");
+        if ((start >= 0) && (start <= n))
+            if((text[0]=='#')||(text[0]=='\0')) continue; // ignore line
+        string index=text.substr(start);
+		string value;
+		if(index=="@STRINGS")
 		{
-			debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: Too many parameters.",settingsFile,ln,old);
-			continue;
-		}
-		value=atoi(param);
-		
-		if(value<0)
-		{
-			debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: Value below zero.",settingsFile,ln,old);
-			continue;
-		}
-
-		if(mode==0)
-		{
-			if(!strcmp(item,"@SETTINGS")) mode=1;
-			else 
-			{
-				if(!strcmp(item,"@END"))
-					debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: Lonely @END.",settingsFile,ln,old);
-				else
-					debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: Line is outside a block but is not marked as comment.",settingsFile,ln,old);
-			}
-			
-		}
-		else if(mode>0)
-		{
-			if(!strcmp(item,"@END"))
-				mode=0;
-			else if(!strcmp(item,"@SETTINGS"))
-				debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: New @SETTINGS block found within a @SETTINGS block.",settingsFile,ln,old);
-			else if(mode==1)
-			{
-				if(!strcmp(item,"Allow goal adaption"))
-				{
-					if(!setAllowGoalAdaption(value))
-						debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: Allow goal adaption out of range.",settingsFile,ln,old);
-				}
-				else if(!strcmp(item,"Max Time"))
-				{
-					//TODO evtl alles in set... rein
-					if(!setMaxTime(value))
-						debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: Max Time out of range.",settingsFile,ln,old);
-				}
-				else if(!strcmp(item,"Max Timeout"))
-				{
-					if(!setMaxTimeOut(value))
-						debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: Max Timeout out of range.",settingsFile,ln,old);
-				}
-				else if(!strcmp(item,"Max Length"))
-				{
-					if(!setMaxLength(value))
-						debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: Max Length out of range.",settingsFile,ln,old);
-				}
-
-				else if(!strcmp(item,"Max Runs"))
-				{
-					if(!setMaxRuns(value))
-						debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: Max Runs too low.",settingsFile,ln,old);
-					//TODO: too low is falsch... Fehlermeldung wird ja eigentlich schon von setMaxRuns geschrieben...
-
-				}
-				
-				else if(!strcmp(item,"Preprocess Buildorder"))
-				{
-					if(!setPreprocessBuildOrder(value))
-						debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: Preprocess Buildorder out of Range.",settingsFile,ln,old);
-				}
-				else if(!strcmp(item,"Mode"))
-				{
-					if(!setMode(value))
-						debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: Mode out of Range.",settingsFile,ln,old);
-				}
-				else if(!strcmp(item,"Breed Factor"))
-				{
-					if(!setBreedFactor(value))
-						debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: Breed Factor out of Range.",settingsFile,ln,old);
-				}
-
-				else if(!strcmp(item,"Crossing Over"))
-				{
-					if(!setCrossOver(value))
-						debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: Cross Over out of Range.",settingsFile,ln,old);
-				}
-
-				else if(!strcmp(item,"Max unchanged Generations"))
-				{
-					if(!setMaxGenerations(value))
-						debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: Max Generations out of range.",settingsFile,ln,old);
-				}
-				else
-					debug.toLog(0,"WARNING: (SETTINGS::loadSettingsFile) %s: Line %d [%s]: Unknown entry.",settingsFile,ln,old);
-			}
-		}// END if(mode>0)
+                map<string, list<string>> block;
+                parse_block(pFile, block);
+				if(value=block["Allow goal adaption"].front()) setAllowGoalAdaption(atoi(value.c_str()));
+				if(value=block["Max Time"].front()) setMaxTime(atoi(value.c_str()));
+				if(value=block["Max Timeout"].front()) setMaxTimeOut(atoi(value.c_str()));
+				if(value=block["Max Length"].front()) setMaxLength(atoi(value.c_str()));
+				if(value=block["Max Runs"].front()) setMaxRuns(atoi(value.c_str()));
+				if(value=block["Preprocess Buildorder"].front()) setPreprocessBuildOrder(atoi(value.c_str()));
+				if(value=block["Mode"].front()) setMode(atoi(value.c_str()));
+				if(value=block["Breed Factor"].front()) setBreedFactor(atoi(value.c_str()));
+				if(value=block["Crossing Over"].front()) setCrossOver(atoi(value.c_str()));
+				if(value=block["Max unchanged Generations"].front()) setMaxGenerations(atoi(value.c_str()));
+		};
 	}// END while
-	return(1);
-};
+}; // schoen :)
 
-int EXPORT SETTINGS::loadHarvestFile(const char* harvestFile)
+void SETTINGS::loadSettingsFile(string& harvestFile)
 {
-	char line[1024],old[1024];
-	FILE* pFile;
-	char* buffer;
-	char item[1024],param[1024];
-	int ln=0;
-	int value=0;
-	int mode=0,modeRace=0;
-	if((pFile = fopen (harvestFile,"r"))==NULL)
-	{
-		debug.toLog(0,"ERROR: (SETTINGS::loadHarvestFile) %s: Could not open file!",harvestFile);
-		return(0); 
-	}
-
-	item[0]='\0';param[0]='\0';
-
-	while(fgets(line,sizeof(line),pFile)!=NULL)
-	{
-		++ln;
-		line[strlen(line)-1]='\0';
-		if((line[0]=='#')||(line[0]=='\0')) continue;
-		strcpy(old,line);
-		strcpy(item,"");
-		strcpy(param,"");
-		value=0;
-		if((buffer=strtok(line,"\""))!=NULL) strcpy(item,buffer);strtok(NULL,"\"");
-		if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param,buffer);strtok(NULL,"\"");
-		if((buffer=strtok(NULL,"\""))!=NULL)
-		{
-			debug.toLog(0,"WARNING: (SETTINGS::loadHarvestFile) %s: Line %d [%s]: Too many parameters.",harvestFile,ln,old);
-			continue;
-		}
-
-		if((value=atoi(param))<0)
-		{
-			debug.toLog(0,"WARNING: (SETTINGS::loadHarvestFile) %s: Line %d [%s]: Value below zero.",harvestFile,ln,old);
-			continue;
-		}
-
-		if(mode==0) //Out of any block
-		{
-			if(!strcmp(item,"@HARVESTDATA")) 
-				mode=1;
-			else if(!strcmp(item,"@END"))
-				debug.toLog(0,"WARNING: (SETTINGS::loadHarvestFile) %s: Line %d [%s]: Lonely @END.",harvestFile,ln,old);
-			else 
-				debug.toLog(0,"WARNING: (SETTINGS::loadHarvestFile) %s: Line %d [%s]: Line is outside a block but is not marked as comment.",harvestFile,ln,old);
-		
-		}
-		else if(mode==1)		
-		{
-			if(modeRace==0)
-			{
-				if(!strcmp(item,"@TERRA"))
-					modeRace=1;
-				else if(!strcmp(item,"@PROTOSS"))
-					modeRace=2;
-				else if(!strcmp(item,"@ZERG"))
-					modeRace=3;
-				else if(!strcmp(item,"@END"))
-					mode=0;
-				else 
-					debug.toLog(0,"WARNING: (SETTINGS::loadHarvestFile) %s: Line %d [%s]: @TERRA, @PROTOSS or @ZERG expected.",harvestFile,ln,old);
-			}
-			else if(modeRace>0)
-			{
-				if(!strcmp(item,"@END"))
-					modeRace=0;
-				else if(!strcmp(item,"Mineral Harvest"))
+    ifstream pFile(harvestFile.c_str());
+    char line[1024];
+    string text;
+    while(pFile.getline(line, sizeof line))
+    {
+        if(pFile.fail())
+            pFile.clear(pFile.rdstate() & ~ios::failbit);
+        text=line;
+        int start=text.find_first_not_of("\9 ");
+        if ((start >= 0) && (start <= n))
+            if((text[0]=='#')||(text[0]=='\0')) continue; // ignore line
+        string index=text.substr(start);
+        list<string> item;
+        if(index=="@HARVESTDATA")
+        {
+                map<string, map<string, list<string>>> block;
+                parse_2nd_block(pFile, block);
+				map<string, list<string>> player;
+				if(player=block["@TERRA"])
 				{
-					int i=0;
-					buffer=strtok(param," ");
-					while((buffer!=NULL)&&(i<45))				
+					if(item=player["Mineral Harvest"])
 					{
-						if(!harvestSpeed[modeRace-1].setHarvestMineralSpeed(i++,(value=atoi(buffer))))
-						{
-							debug.toLog(0,"WARNING: (SETTINGS::loadHarvestFile) %s: Line %d [%s]: Values out of range.",harvestFile,ln,old);
-							break;
-						}
-						buffer=strtok(NULL," ");
+						int j=0;
+						for(list<string>::const_iterator i=item.begin();i!=item.end();++i)
+	                        harvestSpeed[0].setHarvestMineralSpeed(j++,atoi(*i));
 					}
-					if(i<45)
+					if(item=player["Gas Harvest"])
 					{
-						debug.toLog(0,"WARNING: (SETTINGS::loadHarvestFile) %s: Line %d [%s]: Missing entries.",harvestFile,ln,old);
-						for(;i<45;i++)
-							//~~
-							harvestSpeed[modeRace-1].setHarvestMineralSpeed(i++,value);
+						int j=0;
+						for(list<string>::const_iterator i=item.begin();i!=item.end();++i)
+	                        harvestSpeed[0].setHarvestGasSpeed(j++,atoi(*i));
 					}
-				}
-				else
-				if(!strcmp(item,"Gas Harvest"))
+				};
+				if(player=block["@PROTOSS"])
 				{
-					int i=0;
-					buffer=strtok(param," ");
-					while((buffer!=NULL)&&(i<5))
+					if(item=player["Mineral Harvest"])
 					{
-						if(!harvestSpeed[modeRace-1].setHarvestGasSpeed(i++,(value=atoi(buffer))))
-						{
-							debug.toLog(0,"WARNING: (SETTINGS::loadHarvestFile) %s: Line %d [%s]: Values out of range.",harvestFile,ln,old);
-							break;
-						}
-						buffer=strtok(NULL," ");
+						int j=0;
+						for(list<string>::const_iterator i=item.begin();i!=item.end();++i)
+	                        harvestSpeed[1].setHarvestMineralSpeed(j++,atoi(*i));
 					}
-					if(i<5)
+					if(item=player["Gas Harvest"])
 					{
-						debug.toLog(0,"WARNING: (SETTINGS::loadHarvestFile) %s: Line %d [%s]: Missing entries",harvestFile,ln,old);
-						for(;i<5;i++)
-							//~~
-							harvestSpeed[modeRace-1].setHarvestGasSpeed(i++,value);
+						int j=0;
+						for(list<string>::const_iterator i=item.begin();i!=item.end();++i)
+	                        harvestSpeed[1].setHarvestGasSpeed(j++,atoi(*i));
 					}
-				}
-				else 
-					debug.toLog(0,"WARNING: (SETTINGS::loadHarvestFile) %s: Line %d [%s]: Unknown entry.",harvestFile,ln,old);
-			}
-		}
-		else
-			debug.toLog(0,"ERROR: (SETTINGS::loadHarvestFile) %s: Line %d [%s]: Serious bug.",harvestFile,ln,item);
-	}// END while
-	return(1);
-};
+				};
+				if(player=block["@ZERG"])
+				{
+					if(item=player["Mineral Harvest"])
+					{
+						int j=0;
+						for(list<string>::const_iterator i=item.begin();i!=item.end();++i)
+	                        harvestSpeed[2].setHarvestMineralSpeed(j++,atoi(*i));
+					}
+					if(item=player["Gas Harvest"])
+					{
+						int j=0;
+						for(list<string>::const_iterator i=item.begin();i!=item.end();++i)
+	                        harvestSpeed[2].setHarvestGasSpeed(j++,atoi(*i));
+					}
+				};
+        };
+    }// END while
+}; // schoen :)
 
 
 
-
-
-int EXPORT SETTINGS::loadMapFile(const char* mapFile)
+int EXPORT SETTINGS::loadMapFile(string& mapFile)
 {
 	char line[1024],old[1024];
 	FILE* pFile;
@@ -875,7 +789,7 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 	if((pFile = fopen ("maps/LostTemple.map","r"))==NULL)
 	{
 		debug.toLog(0,"ERROR: (SETTINGS::loadMapFile) %s: Could not open file!",mapFile);
-		return(0); 
+		return; 
 	}
 //todo: maps in ne linked list oder so...
 //allgemeine linked list schreiben ... etc. etc.
@@ -911,9 +825,9 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 
 		if(mode==0) //Out of any block
 		{
-			if(!strcmp(item,"@MAP")) 
+			if(parameter[0]=="@MAP")) 
 				mode=1;
-			else if(!strcmp(item,"@LOCATION"))
+			else if(parameter[0]=="@LOCATION"))
 			{
 				if((value1>0)&&(value1<=MAX_LOCATIONS)) 
 				{
@@ -922,7 +836,7 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 				}
 				else debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Location out of range.",mapFile,ln,old);
 			}
-			else if(!strcmp(item,"@PLAYER"))
+			else if(parameter[0]=="@PLAYER"))
 			{
 				if((value1>=0)&&(value1<=loadedMap[getMapCount()].getMaxPlayer()))
 				{
@@ -931,7 +845,7 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 				}
 				else debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Player is out of range.",mapFile,ln,old);
 			}
-			else if(!strcmp(item,"@END"))
+			else if(parameter[0]=="@END"))
 				debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Lonely @END.",mapFile,ln,old);
 			else 
 				debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Line is outside a block but is not marked as comment.",mapFile,ln,old);
@@ -941,39 +855,39 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 		{
 			if(mode==1) // MAP Block
 			{
-				if(!strcmp(item,"Name"))
+				if(parameter[0]=="Name"))
 				{
 					if(!loadedMap[getMapCount()].setName(param1))
 						debug.toLog(0,"ERROR: (SETTINGS::loadMapFile) %s: Line %d [%s]: Name not set!",mapFile,ln,old);
 				}
-				else if(!strcmp(item,"Max Locations"))
+				else if(parameter[0]=="Max Locations"))
 				{
 					if(!loadedMap[getMapCount()].setMaxLocations(value1))
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Max Locations out of range.",mapFile,ln,old);
 				}
-				else if(!strcmp(item,"Max Players"))
+				else if(parameter[0]=="Max Players"))
 				{
 					if(!loadedMap[getMapCount()].setMaxPlayer(value1))
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Max Player out of range.",mapFile,ln,old);
 				}
-				else if(!strcmp(item,"@END"))
+				else if(parameter[0]=="@END"))
 					mode=0;
 				else 
 					debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Unknown entry in MAP Block.",mapFile,ln,old);
 			}
 			else if(mode==2) // LOCATION Block
 			{
-				if(!strcmp(item,"Name"))
+				if(parameter[0]=="Name"))
 				{
 					if(!loadedMap[getMapCount()].setLocationName(modeLocation-1,param1))
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Name invalid.",mapFile,ln,old);
 				}
-				else if(!strcmp(item,"Mineral Distance"))
+				else if(parameter[0]=="Mineral Distance"))
 				{
 					if(!loadedMap[getMapCount()].setMineralDistance(modeLocation-1,value1))
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Mineral Distance out of range.",mapFile,ln,old);
 				}
-				else if(!strcmp(item,"Distances"))
+				else if(parameter[0]=="Distances"))
 				{
 					//~~ wenn maxLocations noch nicht initialisiert...
 					distanceCount=0;
@@ -995,7 +909,7 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 							loadedMap[getMapCount()].setDistance(modeLocation-1,distanceCount,0);
 					}
 				}
-				else if(!strcmp(item,"@PLAYER"))
+				else if(parameter[0]=="@PLAYER"))
 				{
 					if((value1>=0)&&(value1<=loadedMap[getMapCount()].getMaxPlayer()))
 					{
@@ -1005,14 +919,14 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 					else 
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Value out of range.",mapFile,ln,old);
 				}
-				else if(!strcmp(item,"@END"))
+				else if(parameter[0]=="@END"))
 					mode=0;
 				else 
 					debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Unknown entry in LOCATION Block.",mapFile,ln,old);
 			} //end LOCATION Block
 			else if(mode==3) //PLAYER Block
 			{
-				if(!strcmp(item,"Race"))
+				if(parameter[0]=="Race"))
 				{
 					if(!strcmp(param1,"Terra")) 
 					{
@@ -1032,27 +946,27 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 					else 
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Invalid race.",mapFile,ln,old);
 				}
-				else if(!strcmp(item,"Starting Point"))
+				else if(parameter[0]=="Starting Point"))
 				{
 					if(!loadedMap[getMapCount()].setStartPlayerPosition(modePlayer,value1-1))
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Starting Point out of range.",mapFile,ln,old);
 				}
-				else if(!strcmp(item,"Starting Minerals"))
+				else if(parameter[0]=="Starting Minerals"))
 				{
 					if(!loadedMap[getMapCount()].setStartPlayerMins(modePlayer,value1*100))
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Starting Minerals out of range.",mapFile,ln,old);
 				}
-				else if(!strcmp(item,"Starting Gas"))
+				else if(parameter[0]=="Starting Gas"))
 				{
 					if(!loadedMap[getMapCount()].setStartPlayerGas(modePlayer,value1*100))
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Starting Gas out of range.",mapFile,ln,old);
 				}
-				else if(!strcmp(item,"Starttime"))
+				else if(parameter[0]=="Starttime"))
 				{
 					if(!loadedMap[getMapCount()].setStartPlayerTime(modePlayer,value1))
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Start time out of range.",mapFile,ln,old);
 				}
-				else if(!strcmp(item,"@END"))
+				else if(parameter[0]=="@END"))
 				{
 					playerCount++;
 					mode=0;
@@ -1063,7 +977,7 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 			else if(mode==4) // PLAYER Block in LOCATION Block
 			{
 				int i=0;
-				if(!strcmp(item,"@END"))
+				if(parameter[0]=="@END"))
 					mode=2;
 				else 
 				{
@@ -1088,7 +1002,7 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 	if(loadedMap[getMapCount()].getMaxPlayer()>playerCount+1)
 	{
 		debug.toLog(0,"ERROR: (SETTINGS::loadMapFile) %s: 'Max players' declared as %i but only %i (incl. neutral player) players found.",mapFile,loadedMap[getMapCount()].getMaxPlayer(),playerCount+1);
-		return(0);
+		return;
 	}
 //	if(UMS==0)
 //	{

@@ -44,16 +44,39 @@ BUILDORDER& BUILDORDER::operator=(const BUILDORDER& object)
 	tFitness = object.tFitness;
 	return(*this);
 }
-
+#include <sstream>
 const unsigned int BUILDORDER::calculateSecondaryFitness() const
 {
-	// total gathered resources minus minerals that were not used
-	int tsF = getHarvestedMinerals() + getHarvestedGas();// - (getWastedMinerals() + getWastedGas()) / getRealTimer();
 	//TODO: evtl gas und minerals (wie urspruenglich eigentlich) in Verhaeltnis setyen wieviel es jeweils Geysire/Mineralien gibt...	
+	unsigned int penalty = 0;
 	for(unsigned int i=GAS_SCV+1; i--;)
-		if((getGoal()->getAllGoal(i)>0)&&(getGoal()->getAllGoal(i)+(*pStartCondition)->getLocationTotal(GLOBAL, i)<getLocationTotal(GLOBAL, i)))
-			tsF-=((*pStartCondition)->getLocationTotal(GLOBAL, i)-(*pStartCondition)->getLocationTotal(GLOBAL,i)-getGoal()->getAllGoal(i))*(stats[getGoal()->getRace()][i].gas+stats[getGoal()->getRace()][i].minerals);
-	return(tsF);
+	{
+		unsigned int total = getGoal()->getAllGoal(i);
+		if((*pStartCondition)->getLocationTotal(GLOBAL, i) > total)
+				total = (*pStartCondition)->getLocationTotal(GLOBAL, i);					
+		if(getLocationTotal(GLOBAL, i) > total)
+			penalty += (getLocationTotal(GLOBAL,i) - total) * (stats[getGoal()->getRace()][i].gas+stats[getGoal()->getRace()][i].minerals);
+	}
+/*	if(getHarvestedMinerals() + getHarvestedGas() < penalty)
+	{
+		std::ostringstream os; os.str("");
+		for(unsigned int i=GAS_SCV+1; i--;)
+		{
+			unsigned int total = getGoal()->getAllGoal(i);
+			if((*pStartCondition)->getLocationTotal(GLOBAL, i) > total)
+				total = (*pStartCondition)->getLocationTotal(GLOBAL, i);					
+			if(total < getLocationTotal(GLOBAL, i))
+			{
+				os.str("");
+				os << "Unit: " << i << ", " << (getLocationTotal(GLOBAL,i) - total) * (stats[getGoal()->getRace()][i].gas+stats[getGoal()->getRace()][i].minerals);
+				toLog(os.str());
+			}
+		}
+		os.str("");
+		os << "Penalty/Ressources: " << penalty << " / " << getHarvestedMinerals() + getHarvestedGas();
+		toLog(os.str());
+	}*/
+	return(getHarvestedMinerals() + getHarvestedGas() - penalty);
 }
 
 // TODO: reimplement/recheck the speed of the units

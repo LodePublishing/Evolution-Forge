@@ -71,6 +71,7 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Siz
 		case PRESS_BUTTON_MODE:break;
 		case PUSH_BUTTON_MODE:statusFlags |= BF_REPEATS;break;
 		case TAB_BUTTON_MODE:statusFlags |= BF_IS_TAB;statusFlags |= BF_STATIC;break;
+		case BOGRAPH_BUTTON_MODE:statusFlags |= BF_IS_RECTANGLE;break;
 		default:break;
 	} 
 	if((button_position_mode == SPECIAL_BUTTON_LEFT)||(button_position_mode == SPECIAL_BUTTON_ARRANGE_TOP_LEFT)||(button_position_mode == SPECIAL_BUTTON_ARRANGE_TOP_RIGHT))
@@ -107,6 +108,7 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Siz
 		case PRESS_BUTTON_MODE:break;
 		case PUSH_BUTTON_MODE:statusFlags |= BF_REPEATS;break;
 		case TAB_BUTTON_MODE:statusFlags |= BF_IS_TAB; statusFlags |= BF_STATIC;break;
+		case BOGRAPH_BUTTON_MODE:statusFlags |= BF_IS_RECTANGLE;break;
 		default:break;
 	} 
 //	adjustPositionAndSize( theme.lookUpFont(font)->GetTextExtent(button_text));//text->getTextSize());
@@ -154,6 +156,7 @@ UI_Button::UI_Button(UI_Object* button_parent, const Rect button_rect, const Siz
 		case PRESS_BUTTON_MODE:break;
 		case PUSH_BUTTON_MODE:statusFlags |= BF_REPEATS;break;
 		case TAB_BUTTON_MODE:statusFlags |= BF_IS_TAB; statusFlags |= BF_STATIC;break;
+		case BOGRAPH_BUTTON_MODE:statusFlags |= BF_IS_RECTANGLE;break;
 		default:break;
 	} 
 //	startRect = getRelativeRect();
@@ -174,6 +177,7 @@ void UI_Button::reloadOriginalSize()
 
 void UI_Button::setPressDepth(const unsigned int depth)
 {
+	UI_Object::addToProcessArray(this);
 	pressdepth = depth;
 	wasPressed = true;
 	if(text)
@@ -246,7 +250,10 @@ void UI_Button::draw(DC* dc) const
 					*(theme.lookUpColor(theme.lookUpButtonColors(buttonColorsType)->startTextColor[animation_phase])), 
 					*(theme.lookUpColor(theme.lookUpButtonColors(buttonColorsType)->endTextColor[animation_phase])), gradient));
 // TODO TAB-BUTTON MODE
-			dc->DrawEdgedRoundedRectangle(getAbsolutePosition()+Size(pressdepth, pressdepth), getSize()+Size(1,1), 4);
+			if(statusFlags & BF_IS_RECTANGLE)
+				dc->DrawRectangle(getAbsolutePosition()+Size(pressdepth, pressdepth), getSize()+Size(1,1));
+			else
+				dc->DrawEdgedRoundedRectangle(getAbsolutePosition()+Size(pressdepth, pressdepth), getSize()+Size(1,1), 4);
 //			ostringstream os;
 //			os.str("");
 //			if(getAbsoluteRect().Inside(p - Size(pressdepth, pressdepth) ))
@@ -292,6 +299,7 @@ void UI_Button::frameReset()
 
 void UI_Button::mouseHasEnteredArea()
 {
+	UI_Object::addToProcessArray(this);
 	resetGradient();
 	statusFlags |= BF_HIGHLIGHTED;
 	if(statusFlags & BF_WAS_PRESSED)
@@ -306,6 +314,7 @@ void UI_Button::mouseHasEnteredArea()
 
 void UI_Button::mouseHasLeftArea()
 {
+	UI_Object::addToProcessArray(this);
 	statusFlags &= ~BF_HIGHLIGHTED;
 	if(statusFlags & BF_WAS_PRESSED)
 	{
@@ -321,6 +330,7 @@ void UI_Button::mouseLeftButtonPressed()
 {
 	if((statusFlags & BF_NOT_CLICKABLE)||((statusFlags & BF_IS_TAB)&&(isOriginalPosition==true)))
 		return;
+	UI_Object::addToProcessArray(this);
 	statusFlags |= BF_WAS_PRESSED;
 	statusFlags |= BF_DOWN;
 	if(isOriginalPosition)
@@ -339,6 +349,7 @@ void UI_Button::mouseLeftButtonReleased()
 {
 	if((statusFlags & BF_NOT_CLICKABLE))
 		return;
+	UI_Object::addToProcessArray(this);
 //	if(forcedPress)
 //		return;
 	statusFlags &= ~BF_WAS_PRESSED;
@@ -362,7 +373,7 @@ void UI_Button::mouseLeftButtonReleased()
 				radio->leftButtonPressed(this);
 			else 
 			if(!(statusFlags & BF_IS_TAB))
-				radio->leftButtonReleased(this);
+				radio->leftButtonReleased();
 		}		
 	}
 	if(allowMoveByMouse)
@@ -376,6 +387,7 @@ void UI_Button::mouseRightButtonPressed()
 {
 	if((statusFlags & BF_NOT_CLICKABLE)||((statusFlags & BF_IS_TAB)&&(isOriginalPosition==true)))
 		return;
+	UI_Object::addToProcessArray(this);
 	statusFlags |= BF_WAS_PRESSED;
 	statusFlags |= BF_DOWN;
 	if(isOriginalPosition)
@@ -389,6 +401,7 @@ void UI_Button::mouseRightButtonReleased()
 {
 	if((statusFlags & BF_NOT_CLICKABLE))
 		return;
+	UI_Object::addToProcessArray(this);
 //	if(forcedPress)
 //		return;
 	statusFlags &= ~BF_WAS_PRESSED;
@@ -412,7 +425,7 @@ void UI_Button::mouseRightButtonReleased()
 				radio->rightButtonPressed(this);
 			else 
 			if(!(statusFlags & BF_IS_TAB))
-				radio->rightButtonReleased(this);
+				radio->rightButtonReleased();
 		}		
 	}
 }
@@ -462,7 +475,8 @@ void UI_Button::process()
 	} else
 	if(!(statusFlags & BF_HIGHLIGHTED))
 		gradient += (100 - gradient) / 5 + 1;
-	else
+	else {
+		UI_Object::addToNextProcessArray(this);
 	switch(theme.lookUpButtonColors(buttonColorsType)->type)
 	{	
 		case NO_ANIMATION:if(gradient < 100) ++gradient;else gradient = 100;break;
@@ -471,12 +485,18 @@ void UI_Button::process()
 		case BLINKING_ANIMATION:if(frameNumber<theme.lookUpButtonColors(buttonColorsType)->speed/2) gradient=0;else gradient=100;break;
 		default:break;
 	}
+	}
 
 	if(gradient > 100)
+	{
 		gradient = 100;
+	}
 
 	if(gradient != oldgradient)
+	{
 		setNeedRedrawNotMoved();
+		UI_Object::addToNextProcessArray(this);
+	}
 
 	Point absoluteCoord = getRelativePosition();
 	Size absoluteSize = getSize();

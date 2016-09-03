@@ -32,7 +32,7 @@ BoWindow& BoWindow::operator=(const BoWindow& object)
 	return(*this);
 }
 BoWindow::BoWindow(UI_Object* bo_parent, const unsigned int game_number, const unsigned int max_games, const unsigned int player_number, const unsigned int max_players) :
-	UI_Window(bo_parent, BOWINDOW_TITLE_STRING, theme.lookUpPlayerRect(BUILD_ORDER_WINDOW, game_number, max_games, player_number, max_players), theme.lookUpPlayerMaxHeight(BUILD_ORDER_WINDOW, game_number, max_games, player_number, max_players), NOT_SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0, 20, 1000, 1000)),
+	UI_Window(bo_parent, BOWINDOW_TITLE_STRING, theme.lookUpPlayerRect(BUILD_ORDER_WINDOW, game_number, max_games, player_number, max_players), theme.lookUpPlayerMaxHeight(BUILD_ORDER_WINDOW, game_number, max_games, player_number, max_players), SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0, 20, 1000, 1000)),
 	anarace(NULL),
 	optimizeMode(0),
 	boInsertPoint(-1),
@@ -41,7 +41,8 @@ BoWindow::BoWindow(UI_Object* bo_parent, const unsigned int game_number, const u
 	lastBogoal(0),
 	saveBuildOrderButton(new UI_Button(this, getRelativeClientRect(), Size(5,5), SAVE_BUILD_ORDER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_BOLD_FONT, AUTO_SIZE)),
 	loadBuildOrderButton(new UI_Button(this, getRelativeClientRect(), Size(5,5), LOAD_BUILD_ORDER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_SIZE)),
-	alwaysBuildWorker(new UI_CheckButton(this, Rect(5, 40, 200, 15), Size(5, 5), DO_NOT_ADJUST, SETTING_ALWAYS_BUILD_WORKER_STRING, SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING, coreConfiguration.isAlwaysBuildWorker())) // TODO
+	alwaysBuildWorker(new UI_CheckButton(this, Rect(5, 40, 200, 15), Size(5, 5), ARRANGE_LEFT, SETTING_ALWAYS_BUILD_WORKER_STRING, SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING, coreConfiguration.isAlwaysBuildWorker())), // TODO
+	onlySwapOrders(new UI_CheckButton(this, Rect(5, 40, 200, 28), Size(5, 5), ARRANGE_LEFT, SETTING_ONLY_SWAP_ORDERS_STRING, SETTING_ONLY_SWAP_ORDERS_TOOLTIP_STRING, coreConfiguration.isOnlySwapOrders())) // TODO
 //	fixed(fixed_list)
 {
 	resetData();
@@ -60,6 +61,7 @@ BoWindow::~BoWindow()
 	delete saveBuildOrderButton;
 	delete loadBuildOrderButton;
 	delete alwaysBuildWorker;
+	delete onlySwapOrders;
 }
 
 void BoWindow::assignAnarace(ANABUILDORDER* bo_anarace)
@@ -85,6 +87,9 @@ void BoWindow::resetData()
 									
 //	for(i=0;i<MAX_LENGTH;++i)
 //		selection[i]=1;
+	Rect edge = Rect(getRelativeClientRectPosition()+Point(4, 3*(FONT_SIZE+6)), Size(getWidth()-20, FONT_SIZE+5));
+	fitItemToRelativeClientRect(edge, 1);
+
 }
 
 void BoWindow::reloadStrings()
@@ -120,7 +125,7 @@ void BoWindow::processList()
 		std::list<BoEntry*>::iterator entry_point = boList.begin();
 		UI_Button::getCurrentButton()->resetGradient();
 	
-		unsigned int row = 2;
+		unsigned int row = 3;
 		bool found_one = false;
 		while(entry != boList.end())
 		{
@@ -164,7 +169,7 @@ void BoWindow::processList()
 
 	
 	std::list<BoEntry*>::iterator entry = boList.begin();
-	unsigned int row = 3;
+	unsigned int row = 4;
 	for(std::list<PROGRAM>::iterator order = anarace->getProgramList().begin(); order != anarace->getProgramList().end(); ++order)
 	{
 		Rect edge = Rect(getRelativeClientRectPosition()+Point(4, row*(FONT_SIZE+6)), Size(getWidth()-20, FONT_SIZE+5));//(*order)->rect.GetSize());// TODO
@@ -239,7 +244,7 @@ void BoWindow::processList()
 			(*entry)->program = *order;
 			if(edge != (*entry)->getTargetRect())
 			{
-				if((((*entry)->getAbsoluteUpperBound() < getAbsoluteClientRectUpperBound()+25)||((*entry)->getAbsoluteLowerBound() > getAbsoluteClientRectLowerBound())))//&&((*entry)->getRelativeRect()==(*entry)->getTargetRect()))
+				if((((*entry)->getAbsoluteUpperBound() < getAbsoluteClientRectUpperBound()+35)||((*entry)->getAbsoluteLowerBound() > getAbsoluteClientRectLowerBound())))//&&((*entry)->getRelativeRect()==(*entry)->getTargetRect()))
 				{
 //					(*entry)->Hide();
 //					(*entry)->jumpToPosition((*entry)->getTargetPosition());
@@ -330,10 +335,9 @@ void BoWindow::process()
 	
 	while(entry != boList.end())
 	{
-		if((((*entry)->getAbsoluteUpperBound() < getAbsoluteClientRectUpperBound()+25)||((*entry)->getAbsoluteLowerBound() > getAbsoluteClientRectLowerBound())))//&&((*entry)->getRelativeRect()==(*entry)->getTargetRect()))
+		if((((*entry)->getAbsoluteUpperBound() < getAbsoluteClientRectUpperBound()+35)||((*entry)->getAbsoluteLowerBound() > getAbsoluteClientRectLowerBound())))//&&((*entry)->getRelativeRect()==(*entry)->getTargetRect()))
 		{
-			if(isShown())
-				(*entry)->Hide();
+			(*entry)->Hide();
 			
 //			(*entry)->jumpToPosition((*entry)->getTargetPosition());
 		}
@@ -341,8 +345,7 @@ void BoWindow::process()
 		{
 			if((*entry)->getAbsoluteRightBound() > getAbsoluteClientRectRightBound())
 				setNeedRedrawMoved();
-			if(!isShown())
-				(*entry)->Show();
+			(*entry)->Show();
 			
 			if((*entry)->isRightClicked())
 			{
@@ -365,7 +368,7 @@ void BoWindow::process()
 		++order;
 	}
 
-//	if(reloadList)
+	if(reloadList)
 		processList();
        /*	std::list<BoEntry*>::iterator entry = boList.begin();
 	if((*entry)->getHeight()==FONT_SIZE+5)
@@ -536,7 +539,7 @@ void BoWindow::process()
 		{
 			if(UI_Object::editTextField->getString().length()>0)
 			{
-				database.saveBuildOrder(UI_Object::editTextField->getString(), anarace);
+				saveBuildOrder(UI_Object::editTextField->getString());
 				UI_Object::msgList.push_back("Saved build order.");
 			}
 			delete UI_Object::editTextField;
@@ -548,6 +551,9 @@ void BoWindow::process()
 	if(coreConfiguration.isAlwaysBuildWorker() != alwaysBuildWorker->isChecked() )
 		setChangedFlag();
 	coreConfiguration.setAlwaysBuildWorker( alwaysBuildWorker->isChecked() );
+	if(coreConfiguration.isOnlySwapOrders() != onlySwapOrders->isChecked() )
+		setChangedFlag();
+	coreConfiguration.setOnlySwapOrders( onlySwapOrders->isChecked() );
 
 }
 #include <sstream>
@@ -783,5 +789,84 @@ void BoWindow::drawSelectionStuff(DC* dc) const
 }
 #endif
 
+#include <fstream>
+void BoWindow::saveBuildOrder(const std::string& name) const
+{
+	std::ostringstream os;
+	os.str("");
+#ifdef __linux__
+	os << "output/bos/";
+	os << raceString[anarace->getRace()] << "/" << name << ".html";
+#elif __WIN32__
+	os << "output\\bos\\";
+	os << raceString[anarace->getRace()] << "\\" << name << ".html";
+#endif
+	std::ofstream pFile(os.str().c_str(), std::ios_base::out | std::ios_base::trunc);
+	
+	if(!pFile.is_open())
+	{
+		toLog("ERROR: (DATABASE::saveBuildOrder) Could not create file " + os.str() + " (write protection? disk space?)");
+		return;
+	}
+	
+	pFile << "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">" << std::endl;
+	pFile << "<html>" << std::endl;
+	pFile << "<head>" << std::endl;
+	pFile << "  <meta content=\"text/html; charset=ISO-8859-1\"" << std::endl;
+	pFile << " http-equiv=\"content-type\">" << std::endl;
+	pFile << "  <title>Build order list</title>" << std::endl;
+	pFile << "</head>" << std::endl;
+	pFile << "<body alink=\"#000099\" vlink=\"#990099\" link=\"#000099\" style=\"color: rgb("<< (int)UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR)->r() << ", " << (int)UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR)->g() << ", " << (int)UI_Object::theme.lookUpColor(BRIGHT_TEXT_COLOR)->b() << "); background-color: rgb(" << (int)UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColor()->r() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColor()->g() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColor()->b() << ");\">" << std::endl;
+	pFile << "<div style=\"text-align: center;\"><big style=\"font-weight: bold;\"><big>Evolution Forge " << CORE_VERSION << "</big></big><br><br>" << std::endl;
+	pFile << "<big>Buildorder list " << name << "</big><br>" << std::endl;
+	pFile << "</div>" << std::endl;
+	pFile << "<br>" << std::endl;
+	pFile << "<table style=\"background-color: rgb(" << (int)UI_Object::theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH)->GetColor()->r() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH)->GetColor()->g() << ", " << (int)UI_Object::theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH)->GetColor()->b() << "); text-align: center; vertical-align: middle; width: 600px; margin-left: auto; margin-right: auto;\""<< std::endl;
+	pFile << " border=\"1\" cellspacing=\"0\" cellpadding=\"1\">" << std::endl;
+	pFile << "  <tbody>" << std::endl;
+	pFile << "	<tr>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 200px;\">" << UI_Object::theme.lookUpString(OUTPUT_UNITNAME_STRING) << "<br>" << std::endl;
+	pFile << "	  </td>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << UI_Object::theme.lookUpString(OUTPUT_SUPPLY_STRING) << "</td>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << UI_Object::theme.lookUpString(OUTPUT_MINERALS_STRING) << "<br>" << std::endl;
+	pFile << "	  </td>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << UI_Object::theme.lookUpString(OUTPUT_GAS_STRING) << "<br>" << std::endl;
+	pFile << "	  </td>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 100px;\">" << UI_Object::theme.lookUpString(OUTPUT_LOCATION_STRING) << "<br>" << std::endl;
+	pFile << "	  </td>" << std::endl;
+	pFile << "	  <td style=\"text-align: center; vertical-align: middle; width: 75px;\">" << UI_Object::theme.lookUpString(OUTPUT_TIME_STRING) << "<br>" << std::endl;
+	pFile << "	  </td>" << std::endl;
+	pFile << "	</tr>" << std::endl;
+
+	for(std::list<PROGRAM>::const_iterator order = anarace->programList.begin(); order != anarace->programList.end(); ++order)
+	{
+		pFile << "	<tr style=\"text-align: center; vertical-align: middle; background-color: rgb(" << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][order->getUnit()].unitType))->GetColor()->r() << ", " << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][order->getUnit()].unitType))->GetColor()->g() << ", " << (int)UI_Object::theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+stats[anarace->getRace()][order->getUnit()].unitType))->GetColor()->b() << ");\">" << std::endl;
+		pFile << "	  <td style=\"\">" << UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace() + order->getUnit() + UNIT_NULL_STRING)) << "<br>" << std::endl;
+		pFile << "	  </td>" << std::endl;
+		pFile << "	  <td style=\"\">" << order->getStatisticsBefore().getNeedSupply() << "/" << order->getStatisticsBefore().getHaveSupply() << "<br>" << std::endl;
+		pFile << "	  </td>" << std::endl;
+
+		pFile << "	  <td style=\"\">" << order->getStatisticsBefore().getHaveMinerals()/100 << "<br>" << std::endl;
+		pFile << "	  </td>" << std::endl;
+
+		pFile << "	  <td style=\"\">" << order->getStatisticsBefore().getHaveGas()/100 << "<br>" << std::endl;
+		pFile << "	  </td>" << std::endl;
+
+		pFile << "	  <td style=\"\">" << (*anarace->getMap())->getLocation(order->getLocation())->getName() << "<br>" << std::endl;
+		pFile << "	  </td>" << std::endl;
+
+		pFile << "	  <td style=\"\">" << formatTime(order->getRealTime()) << "<br>" << std::endl;
+		pFile << "	  </td>" << std::endl;
+																								   
+		pFile << "	</tr>" << std::endl;
+	}
+
+	pFile << "  </tbody>" << std::endl;
+	pFile << "</table>" << std::endl;
+	pFile << "<br>" << std::endl;
+	pFile << "<b><a href=\"http://www.clawsoftware.de\">www.clawsoftware.de</a></b>\n";
+	pFile << "</body>\n";
+	pFile << "</html>" << std::endl;
+}
 
 

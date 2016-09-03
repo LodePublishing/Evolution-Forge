@@ -71,7 +71,7 @@ UI_Object* UI_NumberField::checkTooltip()
 
 void UI_NumberField::reloadOriginalSize()
 {
-	setOriginalSize(Size(1.5*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH),0));
+	setOriginalSize(Size(3*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)/2,0));
 		
 	addbutton->setOriginalPosition(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 40, 1));
 	subbutton->setOriginalPosition(Point(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH) + 50, 1));

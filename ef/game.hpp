@@ -22,8 +22,6 @@ class Game : public UI_Window
 		void process();
 
 		const bool isOptimizing(const unsigned int player_number) const;
-		void setOptimizing(const bool opt=true);
-
 
 		void newGeneration();
 	
@@ -190,10 +188,6 @@ inline const unsigned int Game::getMapPlayerCount() const {
 
 inline const bool Game::isOptimizing(const unsigned int player_number) const {
 	return(scoreWindow->isOptimizing(player_number));
-}
-
-inline void Game::setOptimizing(const bool opt) {
-//	scoreWindow->setOptimizing(opt);
 }
 
 inline void Game::resetData() {

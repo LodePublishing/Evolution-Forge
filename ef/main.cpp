@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 		toLog(UI_Object::theme.lookUpString(START_UNABLE_TO_INIT_SDL_STRING) + " [SDL ERROR: \"" + SDL_GetError() + "\"]");return(EXIT_FAILURE);		
 	}
 	
-	if ( screen->GetSurface() == NULL ) {
+	if ( !screen->valid() ) {
 		toLog(UI_Object::theme.lookUpString(START_ERROR_SETTING_VIDEO_MODE_STRING) + " [SDL ERROR: \"" + SDL_GetError() + "\"]");return(EXIT_FAILURE);
 	}
 	
@@ -173,6 +173,13 @@ int main(int argc, char *argv[])
 	{
 // ------ DRAWING ------
 		UI_Object::redrawnObjects = 0;
+//		for(std::list<UI_Object*>::iterator i = UI_Object::processArray.begin(); i!=UI_Object::processArray.end(); ++i)
+//			(*i)->process();
+//		{
+//			std::ostringstream os;os.str("");os << "length :" << UI_Object::processArray.size();toLog(os.str());
+//		}
+	
+//		UI_Object::copyToNextProcessArray();
 		m.process();
 		screen->updateScreen();
 		m.draw(screen);
@@ -226,16 +233,16 @@ int main(int argc, char *argv[])
 
 // ------ FPS DEBUG
 /*		{
-			Point p = Point(20, resolution.GetHeight() - 40);
+			Point p = Point(20, resolution.GetHeight() - 50);
 			screen->SetTextForeground(DC::toSDL_Color(255, 20, 20));
-			screen->SetFont(UI_Object::theme.lookUpFont(LARGE_NORMAL_BOLD_FONT));
+			screen->SetFont(UI_Object::theme.lookUpFont(LARGE_BOLD_FONT));
 			screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
 			screen->DrawRectangle(Rect(p, Size(200, 20)));
 
 			std::ostringstream os;
 			os.str("");
 			os << "Objects: " << UI_Object::redrawnObjects << "   FPS: " << efConfiguration.getCurrentFramerate();
-			screen->DrawText(os.str(), p + Size(20, 10));	
+			screen->DrawText(os.str(), p + Size(20, 2));	
 		}*/
 // ------ END FPS DEBUG
 
@@ -518,9 +525,6 @@ int main(int argc, char *argv[])
 			screen->setFullscreen(efConfiguration.isFullScreen());
 			toLog(UI_Object::theme.lookUpString(efConfiguration.isFullScreen()?START_SET_FULLSCREEN_MODE_STRING:START_SET_WINDOW_MODE_STRING));
 		}
-
-
-		
 	}
 }
 					

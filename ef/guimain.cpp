@@ -41,7 +41,8 @@ Main::Main(DC* dc):
 //	mapWindow = new MapWindow(mainWindow);
 	
 	Main::msgWindow = new MessageWindow(mainWindow);
-	ForceWindow::techTreeWindow = new TechTreeWindow(mainWindow);
+	ForceWindow::techTreeWindow = new TechTreeWindow(NULL);
+	ForceWindow::techTreeWindow->Hide();
 	
 	mainWindow->Show();
 	helpWindow->Hide();
@@ -65,7 +66,13 @@ Main::Main(DC* dc):
 void Main::reloadOriginalSize()
 {
 	mainWindow->reloadOriginalSize();
-//	mainWindow->reloadStrings();
+	ForceWindow::techTreeWindow->reloadOriginalSize();
+}
+
+void Main::reloadStrings()
+{
+	mainWindow->reloadStrings();
+	ForceWindow::techTreeWindow->reloadStrings();
 }
 
 void Main::initializeGame(const unsigned int tab_number)
@@ -126,6 +133,7 @@ void Main::initializeGame(const unsigned int tab_number)
 Main::~Main()
 {
 	delete mainWindow;
+	delete ForceWindow::techTreeWindow;
 	delete msgWindow;
 	delete helpWindow;
 //	delete mapWindow;
@@ -148,7 +156,8 @@ void Main::noticeFullscreen()
 
 void Main::process()
 {
-	ForceWindow::techTreeWindow->Hide();
+	mainWindow->resetMinXY();
+//	ForceWindow::techTreeWindow->Hide();
 	
 	UI_Object::windowSelected = false;
 	
@@ -162,6 +171,7 @@ void Main::process()
 	}
 
 	mainWindow->process();
+	ForceWindow::techTreeWindow->process();
 //	if(UI_Button::getCurrentButton()==NULL) // TODO verschaerfen, boolvariable setzen wenn currentButton von !NULL auf NULL gesetzt wurde
 		setMouse(maus);
 
@@ -178,6 +188,7 @@ void Main::process()
 //			if(game[i])
 //				game[i]->reloadStrings();
 		mainWindow->reloadStrings();
+		ForceWindow::techTreeWindow->reloadStrings();
 //		settingsWindow->reloadStrings();
 		msgWindow->addMessage(UI_Object::theme.lookUpString(LANGUAGE_HAS_CHANGED_STRING));
 	} else
@@ -293,7 +304,7 @@ void Main::process()
 	
 }
 
-void Main::stopAllOptimizing()
+/*void Main::stopAllOptimizing()
 {
 	for(unsigned int i=MAX_GAME;i--;)
 		if((game[i])&&(game[i]->isShown()))
@@ -305,7 +316,7 @@ void Main::startAllOptimizing()
 	for(unsigned int i=MAX_GAME;i--;)
 		if((game[i])&&(game[i]->isShown()))
 			game[i]->setOptimizing(true);
-}
+}*/
 
 const bool Main::isAnyOptimizing() const
 {
@@ -329,12 +340,13 @@ void Main::draw(DC* dc) const
 			SDL_Rect rc;
 			rc.x = 0;rc.y = 0; rc.w = UI_Object::max_x; rc.h = UI_Object::max_y;
 			if(efConfiguration.isBackgroundBitmap())
-				SDL_BlitSurface(UI_Object::theme.lookUpBitmap(BACKGROUND_BITMAP) , 0, dc->GetSurface(), &rc);
+				dc->Blit(UI_Object::theme.lookUpBitmap(BACKGROUND_BITMAP), rc);
 			else
-				SDL_FillRect(dc->GetSurface(), &rc, 0);
+				dc->clearScreen();
 		}
 		mainWindow->draw(dc);
 	}
+	ForceWindow::techTreeWindow->draw(dc);
 }
 
 										
@@ -448,6 +460,7 @@ void Main::loadGoals()
 {
 	for(unsigned int i = 0; i < MAX_RACES; ++i)
 	{
+		database.addDefaultGoal((eRace)i);
 		std::list<std::string> goalFiles = database.findFiles("settings", "goals", raceString[i]);
 		for(std::list<std::string>::iterator j = goalFiles.begin(); j!=goalFiles.end(); ++j)
 			database.loadGoalFile(*j);

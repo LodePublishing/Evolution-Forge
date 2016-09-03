@@ -1,7 +1,7 @@
 #ifndef _CORE_BUILDING_HPP
 #define _CORE_BUILDING_HPP
 
-#include "defs.hpp"
+#include "starcraft.hpp"
 #include "../stl/misc.hpp"
 
 class Building

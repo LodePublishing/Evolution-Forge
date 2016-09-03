@@ -98,14 +98,13 @@ void UI_LongText::updateText(const std::string& lt_text)
 	unsigned int firstTextCursorX = 5;
 	unsigned int bold = 0;
 	unsigned int textbutton = 0;
-	unsigned int texttooltip = 0;
 	bool mustNotMakeNewLine = false;
 	unsigned int firstCharPosition=0;
 	unsigned int lastCharPosition=0;
 	unsigned int currentRow=0;
 	unsigned int maxdy=0;
 
-	maxdy = UI_Object::theme.lookUpFont(SMALL_BOLD_FONT)->GetTextExtent(text).GetHeight()*1.3;
+	maxdy = UI_Object::theme.lookUpFont(SMALL_BOLD_FONT)->GetTextExtent(text).GetHeight()*13/10;
 	
 	eColor current_color = color1;
 	eFont current_font = font;

@@ -28,6 +28,7 @@ class ForceEntry : public UI_Button
 		void assignGoal(GOAL* assign_goal);
 		void setUnit(const unsigned int unit_type);
 		void setType(const eUnitType unit_type); // ~~
+
 		const eUnitType getType() const;
 		const unsigned int getUnit() const;
 
@@ -50,7 +51,7 @@ class ForceEntry : public UI_Button
 		static unsigned int forceEntryTime;
 		static unsigned int forceEntryLocation;
 	private:
-        
+        	unsigned int oldGoalCount;
 		unsigned int startForce;
 		unsigned int targetForce;
 		unsigned int currentForce;

@@ -13,18 +13,19 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
 	loadSaveSettings(new UI_Group(this, Rect(Point(0, 0), Size(300, 0)), Size(10, 5), BOTTOM_RIGHT, SETWINDOW_GUI_SETTINGS_STRING/*SETWINDOW_LOADSAVE_SETTINGS_STRING*/)),
 	defaultSettingsRadio(new UI_Radio(this, Rect(Point(0, 35), Size(300, 0)), Size(10, 0), TOP_RIGHT, TITLE_PREDEFINED_SETTINGS_STRING)),
 	
-	maxTime(new UI_NumberField(coreSettings, Rect(Point(10, 0), Size(1.5*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 15)), Size(5,5), ARRANGE_LEFT, MIN_TIME, MAX_TIME, 6, coreConfiguration.getMaxTime(), SETTING_MAX_TIME_STRING, SETTING_MAX_TIME_TOOLTIP_STRING, TIME_NUMBER_TYPE)),
-	maxLength(new UI_NumberField(coreSettings, Rect(Point(10, 0), Size(1.5*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 15)), Size(5,5), ARRANGE_LEFT,  MIN_LENGTH, MAX_LENGTH, 1, coreConfiguration.getMaxLength(), SETTING_MAX_LENGTH_STRING, SETTING_MAX_LENGTH_TOOLTIP_STRING)),
-	maxRuns(new UI_NumberField(coreSettings, Rect(Point(10, 0), Size(1.5*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 15)), Size(5,5), ARRANGE_LEFT,  MIN_RUNS, MAX_RUNS, 1, coreConfiguration.getMaxRuns(), SETTING_MAX_RUNS_STRING, SETTING_MAX_RUNS_TOOLTIP_STRING)),
+	maxTime(new UI_NumberField(coreSettings, Rect(Point(10, 0), Size(3*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)/2, 15)), Size(5,5), ARRANGE_LEFT, MIN_TIME, MAX_TIME, 6, coreConfiguration.getMaxTime(), SETTING_MAX_TIME_STRING, SETTING_MAX_TIME_TOOLTIP_STRING, TIME_NUMBER_TYPE)),
+	maxLength(new UI_NumberField(coreSettings, Rect(Point(10, 0), Size(3*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)/2, 15)), Size(5,5), ARRANGE_LEFT,  MIN_LENGTH, MAX_LENGTH, 1, coreConfiguration.getMaxLength(), SETTING_MAX_LENGTH_STRING, SETTING_MAX_LENGTH_TOOLTIP_STRING)),
+	maxRuns(new UI_NumberField(coreSettings, Rect(Point(10, 0), Size(3*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)/2, 15)), Size(5,5), ARRANGE_LEFT,  MIN_RUNS, MAX_RUNS, 1, coreConfiguration.getMaxRuns(), SETTING_MAX_RUNS_STRING, SETTING_MAX_RUNS_TOOLTIP_STRING)),
 
-	maxGenerations(new UI_NumberField(coreSettings, Rect(Point(10, 0), Size(1.5*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 15)), Size(5,5), ARRANGE_LEFT,  MIN_GENERATIONS, MAX_GENERATIONS, 10, coreConfiguration.getMaxGenerations(), SETTING_MAX_GENERATIONS_STRING, SETTING_MAX_GENERATIONS_TOOLTIP_STRING)),
-	maxTimeOut(new UI_NumberField(coreSettings, Rect(Point(10, 0), Size(1.5*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 15)), Size(5,5), ARRANGE_LEFT,  MIN_TIMEOUT, MAX_TIMEOUT, 1, coreConfiguration.getMaxTimeOut(), SETTING_MAX_TIMEOUT_STRING, SETTING_MAX_TIMEOUT_TOOLTIP_STRING)),
-	breedFactor(new UI_NumberField(coreSettings, Rect(Point(10, 0), Size(1.5*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 15)), Size(5,5), ARRANGE_LEFT,  MIN_BREED_FACTOR, MAX_BREED_FACTOR, 1, coreConfiguration.getBreedFactor(), SETTING_BREED_FACTOR_STRING, SETTING_BREED_FACTOR_TOOLTIP_STRING, PERCENT_NUMBER_TYPE)),
+	maxGenerations(new UI_NumberField(coreSettings, Rect(Point(10, 0), Size(3*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)/2, 15)), Size(5,5), ARRANGE_LEFT,  MIN_GENERATIONS, MAX_GENERATIONS, 10, coreConfiguration.getMaxGenerations(), SETTING_MAX_GENERATIONS_STRING, SETTING_MAX_GENERATIONS_TOOLTIP_STRING)),
+	maxTimeOut(new UI_NumberField(coreSettings, Rect(Point(10, 0), Size(3*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)/2, 15)), Size(5,5), ARRANGE_LEFT,  MIN_TIMEOUT, MAX_TIMEOUT, 1, coreConfiguration.getMaxTimeOut(), SETTING_MAX_TIMEOUT_STRING, SETTING_MAX_TIMEOUT_TOOLTIP_STRING)),
+	breedFactor(new UI_NumberField(coreSettings, Rect(Point(10, 0), Size(3*UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH)/2, 15)), Size(5,5), ARRANGE_LEFT,  MIN_BREED_FACTOR, MAX_BREED_FACTOR, 1, coreConfiguration.getBreedFactor(), SETTING_BREED_FACTOR_STRING, SETTING_BREED_FACTOR_TOOLTIP_STRING, PERCENT_NUMBER_TYPE)),
 	//crossingOver(new UI_NumberField(coreSettings, Rect(Point(10, 90), Size(200, 15)), Size(5, 5), ARRANGE_LEFT,  MIN_CROSSING_OVER, MAX_CROSSING_OVER, 1, coreConfiguration.getCrossingOver(), SETTING_CROSSING_OVER_STRING, SETTING_CROSSING_OVER_TOOLTIP_STRING, PERCENT_NUMBER_TYPE)),
 
 //TODO
 	autoSaveRuns(new UI_CheckButton(coreSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_AUTO_SAVE_RUNS_STRING, SETTING_AUTO_SAVE_RUNS_TOOLTIP_STRING, efConfiguration.isAutoSaveRuns())),
 	alwaysBuildWorker(new UI_CheckButton(coreSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_ALWAYS_BUILD_WORKER_STRING, SETTING_ALWAYS_BUILD_WORKER_TOOLTIP_STRING, coreConfiguration.isAlwaysBuildWorker())),
+	onlySwapOrders(new UI_CheckButton(coreSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_ONLY_SWAP_ORDERS_STRING, SETTING_ONLY_SWAP_ORDERS_TOOLTIP_STRING, coreConfiguration.isOnlySwapOrders())),
 
 	restrictSC(new UI_CheckButton(guiSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_RESTRICT_SC_STRING, SETTING_RESTRICT_SC_TOOLTIP_STRING, efConfiguration.isRestrictSC())),
  	facilityMode(new UI_CheckButton(guiSettings, Rect(Point(10, 0), Size(200, 15)), Size(5, 5), ARRANGE_LEFT, SETTING_FACILITY_MODE_STRING, SETTING_FACILITY_MODE_TOOLTIP_STRING, efConfiguration.isFacilityMode())),
@@ -124,6 +125,7 @@ void SettingsWindow::reloadOriginalSize()
 	fullButton->setOriginalSize(Size(theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 0));
 	customButton->setOriginalSize(Size(theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 0));
 
+	
 	UI_Window::reloadOriginalSize();
 
 /*defaultSettingsRadio->calculateBoxSize();
@@ -151,6 +153,7 @@ SettingsWindow::~SettingsWindow()
 	delete facilityMode;
 	delete autoSaveRuns;
 	delete alwaysBuildWorker;
+	delete onlySwapOrders;
 //	delete preprocessBuildorder;
 //	delete allowGoalAdaption;
 	delete allowStaticFramerate;
@@ -208,13 +211,11 @@ void SettingsWindow::process()
 		return;
 	UI_Window::process();
 
-
 	defaultSettingsRadio->calculateBoxSize();
 	coreSettings->calculateBoxSize();
 	guiSettings->calculateBoxSize();
 	uiSettingsRadio->calculateBoxSize(true);
 	loadSaveSettings->calculateBoxSize();
-
 
 	if(uiSettingsRadio->buttonHasChanged())
 	{
@@ -329,6 +330,7 @@ void SettingsWindow::process()
 	efConfiguration.setFacilityMode( facilityMode->isChecked() );
 	efConfiguration.setAutoSaveRuns ( autoSaveRuns->isChecked() );
 	coreConfiguration.setAlwaysBuildWorker( alwaysBuildWorker->isChecked() );
+	coreConfiguration.setOnlySwapOrders( onlySwapOrders->isChecked() );
 //	coreConfiguration.setPreprocessBuildOrder ( preprocessBuildorder->isChecked() );
 //	coreConfiguration.setAllowGoalAdaption ( allowGoalAdaption->isChecked() );
 	efConfiguration.setAllowStaticFramerate ( allowStaticFramerate->isChecked() );
@@ -444,6 +446,7 @@ void SettingsWindow::updateItems()
 	facilityMode->check ( efConfiguration.isFacilityMode() );
 	autoSaveRuns->check ( efConfiguration.isAutoSaveRuns() );
 	alwaysBuildWorker->check ( coreConfiguration.isAlwaysBuildWorker() );
+	onlySwapOrders->check ( coreConfiguration.isOnlySwapOrders() );
 //	preprocessBuildorder->check ( coreConfiguration.isPreprocessBuildOrder() );
 //	allowGoalAdaption->check ( coreConfiguration.isAllowGoalAdaption() );
 	allowStaticFramerate->check ( efConfiguration.isAllowStaticFramerate() );

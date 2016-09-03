@@ -1,7 +1,7 @@
 #ifndef _CORE_HARVEST_HPP
 #define _CORE_HARVEST_HPP
 
-#include "defs.hpp"
+#include "starcraft.hpp"
 #include "../stl/misc.hpp"
 
 class HARVEST_SPEED

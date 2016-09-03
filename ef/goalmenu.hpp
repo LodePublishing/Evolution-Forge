@@ -15,6 +15,7 @@ class GoalMenu : public Menu
 		void draw(DC* dc) const;
 		void resetData();
 		void assignAnarace(ANABUILDORDER* goal_anarace);
+		void reloadOriginalSize();
 	private:
 		ANABUILDORDER* anarace;
 };

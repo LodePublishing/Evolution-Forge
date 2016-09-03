@@ -18,7 +18,7 @@ class MessageWindow:public UI_Window
 		void draw(DC* dc) const;
 		void reloadOriginalSize();
 	private:
-		list <Message> message;
+		list<Message*> message;
 };
 
 #endif

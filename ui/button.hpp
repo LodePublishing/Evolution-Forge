@@ -21,7 +21,8 @@ enum eButtonMode
 	PUSH_BUTTON_MODE,   // calls several messages when being pressed
 	TAB_BUTTON_MODE,
 //	MENU_TAB_BUTTON_MODE,
-
+	BOGRAPH_BUTTON_MODE, // just a rectangle, not rounded
+	
 	MAX_BUTTON_MODES
 };
 
@@ -166,6 +167,7 @@ class UI_Button:public UI_Object
 		static const unsigned int BF_NOT_CLICKABLE = 2048;
 		static const unsigned int BF_IS_TAB = 4096;
 		static const unsigned int BF_WAS_PRESSED = 8192; // button will be DOWN again, wenn mouse gets over button, without pressing the button again
+		static const unsigned int BF_IS_RECTANGLE = 16384;
 	protected:
 		UI_StaticText* text;
 };

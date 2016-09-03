@@ -93,7 +93,8 @@ void UI_Window::calculateClientRect()
 	clientRect.SetSize(getTargetRect().GetSize());
 	if(clientRect.GetLeft() < 5) clientRect.SetLeft(5);
    	if(clientRect.GetTop() < 5) clientRect.SetTop(5);
-	if(clientRect.GetBottom() > getHeight() - 5) clientRect.SetBottom(getHeight() - 5);
+	if(clientRect.GetBottom() > ((signed int)getHeight()) - 5) 
+		clientRect.SetBottom(((signed int)getHeight()) - 5);
 //	{
 		
 //		if(clientRect.GetRight() > border.GetRight() - 19) 
@@ -101,8 +102,8 @@ void UI_Window::calculateClientRect()
 //		if(clientRect.GetRight() > ScrollRect.GetLeft()-3) clientRect.SetRight(ScrollRect.GetLeft()-3); TODO
 //	} else
 //	{
-		if(clientRect.GetRight() > getWidth() - 5) 
-			clientRect.SetRight(getWidth() - 5);
+		if(clientRect.GetRight() > ((signed int)getWidth()) - 5) 
+			clientRect.SetRight(((signed int)getWidth()) - 5);
 //	}
 
 	originalClientRect = clientRect;
@@ -268,10 +269,6 @@ void UI_Window::process()
 
 	UI_Object::process();
 	
-/*	if((!isMouseInside()) && (scrollBar!=NULL))
-		scrollBar->Hide();
-	else if((isMouseInside()) && (scrollBar!=NULL))
-		scrollBar->Show();*/
 	
 	if(clientRect != clientTargetRect)
 	{
@@ -316,10 +313,10 @@ const bool UI_Window::fitItemToRelativeClientRect(const Rect& rect, const unsign
 {
 	if(scrollBar)
 	{
-		if(scrollBar->firstItemY == 0)
-			scrollBar->firstItemY = rect.GetTop();
-		if(scrollBar->lastItemY < rect.GetBottom())
-			scrollBar->lastItemY = rect.GetBottom();
+		if(scrollBar->getFirstItemY() == 0)
+			scrollBar->setFirstItemY(rect.GetTop());
+		if(scrollBar->getLastItemY() < rect.GetBottom())
+			scrollBar->setLastItemY(rect.GetBottom());
 	}
 
 	if((rect.GetLeft() >= getRelativeClientRectRightBound())||
@@ -353,11 +350,12 @@ const bool UI_Window::fitItemToAbsoluteClientRect(const Rect& rect, const unsign
 {
 	if(scrollBar)
 	{
-		if(scrollBar->firstItemY == 0)
-			scrollBar->firstItemY = rect.GetTop() - getAbsoluteClientRectUpperBound();
-		if(scrollBar->lastItemY < rect.GetBottom() - getAbsoluteClientRectUpperBound())
-			scrollBar->lastItemY = rect.GetBottom() - getAbsoluteClientRectUpperBound();
+		if(scrollBar->getFirstItemY() == 0)
+			scrollBar->setFirstItemY(rect.GetTop() - getAbsoluteClientRectUpperBound());
+		if(scrollBar->getLastItemY() < rect.GetBottom() - getAbsoluteClientRectUpperBound())
+			scrollBar->setLastItemY(rect.GetBottom() - getAbsoluteClientRectUpperBound());
 	}
+	
 	if((rect.GetLeft() >= getAbsoluteClientRectRightBound())||
 	   (rect.GetTop() >= getAbsoluteClientRectLowerBound())||
 	   (rect.GetRight() < getAbsoluteClientRectLeftBound())||

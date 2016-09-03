@@ -4,7 +4,6 @@
 // -----------------------------------------------------------------------------------------
 
 #include "database.hpp"
-#include "../ui/object.hpp"
 
 #include <map>
 #include <sstream>
@@ -55,7 +54,7 @@ std::list<std::string> DATABASE::findFiles(const std::string& directory1, const 
 		os << directory1 << "/" << directory2;
 	else if(directory1!="")
 		os << directory1;
-	
+
 	if ((dir = opendir(os.str().c_str())) == NULL)
 		toLog("ERROR: (DATABASE::findFiles) Cannot open directory " + os.str());
 	else 
@@ -70,7 +69,7 @@ std::list<std::string> DATABASE::findFiles(const std::string& directory1, const 
 	os << directory1 << "\\" << directory2 << "\\" << directory3 << "\\" << "*.*";
 	if ((fhandle=FindFirstFile(os.str().c_str(), &dir)) !=INVALID_HANDLE_VALUE)
 	{
-		do 
+		do
 			fileList.push_back(directory1 + "\\" + directory2 + "\\" + directory3 + "\\" + dir.cFileName);
 		while(FindNextFile(fhandle, &dir));
 	} else
@@ -82,7 +81,14 @@ std::list<std::string> DATABASE::findFiles(const std::string& directory1, const 
 
 
 
-DATABASE database;
+
+void DATABASE::addDefaultGoal(const eRace race)
+{
+	GOAL_ENTRY* goal = new GOAL_ENTRY;
+	goal->setName("Clear List");
+	goal->setRace(race);
+	loadedGoal[goal->getRace()].push_back(goal);
+}
 
 // ---------------------------
 // ------- FILE LOADING ------
@@ -130,12 +136,12 @@ void DATABASE::loadGoalFile(const std::string& goalFile)
 				eRace race=TERRA;
 				i->second.pop_front();
 				std::string estr=i->second.front();
-				if(i->second.front()==UI_Object::theme.lookUpString(TERRA_STRING)) race=TERRA;
-				else if(i->second.front()==UI_Object::theme.lookUpString(PROTOSS_STRING)) race=PROTOSS;
-				else if(i->second.front()==UI_Object::theme.lookUpString(ZERG_STRING)) race=ZERG;
+				if(i->second.front() == raceString[TERRA]) race=TERRA;
+				else if(i->second.front() == raceString[PROTOSS]) race=PROTOSS;
+				else if(i->second.front() == raceString[ZERG]) race=ZERG;
 #ifdef _SCC_DEBUG
 				else {
-					toLog("ERROR: (DATABASE::loadSettingsFile [" + goalFile + "]): Wrong race entry (" + i->second.front() + " [" + UI_Object::theme.lookUpString(TERRA_STRING)+"|" + UI_Object::theme.lookUpString(PROTOSS_STRING)+"|" + UI_Object::theme.lookUpString(ZERG_STRING)+"]).");return;
+					toLog("ERROR: (DATABASE::loadSettingsFile [" + goalFile + "]): Wrong race entry (" + i->second.front() + " [" + raceString[TERRA] + "|" + raceString[PROTOSS] + "|" + raceString[ZERG] + "]).");return;
 				}
 #endif
 				goal->setRace(race);
@@ -399,9 +405,9 @@ void DATABASE::loadStartConditionFile(const std::string& startconditionFile)
 				return;
 			}
 
-			if(*j==UI_Object::theme.lookUpString(TERRA_STRING)) race=TERRA;
-			else if(*j==UI_Object::theme.lookUpString(PROTOSS_STRING)) race=PROTOSS;
-			else if(*j==UI_Object::theme.lookUpString(ZERG_STRING)) race=ZERG;
+			if(*j == raceString[TERRA]) race=TERRA;
+			else if(*j == raceString[PROTOSS]) race=PROTOSS;
+			else if(*j == raceString[ZERG]) race=ZERG;
 
 			std::map<std::string, std::list<std::string> > block;
 			parse_block(pFile, block);
@@ -464,7 +470,7 @@ void DATABASE::loadStartConditionFile(const std::string& startconditionFile)
 
 // FILE SAVING
 
-
+#if 0
 void DATABASE::saveBuildOrder(const std::string& name, const ANABUILDORDER* anarace) const
 {
 	std::ostringstream os;
@@ -543,6 +549,7 @@ void DATABASE::saveBuildOrder(const std::string& name, const ANABUILDORDER* anar
 	pFile << "</body>\n";
 	pFile << "</html>" << std::endl;
 }
+#endif
 
 void DATABASE::saveGoal(const std::string& name, GOAL_ENTRY* goalentry)
 {
@@ -579,3 +586,4 @@ void DATABASE::saveGoal(const std::string& name, GOAL_ENTRY* goalentry)
 // ------ END OF GET/SET FUNCTIONS ------
 // --------------------------------------
 
+DATABASE database;

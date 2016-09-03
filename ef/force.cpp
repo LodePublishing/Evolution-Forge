@@ -11,7 +11,7 @@ ForceWindow::ForceWindow(UI_Object* force_parent, const unsigned int game_number
 	currentGoalUnit(0),
 	startLine(0),
 	menuRadio(new UI_Radio(this, Rect(getRelativeClientRectPosition() + Point(5, 10), Size(0,0)) )),
-	saveGoalButton(new UI_Button(this, Rect(getRelativeClientRectPosition() + Size(0, 10), Size(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 0)), Size(5,5), SAVE_GOAL_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+	saveGoalButton(new UI_Button(this, Rect(getRelativeClientRectPosition() + Size(0, 9), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0)), Size(5,5), SAVE_GOAL_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	nongoalsText(new UI_StaticText(this, NON_GOALS_STRING, Rect(Point(0, 0), Size(0,0)), Size(0,0), FORCE_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
 	goalsText(new UI_StaticText(this, GOALS_STRING, Rect(Point(0, 0), Size(0,0)), Size(0,0), FORCE_TEXT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
 	legend(new UI_StaticText(this, TIME_LEGEND_STRING, Rect(Point(200, 0), Size(0,0)), Size(0,0), FORCE_TEXT_COLOR, SMALL_FONT, DO_NOT_ADJUST)), // TODO
@@ -23,7 +23,6 @@ ForceWindow::ForceWindow(UI_Object* force_parent, const unsigned int game_number
 	unitMenu(new UnitMenu(this, Rect(10, 0, 100, 0), Size(0,0), DO_NOT_ADJUST)),
 	goalMenu(new GoalMenu(this, Rect(10, 0, 100, 0), Size(0,0), DO_NOT_ADJUST))
 //	locationMenu(new LocationMenu(this, anarace, getRelativeClientRect())),
-	
 {	
 	menuButton[UNIT_MENU] = new UI_Button(menuRadio, Rect(Point(0, 0), Size(50,0)), Size(0,0), ADD_GOAL_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
 	menuButton[GOAL_MENU] = new UI_Button(menuRadio, Rect(Point(0, 0), Size(50,0)), Size(0,0), GOAL_LIST_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
@@ -38,7 +37,6 @@ ForceWindow::ForceWindow(UI_Object* force_parent, const unsigned int game_number
 	menuRadio->addButton(menuButton[UNIT_MENU], 0);
 	menuRadio->addButton(menuButton[GOAL_MENU], 1);
 	menuRadio->calculateBoxSize(true);
-
 /*	for (unsigned int j = 0; j < 2; ++j)	
 		for (unsigned int loc = 0; loc < (*anarace->getMap())->getMaxLocations(); ++loc)
 		{
@@ -74,7 +72,7 @@ ForceWindow::~ForceWindow()
 
 void ForceWindow::reloadOriginalSize()
 {
-	saveGoalButton->setOriginalSize(Size(UI_Object::theme.lookUpButtonWidth(STANDARD_BUTTON_WIDTH), 0));
+	saveGoalButton->setOriginalSize(Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
 	UI_Window::reloadOriginalSize();
 }
 
@@ -95,6 +93,7 @@ void ForceWindow::resetData()
 		delete (*i);
 	nongoalForceList.clear();
 	goalForceList.clear();
+	goalMenu->resetData();
 }
 
 void ForceWindow::closeMenus()
@@ -225,7 +224,6 @@ void ForceWindow::process()
 			if(ForceEntry::changed == RIGHT_CLICKED)
 			{} // do nothing
 		}
-
 	}
 
 // TODO rechtsklick -> entfernen, auch im unitmenu!
@@ -415,13 +413,6 @@ void ForceWindow::process()
 	
 		unitMenu->resetData();
 		goalMenu->resetData();
-		switch(assignRace)
-		{
-			case TERRA:UI_Object::theme.setColorTheme(DARK_BLUE_THEME);break;
-			case PROTOSS:UI_Object::theme.setColorTheme(YELLOW_THEME);break;
-			case ZERG:UI_Object::theme.setColorTheme(DARK_RED_THEME);break;
-			default:break;
-		}
 		std::list<ForceEntry*>::iterator a = goalForceList.begin();
 		while(a!=goalForceList.end())
 		{
@@ -474,7 +465,10 @@ void ForceWindow::process()
 		techTreeWindow->setCurrentGoalUnit(currentGoalUnit);
 		techTreeWindow->Show();
 	}
-	//else techTreeWindow->Hide();
+	else 
+	{
+		techTreeWindow->Hide();
+	}
 	
 }
 

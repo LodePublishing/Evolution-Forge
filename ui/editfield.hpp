@@ -18,6 +18,8 @@ class UI_EditField : public UI_Window
 		UI_Object* checkToolTip();
 		UI_Object* checkHighlight();
 		
+		void reloadOriginalSize();
+		
 		void addChar(char a);
 		void removeCharBackspace();
 		void removeCharDelete();

@@ -7,7 +7,21 @@
 
 #include <list>
 
-#define BOGRAPH_MAX_LINES 20
+#define BOGRAPH_MAX_LINES 30
+
+class BOGRAPH
+{
+	public:
+		unsigned int facility;
+		unsigned int height; // number of entries per line
+		unsigned int lines; // number of lines
+		Rect edge;
+		std::list<BoGraphEntry*> boGraphList;
+		void resetData();
+		BOGRAPH();
+		~BOGRAPH();
+};
+
 
 class BoGraphWindow:public UI_Window
 {
@@ -26,15 +40,7 @@ class BoGraphWindow:public UI_Window
 		void assignAnarace(ANABUILDORDER* bograph_anarace);
 	private:
 
-		struct BOGRAPH
-		{
-			unsigned int facility;
-			unsigned int height; // number of entries per line
-			unsigned int lines; // number of lines
-			Rect edge;
-			std::list<BoGraphEntry*> boGraphList;
-		} bograph[BOGRAPH_MAX_LINES];
-	
+		BOGRAPH bograph[BOGRAPH_MAX_LINES];
 		void checkForInfoWindow();
 		unsigned int markAni;
 		ANABUILDORDER* anarace;

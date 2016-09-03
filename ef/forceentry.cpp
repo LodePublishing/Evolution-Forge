@@ -10,15 +10,16 @@ ForceEntry::ForceEntry(UI_Object* entry_parent, const Rect entry_rect, const std
 //	makeLocationGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 60, -11), Size(10,10)), entry_max_rect, GOAL_LOCATION_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
 	makeTimeGoal(new UI_Button(this, Rect(entry_rect.GetTopLeft() + Point(entry_rect.GetWidth() - 29, -11), Size(16,10)), Size(0,0), GOAL_TIME_BUTTON, STATIC_BUTTON_MODE, ARRANGE_RIGHT)),
 
+	oldGoalCount(0),	
 	startForce(0),
 	targetForce(0),
 	currentForce(0),
 	totalNumber(1),
+	highlight(0),
 	unit(0),
 	type(REMAINING_UNIT_TYPE),
 	goal(NULL),
-	showLocMenu(false),
-	highlight(0)
+	showLocMenu(false)
 {
 //	makeLocationGoal->Hide();
 	makeTimeGoal->Hide();
@@ -31,15 +32,16 @@ ForceEntry::ForceEntry(const ForceEntry& object) :
 	timeEntryBox(new UI_NumberField(*object.timeEntryBox)),
 //	makeLocationGoal(new UI_Button(*object.makeLocationGoal)),
 	makeTimeGoal(new UI_Button(*object.makeTimeGoal)),
+	oldGoalCount(object.oldGoalCount),	
 	startForce(object.startForce),
 	targetForce(object.targetForce),
 	currentForce(object.currentForce),
 	totalNumber(object.totalNumber),
+	highlight(object.highlight),
 	unit(object.unit),
 	type(object.type),
 	goal(object.goal),
-	showLocMenu(object.showLocMenu),
-	highlight(object.highlight)
+	showLocMenu(object.showLocMenu)
 { }
 
 
@@ -49,18 +51,18 @@ ForceEntry& ForceEntry::operator=(const ForceEntry& object)
 	timeEntryBox = new UI_NumberField(*object.timeEntryBox);
 //	makeLocationGoal = new UI_Button(*object.makeLocationGoal);
 	makeTimeGoal = new UI_Button(*object.makeTimeGoal);
-
+	oldGoalCount = object.oldGoalCount;
 	startForce = object.startForce;
 	targetForce = object.targetForce;
 	currentForce = object.currentForce;
 	totalNumber = object.totalNumber;
+	highlight = object.highlight;
 	unit = object.unit;
 	type = object.type;
 	goal = object.goal;
 
 	showLocMenu = object.showLocMenu;
 
-	highlight = object.highlight;
 	return(*this);
 }
 																																						   
@@ -153,6 +155,7 @@ void ForceEntry::process()
 			goal->setTime(timeEntryBox->getNumber());
 			changed = GOAL_TIME_HAS_CHANGED;
 			forceEntryUnit = getUnit();
+			ForceEntry::forceEntryUnit = getUnit();
 			forceEntryLocation = goal->getLocation();
 			forceEntryTime = goal->getTime();
 			forceEntryIsGoal = true;
@@ -199,7 +202,7 @@ void ForceEntry::process()
 	if(isLeftClicked())
 	{
 		changed = LEFT_CLICKED;
-		forceEntryUnit = getUnit();
+		ForceEntry::forceEntryUnit = getUnit();
 		if(goal)
 		{
 			forceEntryLocation = goal->getLocation();
@@ -217,6 +220,7 @@ void ForceEntry::process()
 	{
 		changed = RIGHT_CLICKED;
 		forceEntryUnit = getUnit();
+		ForceEntry::forceEntryUnit = getUnit();
 		if(goal)
 		{
 			forceEntryLocation = goal->getLocation();
@@ -231,6 +235,14 @@ void ForceEntry::process()
 	}
 	if(timeEntryBox->checkForNeedRedraw())
 		setNeedRedrawMoved();
+
+	
+	if((goal)&&(oldGoalCount != goal->getCount()))
+	{
+		resetGradient();
+		oldGoalCount = goal->getCount();
+	}
+
 }
 	
 																																							
@@ -242,6 +254,7 @@ void ForceEntry::setTargetForce(const unsigned int force)
 		targetForce = force;
 		setNeedRedrawNotMoved();
 		highlight = 50;
+		resetGradient();
 	}
 }
 
@@ -253,6 +266,7 @@ void ForceEntry::draw(DC* dc) const
 	if(!checkForNeedRedraw())
 		return;
 	Brush b = *theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+getType()));
+
 	if(highlight>0)
 		dc->SetBrush(Brush(dc->brightenColor(*b.GetColor(), highlight), b.GetStyle()));
 	else

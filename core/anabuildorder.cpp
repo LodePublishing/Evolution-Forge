@@ -744,14 +744,20 @@ const bool ANABUILDORDER::buildIt(const unsigned int build_unit)
 	return(ok);
 }
 
-void ANABUILDORDER::writeProgramBackToCode(std::list<PROGRAM>& program_list)
+const bool ANABUILDORDER::writeProgramBackToCode(std::list<PROGRAM>& program_list)
 {
+	bool changed_bo=false;
 	int ip=coreConfiguration.getMaxLength()-1;
 	for(std::list<PROGRAM>::const_iterator i = program_list.begin(); i!=program_list.end();++i)
 	{
-		replaceCode(ip, getGoal()->toGeno(i->getUnit()));
-		--ip;
+		if((!coreConfiguration.isAlwaysBuildWorker())||(i->getUnit()!=SCV))
+		{
+			if(replaceCode(ip, getGoal()->toGeno(i->getUnit())))
+				changed_bo = true;
+			--ip;
+		}
 	}
+	return(changed_bo);
 }
 
 

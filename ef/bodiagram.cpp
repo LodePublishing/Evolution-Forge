@@ -26,6 +26,30 @@ BoDiagramWindow::BoDiagramWindow(UI_Object* bod_parent, const unsigned int game_
 	count(0),
 	bold(false)
 {
+	resetData();
+}
+
+
+BoDiagramWindow::~BoDiagramWindow()
+{ }
+
+void BoDiagramWindow::reloadOriginalSize()
+{
+//	setOriginalRect(UI_Object::theme.lookUpGameRect(BUILD_ORDER_DIAGRAM_WINDOW, gameNumber, gameMax));
+//	setMaxHeight(UI_Object::theme.lookUpGameMaxHeight(BUILD_ORDER_DIAGRAM_WINDOW, gameNumber, gameMax));
+
+	
+	UI_Window::reloadOriginalSize();
+}
+
+void BoDiagramWindow::assignAnarace(ANABUILDORDER* bod_anarace)
+{
+	anarace = bod_anarace;
+	resetData();
+}
+
+void BoDiagramWindow::resetData()
+{ 
 	for(unsigned int i=MAX_TIME;i--;)
 	{
 		minerals[i]=Point(0,0);
@@ -47,27 +71,6 @@ BoDiagramWindow::BoDiagramWindow(UI_Object* bod_parent, const unsigned int game_
 		targetFitness[i]=Point(0,0);
 	}
 }
-
-
-BoDiagramWindow::~BoDiagramWindow()
-{ }
-
-void BoDiagramWindow::reloadOriginalSize()
-{
-//	setOriginalRect(UI_Object::theme.lookUpGameRect(BUILD_ORDER_DIAGRAM_WINDOW, gameNumber, gameMax));
-//	setMaxHeight(UI_Object::theme.lookUpGameMaxHeight(BUILD_ORDER_DIAGRAM_WINDOW, gameNumber, gameMax));
-
-	
-	UI_Window::reloadOriginalSize();
-}
-
-void BoDiagramWindow::assignAnarace(ANABUILDORDER* bod_anarace)
-{
-	anarace = bod_anarace;
-}
-
-void BoDiagramWindow::resetData()
-{ }
 
 void BoDiagramWindow::process()
 {
@@ -91,6 +94,7 @@ void BoDiagramWindow::process()
 		nneedSupply[i].x=targetNneedSupply[i].x;
 //		fitness[i].x=targetFitness[i].x;
 	}
+	
 	bold = false;
 	if((count>2)&&(getAbsoluteClientRect().Inside(mouse))&&(anarace->getRealTimer()>0))
 	{
@@ -364,34 +368,13 @@ void BoDiagramWindow::draw(DC* dc) const
 	if(count>0)
 	{
 		dc->SetFont(theme.lookUpFont(SMALL_BOLD_FONT));
-/*		if(infoWindowNumber)
-		{
-			dc->SetPen(Pen(dc->doColor(80,80,80),2,SOLID_PEN_STYLE));
-			dc->DrawSpline(count,needSupply);
-			dc->SetPen(Pen(dc->doColor(60,60,200),2,SOLID_PEN_STYLE));
-			dc->DrawSpline(count,minerals);
-			dc->SetPen(Pen(dc->doColor(20,160,20),2,SOLID_PEN_STYLE));
-			dc->DrawSpline(count,gas);
-//			dc->SetPen(Pen(dc->doColor(255,40,40),2,SOLID_PEN_STYLE));
-//			dc->DrawSpline(count,fitness);
-//			dc->SetTextForeground(dc->doColor(255,40,40));
-//			dc->DrawText(_T("Fitness"),getAbsoluteClientRectLeftBound()+1,getAbsoluteClientRectUpperBound()+8);
-			dc->SetTextForeground(dc->doColor(60,60,200));
-			dc->DrawText(_T("Minerals"),getAbsoluteClientRectLeftBound()+1,getAbsoluteClientRectUpperBound()+10);
-			dc->SetTextForeground(dc->doColor(20,200,20));
-			dc->DrawText(_T("Gas"),getAbsoluteClientRectLeftBound()+1,getAbsoluteClientRectUpperBound()+21);
-			dc->SetTextForeground(dc->doColor(120,120,120));
-			dc->DrawText(_T("Supply"),getAbsoluteClientRectLeftBound()+1,getAbsoluteClientRectUpperBound()+32);
-		} else*/
-//		{
-		
-			dc->SetBrush(*theme.lookUpBrush(BODIAGRAM_SUPPLY_BRUSH));
-			dc->SetPen(*theme.lookUpPen(BODIAGRAM_SUPPLY_PEN));
+		dc->SetBrush(*theme.lookUpBrush(BODIAGRAM_SUPPLY_BRUSH));
+		dc->SetPen(*theme.lookUpPen(BODIAGRAM_SUPPLY_PEN));
 			for(unsigned int i = 0;i<(count-1);++i)
 			{
-				if((hneedSupply[i].y > nneedSupply[i].y)&&(hneedSupply[i].x < (unsigned int)(getClientTargetWidth()-2)))
+				if((hneedSupply[i].y > nneedSupply[i].y)&&(hneedSupply[i].x < (signed int)(getClientTargetWidth()-2)))
 					dc->DrawRectangle(getAbsoluteClientRectPosition() + Point(0, getClientRectHeight()) + hneedSupply[i], Size(hneedSupply[i+1].x - hneedSupply[i].x, hneedSupply[i].y - nneedSupply[i].y));
-				else if((hneedSupply[i].y < nneedSupply[i].y)&&(hneedSupply[i].x < (unsigned int)(getClientTargetWidth()-2)))
+				else if((hneedSupply[i].y < nneedSupply[i].y)&&(hneedSupply[i].x < (signed int)(getClientTargetWidth()-2)))
 					dc->DrawRectangle(getAbsoluteClientRectPosition() + Point(0, getClientRectHeight()) + hneedSupply[i], Size(hneedSupply[i+1].x - hneedSupply[i].x, nneedSupply[i].y - hneedSupply[i].y));
 			}
 				
@@ -418,7 +401,7 @@ void BoDiagramWindow::draw(DC* dc) const
 			dc->DrawText("Supply",getAbsoluteClientRectPosition()+Point(1,37));
 			dc->SetTextForeground(*theme.lookUpColor(FITNESS_TEXT_COLOR));
 			dc->DrawText("Time",getAbsoluteClientRectPosition()+Point(1,48));
-					
+// Das in process, nur updaten wenn bohasChanged
 			if(bold)
 			{
 				// TODO this anarace values are one iteration too old compared to mouse position...

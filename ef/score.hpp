@@ -21,8 +21,6 @@ class ScoreWindow : public UI_Window
 		const eInitMode getInitMode(const unsigned int player_number) const;
 		void setInitMode(const unsigned int player_number, const eInitMode init_mode);
 
-//		void setOptimizing(const bool opt=true);
-
 		void setScore(const unsigned int player, const unsigned int score);
 		void setGoalComplete(const unsigned int player, const unsigned int goal);
 		void setPlayers(const unsigned int player_count);

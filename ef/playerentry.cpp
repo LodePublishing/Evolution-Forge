@@ -1,4 +1,5 @@
 #include "playerentry.hpp"
+#include "../ui/window.hpp"
 
 PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size distance_bottom_right) :
 	UI_Object(player_parent, rect, distance_bottom_right),
@@ -7,15 +8,17 @@ PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size d
 	goalComplete(0),
 	initMode(INACTIVE),
 	scoreMode(SCORE_FULFILL_MODE),
+// TODO UI_Object:: arrange top left :(
+// 
+	currentActionButton(new UI_Button(this, Rect(Point(0, 0), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*9/10, 0)), Size(0,0), CLICK_TO_CONTINUE_STRING, MY_BUTTON, STATIC_BUTTON_MODE, DO_NOT_ADJUST, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+	playerText(new UI_StaticText(this, "Player 1:", Rect(Point(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0), Size(0,0)), Size(0, 0), IMPORTANT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
+	menuRadio(new UI_Radio(this, Rect(Point(playerText->getRelativeRect().GetLeft()+playerText->getTextSize().GetWidth()+5, 0), Size(0, 0)), Size(0,0), DO_NOT_ADJUST)), // TODO
+	raceMenuButton(new UI_Button(menuRadio, Rect(Point(0, 0), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2, 0)), Size(0, 0), CHOOSE_RACE_STRING, TAB_BUTTON, STATIC_BUTTON_MODE, TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+	raceMenu(new RaceMenu(raceMenuButton, Rect(10, 15, 0, 0), Size(0,0), TOP_LEFT )),
 
-	currentActionButton(new UI_Button(this, Rect(Point(0, 0), Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0)), Size(0,0), CLICK_TO_CONTINUE_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
-	playerText(new UI_StaticText(this, "Player 1:", Rect(Point(0/*5+UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*/, 0), Size(0,0)), Size(0, 0), IMPORTANT_COLOR, SMALL_BOLD_FONT, ARRANGE_TOP_LEFT)),
-	menuRadio(new UI_Radio(this, Rect(Point(0, 0), Size(0, 0)), Size(0,0), DO_NOT_ADJUST/*ARRANGE_TOP_LEFT*/)), // TODO
-	raceMenu(new RaceMenu(menuRadio, Rect(0, 0, 0, 0), Size(0,0), TOP_LEFT )),
-
-	scoreText(new UI_StaticText(this, Rect(Point(10, 0), Size(0, 0)), Size(5,0), IMPORTANT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST/*ARRANGE_TOP_RIGHT*/)),
-	addPlayerButton(new UI_Button(this, Rect(Point(5, 0), Size(60, 0)), Size(5,0), ADD_PLAYER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, TOP_CENTER, SMALL_BOLD_FONT, AUTO_SIZE)),
-	removePlayerButton(new UI_Button(this, Rect(Point(0,1), Size(8,8)), Size(5,0), CANCEL_BUTTON, PRESS_BUTTON_MODE, DO_NOT_ADJUST/*ARRANGE_TOP_RIGHT*/)), // Evtl bitmap
+	removePlayerButton(new UI_Button(this, Rect(Point(getParent()->getWidth()-20, 1), Size(8, 8)), Size(5, 0), CANCEL_BUTTON, PRESS_BUTTON_MODE, DO_NOT_ADJUST)), // Evtl bitmap
+	scoreText(new UI_StaticText(this, Rect(Point(getParent()->getWidth()-50, 0), Size(0, 0)), Size(5, 0), IMPORTANT_COLOR, SMALL_BOLD_FONT, DO_NOT_ADJUST)),
+	addPlayerButton(new UI_Button(this, Rect(Point(5, 0), Size(60, 0)), Size(5, 0), ADD_PLAYER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, TOP_CENTER, SMALL_BOLD_FONT, AUTO_SIZE)),
 	optimizing(false),
 	assignRace(-1)
 {
@@ -23,20 +26,16 @@ PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size d
 - Startposition
 - Startbedingungen
  * */
-	
-	menuButton[RACE_MENU] = new UI_Button(this, Rect(Point(0, 0), Size(35, 0)), Size(0, 0), CHOOSE_RACE_STRING, TAB_BUTTON, STATIC_BUTTON_MODE, TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH);
-	raceMenu->Hide();
-	for(unsigned int i=0; i<MAX_PLAYER_ENTRY_MENUS; ++i)
-		menuRadio->addButton(menuButton[i], i);
+	menuRadio->addButton(raceMenuButton, 0);
 	menuRadio->calculateBoxSize(true);
-		
 	
+	raceMenu->Hide();
 	currentActionButton->Hide();
 	scoreText->Hide();
 	playerText->Hide();
 	addPlayerButton->Show();
 	removePlayerButton->Hide();
-	menuButton[RACE_MENU]->Hide();
+	raceMenuButton->Hide();
 	menuRadio->Hide();
 	for(unsigned int i=20;i--;)
 	{
@@ -47,8 +46,13 @@ PlayerEntry::PlayerEntry(UI_Object* player_parent, const Rect rect, const Size d
 
 void PlayerEntry::reloadOriginalSize()
 {
-	playerText->setOriginalPosition(Point(5+UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
-	currentActionButton->setOriginalSize(Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
+	playerText->setOriginalPosition(Point(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH), 0));
+	currentActionButton->setOriginalSize(Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)*9/10, 0));
+	raceMenuButton->setOriginalSize(Size(UI_Object::theme.lookUpButtonWidth(SMALL_BUTTON_WIDTH)/2, 0));
+	menuRadio->setOriginalPosition(Point(playerText->getRelativeRect().GetLeft()+playerText->getTextSize().GetWidth()+5, 0));
+
+	removePlayerButton->setOriginalPosition(Point(getParent()->getWidth()-20, 1));
+	scoreText->setOriginalPosition(Point(getParent()->getWidth()-50, 0));
 	UI_Object::reloadOriginalSize();
 }
 
@@ -75,8 +79,7 @@ PlayerEntry::~PlayerEntry()
 	delete playerText;
 	delete addPlayerButton;
 	delete removePlayerButton;
-	for(unsigned int i = MAX_PLAYER_ENTRY_MENUS;i--;)
-		delete menuButton[i];
+	delete raceMenuButton;
 	delete menuRadio;
 	delete raceMenu;
 }
@@ -89,7 +92,7 @@ void PlayerEntry::closeMenus()
 void PlayerEntry::mouseHasLeft()
 {
 	menuRadio->forceUnpressAll();
-	menuButton[RACE_MENU]->forceUnpress();	
+	raceMenuButton->forceUnpress();	
 	closeMenus();
 }
 
@@ -189,7 +192,7 @@ void PlayerEntry::process()
 //		playerText->Show();
 //		addPlayerButton->Hide();
 //		removePlayerButton->Show();
-//		menuButton[RACE_MENU]->Show();
+//		raceMenuButton->Show();
 //		goalsFulfilledText->Show();
 		if(scoreMode==SCORE_FULFILL_MODE)
 		{																	
@@ -220,23 +223,25 @@ void PlayerEntry::process()
 	
 		if(programScore!=currentScore)
 		{
-			currentScore -= (currentScore - programScore)/2;
+			currentScore -= ((signed int)currentScore - (signed int)programScore)/2;
 		    	if(programScore<currentScore)
 				--currentScore;
+			else if(programScore>currentScore)
+				++currentScore;
+			std::ostringstream os;
+			if(currentScore >= 3600) // TODO ga->...
+				os << "[--:--]";
+			else
+				os << "[" << formatTime(currentScore) << "]";
+			scoreText->updateText(os.str());
 		}
-		std::ostringstream os;
-		if(currentScore >= 3600) // TODO ga->...
-			os << "[--:--]";
-		else
-			os << "[" << formatTime(currentScore) << "]";
-		scoreText->updateText(os.str());	
 	}
 	else if(initMode == INACTIVE)
 	{
 		playerText->Hide();
 		scoreText->Hide();
 		currentActionButton->Hide();
-		menuButton[RACE_MENU]->Hide();
+		raceMenuButton->Hide();
 		menuRadio->Hide();
 //		goalsFulfilledText->Hide();
 
@@ -249,8 +254,9 @@ void PlayerEntry::process()
 		playerText->Show();
 		scoreText->Show();
 		currentActionButton->Hide();
-		menuButton[RACE_MENU]->Show();
+		raceMenuButton->Show();
 		menuRadio->Show();
+		reloadOriginalSize();
 	}
 	if(removePlayerButton->isLeftClicked())
 	{
@@ -260,8 +266,8 @@ void PlayerEntry::process()
 		playerText->Hide();
 		scoreText->Hide();
 		currentActionButton->Hide();
-		menuButton[RACE_MENU]->updateText(CHOOSE_RACE_STRING);
-		menuButton[RACE_MENU]->Hide();
+		raceMenuButton->updateText(CHOOSE_RACE_STRING);
+		raceMenuButton->Hide();
 		menuRadio->Hide();
 	}
 
@@ -269,9 +275,9 @@ void PlayerEntry::process()
 	if(raceMenu->getPressedItem()>=0)
 	{	
 		assignRace=raceMenu->getPressedItem();
-		menuButton[RACE_MENU]->updateText((eString)(TERRA_STRING+assignRace));
+		raceMenuButton->updateText((eString)(TERRA_STRING+assignRace));
 		menuRadio->forceUnpressAll();
-		menuButton[RACE_MENU]->forceUnpress();
+		raceMenuButton->forceUnpress();
 		currentActionButton->Show();
 	}
 
@@ -279,7 +285,7 @@ void PlayerEntry::process()
 	{
 		switch(menuRadio->getMarked())
 		{
-			case RACE_MENU:
+			case 0:
 				raceMenu->open();
 				if(!raceMenu->isOpen())
 				{

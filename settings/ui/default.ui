@@ -17,14 +17,14 @@
 			FreeSans, 1
 			FreeSans, 9
 			FreeSansBold, 9
-			FreeSans, 12
-			FreeSansBold, 12
-			FreeSans, 14
-			FreeSansBold, 14
-			FreeSans, 18
-			FreeSansBold, 18
-			FreeSans, 24
-			FreeSansBold, 24
+			FreeSans, 11
+			FreeSansBold, 11
+			FreeSans, 13
+			FreeSansBold, 13
+			FreeSans, 16
+			FreeSansBold, 16
+			FreeSans, 22
+			FreeSansBold, 22
 	@END
 
 	@1024x768
@@ -59,44 +59,44 @@
 @MAIN
 	@640x480
 		Main window, 640, 480, 480, absolute coordinates, 0, 0
-		Message window, 400, 75, 75, dock bottom center inside of, Main window
-		Help window, 500, 300, 300, dock center inside of, Main window
+		Message window, 250, 75, 75, dock bottom center inside of, Main window
+		Help window, 500, 400, 400, dock center inside of, Main window
 		Settings window, 425, 368, 368, dock center inside of, Main window
 		Map window, 425, 368, 368, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 300, 300, 300, dock bottom right inside of, Main window
-		Edit field window, 300, 150, 150, dock center inside of, Main window
+		Edit field window, 350, 150, 150, dock center inside of, Main window
 	@END
 	@800x600
 		Main window, 800, 600, 600, absolute coordinates, 0, 0
-		Message window, 400, 100, 100, dock bottom center inside of, Main window
-		Help window, 500, 500, 500, dock center inside of, Main window
+		Message window, 300, 100, 100, dock bottom center inside of, Main window
+		Help window, 600, 500, 500, dock center inside of, Main window
 		Settings window, 500, 400, 400, dock center inside of, Main window
 		Map window, 500, 400, 400, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 500, 500, 500, dock center inside of, Main window
-		Edit field window, 300, 150, 150, dock center inside of, Main window
+		Edit field window, 400, 150, 150, dock center inside of, Main window
 	@END
 	
 	@1024x768
 		Main window, 1024, 768, 768, Main window, absolute coordinates, 0, 0
-		Message window, 400, 125, 125, dock bottom center inside of, Main window
-		Help window, 500, 500, 500, dock center inside of, Main window
+		Message window, 350, 125, 125, dock bottom center inside of, Main window
+		Help window, 800, 600, 600, dock center inside of, Main window
 		Settings window, 600, 450, 450, dock center inside of, Main window
 		Map window, 600, 450, 450, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 500, 500, 500, dock center inside of, Main window
-		Edit field window, 300, 150, 150, dock center inside of, Main window
+		Edit field window, 400, 150, 150, dock center inside of, Main window
 	@END
 	@1280x1024
 		Main window, 1280, 1024, 1024, Main window, absolute coordinates, 0, 0
-		Message window, 400, 150, 150, dock bottom center inside of, Main window
-		Help window, 500, 500, 500, dock center inside of, Main window
+		Message window, 400, 150, 150, dock top center inside of, Main window
+		Help window, 900, 700, 700, dock center inside of, Main window
 		Settings window, 700, 500, 500, dock center inside of, Main window
 		Map window, 700, 500, 500, dock center inside of, Main window
 		Info window, 250, 150, 150, dock center inside of, Main window
 		Tech tree window, 500, 500, 500, dock bottom center inside of, Main window
-		Edit field window, 300, 150, 150, dock center inside of, Main window
+		Edit field window, 450, 150, 150, dock center inside of, Main window
 	@END
 @END
 
@@ -280,310 +280,310 @@
 @END
 
 @PENS
-		@DARK_RED_THEME
+	@DARK_RED_THEME
 # null pen
-			1,   0,   0,   0, TRANSPARENT
+		1,   0,   0,   0, TRANSPARENT
 # border pen
-			1,  100,  40, 30, SOLID
+		1,  100,  40, 30, SOLID
 # outer border pen
-			1,   80,  50, 20, SOLID
+		1,   80,  50, 20, SOLID
 # inner border pen
-			1,  80,  0,  0, SOLID
+		1,  80,  0,  0, SOLID
 # inner border higlight pen
-			1,  100, 50, 50, SOLID
+		1,  100, 50, 50, SOLID
 # big buttons pen
-			1, 155, 100, 100, SOLID
+		1, 155, 100, 100, SOLID
 # rectangle pen
-			1,   0,   0,   0, SOLID
+		1,   0,   0,   0, SOLID
 # marked bitmap pen
-			1, 255, 255, 255, SOLID
+		1, 255, 255, 255, SOLID
 # dashed minerals pen was width 2
-			1, 120, 120, 255, SHORT_DASH
+		1, 120, 120, 255, SHORT_DASH
 # dashed gas pen was width 2
-			1,  80, 255,  80, SHORT_DASH
+		1,  80, 255,  80, SHORT_DASH
 # dashed supply pen was width 2
-			1, 160, 160, 160, SHORT_DASH
+		1, 160, 160, 160, SHORT_DASH
 # dashed marker pen was width 2
-			1, 150,   0,   0, SHORT_DASH
+		1, 150,   0,   0, SHORT_DASH
 # select pen
-			1, 100, 200, 100, SOLID
+		1, 100, 200, 100, SOLID
 # dark background button pen
-			1,   0,   5,  10, SOLID	
+		1,   0,   5,  10, SOLID	
 # marked bitmap green
-			1,   0, 255,   0, SOLID	
+		1,   0, 255,   0, SOLID	
 # marked bitmap yellow
-			1, 100, 100,   0, SOLID	
+		1, 100, 100,   0, SOLID	
 # marked bitmap red
-			1, 200,   0,   0, SOLID
+		1, 200,   0,   0, SOLID
 # basic bitmap pen
-			1, 255,  255,  255, SOLID
+		1, 255,  255,  255, SOLID
 # bodiagram supply, mins, gas pen
-			1,  60,   60,   60, SOLID
-			1,  80,   80,  255, SOLID
-			1,  40,  255,   40, SOLID
-			2, 120,  120,  120, SOLID
-			2,  80,   80,  255, SOLID
-			2,  40,  255,   40, SOLID
+		1,  60,   60,   60, SOLID
+		1,  80,   80,  255, SOLID
+		1,  40,  255,   40, SOLID
+		2, 120,  120,  120, SOLID
+		2,  80,   80,  255, SOLID
+		2,  40,  255,   40, SOLID
 # unit list colors:
-			1,  25,  25,  25, SOLID
-			1,  75,  75,  75, SOLID
-			1,  50, 100,  50, SOLID
-			1, 100,  50,  50, SOLID
-			1, 100,  50, 100, SOLID
-			1,  50,  50, 100, SOLID
-			1,  50, 100, 100, SOLID
-			1, 100, 100,  50, SOLID
-			1,  50,  50,  75, SOLID
-			1,  75,  50,  50, SOLID
-			1,  50,  75,  50, SOLID
+		1,  25,  25,  25, SOLID
+		1,  75,  75,  75, SOLID
+		1,  50, 100,  50, SOLID
+		1, 100,  50,  50, SOLID
+		1, 100,  50, 100, SOLID
+		1,  50,  50, 100, SOLID
+		1,  50, 100, 100, SOLID
+		1, 100, 100,  50, SOLID
+		1,  50,  50,  75, SOLID
+		1,  75,  50,  50, SOLID
+		1,  50,  75,  50, SOLID
 	
-			2,  25,  25,  25, SOLID
-			2,  75,  75,  75, SOLID
-			2,  50, 100,  50, SOLID
-			2, 100,  50,  50, SOLID
-			2, 100,  50, 100, SOLID
-			2,  50,  50, 100, SOLID
-			2,  50, 100, 100, SOLID
-			2, 100, 100,  50, SOLID
-			2,  50,  50,  75, SOLID
-			2,  75,  50,  50, SOLID
-			2,  50,  75,  50, SOLID
+		2,  25,  25,  25, SOLID
+		2,  75,  75,  75, SOLID
+		2,  50, 100,  50, SOLID
+		2, 100,  50,  50, SOLID
+		2, 100,  50, 100, SOLID
+		2,  50,  50, 100, SOLID
+		2,  50, 100, 100, SOLID
+		2, 100, 100,  50, SOLID
+		2,  50,  50,  75, SOLID
+		2,  75,  50,  50, SOLID
+		2,  50,  75,  50, SOLID
 		
 # bright unit list colors:
-			1,  60,  60,  60, SOLID
-			1, 150, 150, 150, SOLID
-			1,  75, 225,  75, SOLID
-			1, 225,  75,  75, SOLID
-			1, 225,  75, 225, SOLID
-			1,  75,  75, 225, SOLID
-			1,  75, 225, 225, SOLID
-			1, 225, 225,  75, SOLID
-			1,  75,  75, 150, SOLID
-			1, 150,  75,  75, SOLID
-			1,  75, 150,  75, SOLID
+		1,  60,  60,  60, SOLID
+		1, 150, 150, 150, SOLID
+		1,  75, 225,  75, SOLID
+		1, 225,  75,  75, SOLID
+		1, 225,  75, 225, SOLID
+		1,  75,  75, 225, SOLID
+		1,  75, 225, 225, SOLID
+		1, 225, 225,  75, SOLID
+		1,  75,  75, 150, SOLID
+		1, 150,  75,  75, SOLID
+		1,  75, 150,  75, SOLID
 
-			2,  60,  60,  60, SOLID
-			2, 150, 150, 150, SOLID
-			2,  75, 225,  75, SOLID
-			2, 225,  75,  75, SOLID
-			2, 225,  75, 225, SOLID
-			2,  75,  75, 225, SOLID
-			2,  75, 225, 225, SOLID
-			2, 225, 225,  75, SOLID
-			2,  75,  75, 150, SOLID
-			2, 150,  75,  75, SOLID
-			2,  75, 150,  75, SOLID
+		2,  60,  60,  60, SOLID
+		2, 150, 150, 150, SOLID
+		2,  75, 225,  75, SOLID
+		2, 225,  75,  75, SOLID
+		2, 225,  75, 225, SOLID
+		2,  75,  75, 225, SOLID
+		2,  75, 225, 225, SOLID
+		2, 225, 225,  75, SOLID
+		2,  75,  75, 150, SOLID
+		2, 150,  75,  75, SOLID
+		2,  75, 150,  75, SOLID
 # green timesteps pen
-			1,  20, 100,  20, SOLID
+		1,  20, 100,  20, SOLID
 # fitness diagram pen
-			2, 155,  40,  40, SOLID
+		2, 155,  40,  40, SOLID
 # disabled border pen
-			1, 110, 100, 100, SOLID
-		@END
-		@DARK_BLUE_THEME
+		1, 110, 100, 100, SOLID
+	@END
+	@DARK_BLUE_THEME
 # null pen
-			1,   0,   0,   0, TRANSPARENT
+		1,   0,   0,   0, TRANSPARENT
 # border pen
-			1,  40,  30, 120, SOLID
+		1,  40,  30, 120, SOLID
 # outer border pen
-			1,   10,  25, 50, SOLID
+		1,   10,  25, 50, SOLID
 # inner border pen
-			1,  0,  0,  100, SOLID
+		1,  0,  0,  100, SOLID
 # inner border higlight pen
-			1,  25, 25, 155, SOLID
+		1,  25, 25, 155, SOLID
 # big buttons pen
-			1, 100, 100, 255, SOLID
+		1, 100, 100, 255, SOLID
 # rectangle pen
-			1,   0,   0,   0, SOLID
+		1,   0,   0,   0, SOLID
 # marked bitmap pen
-			1, 255, 255, 255, SOLID
+		1, 255, 255, 255, SOLID
 # dashed minerals pen was width 2
-			1, 120, 120, 255, SHORT_DASH
+		1, 120, 120, 255, SHORT_DASH
 # dashed gas pen was width 2
-			1,  80, 255,  80, SHORT_DASH
+		1,  80, 255,  80, SHORT_DASH
 # dashed supply pen was width 2
-			1, 160, 160, 160, SHORT_DASH
+		1, 160, 160, 160, SHORT_DASH
 # dashed marker pen was width 2
-			1, 150,   0,   0, SHORT_DASH
+		1, 150,   0,   0, SHORT_DASH
 # select pen
-			1, 100, 200, 100, SOLID
+		1, 100, 200, 100, SOLID
 # dark background button pen
-			1,   0,   5,  10, SOLID	
+		1,   0,   5,  10, SOLID	
 # marked bitmap green
-			1,   0, 255,   0, SOLID	
+		1,   0, 255,   0, SOLID	
 # marked bitmap yellow
-			1, 100, 100,   0, SOLID	
+		1, 100, 100,   0, SOLID	
 # marked bitmap red
-			1, 200,   0,   0, SOLID
+		1, 200,   0,   0, SOLID
 # basic bitmap pen
-			1, 255,  255,  255, SOLID
+		1, 255,  255,  255, SOLID
 # bodiagram supply, mins, gas pen
-			1,  60,   60,   60, SOLID
-			1,  80,   80,  200, SOLID
-			1,  40,  150,   40, SOLID
+		1,  60,   60,   60, SOLID
+		1,  80,   80,  200, SOLID
+		1,  40,  150,   40, SOLID
 
-			2, 120,  120,  120, SOLID
-			2,  80,   80,  255, SOLID
-			2,  40,  255,   40, SOLID
+		2, 120,  120,  120, SOLID
+		2,  80,   80,  255, SOLID
+		2,  40,  255,   40, SOLID
 # unit list colors:
-			1,  25,  25,  25, SOLID
-			1,  75,  75,  75, SOLID
-			1,  50, 100,  50, SOLID
-			1, 100,  50,  50, SOLID
-			1, 100,  50, 100, SOLID
-			1,  50,  50, 100, SOLID
-			1,  50, 100, 100, SOLID
-			1, 100, 100,  50, SOLID
-			1,  50,  50,  75, SOLID
-			1,  75,  50,  50, SOLID
-			1,  50,  75,  50, SOLID
+		1,  25,  25,  25, SOLID
+		1,  75,  75,  75, SOLID
+		1,  50, 100,  50, SOLID
+		1, 100,  50,  50, SOLID
+		1, 100,  50, 100, SOLID
+		1,  50,  50, 100, SOLID
+		1,  50, 100, 100, SOLID
+		1, 100, 100,  50, SOLID
+		1,  50,  50,  75, SOLID
+		1,  75,  50,  50, SOLID
+		1,  50,  75,  50, SOLID
 
-			2,   0,   0,   0, SOLID
-			2,  75,  75,  75, SOLID
-			2,  50, 100,  50, SOLID
-			2, 100,  50,  50, SOLID
-			2, 100,  50, 100, SOLID
-			2,  50,  50, 100, SOLID
-			2,  50, 100, 100, SOLID
-			2, 100, 100,  50, SOLID
-			2,  50,  50,  75, SOLID
-			2,  75,  50,  50, SOLID
-			2,  50,  75,  50, SOLID
+		2,   0,   0,   0, SOLID
+		2,  75,  75,  75, SOLID
+		2,  50, 100,  50, SOLID
+		2, 100,  50,  50, SOLID
+		2, 100,  50, 100, SOLID
+		2,  50,  50, 100, SOLID
+		2,  50, 100, 100, SOLID
+		2, 100, 100,  50, SOLID
+		2,  50,  50,  75, SOLID
+		2,  75,  50,  50, SOLID
+		2,  50,  75,  50, SOLID
 		
 # bright unit list colors:
-			1,  60,  60,  60, SOLID
-			1, 150, 150, 150, SOLID
-			1,  75, 225,  75, SOLID
-			1, 225,  75,  75, SOLID
-			1, 225,  75, 225, SOLID
-			1,  75,  75, 225, SOLID
-			1,  75, 225, 225, SOLID
-			1, 225, 225,  75, SOLID
-			1,  75,  75, 150, SOLID
-			1, 150,  75,  75, SOLID
-			1,  75, 150,  75, SOLID
+		1,  60,  60,  60, SOLID
+		1, 150, 150, 150, SOLID
+		1,  75, 225,  75, SOLID
+		1, 225,  75,  75, SOLID
+		1, 225,  75, 225, SOLID
+		1,  75,  75, 225, SOLID
+		1,  75, 225, 225, SOLID
+		1, 225, 225,  75, SOLID
+		1,  75,  75, 150, SOLID
+		1, 150,  75,  75, SOLID
+		1,  75, 150,  75, SOLID
 
-			2,  60,  60,  60, SOLID
-			2, 150, 150, 150, SOLID
-			2,  75, 225,  75, SOLID
-			2, 225,  75,  75, SOLID
-			2, 225,  75, 225, SOLID
-			2,  75,  75, 225, SOLID
-			2,  75, 225, 225, SOLID
-			2, 225, 225,  75, SOLID
-			2,  75,  75, 150, SOLID
-			2, 150,  75,  75, SOLID
-			2,  75, 150,  75, SOLID
+		2,  60,  60,  60, SOLID
+		2, 150, 150, 150, SOLID
+		2,  75, 225,  75, SOLID
+		2, 225,  75,  75, SOLID
+		2, 225,  75, 225, SOLID
+		2,  75,  75, 225, SOLID
+		2,  75, 225, 225, SOLID
+		2, 225, 225,  75, SOLID
+		2,  75,  75, 150, SOLID
+		2, 150,  75,  75, SOLID
+		2,  75, 150,  75, SOLID
 # green timesteps pen
-			1,  20, 100,  20, SOLID
+		1,  20, 100,  20, SOLID
 # fitness diagram pen
-			2, 155,  40,  40, SOLID
+		2, 155,  40,  40, SOLID
 # disabled border pen
-			1, 100, 100, 110, SOLID
-		@END
+		1, 100, 100, 110, SOLID
+	@END
 		
-		@YELLOW_THEME
+	@YELLOW_THEME
 # null pen
-			1,   0,   0,   0, TRANSPARENT
+		1,   0,   0,   0, TRANSPARENT
 # border pen
-			1,  85,  85, 20, SOLID
+		1,  85,  85, 20, SOLID
 # outer border pen
-			1,   50,  50, 10, SOLID
+		1,   50,  50, 10, SOLID
 # inner border pen
-			1,  85,  85,  0, SOLID
+		1,  85,  85,  0, SOLID
 # inner border higlight pen
-			1,  115, 115, 25, SOLID
+		1,  115, 115, 25, SOLID
 # big buttons pen
-			1, 175, 175, 100, SOLID
+		1, 175, 175, 100, SOLID
 # rectangle pen
-			1,   0,   0,   0, SOLID
+		1,   0,   0,   0, SOLID
 # marked bitmap pen
-			1, 255, 255, 255, SOLID
+		1, 255, 255, 255, SOLID
 # dashed minerals pen was width 2
-			1, 120, 120, 255, SHORT_DASH
+		1, 120, 120, 255, SHORT_DASH
 # dashed gas pen was width 2
-			1,  80, 255,  80, SHORT_DASH
+		1,  80, 255,  80, SHORT_DASH
 # dashed supply pen was width 2
-			1, 160, 160, 160, SHORT_DASH
+		1, 160, 160, 160, SHORT_DASH
 # dashed marker pen was width 2
-			1, 150,   0,   0, SHORT_DASH
+		1, 150,   0,   0, SHORT_DASH
 # select pen
-			1, 100, 200, 100, SOLID
+		1, 100, 200, 100, SOLID
 # dark background button pen
-			1,   0,   5,  10, SOLID	
+		1,   0,   5,  10, SOLID	
 # marked bitmap green
-			1,   0, 255,   0, SOLID	
+		1,   0, 255,   0, SOLID	
 # marked bitmap yellow
-			1, 100, 100,   0, SOLID	
+		1, 100, 100,   0, SOLID	
 # marked bitmap red
-			1, 200,   0,   0, SOLID
+		1, 200,   0,   0, SOLID
 # basic bitmap pen
-			1, 255,  255,  255, SOLID
+		1, 255,  255,  255, SOLID
 # bodiagram supply, mins, gas pen
-			1,  60,   60,   60, SOLID
-			1,  80,   80,  255, SOLID
-			1,  40,  255,   40, SOLID
-			2, 120,  120,  120, SOLID
-			2,  80,   80,  255, SOLID
-			2,  40,  255,   40, SOLID
+		1,  60,   60,   60, SOLID
+		1,  80,   80,  255, SOLID
+		1,  40,  255,   40, SOLID
+		2, 120,  120,  120, SOLID
+		2,  80,   80,  255, SOLID
+		2,  40,  255,   40, SOLID
 		
 # unit list colors:
-			1,  25,  25,  25, SOLID
-			1,  75,  75,  75, SOLID
-			1,  50, 100,  50, SOLID
-			1, 100,  50,  50, SOLID
-			1, 100,  50, 100, SOLID
-			1,  50,  50, 100, SOLID
-			1,  50, 100, 100, SOLID
-			1, 100, 100,  50, SOLID
-			1,  50,  50,  75, SOLID
-			1,  75,  50,  50, SOLID
-			1,  50,  75,  50, SOLID
+		1,  50,  50,  50, SOLID
+		1, 100, 100, 100, SOLID
+		1,  75, 150,  75, SOLID
+		1, 150,  75,  75, SOLID
+		1, 150,  75, 100, SOLID
+		1,  75,  75, 150, SOLID
+		1,  75, 150, 150, SOLID
+		1, 150, 150,  75, SOLID
+		1,  50,  50, 100, SOLID
+		1, 100,  75,  75, SOLID
+		1,  50, 100,  50, SOLID
 
-			2,  25,  25,  25, SOLID
-			2,  75,  75,  75, SOLID
-			2,  50, 100,  50, SOLID
-			2, 100,  50,  50, SOLID
-			2, 100,  50, 100, SOLID
-			2,  50,  50, 100, SOLID
-			2,  50, 100, 100, SOLID
-			2, 100, 100,  50, SOLID
-			2,  50,  50,  75, SOLID
-			2,  75,  50,  50, SOLID
-			2,  50,  75,  50, SOLID
+		2,  50,  50,  50, SOLID
+		2, 100, 100, 100, SOLID
+		2,  75, 150,  75, SOLID
+		2, 150,  75,  75, SOLID
+		2, 150,  75, 100, SOLID
+		2,  75,  75, 150, SOLID
+		2,  75, 150, 150, SOLID
+		2, 150, 150,  75, SOLID
+		2,  50,  50, 100, SOLID
+		2, 100,  75,  75, SOLID
+		2,  50, 100,  50, SOLID
 		
 # bright unit list colors:
-			1,  60,  60,  60, SOLID
-			1, 150, 150, 150, SOLID
-			1,  75, 225,  75, SOLID
-			1, 225,  75,  75, SOLID
-			1, 225,  75, 225, SOLID
-			1,  75,  75, 225, SOLID
-			1,  75, 225, 225, SOLID
-			1, 225, 225,  75, SOLID
-			1,  75,  75, 150, SOLID
-			1, 150,  75,  75, SOLID
-			1,  75, 150,  75, SOLID
+		1, 100, 100, 100, SOLID
+		1, 200, 200, 200, SOLID
+		1, 100, 255, 100, SOLID
+		1, 255, 100, 100, SOLID
+		1, 255, 100, 255, SOLID
+		1, 100, 100, 255, SOLID
+		1, 100, 255, 255, SOLID
+		1, 255, 255, 100, SOLID
+		1,  75,  75, 150, SOLID
+		1, 200, 100, 100, SOLID
+		1, 100, 200, 100, SOLID
 
-			2,  60,  60,  60, SOLID
-			2, 150, 150, 150, SOLID
-			2,  75, 225,  75, SOLID
-			2, 225,  75,  75, SOLID
-			2, 225,  75, 225, SOLID
-			2,  75,  75, 225, SOLID
-			2,  75, 225, 225, SOLID
-			2, 225, 225,  75, SOLID
-			2,  75,  75, 150, SOLID
-			2, 150,  75,  75, SOLID
-			2,  75, 150,  75, SOLID
-		
+		2, 100, 100, 100, SOLID
+		2, 200, 200, 200, SOLID
+		2, 100, 255, 100, SOLID
+		2, 255, 100, 100, SOLID
+		2, 255, 100, 255, SOLID
+		2, 100, 100, 255, SOLID
+		2, 100, 255, 255, SOLID
+		2, 255, 255, 100, SOLID
+		2,  75,  75, 150, SOLID
+		2, 200, 100, 100, SOLID
+		2, 100, 200, 100, SOLID
+	
 # green timesteps pen
-			1,  20, 100,  20, SOLID
+		1,  20, 100,  20, SOLID
 # fitness diagram pen
-			2, 155,  40,  40, SOLID
+		2, 155,  40,  40, SOLID
 # disabled border pen
-			1, 105, 105, 100, SOLID
-		@END
+		1, 105, 105, 100, SOLID
+	@END
 @END
 
 @BRUSHES
@@ -1099,6 +1099,7 @@
 # force window add goal
 	30, 2,    3,  3,  7,  3,  7,    3,  7,  3,  7,  3,    8,  8,  8,  8,  8,   10,  9,  9,  9,  9,    5,  5,  5,  5,  5,    5,  5,  5,  7,  7,    0,  0,  0,  0,  0
 
+
 # statistics 
 	30, 2,    2,  2,  3,  2,  3,    2,  3,  2,  3,  2,   16, 27, 16, 27, 16,   10, 27, 10, 27, 10,    3,  3,  3,  3,  3,    3,  3,  3,  7,  7,    0,  0,  0,  0,  0
 	30, 2,    2,  2,  3,  2,  3,    2,  3,  2,  3,  2,   17, 27, 17, 27, 17,   10, 27, 10, 27, 10,    3,  3,  3,  3,  3,    3,  3,  3,  7,  7,    0,  0,  0,  0,  0
@@ -1128,7 +1129,7 @@
 # checkButton
 	40, 2,    6,  6,  6,  5,  6,    6,  6,  6,  5,  6,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,   16, 16, 16, 16, 16,    0,  0,  0, 17,  17,   14, 14, 15, 14, 15
 # text button
-	40, 2,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    3,  3,  3,  3, 10,    3,  3,  3, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,    0,  0,  0,  0,  0
+	40, 2,    1,  1,  1,  1,  1,    1,  1,  1,  1,  1,    2,  2,  2,  2, 10,    2,  2,  2, 10, 10,    0,  0,  0,  0,  0,    0,  0,  0,  0,   0,    0,  0,  0,  0,  0
 @END
 
 @BUTTON_WIDTH

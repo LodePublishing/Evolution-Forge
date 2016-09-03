@@ -8,7 +8,7 @@ ScoreWindow::ScoreWindow(UI_Object* score_parent, const unsigned int game_number
 //	resetButton(new UI_Button(this, Rect(getRelativeClientRectPosition(), getClientRectSize()), RESET_BUILD_ORDER_STRING, MY_BUTTON, PRESS_BUTTON_MODE, CENTER_RIGHT, SMALL_BOLD_FONT, AUTO_SIZE))
 	players(0),
 	maxPlayer(0),
-	mapMenuButton(new UI_Button(this, Rect(Point(10, 20), Size(100, 50)), Size(5,5), CHOOSE_MAP_STRING, MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
+	mapMenuButton(new UI_Button(this, Rect(Point(10, 20), Size(100, 50)), Size(5,5), database.getMap(0)->getName(), MY_BUTTON, STATIC_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_HEIGHT_CONST_WIDTH)),
 	mapMenu(new MapMenu(mapMenuButton, Rect(10, 10, 100, 0), Size(0, 0), DO_NOT_ADJUST)),
 	assignMap(-1)
 {
@@ -116,7 +116,7 @@ void ScoreWindow::process()
 		else 
 		{
 			player[i]->Show();
-			player[i]->adjustRelativeRect(Rect(getRelativeClientRect().GetLeft(), line*16, getRelativeClientRect().GetWidth(), 12));
+			player[i]->adjustRelativeRect(Rect(getRelativeClientRectLeftBound(), line*16, getRelativeClientRect().GetWidth(), 12));
 			line+=player[i]->getLineHeight(); // height of menu <-
 		}
 	}

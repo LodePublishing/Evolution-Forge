@@ -6,10 +6,10 @@
 
 UI_EditField::UI_EditField(UI_Object* edit_parent, UI_Object* edit_caller, const eString edit_text, const eString description_text, const eString ok_string, const eString cancel_string, const std::string& name_proposal) :
 	UI_Window(edit_parent, edit_text, theme.lookUpGlobalRect(EDIT_FIELD_WINDOW), theme.lookUpGlobalMaxHeight(EDIT_FIELD_WINDOW)),
-	OK_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), ok_string, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_BOLD_FONT, AUTO_SIZE)),
-	Cancel_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), cancel_string, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, SMALL_BOLD_FONT, AUTO_SIZE)),
-	editText(new UI_StaticText(this, description_text, Rect(getRelativeClientRectPosition() + Point(10, 15), getClientRectSize()), Size(0,0), FORCE_TEXT_COLOR, SMALL_BOLD_FONT)),
-	userText(new UI_StaticText(this, name_proposal, Rect(getRelativeClientRectPosition() + Point(17, 37), getClientRectSize()), Size(0,0), BRIGHT_TEXT_COLOR, SMALL_BOLD_FONT)),
+	OK_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), ok_string, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, MIDDLE_BOLD_FONT, AUTO_SIZE)),
+	Cancel_Button(new UI_Button(this, getRelativeClientRect(), Size(0,0), cancel_string, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_BOTTOM_RIGHT, MIDDLE_BOLD_FONT, AUTO_SIZE)),
+	editText(new UI_StaticText(this, description_text, Rect(getRelativeClientRectPosition() + Point(20, 15), getClientRectSize()), Size(0,0), FORCE_TEXT_COLOR, MIDDLE_BOLD_FONT)),
+	userText(new UI_StaticText(this, name_proposal, Rect(getRelativeClientRectPosition() + Point(30, 50), getClientRectSize()), Size(0,0), BRIGHT_TEXT_COLOR, MIDDLE_BOLD_FONT, DO_NOT_ADJUST)),
 	position(name_proposal.size()),
 	caller(edit_caller),
 	ani(5)
@@ -49,6 +49,18 @@ UI_EditField& UI_EditField::operator=(const UI_EditField& object)
 	caller = object.caller;
 	ani = object.ani;
 	return(*this);
+}
+
+void UI_EditField::reloadOriginalSize()
+{
+	setOriginalRect(UI_Object::theme.lookUpGlobalRect(EDIT_FIELD_WINDOW));
+	setMaxHeight(UI_Object::theme.lookUpGlobalMaxHeight(EDIT_FIELD_WINDOW));
+        OK_Button->setOriginalRect(getRelativeClientRect());
+        Cancel_Button->setOriginalRect(getRelativeClientRect());
+        editText->setOriginalRect(Rect(getRelativeClientRectPosition() + Point(20, 15), getClientRectSize()));
+        userText->setOriginalRect(Rect(getRelativeClientRectPosition() + Point(30, 37), getClientRectSize()));
+
+	UI_Window::reloadOriginalSize();
 }
 
 void UI_EditField::addChar(char a)
@@ -98,7 +110,7 @@ void UI_EditField::draw(DC* dc) const
 	dc->DrawRectangle(Rect(getAbsolutePosition()-Size(10,10), getSize() + Size(20,20)));
 
 	UI_Window::draw(dc);
-	Rect entry_rect = Rect(getAbsolutePosition() + Size(25, 50), Size(getWidth()-50, 14));
+	Rect entry_rect = Rect(userText->getAbsolutePosition() - Size(5, 0), Size(getWidth()-75, userText->getTextSize().GetHeight()));
 	if(entry_rect.Inside(mouse))
 		dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
 	else
@@ -107,7 +119,7 @@ void UI_EditField::draw(DC* dc) const
 	dc->DrawEdgedRoundedRectangle(entry_rect, 4);
 	
 	dc->SetPen(Pen(dc->mixColor(*theme.lookUpColor(FORCE_TEXT_COLOR), *theme.lookUpColor(BRIGHT_TEXT_COLOR), (unsigned int)(50*(sin(3.141*ani/10)+1))), 1, SOLID_PEN_STYLE));
-	dc->DrawVerticalLine(entry_rect.GetLeft() + userText->getTextPosSize(position).GetWidth(),  entry_rect.GetTop() + 2, entry_rect.GetBottom() - 2);
+	dc->DrawVerticalLine(userText->getAbsolutePosition().x + userText->getTextPosSize(position).GetWidth(),  entry_rect.GetTop() + 2, entry_rect.GetBottom() - 2);
 }
 
 void UI_EditField::process()

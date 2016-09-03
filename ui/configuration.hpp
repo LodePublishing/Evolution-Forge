@@ -1,7 +1,6 @@
 #ifndef _UI_CONFIGURATION_HPP
 #define _UI_CONFIGURATION_HPP
 
-//#include "defs.hpp"
 #include <list>
 #include <map>
 #include "../stl/misc.hpp"

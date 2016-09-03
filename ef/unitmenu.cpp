@@ -109,8 +109,8 @@ void UnitMenu::processMenu()
 					}
 					++height;
 				}
-				height-=2;
-				height*=2;
+//				height-=2;
+//				height*=2;
 			} else 
 			{
 				for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)

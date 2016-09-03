@@ -1,7 +1,7 @@
 #ifndef _CORE_UNIT_HPP
 #define _CORE_UNIT_HPP
 
-#include "defs.hpp"
+#include "starcraft.hpp"
 #include "../stl/misc.hpp"
 
 /*1. researches + erforschungen werden nur fuer location 0 gezaehlt, wie bisher

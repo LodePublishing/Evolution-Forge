@@ -1,10 +1,22 @@
 #ifndef _CORE_CONFIGURATION_HPP
 #define _CORE_CONFIGURATION_HPP
 
-#include "defs.hpp"
+#include "starcraft.hpp"
 #include <list>
 #include <map>
 #include "../stl/misc.hpp"
+
+extern const unsigned int MIN_MUTATION_FACTOR;
+extern const unsigned int MAX_MUTATION_FACTOR;
+
+extern const unsigned int MAX_BREED_FACTOR;
+extern const unsigned int MIN_BREED_FACTOR;
+
+extern const unsigned int MIN_NOISE;
+extern const unsigned int MAX_NOISE;
+
+extern const unsigned int MAX_CROSSING_OVER;
+extern const unsigned int MIN_CROSSING_OVER;
 
 class CoreConfiguration
 {
@@ -23,6 +35,7 @@ private:
 	bool preprocessBuildOrder; // should the program create a basic valid solution? TODO: IMPLEMENT IT!
 	bool allowGoalAdaption;
 	bool alwaysBuildWorker;
+	bool onlySwapOrders;
 
 	bool autoSaveRuns;  // raus
 	bool restrictSC;
@@ -52,6 +65,7 @@ public:
 	const bool isPreprocessBuildOrder() const;
 	const bool isAllowGoalAdaption() const;
 	const bool isAlwaysBuildWorker() const;
+	const bool isOnlySwapOrders() const;
 	
 	void setCrossingOver(const unsigned int crossing_over);
 	void setBreedFactor(const unsigned int breed_factor);
@@ -69,6 +83,7 @@ public:
 	void setPreprocessBuildOrder(const bool preprocess_build_order);
 	void setAllowGoalAdaption(const bool allow_goal_adaption);
 	void setAlwaysBuildWorker(const bool always_build_scv);
+	void setOnlySwapOrders(const bool only_swap_orders);
 
 	void setConfigurationFile(const std::string& configuration_file);
 	void loadConfigurationFile();
@@ -171,6 +186,10 @@ inline const bool CoreConfiguration::isAlwaysBuildWorker() const {
 	return(alwaysBuildWorker);
 }
 
+inline const bool CoreConfiguration::isOnlySwapOrders() const {
+	return(onlySwapOrders);
+}
+
 inline void CoreConfiguration::setCrossingOver(const unsigned int crossing_over) 
 {
 #ifdef _SCC_DEBUG
@@ -270,6 +289,14 @@ inline void CoreConfiguration::setAllowGoalAdaption(const bool allow_goal_adapti
 
 inline void CoreConfiguration::setAlwaysBuildWorker(const bool always_build_worker) {
 	alwaysBuildWorker = always_build_worker;
+}
+
+inline void CoreConfiguration::setOnlySwapOrders(const bool only_swap_orders) {
+	onlySwapOrders = only_swap_orders;
+}
+
+inline void CoreConfiguration::setConfigurationFile(const std::string& configuration_file) {
+	configurationFile = configuration_file;
 }
 
 #endif // _CORE_CONFIGURATION_HPP

@@ -71,7 +71,7 @@ class ANABUILDORDER: public PREBUILDORDER
 		void prepareForNewGeneration();				// resets all data to standard values
 //		void analyzeBuildOrder();		// sets the isGoal of program
 	
-		void writeProgramBackToCode(std::list<PROGRAM>& program_list);
+		const bool writeProgramBackToCode(std::list<PROGRAM>& program_list);
 
 		std::list<PROGRAM> programList; // TODO private machen
 	private:

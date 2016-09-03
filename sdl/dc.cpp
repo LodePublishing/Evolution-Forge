@@ -12,7 +12,15 @@ DC::DC():
 	textColor(),
 	font(NULL),
 	bitDepth(DEPTH_8BIT),
-	resolution(RESOLUTION_640x480)
+	resolution(RESOLUTION_640x480),
+	Draw_HLine(NULL),
+	Draw_VLine(NULL),
+	Draw_Line(NULL),
+	DrawFilledRound(NULL),
+	DrawFilledEdgedRound(NULL),
+	DrawEmptyEdgedRound(NULL),
+	DrawEmptyRound(NULL),
+	DrawFilledEdgedBorderRound(NULL)
 { }
 
 DC::DC(const DC& other):
@@ -26,8 +34,15 @@ DC::DC(const DC& other):
 	textColor(other.textColor),
 	font(other.font),
 	bitDepth(other.bitDepth),
-	resolution(other.resolution)
-
+	resolution(other.resolution),
+	Draw_HLine(other.Draw_HLine),
+	Draw_VLine(other.Draw_VLine),
+	Draw_Line(other.Draw_Line),
+	DrawFilledRound(other.DrawFilledRound),
+	DrawFilledEdgedRound(other.DrawFilledEdgedRound),
+	DrawEmptyEdgedRound(other.DrawEmptyEdgedRound),
+	DrawEmptyRound(other.DrawEmptyRound),
+	DrawFilledEdgedBorderRound(other.DrawFilledEdgedBorderRound)
 { }
 
 
@@ -43,7 +58,15 @@ DC::DC(const eResolution current_resolution, const eBitDepth bit_depth, const Ui
 	font(NULL),
 // evtl gar nicht initialisieren...
 	bitDepth(bit_depth),
-	resolution(current_resolution)
+	resolution(current_resolution),
+	Draw_HLine(NULL),
+	Draw_VLine(NULL),
+	Draw_Line(NULL),
+	DrawFilledRound(NULL),
+	DrawFilledEdgedRound(NULL),
+	DrawEmptyEdgedRound(NULL),
+	DrawEmptyRound(NULL),
+	DrawFilledEdgedBorderRound(NULL)
 {
 	if ( SDL_Init(initflags) < 0 )
 	{
@@ -136,10 +159,7 @@ std::list<std::string> DC::getAvailibleDrivers()
 }
 
 
-const bool DC::initializationOK() const
-{
-	return(initOK);
-}
+
 
 void DC::setFullscreen(const bool full_screen)
 {
@@ -169,7 +189,7 @@ void DC::DrawBitmap(SDL_Surface* bitmap, const signed int x, const signed int y)
 	drect.h = bitmap->h;
 //	if((drect.x + drect.w >= max_x)||(drect.y + drect.h >= max_y) || (drect.x < 0) || (drect.y < 0))
 //		return;
-	SDL_BlitSurface(bitmap , 0, surface, &drect );
+	SDL_BlitSurface(bitmap , NULL, surface, &drect);
 }
 
 const Color DC::mixColor(const Color& id1, const Color& id2)  const

@@ -55,6 +55,7 @@ class Main
 		const bool hasFullScreenChanged() const;
 
 		void reloadOriginalSize();
+		void reloadStrings();
 	
 	private:
 		void initializeGame(const unsigned int game_number);

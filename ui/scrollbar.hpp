@@ -25,12 +25,17 @@ class UI_Scrollbar : public UI_Object
 		void setClientTargetHeight(const unsigned int height);
 
 		void reloadStrings();
-
-		signed int firstItemY;
-		signed int lastItemY;
-
+		
+		void setFirstItemY(const signed int first_item_y);
+		void setLastItemY(const signed int last_item_y);
+		const signed int getFirstItemY() const;
+		const signed int getLastItemY() const;
+	
 	protected:
 	private:
+		signed int firstItemY;
+		signed int lastItemY;
+		
 		UI_Button* add;
 		UI_Button* sub;
 
@@ -43,7 +48,53 @@ class UI_Scrollbar : public UI_Object
 		unsigned int clientHeight;
 		unsigned int clientTargetHeight;
 		unsigned int totalHeight;
+
+		unsigned int maxHeight;
 };
+
+inline void UI_Scrollbar::setFirstItemY(const signed int first_item_y) 
+{
+#ifdef _SCC_DEBUG
+	if(first_item_y > 90000)
+	{
+		toLog("DEBUG: (UI_Scrollbar::setFirstItemY): Value first_item_y out of range.");return;
+	}
+#endif
+	firstItemY = first_item_y;
+}
+
+inline void UI_Scrollbar::setLastItemY(const signed int last_item_y) 
+{
+#ifdef _SCC_DEBUG
+	if(last_item_y > 90000)
+	{
+		toLog("DEBUG: (UI_Scrollbar::setLastItemY): Value last_item_y out of range.");return;
+	}
+#endif
+	lastItemY = last_item_y;
+}
+
+inline const signed int UI_Scrollbar::getFirstItemY() const 
+{
+#ifdef _SCC_DEBUG
+	if(firstItemY > 90000)
+	{
+		toLog("DEBUG: (UI_Scrollbar::getFirstItemY): Value firstItemY out of range.");return(0);
+	}
+#endif
+	return(firstItemY);
+}
+
+inline const signed int UI_Scrollbar::getLastItemY() const 
+{
+#ifdef _SCC_DEBUG
+	if(lastItemY > 90000)
+	{
+		toLog("DEBUG: (UI_Scrollbar::getLastItemY): Value lastItemY out of range.");return(0);
+	}
+#endif
+	return(lastItemY);
+}
 
 #endif // _UI_SCROLLBAR_HPP
 

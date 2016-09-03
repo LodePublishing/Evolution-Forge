@@ -21,11 +21,11 @@ enum eInitMode
 	INITIALIZED	
 };
 
-enum ePlayerEntryMenu
+/*enum ePlayerEntryMenu
 {
         RACE_MENU,
         MAX_PLAYER_ENTRY_MENUS
-};
+};*/
 
 
 class PlayerEntry : public UI_Object
@@ -66,15 +66,15 @@ class PlayerEntry : public UI_Object
 		UI_Button* currentActionButton;
 		UI_StaticText* playerText;
 		UI_Radio* menuRadio;
+		UI_Button* raceMenuButton;
 		RaceMenu* raceMenu;
+		UI_Button* removePlayerButton;
 //		UI_StaticText* goalsFulfilledText;
 		UI_StaticText* scoreText;
 		UI_Button* addPlayerButton;
-		UI_Button* removePlayerButton;
 		bool optimizing;
 		unsigned int number;
 
-		UI_Button* menuButton[MAX_PLAYER_ENTRY_MENUS];
 		signed int assignRace;
 
 };

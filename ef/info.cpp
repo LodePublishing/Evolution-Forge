@@ -1,5 +1,4 @@
 #include "info.hpp"
-
 #include <sstream>
 
 InfoWindow& InfoWindow::operator=(const InfoWindow& object)

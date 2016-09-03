@@ -54,6 +54,7 @@ class SettingsWindow:public UI_Window
 
 		UI_CheckButton* autoSaveRuns;
 		UI_CheckButton* alwaysBuildWorker;
+		UI_CheckButton* onlySwapOrders;
 		UI_CheckButton* restrictSC;
 		UI_CheckButton* facilityMode;
 //		UI_CheckButton* preprocessBuildorder;

@@ -30,7 +30,7 @@ class DATABASE
 		void saveGoal(const std::string& name, GOAL_ENTRY* goalentry);
 		const unsigned int getGoalCount(const eRace race) const;
 		const GOAL_ENTRY* getGoal(const eRace race, const unsigned int goal_number) const;
-
+		void addDefaultGoal(const eRace race);
 
 // ----- STARTCONDITION -----
 		void loadStartConditionFile(const std::string& startConditionFile);
@@ -38,7 +38,7 @@ class DATABASE
 		const START_CONDITION* getStartCondition(const eRace race, const unsigned int start_condition_number) const;
 
 // ----- BUILD ORDERS -----		
-		void saveBuildOrder(const std::string& name, const ANABUILDORDER* anarace) const;
+//		void saveBuildOrder(const std::string& name, const ANABUILDORDER* anarace) const;
 		
 // ----- HARVEST DATA -----
 		void loadHarvestFile(const std::string& harvestFile);

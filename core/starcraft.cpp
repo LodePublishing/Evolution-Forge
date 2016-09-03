@@ -1,9 +1,9 @@
 //TODO: Problem: auf goals muessen sowohl ueber jeweiligen Ort (also gGoal[MAX_LOCATIONS][MAX_GOALS]), als auch einzelne Goals, wenn z.B. nach 5 und 10 Minuten 3 und 5 Marines an einem Ort sein sollen...
 
-#include "defs.hpp"
+#include "starcraft.hpp"
 #include <string>
 
-const std::string CORE_VERSION="Beta 1.63b";
+const std::string CORE_VERSION="Beta 1.64";
 
 /*const unsigned int MAX_RACES = 3;
 const unsigned int UNIT_TYPE_COUNT = 105;
@@ -40,14 +40,7 @@ const unsigned int MAX_TOTAL_UNITS = 600; // 600 because larva max is 600... in 
 const unsigned int MAX_GENERATIONS = 10000;
 const unsigned int MIN_GENERATIONS = 100;
 
-const unsigned int MAX_BREED_FACTOR = 40;
-const unsigned int MIN_BREED_FACTOR = 0;
 
-const unsigned int MAX_MODE = 2;
-const unsigned int MIN_MODE = 0;
-
-const unsigned int MAX_CROSSING_OVER = 40;
-const unsigned int MIN_CROSSING_OVER = 0;
 
 //const unsigned int MAX_TIME = 3600;
 const unsigned int MIN_TIME = 300;
@@ -55,11 +48,7 @@ const unsigned int MIN_TIME = 300;
 const unsigned int MAX_TIMEOUT = 266;
 const unsigned int MIN_TIMEOUT = 40;
 
-const unsigned int MAX_MUTATION_FACTOR = 400;
-const unsigned int MIN_MUTATION_FACTOR = 1;
 
-const unsigned int MIN_NOISE = 0;
-const unsigned int MAX_NOISE = 100;
 
 //const unsigned int MAX_LENGTH = 96;
 const unsigned int MIN_LENGTH = 32;

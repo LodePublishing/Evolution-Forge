@@ -18,9 +18,9 @@ class UI_Radio : public UI_Group
 		void forcePress(const unsigned int button_id);
 
 		void leftButtonPressed(UI_Button* button);
-		void leftButtonReleased(UI_Button* button); // allow release?		
+		void leftButtonReleased(/*UI_Button* button*/); // allow release?		
 		void rightButtonPressed(UI_Button* button);
-		void rightButtonReleased(UI_Button* button); // allow release?		
+		void rightButtonReleased(/*UI_Button* button*/); // allow release?		
 
 		void process();
 		void draw(DC* dc) const;
@@ -43,8 +43,8 @@ inline void UI_Radio::rightButtonPressed(UI_Button* button) {
 	leftButtonPressed(button);
 }
 
-inline void UI_Radio::rightButtonReleased(UI_Button* button) { // allow release?
-	leftButtonReleased(button);
+inline void UI_Radio::rightButtonReleased(/*UI_Button* button*/) { // allow release?
+	leftButtonReleased(/*button*/);
 }
 
 inline const bool UI_Radio::buttonHasChanged() const {

@@ -30,28 +30,40 @@ UI_Group& UI_Group::operator=(const UI_Group& object)
 void UI_Group::reloadStrings() {
 	UI_Object::reloadStrings();
 }
-
+#include <sstream>
 void UI_Group::calculateBoxSize(const bool horizontal)
 {
 	UI_Object* tmp = getChildren();
 	if(!tmp)
 		return;
-	// TODO problem: Titel ist Teil von UI_Group!
-	unsigned int maxWidth = 0;
 	number = 0;
+	unsigned int maxWidth = 0;
+	unsigned int maxHeight = 0;
 	do
 	{
 		if((maxWidth < tmp->getWidth())&&(tmp!=title))
+		{
 			maxWidth = tmp->getWidth();
+			number++;
+			if(maxHeight < tmp->getHeight())
+				maxHeight = tmp->getHeight();
+		} else 
+		if((maxHeight < tmp->getHeight())&&(tmp!=title))
+		{
+			maxHeight = tmp->getHeight();
+			number++;
+		} else if(tmp!=title)
+			number++;
 		tmp = tmp->getNextBrother();
-		number++;
 	} while(tmp!=getChildren());
-	if(number==2)
-		number++;
+	Size s;
 	if(horizontal)
-		adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, Size((maxWidth + 5) * (number-1), getChildren()->getHeight() + 13));
+		s = Size((maxWidth + 5) * number, maxHeight+13);
 	else
-		adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, Size(maxWidth + 5, getChildren()->getPrevBrother()->getAbsoluteLowerBound() - getChildren()->getAbsoluteUpperBound()));
+		s =  Size(maxWidth + 5, getChildren()->getPrevBrother()->getAbsoluteLowerBound() - getChildren()->getAbsoluteUpperBound());
+
+	adjustRelativeRect(Rect(getRelativePosition(), s));
+//	adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, Size(maxWidth + 5, getChildren()->getPrevBrother()->getAbsoluteLowerBound() - getChildren()->getAbsoluteUpperBound()));
 }
 
 void UI_Group::draw(DC* dc) const
@@ -66,7 +78,7 @@ void UI_Group::draw(DC* dc) const
 		{
 			title->setColor(BRIGHT_TEXT_COLOR);
 			dc->SetBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-			dc->DrawEdgedRoundedRectangle(getAbsolutePosition() - Size(6, 6), getSize(), 4);
+			dc->DrawEdgedRoundedRectangle(getAbsolutePosition() - Size(4, 6), getSize(), 4);
 		
 			Size s = title->getTextSize();
 		  	Rect titleRect = Rect(getAbsolutePosition() - Size(5, 15), s + Size(5,2));
@@ -77,7 +89,7 @@ void UI_Group::draw(DC* dc) const
 		else
 		{
 			dc->SetBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-			dc->DrawEdgedRoundedRectangle(getAbsolutePosition() - Size(6, 6), getSize(), 4);
+			dc->DrawEdgedRoundedRectangle(getAbsolutePosition() - Size(4, 6), getSize(), 4);
 		}
 	}
 	UI_Object::draw(dc);

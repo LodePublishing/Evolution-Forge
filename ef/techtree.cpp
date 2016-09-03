@@ -8,7 +8,7 @@ TechTreeWindow::TechTreeWindow(UI_Object* techtree_parent) :
 	s2(Size(120, 25))
 {	
 	for(unsigned int i = UNIT_TYPE_COUNT;i--;)
-		node[i] = new UI_Object(this, Rect(0,0,0,0));
+		node[i] = new UI_Object(this, Rect(Point(getWidth()/2, 0),s));
 }
 
 TechTreeWindow::~TechTreeWindow()
@@ -22,18 +22,26 @@ void TechTreeWindow::assignAnarace(ANABUILDORDER* techtree_anarace)
 	anarace = techtree_anarace;
 }
 
+void TechTreeWindow::reloadOriginalSize()
+{
+	setOriginalRect(UI_Object::theme.lookUpGlobalRect(TECHTREE_WINDOW));
+	setMaxHeight(UI_Object::theme.lookUpGlobalMaxHeight(TECHTREE_WINDOW));
+	UI_Window::reloadOriginalSize();
+}
+
 void TechTreeWindow::process()
 {
 	if(!isShown())
 		return;
-	unsigned int x1 = 0;
-	unsigned int x2 = 5*s2.GetWidth();
-	unsigned int y2 = 10 * s2.GetHeight();
+	signed int x1 = 0;
+	signed int x2 = 5*s2.GetWidth();
+	signed int y2 = 10 * s2.GetHeight() + 10;
 
+	bool checked[UNIT_TYPE_COUNT];
 	tree = anarace->getGoalTree(currentGoalUnit);
 
 	for(unsigned int i = UNIT_TYPE_COUNT;i--;)
-		node[i]->Hide();
+		checked[i]=false;
 
 	x1=9999;
 	for(unsigned int k = 0; k<10; ++k)
@@ -51,6 +59,7 @@ void TechTreeWindow::process()
 
 				node[*i]->adjustRelativeRect(Rect(Point(px - (s.GetWidth())/2, k*s2.GetHeight()), s));
 				node[*i]->Show();
+				checked[*i]=true;
                                 ++x;
 			}
 			if((px > x2))// /+ (s.GetWidth())/2)>x2)
@@ -58,13 +67,20 @@ void TechTreeWindow::process()
 			if(foundOne)
 				y2 = k*s2.GetHeight()+3+s.GetHeight();
 		}
+	for(unsigned int i = UNIT_TYPE_COUNT;i--;)
+		if(!checked[i])
+		{
+			node[i]->setPosition(Point(getWidth()/2, 0));
+			node[i]->Hide();
+		}
+	UI_Window::process();
 }
 
 void TechTreeWindow::draw(DC* dc) const
 {
 	if(!isShown())
 		return;
-	UI_Window::draw(dc);
+	UI_Object::draw(dc);
 
 
 // TODO umformen

@@ -64,12 +64,12 @@ While you can get the same information by watching replays, reading strategy art
 
 
 //	DESCRIPTION_MAIN_CHAPTER = 200
-"@2. Detailed Description@0@##\
-@2.1: The timer window@210@#\
-@2.2: The goal window@220@#\
-@2.3: The force window@230@#\
-@2.4: The build order diagram window@240@#\
-@2.5: The build order graph window@250@#\
+"@2. Detailed Description@0@###\
+@2.1: The timer window@210@##\
+@2.2: The goal window@220@##\
+@2.3: The force window@230@##\
+@2.4: The build order diagram window@240@##\
+@2.5: The build order graph window@250@##\
 @2.6: The build order window@260@#",
 
 //	DESCRIPTION_SCORE_WINDOW_CHAPTER = 210
@@ -98,10 +98,10 @@ TEXT",
 
 // TODO
 //	RESULTS_MAIN_CHAPTER = 300
-"@3. How to use the results@0@##\
-@3.1: About time and numbers@310@#\
-@3.2: HTML output@320@#\
-@3.3: Using the database@330@#\
+"@3. How to use the results@0@###\
+@3.1: About time and numbers@310@##\
+@3.2: HTML output@320@##\
+@3.3: Using the database@330@##\
 @3.4: Results during the run@340@#",
 
 //	RESULTS_TIME_AND_NUMBERS_CHAPTER = 310
@@ -122,11 +122,11 @@ TEXT",
 
 	
 //	MECHANICS_MAIN_CHAPTER = 400
-"@4. Mechanics of the program@0@##\
-@4.1: How the build order is processed@410@#\
-@4.2: How multiplayer works@420@#\
-@4.3: How to finetune it additional@430@#\
-@4.4: How the algorithm works@440@#",
+"@4. Mechanics of the program@0@###\
+@4.1: How the build order is processed@410@##\
+@4.2: How multiplayer works@420@##\
+@4.3: How to finetune it additional@430@##\
+@4.4: How the algorithm works@440@##",
 
 
 //	MECHANICS_ORDER_CHAPTER = 410
@@ -148,10 +148,10 @@ TEXT",
 
 
 //	INTERACTIVE_MAIN_CHAPTER = 500
-"@5. Interactive mode@0@##\
-@5.1: Editing the build order@510@#\
-@5.2: Playing against the computer@520@#\
-@5.3: Letting it play against itself@530@#\
+"@5. Interactive mode@0@###\
+@5.1: Editing the build order@510@##\
+@5.2: Playing against the computer@520@##\
+@5.3: Letting it play against itself@530@##\
 @5.4: What to learn from the program@540@#",
 	
 //	INTERACTIVE_EDITING_CHAPTER = 510
@@ -173,11 +173,11 @@ TEXT",
 
 
 //	CORE_MAIN_CHAPTER = 600
-"@6. The core of the program@0@##\
-@6.1: The algorithm of the core@610@#\
-@6.2: Buildorder TODO@620@#\
-@6.3: Scalability@630@#\
-@6.4: Comparison?@640@#\
+"@6. The core of the program@0@###\
+@6.1: The algorithm of the core@610@##\
+@6.2: Buildorder TODO@620@##\
+@6.3: Scalability@630@##\
+@6.4: Comparison?@640@##\
 @6.5: Problems with the algorithm@650@#",
 
 
@@ -203,8 +203,8 @@ TEXT",
 
 
 //	COMMUNICATION_MAIN_CHAPTER = 700
-"@7. Communication@0@##\
-@7.1: ClawSoftware.de@710@#\
+"@7. Communication@0@###\
+@7.1: ClawSoftware.de@710@##\
 @7.3: About myself@730@#",
 
 //	COMMUNICATION_CLAWSOFTWARE_CHAPTER = 710
@@ -216,11 +216,11 @@ TEXT",
 TEXT",
 
 //	DEVELOPMENT_MAIN_CHAPTER = 800
-"@8. Development@0@##\
-@8.1: History@810@#\
-@8.2: Things will never be implemented@820@#\
-@8.3: Things that will come later@830@#\
-@8.4: Current developments@840@#\
+"@8. Development@0@###\
+@8.1: History@810@##\
+@8.2: Things will never be implemented@820@##\
+@8.3: Things that will come later@830@##\
+@8.4: Current developments@840@##\
 @8.5: Future plans with Evolution Forge@850@#",
 
 //	DEVELOPMENT_HISTORY_CHAPTER = 810
@@ -245,9 +245,9 @@ TEXT",
 
 
 //	PHILOSOHPY_MAIN_CHAPTER = 900
-"@9. Philosophy@0@##\
-@9.1: Evolution@910@#\
-@9.2: God TODO@920@#\
+"@9. Philosophy@0@###\
+@9.1: Evolution@910@##\
+@9.2: God TODO@920@##\
 @9.3: Reality check@930@#",
 
 //	PHILOSOPHY_EVOLUTION_CHAPTER = 910
@@ -324,7 +324,7 @@ const std::string getChapterString(const eHelpChapter chapter)
 HelpWindow::HelpWindow(UI_Window* parent_window) :
 	UI_Window(parent_window, HELP_WINDOW_TITLE_STRING, theme.lookUpGlobalRect(HELP_WINDOW), theme.lookUpGlobalMaxHeight(HELP_WINDOW), NOT_SCROLLED),
 	helpChapter(INDEX_CHAPTER),
-	text(new UI_LongText(this, Rect(Point(10, 30), Size(400,400)), Size(0, 0), getChapterString(helpChapter), BRIGHT_TEXT_COLOR, FORCE_TEXT_COLOR, LARGE_FONT, TEXT_BUTTON)),
+	text(new UI_LongText(this, Rect(Point(20, 30), Size(getSize()-Size(80, 60))), Size(0, 0), getChapterString(helpChapter), BRIGHT_TEXT_COLOR, FORCE_TEXT_COLOR, LARGE_FONT, TEXT_BUTTON)),
 	indexButton(new UI_Button(this, Rect(0, 12, 0, 0), Size(10, 0), HELP_WINDOW_INDEX_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_BOLD_FONT, AUTO_SIZE)),
 	backButton(new UI_Button(this, Rect(0, 12, 0, 0), Size(10, 0), HELP_WINDOW_BACK_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_BOLD_FONT, AUTO_SIZE)),
 	lastChapter()
@@ -341,6 +341,9 @@ HelpWindow::~HelpWindow()
 
 void HelpWindow::reloadOriginalSize()
 {
+	setOriginalRect(UI_Object::theme.lookUpGlobalRect(HELP_WINDOW));
+	setMaxHeight(UI_Object::theme.lookUpGlobalMaxHeight(HELP_WINDOW));
+	text->setOriginalSize(Size(getSize()-Size(80, 60)));
 	UI_Window::reloadOriginalSize();
 }
 

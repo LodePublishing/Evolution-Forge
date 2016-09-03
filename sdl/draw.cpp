@@ -164,8 +164,8 @@ void DC::Draw_Line_8bit(signed int x1, signed int y1, signed int x2, signed int 
 	}
 
 	Uint8 col = (Uint8)(*pen.GetColor());
-	register unsigned int x = 0;
-	register unsigned int y = 0;
+	register signed int x = 0;
+	register signed int y = 0;
 	
 	Lock();
 	for (; x < dx; ++x, pixel += pixx) {
@@ -195,8 +195,8 @@ void DC::Draw_Line_16bit(signed int x1, signed int y1, signed int x2, signed int
 	}
 	
 	Uint16 col = (Uint16)(*pen.GetColor());
-	register unsigned int x = 0;
-	register unsigned int y = 0;
+	register signed int x = 0;
+	register signed int y = 0;
 	
 	Lock();
 	for (; x < dx; ++x, pixel += pixx) {
@@ -229,8 +229,8 @@ void DC::Draw_Line_24bit(signed int x1, signed int y1, signed int x2, signed int
 	Uint8 colorbyte0 = (Uint8) (col & 0xff);
 	Uint8 colorbyte1 = (Uint8) ((col >> 8) & 0xff);
 	Uint8 colorbyte2 = (Uint8) ((col >> 16) & 0xff);
-	register unsigned int x = 0;
-	register unsigned int y = 0;
+	register signed int x = 0;
+	register signed int y = 0;
 
 	Lock();
 	for (; x < dx; ++x, p += pixx) {
@@ -262,8 +262,8 @@ void DC::Draw_Line_32bit(signed int x1, signed int y1, signed int x2, signed int
 	}
 
 	Uint32 col = (Uint32)(*pen.GetColor());
-	register unsigned int x = 0;
-	register unsigned int y = 0;
+	register signed int x = 0;
+	register signed int y = 0;
 
 	Lock();
 	for (; x < dx; ++x, pixel += pixx) {

@@ -180,11 +180,18 @@ void Player::draw(DC* dc) const
 {
 	if(!isShown())
 		return;
+	switch(anarace->getRace())
+	{
+		case TERRA:UI_Object::theme.setColorTheme(DARK_BLUE_THEME);break;
+		case PROTOSS:UI_Object::theme.setColorTheme(YELLOW_THEME);break;
+		case ZERG:UI_Object::theme.setColorTheme(DARK_RED_THEME);break;
+		default:break;
+	}
+
 	// TODO
 	UI_Window::draw(dc);
 	if(efConfiguration.isDnaSpiral())
 		drawGeneString(dc);
-//	forceWindow->drawTechTree(dc);
 }
 
 void Player::process()
@@ -248,7 +255,6 @@ void Player::reloadOriginalSize()
 	boDiagramWindow->setOriginalRect(UI_Object::theme.lookUpPlayerRect(BUILD_ORDER_DIAGRAM_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
 	boDiagramWindow->setMaxHeight(UI_Object::theme.lookUpPlayerMaxHeight(BUILD_ORDER_DIAGRAM_WINDOW, gameNumber, gameMax, playerNumber, playerMax));
 
-
 	UI_Window::reloadOriginalSize();
 }
 
@@ -257,6 +263,8 @@ void Player::resetData()
 	geneAnimation=0;
 	boWindow->resetData();
 	forceWindow->resetData();
+	boGraphWindow->resetData();
+	boDiagramWindow->resetData();
 }
 
 void Player::CheckOrders()

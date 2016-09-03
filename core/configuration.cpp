@@ -1,5 +1,4 @@
 #include "configuration.hpp"
-#include "defs.hpp"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -17,6 +16,7 @@ CoreConfiguration::CoreConfiguration():
 	preprocessBuildOrder(false),
 	allowGoalAdaption(true),
 	alwaysBuildWorker(false),
+	onlySwapOrders(false),
 	configurationFile("settings/core.cfg")
 { }
 
@@ -36,13 +36,9 @@ void CoreConfiguration::initDefaults()
 	setNoise(0);
 	setPreprocessBuildOrder(false);
 	setAllowGoalAdaption(true);
-	setAlwaysBuildWorker(true);
+	setAlwaysBuildWorker(false);
+	setOnlySwapOrders(false);
 	configurationFile = "settings/core.cfg";
-}
-
-void CoreConfiguration::setConfigurationFile(const std::string& configuration_file)
-{
-	configurationFile = configuration_file;
 }
 
 void CoreConfiguration::saveToFile() const
@@ -75,6 +71,8 @@ void CoreConfiguration::saveToFile() const
 	pFile << "# taken for reproduction and the worst two are replaced by their children" << std::endl;
 	pFile << "" << std::endl;                                                       
 	pFile << "    \"Always Build Worker\" = \"" << (int)isAlwaysBuildWorker() << "\"" << std::endl;
+	pFile << "" << std::endl;                                                       
+	pFile << "    \"Only Swap Orders\" = \"" << (int)isOnlySwapOrders() << "\"" << std::endl;
 	pFile << "@END" << std::endl;
 }
 
@@ -149,6 +147,10 @@ void CoreConfiguration::loadConfigurationFile()
 				i->second.pop_front();
 			   	setAlwaysBuildWorker(atoi(i->second.front().c_str()));
 			}
+			if((i=block.find("Only Swap Orders"))!=block.end()){
+				i->second.pop_front();
+			   	setOnlySwapOrders(atoi(i->second.front().c_str()));
+			}
 
 		}
 	}// END while
@@ -156,4 +158,16 @@ void CoreConfiguration::loadConfigurationFile()
 
 	
 CoreConfiguration coreConfiguration;
+
+const unsigned int MAX_MUTATION_FACTOR = 400;
+const unsigned int MIN_MUTATION_FACTOR = 1;
+
+const unsigned int MAX_BREED_FACTOR = 40;
+const unsigned int MIN_BREED_FACTOR = 0;
+
+const unsigned int MIN_NOISE = 0;
+const unsigned int MAX_NOISE = 100;
+
+const unsigned int MAX_CROSSING_OVER = 40;
+const unsigned int MIN_CROSSING_OVER = 0;
 

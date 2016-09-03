@@ -51,7 +51,7 @@ class PREBUILDORDER
 		void adjustAvailibility(const unsigned int location_number, const unsigned int fac, const UNIT_STATISTICS* stat);
 		void adjustLocationUnitsAfterCompletion(const unsigned int location_number, const eFacilityType facilityType, const unsigned int facility, const unsigned int facility2, const unsigned int count);
 		const unsigned int calculatePrimaryFitness(const bool ready);
-		void replaceCode(const unsigned int ip, const unsigned int code);
+		const bool replaceCode(const unsigned int ip, const unsigned int code);
 
 		unsigned int larvaInProduction[MAX_LOCATIONS]; // well... one of that ugly race-specific variables saves a lot of trouble...
 

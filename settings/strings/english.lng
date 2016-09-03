@@ -506,6 +506,7 @@
 		Facility mode
 		Autosave runs
 		Always build workers
+		Only swap orders
 		Preprocess build order
 		Max length
 		Number of runs
@@ -545,6 +546,7 @@
 		Shall the items in the 'add goal' menu be ordered by theme or by facility?
 		Shall the build orders be automaticly saved at the end of a run or should I ask what to do?
 		Shall the program try to always build workers?~
+		Should no additional order be inserted?~
 		Shall a randomly created or a preprocessed build order used at the beginning?
 		Maximum length of a build order
 		How often shall the program restart to get an optimal build order?

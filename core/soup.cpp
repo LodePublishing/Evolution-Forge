@@ -431,15 +431,28 @@ if(analyzedBuildOrder[k]->getUnchangedGenerations()>=coreConfiguration.getMaxGen
 
 const bool SOUP::recalculateGeneration(ANABUILDORDER* previous_analyzed_buildorder[MAX_PLAYER], const UNIT (*startForce)[MAX_INTERNAL_PLAYER][MAX_LOCATIONS]) //reset: have the goals/settings been changed?
 {
+	bool changed_bo=false;
 	for(unsigned int k = mapPlayerNum; k--;)
 	{
 		if(previous_analyzed_buildorder[k])
-			analyzedBuildOrder[k]->writeProgramBackToCode(previous_analyzed_buildorder[k]->getProgramList());
+		{
+			if(analyzedBuildOrder[k]->writeProgramBackToCode(previous_analyzed_buildorder[k]->getProgramList()))
+				changed_bo=true;
+		} else changed_bo=true;
 	}
+	if(!changed_bo)
+		return(false);
 
 	const unsigned int groupSize=MAX_PROGRAMS/mapPlayerNum;
-	for(unsigned int k=mapPlayerNum;k--;)
-		buildOrder[k*groupSize]->copyCode(*analyzedBuildOrder[k]);
+	if(coreConfiguration.isOnlySwapOrders())
+	{
+		for(unsigned int k=mapPlayerNum;k--;)
+			for(unsigned int i=k*groupSize;i<(k+1)*groupSize; ++i)
+				buildOrder[i]->copyCode(*analyzedBuildOrder[k]);
+	} else
+		for(unsigned int k=mapPlayerNum;k--;)
+			buildOrder[k*groupSize]->copyCode(*analyzedBuildOrder[k]);
+		
 	memcpy(&temporaryForce, &((*startForce)[0][0]), sizeof(temporaryForce));
 	//reset code && calculate 
 	for(unsigned int k = mapPlayerNum; k--;)

@@ -19,6 +19,7 @@ class UI_StaticText : public UI_Object
 		void setFont(const eFont st_font);
 		const std::string& getString() const;
 		void updateText(const std::string& st_text);
+		void reloadText(const std::string& st_text);
 		void reloadOriginalSize();
 
 		void addChar(const unsigned int position, const char key);
@@ -29,6 +30,7 @@ class UI_StaticText : public UI_Object
 		UI_Object* checkHighlight();
 	
 		void updateText(const eString st_text);
+		void reloadText(const eString st_text);
 		void reloadStrings();
 		
 		void draw(DC* dc) const;

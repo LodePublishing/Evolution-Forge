@@ -10,12 +10,7 @@ BoGraphWindow::BoGraphWindow(const BoGraphWindow& object) :
 	anarace(object.anarace)
 {
 	for(unsigned int i = BOGRAPH_MAX_LINES;i--;)
-	{
-		bograph[i].facility = object.bograph[i].facility;
-		bograph[i].height = object.bograph[i].height;
-		bograph[i].lines = object.bograph[i].lines;
-		bograph[i].edge = object.bograph[i].edge;
-	}
+		bograph[i] = object.bograph[i];
 }
 
 BoGraphWindow& BoGraphWindow::operator=(const BoGraphWindow& object)
@@ -24,12 +19,7 @@ BoGraphWindow& BoGraphWindow::operator=(const BoGraphWindow& object)
 	markAni = object.markAni;
 	anarace = object.anarace;
 	for(unsigned int i = BOGRAPH_MAX_LINES;i--;)
-	{
-		bograph[i].facility = object.bograph[i].facility;
-		bograph[i].height = object.bograph[i].height;
-		bograph[i].lines = object.bograph[i].lines;
-		bograph[i].edge = object.bograph[i].edge;
-	}
+		bograph[i] = object.bograph[i];
 	return(*this);
 }
 
@@ -42,19 +32,27 @@ BoGraphWindow::BoGraphWindow(UI_Object* bograph_parent, const unsigned int game_
 }
 
 BoGraphWindow::~BoGraphWindow()
+{}
+
+BOGRAPH::BOGRAPH():
+	facility(0),
+	height(0),
+	lines(0),
+	edge(Rect()),
+	boGraphList()
+{}
+
+BOGRAPH::~BOGRAPH()
 {
-	for(unsigned int j = 0; j < BOGRAPH_MAX_LINES; ++j)
-	{
-		std::list<BoGraphEntry*>::iterator i = bograph[j].boGraphList.begin();
-		while(i != bograph[j].boGraphList.end())
-		{	
-			if(UI_Button::getCurrentButton() == *i) UI_Button::resetButton();
-			delete(*i);
-			i = bograph[j].boGraphList.erase(i);
-		}
+	std::list<BoGraphEntry*>::iterator i = boGraphList.begin();
+	while(i != boGraphList.end())
+	{	
+		if(UI_Button::getCurrentButton() == *i) 
+			UI_Button::resetButton();
+		delete(*i);
+		i = boGraphList.erase(i);
 	}
 }
-
 
 void BoGraphWindow::checkForInfoWindow()
 {
@@ -109,16 +107,21 @@ void BoGraphWindow::checkForInfoWindow()
 	}*/
 //	infoWindow->assignBg(NULL);
 }
-	
+
+void BOGRAPH::resetData()
+{
+	facility = 0;
+	height = 0;
+	lines = 0;
+	edge = Rect();
+}
+
 void BoGraphWindow::resetData()
 {
 	for(unsigned int i=BOGRAPH_MAX_LINES;i--;)
 	{
-		bograph[i].facility = 0;
-		bograph[i].height = 0;
-		bograph[i].lines = 0;
-		bograph[i].edge = Rect();
-	
+		bograph[i].resetData();
+		
 /*		std::list<BoGraphEntry*>::iterator j = bograph[i].boGraphList.begin();
 		while(j != bograph[i].boGraphList.end())
 		{
@@ -218,7 +221,7 @@ void BoGraphWindow::processList()
 	std::sort(fac, fac+BOGRAPH_MAX_LINES); // Warnung?!
 // now put all together
 	unsigned int position = 0;
-	for(unsigned int i = 0;i < BOGRAPH_MAX_LINES; ++i)
+	for(unsigned int i = 0; (i < BOGRAPH_MAX_LINES)&&(position < BOGRAPH_MAX_LINES); ++i)
 	{
 		bograph[position].facility = fac[i];
 		bograph[position].lines = lines[fac[i]];
@@ -249,9 +252,9 @@ void BoGraphWindow::processList()
 					}
 					   edge = Rect(getRelativeClientRectPosition() + Point( 
 							  1+( order->getRealTime()*(getClientRectWidth()-2)) / (anarace->getRealTimer()), 
-							  FONT_SIZE+11+(i+k/MIN_HEIGHT)*(FONT_SIZE+10)+(k%MIN_HEIGHT)*(12*(bograph[i].facility == SCV?2:1))/(bograph[i].height)), Size(  
+							  FONT_SIZE+11+(i+k/MIN_HEIGHT)*(FONT_SIZE+10)+(k%MIN_HEIGHT)*(13)/(bograph[i].height)), Size(  
 							  (order->getBT()*(getClientRectWidth()-2))/(anarace->getRealTimer()), 
-							  (12*(bograph[i].facility == SCV?2:1))/(bograph[i].height)));
+							  (FONT_SIZE+7)/(bograph[i].height)));
 				break;
 			}
 		if(i == BOGRAPH_MAX_LINES)
@@ -476,30 +479,21 @@ void BoGraphWindow::draw(DC* dc) const
 {
 	if(!isShown()) 
 		return;
-
-	// now print the lines...
-	UI_Window::draw(dc);
-
 	if(!checkForNeedRedraw())
 		return;
-	if(anarace==NULL) return;
-	
-	dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
-	for(unsigned int i = 0; i<BOGRAPH_MAX_LINES; ++i)
+	if(anarace==NULL) 
+		return;
+
+	UI_Window::draw(dc);
+
+// print the legend
+	dc->SetFont(UI_Object::theme.lookUpFont(MIDDLE_FONT));
+	dc->SetTextForeground(*theme.lookUpColor(WINDOW_TEXT_COLOR));
+	for(unsigned int i=0; i<BOGRAPH_MAX_LINES; ++i)
 		if(bograph[i].facility>0)
-	//		for(unsigned int j=0;j<bograph[i].lines;++j)
-			{
-				Rect rec = Rect(bograph[i].edge.GetTopLeft() + getAbsoluteClientRectPosition() + Size(0, (FONT_SIZE+10)), Size(getClientRectWidth(), bograph[i].edge.GetHeight()));
-//				if(insideAbsoluteClientRect(rec)) // TODO
-				// TODO BUTTONS drausmachen...
-				{
-				//	if(j%2==0)
-				//		dc->SetBrush(*theme.lookUpBrush(BO_DARK_BRUSH));
-				//	else 
-					dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
-					dc->DrawRectangle(rec);
-				}
-			}
+			dc->DrawText(" "+UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+bograph[i].facility+UNIT_NULL_STRING)), getAbsoluteClientRectPosition()+Point(0, 20+bograph[i].edge.GetTop()));
+
+	dc->SetFont(UI_Object::theme.lookUpFont(SMALL_FONT));
 //	if((signed int)lastbographY > getAbsoluteClientRectUpperBound()+(signed int)(FONT_SIZE+10)) // TODO
 	{
 // and the time steps on the top
@@ -520,11 +514,30 @@ void BoGraphWindow::draw(DC* dc) const
 				std::ostringstream os;
 				os.str("");
 				os << i/2 << ":" << 3*(i%2) << "0";
-				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(5+i*((getClientRectWidth()-20)/((anarace->getRealTimer())/30)), 8));
+				dc->DrawText(os.str(), getAbsoluteClientRectPosition()+Point(5+i*((getClientRectWidth()-20)/((anarace->getRealTimer())/30)), 6));
 			}
 
 // --------------------------------- END BUILD ORDER GRAPH ------------------------------
 	}
+	
+
+// ----- TABELLE -------
+	dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
+	for(unsigned int i = 0; i<BOGRAPH_MAX_LINES; ++i)
+		if(bograph[i].facility>0)
+	//		for(unsigned int j=0;j<bograph[i].lines;++j)
+			{
+				Rect rec = Rect(bograph[i].edge.GetTopLeft() + getAbsoluteClientRectPosition() + Size(0, (FONT_SIZE+10)), Size(getClientRectWidth(), bograph[i].edge.GetHeight()));
+//				if(insideAbsoluteClientRect(rec)) // TODO
+				// TODO BUTTONS drausmachen...
+				{
+				//	if(j%2==0)
+				//		dc->SetBrush(*theme.lookUpBrush(BO_DARK_BRUSH));
+				//	else 
+					dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+					dc->DrawRectangle(rec);
+				}
+			}
 #if 0	
 // ... and finally the orders
 	for(std::map<long, Order>::const_iterator order=orderList->begin(); order!=orderList->end(); ++order)
@@ -549,12 +562,6 @@ void BoGraphWindow::draw(DC* dc) const
 	}
 	#endif
 	
-// finally print the legend
-	dc->SetFont(UI_Object::theme.lookUpFont(MIDDLE_FONT));
-	dc->SetTextForeground(*theme.lookUpColor(WINDOW_TEXT_COLOR));
-	for(unsigned int i=0; i<BOGRAPH_MAX_LINES; ++i)
-		if(bograph[i].facility>0)
-			dc->DrawText(" "+UI_Object::theme.lookUpString((eString)(UNIT_TYPE_COUNT*anarace->getRace()+bograph[i].facility+UNIT_NULL_STRING)), getAbsoluteClientRectPosition()+Point(0, 4+(i+1)*(FONT_SIZE+10)));
 }
 
 void BoGraphWindow::assignAnarace(ANABUILDORDER* bograph_anarace) {

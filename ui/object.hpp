@@ -5,6 +5,12 @@
 #include <list>
 #include <string>
 
+#include <math.h>
+#ifndef M_PI
+	#define M_PI 3.14159265358979323846
+#endif
+// Windows kotz
+
 enum ePositionMode
 {
 	DO_NOT_ADJUST,
@@ -104,9 +110,6 @@ class UI_Object
 		
 		const bool isMouseInside() const;
 
-		
-		
-		
 		void checkForChildrenOverlap(const Rect& rect);
 		const bool checkForNeedRedraw() const;
 		void setNeedRedrawMoved(const bool need_redraw=true);
@@ -175,7 +178,6 @@ class UI_Object
 
 		void adjustPositionAndSize(const eAdjustMode adjust_mode, const Size& size = Size(0,0));
 		void setSize(const Size size);
-		bool sizeHasChanged;
 		static unsigned int max_x;
 		static unsigned int max_y;
 		void setOriginalPosition(const Point& position);
@@ -185,7 +187,12 @@ class UI_Object
 		const Rect& getOriginalRect() const;
 		const Size& getDistanceBottomRight() const;
 	
-
+		static void addToProcessArray(UI_Object* item);
+		static void addToNextProcessArray(UI_Object* item);
+		static void copyToNextProcessArray();
+		static std::list<UI_Object*> processArray;
+		static std::list<UI_Object*> nextProcessArray;
+		
 	protected:
 		UI_Object* children; // pointer to the head of the linked list of children
 	private:
@@ -198,6 +205,7 @@ class UI_Object
 		Rect originalRect;
 		Size distanceBottomRight;
 		Size oldSize;
+		bool sizeHasChanged;
 
 		void setWidth(const unsigned int width);
 		void setHeight(const unsigned int height);

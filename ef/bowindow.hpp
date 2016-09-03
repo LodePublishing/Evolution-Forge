@@ -21,9 +21,9 @@ class BoWindow : public UI_Window
 		void reloadStrings();
 		void processList();
 		void process();
-		
 		void assignAnarace(ANABUILDORDER* bo_anarace);
 	private:
+		void saveBuildOrder(const std::string& name) const;
 		void drawSelectionStuff(DC* dc) const;
 		void checkForInfoWindow();
 //		void resetButtons();
@@ -51,6 +51,7 @@ class BoWindow : public UI_Window
 		bool* fixed;
 		UI_Scrollbar* scrollBar;
 		UI_CheckButton* alwaysBuildWorker;
+		UI_CheckButton* onlySwapOrders;
 };
 
 #endif // _GUI_BOWINDOW_HPP

@@ -1,7 +1,7 @@
 //TODO: Problem: auf goals muessen sowohl ueber jeweiligen Ort (also gGoal[MAX_LOCATIONS][MAX_GOALS]), als auch einzelne Goals, wenn z.B. nach 5 und 10 Minuten 3 und 5 Marines an einem Ort sein sollen...
 
-#ifndef _CORE_DEFS_HPP
-#define _CORE_DEFS_HPP
+#ifndef _CORE_STARCRAFT_HPP
+#define _CORE_STARCRAFT_HPP
 
 #include <string>
 
@@ -27,15 +27,8 @@
 //extern const unsigned int MAX_PLAYER;
 //extern const unsigned int MAX_INTERNAL_PLAYER;
 
-
 #define MAX_PLAYER 4 // TODO FEHLER BEI 1
 #define MAX_INTERNAL_PLAYER 5 // inclusive neutral player!
-
-#include <math.h>
-#ifndef M_PI
-	#define M_PI 3.14159265358979323846
-#endif
-// Windows kotz
 
 //extern const unsigned int GLOBAL;
 
@@ -66,14 +59,6 @@ extern const unsigned int MAX_TOTAL_UNITS;
 extern const unsigned int MAX_GENERATIONS;
 extern const unsigned int MIN_GENERATIONS;
 
-extern const unsigned int MAX_BREED_FACTOR;
-extern const unsigned int MIN_BREED_FACTOR;
-
-extern const unsigned int MAX_MODE;
-extern const unsigned int MIN_MODE;
-
-extern const unsigned int MAX_CROSSING_OVER;
-extern const unsigned int MIN_CROSSING_OVER;
 #define MAX_TIME 3601
 //extern const unsigned int MAX_TIME;
 extern const unsigned int MIN_TIME;
@@ -84,26 +69,16 @@ extern const unsigned int MIN_TIMEOUT;
 //extern const unsigned int MAX_LENGTH;
 extern const unsigned int MIN_LENGTH;
 
-#define MAX_RUNS 10
+#define MAX_RUNS 10 // TODO
 //extern const unsigned int MAX_RUNS;
 extern const unsigned int MIN_RUNS;
 
 extern const unsigned int MAX_TFITNESS;
 extern const unsigned int MAX_PFITNESS;
 
-extern const unsigned int MIN_NOISE;
-extern const unsigned int MAX_NOISE;
-
-
-extern const unsigned int MIN_MUTATION_FACTOR;
-extern const unsigned int MAX_MUTATION_FACTOR;
-
-
 //extern const unsigned int MAX_RACES;
 
 //extern void fillInfluenceList();
-
-#define NEUTRAL_PLAYER 0
 
 enum eErrorMessages
 {
@@ -485,7 +460,7 @@ struct UNIT_STATISTICS
 extern const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT];
 extern const std::string raceString[MAX_RACES];
 
-#endif // _CORE_DEFS_HPP
+#endif // _CORE_STARCRAFT_HPP
 
 
 

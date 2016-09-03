@@ -29,17 +29,20 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const S
 	toolTipString(NULL_STRING)
 {
 	setParent(parent_object);
+	addToProcessArray(this);
 }
 
 UI_Object& UI_Object::operator=(const UI_Object& object)
 {
+	children = object.children;
+	
 	relativeRect = object.relativeRect;
 	startRect = object.startRect;
 	targetRect = object.targetRect;
+	
 	originalRect = object.originalRect;
 	distanceBottomRight = object.distanceBottomRight;
 	oldSize = object.oldSize;
-	children = object.children;
 	sizeHasChanged = true;	
 
 	positionMode = object.positionMode;
@@ -102,6 +105,7 @@ UI_Object::~UI_Object()
 
 void UI_Object::reloadOriginalSize()
 {
+	UI_Object::addToProcessArray(this);
 	UI_Object* tmp=children;  // process all children of gadget
 	if (tmp) {
 		do {
@@ -115,6 +119,7 @@ void UI_Object::reloadOriginalSize()
 #include <sstream>
 void UI_Object::adjustPositionAndSize(const eAdjustMode adjust_mode, const Size& size)
 {
+	UI_Object::addToProcessArray(this);
 	sizeHasChanged = false;
 	signed int left = originalRect.GetLeft();
 	signed int top = originalRect.GetTop();
@@ -179,7 +184,7 @@ void UI_Object::adjustPositionAndSize(const eAdjustMode adjust_mode, const Size&
 			default:break; // TODO ERROR
 		}
 		
-		resetMinXY();	
+//		resetMinXY();	
 	}
 	
 	signed int hor_center = left + ((signed int)full_width - (signed int)getWidth())/2;
@@ -209,34 +214,52 @@ void UI_Object::adjustPositionAndSize(const eAdjustMode adjust_mode, const Size&
 		case CENTER_LEFT:setPosition(left, ver_center);break;
 		case ARRANGE_TOP_LEFT:
 		{
-			setPosition(left + getParent()->getMinTopLeftX(), top);
-			getParent()->addMinTopLeftX(getWidth() + MIN_DISTANCE);
+			if(getParent())
+			{
+				setPosition(left + getParent()->getMinTopLeftX(), top);
+				getParent()->addMinTopLeftX(getWidth() + MIN_DISTANCE);
+			}
 		}break;
 		case ARRANGE_TOP_RIGHT:
 		{
-			setPosition(right - getParent()->getMinTopRightX(), top);
-			getParent()->addMinTopRightX(getWidth() + MIN_DISTANCE);
+			if(getParent())
+			{
+				setPosition(right - getParent()->getMinTopRightX(), top);
+				getParent()->addMinTopRightX(getWidth() + MIN_DISTANCE);
+			}
 		}break;
 		case ARRANGE_BOTTOM_LEFT:
 		{ 
-			setPosition(left + getParent()->getMinBottomLeftX(), bottom);
-			getParent()->addMinBottomLeftX(getWidth()+MIN_DISTANCE);
+			if(getParent())
+			{
+				setPosition(left + getParent()->getMinBottomLeftX(), bottom);
+				getParent()->addMinBottomLeftX(getWidth()+MIN_DISTANCE);
+			}
 		}break;
 		case ARRANGE_BOTTOM_RIGHT:
 		{
-			setPosition(right - getParent()->getMinBottomRightX() - 20, bottom);
-			getParent()->addMinBottomRightX(getWidth() + MIN_DISTANCE);
+			if(getParent())
+			{
+				setPosition(right - getParent()->getMinBottomRightX() - 20, bottom);
+				getParent()->addMinBottomRightX(getWidth() + MIN_DISTANCE);
+			}
 		}break;
 		case ARRANGE_LEFT:
 		if(adjust_mode!=ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED)
 		{
-			setPosition(left, top + getParent()->getMinLeftY());
-			getParent()->addMinLeftY(getHeight() + MIN_DISTANCE);
+			if(getParent())
+			{
+				setPosition(left, top + getParent()->getMinLeftY());
+				getParent()->addMinLeftY(getHeight() + MIN_DISTANCE);
+			}
 		}break;
 		case ARRANGE_RIGHT:
 		{
-			setPosition(right, top + getParent()->getMinRightY()); // TODO
-			getParent()->addMinRightY(getHeight()+MIN_DISTANCE);
+			if(getParent())
+			{
+				setPosition(right, top + getParent()->getMinRightY()); // TODO
+				getParent()->addMinRightY(getHeight()+MIN_DISTANCE);
+			}
 		}break;
 		default:
 			toLog("Wheee");
@@ -271,6 +294,7 @@ void UI_Object::adjustRelativeRect(const Rect& edge)
 		if(edge.GetSize()!=targetRect.GetSize())
 			startRect.SetSize(getSize());
  
+		UI_Object::addToProcessArray(this);
 		targetRect=edge;
 	}
 //	targetRect.width=edge.width;
@@ -338,7 +362,15 @@ void UI_Object::addChild(UI_Object* child)
 
 void UI_Object::resetMinXY()
 {
-	min_top_right_x = 0; min_bottom_right_x = 0; min_bottom_left_x = 0; min_left_y = 0; min_top_left_x = 0; min_right_y = 0;
+	UI_Object* tmp=children;  // process all children of gadget
+	if (tmp) {
+		min_top_right_x = 0; min_bottom_right_x = 0; min_bottom_left_x = 0; min_left_y = 0; min_top_left_x = 0; min_right_y = 0;
+		do {
+			tmp->resetMinXY();
+			tmp = tmp->nextBrother;
+		} while (tmp != children);
+	}
+
 }
 
 void UI_Object::process()
@@ -372,7 +404,6 @@ void UI_Object::process()
 		sizeHasChanged=false;
 	}
 	
-	resetMinXY();	
 
 	UI_Object* tmp=children;  // process all children of gadget
 	if (tmp) {
@@ -385,6 +416,7 @@ void UI_Object::process()
 	if((toolTipString!=NULL_STRING)/*&&(uiConfiguration.isToolTips())*/&&(isMouseInside()))
 		toolTipParent = this;
 	oldSize = relativeRect.GetSize();
+//	resetMinXY();	
 }
 
 void UI_Object::resetData()
@@ -480,33 +512,45 @@ void UI_Object::setRect(const Rect& rect)
 	targetRect = rect;
 	relativeRect = rect;
 	setNeedRedrawMoved();
+	UI_Object::addToProcessArray(this);
 }
 
 void UI_Object::setPosition(const Point& position)
 {
 	if(position == relativeRect.GetTopLeft())
 		return;
+#ifdef _SCC_DEBUG
+	if((position.y > 900000)||(position.x > 900000))
+	{
+		toLog("DEBUG: (UI_Object::setPosition): Value position out of range.");return;
+	}
+#endif
+	UI_Object::addToProcessArray(this);
 	startRect.SetTopLeft(position);
 	targetRect.SetTopLeft(position);
 	relativeRect.SetTopLeft(position);
 	setNeedRedrawMoved();
+	UI_Object::addToProcessArray(this);
 }
 
 void UI_Object::setHeight(const unsigned int height) 
 {
 	if(getTargetHeight() == height)
 		return;
+	UI_Object::addToProcessArray(this);
 	sizeHasChanged = true;
 	relativeRect.SetHeight(height);
 	startRect.SetHeight(height);
 	targetRect.SetHeight(height);
 	setNeedRedrawNotMoved(); // TODO wenns kleiner wird
+	UI_Object::addToProcessArray(this);
 }
 
 void UI_Object::setWidth(const unsigned int width) 
 {
 	if(relativeRect.GetWidth() == width)
 		return;
+	UI_Object::addToProcessArray(this);
 	sizeHasChanged = true;
 	relativeRect.SetWidth(width);
 	startRect.SetWidth(width);
@@ -518,6 +562,7 @@ void UI_Object::setSize(const Size size)
 {
 	if(relativeRect.GetSize() == size)
 		return;
+	UI_Object::addToProcessArray(this);
 	sizeHasChanged = true;
 	relativeRect.SetSize(size);
 	startRect.SetSize(size);
@@ -529,6 +574,7 @@ void UI_Object::setLeft(const signed int x)
 {
 	if(relativeRect.GetLeft() == x)
 		return;
+	UI_Object::addToProcessArray(this);
 	relativeRect.SetLeft(x);
 	startRect.SetLeft(x);
 	targetRect.SetLeft(x);
@@ -625,7 +671,7 @@ const bool UI_Object::checkForNeedRedraw() const
 {
 	if(needRedraw)
 	{
-		++redrawnObjects;
+//		++redrawnObjects;
 //		const_cast< UI_Object* > (this)->needRedraw=false;
 		return(true);
 	} else return(false);
@@ -634,28 +680,32 @@ const bool UI_Object::checkForNeedRedraw() const
 void UI_Object::addMinTopLeftX(signed int dx)
 {
 	if((dx + min_top_left_x > (signed int)max_x)||(dx + min_top_left_x < 0))
-		toLog("MIN_TOP_LEFT_X out of range");
+	{
+//		std::ostringstream os;os.str("");
+//		os << "MIN_TOP_LEFT_X out of range [ dx: " << dx << ", min_top_left_x: " << min_top_left_x << ", max_x: " << max_x << " ]  { " << getAbsolutePosition().x << ":" << getAbsolutePosition().y << "  " << getWidth() << "x" << getHeight() << " }";
+//		toLog(os.str());
+	}
 	min_top_left_x += dx;		
 }
 
 void UI_Object::addMinLeftY(signed int dy)
 {
-	if((dy + min_left_y > (signed int)max_y)||(dy + min_left_y < 0))
-		toLog("MIN_LEFT_Y out of range");
+	if((dy + min_left_y > (signed int)max_y)||(dy + min_left_y < 0));
+//		toLog("MIN_LEFT_Y out of range");
 	min_left_y += dy;
 }
 
 void UI_Object::addMinRightY(signed int dy)
 {
-	if((dy + min_right_y > (signed int)max_y)||(dy + min_right_y < 0))
-		toLog("MIN_RIGHT_Y out of range");
+	if((dy + min_right_y > (signed int)max_y)||(dy + min_right_y < 0));
+//		toLog("MIN_RIGHT_Y out of range");
 	min_right_y += dy;
 }
 
 void UI_Object::addMinBottomLeftX(signed int dx)
 {
-	if((dx + min_bottom_left_x > (signed int)max_x)||(dx + min_bottom_left_x < 0))
-		toLog("MIN_BOTTOM_LEFT_X out of range");
+	if((dx + min_bottom_left_x > (signed int)max_x)||(dx + min_bottom_left_x < 0));
+//		toLog("MIN_BOTTOM_LEFT_X out of range");
 	min_bottom_left_x += dx;		
 }
 
@@ -663,16 +713,17 @@ void UI_Object::addMinTopRightX(signed int dx)
 {
 	if((dx + min_top_right_x > (signed int)max_x)||(dx + min_top_right_x < 0))
 	{
-		toLog("BUTTON MIN_TOP_RIGHT_X out of range");
-		min_top_right_x = min_top_right_x;
+//		std::ostringstream os;os.str("");
+//		os << "MIN_TOP_RIGHT_X out of range [ dx: " << dx << ", min_top_right_x: " << min_top_right_x << ", max_x: " << max_x << " ]  { " << getAbsolutePosition().x << ":" << getAbsolutePosition().y << "  " << getWidth() << "x" << getHeight() << " }";
+//		toLog(os.str());
 	}
 	min_top_right_x += dx;		
 }
 
 void UI_Object::addMinBottomRightX(signed int dx)
 {
-	if((dx + min_bottom_right_x > (signed int)max_x)||(dx + min_bottom_right_x < 0))
-		toLog("BUTTON MIN_BOTTOM_RIGHT_X out of range");
+	if((dx + min_bottom_right_x > (signed int)max_x)||(dx + min_bottom_right_x < 0));
+//		toLog("BUTTON MIN_BOTTOM_RIGHT_X out of range");
 	min_bottom_right_x += dx;		
 }
 
@@ -684,7 +735,28 @@ void UI_Object::setResolution(const Size resolution)
 }
 
 
+void UI_Object::addToProcessArray(UI_Object* item)
+{
+	for(std::list<UI_Object*>::const_iterator i = processArray.begin(); i != processArray.end(); ++i)
+		if(*i == item)
+			return;
+	processArray.push_back(item);
+}
 
+void UI_Object::addToNextProcessArray(UI_Object* item)
+{
+	for(std::list<UI_Object*>::const_iterator i = nextProcessArray.begin(); i != nextProcessArray.end(); ++i)
+		if(*i == item)
+			return;
+	nextProcessArray.push_back(item);
+}
+	
+void UI_Object::copyToNextProcessArray()
+{
+	processArray.clear();
+	processArray = nextProcessArray;
+	nextProcessArray.clear();
+}
 
 UI_Theme UI_Object::theme;
 UI_ToolTip* UI_Object::tooltip(NULL);
@@ -700,3 +772,6 @@ UI_Window* UI_Object::currentWindow = NULL;
 bool UI_Object::windowSelected = false;
 unsigned int UI_Object::redrawnObjects(0);
 std::list<std::string> UI_Object::msgList;
+
+std::list<UI_Object*> UI_Object::processArray;
+std::list<UI_Object*> UI_Object::nextProcessArray;

@@ -17,6 +17,7 @@ class MainWindow : public UI_Window
 		
 		const unsigned int getGameTabCount() const;
 
+		void reloadStrings();
 		void reloadOriginalSize();
 	private:
 		const Size helper(DC* dc, Point point, const unsigned int dx, const int i, const std::string& str) const;
@@ -25,6 +26,7 @@ class MainWindow : public UI_Window
 		bool gizmo;
 		unsigned int gameTabCount;
 		unsigned int gameNumber;
+		unsigned int gameNumbers[MAX_TABS];
 };
 
 inline void MainWindow::setGizmo(const bool do_gizmo)

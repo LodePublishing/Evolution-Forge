@@ -125,7 +125,7 @@ void UI_Radio::leftButtonPressed(UI_Button* button) // Unpress all except one
 			buttonId[i]->forceUnpress();
 }
 
-void UI_Radio::leftButtonReleased(UI_Button* button) // allow release? TODO
+void UI_Radio::leftButtonReleased(/*UI_Button* button*/) // allow release? TODO
 {
 	setButtonHasChanged();
 	// TODO?

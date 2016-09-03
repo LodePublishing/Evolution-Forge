@@ -1,7 +1,7 @@
 #ifndef _CORE_STATISTICS_HPP
 #define _CORE_STATISTICS_HPP
 
-#include "defs.hpp"
+#include "starcraft.hpp"
 #include "../stl/misc.hpp"
 
 class STATISTICS
@@ -38,7 +38,7 @@ class STATISTICS
 inline void STATISTICS::setNeedSupply(const unsigned int need_supply)
 {
 #ifdef _SCC_DEBUG
-	if(need_supply > MAX_SUPPLY) {
+	if(need_supply > 10*MAX_SUPPLY) {
 		toLog("DEBUG: (STATISTICS::setNeedSupply): Value need_supply out of range.");return;
 	}
 #endif
@@ -48,7 +48,7 @@ inline void STATISTICS::setNeedSupply(const unsigned int need_supply)
 inline void STATISTICS::setHaveSupply(const unsigned int have_supply)
 {
 #ifdef _SCC_DEBUG
-	if(have_supply > MAX_SUPPLY) {
+	if(have_supply > 10*MAX_SUPPLY) {
 		toLog("DEBUG: (STATISTICS::setHaveSupply): Value have_supply out of range.");return;
 	}
 #endif
@@ -89,7 +89,7 @@ inline void STATISTICS::setFitness(const unsigned int stat_fitness)
 inline const unsigned int STATISTICS::getNeedSupply() const
 {
 #ifdef _SCC_DEBUG
-	if(needSupply > MAX_SUPPLY) {
+	if(needSupply > 10*MAX_SUPPLY) {
 		toLog("DEBUG: (STATISTICS::getNeedSupply): Variable needSupply not initialized.");	return(0);
 	}
 #endif
@@ -100,7 +100,7 @@ inline const unsigned int STATISTICS::getNeedSupply() const
 inline const unsigned int STATISTICS::getHaveSupply() const
 {
 #ifdef _SCC_DEBUG
-	if(haveSupply > MAX_SUPPLY) {
+	if(haveSupply > 10*MAX_SUPPLY) {
 		toLog("DEBUG: (STATISTICS::getHaveSupply): Variable haveSupply not initialized.");return(0);
 	}
 #endif

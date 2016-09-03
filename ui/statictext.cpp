@@ -46,7 +46,11 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const eString st_text, const 
 	eText(st_text),
 	pressed(false),
 	highlight(false)
-{}
+{
+//	updateText(eText);
+//	if(getParent()) 
+//		adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, getTextSize()); TODO
+}
 
 UI_StaticText::UI_StaticText(UI_Object* st_parent, const std::string& st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode, const eAutoSize auto_size) :
 	UI_Object(st_parent, st_pos, distance_bottom_right, position_mode, auto_size),
@@ -57,7 +61,11 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const std::string& st_text, c
 	eText(NULL_STRING),
 	pressed(false),
 	highlight(false)
-{}
+{
+//	updateText(text);
+//	if(getParent()) 
+//		adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, getTextSize()); TODO, fuer UI_Group groessen bei Buttons... AUTO_HEIGHT muss irgendwo berechnet werden...
+}
 
 UI_StaticText::~UI_StaticText()
 {}
@@ -104,7 +112,7 @@ void UI_StaticText::addChar(const unsigned int pos, const char key)
 		os << key << text;
 	else
 		os << text.substr(0, pos) << key << text.substr(pos);
-	textWasChanged=true;
+	updateText(os.str());
 }
 
 void UI_StaticText::removeCharBackspace(const unsigned int pos)
@@ -117,7 +125,7 @@ void UI_StaticText::removeCharBackspace(const unsigned int pos)
 		os << text.substr(0, text.size()-1);
 	else
 		os << text.substr(0, pos-1) << text.substr(pos);
-	textWasChanged=true;
+	updateText(os.str());
 }
 
 void UI_StaticText::removeCharDelete(const unsigned int pos)
@@ -133,7 +141,7 @@ void UI_StaticText::removeCharDelete(const unsigned int pos)
 		os << text.substr(0, text.size()-1);
 	else
 		os << text.substr(0, pos) << text.substr(pos+1);
-	textWasChanged=true;
+	updateText(os.str());
 }
 
 void UI_StaticText::process()
@@ -142,9 +150,8 @@ void UI_StaticText::process()
 	if(textWasChanged)
 	{
 		if(eText != NULL_STRING)
-			updateText(theme.lookUpString(eText));
-		else updateText(text);
-	
+			reloadText(theme.lookUpString(eText));
+		else reloadText(text);
 		textWasChanged=false;
 	}
 }
@@ -157,36 +164,58 @@ void UI_StaticText::reloadOriginalSize()
 
 void UI_StaticText::updateText(const std::string& st_text)
 {
-//	if(text == st_text)
-//		return; OMFG
+//	if(st_text==text)
+//		return;
 	setNeedRedrawMoved();
+	textWasChanged=true;
+	Size old_size = getTextSize();
 	text = st_text;
 	setSize(getTextSize());
-	if(getParent()!=NULL)
+	if((getParent()!=NULL)&&(old_size!=getTextSize()))
 	{
-		getParent()->resetMinXY();
+//		getParent()->resetMinXY();
 		getParent()->adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, getSize());
 	}
-
-	textWasChanged=true;
 }
 
 void UI_StaticText::updateText(const eString st_text)
 {
-//	if(st_text==eText)
-//		return; //?
 	eText = st_text;
+//	if(eText!=st_text)
+		textWasChanged=true;
 	text = theme.lookUpString(st_text);
 	updateText(theme.lookUpString(st_text));
-	textWasChanged=true;
 }
+
+void UI_StaticText::reloadText(const std::string& st_text)
+{
+	setNeedRedrawMoved();
+	textWasChanged=true;
+	Size old_size = getTextSize();
+	text = st_text;
+	setSize(getTextSize());
+	if((getParent()!=NULL))
+	{
+//		getParent()->resetMinXY();
+		getParent()->adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, getSize());
+	}
+}
+
+void UI_StaticText::reloadText(const eString st_text)
+{
+	eText = st_text;
+	textWasChanged=true;
+	text = theme.lookUpString(st_text);
+	reloadText(theme.lookUpString(st_text));
+}
+
 
 void UI_StaticText::reloadStrings()
 {
 	if(eText!=NULL_STRING)
-		updateText(theme.lookUpString(eText));
+		reloadText(theme.lookUpString(eText));
 	else
-		updateText(text);
+		reloadText(text);
 }
 
 

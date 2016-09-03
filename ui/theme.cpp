@@ -467,6 +467,8 @@ eCommand parse_commands(const std::string& item, const bool horizontal_mirror)
 		if(item=="dock left inside of") return(DOCK_RIGHT_INSIDE_OF_COMMAND);else
 		if(item=="dock right inside of") return(DOCK_LEFT_INSIDE_OF_COMMAND);else
 		if(item=="dock top inside of") return(DOCK_TOP_INSIDE_OF_COMMAND);else
+		if(item=="dock top left inside of") return(DOCK_TOP_RIGHT_INSIDE_OF_COMMAND);else
+		if(item=="dock top right inside of") return(DOCK_TOP_LEFT_INSIDE_OF_COMMAND);else
 		if(item=="dock bottom inside of") return(DOCK_BOTTOM_INSIDE_OF_COMMAND);else
 		return(NO_COMMAND);
 	} else
@@ -484,6 +486,8 @@ eCommand parse_commands(const std::string& item, const bool horizontal_mirror)
 		if(item=="dock left inside of") return(DOCK_LEFT_INSIDE_OF_COMMAND);else
 		if(item=="dock right inside of") return(DOCK_RIGHT_INSIDE_OF_COMMAND);else
 		if(item=="dock top inside of") return(DOCK_TOP_INSIDE_OF_COMMAND);else
+		if(item=="dock top left inside of") return(DOCK_TOP_LEFT_INSIDE_OF_COMMAND);else
+		if(item=="dock top right inside of") return(DOCK_TOP_RIGHT_INSIDE_OF_COMMAND);else
 		if(item=="dock bottom inside of") return(DOCK_BOTTOM_INSIDE_OF_COMMAND);else
 		return(NO_COMMAND);
 	}
@@ -548,11 +552,13 @@ Rect* parse_window(const std::string* parameter, Rect** windows, unsigned int& m
 				case DOCK_WITH_UPPER_BORDER_OF_COMMAND:rect->SetTop(25 + windows[win]->GetTop() - rect->GetHeight());break;
 
 				case DOCK_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(15 + windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, 15 + windows[win]->GetHeight() / 2 - rect->GetHeight() / 2));break;
-				case DOCK_BOTTOM_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, windows[win]->GetHeight() - rect->GetHeight() - 35));break;
+				case DOCK_BOTTOM_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, windows[win]->GetHeight() - rect->GetHeight() - 10));break;
 				case DOCK_TOP_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, 15));break;
 				case DOCK_LEFT_INSIDE_OF_COMMAND:rect->SetLeft(15);break;
-				case DOCK_RIGHT_INSIDE_OF_COMMAND:rect->SetLeft(-15+windows[win]->GetWidth() - rect->GetWidth());break;
-				case DOCK_TOP_INSIDE_OF_COMMAND:rect->SetTop(15);break;
+				case DOCK_RIGHT_INSIDE_OF_COMMAND:rect->SetLeft(windows[win]->GetWidth() - rect->GetWidth());break;
+				case DOCK_TOP_INSIDE_OF_COMMAND:rect->SetTop(0);break;
+				case DOCK_TOP_LEFT_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(0, 0));break;
+				case DOCK_TOP_RIGHT_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetWidth() - rect->GetWidth(), 0));break;
 				case DOCK_BOTTOM_INSIDE_OF_COMMAND:rect->SetTop(-15+windows[win]->GetHeight() - rect->GetHeight());break;
 								   
 /*				case DOCK_CENTER_INSIDE_OF_COMMAND:rect->SetTopLeft(Point(windows[win]->GetLeft() + windows[win]->GetWidth() / 2 - rect->GetWidth() / 2, windows[win]->GetTop() + windows[win]->GetHeight() / 2 - rect->GetHeight() / 2));break;

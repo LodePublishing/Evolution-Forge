@@ -23,6 +23,14 @@ void GoalMenu::assignAnarace(ANABUILDORDER* goal_anarace)
 	resetData();
 }
 
+void GoalMenu::reloadOriginalSize()
+{
+	for(std::list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
+		(*m)->setOriginalSize(Size(getParent()->getWidth()-40, FONT_SIZE+6));
+//	resetData();
+	Menu::reloadOriginalSize();
+}
+
 void GoalMenu::resetData()
 {
 	unsigned int i=0;
@@ -35,17 +43,23 @@ void GoalMenu::resetData()
 			continue;
 		}
 		(*m)->Show();
-		(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_1_BUTTON));
+		if(i==0)
+			(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_2_BUTTON));
+		else
+			(*m)->setButtonColorsType(eButtonColorsType(UNIT_TYPE_1_BUTTON));
 		(*m)->updateText(database.getGoal(anarace->getRace(), i)->getName());
-		Rect edge = Rect(Point(10, height * (FONT_SIZE + 9)), Size(140,0));
+		Rect edge = Rect(Point(10, height * (FONT_SIZE + 9)), Size(getParent()->getWidth()-40, FONT_SIZE+6));
 		(*m)->adjustRelativeRect(edge);
 		++height;
 		++i;
 	}
 	for(;i<database.getGoalCount(anarace->getRace());++i)
 	{
-		MenuEntry* entry = new MenuEntry(this, Rect(Point(10, height * (FONT_SIZE + 9)), Size(160, FONT_SIZE)), database.getGoal(anarace->getRace(), i)->getName());
-		entry->setButtonColorsType(eButtonColorsType(UNIT_TYPE_1_BUTTON));
+		MenuEntry* entry = new MenuEntry(this, Rect(Point(10, height * (FONT_SIZE + 9)), Size(getParent()->getWidth()-40, FONT_SIZE+6)), database.getGoal(anarace->getRace(), i)->getName());
+		if(i==0)
+			entry->setButtonColorsType(eButtonColorsType(UNIT_TYPE_2_BUTTON));
+		else
+			entry->setButtonColorsType(eButtonColorsType(UNIT_TYPE_1_BUTTON));
 		menuEntries.push_back(entry);
 		++height;
 	}

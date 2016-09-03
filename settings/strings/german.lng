@@ -347,7 +347,7 @@
 		Dauer der Initialisierung:
 
 		Farbtiefe zu %ibit geändert.
-		Auflösung zu %s geändert.
+		Auflösung zu  %s geändert.
 
 		
 # window titles
@@ -508,6 +508,7 @@
 		Produktionsstättenmodus
 		Speicherung am Ende
 		Baue immer Arbeiter
+		Nur Befehle neu sortieren
 		Vorberechnung Baufolge
 		Maximale Länge
 		Zahl der Versuche
@@ -541,6 +542,7 @@
 		Sollen die Einträge im 'Füge Ziel hinzu' Menü nach Einsatzgebiet oder nach Baustätte geordnet werden?
 		Sollen die Baureihenfolgen am Ende eines Durchgangs automatisch gespeichert werden oder soll gefragt werden?
 		Soll versucht werden, dass ununterbrochen Arbeiter produziert werden?
+		Sollen die Befehle nur getauscht und keine eingefuegt oder geloescht werden?
 		Soll eine zufällige oder eine vorberechnete Baureihenfolge zu Beginn genommen werden?
 		Maximale Länge einer Baureihenfolge
 		Wie oft soll das Programm neustarten um eine optimale Baureihenfolge zu erhalten?

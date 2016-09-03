@@ -1,8 +1,6 @@
 #ifndef _SDL_SIZE_HPP
 #define _SDL_SIZE_HPP
 
-//#include "../core/defs.hpp"
-
 class Size
 {
 	public:
@@ -34,36 +32,15 @@ inline Size::Size() : width(0), height(0)
 inline Size::Size(const Size& size) :
 	width(size.width),
 	height(size.height)
-{ 
-/*#ifdef _SCC_DEBUG
-	if((width > 1280) || (height > 1024))
-	{
-		toLog("SIZE ERROR: width/height out of range");
-	}
-#endif*/
-}
+{}
 
 inline Size::Size(const unsigned int w, const unsigned int h) :
 	width(w),
 	height(h)
 {
-/*#ifdef _SCC_DEBUG
-	if((width > 1280) || (height > 1024))
-	{
-		toLog("SIZE ERROR: width/height out of range");
-	}
-#endif*/
 }
 
-inline const Size Size::operator-(const Size& size) const 
-{
-/*#ifdef _SCC_DEBUG
-	if((size.width > width) || (size.height > height))
-	{
-		toLog("RESIZE ERROR: Negative size is not allowed");
-		return(Size(0,0));
-	}
-#endif*/
+inline const Size Size::operator-(const Size& size) const {
 	return Size(width - size.width, height - size.height);
 }
 
@@ -86,29 +63,15 @@ inline const Size Size::operator+(const Size& size) const {
 	return Size(width + size.width, height + size.height);
 }
 		
-inline const Size Size::operator/(const unsigned int d) const
-{
+inline const Size Size::operator/(const unsigned int d) const {
 	return(Size(width/d, height/d));
 }
 
-inline void Size::SetWidth(const unsigned int w) 
-{
-/*			#ifdef _SCC_DEBUG
-			if(w > 1280)
-				toLog("SIZE ERROR: width out of range");
-			#endif*/
+inline void Size::SetWidth(const unsigned int w) {
 	width = w;
 }
 		
-inline void Size::SetHeight(const unsigned int h) 
-{
-/*#ifdef _SCC_DEBUG
-	if(h > 1024)
-	{
-		toLog("SIZE ERROR: height out of range");
-		return;
-	}
-#endif*/
+inline void Size::SetHeight(const unsigned int h) {
 	height = h;
 }
 

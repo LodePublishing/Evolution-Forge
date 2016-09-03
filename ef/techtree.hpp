@@ -16,6 +16,7 @@ class TechTreeWindow : public UI_Window
 		void draw(DC* dc) const;
 		void assignAnarace(ANABUILDORDER* techtree_anarace);
 		void setCurrentGoalUnit(unsigned int current_goal_unit);
+		void reloadOriginalSize();
 	private:
 		unsigned int currentGoalUnit; // which goal is currently highlighted?
 		ANABUILDORDER* anarace;

@@ -57,7 +57,7 @@ void UI_CheckButton::process()
 // TODO Text aufleuchten lassen, wenn Maus ueber Text/Button
 	if(!isShown())
 		return;
-	adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, text->getTextSize());
+//	adjustPositionAndSize(ADJUST_AFTER_CHILD_SIZE_WAS_CHANGED, text->getTextSize());
 	UI_Object::process();
 	if(checkButton->checkForNeedRedraw())
 		setNeedRedrawMoved();

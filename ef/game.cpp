@@ -13,8 +13,8 @@ Game::Game(UI_Object* game_parent, const unsigned int game_number, const unsigne
 	totalGeneration(0),
 	gameNumber(game_number),
 	gameMax(game_max),
-	splitGameButton(new UI_Button(this, Rect(0, 12, 0, 0), Size(10, 0), COMPARE_GAME_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_BOLD_FONT, AUTO_SIZE)),
-	removeButton(new UI_Button(this, Rect(0, 12, 0, 0), Size(10, 0), REMOVE_GAME_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_RIGHT, SMALL_BOLD_FONT, AUTO_SIZE))
+	splitGameButton(new UI_Button(this, Rect(50, 0, 0, 0), Size(10, 0), COMPARE_GAME_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_SIZE)),
+	removeButton(new UI_Button(this, Rect(50, 0, 0, 0), Size(10, 0), REMOVE_GAME_STRING, MY_BUTTON, PRESS_BUTTON_MODE, ARRANGE_TOP_LEFT, SMALL_BOLD_FONT, AUTO_SIZE))
 {
 	if(game_max>1)
 		splitGameButton->Hide();
@@ -117,6 +117,7 @@ void Game::draw(DC* dc) const
 	if(!isShown())
 		return;
 	UI_Window::draw(dc);
+	UI_Object::theme.setColorTheme(DARK_BLUE_THEME);
 }
 
 void Game::setBoHasChanged(const bool bo_has_changed)
@@ -271,12 +272,12 @@ void Game::newGeneration()
 	
 	if(!is_any_optimizing)
 	{
-	if(soup->recalculateGeneration(anarace, &startForce)) // <- konstant
-		for(unsigned int i=mapPlayerCount;i--;)
-		{
-			setBoHasChanged();
-			player[i]->assignAnarace(anarace[i]);
-		}
+		if(soup->recalculateGeneration(anarace, &startForce)) // <- konstant
+			for(unsigned int i=mapPlayerCount;i--;)
+			{
+				setBoHasChanged();
+				player[i]->assignAnarace(anarace[i]);
+			}
 	} else
 	{
 //TODO: nach Ende eines Durchlaufs ist anarace 0, aber viele anderen Teile des Codes greifen noch drauf zu!!

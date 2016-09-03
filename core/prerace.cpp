@@ -43,8 +43,8 @@ PRERACE::PRERACE():
 	}
 	for(int i=MAX_LENGTH;i--;)
 	{
-		Code[i]=0;
-		Marker[i]=0;
+		setCode(i, 0);
+		setMarker(i, 0);
 	}
 	resetSpecial();
 }
@@ -82,8 +82,8 @@ void PRERACE::resetPrerace()
 	}
 	for(int i=MAX_LENGTH;i--;)
 	{
-		Code[i]=0;
-		Marker[i]=0;
+		setCode(i, 0);
+		setMarker(i, 0);
 	}
 	resetSpecial();
 }
@@ -128,8 +128,8 @@ PRERACE::PRERACE(const PRERACE& object) :
 	for(int i=MAX_LENGTH;i--;)
 	{
 	//	last[i] = object.last[i];
-		Code[i] = object.Code[i];
-		Marker[i] = object.Marker[i];
+		setCode(i, object.getCode(i));
+		setMarker(i, object.getMarker(i));
 	}
 		
 	for(int i=MAX_LOCATIONS;i--;)
@@ -171,8 +171,8 @@ PRERACE& PRERACE::operator=(const PRERACE& object)
 	for(int i=MAX_LENGTH;i--;)
 	{
 //		last[i] = object.last[i];
-		Code[i] = object.Code[i];
-		Marker[i] = object.Marker[i];
+		setCode(i, object.getCode(i));
+		setMarker(i, object.getMarker(i));
 	}
 																																							
 	for(int i=MAX_LOCATIONS;i--;)
@@ -254,9 +254,9 @@ void PRERACE::replaceCode(const unsigned int ip, const unsigned int code)
 		toLog("DEBUG: (PRERACE::replaceCode): Value code out of range.");return;
 	}
 #endif
-	Code[ip] = code;
+	setCode(ip, code);
 	markerCounter++;
-	Marker[ip] = markerCounter;
+	setMarker(ip, markerCounter);
 }
 
 // ------------------------------------------
@@ -324,6 +324,7 @@ void PRERACE::adjustLocationUnitsAfterCompletion(const unsigned int location_num
 	{
 		case NO_FACILITY:break;
 		case IS_LOST:
+		case IS_MORPHING:
 			if(facility)
 				removeOneLocationTotal(location_number, facility);
 				//availible was already taken account when starting the building
@@ -389,6 +390,12 @@ void PRERACE::adjustAvailibility(const unsigned int loc, const unsigned int fac,
 				setHaveSupply(getHaveSupply()-(*pStats)[stat->facility2].haveSupply);
 			}
 			break;
+		case IS_MORPHING:
+			if(stat->facility[fac]>0)
+				removeOneLocationAvailible(loc, stat->facility[fac]);
+			if(stat->facility2>0)
+				removeOneLocationAvailible(loc, stat->facility2);
+			break;
 		case NEEDED_ONCE:
 			break;
 		case NEEDED_UNTIL_COMPLETE:
@@ -436,7 +443,7 @@ void PRERACE::adjustAvailibility(const unsigned int loc, const unsigned int fac,
 #ifdef _SCC_DEBUG
 			  toLog("ERROR: UNDEFINED FACILITY BEHAVIOUR DETECTED!");
 #endif
-				   break;
+			break;
 	}
 }
 
@@ -447,7 +454,7 @@ const bool PRERACE::calculateReady() const
 }
 
 // nicht const da buildingqueue verzehrt wird :/
-// TODO OPTIMIZE
+// TODO OPTIMIZE !!
 const unsigned int PRERACE::calculatePrimaryFitness(const bool is_ready)
 {
 	unsigned int tpF=0;
@@ -597,7 +604,7 @@ const bool PRERACE::buildIt(const unsigned int build_unit)
 		ok=true;
 	else
 	// special rule for morphing units of protoss
-	if((stat->facility2>0) && (stat->facilityType == IS_LOST) && (stat->facility[0] == stat->facility2))
+	if((stat->facility2>0) && ((stat->facilityType == IS_LOST) || (stat->facilityType == IS_MORPHING)) && (stat->facility[0] == stat->facility2))
 	{
 		if(getLocationAvailible(current_location_window, stat->facility2) >=2)
 		{
@@ -701,6 +708,13 @@ const bool PRERACE::buildIt(const unsigned int build_unit)
 	return(ok);
 }
 
+const bool PRERACE::isDifferent(const unsigned int* code, const unsigned int* marker) const
+{
+	for(int i = MAX_LENGTH;i--;)
+		if((getCode(i)!=code[i])||(getMarker(i)!=marker[i]))
+			return(true);
+	return(false);	
+}
 
 // ------------------------------
 // ------ HARVEST ROUTINES ------
@@ -936,7 +950,6 @@ void PRERACE::setPlayerNumber(const unsigned int player_number)
 
 //	global=&unit[playerNum][0];
 }
-
 void PRERACE::initializePlayer()
 {
 	setMinerals((*pStartCondition)->getMinerals());
@@ -949,8 +962,8 @@ void PRERACE::initializePlayer()
 void PRERACE::eraseIllegalCode()
 {
 	for(int i=MAX_LENGTH;i--;)
-		if(Code[i]>=getpGoal()->getMaxBuildTypes())
-			Code[i]=0;
+		if(getCode(i) >= getpGoal()->getMaxBuildTypes())
+			setCode(i, 0);
 /*		{
 			for(int k=i;k--;)
 				Code[k+1]=Code[k];
@@ -967,119 +980,815 @@ void PRERACE::eraseUselessCode()
 	{
 		bool ok=true;
 		for(int k=3;k--;)
-			ok&=((stats[getpGoal()->getRace()][getpGoal()->toPhaeno(Code[i])].prerequisite[k]==0)||
-				 (allUnits[stats[getpGoal()->getRace()][getpGoal()->toPhaeno(Code[i])].prerequisite[k]]));
+			ok&=((stats[getpGoal()->getRace()][getpGoal()->toPhaeno(getCode(i))].prerequisite[k]==0)||
+				 (allUnits[stats[getpGoal()->getRace()][getpGoal()->toPhaeno(getCode(i))].prerequisite[k]]));
 //WTF? allUnits mit prerequisite vergleichen!?
 
 //TODO so ganz sauber is des net
 		if(!ok)
 		{
 			for(int k=i;k--;)
-				Code[k+1]=Code[k];
-			Code[0]=0;
+				setCode(k+1, getCode(k));
+			setCode(0, 0);
 		}
 		else
-			allUnits[getpGoal()->toPhaeno(Code[i])]++;
+			allUnits[getpGoal()->toPhaeno(getCode(i))]++;
 	}
 }
 
+/*CODE::CODE(const unsigned int* code, const unsigned int code_length)
+{
+	for(int i = MAX_LENGTH-code_length;i<MAX_LENGTH;i++)
+		Code[i]=code[i];
+	length = code_length;
+	
+}
+
+const bool CODE::operator==(const CODE& object) const
+{
+	if(length!=object.length)
+		return(false);
+	for(int i = MAX_LENGTH-length;i<MAX_LENGTH;i++)
+		if(Code[i] != object.Code[i])
+			return(false);
+	return(true);
+}
+
+const bool CODE::operator<(const CODE& object) const
+{
+        if(length<object.length)
+	                return(true);
+	else if(length>object.length)
+			return(false);
+	for(int i = MAX_LENGTH-length; i<MAX_LENGTH;i++)
+		if(Code[i]>object.Code[i])
+			return(true);
+	return(false);
+}
+
+CODE& CODE::operator=(const unsigned int* code)
+{
+	for(int i = MAX_LENGTH;i--;)
+		Code[i] = code[i];
+	return(*this);
+}
+
+CODE::~CODE()
+{ }
+
+SITUATION::SITUATION()
+{
+	for(unsigned int i=UNIT_TYPE_COUNT;i--;)
+	{
+		ttGeno[i]=999;
+		tGeno[i]=0;
+		buildable[i]=false;
+		force[i]=0;
+	}
+	tMaxBuildTypes = 0;			
+}
+
+SITUATION::SITUATION(const SITUATION& object)
+{ 
+	setTMaxBuildTypes( object.getTMaxBuildTypes() );
+	for(int i = UNIT_TYPE_COUNT;i--;)
+	{
+		setForce(i, object.getForce(i));
+		setBuildable(i, object.getBuildable(i));
+		setTGeno(i, object.getTGeno(i));
+		setTTGeno(i, object.getTTGeno(i));
+	}
+}
+
+SITUATION::~SITUATION()
+{ }
+
+unsigned int SITUATION::getTMaxBuildTypes() const
+{
+#ifdef _SCC_DEBUG
+	if(tMaxBuildTypes >= UNIT_TYPE_COUNT)
+	{	
+		toLog("DEBUG: (SITUATION::getTMaxBuildTypes): Variable tMaxBuildTypes not initialized.");return(0);
+	}
+#endif
+	return(tMaxBuildTypes);
+}
+
+unsigned int SITUATION::getForce(const unsigned int unit) const
+{
+#ifdef _SCC_DEBUG
+	if(unit >= UNIT_TYPE_COUNT)
+	{	
+		toLog("DEBUG: (SITUATION::getForce): Value unit out of range.");return(0);
+	}
+	if(force[unit] > MAX_SUPPLY)
+	{	
+		toLog("DEBUG: (SITUATION::getForce): Variable force not initialized.");return(0);
+	}
+#endif
+	return(force[unit]);
+}
+
+unsigned int SITUATION::getBuildable(const unsigned int unit) const
+{
+#ifdef _SCC_DEBUG
+	if(unit >= UNIT_TYPE_COUNT)
+	{	
+		toLog("DEBUG: (SITUATION::getBuildable): Value unit out of range.");return(0);
+	}
+	if(buildable[unit] > MAX_SUPPLY)
+	{	
+		toLog("DEBUG: (SITUATION::getBuildable): Variable buildable not initialized.");return(0);
+	}
+#endif
+	return(buildable[unit]);
+}
+
+unsigned int SITUATION::getTGeno(const unsigned int unit) const
+{
+#ifdef _SCC_DEBUG
+	if(unit >= UNIT_TYPE_COUNT)
+	{	
+		toLog("DEBUG: (SITUATION::getTGeno): Value unit out of range.");return(0);
+	}
+	if(tGeno[unit] > MAX_SUPPLY)
+	{	
+		toLog("DEBUG: (SITUATION::getTGeno): Variable tGeno not initialized.");return(0);
+	}
+#endif
+	return(tGeno[unit]);
+}
+
+unsigned int SITUATION::getTTGeno(const unsigned int unit) const
+{
+#ifdef _SCC_DEBUG
+	if(unit >= UNIT_TYPE_COUNT)
+	{	
+		toLog("DEBUG: (SITUATION::getTTGeno): Value unit out of range.");return(0);
+	}
+	if(ttGeno[unit] > 1000)
+	{	
+		toLog("DEBUG: (SITUATION::getTTGeno): Variable ttGeno not initialized.");return(0);
+	}
+#endif
+	return(ttGeno[unit]);
+}
+
+void SITUATION::setTMaxBuildTypes(const unsigned int count)
+{
+#ifdef _SCC_DEBUG
+        if(count >= UNIT_TYPE_COUNT)
+        {
+                toLog("DEBUG: (SITUATION::setTMaxBuildTypes): Value count out of range.");return;
+        }
+#endif
+	tMaxBuildTypes = count;
+}
+
+void SITUATION::addTMaxBuildTypes()
+{
+#ifdef _SCC_DEBUG
+        if(tMaxBuildTypes >= UNIT_TYPE_COUNT-1)
+        {
+                toLog("DEBUG: (SITUATION::addTMaxBuildTypes): Value out of range.");return;
+        }
+#endif
+	tMaxBuildTypes++;
+}
+
+void SITUATION::subTMaxBuildTypes()
+{
+#ifdef _SCC_DEBUG
+        if(tMaxBuildTypes == 0)
+        {
+                toLog("DEBUG: (SITUATION::subTMaxBuildTypes): Value out of range.");return;
+        }
+#endif
+	tMaxBuildTypes--;
+}
+
+void SITUATION::setForce(const unsigned int unit, const unsigned int count)
+{
+#ifdef _SCC_DEBUG
+        if(unit >= UNIT_TYPE_COUNT)
+        {
+                toLog("DEBUG: (SITUATION::setForce): Value unit out of range.");return;
+        }
+        if(count > MAX_SUPPLY)
+        {
+                toLog("DEBUG: (SITUATION::setForce): Value count out of range.");return;
+        }
+#endif
+	force[unit] = count;
+}
+
+void SITUATION::setBuildable(const unsigned int unit, const unsigned int count)
+{
+#ifdef _SCC_DEBUG
+        if(unit >= UNIT_TYPE_COUNT)
+        {
+                toLog("DEBUG: (SITUATION::setBuildable): Value unit out of range.");return;
+        }
+        if(count > 1)
+        {
+                toLog("DEBUG: (SITUATION::setBuildable): Value count out of range.");return;
+        }
+#endif
+	buildable[unit] = count;
+}
+
+void SITUATION::setTGeno(const unsigned int unit, const unsigned int count)
+{
+#ifdef _SCC_DEBUG
+        if(unit >= UNIT_TYPE_COUNT)
+        {
+                toLog("DEBUG: (SITUATION::setTGeno): Value unit out of range.");return;
+        }
+        if(count >= UNIT_TYPE_COUNT)
+        {
+                toLog("DEBUG: (SITUATION::setTGeno): Value count out of range.");return;
+        }
+#endif
+	tGeno[unit] = count;
+}
+
+void SITUATION::setTTGeno(const unsigned int unit, const unsigned int count)
+{
+#ifdef _SCC_DEBUG
+        if(unit >= UNIT_TYPE_COUNT)
+        {
+                toLog("DEBUG: (SITUATION::setTTGeno): Value unit out of range.");return;
+        }
+        if(count >= 1000)
+        {
+                toLog("DEBUG: (SITUATION::setTTGeno): Value count out of range.");return;
+        }
+#endif
+	ttGeno[unit] = count;
+}*/
+
+#if 0 
+// TODO OPTIMIZE
+void PRERACE::mutateGeneCode(const bool* fixed_list)
+{
+//      return;
+// TODO logger machen, welche Mutationsart besonders erfolgreich ist
+        if(getLength()==0)
+                setLength(MAX_LENGTH);//configuration.getMaxLength()); // TODO
+	bool useOld=false;
+	SITUATION* situation;
+	CODE* thisCode = new CODE(Code, getLength());
+	map<CODE, SITUATION*>::iterator foundSolution = situationHashMap.find(*thisCode);
+	if(foundSolution == situationHashMap.end())
+	{
+		situation = new SITUATION();
+
+	        for(unsigned int i=GAS_SCV+1;i--;)
+	                if(((*pGoal)->getIsBuildable(i))&&((*pStartCondition)->getLocationTotal(GLOBAL,i)>0)) //set start force
+			{
+				situation->setForce(i, (*pStartCondition)->getLocationTotal(GLOBAL,i));
+				situation->setBuildable(i, 1);
+			}
+
+                for(unsigned int i = GAS_SCV+1; i--;)
+                {
+                        if(situation->getForce(i))
+                        {
+                                bool ok=true;
+                                for(int j=GAS_SCV+1;j--;)
+                                        if((situation->getForce(j))&&((*pStats)[j].create>0)&&((*pStats)[j].create == i)) {
+                                                ok=false;break;
+                                        }
+                                if(ok)
+                                {
+                                        situation->setTGeno(situation->getTMaxBuildTypes(), (*pGoal)->toGeno(i));
+					situation->setTTGeno(i, situation->getTMaxBuildTypes());
+                                        situation->addTMaxBuildTypes();
+                                        situation->setBuildable(i, 1);
+                                }
+                        } else
+
+                        if(  ( ((*pGoal)->getIsBuildable(i) ) &&
+                           (((*pStats)[i].prerequisite[0]==0)||(situation->getForce((*pStats)[i].prerequisite[0])))&&
+                           (((*pStats)[i].prerequisite[1]==0)||(situation->getForce((*pStats)[i].prerequisite[1])))&&
+                           (((*pStats)[i].prerequisite[2]==0)||(situation->getForce((*pStats)[i].prerequisite[2])))&&
+                           ((((*pStats)[i].facility[0]>0)&&(situation->getForce((*pStats)[i].facility[0])))||
+                           (((*pStats)[i].facility[1]>0)&&(situation->getForce((*pStats)[i].facility[1])))||
+                           (((*pStats)[i].facility[2]>0)&&(situation->getForce((*pStats)[i].facility[2])))||
+                           (((*pStats)[i].facility[0]==(*pStats)[i].facility[1]==(*pStats)[i].facility[2]==0)))))
+			{
+				situation->setTGeno(situation->getTMaxBuildTypes(), (*pGoal)->toGeno(i));
+				situation->setTTGeno(i, situation->getTMaxBuildTypes());
+				situation->addTMaxBuildTypes();
+				situation->setBuildable(i, 1);
+			}
+			
+			if(((*pGoal)->getIsStatic(i))&&(*pGoal)->getIsBuildable(i)&&(*pGoal)->getAllGoal(i)&&(situation->getForce(i) >= (*pGoal)->getAllGoal(i))&&(situation->getTTGeno(i) != 999))
+			{
+//				for(int j=tMaxBuildTypes;j--;)
+//					if(tGeno[j] == (*pGoal)->toGeno(i))
+					{
+						for(int k = situation->getTTGeno(i); k < situation->getTMaxBuildTypes()-1; k++)
+							situation->setTGeno(k, situation->getTGeno(k+1));
+						situation->setTTGeno(i, 999);
+						situation->subTMaxBuildTypes();
+//						break;
+					}
+			}
+	
+                }
+		situationHashMap.insert(pair<CODE, SITUATION*>(*thisCode, situation));
+		situation->getTMaxBuildTypes();
+	}
+	else
+	{
+		situation = foundSolution->second;
+		foundSolution->second->getTMaxBuildTypes();
+	}
+	situation->getTMaxBuildTypes();
+	delete thisCode;
+	situation->getTMaxBuildTypes();
+
+	for(unsigned int x=MAX_LENGTH;x--;) //length
+        {
+
+//alle ueberpruefen, ob die ueberhaupt baubar sind... aber von hinten her!
+
+
+                if(configuration.getMutationFactor()==0)
+                        return;
+                if(rand() % (MAX_LENGTH*100/configuration.getMutationFactor())==0)
+                {
+                        switch(rand() % 4)
+                        {
+                                //TODO: wenn generateBuildOrder==1 dann bleibts stehen!
+                                case 0://delete one variabel entry and move - Mehrere Schmieden/Kasernen etc. zulassen!
+                                {
+//                                if((((*pGoal)->isVariable[Code[0][x]]==1)&&((*pGoal)->isVariable[Code[1][x]]==1))||(!configuration.preprocessBuildOrder)) TODO
+                                                //TODO: ueberlegen, ob Code evtl struct sein sollte... mmmh
+
+/*					if(x < MAX_LENGTH-1)
+					{
+						memmove(Code+x+1, Code+x, 4*(MAX_LENGTH-x-2));
+						memmove(Marker+x+1, Marker+x, 4*(MAX_LENGTH-x-2));
+					}*/
+                                        for(unsigned int i=x;i<MAX_LENGTH-1;i++)
+					{
+						Code[i] = Code[i+1];
+						Marker[i] = Marker[i+1];
+					}
+                                        // TODO hier auch das buildable und tMaxBuildTypes rein... irgendwie den Code als "mutier mich" markieren und spaetereinfuegen
+					markerCounter++;Marker[MAX_LENGTH-1] = markerCounter;
+					unsigned int y;
+//                                if(configuration.preprocessBuildOrder) // TODO
+//                                while((*pGoal)->isVariable[y]==0) y=rand()%(*pGoal)->getMaxBuildTypes();
+//                                else
+                                        y = situation->getTGeno(rand()%situation->getTMaxBuildTypes());//(*pGoal)->getMaxBuildTypes();
+                                        Code[MAX_LENGTH-1]=y;
+//                                if(configuration.preprocessBuildOrder) // TODO
+//                                while((*pGoal)->isVariable[y]==0) y=rand()%(*pGoal)->getMaxBuildTypes();
+//                                else
+//                                y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
+//                                Code[1][MAX_LENGTH-1]=y;
+                                }break;
+                                case 1://add one variable entry
+                                {
+					memmove(Code+x+1, Code+x, MAX_LENGTH-x-1);
+					memmove(Marker+x+1, Marker+x, MAX_LENGTH-x-1);
+					
+/*                                        for(unsigned int i=MAX_LENGTH-1;i>x;i--)
+                                        {
+                                                Code[i]=Code[i-1];
+                                                Marker[i]=Marker[i-1];
+                                        }*/
+                                        markerCounter++;Marker[x]=markerCounter;
+                                        unsigned int y;
+//                                if(configuration.preprocessBuildOrder) TODO
+//                                        while((*pGoal)->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
+//                                else
+                                        y=situation->getTGeno(rand()%situation->getTMaxBuildTypes());//(*pGoal)->getMaxBuildTypes();
+                                        Code[x]=y;
+//                                if(configuration.preprocessBuildOrder)
+//                                        while((*pGoal)->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//rand()%(*pGoal)->getMaxBuildTypes();
+//                                else
+                                }break;
+                                case 2://change one entry
+                                {
+//                                if((*pGoal)->isVariable[Code[k][x]]==1) TODO
+                                        {
+                                                int y;
+                                                //int y=rand()%(*pGoal)->getMaxBuildTypes();//Optimieren
+//                                        if(configuration.preprocessBuildOrder) TODO
+//                                                while((*pGoal)->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//rand()%(*pGoal)->getMaxBuildTypes();
+//                                        else
+                                                y=situation->getTGeno(rand()%situation->getTMaxBuildTypes());//(*pGoal)->getMaxBuildTypes();
+                                                Code[x]=y;
+                                                markerCounter++;Marker[x]=markerCounter;
+                                        }
+                                }break;
+                                case 3://exchange two entries
+                                        if(x < MAX_LENGTH)
+                                        {
+                                                //hier erst recht
+                                                unsigned int y=rand()%(MAX_LENGTH-x) + x;
+//                                        y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
+//                                        if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH;
+                                                if(situation->getBuildable((*pGoal)->toPhaeno(Code[y])))
+                                                {
+                                                        unsigned int l;
+                                                        l=Code[x];Code[x]=Code[y];Code[y]=l;
+                                                        l=Marker[x];Marker[x]=Marker[y];Marker[y]=l;
+                                                }
+                                        }break;
+                                        case 4://move a block of orders  [a..b..ta..tb..c..d] -> [a..ta..tb..b..c..d]
+                                        //~~~TODO bug, marker und code wird nicht richtig verschoben
+                                        if((getLength()>2)&&(x>0))
+                                        {
+                                                unsigned int block_length = rand()%(MAX_LENGTH-x);
+                                                unsigned int target_position = rand()%x;
+                                                if(block_length > 0)
+                                                {       
+                                                        unsigned int tmpCode[MAX_LENGTH];
+                                                        unsigned int tmpMarker[MAX_LENGTH];
+                                                        
+                                                        for(unsigned int i = 0; i < block_length; i++)
+                                                        {
+                                                                tmpCode[i] = Code[x + i];
+                                                                tmpMarker[i] = Marker[x + i];
+                                                        }
+                                                                
+                                                        for(unsigned int i = target_position; i < x; i++)
+                                                        {
+                                                                Code[i+block_length] = Code[i];
+                                                                Marker[i+block_length] = Marker[i];
+                                                        }
+
+                                                        for(unsigned int i = 0; i<block_length; i++)
+                                                        {
+                                                                Code[target_position + i] = tmpCode[i];
+                                                                Marker[target_position + i] = tmpMarker[i];
+                                                        }
+                                                }
+                                        }break; 
+                                default:
+#ifdef _SCC_DEBUG                       
+                                toLog("ERROR in PRERACE::mutateGeneCode: rand out of Range");
+#endif
+                                break; // TODO ERROR
+                        }
+                }                       
+	
+		CODE* theCode = new CODE(Code, getLength());
+        	map<CODE, SITUATION*>::iterator foundSolution = situationHashMap.find(*theCode);
+		if(foundSolution == situationHashMap.end())
+		{
+			SITUATION* temp = situation;
+			situation = new SITUATION(*temp);
+			delete temp;
+
+			situation->setForce((*pGoal)->toPhaeno(Code[x]), situation->getForce((*pGoal)->toPhaeno(Code[x])) + 1);
+                        if((*pStats)[(*pGoal)->toPhaeno(Code[x])].create>0)
+                                situation->setForce((*pStats)[(*pGoal)->toPhaeno(Code[x])].create, (*pStats)[(*pGoal)->toPhaeno(Code[x])].create + 1);
+
+		situation->setTMaxBuildTypes(0);
+                for(unsigned int i = GAS_SCV+1; i--;)
+                {
+                        if(situation->getForce(i))
+                        {
+                                bool ok=true;
+                                for(int j=GAS_SCV+1;j--;)
+                                        if((situation->getForce(j))&&((*pStats)[j].create>0)&&((*pStats)[j].create == i)) {
+                                                ok=false;break;
+                                        }
+                                if(ok)
+                                {
+                                        situation->setTGeno(situation->getTMaxBuildTypes(), (*pGoal)->toGeno(i));
+					situation->setTTGeno(i, situation->getTMaxBuildTypes());
+                                        situation->addTMaxBuildTypes();
+                                        situation->setBuildable(i, 1);
+                                }
+                        } else
+
+                        if(  ( ((*pGoal)->getIsBuildable(i) ) &&
+                           (((*pStats)[i].prerequisite[0]==0)||(situation->getForce((*pStats)[i].prerequisite[0])))&&
+                           (((*pStats)[i].prerequisite[1]==0)||(situation->getForce((*pStats)[i].prerequisite[1])))&&
+                           (((*pStats)[i].prerequisite[2]==0)||(situation->getForce((*pStats)[i].prerequisite[2])))&&
+                           ((((*pStats)[i].facility[0]>0)&&(situation->getForce((*pStats)[i].facility[0])))||
+                           (((*pStats)[i].facility[1]>0)&&(situation->getForce((*pStats)[i].facility[1])))||
+                           (((*pStats)[i].facility[2]>0)&&(situation->getForce((*pStats)[i].facility[2])))||
+                           (((*pStats)[i].facility[0]==(*pStats)[i].facility[1]==(*pStats)[i].facility[2]==0)))))
+			{
+				situation->setTGeno(situation->getTMaxBuildTypes(), (*pGoal)->toGeno(i));
+				situation->setTTGeno(i, situation->getTMaxBuildTypes());
+				situation->addTMaxBuildTypes();
+				situation->setBuildable(i, 1);
+			}
+			
+			if(((*pGoal)->getIsStatic(i))&&(*pGoal)->getIsBuildable(i)&&(*pGoal)->getAllGoal(i)&&(situation->getForce(i)>=(*pGoal)->getAllGoal(i))&&(situation->getTTGeno(i)!=999))
+			{
+//				for(int j=tMaxBuildTypes;j--;)
+//					if(tGeno[j] == (*pGoal)->toGeno(i))
+					{
+						for(int k = situation->getTTGeno(i); k < situation->getTMaxBuildTypes()-1; k++)
+							situation->setTGeno(k, situation->getTGeno(k+1));
+						situation->setTTGeno(i, 999);
+						situation->subTMaxBuildTypes();
+//						break;
+					}
+			}
+	
+                }
+		
+//                situationHashMap.insert(pair<CODE, SITUATION*>(*theCode, situation));
+	} 
+	else
+	{
+		situation = foundSolution->second;
+	}
+	delete theCode;
+	
+        }                               
+}
+#endif
+
 
 // TODO OPTIMIZE
-void PRERACE::mutateGeneCode()
+void PRERACE::mutateGeneCode(/*const bool* fixed_list*/)
 {
-//	return;
 // TODO logger machen, welche Mutationsart besonders erfolgreich ist
+	if(configuration.getMutationFactor()==0)
+		return;
 	if(getLength()==0) 
 		setLength(MAX_LENGTH);//configuration.getMaxLength()); // TODO
 
-	unsigned int force[UNIT_TYPE_COUNT];
+	bool checked[UNIT_TYPE_COUNT];
 	bool buildable[UNIT_TYPE_COUNT];
-	unsigned int tMaxBuildTypes;
+	unsigned int tMaxBuildTypes = 0;
 	unsigned int tGeno[UNIT_TYPE_COUNT]; // !! keine anderen units drueber nehmen!
 
+	NEED need[UNIT_TYPE_COUNT];
+
+	for(unsigned int i = UNIT_TYPE_COUNT;i--;)
+	{
+		need[i] = (*pGoal)->need[i];
+		checked[i]=false;
+		buildable[i]=false;
+		tGeno[i]=0;
+	}
+ 
+	ALLOW* allow = (*pGoal)->allow;
 
 	for(unsigned int i=GAS_SCV+1;i--;)
-	{
-		tGeno[i]=0;
 		if((*pGoal)->getIsBuildable(i))
 		{
-			force[i]=((*pStartCondition)->getLocationTotal(GLOBAL,i)>0); //set start force
-			if(force[i]) buildable[i]=true;
-		}
-		else
-		{
-			force[i]=0;
-			buildable[i]=false;
-		}
-	}
-																																							
-	for(unsigned int x=MAX_LENGTH;x--;) //length
-	{
-		if(x<MAX_LENGTH-1) { // erstes nicht einbeziehen
-			force[(*pGoal)->toPhaeno(Code[x+1])]=1;
-			if((*pStats)[(*pGoal)->toPhaeno(Code[x+1])].create>0)
-				force[(*pStats)[(*pGoal)->toPhaeno(Code[x+1])].create]=1;
-		}
-
-		tMaxBuildTypes=0;
-		for(unsigned int i=GAS_SCV+1;i--;)
-		{
-			if(force[i]) 
+			buildable[i]=true;
+			tGeno[tMaxBuildTypes]=(*pGoal)->toGeno(i);
+			tMaxBuildTypes++;
+			if((*pStartCondition)->getLocationTotal(GLOBAL,i))
 			{
-				bool ok=true;
-				for(int j=GAS_SCV+1;j--;)
-					if((force[j])&&((*pStats)[j].create>0)&&((*pStats)[j].create == i)) {
-						ok=false;break;
-					}
-				if(ok)
+				list<unsigned int> newBuildable;
+				for(list<unsigned int>::iterator j = allow[i].facility.begin();j!=allow[i].facility.end();j++) 
+					if(need[*j].facilityIsDone())
+						newBuildable.push_back(*j);
+				for(list<unsigned int>::iterator j = allow[i].facility2.begin();j!=allow[i].facility2.end();j++) 
+					if(need[*j].facility2IsDone())
+						newBuildable.push_back(*j);
+				for(list<unsigned int>::iterator j = allow[i].prerequisite.begin();j!=allow[i].prerequisite.end();j++) 
+					if(need[*j].prerequisiteIsDone())
+						newBuildable.push_back(*j);
+				checked[i]=true;
+				for(list<unsigned int>::iterator j = newBuildable.begin();j!=newBuildable.end();j++)
 				{
-					tGeno[tMaxBuildTypes]=(*pGoal)->toGeno(i);
+					buildable[*j]=true;
+					tGeno[tMaxBuildTypes]=(*pGoal)->toGeno(*j);
 					tMaxBuildTypes++;
-					buildable[i]=true;
 				}
-			} else
-			
-			if(  ( ((*pGoal)->getIsBuildable(i) ) &&		
-			   (((*pStats)[i].prerequisite[0]==0)||(force[(*pStats)[i].prerequisite[0]]))&&
-			   (((*pStats)[i].prerequisite[1]==0)||(force[(*pStats)[i].prerequisite[1]]))&&
-			   (((*pStats)[i].prerequisite[2]==0)||(force[(*pStats)[i].prerequisite[2]]))&&
-			   ((((*pStats)[i].facility[0]>0)&&(force[(*pStats)[i].facility[0]]))||
-			   (((*pStats)[i].facility[1]>0)&&(force[(*pStats)[i].facility[1]]))||
-			   (((*pStats)[i].facility[2]>0)&&(force[(*pStats)[i].facility[2]]))||
-			   (((*pStats)[i].facility[0]==(*pStats)[i].facility[1]==(*pStats)[i].facility[2]==0)))))
-				{
-					tGeno[tMaxBuildTypes]=(*pGoal)->toGeno(i);
-					tMaxBuildTypes++;
-					buildable[i]=true;
-				}
+			}
 		}
-																																					
+		
+	for(unsigned int x=MAX_LENGTH-1;x>MAX_LENGTH-getLength();x--) //length
+	{
+// IS_LOST ETC!!!
+                if(rand() % (MAX_LENGTH*100/configuration.getMutationFactor())==0)
+                {
+                        switch(rand() % 4)
+                        {
+                                //TODO: wenn generateBuildOrder==1 dann bleibts stehen!
+                                case 0://delete one variabel entry and move - Mehrere Schmieden/Kasernen etc. zulassen!
+                                {
+//                                if((((*pGoal)->isVariable[Code[0][x]]==1)&&((*pGoal)->isVariable[Code[1][x]]==1))||(!configuration.preprocessBuildOrder)) TODO
+                                                //TODO: ueberlegen, ob Code evtl struct sein sollte... mmmh
+
+/*					if(x < MAX_LENGTH-1)
+					{
+						memmove(Code+x+1, Code+x, 4*(MAX_LENGTH-x-2));
+						memmove(Marker+x+1, Marker+x, 4*(MAX_LENGTH-x-2));
+					}*/
+                                        for(unsigned int i=x;i<MAX_LENGTH-1;i++)
+					{
+						Code[i] = Code[i+1];
+						Marker[i] = Marker[i+1];
+					}
+                                        // TODO hier auch das buildable und tMaxBuildTypes rein... irgendwie den Code als "mutier mich" markieren und spaetereinfuegen
+					markerCounter++;Marker[MAX_LENGTH-1] = markerCounter;
+					unsigned int y;
+//                                if(configuration.preprocessBuildOrder) // TODO
+//                                while((*pGoal)->isVariable[y]==0) y=rand()%(*pGoal)->getMaxBuildTypes();
+//                                else
+                                        y = tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
+                                        Code[MAX_LENGTH-1]=y;
+//                                if(configuration.preprocessBuildOrder) // TODO
+//                                while((*pGoal)->isVariable[y]==0) y=rand()%(*pGoal)->getMaxBuildTypes();
+//                                else
+//                                y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
+//                                Code[1][MAX_LENGTH-1]=y;
+                                }break;
+                                case 1://add one variable entry
+                                {
+					memmove(Code+x+1, Code+x, MAX_LENGTH-x-1);
+					memmove(Marker+x+1, Marker+x, MAX_LENGTH-x-1);
+					
+/*                                        for(unsigned int i=MAX_LENGTH-1;i>x;i--)
+                                        {
+                                                Code[i]=Code[i-1];
+                                                Marker[i]=Marker[i-1];
+                                        }*/
+                                        markerCounter++;Marker[x]=markerCounter;
+                                        unsigned int y;
+//                                if(configuration.preprocessBuildOrder) TODO
+//                                        while((*pGoal)->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
+//                                else
+                                        y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
+                                        Code[x]=y;
+//                                if(configuration.preprocessBuildOrder)
+//                                        while((*pGoal)->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//rand()%(*pGoal)->getMaxBuildTypes();
+//                                else
+                                }break;
+                                case 2://change one entry
+                                {
+//                                if((*pGoal)->isVariable[Code[k][x]]==1) TODO
+                                        {
+                                                int y;
+                                                //int y=rand()%(*pGoal)->getMaxBuildTypes();//Optimieren
+//                                        if(configuration.preprocessBuildOrder) TODO
+//                                                while((*pGoal)->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//rand()%(*pGoal)->getMaxBuildTypes();
+//                                        else
+                                                y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
+                                                Code[x]=y;
+                                                markerCounter++;Marker[x]=markerCounter;
+                                        }
+                                }break;
+                                case 3://exchange two entries
+                                        if(x < MAX_LENGTH)
+                                        {
+                                                //hier erst recht
+                                                unsigned int y=rand()%(MAX_LENGTH-x) + x;
+//                                        y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
+//                                        if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH;
+                                                if(buildable[(*pGoal)->toPhaeno(Code[y])])
+                                                {
+                                                        unsigned int l;
+                                                        l=Code[x];Code[x]=Code[y];Code[y]=l;
+                                                        l=Marker[x];Marker[x]=Marker[y];Marker[y]=l;
+                                                }
+                                        }break;
+                                        case 4://move a block of orders  [a..b..ta..tb..c..d] -> [a..ta..tb..b..c..d]
+                                        //~~~TODO bug, marker und code wird nicht richtig verschoben
+                                        if((getLength()>2)&&(x>0))
+                                        {
+                                                unsigned int block_length = rand()%(MAX_LENGTH-x);
+                                                unsigned int target_position = rand()%x;
+                                                if(block_length > 0)
+                                                {       
+                                                        unsigned int tmpCode[MAX_LENGTH];
+                                                        unsigned int tmpMarker[MAX_LENGTH];
+                                                        
+                                                        for(unsigned int i = 0; i < block_length; i++)
+                                                        {
+                                                                tmpCode[i] = Code[x + i];
+                                                                tmpMarker[i] = Marker[x + i];
+                                                        }
+                                                                
+                                                        for(unsigned int i = target_position; i < x; i++)
+                                                        {
+                                                                Code[i+block_length] = Code[i];
+                                                                Marker[i+block_length] = Marker[i];
+                                                        }
+
+                                                        for(unsigned int i = 0; i<block_length; i++)
+                                                        {
+                                                                Code[target_position + i] = tmpCode[i];
+                                                                Marker[target_position + i] = tmpMarker[i];
+                                                        }
+                                                }
+                                        }break; 
+                                default:
+#ifdef _SCC_DEBUG                       
+                                toLog("ERROR in PRERACE::mutateGeneCode: rand out of Range");
+#endif
+                                break; // TODO ERROR
+                        }
+                }
+			int i = (*pGoal)->toPhaeno(getCode(x));
+			if(!checked[i])
+			{
+				{
+					list<unsigned int> newBuildable;
+					for(list<unsigned int>::iterator j = allow[i].facility.begin();j!=allow[i].facility.end();j++)
+					if(need[*j].facilityIsDone())
+						newBuildable.push_back(*j);
+					for(list<unsigned int>::iterator j = allow[i].facility2.begin();j!=allow[i].facility2.end();j++)
+					if(need[*j].facility2IsDone())
+						newBuildable.push_back(*j);
+					for(list<unsigned int>::iterator j = allow[i].prerequisite.begin();j!=allow[i].prerequisite.end();j++)
+					if(need[*j].prerequisiteIsDone())
+						newBuildable.push_back(*j);
+                        	        checked[i]=true;
+					if((*pGoal)->getIsStatic(i))
+					// remove
+						for(int j = tMaxBuildTypes;j--;)
+							if(tGeno[j] == (*pGoal)->toGeno(i))
+							{
+								tMaxBuildTypes--;
+								for(unsigned int k = j;k<tMaxBuildTypes;k++)
+									tGeno[k] = tGeno[k+1];
+							}
+			
+	                                for(list<unsigned int>::iterator j = newBuildable.begin();j!=newBuildable.end();j++) 
+                                	{
+                        	                buildable[*j]=true;
+                	                        tGeno[tMaxBuildTypes]=(*pGoal)->toGeno(*j);
+        	                                tMaxBuildTypes++;
+	                                }
+				}
+				if((*pStats)[i].create>0)
+				{
+					i = (*pStats)[i].create;
+	        	                if(!checked[i])
+        	        	        {
+                	        	        list<unsigned int> newBuildable;
+	                       	        	for(list<unsigned int>::iterator j = allow[i].facility.begin();j!=allow[i].facility.end();j++)
+        	                	        	if(need[*j].facilityIsDone())
+	        	                	                newBuildable.push_back(*j);
+        	        	                for(list<unsigned int>::iterator j = allow[i].facility2.begin();j!=allow[i].facility2.end();j++)
+		                	                if(need[*j].facility2IsDone())
+                		        	                newBuildable.push_back(*j);
+	        				for(list<unsigned int>::iterator j = allow[i].prerequisite.begin();j!=allow[i].prerequisite.end();j++)
+		        	                        if(need[*j].prerequisiteIsDone())
+		                	                        newBuildable.push_back(*j);
+                		       	        checked[i]=true;
+                                		for(list<unsigned int>::iterator j = newBuildable.begin();j!=newBuildable.end();j++)
+	                                	{
+        	                                	buildable[*j]=true;
+	                	                        tGeno[tMaxBuildTypes]=(*pGoal)->toGeno(*j);
+        	                	                tMaxBuildTypes++;
+                	                	}
+					}
+				}
+			}
+	
+	}
+#if 0
 //alle ueberpruefen, ob die ueberhaupt baubar sind... aber von hinten her!
-																																							
-		if(configuration.getMutationFactor()==0)
-			return;
+//		if(fixed_list[MAX_LENGTH-x])
+//			continue;
 		if(rand() % (MAX_LENGTH*100/configuration.getMutationFactor())==0)
 		{
-			switch(rand() % 4)
+			switch(rand() % 2)
 			{
 				//TODO: wenn generateBuildOrder==1 dann bleibts stehen!
 				case 0://delete one variabel entry and move - Mehrere Schmieden/Kasernen etc. zulassen!
 				{
 //				  if((((*pGoal)->isVariable[Code[0][x]]==1)&&((*pGoal)->isVariable[Code[1][x]]==1))||(!configuration.preprocessBuildOrder)) TODO
 						//TODO: ueberlegen, ob Code evtl struct sein sollte... mmmh
-						for(unsigned int i=x;i<MAX_LENGTH-1;i++)
+
+					int i = x;
+					while(i < MAX_LENGTH-1)
+					{
+						while((i<MAX_LENGTH-1) && (fixed_list[i]))
+							i++;
+						if(i<MAX_LENGTH-1)
 						{
-							Code[i]=Code[i+1];
-							Marker[i]=Marker[i+1];
+							int j = i+1;
+							while((j<MAX_LENGTH)&&(fixed_list[j]))
+								j++;
+							if((j<MAX_LENGTH)&&(!fixed_list[j]))
+							{
+								setCode(i, getCode(j));
+								setMarker(i, getMarker(j));
+							}
 						}
+						if(!fixed_list[i])
+							i++;
+					}
 					// TODO hier auch das buildable und tMaxBuildTypes rein... irgendwie den Code als "mutier mich" markieren und spaetereinfuegen
-					markerCounter++;Marker[MAX_LENGTH-1]=markerCounter;
+					markerCounter++;setMarker(MAX_LENGTH-1, markerCounter);
 					unsigned int y;
 //				  if(configuration.preprocessBuildOrder) // TODO
 //				  while((*pGoal)->isVariable[y]==0) y=rand()%(*pGoal)->getMaxBuildTypes();
 //				  else
 					y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
-					Code[MAX_LENGTH-1]=y;
+					setCode(MAX_LENGTH-1, y);
 //				  if(configuration.preprocessBuildOrder) // TODO
 //				  while((*pGoal)->isVariable[y]==0) y=rand()%(*pGoal)->getMaxBuildTypes();
 //				  else
@@ -1088,18 +1797,32 @@ void PRERACE::mutateGeneCode()
 				}break;
 				case 1://add one variable entry
 				{
-					for(unsigned int i=MAX_LENGTH-1;i>x;i--)
+					int i = MAX_LENGTH-1;
+					while(i>x)
 					{
-						Code[i]=Code[i-1];
-						Marker[i]=Marker[i-1];
+						while((i>x) && (fixed_list[i]))
+							i--;
+						if(i>x)
+						{
+							int j=i-1;
+							while((j) && (fixed_list[j]))
+								j--;
+							if(!fixed_list[j])
+							{
+								setCode(i, getCode(j));
+								setMarker(i, getMarker(j));
+							}
+						}
+						if(!fixed_list[i])
+							i--;
 					}
-					markerCounter++;Marker[x]=markerCounter;
+					markerCounter++;setMarker(x, markerCounter);
 					unsigned int y;
 //				  if(configuration.preprocessBuildOrder) TODO
 //					  while((*pGoal)->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
 //				  else
-					y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
-					Code[x]=y;
+					y = tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
+					setCode(x, y);
 //				  if(configuration.preprocessBuildOrder)
 //					  while((*pGoal)->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//rand()%(*pGoal)->getMaxBuildTypes();
 //				  else
@@ -1114,8 +1837,8 @@ void PRERACE::mutateGeneCode()
 //						  while((*pGoal)->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//rand()%(*pGoal)->getMaxBuildTypes();
 //					  else
 						y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
-						Code[x]=y;
-						markerCounter++;Marker[x]=markerCounter;
+						setCode(x, y);
+						markerCounter++;setMarker(x, markerCounter);
 					}
 				}break;
 				case 3://exchange two entries
@@ -1125,11 +1848,11 @@ void PRERACE::mutateGeneCode()
 						unsigned int y=rand()%(MAX_LENGTH-x) + x;
 //					  y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
 //					  if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH;
-						if(buildable[(*pGoal)->toPhaeno(Code[y])])
+						if((buildable[(*pGoal)->toPhaeno(getCode(y))])&&(!fixed_list[y]))
 						{
 							unsigned int l;
-							l=Code[x];Code[x]=Code[y];Code[y]=l;
-							l=Marker[x];Marker[x]=Marker[y];Marker[y]=l;
+							l=getCode(x);setCode(x, getCode(y));setCode(y, l);
+							l=getMarker(x);setMarker(x, getMarker(y));setMarker(y, l);
 						}
 					}break;
 					case 4://move a block of orders  [a..b..ta..tb..c..d] -> [a..ta..tb..b..c..d]
@@ -1145,20 +1868,20 @@ void PRERACE::mutateGeneCode()
 							
 							for(unsigned int i = 0; i < block_length; i++)
 							{
-								tmpCode[i] = Code[x + i];
-								tmpMarker[i] = Marker[x + i];
+								tmpCode[i] = getCode(x + i);
+								tmpMarker[i] = getMarker(x + i);
 							}							
 								
 							for(unsigned int i = target_position; i < x; i++)
 							{
-								Code[i+block_length] = Code[i];
-								Marker[i+block_length] = Marker[i];
+								setCode(i+block_length, getCode(i));
+								setMarker(i+block_length, getMarker(i));
 							}
 
 							for(unsigned int i = 0; i<block_length; i++)
 							{
-								Code[target_position + i] = tmpCode[i];
-								Marker[target_position + i] = tmpMarker[i];
+								setCode(target_position + i, tmpCode[i]);
+								setMarker(target_position + i, tmpMarker[i]);
 							}
 						}
 					}break;
@@ -1170,7 +1893,9 @@ void PRERACE::mutateGeneCode()
 			}
 		}
 	}
+#endif
 }
+
 
 
 
@@ -1200,13 +1925,13 @@ void PRERACE::resetGeneCode()
 		{
 //			if((i+4)%stats[(*pGoal)->getRace()][y].needSupply==0)
 //			{
-				Code[i]=rand()%(*pGoal)->getMaxBuildTypes();
+				setCode(i, 0);//rand()%(*pGoal)->getMaxBuildTypes());
 //			} else
 //			{
 //				Code[0][i]=/*rand()%*/(*pGoal)->toGeno(SCV);//getMaxBuildTypes();
 //				Code[1][i]=/*rand()%*/(*pGoal)->toGeno(SCV);//getMaxBuildTypes();
 //			}
-			markerCounter++;Marker[i]=markerCounter;
+			markerCounter++;setMarker(i, markerCounter);
 		}
 	}
 }
@@ -1261,6 +1986,30 @@ void PRERACE::crossOver(PRERACE* parent2, PRERACE* child1, PRERACE* child2)
 // -------------------------------------------------------------------
 // ------ BELOW ALL THE GET/SET FUNCTIONS, PRETTY UNINTERESTING ------
 // -------------------------------------------------------------------
+
+void PRERACE::setMarker(const unsigned int ip, const unsigned int value)
+{
+#ifdef _SCC_DEBUG
+	if(ip >= MAX_LENGTH) {
+		toLog("DEBUG: (PRERACE::setMarker): Value ip out of range.");return;
+	}	
+#endif
+	Marker[ip]=value;
+}
+
+
+void PRERACE::setCode(const unsigned int ip, const unsigned int value)
+{
+#ifdef _SCC_DEBUG
+	if(ip >= MAX_LENGTH) {
+		toLog("DEBUG: (PRERACE::setCode): Value ip out of range.");return;
+	}	
+	if(value >= UNIT_TYPE_COUNT) {
+		toLog("DEBUG: (PRERACE::setCode): Value out of range.");return;
+	}
+#endif
+	Code[ip]=value;
+}
 
 const unsigned int PRERACE::getCode(const unsigned int ip) const
 {
@@ -1943,5 +2692,7 @@ const BASIC_MAP* const* PRERACE::pMap;
 signed int PRERACE::noise[MAX_TIME];
 unsigned int PRERACE::markerCounter;
 UNIT PRERACE::unit[MAX_PLAYER][MAX_LOCATIONS];
+
+//map<CODE, SITUATION*> PRERACE::situationHashMap;
 
 

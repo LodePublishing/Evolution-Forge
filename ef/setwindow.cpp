@@ -37,7 +37,7 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
 	fullButton(new UI_Button(this, Rect(Point(0,0), Size(0, 15)), Rect(Point(250,215), Size(200, 15)), SETTING_FULL_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE_ONCE)),
 	
 	customButton(new UI_Button(this, Rect(Point(0,0), Size(0, 15)), Rect(Point(250,215), Size(200, 15)), SETTING_CUSTOM_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE_ONCE)),
-    
+	
 	defaultSettingsRadio(new UI_Radio(this, Point(245, 55), true, TITLE_PREDEFINED_SETTINGS_STRING)),
 	
 	reloadFromFileButton(new UI_Button(loadSaveSettings, Rect(Point(0, 0), Size(0, 15)), getRelativeRect(), SETTING_RELOAD_FROM_FILE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, PRESS_BUTTON_MODE, ARRANGE_LEFT, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE_ONCE)),
@@ -59,10 +59,10 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
 
 	languageMenu->Hide();
 
-/*    menuRadio = new UI_Radio(this);
+/*	menuRadio = new UI_Radio(this);
 	menuRadio->addButton(resolutionMenuButton);
-    menuRadio->addButton(themeMenuButton);
-    menuRadio->addButton(languageMenuButton);*/
+	menuRadio->addButton(themeMenuButton);
+	menuRadio->addButton(languageMenuButton);*/
 	reloadFromFile();
 
 	defaultSettingsRadio->addButton(minimalistButton);
@@ -74,21 +74,21 @@ SettingsWindow::SettingsWindow(UI_Object* setwindow_parent):
 	guiSettings->calculateBoxSize();
 	loadSaveSettings->calculateSameWidthOfButtons();
 
-    customButton->updateToolTip(SETTING_CUSTOM_TOOLTIP_STRING);
-    fullButton->updateToolTip(SETTING_FULL_TOOLTIP_STRING);
-    minimalistButton->updateToolTip(SETTING_MINIMALIST_TOOLTIP_STRING);
+	customButton->updateToolTip(SETTING_CUSTOM_TOOLTIP_STRING);
+	fullButton->updateToolTip(SETTING_FULL_TOOLTIP_STRING);
+	minimalistButton->updateToolTip(SETTING_MINIMALIST_TOOLTIP_STRING);
 	customButton->forcePress();
 }
 
 SettingsWindow::~SettingsWindow()
 {
 	delete maxTime;
-    delete maxLength;
-    delete maxRuns;
+	delete maxLength;
+	delete maxRuns;
 	delete maxGenerations;
-    delete maxTimeOut;
-    delete breedFactor;
-//    delete crossingOver;
+	delete maxTimeOut;
+	delete breedFactor;
+//	delete crossingOver;
 	delete staticFramerate;
 	delete dynamicFramerate;
 
@@ -216,31 +216,31 @@ void SettingsWindow::process()
 
 	if(minimalistButton->isLeftClicked())
 	{
-	    staticFramerate->updateNumber ( 10 );
-	    dynamicFramerate->updateNumber ( 1 );
-    	allowStaticFramerate->check ( false );
-	    glowingButtons->check ( false );
-	    dnaSpiral->check ( false );
-//    	backgroundBitmap->check ( false );
-	    fullscreen->check ( false );
-    	tooltips->check ( false );
-//    	softwareMouse->check ( false );
-//    	transparency->check ( false );
-	    smoothMovement->check ( false );
+		staticFramerate->updateNumber ( 10 );
+		dynamicFramerate->updateNumber ( 1 );
+		allowStaticFramerate->check ( false );
+		glowingButtons->check ( false );
+		dnaSpiral->check ( false );
+//		backgroundBitmap->check ( false );
+		fullscreen->check ( false );
+		tooltips->check ( false );
+//		softwareMouse->check ( false );
+//		transparency->check ( false );
+		smoothMovement->check ( false );
 	} else
 	if(fullButton->isLeftClicked())
 	{
-        staticFramerate->updateNumber ( 35 );
+		staticFramerate->updateNumber ( 35 );
 		dynamicFramerate->updateNumber ( 10 );
-        allowStaticFramerate->check ( true );
-        glowingButtons->check ( true );
-        dnaSpiral->check ( true );
-//      backgroundBitmap->check ( true );
-        fullscreen->check ( true );
-        tooltips->check ( true );
-//      softwareMouse->check ( true );
-//      transparency->check ( true );
-        smoothMovement->check ( true );
+		allowStaticFramerate->check ( true );
+		glowingButtons->check ( true );
+		dnaSpiral->check ( true );
+//	  backgroundBitmap->check ( true );
+		fullscreen->check ( true );
+		tooltips->check ( true );
+//	  softwareMouse->check ( true );
+//	  transparency->check ( true );
+		smoothMovement->check ( true );
 		// TODO disable...
 	}		
 // TODO reihenfolge und Radiobuttons...
@@ -262,16 +262,16 @@ void SettingsWindow::loadFailsafeDefaults()
 
 void SettingsWindow::updateItems()
 {
-    maxTime->updateNumber ( configuration.getMaxTime() );
-    maxLength->updateNumber ( configuration.getMaxLength() );
+	maxTime->updateNumber ( configuration.getMaxTime() );
+	maxLength->updateNumber ( configuration.getMaxLength() );
 	maxGenerations->updateNumber ( configuration.getMaxGenerations() );
-    maxRuns->updateNumber ( configuration.getMaxRuns() );
-    maxTimeOut->updateNumber ( configuration.getMaxTimeOut());
-    breedFactor->updateNumber ( configuration.getBreedFactor() );
-//    crossingOver->updateNumber ( configuration.getCrossingOver() );
-    staticFramerate->updateNumber ( configuration.getStaticFramerate() );
-    dynamicFramerate->updateNumber ( configuration.getDynamicFramerate() );
-    
+	maxRuns->updateNumber ( configuration.getMaxRuns() );
+	maxTimeOut->updateNumber ( configuration.getMaxTimeOut());
+	breedFactor->updateNumber ( configuration.getBreedFactor() );
+//	crossingOver->updateNumber ( configuration.getCrossingOver() );
+	staticFramerate->updateNumber ( configuration.getStaticFramerate() );
+	dynamicFramerate->updateNumber ( configuration.getDynamicFramerate() );
+	
 	eLanguage newLanguage = configuration.getLanguage();
 	languageHasChanged=false;
 	if(newLanguage!=UI_Object::theme.getLanguage())
@@ -282,18 +282,18 @@ void SettingsWindow::updateItems()
 	}
 	
 	facilityMode->check ( configuration.isFacilityMode() );
-    autoSaveRuns->check ( configuration.isAutoSaveRuns() );
+	autoSaveRuns->check ( configuration.isAutoSaveRuns() );
 //  preprocessBuildorder->check ( configuration.isPreprocessBuildOrder() );
 //  allowGoalAdaption->check ( configuration.isAllowGoalAdaption() );
-    allowStaticFramerate->check ( configuration.isAllowStaticFramerate() );
-    glowingButtons->check ( configuration.isGlowingButtons() );
-    dnaSpiral->check ( configuration.isDnaSpiral() );
+	allowStaticFramerate->check ( configuration.isAllowStaticFramerate() );
+	glowingButtons->check ( configuration.isGlowingButtons() );
+	dnaSpiral->check ( configuration.isDnaSpiral() );
 //  backgroundBitmap->check ( configuration.isBackgroundBitmap() );
-    fullscreen->check ( configuration.isFullScreen() );
-    tooltips->check ( configuration.isTooltips() );
+	fullscreen->check ( configuration.isFullScreen() );
+	tooltips->check ( configuration.isTooltips() );
 //  softwareMouse->check ( configuration.isSoftwareMouse() );
 //  transparency->check ( configuration.isTransparency() );
-    smoothMovement->check ( configuration.isSmoothMovements() );
+	smoothMovement->check ( configuration.isSmoothMovements() );
 }
 
 void SettingsWindow::draw(DC* dc) const
@@ -304,7 +304,13 @@ void SettingsWindow::draw(DC* dc) const
 	dc->setFullscreen(fullscreen->isChecked());
 }
 
-const bool SettingsWindow::hasLanguageChanged() {
+void SettingsWindow::forceLanguageChange()
+{
+	languageHasChanged=true;
+}
+
+const bool SettingsWindow::hasLanguageChanged() 
+{
 	if(languageHasChanged)
 	{
 		languageHasChanged=false;

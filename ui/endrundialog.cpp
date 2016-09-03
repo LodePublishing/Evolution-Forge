@@ -12,9 +12,11 @@ UI_EndRunDialog::UI_EndRunDialog(UI_Object* edit_parent, const std::string& name
 
 UI_EndRunDialog::~UI_EndRunDialog()
 {
-	lastString = getString();
 	if(!isCanceled())
-	    configuration.setAutoSaveRuns ( autoSaveRuns->isChecked() );
+	{
+		lastString = getString();
+		configuration.setAutoSaveRuns ( autoSaveRuns->isChecked() );
+	}
 	delete autoSaveRuns;
 }
 

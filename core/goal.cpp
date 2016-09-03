@@ -6,7 +6,7 @@ GOAL::GOAL() :
 	time(0),
 	count(0),
 	location(0),
-	finalTime(0)
+	finalTime(MAX_TIME)
 { }
 
 GOAL::~GOAL()

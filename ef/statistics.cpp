@@ -7,22 +7,23 @@ StatisticsWindow::StatisticsWindow(UI_Object* stat_parent, const ANARACE* stat_a
 	start_time(SDL_GetTicks()),
 	anarace(stat_anarace),
 	averagecounter(0),
-	graph_ani(0)
+	graph_ani(0),
+	wasResetted(false)
 {
 	resetData();
-	Point l1=Point(getRelativeClientRectPosition()+Point(210,0));
-    Size l2=Size(190, FONT_SIZE+7);
-	for(int i=0;i<MAX_STAT_ENTRY;i++)
+	Point l1 = Point(getRelativeClientRectPosition()+Point(210,0));
+	Size l2 = Size(190, FONT_SIZE+7);
+	for(int i = 0; i < MAX_STAT_ENTRY; i++)
 	{
-		statEntry[i] = new UI_Button(this, Rect(l1+Point(0,i*14), l2), Rect(l1+Point(0,i*14), l2), (eString)(MINERALS_STAT_STRING+i), (eButton)(FORCE_STAT_BUTTON+i), NO_TEXT_MODE, STATIC_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE);
-		statEntry[i]->updateToolTip((eString)(FORCE_STAT_TOOLTIP_STRING+i));
+		statEntry[i] = new UI_Button(this, Rect(l1+Point(0,i*14), l2), Rect(l1+Point(0,i*14), l2), (eString)(MINERALS_STAT_STRING+i), (eButton)(MINERALS_STAT_BUTTON+i), NO_TEXT_MODE, STATIC_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE);
+		statEntry[i]->updateToolTip((eString)(MINERALS_STAT_TOOLTIP_STRING+i));
 		statEntry[i]->forcePress();
 	}
 }
 
 StatisticsWindow::~StatisticsWindow()
 {
-	for(int i=0;i<MAX_STAT_ENTRY;i++)
+	for(int i = 0; i < MAX_STAT_ENTRY; i++)
 		delete statEntry[i];
 }
 
@@ -36,11 +37,15 @@ void StatisticsWindow::showGraph(DC* dc, const unsigned int* graph_data, const u
 	int j,k;
 	if(getAbsoluteClientRectPosition().y <0)
 		return;
-	dc->SetPen(Pen(col, 1, SOLID_PEN_STYLE));
+	if(bold)
+		dc->SetPen(Pen(col, 2, SOLID_PEN_STYLE));
+	else
+		dc->SetPen(Pen(col, 1, SOLID_PEN_STYLE));
+
 	Point blub[200];
 	j=1;
 	k=0;
-	for(int i=1;i<199;i++)
+	for(int i = 1; i < 199; i++)
 	{
 		if((graph_data[i] != graph_data[i+1])||(k>9))
 		{
@@ -53,37 +58,32 @@ void StatisticsWindow::showGraph(DC* dc, const unsigned int* graph_data, const u
 	blub[0]=Point(getAbsoluteClientRectPosition() + Point(2, getClientRectHeight() - 3 - (getClientRectHeight()-4)*(graph_data[0]-min)/(max+1)));
 	blub[j]=Point(getAbsoluteClientRectPosition() + Point(201, getClientRectHeight() - 3 - (getClientRectHeight()-4)*(graph_data[199]-min)/(max+1)));
 	dc->DrawSpline(j+1, blub);
-	if(bold)
-	{
-		dc->DrawSpline(j+1, blub, Point(0,1));
-		dc->DrawSpline(j+1, blub, Point(1,0));
-		dc->DrawSpline(j+1, blub, Point(1,1));
-	}
 }
 
 void StatisticsWindow::resetData()
 {
-	averagecounter=1;
-	for(int i=100;i--;)
-		average[i]=0;
+	averagecounter = 1;
+	for(int i = 100; i--; )
+		average[i] = 0;
 																				
-	for(int i=0;i<MAX_STAT_ENTRY;i++)
+	for(int i = 0; i < MAX_STAT_ENTRY; i++)
 	{
-		for(int j=200;j--;)
-			data[i][j]=0;
+		for(int j = 200; j--;)
+			data[i][j] = 0;
 		maxdata[i]=0;
-		for(int j=20;j--;)
+		for(int j = 20; j--;)
 		{
-			oldData[i][j]=0;
-			oldDataCounter[i][j]=0;
+			oldData[i][j] = 0;
+			oldDataCounter[i][j] = 0;
 		}
 	}
 
-	for(int j=200;j--;)
+	for(int j = 200; j--;)
 	{
-		data[FORCE_STAT_ENTRY][j]=5; //5 units at the beginning!
-		data[GENERATIONS_LEFT_STAT_ENTRY][j]=configuration.getMaxGenerations();
+		data[FORCE_STAT_ENTRY][j] = 5; //5 units at the beginning!
+		data[GENERATIONS_LEFT_STAT_ENTRY][j] = configuration.getMaxGenerations();
 	}
+	wasResetted=true;
 }
 
 void StatisticsWindow::draw(DC* dc) const
@@ -96,24 +96,25 @@ void StatisticsWindow::draw(DC* dc) const
 	dc->SetPen(*theme.lookUpPen( INNER_BORDER_PEN ));
 	dc->DrawRectangle(getAbsoluteClientRectPosition(), Size(202, getClientRectHeight()));
 
-	for(int i = 0; i<MAX_STAT_ENTRY;i++)
+	for(int i = 0; i < MAX_STAT_ENTRY; i++)
 		if((!statEntry[i]->isCurrentlyHighlighted())&&(statEntry[i]->isCurrentlyActivated()))
 			showGraph(dc, data[i], 0, maxdata[i], dc->mixColor(theme.lookUpColor((eColor)(MINERALS_TEXT_COLOR+i)), theme.lookUpColor(BRIGHT_TEXT_COLOR), statEntry[i]->getGradient()));
-	for(int i=0;i<MAX_STAT_ENTRY;i++)
+	for(int i = 0; i < MAX_STAT_ENTRY; i++)
 		if((statEntry[i]->isCurrentlyHighlighted())&&(statEntry[i]->isCurrentlyActivated()))
 			showGraph(dc, data[i], 0, maxdata[i], dc->mixColor(theme.lookUpColor((eColor)(MINERALS_TEXT_COLOR+i)), theme.lookUpColor(BRIGHT_TEXT_COLOR), statEntry[i]->getGradient()), true);
 
 	for(int i = 0; i<=AVERAGE_BO_LENGTH_STAT_ENTRY;i++)
-		for(int k=0;k<20;k++)
-        	if(oldDataCounter[i][k]>0)
-	        {
+		if(statEntry[i]->isCurrentlyActivated())
+		for(int k = 0; k < 20; k++)
+			if(oldDataCounter[i][k]>0)
+			{
 				dc->SetTextForeground(dc->darkenColor( theme.lookUpColor((eColor)(MINERALS_TEXT_COLOR+i)), 80-oldDataCounter[i][k]*4));
-	            ostringstream os;
-    	        if(oldData[i][k]>0) 
+				ostringstream os;
+				if(oldData[i][k]>0) 
 					os << "+";
-	            os << oldData[i][k];
-	            dc->DrawText(os.str(), statEntry[i]->getAbsolutePosition() + Size(statEntry[i]->getTextWidth() + oldDataCounter[i][k]-5, 4));
-	        }
+				os << oldData[i][k];
+				dc->DrawText(os.str(), statEntry[i]->getAbsolutePosition() + Size(statEntry[i]->getTextWidth() + oldDataCounter[i][k]-5, 4));
+			}
 }
 
 // TODO ueberpruefen ob is shown
@@ -124,8 +125,22 @@ void StatisticsWindow::process()
 	
 	UI_Window::process();
 
-	if(!anarace->isOptimizing())
+	for(int i=0;i<=AVERAGE_BO_LENGTH_STAT_ENTRY;i++)
+		for(int k=0;k<20;k++)
+			if(oldDataCounter[i][k]>0)
+			{
+				oldDataCounter[i][k]+=2;
+				if(oldDataCounter[i][k]>20)
+				{
+					oldDataCounter[i][k]=0;
+					oldData[i][k]=0;
+				}
+			}
+
+
+	if((!wasResetted)&&(!anarace->isOptimizing()))
 		return;
+	wasResetted = false;
 
 	long int difference = SDL_GetTicks() - start_time;
 	start_time += difference;
@@ -151,30 +166,19 @@ void StatisticsWindow::process()
 	data[FITNESS_VARIANCE_STAT_ENTRY][199] = (int)sqrt((double)anarace->fitnessVariance);
 	data[GENERATIONS_LEFT_STAT_ENTRY][199] = configuration.getMaxGenerations() - anarace->getUnchangedGenerations();
 
-		for(int i=0;i<AVERAGE_BO_LENGTH_STAT_ENTRY;i++)
-			if(data[i][199]!=data[i][198])
-			{
-				for(int l=0;l<20;l++)
-					if(oldDataCounter[i][l]==0)
-					{
-						oldDataCounter[i][l]=1;
-						oldData[i][l]=((signed int)(data[i][199])-(signed int)(data[i][198]));
-						data[i][198]=data[i][199];
-						break;
-					}
-			}
-
-	for(int i=0;i<=AVERAGE_BO_LENGTH_STAT_ENTRY;i++)
-		for(int k=0;k<20;k++)
-			if(oldDataCounter[i][k]>0)
-			{
-				oldDataCounter[i][k]+=2;
-				if(oldDataCounter[i][k]>20)
+	for(int i=0;i<AVERAGE_BO_LENGTH_STAT_ENTRY;i++)
+		if(data[i][199]!=data[i][198])
+		{
+			for(int l=0;l<20;l++)
+				if(oldDataCounter[i][l]==0)
 				{
-					oldDataCounter[i][k]=0;
-					oldData[i][k]=0;
+					oldDataCounter[i][l]=1;
+					oldData[i][l]=((signed int)(data[i][199])-(signed int)(data[i][198]));
+					data[i][198]=data[i][199];
+					break;
 				}
-			}
+		}
+
 
 	ani++;
 	if(ani>5)
@@ -231,7 +235,7 @@ void StatisticsWindow::process()
 	os << data[FPS_STAT_ENTRY][199] << " fps ";/* [" << UI_Object::rectnumber << " updates]";*/
 	if(anarace->isOptimizing())
 		os << "[" << (int) 
-					(float)(100*data[FPS_STAT_ENTRY][199]*(MAX_PROGRAMS*((*anarace->getMap())->getMaxPlayer()-1)) / 
+					(float)(100*data[FPS_STAT_ENTRY][199]*(MAX_PROGRAMS/*((*anarace->getMap())->getMaxPlayer()-1)*/) / 
 					((float)((1+configuration.getCurrentFramesPerGeneration())))) << " BOps]";
 //		TODO alles in eine FPS Klasse oder so
 	statEntry[FPS_STAT_ENTRY]->updateText(os.str());

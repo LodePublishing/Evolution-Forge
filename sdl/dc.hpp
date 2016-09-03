@@ -172,9 +172,14 @@ class DC
 		void DrawVerticalLine(const signed int x0, const signed int y0, const signed int y1) const;
 		void DrawHorizontalLine(const signed int x0, const signed int y0, const signed int x1) const;
 		
+		void DrawGridEdgedRoundedRectangle(const signed int x, const signed y, const unsigned width, const unsigned int height, const unsigned int radius, std::list<Rect> notDrawRectList) const;
 		void DrawRoundedRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int radius) const;
 		void DrawEdgedRoundedRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int radius) const;
 		
+//		void DrawGridEdgedRoundedRectangle(const Point p, const Size& s, const unsigned int radius, std::list<Rect> &notDrawRectList) const {
+//			DrawRoundedRectangle(p.x, p.y, s.GetWidth(), s.GetHeight(), radius);
+//		}
+
 		void DrawRoundedRectangle(const Point& p, const Size& s, const unsigned int radius) const {
 			DrawRoundedRectangle(p.x, p.y, s.GetWidth(), s.GetHeight(), radius);
 		}

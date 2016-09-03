@@ -244,8 +244,8 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 					player[k*groupSize+i]->eraseIllegalCode();
 					player[k*groupSize+i]->eraseUselessCode(); //TODO Problem beim switchen, falls schon goals gesetzt waren
 // preserve player[0]s genes					
-					if(i!=0)
-						player[k*groupSize+i]->mutateGeneCode();
+					if((i!=0)&&(rand()%2))
+						player[k*groupSize+i]->mutateGeneCode(/*anaplayer[k]->getFixed()*/);
 				}
 			}
 		bool complete=false;

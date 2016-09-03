@@ -23,6 +23,7 @@ class SettingsWindow:public UI_Window
 		void draw(DC* dc) const;
 		void updateItems();
 
+		void forceLanguageChange();
 		const bool hasLanguageChanged();
 	private:
 

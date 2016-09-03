@@ -18,36 +18,17 @@ class Order
 			}
 		};
 		
+		void setMarker(const unsigned long order_marker);
 		void setUnit(const unsigned int unit_type);
 		void setIP(const unsigned int ip);
-		void setRow(const unsigned int order_row);
 
+		const unsigned long getMarker() const;
 		const unsigned int getUnit() const;
 		const unsigned int getIP() const;
-		const unsigned int getRow() const;
-	
-		unsigned int blend;
-		unsigned int blendTarget;
-		unsigned int blendStart;
-//build order list
-		Rect rect;
-		Rect brect;
-		Rect target;
-		Rect btarget;
-		Rect start;
-		Rect bstart;
-		unsigned long marker;
-		bool bonew;
-		bool checked;
-
-		
 	private:
-//build order graph
 		unsigned int unit;
-//	int mins,gas,time,location,needSupply,haveSupply,forceFacilityCount,availibleFacilityCount,successType,successUnit,facility,code,forceCount;
 		unsigned int IP;
-		unsigned int row;
-//	int mins, color  etc.
+		unsigned long marker;
 };
 
 #endif // _EF_ORDER_HPP

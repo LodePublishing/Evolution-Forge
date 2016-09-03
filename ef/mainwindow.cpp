@@ -40,7 +40,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::process()
 {
-	UI_Object::rectnumber=0;
+//	UI_Object::rectnumber=0;
 	UI_Window::process();
 
 }

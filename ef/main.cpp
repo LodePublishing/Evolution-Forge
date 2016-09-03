@@ -42,11 +42,11 @@ int main(int argc, char *argv[])
 //	putenv("SDL_VIDEODRIVER=dga"); windows
 	if (configuration.isFullScreen()) {
 		toLog(*UI_Object::theme.lookUpString(START_SET_FULLSCREEN_MODE_STRING));
-		screen=new DC(clientWindow.w, clientWindow.h, 32, SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_ANYFORMAT|SDL_FULLSCREEN|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC);
+		screen=new DC(clientWindow.w, clientWindow.h, 16, SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_ANYFORMAT|SDL_FULLSCREEN|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC);
 	}
 	else {
 		toLog(*UI_Object::theme.lookUpString(START_SET_WINDOW_MODE_STRING));
-		screen=new DC(clientWindow.w, clientWindow.h, 32, SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_ANYFORMAT|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC);
+		screen=new DC(clientWindow.w, clientWindow.h, 16, SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_ANYFORMAT|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_HWPALETTE|SDL_SRCCOLORKEY|SDL_RLEACCEL|SDL_SRCALPHA|SDL_PREALLOC);
 	}
 	
 	if ( screen == NULL )
@@ -139,24 +139,24 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge 1.61 BETA Test :)$# #
 	while(!done)
 	{
 		introText.process();
-	    screen->SetPen(Pen(Color(screen->GetSurface(), 0, 0, 0), 1, TRANSPARENT_PEN_STYLE));
+		screen->SetPen(Pen(Color(screen->GetSurface(), 0, 0, 0), 1, TRANSPARENT_PEN_STYLE));
 		screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
 		screen->DrawRectangle(Rect(clientWindow.x, clientWindow.y, clientWindow.w-1, clientWindow.h-1));
-	    screen->SetPen(*UI_Object::theme.lookUpPen(OUTER_BORDER_PEN));
+		screen->SetPen(*UI_Object::theme.lookUpPen(OUTER_BORDER_PEN));
 		screen->SetBrush(*UI_Object::theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
 		screen->DrawEdgedRoundedRectangle(t,6);
 //		screen->DrawBitmap(claw, clientWindow.w - claw->w, clientWindow.h - claw->h);
 		introText.draw(screen);
-        screen->updateScreen();
-        fps->delay();
+		screen->updateScreen();
+		fps->delay();
 		while (SDL_PollEvent(&event))
 		{
-        	switch (event.type)
-	        {
-	            case SDL_QUIT:
-    	            return(0);break;
-                case SDL_MOUSEBUTTONDOWN:
-        	    case SDL_KEYDOWN:
+			switch (event.type)
+			{
+				case SDL_QUIT:
+					return(0);break;
+				case SDL_MOUSEBUTTONDOWN:
+				case SDL_KEYDOWN:
 					done=true;break;
 			}
 		}
@@ -177,6 +177,11 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge 1.61 BETA Test :)$# #
 		m.drawing=true;
 		m.stopOptimizing();
 	}
+
+	screen->SetPen(Pen(Color(screen->GetSurface(), 0, 0, 0), 1, SOLID_PEN_STYLE));
+	screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
+	screen->DrawRectangle(Rect(clientWindow.x, clientWindow.y, clientWindow.w-1, clientWindow.h-1));
+
 	while(true)
 	{
 		unsigned int frames_per_generation = fps->getFramesPerGeneration();
@@ -224,7 +229,7 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge 1.61 BETA Test :)$# #
 			}
 			else*/
 			{
-			    screen->SetPen(Pen(Color(screen->GetSurface(), 0, 0, 0), 1, SOLID_PEN_STYLE));
+				screen->SetPen(Pen(Color(screen->GetSurface(), 0, 0, 0), 1, SOLID_PEN_STYLE));
 				screen->SetBrush(Brush(Color(screen->GetSurface(), 0, 0, 0), SOLID_BRUSH_STYLE));
 				screen->DrawRectangle(Rect(clientWindow.x, clientWindow.y, clientWindow.w-1, clientWindow.h-1));
 			}
@@ -236,7 +241,7 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge 1.61 BETA Test :)$# #
 		{
 			screen->SetTextForeground(toSDL_Color(255, 20, 20));
 			screen->SetFont(UI_Object::theme.lookUpFont(LARGE_NORMAL_BOLD_FONT));
-            screen->DrawText("DRAWING SUSPENDED FOR MAXIMUM SPEED, PRESS A BUTTON OR KEY TO STOP.", 100, 350);	
+			screen->DrawText("DRAWING SUSPENDED FOR MAXIMUM SPEED, PRESS A BUTTON OR KEY TO STOP.", 100, 350);	
 			warning = true;
 			m.player[0]->window[STATISTICS_WINDOW]->draw(screen);
 		}
@@ -281,9 +286,9 @@ UI_StaticText introText(NULL, "$Welcome to Evolution Forge 1.61 BETA Test :)$# #
 					switch(event.key.keysym.sym)
 					{
 						case SDLK_BACKSPACE:
-                            if(UI_Object::editTextField!=NULL)
-                                UI_Object::editTextField->removeCharBackspace();
-                            break;
+						if(UI_Object::editTextField!=NULL)
+							UI_Object::editTextField->removeCharBackspace();
+						break;
 						case SDLK_TAB:break;//TODO
 						case SDLK_CLEAR:break;//TODO
 						case SDLK_KP_ENTER:

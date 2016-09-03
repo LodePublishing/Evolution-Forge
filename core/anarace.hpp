@@ -60,6 +60,8 @@ class ANARACE: public PRERACE
 		STATISTICS ipStatistics[2*MAX_LENGTH]; // before and after command!
 		STATISTICS timeStatistics[MAX_TIME];
 	
+//		const bool* fixed;
+		
 		static unsigned int successType; //type of error
 		static unsigned int successUnit; //unit number
 
@@ -78,7 +80,6 @@ class ANARACE: public PRERACE
 		void setTimeStatisticsFitness(const unsigned int time, const unsigned int fitness);
 		void setTimeStatisticsHaveMinerals(const unsigned int time, const unsigned int have_minerals);
 		void setTimeStatisticsHaveGas(const unsigned int time, const unsigned int have_gas);
-
 		
 	public:
 		ANARACE();
@@ -87,7 +88,7 @@ class ANARACE: public PRERACE
 		ANARACE(const ANARACE& anarace);
 	
 		unsigned int fitnessAverage;
-       	unsigned int fitnessVariance;
+		unsigned int fitnessVariance;
 		unsigned int positiveCrossover;
 		unsigned int wayneCrossover;
 		unsigned int negativeCrossover;
@@ -109,11 +110,14 @@ class ANARACE: public PRERACE
 		void setActive(const bool active=true);
 
 		const unsigned int getAverageLength() const;
+//		void setFixed(const bool* fixed_list);
+//		const bool* getFixed() const;
 			
 //		unsigned int fitnessCode[MAX_GOALS]; ???
 
 // external data output
 
+		const unsigned int getFastestGoalTime() const;
 
 		const GOAL_TREE getGoalTree(const unsigned currentGoalUnit=0) const;
 		
@@ -167,8 +171,6 @@ class ANARACE: public PRERACE
 		void setMaxsFitness(const unsigned int max_sfitness);
 		void setMaxtFitness(const unsigned int max_tfitness);
 
-	
-
 //		void setProgramIsConstant(const unsigned int ip, const bool isConstant);
 		void setProgramFacility(const unsigned int ip, const unsigned int program_facility);
 		void setProgramBT(const unsigned int ip, const unsigned int program_bt);
@@ -187,6 +189,7 @@ class ANARACE: public PRERACE
 		static void resetStaticData();
 		void prepareForNewGeneration();				// resets all data to standard values
 //		void analyzeBuildOrder();		// sets the isGoal of program
+		
 };
 
 //int getProgramSuccessType(int IP);

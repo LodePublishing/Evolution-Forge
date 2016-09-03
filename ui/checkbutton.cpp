@@ -2,26 +2,26 @@
 
 UI_CheckButton& UI_CheckButton::operator=(const UI_CheckButton& object)
 {
-    ((UI_Object)(*this)) = ((UI_Object)object);
+	((UI_Object)(*this)) = ((UI_Object)object);
 	checked = object.checked;
 	delete checkButton;
-    checkButton = new UI_Button(*(object.checkButton));
+	checkButton = new UI_Button(*(object.checkButton));
 	delete text;
 	text = (object.text?new UI_StaticText(*(object.text)):NULL);
 	return(*this);
 }
 
 UI_CheckButton::UI_CheckButton(const UI_CheckButton& object) :
-    UI_Object((UI_Object)object),
+	UI_Object((UI_Object)object),
 	checked(object.checked),
-    checkButton(new UI_Button(*(object.checkButton))),
-    text(object.text?new UI_StaticText(*(object.text)):NULL)
+	checkButton(new UI_Button(*(object.checkButton))),
+	text(object.text?new UI_StaticText(*(object.text)):NULL)
 { }
 
 UI_CheckButton::UI_CheckButton(UI_Object* checkbutton_parent, const Rect rect, const eString txt, const eString tooltip_string, const bool is_checked) :
 	UI_Object(checkbutton_parent, rect, rect),
-    checkButton(new UI_Button(this, Rect(Point(120, 3),Size(10,10)), Rect(Point(0,0), getSize()), CHECK_BUTTON, STATIC_BUTTON_MODE)),
-    text(new UI_StaticText(this, txt, Rect(Point(0,0), Size(110, 0)), FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT, RIGHT_BOUNDED_TEXT_MODE))
+	checkButton(new UI_Button(this, Rect(Point(120, 3),Size(10,10)), Rect(Point(0,0), getSize()), CHECK_BUTTON, STATIC_BUTTON_MODE)),
+	text(new UI_StaticText(this, txt, Rect(Point(0,0), Size(110, 0)), FORCE_TEXT_COLOR, SMALL_ITALICS_BOLD_FONT, RIGHT_BOUNDED_TEXT_MODE))
 {
 	this->updateToolTip(tooltip_string); // TODO
 	check(is_checked);

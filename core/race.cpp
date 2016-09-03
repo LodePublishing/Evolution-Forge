@@ -21,10 +21,10 @@ RACE::~RACE()
 
 RACE::RACE(const RACE& object) :
 	PRERACE((PRERACE)(object)),
-    mutationRate( object.mutationRate ),
-    pFitness( object.pFitness ),
-    sFitness( object.sFitness ),
-    tFitness( object.tFitness )
+	mutationRate( object.mutationRate ),
+	pFitness( object.pFitness ),
+	sFitness( object.sFitness ),
+	tFitness( object.tFitness )
 { }
 
 void RACE::resetData()
@@ -43,10 +43,10 @@ void RACE::resetStaticData()
 RACE& RACE::operator=(const RACE& object)
 {
 	(PRERACE)(*this) = (PRERACE)(object);
-    mutationRate = object.mutationRate;
-    pFitness = object.pFitness;
-    sFitness = object.sFitness;
-    tFitness = object.tFitness;
+	mutationRate = object.mutationRate;
+	pFitness = object.pFitness;
+	sFitness = object.sFitness;
+	tFitness = object.tFitness;
 	return(*this);
 }
 

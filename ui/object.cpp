@@ -8,6 +8,7 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const R
 
 	filledHeight(relative_rect.GetHeight()),
 	children(NULL),
+//	notDrawRectList(),
 	shown(true),
 	disabledFlag(false),
 
@@ -19,7 +20,7 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const R
 	min_bottom_right_x(0),	
 
 
-	needRedraw(true),
+//	needRedraw(true),
 	isFreeMove(true),
 //	tempSurface(NULL),
 	prevBrother(this),
@@ -42,68 +43,79 @@ UI_Object::~UI_Object()
 
 UI_Object& UI_Object::operator=(const UI_Object& object)
 {
-    startRect = object.startRect;
-    targetRect = object.targetRect;
-    filledHeight = object.filledHeight;
-    children = object.children;
-    shown = object.shown;
-    disabledFlag = object.disabledFlag;
+	startRect = object.startRect;
+	targetRect = object.targetRect;
+	filledHeight = object.filledHeight;
+	children = object.children;
+//	notDrawRectList = object.notDrawRectList,
+	shown = object.shown;
+	disabledFlag = object.disabledFlag;
 
-    min_top_left_x = object.min_top_left_x;
-    min_left_y = object.min_left_y;
-    min_right_y = object.min_right_y;
-    min_bottom_left_x = object.min_bottom_left_x;
-    min_top_right_x = object.min_top_right_x;
-    min_bottom_right_x = object.min_bottom_right_x;
-    needRedraw = object.needRedraw;
-    isFreeMove = object.isFreeMove;
-//    tempSurface = object.tempSurface;
-    prevBrother = this; // !!
-    nextBrother = this; // !!
-    parent = NULL; // !!
-    relativeRect = object.relativeRect;
+	min_top_left_x = object.min_top_left_x;
+	min_left_y = object.min_left_y;
+	min_right_y = object.min_right_y;
+	min_bottom_left_x = object.min_bottom_left_x;
+	min_top_right_x = object.min_top_right_x;
+	min_bottom_right_x = object.min_bottom_right_x;
+//	needRedraw = object.needRedraw;
+	isFreeMove = object.isFreeMove;
+//	SDL_FreeSurface(tempSurface);
+//DL_Crate
+//	tempSurface = object.tempSurface;
+	prevBrother = this; // !!
+	nextBrother = this; // !!
+	parent = NULL; // !!
+	relativeRect = object.relativeRect;
 //  lastRect = object.lastRect;
-    maxRect = object.maxRect;
-    doAdjustments = object.doAdjustments;
+	maxRect = object.maxRect;
+	doAdjustments = object.doAdjustments;
 	toolTipString = object.toolTipString;
 	
-    setParent(object.parent);
+	setParent(object.parent);
 	
 	return(*this);
 }
 
 UI_Object::UI_Object(const UI_Object& object) :
-    startRect( object.startRect ),
-    targetRect( object.targetRect ),
-    filledHeight( object.filledHeight ),
-    children( object.children ),
-    shown( object.shown ), 
-    disabledFlag( object.disabledFlag ),
+	startRect( object.startRect ),
+	targetRect( object.targetRect ),
+	filledHeight( object.filledHeight ),
+	children( object.children ),
+//	notDrawRectList( object.notDrawRectList ),
+	shown( object.shown ), 
+	disabledFlag( object.disabledFlag ),
 
 	min_top_left_x( object.min_top_left_x ),
-    min_left_y( object.min_left_y ),
-    min_right_y( object.min_right_y ),
-    min_bottom_left_x( object.min_bottom_left_x ),
-    min_top_right_x( object.min_top_right_x ),
-    min_bottom_right_x( object.min_bottom_right_x ),
+	min_left_y( object.min_left_y ),
+	min_right_y( object.min_right_y ),
+	min_bottom_left_x( object.min_bottom_left_x ),
+	min_top_right_x( object.min_top_right_x ),
+	min_bottom_right_x( object.min_bottom_right_x ),
 
-    needRedraw( object.needRedraw ),
-    isFreeMove( object.isFreeMove ),
-//    tempSurface( object.tempSurface ),
-    prevBrother( this ), // !!
-    nextBrother( this ), // !!
-    parent( NULL ), // !!
-    relativeRect( object.relativeRect ),
-//    lastRect( object.lastRect ),
-    maxRect( object.maxRect ),
-    doAdjustments( object.doAdjustments ),
-    toolTipString( object.toolTipString )
+//	needRedraw( object.needRedraw ),
+	isFreeMove( object.isFreeMove ),
+//	tempSurface( object.tempSurface ),
+	prevBrother( this ), // !!
+	nextBrother( this ), // !!
+	parent( NULL ), // !!
+	relativeRect( object.relativeRect ),
+//	lastRect( object.lastRect ),
+	maxRect( object.maxRect ),
+	doAdjustments( object.doAdjustments ),
+	toolTipString( object.toolTipString )
 { 
 	setParent(object.parent);
 }
 
+/*
+void UI_Object::addRect(const Rect& rect)
+{
+	notDrawRectList.push_back(rect);
+}*/
 
-const Point UI_Object::getAbsolutePosition() const	{
+
+const Point UI_Object::getAbsolutePosition() const	
+{
 	if(parent)
 		return(relativeRect.GetTopLeft() + parent->getAbsolutePosition());
 	else return(relativeRect.GetTopLeft());
@@ -116,16 +128,16 @@ void UI_Object::getHasFocus()
 }
 const bool UI_Object::setNextFocus()
 {
-    UI_Object* tmp=children;  // process all children of gadget
+	UI_Object* tmp=children;  // process all children of gadget
    	if (tmp) {
-       	do {
+	   	do {
 			if(tmp->getHasFocus() && (tmp->nextBrother!=children))
 			{
 				if(tmp->nextBrother->setFocus())
 				return(true);
 			}
-            tmp = tmp->nextBrother;
-   	    } while (tmp != children);
+			tmp = tmp->nextBrother;
+   		} while (tmp != children);
 	}
 	return(false);
 }
@@ -140,16 +152,16 @@ const bool UI_Object::setFocus()
 	else 
 	{
 		hasFocus=false;
-	    UI_Object* tmp=children;  // process all children of gadget
-    	if (tmp) {
-        	do {
+		UI_Object* tmp=children;  // process all children of gadget
+		if (tmp) {
+			do {
 				if(tmp->setFocus())
 					return(true);
-	            tmp = tmp->nextBrother;
-    	    } while (tmp != children);
+				tmp = tmp->nextBrother;
+			} while (tmp != children);
 		}
 		return(false);
-    }
+	}
 }
 */
 
@@ -191,11 +203,11 @@ const Rect& UI_Object::getMaxRect() const {
 }
 
 const unsigned int UI_Object::getTargetWidth() const {
-    return(targetRect.GetWidth());
+	return(targetRect.GetWidth());
 }
 
 const unsigned int UI_Object::getTargetHeight() const {
-    return(targetRect.GetHeight());
+	return(targetRect.GetHeight());
 }
 
 void UI_Object::setFreeMove(const bool is_free_move) {
@@ -213,10 +225,10 @@ void UI_Object::adjustRelativeRect(Rect edge)
 		if((edge.GetRight() > maxRect.GetRight())&&(!isFreeMove)&&(maxRect.GetRight() > edge.GetLeft()))
 			edge.SetRight( maxRect.GetRight() );
 			
-        if((edge.GetTop()<maxRect.GetTop()) && (!isFreeMove))
-            edge.SetTop(maxRect.GetTop());
+		if((edge.GetTop()<maxRect.GetTop()) && (!isFreeMove))
+			edge.SetTop(maxRect.GetTop());
 			
-		if((edge.GetBottom() > maxRect.GetBottom())&&(isFreeMove)&&(maxRect.GetBottom() > edge.GetBottom()))
+		if((edge.GetBottom() > maxRect.GetBottom())&&(!isFreeMove)&&(maxRect.GetBottom() > edge.GetBottom()))
 			edge.SetBottom(maxRect.GetBottom());
 		 
 // neues Ziel?
@@ -229,12 +241,12 @@ void UI_Object::adjustRelativeRect(Rect edge)
 			startRect.SetRight(getRelativeRightBound());
 		}
 			
-        if((edge.GetTop()!=targetRect.GetTop())||(edge.GetHeight()!=targetRect.GetHeight()))
+		if((edge.GetTop()!=targetRect.GetTop())||(edge.GetHeight()!=targetRect.GetHeight()))
 		{
-            startRect.SetTop(getRelativeUpperBound());
+			startRect.SetTop(getRelativeUpperBound());
 			
 //		if(edge.GetHeight()!=targetRect.GetHeight())
-            startRect.SetBottom(getRelativeLowerBound());
+			startRect.SetBottom(getRelativeLowerBound());
 		}
 		
 
@@ -243,63 +255,63 @@ void UI_Object::adjustRelativeRect(Rect edge)
 	
 	
 //	if(edge.width==-99)
-  //      edge.width=targetRect.width;
-    //if(edge.height==-99)
-      //  edge.height=targetRect.height;
+  //	  edge.width=targetRect.width;
+	//if(edge.height==-99)
+	  //  edge.height=targetRect.height;
 //Only 1 change (X OR WIDTH, Y OR HEIGHT) is allowed!
-    if(edge.width==targetRect.width) // nur x ist unterschiedlich
-    {
-        if(((edge.x!=targetRect.x)&&(edge.x+edge.width<maxRect.x+maxRect.width)) // es ist ein neues Ziel
-        ||((edge.x+edge.width>maxRect.x+maxRect.width)&&(targetRect.x+targetRect.width!=maxRect.x+maxRect.width)) // oder einfach ausserhalb der Begrenzung aber unser Ziel war nicht die Begrenzung
-        ||((edge.x<maxRect.x)&&(targetRect.x!=maxRect.x)) // oder links ausserhalb der Begrenzung und altes Target hat nicht gepasst
-        ||((edge.x!=targetRect.x)&&(isFreeMove))) // oder einfach freemove
-            startRect.x=getLeftBound(); //Dann setze neuen Startpunkt
+	if(edge.width==targetRect.width) // nur x ist unterschiedlich
+	{
+		if(((edge.x!=targetRect.x)&&(edge.x+edge.width<maxRect.x+maxRect.width)) // es ist ein neues Ziel
+		||((edge.x+edge.width>maxRect.x+maxRect.width)&&(targetRect.x+targetRect.width!=maxRect.x+maxRect.width)) // oder einfach ausserhalb der Begrenzung aber unser Ziel war nicht die Begrenzung
+		||((edge.x<maxRect.x)&&(targetRect.x!=maxRect.x)) // oder links ausserhalb der Begrenzung und altes Target hat nicht gepasst
+		||((edge.x!=targetRect.x)&&(isFreeMove))) // oder einfach freemove
+			startRect.x=getLeftBound(); //Dann setze neuen Startpunkt
 		
-        if((edge.x+edge.width>maxRect.x+maxRect.width)&&(!isFreeMove))
-            edge.x=maxRect.x+maxRect.width-edge.width;
-    } else if(edge.x==targetRect.x)
-    {
-        if(((edge.width!=targetRect.width)&&(edge.x+edge.width<maxRect.x+maxRect.width))
-        ||((edge.x+edge.width>maxRect.x+maxRect.width)&&(targetRect.x+targetRect.width!=maxRect.x+maxRect.width))
-        ||((edge.width!=targetRect.width)&&(isFreeMove)))
-            startRect.width=getWidth();
-        if((edge.x+edge.width>maxRect.x+maxRect.width)&&(!isFreeMove))
-            edge.width=maxRect.x+maxRect.width-edge.x;
-    } //else ?
-                                                                                                                                                            
-    if(edge.height==targetRect.height)
-    {
-        if(((edge.y!=targetRect.y)&&(edge.y+edge.height<maxRect.y+maxRect.height))
-        ||((edge.y+edge.height>maxRect.y+maxRect.height)&&(targetRect.y+targetRect.height!=maxRect.y+maxRect.height))
-        ||((edge.y<maxRect.y)&&(targetRect.y!=maxRect.y)) )
-//        ||((edge.y!=targetRect.y)&&(isFreeMove)))
-            startRect.y=getUpperBound();
-    //    if((edge.y+edge.height>maxRect.y+maxRect.height)&&(!isFreeMove))
-      //      edge.y=maxRect.y+maxRect.height-edge.height;
-    } else if(edge.y==targetRect.y)
-    {
-        if(((edge.height!=targetRect.height)&&(edge.y+edge.height<maxRect.y+maxRect.height))
-        ||((edge.y+edge.height>maxRect.y+maxRect.height)&&(targetRect.y+targetRect.height!=maxRect.y+maxRect.height)) )
-    //    ||((edge.height!=targetRect.height)&&(isFreeMove)))
-            startRect.height=getHeight();
-//        if((edge.y+edge.height>maxRect.y+maxRect.height)&&(!isFreeMove))
-  //          edge.height=maxRect.y+maxRect.height-edge.y;
-    } //else ... mmmh...
+		if((edge.x+edge.width>maxRect.x+maxRect.width)&&(!isFreeMove))
+			edge.x=maxRect.x+maxRect.width-edge.width;
+	} else if(edge.x==targetRect.x)
+	{
+		if(((edge.width!=targetRect.width)&&(edge.x+edge.width<maxRect.x+maxRect.width))
+		||((edge.x+edge.width>maxRect.x+maxRect.width)&&(targetRect.x+targetRect.width!=maxRect.x+maxRect.width))
+		||((edge.width!=targetRect.width)&&(isFreeMove)))
+			startRect.width=getWidth();
+		if((edge.x+edge.width>maxRect.x+maxRect.width)&&(!isFreeMove))
+			edge.width=maxRect.x+maxRect.width-edge.x;
+	} //else ?
+																																							
+	if(edge.height==targetRect.height)
+	{
+		if(((edge.y!=targetRect.y)&&(edge.y+edge.height<maxRect.y+maxRect.height))
+		||((edge.y+edge.height>maxRect.y+maxRect.height)&&(targetRect.y+targetRect.height!=maxRect.y+maxRect.height))
+		||((edge.y<maxRect.y)&&(targetRect.y!=maxRect.y)) )
+//		||((edge.y!=targetRect.y)&&(isFreeMove)))
+			startRect.y=getUpperBound();
+	//	if((edge.y+edge.height>maxRect.y+maxRect.height)&&(!isFreeMove))
+	  //	  edge.y=maxRect.y+maxRect.height-edge.height;
+	} else if(edge.y==targetRect.y)
+	{
+		if(((edge.height!=targetRect.height)&&(edge.y+edge.height<maxRect.y+maxRect.height))
+		||((edge.y+edge.height>maxRect.y+maxRect.height)&&(targetRect.y+targetRect.height!=maxRect.y+maxRect.height)) )
+	//	||((edge.height!=targetRect.height)&&(isFreeMove)))
+			startRect.height=getHeight();
+//		if((edge.y+edge.height>maxRect.y+maxRect.height)&&(!isFreeMove))
+  //		  edge.height=maxRect.y+maxRect.height-edge.y;
+	} //else ... mmmh...
 
-     if((edge.x<maxRect.x)||(isFreeMove))
-        targetRect.x=maxRect.x;
-    else targetRect.x=edge.x;
+	 if((edge.x<maxRect.x)||(isFreeMove))
+		targetRect.x=maxRect.x;
+	else targetRect.x=edge.x;
 
 	if((edge.y<maxRect.y)||(isFreeMove))
-      targetRect.y=maxRect.y;
-    else targetRect.y=edge.y;*/
+	  targetRect.y=maxRect.y;
+	else targetRect.y=edge.y;*/
   
 /* 	if((edge.x>=maxRect.x)||(isFreeMove))
-    	targetRect.x=edge.x;
+		targetRect.x=edge.x;
 	else targetRect.x=maxRect.x;
 
 	if((edge.y>=maxRect.y)||(isFreeMove))
-    	targetRect.y=edge.y;
+		targetRect.y=edge.y;
 	else targetRect.y=maxRect.y;*/
 	targetRect=edge;
 	}
@@ -307,7 +319,7 @@ void UI_Object::adjustRelativeRect(Rect edge)
 //	targetRect.width=edge.width;
   //  targetRect.height=edge.height;
 
-    isFreeMove=0;
+	isFreeMove=0;
 }
 
 const bool UI_Object::isTopItem() const
@@ -320,7 +332,7 @@ const bool UI_Object::isTopItem() const
 
 void UI_Object::Show(const bool show)
 {
-	shown=show;
+	shown = show;
 	if(show)
 		process();
 }
@@ -363,22 +375,22 @@ const bool UI_Object::isDisabled() const
 //
 void UI_Object::removeFromFamily()
 {
-    if (parent) 
+	if (parent) 
 	{
-        if (parent->children == this) 
+		if (parent->children == this) 
 		{
-            if (nextBrother == this)  // the only child?
-                parent->children = NULL;  // if so, parent now has no children
-            else
-                parent->children = nextBrother;  // next sibling is now the eldest
-        }
-    } 
-    parent = NULL;
-    if (nextBrother != this) {  // does this object have siblings?
-        nextBrother->prevBrother = prevBrother;
-        prevBrother->nextBrother = nextBrother;
-    }
-    
+			if (nextBrother == this)  // the only child?
+				parent->children = NULL;  // if so, parent now has no children
+			else
+				parent->children = nextBrother;  // next sibling is now the eldest
+		}
+	} 
+	parent = NULL;
+	if (nextBrother != this) {  // does this object have siblings?
+		nextBrother->prevBrother = prevBrother;
+		prevBrother->nextBrother = nextBrother;
+	}
+	
 	nextBrother = prevBrother = this;
 }
 
@@ -389,8 +401,8 @@ void UI_Object::removeFromFamily()
 
 void UI_Object::setParent(UI_Object* daddy) 
 {
-    removeFromFamily();
-    parent = daddy;
+	removeFromFamily();
+	parent = daddy;
 
 	if(!daddy)
 		return;
@@ -400,22 +412,22 @@ void UI_Object::setParent(UI_Object* daddy)
 void UI_Object::addChild(UI_Object* child)
 {
 	if (!children) 
-        children = child;
-    else 
+		children = child;
+	else 
 	{
-        UI_Object *eldest_sibling, *youngest_sibling;
+		UI_Object *eldest_sibling, *youngest_sibling;
 
 		eldest_sibling = children;
-        youngest_sibling = eldest_sibling->prevBrother;
+		youngest_sibling = eldest_sibling->prevBrother;
 
 		child->nextBrother = eldest_sibling;
-        child->prevBrother = youngest_sibling;
+		child->prevBrother = youngest_sibling;
 
 		eldest_sibling->prevBrother = child;
-        youngest_sibling->nextBrother = child;
+		youngest_sibling->nextBrother = child;
 
 //		children = child;
-    }
+	}
 }
 
 // TODO
@@ -463,12 +475,17 @@ void UI_Object::addRectToBeDrawn(Rect& lastRect, const Rect currentRect)
 #endif
 void UI_Object::process()
 {
-    if (/*(disabledFlag)||*/(!shown)) //~~
-      return;
+	if (/*(disabledFlag)||*/(!shown)) //~~
+		return;
+//	needRedraw=false;
+
+//	while(!notDrawRectList.empty())
+//		notDrawRectList.pop_front();
 
 	if(doAdjustments==1)
 	{
 		adjustRelativeRect(Rect(Point(targetRect.GetTopLeft()), Size(targetRect.GetWidth(), filledHeight+25))); // TODO!
+//		ARGH
 		doAdjustments=2;
 	}	
 
@@ -493,16 +510,16 @@ void UI_Object::process()
 #endif
 	min_top_right_x = min_bottom_right_x = min_bottom_left_x = min_left_y = min_top_left_x = min_right_y = 0;
 
-    UI_Object* tmp=children;  // process all children of gadget
-    if (tmp) {
-        do {
-            tmp->process();
-            tmp = tmp->nextBrother;
-                                                                                
-        } while (tmp != children);
-    }
+	UI_Object* tmp=children;  // process all children of gadget
+	if (tmp) {
+		do {
+			tmp->process();
+			tmp = tmp->nextBrother;
+																				
+		} while (tmp != children);
+	}
 	
-	if((configuration.isTooltips())&&(isMouseInside())&&(toolTipString!=NULL_STRING))
+	if((toolTipString!=NULL_STRING)&&(configuration.isTooltips())&&(isMouseInside()))
 		toolTipParent = this;
 }
 
@@ -512,16 +529,16 @@ UI_Object* UI_Object::checkTooltip()
 		return(NULL);
 //	if(!(getAbsoluteRect().Inside(p)))
 //		return(0); 0 size players ?
-    UI_Object* tmp=children;  // process all children of gadget
+	UI_Object* tmp=children;  // process all children of gadget
 	if(!tmp)
 		return(NULL); // return 0 as this is an object and no button!
 
 	UI_Object* result=NULL;
 	do 
-    {
+	{
 		result = tmp->checkTooltip();
-        tmp = tmp->nextBrother;
-    }
+		tmp = tmp->nextBrother;
+	}
 	while((tmp!=children)&&(result==NULL));
 	return(result);
 }
@@ -531,14 +548,14 @@ void UI_Object::adjustButtonPlacementSize()
 
 void UI_Object::reloadStrings()
 {
-    UI_Object* tmp=children;  // process all children of gadget
+	UI_Object* tmp=children;  // process all children of gadget
 	if(!tmp)
 		return;
 	do 
-    {
+	{
 		tmp->reloadStrings();
-        tmp = tmp->nextBrother;
-    }
+		tmp = tmp->nextBrother;
+	}
 	while(tmp!=children);
 }
 
@@ -549,16 +566,16 @@ UI_Object* UI_Object::checkHighlight()
 		return(NULL);
 //	if(!(getAbsoluteRect().Inside(p)))
 //		return(0); 0 size players ?
-    UI_Object* tmp=children;  // process all children of gadget
+	UI_Object* tmp=children;  // process all children of gadget
 	if(!tmp)
 		return(NULL); // return 0 as this is an object and no button!
 
 	UI_Object* result=NULL;
 	do 
-    {
+	{
 		result = tmp->checkHighlight();
-        tmp = tmp->nextBrother;
-    }
+		tmp = tmp->nextBrother;
+	}
 	while((tmp!=children)&&(result==NULL));
 	return(result);
 }
@@ -568,7 +585,7 @@ const bool UI_Object::isMouseInside() const
 	return(getAbsoluteRect().Inside(mouse));
 }
 
-const bool UI_Object::doesNeedRedraw() const
+/*const bool UI_Object::doesNeedRedraw() const
 {
 	return(needRedraw);
 }
@@ -576,23 +593,22 @@ const bool UI_Object::doesNeedRedraw() const
 void UI_Object::setNeedRedraw(const bool need_redraw)
 {
 	this->needRedraw=need_redraw;
-}
+}*/
 
 void UI_Object::draw(DC* dc) const
 {
-    // if hidden, hide children as well
-    if (!shown)
+	// if hidden, hide children as well
+	if (!shown)
 		return;
 
-    UI_Object* tmp=children;
+	UI_Object* tmp = children;
 	
-    if (tmp) {
-        do {
-            tmp->draw(dc);
-            tmp = tmp->nextBrother;
-        } while (tmp != children);
-    }
-
+	if (tmp) {
+		do {
+			tmp->draw(dc);
+			tmp = tmp->nextBrother;
+		} while (tmp != children);
+	}
 }
 
 void UI_Object::setPosition(const Point& position)
@@ -677,8 +693,8 @@ void UI_Object::resetButton()
 	
 UI_Theme UI_Object::theme;
 long unsigned int UI_Object::startTime(0);
-SDL_Rect UI_Object::rectlist[3000];
-unsigned int UI_Object::rectnumber(0);
+//SDL_Rect UI_Object::rectlist[3000];
+//unsigned int UI_Object::rectnumber(0);
 UI_Tooltip* UI_Object::tooltip(NULL);
 UI_Object* UI_Object::toolTipParent(NULL);
 unsigned int UI_Object::max_x(0);

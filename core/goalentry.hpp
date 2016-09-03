@@ -7,13 +7,34 @@
 
 struct GOAL_TREE
 {
-	bool checked[GAS_SCV+1];
-	unsigned int level[GAS_SCV+1];
-	unsigned int coloumn[GAS_SCV+1];
-	unsigned int width[12];
-	std::list<unsigned int> con[GAS_SCV+1];
-	std::list<unsigned int> unit[12];
+	bool checked[UNIT_TYPE_COUNT];
+	unsigned int level[UNIT_TYPE_COUNT];
+	unsigned int coloumn[UNIT_TYPE_COUNT];
+	unsigned int width[10];
+	std::list<unsigned int> con[UNIT_TYPE_COUNT];
+	std::list<unsigned int> unit[10];
 };
+
+struct ALLOW
+{
+        list<unsigned int> facility;
+        list<unsigned int> facility2;
+        list<unsigned int> prerequisite;
+};
+
+struct NEED
+{
+	public:
+		const bool facilityIsDone();
+		const bool facility2IsDone();
+		const bool prerequisiteIsDone();
+		NEED& operator=(const NEED& object);
+	
+        	bool facility;
+	        bool facility2;
+        	unsigned int prerequisite; // we need all... no double?
+};
+
 
 class GOAL_ENTRY
 {
@@ -33,11 +54,13 @@ class GOAL_ENTRY
 		bool changed;
 		bool raceInitialized;
 		bool isBuildable[UNIT_TYPE_COUNT];
-		bool isVariable[UNIT_TYPE_COUNT];	
+		bool isStatic[UNIT_TYPE_COUNT];	
 		bool isHaveable[UNIT_TYPE_COUNT]; // all units that are goals, can be build or are build by the bo (larva etc.)
 
 	public:
 		std::list<GOAL> goal; // private?
+		NEED need[UNIT_TYPE_COUNT];
+		ALLOW allow[UNIT_TYPE_COUNT];
 		
 		GOAL_ENTRY();
 		GOAL_ENTRY(const GOAL_ENTRY& object);
@@ -56,16 +79,9 @@ class GOAL_ENTRY
 		const bool calculateReady(const UNIT* units) const;
 		const unsigned int getAllGoal(const unsigned int unit) const;
 		const unsigned int getGlobalGoal(const unsigned int location, const unsigned int unit) const;
-		const bool getIsBuildable(const unsigned int unit) const
-{
-#ifdef _SCC_DEBUG
-	if(unit>GAS_SCV) {
-		toLog("DEBUG: (GOAL_ENTRY::getIsBuildable): Value unit out of range.");return(false);
-	}
-#endif
-	return(isBuildable[unit]);		
-}
+		const bool getIsBuildable(const unsigned int unit) const;
 		const bool getIsHaveable(const unsigned int unit) const;
+		const bool getIsStatic(const unsigned int unit) const;
 
 		void resetData();
 

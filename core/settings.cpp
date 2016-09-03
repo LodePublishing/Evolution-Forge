@@ -61,7 +61,8 @@ list<string> SETTINGS::findFiles(const string directory1, const string directory
 		}
 		closedir(dir);
 	}
-#else
+#elif __WIN32__
+	toLog("winnn");
 	WIN32_FIND_DATA dir;
 	HANDLE fhandle;
 	ostringstream os;
@@ -139,6 +140,11 @@ void SETTINGS::loadGoalFile(const string& goalFile)
 		toLog(os.str());
 		return;
 	}
+	ostringstream os;
+	os.str("");
+	os << goalFile << " loaded.";
+	toLog(os.str());
+	
 	char line[1024];
 	string text;
 	GOAL_ENTRY* goal = new GOAL_ENTRY;
@@ -554,13 +560,18 @@ pFile << "</html>" << std::endl;
 void SETTINGS::saveGoal(const string& name, GOAL_ENTRY* goalentry)
 {
 	ostringstream os;
+#ifdef __linux__
 	os << "settings/goals/";
 	os << raceString[goalentry->getRace()] << "/" << name << ".gol";// TODO!
-    ofstream pFile(os.str().c_str(), ios_base::out | ios_base::trunc);
-    if(!pFile.is_open())
-    {
-        toLog("ERROR: Could not create file (write protection? disk space?)");
-        return;
+#elif __WIN32__
+	os << "settings\\goals\\";
+	os << raceString[goalentry->getRace()] << "\\" << name << ".gol";// TODO!
+#endif 
+	ofstream pFile(os.str().c_str(), ios_base::out | ios_base::trunc);
+	if(!pFile.is_open())
+	{
+	        toLog("ERROR: Could not create file (write protection? disk space?)");
+        	return;
 	}
 
 	goalentry->setName(name);
@@ -569,13 +580,8 @@ void SETTINGS::saveGoal(const string& name, GOAL_ENTRY* goalentry)
 	pFile << "        \"Name\" \"" << name << "\"" << std::endl; // TODO
 	pFile << "        \"Race\" \"" << raceString[goalentry->getRace()] << "\"" << std::endl;
 
-    for(std::list<GOAL>::const_iterator i = goalentry->goal.begin(); i!=goalentry->goal.end(); i++)
-//    bool first=true;
-  //  while(goalentry->getNextGoal(i, first))
-    {
-//        first=false;
+	for(std::list<GOAL>::const_iterator i = goalentry->goal.begin(); i!=goalentry->goal.end(); i++)
 		pFile << "        \"" << stats[goalentry->getRace()][i->getUnit()].name << "\" \"" << i->getCount() << "\" \"" << i->getLocation() << "\" \"" << i->getTime() << "\"" << std::endl;		
-	}
 	
 	pFile << "@END" << std::endl;
 	loadGoalFile(os.str().c_str());

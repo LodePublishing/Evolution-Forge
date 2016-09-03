@@ -13,6 +13,8 @@ const Size Point::operator-(const Point& point) const
 
 void Point::mv(signed int& x, const signed int sx, const signed int tx)
 {
+	if(x == tx)
+		return;
 	signed int z = (signed int)(((x>sx)?(2*(x-sx)<(tx-sx)?(double)(x-sx)/2:(double)(tx-x)/2):(2*(x-sx)>(tx-sx)?(double)(x-sx)/2:(double)(tx-x)/2)));
 	if(z==0)
 		z=((x>tx)?-2:0)+((x<tx)?1:0);

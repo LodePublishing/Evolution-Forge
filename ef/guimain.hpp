@@ -50,7 +50,8 @@ class Main
 		void setMouse(const Point p);
 	
 		Point maus;
-//	private:
+		bool drawing;
+	private:
 //		SDL_Surface* cursor_save;
 //		SDL_Surface* cursor;
 
@@ -65,7 +66,8 @@ class Main
 		unsigned int update; // TODO anderer Name
 		unsigned int refresh; // "" 
 		unsigned int ani, ani2;
-		bool drawing;
+
+		bool boHasChanged;	
 };
 																				
 #endif

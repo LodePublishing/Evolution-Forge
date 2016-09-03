@@ -19,8 +19,7 @@ Player::Player(UI_Object* player_parent, ANARACE** player_anarace, MessageWindow
 	window[TIMER_WINDOW] = new TimerWindow(this, *anarace, playerNumber);
 	window[STATISTICS_WINDOW]=new StatisticsWindow(this, *anarace, playerNumber);
 	window[INFO_WINDOW] = new InfoWindow(this, *anarace, playerNumber);
-	window[BUILD_ORDER_WINDOW]=new BoWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], msgWindow, &orderList, playerNumber);
-	
+	window[BUILD_ORDER_WINDOW] = new BoWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], msgWindow, &orderList,/* fixed,*/ playerNumber);
 	window[BO_GRAPH_WINDOW] = new BoGraphWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], &orderList, playerNumber);
 	window[BO_DIAGRAM_WINDOW]=new BoDiagramWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], playerNumber);
 	
@@ -31,7 +30,9 @@ Player::Player(UI_Object* player_parent, ANARACE** player_anarace, MessageWindow
 //	return;
 	Hide();
 	setOptimizing(false);
-	
+//	for(int i=MAX_LENGTH;i--;)
+//		fixed[i]=false;	
+//	(*anarace)->setFixed(fixed);
 }
 
 void Player::assignAnarace(ANARACE** player_anarace)
@@ -44,160 +45,7 @@ void Player::assignAnarace(ANARACE** player_anarace)
 	((BoWindow*)window[BUILD_ORDER_WINDOW])->assignAnarace(*anarace);
 	((BoGraphWindow*)window[BO_GRAPH_WINDOW])->assignAnarace(*anarace);
 	((BoDiagramWindow*)window[BO_DIAGRAM_WINDOW])->assignAnarace(*anarace);
-}
-
-void Player::processBoGraph()
-{
-	if((!window[BO_GRAPH_WINDOW]->isShown())||(!isShown()))
-		return;
-	unsigned int fac[20];
-	unsigned int unitCounter[UNIT_TYPE_COUNT][MAX_LENGTH];
-	unsigned int height[UNIT_TYPE_COUNT];
-	unsigned int lines[UNIT_TYPE_COUNT];
-	unsigned int faccount=0;
-	int lastbographY=0;
-
-	for(int i=UNIT_TYPE_COUNT;i--;)
-	{
-		for(int j=0;j<MAX_LENGTH;j++)
-			unitCounter[i][j]=0;
-		height[i]=0;
-		lines[i]=0;
-	}
-
-	BOGRAPH bograph[20];
-	for(int i=20;i--;)
-		fac[i]=0; // TODO in BOGRAPH?
-
-//calculate maximum height per facility => height is after that the maximum of force - availible for each facility
-	for(map<long, Order>::const_iterator order=orderList.begin(); order!=orderList.end(); ++order)
-	{
-		unsigned int IP=order->second.getIP();
-// falls facility benoetigt wird und Zahl der zu dem Zeitpunkt vorhandenen Einheiten minus der verfuegbaren Einheiten > hoehe => setze hoehe auf diesen Wert		
-		if((*anarace)->getProgramFacility(IP)&&
-		  ((*anarace)->getProgramTotalCount(IP, (*anarace)->getProgramFacility(IP))-(*anarace)->getProgramAvailibleCount(IP,(*anarace)->getProgramFacility(IP))>height[(*anarace)->getProgramFacility(IP)]))
-			 height[(*anarace)->getProgramFacility(IP)]=(*anarace)->getProgramTotalCount(IP,(*anarace)->getProgramFacility(IP))-(*anarace)->getProgramAvailibleCount(IP,(*anarace)->getProgramFacility(IP));
-		// total - availible at that time equals used facilities
-	}
-	//=>  height[i] = max used i-facilities
-																																							
-//calculate number of lines per facility and adjust the height
-	for(int i=UNIT_TYPE_COUNT;i--;)
-	{
-// at maximum MIN_HEIGHT items in one row
-		while(height[i]>MIN_HEIGHT) {
-			height[i]-=MIN_HEIGHT;
-			lines[i]++;
-		}
-		if(height[i]>0)
-			lines[i]++;
-		if(lines[i]>1)
-			height[i]=MIN_HEIGHT;
-		if(height[i]==0) // TODO!
-			height[i]=1;
-	}
-
-//make a list of facilities that are needed...
-// TODO WARUM = 1 und nicht = 0?
-	faccount=1;
-	for(map<long, Order>::const_iterator order=orderList.begin(); order!=orderList.end(); ++order)
-	{
-		if((*anarace)->getProgramFacility(order->second.getIP()))
-		{
-			unsigned int i;
-			// search for 'untaken' facilities
-			for(i=1;(i<faccount)&&(fac[i]!=(*anarace)->getProgramFacility(order->second.getIP()));i++);
-																																							
-			if(i==faccount)
-			{
-				fac[i]=(*anarace)->getProgramFacility(order->second.getIP());
-				faccount++;
-			}
-		}
-	}
-
-// ...and sort them (just an optical issue, scvs last)
-	std::sort(fac, fac+20); // Warnung?!
-// now put all together
-	int position=0;
-	for(int i=0;i<20;i++)
-	{
-		bograph[position].type=fac[i];
-		bograph[position].lines=lines[fac[i]];
-		bograph[position].height=height[fac[i]];
-		position+=lines[fac[i]];
-	}
-
-// create a sorted by IP - list
-	int orderCount=0;
-	Order* sortedList[MAX_LENGTH];
-	for(map<long, Order>::iterator order=orderList.begin(); order!=orderList.end(); ++order) {
-		sortedList[orderCount]=&(order->second);
-		orderCount++;
-	}
-
-	std::sort(sortedList, sortedList+orderCount, Order::OrderDescendingIPSort());
-
-	int hoehe=0;
-//  for(map<long, Order>::iterator order=orderList->begin(); order!=orderList->end(); ++order)
-	for(int k=0;k<orderCount;k++)
-	{
-		if((*anarace)->getProgramFacility(sortedList[k]->getIP()))
-			for(int i=0;i<20;i++)
-				if(bograph[i].type==(*anarace)->getProgramFacility(sortedList[k]->getIP()))
-				{
-//order->time muesste vorsortiert sein
-// hoehen! Positionen anordnen damits keine ueberschneidungen gibt
-																																							
-		// calculate the y-position of this specific order, THIS HAS TO BEGIN WITH 0 -> MAX_LENGTH, DO NOT USE -- OPTIMIZATION!
-					for(int j=0;j<MAX_LENGTH;j++)
-						if(unitCounter[bograph[i].type][j]<=(*anarace)->getRealProgramTime(sortedList[k]->getIP()))
-						{
-// if we have found a unitCounter which has a lower time (all unitCounter start with 0) we set the unit time to starttime + buildtime
-// at the end all unitCounter have the time at which programTime ... TODO
-// the items are in REAL TIME, i.e. time 0 is the beginning, ga->maxTime is the end
-																																							
-							unitCounter[bograph[i].type][j]=(*anarace)->getRealProgramTime(sortedList[k]->getIP())+stats[(*anarace)->getRace()][sortedList[k]->getUnit()/*(*anarace)->getPhaenoCode(sortedList[k]->getIP())*/].BT;
-							hoehe=j;
-							j=MAX_LENGTH;
-						}
-																																							
-					Rect t=Rect(
-Point( ( (*anarace)->getRealProgramTime(sortedList[k]->getIP())*window[BO_GRAPH_WINDOW]->getClientRectWidth()) / ((*anarace)->getRealTimer()),
-	   (1+i+hoehe/MIN_HEIGHT)*(FONT_SIZE+10)+(hoehe%MIN_HEIGHT)*(FONT_SIZE+10)/bograph[i].height),
-																																							
-Size(  (stats[(*anarace)->getRace()][sortedList[k]->getUnit()/*(*anarace)->getPhaenoCode(sortedList[k]->getIP())*/].BT/*(*anarace)->getProgramBT(s)*/*window[BO_GRAPH_WINDOW]->getClientRectWidth())/((*anarace)->getRealTimer()),
-	 (FONT_SIZE+9)/(bograph[i].height)));
-					if(t!=sortedList[k]->btarget)
-						sortedList[k]->bstart=sortedList[k]->brect;
-					sortedList[k]->btarget=t;
-					if(sortedList[k]->bonew)
-					{
-//					  sortedList[k]->brect=sortedList[k]->btarget;
-						sortedList[k]->bstart=sortedList[k]->btarget;
-					}
-				}
-	}
-
-// assign the coordinates for the lines where the orders are printed on
-	int j=0;
-	for(int i=0;i<20;i++)
-		if(bograph[i].type>0)
-		{
-			bograph[i].edge=Rect(window[BO_GRAPH_WINDOW]->getAbsoluteClientRectPosition(), Size(window[BO_GRAPH_WINDOW]->getClientRectWidth(), bograph[i].lines*(FONT_SIZE+10)));
-			bograph[i].edge.SetTop(window[BO_GRAPH_WINDOW]->getAbsoluteClientRectUpperBound()+(j+1)*(FONT_SIZE+10));
-			j+=bograph[i].lines;
-			if(window[BO_GRAPH_WINDOW]->fitItemToAbsoluteClientRect(bograph[i].edge,1))
-				lastbographY=bograph[i].edge.GetBottom();
-		}
-		
-	((BoGraphWindow*)window[BO_GRAPH_WINDOW])->copyBoGraph(bograph);
-	((BoGraphWindow*)window[BO_GRAPH_WINDOW])->setBoGraphY(lastbographY);
-
-
-
-	//TODO Hier das bodiagramzeugs rein!
-	// bodiagram braucht eine sortierte IP List
+//	(*anarace)->setFixed(fixed);
 }
 
 void Player::drawGene(DC* dc, int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const
@@ -211,6 +59,7 @@ void Player::drawGene(DC* dc, int k, const Point* points, const Point position, 
 
 void Player::drawGeneString(DC* dc, const Rect position) const
 {
+#if 0
 	int stringheight=0;
 	Point points1[200];
 	Point points2[200];
@@ -230,7 +79,7 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 	const Order* sortedList[MAX_LENGTH];
 	int orderCount=0;
 	for(map<long, Order>::const_iterator order=orderList.begin(); order!=orderList.end(); ++order) {
-		sortedList[orderCount]=&(order->second);
+		sortedList[orderCount]=&((*order)->second);
 		orderCount++;
 	}
 	if(orderCount<2)
@@ -241,7 +90,7 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 		colors[k]=sortedList[k]->getUnit();
 	
 //	for(map<long, Order>::const_iterator order=orderList.begin(); order!=orderList.end(); ++order)
-//		colors[order->second.getIP()]=order->second.getUnit();
+//		colors[(*order)->second.getIP()]=(*order)->second.getUnit();
 
 //	if((*anarace)->isOptimizing())
 	{
@@ -337,6 +186,7 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 				}
 			} //end blend
 	} //end if(isOptimizing)
+#endif
 }
 																			
 
@@ -404,8 +254,9 @@ void Player::process()
 {
 	if(!isShown())
 		return;
+	window[INFO_WINDOW]->Hide();
 	UI_Object::process();
-
+// TODO!
 // ------ COMMUNICATION BETWEEN THE WINDOWS ------ TODO
 	if(window[FORCE_WINDOW]->isShown())
 	{
@@ -414,7 +265,7 @@ void Player::process()
 		if(!markedIP)
 			markedIP=((BoWindow*)window[BUILD_ORDER_WINDOW])->getMarkedIP();
 
-	((BoGraphWindow*)window[BO_GRAPH_WINDOW])->setMarkedUnit(markedUnit);
+		((BoGraphWindow*)window[BO_GRAPH_WINDOW])->setMarkedUnit(markedUnit);
 //	((BoWindow*)window[BUILD_ORDER_WINDOW])->setMarkedUnit(markedUnit);
 		
 		((BoGraphWindow*)window[BO_GRAPH_WINDOW])->setMarkedIP(markedIP);
@@ -433,7 +284,7 @@ void Player::process()
 	if((*anarace)->isOptimizing())
 		geneAnimation++;
 // ------ PROCESS MEMBER VARIABLES ------	
-	MoveOrders();
+//	MoveOrders();
 // ------ END PROCESSING MEMBER VARIABLES ------
 }
 
@@ -457,7 +308,7 @@ void Player::setOptimizing(const bool opt)
 void Player::resetData()
 {
 	((BoWindow*)window[BUILD_ORDER_WINDOW])->resetData();
-	((ForceWindow*)window[FORCE_WINDOW])->resetData();
+//	((ForceWindow*)window[FORCE_WINDOW])->resetData(); ?
 	((BoGraphWindow*)window[BO_GRAPH_WINDOW])->resetData();
 	((StatisticsWindow*)window[STATISTICS_WINDOW])->resetData();
 	((BoDiagramWindow*)window[BO_DIAGRAM_WINDOW])->resetData();
@@ -475,25 +326,138 @@ void Player::restartAnarace()
 
 void Player::CheckOrders()
 {
-	unsigned int k=1;
+	list<Order*>::iterator order = orderList.begin();
+	
 	for(int s=MAX_LENGTH;s--;)
 		if((*anarace)->getProgramIsBuilt(s)&&((*anarace)->getRealProgramTime(s)<=(*anarace)->getRealTimer()))
 		{
+			if(order == orderList.end()) // => insert at the back
+			{
+                                Order* new_order = new Order();
+                                new_order->setUnit((*anarace)->getPhaenoCode(s));
+                                new_order->setIP(s);
+                                new_order->setMarker((*anarace)->getMarker(s));
+                                orderList.push_back(new_order);				
+			} else if((*order)->getMarker() != (*anarace)->getMarker(s))
+			{
+				std::list<Order*>::iterator i = order;
+	                        while(i != orderList.end())
+        	                {
+                	                if((*i)->getMarker() == (*anarace)->getMarker(s))
+                        	                break;
+                                	i++;
+	                        }
+				if(i!=orderList.end()) // Found, Move the entry
+				{
+					Order* old = *i;
+	                                orderList.insert(order, old);
+                                	orderList.erase(i);
+                        	        old->setUnit((*anarace)->getPhaenoCode(s));
+                                	old->setIP(s);
+				} else // => not found, insert a new one
+				{
+        	                        Order* new_order = new Order();
+                	                new_order->setUnit((*anarace)->getPhaenoCode(s));
+        	                        new_order->setIP(s);
+					new_order->setMarker((*anarace)->getMarker(s));
+	                                orderList.insert(order, new_order);
+				}
+			} else  // ok
+			{
+                                (*order)->setIP(s);
+                                order++;
+			}
+	}
+
+	while(order != orderList.end())
+	{
+		delete(*order);
+		order = orderList.erase(order);
+	}
+
+		#if 0	
+			while((s) && (order != orderList.end()) && ((*order)->getMarker() == (*anarace)->getMarker(s)))
+			{
+			// update
+                                (*order)->setRow(k+1);
+                                Rect t = Rect(0, (k+1)*(FONT_SIZE+7), 500-8, FONT_SIZE+6);
+                                if((*order)->target!=t)
+                                {
+                                        (*order)->start = (*order)->rect;
+                                        (*order)->target = t;
+                                	(*order)->blendTarget = 50;
+	                                (*order)->blendStart = (*order)->blend;
+	                                (*order)->setUnit((*anarace)->getPhaenoCode(s));
+				}
+                                (*order)->setIP(s);
+				s--;
+				order++;
+				k++;
+			}
+
+			list<Order*>::iterator i = order;
+			while(i != orderList.end())
+			{
+				if((*i)->getMarker() == (*anarace)->getMarker(s))
+					break;
+				i++;
+			}
+			if(i == orderList.end()) // => not found, insert new
+			{ 
+				Order* new_order = new Order();
+				new_order->setRow(k+1);
+				new_order->rect = Rect(170, new_order->getRow()*(FONT_SIZE+7), 0, FONT_SIZE+6);
+				Rect t = Rect(0, new_order->getRow()*(FONT_SIZE+7), 500-8, FONT_SIZE+6);
+				new_order->start = new_order->rect;
+				new_order->target = t;
+				new_order->blend = 1;
+				new_order->blendTarget = 50;
+				new_order->blendStart = new_order->blend;
+				new_order->setUnit((*anarace)->getPhaenoCode(s));
+				new_order->setIP(s);
+				new_order->setMarker((*anarace)->getMarker(s));
+				orderList.insert(order, new_order);
+				k++;
+			} else
+// update and swap
+			{
+				Order* old = *i;
+				orderList.erase(i);
+				orderList.insert(order, old);
+
+				old->setRow(k+1);
+                                Rect t = Rect(0, (k+1)*(FONT_SIZE+7), 500-8, FONT_SIZE+6);
+                                if(old->target != t)
+				{
+                                        old->start = old->rect;
+					old->target = t;
+				}
+				old->blendTarget = 50;
+				old->blendStart = (*i)->blend;
+				old->setUnit((*anarace)->getPhaenoCode(s));
+				old->setIP(s);
+				k++;
+			}
+		}
+#endif
+/*
+
+			
 			map<long, Order>::iterator order = orderList.find((*anarace)->getMarker(s)) ;// => found old one -> update the data!
 			if(order!=orderList.end())
 			{
-				order->second.setRow(k+1);//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace())); TODO
-				//Rect t=Rect((order->second.getRow()%2)*(window[BUILD_ORDER_WINDOW]->getWidth()/2), (order->second.getRow()/2)*(FONT_SIZE+6),(window[BUILD_ORDER_WINDOW]->getWidth()-8)/2,FONT_SIZE+4);
-				Rect t=Rect(0,order->second.getRow()*(FONT_SIZE+7),500-8,FONT_SIZE+6);
-				if(order->second.target!=t)
-					order->second.start=order->second.rect;
-				order->second.target=t;
-				order->second.blendTarget=50;
-				order->second.blendStart=order->second.blend;
-				order->second.setUnit((*anarace)->getPhaenoCode(s));
-				order->second.setIP(s);
-				order->second.checked=true;
-				order->second.bonew=false;
+				(*order)->second.setRow(k+1);//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace())); TODO
+				//Rect t=Rect(((*order)->second.getRow()%2)*(window[BUILD_ORDER_WINDOW]->getWidth()/2), ((*order)->second.getRow()/2)*(FONT_SIZE+6),(window[BUILD_ORDER_WINDOW]->getWidth()-8)/2,FONT_SIZE+4);
+				Rect t=Rect(0,(*order)->second.getRow()*(FONT_SIZE+7),500-8,FONT_SIZE+6);
+				if((*order)->second.target!=t)
+					(*order)->second.start=(*order)->second.rect;
+				(*order)->second.target=t;
+				(*order)->second.blendTarget=50;
+				(*order)->second.blendStart=(*order)->second.blend;
+				(*order)->second.setUnit((*anarace)->getPhaenoCode(s));
+				(*order)->second.setIP(s);
+				(*order)->second.checked=true;
+				(*order)->second.bonew=false;
 			} // => aktualisieren
 			else
 			// => neues erstellen
@@ -503,28 +467,28 @@ void Player::CheckOrders()
 				map<long, Order>::iterator current_order = orderList.begin();
 				while((!found) && (current_order != orderList.end()))
 				{
-					if((current_order->second.getUnit()!=(*anarace)->getPhaenoCode(s))||(current_order->second.getRow()!=k+1)||(current_order->second.target.GetLeft()>0)||(s!=current_order->second.getIP()))
+					if((current_(*order)->second.getUnit()!=(*anarace)->getPhaenoCode(s))||(current_(*order)->second.getRow()!=k+1)||(current_(*order)->second.target.GetLeft()>0)||(s!=current_(*order)->second.getIP()))
 						current_order++;
 					else //=> ueberschreiben
 					{
 						found=true;
 						Order neuorder;
 						neuorder.setRow(k+1);//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace())); TODO
-//						Rect t=Rect((order->second.getRow()%2)*(window[BUILD_ORDER_WINDOW]->getWidth()/2), (order->second.getRow()/2)*(FONT_SIZE+6),(window[BUILD_ORDER_WINDOW]->getWidth()-8)/2,FONT_SIZE+4);
-						Rect t=Rect(0, current_order->second.getRow()*(FONT_SIZE+7), 500-8, FONT_SIZE+6);
-						if(current_order->second.target != t)
-							neuorder.start = current_order->second.rect;
-						else neuorder.start = current_order->second.start;
+//						Rect t=Rect(((*order)->second.getRow()%2)*(window[BUILD_ORDER_WINDOW]->getWidth()/2), ((*order)->second.getRow()/2)*(FONT_SIZE+6),(window[BUILD_ORDER_WINDOW]->getWidth()-8)/2,FONT_SIZE+4);
+						Rect t=Rect(0, current_(*order)->second.getRow()*(FONT_SIZE+7), 500-8, FONT_SIZE+6);
+						if(current_(*order)->second.target != t)
+							neuorder.start = current_(*order)->second.rect;
+						else neuorder.start = current_(*order)->second.start;
 						neuorder.target = t;
 
-						neuorder.brect = current_order->second.brect;
-						neuorder.bstart = current_order->second.bstart;
-						neuorder.btarget = current_order->second.btarget;
+						neuorder.brect = current_(*order)->second.brect;
+						neuorder.bstart = current_(*order)->second.bstart;
+						neuorder.btarget = current_(*order)->second.btarget;
 						
 						neuorder.blendTarget = 50;
-						neuorder.blendStart = current_order->second.blend;
+						neuorder.blendStart = current_(*order)->second.blend;
 						neuorder.setUnit((*anarace)->getPhaenoCode(s));
-						neuorder.marker = current_order->second.marker;
+						neuorder.marker = current_(*order)->second.marker;
 						neuorder.checked=true;
 						neuorder.bonew=true;
 						orderList.insert(pair<long, Order>((*anarace)->getMarker(s), neuorder));
@@ -540,7 +504,7 @@ void Player::CheckOrders()
 					Order neuorder;
 					neuorder.setRow(k+1);//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace()));
 					neuorder.rect=Rect(170, neuorder.getRow()*(FONT_SIZE+7), 0, FONT_SIZE+6);
-					//Rect t=Rect((order->second.getRow()%2)*(window[BUILD_ORDER_WINDOW]->getWidth()/2), (order->second.getRow()/2)*(FONT_SIZE+6),(window[BUILD_ORDER_WINDOW]->getWidth()-8)/2,FONT_SIZE+4);
+					//Rect t=Rect(((*order)->second.getRow()%2)*(window[BUILD_ORDER_WINDOW]->getWidth()/2), ((*order)->second.getRow()/2)*(FONT_SIZE+6),(window[BUILD_ORDER_WINDOW]->getWidth()-8)/2,FONT_SIZE+4);
 					Rect t=Rect(0, neuorder.getRow()*(FONT_SIZE+7), 500-8, FONT_SIZE+6);
 					neuorder.start = neuorder.rect;
 					neuorder.target = t;
@@ -554,37 +518,31 @@ void Player::CheckOrders()
 				}
 			}
 			k++;
-		}
+		}*/
 
-		map<long, Order>::iterator current_order = orderList.begin();
-		while(current_order != orderList.end())
-			if(!current_order->second.checked)
-			{
-				map<long, Order>::iterator temp = current_order;
-				temp++;
-				orderList.erase(current_order);
-				current_order = temp;
-			}
-			else
-			{
-				current_order->second.checked=false;
-				current_order++;
-			}
-		
-	processBoGraph();
+		((BoWindow*)(window[BUILD_ORDER_WINDOW]))->processList();
+		((BoGraphWindow*)(window[BO_GRAPH_WINDOW]))->processList();
+		((ForceWindow*)(window[FORCE_WINDOW]))->processList();
+
 }
 
 
-
+#if 0
 // ----- MOVE ORDERS IN BOWINDOW AND BOGRAPH -----
 void Player::MoveOrders() 
 {
-	for(map<long, Order>::iterator order=orderList.begin(); order!=orderList.end(); ++order)
+/*	for(map<long, Order>::iterator order=orderList.begin(); order!=orderList.end(); ++order)
 	{
-		order->second.rect.move(order->second.start, order->second.target);
-		order->second.brect.move(order->second.bstart, order->second.btarget);
-		Size::mv(order->second.blend, order->second.blendStart, order->second.blendTarget);
+		(*order)->second.rect.move((*order)->second.start, (*order)->second.target);
+		(*order)->second.brect.move((*order)->second.bstart, (*order)->second.btarget);
+		Size::mv((*order)->second.blend, (*order)->second.blendStart, (*order)->second.blendTarget);
+	}*/
+	for(list<Order*>::iterator order=orderList.begin(); order!=orderList.end(); ++order)
+	{
+//		(*order)->rect.move((*order)->start, (*order)->target);
+//		(*order)->brect.move((*order)->bstart, (*order)->btarget);
+//		Size::mv((*order)->blend, (*order)->blendStart, (*order)->blendTarget);
 	}
 }
-
+#endif
 

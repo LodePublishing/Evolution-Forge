@@ -19,7 +19,7 @@ STATISTICS::STATISTICS():
 	fitness(0)
 { }
 
-STATISTICS::~STATISTICS() {};
+STATISTICS::~STATISTICS() {}
 
 void STATISTICS::resetData()
 {
@@ -46,7 +46,7 @@ PROGRAM::PROGRAM():
 	}
 }
 
-PROGRAM::~PROGRAM() {};
+PROGRAM::~PROGRAM() {}
 
 void PROGRAM::resetData()
 {
@@ -778,6 +778,16 @@ void ANARACE::countUnitsTotal()
 // ------ GET/SET FUNCTIONS ------
 // -------------------------------
 
+/*void ANARACE::setFixed(const bool* fixed_list)
+{
+	fixed = fixed_list;
+}
+
+const bool* ANARACE::getFixed() const
+{
+	return(fixed);
+}*/
+
 const unsigned int ANARACE::getAverageLength() const
 {
 	return(averageLength);
@@ -1377,6 +1387,11 @@ const unsigned int ANARACE::getTimePercentage() const
 	return(timePercentage);
 }
 
+const unsigned int ANARACE::getFastestGoalTime() const
+{
+	return(getpGoal()->calculateFastestBO((*pStartCondition)->getUnit(GLOBAL)));
+}
+
 const unsigned int ANARACE::getGoalPercentage() const
 {
 	if(getTimer()==0)
@@ -1384,7 +1399,8 @@ const unsigned int ANARACE::getGoalPercentage() const
 	else 
 	{
 		unsigned int optimalTime = getpGoal()->calculateFastestBO((*pStartCondition)->getUnit(GLOBAL));
-		if(optimalTime==0)
+//		return(optimalTime);
+		if(/*(optimalTime==0)||*/(getRealTimer()==0))
 			return(100);
 		else
 			return(100*optimalTime/getRealTimer());

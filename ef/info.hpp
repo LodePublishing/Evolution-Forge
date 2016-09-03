@@ -3,7 +3,8 @@
 
 #include "../ui/window.hpp"
 #include "../core/anarace.hpp"
-#include "order.hpp"
+#include "boentry.hpp"
+#include "bograph.hpp"
 
 class InfoWindow : public UI_Window
 {
@@ -16,26 +17,21 @@ class InfoWindow : public UI_Window
 		void process();
 		void draw(DC* dc) const;
 
-		const signed int getBx() const;
-		const unsigned int getBWidth() const;
 		const unsigned int getUnit() const;
-
-		void setBx(const signed int b_x);
-		void setBWidth(const unsigned int b_width);
 		void setUnit(const unsigned int unit_type);
 		void setIP(const unsigned int ip);
 		const unsigned int getIP() const; 
-		const unsigned int isSet() const;
-		void setupOk(const unsigned int ok); // already setuped by bowindow
 		void assignAnarace(ANARACE* info_anarace);
+		void assignBo(const BoEntry* info_bo);
+		void assignBg(const BoGraphEntry* info_bg);
 		
 	private:
-		signed int bx;
-		unsigned int bwidth, unit, key;
+		unsigned int unit;
 		UI_StaticText* text;
-		unsigned int setup;
 		unsigned int IP;
 		ANARACE* anarace;
+		const BoEntry* bo;
+		const BoGraphEntry* bg;
 };
 
 #endif // _GUI_INFO_HPP

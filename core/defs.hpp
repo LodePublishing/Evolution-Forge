@@ -8,7 +8,7 @@
 
 #define MAX_RACES 3
 #define UNIT_TYPE_COUNT 105
-#define MAX_LOCATIONS 9
+#define MAX_LOCATIONS 3
 #define MAX_PLAYER 3
 
 
@@ -236,7 +236,7 @@ enum eTerraUnits
 	F_COMMAND_CENTER_ADDON,
 	F_SCIENCE_FACILITY_ADDON,
 	
-	INTRON, //100
+	INTRON, //104 
 //} // end eTerranUnits
 //
 //enum eProtossUnits
@@ -422,6 +422,7 @@ enum eFacilityType
 // needs no facility rules
 	NO_FACILITY,
 	IS_LOST,
+	IS_MORPHING,
 // facilities are lost (templars/archons, drones/buildings, command center/comsat, ...), 
 	NEEDED_ONCE,
 // facility is needed at this place, only once (probes!)

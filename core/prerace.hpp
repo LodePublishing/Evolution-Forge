@@ -7,6 +7,50 @@
 #include <functional>
 #include <deque>
 #include <queue>
+#include <map>
+
+/*class CODE
+{
+	public:
+		CODE(const unsigned int* code, const unsigned int code_length);
+		~CODE();
+		const bool operator==(const CODE& object) const;
+		const bool operator<(const CODE& object) const;
+		CODE& operator=(const unsigned int* code);
+	private:
+		unsigned int Code[MAX_LENGTH];
+		unsigned int length;
+};
+
+class SITUATION
+{
+	public:
+		SITUATION();
+		SITUATION(const SITUATION& object);
+		~SITUATION();
+		
+		unsigned int getTMaxBuildTypes() const;
+		unsigned int getForce(const unsigned int unit) const;
+		unsigned int getBuildable(const unsigned int unit) const;
+		unsigned int getTGeno(const unsigned int unit) const;
+		unsigned int getTTGeno(const unsigned int unit) const;
+
+		void setTMaxBuildTypes(const unsigned int count);
+		void addTMaxBuildTypes();
+		void subTMaxBuildTypes();
+		void setForce(const unsigned int unit, const unsigned int count);
+		void setBuildable(const unsigned int unit, const unsigned int count);
+		void setTGeno(const unsigned int unit, const unsigned int count);
+		void setTTGeno(const unsigned int unit, const unsigned int count);
+
+
+	private:
+		unsigned int tMaxBuildTypes;
+		unsigned int  force[UNIT_TYPE_COUNT];
+		unsigned int buildable[UNIT_TYPE_COUNT];
+		unsigned int tGeno[UNIT_TYPE_COUNT]; // !! keine anderen units drueber nehmen!
+		unsigned int ttGeno[UNIT_TYPE_COUNT];
+};*/
 
 class PRERACE
 {
@@ -16,7 +60,6 @@ protected:
 //	UNIT* global; // non-static pointer to player's global total force (location 0.total)
 	UNIT* location; // non-static pointer to players total/availible units
 
-	
 	const START_CONDITION* const* pStartCondition; //pointer to player in start
 
 	static const BASIC_MAP* const* pMap; // MAP is all the same for all players using 'start
@@ -61,11 +104,11 @@ protected:
 
 	bool ready;
 	
+	GOAL_ENTRY** pGoal; // pStart->getGoal()
+private:
 	unsigned int Code[MAX_LENGTH];
 	unsigned int Marker[MAX_LENGTH];
 
-	GOAL_ENTRY** pGoal; // pStart->getGoal()
-private:
 	unsigned int playerNum;
 	unsigned int minerals, gas, timer;
 	unsigned int IP;
@@ -79,9 +122,11 @@ private:
 	unsigned int timeout;
 
 
-public:
 
+public:
 	static void assignStart(START* start);
+//	static map<CODE, SITUATION*> situationHashMap;
+
 //	static void assignConfiguration(Configuration* pconfiguration);
 	static void initNoise();
 	static void copyMap(); //copies the startforce from map to static 'units'
@@ -92,6 +137,8 @@ public:
 
 	PRERACE& operator=(const PRERACE& object);
 	PRERACE(const PRERACE& object);
+
+	const bool isDifferent(const unsigned int* code, const unsigned int* marker) const;
 
 // ------ HARVEST ROUTINES ------
 	void adjustMineralHarvest(const unsigned int location_number);
@@ -118,7 +165,7 @@ public:
 
 	void eraseIllegalCode();
 	void eraseUselessCode();
-	void mutateGeneCode();
+	void mutateGeneCode(/*const bool* fixed_list*/);
 	void resetGeneCode();//resets either to a pre-processed buildorder or a completely random one*/
 //	void crossOver(PRERACE* parent2, PRERACE* child1, PRERACE* child2); TODO
 
@@ -126,6 +173,8 @@ public:
 	const bool buildIt(const unsigned int build_unit);
 	
 // ------ GET/SET ROUTINES ------
+	void setMarker(const unsigned int ip, const unsigned int value);
+	void setCode(const unsigned int ip, const unsigned int value);
 	const unsigned int getCode(const unsigned int ip) const;
 	const unsigned int getCurrentCode() const;
 	const unsigned int getMarker(const unsigned int ip) const;

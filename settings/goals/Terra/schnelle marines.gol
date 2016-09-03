@@ -1,0 +1,13 @@
+@GOAL
+        "Name" "schnelle marines"
+        "Race" "Terra"
+        "Dropship" "1" "0" "0"
+        "SCV" "1" "0" "0"
+        "Starport" "1" "0" "0"
+        "Starport[CT]" "1" "0" "0"
+        "Command Center" "1" "0" "0"
+        "Factory" "1" "0" "0"
+        "Barracks" "1" "0" "0"
+        "Refinery" "1" "0" "0"
+        "Space Marine" "4" "0" "300"
+@END

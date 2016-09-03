@@ -5,48 +5,48 @@ UI_Window& UI_Window::operator=(const UI_Window& object)
 {
 	((UI_Object)(*this)) = ((UI_Object)object);
 	delete tabRow;
-    tabRow = (object.tabRow != NULL? new UI_Radio(*object.tabRow) : NULL);
-    window = object.window;
-    currentTab = object.currentTab;
-    titleString = object.titleString;
-    titleParameter = object.titleParameter;
+	tabRow = (object.tabRow != NULL? new UI_Radio(*object.tabRow) : NULL);
+	window = object.window;
+	currentTab = object.currentTab;
+	titleString = object.titleString;
+	titleParameter = object.titleParameter;
 //	delete scrollBar;
 //	scrollBar = (object.scrollBar != NULL? new UI_Scrollbar(*object.scrollBar) : NULL);
-    originalRect = object.originalRect;
-    border = object.border;
-    outerBorder = object.outerBorder;
-    clientRect = object.clientRect;
-    clientStartRect = object.clientStartRect;
-    clientTargetRect = object.clientTargetRect;
-    originalClientRect = object.originalClientRect;
-    windowNumber = object.windowNumber;
-    isAutoAdjust = object.isAutoAdjust;
-    isScrollable = object.isScrollable;
-    isTabbed = object.isTabbed;
-    highlighted = object.highlighted;
+	originalRect = object.originalRect;
+	border = object.border;
+	outerBorder = object.outerBorder;
+	clientRect = object.clientRect;
+	clientStartRect = object.clientStartRect;
+	clientTargetRect = object.clientTargetRect;
+	originalClientRect = object.originalClientRect;
+	windowNumber = object.windowNumber;
+	isAutoAdjust = object.isAutoAdjust;
+	isScrollable = object.isScrollable;
+	isTabbed = object.isTabbed;
+	highlighted = object.highlighted;
 	return(*this);
 }
 
 UI_Window::UI_Window(const UI_Window& object) :
-    UI_Object((UI_Object)object),
-    tabRow((object.tabRow != NULL? new UI_Radio(*object.tabRow) : NULL)),
-    window( object.window ),
-    currentTab( object.currentTab ),
-    titleString( object.titleString ),
-    titleParameter( object.titleParameter ),
-//    scrollBar((object.scrollBar != NULL? new UI_Scrollbar(*object.scrollBar) : NULL)),
-    originalRect( object.originalRect ),
-    border( object.border ),
-    outerBorder( object.outerBorder ),
-    clientRect( object.clientRect ),
-    clientStartRect( object.clientStartRect ),
-    clientTargetRect( object.clientTargetRect ),
-    originalClientRect( object.originalClientRect ),
-    windowNumber( object.windowNumber ),
-    isAutoAdjust( object.isAutoAdjust ),
-    isScrollable( object.isScrollable ),
-    isTabbed( object.isTabbed ),
-    highlighted( object.highlighted )
+	UI_Object((UI_Object)object),
+	tabRow((object.tabRow != NULL? new UI_Radio(*object.tabRow) : NULL)),
+	window( object.window ),
+	currentTab( object.currentTab ),
+	titleString( object.titleString ),
+	titleParameter( object.titleParameter ),
+//	scrollBar((object.scrollBar != NULL? new UI_Scrollbar(*object.scrollBar) : NULL)),
+	originalRect( object.originalRect ),
+	border( object.border ),
+	outerBorder( object.outerBorder ),
+	clientRect( object.clientRect ),
+	clientStartRect( object.clientStartRect ),
+	clientTargetRect( object.clientTargetRect ),
+	originalClientRect( object.originalClientRect ),
+	windowNumber( object.windowNumber ),
+	isAutoAdjust( object.isAutoAdjust ),
+	isScrollable( object.isScrollable ),
+	isTabbed( object.isTabbed ),
+	highlighted( object.highlighted )
 { }
 
 
@@ -156,15 +156,15 @@ void UI_Window::setTitleParameter(const string& p) {
 
 UI_Object* UI_Window::checkTooltip()
 {
-    if(!(isMouseInside()))
-	    return(NULL);
+	if(!(isMouseInside()))
+		return(NULL);
 	return(UI_Object::checkTooltip());
 }
 
 UI_Object* UI_Window::checkHighlight()
 {
-    if(!(isMouseInside()))
-	    return(NULL);
+	if(!(isMouseInside()))
+		return(NULL);
 	return(UI_Object::checkHighlight());
 }
 
@@ -300,6 +300,7 @@ const bool UI_Window::fitItemToRelativeClientRect(Rect& rect, const unsigned int
 	   (rect.GetRight() < getRelativeClientRectLeftBound())||
 	   (rect.GetBottom() < getRelativeClientRectUpperBound()))
 		return(false);
+		
 	if(rect.GetLeft()<getRelativeClientRectLeftBound()) 
 		rect.SetLeft(getRelativeClientRectLeftBound());
 	if((rect.GetRight()>getRelativeClientRectRightBound()))
@@ -384,7 +385,7 @@ void UI_Window::draw(DC* dc) const
 	if(!isShown()) 
 		return;
 
-	if(doesNeedRedraw())
+//	if(doesNeedRedraw())
 	{
 	// draw outer border:
 		dc->SetPen(*theme.lookUpPen(OUTER_BORDER_PEN));
@@ -392,7 +393,10 @@ void UI_Window::draw(DC* dc) const
 			dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 		else
 			dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
-		dc->DrawEdgedRoundedRectangle(outerBorder.GetTopLeft()+getAbsolutePosition(),outerBorder.GetSize(),6);
+//		if(notDrawRectList.empty())
+			dc->DrawEdgedRoundedRectangle(outerBorder.GetTopLeft()+getAbsolutePosition(),outerBorder.GetSize(), 6);
+//		else 
+//			dc->DrawGridEdgedRoundedRectangle(outerBorder.GetLeft()+getAbsolutePosition().x, outerBorder.GetTop() + getAbsolutePosition().y, outerBorder.GetWidth(), outerBorder.GetHeight(), 6, notDrawRectList);
 
 	// draw inner border:
 		if(isMouseInside())

@@ -383,9 +383,20 @@ void BoDiagramWindow::draw(DC* dc) const
 					dc->DrawRectangle(getAbsoluteClientRectPosition() + Point(0, getClientRectHeight()) + hneedSupply[i], Size(hneedSupply[i+1].x - hneedSupply[i].x, nneedSupply[i].y - hneedSupply[i].y));
 			}
 				
-			dc->SetPen(*theme.lookUpPen(BODIAGRAM_MINERALS_PEN));
+			bool bold = false;
+			if((count>2)&&(getAbsoluteClientRect().Inside(mouse))&&(anarace->getRealTimer()>0))
+				bold=true;
+			
+			if(bold)
+				dc->SetPen(*theme.lookUpPen(BODIAGRAM_MINERALS_BOLD_PEN));
+			else
+				dc->SetPen(*theme.lookUpPen(BODIAGRAM_MINERALS_PEN));
 			dc->DrawSpline(count, &(minerals[0]), getAbsoluteClientRectPosition()+Point(0,getClientRectHeight()));
-			dc->SetPen(*theme.lookUpPen(BODIAGRAM_GAS_PEN));
+
+			if(bold)
+				dc->SetPen(*theme.lookUpPen(BODIAGRAM_GAS_BOLD_PEN));
+			else
+				dc->SetPen(*theme.lookUpPen(BODIAGRAM_GAS_PEN));
 			dc->DrawSpline(count, &(gas[0]), getAbsoluteClientRectPosition()+Point(0,getClientRectHeight()));
 //			dc->SetPen(*theme.lookUpPen(BODIAGRAM_FITNESS_PEN));
 //			dc->DrawSpline(count, &(fitness[0]), getAbsoluteClientRectPosition()+Point(0,getClientRectHeight()));*/
@@ -399,18 +410,8 @@ void BoDiagramWindow::draw(DC* dc) const
 			dc->SetTextForeground(*theme.lookUpColor(FITNESS_TEXT_COLOR));
 			dc->DrawText("Time",getAbsoluteClientRectPosition()+Point(1,48));
 					
-			if(count>2)
-			if((getAbsoluteClientRect().Inside(mouse))&&(anarace->getRealTimer()>0))
+			if(bold)
 			{
-				dc->SetPen(*theme.lookUpPen(BODIAGRAM_MINERALS_PEN));
-				dc->DrawSpline(count, &(minerals[0]), getAbsoluteClientRectPosition()+Point(1,getClientRectHeight()));
-				dc->DrawSpline(count, &(minerals[0]), getAbsoluteClientRectPosition()+Point(0,1+getClientRectHeight()));
-				dc->DrawSpline(count, &(minerals[0]), getAbsoluteClientRectPosition()+Point(1,1+getClientRectHeight()));
-				dc->SetPen(*theme.lookUpPen(BODIAGRAM_GAS_PEN));
-				dc->DrawSpline(count, &(gas[0]), getAbsoluteClientRectPosition()+Point(1,getClientRectHeight()));
-				dc->DrawSpline(count, &(gas[0]), getAbsoluteClientRectPosition()+Point(0,1+getClientRectHeight()));
-				dc->DrawSpline(count, &(gas[0]), getAbsoluteClientRectPosition()+Point(1,1+getClientRectHeight()));
-		
 				// TODO this anarace values are one iteration too old compared to mouse position...
 				ostringstream os;
 				dc->SetTextForeground(*theme.lookUpColor(BRIGHT_MINERALS_TEXT_COLOR));

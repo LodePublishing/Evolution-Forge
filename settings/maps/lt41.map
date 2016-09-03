@@ -1,0 +1,28 @@
+# Mineral Distances: 0: Very fast map (3x gathering speed), 1: fast map (2x gathering speed) 2: standard map, 3: slow map (0.75x gathering speed)
+
+# --- Map ---
+@MAP
+	"Name" = "1 Player Lost Temple"
+	"Max Locations" = "2"
+	"Max Player" = "1"
+@END
+
+# --- Locations ---
+
+@LOCATION "1"
+	"Name" = "The wayne location"
+	"Minerals" = "0"
+	"Geysirs" = "0"
+	"Mineral Distance" = "2"
+	"Distances" = 0, 0
+@END
+
+@LOCATION "2"
+	"Name" = "Main"
+	"Minerals" = "8"
+	"Geysirs" = "1"
+	"Mineral Distance" = "2"
+	"Distances" = 0, 0
+@END
+
+

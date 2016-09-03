@@ -64,23 +64,24 @@ class Size
 		    height = h;
 		}*/
 
-		void SetWidth(const unsigned int w) {
-		#ifdef _SCC_DEBUG
-            if(w > 1280)
-            {
-                toLog("SIZE ERROR: width out of range");
-            }
-        #endif
-		    width = w;
+		void SetWidth(const unsigned int w) 
+		{
+/*			#ifdef _SCC_DEBUG
+			if(w > 1280)
+				toLog("SIZE ERROR: width out of range");
+			#endif*/
+			width = w;
 		}
 		
-		void SetHeight(const unsigned int h) {
-        #ifdef _SCC_DEBUG
-            if(h > 1024)
-            {
-                toLog("SIZE ERROR: height out of range");
-            }
-        #endif
+		void SetHeight(const unsigned int h) 
+		{
+#ifdef _SCC_DEBUG
+			if(h > 1024)
+			{
+				toLog("SIZE ERROR: height out of range");
+				return;
+			}
+#endif
 		    height = h;
 		}
                                                                                 

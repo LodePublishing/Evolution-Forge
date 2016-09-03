@@ -75,22 +75,22 @@ class UI_Button:public UI_Object
 		UI_Button(UI_Object* button_parent, const Rect button_rect, const Rect button_max_rect, const eButton button_type, const eButtonMode button_mode = STATIC_BUTTON_MODE, const ePositionMode button_position_mode = DO_NOT_ADJUST);
 		~UI_Button();
 		
-//      void set_hotkey_if_focus(int key); TODO
-        const bool isLeftClicked();            // has it been selected (ie clicked on)
-        const bool isRightClicked();
-//      int double_clicked();   // button was double clicked on
-        const bool isJustPressed() const;      // button has just been selected
+//	  void set_hotkey_if_focus(int key); TODO
+		const bool isLeftClicked();			// has it been selected (ie clicked on)
+		const bool isRightClicked();
+//	  int double_clicked();   // button was double clicked on
+		const bool isJustPressed() const;	  // button has just been selected
 		const bool isJustReleased() const;
-        const bool isJustHighlighted() const; // button has just had mouse go over it
-        const bool isCurrentlyPressed() const; // is the button depressed?
-        const bool isCurrentlyHighlighted() const; // is the mouse over this button?
+		const bool isJustHighlighted() const; // button has just had mouse go over it
+		const bool isCurrentlyPressed() const; // is the button depressed?
+		const bool isCurrentlyHighlighted() const; // is the mouse over this button?
 		const bool isCurrentlyActivated() const;
 
 		const unsigned int getGradient() const;
-                                                                                                                                                            
-        void forceHighlighted();    // force button to be highlighted
-        void forceDelighted();    // force button to be de-highlighted
-        void forcePress();      // force button to get pressed
+																																							
+		void forceHighlighted();	// force button to be highlighted
+		void forceDelighted();	// force button to be de-highlighted
+		void forcePress();	  // force button to get pressed
 		void forceUnpress();
 
 		void setPressDepth(const unsigned int press);
@@ -98,12 +98,12 @@ class UI_Button:public UI_Object
 		void updateText(const string& utext);
 		void updateText(const eString utext);
 
-        //void setHighlightAction( void (*user_function)(void) );
-        //void setDisabledAction( void (*user_function)(void) );
-//      void draw_forced(int frame_num); ?
-        void resetTimestamps();
-  //      void skip_first_highlight_callback();
-//        void set_custom_cursor_bmap(int bmap_id) { custom_cursor_bmap = bmap_id; };
+		//void setHighlightAction( void (*user_function)(void) );
+		//void setDisabledAction( void (*user_function)(void) );
+//	  void draw_forced(int frame_num); ?
+		void resetTimestamps();
+  //	  void skip_first_highlight_callback();
+//		void set_custom_cursor_bmap(int bmap_id) { custom_cursor_bmap = bmap_id; };
 
 		void process(); // process messages, continue animation etc.
 		UI_Object* checkTooltip();
@@ -158,17 +158,22 @@ class UI_Button:public UI_Object
 		unsigned int frameNumber;
 		unsigned int statusFlags;
 
+//		Rect oldRect;
+//		unsigned int oldPressDepth;
+//		unsigned int oldGradient;
+
 		
-//	TODO    int onMouseOverCursor;                 // bmap handle of special cursor used on mouseovers
-  // TODO      int previousCursor;              // store old cursor
-//        void maybeShowCustomCursor();   // show different cursor when onmouseOverCursor is set => process()
-  //      void restorePreviousCursor();   // reset to original state => frame_reset()
+//	TODO	int onMouseOverCursor;				 // bmap handle of special cursor used on mouseovers
+  // TODO	  int previousCursor;			  // store old cursor
+//		void maybeShowCustomCursor();   // show different cursor when onmouseOverCursor is set => process()
+  //	  void restorePreviousCursor();   // reset to original state => frame_reset()
 
 		void resetData();
+//		SDL_Surface* tempSurface; 	
 protected:
 		UI_StaticText* text;
 	
-        long unsigned int nextRepeat;     // timestamp for next repeat if held down
+		long unsigned int nextRepeat;	 // timestamp for next repeat if held down
 
 		bool moveByMouse;
 

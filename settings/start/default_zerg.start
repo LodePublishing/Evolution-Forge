@@ -4,15 +4,15 @@
 # --- Races ---
 @STARTCONDITIONS "Zerg"
 	"Name" = "Default Zerg start"
-    "Minerals" = "50"
-    "Gas" = "0"
-    "Time" = "0"
+	"Minerals" = "50"
+	"Gas" = "0"
+	"Time" = "0"
 @END
 
 # location forces... 2 = LOCATION MAIN
 @LOCATION "2"
-		"Hatchery" = "1"
-		"Drone" = "4"
-		"Overlord" = "1"
-		"Larva" = "3"
+	"Hatchery" = "1"
+	"Drone" = "4"
+	"Overlord" = "1"
+	"Larva" = "3"
 @END

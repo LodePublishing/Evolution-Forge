@@ -438,8 +438,8 @@
 		Fitness average : %i [%i best]
 		Fitness variance : %i
 		%i+ generations left [%i total]
-# window title parameter strings
 		INVISIBLE
+# window title parameter strings
 		Player
 		Advanced Player
 		Expert (Player)

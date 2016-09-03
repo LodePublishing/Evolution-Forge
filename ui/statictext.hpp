@@ -20,11 +20,11 @@ enum eTextMode
 
 class UI_StaticText:public UI_Object
 {
-    public:
+	public:
 		UI_StaticText& operator=(const UI_StaticText& object);
 		UI_StaticText(const UI_StaticText& object);
 		
-        UI_StaticText(UI_Object* st_parent, const Rect st_pos, const eColor st_color, const eFont st_font, const eTextMode st_mode = NO_TEXT_MODE);
+		UI_StaticText(UI_Object* st_parent, const Rect st_pos, const eColor st_color, const eFont st_font, const eTextMode st_mode = NO_TEXT_MODE);
 
 		UI_StaticText(UI_Object* st_parent, const eString st_text, const Rect st_pos, const eColor st_color, const eFont st_font, const eTextMode st_mode = NO_TEXT_MODE);
 		
@@ -46,15 +46,16 @@ class UI_StaticText:public UI_Object
 
 // for formatted Text:
 		const bool doneWriting() const; 
-	        
+			
 		UI_Object* checkTooltip();
 		UI_Object* checkHighlight();
 	
 		void updateText(const eString st_text);
 		void reloadStrings();
+		void calculatePosition();
 		
-        void draw(DC* dc) const;
-        void process();
+		void draw(DC* dc) const;
+		void process();
 
 		const Size getTextSize() const;
 		const Rect& getTextBox() const;
@@ -64,14 +65,14 @@ class UI_StaticText:public UI_Object
 		void setPressed(const bool press=false);
 
 	protected:
-        eTextMode  mode; 
-    private:
+		eTextMode  mode; 
+	private:
 
 		string text;
 		
-        eFont font;
+		eFont font;
 		unsigned int position;
-        Color color;
+		Color color;
 		eString eText;
 		bool textMode;
 		bool pressed; // for buttons only, draw the text +(1,1)	

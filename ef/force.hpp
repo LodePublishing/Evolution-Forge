@@ -29,18 +29,20 @@ class ForceWindow : public UI_Window
 		ForceWindow(UI_Object* force_parent, ANARACE* force_anarace, MessageWindow* force_msg_window, const unsigned int force_window_number);
 		~ForceWindow();
 		
-		void resetData();
+		void processList();
 		void process();
 		void draw(DC* dc) const;
 		const unsigned int getMarkedUnit() const;
 		void setMarkedUnit(const unsigned int marked_unit);
 		void assignAnarace(ANARACE* force_anarace);
 		void drawTechTree(DC* dc) const;
+		void reloadStrings();
 	private:
 		unsigned int addUnit, addTime, addLocation;
 		signed int addCount;
 		
 		unsigned int currentGoalUnit; // which goal is currently highlighted?
+		unsigned int startLine;
 	
 		void closeMenus();
 
@@ -50,14 +52,14 @@ class ForceWindow : public UI_Window
 		UI_Button* menuButton[MAX_MENUS];
 		UI_Button* saveGoalButton;
 
-		UI_StaticText* nongoals;
-		UI_StaticText* goals;
+		UI_StaticText* nongoalsText;
+		UI_StaticText* goalsText;
 		UI_StaticText* locationName[2][MAX_LOCATIONS];
 		UI_StaticText* legend;
 
-		list<ForceEntry*> forceList;
-		ForceEntry* movedForceEntry;
-
+		list<ForceEntry*> goalForceList;
+		list<ForceEntry*> nongoalForceList;
+		
 		unsigned int markedUnit, oldMarkedUnit;
 		ANARACE* anarace;
 

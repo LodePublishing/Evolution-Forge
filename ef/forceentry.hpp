@@ -4,6 +4,14 @@
 #include "../ui/numberfield.hpp"
 #include "../core/goal.hpp"
 
+enum eForceEntryMessage
+{
+	NO_MESSAGE,
+	LEFT_CLICKED,
+	RIGHT_CLICKED,
+	GOAL_TIME_HAS_CHANGED
+};
+
 class ForceEntry : public UI_Button
 {
 	public:
@@ -36,7 +44,11 @@ class ForceEntry : public UI_Button
 		UI_NumberField* timeEntryBox;
 		UI_Button* makeLocationGoal;
 		UI_Button* makeTimeGoal;
-		static bool changed;
+		static eForceEntryMessage changed;
+		static bool forceEntryIsGoal;
+		static unsigned int forceEntryUnit;
+		static unsigned int forceEntryTime;
+		static unsigned int forceEntryLocation;
 	private:
         
 		unsigned int startForce;

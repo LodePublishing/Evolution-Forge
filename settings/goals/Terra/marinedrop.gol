@@ -1,8 +1,6 @@
-@GOAL 
-	"Name" "Marine drop"
+@GOAL
+	"Name" "Marine"
 	"Race" "Terra"
-	"Marine" "5" "0" "0"
-	"Firebat" "1" "0" "0"
-	"Medic" "2" "0" "0"
+	"Marine" "8" "0" "0"
 	"Dropship" "1" "0" "0"
 @END

@@ -30,12 +30,11 @@ void GoalMenu::resetData()
 	height=3;
 	for(list<MenuEntry*>::iterator m=menuEntries.begin(); m!=menuEntries.end(); ++m)
 	{
-	if(i >= settings.getGoalCount(anarace->getPlayerNumber()))
+		if(i >= settings.getGoalCount(anarace->getPlayerNumber()))
 		{
 			(*m)->Hide();
 			continue;
 		}
-
 		(*m)->Show();
 		(*m)->setButton(eButton(UNIT_TYPE_1_BUTTON));
 		(*m)->updateText(settings.getGoal(anarace->getPlayerNumber(), i)->getName());
@@ -43,14 +42,13 @@ void GoalMenu::resetData()
 		(*m)->adjustRelativeRect(edge);
 		height++;
 		i++;
-		
-    }
+	}
 	for(;i<settings.getGoalCount(anarace->getPlayerNumber());i++)
 	{
-        MenuEntry* entry = new MenuEntry(this, Rect(Point(10, height * (FONT_SIZE + 9)), Size(160, FONT_SIZE)), settings.getGoal(anarace->getPlayerNumber(), i)->getName());
-        entry->setButton(eButton(UNIT_TYPE_1_BUTTON));
-        menuEntries.push_back(entry);
-        height++;
+		MenuEntry* entry = new MenuEntry(this, Rect(Point(10, height * (FONT_SIZE + 9)), Size(160, FONT_SIZE)), settings.getGoal(anarace->getPlayerNumber(), i)->getName());
+		entry->setButton(eButton(UNIT_TYPE_1_BUTTON));
+		menuEntries.push_back(entry);
+		height++;
 	}
 }
 

@@ -19,7 +19,7 @@ void toLog(const std::string& msg)
 //	pFile << msg.c_str() << endl;
 }
 
-const unsigned int CORE_VERSION=61;
+const unsigned int CORE_VERSION=62;
 
 //const unsigned int MAX_LOCATIONS = 9;
 const unsigned int MIN_LOCATIONS = 0; //this does not mean that maps with 0 locations can exist....
@@ -178,7 +178,7 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"Ship Plating",			266,15000,15000,  0, 0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_SHIP_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
 {"Ship Weapons",			266,10000,10000,  0, 0, 5000, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_SHIP_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0, RESEARCH_UNIT_TYPE},
 {"Refinery", 				 40,10000,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCV, 0, 0}, 0/*VESPENE_GEYSIR*/, NEEDED_UNTIL_COMPLETE_IS_LOST/*_IS_LOST*/, GAS_SCV, 0, SUPPLY_UNIT_TYPE}, //~~~ueberlegen...
-{"Gas SCV",					  3,    0,    0,  1, 0, 0, {0, 0}, {REFINERY ,0, 0}, {SCV/*REFINERY*/, 0, 0}, /*SCV*/0, /*NEEDED_ONCE_*/IS_LOST, 0, 0, GAS_MINER_UNIT_TYPE},	//~~~~  warum 3,0,0,1?
+{"Gas SCV",					  3,    0,    0,  0, 0, 0, {0, 0}, {REFINERY ,0, 0}, {SCV/*REFINERY*/, 0, 0}, /*SCV*/0, /*NEEDED_ONCE_*/IS_MORPHING, 0, 0, GAS_MINER_UNIT_TYPE},	//~~~~  warum 3,0,0,1?
 {"Move 3 Forward",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
 {"Move 1 Forward",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
 {"Move 1 Backward",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
@@ -229,11 +229,11 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"NULL",  					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
 {"Probe",					 20, 5000,    0,  1, 0, 0, {0, 0}, {0 ,0, 0}, {NEXUS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, WORKER_UNIT_TYPE},
 {"Dark Templar",			 50,12500,10000,  2, 0, 0, {0, 0}, {TEMPLAR_ARCHIVES ,0, 0}, {GATEWAY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
-{"Dark Archon",				 20,    0,    0,  2, 0, 0, {0, 0}, {0 ,0, 0}, {DARK_TEMPLAR, 0, 0}, DARK_TEMPLAR, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
+{"Dark Archon",				 20,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {DARK_TEMPLAR, 0, 0}, DARK_TEMPLAR, IS_MORPHING, 0, 100, COMBAT_UNIT_TYPE},
 {"Zealot",					 40,10000,    0,  2, 0, 0, {0, 0}, {0 ,0, 0}, {GATEWAY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
 {"Dragoon",					 50,12500, 5000,  2, 0, 0, {0, 0}, {CYBERNETICS_CORE ,0, 0}, {GATEWAY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
 {"High Templar",			 50, 5000,15000,  2, 0, 0, {0, 0}, {TEMPLAR_ARCHIVES ,0, 0}, {GATEWAY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
-{"Archon",					 20,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {HIGH_TEMPLAR, 0, 0}, HIGH_TEMPLAR, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
+{"Archon",					 20,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {HIGH_TEMPLAR, 0, 0}, HIGH_TEMPLAR, IS_MORPHING, 0, 100, COMBAT_UNIT_TYPE},
 {"Reaver",					 70,20000,10000,  4, 0, 0, {0, 0}, {ROBOTICS_SUPPORT_BAY ,0, 0}, {ROBOTICS_FACILITY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE}, 
 {"5xScarab",				 35, 7500,    0,  0, 0, 0, {0, 0}, {0, 0, 0}, {REAVER, 0, 0}, 0, NEEDED_ALWAYS, 0, 0, SPECIAL_UNIT_TYPE},
 {"10xScarab",				 35, 7500,    0,  0, 0, 0, {0, 0}, {REAVER_CAPACITY, 0, 0}, {HALF_SCARAB, 0, 0}, 0, IS_LOST, 0, 0, SPECIAL_UNIT_TYPE}, //~~ special rule... reaver is no longer availible :/
@@ -291,7 +291,7 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
 {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
 {"Assimilator",				 40,10000,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {PROBE, 0, 0}, /*VESPENE_GEYSIR*/0, NEEDED_ONCE/*_IS_LOST*/, 0, 0, SUPPLY_UNIT_TYPE},
-{"Gas Probe",				  3,    0,    0,  1, 0, 0, {0, 0}, {ASSIMILATOR ,0, 0}, {PROBE/*ASSIMILATOR*/, 0, 0}, 0/*PROBE*/, /*NEEDED_ONCE_*/IS_LOST, 0, 0, GAS_MINER_UNIT_TYPE},	//Needed once? ~~~ wenn hier ne Aenderung, Facility2 in race und anarace wieder auf location availible checken !TODO
+{"Gas Probe",				  3,    0,    0,  0, 0, 0, {0, 0}, {ASSIMILATOR ,0, 0}, {PROBE/*ASSIMILATOR*/, 0, 0}, 0/*PROBE*/, /*NEEDED_ONCE_*/IS_MORPHING, 0, 0, GAS_MINER_UNIT_TYPE},	//Needed once? ~~~ wenn hier ne Aenderung, Facility2 in race und anarace wieder auf location availible checken !TODO
 {"Window move+++",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
 {"Window move+",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
 {"Window move-",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
@@ -342,20 +342,20 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"Hydralisk",				 28, 7500, 2500,  1, 0, 0, {0, 0}, {HYDRALISK_DEN ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE}, //Hier stand ein Zergling als facility2!?
 {"Ultralisk",				 60,20000,20000,  6, 0, 0, {0, 0}, {ULTRALISK_CAVERN ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
 {"Defiler",					 50, 5000,15000,  2, 0, 0, {0, 0}, {DEFILER_MOUND ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, SUPPORT_UNIT_TYPE},
-{"Lurker",					 40, 5000,10000,  2, 0, 0, {0, 0}, {HYDRALISK_DEN ,LURKER_ASPECT, 0}, {HYDRALISK, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
+{"Lurker",					 40, 5000,10000,  0, 0, 0, {0, 0}, {HYDRALISK_DEN ,LURKER_ASPECT, 0}, {HYDRALISK, 0, 0}, 0, IS_MORPHING, 0, 100, COMBAT_UNIT_TYPE},
 {"Overlord",				 40,10000,    0,  0, 8, 0, {0, 0}, {0 ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, SUPPLY_UNIT_TYPE},
 {"Mutalisk",				 40,10000,10000,  2, 0, 0, {0, 0}, {SPIRE ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
-{"Guardien",				 40, 5000,10000,  2, 0, 0, {0, 0}, {GREATER_SPIRE ,0, 0}, {MUTALISK, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE}, 
+{"Guardien",				 40, 5000,10000,  0, 0, 0, {0, 0}, {GREATER_SPIRE ,0, 0}, {MUTALISK, 0, 0}, 0, IS_MORPHING, 0, 100, COMBAT_UNIT_TYPE}, 
 {"Queen",					 50,10000,10000,  2, 0, 0, {0, 0}, {QUEENS_NEST ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, SUPPORT_UNIT_TYPE},
 {"Scourge",					 30, 2500, 7500,  1, 0, 0, {0, 0}, {SPIRE ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, SCOURGE, 100, COMBAT_UNIT_TYPE},
-{"Devourer",				 40,10000, 5000,  2, 0, 0, {0, 0}, {GREATER_SPIRE ,0, 0}, {MUTALISK, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE}, 
-{"Lair",					100,15000,10000,  0, 1, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {HATCHERY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, ADD_ON_UNIT_TYPE},
-{"Hive",					120,20000,15000,  0, 1, 0, {0, 0}, {QUEENS_NEST ,0, 0}, {LAIR, 0, 0}, 0, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, ADD_ON_UNIT_TYPE},
+{"Devourer",				 40,10000, 5000,  0, 0, 0, {0, 0}, {GREATER_SPIRE ,0, 0}, {MUTALISK, 0, 0}, 0, IS_MORPHING, 0, 100, COMBAT_UNIT_TYPE}, 
+{"Lair",					100,15000,10000,  0, 0, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {HATCHERY, 0, 0}, 0, IS_MORPHING, 0, 0, ADD_ON_UNIT_TYPE},
+{"Hive",					120,20000,15000,  0, 0, 0, {0, 0}, {QUEENS_NEST ,0, 0}, {LAIR, 0, 0}, 0, IS_MORPHING, 0, 0, ADD_ON_UNIT_TYPE},
 {"Nydus Canal",				 40,15000,    0,  0, 0, 0, {0, 0}, {HIVE ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, SUPPORT_UNIT_TYPE},
 {"Hydralisk den",			 40,10000, 5000,  0, 0, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
 {"Defiler mound",			 60,10000,10000,  0, 0, 0, {0, 0}, {HIVE ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
 {"Hatchery",				120,30000,    0,  0, 1, 0, {0, 0}, {0 ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, LARVA, 0, PRODUCE_UNIT_TYPE}, //create 1 Larva when done :-) TODO: add another "create"field for "CREEP"
-{"Greater Spire",			120,10000,15000,  0, 0, 0, {0, 0}, {HIVE ,0, 0}, {SPIRE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
+{"Greater Spire",			120,10000,15000,  0, 0, 0, {0, 0}, {HIVE ,0, 0}, {SPIRE, 0, 0}, 0, IS_MORPHING, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
 {"Queen's Nest",			 60,15000,10000,  0, 0, 0, {0, 0}, {LAIR ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
 {"Evolution Chamber",		 40, 7500,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
 {"Ultralisk Cavern",		 80,15000,20000,  0, 0, 0, {0, 0}, {HIVE ,0, 0}, {DRONE, 0, 0}, 0, IS_LOST, 0, 0, RESEARCH_FACILITY_UNIT_TYPE},
@@ -400,7 +400,7 @@ const UNIT_STATISTICS stats[MAX_RACES][UNIT_TYPE_COUNT]=
 {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
 {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
 {"Extractor",				 40, 5000,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {/*VESPENE_GEYSIR*/DRONE, 0, 0}, 0/*DRONE*/, IS_LOST, 0, 0, SUPPLY_UNIT_TYPE}, //~~ //TODO HAE?
-{"Gas Drone",				  3,    0,    0,  1, 0, 0, {0, 0}, {EXTRACTOR ,0, 0}, {/*EXTRACTOR*/DRONE, 0, 0}, /*DRONE*/0, /*NEEDED_ONCE_*/IS_LOST, 0, 0, GAS_MINER_UNIT_TYPE}, //~~~~
+{"Gas Drone",				  3,    0,    0,  0, 0, 0, {0, 0}, {EXTRACTOR ,0, 0}, {/*EXTRACTOR*/DRONE, 0, 0}, /*DRONE*/0, /*NEEDED_ONCE_*/IS_MORPHING, 0, 0, GAS_MINER_UNIT_TYPE}, //~~~~
 {"Window move+++",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
 {"Window move+",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},
 {"Window move-",			  3,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, SPECIAL_UNIT_TYPE},

@@ -56,8 +56,8 @@ class START
 		GOAL_ENTRY* pCurrentGoal[MAX_PLAYER];
 		const UNIT_STATISTICS* pStats[MAX_PLAYER];
 
-        bool startConditionsInitialized;
-        bool mapInitialized;
+	        bool startConditionsInitialized;
+        	bool mapInitialized;
 // Benutzer waehlt: Karte, Spielmodus, Harvestspeed, und fuegt Spieler mit Rasse, Startforce (default), StartPosition (absolut / zufaellig), Siegbedingungen (goals), 
 	public:
 		const unsigned int getBasicMineralHarvestSpeedPerSecond(const unsigned int playerNum, const unsigned int worker) const; // 'player' noch rausoptimieren!

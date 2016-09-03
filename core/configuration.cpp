@@ -655,6 +655,11 @@ void Configuration::loadConfigurationFile()
 				i->second.pop_front();
 			   	setStaticFramerate(atoi(i->second.front().c_str()));
 			}		
+			if((i=block.find("Dynamic framerate"))!=block.end()){
+				i->second.pop_front();
+			   	setDynamicFramerate(atoi(i->second.front().c_str()));
+			}		
+		
 			if((i=block.find("Glowing buttons"))!=block.end()){
 				i->second.pop_front();
 			   	setGlowingButtons(atoi(i->second.front().c_str()));

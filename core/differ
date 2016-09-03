@@ -1,0 +1,296 @@
+Files ./anarace.o and /home/claw/work/sc1061/sc/core/anarace.o differ
+Files ./basicmap.o and /home/claw/work/sc1061/sc/core/basicmap.o differ
+Files ./building.o and /home/claw/work/sc1061/sc/core/building.o differ
+diff -r -b -B ./configuration.cpp /home/claw/work/sc1061/sc/core/configuration.cpp
+499,557c499,557
+< 	pFile << "@SETTINGS" << endl;
+< 	pFile << "# 1 = english, 2 = german" << endl;
+< 	pFile << "    \"Language\" = \"" << (int)getLanguage() << "\"" << endl;
+< 	pFile << "# max time in seconds" << endl;
+< 	pFile << "    \"Max Time\" = \"" << getMaxTime() << "\"" << endl;
+< 	pFile << "# Do autosave at the end of a run or ask for it?" << endl;
+< 	pFile << "    \"Autosave runs\" = \"" << (int)isAutoSaveRuns() << "\"" << endl;
+< 	pFile << "# Preprocessing not implemented yet" << endl;
+< 	pFile << "    \"Preprocess Buildorder\" = \"" << (int)isPreprocessBuildOrder() << "\"" << endl;
+< 	pFile << "    \"Max unchanged Generations\" = \"" << getMaxGenerations() << "\"" << endl;
+< 	pFile << "    \"Max Length\" = \"" << getMaxLength() << "\"" << endl;
+< 	pFile << "    \"Max Runs\" = \"" << getMaxRuns() << "\"" << endl;
+< 	pFile << "# max timeout for each order in seconds" << endl;
+< 	pFile << "    \"Max Timeout\" = \"" << getMaxTimeOut() << "\"" << endl;
+< 	pFile << "# Allow to ignore unnecessary goals (mainly for using for example only \"lair\" instead of both \"lair\" and \"hatchery\")" << endl;
+< 	pFile << "    \"Allow goal adaption\" = \"" << (int)isAllowGoalAdaption() << "\"" << endl;
+< 	pFile << "# Breed Factor:" << endl;
+< 	pFile << "# This parameter determines how many % of the players will multiply by 1:1 copy" << endl;
+< 	pFile << "    \"Breed Factor\" = \"" << getBreedFactor() << "\"" << endl;
+< 	pFile << "# Crossing Over:" << endl;
+< 	pFile << "# This parameter determines how many % of the players will multiply by crossover# CURRENTLY NOT IMPLEMENTED!" << endl;
+< 	pFile << "    \"Crossing Over\" = \"" << getCrossingOver() << "\"" << endl;
+< 	pFile << "# 10 means that programs will be sorted into 10-program groups, the best 2 are" << endl;
+< 	pFile << "# taken for reproduction and the worst two are replaced by their children" << endl;
+< 	pFile << "" << endl;                                                       
+< 	pFile << "# GUI SETTINGS:" << endl;
+< 	pFile << "" << endl;            
+< 	pFile << "# set this to 1 to set all details to zero, fastest output" << endl;
+< 	pFile << "# Real minimalists should take a look at the command line options where SDL can be deactivated completely! 8-DD" << endl;
+< 	pFile << "# CURRENTLY NOT IMPLEMENTED" << endl;
+< 	pFile << "    \"Minimalist\" = \"0\"" << endl; // TODO
+< 	pFile << "" << endl;
+< 	pFile << "# how a frame update is weighted compared to a core update (e.g. 4 means that a new generation is calculated every 4 frames)" << endl;
+< 	pFile << "    \"Allow static framerate\" = \"" << (int)isAllowStaticFramerate() << "\"" << endl;
+< 	pFile << "# allow the program to dynamicly reduce the speed of the core to reach this frame rate. 0 = offline." << endl;
+< 	pFile << "    \"Static framerate\" = \"" << getStaticFramerate() << "\"" << endl;
+< 	pFile << "# Draw X frames per new generation" << endl;
+< 	pFile << "    \"Dynamic framerate\" = \"" << getDynamicFramerate() << "\"" << endl;
+< 	pFile << "" << endl;                                                                                
+< 	pFile << "# Order entries in the unitmenu by area or by facility?" << endl;
+< 	pFile << "    \"Facility mode\" = \"" << (int)isFacilityMode() << "\"" << endl;
+< 	pFile << "# glowing effects" << endl;
+< 	pFile << "    \"Glowing buttons\" = \"" << (int)isGlowingButtons() << "\"" << endl;
+< 	pFile << "# Show nice DNA spiral?" << endl;
+< 	pFile << "    \"DNA Spiral\" = \"" << (int)isDnaSpiral() << "\"" << endl;
+< 	pFile << "# moving rectangles, 2 = all objects move smoothly, 1 = some objects move smoothly, 0 = all objects jump directly to their destination" << endl;
+< 	pFile << "    \"Smooth movements\" = \"" << (int)isSmoothMovements() << "\"" << endl;
+< 	pFile << "# Rounded rectangles, saves a little cpu power if deactivated (the computer loves simple object :-D" << endl;
+< 	pFile << "# CURRENTLY NOT IMPLEMENTED" << endl;
+< 	pFile << "    \"Rounded rectangles\" = \"1\"" << endl; // TODO
+< 	pFile << "# use background bitmap, saves some cpu power if deactivated" << endl;
+< 	pFile << "    \"Background bitmap\" = \"" << (int)isBackgroundBitmap() << "\"" << endl;
+< 	pFile << "# Transparency, let's burn some cpu power" << endl;
+< 	pFile << "    \"Transparency\" = \"" << (int)isTransparency() << "\"" << endl;
+< 	pFile << endl;                                                                                
+< 	pFile << "    \"Tooltips\" = \"" << (int)isTooltips() << "\"" << endl;
+< 	pFile << "    \"Fullscreen\" = \"" << (int)isFullScreen() << "\"" << endl;
+< 	pFile << "    \"Software mouse\" = \"" << (int)isSoftwareMouse() << "\"" << endl;
+< 	pFile << "@END" << endl;
+---
+> pFile << "@SETTINGS" << endl;
+> pFile << "# 1 = english, 2 = german" << endl;
+> pFile << "    \"Language\" = \"" << getLanguage() << "\"" << endl;
+> pFile << "# max time in seconds" << endl;
+> pFile << "    \"Max Time\" = \"" << getMaxTime() << "\"" << endl;
+> pFile << "# Do autosave at the end of a run or ask for it?" << endl;
+> pFile << "    \"Autosave runs\" = \"" << (int)isAutoSaveRuns() << "\"" << endl;
+> pFile << "# Preprocessing not implemented yet" << endl;
+> pFile << "    \"Preprocess Buildorder\" = \"" << (int)isPreprocessBuildOrder() << "\"" << endl;
+> pFile << "    \"Max unchanged Generations\" = \"" << getMaxGenerations() << "\"" << endl;
+> pFile << "    \"Max Length\" = \"" << getMaxLength() << "\"" << endl;
+> pFile << "    \"Max Runs\" = \"" << getMaxRuns() << "\"" << endl;
+> pFile << "# max timeout for each order in seconds" << endl;
+> pFile << "    \"Max Timeout\" = \"" << getMaxTimeOut() << "\"" << endl;
+> pFile << "# Allow to ignore unnecessary goals (mainly for using for example only \"lair\" instead of both \"lair\" and \"hatchery\")" << endl;
+> pFile << "    \"Allow goal adaption\" = \"" << (int)isAllowGoalAdaption() << "\"" << endl;
+> pFile << "# Breed Factor:" << endl;
+> pFile << "# This parameter determines how many % of the players will multiply by 1:1 copy" << endl;
+> pFile << "    \"Breed Factor\" = \"" << getBreedFactor() << "\"" << endl;
+> pFile << "# Crossing Over:" << endl;
+> pFile << "# This parameter determines how many % of the players will multiply by crossover# CURRENTLY NOT IMPLEMENTED!" << endl;
+> pFile << "    \"Crossing Over\" = \"" << getCrossingOver() << "\"" << endl;
+> pFile << "# 10 means that programs will be sorted into 10-program groups, the best 2 are" << endl;
+> pFile << "# taken for reproduction and the worst two are replaced by their children" << endl;
+> pFile << "" << endl;                                                       
+> pFile << "# GUI SETTINGS:" << endl;
+> pFile << "" << endl;            
+> pFile << "# set this to 1 to set all details to zero, fastest output" << endl;
+> pFile << "# Real minimalists should take a look at the command line options where SDL can be deactivated completely! 8-DD" << endl;
+> pFile << "# CURRENTLY NOT IMPLEMENTED" << endl;
+> pFile << "    \"Minimalist\" = \"0\"" << endl; // TODO
+> pFile << "" << endl;
+> pFile << "# how a frame update is weighted compared to a core update (e.g. 4 means that a new generation is calculated every 4 frames)" << endl;
+> pFile << "    \"Allow static framerate\" = \"" << (int)isAllowStaticFramerate() << "\"" << endl;
+> pFile << "# allow the program to dynamicly reduce the speed of the core to reach this frame rate. 0 = offline." << endl;
+> pFile << "    \"Static framerate\" = \"" << getStaticFramerate() << "\"" << endl;
+> pFile << "# Draw X frames per new generation" << endl;
+> pFile << "    \"Dynamic framerate\" = \"" << getDynamicFramerate() << "\"" << endl;
+> pFile << "" << endl;                                                                                
+> pFile << "# Order entries in the unitmenu by area or by facility?" << endl;
+> pFile << "    \"Facility mode\" = \"" << (int)isFacilityMode() << "\"" << endl;
+> pFile << "# glowing effects" << endl;
+> pFile << "    \"Glowing buttons\" = \"" << (int)isGlowingButtons() << "\"" << endl;
+> pFile << "# Show nice DNA spiral?" << endl;
+> pFile << "    \"DNA Spiral\" = \"" << (int)isDnaSpiral() << "\"" << endl;
+> pFile << "# moving rectangles, 2 = all objects move smoothly, 1 = some objects move smoothly, 0 = all objects jump directly to their destination" << endl;
+> pFile << "    \"Smooth movements\" = \"" << (int)isSmoothMovements() << "\"" << endl;
+> pFile << "# Rounded rectangles, saves a little cpu power if deactivated (the computer loves simple object :-D" << endl;
+> pFile << "# CURRENTLY NOT IMPLEMENTED" << endl;
+> pFile << "    \"Rounded rectangles\" = \"1\"" << endl; // TODO
+> pFile << "# use background bitmap, saves some cpu power if deactivated" << endl;
+> pFile << "    \"Background bitmap\" = \"" << (int)isBackgroundBitmap() << "\"" << endl;
+> pFile << "# Transparency, let's burn some cpu power" << endl;
+> pFile << "    \"Transparency\" = \"" << (int)isTransparency() << "\"" << endl;
+> pFile << endl;                                                                                
+> pFile << "    \"Tooltips\" = \"" << (int)isTooltips() << "\"" << endl;
+> pFile << "    \"Fullscreen\" = \"" << (int)isFullScreen() << "\"" << endl;
+> pFile << "    \"Software mouse\" = \"" << (int)isSoftwareMouse() << "\"" << endl;
+> pFile << "@END" << endl;
+Files ./configuration.o and /home/claw/work/sc1061/sc/core/configuration.o differ
+diff -r -b -B ./defs.cpp /home/claw/work/sc1061/sc/core/defs.cpp
+38c38
+< //const unsigned int UNIT_TYPE_COUNT = 105;
+---
+> //const unsigned int UNIT_TYPE_COUNT = 101;
+112c112
+< // BUILD FREE ADDON PLACE FOR FACTORY, STARPORT ETC. WIE BEI RESEARCHES
+---
+> 
+117,118c117,118
+< {"SCV"	,					 20, 5000,    0,  1, 0, 0, {0, 0}, {0 ,0, 0}, {COMMAND_CENTER, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, WORKER_UNIT_TYPE},
+< {"Space Marine", 		 		 24, 5000,    0,  1, 0, 0, {0, 0}, {0 ,0, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+---
+> {"SCV"	,					 20, 5000,    0,  1, 0, 0, {0, 0}, {0 ,0, 0}, {COMMAND_CENTER, COMMAND_CENTER_CS, COMMAND_CENTER_NS}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, WORKER_UNIT_TYPE},
+> {"Marine", 			 		 24, 5000,    0,  1, 0, 0, {0, 0}, {0 ,0, 0}, {BARRACKS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+120,122c120,122
+< {"Vulture",					 30, 7500,    0,  2, 0, 0, {0, 0}, {0, 0, 0}, {FACTORY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+< {"Goliath",					 40,10000, 5000,  2, 0, 0, {0, 0}, {ARMORY, 0, 0}, {FACTORY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+< {"Siege Tank", 				 50,15000,10000,  2, 0, 0, {0, 0}, {0 ,0, 0}, {FACTORY_MS, 0, 0}, FACTORY, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+---
+> {"Vulture",					 30, 7500,    0,  2, 0, 0, {0, 0}, {0, 0, 0}, {FACTORY, FACTORY_MS, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+> {"Goliath",					 40,10000, 5000,  2, 0, 0, {0, 0}, {ARMORY, 0, 0}, {FACTORY, FACTORY_MS, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+> {"Siege Tank", 				 50,15000,10000,  2, 0, 0, {0, 0}, {0 ,0, 0}, {FACTORY_MS, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+125,129c125,129
+< {"Wraith", 					 60,15000,10000,  2, 0, 0, {0, 0}, {0 ,0, 0}, {STARPORT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+< {"Science Vessel", 			 80,10000,22500,  2, 0, 0, {0, 0}, {SCIENCE_FACILITY, 0, 0}, {STARPORT_CT, 0, 0}, STARPORT, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
+< {"Dropship", 				 50,10000,10000,  2, 0, 0, {0, 0}, {0, 0, 0}, {STARPORT_CT, 0, 0}, STARPORT, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
+< {"Battle Cruiser",			133,40000,30000,  6, 0, 0, {0, 0}, {SCIENCE_FACILITY_PL, 0, 0}, {STARPORT_CT, 0, 0}, STARPORT, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+< {"Valkyrie", 				 50,25000,12500,  3, 0, 0, {0, 0}, {ARMORY, 0, 0}, {STARPORT_CT, 0, 0}, STARPORT, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+---
+> {"Wraith", 					 60,15000,10000,  2, 0, 0, {0, 0}, {0 ,0, 0}, {STARPORT, STARPORT_CT, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+> {"Science Vessel", 			 80,10000,22500,  2, 0, 0, {0, 0}, {SCIENCE_FACILITY, 0, 0}, {STARPORT_CT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
+> {"Dropship", 				 50,10000,10000,  2, 0, 0, {0, 0}, {0, 0, 0}, {STARPORT_CT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, SUPPORT_UNIT_TYPE},
+> {"Battle Cruiser",			133,40000,30000,  6, 0, 0, {0, 0}, {SCIENCE_FACILITY_PL, 0, 0}, {STARPORT_CT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+> {"Valkyrie", 				 50,25000,12500,  3, 0, 0, {0, 0}, {ARMORY, 0, 0}, {STARPORT_CT, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 100, COMBAT_UNIT_TYPE},
+134,137c134,137
+< {"Factory", 				 80,20000,10000,  0, 0, 0, {0, 0}, {BARRACKS ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, F_FACTORY_ADDON, 10, PRODUCE_UNIT_TYPE},
+< {"Command Center",			120,40000,    0,  0,10, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, F_COMMAND_CENTER_ADDON, 10, SUPPLY_UNIT_TYPE},
+< {"Starport", 				 70,15000,10000,  0, 0, 0, {0, 0}, {FACTORY ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, F_STARPORT_ADDON, 10, PRODUCE_UNIT_TYPE},
+< {"Science Facility", 		 60,10000,15000,  0, 0, 0, {0, 0}, {STARPORT ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, F_SCIENCE_FACILITY_ADDON, 10, RESEARCH_FACILITY_UNIT_TYPE},
+---
+> {"Factory", 				 80,20000,10000,  0, 0, 0, {0, 0}, {BARRACKS ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, PRODUCE_UNIT_TYPE},
+> {"Command Center",			120,40000,    0,  0,10, 0, {0, 0}, {0, 0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, SUPPLY_UNIT_TYPE},
+> {"Starport", 				 70,15000,10000,  0, 0, 0, {0, 0}, {FACTORY ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, PRODUCE_UNIT_TYPE},
+> {"Science Facility", 		 60,10000,15000,  0, 0, 0, {0, 0}, {STARPORT ,0, 0}, {SCV, 0, 0}, 0, NEEDED_UNTIL_COMPLETE, 0, 10, RESEARCH_FACILITY_UNIT_TYPE},
+148,153c148,153
+< {"Command Center[CS]", 		 40, 5000, 5000,  0,10, 0, {0, 0}, {ACADEMY, 0, 0}, {COMMAND_CENTER, 0, 0}, F_COMMAND_CENTER_ADDON, NEEDED_UNTIL_COMPLETE, COMSAT_STATION, 0, ADD_ON_UNIT_TYPE}, //TODO: Beim Abheben zerstoeren...
+< {"Command Center[NS]", 		 40,10000,10000,  0,10, 0, {0, 0}, {SCIENCE_FACILITY_CO, 0, 0}, {COMMAND_CENTER, 0, 0}, F_COMMAND_CENTER_ADDON, NEEDED_UNTIL_COMPLETE, NUCLEAR_SILO, 0, ADD_ON_UNIT_TYPE},
+< {"Starport[CT]", 			 80, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {STARPORT, 0, 0}, F_STARPORT_ADDON, NEEDED_UNTIL_COMPLETE, CONTROL_TOWER, 0, ADD_ON_UNIT_TYPE},
+< {"Science Facility[CO]", 	 40, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, F_SCIENCE_FACILITY_ADDON, NEEDED_UNTIL_COMPLETE, COVERT_OPS, 0, ADD_ON_UNIT_TYPE},
+< {"Science Facility[PL]", 	 40, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, F_SCIENCE_FACILITY_ADDON, NEEDED_UNTIL_COMPLETE, PHYSICS_LAB, 0, ADD_ON_UNIT_TYPE},
+< {"Factory[MS]", 			 40, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {FACTORY, 0, 0}, F_FACTORY_ADDON, NEEDED_UNTIL_COMPLETE, MACHINE_SHOP, 0, ADD_ON_UNIT_TYPE},
+---
+> {"Command Center[CS]", 		 40, 5000, 5000,  0,10, 0, {0, 0}, {ACADEMY, 0, 0}, {COMMAND_CENTER, 0, 0}, 0, IS_LOST, COMSAT_STATION, 0, ADD_ON_UNIT_TYPE}, //TODO: Beim Abheben zerstoeren...
+> {"Command Center[NS]", 		 40,10000,10000,  0,10, 0, {0, 0}, {SCIENCE_FACILITY_CO, 0, 0}, {COMMAND_CENTER, 0, 0}, 0, IS_LOST, NUCLEAR_SILO, 0, ADD_ON_UNIT_TYPE},
+> {"Starport[CT]", 			 80, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {STARPORT, 0, 0}, 0, IS_LOST, CONTROL_TOWER, 0, ADD_ON_UNIT_TYPE},
+> {"Science Facility[CO]", 	 40, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, 0, IS_LOST, COVERT_OPS, 0, ADD_ON_UNIT_TYPE},
+> {"Science Facility[PL]", 	 40, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, 0, IS_LOST, PHYSICS_LAB, 0, ADD_ON_UNIT_TYPE},
+> {"Factory[MS]", 			 40, 5000, 5000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {FACTORY, 0, 0}, 0, IS_LOST, MACHINE_SHOP, 0, ADD_ON_UNIT_TYPE},
+156c156
+< {"EMP Shockwave",			120,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, R_EMP_SHOCKWAVE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+---
+> {"EMP Shockwave",			120,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, SCIENCE_FACILITY_CO, SCIENCE_FACILITY_PL}, R_EMP_SHOCKWAVE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+159c159
+< {"Irradiate", 				 80,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, R_IRRADIATE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+---
+> {"Irradiate", 				 80,20000,20000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, SCIENCE_FACILITY_CO, SCIENCE_FACILITY_PL}, R_IRRADIATE, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+167c167
+< {"Titan Reactor",			166,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, 0, 0}, R_TITAN_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+---
+> {"Titan Reactor",			166,15000,15000,  0, 0, 0, {0, 0}, {0 ,0, 0}, {SCIENCE_FACILITY, SCIENCE_FACILITY_CO, SCIENCE_FACILITY_PL}, R_TITAN_REACTOR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, RESEARCH_UNIT_TYPE},
+217,221d216
+< 
+< {"F_Factory Addon",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+< {"F_Starport Addon",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+< {"F_Command Center Addon",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+< {"F_Science Facility Addon",			  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY, 0, 0, REMAINING_UNIT_TYPE},
+330,333d324
+< {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+< {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+< {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+< {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+341c332
+< {"Zergling",				 28, 5000,    0,  1, 0, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, ZERGLING, 100, COMBAT_UNIT_TYPE},
+---
+> {"Zergling",				 28, 5000,    0,  1, 0, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {LARVA, 0, 0}, 0, IS_LOST, 0, 100, COMBAT_UNIT_TYPE},
+352,353c343,344
+< {"Lair",					100,15000,10000,  0, 1, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {HATCHERY, 0, 0}, 0, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, ADD_ON_UNIT_TYPE},
+< {"Hive",					120,20000,15000,  0, 1, 0, {0, 0}, {QUEENS_NEST ,0, 0}, {LAIR, 0, 0}, 0, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0, ADD_ON_UNIT_TYPE},
+---
+> {"Lair",					100,15000,10000,  0, 1, 0, {0, 0}, {SPAWNING_POOL ,0, 0}, {HATCHERY, 0, 0}, 0, IS_LOST, 0, 0, ADD_ON_UNIT_TYPE},
+> {"Hive",					120,20000,15000,  0, 1, 0, {0, 0}, {QUEENS_NEST ,0, 0}, {LAIR, 0, 0}, 0, IS_LOST, 0, 0, ADD_ON_UNIT_TYPE},
+439,442d429
+< {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+< {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+< {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+< {"NULL",					  0,    0,    0,  0, 0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, NO_FACILITY_BEHAVIOUR_DEFINED, 0, 0, REMAINING_UNIT_TYPE},
+diff -r -b -B ./defs.hpp /home/claw/work/sc1061/sc/core/defs.hpp
+10c10
+< #define UNIT_TYPE_COUNT 105
+---
+> #define UNIT_TYPE_COUNT 101
+233,238d232
+< 
+< 	F_FACTORY_ADDON,
+< 	F_STARPORT_ADDON,
+< 	F_COMMAND_CENTER_ADDON,
+< 	F_SCIENCE_FACILITY_ADDON,
+< 	
+Files ./defs.o and /home/claw/work/sc1061/sc/core/defs.o differ
+Only in ./: differ
+Only in ./: .differ.swp
+diff -r -b -B ./goal.cpp /home/claw/work/sc1061/sc/core/goal.cpp
+34,38d33
+< bool GOAL::operator<(const GOAL& goal)
+< {
+< 	return(getLocation() < goal.getLocation());
+< }
+< 
+diff -r -b -B ./goalentry.cpp /home/claw/work/sc1061/sc/core/goalentry.cpp
+199c199
+< 		if((allGoal[i])||(isBuildable[i]))
+---
+> 		if((allGoal[i])/*||(isBuildable[i])*/)
+257,258d256
+< 	if(allGoal[unitType]==0)
+< 		prefList.push_back(unitType);
+299c297
+< 	for(int j=10;j--;) // Nuclear Warhead needs 6 steps (?) ~~~~
+---
+>     for(int j=12;j--;) // Nuclear Warhead needs 6 steps (?) ~~~~
+426,428c424,426
+< 				  	((pStats[i].facility[0]==0)||(tree.checked[pStats[i].facility[0]])||
+< 					((pStats[i].facility[1]>0)&&(tree.checked[pStats[i].facility[1]]))||
+< 					((pStats[i].facility[2]>0)&&(tree.checked[pStats[i].facility[2]])))&&
+---
+> 				  	((pStats[i].facility[0]==0)||(tree.checked[pStats[i].facility[0]]))&&
+>                     ((pStats[i].facility[1]==0)||(tree.checked[pStats[i].facility[1]]))&&
+>                     ((pStats[i].facility[2]==0)||(tree.checked[pStats[i].facility[2]]))&&
+536c534
+< 						addGoal(fac, 1, 1, 0);
+---
+> 						addGoal(fac,1,0,0);
+641,644d638
+< 
+< 	// sort by location:
+< 	//goal.sort(GOAL::GoalAscendingLocationSort());
+< //	goal.sort();
+682,683d675
+< 	if(pStats[unit].unitType==REMAINING_UNIT_TYPE)
+< 		return;
+Files ./goalentry.o and /home/claw/work/sc1061/sc/core/goalentry.o differ
+diff -r -b -B ./goal.hpp /home/claw/work/sc1061/sc/core/goal.hpp
+13d12
+< 		bool operator<(const GOAL& goal);
+Files ./goal.o and /home/claw/work/sc1061/sc/core/goal.o differ
+Files ./harvest.o and /home/claw/work/sc1061/sc/core/harvest.o differ
+Files ./location.o and /home/claw/work/sc1061/sc/core/location.o differ
+Files ./prerace.o and /home/claw/work/sc1061/sc/core/prerace.o differ
+Files ./race.o and /home/claw/work/sc1061/sc/core/race.o differ
+diff -r -b -B ./settings.cpp /home/claw/work/sc1061/sc/core/settings.cpp
+581d580
+< 	loadGoalFile(os.str().c_str());
+diff -r -b -B ./settings.hpp /home/claw/work/sc1061/sc/core/settings.hpp
+37d36
+< //	void clearGoalFiles();
+Files ./settings.o and /home/claw/work/sc1061/sc/core/settings.o differ
+Files ./soup.o and /home/claw/work/sc1061/sc/core/soup.o differ
+Files ./startcondition.o and /home/claw/work/sc1061/sc/core/startcondition.o differ
+Files ./start.o and /home/claw/work/sc1061/sc/core/start.o differ
+Files ./unit.o and /home/claw/work/sc1061/sc/core/unit.o differ

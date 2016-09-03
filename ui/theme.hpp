@@ -45,7 +45,7 @@ enum eDataType
 	MAX_DATA_TYPES
 };
 // ------ END DATA TYPES ------
-                                                                                                                                                            
+																																							
 // ------ SUB DATA TYPES ------
 
 enum eSubDataType
@@ -202,30 +202,58 @@ enum ePen
 	BODIAGRAM_SUPPLY_PEN,
 	BODIAGRAM_MINERALS_PEN,
 	BODIAGRAM_GAS_PEN,
+	BODIAGRAM_SUPPLY_BOLD_PEN,
+	BODIAGRAM_MINERALS_BOLD_PEN,
+	BODIAGRAM_GAS_BOLD_PEN,
 
-    UNIT_TYPE_0_PEN,
-    UNIT_TYPE_1_PEN,
-    UNIT_TYPE_2_PEN,
-    UNIT_TYPE_3_PEN,
-    UNIT_TYPE_4_PEN,
-    UNIT_TYPE_5_PEN,
-    UNIT_TYPE_6_PEN,
-    UNIT_TYPE_7_PEN,
-    UNIT_TYPE_8_PEN,
-    UNIT_TYPE_9_PEN,
-    UNIT_TYPE_10_PEN,
-                                                                                                                 
-    BRIGHT_UNIT_TYPE_0_PEN,
-    BRIGHT_UNIT_TYPE_1_PEN,
-    BRIGHT_UNIT_TYPE_2_PEN,
-    BRIGHT_UNIT_TYPE_3_PEN,
-    BRIGHT_UNIT_TYPE_4_PEN,
-    BRIGHT_UNIT_TYPE_5_PEN,
-    BRIGHT_UNIT_TYPE_6_PEN,
-    BRIGHT_UNIT_TYPE_7_PEN,
-    BRIGHT_UNIT_TYPE_8_PEN,
-    BRIGHT_UNIT_TYPE_9_PEN,
-    BRIGHT_UNIT_TYPE_10_PEN,
+	UNIT_TYPE_0_PEN,
+	UNIT_TYPE_1_PEN,
+	UNIT_TYPE_2_PEN,
+	UNIT_TYPE_3_PEN,
+	UNIT_TYPE_4_PEN,
+	UNIT_TYPE_5_PEN,
+	UNIT_TYPE_6_PEN,
+	UNIT_TYPE_7_PEN,
+	UNIT_TYPE_8_PEN,
+	UNIT_TYPE_9_PEN,
+	UNIT_TYPE_10_PEN,
+
+	UNIT_TYPE_0_BOLD_PEN,
+	UNIT_TYPE_1_BOLD_PEN,
+	UNIT_TYPE_2_BOLD_PEN,
+	UNIT_TYPE_3_BOLD_PEN,
+	UNIT_TYPE_4_BOLD_PEN,
+	UNIT_TYPE_5_BOLD_PEN,
+	UNIT_TYPE_6_BOLD_PEN,
+	UNIT_TYPE_7_BOLD_PEN,
+	UNIT_TYPE_8_BOLD_PEN,
+	UNIT_TYPE_9_BOLD_PEN,
+	UNIT_TYPE_10_BOLD_PEN,
+																											 
+	BRIGHT_UNIT_TYPE_0_PEN,
+	BRIGHT_UNIT_TYPE_1_PEN,
+	BRIGHT_UNIT_TYPE_2_PEN,
+	BRIGHT_UNIT_TYPE_3_PEN,
+	BRIGHT_UNIT_TYPE_4_PEN,
+	BRIGHT_UNIT_TYPE_5_PEN,
+	BRIGHT_UNIT_TYPE_6_PEN,
+	BRIGHT_UNIT_TYPE_7_PEN,
+	BRIGHT_UNIT_TYPE_8_PEN,
+	BRIGHT_UNIT_TYPE_9_PEN,
+	BRIGHT_UNIT_TYPE_10_PEN,
+
+	BRIGHT_UNIT_TYPE_0_BOLD_PEN,
+	BRIGHT_UNIT_TYPE_1_BOLD_PEN,
+	BRIGHT_UNIT_TYPE_2_BOLD_PEN,
+	BRIGHT_UNIT_TYPE_3_BOLD_PEN,
+	BRIGHT_UNIT_TYPE_4_BOLD_PEN,
+	BRIGHT_UNIT_TYPE_5_BOLD_PEN,
+	BRIGHT_UNIT_TYPE_6_BOLD_PEN,
+	BRIGHT_UNIT_TYPE_7_BOLD_PEN,
+	BRIGHT_UNIT_TYPE_8_BOLD_PEN,
+	BRIGHT_UNIT_TYPE_9_BOLD_PEN,
+	BRIGHT_UNIT_TYPE_10_BOLD_PEN,
+
 
 	GREEN_TIMESTEPS_PEN,
 
@@ -430,26 +458,26 @@ enum eString
 	
 
 // window title parameters
-    HIDE_MODE_STRING,
-    BASIC_PLAYER_MODE_STRING,
-    ADVANCED_PLAYER_MODE_STRING, //70
-    EXPERT_PLAYER_MODE_STRING,
-    EXPERT_COMPUTER_MODE_STRING,
-    GOSU_PLAYER_MODE_STRING,
-    GOSU_COMPUTER_MODE_STRING, 
-    COMPARE_PLAYERMODE_STRING,
+	HIDE_MODE_STRING,
+	BASIC_PLAYER_MODE_STRING,
+	ADVANCED_PLAYER_MODE_STRING, //70
+	EXPERT_PLAYER_MODE_STRING,
+	EXPERT_COMPUTER_MODE_STRING,
+	GOSU_PLAYER_MODE_STRING,
+	GOSU_COMPUTER_MODE_STRING, 
+	COMPARE_PLAYERMODE_STRING,
 	ERROR_MODE_STRING,
 // Tabs
-    ZERO_TAB_STRING,
-    BASIC_TAB_STRING,
-    ADVANCED_TAB_STRING,
-    EXPERT_TAB_STRING, // 80
-    GOSU_TAB_STRING,
+	ZERO_TAB_STRING,
+	BASIC_TAB_STRING,
+	ADVANCED_TAB_STRING,
+	EXPERT_TAB_STRING, // 80
+	GOSU_TAB_STRING,
 	
-    TUTORIAL_TAB_STRING,
-    SETTINGS_TAB_STRING,
-    MAP_TAB_STRING, 
-    COMPARE_TAB_STRING,
+	TUTORIAL_TAB_STRING,
+	SETTINGS_TAB_STRING,
+	MAP_TAB_STRING, 
+	COMPARE_TAB_STRING,
 
 // tooltips
 	ADD_UNIT_TOOLTIP_STRING,
@@ -571,9 +599,9 @@ enum eString
 
 	SETTING_RESOLUTION_STRING,
 	SETTING_RESOLUTION_ZERO_STRING,
-    SETTING_RESOLUTION_800x600_STRING,
-    SETTING_RESOLUTION_1024x768_STRING,
-    SETTING_RESOLUTION_1280x1024_STRING,
+	SETTING_RESOLUTION_800x600_STRING,
+	SETTING_RESOLUTION_1024x768_STRING,
+	SETTING_RESOLUTION_1280x1024_STRING,
 				
 	SETTING_THEME_STRING,
 	SETTING_ZERO_THEME_STRING,
@@ -666,6 +694,7 @@ enum eBitmap
 	//BACKGROUND_BITMAP,
 
 	BAR_BITMAP,
+	KEY_BITMAP,
 
 	MAX_BITMAPS
 };
@@ -679,13 +708,13 @@ enum eWindow
 	MESSAGE_WINDOW,
 	THE_CORE_WINDOW,
 	TUTORIAL_WINDOW,
-    BUILD_ORDER_WINDOW,
-    FORCE_WINDOW,
-    TIMER_WINDOW,
-    STATISTICS_WINDOW,
-    BO_DIAGRAM_WINDOW,
-    BO_GRAPH_WINDOW,
-    INFO_WINDOW,
+	BUILD_ORDER_WINDOW,
+	FORCE_WINDOW,
+	TIMER_WINDOW,
+	STATISTICS_WINDOW,
+	BO_DIAGRAM_WINDOW,
+	BO_GRAPH_WINDOW,
+	INFO_WINDOW,
 
 	SETTINGS_WINDOW,
 	EDIT_FIELD_WINDOW,
@@ -697,17 +726,17 @@ enum eWindow
 enum eTab
 {
 	ZERO_TAB,
-    BASIC_TAB,
-    ADVANCED_TAB,
-    EXPERT_TAB,
-    GOSU_TAB,
+	BASIC_TAB,
+	ADVANCED_TAB,
+	EXPERT_TAB,
+	GOSU_TAB,
 
-    TUTORIAL_TAB,
-    SETTINGS_TAB,
-    MAP_TAB,
+	TUTORIAL_TAB,
+	SETTINGS_TAB,
+	MAP_TAB,
 	COMPARE_TAB,
 	
-    MAX_TABS
+	MAX_TABS
 };
 
 enum eArrangeDirection
@@ -758,32 +787,32 @@ enum eButton
 	PROTOSS_BUTTON,
 	ZERG_BUTTON,*/
 
-    UNIT_TYPE_0_BUTTON,
-    UNIT_TYPE_1_BUTTON,
-    UNIT_TYPE_2_BUTTON,
-    UNIT_TYPE_3_BUTTON,
-    UNIT_TYPE_4_BUTTON,
-    UNIT_TYPE_5_BUTTON,
-    UNIT_TYPE_6_BUTTON,
-    UNIT_TYPE_7_BUTTON,
-    UNIT_TYPE_8_BUTTON,
-    UNIT_TYPE_9_BUTTON,
-    UNIT_TYPE_10_BUTTON,
+	UNIT_TYPE_0_BUTTON,
+	UNIT_TYPE_1_BUTTON,
+	UNIT_TYPE_2_BUTTON,
+	UNIT_TYPE_3_BUTTON,
+	UNIT_TYPE_4_BUTTON,
+	UNIT_TYPE_5_BUTTON,
+	UNIT_TYPE_6_BUTTON,
+	UNIT_TYPE_7_BUTTON,
+	UNIT_TYPE_8_BUTTON,
+	UNIT_TYPE_9_BUTTON,
+	UNIT_TYPE_10_BUTTON,
 	VERY_BRIGHT_UNIT_TYPE_BUTTON,
 	TAB_BUTTON,
 
 	ADD_GOAL_BUTTON,
 	
 // statistics window
-    FORCE_STAT_BUTTON,
-    TIME_STAT_BUTTON,
-    MINERALS_STAT_BUTTON,
-    GAS_STAT_BUTTON,
-    FITNESS_AVERAGE_STAT_BUTTON,
-    FITNESS_VARIANCE_STAT_BUTTON,
-    BUILD_ORDER_LENGTH_STAT_BUTTON,
-    GENERATIONS_LEFT_STAT_BUTTON,
-    FPS_STAT_BUTTON,
+	MINERALS_STAT_BUTTON,
+	GAS_STAT_BUTTON,
+	TIME_STAT_BUTTON,
+	FORCE_STAT_BUTTON,
+	BUILD_ORDER_LENGTH_STAT_BUTTON,
+	FITNESS_AVERAGE_STAT_BUTTON,
+	FITNESS_VARIANCE_STAT_BUTTON,
+	GENERATIONS_LEFT_STAT_BUTTON,
+	FPS_STAT_BUTTON,
 	
 	SMALL_ARROW_LEFT_BUTTON,
 	SMALL_ARROW_RIGHT_BUTTON,
@@ -804,54 +833,53 @@ enum eButton
 
 enum eButtonAnimationPhase
 {
-    DISABLED_BUTTON_PHASE,
-    NORMAL_BUTTON_PHASE,
-    PRESSED_BUTTON_PHASE,
-    HIGHLIGHT_BUTTON_PHASE,
+	DISABLED_BUTTON_PHASE,
+	NORMAL_BUTTON_PHASE,
+	PRESSED_BUTTON_PHASE,
+	HIGHLIGHT_BUTTON_PHASE,
 	PRESSED_HIGHLIGHTED_BUTTON_PHASE, // primarily for static buttons
 	
-    MAX_BUTTON_ANIMATION_PHASES
+	MAX_BUTTON_ANIMATION_PHASES
 };
 
 
 enum eButtonAnimationType
 {
-    NO_ANIMATION,
-    JUMPY_COLORS_ANIMATION, // gets bright and jumps back
-    GLOWING_ANIMATION, // back and forth
-    BLINKING_ANIMATION // jumps between start and end colors
+	NO_ANIMATION,
+	JUMPY_COLORS_ANIMATION, // gets bright and jumps back
+	GLOWING_ANIMATION, // back and forth
+	BLINKING_ANIMATION // jumps between start and end colors
 };
 
 
 
 struct ButtonAnimation
 {
-    eBrush startBrush[MAX_BUTTON_ANIMATION_PHASES];
-    eBrush endBrush[MAX_BUTTON_ANIMATION_PHASES];
-                                                                                                                                                            
-    eColor startTextColor[MAX_BUTTON_ANIMATION_PHASES];
-    eColor endTextColor[MAX_BUTTON_ANIMATION_PHASES];
-                                                                                                                                                            
-    ePen startBorderPen[MAX_BUTTON_ANIMATION_PHASES];
-    ePen endBorderPen[MAX_BUTTON_ANIMATION_PHASES];
-                                                                                                                                                            
-    eBitmap bitmap[MAX_BUTTON_ANIMATION_PHASES];// bitmap animation is fixed... for now
-//    eString text[MAX_BUTTON_ANIMATION_PHASES];
+	eBrush startBrush[MAX_BUTTON_ANIMATION_PHASES];
+	eBrush endBrush[MAX_BUTTON_ANIMATION_PHASES];
+	eColor startTextColor[MAX_BUTTON_ANIMATION_PHASES];
+	eColor endTextColor[MAX_BUTTON_ANIMATION_PHASES];
+																																							
+	ePen startBorderPen[MAX_BUTTON_ANIMATION_PHASES];
+	ePen endBorderPen[MAX_BUTTON_ANIMATION_PHASES];
+																																							
+	eBitmap bitmap[MAX_BUTTON_ANIMATION_PHASES];// bitmap animation is fixed... for now
+//	eString text[MAX_BUTTON_ANIMATION_PHASES];
 
 	unsigned int speed; // 100 = 100 steps for full animation
-    eButtonAnimationType type;
+	eButtonAnimationType type;
 };
 
 class UI_Theme
 {
-    public:
+	public:
 		UI_Theme& operator=(const UI_Theme& object);
 		UI_Theme(const UI_Theme& object);
-        UI_Theme();
-        ~UI_Theme();
-        
+		UI_Theme();
+		~UI_Theme();
+		
 		const eLanguage getLanguage() const;
-        void setLanguage(const eLanguage language);
+		void setLanguage(const eLanguage language);
 
 		const eTheme getColorTheme() const;
 		void setColorTheme(const eTheme colorTheme);
@@ -865,16 +893,16 @@ class UI_Theme
 		void loadStringFile(const string& dataFile);	
 		void loadDataFiles(const string& dataFile, const string& bitmapDir, const string& fontDir, DC* dc); //currently all data hard coded, move it to file later! TODO
 
-        const string* lookUpString(const eString id) const;
+		const string* lookUpString(const eString id) const;
 		const string lookUpFormattedString(const eString id, const string& text) const;
 		const string lookUpFormattedString(const eString id, const unsigned int i) const;
 		const string lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j) const;
 		const string lookUpFormattedString(const eString id, const unsigned int i, const unsigned int j, const unsigned int k) const;
-        Color* lookUpColor(const eColor id) const;
-        /*const */Bitmap* lookUpBitmap(const eBitmap id) const;
-        Pen* lookUpPen(const ePen id) const;
-        Brush* lookUpBrush(const eBrush id) const;
-        Font* lookUpFont(const eFont id) const;
+		Color* lookUpColor(const eColor id) const;
+		/*const */Bitmap* lookUpBitmap(const eBitmap id) const;
+		Pen* lookUpPen(const ePen id) const;
+		Brush* lookUpBrush(const eBrush id) const;
+		Font* lookUpFont(const eFont id) const;
 		
 		
 		const Point lookUpRealDistance(const eWindow id, const unsigned int windowNumber=0) const;
@@ -906,18 +934,18 @@ class UI_Theme
 //		const Pen lookUpMixedPen(const ePen id1, ePen id2, const unsigned int gradient);
 //		const Pen lookUpBrightenedPen(const ePen id, const unsigned int brightness);
 
-    private:
+	private:
 //memory issue: load maybe all data after a change! TODO
  		eResolution resolution;
 		eTab tab;
-        eLanguage language;
+		eLanguage language;
 		eTheme colorTheme;
 		
-        string* stringList[MAX_LANGUAGES][MAX_STRINGS];
-        Color* colorList[MAX_COLOR_THEMES][MAX_COLORS];
-        Bitmap* bitmapList[MAX_COLOR_THEMES][MAX_RESOLUTIONS][MAX_BITMAPS];
+		string* stringList[MAX_LANGUAGES][MAX_STRINGS];
+		Color* colorList[MAX_COLOR_THEMES][MAX_COLORS];
+		Bitmap* bitmapList[MAX_COLOR_THEMES][MAX_RESOLUTIONS][MAX_BITMAPS];
 		Pen* penList[MAX_RESOLUTIONS][MAX_COLOR_THEMES][MAX_PENS];
-        Brush* brushList[MAX_COLOR_THEMES][MAX_BRUSHES];
+		Brush* brushList[MAX_COLOR_THEMES][MAX_BRUSHES];
 
 		Rect* rectList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
 		Rect* maxRectList[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];

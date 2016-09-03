@@ -37,7 +37,7 @@ class StatisticsWindow : public UI_Window
 		
 		int ani;
 		
-		UI_Button* statEntry[9];
+		UI_Button* statEntry[MAX_STAT_ENTRY];
 		long unsigned int start_time;
 		const ANARACE* anarace;
 		unsigned int data[MAX_STAT_ENTRY][200];
@@ -48,6 +48,7 @@ class StatisticsWindow : public UI_Window
 		unsigned int average[100];
 		unsigned int averagecounter;
 		unsigned int graph_ani;
+		bool wasResetted;
 };
 #endif
 

@@ -37,11 +37,11 @@ void TimerWindow::resetData()
 {
 	for(int i=20;i--;)
 	{
-		oldTimeCounter[i]=0;
-		oldTime[i]=MAX_TIME-1;
+		oldTimeCounter[i] = 0;
+		oldTime[i] = MAX_TIME-1;
 	}
-	lastTime=MAX_TIME;
-	currentTime=MAX_TIME;
+	lastTime = MAX_TIME;
+	currentTime = MAX_TIME;
 }
 
 void TimerWindow::forcePause(const bool pause)
@@ -86,6 +86,7 @@ void TimerWindow::process()
 		else
 		{
 			goalsFulFilledText->updateText(theme.lookUpFormattedString(OF_TIME_FULFILLED_STRING, anarace->getGoalPercentage()));
+//			goalsFulFilledText->updateText(theme.lookUpFormattedString(OF_TIME_FULFILLED_STRING, anarace->getFastestGoalTime()));
 			if(!anarace->isOptimizing())
 				currentActionText->updateText(PAUSED_STRING);
 			else
@@ -94,7 +95,7 @@ void TimerWindow::process()
 		if(anarace->getRealTimer()<currentTime)
 		{
 			currentTime -= (currentTime - (anarace->getRealTimer()))/2;
-	    	if(anarace->getRealTimer()<currentTime)
+		    	if(anarace->getRealTimer()<currentTime)
 				currentTime--;
 		}
 		std::ostringstream os;
@@ -130,5 +131,10 @@ void TimerWindow::draw(DC* dc) const
 	if(!isShown()) 
 		return;
 	UI_Window::draw(dc);
+	dc->SetPen(*UI_Object::theme.lookUpPen(BODIAGRAM_FITNESS_PEN));
+	dc->DrawHorizontalLine(getAbsolutePosition().x + 10, getAbsolutePosition().y + getHeight() - 30, getAbsolutePosition().x + 10 + ((getWidth()-35)*anarace->getUnchangedGenerations())  / configuration.getMaxGenerations() );
+	ostringstream os;
+	os << 100*anarace->getUnchangedGenerations()  / configuration.getMaxGenerations() << "%";
+	dc->DrawText(os.str(), getAbsolutePosition() + Size(getWidth() - 25, getHeight() - 30));
 }
 

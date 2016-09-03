@@ -3,7 +3,7 @@
 
 #include "statistics.hpp"
 #include "timer.hpp"
-#include "bograph.hpp"
+#include "bgwindow.hpp"
 #include "force.hpp"
 #include "bodiagram.hpp"
 #include "bowindow.hpp"
@@ -68,12 +68,12 @@ class Player : public UI_Object
 	private:
 		void drawGeneString(DC* dc, const Rect position) const;
 		void drawGene(DC* dc, int k, const Point* points, const Point position, Pen& bla1, Pen& bla2) const;
-		void processBoGraph();
 		
 		ANARACE** anarace; //pointer auf pointer, weil sich der pointer ja veraendert!
-		map <long, Order> orderList; // nach markern sortiert
+		list<Order*> orderList; // sorted by IP
 		unsigned int mode;
-		void MoveOrders();
+//		void MoveOrders();
+//		bool fixed[MAX_LENGTH];
 };
 
 #endif

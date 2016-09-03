@@ -2,26 +2,13 @@
 #define _GUI_BOWINDOW_HPP
 
 #include "../ui/window.hpp"
+#include "order.hpp"
 #include "message.hpp"
 
 #include "info.hpp"
-#include <map>
+#include <list>
 
-class BoEntry : public UI_Button
-{
-	public:
-		BoEntry(const BoEntry& object);
-		BoEntry& operator=(const BoEntry& object);
-		BoEntry(UI_Object* bo_parent, Rect bo_rect, Rect bo_max_rect, const string& bo_unit);
-		~BoEntry();
-		const unsigned int changed();
-		void process();
-		void draw(DC* dc) const;
-	private:
-//        UI_Button* addUnit;
-//      UI_Button* subUnit;
-//    UI_Button* cancelUnit; TODO
-};
+#include "boentry.hpp"
 
 
 class BoWindow : public UI_Window
@@ -29,10 +16,12 @@ class BoWindow : public UI_Window
 	public:
 		BoWindow(const BoWindow& object);
 		BoWindow& operator=(const BoWindow& object);
-		BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_info_window, MessageWindow* message_window, std::map <long, Order>* bo_order_list, const unsigned int bo_window_number);
+		BoWindow(UI_Object* bo_parent, ANARACE* bo_anarace, InfoWindow* bo_info_window, MessageWindow* message_window, std::list<Order*>* bo_order_list,/* bool* fixed,*/ const unsigned int bo_window_number);
 		~BoWindow();
 		void resetData();
 		void draw(DC* dc) const;
+		void reloadStrings();
+		void processList();
 		void process();
 		
 		void setMarkedIP(const unsigned int marked_ip);
@@ -43,8 +32,6 @@ class BoWindow : public UI_Window
 		void assignAnarace(ANARACE* bo_anarace);
 	private:
 		void drawSelectionStuff(DC* dc) const;
-		BoEntry* boEntry[MAX_LENGTH];
-	
 //		void resetButtons();
 		unsigned int markedUnit;
 		unsigned int ownMarkedUnit;
@@ -52,8 +39,16 @@ class BoWindow : public UI_Window
 		unsigned int ownMarkedIP;
 		InfoWindow* infoWindow;
 		ANARACE* anarace;
-		std::map <long, Order>* orderList;
+		std::list<Order*>* orderList;
+		std::list<BoEntry*> boList;
 		unsigned int optimizeMode;
+//		int new_one;
+//		int same;
+//		int moved;
+//		int add_end;
+//		int deleted;
+//		int size1;
+//		int size2;
 		signed int boInsertPoint, boEndPoint;
 //		int makeSpaceButton;
 //		int unitButton[2*MAX_LENGTH];
@@ -66,6 +61,7 @@ class BoWindow : public UI_Window
 		UI_Button* saveBuildOrderButton;
 
 		MessageWindow* msgWindow;
+		bool* fixed;
 
 };
 

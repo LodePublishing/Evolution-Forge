@@ -4,41 +4,35 @@
 
 InfoWindow& InfoWindow::operator=(const InfoWindow& object)
 {
-    ((UI_Window)(*this)) = ((UI_Window)object);
-    bx = object.bx;
-    bwidth = object.bwidth;
-    unit = object.unit;
-    key = object.key;
+	((UI_Window)(*this)) = ((UI_Window)object);
+	unit = object.unit;
 	delete text;
-    text = new UI_StaticText(*object.text);
-    setup = object.setup;
-    IP = object.IP;
-    anarace = object.anarace;
+	text = new UI_StaticText(*object.text);
+	IP = object.IP;
+	anarace = object.anarace;
+	bo = object.bo;
+	bg = object.bg;
 	return(*this);
 }
 
 InfoWindow::InfoWindow(const InfoWindow& object) :
-    UI_Window((UI_Window)object),
-    bx(object.bx),
-    bwidth(object.bwidth),
-    unit(object.unit),
-    key(object.key),
-    text(new UI_StaticText(*object.text)),
-    setup(object.setup),
-    IP(object.IP),
-    anarace(object.anarace)
+	UI_Window((UI_Window)object),
+	unit(object.unit),
+	text(new UI_StaticText(*object.text)),
+	IP(object.IP),
+	anarace(object.anarace),
+	bo(object.bo),
+	bg(object.bg)
 { }
 
 InfoWindow::InfoWindow(UI_Object* info_parent, ANARACE* info_anarace, const unsigned int info_window_number):
 	UI_Window(info_parent, INFO_WINDOW_TITLE_STRING, INFO_WINDOW, info_window_number, NOT_SCROLLED),
-	bx(0),
-	bwidth(0),
 	unit(0),
-	key(0),
 	text(new UI_StaticText(this, "nothing", getRelativeClientRect(), BRIGHT_TEXT_COLOR, SMALL_MIDDLE_NORMAL_FONT, FORMATTED_NON_BLOCK_TEXT_MODE)),
-	setup(0),
 	IP(0),
-	anarace(info_anarace)
+	anarace(info_anarace),
+	bo(NULL),
+	bg(NULL)
 { }
 
 InfoWindow::~InfoWindow()
@@ -51,24 +45,13 @@ void InfoWindow::assignAnarace(ANARACE* info_anarace)
 	anarace = info_anarace;
 }
 
-const signed int InfoWindow::getBx() const {
-	return bx;
-}
-
-const unsigned int InfoWindow::getBWidth() const {
-	return bwidth;
+void InfoWindow::assignBg(const BoGraphEntry* info_bg)
+{
+	bg = info_bg;
 }
 
 const unsigned int InfoWindow::getUnit() const {
 	return unit;
-}
-
-void InfoWindow::setBx(const signed int b_x) {
-	bx = b_x;
-}
-
-void InfoWindow::setBWidth(const unsigned int b_width) {
-	bwidth = b_width;
 }
 
 void InfoWindow::setIP(const unsigned int ip) {
@@ -81,23 +64,19 @@ void InfoWindow::setUnit(const unsigned int unit_type) {
 
 void InfoWindow::resetData()
 {
-	bx = 0;
-	bwidth = 0;
 	unit = 0;
 	IP = 0;
-	setup = 0;
-}
-
-const unsigned int InfoWindow::isSet() const {
-	return(setup);
-}
-
-void InfoWindow::setupOk(const unsigned int ok) {
-	setup=ok;
+	bo = NULL;
+	bg = NULL;
 }
 
 const unsigned int InfoWindow::getIP() const {
 	return(IP);
+}
+
+void InfoWindow::assignBo(const BoEntry* info_bo)
+{
+	bo = info_bo;
 }
 
 void InfoWindow::process()
@@ -137,6 +116,14 @@ void InfoWindow::draw(DC* dc) const
 {
 	if(!isShown()) 
 		return;
+	if(bo)
+	{
+		dc->SetPen(Pen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN)->GetColor(), 2, SOLID_PEN_STYLE));
+		dc->DrawLine(getAbsolutePosition() + Size(getWidth() / 2, 0) - Size(0, 3), bo->getAbsolutePosition() + Size(0, bo->getHeight() / 2) - Size(2, 0));
+		dc->SetPen(Pen(*theme.lookUpPen(BIG_BUTTONS_PEN)->GetColor(), 1, SOLID_PEN_STYLE));
+		dc->DrawLine(getAbsolutePosition() + Size(getWidth() / 2+2, 0) - Size(0, 3), bo->getAbsolutePosition() + Size(0, bo->getHeight() / 2+2) - Size(2, 0));
+		dc->DrawLine(getAbsolutePosition() + Size(getWidth() / 2-1, 0) - Size(0, 3), bo->getAbsolutePosition() + Size(0, bo->getHeight() / 2) - Size(2, 1));
+	}
 	UI_Window::draw(dc);
 }
 

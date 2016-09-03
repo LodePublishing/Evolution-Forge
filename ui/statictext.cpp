@@ -6,7 +6,7 @@ UI_StaticText& UI_StaticText::operator=(const UI_StaticText& object)
 {
 	((UI_Object)(*this)) = ((UI_Object)object);
 	mode = object.mode;
-	text = object.text;
+	updateText(object.text);
 	font = object.font;
 	position = object.position;
 	color = object.color;
@@ -20,7 +20,7 @@ UI_StaticText& UI_StaticText::operator=(const UI_StaticText& object)
 UI_StaticText::UI_StaticText(const UI_StaticText& object) :
 	UI_Object((UI_Object)object),
 	mode(object.mode),
-	text(object.text),
+	text(),
 	font(object.font),
 	position(object.position),
 	color(object.color),
@@ -35,27 +35,27 @@ UI_StaticText::UI_StaticText(const UI_StaticText& object) :
 UI_StaticText::UI_StaticText(UI_Object* st_parent, const Rect st_pos, const eColor st_color, const eFont st_font, const eTextMode st_mode) :
 	UI_Object(st_parent, st_pos, st_pos),
 	mode(st_mode),
-	text("ERROR"),
+	text(),
 	font(st_font),
 	position(1),
 	color(*theme.lookUpColor(st_color)),
 	eText(NULL_STRING),
 	textMode(true),
 	pressed(false),
-	textBox(getAbsoluteRect())
+	textBox()
 { }
 
 UI_StaticText::UI_StaticText(UI_Object* st_parent, const eString st_text, const Rect st_pos, const eColor st_color, const eFont st_font, const eTextMode st_mode) :
 	UI_Object(st_parent, st_pos, st_pos),
 	mode(st_mode),
-	text("ERROR"),
+	text(),
 	font(st_font),
 	position(1),
 	color(*theme.lookUpColor(st_color)),
 	eText(NULL_STRING),
 	textMode(true),
 	pressed(false),
-	textBox(getAbsoluteRect())
+	textBox()
 {
 	updateText(st_text);
 }
@@ -63,14 +63,14 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const eString st_text, const 
 UI_StaticText::UI_StaticText(UI_Object* st_parent, const string& st_text, const Rect st_pos, const eColor st_color, const eFont st_font, const eTextMode st_mode) :
 	UI_Object(st_parent, st_pos, st_pos),
 	mode(st_mode),
-	text("ERROR"),
+	text(),
 	font(st_font),
 	position(1),
 	color(*theme.lookUpColor(st_color)),
 	eText(NULL_STRING),
 	textMode(true),
 	pressed(false),
-	textBox(getAbsoluteRect())
+	textBox()
 {
 	updateText(st_text);
 }
@@ -91,7 +91,7 @@ UI_Object* UI_StaticText::checkHighlight() {
 }
 
 UI_Object* UI_StaticText::checkTooltip() {
-	if( (!isShown()) || (isDisabled()) || (!textBox.Inside(mouse)) )
+	if( (!isShown()) || (isDisabled()) || (!Rect(textBox.GetTopLeft() + getAbsolutePosition(), textBox.GetSize()).Inside(mouse )) )
 		return(0);
 	return((UI_Object*)this);
 }
@@ -327,7 +327,12 @@ void UI_StaticText::draw(DC* dc) const
 			}
 		}
 		break;
-		default:dc->DrawText(t_text, textBox.GetTopLeft());break;
+		default:
+		if(pressed)
+			dc->DrawText(t_text, getAbsolutePosition() + textBox.GetTopLeft() + Size(1, 4));
+		else
+			dc->DrawText(t_text, getAbsolutePosition() + textBox.GetTopLeft() + Size(0, 3));
+		break;
 	}
 }
 
@@ -376,9 +381,10 @@ const std::string& UI_StaticText::getString() const
 	return(text);
 }
 
-void UI_StaticText::process()
+void UI_StaticText::calculatePosition()
 {
-	textBox.SetTopLeft(getAbsolutePosition());
+	textBox.SetTopLeft(Point(0,0));//getRelativePosition());//AbsolutePosition());
+	textBox.SetSize(UI_Object::theme.lookUpFont(font)->GetTextExtent(text)); //wenn das auskommentiert ist sind die Buchstaben wild.
 	switch(mode)
 	{
 		case NO_TEXT_MODE:
@@ -531,16 +537,11 @@ void UI_StaticText::process()
 		}break;		
 		default:break;
 	}
+}
 	
-	if((mode!=FORMATTED_TEXT_MODE)&&(mode!=FORMATTED_NON_BLOCK_TEXT_MODE))
-	{
-		if(pressed)
-			textBox.SetTopLeft(textBox.GetTopLeft() + Size(1, 4));
-		else
-			textBox.SetTopLeft(textBox.GetTopLeft() + Size(0, 3));
-	}
 
-
+void UI_StaticText::process()
+{
 	UI_Object::process();
 /*	if(isEditable())
 	{
@@ -551,9 +552,9 @@ void UI_StaticText::process()
 		}
 	}*/
 	// TODO, kA was
-	if(position < text.size()-1)
-		position+=2;
-	else position = text.size();
+//	if(position < text.size()-1)
+//		position+=2;
+//	else position = text.size();
 
 //	if(eText != NULL_STRING)
   //  	updateText(*theme.lookUpString(eText));
@@ -564,17 +565,18 @@ void UI_StaticText::updateText(const string& st_text)
 {
 	if(text == st_text)
 		return;
-	setNeedRedraw();
+//	setNeedRedraw();
 	text = st_text;
 	if(mode == NO_TEXT_MODE)
 		setSize(getTextSize()); // TODO size ist falsch
-
 	position = 1;
 	textMode = true;
+	calculatePosition();
 }
 
 void UI_StaticText::updateText(const eString st_text)
 {
+	calculatePosition();
 	if(st_text==eText)
 		return;
 	eText = st_text;

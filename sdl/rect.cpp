@@ -23,6 +23,8 @@ void Rect::SetRight(const signed int right)
 
 void Rect::move(const Rect startRect, const Rect targetRect)
 {
+	if(startRect == targetRect)
+		return;
 	if(!configuration.isSmoothMovements())
 		*this = targetRect;
 	else

@@ -117,18 +117,23 @@ const Color DC::darkenColor(const Color* id, const unsigned int brightness) cons
 
 void DC::DrawLine(const signed x1, const signed y1, const signed x2, const signed y2) const
 {
-    if(pen.GetStyle()==TRANSPARENT_PEN_STYLE)
+	if(pen.GetStyle()==TRANSPARENT_PEN_STYLE)
 	        return;
 	int xx1 = x1;
 	int xx2 = x2;
 	int yy1 = y1;
 	int yy2 = y2;
 
-	if((xx1<0)||(yy1<0)||(xx1>=max_x)||(yy1>=max_y)||(xx2<0)||(yy2<0)||(xx2>=max_x)||(yy2>=max_y))
+	if((xx1<pen.GetWidth())||(yy1<pen.GetWidth())||(xx1>=max_x-pen.GetWidth())||(yy1>=max_y-pen.GetWidth())||(xx2<pen.GetWidth())||(yy2<pen.GetWidth())||(xx2>=max_x-pen.GetWidth())||(yy2>=max_y-pen.GetWidth()))
 		return;
 
-	
 	Draw_Line(x1, y1, x2, y2);
+	if(pen.GetWidth()>1)
+	{
+		Draw_Line(x1, y1+1, x2, y2+1);
+		Draw_Line(x1+1, y1, x2+1, y2);
+		Draw_Line(x1+1, y1+1, x2+1, y2+1);
+	}
 }
 
 
@@ -187,6 +192,59 @@ void DC::setResolution(const unsigned int dc_max_x, const unsigned int dc_max_y)
 	max_y=dc_max_y;
 }
 
+void DC::DrawGridEdgedRoundedRectangle(const signed int x, const signed y, const unsigned width, const unsigned int height, const unsigned int radius, std::list<Rect> notDrawRectList) const 
+{
+	if((width<2)||(height<2)) return;
+	if((x>=max_x)||(x<0)) return;
+	if((y>=max_y)||(y<0)) return;
+	unsigned int ww = width;
+	unsigned int hh = height;
+	if(x+ww>=max_x) ww = max_x - 1 - x;
+	if(y+hh>=max_y) hh = max_y - 1 - y;
+	bool rounded = false;
+	if((radius <= 1)||(ww<2*radius)||(hh<2*radius))
+		rounded=true;
+
+	signed int xx = x;
+	signed int yy = y;
+	unsigned int lastHeight = 0;
+
+	std::list<Rect>::const_iterator i = notDrawRectList.begin();
+	while(i!=notDrawRectList.end())
+	{
+		lastHeight=0;
+		while((i!=notDrawRectList.end())&&(yy == i->GetTop()))
+		{
+			DrawRectangle(xx, yy, i->GetLeft() - xx, i->GetHeight());
+			lastHeight = i->GetHeight();
+			xx = i->GetLeft() + i->GetWidth();
+			i++;
+		}
+		// rechter Rand
+		DrawRectangle(xx, yy, x+ww - xx, lastHeight);
+		// neue Zeile
+		xx = x;
+		yy += lastHeight;
+		if((i!=notDrawRectList.end())&&(yy < i->GetTop()))
+		{
+			DrawRectangle(xx, yy, ww, i->GetTop() - yy);
+			yy = i->GetTop();
+			xx = x;
+		}
+	}
+	DrawRectangle(xx, yy, x+ww - xx, y + hh - yy);		
+				
+/*	if(rounded) {
+		DrawRectangle(x,y,ww,hh);
+		return;
+	}
+	
+	if (brush.GetStyle() != TRANSPARENT_BRUSH_STYLE)
+		DrawFilledEdgedRound(x, y, ww, hh, radius);
+	if (pen.GetStyle() != TRANSPARENT_PEN_STYLE)
+		DrawEmptyEdgedRound(x, y, ww, hh, radius);*/
+}
+
 void DC::DrawEdgedRoundedRectangle(const signed int x, const signed int y, const unsigned int width, const unsigned int height, const unsigned int radius) const
 {
 	if((width<2)||(height<2)) return;
@@ -238,7 +296,7 @@ void DC::DrawRectangle(const signed int x, const signed int y, const unsigned in
 		return;
 	SDL_Rect rc;
 	rc.x=x+1;rc.y=y+1;rc.w=width-2;rc.h=height-2;
-//	if(brush.GetStyle()!=TRANSPARENT_BRUSH_STYLE)
+	if(brush.GetStyle() != TRANSPARENT_BRUSH_STYLE)
 		SDL_FillRect(surface, &rc, (Uint32)(*brush.GetColor()) );
 	DrawEmptyRectangle(x, y, width, height);	
 }

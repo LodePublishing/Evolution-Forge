@@ -17,6 +17,7 @@ Main::Main(DC* dc):
 //	buttonPressed(false),
 //	hasAlreadyLeft(false),
 //	button(NULL),
+	drawing(true),
 	oldrun(0),
 	endrun(false),
 	gizmo(true),
@@ -24,7 +25,7 @@ Main::Main(DC* dc):
 	refresh(0),
 	ani(1),
 	ani2(0),
-	drawing(true)
+	boHasChanged(true)
 {
 	UI_Object::theme.setTab(BASIC_TAB);
 	resetData(); // TODO 
@@ -39,7 +40,7 @@ Main::Main(DC* dc):
 	settings.loadHarvestFile("settings/harvest/default.hvt");
 	
 	bar->draw(dc, 2, START_LOAD_MAPS_STRING);
-	settings.loadMapFile("settings/maps/lt42.map");
+	settings.loadMapFile("settings/maps/lt41.map");
 	bar->draw(dc, 4, START_LOAD_STARTCONDITIONS_STRING);
 	settings.assignMap(0); // first map (lt) and ums = false
 	settings.loadStartconditionFile("settings/start/default_terra.start");
@@ -53,7 +54,7 @@ Main::Main(DC* dc):
 	settings.loadHarvestFile("settings\\harvest\\default.hvt");
 	
 	bar->draw(dc, 2, START_LOAD_MAPS_STRING);
-	settings.loadMapFile("settings\\maps\\lt42.map");
+	settings.loadMapFile("settings\\maps\\lt41.map");
 	bar->draw(dc, 4, START_LOAD_STARTCONDITIONS_STRING);
 	settings.assignMap(0); // first map (lt) and ums = false
 	settings.loadStartconditionFile("settings\\start\\default_terra.start");
@@ -76,17 +77,17 @@ Main::Main(DC* dc):
 	settings.setHarvestSpeed(ZERG, 2);
 
 	settings.assignStartRace(1, TERRA);
-	settings.assignStartRace(2, TERRA);
+//	settings.assignStartRace(2, TERRA);
 
 	settings.assignStartcondition(1, 0);
-	settings.assignStartcondition(2, 0);
+//	settings.assignStartcondition(2, 0);
 
-	settings.setStartPosition(1, 1);
-	settings.setStartPosition(2, 7);
+	settings.setStartPosition(1, 1); // TODO
+//	settings.setStartPosition(2, 7);
 	settings.fillGroups();
 
 	settings.assignGoal(1, 0);
-	settings.assignGoal(2, 0); //~~
+//	settings.assignGoal(2, 0); //~~ !! TODO
 	// TODO FEHLERMELDUNG FALLS FALSCHES GOAL ZU FALSCHER RASSE
 //	settings.assignStartconditionHarvestSpeed();
 	bar->draw(dc, 2, START_PREPARE_FIRST_RUN_STRING);
@@ -120,9 +121,11 @@ Main::Main(DC* dc):
 	for(unsigned int i = settings.getMap(0)->getMaxPlayer();i<MAX_PLAYER;i++)
 		player[i]=0;*/
 
-	player[0] = new Player(mainWindow, &(anarace[0]), msgWindow, 0);
-	player[1] = new Player(mainWindow, &(anarace[1]), msgWindow, 1);
-	player[2] = 0;
+	for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
+		player[i] = new Player(mainWindow, &(anarace[i]), msgWindow, 0);
+		
+//	player[1] = new Player(mainWindow, &(anarace[1]), msgWindow, 1);
+//	player[2] = 0; TODO restliche 0
 
 	msgWindow->setParent(mainWindow); // process AFTER player
 	
@@ -134,12 +137,11 @@ Main::Main(DC* dc):
 	settingsWindow->Hide();
 
 	player[0]->Show();
-	player[1]->Hide();
+//	player[1]->Hide(); //~~
 
 	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG1_STRING)));
 	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG2_STRING)));
-	msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(PLAYERS_LOADED_STRING, settings.getMap(0)->getMaxPlayer()));
-	msgWindow->addMessage(" - - - www.clawsoftware.de - - - ");
+//	msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(PLAYERS_LOADED_STRING, settings.getMap(0)->getMaxPlayer()));
 	bar->draw(dc, 8, START_MAIN_INIT_COMPLETE_STRING);
 //	cursor=init_system_cursor(arrow);
 //	SDL_ShowCursor(SDL_DISABLE);
@@ -150,7 +152,7 @@ Main::Main(DC* dc):
 //	cursor_save = *UI_Object::theme.lookUpBitmap(MAUS_BITMAP);
 	
 //	get_bg(dc, cursor_save, 0, 0);
-//    SDL_SetAlpha(cursor, SDL_SRCALPHA, 127);
+//	SDL_SetAlpha(cursor, SDL_SRCALPHA, 127);
 	mainWindow->forcePressTab(BASIC_TAB); // !!
 }
 
@@ -166,13 +168,14 @@ Main::~Main()
 
 void Main::resetData()
 {
-	refresh=0;
-	endrun=false;
+	refresh = 0;
+	endrun = false;
 //	gizmor=rand()%GIZMO_NUMBER;
 	for(int i=MAX_PLAYER;i--;)
-		anarace[i]=NULL;
-	update=0;
-	drawing=true;
+		anarace[i] = NULL;
+	update = 0;
+	drawing = true;
+	boHasChanged = true;
 }
 
 void Main::noticeFullscreen()
@@ -194,8 +197,9 @@ void Main::process()
 	if(ani>30) ani=1;
 
 
-//	if(update==2)
+	if(boHasChanged)
 	{
+		boHasChanged=false;
 		for(int i=settings.getMap(0)->getMaxPlayer();i--;)
 			if(player[i]->isShown())
 				player[i]->CheckOrders();
@@ -206,8 +210,8 @@ void Main::process()
 	mainWindow->process();
 	if(settingsWindow->hasLanguageChanged())
 	{
-		player[0]->reloadStrings();
-		player[1]->reloadStrings();
+		for(int i=settings.getMap(0)->getMaxPlayer();i--;)
+			player[i]->reloadStrings();
 		mainWindow->reloadStrings();
 		settingsWindow->reloadStrings();
 		msgWindow->addMessage(*UI_Object::theme.lookUpString(LANGUAGE_HAS_CHANGED_STRING));
@@ -215,6 +219,7 @@ void Main::process()
 
 	if(mainWindow->tabWasChanged())
 	{
+		boHasChanged=true;
 		gizmo=false;
 		eTab ctab = mainWindow->getCurrentTab();
 		switch(ctab)
@@ -248,10 +253,10 @@ void Main::process()
 				tutorialWindow->Hide();
 			break;
 			case MAP_TAB:
-                msgWindow->Show();
-                settingsWindow->Hide();
-                tutorialWindow->Hide();
-            break;
+				msgWindow->Show();
+				settingsWindow->Hide();
+				tutorialWindow->Hide();
+			break;
 			case SETTINGS_TAB:
 				msgWindow->Hide();
 				settingsWindow->Show();
@@ -265,7 +270,7 @@ void Main::process()
 			break;
 			default:break;		
 		} // end switch getCurrentTabs
-		for(int i=0;i<2;i++)
+		for(int i=settings.getMap(0)->getMaxPlayer();i--;)
 			player[i]->setMode(ctab, i);
 //		player[0]->CheckOrders();
 //		player[1]->CheckOrders();
@@ -277,15 +282,12 @@ void Main::process()
 		settingsWindow->updateRectangles(0);
 		tutorialWindow->updateRectangles(0);
 		int maxPlayer=0;
-		if(player[0]->isShown()) 
-			maxPlayer++;
-		if(player[1]->isShown()) 
-			maxPlayer++;
-		if(player[0]->isShown())
-			player[0]->updateRectangles(maxPlayer-1);
-		if(player[1]->isShown()) 
-			player[1]->updateRectangles(maxPlayer-1);
-		
+		for(int i=settings.getMap(0)->getMaxPlayer();i--;)
+			if(player[i]->isShown()) 
+				maxPlayer++;
+		for(int i=settings.getMap(0)->getMaxPlayer();i--;)
+			if(player[i]->isShown())
+				player[i]->updateRectangles(maxPlayer-1);
 /*		settings.initSoup();
 		resetData();*/
 		update=2;
@@ -296,7 +298,7 @@ void Main::process()
 	if(UI_Window::getChangedFlag())
 	{
 		bool was_optimizing = isOptimizing();
-		for(int i=0;i<2;i++)
+		for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
 		{
 			player[i]->resetData();
 			player[i]->restartAnarace(); //?
@@ -305,23 +307,23 @@ void Main::process()
 			startOptimizing();
 		else stopOptimizing();
 		UI_Window::changeAccepted();
-	
+		boHasChanged=true;	
 	} else
 	if(UI_Window::getResetFlag())
 	{
 		bool was_optimizing = isOptimizing();
-		for(int i=0;i<2;i++)
+		for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
 		{
 			player[i]->resetData();
 			player[i]->restartAnarace(); //?
 		}
 		settings.assignRunParametersToSoup();
-	        if(ANARACE** temp=settings.newGeneration(anarace))
-	        {
-	                for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-		                anarace[i]=temp[i];
+		if(ANARACE** temp=settings.newGeneration(anarace))
+		{
+			for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
+				anarace[i] = temp[i];
 		}
-		for(int i=0;i<2;i++)
+		for(unsigned int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
 			player[i]->assignAnarace(&(anarace[i]));
 		if(was_optimizing)
 			startOptimizing();
@@ -329,19 +331,26 @@ void Main::process()
 
 		UI_Window::resetAccepted();
 		UI_Window::changeAccepted();
+		boHasChanged=true;
 	}
 	
 	if(endrun) // TODO!
 	{
 		if(configuration.isAutoSaveRuns())
 		{
-			ostringstream os;
-			os << anarace[0]->getRun() << *UI_Object::theme.lookUpString(ENDRUN_FINISHED_STRING) << " [" << setw(2) << (anarace[0]->getRealTimer())/60 << ":";
+			ostringstream os, os2, time;
+			time << setw(2) << (anarace[0]->getRealTimer())/60 << ":";
 			if(anarace[0]->getRealTimer()<10)
-				os << "0";
-			os << setw(2) << (anarace[0]->getRealTimer())%60 << "]";
+				time << "0";
+			time << setw(2) << (anarace[0]->getRealTimer())%60;
+			
+			os << anarace[0]->getRun() << *UI_Object::theme.lookUpString(ENDRUN_FINISHED_STRING) << "[" << time << "]";
 			msgWindow->addMessage(os.str());
-	        settings.saveBuildOrder(UI_EndRunDialog::getLastString(), anarace[0]); // TODO, evtl alle saven...
+			os2 << "bo_" << (*anarace[0]->getCurrentGoal())->getName() << "_" << time << "_" << anarace[0]->getRun();
+			if(UI_EndRunDialog::getLastString()!="bo")
+				settings.saveBuildOrder(UI_EndRunDialog::getLastString(), anarace[0]); // TODO, evtl alle saven...
+			else
+				settings.saveBuildOrder(os2.str(), anarace[0]); // TODO, evtl alle saven...
 			// TODO Name muss mitangegeben werden...
 			// Dann ist auch die Frage wie die Ergebnisse gespeichert werden sollen, klar, nach Rasse sortiert 
 			// Voreinstellung fuer Editfeld ist letzter benutzter Name  (oder 'leer') + fortlaufende Zahl (Reset bei neuem Namen)
@@ -355,7 +364,7 @@ void Main::process()
 		} else
 		{
 			if(UI_Object::editTextField==NULL)
-				UI_Object::editTextField = new UI_EndRunDialog(mainWindow, "BLA");
+				UI_Object::editTextField = new UI_EndRunDialog(mainWindow, "");
 				// Dialog aufmachen: Weiterrechnen oder neubeginnen? (checkbox: nicht mehr fragen) Neuanfang kann u.U. einen neuen Weg ermoeglichen und u.U. ein besseres Ergebnis bringen... Abspeichern Checkbox, EXIT, CONTINUE, NEW ROUND...
 		// you may want to use 'comparison' (not availible yet) to show all results 
 			else
@@ -365,17 +374,17 @@ void Main::process()
 					drawing=true;
 					if(UI_Object::editTextField->getString().length()>0)
 					{
-			            ostringstream os;
-    	    		    os << anarace[0]->getRun() << *UI_Object::theme.lookUpString(ENDRUN_FINISHED_STRING) << " [" << setw(2) << (anarace[0]->getRealTimer())/60 << ":";
-			            if(anarace[0]->getRealTimer()<10)
-        			        os << "0";
-		        	    os << setw(2) << (anarace[0]->getRealTimer())%60 << "]";
-        		    	msgWindow->addMessage(os.str());
-			            settings.saveBuildOrder(UI_Object::editTextField->getString(), anarace[0]); // TODO, evtl alle saven...
-    	    		    msgWindow->addMessage(*UI_Object::theme.lookUpString(ENDRUN_SAVED_BUILDORDER_STRING));
-			//          resetData();
+						ostringstream os;
+							os << anarace[0]->getRun() << *UI_Object::theme.lookUpString(ENDRUN_FINISHED_STRING) << " [" << setw(2) << (anarace[0]->getRealTimer())/60 << ":";
+						if(anarace[0]->getRealTimer()<10)
+							os << "0";
+						os << setw(2) << (anarace[0]->getRealTimer())%60 << "]";
+						msgWindow->addMessage(os.str());
+						settings.saveBuildOrder(UI_Object::editTextField->getString(), anarace[0]); // TODO, evtl alle saven...
+						msgWindow->addMessage(*UI_Object::theme.lookUpString(ENDRUN_SAVED_BUILDORDER_STRING));
+			//		  resetData();
 					}
-        		    endrun=false;
+					endrun=false;
 					delete UI_Object::editTextField;
 					UI_Object::resetButton();
 					UI_Object::editTextField=NULL;
@@ -438,7 +447,7 @@ void Main::drawGizmo(DC* dc) const
 	dc->DrawText("Forge", mainWindow->getAbsoluteClientRectPosition() + Point(50, 58));
 	dc->SetTextForeground(toSDL_Color(0,0,85));
 	ostringstream os;
-	os << "v1." << CORE_VERSION << " beta test";
+	os << "v1." << CORE_VERSION << " beta2";
 	dc->DrawText(os.str(), mainWindow->getAbsoluteClientRectPosition()+Point(78, 98));
 	dc->SetTextForeground(toSDL_Color(50, 50, 85));
 	dc->DrawText(os.str(), mainWindow->getAbsoluteClientRectPosition()+Point(75, 95));
@@ -505,23 +514,35 @@ void Main::OnIdle()
 {
 	if((!UI_Object::editTextField/*endrun*/)&&(isOptimizing()))
 	{
-		update=2;
+		update = 2;
 		ANARACE** temp;
+		unsigned int oldCode[MAX_PLAYER][MAX_LENGTH];
+		unsigned int oldMarker[MAX_PLAYER][MAX_LENGTH];
+		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
+			for(unsigned int j = MAX_LENGTH;j--;)
+			{
+				oldCode[i][j] = anarace[i]->getCode(j);
+				oldMarker[i][j] = anarace[i]->getMarker(j);
+			}
+			
 //TODO: nach Ende eines Durchlaufs ist anarace 0, aber viele anderen Teile des Codes greifen noch drauf zu!!
 		if((temp=settings.newGeneration(anarace)))
 		{
 			for(int i=settings.getMap(0)->getMaxPlayer();i--;)
 			{
+				if(anarace[i]->isDifferent(oldCode[i], oldMarker[i]))
+					boHasChanged=true;
+					
 				anarace[i]=temp[i];
 			}
 			if(anarace[0]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=true;}
 		}
 	}
+	
 	if(settings.getIsNewRun())
-	{
-		player[0]->resetData();
-		player[1]->resetData();
-	}
+		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
+			player[i]->resetData();
+	
 //	if(update==1)
 //	{
 //		update=2;
@@ -582,7 +603,7 @@ void Main::setMouse(const Point p)
 //		return;
 	maus=p;
 	UI_Object::mouse=p;
-	((BoGraphWindow*)(player[0]->window[BO_GRAPH_WINDOW]))->mouseHasMoved();
+	((BoGraphWindow*)(player[0]->window[BO_GRAPH_WINDOW]))->mouseHasMoved(); // TODO
 //	else if(player[1]->window[BO_GRAPH_WINDOW]->Inside(p))
 //		(BoGraphWindow*)(player[1]->window[BO_GRAPH_WINDOW])->mouseHasMoved();
 	
@@ -616,9 +637,10 @@ void Main::setMouse(const Point p)
 	UI_Object::currentButton=NULL;
 	if(UI_Object::editTextField==NULL)
 	{
-		UI_Object::currentButton = (UI_Button*) (player[0]->checkHighlight());
-		if(!UI_Object::currentButton)
-			UI_Object::currentButton = (UI_Button*) (player[1]->checkHighlight());
+		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
+			if(!UI_Object::currentButton)
+				UI_Object::currentButton = (UI_Button*) (player[i]->checkHighlight());
+				
 		if(!UI_Object::currentButton)
 			UI_Object::currentButton = (UI_Button*) (mainWindow->checkHighlight());
 		if(!UI_Object::currentButton)
@@ -634,36 +656,37 @@ void Main::setMouse(const Point p)
 	if(configuration.isTooltips())
 	{
 //		UI_Object* temp=UI_Object::toolTipParent;
-		UI_Object* temp2;
-		UI_Object::toolTipParent=NULL;
-        temp2 = player[0]->checkTooltip();
-        if((temp2!=NULL) && (temp2->getToolTipString()!=NULL_STRING))
-            UI_Object::toolTipParent = temp2;
+		UI_Object* temp2 = NULL;
+		UI_Object::toolTipParent = NULL;
+
+		for(unsigned int i=settings.getMap(0)->getMaxPlayer();i--;)
+		{
+			if(UI_Object::toolTipParent==NULL)
+				temp2 = player[i]->checkTooltip();
+			if((temp2!=NULL) && (temp2->getToolTipString()!=NULL_STRING))
+				UI_Object::toolTipParent = temp2;
+			temp2=NULL;
+		}
+		
+		if(UI_Object::toolTipParent==NULL)
+			temp2 = mainWindow->checkTooltip();
+		if((temp2!=NULL) && (temp2->getToolTipString()!=NULL_STRING))
+			UI_Object::toolTipParent = temp2;
 		temp2=NULL;
 		if(UI_Object::toolTipParent==NULL)
-        	temp2 = player[1]->checkTooltip();
-        if((temp2!=NULL) && (temp2->getToolTipString()!=NULL_STRING))
-            UI_Object::toolTipParent = temp2;
-		temp2=NULL;
-		if(UI_Object::toolTipParent==NULL)
-        	temp2 = mainWindow->checkTooltip();
-        if((temp2!=NULL) && (temp2->getToolTipString()!=NULL_STRING))
-            UI_Object::toolTipParent = temp2;
-		temp2=NULL;
-		if(UI_Object::toolTipParent==NULL)
-        	temp2 = settingsWindow->checkTooltip();
-        if((temp2!=NULL) && (temp2->getToolTipString()!=NULL_STRING))
-            UI_Object::toolTipParent = temp2;
-//    	if((UI_Object::toolTipParent!=temp)//||(UI_Object::tooltip==NULL))
+			temp2 = settingsWindow->checkTooltip();
+		if((temp2!=NULL) && (temp2->getToolTipString()!=NULL_STRING))
+			UI_Object::toolTipParent = temp2;
+//		if((UI_Object::toolTipParent!=temp)//||(UI_Object::tooltip==NULL))
 // TODO
-	    {
+		{
 			delete UI_Object::tooltip;
 			if(/*(temp!=NULL)&&*/(UI_Object::toolTipParent==NULL))
 				UI_Object::tooltip=NULL;
 			else
 				UI_Object::tooltip=new UI_Tooltip(NULL/*UI_Object::toolTipParent*/, (UI_Object::toolTipParent)->getToolTipString());
 		}
-    } else if(UI_Object::tooltip)
+	} else if(UI_Object::tooltip)
 	{
 		delete UI_Object::tooltip;
 		UI_Object::tooltip=NULL;

@@ -4,7 +4,7 @@
 @MAP
 	"Name" = "2 Player Lost Temple"
 	"Max Locations" = "9"
-	"Max Player" = "2"
+	"Max Player" = "1"
 @END
 
 # --- Locations ---

@@ -5,13 +5,13 @@
 # --- Races ---
 @STARTCONDITIONS "Terra"
 	"Name" = "Default Terra start"
-    "Minerals" = "50"
-    "Gas" = "0"
-    "Time" = "0"
+	"Minerals" = "50"
+	"Gas" = "0"
+	"Time" = "0"
 @END
 
 # location forces... 2 = LOCATION MAIN
 @LOCATION "2"
-		"Command Center" = "1"
-		"SCV" = "4"
+	"Command Center" = "1"
+	"SCV" = "4"
 @END

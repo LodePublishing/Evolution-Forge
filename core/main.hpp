@@ -112,7 +112,7 @@ enum eRace
 	ZERG
 };
 
-#define MAX_RACES (ZERG+1)
+const int MAX_RACES = (ZERG+1);
 
 enum eTerraUnits
 {

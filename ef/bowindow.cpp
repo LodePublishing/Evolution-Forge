@@ -1,38 +1,48 @@
 #include "bowindow.hpp"
 
 BoEntry::BoEntry(UI_Object* parent, Rect rect, Rect maxRect, string unit):UI_Button(parent, rect, maxRect, unit, unit, FORCE_ENTRY_BUTTON, NO_TEXT_MODE, NO_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE)
-    // TODO!
+	// TODO!
 {
-/*    addUnit = new UI_Button(this, Rect(Point(getWidth()-117,2),Size(8,8)), Rect(Point(0,0),getSize()), ADD_BUTTON, PRESS_BUTTON_MODE);
-    subUnit = new UI_Button(this, Rect(Point(getWidth()-107,2),Size(8,8)), Rect(Point(0,0),getSize()), SUB_BUTTON, PRESS_BUTTON_MODE);
-    cancelUnit = new UI_Button(this, Rect(Point(getWidth()-97,2),Size(8,8)), Rect(Point(0,0),getSize()), CANCEL_BUTTON, PRESS_BUTTON_MODE);*/
+/*	addUnit = new UI_Button(this, Rect(Point(getWidth()-117,2),Size(8,8)), Rect(Point(0,0),getSize()), ADD_BUTTON, PRESS_BUTTON_MODE);
+	subUnit = new UI_Button(this, Rect(Point(getWidth()-107,2),Size(8,8)), Rect(Point(0,0),getSize()), SUB_BUTTON, PRESS_BUTTON_MODE);
+	cancelUnit = new UI_Button(this, Rect(Point(getWidth()-97,2),Size(8,8)), Rect(Point(0,0),getSize()), CANCEL_BUTTON, PRESS_BUTTON_MODE);*/
 };
 
-                                                                                                                                                           
 BoEntry::~BoEntry()
 {
-/*    if(addUnit)
-        delete(addUnit);
-    if(subUnit)
-        delete(subUnit);
-    if(cancelUnit)
-        delete(cancelUnit);*/
+/*	delete(addUnit);
+	delete(subUnit);
+	delete(cancelUnit);*/
 };
-                                                                                                                                                            
+
+void BoEntry::draw(DC* dc) const
+{
+	if(!shown)
+		return;
+	UI_Button::draw(dc);	
+};
+
+void BoEntry::process()
+{
+	if(!shown)
+		return;
+	UI_Button::process();
+};
+
 int BoEntry::changed()
 {
-//    if(addUnit->isPressed()) return(1);
+//	if(addUnit->isPressed()) return(1);
   //  if(subUnit->isPressed()) return(2);
-//    if(cancelUnit->isPressed()) return(3);
-    return(0);
+//	if(cancelUnit->isPressed()) return(3);
+	return(0);
 };
-                                                                                                                                                            
+
 void BoEntry::updateText(string utext)
 {
-    updateNormalText(utext);
-    updatePressedText(utext);
+	updateNormalText(utext);
+	updatePressedText(utext);
 };
-                                                                                                                                                            
+
 BoWindow::BoWindow(UI_Object* parent, ANARACE* anarace, InfoWindow* infoWindow, map <long, Order>* orderList, const int windowNumber):UI_Window(parent, BOWINDOW_TITLE_STRING, BUILD_ORDER_WINDOW, windowNumber, SCROLLED, AUTO_SIZE_ADJUST, NOT_TABBED, Rect(0,50,1000,1000))
 {
 //	addButton(Rect(getClientRectLeftBound()+getWidth()-48,getClientRectUpperBound()-30,12,12), 0, PERM_BUTTON);
@@ -41,20 +51,19 @@ BoWindow::BoWindow(UI_Object* parent, ANARACE* anarace, InfoWindow* infoWindow, 
 	this->infoWindow=infoWindow;
 	this->anarace=anarace;
 	resetData();
-    for(int i=MAX_LENGTH;i--;)
-    {
-        boEntry[i]=new BoEntry(this, Rect(getRelativeClientRectPosition()+Point(400,400), Size(getClientRectWidth(),FONT_SIZE+5)),
-                Rect(getRelativeClientRectPosition(), getClientRectSize()+Size(0, getMaxRect().height)),  // max size -y? TODO
-                        stats[(*anarace->getStartCondition())->getRace()][i].name);
-        boEntry[i]->Hide();
-    };
+	for(int i=MAX_LENGTH;i--;)
+	{
+		boEntry[i]=new BoEntry(this, Rect(getRelativeClientRectPosition()+Point(200,200), Size(getClientRectWidth(),FONT_SIZE+5)),
+				Rect(getRelativeClientRectPosition(), getClientRectSize()+Size(0, getMaxRect().height)),  // max size -y? TODO
+						stats[(*anarace->getStartCondition())->getRace()][i].name);
+		boEntry[i]->Hide();
+	};
 };
 
 BoWindow::~BoWindow()
 {
-    for(int i=MAX_LENGTH;i--;)
-        if(boEntry[i])
-            delete boEntry[i]; 
+	for(int i=MAX_LENGTH;i--;)
+		delete boEntry[i]; 
 };
 
 void BoWindow::resetData()
@@ -209,7 +218,7 @@ void BoWindow::process()
 		}
 #endif
 
-		int line=0;
+	int line=0;
 	boEndPoint=0;
 	int oldTime=0;
 	int tempForceCount[UNIT_TYPE_COUNT];
@@ -218,49 +227,51 @@ void BoWindow::process()
 
 	// hack for minimum size ~~
   //  Rect edge=Rect(getRelativeClientRectPosition()+Point(0,100),Size(100,20));
-    //fitItemToRelativeClientRect(edge,1);
+	//fitItemToRelativeClientRect(edge,1);
 
 	for(map<long, Order>::iterator order=orderList->begin(); order!=orderList->end(); ++order)
 	{
-		int row=((boInsertPoint>-1)&&(order->second.row>=boInsertPoint))*(boEndPoint-boInsertPoint);
+		int row=((boInsertPoint>-1)&&(order->second.getRow()>=boInsertPoint))*(boEndPoint-boInsertPoint);
 		Rect edge=Rect(getRelativeClientRectPosition()+order->second.rect.GetPosition()+Point(0,row*(FONT_SIZE+5)-getScrollY()),order->second.rect.GetSize());
 		if(fitItemToRelativeClientRect(edge,1))
 		{
 			boEntry[line]->Show();
 			if(boEntry[line]->isCurrentlyHighlighted()) markedUnit = line;
-            boEntry[line]->adjustRelativeRect(edge);
-			boEntry[line]->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->second.unit].unitType));
+			boEntry[line]->adjustRelativeRect(edge);
+			boEntry[line]->setButton(eButton(UNIT_TYPE_0_BUTTON+stats[(*anarace->getStartCondition())->getRace()][order->second.getUnit()].unitType));
 
 //			int bright=0;
-//				if((infoWindow->isShown())&&(order->second.IP==infoWindow->getIP())||(markedUnit==order->second.unit)) // TODO
+//				if((infoWindow->isShown())&&(order->second.getIP()==infoWindow->getIP())||(markedUnit==order->second.getUnit())) // TODO
 //					bright=50+markAni;
 
 			/*	dc->SetBrush(
 							Brush(
 							dc->brightenColor(
-								theme.lookUpBrush((eBrush)(BRIGHT_UNIT_TYPE_1_BRUSH+stats[(*anarace->getStartCondition())->getRace()][anarace->getPhaenoCode(order->second.IP)].facilityType))->GetColor(), (100+bright)*order->second.blend/50
-								             ), 
-							    theme.lookUpBrush((eBrush)(BRIGHT_UNIT_TYPE_1_BRUSH+stats[(*anarace->getStartCondition())->getRace()][anarace->getPhaenoCode(order->second.IP)].facilityType))->GetStyle()));*/
+								theme.lookUpBrush((eBrush)(BRIGHT_UNIT_TYPE_1_BRUSH+stats[(*anarace->getStartCondition())->getRace()][anarace->getPhaenoCode(order->second.getIP())].facilityType))->GetColor(), (100+bright)*order->second.blend/50
+											 ), 
+								theme.lookUpBrush((eBrush)(BRIGHT_UNIT_TYPE_1_BRUSH+stats[(*anarace->getStartCondition())->getRace()][anarace->getPhaenoCode(order->second.getIP())].facilityType))->GetStyle()));*/
 // optimizeMode...						
 
 //else dc->SetBrush(Brush(dc->doColor(
-//(COLOR2R+BOcolor[stats[(*anarace->getStartCondition())->getRace()][order->second.unit].facilityType].Red())*order->blend/50,
-//(COLOR2G+BOcolor[stats[(*anarace->getStartCondition())->getRace()][order->second.unit].facilityType].Green())*order->blend/50,
-//(COLOR2B+BOcolor[stats[(*anarace->getStartCondition())->getRace()][order->second.unit].facilityType].Blue())*order->blend/50),SOLID));
+//(COLOR2R+BOcolor[stats[(*anarace->getStartCondition())->getRace()][order->second.getUnit()].facilityType].Red())*order->blend/50,
+//(COLOR2G+BOcolor[stats[(*anarace->getStartCondition())->getRace()][order->second.getUnit()].facilityType].Green())*order->blend/50,
+//(COLOR2B+BOcolor[stats[(*anarace->getStartCondition())->getRace()][order->second.getUnit()].facilityType].Blue())*order->blend/50),SOLID));
 
 //					dc->DrawRoundedRectangle(edge,4);
-//					dc->SetTextForeground(*theme.lookUpBrush((eBrush)(UNIT_TYPE_1_BRUSH+stats[(*anarace->getStartCondition())->getRace()][anarace->getPhaenoCode(order->second.IP)].facilityType))->GetColor());
+//					dc->SetTextForeground(*theme.lookUpBrush((eBrush)(UNIT_TYPE_1_BRUSH+stats[(*anarace->getStartCondition())->getRace()][anarace->getPhaenoCode(order->second.getIP())].facilityType))->GetColor());
 
-					if(anarace->getProgramTime(order->second.IP)!=oldTime)
+					if(anarace->getProgramTime(order->second.getIP())!=oldTime)
 						for(int i=UNIT_TYPE_COUNT;i--;)
 								tempForceCount[i]=0;
-					if(edge.width>=110)
+					if(edge.width<110)
+						boEntry[line]->updateText(" ");
+					else	
 					{
 						ostringstream os;
-						os << tempForceCount[anarace->getPhaenoCode(order->second.IP)]+anarace->getProgramTotalCount(order->second.IP, anarace->getPhaenoCode(order->second.IP))+1 << ".";
-						os <<  stats[(*anarace->getStartCondition())->getRace()][anarace->getPhaenoCode(order->second.IP)].name;
+						os << tempForceCount[order->second.getUnit()]+anarace->getProgramTotalCount(order->second.getIP(), order->second.getUnit())+1 << ".";
+						os <<  stats[(*anarace->getStartCondition())->getRace()][order->second.getUnit()].name;
 //						dc->DrawText(os.str(),edge.GetPosition()+Point(5,0));os.str("");
-//						dc->DrawText(stats[(*anarace->getStartCondition())->getRace()][anarace->getPhaenoCode(order->second.IP)].name,edge.GetPosition()+Point(20,0));
+//						dc->DrawText(stats[(*anarace->getStartCondition())->getRace()][anarace->getPhaenoCode(order->second.getIP())].name,edge.GetPosition()+Point(20,0));
 						boEntry[line]->updateText(os.str());
 	//					if(row+order->second.row==boEndPoint) //~~
 	//						dc->DrawBitmap(bmpArrowDown,edge.x+edge.width-12,edge.y+1);
@@ -268,13 +279,14 @@ void BoWindow::process()
 	//						dc->DrawBitmap(bmpArrowUp,edge.x+edge.width-12,edge.y+1);
 //						if(optimizeMode)
 //							optButton[row+t]=addButton(Rect(getClientRectLeftBound()+edge.width,edge.y,getWidth()-edge.width,FONT_SIZE+5));
-//						orderButton[order->second.IP]=addButton(edge, "click right to remove order"); //~~~ TODO
-					} else boEntry[line]->updateText("");
+//						orderButton[order->second.getIP()]=addButton(edge, "click right to remove order"); //~~~ TODO
+					} 
+					//else boEntry[line]->updateText("");*/
 				
-					if(anarace->getProgramTime(order->second.IP)==oldTime)
-						tempForceCount[anarace->getPhaenoCode(order->second.IP)]++;
+					if(anarace->getProgramTime(order->second.getIP())==oldTime)
+						tempForceCount[anarace->getPhaenoCode(order->second.getIP())]++;
 					else					
-						oldTime=anarace->getProgramTime(order->second.IP);
+						oldTime=anarace->getProgramTime(order->second.getIP());
 /*					if(edge.width>=140)
 						dc->DrawText(_T(string::Format(T("%i"),order->second.mins)),110+edge.x,edge.y);
 					if(edge.width>=180)
@@ -288,11 +300,13 @@ void BoWindow::process()
 		} // end fit item
 		else 
 		{
-            boEntry[line]->Hide();
-			boEntry[line]->adjustRelativeRect(Rect(getRelativeClientRectPosition()+Point(400,400), Size(getClientRectWidth(),FONT_SIZE+5)));			
+			boEntry[line]->Hide();
+			boEntry[line]->adjustRelativeRect(Rect(getRelativeClientRectPosition()+Point(200,200), Size(getClientRectWidth(),FONT_SIZE+5)));			
 		}
 		line++;
 	} // end for ...
+	for(;line<MAX_LENGTH;line++)
+		boEntry[line]->Hide();
 	
 
 };
@@ -377,7 +391,7 @@ void BoWindow::draw(DC* dc) const
 					lastBogoal=edge.y;
 					if(fitItemToAbsoluteClientRect(edge, 1))
 					{
-	                    dc->SetBrush(Brush(dc->brightenColor(theme.lookUpBrush((eBrush)(BRIGHT_UNIT_TYPE_1_BRUSH+type))->GetColor(), 100+bright), theme.lookUpBrush((eBrush)(BRIGHT_UNIT_TYPE_1_BRUSH+type))->GetStyle()));
+						dc->SetBrush(Brush(dc->brightenColor(theme.lookUpBrush((eBrush)(BRIGHT_UNIT_TYPE_1_BRUSH+type))->GetColor(), 100+bright), theme.lookUpBrush((eBrush)(BRIGHT_UNIT_TYPE_1_BRUSH+type))->GetStyle()));
 		 				dc->DrawRoundedRectangle(edge,4);
 						dc->SetTextForeground(*theme.lookUpColor(TEXT_COLOUR));
 						dc->DrawText(stats[(*anarace->getStartCondition())->getRace()][i].name, edge.GetPosition()+Point(10,0));
@@ -514,22 +528,22 @@ void BoWindow::setMarkedUnit(int unit)
 
 void BoWindow::checkForInfoWindow()
 {
-    for(map<long, Order>::iterator order=orderList->begin(); order!=orderList->end(); ++order)
-    {
-//        int row=((boInsertPoint>-1)&&(order->row>=boInsertPoint))*(boEndPoint-boInsertPoint);
-//      mouse on order in player reinschieben, da is ja auch orderList zuhause
-		Rect edge(order->second.rect.GetPosition()+getRelativeClientRectPosition()+Point(0,-getScrollY()+((boInsertPoint>-1)&&(order->second.row>=boInsertPoint))*(boEndPoint-boInsertPoint)*(FONT_SIZE+5)-1),Size(order->second.rect.GetWidth(),FONT_SIZE+6));
+	for(map<long, Order>::iterator order=orderList->begin(); order!=orderList->end(); ++order)
+	{
+//		int row=((boInsertPoint>-1)&&(order->row>=boInsertPoint))*(boEndPoint-boInsertPoint);
+//	  mouse on order in player reinschieben, da is ja auch orderList zuhause
+		Rect edge(order->second.rect.GetPosition()+getRelativeClientRectPosition()+Point(0,-getScrollY()+((boInsertPoint>-1)&&(order->second.getRow()>=boInsertPoint))*(boEndPoint-boInsertPoint)*(FONT_SIZE+5)-1),Size(order->second.rect.GetWidth(),FONT_SIZE+6));
 
 		if((fitItemToRelativeClientRect(edge)&&edge.Inside(controls.getCurrentPosition())))
-        {
+		{
 //window[INFO_WINDOW]->adjustWindow(Rect(Point(window[INFO_WINDOW]->getPosition().x,500)/*order->second.rect.GetBottom()+getClientRectUpperBound()-getScrollY()+((boInsertPoint>-1)&&(order->row>=boInsertPoint))*(boEndPoint-boInsertPoint)*(FONT_SIZE+5)-1)*/,window[INFO_WINDOW]->getSize()));
-            infoWindow->setUnit(order->second.unit);
-            infoWindow->setIP(order->second.IP);
-            infoWindow->setBx(order->second.brect.x);
-            infoWindow->setBWidth(order->second.brect.width);
-            infoWindow->Show(1);
-            return;
-        }
-    }
+			infoWindow->setUnit(order->second.getUnit());
+			infoWindow->setIP(order->second.getIP());
+			infoWindow->setBx(order->second.brect.x);
+			infoWindow->setBWidth(order->second.brect.width);
+			infoWindow->Show(1);
+			return;
+		}
+	}
 };
 

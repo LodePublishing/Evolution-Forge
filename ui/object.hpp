@@ -13,9 +13,13 @@ class UI_Object
 		const bool isShown() const;
 
 	    const Point getAbsolutePosition() const;
-	    const Point getAbsolutePosition2() const;
 	    const Point getRelativePosition() const;
+		void setWidth(const int width);
+		void setHeight(const int height);
 		void setSize(const Size size);
+		void setPosition(const Point position);
+		void setLeft(const int x);
+		void setTop(const int y);
     	const Size getSize() const;
 		
 		const int getRelativeUpperBound() const;
@@ -27,11 +31,12 @@ class UI_Object
 
 		const bool isTopItem() const;
 		const Rect getRelativeRect() const;
+		const Rect getAbsoluteRect() const;
 
 //		void setOriginalValues(const int originalValues); TODO
 //		void resetToOriginalValues();
 
-//		int isMouseInside();
+		const bool isMouseInside() const;
 		void setParent(UI_Object* daddy);
 		void addChild(UI_Object* child);
 		void removeFromFamily();
@@ -39,7 +44,7 @@ class UI_Object
 //		draw the object and all its children
 		virtual void draw(DC* dc) const;
 
-		UI_Object(UI_Object* parent, const Rect rect = Rect(0,0,0,0), const Rect rect = Rect(0,0,0,0));
+		UI_Object(UI_Object* parent, const Rect relativeRect = Rect(0,0,0,0), const Rect maxRect = Rect(0,0,0,0));
 		virtual ~UI_Object();
 
 		const Rect getMaxRect() const;
@@ -78,15 +83,19 @@ class UI_Object
 
 		void setMaxRect(const Rect& rect) {this->maxRect=rect;};
 		void setRelativeRect(const Rect& rect) {this->relativeRect=rect;};
+
+		void updateToolTip(const string& tooltip);
+
+	
+		Rect startRect;
+		Rect targetRect;
+		
 	protected:
-		void move(int& x, const int sx, const int tx)
-		{
-    		x+=((x>tx)?-1:0)+((x<tx)?1:0);
-		    x+=((x>sx)?((x-sx)<(tx-sx)/2?(x-sx)/2:(tx-x)/2):((x-sx)>(tx-sx)/2?(x-sx)/2:(tx-x)/2));
-		};
+		void move(int& x, const int sx, const int tx);
 
 		bool shown;
 		bool disabledFlag;
+
 	private:
 		UI_Object* prevBrother;
 		UI_Object* nextBrother; 
@@ -96,22 +105,21 @@ class UI_Object
 
 		Rect relativeRect; // every object needs a current position and size, position is >> RELATIVE << to parent!
 	// to adjust object smoothly
-		Rect startRect;
-		Rect targetRect;
+//		Rect startRect;
+//		Rect targetRect;
 		Rect maxRect;
 
-		Point absoluteCoord; // modificator if rect.GetPosition != real position
 			
 // ignore maxRect for the next adjustWindow calls - important for tutorials
 		bool isFreeMove;
 		int doAdjustments;
 
 		static long startTime;
-		
-	
+
+		string toolTip;
+		void maybeShowToolTip(DC* dc) const;
+
 //		int linkedToHotSpot; // is this item linked constantly to a hotspot? Or is his position determined by hardcoded functions?
-//		int hotspot; // number to look up the hotspot table
-		
 
 //		int hasFocus; // make every object accessible with the keyboard (TAB)
 //		int canTransform; // is the width/height constant or can it be transformed?

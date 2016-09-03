@@ -291,9 +291,12 @@ enum eBrush
 	BODIAGRAM_BACK1,
 	BODIAGRAM_BACK2,
 	BODIAGRAM_BAR,
-	
+	BODIAGRAM_SUPPLY_BRUSH,
+		
 // statistics window
 	GENERATIONS_LEFT_BRUSH,	
+
+	TOOLTIP_BRUSH,
 
 	MAX_BRUSHES
 };
@@ -415,6 +418,7 @@ enum eBitmap
 	CLAW_BITMAP,
 	CLAWSOFTWARE_BITMAP,
 	BACKGROUND_BITMAP,
+	BACKGROUND_SPACE_BITMAP,
 	IMP1_BITMAP,
 	IMP2_BITMAP,
 	IMP3_BITMAP,
@@ -519,6 +523,8 @@ enum eButton
     UNIT_TYPE_10_BUTTON,
 
 	TAB_BUTTON,
+
+	ADD_GOAL_BUTTON,
 	
 	MAX_BUTTONS
 };
@@ -594,8 +600,12 @@ class UI_Theme
         Brush* lookUpBrush(const eBrush id) const;
         Font* lookUpFont(const eFont id) const;
 		
-		const Rect lookUpRect(const eWindow id, int windowNumber=0) const;
-		const Rect lookUpMaxRect(const eWindow id, int windowNumber=0) const;
+		
+		const Point lookUpRealDistance(const eWindow id, const int windowNumber=0) const;
+		const Point lookUpMaxRealDistance(const eWindow id, const int windowNumber=0) const;
+		
+		const Rect lookUpRect(const eWindow id, const int windowNumber=0, const int maxPlayer=0) const;
+		const Rect lookUpMaxRect(const eWindow id, const int windowNumber=0, const int maxPlayer=0) const;
 
 		const ButtonAnimation* lookUpButtonAnimation(const eButton id) const;
 		
@@ -640,6 +650,8 @@ class UI_Theme
 
 		Font* fontList[MAX_RESOLUTIONS][MAX_LANGUAGES][MAX_FONTS];
 		ButtonAnimation* buttonAnimationList[MAX_BUTTONS];
+		eWindow ywindow[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
+		eWindow xwindow[MAX_RESOLUTIONS][MAX_TABS][MAX_WINDOWS];
 };
 
 #endif // _UI_THEME_HPP

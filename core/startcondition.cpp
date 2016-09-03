@@ -161,11 +161,12 @@ void START_CONDITION::setStartTime(const int startTime)
 void START_CONDITION::setLocationAvailible(const int location, const int unit, const int num)
 {
 #ifdef _SCC_DEBUG
-	if((location<0)||(location>=MAX_LOCATIONS)) {
+	if((location<=0)||(location>=MAX_LOCATIONS)) {
 		toLog("DEBUG: (START_CONDITION::setLocationAvailible): Value location out of range.");return;
 	}
 #endif
 	this->unit[location].setAvailible(unit, num);
+	this->unit[0].addAvailible(unit, num);
 };
 
 const int START_CONDITION::getLocationAvailible(const int location, const int unit) const
@@ -192,11 +193,12 @@ const int START_CONDITION::getLocationTotal(const int location, const int unit) 
 void START_CONDITION::setLocationTotal(const int location, const int unit, const int num)
 {
 #ifdef _SCC_DEBUG
-	if((location<0)||(location>=MAX_PLAYER)) {
+	if((location<=0)||(location>=MAX_LOCATIONS)) {
 		toLog("DEBUG: (START_CONDITION::setLocationTotal): Value location out of range.");return;
 	}
 #endif
 	this->unit[location].setTotal(unit, num);
+	this->unit[0].addTotal(unit, num);
 };
 
 

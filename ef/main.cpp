@@ -25,107 +25,97 @@ void Main::process()
 	mainWindow->process();
 	if(mainWindow->tabWasChanged())
 	{
-//		player[0]->resetData();
-//		player[1]->resetData();
-			switch(mainWindow->getCurrentTab())
-			{
-				case BASIC_TAB:
-					player[0]->Show(); // 1
-					player[1]->Hide(); // 0
-					 //1 player
-					msgWindow->Show();
-					theCore->Hide();
-					tutorialWindow->Hide();
-//					settings.setGoal(1,1); // share same goal with advanced
-//					settings.setGoal(0,2); //zero goal!
-				break;
-				case ADVANCED_TAB: //1 player
-					player[0]->Show(); // 2
-					player[1]->Hide(); // 0
-					msgWindow->Show();
-					theCore->Show();
-					tutorialWindow->Hide();
-//					settings.setGoal(1,1); //share same goal with basic
-//					settings.setGoal(0,2); //zero goal!
-				break;
-				case EXPERT_TAB: //2 player rushversuche
-					player[0]->Show(); // 3
-					player[1]->Show(); // 4
-					msgWindow->Show();
-					theCore->Show();
-					tutorialWindow->Hide();
-//					settings.setGoal(1,1); // share same goal as advanced
-//					settings.setGoal(0,2); // zero goal!  -> computer!
-				break;
-				case GOSU_TAB: // 2 player - Spieler spielt
-					player[0]->Show(); // 5
-					player[1]->Show(); // 6 
-					msgWindow->Show();
-					theCore->Show();
-					tutorialWindow->Hide();
-// TODO wenn zero goal -> absturz beim aendern
-//					settings.setGoal(0,1); // zero goal! -> human
-//					settings.setGoal(0,2); // zero goal!  -> computer!
-				break;
-				case TRANSCENDEND_TAB: // 2 player - 2 Computer
-					player[0]->Show(); // 7 ~~
-					player[1]->Show(); // 6
-					msgWindow->Show();
-					theCore->Show();
-					tutorialWindow->Hide();
-//					settings.setGoal(0,1); // zero goal!  -> computer!
-//					settings.setGoal(0,2); // zero goal!  -> computer!
-				break;
-				case TUTORIAL_TAB:
-					player[0]->Show(); // 1  // TODO evtl eigenen tutorial player machen
-					player[1]->Hide(); // 0
-					msgWindow->Hide();
-					theCore->Hide();			
-					tutorialWindow->Show();
-//					settings.setGoal(1,1); // same goal as basic
-//					settings.setGoal(0,2); // zero goal!  -> computer!
-				break;
-				default:break;		
-			} // end switch
-			player[0]->CheckOrders();
-			player[1]->CheckOrders();
+		gizmo=false;
+		switch(mainWindow->getCurrentTab())
+		{
+			case BASIC_TAB:
+				msgWindow->Show();
+				theCore->Hide();
+				tutorialWindow->Hide();
+				gizmo=true;
+			break;
+			case ADVANCED_TAB: //1 player
+				msgWindow->Show();
+				theCore->Hide();
+				tutorialWindow->Hide();
+				gizmo=true;
+			break;
+			case EXPERT_TAB: //2 player rushversuche
+				msgWindow->Show();
+				theCore->Hide();
+				tutorialWindow->Hide();
+			break;
+			case GOSU_TAB: // 2 player - Spieler spielt
+				msgWindow->Show();
+				theCore->Hide();
+				tutorialWindow->Hide();
+			break;
+			case TRANSCENDEND_TAB: // 2 player - 2 Computer
+				msgWindow->Show();
+				theCore->Hide();
+				tutorialWindow->Hide();
+			break;
+			case TUTORIAL_TAB:
+				msgWindow->Hide();
+				theCore->Hide();			
+				tutorialWindow->Show();
+			break;
+			default:break;		
+		} // end switch getCurrentTabs
+		for(int i=0;i<2;i++)
+			player[i]->setMode(mainWindow->getCurrentTab(), i);
+		player[0]->CheckOrders();
+		player[1]->CheckOrders();
 
-			UI_Object::theme.setTab(mainWindow->getCurrentTab());
-			
-			mainWindow->updateRectangles();
-			msgWindow->updateRectangles();
-			theCore->updateRectangles();
-			tutorialWindow->updateRectangles();
-			player[0]->updateRectangles();
-			player[1]->updateRectangles();
-			
+		UI_Object::theme.setTab(mainWindow->getCurrentTab());
+		
+		mainWindow->updateRectangles(0);
+		msgWindow->updateRectangles(0);
+		theCore->updateRectangles(0);
+		tutorialWindow->updateRectangles(0);
+		int maxPlayer=0;
+		if(player[0]->isShown()) 
+			maxPlayer++;
+		if(player[1]->isShown()) 
+			maxPlayer++;
+		if(player[0]->isShown())
+			player[0]->updateRectangles(maxPlayer-1);
+		if(player[1]->isShown()) 
+			player[1]->updateRectangles(maxPlayer-1);
+		
 /*			settings.initSoup();
-				resetData();
-				if(ANARACE** temp=settings.newGeneration(anarace))
-				{				 for(int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-									anarace[i]=temp[i];
-						update=2;
-//			  if(anarace[0]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=1;} TODO?
-				};
-				for(int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-						player[i]->assignAnarace(&(anarace[i]));*/
-	
-//			settings.checkForChange();
-		} // end mainwindow is activated
+			resetData();*/
+		update=2;
+	} // end tabwasChanged
 
+	for(int i=0;i<2;i++)
+		player[i]->checkForChange();
+	
 	settings.checkForChange();
 	if(update==2)
 	{
 		for(int i=settings.getMap(0)->getMaxPlayer();i--;)
 			if(player[i]->isShown())
 				player[i]->CheckOrders();
+/*		ANARACE** temp;
+//TODO: nach Ende eines Durchlaufs ist anarace 0, aber viele anderen Teile des Codes greifen noch drauf zu!!
+		if((temp=settings.newGeneration(anarace)))
+		{
+			for(int i=settings.getMap(0)->getMaxPlayer();i--;)
+			{
+				anarace[i]=temp[i];
+//			  if(anarace[i]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=1;} TODO
+			}
+		};*/
 	}
 	update=1;
 
 	if(endrun)
 	{
 		ostringstream os;
-		os << "Final time round" << anarace[0]->getRun() << ": [" << setw(2) << (ga->maxTime-anarace[0]->getTimer())/60 << ":" << setw(2) << (ga->maxTime-anarace[0]->getTimer())%60 << "]";
+		os << "Final time round" << anarace[0]->getRun() << ": ["  
+			<< setw(2) << (ga->maxTime-anarace[0]->getTimer())/60 << ":" 
+			<< setw(2) << (ga->maxTime-anarace[0]->getTimer())%60 << "]";
 		msgWindow->addMessage(os.str());
 		resetData();
 	}
@@ -148,68 +138,48 @@ void Main::startOptimizing()
 
 const int Main::isOptimizing()
 {
-	for(int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
- 		   if(player[i]->isOptimizing())
+	for(int i=settings.getMap(0)->getMaxPlayer();i--;)
+		if(player[i]->isOptimizing())
 			return(1);
 	return(0);
 };
+
+void Main::helper(DC* dc, int i, int &dx, int &dy, const string& str) const
+{
+	dc->SetTextForeground(toSDL_Color(
+				(0==ani%(20+i))*200+((0==ani%(19+i))+(0==ani%(21+i)))*50,
+				(0==ani%(20+i))*200+((0==ani%(19+i))+(0==ani%(21+i)))*50,
+				(0==ani%(20+i))*200+((0==ani%(19+i))+(0==ani%(21+i)))*100+50));
+	dc->DrawText(str.substr(str.size()-1, str.size()), mainWindow->getAbsoluteClientRectPosition()+Point(20+dx,20));
+	dc->GetTextExtent(str.c_str(),&dx,&dy);
+}
 
 void Main::drawGizmo(DC* dc) const
 {
 	dc->SetFont(UI_Object::theme.lookUpFont(HUGE_DEFAULT_BOLD_FONT));
 	int dx=0;int dy=0;
-	dc->SetTextForeground(toSDL_Color((0==ani%20)*200+((0==ani%19)+(0==ani%21))*50,(0==ani%20)*200+((0==ani%19)+(0==ani%21))*50,(0==ani%20)*200+((0==ani%19)+(0==ani%21))*100+50));
-	dc->DrawText("E",mainWindow->getAbsoluteClientRectPosition()+Point(10,5));
-	dc->GetTextExtent("E",&dx,&dy);
-
-	dc->SetTextForeground(toSDL_Color((0==ani%21)*200+((0==ani%20)+(0==ani%22))*50,(0==ani%21)*200+((0==ani%20)+(0==ani%22))*50,(0==ani%21)*200+((0==ani%20)+(0==ani%22))*100+50));
-	dc->DrawText("v",mainWindow->getAbsoluteClientRectPosition()+Point(10+dx,5));
-	dc->GetTextExtent("Ev",&dx,&dy);
-
-	dc->SetTextForeground(toSDL_Color((0==ani%22)*200+((0==ani%21)+(0==ani%23))*50,(0==ani%22)*200+((0==ani%21)+(0==ani%23))*50,(0==ani%22)*200+((0==ani%21)+(0==ani%23))*100+50));
-	dc->DrawText("o",mainWindow->getAbsoluteClientRectPosition()+Point(10+dx,5));
-	dc->GetTextExtent("Evo",&dx,&dy);
-
-	dc->SetTextForeground(toSDL_Color((0==ani%23)*200+((0==ani%22)+(0==ani%24))*50,(0==ani%23)*200+((0==ani%22)+(0==ani%24))*50,(0==ani%23)*200+((0==ani%22)+(0==ani%24))*100+50));
-	dc->DrawText("l",mainWindow->getAbsoluteClientRectPosition()+Point(10+dx,5));
-	dc->GetTextExtent("Evol",&dx,&dy);
-
-	dc->SetTextForeground(toSDL_Color((0==ani%24)*200+((0==ani%23)+(0==ani%25))*50,(0==ani%24)*200+((0==ani%23)+(0==ani%25))*50,(0==ani%24)*200+((0==ani%23)+(0==ani%25))*100+50));
-	dc->DrawText("u",mainWindow->getAbsoluteClientRectPosition()+Point(10+dx,5));
-	dc->GetTextExtent("Evolu",&dx,&dy);
-
-	dc->SetTextForeground(toSDL_Color((0==ani%25)*200+((0==ani%24)+(0==ani%26))*50,(0==ani%25)*200+((0==ani%24)+(0==ani%26))*50,(0==ani%25)*200+((0==ani%24)+(0==ani%26))*100+50));
-	dc->DrawText("t",mainWindow->getAbsoluteClientRectPosition()+Point(10+dx,5));
-	dc->GetTextExtent("Evolut",&dx,&dy);
-
-	dc->SetTextForeground(toSDL_Color((0==ani%26)*200+((0==ani%25)+(0==ani%27))*50,(0==ani%26)*200+((0==ani%25)+(0==ani%27))*50,(0==ani%26)*200+((0==ani%25)+(0==ani%27))*100+50));
-	dc->DrawText("i",mainWindow->getAbsoluteClientRectPosition()+Point(10+dx,5));
-	dc->GetTextExtent("Evoluti",&dx,&dy);
-
-		dc->SetTextForeground(toSDL_Color((0==ani%27)*200+((0==ani%26)+(0==ani%28))*50,(0==ani%27)*200+((0==ani%26)+(0==ani%28))*50,(0==ani%27)*200+((0==ani%26)+(0==ani%28))*100+50));
-	dc->DrawText("o",mainWindow->getAbsoluteClientRectPosition()+Point(10+dx,5));
-	dc->GetTextExtent("Evolutio",&dx,&dy);
-
-	dc->SetTextForeground(toSDL_Color((0==ani%28)*200+((0==ani%27)+(0==ani%29))*50,(0==ani%28)*200+((0==ani%27)+(0==ani%29))*50,(0==ani%28)*200+((0==ani%27)+(0==ani%29))*100+50));
-	dc->DrawText("n",mainWindow->getAbsoluteClientRectPosition()+Point(10+dx,5));
+	string str="Evolution";
+	for(int i=0;i<str.size();i++)
+		helper(dc, i, dx, dy, str.substr(0,i+1));
 
 	dc->SetTextForeground(toSDL_Color(25,25,85));
-	dc->DrawText("Forge",mainWindow->getAbsoluteClientRectPosition()+Point(50,45));
+	dc->DrawText("Forge",mainWindow->getAbsoluteClientRectPosition()+Point(50,60));
 	dc->SetTextForeground(toSDL_Color(0,0,85));
-	dc->DrawText("v1.12",mainWindow->getAbsoluteClientRectPosition()+Point(154,84));
+	dc->DrawText("v1.21",mainWindow->getAbsoluteClientRectPosition()+Point(158,98));
 	dc->SetTextForeground(toSDL_Color(50,50,85));
-	dc->DrawText("v1.12",mainWindow->getAbsoluteClientRectPosition()+Point(150,80));
+	dc->DrawText("v1.21",mainWindow->getAbsoluteClientRectPosition()+Point(155,95));
 };
 
 void Main::draw(DC* dc) const
 {
-	SDL_BlitSurface(*UI_Object::theme.lookUpBitmap(BACKGROUND_BITMAP) , 0, dc->GetSurface(), 0 );
+	SDL_BlitSurface(*UI_Object::theme.lookUpBitmap(BACKGROUND_SPACE_BITMAP) , 0, dc->GetSurface(), 0 );
 
 
 	if(mainWindow->isShown())
 	{
 		mainWindow->draw(dc);
-		drawGizmo(dc);
+		if(gizmo)
+			drawGizmo(dc);
 	}
 
 /*		dc->SetFont(font3);
@@ -266,7 +236,7 @@ void Main::OnIdle()
 //	}
 
 	refresh++;
-	if(refresh>5)
+	if(refresh>8)
 		refresh=0;		
 }
 
@@ -290,13 +260,10 @@ void Main::Init(DC* dc)
 // choose the first map we loaded (map[0])
 	settings.assignMap(0); // first map (lt) and ums = false
 	settings.setMode(0); // TODO
-//	settings.setStartRace( ...
 	settings.setHarvestSpeed(TERRA, 0);
 	settings.setHarvestSpeed(PROTOSS, 1);
 	settings.setHarvestSpeed(ZERG, 2);
 
-//	settings.assignHarvestSpeedToStartcondition();
-	
 	settings.setStartRace(1, PROTOSS);
 	settings.setStartRace(2, PROTOSS);
 
@@ -307,25 +274,13 @@ void Main::Init(DC* dc)
 	settings.setStartPosition(2, 7);
 	settings.fillGroups();
 
-	settings.setGoal(1, 0);
-	settings.setGoal(2, 1); //~~
+	settings.setGoal(1, PROTOSS);
+	settings.setGoal(2, PROTOSS); //~~
 
 //	settings.assignStartconditionHarvestSpeed();
 		
 	settings.initSoup(); // assign START of settings
 	// initializes players, initializes Map
-	
-//	for(int i=1;i<settings.getMap(0)->getMaxPlayer();i++)
-//		settings.setGoal(0, i);
-	
-	//setMap VOR initsoup um v.a. die Zahl der Spieler zu bestimmen
-
-// MAPS: Startforce
-// Goals: 
-	
-// Goal in "goal.txt" is now goal[0]
-// assign goal 0 to all players
-//GOALS are set by setMap, each startPlayer has now its own goal entry
 	
 	update=0;
 // initialize the soup, set the parameters, load the players etc.
@@ -333,20 +288,24 @@ void Main::Init(DC* dc)
 	oldrun=0;
 //	grey=0;
 	resetData();
+	for(int i=MAX_PLAYER;i--;)
+		anarace[i]=0;
 	if(ANARACE** temp=settings.newGeneration(anarace))
 	{
 		for(int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
 			anarace[i]=temp[i];
-		update=2;
+//		update=2;
 //		if(anarace[0]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=1;} TODO?
 	};
+
+	anarace[0]->setMaxpFitness(0);
 
 	UI_Object::assignStartTime();
 	
 	mainWindow=new MainWindow();
 	ostringstream os;
-	os << "[GUI: " << setprecision(2) << GUI_VERSION << "] [CORE: " << setprecision(2) << CORE_VERSION << "]";
-	 mainWindow->setTitleParameter(os.str());
+	//os << "[GUI: " << setprecision(2) << GUI_VERSION << "] [CORE: " << setprecision(2) << CORE_VERSION << "]";
+	//mainWindow->setTitleParameter(os.str());
 	
 	msgWindow=new MessageWindow(mainWindow);
 	theCore=new CoreWindow(mainWindow);
@@ -355,10 +314,7 @@ void Main::Init(DC* dc)
 //TODO: scc2 player und scc2dll player Zusammenhang nachschaun! loadPlayer wird net aufgerufen... goals ueberschneiden etc...
 
 	for(int i=0;i<settings.getMap(0)->getMaxPlayer();i++)
-		player[i]=new Player(mainWindow, &(anarace[i]), BASIC_PLAYER_MODE, i);
-
-//	haxor=new UI_WindowtoSDL_Color(255,0,0), Color(5,25,0), Color(40,150,20), Rect(0,0,550,100),0,boGraphWindow->getRelativeLeftBound(),boGraphWindow->getLowerBound()+10,0);
-//	haxor->setTitle(0,"H4Xx0r 57uff! :D");
+		player[i]=new Player(mainWindow, &(anarace[i]), i);
 
 //TODO grey wieder rein... evtl bei draw
 
@@ -373,6 +329,8 @@ void Main::Init(DC* dc)
 	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG1_STRING)));
 	msgWindow->addMessage(*(UI_Object::theme.lookUpString(WELCOME_MSG2_STRING)));
 	msgWindow->addMessage(UI_Object::theme.lookUpFormattedString(PLAYERS_LOADED_STRING, settings.getMap(0)->getMaxPlayer()));
+
+
 };
 
 int main(/*int argc, char **argv*/)
@@ -380,33 +338,33 @@ int main(/*int argc, char **argv*/)
 	SDL_Event event;
 	DC* screen;
 
-    if ( SDL_Init(SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE) < 0 )
-    {
-        cout << "Unable to init SDL: " << SDL_GetError() << endl;
-        return(1);
-    }
-    /* start SDL_ttf */
-    if(TTF_Init()==-1)
-    {
-        printf("TTF_Init: %s\n", TTF_GetError());
-        return 2;
-    }
-    atexit(TTF_Quit); /* remember to quit SDL_ttf */
-    atexit(SDL_Quit);
-    SDL_WM_SetCaption("EVOLUTION FORGE (C) CLEMENS LODE, 2004 www.clawsoftware.de","");
+	if ( SDL_Init(SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE) < 0 )
+	{
+		cout << "Unable to init SDL: " << SDL_GetError() << endl;
+		return(1);
+	}
+	/* start SDL_ttf */
+	if(TTF_Init()==-1)
+	{
+		printf("TTF_Init: %s\n", TTF_GetError());
+		return 2;
+	}
+	atexit(TTF_Quit); /* remember to quit SDL_ttf */
+	atexit(SDL_Quit);
+	SDL_WM_SetCaption("EVOLUTION FORGE (C) CLEMENS LODE, 2004 www.clawsoftware.de","");
 	int vx=1280;
 	int vy=1024;
 	int FULLSCREEN=0;
  	SDL_Rect c;c.x=0;c.y=0;c.w=1280;c.h=1024;
-    if (FULLSCREEN==1)
-        screen=new DC(SDL_SetVideoMode(c.w, c.h, 32, SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_FULLSCREEN));
-    else
-        screen=new DC(SDL_SetVideoMode(c.w, c.h, 32, SDL_HWSURFACE|SDL_DOUBLEBUF));
-    if ( screen == NULL )
-    {
+	if (FULLSCREEN==1)
+		screen=new DC(SDL_SetVideoMode(c.w, c.h, 32, SDL_HWSURFACE|SDL_FULLSCREEN));
+	else
+		screen=new DC(SDL_SetVideoMode(c.w, c.h, 32, SDL_HWSURFACE));
+	if ( screen == NULL )
+	{
 		printf("error\n");
-        return(1);
-    }
+		return(1);
+	}
 
 	Main m;
 	m.Init(screen);
@@ -420,13 +378,12 @@ int main(/*int argc, char **argv*/)
 
 		SDL_UpdateRect(screen->GetSurface(), 0, 0, 0, 0);
 		SDL_SetClipRect(screen->GetSurface(), &c);	
-        while (SDL_PollEvent(&event))
-        {
-            switch (event.type)
-            {
-	            case SDL_QUIT:return(0);break;
-	            case SDL_KEYDOWN:
-							  printf("key [%i, %i]\n", c.x, c.y);
+		while (SDL_PollEvent(&event))
+		{
+			switch (event.type)
+			{
+				case SDL_QUIT:return(0);break;
+				case SDL_KEYDOWN:
 							  switch(event.key.keysym.sym)
 							  {
 									case SDLK_ESCAPE:return(0);break;
@@ -444,11 +401,19 @@ int main(/*int argc, char **argv*/)
 									case SDLK_DOWN:if(c.y+c.h<vy-vy/10) c.y+=vy/10;else c.y=vy-c.h;break;
 									case SDLK_LEFT:if(c.x>vx/10) c.x-=vx/10;else c.x=0;break;
 									case SDLK_RIGHT:if(c.x+c.w<vx-vx/10) c.x+=vx/10;else c.x=vx-c.w;break;
+									case SDLK_F1:m.mainWindow->forcePressTab(BASIC_TAB);break;
+									case SDLK_F2:m.mainWindow->forcePressTab(ADVANCED_TAB);break;
+									case SDLK_F3:m.mainWindow->forcePressTab(EXPERT_TAB);break;
+									case SDLK_F4:m.mainWindow->forcePressTab(GOSU_TAB);break;
+									case SDLK_F5:m.mainWindow->forcePressTab(TRANSCENDEND_TAB);break;
+									case SDLK_F6:m.mainWindow->forcePressTab(MAP_TAB);break;
+									case SDLK_F7:m.mainWindow->forcePressTab(SETTINGS_TAB);break;
+									case SDLK_F8:m.mainWindow->forcePressTab(TUTORIAL_TAB);break;
 									default:break;
 							  };
 					
 					break;
-	            case SDL_MOUSEBUTTONDOWN:
+				case SDL_MOUSEBUTTONDOWN:
 					if(event.button.button == SDL_BUTTON_LEFT)
 						controls.leftDown();
 					else if(event.button.button == SDL_BUTTON_RIGHT)
@@ -461,7 +426,6 @@ int main(/*int argc, char **argv*/)
 						controls.rightUp();
 					break;
 				case SDL_MOUSEMOTION:
-					
 					controls.setMouse(Point(event.motion.x, event.motion.y));break;
 				default:break;
 			}
@@ -472,6 +436,5 @@ int main(/*int argc, char **argv*/)
 /*					
 void Main::OnMouseWheelScroll(MouseEvent& event)
 {
-    controls.scrollMouseWheel(event.GetWheelRotation());
+	controls.scrollMouseWheel(event.GetWheelRotation());
 }*/
-                                                                                                                                                            

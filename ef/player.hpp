@@ -41,37 +41,37 @@ enum ePlayerMode
 class Player : public UI_Object
 {
 	public:
-		Player(UI_Object* parent, ANARACE** anarace, const ePlayerMode mode, const int playerNumber);
+		Player(UI_Object* parent, ANARACE** anarace, const int playerNumber);
 		~Player();
 		
 		void update();
 
 		void resetData();
 		
-		void setMode(ePlayerMode mode); 
+		void setMode(const eTab tab, const int playerNum); 
 
 		void draw(DC* dc) const;
 		void process();
 
 		void changeAccepted();
 		const bool getChangedFlag() const;
+		void checkForChange();
 
 		const bool isOptimizing() const;
 		void setOptimizing(bool opt=true);
 
 		void CheckOrders();
 
-		void updateRectangles();
+		void updateRectangles(const int maxPlayer);
 		
 	private:
-		void setWindowTitles(const ePlayerMode mode);
 		void drawGeneString(DC* dc, const Rect position) const;
 
 		UI_Window* window[MAX_WINDOWS]; 
 		ANARACE** anarace; //pointer auf pointer, weil sich der pointer ja veraendert!
 		int geneAnimation;
 		map <long, Order> orderList; // nach markern sortiert
-		ePlayerMode mode;
+		int mode;
 		void MoveOrders();
 };
 

@@ -2,13 +2,13 @@
 #include<sys/timeb.h>
 #include<sys/types.h>
 
-
-void move(int& x, const int sx, const int tx)
+void UI_Object::move(int& x, const int sx, const int tx)
 {
-//  x=tx;
+//x=tx;
     x+=((x>tx)?-1:0)+((x<tx)?1:0);
-    x+=((x>sx)?((x-sx)<(tx-sx)/2?(x-sx)/2:(tx-x)/2):((x-sx)>(tx-sx)/2?(x-sx)/2:(tx-x)/2));
+	x+=((x>sx)?((x-sx)<(tx-sx)/2?(x-sx)/2:(tx-x)/2):((x-sx)>(tx-sx)/2?(x-sx)/1.5:(tx-x)/1.5));
 };
+                                                                                
 
 
 UI_Object::UI_Object(UI_Object* parent, const Rect relativeRect, const Rect maxRect)
@@ -19,15 +19,18 @@ UI_Object::UI_Object(UI_Object* parent, const Rect relativeRect, const Rect maxR
 	isFreeMove=true;
 	this->maxRect=maxRect;
 	doAdjustments=1;
+	
 	startRect=relativeRect;
 	targetRect=relativeRect;
-	absoluteCoord=Point(0,0);
-	startTime=0;
 	lastItemY=relativeRect.height;
+	
+	startTime=0;
 
+	toolTip="";
 	shown=true;
 	nextBrother = prevBrother = this;
 	children=0;
+	min_bottom_x = min_left_y = min_top_x = min_right_y = 0;
 	setParent(parent);
 };
 
@@ -56,10 +59,11 @@ UI_Object* UI_Object::getChildren() const
 	return(children);
 };
 
-void UI_Object::setAbsoluteCoord(const Point p)
+void UI_Object::updateToolTip(const string& toolTip)
 {
-	absoluteCoord=p;
+	this->toolTip=toolTip;
 };
+
 
 const int UI_Object::getDoAdjustments() const
 {
@@ -211,16 +215,8 @@ const bool UI_Object::isTopItem() const
 const Point UI_Object::getAbsolutePosition() const
 {
 	if(parent)
-		return(absoluteCoord + relativeRect.GetPosition() + parent->getAbsolutePosition());
-	else return(absoluteCoord + relativeRect.GetPosition());
-};
-
-
-const Point UI_Object::getAbsolutePosition2() const
-{
-    if(parent)
-	        return(parent->getAbsolutePosition());
-	    else return(Point(0,0));
+		return(relativeRect.GetPosition() + parent->getAbsolutePosition());
+	else return(relativeRect.GetPosition());
 };
 
 const Point UI_Object::getRelativePosition() const
@@ -231,6 +227,38 @@ const Point UI_Object::getRelativePosition() const
 const Rect UI_Object::getRelativeRect() const
 {
 	return(relativeRect);
+};
+
+const Rect UI_Object::getAbsoluteRect() const
+{
+    if(parent)
+        return(Rect(relativeRect.GetPosition() + parent->getAbsolutePosition(), getSize()));
+    else return(Rect(relativeRect.GetPosition(), getSize()));
+};
+
+void UI_Object::setPosition(const Point position)
+{
+	relativeRect.SetPosition(position);
+};
+
+void UI_Object::setLeft(const int x)
+{
+	relativeRect.x=x;
+};
+
+void UI_Object::setTop(const int y)
+{
+	relativeRect.y=y;
+};
+
+void UI_Object::setWidth(const int width)
+{
+	relativeRect.width=width;
+};
+
+void UI_Object::setHeight(const int height)
+{
+	relativeRect.height=height;
 };
 
 void UI_Object::setSize(const Size size)
@@ -379,7 +407,13 @@ void UI_Object::process()
     }
 }
                                                                                 
-
+const bool UI_Object::isMouseInside() const
+{
+	Point p = controls.getCurrentPosition(getAbsolutePosition());
+	if((p.x>=0)&&(p.x<getWidth())&&(p.y>=0)&&(p.y<getHeight()))
+		return(true);
+	else return(false);
+};
 
 void UI_Object::draw(DC* dc) const
 {
@@ -387,24 +421,7 @@ void UI_Object::draw(DC* dc) const
     // if hidden, hide children as well
     if (!shown)
 		return;
-		
-/*	dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
-	dc->SetPen(Pen(dc->doColor(255,0,0),3,SOLID_PEN_STYLE));
-    dc->DrawRectangle(Rect(targetRect.GetPosition(),targetRect.GetSize()));
-	dc->SetPen(Pen(dc->doColor(255,255,255),2,SHORT_DASH_PEN_STYLE));
-    dc->DrawRectangle(Rect(startRect.GetPosition(),startRect.GetSize()));*/
 
-	
-	/*dc->DrawRectangle(Rect(maxRect.GetPosition()+getAbsolutePosition2(),maxRect.GetSize()));
- 	
-	dc->SetPen(Pen(Color(255,255,255),1,SHORT_DASH));
-	dc->DrawRectangle(Rect(relativeRect.GetPosition()+getAbsolutePosition()-relativeRect.GetPosition(),relativeRect.GetSize()));
-	
- 	dc->SetPen(Pen(Color(0,255,0),1,SHORT_DASH));
-	dc->DrawRectangle(Rect(targetRect.GetPosition()+getAbsolutePosition()-relativeRect.GetPosition(),targetRect.GetSize()));
- 	
-	dc->SetPen(Pen(Color(255,0,0),1,SHORT_DASH));
-	dc->DrawRectangle(Rect(startRect.GetPosition()+getAbsolutePosition()-relativeRect.GetPosition(),startRect.GetSize()));*/
     UI_Object* tmp=children;
 	
     if (tmp) {
@@ -413,7 +430,26 @@ void UI_Object::draw(DC* dc) const
             tmp = tmp->nextBrother;
         } while (tmp != children);
     }
+	
+	if(isMouseInside())
+		maybeShowToolTip(dc);
+	
 };
+
+void UI_Object::maybeShowToolTip(DC* dc) const
+{
+	if(toolTip.size()==0)
+		return;
+	dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
+	dc->SetBrush(*theme.lookUpBrush(TOOLTIP_BRUSH));
+	dc->SetTextForeground(*theme.lookUpColor(TEXT_COLOUR));
+	dc->SetFont(theme.lookUpFont(SMALL_ITALICS_BOLD_FONT));
+	int dx, dy;
+	dc->GetTextExtent(toolTip, &dx, &dy);
+	dc->DrawRectangle(getAbsolutePosition()+Point(16,16), Size(dx+16, dy));
+	dc->DrawText(toolTip, getAbsolutePosition()+Point(24,20));
+};
+
 
 void UI_Object::assignStartTime()
 {

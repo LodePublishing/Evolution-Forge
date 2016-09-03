@@ -10,56 +10,62 @@
  *      core from outside the library. In addition some data is     *
         preformatted/precalculated -> statistics.				    */
 
-
 // TODO: reimplement/recheck the speed of the units
 ANARACE::ANARACE()
 {
-	setGeneration(0);
-	setMaxpFitness(0);
-	setMaxsFitness(0);
-	setMaxtFitness(MAX_TFITNESS);
-	setUnchangedGenerations(0);
+	resetData();
 	setRun(0);
 	optimizing=false;
 	active=true;
-	unitsTotal=4;
-	unitsTotalMax=4;
-	timePercentage=0;
-	goalPercentage=0;
+
 };
 
 ANARACE::~ANARACE()
 {
 };
 
+void ANARACE::resetData()
+{
+	setGeneration(0);
+	setMaxpFitness(0);
+	setMaxsFitness(0);
+	setMaxtFitness(MAX_TFITNESS);
+	setUnchangedGenerations(0);
+	unitsTotal=4;
+	unitsTotalMax=4;
+	timePercentage=0;
+	goalPercentage=0;
+};
+
 // Reset all ongoing data (between two runs)
-void EXPORT ANARACE::resetData() // resets all data to standard starting values
+void EXPORT ANARACE::newRun() // resets all data to standard starting values
 {
 	setCurrentpFitness(0);
+
 	for(int i=MAX_GOALS;i--;)
-		setFinalTime(i,0);
+		setFinalTime(i, 0);
 	resetSpecial();
 
 	for(int i=MAX_TIME;i--;)
 	{
-		setStatisticsHaveSupply(i,0);
-		setStatisticsHaveMinerals(i,0);
-		setStatisticsHaveGas(i,0);
-		setStatisticsNeedSupply(i,0);
-		setStatisticsFitness(i,0);
+		setStatisticsHaveSupply(i, 0);
+		setStatisticsHaveMinerals(i, 0);
+		setStatisticsHaveGas(i, 0);
+		setStatisticsNeedSupply(i, 0);
+		setStatisticsFitness(i, 0);
 	}
 
 	for(int i=MAX_LENGTH;i--;)//ANA~
 	{
-		setProgramSuccessType(i,0);
-		setProgramSuccessUnit(i,0);
+		setProgramSuccessType(i, 0);
+		setProgramSuccessUnit(i, 0);
 //		program[i].successLocation=0;
-		setProgramIsBuilt(i,false);
+		setProgramIsBuilt(i, false);
 		setProgramTime(i,MAX_TIME);
-		for(int j=0;j<UNIT_TYPE_COUNT;j++)
+		for(int j=UNIT_TYPE_COUNT;j--;)
 		{
-			setProgramAvailibleCount(i,j,0);
-			setProgramTotalCount(i,j,0);
+			setProgramAvailibleCount(i, j, 0);
+			setProgramTotalCount(i, j, 0);
 		}
 		//program[i].temp=0;
 		setProgramLocation(i,0);
@@ -118,8 +124,18 @@ const bool EXPORT ANARACE::calculateStep()
 			phaenoCode[i]=(*pGoal)->toPhaeno(Code[i]);
 	//	if((*pGoal)->getMode()==0)
 			setCurrentpFitness(calculatePrimaryFitness(ready));
-		buildingList.Clear();
+        while(!buildingQueue.empty())
+            buildingQueue.pop();
 		countUnitsTotal();
+
+		int maxPoints=0;
+		for(int i=MAX_GOALS;i--;)
+			if((*pGoal)->goal[i].count>0)
+				maxPoints+=100;
+		
+		if(maxPoints>0)
+			goalPercentage = 100 * currentpFitness / maxPoints;
+		else goalPercentage = 0;
 		return(true);
 	}
 
@@ -151,7 +167,7 @@ const bool EXPORT ANARACE::calculateStep()
 //				setProgramSuccessLocation(0);
 			}
 //			program[getIP()].temp=location[1].availible[COMMAND_CENTER];
-			for(int i=0;i<UNIT_TYPE_COUNT;i++)
+			for(int i=UNIT_TYPE_COUNT;i--;)
 			{
 				setProgramTotalCount(getIP(),i,getLocationTotal(GLOBAL,i));
 				setProgramAvailibleCount(getIP(),i,getLocationAvailible(0,i));
@@ -182,68 +198,64 @@ const bool EXPORT ANARACE::calculateStep()
 	
 	setTimeOut(getTimeOut()-t);
 	setTimer(getTimer()-t);
-	if(buildingList.isEmpty())
-		return(false);
-	BNODE* node = buildingList.GetHead();
-	Building* build = node->GetData();
-	while(node)
-	{
-		BNODE* oldnode=node;
-		node=node->GetNext();
-		build->setRemainingBuildTime(build->getRemainingBuildTime()-t);
-		if(!build->getRemainingBuildTime())
-		{
-			const UNIT_STATISTICS* stat=&((*pStats)[build->getType()]);
-			setProgramFacility(build->getIP(), build->getFacility());
+	bool foundAnother=true;
+    while((!buildingQueue.empty())&&(foundAnother==true))
+    {
+        if(buildingQueue.top().getBuildFinishedTime()==getTimer())
+        {
+			foundAnother=true;
+        	const Building build = buildingQueue.top();
+			const UNIT_STATISTICS* stat=&((*pStats)[build.getType()]);
+			setProgramFacility(build.getIP(), build.getFacility());
 			switch(stat->facilityType)
 			{
 				case NO_FACILITY:break;
 				case IS_LOST:
-					if(build->getFacility())
+					if(build.getFacility())
 					{
-						addLocationTotal(build->getLocation(),build->getFacility(),-1);
-//						setProgramFacility(build->getIP(),build->getFacility());
+						addLocationTotal(build.getLocation(),build.getFacility(),-1);
+//						setProgramFacility(build.getIP(),build.getFacility());
 						//availible was already taken account when starting the building
 					}
 					if(stat->facility2)
-						addLocationTotal(build->getLocation(),stat->facility2,-1);
+						addLocationTotal(build.getLocation(),stat->facility2,-1);
 					break;
 				case NEEDED_ONCE:break;//TODO ueberlegen ob man nicht jedem programdings ein facility zuweist... mmmh
 				case NEEDED_UNTIL_COMPLETE:
-					if(build->getFacility())
+					if(build.getFacility())
 					{
-						addLocationAvailible(build->getLocation(),build->getFacility(),1);
-//						setProgramFacility(build->getIP(),build->getFacility());
+						addLocationAvailible(build.getLocation(),build.getFacility(),1);
+//						setProgramFacility(build.getIP(),build.getFacility());
 					}
 					break; // TODO: fuer spaeter mal: Wenn in 2 Fabriken produziert wuerde wirds probmelatisch, da
 //in Buiding nur eine facility gespeichert wird...??
 				case NEEDED_ONCE_IS_LOST:
 					if(stat->facility2)
-						addLocationTotal(build->getLocation(),stat->facility2,-1);
+						addLocationTotal(build.getLocation(),stat->facility2,-1);
 					break;
 				case NEEDED_UNTIL_COMPLETE_IS_LOST:
-					if(build->getFacility())
+					if(build.getFacility())
 					{
-						addLocationAvailible(build->getLocation(),build->getFacility(),1);
-//						setProgramFacility(build->getIP(),build->getFacility());
-//						setNeedSupply(getNeedSupply()-(*pStats)[build->getFacility()].needSupply); //<- ?
-//						setHaveSupply(getHaveSupply()-(*pStats)[build->getFacility()].haveSupply); //<- ?
+						addLocationAvailible(build.getLocation(),build.getFacility(),1);
+//						setProgramFacility(build.getIP(),build.getFacility());
+//						setNeedSupply(getNeedSupply()-(*pStats)[build.getFacility()].needSupply); //<- ?
+//						setHaveSupply(getHaveSupply()-(*pStats)[build.getFacility()].haveSupply); //<- ?
 					}
 					if(stat->facility2)
-						addLocationTotal(GLOBAL/*build->getLocation()*/,stat->facility2,-1);
+						addLocationTotal(GLOBAL/*build.getLocation()*/,stat->facility2,-1);
 //r_researches need location 0~~ TODO
 					break;
 				case NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE:
 					{
-						if(build->getFacility())
+						if(build.getFacility())
 						{
-							addLocationAvailible(build->getLocation(),build->getFacility(),1);
-//							setProgramFacility(build->getIP(),build->getFacility()); //?
+							addLocationAvailible(build.getLocation(),build.getFacility(),1);
+//							setProgramFacility(build.getIP(),build.getFacility()); //?
 						}
 						if(stat->facility2) // special rule for upgrades! need 0 location
 						{
-							addLocationTotal(GLOBAL/*build->getLocation()*/,stat->facility2,-1);
-							addLocationAvailible(0/*build->getLocation()*/,stat->facility2,1);
+							addLocationTotal(GLOBAL/*build.getLocation()*/,stat->facility2,-1);
+							addLocationAvailible(0/*build.getLocation()*/,stat->facility2,1);
 						};
 					}
 					break;
@@ -276,24 +288,24 @@ const bool EXPORT ANARACE::calculateStep()
 				}
 			};*/
 			//~~~~
-			addLocationTotal(build->getLocation(),build->getType(),build->getUnitCount());
-			addLocationAvailible(build->getLocation(),build->getType(),build->getUnitCount());
+			addLocationTotal(build.getLocation(),build.getType(),build.getUnitCount());
+			addLocationAvailible(build.getLocation(),build.getType(),build.getUnitCount());
 
-			if(build->getType()==REFINERY) 
+			if(build.getType()==REFINERY) 
 			{
-				addMapLocationTotal(GLOBAL, build->getLocation(),VESPENE_GEYSIR,-1);
-				adjustGasHarvest(build->getLocation());
+				addMapLocationTotal(GLOBAL, build.getLocation(),VESPENE_GEYSIR,-1);
+				adjustGasHarvest(build.getLocation());
 			}
 			else
-			if((build->getType()==COMMAND_CENTER)&&(!getLocationTotal(build->getLocation(),COMMAND_CENTER)))
+			if((build.getType()==COMMAND_CENTER)&&(!getLocationTotal(build.getLocation(),COMMAND_CENTER)))
 			{
-				adjustMineralHarvest(build->getLocation());
-				adjustGasHarvest(build->getLocation());
+				adjustMineralHarvest(build.getLocation());
+				adjustGasHarvest(build.getLocation());
 			}
- else if((build->getType()==LARVA)&&((*pGoal)->getRace()==ZERG))
+ else if((build.getType()==LARVA)&&((*pGoal)->getRace()==ZERG))
 			{
 				if(!buildGene(LARVA))
-					larvaInProduction[build->getLocation()]--;
+					larvaInProduction[build.getLocation()]--;
 //					  if(
 //TODO Was wenn Gebaeude zerstoert? etc.? eigentlich is das hier net noetig...
 //								  (((getLocationTotal(tloc, HATCHERY)+getLocationTotal(tloc, LAIR)+getLocationTotal(tloc, HIVE))*3>
@@ -307,14 +319,14 @@ const bool EXPORT ANARACE::calculateStep()
 //				  };
 			};
 
-			last[lastcounter].unit=build->getType();
-			last[lastcounter].count=build->getUnitCount();
-			last[lastcounter].location=build->getLocation();
+			last[lastcounter].unit=build.getType();
+			last[lastcounter].count=build.getUnitCount();
+			last[lastcounter].location=build.getLocation();
 
-			if((stat->create)&&(!build->getOnTheRun())) //one additional unit (zerglings, scourge, comsat, etc.)
+			if((stat->create)&&(!build.getOnTheRun())) //one additional unit (zerglings, scourge, comsat, etc.)
 			{ //here no unitCount! ~~~
-				addLocationTotal(build->getLocation(),stat->create,1);
-				addLocationAvailible(build->getLocation(),stat->create,1);
+				addLocationTotal(build.getLocation(),stat->create,1);
+				addLocationAvailible(build.getLocation(),stat->create,1);
 				if(last[lastcounter].unit==stat->create) last[lastcounter].count++; //TODO ???
 				// ~~~~ Ja... geht schon... aber kann ja auch mal was anderes sein...
 			}
@@ -322,32 +334,26 @@ const bool EXPORT ANARACE::calculateStep()
 			lastcounter++;
 
 			//ANA~
-			setProgramIsBuilt(build->getIP(),true);
-			setProgramLocation(build->getIP(),build->getLocation());
-			setProgramBT(build->getIP(),build->getTotalBuildTime()); //~~~
+			setProgramIsBuilt(build.getIP(),true);
+			setProgramLocation(build.getIP(),build.getLocation());
+			setProgramBT(build.getIP(),build.getTotalBuildTime()); //~~~
 //			IP zeugs checken... length is immer 2 :/	 ??
 
 				for(int i=MAX_GOALS;i--;)
 // ist dieses goal belegt?
 					if(((*pGoal)->goal[i].unit>0)&&
 // befinden wir uns am richtigen Ort?
-						(((*pGoal)->goal[i].location==0)||(build->getLocation()==(*pGoal)->goal[i].location))&&
+						(((*pGoal)->goal[i].location==0)||(build.getLocation()==(*pGoal)->goal[i].location))&&
 // und untersuchen wir das zum Unittype gehoerende Goal?
-						(build->getType()==(*pGoal)->goal[i].unit))
+						(build.getType()==(*pGoal)->goal[i].unit))
 								setFinalTime(i,ga->maxTime-getTimer());
 // Did we reach the right number at the right time?
 //			  i=MAX_GOALS;  TODO? koennen wir mehrere goals gleichzeitig erfuell0rn?
 
 			ready=calculateReady();
-			buildingList.DeleteNode(oldnode);
-/*			map<int, Building>::iterator temp=buildNode;
-			temp++;
-			buildingList.erase(buildNode);
-			buildNode=temp;*/
+			buildingQueue.pop();
 		} // end while(getremainingbuildorder) ~|~
-		if(node)
-			build=(Building*)node->GetData();
-//		else buildNode++;
+		else foundAnother=false;
 	} //end while
 //TODO: Alles rausschmeissen, was schon von race berechnet wurde!
 	
@@ -372,7 +378,7 @@ const bool ANARACE::buildGene(const int unit)
 //	if(unit==1)
 //		successType=0; //?
 
-	if(unit<=EXTRACTOR+1)
+	if(unit<=REFINERY+1)
 	{
 		if((stat->prerequisite[0]>0)&&(getLocationTotal(GLOBAL,stat->prerequisite[0])==0))
 		{
@@ -519,47 +525,31 @@ const bool ANARACE::buildGene(const int unit)
 						};
 					};
 					
-				/*Building build;
-				build.setOnTheRun(0);
+				Building build;
+				build.setOnTheRun(false);
 				build.setFacility(stat->facility[fac]);
 				build.setLocation(tloc);
 				build.setUnitCount(1);
-//				build.setRemainingBuildTime(stat->BT//+3200*(stat->facility2==unit)*///); //~~ hack :/ TODO ???????????? SINN?
-//				build.setTotalBuildTime(build.getRemainingBuildTime());
-//				build.setType(unit);
-
-					 BNODE *node=NULL;
-					for (node = buildingList.GetTail();node&&(((Building*)node->GetData())->getRemainingBuildTime()<stat->BT/*+3200*(stat->facility2==unit)*/);node = node->GetPrev());
-					Building* build=new Building();
-					if(node&&(((Building*)node->GetData())->getRemainingBuildTime()>=stat->BT/*+3200*(stat->facility2==unit)*/))
-						buildingList.Insert(node,build);
-					else if(!node) buildingList.Append(build);
-
-					build->setOnTheRun(false);
-					build->setFacility(stat->facility[fac]);
-					build->setLocation(tloc);
-					build->setUnitCount(1);
-					build->setRemainingBuildTime(stat->BT/*+3200*(stat->facility2==unit)*/); //~~ hack :/ TODO SINN???????
-					build->setTotalBuildTime(build->getRemainingBuildTime());
-					build->setType(unit);
-
+				build.setBuildFinishedTime(getTimer()-stat->BT/*+3200*(stat->facility2==unit)*/); //~~ hack :/ TODO SINN???????
+				build.setTotalBuildTime(stat->BT);
+				build.setType(unit);
+				build.setIP(getIP());
 					
 				setMinerals(getMinerals()-(stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, unit)));
 				setGas(getGas()-(stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, unit)));
 				setNeedSupply(getNeedSupply()+stat->needSupply);					 
 //				setHaveSupply(getHaveSupply()-stat->needSupply);
-				
 //				if((stat->needSupply>0)||(((*pStats)[stat->facility[0]].needSupply<0)&&(stat->facilityType==IS_LOST))) 
 //					setNeedSupply(getNeedSupply()-stat->needSupply);TODO
 				adjustAvailibility(tloc,fac,stat);
-				build->setIP(getIP());
+
+				buildingQueue.push(build);
 				
-//				buildingList.insert(pair<int, Building>(stat->BT/*+3200*(stat->facility2==unit)*/, build));
 			} //kk!=1?
 		} // if resources prere etc ok
 	}
 //TODO: error wenn facilities net gefunden...
-	else // unit > EXTRACTOR+1
+	else // unit > REFINERY+1
 	{
 	/*	int count=0;
 		switch(unit)
@@ -639,7 +629,7 @@ const bool ANARACE::buildGene(const int unit)
 						gas+=stats[2][building[n].type].gas*0.75;
 						Supply--;
 						force[DRONE]++;
-						if(building[n].type==EXTRACTOR)
+						if(building[n].type==REFINERY)
 						{
 							Vespene_Extractors--;
 							Vespene_Av++;
@@ -1203,11 +1193,6 @@ const bool EXPORT ANARACE::getProgramIsBuilt(const int IP) const
 	}
 #endif
 	return(program[IP].built);
-};
-
-const bool EXPORT ANARACE::getProgramIsBuilt2(const int IP) const
-{
-	return(getProgramIsBuilt(IP));
 };
 
 /*const bool EXPORT ANARACE::getProgramIsConstant(const int IP)

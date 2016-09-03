@@ -4,7 +4,7 @@ Player::~Player()
 {
 };
 
-Player::Player(UI_Object* parent, ANARACE** anarace, const ePlayerMode mode, const int playerNumber):UI_Object(parent)
+Player::Player(UI_Object* parent, ANARACE** anarace, const int playerNumber):UI_Object(parent)
 {
 	geneAnimation=0;
 	shown=0;
@@ -16,8 +16,7 @@ Player::Player(UI_Object* parent, ANARACE** anarace, const ePlayerMode mode, con
 	window[BUILD_ORDER_WINDOW]=new BoWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], &orderList, playerNumber);
 	window[BO_GRAPH_WINDOW] = new BoGraphWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], &orderList, playerNumber);
 	window[BO_DIAGRAM_WINDOW]=new BoDiagramWindow(this, *anarace, (InfoWindow*)window[INFO_WINDOW], playerNumber);
-	setMode(mode);
-	//Show(0);
+	setMode(BASIC_TAB, playerNumber);
 };
 
 
@@ -39,7 +38,7 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 		points4[i].x=0;points4[i].y=0;
 	}
 	int boanzahl=0;
-	int colors[MAX_LENGTH];												    
+	int colors[MAX_LENGTH];													
 	for(int i=0;i<MAX_LENGTH;i++)
 		colors[i]=0;
 //	int boanzahl=orderList.GetCount(); //~~ TODO
@@ -73,7 +72,7 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 					k++;
 				}
 				currentType=stats[(*anarace)->getPlayer()->getRace()][colors[i]].facilityType;
-																			    
+																				
 				for(int j=0;j<k+1;j++)
 				{
 					points1[j].x=10+(stringheight+j)*(position.width-20)/(boanzahl)+position.x-1;
@@ -97,7 +96,7 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 					3*(COLOR1R/2+BOcolor[stats[(*anarace)->getPlayer()->getRace()][colors[i-1]].facilityType].Red())/10,
 					3*(COLOR1G/2+BOcolor[stats[(*anarace)->getPlayer()->getRace()][colors[i-1]].facilityType].Green())/10,
 					3*(COLOR1B/2+BOcolor[stats[(*anarace)->getPlayer()->getRace()][colors[i-1]].facilityType].Blue())/10),1,SOLID);
-																			    
+																				
 					dc->SetPen(bla1);
 					dc->DrawSpline(k,points1);
 					for(int j=0;j<k;j++) points1[j].y-=2;
@@ -105,7 +104,7 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 					dc->DrawSpline(k,points1);
 					for(int j=0;j<k;j++) points1[j].y+=4;
 					dc->DrawSpline(k,points1);
-																			    
+																				
 					dc->SetPen(bla1);
 					dc->DrawSpline(k,points2);
 					for(int j=0;j<k;j++) points2[j].y-=2;
@@ -113,7 +112,7 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 					dc->DrawSpline(k,points2);
 					for(int j=0;j<k;j++) points2[j].y+=4;
 					dc->DrawSpline(k,points2);
-																			    
+																				
 					dc->SetPen(bla1);
 					dc->DrawSpline(k,points3);
 					for(int j=0;j<k;j++) points3[j].y-=2;
@@ -121,7 +120,7 @@ void Player::drawGeneString(DC* dc, const Rect position) const
 					dc->DrawSpline(k,points3);
 					for(int j=0;j<k;j++) points3[j].y+=4;
 					dc->DrawSpline(k,points3);
-																			    
+																				
 					dc->SetPen(bla1);
 					dc->DrawSpline(k,points4);
 					for(int j=0;j<k;j++) points4[j].y-=2;
@@ -191,7 +190,7 @@ void Player::InitPositions(UI_Window* parentWindow)
 
 	boDiagramWindowRect[2]=Rect(Point(FIRST_COLOUMN,125),Size(SECOND_COLOUMN,110));
 	boDiagramWindowMax[2]=boDiagramWindowRect[2];
-																			    
+																				
 	boGraphWindowRect[2]=Rect(FIRST_COLOUMN,240,SECOND_COLOUMN,40);
 	boGraphWindowMax[2]=Rect(boGraphWindowRect[2].GetPosition(),Size(boGraphWindowRect[2].GetWidth(),200));
 
@@ -208,7 +207,7 @@ void Player::InitPositions(UI_Window* parentWindow)
 
 	boDiagramWindowRect[3]=Rect(Point(FIRST_COLOUMN,445),Size(SECOND_COLOUMN,110));
 	boDiagramWindowMax[3]=boDiagramWindowRect[3];
-																			    
+																				
 	boGraphWindowRect[3]=Rect(FIRST_COLOUMN,555,SECOND_COLOUMN,40);
 	boGraphWindowMax[3]=Rect(boGraphWindowRect[3].GetPosition(),Size(boGraphWindowRect[3].GetWidth(),200));
 
@@ -217,10 +216,10 @@ void Player::InitPositions(UI_Window* parentWindow)
 // 2 Player: 1st player [GOSU], the human - freestyle
 	boWindowRect[4]=Rect(Point(mainWindow->getClientRectWidth()-THIRD_COLOUMN,0),Size(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
 	boWindowMax[4]=Rect(boWindowRect[4].GetPosition(),Size(boWindowRect[4].GetWidth(),mainWindow->getClientRectHeight()*2/3));
-																			    
+																				
 	forceWindowRect[4]=Rect(0,SECOND_ROW,FIRST_COLOUMN,14*(FONT_SIZE+5));
 	forceWindowMax[4]=Rect(forceWindowRect[4].GetPosition(),Size(FIRST_COLOUMN,mainWindow->getClientRectHeight()/3-5));
-																			    
+																				
 	timerWindowRect[4]=Rect(Point(mainWindow->getClientRectWidth()-3*THIRD_COLOUMN,0),Size(THIRD_COLOUMN,120));
 	timerWindowMax[4]=timerWindowRect[4];
 
@@ -229,7 +228,7 @@ void Player::InitPositions(UI_Window* parentWindow)
 
 	boDiagramWindowRect[4]=Rect(Point(0,2*mainWindow->getClientRectHeight()/3+5),Size(SECOND_COLOUMN,110));
 	boDiagramWindowMax[4]=boDiagramWindowRect[4];
-																			    
+																				
 	boGraphWindowRect[4]=Rect(0,2*mainWindow->getClientRectHeight()/3+115,SECOND_COLOUMN,40);
 	boGraphWindowMax[4]=Rect(boGraphWindowRect[4].GetPosition(),Size(boGraphWindowRect[4].GetWidth(),200));
 
@@ -238,16 +237,16 @@ void Player::InitPositions(UI_Window* parentWindow)
 // 2 Player: 2nd player [GOSU/TRANSCEND], the computer - freestyle
 	boWindowRect[5]=Rect(Point(mainWindow->getClientRectWidth()-2*THIRD_COLOUMN,0),Size(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
 	boWindowMax[5]=Rect(boWindowRect[5].GetPosition(),Size(boWindowRect[5].GetWidth(),mainWindow->getClientRectHeight()*2/3));
-																			    
+																				
 	forceWindowRect[5]=Rect(FIRST_COLOUMN,SECOND_ROW,FIRST_COLOUMN,14*(FONT_SIZE+5));
 	forceWindowMax[5]=Rect(forceWindowRect[5].GetPosition(),Size(FIRST_COLOUMN,mainWindow->getClientRectHeight()/3-5));
-																			    
+																				
 	timerWindowRect[5]=Rect(Point(mainWindow->getClientRectWidth()-4*THIRD_COLOUMN,0),Size(THIRD_COLOUMN,120));
 	timerWindowMax[5]=timerWindowRect[5];
 
 	boDiagramWindowRect[5]=Rect(Point(SECOND_COLOUMN,2*mainWindow->getClientRectHeight()/3+5),Size(SECOND_COLOUMN,110));
 	boDiagramWindowMax[5]=boDiagramWindowRect[5];
-																			    
+																				
 	boGraphWindowRect[5]=Rect(SECOND_COLOUMN,2*mainWindow->getClientRectHeight()/3+115,SECOND_COLOUMN,40);
 	boGraphWindowMax[5]=Rect(boGraphWindowRect[5].GetPosition(),Size(boGraphWindowRect[5].GetWidth(),200));
 
@@ -256,16 +255,16 @@ void Player::InitPositions(UI_Window* parentWindow)
 // 2 Player: 1st player [TRANSCEND], the computer - freestyle
 	boWindowRect[6]=Rect(Point(mainWindow->getClientRectWidth()-THIRD_COLOUMN,0),Size(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
 	boWindowMax[6]=Rect(boWindowRect[6].GetPosition(),Size(boWindowRect[6].GetWidth(),mainWindow->getClientRectHeight()*2/3));
-																			    
+																				
 	forceWindowRect[6]=Rect(0,SECOND_ROW,FIRST_COLOUMN,14*(FONT_SIZE+5));
 	forceWindowMax[6]=Rect(forceWindowRect[6].GetPosition(),Size(FIRST_COLOUMN,mainWindow->getClientRectHeight()/3-5));
-																			    
+																				
 	timerWindowRect[6]=Rect(Point(mainWindow->getClientRectWidth()-3*THIRD_COLOUMN,0),Size(THIRD_COLOUMN,120));
 	timerWindowMax[6]=timerWindowRect[6];
 
 	boDiagramWindowRect[6]=Rect(Point(0,2*mainWindow->getClientRectHeight()/3+5),Size(SECOND_COLOUMN,110));
 	boDiagramWindowMax[6]=boDiagramWindowRect[6];
-																			    
+																				
 	boGraphWindowRect[6]=Rect(0,2*mainWindow->getClientRectHeight()/3+115,SECOND_COLOUMN,40);
 	boGraphWindowMax[6]=Rect(boGraphWindowRect[6].GetPosition(),Size(boGraphWindowRect[6].GetWidth(),200));
 
@@ -292,7 +291,7 @@ void Player::InitPositions(UI_Window* parentWindow)
 	}
 };
 #endif 
-																			    
+																				
 
 void Player::draw(DC* dc) const
 {
@@ -301,48 +300,32 @@ void Player::draw(DC* dc) const
 	UI_Object::draw(dc);
 };
 
-void Player::setWindowTitles(ePlayerMode mode)
+void Player::setMode(const eTab tab, const int playerNum)//, int player1, int player2)
 {
+	this->mode=tab*2+playerNum-2;
 	for(int i=BUILD_ORDER_WINDOW;i<=INFO_WINDOW;i++)
-		window[(eWindow)i]->setTitleParameter(*theme.lookUpString((eString)(mode+HIDE_MODE_STRING)));
-};
-
-
-void Player::setMode(ePlayerMode mode)//, int player1, int player2)
-{
-	this->mode=mode;
-	setWindowTitles(mode);
-#if 0
-	// hide: 0
-	// basic mode [PLAYER]: 1     // 1 - 2 player trying to reach the goal
-	// advanced mode [PLAYER]: 2  // 1 - 2 player trying to reach the goal
-	// expert mode [PLAYER]: 3    // 2 - 4 player, 1-2 'human', 1-3 computers trying to stop him
-	// expert mode [COMPUTER]: 4 
-	// gosu mode [PLAYER]: 5      // freeplay for 1-2 human vs 1-2 computers
-	// gosu mode [COMPUTER]: 6  
-	// transcendend mode [COMPUTER]: 7 // freeplay for 1-2 computers vs 1-2 computers
-
-//TODO check ob wir den Type nicht schon vorliegen haben
-	if(type)
+		window[(eWindow)i]->setTitleParameter(*theme.lookUpString((eString)(tab+HIDE_MODE_STRING)));
+	switch(mode)
 	{
-		shown=1;
-// erstmal nur 1vs1 max
-	int show[9][8]={
-		{0,0,0,0,0,0,0,0},
-		{1,1,0,0,0,1,0,0}, // basic, goal based
-		{1,1,0,1,1,1,1,0}, // advanced functions, goal based
-		{1,1,1,1,1,1,0,0},{1,2,1,1,1,2,0,1}, // 1 human vs 1 comp - goal based
-		{1,2,1,1,1,2,0,2},{1,2,1,1,1,2,0,2}, // 1 human vs 1 comp free GOSU
-		{1,2,1,1,1,2,0,2},{1,2,1,1,1,2,0,2}}; // 1 comp vs 1 comp free TRANSCEND
-
-	} else 
-	{
-		shown=0; //?
-//		(*anarace)->setActive(1);
-	}
-
-//	(*anarace)->setActive(1);
-#endif
+		case 0:this->Show();(*anarace)->setActive(1);break; // first player
+		case 1:this->Hide();(*anarace)->setActive(0);break; // second player
+		case 2:this->Show();(*anarace)->setActive(1);break; // first player
+		case 3:this->Hide();(*anarace)->setActive(0);break; // second player
+		case 4:this->Show();(*anarace)->setActive(1);break; // first player
+		case 5:this->Show();(*anarace)->setActive(1);break; // second player
+		case 6:this->Show();(*anarace)->setActive(1);break; // first player
+		case 7:this->Show();(*anarace)->setActive(1);break; // second player
+		case 8:this->Show();(*anarace)->setActive(1);break; // first player
+		case 9:this->Show();(*anarace)->setActive(1);break; // second player
+		case 10:this->Hide();(*anarace)->setActive(0);break; // first player
+		case 11:this->Hide();(*anarace)->setActive(0);break; // second player
+		case 12:this->Hide();(*anarace)->setActive(0);break; // first player
+		case 13:this->Hide();(*anarace)->setActive(0);break; // second player
+		case 14:this->Show();(*anarace)->setActive(1);break; // first player
+		case 15:this->Hide();(*anarace)->setActive(0);break; // second player
+		default:break;
+	};
+	// TODO modes der einzelnen Windows (z.B> timer oder force)
 };
 
 void Player::process()
@@ -353,7 +336,7 @@ void Player::process()
 //	if(window[FORCE_WINDOW]->isShown())
 //	{
 //		window[BO_GRAPH_WINDOW]->setMarkedUnit(window[FORCE_WINDOW]->getMarkedUnit());
-//	    window[BUILD_ORDER_WINDOW]->setMarkedUnit(window[FORCE_WINDOW]->getMarkedUnit());
+//		window[BUILD_ORDER_WINDOW]->setMarkedUnit(window[FORCE_WINDOW]->getMarkedUnit());
 //	}
 // ------ END COMMUNICATION BETWEEN THE WINDOWS ------
 
@@ -365,16 +348,16 @@ void Player::process()
 
 const bool Player::getChangedFlag() const
 {
-    for(int i=BUILD_ORDER_WINDOW;i<MAX_WINDOWS;i++)
+	for(int i=BUILD_ORDER_WINDOW;i<MAX_WINDOWS;i++)
 		if(window[(eWindow)i]->getChangedFlag())
 			return(1);
 	return(0);
 };
 
-void Player::updateRectangles()
+void Player::updateRectangles(const int maxPlayer)
 {
-    for(int i=BUILD_ORDER_WINDOW;i<MAX_WINDOWS;i++)
-        window[(eWindow)i]->updateRectangles();
+	for(int i=BUILD_ORDER_WINDOW;i<MAX_WINDOWS;i++)
+		window[(eWindow)i]->updateRectangles(maxPlayer);
 };
 
 const bool Player::isOptimizing() const
@@ -396,42 +379,52 @@ void Player::changeAccepted()
 };
 
 
-/*void Player::resetData()
+void Player::resetData()
 {
-	window[BUILD_ORDER_WINDOW]->resetData();
-	window[FORCE_WINDOW]->resetData();
-	window[BO_GRAPH_WINDOW]->resetData();
-	window[STATISTICS_WINDOW]->resetData();
-	window[BO_DIAGRAM_WINDOW]->resetData();
-	window[TIMER_WINDOW]->resetData();
-	window[INFO_WINDOW]->resetData();
-	geneAnimation=0;
-	shown=0;
-	orderList.Clear();  TODO
-};*/
+	/*(*BoWindow)window[BUILD_ORDER_WINDOW]->resetData();
+	(*ForceWindow)window[FORCE_WINDOW]->resetData();
+	(*BoGraphWindow)window[BO_GRAPH_WINDOW]->resetData();
+	(*StatisticsWindow)window[STATISTICS_WINDOW]->resetData();
+	(*BoDiagramWindow)window[BO_DIAGRAM_WINDOW]->resetData();
+	(*TimerWindow)window[TIMER_WINDOW]->resetData();
+	(*InfoWindow)window[INFO_WINDOW]->resetData();*/
+//	geneAnimation=0;
+//	shown=0;
+	orderList.clear();
+};
+
+void Player::checkForChange()
+{
+	if(window[FORCE_WINDOW]->getChangedFlag())
+	{
+		resetData();
+		(*anarace)->resetData();
+		(*(*anarace)->getCurrentGoal())->adjustGoals(1);
+		window[FORCE_WINDOW]->changeAccepted();
+	};
+};
 
 void Player::CheckOrders()
 {
 	int k=0;
 																			   
 	for(int s=MAX_LENGTH;s--;)
-// /home/clawg/work/sc1041/sc/exe/../scc2/scc2.cpp:843: undefined reference to `ANARACE::getProgramIsBuilt(int)' <- WTF? nur bei exe...
-		if((*anarace)->getProgramIsBuilt2(s)/*&&(anarace->getProgramTime(s)<=ga->maxTime-anarace->getTimer())*/)
+		if((*anarace)->getProgramIsBuilt(s)&&((*anarace)->getProgramTime(s)<=(*anarace)->ga->maxTime-(*anarace)->getTimer()))
 		{
 			map<long, Order>::iterator order=orderList.find((*anarace)->getMarker(s)) ;// => found old one -> update the data!
 			if(order!=orderList.end())
 			{
-				order->second.row=k+1;//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace())); TODO
-				Rect t=Rect(0,order->second.row*(FONT_SIZE+5),500-8,FONT_SIZE+4);
+				order->second.setRow(k+1);//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace())); TODO
+				Rect t=Rect(0,order->second.getRow()*(FONT_SIZE+5),500-8,FONT_SIZE+4);
 				if(order->second.target!=t)
 					order->second.start=order->second.rect;
 				order->second.target=t;
 				order->second.blendTarget=50;
 				order->second.blendStart=order->second.blend;
-				order->second.unit=(*anarace)->getPhaenoCode(s);
-				order->second.IP=s;
-				order->second.checked=1;
-				order->second.bonew=0;
+				order->second.setUnit((*anarace)->getPhaenoCode(s));
+				order->second.setIP(s);
+				order->second.checked=true;
+				order->second.bonew=false;
 			} // => aktualisieren
 			else
 			// => neues erstellen
@@ -441,24 +434,24 @@ void Player::CheckOrders()
 				map<long, Order>::iterator order=orderList.begin();
 				while((!found) && (order!=orderList.end()))
 				{
-					if((order->second.unit!=(*anarace)->getPhaenoCode(s))||(order->second.row!=k+1)||(order->second.target.x>0))
+					if((order->second.getUnit()!=(*anarace)->getPhaenoCode(s))||(order->second.getRow()!=k+1)||(order->second.target.x>0))
 						order++;
 					else //=> ueberschreiben
 					{
 						found=true;
 						Order neuorder;
-	                    neuorder.row=k+1;//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace())); TODO
-                    	Rect t=Rect(0,order->second.row*(FONT_SIZE+5),500-8,FONT_SIZE+4);
-                	    if(order->second.target!=t)
-            	            neuorder.start=order->second.rect;
-        	            else neuorder.start=order->second.start;
-    	                neuorder.target=t;
-	                    neuorder.blendTarget=50;
-                    	neuorder.blendStart=order->second.blend;
-                	    neuorder.unit=(*anarace)->getPhaenoCode(s);
-            	        neuorder.marker=order->second.marker;
-        	            neuorder.checked=1;
-    	                neuorder.bonew=1;
+						neuorder.setRow(k+1);//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace())); TODO
+						Rect t=Rect(0,order->second.getRow()*(FONT_SIZE+5),500-8,FONT_SIZE+4);
+						if(order->second.target!=t)
+							neuorder.start=order->second.rect;
+						else neuorder.start=order->second.start;
+						neuorder.target=t;
+						neuorder.blendTarget=50;
+						neuorder.blendStart=order->second.blend;
+						neuorder.setUnit((*anarace)->getPhaenoCode(s));
+						neuorder.marker=order->second.marker;
+						neuorder.checked=true;
+						neuorder.bonew=true;
 						orderList.insert(pair<long, Order>((*anarace)->getMarker(s), neuorder));
 						map<long, Order>::iterator temp=order;
 						temp++;										
@@ -469,17 +462,17 @@ void Player::CheckOrders()
 				if(!found) // neues erstellen!
 				{
 					Order neuorder;
-					neuorder.row=k+1;//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace()));
-					neuorder.rect=Rect(170,neuorder.row*(FONT_SIZE+5),0,FONT_SIZE+4);
-					Rect t=Rect(0,neuorder.row*(FONT_SIZE+5),500-8,FONT_SIZE+4);
+					neuorder.setRow(k+1);//+((orderList.getMakeSpace()>-1)*(k+1>=orderList.getMakeSpace()));
+					neuorder.rect=Rect(170,neuorder.getRow()*(FONT_SIZE+5),0,FONT_SIZE+4);
+					Rect t=Rect(0,neuorder.getRow()*(FONT_SIZE+5),500-8,FONT_SIZE+4);
 					neuorder.start=neuorder.rect;
 					neuorder.target=t;
 					neuorder.blend=1;neuorder.blendTarget=50;
 					neuorder.blendStart=neuorder.blend;
-					neuorder.bonew=1;
-					neuorder.unit=(*anarace)->getPhaenoCode(s);
-					neuorder.IP=s;
-					neuorder.checked=1;
+					neuorder.bonew=true;
+					neuorder.setUnit((*anarace)->getPhaenoCode(s));
+					neuorder.setIP(s);
+					neuorder.checked=true;
 					orderList.insert(pair<long, Order>((*anarace)->getMarker(s), neuorder));
 				}
 			}
@@ -487,7 +480,7 @@ void Player::CheckOrders()
 		}
 
 		map<long, Order>::iterator order=orderList.begin();
-	    while(order!=orderList.end())
+		while(order!=orderList.end())
 		{
 			if(!order->second.checked)
 			{
@@ -498,7 +491,7 @@ void Player::CheckOrders()
 			}
 			else
 			{
-				order->second.checked=0;
+				order->second.checked=false;
 				order++;
 			}
 		};
@@ -506,13 +499,13 @@ void Player::CheckOrders()
 
 void Player::MoveOrders() 
 {
-    for(map<long, Order>::iterator order=orderList.begin(); order!=orderList.end(); ++order)
+	for(map<long, Order>::iterator order=orderList.begin(); order!=orderList.end(); ++order)
 	{
 //		TODO!
-		order->second.rect=order->second.target;
+/*		order->second.rect=order->second.target;
 		order->second.brect=order->second.btarget;
-		order->second.blend=order->second.blendTarget;
-/*		move(order->second.rect.x,order->second.start.x,order->second.target.x);
+		order->second.blend=order->second.blendTarget;*/
+		move(order->second.rect.x,order->second.start.x,order->second.target.x);
 		move(order->second.rect.y,order->second.start.y,order->second.target.y);
 		move(order->second.rect.width,order->second.start.width,order->second.target.width);
 		move(order->second.rect.height,order->second.start.height,order->second.target.height);
@@ -522,7 +515,7 @@ void Player::MoveOrders()
 		move(order->second.brect.width,order->second.bstart.width,order->second.btarget.width);
 		move(order->second.brect.height,order->second.bstart.height,order->second.btarget.height);
 
-		move(order->second.blend, order->second.blendStart, order->second.blendTarget);*/
+		move(order->second.blend, order->second.blendStart, order->second.blendTarget);
 	}
 };
 

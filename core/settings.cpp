@@ -1,5 +1,12 @@
 #include "settings.hpp"
 
+void toLog(const string& msg)
+{
+	ofstream pFile("error.log", ios_base::app);
+	pFile << msg.c_str() << endl;
+};
+
+
 SETTINGS::SETTINGS()
 {
 	srand(time(NULL));
@@ -63,11 +70,6 @@ void EXPORT SETTINGS::checkForChange() const
 // ------ PARSING TOOLS AND ERROR LOGS ------
 // ------------------------------------------
 
-void toLog(const string& msg)
-{
-	ofstream pFile("error.log", ios_base::app);
-	pFile << msg.c_str() << endl;
-};
 
 void parse_line(string& text, list<string>& words)
 {

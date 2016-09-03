@@ -100,7 +100,6 @@ EXPORT class ANARACE: public PRERACE
 		const int getStatisticsHaveGas(const int time) const;		// gas at that time
 
 		const bool getProgramIsBuilt(const int IP) const;		// was this order successfully built?
-		const bool getProgramIsBuilt2(const int IP) const; //hack wegen exe o_O TODO
 
 		const int getProgramTime(const int IP) const;			// at which time this order was started
 		const int getProgramLocation(const int IP) const;		// at which location was this unit built
@@ -150,9 +149,9 @@ EXPORT class ANARACE: public PRERACE
 		void setProgramTotalCount(const int IP, const int unit, const int count);	
 		void setProgramAvailibleCount(const int IP, const int unit, const int count);
 
-
 		const bool calculateStep();			// calculates another time step of current generation
 		void resetData();				// resets all data to standard values
+		void newRun();				// resets all data to standard values
 //		void analyzeBuildOrder();		// sets the isGoal of program
 // Constructor
 		ANARACE();

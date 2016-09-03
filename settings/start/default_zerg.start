@@ -10,8 +10,8 @@
     "Time" = "0"
 @END
 
-# location forces...
-@LOCATION "1"
+# location forces... 2 = LOCATION MAIN
+@LOCATION "2"
 		"Hatchery" = "1"
 		"Drone" = "4"
 		"Overlord" = "1"

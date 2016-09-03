@@ -26,7 +26,7 @@ void UI_Radio::forceTabPressed(const int tab)
 {
     UI_Button* tmp=(UI_Button*)getChildren();
 	if(!tmp) return;
-    int i=0;
+    int i=1;
     do
     {
 		if(i==tab)
@@ -118,15 +118,8 @@ void UI_Button::setFrameNumber(const int num)
 UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eString normalText, eString pressedText, eButton button, eTextMode textMode, eButtonMode buttonMode, ePositionMode mode, eFont font, eAutoSize autoSize):UI_Object(parent, rect, maxRect)
 {
 	hasBitmap=false;
+	resetData();
 	
-	statusFlags=0;
-	firstPressed=false;
-	hasToolTip=false;
-	frameNumber=0;
-	timeStamp=0;
-	forcedPress=false;
-//	gradient=100;
-
 	switch(buttonMode)
 	{
 		case NO_BUTTON_MODE:statusFlags |= BF_NOT_CLICKABLE;break;
@@ -137,7 +130,7 @@ UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eString normalT
 		default:break;
 	}; 
 						   
-	this->currentSize=rect;
+	this->buttonPlacementArea=rect;
 	this->autoSize=autoSize;
 	this->mode=mode;
 	this->button=button;
@@ -145,22 +138,19 @@ UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eString normalT
 	this->normalText=new UI_StaticText(this, normalText, Rect(0,0,0,0), textMode, theme.lookUpButtonAnimation(button)->startTextColor[PRESSED_BUTTON_PHASE], font);
 	this->pressedText=new UI_StaticText(this, pressedText, Rect(0,0,0,0), textMode, theme.lookUpButtonAnimation(button)->startTextColor[PRESSED_BUTTON_PHASE], font);
 
+	adjustButtonSize(this->normalText->getSize());
+	this->startRect=getRelativeRect();
+	this->targetRect=getRelativeRect();
+	this->lastItemY=getHeight();
+
 //	for(int i=DISABLED_BUTTON_PHASE;i<MAX_BUTTON_ANIMATION_PHASES;i++)
 //		text[i]=new UI_StaticText(this, normalText, Rect(0,0,0,0), HORIZONTALLY_CENTERED_TEXT_MODE, theme.lookUpButtonAnimation(button)->startTextColor[i], font
-	adjustButtonSize(this->normalText->getSize());
 };
 
 UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, string normalText, string pressedText, eButton button, eTextMode textMode, eButtonMode buttonMode, ePositionMode mode, eFont font, eAutoSize autoSize):UI_Object(parent, rect, maxRect)
 {
 	hasBitmap=false;
-	
-	statusFlags=0;
-	firstPressed=false;
-	hasToolTip=false;
-	frameNumber=0;
-	timeStamp=0;
-    forcedPress=false;     
-//	gradient=100;
+	resetData();
 	
 	switch(buttonMode)
 	{
@@ -172,7 +162,7 @@ UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, string normalTe
 		default:break;
 	}; 
 						   
-	this->currentSize=rect;
+	this->buttonPlacementArea=rect;
 	this->autoSize=autoSize;
 	this->mode=mode;
 	this->button=button;
@@ -180,23 +170,22 @@ UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, string normalTe
 	this->normalText=new UI_StaticText(this, normalText, Rect(0,0,0,0), textMode, theme.lookUpButtonAnimation(button)->startTextColor[PRESSED_BUTTON_PHASE], font);
 	this->pressedText=new UI_StaticText(this, pressedText, Rect(0,0,0,0), textMode, theme.lookUpButtonAnimation(button)->startTextColor[PRESSED_BUTTON_PHASE], font);
 
+	adjustButtonSize(this->normalText->getSize());
+	this->startRect=getRelativeRect();
+	this->targetRect=getRelativeRect();
+	this->lastItemY=getHeight();
+
 //	for(int i=DISABLED_BUTTON_PHASE;i<MAX_BUTTON_ANIMATION_PHASES;i++)
 //		text[i]=new UI_StaticText(this, normalText, Rect(0,0,0,0), HORIZONTALLY_CENTERED_TEXT_MODE, font, theme.lookUpButtonAnimation(button)->startTextColor[i]);
-	adjustButtonSize(this->normalText->getSize());
 };
 
 // -> bitmap button!
 UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eButton button, eButtonMode buttonMode, ePositionMode mode):UI_Object(parent, rect, maxRect)
 {
 	hasBitmap=true;
+	setDoAdjustments(false);
+	resetData();
 	
-	statusFlags=0;
-	firstPressed=false;
-	hasToolTip=false;
-	frameNumber=0;
-	timeStamp=0;
-    forcedPress=false;     
-//	gradient=100;
 	switch(buttonMode)
 	{
         case NO_BUTTON_MODE:statusFlags |= BF_NOT_CLICKABLE;break;
@@ -207,7 +196,7 @@ UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eButton button,
 		default:break;
 	}; 
 						   
-	this->currentSize=rect;
+	this->buttonPlacementArea=rect;
 	this->autoSize=NO_AUTO_SIZE;
 	this->mode=mode;
 	this->button=button;
@@ -224,6 +213,16 @@ UI_Button::~UI_Button()
 		delete pressedText;
 };
 
+void UI_Button::resetData()
+{
+	statusFlags=0;
+	firstPressed=false;
+	frameNumber=0;
+	timeStamp=0;
+	forcedPress=false;
+};
+
+
 void UI_Button::setButton(const eButton button)
 {
 	this->button=button;
@@ -231,50 +230,60 @@ void UI_Button::setButton(const eButton button)
 
 void UI_Button::adjustButtonSize(const Size size)
 {
-   	currentSize.SetSize(size+Size(5,0));
+   	setSize(size+Size(5,0));
 
 	switch(autoSize)
 	{
-		case NO_AUTO_SIZE:currentSize.SetSize(getSize());break;
+		case NO_AUTO_SIZE:setSize(buttonPlacementArea.GetSize());break;
 		case AUTO_SIZE:break;
-		case AUTO_HEIGHT_FULL_WIDTH:currentSize.SetWidth(getWidth()-5);break;
-		case CONSTANT_SIZE:currentSize.SetWidth(120);break;// ~~ nur fuer tabs naja
+		case AUTO_HEIGHT_FULL_WIDTH:setWidth(buttonPlacementArea.GetWidth()-5);break;
+		case CONSTANT_SIZE:setWidth(120);break;// ~~ nur fuer tabs naja
 	};
 
-	currentSize.SetPosition(getRelativePosition());
+	setPosition(buttonPlacementArea.GetPosition());
+	
+//	targetRect.SetPosition(buttonPlacementArea.GetPosition());
+	//startRect.SetPosition(buttonPlacementArea.GetPosition());
+
+	//relativeRect ok... aber was ist mit startRect, targetRect etc??
 
 	switch(mode)
 	{
 		case DO_NOT_ADJUST:break;
-		case TOTAL_CENTERED:currentSize.SetPosition(getRelativePosition()+Point((getWidth() - currentSize.GetWidth())/2, (getHeight() + currentSize.GetHeight())/2));break;
-		case HORIZONTAL_CENTERED:currentSize.SetLeft(getRelativeUpperBound()+(getWidth() - currentSize.GetWidth())/2);break;
-		case VERTICALLY_CENTERED:currentSize.SetTop(getRelativeUpperBound()+(getHeight() - currentSize.GetHeight())/2);break;
+		case TOTAL_CENTERED:setPosition(buttonPlacementArea.GetPosition()+Point((buttonPlacementArea.GetWidth() - getWidth())/2, (buttonPlacementArea.GetHeight() + getHeight())/2));break;
+		case HORIZONTAL_CENTERED:setLeft(buttonPlacementArea.GetTop()+(buttonPlacementArea.GetWidth() - getWidth())/2);break;
+		case VERTICALLY_CENTERED:setTop(buttonPlacementArea.GetTop()+(buttonPlacementArea.GetHeight() - getHeight())/2);break;
 		case TOP_LEFT:break;
-		case TOP_CENTER:currentSize.SetPosition(getRelativePosition()+Point((getWidth() + currentSize.GetWidth())/2, 
+		case TOP_CENTER:setPosition(buttonPlacementArea.GetPosition()+Point((buttonPlacementArea.GetWidth() + getWidth())/2, 
 																				0));break;
-		case TOP_RIGHT:currentSize.SetPosition(getRelativePosition()+Point(getWidth() - currentSize.GetWidth(), 
+		case TOP_RIGHT:setPosition(buttonPlacementArea.GetPosition()+Point(buttonPlacementArea.GetWidth() - getWidth(), 
 								   												0));break;
-		case CENTER_RIGHT:currentSize.SetPosition(getRelativePosition()+Point(getWidth() - currentSize.GetWidth(), 
-									  											(getHeight() + currentSize.GetHeight())/2));break;
-		case BOTTOM_RIGHT:currentSize.SetPosition(getRelativePosition()+Point(getWidth() - currentSize.GetWidth(), 
-									  											getHeight() - currentSize.GetHeight()));break;
-		case BOTTOM_CENTER:currentSize.SetPosition(getRelativePosition()+Point((getWidth() - currentSize.GetWidth())/2, 
-									   											getHeight() - 2*currentSize.GetHeight()));break;
-		case BOTTOM_LEFT:currentSize.SetPosition(getRelativePosition()+Point(0, 
-									 											getHeight() - currentSize.GetHeight()));break;
-		case CENTER_LEFT:currentSize.SetPosition(getRelativePosition()+Point(0, 
-									 											(getHeight() + currentSize.GetHeight())/2));break;
+		case CENTER_RIGHT:setPosition(buttonPlacementArea.GetPosition()+Point(buttonPlacementArea.GetWidth() - getWidth(), 
+									  											(buttonPlacementArea.GetHeight() + getHeight())/2));break;
+		case BOTTOM_RIGHT:setPosition(buttonPlacementArea.GetPosition()+Point(buttonPlacementArea.GetWidth() - getWidth(), 
+									  											buttonPlacementArea.GetHeight() - getHeight()));break;
+		case BOTTOM_CENTER:setPosition(buttonPlacementArea.GetPosition()+Point((buttonPlacementArea.GetWidth() - getWidth())/2, 
+									   											buttonPlacementArea.GetHeight() - 2*getHeight()));break;
+		case BOTTOM_LEFT:setPosition(buttonPlacementArea.GetPosition()+Point(0, 
+									 											buttonPlacementArea.GetHeight() - getHeight()));break;
+		case CENTER_LEFT:setPosition(buttonPlacementArea.GetPosition()+Point(0, 
+									 											(buttonPlacementArea.GetHeight() + getHeight())/2));break;
 
 		case ARRANGE_TOP:
 						 {
-							 currentSize.SetPosition(getRelativePosition()+Point(getParent()->min_top_x, 0));
-							 getParent()->min_top_x += currentSize.GetWidth() + MIN_DISTANCE;
+							 setPosition(buttonPlacementArea.GetPosition()+Point(getParent()->min_top_x, 0));
+							 getParent()->min_top_x += getWidth() + MIN_DISTANCE;
 						 };break;
-		case ARRANGE_BOTTOM:currentSize.SetPosition(getRelativePosition()+Point(getParent()->min_bottom_x, getHeight() - currentSize.GetHeight()));getParent()->min_bottom_x+=currentSize.GetWidth()+MIN_DISTANCE;break;
-		case ARRANGE_LEFT:currentSize.SetPosition(getRelativePosition()+Point(0, getParent()->min_left_y));getParent()->min_left_y+=currentSize.GetHeight()+MIN_DISTANCE;break;
-		case ARRANGE_RIGHT:currentSize.SetPosition(getRelativePosition()+Point(getWidth() - currentSize.GetWidth(), getParent()->min_right_y));getParent()->min_right_y+=currentSize.GetHeight()+MIN_DISTANCE;break;
+		case ARRANGE_BOTTOM:setPosition(buttonPlacementArea.GetPosition()+Point(getParent()->min_bottom_x, buttonPlacementArea.GetHeight() - getHeight()));
+							getParent()->min_bottom_x+=getWidth()+MIN_DISTANCE;
+							break;
+		case ARRANGE_LEFT:setPosition(buttonPlacementArea.GetPosition()+Point(0, getParent()->min_left_y));
+						  getParent()->min_left_y+=getHeight()+MIN_DISTANCE;
+						  break;
+		case ARRANGE_RIGHT:setPosition(buttonPlacementArea.GetPosition()+Point(buttonPlacementArea.GetWidth() - getWidth(), getParent()->min_right_y));
+						   getParent()->min_right_y+=getHeight()+MIN_DISTANCE;
+						   break;
 	};
-
 };
 
 void UI_Button::updatePressedText(const string utext)
@@ -307,7 +316,7 @@ void UI_Button::draw(DC* dc) const
 			animation_phase=PRESSED_HIGHLIGHTED_BUTTON_PHASE;
 		else
 		animation_phase=PRESSED_BUTTON_PHASE;
-//		currentSize.SetPosition(currentSize.GetPosition()+m);
+//		setPosition(getPosition()+m);
 	}
 	else
 	if(statusFlags & BF_HIGHLIGHTED)
@@ -319,14 +328,19 @@ void UI_Button::draw(DC* dc) const
 	{
 		dc->SetBrush(*theme.lookUpBrush(NULL_BRUSH));
 		dc->SetPen(*theme.lookUpPen(DARK_BACKGROUND_PEN));
-		dc->DrawRectangle(Rect(getAbsolutePosition()-Point(1,1)-m, currentSize.GetSize()+Size(2,2)));
+		dc->DrawRectangle(Rect(getAbsolutePosition()-Point(1,1)-m, getSize() + Size(2,2)));
 
 //		dc->SetBrush(*theme.lookUpBrush(NULL_BRUSH)); //?
 //		dc->SetPen(*theme.lookUpPen(RECTANGLE_PEN));
-//		dc->DrawRoundedRectangle(Rect(getAbsolutePosition(), currentSize.GetSize()), 2);
+//		dc->DrawRoundedRectangle(Rect(getAbsolutePosition(), getSize()), 2);
 	}
 
 	int gradient=100;
+
+	// TODO evtl Animation fuer jede Phase in die config datei
+	// dann waere sowas moeglich, dass ich maus reinfahr und das langsam verblasst
+	// evtl auch einfach brightencolor ueberlegen...
+	
 	switch(theme.lookUpButtonAnimation(button)->type)
 	{
     	case NO_ANIMATION:if(gradient<100) gradient++;else gradient=100;break;
@@ -354,20 +368,20 @@ void UI_Button::draw(DC* dc) const
 		else 
 			normalText->setColor(dc->mixColor(theme.lookUpColor(theme.lookUpButtonAnimation(button)->startTextColor[animation_phase]), theme.lookUpColor( theme.lookUpButtonAnimation(button)->endTextColor[animation_phase]), gradient));
 	// TODO TAB-BUTTON MODE
-		dc->DrawRoundedRectangle(Rect(getAbsolutePosition(), currentSize.GetSize()), 2);
+		dc->DrawRoundedRectangle(Rect(getAbsolutePosition(), getSize()), 2);
 	}
 	else 
 	{
 		dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
-		dc->DrawRectangle(Rect(getAbsolutePosition()-Point(1,1),currentSize.GetSize()+Size(2,2))); // kasterl ums bitmap
+		dc->DrawRectangle(Rect(getAbsolutePosition()-Point(1,1),getSize()+Size(2,2))); // kasterl ums bitmap
 		dc->DrawBitmap(*theme.lookUpBitmap(theme.lookUpButtonAnimation(button)->bitmap[animation_phase]), getAbsolutePosition());
 	}
 	
 /*	if((animation_phase==PRESSED_BUTTON_PHASE)||(animation_phase==PRESSED_HIGHLIGHTED_BUTTON_PHASE))
 	{
 		dc->SetPen(Pen(*(theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)->GetColor()),1,SOLID_PEN_STYLE));
-		dc->DrawLine(getAbsolutePosition() + Point(0, currentSize.GetHeight()-1), getAbsolutePosition() + Point(currentSize.GetWidth(), currentSize.GetHeight()-1));
-		dc->DrawLine(getAbsolutePosition() + Point(currentSize.GetWidth()-1, 0), getAbsolutePosition() + Point(currentSize.GetWidth()-1, currentSize.GetHeight()));
+		dc->DrawLine(getAbsolutePosition() + Point(0, getHeight()-1), getAbsolutePosition() + Point(getWidth(), getHeight()-1));
+		dc->DrawLine(getAbsolutePosition() + Point(getWidth()-1, 0), getAbsolutePosition() + Point(getWidth()-1, getHeight()));
 	} ??? */
 
 	UI_Object::draw(dc);	
@@ -431,11 +445,11 @@ void UI_Button::draw(DC* dc) const
         gr_reset_clip();
     }*/
 
-// if statusFlags & BF_HIGHLIGHTED 
-// maybeShowToolTip()
+//	if(statusFlags & BF_HIGHLIGHTED)
+//		maybeShowToolTip(dc);
 
 //	if(statusFlags & BF_DOWN)
-//		currentSize.SetPosition(currentSize.GetPosition()-m);
+//		setPosition(getPosition()-m);
 }
 
 
@@ -467,19 +481,23 @@ void UI_Button::frameReset()
 
 void UI_Button::process()
 {
-	if(!shown) //~~
-		return;
+//	if(!shown) //~~
+//		return;
 	// first check getChildren()
-	setAbsoluteCoord(currentSize.GetPosition() - getRelativePosition()); 
-	UI_Object::process();
 	
-	Rect r = Rect(getParent()->getAbsolutePosition() + currentSize.GetPosition(), currentSize.GetSize());	
+	Point absoluteCoord = getRelativePosition() - buttonPlacementArea.GetPosition();
+	
+	UI_Object::process();
+
+	buttonPlacementArea.SetPosition( getRelativePosition() - absoluteCoord );
+	
+	Rect r = getAbsoluteRect();
+	//Rect(getParent()->getAbsolutePosition() + getRelativePosition(), getSize());	
 	int condition;
 	if(statusFlags & BF_DOWN)
 		r.SetPosition(r.GetPosition()+Point(-1,-1));
 //	else 
 //		r.SetPosition(r.GetPosition()+Point(-1,-1));
-	r.SetSize(r.GetSize());
 	condition = controls.getPressConditionOf(r);
 
 	int old_status_flags = statusFlags;
@@ -502,7 +520,6 @@ void UI_Button::process()
 			statusFlags |= BF_HIGHLIGHTED;
 				// if(!(old_status_flags & BF_HIGHLIGHTED )) => callback!
 //				maybeShowCustomCursor(); TODO
-//				maybeShowToolTip(); TODO
 			if( statusFlags & BF_STATIC )
 			{
 				if(condition & LEFT_BUTTON_WAS_PRESSED_AND_RELEASED)
@@ -521,7 +538,6 @@ void UI_Button::process()
 			if(( condition & PRESSING_LEFT_BUTTON ) && (!(old_status_flags & BF_DOWN)))
 				statusFlags |= BF_JUST_PRESSED;
 		}
-
 		
 		if( !(statusFlags & BF_DOWN))
 		{
@@ -540,7 +556,7 @@ void UI_Button::process()
 				pressedText->Hide();
 				normalText->Show();
 				adjustButtonSize(normalText->getSize());
-				normalText->setSize(currentSize.GetSize());
+				normalText->setSize(getSize());
 			}
 		} else
 		{
@@ -549,7 +565,7 @@ void UI_Button::process()
 				pressedText->Show();
 				normalText->Hide();
 				adjustButtonSize(pressedText->getSize());
-				pressedText->setSize(currentSize.GetSize());
+				pressedText->setSize(getSize());
 			}
 
 		if( !(old_status_flags & BF_DOWN))
@@ -697,15 +713,7 @@ void UI_Button::restorePreviousCursor()
     //    gr_set_cursor_bitmap(previous_cursor_bmap, GR_CURSOR_UNLOCK);       // restore and unlock
       //  previous_cursor_bmap = -1;
     //}
-};
-
-
-void UI_Button::maybeShowToolTip()
-{
-};
-
-void UI_Button::hideToolTip()
-{
-};
+};*/
 #endif
+
 

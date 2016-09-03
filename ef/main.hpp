@@ -20,7 +20,7 @@ const float GUI_VERSION=0.50;
 class Main
 {
 	public:
-		Main() {};
+		Main() {gizmo=true;};
 		~Main() {};
 		void draw(DC* dc) const;
 		void process();
@@ -28,7 +28,6 @@ class Main
 		void resetData();
 		UI_Window* mainWindow;
 		MessageWindow* msgWindow;
-		UI_Window* haxor;
 		UI_Window* infoWindow;
 		TutorialWindow* tutorialWindow;
 		Player* player[MAX_PLAYER];
@@ -39,8 +38,10 @@ class Main
 		void Init(DC* dc);
 	private:
 		int oldrun,endrun;
+		bool gizmo;
 		const GA* ga;
 		void drawGizmo(DC* dc) const;
+		void helper(DC* dc, int i, int &dx, int &dy, const string& str) const;
 		ANARACE* anarace[MAX_PLAYER];
 		int update;
 		int refresh;

@@ -11,6 +11,16 @@ MainWindow::MainWindow():UI_Window( NULL, MAIN_WINDOW_TITLE_STRING, MAIN_WINDOW,
     tab[MAP_TAB] = new UI_Button(this, Rect(getRelativePosition()+Point(10,-41), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Point(10,-41), Size(getWidth()-20, 20)), MAP_TAB_STRING, MAP_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
     tab[SETTINGS_TAB] = new UI_Button(this, Rect(getRelativePosition()+Point(10,-41), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Point(10,-41), Size(getWidth()-20, 20)), SETTINGS_TAB_STRING, SETTINGS_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, ARRANGE_TOP, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
     tab[TUTORIAL_TAB] = new UI_Button(this, Rect(getRelativePosition()+Point(10,-41), Size(getWidth()-20, 20)), Rect(getRelativePosition()+Point(10,-41), Size(getWidth()-20, 20)), TUTORIAL_TAB_STRING, TUTORIAL_TAB_STRING, TAB_BUTTON, TOTAL_CENTERED_TEXT_MODE, TAB_BUTTON_MODE, TOP_RIGHT, MIDDLE_NORMAL_BOLD_FONT, CONSTANT_SIZE);
+
+	tab[BASIC_TAB]->updateToolTip("Simple interface and basic options");
+	tab[ADVANCED_TAB]->updateToolTip("All options are availible");
+	tab[EXPERT_TAB]->updateToolTip("The build order will be tested against rushes");
+	tab[GOSU_TAB]->updateToolTip("Play in realtime against the computer");
+	tab[TRANSCENDEND_TAB]->updateToolTip("Let two computers play against each other");
+	tab[MAP_TAB]->updateToolTip("Create and configure forces, goals and maps");
+	tab[SETTINGS_TAB]->updateToolTip("Simple interface and basic options");
+	tab[TUTORIAL_TAB]->updateToolTip("Well...");
+	
 	for(int i=BASIC_TAB;i<MAX_TABS;i++)
 		addTab(tab[i]);
     tab[BASIC_TAB]->forcePressed();
@@ -24,8 +34,7 @@ MainWindow::MainWindow():UI_Window( NULL, MAIN_WINDOW_TITLE_STRING, MAIN_WINDOW,
 MainWindow::~MainWindow()
 {
 	for(int i=BASIC_TAB;i<MAX_TABS;i++)
-		if(tab[i])
-			delete tab[i];
+		delete tab[i];
 };
 
 void MainWindow::process()

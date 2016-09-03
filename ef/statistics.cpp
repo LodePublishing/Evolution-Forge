@@ -12,7 +12,6 @@ StatisticsWindow::~StatisticsWindow()
 																				
 void StatisticsWindow::showGraph(DC* dc, const int* data, const int min, const int max, const Color col) const
 {
-	return;
 	int j,k;
 	dc->SetPen(Pen(col,1,SOLID_PEN_STYLE));
 	Point blub[200];
@@ -35,10 +34,8 @@ void StatisticsWindow::showGraph(DC* dc, const int* data, const int min, const i
 
 void StatisticsWindow::resetData()
 {
-//		dt1=DateTime::UNow();
-  //	  dt2=DateTime::UNow();
 	averagecounter=0;
-	for(int i=0;i<100;i++)
+	for(int i=100;i--;)
 		average[i]=0;
 																				
 	maxpFitness=100;
@@ -46,7 +43,7 @@ void StatisticsWindow::resetData()
 	maxtFitness=100;
 	maxHarvestedRessources=1000;
 	mintFitness=99999;
-	for(int i=0;i<200;i++)
+	for(int i=200;i--;)
 	{
 		pFitness[i]=0;
 		harvestedMinerals[i]=0;
@@ -59,7 +56,7 @@ void StatisticsWindow::resetData()
 		force[i]=5; //5 units at the beginning!
 	};
 																				
-	for(int i=0;i<20;i++)
+	for(int i=20;i--;)
 	{
 		oldForceCounter[i]=0;
 		oldForce[i]=0;
@@ -68,7 +65,6 @@ void StatisticsWindow::resetData()
 		oldMineralsCounter[i]=0;
 		oldMinerals[i]=0;
 	}
-																				
 };
 
 void StatisticsWindow::draw(DC* dc) const
@@ -81,10 +77,8 @@ void StatisticsWindow::draw(DC* dc) const
 	Point Legend3=Point(180,FONT_SIZE+4);
 																				
 	dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH)); // TODO
-			//Brush(dc->doColor(40,40,40),SOLID_BRUSH_STYLE));
 	dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN)); // TODO
-			//Pen(dc->doColor(80,80,80),1,SOLID_PEN_STYLE));
-																				
+	
 	dc->DrawRoundedRectangle(Legend2.x,Legend2.y,Legend3.x,Legend3.y,4);
 
 
@@ -109,7 +103,7 @@ void StatisticsWindow::draw(DC* dc) const
 																				
 	dc->DrawRoundedRectangle(Legend2.x,Legend2.y+12,Legend3.x,Legend3.y,4);
 	dc->SetTextForeground(*theme.lookUpColor(TIME_TEXT_COLOUR));
-	dc->DrawText(theme.lookUpFormattedString(TIME_STRING, time[199]/60, time[199]%60),Legend2.x,Legend2.y+12);
+	dc->DrawText(theme.lookUpFormattedString(TIME_STRING, time[199]/60, time[199]%60),Legend2.x, Legend2.y+12);
 //	addButton(Rect(Legend2.x, Legend2.y+12, Legend3.x, Legend3.y), "time of the best build order"); TODO
 	
 																				
@@ -122,7 +116,7 @@ void StatisticsWindow::draw(DC* dc) const
 		if(oldMineralsCounter[k]>0)
 		{
 //			dc->SetTextForeground(*theme.lookUpColor(WINDOW_TEXT_COLOUR));
-			dc->SetTextForeground(Color(dc->GetSurface(), 40,100-oldMineralsCounter[k]*3,200-oldMineralsCounter[k]*8));
+			dc->SetTextForeground(Color(dc->GetSurface(), 40, 100-oldMineralsCounter[k]*3, 200-oldMineralsCounter[k]*8));
 			string bla=theme.lookUpFormattedString(MINERALS_STRING, harvestedMinerals[199]/100);
 			int dx,dy;
 			dc->GetTextExtent(bla,&dx,&dy);
@@ -163,7 +157,7 @@ void StatisticsWindow::draw(DC* dc) const
 																				
 	dc->DrawRoundedRectangle(Legend2.x,Legend2.y+48,Legend3.x,Legend3.y,4);
 	dc->SetTextForeground(*theme.lookUpColor(FITNESS_AVERAGE_TEXT_COLOUR));
-	dc->DrawText(theme.lookUpFormattedString(FITNESS_AVERAGE_STRING, aFitness[199]),Legend2.x,Legend2.y+48);
+	dc->DrawText(theme.lookUpFormattedString(FITNESS_AVERAGE_STRING, aFitness[199], anarace->getMaxpFitness()),Legend2.x,Legend2.y+48);
 //	addButton(Rect(Legend2.x, Legend2.y+48, Legend3.x, Legend3.y), "average fitness including mutations"); TODO
 																				
 	dc->DrawRoundedRectangle(Legend2.x,Legend2.y+60,Legend3.x,Legend3.y,4);
@@ -294,7 +288,7 @@ void StatisticsWindow::process()
 	aFitness[199]=anarace->fitnessAverage;
 	vFitness[199]=(int)sqrt((double)anarace->fitnessVariance);
 	length[199]=anarace->getLength();
-	time[199]=(anarace->ga->maxTime-15);//anarace->getTimer());
+	time[199]=(anarace->ga->maxTime-anarace->getTimer());
 	force[199]=anarace->getUnitsTotal();
 
 	maxpFitness=0;
@@ -330,67 +324,67 @@ void StatisticsWindow::process()
 			maxForce=force[i];
 	};
 
-		int l=0;
-		for(int k=0;k<20;k++)
+	int l=0;
+	for(int k=0;k<20;k++)
+	{
+		if(oldForceCounter[k]>0)
 		{
-			if(oldForceCounter[k]>0)
+			oldForceCounter[k]+=2;
+			if(oldForceCounter[k]>20)
 			{
-				oldForceCounter[k]+=2;
-				if(oldForceCounter[k]>20)
-				{
-					oldForceCounter[k]=0;
-					oldForce[k]=0;
-				}
+				oldForceCounter[k]=0;
+				oldForce[k]=0;
 			}
-			if(oldForceCounter[k]==0)
-				l=k;
 		}
+		if(oldForceCounter[k]==0)
+			l=k;
+	}
 	if(force[199]!=force[198])
 	{
 		oldForceCounter[l]=1;
 		oldForce[l]=force[199]-force[198];
 	}
 
-		for(int k=0;k<20;k++)
+	for(int k=0;k<20;k++)
+	{
+		if(oldGasCounter[k]>0)
 		{
-			if(oldGasCounter[k]>0)
+			oldGasCounter[k]+=2;
+			if(oldGasCounter[k]>20)
 			{
-				oldGasCounter[k]+=2;
-				if(oldGasCounter[k]>20)
-				{
-					oldGasCounter[k]=0;
-					oldGas[k]=0;
-				}
+				oldGasCounter[k]=0;
+				oldGas[k]=0;
 			}
-			if(oldGasCounter[k]==0)
-				l=k;
 		}
+		if(oldGasCounter[k]==0)
+			l=k;
+	}
 	if(harvestedGas[199]!=harvestedGas[198])
 	{
 		oldGasCounter[l]=1;
 		oldGas[l]=harvestedGas[199]-harvestedGas[198];
 	}
 	
-		for(int k=0;k<20;k++)
+	for(int k=0;k<20;k++)
+	{
+		if(oldMineralsCounter[k]>0)
 		{
-			if(oldMineralsCounter[k]>0)
+			oldMineralsCounter[k]+=2;
+			if(oldMineralsCounter[k]>20)
 			{
-				oldMineralsCounter[k]+=2;
-				if(oldMineralsCounter[k]>20)
-				{
-					oldMineralsCounter[k]=0;
-					oldMinerals[k]=0;
-				}
+				oldMineralsCounter[k]=0;
+				oldMinerals[k]=0;
 			}
-			if(oldMineralsCounter[k]==0)
-				l=k;
 		}
-		if(harvestedMinerals[199]!=harvestedMinerals[198])
-		{
-			oldMineralsCounter[l]=1;
-			oldMinerals[l]=harvestedMinerals[199]-harvestedMinerals[198];
-		}
-		for(int i=0;i<20;i++)
+		if(oldMineralsCounter[k]==0)
+			l=k;
+	}
+	if(harvestedMinerals[199]!=harvestedMinerals[198])
+	{
+		oldMineralsCounter[l]=1;
+		oldMinerals[l]=harvestedMinerals[199]-harvestedMinerals[198];
+	}
+	for(int i=0;i<20;i++)
 		for(int j=0;j<i;j++)
 		{
 			if(oldForceCounter[j]<oldForceCounter[i])
@@ -411,7 +405,6 @@ void StatisticsWindow::process()
 				oldGas[i]=oldGas[j];
 				oldGas[j]=tee;
 			}
-																				
 			if(oldMineralsCounter[j]<oldMineralsCounter[i])
 			{
 				int tee=oldMineralsCounter[i];
@@ -422,6 +415,5 @@ void StatisticsWindow::process()
 				oldMinerals[j]=tee;
 			}
 		}
-	
 };
 

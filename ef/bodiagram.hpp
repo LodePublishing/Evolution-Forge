@@ -15,8 +15,8 @@ class BoDiagramWindow:public UI_Window {
 		void draw(DC * dc) const;
 
 	private:
-		ANARACE * anarace;
-		InfoWindow *infoWindow;
+		ANARACE* anarace;
+		InfoWindow* infoWindow;
 };
 
-#endif
+#endif // _GUI_BODIAGRAM_HPP

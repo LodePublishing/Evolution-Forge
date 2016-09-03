@@ -13,6 +13,8 @@ class BoEntry : public UI_Button
         ~BoEntry();
         int changed();
         void updateText(string utext);
+		void process();
+		void draw(DC* dc) const;
     private:
 //        UI_Button* addUnit;
 //      UI_Button* subUnit;

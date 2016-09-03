@@ -13,13 +13,10 @@ SOUP::SOUP()
 
 SOUP::~SOUP()
 {
-//	if(playerInitialized)
-//	{
-		for(int i=MAX_PROGRAMS;i--;)
-			if(player[i]) delete player[i];
-		for(int i=MAX_PLAYER;i--;)
-			if(anaplayer[i]) delete anaplayer[i];
-//	};
+	for(int i=MAX_PROGRAMS;i--;)
+		delete player[i];
+	for(int i=MAX_PLAYER;i--;)
+		delete anaplayer[i];
 };
 
 
@@ -63,33 +60,18 @@ void SOUP::initSoup()
 	{
 		for(int i=t;i--;)
 		{
-			if(player[i+k*t])
-			{
-				delete player[i+k*t];
-				player[i+k*t]=0;
-			}
+			delete player[i+k*t];
 			player[i+k*t]=new RACE();
 			player[i+k*t]->setPlayerNum(k+1);
 			player[i+k*t]->resetGeneCode();
 		}
-		if(anaplayer[k])
-		{
-			delete anaplayer[k];
-			anaplayer[k]=0;
-		}
+		delete anaplayer[k];
 		anaplayer[k]=new ANARACE();
 		anaplayer[k]->setPlayerNum(k+1);
 	};
 	for(k=mapPlayerNum;k<MAX_PLAYER;k++)
-	{
-		if(anaplayer[k])
-		{
 			delete anaplayer[k];
-			anaplayer[k]=0;
-		}
 		//what about 'player'?
-	}
-//	playerInitialized=1;
 };
 
 
@@ -120,7 +102,7 @@ void SOUP::checkForChange() const
 			anaplayer[k]->setUnchangedGenerations(0);
 		}
 	if(changed)
-		calculateAnaplayer();*/ // TODO 
+		calculateAnaplayer(); // TODO */
 }
 
 
@@ -129,9 +111,9 @@ void EXPORT SOUP::calculateAnaplayer() const
 	PRERACE::copyMap(); // copy all units from start map to 'work sheet' ;)
 
 	for(int k=mapPlayerNum;k--;)
-//		if(anaplayer[k]->isActive())
+		if(anaplayer[k]->isActive())
 		{
-			anaplayer[k]->resetData();
+			anaplayer[k]->newRun();
 			anaplayer[k]->initializePlayer();
 			anaplayer[k]->adjustHarvestAllLocations();
 		}
@@ -141,7 +123,7 @@ void EXPORT SOUP::calculateAnaplayer() const
 	{
 		complete=1;
 		for(int k=mapPlayerNum;k--;)
-//			if(anaplayer[k]->isActive())
+			if(anaplayer[k]->isActive())
 				complete&=anaplayer[k]->calculateStep();
 	}
 //		anaplayer[0]->backupMap();  backup&&restore map currently off-line!!!
@@ -173,63 +155,65 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 		return(0);
 	int t=MAX_PROGRAMS/mapPlayerNum;
 
-	PRERACE::initNoise();
-
-
+//	PRERACE::initNoise();
 // Set players on given code and parameters
-	for(int j=mapPlayerNum;j--;)
-		if(oldAnarace[j]) //TODO
-		{
-			for(int i=MAX_LENGTH;i--;)
+//	for(int j=mapPlayerNum;j--;)
+//		if(oldAnarace[j]) //TODO
+//		{
+	/*		for(int i=MAX_LENGTH;i--;)
 			{
 				player[j*t]->Code[i]=oldAnarace[j]->Code[i];
 				player[j*t]->Marker[i]=oldAnarace[j]->Marker[i];
-			}
+			}*/
 //			anaplayer[j]->setActive(oldAnarace[j]->isActive());
-			anaplayer[j]->setOptimizing(oldAnarace[j]->isOptimizing());
-		}
+//			anaplayer[j]->setOptimizing(oldAnarace[j]->isOptimizing());
+//		}*/
+	if(!oldAnarace[0])
+	{
+		anaplayer[0]->setActive(true);
+		anaplayer[0]->setOptimizing(false);
+	};
+	
 
 // check whether goals etc. have changed
-		checkForChange();
-
+//		checkForChange();
 
 	for(int i=t;i--;)
 	{
 // Map mit Startwerten initialisieren, muss JEDEN Durchlauf passieren!! sonst sammeln sich in der statischen loc variable Haufenweise Commando Centers an 8-)
-
 		PRERACE::copyMap();
 
 		//reset code && calculate 
 		for(int k=mapPlayerNum;k--;)
-//			if(anaplayer[k]->isActive())
+			if(anaplayer[k]->isActive())
 			{
 				player[k*t+i]->resetData();
 				player[k*t+i]->initializePlayer();
 				player[k*t+i]->adjustHarvestAllLocations();
-//				if(anaplayer[k]->isOptimizing())
+				if(anaplayer[k]->isOptimizing())
 				{
 					if(i!=0)
 						player[k*t+i]->mutateGeneCode();
 					player[k*t+i]->eraseIllegalCode(); //TODO Problem beim switchen, falls schon goals gesetzt waren
 				}
 			}
-		int complete=0;
-		while(!complete)
-		{
-			complete=1;
-			for(int k=mapPlayerNum;k--;)
-				if(anaplayer[k]->isActive())
-					complete&=player[k*t+i]->calculateStep();
-		//TODO Sleep Funktion einbauen
-		}
+			int complete=0;
+			while(!complete)
+			{
+				complete=1;
+				for(int k=mapPlayerNum;k--;)
+					if(anaplayer[k]->isActive())
+						complete&=player[k*t+i]->calculateStep();
+			//TODO Sleep Funktion einbauen
+			}
 	}
 
 
 //NOW: all pFtiness of the players are calculated
 	for(int k=mapPlayerNum;k--;) //-1 because of the 0 player
-//		if(anaplayer[k]->isActive())
+		if(anaplayer[k]->isActive())
 		{
-			for(int i=k*t;i<k*t;i++)
+			for(int i=k*t;i<(k+1)*t;i++)
 				for(int j=k*t;j<i;j++)
 					if((player[i]->getpFitness()>player[j]->getpFitness())||
 					  ((player[i]->getpFitness()==player[j]->getpFitness())&&(player[i]->getsFitness()>player[j]->getsFitness()))||
@@ -354,7 +338,7 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 // SOME POST PROCESSING
 // CALCULATE FITNESS AVERAGE & VARIANCE
 	for(int k=mapPlayerNum;k--;) //-1 because of the 0 player
-//	if(anaplayer[k]->isActive()) //~~ TODO evtl isOptimizing stattdessen...
+	if(anaplayer[k]->isActive()) //~~ TODO evtl isOptimizing stattdessen...
 	{
 		anaplayer[k]->fitnessAverage=0;
 		for(int i=k*t;i<(k+1)*t;i++)

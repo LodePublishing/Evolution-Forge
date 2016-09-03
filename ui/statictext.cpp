@@ -71,7 +71,7 @@ void UI_StaticText::draw(DC* dc) const
 	};
 	// TODO Formatted, block text
 
-	dc->DrawText(text, temp.GetPosition() + Point(0,2) + getParent()->getAbsolutePosition());
+	dc->DrawText(text, temp.GetPosition() + Point(0,3) + getParent()->getAbsolutePosition());
 };
 
 void UI_StaticText::process()

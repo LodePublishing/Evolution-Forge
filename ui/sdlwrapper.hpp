@@ -11,6 +11,10 @@
 #include <iostream>
 using namespace std;
 
+
+//extern void (*Draw_Round)(SDL_Surface *super,
+  //                 Sint16 x0,Sint16 y0, Uint16 w,Uint16 h,
+    //               Uint16 corner, Uint32 color);
 enum eBrushStyle
 {
     TRANSPARENT_BRUSH_STYLE,

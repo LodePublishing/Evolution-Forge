@@ -3,29 +3,7 @@
 
 #include "../ui/window.hpp"
 #include "../core/anarace.hpp"
-
-struct Order
-{
-	int blend;
-	int blendTarget;
-	int blendStart;
-//build order list
-	Rect rect;
-	Rect brect;
-	Rect target;
-	Rect btarget;
-	Rect start;
-	Rect bstart;
-//build order graph
-	int unit;
-	int checked;
-//	int mins,gas,time,location,needSupply,haveSupply,forceFacilityCount,availibleFacilityCount,successType,successUnit,facility,code,forceCount;
-	int bonew;
-	int IP;
-	int row;
-	long marker;
-//	int mins, color  etc.
-};
+#include "order.hpp"
 
 const char error_message[ERROR_MESSAGES][25]=
 {
@@ -67,5 +45,5 @@ class InfoWindow:public UI_Window
 		ANARACE* anarace;
 };
 
-#endif
+#endif // _GUI_INFO_HPP
 

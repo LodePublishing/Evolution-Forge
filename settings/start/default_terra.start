@@ -10,8 +10,8 @@
     "Time" = "0"
 @END
 
-# location forces...
-@LOCATION "1"
+# location forces... 2 = LOCATION MAIN
+@LOCATION "2"
 		"Command Center" = "1"
 		"SCV" = "4"
 @END

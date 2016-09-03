@@ -4,16 +4,11 @@
 #include "../ui/window.hpp"
 #include "../ui/button.hpp"
 
+#include "unitmenu.hpp"
+
 #include "../core/anarace.hpp"
 #include "../core/settings.hpp"
 
-/*
-class UnitMenu
-{
-	v
-// to choose units from
-};
-*/
 class ForceEntry : public UI_Button
 {
 	public:
@@ -45,8 +40,10 @@ class ForceWindow:public UI_Window
 		void process();
 		void draw(DC* dc) const;
 		const int getMarkedUnit() const;
-		
+
+		const bool hasChanged();		
 	private:
+		bool changed;
 		UI_Radio* radio;
 		UI_Button* goalButton[4];
 		UI_StaticText* nongoals;
@@ -56,13 +53,12 @@ class ForceWindow:public UI_Window
 		int markedUnit;
 		ANARACE* anarace;
 		int oldForceList[UNIT_TYPE_COUNT];
-		int goalListOpened;
 //		int addGoalButton;
 		int currentUnitType;
 //		int buttonType[11]; //button ID -> unit
 //		int selectGoalButton[100];
 //		int goalFileListButton;
-		int goalFileListOpened;
+		UnitMenu* unitMenu;
 };
 
 #endif

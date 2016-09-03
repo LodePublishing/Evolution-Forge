@@ -79,15 +79,17 @@ const int PRERACE::calculateIdleTime() const
 	int harvest_minerals = harvestMinerals();
 	int harvest_gas = harvestGas();
 
-    if(!buildingList.isEmpty()) {
-        int buildingRemaining = buildingList.GetHead()->GetData()->getRemainingBuildTime();
+    if(!buildingQueue.empty()) {
+		// buildingRemaining = time until the building will be completed
+        int buildingRemaining = getTimer() - buildingQueue.top().getBuildFinishedTime();
         if(idle_time > buildingRemaining) 
 			idle_time = buildingRemaining;
     }
 
-    if( harvest_gas && 
-	  ( harvest_minerals || 
-      	(neededGas + harvest_gas - neededGas % harvest_gas)/harvestGas() < (neededMinerals+(harvest_minerals - neededMinerals % harvest_minerals))/harvest_minerals)) {
+    if( harvest_gas ) //&& 
+//	  ( harvest_minerals || 
+  //    	(neededGas + harvest_gas - neededGas % harvest_gas)/harvestGas() < (neededMinerals+(harvest_minerals - neededMinerals % harvest_minerals))/harvest_minerals)) 
+	{
         int gasRemaining=(neededGas+(harvest_gas-neededGas % harvest_gas))/harvest_gas;
         if(idle_time>gasRemaining) 
 			idle_time=gasRemaining;
@@ -99,6 +101,10 @@ const int PRERACE::calculateIdleTime() const
     if(idle_time>getTimeOut()) {
         idle_time=getTimeOut();
     }
+#ifdef _SCC_DEBUG
+	if(idle_time<0)
+		toLog("ERROR idle time < 0");
+#endif
 	return(idle_time);
 	
 };

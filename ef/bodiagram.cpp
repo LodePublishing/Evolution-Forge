@@ -110,18 +110,12 @@ void BoDiagramWindow::draw(DC* dc) const
 //				{
 //						dc->SetTextForeground(dc->doColor(255,160,160)); for fitness
 						dc->SetPen(*theme.lookUpPen(BODIAGRAM_SUPPLY_PEN));
+						dc->SetBrush(*theme.lookUpBrush(BODIAGRAM_SUPPLY_BRUSH));
 						for(int i=count;i--;)
 						{
 							if(i>0)
-							{
-								int k=hneedSupply[i].x;
-								while(k<hneedSupply[i-1].x)
-								{
-									k++;
-									dc->DrawLine(Point(k,hneedSupply[i].x),Point(k,nneedSupply[i].y));
-								}
-							}
-							dc->DrawLine(hneedSupply[i],nneedSupply[i]);
+dc->DrawRectangle(hneedSupply[i].x, hneedSupply[i].y, 5/*+hneedSupply[i].x - hneedSupply[i-1].x*/, nneedSupply[i].y - hneedSupply[i].y+1);//hneedSupply[i].y - getAbsoluteClientRectLowerBound());
+//							dc->DrawLine(hneedSupply[i],nneedSupply[i]);
 						} // TODO
 //						dc->DrawSpline(count,needSupply);
 						dc->SetPen(*theme.lookUpPen(BODIAGRAM_MINERALS_PEN));

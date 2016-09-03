@@ -3,7 +3,7 @@
 Building::Building()
 {
 	setTotalBuildTime(0);
-	setRemainingBuildTime(0);
+	setBuildFinishedTime(0);
 	setType(0);
 	setUnitCount(0);
 	setFacility(0);
@@ -16,21 +16,21 @@ Building::Building()
 const int EXPORT Building::getTotalBuildTime() const
 {
 #ifdef _SCC_DEBUG
-	if((TB<0)||(TB>MAX_TIME)) {
-		toLog("DEBUG: Building::getTotalBuildTime): Variable TB not initialized.");return(0);
+	if((totalBuildTime<0)||(totalBuildTime>MAX_TIME)) {
+		toLog("DEBUG: Building::getTotalBuildTime): Variable totalBuildTime not initialized.");return(0);
 	}
 #endif
-	return(TB);
+	return(totalBuildTime);
 };
 																				
-const int EXPORT Building::getRemainingBuildTime() const
+const int EXPORT Building::getBuildFinishedTime() const
 {
 #ifdef _SCC_DEBUG
-	if((RB<0)||(RB>MAX_TIME)) {
-		toLog("DEBUG: Building::getRemainingBuildTime): Variable not initialized.");return(0);
+	if((buildFinishedTime<-MAX_TIME)||(buildFinishedTime>MAX_TIME)) {
+		toLog("DEBUG: Building::getBuildFinishedTime): Variable not initialized.");return(0);
 	}
 #endif
-	return(RB);
+	return(buildFinishedTime);
 };
 																				
 const int EXPORT Building::getType() const
@@ -98,24 +98,24 @@ const bool EXPORT Building::getOnTheRun() const
 	return(onTheRun);
 };
 
-void EXPORT Building::setTotalBuildTime(const int time)
+void EXPORT Building::setTotalBuildTime(const int totalBuildTime)
 {
 #ifdef _SCC_DEBUG
-	if((time<0)||(time>=MAX_TIME)) {
+	if((totalBuildTime<0)||(totalBuildTime>=MAX_TIME)) {
 		toLog("DEBUG: Building::setTotalBuildTime): Value out of range.");return;
 	}
 #endif
-	TB=time;
+	this->totalBuildTime=totalBuildTime;
 };
 																				
-void EXPORT Building::setRemainingBuildTime(const int time)
+void EXPORT Building::setBuildFinishedTime(const int buildFinishedTime)
 {
 #ifdef _SCC_DEBUG
-	if((time<0)||(time>=MAX_TIME)) {
-		toLog("DEBUG: Building::setRemainingBuildTime): Value out of range.");return;
+	if((buildFinishedTime<-MAX_TIME)||(buildFinishedTime>MAX_TIME)) {
+		toLog("DEBUG: Building::setBuildFinishedTime): Value out of range.");return;
 	}
 #endif
-	RB=time;
+	this->buildFinishedTime=buildFinishedTime;
 };
 																				
 void EXPORT Building::setType(const int type)

@@ -24,9 +24,10 @@ void START::fillGroups()
 
 	for(int j=MAX_LOCATIONS;j--;)
 	{
-
 		startForce[0][j].setTotal(MINERAL_PATCH, tmpmap->getLocationMineralPatches(j));
 		startForce[0][j].setTotal(VESPENE_GEYSIR, tmpmap->getLocationVespeneGeysirs(j));
+		startForce[0][j].setAvailible(MINERAL_PATCH, tmpmap->getLocationMineralPatches(j));
+		startForce[0][j].setAvailible(VESPENE_GEYSIR, tmpmap->getLocationVespeneGeysirs(j));
 	}
 	for(int i=maxp;i--;)
 	{

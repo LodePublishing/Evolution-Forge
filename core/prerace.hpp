@@ -7,7 +7,9 @@
 #include "location.hpp"
 #include "building.hpp"
 #include "start.hpp"
-#include "blist.hpp"
+#include <queue>
+#include <deque>
+#include <functional>
 
 class EXPORT PRERACE
 {
@@ -24,8 +26,8 @@ protected:
 
 	const static BASIC_MAP* const* pMap; // MAP is all the same for all players using 'start
 //------------- end -------------------------------
-	
-	BuildingList buildingList;
+
+	priority_queue<Building, deque<Building> >	buildingQueue;
 	
 	static int noise[MAX_TIME];
 	static int markerCounter;
@@ -48,6 +50,7 @@ protected:
 	void replaceCode(const int IP, const int num);
 
 	int larvaInProduction[MAX_LOCATIONS]; // well... one of that ugly race-specific variables saves a lot of trouble...
+
 
 	const int calculateIdleTime() const; // calculate the next time something significant will happen
 private:

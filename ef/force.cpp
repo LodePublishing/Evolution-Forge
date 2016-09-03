@@ -3,23 +3,25 @@
 ForceEntry::ForceEntry(UI_Object* parent, Rect rect, Rect maxRect, string unit):UI_Button(parent, rect, maxRect, unit, unit, FORCE_ENTRY_BUTTON, NO_TEXT_MODE, NO_BUTTON_MODE, DO_NOT_ADJUST, SMALL_NORMAL_BOLD_FONT, NO_AUTO_SIZE)
 	// TODO!
 {
-	addUnit = new UI_Button(this, Rect(Point(getWidth()-117,2),Size(8,8)), Rect(Point(0,0),getSize()), ADD_BUTTON, PRESS_BUTTON_MODE);
-	subUnit = new UI_Button(this, Rect(Point(getWidth()-107,2),Size(8,8)), Rect(Point(0,0),getSize()), SUB_BUTTON, PRESS_BUTTON_MODE);
-	cancelUnit = new UI_Button(this, Rect(Point(getWidth()-97,2),Size(8,8)), Rect(Point(0,0),getSize()), CANCEL_BUTTON, PRESS_BUTTON_MODE);
+	addUnit = new UI_Button(this, Rect(Point(getWidth()-117,2),Size(8,8)), Rect(Point(0,0), getSize()), ADD_BUTTON, PRESS_BUTTON_MODE);
+	subUnit = new UI_Button(this, Rect(Point(getWidth()-107,2),Size(8,8)), Rect(Point(0,0), getSize()), SUB_BUTTON, PRESS_BUTTON_MODE);
+	cancelUnit = new UI_Button(this, Rect(Point(getWidth()-97,2),Size(8,8)), Rect(Point(0,0), getSize()), CANCEL_BUTTON, PRESS_BUTTON_MODE);
+	addUnit->updateToolTip("add a unit");
+	subUnit->updateToolTip("remove a unit");
+	cancelUnit->updateToolTip("remove a goal");
 };
 
 ForceEntry::~ForceEntry()
 {
-	if(addUnit)
-		delete(addUnit);
-	if(subUnit)
-		delete(subUnit);
-	if(cancelUnit)
-		delete(cancelUnit);
+	delete(addUnit);
+	delete(subUnit);
+	delete(cancelUnit);
 };
 
 void ForceEntry::process()
 {
+	if(!shown)
+		return;
 	UI_Button::process();
 };
 
@@ -30,21 +32,23 @@ void ForceEntry::draw(DC* dc) const
 	if (oldForce)
 	{
 	//TODO: Was ist mit Einheiten die zwar als force da sind, aber nicht buildable ( = kein Eintrag in phaenoToGenoType) sind?
-			dc->SetBrush(*theme.lookUpBrush((eBrush)(BRIGHT_UNIT_TYPE_0_BRUSH+type)));
+			dc->SetBrush(*theme.lookUpBrush((eBrush)(UNIT_TYPE_0_BRUSH+type)));
+			dc->SetPen(*theme.lookUpPen((ePen)(BRIGHT_UNIT_TYPE_0_PEN+type)));
 					
 	//                                      if(isShown()==1)
-			dc->DrawRoundedRectangle(Rect(getAbsolutePosition()+Point(getWidth()-oldForce, 0), Size(oldForce+1,FONT_SIZE+4)), 4);
+			dc->DrawRoundedRectangle(Rect(getAbsolutePosition()+Point(getWidth()-oldForce, 0), Size(oldForce+1,FONT_SIZE+5)), 3);
 	//                                      else if(isShown()==2)
 	//		dc->DrawRoundedRectangle(Rect(edge.GetPosition() + Point(edge.GetWidth() - oldForce[i], 0), Size(oldForce[i] + 1, FONT_SIZE + 4)), 4);
-//	if (anarace->getLocationTotal(0, i) < (*anarace->getCurrentGoal())->allGoal[i])
-			dc->SetTextForeground(*theme.lookUpColor(TEXT_COLOUR));
-//	else
-//		dc->SetTextForeground(theme.lookUpMixedColor(TEXT_COLOUR, NOT_FULFILLED_TEXT_COLOUR));
+			if (total < goal)
+				dc->SetTextForeground(dc->mixColor(theme.lookUpColor(BRIGHT_TEXT_COLOUR), theme.lookUpColor(FULFILLED_TEXT_COLOUR)));
+			else
+				dc->SetTextForeground(dc->mixColor(theme.lookUpColor(BRIGHT_TEXT_COLOUR), theme.lookUpColor(NOT_FULFILLED_TEXT_COLOUR)));
+	
 		    ostringstream os;
 		    os << total << "/" << goal;
 			int dx, dy;
 			dc->GetTextExtent(os.str(), &dx, &dy);
-			dc->DrawText(os.str(), getAbsolutePosition() + Point(getWidth() - dx - 2, 0));
+			dc->DrawText(os.str(), getAbsolutePosition() + Point(getWidth() - dx - 2, 2));
 		} // end oldForceList >0
 
 };
@@ -70,6 +74,10 @@ ForceWindow::ForceWindow(UI_Object* parent, ANARACE* anarace, const int windowNu
 	goalButton[2] = new UI_Button(this, Rect(getRelativeClientRectPosition()+Point(0,20), getClientRectSize()), Rect(Point(0,0),getSize()), PROTOSS_STRING, PROTOSS_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE);
 	goalButton[3] = new UI_Button(this, Rect(getRelativeClientRectPosition()+Point(0,20), getClientRectSize()), Rect(Point(0,0),getSize()), ZERG_STRING, ZERG_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, ARRANGE_TOP, SMALL_NORMAL_BOLD_FONT, AUTO_SIZE);
 
+	goalButton[1]->updateToolTip("Choose race terra");
+	goalButton[2]->updateToolTip("Choose race protoss");
+	goalButton[3]->updateToolTip("Choose race zerg");
+	
 	nongoals = new UI_StaticText(this, NON_GOALS_STRING, Rect(getRelativeClientRectPosition()+Point(0,20), getClientRectSize()), HORIZONTALLY_CENTERED_TEXT_MODE, FORCE_TEXT_COLOUR);
 			
 	radio = new UI_Radio(this);
@@ -77,31 +85,30 @@ ForceWindow::ForceWindow(UI_Object* parent, ANARACE* anarace, const int windowNu
 		radio->addButton(goalButton[i]);
 	goalButton[2]->forcePressed();
 
-	goalFileListOpened = 0;
-	goalListOpened = 0;
+//	goalFileListOpened = 0;
+//	goalListOpened = 0;
 	this->anarace = anarace;
 	
 	resetData();
 
 	for(int i=GAS_SCV+1;i--;)
 	{
-		forceEntry[i]=new ForceEntry(this, Rect(getRelativeClientRectPosition()+Point(-50,400), Size(getClientRectWidth(),FONT_SIZE+10)), 
+		forceEntry[i]=new ForceEntry(this, Rect(getRelativeClientRectPosition()+Point(-100,200), Size(getClientRectWidth(),FONT_SIZE+5)), 
 				Rect(getRelativeClientRectPosition(), getClientRectSize()+Size(0, getMaxRect().height)),  // max size -y?
 						stats[(*anarace->getStartCondition())->getRace()][i].name);
 		forceEntry[i]->Hide();
 	};
+	unitMenu=new UnitMenu(this, anarace, Rect(10, 50, 0, 0));
 };
 
 ForceWindow::~ForceWindow()
 {
 	for(int i=4;i--;)
-		if(goalButton[i])
-			delete goalButton[i];
+		delete goalButton[i];
 	for(int i=GAS_SCV+1;i--;)
-		if(forceEntry[i])
-			delete forceEntry[i];
-	if(radio)
-		delete radio;
+		delete forceEntry[i];
+	delete radio;
+	delete unitMenu;
 };
 
 const int ForceWindow::getMarkedUnit() const
@@ -111,10 +118,19 @@ const int ForceWindow::getMarkedUnit() const
 
 void ForceWindow::process()
 {
+	if(!shown)
+		return;
 	UI_Window::process();
+
+	int a = unitMenu->pressedUnit;
+	if(a>0)
+	{
+		(*anarace->getCurrentGoal())->addGoal(a, 1, 0, 0);
+		setChangedFlag();
+	};
+	
 	currentUnitType = 0;
 	markedUnit = 0;
-
 	if(radio->hasChanged())
 	{
             switch (radio->getMarked())
@@ -128,6 +144,7 @@ void ForceWindow::process()
 				  settings.setStartcondition(anarace->getPlayerNum(), TERRA);
 				  settings.fillGroups();
 				  settings.setGoal(anarace->getPlayerNum(), TERRA);
+				setChangedFlag();					
 //				  settings.initSoup();
 				  /// TODO hier wird mehrfach adjustgoals aufgerufen!!
               };break;
@@ -137,6 +154,7 @@ void ForceWindow::process()
 				  settings.setStartcondition(anarace->getPlayerNum(), PROTOSS);
 				  settings.fillGroups();
 				  settings.setGoal(anarace->getPlayerNum(), PROTOSS);
+				setChangedFlag();					
 //				  settings.initSoup();
               };break;
               case (ZERG + 1):
@@ -145,6 +163,7 @@ void ForceWindow::process()
 				  settings.setStartcondition(anarace->getPlayerNum(), ZERG);
 				  settings.fillGroups();
 				  settings.setGoal(anarace->getPlayerNum(), ZERG);
+				setChangedFlag();					
 //				  settings.initSoup();
               };break;
             }
@@ -153,24 +172,25 @@ void ForceWindow::process()
 	if(getChangedFlag())
         resetData();
 	
-	if (!Rect(getAbsolutePosition(), getSize()).Inside(controls.getCurrentPosition()))
-	{
-		goalListOpened = 0;
-		goalFileListOpened = 0;
-	}
+//	if (!Rect(getAbsolutePosition(), getSize()).Inside(controls.getCurrentPosition()))
+//	{
+//		goalListOpened = 0;
+//		goalFileListOpened = 0;
+//	}
 
 // ------------------- GOALS
-	int line = 4;
+	int line = 2+unitMenu->getHeight();
 // all units above GAS_SCV are pretty uninteresting (mostly temporary variables)
 	for (int i = 0; i <= GAS_SCV; i++)
 		if((*anarace->getCurrentGoal())->allGoal[i] > 0)
 		{
 			Rect edge = Rect(getRelativeClientRectPosition() + Point(0, line*(FONT_SIZE+6)), Size(getClientRectWidth(), FONT_SIZE+5));
 
-			if (forceEntry[i]->oldForce < anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax())
-				forceEntry[i]->oldForce += (anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax() - oldForceList[i]) / 5 + 1;
-			else if (forceEntry[i]->oldForce > anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax())
-				forceEntry[i]->oldForce -= (forceEntry[i]->oldForce - anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax()) / 5 + 1;
+			if (forceEntry[i]->oldForce < anarace->getLocationTotal(0, i) * 75 / anarace->getUnitsTotalMax())
+				forceEntry[i]->oldForce += (anarace->getLocationTotal(0, i) * 75 / anarace->getUnitsTotalMax() /*- oldForceList[i]*/) / 5 + 1;
+			else if (forceEntry[i]->oldForce > anarace->getLocationTotal(0, i) * 75 / anarace->getUnitsTotalMax())
+				forceEntry[i]->oldForce -= (forceEntry[i]->oldForce - anarace->getLocationTotal(0, i) * 75 / anarace->getUnitsTotalMax()) / 5 + 1;
+			if(forceEntry[i]->oldForce < 20) forceEntry[i]->oldForce=20;
 			forceEntry[i]->type=stats[(*anarace->getStartCondition())->getRace()][i].unitType;
 			forceEntry[i]->total=anarace->getLocationTotal(0, i);
 			forceEntry[i]->goal=(*anarace->getCurrentGoal())->allGoal[i];
@@ -181,10 +201,11 @@ void ForceWindow::process()
 				if (forceEntry[i]->isCurrentlyHighlighted())
 					markedUnit = i;
 				ostringstream os;
-				os << anarace->getLocationTotal(0, i) << " " << stats[(*anarace->getStartCondition())->getRace()][i].name;
-				if (anarace->getLocationTotal(0, i) == 1);
-				else os << "s";
-				forceEntry[i]->updateText(os.str());
+//				os << anarace->getLocationTotal(0, i) << " " << stats[(*anarace->getStartCondition())->getRace()][i].name;
+//				if (anarace->getLocationTotal(0, i) == 1);
+//				else os << "s";
+//				forceEntry[i]->updateText(os.str());
+				forceEntry[i]->updateText("   " + stats[(*anarace->getStartCondition())->getRace()][i].name);
 				forceEntry[i]->adjustRelativeRect(edge);
 				switch(forceEntry[i]->changed())
 				{
@@ -196,11 +217,11 @@ void ForceWindow::process()
 					        setChangedFlag();break;           // <- und auch bei X natuerlich
 				};
 			}
-		   	else
+/*		   	else
 			{
 				forceEntry[i]->Hide();
-				forceEntry[i]->adjustRelativeRect(Rect(getRelativeClientRectPosition()+Point(-50,400), Size(getClientRectWidth(),FONT_SIZE+10)));
-			}
+				forceEntry[i]->adjustRelativeRect(Rect(getRelativeClientRectPosition()+Point(-100,200), Size(getClientRectWidth(),FONT_SIZE+10)));
+			}*/
 			line++;
 		} // goal > 0
 
@@ -208,14 +229,14 @@ void ForceWindow::process()
 //  ---------- NON GOALS
 	line++;
     for (int i = 0; i <= GAS_SCV; i++)
-        if (((*anarace->getCurrentGoal())->allGoal[i] == 0) && (anarace->getLocationTotal(0, i)))
+        if (((*anarace->getCurrentGoal())->allGoal[i] == 0) && ((*anarace->getCurrentGoal())->isBuildable[i]))
         {
             Rect edge = Rect(getRelativeClientRectPosition() + Point(0, line*(FONT_SIZE+6)), Size(getClientRectWidth(), FONT_SIZE+5));
                                                                                                                                                             
-            if (forceEntry[i]->oldForce < anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax())
-                forceEntry[i]->oldForce += (anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax() - oldForceList[i]) / 5 + 1;
-            else if (forceEntry[i]->oldForce > anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax())
-                forceEntry[i]->oldForce -= (forceEntry[i]->oldForce - anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax()) / 5 + 1;
+            if (forceEntry[i]->oldForce < anarace->getLocationTotal(0, i) * 75 / anarace->getUnitsTotalMax())
+                forceEntry[i]->oldForce += (anarace->getLocationTotal(0, i) * 75 / anarace->getUnitsTotalMax()/* - oldForceList[i]*/) / 5 + 1;
+            else if (forceEntry[i]->oldForce > anarace->getLocationTotal(0, i) * 75 / anarace->getUnitsTotalMax())
+                forceEntry[i]->oldForce -= (forceEntry[i]->oldForce - anarace->getLocationTotal(0, i) * 75 / anarace->getUnitsTotalMax()) / 5 + 1;
             forceEntry[i]->type=stats[(*anarace->getStartCondition())->getRace()][i].unitType;
             forceEntry[i]->total=anarace->getLocationTotal(0, i);
             forceEntry[i]->goal=(*anarace->getCurrentGoal())->allGoal[i];
@@ -226,10 +247,11 @@ void ForceWindow::process()
                 if (forceEntry[i]->isCurrentlyHighlighted())
                     markedUnit = i;
                 ostringstream os;
-                os << anarace->getLocationTotal(0, i) << " " << stats[(*anarace->getStartCondition())->getRace()][i].name;
-                if (anarace->getLocationTotal(0, i) == 1);
-                else os << "s";
-                forceEntry[i]->updateText(os.str());
+                //os << anarace->getLocationTotal(0, i) << " " << stats[(*anarace->getStartCondition())->getRace()][i].name;
+                //if (anarace->getLocationTotal(0, i) == 1);
+                //else os << "s";
+                //forceEntry[i]->updateText(os.str());
+                forceEntry[i]->updateText("   " + stats[(*anarace->getStartCondition())->getRace()][i].name);
                 forceEntry[i]->adjustRelativeRect(edge);
                 switch(forceEntry[i]->changed())
                 {
@@ -241,17 +263,17 @@ void ForceWindow::process()
                             setChangedFlag();break;           // <- und auch bei X natuerlich
                 };
             }
-            else
+         /*   else
             {
                 forceEntry[i]->Hide();
-                forceEntry[i]->adjustRelativeRect(Rect(getRelativeClientRectPosition()+Point(-50,400), Size(getClientRectWidth(),FONT_SIZE+10)));
-            }
+                forceEntry[i]->adjustRelativeRect(Rect(getRelativeClientRectPosition()+Point(-100,200), Size(getClientRectWidth(),FONT_SIZE+10)));
+            }*/
             line++;
         } // goal > 0
 		else if((*anarace->getCurrentGoal())->allGoal[i] == 0)
 		{
     	    forceEntry[i]->Hide();
-        	forceEntry[i]->adjustRelativeRect(Rect(getRelativeClientRectPosition()+Point(-50,400), Size(getClientRectWidth(),FONT_SIZE+10)));
+        //	forceEntry[i]->adjustRelativeRect(Rect(getRelativeClientRectPosition()+Point(-100,200), Size(getClientRectWidth(),FONT_SIZE+10)));
 	    };
 
 /*	line++;
@@ -391,7 +413,7 @@ void ForceWindow::resetData()
 		if ((!anarace) || ((*anarace->getCurrentGoal())->allGoal[i] == 0))
 			oldForceList[i] = 0;
 		else if ((anarace) && ((*anarace->getCurrentGoal())->allGoal[i]))
-			oldForceList[i] = anarace->getLocationTotal(0, i) * 100 / anarace->getUnitsTotalMax();
+			oldForceList[i] = anarace->getLocationTotal(0, i) * 75 / anarace->getUnitsTotalMax();
 	}
 	markedUnit = 0;
 };

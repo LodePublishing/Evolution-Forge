@@ -44,7 +44,8 @@ const bool RACE::calculateStep()
 		setsFitness(calculateSecondaryFitness());
 //		if((*pGoal)->getMode()==0)
 			setpFitness(calculatePrimaryFitness(ready));
-		buildingList.Clear();
+		while(!buildingQueue.empty())
+			buildingQueue.pop();
 		return(true);
 	}
 	bool ok=true;
@@ -92,64 +93,53 @@ const bool RACE::calculateStep()
 	setTimeOut(getTimeOut()-t);
 	setTimer(getTimer()-t);
 
-    if(buildingList.isEmpty())
-        return(false);
-    BNODE* node = buildingList.GetHead();
-    Building* build = node->GetData();
-	int counterr=0;
-	int totalr = buildingList.GetCount();
-	if(totalr==3)
+	bool foundAnother=true;
+	while((!buildingQueue.empty())&&(foundAnother==true))
 	{
-		totalr=3;
-	};
-	while(node)
-	{
-		BNODE* oldnode=node;
-		node=node->GetNext();
-		build->setRemainingBuildTime(build->getRemainingBuildTime()-t);
-		counterr++;
-		if(!build->getRemainingBuildTime())
+		if(buildingQueue.top().getBuildFinishedTime()==getTimer())
 		{
-			const UNIT_STATISTICS* stat=&(*pStats)[build->getType()];
+			foundAnother=true;
+		    Building build = buildingQueue.top();
+			const UNIT_STATISTICS* stat=&(*pStats)[build.getType()];
 			switch(stat->facilityType)
 			{
 				case NO_FACILITY:break;
 				case IS_LOST:
-					if(build->getFacility())
-						addLocationTotal(build->getLocation(),build->getFacility(),-1);
+					if(build.getFacility())
+						addLocationTotal(build.getLocation(),build.getFacility(),-1);
 						//availible was already taken account when starting the building
 					if(stat->facility2)
-						addLocationTotal(build->getLocation(),stat->facility2,-1);
+						addLocationTotal(build.getLocation(),stat->facility2,-1);
 					break;
 				case NEEDED_ONCE:break;
 				case NEEDED_UNTIL_COMPLETE:
-					if(build->getFacility())
-						addLocationAvailible(build->getLocation(),build->getFacility(),1);
+					if(build.getFacility())
+						addLocationAvailible(build.getLocation(),build.getFacility(),1);
 					break; // fuer spaeter mal: Wenn in 2 Fabriken produziert wuerde wirds probmelatisch, da
 //in Buiding nur eine facility gespeichert wird...
 				case NEEDED_ONCE_IS_LOST:
 					if(stat->facility2)
-						addLocationTotal(build->getLocation(),stat->facility2,-1);
+						addLocationTotal(build.getLocation(),stat->facility2,-1);
 					break;
 				case NEEDED_UNTIL_COMPLETE_IS_LOST:
-					if(build->getFacility())
+					if(build.getFacility())
 					{
-						addLocationAvailible(build->getLocation(),build->getFacility(),1);
-//						setNeedSupply(getNeedSupply()-(*pStats)[build->getFacility()].needSupply); //<- ? ??? TODO
-//						setHaveSupply(getHaveSupply()-(*pStats)[build->getFacility()].haveSupply); //<- ? ???
+						addLocationAvailible(build.getLocation(),build.getFacility(),1);
+//						setNeedSupply(getNeedSupply()-(*pStats)[build.getFacility()].needSupply); //<- ? ??? TODO
+//						setHaveSupply(getHaveSupply()-(*pStats)[build.getFacility()].haveSupply); //<- ? ???
 					}					
 					if(stat->facility2)
-						addLocationTotal(GLOBAL/*build->getLocation()*/,stat->facility2,-1);
+						addLocationTotal(GLOBAL/*build.getLocation()*/,stat->facility2,-1);
 //r_researches need location 0
 					break;
 				case NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE:
 					{
-						if(build->getFacility())
-							addLocationAvailible(build->getLocation(),build->getFacility(),1);
+						if(build.getFacility())
+							addLocationAvailible(build.getLocation(),build.getFacility(),1);
 						if(stat->facility2) // special rule for upgrades!
 						{
-							addLocationTotal(GLOBAL/*build->getLocation()*/,stat->facility2,-1);
-							addLocationAvailible(GLOBAL/*build->getLocation()*/,stat->facility2,1);
+							addLocationTotal(GLOBAL/*build.getLocation()*/,stat->facility2,-1);
+							addLocationAvailible(GLOBAL/*build.getLocation()*/,stat->facility2,1);
 						};
 					}
 					break;
@@ -165,24 +155,24 @@ const bool RACE::calculateStep()
 			// increase haveSupply AFTER the building is completed (needSupply is increased BEFORE it's started!)
 			setHaveSupply(getHaveSupply()+stat->haveSupply);
 			
-			addLocationTotal(build->getLocation(),build->getType(),build->getUnitCount());
-			addLocationAvailible(build->getLocation(),build->getType(),build->getUnitCount());
+			addLocationTotal(build.getLocation(),build.getType(),build.getUnitCount());
+			addLocationAvailible(build.getLocation(),build.getType(),build.getUnitCount());
 
-			if(build->getType()==REFINERY) 
+			if(build.getType()==REFINERY) 
 			{
-				addMapLocationTotal(GLOBAL, build->getLocation(),VESPENE_GEYSIR,-1);
-				adjustGasHarvest(build->getLocation());
+				addMapLocationTotal(GLOBAL, build.getLocation(),VESPENE_GEYSIR,-1);
+				adjustGasHarvest(build.getLocation());
 				//TODO: ein scv zum Gas schicken... ueber buildgene? oder manuell hier?
 			}
 			else
-			if((build->getType()==COMMAND_CENTER)&&(!getLocationTotal(build->getLocation(),COMMAND_CENTER)))
+			if((build.getType()==COMMAND_CENTER)&&(!getLocationTotal(build.getLocation(),COMMAND_CENTER)))
 			{
-				adjustMineralHarvest(build->getLocation());
-				adjustGasHarvest(build->getLocation());
-			} else if((build->getType()==LARVA)&&((*pGoal)->getRace()==ZERG))
+				adjustMineralHarvest(build.getLocation());
+				adjustGasHarvest(build.getLocation());
+			} else if((build.getType()==LARVA)&&((*pGoal)->getRace()==ZERG))
 			{
 				if(!buildGene(LARVA))
-					larvaInProduction[build->getLocation()]--;
+					larvaInProduction[build.getLocation()]--;
 //						if(
 //TODO Was wenn Gebaeude zerstoert? etc.? eigentlich is das hier net noetig...
 //									(((getLocationTotal(tloc, HATCHERY)+getLocationTotal(tloc, LAIR)+getLocationTotal(tloc, HIVE))*3>
@@ -196,14 +186,14 @@ const bool RACE::calculateStep()
 //					};
 			};
 				
-			last[lastcounter].unit=build->getType();
-			last[lastcounter].count=build->getUnitCount();
-			last[lastcounter].location=build->getLocation();
+			last[lastcounter].unit=build.getType();
+			last[lastcounter].count=build.getUnitCount();
+			last[lastcounter].location=build.getLocation();
 
-			if((stat->create)&&(!build->getOnTheRun())) //one additional unit (zerglings, scourge, comsat, etc.)
+			if((stat->create)&&(!build.getOnTheRun())) //one additional unit (zerglings, scourge, comsat, etc.)
 			{ //here no unitCount! ~~~
-				addLocationTotal(build->getLocation(),stat->create,1);
-				addLocationAvailible(build->getLocation(),stat->create,1);
+				addLocationTotal(build.getLocation(),stat->create,1);
+				addLocationAvailible(build.getLocation(),stat->create,1);
 				if(last[lastcounter].unit==stat->create) last[lastcounter].count++; //TODO ???
 				// ~~~~ Ja... geht schon... aber kann ja auch mal was anderes sein...
 			}
@@ -218,18 +208,17 @@ const bool RACE::calculateStep()
 // ist dieses goal belegt?
 				if(((*pGoal)->goal[i].unit>0)&&
 // befinden wir uns am richtigen Ort?
-					(((*pGoal)->goal[i].location==0)||(build->getLocation()==(*pGoal)->goal[i].location))&&
+					(((*pGoal)->goal[i].location==0)||(build.getLocation()==(*pGoal)->goal[i].location))&&
 // und untersuchen wir das zum Unittype gehoerende Goal?
-					(build->getType()==(*pGoal)->goal[i].unit))
+					(build.getType()==(*pGoal)->goal[i].unit))
 					setFinalTime(i,ga->maxTime-getTimer());
 // Did we reach the right number at the right time?
 //			  i=MAX_GOALS;  TODO? koennen wir mehrere goals gleichzeitig erfuell0rn?
 			ready=calculateReady();
-			buildingList.DeleteNode(oldnode);
+			buildingQueue.pop();
 // oder: irgendeine location... TODO: Problem: die Einheiten koennen irgendwo sein, also nicht gesammelt an einem Fleck...
-		} // END of if(!build->getRemainingBuildTime())
-		if(node) 
-			build=(Building*)node->GetData();
+		} // END of if(build.getBuildFinishedTime()==getTimer())
+		else foundAnother=false;
 	} // END of while
 	return(false);
 	//TODO: Auch voruebergehende Ziele miteinberechnen (Bewegungen!)
@@ -249,7 +238,7 @@ const bool RACE::buildGene(const int unit)
 {
 	const UNIT_STATISTICS* stat=&(*pStats)[unit];
 	bool ok=false;
-	if(unit<=EXTRACTOR+1)
+	if(unit<=REFINERY+1)
 	{
 		//TODO: Array und testen wo der comp am meisten haengenbleibt und abbricht... moeglichst dann nach oben bringen!
 		if(
@@ -327,10 +316,10 @@ const bool RACE::buildGene(const int unit)
 
 				if((ok)&&(unit==REFINERY))
 				{
-					if(getMapLocationAvailible(GLOBAL, tloc,VESPENE_GEYSIR)<=0)
+					if(getMapLocationAvailible(GLOBAL, tloc, VESPENE_GEYSIR) <=0)
 						ok=false;
 					else 
-						addMapLocationAvailible(GLOBAL, tloc,VESPENE_GEYSIR,-1);
+						addMapLocationAvailible(GLOBAL, tloc, VESPENE_GEYSIR, -1);
 				}
 //TODO: Wenn verschiedene facilities moeglich sind, dann das letzte nehmen						
 //				bewegliche Sachen ueberdenken...
@@ -354,40 +343,15 @@ const bool RACE::buildGene(const int unit)
 					
 						};
 					};
-                                                                                                                                                            
-					if((buildingList.GetCount()==2)&&(buildingList.GetHead()->GetData()->getRemainingBuildTime()==120))
-					{
-						int asdf=5;
-					};
-					BNODE* node = buildingList.GetTail();
-					while(node!=NULL)
-					{
-						if(node->GetData()->getRemainingBuildTime()<stat->BT)
-							break;
-						else node=node->GetPrev();
-					};
-						
-							
-                    //for (node = buildingList.GetTail();node&&(((Building*)node->GetData())->getRemainingBuildTime()<stat->BT/*+3200*(stat->facility2==unit)*/);node = node->GetPrev());
-                    Building* build=new Building();
-                    if(node)
-							//&&(((Building*)node->GetData())->getRemainingBuildTime()>=stat->BT/*+3200*(stat->facility2==unit)*/))
-					{
-                        buildingList.Insert(node, build);
-					}
-                    else if(!node) 
-					{
-						buildingList.Append(build);
-					}
-
-                    build->setOnTheRun(0);
-                    build->setFacility(stat->facility[fac]);
-                    build->setLocation(tloc);
-                    build->setUnitCount(1);
-                    build->setRemainingBuildTime(stat->BT/*+3200*(stat->facility2==unit)*/); //~~ hack :/ TODO SINN???????
-                    build->setTotalBuildTime(build->getRemainingBuildTime());
-                    build->setType(unit);
-
+                                              
+					Building build;					
+					build.setOnTheRun(false);
+                    build.setFacility(stat->facility[fac]);
+                    build.setLocation(tloc);
+                    build.setUnitCount(1);
+                    build.setBuildFinishedTime(getTimer()-stat->BT/*+3200*(stat->facility2==unit)*/); //~~ hack :/ TODO SINN???????
+                    build.setTotalBuildTime(stat->BT);
+                    build.setType(unit);
 					
 					if(getMinerals()*3<4*stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL, unit)) settFitness(gettFitness()-2);
 					if(getGas()*3<4*stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL, unit)) settFitness(gettFitness()-2);
@@ -405,18 +369,17 @@ const bool RACE::buildGene(const int unit)
 					setMinerals(getMinerals()-(stat->minerals+stat->upgrade_cost*getLocationTotal(GLOBAL,unit)));
 					setGas(getGas()-(stat->gas+stat->upgrade_cost*getLocationTotal(GLOBAL,unit)));
 	
-					
 //					build.setIP(getIP()); needed only for Anarace!
 					setNeedSupply(getNeedSupply()+stat->needSupply);
 //					if((stat->needSupply>0)||(((*pStats)[stat->facility[0]].needSupply<0)&&(stat->facilityType==IS_LOST)))  TODO!!!!
 //						setNeedSupply(getNeedSupply()-stat->needSupply); //? Beschreibung!
 					adjustAvailibility(tloc, fac, stat);
-                //	buildingList.insert(pair<int, Building>(stat->BT/*+3200*(stat->facility2==unit)*/, build));
+					buildingQueue.push(build);
 				} //end if(ok)
 			} //end minerals/gas else
 		} //end prere/fac else
-	} //end unit < EXTRACTOR
-	else // unit > EXTRACTOR+1
+	} //end unit < REFINERY
+	else // unit > REFINERY+1
 	{
 
 //hier checken!
@@ -496,7 +459,7 @@ const bool RACE::buildGene(const int unit)
 						gas+=stats[2][building[n].type].gas*0.75;
 						Supply--;
 						force[DRONE]++;
-						if(building[n].type==EXTRACTOR)
+						if(building[n].type==REFINERY)
 						{
 							Vespene_Extractors--;
 							Vespene_Av++;
@@ -549,9 +512,6 @@ void RACE::mutateGeneCode()
 			mutationRate-=rand()%50;
 		else mutationRate+=rand()%50;
 	}*/
-//	for(int i=0;i<MAX_LENGTH;i++)
-//		Code[i]=rand()%3;
-//	return;
 	int force[GAS_SCV+1];
 	int buildable[GAS_SCV+1];
 	int tMaxBuildTypes;
@@ -583,10 +543,6 @@ void RACE::mutateGeneCode()
 		for(int i=GAS_SCV+1;i--;)
 			if(buildable[i])
 			{
-				if(i==WRAITH)
-				{
-					i=WRAITH;
-				};
 				if(!(*pGoal)->isBuildable[i])
 					buildable[i]=0;
 				else

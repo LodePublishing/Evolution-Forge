@@ -10,8 +10,8 @@
     "Time" = "0"
 @END
 
-# location forces...
-@LOCATION "1"
+# location forces... 2 = LOCATION MAIN
+@LOCATION "2"
 		"Nexus" = "1"
 		"Probe" = "4"
 @END

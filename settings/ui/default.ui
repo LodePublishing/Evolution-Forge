@@ -64,10 +64,10 @@
 		49, Click to pause
 # statistics window
 		50, Force : %i
-		51, Time : %i:%i
+		51, Time : %i:%2i
 		52, Minerals : %i
 		53, Gas : %i
-		54, Fitness average : %i
+		54, Fitness average : %i [%i]
 		55, Fitness variance : %i
 		56, Build order length : %i
 		57, %i+ generations left
@@ -82,84 +82,84 @@
 		65, 2nd Computer enemy
 		66, ERROR - Check playermodes
 #tabs
-        67, Zero Tab
-        68, Beginner
-        69, Advanced
-        70, Expert
-        71, Gosu
-        72, Transcendend
-        73, Map
-        74, Settings
-        75, Help
+		67, Zero Tab
+		68, Beginner
+		69, Advanced
+		70, Expert
+		71, Gosu
+		72, Transcendend
+		73, Map
+		74, Settings
+		75, Help
 	@END
 
 	@GERMAN
 
-        0,  NULL!
+		0,  NULL!
 # window titles
-        1,  Evolution Forge v%s
-        2,  Nachrichten
-        3,  Kern von Evolution Forge
-        4,  Evolution forge Einfuehrung
-        5,  Befehlsbeschreibung Spieler %s
-        6,  Grafische Darstellung der Befehle %s
-        7,  Uebersicht ueber den Verlauf %s
-        8,  Statistiken %s
-        9,  Das beste Programm %s
-        10, Einheitenliste %s
-        11, Befehlsreihenfolge %s
+		1,  Evolution Forge v%s
+		2,  Nachrichten
+		3,  Kern von Evolution Forge
+		4,  Evolution forge Einfuehrung
+		5,  Befehlsbeschreibung Spieler %s
+		6,  Grafische Darstellung der Befehle %s
+		7,  Uebersicht ueber den Verlauf %s
+		8,  Statistiken %s
+		9,  Das beste Programm %s
+		10, Einheitenliste %s
+		11, Befehlsreihenfolge %s
 # messages
-        12, Willkommen zu Evolution Forge!
-        13, Klicke oben um weitere Ziele hinzuzufuegen.
-        14, %i Spieler geladen ....
+		12, Willkommen zu Evolution Forge!
+		13, Klicke oben um weitere Ziele hinzuzufuegen.
+		14, %i Spieler geladen ....
 
 # force window
 # unit type names TODO
-        15, rest
-        16, WBF
-        17, Gas WBF
-        18, Kampfeinheiten...
-        19, Unterstuetzungseinheiten...
-        20, Versorgung/Raffinerie...
-        21, Produzierende Gebaeude...
-        22, Forschungseinrichtungen...
-        23, Gebaeudezusaetze...
-        24, Forschung...
-        25, Spezial...
-        26, Einheiten zu Beginn:
+		15, rest
+		16, WBF
+		17, Gas WBF
+		18, Kampfeinheiten...
+		19, Unterstuetzungseinheiten...
+		20, Versorgung/Raffinerie...
+		21, Produzierende Gebaeude...
+		22, Forschungseinrichtungen...
+		23, Gebaeudezusaetze...
+		24, Forschung...
+		25, Spezial...
+		26, Einheiten zu Beginn:
 		27, Hier klicken um Ziel hinzuzufuegen
-        28, (Hier klicken zum schliessen)
-        29, (Hier klicken um zurueckzukehren)
-        30, zusaetzliche Einheiten (keine Ziele):
-        31, diese Einheit als Ziel hinzufuegen
-        32, Lade Ziele-Liste...
-        33, Schliesse Ziel-Liste
-        34, Karteneinstellungen
-        35, Terraner
-        36, Protoss
-        37, Zerg
+		28, (Hier klicken zum schliessen)
+		29, (Hier klicken um zurueckzukehren)
+		30, zusaetzliche Einheiten (keine Ziele):
+		31, diese Einheit als Ziel hinzufuegen
+		32, Lade Ziele-Liste...
+		33, Schliesse Ziel-Liste
+		34, Karteneinstellungen
+		35, Terraner
+		36, Protoss
+		37, Zerg
 # bowindow
-        38, (Hier klicken um ein Befehl einzufuegen)
-#       (Click here to close)
-#       (Click here to go back)
-        39, Alles optimieren
-        40, Optimiere nur Auswahl
+		38, (Hier klicken um ein Befehl einzufuegen)
+#	   (Click here to close)
+#	   (Click here to go back)
+		39, Alles optimieren
+		40, Optimiere nur Auswahl
 # timer window
-        41, %i % der Ziele erfuellt
-        42, (unterbrochen)
-        43, Suche...
-        44, %i%% des theoretischen Optimums
-        45, Optimiere...
-        46, %i/%i/%i Res./Einh./Geb.
-        47, Gesamt: %i
-        48, Klicken um fortzufahren
+		41, %i % der Ziele erfuellt
+		42, (unterbrochen)
+		43, Suche...
+		44, %i%% des theoretischen Optimums
+		45, Optimiere...
+		46, %i/%i/%i Res./Einh./Geb.
+		47, Gesamt: %i
+		48, Klicken um fortzufahren
 		49, Klicken um zu unterbrechen
 # statistics window
 		50, Einheitenzahl : %i
-		51, Zeit : %i:%i
+		51, Zeit : %i:%2i
 		52, Mineralien : %i
 		53, Vespine Gas : %i
-		54, durchschnittliche Fitness : %i
+		54, durchschnittliche Fitness : %i [%i]
 		55, Varianz der Fitness : %i
 		56, Laenge der Befehlsliste : %i
 		57, %i+ Generationen uebrig
@@ -214,8 +214,8 @@
 			2,  FreeSans, 10
 			3,  FreeSans, 14
 			4,  FreeSans, 18
-			5,  FreeSans, 24
-			6,  FreeSans, 32
+			5,  FreeSansBold, 24
+			6,  FreeSansBold, 32
 
 
 # null font
@@ -234,8 +234,8 @@
 			2,  FreeSans, 10
 			3,  FreeSans, 14
 			4,  FreeSans, 18
-			5,  FreeSans, 24
-			6,  FreeSans, 32
+			5,  FreeSansBold, 24
+			6,  FreeSansBold, 32
 # null font
 #			0,  4, normal, normal, normal
 #			1,  7, decorative, normal, bold
@@ -253,9 +253,9 @@
 @COLOURS
 
 	@DARK_BLUE_THEME
-		0,    0,   0,   0
+		0,	0,   0,   0
 # Text colour
-		1,    0,   0,   0
+		1,	0,   0,   0
 # window text colour
 		2,  150, 150, 200
 # bright window text colour
@@ -265,10 +265,10 @@
 # important text (time etc. red in the original)
 		5,  200,   0,   0
 # fulfilled & not fulfilled
-		6,    0, 100,   0
+		6,	0, 100,   0
 		7,  100,   0,   0
 # force add goal button colour
-		8,    0, 200,   0
+		8,	0, 200,   0
 # force text colour
 		9,   50, 150,  50
 # big text buttons colour
@@ -295,10 +295,10 @@
 # 	fitness average text colour
 		20, 200, 200, 200
 #   fitness variance text colour
-	    21, 100, 100, 100
+		21, 100, 100, 100
 #   bo length text colour 
 		22, 100, 150, 200
-#    generations left text colour
+#	generations left text colour
 		23, 100, 100, 255
 
 	@END
@@ -350,29 +350,29 @@
 			19, 2,  80,   80,  255, SOLID
 			20, 2,  40,  255,   40, SOLID
 # unit list colours:
-	        21, 1,   0,   0,   0, SOLID
-   		    22, 1,  75,  75,  75, SOLID
-	   	    23, 1,  50, 100,  50, SOLID
-    	    24, 1, 100,  50,  50, SOLID
-        	25, 1, 100,  50, 100, SOLID
-	        26, 1,  50,  50, 100, SOLID
-    	    27, 1,  50, 100, 100, SOLID
-        	28, 1, 100, 100,  50, SOLID
-	        29, 1,  50,  50,  75, SOLID
-    	    30, 1,  75,  50,  50, SOLID
-        	31, 1,  50,  75,  50, SOLID
+			21, 1,   0,   0,   0, SOLID
+   			22, 1,  75,  75,  75, SOLID
+	   		23, 1,  50, 100,  50, SOLID
+			24, 1, 100,  50,  50, SOLID
+			25, 1, 100,  50, 100, SOLID
+			26, 1,  50,  50, 100, SOLID
+			27, 1,  50, 100, 100, SOLID
+			28, 1, 100, 100,  50, SOLID
+			29, 1,  50,  50,  75, SOLID
+			30, 1,  75,  50,  50, SOLID
+			31, 1,  50,  75,  50, SOLID
 # bright unit list colours:
-    	    32, 1,   0,   0,   0, SOLID
-	        33, 1, 100, 100, 100, SOLID
-        	34, 1,  50, 150,  50, SOLID
-    	    35, 1, 150,  50,  50, SOLID
-	        36, 1, 150,  50, 150, SOLID
-        	37, 1,  50,  50, 150, SOLID
-    	    38, 1,  50, 150, 150, SOLID
-	        39, 1, 150, 150,  50, SOLID
-        	40, 1,  50,  50, 100, SOLID
-    	    41, 1, 100,  50,  50, SOLID
-	        42, 1,  50, 100,  50, SOLID
+			32, 1,   0,   0,   0, SOLID
+			33, 1, 100, 100, 100, SOLID
+			34, 1,  50, 150,  50, SOLID
+			35, 1, 150,  50,  50, SOLID
+			36, 1, 150,  50, 150, SOLID
+			37, 1,  50,  50, 150, SOLID
+			38, 1,  50, 150, 150, SOLID
+			39, 1, 150, 150,  50, SOLID
+			40, 1,  50,  50, 100, SOLID
+			41, 1, 100,  50,  50, SOLID
+			42, 1,  50, 100,  50, SOLID
 		@END
 	@END
 
@@ -381,13 +381,13 @@
 @BRUSHES
 
 	@DARK_BLUE_THEME
-		0,    0,   0,   0, SOLID
+		0,	0,   0,   0, SOLID
 # main window is transparent
-		1,    0,   0,   0, TRANSPARENT
+		1,	0,   0,   0, TRANSPARENT
 # window foreground
-        2,    5,  10,  10, SOLID
+		2,	5,  10,  10, SOLID
 # window background
-		3,    5,  15,  30, SOLID
+		3,	5,  15,  30, SOLID
 
 # bo dark color
 		4,  100, 100, 100, SOLID
@@ -401,16 +401,16 @@
 		7,   50,   50,  50, SOLID
 
 # unit list colours:
-		8,    0,   0,   0, SOLID
+		8,	0,   0,   0, SOLID
 		9,   25,  25,  25, SOLID
 		10,   0,  50,   0, SOLID
 		11,  50,   0,   0, SOLID
 		12,  50,   0,  50, SOLID
-        13,   0,   0,  50, SOLID
-        14,   0,  50,  50, SOLID
-        15,  50,  50,   0, SOLID
-        16,   0,   0,  25, SOLID
-        17,  25,   0,   0, SOLID
+		13,   0,   0,  50, SOLID
+		14,   0,  50,  50, SOLID
+		15,  50,  50,   0, SOLID
+		16,   0,   0,  25, SOLID
+		17,  25,   0,   0, SOLID
 		18,   0,  25,   0, SOLID
 
 # bright unit list colours:
@@ -419,11 +419,11 @@
 		21,  25, 125,  25, SOLID
 		22, 125,  25,  25, SOLID
 		23, 125,  25, 125, SOLID
-        24,  25,  25, 125, SOLID
-        25,  25, 125, 125, SOLID
-        26, 125, 125,  25, SOLID
-        27,  25,  25,  75, SOLID
-        28,  75,  25,  25, SOLID
+		24,  25,  25, 125, SOLID
+		25,  25, 125, 125, SOLID
+		26, 125, 125,  25, SOLID
+		27,  25,  25,  75, SOLID
+		28,  75,  25,  25, SOLID
 		29,  25,  75,  25, SOLID
 # continue button brush
 		30,  75,  75, 125, SOLID
@@ -434,8 +434,12 @@
 		34,  50,  50,  50, CROSS_HATCH
 # bodiagram bar 
 		35,  40,  40,  40, SOLID
+# supply brush
+		36, 120, 120, 120, SOLID 
 # statistics window (generations left brush)
-		36,  40,  40, 100, SOLID
+		37,  40,  40, 100, SOLID
+# tooltip
+		38, 200, 200,  20, SOLID
 		
 	@END
 
@@ -456,13 +460,14 @@
 			7,  arrow_down
 			8,  clemens
 			9,  clawsoftware
-			10, backstar
-			11, i1
-			12, i2
-			13, i3
-			14, i4
-			15, i5
-			16, i6
+			10, roids
+			11, roids
+			12, i1
+			13, i2
+			14, i3
+			15, i4
+			16, i5
+			17, i6
 		@END
 
 	@END
@@ -483,114 +488,121 @@
 			7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
 			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
 			9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
-            10, Build order graph window, dock with lower border of, Build order diagram window, dock with left border of, Build order window, 500, 50
+#			10, Build order graph window, dock with lower border of, Build order diagram window, dock with left border of, Build order window, 500, 50
+			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
 			11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
 		@END
 
-        @ADVANCED_TAB
-            0,  NULL window, absolute coordinates, 0, 0, 0, 0
+		@ADVANCED_TAB
+			0,  NULL window, absolute coordinates, 0, 0, 0, 0
 			1,  Main window, absolute coordinates, 0, 21, 1280, 1003
-            2,  Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
-            3,  The core window, dock center inside of, Main window, 500, 220
-            4,  Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
-            5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
-            6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
-            7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
-            8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
-            9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
-            10, Build order graph window, dock with lower border of, Build order diagram window, dock with left border of, Build order window, 500, 50
-            11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
-        @END
+			2,  Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
+			3,  The core window, dock center inside of, Main window, 500, 220
+			4,  Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
+			5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
+			6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
+			7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
+			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
+			9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
+#			10, Build order graph window, dock with lower border of, Build order diagram window, dock with left border of, Build order window, 500, 50
+			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
+			11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
+		@END
 
-        @EXPERT_TAB
-            0,  NULL window, absolute coordinates, 0, 0, 0, 0
+		@EXPERT_TAB
+			0,  NULL window, absolute coordinates, 0, 0, 0, 0
 			1,  Main window, absolute coordinates, 0, 21, 1280, 1003
-            2,  Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
-            3,  The core window, dock center inside of, Main window, 500, 220
-            4,  Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
-            5,  Build order window, dock right inside of, Main window, dock top inside of, Main window, 200, 100
-            6,  Force window, dock left inside of, Main window, dock top inside of, Main window, 300, 100
-            7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
-            8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
-            9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
-            10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
-            11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
-        @END
-                                                                                                                                                            
-        @GOSU_TAB
-            0,  NULL window, absolute coordinates, 0, 0, 0, 0
-			1,  Main window, absolute coordinates, 0, 21, 1280, 1003
-            2,  Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
-            3,  The core window, dock center inside of, Main window, 500, 220
-            4,  Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
-            5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
-            6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
-            7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
-            8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
-            9,  Build order diagram window, absolute y coordinate, 400, dock with left border of, Build order window, 500, 110
-            10, Build order graph window, dock with lower border of, Build order diagram window, dock with left border of, Build order window, 500, 50
-            11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
-        @END
+			2,  Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
+			3,  The core window, dock center inside of, Main window, 500, 220
+			4,  Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
+			5,  Build order window, dock with lower border of, Timer window, dock right inside of, Main window, 200, 100
+			6,  Force window, dock left inside of, Main window, dock with lower border of, NULL window, 300, 120
+#dock top inside of, Main window, 300, 100
+			7,  Timer window, dock top inside of, Main window, dock right inside of, Main window, 200, 120
+			8,  Statistics window, dock with right border of, Force window, dock top inside of, Main window, 500, 120
+			9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
+			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
+			11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
+		@END
 
-        @TRANSCENDEND_TAB
-            0,  NULL window, absolute coordinates, 0, 0, 0, 0
+		@GOSU_TAB
+			0,  NULL window, absolute coordinates, 0, 0, 0, 0
 			1,  Main window, absolute coordinates, 0, 21, 1280, 1003
-            2,  Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
-            3,  The core window, dock center inside of, Main window, 500, 220
-            4,  Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
-            5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
-            6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
-            7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
-            8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
-            9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
-            10, Build order graph window, dock with lower border of, Build order diagram window, dock with right border of, Force window, 500, 50
-            11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
-        @END
-                                                                                                                                                            
-        @MAP_TAB
-            0,  NULL window, absolute coordinates, 0, 0, 0, 0
-			1,  Main window, absolute coordinates, 0, 21, 1280, 1003
-            2,  Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
-            3,  The core window, dock center inside of, Main window, 500, 220
-            4,  Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
-            5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
-            6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
-            7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
-            8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
-            9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
-            10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
-            11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
-        @END
+			2,  Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
+			3,  The core window, dock center inside of, Main window, 500, 220
+			4,  Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
+			5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
+#			6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
+			6,  Force window, dock left inside of, Main window, dock top inside of, Main window, 300, 100
+			7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
+			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
+			9,  Build order diagram window, absolute y coordinate, 400, dock with left border of, Build order window, 500, 110
+			10, Build order graph window, dock with lower border of, Build order diagram window, dock with left border of, Build order window, 500, 50
+			11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
+		@END
 
-        @SETTINGS_TAB
-            0,  NULL window, absolute coordinates, 0, 0, 0, 0
+		@TRANSCENDEND_TAB
+			0,  NULL window, absolute coordinates, 0, 0, 0, 0
 			1,  Main window, absolute coordinates, 0, 21, 1280, 1003
-            2,  Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
-            3,  The core window, dock center inside of, Main window, 500, 220
-            4,  Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
-            5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
-            6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
-            7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
-            8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
-            9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
-            10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
-            11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
-        @END
-                                                                                                                                                            
-        @TUTORIAL_TAB
-            0,  NULL window, absolute coordinates, 0, 0, 0, 0
+			2,  Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
+			3,  The core window, dock center inside of, Main window, 500, 220
+			4,  Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
+			5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
+#			6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
+			6,  Force window, dock left inside of, Main window, dock top inside of, Main window, 300, 100
+			7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
+			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
+			9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
+			10, Build order graph window, dock with lower border of, Build order diagram window, dock with right border of, Force window, 500, 50
+			11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
+		@END
+
+		@MAP_TAB
+			0,  NULL window, absolute coordinates, 0, 0, 0, 0
 			1,  Main window, absolute coordinates, 0, 21, 1280, 1003
-            2,  Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
-            3,  The core window, dock center inside of, Main window, 500, 220
-            4,  Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
-            5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
-            6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
-            7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
-            8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
-            9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
-            10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
-            11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
-        @END
+			2,  Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
+			3,  The core window, dock center inside of, Main window, 500, 220
+			4,  Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
+			5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
+#			6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
+			6,  Force window, dock left inside of, Main window, dock top inside of, Main window, 300, 100
+			7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
+			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
+			9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
+			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
+			11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
+		@END
+
+		@SETTINGS_TAB
+			0,  NULL window, absolute coordinates, 0, 0, 0, 0
+			1,  Main window, absolute coordinates, 0, 21, 1280, 1003
+			2,  Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
+			3,  The core window, dock center inside of, Main window, 500, 220
+			4,  Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
+			5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
+#			6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
+			6,  Force window, dock left inside of, Main window, dock top inside of, Main window, 300, 100
+			7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
+			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
+			9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
+			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
+			11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
+		@END
+
+		@TUTORIAL_TAB
+			0,  NULL window, absolute coordinates, 0, 0, 0, 0
+			1,  Main window, absolute coordinates, 0, 21, 1280, 1003
+			2,  Message window, dock left inside of, Main window, dock bottom inside of, Main window, 300, 120
+			3,  The core window, dock center inside of, Main window, 500, 220
+			4,  Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
+			5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
+			6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
+			7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
+			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
+			9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
+			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
+			11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
+		@END
 
 	@END
 
@@ -602,123 +614,123 @@
 
 		@BASIC_TAB
 			0,  NULL window, same as above
-	        1,  Main window, same as above
-        	2,  Message window, same as above
-    	    3,  The core window, same as above
-	        4,  Tutorial window, calculate maxsize
+			1,  Main window, same as above
+			2,  Message window, same as above
+			3,  The core window, same as above
+			4,  Tutorial window, calculate maxsize
 			5,  Build order window, calculate maxheight
 			6,  Force window, calculate maxheight
 			7,  Timer window, same as above
 			8,  Statistics window, same as above
 			9,  Build order diagram window, same as above
-			10, Build order graph window, same as above
+			10, Build order graph window, calculate maxheight
 #dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 380
 			11, Info window, same as above
 		@END
 
 		@ADVANCED_TAB
 			0,  NULL window, same as above
-	        1,  Main window, same as above
-        	2,  Message window, same as above
-    	    3,  The core window, same as above
-	        4,  Tutorial window, calculate maxsize
+			1,  Main window, same as above
+			2,  Message window, same as above
+			3,  The core window, same as above
+			4,  Tutorial window, calculate maxsize
 			5,  Build order window, calculate maxheight
 			6,  Force window, calculate maxheight
 			7,  Timer window, same as above
 			8,  Statistics window, same as above
 			9,  Build order diagram window, same as above
-			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 380
+			10, Build order graph window, calculate maxheight
 			11, Info window, same as above
 		@END
 
 		@EXPERT_TAB
 			0,  NULL window, same as above
-	        1,  Main window, same as above
-        	2,  Message window, same as above
-    	    3,  The core window, same as above
-	        4,  Tutorial window, calculate maxsize
+			1,  Main window, same as above
+			2,  Message window, same as above
+			3,  The core window, same as above
+			4,  Tutorial window, calculate maxsize
 			5,  Build order window, calculate maxheight
-			6,  Force window, same as above
+			6,  Force window, calculate maxheight
 #calculate maxheight
 			7,  Timer window, same as above
 			8,  Statistics window, same as above
 			9,  Build order diagram window, same as above
-			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 380
+			10, Build order graph window, calculate maxheight
 			11, Info window, same as above
 		@END
 
 		@GOSU_TAB
 			0,  NULL window, same as above
-	        1,  Main window, same as above
-        	2,  Message window, same as above
-    	    3,  The core window, same as above
-	        4,  Tutorial window, calculate maxsize
+			1,  Main window, same as above
+			2,  Message window, same as above
+			3,  The core window, same as above
+			4,  Tutorial window, calculate maxsize
 			5,  Build order window, calculate maxheight
 			6,  Force window, calculate maxheight
 			7,  Timer window, same as above
 			8,  Statistics window, same as above
 			9,  Build order diagram window, same as above
-			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 380
+			10, Build order graph window, calculate maxheight
 			11, Info window, same as above
 		@END
 
 		@TRANSCENDEND_TAB
 			0,  NULL window, same as above
-	        1,  Main window, same as above
-        	2,  Message window, same as above
-    	    3,  The core window, same as above
-	        4,  Tutorial window, calculate maxsize
+			1,  Main window, same as above
+			2,  Message window, same as above
+			3,  The core window, same as above
+			4,  Tutorial window, calculate maxsize
 			5,  Build order window, calculate maxheight
 			6,  Force window, calculate maxheight
 			7,  Timer window, same as above
 			8,  Statistics window, same as above
 			9,  Build order diagram window, same as above
-			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 380
+			10, Build order graph window, calculate maxheight
 			11, Info window, same as above
 		@END
 
 		@MAP_TAB
 			0,  NULL window, same as above
-	        1,  Main window, same as above
-        	2,  Message window, same as above
-    	    3,  The core window, same as above
-	        4,  Tutorial window, calculate maxsize
+			1,  Main window, same as above
+			2,  Message window, same as above
+			3,  The core window, same as above
+			4,  Tutorial window, calculate maxsize
 			5,  Build order window, calculate maxheight
 			6,  Force window, calculate maxheight
 			7,  Timer window, same as above
 			8,  Statistics window, same as above
 			9,  Build order diagram window, same as above
-			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 380
+			10, Build order graph window, calculate maxheight
 			11, Info window, same as above
 		@END
 
 		@SETTINGS_TAB
 			0,  NULL window, same as above
-	        1,  Main window, same as above
-        	2,  Message window, same as above
-    	    3,  The core window, same as above
-	        4,  Tutorial window, calculate maxsize
+			1,  Main window, same as above
+			2,  Message window, same as above
+			3,  The core window, same as above
+			4,  Tutorial window, calculate maxsize
 			5,  Build order window, calculate maxheight
 			6,  Force window, calculate maxheight
 			7,  Timer window, same as above
 			8,  Statistics window, same as above
 			9,  Build order diagram window, same as above
-			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 380
+			10, Build order graph window, calculate maxheight
 			11, Info window, same as above
 		@END
 
 		@TUTORIAL_TAB
 			0,  NULL window, same as above
-	        1,  Main window, same as above
-        	2,  Message window, same as above
-    	    3,  The core window, same as above
-	        4,  Tutorial window, calculate maxsize
+			1,  Main window, same as above
+			2,  Message window, same as above
+			3,  The core window, same as above
+			4,  Tutorial window, calculate maxsize
 			5,  Build order window, calculate maxheight
 			6,  Force window, calculate maxheight
 			7,  Timer window, same as above
 			8,  Statistics window, same as above
 			9,  Build order diagram window, same as above
-			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 380
+			10, Build order graph window, calculate maxheight
 			11, Info window, same as above
 		@END
 
@@ -728,7 +740,8 @@
 
 @BUTTONS
 # startbrush, endbrush, starttextcolor, endtextcolor, startborderpen, endborderpen, bitmap
-#    DISABLED_BUTTON_PHASE,  NORMAL_BUTTON_PHASE,  PRESSED_BUTTON_PHASE,  HIGHLIGHT_BUTTON_PHASE, PRESSED_HIGHLIGHTED_BUTTON_PHASE                                                                               
+#	DISABLED_BUTTON_PHASE,  NORMAL_BUTTON_PHASE,  PRESSED_BUTTON_PHASE,  HIGHLIGHT_BUTTON_PHASE, PRESSED_HIGHLIGHTED_BUTTON_PHASE
+
 # continue button brush
 	0,	30, 2, 30, 30, 30, 31, 30,  30, 31, 30, 30, 30,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,   5,  5,  5,  5,  5,   5,  5,  5,  7,  7,   0,  0,  0,  0,  0
 # non-button force entry
@@ -754,5 +767,7 @@
 	15,	15, 2, 18, 18, 18, 18, 18,  18, 18, 29, 29, 29,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  31, 31, 31, 31, 31,  31, 31, 42, 42, 42,   0,  0,  0,  0,  0
 # main window tabs 
 	16,	30, 2, 30, 30, 32, 31, 32,  30, 31, 30, 32, 30,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,   5,  5,  5,  5,  5,   5,  5,  5,  7,  7,   0,  0,  0,  0,  0
+# force window add goal
+	16,	30, 2,  3,  3,  7,  3,  7,   3,  7,  3,  7,  3,   8,  8,  8,  8,  8,   9,  9,  9,  9,  9,   5,  5,  5,  5,  5,   5,  5,  5,  7,  7,   0,  0,  0,  0,  0
 @END
 

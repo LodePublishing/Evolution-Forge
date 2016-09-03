@@ -59,7 +59,7 @@ class UI_Window : public UI_Object
 		void process();
 	    void draw(DC* dc) const;
 		// reconfigure rectangles depending on current theme settings
-		void updateRectangles();
+		void updateRectangles(const int maxPlayer);
 
 		UI_Window(UI_Object* parent, const eString titleString, const eWindow window, const int windowNumber, const eIsScrolled isScrolled=SCROLLED, const eIsAutoAdjust isAutoAdjust=NO_AUTO_SIZE_ADJUST, const eIsTabbed isTabbed=NOT_TABBED, const Rect clientArea=Rect(0,0,9999,9999));
 		~UI_Window();
@@ -73,7 +73,8 @@ class UI_Window : public UI_Object
 		void updateBorders();
 
 		const eTab getCurrentTab() const;
-		void setCurrentTab(const eTab tab);
+
+		void forcePressTab(const eTab tab);
 
 	protected:
 //		bool isMouseInsideClientArea();
@@ -101,7 +102,7 @@ class UI_Window : public UI_Object
 
 // no set/get for title as this is unique and does not change
 		eString titleString;
-		string* titleParameter;
+		string titleParameter;
 		
 // this windows may have a scroll bar		
 //		UI_ScrollBar* scrollBar;

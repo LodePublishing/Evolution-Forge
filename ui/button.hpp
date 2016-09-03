@@ -150,8 +150,11 @@ enum eButtonMode
 class UI_Button:public UI_Object
 {
 	public:
+
 		UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eString normalText, eString pressedText, eButton button, eTextMode textMode=HORIZONTALLY_CENTERED_TEXT_MODE, eButtonMode buttonMode = STATIC_BUTTON_MODE, ePositionMode mode = DO_NOT_ADJUST, eFont font=SMALL_NORMAL_BOLD_FONT, eAutoSize autoSize=NO_AUTO_SIZE);
+
 		UI_Button(UI_Object* parent, Rect rect, Rect maxRect, string normalText, string pressedText, eButton button, eTextMode textMode=HORIZONTALLY_CENTERED_TEXT_MODE, eButtonMode buttonMode = STATIC_BUTTON_MODE, ePositionMode mode = DO_NOT_ADJUST, eFont font=SMALL_NORMAL_BOLD_FONT, eAutoSize autoSize=NO_AUTO_SIZE);
+
 		UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eButton button, eButtonMode buttonMode = STATIC_BUTTON_MODE, ePositionMode mode = DO_NOT_ADJUST);
 		~UI_Button();
 		
@@ -183,6 +186,8 @@ class UI_Button:public UI_Object
 		bool forcedPress;
 		void setButton(const eButton button);
 		void setFrameNumber(const int num);
+	
+		Rect buttonPlacementArea;
 	protected:
 		UI_StaticText* normalText;
 		UI_StaticText* pressedText;
@@ -190,35 +195,29 @@ class UI_Button:public UI_Object
         long int nextRepeat;     // timestamp for next repeat if held down
 	private:
 
-//		int gradient;
 		long int timeStamp;
 		
 		void adjustButtonSize(const Size size);
-		Rect currentSize;
-	
+//		Point absoluteCoord; // modificator if rect.GetPosition != real position
+		
 		eFont font;
 		eButton button;	
 		eAutoSize autoSize;
 		ePositionMode mode;
-
 		
 		void frameReset();
 		int frameNumber;
 		int statusFlags;
-		Rect buttonRect;
         bool firstPressed; // first press-message after the button was not pressed
 		
 //	TODO    int onMouseOverCursor;                 // bmap handle of special cursor used on mouseovers
   // TODO      int previousCursor;              // store old cursor
 //        void maybeShowCustomCursor();   // show different cursor when onmouseOverCursor is set => process()
   //      void restorePreviousCursor();   // reset to original state => frame_reset()
-	//	void maybeShowToolTip();
-	//	void hideToolTip();
+		void resetData();
 
-		bool hasToolTip;
+
 		bool hasBitmap;
-//		UI_ToolTip* toolTip;
-
 };
 
 class UI_Radio:public UI_Object

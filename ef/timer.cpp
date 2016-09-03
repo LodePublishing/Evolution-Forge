@@ -10,17 +10,19 @@ TimerWindow::TimerWindow(UI_Object* parent, ANARACE* anarace, const int windowNu
 
 // TODO irgendwas stimmt hier mit der Hoehe nicht
 	continueButton = new UI_Button(this, getRelativeClientRect(), getRelativeClientRect(), CLICK_TO_CONTINUE_STRING, CLICK_TO_PAUSE_STRING, MY_BUTTON, HORIZONTALLY_CENTERED_TEXT_MODE, STATIC_BUTTON_MODE, BOTTOM_CENTER, SMALL_NORMAL_BOLD_FONT, AUTO_HEIGHT_FULL_WIDTH);
+	continueButton->updateToolTip("Continue the optimization");
 			
 	resetData();
+	mode=1;
 };
 
 TimerWindow::~TimerWindow()
 {
-	if(goalsFulFilledText) delete(goalsFulFilledText);
-	if(currentActionText) delete(currentActionText);
-	if(timeText) delete(timeText);
-	if(continueButton) delete(continueButton);
-//	if(cbut) delete(cbut);
+	delete(goalsFulFilledText);
+	delete(currentActionText);
+	delete(timeText);
+	delete(continueButton);
+//	delete(cbut);
 };
 																				
 void TimerWindow::resetData()
@@ -31,7 +33,6 @@ void TimerWindow::resetData()
 		oldTime[i]=anarace->ga->maxTime;
 	}
 	lastTime=anarace->ga->maxTime;
-	mode=1;
 };
 
 void TimerWindow::process()
@@ -99,14 +100,14 @@ void TimerWindow::process()
 	}
 	else
 	{
-		goalsFulFilledText->updateText(theme.lookUpFormattedString(OF_GOALS_FULFILLED_STRING, anarace->getTimePercentage()));
+		goalsFulFilledText->updateText(theme.lookUpFormattedString(OF_GOALS_FULFILLED_STRING, anarace->getGoalPercentage()));
 		if(!anarace->isOptimizing())
 			currentActionText->updateText(PAUSED_STRING);
 		else
 			currentActionText->updateText(OPTIMIZING_STRING);
 	}
 	ostringstream os;
-	os << "[" << (anarace->ga->maxTime-anarace->getTimer())/60 << ":" << (anarace->ga->maxTime-anarace->getTimer())%60 << "]";
+	os << "[" << (anarace->ga->maxTime-anarace->getTimer())/60 << ":" << setfill('0') << setw(2) << (anarace->ga->maxTime-anarace->getTimer())%60 << "]";
 	timeText->updateText(os.str());
 
 	}

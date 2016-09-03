@@ -50,7 +50,7 @@ void EXPORT SETTINGS::initDefaults()
 // ------ CONTROL FUNCTIONS ------
 // -------------------------------
 
-void EXPORT SETTINGS::initSoup()
+void EXPORT SETTINGS::assignRunParametersToSoup()
 {
 //	soup.initializeMap(start.getMap()); //???? TODO
 	// set GA and START on prerace and soup
@@ -253,7 +253,7 @@ void SETTINGS::loadSettingsFile(const string& settingsFile)
 		string index=text.substr(start, stop);
 		string value;
 		map<string, list<string> >::iterator i;
-		if(index=="@STRINGS")
+		if(index=="@SETTINGS")
 		{
 				map<string, list<string> > block;
 				parse_block(pFile, block);

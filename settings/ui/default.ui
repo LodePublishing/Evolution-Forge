@@ -91,9 +91,28 @@
 		72, Expert
 		73, Gosu
 		74, Transcendend
-		75, Map
+		75, Map & Goals
 		76, Settings
 		77, Help
+# tooltips:
+        78, add a unit
+        79, remove a unit
+        80, remove a goal
+        81, Choose Terra, Protoss or Zerg
+        82, Add goals to the list
+        83, Choose predefined goal list
+        84, Choose predefined starting force
+
+		85, total amount of units at the end
+		86, time of best build order
+		87, total harvested minerals
+		88, total harvested gas
+		89, average fitness of all programs
+		90, fitness variance of all programs
+		91, length of build order in items
+		92, minimum number of generations left
+
+
 	@END
 
 	@GERMAN
@@ -185,9 +204,27 @@
 		72, Experte
 		73, Gosu
 		74, Transzendent
-		75, Karte
+		75, Karte & Ziele
 		76, Einstellungen
 		77, Hilfe
+# tooltips:
+		78, add a unit
+		79, remove a unit
+		80, remove a goal
+		81, Choose Terra, Protoss or Zerg
+		82, Add goals to the list
+		83, Choose predefined goal list
+		84, Choose predefined starting force
+
+        85, total amount of units at the end
+        86, time of best build order
+        87, total harvested minerals
+        88, total harvested gas
+        89, average fitness of all programs
+        90, fitness variance of all programs
+        91, length of build order in items
+        92, minimum number of generations left
+		
 	@END
 
 @END
@@ -304,7 +341,7 @@
 #   bo length text colour 
 		22, 100, 150, 200
 #	generations left text colour
-		23, 100, 100, 255
+		23, 200,   0,   0
 
 	@END
 
@@ -378,6 +415,8 @@
 			40, 1,  50,  50, 100, SOLID
 			41, 1, 100,  50,  50, SOLID
 			42, 1,  50, 100,  50, SOLID
+# green timesteps pen
+			43, 1,  20, 100,  20, SOLID
 		@END
 	@END
 
@@ -491,9 +530,8 @@
 			5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
 			6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
 			7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
-			8,  Statistics window, dock with right border of, Force window, dock top inside of, Main window, 500, 120
-			9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
-#			10, Build order graph window, dock with lower border of, Build order diagram window, dock with left border of, Build order window, 500, 50
+			8,  Statistics window, dock with right border of, Force window, dock top inside of, Main window, 420, 120
+			9,  Build order diagram window, dock with right border of, Force window, dock with lower border of, Statistics window, 500, 110
 			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
 			11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
 		@END
@@ -507,9 +545,8 @@
 			5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
 			6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
 			7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
-			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
-			9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
-#			10, Build order graph window, dock with lower border of, Build order diagram window, dock with left border of, Build order window, 500, 50
+			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 120
+			9,  Build order diagram window, dock with right border of, Force window, dock with lower border of, Statistics window, 500, 110
 			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
 			11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
 		@END
@@ -524,8 +561,8 @@
 			6,  Force window, dock left inside of, Main window, dock with lower border of, NULL window, 300, 120
 #dock top inside of, Main window, 300, 100
 			7,  Timer window, dock top inside of, Main window, dock right inside of, Main window, 200, 120
-			8,  Statistics window, dock with right border of, Force window, dock top inside of, Main window, 500, 120
-			9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
+			8,  Statistics window, dock with right border of, Force window, dock top inside of, Main window, 420, 120
+			9,  Build order diagram window, dock with right border of, Force window, dock with lower border of, Statistics window, 500, 110
 			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
 			11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
 		@END
@@ -538,9 +575,9 @@
 			4,  Tutorial window, dock right inside of, Main window, dock with lower border of, Timer window, 500, 500
 			5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
 #			6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
-			6,  Force window, dock left inside of, Main window, dock top inside of, Main window, 300, 100
+			6,  Force window, dock top inside of, Main window, dock left inside of, Main window, 300, 100
 			7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
-			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
+			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 120
 			9,  Build order diagram window, absolute y coordinate, 400, dock with left border of, Build order window, 500, 110
 			10, Build order graph window, dock with lower border of, Build order diagram window, dock with left border of, Build order window, 500, 50
 			11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
@@ -556,7 +593,7 @@
 #			6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
 			6,  Force window, dock left inside of, Main window, dock top inside of, Main window, 300, 100
 			7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
-			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
+			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 120
 			9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
 			10, Build order graph window, dock with lower border of, Build order diagram window, dock with right border of, Force window, 500, 50
 			11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
@@ -572,7 +609,7 @@
 #			6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
 			6,  Force window, dock left inside of, Main window, dock top inside of, Main window, 300, 100
 			7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
-			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
+			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 120
 			9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
 			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
 			11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
@@ -588,7 +625,7 @@
 #			6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
 			6,  Force window, dock left inside of, Main window, dock top inside of, Main window, 300, 100
 			7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
-			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
+			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 120
 			9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
 			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
 			11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
@@ -603,7 +640,7 @@
 			5,  Build order window, dock right inside of, Main window, dock with lower border of, Timer window, 200, 100
 			6,  Force window, dock left inside of, Main window, absolute y coordinate, 200, 300, 100
 			7,  Timer window, dock right inside of, Main window, dock top inside of, Main window, 200, 120
-			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 500, 120
+			8,  Statistics window, dock with left border of, Timer window, dock top inside of, Main window, 420, 120
 			9,  Build order diagram window, dock with right border of, Force window, absolute y coordinate, 400, 500, 110
 			10, Build order graph window, dock with right border of, Force window, dock with lower border of, Build order diagram window, 500, 50
 			11, Info window, dock with left border of, Build order window, dock top inside of, Main window, 200, 110
@@ -655,8 +692,7 @@
 			3,  The core window, same as above
 			4,  Tutorial window, calculate maxsize
 			5,  Build order window, calculate maxheight
-			6,  Force window, calculate maxheight
-#calculate maxheight
+			6,  Force window, same position as above, 300, 500
 			7,  Timer window, same as above
 			8,  Statistics window, same as above
 			9,  Build order diagram window, same as above
@@ -759,20 +795,32 @@
 	4,	20, 2,  6,  6,  6,  5,  6,   6,  6,  6,  5,  6,   1,  1,  1,  1,  1,   1,  1,  1,  1,  1,   0,  0,  0, 17, 17,   0,  0,  0, 16,  16,   3,  3,  3,  3,  3
 
 # bo list
-	5,	15, 2,  8,  8,  8,  8,  8,   8,  8, 19, 19, 19,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  21, 21, 21, 21, 21,  21, 21, 32, 32, 32,   0,  0,  0,  0,  0
-	6,	15, 2,  9,  9,  9,  9,  9,   9,  9, 20, 20, 20,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  22, 22, 22, 22, 22,  33, 33, 33, 33, 33,   0,  0,  0,  0,  0
-	7,	15, 2, 10, 10, 10, 10, 10,  10, 10, 21, 21, 21,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  23, 23, 23, 23, 23,  23, 23, 34, 34, 34,   0,  0,  0,  0,  0
-	8,	15, 2, 11, 11, 11, 11, 11,  11, 11, 22, 22, 22,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  24, 24, 24, 24, 24,  24, 24, 35, 35, 35,   0,  0,  0,  0,  0
-	9,	15, 2, 12, 12, 12, 12, 12,  12, 12, 23, 23, 23,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  25, 25, 25, 25, 25,  25, 25, 36, 36, 36,   0,  0,  0,  0,  0
-	10,	15, 2, 13, 13, 13, 13, 13,  13, 13, 24, 24, 24,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  26, 26, 26, 26, 26,  26, 26, 37, 37, 37,   0,  0,  0,  0,  0
-	11,	15, 2, 14, 14, 14, 14, 14,  14, 14, 25, 25, 25,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  27, 27, 27, 27, 27,  27, 27, 38, 38, 38,   0,  0,  0,  0,  0
-	12,	15, 2, 15, 15, 15, 15, 15,  15, 15, 26, 26, 26,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  28, 28, 28, 28, 28,  28, 28, 39, 39, 39,   0,  0,  0,  0,  0
-	13,	15, 2, 16, 16, 16, 16, 16,  16, 16, 27, 27, 27,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  29, 29, 29, 29, 29,  29, 29, 40, 40, 40,   0,  0,  0,  0,  0
-	14,	15, 2, 17, 17, 17, 17, 17,  17, 17, 28, 28, 28,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  30, 30, 30, 30, 30,  30, 30, 41, 41, 41,   0,  0,  0,  0,  0
-	15,	15, 2, 18, 18, 18, 18, 18,  18, 18, 29, 29, 29,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,  31, 31, 31, 31, 31,  31, 31, 42, 42, 42,   0,  0,  0,  0,  0
+	5,	15, 2,  8,  8,  8,  8,  8,   8,  8, 19, 19, 19,  16, 16, 16, 16, 16,  10, 10, 10, 10, 10, 21, 21, 21, 21, 21,  21, 21, 32, 32, 32,   0,  0,  0,  0,  0
+	6,	15, 2,  9,  9,  9,  9,  9,   9,  9, 20, 20, 20,  16, 16, 16, 16, 16,  10, 10, 10, 10, 10, 22, 22, 22, 22, 22,  33, 33, 33, 33, 33,   0,  0,  0,  0,  0
+	7,	15, 2, 10, 10, 10, 10, 10,  10, 10, 21, 21, 21,  16, 16, 16, 16, 16,  10, 10, 10, 10, 10, 23, 23, 23, 23, 23,  23, 23, 34, 34, 34,   0,  0,  0,  0,  0
+	8,	15, 2, 11, 11, 11, 11, 11,  11, 11, 22, 22, 22,  16, 16, 16, 16, 16,  10, 10, 10, 10, 10, 24, 24, 24, 24, 24,  24, 24, 35, 35, 35,   0,  0,  0,  0,  0
+	9,	15, 2, 12, 12, 12, 12, 12,  12, 12, 23, 23, 23,  16, 16, 16, 16, 16,  10, 10, 10, 10, 10, 25, 25, 25, 25, 25,  25, 25, 36, 36, 36,   0,  0,  0,  0,  0
+	10,	15, 2, 13, 13, 13, 13, 13,  13, 13, 24, 24, 24,  16, 16, 16, 16, 16,  10, 10, 10, 10, 10, 26, 26, 26, 26, 26,  26, 26, 37, 37, 37,   0,  0,  0,  0,  0
+	11,	15, 2, 14, 14, 14, 14, 14,  14, 14, 25, 25, 25,  16, 16, 16, 16, 16,  10, 10, 10, 10, 10, 27, 27, 27, 27, 27,  27, 27, 38, 38, 38,   0,  0,  0,  0,  0
+	12,	15, 2, 15, 15, 15, 15, 15,  15, 15, 26, 26, 26,  16, 16, 16, 16, 16,  10, 10, 10, 10, 10, 28, 28, 28, 28, 28,  28, 28, 39, 39, 39,   0,  0,  0,  0,  0
+	13,	15, 2, 16, 16, 16, 16, 16,  16, 16, 27, 27, 27,  16, 16, 16, 16, 16,  10, 10, 10, 10, 10, 29, 29, 29, 29, 29,  29, 29, 40, 40, 40,   0,  0,  0,  0,  0
+	14,	15, 2, 17, 17, 17, 17, 17,  17, 17, 28, 28, 28,  16, 16, 16, 16, 16,  10, 10, 10, 10, 10, 30, 30, 30, 30, 30,  30, 30, 41, 41, 41,   0,  0,  0,  0,  0
+	15,	15, 2, 18, 18, 18, 18, 18,  18, 18, 29, 29, 29,  16, 16, 16, 16, 16,  10, 10, 10, 10, 10, 31, 31, 31, 31, 31,  31, 31, 42, 42, 42,   0,  0,  0,  0,  0
 # main window tabs 
-	16,	30, 2, 30, 30, 32, 31, 32,  30, 31, 30, 32, 30,  16, 16, 16, 16, 16,  14, 14, 14, 14, 14,   5,  5,  5,  5,  5,   5,  5,  5,  7,  7,   0,  0,  0,  0,  0
+	16,	30, 2, 30, 30, 32, 31, 32,  30, 31, 30, 32, 30,  16, 16, 16, 16, 16,  10, 10, 10, 10, 10,  5,  5,  5,  5,  5,   5,  5,  5,  7,  7,   0,  0,  0,  0,  0
 # force window add goal
-	16,	30, 2,  3,  3,  7,  3,  7,   3,  7,  3,  7,  3,   8,  8,  8,  8,  8,   9,  9,  9,  9,  9,   5,  5,  5,  5,  5,   5,  5,  5,  7,  7,   0,  0,  0,  0,  0
+	17,	30, 2,  3,  3,  7,  3,  7,   3,  7,  3,  7,  3,   8,  8,  8,  8,  8,  10,  9,  9,  9,  9,   5,  5,  5,  5,  5,   5,  5,  5,  7,  7,   0,  0,  0,  0,  0
+
+# statistics 
+	18,	30, 2,  2,  2,  3,  2,  3,   2,  3,  2,  3,  2,   18, 18, 18, 18, 18,   10, 10, 10, 10, 10,  3,  3,  3,  3,  3,   3,  3,  3,  7,  7,   0,  0,  0,  0,  0
+	19,	30, 2,  2,  2,  3,  2,  3,   2,  3,  2,  3,  2,   19, 19, 19, 19, 19,   10, 10, 10, 10, 10,  3,  3,  3,  3,  3,   3,  3,  3,  7,  7,   0,  0,  0,  0,  0
+	20,	30, 2,  2,  2,  3,  2,  3,   2,  3,  2,  3,  2,   11, 11, 11, 11, 11,   10, 10, 10, 10, 10,  3,  3,  3,  3,  3,   3,  3,  3,  7,  7,   0,  0,  0,  0,  0
+	21,	30, 2,  2,  2,  3,  2,  3,   2,  3,  2,  3,  2,   13, 13, 13, 13, 13,   10, 10, 10, 10, 10,  3,  3,  3,  3,  3,   3,  3,  3,  7,  7,   0,  0,  0,  0,  0
+
+	22,	30, 2,  2,  2,  3,  2,  3,   2,  3,  2,  3,  2,   20, 20, 20, 20, 20,   10, 10, 10, 10, 10,  3,  3,  3,  3,  3,   3,  3,  3,  7,  7,   0,  0,  0,  0,  0
+	23,	30, 2,  2,  2,  3,  2,  3,   2,  3,  2,  3,  2,   21, 21, 21, 21, 21,   10, 10, 10, 10, 10,  3,  3,  3,  3,  3,   3,  3,  3,  7,  7,   0,  0,  0,  0,  0
+	24,	30, 2,  2,  2,  3,  2,  3,   2,  3,  2,  3,  2,   22, 22, 22, 22, 22,   10, 10, 10, 10, 10,  3,  3,  3,  3,  3,   3,  3,  3,  7,  7,   0,  0,  0,  0,  0
+	25,	30, 2,  2,  2,  3,  2,  3,   2,  3,  2,  3,  2,   23, 23, 23, 23, 23,   10, 10, 10, 10, 10,  3,  3,  3,  3,  3,   3,  3,  3,  7,  7,   0,  0,  0,  0,  0
+
 @END
 

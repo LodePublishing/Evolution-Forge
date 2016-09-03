@@ -63,7 +63,7 @@ class Player : public UI_Object
 		
 	private:
 		void drawGeneString(DC* dc, const Rect position) const;
-
+		
 		UI_Window* window[MAX_WINDOWS]; 
 		ANARACE** anarace; //pointer auf pointer, weil sich der pointer ja veraendert!
 		int geneAnimation;

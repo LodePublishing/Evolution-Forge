@@ -336,7 +336,7 @@ void BoWindow::process()
 			boEntry[i]->Hide();
 	
 	if(resetButton->isPressed())
-		settings.initSoup();
+		settings.assignRunParametersToSoup();
 
 	if(addSpeed->isPressed() && (settings.getSpeed()>0))
 		settings.setSpeed(settings.getSpeed()-1);
@@ -347,7 +347,8 @@ void BoWindow::process()
 
 void BoWindow::draw(DC* dc) const
 {
-	if(!shown) return;
+	if(!shown) 
+		return;
 	UI_Window::draw(dc);
 
 	drawSelectionStuff(dc);

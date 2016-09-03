@@ -29,14 +29,26 @@ class ForceEntry : public UI_Button
 		void updateText(string utext);
 		void process();
 		void draw(DC* dc) const;
-		int oldForce;
-		eUnitType type;
-		int total;
-		int goal;
+
+		void setTargetForce(const int force);
+
+		void setType(const eUnitType type);
+		const eUnitType getType() const;
+		void setTotal(const int total);
+		void setGoal(const int goal);
 	private:
 		UI_Button* addUnit;
    		UI_Button* subUnit;
 		UI_Button* cancelUnit;
+        
+
+		int startForce;
+		int targetForce;
+		int currentForce;
+		
+		eUnitType type;
+		int total;
+		int goal;
 };
 
 
@@ -69,8 +81,14 @@ class ForceWindow:public UI_Window
 		
 		int markedUnit;
 		ANARACE* anarace;
-		int oldForceList[UNIT_TYPE_COUNT];
+//		int oldForceList[UNIT_TYPE_COUNT];
 		int currentUnitType;
+
+		int unitTypeCount[UNIT_TYPE_TYPES];
+		int startUnitTypeCount[UNIT_TYPE_TYPES];
+		int currentUnitTypeCount[UNIT_TYPE_TYPES];
+		int targetUnitTypeCount[UNIT_TYPE_TYPES];
+	    int totalUnits;
 
 		UnitMenu* unitMenu;
 		GoalMenu* goalMenu;

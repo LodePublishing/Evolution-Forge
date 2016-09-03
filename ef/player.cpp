@@ -404,12 +404,14 @@ void Player::checkForChange()
 	}
 }
 
+
+
 void Player::CheckOrders()
 {
 	int k=0;
 																			   
 	for(int s=MAX_LENGTH;s--;)
-		if((*anarace)->getProgramIsBuilt(s)&&((*anarace)->getProgramTime(s)<=(*anarace)->ga->maxTime-(*anarace)->getTimer()))
+		if((*anarace)->getProgramIsBuilt(s)&&((*anarace)->getProgramTime(s)<=(*anarace)->getRealTimer()))
 		{
 			map<long, Order>::iterator order=orderList.find((*anarace)->getMarker(s)) ;// => found old one -> update the data!
 			if(order!=orderList.end())
@@ -454,7 +456,7 @@ void Player::CheckOrders()
 						neuorder.bonew=true;
 						orderList.insert(pair<long, Order>((*anarace)->getMarker(s), neuorder));
 						map<long, Order>::iterator temp=order;
-						temp++;										
+						temp++;
 						orderList.erase(order);
 						order=temp;
 					}
@@ -481,7 +483,6 @@ void Player::CheckOrders()
 
 		map<long, Order>::iterator order=orderList.begin();
 		while(order!=orderList.end())
-		{
 			if(!order->second.checked)
 			{
 				map<long, Order>::iterator temp=order;
@@ -494,22 +495,18 @@ void Player::CheckOrders()
 				order->second.checked=false;
 				order++;
 			}
-		}
 }
+
+
+
 
 void Player::MoveOrders() 
 {
 	for(map<long, Order>::iterator order=orderList.begin(); order!=orderList.end(); ++order)
 	{
-		move(order->second.rect.x,order->second.start.x,order->second.target.x);
-		move(order->second.rect.y,order->second.start.y,order->second.target.y);
-		move(order->second.rect.width,order->second.start.width,order->second.target.width);
-		move(order->second.rect.height,order->second.start.height,order->second.target.height);
+		move(order->second.rect, order->second.start, order->second.target);
 
-		move(order->second.brect.x,order->second.bstart.x,order->second.btarget.x);
-		move(order->second.brect.y,order->second.bstart.y,order->second.btarget.y);
-		move(order->second.brect.width,order->second.bstart.width,order->second.btarget.width);
-		move(order->second.brect.height,order->second.bstart.height,order->second.btarget.height);
+		move(order->second.brect, order->second.bstart, order->second.btarget);
 
 		move(order->second.blend, order->second.blendStart, order->second.blendTarget);
 	}

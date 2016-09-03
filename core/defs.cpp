@@ -34,6 +34,8 @@ const int LARVA_MAX = 200;
 //const int MAX_HARVEST_SPEEDS = 100;
 const int MAX_SUPPLY = 200;
 
+const int MAX_TOTAL_UNITS = 600; // 600 because larva max is 600... in addition 600 should be low enough to find bugs concerning uninitialized values
+
 const int MAX_GENERATIONS = 10000;
 const int MIN_GENERATIONS = 100;
 

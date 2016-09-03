@@ -90,7 +90,7 @@ public:
 // todo evtl error codes...
 	
 	ANARACE** newGeneration(ANARACE* oldAnarace[MAX_PLAYER]);
-	void initSoup(); //?
+	void assignRunParametersToSoup();
 
 	SETTINGS();
 	~SETTINGS();

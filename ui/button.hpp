@@ -176,6 +176,8 @@ class UI_Button:public UI_Object
 	
         long int nextRepeat;     // timestamp for next repeat if held down
 	private:
+		int gradient;
+		
 		long int timeStamp;
 		
 		void adjustButtonSize(const Size size);

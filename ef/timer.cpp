@@ -31,9 +31,9 @@ void TimerWindow::resetData()
 	for(int i=20;i--;)
 	{
 		oldTimeCounter[i]=0;
-		oldTime[i]=anarace->ga->maxTime;
+		oldTime[i]=MAX_TIME;
 	}
-	lastTime=anarace->ga->maxTime;
+	lastTime=MAX_TIME;
 	currentTime=MAX_TIME;
 }
 
@@ -47,7 +47,7 @@ void TimerWindow::process()
 	
 	if(getCurrentMode()==1)
 	{																	
-/*		if(anarace->ga->maxTime-anarace->getTimer()<lastTime)
+/*		if(anarace->getRealTimer()<lastTime)
 		{
 			int i=0;
 			while(oldTimeCounter[i]>0)
@@ -59,7 +59,7 @@ void TimerWindow::process()
 			oldTime[i]=lastTime;
 		}
 	
-	lastTime=anarace->ga->maxTime-anarace->getTimer();
+	lastTime=anarace->getRealTimer();
 																				
 	for(int i=0;i<20;i++)
 		for(int j=0;j<i;j++)
@@ -108,14 +108,14 @@ void TimerWindow::process()
 		else
 			currentActionText->updateText(OPTIMIZING_STRING);
 	}
-	if(anarace->ga->maxTime-anarace->getTimer()<currentTime)
+	if(anarace->getRealTimer()<currentTime)
 	{
-		currentTime -= (currentTime - (anarace->ga->maxTime-anarace->getTimer()))/2;
-	    if(anarace->ga->maxTime-anarace->getTimer()<currentTime)
+		currentTime -= (currentTime - (anarace->getRealTimer()))/2;
+	    if(anarace->getRealTimer()<currentTime)
 			currentTime--;
 	}
 	ostringstream os;
-//	os << "[" << (anarace->ga->maxTime-anarace->getTimer())/60 << ":" << setfill('0') << setw(2) << (anarace->ga->maxTime-anarace->getTimer())%60 << "]";
+//	os << "[" << (anarace->getRealTimer())/60 << ":" << setfill('0') << setw(2) << (anarace->getRealTimer())%60 << "]";
 	os << "[" << currentTime/60 << ":" << setfill('0') << setw(2) << currentTime%60 << "]";
 	timeText->updateText(os.str());
 

@@ -28,24 +28,65 @@ class UI_Window : public UI_Object
 {
 	public:
 // returns position and size of the client area
-		const Rect getRelativeClientRect() const;
-		const Rect getAbsoluteClientRect() const;
-		const Point getRelativeClientRectPosition() const;
-		const Point getAbsoluteClientRectPosition() const;
-	   	const int getClientRectHeight() const;
-	    const int getClientRectWidth() const;
+		const Rect getRelativeClientRect() const {
+		    return(clientRect);
+		}
+			
+		const Rect getAbsoluteClientRect() const {
+		    return(Rect(getAbsoluteClientRectPosition(),getClientRectSize()));
+		}
 	
-		const Size getClientRectSize() const;
-		
-		const int getRelativeClientRectUpperBound() const;
-	    const int getRelativeClientRectLeftBound() const;
-   		const int getRelativeClientRectLowerBound() const;
-		const int getRelativeClientRectRightBound() const;
+		const Point getRelativeClientRectPosition() const {
+		    return(clientRect.GetPosition());
+		}
+	
+		const Point getAbsoluteClientRectPosition() const {
+		    return(clientRect.GetPosition()+getAbsolutePosition());
+		}
+	
+	   	const int getClientRectHeight() const {
+		    return(clientRect.height);
+		}			
 
-		const int getAbsoluteClientRectUpperBound() const;
-	    const int getAbsoluteClientRectLeftBound() const;
-   		const int getAbsoluteClientRectLowerBound() const;
-		const int getAbsoluteClientRectRightBound() const;
+		const int getClientRectWidth() const {
+		    return(clientRect.width);
+		}
+	
+		const Size getClientRectSize() const {
+		    return(clientRect.GetSize());
+		}
+		
+		const int getRelativeClientRectUpperBound() const {
+		    return(clientRect.y);
+		}
+	
+	    const int getRelativeClientRectLeftBound() const {
+		    return(clientRect.x);
+		}
+	
+   		const int getRelativeClientRectLowerBound() const {
+		    return(clientRect.y+clientRect.height);
+		}
+	
+		const int getRelativeClientRectRightBound() const {
+		    return(clientRect.x+clientRect.width);
+		}
+	
+
+		const int getAbsoluteClientRectUpperBound() const {
+			return(getAbsoluteClientRectPosition().y);
+		}
+	    const int getAbsoluteClientRectLeftBound() const {
+		    return(getAbsoluteClientRectPosition().x);
+		}
+	
+   		const int getAbsoluteClientRectLowerBound() const {
+		    return(getAbsoluteClientRectPosition().y+getClientRectHeight());
+		}
+		const int getAbsoluteClientRectRightBound() const {
+		    return(getAbsoluteClientRectPosition().x+getClientRectWidth());
+		}
+	
 
 		
 		const bool insideClientRect(const Point pos) const;
@@ -78,7 +119,6 @@ class UI_Window : public UI_Object
 
 		void forcePressTab(const eTab tab);
 
-		static SDL_Rect rectlist[100];
 		static int rectnumber;
 
 	protected:

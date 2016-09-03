@@ -21,7 +21,6 @@ protected:
 
 	
 	const START_CONDITION* const* pStartCondition; //pointer to player in start
-	GOAL_ENTRY** pGoal; // pStart->getGoal()
 
 	const static BASIC_MAP* const* pMap; // MAP is all the same for all players using 'start
 //------------- end -------------------------------
@@ -48,34 +47,43 @@ protected:
 	const bool calculateReady() const;
 	void adjustAvailibility(const int location, const int fac, const UNIT_STATISTICS* stat);
 	void adjustLocationUnitsAfterCompletion(const int location, const eFacilityType facilityType, const int facility, const int facility2);
-	void calculateFinalTimes(const int location, const int type);
 	const int calculatePrimaryFitness(const bool ready) const;
-	void replaceCode(const int IP, const int num);
+	void replaceCode(const int IP, const int code);
 
 	int larvaInProduction[MAX_LOCATIONS]; // well... one of that ugly race-specific variables saves a lot of trouble...
 
-
+//TODO: PlayerNum von anarace ist irgendwie 2 statt 1 oder so ... auch ist die Frage wie was upgedatet wird...
+//		 Deutlich durchsichtiger machen...
 	const int calculateIdleTime() const; // calculate the next time something significant will happen
+	GOAL_ENTRY* getpGoal() const {
+		return(*pGoal);
+	}
+	static GA* ga;
+
 private:
+	GOAL_ENTRY** pGoal; // pStart->getGoal()
 	int playerNum;
 	int minerals,gas,timer;
 	int IP;
 	int mineralHarvestPerSecond[MAX_LOCATIONS][45];
 	int gasHarvestPerSecond[MAX_LOCATIONS][5];
 	int harvestedGas,harvestedMinerals;
+	int wastedGas,wastedMinerals;
 	int needSupply;		// free supply
 	int haveSupply; // total supply
-	int ftime[MAX_GOALS]; //when the goal is reached / when the last item is produced (ALL locations...*/
+//	int ftime[MAX_GOALS]; //when the goal is reached / when the last item is produced (ALL locations...*/
 	int length,timeout;
+
+	int Code[MAX_LENGTH];
+	int Marker[MAX_LENGTH];
+
 public:
 
 // ------ PUBLIC VARIABLES ------
 
-	int Code[MAX_LENGTH];
-	int Marker[MAX_LENGTH];
-	static GA* ga;
 
 	static void assignStart(START* start);
+	static void assignGA(GA* pga);
 	static void initNoise();
 	static void copyMap(); //copies the startforce from map to static 'units'
 	static const BASIC_MAP* const* getMap(); 	
@@ -90,16 +98,31 @@ public:
 	const int getGasHarvestPerSecond(const int location, const int worker) const;
 	const int getHarvestedMinerals() const;
 	const int getHarvestedGas() const;
-	void setHarvestedMinerals(const int minerals);
-	void setHarvestedGas(const int gas);
+	void setHarvestedMinerals(const int harvestedMinerals);
+	void setHarvestedGas(const int harvestedGas);
 	
+	const int getWastedMinerals() const;
+	const int getWastedGas() const;
+	void setWastedMinerals(const int minerals);
+	void setWastedGas(const int gas);
+
 // ------ INITIALIZATION ROUTINES ------
 	static void resetGeneMarker();
 	void setPlayerNum(const int playerNum); // assigns player data from start (start minerals, supply etc.) and sets the appropriate optimized pointers (global, location, pMap etc.) CALL IT AFTER EACH MAP CHANGE AND PLAYER CHANGE!!
 	void initializePlayer();
 	void prepareForNewGeneration();
 
+	void eraseIllegalCode();
+	void eraseUselessCode();
+	void mutateGeneCode();
+	void resetGeneCode();//resets either to a pre-processed buildorder or a completely random one*/
+	void crossOver(PRERACE* parent2, PRERACE* child1, PRERACE* child2);
+	
 // ------ GET/SET ROUTINES ------
+	const int getCode(const int IP) const;
+	const int getCurrentCode() const;
+	const int getMarker(const int IP) const;
+	void copyCode(PRERACE& player);
 
 	void addLarvaToQueue(const int location);
 	void removeLarvaFromQueue(const int location);
@@ -113,20 +136,20 @@ public:
 	const static int getMapLocationAvailible(const int player, const int location, const int unittype);
 	const static int getMapLocationTotal(const int player, const int location, const int unittype);
 																				
-	static void setMapLocationAvailible(const int player, const int location, const int unittype, const int num);
-	static void setMapLocationTotal(const int player, const int location, const int unittype, const int num);
+	static void setMapLocationAvailible(const int player, const int location, const int unittype, const int availible);
+	static void setMapLocationTotal(const int player, const int location, const int unittype, const int total);
 																				
-	static void addMapLocationAvailible(const int player, const int location, const int unittype, const int num);
-	static void addMapLocationTotal(const int player, const int location, int unittype, const int num);
+	static void addMapLocationAvailible(const int player, const int location, const int unittype, const int availible);
+	static void addMapLocationTotal(const int player, const int location, int unittype, const int total);
 																				
 	const int getLocationAvailible(const int location, const int unittype) const;
 	const int getLocationTotal(const int location, const int unittype) const;
 																				
-	void setLocationAvailible(const int location, int unittype, int num);
-	void setLocationTotal(int location, const int unittype, int num);
+	void setLocationAvailible(const int location, int unittype, int availible);
+	void setLocationTotal(int location, const int unittype, int total);
 																				
-	void addLocationAvailible(const int location, const int unittype, const int num);
-	void addLocationTotal(const int location, const int unittype, const int num);
+	void addLocationAvailible(const int location, const int unittype, const int availible);
+	void addLocationTotal(const int location, const int unittype, const int total);
 
 	void addOneLocationAvailible(const int location, const int unittype);
 	void addOneLocationTotal(const int location, const int unittype);
@@ -149,6 +172,7 @@ public:
 
 	void setTimer(const int time);
 	const int getTimer() const;
+	const int getRealTimer() const;
 
 	void setTimeOut(const int time);
 	const int getTimeOut() const;
@@ -156,10 +180,9 @@ public:
 	const int getIP() const;
 	void setIP(const int IP);
 
-
-
-	void setFinalTime(const int goal, const int time);
-	const int getFinalTime(const int goal) const;
+	//void setFinalTime(const int goal, const int time);
+//	const int getFinalTime(const int goal) const;
+	
 	const int getLength() const;
 	void setLength(const int length);
 		

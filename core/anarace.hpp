@@ -57,6 +57,7 @@ EXPORT class ANARACE: public PRERACE
 		int goalPercentage;
 		void setCurrentpFitness(int num);
 		int currentpFitness;
+		int averageLength;
 		int phaenoCode[MAX_LENGTH];		// the final build order: an array of unit numbers (as defined in main.h)
 	public:
 		const int getUnitsTotalMax() const;
@@ -73,7 +74,9 @@ EXPORT class ANARACE: public PRERACE
 		const bool isActive() const;
 		void setActive(const bool active=true);
 
-		int fitnessCode[MAX_GOALS];
+		const int getAverageLength() const;
+			
+//		int fitnessCode[MAX_GOALS]; ???
 
 		int fitnessAverage;
        	int fitnessVariance;
@@ -82,14 +85,11 @@ EXPORT class ANARACE: public PRERACE
 		int negativeCrossover;
 // external data output
 
-		const int getMarker(const int IP) const;
-
 
 //		const bool getProgramIsConstant(const int IP) const;
 
 		const int getTimePercentage() const;
 		const int getGoalPercentage() const;
-		const int getProgramCode(const int IP) const;
 		const int getProgramSuccessType(const int IP) const;	// determines the type of the last error before the item was built at that IP
 		const int getProgramSuccessUnit(const int IP) const;	// what unit was missing? (connected to successtype)
 		

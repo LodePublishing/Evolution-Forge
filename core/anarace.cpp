@@ -36,6 +36,7 @@ void ANARACE::resetData()
 	unitsTotalMax=4;
 	timePercentage=0;
 	goalPercentage=0;
+	averageLength=0;
 }
 
 
@@ -97,18 +98,15 @@ const bool EXPORT ANARACE::calculateStep()
 			setTimer(0);
 		while(!buildingQueue.empty())
             buildingQueue.pop();
-	
+
 		for(int i=MAX_LENGTH;i--;)
-			phaenoCode[i]=(*pGoal)->toPhaeno(Code[i]);
-	//	if((*pGoal)->getMode()==0)
+			phaenoCode[i]=getpGoal()->toPhaeno(getCode(i));
+	//	if(getpGoal()->getMode()==0)
 			setCurrentpFitness(calculatePrimaryFitness(ready));
 		
 // ------ ANARACE SPECIFIC ------
 		countUnitsTotal();
-		int maxPoints=0;
-		for(int i=MAX_GOALS;i--;)
-			if((*pGoal)->goal[i].count>0)
-				maxPoints+=100;
+		int maxPoints=getpGoal()->countGoals();
 		if(maxPoints>0)
 			goalPercentage = 100 * currentpFitness / maxPoints;
 		else goalPercentage = 0;
@@ -123,7 +121,7 @@ const bool EXPORT ANARACE::calculateStep()
 // set needed_ to maximum to determine the minimum of minerals/gas our jobs need (needed_ is set in buildGene)
 		neededMinerals=MAX_MINERALS;
 		neededGas=MAX_GAS;
-		ok=buildGene((*pGoal)->toPhaeno(Code[getIP()]));
+		ok=buildGene(getpGoal()->toPhaeno(getCurrentCode()));
 		
 		if(successType>0)
 		{
@@ -136,7 +134,7 @@ const bool EXPORT ANARACE::calculateStep()
 
 		if((ok)||(!getTimeOut())) {
 			if(ok) {
-				setProgramTime(getIP(), ga->maxTime-getTimer());
+				setProgramTime(getIP(), getRealTimer());
 			} else {
 				setProgramTime(getIP(),ga->maxTime);
 				setProgramSuccessType(getIP(),TIMEOUT_ERROR);
@@ -155,11 +153,18 @@ const bool EXPORT ANARACE::calculateStep()
 
 //  ------ LEAP FORWARD IN TIME ------
 	int t=calculateIdleTime();
+    int oldMinerals = getMinerals();
+    int oldGas = getGas();
+
 	t=1;
 	setMinerals(getMinerals()+harvestMinerals()*t);
 	setHarvestedMinerals(getHarvestedMinerals()+harvestMinerals()*t);
+//    setWastedMinerals(getWastedMinerals() + oldMinerals*t + (getMinerals() - oldMinerals) * t / 2);
+	
 	setGas(getGas()+harvestGas()*t);
 	setHarvestedGas(getHarvestedGas()+harvestGas()*t);
+  //  setWastedGas(getWastedGas() + oldGas*t + (getGas() - oldGas) * t / 2);
+
 	setTimeOut(getTimeOut()-t);
 	setTimer(getTimer()-t);
 //  ------ END LEAP FORWARD IN TIME ------
@@ -190,14 +195,14 @@ const bool EXPORT ANARACE::calculateStep()
 				adjustMineralHarvest(build.getLocation());
 				adjustGasHarvest(build.getLocation());
 			} else 
-			if((build.getType()==LARVA)&&((*pGoal)->getRace()==ZERG)&&(!buildGene(LARVA))) {
+			if((build.getType()==LARVA)&&(getpGoal()->getRace()==ZERG)&&(!buildGene(LARVA))) {
 				removeLarvaFromQueue(build.getLocation());
 			}
 // ------ END SPECIAL RULES ------
 
 			
 // ------ CHECK WHETHER WE ARE READY ------
-			calculateFinalTimes(build.getLocation(), build.getType());
+			getpGoal()->calculateFinalTimes(build.getLocation(), build.getType(), getRealTimer());
 			ready=calculateReady();
 // ------ END CHECK ------
 
@@ -369,7 +374,7 @@ const bool ANARACE::buildGene(const int unit)
 
 			if(ok)
 			{
-					if((*pGoal)->getRace()==ZERG)
+					if(getpGoal()->getRace()==ZERG)
 					{
 						if((*pStats)[unit].facility[0]==LARVA)
 						{
@@ -524,7 +529,7 @@ void EXPORT ANARACE::removeOrder(const int IP)
 				program[j+1].built=program[j].built;
 		}
 	for(int j=0;j<MAX_LENGTH;j++)
-		phaenoCode[j]=(*pGoal)->toPhaeno(Code[j]);
+		phaenoCode[j]=getpGoal()->toPhaeno(Code[j]);
 	(*pStartCondition)->wasChanged(); // to allow update of time etc. of anarace
 };
 
@@ -547,17 +552,17 @@ void EXPORT ANARACE::insertOrder(int unit, int position)
 		program[j].built=program[j+1].built;
 	}
 	
-	if((*pGoal)->allGoal[unit]==0)
+	if(getpGoal()->allGoal[unit]==0)
 	{
-		(*pGoal)->addGoal(unit,1,0,0);
+		getpGoal()->addGoal(unit,1,0,0);
 		(*pStartCondition)->changeAccepted();
 	}
-	replaceCode(i,(*pGoal)->toGeno(unit));
+	replaceCode(i,getpGoal()->toGeno(unit));
 	
 	program[i].built=1;
 
 	for(int j=0;j<MAX_LENGTH;j++)
-		phaenoCode[j]=(*pGoal)->toPhaeno(Code[j]); 
+		phaenoCode[j]=getpGoal()->toPhaeno(Code[j]); 
 	(*pStartCondition)->wasChanged(); // to allow update of time etc. of anarace
 }
 */
@@ -596,39 +601,39 @@ const int ANARACE::maximum(const int unit) const
 {
 /*	int max=0;
 	int t=0;
-	if((stats[(*pGoal)->getRace()][unit].facility[0])&&(!getMap()->location[0].force[1][stats[(*pGoal)->getRace()][unit].facility[0]])&&(stats[(*pGoal)->getRace()][unit].facility[0]!=unit))
+	if((stats[getpGoal()->getRace()][unit].facility[0])&&(!getMap()->location[0].force[1][stats[getpGoal()->getRace()][unit].facility[0]])&&(stats[getpGoal()->getRace()][unit].facility[0]!=unit))
 	{
-		t=needTime(stats[(*pGoal)->getRace()][unit].facility[0]);
+		t=needTime(stats[getpGoal()->getRace()][unit].facility[0]);
 		if(t>max) max=t;
 		t=0;
 	}
-		if((stats[(*pGoal)->getRace()][unit].facility[1])&&(!getMap()->location[0].force[1][stats[(*pGoal)->getRace()][unit].facility[1]]))
+		if((stats[getpGoal()->getRace()][unit].facility[1])&&(!getMap()->location[0].force[1][stats[getpGoal()->getRace()][unit].facility[1]]))
 		{
-				t=needTime(stats[(*pGoal)->getRace()][unit].facility[1]);
+				t=needTime(stats[getpGoal()->getRace()][unit].facility[1]);
 				if(t>max) max=t;
 				t=0;
 		}
-		if((stats[(*pGoal)->getRace()][unit].facility[2])&&(!getMap()->location[0].force[1][stats[(*pGoal)->getRace()][unit].facility[2]]))
+		if((stats[getpGoal()->getRace()][unit].facility[2])&&(!getMap()->location[0].force[1][stats[getpGoal()->getRace()][unit].facility[2]]))
 		{
-				t=needTime(stats[(*pGoal)->getRace()][unit].facility[2]);
+				t=needTime(stats[getpGoal()->getRace()][unit].facility[2]);
 				if(t>max) max=t;
 				t=0;
 		}
-		if((stats[(*pGoal)->getRace()][unit].prerequisite[0])&&(!getMap()->location[0].force[1][stats[(*pGoal)->getRace()][unit].prerequisite[0]]))
+		if((stats[getpGoal()->getRace()][unit].prerequisite[0])&&(!getMap()->location[0].force[1][stats[getpGoal()->getRace()][unit].prerequisite[0]]))
 		{
-				t=needTime(stats[(*pGoal)->getRace()][unit].prerequisite[0]);
+				t=needTime(stats[getpGoal()->getRace()][unit].prerequisite[0]);
 				if(t>max) max=t;
 				t=0;
 		}
-		if((stats[(*pGoal)->getRace()][unit].prerequisite[1])&&(!getMap()->location[0].force[1][stats[(*pGoal)->getRace()][unit].prerequisite[1]]))
+		if((stats[getpGoal()->getRace()][unit].prerequisite[1])&&(!getMap()->location[0].force[1][stats[getpGoal()->getRace()][unit].prerequisite[1]]))
 		{
-				t=needTime(stats[(*pGoal)->getRace()][unit].prerequisite[1]);
+				t=needTime(stats[getpGoal()->getRace()][unit].prerequisite[1]);
 				if(t>max) max=t;
 				t=0;
 		}
-		if((stats[(*pGoal)->getRace()][unit].prerequisite[2])&&(!getMap()->location[0].force[1][stats[(*pGoal)->getRace()][unit].prerequisite[2]]))
+		if((stats[getpGoal()->getRace()][unit].prerequisite[2])&&(!getMap()->location[0].force[1][stats[getpGoal()->getRace()][unit].prerequisite[2]]))
 		{
-				t=needTime(stats[(*pGoal)->getRace()][unit].prerequisite[2]);
+				t=needTime(stats[getpGoal()->getRace()][unit].prerequisite[2]);
 				if(t>max) max=t;
 				t=0;
 		}
@@ -639,7 +644,7 @@ const int ANARACE::maximum(const int unit) const
 const int ANARACE::needTime(const int unit) const
 {
 //	if(!getMap()->location[0].force[1][unit])
-//		return(stats[(*pGoal)->getRace()][unit].BT+maximum(unit)); //eigene Bauzeit + Bauzeit der Prerequisites/Facilities
+//		return(stats[getpGoal()->getRace()][unit].BT+maximum(unit)); //eigene Bauzeit + Bauzeit der Prerequisites/Facilities
 //	else return(0);
 	return(0);
 }
@@ -652,8 +657,8 @@ void EXPORT ANARACE::countUnitsTotal()
 	{
 		if (getLocationTotal(GLOBAL, i) > unitsTotalMax)
 			unitsTotalMax = getLocationTotal(GLOBAL, i);
-		if ((*pGoal)->allGoal[i] > unitsTotalMax)
-			unitsTotalMax = (*pGoal)->allGoal[i];
+		if (getpGoal()->getAllGoal(i) > unitsTotalMax)
+			unitsTotalMax = getpGoal()->getAllGoal(i);
 		unitsTotal += getLocationTotal(GLOBAL, i);;
 	}
 }
@@ -666,10 +671,16 @@ void EXPORT ANARACE::countUnitsTotal()
 // ------ GET/SET FUNCTIONS ------
 // -------------------------------
 
+const int EXPORT ANARACE::getAverageLength() const
+{
+	return(averageLength);
+}
+
+
 const int EXPORT ANARACE::getUnitsTotalMax() const
 {
 #ifdef _SCC_DEBUG
-	if((unitsTotalMax<0)||(unitsTotalMax>MAX_SUPPLY)) {
+	if((unitsTotalMax<0)||(unitsTotalMax>MAX_TOTAL_UNITS*UNIT_TYPE_COUNT*MAX_LOCATIONS)) {
 		toLog("DEBUG: (ANARACE::getUnitsTotalMax): Variable not initialized.");return(0);
 	}
 #endif
@@ -679,7 +690,7 @@ const int EXPORT ANARACE::getUnitsTotalMax() const
 const int EXPORT ANARACE::getUnitsTotal() const
 {
 #ifdef _SCC_DEBUG
-	if((unitsTotal<0)||(unitsTotal>MAX_SUPPLY)) {
+	if((unitsTotal<0)||(unitsTotal>MAX_TOTAL_UNITS*UNIT_TYPE_COUNT*MAX_LOCATIONS)) {
 		toLog("DEBUG: (ANARACE::getUnitsTotal): Variable not initialized.");return(0);
 	}
 #endif
@@ -704,29 +715,6 @@ const bool EXPORT ANARACE::isOptimizing() const
 void EXPORT ANARACE::setOptimizing(const bool optimizing)
 {
 	this->optimizing=optimizing;
-}
-
-const int EXPORT ANARACE::getMarker(const int IP) const
-{
-#ifdef _SCC_DEBUG
-	if((IP<0)||(IP>MAX_LENGTH)) {
-		toLog("DEBUG: (ANARACE::getMarker): Value IP out of range.");return(0);
-	}
-#endif
-	return(Marker[IP]); 
-}
-
-const int EXPORT ANARACE::getProgramCode(int IP) const
-{
-#ifdef _SCC_DEBUG
-	if((IP<0)||(IP>=MAX_LENGTH)) {
-		toLog("DEBUG: (ANARACE::getProgramCode): Value IP out of range.");return(0);
-	}
-	if((Code[IP]<0)||(Code[IP]>=UNIT_TYPE_COUNT)) {
-		toLog("DEBUG: (ANARACE::getProgramCode): Variable Code not initialized.");return(0);
-	}
-#endif					
-	return(Code[IP]);
 }
 
 const int EXPORT ANARACE::getProgramFacility(const int IP) const
@@ -798,7 +786,7 @@ void EXPORT ANARACE::setProgramAvailibleCount(const int IP, const int unit, cons
 	if((unit<0)||(unit>=UNIT_TYPE_COUNT)) {
 		toLog("DEBUG: (ANARACE::setProgramAvailibleCount): Value unit out of range.");return;
 	}
-	if((count<0)||(count>=MAX_SUPPLY)) {
+	if((count<0)||(count>=MAX_TOTAL_UNITS)) {
 		toLog("DEBUG: (ANARACE::setProgramAvailibleCount): Value count out of range.");return;
 	}
 #endif
@@ -814,7 +802,7 @@ void EXPORT ANARACE::setProgramTotalCount(const int IP, const int unit, const in
 	if((unit<0)||(unit>=UNIT_TYPE_COUNT)) {
 		toLog("DEBUG: (ANARACE::setProgramTotalCount): Value unit out of range.");return;
 	}
-	if((count<0)||(count>=MAX_SUPPLY)) {
+	if((count<0)||(count>=MAX_TOTAL_UNITS)) {
 		toLog("DEBUG: (ANARACE::setProgramTotalCount): Value count out of range.");return;
 	}
 #endif
@@ -1298,7 +1286,7 @@ void EXPORT ANARACE::setMaxtFitness(const int maxtFitness)
 	{
 		tGoal[i]=0;
 		for(int j=1;j<MAX_LOCATIONS;j++)
-			tGoal[i]+=(*pGoal)->globalGoal[j][i]-pStartcondition->getLocationTotal(j,i);
+			tGoal[i]+=getpGoal()->globalGoal[j][i]-pStartcondition->getLocationTotal(j,i);
 	}
 
 	for(int i=0;i<MAX_LENGTH;i++)

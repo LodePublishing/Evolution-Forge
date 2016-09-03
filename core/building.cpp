@@ -46,7 +46,7 @@ const int EXPORT Building::getType() const
 const int EXPORT Building::getUnitCount() const
 {
 #ifdef _SCC_DEBUG
-	if((unitCount<0)||(unitCount>MAX_SUPPLY)) {
+	if((unitCount<0)||(unitCount>MAX_TOTAL_UNITS)) {
 		toLog("DEBUG: Building::getUnitCount): Variable not initialized.");return(0);
 	}
 #endif

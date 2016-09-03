@@ -28,7 +28,7 @@ UI_StaticText::~UI_StaticText()
 {
 }
 
-const Size UI_StaticText::getSize() const
+const Size UI_StaticText::getTextSize() const
 {
 	int dx,dy;
 	theme.lookUpFont(font)->GetTextExtent(text.c_str(), &dx, &dy);
@@ -82,7 +82,11 @@ void UI_StaticText::process()
 
 void UI_StaticText::updateText(const string text)
 {
+	if(this->text!=text) setNeedRedraw();
+	else setNeedRedraw(false);
 	this->text=text;
+	if(mode==NO_TEXT_MODE)
+		setSize(getTextSize());
 }
 
 void UI_StaticText::updateText(const eString text)

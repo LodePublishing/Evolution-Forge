@@ -23,6 +23,23 @@ void Main::process()
 	else ani=1;
 	if(ani>30) ani=1;
 
+	if(update==2)
+	{
+		for(int i=settings.getMap(0)->getMaxPlayer();i--;)
+			if(player[i]->isShown())
+				player[i]->CheckOrders();
+/*		ANARACE** temp;
+//TODO: nach Ende eines Durchlaufs ist anarace 0, aber viele anderen Teile des Codes greifen noch drauf zu!!
+		if((temp=settings.newGeneration(anarace)))
+		{
+			for(int i=settings.getMap(0)->getMaxPlayer();i--;)
+			{
+				anarace[i]=temp[i];
+//			  if(anarace[i]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=1;} TODO
+			}
+		};*/
+	}
+	update=1;
 	mainWindow->process();
 	if(mainWindow->tabWasChanged())
 	{
@@ -65,8 +82,8 @@ void Main::process()
 		} // end switch getCurrentTabs
 		for(int i=0;i<2;i++)
 			player[i]->setMode(mainWindow->getCurrentTab(), i);
-		player[0]->CheckOrders();
-		player[1]->CheckOrders();
+//		player[0]->CheckOrders();
+//		player[1]->CheckOrders();
 
 		UI_Object::theme.setTab(mainWindow->getCurrentTab());
 		
@@ -93,23 +110,7 @@ void Main::process()
 		player[i]->checkForChange();
 	
 	settings.checkForChange();
-	if(update==2)
-	{
-		for(int i=settings.getMap(0)->getMaxPlayer();i--;)
-			if(player[i]->isShown())
-				player[i]->CheckOrders();
-/*		ANARACE** temp;
-//TODO: nach Ende eines Durchlaufs ist anarace 0, aber viele anderen Teile des Codes greifen noch drauf zu!!
-		if((temp=settings.newGeneration(anarace)))
-		{
-			for(int i=settings.getMap(0)->getMaxPlayer();i--;)
-			{
-				anarace[i]=temp[i];
-//			  if(anarace[i]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=1;} TODO
-			}
-		};*/
-	}
-	update=1;
+
 
 	if(endrun)
 	{
@@ -147,9 +148,9 @@ const int Main::isOptimizing()
 void Main::helper(DC* dc, int i, int &dx, int &dy, const string& str) const
 {
 	dc->SetTextForeground(toSDL_Color(
-				(0==ani%(20+i))*200+((0==ani%(19+i))+(0==ani%(21+i)))*50,
-				(0==ani%(20+i))*200+((0==ani%(19+i))+(0==ani%(21+i)))*50,
-				(0==ani%(20+i))*200+((0==ani%(19+i))+(0==ani%(21+i)))*100+50));
+				(Uint8)((0==ani%(20+i))*200+((0==ani%(19+i))+(0==ani%(21+i)))*50),
+				(Uint8)((0==ani%(20+i))*200+((0==ani%(19+i))+(0==ani%(21+i)))*50),
+				(Uint8)((0==ani%(20+i))*200+((0==ani%(19+i))+(0==ani%(21+i)))*100+50)));
 	dc->DrawText(str.substr(str.size()-1, str.size()), mainWindow->getAbsoluteClientRectPosition()+Point(20+dx,20));
 	dc->GetTextExtent(str.c_str(),&dx,&dy);
 }
@@ -172,9 +173,7 @@ void Main::drawGizmo(DC* dc) const
 
 void Main::draw(DC* dc) const
 {
-	SDL_BlitSurface(*UI_Object::theme.lookUpBitmap(BACKGROUND_SPACE_BITMAP) , 0, dc->GetSurface(), 0 );
-
-
+//	SDL_BlitSurface(*UI_Object::theme.lookUpBitmap(BACKGROUND_SPACE_BITMAP) , 0, dc->GetSurface(), 0 );
 	if(mainWindow->isShown())
 	{
 		mainWindow->draw(dc);
@@ -281,7 +280,7 @@ void Main::Init(DC* dc)
 
 //	settings.assignStartconditionHarvestSpeed();
 		
-	settings.initSoup(); // assign START of settings
+	settings.assignRunParametersToSoup(); // assign START and GA of settings to soup
 	// initializes players, initializes Map
 	
 	update=0;
@@ -355,7 +354,7 @@ int main(/*int argc, char **argv*/)
 	int vx=1280;
 	int vy=1024;
 	int FULLSCREEN=0;
- 	SDL_Rect c;c.x=0;c.y=0;c.w=1280;c.h=1024;
+ 	SDL_Rect c;c.x=0;c.y=0;c.w=vx;c.h=vy;
 	if (FULLSCREEN==1)
 		screen=new DC(SDL_SetVideoMode(c.w, c.h, 32, SDL_HWSURFACE|SDL_FULLSCREEN));
 	else
@@ -377,18 +376,17 @@ int main(/*int argc, char **argv*/)
 	int screenshot=100;
 	while(true)
 	{
-		UI_Window::rectnumber=0;
+		UI_Object::rectnumber=0;
 		m.process();
 		m.OnIdle();
 		m.draw(screen);
 		
-//		SDL_UpdateRects(screen->GetSurface(), 7, &(UI_Window::rectlist[0]));
+//		SDL_UpdateRects(screen->GetSurface(), UI_Object::rectnumber, &(UI_Object::rectlist[0]));
+		SDL_UpdateRect(screen->GetSurface(),0,0,0,0);
+	    SDL_SetClipRect(screen->GetSurface(), &c);
+//        SDL_Flip(screen->GetSurface());
 		
 		SDL_framerateDelay(fpsmanager);
-
-		
-//		if(fullupdate)
-			SDL_UpdateRect(screen->GetSurface(),0,0,0,0);
 
 		if(fullupdate)
 		{

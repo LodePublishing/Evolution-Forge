@@ -22,11 +22,12 @@ RACE::~RACE()
 
 const int RACE::calculateSecondaryFitness() const
 {
-	int tsF=getHarvestedMinerals()+getHarvestedGas();
+	// total gathered resources minus minerals that were not used
+	int tsF=getHarvestedMinerals() + getHarvestedGas();// - (getWastedMinerals() + getWastedGas()) / getRealTimer();
 	//TODO: evtl gas und minerals (wie urspruenglich eigentlich) in Verhaeltnis setyen wieviel es jeweils Geysire/Mineralien gibt...	
-		for(int i=GAS_SCV+1;i--;)
-			if(((*pGoal)->allGoal[i]>0)&&((*pGoal)->allGoal[i]+(*pStartCondition)->getLocationTotal(GLOBAL, i)<getLocationTotal(GLOBAL, i)))
-				tsF-=((*pStartCondition)->getLocationTotal(GLOBAL, i)-(*pStartCondition)->getLocationTotal(GLOBAL,i)-(*pGoal)->allGoal[i])*(stats[(*pGoal)->getRace()][i].gas+stats[(*pGoal)->getRace()][i].minerals);
+	for(int i=GAS_SCV+1;i--;)
+		if((getpGoal()->getAllGoal(i)>0)&&(getpGoal()->getAllGoal(i)+(*pStartCondition)->getLocationTotal(GLOBAL, i)<getLocationTotal(GLOBAL, i)))
+			tsF-=((*pStartCondition)->getLocationTotal(GLOBAL, i)-(*pStartCondition)->getLocationTotal(GLOBAL,i)-getpGoal()->getAllGoal(i))*(stats[getpGoal()->getRace()][i].gas+stats[getpGoal()->getRace()][i].minerals);
 	return(tsF);
 }
 
@@ -42,7 +43,7 @@ const bool RACE::calculateStep()
 		setLength(ga->maxLength-getIP());
 		if(!ready) 
 			setTimer(0);
-//		if((*pGoal)->getMode()==0)
+//		if(getpGoal()->getMode()==0)
 			setpFitness(calculatePrimaryFitness(ready));
 		while(!buildingQueue.empty())
 			buildingQueue.pop();
@@ -64,7 +65,7 @@ const bool RACE::calculateStep()
 // set needed_ to maximum to determine the minimum of minerals/gas our jobs need (needed_ is set in buildGene)
 		neededMinerals=MAX_MINERALS;
 		neededGas=MAX_GAS;
-		ok=buildGene((*pGoal)->toPhaeno(Code[getIP()]));
+		ok=buildGene(getpGoal()->toPhaeno(getCurrentCode()));
 		
 		if((ok)||(!getTimeOut()))
 		{
@@ -82,10 +83,17 @@ const bool RACE::calculateStep()
 
 //  ------ LEAP FORWARD IN TIME ------
 	int t=calculateIdleTime();
+	int oldMinerals = getMinerals();
+	int oldGas = getGas();
+
 	setMinerals(getMinerals()+harvestMinerals()*t);
 	setHarvestedMinerals(getHarvestedMinerals()+harvestMinerals()*t);
+//	setWastedMinerals(getWastedMinerals() + oldMinerals*t + (getMinerals() - oldMinerals) * t / 2);
+
 	setGas(getGas()+harvestGas()*t);
 	setHarvestedGas(getHarvestedGas()+harvestGas()*t);
+//	setWastedGas(getWastedGas() + oldGas*t + (getGas() - oldGas) * t / 2);
+			
 	setTimeOut(getTimeOut()-t);
 	setTimer(getTimer()-t);
 //  ------ END LEAP FORWARD IN TIME ------
@@ -125,7 +133,7 @@ const bool RACE::calculateStep()
 
 			
 // ------ CHECK WHETHER WE ARE READY ------
-			calculateFinalTimes(build.getLocation(), build.getType());
+			getpGoal()->calculateFinalTimes(build.getLocation(), build.getType(), getRealTimer());
 			ready=calculateReady();
 // ------ END CHECK -------
 			
@@ -262,7 +270,7 @@ const bool RACE::buildGene(const int unit)
 //		Phagen ueber Phagen...			
 				if(ok)
 				{
-					if((*pGoal)->getRace()==ZERG)
+					if(getpGoal()->getRace()==ZERG)
 					{
 						if((*pStats)[unit].facility[0]==LARVA)
 						{
@@ -414,244 +422,6 @@ const bool RACE::buildGene(const int unit)
 	return(ok);
 }
 
-void RACE::eraseIllegalCode()
-{
-	for(int i=MAX_LENGTH;i--;)
-		if(Code[i]>=(*pGoal)->getMaxBuildTypes())
-			Code[i]=0;
-/*		{
-			for(int k=i;k--;)
-				Code[k+1]=Code[k];
-			Code[0]=0;
-		}*/
-}
-void RACE::eraseUselessCode()
-{
-	int allUnits[UNIT_TYPE_COUNT];
-	for(int i=UNIT_TYPE_COUNT;i--;)
-		allUnits[i]=getLocationTotal(GLOBAL,i);
-	for(int i=MAX_LENGTH;i--;)
-	{
-		bool ok=true;
-		for(int k=3;k--;)
-			ok&=((stats[(*pGoal)->getRace()][(*pGoal)->toPhaeno(Code[i])].prerequisite[k]==0)||
-				 (allUnits[stats[(*pGoal)->getRace()][(*pGoal)->toPhaeno(Code[i])].prerequisite[k]]));
-//WTF? allUnits mit prerequisite vergleichen!?
-
-//TODO so ganz sauber is des net
-		if(!ok)
-		{
-			for(int k=i;k--;)
-				Code[k+1]=Code[k];
-			Code[0]=0;
-		}
-		else
-			allUnits[(*pGoal)->toPhaeno(Code[i])]++;
-	}
-}
-
-void RACE::mutateGeneCode()
-{
-// TODO logger machen, welche Mutationsart besonders erfolgreich ist
-	if(getLength()==0) 
-		setLength(MAX_LENGTH);
-//		return;
-/*	if(rand()%100==0)
-	{
-	   		if(mutationRate>50)
-			mutationRate-=rand()%50;
-		else mutationRate+=rand()%50;
-	}*/
-	int force[GAS_SCV+1];
-	bool buildable[GAS_SCV+1];
-	int tMaxBuildTypes;
-	int tGeno[GAS_SCV+1]; // !! keine anderen units drueber nehmen!
-	for(int i=GAS_SCV+1;i--;)
-	if((*pGoal)->isBuildable[i])
-	{
-		force[i]=((*pStartCondition)->getLocationTotal(GLOBAL,i)>0); //set start force
-		if(force[i]) buildable[i]=true;
-		tGeno[i]=0;
-	}
-	else 
-	{
-		force[i]=0;
-		buildable[i]=false;
-		tGeno[i]=0;
-	}
-
-	for(int x=MAX_LENGTH;x--;) //length
-	{
-		if(x<MAX_LENGTH-1) { // erstes nicht einbeziehen
-			force[(*pGoal)->toPhaeno(Code[x+1])]=1;
-		}
-		
-		for(int i=GAS_SCV+1;i--;)
-		{
-			if(force[i]) buildable[i]=true;
-			if(((*pStats)[i].prerequisite[0])&&(force[(*pStats)[i].prerequisite[0]])) buildable[i]=true;
-			if(((*pStats)[i].prerequisite[1])&&(force[(*pStats)[i].prerequisite[1]])) buildable[i]=true;
-			if(((*pStats)[i].prerequisite[2])&&(force[(*pStats)[i].prerequisite[2]])) buildable[i]=true;
-			if(((*pStats)[i].facility[0])&&(force[(*pStats)[i].facility[0]])) buildable[i]=true;
-			if(((*pStats)[i].facility[1])&&(force[(*pStats)[i].facility[1]])) buildable[i]=true;
-			if(((*pStats)[i].facility[2])&&(force[(*pStats)[i].facility[2]])) buildable[i]=true;
-		}
-		tMaxBuildTypes=0;
-		for(int i=GAS_SCV+1;i--;)
-			if(buildable[i])
-			{
-				if(!(*pGoal)->isBuildable[i])
-					buildable[i]=false;
-				else
-				{
-					tGeno[tMaxBuildTypes]=(*pGoal)->toGeno(i);
-					tMaxBuildTypes++;
-				}
-			}
-		
-//alle ueberpruefen, ob die ueberhaupt baubar sind... aber von hinten her!
- 
-		if(ga->getMutationFactor()==0)
-			return;
-		if(rand()%(MAX_LENGTH*100/ga->getMutationFactor())==0)
-		{
-			switch(rand()%4)
-			{
-				//TODO: wenn generateBuildOrder==1 dann bleibts stehen!
-				case 0://delete one variabel entry and move - Mehrere Schmieden/Kasernen etc. zulassen!
-				{
-//					if((((*pGoal)->isVariable[Code[0][x]]==1)&&((*pGoal)->isVariable[Code[1][x]]==1))||(!ga->preprocessBuildOrder)) TODO
-						//TODO: ueberlegen, ob Code evtl struct sein sollte... mmmh
-						for(int i=x;i<MAX_LENGTH-1;i++)
-						{
-							Code[i]=Code[i+1];
-							Marker[i]=Marker[i+1];
-						}
-					// TODO hier auch das buildable und tMaxBuildTypes rein... irgendwie den Code als "mutier mich" markieren und spaetereinfuegen
-					markerCounter++;Marker[MAX_LENGTH-1]=markerCounter;
-					int y;
-//					if(ga->preprocessBuildOrder) // TODO
-//					while((*pGoal)->isVariable[y]==0) y=rand()%(*pGoal)->getMaxBuildTypes();
-//					else	
-					y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
-					Code[MAX_LENGTH-1]=y;
-//					if(ga->preprocessBuildOrder) // TODO
-//					while((*pGoal)->isVariable[y]==0) y=rand()%(*pGoal)->getMaxBuildTypes();
-//					else
-//					y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
-//					Code[1][MAX_LENGTH-1]=y;
-				}break;
-				case 1://add one variable entry
-				{
-					for(int i=MAX_LENGTH-1;i>x;i--)
-					{
-						Code[i]=Code[i-1];
-						Marker[i]=Marker[i-1];
-					
-					}
-					//todo: BUG! player not initialized!very rare
-					markerCounter++;Marker[x]=markerCounter;
-					int y;
-//					if(ga->preprocessBuildOrder) TODO
-//						while((*pGoal)->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
-//					else
-					y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
-					Code[x]=y;
-//					if(ga->preprocessBuildOrder)
-//						while((*pGoal)->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//rand()%(*pGoal)->getMaxBuildTypes();
-//					else
-				}break;
-				case 2://change one entry
-				{
-//					if((*pGoal)->isVariable[Code[k][x]]==1) TODO
-					{
-						int y;
-						//int y=rand()%(*pGoal)->getMaxBuildTypes();//Optimieren
-//						if(ga->preprocessBuildOrder) TODO
-//							while((*pGoal)->isVariable[y]==0) y=tGeno[rand()%tMaxBuildTypes];//rand()%(*pGoal)->getMaxBuildTypes();
-//						else						
-						y=tGeno[rand()%tMaxBuildTypes];//(*pGoal)->getMaxBuildTypes();
-						Code[x]=y;
-						markerCounter++;Marker[x]=markerCounter;
-					}
-				}break;
-				case 3://exchange two entries
-					{
-						//hier erst recht
-						int y=rand()%MAX_LENGTH/2+rand()%MAX_LENGTH/2-x;
-//						y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
-//						if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH;
-						if((y>0)&&(x!=y)&&
-						   (buildable[(*pGoal)->toPhaeno(Code[y])]))
-						{
-							int l;
-							l=Code[x];Code[x]=Code[y];Code[y]=l;
-							l=Marker[x];Marker[x]=Marker[y];Marker[y]=l;
-						}
-					}break;
-//				case 5://move a block of orders  [a..b..ta..tb..c..d] -> [a..ta..tb..b..c..d]
-					//~~~TODO bug, marker und code wird nicht richtig verschoben
-/*					if(getLength()>2)
-					{
-						int i,ta,tb,ttt,y;
-						ta=rand()%(getLength()-2)+1; //>0	<getLength()-2
-						tb=rand()%(getLength()-1)+2; //>1   <getLength()-1 
-						while(ta==tb) tb=rand()%(getLength()-1)+2;
-						if(ta>tb) {ttt=tb;tb=ta;ta=ttt;} //~~
-						y=rand()%getLength(); //move it here
-						while((y<=tb)&&(y>=ta)) y=rand()%getLength();
-						int tmp[MAX_LENGTH];
-						if(y>tb)
-						{
-							for(i=0;i<y-tb;i++) tmp[i]=Code[0][i+tb];
-							for(i=ta;i<tb;i++) Code[0][i+y-tb]=Code[0][i];
-							for(i=0;i<y-tb;i++) Code[0][ta+i]=tmp[i];
-
-							for(i=0;i<y-tb;i++) tmp[i]=Code[1][i+tb];
-							for(i=ta;i<tb;i++) Code[1][i+y-tb]=Code[1][i];
-							for(i=0;i<y-tb;i++) Code[1][ta+i]=tmp[i];
-
-							for(i=0;i<y-tb;i++) tmp[i]=Marker[0][i+tb];
-							for(i=ta;i<tb;i++) Marker[0][i+y-tb]=Marker[0][i];
-							for(i=0;i<y-tb;i++) Marker[0][ta+i]=tmp[i];
-																				
-							for(i=0;i<y-tb;i++) tmp[i]=Marker[1][i+tb];
-							for(i=ta;i<tb;i++) Marker[1][i+y-tb]=Marker[1][i];
-							for(i=0;i<y-tb;i++) Marker[1][ta+i]=tmp[i];
-
-						}
-						else
-						if(y<ta)
-						{
-							for(i=0;i<ta-y;i++) tmp[i]=Code[0][i+y];
-							for(i=ta;i<tb;i++) Code[0][y+i-ta]=Code[0][i];
-							for(i=0;i<ta-y;i++) Code[0][tb-y]=tmp[i];
-
-							for(i=0;i<ta-y;i++) tmp[i]=Code[1][i+y];
-							for(i=ta;i<tb;i++) Code[1][y+i-ta]=Code[1][i];
-							for(i=0;i<ta-y;i++) Code[1][tb-y]=tmp[i];
-
-							for(i=0;i<ta-y;i++) tmp[i]=Marker[0][i+y];
-							for(i=ta;i<tb;i++) Marker[0][y+i-ta]=Marker[0][i];
-							for(i=0;i<ta-y;i++) Marker[0][tb-y]=tmp[i];
-																				
-							for(i=0;i<ta-y;i++) tmp[i]=Marker[1][i+y];
-							for(i=ta;i<tb;i++) Marker[1][y+i-ta]=Marker[1][i];
-							for(i=0;i<ta-y;i++) Marker[1][tb-y]=tmp[i];
-						}
-					}*///break;
-//				case 6://flip entries
-//					{
-						// neutral :o
-//						int l;
-//						l=Code[0][x];Code[0][x]=Code[1][x];Code[1][x]=l;
-//						l=Marker[0][x];Marker[0][x]=Marker[1][x];Marker[1][x]=l;
-//					}break;
-			}
-		}
-	}
-}
-
 // Reset all ongoing data (between two generations)
 void RACE::prepareForNewGeneration() // resets all data to standard starting values
 {
@@ -660,87 +430,6 @@ void RACE::prepareForNewGeneration() // resets all data to standard starting val
 	setpFitness(0);
 	setsFitness(0);
 	settFitness(MAX_TFITNESS);
-}
-
-
-//Reinitialize programs with random orders
-void RACE::resetGeneCode()
-{
-//	mutationRate=500+rand()%1000;
-/*	if((ga->preprocessBuildOrder)&&(basicLength>0))
-	{
-		memcpy(Code,basicBuildOrder,MAX_LENGTH*4);
-		for(int i=MAX_LENGTH;i--;)
-		{
-			markerCounter++;Marker[i]=markerCounter;
-		}
-	}
-	else*/
-	{
-		int y=0;
-		switch((*pGoal)->getRace())
-		{
-			case TERRA:y=SUPPLY_DEPOT;break;
-			case PROTOSS:y=PYLON;break;
-			case ZERG:y=OVERLORD;break;
-		}
-		for(int i=MAX_LENGTH;i--;)
-		{
-//			if((i+4)%stats[(*pGoal)->getRace()][y].needSupply==0)
-//			{
-				Code[i]=rand()%(*pGoal)->getMaxBuildTypes();
-//			} else
-//			{
-//				Code[0][i]=/*rand()%*/(*pGoal)->toGeno(SCV);//getMaxBuildTypes();
-//				Code[1][i]=/*rand()%*/(*pGoal)->toGeno(SCV);//getMaxBuildTypes();
-//			}
-			markerCounter++;Marker[i]=markerCounter;
-		}
-	}
-}
-
-void RACE::crossOver(RACE* parent2, RACE* child1, RACE* child2)
-{
-/*	int counter=MAX_LENGTH;
-	for(int i=0;i<MAX_LENGTH;i++)
-	{
-		if(rand()%counter<5)
-		{
-			int num=MAX_LENGTH-counter;
-			memcpy(&child1->Code[0][i-num],&Code[0][i-num],num*4);
-			memcpy(&child1->Marker[0][i-num],&Marker[0][i-num],num*4);
-
-			memcpy(&child1->Code[1][i-num],&parent2->Code[1][i-num],num*4);
-			memcpy(&child1->Marker[1][i-num],&parent2->Marker[1][i-num],num*4);
-
-			memcpy(&child2->Code[1][i-num],&Code[1][i-num],num*4);
-			memcpy(&child2->Marker[1][i-num],&Marker[1][i-num],num*4);
-
-			memcpy(&child2->Code[0][i-num],&parent2->Code[0][i-num],num*4);
-			memcpy(&child2->Marker[0][i-num],&parent2->Marker[0][i-num],num*4);
-
-			counter=MAX_LENGTH; //~~ TODO
-			RACE* c=child1;
-			child1=child2;
-			child2=c;
-		}
-		counter--;
-	}
-	int num=MAX_LENGTH-counter;
-	memcpy(&child1->Code[0][counter],&Code[0][counter],num*4);
-	memcpy(&child1->Marker[0][counter],&Marker[0][counter],num*4);
-
-	memcpy(&child1->Code[1][counter],&parent2->Code[1][counter],num*4);
-	memcpy(&child1->Marker[1][counter],&parent2->Marker[1][counter],num*4);
-
-	memcpy(&child2->Code[1][counter],&Code[1][counter],num*4);
-	memcpy(&child2->Marker[1][counter],&Marker[1][counter],num*4);
-
-	memcpy(&child2->Code[0][counter],&parent2->Code[0][counter],num*4);
-	memcpy(&child2->Marker[0][counter],&parent2->Marker[0][counter],num*4);
-
-	child1->mutationRate=(2*mutationRate+parent2->mutationRate)/3;
-	child2->mutationRate=(2*parent2->mutationRate+mutationRate)/3;*/
 }
 
 // ----------------------------------------------------

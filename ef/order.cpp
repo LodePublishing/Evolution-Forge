@@ -23,6 +23,25 @@ Order::~Order()
 {
 }
 
+void Order::operator=(const Order& order)
+{
+	blend=order.blend;
+	blendTarget=order.blendTarget;
+	blendStart=order.blendStart;
+	rect=order.rect;
+//	brect=order.brect;
+	target=order.target;
+//	btarget=order.btarget;
+	start=order.start;
+//	bstart=order.bstart;
+	marker=order.marker;
+	bonew=order.bonew;
+	checked=order.checked;
+	unit=order.unit;
+	IP=order.IP;
+	row=order.row;
+}
+
 void Order::setUnit(const int unit)
 {
 #ifdef _SCC_DEBUG

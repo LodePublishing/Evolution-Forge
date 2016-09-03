@@ -64,7 +64,7 @@ class Color
 {
 	public:
 		Color(const Uint32 ucol, const SDL_Color scol); 
-		Color(SDL_Surface* surface, const int r, const int g, const int b); 
+		Color(SDL_Surface* surface, const Uint8 r, const Uint8 g, const Uint8 b); 
 		Color();
 		Color(const Color& col);
 
@@ -72,9 +72,9 @@ class Color
 		//operator SDL_Color*() const; 
 		operator Uint32() const;  
 //		operator Uint32*() const;
-		const int r() const;
-		const int g() const;
-		const int b() const;
+		const Uint8 r() const;
+		const Uint8 g() const;
+		const Uint8 b() const;
 		~Color();
 		Uint32 ucol;
 		SDL_Color scol;
@@ -85,7 +85,7 @@ class Brush
 {
 	public:
 		Brush(const Color color, const eBrushStyle style);
-		Brush(SDL_Surface* surface, const int r, const int g, const int b, const eBrushStyle style);
+		Brush(SDL_Surface* surface, const Uint8 r, Uint8 g, Uint8 b, const eBrushStyle style);
 		Brush() {};
 		~Brush() {};
 		const eBrushStyle GetStyle() const {return style;};
@@ -99,7 +99,7 @@ class Pen
 {
 	public:
 		Pen(const Color color, const int width, const ePenStyle style); 
-		Pen(SDL_Surface* surface, const int r, const int g, const int b, const int width, const ePenStyle style);
+		Pen(SDL_Surface* surface, const Uint8 r, const Uint8 g, const Uint8 b, const int width, const ePenStyle style);
 		Pen() {};
 		
 		~Pen() {};
@@ -199,12 +199,13 @@ class Rect
 {
 public:
     Rect() : x(0), y(0), width(0), height(0) { }
-    Rect(const int xx, const int yy, const int ww, const int hh) : x(xx), y(yy), width(ww), height(hh) { };
-    Rect(const Point& topLeft, const Point& bottomRight);
-    Rect(const Point& pos, const Size& size);
+    Rect(const int xx, const int yy, const int ww, const int hh) : x(xx), y(yy), width(ww), height(hh) { }
+//    Rect(const Point& topLeft, const Point& bottomRight);
+    Rect(const Point& pos, const Size& size) { x = pos.x; y = pos.y; width = size.x; height = size.y;}
+			
 // default copy ctor and assignment operators ok
 
-    const int GetWidth() const { return width; };
+    const int GetWidth() const { return width; }
     void SetWidth(const int w) { width = w; };
                                                                                                                                                             
     const int GetHeight() const { return height; };
@@ -307,6 +308,8 @@ class DC
 		void DrawLine(const Point& p1, const Point& p2) const {DrawLine(p1.x, p1.y, p2.x, p2.y);};
 		void DrawLine(const int x1, const int y1, const int x2, const int y2) const;
 		
+		void DrawHalfRoundedRectangle(const int x1, const int y1, const int x2, const int y2, const int radius) const;
+		void DrawHalfRoundedRectangle(const Point& p, const Size& s, const int radius) const {DrawHalfRoundedRectangle(p.x, p.y, s.x, s.y, radius);};
 		void DrawRoundedRectangle(const int x1, const int y1, const int x2, const int y2, const int radius) const;
 		void DrawRoundedRectangle(const Point& p, const Size& s, const int radius) const {DrawRoundedRectangle(p.x, p.y, s.x, s.y, radius);};
 		void DrawRoundedRectangle(const Rect& rect, const int radius) const {DrawRoundedRectangle(rect.x, rect.y, rect.width, rect.height,radius);};
@@ -324,10 +327,6 @@ class DC
 		DC(const DC& other): surface(other.surface) {};
 		DC &operator=(const DC& other) {if(this != &other) SetSurface(other.surface);return *this;};
 	private:
-		void line8(const int x1, const int y1, const int x2, const int y2) const;
-		void line16(const int x1, const int y1, const int x2, const int y2) const;
-		void line24(const int x1, const int y1, const int x2, const int y2) const;
-		void line32(const int x1, const int y1, const int x2, const int y2) const;
 		Brush brush;
 		Pen pen;
 		Color* color;
@@ -337,5 +336,5 @@ class DC
 
 #endif // _UI_SDLWRAPPER_HPP
 
-SDL_Color toSDL_Color(const int r, const int g, const int b);
+SDL_Color toSDL_Color(const Uint8 r, const Uint8 g, const Uint8 b);
 

@@ -42,11 +42,11 @@ extern const int MIN_MAPS;
 //extern const int MAX_PROGRAMS; //must be multiplier of (16*player)
 extern const int LARVA_MAX;
 //extern const int UNIT_TYPE_COUNT;
-#define MAX_GOALS 100
-//extern const int MAX_GOALS; // count of possible different goals
 #define MAX_HARVEST_SPEEDS 100
 //extern const int MAX_HARVEST_SPEEDS;
 extern const int MAX_SUPPLY;
+
+extern const int MAX_TOTAL_UNITS;
 
 extern const int MAX_GENERATIONS;
 extern const int MIN_GENERATIONS;
@@ -443,6 +443,8 @@ struct GOAL
 	int time;
 	int count;
 	int location;
+
+	int finalTime; // temporary!
 };
 
 struct UNIT_STATISTICS

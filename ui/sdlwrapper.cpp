@@ -1,16 +1,16 @@
 #include "sdlwrapper.hpp"
 
-SDL_Color toSDL_Color(const int r, const int g, const int b)
+SDL_Color toSDL_Color(const Uint8 r, const Uint8 g, const Uint8 b)
 {
 	SDL_Color c;
 	c.r=r;
 	c.g=g;
 	c.b=b;
-	c.unused=0;
+	c.unused=255;
 	return(c);	
 }
 
-inline Rect::Rect(const Point& topLeft, const Point& bottomRight)
+/*inline Rect::Rect(const Point& topLeft, const Point& bottomRight)
 {
   x = topLeft.x;
   y = topLeft.y;
@@ -28,13 +28,7 @@ inline Rect::Rect(const Point& topLeft, const Point& bottomRight)
 	height = -height;
 	y -= height;
   }
-}
-
-Rect::Rect(const Point& point, const Size& size)
-{
-	x = point.x; y = point.y;
-	width = size.x; height = size.y;
-}
+}*/
 
 Rect& Rect::operator += (const Rect& rect)
 {
@@ -73,13 +67,14 @@ Color::Color(const Color& col)
 	scol.unused=col.scol.unused;
 }
 
-Color::Color(SDL_Surface* surface, const int r, const int g, const int b)
+Color::Color(SDL_Surface* surface, const Uint8 r, const Uint8 g, const Uint8 b)
 {
 	scol.r=r;
 	scol.g=g;
 	scol.b=b;
-	scol.unused=100;
-	ucol=SDL_MapRGB(surface->format, r, g, b);
+	scol.unused=255;
+//	ucol=SDL_MapRGB(surface->format, r, g, b);
+	ucol = (r << 24 ) + (g << 16) + (b << 8) + 255;
 }
 
 Color::Color() {}
@@ -88,9 +83,9 @@ Color::operator SDL_Color() const {return(scol);}
 //Color::operator SDL_Color*() const {return(&scol);};
 Color::operator Uint32() const {return(ucol);}
 //Color::operator Uint32*() const {return(&ucol);};
-const int Color::r() const {return(scol.r);}
-const int Color::g() const {return(scol.g);}
-const int Color::b() const {return(scol.b);}
+const Uint8 Color::r() const {return(scol.r);}
+const Uint8 Color::g() const {return(scol.g);}
+const Uint8 Color::b() const {return(scol.b);}
 Color::~Color() {}
 
 
@@ -215,67 +210,205 @@ void DC::DrawSpline(const int c, const Point* p) const
 //		aalineColor(surface, p[i].x, p[i].y+1, p[i+1].x, p[i+1].y+1, (Uint32)(*pen.GetColor()));
 //	}
 	{
-		DrawBresLine(p[i].x, p[i].y, p[i+1].x, p[i+1].y);
-		DrawBresLine(p[i].x, p[i].y+1, p[i+1].x, p[i+1].y+1);
+		if((i>0)&&(i<c-2))
+		{
+			DrawBresLine(p[i].x, p[i].y + (p[i].y < p[i-1].y) + (p[i].y < p[i+1].y) - (p[i].y > p[i-1].y) - (p[i].y > p[i+1].y),
+					   p[i+1].x, p[i+1].y + (p[i+1].y < p[i].y) + (p[i+1].y < p[i+2].y) - (p[i+1].y > p[i].y) - (p[i+1].y > p[i+2].y));
+			DrawBresLine(p[i].x, p[i].y + (p[i].y < p[i-1].y) + (p[i].y < p[i+1].y) - (p[i].y > p[i-1].y) - (p[i].y > p[i+1].y) + 1,
+					   p[i+1].x, p[i+1].y + (p[i+1].y < p[i].y) + (p[i+1].y < p[i+2].y) - (p[i+1].y > p[i].y) - (p[i+1].y > p[i+2].y) + 1);
+		} else
+		{
+			DrawBresLine(p[i].x, p[i].y, p[i+1].x, p[i+1].y);
+			DrawBresLine(p[i].x, p[i].y+1, p[i+1].x, p[i+1].y+1);
+		}
 	}
 	
 }
 
-void DC::DrawRoundedRectangle(const int x, const int y, const int w, const int h, const int radius) const
+void DC::DrawHalfRoundedRectangle(const int x, const int y, const int w, const int h, const int radius) const
 {
-	if((x<0)||(y<0)||(x+w>1280)||(y+h>1024)) // TODO clipping
+	if((x<0)||(y<0)||(x+w>=1280)||(y+h>=1024)) // TODO clipping
 		return;
 	// CMB: if radius is zero use DrawRectangle() instead to avoid
 	// X drawing errors with small radii
-	if((radius <= 1)||(w<6)||(h<6))
+	if((radius <= 1)||(w<6)||(h<6))	{
+		DrawRectangle(x,y,w,h);
+		return;
+	}
+
+	bool clippedRight=false;
+	bool clippedBottom=false;
+	// TODO!
+	int ww,hh;
+	if(x + w > 1280) {
+		clippedRight=true;
+		ww = 1280 - x;
+	} else ww = w;
+	if(y + h > 1024) {
+		clippedBottom=true;
+		hh = 1280 - y;
+	} else hh = h;
+
+	
+/*	bool clippedLeft=false;
+	bool clippedTop=false;*/
+
+	int dd=radius*8;
+	if (dd > ww) dd = ww;
+	if (dd > hh) dd = hh;
+	int rr = dd / 2;
+
+	if (brush.GetStyle() != TRANSPARENT_BRUSH_STYLE)
+	{
+//		SDL_Rect rc;
+//		rc.x=x+1;rc.y=y+rr+1;rc.w=ww-2;rc.h=h-dd-2;
+		boxColor(surface, x+1, y+rr+1, x+ww-1, y+hh-rr-1, (Uint32)(*brush.GetColor()) );
+	//	SDL_FillRect(surface, &rc, (Uint32)(*brush.GetColor()) );
+// die 2 Seiten oben und unten:
+//		rc.x=x+rr+1;rc.y=y+1;rc.w=ww-dd-2;rc.h=rr;
+		boxColor(surface, x+rr+1, y+1, x+ww-rr-1, y+rr+1, (Uint32)(*brush.GetColor()) );
+//		SDL_FillRect(surface, &rc, (Uint32)(*brush.GetColor()) );
+
+//		rc.x=x+rr+1;rc.y=y+hh-rr-1;rc.w=ww-dd-2;rc.h=rr;
+		boxColor(surface, x+rr+1, y+hh-rr-1, x+ww-rr-1, y+hh-1, (Uint32)(*brush.GetColor()) );
+//		SDL_FillRect(surface, &rc, (Uint32)(*brush.GetColor()) );
+
+		if(!clippedRight) {
+	        filledpieColor(surface, x+ww-rr, y+rr, rr, 270, 0, (Uint32)(*brush.GetColor()));
+			if(!clippedBottom)
+	    	    filledpieColor(surface, x+ww-rr, y+hh-rr, rr, 0, 90, (Uint32)(*brush.GetColor()));
+		}
+	    filledpieColor(surface, x+rr, y+rr, rr, 180, 270, (Uint32)(*brush.GetColor()));
+		if(!clippedBottom)
+	        filledpieColor(surface, x+rr, y+hh-rr, rr, 90, 180, (Uint32)(*brush.GetColor()));
+	}
+
+	if (pen.GetStyle() != TRANSPARENT_PEN_STYLE)
+	{
+//		SDL_Rect rc;
+// left to right (up)
+//		rc.x=x+rr-(pen.GetWidth()>>1);rc.y=y-(pen.GetWidth()>>1);rc.w=ww-dd;rc.h=pen.GetWidth();
+		hlineColor(surface, x+rr, x+ww-rr, y, (Uint32)(*pen.GetColor()));
+//		SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
+// left to right (low)
+//		rc.x=x+rr-(pen.GetWidth()>>1);rc.y=y+hh-1-(pen.GetWidth()>>1);rc.w=ww-dd;rc.h=pen.GetWidth();
+		if(!clippedBottom)
+			hlineColor(surface, x+rr, x+ww-rr, y+hh-1, (Uint32)(*pen.GetColor()));
+//		SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
+// left to down
+//		rc.x=x-(pen.GetWidth()>>1);rc.y=y+rr-(pen.GetWidth()>>1);rc.w=pen.GetWidth();rc.h=h-dd;
+		vlineColor(surface, x, y+rr, y+hh-rr, (Uint32)(*pen.GetColor()));
+//		SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
+		if(!clippedRight) {
+// right to down
+//			rc.x=x+ww-1-(pen.GetWidth()>>1);rc.y=y+rr-(pen.GetWidth()>>1);rc.w=pen.GetWidth();rc.h=h-dd;
+	//		SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
+			vlineColor(surface, x+ww-1, y+rr, y+hh-rr, (Uint32)(*pen.GetColor()));
+			pieColor(surface, x+ww-rr, y+rr, rr, 270, 0, (Uint32)(*pen.GetColor()));
+			if(!clippedBottom)
+				pieColor(surface, x+ww-rr, y+hh-rr, rr, 0, 90, (Uint32)(*pen.GetColor()));
+		}
+		pieColor(surface, x+rr, y+rr, rr, 180, 270, (Uint32)(*pen.GetColor()));
+		if(!clippedBottom)
+			pieColor(surface, x+rr, y+hh-rr, rr, 90, 180, (Uint32)(*pen.GetColor()));
+	}
+}
+
+
+
+
+void DC::DrawRoundedRectangle(const int x, const int y, const int w, const int h, const int radius) const
+{
+	if((x<0)||(y<0)||(x+w>=1280)||(y+h>=1024)) // TODO clipping
+		return;
+	// CMB: if radius is zero use DrawRectangle() instead to avoid
+	// X drawing errors with small radii
+	if((radius <= 1)||(w<2*radius)||(h<2*radius))
 	{
 		DrawRectangle(x,y,w,h);
 		return;
 	};
 
+	bool clippedRight=false;
+	bool clippedBottom=false;
+	// TODO!
+	int ww, hh;
+	if(x + w > 1280)
+	{
+		clippedRight=true;
+		ww = 1280 - x;
+	} else ww = w;
+    if(y + h > 1024) {
+	    clippedBottom=true;
+		hh = 1280 - y;
+    } else hh = h;
+
+		
+	
+/*	bool clippedLeft=false;
+	bool clippedTop=false;*/
+
 	int dd=radius*2;
-	if (dd > w) dd = w;
-	if (dd > h) dd = h;
+	if (dd > ww) dd = ww;
+	if (dd > hh) dd = hh;
 	int rr = dd / 2;
 
 	if (brush.GetStyle() != TRANSPARENT_BRUSH_STYLE)
 	{
-		SDL_Rect rc;
-		rc.x=x+1;rc.y=y+rr+1;rc.w=w-2;rc.h=h-dd-2;
-		SDL_FillRect(surface, &rc, (Uint32)(*brush.GetColor()) );
+//		SDL_Rect rc;
+//		rc.x=x+1;rc.y=y+rr+1;rc.w=ww-2;rc.h=h-dd-2;
+//		boxRGBA(surface, x+1, y+rr+1, x+ww-2, y+h-dd-2, 200,0,0,55 );
+		boxColor(surface, x, y+rr, x+ww-1, y+hh-rr-1, (Uint32)(*brush.GetColor()) );
+//		SDL_FillRect(surface, &rc, (Uint32)(*brush.GetColor()) );
 // die 2 Seiten oben und unten:
-		rc.x=x+rr+1;rc.y=y+1;rc.w=w-dd-2;rc.h=rr;
-		SDL_FillRect(surface, &rc, (Uint32)(*brush.GetColor()) );
+//		rc.x=x+rr+1;rc.y=y+1;rc.w=ww-dd-2;rc.h=rr;
+		boxColor(surface, x+rr, y, x+ww-rr-1, y+rr-1, (Uint32)(*brush.GetColor()) );
+//		SDL_FillRect(surface, &rc, (Uint32)(*brush.GetColor()) );
 
-		rc.x=x+rr+1;rc.y=y+h-rr-1;rc.w=w-dd-2;rc.h=rr;
-		SDL_FillRect(surface, &rc, (Uint32)(*brush.GetColor()) );
+//		rc.x=x+rr+1;rc.y=y+h-rr-1;rc.w=ww-dd-2;rc.h=rr;
+		if(!clippedBottom)
+			boxColor(surface, x+rr, y+hh-rr, x+ww-rr-1, y+hh-1, (Uint32)(*brush.GetColor()) );
+//		SDL_FillRect(surface, &rc, (Uint32)(*brush.GetColor()) );
 
-        filledpieColor(surface, x+rr, y+rr, rr, 180, 270, Color(surface, 0, 0, 255)/* (Uint32)(*brush.GetColor())*/ );
-        filledpieColor(surface, x+w-rr, y+rr, rr, 270, 0, (Uint32)(*brush.GetColor()));
-        filledpieColor(surface, x+w-rr, y+h-rr, rr, 0, 90, (Uint32)(*brush.GetColor()));
-        filledpieColor(surface, x+rr, y+h-rr, rr, 90, 180, (Uint32)(*brush.GetColor()));
+        filledpieColor(surface, x+rr, y+rr, rr, 180, 270, (Uint32)(*brush.GetColor()));
+		if(!clippedBottom)
+	        filledpieColor(surface, x+rr, y+hh-rr, rr, 90, 180, (Uint32)(*brush.GetColor()));
+		if(!clippedRight)
+		{
+	        filledpieColor(surface, x+ww-rr, y+rr, rr, 270, 0, (Uint32)(*brush.GetColor()));
+			if(!clippedBottom)
+	    	    filledpieColor(surface, x+ww-rr, y+hh-rr, rr, 0, 90, (Uint32)(*brush.GetColor()));
+		}
 	}
 
 	if (pen.GetStyle() != TRANSPARENT_PEN_STYLE)
 	{
-		SDL_Rect rc;
+//		SDL_Rect rc;
 // left to right (up)
-		rc.x=x+rr-(pen.GetWidth()>>1);rc.y=y-(pen.GetWidth()>>1);rc.w=w-dd;rc.h=pen.GetWidth();
-		SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
+//		rc.x=x+rr-(pen.GetWidth()>>1);rc.y=y-(pen.GetWidth()>>1);rc.w=ww-dd;rc.h=pen.GetWidth();
+        hlineColor(surface, x+rr, x+ww-rr, y, (Uint32)(*pen.GetColor()));
+//		SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
 // left to right (low)
-		rc.x=x+rr-(pen.GetWidth()>>1);rc.y=y+h-1-(pen.GetWidth()>>1);rc.w=w-dd;rc.h=pen.GetWidth();
-		SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
+//		rc.x=x+rr-(pen.GetWidth()>>1);rc.y=y+h-1-(pen.GetWidth()>>1);rc.w=ww-dd;rc.h=pen.GetWidth();
+		if(!clippedBottom)
+	        hlineColor(surface, x+rr, x+ww-rr, y+hh-1, (Uint32)(*pen.GetColor()));
+//		SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
 // left to down
-		rc.x=x-(pen.GetWidth()>>1);rc.y=y+rr-(pen.GetWidth()>>1);rc.w=pen.GetWidth();rc.h=h-dd;
-		SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
+//		rc.x=x-(pen.GetWidth()>>1);rc.y=y+rr-(pen.GetWidth()>>1);rc.w=pen.GetWidth();rc.h=h-dd;
+        vlineColor(surface, x, y+rr, y+hh-rr, (Uint32)(*pen.GetColor()));
+//		SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
+		if(!clippedRight) {
 // right to down
-		rc.x=x+w-1-(pen.GetWidth()>>1);rc.y=y+rr-(pen.GetWidth()>>1);rc.w=pen.GetWidth();rc.h=h-dd;
-		SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
-
+//			rc.x=x+ww-1-(pen.GetWidth()>>1);rc.y=y+rr-(pen.GetWidth()>>1);rc.w=pen.GetWidth();rc.h=h-dd;
+//			SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
+            vlineColor(surface, x+ww-1, y+rr, y+hh-rr, (Uint32)(*pen.GetColor()));
+			pieColor(surface, x+ww-rr, y+rr, rr, 270, 0, (Uint32)(*pen.GetColor()));
+			if(!clippedBottom)
+				pieColor(surface, x+ww-rr, y+hh-rr, rr, 0, 90, (Uint32)(*pen.GetColor()));
+		}
 		pieColor(surface, x+rr, y+rr, rr, 180, 270, (Uint32)(*pen.GetColor()));
-		pieColor(surface, x+w-rr, y+rr, rr, 270, 0, (Uint32)(*pen.GetColor()));
-		pieColor(surface, x+w-rr, y+h-rr, rr, 0, 90, (Uint32)(*pen.GetColor()));
-		pieColor(surface, x+rr, y+h-rr, rr, 90, 180, (Uint32)(*pen.GetColor()));
+		if(!clippedBottom)
+			pieColor(surface, x+rr, y+hh-rr, rr, 90, 180, (Uint32)(*pen.GetColor()));
 	}
 }
 
@@ -283,21 +416,27 @@ void DC::DrawRoundedRectangle(const int x, const int y, const int w, const int h
 void DC::DrawRectangle(const int x, const int y, const int w, const int h) const
 {
 	if((w<2)||(h<2)) return;
-	SDL_Rect rc;
-	rc.x=x+1;rc.y=y+1;rc.w=w-2;rc.h=h-2;
+	if((x<0)||(y<0)||(x+w>=1280)||(y+h>=1024)) // TODO clipping
+		return;
+//	SDL_Rect rc;
+//	rc.x=x+1;rc.y=y+1;rc.w=w-2;rc.h=h-2;
 	if(brush.GetStyle()!=TRANSPARENT_BRUSH_STYLE)
 	{
-		SDL_FillRect(surface, &rc, (Uint32)(*brush.GetColor()) );
+        boxColor(surface, x+1, y+1, x+w-1, y+h-1, (Uint32)(*brush.GetColor()) );
+//		SDL_FillRect(surface, &rc, (Uint32)(*brush.GetColor()) );
 	};
 	DrawEmptyRectangle(x,y,w,h);	
 }
 
 void DC::DrawEmptyRectangle(const int x, const int y, const int w, const int h) const
 {
-//	if(pen.GetStyle()==TRANSPARENT_PEN_STYLE) return;
-	SDL_Rect rc;
-	
-	rc.x=x-(pen.GetWidth()>>1);rc.y=y-(pen.GetWidth()>>1);rc.w=w;rc.h=pen.GetWidth();
+	if(pen.GetStyle()==TRANSPARENT_PEN_STYLE) return;
+//	SDL_Rect rc;
+	if((x<0)||(y<0)||(x+w>=1280)||(y+h>=1024)) // TODO clipping
+		return;
+
+	rectangleColor(surface, x, y, x + w, y + h, (Uint32)(*pen.GetColor()));
+/*	rc.x=x-(pen.GetWidth()>>1);rc.y=y-(pen.GetWidth()>>1);rc.w=w;rc.h=pen.GetWidth();
 	SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
 	
 	rc.x=x-(pen.GetWidth()>>1);rc.y=y+h-1-(pen.GetWidth()>>1);rc.w=w;rc.h=pen.GetWidth();
@@ -307,7 +446,7 @@ void DC::DrawEmptyRectangle(const int x, const int y, const int w, const int h) 
 	SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
 	
 	rc.x=x+w-1-(pen.GetWidth()>>1);rc.y=y-(pen.GetWidth()>>1);rc.w=pen.GetWidth();rc.h=h;
-	SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
+	SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));*/
 }
 
 void DC::DrawLine(const int x1, const int y1, const int x2, const int y2) const
@@ -315,7 +454,9 @@ void DC::DrawLine(const int x1, const int y1, const int x2, const int y2) const
 	if(pen.GetStyle()==TRANSPARENT_PEN_STYLE) return;
 	if((x2-x1==0)||(y2-y1==0))
 		return;
-	SDL_Rect rc;
+
+	aalineColor(surface, x1, y1, x2, y2, (Uint32)(*pen.GetColor()));
+/*	SDL_Rect rc;
 	rc.x=x1-(pen.GetWidth()>>1);rc.y=y1-(pen.GetWidth()>>1);
 	if(x2<x1) {
 		rc.w=x1-x2;rc.x-=rc.w;
@@ -324,7 +465,7 @@ void DC::DrawLine(const int x1, const int y1, const int x2, const int y2) const
 	if(y2<y1) {
 		rc.h=y1-y2;rc.y-=rc.h;
 	} else rc.h=y2-y1;
-	SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));
+	SDL_FillRect(surface, &rc, (Uint32)(*pen.GetColor()));*/
 }
 
 void DC::DrawText(const string& text, const int x, const int y) const
@@ -333,10 +474,10 @@ void DC::DrawText(const string& text, const int x, const int y) const
 }
 
 const bool DC::Lock() const {
-if(SDL_MUSTLOCK(surface)) {
-return SDL_LockSurface(surface) == 0;
-}
-else return true;
+	if(SDL_MUSTLOCK(surface)) {
+		return SDL_LockSurface(surface) == 0;
+	}
+	else return true;
 }
 
 void DC::Unlock() const {
@@ -370,32 +511,33 @@ return SDL_BlitSurface(src.surface, 0, surface, 0);
 }
 
 const bool DC::Fill(const Color color) const {
-return SDL_FillRect(surface, 0, color) == 0;
+	return SDL_FillRect(surface, 0, color) == 0;
 }
 
 const bool DC::FillRect(SDL_Rect& dstrect, const Color color) const{
-return SDL_FillRect(surface, &dstrect, color) == 0;
+	return(boxColor(surface, dstrect.x, dstrect.y, dstrect.x+dstrect.w, dstrect.y+dstrect.h, (Uint32)color )==0);
+//return SDL_FillRect(surface, &dstrect, color) == 0;
 }
 
 // Set various things
 const bool DC::SetColorKey(const Uint32 flag, const Color key) const {
-return SDL_SetColorKey(surface, flag, key) == 0;
+	return SDL_SetColorKey(surface, flag, key) == 0;
 }
 
 const bool DC::SetAlpha(const Uint32 flag, const Uint8 alpha) const {
-return SDL_SetAlpha(surface, flag, alpha) == 0;
+	return SDL_SetAlpha(surface, flag, alpha) == 0;
 }
 
 void DC::SetClipRect(const SDL_Rect& rect) const {
-SDL_SetClipRect(surface, const_cast<SDL_Rect*>(&rect));
+	SDL_SetClipRect(surface, const_cast<SDL_Rect*>(&rect));
 }
 
 void DC::ResetClipRect() const {
-SDL_SetClipRect(surface, 0);
+	SDL_SetClipRect(surface, 0);
 }
 
 void DC::GetClipRect(SDL_Rect& rect) const {
-SDL_GetClipRect(surface, &rect);
+	SDL_GetClipRect(surface, &rect);
 }
 
 bool DC::SaveBMP(const char *file) const 
@@ -407,12 +549,13 @@ bool DC::SaveBMP(const char *file) const
 Brush::Brush(const Color color, const eBrushStyle style) 
 {this->color=color;this->style=style;}
 
-Brush::Brush(SDL_Surface* surface, const int r, const int g, const int b, const eBrushStyle style) 
+Brush::Brush(SDL_Surface* surface, const Uint8 r, const Uint8 g, const Uint8 b, const eBrushStyle style) 
 {
-	color.scol.r=r;
-	color.scol.g=g;
-	color.scol.b=b;
-	color.ucol=SDL_MapRGB(surface->format, r, g, b);
+	color = Color(surface, r, g, b);
+//	color.scol.r=r;
+//	color.scol.g=g;
+//	color.scol.b=b;
+//	color.ucol=SDL_MapRGB(surface->format, r, g, b);
 	this->style=style;
 }
 
@@ -420,348 +563,17 @@ Brush::Brush(SDL_Surface* surface, const int r, const int g, const int b, const 
 Pen::Pen(const Color color, const int width, const ePenStyle style)
 {this->color=color;this->width=width;this->style=style;}
 
-Pen::Pen(SDL_Surface* surface, const int r, const int g, const int b, const int width, const ePenStyle style)
+Pen::Pen(SDL_Surface* surface, const Uint8 r, const Uint8 g, const Uint8 b, const int width, const ePenStyle style)
 {
-	color.scol.r=r;
-	color.scol.g=g;
-	color.scol.b=b;
-	color.ucol=SDL_MapRGB(surface->format, r, g, b);
+	color = Color(surface, r, g, b);
+//	color.scol.r=r;
+//	color.scol.g=g;
+//	color.scol.b=b;
+//	color.ucol=SDL_MapRGB(surface->format, r, g, b);
 	this->width=width;this->style=style;
 }
 
 
-
-//----------------------------------------------------------
-
-// A set of very useful macros that you will find in most
-// code that I write whether I use them in a program or
-// not.
-
-#define max(a,b) (((a) > (b)) ? (a) : (b))
-#define min(a,b) (((a) < (b)) ? (a) : (b))
-#define abs(a) (((a)<0) ? -(a) : (a))
-#define sign(a) (((a)<0) ? -1 : (a)>0 ? 1 : 0)
-
-// Draw lines in 8 bit surfaces.
-
-void DC::line8(const int x1, const int y1, const int x2, const int y2) const
-{
-  int d;
-  int x;
-  int y;
-  int ax;
-  int ay;
-  int sx;
-  int sy;
-  int dx;
-  int dy;
-  const Uint32 col=(Uint32)(*pen.GetColor());
-  
-  Uint8 *lineAddr;
-  Sint32 yOffset;
-
-  dx = x2 - x1;  
-  ax = abs(dx) << 1;  
-  sx = sign(dx);
-
-  dy = y2 - y1;  
-  ay = abs(dy) << 1;  
-  sy = sign(dy);
-  yOffset = sy * surface->pitch;
-
-  x = x1;
-  y = y1;
-
-  lineAddr = ((Uint8 *)(surface->pixels)) + (y * surface->pitch);
-  if (ax>ay)
-  {					  /* x dominant */
-	d = ay - (ax >> 1);
-	for (;;)
-	{
-	  *(lineAddr + x) = (Uint8)col;
-
-	  if (x == x2)
-	  {
-		return;
-	  }
-	  if (d>=0)
-	  {
-		y += sy;
-		lineAddr += yOffset;
-		d -= ax;
-	  }
-	  x += sx;
-	  d += ay;
-	}
-  }
-  else
-  {					  /* y dominant */
-	d = ax - (ay >> 1);
-	for (;;)
-	{
-	  *(lineAddr + x) = (Uint8)col;
-
-	  if (y == y2)
-	  {
-		return;
-	  }
-	  if (d>=0) 
-	  {
-		x += sx;
-		d -= ay;
-	  }
-	  y += sy;
-	  lineAddr += yOffset;
-	  d += ax;
-	}
-  }
-}
-
-//----------------------------------------------------------
-
-// Draw lines in 16 bit surfaces. Note that this code will
-// also work on 15 bit surfaces.
-
-void DC::line16(const int x1, const int y1, const int x2, const int y2) const
-{
-  int d;
-  int x;
-  int y;
-  int ax;
-  int ay;
-  int sx;
-  int sy;
-  int dx;
-  int dy;
-  Uint32 col=(Uint32)(*pen.GetColor());
-
-  Uint8 *lineAddr;
-  Sint32 yOffset;
-
-  dx = x2 - x1;  
-  ax = abs(dx) << 1;  
-  sx = sign(dx);
-
-  dy = y2 - y1;  
-  ay = abs(dy) << 1;  
-  sy = sign(dy);
-  yOffset = sy * surface->pitch;
-
-  x = x1;
-  y = y1;
-
-  lineAddr = ((Uint8 *)surface->pixels) + (y * surface->pitch);
-  if (ax>ay)
-  {					  /* x dominant */
-	d = ay - (ax >> 1);
-	for (;;)
-	{
-	  *((Uint16 *)(lineAddr + (x << 1))) = (Uint16)col;
-
-	  if (x == x2)
-	  {
-		return;
-	  }
-	  if (d>=0)
-	  {
-		y += sy;
-		lineAddr += yOffset;
-		d -= ax;
-	  }
-	  x += sx;
-	  d += ay;
-	}
-  }
-  else
-  {					  /* y dominant */
-	d = ax - (ay >> 1);
-	for (;;)
-	{
-	  *((Uint16 *)(lineAddr + (x << 1))) = (Uint16)col;
-
-	  if (y == y2)
-	  {
-		return;
-	  }
-	  if (d>=0) 
-	  {
-		x += sx;
-		d -= ay;
-	  }
-	  y += sy;
-	  lineAddr += yOffset;
-	  d += ax;
-	}
-  }
-}
-
-//----------------------------------------------------------
-
-// Draw lines in 24 bit surfaces. 24 bit surfaces require
-// special handling because the pixels don't fall on even
-// address boundaries. Instead of being able to store a
-// single byte, word, or long you have to store 3
-// individual bytes. As a result 24 bit graphics is slower
-// than the other pixel sizes.
-
-void DC::line24(const int x1, const int y1, const int x2, const int y2) const
-{
-  int d;
-  int x;
-  int y;
-  int ax;
-  int ay;
-  int sx;
-  int sy;
-  int dx;
-  int dy;
-  Uint32 col=(Uint32)(*pen.GetColor());
-
-  Uint8 *lineAddr;
-  Sint32 yOffset;
-
-#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-  col <<= 8;
-#endif
-
-  dx = x2 - x1;  
-  ax = abs(dx) << 1;  
-  sx = sign(dx);
-
-  dy = y2 - y1;  
-  ay = abs(dy) << 1;  
-  sy = sign(dy);
-  yOffset = sy * surface->pitch;
-
-  x = x1;
-  y = y1;
-
-  lineAddr = ((Uint8 *)(surface->pixels)) + (y * surface->pitch);
-  if (ax>ay)
-  {					  /* x dominant */
-	d = ay - (ax >> 1);
-	for (;;)
-	{
-	  Uint8 *p = (lineAddr + (x * 3));
-	  memcpy(p, &col, 3);
-
-	  if (x == x2)
-	  {
-		return;
-	  }
-	  if (d>=0)
-	  {
-		y += sy;
-		lineAddr += yOffset;
-		d -= ax;
-	  }
-	  x += sx;
-	  d += ay;
-	}
-  }
-  else
-  {					  /* y dominant */
-	d = ax - (ay >> 1);
-	for (;;)
-	{
-	  Uint8 *p = (lineAddr + (x * 3));
-	  memcpy(p, &col, 3);
-
-	  if (y == y2)
-	  {
-		return;
-	  }
-	  if (d>=0) 
-	  {
-		x += sx;
-		d -= ay;
-	  }
-	  y += sy;
-	  lineAddr += yOffset;
-	  d += ax;
-	}
-  }
-}
-
-//----------------------------------------------------------
-
-// Draw lines in 32 bit surfaces. Note that this routine
-// ignores alpha values. It writes them into the surface
-// if they are included in the pixel, but does nothing
-// else with them.
-
-void DC::line32(const int x1, const int y1, const int x2, const int y2) const
-{
-  int d;
-  int x;
-  int y;
-  int ax;
-  int ay;
-  int sx;
-  int sy;
-  int dx;
-  int dy;
-  Uint32 col=(Uint32)(*pen.GetColor());
-
-  Uint8 *lineAddr;
-  Sint32 yOffset;
-
-  dx = x2 - x1;  
-  ax = abs(dx) << 1;  
-  sx = sign(dx);
-
-  dy = y2 - y1;  
-  ay = abs(dy) << 1;  
-  sy = sign(dy);
-  yOffset = sy * surface->pitch;
-
-  x = x1;
-  y = y1;
-
-  lineAddr = ((Uint8 *)(surface->pixels)) + (y * surface->pitch);
-  if (ax>ay)
-  {					  /* x dominant */
-	d = ay - (ax >> 1);
-	for (;;)
-	{
-	  *((Uint32 *)(lineAddr + (x << 2))) = col;
-
-	  if (x == x2)
-	  {
-		return;
-	  }
-	  if (d>=0)
-	  {
-		y += sy;
-		lineAddr += yOffset;
-		d -= ax;
-	  }
-	  x += sx;
-	  d += ay;
-	}
-  }
-  else
-  {					  /* y dominant */
-	d = ax - (ay >> 1);
-	for (;;)
-	{
-	  *((Uint32 *)(lineAddr + (x << 2))) = col;
-
-	  if (y == y2)
-	  {
-		return;
-	  }
-	  if (d>=0) 
-	  {
-		x += sx;
-		d -= ay;
-	  }
-	  y += sy;
-	  lineAddr += yOffset;
-	  d += ax;
-	}
-  }
-}
 
 //----------------------------------------------------------
 
@@ -771,21 +583,7 @@ void DC::line32(const int x1, const int y1, const int x2, const int y2) const
 
 void DC::DrawBresLine(const int x1, const int y1, const int x2, const int y2) const
 {
-  switch (surface->format->BytesPerPixel)
-  {
-  case 1:
-	line8(x1, y1, x2, y2);
-	break;
-  case 2:
-	line16(x1, y1, x2, y2);
-	break;
-  case 3:
-	line24(x1, y1, x2, y2);
-	break;
-  case 4:
-	line32(x1, y1, x2, y2);
-	break;
-  } // ok
+	lineColor(surface, x1, y1, x2, y2, (Uint32)(*pen.GetColor()));
 }
 
 

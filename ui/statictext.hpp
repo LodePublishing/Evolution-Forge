@@ -34,7 +34,7 @@ class UI_StaticText:public UI_Object
         void draw(DC* dc) const;
         void process();
 
-		const Size getSize() const;
+		const Size getTextSize() const;
 	protected:
         eTextMode  mode; // left-bound=0, right-bound=1, vertically centered=2, horizontally centered=4, block text = 8, FORMATTED = 16
     private:

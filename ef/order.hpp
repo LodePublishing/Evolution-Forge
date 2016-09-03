@@ -8,6 +8,7 @@ class Order
 	public:
 		Order();
 		~Order();
+		void operator=(const Order& order);
 		int blend;
 		int blendTarget;
 		int blendStart;

@@ -13,7 +13,6 @@ void ForceMenu::process()
 	if(!shown)
 		return;
 	Menu::process();
-
 	if(menuLevel)
 	{
     	for (int i = 0; i < settings.getStartconditionCount(); i++)
@@ -23,7 +22,7 @@ void ForceMenu::process()
 		for(int i = 0; i<settings.getStartconditionCount(); i ++)
 			if(settings.getStartcondition(i)->getRace() == anarace->getRace())
 			{
-				Rect edge = Rect(Point(10, height*(FONT_SIZE+6)), Size(getParent()->getWidth(), FONT_SIZE+5));
+				Rect edge = Rect(Point(10, height*(FONT_SIZE+5)), Size(getParent()->getWidth(), FONT_SIZE));
 	//			if (parent->fitItemToRelativeRect(edge, 1)) 
 				{
 					menuEntry[i]->Show();

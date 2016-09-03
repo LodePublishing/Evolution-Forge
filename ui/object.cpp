@@ -3,9 +3,22 @@
 
 void UI_Object::move(int& x, const int sx, const int tx)
 {
-//x=tx;
     x+=((x>tx)?-1:0)+((x<tx)?1:0);
 	x+=(int)((x>sx)?(2*(x-sx)<(tx-sx)?(double)(x-sx)/2:(double)(tx-x)/2):(2*(x-sx)>(tx-sx)?(double)(x-sx)/1.5:(double)(tx-x)/1.5));
+}
+
+void UI_Object::move(Point& p, const Point sp, const Point tp)
+{
+	move(p.x, sp.x, tp.x);
+	move(p.y, sp.y, tp.y);
+}
+
+void UI_Object::move(Rect& r, const Rect sr, const Rect tr)
+{
+	move(r.x, sr.x, tr.x);
+	move(r.y, sr.y, tr.y);
+	move(r.width, sr.width, tr.width);
+	move(r.height, sr.height, tr.height);
 }
 
 UI_Object::UI_Object(UI_Object* parent, const Rect relativeRect, const Rect maxRect)
@@ -29,6 +42,8 @@ UI_Object::UI_Object(UI_Object* parent, const Rect relativeRect, const Rect maxR
 	children=0;
 	min_bottom_x = min_left_y = min_top_x = min_right_y = 0;
 	setParent(parent);
+	needRedraw=true;
+	lastRect=getAbsoluteRect();
 }
 
 UI_Object::~UI_Object()
@@ -207,94 +222,6 @@ const bool UI_Object::isTopItem() const
 	else return(true);
 }
 
-const Point UI_Object::getAbsolutePosition() const
-{
-	if(parent)
-		return(relativeRect.GetPosition() + parent->getAbsolutePosition());
-	else return(relativeRect.GetPosition());
-}
-
-const Point UI_Object::getRelativePosition() const
-{
-    return(relativeRect.GetPosition());
-}
-
-const Rect UI_Object::getRelativeRect() const
-{
-	return(relativeRect);
-}
-
-const Rect UI_Object::getAbsoluteRect() const
-{
-    if(parent)
-        return(Rect(relativeRect.GetPosition() + parent->getAbsolutePosition(), getSize()));
-    else return(Rect(relativeRect.GetPosition(), getSize()));
-}
-
-void UI_Object::setPosition(const Point position)
-{
-	relativeRect.SetPosition(position);
-}
-
-void UI_Object::setLeft(const int x)
-{
-	relativeRect.x=x;
-}
-
-void UI_Object::setTop(const int y)
-{
-	relativeRect.y=y;
-}
-
-void UI_Object::setWidth(const int width)
-{
-	relativeRect.width=width;
-}
-
-void UI_Object::setHeight(const int height)
-{
-	relativeRect.height=height;
-}
-
-void UI_Object::setSize(const Size size)
-{
-	relativeRect.SetSize(size);
-}
-
-const Size UI_Object::getSize() const
-{
-    return(relativeRect.GetSize());
-}
-
-const int UI_Object::getRelativeUpperBound() const
-{
-    return(relativeRect.y);
-}
-
-const int UI_Object::getRelativeLowerBound() const
-{
-    return(relativeRect.y+relativeRect.height);
-}
-
-const int UI_Object::getRelativeLeftBound() const
-{
-    return(relativeRect.x);
-}
-
-const int UI_Object::getRelativeRightBound() const
-{
-    return(relativeRect.x+relativeRect.width);
-}
-
-const int UI_Object::getHeight() const
-{
-    return(relativeRect.height);
-}
-
-const int UI_Object::getWidth() const
-{
-	return(relativeRect.width);
-}
 
 void UI_Object::Show(const bool show)
 {
@@ -385,10 +312,51 @@ void UI_Object::process()
 		adjustRelativeRect(Rect(Point(targetRect.GetPosition()),Size(targetRect.GetWidth(),lastItemY+25)));
 		doAdjustments=2;
 	}	
-	move(relativeRect.x,		startRect.x,		targetRect.x);
-	move(relativeRect.y,		startRect.y,		targetRect.y);
-	move(relativeRect.width,	startRect.width,	targetRect.width);
-	move(relativeRect.height,	startRect.height,	targetRect.height);
+
+	move(relativeRect,		startRect,		targetRect);
+
+	if((lastRect!=getAbsoluteRect())||(needRedraw))
+	{
+		needRedraw=true;
+		rectlist[rectnumber].x = lastRect.x;rectlist[rectnumber].y = lastRect.y;
+		rectlist[rectnumber].w = lastRect.width; rectlist[rectnumber].h = lastRect.height;
+		
+		lastRect = getAbsoluteRect();
+		if( lastRect.x < rectlist[rectnumber].x)
+		{
+			rectlist[rectnumber].w += rectlist[rectnumber].x - lastRect.x;
+			rectlist[rectnumber].x = lastRect.x;
+		} else
+		if( lastRect.x > rectlist[rectnumber].x)	
+			rectlist[rectnumber].w += lastRect.x - rectlist[rectnumber].x;
+		if( lastRect.y < rectlist[rectnumber].y)	
+		{
+			rectlist[rectnumber].h += rectlist[rectnumber].y - lastRect.y;
+			rectlist[rectnumber].y = lastRect.y;
+		} else
+		if( lastRect.y > rectlist[rectnumber].y)	
+			rectlist[rectnumber].h += lastRect.y - rectlist[rectnumber].y;
+
+		if( lastRect.width > rectlist[rectnumber].w )
+			rectlist[rectnumber].w = lastRect.width;
+
+		if( lastRect.height > rectlist[rectnumber].h )
+			rectlist[rectnumber].h = lastRect.height;
+		if((rectlist[rectnumber].x<1280)&&(rectlist[rectnumber].y<1024)&&(rectlist[rectnumber].x + rectlist[rectnumber].w>0)&&(rectlist[rectnumber].y + rectlist[rectnumber].h > 0))
+		{
+			if(rectlist[rectnumber].x +rectlist[rectnumber].w > 1280) rectlist[rectnumber].w = 1280 - rectlist[rectnumber].x;
+			if(rectlist[rectnumber].y +rectlist[rectnumber].h > 1024) rectlist[rectnumber].h = 1024 - rectlist[rectnumber].y;
+			if(rectlist[rectnumber].x < 0) {rectlist[rectnumber].w += rectlist[rectnumber].x;rectlist[rectnumber].x=0;}
+			if(rectlist[rectnumber].y < 0) {rectlist[rectnumber].h += rectlist[rectnumber].y;rectlist[rectnumber].y=0;}
+#ifdef _SCC_DEBUG
+			if(rectnumber>=2999) {
+		        toLog("WARNING: (UI_Object::process): Value rectnumber out of range.");return;
+		    }
+#endif
+			rectnumber++;
+			
+		}
+	}
 
 	min_bottom_x = min_left_y = min_top_x = min_right_y = 0;
 
@@ -410,9 +378,18 @@ const bool UI_Object::isMouseInside() const
 	else return(false);
 }
 
+const bool UI_Object::doesNeedRedraw() const
+{
+	return(needRedraw);
+}
+
+void UI_Object::setNeedRedraw(const bool needRedraw)
+{
+	this->needRedraw=needRedraw;
+}
+
 void UI_Object::draw(DC* dc) const
 {
-                                                                                
     // if hidden, hide children as well
     if (!shown)
 		return;
@@ -425,6 +402,7 @@ void UI_Object::draw(DC* dc) const
             tmp = tmp->nextBrother;
         } while (tmp != children);
     }
+
 	
 	if(isMouseInside())
 		maybeShowToolTip(dc);
@@ -473,4 +451,6 @@ const bool UI_Object::isTimeSpanElapsed(const long int timeSpan)
 
 UI_Theme UI_Object::theme;
 long int UI_Object::startTime;
+SDL_Rect UI_Object::rectlist[3000];
+int UI_Object::rectnumber;
 

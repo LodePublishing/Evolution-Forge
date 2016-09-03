@@ -3,6 +3,9 @@ UI=ui
 DEPENDFILE=.depend
 CXX=g++
 COREPATH=core
+GFXPATH=/data2/SDL/SDL_gfx-2.0.11
+GFXDLL=$(GFXPATH)/SDL_framerate.o  $(GFXPATH)/SDL_gfxPrimitives.o  $(GFXPATH)/SDL_imageFilter.o  $(GFXPATH)/SDL_rotozoom.o
+
 OBJDLL=$(COREPATH)/defs.o $(COREPATH)/anarace.o $(COREPATH)/ga.o $(COREPATH)/goal.o  $(COREPATH)/harvest.o  $(COREPATH)/location.o  $(COREPATH)/basicmap.o  $(COREPATH)/prerace.o  $(COREPATH)/race.o  $(COREPATH)/settings.o  $(COREPATH)/soup.o $(COREPATH)/building.o $(COREPATH)/start.o $(COREPATH)/unit.o $(COREPATH)/startcondition.o
 
 SOURCEDLL=$(OBJDLL:%.o=%.cpp)
@@ -11,7 +14,7 @@ OBJMAIN=$(UI)/sdlwrapper.o $(UI)/object.o $(UI)/window.o $(UI)/button.o $(UI)/st
 SOURCEMAIN=$(OBJMAIN:%.o=%.cpp)
 
 DLLFLAGS=-DBUILD_DLL
-LIBS=-L./ $(PROGRAM).so.1.0
+#LIBS=-L./ $(PROGRAM).so.1.0 
 
 CPPFLAGS =
 CXXFLAGS = -ansi -pedantic -Wall -g -D_SCC_DEBUG
@@ -19,13 +22,16 @@ CXXFLAGS = -ansi -pedantic -Wall -g -D_SCC_DEBUG
 -include $(DEPENDFILE)
 
 .SUFFIXES: .o .cpp
-bin:	$(OBJMAIN) $(OBJHEADER)
-	$(CXX) $(CXXFLAGS) -o $(PROGRAM)b $(OBJMAIN) $(LIBS) $(LDLIBS) $(LIBRARIES) -lSDL -lSDL_ttf -lSDL_image -lSDL_gfx -I/usr/local/include/SDL 
+bin:	$(OBJMAIN) $(OBJHEADER) 
+	$(CXX) $(CXXFLAGS) -o $(PROGRAM)b $(OBJMAIN) $(LIBS) -lSDL -lSDL_ttf -lSDL_image -I/usr/local/include/SDL gfxlib.a lib.a
 		
 lib:	$(SOURCEDLL) $(SOURCEHEADER)
 	$(CXX) $(CXXFLAGS) -fPIC -c $(SOURCEDLL)
-	@mv *.o $(COREPATH)
-	$(CXX) $(CXXFLAGS) -shared -Wl,-soname,$(PROGRAM).so.1 -o $(PROGRAM).so.1.0 $(SOURCEDLL)
+#	@mv *.o $(COREPATH)
+#	$(CXX) $(CXXFLAGS) -shared -Wl,-soname,$(PROGRAM).so.1 -o $(PROGRAM).so.1.0 $(SOURCEDLL)
+
+lib.a: lib.a($(OBJDLL))
+gfxlib.a: gfxlib.a($(GFXDLL))
 
 dep: $(SOURCEDLL) $(SOURCEMAIN)
 	$(CXX) -MM $(SOURCEDLL) $(SOURCEMAIN) > $(DEPENDFILE)
@@ -43,8 +49,10 @@ libclean:
 allclean:
 	@rm -vf ./*.o
 	@rm -vf ./*.d
+	@rm -vf ./lib.a
 	@rm -vf $(COREPATH)/*.d
 	@rm -vf $(COREPATH)/*.o
+	@rm -vf $(COREPATH)/*.a
 	@rm -vf $(PROGRAM)/*.d
 	@rm -vf $(PROGRAM)/*.o
 	@rm -vf $(UI)/*.d

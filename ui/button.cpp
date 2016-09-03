@@ -170,7 +170,7 @@ UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, eString normalT
 	this->normalText=new UI_StaticText(this, normalText, Rect(0,0,0,0), textMode, theme.lookUpButtonAnimation(button)->startTextColor[PRESSED_BUTTON_PHASE], font);
 	this->pressedText=new UI_StaticText(this, pressedText, Rect(0,0,0,0), textMode, theme.lookUpButtonAnimation(button)->startTextColor[PRESSED_BUTTON_PHASE], font);
 
-	adjustButtonSize(this->normalText->getSize());
+	adjustButtonSize(this->normalText->getTextSize());
 	this->startRect=getRelativeRect();
 	this->targetRect=getRelativeRect();
 	this->lastItemY=getHeight();
@@ -202,7 +202,7 @@ UI_Button::UI_Button(UI_Object* parent, Rect rect, Rect maxRect, string normalTe
 	this->normalText=new UI_StaticText(this, normalText, Rect(0,0,0,0), textMode, theme.lookUpButtonAnimation(button)->startTextColor[PRESSED_BUTTON_PHASE], font);
 	this->pressedText=new UI_StaticText(this, pressedText, Rect(0,0,0,0), textMode, theme.lookUpButtonAnimation(button)->startTextColor[PRESSED_BUTTON_PHASE], font);
 
-	adjustButtonSize(this->normalText->getSize());
+	adjustButtonSize(this->normalText->getTextSize());
 	this->startRect=getRelativeRect();
 	this->targetRect=getRelativeRect();
 	this->lastItemY=getHeight();
@@ -257,6 +257,11 @@ void UI_Button::resetData()
 
 void UI_Button::setButton(const eButton button)
 {
+#ifdef _SCC_DEBUG
+    if((button<0)&&(button>=MAX_BUTTONS)) {
+        toLog("WARNING: (UI_Button::setButton): Value button out of range.");return;
+    }
+#endif
 	this->button=button;
 }
 
@@ -362,22 +367,6 @@ void UI_Button::draw(DC* dc) const
 //		dc->DrawRoundedRectangle(Rect(getAbsolutePosition(), getSize()), 2);
 	}
 
-	int gradient=100;
-
-	// TODO evtl Animation fuer jede Phase in die config datei
-	// dann waere sowas moeglich, dass ich maus reinfahr und das langsam verblasst
-	// evtl auch einfach brightencolor ueberlegen...
-	
-	switch(theme.lookUpButtonAnimation(button)->type)
-	{
-    	case NO_ANIMATION:if(gradient<100) gradient++;else gradient=100;break;
-		case JUMPY_COLOURS_ANIMATION:gradient=(frameNumber%theme.lookUpButtonAnimation(button)->speed)*100/theme.lookUpButtonAnimation(button)->speed;break;
-		case GLOWING_ANIMATION:gradient=(int)(50*(sin(3.141*frameNumber/theme.lookUpButtonAnimation(button)->speed)+1));break;
-		case BLINKING_ANIMATION:if(frameNumber<theme.lookUpButtonAnimation(button)->speed/2) gradient=100;else gradient=0;break;
-		default:break;
-	}
-// TODO evtl ueberlegen, dass markierte buttons langsam verblassen wenn sie nicht mehr gehighlighted sind
-	// Problem: die mixColor arbeitet mit animation_phase, wenn ausserhalb der phase wird gradient ignoriert auf 
 	dc->SetPen(Pen(dc->mixColor(
 					theme.lookUpPen(theme.lookUpButtonAnimation(button)->startBorderPen[animation_phase])->GetColor(), 
 					theme.lookUpPen(theme.lookUpButtonAnimation(button)->endBorderPen[animation_phase])->GetColor(), gradient), 
@@ -522,7 +511,7 @@ void UI_Button::process()
             {
                 pressedText->Hide();
                 normalText->Show();
-                adjustButtonSize(normalText->getSize());
+                adjustButtonSize(normalText->getTextSize());
                 normalText->setSize(getSize());
             }
         } else
@@ -531,7 +520,7 @@ void UI_Button::process()
             {
                 pressedText->Show();
                 normalText->Hide();
-                adjustButtonSize(pressedText->getSize());
+                adjustButtonSize(pressedText->getTextSize());
                 pressedText->setSize(getSize());
             }
 		}
@@ -601,7 +590,7 @@ void UI_Button::process()
 			{
 				pressedText->Hide();
 				normalText->Show();
-				adjustButtonSize(normalText->getSize());
+				adjustButtonSize(normalText->getTextSize());
 				normalText->setSize(getSize());
 			}*/
 		} else
@@ -610,7 +599,7 @@ void UI_Button::process()
 			{
 				pressedText->Show();
 				normalText->Hide();
-				adjustButtonSize(pressedText->getSize());
+				adjustButtonSize(pressedText->getTextSize());
 				pressedText->setSize(getSize());
 			}*/
 
@@ -650,6 +639,28 @@ void UI_Button::process()
 
 	if(statusFlags & BF_DOWN)
 		setPosition(getRelativePosition()-Point(1,1));
+
+	gradient=100;
+
+	// TODO evtl Animation fuer jede Phase in die config datei
+	// dann waere sowas moeglich, dass ich maus reinfahr und das langsam verblasst
+	// evtl auch einfach brightencolor ueberlegen...
+	
+	switch(theme.lookUpButtonAnimation(button)->type)
+	{
+    	case NO_ANIMATION:if(gradient<100) gradient++;else gradient=100;break;
+		case JUMPY_COLOURS_ANIMATION:gradient=(frameNumber%theme.lookUpButtonAnimation(button)->speed)*100/theme.lookUpButtonAnimation(button)->speed;break;
+		case GLOWING_ANIMATION:gradient=(int)(50*(sin(3.141*frameNumber/theme.lookUpButtonAnimation(button)->speed)+1));break;
+		case BLINKING_ANIMATION:if(frameNumber<theme.lookUpButtonAnimation(button)->speed/2) gradient=100;else gradient=0;break;
+		default:break;
+	}
+
+	if(gradient!=100)
+		setNeedRedraw();
+	else setNeedRedraw(false);
+	
+// TODO evtl ueberlegen, dass markierte buttons langsam verblassen wenn sie nicht mehr gehighlighted sind
+	// Problem: die mixColor arbeitet mit animation_phase, wenn ausserhalb der phase wird gradient ignoriert auf 
 
 }				
 

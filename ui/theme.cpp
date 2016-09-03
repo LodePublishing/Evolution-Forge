@@ -119,12 +119,23 @@ const eTab UI_Theme::getTab() const
 
 const ButtonAnimation* UI_Theme::lookUpButtonAnimation(const eButton id) const
 {
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_BUTTONS)) {
+        toLog("ERROR: (UI_Theme::lookUpButtonAnimation) id out of range.");return(buttonAnimationList[0]);
+	}
+#endif
 	return(buttonAnimationList[id]);
 }
 
 
 const string* UI_Theme::lookUpString(const eString id) const
 {
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_STRINGS)) {
+        toLog("ERROR: (UI_Theme::looUpString) id out of range.");return(stringList[language][0]);
+	}
+#endif
+
 	return(stringList[language][id]);
 }
 
@@ -136,6 +147,11 @@ void findandreplace( string& source, const string& find, const string& replace )
 
 const string UI_Theme::lookUpFormattedString(const eString id, const string& text) const
 {
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_STRINGS)) {
+        toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
+	}
+#endif
 	string bla=*(stringList[language][id]);
 	findandreplace(bla, "%s", text);
 	return(bla);
@@ -143,6 +159,11 @@ const string UI_Theme::lookUpFormattedString(const eString id, const string& tex
 
 const string UI_Theme::lookUpFormattedString(const eString id, const int i) const
 {
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_STRINGS)) {
+        toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
+	}
+#endif
 	string bla=*(stringList[language][id]);
 	ostringstream os;
 	os << i; 
@@ -151,6 +172,11 @@ const string UI_Theme::lookUpFormattedString(const eString id, const int i) cons
 }
 const string UI_Theme::lookUpFormattedString(const eString id, const int i, const int j, const int k) const
 {
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_STRINGS)) {
+        toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
+	}
+#endif
 	string bla=*(stringList[language][id]);
 	ostringstream os;
 	os << i;findandreplace(bla, "%i", os.str());os.str("");
@@ -161,6 +187,11 @@ const string UI_Theme::lookUpFormattedString(const eString id, const int i, cons
 
 const string UI_Theme::lookUpFormattedString(const eString id, const int i, const int j) const
 {
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_STRINGS)) {
+        toLog("ERROR: (UI_Theme::lookUpFormattedString) id out of range.");return("");
+	}
+#endif
 	string bla=*(stringList[language][id]);
 	ostringstream os;
 	if(bla.find("%2i")!=string::npos)
@@ -189,31 +220,62 @@ const string UI_Theme::lookUpFormattedString(const eString id, const int i, cons
 
 Color* UI_Theme::lookUpColor(const eColor id) const
 {
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_COLOURS)) {
+        toLog("ERROR: (UI_Theme::lookUpColor) id out of range.");return(colorList[colorTheme][id]);
+	}
+#endif
 	return(colorList[colorTheme][id]);
 }
 
 const Bitmap* UI_Theme::lookUpBitmap(const eBitmap id) const 
 {
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_BITMAPS)) {
+        toLog("ERROR: (UI_Theme::lookUpBitmap) id out of range.");return(bitmapList[resolution][colorTheme][id]);
+	}
+#endif
+
 	return(bitmapList[resolution][colorTheme][id]);
 }
 
 Pen* UI_Theme::lookUpPen(const ePen id) const
 {
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_PENS)) {
+        toLog("ERROR: (UI_Theme::lookUpPen) id out of range.");return(penList[resolution][colorTheme][id]);
+	}
+#endif
 	return(penList[resolution][colorTheme][id]);
 }
 
 Brush* UI_Theme::lookUpBrush(const eBrush id) const
 {
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_BRUSHES)) {
+        toLog("ERROR: (UI_Theme::lookUpBrush) id out of range.");return(brushList[colorTheme][id]);
+	}
+#endif
 	return(brushList[colorTheme][id]);
 }
 
 Font* UI_Theme::lookUpFont(const eFont id) const
 {
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_FONTS)) {
+        toLog("ERROR: (UI_Theme::lookUpFont) id out of range.");return(fontList[resolution][language][id]);
+	}
+#endif
 	return(fontList[resolution][language][id]);
 }
 
 const Point UI_Theme::lookUpRealDistance(const eWindow id, const int windowNumber) const // ~~ Name
 {
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_WINDOWS)) {
+        toLog("ERROR: (UI_Theme::lookUpRealDistance) id out of range.");return(Point(0,0));
+	}
+#endif
 	if(id==MAIN_WINDOW) return(Point(0,0));
 	switch(arrangeDirection[resolution][tab][id])
 	{
@@ -227,6 +289,11 @@ const Point UI_Theme::lookUpRealDistance(const eWindow id, const int windowNumbe
 
 const Point UI_Theme::lookUpMaxRealDistance(const eWindow id, const int windowNumber) const // ~~ Name
 {
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_WINDOWS)) {		
+        toLog("ERROR: (UI_Theme::lookUpMaxRealDistance) id out of range.");return(Point(0,0));
+	}
+#endif
 	if(id==MAIN_WINDOW) return(Point(0,0));
 	switch(arrangeDirection[resolution][tab][id])
 	{
@@ -240,6 +307,11 @@ const Point UI_Theme::lookUpMaxRealDistance(const eWindow id, const int windowNu
 
 const Rect UI_Theme::lookUpRect(const eWindow id, const int windowNumber, const int maxPlayer) const
 {
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_WINDOWS)) {
+        toLog("ERROR: (UI_Theme::lookUpRect) id out of range.");return(Rect(0,0,0,0));
+	}
+#endif
 	Point p;
 	switch(arrangeDirection[resolution][tab][id])
 	{
@@ -253,6 +325,11 @@ const Rect UI_Theme::lookUpRect(const eWindow id, const int windowNumber, const 
 
 const Rect UI_Theme::lookUpMaxRect(const eWindow id, const int windowNumber, const int maxPlayer) const 
 {
+#ifdef _SCC_DEBUG
+	if((id<0)||(id>=MAX_WINDOWS)) {
+        toLog("ERROR: (UI_Theme::lookUpMaxRect) id out of range.");return(Rect(0,0,0,0));
+	}
+#endif
 	Point p;
 	switch(arrangeDirection[resolution][tab][id])
 	{
@@ -697,8 +774,8 @@ void UI_Theme::loadDataFiles(const string& dataFile, const string& bitmapDir, co
 				switch(mode)
 				{
 					case STRING_DATA_TYPE:stringList[current_language][current_line]=new string(p[1]);break;
-					case COLOUR_DATA_TYPE:colorList[current_theme][current_line]=new Color(dc->GetSurface(),v[1],v[2],v[3]);break;
-					case BRUSH_DATA_TYPE:brushList[current_theme][current_line]=new Brush(dc->GetSurface(),v[1],v[2],v[3],get_brush_style(p[4]));break;
+					case COLOUR_DATA_TYPE:colorList[current_theme][current_line]=new Color(dc->GetSurface(),(Uint8)v[1],(Uint8)v[2],(Uint8)v[3]);break;
+					case BRUSH_DATA_TYPE:brushList[current_theme][current_line]=new Brush(dc->GetSurface(),(Uint8)v[1],(Uint8)v[2],(Uint8)v[3],get_brush_style(p[4]));break;
 					default:break;
 				}
 				current_line++;

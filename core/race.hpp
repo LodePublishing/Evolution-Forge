@@ -23,13 +23,10 @@ class RACE: public PRERACE
 		const int getsFitness() const;
 		const int gettFitness() const;
 //Controls:
-		void eraseIllegalCode();
-		void eraseUselessCode();
-		void mutateGeneCode();
 		const bool calculateStep(); 
-		void resetGeneCode();//resets either to a pre-processed buildorder or a completely random one*/
+//		void resetGeneCode();//resets either to a pre-processed buildorder or a completely random one*/
 		void prepareForNewGeneration(); //resets all data to standard values
-		void crossOver(RACE* parent2, RACE* child1, RACE* child2);
+//		void crossOver(RACE* parent2, RACE* child1, RACE* child2);
 		RACE();
 		~RACE();
 };

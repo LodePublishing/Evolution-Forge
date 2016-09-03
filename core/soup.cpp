@@ -21,6 +21,9 @@ SOUP::~SOUP()
 	
 void SOUP::initSoup()
 {
+/* benoetigt folgende initialisierte Daten:
+   mapPlayerNum
+*/
 #ifdef _SCC_DEBUG
 /*	if(!mapInitialized)
 	{
@@ -234,14 +237,15 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 					  ((player[k*groupSize+l]->getpFitness()==player[k*groupSize]->getpFitness())&&(player[k*groupSize+l]->getsFitness()*1.1<player[k*groupSize]->getsFitness()))||
 					  ((player[k*groupSize+l]->getpFitness()==player[k*groupSize]->getpFitness())&&(player[k*groupSize+l]->getsFitness()==player[k*groupSize]->getsFitness())&&(player[k*groupSize+l]->gettFitness()*1.1<player[k*groupSize]->gettFitness())) )
 
-				for(int j=MAX_LENGTH;j--;)
+				player[k*groupSize+l]->copyCode(*player[k*groupSize]);
+/*				for(int j=MAX_LENGTH;j--;)
 				{
 					player[k*groupSize+l]->Code[j]=player[k*groupSize]->Code[j];
 					player[k*groupSize+l]->Marker[j]=player[k*groupSize]->Marker[j];
 
 	//				  memcpy(player[t]->Code[0],player[0]->Code[0],MAX_LENGTH); 
 	//				  memcpy(player[t]->Code[1],player[0]->Code[1],MAX_LENGTH);
-				}
+				}*/
 			}
 		}
 
@@ -275,14 +279,15 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 					}
 					anaplayer[k]->setUnchangedGenerations(0);
 					newcalc=1;
-					for(int i=MAX_LENGTH;i--;)
+					anaplayer[k]->copyCode(*player[k*groupSize]);
+/*					for(int i=MAX_LENGTH;i--;)
 					{
 	// assign the 'best of breed' to anaplayer
 						anaplayer[k]->Code[i]=player[k*groupSize]->Code[i];
 						anaplayer[k]->Marker[i]=player[k*groupSize]->Marker[i];
 					//memcpy(anaplayer[j]->Code[0],player[j*MAX_PROGRAMS/2]->Code[0],MAX_LENGTH*4);
 					//memcpy(anaplayer[j]->Code[1],player[j*MAX_PROGRAMS/2]->Code[1],MAX_LENGTH*4);
-					}
+					}*/
 				}
 			}
 
@@ -442,23 +447,26 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 
 void SOUP::setMapPlayerNum(const int mapPlayerNum)
 {
+#ifdef _SCC_DEBUG
+	if((mapPlayerNum<1)||(mapPlayerNum>=MAX_PLAYER)) {
+		toLog("DEBUG: (SOUP::setMapPlayerNum): mapPlayerNum not initialized.");return;
+	}
+#endif
 	this->mapPlayerNum=mapPlayerNum;
 }
 
 void SOUP::setParameters(GA* ga, START* start)
 {
 #ifdef _SCC_DEBUG
-	if((!ga)||(!start))
-	{
-		toLog("DEBUG: (SOUP::setParameters): Value ga/start not initialized.");
-		return;
+	if((!ga)||(!start))	{
+		toLog("DEBUG: (SOUP::setParameters): Value ga/start not initialized.");return;
 	}
 #endif
 //	gaInitialized=1;
 	this->ga=ga;
 	this->start=start;
 	setMapPlayerNum((*start->getMap())->getMaxPlayer()); // ~~~
-	PRERACE::ga=ga;
+	PRERACE::assignGA(ga);
 	PRERACE::assignStart(start);
 	initSoup();
 }

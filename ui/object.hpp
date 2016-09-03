@@ -12,26 +12,81 @@ class UI_Object
         void Hide(const bool show=false);
 		const bool isShown() const;
 
-	    const Point getAbsolutePosition() const;
-	    const Point getRelativePosition() const;
-		void setWidth(const int width);
-		void setHeight(const int height);
-		void setSize(const Size size);
-		void setPosition(const Point position);
-		void setLeft(const int x);
-		void setTop(const int y);
-    	const Size getSize() const;
+	    const Point getAbsolutePosition() const	{
+		    if(parent)
+				        return(relativeRect.GetPosition() + parent->getAbsolutePosition());
+			    else return(relativeRect.GetPosition());
+		};
 		
-		const int getRelativeUpperBound() const;
-    	const int getRelativeLowerBound() const;
-	    const int getRelativeLeftBound() const;
-    	const int getRelativeRightBound() const;
-	    const int getHeight() const;
-    	const int getWidth() const;
-
+	    const Point getRelativePosition() const {
+		    return(relativeRect.GetPosition());
+		};
+				
+			
+		void setWidth(const int width) {
+		    relativeRect.width=width;
+		}
+				
+			
+		void setHeight(const int height) {
+		    relativeRect.height=height;
+		}
+				
+		void setSize(const Size size) {
+		    relativeRect.SetSize(size);
+		}
+	
+		void setPosition(const Point position) {
+    		relativeRect.SetPosition(position);
+		}
+		
+		void setLeft(const int x) {
+			relativeRect.x=x;
+		}
+		
+		void setTop(const int y) {
+		    relativeRect.y=y;
+		}
+				
+    	const Size getSize() const {
+		    return(relativeRect.GetSize());
+		}
+	
+		const int getRelativeUpperBound() const {
+		    return(relativeRect.y);
+		}
+				
+    	const int getRelativeLowerBound() const {
+		    return(relativeRect.y+relativeRect.height);
+		}
+	
+	    const int getRelativeLeftBound() const {
+		    return(relativeRect.x);
+		}
+	
+    	const int getRelativeRightBound() const {
+		    return(relativeRect.x+relativeRect.width);
+		}
+	
+	    const int getHeight() const {
+		    return(relativeRect.height);
+		}
+	
+    	const int getWidth() const {
+    		return(relativeRect.width);
+		}
+	
 		const bool isTopItem() const;
-		const Rect getRelativeRect() const;
-		const Rect getAbsoluteRect() const;
+		const Rect getRelativeRect() const {
+		    return(relativeRect);
+		}
+				
+		const Rect getAbsoluteRect() const {
+		    if(parent)
+		        return(Rect(relativeRect.GetPosition() + parent->getAbsolutePosition(), getSize()));
+		    else return(Rect(relativeRect.GetPosition(), getSize()));
+		}
+		
 
 //		void setOriginalValues(const int originalValues); TODO
 //		void resetToOriginalValues();
@@ -89,9 +144,17 @@ class UI_Object
 	
 		Rect startRect;
 		Rect targetRect;
+
+		const bool doesNeedRedraw() const;
+		void setNeedRedraw(const bool needRedraw=true);
+
+		static SDL_Rect rectlist[3000];
+		static int rectnumber;
 		
 	protected:
 		void move(int& x, const int sx, const int tx);
+		void move(Point& p, const Point sp, const Point tp);
+		void move(Rect& r, const Rect sr, const Rect tr);
 
 		bool shown;
 		bool disabledFlag;
@@ -104,11 +167,14 @@ class UI_Object
 		UI_Object* children; // pointer to the head of the linked list of children
 
 		Rect relativeRect; // every object needs a current position and size, position is >> RELATIVE << to parent!
+		Rect lastRect;
 	// to adjust object smoothly
 //		Rect startRect;
 //		Rect targetRect;
 		Rect maxRect;
 
+		// needs redraw?
+		bool needRedraw;
 			
 // ignore maxRect for the next adjustWindow calls - important for tutorials
 		bool isFreeMove;

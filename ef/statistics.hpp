@@ -18,6 +18,11 @@ class StatisticsWindow:public UI_Window
 		void resetData();
 		
 	private:
+		UI_StaticText* mspf;
+		UI_StaticText* fps;
+		UI_StaticText* bps;
+		
+		UI_Button* statEntry[8];
 		long int start_time;
 		const ANARACE* anarace;
 		void showGraph(DC* dc, const int* data, const int min, const int max, const Color col) const;
@@ -27,9 +32,10 @@ class StatisticsWindow:public UI_Window
 		int tFitness[200];
 		int aFitness[200];
 		int vFitness[200];
-		int length[200];
+		int alength[200];
 		int time[200];
 		int force[200];
+		int generation[200];
 		int oldForceCounter[20],oldForce[20];
 		int oldGasCounter[20],oldGas[20];
 		int oldMineralsCounter[20],oldMinerals[20];
@@ -43,7 +49,6 @@ class StatisticsWindow:public UI_Window
 		int maxHarvestedRessources;
 		int average[100];
 		int averagecounter;
-		int av;
 };
 #endif
 

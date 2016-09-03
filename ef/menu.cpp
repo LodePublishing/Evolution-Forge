@@ -14,7 +14,7 @@ Menu::Menu(UI_Object* parent, ANARACE* anarace, Rect rect):UI_Object(parent, rec
 
 	for(int i=UNIT_TYPE_COUNT;i--;)
 	{
-		menuEntry[i]=new MenuEntry(this, Rect(0,0,120,20), Rect(0,0,120,20), "NULL");
+		menuEntry[i]=new MenuEntry(this, Rect(0,0,120,FONT_SIZE+5), Rect(0,0,120,FONT_SIZE+5), "NULL");
 		menuEntry[i]->Hide();
 	}
 }

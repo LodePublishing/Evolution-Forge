@@ -108,81 +108,6 @@ void UI_Window::setTitleParameter(const string p)
 	titleParameter=p;
 }
 
-const Rect UI_Window::getRelativeClientRect() const
-{
-	return(clientRect);
-}
-
-const Rect UI_Window::getAbsoluteClientRect() const
-{
-	return(Rect(getAbsoluteClientRectPosition(),getClientRectSize()));
-}
-
-const int UI_Window::getClientRectHeight() const
-{
-	return(clientRect.height);
-}
-
-const int UI_Window::getClientRectWidth() const
-{
-	return(clientRect.width);
-}
-
-const Point UI_Window::getRelativeClientRectPosition() const
-{
-	return(clientRect.GetPosition());
-}
-
-const int UI_Window::getRelativeClientRectUpperBound() const
-{
-	return(clientRect.y);
-}
-
-const int UI_Window::getRelativeClientRectLeftBound() const
-{
-	return(clientRect.x);
-}
-
-const int UI_Window::getRelativeClientRectRightBound() const
-{
-	return(clientRect.x+clientRect.width);
-}
-
-const int UI_Window::getRelativeClientRectLowerBound() const
-{
-	return(clientRect.y+clientRect.height);
-}
-
-const int UI_Window::getAbsoluteClientRectLeftBound() const
-{
-	return(getAbsoluteClientRectPosition().x);
-}
-
-const int UI_Window::getAbsoluteClientRectRightBound() const
-{
-	return(getAbsoluteClientRectPosition().x+getClientRectWidth());
-}
-
-const int UI_Window::getAbsoluteClientRectUpperBound() const
-{
-	return(getAbsoluteClientRectPosition().y);
-}
-
-const int UI_Window::getAbsoluteClientRectLowerBound() const
-{
-	return(getAbsoluteClientRectPosition().y+getClientRectHeight());
-}
-
-const Point UI_Window::getAbsoluteClientRectPosition() const
-{
-	return(clientRect.GetPosition()+getAbsolutePosition());
-}
-
-const Size UI_Window::getClientRectSize() const
-{
-	return(clientRect.GetSize());
-}
-
 const bool UI_Window::insideClientRect(const Point pos) const
 {
 	return(clientRect.Inside(pos-getAbsolutePosition())); //?
@@ -243,12 +168,12 @@ void UI_Window::process()
 {
 	if(!shown) return;
 
-	Rect r = getAbsoluteRect();
-	rectlist[rectnumber].x = r.x;rectlist[rectnumber].y = r.y;rectlist[rectnumber].w = r.width; rectlist[rectnumber].h = r.height;
+	/*Rect r = getAbsoluteRect();
+	rectlist[rectnumber].x = r.x;rectlist[rectnumber].y = r.y;rectlist[rectnumber].w = r.width; rectlist[rectnumber].h = r.height;*/
 
 	UI_Object::process();
 	
-	r = getAbsoluteRect();
+/*	r = getAbsoluteRect();
 	if( r.x < rectlist[rectnumber].x)	
 	{
 		rectlist[rectnumber].w += rectlist[rectnumber].x - r.x;
@@ -269,8 +194,7 @@ void UI_Window::process()
 
 	if( r.height > rectlist[rectnumber].h )
 		rectlist[rectnumber].h = r.height;
-
-	rectnumber++;
+	rectnumber++;*/
 		
 //  int i;
 //  if(WindowMove) ~~
@@ -279,12 +203,7 @@ void UI_Window::process()
 	int a=clientRect.height;
 	int b=clientTargetRect.height;
 	if(a!=b)
-	{
-		move(clientRect.x,		clientStartRect.x,		clientTargetRect.x);
-		move(clientRect.y,		clientStartRect.y,		clientTargetRect.y);
-		move(clientRect.width,	clientStartRect.width,	clientTargetRect.width);
-		move(clientRect.height,	clientStartRect.height,	clientTargetRect.height);
-	}
+		move(clientRect, clientStartRect, clientTargetRect);
 
 	updateBorders();
 
@@ -350,124 +269,127 @@ void UI_Window::drawTitle(DC* dc) const
 void UI_Window::draw(DC* dc) const
 {
 	if(!shown) return;
-// draw outer border:
-	dc->SetPen(*theme.lookUpPen(OUTER_BORDER_PEN));
-	if(isTopItem()) // => main window!
+	if(doesNeedRedraw())
+	{
+	// draw outer border:
+		dc->SetPen(*theme.lookUpPen(OUTER_BORDER_PEN));
+		if(isTopItem()) // => main window!
+			dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+		else
+			dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
+
+		dc->DrawHalfRoundedRectangle(outerBorder.GetPosition()+getAbsolutePosition(),outerBorder.GetSize(),4);
+
+	// draw inner border:
+		if(border.Inside(controls.getCurrentPosition(getAbsolutePosition())))
+			dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+		else 
+		{
+			dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
+		}
 		dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
-	else
-		dc->SetBrush(*theme.lookUpBrush(WINDOW_BACKGROUND_BRUSH));
 
-	dc->DrawRoundedRectangle(outerBorder.GetPosition()+getAbsolutePosition(),outerBorder.GetSize(),4);
+		dc->DrawHalfRoundedRectangle(border.GetPosition()+getAbsolutePosition(),border.GetSize(),4);
+		
+	// draw title if there are no tabs: 
+		if(isTabbed==NOT_TABBED)
+			drawTitle(dc);
 
-// draw inner border:
-	if(border.Inside(controls.getCurrentPosition(getAbsolutePosition())))
-		dc->SetPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-	else 
-	{
-		dc->SetPen(*theme.lookUpPen(INNER_BORDER_PEN));
-	}
-	dc->SetBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
+	// draw descriptions - obsolete
 
-	dc->DrawRoundedRectangle(border.GetPosition()+getAbsolutePosition(),border.GetSize(),4);
-	
-// draw title if there are no tabs: 
-	if(isTabbed==NOT_TABBED)
-		drawTitle(dc);
+	//   dc->SetBrush(getBackground());
+	  /*  if(!scrolled) return;
 
-// draw descriptions - obsolete
+	//(RahmenPen.Red+RahmenPen.Green+RahmenPen.Blue)/3,(RahmenPen.Red+RahmenPen.Green+RahmenPen.Blue)/3,(RahmenPen.Red+RahmenPen.Green+RahmenPen.Blue)/3);
 
-//   dc->SetBrush(getBackground());
-  /*  if(!scrolled) return;
-
-//(RahmenPen.Red+RahmenPen.Green+RahmenPen.Blue)/3,(RahmenPen.Red+RahmenPen.Green+RahmenPen.Blue)/3,(RahmenPen.Red+RahmenPen.Green+RahmenPen.Blue)/3);
-
-// draw ScrollBar:
-	
-	dc->DrawRoundedRectangle(Rect(ScrollArea.GetPosition()+rect.GetPosition(),ScrollArea.GetSize()),3);
-//TODO button draus machen
-	if((ScrollBalkenPressed==2)||(ScrollBalkenPressed==3)||(ScrollBalkenPressed==4)) //currently pressing the ScrollBalken
-	{
-		dc->SetBrush(clickedItemBrush);
-		dc->SetPen(RahmenPen);
-	} else
-	if(ScrollBalkenPressed) // just inside the ScrollBalken
-	{
-		dc->SetBrush(RahmenBrush);
-		dc->SetPen(clickedItemPen);
-	} else
-	{
-		dc->SetBrush(getBackground());
-		dc->SetPen(RahmenPen);
-	}
-	
-	dc->DrawRoundedRectangle(Rect(ScrollBalken.GetPosition()+rect.GetPosition(),ScrollBalken.GetSize()),4);
-	dc->DrawRoundedRectangle(Rect(controls.getDragStartPosition(),ScrollBalken.GetSize()),4);
-	
-	dc->SetPen(RahmenPen);
-	dc->SetBrush(getBackground());
-	dc->DrawRoundedRectangle(Rect(PfeilUp.GetPosition()+rect.GetPosition(),PfeilUp.GetSize()),4);
-	
-	if(scrollY<=0)
-	{
-		dc->SetBrush(getBackground());
-		dc->SetPen(disabledItemPen);
-	} else
-	switch(PfeilUpPressed)
-	{
-		case POINTER_OVER_BUTTON:
-		{
-			dc->SetBrush(RahmenBrush);
-			dc->SetPen(clickedItemPen);
-		};break;
-		case PRESSING_BUTTON:
+	// draw ScrollBar:
+		
+		dc->DrawRoundedRectangle(Rect(ScrollArea.GetPosition()+rect.GetPosition(),ScrollArea.GetSize()),3);
+	//TODO button draus machen
+		if((ScrollBalkenPressed==2)||(ScrollBalkenPressed==3)||(ScrollBalkenPressed==4)) //currently pressing the ScrollBalken
 		{
 			dc->SetBrush(clickedItemBrush);
 			dc->SetPen(RahmenPen);
-	  };break;
-		default:
-		{
-			dc->SetBrush(getBackground());
-			dc->SetPen(RahmenPen);
-		};break;
-	}
-	Point points[3];
-	points[0].x=PfeilUp.width/2;points[0].y=2;
-	points[1].x=2;points[1].y=PfeilUp.height-3;
-	points[2].x=PfeilUp.width-3;points[2].y=PfeilUp.height-3;
-	dc->DrawPolygon(3,points,PfeilUp.x+rect.GetX(),PfeilUp.y+rect.GetY());
-	
-	dc->SetPen(RahmenPen);
-	dc->SetBrush(getBackground());
-	dc->DrawRoundedRectangle(PfeilDown.x+rect.GetX(),PfeilDown.y+rect.GetY(),PfeilDown.width,PfeilDown.height,4);
-	
-	if(scrollY>=maxScrollY-(clientRect.height))
-	{
-		dc->SetBrush(getBackground());
-		dc->SetPen(disabledItemPen);
-	} else
-	switch(PfeilDownPressed)
-	{
-		case POINTER_OVER_BUTTON:
+		} else
+		if(ScrollBalkenPressed) // just inside the ScrollBalken
 		{
 			dc->SetBrush(RahmenBrush);
 			dc->SetPen(clickedItemPen);
-		};break;
-		case PRESSING_BUTTON:
-		{
-			dc->SetBrush(clickedItemBrush);
-			dc->SetPen(RahmenPen);
-		};break;
-		default:
+		} else
 		{
 			dc->SetBrush(getBackground());
 			dc->SetPen(RahmenPen);
-		};break;
+		}
+		
+		dc->DrawRoundedRectangle(Rect(ScrollBalken.GetPosition()+rect.GetPosition(),ScrollBalken.GetSize()),4);
+		dc->DrawRoundedRectangle(Rect(controls.getDragStartPosition(),ScrollBalken.GetSize()),4);
+		
+		dc->SetPen(RahmenPen);
+		dc->SetBrush(getBackground());
+		dc->DrawRoundedRectangle(Rect(PfeilUp.GetPosition()+rect.GetPosition(),PfeilUp.GetSize()),4);
+		
+		if(scrollY<=0)
+		{
+			dc->SetBrush(getBackground());
+			dc->SetPen(disabledItemPen);
+		} else
+		switch(PfeilUpPressed)
+		{
+			case POINTER_OVER_BUTTON:
+			{
+				dc->SetBrush(RahmenBrush);
+				dc->SetPen(clickedItemPen);
+			};break;
+			case PRESSING_BUTTON:
+			{
+				dc->SetBrush(clickedItemBrush);
+				dc->SetPen(RahmenPen);
+		  };break;
+			default:
+			{
+				dc->SetBrush(getBackground());
+				dc->SetPen(RahmenPen);
+			};break;
+		}
+		Point points[3];
+		points[0].x=PfeilUp.width/2;points[0].y=2;
+		points[1].x=2;points[1].y=PfeilUp.height-3;
+		points[2].x=PfeilUp.width-3;points[2].y=PfeilUp.height-3;
+		dc->DrawPolygon(3,points,PfeilUp.x+rect.GetX(),PfeilUp.y+rect.GetY());
+		
+		dc->SetPen(RahmenPen);
+		dc->SetBrush(getBackground());
+		dc->DrawRoundedRectangle(PfeilDown.x+rect.GetX(),PfeilDown.y+rect.GetY(),PfeilDown.width,PfeilDown.height,4);
+		
+		if(scrollY>=maxScrollY-(clientRect.height))
+		{
+			dc->SetBrush(getBackground());
+			dc->SetPen(disabledItemPen);
+		} else
+		switch(PfeilDownPressed)
+		{
+			case POINTER_OVER_BUTTON:
+			{
+				dc->SetBrush(RahmenBrush);
+				dc->SetPen(clickedItemPen);
+			};break;
+			case PRESSING_BUTTON:
+			{
+				dc->SetBrush(clickedItemBrush);
+				dc->SetPen(RahmenPen);
+			};break;
+			default:
+			{
+				dc->SetBrush(getBackground());
+				dc->SetPen(RahmenPen);
+			};break;
+		}
+		
+		points[0].x=PfeilDown.width/2;points[0].y=PfeilDown.height-3;
+		points[1].x=2;points[1].y=2;
+		points[2].x=PfeilDown.width-3;points[2].y=2;
+		dc->DrawPolygon(3,points,PfeilDown.GetX()+rect.GetX(),PfeilDown.GetY()+rect.GetY());*/
 	}
-	
-	points[0].x=PfeilDown.width/2;points[0].y=PfeilDown.height-3;
-	points[1].x=2;points[1].y=2;
-	points[2].x=PfeilDown.width-3;points[2].y=2;
-	dc->DrawPolygon(3,points,PfeilDown.GetX()+rect.GetX(),PfeilDown.GetY()+rect.GetY());*/
 
 	UI_Object::draw(dc);
 
@@ -551,6 +473,4 @@ void UI_Window::changeAccepted()
 
 // TODO evtl in UI_Object und alle Kinder immer aufrufen!
 
-int UI_Window::rectnumber;
-SDL_Rect UI_Window::rectlist[100];
 

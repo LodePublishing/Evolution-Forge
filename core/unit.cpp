@@ -116,7 +116,7 @@ const int UNIT::getAvailible(const int unitType) const
 	if((unitType<0)||(unitType>=UNIT_TYPE_COUNT)) {
 		toLog("DEBUG: (UNIT::getAvailible): Value unitType out of range.");return(0);
 	}
-	if((availible[unitType]<0)||(availible[unitType]>MAX_SUPPLY)) {
+	if((availible[unitType]<0)||(availible[unitType]>MAX_TOTAL_UNITS)) {
 		toLog("DEBUG: (UNIT::getAvailible): Variable availible not initialized.");return(0);
 	}
 #endif
@@ -129,7 +129,7 @@ const int UNIT::getTotal(const int unittype) const
 	if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
 		toLog("DEBUG: (UNIT::getTotal): Value unittype out of range.");return(0);
 	}
-	if((total[unittype]<0)||(total[unittype]>MAX_SUPPLY)) {
+	if((total[unittype]<0)||(total[unittype]>MAX_TOTAL_UNITS)) {
 		toLog("DEBUG: (UNIT::getTotal): Variable total not initialized.");return(0);
 	}
 #endif
@@ -142,7 +142,7 @@ void UNIT::setAvailible(const int unittype, const int availible)
 	if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
 		toLog("DEBUG: (UNIT::setAvailible): Value unittype out of range.");return;
 	}
-	if((availible<0)||(availible>MAX_SUPPLY)) {
+	if((availible<0)||(availible>MAX_TOTAL_UNITS)) {
 		toLog("DEBUG: (UNIT::setAvailible): Value availible out of range.");return;
 	}
 #endif
@@ -155,7 +155,7 @@ void UNIT::setTotal(const int unittype, const int total)
 	if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
 		toLog("DEBUG: (UNIT::setTotal): Value unittype out of range.");return;
 	}
-	if((total<0)||(total>MAX_SUPPLY)) {
+	if((total<0)||(total>MAX_TOTAL_UNITS)) {
 		toLog("DEBUG: (UNIT::setTotal): Value total out of range.");return;
 	}
 #endif
@@ -168,7 +168,7 @@ void UNIT::addAvailible(const int unittype, const int availible)
 	if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
 		toLog("DEBUG: (UNIT::addAvailible): Value unittype out of range.");return;
 	}
-	if((this->availible[unittype]+availible<0)||(this->availible[unittype]+availible>MAX_SUPPLY)) {
+	if((this->availible[unittype]+availible<0)||(this->availible[unittype]+availible>MAX_TOTAL_UNITS)) {
 		toLog("DEBUG: (UNIT::addAvailible): Value num out of range.");return;
 	}
 
@@ -182,7 +182,7 @@ void UNIT::addTotal(const int unittype, const int total)
 	if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
 		toLog("DEBUG: (UNIT::addTotal): Value unittype out of range.");return;
 	}
-	if((this->total[unittype]+total<0)||(this->total[unittype]+total>MAX_SUPPLY)) {
+	if((this->total[unittype]+total<0)||(this->total[unittype]+total>MAX_TOTAL_UNITS)) {
 		toLog("DEBUG: (UNIT::addTotal): Value num out of range.");return;
 	}
 #endif
@@ -195,7 +195,7 @@ void UNIT::addOneAvailible(const int unittype)
     if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
         toLog("DEBUG: (UNIT::addOneAvailible): Value unittype out of range.");return;
     }
-    if((availible[unittype]+1<0)||(availible[unittype]+1>MAX_SUPPLY)) {
+    if((availible[unittype]+1<0)||(availible[unittype]+1>MAX_TOTAL_UNITS)) {
         toLog("DEBUG: (UNIT::addOneAvailible): Value num out of range.");return;
     }
 #endif
@@ -208,7 +208,7 @@ void UNIT::addOneTotal(const int unittype)
     if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
         toLog("DEBUG: (UNIT::addOneTotal): Value unittype out of range.");return;
     }
-    if((total[unittype]+1<0)||(total[unittype]+1>MAX_SUPPLY)) {
+    if((total[unittype]+1<0)||(total[unittype]+1>MAX_TOTAL_UNITS)) {
         toLog("DEBUG: (UNIT::addOneTotal): Value num out of range.");return;
     }
 #endif
@@ -221,7 +221,7 @@ void UNIT::removeOneAvailible(const int unittype)
     if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
         toLog("DEBUG: (UNIT::removeOneAvailible): Value unittype out of range.");return;
     }
-    if((availible[unittype]-1<0)||(availible[unittype]-1>MAX_SUPPLY)) {
+    if((availible[unittype]-1<0)||(availible[unittype]-1>MAX_TOTAL_UNITS)) {
         toLog("DEBUG: (UNIT::removeOneAvailible): Value num out of range.");return;
     }
 #endif
@@ -234,7 +234,7 @@ void UNIT::removeOneTotal(const int unittype)
     if((unittype<0)||(unittype>=UNIT_TYPE_COUNT)) {
         toLog("DEBUG: (UNIT::removeOneTotal): Value unittype out of range.");return;
     }
-    if((total[unittype]-1<0)||(total[unittype]-1>MAX_SUPPLY)) {
+    if((total[unittype]-1<0)||(total[unittype]-1>MAX_TOTAL_UNITS)) {
         toLog("DEBUG: (UNIT::removeOneTotal): Value num out of range.");return;
     }
 #endif

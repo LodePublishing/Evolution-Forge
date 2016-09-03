@@ -22,7 +22,6 @@ public:
 			return(true);
 		return(false);
 	};
-
 	const int getTotalBuildTime() const;
 	const int getBuildFinishedTime() const;
 	

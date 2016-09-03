@@ -6,6 +6,16 @@
 
 #include <map>
 
+/*struct BoGraphItem
+{
+	Rect rect;
+	Rect startRect;
+	Rect targetRect;
+	int IP;
+	int unit;
+	
+}*/
+
 class BoGraphWindow:public UI_Window
 {
 	public:
@@ -30,7 +40,11 @@ class BoGraphWindow:public UI_Window
 		void checkForInfoWindow();
 		int markedUnit;
 		int markAni;
+		// TODO orderList bei jedem Schritt kopieren oder so... :/
+		// WEIL: die orderlist veraendert wird von CheckOrders von player und somit die DrawFunktion von Bographwindow net funzt 
  		map <long, Order>* orderList;
+		Order* sortedList[MAX_LENGTH]; // ~~
+		int orderCount;
 		InfoWindow* infoWindow;
 		ANARACE* anarace;
 };

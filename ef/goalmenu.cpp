@@ -11,7 +11,7 @@ GoalMenu::~GoalMenu()
 void GoalMenu::process()
 {
 	Menu::process();
-	
+		
 	if(menuLevel)
 	{
         for (int i = 0; i < settings.getGoalCount(); i++)

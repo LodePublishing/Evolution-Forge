@@ -12,16 +12,8 @@ GOAL_ENTRY::~GOAL_ENTRY()
 void GOAL_ENTRY::resetData()
 {
 //	mode=0;
-//	raceInitialized=false;
-	goalCount=0;
+	raceInitialized=false;
 	maxBuildTypes=0;
-	for(int i=MAX_GOALS;i--;)
-	{
-		goal[i].count=0;
-		goal[i].time=0;
-		goal[i].unit=0;
-		goal[i].location=0;
-	}
 	for(int i=UNIT_TYPE_COUNT;i--;)
 	{
 		genoToPhaenotype[i]=-1;
@@ -35,17 +27,101 @@ void GOAL_ENTRY::resetData()
 //	initialized=true;
 }
 
+const int GOAL_ENTRY::countGoals() const
+{
+	int goalNum=0;
+	for(list<GOAL>::const_iterator i = goal.begin(); i!=goal.end();++i)
+		if(i->count>0)
+			goalNum++;
+	return(goalNum);
+	// TODO evtl bei addGoal mitprotokollieren
+}
+
+const bool GOAL_ENTRY::calculateReady(const UNIT* units) const
+{
+    bool ready=true;
+    for(list<GOAL>::const_iterator i = goal.begin(); (i!=goal.end())&&(ready);++i)
+        if(i->count)
+            ready&=((i->count<=units[i->location].getTotal(i->unit))&&((i->time>=i->finalTime)||(i->time==0)));
+    return(ready);
+}
+
+const bool GOAL_ENTRY::getNextGoal(list<GOAL>::const_iterator& current, const bool first) const
+{
+	if(first)
+		current=goal.begin();
+	else 
+	{
+		++current;
+		while((current!=goal.end())&&(current->count==0))
+			++current;
+	}
+	if(current==goal.end()) return(false);
+	else return(true);
+}	
+
+void GOAL_ENTRY::calculateFinalTimes(const int location, const int unit, const int time)
+{
+    for(list<GOAL>::iterator i=goal.begin();i!=goal.end();++i)
+    {
+// ist dieses goal belegt?
+        if(( i->unit>0 )&&
+// befinden wir uns am richtigen Ort?
+          (( i->location==0 )||( i->location == location))&&
+// und untersuchen wir das zum Unittype gehoerende Goal?
+            ( i->unit == unit ) )
+              i->finalTime = time;
+    }
+}
+
+const int GOAL_ENTRY::getAllGoal(const int unit) const
+{
+#ifdef _SCC_DEBUG
+	if((unit<0)||(unit>GAS_SCV)) {
+		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value unit out of range.");return(0);
+    }
+	if((allGoal[unit]<0)||(allGoal[unit]>200)) {
+		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Variable allGoal out of range.");return(0);
+    }	
+#endif
+	return(allGoal[unit]);		
+}
+
+const int GOAL_ENTRY::getGlobalGoal(const int location, const int unit) const
+{
+#ifdef _SCC_DEBUG
+	if((location<0)||(location>=MAX_LOCATIONS)) {
+		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value location out of range.");return(0);
+    }
+	if((unit<0)||(unit>GAS_SCV)) {
+		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Value unit out of range.");return(0);
+    }
+	if((globalGoal[location][unit]<0)||(globalGoal[location][unit]>200)) {
+		toLog("DEBUG: (GOAL_ENTRY::getAllGoal): Variable globalGoal out of range.");return(0);
+    }	
+#endif
+	return(globalGoal[location][unit]);		
+}
+const bool GOAL_ENTRY::getIsBuildable(const int unit) const
+{
+#ifdef _SCC_DEBUG
+	if((unit<0)||(unit>GAS_SCV)) {
+		toLog("DEBUG: (GOAL_ENTRY::getIsBuildable): Value unit out of range.");return(false);
+    }
+#endif
+	return(isBuildable[unit]);		
+}
+
 void EXPORT GOAL_ENTRY::copy(const GOAL_ENTRY* goal, const UNIT* unit)
 {
 #ifdef _SCC_DEBUG
 	if(!goal) {
-		toLog("DEBUG: (GOAL_ENTRY:copy): Variable goal not initialized.");return;
+		toLog("DEBUG: (GOAL_ENTRY::copy): Variable goal not initialized.");return;
 	}
 #endif
-	race=goal->getRace();
+	setRace(goal->getRace());
 	maxBuildTypes=goal->getMaxBuildTypes();
 //	initialized=goal->getInitialized();
-//	raceInitialized=true; //TODO!
 	for(int i=UNIT_TYPE_COUNT;i--;)
 	{
 		allGoal[i]=goal->allGoal[i];
@@ -56,15 +132,14 @@ void EXPORT GOAL_ENTRY::copy(const GOAL_ENTRY* goal, const UNIT* unit)
 		genoToPhaenotype[i]=goal->genoToPhaenotype[i];
 		phaenoToGenotype[i]=goal->phaenoToGenotype[i];
 	}
-	pStats=goal->getpStats();
-	for(int i=MAX_GOALS;i--;)
+	for(list<GOAL>::const_iterator i = goal->goal.begin();i!=goal->goal.end();++i)
 	{
-		this->goal[i].unit=goal->goal[i].unit;
+		this->goal.push_back(*i);
+/*		this->goal[i].unit=goal->goal[i].unit;
 		this->goal[i].time=goal->goal[i].time;
 		this->goal[i].count=goal->goal[i].count;
-		this->goal[i].location=goal->goal[i].location;
+		this->goal[i].location=goal->goal[i].location;*/
 	}
-	this->goalCount=goal->goalCount;
 	adjustGoals(true, unit);
 }
 
@@ -72,7 +147,7 @@ void EXPORT GOAL_ENTRY::setRace(const eRace race)
 {
 	resetData();	
 	pStats=&(stats[this->race=race][0]);
-//	raceInitialized=true;
+	raceInitialized=true;
 	changed=true;
 }
 
@@ -218,7 +293,7 @@ void EXPORT GOAL_ENTRY::addGoal(const int unit, const int count, const int time,
 	if((unit<=0)||(unit>=UNIT_TYPE_COUNT)) {
 		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value unit out of range.");return;
 	}
-	if((count+globalGoal[location][unit]<0)||(count>MAX_SUPPLY)) {
+	if((count+globalGoal[location][unit]<0)||(count>MAX_TOTAL_UNITS)) {
 		toLog("DEBUG: (GOAL_ENTRY::addGoal): Value count out of range.");return;
 	}
 	if((time<0)||(time>=MAX_TIME)) {
@@ -240,23 +315,27 @@ void EXPORT GOAL_ENTRY::addGoal(const int unit, const int count, const int time,
 
 	globalGoal[location][unit]+=count;
 
-	int i=0;
+	bool found=false;
 	// TODO wenn Einheiten an mehreren verschiedenen Positionen und location 0 geloescht wird aufsammeln!!
-	for(i=0;i<goalCount;i++)
-		if((goal[i].unit==unit)&&(goal[i].time==time)&&(goal[i].location==location))
-		{
-	//TODO goal loeschen..
-			goal[i].count+=count;
-			i=goalCount+1;
-		}
-	// TODO Liste draus machen!
-	if(i<goalCount+1)
+	for(list<GOAL>::iterator i=goal.begin(); (i!=goal.end())&&(!found); ++i)
 	{
-		goal[goalCount].unit=unit;
-		goal[goalCount].time=time;
-		goal[goalCount].location=location;
-		goal[goalCount].count=count;
-		goalCount++;
+		if((i->unit==unit)&&(i->time==time)&&(i->location==location)) {
+	//TODO goal loeschen..!!!!!!!!!!!!!!11
+//			asdf
+			i->count += count;
+			found=true;
+		}
+	}
+	// neue goal erstellen
+	if(!found)
+	{
+		GOAL new_goal;
+		new_goal.unit=unit;
+		new_goal.time=time;
+		new_goal.location=location;
+		new_goal.count=count;
+		new_goal.finalTime=0;
+		goal.push_back(new_goal);
 	}
 	changed=true;
 }
@@ -334,6 +413,12 @@ const string& EXPORT GOAL_ENTRY::getName() const
 
 const eRace EXPORT GOAL_ENTRY::getRace() const
 {
+#ifdef _SCC_DEBUG
+// TODO irgendwie maxbuildtypes statt UNIT_TYPE_COUNT?
+    if(!raceInitialized) {
+        toLog("DEBUG: (GOAL_ENTRY::getRace): race not initialized.");return(TERRA);
+    }
+#endif
 	return race;
 }
 
@@ -350,11 +435,6 @@ void EXPORT GOAL_ENTRY::setName(const string& name)
 void EXPORT GOAL_ENTRY::setMode(const int mode)
 {
 	this->mode=mode;
-}*/
-
-/*const bool EXPORT GOAL_ENTRY::isRaceInitialized() const
-{
-	return(raceInitialized);
 }*/
 
 

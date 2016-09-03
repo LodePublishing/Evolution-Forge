@@ -1,27 +1,23 @@
 #ifndef __LIST_H
 #define __LIST_H
 
+#include "wx/wx.h"
+
 struct ORDER
 {
         int blend;
         int blendTarget;
+	int blendStart;
                                                                                
 //build order list
-        int x,y; //current x,y
-        int targetx,targety;
-        int targetwidth,width;
-        int dx,dy;
+	wxRect rect;
+	wxRect target;
+	wxRect start;
                                                                                
 //build order graph
-        int bx,by;
-        int targetbx,targetby;
-                                                                               
-        int bheight,bwidth;
-        int checked;
-        int targetbheight,targetbwidth;
             
 	int unit;
-                                                                   
+        int checked;
 //      int mins,gas,time,location,needSupply,haveSupply,forceFacilityCount,availibleFacilityCount,successType,successUnit,facility,code,forceCount;
         int /*marker,*/bonew;
                                                                                
@@ -29,6 +25,8 @@ struct ORDER
         int row;
 //      int mins, color  etc.
 };
+
+//evtl nochmal ne ebene 'player' in mydcwindow und da dann das ganze zeugs unterbringen, v.a. orderlist etc.!
 
 
 class NODE
@@ -59,7 +57,7 @@ class OrderList
 		~OrderList();
 		void Append(int key, ORDER* object);
 		void Clear();
-		void DeleteNode(NODE* node);
+		NODE* DeleteNode(NODE* node);
 		NODE* Find(int key);
 		int GetCount();
 		NODE* GetFirst();

@@ -247,6 +247,11 @@ int EXPORT SETTINGS::setGoal(int goal, int player)
 	return(soup.setGoal(&goalEntry[goal], player));
 };
 
+void EXPORT SETTINGS::checkForChange()
+{
+	soup.checkForChange();	
+};
+
 int EXPORT SETTINGS::setBreedFactor(int num)
 {
 	if((num<MIN_BREED_FACTOR)||(num>MAX_BREED_FACTOR))
@@ -385,8 +390,6 @@ int EXPORT SETTINGS::loadGoalFile(const char* goalFile) //~~~
 	int value1=0,value2=0,value3=0;
 	int mode=0;
 
-	int i;
-
 	item[0]='\0';param1[0]='\0';param2[0]='\0';param3[0]='\0';
 
 	if((pFile = fopen (goalFile,"r"))==NULL)
@@ -465,8 +468,8 @@ int EXPORT SETTINGS::loadGoalFile(const char* goalFile) //~~~
 				mode=1;
 			else
 			{
-
 //Aufbau der goal datei: "Einheitname" LEER "Anzahl" LEER "Zeit" LEER "Ort"
+				int i;
 				for(i=0;i<REFINERY;i++) 
 					if((strstr(stats[goalEntry[getGoalCount()].getRace()][i].name,item)!=NULL)&&(value2<=getMaxTime())&&(value3<=MAX_LOCATIONS))
 					{
@@ -626,7 +629,6 @@ int EXPORT SETTINGS::loadHarvestFile(const char* harvestFile)
 	int ln=0;
 	int value=0;
 	int mode=0,modeRace=0;
-	int i=0;
 	if((pFile = fopen (harvestFile,"r"))==NULL)
 	{
 		debug.toLog(0,"ERROR: (SETTINGS::loadHarvestFile) %s: Could not open file!",harvestFile);
@@ -689,7 +691,7 @@ int EXPORT SETTINGS::loadHarvestFile(const char* harvestFile)
 					modeRace=0;
 				else if(!strcmp(item,"Mineral Harvest"))
 				{
-					i=0;
+					int i=0;
 					buffer=strtok(param," ");
 					while((buffer!=NULL)&&(i<45))				
 					{
@@ -711,7 +713,7 @@ int EXPORT SETTINGS::loadHarvestFile(const char* harvestFile)
 				else
 				if(!strcmp(item,"Gas Harvest"))
 				{
-					i=0;
+					int i=0;
 					buffer=strtok(param," ");
 					while((buffer!=NULL)&&(i<5))
 					{
@@ -753,7 +755,6 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 	int ln=0;
 	int value1=0,value2=0,value3=0;
 	int mode=0,modeLocation=0,modePlayer=-1;
-	int i=0;
 	int playerCount=0;
 	if((pFile = fopen (mapFile,"r"))==NULL)
 	{
@@ -943,6 +944,7 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 			}
 			else if(mode==4) // PLAYER Block in LOCATION Block
 			{
+				int i=0;
 				if(!strcmp(item,"@END"))
 					mode=2;
 				else
@@ -955,8 +957,8 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 							i=UNIT_TYPE_COUNT+1;
 							break;
 						}
-				};
-				if(i!=UNIT_TYPE_COUNT+1) debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: No matching unit name.",mapFile,ln,item);
+					if(i!=UNIT_TYPE_COUNT+1) debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: No matching unit name.",mapFile,ln,item);
+				}
 			}
 			else
 				debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Unknown entry in PLAYER Block in LOCATION Block.",mapFile,ln,item);
@@ -982,13 +984,15 @@ GA* EXPORT SETTINGS::getGa()
 int EXPORT SETTINGS::initSoup()
 {
 	int tmp=0;
-	if((tmp=soup.setParameters(&ga))!=1) return(100-tmp);
-	if((tmp=soup.initSoup())!=1) return(200-tmp);
+	if((tmp=soup.setParameters(&ga))!=1) 
+		debug.toLog(0,"error1");//return(100-tmp);
+	if((tmp=soup.initSoup())!=1) 
+		debug.toLog(0,"error2");//return(200-tmp);
 	return(1);
 }
 
 
-ANARACE* EXPORT SETTINGS::newGeneration(ANARACE* oldAnarace)
+ANARACE** EXPORT SETTINGS::newGeneration(ANARACE* oldAnarace[MAX_PLAYER])
 {
 	return(soup.newGeneration(oldAnarace));
 };

@@ -23,6 +23,8 @@ private:
 public:
 	MAP* getMap(int num);
 
+	void checkForChange();
+
 //all those nasty range checking stuff :-)
 	int getMAXBreedFactor();
 	int getMAXMode();
@@ -83,7 +85,7 @@ public:
 	int loadSettingsFile(const char* settingsFile);
 	int loadMapFile(const char* mapFile);
 	int loadHarvestFile(const char* harvestFile);
-	ANARACE* newGeneration(ANARACE* oldAnarace);
+	ANARACE** newGeneration(ANARACE* oldAnarace[MAX_PLAYER]);
 
 	int initSoup();
 

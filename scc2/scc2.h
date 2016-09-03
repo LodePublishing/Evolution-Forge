@@ -8,14 +8,19 @@
 
 // the application icon (under Windows and OS/2 it is in resources)
 #if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
-    #include "/home/clawg/work/sc1040/sc/icon.xpm"
+    #include "/home/clawg/work/sc1041/sc/icon.xpm"
 //    #include "scc.png"
 #endif
 
-#include <wx/spinctrl.h>
-#include <wx/button.h>
-
+//#include <wx/spinctrl.h>
+//#include <wx/button.h>
 #include <wx/datetime.h>
+
+#include "graphics.h"
+#include "list.h"
+#include "player.h"
+#include "message.h"
+
 enum
 {
         EF_Version=108,
@@ -47,14 +52,6 @@ enum
     // (where it is special and put into the "Apple" menu)
     EF_About = wxID_ABOUT
 };
-
-#ifdef __WIN32__                                                                                
-const int FONT_SIZE=6;
-#else
-const int FONT_SIZE=7;
-#endif
-
-#include "list.h"
 
 // this is mainly for for io to display some of the output
 const char error_message[ERROR_MESSAGES][25]=
@@ -94,24 +91,14 @@ const char gizmo[GIZMO_NUMBER][40]=
                                                                                     
 
 
-const int FIRST_COLOUMN=300;
-const int SECOND_COLOUMN=500;
-const int THIRD_COLOUMN=200;
 
-//const int FIRST_ROW=0;
-const int SECOND_ROW=125;
-//const int THIRD_ROW=
-//const int FOURTH_ROW=
+//const int BUILD_ORDER_NUMBER=36;
 
-const int BUILD_ORDER_NUMBER=36;
-const int FORCE_LIST_NUMBER=23;
+//const int BUILD_ORDER_GRAPH_LENGTH=FORCE_LIST_NUMBER*(FONT_SIZE+5)+3;//BUILD_ORDER_GRAPH_NUMBER*(FONT_SIZE+5)+3+FORCE_LIST_LENGTH;
 
-const int BUILD_ORDER_GRAPH_LENGTH=FORCE_LIST_NUMBER*(FONT_SIZE+5)+3;//BUILD_ORDER_GRAPH_NUMBER*(FONT_SIZE+5)+3+FORCE_LIST_LENGTH;
-
-const int FORCE_LIST_LENGTH=60+3+BUILD_ORDER_GRAPH_LENGTH;//FORCE_LIST_NUMBER*(FONT_SIZE+5)+3;
-const int BUILD_ORDER_GRAPH_NUMBER=10; 
+//const int FORCE_LIST_LENGTH=60+3+BUILD_ORDER_GRAPH_LENGTH;//FORCE_LIST_NUMBER*(FONT_SIZE+5)+3;
+//const int BUILD_ORDER_GRAPH_NUMBER=10; 
 //const int BUILD_ORDER_GRAPH_LENGTH=BUILD_ORDER_GRAPH_NUMBER*(FONT_SIZE+5)+3+FORCE_LIST_LENGTH;
-const int MIN_HEIGHT=2;
 
 // Define a new application type, each program should derive a class from wxApp
 class MyApp : public wxApp
@@ -120,24 +107,6 @@ public:
     virtual bool OnInit();
 };
                                                                                                                                                            
-struct BOLOG
-{
-        int count;
-        int order;
-};  //this is for logging the build order
-
-
-
-//WX_DECLARE_LIST(OLDORDER, OrderList);
-
-struct Message
-{
-	int type;
-	wxString string;
-	int col;
-} message[1000];
-int msgCount;
-
 
 class MyDCWindow:public wxWindow
 {
@@ -153,95 +122,51 @@ public:
         void OnMouseScroll(wxMouseEvent& event);
 	void OnTimer(wxTimerEvent& event);
         SETTINGS settings;
-	int run;
 	void resetData();
 	void showToolTip();
+	GraphixScrollWindow* mainWindow;
+	MessageWindow* msgWindow;
+	GraphixScrollWindow* haxor;
+	GraphixScrollWindow* infoWindow;
+	GraphixScrollWindow* tutorialWindow;
+	Player* player[MAX_PLAYER];
+	GraphixScrollWindow* theCore;
+	int isOptimizing();
+	void stopOptimizing();
 private:
 	wxTimer wxtimer;
-	void CheckOldOrders();
-	void MoveOldOrders();
-	int CheckForInfoWindow();
-	void ProgressGraph();
 	int userIsNewbie;
 	
-	int selection[MAX_LENGTH];
-	int mouseX,mouseY,mouseLeft,orderLength;
+	int mouseLeft;
 	int oldrun,endrun;
         GA* ga;
         BOLOG bolog[MAX_LENGTH];
-        BOLOG globalForcelog[UNIT_TYPE_COUNT];
         wxBitmap bmpGraph,bmpTimer,bmpBack,bmpBack2,bmpCancel,bmpAdd,bmpSub;
 	wxBitmap bmpArrowLeft,bmpArrowUp,bmpArrowRight,bmpArrowDown;
-	int currentForce;
-	void analyzeData();
-	void showBoGraph();
 	void processButtons();
-	void drawBuildOrder();
-	void drawStatistics();
-	void drawGoalList();
 	void drawGizmo();
-	void drawMessages();
-	void drawSelectionStuff();
-	void drawGeneString();
-	int optimizeMode;
-        void showGraph(int* data,int max,wxColour col);
-	void showInfoWindow();
 	void showCoreAnimation();
-	void showTimer();
-	void showProgramGraph();
 	wxMemoryDC* dc;
-        ANARACE* anarace;
+        ANARACE* anarace[MAX_PLAYER];
         
-	int boInsertPoint,boEndPoint,boGoalListOpened,addBoGoalButton,lastBogoal;
-	int continueButton;
 
-	int unitButton[MAX_LENGTH];
-	int optButton[MAX_LENGTH];
 
 	int animationNumbers;
-	int infoWindowNumber;
 	int update;
-        int harvestedMins[200];
-	int harvestedGas[200];
-        int pFitness[200];
-        int tFitness[200];
-        int aFitness[200];
-	int vFitness[200];
-	int length[200];
-        int time[200];
-        int force[200];
 
-	wxDateTime dt1;
-	wxDateTime dt2;
+//	wxDateTime dt1;
+//	wxDateTime dt2;
+	int refresh;
 
 	int tutorialChapter;
 
-	int average[100];int averagecounter;
 	
-	int oldTimeCounter[20],oldTime[20];
-	int oldForceCounter[20],oldForce[20];
-	int oldGasCounter[20],oldGas[20];
-	int oldMinsCounter[20],oldMins[20];
-	
-//	OLDORDER* oldOrder[MAX_LENGTH*50];
-	OrderList orderList;
-//	int oldMarker[MAX_LENGTH];
-
-//	int oldBuildOrders[BUILD_ORDER_NUMBER];
-	int oldForceList[FORCE_LIST_NUMBER];
-	//int oldData[8];
 wxBitmap bitmap,bitmap2,bitmap3,hintBitmap,bmpNumbers,bmpRadiation,bmpAlpha,bmpTreppe,bmpCloning,bmpFitness;
 	wxBitmap bmpRad[5];
 	wxBitmap bmpHeart[5];
 	int ani;
-        int maxsFitness;
-        int maxpFitness;
-        int maxtFitness;
 	int tutorialAnimation;
-	int mintFitness;
-        int maxForce; //all units
-        int maxUnitForce; //single unit
-        DECLARE_EVENT_TABLE()
+       DECLARE_EVENT_TABLE()
 };
                                                                                 
 
@@ -255,25 +180,25 @@ public:
             long style = wxDEFAULT_FRAME_STYLE);
 
 // event handlers (these functions should _not_ be virtual)
-        void OnQuit(wxCommandEvent& event);
-        void OnAbout(wxCommandEvent& event);
-        void OnOpen(wxCommandEvent& event);
-	void OnStart(wxCommandEvent& event);
-	void OnStop(wxCommandEvent& event);
-	void OnGeneralSettings(wxCommandEvent& event);
+//        void OnQuit(wxCommandEvent& event);
+/*        void OnAbout(wxCommandEvent& event);
+        void OnOpen(wxCommandEvent& event);*/
+//	void OnStart(wxCommandEvent& event);
+//	void OnStop(wxCommandEvent& event);
+//	void OnGeneralSettings(wxCommandEvent& event);
 
 	
-        void OnSettingsDialogApply();
+/*        void OnSettingsDialogApply();
 
 	void OnGoalCreate(wxCommandEvent& event);
         void OnGoalImport(wxCommandEvent& event);
         void OnMapCreate(wxCommandEvent& event);
-        void OnMapImport(wxCommandEvent& event);
+        void OnMapImport(wxCommandEvent& event);*/
 private:
 	MyDCWindow* child;
 //	wxBitmap bitmap;
 
-        wxMenu* menuFile;
+/*      wxMenu* menuFile;
         wxMenu* menuHelp;
 	wxMenu* menuSettings;
 	wxMenu* menuGoal;
@@ -299,10 +224,10 @@ private:
 	wxListBox* lb1;
 	wxListBox* lb2;
 
-	wxDialog* msgBox;
+	wxDialog* msgBox;*/
 
     // any class wishing to process wxWindows events must use this macro
-        DECLARE_EVENT_TABLE()
+//        DECLARE_EVENT_TABLE()
 };
 
 #endif

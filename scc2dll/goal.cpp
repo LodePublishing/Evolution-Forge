@@ -9,6 +9,7 @@ int EXPORT GOAL_ENTRY::isChanged()
 
 void EXPORT GOAL_ENTRY::changeAccepted()
 {
+	bestTime=0;
 	changed=0;
 };
 
@@ -301,6 +302,7 @@ GOAL_ENTRY::GOAL_ENTRY()
 			globalGoal[j][i]=0;
 	}
 	initialized=1;
+	bestTime=0;
 };
 
 GOAL_ENTRY::~GOAL_ENTRY()

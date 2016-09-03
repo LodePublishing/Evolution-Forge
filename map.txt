@@ -6,7 +6,7 @@
 "Name" = "Lost Temple"
 "Max Locations" = "9"
 #Max Player incl. "neutral" player (minerals, vespene geysirs etc.)
-"Max Players" = "2"
+"Max Players" = "3"
 "@END"
 
 # --- Players ---
@@ -19,13 +19,13 @@
 "Starting Gas" = "0"
 "@END"
 
-#"@PLAYER" "2"
+"@PLAYER" "2"
 #Race should be first item of player entry!
-#"Race" = "Terra"
-#"Starting Point" = "8"
-#"Starting Minerals" = "50"
-#"Starting Gas" = "0"
-#"@END"
+"Race" = "Terra"
+"Starting Point" = "8"
+"Starting Minerals" = "50"
+"Starting Gas" = "0"
+"@END"
 
 "@PLAYER" "0"
 # temporary player, do not use!
@@ -116,10 +116,10 @@
 "Vespene Geysir" = "1"
 "@END"
 
-#"@PLAYER" "2"
-#"SCV" = "4"
-#"Command Center" = "1"
-#"@END"
+"@PLAYER" "2"
+"SCV" = "4"
+"Command Center" = "1"
+"@END"
 
 "@END"
 

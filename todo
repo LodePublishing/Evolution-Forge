@@ -50,7 +50,7 @@ facility2 packt er irgendwie net :-/ alles availible0 8[...done
 linked lists v.a. fuer buildings und counters...done
 wenn maus ueber Eintrag is, Hilfefenster anzeigen (und wieder verschwinden lassen, sobald Maus bewegt)...done
 
-- fitness, mins und gas unten rechts nicht pro Befehl sondern pro Minute antragen
+fitness, mins und gas unten rechts nicht pro Befehl sondern pro Minute antragen... done
 
 - timer fuer animationen
 
@@ -113,4 +113,9 @@ u238 shells und colossus reactor haengen irgendwie zusammen :o
 - alle goal bts zusammenzaehlen und jeweils durch facilities teilen
 
 - oben den Graphen schoener machen... Veraenderungen etc.... => gui blooper :o
+
+- Bewertungsfunktion:
+Stoerer: Nur Antizeit
+human vs comp / comp vs comp: beide Parteien zaehlen ihre Punkte (gebaut + 2 * vernichtet)
+
 

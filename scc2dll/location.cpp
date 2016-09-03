@@ -73,13 +73,12 @@ int MAP_LOCATION_BASIC::getDistance(int num)
 
 MAP_LOCATION_BASIC::MAP_LOCATION_BASIC()
 {
-	int i,j;
 	strcpy(name,"Error!");
 	mineralDistance=0;
-	for(i=0;i<MAX_LOCATIONS;i++)
+	for(int i=0;i<MAX_LOCATIONS;i++)
 		setDistance(i,0);
-	for(i=0;i<MAX_PLAYER;i++)
-		for(j=0;j<UNIT_TYPE_COUNT;j++)
+	for(int i=0;i<MAX_PLAYER;i++)
+		for(int j=0;j<UNIT_TYPE_COUNT;j++)
 			force[i][j]=0;
 };
 

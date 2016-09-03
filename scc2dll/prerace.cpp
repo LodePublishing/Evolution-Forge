@@ -1,16 +1,10 @@
 #include "prerace.h"
 #include "debug.h"
 
-#include "wx/listimpl.cpp"
-																			    
-WX_DEFINE_LIST(BuildingList);
-
-
 void EXPORT PRERACE::createSpecial()
 {
-	int i;
 	if(getPlayer()->goal->getRace()==ZERG)
-		for(i=0;i<larvacounternumber;i++)
+		for(int i=0;i<larvacounternumber;i++)
 			if(!--larva[i].counter)
 			{
 				larva[i].counter=20;
@@ -106,7 +100,6 @@ int EXPORT PRERACE::setMapLocationForce(int player, int loc, int type, int num)
 		debug.toLog(0,"DEBUG: (PRERACE::setMapLocationForce): Value player [%i] out of range.",player);
 		return(0);
 	}
-																			    
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setMapLocationForce): Value loc [%i] out of range.",loc);
@@ -477,12 +470,11 @@ int EXPORT PRERACE::adjustMineralHarvest(int location)
 		debug.toLog(0,"DEBUG: (PRERACE::adjustMineralHarvest): Value location [%i] out of range.",location);
 		return(0);
 	}
-	int i,j;
 	//TODO Zerg hatchery,lair etc.
 	if((location==0)||((!getLocationForce(location,COMMAND_CENTER))&&(!getMapLocationForce(0,location,MINERALS))))
 	{
-		for(j=45;j--;)
-			setMineralHarvestPerSecond(location,j,0);
+		for(int i=45;i--;)
+			setMineralHarvestPerSecond(location,i,0);
 	}
 //	else if((!pMap->location[num].force[playerNum][COMMAND_CENTER])&&(pMap->location[num].force[0][MINERALS]))
 //	{
@@ -497,7 +489,7 @@ int EXPORT PRERACE::adjustMineralHarvest(int location)
 	else if(player->getBasicMineralHarvestPerSecond(1)>0) //???
 	{
 //		int k;
-		for(i=45;i--;)
+		for(int i=45;i--;)
 		{
 //			k=0;
 //			for(j=0;j<45;j++)
@@ -517,11 +509,10 @@ int EXPORT PRERACE::adjustGasHarvest(int location)
 		debug.toLog(0,"DEBUG: (PRERACE::adjustGasHarvest): Value location [%i] out of range.",location);
 		return(0);
 	}
-	int i,j;
 	if((location==0)||((!getLocationForce(location,COMMAND_CENTER))&&(!getLocationForce(location,REFINERY))))
 	{
-		for(j=5;j--;)
-			setGasHarvestPerSecond(location,j,0);
+		for(int i=5;i--;)
+			setGasHarvestPerSecond(location,i,0);
 	}
 /*	else if((!pMap->location[num].force[playerNum][COMMAND_CENTER])&&(pMap->location[num].force[playerNum][REFINERY]))
 	{
@@ -534,7 +525,7 @@ int EXPORT PRERACE::adjustGasHarvest(int location)
 	else
 	{
 		int k;
-		for(i=5;i--;)
+		for(int i=5;i--;)
 		{
 			k=0;
 //			for(j=0;j<5;j++)
@@ -623,8 +614,7 @@ int EXPORT PRERACE::adjustHarvest()
 		debug.toLog(0,"DEBUG: (PRERACE::adjustHarvest): Map was not initialized.");
 		return(0);
 	}
-	int i;
-	for(i=0;i<MAX_LOCATIONS;i++)
+	for(int i=0;i<MAX_LOCATIONS;i++)
 	{
 		adjustMineralHarvest(i);
 		adjustGasHarvest(i);
@@ -635,17 +625,18 @@ int EXPORT PRERACE::adjustHarvest()
 
 int EXPORT PRERACE::harvestMinerals()
 {
-	int i,s;
 	int sum=0;
 //      int t=(rand()%10)-5;
-	for(i=1;i<MAX_LOCATIONS;i++)//~~
-	if((s=location[i].availible[SCV]))
+	for(int i=1;i<MAX_LOCATIONS;i++)//~~
 	{
-		//availible is 0, harvestSpeed ist ok!
-		if(s<44) //~~ war 56
-			sum+=getMineralHarvestPerSecond(i,s);
-		else
-			sum+=getMineralHarvestPerSecond(i,44);
+		int s=location[i].availible[SCV];
+		if(s)
+		{
+			//availible is 0, harvestSpeed ist ok!
+			if(s<44) //~~ war 56
+				sum+=getMineralHarvestPerSecond(i,s);
+			else
+				sum+=getMineralHarvestPerSecond(i,44);
 /*		{
 			setMins(getMins()+getMineralHarvestPerSecond(i,s));
 			//~~~ neu berechnen / Tabelle anlegen! sind ja nicht bei jeder Exe gleichviel Mineralien... <- das sollte sich mit adjustHarvest erledigt haben
@@ -656,6 +647,7 @@ int EXPORT PRERACE::harvestMinerals()
 			setMins(getMins()+getMineralHarvestPerSecond(i,44)); //war 56
 			harvestedMins+=getMineralHarvestPerSecond(i,44);
 		}*/
+		}
 	}
 	return(sum);
 }
@@ -663,24 +655,26 @@ int EXPORT PRERACE::harvestMinerals()
 
 int EXPORT PRERACE::harvestGas()
 {
-	int i,s;
 	int sum=0;
 //	int t=(rand()%10)-5;
-	for(i=1;i<MAX_LOCATIONS;i++)//~~
-	if((s=location[i].availible[GAS_SCV]))
+	for(int i=1;i<MAX_LOCATIONS;i++)//~~
 	{
-		if(s<4)
-			sum+=getGasHarvestPerSecond(i,s);
-		else
-			sum+=getGasHarvestPerSecond(i,4); //TODO
-/*
-			harvestedGas+=getGasHarvestPerSecond(i,s);
-		}
-		else
+		int s=location[i].availible[GAS_SCV];
+		if(s)
 		{
-			setGas(getGas()+getGasHarvestPerSecond(i,4));
-			harvestedGas+=getGasHarvestPerSecond(i,4);
-		}*/
+			if(s<4)
+				sum+=getGasHarvestPerSecond(i,s);
+			else
+				sum+=getGasHarvestPerSecond(i,4); //TODO
+	/*
+				harvestedGas+=getGasHarvestPerSecond(i,s);
+			}
+			else
+			{
+				setGas(getGas()+getGasHarvestPerSecond(i,4));
+				harvestedGas+=getGasHarvestPerSecond(i,4);
+			}*/
+		}
 	}
 	return(sum);
 };
@@ -713,30 +707,32 @@ int EXPORT PRERACE::resetSupply()
 		debug.toLog(0,"DEBUG: (PRERACE::resetSupply): Map was not initialized.");
 		return(0);
 	}
-	setSupply(0);
 	setMaxSupply(0);
-	int i,j;
-	for(i=1;i<MAX_LOCATIONS;i++)
-		for(j=UNIT_TYPE_COUNT;j--;)
+	int temp=0;
+	for(int i=1;i<MAX_LOCATIONS;i++)
+		for(int j=UNIT_TYPE_COUNT;j--;)
 		{
-			if(pStats[j].supply<0)
+			if(pStats[j].supply<0) // -> supply building like depot, cc etc.
 			{
 				if(getMaxSupply()-pStats[j].supply*location[i].force[j]>MAX_SUPPLY)
 				{
 					if(getMaxSupply()<MAX_SUPPLY)
 					{
-						setSupply(getMaxSupply()+(MAX_SUPPLY-getMaxSupply()));
+	//TODO!!				
+						temp=getMaxSupply()+(MAX_SUPPLY-getMaxSupply());
 						setMaxSupply(MAX_SUPPLY);
 					}
 				}
 				else
 				{
-					setSupply(getSupply()-pStats[j].supply*location[i].force[j]);
+	//TODO handle negative supply at beginning
+					temp-=pStats[j].supply*location[i].force[j];
 					setMaxSupply(getMaxSupply()-pStats[j].supply*location[i].force[j]);
 				}
-			} else
-				setSupply(getSupply()-pStats[j].supply*location[i].force[j]);
+			} else //unit or something
+				temp-=pStats[j].supply*location[i].force[j];
 		}
+	setSupply(temp);
 	return(1);
 };
 
@@ -953,8 +949,7 @@ void EXPORT PRERACE::resetMapInitialized()
 
 void EXPORT PRERACE::resetSpecial()
 {
-	int i,j,k;
-	for(i=0;i<20;i++)
+	for(int i=0;i<20;i++)
 	{
 		larva[i].counter=0;
 		larva[i].location=0;
@@ -963,9 +958,12 @@ void EXPORT PRERACE::resetSpecial()
 	larvacounternumber=0;
 	if(getPlayer()->goal->getRace()==ZERG)
 	{
-		for(i=1;i<MAX_LOCATIONS;i++)
-			if((j=(getLocationForce(i,HATCHERY)+getLocationForce(i,LAIR)+getLocationForce(i,HIVE))))
-				for(k=0;k<j;k++)
+		for(int i=1;i<MAX_LOCATIONS;i++)
+		{
+			int j=(getLocationForce(i,HATCHERY)+getLocationForce(i,LAIR)+getLocationForce(i,HIVE));
+			if(j)
+			{
+				for(int k=0;k<j;k++)
 				{
 					larva[larvacounternumber].counter=20;
 					larva[larvacounternumber].location=i;
@@ -974,6 +972,8 @@ void EXPORT PRERACE::resetSpecial()
 					addLocationForce(i,LARVA,1);
 					addLocationAvailible(i,LARVA,1);	
 				}
+			}
+		}
 	}
 }
 
@@ -990,8 +990,7 @@ void PRERACE::adjustAvailibility(int loc,int fac,const UNIT_STATISTICS* stat)
 				{
 					int bestPlace=0;//unschoen hier :/
 					int bestCounter=0;
-					int i;
-					for(i=0;i<larvacounternumber;i++)
+					for(int i=0;i<larvacounternumber;i++)
 						if((larva[i].location==loc)&&(larva[i].larvacount>bestCounter))
 							{bestCounter=larva[i].larvacount;bestPlace=i;}
 					larva[bestPlace].larvacount--;
@@ -1049,9 +1048,8 @@ void PRERACE::adjustAvailibility(int loc,int fac,const UNIT_STATISTICS* stat)
 
 int PRERACE::calculateReady()
 {
-	int i;
 	int ready=1;
-	for(i=MAX_GOALS;(i--)&&(ready);)
+	for(int i=MAX_GOALS;(i--)&&(ready);)
 		if(getPlayer()->goal->goal[i].count)
 			ready&=((getPlayer()->goal->goal[i].count<=getLocationForce(getPlayer()->goal->goal[i].location,getPlayer()->goal->goal[i].unit))&&((getPlayer()->goal->goal[i].time>=getFinalTime(i))||(getPlayer()->goal->goal[i].time==0)));
 	return(ready);
@@ -1060,7 +1058,6 @@ int PRERACE::calculateReady()
 
 PRERACE::PRERACE()
 {
-	int i,j;
 	calculated=0;
 	player=0;
 	mins=0;
@@ -1074,14 +1071,14 @@ PRERACE::PRERACE()
 	harvestedMins=0;
 	setLength(0);
 	//todo: mehr auf 0 setzen!
-	for(i=0;i<MAX_LOCATIONS;i++)
+	for(int i=0;i<MAX_LOCATIONS;i++)
 	{
-		for(j=0;j<45;j++)
+		for(int j=0;j<45;j++)
 			setMineralHarvestPerSecond(i,j,0);
-		for(j=0;j<5;j++)
+		for(int j=0;j<5;j++)
 			setGasHarvestPerSecond(i,j,0);
 	};
-	for(i=0;i<MAX_LENGTH;i++)
+	for(int i=0;i<MAX_LENGTH;i++)
 	{
 		Code[0][i]=0;
 		Code[1][i]=0;
@@ -1089,7 +1086,7 @@ PRERACE::PRERACE()
 		last[i].location=0;
 		last[i].count=0;
 	};
-	for(i=0;i<20;i++)
+	for(int i=0;i<20;i++)
 	{
 		larva[i].counter=0;
 		larva[i].location=0;
@@ -1109,7 +1106,6 @@ int PRERACE::markerCounter;
 MAP* PRERACE::pMap;
 GA* PRERACE::ga;
 int PRERACE::mapInitialized;
-int PRERACE::bestTime;
 int PRERACE::noise[MAX_TIME];
 MAP_LOCATION PRERACE::loc[MAX_PLAYER][MAX_LOCATIONS];
 

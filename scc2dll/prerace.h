@@ -7,16 +7,15 @@
 #include "ga.h"
 #include "location.h"
 #include "building.h"
-#include "wx/list.h"
+#include "blist.h"
 
-#include "wx/wxprec.h"
+//#include "wx/wxprec.h"
                                                                                 
-#ifndef WX_PRECOMP
-#include "wx/wx.h"
-#endif
+//#ifndef WX_PRECOMP
+//#include "wx/wx.h"
+//#endif
 
 
-WX_DECLARE_LIST(Building, BuildingList);
 
 struct LARVACOUNTER
 {
@@ -71,7 +70,6 @@ public:
         static int noise[MAX_TIME];
 
         static int markerCounter;
-	static int bestTime; // cancel calculation if this calculation is worse than 25%
 																		    
 	int getMapLocationAvailible(int player, int loc, int type);
 	int getMapLocationForce(int player, int loc, int type);

@@ -44,10 +44,9 @@ int HARVEST_SPEED::setHarvestGasSpeed(int num,int speed)
 
 HARVEST_SPEED::HARVEST_SPEED()
 {
-	int i;
-	for(i=0;i<45;i++)
+	for(int i=0;i<45;i++)
 		setHarvestMineralSpeed(i,0);
-	for(i=0;i<5;i++)
+	for(int i=0;i<5;i++)
 		setHarvestGasSpeed(i,0);
 };
 

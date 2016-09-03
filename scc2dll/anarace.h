@@ -27,6 +27,8 @@ struct PROGRAM
 	int availibleCount[UNIT_TYPE_COUNT];
 	int facility; 	// where it was produced
 	int BT;		//real buildtime, incl. moving scv etc.
+//	int isConstant; //this build order may not be moved. In addition no order may be inserted before the order, if the previous order is also constant.
+// TODO: Zeitfenster machen!
 }; 
 
 EXPORT class ANARACE: public PRERACE
@@ -34,7 +36,9 @@ EXPORT class ANARACE: public PRERACE
 	private:
 		int buildGene(int unit);
 		int unchangedGenerations;
-		int run;
+		int currentRun;
+		int optimizing;
+		int active;
 		int generation;
 		int maxpFitness;
 		int maxsFitness;
@@ -48,6 +52,13 @@ EXPORT class ANARACE: public PRERACE
 		int maximum(int unit);
 		int percentage;
 	public:
+		
+		int isOptimizing();
+		void setOptimizing(int opt);
+
+		int isActive();
+		void setActive(int act);
+
 		int fitnessCode[MAX_GOALS];
 
 		int backupMap();
@@ -63,6 +74,9 @@ EXPORT class ANARACE: public PRERACE
 
 		int getMarker(int IP);
 
+
+//		int getProgramIsConstant(int IP);
+
 		int getPercentage();
 		int getProgramCode(int IP);
 		int getProgramSuccessType(int IP);	// determines the type of the last error before the item was built at that IP
@@ -75,6 +89,8 @@ EXPORT class ANARACE: public PRERACE
 		int getStatisticsHaveGas(int time);		// gas at that time
 
 		int getProgramIsBuilt(int IP);		// was this order successfully built?
+		int getProgramIsBuilt2(int IP); //hack wegen exe o_O TODO
+
 		int getProgramTime(int IP);			// at which time this order was started
 		int getProgramLocation(int IP);		// at which location was this unit built
 		int getProgramTemp(int IP);			// unused
@@ -110,6 +126,8 @@ EXPORT class ANARACE: public PRERACE
 		int setStatisticsHaveMinerals(int time, int mins);
 		int setStatisticsHaveGas(int time, int gas);
 	
+
+//		int setProgramIsConstant(int IP, int num);
 		int setProgramFacility(int IP, int num);
 		int setProgramBT(int IP, int num);
 		int setProgramSuccessType(int IP, int num);

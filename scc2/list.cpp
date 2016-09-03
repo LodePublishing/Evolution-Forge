@@ -22,7 +22,10 @@ NODE::NODE(NODE* prev, int key)
 NODE::~NODE()
 {
 	if(GetData())
+	{
 		delete data;
+		data=0;
+	}
 	if(GetPrev())
 	{
 		if(GetNext())
@@ -115,22 +118,26 @@ void OrderList::Clear()
 	tail=0;
 };
 
-void OrderList::DeleteNode(NODE* node)
+NODE* OrderList::DeleteNode(NODE* node)
 {
+	NODE* temp=0;	
 	if(node->GetNext()&&node->GetPrev())
 	{
 		node->GetNext()->SetPrev(node->GetPrev());
 		node->GetPrev()->SetNext(node->GetNext());
+		temp=node->GetNext();
 	} else if(node->GetNext())
 	{
 		head=node->GetNext();
 		head->SetPrev(0);
+		temp=node->GetNext();
 	} else if(node->GetPrev())
 	{
 		tail=node->GetPrev();
 		tail->SetNext(0);
 	}		
 	delete node;
+	return(temp);
 };
 
 NODE* OrderList::Find(int key)

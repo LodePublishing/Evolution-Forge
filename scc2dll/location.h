@@ -11,6 +11,7 @@ class EXPORT MAP_LOCATION_BASIC
 		int distance[MAX_LOCATIONS];
 	//	int isCliff; //only reachable per dropship
 	//	int canShootbetweenwhichconnection... // maybe for cliff drop later
+		int force[MAX_PLAYER][UNIT_TYPE_COUNT];
 	public:
 		int setName(const char* line);
 		int setMineralDistance(int num);
@@ -20,7 +21,6 @@ class EXPORT MAP_LOCATION_BASIC
 		int getMineralDistance();
 
 		int getDistance(int num);
-		int force[MAX_PLAYER][UNIT_TYPE_COUNT];
 		MAP_LOCATION_BASIC();
 		~MAP_LOCATION_BASIC();
 };

@@ -2,9 +2,10 @@ WXPATH=/home/clawg/temp/wxX/
 PROGRAM=scc2
 CXX=g++
 DLLPATH=$(PROGRAM)dll
-OBJDLL=$(DLLPATH)/anarace.o $(DLLPATH)/debug.o $(DLLPATH)/ga.o $(DLLPATH)/goal.o  $(DLLPATH)/harvest.o  $(DLLPATH)/location.o  $(DLLPATH)/map.o  $(DLLPATH)/player.o  $(DLLPATH)/prerace.o  $(DLLPATH)/race.o  $(DLLPATH)/settings.o  $(DLLPATH)/soup.o $(DLLPATH)/building.o
-SOURCEDLL=$(DLLPATH)/anarace.cpp $(DLLPATH)/debug.cpp $(DLLPATH)/ga.cpp $(DLLPATH)/goal.cpp  $(DLLPATH)/harvest.cpp  $(DLLPATH)/location.cpp  $(DLLPATH)/map.cpp  $(DLLPATH)/player.cpp  $(DLLPATH)/prerace.cpp  $(DLLPATH)/race.cpp  $(DLLPATH)/settings.cpp  $(DLLPATH)/soup.cpp $(DLLPATH)/building.cpp
-OBJMAIN=$(PROGRAM)/scc2.o $(PROGRAM)/graphics.o $(PROGRAM)/list.o
+OBJDLL=$(DLLPATH)/anarace.o $(DLLPATH)/debug.o $(DLLPATH)/ga.o $(DLLPATH)/goal.o  $(DLLPATH)/harvest.o  $(DLLPATH)/location.o  $(DLLPATH)/map.o  $(DLLPATH)/player.o  $(DLLPATH)/prerace.o  $(DLLPATH)/race.o  $(DLLPATH)/settings.o  $(DLLPATH)/soup.o $(DLLPATH)/building.o $(DLLPATH)/blist.o
+SOURCEDLL=$(DLLPATH)/anarace.cpp $(DLLPATH)/debug.cpp $(DLLPATH)/ga.cpp $(DLLPATH)/goal.cpp  $(DLLPATH)/harvest.cpp  $(DLLPATH)/location.cpp  $(DLLPATH)/map.cpp  $(DLLPATH)/player.cpp  $(DLLPATH)/prerace.cpp  $(DLLPATH)/race.cpp  $(DLLPATH)/settings.cpp  $(DLLPATH)/soup.cpp $(DLLPATH)/building.cpp $(DLLPATH)/blist.cpp
+
+OBJMAIN=$(PROGRAM)/scc2.o $(PROGRAM)/graphics.o $(PROGRAM)/list.o $(PROGRAM)/input.o $(PROGRAM)/bodiagram.o $(PROGRAM)/bograph.o $(PROGRAM)/bowindow.o $(PROGRAM)/force.o $(PROGRAM)/info.o $(PROGRAM)/message.o $(PROGRAM)/player.o $(PROGRAM)/statistics.o $(PROGRAM)/timer.o $(PROGRAM)/util.o
 DLLFLAGS=-DBUILD_DLL
 LIBS=-L./ $(PROGRAM).so.1.0
 RES_PROGRAM_OBJ = $(PROGRAM)_resourcesl.o
@@ -49,6 +50,9 @@ allclean:
 	@rm -vf $(PROGRAM).bin
 	@rm -vf $(PROGRAM).exe
 	@rm -vf $(PROGRAM).so.1.0
+	@rm -vf exe/*.d
+	@rm -vf exe/*.o
+	@rm -vf exe/*.a
 	@rm -vf a.out
 	@rm -vf gmon.out
 	@echo "done."

@@ -22,10 +22,11 @@ private:
 public:
 	int setGoal(GOAL_ENTRY* goal, int player);
 	int setMap(MAP* map);
+	void checkForChange(); // manually update changes (when the engine is not optimizing for example)
 // initializes the soup (primarily it does some error checking whether all is initialized and allocates the memory for the players
 	int initSoup();
 //one generation, copies stats and results of best individual and average values of the soup in 'best'
-	ANARACE* newGeneration(ANARACE* oldAnarace); 
+	ANARACE** newGeneration(ANARACE* oldAnarace[MAX_PLAYER]); 
 
 	SOUP();
 	~SOUP();

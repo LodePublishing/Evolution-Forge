@@ -40,6 +40,7 @@ public:
 	int isGoal(int unit);
 	int getInitialized();
 
+	int bestTime; // cancel calculation if this calculation is worse than 25%
 	GOAL_ENTRY();
 	~GOAL_ENTRY();
 };

@@ -4,6 +4,33 @@
 #include "debug.h"
 // TODO: reimplement/recheck the speed of the units
 
+int EXPORT ANARACE::isActive()
+{
+	return(active);
+};
+
+void EXPORT ANARACE::setActive(int act)
+{
+	if(act)
+		active=1;
+	else
+		active=0;
+};
+
+int EXPORT ANARACE::isOptimizing()
+{
+	return(optimizing);
+};
+
+void EXPORT ANARACE::setOptimizing(int opt)
+{
+	if(opt)
+		optimizing=1;
+	else
+		optimizing=0;
+};
+
+
 int EXPORT ANARACE::getMarker(int IP)
 {
         if((IP<0)||(IP>MAX_LENGTH))
@@ -17,13 +44,13 @@ int EXPORT ANARACE::getMarker(int IP)
 
 void EXPORT ANARACE::insertOrder(int unit, int position)
 {
-	int i,j,l;
-	l=0;
+	int l=0;
+	int i;
 	for(i=MAX_LENGTH;(l<position)&&(i--);)
 		if(getProgramIsBuilt(i))
 			l++;
 	i++;
-	for(j=0;j<i;j++)
+	for(int j=0;j<i;j++)
 	{
 		Code[0][j]=Code[0][j+1];
 		Code[1][j]=Code[1][j+1];
@@ -43,19 +70,18 @@ void EXPORT ANARACE::insertOrder(int unit, int position)
 	Code[1][i]=Code[0][i];
         program[i].dominant=0;
         program[i].built=1;
-
 	markerCounter++;Marker[0][i]=markerCounter;
         markerCounter++;Marker[1][i]=markerCounter;
-	for(i=0;i<MAX_LENGTH;i++)
-        	phaenoCode[i]=getPlayer()->goal->toPhaeno(Code[getProgramDominant(i)][i]); 
+
+	for(int j=0;j<MAX_LENGTH;j++)
+        	phaenoCode[j]=getPlayer()->goal->toPhaeno(Code[getProgramDominant(j)][j]); 
 }
 
 int EXPORT ANARACE::backupMap()
 {
-	int i,j,k;
-	for(i=0;i<pMap->getMaxPlayer()-1;i++)
-		for(j=0;j<MAX_LOCATIONS;j++)
-			for(k=0;k<UNIT_TYPE_COUNT;k++)
+	for(int i=0;i<pMap->getMaxPlayer()-1;i++)
+		for(int j=0;j<MAX_LOCATIONS;j++)
+			for(int k=0;k<UNIT_TYPE_COUNT;k++)
 			{
 				backupLoc[i][j].availible[k]=getMapLocationAvailible(i,j,k);
 				backupLoc[i][j].force[k]=getMapLocationForce(i,j,k);
@@ -65,16 +91,15 @@ int EXPORT ANARACE::backupMap()
 
 int EXPORT ANARACE::restoreMap()
 {
-	int i,j,k;
-	for(i=0;i<pMap->getMaxPlayer()-1;i++)
-		for(j=0;j<MAX_LOCATIONS;j++)
-			for(k=0;k<UNIT_TYPE_COUNT;k++)
+	for(int i=0;i<pMap->getMaxPlayer()-1;i++)
+		for(int j=0;j<MAX_LOCATIONS;j++)
+			for(int k=0;k<UNIT_TYPE_COUNT;k++)
 			{
 				setMapLocationAvailible(i,j,k,backupLoc[i][j].availible[k]);
 				setMapLocationForce(i,j,k,backupLoc[i][j].force[k]);
 			}
 	return(1);
-}
+};
 
 int EXPORT ANARACE::getProgramDominant(int IP) 
 {
@@ -90,7 +115,7 @@ int EXPORT ANARACE::getProgramDominant(int IP)
 		return(0);
 	}
 	return(program[IP].dominant);
-}
+};
 
 
 int EXPORT ANARACE::getProgramCode(int IP)
@@ -330,7 +355,26 @@ int EXPORT ANARACE::setProgramIsGoal(int IP, int num)
 	}
 	program[IP].isGoal=num;
 	return(1);
-}
+};
+
+/*int EXPORT ANARACE::setProgramIsConstant(int IP, int num)
+{
+        if((IP<0)||(IP>=MAX_LENGTH))
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::setProgramIsConstant): Value IP [%i] out of range.",IP);
+                return(0);
+        }
+        if((num<0)||(num>=2))
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::setProgramIsConstant): Value num [%i] out of range.",num);
+                return(0);
+        }
+        program[IP].isConstant=num;
+        return(1);
+};*/
+
+
+
 
 int EXPORT ANARACE::setProgramDominant(int IP, int num)
 {
@@ -380,7 +424,7 @@ int EXPORT ANARACE::setProgramIsBuilt(int IP, int num)
 	}
 	program[IP].built=num;
 	return(1);
-}
+};
 
 int EXPORT ANARACE::setProgramLocation(int IP, int location)
 {
@@ -540,7 +584,6 @@ int EXPORT ANARACE::getStatisticsHaveSupply(int time)
 	return(statistics[time].haveSupply);
 };
 
-
 int EXPORT ANARACE::getProgramIsBuilt(int IP)
 {
 	if((IP<0)||(IP>=MAX_LENGTH))
@@ -556,6 +599,26 @@ int EXPORT ANARACE::getProgramIsBuilt(int IP)
 	}
 	return(program[IP].built);
 };
+
+int EXPORT ANARACE::getProgramIsBuilt2(int IP)
+{
+	return(getProgramIsBuilt(IP));
+};
+
+/*int EXPORT ANARACE::getProgramIsConstant(int IP)
+{
+        if((IP<0)||(IP>=MAX_LENGTH))
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::getProgramIsConstant): Value IP [%i] out of range.",IP);
+                return(0);
+        }
+        if((program[IP].isConstant<0)||(program[IP].isConstant>1))
+        {
+                debug.toLog(0,"DEBUG: (ANARACE::getProgramIsConstant): Variable not initialized [%i].",program[IP].isConstant);
+                return(0);
+        }
+	return(program[IP].isConstant);
+};*/
 
 int EXPORT ANARACE::getProgramIsGoal(int IP)
 {
@@ -715,14 +778,12 @@ int ANARACE::needTime(int unit)
 
 int EXPORT ANARACE::calculateFitness() // Fuer den Uebersichtsgraphen unten rechts
 {
-	int i,j,tpF;
+	int tpF=0;
 //	int bonus[MAX_LOCATIONS][UNIT_TYPE_COUNT]; // temporary data to check whether a bonus is already given (only applies if force > goal)
 //TODO: Nicht alle Einheiten am Ort? => Ort egal sein lassen aber zur Zeit hinzuzaehlen
 	// Nicht alle Einheiten ueberhaupt gebaut UND nicht alle am Ort => nur viertel Bonus fuer Einheiten die nicht am Ort sind
-	tpF=0;
 	int otpF=0;
-	
-	for(i=MAX_GOALS;i--;)
+	for(int i=MAX_GOALS;i--;)
 		if(getPlayer()->goal->goal[i].count>0)
 		{
 			otpF=tpF;
@@ -737,7 +798,7 @@ int EXPORT ANARACE::calculateFitness() // Fuer den Uebersichtsgraphen unten rech
 				else
 				{
 					bon=getPlayer()->goal->goal[i].count;
-					j=1;
+					int j=1;
 					while((j<MAX_LOCATIONS)&&(bon>getLocationForce(pMap->locationList[getPlayer()->goal->goal[i].location][j],getPlayer()->goal->goal[i].unit)))						 
 					{
 						sumup+=getLocationForce(pMap->locationList[getPlayer()->goal->goal[i].location][j],getPlayer()->goal->goal[i].unit)*(100-pMap->location[pMap->locationList[getPlayer()->goal->goal[i].location][j]].getDistance(getPlayer()->goal->goal[i].location));							 
@@ -825,36 +886,24 @@ int EXPORT ANARACE::calculateStep()
 {
 //ZERG: CREEP!
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
-	int tm,tg;
-	int i;
-
 	setStatisticsNeedSupply(getTimer(),getMaxSupply()-getSupply());
 	setStatisticsHaveSupply(getTimer(),getMaxSupply());
-	setStatisticsHaveMinerals(getTimer(),tm);
-	setStatisticsHaveGas(getTimer(),tg);
+	setStatisticsHaveMinerals(getTimer(),getMins());
+	setStatisticsHaveGas(getTimer(),getGas());
 	setStatisticsFitness(getTimer(),calculateFitness());
 
-	if((!getTimer())||(ready=calculateReady())||(!getIP())||((bestTime*4<3*ga->maxTime)&&(4*getTimer()<3*bestTime))) //TODO calculateReady optimieren
+	if((!getTimer())||(ready=calculateReady())||(!getIP())||((getPlayer()->goal->bestTime*4<3*ga->maxTime)&&(4*getTimer()<3*getPlayer()->goal->bestTime))) //TODO calculateReady optimieren
 	{
 		setLength(ga->maxLength-getIP());
 		if(!ready) setTimer(0);
 			
-		for(i=0;i<MAX_LENGTH;i++)
+		for(int i=0;i<MAX_LENGTH;i++)
 			phaenoCode[i]=getPlayer()->goal->toPhaeno(Code[getProgramDominant(i)][i]);
 		calculateFitness();
-		BuildingList::Node *node=buildingList.GetFirst();
-
-		while(node)
-		{
-			Building* build=(Building*)node->GetData();
-			node=node->GetNext();
-			buildingList.DeleteObject(build);
-			delete build;
-		}
+		buildingList.Clear();
 		return(1);
 	}
 
-	tm=getMins();tg=getGas();
 	int dominant=0;
 	int ok=1;
 	while((ok)&&(getIP()))
@@ -894,7 +943,7 @@ int EXPORT ANARACE::calculateStep()
 //				setProgramSuccessLocation(0);
 			}
 //			program[getIP()].temp=location[1].availible[COMMAND_CENTER];
-			for(i=0;i<UNIT_TYPE_COUNT;i++)
+			for(int i=0;i<UNIT_TYPE_COUNT;i++)
 			{
 				setProgramForceCount(getIP(),i,getLocationForce(0,i));
 				setProgramAvailibleCount(getIP(),i,getLocationAvailible(0,i));
@@ -910,13 +959,12 @@ int EXPORT ANARACE::calculateStep()
 	}
 
 /*	int t=getTimer();*/
-//	BuildingList::Node *node=buildingList.GetFirst();
-        wxNode *node=buildingList.First();
+	BNODE *node=buildingList.GetFirst();
 	Building* build;
 	if(node)
 	{
 		build=(Building*)node->GetData();
-		int buildingRemaining=build->getRemainingBuildTime();
+//		int buildingRemaining=build->getRemainingBuildTime();
 //		if(t>buildingRemaining) t=buildingRemaining;
 	}
 /*	if((harvestGas()>0)&&((harvestMinerals()==0)||(neededGas+(harvestGas()-neededGas%harvestGas()))/harvestGas() < (neededMinerals+(harvestMinerals()-neededMinerals%harvestMinerals()))/harvestMinerals()))
@@ -935,7 +983,7 @@ int EXPORT ANARACE::calculateStep()
 	*/
 	int t=1;
         int mult=0;
-        for(i=getTimer()-t;i<getTimer();i++)
+        for(int i=getTimer()-t;i<getTimer();i++)
         {
                 mult+=noise[i];
         }
@@ -952,6 +1000,7 @@ int EXPORT ANARACE::calculateStep()
 
 	while(node)
 	{
+		BNODE* oldnode=node;
 		node=node->GetNext();
 		build->setRemainingBuildTime(build->getRemainingBuildTime()-t);
 		if(!build->getRemainingBuildTime())
@@ -959,7 +1008,7 @@ int EXPORT ANARACE::calculateStep()
 			const UNIT_STATISTICS* stat=&pStats[build->getType()];
 			setProgramFacility(build->getIP(),build->getFacility());
 			int drinne=1;
-			for(i=0;i<3;i++)
+			for(int i=0;i<3;i++)
 				drinne&=stat->facility[i]!=build->getFacility();
 			if(drinne) debug.toLog(0,"O_o");
 			switch(stat->facility_type)
@@ -1075,7 +1124,7 @@ int EXPORT ANARACE::calculateStep()
 			setProgramBT(build->getIP(),build->getTotalBuildTime()); //~~~
 //			IP zeugs checken... length is immer 2 :/	 ??
 
-		        for(i=MAX_GOALS;i--;)
+		        for(int i=MAX_GOALS;i--;)
 // ist dieses goal belegt?
 		                if((getPlayer()->goal->goal[i].unit>0)&&
 // befinden wir uns am richtigen Ort?
@@ -1087,8 +1136,7 @@ int EXPORT ANARACE::calculateStep()
 //              i=MAX_GOALS;  TODO? koennen wir mehrere goals gleichzeitig erfuell0rn?
 
 			ready=calculateReady();
-			buildingList.DeleteObject(build);
-			delete build;
+			buildingList.DeleteNode(oldnode);
 		}
 		if(node) build=(Building*)node->GetData();
 	} //end while
@@ -1248,7 +1296,7 @@ int ANARACE::buildGene(int unit)
 
 			if(ok)
 			{
-				BuildingList::Node *node=NULL;
+				BNODE *node=NULL;
 				for (node = buildingList.GetFirst();node&&((node->GetData())->getRemainingBuildTime()<stat->BT/*+3200*(stat->facility2==unit)*/);node = node->GetNext());
 				Building* build=new Building();
 				if(node&&((node->GetData())->getRemainingBuildTime()>=stat->BT/*+3200*(stat->facility2==unit)*/))
@@ -1373,12 +1421,11 @@ int ANARACE::buildGene(int unit)
 // Reset all ongoing data (between two runs)
 void EXPORT ANARACE::resetData() // resets all data to standard starting values
 {
-	int i,j;
-	for(i=UNIT_TYPE_COUNT;i--;)
+	for(int i=UNIT_TYPE_COUNT;i--;)
 		setFinalTime(i,0);
 	resetSpecial();
 
-	for(i=MAX_TIME;i--;)
+	for(int i=MAX_TIME;i--;)
 	{
 		setStatisticsHaveSupply(i,0);
 		setStatisticsHaveMinerals(i,0);
@@ -1387,7 +1434,7 @@ void EXPORT ANARACE::resetData() // resets all data to standard starting values
 		setStatisticsFitness(i,0);
 	}
 
-	for(i=MAX_LENGTH;i--;)//ANA~
+	for(int i=MAX_LENGTH;i--;)//ANA~
 	{
 		setProgramSuccessType(i,0);
 		setProgramSuccessUnit(i,0);
@@ -1395,7 +1442,7 @@ void EXPORT ANARACE::resetData() // resets all data to standard starting values
 		setProgramIsBuilt(i,0);
 		program[i].time=MAX_TIME;
 	//	setProgramTime(i,MAX_TIME);
-		for(j=0;j<UNIT_TYPE_COUNT;j++)
+		for(int j=0;j<UNIT_TYPE_COUNT;j++)
 		{
 			setProgramAvailibleCount(i,j,0);
 			setProgramForceCount(i,j,0);
@@ -1416,13 +1463,13 @@ void EXPORT ANARACE::resetData() // resets all data to standard starting values
 	setSupply(0);
 	setMaxSupply(0);
 
-	for(i=0;i<4;i++) //TODO
+	for(int i=0;i<4;i++) //TODO
 	{
 		last[i].location=1;
 		last[i].unit=SCV;
 		last[i].count=1;
 	}
-	for(i=4;i<MAX_LENGTH;i++)
+	for(int i=4;i<MAX_LENGTH;i++)
 	{
 		last[i].location=0;
 		last[i].unit=0;
@@ -1448,12 +1495,12 @@ int EXPORT ANARACE::getUnchangedGenerations()
 
 int EXPORT ANARACE::getRun()
 {
-	if((run<0)||(run>MAX_RUNS))
+	if((currentRun<0)||(currentRun>MAX_RUNS))
 	{
-		debug.toLog(0,"DEBUG: (ANARACE::getRun): Variable not initialized [%i].",run);
+		debug.toLog(0,"DEBUG: (ANARACE::getRun): Variable currentRun not initialized [%i].",currentRun);
 		return(0);
 	}
-	return(run);
+	return(currentRun);
 };
 
 int EXPORT ANARACE::getGeneration()
@@ -1516,7 +1563,7 @@ int EXPORT ANARACE::setRun(int run)
 		debug.toLog(0,"DEBUG: (ANARACE::setRun): Value run [%i] out of range.",run);
 		return(0);
 	}
-	this->run=run;
+	currentRun=run;
 	return(1);
 };
 
@@ -1570,24 +1617,22 @@ void EXPORT ANARACE::analyzeBuildOrder()
 //keeps track of the '@' symbol on the left of each build order entry
 //if the goal is set to 10 marines, the eleventh won't be marked as a 'fulfilled goal' with a '@'
 	int tGoal[UNIT_TYPE_COUNT];
-	int s,t;
-
 // reset the tgGoals (to sign with '@' the units which are part of the goal list)
 // and subtract the units that are already on the map
-	for(t=0;t<UNIT_TYPE_COUNT;t++)
+	for(int i=0;i<UNIT_TYPE_COUNT;i++)
 	{
-		tGoal[t]=0;
-		for(s=1;s<MAX_LOCATIONS;s++)
-			tGoal[t]+=getPlayer()->goal->globalGoal[s][t]-getMap()->location[s].force[getPlayerNum()][t];
+		tGoal[i]=0;
+		for(int j=1;j<MAX_LOCATIONS;j++)
+			tGoal[i]+=getPlayer()->goal->globalGoal[j][i]-getMap()->location[j].force[getPlayerNum()][i];
 	}
 
-	for(s=0;s<MAX_LENGTH;s++)
-		if(tGoal[phaenoCode[s]]>0) //~~~~~~ location=0?
+	for(int i=0;i<MAX_LENGTH;i++)
+		if(tGoal[phaenoCode[i]]>0) //~~~~~~ location=0?
 		{
-			tGoal[phaenoCode[s]]--;
-			setProgramIsGoal(s,1);
+			tGoal[phaenoCode[i]]--;
+			setProgramIsGoal(i,1);
 		}
-		else setProgramIsGoal(s,0);
+		else setProgramIsGoal(i,0);
 };
 
 
@@ -1600,6 +1645,8 @@ ANARACE::ANARACE()
 	setMaxtFitness(0);
 	setUnchangedGenerations(0);
 	setRun(0);
+	optimizing=0;
+	active=0;
 };
 
 ANARACE::~ANARACE()

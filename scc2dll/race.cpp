@@ -10,27 +10,19 @@ int RACE::calculateStep()
 //ZERG:  CREEP!
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
 //mins, gas hier rein...
-	if((!getTimer())||(ready=calculateReady())||(!getIP())||((bestTime*4<ga->maxTime*3)&&(4*getTimer()<3*bestTime))) //TODO calculateReady optimieren
+	if((!getTimer())||(ready=calculateReady())||(!getIP())||((getPlayer()->goal->bestTime*4<ga->maxTime*3)&&(4*getTimer()<3*getPlayer()->goal->bestTime))) //TODO calculateReady optimieren
 	{
 		setLength(ga->maxLength-getIP());
 		settFitness(gettFitness()-getLength());
 		if(!ready) setTimer(0);
 		setpFitness(getTimer());
 		calculateFitness(ready);
-		BuildingList::Node *node=buildingList.GetFirst();
-		while(node)
-		{
-			Building* build=node->GetData();
-			node=node->GetNext();
-			buildingList.DeleteObject(build);
-			delete build;
-		}
+		buildingList.Clear();
 		return(1);
 	}
 	int dominant=0;
 	int ok=1;
 	int first=1;
-	int i;
 
 	while((ok)&&(getIP()))
 	{
@@ -60,7 +52,7 @@ int RACE::calculateStep()
 	}
 
 	int t=getTimer();
-	BuildingList::Node *node=buildingList.GetFirst();
+	BNODE *node=buildingList.GetFirst();
 
 	Building* build;
 	if(node)
@@ -83,8 +75,9 @@ int RACE::calculateStep()
 //	if((getTimeOut()>1)&&(t==getTimeOut()))
 //		t=getTimeOut()-1;
 
+// TODO t wird da oben irgendwo null wenn ich zwischen den Spalten schalte
 	int mult=0;
-	for(i=getTimer()-t;i<getTimer();i++)
+	for(int i=getTimer()-t;i<getTimer();i++)
 	{
 		mult+=noise[i];
 	}
@@ -103,6 +96,7 @@ int RACE::calculateStep()
 
 	while(node)
 	{
+		BNODE* oldnode=node;
 		node=node->GetNext();
 		build->setRemainingBuildTime(build->getRemainingBuildTime()-t);
 		if(!build->getRemainingBuildTime())
@@ -209,7 +203,7 @@ int RACE::calculateStep()
 // Quasi wie "ready" nur ohne Zeit
 //TODO CHECKEN!!
 
-		        for(i=MAX_GOALS;i--;)
+		        for(int i=MAX_GOALS;i--;)
 // ist dieses goal belegt?
 		                if((getPlayer()->goal->goal[i].unit>0)&&
 // befinden wir uns am richtigen Ort?
@@ -223,10 +217,12 @@ int RACE::calculateStep()
 			ready=calculateReady();
 
 // oder: irgendeine location... TODO: Problem: die Einheiten koennen irgendwo sein, also nicht gesammelt an einem Fleck...
-			buildingList.DeleteObject(build);		
-			delete build;
+			if(!oldnode)
+				while(true);
+			buildingList.DeleteNode(oldnode);
 		} // END of if(!build->getRemainingBuildTime())
-		if(node) build=(Building*)node->GetData();
+		if(node) 
+			build=(Building*)node->GetData();
 	} // END of while
 	return(0);
 	//TODO: Auch voruebergehende Ziele miteinberechnen (Bewegungen!)
@@ -243,18 +239,17 @@ int RACE::calculateStep()
 void RACE::calculateFitness(int ready)
 {
 //TODO evtl noch uebrige availible miteinbeziehen
-	int i,j;
 //	int bonus[MAX_LOCATIONS][UNIT_TYPE_COUNT]; // temporary data to check whether a bonus is already given (only applies if force > goal)
 	setsFitness(getHarvestedMins()+getHarvestedGas()); //TODO: evtl gas und mins (wie urspruenglich eigentlich) in Verhaeltnis setyen wieviel es jeweils Geysire/Mineralien gibt...
 //TODO: Nicht alle Einheiten am Ort? => Ort egal sein lassen aber zur Zeit hinzuzaehlen
 	// Nicht alle Einheiten ueberhaupt gebaut UND nicht alle am Ort => nur viertel Bonus fuer Einheiten die nicht am Ort sind
-	for(i=0;i<UNIT_TYPE_COUNT;i++)
+	for(int i=0;i<UNIT_TYPE_COUNT;i++)
 		if((getPlayer()->goal->allGoal[i]>0)&&(getPlayer()->goal->allGoal[i]+getMap()->location[0].force[1][i]<getLocationForce(0,i)))
 			setsFitness(getsFitness()-(getLocationForce(0,i)-getMap()->location[0].force[1][i]-getPlayer()->goal->allGoal[i])*(stats[getPlayer()->goal->getRace()][i].gas+stats[getPlayer()->goal->getRace()][i].mins));
 	if(!ready)
 	{
 		//calculate number of fulfilled goals & their time & their distance to goal position
-		for(i=MAX_GOALS;i--;)
+		for(int i=MAX_GOALS;i--;)
 			if(getPlayer()->goal->goal[i].count>0)
 			{
 // Haben wir zuwenig Einheiten gebaut?  force < goal
@@ -274,7 +269,7 @@ if( /*((getPlayer()->goal->goal[i].location==0)&&(getPlayer()->goal->goal[i].cou
 				// location != 0 ? Dann schaun wir mal, ob wir auf der Karte noch wo Units verstreut haben
 				// mehr als goalcount koennen wir keinen Bonus vergeben
 						bon=getPlayer()->goal->goal[i].count;
-						j=1;
+						int j=1;
 						while((j<MAX_LOCATIONS)&&(bon>getLocationForce(pMap->locationList[getPlayer()->goal->goal[i].location][j],getPlayer()->goal->goal[i].unit)))
 						{
 							sumup+=getLocationForce(pMap->locationList[getPlayer()->goal->goal[i].location][j],getPlayer()->goal->goal[i].unit)*(100-pMap->location[pMap->locationList[getPlayer()->goal->goal[i].location][j]].getDistance(getPlayer()->goal->goal[i].location)); //was pMap->location[j]...
@@ -345,7 +340,7 @@ if( /*((getPlayer()->goal->goal[i].location==0)&&(getPlayer()->goal->goal[i].cou
 
 	} // end of ready=false
 	else   // all goals fulfilled, fitness <- timer 
-		for(i=MAX_GOALS;i--;)
+		for(int i=MAX_GOALS;i--;)
 		{
 			if(getPlayer()->goal->goal[i].count>0)
 				setpFitness(getpFitness()+100);
@@ -450,7 +445,7 @@ int RACE::buildGene(int unit)
 //		Phagen ueber Phagen...			
 				if(ok)
 				{
-					BuildingList::Node *node=NULL;
+					BNODE *node=NULL;
 					for (node = buildingList.GetFirst();node&&(((Building*)node->GetData())->getRemainingBuildTime()<stat->BT/*+3200*(stat->facility2==unit)*/);node = node->GetNext());
 					Building* build=new Building();
 					if(node&&(((Building*)node->GetData())->getRemainingBuildTime()>=stat->BT/*+3200*(stat->facility2==unit)*/))
@@ -584,18 +579,17 @@ int RACE::buildGene(int unit)
 
 void RACE::eraseIllegalCode()
 {
-	int i,k;
 	int allUnits[UNIT_TYPE_COUNT];
-	for(i=0;i<UNIT_TYPE_COUNT;i++)
+	for(int i=0;i<UNIT_TYPE_COUNT;i++)
 		allUnits[i]=getLocationForce(0,i);
-	for(i=MAX_LENGTH;i--;)
+	for(int i=MAX_LENGTH;i--;)
 	{
 		int ok=1;
-		for(k=0;k<3;k++)
+		for(int k=0;k<3;k++)
 			ok&=((stats[getPlayer()->goal->getRace()][getPlayer()->goal->toPhaeno(Code[0][i])].prerequisite[k]==0)||(allUnits[i]>=stats[getPlayer()->goal->getRace()][getPlayer()->goal->toPhaeno(Code[0][i])].prerequisite[k]))&&((stats[getPlayer()->goal->getRace()][getPlayer()->goal->toPhaeno(Code[0][i])].prerequisite[k]==0)||(allUnits[i]>=stats[getPlayer()->goal->getRace()][getPlayer()->goal->toPhaeno(Code[0][i])].prerequisite[k]));
 		if(!ok)
 		{
-			for(k=i;k--;)
+			for(int k=i;k--;)
 			{
 				Code[0][k+1]=Code[0][k];
 				Code[1][k+1]=Code[0][k];
@@ -617,7 +611,6 @@ void RACE::mutateGeneCode()
 //ODER: jedem Befehl eine Zahl zuweisen, ne Art radioaktiver Marker... Zu ueberlegen ist nur, was mit dem bei crossing over passiert...
 	if(ga->getMutationFactor()==0)
 		return;
-	int x;
 	if(getLength()==0) 
 		setLength(MAX_LENGTH);
 //		return;
@@ -627,85 +620,83 @@ void RACE::mutateGeneCode()
 			mutationRate-=rand()%50;
 		else mutationRate+=rand()%50;
 	}*/
-	for(x=MAX_LENGTH;x--;) //length
+	for(int x=MAX_LENGTH;x--;) //length
 		if(rand()%(MAX_LENGTH*100/ga->getMutationFactor())==0)
 		{
 			switch(rand()%7)
 			{
 				//TODO: wenn generateBuildOrder==1 dann bleibts stehen!
 				case 0://delete one variabel entry and move - Mehrere Schmieden/Kasernen etc. zulassen!
-					int y;
+				{
 					if(((getPlayer()->goal->isVariable[Code[0][x]]==1)&&(getPlayer()->goal->isVariable[Code[1][x]]==1))||(!ga->preprocessBuildOrder))
 						//TODO: ueberlegen, ob Code evtl struct sein sollte... mmmh
-					for(y=x;y<MAX_LENGTH-1;y++)
-					{
-						Code[0][y]=Code[0][y+1];
-						Code[1][y]=Code[1][y+1];
-						
-						Marker[0][y]=Marker[0][y+1];
-						Marker[1][y]=Marker[1][y+1];
-					};
-						y=rand()%getPlayer()->goal->getMaxBuildTypes();
-						markerCounter++;Marker[0][MAX_LENGTH-1]=markerCounter;
-						markerCounter++;Marker[1][MAX_LENGTH-1]=markerCounter;
-																			    
-						if(ga->preprocessBuildOrder)
-							while(getPlayer()->goal->isVariable[y]==0) y=rand()%getPlayer()->goal->getMaxBuildTypes();
-						Code[0][MAX_LENGTH-1]=y;
-						y=rand()%getPlayer()->goal->getMaxBuildTypes();
-						if(ga->preprocessBuildOrder)
-							while(getPlayer()->goal->isVariable[y]==0) y=rand()%getPlayer()->goal->getMaxBuildTypes();
-						 Code[1][MAX_LENGTH-1]=y;
-
-					break;
-				case 1://add one variable entry
-					{
-						int y;
-						for(y=MAX_LENGTH-1;y>x;y--)
+						for(int i=x;i<MAX_LENGTH-1;i++)
 						{
-							Code[0][y]=Code[0][y-1];
-							Code[1][y]=Code[1][y-1];
-							Marker[0][y]=Marker[0][y-1];
-							Marker[1][y]=Marker[1][y-1];
-							
-						}
-						//todo: BUG! player not initialized!very rare
-						y=rand()%getPlayer()->goal->getMaxBuildTypes();
-						markerCounter++;Marker[0][x]=markerCounter;
-						markerCounter++;Marker[1][x]=markerCounter;
+							Code[0][i]=Code[0][i+1];
+							Code[1][i]=Code[1][i+1];
 						
-						if(ga->preprocessBuildOrder)
-							while(getPlayer()->goal->isVariable[y]==0) y=rand()%getPlayer()->goal->getMaxBuildTypes();
-						Code[0][x]=y;
-						y=rand()%getPlayer()->goal->getMaxBuildTypes();
-						if(ga->preprocessBuildOrder)
-							while(getPlayer()->goal->isVariable[y]==0) y=rand()%getPlayer()->goal->getMaxBuildTypes();
-						Code[1][x]=y;
-					};break;
+							Marker[0][i]=Marker[0][i+1];
+							Marker[1][i]=Marker[1][i+1];
+						};
+					int y=rand()%getPlayer()->goal->getMaxBuildTypes();
+						markerCounter++;Marker[0][MAX_LENGTH-1]=markerCounter;
+					markerCounter++;Marker[1][MAX_LENGTH-1]=markerCounter;
+																		    
+					if(ga->preprocessBuildOrder)
+						while(getPlayer()->goal->isVariable[y]==0) y=rand()%getPlayer()->goal->getMaxBuildTypes();
+					Code[0][MAX_LENGTH-1]=y;
+					y=rand()%getPlayer()->goal->getMaxBuildTypes();
+					if(ga->preprocessBuildOrder)
+						while(getPlayer()->goal->isVariable[y]==0) y=rand()%getPlayer()->goal->getMaxBuildTypes();
+					Code[1][MAX_LENGTH-1]=y;
+				};break;
+				case 1://add one variable entry
+				{
+					for(int i=MAX_LENGTH-1;i>x;i--)
+					{
+						Code[0][i]=Code[0][i-1];
+						Code[1][i]=Code[1][i-1];
+						Marker[0][i]=Marker[0][i-1];
+						Marker[1][i]=Marker[1][i-1];
+					
+					}
+					//todo: BUG! player not initialized!very rare
+					int y=rand()%getPlayer()->goal->getMaxBuildTypes();
+					markerCounter++;Marker[0][x]=markerCounter;
+					markerCounter++;Marker[1][x]=markerCounter;
+					
+					if(ga->preprocessBuildOrder)
+						while(getPlayer()->goal->isVariable[y]==0) y=rand()%getPlayer()->goal->getMaxBuildTypes();
+					Code[0][x]=y;
+					y=rand()%getPlayer()->goal->getMaxBuildTypes();
+					if(ga->preprocessBuildOrder)
+						while(getPlayer()->goal->isVariable[y]==0) y=rand()%getPlayer()->goal->getMaxBuildTypes();
+					Code[1][x]=y;
+				};break;
 				case 2://change one entry
+				{
+					int k=rand()%2;
+					if(getPlayer()->goal->isVariable[Code[k][x]]==1)
+					{
+						int y=rand()%getPlayer()->goal->getMaxBuildTypes();//Optimieren
+						if(ga->preprocessBuildOrder)
+							while(getPlayer()->goal->isVariable[y]==0) y=rand()%getPlayer()->goal->getMaxBuildTypes();
+						Code[k][x]=y;
+						markerCounter++;Marker[k][x]=markerCounter;
+					};
+				};break;
+				case 3://exchange two entries
+				{
+					int y=rand()%MAX_LENGTH/2+rand()%MAX_LENGTH/2-x;
+//					y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
+//					if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH; //TODO? Warum
+					if((y>0)&&(x!=y))
 					{
 						int k=rand()%2;
-						if(getPlayer()->goal->isVariable[Code[k][x]]==1)
-						{
-							int y=rand()%getPlayer()->goal->getMaxBuildTypes();//Optimieren
-							if(ga->preprocessBuildOrder)
-								while(getPlayer()->goal->isVariable[y]==0) y=rand()%getPlayer()->goal->getMaxBuildTypes();
-							Code[k][x]=y;
-							markerCounter++;Marker[k][x]=markerCounter;
-						};
-					};break;
-				case 3://exchange two entries
-					{
-						int y=rand()%MAX_LENGTH/2+rand()%MAX_LENGTH/2-x;
-//						y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
-//						if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH; //TODO? Warum
-						if((y>0)&&(x!=y))
-						{
-							int k=rand()%2;
-							int l=Code[k][x];Code[k][x]=Code[k][y];Code[k][y]=l;
-							l=Marker[k][x];Marker[k][x]=Marker[k][y];Marker[k][y]=l;
-						}
-					};break;
+						int l=Code[k][x];Code[k][x]=Code[k][y];Code[k][y]=l;
+						l=Marker[k][x];Marker[k][x]=Marker[k][y];Marker[k][y]=l;
+					}
+				};break;
 				case 4://exchange two entries
 					{
 						int y=rand()%MAX_LENGTH/2+rand()%MAX_LENGTH/2-x;
@@ -783,18 +774,17 @@ void RACE::mutateGeneCode()
 // Reset all ongoing data (between two runs)
 void RACE::resetData() // resets all data to standard starting values
 {
-	int i;
-	for(i=UNIT_TYPE_COUNT;i--;)
+	for(int i=UNIT_TYPE_COUNT;i--;)
 		setFinalTime(i,0);
 	resetSpecial();
-	for(i=0;i<4;i++) //TODO ???
+	for(int i=0;i<4;i++) //TODO ???
 	{
 		last[i].location=1;
 		last[i].unit=SCV;
 		last[i].count=1;
 	}
 
-	for(i=4;i<MAX_LENGTH;i++)
+	for(int i=4;i<MAX_LENGTH;i++)
 	{
 		last[i].location=0;
 		last[i].unit=0;
@@ -970,20 +960,19 @@ void RACE::resetData() // resets all data to standard starting values
 //Reinitialize programs with random orders
 void RACE::resetGeneCode()
 {
-	int i;
 	mutationRate=500+rand()%1000;
 	if((ga->preprocessBuildOrder)&&(basicLength>0))
 	{
 		memcpy(Code[0],basicBuildOrder[0],MAX_LENGTH*4);
 		memcpy(Code[1],basicBuildOrder[1],MAX_LENGTH*4);
-		for(i=0;i<MAX_LENGTH;i++)
+		for(int i=0;i<MAX_LENGTH;i++)
 		{
 			markerCounter++;Marker[0][i]=markerCounter;
 			markerCounter++;Marker[1][i]=markerCounter;
 		}
 	}
 	else
-	for(i=MAX_LENGTH;i--;)
+	for(int i=MAX_LENGTH;i--;)
 	{
 		Code[0][i]=rand()%getPlayer()->goal->getMaxBuildTypes();
 		Code[1][i]=rand()%getPlayer()->goal->getMaxBuildTypes();
@@ -994,9 +983,8 @@ void RACE::resetGeneCode()
 
 void RACE::crossOver(RACE* parent2, RACE* child1, RACE* child2)
 {
-	int i;
 	int counter=MAX_LENGTH;
-	for(i=0;i<MAX_LENGTH;i++)
+	for(int i=0;i<MAX_LENGTH;i++)
 	{
 		if(rand()%counter<5)
 		{
@@ -1050,7 +1038,7 @@ int RACE::setpFitness(int fitness)
 
 int RACE::setsFitness(int fitness)
 {
-	if((fitness<0)||(fitness>MAX_MINS))
+	if((fitness<0)||(fitness>MAX_MINS+MAX_GAS))
 	{
 		debug.toLog(0,"DEBUG: (RACE::setsFitness): Value fitness [%i] out of range.",fitness);
 		return(0);

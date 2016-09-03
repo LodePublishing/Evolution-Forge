@@ -65,13 +65,12 @@ int MAP::setMaxPlayer(int num)
 int MAP::adjustSupply()
 {
 	//initialized?
-	int i,j,k;
-	for(k=0;k<MAX_PLAYER;k++)
+	for(int k=0;k<MAX_PLAYER;k++)
 	{
 		player[k].setSupply(0);
 		player[k].setMaxSupply(0);
-		for(i=0;i<MAX_LOCATIONS;i++)
-			for(j=UNIT_TYPE_COUNT;j--;)
+		for(int i=0;i<MAX_LOCATIONS;i++)
+			for(int j=UNIT_TYPE_COUNT;j--;)
 			{
 				if(i>0)
 				{
@@ -101,17 +100,16 @@ int MAP::adjustSupply()
 int MAP::adjustDistanceList()
 {
 	//initialized?
-	int i,j,k,counter,ok,min;
-	for(i=1;i<MAX_LOCATIONS;i++)
+	for(int i=1;i<MAX_LOCATIONS;i++)
 	{
-		for(counter=1;counter<MAX_LOCATIONS;counter++)
+		for(int counter=1;counter<MAX_LOCATIONS;counter++)
 		{
-			min=200;
-			for(j=1;j<MAX_LOCATIONS;j++)
+			int min=200;
+			for(int j=1;j<MAX_LOCATIONS;j++)
 				if(location[i].getDistance(j)<min)
 				{
-					ok=1;
-					for(k=1;k<counter;k++)
+					int ok=1;
+					for(int k=1;k<counter;k++)
 						if(locationList[i][k]==j) ok=0;
 					if(ok)
 					{

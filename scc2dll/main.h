@@ -512,7 +512,7 @@ const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 {"Ship Plating",266,15000,15000,  0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_SHIP_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
 {"Ship Weapons",266,10000,10000,  0, 5000, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_SHIP_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0,9},
 {"Refinery", 40,10000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {SCV, 0, 0}, 0/*VESPENE_GEYSIR*/, NEEDED_UNTIL_COMPLETE_IS_LOST/*_IS_LOST*/, GAS_SCV, 0,5}, //~~~ueberlegen...
-{"Gas SCV",  3,    0,    0,  1, 0, {0, 0}, {0 ,0, 0}, {SCV/*REFINERY*/, 0, 0}, /*SCV*/0, /*NEEDED_ONCE_*/IS_LOST, 0, 0,2},	//~~~~
+{"Gas SCV",  3,    0,    0,  1, 0, {0, 0}, {REFINERY ,0, 0}, {SCV/*REFINERY*/, 0, 0}, /*SCV*/0, /*NEEDED_ONCE_*/IS_LOST, 0, 0,2},	//~~~~
 //TODO: Move Befehle an den Anfang der Befehlskette (wegen code[0]>code[1]...) TODO
 {"Move 3 Forward",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
 {"Move 1 Forward",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
@@ -621,7 +621,7 @@ const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 {"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
 {"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
 {"         Assimilator", 40,10000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {PROBE, 0, 0}, /*VESPENE_GEYSIR*/0, NEEDED_ONCE/*_IS_LOST*/, 0, 0,5},
-{"           Gas Probe",  3,    0,    0,  1, 0, {0, 0}, {0 ,0, 0}, {PROBE/*ASSIMILATOR*/, 0, 0}, 0/*PROBE*/, /*NEEDED_ONCE_*/IS_LOST, 0, 0,2},	//Needed once? ~~~ wenn hier ne Aenderung, Facility2 in race und anarace wieder auf location availible checken !TODO
+{"           Gas Probe",  3,    0,    0,  1, 0, {0, 0}, {ASSIMILATOR ,0, 0}, {PROBE/*ASSIMILATOR*/, 0, 0}, 0/*PROBE*/, /*NEEDED_ONCE_*/IS_LOST, 0, 0,2},	//Needed once? ~~~ wenn hier ne Aenderung, Facility2 in race und anarace wieder auf location availible checken !TODO
 {"      Window move+++",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
 {"        Window move+",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
 {"        Window move-",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
@@ -728,7 +728,7 @@ const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 {"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
 {"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,0},
 {"           Extractor", 40, 5000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {/*VESPENE_GEYSIR*/DRONE, 0, 0}, 0/*DRONE*/, IS_LOST, 0, 0,5}, //~~ //TODO HAE?
-{"           Gas Drone",  3,    0,    0,  1, 0, {0, 0}, {0 ,0, 0}, {/*EXTRACTOR*/DRONE, 0, 0}, /*DRONE*/0, /*NEEDED_ONCE_*/IS_LOST, 0, 0,2}, //~~~~
+{"           Gas Drone",  3,    0,    0,  1, 0, {0, 0}, {EXTRACTOR ,0, 0}, {/*EXTRACTOR*/DRONE, 0, 0}, /*DRONE*/0, /*NEEDED_ONCE_*/IS_LOST, 0, 0,2}, //~~~~
 
 {"      Window move+++",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},
 {"        Window move+",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0,10},

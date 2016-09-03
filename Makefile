@@ -16,7 +16,8 @@ EXTRALIBS = -Wl -L/usr/lib -L/usr/X11R6/lib -lX11
 DLIBS=$(WXPATH)/lib/libwx_x11univ-2.4.so.0.1.1 $(EXTRALIBS)
 RESFLAGS=--include-dir $(WXPATH)/include --define __WXX11__ --define __UNIX__
 
-CPPFLAGS = -I$(WXPATH)/lib/wx/include/x11univ-2.4 -I$(WXPATH)/include -I/usr/X11R6/include -D__WXUNIVERSAL__ -D__WXX11__ -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -g
+CPPFLAGS = -I$(WXPATH)/lib/wx/include/x11univ-2.4 -I$(WXPATH)/include -I/usr/X11R6/include -D__WXUNIVERSAL__ -D__WXX11__ -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -O3
+#-g -D_SCC_DEBUG
 #-I/usr/include/glib-1.2 -I/usr/lib/glib/include -D_REENTRANT -I/usr/X11R6/include
 
 CXXFLAGS = $(CPPFLAGS) -MMD -Wall
@@ -32,6 +33,15 @@ lib:	$(SOURCEDLL)
 	$(CXX) $(CXXFLAGS) -fPIC -c $(SOURCEDLL)
 	@mv *.o $(DLLPATH)
 	$(CXX) $(CXXFLAGS) -shared -Wl,-soname,$(PROGRAM).so.1 -o $(PROGRAM).so.1.0 $(SOURCEDLL)
+
+dbin:   $(OBJMAIN)
+	$(CXX) $(CXXFLAGS) -g -D_SCC_DEBUG -o $(PROGRAM).bin $(OBJMAIN) $(LIBS) $(LDLIBS) $(LIBRARIES) $(WXPATH)/lib/libwx_x11univ-2.4.so.0.1.1
+
+dlib:   $(SOURCEDLL)
+	$(CXX) $(CXXFLAGS) -g -D_SCC_DEBUG -fPIC -c $(SOURCEDLL)
+	@mv *.o $(DLLPATH)
+	$(CXX) $(CXXFLAGS) -g -D_SCC_DEBUG -shared -Wl,-soname,$(PROGRAM).so.1 -o $(PROGRAM).so.1.0 $(SOURCEDLL)
+
 	
 clean:
 	@rm -vf ./*.o

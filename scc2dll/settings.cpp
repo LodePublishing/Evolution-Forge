@@ -121,11 +121,13 @@ int EXPORT SETTINGS::getMINCurrentMap()
                                                                                                                                                             
 int EXPORT SETTINGS::setAllowGoalAdaption(int num) // allow the program to change goals (for example ignore command center when command center [NS] is already a goal
 {
+#ifdef _SCC_DEBUG
         if((num<0)||(num>1))
         {
                 debug.toLog(0,"WARNING: (SETTINGS::setAllowGoalAdaption): Value [%i] out of range.",num);
                 return(0);
         }
+#endif
         ga.allowGoalAdaption=num;
         return(1);
 };
@@ -133,77 +135,91 @@ int EXPORT SETTINGS::setAllowGoalAdaption(int num) // allow the program to chang
 
 int EXPORT SETTINGS::setMaxTime(int num) //maximum time of build order in seconds
 {
+#ifdef _SCC_DEBUG
 	if((num<MIN_TIME)||(num>MAX_TIME)) 
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setMaxTime): Value [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	ga.maxTime=num;
 	return(1);
 };
 
 int EXPORT SETTINGS::setMaxTimeOut(int num) //timeout for building
 {
+#ifdef _SCC_DEBUG
 	if((num<MIN_TIMEOUT)||(num>MAX_TIMEOUT)) 
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setMaxTimeOut): Value [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	ga.maxTimeOut=num;
 	return(1);
 };
 
 int EXPORT SETTINGS::setMaxLength(int num)
 {
+#ifdef _SCC_DEBUG
 	if((num<MIN_LENGTH)||(num>MAX_LENGTH)) 
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setMaxLength): Value [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	ga.maxLength=num;
 	return(1);
 };
 
 int EXPORT SETTINGS::setMaxRuns(int num)
 {
+#ifdef _SCC_DEBUG
 	if((num<MIN_RUNS)||(num>MAX_RUNS))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setMaxRuns): Value [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	ga.maxRuns=num;
 	return(1);
 };
 
 int EXPORT SETTINGS::setMaxGenerations(int num)
 {
+#ifdef _SCC_DEBUG
 	if((num<MIN_GENERATIONS)||(num>MAX_GENERATIONS))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setMaxGenerations): Value [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	ga.maxGenerations=num;
 	return(1);
 };
 
 int SETTINGS::setMapCount(int num)
 {
+#ifdef _SCC_DEBUG
 	if((num<MIN_MAPS)||(num>=MAX_MAPS))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setMapCount): Value [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	ga.mapCount=num;
 	return(1);
 };
 
 int SETTINGS::setGoalCount(int num)
 {
+#ifdef _SCC_DEBUG
 	if((num<MIN_GOAL_ENTRIES)||(num>=MAX_GOAL_ENTRIES))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setGoalCount): Value [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	ga.goalCount=num;
 	return(1);
 };
@@ -226,11 +242,13 @@ int EXPORT SETTINGS::setPreprocessBuildOrder(int num)
 
 int EXPORT SETTINGS::setCurrentMap(int num)
 {
+#ifdef _SCC_DEBUG
 	if((num<MIN_MAPS)||(num>getMapCount()))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setCurrentMap): Value [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	ga.currentMap=num;
 	soup.setMap(&map[num]);
 	return(1);
@@ -239,11 +257,13 @@ int EXPORT SETTINGS::setCurrentMap(int num)
 
 int EXPORT SETTINGS::setGoal(int goal, int player)
 {
+#ifdef _SCC_DEBUG
 	if((goal<MIN_GOAL_ENTRIES)||(goal>=getGoalCount())||(player<MIN_PLAYER)||(player>map[getCurrentMap()].getMaxPlayer()))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setGoal): Value [%i/%i] out of range.",goal,player);
 		return(0);
 	}
+#endif
 	return(soup.setGoal(&goalEntry[goal], player));
 };
 
@@ -254,33 +274,39 @@ void EXPORT SETTINGS::checkForChange()
 
 int EXPORT SETTINGS::setBreedFactor(int num)
 {
+#ifdef _SCC_DEBUG
 	if((num<MIN_BREED_FACTOR)||(num>MAX_BREED_FACTOR))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setBreedFactor): Value [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	ga.setBreedFactor(num);
 	return(1);
 };
 
 int EXPORT SETTINGS::setMode(int num)
 {
+#ifdef _SCC_DEBUG
 	if((num<MIN_MODE)||(num>MAX_MODE))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setMode): Value [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	ga.mode=num;
 	return(1);
 };
 
 int EXPORT SETTINGS::setCrossOver(int num)
 {
+#ifdef _SCC_DEBUG
 	if((num<MIN_CROSSOVER)||(num>MAX_CROSSOVER))
 	{
 		debug.toLog(0,"WARNING: (SETTINGS::setCrossOver): Value [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	ga.setCrossOver(num);
 	return(1);
 };
@@ -364,7 +390,7 @@ int EXPORT SETTINGS::getDistance(int l1,int l2)
 {
 	if((l1<MIN_LOCATIONS)||(l1>=MAX_LOCATIONS))
 		return(0);
-	return(map[ga.currentMap].location[l1].getDistance(l2));
+	return(map[ga.currentMap].getDistance(l1,l2));
 };
 
 GOAL_ENTRY* EXPORT SETTINGS::getGoal(int num)
@@ -847,12 +873,12 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 			{
 				if(!strcmp(item,"Name"))
 				{
-					if(!map[getMapCount()].location[modeLocation-1].setName(param1))
+					if(!map[getMapCount()].setLocationName(modeLocation-1,param1))
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Name invalid.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"Mineral Distance"))
 				{
-					if(!map[getMapCount()].location[modeLocation-1].setMineralDistance(value1))
+					if(!map[getMapCount()].setMineralDistance(modeLocation-1,value1))
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Mineral Distance out of range.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"Distances"))
@@ -862,7 +888,7 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 					buffer=strtok(param1," ");
 					while((buffer!=NULL)&&(distanceCount<map[getMapCount()].getMaxLocations()))
 					{
-						if(!map[getMapCount()].location[modeLocation-1].setDistance(distanceCount++,(value1=atoi(buffer))) )
+						if(!map[getMapCount()].setDistance(modeLocation-1,distanceCount++,(value1=atoi(buffer))) )
 						{
 							debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Values out of range.",mapFile,ln,old);
 							break;
@@ -874,7 +900,7 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 					{
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Missing entries",mapFile,ln,old);
 						for(;distanceCount<map[getMapCount()].getMaxLocations();distanceCount++)
-							map[getMapCount()].location[modeLocation-1].setDistance(distanceCount,0);
+							map[getMapCount()].setDistance(modeLocation-1,distanceCount,0);
 					}
 				}
 				else if(!strcmp(item,"@PLAYER"))
@@ -898,40 +924,40 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 				{
 					if(!strcmp(param1,"Terra")) 
 					{
-						map[getMapCount()].player[modePlayer].setRace(TERRA);
-						map[getMapCount()].player[modePlayer].setHarvest(&harvestSpeed[TERRA].minerals[0],&harvestSpeed[TERRA].gas[0]);
+						map[getMapCount()].setStartPlayerRace(modePlayer,TERRA);
+						map[getMapCount()].setStartPlayerHarvestSpeed(modePlayer,&harvestSpeed[TERRA].minerals[0],&harvestSpeed[TERRA].gas[0]);
 					}
 					else if(!strcmp(param1,"Protoss")) 
 					{
-						map[getMapCount()].player[modePlayer].setRace(PROTOSS);
-						map[getMapCount()].player[modePlayer].setHarvest(&harvestSpeed[PROTOSS].minerals[0],&harvestSpeed[PROTOSS].gas[0]);
+						map[getMapCount()].setStartPlayerRace(modePlayer,PROTOSS);
+						map[getMapCount()].setStartPlayerHarvestSpeed(modePlayer,&harvestSpeed[PROTOSS].minerals[0],&harvestSpeed[PROTOSS].gas[0]);
 					}
 					else if(!strcmp(param1,"Zerg")) 
 					{
-						map[getMapCount()].player[modePlayer].setRace(ZERG);
-						map[getMapCount()].player[modePlayer].setHarvest(&harvestSpeed[ZERG].minerals[0],&harvestSpeed[ZERG].gas[0]);
+						map[getMapCount()].setStartPlayerRace(modePlayer,ZERG);
+						map[getMapCount()].setStartPlayerHarvestSpeed(modePlayer,&harvestSpeed[ZERG].minerals[0],&harvestSpeed[ZERG].gas[0]);
 					}
 					else 
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Invalid race.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"Starting Point"))
 				{
-					if(!map[getMapCount()].player[modePlayer].setPosition(value1))
+					if(!map[getMapCount()].setStartPlayerPosition(modePlayer,value1))
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Starting Point out of range.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"Starting Minerals"))
 				{
-					if(!map[getMapCount()].player[modePlayer].setMins(value1*100))
+					if(!map[getMapCount()].setStartPlayerMins(modePlayer,value1*100))
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Starting Minerals out of range.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"Starting Gas"))
 				{
-					if(!map[getMapCount()].player[modePlayer].setGas(value1*100))
+					if(!map[getMapCount()].setStartPlayerGas(modePlayer,value1*100))
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Starting Gas out of range.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"Starttime"))
 				{
-					if(!map[getMapCount()].player[modePlayer].setTimer(value1))
+					if(!map[getMapCount()].setStartPlayerTime(modePlayer,value1))
 						debug.toLog(0,"WARNING: (SETTINGS::loadMapFile) %s: Line %d [%s]: Start time out of range.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"@END"))
@@ -950,10 +976,10 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 				else
 				{
 					for(i=0;i<=UNIT_TYPE_COUNT;i++)  // TODO reicht eigentlich nur bis GAS SCV... aber dann auch unten die abbruchbedingung anguggn
-						if(strstr(stats[map[getMapCount()].player[modePlayer].getRace()][i].name,item)!=NULL)
+						if(strstr(stats[map[getMapCount()].getStartPlayerRace(modePlayer)][i].name,item)!=NULL)
 						{
-                                                        map[getMapCount()].location[0].force[modePlayer][i]=value1;
-							map[getMapCount()].location[modeLocation-1].force[modePlayer][i]=value1;
+                                                        map[getMapCount()].setLocationForce(0,modePlayer,i,value1);
+							map[getMapCount()].setLocationForce(modeLocation-1,modePlayer,i,value1);
 							i=UNIT_TYPE_COUNT+1;
 							break;
 						}
@@ -971,6 +997,7 @@ int EXPORT SETTINGS::loadMapFile(const char* mapFile)
 		return(0);
 	}
 	map[getMapCount()].adjustSupply();
+	map[getMapCount()].adjustResearches(); // temporary units, 3 for upgrades, 1 for researchs etc.
 	map[getMapCount()].adjustDistanceList();
 	setMapCount(getMapCount()+1);
 	return(1);

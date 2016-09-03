@@ -12,7 +12,7 @@
 class Player
 {
         public:
-                Player(ANARACE** anarace, int position);
+                Player(ANARACE** anarace, int mode);
                 ~Player();
                 void update();
                 StatisticsWindow* statisticsWindow;
@@ -23,6 +23,7 @@ class Player
                 ForceWindow* forceWindow;
                 InfoWindow* infoWindow;
                 void resetData();
+		void setTitles(int mode);
 		void assignAnarace(ANARACE** anarace);
                 void DrawMe(wxDC* dc);
                 void drawGeneString(wxDC* dc, wxRect position);
@@ -51,6 +52,7 @@ class Player
         private:
                 ANARACE** anarace; //pointer auf pointer, weil sich der pointer ja veraendert!
 		int shown;
+		int geneAnimation;
 };
 
 #endif

@@ -16,7 +16,7 @@
 "Mode" = "0"
 # Breed Factor:
 # This parameter determines how many % of the players will multiply by 1:1 copy
-"Breed Factor" = "5"
+"Breed Factor" = "10"
 # Crossing Over:
 # This parameter determines how many % of the players will multiply by crossover
 "Crossing Over" = "0"

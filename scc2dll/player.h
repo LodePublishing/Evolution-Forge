@@ -30,6 +30,7 @@ class PLAYER
 		int getBasicGasHarvestPerSecond(int num);
 		int getSupply();
 		int getMaxSupply();
+		int setTime(int time);
 
 		int setSupply(int num);
 		int setMaxSupply(int num);

@@ -65,7 +65,6 @@ void MyDCWindow::resetData()
 MyDCWindow::MyDCWindow(wxFrame *parent)
 	:wxWindow(parent, -1)
 {
-//	bmpBack2.LoadFile("back2.bmp",wxBITMAP_TYPE_BMP);
 //	dt1=wxDateTime::UNow();
 #ifdef __WIN32__
 	GraphixScrollWindow::font=wxFont(FONT_SIZE,wxDEFAULT,wxNORMAL,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT);
@@ -145,41 +144,22 @@ msgWindow->setTitle(0,"Messages");
 	tutorialWindow->Show(0);
 	mainWindow->currentTab=0;
 
-	player[0]->Show(2);
+	player[0]->Show(1);
 	player[1]->Show(0);
 
 	msgWindow->addMessage(_T("Welcome to Evolution Forge!"));
 	msgWindow->addMessage(_T("Click above to add new goals."));
 	msgWindow->addMessage(_T(wxString::Format(wxT("%i players loaded..."),settings.getMap(0)->getMaxPlayer()-1))),
 
-	bitmap.LoadFile("clawsoftware.bmp", wxBITMAP_TYPE_BMP);
-	bitmap2.LoadFile("clemens.bmp", wxBITMAP_TYPE_BMP);
-	hintBitmap.LoadFile("hint.bmp", wxBITMAP_TYPE_BMP);
-	bmpCancel.LoadFile("cancel.bmp", wxBITMAP_TYPE_BMP);
-	bmpAdd.LoadFile("add.bmp",wxBITMAP_TYPE_BMP);
-	bmpSub.LoadFile("sub.bmp",wxBITMAP_TYPE_BMP);
-	bmpNumbers.LoadFile("numbers.bmp",wxBITMAP_TYPE_BMP);
-	bmpAlpha.LoadFile("alpha.bmp",wxBITMAP_TYPE_BMP);
-	bmpTreppe.LoadFile("treppe.bmp",wxBITMAP_TYPE_BMP);
-	bmpCloning.LoadFile("cloning.bmp",wxBITMAP_TYPE_BMP);
-	bmpFitness.LoadFile("fitness.bmp",wxBITMAP_TYPE_BMP);
-																			    
-	bmpRad[0].LoadFile("rad1.bmp",wxBITMAP_TYPE_BMP);
-	bmpRad[1].LoadFile("rad2.bmp",wxBITMAP_TYPE_BMP);
-	bmpRad[2].LoadFile("rad3.bmp",wxBITMAP_TYPE_BMP);
-	bmpRad[3].LoadFile("rad4.bmp",wxBITMAP_TYPE_BMP);
-	bmpRad[4].LoadFile("rad5.bmp",wxBITMAP_TYPE_BMP);
-																			    
-	bmpHeart[0].LoadFile("heart1.bmp",wxBITMAP_TYPE_BMP);
-	bmpHeart[1].LoadFile("heart2.bmp",wxBITMAP_TYPE_BMP);
-	bmpHeart[2].LoadFile("heart3.bmp",wxBITMAP_TYPE_BMP);
-	bmpHeart[3].LoadFile("heart4.bmp",wxBITMAP_TYPE_BMP);
-	bmpHeart[4].LoadFile("heart5.bmp",wxBITMAP_TYPE_BMP);
-																			    
-	bmpArrowLeft.LoadFile("arrow_left.bmp",wxBITMAP_TYPE_BMP);
-	bmpArrowUp.LoadFile("arrow_up.bmp",wxBITMAP_TYPE_BMP);
-	bmpArrowRight.LoadFile("arrow_right.bmp",wxBITMAP_TYPE_BMP);
-	bmpArrowDown.LoadFile("arrow_down.bmp",wxBITMAP_TYPE_BMP);
+	GraphixScrollWindow::bmpClawsoftware.LoadFile("clawsoftware.bmp", wxBITMAP_TYPE_BMP);
+	GraphixScrollWindow::bmpClemens.LoadFile("clemens.bmp", wxBITMAP_TYPE_BMP);
+	GraphixScrollWindow::bmpCancel.LoadFile("cancel.bmp", wxBITMAP_TYPE_BMP);
+	GraphixScrollWindow::bmpAdd.LoadFile("add.bmp",wxBITMAP_TYPE_BMP);
+	GraphixScrollWindow::bmpSub.LoadFile("sub.bmp",wxBITMAP_TYPE_BMP);
+	GraphixScrollWindow::bmpArrowLeft.LoadFile("arrow_left.bmp",wxBITMAP_TYPE_BMP);
+	GraphixScrollWindow::bmpArrowUp.LoadFile("arrow_up.bmp",wxBITMAP_TYPE_BMP);
+	GraphixScrollWindow::bmpArrowRight.LoadFile("arrow_right.bmp",wxBITMAP_TYPE_BMP);
+	GraphixScrollWindow::bmpArrowDown.LoadFile("arrow_down.bmp",wxBITMAP_TYPE_BMP);
 
 /*	theCore->addBitmapButton(wxRect(theCore->getInnerLeftBound()+440,theCore->getInnerUpperBound()+50,8,8),bmpAdd,1);
 	theCore->addBitmapButton(wxRect(theCore->getInnerLeftBound()+440,theCore->getInnerUpperBound()+60,8,8),bmpSub,1);
@@ -257,26 +237,9 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-//      static const int max = 7;
-//      int progress=0;
-//      wxSplashScreen* splash=NULL;
-//      wxBitmap* bitmap=new wxBitmap("scc.bmp", wxBITMAP_TYPE_BMP);
-//      if(bitmap) //	      splash = new wxSplashScreen(*bitmap, wxSPLASH_CENTRE_ON_SCREEN|wxSPLASH_NO_TIMEOUT, -1, NULL, -1, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER|wxSTAY_ON_TOP);
-																			     /*      wxProgressDialog dialog(_T("Progress of initializing"), _T("Be patient"), max, NULL, wxPD_APP_MODAL | wxPD_ELAPSED_TIME | wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME);
-																			    
-	dialog.Update(progress,_T(wxString::Format(wxT("%i%%: Initializing main window"),progress*100/max)));progress++;*/
 	SCREEN_X=1024-4;SCREEN_Y=768-55;
 	MyFrame *frame = new MyFrame(_T("Evolution Forge v1.11"), wxPoint(0, 0), wxSize(SCREEN_X,SCREEN_Y));
-/*      dialog.Update(progress,_T(wxString::Format(wxT("%i%%: Setting map and goals"),(progress+1)*100/max)));progress++;
-	dialog.Update(progress,_T(wxString::Format(wxT("%i%%: Setting up tables"),(progress+1)*100/max)));progress++;
-	dialog.Update(progress,_T(wxString::Format(wxT("%i%%: Setting up status bar"),(progress+1)*100/max)));progress++;
-	dialog.Update(progress,_T(wxString::Format(wxT("%i%%: Initializing EF core"),(progress+1)*100/max)));progress++;
-	dialog.Update(progress,_T(wxString::Format(wxT("%i%%: Loading data files"),(progress+1)*100/max)));progress++;
-	dialog.Update(progress,_T(wxString::Format(wxT("%i%%: Starting main application"),(progress+1)*100/max)));progress++;*/
-																			    
 	frame->Show(TRUE);
-//      if(bitmap) delete(bitmap);
-//      if(splash) delete(splash);
 	return TRUE;
 }
 
@@ -308,8 +271,8 @@ void MyDCWindow::processButtons()
 		if(mainWindow->isActivated(i))
 		{
 			update=2;
-			player[0]->boWindow->resetData();
-			player[1]->boWindow->resetData();
+			player[0]->resetData();
+			player[1]->resetData();
 			mainWindow->currentTab=i;
 			mainWindow->clearButtons();
 			switch(mainWindow->currentTab)
@@ -348,6 +311,7 @@ void MyDCWindow::processButtons()
 					msgWindow->Show(0);
 					theCore->Show(0);
 					tutorialWindow->Show(0);
+// TODO wenn zero goal -> absturz beim aendern
                                         settings.setGoal(0,1); // zero goal! -> human
                                         settings.setGoal(0,2); // zero goal!  -> computer!
 				break;
@@ -375,7 +339,11 @@ void MyDCWindow::processButtons()
 				break;
 				default:break;		
 			}
-			settings.initSoup();
+
+			player[0]->update();
+			player[1]->update();
+
+/*			settings.initSoup();
 		        resetData();
 		        if(ANARACE** temp=settings.newGeneration(anarace))
 		        {                 for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
@@ -384,10 +352,11 @@ void MyDCWindow::processButtons()
 //              if(anarace[0]->getRun()!=oldrun) {oldrun=anarace[0]->getRun();endrun=1;} TODO?
 		        };
 		        for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
-                		player[i]->assignAnarace(&(anarace[i]));
-			refresh=0;
-
+                		player[i]->assignAnarace(&(anarace[i]));*/
+	
+			settings.checkForChange();
 		}
+
 	for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
 		if(player[i]->isShown())
 		{
@@ -395,8 +364,7 @@ void MyDCWindow::processButtons()
 			if(player[i]->hasChanged())
 			{
 				if(!isOptimizing())
-					settings.checkForChange();
-				update=2;
+					update=2;
 				player[i]->changeAccepted(); //~~
 			}
 		}
@@ -641,113 +609,6 @@ void MyDCWindow::drawGizmo()
 
 void MyDCWindow::showCoreAnimation()
 {
-//	int bla=(sin((animationNumbers%10)*3.141*0.2)+1.0)*2.5;
-//	if(ga->getMutationFactor()==0)
-//		bla=4;
-//(animationNumbers%10>4)*4+(animationNumbers%10>4)*(-2)*(animationNumbers%5)+(animationNumbers%5);
-
-	if(animationNumbers%11==0) dc->SetPen(wxPen(wxColour(100,255,80),3,wxSOLID));else dc->SetPen(wxPen(wxColour(40,150,20),2,wxSOLID));
-	theCore->drawArrow(dc,wxPoint(470,60),0,20);
-
-	dc->DrawBitmap(bmpRad[4],theCore->getInnerLeftBound()+400/*+(39-bmpRad[bla].GetWidth())/2*/,theCore->getInnerUpperBound()+50/*+(39-bmpRad[bla].GetHeight())/2*/);
-	dc->DrawText(_T(wxString::Format(wxT("%i%%"),ga->getMutationFactor())),theCore->getInnerLeftBound()+405/*+(39-bmpRad[bla].GetWidth())/2*/,theCore->getInnerUpperBound()+55/*+(39-bmpRad[bla].GetHeight())/2*/);
-	dc->DrawText(_T("Mutations"),theCore->getInnerLeftBound()+400,theCore->getInnerUpperBound()+30);
-
-	if(animationNumbers%11==1) dc->SetPen(wxPen(wxColour(100,255,80),3,wxSOLID));else dc->SetPen(wxPen(wxColour(40,150,20),2,wxSOLID));
-	theCore->drawArrow(dc,wxPoint(370,60),0,20);
-
-// Now some parts of some build orders of the current population of build orders are randomly changed. This is also known as Mutation which will broaden the search.
-
-	dc->DrawBitmap(bmpFitness,theCore->getInnerLeftBound()+300,theCore->getInnerUpperBound()+50);
-	dc->DrawText(_T("Fitness Test"),theCore->getInnerLeftBound()+300,theCore->getInnerUpperBound()+30);
-
-	if(animationNumbers%11==2) dc->SetPen(wxPen(wxColour(100,255,80),3,wxSOLID));else dc->SetPen(wxPen(wxColour(40,150,20),2,wxSOLID));
-	theCore->drawArrow(dc,wxPoint(270,60),0,20);
-
-// The new creations are then tested on their fitness. That means how fast they are able to fulfill the goals and how much resources they gather.
-
-	wxMemoryDC temp_dc;
-	temp_dc.SelectObject(wxBitmap(32,16));
-	temp_dc.DrawBitmap(bmpNumbers,-animationNumbers,0);
-	dc->Blit(theCore->getInnerLeftBound()+200,theCore->getInnerUpperBound()+50,32,16,&temp_dc,0,0);
-	dc->DrawText(_T("Quicksort"),theCore->getInnerLeftBound()+200,theCore->getInnerUpperBound()+30);
-
-
-// All possible solutions are now sorted after their fitness values
-
-	dc->DrawBitmap(bmpTreppe,theCore->getInnerLeftBound()+100,theCore->getInnerUpperBound()+50);
-	dc->DrawText(_T("Ranking"),theCore->getInnerLeftBound()+100,theCore->getInnerUpperBound()+30);
-
-	if(animationNumbers%11==4) dc->SetPen(wxPen(wxColour(100,255,80),3,wxSOLID));else dc->SetPen(wxPen(wxColour(40,150,20),2,wxSOLID));
-	theCore->drawArrow(dc,wxPoint(70,60),0,20);
-	if(animationNumbers%11==3) dc->SetPen(wxPen(wxColour(100,255,80),3,wxSOLID));else dc->SetPen(wxPen(wxColour(40,150,20),2,wxSOLID));
-	theCore->drawArrow(dc,wxPoint(170,60),0,20);
-
-// And put together in a ranking. Pretty bad build orders will be deleted.
-
-	dc->DrawBitmap(bmpCloning,theCore->getInnerLeftBound(),theCore->getInnerUpperBound()+50);
-	dc->DrawText(_T(wxString::Format(wxT("%i%%"),ga->getBreedFactor())),theCore->getInnerLeftBound()+5,theCore->getInnerUpperBound()+55);
-	dc->DrawText(_T("Cloning"),theCore->getInnerLeftBound(),theCore->getInnerUpperBound()+30);
-
-	if(animationNumbers%11==5) dc->SetPen(wxPen(wxColour(100,255,80),3,wxSOLID));else dc->SetPen(wxPen(wxColour(40,150,20),2,wxSOLID));
-	theCore->drawArrow(dc,wxPoint(40,110),1,20);
-
-
-// A certain percentage of the build orders which were ranked best in the last step are now "cloned" to deepen the search for the optimal solution into that direction.
-
-//	bla=(sin(((animationNumbers+3)%10)*3.141*0.2)+1.0)*2.5;
-  //      if(ga->getCrossOver()==0)
-    //	    bla=0;
-
-	dc->DrawBitmap(bmpHeart[0],theCore->getInnerLeftBound(),theCore->getInnerUpperBound()+150);
-	dc->DrawText(_T(wxString::Format(wxT("%i%%"),ga->getCrossOver())),theCore->getInnerLeftBound()+5,theCore->getInnerUpperBound()+155);
-	dc->DrawText(_T("Crossing Over"),theCore->getInnerLeftBound(),theCore->getInnerUpperBound()+130);
-
-	if(animationNumbers%11==6) dc->SetPen(wxPen(wxColour(100,255,80),3,wxSOLID));else dc->SetPen(wxPen(wxColour(40,150,20),2,wxSOLID));
-	theCore->drawArrow(dc,wxPoint(50,160),2,20);
-
-
-// In addition several build orders are choosen and merged together, like the chromosoms in nature. This is more or less another elaborate mutation .
-
-	dc->DrawBitmap(bmpFitness,theCore->getInnerLeftBound()+100,theCore->getInnerUpperBound()+150);
-	dc->DrawText(_T("Fitness Test"),theCore->getInnerLeftBound()+100,theCore->getInnerUpperBound()+130);
-
-	if(animationNumbers%11==7) dc->SetPen(wxPen(wxColour(100,255,80),3,wxSOLID));else dc->SetPen(wxPen(wxColour(40,150,20),2,wxSOLID));
-	theCore->drawArrow(dc,wxPoint(150,160),2,20);
-
-// Through cloning and crossing over the build orders have changed. So some of them get under another fitness test.
-																			    
-	temp_dc.DrawBitmap(bmpNumbers,-animationNumbers-32,0);
-	dc->Blit(theCore->getInnerLeftBound()+200,theCore->getInnerUpperBound()+150,32,16,&temp_dc,0,0);
-	dc->DrawText(_T("Quicksort"),theCore->getInnerLeftBound()+200,theCore->getInnerUpperBound()+130);
-
-	if(animationNumbers%11==8) dc->SetPen(wxPen(wxColour(100,255,80),3,wxSOLID));else dc->SetPen(wxPen(wxColour(40,150,20),2,wxSOLID));
-	theCore->drawArrow(dc,wxPoint(250,160),2,20);
-
-
-// The final population are sorted again after their fitness values
-																			    
-	dc->DrawBitmap(bmpTreppe,theCore->getInnerLeftBound()+300,theCore->getInnerUpperBound()+150);
-	dc->DrawText(_T("Ranking"),theCore->getInnerLeftBound()+300,theCore->getInnerUpperBound()+130);
-
-	if(animationNumbers%11==9) dc->SetPen(wxPen(wxColour(100,255,80),3,wxSOLID));else dc->SetPen(wxPen(wxColour(40,150,20),2,wxSOLID));
-	theCore->drawArrow(dc,wxPoint(350,160),2,20);
-
-
-// And put into a final ranking of this generation of build orders.
-
-	dc->DrawBitmap(bmpAlpha,theCore->getInnerLeftBound()+400,theCore->getInnerUpperBound()+150);
-	dc->DrawText(_T("Alpha program"),theCore->getInnerLeftBound()+400,theCore->getInnerUpperBound()+130);
-
-	if(animationNumbers%11==10) dc->SetPen(wxPen(wxColour(100,255,80),3,wxSOLID));else dc->SetPen(wxPen(wxColour(40,150,20),2,wxSOLID));
-	theCore->drawArrow(dc,wxPoint(450,160),2,20);
-
-	if(animationNumbers%11==10) dc->SetPen(wxPen(wxColour(100,255,80),3,wxSOLID));else dc->SetPen(wxPen(wxColour(40,150,20),2,wxSOLID));
-	theCore->drawArrow(dc,wxPoint(420,110),3,20);
-
-
-// The best program, so-called "Alpha program" is chosen and gets under further analysis and tests to make the data user readable and ready to print it on the screen
-
 }
 
 wxColour chooseColour(int num,int row)
@@ -763,7 +624,7 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 	if(dc) delete(dc);
 	dc=new wxMemoryDC();
 	dc->SelectObject(wxBitmap(SCREEN_X,SCREEN_Y));
-	dc->SetBrush(wxBrush(wxColour(0,0,0),wxSOLID));
+	dc->SetBrush(*wxBLACK_BRUSH);
 	animationNumbers++;
 	if(animationNumbers>150)
 	animationNumbers=1;
@@ -777,25 +638,24 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 
 	if(userIsNewbie)
 	{
-		dc->SetBrush(wxBrush(wxColour(0,0,0),wxSOLID));
-		dc->SetPen(wxPen(wxColour(0,0,0),0,wxTRANSPARENT));
+		dc->SetBrush(*wxBLACK_BRUSH);
+		dc->SetPen(*wxTRANSPARENT_PEN);
 		dc->SetFont(GraphixScrollWindow::font);
-//wxFont(FONT_SIZE,wxDECORATIVE,wxFONTSTYLE_ITALIC,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT));
 		wxString bla=_T("Click");
 		int dx,dy;
 		dc->GetTextExtent(bla,&dx,&dy);
 		wxRect edget=wxRect(mainWindow->getLeftBound()+mainWindow->getWidth()-dx-190-3,mainWindow->getUpperBound()-dy-3,dx+26,dy+6);
 		dc->DrawRectangle(edget);
 		dc->DrawText(bla,mainWindow->getLeftBound()+mainWindow->getWidth()-dx-190,mainWindow->getUpperBound()-dy);
-		dc->DrawBitmap(bmpArrowRight,mainWindow->getLeftBound()+mainWindow->getWidth()-180-animationNumbers%4,mainWindow->getUpperBound()-dy);
+		dc->DrawBitmap(GraphixScrollWindow::bmpArrowRight,mainWindow->getLeftBound()+mainWindow->getWidth()-180-animationNumbers%4,mainWindow->getUpperBound()-dy);
 	}
 
-	if(update==2)
-	{
+//	if(update==2)
+//	{
 		for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
 			if(player[i]->isShown())
 				player[i]->update();
-	}
+//	}
 
 	update=1;
 
@@ -1286,15 +1146,16 @@ void MyDCWindow::OnPaint(wxPaintEvent& event)
 		if(infoWindowNumber) //infoWindow needs to be AFTER theCore
 			showInfoWindow();
 	}*/
+
 	for(int i=0;i<settings.getMap(0)->getMaxPlayer()-1;i++)
 		if(player[i]->isShown())
 			player[i]->DrawMe(dc);
 
-	if(theCore->isShown())
-		player[0]->drawGeneString(dc,wxRect(theCore->getPosition(),theCore->getSize()));
-	processButtons();
+//	if(theCore->isShown())
+//		player[0]->drawGeneString(dc,wxRect(theCore->getPosition()+wxPoint(0,10),theCore->getSize()+wxSize(0,-4)));
 	wxPaintDC dcp(this);
 
+	processButtons();
 //	wxScreenDC* dcp2=new wxScreenDC();
 //	dcp2->StartDrawingOnTop();
 	dcp.Blit(0, 0, SCREEN_X, SCREEN_Y, dc, 0, 0);

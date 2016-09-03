@@ -20,6 +20,7 @@ void EXPORT PRERACE::createSpecial()
 
 int EXPORT PRERACE::getMapLocationAvailible(int player, int loc, int type)
 {
+#ifdef _SCC_DEBUG
 	if((player<0)||(player>=pMap->getMaxPlayer()))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getMapLocationAvailible): Value player [%i] out of range.",player);
@@ -41,11 +42,13 @@ int EXPORT PRERACE::getMapLocationAvailible(int player, int loc, int type)
 		debug.toLog(0,"DEBUG: (PRERACE::getMapLocationAvailible): Variable loc[%i][%i].availible[%i] not initialized [%i].",player,loc,type,this->loc[player][loc].availible[type]);
 		return(0);
 	}
+#endif
 	return(this->loc[player][loc].availible[type]);
 };
 
 int EXPORT PRERACE::getMapLocationForce(int player, int loc, int type)
 {
+#ifdef _SCC_DEBUG
 	if((player<0)||(player>=pMap->getMaxPlayer()))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getMapLocationForce): Value player [%i] out of range.",player);
@@ -67,12 +70,14 @@ int EXPORT PRERACE::getMapLocationForce(int player, int loc, int type)
 		debug.toLog(0,"DEBUG: (PRERACE::getMapLocationForce): Variable loc[%i][%i].force[%i] not initialized [%i].",player,loc,type,this->loc[player][loc].force[type]);
 		return(0);
 	}
+#endif
 	return(this->loc[player][loc].force[type]);
 };
 
 //TODO Static machen
 int EXPORT PRERACE::setMapLocationAvailible(int player, int loc, int type, int num)
 {
+#ifdef _SCC_DEBUG
 	if((player<0)||(player>=pMap->getMaxPlayer()))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setMapLocationAvailible): Value player [%i] out of range.",player);
@@ -89,12 +94,14 @@ int EXPORT PRERACE::setMapLocationAvailible(int player, int loc, int type, int n
 		debug.toLog(0,"DEBUG: (PRERACE::setMapLocationAvailible): Value type [%i] out of range.",type);
 		return(0);
 	}
+#endif
 	this->loc[player][loc].availible[type]=num;
 	return(1);
 };
 																			    
 int EXPORT PRERACE::setMapLocationForce(int player, int loc, int type, int num)
 {
+#ifdef _SCC_DEBUG
 	if((player<0)||(player>=pMap->getMaxPlayer()))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setMapLocationForce): Value player [%i] out of range.",player);
@@ -115,13 +122,14 @@ int EXPORT PRERACE::setMapLocationForce(int player, int loc, int type, int num)
 		debug.toLog(0,"DEBUG: (PRERACE::setMapLocationForce): Value num [%i] out of range.",num);
 		return(0);
 	}
-
+#endif
 	this->loc[player][loc].force[type]=num;
 	return(1);
 };
 
 int EXPORT PRERACE::addMapLocationAvailible(int player, int loc, int type, int num)
 {
+#ifdef _SCC_DEBUG
 	if((player<0)||(player>=pMap->getMaxPlayer()))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationAvailible): Value player [%i] out of range.",player);
@@ -149,6 +157,7 @@ int EXPORT PRERACE::addMapLocationAvailible(int player, int loc, int type, int n
 		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationAvailible): Value num [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	this->loc[player][loc].availible[type]+=num;
 	return(1);
 };
@@ -156,6 +165,7 @@ int EXPORT PRERACE::addMapLocationAvailible(int player, int loc, int type, int n
 
 int EXPORT PRERACE::addMapLocationForce(int player, int loc, int type, int num)
 {
+#ifdef _SCC_DEBUG
 	if((player<0)||(player>=pMap->getMaxPlayer()))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationForce): Value player [%i] out of range.",player);
@@ -183,7 +193,7 @@ int EXPORT PRERACE::addMapLocationForce(int player, int loc, int type, int num)
 		debug.toLog(0,"DEBUG: (PRERACE::addMapLocationForce): Value num [%i] out of range.",num);
 		return(0);
 	}
-
+#endif
 	this->loc[player][loc].force[type]+=num;
 	return(1);
 };
@@ -193,6 +203,7 @@ int EXPORT PRERACE::addMapLocationForce(int player, int loc, int type, int num)
 
 int EXPORT PRERACE::getLocationAvailible(int loc, int type)
 {
+#ifdef _SCC_DEBUG
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getLocationAvailible): Value loc [%i] out of range.",loc);
@@ -208,11 +219,13 @@ int EXPORT PRERACE::getLocationAvailible(int loc, int type)
 		debug.toLog(0,"DEBUG: (PRERACE::getLocationAvailible): Variable location[%i].availible[%i] not initialized [%i].",loc,type,location[loc].availible[type]);
 		return(0);
 	}
+#endif
 	return(location[loc].availible[type]);
 };
 
 int EXPORT PRERACE::getLocationForce(int loc, int type)
 {
+#ifdef _SCC_DEBUG
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getLocationForce): Value loc [%i] out of range.",loc);
@@ -228,12 +241,14 @@ int EXPORT PRERACE::getLocationForce(int loc, int type)
 		debug.toLog(0,"DEBUG: (PRERACE::getLocationForce): Variable location[%i].force[%i] not initialized [%i].",loc,type,location[loc].force[type]);
 		return(0);
 	}
+#endif
 	return(location[loc].force[type]);
 };
 
 
 int EXPORT PRERACE::setLocationAvailible(int loc, int type, int num)
 {
+#ifdef _SCC_DEBUG
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setLocationAvailible): Value loc [%i] out of range.",loc);
@@ -249,12 +264,14 @@ int EXPORT PRERACE::setLocationAvailible(int loc, int type, int num)
 		debug.toLog(0,"DEBUG: (PRERACE::setLocationAvailible): Value num [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	location[loc].availible[type]=num;
 	return(1);
 };
 
 int EXPORT PRERACE::setLocationForce(int loc, int type, int num)
 {
+#ifdef _SCC_DEBUG
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setLocationForce): Value loc [%i] out of range.",loc);
@@ -270,6 +287,7 @@ int EXPORT PRERACE::setLocationForce(int loc, int type, int num)
 		debug.toLog(0,"DEBUG: (PRERACE::setLocationForce): Value num [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	location[loc].force[type]=num;
 	return(1);
 };
@@ -277,6 +295,7 @@ int EXPORT PRERACE::setLocationForce(int loc, int type, int num)
 
 int EXPORT PRERACE::addLocationAvailible(int loc, int type, int num)
 {
+#ifdef _SCC_DEBUG
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::addLocationAvailible): Value loc [%i] out of range.",loc);
@@ -297,7 +316,7 @@ int EXPORT PRERACE::addLocationAvailible(int loc, int type, int num)
 		debug.toLog(0,"DEBUG: (PRERACE::addLocationAvailible): Value num [%i] out of range.",num);
 		return(0);
 	}
-	
+#endif	
 	location[loc].availible[type]+=num;
 	if(loc>0) //sonst waers ja doppelt...
 		location[0].availible[type]+=num;
@@ -306,6 +325,7 @@ int EXPORT PRERACE::addLocationAvailible(int loc, int type, int num)
 																			    
 int EXPORT PRERACE::addLocationForce(int loc, int type, int num)
 {
+#ifdef _SCC_DEBUG
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::addLocationForce): Value loc [%i] out of range.",loc);
@@ -326,7 +346,7 @@ int EXPORT PRERACE::addLocationForce(int loc, int type, int num)
 		debug.toLog(0,"DEBUG: (PRERACE::addLocationForce): Variable num not initialized [%i].",num);
 		return(0);
 	}
-
+#endif
 	location[0].force[type]+=num;
 	if(loc>0)
 		location[loc].force[type]+=num;
@@ -335,71 +355,84 @@ int EXPORT PRERACE::addLocationForce(int loc, int type, int num)
 
 MAP* PRERACE::getMap()
 {
+//TODO Fehlerbehandlung
 	return(pMap);
 };
 
 int EXPORT PRERACE::setMins(int mins)
 {
+#ifdef _SCC_DEBUG
 	if((mins<0)||(mins>MAX_MINS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setMins): Value mins [%i] out of range.",mins);
 		return(0);
 	}
+#endif
 	this->mins=mins;
 	return(1);
 };
 
 int EXPORT PRERACE::setGas(int gas)
 {
+#ifdef _SCC_DEBUG
 	if((gas<0)||(gas>MAX_GAS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setGas): Value gas [%i] out of range.",gas);
 		return(0);
 	}
+#endif
 	this->gas=gas;
 	return(1);
 };
 
 int EXPORT PRERACE::setTimer(int time)
 {
+#ifdef _SCC_DEBUG
 	if((time<0)||(time>MAX_TIME))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setTimer): Value time [%i] out of range.",time);
 		return(0);
 	}
+#endif
 	timer=time;
 	return(1);
 };
 
 int EXPORT PRERACE::setSupply(int supply)
 {
+#ifdef _SCC_DEBUG
 	if((supply>MAX_SUPPLY)||(supply<0))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setSupply): Value supply [%i] out of range.",supply);
 		return(0);
 	}
+#endif
 	this->supply=supply;
 	return(1);
 };
 
 int EXPORT PRERACE::setMaxSupply(int supply)
 {
+#ifdef _SCC_DEBUG
 	if((supply>MAX_SUPPLY)||(supply<0))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setMaxSupply): Value supply [%i] out of range.",supply);
 		return(0);
 	}
+#endif
 	maxSupply=supply;
 	return(1);
 };
 
 int EXPORT PRERACE::setMap(MAP* map)
 {
+#ifdef _SCC_DEBUG
 	if(!map)
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setMap): Map not initialized.");
 		return(0);
 	}
+#endif
 	pMap=map;
 	mapInitialized=1;
 	return(1);
@@ -408,68 +441,82 @@ int EXPORT PRERACE::setMap(MAP* map)
 
 int EXPORT PRERACE::getPlayerNum()
 {
+#ifdef _SCC_DEBUG
 	if((playerNum<0)||(playerNum>=MAX_PLAYER))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getPlayer): Variable not initialized [%i].",playerNum);
 		return(0);
 	}
+#endif
 	return(playerNum);
 };
 
 int EXPORT PRERACE::getSupply()
 {
+#ifdef _SCC_DEBUG
 	if((supply<0)||(supply>200))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getSupply): Variable not initialized [%i].",supply);
 		return(0);
 	}
+#endif
 	return(supply);
 };
 int EXPORT PRERACE::getMaxSupply()
 {
+#ifdef _SCC_DEBUG
 	if((maxSupply<0)||(maxSupply>200))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getMaxSupply): Variable not initialized [%i].",maxSupply);
 		return(0);
 	}
+#endif
 	return(maxSupply);
 };
 int EXPORT PRERACE::getMins()
 {
+#ifdef _SCC_DEBUG
 	if((mins<0)||(mins>MAX_MINS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getMins): Variable mins not initialized [%i].",mins);
 		return(0);
 	}
+#endif
 	return(mins);
 };
 int EXPORT PRERACE::getGas()
 {
+#ifdef _SCC_DEBUG
 	if((gas<0)||(gas>MAX_GAS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getGas): Variable gas not initialized [%i].",gas);
 		return(0);
 	}
+#endif
 	return(gas);
 };
 int EXPORT PRERACE::getTimer()
 {
+#ifdef _SCC_DEBUG
 	if((timer<0)||(timer>MAX_TIME))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getTimer): Variable timer not initialized [%i].",timer);
 		return(0);
 	}
+#endif
 	return(timer);
 };
 
 
 int EXPORT PRERACE::adjustMineralHarvest(int location)
 {
+#ifdef _SCC_DEBUG
 	if((location<0)||(location>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::adjustMineralHarvest): Value location [%i] out of range.",location);
 		return(0);
 	}
+#endif
 	//TODO Zerg hatchery,lair etc.
 	if((location==0)||((!getLocationForce(location,COMMAND_CENTER))&&(!getMapLocationForce(0,location,MINERALS))))
 	{
@@ -504,11 +551,13 @@ int EXPORT PRERACE::adjustMineralHarvest(int location)
 
 int EXPORT PRERACE::adjustGasHarvest(int location)
 {
+#ifdef _SCC_DEBUG
 	if((location<0)||(location>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::adjustGasHarvest): Value location [%i] out of range.",location);
 		return(0);
 	}
+#endif
 	if((location==0)||((!getLocationForce(location,COMMAND_CENTER))&&(!getLocationForce(location,REFINERY))))
 	{
 		for(int i=5;i--;)
@@ -542,11 +591,13 @@ int EXPORT PRERACE::adjustGasHarvest(int location)
 
 int EXPORT PRERACE::setPlayerNum(int num)
 {
+#ifdef _SCC_DEBUG
 	if((num<0)||(num>=MAX_PLAYER))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setPlayerNum): Value [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	playerNum=num; //~```~  player[0]?
 	location=(loc[num]);
 	return(1);
@@ -554,32 +605,38 @@ int EXPORT PRERACE::setPlayerNum(int num)
 
 PLAYER* EXPORT PRERACE::getPlayer()
 {
+#ifdef _SCC_DEBUG
 	if(!player->getInitialized())
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getPlayer): Variable not initialized.");
 		return(0);
 	}
+#endif
 	return(player);
 };
 
 int EXPORT PRERACE::setPlayer(PLAYER* player)
 {
+#ifdef _SCC_DEBUG
 	if(!player->getInitialized())
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setPlayer): Variable not initialized.");
 		return(0);
 	}
+#endif
 	this->player=player;
 	return(1);
 };
 
 int EXPORT PRERACE::setpStats(const UNIT_STATISTICS* pStats)
 {
+#ifdef _SCC_DEBUG
 	if(pStats[0].mins!=0)//~~
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setpStats): Variable not initialized.");
 		return(0);
 	}
+#endif
 	this->pStats=pStats;
 	return(1);
 };
@@ -587,11 +644,13 @@ int EXPORT PRERACE::setpStats(const UNIT_STATISTICS* pStats)
 
 const UNIT_STATISTICS* EXPORT PRERACE::getpStats()
 {
+#ifdef _SCC_DEBUG
 	if(!pStats)
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getpStats): Variable not initialized.");
 		return(0);
 	}
+#endif
 	return(pStats);
 };
 
@@ -599,7 +658,7 @@ const UNIT_STATISTICS* EXPORT PRERACE::getpStats()
 int EXPORT PRERACE::loadPlayer(int num)
 {
 	setPlayerNum(num);
-	setPlayer(&pMap->player[num]);
+	setPlayer(pMap->getStartPlayer(num));
 	setpStats(player->goal->getpStats());
 	setMins(player->getMins());
 	setGas(player->getGas());
@@ -609,11 +668,13 @@ int EXPORT PRERACE::loadPlayer(int num)
 
 int EXPORT PRERACE::adjustHarvest()
 {
+#ifdef _SCC_DEBUG
 	if(!mapInitialized)
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::adjustHarvest): Map was not initialized.");
 		return(0);
 	}
+#endif
 	for(int i=0;i<MAX_LOCATIONS;i++)
 	{
 		adjustMineralHarvest(i);
@@ -681,32 +742,38 @@ int EXPORT PRERACE::harvestGas()
 
 int EXPORT PRERACE::getCalculated()
 {
+#ifdef _SCC_DEBUG
 	if((calculated<0)||(calculated>1))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getCalculated): Variable is not initialized [%i].",calculated);
 		return(0);
 	}
+#endif
 	return(calculated);
 };
 
 int EXPORT PRERACE::setCalculated(int num)
 {
+#ifdef _SCC_DEBUG
 	if((num<0)||(num>1))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setCalculated): Value [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	calculated=num;
 	return(1);
 };
 
 int EXPORT PRERACE::resetSupply()
 {
+#ifdef _SCC_DEBUG
 	if(!mapInitialized)
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::resetSupply): Map was not initialized.");
 		return(0);
 	}
+#endif
 	setMaxSupply(0);
 	int temp=0;
 	for(int i=1;i<MAX_LOCATIONS;i++)
@@ -739,16 +806,19 @@ int EXPORT PRERACE::resetSupply()
 
 int EXPORT PRERACE::getIP()
 {
+#ifdef _SCC_DEBUG
 	if((IP<0)||(IP>MAX_LENGTH))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getIP): Variable IP not initialized [%i].",IP);
 		return(0);
 	}
+#endif
 	return(IP);
 }
 
 int EXPORT PRERACE::getMineralHarvestPerSecond(int location, int worker)
 {
+#ifdef _SCC_DEBUG
 	if((location<0)||(location>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getMineralHarvestPerSecond): Value location [%i] out of range.",location);
@@ -765,11 +835,13 @@ int EXPORT PRERACE::getMineralHarvestPerSecond(int location, int worker)
 		debug.toLog(0,"DEBUG: (PRERACE::getMineralHarvestPerSecond): Variable mineralHarvestPerSecond[%i][%i] not initialized [%i].",location,worker,mineralHarvestPerSecond[location][worker]);
 		return(0);
 	}
+#endif
 	return(mineralHarvestPerSecond[location][worker]);
 }
 
 int EXPORT PRERACE::getGasHarvestPerSecond(int location,int worker)
 {
+#ifdef _SCC_DEBUG
 	if((location<0)||(location>=MAX_LOCATIONS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getGasHarvestPerSecond): Value location [%i] out of range.",location);
@@ -785,32 +857,38 @@ int EXPORT PRERACE::getGasHarvestPerSecond(int location,int worker)
 		debug.toLog(0,"DEBUG: (PRERACE::getGasHarvestPerSecond): Variable gasHarvestPerSecond[%i][%i] not initialized [%i].",location,worker,gasHarvestPerSecond[location][worker]);
 		return(0);
 	}
+#endif
 	return(gasHarvestPerSecond[location][worker]);
 }
 
 int EXPORT PRERACE::getHarvestedMins()
 {
+#ifdef _SCC_DEBUG
 	if((harvestedMins<0)||(harvestedMins>MAX_MINS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getHarvestedMins): Variable harvestedMins not initialized [%i].",harvestedMins);
 		return(0);
 	}
+#endif
 	return(harvestedMins);
 };
 
 int EXPORT PRERACE::getHarvestedGas()
 {
+#ifdef _SCC_DEBUG
 	if((harvestedGas<0)||(harvestedGas>MAX_GAS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getHarvestedGas): Variable harvestedGas not initialized [%i].",harvestedGas);
 		return(0);
 	}
+#endif
 	return(harvestedGas);
 };
 
 int EXPORT PRERACE::getFinalTime(int goal)
 {
-	if((goal<0)||(goal>=UNIT_TYPE_COUNT))
+#ifdef _SCC_DEBUG
+	if((goal<0)||(goal>=MAX_GOALS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getFinalTime): Value goal [%i] out of range.",goal);
 		return(0);
@@ -820,32 +898,38 @@ int EXPORT PRERACE::getFinalTime(int goal)
 		debug.toLog(0,"DEBUG: (PRERACE::getFinalTime): Variable ftime[%i] not initialized [%i].",goal,ftime[goal]);
 		return(0);
 	}
+#endif
 	return(ftime[goal]);
 };
 
 int EXPORT PRERACE::getLength()
 {
+#ifdef _SCC_DEBUG
 	if((length<0)||(length>MAX_LENGTH))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getLength): Variable length not initialized [%i].",length);
 		return(0);
 	}
+#endif
 	return(length);
 };
 
 int EXPORT PRERACE::setIP(int IP)
 {
+#ifdef _SCC_DEBUG
 	if((IP<0)||(IP>=MAX_LENGTH))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setIP): Value IP [%i] out of range.",IP);
 		return(0);
 	}
+#endif
 	this->IP=IP;
 	return(1);
 };
 
 int EXPORT PRERACE::setMineralHarvestPerSecond(int location,int worker,int mins)
 {
+#ifdef _SCC_DEBUG
 	if((mins<0)||(mins>=MAX_MINS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setMineralHarvestPerSecond): Value mins [%i] out of range.",mins);
@@ -861,61 +945,78 @@ int EXPORT PRERACE::setMineralHarvestPerSecond(int location,int worker,int mins)
 		debug.toLog(0,"DEBUG: (PRERACE::setMineralHarvestPerSecond): Value worker [%i] out of range.",worker);
 		return(0);
 	}
+#endif
 	mineralHarvestPerSecond[location][worker]=mins;
 	return(1);
 };
 
 int EXPORT PRERACE::setGasHarvestPerSecond(int tloc,int worker,int num)
 {
+#ifdef _SCC_DEBUG
 	if((num<0)||(num>=MAX_GAS)||(tloc<0)||(tloc>=MAX_LOCATIONS)||(worker<0)||(worker>=5))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setGasHarvestPerSecond): Value [%i/%i/%i] out of range.",tloc,worker,num);
 		return(0);
 	}
+#endif
 	gasHarvestPerSecond[tloc][worker]=num;
 	return(1);
 };
 
 int EXPORT PRERACE::setHarvestedMins(int num)
 {
+#ifdef _SCC_DEBUG
 	if((num<0)||(num>=MAX_MINS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setHarvestedMins): Value [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	harvestedMins=num;
 	return(1);
 };
 
 int EXPORT PRERACE::setHarvestedGas(int num)
 {
+#ifdef _SCC_DEBUG
 	if((num<0)||(num>=MAX_GAS))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setHarvestedGas): Value [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	harvestedGas=num;
 	return(1);
 };
 
 int EXPORT PRERACE::setFinalTime(int goal, int time)
 {
-	if((time<0)||(time>MAX_TIME)||(goal<0)||(goal>=UNIT_TYPE_COUNT))
+#ifdef _SCC_DEBUG
+	if((time<0)||(time>MAX_TIME))
 	{
-		debug.toLog(0,"DEBUG: (PRERACE::setFinalTime): Value goal/time [%i/%i] out of range.",goal,time);
+		debug.toLog(0,"DEBUG: (PRERACE::setFinalTime): Value time [%i] out of range.",time);
 		return(0);
 	}
+        if((goal<0)||(goal>=MAX_GOALS))
+        {
+                debug.toLog(0,"DEBUG: (PRERACE::setFinalTime): Value goal [%i] out of range.",goal);
+                return(0);
+        }
+
+#endif
 	ftime[goal]=time;
 	return(1);
 };
 
 int EXPORT PRERACE::setLength(int length)
 {
+#ifdef _SCC_DEBUG
 	if((length<0)||(length>MAX_LENGTH))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setLength): Value length [%i] out of range.",length);
 		return(0);
 	}
+#endif
 	this->length=length;
 	return(1);
 };
@@ -923,22 +1024,26 @@ int EXPORT PRERACE::setLength(int length)
 
 int EXPORT PRERACE::setTimeOut(int time)
 {
+#ifdef _SCC_DEBUG
 	if((time<0)||(time>MAX_TIMEOUT))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::setTimeOut): Value time [%i] out of range.",time);
 		return(0);
 	}
+#endif
 	timeout=time;
 	return(1);
 };
 
 int EXPORT PRERACE::getTimeOut()
 {
+#ifdef _SCC_DEBUG
 	if((timeout<0)||(timeout>MAX_TIMEOUT))
 	{
 		debug.toLog(0,"DEBUG: (PRERACE::getTimeOut): Variable timeout not initialized [%i].",timeout);
 		return(0);
 	}
+#endif
 	return(timeout);
 };
 

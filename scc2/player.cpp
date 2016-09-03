@@ -3,103 +3,113 @@
 
 void Player::drawGeneString(wxDC* dc, wxRect position)
 {
-	int i,k,j;
 	int stringheight=0;
-	int currentType=0;
-	k=0;
+	int currentType=-1;
 	wxPoint points1[200];
 	wxPoint points2[200];
 	wxPoint points3[200];
 	wxPoint points4[200];
-	for(i=0;i<200;i++)
+	for(int i=0;i<200;i++)
 	{
 		points1[i].x=0;points1[i].y=0;
 		points2[i].x=0;points2[i].y=0;
 		points3[i].x=0;points3[i].y=0;
 		points4[i].x=0;points4[i].y=0;
 	}
-																			    
-	int boanzahl=boWindow->orderList.GetCount(); //~~ TODO
+	int boanzahl=0;
+	int colors[MAX_LENGTH];												    
+	for(int i=0;i<MAX_LENGTH;i++)
+		colors[i]=0;
+//	int boanzahl=boWindow->orderList.GetCount(); //~~ TODO
+	{
+                NODE* node=boWindow->orderList.GetFirst();
+                while(node)
+                {
+                        ORDER* order=node->GetData();
+                        if(order->blend)
+                        {
+				boanzahl++;
+				colors[order->row]=order->unit;
+				node=node->GetNext();
+			}
+		}
+	}
+	currentType=-1;
+
 	if((*anarace)->isOptimizing())
 	{
-		NODE* node=boWindow->orderList.GetFirst(); //~~ TODO
-		while(node)
-		{
-			ORDER* order=node->GetData();
-			if(order->blend)
+		for(int i=0;i<MAX_LENGTH;i++)
+			if(colors[i])
 			{
-				k=1;
-				while((node)&&((!(order=node->GetData())->blend)||((stats[(*anarace)->getPlayer()->getRace()][order->unit].type)&&(stats[(*anarace)->getPlayer()->getRace()][order->unit].type==currentType))))
+				int k=1;
+				while((i<MAX_LENGTH)&&((!colors[i])||((stats[(*anarace)->getPlayer()->getRace()][colors[i]].type)&&((currentType==-1)||(stats[(*anarace)->getPlayer()->getRace()][colors[i]].type==currentType)))))
 				{
-					node=node->GetNext();
-					if(!order->blend) continue;
+					i++;
+					if(!colors[i]) continue;
+					if(currentType==-1)
+						currentType=stats[(*anarace)->getPlayer()->getRace()][colors[i]].type;
 					k++;
 				}
-				currentType=stats[(*anarace)->getPlayer()->getRace()][order->unit].type;
+				currentType=stats[(*anarace)->getPlayer()->getRace()][colors[i]].type;
 																			    
-				for(j=0;j<k+1;j++)
+				for(int j=0;j<k+1;j++)
 				{
 					points1[j].x=10+(stringheight+j)*(position.width-20)/(boanzahl)+position.x-1;
 					points2[j].x=10+(stringheight+j)*(position.width-20)/(boanzahl)+position.x-1;
-					points1[j].y=(int)((cos((float)((stringheight+j)+(*anarace)->getGeneration())*10.0*3.1416/200.0)*0.9*position.height/2)+position.y+position.height/2.1);
-					points2[j].y=(int)((sin(((float)((stringheight+j)+(*anarace)->getGeneration())+13.0)*10.0*3.1416/200.0)*0.9*position.height/2)+position.y+position.height/2.1);
-																			    
+					points1[j].y=(int)((cos((float)((stringheight+j)+geneAnimation)*10.0*3.1416/200.0)*0.9*position.height/2)+position.y+position.height/2.1);
+					points2[j].y=(int)((sin(((float)((stringheight+j)+geneAnimation)+13.0)*10.0*3.1416/200.0)*0.9*position.height/2)+position.y+position.height/2.1);
 					points3[j].x=10+(stringheight+j)*(position.width-20)/(boanzahl)+position.x-1;
 					points4[j].x=10+(stringheight+j)*(position.width-20)/(boanzahl)+position.x-1;
-					points3[j].y=(int)((cos(((float)((stringheight+j)+(*anarace)->getGeneration())+26.0)*10.0*3.1416/200.0)*0.9*position.height/2)+position.y+position.height/2.1);
-					points4[j].y=(int)((sin(((float)((stringheight+j)+(*anarace)->getGeneration())+39.0)*10.0*3.1416/200.0)*0.9*position.height/2)+position.y+position.height/2.1);
+					points3[j].y=(int)((cos(((float)((stringheight+j)+geneAnimation)+26.0)*10.0*3.1416/200.0)*0.9*position.height/2)+position.y+position.height/2.1);
+					points4[j].y=(int)((sin(((float)((stringheight+j)+geneAnimation)+39.0)*10.0*3.1416/200.0)*0.9*position.height/2)+position.y+position.height/2.1);
 				} //end for(j=0;j<k;j++)
 				stringheight+=k;
-//			      points1[stringheight].x=boDiagramWindow->getRightBound()+60+(int)(cos((float)((stringheight+j)+(*anarace)->getGeneration())*5.0*3.1416/200.0)*50.0);
 				k++;
 				if(k>=1)
 				{
-				wxPen bla1=wxPen(wxColour(
-3*(COLOR1R+2*BOcolor[stats[(*anarace)->getPlayer()->getRace()][order->unit].type].Red())/10,
-3*(COLOR1G+2*BOcolor[stats[(*anarace)->getPlayer()->getRace()][order->unit].type].Green())/10,
-3*(COLOR1B+2*BOcolor[stats[(*anarace)->getPlayer()->getRace()][order->unit].type].Blue())/10),3,wxSOLID);
-				wxPen bla2=wxPen(wxColour(
-				3*(COLOR1R/2+BOcolor[stats[(*anarace)->getPlayer()->getRace()][order->unit].type].Red())/10,
-				3*(COLOR1G/2+BOcolor[stats[(*anarace)->getPlayer()->getRace()][order->unit].type].Green())/10,
-				3*(COLOR1B/2+BOcolor[stats[(*anarace)->getPlayer()->getRace()][order->unit].type].Blue())/10),1,wxSOLID);
+					wxPen bla1=wxPen(wxColour(
+3*(COLOR1R+2*BOcolor[stats[(*anarace)->getPlayer()->getRace()][colors[i-1]].type].Red())/4,
+3*(COLOR1G+2*BOcolor[stats[(*anarace)->getPlayer()->getRace()][colors[i-1]].type].Green())/4,
+3*(COLOR1B+2*BOcolor[stats[(*anarace)->getPlayer()->getRace()][colors[i-1]].type].Blue())/4),3,wxSOLID);
+					wxPen bla2=wxPen(wxColour(
+					3*(COLOR1R/2+BOcolor[stats[(*anarace)->getPlayer()->getRace()][colors[i-1]].type].Red())/10,
+					3*(COLOR1G/2+BOcolor[stats[(*anarace)->getPlayer()->getRace()][colors[i-1]].type].Green())/10,
+					3*(COLOR1B/2+BOcolor[stats[(*anarace)->getPlayer()->getRace()][colors[i-1]].type].Blue())/10),1,wxSOLID);
 																			    
-				dc->SetPen(bla1);
-				dc->DrawSpline(k,points1);
-				for(j=0;j<k;j++) points1[j].y-=2;
-				dc->SetPen(bla2);
-				dc->DrawSpline(k,points1);
-				for(j=0;j<k;j++) points1[j].y+=4;
-				dc->DrawSpline(k,points1);
+					dc->SetPen(bla1);
+					dc->DrawSpline(k,points1);
+					for(int j=0;j<k;j++) points1[j].y-=2;
+					dc->SetPen(bla2);
+					dc->DrawSpline(k,points1);
+					for(int j=0;j<k;j++) points1[j].y+=4;
+					dc->DrawSpline(k,points1);
 																			    
-				dc->SetPen(bla1);
-				dc->DrawSpline(k,points2);
-				for(j=0;j<k;j++) points2[j].y-=2;
-				dc->SetPen(bla2);
-				dc->DrawSpline(k,points2);
-				for(j=0;j<k;j++) points2[j].y+=4;
-				dc->DrawSpline(k,points2);
+					dc->SetPen(bla1);
+					dc->DrawSpline(k,points2);
+					for(int j=0;j<k;j++) points2[j].y-=2;
+					dc->SetPen(bla2);
+					dc->DrawSpline(k,points2);
+					for(int j=0;j<k;j++) points2[j].y+=4;
+					dc->DrawSpline(k,points2);
 																			    
-				dc->SetPen(bla1);
-				dc->DrawSpline(k,points3);
-				for(j=0;j<k;j++) points3[j].y-=2;
-				dc->SetPen(bla2);
-				dc->DrawSpline(k,points3);
-				for(j=0;j<k;j++) points3[j].y+=4;
-				dc->DrawSpline(k,points3);
+					dc->SetPen(bla1);
+					dc->DrawSpline(k,points3);
+					for(int j=0;j<k;j++) points3[j].y-=2;
+					dc->SetPen(bla2);
+					dc->DrawSpline(k,points3);
+					for(int j=0;j<k;j++) points3[j].y+=4;
+					dc->DrawSpline(k,points3);
 																			    
-				dc->SetPen(bla1);
-				dc->DrawSpline(k,points4);
-				for(j=0;j<k;j++) points4[j].y-=2;
-				dc->SetPen(bla2);
-				dc->DrawSpline(k,points4);
-				for(j=0;j<k;j++) points4[j].y+=4;
-				dc->DrawSpline(k,points4);
+					dc->SetPen(bla1);
+					dc->DrawSpline(k,points4);
+					for(int j=0;j<k;j++) points4[j].y-=2;
+					dc->SetPen(bla2);
+					dc->DrawSpline(k,points4);
+					for(int j=0;j<k;j++) points4[j].y+=4;
+					dc->DrawSpline(k,points4);
 				}
 			} //end blend
-			if(node)
-				node=node->GetNext();
-																			    
-		} //end while(node)
+		geneAnimation++;
 	} //end if(isOptimizing)
 };
 
@@ -109,6 +119,7 @@ void Player::InitPositions(GraphixScrollWindow* mainWindow)
 	boWindowRect[0]=wxRect(wxPoint(mainWindow->getInnerWidth()-THIRD_COLOUMN,SECOND_ROW),wxSize(THIRD_COLOUMN,6*(FONT_SIZE+5)+3));
 	boWindowMax[0]=wxRect(boWindowRect[0].GetPosition(),wxSize(boWindowRect[0].GetWidth(),mainWindow->getInnerHeight()-30-120));
 	forceWindowRect[0]=wxRect(0,SECOND_ROW,FIRST_COLOUMN,14*(FONT_SIZE+5));
+//TODO ne Art * Operator reinbringen, damit die Hoehe genommen wird, die die entsprechende Drawroutine berechnet
 	forceWindowMax[0]=wxRect(0,SECOND_ROW,FIRST_COLOUMN,mainWindow->getInnerHeight()-250);
 	timerWindowRect[0]=wxRect(wxPoint(mainWindow->getInnerWidth()-THIRD_COLOUMN,0),wxSize(THIRD_COLOUMN,120));
 	timerWindowMax[0]=timerWindowRect[0];
@@ -254,37 +265,44 @@ void Player::InitPositions(GraphixScrollWindow* mainWindow)
 	}
 };
 																			    
-Player::Player(ANARACE** anarace, int position)
+Player::Player(ANARACE** anarace, int mode)
 {
 	this->anarace=anarace;
 	boWindow=new BoWindow(boWindowRect[0],boWindowMax[0]);
-//,SCROLLED,NOT_TABBED,wxRect(0,50,1000,1000));
-	boWindow->setTitle(0,_T(wxString::Format(wxT("Build Order player %i"),position+1)));
-//      boWindow->addDescription(0,"Name");boWindow->addDescription(110,"Mins");boWindow->addDescription(150,"Gas");boWindow->addDescription(190,"Supply");boWindow->addDescription(243,"Time");
-																			    
 	forceWindow=new ForceWindow(forceWindowRect[0],forceWindowMax[0]);
-	forceWindow->setTitle(0,_T(wxString::Format(wxT("Units list player %i"),position+1)));
-																			    
 	timerWindow=new TimerWindow(timerWindowRect[0],timerWindowMax[0]);
-	timerWindow->setTitle(0,_T(wxString::Format(wxT("Best of breed player %i"),position+1)));
-																			    
 	statisticsWindow=new StatisticsWindow(statisticsWindowRect[0],statisticsWindowMax[0]);
-	statisticsWindow->setTitle(0,_T(wxString::Format(wxT("Statistics player %i"),position+1)));
-																			    
 	boDiagramWindow=new BoDiagramWindow(boDiagramWindowRect[0],boDiagramWindowMax[0]);
-	boDiagramWindow->setTitle(0,_T(wxString::Format(wxT("Overview player %i"),position+1)));
-																			    
 	boGraphWindow=new BoGraphWindow(boGraphWindowRect[0],boGraphWindowMax[0]);
-	boGraphWindow->setTitle(0,_T(wxString::Format(wxT("Graphical build order player %i"),position+1)));
-																			    
 	infoWindow=new InfoWindow(infoWindowRect[0],infoWindowMax[0]);
-	infoWindow->setTitle(0,"Order description");
 
 	assignAnarace(anarace);
+	setTitles(mode);
 
 	Show(0);
 	resetData();
 };
+
+void Player::setTitles(int mode)
+{
+	wxString bla;
+	switch(mode)
+	{
+		case 0:bla=_T("player");break;
+		case 1:bla=_T("1. computer enemy");break;
+		case 2:bla=_T("2. computer enemy");break;
+		default:bla=_T("ERROR");break;
+	};
+
+	infoWindow->setTitle(0,"Order description");
+	boGraphWindow->setTitle(0,_T(wxString::Format(wxT("Graphical build order"+bla))));
+	boDiagramWindow->setTitle(0,_T(wxString::Format(wxT("Overview "+bla))));
+	statisticsWindow->setTitle(0,_T(wxString::Format(wxT("Statistics "+bla))));
+	timerWindow->setTitle(0,_T(wxString::Format(wxT("Best of breed "+bla))));
+	forceWindow->setTitle(0,_T(wxString::Format(wxT("Units list "+bla))));
+	boWindow->setTitle(0,_T(wxString::Format(wxT("Build Order "+bla))));
+};
+
 
 void Player::assignAnarace(ANARACE** anarace)
 {
@@ -306,6 +324,7 @@ void Player::Show(int type)//, int player1, int player2)
 	// gosu mode: 4      // freeplay for 1-2 human vs 1-2 computers
 	// transcendend mode: 5 // freeplay for 1-2 computers vs 1-2 computers
 
+//TODO check ob wir den Type nicht schon vorliegen haben
 	if(type)
 	{
 		shown=1;
@@ -356,6 +375,20 @@ void Player::Show(int type)//, int player1, int player2)
 		shown=0; //?
 		(*anarace)->setActive(0);
 	}
+
+	switch(type)
+	{
+		case 0:
+		case 1:
+		case 2:
+		case 3:setTitles(0);break;
+		case 4:setTitles(1);break;
+		case 5:setTitles(0);break;
+		case 6:setTitles(1);break;
+		case 7:setTitles(2);break;
+		default:break;
+	}
+	(*anarace)->setActive(1);
 };
 
 void Player::processButtons()
@@ -371,6 +404,11 @@ void Player::processButtons()
 
 int Player::hasChanged()
 {
+	if((forceWindow->hasChanged())&&(forceWindow->goalReset))
+	{
+		resetData();
+		return(1);
+	}
 	if(boWindow->hasChanged()||forceWindow->hasChanged()||infoWindow->hasChanged()||boDiagramWindow->hasChanged()||boGraphWindow->hasChanged()||timerWindow->hasChanged()||statisticsWindow->hasChanged())
 		return(1);
 	else return(0);
@@ -408,6 +446,14 @@ Player::~Player()
 
 void Player::resetData()
 {
+	boWindow->resetData();
+	forceWindow->resetData();
+	boGraphWindow->resetData();
+	statisticsWindow->resetData();
+	boDiagramWindow->resetData();
+	timerWindow->resetData();
+	infoWindow->resetData();
+	geneAnimation=0;
 	shown=0;
 };
 																			    

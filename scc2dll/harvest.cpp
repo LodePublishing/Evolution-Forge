@@ -3,41 +3,49 @@
 
 int HARVEST_SPEED::getHarvestMineralSpeed(int num)
 {
+#ifdef _SCC_DEBUG
 	//todo range checking von minerals[num]!
 	if((num<0)||(num>=45))
 	{
 		debug.toLog(0,"DEBUG: (HARVEST_SPEED::getHarvestMineralSpeed): Value [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	return(minerals[num]);
 };
 
 int HARVEST_SPEED::getHarvestGasSpeed(int num)
 {
+#ifdef _SCC_DEBUG
 	if((num<0)||(num>=5))
 	{
 		debug.toLog(0,"DEBUG: (HARVEST_SPEED::getHarvestGasSpeed): Value [%i] out of range.",num);
 		return(0);
 	}
+#endif
 	return(gas[num]);
 };
 int HARVEST_SPEED::setHarvestMineralSpeed(int num,int speed)
 {
+#ifdef _SCC_DEBUG
 	if((num<0)||(num>=45)||(speed<0))
 	{
 		debug.toLog(0,"DEBUG: (HARVEST_SPEED::setHarvestMineralSpeed): Value [%i/%i] out of range.",num,speed);
 		return(0);
 	}
+#endif
 	minerals[num]=speed;
 	return(1);
 };
 int HARVEST_SPEED::setHarvestGasSpeed(int num,int speed)
 {
+#ifdef _SCC_DEBUG
 	if((num<0)||(num>=5)||(speed<0))
 	{
 		debug.toLog(0,"DEBUG: (HARVEST_SPEED::getHarvestGasSpeed): Value [%i/%i] out of range.",num,speed);
 		return(0);
 	}
+#endif
 	gas[num]=speed;
 	return(1);
 };

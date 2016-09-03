@@ -26,7 +26,7 @@ NODE::~NODE()
 		delete data;
 		data=0;
 	}
-	if(GetPrev())
+/*	if(GetPrev())
 	{
 		if(GetNext())
 			GetPrev()->SetNext(GetNext());
@@ -39,7 +39,7 @@ NODE::~NODE()
 			GetNext()->SetPrev(GetPrev());
 		else
 			GetNext()->SetPrev(0);
-	}
+	}*/
 };
 
 ORDER* NODE::GetData()
@@ -135,7 +135,11 @@ NODE* OrderList::DeleteNode(NODE* node)
 	{
 		tail=node->GetPrev();
 		tail->SetNext(0);
-	}		
+	} else
+	{
+		tail=0;
+		head=0;
+	}
 	delete node;
 	return(temp);
 };

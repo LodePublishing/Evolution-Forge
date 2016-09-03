@@ -40,8 +40,8 @@ GA::GA()
 	maxGenerations=0;
 	preprocessBuildOrder=0;
 	currentMap=0;
-	breedFactor=0; //~~
-	mutationFactor=100;
+	breedFactor=5; //~~
+	mutationFactor=200;
 	mode=0;
 	noise=0;
 }

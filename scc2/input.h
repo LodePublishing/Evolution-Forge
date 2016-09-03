@@ -3,6 +3,12 @@
 
 #include "wx/wx.h"
 
+const int NOT_PRESSED=0;
+const int POINTER_OVER_BUTTON=1;
+const int PRESSING_BUTTON=2;
+const int PRESSING_BUTTON_BUT_OUTSIDE=3;
+const int BUTTON_WAS_PRESSED=4;
+
 class Controls
 {
         public:

@@ -46,11 +46,13 @@ bool APIENTRY DllMain( HANDLE hModule,
 
 int SOUP::setMap(MAP* map)
 {
+#ifdef _SCC_DEBUG
 	if(!map)
 	{
 		debug.toLog(0,"DEBUG: (SOUP::setMap): Variable map not initialized [%i].",map);
 		return(0);
 	}
+#endif
 	mapInitialized=1;
 	pMap=map;
 	return(1);
@@ -59,6 +61,7 @@ int SOUP::setMap(MAP* map)
 
 int SOUP::setGoal(GOAL_ENTRY* goal, int player)
 {
+#ifdef _SCC_DEBUG
 	if(!mapInitialized)
 	{
 		debug.toLog(0,"DEBUG: (SOUP::setGoal): Map not initialized.");
@@ -74,20 +77,23 @@ int SOUP::setGoal(GOAL_ENTRY* goal, int player)
 		debug.toLog(0,"DEBUG: (SOUP::setGoal): Value goal [%i] not initialized.",goal);
 		return(0);
 	}
+#endif
 //	goalCount++; //wtf? TODO
 //	if(goalCount==pMap->getMaxPlayer()-1)
 	goalsInitialized=1;
 	this->goal[player]=goal;
-	return(pMap->player[player].setGoal(goal));
+	return(pMap->setStartPlayerGoal(player,goal));
 };
 
 int SOUP::setParameters(GA* ga)
 {
+#ifdef _SCC_DEBUG
 	if(!ga)
 	{
 		debug.toLog(0,"DEBUG: (SOUP::setParameters): Value ga [%i] not initialized.",ga);
 		return(0);
 	}
+#endif
 	gaInitialized=1;
 	this->ga=ga;
 	PRERACE::ga=ga;
@@ -96,6 +102,7 @@ int SOUP::setParameters(GA* ga)
 
 int SOUP::initSoup()
 {
+#ifdef _SCC_DEBUG
 	if(!mapInitialized)
 	{
 		debug.toLog(0,"ERROR: (SOUP::initSoup) Map not initialized.");
@@ -111,6 +118,7 @@ int SOUP::initSoup()
 		debug.toLog(0,"ERROR: (SOUP::initSoup) GA not initialized.");
 		return(0);
 	}
+#endif
 //	if(playerInitialized)
 //	{
 //		debug.toLog(0,"ERROR: (SOUP::initSoup) SOUP is already initialzed.");
@@ -192,6 +200,7 @@ void SOUP::checkForChange()
 
 ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the goals/settings been changed?
 {
+#ifdef _SCC_DEBUG
 	if(!mapInitialized)
 	{
 		debug.toLog(0,"ERROR: (SOUP::newGeneration) Map not initialized.");
@@ -207,10 +216,11 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 		debug.toLog(0,"ERROR: (SOUP::newGeneration) GA not initialized.");
 		return(0);
 	}
+#endif
 	if(anaplayer[0]->getRun()>=ga->maxRuns) //~~
 		return(0);
 	int t=MAX_PROGRAMS/(pMap->getMaxPlayer()-1);
-//TODO isChanged oder so rein
+
 	if(ga->noise>0)
 	{
 		for(int j=0;j<MAX_TIME;j++)
@@ -232,70 +242,25 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 //					player[j*t]->Code[k][i]=oldAnarace[j]->Code[k][i];
 			anaplayer[j]->setActive(oldAnarace[j]->isActive());
 			anaplayer[j]->setOptimizing(oldAnarace[j]->isOptimizing());
-		
 		}
 
-
-//TODO: das in ne eigene aufrufbare Funktion rein, damit goals schon beim editieren eingefuegt werden
-
+// check whether goals etc. have changed
 		checkForChange();
-//create noise for this whole generation:
 
 
-// Map initialisieren und fitness errechnen
 	for(int i=0;i<t;i++)
-	{ 
-		for(int k=0;k<pMap->getMaxPlayer();k++) //warum -1? nochmal pruefen... TODO
-		if((k>=pMap->getMaxPlayer()-1)||(anaplayer[k]->isActive()))
-		{
+	{
+// Map mit Startwerten initialisieren, muss JEDEN Durchlauf passieren!! sonst sammeln sich in der statischen loc variable Haufenweise Commando Centers an 8-)
+	for(int k=0;k<pMap->getMaxPlayer();k++) //warum -1? nochmal pruefen... TODO
+//		if((k>=pMap->getMaxPlayer()-1)||(anaplayer[k]->isActive()))
 			for(int l=0;l<pMap->getMaxLocations();l++)
 				for(int m=0;m<UNIT_TYPE_COUNT;m++) //TODO: Grenzen runter ... brauchts nur gasscv oder so
 				{
-					player[0]->setMapLocationForce(k,l,m,pMap->location[l].force[k][m]); //in player[k]->setLocation aendern?
-					player[0]->setMapLocationAvailible(k,l,m,pMap->location[l].force[k][m]);
+					player[0]->setMapLocationForce(k,l,m,pMap->getLocationForce(l,k,m)); //in player[k]->setLocation aendern?
+					player[0]->setMapLocationAvailible(k,l,m,pMap->getLocationForce(l,k,m));
 				}
-			switch(player[k]->getPlayer()->goal->getRace())
-			{
-				case TERRA:
-					for(int j=74;j<94;j++) 
-					{
-						player[k]->setLocationForce(0,j,1);
-						player[k]->setLocationAvailible(0,j,1);
-					}
-					for(int j=95;j<100;j++)
-					{
-						player[k]->setLocationForce(0,j,3);
-						player[k]->setLocationAvailible(0,j,1);
-						//temporary researches and upgrades
-					};break;
-				case PROTOSS:
-						for(int j=74;j<95;j++)
-					{
-						player[k]->setLocationForce(0,j,1);
-						player[k]->setLocationAvailible(0,j,1);
-					}
-					for(int j=96;j<100;j++)					 
-					{
-						player[k]->setLocationForce(0,j,3);
-						player[k]->setLocationAvailible(0,j,1);
-						//temporary researches and upgrades
-					};break;
-				case ZERG:
-					for(int j=75;j<92;j++)
-					{
-						 player[k]->setLocationForce(0,j,1);
-						 player[k]->setLocationAvailible(0,j,1);
-					}					 
-					for(int j=93;j<97;j++)
-					{
-						player[k]->setLocationForce(0,j,3);
-						player[k]->setLocationAvailible(0,j,1);
-					       //temporary researches and upgrades
-					};break;
-				default:break;//error ?
-			}
-		}
 
+	//reset code && calculate 
 		for(int k=0;k<pMap->getMaxPlayer()-1;k++)
 			if(anaplayer[k]->isActive())
 			{
@@ -306,7 +271,7 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 				{
 					if(i!=0)
 						player[k*t+i]->mutateGeneCode();
-					player[k*t+i]->eraseIllegalCode(); 
+//					player[k*t+i]->eraseIllegalCode();  TODO
 				}
 			}
 		int complete=0;
@@ -319,6 +284,7 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 		//TODO Sleep Funktion einbauen
 		}
 	}
+
 
 //NOW: all pFtiness of the players are calculated
 	for(int k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
@@ -405,7 +371,7 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 
 //TODO: Kinder sofort neuberechnen
 // Anzahl Tournaments pro Spieler: (MAX_PROGRAMS/pMap->getMaxPlayer())/(100/ga->getCrossOver())
-	int tournaments=t*ga->getCrossOver()/100;
+/*	int tournaments=t*ga->getCrossOver()/100;
 	if(tournaments>0)
 	{
 //jetzt: sortieren
@@ -430,87 +396,44 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 //JETZT: Player in z.B. 20er (bei crossOver=5) Gruppen sortiert => besten 2 herausnehmen, schlechtesten 2 ersetzen
 																			    
 																			    
-		for(int k=0;k<pMap->getMaxPlayer()-1;k++)
-		if(anaplayer[k]->isActive())
-			for(int i=0;i<tournaments;i++)
-			{
-				int p1=i*(100/ga->getCrossOver())+(k*t);
-				int p2=i*(100/ga->getCrossOver())+(k*t)+1; //evtl nur unterschiedlichen nehmen? => phaenocode zusammenzaehlen ~
-				int c1=(i+1)*(100/ga->getCrossOver())+(k*t)-1;
-				int c2=(i+1)*(100/ga->getCrossOver())+(k*t)-2;
-				player[p1]->crossOver(player[p2],player[c1],player[c2]);
-			}
-	}
+//		for(int k=0;k<pMap->getMaxPlayer()-1;k++)
+//		if(anaplayer[k]->isActive())
+//			for(int i=0;i<tournaments;i++)
+//			{
+//				int p1=i*(100/ga->getCrossOver())+(k*t);
+//				int p2=i*(100/ga->getCrossOver())+(k*t)+1; //evtl nur unterschiedlichen nehmen? => phaenocode zusammenzaehlen ~
+//				int c1=(i+1)*(100/ga->getCrossOver())+(k*t)-1;
+//				int c2=(i+1)*(100/ga->getCrossOver())+(k*t)-2;
+//				player[p1]->crossOver(player[p2],player[c1],player[c2]);
+//			}
+	}*/
 																			    
 //evtl breed hinter crossover, aber vorher neue Kinder neu berechnen!
 
 //	if(newcalc)
 //	{
-		for(int k=0;k<pMap->getMaxPlayer();k++) //warum net -1?
-		if((k>=pMap->getMaxPlayer()-1)||(anaplayer[k]->isActive()))
+	for(int k=0;k<pMap->getMaxPlayer()-1;k++) //warum net -1?
+		if(anaplayer[k]->isActive())
 		{
+// map reset
 			for(int l=0;l<pMap->getMaxLocations();l++) // warum -1 !??!
 				for(int m=0;m<UNIT_TYPE_COUNT;m++)
 				{
-					anaplayer[0]->setMapLocationForce(k,l,m,pMap->location[l].force[k][m]);
-					anaplayer[0]->setMapLocationAvailible(k,l,m,pMap->location[l].force[k][m]);
+					anaplayer[0]->setMapLocationForce(k,l,m,pMap->getLocationForce(l,k,m));
+					anaplayer[0]->setMapLocationAvailible(k,l,m,pMap->getLocationForce(l,k,m));
 				}
-			if(k<pMap->getMaxPlayer()-1)
-			{
-				switch(anaplayer[k]->getPlayer()->goal->getRace())
-				{
-					case TERRA:
-						for(int j=74;j<94;j++)
-						{
-							anaplayer[k]->setLocationForce(0,j,1);
-							anaplayer[k]->setLocationAvailible(0,j,1);
-						}
-						for(int j=95;j<100;j++)
-						{
-							anaplayer[k]->setLocationForce(0,j,3);
-							anaplayer[k]->setLocationAvailible(0,j,1);
-							//temporary researches and upgrades
-						};break;
-					case PROTOSS:
-						for(int j=74;j<95;j++)
-						{
-							anaplayer[k]->setLocationForce(0,j,1);
-							anaplayer[k]->setLocationAvailible(0,j,1);
-						}
-						for(int j=96;j<100;j++)
-						{
-							anaplayer[k]->setLocationForce(0,j,3);
-							anaplayer[k]->setLocationAvailible(0,j,1);
-							//temporary researches and upgrades
-						};break;
-					case ZERG:
-						for(int j=75;j<92;j++)
-						{
-							 anaplayer[k]->setLocationForce(0,j,1);
-							 anaplayer[k]->setLocationAvailible(0,j,1);
-						}
-						for(int j=93;j<97;j++)
-						{
-							anaplayer[k]->setLocationForce(0,j,3);
-							anaplayer[k]->setLocationAvailible(0,j,1);
-						       //temporary researches and upgrades
-						};break;
-					default:break;//error ?
-				}
-				anaplayer[k]->resetData();
-				anaplayer[k]->resetSupply();
-				anaplayer[k]->adjustHarvest();
-			}
+			anaplayer[k]->resetData();
+			anaplayer[k]->resetSupply();
+			anaplayer[k]->adjustHarvest();
 		}
-
-		int complete=0;
-		while(!complete)
-		{
-			complete=1;
-			for(int k=0;k<pMap->getMaxPlayer()-1;k++)
+	int complete=0;
+	while(!complete)
+	{
+		complete=1;
+		for(int k=0;k<pMap->getMaxPlayer()-1;k++)
 			if(anaplayer[k]->isActive())
 				complete&=anaplayer[k]->calculateStep();
-		}
+	}
 //		anaplayer[0]->backupMap();
 //	} else
 //		anaplayer[0]->restoreMap();
@@ -535,22 +458,6 @@ ANARACE** SOUP::newGeneration(ANARACE* oldAnarace[MAX_PLAYER]) //reset: have the
 		anaplayer[k]->fitnessVariance/=MAX_PROGRAMS;
 		anaplayer[k]->analyzeBuildOrder();
 		anaplayer[k]->getPlayer()->goal->bestTime=anaplayer[k]->getTimer();
-/*	for(int k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
-	{
-		for(int j=0;j<k;j++)
-			if((anaplayer[k]->getMaxpFitness()>anaplayer[j]->getMaxpFitness())||
-				((anaplayer[k]->getMaxpFitness()==anaplayer[j]->getMaxpFitness())&&(anaplayer[k]->getMaxsFitness()>anaplayer[j]->getMaxsFitness()))||
-				((anaplayer[k]->getMaxpFitness()==anaplayer[j]->getMaxpFitness())&&(anaplayer[k]->getMaxsFitness()==anaplayer[j]->getMaxsFitness())&&(anaplayer[k]->getMaxtFitness()>anaplayer[j]->getMaxtFitness())) )
-			{
-				ANARACE* temp;
-				temp=anaplayer[k];
-				anaplayer[k]=anaplayer[j];
-				anaplayer[j]=temp;
-			}
-	}
-WTF?!
-*/
-//TODO
 		anaplayer[k]->setUnchangedGenerations(anaplayer[k]->getUnchangedGenerations()+1);
 		anaplayer[k]->setGeneration(anaplayer[k]->getGeneration()+1);
 		if(anaplayer[k]->getUnchangedGenerations()>ga->maxGenerations)

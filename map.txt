@@ -13,7 +13,7 @@
 
 "@PLAYER" "1"
 # Race should be first item of player entry!
-"Race" = "Terra"
+"Race" = "Protoss"
 "Starting Point" = "2"
 "Starting Minerals" = "50"
 "Starting Gas" = "0"
@@ -21,7 +21,7 @@
 
 "@PLAYER" "2"
 #Race should be first item of player entry!
-"Race" = "Terra"
+"Race" = "Protoss"
 "Starting Point" = "8"
 "Starting Minerals" = "50"
 "Starting Gas" = "0"
@@ -51,8 +51,8 @@
 "@END"
 
 "@PLAYER" "1"
-"Command Center" = "1"
-"SCV" = "4"
+"Nexus" = "1"
+"Probe" = "4"
 #"Nexus" = "1"
 #"Probe" = "4"
 #"Marine" = "12"
@@ -117,8 +117,8 @@
 "@END"
 
 "@PLAYER" "2"
-"SCV" = "4"
-"Command Center" = "1"
+"Probe" = "4"
+"Nexus" = "1"
 "@END"
 
 "@END"

@@ -9,14 +9,6 @@
 #include "building.h"
 #include "blist.h"
 
-//#include "wx/wxprec.h"
-                                                                                
-//#ifndef WX_PRECOMP
-//#include "wx/wx.h"
-//#endif
-
-
-
 struct LARVACOUNTER
 {
 	int location;

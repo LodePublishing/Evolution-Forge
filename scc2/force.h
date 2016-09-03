@@ -23,15 +23,15 @@ class ForceWindow:public GraphixScrollWindow
                 void drawGoalList(wxDC* dc);
                 int maxUnitForce; //single unit
 		void processButtons();
+		int goalReset; //TODO
         private:
                 ANARACE* anarace;
                 int addUnitButton[UNIT_TYPE_COUNT];
-                int oldForceList[FORCE_LIST_NUMBER];
                 BOLOG globalForcelog[UNIT_TYPE_COUNT];
+	        int oldForceList[UNIT_TYPE_COUNT];
 		int goalListOpened;
 		int addGoalButton;
 		int resetButton;
-		int goalReset; //TODO
 		int buttonType[3*UNIT_TYPE_COUNT]; //button ID -> unit
 };
 

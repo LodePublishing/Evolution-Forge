@@ -10,7 +10,7 @@ int RACE::calculateStep()
 //ZERG:  CREEP!
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
 //mins, gas hier rein...
-	if((!getTimer())||(ready=calculateReady())||(!getIP())||((getPlayer()->goal->bestTime*4<ga->maxTime*3)&&(4*getTimer()<3*getPlayer()->goal->bestTime))) //TODO calculateReady optimieren
+	if((!getTimer())||(ready=calculateReady())||(!getIP()))//||((getPlayer()->goal->bestTime*4<ga->maxTime*3)&&(4*getTimer()<3*getPlayer()->goal->bestTime))) //TODO calculateReady optimieren
 	{
 		setLength(ga->maxLength-getIP());
 		settFitness(gettFitness()-getLength());
@@ -87,8 +87,6 @@ int RACE::calculateStep()
         setHarvestedMins(getHarvestedMins()+harvestMinerals()*(100+mult)*t/100);
         setGas(getGas()+harvestGas()*(100+mult)*t/100);
         setHarvestedGas(getHarvestedGas()+harvestGas()*(100+mult)*t/100);
-
-		
 
 	setTimeOut(getTimeOut()-t);
 	setTimer(getTimer()-t);
@@ -213,9 +211,7 @@ int RACE::calculateStep()
 	                        	setFinalTime(i,ga->maxTime-getTimer());
 // Did we reach the right number at the right time?
 //              i=MAX_GOALS;  TODO? koennen wir mehrere goals gleichzeitig erfuell0rn?
-
 			ready=calculateReady();
-
 // oder: irgendeine location... TODO: Problem: die Einheiten koennen irgendwo sein, also nicht gesammelt an einem Fleck...
 			if(!oldnode)
 				while(true);
@@ -243,9 +239,12 @@ void RACE::calculateFitness(int ready)
 	setsFitness(getHarvestedMins()+getHarvestedGas()); //TODO: evtl gas und mins (wie urspruenglich eigentlich) in Verhaeltnis setyen wieviel es jeweils Geysire/Mineralien gibt...
 //TODO: Nicht alle Einheiten am Ort? => Ort egal sein lassen aber zur Zeit hinzuzaehlen
 	// Nicht alle Einheiten ueberhaupt gebaut UND nicht alle am Ort => nur viertel Bonus fuer Einheiten die nicht am Ort sind
-	for(int i=0;i<UNIT_TYPE_COUNT;i++)
-		if((getPlayer()->goal->allGoal[i]>0)&&(getPlayer()->goal->allGoal[i]+getMap()->location[0].force[1][i]<getLocationForce(0,i)))
-			setsFitness(getsFitness()-(getLocationForce(0,i)-getMap()->location[0].force[1][i]-getPlayer()->goal->allGoal[i])*(stats[getPlayer()->goal->getRace()][i].gas+stats[getPlayer()->goal->getRace()][i].mins));
+	for(int i=0;i<GAS_SCV;i++)
+// allGoal is ok
+// map->getLocationForce is ok
+// prerace::location is kaputt, zeiger location auf loc is ok
+		if((getPlayer()->goal->allGoal[i]>0)&&(getPlayer()->goal->allGoal[i]+getMap()->getLocationForce(0,1,i)<getLocationForce(0,i)))
+			setsFitness(getsFitness()-(getLocationForce(0,i)-getMap()->getLocationForce(0,1,i)-getPlayer()->goal->allGoal[i])*(stats[getPlayer()->goal->getRace()][i].gas+stats[getPlayer()->goal->getRace()][i].mins));
 	if(!ready)
 	{
 		//calculate number of fulfilled goals & their time & their distance to goal position
@@ -270,15 +269,16 @@ if( /*((getPlayer()->goal->goal[i].location==0)&&(getPlayer()->goal->goal[i].cou
 				// mehr als goalcount koennen wir keinen Bonus vergeben
 						bon=getPlayer()->goal->goal[i].count;
 						int j=1;
-						while((j<MAX_LOCATIONS)&&(bon>getLocationForce(pMap->locationList[getPlayer()->goal->goal[i].location][j],getPlayer()->goal->goal[i].unit)))
+						int loc=pMap->getNearestLocation(getPlayer()->goal->goal[i].location,j);
+						while((j<MAX_LOCATIONS)&&(bon>getLocationForce(loc,getPlayer()->goal->goal[i].unit)))
 						{
-							sumup+=getLocationForce(pMap->locationList[getPlayer()->goal->goal[i].location][j],getPlayer()->goal->goal[i].unit)*(100-pMap->location[pMap->locationList[getPlayer()->goal->goal[i].location][j]].getDistance(getPlayer()->goal->goal[i].location)); //was pMap->location[j]...
-							bon-=getLocationForce(pMap->locationList[getPlayer()->goal->goal[i].location][j],getPlayer()->goal->goal[i].unit);
+							sumup+=getLocationForce(loc,getPlayer()->goal->goal[i].unit)*(100-pMap->getDistance(loc,getPlayer()->goal->goal[i].location)); //was pMap->location[j]...
+							bon-=getLocationForce(loc,getPlayer()->goal->goal[i].unit);
 							j++;
 						}
 						// Falls j<MAX_LOCATIONS => unser "Bon" wurde schon vorher aufgebraucht => An dieser Stelle j den Rest draufgeben... 
 						if(j<MAX_LOCATIONS)
-							sumup+=bon*(100-pMap->location[pMap->locationList[getPlayer()->goal->goal[i].location][j]].getDistance(getPlayer()->goal->goal[i].location));
+							sumup+=bon*(100-pMap->getDistance(loc,getPlayer()->goal->goal[i].location));
 					}
 
 //jetzt steht in sumup die gesammelten forces gewichtet mit den Entfernungen zum Ziel
@@ -416,7 +416,7 @@ int RACE::buildGene(int unit)
 				if(!ok)
 					while(j<MAX_LOCATIONS)
 					{
-						ttloc=pMap->locationList[tloc][j];
+						ttloc=pMap->getNearestLocation(tloc,j);
 //						if((stat->facility2==0)||(getLocationAvailible(ttloc,stat->facility2)>0))
 //						{
 						for(fac=3;fac--;)
@@ -586,7 +586,13 @@ void RACE::eraseIllegalCode()
 	{
 		int ok=1;
 		for(int k=0;k<3;k++)
-			ok&=((stats[getPlayer()->goal->getRace()][getPlayer()->goal->toPhaeno(Code[0][i])].prerequisite[k]==0)||(allUnits[i]>=stats[getPlayer()->goal->getRace()][getPlayer()->goal->toPhaeno(Code[0][i])].prerequisite[k]))&&((stats[getPlayer()->goal->getRace()][getPlayer()->goal->toPhaeno(Code[0][i])].prerequisite[k]==0)||(allUnits[i]>=stats[getPlayer()->goal->getRace()][getPlayer()->goal->toPhaeno(Code[0][i])].prerequisite[k]));
+			ok&=((stats[getPlayer()->goal->getRace()][getPlayer()->goal->toPhaeno(Code[0][i])].prerequisite[k]==0)||
+			     (allUnits[i]>=stats[getPlayer()->goal->getRace()][getPlayer()->goal->toPhaeno(Code[0][i])].prerequisite[k]))&&
+                            ((stats[getPlayer()->goal->getRace()][getPlayer()->goal->toPhaeno(Code[1][i])].prerequisite[k]==0)||
+			     (allUnits[i]>=stats[getPlayer()->goal->getRace()][getPlayer()->goal->toPhaeno(Code[1][i])].prerequisite[k]));
+//WTF? allUnits mit prerequisite vergleichen!?
+
+//TODO so ganz sauber is des net
 		if(!ok)
 		{
 			for(int k=i;k--;)
@@ -774,7 +780,7 @@ void RACE::mutateGeneCode()
 // Reset all ongoing data (between two runs)
 void RACE::resetData() // resets all data to standard starting values
 {
-	for(int i=UNIT_TYPE_COUNT;i--;)
+	for(int i=MAX_GOALS;i--;)
 		setFinalTime(i,0);
 	resetSpecial();
 	for(int i=0;i<4;i++) //TODO ???
@@ -1027,64 +1033,76 @@ void RACE::crossOver(RACE* parent2, RACE* child1, RACE* child2)
 
 int RACE::setpFitness(int fitness)
 {
+#ifdef _SCC_DEBUG
 	if(fitness<0)
 	{
 		debug.toLog(0,"DEBUG: (RACE::setpFitness): Value fitness [%i] out of range.",fitness);
 		return(0);
 	};
+#endif
 	pFitness=fitness;
 	return(1);
 };
 
 int RACE::setsFitness(int fitness)
 {
+#ifdef _SCC_DEBUG
 	if((fitness<0)||(fitness>MAX_MINS+MAX_GAS))
 	{
 		debug.toLog(0,"DEBUG: (RACE::setsFitness): Value fitness [%i] out of range.",fitness);
 		return(0);
 	};
+#endif
 	sFitness=fitness;
 	return(1);
 };
 
 int RACE::settFitness(int fitness)
 {
+#ifdef _SCC_DEBUG
 	if(fitness<0)
 	{
 		debug.toLog(0,"DEBUG: (RACE::settFitness): Value fitness [%i] out of range.",fitness);
 		return(0);
 	};
+#endif
 	tFitness=fitness;
 	return(1);
 };
 
 int RACE::getpFitness()
 {
+#ifdef _SCC_DEBUG
 	if((pFitness<0)||(pFitness>30000))
 	{
 		debug.toLog(0,"DEBUG: (RACE::getpFitness): Variable pFitness not initialized [%i].",pFitness);
 		return(0);
 	};
+#endif
 	return(pFitness);
 };
 
 int RACE::getsFitness()
 {
+#ifdef _SCC_DEBUG
 	if((sFitness<0)||(sFitness>MAX_MINS+MAX_GAS))
 	{
 		debug.toLog(0,"DEBUG: (RACE::getsFitness): Variable sFitness not initialized [%i].",sFitness);
 		return(0);
 	};
+#endif
 	return(sFitness);
 };
 
 int RACE::gettFitness()
 {
+#ifdef _SCC_DEBUG
 	if((tFitness<0)||(tFitness>30000))
 	{
 		debug.toLog(0,"DEBUG: (RACE::gettFitness): Variable tFitness not initialized [%i].",tFitness);
 		return(0);
 	};
+#endif
 	return(tFitness);
 };
 

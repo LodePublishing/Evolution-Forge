@@ -175,6 +175,18 @@ public:
 	static wxFont font6;
 	int isShown();
 	void Show(int show);
+
+	static wxBitmap bmpCancel;
+	static wxBitmap bmpAdd;
+	static wxBitmap bmpSub;
+	static wxBitmap bmpArrowLeft;
+	static wxBitmap bmpArrowUp;
+	static wxBitmap bmpArrowRight;
+	static wxBitmap bmpArrowDown;
+	static wxBitmap bmpClemens;
+	static wxBitmap bmpClawsoftware;
+
+
 private:
 	int changed;
 	Button button[1000];	
@@ -214,19 +226,28 @@ private:
 	int tabPosition[10];
 
         wxColour TitleColour;
+	wxColour disabledItemColour;
+	wxColour clickedItemColour;
+        wxColour RahmenColour;
+	wxColour BrightRahmenColour;
+        wxPen disabledItemPen;
+        wxPen RahmenPen;
+	wxPen BrightRahmenPen;
+	wxPen clickedItemPen;
+
+	wxBrush RahmenBrush;
+        wxBrush clickedItemBrush;
         wxBrush Background;
-	wxColour disabledItem;
-	wxColour enabledItemPen;
-	wxColour disabledItemPen;
-	wxColour mouseOverItem;
-	wxColour clickedItem;
-	wxColour disabledItemBorder;
-        wxColour RahmenPen,RahmenPen2;
+
+	
+
+
         wxRect Rahmen;
 	wxRect OuterRahmen;
         wxRect ScrollBalken;
 	wxRect ScrollArea;
 	wxRect PfeilUp;
 	wxRect PfeilDown;
+
 };
 #endif

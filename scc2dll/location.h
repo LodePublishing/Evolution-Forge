@@ -12,17 +12,22 @@ class EXPORT MAP_LOCATION_BASIC
 	//	int isCliff; //only reachable per dropship
 	//	int canShootbetweenwhichconnection... // maybe for cliff drop later
 		int force[MAX_PLAYER][UNIT_TYPE_COUNT];
+		int availible[MAX_PLAYER][UNIT_TYPE_COUNT];
 	public:
 		int setName(const char* line);
 		int setMineralDistance(int num);
 		int setDistance(int num,int dist);
-
 		const char* getName();
 		int getMineralDistance();
-
 		int getDistance(int num);
+		int getForce(int player, int unit);
+		int setForce(int player, int unit, int num);
+
+		int getAvailible(int player, int unit);
+		int setAvailible(int player, int unit, int num);
 		MAP_LOCATION_BASIC();
 		~MAP_LOCATION_BASIC();
+		
 };
 
 struct MAP_LOCATION

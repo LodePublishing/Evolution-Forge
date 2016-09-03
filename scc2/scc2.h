@@ -141,8 +141,6 @@ private:
 	int oldrun,endrun;
         GA* ga;
         BOLOG bolog[MAX_LENGTH];
-        wxBitmap bmpGraph,bmpTimer,bmpBack,bmpBack2,bmpCancel,bmpAdd,bmpSub;
-	wxBitmap bmpArrowLeft,bmpArrowUp,bmpArrowRight,bmpArrowDown;
 	void processButtons();
 	void drawGizmo();
 	void showCoreAnimation();
@@ -160,11 +158,7 @@ private:
 
 	int tutorialChapter;
 
-	
-wxBitmap bitmap,bitmap2,bitmap3,hintBitmap,bmpNumbers,bmpRadiation,bmpAlpha,bmpTreppe,bmpCloning,bmpFitness;
-	wxBitmap bmpRad[5];
-	wxBitmap bmpHeart[5];
-	int ani;
+		int ani;
 	int tutorialAnimation;
        DECLARE_EVENT_TABLE()
 };

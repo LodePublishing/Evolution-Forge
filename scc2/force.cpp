@@ -96,13 +96,15 @@ void ForceWindow::resetData()
 {
 	for(int i=0;i<UNIT_TYPE_COUNT;i++)
 		addUnitButton[i]=99999;
-	for(int i=0;i<UNIT_TYPE_COUNT;i++)
-		oldForceList[i]=0;
 	for(int i=0;i<UNIT_TYPE_COUNT*3;i++)
 		buttonType[i]=99999;
+	for(int i=0;i<UNIT_TYPE_COUNT;i++) // muss global in der Klasse sein und nicht lokal in drawGoalList, weil die Balken vergroessern/verkleinern sich ja 
+	oldForceList[i]=0;
 	goalListOpened=0;
  	addGoalButton=99999;
+	resetButton=99999;
 	maxUnitForce=1;
+	goalReset=0;
 };
 																			    
 void ForceWindow::drawGoalList(wxDC* dc)
@@ -129,6 +131,7 @@ void ForceWindow::drawGoalList(wxDC* dc)
 	dc->SetTextForeground(wxColour(TEXT1R,TEXT1G,TEXT1B));
 	dc->SetPen(wxPen(wxColour(0,0,0),1,wxSOLID));
        	int line=1;
+	clearButtons();
 	if(isShown()==1)
 	{
 		wxString bla=_T("reset goals");
@@ -146,7 +149,6 @@ void ForceWindow::drawGoalList(wxDC* dc)
 		dc->SetPen(wxPen(wxColour(0,0,0),1,wxSOLID));
 		dc->SetFont(GraphixScrollWindow::font);
 		dc->SetTextForeground(wxColour(TEXT1R,TEXT1G,TEXT1B));
-		clearButtons();
 		edge=wxRect(getInnerPosition()+wxPoint(0,line*(FONT_SIZE+5)-getScrollY()),wxSize(270,FONT_SIZE+5));
 		if(fitToClientArea(edge,1))
 		{
@@ -155,17 +157,17 @@ void ForceWindow::drawGoalList(wxDC* dc)
 			dc->SetTextForeground(wxColour(0,200,0));
 			if(!goalListOpened)
 			{
-//      			dc->DrawBitmap(bmpArrowDown,edge.x+4,edge.y+2);
+	      			dc->DrawBitmap(bmpArrowDown,edge.x+4,edge.y+2);
 				dc->DrawText(_T("Click here to add a goal"),edge.GetPosition()+wxPoint(14,0));
 			}
 			else if(goalListOpened==1)
 			{
-//      			dc->DrawBitmap(bmpArrowUp,edge.x+4,edge.y+2);
+	      			dc->DrawBitmap(bmpArrowUp,edge.x+4,edge.y+2);
 				dc->DrawText(_T("(Click here to close)"),edge.GetPosition()+wxPoint(14,0));
 			}
 			else
 			{
-//			      dc->DrawBitmap(bmpArrowUp,edge.x+4,edge.y+2);
+				dc->DrawBitmap(bmpArrowUp,edge.x+4,edge.y+2);
 				dc->DrawText(_T("(Click here to go back)"),edge.GetPosition()+wxPoint(14,0));
 			}
 			addGoalButton=addButton(edge);
@@ -258,10 +260,18 @@ void ForceWindow::drawGoalList(wxDC* dc)
 dc->SetBrush(wxBrush(wxColour(((anarace->getPlayer()->goal->toGeno(i)+1)*255/(1+anarace->getPlayer()->goal->getMaxBuildTypes()/2))%256,
 					((anarace->getPlayer()->goal->toGeno(i)+1)*255/(1+anarace->getPlayer()->goal->getMaxBuildTypes()/4))%256,
 					((anarace->getPlayer()->goal->toGeno(i)+1)*255/(1+anarace->getPlayer()->goal->getMaxBuildTypes()/8))%256),wxSOLID));																			    
-					dc->DrawRoundedRectangle(wxRect(edge.GetPosition()+wxPoint(edge.GetWidth()-41-oldForceList[i],0),wxSize(oldForceList[i]+1,FONT_SIZE+4)),4);
+					if(isShown()==1)
+						dc->DrawRoundedRectangle(wxRect(edge.GetPosition()+wxPoint(edge.GetWidth()-41-oldForceList[i],0),wxSize(oldForceList[i]+1,FONT_SIZE+4)),4);
+					else if(isShown()==2)
+                                                dc->DrawRoundedRectangle(wxRect(edge.GetPosition()+wxPoint(edge.GetWidth()-oldForceList[i],0),wxSize(oldForceList[i]+1,FONT_SIZE+4)),4);
+
 				}
 				dc->SetBrush(wxBrush(wxColour(200,200,200),wxTRANSPARENT)); //TODO gruen rot  evtl
-				dc->DrawRoundedRectangle(edge.GetPosition()+wxPoint(edge.GetWidth()-41-anarace->getPlayer()->goal->allGoal[i]*100/maxUnitForce,0),wxSize(anarace->getPlayer()->goal->allGoal[i]*100/maxUnitForce+1,FONT_SIZE+4),4);
+				if(isShown()==1)
+					dc->DrawRoundedRectangle(edge.GetPosition()+wxPoint(edge.GetWidth()-41-anarace->getPlayer()->goal->allGoal[i]*100/maxUnitForce,0),wxSize(anarace->getPlayer()->goal->allGoal[i]*100/maxUnitForce+1,FONT_SIZE+4),4);
+				else if(isShown()==2)
+                                        dc->DrawRoundedRectangle(edge.GetPosition()+wxPoint(edge.GetWidth()-anarace->getPlayer()->goal->allGoal[i]*100/maxUnitForce,0),wxSize(anarace->getPlayer()->goal->allGoal[i]*100/maxUnitForce+1,FONT_SIZE+4),4);
+
 																			    
 				if((percent[i]/counter[i]<100)&&(percent[i]/counter[i]>0))
 				{
@@ -280,11 +290,12 @@ dc->SetBrush(wxBrush(wxColour(((anarace->getPlayer()->goal->toGeno(i)+1)*255/(1+
 					dc->DrawText(bla,edge.GetPosition()+wxPoint(edge.GetWidth()-45-dx,0));
 				}
 																			    
-																			    
-//			      buttonType[i*3]=addBitmapButton(wxRect(edge.x+edge.width-36,edge.y+2,8,8),bmpAdd);
-//			      buttonType[i*3+1]=addBitmapButton(wxRect(edge.x+edge.width-26,edge.y+2,8,8),bmpSub);
-//			      buttonType[i*3+2]=addBitmapButton(wxRect(edge.x+edge.width-16,edge.y+2,8,8),bmpCancel);
-																			    
+				if(isShown()==1)
+				{													    
+					buttonType[i*3]=addBitmapButton(wxRect(edge.x+edge.width-36,edge.y+2,8,8),bmpAdd);
+					buttonType[i*3+1]=addBitmapButton(wxRect(edge.x+edge.width-26,edge.y+2,8,8),bmpSub);
+					buttonType[i*3+2]=addBitmapButton(wxRect(edge.x+edge.width-16,edge.y+2,8,8),bmpCancel);
+				}															    
 			}
 		line++;
 	}

@@ -51,7 +51,7 @@ void TimerWindow::drawTimer(wxDC* dc)
 			if(i>19) i=0;
 		}
 		oldTimeCounter[i]=1;
-		oldTime[i]=lastTime/100;
+		oldTime[i]=lastTime;
 	}
 	lastTime=anarace->ga->maxTime-anarace->getTimer();
 																			    
@@ -93,6 +93,20 @@ void TimerWindow::drawTimer(wxDC* dc)
 	dc->SetTextForeground(wxColour(200,0,0));
 	if(anarace->getTimer()==0)
 	{
+		int count=0;
+		for(int i=0;i<MAX_GOALS;i++)
+			if(anarace->getPlayer()->goal->goal[i].count>0)
+				count++;
+		int percentage=0;
+		if(count>0)
+			percentage=anarace->getMaxpFitness()/count;
+		else percentage=100;
+
+                dc->SetFont(GraphixScrollWindow::font6);
+//wxFont(12,wxDECORATIVE,wxNORMAL,wxBOLD,false,_T(""),wxFONTENCODING_DEFAULT));
+                dc->DrawText(_T(wxString::Format(wxT("%i%% of goals fulfilled"),percentage)),getInnerLeftBound(),getInnerUpperBound());
+		dc->SetFont(GraphixScrollWindow::font5);
+          
 		if(!anarace->isOptimizing()) bla=_T("(paused)");
 		else
 			bla=_T("Searching...");

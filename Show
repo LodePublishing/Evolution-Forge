@@ -1,0 +1,32 @@
+scc2/scc2.cpp:/*	if(infoWindow->isShown())
+scc2/scc2.cpp://	if(infoWindow->isShown())
+scc2/bowindow.cpp:			//infoWindow->adjustWindow(wxRect(infoWindow->getLeftBound(),edge.y+getInnerUpperBound()-50,infoWindow->getWidth(),infoWindow->getHeight()));
+scc2/bograph.cpp:	infoWindow->Show(0);
+scc2/bograph.cpp:			infoWindow->setBx(order->rect.x);
+scc2/bograph.cpp:			infoWindow->setBWidth(order->rect.width);
+scc2/bograph.cpp:			infoWindow->setUnit(order->unit);
+scc2/bograph.cpp:			infoWindow->setKey(node->GetKey());
+scc2/bograph.cpp:			infoWindow->Show(1);
+scc2/bograph.cpp:		((anarace->getProgramCode(order->IP)+1)*155/(1+anarace->getPlayer()->goal->getMaxBuildTypes()/2))%156+100*(infoWindow->isShown())*(node->GetKey()==infoWindow->getKey()),
+scc2/bograph.cpp:		((anarace->getProgramCode(order->IP)+1)*155/(1+anarace->getPlayer()->goal->getMaxBuildTypes()/4))%156+100*(infoWindow->isShown())*(node->GetKey()==infoWindow->getKey()),
+scc2/bograph.cpp:		((anarace->getProgramCode(order->IP)+1)*155/(1+anarace->getPlayer()->goal->getMaxBuildTypes()/8))%156+100*(infoWindow->isShown())*(node->GetKey()==infoWindow->getKey())),wxSOLID));
+scc2/bodiagram.cpp://        if(infoWindow->isShown())
+scc2/bodiagram.cpp:        if(infoWindow->isShown())
+scc2/bodiagram.cpp:                dc->DrawLine(getInnerLeftBound()+infoWindow->getBx(),getInnerUpperBound()+10,getInnerLeftBound()+infoWindow->getBx(),getInnerUpperBound()+getInnerHeight());
+scc2/bodiagram.cpp:                dc->DrawLine(getInnerLeftBound()+infoWindow->getBx()+infoWindow->getBWidth(),getInnerUpperBound()+10,getInnerLeftBound()+infoWindow->getBx()+infoWindow->getBWidth(),getInnerUpperBound()+getInnerHeight());
+scc2/bodiagram.cpp:                if(stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].mins)
+scc2/bodiagram.cpp:                        dc->DrawLine(getInnerLeftBound()+infoWindow->getBx()+1,getInnerUpperBound()+getInnerHeight()-stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].mins/1000,getInnerLeftBound()+infoWindow->getBx()+infoWindow->getBWidth()-1,getInnerUpperBound()+getInnerHeight()-stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].mins/1000);
+scc2/bodiagram.cpp:                if(stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].gas)
+scc2/bodiagram.cpp:                        dc->DrawLine(getInnerLeftBound()+infoWindow->getBx()+1,getInnerUpperBound()+getInnerHeight()-stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].gas/1000,getInnerLeftBound()+infoWindow->getBx()+infoWindow->getBWidth()-1,getInnerUpperBound()+getInnerHeight()-stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].gas/1000);
+scc2/bodiagram.cpp:                if(stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].supply)
+scc2/bodiagram.cpp:                        dc->DrawLine(getInnerLeftBound()+infoWindow->getBx()+1,getInnerUpperBound()+getInnerHeight()-stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].supply*5,getInnerLeftBound()+infoWindow->getBx()+infoWindow->getBWidth()-1,getInnerUpperBound()+getInnerHeight()-stats[anarace->getPlayer()->getRace()][infoWindow->getUnit()].supply*5);
+scc2/player.cpp:	infoWindow->setTitle(0,"Order description");
+scc2/player.cpp:	infoWindow->setAnarace(*anarace);
+scc2/player.cpp://	infoWindow->Show(show[type][2]);
+scc2/player.cpp://	if(infoWindow->isShown()) infoWindow->processButtons();
+scc2/player.cpp:	if(boWindow->hasChanged()||forceWindow->hasChanged()||infoWindow->hasChanged()||boDiagramWindow->hasChanged()||boGraphWindow->hasChanged()||timerWindow->hasChanged()||statisticsWindow->hasChanged())
+scc2/player.cpp:	infoWindow->changeAccepted();
+scc2/player.cpp:	infoWindow->resetData();
+scc2/player.cpp:	if(infoWindow->isShown())
+scc2/player.cpp:		infoWindow->Draw(dc);
+scc2/player.cpp:		infoWindow->drawInfo(dc);

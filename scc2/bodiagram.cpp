@@ -7,7 +7,12 @@ BoDiagramWindow::BoDiagramWindow(wxRect rahmen, wxRect maxSize):GraphixScrollWin
 void BoDiagramWindow::setAnarace(ANARACE* anarace)
 {
 	this->anarace=anarace;
+	resetData();
 }
+
+void BoDiagramWindow::resetData()
+{
+};
                                                                                                                                                             
 void BoDiagramWindow::showProgramGraph(wxDC* dc)
 {

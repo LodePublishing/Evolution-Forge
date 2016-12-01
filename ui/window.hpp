@@ -11,7 +11,8 @@ enum eIsAutoAdjust
 
 struct SaveBoxParameter
 {
-	std::string saveboxText, descriptionText, okString, cancelString, inputProposal;
+	eString saveboxText, descriptionText, okString, cancelString;
+	std::string inputProposal;
 };
 
 enum eTransparentWindow
@@ -25,7 +26,7 @@ class UI_Window : public UI_Object
 {
 	public:
 		UI_Window(UI_Object* window_parent, 
-				const unsigned int window_title_string_id, 
+				const eString window_title_string, 
 				const Rect rect, 
 				const unsigned int max_height, 
 				const eIsScrolled window_is_scrolled = NOT_SCROLLED, 
@@ -112,8 +113,8 @@ class UI_Window : public UI_Object
 
 		eTransparentWindow transparentWindow;
 // no set/get for title as this is unique and does not change
-		
-		UI_StaticText* title;
+		eString titleString;
+		std::string titleParameter;
 		
 // client area
 		Rect clientRect;

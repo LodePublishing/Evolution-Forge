@@ -1,0 +1,16 @@
+#!/bin/sh
+echo "Bytes:"
+echo "Source Files     :" $(du -cbh $(find ef/*.?pp core/*.?pp ui/*.?pp sdl/*.?pp stl/*.?pp) | grep total) "(Main: "$(du -cbh $(find ef/*.?pp stl/*.?pp) | grep total)", UI: "$(du -cbh $(find ui/*.?pp) | grep total)", SDL: "$(du -cbh $(find sdl/*.?pp) | grep total)", Core: "$(du -cbh $(find core/*.?pp) | grep total)")"
+echo "Settings Files   :" $(du -cbh $(find settings/*.cfg settings/ui/*) | grep total)
+echo "Multimedia Files :" $(du -cbh $(find data/bitmaps/* data/sounds/* data/fonts/*) | grep total)
+echo "Program Strings  : "$(du -cbh $(find data/strings/program/* data/strings/help/*) | grep total)
+echo "StarCraft Files  : "$(du -cbh $(find starcraft/maps/* starcraft/start/* starcraft/strings/game/* starcraft/strings/units/*) | grep total)
+echo "BroodWar Files  : "$(du -cbh $(find broodwar/maps/* broodwar/start/* broodwar/strings/game/* broodwar/strings/units/*) | grep total)
+echo "WarCraft3 Files  : "$(du -cbh $(find warcraft3/maps/* warcraft3/start/* warcraft3/strings/game/* warcraft3/strings/units/*) | grep total)
+#echo "Everything   :" $(du -cbh $(find settings/*.cfg settings/harvest/* settings/help/* settings/maps/* settings/start/* settings/strings/* settings/ui/* ef/*.?pp core/*.?pp ui/*.?pp sdl/*.?pp stl/*.?pp data/bitmaps/* data/sounds/*) | grep total)
+echo "Lines:"
+echo "Source Files     :" $(wc -l $(find ef/*.?pp core/*.?pp ui/*.?pp sdl/*.?pp stl/*.?pp) | grep total) "(Main: "$(wc -l $(find ef/*.?pp stl/*.?pp) | grep total)", UI: "$(wc -l $(find ui/*.?pp) | grep total)", SDL: "$(wc -l $(find sdl/*.?pp) | grep total)", Core: "$(wc -l $(find core/*.?pp) | grep total)")"
+#echo "Settings Files   :" $(wc -l $(find settings/*.cfg settings/harvest/* settings/help/* settings/maps/* settings/start/* settings/strings/* settings/ui/*) | grep total)
+#echo "Multimedia Files :" $(wc -l $(find data/bitmaps/* data/sounds/* data/fonts/*) | grep total)
+#echo "Everything   :" $(wc -l $(find settings/*.cfg settings/harvest/* settings/help/* settings/maps/* settings/start/* settings/strings/* settings/ui/* ef/*.?pp core/*.?pp ui/*.?pp sdl/*.?pp stl/*.?pp data/bitmaps/* data/sounds/*) | grep total)
+

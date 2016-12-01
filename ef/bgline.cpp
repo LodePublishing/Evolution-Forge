@@ -9,7 +9,7 @@ BoGraphLine::BoGraphLine(UI_Object* bg_parent, const Rect& initial_rect, const u
 	lineHeight(bg_line_height),
 	lines(bg_lines),
 	facilityChanged(false),
-	facilityName(new UI_StaticText(this, GAME::lookUpUnitString(race, facility), Rect(2,2,0,0), Size(), BRIGHT_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST))
+	facilityName(new UI_StaticText(this, GAME::lookUpUnitStringID(race, facility), Rect(2,2,0,0), Size(), BRIGHT_TEXT_COLOR, SMALL_SHADOW_BOLD_FONT, DO_NOT_ADJUST))
 {
 	if(lineHeight == 0)
 		toErrorLog(" :`-(");
@@ -32,11 +32,6 @@ void BoGraphLine::resetData()
 	lineHeight = 0;
 	lines = 0;
 	race = 0;
-}
-
-void BoGraphLine::reloadStrings()
-{
-	facilityName->updateText(GAME::lookUpUnitString(race, facility));
 }
 
 void BoGraphLine::process()

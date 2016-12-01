@@ -1,0 +1,152 @@
+std::list<UI_Object*> objectList;
+
+signed int z;
+Rect old_rect;
+Rect new_rect;
+
+std::list<Rect> redraw_background_rect_list;
+std::list<Rect> visible_object_rect_list;
+
+redraw_background_rect_list.push_back(old_rect);
+visible_object_rect_list.push_back(new_rect);
+
+remove_rect_from(redraw_background_rect_list, new_rect);
+
+
+for(std::list<UI_Object*>::const_iterator i = objectList.begin(); i != objectList.end(); ++i)
+{
+// Object wird ueberdeckt
+	if((*i)->z < z)
+	{
+		remove_rect_from(visible_object_rect_list, (*i)->getNewRect());
+	} else 
+// Object ueberdeckt andere
+	if((*i)->z > z)
+	{
+			
+	}
+}
+
+.................................
+Objekttyp:
+- transparent (fuellt Flaeche nicht komplett aus, kann gepuffert werden)
+- aliasing (impliziert transparent, verschmilzt mit Hintergrund)
+- solid (kann gepuffert werden)
+
+Neumalende Flaechen:
+- blitList
+- invalid_bit
+
+Globale Variablen:
+- new_rect Liste
+- old_rect Liste
+
+* * * void Hide();
+------------------
+1. old_rect hinzufuegen zu Liste
+
+* * * void Show();
+------------------
+1. new_rect hinzufuegen zu Liste
+
+
+* * * void makeInvalid();
+-------------------------
+1. invalid bit setzen
+
+
+* * * void setSize();
+---------------------
+1. old_rect speichern
+2. Groesse setzen
+3. Falls Groessenaenderung:
+   -> size_changed bit setzen
+   -> old_rect und new_rect hinzufuegen
+
+* * * void move();
+------------------
+1. old_rect speichern
+2. moveRect(start_rect, old_rect, new_rect)
+3. falls old_rect != new_rect
+   -> old_rect und new_rect zu den Listen hinzufuegen
+4. falls Groessenaenderung
+   -> size_changed bit setzen
+
+
+* * * bool touches(Rect rect1, Rect rect2);
+-------------------------------------------
+1. rect.inside Aufrufe aller vier Ecken von rect2 (zu rect1)
+2. rect.inside Aufrufe aller vier Ecken von rect1 (zu rect2)
+
+* * * void connectRects(std::list<Rect>& rects);
+------------------------------------------------
+1. Zweifach verschachtelt durch Liste laufen
+   -> Rect liegt innerhalb des anderen (touches()) => Rect loeschen
+   -> Rect hat mindestens einen Punkt im anderen?
+      -> Rect stimmt in x1 und x2 ueberein?
+      -> Rect stimmt in y1 und y2 ueberein?
+         -> Zusammenfuegen, Rect loeschen
+	 -> moeglicherweise neubeginnen (bzw. neues rect komplett mit allen anderen rects testen)
+
+
+* * * std::list<Rect> withoutRect(Rect rect1, Rect rect2);
+----------------------------------------------------------
+1. temporaere Rectliste bereitstellen
+2. Falls kein Beruehrungspunkt (!touches()) rect1 einfuegen und zurueckgeben
+3. Falls rect1 innerhalb rect2 leere Liste zurueckgeben
+4. Zwei Punkte innerhalb von rect1?
+   -> Je nach freien Punkte von dort aus ein einzelnes Rect ziehen, eintragen und zurueckgeben
+5. Nur ein Punkt innerhalb von rect1?
+   -> Je nach Punkt drei Rechtecke zurueckgeben~
+
+
+
+* * * void removeRect(std::list<Rect>& rects, Rect rect);
+---------------------------------------------------------
+1. Laufe durch Liste
+   -> withoutRect aufrufen und Liste in rects hinzufuegen [vorne anfuegen, damit nicht nochmal mit dem selben getestet wird]
+   -> untersuchtes Element aus rects entfernen
+
+
+* * * void updateScreen():
+--------------------------
+1. Alle old_rects mit Z in Liste
+2. Alle new_rects mit Object in zweite Liste
+3. Rects in old_rects Liste zusammenfuegen - connectRects()
+4. Sortierte Objektliste erstellen (vom kleinsten Z bis zum groessten)
+
+5. Objektliste durchlaufen
+   -> Falls 'invalid' und 'aliasing' dann new_rect des Objekts dem old_rect hinzufuegen
+   
+6. Objektliste durchlaufen, alle Ueberschneidungen der new_rects der Objekte mit der new_rects Liste ermitteln, beginnend beim naechsten Eintrag der Liste
+   [Falls Object unter rect ( Objekt-Z >= new_rect-Z ) dann ignorieren (sollte auch nicht vorkommen bei einer sortierten Liste)]
+   * Sonst (Objekt liegt ueber dem Objekt in der Liste)
+     -> Falls Objekt 'solid' dann new_rect aus new_rect Liste teilen (wird ja uebermalt vom Objekt) -> removeRect()
+     -> Falls Objekt 'transparent' keine Aktion
+
+=> new_rect Liste beinhaltet nur noch die Bildbereiche die sich tatsaechlich veraendert haben, Solide, sich nicht veraendernde Objekte bleiben erhalten
+
+
+7. Durchlaufen, doppelt belegten Bereiche innerhalb der old_rect Liste entfernen
+
+8. Sortierte Objektliste durchlaufen, Ueberschneidungen von jeweiligem Objekt-new_rect mit old_rect Liste in reblitListe des Objekts schreiben
+   -> Falls 'solid' dann old_rect aus old_rect Liste entfernen -> removeRect()
+ => old_rect Liste ist leer
+
+9. Sortierte Objektliste durchlaufen, Ueberschneidungen von jeweiligem Objekt-new_rect mit new_rect Liste in reblitListe des Objekts schreiben
+   -> aus new_rect Liste entfernen -> removeRect()
+ => new_rect Liste ist leer
+
+
+* * * void draw():
+------------------
+1. Objektliste vom groessten zum kleinsten (also umgekehrt) durchlaufen
+2. rects in reblitListe zusammenfuegen -> connectRects
+3. Malen
+   -> Falls aliasing -> kein blitten sondern neumalen (und DC::addRectangle aufrufen)
+   -> Falls puffer null oder size_changed flag -> neuen Puffer 
+   -> Falls invalid -> neu in Puffer schreiben
+   -> Falls nicht aliasing -> aus puffer blitten (und DC::addRectangle aufrufen)
+4. blitListe leeren
+
+

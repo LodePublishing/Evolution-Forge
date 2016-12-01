@@ -120,6 +120,16 @@ void BoWindow::resetData()
 	recheckSomeDataAfterChange();
 }
 
+/*
+void BoWindow::reloadStrings()
+{
+	processList();
+	for(std::list<BoEntry*>::iterator entry = boList.begin(); entry!=boList.end(); ++entry)
+		(*entry)->reloadStrings();
+	
+	UI_Window::reloadStrings();
+}*/
+
 void BoWindow::closeMenus()
 {
 //	unitMenu->close();

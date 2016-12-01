@@ -20,7 +20,6 @@ class BoGraphLine : public UI_Object
 
 		void process();
 		void draw() const;
-		void reloadStrings();
 
 		void setRace(const unsigned int race);
 		void setFacility(const unsigned int bg_facility);

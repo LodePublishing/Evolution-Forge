@@ -7,7 +7,7 @@ CORE_OBJ=$(CORE)/configuration.o $(CORE)/goal.o $(CORE)/harvest.o  $(CORE)/locat
 
 EF_OBJ= $(EF)/mainmenuline.o $(EF)/bodiagram.o $(EF)/bgentry.o $(EF)/bgline.o $(EF)/bgwindow.o $(EF)/bowindow.o $(EF)/player.o $(EF)/forceentry.o $(EF)/force.o $(EF)/message.o $(EF)/msgwindow.o $(EF)/score.o $(EF)/game.o $(EF)/racemenu.o $(EF)/bomenu.o $(EF)/unitmenu.o $(EF)/goalmenu.o $(EF)/mapmenu.o $(EF)/boentry.o $(EF)/configuration.o stl/misc.o $(EF)/playerentry.o $(EF)/techtree.o $(EF)/setwindow.o $(EF)/guimain.o $(EF)/main.o $(EF)/helpwindow.o $(EF)/savebox.o $(EF)/locationmenu.o $(EF)/datawindow.o $(EF)/dataentry.o $(EF)/intro.o $(EF)/introwindow.o $(EF)/debug.o $(EF)/files.o
 
-UI_OBJ=$(UI)/ui.o $(UI)/object.o $(UI)/window.o $(UI)/button.o $(UI)/bitmap.o $(UI)/animation.o $(UI)/radio.o $(UI)/statictext.o $(UI)/longtext.o $(UI)/theme.o $(UI)/sound.o $(UI)/group.o $(UI)/editfield.o $(UI)/tooltip.o $(UI)/numberfield.o $(UI)/scrollbar.o $(UI)/configuration.o $(UI)/menuentry.o $(UI)/menu.o $(UI)/diagram.o $(UI)/graphpoint.o $(UI)/exitinfo.o $(UI)/framerate.o $(UI)/background.o
+UI_OBJ=$(UI)/object.o $(UI)/window.o $(UI)/button.o $(UI)/bitmap.o $(UI)/animation.o $(UI)/radio.o $(UI)/statictext.o $(UI)/longtext.o $(UI)/theme.o $(UI)/sound.o $(UI)/group.o $(UI)/editfield.o $(UI)/tooltip.o $(UI)/numberfield.o $(UI)/scrollbar.o $(UI)/configuration.o $(UI)/menuentry.o $(UI)/menu.o $(UI)/diagram.o $(UI)/graphpoint.o $(UI)/exitinfo.o $(UI)/framerate.o $(UI)/background.o
 
 SDL_OBJ=$(SDL)/color.o $(SDL)/font.o $(SDL)/pen.o $(SDL)/surface.o $(SDL)/brush.o $(SDL)/dc.o $(SDL)/framerate.o $(SDL)/draw.o $(SDL)/size.o $(SDL)/rect.o $(SDL)/point.o $(SDL)/rotozoom.o
 

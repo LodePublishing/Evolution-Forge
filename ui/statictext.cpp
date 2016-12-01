@@ -10,13 +10,14 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const unsigned int string_id,
 	color(st_color),
 	tempColor(),
 	tempColorIsSet(false),
+	eText(st_text),
 	highlight(false)
 {
-	aufruf updateStringID
-		
+	UI::registerString(this, stringID);
+	
 	setDrawType(TRANSPARENT_OBJECT);
 //	setDrawType(ANTI_ALIASED_OBJECT);
-//	updateText(theme.lookUpString(st_text)); //? => vom Hauptprogramm machen!
+//	updateText(theme.lookUpString(st_text)); //?
 }
 
 UI_StaticText::UI_StaticText(UI_Object* st_parent, const std::string& st_text, const Rect st_pos, const Size distance_bottom_right, const eColor st_color, const eFont st_font, const ePositionMode position_mode) :
@@ -28,7 +29,6 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const std::string& st_text, c
 	color(st_color),
 	tempColor(),
 	tempColorIsSet(false),
-	eText(NULL_STRING),
 	highlight(false)
 {
 	setDrawType(TRANSPARENT_OBJECT);
@@ -36,7 +36,9 @@ UI_StaticText::UI_StaticText(UI_Object* st_parent, const std::string& st_text, c
 }
 
 UI_StaticText::~UI_StaticText()
-{}
+{
+	UI::unregisterString(this, stringID);
+}
 
 void UI_StaticText::doHighlight(const bool high_light) 
 {
@@ -172,7 +174,7 @@ void UI_StaticText::setTextWasChanged()
 
 void UI_StaticText::reloadOriginalSize()
 {
-	setTextWasChanged();
+	reloadStrings();
 	UI_Object::reloadOriginalSize();
 }
 
@@ -180,18 +182,42 @@ void UI_StaticText::updateText(const std::string& st_text, const bool etext_chan
 {
 	if((st_text==text) && (!etext_change))
 		return; //?
+	if((!etext_change) && (stringID))
+	{
+		UI::unregisterString(this, stringID);
+		stringID = 0;
+	}
 	text = st_text;
-	stringID = 0;
 	setTextWasChanged();
 }
 
 void UI_StaticText::updateText(const unsigned int string_id)
 {
-	if(string_id == stringID) // o_O
+	if(stringID == string_id) // o_O
 		return;
-	stringID = string_id;	
 	UI::unregisterString(this, stringID);
-	UI::registerString(this, string_id);
-//	updateText(theme.lookUpString(st_text), true); ?
+	stringID = string_id;
+	UI::registerString(this, stringID);
+}
+
+void UI_StaticText::reloadText(const std::string& st_text)
+{
+	text = st_text;
+	setTextWasChanged();
+}
+
+void UI_StaticText::reloadText(const unsigned int string_id) // ?
+{
+	UI::unregisterString(this, stringID);
+	UI::registerString(this, stringID);
+}
+
+
+void UI_StaticText::reloadStrings()
+{
+	if(stringID)
+		reloadText(theme.lookUpString(eText)); // ?
+	else
+		reloadText(text);
 }
 

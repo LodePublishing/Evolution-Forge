@@ -111,6 +111,14 @@ void UI_LongText::process()
 #endif
 }
 
+void UI_LongText::reloadOriginalSize()
+{
+	if(!isShown())
+		return;
+	UI_Object::reloadOriginalSize();
+	reloadStrings();
+}
+
 void UI_LongText::updateText(const std::string& lt_text)
 {
 //	if(text == lt_text)
@@ -487,5 +495,10 @@ const signed int UI_LongText::getPressed() const
 		++i;
 	}
 	return(-1);
+}
+
+void UI_LongText::reloadStrings()
+{
+	updateText(text);
 }
 

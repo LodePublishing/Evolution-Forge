@@ -79,6 +79,8 @@ unsigned int GAME::MAX_TOTAL_UNITS = 0;
 unsigned int GAME::MAX_RESOURCES = 0;
 unsigned int GAME::CANCELING_BUILDING_RETURN = 0;
 
+unsigned int GAME::FIRST_STRING = 1000; // TODO, evtl in theme oder gui
+
 eLanguage GAME::currentLanguage = ZERO_LANGUAGE;
 std::string GAME::gameDirectory = "";
 

@@ -57,6 +57,8 @@ class GAME
 		static unsigned int MAX_TOTAL_UNITS;
 		static unsigned int MAX_RESOURCES;
 		static unsigned int MAX_GAME_TYPES;
+
+		static const unsigned int FIRST_STRING;
 		
 		enum eGameStrings
 		{
@@ -89,6 +91,9 @@ class GAME
 		static std::vector< std::vector<std::string> > gameStringList; // languages
 		static const std::string& lookUpGameString(const unsigned int game_string_id);
 		static const std::string& lookUpUnitString(const unsigned int unit_race, const unsigned int unit_string_id);
+
+		static const unsigned int lookUpUnitStringID(const unsigned int unit_race, const unsigned int unit_string_id);
+		
 		static std::vector<bool> languageInitializedForGameStrings;
 
 		static void initResources();
@@ -106,7 +111,6 @@ class GAME
 	private:
 };
 
-
 inline const std::string& GAME::lookUpUnitString(const unsigned int unit_race, const unsigned int unit_string_id)
 {
 #ifdef _SCC_DEBUG
@@ -118,6 +122,19 @@ inline const std::string& GAME::lookUpUnitString(const unsigned int unit_race, c
 	}
 #endif
 	return(race[unit_race].unitsStringList[currentLanguage][unit_string_id]);
+}
+
+inline const unsigned int GAME::lookUpUnitStringID(const unsigned int unit_race, const unsigned int unit_string_id)
+{
+#ifdef _SCC_DEBUG
+	if(unit_race >= MAX_RACES) {
+		toErrorLog("ERROR (GAME::lookUpUnitStringID()): Value unit_race out of range.");return(0);
+	}
+	if(unit_string_id >= RACE::UNIT_TYPE_COUNT) {
+		toErrorLog("ERROR (GAME::lookUpUnitStringID()): Value unit_string_id out of range.");return(0);
+	}
+#endif
+	return(unit_race * RACE::UNIT_TYPE_COUNT + unit_string_id + RACE::FIRST_STRING);
 }
 
 

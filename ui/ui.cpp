@@ -1,6 +1,5 @@
-#include "ui.hpp"
+#include "object.hpp"
 
-#if 0
 UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const Size distance_bottom_right, const ePositionMode position_mode, const eAutoSize auto_size) :
 	isClipped(false),
 	clipRect(),
@@ -34,6 +33,7 @@ UI_Object::UI_Object(UI_Object* parent_object, const Rect relative_rect, const S
 	toolTipString()
 {
 	setParent(parent_object);
+//	addToProcessArray(this);
 	UI_Object::objectList.push_back(this);
 	Show();
 }
@@ -71,6 +71,7 @@ UI_Object::UI_Object(UI_Object* parent_object, UI_Object* position_parent_object
 {
 	setParent(parent_object);
 	setPositionParent(position_parent_object);
+//	addToProcessArray(this);
 	UI_Object::objectList.push_back(this);
 	Show();
 }
@@ -163,6 +164,7 @@ void UI_Object::reloadOriginalSize()
 
 //=> Bool Variable und dann in process pruefen (nach show) damit erst dann upgedatet wird wenn das Teil wieder gezeigt wird.  TODO
 	
+//	UI_Object::addToProcessArray(this);
 	UI_Object* tmp = children;  // process all children of gadget
 	if (tmp) {
 		do {
@@ -175,6 +177,7 @@ void UI_Object::reloadOriginalSize()
 
 void UI_Object::adjustSize(const eAdjustMode adjust_mode, const Size& size)
 {
+//	UI_Object::addToProcessArray(this);
 	signed int left = originalRect.getLeft();
 	unsigned int full_width;
 	if(getParent() != NULL)
@@ -227,6 +230,7 @@ void UI_Object::adjustSize(const eAdjustMode adjust_mode, const Size& size)
 	
 void UI_Object::adjustPosition()
 {
+//	UI_Object::addToProcessArray(this);
 	signed int left = originalRect.getLeft() + distanceBottomRight.getWidth();
 	signed int top = originalRect.getTop() + distanceBottomRight.getHeight();
 	unsigned int full_width;
@@ -296,6 +300,7 @@ void UI_Object::adjustRelativeRect(const Rect& edge)
 		if(edge.getSize()!=targetRect.getSize())
 			startRect.setSize(getSize());
  
+//		UI_Object::addToProcessArray(this);
 		targetRect=edge;
 	}
 //	targetRect.width=edge.width;
@@ -567,6 +572,21 @@ UI_Object* UI_Object::checkToolTip()
 	
 	return(result);
 }
+
+void UI_Object::reloadStrings()
+{
+
+	UI_Object* tmp=children;  // process all children of gadget
+	if(!tmp)
+		return;
+	do 
+	{
+		tmp->reloadStrings();
+		tmp = tmp->nextBrother;
+	}
+	while(tmp!=children);
+}
+
 
 UI_Object* UI_Object::checkHighlight()
 {
@@ -940,12 +960,35 @@ const bool UI_Object::setBitDepth(const eBitDepth bitdepth)
 	return(true);
 }
 
+/*void UI_Object::addToProcessArray(UI_Object* item)
+{
+	for(std::list<UI_Object*>::const_iterator i = processArray.begin(); i != processArray.end(); ++i)
+		if(*i == item)
+			return;
+	processArray.push_back(item);
+}
+
+void UI_Object::addToNextProcessArray(UI_Object* item)
+{
+	for(std::list<UI_Object*>::const_iterator i = nextProcessArray.begin(); i != nextProcessArray.end(); ++i)
+		if(*i == item)
+			return;
+	nextProcessArray.push_back(item);
+}
+	
+void UI_Object::copyToNextProcessArray()
+{
+	processArray.clear();
+	processArray = nextProcessArray;
+	nextProcessArray.clear();
+}*/
+
 void UI_Object::resetWindow()
 {
 	UI_Object::windowSelected = false;
 	UI_Object::currentWindow = NULL;
 }
-#endif
+
 UI_Object* UI_Object::focus(NULL);
 
 UI_Theme UI_Object::theme;
@@ -964,6 +1007,9 @@ bool UI_Object::windowSelected = false;
 unsigned int UI_Object::redrawnObjects(0);
 std::list<std::string> UI_Object::msgList;
 std::list<UI_Object*> UI_Object::objectList;
+
+//std::list<UI_Object*> UI_Object::processArray;
+//std::list<UI_Object*> UI_Object::nextProcessArray;
 
 std::list<std::pair<signed int, Rect> > UI_Object::newRectList;
 std::list<Rect> UI_Object::oldRectList;

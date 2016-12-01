@@ -1,7 +1,7 @@
 #ifndef _UI_OBJECT_HPP
 #define _UI_OBJECT_HPP
 
-#include "configuration.hpp"
+#include "sound.hpp"
 
 enum eDrawType
 {
@@ -55,7 +55,6 @@ enum eAdjustMode
 class UI_Object;
 class UI_ToolTip;
 class UI_Window;
-class UI_Sound;
 
 // singleton class
 class UI
@@ -71,7 +70,7 @@ class UI
 		const bool setResolution(const eResolution resolution, const bool first_call = false);
 		const bool setBitDepth(const eBitDepth bitdepth);
 		
-		UI_Sound* sound;
+		UI_Sound sound;
 		UI_Window* currentWindow;
 		bool windowSelected;
 		
@@ -82,18 +81,16 @@ class UI
 
 		void resetWindow();	
 		
+/*		void addToProcessArray(UI_Object* item);
+		void addToNextProcessArray(UI_Object* item);
+		void copyToNextProcessArray();
+		std::list<UI_Object*> processArray;
+		std::list<UI_Object*> nextProcessArray;*/
+	
 		UI_Object* focus;
 
 		const bool initSDL(std::string window_title);
 		DC* dc;
-
-		void updateToolTip(const eString tool_tip_string);
-		void updateToolTip(const std::string& tool_tip_string);
-		
-		const eString getToolTipEString() const;
-		const std::string& getToolTipString() const;
-		const bool toolTipExists() const;
-
 
 		void updateScreen();
 		void processAll();
@@ -127,8 +124,43 @@ inline void UI_Object::updateToolTip(const std::string& tool_tip_string) {
 	toolTipString = tool_tip_string;
 }
 
-inline const bool UI_Object::toolTipExists() const {
+inline const bool UI_Object::hasToolTip() const {
 	return((toolTipString!="")||(toolTipEString!=NULL_STRING));
+}
+
+inline const unsigned int UI_Object::getTargetWidth() const {
+	return(targetRect.getWidth());
+}
+
+inline const unsigned int UI_Object::getTargetHeight() const {
+	return(targetRect.getHeight());
+}
+
+inline const Point UI_Object::getTargetPosition() const {
+	return(targetRect.getTopLeft());
+}
+
+inline const Rect& UI_Object::getTargetRect() const {
+	return(targetRect);
+}
+
+inline const bool UI_Object::isMouseInside() const {
+	return(getAbsoluteRect().isTopLeftCornerInside(mouse));
+}
+
+
+
+inline void UI_Object::setPosition(const unsigned int x, const unsigned int y) {
+	setPosition(Point(x, y));
+}
+
+inline void UI_Object::setSize(const unsigned int width, const unsigned int height) {
+	setSize(Size(width, height));
+}
+
+
+inline const bool UI_Object::isTopItem() const {
+	return(positionParent==NULL);
 }
 
 inline const eString UI_Object::getToolTipEString() const {
@@ -138,6 +170,12 @@ inline const eString UI_Object::getToolTipEString() const {
 inline const std::string& UI_Object::getToolTipString() const {
 	return(toolTipString);
 }
+
+inline const bool UI_Object::hasSizeChanged() const {
+	return(sizeHasChanged);
+}
+
+
 
 #endif
 

@@ -17,7 +17,7 @@ class BoWindow : public UI_Window
 		~BoWindow();
 		void resetData();
 		void draw() const;
-		void reloadStrings();
+//		void reloadStrings();
 		void processList();
 		void process();
 

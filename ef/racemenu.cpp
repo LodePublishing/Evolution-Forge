@@ -6,7 +6,7 @@ RaceMenu::RaceMenu(UI_Object* race_parent, const Rect race_rect, const Size dist
 {
 	for(unsigned int i=0; i<GAME::MAX_RACES; ++i)
 	{
-		UI_MenuEntry* entry = new UI_MenuEntry(this, Rect(), GAME::lookUpGameString(GAME::FIRST_RACE_STRING + i));
+		UI_MenuEntry* entry = new UI_MenuEntry(this, Rect(), GAME::FIRST_STRING + GAME::FIRST_RACE_STRING + i);
 		entry->setButtonColorsType(UNIT_TYPE_5_BUTTON);
 		menuEntries.push_back(entry);
 	}
@@ -21,13 +21,6 @@ RaceMenu::RaceMenu(UI_Object* race_parent, const Rect race_rect, const Size dist
 
 RaceMenu::~RaceMenu()
 { }
-
-void RaceMenu::reloadStrings()
-{
-	unsigned int i = 0;
-	for(std::list<UI_MenuEntry*>::iterator m = menuEntries.begin(); m != menuEntries.end(); ++m, ++i)
-		(*m)->updateText(GAME::lookUpGameString(GAME::FIRST_RACE_STRING + i));
-}
 
 const bool RaceMenu::addKey(unsigned int key, unsigned int mod)
 {

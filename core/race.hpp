@@ -132,6 +132,7 @@ struct RACE
 	public:
 		static unsigned int UNIT_TYPE_COUNT;
 		static unsigned int MAX_RESOURCE_TYPES;
+		static const unsigned int FIRST_STRING;
 		
 		std::vector<UNIT_STATISTICS> stats;
 		

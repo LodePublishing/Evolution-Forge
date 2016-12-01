@@ -1,7 +1,7 @@
 #ifndef _UI_OBJECT_HPP
 #define _UI_OBJECT_HPP
 
-#include "ui.hpp"
+#include "sound.hpp"
 
 enum eDrawType
 {
@@ -108,9 +108,9 @@ class UI_Object
 		void makePufferValid();
 		const bool isPufferInvalid() const;
 		
-		void Show(const bool show = true);
-		void showRemember(const bool show = true);
-		void Hide(const bool hide = true);
+		void Show(const bool show=true);
+		void showRemember(const bool show=true);
+		void Hide(const bool hide=true);
 
 		virtual void draw() const;
 		void putOnScreen();
@@ -122,6 +122,7 @@ class UI_Object
 // returns the object the mouse cursor is currently over
 		virtual UI_Object* checkToolTip();
 		virtual UI_Object* checkHighlight();
+		virtual void reloadStrings();
 		virtual void reloadOriginalSize();
 
 		virtual void process();
@@ -129,12 +130,48 @@ class UI_Object
 		
 //		void clearRedrawFlag();
 		void clearFlags();
+		static void clearAllFlags();
 
+		void updateToolTip(const eString tool_tip_string);
+		void updateToolTip(const std::string& tool_tip_string);
+		
+		const eString getToolTipEString() const;
+		const std::string& getToolTipString() const;
+		const bool hasToolTip() const;
+		
+		static UI_ToolTip* tooltip;
+		static UI_Object* toolTipParent;
+
+		static unsigned int redrawnObjects;
+		static const bool setResolution(const eResolution resolution, const bool first_call = false);
+		static const bool setBitDepth(const eBitDepth bitdepth);
+		
+		static UI_Sound sound;
+		static UI_Window* currentWindow;
+		static bool windowSelected;
+		
+		static unsigned int mouseType;
+		static Point mouse;
+
+		static std::list<std::string> msgList;
+
+		static unsigned int max_x;
+		static unsigned int max_y;
+
+		static void resetWindow();	
+		
 		const Point& getOriginalPosition() const;
 		const Rect& getOriginalRect() const;
 		const Size& getDistanceBottomRight() const;
 	
+/*		static void addToProcessArray(UI_Object* item);
+		static void addToNextProcessArray(UI_Object* item);
+		static void copyToNextProcessArray();
+		static std::list<UI_Object*> processArray;
+		static std::list<UI_Object*> nextProcessArray;*/
+	
 		virtual const bool addKey(unsigned int key, unsigned int mod);
+		static UI_Object* focus;
 
 		const bool isMoving() const;
 		
@@ -158,13 +195,23 @@ class UI_Object
 		void setClipRect(const Rect& rect);
 		void setWidth(const unsigned int width);
 
+		static const bool initSDL(std::list<std::string>& arguments, std::string window_title);
+		static DC* dc;
+
+		static void updateScreen();
+		static void processAll();
+
 		const eDrawType getDrawType() const;
 		void setDrawType(const eDrawType draw_type);
 
 
 		const signed int getZ() const;
 		void setZ(const signed int zcoord);
+		static void addMessage(const std::string& msg);
+		static void addMessage(const eString msg);
 
+		static std::list<UI_Object*> objectList;
+		static void addNewRectToList(const Rect rect, const unsigned int z_coord);
 	protected:
 		void setRect(const Rect& rect);
 
@@ -179,6 +226,7 @@ class UI_Object
 		ePositionMode positionMode;
 
 		std::list<Rect> blitRectList;
+		static std::list<std::string> remainingMessages;
 
 	private:
 		bool pufferInvalid;
@@ -186,6 +234,8 @@ class UI_Object
 		eDrawType drawType;
 	
 		void move();
+		static std::list<Rect> oldRectList;
+		static std::list<std::pair<signed int, Rect> > newRectList;
 		
 //		bei wechsel alle rekursiv (-> virtual) durchlaufen und Liste bilden, das aktuelle heraussuchen und aktivieren
 //		Ansonsten bei klick Focus legen, Esc/anderer Klick entfernt den Focus (NULL bzw. anderer Fokus)
@@ -382,6 +432,18 @@ inline UI_Object* UI_Object::getChildren() const {
 	return(children);
 }
 
+inline void UI_Object::updateToolTip(const eString tool_tip_string) {
+	toolTipEString = tool_tip_string;
+}
+
+inline void UI_Object::updateToolTip(const std::string& tool_tip_string) {
+	toolTipString = tool_tip_string;
+}
+
+inline const bool UI_Object::hasToolTip() const {
+	return((toolTipString!="")||(toolTipEString!=NULL_STRING));
+}
+
 inline const unsigned int UI_Object::getTargetWidth() const {
 	return(targetRect.getWidth());
 }
@@ -399,8 +461,9 @@ inline const Rect& UI_Object::getTargetRect() const {
 }
 
 inline const bool UI_Object::isMouseInside() const {
-	return(getAbsoluteRect().isTopLeftCornerInside(UI::getMousePosition()));
+	return(getAbsoluteRect().isTopLeftCornerInside(mouse));
 }
+
 
 
 inline void UI_Object::setPosition(const unsigned int x, const unsigned int y) {
@@ -414,6 +477,14 @@ inline void UI_Object::setSize(const unsigned int width, const unsigned int heig
 
 inline const bool UI_Object::isTopItem() const {
 	return(positionParent==NULL);
+}
+
+inline const eString UI_Object::getToolTipEString() const {
+	return(toolTipEString);
+}
+
+inline const std::string& UI_Object::getToolTipString() const {
+	return(toolTipString);
 }
 
 inline const bool UI_Object::hasSizeChanged() const {

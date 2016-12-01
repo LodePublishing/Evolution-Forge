@@ -1,8 +1,8 @@
 #include "window.hpp"
 #include "configuration.hpp"
 
-UI_Window::UI_Window(UI_Object* window_parent,
-		const unsigned int window_title_string_id, 
+UI_Window::UI_Window(UI_Object* window_parent, 
+		const eString window_title_string, 
 		const Rect rect, 
 		const unsigned int max_height,
 		const eIsScrolled window_is_scrollable, 
@@ -12,8 +12,8 @@ UI_Window::UI_Window(UI_Object* window_parent,
 	UI_Object(window_parent, rect, Size()),
 	filledHeight(0),
 	doAdjustments(false),
-	title(this, window_title_string), // ??
-//	titleParameter(""), ?
+	titleString(window_title_string), // ??
+	titleParameter(""),
 	clientRect(window_client_area),
 	clientStartRect(),
 	clientTargetRect(),
@@ -27,29 +27,7 @@ UI_Window::UI_Window(UI_Object* window_parent,
 	helpChapter(INDEX_CHAPTER),
 	transparentWindow(transparent_window)
 {
-void UI_Window::drawTitle() const
-{
-	if(titleString==NULL_STRING)
-		return;
-	dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-	dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-	dc->setFont(theme.lookUpFont(SMALL_BOLD_FONT));
-	dc->setTextForeground(*theme.lookUpColor(TITLE_COLOR));
 
-	std::string text;
-
-// TODO UI_StaticText einfuegen!
-	if(titleParameter != "")
-		text=theme.lookUpFormattedString(titleString, titleParameter);
-	else text = theme.lookUpString(titleString);
-	
-	Size s = dc->getTextExtent(text);
-	Rect titleRect = Rect(Point(), s + Size(5, 0));
-	
-	dc->DrawRectangle(titleRect);
-	titleRect.setTopLeft(titleRect.getTopLeft() + Point(2, 3));
-	dc->DrawText(text, titleRect.getTopLeft());
-}
 // ------ PROCESSING
 	calculateClientRect();
 
@@ -322,6 +300,30 @@ const bool UI_Window::fitItemToAbsoluteClientRect(const Rect& rect, const bool a
 }
 
 
+void UI_Window::drawTitle() const
+{
+	if(titleString==NULL_STRING)
+		return;
+	dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
+	dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
+	dc->setFont(theme.lookUpFont(SMALL_BOLD_FONT));
+	dc->setTextForeground(*theme.lookUpColor(TITLE_COLOR));
+
+	std::string text;
+
+// TODO UI_StaticText einfuegen!
+	if(titleParameter != "")
+		text=theme.lookUpFormattedString(titleString, titleParameter);
+	else text = theme.lookUpString(titleString);
+	
+	Size s = dc->getTextExtent(text);
+	Rect titleRect = Rect(Point(), s + Size(5, 0));
+	
+	dc->DrawRectangle(titleRect);
+	titleRect.setTopLeft(titleRect.getTopLeft() + Point(2, 3));
+	dc->DrawText(text, titleRect.getTopLeft());
+}
+
 void UI_Window::drawWindow() const
 {
 // draw outer border:
@@ -341,30 +343,9 @@ void UI_Window::drawWindow() const
 	dc->setBrush(*theme.lookUpBrush(TRANSPARENT_BRUSH));
 	
 	dc->DrawEdgedRoundedRectangle(Point(3, 3), getSize() - Size(6, 6), 6);
-
-	if(title)
-	{
-		dc->setBrush(*theme.lookUpBrush(WINDOW_FOREGROUND_BRUSH));
-		dc->setPen(*theme.lookUpPen(INNER_BORDER_HIGHLIGHT_PEN));
-
-	//	if(titleParameter != "")
-	//		text = theme.lookUpFormattedString(titleString, titleParameter);
-	//	else text = theme.lookUpString(titleString);
 	
-		Rect titleRect = Rect(Point(), title->getTextSize() + Size(5, 0));
-		dc->DrawRectangle(titleRect);
-	}
-// ------ PROCESSING
-	calculateClientRect();
-
-
-
-
-	
+	drawTitle();
 //	toErrorLog("draw window");
-//
-//
-//	
 }
 
 void UI_Window::draw() const
